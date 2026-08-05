@@ -1,0 +1,12 @@
+Harnix
+Copyright (C) 2026 Tam Nguyen Thanh
+
+This package is licensed under AGPL-3.0-or-later.
+
+Harnix selectively adapts ideas and, where applicable, material from the following
+upstreams. Exact provenance, source SHAs, reuse decisions, and required notices are
+recorded in docs/UPSTREAM_BASELINE.md and docs/UPSTREAM_MAPPING.md.
+
+- mindfold-ai/Trellis (AGPL-3.0-or-later)
+- ECC (MIT)
+- Superpowers (MIT)

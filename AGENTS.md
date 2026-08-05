@@ -20,8 +20,8 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 ## Current state
 
 - Documentation readiness has passed.
-- Production implementation has not started.
-- Begin with Task 1.1 in `docs/IMPLEMENTATION_PLAN.md` unless the user changes priority.
+- Phase 1 implementation is in progress; the package/tooling scaffold and root/path primitives exist.
+- Continue from the first unchecked requirement in Task 1.1/1.2 of `docs/IMPLEMENTATION_PLAN.md` unless the user changes priority.
 - Do not invent a second package, workspace, service, or compatibility surface.
 
 ## Non-negotiable product boundaries
@@ -66,7 +66,8 @@ For each implementation task:
 5. Refactor while green; avoid speculative abstractions and unsupported surfaces.
 6. Run compliance review before quality/security review.
 7. Run fresh focused verification, then the broader gate required by the phase.
-8. Report actual evidence, omitted checks, residual risks, and next task. Do not claim success from stale or partial output.
+8. Update `CHANGELOG.md` under `Unreleased` with user-visible implementation changes before committing.
+9. Report actual evidence, omitted checks, residual risks, and next task. Do not claim success from stale or partial output.
 
 Docs-only, trivial wiring, or generated snapshots may use the documented TDD exception, but must record the reason and use the strongest meaningful alternative verification.
 
@@ -110,4 +111,6 @@ Do not weaken, bypass, or silently skip these gates. Filesystem tests use isolat
 ## Completion gate
 
 Before reporting implementation complete, run the exact acceptance sequence in `docs/IMPLEMENTATION_PLAN.md` section 11 and read every exit code/output. Harnix is not complete until tarball smoke tests, platform parity, doctor fixtures, performance, footprint, safety, attribution, and release scans pass with fresh evidence.
+
+
 

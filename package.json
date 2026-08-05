@@ -1,0 +1,57 @@
+{
+  "name": "@tamtiger/harnix",
+  "version": "0.1.0",
+  "description": "Project-local coding-agent harness for Kiro, Antigravity, and Codex.",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "private": false,
+  "bin": {
+    "harnix": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run test/unit",
+    "test:integration": "vitest run test/integration",
+    "test:migration": "vitest run test/migration",
+    "test:platform": "vitest run test/platform",
+    "test:workflow": "vitest run test/evals",
+    "test:safety": "vitest run test/safety",
+    "test:acceptance": "pnpm run test:unit && pnpm run test:integration && pnpm run test:migration && pnpm run test:platform && pnpm run test:workflow && pnpm run test:safety",
+    "pack:check": "node scripts/pack-check.mjs",
+    "smoke:tarball": "node scripts/smoke-tarball.mjs",
+    "measure:init": "node scripts/measure-init.mjs",
+    "measure:footprint": "node scripts/measure-footprint.mjs",
+    "scan:release": "node scripts/scan-release.mjs"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "inquirer": "^12.4.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@types/node": "^22.13.5",
+    "eslint": "^9.21.0",
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.0",
+    "vitest": "^3.0.5"
+  },
+  "packageManager": "pnpm@11.4.0"
+}

@@ -6,7 +6,7 @@ Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
 ## Trạng thái
 
-Harnix hiện **đã sẵn sàng để triển khai nhưng chưa được implement hoặc phát hành**. Yêu cầu sản phẩm, workflow, schema cố định, hợp đồng tích hợp nền tảng, kế hoạch triển khai và các cổng nghiệm thu đã hoàn tất. Quá trình phát triển bắt đầu từ Task 1.1 trong kế hoạch triển khai.
+Harnix hiện **đang được triển khai và chưa phát hành**. Phase 1 đã có package scaffold, CLI help/usage và các primitive an toàn cho path/atomic write; các lệnh nghiệp vụ như `init` và `setup` chưa tồn tại. Yêu cầu sản phẩm, workflow, schema cố định, hợp đồng tích hợp nền tảng, kế hoạch triển khai và các cổng nghiệm thu đã hoàn tất.
 
 Không cài `@tamtiger/harnix` từ npm cho đến khi README này được cập nhật với một bản phát hành đã kiểm chứng.
 
@@ -79,6 +79,7 @@ Các module runtime được phân phối trong package đã cài. Repository s�
 - [Ánh xạ upstream](docs/UPSTREAM_MAPPING.md)
 - [Baseline upstream cố định](docs/UPSTREAM_BASELINE.md)
 - [Hướng dẫn coding agent](AGENTS.md)
+- [Changelog](CHANGELOG.md)
 
 ## Phát triển
 
@@ -107,3 +108,5 @@ Người đóng góp và coding agent phải bảo toàn thay đổi của ngư�
 Harnix là một bản triển khai phái sinh có chọn lọc, được xây dựng dựa trên nghiên cứu từ mindfold-ai/Trellis, ECC và Superpowers. SHA nguồn cố định, giấy phép, quyết định tái sử dụng và chính sách ghi công được mô tả trong [UPSTREAM_BASELINE.md](docs/UPSTREAM_BASELINE.md) và [UPSTREAM_MAPPING.md](docs/UPSTREAM_MAPPING.md).
 
 Kế hoạch triển khai yêu cầu giấy phép/thông báo AGPL-3.0 cho phần code phái sinh từ Trellis và giữ nguyên ghi công MIT cho nội dung chuyển thể từ ECC và Superpowers. Các file giấy phép và thông báo cuối cùng sẽ được tạo cùng package scaffold trước khi phân phối.
+
+
