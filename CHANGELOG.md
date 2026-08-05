@@ -8,7 +8,16 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 ### Added
 
-- Chưa có thay đổi chưa commit.
+- Detection cục bộ, deterministic cho C#/.NET/ABP, NestJS, Python, Java/Spring, Go, React, Vue và monorepo.
+- Discovery package manager và verification script chỉ đọc; bỏ qua dependency/generator tree và không thực thi script dự án.
+- Config YAML Harnix v1: validation schema, canonical sorting, safe package path, reject future schema và preserve compatible unknown keys.
+- Init core idempotent tạo `.harnix` project data; legacy `.trellis`/`.trellis-pro` được preview no-write khi chưa yêu cầu migrate.
+- Public CLI `init`/`setup`; Kiro và Codex project-local setup idempotent, Antigravity được nhận diện nhưng chưa sinh hook/settings v1.
+- Init test coverage cho config preservation, dry-run và performance; Kiro steering chỉ nạp ngôn ngữ đã detect.
+- `pack:check` tạo và kiểm tra đúng một tarball Harnix trong `.artifacts`.
+- `init` hỗ trợ prompt interactive có test injection, đồng thời giữ automation flags cho CI.
+- Codex setup merge giữ lại `UserPromptSubmit` do người dùng sở hữu và thay thế duy nhất Harnix hook.
+- Phase 1 hoàn tất: fresh `pnpm install --frozen-lockfile --ignore-scripts`, build, lint, typecheck, 44 test, `test:acceptance`, `pack:check`, branding scan và `git diff --check` đều pass.
 
 ## [0.1.0] - 2026-08-05
 
@@ -36,5 +45,3 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 [Unreleased]: https://github.com/tamtiger/harnix/compare/d01239f...HEAD
 [0.1.0]: https://github.com/tamtiger/harnix/commits/main
 [Documentation baseline]: https://github.com/tamtiger/harnix/commit/d01239f
-
-

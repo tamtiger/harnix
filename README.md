@@ -6,7 +6,7 @@ Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
 ## Trạng thái
 
-Harnix hiện **đang được triển khai và chưa phát hành**. Phase 1 đã có package scaffold, CLI help/usage và các primitive an toàn cho path/atomic write; các lệnh nghiệp vụ như `init` và `setup` chưa tồn tại. Yêu cầu sản phẩm, workflow, schema cố định, hợp đồng tích hợp nền tảng, kế hoạch triển khai và các cổng nghiệm thu đã hoàn tất.
+Harnix hiện **đang được triển khai và chưa phát hành**. Phase 1 đã hoàn tất: package scaffold, CLI `init`/`setup`, detection cục bộ, config YAML, legacy preview, primitive an toàn, và setup dự án cho Kiro/Codex. Antigravity được nhận diện nhưng chưa sinh settings/hook vì schema project-local chưa được xác minh; phần writer thuộc Phase 3. Yêu cầu sản phẩm, workflow, schema cố định, hợp đồng tích hợp nền tảng, kế hoạch triển khai và các cổng nghiệm thu đã hoàn tất.
 
 Không cài `@tamtiger/harnix` từ npm cho đến khi README này được cập nhật với một bản phát hành đã kiểm chứng.
 
@@ -83,7 +83,7 @@ Các module runtime được phân phối trong package đã cài. Repository s�
 
 ## Phát triển
 
-Toolchain dự kiến gồm Node.js `>=18`, pnpm, TypeScript, tsup, ESLint, Commander.js, Inquirer và Vitest. Package scaffold chưa tồn tại; hãy làm theo kế hoạch triển khai thay vì tự đặt ra lệnh mới trước khi Task 1.1 tạo và kiểm thử chúng.
+Toolchain gồm Node.js `>=18`, pnpm, TypeScript, tsup, ESLint, Commander.js, Inquirer và Vitest. Dùng `pnpm install --frozen-lockfile --ignore-scripts` trong môi trường pnpm 11 hiện tại để không tạo workspace approval file; các gate build/test sau đó không thực thi script dự án.
 
 Sau khi có scaffold, chuỗi nghiệm thu bắt buộc sẽ là:
 

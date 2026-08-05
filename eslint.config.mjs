@@ -11,6 +11,7 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         URL: 'readonly',
+        process: 'readonly',
       },
     },
     rules: {
@@ -18,4 +19,3 @@ export default tseslint.config(
     },
   },
 );
-

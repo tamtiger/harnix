@@ -344,12 +344,13 @@ Mọi public command dùng stderr cho actionable error/warning và stdout cho re
 
 **Create:** root `package.json`, TypeScript/tsup/Vitest/ESLint config, `src/{cli,index}.ts`, license/notice/readme.
 
-- [ ] Write packaging invariant test first: exactly one publishable `package.json`, no workspace file, one `harnix` bin.
-- [ ] Scaffold package with Node >=18 and ESM.
-- [ ] Lock package scripts: `build`, `lint`, `typecheck`, `test`, `test:unit`, `test:integration`, `test:migration`, `test:platform`, `test:workflow`, `test:safety`, `test:acceptance`, `pack:check`, `smoke:tarball`, `measure:init`, `measure:footprint`, `scan:release`.
-- [ ] `test:acceptance` orchestrates all required suites and doctor fixtures; `pack:check` produces exactly one tarball under `.artifacts/`; other acceptance scripts consume that tarball/isolated fixtures without global mutation.
-- [ ] Build minimal CLI help and non-zero usage errors.
-- [ ] Verify `pnpm install`, build, lint, typecheck and minimal tests.
+- [x] Write packaging invariant test first: exactly one publishable `package.json`, no workspace file, one `harnix` bin.
+- [x] Scaffold package with Node >=18 and ESM.
+- [x] Lock package scripts: `build`, `lint`, `typecheck`, `test`, `test:unit`, `test:integration`, `test:migration`, `test:platform`, `test:workflow`, `test:safety`, `test:acceptance`, `pack:check`, `smoke:tarball`, `measure:init`, `measure:footprint`, `scan:release`.
+- [x] Phase 1: `test:acceptance` orchestrates the implemented unit/integration/migration/platform/workflow/safety suites; `pack:check` produces exactly one tarball under `.artifacts/` without global mutation.
+- [ ] Phase 4 extension: add clean/seeded `doctor --json` fixtures to `test:acceptance`, then have smoke/release scripts consume the checked tarball and isolated fixtures.
+- [x] Build minimal CLI help and non-zero usage errors.
+- [x] Verify `pnpm install --frozen-lockfile --ignore-scripts`, build, lint, typecheck and minimal tests (pnpm 11 no-workspace policy).
 
 ### Task 1.2: Root/path and atomic primitives
 
@@ -357,50 +358,50 @@ Mọi public command dùng stderr cho actionable error/warning và stdout cho re
 
 **Tests:** `test/unit/{paths,atomic-write}.test.ts`
 
-- [ ] RED tests for nested Git root, worktree root, Unicode/spaces, non-Git fallback, traversal and symlink/junction escape.
-- [ ] Implement Node path APIs + argument-safe Git lookup; never shell-concatenate paths.
-- [ ] RED tests for atomic success, interrupted replacement and temp cleanup.
-- [ ] Implement sibling temp write + atomic replacement.
+- [x] RED tests for nested Git root, worktree root, Unicode/spaces, non-Git fallback, traversal and symlink/junction escape.
+- [x] Implement Node path APIs + argument-safe Git lookup; never shell-concatenate paths.
+- [x] RED tests for atomic success, interrupted replacement and temp cleanup.
+- [x] Implement sibling temp write + atomic replacement.
 
 ### Task 1.3: Detection
 
 **Create:** `src/utils/detection.ts`; fixture repositories.
 
-- [ ] RED tests for C#/.NET/ABP, NestJS, Python, Java/Spring, Go, React, Vue and monorepo.
-- [ ] Test ignored `node_modules/vendor/bin/obj/dist/build` trees.
-- [ ] Detect package manager and available verification scripts without executing them.
-- [ ] Return deterministic sorted languages/packages/commands.
+- [x] RED tests for C#/.NET/ABP, NestJS, Python, Java/Spring, Go, React, Vue and monorepo.
+- [x] Test ignored `node_modules/vendor/bin/obj/dist/build` trees.
+- [x] Detect package manager and available verification scripts without executing them.
+- [x] Return deterministic sorted languages/packages/commands.
 
 ### Task 1.4: Config schema and init
 
 **Create:** `src/core/config/**`, `src/commands/init.ts`, Harnix base templates.
 
-- [ ] RED config tests implement exact 4.1 types/invariants, valid/corrupt/future schemas and compatible unknown-key round-trip preservation.
-- [ ] RED CLI tests for `--yes`, `--user`, `--languages`, interactive edit and idempotence.
-- [ ] Init creates only the approved `.harnix` tree; no runtime scripts.
-- [ ] Existing specs/config/tasks/journals remain untouched.
-- [ ] Performance test uses a representative local fixture and requires <5 seconds.
+- [x] RED config tests implement exact 4.1 types/invariants, valid/corrupt/future schemas and compatible unknown-key round-trip preservation.
+- [x] RED CLI tests for `--yes`, `--user`, `--languages`, interactive edit and idempotence.
+- [x] Init creates only the approved `.harnix` tree; no runtime scripts.
+- [x] Existing specs/config/tasks/journals remain untouched.
+- [x] Performance test uses a representative local fixture and requires <5 seconds.
 
 ### Task 1.5: Legacy preview
 
 **Create:** `src/migration/discovery.ts`, preview model.
 
-- [ ] Detect `.trellis`, `.trellis-pro`, legacy packages/skills and mixed state.
-- [ ] Default init with legacy state emits preview and performs no write.
-- [ ] `--dry-run` output is stable and machine-testable.
+- [x] Detect `.trellis`, `.trellis-pro`, legacy packages/skills and mixed state.
+- [x] Default init with legacy state emits preview and performs no write.
+- [x] `--dry-run` output is stable and machine-testable.
 
 ### Task 1.6: Basic Kiro/Codex setup from frozen contracts
 
 **Create:** `src/commands/setup.ts`, configurator interface, minimal `kiro.ts`/`codex.ts`, templates and schema snapshots.
 
-- [ ] Require at least one platform flag; accept multiple flags; `--antigravity` is recognized but its writer lands in Task 3.5.
-- [ ] Validate config before any platform write.
-- [ ] Kiro emits exactly the Task 1.0 project paths and one schema-valid `.kiro.hook`; selected-language output only.
-- [ ] Codex preserves arbitrary `AGENTS.md` outside managed markers, emits valid repo skills and uses one `.codex/hooks.json` representation.
-- [ ] No configurator writes user-level state, machine paths, credentials or runtime copies.
-- [ ] Rerun produces byte-identical managed output.
+- [x] Require at least one platform flag; accept multiple flags; `--antigravity` is recognized but its writer lands in Task 3.5.
+- [x] Validate config before any platform write.
+- [x] Kiro emits exactly the Task 1.0 project paths and one schema-valid `.kiro.hook`; selected-language output only.
+- [x] Codex preserves arbitrary `AGENTS.md` outside managed markers, emits valid repo skills and uses one `.codex/hooks.json` representation.
+- [x] No configurator writes user-level state, machine paths, credentials or runtime copies.
+- [x] Rerun produces byte-identical managed output.
 
-**Phase 1 gate:** focused unit/integration tests green; build/lint/typecheck green; no unsupported public branding in new output.
+**Phase 1 gate:** [x] focused unit/integration tests green; build/lint/typecheck green; no unsupported public branding in new output. Verified on 2026-08-05 with `pnpm install --frozen-lockfile --ignore-scripts`, build, lint, typecheck, 44 tests, `test:acceptance`, `pack:check`, branding scan and `git diff --check`.
 
 ## 7. Phase 2 — Core workflow data, context và managed ownership
 
