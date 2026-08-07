@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { initializeProject } from "./commands/init.js";
 import { setupPlatforms } from "./commands/setup.js";
 import { resolveProjectRoot } from "./utils/paths.js";
+import { renderInternalContext } from "./commands/internal-context.js";
 
 export function createProgram(): Command {
   const program = new Command();
@@ -26,6 +27,13 @@ export function createProgram(): Command {
     const result = await setupPlatforms({ platforms, root: await resolveProjectRoot(process.cwd()) });
     process.stdout.write(`${JSON.stringify(result)}\n`);
   });
+  const internal = new Command("internal");
+  internal.command("context").option("--platform <platform>").action(async (options: { platform: "kiro" | "antigravity" | "codex" }) => {
+    if (!options.platform || !["kiro", "antigravity", "codex"].includes(options.platform)) throw new Error("--platform must be kiro, antigravity, or codex.");
+    const output = await renderInternalContext(await resolveProjectRoot(process.cwd()), options.platform);
+    if (output) process.stdout.write(`${output}\n`);
+  });
+  program.addCommand(internal, { hidden: true });
   return program;
 }
 

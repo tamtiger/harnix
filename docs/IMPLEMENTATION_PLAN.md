@@ -460,60 +460,60 @@ Mọi public command dùng stderr cho actionable error/warning và stdout cho re
 
 **Create:** `src/templates/harnix/workflow.md` từ canonical doc; `harnix-brainstorm`, `harnix-implement`, `harnix-check`, `harnix-finish-work`, `harnix-continue` sources.
 
-- [ ] Generated `.harnix/workflow.md` giữ đúng state/transition/gate semantics và được managed-until-edited.
-- [ ] Eval Bypass không tạo task; Lite/Full tạo đúng artifact contract.
-- [ ] Eval lite/full/ambiguous/forced routing.
-- [ ] Full output contains acceptance criteria, material-unknown research decision and decision-complete plan.
-- [ ] Explicit implementation request proceeds after ready gate without duplicate approval; plan-only request stops at `ready`.
-- [ ] Implement loads scoped context and records checkpoints.
-- [ ] Check enforces compliance stage before quality/security stage.
-- [ ] Finish requires fresh verification, journals evidence and never commits.
-- [ ] Continue routes from persisted status/checkpoint, loads minimum relevant state and fails closed on corrupt/future task state.
+- [x] Generated `.harnix/workflow.md` giữ đúng state/transition/gate semantics và được managed-until-edited.
+- [x] Eval Bypass không tạo task; Lite/Full tạo đúng artifact contract.
+- [x] Eval lite/full/ambiguous/forced routing.
+- [x] Full output contains acceptance criteria, material-unknown research decision and decision-complete plan.
+- [x] Explicit implementation request proceeds after ready gate without duplicate approval; plan-only request stops at `ready`.
+- [x] Implement loads scoped context and records checkpoints.
+- [x] Check enforces compliance stage before quality/security stage.
+- [x] Finish requires fresh verification, journals evidence and never commits.
+- [x] Continue routes from persisted status/checkpoint, loads minimum relevant state and fails closed on corrupt/future task state.
 
 ### Task 3.2: Research/debug skills
 
 **Create:** `harnix-research`, `harnix-debug`.
 
-- [ ] Eval research activates only for defined material unknowns.
-- [ ] Research findings retain source/date/task attribution.
-- [ ] Debug eval enforces reproduce/evidence/root cause/single hypothesis/regression sequence.
-- [ ] Three failed hypotheses trigger architecture reassessment.
+- [x] Eval research activates only for defined material unknowns.
+- [x] Research findings retain source/date/task attribution.
+- [x] Debug eval enforces reproduce/evidence/root cause/single hypothesis/regression sequence.
+- [x] Three failed hypotheses trigger architecture reassessment.
 
 ### Task 3.3: Adaptive TDD and verification evals
 
-- [ ] Behavior change routes RED–GREEN–REFACTOR.
-- [ ] Docs/trivial wiring/generated snapshot exception records reason and alternate verification.
-- [ ] Stale or inferred output cannot satisfy completion.
-- [ ] Partial verification cannot support a broader claim; evidence stores check, time, result/exit and summary.
-- [ ] YAGNI prevents unrequested framework/generalization.
+- [x] Behavior change routes RED–GREEN–REFACTOR.
+- [x] Docs/trivial wiring/generated snapshot exception records reason and alternate verification.
+- [x] Stale or inferred output cannot satisfy completion.
+- [x] Partial verification cannot support a broader claim; evidence stores check, time, result/exit and summary.
+- [x] YAGNI prevents unrequested framework/generalization.
 
 ### Task 3.4: Codex native parity
 
 **Create:** finalized `src/configurators/codex.ts`, Codex templates/tests.
 
-- [ ] Preserve user `AGENTS.md`; managed markers never duplicate.
-- [ ] Repo skills at `.agents/skills/harnix-*` pass frontmatter/schema tests.
-- [ ] Structurally merge only Harnix-owned `.codex/config.toml` keys.
-- [ ] Use exactly one current hook representation; test bounded output, safe commands, Windows override, trust guidance and nested worktree root.
-- [ ] Optional roles cannot become core dependency.
-- [ ] Preserve user-owned `.codex` files and unrelated config.
+- [x] Preserve user `AGENTS.md`; managed markers never duplicate.
+- [x] Repo skills at `.agents/skills/harnix-*` pass frontmatter/schema tests.
+- [x] Structurally merge only Harnix-owned `.codex/config.toml` keys.
+- [x] Use exactly one current hook representation; test bounded output, safe commands, Windows override, trust guidance and nested worktree root.
+- [x] Optional roles cannot become core dependency.
+- [x] Preserve user-owned `.codex` files and unrelated config.
 
 ### Task 3.5: Kiro and Antigravity parity
 
-- [ ] Revalidate Task 1.0 snapshots only when installed version/current authoritative behavior differs; record date/source for deviations.
-- [ ] Preflight `agy --version`; missing executable yields an actionable readiness warning, while fixture/injected runner keeps tests deterministic.
-- [ ] Antigravity emits only managed project `GEMINI.md` and `.gemini/skills/harnix-*`; do not generate unverified settings/hooks or touch any user-level `.gemini` state.
-- [ ] Kiro finalized output remains schema-compatible with the frozen `.kiro.hook` fixture.
-- [ ] Generate equivalent core/optional workflow behavior and relevant rules across both adapters.
-- [ ] Multi-platform setup has no path collision or duplicate execution; no absolute machine path appears in output.
+- [x] Revalidate Task 1.0 snapshots only when installed version/current authoritative behavior differs; record date/source for deviations.
+- [x] Preflight `agy --version`; missing executable yields an actionable readiness warning, while fixture/injected runner keeps tests deterministic.
+- [x] Antigravity emits only managed project `GEMINI.md` and `.gemini/skills/harnix-*`; do not generate unverified settings/hooks or touch any user-level `.gemini` state.
+- [x] Kiro finalized output remains schema-compatible with the frozen `.kiro.hook` fixture.
+- [x] Generate equivalent core/optional workflow behavior and relevant rules across both adapters.
+- [x] Multi-platform setup has no path collision or duplicate execution; no absolute machine path appears in output.
 
 ### Task 3.6: Remove stale upstream surfaces
 
-- [ ] Remove unsupported adapters, agents, scripts, packages, imports and tests.
-- [ ] Add negative scans for forbidden branding/surfaces.
-- [ ] Preserve allowed research/migration/license occurrences only.
+- [x] Remove unsupported adapters, agents, scripts, packages, imports and tests.
+- [x] Add negative scans for forbidden branding/surfaces.
+- [x] Preserve allowed research/migration/license occurrences only.
 
-**Phase 3 gate:** workflow evals and platform snapshots green; setup parity/idempotence green; public/output branding clean.
+**Phase 3 gate:** [x] workflow evals and platform snapshots green; setup parity/idempotence green; public/output branding clean. Verified with fresh acceptance, typecheck, lint, and diff check.
 
 ## 9. Phase 4 — Lifecycle, migration, doctor và release polish
 

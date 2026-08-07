@@ -5,6 +5,8 @@ import { createConfig, writeConfig } from "../core/config/config.js";
 import { detectProject, type LanguageId } from "../utils/detection.js";
 import { atomicWriteFile } from "../utils/atomic-write.js";
 import { discoverLegacy } from "../migration/discovery.js";
+import { sha256 } from "../utils/hashing.js";
+import { workflowTemplate } from "../templates/harnix/workflow.js";
 
 export interface InitializeProjectOptions {
   root: string;
@@ -49,8 +51,8 @@ export async function initializeProject(options: InitializeProjectOptions): Prom
   await Promise.all([
     writeConfig(configPath, config),
     atomicWriteFile(join(harnixRoot, ".developer"), `${options.developer}\n`),
-    atomicWriteFile(join(harnixRoot, "workflow.md"), "# Harnix workflow\n\nSee docs/HARNIX_WORKFLOW.md.\n"),
-    atomicWriteFile(join(harnixRoot, ".template-hashes.json"), "{\n  \"generator\": \"harnix\",\n  \"schemaVersion\": 1,\n  \"entries\": []\n}\n"),
+    atomicWriteFile(join(harnixRoot, "workflow.md"), workflowTemplate),
+    atomicWriteFile(join(harnixRoot, ".template-hashes.json"), `${JSON.stringify({ generator: "harnix", schemaVersion: 1, entries: [{ path: ".harnix/workflow.md", sourceId: "harnix-workflow", scope: "project", generatedHash: sha256(workflowTemplate), generatorVersion: "0.1.0" }] }, null, 2)}\n`),
   ]);
   return { created: true, legacyMarkers };
 }

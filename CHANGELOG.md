@@ -6,6 +6,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-08-07
+
+### Added
+
+- Phase 3 workflow and platform parity: managed workflow/skills, research/debug/verification guards, bounded internal context hooks, Codex adapter parity, and Kiro/Antigravity project-local setup.
+
 ## [0.2.0] - 2026-08-07
 
 ### Added
