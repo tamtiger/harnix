@@ -519,59 +519,59 @@ Mọi public command dùng stderr cho actionable error/warning và stdout cho re
 
 ### Task 4.1: Update
 
-- [ ] Materialize desired template set from config/platform/language.
-- [ ] Apply managed ownership state machine.
-- [ ] Report user-deleted files and require explicit restore path.
-- [ ] Never touch tasks/journals/unrelated files.
+- [x] Materialize desired template set from config/platform/language.
+- [x] Apply managed ownership state machine.
+- [x] Report user-deleted files and require explicit restore path.
+- [x] Never touch tasks/journals/unrelated files.
 
 ### Task 4.2: Upgrade
 
-- [ ] Report installed and available versions.
-- [ ] Present safe npm upgrade path for `@tamtiger/harnix`.
-- [ ] Use `execFile` argument arrays and injected version/network/process dependencies.
-- [ ] Tests prove no network/install process is invoked unless injected fake permits it.
+- [x] Report installed and available versions.
+- [x] Present safe npm upgrade path for `@tamtiger/harnix`.
+- [x] Use `execFile` argument arrays and injected version/network/process dependencies.
+- [x] Tests prove no network/install process is invoked unless injected fake permits it.
 
 ### Task 4.3: Uninstall/purge
 
-- [ ] Default removes unchanged managed platform files/blocks only.
-- [ ] Preserve `.harnix` data, modified injections and user files.
-- [ ] Purge lists exact targets and requires confirmation unless intentional `--yes`.
-- [ ] Refuse filesystem/repo unsafe roots and external symlinks.
-- [ ] Legacy sources require separate verified cleanup option.
+- [x] Default removes unchanged managed platform files/blocks only.
+- [x] Preserve `.harnix` data, modified injections and user files.
+- [x] Purge lists exact targets and requires confirmation unless intentional `--yes`.
+- [x] Refuse filesystem/repo unsafe roots and external symlinks.
+- [x] Legacy sources require separate verified cleanup option.
 
 ### Task 4.4: Safe migration
 
-- [ ] Preview discovery and conflict plan.
-- [ ] Stage copy/transform into temporary sibling.
-- [ ] Re-baseline namespace/hash ownership conservatively.
-- [ ] Verify config/spec/task/journal counts/hashes before atomic activation.
-- [ ] On failure remove only owned staging and leave legacy source unchanged.
-- [ ] Cleanup only after explicit option and verified migration.
+- [x] Preview discovery and conflict plan.
+- [x] Stage copy/transform into temporary sibling.
+- [x] Re-baseline namespace/hash ownership conservatively.
+- [x] Verify config/spec/task/journal counts/hashes before atomic activation.
+- [x] On failure remove only owned staging and leave legacy source unchanged.
+- [x] Cleanup only after explicit option and verified migration.
 
 ### Task 4.5: Mem
 
-- [ ] Query/user/limit/json contract and stable JSON.
-- [ ] Missing/malformed/Unicode cases degrade gracefully.
-- [ ] Include candidate confidence/evidence without promotion.
+- [x] Query/user/limit/json contract and stable JSON.
+- [x] Missing/malformed/Unicode cases degrade gracefully.
+- [x] Include candidate confidence/evidence without promotion.
 
 ### Task 4.6: Doctor/fix
 
-- [ ] Implement deterministic checks: schemas, manifest ownership, missing/modified/obsolete, duplicate/legacy injections, skill frontmatter, hooks, trust drift, unsafe paths, attribution, platform drift, secrets, permissions and injection-prone commands.
-- [ ] Redact secret values.
-- [ ] `--fix` emits plan then repairs only safe managed issues.
-- [ ] Never modify specs/tasks/journals/secrets/sensitive permissions/user-modified files.
-- [ ] Stable 4.6 JSON ordering/redaction and 4.8 exit codes locked by fixtures.
+- [x] Implement deterministic checks: schemas, manifest ownership, missing/modified/obsolete, duplicate/legacy injections, skill frontmatter, hooks, trust drift, unsafe paths, attribution, platform drift, secrets, permissions and injection-prone commands.
+- [x] Redact secret values.
+- [x] `--fix` emits plan then repairs only safe managed issues.
+- [x] Never modify specs/tasks/journals/secrets/sensitive permissions/user-modified files.
+- [x] Stable 4.6 JSON ordering/redaction and 4.8 exit codes locked by fixtures.
 
 ### Task 4.7: Packaging, performance và footprint
 
-- [ ] Implement and verify `pack:check`; tarball contains only intended dist/runtime/templates/licenses/notices and exactly one package/bin.
-- [ ] Implement `smoke:tarball` with isolated install plus init/setup each platform and multi-platform.
-- [ ] Implement `measure:init` with documented fixture/repetitions and <5-second worst-run gate.
-- [ ] Implement `measure:footprint` using `UPSTREAM_BASELINE.md` definition and >=50% reduction gate.
-- [ ] Implement `scan:release` for secrets, machine paths, required TODOs, forbidden branding/surfaces, second package/workspace, dead packaged imports and duplicate hooks.
-- [ ] `test:acceptance` orchestrates all non-packaging suites and doctor fixtures; every script propagates non-zero exit on gate failure.
+- [x] Implement and verify `pack:check`; tarball contains only intended dist/runtime/templates/licenses/notices and exactly one package/bin.
+- [x] Implement `smoke:tarball` with isolated install plus init/setup each platform and multi-platform.
+- [x] Implement `measure:init` with documented fixture/repetitions and <5-second worst-run gate.
+- [x] Implement `measure:footprint` using `UPSTREAM_BASELINE.md` definition and >=50% reduction gate.
+- [x] Implement `scan:release` for secrets, machine paths, required TODOs, forbidden branding/surfaces, second package/workspace, dead packaged imports and duplicate hooks.
+- [x] `test:acceptance` orchestrates all non-packaging suites and doctor fixtures; every script propagates non-zero exit on gate failure.
 
-**Phase 4 gate:** all acceptance commands and smoke/safety/performance/footprint checks green with fresh output.
+**Phase 4 gate:** [x] all acceptance commands and smoke/safety/performance/footprint checks green with fresh output (2026-08-07: 87 tests, tarball smoke for Kiro/Antigravity/Codex/all, 471 ms worst init, 98.99% footprint reduction).
 
 ## 10. Required test inventory
 

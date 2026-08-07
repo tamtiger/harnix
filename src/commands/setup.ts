@@ -2,12 +2,13 @@ import { readFile } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { join } from "node:path";
 
-import { readConfig, type PlatformId } from "../core/config/config.js";
+import { readConfig, writeConfig, type PlatformId } from "../core/config/config.js";
 import { atomicWriteFile } from "../utils/atomic-write.js";
 import { seedRules } from "../rules/rules.js";
 import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
 import { configureCodex } from "../configurators/codex.js";
 import { ensureManagedWorkflow } from "../templates/harnix/managed-workflow.js";
+import { baselineManagedTemplates } from "./update.js";
 
 export type VersionLookup = (executable: string, args: string[]) => Promise<string | undefined>;
 export interface SetupPlatformsOptions { root: string; platforms: PlatformId[]; versionLookup?: VersionLookup; }
@@ -28,7 +29,9 @@ export async function setupPlatforms(options: SetupPlatformsOptions): Promise<Se
     else if (platform === "antigravity") { const version = await (options.versionLookup ?? lookupVersion)("agy", ["--version"]); if (!version) warnings.push("Antigravity executable 'agy' was not found; generated project guidance remains usable offline."); await setupAntigravity(options.root); configured.push(platform); }
     else skipped.push(platform);
   }
+  await writeConfig(join(options.root, ".harnix", "config.yaml"), { ...config, platforms: [...new Set([...config.platforms, ...configured])].sort() });
   await seedRules({ root: options.root, languages: config.languages });
+  await baselineManagedTemplates(options.root);
   return { configured, skipped, warnings };
 }
 

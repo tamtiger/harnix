@@ -7,6 +7,7 @@ import { atomicWriteFile } from "../utils/atomic-write.js";
 import { discoverLegacy } from "../migration/discovery.js";
 import { sha256 } from "../utils/hashing.js";
 import { workflowTemplate } from "../templates/harnix/workflow.js";
+import { migrateLegacyProject } from "../migration/migrate.js";
 
 export interface InitializeProjectOptions {
   root: string;
@@ -29,6 +30,10 @@ export async function initializeProject(options: InitializeProjectOptions): Prom
   }
   if (options.dryRun) {
     return { created: false, legacyMarkers };
+  }
+  if (legacyMarkers.length > 0 && options.migrate) {
+    const migrated = await migrateLegacyProject({ root: options.root, developer: options.developer, apply: true });
+    return { created: migrated.activated, legacyMarkers };
   }
 
   const harnixRoot = join(options.root, ".harnix");

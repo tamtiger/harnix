@@ -30,8 +30,7 @@ export async function readManifest(path: string): Promise<ManagedManifest> {
 }
 
 export async function writeManifest(path: string, manifest: ManagedManifest, options: { filesystem?: AtomicFileSystem; randomSuffix?: () => string } = {}): Promise<void> {
-  const { stringify } = await import("yaml");
-  await atomicWriteFile(path, stringify(validateManifest(manifest)).replaceAll("\r\n", "\n"), options);
+  await atomicWriteFile(path, `${JSON.stringify(validateManifest(manifest), null, 2)}\n`, options);
 }
 
 export async function ownershipState(projectRoot: string, desired: ManagedEntry, previous?: ManagedEntry): Promise<OwnershipState> {
@@ -57,7 +56,7 @@ export async function reconcileManagedFiles(
   projectRoot: string,
   manifest: ManagedManifest,
   desired: DesiredManagedFile[],
-  options: { generatorVersion: string; removeObsolete?: boolean } = { generatorVersion: "unknown" },
+  options: { generatorVersion: string; removeObsolete?: boolean | undefined; restoreDeleted?: boolean | undefined } = { generatorVersion: "unknown" },
 ): Promise<{ manifest: ManagedManifest; result: ReconcileResult }> {
   const oldByPath = new Map(manifest.entries.map((entry) => [entry.path, entry]));
   const result: ReconcileResult = { created: [], updated: [], preserved: [], deleted: [], obsolete: [] };
@@ -66,16 +65,38 @@ export async function reconcileManagedFiles(
     const entry = { ...file.entry, generatorVersion: options.generatorVersion };
     const previous = oldByPath.get(entry.path);
     const state = await ownershipState(projectRoot, entry, previous);
-    if (state === "new" || state === "deleted") { await atomicWriteFile(await resolveSafeProjectPath(projectRoot, entry.path), file.content); result[state === "new" ? "created" : "deleted"].push(entry.path); }
+    if (state === "new") { await atomicWriteFile(await resolveSafeProjectPath(projectRoot, entry.path), file.content); result.created.push(entry.path); }
+    else if (state === "deleted") {
+      if (options.restoreDeleted) {
+        await atomicWriteFile(await resolveSafeProjectPath(projectRoot, entry.path), file.content);
+        result.created.push(entry.path);
+        nextEntries.push({ ...entry, generatedHash: sha256(file.content) });
+      } else {
+        result.deleted.push(entry.path);
+        nextEntries.push(previous!);
+      }
+      oldByPath.delete(entry.path);
+      continue;
+    }
     else if (state === "unchanged") { if (previous?.generatedHash !== sha256(file.content)) { await atomicWriteFile(await resolveSafeProjectPath(projectRoot, entry.path), file.content); result.updated.push(entry.path); } else result.preserved.push(entry.path); }
-    else if (state === "modified") { if (previous) result.preserved.push(entry.path); else { await atomicWriteFile(await resolveSafeProjectPath(projectRoot, entry.path), file.content); result.created.push(entry.path); } }
+    else if (state === "modified") {
+      if (previous) {
+        result.preserved.push(entry.path);
+        nextEntries.push(previous);
+      } else result.preserved.push(entry.path);
+      oldByPath.delete(entry.path);
+      continue;
+    }
     nextEntries.push({ ...entry, generatedHash: sha256(file.content) });
     oldByPath.delete(entry.path);
   }
   for (const obsolete of oldByPath.values()) {
     const state = await obsoleteState(projectRoot, obsolete);
     if (state === "obsolete-unchanged" && options.removeObsolete) { const target = await resolveSafeProjectPath(projectRoot, obsolete.path); const { rm } = await import("node:fs/promises"); await rm(target, { force: true }); result.deleted.push(obsolete.path); }
-    else { result[state === "obsolete-unchanged" ? "obsolete" : "preserved"].push(obsolete.path); }
+    else {
+      result[state === "obsolete-unchanged" ? "obsolete" : "preserved"].push(obsolete.path);
+      nextEntries.push(obsolete);
+    }
   }
   return { manifest: validateManifest({ generator: "harnix", schemaVersion: 1, entries: nextEntries }), result };
 }

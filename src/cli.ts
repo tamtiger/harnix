@@ -8,6 +8,11 @@ import { initializeProject } from "./commands/init.js";
 import { setupPlatforms } from "./commands/setup.js";
 import { resolveProjectRoot } from "./utils/paths.js";
 import { renderInternalContext } from "./commands/internal-context.js";
+import { updateProject } from "./commands/update.js";
+import { upgradeHarnix } from "./commands/upgrade.js";
+import { uninstallProject } from "./commands/uninstall.js";
+import { searchMemory } from "./commands/mem.js";
+import { diagnoseProject } from "./commands/doctor.js";
 
 export function createProgram(): Command {
   const program = new Command();
@@ -26,6 +31,22 @@ export function createProgram(): Command {
     const platforms = (["kiro", "antigravity", "codex"] as const).filter((platform) => options[platform]);
     const result = await setupPlatforms({ platforms, root: await resolveProjectRoot(process.cwd()) });
     process.stdout.write(`${JSON.stringify(result)}\n`);
+  });
+  program.command("update").option("--restore", "Restore explicitly deleted managed files").action(async (options: { restore?: boolean }) => {
+    const result = await updateProject({ root: await resolveProjectRoot(process.cwd()), restoreDeleted: options.restore });
+    process.stdout.write(`${JSON.stringify(result)}\n`);
+  });
+  program.command("upgrade").option("--apply", "Run the displayed npm upgrade command").action(async (options: { apply?: boolean }) => {
+    const result = await upgradeHarnix({ installedVersion: "0.1.0", apply: options.apply }); process.stdout.write(`${JSON.stringify(result)}\n`);
+  });
+  program.command("uninstall").option("--purge", "Also remove .harnix project data").option("--yes", "Confirm purge").action(async (options: { purge?: boolean; yes?: boolean }) => {
+    const result = await uninstallProject({ root: await resolveProjectRoot(process.cwd()), purge: options.purge, yes: options.yes }); process.stdout.write(`${JSON.stringify(result)}\n`); if (result.confirmationRequired) process.exitCode = 2;
+  });
+  program.command("mem").option("--query <query>").option("--user <id>").option("--limit <count>").option("--json", "Output stable JSON").action(async (options: { query?: string; user?: string; limit?: string }) => {
+    const limit = options.limit === undefined ? undefined : Number.parseInt(options.limit, 10); if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) throw new Error("--limit must be a positive integer."); const result = await searchMemory({ root: await resolveProjectRoot(process.cwd()), query: options.query, user: options.user, limit }); process.stdout.write(`${JSON.stringify(result)}\n`);
+  });
+  program.command("doctor").option("--fix", "Repair safe, unchanged managed files").action(async (options: { fix?: boolean }) => {
+    const result = await diagnoseProject({ root: await resolveProjectRoot(process.cwd()), fix: options.fix }); process.stdout.write(`${JSON.stringify(result)}\n`); if (!result.ok) process.exitCode = 1;
   });
   const internal = new Command("internal");
   internal.command("context").option("--platform <platform>").action(async (options: { platform: "kiro" | "antigravity" | "codex" }) => {

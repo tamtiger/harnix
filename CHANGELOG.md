@@ -6,6 +6,15 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-08-07
+
+### Added
+
+- Phase 4 lifecycle commands: managed `update` with explicit restore, offline-by-default upgrade planning, safe uninstall/purge confirmation, journal `mem`, and deterministic `doctor --fix` reporting.
+- Staged legacy migration with preview, conflict detection, atomic activation, verification, and opt-in legacy cleanup.
+- Managed ownership now preserves user-modified/deleted files without re-baselining them; setup records Harnix-owned platform templates for safe later lifecycle operations.
+- Packaging/release gates now inspect tarball contents, smoke install the tarball for every supported platform combination, measure init/footprint, and scan release output for secrets, machine paths, one-package, and one-bin invariants.
+
 ## [0.3.0] - 2026-08-07
 
 ### Added

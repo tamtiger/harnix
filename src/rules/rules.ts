@@ -20,6 +20,8 @@ const packs: Record<LanguageId, string> = {
   vue: `# Vue rules\n\n- Keep components focused, props/events typed, and state ownership explicit.\n- Validate user input and test rendered behavior.\n`,
 };
 
+export function languageRule(language: string): string | undefined { return packs[language as LanguageId]; }
+
 export interface SeedRulesOptions { root: string; languages: LanguageId[]; force?: boolean; }
 export interface SeedRulesResult { paths: string[]; preserved: string[]; }
 export function composeRules(languages: LanguageId[]): string { return [commonRules, ...[...new Set(languages)].sort((a, b) => a.localeCompare(b)).map((language) => packs[language])].join("\n"); }
