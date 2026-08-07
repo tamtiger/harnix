@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { readConfig, type PlatformId } from "../core/config/config.js";
 import { atomicWriteFile } from "../utils/atomic-write.js";
+import { seedRules } from "../rules/rules.js";
 
 export interface SetupPlatformsOptions { root: string; platforms: PlatformId[]; }
 export interface SetupPlatformsResult { configured: PlatformId[]; skipped: PlatformId[]; }
@@ -20,6 +21,7 @@ export async function setupPlatforms(options: SetupPlatformsOptions): Promise<Se
     else if (platform === "codex") { await setupCodex(options.root); configured.push(platform); }
     else skipped.push(platform);
   }
+  await seedRules({ root: options.root, languages: config.languages });
   return { configured, skipped };
 }
 

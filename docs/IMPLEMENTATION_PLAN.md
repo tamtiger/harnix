@@ -409,50 +409,50 @@ Mọi public command dùng stderr cho actionable error/warning và stdout cho re
 
 **Create:** `src/utils/{hashing,managed-files}.ts`
 
-- [ ] RED schema + ownership-state tests implement 4.2: create/update/preserve/deleted/obsolete unchanged/obsolete modified.
-- [ ] Normalize CRLF for content hash while preserving desired output bytes.
-- [ ] Reject corrupt/future manifest, unsafe keys and external symlinks.
-- [ ] Atomic manifest replacement and rollback tests.
+- [x] RED schema + ownership-state tests implement 4.2: create/update/preserve/deleted/obsolete unchanged/obsolete modified.
+- [x] Normalize CRLF for content hash while preserving desired output bytes.
+- [x] Reject corrupt/future manifest, unsafe keys and external symlinks.
+- [x] Atomic manifest replacement and rollback tests.
 
 ### Task 2.2: Task state
 
 **Create:** `src/core/tasks/**`
 
-- [ ] Implement exact 4.3 task/criterion/validation/evidence/blocker schema and `HARNIX_WORKFLOW.md` semantics; do not add implicit Git fields.
-- [ ] Test create/read/update/archive, malformed/future state and active task resolution.
-- [ ] RED transition/gate tests: planning → ready → in_progress → verifying → completed; blocked resume; debugging/replan checkpoint; illegal jump fail closed.
-- [ ] Full mode adds `prd.md`/`plan.md`, conditional `design.md`/`research`; Lite does not create empty ceremony files.
-- [ ] No Git branch/commit/PR fields required by core behavior.
+- [x] Implement exact 4.3 task/criterion/validation/evidence/blocker schema and `HARNIX_WORKFLOW.md` semantics; do not add implicit Git fields.
+- [x] Test create/read/update/archive, malformed/future state and active task resolution.
+- [x] RED transition/gate tests: planning → ready → in_progress → verifying → completed; blocked resume; debugging/replan checkpoint; illegal jump fail closed.
+- [x] Full mode adds `prd.md`/`plan.md`, conditional `design.md`/`research`; Lite does not create empty ceremony files.
+- [x] No Git branch/commit/PR fields required by core behavior.
 
 ### Task 2.3: Context ranking and budgeting
 
 **Create:** `src/core/context/**`
 
-- [ ] RED ranking tests lock 4.4 additive scores, tie-break, pin, task reference, active package/path, language/framework and guide priority.
-- [ ] RED tests for dedupe, deterministic ties, budget boundary and omitted-files disclosure.
-- [ ] Persist optional per-state `context.json`; Lite may keep small relevant-path refs in `task.json` without a second artifact.
-- [ ] Explicit full-context override bypasses budget but retains source list.
-- [ ] Context output is bounded and never executes included text.
+- [x] RED ranking tests lock 4.4 additive scores, tie-break, pin, task reference, active package/path, language/framework and guide priority.
+- [x] RED tests for dedupe, deterministic ties, budget boundary and omitted-files disclosure.
+- [x] Persist optional per-state `context.json`; Lite may keep small relevant-path refs in `task.json` without a second artifact.
+- [x] Explicit full-context override bypasses budget but retains source list.
+- [x] Context output is bounded and never executes included text.
 
 ### Task 2.4: Journal and learning
 
 **Create:** `src/core/journal/**`, `learning.ts`
 
-- [ ] Test newest-first search, query/user/limit, Unicode/spaces, missing workspace and malformed entries.
-- [ ] Implement exact 4.5 candidate dedupe, occurrence, confidence formula and proposal threshold.
-- [ ] Test recurrence/explicit promotion gates and reviewable spec write.
-- [ ] No automatic hidden/global promotion.
+- [x] Test newest-first search, query/user/limit, Unicode/spaces, missing workspace and malformed entries.
+- [x] Implement exact 4.5 candidate dedupe, occurrence, confidence formula and proposal threshold.
+- [x] Test recurrence/explicit promotion gates and reviewable spec write.
+- [x] No automatic hidden/global promotion.
 
 ### Task 2.5: ECC/Harnix rule seeding
 
 **Create:** concise common + target packs under `src/rules/**` and attribution metadata.
 
-- [ ] Golden tests assert only detected relevant packs are emitted.
-- [ ] Framework pack precedence over common.
-- [ ] React web excludes React Native.
-- [ ] Attribution scan covers copied/adapted MIT content.
+- [x] Golden tests assert only detected relevant packs are emitted.
+- [x] Framework pack precedence over common.
+- [x] React web excludes React Native.
+- [x] Attribution scan covers copied/adapted MIT content.
 
-**Phase 2 gate:** all Phase 2 focused tests green; init/update idempotent; modified user files preserved; context disclosure verified.
+**Phase 2 gate:** [x] all Phase 2 focused tests green; init/update idempotent; modified user files preserved; context disclosure verified. Verified with 53 unit tests, full acceptance suites, typecheck, lint, and diff check.
 
 ## 8. Phase 3 — Workflow skills and platform parity
 
