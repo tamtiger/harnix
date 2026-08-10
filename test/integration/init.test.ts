@@ -36,10 +36,12 @@ describe("initializeProject", () => {
     await initializeProject({ developer: "tam", root, yes: true });
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toBe(config);
   });
-  it("reports legacy state without writing unless migration is explicitly requested", async () => {
+  it("should_initialize_harnix_without_touching_existing_trellis_data", async () => {
     const root = await fixture(); await writeFile(join(root, ".trellis"), "legacy");
     const result = await initializeProject({ developer: "tam", root, yes: true });
-    expect(result.legacyMarkers).toEqual([".trellis"]); await expect(access(join(root, ".harnix"))).rejects.toBeDefined();
+    expect(result).toEqual({ created: true, legacyMarkers: [] });
+    await expect(access(join(root, ".harnix"))).resolves.toBeUndefined();
+    await expect(readFile(join(root, ".trellis"), "utf8")).resolves.toBe("legacy");
   });
   it("preserves existing config, supports dry-run, and initializes quickly", async () => {
     const root = await fixture(); await initializeProject({ developer: "tam", root, yes: true });

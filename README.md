@@ -136,14 +136,15 @@ Tạo `.harnix/`, config, workflow, task/workspace namespace, các rule liên qu
 
 ```text
 harnix init [--yes] [--user <name>] [--languages <csv>]
-           [--migrate] [--dry-run]
+           [--dry-run]
 ```
 
 - `--yes`: không prompt, phù hợp CI.
 - `--user`: developer workspace ID; chỉ cho phép ký tự an toàn.
 - `--languages`: override detection bằng danh sách language ID.
-- `--migrate`: cho phép migration legacy sau khi xem preview.
 - `--dry-run`: kiểm tra kế hoạch mà không ghi file.
+
+`init` chỉ tạo và quản lý namespace `.harnix/`. Nó không kiểm tra, migrate, overwrite hoặc xóa `.trellis`, `.trellis-pro` hay các skill `trellis-*` đang có trong repository. Sau `init`, chạy `setup` cho platform cần dùng để tạo các skill `harnix-*`.
 
 ### `setup`
 

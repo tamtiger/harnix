@@ -2,7 +2,6 @@ import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import { readConfig, type HarnixConfigV1 } from "../core/config/config.js";
-import { discoverLegacy } from "../migration/discovery.js";
 import { ownershipState, readManifest, type ManagedManifest } from "../utils/managed-files.js";
 import { resolveSafeProjectPath } from "../utils/paths.js";
 import { desiredFiles, updateProject } from "./update.js";
@@ -52,7 +51,6 @@ async function diagnoseOnce(root: string): Promise<DoctorReport> {
   await inspectSkills(root, config, findings);
   await inspectSensitiveFiles(root, findings);
   await inspectPermissions(root, manifest, findings);
-  for (const legacy of await discoverLegacy(root)) findings.push(finding("legacy-surface", "warning", legacy, "Legacy compatibility surface detected; migration cleanup is explicit.", false));
   return report(findings, 0);
 }
 

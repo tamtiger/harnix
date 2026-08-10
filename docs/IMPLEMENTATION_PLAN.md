@@ -382,13 +382,15 @@ Mọi public command dùng stderr cho actionable error/warning và stdout cho re
 - [x] Existing `AGENTS.md`, specs/config/tasks/journals remain untouched; the bootstrap is managed conservatively and preserves user edits.
 - [x] Performance test uses a representative local fixture and requires <5 seconds.
 
-### Task 1.5: Legacy preview
+### Task 1.5: Legacy preview (superseded for runtime)
 
 **Create:** `src/migration/discovery.ts`, preview model.
 
-- [x] Detect `.trellis`, `.trellis-pro`, legacy packages/skills and mixed state.
-- [x] Default init with legacy state emits preview and performs no write.
+- [x] Historical compatibility code and tests remain for provenance.
+- [x] Current `init` ignores legacy markers and always manages only `.harnix`.
 - [x] `--dry-run` output is stable and machine-testable.
+
+Product decision supersession: Harnix no longer exposes legacy detection or migration through the runtime init/doctor flow. Existing Trellis files remain untouched.
 
 ### Task 1.6: Basic Kiro/Codex setup from frozen contracts
 
@@ -540,6 +542,8 @@ Mọi public command dùng stderr cho actionable error/warning và stdout cho re
 - [x] Legacy sources require separate verified cleanup option.
 
 ### Task 4.4: Safe migration
+
+Historical implementation retained for provenance and isolated migration tests; it is not part of the public Harnix runtime path.
 
 - [x] Preview discovery and conflict plan.
 - [x] Stage copy/transform into temporary sibling.

@@ -24,14 +24,14 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   const program = new Command();
   const interactive = programOptions.interactive ?? process.stdin.isTTY === true;
   program.name("harnix").description("Project-local coding-agent harness for Kiro, Antigravity, and Codex.").version(packageVersion).showSuggestionAfterError().exitOverride();
-  program.command("init").option("--yes", "Run without interactive prompts").option("--user <name>", "Developer workspace ID").option("--languages <csv>", "Comma-separated language IDs").option("--migrate", "Allow explicit legacy migration").option("--dry-run", "Preview without writing").action(async (options: { yes?: boolean; user?: string; languages?: string; migrate?: boolean; dryRun?: boolean }) => {
+  program.command("init").option("--yes", "Run without interactive prompts").option("--user <name>", "Developer workspace ID").option("--languages <csv>", "Comma-separated language IDs").option("--dry-run", "Preview without writing").action(async (options: { yes?: boolean; user?: string; languages?: string; dryRun?: boolean }) => {
     const defaults = { developer: options.user ?? process.env.USERNAME ?? process.env.USER ?? "developer", languages: options.languages };
     const answers = options.yes || !interactive ? defaults : await inquirer.prompt<{ developer: string; languages?: string }>([
       { default: defaults.developer, message: "Developer workspace ID", name: "developer", type: "input" },
       { default: defaults.languages ?? "", message: "Languages (comma-separated, optional)", name: "languages", type: "input" },
     ]);
     const languages = answers.languages === undefined || answers.languages.trim() === "" ? undefined : answers.languages.split(",").map((language) => language.trim()).filter(Boolean);
-    const result = await initializeProject({ developer: answers.developer, dryRun: options.dryRun, languages: languages as never, migrate: options.migrate, root: await resolveProjectRoot(process.cwd()), yes: options.yes ?? !interactive });
+    const result = await initializeProject({ developer: answers.developer, dryRun: options.dryRun, languages: languages as never, root: await resolveProjectRoot(process.cwd()), yes: options.yes ?? !interactive });
     process.stdout.write(`${JSON.stringify(result)}\n`);
   });
   program.command("setup").option("--kiro", "Configure Kiro").option("--antigravity", "Recognize Antigravity setup").option("--codex", "Configure Codex").action(async (options: { kiro?: boolean; antigravity?: boolean; codex?: boolean }) => {

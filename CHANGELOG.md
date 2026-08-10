@@ -15,8 +15,10 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 ### Changed
 
+- `harnix init` now always creates the `.harnix/` namespace regardless of existing Trellis folders or skills; it no longer exposes legacy migration through the init flow.
 - CLI entry-point detection now resolves symlinked pnpm global installs before comparing module paths, so `harnix` executes normally after `pnpm add -g .` on Windows.
 - README now documents pnpm 11 global CLI registration from source, `PNPM_HOME`/`PATH` recovery on PowerShell, project-local execution, and the unpublished npm-package limitation.
+- README now documents the fail-safe legacy Trellis migration flow, what `--migrate` transfers, and why old Trellis skills remain until explicit cleanup.
 - Setup, update, and uninstall now preserve user-modified platform files and injected blocks, reconcile obsolete ownership safely, retain unrelated Codex hook keys, and prevent removed platforms from being recreated.
 - Migration now inventories and hash-verifies legacy specs, tasks, and journals in staging before activation; explicit cleanup removes only discovered verified legacy roots.
 - Workflow/task validation now persists completion before archive, honors the latest required evidence, clears resumed blockers, and rejects incomplete completed records.

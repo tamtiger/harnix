@@ -112,7 +112,7 @@ harnix/
 CLI có help rõ, actionable errors và non-zero exit khi thất bại:
 
 ```text
-harnix init [--migrate] [--dry-run]
+harnix init [--dry-run]
 harnix setup --kiro|--antigravity|--codex
 harnix update
 harnix upgrade
@@ -121,7 +121,7 @@ harnix mem [query]
 harnix doctor [--fix] [--json]
 ```
 
-Automation flags gồm `--yes`, `--user <name>`, `--languages <csv>`, `--limit`, `--json` và explicit legacy cleanup option ở command phù hợp. Packaged hidden `harnix internal context --platform <id>` chỉ là platform-hook protocol, không xuất hiện trong public help và không phải supported public API; exact stdin/stdout/bounds nằm trong `IMPLEMENTATION_PLAN.md` mục 4.7.
+Automation flags gồm `--yes`, `--user <name>`, `--languages <csv>`, `--limit` và `--json`. Packaged hidden `harnix internal context --platform <id>` chỉ là platform-hook protocol, không xuất hiện trong public help và không phải supported public API; exact stdin/stdout/bounds nằm trong `IMPLEMENTATION_PLAN.md` mục 4.7.
 
 ## 8. Init requirements
 
@@ -152,7 +152,7 @@ Init chỉ tạo:
   .template-hashes.json
 ```
 
-Không tạo runtime scripts. Seed relevant specs/rules. Rerun idempotent và giữ modified specs/config/tasks/journals. Legacy state mặc định chỉ preview/no-write. Representative non-migration fixture phải dưới 5 giây.
+Không tạo runtime scripts. Seed relevant specs/rules. Rerun idempotent và giữ modified specs/config/tasks/journals. Init chỉ quản lý `.harnix/`, không inspect, migrate, overwrite hoặc xóa `.trellis`, `.trellis-pro` hay skill Trellis. Representative fixture phải dưới 5 giây.
 
 ## 9. Setup and platform requirements
 
@@ -253,20 +253,13 @@ Search newest-first với query/user/limit/json; include candidate confidence/ev
 
 Offline deterministic checks cho schemas, hashes, missing/modified/obsolete, duplicate/legacy injection, skill frontmatter, hooks, unsafe paths, attribution, platform drift, embedded secrets, broad permissions và injection-prone commands. Stable JSON/exit codes; redact secret values. `--fix` preview và chỉ sửa safe managed issues, không sửa user files/specs/tasks/journals/secrets/sensitive permissions.
 
-## 13. Legacy migration
+## 13. Legacy compatibility boundary
 
-Legacy markers: `.trellis/`, `.trellis-pro/`, `trellis-*` skills, `@mindfoldhq/trellis`, `@tamtiger/trellis-*`.
+Trellis/ECC/Superpowers chỉ còn là provenance và research history. Runtime Harnix không phụ thuộc vào hoặc phát hiện `.trellis/`, `.trellis-pro/`, `trellis-*` skills hay package Trellis.
 
-- Không silent merge/overwrite.
-- Init mặc định preview/no-write.
-- Chỉ migrate sau confirmation hoặc explicit `--migrate`; hỗ trợ `--dry-run`, intentional `--yes`.
-- Stage copy/transform sang `.harnix`, source preserved mặc định.
-- Verify config/spec/task/journal counts và ownership trước activation.
-- Failure rollback chỉ xóa owned staging.
-- Legacy hashes không được tin qua namespace; re-baseline conservative.
-- Modified conflicts preserve/report.
-- Cleanup explicit sau verified migration.
-- Doctor phát hiện mixed/duplicate install và đề xuất một migration path.
+- `init` luôn tạo namespace `.harnix/` nếu namespace này chưa tồn tại.
+- Existing Trellis files được giữ nguyên và không bị migrate, overwrite, rename hoặc xóa.
+- `setup` chỉ tạo managed Harnix surfaces cho platform được chọn.
 
 ## 14. Workflow and skills
 
