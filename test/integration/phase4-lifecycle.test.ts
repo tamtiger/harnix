@@ -1,7 +1,6 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { diagnoseProject } from "../../src/commands/doctor.js";
 import { initializeProject } from "../../src/commands/init.js";
@@ -10,10 +9,9 @@ import { setupPlatforms } from "../../src/commands/setup.js";
 import { uninstallProject } from "../../src/commands/uninstall.js";
 import { upgradeHarnix } from "../../src/commands/upgrade.js";
 import { migrateLegacyProject } from "../../src/migration/migrate.js";
+import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
 
-const directories: string[] = [];
-async function fixture(): Promise<string> { const root = await mkdtemp(join(tmpdir(), "harnix-phase4-")); directories.push(root); return root; }
-afterEach(async () => { await Promise.all(directories.splice(0).map((path) => rm(path, { force: true, recursive: true }))); });
+const fixture = useTemporaryRepositories("harnix-phase4-");
 
 describe("phase 4 lifecycle commands", () => {
   it("keeps upgrade offline until an explicit injected apply runner is used", async () => {
@@ -38,7 +36,8 @@ describe("phase 4 lifecycle commands", () => {
     await expect(migrateLegacyProject({ root, apply: true })).resolves.toMatchObject({ activated: true, cleaned: [] }); await expect(readFile(join(root, ".trellis", "keep"), "utf8")).resolves.toBe("legacy");
   });
   it("reports deterministic doctor findings and fixes only safe untracked files", async () => {
-    const root = await fixture(); await initializeProject({ developer: "tam", root, yes: true }); await rm(join(root, ".harnix", "spec"), { force: true, recursive: true });
-    const report = await diagnoseProject({ root, fix: true }); expect(report.findings.map((item) => item.code)).toContain("managed-untracked"); await expect(readFile(join(root, ".harnix", "spec", "guides", "common-rules.md"), "utf8")).resolves.toContain("common engineering rules");
+    const root = await fixture(); await initializeProject({ developer: "tam", root, yes: true });
+    const configPath = join(root, ".harnix", "config.yaml"); const config = await readFile(configPath, "utf8"); await writeFile(configPath, config.replace("languages: []", "languages:\n  - vue"));
+    const report = await diagnoseProject({ root, fix: true }); expect(report.summary.fixed).toBeGreaterThan(0); expect(report.findings.map((item) => item.code)).not.toContain("managed-untracked"); await expect(readFile(join(root, ".harnix", "spec", "guides", "vue.md"), "utf8")).resolves.toContain("Vue rules");
   });
 });

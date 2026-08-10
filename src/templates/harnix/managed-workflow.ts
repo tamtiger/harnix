@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { sha256 } from "../../utils/hashing.js";
 import { workflowTemplate } from "./workflow.js";
+import { packageVersion } from "../../version.js";
 
 interface WorkflowManifest { generator: "harnix"; schemaVersion: 1; entries: Array<{ path: string; sourceId: string; scope: string; generatedHash: string; generatorVersion: string }>; }
 export async function ensureManagedWorkflow(root: string): Promise<void> {
@@ -12,7 +13,7 @@ export async function ensureManagedWorkflow(root: string): Promise<void> {
   const previous = manifest.entries.find((entry) => entry.path === ".harnix/workflow.md");
   if (workflow.length > 0 && (!previous || sha256(workflow) !== previous.generatedHash)) return;
   await atomicWriteFile(workflowPath, workflowTemplate);
-  const entry = { path: ".harnix/workflow.md", sourceId: "harnix-workflow", scope: "project", generatedHash: sha256(workflowTemplate), generatorVersion: "0.1.0" };
+  const entry = { path: ".harnix/workflow.md", sourceId: "harnix-workflow", scope: "project", generatedHash: sha256(workflowTemplate), generatorVersion: packageVersion };
   manifest.entries = [...manifest.entries.filter((item) => item.path !== entry.path), entry].sort((left, right) => left.path.localeCompare(right.path));
   await atomicWriteFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 }

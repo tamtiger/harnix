@@ -1,44 +1,183 @@
 # Harnix
 
-Harnix là một harness gọn nhẹ, hoạt động cục bộ trong dự án dành cho các coding agent. Harnix chuyển yêu cầu thành những task có phạm vi và tiêu chí nghiệm thu rõ ràng, nạp tri thức dự án phù hợp trong giới hạn context, hướng dẫn quá trình triển khai và kiểm chứng, đồng thời lưu lại bằng chứng cùng kiến thức có thể tái sử dụng mà không đưa runtime dư thừa vào repository.
+Harnix là coding-agent harness chạy cục bộ trong repository. Harnix biến yêu cầu thành task có phạm vi và tiêu chí nghiệm thu rõ ràng, chọn context phù hợp trong giới hạn, hướng dẫn triển khai/kiểm chứng và lưu bằng chứng cùng knowledge có thể tái sử dụng.
+
+Harnix hỗ trợ đúng ba nền tảng: Kiro, Antigravity và Codex.
 
 Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
 ## Trạng thái
 
-Harnix hiện **đang được triển khai và chưa phát hành**. Phase 1 đã hoàn tất: package scaffold, CLI `init`/`setup`, detection cục bộ, config YAML, legacy preview, primitive an toàn, và setup dự án cho Kiro/Codex. Antigravity được nhận diện nhưng chưa sinh settings/hook vì schema project-local chưa được xác minh; phần writer thuộc Phase 3. Yêu cầu sản phẩm, workflow, schema cố định, hợp đồng tích hợp nền tảng, kế hoạch triển khai và các cổng nghiệm thu đã hoàn tất.
+Phase 5 review/refactor đã hoàn tất và toàn bộ acceptance gate hiện tại đã pass. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
 
-Không cài `@tamtiger/harnix` từ npm cho đến khi README này được cập nhật với một bản phát hành đã kiểm chứng.
-
-## Hình thái sản phẩm
+## Đặc điểm sản phẩm
 
 - Một npm package: `@tamtiger/harnix`
 - Một executable: `harnix`
-- Một thư mục dữ liệu dự án: `.harnix/`
-- Ba nền tảng coding được hỗ trợ: Kiro, Antigravity và Codex
-- Runtime hoạt động cục bộ trong dự án và mặc định không cần mạng
-- Một workflow chuẩn duy nhất với hai mức độ Lite và Full
-- Không telemetry, daemon, dịch vụ hosted, global memory hoặc cơ chế điều phối đa agent bắt buộc
+- Một namespace dữ liệu dự án: `.harnix/`
+- Runtime chạy local, mặc định không cần network.
+- Một workflow state machine duy nhất với hai mức ceremony: Lite và Full.
+- Không telemetry, daemon, hosted service, global memory hoặc bắt buộc điều phối multi-agent.
+- Không tự động commit, branch, worktree, merge, push, publish hay tạo pull request.
 
-Tên công khai của nền tảng là Antigravity và executable là `agy`. Các bề mặt dự án đã được kiểm chứng của Antigravity sử dụng `GEMINI.md` và `.gemini/skills`; namespace vật lý này không có nghĩa Gemini CLI được hỗ trợ.
+Antigravity có identity public là `antigravity`, flag là `--antigravity` và executable là `agy`. Harnix chỉ tạo project-local `GEMINI.md` cùng `.gemini/skills/harnix-*`; không chỉnh user-level `.gemini` state.
 
-## CLI dự kiến
+## Yêu cầu
 
-```text
-harnix init [--migrate] [--dry-run]
-harnix setup --kiro|--antigravity|--codex
-harnix update
-harnix upgrade
-harnix uninstall [--purge]
-harnix mem [query]
-harnix doctor [--fix] [--json]
+- Node.js `>=18`
+- pnpm `11.4.0` hoặc tương thích
+- Một repository dự án có quyền đọc/ghi
+- Executable nền tảng tương ứng nếu muốn kiểm tra readiness; test và setup fixture vẫn có thể chạy offline.
+
+## Cài đặt và chạy từ source
+
+```powershell
+git clone https://github.com/tamtiger/harnix.git
+Set-Location harnix
+pnpm install --frozen-lockfile
+pnpm build
 ```
 
-`init` tạo dữ liệu Harnix trong dự án. `setup` chỉ cài tích hợp cho nền tảng được chọn. Theo mặc định, các lệnh quản lý vòng đời phải bảo toàn nội dung do người dùng chỉnh sửa và dữ liệu thuộc sở hữu người dùng.
+Các ví dụ bên dưới dùng lệnh `harnix` với giả định binary đã nằm trên `PATH` hoặc package đã được cài vào dự án. Khi chạy trực tiếp từ source chưa publish, thay `harnix` bằng `node C:\path\to\harnix\dist\cli.js`.
 
-## Workflow
+Trong repository cần quản lý, chạy binary đã build:
 
-Harnix sử dụng một state machine duy nhất:
+```powershell
+node C:\path\to\harnix\dist\cli.js --help
+```
+
+Khi package đã được publish, cách dùng tương đương sẽ là:
+
+```powershell
+pnpm add -D @tamtiger/harnix
+pnpm exec harnix --help
+```
+
+## Quick start
+
+Từ thư mục gốc dự án:
+
+```powershell
+# Khởi tạo .harnix và tự động phát hiện ngôn ngữ/framework
+harnix init --yes --user tam
+
+# Chọn một hoặc nhiều coding agent
+harnix setup --kiro --antigravity --codex
+
+# Kiểm tra drift, hook, path safety và secret exposure
+harnix doctor --json
+```
+
+Nếu muốn chỉ định ngôn ngữ, dùng danh sách phân cách bằng dấu phẩy:
+
+```powershell
+harnix init --yes --user tam --languages vue,typescript-nestjs
+```
+
+Khi bỏ qua `--languages`, Harnix đọc marker dự án một cách local và deterministic. Các language/framework ID hiện được nhận diện gồm C#/.NET ABP, NestJS, Python, Java/Spring, Go, React web và Vue.
+
+## CLI
+
+### `init`
+
+Tạo `.harnix/`, config, workflow, task/workspace namespace, các rule liên quan và root `AGENTS.md` bootstrap để AI agent biết cách đọc workflow Harnix. Init không overwrite file người dùng đã có.
+
+```text
+harnix init [--yes] [--user <name>] [--languages <csv>]
+           [--migrate] [--dry-run]
+```
+
+- `--yes`: không prompt, phù hợp CI.
+- `--user`: developer workspace ID; chỉ cho phép ký tự an toàn.
+- `--languages`: override detection bằng danh sách language ID.
+- `--migrate`: cho phép migration legacy sau khi xem preview.
+- `--dry-run`: kiểm tra kế hoạch mà không ghi file.
+
+### `setup`
+
+Materialize tích hợp cho platform được chọn và ghi ownership vào managed manifest:
+
+```text
+harnix setup --kiro|--antigravity|--codex
+```
+
+Có thể chọn nhiều flag trong một lần chạy. Setup bảo toàn file đã bị người dùng chỉnh sửa, không tạo Antigravity settings/hooks chưa được xác minh, và cảnh báo nếu không tìm thấy executable `agy`.
+
+### `update`
+
+Đồng bộ managed files theo config hiện tại:
+
+```text
+harnix update
+harnix update --restore
+```
+
+Mặc định, file managed đã bị người dùng xóa sẽ được báo cáo nhưng không tự khôi phục. Dùng `--restore` khi muốn khôi phục rõ ràng. File obsolete chưa bị sửa sẽ được xóa; file obsolete đã sửa được giữ lại. Task, spec, journal và file không thuộc Harnix không bị chạm vào.
+
+### `doctor`
+
+Kiểm tra config/manifest, ownership, missing/modified/obsolete files, injection marker, hook schema, Codex trust drift, skill frontmatter, unsafe path, secret và permission drift:
+
+```text
+harnix doctor
+harnix doctor --json
+harnix doctor --fix --json
+```
+
+`--fix` chỉ sửa managed issue an toàn và luôn diagnose lại sau khi sửa. Exit code:
+
+- `0`: project sạch.
+- `1`: có warning hoặc error cần xử lý.
+- `2`: usage không hợp lệ, state corrupt hoặc path không an toàn.
+
+### `mem`
+
+Tìm journal memory theo query, developer và giới hạn kết quả:
+
+```text
+harnix mem "database migration"
+harnix mem --user tam --limit 10 --json
+harnix mem --query "timeout" --json
+```
+
+Journal malformed được đếm và bỏ qua; memory search không tự promote learning thành rule.
+
+### `uninstall`
+
+Gỡ platform surface nhưng giữ `.harnix` data:
+
+```text
+harnix uninstall
+harnix uninstall --purge
+harnix uninstall --purge --yes
+```
+
+Uninstall mặc định chỉ xóa surface managed chưa bị sửa và giữ injected block đã bị người dùng chỉnh sửa. `--purge` xóa toàn bộ `.harnix`; nếu thiếu `--yes`, lệnh chỉ preview target và trả exit code 2.
+
+### `upgrade`
+
+Upgrade mặc định chỉ hiển thị kế hoạch, không chạy network/install:
+
+```text
+harnix upgrade
+harnix upgrade --apply
+```
+
+Chỉ dùng `--apply` khi muốn chạy npm upgrade explicit.
+
+## Tích hợp platform
+
+| Platform | Identity/flag | Surface Harnix tạo |
+|---|---|---|
+| Kiro | `kiro` / `--kiro` | `.kiro/skills`, steering và frozen context hook |
+| Antigravity | `antigravity` / `--antigravity` | `GEMINI.md`, `.gemini/skills/harnix-*` |
+| Codex | `codex` / `--codex` | `AGENTS.md`, `.agents/skills/harnix-*`, `.codex/config.toml`, `.codex/hooks.json` |
+
+Các surface của người dùng và top-level hook/config key không liên quan được bảo toàn. Harnix không copy runtime script vào project đích.
+
+## Workflow sử dụng
+
+Workflow duy nhất của Harnix có state machine:
 
 ```text
 triage -> planning -> ready -> implementing -> verifying -> finishing -> completed
@@ -48,44 +187,44 @@ triage -> planning -> ready -> implementing -> verifying -> finishing -> complet
                                    replan -> planning
 ```
 
-Câu hỏi chỉ đọc và yêu cầu review có thể bỏ qua bước tạo task. Công việc Lite giữ một task record tối thiểu; công việc Full bổ sung task PRD và plan, còn design, research và persisted context chỉ được tạo khi thực sự cần. Hoàn thành luôn yêu cầu bằng chứng mới từ trạng thái hiện tại của source tree.
+- Lite phù hợp thay đổi nhỏ, có task record và validation tối thiểu.
+- Full dùng cho thay đổi cross-layer, security-sensitive, material unknown hoặc yêu cầu implementation lớn; có thêm PRD/plan và research khi cần.
+- Câu hỏi chỉ đọc có thể bypass việc tạo task.
+- Finish yêu cầu fresh verification, mọi acceptance criterion đạt hoặc được waiver hợp lệ, sau đó journal evidence và clear active task.
 
-Xem [Workflow chuẩn](docs/HARNIX_WORKFLOW.md).
+Xem [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) để biết transition, gate và artifact contract chi tiết.
 
-## Kiến trúc
-
-Mục tiêu triển khai là một package TypeScript ESM duy nhất:
+## Dữ liệu dự án
 
 ```text
-src/
-  core/             config, task, context, journal, ranh giới dự án
-  commands/         bảy lệnh CLI công khai
-  configurators/    Kiro, Antigravity, Codex
-  templates/        template dự án và nền tảng
-  rules/            hướng dẫn chung và theo ngôn ngữ/framework đã chọn
-  skills/           các skill tập trung vào workflow Harnix
-  migration/        phát hiện và migration hệ thống cũ an toàn
-  utils/            path, detection, hashing, atomic file và managed file
+.harnix/
+  config.yaml
+  workflow.md
+  .developer
+  .template-hashes.json
+  spec/                 # guide/rule đã được quản lý
+  tasks/                # task record và artifact do người dùng sở hữu
+  workspace/<developer>/journal/
 ```
 
-Các module runtime được phân phối trong package đã cài. Repository sử dụng Harnix chỉ nhận dữ liệu dự án và nội dung managed của nền tảng đã chọn, không nhận bản sao runtime script.
+Task, spec, research và journal là dữ liệu người dùng. Harnix dùng atomic write, normalized POSIX path và containment check để hạn chế mất dữ liệu hoặc path escape qua symlink/junction.
 
-## Tài liệu
+## Dùng trong CI
 
-- [Yêu cầu sản phẩm](docs/HARNIX_PRD.md)
-- [Workflow chuẩn](docs/HARNIX_WORKFLOW.md)
-- [Kế hoạch triển khai](docs/IMPLEMENTATION_PLAN.md)
-- [Quyết định nghiên cứu harness](docs/HARNESS_RESEARCH.md)
-- [Ánh xạ upstream](docs/UPSTREAM_MAPPING.md)
-- [Baseline upstream cố định](docs/UPSTREAM_BASELINE.md)
-- [Hướng dẫn coding agent](AGENTS.md)
-- [Changelog](CHANGELOG.md)
+CI nên chạy non-interactive và kiểm tra state trước khi merge:
 
-## Phát triển
+```powershell
+harnix init --yes --user ci
+harnix doctor --json
+```
 
-Toolchain gồm Node.js `>=18`, pnpm, TypeScript, tsup, ESLint, Commander.js, Inquirer và Vitest. Dùng `pnpm install --frozen-lockfile --ignore-scripts` trong môi trường pnpm 11 hiện tại để không tạo workspace approval file; các gate build/test sau đó không thực thi script dự án.
+Không truyền credential vào command line hoặc generated output. Harnix không tự gọi network trong runtime; chỉ `upgrade --apply` và các bước dependency/package manager explicit mới cần network.
 
-Sau khi có scaffold, chuỗi nghiệm thu bắt buộc sẽ là:
+## Phát triển Harnix
+
+Toolchain gồm Node.js `>=18`, pnpm, TypeScript, tsup, ESLint, Commander.js, Inquirer và Vitest.
+
+Quality gate đầy đủ:
 
 ```text
 pnpm install --frozen-lockfile
@@ -101,12 +240,33 @@ pnpm measure:footprint
 pnpm scan:release
 ```
 
-Người đóng góp và coding agent phải bảo toàn thay đổi của người dùng, làm test-first đối với thay đổi hành vi, tuân thủ các hợp đồng v1 đã cố định và không tự động commit, push, publish hoặc thay đổi cấu hình global của công cụ.
+Các suite riêng lẻ:
+
+```text
+pnpm test:unit
+pnpm test:integration
+pnpm test:migration
+pnpm test:platform
+pnpm test:workflow
+pnpm test:safety
+```
+
+Mọi filesystem test dùng temporary repository cô lập, không mutate global user configuration và không gọi install/network thật ngoài boundary explicit.
+
+## Tài liệu
+
+- [Yêu cầu sản phẩm](docs/HARNIX_PRD.md)
+- [Workflow chuẩn](docs/HARNIX_WORKFLOW.md)
+- [Kế hoạch triển khai](docs/IMPLEMENTATION_PLAN.md)
+- [Kế hoạch review/refactor](docs/REVIEW_REFACTOR_PLAN.md)
+- [Quyết định nghiên cứu harness](docs/HARNESS_RESEARCH.md)
+- [Ánh xạ upstream](docs/UPSTREAM_MAPPING.md)
+- [Baseline upstream cố định](docs/UPSTREAM_BASELINE.md)
+- [Hướng dẫn coding agent](AGENTS.md)
+- [Changelog](CHANGELOG.md)
 
 ## Nguồn gốc và giấy phép
 
-Harnix là một bản triển khai phái sinh có chọn lọc, được xây dựng dựa trên nghiên cứu từ mindfold-ai/Trellis, ECC và Superpowers. SHA nguồn cố định, giấy phép, quyết định tái sử dụng và chính sách ghi công được mô tả trong [UPSTREAM_BASELINE.md](docs/UPSTREAM_BASELINE.md) và [UPSTREAM_MAPPING.md](docs/UPSTREAM_MAPPING.md).
+Harnix là implementation phái sinh có chọn lọc, được xây dựng dựa trên nghiên cứu từ mindfold-ai/Trellis, ECC và Superpowers. SHA nguồn, giấy phép, quyết định tái sử dụng và chính sách attribution được mô tả trong [UPSTREAM_BASELINE.md](docs/UPSTREAM_BASELINE.md) và [UPSTREAM_MAPPING.md](docs/UPSTREAM_MAPPING.md).
 
-Kế hoạch triển khai yêu cầu giấy phép/thông báo AGPL-3.0 cho phần code phái sinh từ Trellis và giữ nguyên ghi công MIT cho nội dung chuyển thể từ ECC và Superpowers. Các file giấy phép và thông báo cuối cùng sẽ được tạo cùng package scaffold trước khi phân phối.
-
-
+Package sử dụng giấy phép AGPL-3.0-or-later và giữ attribution MIT cho nội dung chuyển thể từ ECC và Superpowers. Xem [LICENSE](LICENSE) và [NOTICE](NOTICE).

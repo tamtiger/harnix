@@ -14,9 +14,12 @@ export async function renderInternalContext(root: string, platform: InternalCont
   if (!active) return platform === "codex" ? JSON.stringify({ hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: "" } }) : "";
   const contextPath = join(harnixRoot, "tasks", active.id, "context.json");
   const entries = await exists(contextPath) ? (await loadContextManifest(contextPath)).entries : active.relevantPaths.map((path) => ({ path, reason: "task reference", priority: 0, pinned: false, states: ["implementing"] }));
-  const output = await buildContext(root, entries, config.context.maxCharacters, { references: active.relevantPaths }, config.runtime.fullContext);
-  const text = output.text.length === 0 ? "" : `${output.text}\n\nOmitted: ${output.manifest.omitted.map((item) => item.path).join(", ") || "none"}`;
-  if (platform === "codex") return JSON.stringify({ hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: text.slice(0, 2500) } });
-  return text.slice(0, config.context.maxCharacters);
+  const output = await buildContext(root, entries, config.context.maxCharacters, { taskId: active.id, references: active.relevantPaths }, config.runtime.fullContext);
+  const cap = platform === "codex" ? 2500 : config.context.maxCharacters;
+  const disclosure = `Omitted: ${output.manifest.omitted.map((item) => item.path).join(", ") || "none"}`;
+  const contentBudget = Math.max(0, cap - disclosure.length - 2);
+  const text = `${output.text.slice(0, contentBudget)}\n\n${disclosure}`.slice(0, cap);
+  if (platform === "codex") return JSON.stringify({ hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: text } });
+  return text;
 }
 async function exists(path: string): Promise<boolean> { try { await access(path); return true; } catch { return false; } }

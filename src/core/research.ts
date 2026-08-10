@@ -1,5 +1,5 @@
 import { atomicWriteFile } from "../utils/atomic-write.js";
-import { join } from "node:path";
+import { resolveSafeProjectPath } from "../utils/paths.js";
 
 export interface ResearchFinding { taskId: string; topic: string; source: string; researchedAt: string; conclusion: string; materialUnknown: boolean; }
 export function createResearchFinding(finding: ResearchFinding): string {
@@ -9,5 +9,5 @@ export function createResearchFinding(finding: ResearchFinding): string {
 }
 export async function saveResearchFinding(taskDirectory: string, filename: string, finding: ResearchFinding): Promise<void> {
   if (!/^[a-z0-9][a-z0-9._-]*\.md$/u.test(filename)) throw new Error("Research filename is invalid.");
-  await atomicWriteFile(join(taskDirectory, "research", filename), createResearchFinding(finding));
+  await atomicWriteFile(await resolveSafeProjectPath(taskDirectory, `research/${filename}`), createResearchFinding(finding));
 }

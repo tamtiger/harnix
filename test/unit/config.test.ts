@@ -1,7 +1,6 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   ConfigValidationError,
@@ -10,18 +9,9 @@ import {
   validateConfig,
   writeConfig,
 } from "../../src/core/config/config.js";
+import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
 
-const temporaryDirectories: string[] = [];
-
-async function createFixture(): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), "harnix-config-"));
-  temporaryDirectories.push(directory);
-  return directory;
-}
-
-afterEach(async () => {
-  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { force: true, recursive: true })));
-});
+const createFixture = useTemporaryRepositories("harnix-config-");
 
 describe("Harnix config v1", () => {
   it("creates a deterministic valid default config", () => {

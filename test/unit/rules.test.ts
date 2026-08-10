@@ -1,11 +1,13 @@
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { attribution, composeRules, seedRules } from "../../src/rules/rules.js";
+import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
+
+const temporaryRepository = useTemporaryRepositories();
 describe("rule seeding", () => {
   it("seeds only detected packs and preserves modified files", async () => {
-    const root = await mkdtemp(join(tmpdir(), "harnix-"));
+    const root = await temporaryRepository();
     const first = await seedRules({ root, languages: ["react-web", "typescript-nestjs", "react-web"] });
     expect(first.paths).toEqual([".harnix/spec/guides/common-rules.md", ".harnix/spec/guides/react-web.md", ".harnix/spec/guides/typescript-nestjs.md"]);
     expect(await readFile(join(root, ".harnix/spec/guides/react-web.md"), "utf8")).not.toContain("React Native");

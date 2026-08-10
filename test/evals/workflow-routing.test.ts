@@ -1,11 +1,13 @@
-import { mkdtemp, readFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { canCompleteTask, continueWorkflowTask, evidenceSupportsScope, finishWorkflowTask, implementationStrategy, isWithinRequestedScope, nextWorkflowStatus, routeWorkflow, shouldReassessArchitecture, shouldResearch, validateFullReadyArtifact, verificationStages } from "../../src/core/workflow.js";
-import { saveTask, setActiveTask } from "../../src/core/tasks/task.js";
+import { loadTask, saveTask, setActiveTask, transitionTask } from "../../src/core/tasks/task.js";
 import { createResearchFinding } from "../../src/core/research.js";
 import type { TaskRecord } from "../../src/core/tasks/task.js";
+import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
+
+const temporaryRepository = useTemporaryRepositories();
 
 function task(evidenceAt: string, scope: "focused" | "full" = "full"): TaskRecord { return { generator: "harnix", schemaVersion: 1, id: "20260807-120000-task", title: "t", mode: "lite", status: "verifying", checkpoint: "verifying", goal: "t", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "met", evidenceIds: ["e"] }], relevantPaths: [], relevantSpecs: [], validationPlan: [{ id: "check", description: "verify", scope, required: true }], evidence: [{ id: "e", checkId: "check", recordedAt: evidenceAt, result: "pass", summary: "ok", artifactPaths: [] }], createdAt: "x", updatedAt: "x" }; }
 describe("workflow routing and completion evidence", () => {
@@ -28,15 +30,25 @@ describe("workflow routing and completion evidence", () => {
     expect(nextWorkflowStatus("plan", true)).toBe("ready"); expect(nextWorkflowStatus("implement", true)).toBe("in_progress"); expect(nextWorkflowStatus("fix", false)).toBe("planning"); expect(validateFullReadyArtifact({ acceptanceCriteria: ["a"], materialUnknownDecision: "not needed", plan: "step" })).toBe(true); expect(validateFullReadyArtifact({ acceptanceCriteria: [], materialUnknownDecision: "x", plan: "x" })).toBe(false);
   });
   it("finishes only verified tasks and journals evidence without Git work", async () => {
-    const root = await mkdtemp(join(tmpdir(), "harnix-")); const current = new Date().toISOString(); const ready = task(current);
+    const root = await temporaryRepository(); const current = new Date().toISOString(); const ready = task(current);
     await saveTask(root, ready); await setActiveTask(root, ready.id); const finished = await finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", ready, current);
     expect(finished.status).toBe("completed"); expect(await readFile(join(root, "journal.jsonl"), "utf8")).toContain("Completed: t");
+    expect((await loadTask(join(root, "tasks", ready.id, "task.json"))).status).toBe("completed");
+  });
+  it("should_reject_completion_when_latest_required_evidence_failed", () => {
+    const current = task("2026-08-07T09:30:00Z");
+    current.evidence.push({ id: "e-fail", checkId: "check", recordedAt: "2026-08-07T09:45:00Z", result: "fail", exitCode: 1, summary: "failed", artifactPaths: [] });
+    expect(canCompleteTask(current, Date.parse("2026-08-07T10:00:00Z"))).toBe(false);
+  });
+  it("should_clear_blocker_when_blocked_task_resumes", () => {
+    const current = { ...task("2026-08-07T09:30:00Z"), status: "blocked" as const, blocker: { kind: "repository" as const, summary: "locked", nextAction: "retry", resumeStatus: "verifying" as const } };
+    expect(transitionTask(current, "verifying", "verifying").blocker).toBeUndefined();
   });
   it("records research provenance only for material unknowns", () => {
     expect(createResearchFinding({ taskId: "t", topic: "compatibility", source: "official docs", researchedAt: "2026-08-07", conclusion: "supported", materialUnknown: true })).toContain("Source: official docs"); expect(() => createResearchFinding({ taskId: "t", topic: "known", source: "local", researchedAt: "2026-08-07", conclusion: "x", materialUnknown: false })).toThrow("material unknown");
   });
   it("continues from persisted active state with minimum deduplicated context", async () => {
-    const root = await mkdtemp(join(tmpdir(), "harnix-")); const active = { ...task(new Date().toISOString()), relevantPaths: ["b", "a"], relevantSpecs: ["a", "spec"] };
+    const root = await temporaryRepository(); const active = { ...task(new Date().toISOString()), relevantPaths: ["b", "a"], relevantSpecs: ["a", "spec"] };
     await saveTask(root, active); await setActiveTask(root, active.id); expect((await continueWorkflowTask(root))?.contextPaths).toEqual(["a", "b", "spec"]);
   });
   it("runs compliance before quality/security and rejects scope creep", () => {

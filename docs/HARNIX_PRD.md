@@ -26,7 +26,7 @@ Harnix được phát triển từ baseline kỹ thuật [mindfold-ai/Trellis](h
 |---:|---|---|
 | 1 | Brainstorm quá nặng cho task nhỏ | Dual mode lite/full; lite hỏi tối đa một confirmation |
 | 2 | Context injection bloat | Rank, deduplicate, budget và disclosure cho omitted files |
-| 3 | Init dump runtime/platform files | Tách `init` project data khỏi `setup` platform surfaces |
+| 3 | Init dump runtime/platform files | `init` chỉ tạo project data và một root `AGENTS.md` bootstrap nhỏ; các surface tích hợp platform vẫn thuộc `setup` |
 | 4 | Nested path/worktree hooks hỏng | Resolve Git root an toàn trên Windows/macOS/Linux |
 | 5 | Re-init/update overwrite customizations | Versioned hash manifest và conservative ownership |
 | 6 | Scripts/hooks duplicate | Runtime từ package đã cài; mỗi platform một mechanism |
@@ -194,7 +194,7 @@ Frozen local baseline là `codex-cli 0.139.0`; official current docs vẫn có p
 - Giải thích project trust; doctor phát hiện drift có thể kiểm được.
 - Optional managed `## Code Review Rules` không làm mất user content; không legacy custom prompts/slash commands.
 
-`AGENTS.md` chỉ bootstrap; chi tiết load dần từ skills và `.harnix`.
+`AGENTS.md` là bootstrap project-local được `init` tạo nếu chưa có; chi tiết load dần từ skills và `.harnix`. Codex setup tái sử dụng managed block trong file này và không tạo duplicate.
 ## 10. Config, context, journal and learning
 
 Normative v1 schemas cho `.harnix/config.yaml`, managed manifest, task/evidence, optional context manifest, journal/learning và doctor report nằm tại `IMPLEMENTATION_PLAN.md` mục 4. Implementation không được tự đổi field/enum/path/transition mà không cập nhật PRD/workflow, migration và tests trong cùng change. Config migrations explicit, preserve compatible unknown keys và reject future versions.

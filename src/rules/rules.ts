@@ -2,6 +2,7 @@ import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { atomicWriteFile } from "../utils/atomic-write.js";
 import type { LanguageId } from "../utils/detection.js";
+import { resolveSafeProjectPath } from "../utils/paths.js";
 
 export const commonRules = `# Harnix common engineering rules
 
@@ -31,7 +32,7 @@ export async function seedRules(options: SeedRulesOptions): Promise<SeedRulesRes
   const files = [{ path: ".harnix/spec/guides/common-rules.md", content: commonRules }, ...selected.map((language) => ({ path: `.harnix/spec/guides/${language}.md`, content: packs[language] }))];
   const paths: string[] = [], preserved: string[] = [];
   for (const file of files) {
-    const absolute = join(options.root, ...file.path.split("/"));
+    const absolute = await resolveSafeProjectPath(options.root, file.path);
     if (!options.force && await exists(absolute)) { preserved.push(file.path); continue; }
     await mkdir(join(absolute, ".."), { recursive: true }); await atomicWriteFile(absolute, file.content); paths.push(file.path);
   }

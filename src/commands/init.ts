@@ -8,6 +8,9 @@ import { discoverLegacy } from "../migration/discovery.js";
 import { sha256 } from "../utils/hashing.js";
 import { workflowTemplate } from "../templates/harnix/workflow.js";
 import { migrateLegacyProject } from "../migration/migrate.js";
+import { updateProject } from "./update.js";
+import { resolveSafeProjectPath } from "../utils/paths.js";
+import { packageVersion } from "../version.js";
 
 export interface InitializeProjectOptions {
   root: string;
@@ -33,6 +36,7 @@ export async function initializeProject(options: InitializeProjectOptions): Prom
   }
   if (legacyMarkers.length > 0 && options.migrate) {
     const migrated = await migrateLegacyProject({ root: options.root, developer: options.developer, apply: true });
+    if (migrated.activated) await updateProject({ root: options.root });
     return { created: migrated.activated, legacyMarkers };
   }
 
@@ -48,6 +52,7 @@ export async function initializeProject(options: InitializeProjectOptions): Prom
     languages: options.languages ?? detection.languages,
     packages: detection.packages.map(({ languages, path }) => ({ languages, path })),
   });
+  for (const path of ["AGENTS.md", ".harnix/spec/guides", ".harnix/tasks", `.harnix/workspace/${options.developer}`, ".harnix/config.yaml", ".harnix/.developer", ".harnix/workflow.md", ".harnix/.template-hashes.json"]) await resolveSafeProjectPath(options.root, path);
   await Promise.all([
     mkdir(join(harnixRoot, "spec", "guides"), { recursive: true }),
     mkdir(join(harnixRoot, "tasks"), { recursive: true }),
@@ -57,8 +62,9 @@ export async function initializeProject(options: InitializeProjectOptions): Prom
     writeConfig(configPath, config),
     atomicWriteFile(join(harnixRoot, ".developer"), `${options.developer}\n`),
     atomicWriteFile(join(harnixRoot, "workflow.md"), workflowTemplate),
-    atomicWriteFile(join(harnixRoot, ".template-hashes.json"), `${JSON.stringify({ generator: "harnix", schemaVersion: 1, entries: [{ path: ".harnix/workflow.md", sourceId: "harnix-workflow", scope: "project", generatedHash: sha256(workflowTemplate), generatorVersion: "0.1.0" }] }, null, 2)}\n`),
+    atomicWriteFile(join(harnixRoot, ".template-hashes.json"), `${JSON.stringify({ generator: "harnix", schemaVersion: 1, entries: [{ path: ".harnix/workflow.md", sourceId: "harnix-workflow", scope: "project", generatedHash: sha256(workflowTemplate), generatorVersion: packageVersion }] }, null, 2)}\n`),
   ]);
+  await updateProject({ root: options.root });
   return { created: true, legacyMarkers };
 }
 

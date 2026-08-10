@@ -1,27 +1,17 @@
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { describe, expect, it } from "vitest";
 
 import { detectProject } from "../../src/utils/detection.js";
+import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
 
-const temporaryDirectories: string[] = [];
-
-async function createFixture(): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), "harnix-detection-"));
-  temporaryDirectories.push(directory);
-  return directory;
-}
+const createFixture = useTemporaryRepositories("harnix-detection-");
 
 async function writeFixtureFile(root: string, path: string, content = ""): Promise<void> {
   const destination = join(root, ...path.split("/"));
-  await mkdir(join(destination, ".."), { recursive: true });
+  await mkdir(dirname(destination), { recursive: true });
   await writeFile(destination, content);
 }
-
-afterEach(async () => {
-  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { force: true, recursive: true })));
-});
 
 describe("detectProject", () => {
   it.each([
@@ -86,12 +76,20 @@ describe("detectProject", () => {
     await writeFixtureFile(root, "obj/pyproject.toml", "[project]");
     await writeFixtureFile(root, "dist/package.json", '{"dependencies":{"vue":"1"}}');
     await writeFixtureFile(root, "build/App.csproj", "<Project />");
+    await writeFixtureFile(root, "coverage/package.json", '{"dependencies":{"vue":"1"}}');
+    await writeFixtureFile(root, ".cache/package.json", '{"dependencies":{"react":"1"}}');
 
     await expect(detectProject(root)).resolves.toEqual({
       languages: [],
       packageManager: undefined,
       packages: [],
     });
+  });
+
+  it("should_exclude_react_native_when_no_web_runtime_is_present", async () => {
+    const root = await createFixture();
+    await writeFixtureFile(root, "package.json", '{"dependencies":{"react":"1","react-native":"1"}}');
+    await expect(detectProject(root)).resolves.toEqual({ languages: [], packageManager: undefined, packages: [] });
   });
 
   it("does not execute package scripts while discovering them", async () => {

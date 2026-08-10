@@ -1,7 +1,6 @@
-import { mkdtemp, mkdir, rm, symlink, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { mkdir, symlink, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   UnsafeProjectPathError,
@@ -9,18 +8,10 @@ import {
   resolveProjectRoot,
   resolveSafeProjectPath,
 } from "../../src/utils/paths.js";
+import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
 
-const temporaryDirectories: string[] = [];
-
-async function createTemporaryDirectory(prefix: string): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), prefix));
-  temporaryDirectories.push(directory);
-  return directory;
-}
-
-afterEach(async () => {
-  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { force: true, recursive: true })));
-});
+const temporaryRepository = useTemporaryRepositories("harnix-path-");
+async function createTemporaryDirectory(prefix: string): Promise<string> { void prefix; return temporaryRepository(); }
 
 describe("normalizeRepositoryPath", () => {
   it("normalizes repository-relative Windows paths to POSIX", () => {

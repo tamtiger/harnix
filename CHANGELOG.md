@@ -6,6 +6,29 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 ## [Unreleased]
 
+### Added
+
+- Phase 5 regression coverage for legacy-data migration, managed setup/uninstall ownership, workflow completion, CLI exit/redaction behavior, doctor findings, path containment, and concurrent journal writes.
+- Repository review and remediation roadmap in `docs/REVIEW_REFACTOR_PLAN.md`.
+- README usage guide covering installation, quick start, CLI flags, platform setup, workflow, CI and troubleshooting-oriented lifecycle commands.
+- `harnix init` now seeds a root `AGENTS.md` bootstrap that explains CLI versus skill responsibilities, Bypass/Lite/Full routing, skill order, persisted states, recovery, safety rules, and verification expectations.
+
+### Changed
+
+- Setup, update, and uninstall now preserve user-modified platform files and injected blocks, reconcile obsolete ownership safely, retain unrelated Codex hook keys, and prevent removed platforms from being recreated.
+- Migration now inventories and hash-verifies legacy specs, tasks, and journals in staging before activation; explicit cleanup removes only discovered verified legacy roots.
+- Workflow/task validation now persists completion before archive, honors the latest required evidence, clears resumed blockers, and rejects incomplete completed records.
+- CLI automation now preserves language detection, avoids non-TTY prompts, supports stable doctor JSON/exit semantics, consumes validated hook-event `cwd`, and redacts project paths from errors.
+- Context and journal processing now normalize/deduplicate inputs, disclose unsafe or omitted sources, bound retained search results, and serialize concurrent in-process appends.
+- Doctor and release scanning now cover deterministic lifecycle drift, hooks, injections, sensitive values, attribution, packaged output, and isolated generated fixtures.
+- Detection ignores additional generated/cache trees, excludes React Native-only projects, and uses bounded directory traversal; init performance measurement now uses a representative Vue/Nest monorepo fixture.
+- Platform rendering is separated into Kiro, Antigravity, and Codex configurators, and package version metadata has one build/runtime source.
+
+### Security
+
+- Project writes and destructive lifecycle operations now preflight repository containment and reject traversal plus symlink/junction escapes.
+- Runtime dependency audit remains clean. The single Low development-only esbuild advisory is explicitly risk-accepted until tsup publishes a compatible patched range; Harnix never invokes esbuild's affected development server, and adding a pnpm workspace solely for an override would violate the one-package/no-workspace product contract.
+
 ## [0.4.0] - 2026-08-07
 
 ### Added

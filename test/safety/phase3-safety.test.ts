@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 describe("Phase 3 supported platform surface", () => {
   it("contains no unsupported platform adapter directories", async () => {
     const adapters = await readdir(join(process.cwd(), "src", "configurators"));
-    expect(adapters).toEqual(["codex.ts"]);
+    expect(adapters).toEqual(["antigravity.ts", "codex.ts", "kiro.ts"]);
   });
   it("does not expose deprecated Gemini CLI or Trellis product surfaces", async () => {
     const files = await readdir(join(process.cwd(), "src"), { recursive: true });

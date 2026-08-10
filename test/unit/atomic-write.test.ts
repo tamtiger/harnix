@@ -1,21 +1,11 @@
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { atomicWriteFile, type AtomicFileSystem } from "../../src/utils/atomic-write.js";
+import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
 
-const temporaryDirectories: string[] = [];
-
-async function createTemporaryDirectory(): Promise<string> {
-  const directory = await mkdtemp(join(tmpdir(), "harnix-atomic-"));
-  temporaryDirectories.push(directory);
-  return directory;
-}
-
-afterEach(async () => {
-  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { force: true, recursive: true })));
-});
+const createTemporaryDirectory = useTemporaryRepositories("harnix-atomic-");
 
 describe("atomicWriteFile", () => {
   it("replaces a file through a sibling temporary file", async () => {

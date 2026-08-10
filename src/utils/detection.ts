@@ -31,7 +31,7 @@ interface PackageManifest {
   scripts?: Record<string, string>;
 }
 
-const ignoredDirectoryNames = new Set([".git", "node_modules", "vendor", "bin", "obj", "dist", "build"]);
+const ignoredDirectoryNames = new Set([".git", ".cache", ".next", ".pytest_cache", ".turbo", "__pycache__", "node_modules", "vendor", "bin", "obj", "dist", "build", "coverage"]);
 const verificationScriptNames = ["build", "lint", "test", "typecheck"] as const;
 
 export async function detectProject(projectRoot: string): Promise<ProjectDetection> {
@@ -65,6 +65,7 @@ export async function detectProject(projectRoot: string): Promise<ProjectDetecti
 async function collectFiles(directory: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true });
   const files: string[] = [];
+  const directories: string[] = [];
 
   for (const entry of entries) {
     if (entry.isSymbolicLink()) {
@@ -74,7 +75,7 @@ async function collectFiles(directory: string): Promise<string[]> {
     const entryPath = join(directory, entry.name);
     if (entry.isDirectory()) {
       if (!ignoredDirectoryNames.has(entry.name)) {
-        files.push(...await collectFiles(entryPath));
+        directories.push(entryPath);
       }
       continue;
     }
@@ -82,6 +83,11 @@ async function collectFiles(directory: string): Promise<string[]> {
     if (entry.isFile()) {
       files.push(entryPath);
     }
+  }
+
+  for (let index = 0; index < directories.length; index += 16) {
+    const batch = directories.slice(index, index + 16);
+    files.push(...(await Promise.all(batch.map(async (path) => collectFiles(path)))).flat());
   }
 
   return files.sort((left, right) => left.localeCompare(right));
@@ -178,7 +184,7 @@ function detectManifestLanguages(manifest: PackageManifest): LanguageId[] {
   if (dependencies.has("@nestjs/core")) {
     languages.push("typescript-nestjs");
   }
-  if (dependencies.has("react")) {
+  if (dependencies.has("react") && (!dependencies.has("react-native") || dependencies.has("react-dom"))) {
     languages.push("react-web");
   }
   if (dependencies.has("vue")) {

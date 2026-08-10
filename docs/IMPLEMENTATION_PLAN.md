@@ -348,7 +348,7 @@ Mọi public command dùng stderr cho actionable error/warning và stdout cho re
 - [x] Scaffold package with Node >=18 and ESM.
 - [x] Lock package scripts: `build`, `lint`, `typecheck`, `test`, `test:unit`, `test:integration`, `test:migration`, `test:platform`, `test:workflow`, `test:safety`, `test:acceptance`, `pack:check`, `smoke:tarball`, `measure:init`, `measure:footprint`, `scan:release`.
 - [x] Phase 1: `test:acceptance` orchestrates the implemented unit/integration/migration/platform/workflow/safety suites; `pack:check` produces exactly one tarball under `.artifacts/` without global mutation.
-- [ ] Phase 4 extension: add clean/seeded `doctor --json` fixtures to `test:acceptance`, then have smoke/release scripts consume the checked tarball and isolated fixtures.
+- [x] Phase 4 extension: add clean/seeded `doctor --json` fixtures to `test:acceptance`, then have smoke/release scripts consume the checked tarball and isolated fixtures.
 - [x] Build minimal CLI help and non-zero usage errors.
 - [x] Verify `pnpm install --frozen-lockfile --ignore-scripts`, build, lint, typecheck and minimal tests (pnpm 11 no-workspace policy).
 
@@ -378,8 +378,8 @@ Mọi public command dùng stderr cho actionable error/warning và stdout cho re
 
 - [x] RED config tests implement exact 4.1 types/invariants, valid/corrupt/future schemas and compatible unknown-key round-trip preservation.
 - [x] RED CLI tests for `--yes`, `--user`, `--languages`, interactive edit and idempotence.
-- [x] Init creates only the approved `.harnix` tree; no runtime scripts.
-- [x] Existing specs/config/tasks/journals remain untouched.
+- [x] Init creates the approved `.harnix` tree plus a small root `AGENTS.md` bootstrap for AI agents; no runtime scripts or platform hook/settings are created.
+- [x] Existing `AGENTS.md`, specs/config/tasks/journals remain untouched; the bootstrap is managed conservatively and preserves user edits.
 - [x] Performance test uses a representative local fixture and requires <5 seconds.
 
 ### Task 1.5: Legacy preview
@@ -572,6 +572,17 @@ Mọi public command dùng stderr cho actionable error/warning và stdout cho re
 - [x] `test:acceptance` orchestrates all non-packaging suites and doctor fixtures; every script propagates non-zero exit on gate failure.
 
 **Phase 4 gate:** [x] all acceptance commands and smoke/safety/performance/footprint checks green with fresh output (2026-08-07: 87 tests, tarball smoke for Kiro/Antigravity/Codex/all, 471 ms worst init, 98.99% footprint reduction).
+
+## 9A. Phase 5 — Review remediation and contract hardening
+
+The 2026-08-10 repository review found lifecycle and persisted-state gaps that were not exercised by the historical Phase 4 suite. The authoritative finding list, implementation order, regression strategy, and completion evidence are maintained in [`REVIEW_REFACTOR_PLAN.md`](./REVIEW_REFACTOR_PLAN.md).
+
+- [x] P0 data safety and workflow correctness complete.
+- [x] P1 lifecycle and diagnostic completeness complete.
+- [x] P2 harness quality, performance, and dependency hygiene complete.
+- [x] Fresh section 11 acceptance sequence and dependency audits pass (runtime audit clean; one documented Low development-only exception remains time-bounded).
+
+Historical Phase 1–4 checkmarks record their original checkpoints; they do not supersede Phase 5 regression evidence.
 
 ## 10. Required test inventory
 

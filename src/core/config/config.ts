@@ -41,6 +41,13 @@ export class ConfigValidationError extends Error {
   override name = "ConfigValidationError";
 }
 
+export function validateDeveloperId(value: string): string {
+  if (!developerPattern.test(value)) {
+    throw new ConfigValidationError("developer must be a safe workspace ID.");
+  }
+  return value;
+}
+
 export function createConfig(options: CreateConfigOptions): HarnixConfigV1 {
   const config: HarnixConfigV1 = {
     context: { maxCharacters: 24000, tokenApproximation: 4 },
@@ -62,9 +69,8 @@ export function validateConfig(value: unknown): HarnixConfigV1 {
   if (value.generator !== "harnix" || value.schemaVersion !== 1) {
     throw new ConfigValidationError("Unsupported Harnix config generator or schema version.");
   }
-  if (typeof value.developer !== "string" || !developerPattern.test(value.developer)) {
-    throw new ConfigValidationError("developer must be a safe workspace ID.");
-  }
+  if (typeof value.developer !== "string") throw new ConfigValidationError("developer must be a safe workspace ID.");
+  validateDeveloperId(value.developer);
 
   assertLanguages(value.languages, "languages");
   assertPlatforms(value.platforms);

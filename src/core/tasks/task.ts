@@ -1,6 +1,7 @@
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
+import { resolveSafeProjectPath } from "../../utils/paths.js";
 
 export type TaskMode = "lite" | "full";
 export type TaskStatus = "planning" | "ready" | "in_progress" | "verifying" | "blocked" | "completed";
@@ -28,36 +29,41 @@ export function validateTask(value: unknown): TaskRecord {
   }
   if (value.status === "blocked" && (!isRecord(value.blocker) || !["decision", "authority", "credential", "external", "repository"].includes(String(value.blocker.kind)) || typeof value.blocker.summary !== "string" || typeof value.blocker.nextAction !== "string" || !["planning", "ready", "in_progress", "verifying"].includes(String(value.blocker.resumeStatus)))) throw new TaskValidationError("Blocked task blocker is invalid.");
   if (value.status === "blocked" && !value.blocker) throw new TaskValidationError("Blocked tasks require a blocker.");
-  if (value.status === "completed" && (!value.completedAt || value.blocker || (value.acceptanceCriteria as AcceptanceCriterion[]).some((c) => c.status === "pending" && (value.validationPlan as ValidationCheck[]).some((v) => v.required)))) throw new TaskValidationError("Completed task is missing completion requirements.");
+  if (value.status !== "blocked" && value.blocker !== undefined) throw new TaskValidationError("Only blocked tasks may retain a blocker.");
+  if (value.status === "completed" && (!value.completedAt || (value.acceptanceCriteria as AcceptanceCriterion[]).some((criterion) => criterion.status === "pending"))) throw new TaskValidationError("Completed task is missing completion requirements.");
   return value as unknown as TaskRecord;
 }
 
 export function transitionTask(task: TaskRecord, status: TaskStatus, checkpoint: WorkflowCheckpoint, now = new Date().toISOString()): TaskRecord {
   if (!transitions[task.status].includes(status)) throw new TaskValidationError(`Illegal task transition ${task.status} -> ${status}.`);
   if (task.status === "blocked" && task.blocker?.resumeStatus !== status) throw new TaskValidationError("Blocked task must resume to its recorded status.");
-  return validateTask({ ...task, status, checkpoint, updatedAt: now, ...(status === "completed" ? { completedAt: now } : {}) });
+  const withoutBlocker = { ...task };
+  delete withoutBlocker.blocker;
+  return validateTask({ ...withoutBlocker, ...(status === "blocked" && task.blocker ? { blocker: task.blocker } : {}), status, checkpoint, updatedAt: now, ...(status === "completed" ? { completedAt: now } : {}) });
 }
 
-export async function saveTask(root: string, task: TaskRecord): Promise<void> { const valid = validateTask(task); await mkdir(join(root, "tasks", valid.id), { recursive: true }); await atomicWriteFile(join(root, "tasks", valid.id, "task.json"), JSON.stringify(valid, null, 2) + "\n"); }
+export async function saveTask(root: string, task: TaskRecord): Promise<void> { const valid = validateTask(task); const directory = await resolveSafeProjectPath(root, `tasks/${valid.id}`); const path = await resolveSafeProjectPath(root, `tasks/${valid.id}/task.json`); await mkdir(directory, { recursive: true }); await atomicWriteFile(path, JSON.stringify(valid, null, 2) + "\n"); }
 export interface TaskArtifacts { prd?: string; plan?: string; design?: string; research?: Record<string, string>; }
 export async function saveTaskWithArtifacts(root: string, task: TaskRecord, artifacts: TaskArtifacts = {}): Promise<void> {
-  await saveTask(root, task);
-  const directory = join(root, "tasks", task.id);
   if (task.mode === "full") {
     if (!artifacts.prd?.trim() || !artifacts.plan?.trim()) throw new TaskValidationError("Full tasks require prd.md and plan.md.");
-    await atomicWriteFile(join(directory, "prd.md"), artifacts.prd);
-    await atomicWriteFile(join(directory, "plan.md"), artifacts.plan);
   } else if (artifacts.prd || artifacts.plan) throw new TaskValidationError("Lite tasks must not create full ceremony artifacts.");
-  if (artifacts.design?.trim()) await atomicWriteFile(join(directory, "design.md"), artifacts.design);
+  if (artifacts.research) for (const [name, content] of Object.entries(artifacts.research)) if (!/^[a-z0-9][a-z0-9._-]*\.md$/u.test(name) || !content.trim()) throw new TaskValidationError("Research artifact name or content is invalid.");
+  await saveTask(root, task);
+  const directory = await resolveSafeProjectPath(root, `tasks/${task.id}`);
+  if (task.mode === "full") {
+    await atomicWriteFile(await resolveSafeProjectPath(directory, "prd.md"), artifacts.prd!);
+    await atomicWriteFile(await resolveSafeProjectPath(directory, "plan.md"), artifacts.plan!);
+  }
+  if (artifacts.design?.trim()) await atomicWriteFile(await resolveSafeProjectPath(directory, "design.md"), artifacts.design);
   if (artifacts.research) for (const [name, content] of Object.entries(artifacts.research)) {
-    if (!/^[a-z0-9][a-z0-9._-]*\.md$/u.test(name) || !content.trim()) throw new TaskValidationError("Research artifact name or content is invalid.");
-    await atomicWriteFile(join(directory, "research", name), content);
+    await atomicWriteFile(await resolveSafeProjectPath(directory, `research/${name}`), content);
   }
 }
 export async function loadTask(path: string): Promise<TaskRecord> { return validateTask(JSON.parse(await readFile(path, "utf8")) as unknown); }
 export async function setActiveTask(harnixRoot: string, taskId: string): Promise<void> {
   validateTaskId(taskId);
-  await atomicWriteFile(join(harnixRoot, "tasks", ".active"), `${taskId}\n`);
+  await atomicWriteFile(await resolveSafeProjectPath(harnixRoot, "tasks/.active"), `${taskId}\n`);
 }
 export async function resolveActiveTask(harnixRoot: string): Promise<TaskRecord | undefined> {
   try {

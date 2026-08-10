@@ -1,14 +1,13 @@
-import { access, mkdtemp, readFile, rm, unlink, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { access, readFile, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { initializeProject } from "../../src/commands/init.js";
 import { updateProject } from "../../src/commands/update.js";
+import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
 
-const directories: string[] = [];
-async function fixture(): Promise<string> { const root = await mkdtemp(join(tmpdir(), "harnix-update-")); directories.push(root); await initializeProject({ developer: "tam", root, yes: true }); return root; }
-afterEach(async () => { await Promise.all(directories.splice(0).map((path) => rm(path, { force: true, recursive: true }))); });
+const temporaryRepository = useTemporaryRepositories("harnix-update-");
+async function fixture(): Promise<string> { const root = await temporaryRepository(); await initializeProject({ developer: "tam", root, yes: true }); return root; }
 
 describe("updateProject", () => {
   it("preserves user edits and requires --restore for user-deleted managed files", async () => {
@@ -25,5 +24,17 @@ describe("updateProject", () => {
     await writeFile(join(root, ".harnix", "tasks", "keep.txt"), "task"); await writeFile(join(root, ".harnix", "workspace", "tam", "keep.jsonl"), "journal"); await writeFile(join(root, "keep.txt"), "user");
     await updateProject({ root });
     await expect(readFile(join(root, ".harnix", "tasks", "keep.txt"), "utf8")).resolves.toBe("task"); await expect(readFile(join(root, ".harnix", "workspace", "tam", "keep.jsonl"), "utf8")).resolves.toBe("journal"); await expect(readFile(join(root, "keep.txt"), "utf8")).resolves.toBe("user");
+  });
+  it("should_remove_unchanged_obsolete_file_when_template_is_no_longer_desired", async () => {
+    const root = await fixture();
+    const obsolete = join(root, ".harnix", "spec", "guides", "vue.md");
+    const configPath = join(root, ".harnix", "config.yaml");
+    const config = await readFile(configPath, "utf8");
+    await writeFile(configPath, config.replace("languages: []", "languages:\n  - vue"));
+    await updateProject({ root });
+    await writeFile(configPath, config);
+    const result = await updateProject({ root });
+    expect(result.deleted).toContain(".harnix/spec/guides/vue.md");
+    await expect(access(obsolete)).rejects.toMatchObject({ code: "ENOENT" });
   });
 });

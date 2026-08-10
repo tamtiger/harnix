@@ -1,22 +1,13 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { createConfig, writeConfig } from "../../src/core/config/config.js";
 import { setupPlatforms } from "../../src/commands/setup.js";
+import { mergeCodexConfig } from "../../src/configurators/codex.js";
+import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
 
-const temporaryDirectories: string[] = [];
-
-async function fixture(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "harnix-platform-"));
-  temporaryDirectories.push(root);
-  return root;
-}
-
-afterEach(async () => {
-  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { force: true, recursive: true })));
-});
+const fixture = useTemporaryRepositories("harnix-platform-");
 
 describe("setupPlatforms", () => {
   it("writes byte-idempotent Kiro and Codex project surfaces while preserving user-owned Codex data", async () => {
@@ -34,6 +25,8 @@ describe("setupPlatforms", () => {
     expect(await readFile(join(root, "AGENTS.md"), "utf8")).toBe(firstAgents);
     expect(firstAgents).toContain("Keep this text.");
     expect(firstAgents).toContain("<!-- harnix:begin -->");
+    expect(firstAgents).toContain("Bypass, Lite, or Full");
+    expect(firstAgents).toContain("harnix-finish-work");
     await expect(readFile(join(root, ".kiro", "hooks", "harnix-context.kiro.hook"), "utf8")).resolves.toContain('"promptSubmit"');
     await expect(readFile(join(root, ".kiro", "steering", "harnix.md"), "utf8")).resolves.toContain("Harnix");
     await expect(readFile(join(root, ".agents", "skills", "harnix-implement", "SKILL.md"), "utf8")).resolves.toContain("name: harnix-implement");
@@ -63,5 +56,9 @@ describe("setupPlatforms", () => {
     const hooks = JSON.parse(await readFile(join(root, ".codex", "hooks.json"), "utf8")) as { hooks: { UserPromptSubmit: Array<{ command: string }> } };
     expect(hooks.hooks.UserPromptSubmit.filter((hook) => hook.command === "harnix internal context --platform codex")).toHaveLength(1);
     for (const skill of ["harnix-brainstorm", "harnix-implement", "harnix-check", "harnix-finish-work", "harnix-continue", "harnix-research", "harnix-debug"]) for (const directory of [".kiro/skills", ".agents/skills", ".gemini/skills"]) expect(await readFile(join(root, directory, skill, "SKILL.md"), "utf8")).not.toContain(root);
+  });
+  it("should_reject_malformed_or_duplicate_harnix_toml_tables_when_merging", () => {
+    expect(() => mergeCodexConfig("[broken\nvalue = true\n")).toThrow("malformed");
+    expect(() => mergeCodexConfig("[harnix]\nenabled = true\n[harnix]\nenabled = false\n")).toThrow("duplicated");
   });
 });

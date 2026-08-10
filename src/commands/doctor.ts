@@ -1,64 +1,150 @@
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 
-import { readConfig } from "../core/config/config.js";
-import { desiredFiles, updateProject } from "./update.js";
-import { ownershipState, readManifest } from "../utils/managed-files.js";
+import { readConfig, type HarnixConfigV1 } from "../core/config/config.js";
 import { discoverLegacy } from "../migration/discovery.js";
+import { ownershipState, readManifest, type ManagedManifest } from "../utils/managed-files.js";
+import { resolveSafeProjectPath } from "../utils/paths.js";
+import { desiredFiles, updateProject } from "./update.js";
 
 export interface DoctorFinding { code: string; severity: "error" | "warning" | "info"; path?: string; message: string; fixable: boolean; }
 export interface DoctorReport { schemaVersion: 1; generator: "harnix"; ok: boolean; summary: { errors: number; warnings: number; fixed: number }; findings: DoctorFinding[]; }
 export interface DoctorOptions { root: string; fix?: boolean | undefined; }
 
+const harnixCodexCommand = "harnix internal context --platform codex";
+const harnixCodexHook = { command: harnixCodexCommand, commandWindows: "harnix.exe internal context --platform codex", timeout: 5, additionalContextLimit: 2500 };
+
 export async function diagnoseProject(options: DoctorOptions): Promise<DoctorReport> {
-  const findings: DoctorFinding[] = []; let config;
-  try { config = await readConfig(join(options.root, ".harnix", "config.yaml")); }
-  catch (error) { findings.push(finding("config-invalid", "error", ".harnix/config.yaml", redact(error), false)); return report(findings, 0); }
-  let manifest;
-  try { manifest = await readManifest(join(options.root, ".harnix", ".template-hashes.json")); }
-  catch (error) { findings.push(finding("manifest-invalid", "error", ".harnix/.template-hashes.json", redact(error), false)); return report(findings, 0); }
-  const desired = new Map(desiredFiles(config.platforms, config.languages).map((file) => [file.entry.path, file]));
-  for (const entry of manifest.entries) {
-    const state = await ownershipState(options.root, entry, entry);
-    if (state === "deleted") findings.push(finding("managed-missing", "warning", entry.path, "Managed file was deleted by the user; run update --restore to recreate it.", false));
-    if (state === "modified") findings.push(finding("managed-modified", "warning", entry.path, "Managed file has user changes and will be preserved.", false));
-    if (!desired.has(entry.path)) findings.push(finding("managed-obsolete", "warning", entry.path, "Managed file is no longer in the desired template set.", false));
-  }
-  for (const [path] of desired) if (!manifest.entries.some((entry) => entry.path === path)) findings.push(finding("managed-untracked", "warning", path, "Desired file is not yet owned by Harnix.", true));
-  await inspectInjections(options.root, findings);
-  await inspectSkillsAndCommands(options.root, config.platforms, findings);
-  for (const legacy of await discoverLegacy(options.root)) findings.push(finding("legacy-surface", "warning", legacy, "Legacy compatibility surface detected; migration cleanup is explicit.", false));
-  const safe = options.fix ? await updateProject({ root: options.root }) : undefined;
-  const fixed = safe ? safe.created.length + safe.updated.length : 0;
-  if (fixed > 0) findings.push(finding("safe-fix-applied", "info", undefined, `Reconciled ${fixed} safe managed file(s).`, false));
-  return report(findings, fixed);
+  const initial = await diagnoseOnce(options.root);
+  if (!options.fix || !initial.findings.some((item) => item.fixable)) return initial;
+
+  const reconciliation = await updateProject({ root: options.root });
+  const fixed = reconciliation.created.length + reconciliation.updated.length + reconciliation.deleted.length;
+  const current = await diagnoseOnce(options.root);
+  if (fixed > 0) current.findings.push(finding("safe-fix-applied", "info", undefined, `Reconciled ${fixed} safe managed file(s).`, false));
+  return report(current.findings, fixed);
 }
 
-async function inspectInjections(root: string, findings: DoctorFinding[]): Promise<void> {
-  for (const path of ["AGENTS.md", "GEMINI.md"]) {
-    const text = await optional(join(root, path)); const count = (text.match(/<!-- harnix:begin -->/gu) ?? []).length;
-    if (count > 1) findings.push(finding("duplicate-injection", "error", path, "Multiple Harnix managed blocks were found.", false));
-    else if ((text.match(/<!-- harnix:end -->/gu) ?? []).length !== count) findings.push(finding("broken-injection", "warning", path, "Harnix managed block markers are unbalanced.", false));
-  }
-  const hooks = await optional(join(root, ".codex", "hooks.json"));
-  if (hooks) try { const value = JSON.parse(hooks) as { hooks?: { UserPromptSubmit?: Array<{ command?: string }> } }; const count = value.hooks?.UserPromptSubmit?.filter((hook) => hook.command === "harnix internal context --platform codex").length ?? 0; if (count > 1) findings.push(finding("duplicate-hook", "error", ".codex/hooks.json", "Multiple Harnix Codex hooks were found.", false)); } catch { findings.push(finding("hooks-invalid", "error", ".codex/hooks.json", "Hooks JSON is invalid.", false)); }
-}
-async function inspectSkillsAndCommands(root: string, platforms: string[], findings: DoctorFinding[]): Promise<void> {
-  for (const platform of platforms) {
-    const base = platform === "codex" ? ".agents/skills" : platform === "kiro" ? ".kiro/skills" : ".gemini/skills";
-    for (const file of desiredFiles([platform], []).filter((item) => item.entry.path.startsWith(base)).map((item) => item.entry.path)) {
-      const text = await optional(join(root, ...file.split("/")));
-      if (text.length === 0) findings.push(finding("skill-missing", "warning", file, "Expected platform skill is missing.", true));
-      else if (!/^---\r?\nname: harnix-[a-z-]+\r?\n/iu.test(text)) findings.push(finding("skill-frontmatter", "warning", file, "Skill frontmatter is missing or invalid.", false));
-      if (containsSecret(text)) findings.push(finding("secret-exposure", "error", file, "Potential secret value detected: [REDACTED].", false));
+async function diagnoseOnce(root: string): Promise<DoctorReport> {
+  const findings: DoctorFinding[] = [];
+  let config: HarnixConfigV1;
+  try { config = await readConfig(join(root, ".harnix", "config.yaml")); }
+  catch (error) { findings.push(finding("config-invalid", "error", ".harnix/config.yaml", redact(error, root), false)); return report(findings, 0); }
+
+  let manifest: ManagedManifest;
+  try { manifest = await readManifest(join(root, ".harnix", ".template-hashes.json")); }
+  catch (error) { findings.push(finding("manifest-invalid", "error", ".harnix/.template-hashes.json", redact(error, root), false)); return report(findings, 0); }
+
+  const desired = new Map(desiredFiles(config.platforms, config.languages).map((file) => [file.entry.path, file]));
+  for (const entry of manifest.entries) {
+    try {
+      const state = await ownershipState(root, entry, entry);
+      if (state === "deleted") findings.push(finding("managed-missing", "warning", entry.path, "Managed file was deleted by the user; run update --restore to recreate it.", false));
+      if (state === "modified") findings.push(finding("managed-modified", "warning", entry.path, "Managed file has user changes and will be preserved.", false));
+      if (!desired.has(entry.path)) findings.push(finding("managed-obsolete", "warning", entry.path, "Managed file is no longer in the desired template set.", state === "unchanged"));
+    } catch (error) {
+      findings.push(finding("unsafe-managed-path", "error", entry.path, redact(error, root), false));
     }
   }
-  const kiroHook = await optional(join(root, ".kiro", "hooks", "harnix-context.kiro.hook"));
-  if (kiroHook) try { const hook = JSON.parse(kiroHook) as { then?: { command?: string } }; if (hook.then?.command !== "harnix internal context --platform kiro") findings.push(finding("unsafe-hook-command", "error", ".kiro/hooks/harnix-context.kiro.hook", "Managed hook command is not the approved Harnix command.", false)); } catch { findings.push(finding("hook-schema", "error", ".kiro/hooks/harnix-context.kiro.hook", "Managed Kiro hook is invalid JSON.", false)); }
-  for (const path of [".harnix/config.yaml", ".harnix/.template-hashes.json", ".codex/hooks.json"]) { const text = await optional(join(root, ...path.split("/"))); if (containsSecret(text)) findings.push(finding("secret-exposure", "error", path, "Potential secret value detected: [REDACTED].", false)); }
+  for (const [path] of desired) if (!manifest.entries.some((entry) => entry.path === path)) findings.push(finding("managed-untracked", "warning", path, "Desired file is not yet owned by Harnix.", true));
+
+  await inspectInjections(root, config, findings);
+  await inspectSkills(root, config, findings);
+  await inspectSensitiveFiles(root, findings);
+  await inspectPermissions(root, manifest, findings);
+  for (const legacy of await discoverLegacy(root)) findings.push(finding("legacy-surface", "warning", legacy, "Legacy compatibility surface detected; migration cleanup is explicit.", false));
+  return report(findings, 0);
 }
-function report(findings: DoctorFinding[], fixed: number): DoctorReport { const sorted = findings.sort((left, right) => `${left.path ?? ""}:${left.code}`.localeCompare(`${right.path ?? ""}:${right.code}`)); const errors = sorted.filter((item) => item.severity === "error").length, warnings = sorted.filter((item) => item.severity === "warning").length; return { schemaVersion: 1, generator: "harnix", ok: errors === 0, summary: { errors, warnings, fixed }, findings: sorted }; }
+
+async function inspectInjections(root: string, config: HarnixConfigV1, findings: DoctorFinding[]): Promise<void> {
+  for (const [platform, path] of [["codex", "AGENTS.md"], ["antigravity", "GEMINI.md"]] as const) {
+    const text = await optionalSafe(root, path, findings);
+    const beginCount = (text.match(/<!-- harnix:begin -->/gu) ?? []).length;
+    const endCount = (text.match(/<!-- harnix:end -->/gu) ?? []).length;
+    if (beginCount > 1) findings.push(finding("duplicate-injection", "error", path, "Multiple Harnix managed blocks were found.", false));
+    else if (endCount !== beginCount) findings.push(finding("broken-injection", "warning", path, "Harnix managed block markers are unbalanced.", false));
+    else if (config.platforms.includes(platform) && beginCount === 0) findings.push(finding("injection-missing", "warning", path, `Expected ${platform} project guidance is missing.`, false));
+  }
+
+  if (config.platforms.includes("codex")) {
+    const hooksPath = ".codex/hooks.json";
+    const hooksText = await optionalSafe(root, hooksPath, findings);
+    if (!hooksText) findings.push(finding("hook-missing", "warning", hooksPath, "Expected Codex context hook is missing.", false));
+    else inspectCodexHooks(hooksText, findings);
+    const configText = await optionalSafe(root, ".codex/config.toml", findings);
+    if (!/^\[harnix\]\r?\nenabled\s*=\s*true\s*$/mu.test(configText)) findings.push(finding("codex-trust-drift", "warning", ".codex/config.toml", "Codex Harnix project configuration is missing or modified; verify project trust before use.", false));
+  }
+
+  if (config.platforms.includes("kiro")) {
+    const path = ".kiro/hooks/harnix-context.kiro.hook";
+    const text = await optionalSafe(root, path, findings);
+    if (!text) findings.push(finding("hook-missing", "warning", path, "Expected Kiro context hook is missing.", false));
+    else try {
+      const hook = JSON.parse(text) as { version?: unknown; enabled?: unknown; when?: { type?: unknown }; then?: { type?: unknown; command?: unknown } };
+      if (hook.version !== "1.0.0" || hook.enabled !== true || hook.when?.type !== "promptSubmit" || hook.then?.type !== "runCommand" || hook.then.command !== "harnix internal context --platform kiro") findings.push(finding("hook-schema", "error", path, "Managed Kiro hook does not match the approved schema and command.", false));
+    } catch { findings.push(finding("hook-schema", "error", path, "Managed Kiro hook is invalid JSON.", false)); }
+  }
+}
+
+function inspectCodexHooks(source: string, findings: DoctorFinding[]): void {
+  const path = ".codex/hooks.json";
+  try {
+    const value = JSON.parse(source) as { hooks?: { UserPromptSubmit?: unknown[] } };
+    const hooks = value.hooks?.UserPromptSubmit;
+    if (!Array.isArray(hooks)) { findings.push(finding("hooks-invalid", "error", path, "Codex UserPromptSubmit hooks must be an array.", false)); return; }
+    const harnixHooks = hooks.filter((hook) => isRecord(hook) && hook.command === harnixCodexCommand);
+    if (harnixHooks.length > 1) findings.push(finding("duplicate-hook", "error", path, "Multiple Harnix Codex hooks were found.", false));
+    if (harnixHooks.length === 0) findings.push(finding("hook-missing", "warning", path, "Expected Codex context hook is missing.", false));
+    else if (!sameRecord(harnixHooks[0] as Record<string, unknown>, harnixCodexHook)) findings.push(finding("hook-schema", "error", path, "Harnix Codex hook fields differ from the approved schema.", false));
+    if (hooks.some((hook) => isRecord(hook) && typeof hook.command === "string" && /harnix\s+internal\s+context/iu.test(hook.command) && hook.command !== harnixCodexCommand)) findings.push(finding("unsafe-hook-command", "error", path, "A Harnix-like hook uses an unapproved command.", false));
+  } catch { findings.push(finding("hooks-invalid", "error", path, "Hooks JSON is invalid.", false)); }
+}
+
+async function inspectSkills(root: string, config: HarnixConfigV1, findings: DoctorFinding[]): Promise<void> {
+  for (const platform of config.platforms) {
+    const base = platform === "codex" ? ".agents/skills" : platform === "kiro" ? ".kiro/skills" : ".gemini/skills";
+    const files = desiredFiles([platform], []).filter((item) => item.entry.path.startsWith(base)).map((item) => item.entry.path);
+    for (const path of files) {
+      const text = await optionalSafe(root, path, findings);
+      if (!text) findings.push(finding("skill-missing", "warning", path, "Expected platform skill is missing.", true));
+      else if (!/^---\r?\nname: harnix-[a-z-]+\r?\ndescription: .+\r?\n---\r?\n/u.test(text)) findings.push(finding("skill-frontmatter", "warning", path, "Skill frontmatter is missing or invalid.", false));
+    }
+  }
+}
+
+async function inspectSensitiveFiles(root: string, findings: DoctorFinding[]): Promise<void> {
+  for (const path of [".harnix/config.yaml", ".harnix/.template-hashes.json", ".codex/hooks.json", ".kiro/hooks/harnix-context.kiro.hook", "AGENTS.md", "GEMINI.md"]) {
+    const text = await optionalSafe(root, path, findings);
+    if (containsSecret(text)) findings.push(finding("secret-exposure", "error", path, "Potential secret value detected: [REDACTED].", false));
+  }
+}
+
+async function inspectPermissions(root: string, manifest: ManagedManifest, findings: DoctorFinding[]): Promise<void> {
+  if (process.platform === "win32") return;
+  for (const entry of manifest.entries) try {
+    const metadata = await stat(await resolveSafeProjectPath(root, entry.path));
+    if ((metadata.mode & 0o002) !== 0) findings.push(finding("broad-permissions", "warning", entry.path, "Managed file is world-writable.", false));
+  } catch (error: unknown) { if (!isMissing(error)) findings.push(finding("permission-check-failed", "warning", entry.path, redact(error, root), false)); }
+}
+
+async function optionalSafe(root: string, path: string, findings: DoctorFinding[]): Promise<string> {
+  try { return await readFile(await resolveSafeProjectPath(root, path), "utf8"); }
+  catch (error: unknown) {
+    if (isMissing(error)) return "";
+    findings.push(finding("unsafe-path", "error", path, redact(error, root), false));
+    return "";
+  }
+}
+
+function report(findings: DoctorFinding[], fixed: number): DoctorReport {
+  const order = { error: 0, warning: 1, info: 2 } as const;
+  const sorted = findings.sort((left, right) => order[left.severity] - order[right.severity] || left.code.localeCompare(right.code) || (left.path ?? "").localeCompare(right.path ?? ""));
+  const errors = sorted.filter((item) => item.severity === "error").length, warnings = sorted.filter((item) => item.severity === "warning").length;
+  return { schemaVersion: 1, generator: "harnix", ok: errors === 0 && warnings === 0, summary: { errors, warnings, fixed }, findings: sorted };
+}
 function finding(code: string, severity: DoctorFinding["severity"], path: string | undefined, message: string, fixable: boolean): DoctorFinding { return { code, severity, ...(path ? { path } : {}), message, fixable }; }
-function redact(value: unknown): string { return String(value instanceof Error ? value.message : value).replace(/(?:token|secret|password|api[_-]?key)\s*[=:]\s*[^\s,]+/giu, "$1=[REDACTED]"); }
+function redact(value: unknown, root: string): string { return String(value instanceof Error ? value.message : value).replaceAll(root, "[PROJECT]").replace(/(?:token|secret|password|api[_-]?key)\s*[=:]\s*[^\s,]+/giu, "$1=[REDACTED]"); }
 function containsSecret(value: string): boolean { return /(?:token|secret|password|api[_-]?key)\s*[=:]\s*['"]?[^\s,'"]{8,}/iu.test(value); }
-async function optional(path: string): Promise<string> { try { return await readFile(path, "utf8"); } catch (error: unknown) { if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return ""; throw error; } }
+function sameRecord(left: Record<string, unknown>, right: object): boolean { return Object.keys(left).length === Object.keys(right).length && Object.entries(right).every(([key, value]) => left[key] === value); }
+function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
+function isMissing(error: unknown): boolean { return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"; }

@@ -1,21 +1,11 @@
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { discoverLegacy } from "../../src/migration/discovery.js";
+import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
 
-const temporaryDirectories: string[] = [];
-
-async function fixture(): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), "harnix-migration-"));
-  temporaryDirectories.push(root);
-  return root;
-}
-
-afterEach(async () => {
-  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { force: true, recursive: true })));
-});
+const fixture = useTemporaryRepositories("harnix-migration-");
 
 describe("discoverLegacy", () => {
   it("reports legacy project directories, packages and skills deterministically", async () => {

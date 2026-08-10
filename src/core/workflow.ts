@@ -1,6 +1,6 @@
 import type { Evidence, TaskMode, TaskRecord } from "./tasks/task.js";
 import { appendJournal } from "./journal/journal.js";
-import { archiveTask, transitionTask } from "./tasks/task.js";
+import { archiveTask, saveTask, transitionTask } from "./tasks/task.js";
 import { resolveActiveTask } from "./tasks/task.js";
 
 export type WorkflowRoute = "bypass" | TaskMode;
@@ -20,7 +20,13 @@ export function validateFullReadyArtifact(value: { acceptanceCriteria: string[];
 
 export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceAgeMs = 60 * 60 * 1000): boolean {
   const required = task.validationPlan.filter((check) => check.required);
-  const freshPasses = task.evidence.filter((evidence) => evidence.result === "pass" && isFresh(evidence, now, maxEvidenceAgeMs));
+  const latestByCheck = new Map<string, Evidence>();
+  for (const evidence of task.evidence) {
+    if (!evidence.checkId) continue;
+    const previous = latestByCheck.get(evidence.checkId);
+    if (!previous || evidenceTime(evidence) >= evidenceTime(previous)) latestByCheck.set(evidence.checkId, evidence);
+  }
+  const freshPasses = task.evidence.filter((evidence) => evidence.result === "pass" && isFresh(evidence, now, maxEvidenceAgeMs) && (!evidence.checkId || latestByCheck.get(evidence.checkId)?.id === evidence.id));
   if (required.some((check) => !freshPasses.some((evidence) => evidence.checkId === check.id))) return false;
   return task.acceptanceCriteria.every((criterion) => criterion.status === "waived" || (criterion.status === "met" && criterion.evidenceIds.some((id) => freshPasses.some((evidence) => evidence.id === id))));
 }
@@ -36,6 +42,7 @@ export function evidenceSupportsScope(evidence: Evidence, requiredScope: "focuse
 export async function finishWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, now = new Date().toISOString()): Promise<TaskRecord> {
   if (task.status !== "verifying" || !canCompleteTask(task, Date.parse(now))) throw new Error("Task requires fresh complete verification before finishing.");
   const completed = transitionTask(task, "completed", "finishing", now);
+  await saveTask(harnixRoot, completed);
   await appendJournal(journalPath, { generator: "harnix", schemaVersion: 1, id: `${completed.id}-completion`, recordedAt: now, developer, taskId: completed.id, kind: "completion", summary: `Completed: ${completed.title}`, evidenceIds: completed.evidence.map((evidence) => evidence.id) });
   await archiveTask(harnixRoot, completed);
   return completed;
@@ -48,3 +55,4 @@ export function verificationStages(): ["compliance", "quality-security"] { retur
 export function isWithinRequestedScope(requested: string[], proposed: string[]): boolean { const allowed = new Set(requested); return proposed.every((item) => allowed.has(item)); }
 
 function isFresh(evidence: Evidence, now: number, maxAgeMs: number): boolean { const timestamp = Date.parse(evidence.recordedAt); return Number.isFinite(timestamp) && timestamp <= now && now - timestamp <= maxAgeMs; }
+function evidenceTime(evidence: Evidence): number { const parsed = Date.parse(evidence.recordedAt); return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY; }
