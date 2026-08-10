@@ -38,6 +38,49 @@ pnpm install --frozen-lockfile
 pnpm build
 ```
 
+### Đăng ký lệnh `harnix` global từ source
+
+Package hiện chưa được publish lên npm. Để gọi trực tiếp `harnix` trong mọi PowerShell, build và đăng ký binary local từ thư mục repository Harnix:
+
+```powershell
+Set-Location C:\FPT\MyProject\harnix
+pnpm install --frozen-lockfile
+pnpm build
+pnpm add -g .
+
+# Xác nhận PowerShell tìm thấy executable
+Get-Command harnix
+harnix --help
+```
+
+Với pnpm 11, không dùng `pnpm link --global`; lệnh này đã bị loại bỏ. Dùng `pnpm add -g .` để đăng ký binary khai báo trong trường `bin` của `package.json`.
+
+Nếu `pnpm add -g .` báo không tìm thấy global bin directory, hoặc `Get-Command harnix` vẫn không tìm thấy lệnh, chạy:
+
+```powershell
+pnpm setup
+pnpm bin -g
+```
+
+Sau `pnpm setup`, đóng toàn bộ cửa sổ PowerShell, mở cửa sổ mới rồi chạy lại `pnpm add -g .` và `harnix --help`. `pnpm setup` tạo `PNPM_HOME` và thêm thư mục global bin vào `PATH`; terminal đang mở trước đó thường chưa nhận biến môi trường mới.
+
+Khi source thay đổi, chạy lại `pnpm build`. Nếu muốn đăng ký lại bản global một cách rõ ràng, chạy lại `pnpm add -g .`. Để gỡ bản global:
+
+```powershell
+pnpm remove -g @tamtiger/harnix
+```
+
+Sau khi đăng ký thành công, có thể chuyển sang repository cần quản lý và chạy:
+
+```powershell
+Set-Location C:\path\to\consumer-project
+harnix init --yes --user tam
+harnix setup --codex
+harnix doctor --json
+```
+
+### Chạy không cần đăng ký global
+
 Các ví dụ bên dưới dùng lệnh `harnix` với giả định binary đã nằm trên `PATH` hoặc package đã được cài vào dự án. Khi chạy trực tiếp từ source chưa publish, thay `harnix` bằng `node C:\path\to\harnix\dist\cli.js`.
 
 Trong repository cần quản lý, chạy binary đã build:
@@ -46,12 +89,21 @@ Trong repository cần quản lý, chạy binary đã build:
 node C:\path\to\harnix\dist\cli.js --help
 ```
 
-Khi package đã được publish, cách dùng tương đương sẽ là:
+Khi package đã được publish, có thể cài project-local và gọi qua `pnpm exec`:
 
 ```powershell
 pnpm add -D @tamtiger/harnix
 pnpm exec harnix --help
 ```
+
+Hoặc cài global từ npm:
+
+```powershell
+pnpm add -g @tamtiger/harnix
+harnix --help
+```
+
+Hai lệnh cài từ npm ở trên sẽ trả `404` cho đến khi `@tamtiger/harnix` được publish thành công trên npm registry.
 
 ## Quick start
 

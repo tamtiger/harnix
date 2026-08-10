@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import inquirer from "inquirer";
+import { realpathSync } from "node:fs";
 import { stat } from "node:fs/promises";
 import { isAbsolute, win32 } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -112,4 +113,11 @@ async function readBoundedStdin(): Promise<string> {
   return Buffer.concat(chunks).toString("utf8");
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.exitCode = await runCli();
+if (isCliEntryPoint()) process.exitCode = await runCli();
+
+function isCliEntryPoint(): boolean {
+  const entryPath = process.argv[1];
+  if (entryPath === undefined) return false;
+  try { return realpathSync(entryPath) === realpathSync(fileURLToPath(import.meta.url)); }
+  catch { return false; }
+}
