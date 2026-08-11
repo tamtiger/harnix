@@ -121,28 +121,30 @@ Harnix kết hợp hai nguồn bằng một state machine chuẩn tại `docs/HA
 Skill chỉ sở hữu một đoạn state machine; skill không được định nghĩa transition cạnh tranh. Kiro, Antigravity và Codex có syntax adapter khác nhau nhưng cùng behavior eval fixtures.
 ## 4. Platform research decisions
 
+Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapters described by earlier Phase 1–5 research are retained only as legacy/provenance evidence; the current adopted contract is `GLOBAL_SETUP_REFACTOR_PLAN.md` §§2, 6–9.
+
 ### Codex
 
-- `AGENTS.md`: bootstrap ngắn trong managed markers; giữ toàn bộ user text ngoài markers; optional managed `## Code Review Rules`.
-- `.agents/skills/harnix-*`: surface workflow chính, frontmatter hợp lệ, description/trigger cụ thể.
-- `.codex/hooks.json`: một official-schema `UserPromptSubmit` command handler gọi `harnix internal context --platform codex`, có `commandWindows`, timeout, `additionalContextLimit` và bounded JSON output.
-- `.codex/config.toml`: merge cấu trúc tối thiểu; không tạo duplicate tables và không sửa model/reasoning/sandbox/approval/MCP/provider/auth/unrelated keys.
-- `.codex/agents/`: optional research/independent review roles chỉ khi current official surface hỗ trợ; không phải dependency của workflow.
-- Doctor phải giải thích project trust vì project-local config/hooks/rules bị bỏ qua khi untrusted.
+- Official user skill surface là `$HOME/.agents/skills/harnix-*`; skill metadata/triggers vẫn phải cụ thể.
+- Merge block conditional ngắn vào `$CODEX_HOME/AGENTS.md` và nested `UserPromptSubmit` handler vào `$CODEX_HOME/hooks.json`; preserve all unrelated content/groups/handlers and detect `AGENTS.override.md` shadowing.
+- Không tạo/sửa `config.toml`, model/reasoning/sandbox/approval/MCP/provider/auth hoặc feature flags. Constant hook command must resolve through Windows pnpm/npm shim smoke without a persisted absolute executable.
+- Hook command requires user `/hooks` review/trust. File presence means `installed-pending-trust`, not `active`; Harnix never bypasses trust.
+- `.codex/agents/` remains optional only when current official surface supports it; it is not a workflow dependency.
 - Không tạo legacy custom prompts hoặc slash-command shims.
 
 ### Kiro
 
-- Generate Harnix-namespaced skills, context hooks, workflow steering và rules đúng ngôn ngữ.
-- Không tạo cơ chế install thứ hai hoặc runtime scripts trong consumer.
-- Frozen baseline `kiro-cli-chat 2.14.2`: project `.kiro/skills/harnix-*`, `.kiro/steering/harnix.md` và một `.kiro/hooks/harnix-context.kiro.hook` dùng `promptSubmit -> runCommand`; successful stdout được thêm vào agent context.
+- Global user surface is `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md` and `~/.kiro/hooks/harnix-context.json`; skills are not derived from the setup cwd languages.
+- Steering uses a conditional Harnix-project guard. One JSON-v1 `UserPromptSubmit` command handler runs the fixed installed `harnix` command with timeout 5.
+- Capability detection distinguishes supported IDE/CLI global hooks from legacy Kiro; doctor reports unsupported versions and stale workspace hook duplication rather than generating an old schema.
+- Không tạo cơ chế install thứ hai, permission/trusted-command mutation hoặc runtime scripts trong consumer.
 
 ### Antigravity
 
-- Executable thực tế là `agy` (local baseline `1.1.1`); setup/doctor không dùng lệnh `gemini`.
-- Antigravity dùng physical `.gemini` namespace. Project integration dùng managed `GEMINI.md` và `.gemini/skills`/verified settings nhưng public identity là Antigravity.
-- User-level `.gemini/config`, `.gemini/antigravity-cli`, `.gemini/antigravity-ide`, accounts, registry và MCP credential-bearing fields nằm ngoài ownership Harnix.
-- V1 chỉ generate verified project `GEMINI.md` và `.gemini/skills/harnix-*`; không generate settings/hooks chưa có authoritative project-local schema. `agy 1.1.1` là frozen local baseline; version drift kích hoạt documented revalidation và không hardcode machine path.
+- Executable thực tế là `agy`; setup/doctor không dùng lệnh Gemini CLI. Physical `.gemini` namespace does not change the public Antigravity identity.
+- Use two independently owned global plugins: Desktop `~/.gemini/config/plugins/harnix` and CLI `~/.gemini/antigravity-cli/plugins/harnix`. Each has only official `plugin.json`, Harnix skills/rule and a fixed `PreInvocation` command handler.
+- Handler returns `injectSteps` only for the first invocation. It selects a valid cwd project first, otherwise one initialized workspace path; a multi-root ambiguity preserves data privacy and emits only a short warning.
+- No MCP/settings/account/registry/credential/permission mutation, no machine path and no project `GEMINI.md`/skills setup output. Doctor distinguishes verified `shadowed` from `precedence-unknown`.
 
 ## 5. Rules strategy
 
@@ -197,12 +199,12 @@ Các quyết định này là guardrail chống scope creep. Thay đổi cần c
 | Root/path safety | `src/utils/paths.ts` | nested Git/worktree, Unicode/spaces, traversal, symlink |
 | Config/schema | `src/core/config/**` | exact frozen types, valid/corrupt, migrations, future version, unknown-key round trip |
 | Detection | `src/utils/detection.ts` | 7 language/framework fixtures, packages, package managers |
-| Managed files | `src/utils/{hashing,managed-files,atomic-write}.ts` | modified/deleted/obsolete/corrupt/rollback |
+| Managed files | `src/utils/{hashing,managed-files,atomic-write}.ts` plus Phase 6 global ownership/lock boundary | modified/deleted/obsolete/corrupt/rollback, fragment collision, permission mode and concurrent-edit preservation |
 | Context budget | `src/core/context/**` | rank, dedupe, pins, truncation disclosure, full override |
 | Journal/learning | `src/core/journal/**`, `learning.ts` | malformed/Unicode/newest-first/confidence/promotion |
 | Workflow | `src/skills/**` | lite/full/ambiguous/forced, debug, TDD exceptions, reviews, verification |
-| Platforms/hooks | `src/configurators/{kiro,antigravity,codex}.ts`, hidden internal context handler | frozen snapshots, stdin/stdout protocol, bounds, idempotence, no machine paths |
-| Lifecycle/migration | `src/commands/**`, `src/migration/**` | CLI integration, legacy conflicts, rollback, purge safety |
-| Doctor | `src/commands/doctor.ts` | stable ordered/redacted JSON + unsafe/duplicate/legacy/secret fixtures |
+| Platforms/hooks | `src/configurators/{kiro,antigravity,codex}.ts`, Home/Platform root resolvers, hidden internal context handler | user-global snapshots, stdin/stdout protocol, activation guard, bounds, idempotence, fake home and no machine paths |
+| Lifecycle/migration | `src/commands/**`, `src/migration/**` | project/global scope, legacy conflicts, rollback, purge/global-uninstall safety |
+| Doctor | `src/commands/doctor.ts` | stable ordered/redacted Doctor JSON v2 + unsafe/duplicate/legacy/global/secret fixtures |
 
 Chi tiết task order và gates nằm trong `IMPLEMENTATION_PLAN.md`; phân loại reuse/remove/build nằm trong `UPSTREAM_MAPPING.md`.

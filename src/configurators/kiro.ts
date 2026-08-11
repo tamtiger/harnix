@@ -1,14 +1,74 @@
-import type { DesiredManagedFile } from "../utils/managed-files.js";
-import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
-import { packageVersion } from "../version.js";
+import type { DesiredGlobalManagedFile } from "../utils/global-managed-files.js";
+import { type SkillTemplate, workflowSkills } from "../templates/harnix/workflow.js";
 
-export function kiroDesiredFiles(languages: string[]): DesiredManagedFile[] {
-  const files = workflowSkills.map((skill) => managed(`.kiro/skills/${skill.name}/SKILL.md`, skill.name, renderSkill(skill)));
-  files.push(managed(".kiro/steering/harnix.md", "kiro-steering", `# Harnix\n\nUse the project-local Harnix workflow and relevant .harnix context.\n\nDetected languages: ${languages.join(", ") || "none"}.\n`));
-  files.push(managed(".kiro/hooks/harnix-context.kiro.hook", "kiro-context-hook", `${JSON.stringify({ version: "1.0.0", enabled: true, when: { type: "promptSubmit" }, then: { type: "runCommand", command: "harnix internal context --platform kiro" } }, null, 2)}\n`));
-  return files;
+export const KIRO_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix internal context --platform kiro";
+
+export const KIRO_GLOBAL_CONTEXT_HOOK = {
+  version: "v1",
+  hooks: [{
+    name: "harnix-context",
+    trigger: "UserPromptSubmit",
+    action: {
+      type: "command",
+      command: KIRO_GLOBAL_CONTEXT_HOOK_COMMAND,
+    },
+    timeout: 5,
+    enabled: true,
+  }],
+} as const;
+
+export const KIRO_GLOBAL_STEERING = [
+  "# Harnix",
+  "",
+  "## Harnix activation guard",
+  "",
+  "First locate the nearest ancestor or workspace root containing .harnix/config.yaml.",
+  "Apply this steering only when that root exists and its Harnix state is valid; then read .harnix/workflow.md and use the installed Harnix skills with bounded project context.",
+  "If no such root exists or its state is invalid, do not apply the Harnix workflow, create Harnix state, or run harnix init.",
+  "",
+].join("\n");
+
+/**
+ * Pure, root-relative user-global Kiro plan. The lifecycle supplies the
+ * verified ~/.kiro root and owns all filesystem reconciliation.
+ */
+export function kiroGlobalDesiredFiles(): DesiredGlobalManagedFile[] {
+  return [
+    ...workflowSkills.map((skill): DesiredGlobalManagedFile => ({
+      path: "skills/" + skill.name + "/SKILL.md",
+      sourceId: "kiro-skill-" + skill.name,
+      kind: "file",
+      content: renderGlobalSkill(skill),
+    })),
+    {
+      path: "steering/harnix.md",
+      sourceId: "kiro-steering",
+      kind: "file",
+      content: KIRO_GLOBAL_STEERING,
+    },
+    {
+      path: "hooks/harnix-context.json",
+      sourceId: "kiro-context-hook",
+      kind: "file",
+      content: JSON.stringify(KIRO_GLOBAL_CONTEXT_HOOK, null, 2) + "\n",
+    },
+  ];
 }
 
-function managed(path: string, sourceId: string, content: string): DesiredManagedFile {
-  return { entry: { path, sourceId, scope: "kiro", generatedHash: "0".repeat(64), generatorVersion: packageVersion }, content };
+function renderGlobalSkill(skill: SkillTemplate): string {
+  return [
+    "---",
+    "name: " + skill.name,
+    "description: " + skill.description,
+    "---",
+    "",
+    "## Harnix activation guard",
+    "",
+    "First locate the nearest ancestor or workspace root containing .harnix/config.yaml.",
+    "Apply this skill only when that root exists and its Harnix state is valid.",
+    "If no such root exists or its state is invalid, do not apply the Harnix workflow, create Harnix state, or run harnix init.",
+    "",
+    skill.body,
+    "",
+  ].join("\n");
 }

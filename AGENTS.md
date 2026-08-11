@@ -2,7 +2,7 @@
 
 ## Mission
 
-Build Harnix as a lean, project-local coding-agent harness for exactly Kiro, Antigravity, and Codex. The product is one npm package (`@tamtiger/harnix`), one executable (`harnix`), and one project-data namespace (`.harnix/`).
+Build Harnix as a lean coding-agent harness for exactly Kiro, Antigravity, and Codex. Project workflow data remains local in `.harnix/`; Phase 6 platform integrations are explicit, Harnix-owned **user-global** customizations. The product is one npm package (`@tamtiger/harnix`) and one executable (`harnix`).
 
 ## Sources of truth
 
@@ -20,7 +20,7 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 ## Current state
 
 - Documentation readiness has passed.
-- Phase 1 implementation is complete; use its tests and contracts as the foundation for later phases.
+- Phase 1–5 implementation is complete. Phase 6 is active; follow `docs/GLOBAL_SETUP_REFACTOR_PLAN.md` from G0 onward.
 - Continue from the first unchecked task in the active phase in `docs/IMPLEMENTATION_PLAN.md` unless the user changes priority; explicitly deferred Phase 4 extensions do not block earlier phases.
 - Do not invent a second package, workspace, service, or compatibility surface.
 
@@ -32,6 +32,7 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 - Antigravity public identity/flag is `antigravity`/`--antigravity`; its executable is `agy`. The physical `.gemini` namespace does not make Gemini CLI a supported platform.
 - Runtime code stays in the installed package. Never copy runtime scripts into consumer repositories.
 - No telemetry, daemon, hosted service, marketplace, default MCP, global memory, or silent runtime network.
+- User-global setup is limited to the documented Kiro, Antigravity, and Codex files. Never create `~/.harnix`, mutate real user homes in tests, or infer global ownership from a project manifest.
 - No channel/forum/worker network, workflow-template switching, mandatory subagents, or automatic Git integration.
 - Never auto-commit, branch, create a worktree, merge, push, publish, or create a PR.
 
@@ -48,8 +49,8 @@ core -X-> Commander/Inquirer/platform templates
 
 - Inject filesystem, clock, process runner, version lookup, network, and prompt dependencies where deterministic tests need control.
 - Use Node path/realpath APIs and executable-plus-argument arrays. Never concatenate untrusted shell input.
-- Normalize persisted paths to repository-relative POSIX form and reject traversal, unsafe roots, and symlink/junction escape.
-- Use atomic replacement for config, manifests, and task state.
+- Normalize project paths to repository-relative POSIX form and global paths to a verified platform root; reject traversal, unsafe roots, and symlink/junction escape.
+- Use permission-preserving atomic replacement for config, manifests, task state, and shared global integration files.
 - Preserve unrelated and user-modified content. Tasks, research, and journals are always user-owned.
 - Do not expose machine-specific absolute paths, credentials, prompts, or secret values in generated output or diagnostics.
 
@@ -66,22 +67,28 @@ For each implementation task:
 5. Refactor while green; avoid speculative abstractions and unsupported surfaces.
 6. Run compliance review before quality/security review.
 7. Run fresh focused verification, then the broader gate required by the phase.
-8. Update `CHANGELOG.md` under `Unreleased` with user-visible implementation changes before committing.
+8. Update `CHANGELOG.md` with user-visible implementation changes before committing.
 9. Report actual evidence, omitted checks, residual risks, and next task. Do not claim success from stale or partial output.
 
 Docs-only, trivial wiring, or generated snapshots may use the documented TDD exception, but must record the reason and use the strongest meaningful alternative verification.
 
 For failures, reproduce, gather evidence, identify root cause, test one hypothesis, add regression protection, and fix. After three failed hypotheses for the same symptom, reassess assumptions or architecture and return to planning.
 
-## Frozen v1 contracts
+## Frozen contracts
 
 Do not alter field names, enums, paths, transitions, scoring, hook protocol, or exit semantics in `docs/IMPLEMENTATION_PLAN.md` section 4 without updating PRD, workflow, migration behavior, and tests in the same change.
 
+Phase 6 supersedes the former project-local platform paths while preserving the frozen project-data/task contracts. The detailed source is `docs/GLOBAL_SETUP_REFACTOR_PLAN.md`.
+
 Important adapter constraints:
 
-- Kiro: project skills, steering, and one frozen `promptSubmit -> runCommand` context hook.
-- Antigravity: v1 generates only managed `GEMINI.md` and `.gemini/skills/harnix-*`; do not generate unverified settings/hooks or touch user-level `.gemini` state.
-- Codex: preserve text outside the managed `AGENTS.md` block; use repo `.agents/skills/harnix-*`, minimal structural `.codex/config.toml` merge, and exactly one `.codex/hooks.json` representation.
+- `harnix setup --kiro|--antigravity|--codex [--dry-run] [--json]` is user-global only. It must not resolve a project root or read `.harnix/config.yaml`.
+- Kiro uses `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, and one `~/.kiro/hooks/harnix-context.json` JSON-v1 `UserPromptSubmit` handler.
+- Antigravity uses independent Desktop and CLI plugins below `~/.gemini/config/plugins/harnix` and `~/.gemini/antigravity-cli/plugins/harnix`; never write MCP/settings/credentials.
+- Codex uses `$HOME/.agents/skills/harnix-*`, a managed conditional block in `$CODEX_HOME/AGENTS.md`, and a nested `$CODEX_HOME/hooks.json` handler. Do not write `config.toml`; preserve unrelated text/handlers. Report `installed-pending-trust` until the user reviews the hook in `/hooks`.
+- Each platform root owns a separate validated sidecar manifest. Reconcile only unchanged Harnix fragments, preserve collisions/modified content, lock in stable order, and rollback conservatively.
+- `update --global`, `doctor --fix --global`, and `uninstall --global ... --yes` operate on global integrations. `uninstall --purge --yes` remains project-only. Legacy project surfaces require explicit `--legacy-project-surfaces [--yes]` cleanup.
+- The hidden `harnix internal context` command must be a fast, no-write/no-network no-op outside an initialized project. Global instructions and hooks must include the same activation guard.
 
 ## Required package scripts
 
@@ -106,8 +113,8 @@ measure:footprint
 scan:release
 ```
 
-Do not weaken, bypass, or silently skip these gates. Filesystem tests use isolated temporary repositories and must not mutate global user configuration or call real install/network operations.
+Do not weaken, bypass, or silently skip these gates. Filesystem tests use isolated temporary repositories **and injected disposable user homes**; they must not mutate real global configuration or call real install/network operations.
 
 ## Completion gate
 
-Before reporting implementation complete, run the exact acceptance sequence in `docs/IMPLEMENTATION_PLAN.md` section 11 and read every exit code/output. Harnix is not complete until tarball smoke tests, platform parity, doctor fixtures, performance, footprint, safety, attribution, and release scans pass with fresh evidence.
+Before reporting implementation complete, run the exact acceptance sequence in `docs/IMPLEMENTATION_PLAN.md` section 11 and read every exit code/output. Phase 6 additionally requires fake-home tarball smoke and the documented disposable-profile manual smoke; a real user profile is never touched without explicit authorization. Harnix is not complete until platform parity, doctor v2 fixtures, performance, footprint, safety, attribution, and release scans pass with fresh evidence.

@@ -1,9 +1,12 @@
-import { access, readFile, unlink, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { initializeProject } from "../../src/commands/init.js";
 import { updateProject } from "../../src/commands/update.js";
+import { readConfig, writeConfig } from "../../src/core/config/config.js";
+import { readManifest, writeManifest } from "../../src/utils/managed-files.js";
+import { sha256 } from "../../src/utils/hashing.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-update-");
@@ -53,5 +56,33 @@ describe("updateProject", () => {
     expect(result.preserved).toContain(".harnix/spec/guides/vue.md");
     await expect(readFile(obsolete, "utf8")).resolves.toBe("user-owned Vue guidance\n");
     expect(manifest).toContain(".harnix/spec/guides/vue.md");
+  });
+
+  it("should_keep_legacy_platform_surfaces_out_of_project_update_ownership", async () => {
+    const root = await fixture();
+    const configPath = join(root, ".harnix", "config.yaml");
+    const manifestPath = join(root, ".harnix", ".template-hashes.json");
+    const legacyPath = ".kiro/skills/harnix-implement/SKILL.md";
+    const legacyContent = "legacy platform skill\n";
+    await writeConfig(configPath, { ...(await readConfig(configPath)), platforms: ["kiro"] });
+    await mkdir(join(root, ".kiro", "skills", "harnix-implement"), { recursive: true });
+    await writeFile(join(root, legacyPath), legacyContent, { encoding: "utf8" });
+    const manifest = await readManifest(manifestPath);
+    await writeManifest(manifestPath, {
+      ...manifest,
+      entries: [...manifest.entries, {
+        path: legacyPath,
+        sourceId: "harnix-implement",
+        scope: "kiro" as const,
+        generatedHash: sha256(legacyContent),
+        generatorVersion: "0.5.0",
+      }].sort((left, right) => left.path.localeCompare(right.path)),
+    });
+
+    await updateProject({ root });
+
+    await expect(readFile(join(root, legacyPath), "utf8")).resolves.toBe(legacyContent);
+    await expect(access(join(root, ".kiro", "hooks", "harnix-context.json"))).rejects.toMatchObject({ code: "ENOENT" });
+    expect((await readManifest(manifestPath)).entries).toContainEqual(expect.objectContaining({ path: legacyPath, scope: "kiro" }));
   });
 });

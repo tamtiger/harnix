@@ -20,9 +20,13 @@ describe("initializeProject", () => {
     await expect(access(join(root, ".harnix", "tasks"))).resolves.toBeUndefined();
     await expect(access(join(root, ".harnix", "workspace", "tam"))).resolves.toBeUndefined();
     const agentInstructions = await readFile(join(root, "AGENTS.md"), "utf8");
-    expect(agentInstructions).toContain("CLI manages project lifecycle surfaces");
+    expect(agentInstructions).toContain("CLI manages this project's .harnix lifecycle");
     expect(agentInstructions).toContain("harnix --help");
     expect(agentInstructions).toContain("harnix setup --codex");
+    expect(agentInstructions).toContain("explicit user-global integration");
+    expect(agentInstructions).toContain("Do not run setup or harnix init automatically");
+    expect(agentInstructions).toContain("current workspace has .harnix/config.yaml");
+    expect(agentInstructions).not.toContain("Project-local skills are generated");
     expect(agentInstructions).toContain("not coding-task stage transitions");
     expect(agentInstructions).toContain("Bypass, Lite, or Full");
     expect(agentInstructions).toContain("harnix-brainstorm");

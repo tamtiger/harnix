@@ -1,10 +1,13 @@
-import { mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
 import { builtinModules, createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, extname, join, resolve } from "node:path";
+import { performance } from "node:perf_hooks";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
+
+import { createIsolatedUserEnvironment } from "./isolated-user-home.mjs";
 
 const repositoryRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const runtimeDependencyFields = ["dependencies", "optionalDependencies", "peerDependencies"];
@@ -21,6 +24,10 @@ export async function runReleaseScan(options = {}) {
 
   const temporary = await mkdtemp(join(options.temporaryDirectory ?? tmpdir(), "harnix-release-scan-"));
   try {
+    const packageManagerHome = join(temporary, "package-manager-home");
+    const userHome = join(temporary, "user-home");
+    await mkdir(packageManagerHome);
+    await mkdir(userHome);
     const tarball = join(artifacts, tarballs[0]);
     const listing = run("tar", ["-tzf", tarball], root).stdout.split(/\r?\n/u).filter(Boolean);
     await assertTarballListing(listing);
@@ -41,24 +48,35 @@ export async function runReleaseScan(options = {}) {
     await writeFile(join(installRoot, "package.json"), '{"private":true}\n');
     const packageManagerEntrypoint = process.env.npm_execpath;
     if (!packageManagerEntrypoint) throw new Error("scan:release must run through pnpm or npm.");
-    run(process.execPath, [packageManagerEntrypoint, "add", "--ignore-scripts", "--no-lockfile", tarball], installRoot);
+    run(process.execPath, [packageManagerEntrypoint, "add", "--ignore-scripts", "--no-lockfile", tarball], installRoot, createIsolatedUserEnvironment(packageManagerHome));
     const installedCli = await realpath(join(installRoot, "node_modules", "@tamtiger", "harnix", "dist", "cli.js"));
     const installedPackage = resolve(installedCli, "..", "..");
     const installedRequire = createRequire(join(installedPackage, "package.json"));
     await assertNoDeadPackagedImports(installedPackage, packedPackageJson, {
       resolveBareSpecifier: (specifier) => installedRequire.resolve(specifier),
     });
-    run(process.execPath, [installedCli, "--help"], installRoot);
+    const integrationEnvironment = createIsolatedUserEnvironment(userHome, {
+      pathPrefix: join(installRoot, "node_modules", ".bin"),
+    });
+    run(process.execPath, [installedCli, "--help"], installRoot, integrationEnvironment);
 
     const fixture = join(temporary, "fixture");
     await mkdir(fixture);
-    run(process.execPath, [installedCli, "init", "--yes", "--user", "scan", "--languages", "vue"], fixture);
-    run(process.execPath, [installedCli, "setup", "--kiro", "--antigravity", "--codex"], fixture);
-    const generatedFiles = await walk(fixture);
+    run(process.execPath, [installedCli, "init", "--yes", "--user", "scan", "--languages", "vue"], fixture, integrationEnvironment);
+    run(process.execPath, [installedCli, "setup", "--kiro", "--antigravity", "--codex"], fixture, integrationEnvironment);
+    const generatedFiles = [...await walk(fixture), ...await walk(userHome)];
     await scanTextFiles(generatedFiles, "generated fixture", true);
-    await assertSingleHooks(fixture);
+    await assertExpectedGlobalSurfaces(userHome);
+    await assertNoProjectLocalPlatformSurfaces(fixture);
+    await assertSingleHooks(userHome);
+    const ordinaryWorkspace = join(temporary, "ordinary-workspace");
+    await mkdir(ordinaryWorkspace);
+    const nonHarnixContextPerformance = measureNonHarnixContextFastPath(installedCli, ordinaryWorkspace, integrationEnvironment);
+    if ((await readdir(ordinaryWorkspace)).length !== 0) {
+      throw new Error("Non-Harnix internal context must not write to the workspace.");
+    }
 
-    process.stdout.write(`${JSON.stringify({ package: packageJson.name, tarball: tarballs[0], packagedFiles: packagedFiles.length, generatedFiles: generatedFiles.length, scanned: ["secrets", "machine-paths", "required-todos", "forbidden-surfaces", "one-package", "one-bin", "dead-imports", "duplicate-hooks", "attribution"] })}\n`);
+    process.stdout.write(`${JSON.stringify({ package: packageJson.name, tarball: tarballs[0], packagedFiles: packagedFiles.length, generatedFiles: generatedFiles.length, nonHarnixContextPerformance, scanned: ["secrets", "machine-paths", "required-todos", "forbidden-surfaces", "one-package", "one-bin", "dead-imports", "duplicate-hooks", "attribution", "non-harnix-context-performance"] })}\n`);
   } finally {
     await rm(temporary, { force: true, recursive: true });
   }
@@ -105,17 +123,111 @@ export async function assertNoDeadPackagedImports(packageRoot, packageJson, opti
   }
 }
 
-export async function assertSingleHooks(fixture) {
-  const codex = JSON.parse(await readFile(join(fixture, ".codex", "hooks.json"), "utf8"));
+export async function assertExpectedGlobalSurfaces(home) {
+  const required = [
+    ".agents/harnix/managed.json",
+    ".agents/skills",
+    ".codex/AGENTS.md",
+    ".codex/harnix/managed.json",
+    ".codex/hooks.json",
+    ".gemini/antigravity-cli/plugins/harnix/.managed.json",
+    ".gemini/antigravity-cli/plugins/harnix/hooks.json",
+    ".gemini/antigravity-cli/plugins/harnix/plugin.json",
+    ".gemini/config/plugins/harnix/.managed.json",
+    ".gemini/config/plugins/harnix/hooks.json",
+    ".gemini/config/plugins/harnix/plugin.json",
+    ".kiro/harnix/managed.json",
+    ".kiro/hooks/harnix-context.json",
+    ".kiro/steering/harnix.md",
+  ];
+  for (const relativePath of required) {
+    try {
+      await access(join(home, ...relativePath.split("/")));
+    } catch (error) {
+      if (error?.code === "ENOENT") throw new Error(`Expected global integration surface is missing: ${relativePath}.`);
+      throw error;
+    }
+  }
+}
+
+export async function assertNoProjectLocalPlatformSurfaces(project) {
+  const forbidden = [".agents", ".codex", ".gemini", ".kiro", "GEMINI.md"];
+  const present = [];
+  for (const relativePath of forbidden) {
+    try {
+      await access(join(project, relativePath));
+      present.push(relativePath);
+    } catch (error) {
+      if (error?.code !== "ENOENT") throw error;
+    }
+  }
+  if (present.length > 0) throw new Error(`Project-local platform surfaces are not allowed: ${present.join(", ")}.`);
+}
+
+export async function assertSingleHooks(home) {
+  const codex = JSON.parse(await readFile(join(home, ".codex", "hooks.json"), "utf8"));
   const codexCount = hookCommands(codex.hooks?.UserPromptSubmit).filter((command) => command === "harnix internal context --platform codex").length;
   if (codexCount !== 1) throw new Error(`Expected one Codex Harnix hook, found ${codexCount}.`);
 
-  const kiro = JSON.parse(await readFile(join(fixture, ".kiro", "hooks", "harnix-context.kiro.hook"), "utf8"));
-  const kiroCount = [
-    typeof kiro.then?.command === "string" ? kiro.then.command : undefined,
-    ...(Array.isArray(kiro.hooks) ? kiro.hooks.map((hook) => hook?.action?.command) : []),
-  ].filter((command) => command === "harnix internal context --platform kiro").length;
+  const kiro = JSON.parse(await readFile(join(home, ".kiro", "hooks", "harnix-context.json"), "utf8"));
+  const kiroCount = (Array.isArray(kiro.hooks) ? kiro.hooks.map((hook) => hook?.action?.command) : [])
+    .filter((command) => command === "harnix internal context --platform kiro").length;
   if (kiroCount !== 1) throw new Error(`Expected one Kiro Harnix hook, found ${kiroCount}.`);
+
+  for (const pluginRoot of [
+    ".gemini/config/plugins/harnix",
+    ".gemini/antigravity-cli/plugins/harnix",
+  ]) {
+    const pluginHooks = JSON.parse(await readFile(join(home, ...pluginRoot.split("/"), "hooks.json"), "utf8"));
+    const entries = pluginHooks?.["harnix-context"]?.PreInvocation;
+    const count = (Array.isArray(entries) ? entries : [])
+      .filter((entry) => entry?.command === "harnix internal context --platform antigravity").length;
+    if (count !== 1) throw new Error(`Expected one Antigravity Harnix hook in ${pluginRoot}, found ${count}.`);
+  }
+}
+
+/**
+ * Measures a cold Node process on the non-Harnix hook path from the packed
+ * artifact. It intentionally provides an Antigravity event so event parsing
+ * is part of the release measurement while the empty workspace must still be
+ * a fast, output-free no-op.
+ */
+export function measureNonHarnixContextFastPath(cli, workspace, environment) {
+  const input = JSON.stringify({
+    cwd: workspace,
+    invocationNum: 0,
+    workspacePaths: [workspace],
+  });
+  const samples = [];
+  for (let index = 0; index < 15; index += 1) {
+    const started = performance.now();
+    const result = run(process.execPath, [cli, "internal", "context", "--platform", "antigravity"], workspace, environment, input);
+    const duration = performance.now() - started;
+    assertNonHarnixContextNoOutput(result.stdout, result.stderr);
+    samples.push(duration);
+  }
+  return assertNonHarnixContextPerformance(samples);
+}
+
+export function assertNonHarnixContextNoOutput(stdout, stderr = "") {
+  if (stdout.trim().length !== 0 || stderr.trim().length !== 0) {
+    throw new Error("Non-Harnix internal context must not emit output.");
+  }
+}
+
+export function assertNonHarnixContextPerformance(samples) {
+  const sorted = [...samples].sort((left, right) => left - right);
+  const median = percentile(sorted, 0.5);
+  const p95 = percentile(sorted, 0.95);
+  const max = sorted.at(-1);
+  if (median >= 300 || p95 >= 750 || max === undefined || max >= 1000) {
+    throw new Error(`Non-Harnix internal context startup exceeds release thresholds: median=${median.toFixed(1)}ms p95=${p95.toFixed(1)}ms max=${max?.toFixed(1) ?? "unknown"}ms.`);
+  }
+  return { max, median, p95, repetitions: samples.length, samples };
+}
+
+function percentile(sorted, ratio) {
+  return sorted[Math.max(0, Math.ceil(sorted.length * ratio) - 1)] ?? Number.NaN;
 }
 
 function isUnsafeTarballPath(path) {
@@ -213,8 +325,14 @@ function importSpecifiers(source) {
   return [...specifiers];
 }
 
-function run(executable, args, cwd) {
-  const result = spawnSync(executable, args, { cwd, encoding: "utf8", windowsHide: true });
+function run(executable, args, cwd, env, input) {
+  const result = spawnSync(executable, args, {
+    cwd,
+    encoding: "utf8",
+    env,
+    ...(input === undefined ? {} : { input }),
+    windowsHide: true,
+  });
   if (result.status !== 0) throw new Error(`${executable} ${args.join(" ")} failed: ${result.error?.message ?? result.stderr ?? result.stdout ?? "unknown"}`);
   return result;
 }

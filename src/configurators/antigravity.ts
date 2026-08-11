@@ -1,37 +1,79 @@
-import { readFile } from "node:fs/promises";
+import type { DesiredGlobalManagedFile } from "../utils/global-managed-files.js";
+import { type SkillTemplate, workflowSkills } from "../templates/harnix/workflow.js";
 
-import { atomicWriteFile } from "../utils/atomic-write.js";
-import type { DesiredManagedFile } from "../utils/managed-files.js";
-import { resolveSafeProjectPath } from "../utils/paths.js";
-import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
-import { packageVersion } from "../version.js";
+export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix internal context --platform antigravity";
 
-export const antigravityManagedBlock = "<!-- harnix:begin -->\n## Harnix\n\nUse .harnix/workflow.md and Harnix skills. Load bounded context with `harnix internal context --platform antigravity` when needed.\n<!-- harnix:end -->";
+/** The official plugin marker schema accepts this namespaced name and no extra fields. */
+export const ANTIGRAVITY_GLOBAL_PLUGIN_MANIFEST = { name: "harnix" } as const;
 
-export function antigravityDesiredFiles(): DesiredManagedFile[] {
-  return workflowSkills.map((skill) => ({ entry: { path: `.gemini/skills/${skill.name}/SKILL.md`, sourceId: skill.name, scope: "antigravity", generatedHash: "0".repeat(64), generatorVersion: packageVersion }, content: renderSkill(skill) }));
+export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK = {
+  "harnix-context": {
+    PreInvocation: [{
+      type: "command",
+      command: ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND,
+      timeout: 5,
+    }],
+  },
+} as const;
+
+export const ANTIGRAVITY_GLOBAL_RULE = [
+  "# Harnix",
+  "",
+  "## Harnix activation guard",
+  "",
+  "First locate the nearest ancestor or workspace root containing .harnix/config.yaml.",
+  "Apply this rule only when that root exists and its Harnix state is valid; then read .harnix/workflow.md and follow the matching Harnix skill with bounded context.",
+  "If no such root exists or its state is invalid, do not apply the Harnix workflow, create Harnix state, or run harnix init.",
+  "",
+].join("\n");
+
+/**
+ * Pure plugin plan shared unchanged by the Desktop and CLI plugin roots. The
+ * user-global lifecycle supplies the verified root and performs reconciliation.
+ */
+export function antigravityGlobalPluginDesiredFiles(): DesiredGlobalManagedFile[] {
+  return [
+    {
+      path: "plugin.json",
+      sourceId: "antigravity-plugin-manifest",
+      kind: "file",
+      content: JSON.stringify(ANTIGRAVITY_GLOBAL_PLUGIN_MANIFEST, null, 2) + "\n",
+    },
+    ...workflowSkills.map((skill): DesiredGlobalManagedFile => ({
+      path: "skills/" + skill.name + "/SKILL.md",
+      sourceId: "antigravity-skill-" + skill.name,
+      kind: "file",
+      content: renderGlobalSkill(skill),
+    })),
+    {
+      path: "rules/harnix.md",
+      sourceId: "antigravity-global-rule",
+      kind: "file",
+      content: ANTIGRAVITY_GLOBAL_RULE,
+    },
+    {
+      path: "hooks.json",
+      sourceId: "antigravity-context-hook",
+      kind: "file",
+      content: JSON.stringify(ANTIGRAVITY_GLOBAL_CONTEXT_HOOK, null, 2) + "\n",
+    },
+  ];
 }
 
-export interface AntigravitySurfacePlan { path: string; content: string; }
-export async function prepareAntigravitySurface(root: string, preserveModifiedBlock = false): Promise<AntigravitySurfacePlan> {
-  const path = await resolveSafeProjectPath(root, "GEMINI.md");
-  const existing = await optional(path);
-  return { path, content: mergeManagedBlock(existing, antigravityManagedBlock, preserveModifiedBlock) };
+function renderGlobalSkill(skill: SkillTemplate): string {
+  return [
+    "---",
+    "name: " + skill.name,
+    "description: " + skill.description,
+    "---",
+    "",
+    "## Harnix activation guard",
+    "",
+    "First locate the nearest ancestor or workspace root containing .harnix/config.yaml.",
+    "Apply this skill only when that root exists and its Harnix state is valid.",
+    "If no such root exists or its state is invalid, do not apply the Harnix workflow, create Harnix state, or run harnix init.",
+    "",
+    skill.body,
+    "",
+  ].join("\n");
 }
-export async function applyAntigravitySurface(plan: AntigravitySurfacePlan): Promise<void> { await atomicWriteFile(plan.path, plan.content); }
-export async function configureAntigravity(root: string, preserveModifiedBlock = false): Promise<void> {
-  await applyAntigravitySurface(await prepareAntigravitySurface(root, preserveModifiedBlock));
-}
-
-function mergeManagedBlock(existing: string, block: string, preserveModified: boolean): string {
-  const begin = "<!-- harnix:begin -->", end = "<!-- harnix:end -->";
-  const start = existing.indexOf(begin), finish = existing.indexOf(end);
-  if (start >= 0 && finish >= start) {
-    if (preserveModified && existing.slice(start, finish + end.length) !== block) return existing;
-    return `${existing.slice(0, start)}${block}${existing.slice(finish + end.length)}`;
-  }
-  if (start >= 0 || finish >= 0) throw new Error("Cannot merge GEMINI.md because Harnix markers are unbalanced.");
-  return existing.length === 0 ? `${block}\n` : `${existing.trimEnd()}\n\n${block}\n`;
-}
-
-async function optional(path: string): Promise<string> { try { return await readFile(path, "utf8"); } catch (error: unknown) { if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return ""; throw error; } }

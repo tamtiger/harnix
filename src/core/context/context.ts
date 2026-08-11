@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "../../utils/paths.js";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { sha256 } from "../../utils/hashing.js";
@@ -14,7 +14,14 @@ export function rankContext(entries: ContextEntry[], signals: ContextSignals = {
   return [...unique.values()].map((entry) => ({ ...entry, priority: entry.priority + (entry.pinned ? 1000 : 0) + (refs.has(entry.path) ? 500 : 0) + (active.has(entry.path) ? 250 : 0) + (langs.has(entry.path) ? 100 : 0) + (guides.has(entry.path) ? 25 : 0) })).sort(compareEntries);
 }
 
-export async function buildContext(projectRoot: string, entries: ContextEntry[], maxCharacters: number, signals: ContextSignals = {}, fullContext = false): Promise<{ text: string; manifest: ContextManifest }> {
+export async function buildContext(
+  projectRoot: string,
+  entries: ContextEntry[],
+  maxCharacters: number,
+  signals: ContextSignals = {},
+  fullContext = false,
+  maxEntries = Number.POSITIVE_INFINITY,
+): Promise<{ text: string; manifest: ContextManifest }> {
   const normalizedSeen = new Set<string>(), safeEntries: ContextEntry[] = [], omitted: ContextManifest["omitted"] = [];
   for (const entry of entries) {
     try {
@@ -25,12 +32,27 @@ export async function buildContext(projectRoot: string, entries: ContextEntry[],
   }
   const ranked = rankContext(safeEntries, signals), included: ContextEntry[] = [], chunks: string[] = [], contentHashes = new Set<string>();
   let size = 0;
+  let inspectedEntries = 0;
   for (const entry of ranked) {
+    if (inspectedEntries >= maxEntries) {
+      omitted.push({ path: entry.path, reason: "budget" });
+      continue;
+    }
+    inspectedEntries += 1;
     try {
-      const content = await readFile(await resolveSafeProjectPath(projectRoot, entry.path), "utf8");
+      const path = await resolveSafeProjectPath(projectRoot, entry.path);
+      const header = `\n--- ${entry.path} ---\n`;
+      // A bounded caller must not read a giant file merely to discover that it
+      // cannot fit. UTF-8 byte size is a conservative upper bound for the JS
+      // string length used by this context budget.
+      if (!fullContext && size + header.length + (await stat(path)).size > maxCharacters) {
+        omitted.push({ path: entry.path, reason: "budget" });
+        continue;
+      }
+      const content = await readFile(path, "utf8");
       const contentHash = sha256(content);
       if (contentHashes.has(contentHash)) { omitted.push({ path: entry.path, reason: "duplicate" }); continue; }
-      const chunk = `\n--- ${entry.path} ---\n${content}`;
+      const chunk = `${header}${content}`;
       if (!fullContext && size + chunk.length > maxCharacters) { omitted.push({ path: entry.path, reason: "budget" }); continue; }
       contentHashes.add(contentHash); included.push({ ...entry, contentHash }); chunks.push(chunk); size += chunk.length;
     } catch (error: unknown) { omitted.push({ path: entry.path, reason: isUnsafe(error) ? "unsafe" : "missing" }); }

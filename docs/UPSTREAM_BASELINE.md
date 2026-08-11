@@ -70,6 +70,8 @@ Hash bản làm việc và bản sao khớp tuyệt đối trước khi chỉnh 
 
 ## 6. Tài liệu Codex chính thức đã dùng
 
+Các kết luận project-local bên dưới là snapshot Phase 1–5, giữ lại để provenance/review. Phase 6 user-global contract supersedes them; current authoritative paths/schema are recorded in `GLOBAL_SETUP_REFACTOR_PLAN.md` §§2, 6–9.
+
 Codex manual được đồng bộ ngày 2026-08-05 và báo trạng thái current. Các trang authoritative dùng cho thiết kế:
 
 - [Codex manual](https://developers.openai.com/codex/codex-manual.md)
@@ -91,7 +93,7 @@ Các kết luận ràng buộc:
 
 Nếu official behavior thay đổi trước khi phát hành, implementation và tests phải theo tài liệu chính thức mới hơn; deviation phải được ghi lại cùng ngày kiểm chứng.
 
-## 7. Frozen local platform baseline
+## 7. Frozen local platform baseline (historical)
 
 Read-only checks ngày **2026-08-05** khóa implementation inputs:
 
@@ -101,9 +103,21 @@ Read-only checks ngày **2026-08-05** khóa implementation inputs:
 | Antigravity | `agy 1.1.1` | public `--antigravity`; physical `GEMINI.md` + `.gemini/skills/harnix-*`; no unverified settings/hooks; no user-level `.gemini` mutation |
 | Codex | `codex-cli 0.139.0` | managed `AGENTS.md` block, `.agents/skills/harnix-*`, minimal Harnix-owned `.codex/config.toml` merge and one `.codex/hooks.json` representation |
 
-Installed version drift requires revalidation against current authoritative behavior and updated snapshots; it does not silently expand generated surfaces.
+Installed version drift requires revalidation against current authoritative behavior and updated snapshots; it does not silently expand generated surfaces. These project-local paths are legacy inventory, not Phase 6 setup output.
 
 Kiro hook behavior được kiểm tra với [Kiro CLI Hooks](https://kiro.dev/docs/cli/hooks/) và local .kiro.hook schema. Codex hook shape/output được kiểm tra với [OpenAI Codex Hooks](https://learn.chatgpt.com/docs/hooks).
+
+## 7.1 Phase 6 user-global integration snapshot
+
+Research revalidation on **2026-08-11** freezes the target below. It is the current setup contract; implementation must revalidate version/capability drift before release and record a dated source/snapshot change.
+
+| Platform | User-global paths | Contract summary |
+|---|---|---|
+| Kiro | `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, `~/.kiro/hooks/harnix-context.json` | Conditional steering plus JSON-v1 `UserPromptSubmit` fixed command; capability/version check and no permission/MCP mutation |
+| Antigravity | `~/.gemini/config/plugins/harnix`, `~/.gemini/antigravity-cli/plugins/harnix` | Independent Desktop/CLI namespaced plugins, official `plugin.json`, initial-invocation `PreInvocation` `injectSteps` handler |
+| Codex | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/hooks.json` | Conditional AGENTS block plus nested hook, preserve unrelated content, `installed-pending-trust` until user `/hooks` review |
+
+No global runtime, `~/.harnix`, credentials, MCP, permission/trust bypass, absolute path, or silent network is permitted. Per-root sidecar manifests, injected fake homes in tests, conservative fragment ownership, locking and rollback are mandatory.
 ## 8. License và provenance policy
 
 - Giữ `LICENSE` AGPL-3.0 và copyright/notices của Trellis cho derived code.

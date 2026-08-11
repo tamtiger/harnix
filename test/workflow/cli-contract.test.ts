@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createProgram } from "../../src/cli.js";
+import { createProgram } from "../../src/cli-program.js";
 
 describe("CLI command contract", () => {
   it("exposes the seven supported lifecycle commands without exposing hidden/internal commands", () => {

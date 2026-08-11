@@ -1,21 +1,43 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { initializeProject } from "../../src/commands/init.js";
-import { setupPlatforms } from "../../src/commands/setup.js";
+import { agentsTemplate, harnixAgentsBlock } from "../../src/templates/harnix/agents.js";
+import { ensureManagedWorkflow } from "../../src/templates/harnix/managed-workflow.js";
+import { workflowTemplate } from "../../src/templates/harnix/workflow.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
 describe("workflow templates", () => {
-  it("seeds canonical workflow and all skills for Kiro and Codex", async () => {
-    const root = await temporaryRepository(); await initializeProject({ root, developer: "tam", yes: true });
-    await setupPlatforms({ root, platforms: ["kiro", "codex"] });
-    for (const base of [".kiro/skills", ".agents/skills"]) for (const name of ["harnix-brainstorm", "harnix-implement", "harnix-check", "harnix-finish-work", "harnix-continue", "harnix-research", "harnix-debug"]) expect(await readFile(join(root, base, name, "SKILL.md"), "utf8")).toContain(`name: ${name}`);
-    expect(await readFile(join(root, ".harnix", "workflow.md"), "utf8")).toContain("planning → ready → in_progress");
+  it("keeps the init bootstrap project-local while directing opt-in setup to user-global integrations", async () => {
+    const root = await temporaryRepository();
+
+    await initializeProject({ root, developer: "tam", yes: true });
+
+    await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toBe(agentsTemplate);
+    await expect(readFile(join(root, ".harnix", "workflow.md"), "utf8")).resolves.toBe(workflowTemplate);
+    expect(harnixAgentsBlock).toContain("explicit user-global integration");
+    expect(harnixAgentsBlock).toContain("Do not run setup or harnix init automatically");
+    expect(harnixAgentsBlock).toContain(".harnix/config.yaml");
+    expect(harnixAgentsBlock).not.toContain("Project-local skills are generated");
+    expect(harnixAgentsBlock).not.toMatch(/\.(?:kiro|gemini|codex)\//u);
+    expect(harnixAgentsBlock).not.toContain("commandWindows");
+    await expect(access(join(root, ".kiro"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(root, ".gemini"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(root, ".codex"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(root, ".agents"))).rejects.toMatchObject({ code: "ENOENT" });
   });
-  it("preserves a user-modified managed workflow on rerun", async () => {
-    const root = await temporaryRepository(); await initializeProject({ root, developer: "tam", yes: true }); await setupPlatforms({ root, platforms: ["kiro"] });
-    await writeFile(join(root, ".harnix", "workflow.md"), "user workflow"); await setupPlatforms({ root, platforms: ["kiro"] }); expect(await readFile(join(root, ".harnix", "workflow.md"), "utf8")).toBe("user workflow");
+  it("preserves a user-modified managed workflow without invoking platform setup", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+
+    expect(workflowTemplate).toContain("only to a project whose current workspace has `.harnix/config.yaml`");
+    expect(workflowTemplate).toContain("explicit user-global operation");
+    expect(workflowTemplate).toContain("do not create files or automatically run `harnix init`");
+    await writeFile(join(root, ".harnix", "workflow.md"), "user workflow");
+    await ensureManagedWorkflow(root);
+
+    await expect(readFile(join(root, ".harnix", "workflow.md"), "utf8")).resolves.toBe("user workflow");
   });
 });

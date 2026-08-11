@@ -1,74 +1,100 @@
-import { readFile } from "node:fs/promises";
-import { atomicWriteFile } from "../utils/atomic-write.js";
-import { resolveSafeProjectPath } from "../utils/paths.js";
-import type { DesiredManagedFile } from "../utils/managed-files.js";
+import type {
+  DesiredGlobalManagedFile,
+  GlobalJsonMemberMatcher,
+  JsonArrayMemberSelector,
+  JsonValue,
+  MarkerSelector,
+} from "../utils/global-managed-files.js";
 import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
-import { harnixAgentsBlock } from "../templates/harnix/agents.js";
-import { packageVersion } from "../version.js";
 
 const begin = "<!-- harnix:begin -->";
 const end = "<!-- harnix:end -->";
 
-export const codexManagedBlock = harnixAgentsBlock;
+export const CODEX_GLOBAL_AGENTS_SELECTOR: MarkerSelector = { type: "markers", begin, end };
+export const CODEX_GLOBAL_HOOK_SELECTOR: JsonArrayMemberSelector = {
+  type: "json-array-member",
+  pointer: "/hooks/UserPromptSubmit",
+  memberId: "harnix-context",
+};
+export const CODEX_GLOBAL_CONTEXT_COMMAND = "harnix internal context --platform codex";
 
-export function codexDesiredFiles(): DesiredManagedFile[] {
-  return workflowSkills.map((skill) => ({ entry: { path: `.agents/skills/${skill.name}/SKILL.md`, sourceId: skill.name, scope: "codex", generatedHash: "0".repeat(64), generatorVersion: packageVersion }, content: renderSkill(skill) }));
+const codexGlobalSkillGuard = "First locate the nearest ancestor or workspace root containing `.harnix/config.yaml`. Activate Harnix only when that root exists and its Harnix state is valid. If no such root exists or its state is invalid, do not apply Harnix workflow, read project state, or create files.";
+
+export const codexGlobalAgentsContent = `## Harnix
+
+${codexGlobalSkillGuard}
+
+For an initialized Harnix project, read \`.harnix/workflow.md\` and the minimum relevant \`.harnix\` context before acting. Preserve user-owned project files and use fresh verification before completing work. Do not auto-commit, push, or create a pull request.`;
+
+export const codexGlobalContextHookGroup: JsonValue = {
+  hooks: [{
+    additionalContextLimit: 2500,
+    command: CODEX_GLOBAL_CONTEXT_COMMAND,
+    timeout: 5,
+    type: "command",
+  }],
+};
+
+export interface CodexGlobalSurfacePlan {
+  /** Root-relative files for the global `$HOME/.agents` root. */
+  readonly skills: readonly DesiredGlobalManagedFile[];
+  /** Root-relative fragments for the global `$CODEX_HOME` root. */
+  readonly config: readonly DesiredGlobalManagedFile[];
 }
 
-export interface CodexSurfacePlan { agentsPath: string; agents: string; configPath: string; config: string; hooksPath: string; hooks: string; }
+/**
+ * Produces no absolute paths and performs no I/O. G7 maps each set to its
+ * corresponding verified user root and global ownership manifest.
+ */
+export function createCodexGlobalSurfacePlan(): CodexGlobalSurfacePlan {
+  return {
+    config: [
+      {
+        content: codexGlobalAgentsContent,
+        kind: "managed-block",
+        path: "AGENTS.md",
+        selector: CODEX_GLOBAL_AGENTS_SELECTOR,
+        sourceId: "codex-global-agents",
+      },
+      {
+        kind: "json-member",
+        member: codexGlobalContextHookGroup,
+        memberMatcher: matchesCodexGlobalContextHookGroup,
+        preserveIfUnmatched: true,
+        path: "hooks.json",
+        selector: CODEX_GLOBAL_HOOK_SELECTOR,
+        sourceId: "codex-global-context-hook",
+      },
+    ],
+    skills: workflowSkills.map((skill) => ({
+      content: renderCodexGlobalSkill(skill),
+      kind: "file" as const,
+      path: `skills/${skill.name}/SKILL.md`,
+      sourceId: `codex-global-skill-${skill.name}`,
+    })),
+  };
+}
 
-export async function prepareCodexSurfaces(root: string, preserveModifiedBlock = false, preserveModifiedConfiguration = preserveModifiedBlock): Promise<CodexSurfacePlan> {
-  const agentsPath = await resolveSafeProjectPath(root, "AGENTS.md"), existing = await readOptionalFile(agentsPath);
-  const start = existing.indexOf(begin), finish = existing.indexOf(end);
-  if (start >= 0 && finish < start) throw new Error("Cannot merge AGENTS.md because Harnix markers are unbalanced.");
-  const modified = start >= 0 && finish >= start && existing.slice(start, finish + end.length) !== codexManagedBlock;
-  const agents = modified && preserveModifiedBlock ? existing : start >= 0 && finish >= start ? `${existing.slice(0, start)}${codexManagedBlock}${existing.slice(finish + end.length)}` : existing.length === 0 ? `${codexManagedBlock}\n` : `${existing.trimEnd()}\n\n${codexManagedBlock}\n`;
-  const configPath = await resolveSafeProjectPath(root, ".codex/config.toml"), hooksPath = await resolveSafeProjectPath(root, ".codex/hooks.json");
-  const config = mergeCodexConfig(await readOptionalFile(configPath), !preserveModifiedConfiguration);
-  const hooks = `${JSON.stringify(mergeCodexHooks(await readOptionalFile(hooksPath), !preserveModifiedConfiguration), null, 2)}\n`;
-  return { agentsPath, agents, configPath, config, hooksPath, hooks };
-}
-export async function applyCodexSurfaces(plan: CodexSurfacePlan): Promise<void> {
-  await Promise.all([atomicWriteFile(plan.agentsPath, plan.agents), atomicWriteFile(plan.configPath, plan.config), atomicWriteFile(plan.hooksPath, plan.hooks)]);
-}
-export async function configureCodex(root: string, preserveModifiedSurfaces = false): Promise<void> {
-  await applyCodexSurfaces(await prepareCodexSurfaces(root, preserveModifiedSurfaces));
-}
-export function mergeCodexConfig(existing: string, replaceOwned = true): string {
-  const sections = tomlSections(existing), owned = sections.filter((section) => section.name === "harnix");
-  if (owned.length > 1) throw new Error("Cannot merge .codex/config.toml because [harnix] is duplicated.");
-  if (!replaceOwned && owned.length === 1) return existing;
-  let withoutHarnix = existing;
-  if (owned[0]) withoutHarnix = `${existing.slice(0, owned[0].start)}${existing.slice(owned[0].end)}`;
-  withoutHarnix = withoutHarnix.trimEnd();
-  return `${withoutHarnix}${withoutHarnix.length === 0 ? "" : "\n\n"}[harnix]\nenabled = true\n`;
-}
-export function mergeCodexHooks(existing: string, replaceOwned = true): { hooks: Record<string, unknown[]> } {
-  const harnixHook = { command: "harnix internal context --platform codex", commandWindows: "harnix.exe internal context --platform codex", timeout: 5, additionalContextLimit: 2500 };
-  if (existing.length === 0) return { hooks: { UserPromptSubmit: [harnixHook] } };
-  let parsed: unknown; try { parsed = JSON.parse(existing); } catch { throw new Error("Cannot merge .codex/hooks.json because it is not valid JSON."); }
-  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw new Error("Cannot merge .codex/hooks.json because it must be an object.");
-  const hooks = (parsed as Record<string, unknown>).hooks;
-  if (typeof hooks !== "object" || hooks === null || Array.isArray(hooks)) throw new Error("Cannot merge .codex/hooks.json because hooks must be an object.");
-  const prompt = (hooks as Record<string, unknown>).UserPromptSubmit;
-  if (prompt !== undefined && !Array.isArray(prompt)) throw new Error("Cannot merge .codex/hooks.json because UserPromptSubmit must be an array.");
-  if (!replaceOwned && (prompt ?? []).some((hook) => typeof hook === "object" && hook !== null && "command" in hook && (hook as { command?: unknown }).command === harnixHook.command)) return parsed as { hooks: Record<string, unknown[]> };
-  const retained = (prompt ?? []).filter((hook) => !(typeof hook === "object" && hook !== null && "command" in hook && (hook as { command?: unknown }).command === harnixHook.command));
-  return { ...(parsed as Record<string, unknown>), hooks: { ...(hooks as Record<string, unknown[]>), UserPromptSubmit: [...retained, harnixHook] } };
-}
-async function readOptionalFile(path: string): Promise<string> { try { return await readFile(path, "utf8"); } catch (error: unknown) { if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return ""; throw error; } }
-function tomlSections(source: string): Array<{ name?: string; start: number; end: number }> {
-  const starts: Array<{ name?: string; start: number }> = [];
-  let offset = 0;
-  for (const line of source.split(/(?<=\n)/u)) {
-    const value = line.replace(/\r?\n$/u, "").trim();
-    if (value.startsWith("[")) {
-      const table = /^\[([A-Za-z0-9_.-]+)\](?:\s*#.*)?$/u.exec(value);
-      const arrayTable = /^\[\[[A-Za-z0-9_.-]+\]\](?:\s*#.*)?$/u.test(value);
-      if (!table && !arrayTable) throw new Error("Cannot merge .codex/config.toml because a table header is malformed.");
-      starts.push({ ...(table ? { name: table[1] } : {}), start: offset });
-    }
-    offset += line.length;
+/**
+ * A stable structural signature for the Harnix group. Command, timeout, and
+ * hook type are mutable user content, so any one of the fixed command or the
+ * Harnix-specific context-limit marker is enough to identify the group for
+ * preservation. This prevents an edited owned group from being re-added as a
+ * duplicate while ordinary command groups remain unrelated.
+ */
+export const matchesCodexGlobalContextHookGroup: GlobalJsonMemberMatcher = (candidate, selector) => {
+  if (selector.memberId !== CODEX_GLOBAL_HOOK_SELECTOR.memberId || selector.pointer !== CODEX_GLOBAL_HOOK_SELECTOR.pointer || !isJsonRecord(candidate) || !Array.isArray(candidate.hooks)) {
+    return false;
   }
-  return starts.map((section, index) => ({ ...section, end: starts[index + 1]?.start ?? source.length }));
+  return candidate.hooks.some((handler) => isJsonRecord(handler)
+    && typeof handler.command === "string"
+    && (handler.command === CODEX_GLOBAL_CONTEXT_COMMAND || handler.additionalContextLimit === 2500));
+};
+
+function renderCodexGlobalSkill(skill: (typeof workflowSkills)[number]): string {
+  return renderSkill({ ...skill, body: `${codexGlobalSkillGuard}\n\n${skill.body}` });
+}
+
+function isJsonRecord(value: JsonValue): value is { [key: string]: JsonValue } {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

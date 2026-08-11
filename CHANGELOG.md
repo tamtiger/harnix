@@ -9,6 +9,9 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 ### Added
 
 - User-global setup refactor plan with current official Kiro, Antigravity, and Codex paths, hook schemas, ownership isolation, migration, security, and acceptance gates.
+- User-global Harnix integrations for Kiro, Antigravity Desktop/CLI and Codex, with namespaced skills, rules/instructions, current hook schemas and independently owned manifests per platform root.
+- Explicit global lifecycle: `setup`, `update --global`, Doctor JSON v2/global repair, scoped global uninstall, and manifest-backed cleanup for only safe standalone legacy project surfaces.
+- Isolated-home tarball/release fixtures, Windows `.cmd` launcher coverage, collision/rollback/lock regressions, and a cold non-Harnix hook performance gate.
 - Phase 5 regression coverage for legacy-data migration, managed setup/uninstall ownership, workflow completion, CLI exit/redaction behavior, doctor findings, path containment, and concurrent journal writes.
 - Repository review and remediation roadmap in `docs/REVIEW_REFACTOR_PLAN.md`.
 - README usage guide covering installation, quick start, CLI flags, platform setup, workflow, CI and troubleshooting-oriented lifecycle commands.
@@ -17,6 +20,10 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 ### Changed
 
 - Package metadata, build-time CLI metadata và generated manifests nay cùng lấy version `0.5.0` từ một nguồn `package.json`.
+- `setup` now runs from any directory and installs only explicit user-global platform integrations; `init` remains project-local and creates only `.harnix` data.
+- Package metadata and CLI help now distinguish project-local workflow data from user-global platform integrations.
+- Global reconciliation preserves unrelated, untracked and user-modified content; it preflights all selected roots, uses stable locks and reports safe drift instead of overwriting collisions.
+- The packaged CLI uses a lean canonical `internal context` fast path, keeping a non-Harnix Antigravity hook no-op output-free while meeting the cold-start release threshold.
 - Test coverage is organized by behavior and boundary (`workflow`, `support`, focused core/lifecycle files) instead of historical Phase-labelled files.
 - Phase 5 now refuses staged legacy-content mismatches before activation or cleanup, preserves modified obsolete-template ownership deterministically, preflights destructive uninstall paths, protects `.harnix` and task-state paths from symlink/junction escapes, and keeps customized Harnix instruction blocks intact on first platform setup.
 - `harnix init` now always creates the `.harnix/` namespace regardless of existing Trellis folders or skills; it no longer exposes legacy migration through the init flow.
@@ -35,6 +42,7 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 ### Security
 
 - Project writes and destructive lifecycle operations now preflight repository containment and reject traversal plus symlink/junction escapes.
+- User-global writes are anchored to verified user roots, never use a real profile in automated tests, and preserve concurrent editor changes during managed transactions.
 - Runtime dependency audit remains clean. The single Low development-only esbuild advisory is explicitly risk-accepted until tsup publishes a compatible patched range; Harnix never invokes esbuild's affected development server, and adding a pnpm workspace solely for an override would violate the one-package/no-workspace product contract.
 
 ## [0.4.0] - 2026-08-07

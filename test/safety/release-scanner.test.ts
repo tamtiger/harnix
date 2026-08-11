@@ -6,9 +6,13 @@ import { describe, expect, it } from "vitest";
 // negative fixtures cover the same checks used by `pnpm scan:release`.
 type ReleaseScanner = {
   assertAttribution(notice: string): void;
+  assertExpectedGlobalSurfaces(home: string): Promise<void>;
+  assertNonHarnixContextNoOutput(stdout: string, stderr?: string): void;
+  assertNonHarnixContextPerformance(samples: number[]): { max: number; median: number; p95: number; repetitions: number; samples: number[] };
   assertNoDeadPackagedImports(packageRoot: string, packageJson: { dependencies?: Record<string, string> }, options?: { resolveBareSpecifier?(specifier: string): string }): Promise<void>;
+  assertNoProjectLocalPlatformSurfaces(project: string): Promise<void>;
   assertSingleHarnixExecutable(packageJson: { bin?: Record<string, string> }): void;
-  assertSingleHooks(fixture: string): Promise<void>;
+  assertSingleHooks(home: string): Promise<void>;
   assertTarballListing(listing: string[]): Promise<void>;
   scanTextFiles(files: string[], scope: string, generated: boolean): Promise<void>;
 };
@@ -16,7 +20,11 @@ type ReleaseScanner = {
 const releaseScanner = await import(new URL("../../scripts/scan-release.mjs", import.meta.url).href) as ReleaseScanner;
 const {
   assertAttribution,
+  assertExpectedGlobalSurfaces,
+  assertNonHarnixContextNoOutput,
+  assertNonHarnixContextPerformance,
   assertNoDeadPackagedImports,
+  assertNoProjectLocalPlatformSurfaces,
   assertSingleHarnixExecutable,
   assertSingleHooks,
   assertTarballListing,
@@ -119,20 +127,78 @@ describe("release scanner negative fixtures", () => {
     await expect(assertNoDeadPackagedImports(root, { dependencies: {} })).resolves.toBeUndefined();
   });
 
-  it("should_reject_duplicate_harnix_hook_when_fixture_contains_two_codex_entries", async () => {
-    const root = await fixture();
-    await writeFixtureFile(root, ".codex/hooks.json", JSON.stringify({
+  it("should_reject_duplicate_harnix_hook_when_global_fixture_contains_two_codex_entries", async () => {
+    const home = await fixture();
+    await writeFixtureFile(home, ".codex/hooks.json", JSON.stringify({
       hooks: {
         UserPromptSubmit: [
-          { command: "harnix internal context --platform codex" },
-          { command: "harnix internal context --platform codex" },
+          { hooks: [{ command: "harnix internal context --platform codex", type: "command" }] },
+          { hooks: [{ command: "harnix internal context --platform codex", type: "command" }] },
         ],
       },
     }));
-    await writeFixtureFile(root, ".kiro/hooks/harnix-context.kiro.hook", JSON.stringify({
-      then: { command: "harnix internal context --platform kiro" },
-    }));
 
-    await expect(assertSingleHooks(root)).rejects.toThrow(/one Codex Harnix hook, found 2/u);
+    await expect(assertSingleHooks(home)).rejects.toThrow(/one Codex Harnix hook, found 2/u);
+  });
+
+  it("should_accept_current_user_global_hook_locations_when_each_platform_has_one_handler", async () => {
+    const home = await fixture();
+    await writeFixtureFile(home, ".codex/hooks.json", JSON.stringify({
+      hooks: {
+        UserPromptSubmit: [{ hooks: [{ command: "harnix internal context --platform codex", type: "command" }] }],
+      },
+    }));
+    await writeFixtureFile(home, ".kiro/hooks/harnix-context.json", JSON.stringify({
+      hooks: [{ action: { command: "harnix internal context --platform kiro" } }],
+      version: "v1",
+    }));
+    for (const root of [".gemini/config/plugins/harnix", ".gemini/antigravity-cli/plugins/harnix"]) {
+      await writeFixtureFile(home, `${root}/hooks.json`, JSON.stringify({
+        "harnix-context": {
+          PreInvocation: [{ command: "harnix internal context --platform antigravity", type: "command" }],
+        },
+      }));
+    }
+
+    await expect(assertSingleHooks(home)).resolves.toBeUndefined();
+  });
+
+  it("should_reject_project_local_platform_surfaces_when_release_fixture_contains_legacy_setup_output", async () => {
+    const project = await fixture();
+    await writeFixtureFile(project, ".kiro/hooks/harnix-context.kiro.hook", "{}\n");
+
+    await expect(assertNoProjectLocalPlatformSurfaces(project)).rejects.toThrow(/Project-local platform surfaces/u);
+  });
+
+  it("should_reject_missing_user_global_surfaces_when_release_fixture_is_incomplete", async () => {
+    const home = await fixture();
+    await writeFixtureFile(home, ".kiro/harnix/managed.json", "{}\n");
+
+    await expect(assertExpectedGlobalSurfaces(home)).rejects.toThrow(/global integration surface is missing/u);
+  });
+
+  it("should_reject_non_empty_hook_output_when_the_release_context_fixture_runs_outside_harnix", () => {
+    expect(() => assertNonHarnixContextNoOutput("", "")).not.toThrow();
+    expect(() => assertNonHarnixContextNoOutput('{"injectSteps":[]}\n')).toThrow(/must not emit output/u);
+    expect(() => assertNonHarnixContextNoOutput("", "unexpected warning\n")).toThrow(/must not emit output/u);
+  });
+
+  it("should_report_cold_non_harnix_context_metrics_when_all_release_thresholds_are_met", () => {
+    const samples = [120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 300];
+
+    expect(assertNonHarnixContextPerformance(samples)).toMatchObject({
+      max: 300,
+      median: 190,
+      p95: 300,
+      repetitions: 15,
+    });
+  });
+
+  it("should_reject_cold_non_harnix_context_metrics_when_a_release_threshold_is_exceeded", () => {
+    const slowMedian = Array.from({ length: 15 }, () => 300);
+    const slowP95 = [...Array.from({ length: 14 }, () => 100), 750];
+
+    expect(() => assertNonHarnixContextPerformance(slowMedian)).toThrow(/startup exceeds release thresholds/u);
+    expect(() => assertNonHarnixContextPerformance(slowP95)).toThrow(/startup exceeds release thresholds/u);
   });
 });

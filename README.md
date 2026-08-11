@@ -8,21 +8,19 @@ Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
 ## Trạng thái
 
-Phase 5 review/refactor đã hoàn tất và toàn bộ acceptance gate hiện tại đã pass. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
-
-Behavior `setup` trong code hiện tại vẫn là project-local. Yêu cầu chuyển Kiro, Antigravity và Codex integration sang user-global đang ở Phase 6 planned; xem [kế hoạch global setup](docs/GLOBAL_SETUP_REFACTOR_PLAN.md). Các path/command trong kế hoạch chưa được xem là đã phát hành cho tới khi Phase 6 acceptance pass.
+Phase 5 review/refactor đã hoàn tất. Implementation Phase 6 cho user-global integrations của Kiro, Antigravity và Codex cùng toàn bộ automated acceptance đã pass với fresh evidence trên current working tree. Đây chưa phải là claim về một package đã publish. Manual smoke trên tool session thật trong disposable Windows profile/test home chưa được chạy vì chưa có explicit authorization để mutate profile ngoài test fixture. Vì vậy Harnix không claim discovery/activation thực tế trong tool của người dùng; xem [kế hoạch global setup](docs/GLOBAL_SETUP_REFACTOR_PLAN.md) để biết acceptance còn lại. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
 
 ## Đặc điểm sản phẩm
 
 - Một npm package: `@tamtiger/harnix`
 - Một executable: `harnix`
-- Một namespace dữ liệu dự án: `.harnix/`
+- Project data nằm trong namespace `.harnix/`; platform integration là user-global, explicit và Harnix-owned.
 - Runtime chạy local, mặc định không cần network.
 - Một workflow state machine duy nhất với hai mức ceremony: Lite và Full.
 - Không telemetry, daemon, hosted service, global memory hoặc bắt buộc điều phối multi-agent.
 - Không tự động commit, branch, worktree, merge, push, publish hay tạo pull request.
 
-Antigravity có identity public là `antigravity`, flag là `--antigravity` và executable là `agy`. Harnix chỉ tạo project-local `GEMINI.md` cùng `.gemini/skills/harnix-*`; không chỉnh user-level `.gemini` state.
+Antigravity có identity public là `antigravity`, flag là `--antigravity` và executable là `agy`. Phase 6 cài plugin Harnix namespaced vào hai user roots độc lập cho Desktop và CLI; không sửa MCP, account, registry, credential, permission policy hoặc state không thuộc Harnix.
 
 ## Yêu cầu
 
@@ -115,7 +113,8 @@ Từ thư mục gốc dự án:
 # Khởi tạo .harnix và tự động phát hiện ngôn ngữ/framework
 harnix init --yes --user tam
 
-# Chọn một hoặc nhiều coding agent
+# Cài integration một lần cho user profile; có thể chạy ngoài project
+harnix setup --kiro --antigravity --codex --dry-run --json
 harnix setup --kiro --antigravity --codex
 
 # Kiểm tra drift, hook, path safety và secret exposure
@@ -146,17 +145,19 @@ harnix init [--yes] [--user <name>] [--languages <csv>]
 - `--languages`: override detection bằng danh sách language ID.
 - `--dry-run`: kiểm tra kế hoạch mà không ghi file.
 
-`init` chỉ tạo và quản lý namespace `.harnix/`. Nó không kiểm tra, migrate, overwrite hoặc xóa `.trellis`, `.trellis-pro` hay các skill `trellis-*` đang có trong repository. Sau `init`, chạy `setup` cho platform cần dùng để tạo các skill `harnix-*`.
+`init` chỉ tạo và quản lý namespace `.harnix/`. Nó không kiểm tra, migrate, overwrite hoặc xóa `.trellis`, `.trellis-pro` hay các skill `trellis-*` đang có trong repository. `setup` là user-global nên không cần chạy lại theo từng project; trước khi kích hoạt, global skills/hook phải resolve project Harnix initialized gần nhất từ cwd hoặc workspace roots (kể cả ancestor), rồi mới dùng `.harnix/config.yaml` của project đó.
 
 ### `setup`
 
-Materialize tích hợp cho platform được chọn và ghi ownership vào managed manifest:
+Materialize tích hợp user-global cho platform được chọn. Lệnh chạy được ở mọi thư mục, không resolve project root, không đọc `.harnix/config.yaml` và yêu cầu ít nhất một platform flag:
 
 ```text
-harnix setup --kiro|--antigravity|--codex
+harnix setup --kiro|--antigravity|--codex [--dry-run] [--json]
 ```
 
-Có thể chọn nhiều flag trong một lần chạy. Setup bảo toàn file đã bị người dùng chỉnh sửa, không tạo Antigravity settings/hooks chưa được xác minh, và cảnh báo nếu không tìm thấy executable `agy`.
+Có thể chọn nhiều flag trong một lần chạy. Mỗi invocation chỉ resolve/validate user root của platform đã chọn; ví dụ `CODEX_HOME` lỗi không làm `harnix setup --kiro` thất bại. `--dry-run` trả exact logical targets và planned state mà không ghi file. Kết quả trả status per platform/file: created, updated, unchanged, preserved, warnings và readiness. CLI tự xác minh file state, launcher và trust requirement đã biết; nó không tự chạy platform-version probe hoặc suy diễn activation/precedence từ file tồn tại. Các status `active`, `shadowed` và `unsupported-version` chỉ hợp lệ khi lifecycle boundary nhận được bằng chứng external authoritative; không có bằng chứng đó, Antigravity được báo `precedence-unknown`, Kiro là `installed`/`binary-unavailable`, và Codex là `installed-pending-trust`.
+
+Setup dùng manifest sidecar độc lập cho từng platform root, chỉ update fragment Harnix chưa bị sửa, preserve collision/unrelated content và không copy runtime. Nếu launcher `harnix` không resolve được trong environment hook, files vẫn có thể được cài nhưng result là `binary-unavailable`, không phải ready.
 
 ### `update`
 
@@ -165,25 +166,30 @@ Có thể chọn nhiều flag trong một lần chạy. Setup bảo toàn file �
 ```text
 harnix update
 harnix update --restore
+harnix update --global
+harnix update --global --restore
+harnix update --global --kiro --codex
+harnix update --global --kiro --codex --dry-run --json
 ```
 
-Mặc định, file managed đã bị người dùng xóa sẽ được báo cáo nhưng không tự khôi phục. Dùng `--restore` khi muốn khôi phục rõ ràng. File obsolete chưa bị sửa sẽ được xóa; file obsolete đã sửa được giữ lại. Task, spec, journal và file không thuộc Harnix không bị chạm vào.
+`update` không flag vẫn chỉ đồng bộ `.harnix/**` của project. `update --global` reconcile integration user-global; nếu không chỉ định platform, chỉ dùng platform có global manifest hợp lệ. Mặc định, file managed đã bị người dùng xóa sẽ được báo cáo nhưng không tự khôi phục. Dùng `--restore` khi muốn khôi phục rõ ràng. File obsolete chưa bị sửa sẽ được xóa; file obsolete đã sửa được giữ lại. Task, spec, journal và file không thuộc Harnix không bị chạm vào.
 
 ### `doctor`
 
-Kiểm tra config/manifest, ownership, missing/modified/obsolete files, injection marker, hook schema, Codex trust drift, skill frontmatter, unsafe path, secret và permission drift:
+Doctor JSON v2 kiểm tra project và global integrations riêng: config/manifest, ownership, missing/modified/obsolete files, injection marker, hook schema, Codex trust drift, skill frontmatter, unsafe path, secret và permission drift. Doctor vẫn hoạt động ngoài Harnix project để báo global integrations:
 
 ```text
 harnix doctor
 harnix doctor --json
 harnix doctor --fix --json
+harnix doctor --fix --global --json
 ```
 
-`--fix` chỉ sửa managed issue an toàn và luôn diagnose lại sau khi sửa. Exit code:
+`--fix` không có `--global` chỉ sửa project issue an toàn. `--fix --global` chỉ reconcile entry global missing/unchanged; không trust Codex hook, enable permission/feature hay sửa user fragment. `doctor` không tự probe version nền tảng hoặc suy activation/precedence từ file; `active`, `shadowed` và `unsupported-version` chỉ được report khi có bằng chứng external authoritative. Exit code:
 
-- `0`: project sạch.
-- `1`: có warning hoặc error cần xử lý.
-- `2`: usage không hợp lệ, state corrupt hoặc path không an toàn.
+- `0`: global state đọc an toàn, không warning/error; `project:not-initialized` ngoài project chỉ là info.
+- `1`: warning actionable, gồm pending trust, binary unavailable, shadowed/precedence unknown, unsupported version hoặc drift.
+- `2`: usage không hợp lệ, project/global manifest/schema corrupt/future hoặc path không an toàn.
 
 ### `mem`
 
@@ -199,15 +205,17 @@ Journal malformed được đếm và bỏ qua; memory search không tự promot
 
 ### `uninstall`
 
-Gỡ platform surface nhưng giữ `.harnix` data:
+Gỡ project data hoặc một global integration theo scope explicit:
 
 ```text
-harnix uninstall
 harnix uninstall --purge
 harnix uninstall --purge --yes
+harnix uninstall --global --kiro --yes
+harnix uninstall --legacy-project-surfaces
+harnix uninstall --legacy-project-surfaces --yes
 ```
 
-Uninstall mặc định chỉ xóa surface managed chưa bị sửa và giữ injected block đã bị người dùng chỉnh sửa. `--purge` xóa toàn bộ `.harnix`; nếu thiếu `--yes`, lệnh chỉ preview target và trả exit code 2.
+`--purge --yes` chỉ xóa `.harnix` project; không suy diễn thành gỡ global setup. `--global` chỉ gỡ platform đã chọn, preview trước và yêu cầu `--yes`. `--legacy-project-surfaces` chỉ xóa path legacy **standalone** khi manifest project v1 chứng minh đúng source/path Harnix sở hữu và content vẫn unchanged. File root/shared — gồm `AGENTS.md`, `GEMINI.md`, `.codex` config/hook và file người dùng bất kỳ — chỉ được inventory, không là deletion target; modified/untracked content luôn được preserve. Hai flag này mutually exclusive với `--purge`.
 
 ### `upgrade`
 
@@ -222,13 +230,13 @@ Chỉ dùng `--apply` khi muốn chạy npm upgrade explicit.
 
 ## Tích hợp platform
 
-| Platform | Identity/flag | Surface Harnix tạo |
+| Platform | Identity/flag | User-global surface Harnix tạo |
 |---|---|---|
-| Kiro | `kiro` / `--kiro` | `.kiro/skills`, steering và frozen context hook |
-| Antigravity | `antigravity` / `--antigravity` | `GEMINI.md`, `.gemini/skills/harnix-*` |
-| Codex | `codex` / `--codex` | `AGENTS.md`, `.agents/skills/harnix-*`, `.codex/config.toml`, `.codex/hooks.json` |
+| Kiro | `kiro` / `--kiro` | `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, `~/.kiro/hooks/harnix-context.json` |
+| Antigravity | `antigravity` / `--antigravity` | Desktop `~/.gemini/config/plugins/harnix` và CLI `~/.gemini/antigravity-cli/plugins/harnix` |
+| Codex | `codex` / `--codex` | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/hooks.json` |
 
-Các surface của người dùng và top-level hook/config key không liên quan được bảo toàn. Harnix không copy runtime script vào project đích.
+Kiro hook dùng JSON-v1 `UserPromptSubmit`; Antigravity hook trả `injectSteps` chỉ tại invocation đầu trong initialized project; Codex hook dùng nested `UserPromptSubmit` schema và cần người dùng review/trust qua `/hooks`. Activation guard resolve initialized project gần nhất từ cwd/workspace roots, kể cả ancestor của cwd, thay vì chỉ xét thư mục workspace hiện tại. Nếu không tìm thấy project đó hoặc event Antigravity malformed, internal context exit `0` và stdout rỗng; Antigravity chỉ trả `{ "injectSteps": [] }` khi đã xác định initialized project nhưng invocation đã qua lượt đầu hoặc không có context áp dụng. Nếu project đã được xác định nhưng state không đọc an toàn, Harnix không inject project data mà trả warning ngắn, redact và platform-specific để chạy `harnix doctor`; host agent vẫn không bị block. Các surface không liên quan được bảo toàn. Harnix không copy runtime script, không ghi absolute home path, không thêm `config.toml` key Codex, và không tạo platform surface mới trong project. Root `AGENTS.md` bootstrap do `init` tạo là ngoại lệ tương thích.
 
 ## Workflow sử dụng
 
@@ -293,6 +301,7 @@ pnpm smoke:tarball
 pnpm measure:init
 pnpm measure:footprint
 pnpm scan:release
+git diff --check
 ```
 
 Các suite riêng lẻ:
@@ -306,7 +315,9 @@ pnpm test:workflow
 pnpm test:safety
 ```
 
-Mọi filesystem test dùng temporary repository cô lập, không mutate global user configuration và không gọi install/network thật ngoài boundary explicit.
+Mọi filesystem test dùng temporary repository cô lập và disposable fake user home injected; không mutate profile/config thật hoặc gọi install/network thật ngoài boundary explicit. Tarball smoke dùng ít nhất hai root tạm độc lập: fake home cho setup và project cho init/context.
+
+Automated Phase 6 gates đã pass với fresh evidence trên current working tree. Manual smoke vẫn là acceptance ngoài test fixture và **chưa được chạy**: dùng disposable Windows profile để mở session trong từng platform; explicit test home chỉ phù hợp command-side check nếu tool cũng được launch cùng home đó. Kiểm `harnix setup --kiro --antigravity --codex --dry-run --json`, sau đó chạy `harnix setup --kiro --antigravity --codex`, kiểm non-Harnix no-op và initialized-project context, review/trust Codex hook qua `/hooks`, chạy `harnix doctor --json`, preview bằng `harnix uninstall --global --kiro --antigravity --codex`, rồi chỉ apply `harnix uninstall --global --kiro --antigravity --codex --yes` sau khi đã kiểm target. Không dùng profile thật nếu chưa có explicit authorization.
 
 ## Tài liệu
 

@@ -5,17 +5,30 @@ import { performance } from "node:perf_hooks";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
+import { createIsolatedUserEnvironment } from "./isolated-user-home.mjs";
+
 const root = fileURLToPath(new URL("..", import.meta.url));
 const runs = [];
 for (let index = 0; index < 3; index += 1) {
-  const fixture = await mkdtemp(join(tmpdir(), "harnix-measure-init-"));
+  const fixture = await mkdtemp(join(tmpdir(), "harnix-measure-init-project-"));
+  const home = await mkdtemp(join(tmpdir(), "harnix-measure-init-home-"));
   try {
     await createRepresentativeFixture(fixture);
     const started = performance.now();
-    const result = spawnSync(process.execPath, [join(root, "dist", "cli.js"), "init", "--yes", "--user", "measure"], { cwd: fixture, encoding: "utf8" });
-    if (result.status !== 0) throw new Error(`init run failed: ${result.stderr || result.stdout}`);
+    const result = spawnSync(process.execPath, [join(root, "dist", "cli.js"), "init", "--yes", "--user", "measure"], {
+      cwd: fixture,
+      encoding: "utf8",
+      env: createIsolatedUserEnvironment(home),
+      windowsHide: true,
+    });
+    if (result.status !== 0) throw new Error(`init run failed: ${result.error?.message || result.stderr || result.stdout || "unknown command failure"}`);
     runs.push(performance.now() - started);
-  } finally { await rm(fixture, { force: true, recursive: true }); }
+  } finally {
+    await Promise.all([
+      rm(fixture, { force: true, recursive: true }),
+      rm(home, { force: true, recursive: true }),
+    ]);
+  }
 }
 const ordered = [...runs].sort((left, right) => left - right); const median = ordered[1]; const worst = ordered.at(-1);
 process.stdout.write(`${JSON.stringify({ command: "harnix init --yes", fixture: "representative-vue-nest-monorepo-with-ignored-trees", repetitions: runs.length, runs, median, worst })}\n`);

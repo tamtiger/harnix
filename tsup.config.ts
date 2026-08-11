@@ -10,6 +10,6 @@ export default defineConfig({
   clean: true,
   dts: true,
   sourcemap: true,
-  splitting: false,
+  splitting: true,
   define: { __HARNIX_VERSION__: JSON.stringify(packageVersion) },
 });

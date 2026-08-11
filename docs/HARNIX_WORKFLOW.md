@@ -11,6 +11,8 @@ Workflow được chuyển thể từ:
 
 Harnix chủ động không kế thừa mandatory commit, branch, worktree, PR, subagent, auto-commit archive hoặc xin approval lặp lại khi yêu cầu ban đầu đã cho phép triển khai trong phạm vi rõ ràng.
 
+Phase 6 user-global Kiro, Antigravity and Codex integrations are an adapter/lifecycle concern, not a second workflow. Their skills, instructions and hooks use this workflow only after the activation guard finds the nearest initialized project ancestor/root from cwd or workspace roots, not merely the current workspace directory. Outside such a project they no-op, exit `0` with empty stdout from `internal context`, and do not create a task or state. For Antigravity, a malformed optional event has the same empty no-op; `{ "injectSteps": [] }` is protocol output only after an initialized project is known but no injection applies. If a known initialized project's state is corrupt or inaccessible, the hook fails closed for project data but emits a concise redacted platform-specific warning without blocking the host agent.
+
 ## 2. Workflow invariants
 
 1. Một workflow và một active task; Lite/Full chỉ là mức ceremony.
@@ -23,6 +25,7 @@ Harnix chủ động không kế thừa mandatory commit, branch, worktree, PR, 
 8. Completion claim luôn dựa trên fresh evidence của đúng working tree hiện tại.
 9. Finish không commit, push, merge, tạo PR hay xóa branch/worktree.
 10. Workflow phải chạy hoàn chỉnh với một agent; delegation chỉ là optimization được phép khi platform và người dùng cho phép.
+11. Global integration setup, update, doctor and uninstall do not transfer ownership to a project task. They use explicit platform scope, logical paths, conservative manifests and their own lifecycle gates.
 
 ## 3. Entry routing
 
@@ -220,4 +223,4 @@ Evals phải chứng minh:
 - Finish không commit/push/merge/PR và journal/promotion đúng gate.
 - Continue phục hồi đúng state với bounded context và fail closed trên corrupt/future state.
 - Cùng fixture cho kết quả workflow tương đương trên Kiro, Antigravity và Codex.
-
+- Global hooks/instructions are a fast no-op in a non-Harnix workspace, activate only with safe bounded project context, and never turn malformed optional hook input into a blocked prompt.

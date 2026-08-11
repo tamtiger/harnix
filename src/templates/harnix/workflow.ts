@@ -1,5 +1,7 @@
 export const workflowTemplate = `# Harnix workflow
 
+This workflow applies only to a project whose current workspace has \`.harnix/config.yaml\`. If the guard is absent or invalid, do not create files or automatically run \`harnix init\`; report the missing or invalid state. Platform setup is a separate, explicit user-global operation and does not create platform integration surfaces in this project.
+
 Use one active task and the canonical sequence: planning → ready → in_progress → verifying → completed. A task may be blocked and resumes only to its recorded status. Treat debugging, replan, and finishing as checkpoints.
 
 Before implementation, record acceptance criteria, relevant paths, and a validation plan. Use focused fresh evidence; compliance review comes before quality/security review. Do not commit, branch, push, merge, or create a PR.

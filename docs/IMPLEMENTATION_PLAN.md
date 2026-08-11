@@ -20,8 +20,8 @@ Plan này là checkpoint bắt buộc trước code. Checkpoint đã pass tại 
 - Một publishable `package.json`; không workspace/core package phụ.
 - Chỉ Kiro, Antigravity, Codex.
 - Runtime nằm trong package; không sinh runtime scripts vào consumer.
-- User-modified project/platform files thắng packaged defaults.
-- Không telemetry, daemon, hosted service, silent network, default MCP, global config mutation.
+- User-modified project files and user-global Harnix fragments thắng packaged defaults.
+- Không telemetry, daemon, hosted service, silent network, default MCP, global runtime/memory, credential, permission or trust mutation. Phase 6 permits only explicit Harnix-owned user-global platform customization described in `GLOBAL_SETUP_REFACTOR_PLAN.md`.
 - Không tự commit, branch, worktree, merge, push hoặc PR; subagent không phải dependency.
 - Default uninstall giữ data; purge cần preview, confirmation và safe-root verification.
 - AGPL-3.0/notices cho derived Trellis code; MIT attribution cho ECC/Superpowers adaptations.
@@ -72,11 +72,11 @@ configurators -> templates/rules/skills
 core -X-> Commander/Inquirer/platform templates
 ```
 
-Filesystem, clock, process runner, version lookup và prompt dependencies phải inject được để integration tests không gọi network/install hoặc interactive terminal thật.
+Filesystem, clock, process runner, version lookup, prompt dependencies and user-home/root resolvers must be injectable so integration tests never call network/install, interactive terminals or a real user profile.
 
 ## 4. Frozen state and schema contracts
 
-Các contract trong mục này là normative cho implementation v1. Thay đổi field, enum, path hoặc transition phải cập nhật PRD/workflow, migration và tests trong cùng change.
+Các contract project-data trong mục này là normative cho implementation v1. Phase 6 supersedes former platform setup paths and the Doctor v1 shape with the global contracts in `GLOBAL_SETUP_REFACTOR_PLAN.md`; any field, enum, path or transition change still requires matching PRD/workflow, migration and test updates in the same change.
 
 ### 4.1 `.harnix/config.yaml`
 
@@ -103,7 +103,7 @@ interface HarnixConfigV1 {
   developer: string;         // workspace ID matching ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$
   languages: LanguageId[];   // project union, unique and sorted
   packages: PackageConfig[]; // unique by path and sorted by path
-  platforms: PlatformId[];   // unique and sorted
+  platforms: PlatformId[];   // v1 parse compatibility only; deprecated and ignored for desired global setup
   context: {
     maxCharacters: number;   // positive integer, default 24000
     tokenApproximation: number; // positive number, default 4 chars/token
@@ -117,7 +117,7 @@ interface HarnixConfigV1 {
 
 YAML serialization dùng đúng shape trên, deterministic key order và LF trong golden fixtures. Schema migration explicit `N -> N+1`; future versions bị reject. Compatible unknown user keys được round-trip preserve nhưng core logic chỉ đọc known fields. Arrays duplicate, absolute/package-escape path, developer không khớp safe ID pattern và invalid enum fail validation trước write.
 
-### 4.2 Managed manifest
+### 4.2 Project managed manifest
 
 File: `.harnix/.template-hashes.json`.
 
@@ -125,7 +125,7 @@ File: `.harnix/.template-hashes.json`.
 interface ManagedEntryV1 {
   path: string;             // POSIX-normalized repo-relative, unique
   sourceId: string;         // stable packaged template/rule/skill identifier
-  scope: "project" | "kiro" | "antigravity" | "codex";
+  scope: "project";
   generatedHash: string;    // lowercase SHA-256 of normalized content
   generatorVersion: string;
 }
@@ -137,7 +137,11 @@ interface ManagedManifestV1 {
 }
 ```
 
-Manifest replacement là atomic. Ownership state được suy ra từ desired template, stored entry và disk hash; không persist transient state. Không track tasks/journals. Reject duplicate/absolute/traversal keys, external symlinks, invalid hash và corrupt/future manifest. Legacy hash namespace không được tin; migration re-baseline từ disk/template evidence.
+Manifest replacement là atomic. This project manifest owns only `.harnix/**` templates and never global integration output; former platform entries are legacy inventory only. Ownership state được suy ra từ desired template, stored entry và disk hash; không persist transient state. Không track tasks/journals. Reject duplicate/absolute/traversal keys, external symlinks, invalid hash và corrupt/future manifest. Legacy hash namespace không được tin; migration re-baseline từ disk/template evidence.
+
+### 4.2A Global managed manifest
+
+Phase 6 adds `GlobalManagedManifestV1` exactly as specified in `GLOBAL_SETUP_REFACTOR_PLAN.md` §5. It is a separate sidecar per verified Kiro, Antigravity Desktop, Antigravity CLI or Codex root, with only root-relative POSIX paths. Each entry has a stable `sourceId`, kind `file|managed-block|json-member`, generated hash/version and a required non-overlapping selector for fragments. Shared JSON array members are identified by stable `memberId` plus exact structural signature, never an array index. Corrupt/future data fails before write; a multi-platform transaction preflights all targets, locks in stable order, writes its manifest last and rolls back only when the disk still equals the output Harnix wrote.
 
 ### 4.3 Task record and workflow state
 
@@ -259,45 +263,67 @@ interface JournalEntryV1 {
 
 Candidate normalization dedupe `sourceTaskIds`/`evidenceIds`; `occurrences` bằng số source task độc lập. Deterministic confidence là `min(1, 0.4 + 0.2*min(distinctTasks,2) + 0.1*min(distinctEvidence,2))`. Không có explicit approval thì chỉ eligible để đề xuất khi distinct tasks >=2, distinct evidence >=2 và confidence >=0.8; write vào spec vẫn cần finish/review action rõ và luôn reviewable. Không hidden/global promotion.
 
-### 4.6 Doctor JSON
+### 4.6 Doctor JSON v2
 
 ```ts
-interface DoctorReportV1 {
-  schemaVersion: 1;
+interface DoctorFinding {
+  code: string;
+  severity: "error" | "warning" | "info";
+  path?: string; // logical path only; never an absolute home path
+  message: string;
+  fixable: boolean;
+}
+
+interface DoctorReportV2 {
   generator: "harnix";
+  schemaVersion: 2;
   ok: boolean;
-  summary: { errors: number; warnings: number; fixed: number };
-  findings: Array<{
-    code: string;
-    severity: "error" | "warning" | "info";
-    path?: string;
-    message: string;
-    fixable: boolean;
+  project: {
+    status: "ready" | "not-initialized" | "invalid";
+    findings: DoctorFinding[];
+  };
+  globalIntegrations: Array<{
+    platform: "kiro" | "antigravity" | "codex";
+    status:
+      | "not-installed"
+      | "installed"
+      | "active"
+      | "installed-pending-trust"
+      | "binary-unavailable"
+      | "shadowed"
+      | "precedence-unknown"
+      | "unsupported-version"
+      | "drifted"
+      | "invalid";
+    findings: DoctorFinding[];
   }>;
+  summary: { errors: number; warnings: number; fixed: number };
 }
 ```
 
-Finding order là severity/code/path deterministic; secret values luôn redact. Exit `0` clean, `1` có warning/error finding, `2` invalid usage, corrupt root state hoặc internal deterministic failure. `--fix` vẫn trả report cùng schema sau repair attempt.
+Consumer expecting v1 receives an explicit schema mismatch, never a misleading flat object. Finding order is deterministic by severity/code/path and secrets are redacted. The regular CLI does not invoke platform-version probes or infer activation/precedence from installed files: `active`, `shadowed` and `unsupported-version` are valid only when authoritative external evidence is supplied at the lifecycle boundary; otherwise the report remains conservative (`installed`, `installed-pending-trust`, `binary-unavailable` or `precedence-unknown`). Exit `0` means global state was read safely with no warning/error; `project:not-initialized` outside a project is info. Exit `1` is an actionable warning (including pending trust, binary unavailable, precedence/version drift). Exit `2` is invalid usage or unsafe/corrupt/future project/global state. `--fix` repairs only safe project issues; `--fix --global` reconciles only safe missing/unchanged global entries and never changes trust, permissions, features or user-modified fragments.
+
 ### 4.7 Internal platform-hook protocol
 
-`harnix internal context --platform <kiro|antigravity|codex>` là packaged hidden subcommand, không xuất hiện trong public help và không làm tăng public seven-command contract. Nó:
+`harnix internal context --platform <kiro|antigravity|codex>` is a packaged hidden subcommand, not public API and does not increase the seven-command contract. It:
 
-1. đọc hook event JSON từ stdin khi có, lấy `cwd` đã validate hoặc fallback process cwd;
-2. resolve repository/task state bằng cùng safe path APIs;
-3. load bounded ranked context, không network và không mutation;
-4. exit `0` với empty output khi project chưa init; invalid/corrupt Harnix state trả concise redacted stderr + non-zero;
-5. không echo prompt, secret, credential hoặc absolute machine path; stdout không vượt `config.context.maxCharacters` và luôn disclose truncation.
+1. accepts bounded optional hook-event JSON from stdin, validates `cwd` and bounded `workspacePaths[]`, and falls back safely to process cwd;
+2. resolves the **nearest** initialized project ancestor/root from cwd or workspace roots using safe realpath containment, including non-Git workspaces, deduplicated symlink-equivalent roots; it must not require the current workspace directory itself to contain `.harnix`;
+3. loads bounded ranked context without network, write, prompt/transcript/credential logging or execution of project content;
+4. exits `0` with empty output in a non-Harnix repository; malformed optional input fails open for the hosting agent using the platform-specific output below (a malformed Antigravity event is an empty no-op). A known initialized project with corrupt/inaccessible state must fail closed for project data and emit only a concise redacted platform-specific warning without blocking the host agent;
+5. emits no absolute home path, obeys stdin/stdout/time/workspace-root bounds and always discloses context truncation.
 
-Platform output:
+Global platform handlers use fixed, non-concatenated commands:
 
-- **Kiro:** UTF-8 Markdown/plain text. Frozen hook is `.kiro/hooks/harnix-context.kiro.hook` with `version: "1.0.0"`, `enabled: true`, `when: { type: "promptSubmit" }`, `then: { type: "runCommand", command: "harnix internal context --platform kiro" }`. Kiro adds successful stdout to agent context.
-- **Codex:** one `.codex/hooks.json` `UserPromptSubmit` command handler: POSIX command `harnix internal context --platform codex`, Windows override `harnix.exe internal context --platform codex`, `timeout: 5`, `additionalContextLimit: 2500`. Stdout is JSON `{ "hookSpecificOutput": { "hookEventName": "UserPromptSubmit", "additionalContext": "..." } }`; JSON escaping and hard output cap are tested.
-- **Antigravity:** no generated hook in v1. `GEMINI.md`/skills instruct pull-based loading and may invoke the same hidden command explicitly; absence of `agy` does not prevent offline template generation.
+- **Kiro:** `~/.kiro/hooks/harnix-context.json` JSON-v1 `UserPromptSubmit` command `harnix internal context --platform kiro`, timeout 5; stdout is UTF-8 plain developer context.
+- **Antigravity:** each global plugin has a `PreInvocation` command `harnix internal context --platform antigravity`, timeout 5. It returns `{ "injectSteps": [{ "ephemeralMessage": "..." }] }` only on the initial invocation in a known initialized project. A non-Harnix workspace or malformed optional event exits `0` with empty stdout; `{ "injectSteps": [] }` is emitted only after initialized-project resolution succeeds but the invocation is later or no context applies.
+- **Codex:** `$CODEX_HOME/hooks.json` has a nested `UserPromptSubmit` command `harnix internal context --platform codex`, timeout 5 and `additionalContextLimit: 2500`. Output is valid nested `hookSpecificOutput` or plain developer context according to the current schema; Windows uses a constant launcher form only after shim-resolution smoke evidence.
 
-Hook commands are generated constants, never concatenated with user input. Platform hook fixtures cover success, no-project, corrupt state, Unicode/spaces, nested worktree, bounded output and Windows executable resolution.
+Fixtures cover non-Harnix no-op, corrupt/malformed optional input, Unicode/spaces, nested Git/non-Git discovery, Antigravity zero/one/multi-root selection and ambiguity, bounded output, Codex Windows resolution, and cold-path performance (median <300ms, p95 <750ms, no sample >1s).
+
 ### 4.8 Common CLI result semantics
 
-Mọi public command dùng stderr cho actionable error/warning và stdout cho requested data/output. Exit `0` là success/clean intentional no-op/dry-run; exit `1` là operation hoặc diagnostic hoàn tất nhưng có actionable finding/conflict/failure; exit `2` là invalid usage/config/schema/root hoặc deterministic internal failure. Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated/machine-readable output. `--json` (nơi được hỗ trợ) emit đúng một JSON document; interactive prompts bị disable khi `--yes` hoặc non-TTY và thiếu required value phải fail thay vì treo.
+Mọi public command dùng stderr cho actionable error/warning và stdout cho requested data/output. Exit `0` là success/clean intentional no-op/dry-run; exit `1` là operation hoặc diagnostic hoàn tất nhưng có actionable finding/conflict/failure; exit `2` là invalid usage/config/schema/root hoặc deterministic internal failure. Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated/machine-readable output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. `--json` (nơi được hỗ trợ) emits exactly one document; `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. Interactive prompts bị disable khi `--yes` hoặc non-TTY và thiếu required value phải fail thay vì treo.
 ## 5. Phase 0 — Documentation và baseline checkpoint
 
 ### Task 0.1: Chuẩn hóa PRD
@@ -332,6 +358,8 @@ Mọi public command dùng stderr cho actionable error/warning và stdout cho re
 
 **Exit criteria:** documentation contracts nhất quán; user request “update toàn bộ để có thể implement” cho phép bắt đầu Phase 1 sau khi update này được verify. Không cần approval lặp lại giữa phase trừ khi xuất hiện product decision/authority blocker mới.
 ## 6. Phase 1 — Single-package foundation, init và basic setup
+
+Phase 1–5 task checkmarks below are historical delivery evidence. Their former project-local platform output is legacy inventory, not a current normative setup requirement; Phase 6 contracts in section 9B and `GLOBAL_SETUP_REFACTOR_PLAN.md` supersede it.
 
 ### Task 1.0: Freeze platform adapter contracts
 
@@ -591,39 +619,40 @@ The 2026-08-10 repository review found lifecycle and persisted-state gaps that w
 
 Historical Phase 1–4 checkmarks record their original checkpoints; they do not supersede Phase 5 regression evidence.
 
-## 9B. Phase 6 — User-global platform integrations (planned)
+## 9B. Phase 6 — User-global platform integrations (automated implementation complete; manual smoke pending authorization)
 
-Yêu cầu ngày 2026-08-11 thay đổi `setup` từ project-local sang user-global cho Kiro, Antigravity và Codex. Đây là active architecture refactor; các checkmark Phase 1–5 chỉ mô tả behavior cũ đã hoàn tất và không được dùng để claim Phase 6 complete.
+Yêu cầu ngày 2026-08-11 thay đổi `setup` từ project-local sang user-global cho Kiro, Antigravity và Codex. G0–G9 và phần automated của G10 đã hoàn tất với fresh evidence trong current working tree; các checkmark Phase 1–5 chỉ mô tả behavior cũ đã hoàn tất. Disposable-profile/tool-session smoke vẫn chưa chạy vì cần explicit authorization, nên Phase 6 chưa được claim completed trong real user platform session.
 
 Trong phạm vi Phase 6, constraint cũ “không global config mutation” và các frozen project-local platform paths bị supersede bởi explicit, Harnix-owned user-global customization. Các cấm đoán về global runtime, memory, credential, MCP, permission mutation, telemetry và silent network vẫn giữ nguyên.
 
 Kế hoạch, official path/schema snapshot, migration policy, work breakdown và acceptance gate nằm tại [`GLOBAL_SETUP_REFACTOR_PLAN.md`](GLOBAL_SETUP_REFACTOR_PLAN.md).
 
-- [ ] G0 cập nhật toàn bộ normative documentation contracts theo thiết kế đã duyệt.
-- [ ] G1–G3 thêm isolated-home tests, safe user paths, global ownership/locking/rollback.
-- [ ] G4–G6 chuyển Kiro, Antigravity Desktop/CLI và Codex sang official current user-global surfaces.
-- [ ] G7–G8 tách lifecycle global/project và cleanup project-local integration cũ một cách explicit.
-- [ ] G9–G10 cập nhật templates/release scripts rồi chạy full automated và disposable-profile acceptance.
+- [x] G0 cập nhật toàn bộ normative documentation contracts theo thiết kế đã duyệt.
+- [x] G1–G3 thêm isolated-home tests, safe user paths, global ownership/locking/rollback.
+- [x] G4–G6 chuyển Kiro, Antigravity Desktop/CLI và Codex sang official current user-global surfaces.
+- [x] G7–G8 tách lifecycle global/project và cleanup project-local integration cũ một cách explicit; legacy cleanup chỉ có thể xóa standalone path đúng source/path do manifest v1 chứng minh, còn root/shared file chỉ inventory.
+- [x] G9 cập nhật templates/AGENTS guard, release scripts và chạy full automated acceptance với fake-home/project fixtures.
+- [ ] G10 manual disposable-profile/tool-session smoke: chưa chạy do chưa có explicit authorization; không được dùng profile thật, và automated evidence không được suy diễn thành activation thực tế.
 
 ## 10. Required test inventory
 
 | Suite | Required coverage |
 |---|---|
-| Unit | detection, config migrations, context rank/budget, hashes/manifest, atomic writes, journal, learning, doctor checks |
-| CLI integration | all seven commands, idempotence, modified/deleted files, corrupt/future schemas |
+| Unit | detection, config migrations, context rank/budget, project/global manifests, permission-preserving atomic writes, home/path containment, locks, rollback, journal, learning, Doctor v2 |
+| CLI integration | all seven commands, project/global scope, setup outside a project, idempotence, modified/deleted files, corrupt/future project/global schemas |
 | Migration | discovery, dry-run, copy/transform, preservation, conflict, rollback, cleanup |
 | Fixtures | .NET/ABP, NestJS, Python, Java/Spring, Go, React, Vue, multilingual monorepo |
-| Platform | Kiro/Antigravity/Codex snapshots and schema, relevant rules, no machine path |
-| Codex | AGENTS preservation, skills metadata, config merge, hooks Windows/Linux, duplicate prevention, user-owned files |
+| Platform | Kiro user-global JSON hook, Antigravity Desktop/CLI plugin snapshots and multi-root protocol, Codex user-global schema, relevant rules, no machine path |
+| Codex | global AGENTS preservation, skills metadata, nested hooks Windows/Linux, `CODEX_HOME`/override/trust/duplicate coverage, user-owned files |
 | Workflow eval | routing, research, debug, TDD exception, reviews, verification, budget, finish/continue, promotion |
-| Safety | traversal/symlink, hook injection, secrets, purge, data preservation, duplicates |
-| Packaging | one package/bin, tarball contents, installed smoke tests, forbidden surface scan |
+| Safety | traversal/symlink/junction, hook no-op/injection, secrets, global uninstall confirmation, data preservation, collisions, locks and duplicate/legacy hooks |
+| Packaging | one package/bin, tarball contents, fake-home + project smoke tests, forbidden project-local setup surface scan |
 
-All filesystem tests use isolated temporary repositories. Tests must not mutate global user configuration or call real install/network operations.
+All filesystem tests use isolated temporary repositories **and injected disposable user homes**. Tests must not mutate real user configuration or call real install/network operations.
 
 ## 11. Acceptance command sequence
 
-Task 1.1 phải tạo đúng các package scripts dưới đây. Chạy từ dependency state sạch; mỗi script ghi command, duration, exit code và summary. Scripts dùng isolated temp fixtures, không global mutation và không real network ngoài explicit `pnpm install`/upgrade integration mock boundary.
+Task 1.1 phải tạo đúng các package scripts dưới đây. Chạy từ dependency state sạch; mỗi script ghi command, duration, exit code và summary. Scripts use isolated temporary repositories plus fake homes, never a real profile, and no real network outside explicit `pnpm install`/upgrade integration mock boundary.
 
 ```text
 pnpm install --frozen-lockfile
@@ -637,16 +666,17 @@ pnpm smoke:tarball
 pnpm measure:init
 pnpm measure:footprint
 pnpm scan:release
+git diff --check
 ```
 
 Script contracts:
 
 - `test:acceptance`: chạy unit/integration/migration/platform/workflow/safety suites, gồm clean và seeded unsafe `doctor --json` fixtures.
 - `pack:check`: xóa/recreate project-local `.artifacts/` safely, chạy `pnpm pack --pack-destination .artifacts`, assert đúng một `@tamtiger/harnix` tarball và kiểm contents/license/runtime/templates.
-- `smoke:tarball`: cài tarball đó vào isolated fixtures rồi chạy `init`, setup từng Kiro/Antigravity/Codex và tổ hợp ba platform; Antigravity dùng injected runner hoặc local `agy` khi available.
+- `smoke:tarball`: cài tarball đó vào two independent temporary roots: fake user home for global setup and one-or-more project fixtures for `init`/context; smoke từng Kiro/Antigravity/Codex và tổ hợp ba platform without a real profile.
 - `measure:init`: chạy documented non-migration fixture nhiều lần, report median/worst wall-clock và fail nếu worst >=5 giây.
 - `measure:footprint`: đo files/bytes theo `UPSTREAM_BASELINE.md`, report numerator/denominator và fail nếu reduction <50%.
-- `scan:release`: scan tarball + generated fixtures cho forbidden branding/surfaces, secrets, absolute machine paths, required TODO, second package/workspace, dead packaged imports và duplicate hooks.
+- `scan:release`: scan tarball + generated fixtures cho forbidden branding/surfaces, stale project-local setup output, secrets, absolute machine paths, required TODO, second package/workspace, dead packaged imports và duplicate hooks.
 
 Failure dừng gate, kích hoạt systematic debugging và rerun focused rồi full command. Previous/partial output không phải completion evidence.
 ## 12. Risk register
@@ -670,7 +700,9 @@ Harnix chỉ hoàn thành khi:
 - Mọi PRD criterion và adopted capability trace tới code/test.
 - Tất cả command gates pass từ fresh output.
 - Tarball cài và smoke được trên temp repositories.
-- Doctor clean fixture pass và seeded unsafe/duplicate/legacy fixtures được phát hiện.
+- Setup runs from outside a Harnix project and writes only official user-global surfaces with dry-run/status, safe ownership, rollback and scoped uninstall.
+- Doctor JSON v2 clean fixture pass; seeded unsafe/duplicate/legacy/global fixtures are detected and Codex is never claimed active before trust evidence.
+- Tarball smoke uses a fake home plus project fixtures; disposable Windows profile smoke verifies discovery/activation/trust/uninstall after explicit authorization.
 - Init <5 giây và footprint giảm ít nhất 50% theo định nghĩa đã khóa.
 - Không có second package/workspace, unsupported adapters, dead imports, secrets, accidental absolute paths, required TODO hoặc duplicate hooks.
 - Trellis chỉ còn trong attribution/research/migration compatibility/license/history.

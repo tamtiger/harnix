@@ -1,140 +1,399 @@
-import { access, mkdir, readFile, symlink, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { access, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { initializeProject } from "../../src/commands/init.js";
 import { setupPlatforms } from "../../src/commands/setup.js";
-import { mergeCodexConfig } from "../../src/configurators/codex.js";
-import { createConfig, readConfig, writeConfig } from "../../src/core/config/config.js";
+import { packageVersion } from "../../src/version.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
+import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
 
-const fixture = useTemporaryRepositories("harnix-platform-");
+const temporaryRepository = useTemporaryRepositories("harnix-global-setup-project-");
+const temporaryUserHome = useTemporaryUserHomes("harnix-global-setup-home-");
 
-async function initializedRepository(): Promise<string> {
-  const root = await fixture();
-  await initializeProject({ developer: "tam", root, yes: true });
-  return root;
+function fakeEnvironment(home: string): Record<string, string> {
+  return { CODEX_HOME: join(home, "codex-home") };
 }
 
-describe("setupPlatforms", () => {
-  it("writes byte-idempotent Kiro and Codex project surfaces while preserving user-owned Codex data", async () => {
-    const root = await fixture();
-    await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam", languages: ["vue"] }));
-    await writeFile(join(root, "AGENTS.md"), "# User guide\n\nKeep this text.\n");
-    await mkdir(join(root, ".codex"), { recursive: true });
-    await writeFile(join(root, ".codex", "hooks.json"), JSON.stringify({ hooks: { UserPromptSubmit: [{ command: "user-command" }] } }));
-    await writeFile(join(root, ".codex", "config.toml"), "model = \"user-model\"\n\n[harnix]\nenabled = false\n\n[other]\nvalue = true\n");
-
-    await setupPlatforms({ platforms: ["kiro", "codex"], root });
-    const firstAgents = await readFile(join(root, "AGENTS.md"), "utf8");
-    await setupPlatforms({ platforms: ["kiro", "codex"], root });
-
-    expect(await readFile(join(root, "AGENTS.md"), "utf8")).toBe(firstAgents);
-    expect(firstAgents).toContain("Keep this text.");
-    expect(firstAgents).toContain("<!-- harnix:begin -->");
-    expect(firstAgents).toContain("Bypass, Lite, or Full");
-    expect(firstAgents).toContain("harnix-finish-work");
-    await expect(readFile(join(root, ".kiro", "hooks", "harnix-context.kiro.hook"), "utf8")).resolves.toContain('"promptSubmit"');
-    await expect(readFile(join(root, ".kiro", "steering", "harnix.md"), "utf8")).resolves.toContain("Harnix");
-    await expect(readFile(join(root, ".agents", "skills", "harnix-implement", "SKILL.md"), "utf8")).resolves.toContain("name: harnix-implement");
-    const hooks = JSON.parse(await readFile(join(root, ".codex", "hooks.json"), "utf8")) as { hooks: { UserPromptSubmit: Array<{ command: string }> } };
-    expect(hooks.hooks.UserPromptSubmit.map((hook) => hook.command)).toEqual(["user-command", "harnix internal context --platform codex"]);
-    await expect(readFile(join(root, ".codex", "config.toml"), "utf8")).resolves.toBe("model = \"user-model\"\n\n[other]\nvalue = true\n\n[harnix]\nenabled = true\n");
+describe("setupPlatforms user-global lifecycle", () => {
+  it("should_fail_closed_in_test_mode_when_no_fake_home_is_injected", async () => {
+    await expect(setupPlatforms({ platforms: ["kiro"] })).rejects.toThrow("injected homeResolver");
   });
 
-  it("writes only Antigravity's managed project guidance and skills", async () => {
-    const root = await fixture();
-    await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" }));
+  it("should_fail_closed_in_test_mode_when_no_launcher_lookup_is_injected", async () => {
+    const home = await temporaryUserHome();
 
-    await writeFile(join(root, "GEMINI.md"), "# User guidance\n");
-    const result = await setupPlatforms({ platforms: ["antigravity"], root, versionLookup: async () => undefined });
+    await expect(setupPlatforms({
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      platforms: ["kiro"],
+    })).rejects.toThrow("injected commandLookup");
 
-    expect(result.configured).toEqual(["antigravity"]);
-    expect(result.warnings).toContain("Antigravity executable 'agy' was not found; generated project guidance remains usable offline.");
-    await expect(readFile(join(root, "GEMINI.md"), "utf8")).resolves.toContain("# User guidance");
-    await expect(readFile(join(root, ".gemini", "skills", "harnix-implement", "SKILL.md"), "utf8")).resolves.toContain("name: harnix-implement");
-    await expect(readFile(join(root, ".gemini", "settings.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
-    await expect(readFile(join(root, ".gemini", "hooks.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(home, ".kiro"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
-  it("sets up all supported platforms without duplicate hooks or machine paths", async () => {
-    const root = await fixture(); await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam", languages: ["vue"] }));
-    await setupPlatforms({ root, platforms: ["kiro", "codex", "antigravity"], versionLookup: async () => "1.1.1" });
-    const hooks = JSON.parse(await readFile(join(root, ".codex", "hooks.json"), "utf8")) as { hooks: { UserPromptSubmit: Array<{ command: string }> } };
-    expect(hooks.hooks.UserPromptSubmit.filter((hook) => hook.command === "harnix internal context --platform codex")).toHaveLength(1);
-    for (const skill of ["harnix-brainstorm", "harnix-implement", "harnix-check", "harnix-finish-work", "harnix-continue", "harnix-research", "harnix-debug"]) for (const directory of [".kiro/skills", ".agents/skills", ".gemini/skills"]) expect(await readFile(join(root, directory, skill, "SKILL.md"), "utf8")).not.toContain(root);
-  });
-  it("should_reject_malformed_or_duplicate_harnix_toml_tables_when_merging", () => {
-    expect(() => mergeCodexConfig("[broken\nvalue = true\n")).toThrow("malformed");
-    expect(() => mergeCodexConfig("[harnix]\nenabled = true\n[harnix]\nenabled = false\n")).toThrow("duplicated");
-  });
-
-  it("should_preserve_modified_skill_when_setup_is_rerun", async () => {
-    const root = await initializedRepository();
-    await setupPlatforms({ root, platforms: ["kiro"] });
-    const skill = join(root, ".kiro", "skills", "harnix-implement", "SKILL.md");
-    await writeFile(skill, "user-owned skill\n");
-
-    await setupPlatforms({ root, platforms: ["kiro"] });
-
-    await expect(readFile(skill, "utf8")).resolves.toBe("user-owned skill\n");
-  });
-
-  it("should_preserve_modified_managed_blocks_when_a_platform_is_first_configured", async () => {
-    const root = await initializedRepository();
-    const agentsPath = join(root, "AGENTS.md");
-    await writeFile(
-      agentsPath,
-      (await readFile(agentsPath, "utf8")).replace("This repository uses Harnix", "User customized this Harnix bootstrap"),
-    );
-    await writeFile(join(root, "GEMINI.md"), "<!-- harnix:begin -->\n## User Antigravity guidance\n<!-- harnix:end -->\n");
-
-    await setupPlatforms({
-      root,
-      platforms: ["codex", "antigravity"],
-      versionLookup: async () => "1.1.1",
+  it("should_install_all_selected_platforms_in_an_injected_home_without_requiring_a_project", async () => {
+    const home = await temporaryUserHome();
+    const nonHarnixDirectory = await temporaryRepository();
+    const result = await setupPlatforms({
+      commandLookup: async () => true,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      platforms: ["kiro", "antigravity", "codex"],
     });
 
-    await expect(readFile(agentsPath, "utf8")).resolves.toContain("User customized this Harnix bootstrap");
-    await expect(readFile(join(root, "GEMINI.md"), "utf8")).resolves.toContain("## User Antigravity guidance");
+    expect(result.scope).toBe("user");
+    expect(result.platforms.map((platform) => platform.platform)).toEqual(["antigravity", "codex", "kiro"]);
+    expect(JSON.stringify(result)).not.toContain(home);
+    await expect(readFile(join(home, ".kiro", "hooks", "harnix-context.json"), "utf8")).resolves.toContain('"UserPromptSubmit"');
+    await expect(readFile(join(home, ".gemini", "config", "plugins", "harnix", "plugin.json"), "utf8")).resolves.toContain('"name": "harnix"');
+    await expect(readFile(join(home, ".gemini", "antigravity-cli", "plugins", "harnix", "hooks.json"), "utf8")).resolves.toContain('"PreInvocation"');
+    await expect(readFile(join(home, ".agents", "skills", "harnix-implement", "SKILL.md"), "utf8")).resolves.toContain("nearest ancestor or workspace root containing `.harnix/config.yaml`");
+    await expect(readFile(join(home, "codex-home", "hooks.json"), "utf8")).resolves.toContain('"hooks"');
+    await expect(access(join(nonHarnixDirectory, ".harnix", "config.yaml"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(nonHarnixDirectory, ".kiro"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(nonHarnixDirectory, ".gemini"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(nonHarnixDirectory, ".codex"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
-  it("should_preserve_codex_top_level_keys_when_merging_hooks", async () => {
-    const root = await initializedRepository();
-    await mkdir(join(root, ".codex"), { recursive: true });
-    await writeFile(
-      join(root, ".codex", "hooks.json"),
-      JSON.stringify({
-        version: 1,
-        custom: { enabled: true },
-        hooks: { UserPromptSubmit: [{ command: "user-command" }] },
-      }),
-    );
+  it("should_not_validate_an_unselected_codex_home_when_installing_only_kiro", async () => {
+    const home = await temporaryUserHome();
 
-    await setupPlatforms({ root, platforms: ["codex"] });
+    const result = await setupPlatforms({
+      commandLookup: async () => true,
+      environment: { CODEX_HOME: "relative-codex-home" },
+      homeResolver: async () => home,
+      platforms: ["kiro"],
+    });
 
-    const hooks = JSON.parse(await readFile(join(root, ".codex", "hooks.json"), "utf8")) as Record<string, unknown>;
-    expect(hooks.version).toBe(1);
-    expect(hooks.custom).toEqual({ enabled: true });
+    expect(result.platforms).toEqual([expect.objectContaining({ platform: "kiro", readiness: "installed" })]);
+    await expect(access(join(home, ".kiro", "hooks", "harnix-context.json"))).resolves.toBeUndefined();
+    await expect(access(join(home, ".agents"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
-  it("should_fail_before_writes_when_codex_surface_is_malformed", async () => {
-    const root = await initializedRepository();
-    await mkdir(join(root, ".codex"), { recursive: true });
-    await writeFile(join(root, ".codex", "hooks.json"), "{not-json");
+  it("should_preview_logical_targets_without_writing_or_creating_a_manifest", async () => {
+    const home = await temporaryUserHome();
+    const result = await setupPlatforms({
+      commandLookup: async () => true,
+      dryRun: true,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      platforms: ["kiro", "codex"],
+    });
 
-    await expect(setupPlatforms({ root, platforms: ["codex"] })).rejects.toThrow("valid JSON");
-
-    await expect(readConfig(join(root, ".harnix", "config.yaml"))).resolves.toMatchObject({ platforms: [] });
-    await expect(access(join(root, ".agents"))).rejects.toMatchObject({ code: "ENOENT" });
+    expect(result.scope).toBe("user");
+    expect(result.platforms.flatMap((platform) => platform.created)).toEqual(expect.arrayContaining([
+      "~/.kiro/hooks/harnix-context.json",
+      "~/.agents/skills/harnix-implement/SKILL.md",
+      "$CODEX_HOME/hooks.json#codex-global-context-hook",
+    ]));
+    expect(JSON.stringify(result)).not.toContain(home);
+    await expect(access(join(home, ".kiro"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(home, ".agents"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(home, "codex-home"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
-  it("should_reject_external_symlink_when_setting_up_platform", async () => {
-    const root = await initializedRepository();
-    const external = await fixture();
-    await symlink(external, join(root, ".kiro"), process.platform === "win32" ? "junction" : "dir");
+  it("should_remain_byte_idempotent_when_two_projects_share_one_user_home", async () => {
+    const home = await temporaryUserHome();
+    const firstProject = await temporaryRepository();
+    const secondProject = await temporaryRepository();
+    const options = {
+      commandLookup: async () => true,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      platforms: ["kiro", "antigravity", "codex"] as const,
+    };
+    await setupPlatforms(options);
+    const first = await Promise.all([
+      readFile(join(home, ".kiro", "harnix", "managed.json"), "utf8"),
+      readFile(join(home, ".gemini", "config", "plugins", "harnix", ".managed.json"), "utf8"),
+      readFile(join(home, "codex-home", "harnix", "managed.json"), "utf8"),
+      readFile(join(home, ".agents", "harnix", "managed.json"), "utf8"),
+    ]);
 
-    await expect(setupPlatforms({ root, platforms: ["kiro"] })).rejects.toThrow("symbolic link");
-    await expect(access(join(external, "skills"))).rejects.toMatchObject({ code: "ENOENT" });
+    // Project identity is intentionally not an input to the global lifecycle.
+    expect(firstProject).not.toBe(secondProject);
+    const rerun = await setupPlatforms(options);
+    const second = await Promise.all([
+      readFile(join(home, ".kiro", "harnix", "managed.json"), "utf8"),
+      readFile(join(home, ".gemini", "config", "plugins", "harnix", ".managed.json"), "utf8"),
+      readFile(join(home, "codex-home", "harnix", "managed.json"), "utf8"),
+      readFile(join(home, ".agents", "harnix", "managed.json"), "utf8"),
+    ]);
+
+    expect(second).toEqual(first);
+    expect(rerun.platforms.flatMap((platform) => platform.updated)).toEqual([]);
+    expect(rerun.platforms.flatMap((platform) => platform.created)).toEqual([]);
+  });
+
+  it("should_preserve_untracked_user_content_and_report_pending_or_unknown_readiness", async () => {
+    const home = await temporaryUserHome();
+    await mkdir(join(home, "codex-home"), { recursive: true });
+    await writeFile(join(home, "codex-home", "AGENTS.md"), "# User instructions\n\nKeep this text.\n");
+    await writeFile(join(home, "codex-home", "hooks.json"), `${JSON.stringify({ hooks: { UserPromptSubmit: [{ hooks: [{ type: "command", command: "user-context" }] }] } }, null, 2)}\n`);
+    const result = await setupPlatforms({
+      commandLookup: async () => true,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      platforms: ["antigravity", "codex"],
+    });
+
+    await expect(readFile(join(home, "codex-home", "AGENTS.md"), "utf8")).resolves.toContain("Keep this text.");
+    const codex = result.platforms.find((platform) => platform.platform === "codex");
+    const antigravity = result.platforms.find((platform) => platform.platform === "antigravity");
+    expect(codex?.readiness).toBe("installed-pending-trust");
+    expect(codex?.warnings.join(" ")).toContain("/hooks");
+    expect(antigravity?.readiness).toBe("precedence-unknown");
+  });
+
+  it("should_preserve_an_unowned_antigravity_harnix_plugin_root_without_writing_a_sidecar", async () => {
+    const home = await temporaryUserHome();
+    const desktopPluginRoot = join(home, ".gemini", "config", "plugins", "harnix");
+    await mkdir(desktopPluginRoot, { recursive: true });
+    await writeFile(join(desktopPluginRoot, "plugin.json"), '{"name":"user-harnix-plugin"}\n');
+
+    const result = await setupPlatforms({
+      commandLookup: async () => true,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      platforms: ["antigravity"],
+    });
+
+    const antigravity = result.platforms[0]!;
+    expect(antigravity.readiness).toBe("drifted");
+    expect(antigravity.preserved).toContain("~/.gemini/config/plugins/harnix/plugin.json");
+    await expect(readFile(join(desktopPluginRoot, "plugin.json"), "utf8")).resolves.toBe('{"name":"user-harnix-plugin"}\n');
+    await expect(access(join(desktopPluginRoot, ".managed.json"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(desktopPluginRoot, ".managed.lock"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(desktopPluginRoot, "hooks.json"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(home, ".gemini", "antigravity-cli", "plugins", "harnix", ".managed.json"))).resolves.toBeUndefined();
+  });
+
+  it("should_recover_a_manifestless_antigravity_root_when_its_only_file_is_a_harnix_lock", async () => {
+    const home = await temporaryUserHome();
+    const desktopPluginRoot = join(home, ".gemini", "config", "plugins", "harnix");
+    const desktopLock = join(desktopPluginRoot, ".managed.lock");
+    await mkdir(desktopPluginRoot, { recursive: true });
+    await writeFile(desktopLock, `${JSON.stringify({
+      acquiredAt: "2026-01-01T00:00:00.000Z",
+      generator: "harnix",
+      generatorVersion: packageVersion,
+      operationId: "crashed-operation",
+      ownerPid: 123,
+      processStartedAt: "2026-01-01T00:00:00.000Z",
+      schemaVersion: 1,
+    })}\n`, "utf8");
+    let recoveredLocks = 0;
+
+    const result = await setupPlatforms({
+      commandLookup: async () => true,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      lockAcquirer: async (path) => {
+        if (path !== desktopLock) return { release: async () => {} };
+        recoveredLocks += 1;
+        const record = {
+          acquiredAt: "2026-01-02T00:00:00.000Z",
+          generator: "harnix" as const,
+          generatorVersion: packageVersion,
+          operationId: "recovered-operation",
+          ownerPid: process.pid,
+          processStartedAt: "2026-01-02T00:00:00.000Z",
+          schemaVersion: 1 as const,
+        };
+        await writeFile(path, `${JSON.stringify(record)}\n`, "utf8");
+        return { record, release: async () => { await rm(path, { force: true }); } };
+      },
+      platforms: ["antigravity"],
+    });
+
+    expect(recoveredLocks).toBe(1);
+    expect(result.platforms[0]).toMatchObject({ platform: "antigravity" });
+    await expect(access(join(desktopPluginRoot, ".managed.json"))).resolves.toBeUndefined();
+    await expect(access(join(desktopPluginRoot, "plugin.json"))).resolves.toBeUndefined();
+    await expect(access(desktopLock)).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("should_preserve_a_plugin_created_between_preflight_and_apply_even_when_its_own_lock_created_the_root", async () => {
+    const home = await temporaryUserHome();
+    const desktopPluginRoot = join(home, ".gemini", "config", "plugins", "harnix");
+    const desktopLock = join(desktopPluginRoot, ".managed.lock");
+    const userPlugin = join(desktopPluginRoot, "plugin.json");
+    const result = await setupPlatforms({
+      commandLookup: async () => true,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      lockAcquirer: async (path) => {
+        if (path === desktopLock) {
+          await mkdir(dirname(path), { recursive: true });
+          await writeFile(path, "harnix lock\n");
+          await writeFile(userPlugin, '{"name":"concurrent-user-plugin"}\n');
+          return { release: async () => { await rm(path, { force: true }); } };
+        }
+        return { release: async () => {} };
+      },
+      platforms: ["antigravity"],
+    });
+
+    expect(result.platforms[0]).toMatchObject({ platform: "antigravity", readiness: "drifted" });
+    await expect(readFile(userPlugin, "utf8")).resolves.toBe('{"name":"concurrent-user-plugin"}\n');
+    await expect(access(join(desktopPluginRoot, ".managed.json"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(desktopPluginRoot, "hooks.json"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(desktopLock)).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("should_preserve_an_unowned_harnix_skill_unit_without_claiming_or_overwriting_it", async () => {
+    const home = await temporaryUserHome();
+    const skillUnit = join(home, ".kiro", "skills", "harnix-check");
+    await mkdir(skillUnit, { recursive: true });
+    await writeFile(join(skillUnit, "USER-NOTES.md"), "do not replace this skill\n");
+
+    const result = await setupPlatforms({
+      commandLookup: async () => true,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      platforms: ["kiro"],
+    });
+
+    expect(result.platforms[0]).toMatchObject({ platform: "kiro", readiness: "drifted" });
+    expect(result.platforms[0]?.preserved).toContain("~/.kiro/skills/harnix-check/SKILL.md");
+    await expect(readFile(join(skillUnit, "USER-NOTES.md"), "utf8")).resolves.toBe("do not replace this skill\n");
+    await expect(access(join(skillUnit, "SKILL.md"))).rejects.toMatchObject({ code: "ENOENT" });
+    const manifest = JSON.parse(await readFile(join(home, ".kiro", "harnix", "managed.json"), "utf8")) as { entries: Array<{ path: string }> };
+    expect(manifest.entries.some((entry) => entry.path === "skills/harnix-check/SKILL.md")).toBe(false);
+  });
+
+  it("should_preserve_a_modified_codex_hook_command_without_adding_a_duplicate_group", async () => {
+    const home = await temporaryUserHome();
+    const environment = fakeEnvironment(home);
+    const options = {
+      commandLookup: async () => true,
+      environment,
+      homeResolver: async () => home,
+      platforms: ["codex"] as const,
+    };
+    await setupPlatforms(options);
+    const hooksPath = join(home, "codex-home", "hooks.json");
+    const hooks = JSON.parse(await readFile(hooksPath, "utf8")) as {
+      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ command?: string; additionalContextLimit?: number }> }> };
+    };
+    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix internal context --platform codex"));
+    if (group === undefined || group.hooks[0] === undefined) throw new Error("Expected the installed Codex Harnix hook.");
+    group.hooks[0].command = "user-edited-harnix-command";
+    await writeFile(hooksPath, `${JSON.stringify(hooks, null, 2)}\n`);
+
+    const rerun = await setupPlatforms(options);
+    const after = JSON.parse(await readFile(hooksPath, "utf8")) as {
+      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ command?: string }> }> };
+    };
+
+    expect(rerun.platforms[0]).toMatchObject({ platform: "codex", readiness: "drifted" });
+    expect(rerun.platforms[0]?.preserved).toContain("$CODEX_HOME/hooks.json#codex-global-context-hook");
+    expect(after.hooks.UserPromptSubmit).toHaveLength(1);
+    expect(after.hooks.UserPromptSubmit[0]?.hooks[0]?.command).toBe("user-edited-harnix-command");
+  });
+
+  it("should_preserve_a_codex_hook_when_its_context_limit_or_type_is_edited", async () => {
+    const home = await temporaryUserHome();
+    const environment = fakeEnvironment(home);
+    const options = {
+      commandLookup: async () => true,
+      environment,
+      homeResolver: async () => home,
+      platforms: ["codex"] as const,
+    };
+    await setupPlatforms(options);
+    const hooksPath = join(home, "codex-home", "hooks.json");
+    const hooks = JSON.parse(await readFile(hooksPath, "utf8")) as {
+      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ command?: string; additionalContextLimit?: number; type?: string }> }> };
+    };
+    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix internal context --platform codex"));
+    if (group === undefined || group.hooks[0] === undefined) throw new Error("Expected the installed Codex Harnix hook.");
+    group.hooks[0].command = "user-edited-all-hook-identifiers";
+    group.hooks[0].additionalContextLimit = 42;
+    group.hooks[0].type = "user-edited-type";
+    await writeFile(hooksPath, `${JSON.stringify(hooks, null, 2)}\n`);
+
+    const rerun = await setupPlatforms(options);
+    const after = JSON.parse(await readFile(hooksPath, "utf8")) as {
+      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ additionalContextLimit?: number; type?: string }> }> };
+    };
+
+    expect(rerun.platforms[0]).toMatchObject({ platform: "codex", readiness: "drifted" });
+    expect(rerun.platforms[0]?.preserved).toContain("$CODEX_HOME/hooks.json#codex-global-context-hook");
+    expect(after.hooks.UserPromptSubmit).toHaveLength(1);
+    expect(after.hooks.UserPromptSubmit[0]?.hooks[0]).toMatchObject({ command: "user-edited-all-hook-identifiers", additionalContextLimit: 42, type: "user-edited-type" });
+  });
+
+  it("should_preserve_a_codex_hook_when_all_harnix_identity_fields_are_edited", async () => {
+    const home = await temporaryUserHome();
+    const environment = fakeEnvironment(home);
+    const options = {
+      commandLookup: async () => true,
+      environment,
+      homeResolver: async () => home,
+      platforms: ["codex"] as const,
+    };
+    await setupPlatforms(options);
+    const hooksPath = join(home, "codex-home", "hooks.json");
+    const hooks = JSON.parse(await readFile(hooksPath, "utf8")) as {
+      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ additionalContextLimit?: number; command?: string; type?: string }> }> };
+    };
+    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix internal context --platform codex"));
+    if (group === undefined || group.hooks[0] === undefined) throw new Error("Expected the installed Codex Harnix hook.");
+    group.hooks[0].command = "user-custom-context";
+    group.hooks[0].additionalContextLimit = 999;
+    group.hooks[0].type = "user-command";
+    await writeFile(hooksPath, `${JSON.stringify(hooks, null, 2)}\n`);
+
+    const rerun = await setupPlatforms(options);
+    const after = JSON.parse(await readFile(hooksPath, "utf8")) as {
+      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ additionalContextLimit?: number; command?: string; type?: string }> }> };
+    };
+
+    expect(rerun.platforms[0]).toMatchObject({ platform: "codex", readiness: "drifted" });
+    expect(rerun.platforms[0]?.preserved).toContain("$CODEX_HOME/hooks.json#codex-global-context-hook");
+    expect(after.hooks.UserPromptSubmit).toHaveLength(1);
+    expect(after.hooks.UserPromptSubmit[0]?.hooks[0]).toMatchObject({ additionalContextLimit: 999, command: "user-custom-context", type: "user-command" });
+  });
+
+  it("should_install_but_report_binary_unavailable_and_reject_user_root_symlink_escape", async () => {
+    const home = await temporaryUserHome();
+    const external = await temporaryUserHome();
+    const unavailable = await setupPlatforms({
+      commandLookup: async () => false,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      platforms: ["kiro"],
+    });
+    expect(unavailable.platforms[0]).toMatchObject({ platform: "kiro", readiness: "binary-unavailable" });
+    await expect(access(join(home, ".kiro", "hooks", "harnix-context.json"))).resolves.toBeUndefined();
+
+    const escapingHome = await temporaryUserHome();
+    await symlink(external, join(escapingHome, ".kiro"), process.platform === "win32" ? "junction" : "dir");
+    await expect(setupPlatforms({
+      commandLookup: async () => true,
+      environment: fakeEnvironment(escapingHome),
+      homeResolver: async () => escapingHome,
+      platforms: ["kiro"],
+    })).rejects.toThrow("symbolic link");
+    await expect(access(join(external, "hooks", "harnix-context.json"))).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("should_preflight_every_selected_root_before_creating_any_global_lock_or_surface", async () => {
+    const home = await temporaryUserHome();
+    const invalidManifest = join(home, ".kiro", "harnix", "managed.json");
+    await mkdir(join(invalidManifest, ".."), { recursive: true });
+    await writeFile(invalidManifest, "not-a-harnix-manifest\n", { encoding: "utf8" });
+
+    await expect(setupPlatforms({
+      commandLookup: async () => true,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      platforms: ["kiro", "codex"],
+    })).rejects.toThrow("manifest");
+
+    await expect(access(join(home, "codex-home"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(home, ".agents"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(readFile(invalidManifest, "utf8")).resolves.toBe("not-a-harnix-manifest\n");
   });
 });

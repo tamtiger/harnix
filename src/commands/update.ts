@@ -5,9 +5,6 @@ import { commonRules, languageRule } from "../rules/rules.js";
 import { workflowTemplate } from "../templates/harnix/workflow.js";
 import { reconcileManagedFiles, readManifest, writeManifest, type DesiredManagedFile, type ManagedManifest } from "../utils/managed-files.js";
 import { sha256 } from "../utils/hashing.js";
-import { kiroDesiredFiles } from "../configurators/kiro.js";
-import { antigravityDesiredFiles } from "../configurators/antigravity.js";
-import { codexDesiredFiles } from "../configurators/codex.js";
 import { packageVersion } from "../version.js";
 import { agentsTemplate } from "../templates/harnix/agents.js";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
@@ -22,12 +19,13 @@ export async function updateProject(options: UpdateProjectOptions): Promise<Upda
   const config = await readConfig(configPath);
   const manifest = await loadManifest(manifestPath);
   const desired = desiredFiles(config.platforms, config.languages);
-  const reconciled = await reconcileManagedFiles(options.root, manifest, desired, {
+  const legacyEntries = manifest.entries.filter((entry) => entry.scope !== "project");
+  const reconciled = await reconcileManagedFiles(options.root, { ...manifest, entries: manifest.entries.filter((entry) => entry.scope === "project") }, desired, {
     generatorVersion: packageVersion,
     removeObsolete: true,
     restoreDeleted: options.restoreDeleted,
   });
-  await writeManifest(manifestPath, reconciled.manifest);
+  await writeManifest(manifestPath, mergeManifestEntries(reconciled.manifest, legacyEntries));
   return reconciled.result;
 }
 
@@ -39,26 +37,34 @@ export async function baselineManagedTemplates(root: string): Promise<void> {
   const current = await loadManifest(manifestPath);
   const desired = desiredFiles(config.platforms, config.languages);
   const paths = new Set(desired.map((file) => file.entry.path));
-  const entries = [...current.entries.filter((entry) => !paths.has(entry.path)), ...desired.map(({ entry, content }) => ({ ...entry, generatedHash: sha256(content), generatorVersion: packageVersion }))].sort((left, right) => left.path.localeCompare(right.path));
+  const entries = [...current.entries.filter((entry) => entry.scope !== "project" || !paths.has(entry.path)), ...desired.map(({ entry, content }) => ({ ...entry, generatedHash: sha256(content), generatorVersion: packageVersion }))].sort((left, right) => left.path.localeCompare(right.path));
   await writeManifest(manifestPath, { generator: "harnix", schemaVersion: 1, entries });
 }
 
-export function desiredFiles(platforms: string[], languages: string[]): DesiredManagedFile[] {
+/**
+ * `platforms` remains accepted solely for config-v1 call compatibility.
+ * Phase 6 deliberately ignores it: project update only owns project data and
+ * the root AGENTS bootstrap, never legacy project-local platform surfaces.
+ */
+export function desiredFiles(_platforms: string[], languages: string[]): DesiredManagedFile[] {
   const files: DesiredManagedFile[] = [managed("AGENTS.md", "agents-bootstrap", "project", agentsTemplate), managed(".harnix/workflow.md", "workflow", "project", workflowTemplate), managed(".harnix/spec/guides/common-rules.md", "common-rules", "project", commonRules)];
   for (const language of languages) {
     const content = languageRule(language);
     if (content) files.push(managed(`.harnix/spec/guides/${language}.md`, `rules-${language}`, "project", content));
-  }
-  for (const platform of platforms) {
-    if (platform === "kiro") files.push(...kiroDesiredFiles(languages));
-    else if (platform === "antigravity") files.push(...antigravityDesiredFiles());
-    else if (platform === "codex") files.push(...codexDesiredFiles());
   }
   return files;
 }
 
 function managed(path: string, sourceId: string, scope: "project" | "kiro" | "antigravity" | "codex", content: string): DesiredManagedFile {
   return { entry: { path, sourceId, scope, generatedHash: "0".repeat(64), generatorVersion: packageVersion }, content };
+}
+
+function mergeManifestEntries(projectManifest: ManagedManifest, legacyEntries: ManagedManifest["entries"]): ManagedManifest {
+  return {
+    generator: "harnix",
+    schemaVersion: 1,
+    entries: [...projectManifest.entries, ...legacyEntries].sort((left, right) => left.path.localeCompare(right.path)),
+  };
 }
 
 async function loadManifest(path: string): Promise<ManagedManifest> {

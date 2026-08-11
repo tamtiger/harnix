@@ -19,7 +19,7 @@ Mọi public symbol, package, executable, template và generated branding dùng 
 | `packages/core/src/mem/**` | `src/core/journal/**` | `reuse/adapt` | Project journals + search; bỏ platform chat DB adapters/global memory |
 | `packages/core/src/channel/**` | — | `remove` | Không forum, worker, spawn, supervisor hoặc channel store |
 | `packages/cli/src/cli/**` | `src/cli.ts` | `reuse/adapt` | Commander CLI, một executable `harnix` |
-| `packages/cli/src/commands/init.ts` | `src/commands/init.ts` | `reuse/adapt` | Init chỉ tạo `.harnix` project data; setup tách riêng |
+| `packages/cli/src/commands/init.ts` | `src/commands/init.ts` | `reuse/adapt` | Init tạo `.harnix` project data plus root `AGENTS.md` bootstrap only when absent; setup tách riêng |
 | Configurator registry 24 platform | `src/configurators/{kiro,antigravity,codex}.ts` | `reuse/adapt` | Registry đóng chỉ Kiro, Antigravity và Codex |
 | `commands/{update,upgrade,uninstall,mem}.ts` | Cùng command names dưới `src/commands` | `reuse/adapt` | Semantics ownership, injection và safety mới |
 | — | `src/commands/setup.ts` | `build new` | Multi-flag platform setup tách khỏi init |
@@ -59,12 +59,12 @@ Public exports chỉ gồm supported programmatic boundaries được ghi trong 
 | Public command | Upstream basis | Harnix delta |
 |---|---|---|
 | `harnix init [--migrate] [--dry-run]` | Trellis init/project detector | `.harnix`, no scripts, interactive/CI language choice, legacy preview default, <5s |
-| `harnix setup --kiro|--antigravity|--codex` | Upstream configurators/templates | Required flag, multi-platform invocation, config validation, only selected rules |
-| `harnix update` | Template hash/fetch/prune | Offline packaged templates, versioned manifest, user-deleted state, safe obsolete removal |
+| `harnix setup --kiro|--antigravity|--codex [--dry-run] [--json]` | Upstream configurators/templates | Explicit user-global integration, multi-platform invocation, fixed hook command/readiness, no project config/root dependency |
+| `harnix update [--global]` | Template hash/fetch/prune | Offline project template reconcile by default; global reconcile uses per-root ownership manifests |
 | `harnix upgrade` | Upgrade command | `@tamtiger/harnix`, installed/available versions, injected network/process deps |
-| `harnix uninstall [--purge]` | Uninstall scrubbers | Default data preservation; purge preview/confirm; legacy untouched without explicit cleanup |
+| `harnix uninstall [--purge|--global|--legacy-project-surfaces]` | Uninstall scrubbers | Project purge remains separate; global/legacy cleanup preview and confirmation preserve modified/untracked content |
 | `harnix mem [query]` | Mem search concepts | Project JSONL/structured journals, Unicode/malformed handling, learning metadata |
-| `harnix doctor [--fix] [--json]` | New + ECC doctor ideas | Stable JSON schema, meaningful exit codes, conservative fix plan, no network |
+| `harnix doctor [--fix] [--global] [--json]` | New + ECC doctor ideas | Doctor JSON v2 projects + global integrations, meaningful exit codes, conservative scoped fix, no network |
 | Trellis `workflow` | — | Removed; exactly one Harnix workflow |
 | Trellis `channel` | — | Removed completely |
 
@@ -82,14 +82,15 @@ Only the following is valid new-project init output:
   workflow.md
   .developer
   .template-hashes.json
+AGENTS.md                  # bootstrap only when absent
 ```
 
 Mapping rules:
 
 - `.trellis/` or `.trellis-pro/` is legacy input only; never new output.
-- `scripts/`, platform runtime copies, SQLite/global state and hidden generated skills are not created.
+- `scripts/`, platform runtime copies, SQLite/global state and hidden generated skills are not created. The root `AGENTS.md` bootstrap is the sole non-`.harnix` init exception; it is not a setup-owned platform surface.
 - Tasks/journals are user-owned. Config/spec/workflow begin as managed where applicable and become preserved once modified.
-- Manifest keys are POSIX-normalized repository-relative paths; values include source ID, scope/platform, hash and generator version.
+- Project manifest keys are POSIX-normalized repository-relative paths; values include source ID, project scope, hash and generator version. Phase 6 global output uses separate platform-root-relative sidecar manifests and never puts ownership into project data.
 
 ## 6. Platform mapping
 
@@ -97,18 +98,18 @@ Mapping rules:
 
 | Upstream | Harnix |
 |---|---|
-| Trellis Kiro configurator | Frozen Kiro 2.14.2 adapter: skills + steering + one `promptSubmit -> runCommand` context hook invoking installed Harnix runtime |
+| Trellis Kiro configurator | User-global `~/.kiro` skills + conditional steering + one JSON-v1 `UserPromptSubmit` context hook invoking installed Harnix runtime |
 | `trellis-*` names | `harnix-*` only |
 | Runtime Python hooks/scripts | Package executable with bounded arguments/output |
-| Generic/all-language steering | Detected/confirmed languages only |
+| Generic/all-language steering | Global conditional Harnix-project guard; no setup-cwd language dependence |
 
 ### Antigravity
 
 | Upstream | Harnix |
 |---|---|
-| Upstream Gemini/adjacent ideas | Reimplement Antigravity project surfaces; executable preflight dùng `agy` |
-| Physical `.gemini` namespace | Managed project `GEMINI.md`/`.gemini/skills/harnix-*` only in v1; unverified Antigravity settings/hooks are not generated; public identity is Antigravity |
-| User Antigravity state | Không chạm `.gemini/config`, `antigravity-cli`, `antigravity-ide`, accounts, registry hoặc MCP credentials |
+| Upstream Gemini/adjacent ideas | Reimplement two namespaced Antigravity **user-global** plugins; executable preflight dùng `agy` |
+| Physical `.gemini` namespace | Desktop `~/.gemini/config/plugins/harnix` and CLI `~/.gemini/antigravity-cli/plugins/harnix`; public identity is Antigravity |
+| User Antigravity state | Only Harnix-owned plugin fragments; no unrelated settings, accounts, registry, MCP or credentials |
 | Trellis commands/agents | Focused Harnix workflow parity; no mandatory agents |
 | Shared runtime scripts | Installed `harnix` executable |
 
@@ -117,10 +118,10 @@ Mapping rules:
 | Upstream | Harnix |
 |---|---|
 | Broad Codex templates/agents/config | Minimal native surfaces verified against current official docs |
-| Root `AGENTS.md` overwrite risk | Managed marker block preserving all outside text |
-| Platform-specific skill copies | Repo `.agents/skills/harnix-*` with valid frontmatter |
-| Python session scripts | One official-schema `.codex/hooks.json` `UserPromptSubmit` handler invoking hidden installed-runtime context protocol, bounded JSON output and `commandWindows` |
-| Config replacement | Structural merge of Harnix-owned keys only |
+| Root `AGENTS.md` overwrite risk | Managed conditional block in `$CODEX_HOME/AGENTS.md` preserving all outside text |
+| Platform-specific skill copies | User `$HOME/.agents/skills/harnix-*` with valid frontmatter |
+| Python session scripts | One nested `$CODEX_HOME/hooks.json` `UserPromptSubmit` handler invoking hidden installed-runtime context protocol, bounded output and Windows shim smoke |
+| Config replacement | No `config.toml` mutation; preserve unrelated global hooks/instructions |
 | Mandatory implement/check/research agents | Optional research/independent-review roles; core workflow independent |
 | Legacy prompts/commands | Removed; skills are primary |
 

@@ -1,9 +1,8 @@
-import { access, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { initializeProject } from "../../src/commands/init.js";
-import { setupPlatforms } from "../../src/commands/setup.js";
 import { uninstallProject } from "../../src/commands/uninstall.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
@@ -16,60 +15,60 @@ async function initializedRepository(): Promise<string> {
 }
 
 describe("uninstallProject", () => {
-  it("should_uninstall_only_unchanged_managed_platform_files_and_require_purge_confirmation", async () => {
+  it("should_preserve_project_data_and_legacy_platform_surfaces_without_an_explicit_cleanup_mode", async () => {
     const root = await initializedRepository();
-    await setupPlatforms({ root, platforms: ["kiro"] });
-    const skill = join(root, ".kiro", "skills", "harnix-implement", "SKILL.md");
-    await writeFile(skill, "user skill\n");
+    const legacySkill = join(root, ".kiro", "skills", "harnix-check", "SKILL.md");
+    await mkdir(join(legacySkill, ".."), { recursive: true });
+    await writeFile(legacySkill, "legacy user content\n", { encoding: "utf8" });
 
     const result = await uninstallProject({ root });
 
-    expect(result.preserved).toContain(".kiro/skills/harnix-implement/SKILL.md");
-    await expect(readFile(skill, "utf8")).resolves.toBe("user skill\n");
-    await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("developer: tam");
-    await expect(uninstallProject({ root, purge: true })).resolves.toMatchObject({
-      confirmationRequired: true,
-      purgeTargets: [".harnix"],
+    expect(result).toEqual({
+      removed: [],
+      preserved: [],
+      purgeTargets: [],
+      confirmationRequired: false,
     });
+    await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("developer: tam");
+    await expect(readFile(legacySkill, "utf8")).resolves.toBe("legacy user content\n");
   });
 
-  it("should_not_mutate_any_surface_when_purge_needs_confirmation", async () => {
+  it("should_require_confirmation_then_purge_only_project_harnix_data", async () => {
     const root = await initializedRepository();
-    await setupPlatforms({ root, platforms: ["kiro"] });
-    const skill = join(root, ".kiro", "skills", "harnix-check", "SKILL.md");
-    const before = await readFile(skill, "utf8");
+    const legacySkill = join(root, ".agents", "skills", "harnix-check", "SKILL.md");
+    await writeFile(join(root, "AGENTS.md"), "project instructions\n", { encoding: "utf8" });
+    await mkdir(join(legacySkill, ".."), { recursive: true });
+    await writeFile(legacySkill, "legacy user content\n", { encoding: "utf8" });
 
-    const result = await uninstallProject({ root, purge: true });
-
-    expect(result.confirmationRequired).toBe(true);
-    await expect(readFile(skill, "utf8")).resolves.toBe(before);
+    await expect(uninstallProject({ root, purge: true })).resolves.toEqual({
+      removed: [],
+      preserved: [],
+      purgeTargets: [".harnix"],
+      confirmationRequired: true,
+    });
     await expect(access(join(root, ".harnix", "config.yaml"))).resolves.toBeUndefined();
+
+    await expect(uninstallProject({ root, purge: true, yes: true })).resolves.toEqual({
+      removed: [".harnix"],
+      preserved: [],
+      purgeTargets: [".harnix"],
+      confirmationRequired: false,
+    });
+    await expect(access(join(root, ".harnix"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toBe("project instructions\n");
+    await expect(readFile(legacySkill, "utf8")).resolves.toBe("legacy user content\n");
   });
 
-  it("should_preserve_modified_injection_when_uninstalling", async () => {
-    const root = await initializedRepository();
-    await setupPlatforms({ root, platforms: ["codex"] });
-    const agentsPath = join(root, "AGENTS.md");
-    const modified = (await readFile(agentsPath, "utf8")).replace("## Harnix", "## Harnix user customization");
-    await writeFile(agentsPath, modified);
-
-    const result = await uninstallProject({ root });
-
-    expect(result.preserved).toContain("AGENTS.md");
-    await expect(readFile(agentsPath, "utf8")).resolves.toContain("user customization");
-  });
-
-  it("should_fail_before_removing_platform_files_when_uninstall_path_is_unsafe", async () => {
+  it("should_fail_closed_when_the_purge_target_escapes_through_a_symbolic_link", async () => {
     const root = await initializedRepository();
     const external = await temporaryRepository();
-    await setupPlatforms({ root, platforms: ["kiro", "codex"] });
-    const codexSkill = join(root, ".agents", "skills", "harnix-implement", "SKILL.md");
-    await rm(join(root, ".kiro"), { recursive: true, force: true });
-    await symlink(external, join(root, ".kiro"), process.platform === "win32" ? "junction" : "dir");
+    const externalConfig = join(external, "config.yaml");
+    await writeFile(externalConfig, "external data\n", { encoding: "utf8" });
+    await rm(join(root, ".harnix"), { recursive: true, force: true });
+    await symlink(external, join(root, ".harnix"), process.platform === "win32" ? "junction" : "dir");
 
-    await expect(uninstallProject({ root, yes: true })).rejects.toThrow("symbolic link");
+    await expect(uninstallProject({ root, purge: true, yes: true })).rejects.toThrow("symbolic link");
 
-    await expect(access(codexSkill)).resolves.toBeUndefined();
-    await expect(access(join(external, "skills"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(readFile(externalConfig, "utf8")).resolves.toBe("external data\n");
   });
 });

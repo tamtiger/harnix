@@ -1,111 +1,270 @@
-import { readFile, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { diagnoseProject } from "../../src/commands/doctor.js";
 import { initializeProject } from "../../src/commands/init.js";
 import { setupPlatforms } from "../../src/commands/setup.js";
-import { readConfig, writeConfig } from "../../src/core/config/config.js";
+import { GlobalManagedTransactionError } from "../../src/utils/global-managed-files.js";
+import { readManifest, writeManifest } from "../../src/utils/managed-files.js";
+import { sha256 } from "../../src/utils/hashing.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
+import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-doctor-");
-const approvedHook = { command: "harnix internal context --platform codex", commandWindows: "harnix.exe internal context --platform codex", timeout: 5, additionalContextLimit: 2500 };
+const temporaryUserHome = useTemporaryUserHomes("harnix-doctor-home-");
 
-describe("diagnoseProject", () => {
-  it("should_report_non_clean_status_and_deterministic_severity_when_hooks_are_unsafe", async () => {
-    const root = await temporaryRepository();
+function globalOptions(home: string) {
+  return {
+    commandLookup: async () => true,
+    environment: { CODEX_HOME: join(home, "codex") },
+    homeResolver: async () => home,
+  };
+}
+
+describe("diagnoseProject Doctor v2", () => {
+  it("should_report_project_not_initialized_but_still_inspect_global_integrations", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+
+    expect(report).toMatchObject({ generator: "harnix", schemaVersion: 2, ok: true, project: { status: "not-initialized" } });
+    expect(report.globalIntegrations.map((integration) => ({ platform: integration.platform, status: integration.status }))).toEqual([
+      { platform: "kiro", status: "not-installed" },
+      { platform: "antigravity", status: "not-installed" },
+      { platform: "codex", status: "not-installed" },
+    ]);
+  });
+
+  it("should_report_global_codex_as_pending_trust_without_exposing_the_user_home", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
     await initializeProject({ developer: "tam", root, yes: true });
-    await setupPlatforms({ root, platforms: ["codex"] });
-    await writeFile(join(root, ".codex", "hooks.json"), `${JSON.stringify({ hooks: { UserPromptSubmit: [approvedHook, approvedHook, { command: "harnix internal context --platform codex && echo bad" }] } }, null, 2)}\n`);
+    await setupPlatforms({ ...globalOptions(home), platforms: ["codex"] });
 
-    const report = await diagnoseProject({ root });
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+    const codex = report.globalIntegrations.find((integration) => integration.platform === "codex");
 
+    expect(report.project.status).toBe("ready");
     expect(report.ok).toBe(false);
-    expect(report.summary.errors).toBeGreaterThanOrEqual(2);
-    expect(report.findings.map((finding) => finding.code)).toEqual(expect.arrayContaining(["duplicate-hook", "unsafe-hook-command"]));
-    expect(report.findings.map((finding) => finding.severity)).toEqual([...report.findings.map((finding) => finding.severity)].sort((left, right) => ({ error: 0, warning: 1, info: 2 })[left] - ({ error: 0, warning: 1, info: 2 })[right]));
+    expect(codex).toMatchObject({ status: "installed-pending-trust" });
+    expect(codex?.findings).toContainEqual(expect.objectContaining({ code: "codex-trust-pending", severity: "warning" }));
+    expect(JSON.stringify(report)).not.toContain(home);
   });
 
-  it("should_preserve_user_deleted_files_when_fixing_safe_untracked_files", async () => {
-    const root = await temporaryRepository();
+  it("should_surface_only_explicit_global_capability_evidence_in_the_v2_report", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
     await initializeProject({ developer: "tam", root, yes: true });
-    const configPath = join(root, ".harnix", "config.yaml");
-    await writeFile(configPath, (await readFile(configPath, "utf8")).replace("languages: []", "languages:\n  - vue"));
-    const deleted = join(root, ".harnix", "workflow.md");
-    await rm(deleted);
+    await setupPlatforms({ ...globalOptions(home), platforms: ["kiro", "antigravity", "codex"] });
 
-    const report = await diagnoseProject({ root, fix: true });
+    const report = await diagnoseProject({
+      ...globalOptions(home),
+      capabilityLookup: async (platform) => ({
+        kiro: "unsupported-version" as const,
+        antigravity: "shadowed" as const,
+        codex: "active" as const,
+      })[platform],
+      codexTrustLookup: async () => "trusted",
+      root,
+    });
 
-    expect(report.findings).toEqual(expect.arrayContaining([expect.objectContaining({ code: "managed-missing", path: ".harnix/workflow.md", fixable: false })]));
-    await expect(readFile(deleted, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "vue.md"), "utf8")).resolves.toContain("Vue rules");
+    expect(report.globalIntegrations.map((integration) => ({ platform: integration.platform, status: integration.status }))).toEqual([
+      { platform: "kiro", status: "unsupported-version" },
+      { platform: "antigravity", status: "shadowed" },
+      { platform: "codex", status: "active" },
+    ]);
   });
 
-  it("should_report_broken_injection_when_harnix_markers_are_reversed", async () => {
-    const root = await temporaryRepository();
+  it("should_not_mutate_global_integrations_when_project_only_fix_is_requested", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
     await initializeProject({ developer: "tam", root, yes: true });
-    await setupPlatforms({ root, platforms: ["codex"] });
-    await writeFile(join(root, "AGENTS.md"), "<!-- harnix:end -->\nUser guidance\n<!-- harnix:begin -->\n");
+    await setupPlatforms({ ...globalOptions(home), platforms: ["kiro"] });
+    const globalManifest = join(home, ".kiro", "harnix", "managed.json");
+    const before = await readFile(globalManifest, "utf8");
+    await rm(join(root, ".harnix", "workflow.md"));
 
-    const report = await diagnoseProject({ root });
+    const report = await diagnoseProject({ root, fix: true, ...globalOptions(home) });
 
-    expect(report.findings).toContainEqual(expect.objectContaining({ code: "broken-injection", fixable: false, path: "AGENTS.md", severity: "warning" }));
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "managed-missing", path: ".harnix/workflow.md" }));
+    await expect(readFile(globalManifest, "utf8")).resolves.toBe(before);
+    await expect(access(join(root, ".harnix", "workflow.md"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
-  it("should_report_invalid_skill_frontmatter_without_hiding_managed_drift", async () => {
-    const root = await temporaryRepository();
+  it("should_repair_only_safe_missing_global_entries_when_fix_global_is_explicit", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
     await initializeProject({ developer: "tam", root, yes: true });
-    await setupPlatforms({ root, platforms: ["codex"] });
-    const path = join(root, ".agents", "skills", "harnix-implement", "SKILL.md");
-    await writeFile(path, "name: harnix-implement\ndescription: frontmatter markers are missing\n");
+    await setupPlatforms({ ...globalOptions(home), platforms: ["kiro"] });
+    const steering = join(home, ".kiro", "steering", "harnix.md");
+    await rm(steering);
 
-    const report = await diagnoseProject({ root });
+    const report = await diagnoseProject({ root, fix: true, global: true, ...globalOptions(home) });
 
-    expect(report.findings).toEqual(expect.arrayContaining([
-      expect.objectContaining({ code: "managed-modified", path: ".agents/skills/harnix-implement/SKILL.md" }),
-      expect.objectContaining({ code: "skill-frontmatter", path: ".agents/skills/harnix-implement/SKILL.md" }),
-    ]));
+    expect(report.summary.fixed).toBeGreaterThan(0);
+    await expect(readFile(steering, "utf8")).resolves.toContain("Harnix activation guard");
   });
 
-  it("should_redact_detected_secrets_from_doctor_inventory_output", async () => {
-    const root = await temporaryRepository();
+  it("should_report_preserved_concurrent_global_edits_when_global_fix_rolls_back_partially", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    await setupPlatforms({ ...globalOptions(home), platforms: ["kiro"] });
+    const partialPath = "~/.kiro/steering/harnix.md";
+
+    const report = await diagnoseProject({
+      root,
+      fix: true,
+      global: true,
+      ...globalOptions(home),
+      globalUpdate: async () => {
+        throw new GlobalManagedTransactionError(
+          "Global managed reconciliation failed; attempted writes were rolled back conservatively.",
+          { partial: [partialPath], restored: [] },
+          new Error("concurrent editor"),
+        );
+      },
+    });
+
+    const kiro = report.globalIntegrations.find((integration) => integration.platform === "kiro");
+    expect(kiro).toMatchObject({ status: "drifted" });
+    expect(kiro?.findings).toContainEqual(expect.objectContaining({ code: "global-partial-rollback", path: partialPath, severity: "warning", fixable: false }));
+    expect(JSON.stringify(report)).not.toContain(home);
+  });
+
+  it("should_inventory_legacy_project_surfaces_without_taking_new_ownership", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const path = ".kiro/skills/harnix-check/SKILL.md";
+    const content = "legacy owned skill\n";
+    await mkdir(join(root, ".kiro", "skills", "harnix-check"), { recursive: true });
+    await writeFile(join(root, path), content, { encoding: "utf8" });
+    const manifestPath = join(root, ".harnix", ".template-hashes.json");
+    const manifest = await readManifest(manifestPath);
+    await writeManifest(manifestPath, {
+      ...manifest,
+      entries: [...manifest.entries, { path, sourceId: "legacy-check", scope: "kiro" as const, generatedHash: sha256(content), generatorVersion: "0.5.0" }].sort((left, right) => left.path.localeCompare(right.path)),
+    });
+
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "legacy-project-surface", path, severity: "info" }));
+    await expect(readFile(join(root, path), "utf8")).resolves.toBe(content);
+  });
+
+  it("should_inventory_an_untracked_legacy_skill_when_a_sibling_skill_is_manifest_owned", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const ownedPath = ".agents/skills/harnix-check/SKILL.md";
+    const untrackedPath = ".agents/skills/harnix-implement/SKILL.md";
+    const owned = "owned legacy Harnix skill\n";
+    const untracked = "untracked legacy Harnix skill\n";
+    await mkdir(join(root, ".agents", "skills", "harnix-check"), { recursive: true });
+    await mkdir(join(root, ".agents", "skills", "harnix-implement"), { recursive: true });
+    await writeFile(join(root, ownedPath), owned, { encoding: "utf8" });
+    await writeFile(join(root, untrackedPath), untracked, { encoding: "utf8" });
+    const manifestPath = join(root, ".harnix", ".template-hashes.json");
+    const manifest = await readManifest(manifestPath);
+    await writeManifest(manifestPath, {
+      ...manifest,
+      entries: [...manifest.entries, { path: ownedPath, sourceId: "legacy-check", scope: "codex" as const, generatedHash: sha256(owned), generatorVersion: "0.5.0" }].sort((left, right) => left.path.localeCompare(right.path)),
+    });
+
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "legacy-project-surface-untracked", path: untrackedPath, severity: "warning", fixable: false }));
+  });
+
+  it("should_inventory_each_untracked_legacy_skill_across_historical_platform_skill_roots", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const ownedPath = ".kiro/skills/harnix-check/SKILL.md";
+    const untrackedPath = ".kiro/skills/harnix-research/SKILL.md";
+    const owned = "owned legacy Harnix skill\n";
+    const untracked = "untracked legacy Harnix skill\n";
+    await mkdir(join(root, ".kiro", "skills", "harnix-check"), { recursive: true });
+    await mkdir(join(root, ".kiro", "skills", "harnix-research"), { recursive: true });
+    await writeFile(join(root, ownedPath), owned, { encoding: "utf8" });
+    await writeFile(join(root, untrackedPath), untracked, { encoding: "utf8" });
+    const manifestPath = join(root, ".harnix", ".template-hashes.json");
+    const manifest = await readManifest(manifestPath);
+    await writeManifest(manifestPath, {
+      ...manifest,
+      entries: [...manifest.entries, { path: ownedPath, sourceId: "legacy-kiro-check", scope: "kiro" as const, generatedHash: sha256(owned), generatorVersion: "0.5.0" }].sort((left, right) => left.path.localeCompare(right.path)),
+    });
+
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "legacy-project-surface-untracked", path: untrackedPath, severity: "warning", fixable: false }));
+  });
+
+  it("should_inventory_an_untracked_historical_root_agents_block_but_ignore_the_current_init_bootstrap", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const current = await diagnoseProject({ root, ...globalOptions(home) });
+    expect(current.project.findings).not.toContainEqual(expect.objectContaining({ code: "legacy-project-surface-untracked", path: "AGENTS.md" }));
+
+    const agentsPath = join(root, "AGENTS.md");
+    const historical = `# User instructions\n\n<!-- harnix:begin -->\nProject-local skills are generated by harnix setup --kiro, harnix setup --antigravity, or harnix setup --codex.\n<!-- harnix:end -->\n`;
+    await writeFile(agentsPath, historical, { encoding: "utf8" });
+    const manifestPath = join(root, ".harnix", ".template-hashes.json");
+    const manifest = await readManifest(manifestPath);
+    await writeManifest(manifestPath, {
+      ...manifest,
+      entries: manifest.entries.filter((entry) => entry.path !== "AGENTS.md"),
+    });
+
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "legacy-project-surface-untracked", path: "AGENTS.md", severity: "warning", fixable: false }));
+  });
+
+  it("should_classify_manifest_proven_legacy_hooks_as_possible_duplicate_injection", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const path = ".kiro/hooks/harnix-context.kiro.hook";
+    const content = `${JSON.stringify({
+      then: { command: "harnix internal context --platform kiro" },
+      when: { type: "promptSubmit" },
+    }, null, 2)}\n`;
+    await mkdir(join(root, ".kiro", "hooks"), { recursive: true });
+    await writeFile(join(root, path), content, { encoding: "utf8" });
+    const manifestPath = join(root, ".harnix", ".template-hashes.json");
+    const manifest = await readManifest(manifestPath);
+    await writeManifest(manifestPath, {
+      ...manifest,
+      entries: [...manifest.entries, { path, sourceId: "legacy-kiro-hook", scope: "kiro" as const, generatedHash: sha256(content), generatorVersion: "0.5.0" }].sort((left, right) => left.path.localeCompare(right.path)),
+    });
+
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "legacy-project-surface", path, severity: "info" }));
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "legacy-project-duplicate-hook", path, severity: "warning", fixable: false }));
+  });
+
+  it("should_detect_an_untracked_antigravity_workspace_hook_without_removing_it", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const path = ".agents/plugins/harnix/hooks.json";
+    const content = `${JSON.stringify({
+      "harnix-context": {
+        PreInvocation: [{ command: "harnix internal context --platform antigravity", type: "command" }],
+      },
+    }, null, 2)}\n`;
+    await mkdir(join(root, ".agents", "plugins", "harnix"), { recursive: true });
+    await writeFile(join(root, path), content, { encoding: "utf8" });
+
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "legacy-project-duplicate-hook", path, severity: "warning", fixable: false }));
+    await expect(readFile(join(root, path), "utf8")).resolves.toBe(content);
+  });
+
+  it("should_redact_detected_secrets_from_project_findings", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
     const secret = "harnix-super-secret-value";
     await initializeProject({ developer: "tam", root, yes: true });
     await writeFile(join(root, "AGENTS.md"), `api_key=${secret}\n`);
 
-    const report = await diagnoseProject({ root });
-    const serialized = JSON.stringify(report);
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
 
-    expect(report.findings).toContainEqual(expect.objectContaining({ code: "secret-exposure", message: expect.stringContaining("[REDACTED]"), path: "AGENTS.md", severity: "error" }));
-    expect(serialized).not.toContain(secret);
-  });
-
-  it("should_inventory_obsolete_and_untracked_desired_files_together", async () => {
-    const root = await temporaryRepository();
-    await initializeProject({ developer: "tam", languages: ["vue"], root, yes: true });
-    const configPath = join(root, ".harnix", "config.yaml");
-    const config = await readConfig(configPath);
-    await writeConfig(configPath, { ...config, languages: ["react-web"] });
-
-    const report = await diagnoseProject({ root });
-
-    expect(report.findings).toEqual(expect.arrayContaining([
-      expect.objectContaining({ code: "managed-obsolete", fixable: true, path: ".harnix/spec/guides/vue.md", severity: "warning" }),
-      expect.objectContaining({ code: "managed-untracked", fixable: true, path: ".harnix/spec/guides/react-web.md", severity: "warning" }),
-    ]));
-  });
-
-  it("should_fix_only_safe_untracked_files_when_doctor_runs_with_fix", async () => {
-    const root = await temporaryRepository();
-    await initializeProject({ developer: "tam", root, yes: true });
-    const configPath = join(root, ".harnix", "config.yaml");
-    const config = await readFile(configPath, "utf8");
-    await writeFile(configPath, config.replace("languages: []", "languages:\n  - vue"));
-
-    const report = await diagnoseProject({ root, fix: true });
-
-    expect(report.summary.fixed).toBeGreaterThan(0);
-    expect(report.findings.map((item) => item.code)).not.toContain("managed-untracked");
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "vue.md"), "utf8")).resolves.toContain("Vue rules");
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "secret-exposure", message: expect.stringContaining("[REDACTED]"), path: "AGENTS.md", severity: "error" }));
+    expect(JSON.stringify(report)).not.toContain(secret);
   });
 });
