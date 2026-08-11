@@ -10,6 +10,8 @@ Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
 Phase 5 review/refactor đã hoàn tất và toàn bộ acceptance gate hiện tại đã pass. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
 
+Behavior `setup` trong code hiện tại vẫn là project-local. Yêu cầu chuyển Kiro, Antigravity và Codex integration sang user-global đang ở Phase 6 planned; xem [kế hoạch global setup](docs/GLOBAL_SETUP_REFACTOR_PLAN.md). Các path/command trong kế hoạch chưa được xem là đã phát hành cho tới khi Phase 6 acceptance pass.
+
 ## Đặc điểm sản phẩm
 
 - Một npm package: `@tamtiger/harnix`

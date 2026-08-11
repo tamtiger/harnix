@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { discoverLegacy } from "../../src/migration/discovery.js";
-import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
+import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const fixture = useTemporaryRepositories("harnix-migration-");
 

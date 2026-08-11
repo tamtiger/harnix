@@ -8,7 +8,7 @@ import {
   resolveProjectRoot,
   resolveSafeProjectPath,
 } from "../../src/utils/paths.js";
-import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
+import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-path-");
 async function createTemporaryDirectory(prefix: string): Promise<string> { void prefix; return temporaryRepository(); }

@@ -3,13 +3,13 @@ import { join } from "node:path";
 
 import { readConfig, validateDeveloperId } from "../core/config/config.js";
 import { searchJournal, type JournalEntry } from "../core/journal/journal.js";
-import { resolveSafeProjectPath } from "../utils/paths.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 
 export interface MemOptions { root: string; query?: string | undefined; user?: string | undefined; limit?: number | undefined; }
 export interface MemResult { entries: JournalEntry[]; malformed: number; }
 
 export async function searchMemory(options: MemOptions): Promise<MemResult> {
-  const config = await readConfig(join(options.root, ".harnix", "config.yaml"));
+  const config = await readConfig(await resolveSafeHarnixPath(options.root, "config.yaml"));
   const developer = validateDeveloperId(options.user ?? config.developer);
   const journalRoot = await resolveSafeProjectPath(options.root, `.harnix/workspace/${developer}/journal`);
   let names: string[];

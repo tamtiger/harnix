@@ -3,11 +3,11 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { initializeProject } from "../../src/commands/init.js";
 import { setupPlatforms } from "../../src/commands/setup.js";
-import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
+import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
-describe("Phase 3 workflow templates", () => {
+describe("workflow templates", () => {
   it("seeds canonical workflow and all skills for Kiro and Codex", async () => {
     const root = await temporaryRepository(); await initializeProject({ root, developer: "tam", yes: true });
     await setupPlatforms({ root, platforms: ["kiro", "codex"] });

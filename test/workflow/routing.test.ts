@@ -2,10 +2,11 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { canCompleteTask, continueWorkflowTask, evidenceSupportsScope, finishWorkflowTask, implementationStrategy, isWithinRequestedScope, nextWorkflowStatus, routeWorkflow, shouldReassessArchitecture, shouldResearch, validateFullReadyArtifact, verificationStages } from "../../src/core/workflow.js";
-import { loadTask, saveTask, setActiveTask, transitionTask } from "../../src/core/tasks/task.js";
+import { appendJournal } from "../../src/core/journal/journal.js";
+import { loadTask, resolveActiveTask, saveTask, setActiveTask, transitionTask } from "../../src/core/tasks/task.js";
 import { createResearchFinding } from "../../src/core/research.js";
 import type { TaskRecord } from "../../src/core/tasks/task.js";
-import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
+import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -34,6 +35,49 @@ describe("workflow routing and completion evidence", () => {
     await saveTask(root, ready); await setActiveTask(root, ready.id); const finished = await finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", ready, current);
     expect(finished.status).toBe("completed"); expect(await readFile(join(root, "journal.jsonl"), "utf8")).toContain("Completed: t");
     expect((await loadTask(join(root, "tasks", ready.id, "task.json"))).status).toBe("completed");
+    expect(await resolveActiveTask(root)).toBeUndefined();
+  });
+  it("should_persist_completion_and_retain_active_pointer_when_archiving_fails", async () => {
+    const root = await temporaryRepository(); const current = new Date().toISOString(); const verifying = task(current); const calls: string[] = [];
+    await saveTask(root, verifying); await setActiveTask(root, verifying.id);
+
+    await expect(finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", verifying, current, {
+      saveTask: async (...args) => { calls.push("save"); await saveTask(...args); },
+      appendJournal: async (...args) => { calls.push("journal"); await appendJournal(...args); },
+      archiveTask: async () => { calls.push("archive"); throw new Error("active pointer write failed"); },
+    })).rejects.toThrow("active pointer write failed");
+
+    expect(calls).toEqual(["save", "journal", "archive"]);
+    expect((await loadTask(join(root, "tasks", verifying.id, "task.json"))).status).toBe("completed");
+    expect((await resolveActiveTask(root))?.id).toBe(verifying.id);
+  });
+  it("should_retain_verifying_task_and_active_pointer_when_completion_persistence_fails", async () => {
+    const root = await temporaryRepository(); const current = new Date().toISOString(); const verifying = task(current); const calls: string[] = [];
+    await saveTask(root, verifying); await setActiveTask(root, verifying.id);
+
+    await expect(finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", verifying, current, {
+      saveTask: async () => { calls.push("save"); throw new Error("task persistence failed"); },
+      appendJournal: async () => { calls.push("journal"); },
+      archiveTask: async () => { calls.push("archive"); },
+    })).rejects.toThrow("task persistence failed");
+
+    expect(calls).toEqual(["save"]);
+    expect((await loadTask(join(root, "tasks", verifying.id, "task.json"))).status).toBe("verifying");
+    expect((await resolveActiveTask(root))?.id).toBe(verifying.id);
+  });
+  it("should_retain_active_pointer_when_completion_journal_write_fails", async () => {
+    const root = await temporaryRepository(); const current = new Date().toISOString(); const verifying = task(current); const calls: string[] = [];
+    await saveTask(root, verifying); await setActiveTask(root, verifying.id);
+
+    await expect(finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", verifying, current, {
+      saveTask: async (...args) => { calls.push("save"); await saveTask(...args); },
+      appendJournal: async () => { calls.push("journal"); throw new Error("journal write failed"); },
+      archiveTask: async () => { calls.push("archive"); },
+    })).rejects.toThrow("journal write failed");
+
+    expect(calls).toEqual(["save", "journal"]);
+    expect((await loadTask(join(root, "tasks", verifying.id, "task.json"))).status).toBe("completed");
+    expect((await resolveActiveTask(root))?.id).toBe(verifying.id);
   });
   it("should_reject_completion_when_latest_required_evidence_failed", () => {
     const current = task("2026-08-07T09:30:00Z");

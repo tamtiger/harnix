@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { createConfig, writeConfig } from "../../src/core/config/config.js";
 import { renderInternalContext } from "../../src/commands/internal-context.js";
 import { saveTask, setActiveTask, type TaskRecord } from "../../src/core/tasks/task.js";
-import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
+import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
 

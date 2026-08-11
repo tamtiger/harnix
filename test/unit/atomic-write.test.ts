@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
 import { atomicWriteFile, type AtomicFileSystem } from "../../src/utils/atomic-write.js";
-import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
+import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const createTemporaryDirectory = useTemporaryRepositories("harnix-atomic-");
 

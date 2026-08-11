@@ -58,6 +58,10 @@ export async function reconcileManagedFiles(
   desired: DesiredManagedFile[],
   options: { generatorVersion: string; removeObsolete?: boolean | undefined; restoreDeleted?: boolean | undefined } = { generatorVersion: "unknown" },
 ): Promise<{ manifest: ManagedManifest; result: ReconcileResult }> {
+  await Promise.all([
+    ...manifest.entries.map((entry) => resolveSafeProjectPath(projectRoot, entry.path)),
+    ...desired.map((file) => resolveSafeProjectPath(projectRoot, file.entry.path)),
+  ]);
   const oldByPath = new Map(manifest.entries.map((entry) => [entry.path, entry]));
   const result: ReconcileResult = { created: [], updated: [], preserved: [], deleted: [], obsolete: [] };
   const nextEntries: ManagedEntry[] = [];
@@ -98,7 +102,7 @@ export async function reconcileManagedFiles(
       nextEntries.push(obsolete);
     }
   }
-  return { manifest: validateManifest({ generator: "harnix", schemaVersion: 1, entries: nextEntries }), result };
+  return { manifest: validateManifest({ generator: "harnix", schemaVersion: 1, entries: nextEntries.sort((left, right) => left.path.localeCompare(right.path)) }), result };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }

@@ -17,15 +17,15 @@ export function codexDesiredFiles(): DesiredManagedFile[] {
 
 export interface CodexSurfacePlan { agentsPath: string; agents: string; configPath: string; config: string; hooksPath: string; hooks: string; }
 
-export async function prepareCodexSurfaces(root: string, preserveModifiedSurfaces = false): Promise<CodexSurfacePlan> {
+export async function prepareCodexSurfaces(root: string, preserveModifiedBlock = false, preserveModifiedConfiguration = preserveModifiedBlock): Promise<CodexSurfacePlan> {
   const agentsPath = await resolveSafeProjectPath(root, "AGENTS.md"), existing = await readOptionalFile(agentsPath);
   const start = existing.indexOf(begin), finish = existing.indexOf(end);
   if (start >= 0 && finish < start) throw new Error("Cannot merge AGENTS.md because Harnix markers are unbalanced.");
   const modified = start >= 0 && finish >= start && existing.slice(start, finish + end.length) !== codexManagedBlock;
-  const agents = modified && preserveModifiedSurfaces ? existing : start >= 0 && finish >= start ? `${existing.slice(0, start)}${codexManagedBlock}${existing.slice(finish + end.length)}` : existing.length === 0 ? `${codexManagedBlock}\n` : `${existing.trimEnd()}\n\n${codexManagedBlock}\n`;
+  const agents = modified && preserveModifiedBlock ? existing : start >= 0 && finish >= start ? `${existing.slice(0, start)}${codexManagedBlock}${existing.slice(finish + end.length)}` : existing.length === 0 ? `${codexManagedBlock}\n` : `${existing.trimEnd()}\n\n${codexManagedBlock}\n`;
   const configPath = await resolveSafeProjectPath(root, ".codex/config.toml"), hooksPath = await resolveSafeProjectPath(root, ".codex/hooks.json");
-  const config = mergeCodexConfig(await readOptionalFile(configPath), !preserveModifiedSurfaces);
-  const hooks = `${JSON.stringify(mergeCodexHooks(await readOptionalFile(hooksPath), !preserveModifiedSurfaces), null, 2)}\n`;
+  const config = mergeCodexConfig(await readOptionalFile(configPath), !preserveModifiedConfiguration);
+  const hooks = `${JSON.stringify(mergeCodexHooks(await readOptionalFile(hooksPath), !preserveModifiedConfiguration), null, 2)}\n`;
   return { agentsPath, agents, configPath, config, hooksPath, hooks };
 }
 export async function applyCodexSurfaces(plan: CodexSurfacePlan): Promise<void> {

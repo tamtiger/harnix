@@ -9,7 +9,7 @@ import {
   validateConfig,
   writeConfig,
 } from "../../src/core/config/config.js";
-import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
+import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const createFixture = useTemporaryRepositories("harnix-config-");
 

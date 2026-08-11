@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { initializeProject } from "../../src/commands/init.js";
 import { updateProject } from "../../src/commands/update.js";
-import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
+import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-update-");
 async function fixture(): Promise<string> { const root = await temporaryRepository(); await initializeProject({ developer: "tam", root, yes: true }); return root; }
@@ -36,5 +36,22 @@ describe("updateProject", () => {
     const result = await updateProject({ root });
     expect(result.deleted).toContain(".harnix/spec/guides/vue.md");
     await expect(access(obsolete)).rejects.toMatchObject({ code: "ENOENT" });
+  });
+  it("should_preserve_modified_obsolete_file_and_its_manifest_entry", async () => {
+    const root = await fixture();
+    const obsolete = join(root, ".harnix", "spec", "guides", "vue.md");
+    const configPath = join(root, ".harnix", "config.yaml");
+    const baseConfig = await readFile(configPath, "utf8");
+    await writeFile(configPath, baseConfig.replace("languages: []", "languages:\n  - vue"));
+    await updateProject({ root });
+    await writeFile(obsolete, "user-owned Vue guidance\n");
+    await writeFile(configPath, baseConfig);
+
+    const result = await updateProject({ root });
+    const manifest = await readFile(join(root, ".harnix", ".template-hashes.json"), "utf8");
+
+    expect(result.preserved).toContain(".harnix/spec/guides/vue.md");
+    await expect(readFile(obsolete, "utf8")).resolves.toBe("user-owned Vue guidance\n");
+    expect(manifest).toContain(".harnix/spec/guides/vue.md");
   });
 });

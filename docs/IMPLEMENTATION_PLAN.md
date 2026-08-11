@@ -50,8 +50,11 @@ harnix/
 ├── test/
 │   ├── unit/
 │   ├── integration/
-│   ├── evals/
-│   └── fixtures/
+│   ├── workflow/
+│   ├── migration/
+│   ├── platform/
+│   ├── safety/
+│   └── support/
 ├── docs/
 ├── package.json
 ├── tsconfig.json
@@ -587,6 +590,20 @@ The 2026-08-10 repository review found lifecycle and persisted-state gaps that w
 - [x] Fresh section 11 acceptance sequence and dependency audits pass (runtime audit clean; one documented Low development-only exception remains time-bounded).
 
 Historical Phase 1–4 checkmarks record their original checkpoints; they do not supersede Phase 5 regression evidence.
+
+## 9B. Phase 6 — User-global platform integrations (planned)
+
+Yêu cầu ngày 2026-08-11 thay đổi `setup` từ project-local sang user-global cho Kiro, Antigravity và Codex. Đây là active architecture refactor; các checkmark Phase 1–5 chỉ mô tả behavior cũ đã hoàn tất và không được dùng để claim Phase 6 complete.
+
+Trong phạm vi Phase 6, constraint cũ “không global config mutation” và các frozen project-local platform paths bị supersede bởi explicit, Harnix-owned user-global customization. Các cấm đoán về global runtime, memory, credential, MCP, permission mutation, telemetry và silent network vẫn giữ nguyên.
+
+Kế hoạch, official path/schema snapshot, migration policy, work breakdown và acceptance gate nằm tại [`GLOBAL_SETUP_REFACTOR_PLAN.md`](GLOBAL_SETUP_REFACTOR_PLAN.md).
+
+- [ ] G0 cập nhật toàn bộ normative documentation contracts theo thiết kế đã duyệt.
+- [ ] G1–G3 thêm isolated-home tests, safe user paths, global ownership/locking/rollback.
+- [ ] G4–G6 chuyển Kiro, Antigravity Desktop/CLI và Codex sang official current user-global surfaces.
+- [ ] G7–G8 tách lifecycle global/project và cleanup project-local integration cũ một cách explicit.
+- [ ] G9–G10 cập nhật templates/release scripts rồi chạy full automated và disposable-profile acceptance.
 
 ## 10. Required test inventory
 

@@ -1,5 +1,4 @@
 import { mkdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { resolveSafeProjectPath } from "../../utils/paths.js";
 
@@ -9,7 +8,8 @@ export type WorkflowCheckpoint = "triage" | "planning" | "ready" | "implementing
 export interface AcceptanceCriterion { id: string; text: string; status: "pending" | "met" | "waived"; evidenceIds: string[]; waiverReason?: string; }
 export interface ValidationCheck { id: string; description: string; command?: string; scope: "focused" | "full"; required: boolean; }
 export interface Evidence { id: string; checkId?: string; recordedAt: string; result: "pass" | "fail" | "skipped"; exitCode?: number; summary: string; artifactPaths: string[]; }
-export interface TaskRecord { generator: "harnix"; schemaVersion: 1; id: string; title: string; mode: TaskMode; status: TaskStatus; checkpoint: WorkflowCheckpoint; goal: string; nonGoals: string[]; acceptanceCriteria: AcceptanceCriterion[]; relevantPaths: string[]; relevantSpecs: string[]; validationPlan: ValidationCheck[]; evidence: Evidence[]; blocker?: { kind: "decision" | "authority" | "credential" | "external" | "repository"; summary: string; nextAction: string; resumeStatus: "planning" | "ready" | "in_progress" | "verifying" }; createdAt: string; updatedAt: string; completedAt?: string; }
+export interface TaskBlocker { kind: "decision" | "authority" | "credential" | "external" | "repository"; summary: string; nextAction: string; resumeStatus: "planning" | "ready" | "in_progress" | "verifying"; }
+export interface TaskRecord { generator: "harnix"; schemaVersion: 1; id: string; title: string; mode: TaskMode; status: TaskStatus; checkpoint: WorkflowCheckpoint; goal: string; nonGoals: string[]; acceptanceCriteria: AcceptanceCriterion[]; relevantPaths: string[]; relevantSpecs: string[]; validationPlan: ValidationCheck[]; evidence: Evidence[]; blocker?: TaskBlocker; createdAt: string; updatedAt: string; completedAt?: string; }
 
 export class TaskValidationError extends Error { override name = "TaskValidationError"; }
 const transitions: Record<TaskStatus, TaskStatus[]> = { planning: ["ready", "blocked"], ready: ["in_progress", "blocked"], in_progress: ["verifying", "blocked"], verifying: ["completed", "blocked"], blocked: ["planning", "ready", "in_progress", "verifying"], completed: [] };
@@ -34,12 +34,13 @@ export function validateTask(value: unknown): TaskRecord {
   return value as unknown as TaskRecord;
 }
 
-export function transitionTask(task: TaskRecord, status: TaskStatus, checkpoint: WorkflowCheckpoint, now = new Date().toISOString()): TaskRecord {
+export function transitionTask(task: TaskRecord, status: TaskStatus, checkpoint: WorkflowCheckpoint, now = new Date().toISOString(), blocker?: TaskBlocker): TaskRecord {
   if (!transitions[task.status].includes(status)) throw new TaskValidationError(`Illegal task transition ${task.status} -> ${status}.`);
   if (task.status === "blocked" && task.blocker?.resumeStatus !== status) throw new TaskValidationError("Blocked task must resume to its recorded status.");
+  if (status === "blocked" && blocker === undefined) throw new TaskValidationError("Transitioning to blocked requires a blocker.");
   const withoutBlocker = { ...task };
   delete withoutBlocker.blocker;
-  return validateTask({ ...withoutBlocker, ...(status === "blocked" && task.blocker ? { blocker: task.blocker } : {}), status, checkpoint, updatedAt: now, ...(status === "completed" ? { completedAt: now } : {}) });
+  return validateTask({ ...withoutBlocker, ...(status === "blocked" ? { blocker } : {}), status, checkpoint, updatedAt: now, ...(status === "completed" ? { completedAt: now } : {}) });
 }
 
 export async function saveTask(root: string, task: TaskRecord): Promise<void> { const valid = validateTask(task); const directory = await resolveSafeProjectPath(root, `tasks/${valid.id}`); const path = await resolveSafeProjectPath(root, `tasks/${valid.id}/task.json`); await mkdir(directory, { recursive: true }); await atomicWriteFile(path, JSON.stringify(valid, null, 2) + "\n"); }
@@ -67,17 +68,17 @@ export async function setActiveTask(harnixRoot: string, taskId: string): Promise
 }
 export async function resolveActiveTask(harnixRoot: string): Promise<TaskRecord | undefined> {
   try {
-    const taskId = (await readFile(join(harnixRoot, "tasks", ".active"), "utf8")).trim();
+    const taskId = (await readFile(await resolveSafeProjectPath(harnixRoot, "tasks/.active"), "utf8")).trim();
     if (taskId.length === 0) return undefined;
     validateTaskId(taskId);
-    return await loadTask(join(harnixRoot, "tasks", taskId, "task.json"));
+    return await loadTask(await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}/task.json`));
   } catch (error: unknown) {
     if (isMissing(error)) return undefined;
     throw error;
   }
 }
 export async function clearActiveTask(harnixRoot: string, taskId: string): Promise<void> {
-  const activePath = join(harnixRoot, "tasks", ".active");
+  const activePath = await resolveSafeProjectPath(harnixRoot, "tasks/.active");
   try { if ((await readFile(activePath, "utf8")).trim() === taskId) await atomicWriteFile(activePath, ""); } catch (error: unknown) { if (!isMissing(error)) throw error; }
 }
 export async function archiveTask(harnixRoot: string, task: TaskRecord): Promise<void> {

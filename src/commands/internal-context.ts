@@ -3,11 +3,12 @@ import { join } from "node:path";
 import { buildContext, loadContextManifest } from "../core/context/context.js";
 import { readConfig } from "../core/config/config.js";
 import { resolveActiveTask } from "../core/tasks/task.js";
+import { resolveSafeHarnixPath } from "../utils/paths.js";
 
 export type InternalContextPlatform = "kiro" | "antigravity" | "codex";
 
 export async function renderInternalContext(root: string, platform: InternalContextPlatform): Promise<string> {
-  const harnixRoot = join(root, ".harnix");
+  const harnixRoot = await resolveSafeHarnixPath(root);
   if (!await exists(join(harnixRoot, "config.yaml"))) return "";
   const config = await readConfig(join(harnixRoot, "config.yaml"));
   const active = await resolveActiveTask(harnixRoot);

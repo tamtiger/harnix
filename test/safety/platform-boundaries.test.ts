@@ -2,7 +2,7 @@ import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-describe("Phase 3 supported platform surface", () => {
+describe("supported platform surface", () => {
   it("contains no unsupported platform adapter directories", async () => {
     const adapters = await readdir(join(process.cwd(), "src", "configurators"));
     expect(adapters).toEqual(["antigravity.ts", "codex.ts", "kiro.ts"]);

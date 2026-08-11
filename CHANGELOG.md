@@ -4,10 +4,11 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; các mục dưới đây theo commit cho đến khi versioning/release workflow được triển khai.
 
-## [Unreleased]
+## [0.5.0] - 2026-08-11
 
 ### Added
 
+- User-global setup refactor plan with current official Kiro, Antigravity, and Codex paths, hook schemas, ownership isolation, migration, security, and acceptance gates.
 - Phase 5 regression coverage for legacy-data migration, managed setup/uninstall ownership, workflow completion, CLI exit/redaction behavior, doctor findings, path containment, and concurrent journal writes.
 - Repository review and remediation roadmap in `docs/REVIEW_REFACTOR_PLAN.md`.
 - README usage guide covering installation, quick start, CLI flags, platform setup, workflow, CI and troubleshooting-oriented lifecycle commands.
@@ -15,6 +16,9 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 ### Changed
 
+- Package metadata, build-time CLI metadata và generated manifests nay cùng lấy version `0.5.0` từ một nguồn `package.json`.
+- Test coverage is organized by behavior and boundary (`workflow`, `support`, focused core/lifecycle files) instead of historical Phase-labelled files.
+- Phase 5 now refuses staged legacy-content mismatches before activation or cleanup, preserves modified obsolete-template ownership deterministically, preflights destructive uninstall paths, protects `.harnix` and task-state paths from symlink/junction escapes, and keeps customized Harnix instruction blocks intact on first platform setup.
 - `harnix init` now always creates the `.harnix/` namespace regardless of existing Trellis folders or skills; it no longer exposes legacy migration through the init flow.
 - CLI entry-point detection now resolves symlinked pnpm global installs before comparing module paths, so `harnix` executes normally after `pnpm add -g .` on Windows.
 - README now documents pnpm 11 global CLI registration from source, `PNPM_HOME`/`PATH` recovery on PowerShell, project-local execution, and the unpublished npm-package limitation.
@@ -89,6 +93,9 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 - Quyết định sản phẩm Harnix, contract v1, workflow và provenance upstream được chốt tại commit `d01239f`.
 
-[Unreleased]: https://github.com/tamtiger/harnix/compare/d01239f...HEAD
+[0.5.0]: https://github.com/tamtiger/harnix/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/tamtiger/harnix/compare/v0.3.0...v0.4.0
+[0.3.0]: https://github.com/tamtiger/harnix/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/tamtiger/harnix/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/tamtiger/harnix/commits/main
 [Documentation baseline]: https://github.com/tamtiger/harnix/commit/d01239f

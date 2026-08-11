@@ -1,6 +1,6 @@
 {
   "name": "@tamtiger/harnix",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "Project-local coding-agent harness for Kiro, Antigravity, and Codex.",
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -31,7 +31,7 @@
     "test:integration": "vitest run test/integration",
     "test:migration": "vitest run test/migration",
     "test:platform": "vitest run test/platform",
-    "test:workflow": "vitest run test/evals",
+    "test:workflow": "vitest run test/workflow",
     "test:safety": "vitest run test/safety",
     "test:acceptance": "pnpm run test:unit && pnpm run test:integration && pnpm run test:migration && pnpm run test:platform && pnpm run test:workflow && pnpm run test:safety",
     "pack:check": "node scripts/pack-check.mjs",

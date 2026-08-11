@@ -1,9 +1,8 @@
 import { readFile, stat } from "node:fs/promises";
-import { join } from "node:path";
 
 import { readConfig, type HarnixConfigV1 } from "../core/config/config.js";
 import { ownershipState, readManifest, type ManagedManifest } from "../utils/managed-files.js";
-import { resolveSafeProjectPath } from "../utils/paths.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import { desiredFiles, updateProject } from "./update.js";
 
 export interface DoctorFinding { code: string; severity: "error" | "warning" | "info"; path?: string; message: string; fixable: boolean; }
@@ -27,11 +26,11 @@ export async function diagnoseProject(options: DoctorOptions): Promise<DoctorRep
 async function diagnoseOnce(root: string): Promise<DoctorReport> {
   const findings: DoctorFinding[] = [];
   let config: HarnixConfigV1;
-  try { config = await readConfig(join(root, ".harnix", "config.yaml")); }
+  try { config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml")); }
   catch (error) { findings.push(finding("config-invalid", "error", ".harnix/config.yaml", redact(error, root), false)); return report(findings, 0); }
 
   let manifest: ManagedManifest;
-  try { manifest = await readManifest(join(root, ".harnix", ".template-hashes.json")); }
+  try { manifest = await readManifest(await resolveSafeHarnixPath(root, ".template-hashes.json")); }
   catch (error) { findings.push(finding("manifest-invalid", "error", ".harnix/.template-hashes.json", redact(error, root), false)); return report(findings, 0); }
 
   const desired = new Map(desiredFiles(config.platforms, config.languages).map((file) => [file.entry.path, file]));
@@ -57,11 +56,10 @@ async function diagnoseOnce(root: string): Promise<DoctorReport> {
 async function inspectInjections(root: string, config: HarnixConfigV1, findings: DoctorFinding[]): Promise<void> {
   for (const [platform, path] of [["codex", "AGENTS.md"], ["antigravity", "GEMINI.md"]] as const) {
     const text = await optionalSafe(root, path, findings);
-    const beginCount = (text.match(/<!-- harnix:begin -->/gu) ?? []).length;
-    const endCount = (text.match(/<!-- harnix:end -->/gu) ?? []).length;
-    if (beginCount > 1) findings.push(finding("duplicate-injection", "error", path, "Multiple Harnix managed blocks were found.", false));
-    else if (endCount !== beginCount) findings.push(finding("broken-injection", "warning", path, "Harnix managed block markers are unbalanced.", false));
-    else if (config.platforms.includes(platform) && beginCount === 0) findings.push(finding("injection-missing", "warning", path, `Expected ${platform} project guidance is missing.`, false));
+    const markers = inspectManagedMarkers(text);
+    if (markers.beginCount > 1) findings.push(finding("duplicate-injection", "error", path, "Multiple Harnix managed blocks were found.", false));
+    if (markers.malformed) findings.push(finding("broken-injection", "warning", path, "Harnix managed block markers are unbalanced or out of order.", false));
+    else if (config.platforms.includes(platform) && markers.beginCount === 0) findings.push(finding("injection-missing", "warning", path, `Expected ${platform} project guidance is missing.`, false));
   }
 
   if (config.platforms.includes("codex")) {
@@ -139,6 +137,15 @@ function report(findings: DoctorFinding[], fixed: number): DoctorReport {
   const sorted = findings.sort((left, right) => order[left.severity] - order[right.severity] || left.code.localeCompare(right.code) || (left.path ?? "").localeCompare(right.path ?? ""));
   const errors = sorted.filter((item) => item.severity === "error").length, warnings = sorted.filter((item) => item.severity === "warning").length;
   return { schemaVersion: 1, generator: "harnix", ok: errors === 0 && warnings === 0, summary: { errors, warnings, fixed }, findings: sorted };
+}
+function inspectManagedMarkers(source: string): { beginCount: number; malformed: boolean } {
+  let beginCount = 0, depth = 0, malformed = false;
+  for (const match of source.matchAll(/<!-- harnix:(begin|end) -->/gu)) {
+    if (match[1] === "begin") { beginCount += 1; depth += 1; }
+    else if (depth === 0) malformed = true;
+    else depth -= 1;
+  }
+  return { beginCount, malformed: malformed || depth !== 0 };
 }
 function finding(code: string, severity: DoctorFinding["severity"], path: string | undefined, message: string, fixable: boolean): DoctorFinding { return { code, severity, ...(path ? { path } : {}), message, fixable }; }
 function redact(value: unknown, root: string): string { return String(value instanceof Error ? value.message : value).replaceAll(root, "[PROJECT]").replace(/(?:token|secret|password|api[_-]?key)\s*[=:]\s*[^\s,]+/giu, "$1=[REDACTED]"); }

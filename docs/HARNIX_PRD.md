@@ -96,7 +96,14 @@ harnix/
 │   ├── utils/              # paths, detection, hashing, managed files, process
 │   ├── cli.ts
 │   └── index.ts
-├── test/{unit,integration,evals,fixtures}/
+├── test/
+│   ├── unit/               # pure core and utility behavior
+│   ├── integration/        # CLI and project lifecycle boundaries
+│   ├── workflow/           # routing, context, and template contracts
+│   ├── migration/
+│   ├── platform/
+│   ├── safety/
+│   └── support/            # reusable isolated-repository fixture
 ├── docs/
 ├── package.json
 ├── tsconfig.json

@@ -5,6 +5,11 @@ import { resolveActiveTask } from "./tasks/task.js";
 
 export type WorkflowRoute = "bypass" | TaskMode;
 export interface RouteRequest { intent: "question" | "plan" | "implement" | "fix" | "docs"; forceMode?: TaskMode; materialUnknown?: boolean; crossLayer?: boolean; securitySensitive?: boolean; }
+export interface WorkflowFinishDependencies {
+  saveTask?: typeof saveTask;
+  appendJournal?: typeof appendJournal;
+  archiveTask?: typeof archiveTask;
+}
 
 export function routeWorkflow(request: RouteRequest): WorkflowRoute {
   if (request.intent === "question") return "bypass";
@@ -39,12 +44,12 @@ export function implementationStrategy(kind: "behavior" | "docs" | "wiring" | "s
   return "documented-exception";
 }
 export function evidenceSupportsScope(evidence: Evidence, requiredScope: "focused" | "full", checkScope: "focused" | "full"): boolean { return evidence.result === "pass" && (requiredScope === "focused" || checkScope === "full"); }
-export async function finishWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, now = new Date().toISOString()): Promise<TaskRecord> {
+export async function finishWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, now = new Date().toISOString(), dependencies: WorkflowFinishDependencies = {}): Promise<TaskRecord> {
   if (task.status !== "verifying" || !canCompleteTask(task, Date.parse(now))) throw new Error("Task requires fresh complete verification before finishing.");
   const completed = transitionTask(task, "completed", "finishing", now);
-  await saveTask(harnixRoot, completed);
-  await appendJournal(journalPath, { generator: "harnix", schemaVersion: 1, id: `${completed.id}-completion`, recordedAt: now, developer, taskId: completed.id, kind: "completion", summary: `Completed: ${completed.title}`, evidenceIds: completed.evidence.map((evidence) => evidence.id) });
-  await archiveTask(harnixRoot, completed);
+  await (dependencies.saveTask ?? saveTask)(harnixRoot, completed);
+  await (dependencies.appendJournal ?? appendJournal)(journalPath, { generator: "harnix", schemaVersion: 1, id: `${completed.id}-completion`, recordedAt: now, developer, taskId: completed.id, kind: "completion", summary: `Completed: ${completed.title}`, evidenceIds: completed.evidence.map((evidence) => evidence.id) });
+  await (dependencies.archiveTask ?? archiveTask)(harnixRoot, completed);
   return completed;
 }
 export async function continueWorkflowTask(harnixRoot: string): Promise<{ task: TaskRecord; contextPaths: string[] } | undefined> {

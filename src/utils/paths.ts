@@ -84,6 +84,12 @@ export async function resolveSafeProjectPath(projectRoot: string, repositoryPath
   return candidate;
 }
 
+/** Resolves Harnix state below a project root without trusting `.harnix` as a filesystem root. */
+export async function resolveSafeHarnixPath(projectRoot: string, harnixPath = "."): Promise<string> {
+  const relativePath = harnixPath === "." || harnixPath.length === 0 ? ".harnix" : `.harnix/${harnixPath}`;
+  return resolveSafeProjectPath(projectRoot, relativePath);
+}
+
 function isContainedPath(root: string, candidate: string): boolean {
   const pathToCandidate = relative(root, candidate);
   return pathToCandidate === "" || (!pathToCandidate.startsWith(`..${sep}`) && pathToCandidate !== ".." && !isAbsolute(pathToCandidate));

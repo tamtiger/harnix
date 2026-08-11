@@ -6,7 +6,8 @@ vi.mock("inquirer", () => ({ default: { prompt: vi.fn() } }));
 
 import { createProgram, runCli } from "../../src/cli.js";
 import inquirer from "inquirer";
-import { useTemporaryRepositories } from "../helpers/temporary-repository.js";
+import { initializeProject } from "../../src/commands/init.js";
+import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const originalCwd = process.cwd();
 const originalExitCode = process.exitCode;
@@ -39,6 +40,21 @@ describe.sequential("CLI", () => {
     const root = await fixture(); process.chdir(root);
     await createProgram({ interactive: false }).parseAsync(["node", "harnix", "init", "--yes", "--user", "tam"], { from: "node" });
     await expect(createProgram({ interactive: false }).parseAsync(["node", "harnix", "doctor", "--json"], { from: "node" })).resolves.toBeDefined();
+  });
+  it("should_emit_one_deterministic_doctor_json_document_to_stdout", async () => {
+    const root = await fixture(); process.chdir(root);
+    await initializeProject({ developer: "tam", root, yes: true });
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await expect(runCli(["node", "harnix", "doctor", "--json"])).resolves.toBe(0);
+    const first = stdout.mock.calls.map((call) => String(call[0])).join("");
+    stdout.mockClear();
+    await expect(runCli(["node", "harnix", "doctor", "--json"])).resolves.toBe(0);
+    const second = stdout.mock.calls.map((call) => String(call[0])).join("");
+
+    expect(first).toBe(second);
+    expect(first).toMatch(/^\{[\s\S]*\}\n$/u);
+    expect(JSON.parse(first)).toEqual({ generator: "harnix", schemaVersion: 1, ok: true, summary: { errors: 0, warnings: 0, fixed: 0 }, findings: [] });
   });
   it("should_use_validated_hook_event_cwd_when_internal_context_is_invoked", async () => {
     const root = await fixture(); const elsewhere = await fixture();

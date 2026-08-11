@@ -85,13 +85,13 @@ Phase 5 chỉ hoàn tất khi mọi checkbox phía trên có code/test evidence 
 
 Exception dependency hiện được chấp nhận là `GHSA-g7r4-m6w7-qqqr` trong `esbuild@0.27.7`, chỉ được kéo vào bởi `tsup@8.5.1`. Advisory ảnh hưởng development server của esbuild trên Windows; Harnix chỉ gọi tsup cho one-shot build và không expose server đó. `esbuild@0.28.1` đã được patch nhưng nằm ngoài range `^0.27.0` mà tsup khai báo tại thời điểm 2026-08-10. pnpm 11 yêu cầu `pnpm-workspace.yaml` cho transitive override, xung đột với contract no-workspace đã đóng băng của Harnix. Cần review exception này trước 2026-09-10 hoặc tại release/dependency gate kế tiếp, tùy mốc nào đến trước, và gỡ bỏ ngay khi tsup phát hành range tương thích.
 
-## 7. Bằng chứng hoàn tất — 2026-08-10
+## 7. Bằng chứng hoàn tất — 2026-08-11
 
 - Chuỗi mục 11 chạy pass từ `pnpm install --frozen-lockfile` đến `pnpm scan:release`; mọi command exit 0.
-- `pnpm test`: 120/120 test trên 22 file; các suite tách riêng trong `test:acceptance` cũng pass.
+- `pnpm test`: 156/156 test trên 23 file; các suite tách riêng trong `test:acceptance` cũng pass.
 - Tarball smoke: Kiro, Antigravity, Codex và setup kết hợp cả ba platform đều pass từ isolated install.
-- Fixture init đại diện: ba lần chạy, median 390,35 ms và worst 393,28 ms, thấp hơn gate 5 giây.
-- Footprint: 13.528 bytes trên 33 file, giảm 98,99% so với upstream baseline đã đóng băng.
-- Release scan: tarball đã kiểm tra cùng generated fixture pass secrets, machine path, required TODO, forbidden surface, one-package/bin, dead import, duplicate hook và attribution check.
+- Fixture init đại diện: ba lần chạy, median 393,45 ms và worst 452,74 ms, thấp hơn gate 5 giây.
+- Footprint: 16.393 bytes trên 33 file, giảm 98,78% so với upstream baseline đã đóng băng.
+- Release scan: tarball đã kiểm tra cùng generated fixture pass secrets, machine path, required TODO, forbidden surface, one-package/bin, dead import, duplicate hook và attribution check; scanner có fixture âm cho từng category công bố.
 - `pnpm audit --prod --audit-level low`: zero advisory. Full audit chỉ còn advisory esbuild development-only đã chấp nhận ở trên.
 - Các major upgrade hiện có của Commander, Inquirer, ESLint và Vitest yêu cầu Node 20/22+, nên được hoãn để giữ contract Node 18; mọi version trong range tương thích hiện tại đã được cài đặt.

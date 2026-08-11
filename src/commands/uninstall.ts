@@ -1,8 +1,7 @@
 import { readFile, rm } from "node:fs/promises";
-import { join } from "node:path";
 
 import { ownershipState, readManifest, type ManagedEntry } from "../utils/managed-files.js";
-import { resolveSafeProjectPath } from "../utils/paths.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import { atomicWriteFile } from "../utils/atomic-write.js";
 import { readConfig, writeConfig } from "../core/config/config.js";
 import { writeManifest } from "../utils/managed-files.js";
@@ -15,12 +14,17 @@ export interface UninstallOptions { root: string; purge?: boolean | undefined; y
 export interface UninstallResult { removed: string[]; preserved: string[]; purgeTargets: string[]; confirmationRequired: boolean; }
 
 export async function uninstallProject(options: UninstallOptions): Promise<UninstallResult> {
-  await resolveSafeProjectPath(options.root, ".harnix/config.yaml");
-  const manifest = await optionalManifest(join(options.root, ".harnix", ".template-hashes.json"));
+  const configPath = await resolveSafeHarnixPath(options.root, "config.yaml");
+  const manifestPath = await resolveSafeHarnixPath(options.root, ".template-hashes.json");
+  const manifest = await optionalManifest(manifestPath);
   const removed: string[] = [], preserved: string[] = [];
   const purgeTargets = options.purge ? [".harnix"] : [];
-  if (options.purge) await resolveSafeProjectPath(options.root, ".harnix");
+  const harnixRoot = options.purge ? await resolveSafeHarnixPath(options.root) : undefined;
   if (options.purge && !options.yes) return { removed, preserved, purgeTargets, confirmationRequired: true };
+  await Promise.all([
+    ...(manifest?.entries ?? []).filter((entry) => entry.scope !== "project").map((entry) => resolveSafeProjectPath(options.root, entry.path)),
+    ...["AGENTS.md", "GEMINI.md", ".codex/hooks.json"].map((path) => resolveSafeProjectPath(options.root, path)),
+  ]);
   const retainedEntries: ManagedEntry[] = [];
   for (const entry of manifest?.entries ?? []) {
     if (entry.scope === "project") { retainedEntries.push(entry); continue; }
@@ -29,12 +33,11 @@ export async function uninstallProject(options: UninstallOptions): Promise<Unins
     else { preserved.push(entry.path); retainedEntries.push(entry); }
   }
   await removeInjectionSurfaces(options.root, removed, preserved);
-  if (options.purge) { await rm(await resolveSafeProjectPath(options.root, ".harnix"), { force: true, recursive: true }); removed.push(".harnix"); }
+  if (options.purge) { await rm(harnixRoot!, { force: true, recursive: true }); removed.push(".harnix"); }
   else {
-    const configPath = join(options.root, ".harnix", "config.yaml");
     const config = await readConfig(configPath);
     await writeConfig(configPath, { ...config, platforms: [] });
-    if (manifest) await writeManifest(join(options.root, ".harnix", ".template-hashes.json"), { generator: "harnix", schemaVersion: 1, entries: retainedEntries.sort((left, right) => left.path.localeCompare(right.path)) });
+    if (manifest) await writeManifest(manifestPath, { generator: "harnix", schemaVersion: 1, entries: retainedEntries.sort((left, right) => left.path.localeCompare(right.path)) });
   }
   return { removed: removed.sort(), preserved: preserved.sort(), purgeTargets, confirmationRequired: false };
 }

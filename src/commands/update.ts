@@ -1,5 +1,4 @@
 import { access } from "node:fs/promises";
-import { join } from "node:path";
 
 import { readConfig } from "../core/config/config.js";
 import { commonRules, languageRule } from "../rules/rules.js";
@@ -11,14 +10,16 @@ import { antigravityDesiredFiles } from "../configurators/antigravity.js";
 import { codexDesiredFiles } from "../configurators/codex.js";
 import { packageVersion } from "../version.js";
 import { agentsTemplate } from "../templates/harnix/agents.js";
+import { resolveSafeHarnixPath } from "../utils/paths.js";
 
 export interface UpdateProjectOptions { root: string; restoreDeleted?: boolean | undefined; }
 export interface UpdateProjectResult { created: string[]; updated: string[]; preserved: string[]; deleted: string[]; obsolete: string[]; }
 
 /** Reconciles complete, Harnix-owned files only. Injection surfaces stay user-owned. */
 export async function updateProject(options: UpdateProjectOptions): Promise<UpdateProjectResult> {
-  const config = await readConfig(join(options.root, ".harnix", "config.yaml"));
-  const manifestPath = join(options.root, ".harnix", ".template-hashes.json");
+  const configPath = await resolveSafeHarnixPath(options.root, "config.yaml");
+  const manifestPath = await resolveSafeHarnixPath(options.root, ".template-hashes.json");
+  const config = await readConfig(configPath);
   const manifest = await loadManifest(manifestPath);
   const desired = desiredFiles(config.platforms, config.languages);
   const reconciled = await reconcileManagedFiles(options.root, manifest, desired, {
@@ -32,8 +33,9 @@ export async function updateProject(options: UpdateProjectOptions): Promise<Upda
 
 /** Records files immediately after setup has written the exact packaged templates. */
 export async function baselineManagedTemplates(root: string): Promise<void> {
-  const config = await readConfig(join(root, ".harnix", "config.yaml"));
-  const manifestPath = join(root, ".harnix", ".template-hashes.json");
+  const configPath = await resolveSafeHarnixPath(root, "config.yaml");
+  const manifestPath = await resolveSafeHarnixPath(root, ".template-hashes.json");
+  const config = await readConfig(configPath);
   const current = await loadManifest(manifestPath);
   const desired = desiredFiles(config.platforms, config.languages);
   const paths = new Set(desired.map((file) => file.entry.path));

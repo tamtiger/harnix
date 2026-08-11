@@ -1,13 +1,13 @@
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { sha256 } from "../../utils/hashing.js";
 import { workflowTemplate } from "./workflow.js";
 import { packageVersion } from "../../version.js";
+import { resolveSafeHarnixPath } from "../../utils/paths.js";
 
 interface WorkflowManifest { generator: "harnix"; schemaVersion: 1; entries: Array<{ path: string; sourceId: string; scope: string; generatedHash: string; generatorVersion: string }>; }
 export async function ensureManagedWorkflow(root: string): Promise<void> {
-  const workflowPath = join(root, ".harnix", "workflow.md"), manifestPath = join(root, ".harnix", ".template-hashes.json");
+  const workflowPath = await resolveSafeHarnixPath(root, "workflow.md"), manifestPath = await resolveSafeHarnixPath(root, ".template-hashes.json");
   const [workflow, manifestText] = await Promise.all([optional(workflowPath), optional(manifestPath)]);
   const manifest: WorkflowManifest = manifestText.length === 0 ? { generator: "harnix", schemaVersion: 1, entries: [] } : JSON.parse(manifestText) as WorkflowManifest;
   const previous = manifest.entries.find((entry) => entry.path === ".harnix/workflow.md");
