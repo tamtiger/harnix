@@ -491,7 +491,7 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 
 ### Task 3.1: Core skills
 
-**Create:** `src/templates/harnix/workflow.md` từ canonical doc; `harnix-brainstorm`, `harnix-implement`, `harnix-check`, `harnix-finish-work`, `harnix-continue` sources.
+**Create:** generated workflow template từ canonical doc; source thật `src/skills/harnix-*/SKILL.md` cho `harnix-brainstorm`, `harnix-implement`, `harnix-check`, `harnix-finish-work`, `harnix-continue`.
 
 - [x] Generated `.harnix/workflow.md` giữ đúng state/transition/gate semantics và được managed-until-edited.
 - [x] Eval Bypass không tạo task; Lite/Full tạo đúng artifact contract.
@@ -549,6 +549,14 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 - [x] Preserve allowed research/migration/license occurrences only.
 
 **Phase 3 gate:** [x] workflow evals and platform snapshots green; setup parity/idempotence green; public/output branding clean. Verified with fresh acceptance, typecheck, lint, and diff check.
+
+### Phase 3 hardening: canonical skill sources (2026-08-13)
+
+- [x] RED chứng minh source `src/skills/harnix-*/SKILL.md` chưa tồn tại và prose bị duplicate trong `workflow.ts`.
+- [x] Bảy source canonical adapt behavior đã chọn từ frozen Trellis/ECC/Superpowers, có trigger frontmatter, activation guard, incoming/persist/exit và provenance.
+- [x] Raw Markdown được nhúng vào bundle; Kiro/Antigravity/Codex render byte-identical content và không còn renderer skill guard riêng.
+- [x] Focused source/workflow/platform tests green.
+- [x] Forward behavior eval, typecheck, lint, build, platform/setup suites, pack/tarball/release gates và fake-home update đều green trước khi đóng hardening slice.
 
 ## 9. Phase 4 — Lifecycle, migration, doctor và release polish
 

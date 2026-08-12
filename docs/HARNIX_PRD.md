@@ -289,6 +289,8 @@ Core skills:
 
 Optional focused skills: `harnix-research` cho full-mode material unknowns và `harnix-debug` cho bugs/failures. Không tạo skill mới nếu behavior thuộc core skill.
 
+Source of truth của từng skill là file thật `src/skills/harnix-*/SKILL.md`, không phải string prose nhúng trong `workflow.ts`. Build nhúng Markdown vào `dist` để không cần runtime filesystem/network. Kiro, Antigravity và Codex cài cùng byte content canonical; frontmatter chỉ có `name`/`description`, activation guard và behavior stage nằm trong source đó. Test bắt buộc kiểm tra frontmatter, bảy skill đầy đủ, ready/TDD/debug/verification/resume guardrail và parity giữa platform.
+
 - **Lite:** thay đổi tập trung, rủi ro thấp, ít decision; task record tối thiểu vẫn có acceptance, validation và evidence. LOC chỉ là tín hiệu, không phải luật.
 - **Full:** feature, integration, migration, architecture/refactor, security-sensitive hoặc multi-layer; task `prd.md` + `plan.md`, conditional `design.md`/research và decision-complete plan.
 - **Ambiguous:** tự chọn mức nhẹ nhất kiểm soát được rủi ro; chỉ hỏi full brainstorm hay quick implementation khi outcome/cost khác đáng kể.
@@ -302,7 +304,7 @@ Language/package profile trong `.harnix/config.yaml` chỉ là init-time discove
 
 Bug/failure dùng reproduce → evidence → root cause → one hypothesis → minimal failing test → regression protection → fix. Sau ba failed hypotheses cho cùng symptom, reassess architecture và replan nếu cần. Behavior change ưu tiên RED–GREEN–REFACTOR; docs/trivial wiring/generated snapshots có thể dùng documented exception và strongest alternative verification.
 
-Ready gate bắt buộc acceptance criteria, affected scope, validation plan, resolved material unknowns và artifacts tương xứng mode. Material research lưu task/source/date/conclusion/remaining uncertainty. Check stage 1 là PRD/spec/acceptance compliance; stage 2 là correctness, tests, security, maintainability và unnecessary complexity. Finish chạy fresh final verification, archive/complete state, journal evidence/validated learning và không commit/push/merge/PR. Continue route từ persisted status/checkpoint và load smallest relevant journal/spec slice; corrupt/future state fail closed.
+Ready gate bắt buộc observable acceptance criteria, affected contract/scope, validation plan, resolved material unknowns, placeholder/consistency/decision self-review và artifacts tương xứng mode. Contract chưa quyết định không được đẩy vào một implementation “freeze” step để lách gate. Material research lưu task/source/date/conclusion/remaining uncertainty. Implement phải critical-review plan và quan sát RED fail đúng lý do trước GREEN. Check stage 1 là PRD/spec/acceptance compliance; stage 2 là correctness, tests, security, maintainability và unnecessary complexity; từng claim map tới fresh command/inspection cùng full output/exit. Finish archive/complete state, journal evidence/validated learning và không commit/push/merge/PR. Continue route từ persisted status/checkpoint và load smallest relevant journal/spec slice; corrupt/future state fail closed.
 ## 15. Rules integration
 
 Precedence:

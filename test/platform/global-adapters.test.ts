@@ -13,7 +13,8 @@ import {
   KIRO_GLOBAL_STEERING,
   kiroGlobalDesiredFiles,
 } from "../../src/configurators/kiro.js";
-import { workflowSkills } from "../../src/templates/harnix/workflow.js";
+import { renderSkill, workflowSkills } from "../../src/templates/harnix/workflow.js";
+import { createCodexGlobalSurfacePlan } from "../../src/configurators/codex.js";
 import type { DesiredGlobalManagedFile } from "../../src/utils/global-managed-files.js";
 
 function fileContent(file: DesiredGlobalManagedFile | undefined): string {
@@ -74,6 +75,21 @@ describe("user-global platform desired-surface renderers", () => {
     expect(ANTIGRAVITY_GLOBAL_RULE).toContain("no such root exists or its state is invalid");
     expect(KIRO_GLOBAL_STEERING).toContain("nearest ancestor or workspace root");
     expect(KIRO_GLOBAL_STEERING).toContain("no such root exists or its state is invalid");
+  });
+
+  it("should_render_byte-identical_canonical_skill_sources_for_every_platform", () => {
+    const expected = new Map(workflowSkills.map((skill) => [`skills/${skill.name}/SKILL.md`, renderSkill(skill)]));
+    const platforms = [
+      kiroGlobalDesiredFiles(),
+      antigravityGlobalPluginDesiredFiles(),
+      [...createCodexGlobalSurfacePlan().skills],
+    ];
+
+    for (const files of platforms) {
+      for (const [path, content] of expected) {
+        expect(fileContent(files.find((file) => file.path === path))).toBe(content);
+      }
+    }
   });
 
   it("should_render_identical_root_relative_antigravity_plugin_when_reused_for_desktop_and_cli", () => {

@@ -8,6 +8,7 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 ### Changed
 
+- Seven Harnix workflow skills now have canonical `src/skills/harnix-*/SKILL.md` sources adapted from the frozen Trellis, ECC, and Superpowers baselines. They restore decision-complete ready review, critical plan review, observed RED–GREEN–REFACTOR, root-cause debugging, claim-to-evidence verification, safe resume/finish behavior, and byte-identical Kiro/Antigravity/Codex installation without mandatory worktrees, subagents, commits, branches, pushes, or pull requests.
 - `harnix init` is now zero-option and non-interactive by default, inferring the developer journal ID from the OS user and auto-detecting the stack; `--user` and `--languages` remain optional overrides while the old `--yes` flag is a hidden no-op compatibility alias.
 - Init output now reports project status, selected developer/languages, and sorted per-path `created`, `updated`, `unchanged`, `preserved`, and warning arrays.
 - New projects no longer contain the redundant `.developer` file or empty `tasks/` and `workspace/<developer>/` placeholders; task and journal writers create their namespaces lazily.

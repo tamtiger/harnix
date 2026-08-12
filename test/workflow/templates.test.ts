@@ -55,9 +55,9 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("discovery seeds, not complete repository truth");
     expect(workflowTemplate).toContain("Plan-only requests stop at `ready`");
     for (const skill of workflowSkills) {
-      expect(skill.body).toContain("Incoming state:");
-      expect(skill.body).toContain("Persist:");
-      expect(skill.body).toContain("Exit:");
+      expect(skill.body).toContain("## Incoming state");
+      expect(skill.body).toContain("## Persist");
+      expect(skill.body).toContain("## Exit");
     }
     await writeFile(join(root, ".harnix", "workflow.md"), "user workflow");
     await ensureManagedWorkflow(root);

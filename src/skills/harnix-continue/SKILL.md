@@ -1,0 +1,60 @@
+---
+name: harnix-continue
+description: Use when an initialized Harnix project may have an unfinished, interrupted, blocked, or partially persisted task that must resume safely.
+---
+
+# Continue persisted Harnix work
+
+Restore truth from disk, validate it, and route to the owner of the current stage. Do not reconstruct workflow state from conversation memory.
+
+## Harnix activation guard
+
+Locate the nearest ancestor or workspace root containing `.harnix/config.yaml`.
+Activate Harnix only when that root exists and its Harnix state is valid. If no such root exists or its state is invalid, do not apply the Harnix workflow, read project state, create files, or run `harnix init`; report the condition instead.
+Read `.harnix/workflow.md` before routing.
+
+## Incoming state
+
+Read `.harnix/tasks/.active`. If it is absent or empty, return to request triage without creating a task. If it points outside the safe task root, to a missing record, or to malformed/future state, fail closed and provide repair-only guidance.
+
+Load the TaskRecord, required artifacts for its mode/status, checkpoint, blocker/resume fields, acceptance criteria, evidence references, and only the context needed by the next stage. Verify referenced task-owned paths before trusting them.
+
+## Routing table
+
+| Persisted state | Route |
+|---|---|
+| `planning` or checkpoint `replan` | `harnix-brainstorm` |
+| `ready/ready` with implementation already authorized | `harnix-implement` |
+| `ready/ready` for plan-only work | report ready; wait for an implementation request |
+| `in_progress/implementing` | `harnix-implement` from the last recorded slice |
+| `in_progress/debugging` | `harnix-debug` from the recorded symptom/hypothesis |
+| `verifying/verifying` | `harnix-check`, preserving prior failed/passing evidence |
+| `verifying/finishing` with green prerequisites | `harnix-finish-work` |
+| `blocked` with unchanged blocker | report blocker and resume status; do not pretend progress |
+| `completed` still active | validate completion persistence, then repair pointer/archive only within the documented workflow |
+
+Do not interpret `ready` as proof that the ready gate passed when artifacts contradict it. Route to `replan` if a material decision, placeholder, or contract gap is visible.
+
+## Recover partial persistence
+
+When state and artifacts disagree:
+
+1. identify the last durable valid state;
+2. compare timestamps/evidence without inventing missing events;
+3. preserve user-owned and unrelated files;
+4. choose the smallest safe repair allowed by the workflow;
+5. request user authority if repair would overwrite, delete, or broaden scope.
+
+Never silently downgrade schema, discard evidence, clear a blocker, or advance a status to make the record convenient.
+
+## Persist
+
+Ordinary continuation is read-only until the owning skill performs its documented transition. If a safe metadata repair is authorized and required, record exactly what was repaired and why. Keep blocker, resume status, failed evidence, and next step intact.
+
+## Exit
+
+Hand off to exactly one stage owner with the active task path, validated status/checkpoint, last durable evidence, and next action. For invalid state, stop with repair guidance. For no active task, return to triage.
+
+## Upstream basis
+
+Adapted for Harnix from Trellis `continue` and workflow routing at `516b34e3591001b28fda5e2d4df3f717e82f5785`. Harnix keeps status/artifact recovery while removing session hooks, mandatory subagents, automatic commits, and platform-specific command ceremony.

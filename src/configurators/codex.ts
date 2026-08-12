@@ -92,7 +92,7 @@ export const matchesCodexGlobalContextHookGroup: GlobalJsonMemberMatcher = (cand
 };
 
 function renderCodexGlobalSkill(skill: (typeof workflowSkills)[number]): string {
-  return renderSkill({ ...skill, body: `${codexGlobalSkillGuard}\n\n${skill.body}` });
+  return renderSkill(skill);
 }
 
 function isJsonRecord(value: JsonValue): value is { [key: string]: JsonValue } {

@@ -112,6 +112,8 @@ Task chỉ sang `ready` khi:
 - không còn product decision hoặc authority blocker;
 - implementation nằm trong quyền mà user đã cấp.
 
+Trước khi persist `ready`, agent bắt buộc self-review: decision inventory không còn material decision ẩn trong implementation step; mỗi requirement map tới slice triển khai/verification; field/interface/migration/ownership contract đủ chính xác; không còn placeholder hoặc câu mơ hồ có thể đổi code; PRD/plan/research/task record nhất quán; dirty user-owned work có preservation rule; scope có thể triển khai và kiểm chứng độc lập. Một plan bắt đầu bằng “freeze contract” không được xem là ready nếu contract sản phẩm vẫn chưa được quyết định.
+
 Nếu user chỉ yêu cầu plan hoặc yêu cầu checkpoint trước code, dừng ở `ready`. Nếu user đã yêu cầu triển khai và gate pass, chuyển tiếp mà không xin approval lần hai.
 
 Transition sang `ready` phải được persist trước khi Planning kết thúc. Full phải có `prd.md`/`plan.md` trên disk tại thời điểm này; không dùng nội dung chỉ tồn tại trong hội thoại để giả định ready gate đã pass.
@@ -120,9 +122,9 @@ Transition sang `ready` phải được persist trước khi Planning kết thú
 
 Agent load task artifacts và context nhỏ nhất liên quan tới bước hiện tại. Với mỗi checkpoint:
 
-1. Persist `in_progress` với checkpoint `implementing` trước product edit đầu tiên; resume phải dùng status/checkpoint đã lưu.
+1. Review plan critical với source/test hiện tại; nếu có material gap thì persist checkpoint `replan`, không đoán rồi code. Sau khi plan pass, persist `in_progress` với checkpoint `implementing` trước product edit đầu tiên; resume phải dùng status/checkpoint đã lưu.
 2. Chọn một behavior/deliverable có thể kiểm chứng.
-3. Dùng RED–GREEN–REFACTOR khi behavior thay đổi và failing test mang ý nghĩa.
+3. Dùng RED → quan sát fail đúng lý do → GREEN tối thiểu → REFACTOR khi vẫn green cho behavior change.
 4. Ghi exception cho docs-only, trivial wiring, generated snapshots hoặc trường hợp test-first không có tín hiệu; dùng verification mạnh nhất thay thế.
 5. Thực hiện thay đổi tối thiểu, giữ YAGNI và repository conventions.
 6. Chạy focused verification và ghi checkpoint/evidence trước khi mở rộng.
@@ -152,6 +154,8 @@ Verification có hai stage theo thứ tự:
 Review feedback phải được hiểu và kiểm tra với codebase trước khi áp dụng; feedback không tự động trở thành requirement. Fix theo từng finding và rerun check bị ảnh hưởng.
 
 Mỗi evidence record gồm command/check, thời điểm, exit/result và concise summary. Evidence phải fresh, full-scope tương xứng claim và chạy trên current tree. Partial check chỉ chứng minh phạm vi partial.
+
+Mỗi claim phải map tới command/inspection thực sự chứng minh claim đó. Agent đọc output liên quan và exit/result đầy đủ; passing rerun không được xóa failed evidence trước đó. Review feedback là technical hypothesis cần kiểm tra với code/contract, không phải requirement tự động.
 
 Persist `verifying` trước check đầu tiên. Ghi từng evidence ngay sau khi check kết thúc; failed evidence giữ task recoverable ở `verifying` hoặc route rõ sang Debugging, không bị thay thế im lặng bởi summary mới hơn.
 
@@ -216,6 +220,8 @@ Tasks, research và journal là user-owned. Packaged `workflow.md` và seed spec
 | `harnix-continue` | Restore state/context và route tới bước hợp lệ kế tiếp |
 
 Platform adapters cho Kiro, Antigravity và Codex phải giữ cùng state/gate semantics. Hook, steering hoặc skill syntax có thể khác nhưng không được tạo platform-specific workflow.
+
+Source canonical của bảy skill nằm tại `src/skills/harnix-*/SKILL.md`. Build nhúng raw Markdown vào package; runtime không đọc source tree hoặc network. Cả ba adapter phải cài byte-identical canonical `SKILL.md`, gồm activation guard và provenance, thay vì prepend các bản guard/prose riêng có thể drift.
 
 ## 8. Required behavior evals
 

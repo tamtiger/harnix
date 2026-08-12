@@ -1,0 +1,98 @@
+---
+name: harnix-implement
+description: Use when an authorized Harnix task is ready or already in progress and needs plan review, test-first implementation, refactoring, or technical feedback handling.
+---
+
+# Implement a ready Harnix task
+
+Review before coding, prove the behavior with a meaningful failing test, implement the smallest coherent change, and leave resumable evidence.
+
+## Harnix activation guard
+
+Locate the nearest ancestor or workspace root containing `.harnix/config.yaml`.
+Activate Harnix only when that root exists and its Harnix state is valid. If no such root exists or its state is invalid, do not apply the Harnix workflow, read project state, create files, or run `harnix init`; report the condition instead.
+Read `.harnix/workflow.md`, the active task, and only task-relevant code/spec context.
+
+## Incoming state
+
+Accept a valid `ready/ready` task whose original request authorizes implementation, or an `in_progress` task resumed at `implementing` or `debugging`. Preserve unrelated and user-owned changes.
+
+Review the plan critically before product edits:
+
+- confirm every material decision is already resolved;
+- confirm file/interface names exist or are explicitly created;
+- confirm migration, preservation, error, and compatibility behavior;
+- confirm each slice has a meaningful RED and focused GREEN command;
+- compare the plan to current source and tests, not stale assumptions.
+
+If the plan has a critical gap, do not guess and do not code around it. Persist checkpoint `replan`, describe the exact missing decision or contradiction, and hand back to `harnix-brainstorm`. If the task is ready, persist `in_progress/implementing` before the first product edit.
+
+## Load bounded context
+
+Read task artifacts, nearest project instructions, relevant specs, affected implementation, neighboring interfaces, current tests, and the current diff. Treat `.harnix/config.yaml` language/package values as discovery hints, not complete truth. Do not bulk-load the repository.
+
+## RED–GREEN–REFACTOR
+
+Apply this cycle per observable behavior.
+
+### RED
+
+Write one focused test that demonstrates the missing or broken behavior. Prefer real behavior over assertions about mocks or implementation details.
+
+### Verify RED
+
+Run the narrow test and observe it fail. Confirm:
+
+- it fails rather than crashes for unrelated setup;
+- the failure message matches the intended missing behavior;
+- it fails because production behavior is absent or wrong;
+- an existing passing test was not merely renamed or weakened.
+
+If it passes immediately, improve the test or verify the behavior already exists. A test that never demonstrated the defect is not regression evidence.
+
+### GREEN
+
+Write the minimal implementation that satisfies the test and the frozen contract. Do not add speculative options, unrelated refactors, or compatibility surfaces.
+
+Run the focused test and relevant neighboring tests. Fix production code when the contract is right; do not rewrite the test to bless an incorrect implementation.
+
+### REFACTOR
+
+Only while green, remove duplication, improve names, and restore architectural boundaries. Re-run the focused checks after refactoring. Add the next behavior through a new RED.
+
+## Documented TDD exceptions
+
+Docs-only wording, generated snapshots, trivial wiring, or mechanically moved canonical assets may lack a useful behavioral RED. Record the reason before the edit and use the strongest alternative: schema validation, exact parity, snapshot, typecheck, build, or focused integration test. Existing code is not an excuse to skip regression protection for changed behavior.
+
+## Handle technical feedback
+
+When the user or a reviewer proposes a change, read the complete feedback, restate the technical requirement, verify it against the codebase, and evaluate whether it is correct for this contract. Apply one item at a time and test it. Push back with evidence when feedback conflicts with repository facts or requirements; never accept or reject it performatively.
+
+## Stop and route
+
+Stop implementation when:
+
+- a new product or compatibility decision appears;
+- the plan contradicts current evidence;
+- a dependency, credential, authority, or external state blocks progress;
+- a focused verification repeatedly fails without a confirmed cause;
+- the proposed change would overwrite unrelated/user-owned content.
+
+Use `harnix-debug` for a reproducible failure. Return to planning for a requirement or architecture defect. Do not layer speculative fixes.
+
+## Persist
+
+Keep `in_progress/implementing` with the last completed slice, current failing/passing command, concise result, and next step. Record documented exceptions and alternate evidence. Move to `verifying/verifying` only after all implementation slices and focused checks are complete.
+
+## Exit
+
+- Resumable partial work: remain `in_progress` and report the checkpoint.
+- Confirmed defect: hand to `harnix-debug`.
+- Requirement/architecture gap: checkpoint `replan` and hand to `harnix-brainstorm`.
+- Implementation and focused checks complete: persist `verifying` and hand to `harnix-check`.
+
+Never create a branch, worktree, commit, push, merge, publish, or pull request unless the user separately authorizes that exact action.
+
+## Upstream basis
+
+Adapted for Harnix from Trellis `before-dev` at `516b34e3591001b28fda5e2d4df3f717e82f5785` and Superpowers `executing-plans`, `test-driven-development`, and `receiving-code-review` at `44c9b2d6e889982ac18c27d05a19fefe335194e1`. Mandatory worktrees, subagents, commits, and branch integration are intentionally removed.

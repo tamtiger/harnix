@@ -11,5 +11,6 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   splitting: true,
+  loader: { ".md": "text" },
   define: { __HARNIX_VERSION__: JSON.stringify(packageVersion) },
 });

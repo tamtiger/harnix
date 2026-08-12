@@ -1,5 +1,5 @@
 import type { DesiredGlobalManagedFile } from "../utils/global-managed-files.js";
-import { type SkillTemplate, workflowSkills } from "../templates/harnix/workflow.js";
+import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
 
 export const KIRO_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix internal context --platform kiro";
 
@@ -38,7 +38,7 @@ export function kiroGlobalDesiredFiles(): DesiredGlobalManagedFile[] {
       path: "skills/" + skill.name + "/SKILL.md",
       sourceId: "kiro-skill-" + skill.name,
       kind: "file",
-      content: renderGlobalSkill(skill),
+      content: renderSkill(skill),
     })),
     {
       path: "steering/harnix.md",
@@ -53,22 +53,4 @@ export function kiroGlobalDesiredFiles(): DesiredGlobalManagedFile[] {
       content: JSON.stringify(KIRO_GLOBAL_CONTEXT_HOOK, null, 2) + "\n",
     },
   ];
-}
-
-function renderGlobalSkill(skill: SkillTemplate): string {
-  return [
-    "---",
-    "name: " + skill.name,
-    "description: " + skill.description,
-    "---",
-    "",
-    "## Harnix activation guard",
-    "",
-    "First locate the nearest ancestor or workspace root containing .harnix/config.yaml.",
-    "Apply this skill only when that root exists and its Harnix state is valid.",
-    "If no such root exists or its state is invalid, do not apply the Harnix workflow, create Harnix state, or run harnix init.",
-    "",
-    skill.body,
-    "",
-  ].join("\n");
 }

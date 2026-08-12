@@ -51,7 +51,7 @@ describe("Codex global surface plan", () => {
     if (hook?.kind !== "json-member") throw new Error("Expected hooks.json to contain a managed JSON member.");
     expect(JSON.stringify(hook.member)).not.toContain("harnix.exe");
     expect(JSON.stringify(plan)).not.toContain(process.cwd());
-    expect(JSON.stringify(plan)).not.toMatch(/[A-Za-z]:\\/u);
+    expect(JSON.stringify(plan)).not.toMatch(/[A-Za-z]:\\\\/u);
     expect(JSON.stringify(plan)).not.toContain("/home/");
     expect(JSON.stringify(plan)).not.toContain(".codex/");
     expect(JSON.stringify(plan)).not.toContain(".agents/");
