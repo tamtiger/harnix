@@ -91,6 +91,16 @@ describe("initializeProject", () => {
     expect(common).toContain("Repository conventions");
     await expect(readFile(join(root, ".harnix", "spec", "guides", "vue.md"), "utf8")).resolves.toContain("Vue rules");
   });
+  it("should_detect_php_composer_projects_and_seed_php_guidance", async () => {
+    const root = await fixture();
+    await writeFile(join(root, "composer.json"), JSON.stringify({ require: { php: ">=5.4" } }));
+
+    await initializeProject({ developer: "tam", root, yes: true });
+
+    await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("- php");
+    await expect(readFile(join(root, ".harnix", "spec", "guides", "php.md"), "utf8")).resolves.toContain("PHP rules");
+    await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toContain("- Languages: PHP.");
+  });
   it("should_seed_actionable_dotnet_abp_guidance_instead_of_a_placeholder", async () => {
     const root = await fixture(); await writeFile(join(root, "sample.sln"), "");
 

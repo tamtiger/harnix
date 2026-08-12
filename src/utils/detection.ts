@@ -4,6 +4,7 @@ import { basename, join, relative, resolve } from "node:path";
 export type LanguageId =
   | "csharp-dotnet-abp"
   | "typescript-nestjs"
+  | "php"
   | "python"
   | "java-spring"
   | "go"
@@ -118,6 +119,8 @@ function detectMarkerLanguages(files: string[]): LanguageId[] {
     const fileName = basename(file);
     if (fileName.endsWith(".csproj") || fileName === "global.json" || fileName.endsWith(".sln")) {
       languages.push("csharp-dotnet-abp");
+    } else if (fileName === "composer.json" || fileName.endsWith(".php")) {
+      languages.push("php");
     } else if (fileName === "pyproject.toml" || fileName === "requirements.txt") {
       languages.push("python");
     } else if (fileName === "pom.xml" || fileName === "build.gradle" || fileName === "build.gradle.kts") {

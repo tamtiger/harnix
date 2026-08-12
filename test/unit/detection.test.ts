@@ -18,6 +18,8 @@ describe("detectProject", () => {
     ["C#/.NET ABP", "src/App/App.csproj", '<Project><PackageReference Include="Volo.Abp" /></Project>', "csharp-dotnet-abp"],
     ["NestJS", "package.json", '{"dependencies":{"@nestjs/core":"1"}}', "typescript-nestjs"],
     ["Python", "pyproject.toml", "[project]\nname = 'sample'", "python"],
+    ["PHP/Composer", "composer.json", '{"require":{"php":">=8.2"}}', "php"],
+    ["PHP source", "public/index.php", "<?php echo 'Hello';", "php"],
     ["Java/Spring", "pom.xml", "<project><dependency><artifactId>spring-boot-starter</artifactId></dependency></project>", "java-spring"],
     ["Go", "go.mod", "module example.test/app\ngo 1.22", "go"],
     ["React", "package.json", '{"dependencies":{"react":"1"}}', "react-web"],
@@ -72,6 +74,7 @@ describe("detectProject", () => {
     const root = await createFixture();
     await writeFixtureFile(root, "node_modules/react/package.json", '{"dependencies":{"react":"1"}}');
     await writeFixtureFile(root, "vendor/go.mod", "module ignored");
+    await writeFixtureFile(root, "vendor/composer.json", '{"require":{"php":">=8.2"}}');
     await writeFixtureFile(root, "bin/pom.xml", "<artifactId>spring-boot-starter</artifactId>");
     await writeFixtureFile(root, "obj/pyproject.toml", "[project]");
     await writeFixtureFile(root, "dist/package.json", '{"dependencies":{"vue":"1"}}');

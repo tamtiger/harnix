@@ -84,6 +84,7 @@ Các contract project-data trong mục này là normative cho implementation v1.
 type LanguageId =
   | "csharp-dotnet-abp"
   | "typescript-nestjs"
+  | "php"
   | "python"
   | "java-spring"
   | "go"

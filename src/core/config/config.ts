@@ -32,7 +32,7 @@ export interface CreateConfigOptions {
 }
 
 const languageIds = new Set<LanguageId>([
-  "csharp-dotnet-abp", "typescript-nestjs", "python", "java-spring", "go", "react-web", "vue",
+  "csharp-dotnet-abp", "typescript-nestjs", "php", "python", "java-spring", "go", "react-web", "vue",
 ]);
 const platformIds = new Set<PlatformId>(["kiro", "antigravity", "codex"]);
 const developerPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u;

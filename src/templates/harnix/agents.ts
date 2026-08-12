@@ -11,6 +11,7 @@ const languageLabels: Record<LanguageId, string> = {
   "csharp-dotnet-abp": "C#/.NET/ABP",
   go: "Go",
   "java-spring": "Java/Spring",
+  php: "PHP",
   python: "Python",
   "react-web": "React web",
   "typescript-nestjs": "TypeScript/NestJS",
