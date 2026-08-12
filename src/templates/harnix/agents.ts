@@ -40,6 +40,8 @@ function renderHarnixAgentsBlock(profile: AgentsProjectProfile): string {
 - Languages: ${languages}.
 - Package paths: ${packagePaths}.
 
+Treat this profile as an initialization-time discovery seed. Verify current manifests, source, tests, and repository instructions before selecting bounded task context; do not bulk-load the repository.
+
 ## Harnix workflow
 
 Use harnix --help or harnix <command> --help for exact CLI syntax; do not guess flags. Public commands are init, setup, update, upgrade, uninstall, mem, and doctor. They manage the harness and diagnostics, not coding-task stage transitions.
@@ -49,7 +51,7 @@ Use harnix --help or harnix <command> --help for exact CLI syntax; do not guess 
 Activation guard and before work:
 
 1. Locate the nearest initialized project ancestor or workspace root containing .harnix/config.yaml. If none exists or its state is invalid, do not apply Harnix workflow, read Harnix project state, create state, or run harnix init; report the problem.
-2. Read .harnix/workflow.md and .harnix/config.yaml, then load only the context relevant to the request.
+2. Read .harnix/workflow.md and .harnix/config.yaml, verify the current repository evidence, then load only the context relevant to the request.
 3. If .harnix/tasks/.active identifies an unfinished task, use harnix-continue and resume its persisted status, checkpoint, and evidence.
 4. Otherwise classify the request as Bypass, Lite, or Full using .harnix/workflow.md. Read-only answers may bypass task creation; implementation work follows the selected workflow.
 

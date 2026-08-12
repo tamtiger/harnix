@@ -1,0 +1,91 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260812-140008-repomap",
+  "title": "Plan a safe repository map for fast agent context",
+  "mode": "full",
+  "status": "ready",
+  "checkpoint": "ready",
+  "goal": "Design a deterministic, local repository scanner and compact searchable repo map that helps coding agents identify the most relevant files before reading source code.",
+  "nonGoals": [
+    "Implement the repository scanner, index, hidden runtime commands, or workflow integration in this task.",
+    "Add embeddings, a vector database, a daemon, filesystem watchers, telemetry, or runtime network access.",
+    "Persist raw source code, secrets, machine-specific absolute paths, or generated dependency trees.",
+    "Require Git or add another public Harnix command."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-inventory",
+      "text": "The plan defines safe, ignore-aware file inventory for Git and non-Git repositories, including traversal, symlink, binary, secret, and size protections.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-index",
+      "text": "The plan defines a versioned disposable repo-map format that contains compact structural metadata without raw source, secrets, or absolute paths.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-retrieval",
+      "text": "The plan defines lexical candidate retrieval plus deterministic Harnix reranking so agents receive a bounded set of relevant files and outlines.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-workflow",
+      "text": "The plan integrates repo-map refresh and query into the existing workflow without adding a public command or allowing prompt hooks to build or write the cache.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-validation",
+      "text": "The plan includes deterministic correctness, safety, cross-platform, incremental-equivalence, query-quality, performance, footprint, and release validation.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/core/repo-map/inventory.ts",
+    "src/core/repo-map/extract.ts",
+    "src/core/repo-map/store.ts",
+    "src/core/repo-map/search.ts",
+    "src/core/repo-map/service.ts",
+    "src/commands/internal.ts",
+    "src/templates/harnix/workflow.ts",
+    "test/unit/repo-map",
+    "test/integration/repo-map"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "repo-map-focused",
+      "description": "Run focused inventory, extraction, persistence, query, and workflow-integration tests.",
+      "command": "pnpm exec vitest run test/unit/repo-map test/integration/repo-map",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "repo-map-quality",
+      "description": "Run type checking, linting, the complete test suite, and production build.",
+      "command": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+      "scope": "full",
+      "required": true
+    },
+    {
+      "id": "repo-map-release",
+      "description": "Run safety, acceptance, package, tarball smoke, footprint, and release scans with representative fixtures.",
+      "command": "pnpm test:safety && pnpm test:acceptance && pnpm pack:check && pnpm smoke:tarball && pnpm measure:footprint && pnpm scan:release",
+      "scope": "full",
+      "required": true
+    }
+  ],
+  "evidence": [],
+  "createdAt": "2026-08-12T14:00:08.8278644+07:00",
+  "updatedAt": "2026-08-12T14:03:14.4063294+07:00"
+}

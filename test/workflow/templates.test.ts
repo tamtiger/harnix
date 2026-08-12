@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { initializeProject } from "../../src/commands/init.js";
 import { renderAgentsTemplate } from "../../src/templates/harnix/agents.js";
 import { ensureManagedWorkflow } from "../../src/templates/harnix/managed-workflow.js";
-import { workflowTemplate } from "../../src/templates/harnix/workflow.js";
+import { workflowSkills, workflowTemplate } from "../../src/templates/harnix/workflow.js";
 import { packageVersion } from "../../src/version.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
@@ -25,6 +25,8 @@ describe("workflow templates", () => {
     expect(agentInstructions).toContain("## Project profile");
     expect(agentInstructions).toContain("- Languages: not specified.");
     expect(agentInstructions).toContain("- Package paths: not specified.");
+    expect(agentInstructions).toContain("initialization-time discovery seed");
+    expect(agentInstructions).toContain("do not bulk-load the repository");
     expect(agentInstructions).toContain("project-local coding-agent harness");
     expect(agentInstructions).toContain("Do not run setup or harnix init automatically");
     expect(agentInstructions).toContain("nearest initialized project ancestor or workspace root");
@@ -47,6 +49,16 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("Bypass");
     expect(workflowTemplate).toContain("Ready gate");
     expect(workflowTemplate).toContain("RED → GREEN → REFACTOR");
+    expect(workflowTemplate).toContain("## Persist and restore state");
+    expect(workflowTemplate).toContain("Before product edits, persist");
+    expect(workflowTemplate).toContain(".harnix/tasks/.active");
+    expect(workflowTemplate).toContain("discovery seeds, not complete repository truth");
+    expect(workflowTemplate).toContain("Plan-only requests stop at `ready`");
+    for (const skill of workflowSkills) {
+      expect(skill.body).toContain("Incoming state:");
+      expect(skill.body).toContain("Persist:");
+      expect(skill.body).toContain("Exit:");
+    }
     await writeFile(join(root, ".harnix", "workflow.md"), "user workflow");
     await ensureManagedWorkflow(root);
 

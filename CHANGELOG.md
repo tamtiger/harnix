@@ -14,6 +14,7 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 - Generated common and C#/.NET/ABP guides now contain actionable architecture, security, persistence, cancellation, testing, and verification rules; the project workflow template now includes routing, ready-gate, implementation, and two-stage verification guidance.
 - Generated workflow and AGENTS bootstrap instructions now resolve the nearest initialized project ancestor or workspace root, so nested working directories follow the same activation guard as global integrations.
 - Generated `AGENTS.md` now places Harnix version and project-local workflow/task/guidance/diagnostic scope above the workflow, and adds a concise `Project profile` with configured languages and package paths; it does not use a “Detected repository” heading.
+- Self-hosted workflow instructions and global skills now declare incoming state, persistence boundaries, and exit handoffs; project profiles are discovery seeds rather than complete repository truth, and research artifacts retain remaining uncertainty.
 
 ## [0.5.0] - 2026-08-11
 

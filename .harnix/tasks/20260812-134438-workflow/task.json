@@ -1,0 +1,213 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260812-134438-workflow",
+  "title": "Improve Harnix workflow through self-hosting",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Make the generated Harnix workflow and global skills operationally precise enough that an agent can persist and resume every stage safely while discovering only current, relevant repository context.",
+  "nonGoals": [
+    "Implement the repository scanner or code indexer planned by the user.",
+    "Add an eighth public command or a new task-state schema.",
+    "Install or mutate user-global platform integrations.",
+    "Commit, push, publish, or create a pull request."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-persistence",
+      "text": "Generated workflow instructions define when task state and artifacts are persisted at planning, ready, implementation, verification, and completion boundaries.",
+      "status": "met",
+      "evidenceIds": [
+        "e-focused-green",
+        "e-self-host-update",
+        "e-compliance"
+      ]
+    },
+    {
+      "id": "ac-skills",
+      "text": "Each generated harnix skill states its required incoming state, persisted transition or checkpoint, and safe exit condition without creating a second workflow.",
+      "status": "met",
+      "evidenceIds": [
+        "e-focused-green",
+        "e-compliance"
+      ]
+    },
+    {
+      "id": "ac-context",
+      "text": "Workflow guidance treats config profile data as a seed, verifies current repository evidence, and forbids broad repository dumps in favor of bounded relevant context.",
+      "status": "met",
+      "evidenceIds": [
+        "e-focused-green",
+        "e-compliance"
+      ]
+    },
+    {
+      "id": "ac-research",
+      "text": "Material research artifacts record conclusion and remaining uncertainty with provenance.",
+      "status": "met",
+      "evidenceIds": [
+        "e-focused-green"
+      ]
+    },
+    {
+      "id": "ac-verification",
+      "text": "Canonical docs, generated templates, runtime helpers, changelog, and regression tests remain consistent and pass focused plus full verification.",
+      "status": "met",
+      "evidenceIds": [
+        "e-static-quality",
+        "e-full-pass"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/research.ts",
+    "src/templates/harnix/agents.ts",
+    "src/templates/harnix/workflow.ts",
+    "test/workflow/routing.test.ts",
+    "test/workflow/templates.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "focused-workflow",
+      "description": "Run workflow template, task state, and research regression tests.",
+      "command": "pnpm exec vitest run test/workflow/routing.test.ts test/workflow/templates.test.ts test/unit/task-state.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "static-quality",
+      "description": "Run TypeScript and lint checks.",
+      "command": "pnpm typecheck && pnpm lint",
+      "scope": "full",
+      "required": true
+    },
+    {
+      "id": "full-suite",
+      "description": "Run the complete test suite and build on the current tree.",
+      "command": "pnpm test && pnpm build",
+      "scope": "full",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-focused-red",
+      "checkId": "focused-workflow",
+      "recordedAt": "2026-08-12T13:47:12+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Focused RED run failed on the missing persistence guidance and remaining-uncertainty rendering, as intended.",
+      "artifactPaths": [
+        "test/workflow/routing.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "e-focused-green",
+      "checkId": "focused-workflow",
+      "recordedAt": "2026-08-12T13:50:28+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused workflow, template, research, and task-state tests passed 26/26; TypeScript typecheck also passed.",
+      "artifactPaths": [
+        "src/core/research.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/routing.test.ts",
+        "test/workflow/templates.test.ts",
+        "test/unit/task-state.test.ts"
+      ]
+    },
+    {
+      "id": "e-self-host-update",
+      "recordedAt": "2026-08-12T13:51:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Built Harnix and dogfooded project update: workflow.md updated while AGENTS.md and the common guide were preserved.",
+      "artifactPaths": [
+        ".harnix/workflow.md",
+        ".harnix/.template-hashes.json"
+      ]
+    },
+    {
+      "id": "e-compliance",
+      "recordedAt": "2026-08-12T13:52:22.0311805+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Stage 1 compliance review matched all requested workflow boundaries, confirmed seven public commands, no task/context schema or dependency change, valid Full artifacts, and generated/source parity.",
+      "artifactPaths": [
+        ".harnix/workflow.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/templates/harnix/workflow.ts"
+      ]
+    },
+    {
+      "id": "e-full-fail",
+      "checkId": "full-suite",
+      "recordedAt": "2026-08-12T13:52:48+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Full suite had one failure: the current lock generator version assertion was hardcoded to stale 0.5.0 while 272 tests passed; lint and build passed.",
+      "artifactPaths": [
+        "test/unit/file-lock.test.ts"
+      ]
+    },
+    {
+      "id": "e-debug-version-fixture",
+      "recordedAt": "2026-08-12T13:53:39+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "The single stale-version hypothesis was confirmed; using packageVersion for the current generated lock assertion passed file-lock tests 7/7 while preserving the legacy 0.5.0 fixture.",
+      "artifactPaths": [
+        "test/unit/file-lock.test.ts"
+      ]
+    },
+    {
+      "id": "e-static-quality",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-12T13:54:16+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh TypeScript typecheck and ESLint checks passed on the current tree.",
+      "artifactPaths": [
+        "src/core/research.ts",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts"
+      ]
+    },
+    {
+      "id": "e-full-pass",
+      "checkId": "full-suite",
+      "recordedAt": "2026-08-12T13:54:47.0717923+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh full suite passed 273 tests with 1 platform-conditional skip, followed by a successful production build.",
+      "artifactPaths": [
+        "test/unit/file-lock.test.ts",
+        "test/workflow/routing.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "e-final-review",
+      "recordedAt": "2026-08-12T13:59:26.2610963+07:00",
+      "result": "pass",
+      "summary": "Final scope and diff review passed; doctor found no errors and only one existing user-owned AGENTS ownership warning plus 28 out-of-scope outdated global skill warnings. No global mutation was performed.",
+      "artifactPaths": [
+        ".harnix/workflow.md",
+        ".harnix/tasks/20260812-134438-workflow/task.json",
+        "src/templates/harnix/workflow.ts"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-12T13:44:38.7958368+07:00",
+  "updatedAt": "2026-08-12T13:59:26.2610963+07:00",
+  "completedAt": "2026-08-12T13:59:26.2610963+07:00"
+}

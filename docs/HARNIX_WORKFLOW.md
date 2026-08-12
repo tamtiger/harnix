@@ -26,6 +26,8 @@ Phase 6 user-global Kiro, Antigravity and Codex integrations are an adapter/life
 9. Finish không commit, push, merge, tạo PR hay xóa branch/worktree.
 10. Workflow phải chạy hoàn chỉnh với một agent; delegation chỉ là optimization được phép khi platform và người dùng cho phép.
 11. Global integration setup, update, doctor and uninstall do not transfer ownership to a project task. They use explicit platform scope, logical paths, conservative manifests and their own lifecycle gates.
+12. Mỗi persisted transition được ghi trước khi hành động của stage kế tiếp bắt đầu; evidence được ghi ngay sau check tương ứng, không chỉ tổng hợp lúc finish.
+13. Language/package profile trong config là discovery seed tại thời điểm init, không phải repository truth vĩnh viễn; task context phải được đối chiếu với manifest, source, test và instruction hiện tại.
 
 ## 3. Entry routing
 
@@ -89,11 +91,12 @@ Output là Bypass hoặc một task ở `planning`.
 
 Agent đọc project instructions, relevant docs/code/tests và dirty state trước. Planning hội tụ theo thứ tự:
 
-1. Goal, non-goals và acceptance criteria quan sát được.
-2. Constraints, affected boundaries và validation commands.
-3. Material unknowns; research chỉ khi unknown có thể đổi design, dependency, security hoặc compatibility.
-4. Approach và alternatives có trade-off đáng kể.
-5. File/interface-level execution plan cho Full; Lite có checklist ngắn trong task record.
+1. Restore `.harnix/tasks/.active`; nếu chưa có task thì persist một task `planning` và active pointer trước product edits.
+2. Goal, non-goals và acceptance criteria quan sát được.
+3. Constraints, affected boundaries và validation commands.
+4. Material unknowns; research chỉ khi unknown có thể đổi design, dependency, security hoặc compatibility, và artifact phải ghi source/date/conclusion/remaining uncertainty.
+5. Approach và alternatives có trade-off đáng kể.
+6. File/interface-level execution plan cho Full; Lite có checklist ngắn trong task record.
 
 Hỏi từng product decision độc lập, ưu tiên câu hỏi có options/trade-offs. Không hỏi thông tin có thể tìm trong repository hoặc nguồn authoritative. Khi user answer thay đổi requirement, cập nhật artifact ngay.
 
@@ -111,15 +114,18 @@ Task chỉ sang `ready` khi:
 
 Nếu user chỉ yêu cầu plan hoặc yêu cầu checkpoint trước code, dừng ở `ready`. Nếu user đã yêu cầu triển khai và gate pass, chuyển tiếp mà không xin approval lần hai.
 
+Transition sang `ready` phải được persist trước khi Planning kết thúc. Full phải có `prd.md`/`plan.md` trên disk tại thời điểm này; không dùng nội dung chỉ tồn tại trong hội thoại để giả định ready gate đã pass.
+
 ### 5.4 Implementing
 
 Agent load task artifacts và context nhỏ nhất liên quan tới bước hiện tại. Với mỗi checkpoint:
 
-1. Chọn một behavior/deliverable có thể kiểm chứng.
-2. Dùng RED–GREEN–REFACTOR khi behavior thay đổi và failing test mang ý nghĩa.
-3. Ghi exception cho docs-only, trivial wiring, generated snapshots hoặc trường hợp test-first không có tín hiệu; dùng verification mạnh nhất thay thế.
-4. Thực hiện thay đổi tối thiểu, giữ YAGNI và repository conventions.
-5. Chạy focused verification và ghi checkpoint/evidence trước khi mở rộng.
+1. Persist `in_progress` với checkpoint `implementing` trước product edit đầu tiên; resume phải dùng status/checkpoint đã lưu.
+2. Chọn một behavior/deliverable có thể kiểm chứng.
+3. Dùng RED–GREEN–REFACTOR khi behavior thay đổi và failing test mang ý nghĩa.
+4. Ghi exception cho docs-only, trivial wiring, generated snapshots hoặc trường hợp test-first không có tín hiệu; dùng verification mạnh nhất thay thế.
+5. Thực hiện thay đổi tối thiểu, giữ YAGNI và repository conventions.
+6. Chạy focused verification và ghi checkpoint/evidence trước khi mở rộng.
 
 Không tự sửa unrelated user changes. Requirement gap quay về Planning; lỗi thực thi đi vào Debugging.
 
@@ -146,6 +152,8 @@ Verification có hai stage theo thứ tự:
 Review feedback phải được hiểu và kiểm tra với codebase trước khi áp dụng; feedback không tự động trở thành requirement. Fix theo từng finding và rerun check bị ảnh hưởng.
 
 Mỗi evidence record gồm command/check, thời điểm, exit/result và concise summary. Evidence phải fresh, full-scope tương xứng claim và chạy trên current tree. Partial check chỉ chứng minh phạm vi partial.
+
+Persist `verifying` trước check đầu tiên. Ghi từng evidence ngay sau khi check kết thúc; failed evidence giữ task recoverable ở `verifying` hoặc route rõ sang Debugging, không bị thay thế im lặng bởi summary mới hơn.
 
 ### 5.7 Finishing
 
@@ -189,6 +197,8 @@ Blocked chỉ dùng khi không thể tiến bộ an toàn do user-owned decision
 
 `task.json` là record versioned tối thiểu: id/title, mode, status, goal, non-goals, acceptance criteria, current checkpoint, relevant paths/specs, validation plan, evidence refs, blockers và timestamps. Exact v1 field types, safe task ID, active pointer, legal transitions và resume status được khóa tại `IMPLEMENTATION_PLAN.md` mục 4; skill/platform adapter không được tự định nghĩa schema khác. Lite giữ các field cần thiết ngay trong record; Full dùng các file Markdown để tránh JSON phình to.
 
+Operational persistence order là: create `planning` task + `.active` → write Full artifacts/research → persist `ready` → persist `in_progress/implementing` before product edits → persist `verifying` before checks and append fresh evidence → persist `completed` before journal/archive clears the matching pointer. Plan-only work stops at persisted `ready`. A later failure must retain enough state for `harnix-continue`; it must not erase or fabricate evidence.
+
 Khi cần persist context để resume hoặc phối hợp nhiều state, Harnix dùng một `context.json` có scope theo state thay vì duplicate `implement.jsonl`/`check.jsonl`; Lite có thể chỉ giữ relevant paths/specs trong `task.json`. Entry gồm normalized repo-relative path, reason, priority/pin và states áp dụng. Code files được discovery theo task; chỉ persist khi chúng quan trọng để resume. Mọi truncation phải liệt kê source bị bỏ.
 
 Tasks, research và journal là user-owned. Packaged `workflow.md` và seed specs là managed cho tới khi user sửa; update phải preserve modified content theo managed ownership contract.
@@ -215,7 +225,9 @@ Evals phải chứng minh:
 - Explicit implementation request không bị hỏi approval lần hai; plan-only request dừng ở `ready`.
 - Ambiguous routing chỉ hỏi khi outcome/cost thực sự khác.
 - Ready gate chặn missing acceptance, validation, decision hoặc required Full artifact.
+- Self-hosting fixture chứng minh planning/ready/in_progress/verifying boundaries được persist trước stage action và plan-only dừng ở ready.
 - Research không chạy cho known/local fact và có provenance cho material unknown.
+- Research artifact lưu cả conclusion và remaining uncertainty.
 - Debug giữ one-hypothesis loop và replan sau ba failed hypotheses.
 - TDD exception có reason và alternate verification.
 - Compliance chạy trước quality; review feedback được verify, không blind-apply.

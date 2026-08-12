@@ -8,6 +8,7 @@ import {
   type FileLockClock,
   type HarnixFileLockRecord,
 } from "../../src/utils/file-lock.js";
+import { packageVersion } from "../../src/version.js";
 import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
 
 const temporaryUserHome = useTemporaryUserHomes("harnix-lock-home-");
@@ -46,7 +47,7 @@ describe("Harnix file lock", () => {
 
     expect(JSON.parse(await readFile(path, "utf8"))).toMatchObject({
       generator: "harnix",
-      generatorVersion: "0.5.0",
+      generatorVersion: packageVersion,
       operationId: "operation-a",
       ownerPid: 42,
       schemaVersion: 1,

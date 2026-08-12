@@ -296,9 +296,13 @@ Optional focused skills: `harnix-research` cho full-mode material unknowns và `
 
 Yêu cầu rõ kiểu build/fix/implement/change cho phép chuyển từ ready sang implementing trong phạm vi đã yêu cầu; không xin approval lần hai. Plan-only request hoặc explicit review checkpoint dừng ở `ready`. Product decision chưa giải quyết, scope expansion, destructive/external action hoặc thiếu authority mới cần hỏi.
 
+Workflow phải operational từ generated project artifacts: restore `.harnix/tasks/.active`; persist task `planning` trước product edits; persist `ready`, `in_progress/implementing`, và `verifying` trước hành động của stage kế tiếp; ghi evidence ngay sau check; persist `completed` trước journal/archive. Full artifacts phải tồn tại trên disk tại ready gate. Mỗi generated skill phải nêu incoming state, persisted action, và exit/handoff; không dựa vào conversation memory để giả định transition.
+
+Language/package profile trong `.harnix/config.yaml` chỉ là init-time discovery seed. Agent phải đối chiếu manifest, source, test và project instructions hiện tại, chọn context có budget, và không bulk-load repository chỉ vì profile thiếu hoặc stale.
+
 Bug/failure dùng reproduce → evidence → root cause → one hypothesis → minimal failing test → regression protection → fix. Sau ba failed hypotheses cho cùng symptom, reassess architecture và replan nếu cần. Behavior change ưu tiên RED–GREEN–REFACTOR; docs/trivial wiring/generated snapshots có thể dùng documented exception và strongest alternative verification.
 
-Ready gate bắt buộc acceptance criteria, affected scope, validation plan, resolved material unknowns và artifacts tương xứng mode. Check stage 1 là PRD/spec/acceptance compliance; stage 2 là correctness, tests, security, maintainability và unnecessary complexity. Finish chạy fresh final verification, archive/complete state, journal evidence/validated learning và không commit/push/merge/PR. Continue route từ persisted status/checkpoint và load smallest relevant journal/spec slice; corrupt/future state fail closed.
+Ready gate bắt buộc acceptance criteria, affected scope, validation plan, resolved material unknowns và artifacts tương xứng mode. Material research lưu task/source/date/conclusion/remaining uncertainty. Check stage 1 là PRD/spec/acceptance compliance; stage 2 là correctness, tests, security, maintainability và unnecessary complexity. Finish chạy fresh final verification, archive/complete state, journal evidence/validated learning và không commit/push/merge/PR. Continue route từ persisted status/checkpoint và load smallest relevant journal/spec slice; corrupt/future state fail closed.
 ## 15. Rules integration
 
 Precedence:

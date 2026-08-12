@@ -1,0 +1,20 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "path": ".harnix/spec/guides/common-rules.md",
+      "sourceId": "common-rules",
+      "scope": "project",
+      "generatedHash": "e5f5d21fbb54b7c84533ee7752bbb902cc4eafdaa0ae483c44822b1c32b9d6c8",
+      "generatorVersion": "0.6.0"
+    },
+    {
+      "path": ".harnix/workflow.md",
+      "sourceId": "workflow",
+      "scope": "project",
+      "generatedHash": "c8f31b0056733c6c85b5915b1860cce0e3d8ef6f5fb66773a683def0af6d36d5",
+      "generatorVersion": "0.6.0"
+    }
+  ]
+}

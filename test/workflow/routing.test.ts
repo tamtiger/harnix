@@ -89,7 +89,11 @@ describe("workflow routing and completion evidence", () => {
     expect(transitionTask(current, "verifying", "verifying").blocker).toBeUndefined();
   });
   it("records research provenance only for material unknowns", () => {
-    expect(createResearchFinding({ taskId: "t", topic: "compatibility", source: "official docs", researchedAt: "2026-08-07", conclusion: "supported", materialUnknown: true })).toContain("Source: official docs"); expect(() => createResearchFinding({ taskId: "t", topic: "known", source: "local", researchedAt: "2026-08-07", conclusion: "x", materialUnknown: false })).toThrow("material unknown");
+    const finding = createResearchFinding({ taskId: "t", topic: "compatibility", source: "official docs", researchedAt: "2026-08-07", conclusion: "supported", remainingUncertainty: "Platform smoke is still required.", materialUnknown: true });
+    expect(finding).toContain("Source: official docs");
+    expect(finding).toContain("## Remaining uncertainty\n\nPlatform smoke is still required.");
+    expect(() => createResearchFinding({ taskId: "t", topic: "known", source: "local", researchedAt: "2026-08-07", conclusion: "x", remainingUncertainty: "none", materialUnknown: false })).toThrow("material unknown");
+    expect(() => createResearchFinding({ taskId: "t", topic: "compatibility", source: "official docs", researchedAt: "2026-08-07", conclusion: "supported", remainingUncertainty: "", materialUnknown: true })).toThrow("provenance");
   });
   it("continues from persisted active state with minimum deduplicated context", async () => {
     const root = await temporaryRepository(); const active = { ...task(new Date().toISOString()), relevantPaths: ["b", "a"], relevantSpecs: ["a", "spec"] };

@@ -502,13 +502,15 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 - [x] Check enforces compliance stage before quality/security stage.
 - [x] Finish requires fresh verification, journals evidence and never commits.
 - [x] Continue routes from persisted status/checkpoint, loads minimum relevant state and fails closed on corrupt/future task state.
+- [x] Generated workflow and every skill state incoming status, persisted transition/checkpoint, and exit/handoff; planning is written before product edits and plan-only work remains at persisted `ready`.
+- [x] Project profile values are discovery seeds; current repository evidence and bounded task relevance control context selection.
 
 ### Task 3.2: Research/debug skills
 
 **Create:** `harnix-research`, `harnix-debug`.
 
 - [x] Eval research activates only for defined material unknowns.
-- [x] Research findings retain source/date/task attribution.
+- [x] Research findings retain source/date/task attribution, conclusion, and remaining uncertainty.
 - [x] Debug eval enforces reproduce/evidence/root cause/single hypothesis/regression sequence.
 - [x] Three failed hypotheses trigger architecture reassessment.
 
