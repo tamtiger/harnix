@@ -1,4 +1,4 @@
-import { access, lstat, mkdir, readdir, readFile, rename, rm } from "node:fs/promises";
+import { access, lstat, readdir, readFile, rename, rm } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { createHash } from "node:crypto";
 
@@ -25,11 +25,7 @@ export async function migrateLegacyProject(options: MigrateOptions, dependencies
   const stagedTree = join(stage, ".harnix");
   try {
     const developer = options.developer ?? "migration";
-    await mkdir(join(stagedTree, "spec", "guides"), { recursive: true });
-    await mkdir(join(stagedTree, "tasks"), { recursive: true });
-    await mkdir(join(stagedTree, "workspace", developer, "journal"), { recursive: true });
     await writeConfig(join(stagedTree, "config.yaml"), createConfig({ developer }));
-    await atomicWriteFile(join(stagedTree, ".developer"), `${developer}\n`);
     await atomicWriteFile(join(stagedTree, "workflow.md"), workflowTemplate);
     await atomicWriteFile(join(stagedTree, ".template-hashes.json"), `${JSON.stringify({ generator: "harnix", schemaVersion: 1, entries: [{ path: ".harnix/workflow.md", sourceId: "workflow", scope: "project", generatedHash: sha256(workflowTemplate), generatorVersion: packageVersion }] }, null, 2)}\n`);
     for (const file of migrationFiles) await atomicWriteFile(join(stagedTree, ...file.destination.split("/")), await readFile(file.source));

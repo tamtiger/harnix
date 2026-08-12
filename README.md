@@ -74,7 +74,7 @@ Sau khi đăng ký thành công, có thể chuyển sang repository cần quản
 
 ```powershell
 Set-Location C:\path\to\consumer-project
-harnix init --yes --user tam
+harnix init
 harnix setup --codex
 harnix doctor --json
 ```
@@ -111,7 +111,7 @@ Từ thư mục gốc dự án:
 
 ```powershell
 # Khởi tạo .harnix và tự động phát hiện ngôn ngữ/framework
-harnix init --yes --user tam
+harnix init
 
 # Cài integration một lần cho user profile; có thể chạy ngoài project
 harnix setup --kiro --antigravity --codex --dry-run --json
@@ -124,7 +124,7 @@ harnix doctor --json
 Nếu muốn chỉ định ngôn ngữ, dùng danh sách phân cách bằng dấu phẩy:
 
 ```powershell
-harnix init --yes --user tam --languages vue,typescript-nestjs
+harnix init --languages vue,typescript-nestjs
 ```
 
 Khi bỏ qua `--languages`, Harnix đọc marker dự án một cách local và deterministic. Các language/framework ID hiện được nhận diện gồm C#/.NET ABP, NestJS, Python, Java/Spring, Go, React web và Vue.
@@ -133,17 +133,19 @@ Khi bỏ qua `--languages`, Harnix đọc marker dự án một cách local và 
 
 ### `init`
 
-Tạo `.harnix/`, config, workflow, task/workspace namespace, các rule liên quan và root `AGENTS.md` bootstrap để AI agent biết cách đọc workflow Harnix. Init không overwrite file người dùng đã có.
+Tạo các file `.harnix` cần thiết, rule liên quan và root `AGENTS.md` bootstrap để AI agent biết cách đọc workflow Harnix. Init không prompt, không tạo thư mục rỗng và không overwrite file người dùng đã có.
 
 ```text
-harnix init [--yes] [--user <name>] [--languages <csv>]
+harnix init [--user <name>] [--languages <csv>]
            [--dry-run]
 ```
 
-- `--yes`: không prompt, phù hợp CI.
-- `--user`: developer workspace ID; chỉ cho phép ký tự an toàn.
+- Không cần option cho trường hợp thông thường: Harnix lấy developer journal ID từ user hệ điều hành và tự detect stack.
+- `--user`: override developer journal ID; chỉ cần khi muốn namespace khác hoặc CI cần giá trị cố định.
 - `--languages`: override detection bằng danh sách language ID.
 - `--dry-run`: kiểm tra kế hoạch mà không ghi file.
+
+Output gồm `status`, developer/languages đã chọn và các mảng path `created`, `updated`, `unchanged`, `preserved`, `warnings`.
 
 `init` chỉ tạo và quản lý namespace `.harnix/`. Nó không kiểm tra, migrate, overwrite hoặc xóa `.trellis`, `.trellis-pro` hay các skill `trellis-*` đang có trong repository. `setup` là user-global nên không cần chạy lại theo từng project; trước khi kích hoạt, global skills/hook phải resolve project Harnix initialized gần nhất từ cwd hoặc workspace roots (kể cả ancestor), rồi mới dùng `.harnix/config.yaml` của project đó.
 
@@ -263,11 +265,10 @@ Xem [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) để biết transition, gate v�
 .harnix/
   config.yaml
   workflow.md
-  .developer
   .template-hashes.json
   spec/                 # guide/rule đã được quản lý
-  tasks/                # task record và artifact do người dùng sở hữu
-  workspace/<developer>/journal/
+  tasks/                # tạo lazy khi persist task đầu tiên
+  workspace/<developer>/journal/ # tạo lazy khi ghi journal đầu tiên
 ```
 
 Task, spec, research và journal là dữ liệu người dùng. Harnix dùng atomic write, normalized POSIX path và containment check để hạn chế mất dữ liệu hoặc path escape qua symlink/junction.
@@ -277,7 +278,7 @@ Task, spec, research và journal là dữ liệu người dùng. Harnix dùng at
 CI nên chạy non-interactive và kiểm tra state trước khi merge:
 
 ```powershell
-harnix init --yes --user ci
+harnix init --user ci
 harnix doctor --json
 ```
 

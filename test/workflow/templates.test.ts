@@ -2,9 +2,10 @@ import { access, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { initializeProject } from "../../src/commands/init.js";
-import { agentsTemplate, harnixAgentsBlock } from "../../src/templates/harnix/agents.js";
+import { renderAgentsTemplate } from "../../src/templates/harnix/agents.js";
 import { ensureManagedWorkflow } from "../../src/templates/harnix/managed-workflow.js";
 import { workflowTemplate } from "../../src/templates/harnix/workflow.js";
+import { packageVersion } from "../../src/version.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -15,14 +16,22 @@ describe("workflow templates", () => {
 
     await initializeProject({ root, developer: "tam", yes: true });
 
-    await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toBe(agentsTemplate);
+    await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toBe(renderAgentsTemplate({ languages: [], packages: [] }));
     await expect(readFile(join(root, ".harnix", "workflow.md"), "utf8")).resolves.toBe(workflowTemplate);
-    expect(harnixAgentsBlock).toContain("explicit user-global integration");
-    expect(harnixAgentsBlock).toContain("Do not run setup or harnix init automatically");
-    expect(harnixAgentsBlock).toContain(".harnix/config.yaml");
-    expect(harnixAgentsBlock).not.toContain("Project-local skills are generated");
-    expect(harnixAgentsBlock).not.toMatch(/\.(?:kiro|gemini|codex)\//u);
-    expect(harnixAgentsBlock).not.toContain("commandWindows");
+    const agentInstructions = await readFile(join(root, "AGENTS.md"), "utf8");
+    expect(agentInstructions).toContain("explicit user-global integration");
+    expect(agentInstructions).toContain(`- Version: ${packageVersion}.`);
+    expect(agentInstructions).toContain("## Harnix\n\n- Version:");
+    expect(agentInstructions).toContain("## Project profile");
+    expect(agentInstructions).toContain("- Languages: not specified.");
+    expect(agentInstructions).toContain("- Package paths: not specified.");
+    expect(agentInstructions).toContain("project-local coding-agent harness");
+    expect(agentInstructions).toContain("Do not run setup or harnix init automatically");
+    expect(agentInstructions).toContain("nearest initialized project ancestor or workspace root");
+    expect(agentInstructions).not.toContain("Detected repository");
+    expect(agentInstructions).not.toContain("Project-local skills are generated");
+    expect(agentInstructions).not.toMatch(/\.(?:kiro|gemini|codex)\//u);
+    expect(agentInstructions).not.toContain("commandWindows");
     await expect(access(join(root, ".kiro"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(root, ".gemini"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(root, ".codex"))).rejects.toMatchObject({ code: "ENOENT" });
@@ -32,9 +41,12 @@ describe("workflow templates", () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
 
-    expect(workflowTemplate).toContain("only to a project whose current workspace has `.harnix/config.yaml`");
+    expect(workflowTemplate).toContain("nearest initialized project ancestor or workspace root");
     expect(workflowTemplate).toContain("explicit user-global operation");
     expect(workflowTemplate).toContain("do not create files or automatically run `harnix init`");
+    expect(workflowTemplate).toContain("Bypass");
+    expect(workflowTemplate).toContain("Ready gate");
+    expect(workflowTemplate).toContain("RED → GREEN → REFACTOR");
     await writeFile(join(root, ".harnix", "workflow.md"), "user workflow");
     await ensureManagedWorkflow(root);
 

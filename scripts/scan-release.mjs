@@ -62,7 +62,7 @@ export async function runReleaseScan(options = {}) {
 
     const fixture = join(temporary, "fixture");
     await mkdir(fixture);
-    run(process.execPath, [installedCli, "init", "--yes", "--user", "scan", "--languages", "vue"], fixture, integrationEnvironment);
+    run(process.execPath, [installedCli, "init", "--user", "scan", "--languages", "vue"], fixture, integrationEnvironment);
     run(process.execPath, [installedCli, "setup", "--kiro", "--antigravity", "--codex"], fixture, integrationEnvironment);
     const generatedFiles = [...await walk(fixture), ...await walk(userHome)];
     await scanTextFiles(generatedFiles, "generated fixture", true);

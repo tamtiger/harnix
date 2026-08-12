@@ -184,7 +184,7 @@ Blocked chỉ dùng khi không thể tiến bộ an toàn do user-owned decision
       context.json      # Conditional ranked sources and per-state scope
       research/         # Conditional, one topic per file
   workspace/<developer>/
-    journal/
+    journal/              # created lazily on first journal write
 ```
 
 `task.json` là record versioned tối thiểu: id/title, mode, status, goal, non-goals, acceptance criteria, current checkpoint, relevant paths/specs, validation plan, evidence refs, blockers và timestamps. Exact v1 field types, safe task ID, active pointer, legal transitions và resume status được khóa tại `IMPLEMENTATION_PLAN.md` mục 4; skill/platform adapter không được tự định nghĩa schema khác. Lite giữ các field cần thiết ngay trong record; Full dùng các file Markdown để tránh JSON phình to.

@@ -119,7 +119,7 @@ harnix/
 CLI có help rõ, actionable errors và non-zero exit khi thất bại:
 
 ```text
-harnix init [--yes] [--user <name>] [--languages <csv>] [--dry-run]
+harnix init [--user <name>] [--languages <csv>] [--dry-run]
 harnix setup --kiro|--antigravity|--codex [--dry-run] [--json]
 harnix update [--restore]
 harnix update --global [--kiro|--antigravity|--codex] [--restore] [--dry-run] [--json]
@@ -131,7 +131,7 @@ harnix mem [query]
 harnix doctor [--fix] [--global] [--json]
 ```
 
-Vẫn chỉ có bảy public commands. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Automation flags gồm `--yes`, `--user <name>`, `--languages <csv>`, `--limit`, `--dry-run` và `--json`. Packaged hidden `harnix internal context --platform <id>` chỉ là platform-hook protocol, không xuất hiện trong public help và không phải supported public API; exact stdin/stdout/bounds nằm trong `IMPLEMENTATION_PLAN.md` mục 4.7.
+Vẫn chỉ có bảy public commands. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user` và `--languages` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix internal context --platform <id>` chỉ là platform-hook protocol, không xuất hiện trong public help và không phải supported public API; exact stdin/stdout/bounds nằm trong `IMPLEMENTATION_PLAN.md` mục 4.7.
 
 ## 8. Init requirements
 
@@ -146,24 +146,20 @@ Vẫn chỉ có bảy public commands. Platform flags là explicit authorization
   - React dependencies → React web.
   - Vue dependencies → Vue.
 - Detect packages, package manager và verification commands nhưng không execute.
-- Interactive confirm/edit languages; `--yes`, `--user`, `--languages` hỗ trợ CI/tests.
+- Non-interactive by default: infer a safe developer journal ID from the current OS user and auto-detect languages. `--user` and `--languages` are optional deterministic overrides for CI/tests.
 
 Init chỉ tạo:
 
 ```text
 .harnix/
-  spec/<package>/
   spec/guides/
-  tasks/
-  workspace/<developer>/
   config.yaml
   workflow.md
-  .developer
   .template-hashes.json
 AGENTS.md                  # short bootstrap only when absent
 ```
 
-Không tạo runtime scripts. Seed relevant specs/rules. Rerun idempotent và giữ modified specs/config/tasks/journals. Init quản lý `.harnix/` và may create the minimal root `AGENTS.md` bootstrap only when it is absent; it does not inspect, migrate, overwrite or delete `.trellis`, `.trellis-pro` or Trellis skills. Representative fixture phải dưới 5 giây.
+Không tạo runtime scripts hoặc empty placeholder directories. `tasks/` và `workspace/<developer>/journal/` được tạo lazy khi task/journal đầu tiên được persist; developer source of truth là `config.yaml`, không duplicate `.developer`. Seed relevant specs/rules. Rerun idempotent và giữ modified specs/config/tasks/journals. Init trả project status cùng các path `created`, `updated`, `unchanged`, `preserved` và warning để người dùng thấy chính xác file nào bị tác động. Init quản lý `.harnix/` và may create the minimal root `AGENTS.md` bootstrap only when it is absent; it does not inspect, migrate, overwrite or delete `.trellis`, `.trellis-pro` or Trellis skills. Representative fixture phải dưới 5 giây.
 
 ## 9. User-global setup and platform requirements
 

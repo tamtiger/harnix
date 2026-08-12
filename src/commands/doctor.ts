@@ -153,7 +153,7 @@ async function diagnoseProjectSection(root: string): Promise<DoctorProjectSectio
     return { status: "invalid", findings: [finding("manifest-invalid", "error", ".harnix/.template-hashes.json", redact(error, root), false)] };
   }
 
-  const desired = new Map(desiredFiles(config.platforms, config.languages).map((file) => [file.entry.path, file]));
+  const desired = new Map(desiredFiles(config).map((file) => [file.entry.path, file]));
   for (const entry of manifest.entries) {
     if (entry.scope !== "project") {
       await inspectLegacyEntry(root, entry, findings);

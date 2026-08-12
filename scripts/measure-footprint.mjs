@@ -12,7 +12,7 @@ const home = await mkdtemp(join(tmpdir(), "harnix-footprint-home-"));
 
 try {
   const environment = createIsolatedUserEnvironment(home);
-  run(process.execPath, [join(root, "dist", "cli.js"), "init", "--yes", "--user", "measure", "--languages", "vue"], project, environment);
+  run(process.execPath, [join(root, "dist", "cli.js"), "init", "--user", "measure", "--languages", "vue"], project, environment);
   run(process.execPath, [join(root, "dist", "cli.js"), "setup", "--kiro", "--antigravity", "--codex"], project, environment);
   await assertNoProjectLocalPlatformSurfaces(project);
   await assertExpectedGlobalSurfaces(home);

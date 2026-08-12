@@ -32,7 +32,7 @@ Mọi public symbol, package, executable, template và generated branding dùng 
 | `.trellis/scripts/**` | Package runtime modules | `remove` | Không sinh Python/runtime scripts vào consumer |
 | `.trellis/spec/**` templates | `src/templates/harnix/spec/**` | `reuse/adapt` | Concise, language-scoped, managed-until-edited |
 | `.trellis/tasks/**` | `.harnix/tasks/**` | `reuse/adapt` | User data, never managed template |
-| `.trellis/workspace/**` | `.harnix/workspace/<developer>/**` | `reuse/adapt` | Journal/learning local, newest-first |
+| `.trellis/workspace/**` | `.harnix/workspace/<developer>/**` | `reuse/adapt` | Journal/learning local, newest-first; directory created lazily on first write |
 | `.trellis/config.yaml` | `.harnix/config.yaml` | `build new` | `generator: harnix`, versioned strict schema |
 | `.trellis/workflow.md` | `docs/HARNIX_WORKFLOW.md` → `src/templates/harnix/workflow.md` → `.harnix/workflow.md` | `adapt` | Một state machine; Bypass/Lite/Full routing, ready gate, debug/replan, two-stage verification; no duplicate approval/mandatory Git |
 | Trellis platform agents/commands/skills | Harnix focused skills | `adapt` | Namespace `harnix-*`; không slash-command shim |
@@ -74,13 +74,9 @@ Only the following is valid new-project init output:
 
 ```text
 .harnix/
-  spec/<package>/
   spec/guides/
-  tasks/
-  workspace/<developer>/
   config.yaml
   workflow.md
-  .developer
   .template-hashes.json
 AGENTS.md                  # bootstrap only when absent
 ```
@@ -89,7 +85,7 @@ Mapping rules:
 
 - `.trellis/` or `.trellis-pro/` is legacy input only; never new output.
 - `scripts/`, platform runtime copies, SQLite/global state and hidden generated skills are not created. The root `AGENTS.md` bootstrap is the sole non-`.harnix` init exception; it is not a setup-owned platform surface.
-- Tasks/journals are user-owned. Config/spec/workflow begin as managed where applicable and become preserved once modified.
+- Tasks/journals are user-owned and their directories are created lazily. `config.yaml` is the sole developer-ID source of truth; new init output has no duplicate `.developer`. Config/spec/workflow begin as managed where applicable and become preserved once modified.
 - Project manifest keys are POSIX-normalized repository-relative paths; values include source ID, project scope, hash and generator version. Phase 6 global output uses separate platform-root-relative sidecar manifests and never puts ownership into project data.
 
 ## 6. Platform mapping

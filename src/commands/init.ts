@@ -1,36 +1,47 @@
-import { access, mkdir } from "node:fs/promises";
+import { access } from "node:fs/promises";
 
-import { createConfig, writeConfig } from "../core/config/config.js";
+import { createConfig, readConfig, writeConfig } from "../core/config/config.js";
 import { detectProject, type LanguageId } from "../utils/detection.js";
-import { atomicWriteFile } from "../utils/atomic-write.js";
-import { sha256 } from "../utils/hashing.js";
-import { workflowTemplate } from "../templates/harnix/workflow.js";
-import { updateProject } from "./update.js";
+import { writeManifest } from "../utils/managed-files.js";
+import { desiredFiles, updateProject } from "./update.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
-import { packageVersion } from "../version.js";
 
 export interface InitializeProjectOptions {
   root: string;
   developer: string;
-  yes: boolean;
+  /** @deprecated Init is non-destructive and no longer needs confirmation. */
+  yes?: boolean | undefined;
   dryRun?: boolean | undefined;
   languages?: LanguageId[] | undefined;
 }
 
 export interface InitializeProjectResult {
-  created: boolean;
-  legacyMarkers: string[];
+  scope: "project";
+  status: "initialized" | "already-initialized" | "planned";
+  developer: string;
+  languages: LanguageId[];
+  created: string[];
+  updated: string[];
+  unchanged: string[];
+  preserved: string[];
+  warnings: string[];
 }
 
 export async function initializeProject(options: InitializeProjectOptions): Promise<InitializeProjectResult> {
-  const legacyMarkers: string[] = [];
-  if (options.dryRun) {
-    return { created: false, legacyMarkers };
-  }
-
   const configPath = await resolveSafeHarnixPath(options.root, "config.yaml");
   if (await pathExists(configPath)) {
-    return { created: false, legacyMarkers };
+    const config = await readConfig(configPath);
+    return {
+      scope: "project",
+      status: "already-initialized",
+      developer: config.developer,
+      languages: config.languages,
+      created: [],
+      updated: [],
+      unchanged: [".harnix/config.yaml"],
+      preserved: [],
+      warnings: ["Project is already initialized; run 'harnix update' to reconcile managed files."],
+    };
   }
 
   const detection = await detectProject(options.root);
@@ -39,28 +50,56 @@ export async function initializeProject(options: InitializeProjectOptions): Prom
     languages: options.languages ?? detection.languages,
     packages: detection.packages.map(({ languages, path }) => ({ languages, path })),
   });
-  await resolveSafeProjectPath(options.root, "AGENTS.md");
-  const [guidesPath, tasksPath, workspacePath, developerPath, workflowPath, manifestPath] = await Promise.all([
-    resolveSafeHarnixPath(options.root, "spec/guides"),
-    resolveSafeHarnixPath(options.root, "tasks"),
-    resolveSafeHarnixPath(options.root, `workspace/${options.developer}`),
-    resolveSafeHarnixPath(options.root, ".developer"),
-    resolveSafeHarnixPath(options.root, "workflow.md"),
-    resolveSafeHarnixPath(options.root, ".template-hashes.json"),
-  ]);
-  await Promise.all([
-    mkdir(guidesPath, { recursive: true }),
-    mkdir(tasksPath, { recursive: true }),
-    mkdir(workspacePath, { recursive: true }),
-  ]);
-  await Promise.all([
-    writeConfig(configPath, config),
-    atomicWriteFile(developerPath, `${options.developer}\n`),
-    atomicWriteFile(workflowPath, workflowTemplate),
-    atomicWriteFile(manifestPath, `${JSON.stringify({ generator: "harnix", schemaVersion: 1, entries: [{ path: ".harnix/workflow.md", sourceId: "harnix-workflow", scope: "project", generatedHash: sha256(workflowTemplate), generatorVersion: packageVersion }] }, null, 2)}\n`),
-  ]);
-  await updateProject({ root: options.root });
-  return { created: true, legacyMarkers };
+  const manifestPath = await resolveSafeHarnixPath(options.root, ".template-hashes.json");
+  const manifestExists = await pathExists(manifestPath);
+  const desired = desiredFiles(config);
+  await Promise.all(desired.map(({ entry }) => resolveSafeProjectPath(options.root, entry.path)));
+
+  if (options.dryRun) {
+    const planned = await classifyDesiredPaths(options.root, desired.map(({ entry }) => entry.path));
+    return result("planned", config.developer, config.languages, {
+      created: [".harnix/config.yaml", ...(!manifestExists ? [".harnix/.template-hashes.json"] : []), ...planned.created],
+      preserved: [...(manifestExists ? [".harnix/.template-hashes.json"] : []), ...planned.preserved],
+    });
+  }
+
+  await writeConfig(configPath, config);
+  if (!manifestExists) {
+    await writeManifest(manifestPath, { generator: "harnix", schemaVersion: 1, entries: [] });
+  }
+  const reconciled = await updateProject({ root: options.root });
+  return result("initialized", config.developer, config.languages, {
+    created: [".harnix/config.yaml", ...(!manifestExists ? [".harnix/.template-hashes.json"] : []), ...reconciled.created],
+    updated: [...(manifestExists ? [".harnix/.template-hashes.json"] : []), ...reconciled.updated],
+    preserved: reconciled.preserved,
+  });
+}
+
+function result(
+  status: InitializeProjectResult["status"],
+  developer: string,
+  languages: LanguageId[],
+  paths: Partial<Pick<InitializeProjectResult, "created" | "updated" | "unchanged" | "preserved">>,
+): InitializeProjectResult {
+  return {
+    scope: "project",
+    status,
+    developer,
+    languages,
+    created: [...(paths.created ?? [])].sort(),
+    updated: [...(paths.updated ?? [])].sort(),
+    unchanged: [...(paths.unchanged ?? [])].sort(),
+    preserved: [...(paths.preserved ?? [])].sort(),
+    warnings: [],
+  };
+}
+
+async function classifyDesiredPaths(root: string, paths: string[]): Promise<{ created: string[]; preserved: string[] }> {
+  const classified = await Promise.all(paths.map(async (path) => ({ exists: await pathExists(await resolveSafeProjectPath(root, path)), path })));
+  return {
+    created: classified.filter(({ exists }) => !exists).map(({ path }) => path),
+    preserved: classified.filter(({ exists }) => exists).map(({ path }) => path),
+  };
 }
 
 async function pathExists(path: string): Promise<boolean> {

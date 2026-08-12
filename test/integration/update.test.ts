@@ -24,6 +24,10 @@ describe("updateProject", () => {
   });
   it("does not touch tasks, journals, or unrelated files", async () => {
     const root = await fixture();
+    await Promise.all([
+      mkdir(join(root, ".harnix", "tasks"), { recursive: true }),
+      mkdir(join(root, ".harnix", "workspace", "tam"), { recursive: true }),
+    ]);
     await writeFile(join(root, ".harnix", "tasks", "keep.txt"), "task"); await writeFile(join(root, ".harnix", "workspace", "tam", "keep.jsonl"), "journal"); await writeFile(join(root, "keep.txt"), "user");
     await updateProject({ root });
     await expect(readFile(join(root, ".harnix", "tasks", "keep.txt"), "utf8")).resolves.toBe("task"); await expect(readFile(join(root, ".harnix", "workspace", "tam", "keep.jsonl"), "utf8")).resolves.toBe("journal"); await expect(readFile(join(root, "keep.txt"), "utf8")).resolves.toBe("user");

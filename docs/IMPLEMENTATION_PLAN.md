@@ -100,7 +100,7 @@ interface PackageConfig {
 interface HarnixConfigV1 {
   generator: "harnix";
   schemaVersion: 1;
-  developer: string;         // workspace ID matching ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$
+  developer: string;         // journal namespace ID matching ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$
   languages: LanguageId[];   // project union, unique and sorted
   packages: PackageConfig[]; // unique by path and sorted by path
   platforms: PlatformId[];   // v1 parse compatibility only; deprecated and ignored for desired global setup
@@ -234,7 +234,7 @@ Deterministic base score là pin `1000`, explicit task/acceptance reference `500
 
 ### 4.5 Journal and learning
 
-Journal path: `.harnix/workspace/<developer>/journal/YYYY-MM-DD.jsonl`; một UTF-8 JSON object mỗi line, append bằng locked/atomic strategy phù hợp platform. Malformed lines được report và skip, không làm mất valid entries.
+Journal path: `.harnix/workspace/<developer>/journal/YYYY-MM-DD.jsonl`; namespace directory được tạo lazy khi ghi entry đầu tiên. Mỗi UTF-8 JSON object nằm trên một line, append bằng locked/atomic strategy phù hợp platform. Malformed lines được report và skip, không làm mất valid entries.
 
 ```ts
 interface LearningCandidateV1 {
@@ -323,7 +323,7 @@ Fixtures cover non-Harnix no-op, corrupt/malformed optional input, Unicode/space
 
 ### 4.8 Common CLI result semantics
 
-Mọi public command dùng stderr cho actionable error/warning và stdout cho requested data/output. Exit `0` là success/clean intentional no-op/dry-run; exit `1` là operation hoặc diagnostic hoàn tất nhưng có actionable finding/conflict/failure; exit `2` là invalid usage/config/schema/root hoặc deterministic internal failure. Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated/machine-readable output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. `--json` (nơi được hỗ trợ) emits exactly one document; `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. Interactive prompts bị disable khi `--yes` hoặc non-TTY và thiếu required value phải fail thay vì treo.
+Mọi public command dùng stderr cho actionable error/warning và stdout cho requested data/output. Exit `0` là success/clean intentional no-op/dry-run; exit `1` là operation hoặc diagnostic hoàn tất nhưng có actionable finding/conflict/failure; exit `2` là invalid usage/config/schema/root hoặc deterministic internal failure. Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated/machine-readable output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. `--json` (nơi được hỗ trợ) emits exactly one document; `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. `init` is always non-interactive and emits one `InitProjectResult` document with `scope: "project"`, `status: "initialized" | "already-initialized" | "planned"`, detected developer/languages, and sorted `created`, `updated`, `unchanged`, `preserved`, `warnings` arrays. `--yes` is not part of the public init syntax; a hidden no-op compatibility alias may remain for v0.5 callers.
 ## 5. Phase 0 — Documentation và baseline checkpoint
 
 ### Task 0.1: Chuẩn hóa PRD
@@ -408,8 +408,8 @@ Phase 1–5 task checkmarks below are historical delivery evidence. Their former
 **Create:** `src/core/config/**`, `src/commands/init.ts`, Harnix base templates.
 
 - [x] RED config tests implement exact 4.1 types/invariants, valid/corrupt/future schemas and compatible unknown-key round-trip preservation.
-- [x] RED CLI tests for `--yes`, `--user`, `--languages`, interactive edit and idempotence.
-- [x] Init creates the approved `.harnix` tree plus a small root `AGENTS.md` bootstrap for AI agents; no runtime scripts or platform hook/settings are created.
+- [x] RED CLI tests for zero-option non-interactive init, optional `--user`/`--languages` overrides, per-path status output and idempotence.
+- [x] Init creates only required files plus a small root `AGENTS.md` bootstrap for AI agents; task/journal directories are lazy, and no duplicate `.developer`, runtime scripts or platform hook/settings are created.
 - [x] Existing `AGENTS.md`, specs/config/tasks/journals remain untouched; the bootstrap is managed conservatively and preserves user edits.
 - [x] Performance test uses a representative local fixture and requires <5 seconds.
 
@@ -690,7 +690,7 @@ Failure dừng gate, kích hoạt systematic debugging và rerun focused rồi f
 | Legacy migration partial state | Medium/High | Staging/verify/atomic activation/rollback/source preservation |
 | Rule/skill bloat | High/Medium | Context budget, concise packs, footprint threshold, routing evals |
 | License omission | Low/High | NOTICE/license scan and source metadata |
-| Interactive CLI makes CI flaky | Medium/Medium | Inject prompts; `--yes`, `--user`, `--languages`; isolated integration tests |
+| Init CLI interaction makes CI flaky | Medium/Medium | Init has no prompt; optional `--user`/`--languages` give deterministic overrides; isolated integration tests |
 | Upgrade tests call real network/install | Low/High | Inject dependencies; fail test on unexpected process/network |
 
 ## 13. Definition of done

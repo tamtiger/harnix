@@ -51,7 +51,7 @@ describe("searchMemory", () => {
   it("should_reject_unsafe_user_when_searching_memory", async () => {
     const root = await initializedRepository();
 
-    await expect(searchMemory({ root, user: "../../outside" })).rejects.toThrow("workspace ID");
+    await expect(searchMemory({ root, user: "../../outside" })).rejects.toThrow("journal ID");
   });
 
   it("should_skip_malformed_journal_shape_when_searching_memory", async () => {

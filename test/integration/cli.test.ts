@@ -2,10 +2,7 @@ import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("inquirer", () => ({ default: { prompt: vi.fn() } }));
-
 import { createProgram, redactPublicErrorMessage, runCli } from "../../src/cli-program.js";
-import inquirer from "inquirer";
 import { initializeProject } from "../../src/commands/init.js";
 import { GlobalManagedTransactionError } from "../../src/utils/global-managed-files.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
@@ -71,18 +68,22 @@ describe.sequential("CLI", () => {
     await expect(readFile(join(home, ".kiro", "steering", "harnix.md"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
   });
-  it("should_use_interactive_answers_when_yes_is_omitted", async () => {
+  it("should_initialize_without_confirmation_or_user_flags", async () => {
     const root = await fixture(); process.chdir(root);
-    vi.mocked(inquirer.prompt).mockResolvedValueOnce({ developer: "interactive", languages: "go,vue" });
-    await createProgram({ interactive: true }).parseAsync(["node", "harnix", "init"], { from: "node" });
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    await createProgram({ environment: { USERNAME: "interactive" }, interactive: true }).parseAsync(["node", "harnix", "init"], { from: "node" });
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("developer: interactive");
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
+      scope: "project",
+      status: "initialized",
+      developer: "interactive",
+      created: expect.arrayContaining([".harnix/config.yaml", ".harnix/workflow.md", "AGENTS.md"]),
+    });
   });
-  it("should_detect_languages_without_prompt_when_yes_omits_languages", async () => {
+  it("should_detect_languages_when_init_omits_all_options", async () => {
     const root = await fixture(); process.chdir(root);
     await writeFile(join(root, "package.json"), JSON.stringify({ dependencies: { react: "latest" } }));
-    vi.mocked(inquirer.prompt).mockClear();
-    await createProgram({ interactive: false }).parseAsync(["node", "harnix", "init", "--yes", "--user", "tam"], { from: "node" });
-    expect(vi.mocked(inquirer.prompt)).not.toHaveBeenCalled();
+    await createProgram({ environment: { USERNAME: "tam" }, interactive: false }).parseAsync(["node", "harnix", "init"], { from: "node" });
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("- react-web");
   });
   it("should_accept_doctor_json_when_requested", async () => {

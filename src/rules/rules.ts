@@ -6,13 +6,25 @@ import { resolveSafeProjectPath } from "../utils/paths.js";
 
 export const commonRules = `# Harnix common engineering rules
 
-- Keep changes scoped, reviewable, and covered by fresh verification.
-- Preserve user data and do not expose secrets or machine-specific paths.
-- Validate boundaries, handle errors explicitly, and prefer deterministic behavior.
+- **Repository conventions:** inspect the nearest project instructions, existing architecture, build scripts, and tests before changing code; follow established naming and dependency direction.
+- **Scope and ownership:** keep changes limited to the stated acceptance criteria. Preserve unrelated edits, generated/user-owned data, and public compatibility unless the task explicitly changes them.
+- **Boundaries:** validate external input at the edge, keep I/O and side effects explicit, propagate cancellation/timeouts, and return actionable errors without leaking secrets or machine paths.
+- **Behavior changes:** add a focused failing regression test first when practical, implement the smallest coherent fix, then refactor only while the checks stay green.
+- **Acceptance and verification:** run the narrowest meaningful checks first, then the required broader gate. Report actual commands, exit codes, omitted checks, and residual risk; stale output is not evidence.
+- **Security and operations:** do not log credentials or sensitive payloads, concatenate untrusted shell input, silently call network services, or perform destructive/external actions without authority.
 `;
 export const attribution = { source: "Harnix-authored adaptations informed by ECC/Superpowers research", license: "MIT-compatible adaptation metadata; see NOTICE" } as const;
 const packs: Record<LanguageId, string> = {
-  "csharp-dotnet-abp": `# C#/.NET/ABP rules\n\n- Enable nullable reference types and honor cancellation tokens.\n- Keep authorization, validation, application services, and persistence boundaries explicit.\n- Use async APIs, DI, EF Core query boundaries, and focused xUnit tests.\n`,
+  "csharp-dotnet-abp": `# C#/.NET/ABP rules
+
+- Respect solution-layer dependencies: Domain holds business invariants, Application orchestrates use cases and DTO mapping, and EntityFrameworkCore/Infrastructure owns persistence and external adapters.
+- Enforce ABP authorization policies and validation at application boundaries. Preserve tenant context, data filters, audit behavior, and unit-of-work semantics; never trust a client-supplied tenant or permission decision.
+- Keep EF Core entities and IQueryable inside persistence boundaries. Project only required columns, use AsNoTracking for read-only queries, avoid N+1 queries, and make transaction/migration changes explicit.
+- Enable nullable reference types, keep DTO/entity nullability honest, use async APIs end-to-end, pass CancellationToken to cancellable I/O, and avoid sync-over-async.
+- Prefer constructor DI and small focused services. Do not hide ambient state, service-location, DateTime/network/filesystem calls, or cross-aggregate writes that make behavior nondeterministic.
+- Cover domain invariants with focused unit tests and application/persistence behavior with xUnit plus the appropriate ABP integration fixture. Include authorization, validation, tenant isolation, cancellation, and database-boundary regressions when relevant.
+- Keep secrets in the configured secret provider/environment, never committed settings or logs. Log stable identifiers and outcomes rather than tokens, credentials, or full sensitive payloads.
+`,
   "typescript-nestjs": `# TypeScript/NestJS rules\n\n- Keep strict types and validate external input at controller boundaries.\n- Separate modules, application services, persistence, and transport concerns.\n- Test behavior with deterministic fixtures and avoid hidden global state.\n`,
   python: `# Python rules\n\n- Use type hints, explicit resource management, and small testable modules.\n- Validate external data and keep I/O at clear boundaries.\n`,
   "java-spring": `# Java/Spring rules\n\n- Keep transaction and persistence boundaries explicit.\n- Apply Bean Validation and Spring Security at the boundary; test with JUnit/Testcontainers where integration behavior matters.\n`,

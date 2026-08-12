@@ -15,7 +15,7 @@ for (let index = 0; index < 3; index += 1) {
   try {
     await createRepresentativeFixture(fixture);
     const started = performance.now();
-    const result = spawnSync(process.execPath, [join(root, "dist", "cli.js"), "init", "--yes", "--user", "measure"], {
+    const result = spawnSync(process.execPath, [join(root, "dist", "cli.js"), "init", "--user", "measure"], {
       cwd: fixture,
       encoding: "utf8",
       env: createIsolatedUserEnvironment(home),
@@ -31,7 +31,7 @@ for (let index = 0; index < 3; index += 1) {
   }
 }
 const ordered = [...runs].sort((left, right) => left - right); const median = ordered[1]; const worst = ordered.at(-1);
-process.stdout.write(`${JSON.stringify({ command: "harnix init --yes", fixture: "representative-vue-nest-monorepo-with-ignored-trees", repetitions: runs.length, runs, median, worst })}\n`);
+process.stdout.write(`${JSON.stringify({ command: "harnix init", fixture: "representative-vue-nest-monorepo-with-ignored-trees", repetitions: runs.length, runs, median, worst })}\n`);
 if (worst >= 5000) throw new Error(`init worst run ${worst.toFixed(1)}ms exceeds 5 seconds.`);
 
 async function createRepresentativeFixture(directory) {

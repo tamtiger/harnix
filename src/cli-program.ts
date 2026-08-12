@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-import { Command } from "commander";
-import inquirer from "inquirer";
+import { Command, Option } from "commander";
 
 import { initializeProject } from "./commands/init.js";
 import { setupPlatforms, type HookCommandLookup } from "./commands/setup.js";
@@ -32,18 +31,19 @@ export interface ProgramOptions {
 
 export function createProgram(programOptions: ProgramOptions = {}): Command {
   const program = new Command();
-  const interactive = programOptions.interactive ?? process.stdin.isTTY === true;
   program.name("harnix").description("Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, and Codex integrations.").version(packageVersion).showSuggestionAfterError().exitOverride();
-  program.command("init").option("--yes", "Run without interactive prompts").option("--user <name>", "Developer workspace ID").option("--languages <csv>", "Comma-separated language IDs").option("--dry-run", "Preview without writing").action(async (options: { yes?: boolean; user?: string; languages?: string; dryRun?: boolean }) => {
-    const defaults = { developer: options.user ?? process.env.USERNAME ?? process.env.USER ?? "developer", languages: options.languages };
-    const answers = options.yes || !interactive ? defaults : await inquirer.prompt<{ developer: string; languages?: string }>([
-      { default: defaults.developer, message: "Developer workspace ID", name: "developer", type: "input" },
-      { default: defaults.languages ?? "", message: "Languages (comma-separated, optional)", name: "languages", type: "input" },
-    ]);
-    const languages = answers.languages === undefined || answers.languages.trim() === "" ? undefined : answers.languages.split(",").map((language) => language.trim()).filter(Boolean);
-    const result = await initializeProject({ developer: answers.developer, dryRun: options.dryRun, languages: languages as never, root: await resolveProjectRoot(process.cwd()), yes: options.yes ?? !interactive });
-    process.stdout.write(`${JSON.stringify(result)}\n`);
-  });
+  program.command("init")
+    .option("--user <name>", "Override the detected developer journal ID")
+    .option("--languages <csv>", "Override auto-detected language IDs")
+    .option("--dry-run", "Preview without writing")
+    .addOption(new Option("--yes", "Deprecated compatibility option; init no longer prompts").hideHelp())
+    .action(async (options: { yes?: boolean; user?: string; languages?: string; dryRun?: boolean }) => {
+      const environment = { ...process.env, ...(programOptions.environment ?? {}) };
+      const developer = options.user ?? defaultDeveloperId(environment);
+      const languages = options.languages === undefined || options.languages.trim() === "" ? undefined : options.languages.split(",").map((language) => language.trim()).filter(Boolean);
+      const result = await initializeProject({ developer, dryRun: options.dryRun, languages: languages as never, root: await resolveProjectRoot(process.cwd()), yes: options.yes });
+      process.stdout.write(`${JSON.stringify(result)}\n`);
+    });
   program.command("setup").option("--kiro", "Install Kiro user-global integration").option("--antigravity", "Install Antigravity user-global integration").option("--codex", "Install Codex user-global integration").option("--dry-run", "Preview user-global changes without writing").option("--json", "Output stable JSON").action(async (options: { kiro?: boolean; antigravity?: boolean; codex?: boolean; dryRun?: boolean }) => {
     const platforms = (["kiro", "antigravity", "codex"] as const).filter((platform) => options[platform]);
     const result = await setupPlatforms({
@@ -131,6 +131,15 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   });
   program.addCommand(internal, { hidden: true });
   return program;
+}
+
+export function defaultDeveloperId(environment: Readonly<Record<string, string | undefined>>): string {
+  const candidate = environment.USERNAME ?? environment.USER ?? "developer";
+  const normalized = candidate
+    .replace(/[^A-Za-z0-9._-]+/gu, "-")
+    .replace(/^[^A-Za-z0-9]+/u, "")
+    .slice(0, 64);
+  return /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u.test(normalized) ? normalized : "developer";
 }
 
 export async function runCli(argv = process.argv, programOptions: ProgramOptions = {}): Promise<number> {

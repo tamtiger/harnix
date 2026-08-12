@@ -1,10 +1,26 @@
 export const workflowTemplate = `# Harnix workflow
 
-This workflow applies only to a project whose current workspace has \`.harnix/config.yaml\`. If the guard is absent or invalid, do not create files or automatically run \`harnix init\`; report the missing or invalid state. Platform setup is a separate, explicit user-global operation and does not create platform integration surfaces in this project.
+This workflow applies only after locating the nearest initialized project ancestor or workspace root containing \`.harnix/config.yaml\`. If no such root exists or its state is invalid, do not create files or automatically run \`harnix init\`; report the missing or invalid state. Platform setup is a separate, explicit user-global operation and does not create platform integration surfaces in this project.
 
-Use one active task and the canonical sequence: planning → ready → in_progress → verifying → completed. A task may be blocked and resumes only to its recorded status. Treat debugging, replan, and finishing as checkpoints.
+## Route the request
 
-Before implementation, record acceptance criteria, relevant paths, and a validation plan. Use focused fresh evidence; compliance review comes before quality/security review. Do not commit, branch, push, merge, or create a PR.
+- **Bypass:** read-only explanation or a trivial action that does not need persisted task state.
+- **Lite:** localized, low-risk implementation with clear scope; persist a compact task record.
+- **Full:** cross-layer, security-sensitive, migration-heavy, or materially uncertain work; persist PRD/plan and targeted research when needed.
+
+Use one active task and the canonical sequence: planning → ready → in_progress → verifying → completed. A task may be blocked only by a concrete decision, authority, credential, external dependency, or repository condition, and resumes only to its recorded status. Debugging, replan, and finishing are checkpoints, not alternate workflows.
+
+## Ready gate
+
+Before implementation, record the goal, non-goals, acceptance criteria, relevant paths/specs, and a validation plan. Resolve material product decisions first. A clear user request to implement authorizes work within that scope; ask again only for a new decision, authority, destructive/external action, or material scope expansion.
+
+## Implement and verify
+
+For behavior changes, prefer RED → GREEN → REFACTOR: reproduce with a focused failing test, make the smallest coherent change, then refactor while green. Preserve unrelated/user-owned content and load only task-relevant context.
+
+Verification has two ordered stages: (1) compliance with the request, PRD/spec, and acceptance criteria; (2) correctness, tests, security, maintainability, and unnecessary complexity. Use fresh focused evidence before the required broader gate. Record actual failures and omitted checks; never infer success from stale or partial output.
+
+Finish only when every criterion is met or explicitly waived with a reason, required evidence is fresh, and persisted state is updated safely. Do not commit, branch, push, merge, publish, or create a PR automatically.
 `;
 
 export interface SkillTemplate { name: string; description: string; body: string; }

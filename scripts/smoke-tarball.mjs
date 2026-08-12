@@ -25,7 +25,7 @@ for (const platforms of [["--kiro"], ["--antigravity"], ["--codex"], ["--kiro", 
     const environment = createIsolatedUserEnvironment(home, {
       pathPrefix: join(project, "node_modules", ".bin"),
     });
-    run(process.execPath, [cli, "init", "--yes", "--user", "smoke", "--languages", "vue"], project, environment);
+    run(process.execPath, [cli, "init", "--user", "smoke", "--languages", "vue"], project, environment);
     const setup = run(process.execPath, [cli, "setup", ...platforms, "--json"], project, environment);
     assertGlobalSetupResult(setup.stdout, platforms, home);
     await assertNoProjectLocalPlatformSurfaces(project);

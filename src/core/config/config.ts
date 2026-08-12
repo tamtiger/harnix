@@ -43,7 +43,7 @@ export class ConfigValidationError extends Error {
 
 export function validateDeveloperId(value: string): string {
   if (!developerPattern.test(value)) {
-    throw new ConfigValidationError("developer must be a safe workspace ID.");
+    throw new ConfigValidationError("developer must be a safe journal ID.");
   }
   return value;
 }
@@ -69,7 +69,7 @@ export function validateConfig(value: unknown): HarnixConfigV1 {
   if (value.generator !== "harnix" || value.schemaVersion !== 1) {
     throw new ConfigValidationError("Unsupported Harnix config generator or schema version.");
   }
-  if (typeof value.developer !== "string") throw new ConfigValidationError("developer must be a safe workspace ID.");
+  if (typeof value.developer !== "string") throw new ConfigValidationError("developer must be a safe journal ID.");
   validateDeveloperId(value.developer);
 
   assertLanguages(value.languages, "languages");

@@ -4,6 +4,17 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; các mục dưới đây theo commit cho đến khi versioning/release workflow được triển khai.
 
+## [0.6.0] - 2026-08-12
+
+### Changed
+
+- `harnix init` is now zero-option and non-interactive by default, inferring the developer journal ID from the OS user and auto-detecting the stack; `--user` and `--languages` remain optional overrides while the old `--yes` flag is a hidden no-op compatibility alias.
+- Init output now reports project status, selected developer/languages, and sorted per-path `created`, `updated`, `unchanged`, `preserved`, and warning arrays.
+- New projects no longer contain the redundant `.developer` file or empty `tasks/` and `workspace/<developer>/` placeholders; task and journal writers create their namespaces lazily.
+- Generated common and C#/.NET/ABP guides now contain actionable architecture, security, persistence, cancellation, testing, and verification rules; the project workflow template now includes routing, ready-gate, implementation, and two-stage verification guidance.
+- Generated workflow and AGENTS bootstrap instructions now resolve the nearest initialized project ancestor or workspace root, so nested working directories follow the same activation guard as global integrations.
+- Generated `AGENTS.md` now places Harnix version and project-local workflow/task/guidance/diagnostic scope above the workflow, and adds a concise `Project profile` with configured languages and package paths; it does not use a “Detected repository” heading.
+
 ## [0.5.0] - 2026-08-11
 
 ### Added
@@ -101,6 +112,7 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 - Quyết định sản phẩm Harnix, contract v1, workflow và provenance upstream được chốt tại commit `d01239f`.
 
+[0.6.0]: https://github.com/tamtiger/harnix/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/tamtiger/harnix/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/tamtiger/harnix/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/tamtiger/harnix/compare/v0.2.0...v0.3.0

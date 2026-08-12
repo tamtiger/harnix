@@ -17,15 +17,20 @@ describe("initializeProject", () => {
     const config = await readFile(join(root, ".harnix", "config.yaml"), "utf8");
     expect(config).toContain("developer: tam"); expect(config).toContain("- vue");
     await expect(access(join(root, ".harnix", "spec", "guides"))).resolves.toBeUndefined();
-    await expect(access(join(root, ".harnix", "tasks"))).resolves.toBeUndefined();
-    await expect(access(join(root, ".harnix", "workspace", "tam"))).resolves.toBeUndefined();
+    await expect(access(join(root, ".harnix", "tasks"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(root, ".harnix", "workspace", "tam"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(root, ".harnix", ".developer"))).rejects.toMatchObject({ code: "ENOENT" });
     const agentInstructions = await readFile(join(root, "AGENTS.md"), "utf8");
     expect(agentInstructions).toContain("CLI manages this project's .harnix lifecycle");
     expect(agentInstructions).toContain("harnix --help");
     expect(agentInstructions).toContain("harnix setup --codex");
     expect(agentInstructions).toContain("explicit user-global integration");
     expect(agentInstructions).toContain("Do not run setup or harnix init automatically");
-    expect(agentInstructions).toContain("current workspace has .harnix/config.yaml");
+    expect(agentInstructions).toContain("nearest initialized project ancestor or workspace root");
+    expect(agentInstructions).toContain("## Project profile");
+    expect(agentInstructions).toContain("- Languages: Vue.");
+    expect(agentInstructions).toContain("- Package paths: `.`.");
+    expect(agentInstructions).not.toContain("Detected repository");
     expect(agentInstructions).not.toContain("Project-local skills are generated");
     expect(agentInstructions).toContain("not coding-task stage transitions");
     expect(agentInstructions).toContain("Bypass, Lite, or Full");
@@ -43,7 +48,23 @@ describe("initializeProject", () => {
   it("should_initialize_harnix_without_touching_existing_trellis_data", async () => {
     const root = await fixture(); await writeFile(join(root, ".trellis"), "legacy");
     const result = await initializeProject({ developer: "tam", root, yes: true });
-    expect(result).toEqual({ created: true, legacyMarkers: [] });
+    expect(result).toEqual({
+      scope: "project",
+      status: "initialized",
+      developer: "tam",
+      languages: [],
+      created: [
+        ".harnix/.template-hashes.json",
+        ".harnix/config.yaml",
+        ".harnix/spec/guides/common-rules.md",
+        ".harnix/workflow.md",
+        "AGENTS.md",
+      ],
+      updated: [],
+      unchanged: [],
+      preserved: [],
+      warnings: [],
+    });
     await expect(access(join(root, ".harnix"))).resolves.toBeUndefined();
     await expect(readFile(join(root, ".trellis"), "utf8")).resolves.toBe("legacy");
   });
@@ -51,15 +72,35 @@ describe("initializeProject", () => {
     const root = await fixture(); await initializeProject({ developer: "tam", root, yes: true });
     const configPath = join(root, ".harnix", "config.yaml"); await writeFile(configPath, `${await readFile(configPath, "utf8")}futureCompatibleNote: keep\n`);
     await initializeProject({ developer: "other", root, yes: true }); await expect(readFile(configPath, "utf8")).resolves.toContain("futureCompatibleNote: keep");
-    const dryRunRoot = await fixture(); await expect(initializeProject({ developer: "tam", dryRun: true, root: dryRunRoot, yes: true })).resolves.toEqual({ created: false, legacyMarkers: [] });
+    const dryRunRoot = await fixture(); await expect(initializeProject({ developer: "tam", dryRun: true, root: dryRunRoot, yes: true })).resolves.toMatchObject({
+      scope: "project",
+      status: "planned",
+      developer: "tam",
+      created: expect.arrayContaining([".harnix/config.yaml", ".harnix/workflow.md", "AGENTS.md"]),
+      unchanged: [],
+      preserved: [],
+    });
     await expect(access(join(dryRunRoot, ".harnix"))).rejects.toBeDefined();
     const performanceRoot = await fixture(); const startedAt = performance.now(); await initializeProject({ developer: "tam", root: performanceRoot, yes: true }); expect(performance.now() - startedAt).toBeLessThan(5000);
   });
   it("should_seed_relevant_rules_when_initializing_detected_project", async () => {
     const root = await fixture(); await writeFile(join(root, "package.json"), JSON.stringify({ dependencies: { vue: "latest" } }));
     await initializeProject({ developer: "tam", root, yes: true });
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "common-rules.md"), "utf8")).resolves.toContain("common engineering rules");
+    const common = await readFile(join(root, ".harnix", "spec", "guides", "common-rules.md"), "utf8");
+    expect(common).toContain("Acceptance and verification");
+    expect(common).toContain("Repository conventions");
     await expect(readFile(join(root, ".harnix", "spec", "guides", "vue.md"), "utf8")).resolves.toContain("Vue rules");
+  });
+  it("should_seed_actionable_dotnet_abp_guidance_instead_of_a_placeholder", async () => {
+    const root = await fixture(); await writeFile(join(root, "sample.sln"), "");
+
+    await initializeProject({ developer: "tam", root, yes: true });
+
+    const guide = await readFile(join(root, ".harnix", "spec", "guides", "csharp-dotnet-abp.md"), "utf8");
+    expect(guide).toContain("ABP authorization policies");
+    expect(guide).toContain("AsNoTracking");
+    expect(guide).toContain("CancellationToken");
+    expect(guide).toContain("xUnit");
   });
   it("should_preserve_existing_agent_instructions_when_initializing", async () => {
     const root = await fixture(); await writeFile(join(root, "AGENTS.md"), "# User instructions\n");

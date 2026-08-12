@@ -1,7 +1,46 @@
-export const harnixAgentsBlock = `<!-- harnix:begin -->
-## Harnix workflow
+import type { PackageConfig } from "../../core/config/config.js";
+import type { LanguageId } from "../../utils/detection.js";
+import { packageVersion } from "../../version.js";
 
-This repository uses Harnix as its project-local coding-agent harness. The Harnix CLI manages this project's .harnix lifecycle; this root AGENTS bootstrap and .harnix/workflow.md drive coding tasks.
+export interface AgentsProjectProfile {
+  languages: readonly LanguageId[];
+  packages: readonly Pick<PackageConfig, "path">[];
+}
+
+const languageLabels: Record<LanguageId, string> = {
+  "csharp-dotnet-abp": "C#/.NET/ABP",
+  go: "Go",
+  "java-spring": "Java/Spring",
+  python: "Python",
+  "react-web": "React web",
+  "typescript-nestjs": "TypeScript/NestJS",
+  vue: "Vue",
+};
+
+export function renderAgentsTemplate(profile: AgentsProjectProfile): string {
+  return `# Project agent instructions
+
+${renderHarnixAgentsBlock(profile)}
+`;
+}
+
+function renderHarnixAgentsBlock(profile: AgentsProjectProfile): string {
+  const languages = profile.languages.map((language) => languageLabels[language]).join(", ") || "not specified";
+  const packagePaths = profile.packages.map(({ path }) => `\`${path}\``).join(", ") || "not specified";
+
+  return `<!-- harnix:begin -->
+## Harnix
+
+- Version: ${packageVersion}.
+- Role: project-local coding-agent harness for workflow state, task evidence, concise engineering guidance, and diagnostics.
+- Scope: the Harnix CLI manages this project's .harnix lifecycle; this root AGENTS bootstrap and .harnix/workflow.md drive coding tasks. Platform integrations, when explicitly installed, are user-global and never project-local setup output.
+
+## Project profile
+
+- Languages: ${languages}.
+- Package paths: ${packagePaths}.
+
+## Harnix workflow
 
 Use harnix --help or harnix <command> --help for exact CLI syntax; do not guess flags. Public commands are init, setup, update, upgrade, uninstall, mem, and doctor. They manage the harness and diagnostics, not coding-task stage transitions.
 
@@ -9,7 +48,7 @@ Use harnix --help or harnix <command> --help for exact CLI syntax; do not guess 
 
 Activation guard and before work:
 
-1. Verify that the current workspace has .harnix/config.yaml. If it is absent or invalid, do not apply Harnix workflow, read Harnix project state, create state, or run harnix init; report the problem.
+1. Locate the nearest initialized project ancestor or workspace root containing .harnix/config.yaml. If none exists or its state is invalid, do not apply Harnix workflow, read Harnix project state, create state, or run harnix init; report the problem.
 2. Read .harnix/workflow.md and .harnix/config.yaml, then load only the context relevant to the request.
 3. If .harnix/tasks/.active identifies an unfinished task, use harnix-continue and resume its persisted status, checkpoint, and evidence.
 4. Otherwise classify the request as Bypass, Lite, or Full using .harnix/workflow.md. Read-only answers may bypass task creation; implementation work follows the selected workflow.
@@ -33,8 +72,4 @@ Operating rules:
 - Never commit, branch, create a worktree, merge, push, publish, or create a pull request automatically.
 - If the CLI, a required skill, or persisted state is unavailable or invalid, report the problem instead of inventing Harnix state or schemas.
 <!-- harnix:end -->`;
-
-export const agentsTemplate = `# Project agent instructions
-
-${harnixAgentsBlock}
-`;
+}
