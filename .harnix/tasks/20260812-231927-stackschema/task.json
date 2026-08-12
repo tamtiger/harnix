@@ -1,0 +1,236 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260812-231927-stackschema",
+  "title": "Củng cố workflow skill và xây catalog stack/guide dựa trên bằng chứng",
+  "mode": "full",
+  "status": "in_progress",
+  "checkpoint": "implementing",
+  "goal": "Củng cố bảy workflow skill Harnix từ các upstream đã khóa thành source SKILL.md có thể kiểm chứng, sau đó refactor profiling để ngôn ngữ nguồn tách khỏi catalog technology có kiểu, detection giữ bằng chứng giải thích được và thư viện rule/guide mở rộng có metadata, provenance cùng cơ chế chọn an toàn.",
+  "nonGoals": [
+    "Thêm platform ngoài Kiro, Antigravity và Codex.",
+    "Sao chép nguyên một repository rules hoặc prompts bên ngoài, hoặc thêm dependency runtime từ upstream.",
+    "Tự động cài mọi guide được phát hiện hoặc nạp toàn bộ thư viện guide vào context agent.",
+    "Quét lại hoặc âm thầm ghi đè cấu hình project do người dùng sở hữu trong các lệnh chỉ đọc.",
+    "Ghi đè guide do người dùng sửa hoặc managed content legacy.",
+    "Triển khai chức năng repository-map từ task lập kế hoạch trước đó."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-skill-source",
+      "text": "Bảy workflow skill có source canonical dạng src/skills/harnix-*/SKILL.md, frontmatter hợp lệ và được build trực tiếp vào package; workflow.ts không còn giữ bản prose rút gọn song song.",
+      "status": "met",
+      "evidenceIds": [
+        "e-skill-focused-green",
+        "e-skill-quality-green"
+      ]
+    },
+    {
+      "id": "ac-skill-behavior",
+      "text": "Skill đã adapt giữ các guardrail phù hợp từ frozen Trellis/ECC/Superpowers: planning convergence và ready self-review, plan review trước code, RED–GREEN–REFACTOR có bằng chứng, một giả thuyết debug, verification theo claim, technical feedback review, resume fail-closed và finish không tự động Git integration.",
+      "status": "met",
+      "evidenceIds": [
+        "e-skill-focused-green",
+        "e-skill-pressure-evals"
+      ]
+    },
+    {
+      "id": "ac-skill-parity",
+      "text": "Kiro, Antigravity và Codex cài cùng nội dung canonical cho cả bảy skill, có activation guard, attribution và test chống drift; update giữ nguyên collision/user modification theo ownership hiện tại.",
+      "status": "met",
+      "evidenceIds": [
+        "e-skill-focused-green",
+        "e-skill-release-green",
+        "e-codex-global-update"
+      ]
+    },
+    {
+      "id": "ac-catalogs",
+      "text": "Catalog language, technology và guide được đóng gói có ID ổn định, metadata có kiểu, thứ tự xác định, provenance và không phụ thuộc detector hoặc platform code.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-schema",
+      "text": "Config v2 lưu mảng ID language và technology độc lập ở project và package; kind của technology chỉ là metadata trong catalog, không lặp lại trong config; các unknown key tương thích được giữ lại khi parse và serialize.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-migration",
+      "text": "Mọi stack ID hợp lệ của config v1 có mapping v2 xác định và có tài liệu; migration rõ ràng, atomic, idempotent, giữ unknown field, từ chối schema tương lai hoặc hỏng, và không yêu cầu quét lại repository.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-detection",
+      "text": "Detection báo language và technology độc lập với bằng chứng có giới hạn và confidence tier, hỗ trợ tín hiệu dương, bắt buộc, âm và ưu tiên, đồng thời không nhận nhầm ABP, Spring, Laravel hoặc CodeIgniter từ manifest chung.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-guides",
+      "text": "Guide selection ghép guidance common, language và technology/domain ngày càng cụ thể từ metadata, tôn trọng activation theo path/task, ghi provenance và không nạp nội dung thư viện không liên quan.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-consumers",
+      "text": "Kết quả init CLI/API, override, AGENTS project profile, managed update, doctor và context ranking dùng stack profile mới, không còn lưu compound ID như giá trị schema hiện tại.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-preservation",
+      "text": "Update project v1 tạo guide theo catalog được chọn, chỉ xóa combined guide cũ còn nguyên bản, và giữ guide đã sửa hoặc nội dung không thuộc Harnix với báo cáo rõ ràng.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-contracts",
+      "text": "PRD, workflow, implementation schema, README, changelog, fixture, attribution và release scan mô tả nhất quán contract stack/guide mới cùng hành vi tương thích chuyển tiếp.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/skills",
+    "src/templates/harnix/workflow.ts",
+    "src/configurators/kiro.ts",
+    "src/configurators/antigravity.ts",
+    "src/configurators/codex.ts",
+    "tsup.config.ts",
+    "test/workflow/templates.test.ts",
+    "test/workflow/skill-sources.test.ts",
+    "test/platform/global-adapters.test.ts",
+    "src/catalog",
+    "src/guides",
+    "src/utils/stack.ts",
+    "src/utils/detection.ts",
+    "src/core/config/config.ts",
+    "src/core/context/context.ts",
+    "src/commands/init.ts",
+    "src/commands/update.ts",
+    "src/commands/doctor.ts",
+    "src/cli-program.ts",
+    "src/rules",
+    "src/templates/harnix/agents.ts",
+    "test/unit/config.test.ts",
+    "test/unit/detection.test.ts",
+    "test/unit/rules.test.ts",
+    "test/unit/context.test.ts",
+    "test/integration/init.test.ts",
+    "test/integration/update.test.ts",
+    "test/integration/doctor.test.ts",
+    "test/integration/cli.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "docs/UPSTREAM_BASELINE.md",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "catalog-focused",
+      "description": "Chạy test tập trung cho source/parity workflow skill, catalog, schema, migration, detection, guide-selection, template, context, init, update, doctor và CLI.",
+      "command": "pnpm exec vitest run test/workflow/skill-sources.test.ts test/workflow/templates.test.ts test/platform/global-adapters.test.ts test/platform/codex-global.test.ts test/platform/setup.test.ts test/unit/catalog.test.ts test/unit/config.test.ts test/unit/detection.test.ts test/unit/rules.test.ts test/unit/context.test.ts test/integration/init.test.ts test/integration/update.test.ts test/integration/doctor.test.ts test/integration/cli.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "catalog-quality",
+      "description": "Chạy type checking, lint, build và toàn bộ test suite.",
+      "command": "pnpm typecheck && pnpm lint && pnpm build && pnpm test",
+      "scope": "full",
+      "required": true
+    },
+    {
+      "id": "catalog-release",
+      "description": "Chạy acceptance, đóng gói, tarball smoke, release/attribution scan và kiểm tra whitespace trên fixture migration và project mới.",
+      "command": "pnpm test:acceptance && pnpm pack:check && pnpm smoke:tarball && pnpm scan:release && git diff --check",
+      "scope": "full",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-skill-focused-green",
+      "recordedAt": "2026-08-12T23:55:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused canonical-source, workflow-template and cross-platform parity run passed 4 files and 10 tests; workflow and platform suites separately passed 27 and 22 tests.",
+      "artifactPaths": [
+        "src/skills",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/platform/codex-global.test.ts"
+      ]
+    },
+    {
+      "id": "e-skill-pressure-evals",
+      "recordedAt": "2026-08-12T23:55:00+07:00",
+      "result": "pass",
+      "summary": "Independent planning and verification pressure scenarios both rejected unsafe progression: unresolved public contracts routed back to replan, while stale/partial checks could not finish a task.",
+      "artifactPaths": [
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/skills/harnix-check/SKILL.md",
+        ".harnix/tasks/20260812-231927-stackschema/research/workflow-skill-refactor.md"
+      ]
+    },
+    {
+      "id": "e-skill-quality-green",
+      "recordedAt": "2026-08-12T23:55:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Typecheck, lint and production build passed; the built bundle contains the canonical planning, verification and debugging guardrails.",
+      "artifactPaths": [
+        "src/skills/catalog.ts",
+        "src/types/markdown.d.ts",
+        "tsup.config.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "e-skill-release-green",
+      "recordedAt": "2026-08-12T23:58:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pack:check, tarball smoke for Kiro/Antigravity/Codex, release and attribution scan, and git diff --check all passed for the skill slice.",
+      "artifactPaths": [
+        "package.json",
+        "scripts/pack-check.mjs",
+        "scripts/smoke-tarball.mjs",
+        "scripts/scan-release.mjs"
+      ]
+    },
+    {
+      "id": "e-codex-global-update",
+      "recordedAt": "2026-08-12T23:58:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Codex global update changed exactly seven Harnix skills, preserved the managed AGENTS and hooks fragments, and SHA-256 comparison confirmed every installed SKILL.md is byte-identical to its canonical source.",
+      "artifactPaths": [
+        "src/skills"
+      ]
+    },
+    {
+      "id": "e-full-suite-known-fail",
+      "checkId": "catalog-quality",
+      "recordedAt": "2026-08-12T23:56:30+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Full Vitest run passed 42 of 43 files and 278 tests; the sole failure is the pre-existing one-package invariant because the user-owned untracked pnpm-workspace.yaml exists. The file was preserved.",
+      "artifactPaths": [
+        "pnpm-workspace.yaml",
+        "test/unit/package-contract.test.ts"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-12T23:19:27+07:00",
+  "updatedAt": "2026-08-13T00:00:23+07:00"
+}
