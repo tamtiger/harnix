@@ -1,0 +1,28 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-131300-commitapproval",
+  "title": "Yêu cầu approval trước khi commit",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bắt buộc trình bày thay đổi và commit message đề xuất, sau đó chờ người dùng approve rõ ràng trước mỗi commit; phát hành patch 0.6.4.",
+  "nonGoals": ["Tự động stage hoặc commit thay đổi hiện tại.", "Thay đổi branch, push, PR hoặc release workflow khác."],
+  "acceptanceCriteria": [
+    {"id":"approval-rule","text":"Current, canonical, generated, and finish-work instructions require showing changes and a proposed commit message, then waiting for explicit approval before commit.","status":"met","evidenceIds":["e-commit-approval-red","e-commit-approval-green"]},
+    {"id":"patch-bumped","text":"Package metadata and changelog reflect 0.6.4.","status":"met","evidenceIds":["e-commit-approval-green"]}
+  ],
+  "relevantPaths":["README.md","AGENTS.md",".harnix/workflow.md","docs/HARNIX_WORKFLOW.md","src/templates/harnix/agents.ts","src/templates/harnix/workflow.ts","src/skills/harnix-finish-work/SKILL.md","test/workflow/templates.test.ts","package.json","CHANGELOG.md"],
+  "relevantSpecs":[".harnix/workflow.md"],
+  "validationPlan":[
+    {"id":"commit-approval-focused","description":"Run template tests and inspect the commit-approval instructions.","command":"pnpm test -- test/workflow/templates.test.ts","scope":"focused","required":true},
+    {"id":"commit-approval-quality","description":"Run typecheck, lint, package check, and diff check.","command":"pnpm typecheck && pnpm lint && pnpm pack:check && git diff --check","scope":"focused","required":true}
+  ],
+  "evidence":[
+    {"id":"e-commit-approval-red","checkId":"commit-approval-focused","recordedAt":"2026-08-13T13:13:45+07:00","result":"fail","exitCode":1,"summary":"New generated AGENTS and workflow assertions failed as expected because the commit-approval rule was absent.","artifactPaths":["test/workflow/templates.test.ts","src/templates/harnix/agents.ts","src/templates/harnix/workflow.ts"]},
+    {"id":"e-commit-approval-green","checkId":"commit-approval-quality","recordedAt":"2026-08-13T13:14:35+07:00","result":"pass","exitCode":0,"summary":"Generated template and skill-source tests (4 tests), typecheck, lint, package check, and diff check passed. Current/canonical/generated instructions require showing changes and a proposed commit message, then explicit approval before staging or committing; package metadata is 0.6.4.","artifactPaths":["README.md","AGENTS.md",".harnix/workflow.md","docs/HARNIX_WORKFLOW.md","src/templates/harnix/agents.ts","src/templates/harnix/workflow.ts","src/skills/harnix-finish-work/SKILL.md","package.json","CHANGELOG.md","test/workflow/templates.test.ts"]}
+  ],
+  "createdAt":"2026-08-13T13:13:00+07:00",
+  "updatedAt":"2026-08-13T13:15:00+07:00",
+  "completedAt":"2026-08-13T13:15:00+07:00"
+}

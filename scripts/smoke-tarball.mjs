@@ -26,7 +26,7 @@ for (const platforms of [["--kiro"], ["--antigravity"], ["--codex"], ["--kiro", 
       pathPrefix: join(project, "node_modules", ".bin"),
     });
     run(process.execPath, [cli, "init", "--user", "smoke", "--languages", "vue"], project, environment);
-    const setup = run(process.execPath, [cli, "setup", ...platforms, "--json"], project, environment);
+    const setup = run(process.execPath, [cli, "setup", ...platforms], project, environment);
     assertGlobalSetupResult(setup.stdout, platforms, home);
     await assertNoProjectLocalPlatformSurfaces(project);
     await assertExpectedGlobalSurfaces(home, platforms);
@@ -53,7 +53,7 @@ function assertGlobalSetupResult(output, platforms, home) {
   try {
     result = JSON.parse(output);
   } catch {
-    throw new Error(`setup --json did not return valid JSON: ${output}`);
+    throw new Error(`setup did not return valid JSON: ${output}`);
   }
   const selected = platforms.map((flag) => flag.slice(2)).sort();
   const actual = Array.isArray(result.platforms) ? result.platforms.map((platform) => platform?.platform).sort() : [];

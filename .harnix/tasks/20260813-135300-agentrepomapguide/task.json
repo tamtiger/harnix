@@ -1,0 +1,34 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-135300-agentrepomapguide",
+  "title": "Bổ sung repo-map guide cho AGENTS template",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Generated AGENTS bootstrap chỉ rõ khi nào và cách dùng public repo-map command an toàn.",
+  "nonGoals": [
+    "Thay đổi implementation, cache format, hook behavior, hoặc public command contract.",
+    "Chỉnh sửa AGENTS.md của consumer project đã được người dùng sửa."
+  ],
+  "acceptanceCriteria": [
+    {"id":"template-guide","text":"renderAgentsTemplate hướng dẫn repo-map là cache-only, dùng harnix repo-map --query <text>, và dùng doctor --fix để rebuild; không thêm vào hook.","status":"met","evidenceIds":["e-agent-repomap-focused-green","e-agent-repomap-quality-green"]},
+    {"id":"template-regression","text":"Workflow template test kiểm tra guide mới trong generated AGENTS bootstrap.","status":"met","evidenceIds":["e-agent-repomap-focused-green","e-agent-repomap-quality-green"]},
+    {"id":"patch-bumped","text":"Package metadata và CHANGELOG tăng patch trước completion.","status":"met","evidenceIds":["e-agent-repomap-version-inspection","e-agent-repomap-quality-green"]}
+  ],
+  "relevantPaths": ["src/templates/harnix/agents.ts","test/workflow/templates.test.ts","package.json","CHANGELOG.md"],
+  "relevantSpecs": [".harnix/workflow.md"],
+  "validationPlan": [
+    {"id":"agent-repomap-focused","description":"Run generated workflow template tests.","command":"pnpm test -- test/workflow/templates.test.ts","scope":"focused","required":true},
+    {"id":"agent-repomap-quality","description":"Run typecheck, lint, workflow test, and diff check.","command":"pnpm typecheck && pnpm lint && pnpm test:workflow && git diff --check","scope":"full","required":true}
+  ],
+  "evidence": [
+    {"id":"e-agent-repomap-red","checkId":"agent-repomap-focused","recordedAt":"2026-08-13T06:56:15.000Z","result":"fail","exitCode":1,"summary":"RED observed: generated AGENTS bootstrap did not contain the repo-map usage guidance.","artifactPaths":["test/workflow/templates.test.ts"]},
+    {"id":"e-agent-repomap-focused-green","checkId":"agent-repomap-focused","recordedAt":"2026-08-13T06:57:55.000Z","result":"pass","exitCode":0,"summary":"Generated AGENTS template test passed with cache-only repo-map usage, doctor repair, and hook-prohibition assertions.","artifactPaths":["src/templates/harnix/agents.ts","test/workflow/templates.test.ts"]},
+    {"id":"e-agent-repomap-version-inspection","recordedAt":"2026-08-13T06:59:54.000Z","result":"pass","exitCode":0,"summary":"Inspected package metadata and changelog: patch version is 0.6.6 and the user-visible template guidance is recorded.","artifactPaths":["package.json","CHANGELOG.md"]},
+    {"id":"e-agent-repomap-quality-green","checkId":"agent-repomap-quality","recordedAt":"2026-08-13T06:59:50.000Z","result":"pass","exitCode":0,"summary":"Typecheck, lint, all workflow tests (27), and diff whitespace check passed.","artifactPaths":["test/workflow"]}
+  ],
+  "createdAt": "2026-08-13T13:53:00+07:00",
+  "updatedAt": "2026-08-13T13:59:54.4184840+07:00",
+  "completedAt": "2026-08-13T13:59:54.4184840+07:00"
+}

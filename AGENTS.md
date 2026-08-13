@@ -35,6 +35,7 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 - User-global setup is limited to the documented Kiro, Antigravity, and Codex files. Never create `~/.harnix`, mutate real user homes in tests, or infer global ownership from a project manifest.
 - No channel/forum/worker network, workflow-template switching, mandatory subagents, or automatic Git integration.
 - Never auto-commit, branch, create a worktree, merge, push, publish, or create a PR.
+- Before any commit, show the proposed changes and commit message, then wait for explicit user approval. A request to commit does not authorize skipping this review.
 
 ## Architecture rules
 
@@ -67,8 +68,9 @@ For each implementation task:
 5. Refactor while green; avoid speculative abstractions and unsupported surfaces.
 6. Run compliance review before quality/security review.
 7. Run fresh focused verification, then the broader gate required by the phase.
-8. Update `CHANGELOG.md` with user-visible implementation changes before committing.
-9. Report actual evidence, omitted checks, residual risks, and next task. Do not claim success from stale or partial output.
+8. Before marking any task `completed`, increment the package patch version and update `CHANGELOG.md`; do this before completion persistence, not as a later follow-up.
+9. Update `CHANGELOG.md` with user-visible implementation changes before committing.
+10. Report actual evidence, omitted checks, residual risks, and next task. Do not claim success from stale or partial output.
 
 Docs-only, trivial wiring, or generated snapshots may use the documented TDD exception, but must record the reason and use the strongest meaningful alternative verification.
 
@@ -82,7 +84,8 @@ Phase 6 supersedes the former project-local platform paths while preserving the 
 
 Important adapter constraints:
 
-- `harnix setup --kiro|--antigravity|--codex [--dry-run] [--json]` is user-global only. It must not resolve a project root or read `.harnix/config.yaml`.
+- Public Harnix commands always emit JSON; do not add or require a `--json` flag.
+- `harnix setup --kiro|--antigravity|--codex [--dry-run]` is user-global only. It must not resolve a project root or read `.harnix/config.yaml`.
 - Kiro uses `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, and one `~/.kiro/hooks/harnix-context.json` JSON-v1 `UserPromptSubmit` handler.
 - Antigravity uses independent Desktop and CLI plugins below `~/.gemini/config/plugins/harnix` and `~/.gemini/antigravity-cli/plugins/harnix`; never write MCP/settings/credentials.
 - Codex uses `$HOME/.agents/skills/harnix-*`, a managed conditional block in `$CODEX_HOME/AGENTS.md`, and a nested `$CODEX_HOME/hooks.json` handler. Do not write `config.toml`; preserve unrelated text/handlers. Report `installed-pending-trust` until the user reviews the hook in `/hooks`.

@@ -33,10 +33,11 @@ Confirm that evidence still describes the current files. If files changed after 
 
 Use this order:
 
-1. write the task `status` as `completed`, checkpoint `finishing`, `completedAt`, and final evidence links;
-2. persist the journal/archive material required by the project workflow;
-3. clear `.harnix/tasks/.active` only when it still points to this exact task;
-4. reread the written state and report any partial persistence failure.
+1. increment the package patch version and update `CHANGELOG.md`; include both in the task's final verification evidence;
+2. write the task `status` as `completed`, checkpoint `finishing`, `completedAt`, and final evidence links;
+3. persist the journal/archive material required by the project workflow;
+4. clear `.harnix/tasks/.active` only when it still points to this exact task;
+5. reread the written state and report any partial persistence failure.
 
 Never clear the active pointer first. Never mark completed merely because time or budget is ending. Preserve recoverable task state if a later step fails.
 
@@ -51,6 +52,8 @@ Record actual completion time, evidence, waivers, omitted checks, residual risks
 Report the delivered outcome first, followed by fresh verification evidence, omitted checks, and residual risks. If completion persistence was partial, report the exact durable state and recovery step.
 
 Never commit, branch, merge, push, publish, create a pull request, delete a worktree, or discard user changes. Those are separate user-authorized actions outside Harnix finishing.
+
+When a user requests a commit, first show the proposed changes and commit message, then wait for explicit approval before staging or committing.
 
 ## Upstream basis
 

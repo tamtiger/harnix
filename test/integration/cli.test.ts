@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createProgram, redactPublicErrorMessage, runCli } from "../../src/cli-program.js";
 import { initializeProject } from "../../src/commands/init.js";
+import { refreshRepoMap } from "../../src/core/repo-map/service.js";
 import { GlobalManagedTransactionError } from "../../src/utils/global-managed-files.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
@@ -41,7 +42,7 @@ describe.sequential("CLI", () => {
       homeResolver: async () => home,
     };
     await createProgram(programOptions).parseAsync(["node", "harnix", "init", "--yes", "--user", "tam", "--languages", "vue"], { from: "node" });
-    await createProgram(programOptions).parseAsync(["node", "harnix", "setup", "--kiro", "--codex", "--json"], { from: "node" });
+    await createProgram(programOptions).parseAsync(["node", "harnix", "setup", "--kiro", "--codex"], { from: "node" });
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("- vue");
     await expect(readFile(join(home, ".kiro", "hooks", "harnix-context.json"), "utf8")).resolves.toContain("UserPromptSubmit");
     await expect(readFile(join(home, "codex", "hooks.json"), "utf8")).resolves.toContain("UserPromptSubmit");
@@ -57,10 +58,10 @@ describe.sequential("CLI", () => {
     await createProgram(programOptions).parseAsync(["node", "harnix", "setup", "--kiro"], { from: "node" });
     await rm(join(home, ".kiro", "steering", "harnix.md"));
 
-    await createProgram(programOptions).parseAsync(["node", "harnix", "update", "--global", "--json"], { from: "node" });
+    await createProgram(programOptions).parseAsync(["node", "harnix", "update", "--global"], { from: "node" });
 
     await expect(readFile(join(home, ".kiro", "steering", "harnix.md"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
-    await createProgram(programOptions).parseAsync(["node", "harnix", "update", "--global", "--restore", "--json"], { from: "node" });
+    await createProgram(programOptions).parseAsync(["node", "harnix", "update", "--global", "--restore"], { from: "node" });
 
     await expect(readFile(join(home, ".kiro", "steering", "harnix.md"), "utf8")).resolves.toContain("Harnix activation guard");
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
@@ -103,21 +104,22 @@ describe.sequential("CLI", () => {
     await createProgram({ environment: { USERNAME: "tam" }, interactive: false }).parseAsync(["node", "harnix", "init"], { from: "node" });
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("- react-web");
   });
-  it("should_accept_doctor_json_when_requested", async () => {
+  it("should_emit_doctor_json_by_default", async () => {
     const root = await fixture(); const home = await temporaryUserHome(); process.chdir(root);
     await createProgram({ interactive: false }).parseAsync(["node", "harnix", "init", "--yes", "--user", "tam"], { from: "node" });
-    await expect(createProgram({ commandLookup: async () => true, environment: { CODEX_HOME: join(home, "codex") }, homeResolver: async () => home, interactive: false }).parseAsync(["node", "harnix", "doctor", "--json"], { from: "node" })).resolves.toBeDefined();
+    await expect(createProgram({ commandLookup: async () => true, environment: { CODEX_HOME: join(home, "codex") }, homeResolver: async () => home, interactive: false }).parseAsync(["node", "harnix", "doctor"], { from: "node" })).resolves.toBeDefined();
   });
   it("should_emit_one_deterministic_doctor_json_document_to_stdout", async () => {
     const root = await fixture(); const home = await temporaryUserHome(); process.chdir(root);
     await initializeProject({ developer: "tam", root, yes: true });
+    await refreshRepoMap({ root });
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     const programOptions = { commandLookup: async () => true, environment: { CODEX_HOME: join(home, "codex") }, homeResolver: async () => home };
 
-    await expect(runCli(["node", "harnix", "doctor", "--json"], programOptions)).resolves.toBe(0);
+    await expect(runCli(["node", "harnix", "doctor"], programOptions)).resolves.toBe(0);
     const first = stdout.mock.calls.map((call) => String(call[0])).join("");
     stdout.mockClear();
-    await expect(runCli(["node", "harnix", "doctor", "--json"], programOptions)).resolves.toBe(0);
+    await expect(runCli(["node", "harnix", "doctor"], programOptions)).resolves.toBe(0);
     const second = stdout.mock.calls.map((call) => String(call[0])).join("");
 
     expect(first).toBe(second);
@@ -183,9 +185,9 @@ describe.sequential("CLI", () => {
     await rm(join(root, ".harnix", "workflow.md"));
     const programOptions = { commandLookup: async () => true, environment: { CODEX_HOME: join(home, "codex") }, homeResolver: async () => home };
 
-    await expect(runCli(["node", "harnix", "doctor", "--json"], programOptions)).resolves.toBe(1);
+    await expect(runCli(["node", "harnix", "doctor"], programOptions)).resolves.toBe(1);
     await writeFile(join(root, ".harnix", "config.yaml"), "not: [valid");
-    await expect(runCli(["node", "harnix", "doctor", "--json"], programOptions)).resolves.toBe(2);
+    await expect(runCli(["node", "harnix", "doctor"], programOptions)).resolves.toBe(2);
   });
   it("should_return_success_when_help_is_requested", async () => {
     vi.spyOn(process.stdout, "write").mockImplementation(() => true);

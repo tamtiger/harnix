@@ -1,6 +1,7 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 
 import { readConfigDocument, type HarnixConfigV2 } from "../core/config/config.js";
+import { diagnoseRepoMap, refreshRepoMap } from "../core/repo-map/service.js";
 import { ownershipState, readManifest, type ManagedEntry, type ManagedManifest } from "../utils/managed-files.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import { desiredFiles, updateProject } from "./update.js";
@@ -72,6 +73,15 @@ export async function diagnoseProject(options: DoctorOptions): Promise<DoctorRep
       } catch {
         // Re-diagnose below to report an invalid project state without exposing
         // an implementation-specific error in a global hook or JSON consumer.
+      }
+      try {
+        const cache = await diagnoseRepoMap(options.root);
+        if (cache !== "ready") {
+          await refreshRepoMap({ root: options.root });
+          fixed += 1;
+        }
+      } catch {
+        // The second diagnosis reports the cache state without replacing an unsafe path.
       }
     }
     if (options.global) {
@@ -181,6 +191,11 @@ async function diagnoseProjectSection(root: string): Promise<DoctorProjectSectio
   await inspectUntrackedLegacySurfaces(root, manifest, findings);
   await inspectSensitiveFiles(root, findings);
   await inspectPermissions(root, manifest, findings);
+  const repoMap = await diagnoseRepoMap(root);
+  if (repoMap !== "ready") {
+    const severity = repoMap === "invalid" ? "error" : "warning";
+    findings.push(finding(`repo-map-${repoMap}`, severity, ".harnix/cache/repo-map-v1.json", `Repository map cache is ${repoMap}; run doctor --fix to rebuild it.`, true));
+  }
   return { status: "ready", findings: sortFindings(findings) };
 }
 

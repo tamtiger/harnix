@@ -3,6 +3,7 @@ import { access } from "node:fs/promises";
 import type { DetectionMatch, LanguageId, TechnologyId } from "../catalog/catalog.js";
 import { stackCatalog } from "../catalog/catalog.js";
 import { createConfig, readConfig, writeConfig } from "../core/config/config.js";
+import { refreshRepoMap } from "../core/repo-map/service.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import { detectProject } from "../utils/detection.js";
 import { writeManifest } from "../utils/managed-files.js";
@@ -82,13 +83,14 @@ export async function initializeProject(options: InitializeProjectOptions): Prom
 
   if (options.dryRun) {
     const planned = await classifyDesiredPaths(options.root, desired.map(({ entry }) => entry.path));
-    return result("planned", config, detection.matches, { created: [".harnix/config.yaml", ...(!manifestExists ? [".harnix/.template-hashes.json"] : []), ...planned.created], preserved: [...(manifestExists ? [".harnix/.template-hashes.json"] : []), ...planned.preserved] }, warnings);
+    return result("planned", config, detection.matches, { created: [".harnix/config.yaml", ".harnix/cache/repo-map-v1.json", ...(!manifestExists ? [".harnix/.template-hashes.json"] : []), ...planned.created], preserved: [...(manifestExists ? [".harnix/.template-hashes.json"] : []), ...planned.preserved] }, warnings);
   }
 
   await writeConfig(configPath, config);
   if (!manifestExists) await writeManifest(manifestPath, { generator: "harnix", schemaVersion: 1, entries: [] });
   const reconciled = await updateProject({ root: options.root });
-  return result("initialized", config, detection.matches, { created: [".harnix/config.yaml", ...(!manifestExists ? [".harnix/.template-hashes.json"] : []), ...reconciled.created], updated: [...(manifestExists ? [".harnix/.template-hashes.json"] : []), ...reconciled.updated], preserved: reconciled.preserved }, warnings);
+  await refreshRepoMap({ root: options.root });
+  return result("initialized", config, detection.matches, { created: [".harnix/cache/repo-map-v1.json", ".harnix/config.yaml", ...(!manifestExists ? [".harnix/.template-hashes.json"] : []), ...reconciled.created], updated: [...(manifestExists ? [".harnix/.template-hashes.json"] : []), ...reconciled.updated], preserved: reconciled.preserved }, warnings);
 }
 
 function result(status: InitializeProjectResult["status"], config: { developer: string; languages: LanguageId[]; technologies: TechnologyId[] }, matches: DetectionMatch[], paths: Partial<Pick<InitializeProjectResult, "created" | "updated" | "unchanged" | "preserved">>, warnings: string[]): InitializeProjectResult {

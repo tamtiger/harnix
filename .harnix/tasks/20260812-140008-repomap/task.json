@@ -4,11 +4,10 @@
   "id": "20260812-140008-repomap",
   "title": "Plan a safe repository map for fast agent context",
   "mode": "full",
-  "status": "ready",
-  "checkpoint": "ready",
-  "goal": "Design a deterministic, local repository scanner and compact searchable repo map that helps coding agents identify the most relevant files before reading source code.",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Implement a deterministic, local repository map that gives explicitly invoked workflow stages a bounded, searchable structural view before source files are read.",
   "nonGoals": [
-    "Implement the repository scanner, index, hidden runtime commands, or workflow integration in this task.",
     "Add embeddings, a vector database, a daemon, filesystem watchers, telemetry, or runtime network access.",
     "Persist raw source code, secrets, machine-specific absolute paths, or generated dependency trees.",
     "Require Git or add another public Harnix command."
@@ -17,42 +16,46 @@
     {
       "id": "ac-inventory",
       "text": "The plan defines safe, ignore-aware file inventory for Git and non-Git repositories, including traversal, symlink, binary, secret, and size protections.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": ["e-repomap-focused-green", "e-repomap-release-green"]
     },
     {
       "id": "ac-index",
       "text": "The plan defines a versioned disposable repo-map format that contains compact structural metadata without raw source, secrets, or absolute paths.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": ["e-repomap-focused-green", "e-repomap-incremental-green", "e-repomap-release-green"]
     },
     {
       "id": "ac-retrieval",
       "text": "The plan defines lexical candidate retrieval plus deterministic Harnix reranking so agents receive a bounded set of relevant files and outlines.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": ["e-repomap-focused-green", "e-repomap-release-green"]
     },
     {
       "id": "ac-workflow",
       "text": "The plan integrates repo-map refresh and query into the existing workflow without adding a public command or allowing prompt hooks to build or write the cache.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": ["e-repomap-focused-green", "e-repomap-release-green"]
     },
     {
       "id": "ac-validation",
       "text": "The plan includes deterministic correctness, safety, cross-platform, incremental-equivalence, query-quality, performance, footprint, and release validation.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": ["e-repomap-incremental-green", "e-repomap-release-green"]
     }
   ],
   "relevantPaths": [
+    "src/core/repo-map/types.ts",
     "src/core/repo-map/inventory.ts",
     "src/core/repo-map/extract.ts",
     "src/core/repo-map/store.ts",
     "src/core/repo-map/search.ts",
     "src/core/repo-map/service.ts",
-    "src/commands/internal.ts",
-    "src/templates/harnix/workflow.ts",
+    "src/commands/repo-map-internal.ts",
+    "src/commands/internal-context.ts",
+    "src/commands/doctor.ts",
+    "src/cli-program.ts",
+    "src/cli.ts",
     "test/unit/repo-map",
     "test/integration/repo-map"
   ],
@@ -60,7 +63,8 @@
     "docs/HARNIX_PRD.md",
     "docs/HARNIX_WORKFLOW.md",
     "docs/IMPLEMENTATION_PLAN.md",
-    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "package.json"
   ],
   "validationPlan": [
     {
@@ -85,7 +89,86 @@
       "required": true
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "e-repomap-replan-current-architecture",
+      "recordedAt": "2026-08-13T11:18:00+07:00",
+      "result": "pass",
+      "summary": "Replan reconciled obsolete internal.ts and hook assumptions with the current internal-context-cli.ts/cli.ts fast-path architecture; no runtime code was changed.",
+      "artifactPaths": [
+        "src/cli.ts",
+        "src/commands/internal-context.ts",
+        "src/commands/internal-context-cli.ts",
+        ".harnix/tasks/20260812-140008-repomap/plan.md"
+      ]
+    },
+    {
+      "id": "e-repomap-dependency-compatibility",
+      "recordedAt": "2026-08-13T11:18:00+07:00",
+      "result": "pass",
+      "summary": "Primary-source research selected globby 14.1.0 for Node 18 inventory and MiniSearch 7.2.0 for dependency-free in-memory lexical candidates.",
+      "artifactPaths": [
+        ".harnix/tasks/20260812-140008-repomap/research/dependency-compatibility.md"
+      ]
+    },
+    {
+      "id": "e-repomap-ready-gate",
+      "checkId": "repo-map-focused",
+      "recordedAt": "2026-08-13T11:20:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Task record and refreshed plan passed structural inspection; existing CLI fast-path and internal-context suites passed 9 tests, proving the plan preserves the hook boundary before implementation.",
+      "artifactPaths": [
+        ".harnix/tasks/20260812-140008-repomap/prd.md",
+        ".harnix/tasks/20260812-140008-repomap/plan.md",
+        "test/unit/cli-fast-path.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "e-repomap-focused-green",
+      "checkId": "repo-map-focused",
+      "recordedAt": "2026-08-13T11:26:27+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused repository-map, Doctor, internal CLI, and workflow-template tests passed: 4 files and 5 tests. They cover safe structural persistence, hidden JSON operations, explicit Doctor repair, public-help invisibility, workflow guidance, and unchanged hook boundaries.",
+      "artifactPaths": [
+        "test/unit/repo-map/service.test.ts",
+        "test/integration/repo-map/internal.test.ts",
+        "test/integration/repo-map/doctor.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "e-repomap-incremental-green",
+      "checkId": "repo-map-focused",
+      "recordedAt": "2026-08-13T11:28:30+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "The incremental add/change/delete fixture passed and produced a cache map identical to a clean rebuild.",
+      "artifactPaths": [
+        "test/integration/repo-map/incremental.test.ts"
+      ]
+    },
+    {
+      "id": "e-repomap-release-green",
+      "checkId": "repo-map-release",
+      "recordedAt": "2026-08-13T11:29:53+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh full gates passed: typecheck, lint, build, acceptance (306 tests passed, 1 skipped), package check, tarball smoke, footprint (150493 bytes, 0.888 reduction), release scan, and git diff check.",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/core/repo-map",
+        "src/commands/repo-map-internal.ts",
+        "src/commands/doctor.ts",
+        "test/unit/repo-map",
+        "test/integration/repo-map"
+      ]
+    }
+  ],
   "createdAt": "2026-08-12T14:00:08.8278644+07:00",
-  "updatedAt": "2026-08-12T14:03:14.4063294+07:00"
+  "updatedAt": "2026-08-13T11:30:19+07:00",
+  "completedAt": "2026-08-13T11:30:19+07:00"
 }

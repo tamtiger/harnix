@@ -30,4 +30,6 @@ For behavior changes, prefer RED → GREEN → REFACTOR: reproduce with a focuse
 
 Verification has two ordered stages: (1) compliance with the request, PRD/spec, and acceptance criteria; (2) correctness, tests, security, maintainability, and unnecessary complexity. Use fresh focused evidence before the required broader gate. Record actual failures and omitted checks; never infer success from stale or partial output.
 
-Finish only when every criterion is met or explicitly waived with a reason, required evidence is fresh, and persisted state is updated safely. Do not commit, branch, push, merge, publish, or create a PR automatically.
+Fresh `harnix init` builds the structural repository-map cache. For explicit implementation-stage discovery, query it with `harnix repo-map --query <text>`; use `harnix doctor --fix` to safely rebuild a missing, stale, or invalid cache. Treat results as bounded navigation hints: read only the selected files, never source or secret content from the cache, and do not add these operations to platform hooks.
+
+Before recording any task as `completed`, increment the package patch version and update `CHANGELOG.md`; include the version change in the same task's verification. Finish only when every criterion is met or explicitly waived with a reason, required evidence is fresh, and persisted state is updated safely. Before any commit, show the proposed changes and commit message, then wait for explicit user approval. Do not commit, branch, push, merge, publish, or create a PR automatically.

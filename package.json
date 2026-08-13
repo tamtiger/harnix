@@ -1,6 +1,6 @@
 {
   "name": "@tamtiger/harnix",
-  "version": "0.6.1",
+  "version": "0.6.7",
   "description": "Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, and Codex integrations.",
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -42,7 +42,9 @@
   },
   "dependencies": {
     "commander": "^13.1.0",
+    "globby": "^14.1.0",
     "inquirer": "^12.4.1",
+    "minisearch": "^7.2.0",
     "yaml": "^2.9.0"
   },
   "devDependencies": {

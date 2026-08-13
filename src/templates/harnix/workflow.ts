@@ -34,7 +34,9 @@ Before product edits, review the plan critically against current source and test
 
 Verification has two ordered stages: (1) compliance with the request, PRD/spec, and acceptance criteria; (2) correctness, tests, security, maintainability, and unnecessary complexity. Map every claim to a fresh command/inspection, read its relevant full output and exit/result, then record it without erasing earlier failures. Use focused evidence before the required broader gate; never infer success from stale or partial output.
 
-Finish only when every criterion is met or explicitly waived with a reason, required evidence is fresh, and persisted state is updated safely. Do not commit, branch, push, merge, publish, or create a PR automatically.
+Fresh \`harnix init\` builds the structural repository-map cache. For explicit implementation-stage discovery, query it with \`harnix repo-map --query <text>\`; use \`harnix doctor --fix\` to safely rebuild a missing, stale, or invalid cache. Treat results as bounded navigation hints: read only the selected files, never source or secret content from the cache, and do not add these operations to platform hooks. Global instructions and hooks must remain fast no-write/no-network paths and must not invoke repository-map queries or refreshes.
+
+Increase the package patch version and update \`CHANGELOG.md\` before recording any task as \`completed\`; include the version change in that task's verification. Finish only when every criterion is met or explicitly waived with a reason, required evidence is fresh, and persisted state is updated safely. Before any commit, show the proposed changes and commit message, then wait for explicit user approval. Do not commit, branch, push, merge, publish, or create a PR automatically.
 `;
 
 export { renderSkill, workflowSkills, type SkillTemplate } from "../../skills/catalog.js";

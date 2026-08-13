@@ -17,7 +17,7 @@ Baseline review được thực hiện trên worktree sạch. Các kiểm tra m�
 - `pnpm measure:footprint`: 13.528 bytes/33 file, giảm 98,99% so với baseline đã đóng băng.
 - Runtime dependency audit: không có vulnerability đã biết.
 - Full dependency audit: một advisory Low trong `esbuild@0.27.7` qua development build toolchain; bản vá nằm từ `esbuild >=0.28.1`.
-- CLI probe: setup không hợp lệ in stack trace và exit 1 thay vì 2; `doctor --json` chưa tồn tại.
+- CLI probe: setup không hợp lệ in stack trace và exit 1 thay vì 2; doctor chưa emit JSON theo contract.
 
 Việc các gate lịch sử pass không chứng minh Phase 5 đã hoàn tất. Mỗi mục bên dưới cần có regression test quan sát disk state hoặc process output tại đúng boundary mà contract yêu cầu.
 
@@ -30,7 +30,7 @@ Việc các gate lịch sử pass không chứng minh Phase 5 đã hoàn tất. 
 - [x] Codex hook merge bảo toàn các top-level key và hook configuration không thuộc Harnix.
 - [x] Uninstall lập kế hoạch không ghi trước khi confirmation, bảo toàn injected block đã sửa, đồng thời cập nhật config/manifest còn giữ để update không cài lại platform đã gỡ.
 - [x] Workflow finish persist task completed một cách an toàn trước khi xóa active pointer; resume từ blocked xóa blocker; completion yêu cầu mọi criterion và fresh evidence mới nhất.
-- [x] CLI vẫn tự động detection khi không có `--languages`, không prompt trên non-TTY, hỗ trợ `doctor --json`, map public error về exit code chuẩn, không in stack trace hoặc machine path mặc định.
+- [x] CLI vẫn tự động detection khi không có `--languages`, không prompt trên non-TTY, doctor emit JSON theo contract, map public error về exit code chuẩn, không in stack trace hoặc machine path mặc định.
 - [x] Memory lookup validate developer ID và journal entry để traversal hoặc JSON sai hình dạng được fail closed hoặc degrade gracefully.
 - [x] Mọi project write đi qua filesystem boundary có kiểm tra containment; test symlink/junction escape bao phủ command, task artifact, rule và platform setup.
 

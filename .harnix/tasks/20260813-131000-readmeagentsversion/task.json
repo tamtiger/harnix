@@ -1,0 +1,94 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-131000-readmeagentsversion",
+  "title": "Đồng bộ quy tắc version vào README và AGENTS template",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Ghi rõ quy tắc tăng patch version khi hoàn tất task trong README, AGENTS hiện tại và AGENTS template, đồng thời phát hành patch 0.6.3 cho thay đổi này.",
+  "nonGoals": [
+    "Tạo tag, commit, publish, hoặc thay đổi minor/major version.",
+    "Thay đổi quy trình release ngoài quy tắc patch version theo task."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "readme-policy",
+      "text": "README giải thích rằng một task chỉ được persisted completed sau khi tăng patch version và cập nhật changelog.",
+      "status": "met",
+      "evidenceIds": ["e-readme-agents-red", "e-readme-agents-green"]
+    },
+    {
+      "id": "agents-policy",
+      "text": "AGENTS hiện tại và bootstrap AGENTS template cùng yêu cầu quy tắc version completion.",
+      "status": "met",
+      "evidenceIds": ["e-readme-agents-red", "e-readme-agents-green"]
+    },
+    {
+      "id": "patch-bumped",
+      "text": "Package metadata và changelog phản ánh 0.6.3.",
+      "status": "met",
+      "evidenceIds": ["e-readme-agents-green"]
+    }
+  ],
+  "relevantPaths": [
+    "README.md",
+    "AGENTS.md",
+    "src/templates/harnix/agents.ts",
+    "test/workflow/templates.test.ts",
+    "package.json",
+    "CHANGELOG.md"
+  ],
+  "relevantSpecs": [
+    ".harnix/workflow.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "readme-agents-focused",
+      "description": "Run generated AGENTS template tests and inspect the README policy wording.",
+      "command": "pnpm test -- test/workflow/templates.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "readme-agents-quality",
+      "description": "Run typecheck, lint, package check, and diff check.",
+      "command": "pnpm typecheck && pnpm lint && pnpm pack:check && git diff --check",
+      "scope": "focused",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-readme-agents-red",
+      "checkId": "readme-agents-focused",
+      "recordedAt": "2026-08-13T13:10:44+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "The new generated-AGENTS assertion failed as expected because the completion-version rule was absent from the template.",
+      "artifactPaths": [
+        "test/workflow/templates.test.ts",
+        "src/templates/harnix/agents.ts"
+      ]
+    },
+    {
+      "id": "e-readme-agents-green",
+      "checkId": "readme-agents-quality",
+      "recordedAt": "2026-08-13T13:11:19+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "README, current AGENTS, and generated AGENTS template contain the same completion-version rule. Workflow tests (4 tests), typecheck, lint, package check, and diff check passed; package metadata is 0.6.3.",
+      "artifactPaths": [
+        "README.md",
+        "AGENTS.md",
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts",
+        "package.json",
+        "CHANGELOG.md"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-13T13:10:00+07:00",
+  "updatedAt": "2026-08-13T13:12:00+07:00",
+  "completedAt": "2026-08-13T13:12:00+07:00"
+}

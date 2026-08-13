@@ -33,7 +33,7 @@ Treat this profile as an initialization-time discovery seed. Verify current mani
 
 ## Harnix workflow
 
-Use harnix --help or harnix <command> --help for exact CLI syntax; do not guess flags. Public commands are init, setup, update, upgrade, uninstall, mem, and doctor. They manage the harness and diagnostics, not coding-task stage transitions.
+Use harnix --help or harnix <command> --help for exact CLI syntax; do not guess flags. Public commands are init, setup, update, upgrade, uninstall, mem, doctor, and repo-map. They manage the harness and diagnostics, not coding-task stage transitions.
 
 \`harnix init\` creates this project's .harnix state and root AGENTS bootstrap. It does not install platform integrations. \`harnix setup --kiro\`, \`harnix setup --antigravity\`, and \`harnix setup --codex\` are explicit user-global integration operations: they may run from any directory and affect only the selected user integration, not this repository. Do not run setup or harnix init automatically. Run a selected setup only with explicit user authorization; if a required global skill or hook is unavailable, report that instead of simulating it.
 
@@ -58,9 +58,12 @@ Operating rules:
 
 - Preserve user-owned files, tasks, specs, research, journals, credentials, and unrelated configuration.
 - Keep generated paths repository-relative and never expose secrets, prompts, or machine-specific absolute paths in output.
-- Run harnix doctor --json when managed files, platform setup, or project state may have drifted.
+- Run harnix doctor when managed files, platform setup, or project state may have drifted.
+- For explicit implementation-stage discovery in an initialized project, run \`harnix repo-map --query <text>\`. It returns cache-only navigation hints; use \`harnix doctor --fix\` to rebuild a missing, stale, or invalid cache. Platform hooks must not invoke repository-map queries or refreshes.
+- Before recording any task as \`completed\`, increment the package patch version and update \`CHANGELOG.md\`; include both in that task's final verification.
 - Require explicit user authorization for destructive, networked, installation, upgrade, purge, or externally visible actions.
 - Never commit, branch, create a worktree, merge, push, publish, or create a pull request automatically.
+- Before any commit, show the proposed changes and commit message, then wait for explicit user approval.
 - If the CLI, a required skill, or persisted state is unavailable or invalid, report the problem instead of inventing Harnix state or schemas.
 `;
 }

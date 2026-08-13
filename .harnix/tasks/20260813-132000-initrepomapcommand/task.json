@@ -1,0 +1,37 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-132000-initrepomapcommand",
+  "title": "Khởi tạo repo-map cùng init và thêm lệnh repo-map ngắn",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Tạo repo-map an toàn khi khởi tạo project mới và cung cấp public command `repo-map` JSON mặc định để truy vấn cache.",
+  "nonGoals": [
+    "Refresh cache từ platform hook hoặc thêm network, daemon, embeddings hay source persistence.",
+    "Thay đổi semantics idempotent của init trên project đã initialized.",
+    "Tự stage, commit, push hoặc publish thay đổi."
+  ],
+  "acceptanceCriteria": [
+    {"id":"init-cache","text":"Fresh init tạo validated repo-map cache và dry-run chỉ báo cache sẽ được tạo; re-init không refresh cache.","status":"met","evidenceIds":["e-init-repomap-focused-green","e-init-repomap-quality-green"]},
+    {"id":"short-query","text":"Public harnix repo-map --query <text> [--limit <count>] trả tối đa 20 JSON candidates từ cache và xuất hiện trong help; hidden internal commands vẫn tương thích.","status":"met","evidenceIds":["e-init-repomap-focused-green","e-init-repomap-quality-green"]},
+    {"id":"docs-contract","text":"PRD, implementation plan, README, changelog và task artifacts ghi đúng public command, init behavior và JSON-default contract.","status":"met","evidenceIds":["e-init-repomap-contract-inspection","e-init-repomap-quality-green"]},
+    {"id":"patch-bumped","text":"Package metadata và changelog phản ánh patch 0.6.5 trước completion.","status":"met","evidenceIds":["e-init-repomap-version-inspection","e-init-repomap-quality-green"]}
+  ],
+  "relevantPaths": ["src/commands/init.ts","src/cli-program.ts","src/commands/repo-map-internal.ts","src/core/repo-map/service.ts","test/integration/init.test.ts","test/integration/repo-map/internal.test.ts","docs/HARNIX_PRD.md","docs/IMPLEMENTATION_PLAN.md","README.md","package.json","CHANGELOG.md"],
+  "relevantSpecs": ["docs/HARNIX_PRD.md","docs/IMPLEMENTATION_PLAN.md",".harnix/workflow.md"],
+  "validationPlan": [
+    {"id":"init-repomap-focused","description":"Run focused init and repo-map CLI integration tests.","command":"pnpm test -- test/integration/init.test.ts test/integration/repo-map/internal.test.ts","scope":"focused","required":true},
+    {"id":"init-repomap-quality","description":"Run typecheck, lint, acceptance, package/tarball/release checks, and diff check.","command":"pnpm typecheck && pnpm lint && pnpm test:acceptance && pnpm pack:check && pnpm smoke:tarball && pnpm measure:footprint && pnpm scan:release && git diff --check","scope":"full","required":true}
+  ],
+  "evidence": [
+    {"id":"e-init-repomap-red","checkId":"init-repomap-focused","recordedAt":"2026-08-13T06:29:00.000Z","result":"fail","exitCode":1,"summary":"RED observed before implementation: focused integration expectations failed because init did not create the repository-map cache and the public repo-map command was absent.","artifactPaths":["test/integration/init.test.ts","test/integration/repo-map/internal.test.ts"]},
+    {"id":"e-init-repomap-focused-green","checkId":"init-repomap-focused","recordedAt":"2026-08-13T06:42:44.000Z","result":"pass","exitCode":0,"summary":"Focused init and repository-map integration tests passed: fresh init creates the cache, dry-run plans it, re-init preserves it, and public plus hidden queries return JSON candidates.","artifactPaths":["test/integration/init.test.ts","test/integration/repo-map/internal.test.ts","test/integration/repo-map/doctor.test.ts"]},
+    {"id":"e-init-repomap-contract-inspection","recordedAt":"2026-08-13T06:49:24.000Z","result":"pass","exitCode":0,"summary":"Inspected public command, generated guidance, README, PRD, implementation plan, upstream mapping, and global setup plan. The only remaining --json mentions state that the flag is not needed or must not be added; no command usage retains it.","artifactPaths":["src/cli-program.ts","README.md","AGENTS.md","docs/HARNIX_PRD.md","docs/IMPLEMENTATION_PLAN.md","docs/GLOBAL_SETUP_REFACTOR_PLAN.md","docs/UPSTREAM_MAPPING.md"]},
+    {"id":"e-init-repomap-version-inspection","recordedAt":"2026-08-13T06:49:24.000Z","result":"pass","exitCode":0,"summary":"Package metadata and changelog were inspected and both record patch version 0.6.5 before task completion.","artifactPaths":["package.json","CHANGELOG.md"]},
+    {"id":"e-init-repomap-quality-green","checkId":"init-repomap-quality","recordedAt":"2026-08-13T06:50:00.000Z","result":"pass","exitCode":0,"summary":"Full gate passed: typecheck, lint, build, all acceptance suites (306 passed, 1 skipped), package check, tarball smoke, footprint, release scan, whitespace check, and the JSON-contract search.","artifactPaths":["scripts/pack-check.mjs","scripts/smoke-tarball.mjs","scripts/measure-footprint.mjs","scripts/scan-release.mjs"]}
+  ],
+  "createdAt": "2026-08-13T13:20:00+07:00",
+  "updatedAt": "2026-08-13T13:50:04.1732346+07:00",
+  "completedAt": "2026-08-13T13:50:04.1732346+07:00"
+}

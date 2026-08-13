@@ -356,7 +356,7 @@ Fixtures cover non-Harnix no-op, corrupt/malformed optional input, Unicode/space
 
 ### 4.8 Common CLI result semantics
 
-Mọi public command dùng stderr cho actionable error/warning và stdout cho requested data/output. Exit `0` là success/clean intentional no-op/dry-run; exit `1` là operation hoặc diagnostic hoàn tất nhưng có actionable finding/conflict/failure; exit `2` là invalid usage/config/schema/root hoặc deterministic internal failure. Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated/machine-readable output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. `--json` (nơi được hỗ trợ) emits exactly one document; `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. `init` is always non-interactive and emits one `InitProjectResult` with project status, developer, sorted languages/technologies, bounded `detection.matches`, and sorted created/updated/unchanged/preserved/warnings arrays. Existing projects return empty detection matches because init does not rescan; new/dry-run projects report pre-override evidence and warnings identify overridden facets. `--yes` is not part of the public init syntax; a hidden no-op compatibility alias may remain for v0.5 callers.
+Mọi public command dùng stderr cho actionable error/warning và stdout cho exactly one JSON document. Exit `0` là success/clean intentional no-op/dry-run; exit `1` là operation hoặc diagnostic hoàn tất nhưng có actionable finding/conflict/failure; exit `2` là invalid usage/config/schema/root hoặc deterministic internal failure. Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. `init` is always non-interactive and emits one `InitProjectResult` with project status, developer, sorted languages/technologies, bounded `detection.matches`, and sorted created/updated/unchanged/preserved/warnings arrays. Existing projects return empty detection matches because init does not rescan; new/dry-run projects report pre-override evidence and warnings identify overridden facets. `--yes` is not part of the public init syntax; a hidden no-op compatibility alias may remain for v0.5 callers.
 ## 5. Phase 0 — Documentation và baseline checkpoint
 
 ### Task 0.1: Chuẩn hóa PRD
@@ -412,7 +412,7 @@ Phase 1–5 task checkmarks below are historical delivery evidence. Their former
 - [x] Scaffold package with Node >=18 and ESM.
 - [x] Lock package scripts: `build`, `lint`, `typecheck`, `test`, `test:unit`, `test:integration`, `test:migration`, `test:platform`, `test:workflow`, `test:safety`, `test:acceptance`, `pack:check`, `smoke:tarball`, `measure:init`, `measure:footprint`, `scan:release`.
 - [x] Phase 1: `test:acceptance` orchestrates the implemented unit/integration/migration/platform/workflow/safety suites; `pack:check` produces exactly one tarball under `.artifacts/` without global mutation.
-- [x] Phase 4 extension: add clean/seeded `doctor --json` fixtures to `test:acceptance`, then have smoke/release scripts consume the checked tarball and isolated fixtures.
+- [x] Phase 4 extension: add clean/seeded Doctor JSON fixtures to `test:acceptance`, then have smoke/release scripts consume the checked tarball and isolated fixtures.
 - [x] Build minimal CLI help and non-zero usage errors.
 - [x] Verify `pnpm install --frozen-lockfile --ignore-scripts`, build, lint, typecheck and minimal tests (pnpm 11 no-workspace policy).
 
@@ -682,7 +682,7 @@ Kế hoạch, official path/schema snapshot, migration policy, work breakdown v�
 | Suite | Required coverage |
 |---|---|
 | Unit | detection, config migrations, context rank/budget, project/global manifests, permission-preserving atomic writes, home/path containment, locks, rollback, journal, learning, Doctor v2 |
-| CLI integration | all seven commands, project/global scope, setup outside a project, idempotence, modified/deleted files, corrupt/future project/global schemas |
+| CLI integration | all eight commands, project/global scope, setup outside a project, init repo-map creation, cache-only repo-map query, idempotence, modified/deleted files, corrupt/future project/global schemas |
 | Migration | discovery, dry-run, copy/transform, preservation, conflict, rollback, cleanup |
 | Fixtures | independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue, multilingual/multi-technology monorepo |
 | Platform | Kiro user-global JSON hook, Antigravity Desktop/CLI plugin snapshots and multi-root protocol, Codex user-global schema, relevant rules, no machine path |
@@ -714,7 +714,7 @@ git diff --check
 
 Script contracts:
 
-- `test:acceptance`: chạy unit/integration/migration/platform/workflow/safety suites, gồm clean và seeded unsafe `doctor --json` fixtures.
+- `test:acceptance`: chạy unit/integration/migration/platform/workflow/safety suites, gồm clean và seeded unsafe Doctor JSON fixtures.
 - `pack:check`: xóa/recreate project-local `.artifacts/` safely, chạy `pnpm pack --pack-destination .artifacts`, assert đúng một `@tamtiger/harnix` tarball và kiểm contents/license/runtime/templates.
 - `smoke:tarball`: cài tarball đó vào two independent temporary roots: fake user home for global setup and one-or-more project fixtures for `init`/context; smoke từng Kiro/Antigravity/Codex và tổ hợp ba platform without a real profile.
 - `measure:init`: chạy documented non-migration fixture nhiều lần, report median/worst wall-clock và fail nếu worst >=5 giây.
@@ -752,3 +752,7 @@ Harnix chỉ hoàn thành khi:
 - Remaining limitation/deviation được ghi rõ, không được che bằng claim suy luận.
 
 Sau documentation checkpoint này, implementation tiếp tục Phase 1–4 theo thứ tự; không chờ phê duyệt giữa phase trừ khi user yêu cầu checkpoint mới hoặc xuất hiện blocker về credential/authority/product decision không thể suy ra an toàn.
+
+## 14. Repository map v1
+
+Use `globby@^14.1.0` for Node-18-compatible, ignore-aware local inventory and `minisearch@^7.2.0` only for in-memory lexical candidates. Persist a validated, atomically replaced `.harnix/cache/repo-map-v1.json` with sorted relative paths, content hashes, bounded identifiers/headings/import targets and no raw source or absolute path. Fresh init and hidden internal refresh write; public `repo-map --query <text> [--limit <count>]` is read-only, JSON-default, and bounded to 20 results. Project Doctor inventories missing/stale/invalid cache and safe `--fix` rebuilds it. Required fixtures cover non-Git/Git ignores, secrets, binaries, limits, symlink/junction escape, deterministic cache, query ranking, hook no-write, Node 18 ESM, footprint and release scans.

@@ -1,0 +1,35 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-140100-repomapsort",
+  "title": "Sửa repo-map init thất bại khi sort path",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "harnix init tạo repo-map thành công với mọi path repository hợp lệ bằng một ordering nhất quán với validator.",
+  "nonGoals": [
+    "Thay đổi schema repo-map, nội dung record, ignore rules, hoặc query behavior.",
+    "Bỏ validation uniqueness hoặc tự loại record trùng mà không xác định nguồn."
+  ],
+  "acceptanceCriteria": [
+    {"id":"sort-consistency","text":"Repo-map records được sort theo cùng comparator mà validator sử dụng, nên path hợp lệ không bị reject do locale ordering.","status":"met","evidenceIds":["e-repomap-sort-focused-green","e-repomap-sort-quality-green"]},
+    {"id":"regression","text":"Regression test tái hiện ordering khác localeCompare và init/repo-map creation pass sau fix.","status":"met","evidenceIds":["e-repomap-sort-red","e-repomap-sort-focused-green","e-repomap-sort-quality-green"]},
+    {"id":"patch-bumped","text":"Package metadata và CHANGELOG tăng patch trước completion.","status":"met","evidenceIds":["e-repomap-sort-version-inspection","e-repomap-sort-quality-green"]}
+  ],
+  "relevantPaths": ["src/core/repo-map/store.ts","test/unit/repo-map/service.test.ts","package.json","CHANGELOG.md"],
+  "relevantSpecs": [".harnix/workflow.md"],
+  "validationPlan": [
+    {"id":"repomap-sort-focused","description":"Run repository-map unit tests.","command":"pnpm test -- test/unit/repo-map/service.test.ts","scope":"focused","required":true},
+    {"id":"repomap-sort-quality","description":"Run typecheck, lint, repo-map integration tests, and diff check.","command":"pnpm typecheck && pnpm lint && pnpm test -- test/unit/repo-map test/integration/repo-map test/integration/init.test.ts && git diff --check","scope":"full","required":true}
+  ],
+  "evidence": [
+    {"id":"e-repomap-sort-hypothesis","recordedAt":"2026-08-13T07:03:20.000Z","result":"pass","exitCode":0,"summary":"Discriminating comparison confirmed locale ordering differs from code-unit ordering for valid mixed-case paths; createRepoMap used the former while its validator used the latter.","artifactPaths":["src/core/repo-map/store.ts"]},
+    {"id":"e-repomap-sort-red","checkId":"repomap-sort-focused","recordedAt":"2026-08-13T07:04:04.000Z","result":"fail","exitCode":1,"summary":"RED regression reproduced the user-visible error: createRepoMap with src/a.ts and src/B.ts threw Repo map records must be unique and sorted.","artifactPaths":["test/unit/repo-map/service.test.ts"]},
+    {"id":"e-repomap-sort-focused-green","checkId":"repomap-sort-focused","recordedAt":"2026-08-13T07:04:49.000Z","result":"pass","exitCode":0,"summary":"Focused repository-map unit tests passed after using the same code-unit comparator for creation and validation.","artifactPaths":["src/core/repo-map/store.ts","test/unit/repo-map/service.test.ts"]},
+    {"id":"e-repomap-sort-version-inspection","recordedAt":"2026-08-13T07:06:18.000Z","result":"pass","exitCode":0,"summary":"Package metadata and changelog record patch version 0.6.7 and the repo-map init fix before completion.","artifactPaths":["package.json","CHANGELOG.md"]},
+    {"id":"e-repomap-sort-quality-green","checkId":"repomap-sort-quality","recordedAt":"2026-08-13T07:06:12.000Z","result":"pass","exitCode":0,"summary":"Typecheck, lint, repository-map and init regressions (12 tests), and diff whitespace check passed.","artifactPaths":["test/unit/repo-map","test/integration/repo-map","test/integration/init.test.ts"]}
+  ],
+  "createdAt": "2026-08-13T14:01:00+07:00",
+  "updatedAt": "2026-08-13T14:06:18.5120272+07:00",
+  "completedAt": "2026-08-13T14:06:18.5120272+07:00"
+}

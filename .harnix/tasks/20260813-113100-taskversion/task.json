@@ -1,0 +1,110 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-113100-taskversion",
+  "title": "Tăng patch version khi hoàn tất task",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Tăng bản vá 0.6.2 cho task repo-map vừa hoàn tất và quy định rằng các task hoàn tất sau này phải tăng patch version trước khi được ghi completed.",
+  "nonGoals": [
+    "Tạo tag, commit, publish, hoặc thay đổi major/minor version.",
+    "Tự tăng version lần nữa chỉ vì task chính sách này được đóng."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "patch-bumped",
+      "text": "Package metadata và changelog phản ánh 0.6.2 cho task repo-map vừa hoàn tất.",
+      "status": "met",
+      "evidenceIds": ["e-task-version-focused-green", "e-task-version-final-green"]
+    },
+    {
+      "id": "future-policy",
+      "text": "Canonical và generated workflow instructions yêu cầu tăng patch version và cập nhật changelog trước khi ghi bất kỳ task nào là completed.",
+      "status": "met",
+      "evidenceIds": ["e-task-version-focused-green", "e-task-version-final-green"]
+    }
+  ],
+  "relevantPaths": [
+    "package.json",
+    "CHANGELOG.md",
+    "AGENTS.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "src/templates/harnix/workflow.ts",
+    "src/skills/harnix-finish-work/SKILL.md",
+    "test/workflow/templates.test.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/workflow.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "task-version-focused",
+      "description": "Run the generated-workflow template test and inspect package/changelog metadata.",
+      "command": "pnpm test -- test/workflow/templates.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "task-version-quality",
+      "description": "Type-check, lint, and check the diff after the metadata and instruction change.",
+      "command": "pnpm typecheck && pnpm lint && git diff --check",
+      "scope": "focused",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-task-version-red",
+      "checkId": "task-version-focused",
+      "recordedAt": "2026-08-13T13:05:10+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "The new workflow-template assertion failed as expected because the completion-version instruction had not yet been added.",
+      "artifactPaths": [
+        "test/workflow/templates.test.ts",
+        "src/templates/harnix/workflow.ts"
+      ]
+    },
+    {
+      "id": "e-task-version-focused-green",
+      "checkId": "task-version-focused",
+      "recordedAt": "2026-08-13T13:06:42+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Workflow template test (2 tests), typecheck, lint, and diff check passed. Package metadata is 0.6.2 and the changelog has the corresponding release entry and comparison link.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "AGENTS.md",
+        ".harnix/workflow.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "src/templates/harnix/workflow.ts",
+        "src/skills/harnix-finish-work/SKILL.md",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "e-task-version-final-green",
+      "checkId": "task-version-quality",
+      "recordedAt": "2026-08-13T13:08:18+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh final workflow-source/template tests (4 tests), typecheck, lint, package check, and diff check passed after the universal wording was applied.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "AGENTS.md",
+        ".harnix/workflow.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "src/templates/harnix/workflow.ts",
+        "src/skills/harnix-finish-work/SKILL.md",
+        "test/workflow/templates.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-13T11:31:00+07:00",
+  "updatedAt": "2026-08-13T13:09:00+07:00",
+  "completedAt": "2026-08-13T13:09:00+07:00"
+}

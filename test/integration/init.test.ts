@@ -20,6 +20,8 @@ describe("initializeProject", () => {
     await expect(access(join(root, ".harnix", "tasks"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(root, ".harnix", "workspace", "tam"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(root, ".harnix", ".developer"))).rejects.toMatchObject({ code: "ENOENT" });
+    const repoMapPath = join(root, ".harnix", "cache", "repo-map-v1.json");
+    await expect(access(repoMapPath)).resolves.toBeUndefined();
     const agentInstructions = await readFile(join(root, "AGENTS.md"), "utf8");
     expect(agentInstructions).toContain("CLI manages this project's .harnix lifecycle");
     expect(agentInstructions).toContain("harnix --help");
@@ -41,10 +43,12 @@ describe("initializeProject", () => {
     expect(agentInstructions).toContain("harnix-finish-work");
     expect(agentInstructions).toContain("harnix-continue");
     expect(agentInstructions).toContain("planning -> ready -> in_progress -> verifying -> completed");
-    expect(agentInstructions).toContain("harnix doctor --json");
+    expect(agentInstructions).toContain("harnix doctor");
     await expect(readFile(join(root, "keep.txt"), "utf8")).resolves.toBe("user content");
+    await writeFile(join(root, "added-after-init.ts"), "export const stale = true;\n");
     await initializeProject({ developer: "tam", root, yes: true });
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toBe(config);
+    await expect(readFile(repoMapPath, "utf8")).resolves.not.toContain("added-after-init.ts");
   });
   it("should_initialize_harnix_without_touching_existing_trellis_data", async () => {
     const root = await fixture(); await writeFile(join(root, ".trellis"), "legacy");
@@ -58,6 +62,7 @@ describe("initializeProject", () => {
       detection: { matches: [] },
       created: [
         ".harnix/.template-hashes.json",
+        ".harnix/cache/repo-map-v1.json",
         ".harnix/config.yaml",
         ".harnix/spec/guides/common/engineering.md",
         ".harnix/workflow.md",
@@ -79,7 +84,7 @@ describe("initializeProject", () => {
       scope: "project",
       status: "planned",
       developer: "tam",
-      created: expect.arrayContaining([".harnix/config.yaml", ".harnix/workflow.md", "AGENTS.md"]),
+      created: expect.arrayContaining([".harnix/config.yaml", ".harnix/cache/repo-map-v1.json", ".harnix/workflow.md", "AGENTS.md"]),
       unchanged: [],
       preserved: [],
     });

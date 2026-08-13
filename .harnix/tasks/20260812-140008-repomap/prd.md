@@ -1,57 +1,52 @@
 # PRD: Safe repository map for fast agent context
 
-## Problem
-
-Coding agents lose time and context budget when they must repeatedly enumerate a repository or open broad groups of files before finding the few files relevant to a task. Harnix already supplies workflow state and a compact repository profile, but it does not provide a fresh, searchable structural map of the current tree.
-
 ## Outcome
 
-Harnix can build a local, disposable repo map and query it for a bounded list of relevant paths and compact outlines. The agent then reads the real files it needs. The feature must work without Git, network access, a daemon, or raw-source persistence.
+Harnix can explicitly build and query a local, disposable repository map so an agent can identify a bounded list of relevant files and structural outlines before opening real source files. The map works with or without Git and remains entirely local.
 
-## Users and scenarios
+## In scope
 
-- A coding agent starts planning and needs likely entry points, tests, manifests, and nearby modules.
-- A resumed task needs fresh candidates after files changed.
-- A mixed monorepo needs results biased toward the current package and language.
-- `harnix internal context` may consume an already-fresh map, but a prompt hook must stay fast and read-only.
+- Safe ignore-aware inventory, compact structural extraction, deterministic cache, lexical search, stable Harnix reranking, hidden internal JSON operations, project Doctor diagnostics, and explicit workflow-stage guidance.
+- Cache location: `.harnix/cache/repo-map-v1.json`; it is disposable project data removed by the existing project purge.
+- Dependencies: `globby@^14.1.0` for Node-18-compatible inventory and `minisearch@^7.2.0` for in-memory lexical candidates. Harnix owns all persistence, validation, ranking, and public behavior.
+- Repository-relative POSIX paths only. No source body, comments, literals, secrets, absolute paths, real user-home values, or serialized third-party index state are persisted.
 
-## Functional requirements
+## Out of scope
 
-1. Inventory eligible files using repository-relative POSIX paths and repository ignore rules where available.
-2. Work in Git and non-Git repositories; Git is an optional optimization, never a requirement.
-3. Refuse traversal and symlink or junction escape; do not follow directory symlinks by default.
-4. Exclude dependencies, generated output, VCS data, Harnix task/workspace data, binary files, secret-prone paths, and oversized files.
-5. Extract compact language-neutral signals first: path, basename, extension, package, language, file kind, identifiers, headings, and import targets.
-6. Persist an atomically replaced, schema-versioned cache under `.harnix/cache/` containing no raw source, secrets, or absolute paths.
-7. Refresh incrementally from stable fingerprints and make incremental output equivalent to a clean rebuild.
-8. Search the map lexically, then apply deterministic Harnix scoring for task terms, path proximity, package, language, file kind, tests, and current task paths.
-9. Return a bounded result containing normalized paths, scores/reasons, and compact outlines; the agent reads source files separately.
-10. Integrate through hidden internal runtime operations and the existing workflow. Do not add an eighth public command.
-11. Diagnose missing, stale, corrupt, or unsafe cache state. Rebuild only during an explicit project operation, never from a global prompt hook.
+- Embeddings, vector database, network access, telemetry, Git requirement/process enumeration, daemon, watcher, native/AST parser, raw-source cache, new public command, global integration mutation, and automatic prompt-hook refresh.
+- Any change to the fixed `harnix internal context --platform <id>` protocol or its fast path.
 
-## Non-functional requirements
+## User-visible behavior
 
-- Deterministic output for identical eligible inputs and configuration.
-- No network, telemetry, background process, watcher, embeddings, or vector database.
-- Warm query p95 below 100 ms for a representative 10,000-file fixture.
-- Full refresh target below 3 seconds for 10,000 eligible files or 50 MB of scanned text on the documented reference machine.
-- Cache target at or below 8 MB for the representative fixture.
-- Bounded memory and concurrency; abort cleanly without corrupting the previous cache.
-- Node.js 18 compatibility and Windows, macOS, and Linux path behavior.
+The seven public commands remain unchanged. Advanced workflow use is through unsupported hidden operations:
 
-## Product decisions
+```text
+harnix internal repo-map refresh --json
+harnix internal repo-map query --query <text> [--limit <1..20>] --json
+```
 
-- Use `globby` 14.x for safe, ignore-aware inventory because Harnix supports Node.js 18.
-- Use `MiniSearch` for zero-service local lexical candidate retrieval, followed by Harnix-owned deterministic reranking.
-- Defer AST-native parsing. Start with lightweight language adapters and add AST parsing later only if measured query-quality gains justify native/dynamic language packages and footprint.
-- Store only disposable structural metadata. User source remains the source of truth.
+Refresh requires a valid initialized project and is the only write path. Query is read-only and never scans or refreshes. Global hooks do not call either operation; they preserve their current bounded no-write behavior. Project Doctor reports missing/stale/invalid/unsafe cache state; `doctor --fix` rebuilds only safe missing, stale, or invalid cache after project validation.
+
+## Safety and privacy requirements
+
+- Do not follow directory symlinks/junctions; verify realpath containment for every accepted file.
+- Exclude VCS, Harnix/agent tooling, dependency, generated/cache, binary, secret-prone, unreadable, and over-budget files.
+- Limits are 10,000 files, 50 MiB total UTF-8 input, 1 MiB/file, and extraction concurrency 16. A limit/unsafe failure preserves any prior cache and returns bounded diagnostics.
+- Cache validation rejects corrupt/future schema, unsafe or absolute paths, invalid hashes, unsorted/duplicate records, outline-limit violations, and secret-looking structural fields.
+- Refresh output is byte-stable; a content-hash fingerprint over the sorted eligible set ensures incremental extraction produces the same result as a clean rebuild.
+
+## Retrieval requirements
+
+- Persist only records with normalized path, content hash, size, extension, package root, optional language, kind, and capped identifiers/headings/import targets.
+- Build MiniSearch from validated records at query time; initial candidates are bounded to 50 and results to 20.
+- Rerank deterministically using current task terms/relevant paths, package, profile language/technology, implementation/test pairing, manifest/config role, then normalized path as tie-breaker.
+- Result JSON gives path, score, reasons, and structural outline only. The agent separately reads current source.
 
 ## Acceptance
 
-- Fixtures cover the Harnix TypeScript repository, a C# solution, a mixed monorepo, and a non-Git repository.
-- Nested ignore rules, Unicode/spaces, binary files, large files, secret-prone paths, and symlink/junction escapes are tested.
-- Repeated clean builds are byte-stable, and incremental refresh equals clean rebuild.
-- Golden queries rank the intended implementation, test, manifest, and documentation files near the top.
-- Cache inspection proves no raw source, secret fixture values, or absolute machine paths are present.
-- Prompt-hook tests prove no map build or filesystem write occurs.
-- Focused, full quality, safety, acceptance, tarball, footprint, and release gates pass with fresh evidence.
+1. Git/non-Git, nested-ignore, Unicode/space, binary, large, secret, unreadable, traversal, symlink/junction, and budget fixtures prove no unsafe inventory or source persistence.
+2. Cache schema, atomic replacement, corruption handling, deletion reset, byte stability, and clean/incremental equivalence are tested.
+3. Golden implementation/test/manifest/document queries prove stable bounded ranking, including package/language/task affinity and adversarial input handling.
+4. Hidden operations remain outside public help; the exact platform-hook fast path remains unchanged and performs no map scan/write.
+5. Doctor diagnoses and safe `--fix` behavior are project-only; global integration behavior is preserved.
+6. Node 18 ESM, type/lint/full/safety/acceptance/tarball/footprint/release gates pass. Fixed fixture measurements meet ≤3 s refresh, <100 ms p95 warm query, and ≤8 MiB cache targets or the task returns to replan.

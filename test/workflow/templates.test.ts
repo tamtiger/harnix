@@ -29,7 +29,13 @@ describe("workflow templates", () => {
     expect(agentInstructions).toContain("do not bulk-load the repository");
     expect(agentInstructions).toContain("project-local coding-agent harness");
     expect(agentInstructions).toContain("Do not run setup or harnix init automatically");
+    expect(agentInstructions).toContain("Before recording any task as `completed`, increment the package patch version and update `CHANGELOG.md`");
+    expect(agentInstructions).toContain("Before any commit, show the proposed changes and commit message, then wait for explicit user approval");
     expect(agentInstructions).toContain("nearest initialized project ancestor or workspace root");
+    expect(agentInstructions).toContain("harnix repo-map --query <text>");
+    expect(agentInstructions).toContain("cache-only navigation hints");
+    expect(agentInstructions).toContain("harnix doctor --fix");
+    expect(agentInstructions).toContain("must not invoke repository-map queries or refreshes");
     expect(agentInstructions).not.toContain("<!-- harnix:begin -->");
     expect(agentInstructions).not.toContain("<!-- harnix:end -->");
     expect(agentInstructions).not.toContain("Detected repository");
@@ -56,6 +62,10 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain(".harnix/tasks/.active");
     expect(workflowTemplate).toContain("discovery seeds, not complete repository truth");
     expect(workflowTemplate).toContain("Plan-only requests stop at `ready`");
+    expect(workflowTemplate).toContain("harnix repo-map --query <text>");
+    expect(workflowTemplate).toContain("must not invoke repository-map queries or refreshes");
+    expect(workflowTemplate).toContain("Increase the package patch version and update `CHANGELOG.md` before recording any task as `completed`");
+    expect(workflowTemplate).toContain("Before any commit, show the proposed changes and commit message, then wait for explicit user approval");
     for (const skill of workflowSkills) {
       expect(skill.body).toContain("## Incoming state");
       expect(skill.body).toContain("## Persist");

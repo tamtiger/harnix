@@ -14,6 +14,7 @@ import { uninstallGlobalIntegrations } from "./commands/global-uninstall.js";
 import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces.js";
 import { searchMemory } from "./commands/mem.js";
 import { diagnoseProject } from "./commands/doctor.js";
+import { queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
@@ -45,7 +46,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       const result = await initializeProject({ developer, dryRun: options.dryRun, languages: profile.languages, technologies: profile.technologies, warnings: profile.warnings, root: await resolveProjectRoot(process.cwd()), yes: options.yes });
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
-  program.command("setup").option("--kiro", "Install Kiro user-global integration").option("--antigravity", "Install Antigravity user-global integration").option("--codex", "Install Codex user-global integration").option("--dry-run", "Preview user-global changes without writing").option("--json", "Output stable JSON").action(async (options: { kiro?: boolean; antigravity?: boolean; codex?: boolean; dryRun?: boolean }) => {
+  program.command("setup").option("--kiro", "Install Kiro user-global integration").option("--antigravity", "Install Antigravity user-global integration").option("--codex", "Install Codex user-global integration").option("--dry-run", "Preview user-global changes without writing").action(async (options: { kiro?: boolean; antigravity?: boolean; codex?: boolean; dryRun?: boolean }) => {
     const platforms = (["kiro", "antigravity", "codex"] as const).filter((platform) => options[platform]);
     const result = await setupPlatforms({
       ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
@@ -56,7 +57,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     });
     process.stdout.write(`${JSON.stringify(result)}\n`);
   });
-  program.command("update").option("--restore", "Restore explicitly deleted managed files").option("--global", "Reconcile user-global platform integrations").option("--kiro", "Select Kiro for --global").option("--antigravity", "Select Antigravity for --global").option("--codex", "Select Codex for --global").option("--dry-run", "Preview global changes without writing").option("--json", "Output stable JSON").action(async (options: { restore?: boolean; global?: boolean; kiro?: boolean; antigravity?: boolean; codex?: boolean; dryRun?: boolean }) => {
+  program.command("update").option("--restore", "Restore explicitly deleted managed files").option("--global", "Reconcile user-global platform integrations").option("--kiro", "Select Kiro for --global").option("--antigravity", "Select Antigravity for --global").option("--codex", "Select Codex for --global").option("--dry-run", "Preview global changes without writing").action(async (options: { restore?: boolean; global?: boolean; kiro?: boolean; antigravity?: boolean; codex?: boolean; dryRun?: boolean }) => {
     const platforms = (["kiro", "antigravity", "codex"] as const).filter((platform) => options[platform]);
     if (!options.global && (platforms.length > 0 || options.dryRun)) throw new Error("--kiro, --antigravity, --codex, and --dry-run require update --global.");
     const result = options.global
@@ -82,7 +83,6 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--antigravity", "Select Antigravity for --global")
     .option("--codex", "Select Codex for --global")
     .option("--yes", "Confirm the selected destructive action")
-    .option("--json", "Output stable JSON")
     .action(async (options: { purge?: boolean; global?: boolean; legacyProjectSurfaces?: boolean; kiro?: boolean; antigravity?: boolean; codex?: boolean; yes?: boolean }) => {
       const platforms = (["kiro", "antigravity", "codex"] as const).filter((platform) => options[platform]);
       const projectModeCount = Number(options.purge === true) + Number(options.legacyProjectSurfaces === true);
@@ -107,10 +107,10 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
         : result.platforms.some((platform) => platform.confirmationRequired);
       if (confirmationRequired) process.exitCode = 2;
     });
-  program.command("mem").argument("[query]").option("--query <query>").option("--user <id>").option("--limit <count>").option("--json", "Output stable JSON").action(async (query: string | undefined, options: { query?: string; user?: string; limit?: string }) => {
+  program.command("mem").argument("[query]").option("--query <query>").option("--user <id>").option("--limit <count>").action(async (query: string | undefined, options: { query?: string; user?: string; limit?: string }) => {
     const limit = options.limit === undefined ? undefined : /^\d+$/u.test(options.limit) ? Number(options.limit) : Number.NaN; if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) throw new Error("--limit must be a positive integer."); const result = await searchMemory({ root: await resolveProjectRoot(process.cwd()), query: options.query ?? query, user: options.user, limit }); process.stdout.write(`${JSON.stringify(result)}\n`);
   });
-  program.command("doctor").option("--fix", "Repair safe, unchanged managed files").option("--global", "Allow --fix to reconcile safe global integration drift").option("--json", "Output stable JSON").action(async (options: { fix?: boolean; global?: boolean; json?: boolean }) => {
+  program.command("doctor").option("--fix", "Repair safe, unchanged managed files").option("--global", "Allow --fix to reconcile safe global integration drift").action(async (options: { fix?: boolean; global?: boolean }) => {
     const result = await diagnoseProject({
       ...(programOptions.capabilityLookup === undefined ? {} : { capabilityLookup: programOptions.capabilityLookup }),
       ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
@@ -124,11 +124,21 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     if (result.project.status === "invalid" || result.globalIntegrations.some((integration) => integration.status === "invalid")) process.exitCode = 2;
     else if (!result.ok) process.exitCode = 1;
   });
+  program.command("repo-map").requiredOption("--query <text>", "Search the structural repository map").option("--limit <count>", "Maximum results", "20").action(async (options: { query: string; limit: string }) => {
+    process.stdout.write(`${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query, parseRepoMapLimit(options.limit)))}\n`);
+  });
   const internal = new Command("internal");
   internal.command("context").option("--platform <platform>").action(async (options: { platform: "kiro" | "antigravity" | "codex" }) => {
     if (!options.platform || !["kiro", "antigravity", "codex"].includes(options.platform)) throw new Error("--platform must be kiro, antigravity, or codex.");
     const hookInput = programOptions.hookEventInput ? await programOptions.hookEventInput() : process.stdin.isTTY === true ? "" : await readBoundedStdin();
     await runInternalContextCommand({ hookInput, platform: options.platform });
+  });
+  const repoMap = internal.command("repo-map", { hidden: true });
+  repoMap.command("refresh").action(async () => {
+    process.stdout.write(`${JSON.stringify(await refreshRepoMapInternal(process.cwd()))}\n`);
+  });
+  repoMap.command("query").requiredOption("--query <text>").option("--limit <count>", "Maximum results", "20").action(async (options: { query: string; limit: string }) => {
+    process.stdout.write(`${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query, parseRepoMapLimit(options.limit)))}\n`);
   });
   program.addCommand(internal, { hidden: true });
   return program;
@@ -141,6 +151,13 @@ export function defaultDeveloperId(environment: Readonly<Record<string, string |
     .replace(/^[^A-Za-z0-9]+/u, "")
     .slice(0, 64);
   return /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u.test(normalized) ? normalized : "developer";
+}
+
+function parseRepoMapLimit(value: string): number {
+  if (!/^\d+$/u.test(value)) throw new Error("--limit must be an integer between 1 and 20.");
+  const limit = Number(value);
+  if (limit < 1 || limit > 20) throw new Error("--limit must be an integer between 1 and 20.");
+  return limit;
 }
 
 export async function runCli(argv = process.argv, programOptions: ProgramOptions = {}): Promise<number> {

@@ -59,12 +59,12 @@ Public exports chỉ gồm supported programmatic boundaries được ghi trong 
 | Public command | Upstream basis | Harnix delta |
 |---|---|---|
 | `harnix init [--migrate] [--dry-run]` | Trellis init/project detector | `.harnix`, no scripts, interactive/CI language choice, legacy preview default, <5s |
-| `harnix setup --kiro|--antigravity|--codex [--dry-run] [--json]` | Upstream configurators/templates | Explicit user-global integration, multi-platform invocation, fixed hook command/readiness, no project config/root dependency |
+| `harnix setup --kiro|--antigravity|--codex [--dry-run]` | Upstream configurators/templates | Explicit user-global integration, multi-platform invocation, fixed hook command/readiness, no project config/root dependency; all public output is JSON by default |
 | `harnix update [--global]` | Template hash/fetch/prune | Offline project template reconcile by default; global reconcile uses per-root ownership manifests |
 | `harnix upgrade` | Upgrade command | `@tamtiger/harnix`, installed/available versions, injected network/process deps |
 | `harnix uninstall [--purge|--global|--legacy-project-surfaces]` | Uninstall scrubbers | Project purge remains separate; global/legacy cleanup preview and confirmation preserve modified/untracked content |
 | `harnix mem [query]` | Mem search concepts | Project JSONL/structured journals, Unicode/malformed handling, learning metadata |
-| `harnix doctor [--fix] [--global] [--json]` | New + ECC doctor ideas | Doctor JSON v2 projects + global integrations, meaningful exit codes, conservative scoped fix, no network |
+| `harnix doctor [--fix] [--global]` | New + ECC doctor ideas | Doctor JSON v2 projects + global integrations, meaningful exit codes, conservative scoped fix, no network |
 | Trellis `workflow` | — | Removed; exactly one Harnix workflow |
 | Trellis `channel` | — | Removed completely |
 

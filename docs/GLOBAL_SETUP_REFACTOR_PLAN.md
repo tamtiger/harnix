@@ -137,7 +137,7 @@ Ownership rules:
 
 ```text
 harnix setup --kiro|--antigravity|--codex [nhiều flag]
-             [--dry-run] [--json]
+             [--dry-run]
 ```
 
 - User-global là behavior duy nhất; không thêm `--scope project`.
@@ -398,11 +398,11 @@ git diff --check
 Manual smoke sau automated gates:
 
 1. Dùng disposable Windows user/profile để mở session trong tool. Explicit test home chỉ phù hợp command-side check nếu tool cũng được launch cùng home đó.
-2. Chạy `harnix setup --kiro --antigravity --codex --dry-run --json` và kiểm logical targets.
+2. Chạy `harnix setup --kiro --antigravity --codex --dry-run` và kiểm logical targets.
 3. Chạy `harnix setup --kiro --antigravity --codex`, mở session mới trong từng tool và kiểm skill discovery/hook activation.
    Với Codex, mở `/hooks`, review/trust exact Harnix hook rồi mới claim active.
 4. Kiểm repo chưa init không nhận Harnix context; repo đã init nhận đúng bounded context.
-5. Chạy `harnix doctor --json`, preview bằng `harnix uninstall --global --kiro --antigravity --codex`, chỉ apply `harnix uninstall --global --kiro --antigravity --codex --yes` sau khi đã kiểm target, rồi verify unrelated global config còn nguyên.
+5. Chạy `harnix doctor`, preview bằng `harnix uninstall --global --kiro --antigravity --codex`, chỉ apply `harnix uninstall --global --kiro --antigravity --codex --yes` sau khi đã kiểm target, rồi verify unrelated global config còn nguyên.
 
 ## 12. Rủi ro và mitigation
 

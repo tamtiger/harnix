@@ -168,9 +168,12 @@ Trước `completed`, agent:
 3. Ghi evidence, outcome, residual risks và omitted checks.
 4. Ghi journal entry; tạo learning candidate chỉ từ non-obvious evidence.
 5. Promote learning vào spec chỉ khi có explicit approval hoặc recurrence/evidence gate, dưới dạng diff reviewable.
-6. Archive/complete task state bằng atomic write.
+6. Tăng patch version của package và cập nhật `CHANGELOG.md` trong chính task đó.
+7. Archive/complete task state bằng atomic write.
 
 Finish báo đúng trạng thái thực tế. Không biến Git integration thành điều kiện hoàn thành của Harnix.
+
+Khi người dùng yêu cầu commit sau khi task hoàn tất, agent phải trình bày thay đổi và commit message đề xuất, rồi chờ approve rõ ràng trước khi stage hoặc commit. Yêu cầu commit không cho phép bỏ qua bước review này.
 
 ### 5.8 Continue
 
@@ -242,3 +245,4 @@ Evals phải chứng minh:
 - Continue phục hồi đúng state với bounded context và fail closed trên corrupt/future state.
 - Cùng fixture cho kết quả workflow tương đương trên Kiro, Antigravity và Codex.
 - Global hooks/instructions are a fast no-op in a non-Harnix workspace, activate only with safe bounded project context, and never turn malformed optional hook input into a blocked prompt.
+- Fresh init creates the validated repo map; workflow stages may use `harnix repo-map --query <text> [--limit <count>]` for bounded candidate discovery. Hooks never invoke repo-map operations; only `doctor --fix` and the hidden compatibility refresh can rebuild a cache after init.

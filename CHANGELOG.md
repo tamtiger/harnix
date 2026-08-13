@@ -4,6 +4,47 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; các mục dưới đây theo commit cho đến khi versioning/release workflow được triển khai.
 
+## [0.6.7] - 2026-08-13
+
+### Fixed
+
+- Fixed `harnix init` failing on valid mixed-case or locale-sensitive repository paths when creating the repository-map cache.
+
+## [0.6.6] - 2026-08-13
+
+### Changed
+
+- Generated project `AGENTS.md` now explains safe cache-only `repo-map` discovery, Doctor repair, and the prohibition on invoking repository-map operations from platform hooks.
+
+## [0.6.5] - 2026-08-13
+
+### Added
+
+- Fresh `harnix init` now creates the safe repository-map cache, and `harnix repo-map --query <text> [--limit <count>]` provides a short cache-only query command.
+
+### Changed
+
+- Public commands now always emit JSON and no longer require or expose a redundant `--json` flag.
+
+## [0.6.4] - 2026-08-13
+
+### Changed
+
+- Commit requests now require a displayed change summary and proposed commit message followed by explicit user approval before staging or committing.
+
+## [0.6.3] - 2026-08-13
+
+### Changed
+
+- README and generated project `AGENTS.md` now document the required patch-version and changelog update before every task completion.
+
+## [0.6.2] - 2026-08-13
+
+### Changed
+
+- Every completed Harnix task now increments the package patch version and updates this changelog before its task record is persisted as completed.
+- Added a disposable, deterministic repository-map cache with safe inventory, structural-only lexical retrieval, hidden refresh/query operations, and project Doctor repair; platform hook fast paths remain read-only and unchanged.
+
 ## [0.6.1] - 2026-08-13
 
 ### Changed
@@ -123,6 +164,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 - Quyết định sản phẩm Harnix, contract v1, workflow và provenance upstream được chốt tại commit `d01239f`.
 
+[0.6.7]: https://github.com/tamtiger/harnix/compare/v0.6.6...v0.6.7
+[0.6.6]: https://github.com/tamtiger/harnix/compare/v0.6.5...v0.6.6
+[0.6.5]: https://github.com/tamtiger/harnix/compare/v0.6.4...v0.6.5
+[0.6.4]: https://github.com/tamtiger/harnix/compare/v0.6.3...v0.6.4
+[0.6.3]: https://github.com/tamtiger/harnix/compare/v0.6.2...v0.6.3
+[0.6.2]: https://github.com/tamtiger/harnix/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/tamtiger/harnix/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/tamtiger/harnix/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/tamtiger/harnix/compare/v0.4.0...v0.5.0

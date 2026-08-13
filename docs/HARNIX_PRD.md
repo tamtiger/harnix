@@ -120,18 +120,19 @@ CLI có help rõ, actionable errors và non-zero exit khi thất bại:
 
 ```text
 harnix init [--user <name>] [--languages <csv>] [--dry-run]
-harnix setup --kiro|--antigravity|--codex [--dry-run] [--json]
+harnix setup --kiro|--antigravity|--codex [--dry-run]
 harnix update [--restore]
-harnix update --global [--kiro|--antigravity|--codex] [--restore] [--dry-run] [--json]
+harnix update --global [--kiro|--antigravity|--codex] [--restore] [--dry-run]
 harnix upgrade
 harnix uninstall --purge [--yes]
 harnix uninstall --global --kiro|--antigravity|--codex [--yes]
 harnix uninstall --legacy-project-surfaces [--yes]
 harnix mem [query]
-harnix doctor [--fix] [--global] [--json]
+harnix doctor [--fix] [--global]
+harnix repo-map --query <text> [--limit <count>]
 ```
 
-Vẫn chỉ có bảy public commands. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix internal context --platform <id>` chỉ là platform-hook protocol, không xuất hiện trong public help và không phải supported public API; exact stdin/stdout/bounds nằm trong `IMPLEMENTATION_PLAN.md` mục 4.7.
+Có tám public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix internal context --platform <id>` chỉ là platform-hook protocol, không xuất hiện trong public help và không phải supported public API; exact stdin/stdout/bounds nằm trong `IMPLEMENTATION_PLAN.md` mục 4.7.
 
 ## 8. Init requirements
 
@@ -152,12 +153,13 @@ Init chỉ tạo:
 .harnix/
   spec/guides/
   config.yaml
+  cache/repo-map-v1.json
   workflow.md
   .template-hashes.json
 AGENTS.md                  # short bootstrap only when absent
 ```
 
-Không tạo runtime scripts hoặc empty placeholder directories. `tasks/` và `workspace/<developer>/journal/` được tạo lazy khi task/journal đầu tiên được persist; developer source of truth là `config.yaml`, không duplicate `.developer`. Seed relevant specs/rules. Rerun idempotent và giữ modified specs/config/tasks/journals. Init trả project status cùng các path `created`, `updated`, `unchanged`, `preserved` và warning để người dùng thấy chính xác file nào bị tác động. Init quản lý `.harnix/` và may create the minimal root `AGENTS.md` bootstrap only when it is absent; it does not inspect, migrate, overwrite or delete `.trellis`, `.trellis-pro` or Trellis skills. Representative fixture phải dưới 5 giây.
+Khởi tạo mới build repo-map cache sau config và managed files; `--dry-run` chỉ báo cache planned, còn rerun initialized project không refresh cache. Không tạo runtime scripts hoặc empty placeholder directories. `tasks/` và `workspace/<developer>/journal/` được tạo lazy khi task/journal đầu tiên được persist; developer source of truth là `config.yaml`, không duplicate `.developer`. Seed relevant specs/rules. Rerun idempotent và giữ modified specs/config/tasks/journals. Init trả project status cùng các path `created`, `updated`, `unchanged`, `preserved` và warning để người dùng thấy chính xác file nào bị tác động. Init quản lý `.harnix/` và may create the minimal root `AGENTS.md` bootstrap only when it is absent; it does not inspect, migrate, overwrite or delete `.trellis`, `.trellis-pro` or Trellis skills. Representative fixture phải dưới 5 giây.
 
 ## 9. User-global setup and platform requirements
 
@@ -364,6 +366,10 @@ Harnix không hoàn thành cho tới khi fresh output chứng minh:
 - License/NOTICE attribution đúng cho Trellis, ECC và Superpowers.
 
 Delivery evidence status on 2026-08-11: Phase 6 implementation and automated isolated-home gates are complete with fresh evidence in the current working tree. The disposable-profile/tool-session smoke is intentionally not run without explicit authorization; it remains an external acceptance item and does not establish a real-user `active`, `shadowed` or `unsupported-version` claim.
+
+## Repository map v1
+
+Repo-map is disposable project cache at `.harnix/cache/repo-map-v1.json`, containing only deterministic repository-relative structural metadata and SHA-256 fingerprints—never source bodies, literals, secrets, absolute paths, a daemon, embeddings, or network data. Fresh `harnix init`, hidden `harnix internal repo-map refresh`, and project `doctor --fix` may safely rebuild it. Public `harnix repo-map --query <text> [--limit <count>]` is cache-only and always emits JSON; global hooks never scan, refresh, write, or query it.
 
 ## 19. Provenance and requirement history
 
