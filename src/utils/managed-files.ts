@@ -50,7 +50,7 @@ export async function obsoleteState(projectRoot: string, entry: ManagedEntry): P
 }
 
 export interface DesiredManagedFile { entry: ManagedEntry; content: string; }
-export interface ReconcileResult { created: string[]; updated: string[]; preserved: string[]; deleted: string[]; obsolete: string[]; }
+export interface ReconcileResult { created: string[]; updated: string[]; metadataUpdated: string[]; preserved: string[]; deleted: string[]; obsolete: string[]; }
 
 export async function reconcileManagedFiles(
   projectRoot: string,
@@ -63,7 +63,7 @@ export async function reconcileManagedFiles(
     ...desired.map((file) => resolveSafeProjectPath(projectRoot, file.entry.path)),
   ]);
   const oldByPath = new Map(manifest.entries.map((entry) => [entry.path, entry]));
-  const result: ReconcileResult = { created: [], updated: [], preserved: [], deleted: [], obsolete: [] };
+  const result: ReconcileResult = { created: [], updated: [], metadataUpdated: [], preserved: [], deleted: [], obsolete: [] };
   const nextEntries: ManagedEntry[] = [];
   for (const file of desired.sort((a, b) => a.entry.path.localeCompare(b.entry.path))) {
     const entry = { ...file.entry, generatorVersion: options.generatorVersion };
@@ -82,7 +82,18 @@ export async function reconcileManagedFiles(
       oldByPath.delete(entry.path);
       continue;
     }
-    else if (state === "unchanged") { if (previous?.generatedHash !== sha256(file.content)) { await atomicWriteFile(await resolveSafeProjectPath(projectRoot, entry.path), file.content); result.updated.push(entry.path); } else result.preserved.push(entry.path); }
+    else if (state === "unchanged") {
+      const generatedHash = sha256(file.content);
+      if (previous?.generatedHash !== generatedHash) {
+        await atomicWriteFile(await resolveSafeProjectPath(projectRoot, entry.path), file.content);
+        result.updated.push(entry.path);
+      } else {
+        result.preserved.push(entry.path);
+        if (previous.generatorVersion !== entry.generatorVersion || previous.sourceId !== entry.sourceId || previous.scope !== entry.scope) {
+          result.metadataUpdated.push(entry.path);
+        }
+      }
+    }
     else if (state === "modified") {
       if (previous) {
         result.preserved.push(entry.path);

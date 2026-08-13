@@ -32,7 +32,16 @@ export function routeWorkflow(request: WorkflowRouteFacts): WorkflowRouteDecisio
       : decision("bypass", undefined, undefined, "read-only");
   }
   const mode = request.explicitMode ?? (request.riskSignals.length > 0 ? "full" : "lite");
-  return decision("create", mode, "harnix-brainstorm", request.explicitMode ? `explicit-${mode}` : mode === "full" ? "risk-full" : "low-risk-lite");
+  if (request.explicitMode) {
+    return decision(
+      "create",
+      mode,
+      "harnix-brainstorm",
+      `explicit-${mode}`,
+      ...(mode === "lite" && request.riskSignals.length > 0 ? ["explicit-lite-risk-conflict"] : []),
+    );
+  }
+  return decision("create", mode, "harnix-brainstorm", mode === "full" ? "risk-full" : "low-risk-lite");
 }
 export function nextWorkflowStatus(intent: "plan" | "implement" | "fix", ready: boolean): "planning" | "ready" | "in_progress" {
   if (!ready) return "planning";
@@ -42,6 +51,7 @@ export function validateFullReadyArtifact(value: { acceptanceCriteria: string[];
 
 export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceAgeMs = 60 * 60 * 1000): boolean {
   const required = task.validationPlan.filter((check) => check.required);
+  if (task.acceptanceCriteria.length === 0 || required.length === 0) return false;
   const latestByCheck = new Map<string, Evidence>();
   for (const evidence of task.evidence) {
     if (!evidence.checkId) continue;
@@ -116,6 +126,6 @@ function isKnownActiveState(active: NonNullable<WorkflowRouteFacts["activeTask"]
   return legal[active.status]?.includes(active.checkpoint) ?? false;
 }
 
-function decision(entry: WorkflowEntry, mode: TaskMode | undefined, owner: WorkflowStageOwner | undefined, reason: string): WorkflowRouteDecision {
-  return { entry, ...(mode === undefined ? {} : { mode }), ...(owner === undefined ? {} : { owner }), reasonCodes: [reason] };
+function decision(entry: WorkflowEntry, mode: TaskMode | undefined, owner: WorkflowStageOwner | undefined, ...reasonCodes: string[]): WorkflowRouteDecision {
+  return { entry, ...(mode === undefined ? {} : { mode }), ...(owner === undefined ? {} : { owner }), reasonCodes };
 }

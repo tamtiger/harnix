@@ -52,7 +52,9 @@ Persist `planning` before any product edit. Record:
 - focused and broader validation commands;
 - one explicit material-unknown decision, with task-owned research when needed.
 
-Full tasks require `prd.md` and `plan.md`. Add `design.md` only when it materially clarifies boundaries or data flow. Plans must identify concrete files and interfaces, order RED–GREEN slices, and state what each verification proves.
+Use a short lowercase task slug with a hyphen between words so the task directory and active pointer remain readable, for example `workflow-audit-fix`; append only the documented deterministic numeric collision suffix. Validate the complete task ID before writing. If the current frozen validator cannot represent the requested hyphenated slug, keep state valid, record the contract change explicitly, and do not fabricate or persist an invalid ID.
+
+Full tasks require `prd.md` and `plan.md`. Add `design.md` only when it materially clarifies boundaries or data flow. Plans must identify concrete files and interfaces, order RED–GREEN slices, and state what each verification proves. Put a Markdown implementation checklist near the top of `plan.md` with one stable item per independently verifiable slice. Leave every item unchecked at planning time; an implementation owner checks an item only after its stated work and focused evidence are complete. The checklist is a progress view, not a replacement for TaskRecord criteria or evidence.
 
 ## Ready self-review
 
@@ -66,6 +68,7 @@ Before changing the checkpoint to `ready`, run every item:
 - **Consistency scan:** PRD, plan, research, task record, and repository instructions do not contradict one another.
 - **Scope check:** the task is small enough to implement and verify without mixing independent products.
 - **Dirty-worktree check:** unrelated or user-owned changes are identified and preservation is explicit.
+- **Tracking check:** the task name is readable and hyphen-separated, and the implementation checklist maps one-to-one to the ordered implementation slices.
 
 Do not mark the task `ready` while any item fails. Keep `status` at its current legal planning state, use checkpoint `replan` when revising a previously prepared task, and report the exact gap. A plan may intentionally begin with a contract-freeze slice only when that slice resolves implementation detail rather than an undecided product contract; otherwise the plan is not ready.
 

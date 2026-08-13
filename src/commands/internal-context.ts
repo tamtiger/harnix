@@ -2,7 +2,7 @@ import { access } from "node:fs/promises";
 import { isAbsolute, win32 } from "node:path";
 
 import { readConfig } from "../core/config/config.js";
-import { buildContext, loadContextManifest } from "../core/context/context.js";
+import { buildContext, loadContextManifest, UNTRUSTED_CONTEXT_PREFIX, UNTRUSTED_CONTEXT_SUFFIX } from "../core/context/context.js";
 import { resolveActiveTask } from "../core/tasks/task.js";
 import { findInitializedProject } from "../utils/project-discovery.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
@@ -154,6 +154,15 @@ function emptyInitializedProjectPayload(platform: InternalContextPlatform): stri
 
 function boundedContext(source: string, omittedPaths: string[], cap: number): string {
   const disclosure = `Omitted: ${omittedPaths.join(", ") || "none"}`;
+  if (source.startsWith(UNTRUSTED_CONTEXT_PREFIX) && source.endsWith(UNTRUSTED_CONTEXT_SUFFIX)) {
+    const framedSuffix = `${UNTRUSTED_CONTEXT_SUFFIX}\n\n${disclosure}`;
+    const contentBudget = cap - UNTRUSTED_CONTEXT_PREFIX.length - framedSuffix.length;
+    if (contentBudget >= 0) {
+      const content = source.slice(UNTRUSTED_CONTEXT_PREFIX.length, -UNTRUSTED_CONTEXT_SUFFIX.length);
+      return `${UNTRUSTED_CONTEXT_PREFIX}${content.slice(0, contentBudget)}${framedSuffix}`;
+    }
+    return disclosure.slice(0, cap);
+  }
   const contentBudget = Math.max(0, cap - disclosure.length - 2);
   return `${source.slice(0, contentBudget)}\n\n${disclosure}`.slice(0, cap);
 }

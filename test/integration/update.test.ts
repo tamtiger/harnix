@@ -7,6 +7,7 @@ import { updateProject } from "../../src/commands/update.js";
 import { readConfig, writeConfig } from "../../src/core/config/config.js";
 import { readManifest, writeManifest } from "../../src/utils/managed-files.js";
 import { sha256 } from "../../src/utils/hashing.js";
+import { packageVersion } from "../../src/version.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-update-");
@@ -116,5 +117,24 @@ describe("updateProject", () => {
     await expect(readFile(join(root, legacyPath), "utf8")).resolves.toBe(legacyContent);
     await expect(access(join(root, ".kiro", "hooks", "harnix-context.json"))).rejects.toMatchObject({ code: "ENOENT" });
     expect((await readManifest(manifestPath)).entries).toContainEqual(expect.objectContaining({ path: legacyPath, scope: "kiro" }));
+  });
+
+  it("reports metadata-only reconciliation without claiming a managed file update", async () => {
+    const root = await fixture();
+    const manifestPath = join(root, ".harnix", ".template-hashes.json");
+    const manifest = await readManifest(manifestPath);
+    await writeManifest(manifestPath, {
+      ...manifest,
+      entries: manifest.entries.map((entry) => entry.path === ".harnix/workflow.md"
+        ? { ...entry, generatorVersion: "0.0.0" }
+        : entry),
+    });
+
+    const result = await updateProject({ root });
+    const reconciled = await readManifest(manifestPath);
+
+    expect(result.updated).not.toContain(".harnix/workflow.md");
+    expect(result.metadataUpdated).toEqual([".harnix/workflow.md"]);
+    expect(reconciled.entries.find(({ path }) => path === ".harnix/workflow.md")?.generatorVersion).toBe(packageVersion);
   });
 });

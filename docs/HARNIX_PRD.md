@@ -159,7 +159,7 @@ Init chỉ tạo:
 AGENTS.md                  # short bootstrap only when absent
 ```
 
-Khởi tạo mới build repo-map cache sau config và managed files; `--dry-run` chỉ báo cache planned, còn rerun initialized project không refresh cache. Không tạo runtime scripts hoặc empty placeholder directories. `tasks/` và `workspace/<developer>/journal/` được tạo lazy khi task/journal đầu tiên được persist; developer source of truth là `config.yaml`, không duplicate `.developer`. Seed relevant specs/rules. Rerun idempotent và giữ modified specs/config/tasks/journals. Init trả project status cùng các path `created`, `updated`, `unchanged`, `preserved` và warning để người dùng thấy chính xác file nào bị tác động. Init quản lý `.harnix/` và may create the minimal root `AGENTS.md` bootstrap only when it is absent; it does not inspect, migrate, overwrite or delete `.trellis`, `.trellis-pro` or Trellis skills. Representative fixture phải dưới 5 giây.
+Khởi tạo mới build repo-map cache sau config và managed files; `--dry-run` chỉ báo cache planned, còn rerun initialized project không refresh cache. Không tạo runtime scripts hoặc empty placeholder directories. `tasks/` và `workspace/<developer>/journal/` được tạo lazy khi task/journal đầu tiên được persist; developer source of truth là `config.yaml`, không duplicate `.developer`. Seed relevant specs/rules. Rerun idempotent và giữ modified specs/config/tasks/journals. Init trả project status cùng các path `created`, `updated`, `unchanged`, `preserved` và warning để người dùng thấy chính xác file nào bị tác động. Project update báo `metadataUpdated` riêng cho managed entry chỉ được refresh manifest metadata; các path này không được claim là content `updated`. Init quản lý `.harnix/` và may create the minimal root `AGENTS.md` bootstrap only when it is absent; it does not inspect, migrate, overwrite or delete `.trellis`, `.trellis-pro` or Trellis skills. Representative fixture phải dưới 5 giây.
 
 ## 9. User-global setup and platform requirements
 
@@ -294,11 +294,11 @@ Source of truth của từng skill là file thật `src/skills/harnix-*/SKILL.md
 - **Lite:** thay đổi tập trung, rủi ro thấp, ít decision; task record tối thiểu vẫn có acceptance, validation và evidence. LOC chỉ là tín hiệu, không phải luật.
 - **Full:** feature, integration, migration, architecture/refactor, security-sensitive hoặc multi-layer; task `prd.md` + `plan.md`, conditional `design.md`/research và decision-complete plan.
 - **Ambiguous:** tự chọn mức nhẹ nhất kiểm soát được rủi ro; chỉ hỏi full brainstorm hay quick implementation khi outcome/cost khác đáng kể.
-- Explicit `--lite`/`--full` override heuristic.
+- Explicit `--lite`/`--full` override heuristic. Forced Lite với risk signal vốn chọn Full phải giữ Lite nhưng emit `explicit-lite-risk-conflict`; cả hai mode vẫn giữ common compliance và quality/security gates.
 
 Yêu cầu rõ kiểu build/fix/implement/change cho phép chuyển từ ready sang implementing trong phạm vi đã yêu cầu; không xin approval lần hai. Plan-only request hoặc explicit review checkpoint dừng ở `ready`. Product decision chưa giải quyết, scope expansion, destructive/external action hoặc thiếu authority mới cần hỏi.
 
-Workflow phải operational từ generated project artifacts: restore `.harnix/tasks/.active`; persist task `planning` trước product edits; persist `ready`, `in_progress/implementing`, và `verifying` trước hành động của stage kế tiếp; ghi evidence ngay sau check; persist `completed` trước journal/archive. Full artifacts phải tồn tại trên disk tại ready gate. Mỗi generated skill phải nêu incoming state, persisted action, và exit/handoff; không dựa vào conversation memory để giả định transition.
+Workflow phải operational từ generated project artifacts: restore `.harnix/tasks/.active`; persist task `planning` trước product edits; persist `ready`, `in_progress/implementing`, và `verifying` trước hành động của stage kế tiếp; ghi evidence ngay sau check; persist `completed` trước journal/archive. Task ID phải dùng lowercase kebab slug dễ đọc và vẫn fail closed với unsafe path. Ready persistence bắt buộc ít nhất một acceptance criterion và một required validation check; sau lần persist đầu, criterion ID/text và required-check ID/definition không được xoá, đổi tên, demote hoặc sửa in-place. Clarification dùng obligation bổ sung; obligation không còn áp dụng dùng explicit waiver có lý do. Full artifacts phải tồn tại, an toàn và không rỗng trên disk tại mỗi ready transition; `plan.md` có implementation checklist ánh xạ một-một với các slice, chỉ check sau focused evidence và không thay thế TaskRecord evidence. Mỗi generated skill phải nêu incoming state, persisted action, và exit/handoff; không dựa vào conversation memory để giả định transition.
 
 Language/package profile trong `.harnix/config.yaml` chỉ là init-time discovery seed. Agent phải đối chiếu manifest, source, test và project instructions hiện tại, chọn context có budget, và không bulk-load repository chỉ vì profile thiếu hoặc stale.
 
@@ -332,7 +332,7 @@ Initial IDs cover source languages C#, TypeScript, JavaScript, PHP, Python, Java
 - Shared JSON/Markdown merge does not touch sensitive or unrelated keys/content; global setup never changes MCP, credentials, permissions, trust, model or provider configuration.
 - Purge/migration exact preview và explicit intent.
 - Atomic writes, rollback, source preservation có injected-failure tests.
-- Không execute spec/context/journal content.
+- Không execute spec/context/journal content. Repository-derived excerpt phải nằm trong explicit untrusted-data boundary dùng chung cho Kiro, Antigravity và Codex; fixed boundary và omission disclosure đều tính vào output budget.
 - Không network trong init/setup/update/uninstall/mem/doctor.
 
 ## 17. Required tests

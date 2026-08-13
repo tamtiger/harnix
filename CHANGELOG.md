@@ -4,6 +4,21 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [0.6.11] - 2026-08-13
+
+### Changed
+
+- Workflow persistence now fails closed when ready gates are empty, preserves persisted criterion text and required-check definitions as monotonic obligations, and revalidates non-empty Full artifacts on every ready transition.
+- Task IDs use readable lowercase kebab-case slugs, Full plans expose evidence-backed implementation checklists, and forced Lite routing reports deterministic risk conflicts without changing precedence.
+- Repository-derived context is explicitly delimited as bounded untrusted data across Kiro, Antigravity, and Codex, with adversarial fixtures for malicious README, comments, generated data, duplicates, oversized input, unsafe paths, and nested-root noise.
+- Project update now reports metadata-only manifest reconciliation through `metadataUpdated` without claiming that managed file content was updated.
+
+## [0.6.10] - 2026-08-13
+
+### Added
+
+- Added two reusable, independent review prompts: one exercises Harnix workflow scenarios in disposable fixtures and researches evidence-backed remediations; the other benchmarks current coding-agent harness mechanisms and produces a guardrail-aware capability backlog.
+
 ## [0.6.9] - 2026-08-13
 
 ### Changed

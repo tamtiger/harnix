@@ -24,6 +24,7 @@ Review the plan critically before product edits:
 - confirm migration, preservation, error, and compatibility behavior;
 - confirm each slice has a meaningful RED and focused GREEN command;
 - compare the plan to current source and tests, not stale assumptions.
+- confirm the implementation checklist exists, is ordered consistently with the slices, and has no item pre-checked without persisted evidence.
 
 If the plan has a critical gap, do not guess and do not code around it. Persist checkpoint `replan`, describe the exact missing decision or contradiction, and hand back to `harnix-brainstorm`. If the task is ready, persist `in_progress/implementing` before the first product edit.
 
@@ -82,7 +83,7 @@ Use `harnix-debug` for a reproducible failure. Return to planning for a requirem
 
 ## Persist
 
-Keep `in_progress/implementing` with the last completed slice, current failing/passing command, concise result, and next step. Record documented exceptions and alternate evidence. Move to `verifying/verifying` only after all implementation slices and focused checks are complete.
+Keep `in_progress/implementing` with the last completed slice, current failing/passing command, concise result, and next step. Check an implementation-plan item only after that slice's work and focused evidence are complete; never infer progress from an unchecked/checked box alone, and never erase earlier failure evidence. Record documented exceptions and alternate evidence. Move to `verifying/verifying` only after all implementation checklist items, implementation slices, and focused checks are complete.
 
 ## Exit
 

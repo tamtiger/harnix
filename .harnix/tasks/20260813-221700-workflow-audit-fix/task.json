@@ -1,0 +1,456 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-221700-workflow-audit-fix",
+  "title": "khac-phuc-loi-workflow-audit-va-bo-sung-bang-chung-runtime-con-thieu",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bảo đảm mọi tuyên bố ready và completed của Harnix đều fail closed, khôi phục tính nhất quán self-host khi phát hành, hiển thị xung đột rủi ro của chế độ ép buộc và bổ sung regression coverage có giới hạn cho context đối kháng.",
+  "nonGoals": [
+    "Thêm nền tảng ngoài Kiro, Antigravity và Codex",
+    "Thêm telemetry, daemon, hosted evaluation, MCP mặc định, global memory, thao tác Git tự động hoặc package thứ hai",
+    "Thay đổi tên field, enum hoặc legal status transition đã đóng băng của TaskRecord ngoài việc làm rõ task-ID slug grammar được yêu cầu trong task này",
+    "Tuyên bố khả năng chống prompt injection tuyệt đối hoặc chạy test với secret thật hay user profile thật",
+    "Refactor code workflow, platform, context hoặc release không liên quan"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ready-gates",
+      "text": "Persistence boundary từ chối planning-to-ready khi acceptance criteria hoặc required validation plan rỗng và trả về diagnostic xác định được.",
+      "status": "met",
+      "evidenceIds": [
+        "s6-obligation-definition-green"
+      ]
+    },
+    {
+      "id": "gate-preservation",
+      "text": "Sau lần persist đầu tiên, acceptance criteria và required validation checks không thể bị xoá hoặc đổi tên để bỏ qua verification; premature finish vẫn bị từ chối sau khi payload bị sửa theo hướng đối kháng.",
+      "status": "met",
+      "evidenceIds": [
+        "s6-obligation-definition-green"
+      ]
+    },
+    {
+      "id": "full-artifacts",
+      "text": "Full task không thể chuyển sang ready khi prd.md hoặc plan.md bị thiếu, rỗng, không an toàn hoặc không còn thuộc active task.",
+      "status": "met",
+      "evidenceIds": [
+        "s6-obligation-definition-green"
+      ]
+    },
+    {
+      "id": "forced-mode",
+      "text": "Explicit Lite tiếp tục override lựa chọn ceremony, nhưng xung đột với security signal hoặc Full-risk signal khác phải tạo diagnostic ổn định, quan sát được và không loại bỏ yêu cầu compliance hoặc security verification dùng chung.",
+      "status": "met",
+      "evidenceIds": [
+        "s6-obligation-definition-green"
+      ]
+    },
+    {
+      "id": "untrusted-context",
+      "text": "Generated project context phân định rõ text lấy từ repository là untrusted data, luôn bounded và không chứa secret, đồng thời pass các fixture xác định được chứa README, comment và generated data độc hại trên surface của Kiro, Antigravity và Codex.",
+      "status": "met",
+      "evidenceIds": [
+        "final-focused-context"
+      ]
+    },
+    {
+      "id": "self-host-consistency",
+      "text": "Package version, changelog, generated self-host metadata và canonical managed surfaces được đồng bộ trước completion; self-host test pass sau một fresh project update và reconciliation được báo cáo trung thực.",
+      "status": "met",
+      "evidenceIds": [
+        "s6-obligation-definition-green"
+      ]
+    },
+    {
+      "id": "regression-gates",
+      "text": "Focused workflow/context tests, workflow, safety, platform, full test, acceptance, pack check, tarball smoke, footprint và release scans đều pass với fresh evidence, không required stage nào bị âm thầm bỏ qua.",
+      "status": "met",
+      "evidenceIds": [
+        "s6-obligation-definition-green",
+        "final-focused-context",
+        "final-static-quality",
+        "final-workflow-gate",
+        "final-safety-platform-gates",
+        "final-full-acceptance",
+        "final-package-runtime",
+        "final-release-measures"
+      ]
+    },
+    {
+      "id": "preservation",
+      "text": "Các thay đổi user-owned có sẵn và file không liên quan được bảo toàn theo byte, mọi mutable test dùng disposable repository và fake home, đồng thời không có thao tác Git hoặc real-profile nào xảy ra.",
+      "status": "met",
+      "evidenceIds": [
+        "final-preservation-integrity"
+      ]
+    },
+    {
+      "id": "readable-task-tracking",
+      "text": "Task mới dùng slug lowercase có dấu gạch nối giữa từng từ, validator và safe-path checks chấp nhận đúng kebab-case cùng numeric collision suffix; Full plan có implementation checklist ánh xạ một-một với các slice và chỉ được check khi focused evidence tương ứng đã hoàn thành.",
+      "status": "met",
+      "evidenceIds": [
+        "s6-obligation-definition-green"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/internal-workflow.ts",
+    "src/core/tasks/task.ts",
+    "src/core/workflow.ts",
+    "src/core/context/context.ts",
+    "src/commands/update.ts",
+    "src/skills/harnix-brainstorm/SKILL.md",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/templates",
+    "src/skills",
+    "test/workflow",
+    "test/unit/context.test.ts",
+    "test/unit/task-state.test.ts",
+    "test/platform",
+    ".harnix/.template-hashes.json",
+    "package.json",
+    "CHANGELOG.md"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "docs/HARNESS_RESEARCH.md",
+    "AGENTS.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "focused-workflow",
+      "description": "Chạy RED-GREEN regression coverage cho task-ID kebab-case, workflow persistence, routing, Full artifacts, finish, skill tracking convention và self-host state.",
+      "command": "pnpm exec vitest run test/unit/task-state.test.ts test/workflow/internal-workflow.test.ts test/workflow/routing.test.ts test/workflow/skill-sources.test.ts test/workflow/self-host.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "focused-context",
+      "description": "Chạy các fixture về context boundary, budget, disclosure và repository content đối kháng.",
+      "command": "pnpm exec vitest run test/unit/context.test.ts test/workflow/internal-context.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "static-quality",
+      "description": "Xác minh build, lint và TypeScript contracts.",
+      "command": "pnpm build && pnpm lint && pnpm typecheck",
+      "scope": "full",
+      "required": true
+    },
+    {
+      "id": "workflow-gate",
+      "description": "Chạy canonical workflow suite, bao gồm các adversarial invariant mới.",
+      "command": "pnpm test:workflow",
+      "scope": "full",
+      "required": true
+    },
+    {
+      "id": "safety-platform-gates",
+      "description": "Xác minh unsafe paths, fake-home containment, transaction rollback, platform parity và tính trung thực của readiness.",
+      "command": "pnpm test:safety && pnpm test:platform",
+      "scope": "full",
+      "required": true
+    },
+    {
+      "id": "full-acceptance",
+      "description": "Chạy test toàn repository và exact acceptance chain sau khi focused gates đã green.",
+      "command": "pnpm test && pnpm test:acceptance",
+      "scope": "full",
+      "required": true
+    },
+    {
+      "id": "package-runtime",
+      "description": "Xác minh packaged contents và tarball runtime behavior cho cả ba nền tảng được hỗ trợ.",
+      "command": "pnpm pack:check && pnpm smoke:tarball",
+      "scope": "full",
+      "required": true
+    },
+    {
+      "id": "release-measures",
+      "description": "Chạy lại các phép đo initialization, footprint và release safety.",
+      "command": "pnpm measure:init && pnpm measure:footprint && pnpm scan:release",
+      "scope": "full",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "s0-task-id-green",
+      "checkId": "focused-workflow",
+      "recordedAt": "2026-08-13T16:07:49.079Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "S0 pass: task-ID RED failed for the expected single-token validator; GREEN task-state/skill/template suite passed 17/17, active task migrated to kebab-case, and the legacy directory is absent.",
+      "artifactPaths": [
+        ".harnix/tasks/20260813-221700-workflow-audit-fix/plan.md"
+      ]
+    },
+    {
+      "id": "s1-persistence-red",
+      "checkId": "focused-workflow",
+      "recordedAt": "2026-08-13T16:10:13.329Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "S1 RED reproduced four defects: empty ready gates, removable persisted obligations, missing Full artifacts at ready, and vacuous empty completion all failed their oracles.",
+      "artifactPaths": [
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "s2-persistence-green",
+      "checkId": "focused-workflow",
+      "recordedAt": "2026-08-13T16:10:14.328Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "S2 GREEN passed 24/24 focused workflow assertions with no unhandled errors after preserving obligations, requiring non-empty ready gates, rechecking Full artifacts, and rejecting empty completion obligations.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "src/core/workflow.ts"
+      ]
+    },
+    {
+      "id": "s3-forced-mode-red",
+      "checkId": "focused-workflow",
+      "recordedAt": "2026-08-13T16:11:28.027Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "S3 RED showed explicit Lite retained precedence but emitted only explicit-lite and omitted the risk-conflict diagnostic.",
+      "artifactPaths": [
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "s3-forced-mode-green",
+      "checkId": "focused-workflow",
+      "recordedAt": "2026-08-13T16:11:29.027Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "S3 GREEN passed 19/19 routing tests: explicit Lite remains selected and emits explicit-lite-risk-conflict for Full-risk signals; ordinary explicit and heuristic routes remain unchanged.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/HARNIX_PRD.md"
+      ]
+    },
+    {
+      "id": "s4-context-boundary-red",
+      "checkId": "focused-context",
+      "recordedAt": "2026-08-13T16:13:56.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "S4 RED failed 2/2 targeted adversarial tests because repository-derived text had no explicit untrusted-data opening or closing boundary; unsafe traversal still did not expose the canary.",
+      "artifactPaths": [
+        "test/unit/context.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "s4-context-boundary-green",
+      "checkId": "focused-context",
+      "recordedAt": "2026-08-13T16:14:55.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "S4 GREEN passed 17/17 focused context tests: bounded repository excerpts use one explicit untrusted-data boundary on Kiro, Antigravity and Codex, preserve the closing marker under trimming, and do not read an unsafe or unrelated canary path.",
+      "artifactPaths": [
+        "src/core/context/context.ts",
+        "src/commands/internal-context.ts",
+        "test/unit/context.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "s5-metadata-reconciliation-red",
+      "checkId": "focused-workflow",
+      "recordedAt": "2026-08-13T16:16:54.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "S5 RED reproduced truthful-output drift: update refreshed stale generator metadata but returned no metadataUpdated field, so callers could not observe a metadata-only reconciliation.",
+      "artifactPaths": [
+        "test/integration/update.test.ts"
+      ]
+    },
+    {
+      "id": "s5-self-host-green",
+      "checkId": "focused-workflow",
+      "recordedAt": "2026-08-13T16:20:45.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "S5 GREEN: project update reports metadataUpdated separately from content updated, package/changelog are 0.6.11, self-host update refreshed the managed workflow and metadata, and self-host/update/managed-files tests passed 12/12.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        ".harnix/.template-hashes.json",
+        ".harnix/workflow.md",
+        "src/commands/update.ts",
+        "src/utils/managed-files.ts",
+        "test/integration/update.test.ts",
+        "test/workflow/self-host.test.ts"
+      ]
+    },
+    {
+      "id": "s6-compliance-obligation-text-fail",
+      "recordedAt": "2026-08-13T16:23:00.000Z",
+      "result": "fail",
+      "summary": "Stage 1 compliance review found that preserveObligations retained criterion IDs but allowed the same persisted ID to replace its observable text with a weaker outcome, contrary to the task PRD's fail-closed obligation contract.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        ".harnix/tasks/20260813-221700-workflow-audit-fix/prd.md"
+      ]
+    },
+    {
+      "id": "s6-obligation-definition-green",
+      "checkId": "focused-workflow",
+      "recordedAt": "2026-08-13T16:26:15.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Compliance correction GREEN passed the exact focused-workflow gate 42/42: persisted criterion text and required-check definitions cannot be weakened, while additions, met status, explicit waiver, unchanged save, self-host state, routing and readable task IDs remain valid.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    },
+    {
+      "id": "s6-compliance-pass",
+      "recordedAt": "2026-08-13T16:27:25.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Stage 1 compliance passed after reviewing the actual diff against PRD, workflow, frozen v1 contracts and ownership boundaries; final template/update tests passed 9/9 and git diff --check exited 0. No platform, package, network, Git automation, real-profile or unsupported schema surface was added.",
+      "artifactPaths": [
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/templates/harnix/workflow.ts",
+        "src/commands/update.ts",
+        "src/commands/internal-workflow.ts"
+      ]
+    },
+    {
+      "id": "final-static-quality",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-13T16:28:10.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact static-quality gate passed: pnpm build, pnpm lint and pnpm typecheck all exited 0 on the final implementation state.",
+      "artifactPaths": [
+        "package.json",
+        "src",
+        "test"
+      ]
+    },
+    {
+      "id": "final-workflow-gate",
+      "checkId": "workflow-gate",
+      "recordedAt": "2026-08-13T16:28:40.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Canonical pnpm test:workflow gate passed 46/46 tests across 8 files, including persistence, routing, context parity, templates, CLI contract and self-host state.",
+      "artifactPaths": [
+        "test/workflow"
+      ]
+    },
+    {
+      "id": "final-safety-platform-gates",
+      "checkId": "safety-platform-gates",
+      "recordedAt": "2026-08-13T16:29:05.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact safety and platform gates passed: 30/30 safety tests and 22/22 platform tests using isolated user homes and platform fixtures.",
+      "artifactPaths": [
+        "test/safety",
+        "test/platform"
+      ]
+    },
+    {
+      "id": "final-full-acceptance",
+      "checkId": "full-acceptance",
+      "recordedAt": "2026-08-13T16:30:00.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact pnpm test && pnpm test:acceptance command exited 0. The acceptance chain reran unit, integration, migration, platform, workflow and safety suites with no required stage skipped.",
+      "artifactPaths": [
+        "test",
+        "package.json"
+      ]
+    },
+    {
+      "id": "final-package-runtime",
+      "checkId": "package-runtime",
+      "recordedAt": "2026-08-13T16:30:30.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact pack:check and smoke:tarball gate exited 0; tarball runtime smoke passed Kiro, Antigravity, Codex and combined platform scenarios in disposable locations.",
+      "artifactPaths": [
+        "package.json",
+        "scripts/pack-check.mjs",
+        "scripts/smoke-tarball.mjs"
+      ]
+    },
+    {
+      "id": "final-release-measures",
+      "checkId": "release-measures",
+      "recordedAt": "2026-08-13T16:30:50.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact release-measures gate exited 0: init median 322.264 ms/worst 393.013 ms, footprint 50 files/172357 bytes with 87.17% reduction, and release scan passed all listed secret, path, package, hook, attribution and performance checks.",
+      "artifactPaths": [
+        "scripts/measure-init.mjs",
+        "scripts/measure-footprint.mjs",
+        "scripts/scan-release.mjs"
+      ]
+    },
+    {
+      "id": "final-focused-context",
+      "checkId": "focused-context",
+      "recordedAt": "2026-08-13T16:26:42.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact focused-context command passed 17/17 tests on the final context implementation, including shared Kiro, Antigravity and Codex boundaries, budgets, omissions and adversarial canaries.",
+      "artifactPaths": [
+        "src/core/context/context.ts",
+        "src/commands/internal-context.ts",
+        "test/unit/context.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "final-preservation-integrity",
+      "recordedAt": "2026-08-13T16:31:20.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final integrity inspection matched the captured pre-implementation hashes and pre-task mtimes for both prompt files, the prior completed prompt task and the existing journal; package and every project manifest entry are 0.6.11, the kebab active pointer resolves, the legacy task directory is absent, and git diff --check exited 0.",
+      "artifactPaths": [
+        "docs/prompts/harness-capability-research.md",
+        "docs/prompts/workflow-scenario-audit.md",
+        ".harnix/tasks/20260813-214222-workflow-research-prompts/task.json",
+        ".harnix/workspace/TamNT167/journal/2026-08-13.jsonl",
+        "package.json",
+        ".harnix/.template-hashes.json"
+      ]
+    },
+    {
+      "id": "s7-quality-security-pass",
+      "recordedAt": "2026-08-13T16:31:21.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Stage 2 quality/security review found no remaining blocking issue after focused and broader gates: dependency direction remains commands-to-core-to-utils, path/content boundaries stay bounded and non-executing, writes remain atomic/owned, tests use disposable repositories or fake homes, and package/release scans are green.",
+      "artifactPaths": [
+        "src",
+        "test",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-13T15:17:00.102Z",
+  "updatedAt": "2026-08-13T16:32:48.180Z",
+  "completedAt": "2026-08-13T16:32:48.180Z"
+}

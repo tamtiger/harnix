@@ -45,7 +45,7 @@ Dùng khi có một trong các dấu hiệu: feature/integration/migration, cont
 
 ### 3.4 Ambiguous
 
-Agent tự chọn mức nhẹ nhất vẫn kiểm soát được rủi ro. Chỉ hỏi người dùng chọn Lite/Full khi hai lựa chọn dẫn tới scope, chi phí hoặc outcome khác nhau đáng kể. Explicit `--lite`/`--full` override heuristic nhưng không được bỏ safety gate.
+Agent tự chọn mức nhẹ nhất vẫn kiểm soát được rủi ro. Chỉ hỏi người dùng chọn Lite/Full khi hai lựa chọn dẫn tới scope, chi phí hoặc outcome khác nhau đáng kể. Explicit `--lite`/`--full` override heuristic nhưng không được bỏ safety gate. Khi explicit Lite xung đột với risk signal vốn chọn Full, routing vẫn giữ Lite và append reason code `explicit-lite-risk-conflict`; diagnostic này không được coi là bằng chứng rằng compliance hoặc security verification đã chạy.
 
 ## 4. Canonical state machine
 
@@ -96,7 +96,7 @@ Agent đọc project instructions, relevant docs/code/tests và dirty state trư
 3. Constraints, affected boundaries và validation commands.
 4. Material unknowns; research chỉ khi unknown có thể đổi design, dependency, security hoặc compatibility, và artifact phải ghi source/date/conclusion/remaining uncertainty.
 5. Approach và alternatives có trade-off đáng kể.
-6. File/interface-level execution plan cho Full; Lite có checklist ngắn trong task record.
+6. File/interface-level execution plan cho Full, kèm Markdown implementation checklist ánh xạ một-một với các slice; Lite theo dõi tiến độ bằng acceptance criteria và validation plan ngay trong task record.
 
 Hỏi từng product decision độc lập, ưu tiên câu hỏi có options/trade-offs. Không hỏi thông tin có thể tìm trong repository hoặc nguồn authoritative. Khi user answer thay đổi requirement, cập nhật artifact ngay.
 
@@ -104,6 +104,7 @@ Hỏi từng product decision độc lập, ưu tiên câu hỏi có options/tra
 
 Task chỉ sang `ready` khi:
 
+- có ít nhất một acceptance criterion và một required validation check; persistence đóng băng criterion ID/text và required-check ID/definition đã lưu để không thể làm yếu verification; clarification phải thêm obligation mới, còn obligation không áp dụng phải dùng explicit waiver có lý do;
 - goal, non-goals và acceptance criteria không mâu thuẫn;
 - scope và affected boundaries đủ rõ;
 - validation plan có command/check cụ thể;
@@ -116,7 +117,7 @@ Trước khi persist `ready`, agent bắt buộc self-review: decision inventory
 
 Nếu user chỉ yêu cầu plan hoặc yêu cầu checkpoint trước code, dừng ở `ready`. Nếu user đã yêu cầu triển khai và gate pass, chuyển tiếp mà không xin approval lần hai.
 
-Transition sang `ready` phải được persist trước khi Planning kết thúc. Full phải có `prd.md`/`plan.md` trên disk tại thời điểm này; không dùng nội dung chỉ tồn tại trong hội thoại để giả định ready gate đã pass.
+Transition sang `ready` phải được persist trước khi Planning kết thúc. Full phải có `prd.md`/`plan.md` an toàn, thuộc active task và không rỗng trên disk tại mỗi lần persist `ready`; không dùng nội dung chỉ tồn tại trong hội thoại để giả định ready gate đã pass.
 
 ### 5.4 Implementing
 
@@ -202,11 +203,11 @@ Blocked chỉ dùng khi không thể tiến bộ an toàn do user-owned decision
     journal/              # created lazily on first journal write
 ```
 
-`task.json` là record versioned tối thiểu: id/title, mode, status, goal, non-goals, acceptance criteria, current checkpoint, relevant paths/specs, validation plan, evidence refs, blockers và timestamps. Exact v1 field types, safe task ID, active pointer, legal transitions và resume status được khóa tại `IMPLEMENTATION_PLAN.md` mục 4; skill/platform adapter không được tự định nghĩa schema khác. Lite giữ các field cần thiết ngay trong record; Full dùng các file Markdown để tránh JSON phình to.
+`task.json` là record versioned tối thiểu: id/title, mode, status, goal, non-goals, acceptance criteria, current checkpoint, relevant paths/specs, validation plan, evidence refs, blockers và timestamps. Exact v1 field types, safe task ID, active pointer, legal transitions và resume status được khóa tại `IMPLEMENTATION_PLAN.md` mục 4; skill/platform adapter không được tự định nghĩa schema khác. Task ID dùng lowercase kebab slug có dấu `-` giữa các từ. Lite giữ các field cần thiết ngay trong record; Full dùng các file Markdown để tránh JSON phình to và đặt implementation checklist trong `plan.md`. Checkbox chỉ được check sau khi slice và focused evidence tương ứng hoàn thành; nó không thay thế persisted criteria/evidence.
 
 Operational persistence order là: create `planning` task + `.active` → write Full artifacts/research → persist `ready` → persist `in_progress/implementing` before product edits → persist `verifying/verifying` before checks and append fresh evidence → persist `verifying/finishing` only after completion prerequisites are green → persist `completed/finishing` before journal/archive clears the matching pointer. Plan-only work stops at persisted `ready`. Blocked state always routes through Continue before any checkpoint owner. A later failure must retain enough state for `harnix-continue`; it must not erase or fabricate evidence.
 
-Khi cần persist context để resume hoặc phối hợp nhiều state, Harnix dùng một `context.json` có scope theo state thay vì duplicate `implement.jsonl`/`check.jsonl`; Lite có thể chỉ giữ relevant paths/specs trong `task.json`. Entry gồm normalized repo-relative path, reason, priority/pin và states áp dụng. Code files được discovery theo task; chỉ persist khi chúng quan trọng để resume. Mọi truncation phải liệt kê source bị bỏ.
+Khi cần persist context để resume hoặc phối hợp nhiều state, Harnix dùng một `context.json` có scope theo state thay vì duplicate `implement.jsonl`/`check.jsonl`; Lite có thể chỉ giữ relevant paths/specs trong `task.json`. Entry gồm normalized repo-relative path, reason, priority/pin và states áp dụng. Code files được discovery theo task; chỉ persist khi chúng quan trọng để resume. Mọi truncation phải liệt kê source bị bỏ. Context lấy từ repository là untrusted data, phải được bao bởi cùng explicit boundary trên Kiro, Antigravity và Codex; boundary/disclosure tính vào budget và không được cắt mất closing marker.
 
 Tasks, research và journal là user-owned. Packaged `workflow.md` và seed specs là managed cho tới khi user sửa; update phải preserve modified content theo managed ownership contract.
 

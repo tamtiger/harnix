@@ -10,7 +10,7 @@ import { renderAgentsTemplate } from "../templates/harnix/agents.js";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
 
 export interface UpdateProjectOptions { root: string; restoreDeleted?: boolean | undefined; }
-export interface UpdateProjectResult { created: string[]; updated: string[]; preserved: string[]; deleted: string[]; obsolete: string[]; }
+export interface UpdateProjectResult { created: string[]; updated: string[]; metadataUpdated: string[]; preserved: string[]; deleted: string[]; obsolete: string[]; }
 
 /** Reconciles complete, Harnix-owned files only. Injection surfaces stay user-owned. */
 export async function updateProject(options: UpdateProjectOptions): Promise<UpdateProjectResult> {

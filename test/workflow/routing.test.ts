@@ -21,8 +21,17 @@ describe("workflow routing and completion evidence", () => {
     expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [], activeTask: { mode: "lite", status: "blocked", checkpoint: "implementing", blocker: { kind: "decision", summary: "need decision", nextAction: "decide", resumeStatus: "ready" } } })).toMatchObject({ entry: "fail-closed", reasonCodes: ["invalid-active-state"] });
     expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [], activeTask: { mode: "full", status: "blocked", checkpoint: "replan", blocker: { kind: "decision", summary: "need decision", nextAction: "decide", resumeStatus: "verifying" } } })).toMatchObject({ entry: "resume", owner: "harnix-continue", reasonCodes: ["active-stage"] });
   });
+  it("keeps explicit mode precedence while diagnosing forced Lite risk conflicts", () => {
+    expect(routeWorkflow({ action: "change", workKind: "security", mutation: "project", explicitMode: "lite", riskSignals: ["security-sensitive"] })).toMatchObject({ mode: "lite", reasonCodes: ["explicit-lite", "explicit-lite-risk-conflict"] });
+    expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", explicitMode: "lite", riskSignals: ["contract-change"] })).toMatchObject({ mode: "lite", reasonCodes: ["explicit-lite", "explicit-lite-risk-conflict"] });
+    expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", explicitMode: "lite", riskSignals: [] })).toMatchObject({ mode: "lite", reasonCodes: ["explicit-lite"] });
+    expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", explicitMode: "full", riskSignals: [] })).toMatchObject({ mode: "full", reasonCodes: ["explicit-full"] });
+  });
   it("requires fresh required evidence for completion", () => {
     const now = Date.parse("2026-08-07T10:00:00Z"); expect(canCompleteTask(task("2026-08-07T09:30:00Z"), now)).toBe(true); expect(canCompleteTask(task("2026-08-07T06:00:00Z"), now)).toBe(false);
+  });
+  it("does not treat empty completion obligations as complete", () => {
+    expect(canCompleteTask({ ...task("2026-08-07T09:30:00Z"), acceptanceCriteria: [], validationPlan: [], evidence: [] }, Date.parse("2026-08-07T10:00:00Z"))).toBe(false);
   });
   it("researches only material unknowns and reassesses after three failed hypotheses", () => {
     expect(shouldResearch(false)).toBe(false); expect(shouldResearch(true)).toBe(true); expect(shouldReassessArchitecture(2)).toBe(false); expect(shouldReassessArchitecture(3)).toBe(true);

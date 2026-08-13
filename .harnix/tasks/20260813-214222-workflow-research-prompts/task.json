@@ -1,0 +1,137 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-214222-workflow-research-prompts",
+  "title": "Tách prompt audit workflow và research harness",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cung cấp hai prompt Markdown độc lập để đánh giá workflow bằng simulation và lựa chọn capability từ các harness hiện hành cho Harnix.",
+  "nonGoals": [
+    "Chạy các scenario, thực hiện Internet research hoặc triển khai capability trong task này.",
+    "Thay đổi product contract, workflow runtime, platform integration hoặc test behavior.",
+    "Commit, branch, push, publish hoặc tạo pull request."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "simulation-prompt",
+      "text": "Một file Markdown độc lập yêu cầu chạy scenario workflow trong disposable fixtures, thu fresh evidence, phân loại weakness và research cách khắc phục.",
+      "status": "met",
+      "evidenceIds": ["e-prompts-focused-green", "e-prompts-compliance-green"]
+    },
+    {
+      "id": "harness-prompt",
+      "text": "Một file Markdown độc lập yêu cầu research các harness từ primary sources, chấm điểm và chọn tối đa năm capability phù hợp guardrail Harnix.",
+      "status": "met",
+      "evidenceIds": ["e-prompts-focused-green", "e-prompts-compliance-green"]
+    },
+    {
+      "id": "prompt-quality",
+      "text": "Hai prompt có mục tiêu, scope, safety constraints, phương pháp, output contract và có thể sử dụng riêng mà không phụ thuộc prompt còn lại.",
+      "status": "met",
+      "evidenceIds": ["e-prompts-compliance-green", "e-prompts-final-quality-green"]
+    },
+    {
+      "id": "patch-bumped",
+      "text": "Package patch version và CHANGELOG được cập nhật trước completion persistence theo project rule.",
+      "status": "met",
+      "evidenceIds": ["e-prompts-final-quality-green"]
+    }
+  ],
+  "relevantPaths": [
+    "docs/prompts/workflow-scenario-audit.md",
+    "docs/prompts/harness-capability-research.md",
+    "package.json",
+    "CHANGELOG.md"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    ".harnix/workflow.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "prompt-structure",
+      "description": "Inspect both prompt files for independent scope, required scenario/research sections, safety controls, and output contracts.",
+      "command": "rg -n \"MỤC TIÊU|RÀNG BUỘC|ĐẦU RA BẮT BUỘC|disposable|primary source|Adopt|Adapt|Defer|Reject\" docs/prompts/*.md",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "prompt-quality",
+      "description": "Run repository lint and whitespace validation after the docs-only change.",
+      "command": "pnpm lint && git diff --check",
+      "scope": "full",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-prompts-tdd-exception",
+      "recordedAt": "2026-08-13T21:45:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Docs-only prompt assets have no meaningful behavioral RED; the strongest alternative is exact structural inspection, safety/content scans, repository lint, and whitespace validation.",
+      "artifactPaths": [
+        "docs/prompts/workflow-scenario-audit.md",
+        "docs/prompts/harness-capability-research.md"
+      ]
+    },
+    {
+      "id": "e-prompts-focused-green",
+      "checkId": "prompt-structure",
+      "recordedAt": "2026-08-13T21:46:29.8330631+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Both independent prompt files contain their required objectives, safety/research methodology, output contracts, no unresolved placeholder language, and the simulation prompt defines 33 workflow scenarios.",
+      "artifactPaths": [
+        "docs/prompts/workflow-scenario-audit.md",
+        "docs/prompts/harness-capability-research.md"
+      ]
+    },
+    {
+      "id": "e-prompts-quality-green",
+      "checkId": "prompt-quality",
+      "recordedAt": "2026-08-13T21:46:29.8330631+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Repository lint and git diff whitespace validation passed; package metadata parses at version 0.6.10.",
+      "artifactPaths": [
+        "docs/prompts",
+        "package.json",
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "id": "e-prompts-compliance-green",
+      "checkId": "prompt-structure",
+      "recordedAt": "2026-08-13T21:47:29.0305699+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Compliance assertions confirmed two standalone prompt contracts: the simulation prompt contains 33 isolated scenarios plus evidence-bound remediation research, and the harness prompt defines Full plan-only primary-source research, guardrails, scoring, decisions, and a bounded backlog.",
+      "artifactPaths": [
+        "docs/prompts/workflow-scenario-audit.md",
+        "docs/prompts/harness-capability-research.md"
+      ]
+    },
+    {
+      "id": "e-prompts-final-quality-green",
+      "checkId": "prompt-quality",
+      "recordedAt": "2026-08-13T21:47:29.0305699+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh typecheck, lint, and git diff whitespace checks passed on the final docs and metadata state; package version is 0.6.10 and the changelog records both prompt assets.",
+      "artifactPaths": [
+        "docs/prompts",
+        "package.json",
+        "CHANGELOG.md"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-13T21:42:28.3490026+07:00",
+  "updatedAt": "2026-08-13T21:48:09.5231099+07:00",
+  "completedAt": "2026-08-13T21:48:09.5231099+07:00"
+}

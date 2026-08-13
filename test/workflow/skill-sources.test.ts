@@ -18,6 +18,8 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "decision inventory",
     "observable acceptance criteria",
     "placeholder scan",
+    "hyphen between words",
+    "implementation checklist",
     "Do not mark the task `ready`",
   ],
   "harnix-implement": [
@@ -25,6 +27,7 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "Verify RED",
     "minimal implementation",
     "technical feedback",
+    "implementation checklist",
   ],
   "harnix-check": [
     "Map every claim",

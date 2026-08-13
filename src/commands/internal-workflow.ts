@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { readConfig } from "../core/config/config.js";
 import { finishWorkflowTask } from "../core/workflow.js";
 import {
@@ -36,6 +37,7 @@ export async function saveWorkflow(root: string, envelope: WorkflowSaveEnvelope)
   if (active && active.id !== candidate.id) throw new Error("Workflow save may update only the active task.");
   if (existing) {
     preserveEvidence(existing.evidence, candidate.evidence);
+    preserveObligations(existing, candidate);
     assertLegalTransition(existing, candidate);
   } else {
     if (active || candidate.status !== "planning") throw new Error("Workflow save may create only a planning task when no task is active.");
@@ -43,6 +45,7 @@ export async function saveWorkflow(root: string, envelope: WorkflowSaveEnvelope)
   }
 
   if (candidate.status === "completed") throw new Error("Workflow completion must use internal workflow finish.");
+  if (candidate.status === "ready") await assertReadyRequirements(harnixRoot, candidate);
   if (envelope.artifacts) await saveTaskWithArtifacts(harnixRoot, candidate, envelope.artifacts);
   else await saveTask(harnixRoot, candidate);
   if (!existing) await setActiveTask(harnixRoot, candidate.id);
@@ -68,6 +71,44 @@ function preserveEvidence(previous: readonly Evidence[], next: readonly Evidence
   for (const evidence of previous) {
     const candidate = byId.get(evidence.id);
     if (!candidate || JSON.stringify(candidate) !== JSON.stringify(evidence)) throw new Error("Workflow save cannot remove or mutate existing evidence.");
+  }
+}
+
+function preserveObligations(previous: TaskRecord, next: TaskRecord): void {
+  const nextCriteria = new Map(next.acceptanceCriteria.map((criterion) => [criterion.id, criterion]));
+  for (const criterion of previous.acceptanceCriteria) {
+    const candidate = nextCriteria.get(criterion.id);
+    if (!candidate) throw new Error(`Workflow save cannot remove or rename acceptance criterion ${criterion.id}.`);
+    if (candidate.text !== criterion.text) throw new Error(`Workflow save cannot mutate acceptance criterion text ${criterion.id}; add a criterion or use an explicit waiver.`);
+  }
+
+  const nextChecks = new Map(next.validationPlan.map((check) => [check.id, check]));
+  for (const check of previous.validationPlan.filter((candidate) => candidate.required)) {
+    const candidate = nextChecks.get(check.id);
+    if (candidate?.required !== true) throw new Error(`Workflow save cannot remove, rename, or demote required validation check ${check.id}.`);
+    if (candidate.description !== check.description || candidate.command !== check.command || candidate.scope !== check.scope) {
+      throw new Error(`Workflow save cannot mutate required validation check ${check.id}; add a check instead.`);
+    }
+  }
+}
+
+async function assertReadyRequirements(harnixRoot: string, task: TaskRecord): Promise<void> {
+  if (task.acceptanceCriteria.length === 0) throw new Error("Workflow ready requires at least one acceptance criterion.");
+  if (!task.validationPlan.some((check) => check.required)) throw new Error("Workflow ready requires at least one required validation check.");
+  if (task.mode !== "full") return;
+
+  try {
+    const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
+    const prdPath = await resolveSafeProjectPath(taskDirectory, "prd.md");
+    const planPath = await resolveSafeProjectPath(taskDirectory, "plan.md");
+    const [prd, plan] = await Promise.all([
+      readFile(prdPath, "utf8"),
+      readFile(planPath, "utf8"),
+    ]);
+    if (!prd.trim() || !plan.trim()) throw new Error("Full tasks require non-empty prd.md and plan.md at ready.");
+  } catch (error: unknown) {
+    if (isMissing(error)) throw new Error("Full tasks require non-empty prd.md and plan.md at ready.");
+    throw error;
   }
 }
 

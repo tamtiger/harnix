@@ -75,6 +75,27 @@ describe("task state", () => {
     expect(() => validateTask({ ...taskFixture(), checkpoint: "unknown" })).toThrow("invalid");
   });
 
+  it("accepts readable kebab-case task slugs and rejects unsafe task IDs", async () => {
+    const readable = { ...taskFixture(), id: "20260813-221700-workflow-audit-fix" };
+    expect(() => validateTask(readable)).not.toThrow();
+
+    const root = await temporaryRepository();
+    await saveTask(root, readable);
+    await setActiveTask(root, readable.id);
+    await expect(resolveActiveTask(root)).resolves.toMatchObject({ id: readable.id });
+
+    for (const id of [
+      "20260813-221700-Workflow-audit-fix",
+      "20260813-221700-workflow--audit-fix",
+      "20260813-221700--workflow-audit-fix",
+      "20260813-221700-workflow-audit-fix-",
+      "20260813-221700-../workflow-audit-fix",
+    ]) {
+      expect(() => validateTask({ ...taskFixture(), id }), id).toThrow("invalid");
+      await expect(setActiveTask(root, id), id).rejects.toThrow("unsafe");
+    }
+  });
+
   it("rejects malformed evidence and acceptance criteria", () => {
     expect(() => validateTask({ ...taskFixture(), evidence: [{ id: "e" }] })).toThrow("Evidence");
     expect(() => validateTask({ ...taskFixture(), acceptanceCriteria: [{ id: "a", text: "x", status: "bad", evidenceIds: [] }] })).toThrow("Acceptance");

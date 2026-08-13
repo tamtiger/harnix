@@ -13,6 +13,7 @@ export interface TaskRecord { generator: "harnix"; schemaVersion: 1; id: string;
 export interface TaskValidationOptions { allowUnsafeCompletedEvidenceArtifacts?: boolean | undefined; }
 
 export class TaskValidationError extends Error { override name = "TaskValidationError"; }
+const taskIdPattern = /^\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const transitions: Record<TaskStatus, TaskStatus[]> = { planning: ["ready", "blocked"], ready: ["in_progress", "blocked"], in_progress: ["verifying", "blocked"], verifying: ["completed", "blocked"], blocked: ["planning", "ready", "in_progress", "verifying"], completed: [] };
 const legalCheckpoints: Record<Exclude<TaskStatus, "blocked">, readonly WorkflowCheckpoint[]> = {
   planning: ["triage", "planning", "replan"],
@@ -25,7 +26,7 @@ const legalCheckpoints: Record<Exclude<TaskStatus, "blocked">, readonly Workflow
 export function validateTask(value: unknown, options: TaskValidationOptions = {}): TaskRecord {
   if (!isRecord(value) || value.generator !== "harnix" || value.schemaVersion !== 1) throw new TaskValidationError("Invalid or unsupported task record.");
   for (const key of ["id", "title", "goal", "createdAt", "updatedAt"]) if (typeof value[key] !== "string") throw new TaskValidationError(`Task ${key} is required.`);
-  if (!/^[a-z0-9]{8}-[0-9]{6}-[a-z0-9]+(?:-[0-9]+)?$/u.test(String(value.id)) || !["lite", "full"].includes(String(value.mode)) || !Object.keys(transitions).includes(String(value.status)) || !["triage", "planning", "ready", "implementing", "debugging", "replan", "verifying", "finishing"].includes(String(value.checkpoint))) throw new TaskValidationError("Task identity, mode, status, or checkpoint is invalid.");
+  if (!taskIdPattern.test(String(value.id)) || !["lite", "full"].includes(String(value.mode)) || !Object.keys(transitions).includes(String(value.status)) || !["triage", "planning", "ready", "implementing", "debugging", "replan", "verifying", "finishing"].includes(String(value.checkpoint))) throw new TaskValidationError("Task identity, mode, status, or checkpoint is invalid.");
   if (!Array.isArray(value.nonGoals) || !Array.isArray(value.acceptanceCriteria) || !Array.isArray(value.relevantPaths) || !Array.isArray(value.relevantSpecs) || !Array.isArray(value.validationPlan) || !Array.isArray(value.evidence)) throw new TaskValidationError("Task arrays are required.");
   if (!isIsoTimestamp(value.createdAt) || !isIsoTimestamp(value.updatedAt) || Date.parse(value.updatedAt) < Date.parse(value.createdAt)) throw new TaskValidationError("Task timestamp is invalid.");
   if (!(value.nonGoals as unknown[]).every((item) => typeof item === "string") || !(value.relevantPaths as unknown[]).every((item) => typeof item === "string") || !(value.relevantSpecs as unknown[]).every((item) => typeof item === "string")) throw new TaskValidationError("Task path and goal arrays are invalid.");
@@ -114,7 +115,7 @@ export async function archiveTask(harnixRoot: string, task: TaskRecord): Promise
   if (valid.status !== "completed") throw new TaskValidationError("Only completed tasks can be archived.");
   await clearActiveTask(harnixRoot, valid.id);
 }
-function validateTaskId(value: string): void { if (!/^\d{8}-\d{6}-[a-z0-9]+(?:-\d+)?$/u.test(value)) throw new TaskValidationError("Task ID is unsafe."); }
+function validateTaskId(value: string): void { if (!taskIdPattern.test(value)) throw new TaskValidationError("Task ID is unsafe."); }
 function isMissing(error: unknown): boolean { return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"; }
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
 function isIsoTimestamp(value: unknown): value is string { return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u.test(value) && Number.isFinite(Date.parse(value)); }
