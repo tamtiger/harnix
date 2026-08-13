@@ -3,18 +3,18 @@
   "schemaVersion": 1,
   "entries": [
     {
-      "path": ".harnix/spec/guides/common-rules.md",
-      "sourceId": "common-rules",
+      "path": ".harnix/spec/guides/common/engineering.md",
+      "sourceId": "guide-common-engineering",
       "scope": "project",
-      "generatedHash": "e5f5d21fbb54b7c84533ee7752bbb902cc4eafdaa0ae483c44822b1c32b9d6c8",
-      "generatorVersion": "0.6.0"
+      "generatedHash": "cb07c1bb7396b23466aac655be6c0cd827022ed8f4d5da48706e0565ec4fa361",
+      "generatorVersion": "0.6.9"
     },
     {
       "path": ".harnix/workflow.md",
       "sourceId": "workflow",
       "scope": "project",
-      "generatedHash": "c8f31b0056733c6c85b5915b1860cce0e3d8ef6f5fb66773a683def0af6d36d5",
-      "generatorVersion": "0.6.0"
+      "generatedHash": "02c9730584570456067d227851015714b05792b027a7753b0585aa21d9cc9fe8",
+      "generatorVersion": "0.6.9"
     }
   ]
 }

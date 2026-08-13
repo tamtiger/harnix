@@ -201,6 +201,40 @@ File: `.harnix/config.yaml`, `.harnix/.template-hashes.json`, `.harnix/workflow.
 - Manual G10 smoke trên tool session/profile disposable vẫn là external action cần cấp quyền riêng. Không tuyên bố platform activation thật từ automated fixture.
 - Trước mọi commit, trình bày đầy đủ diff summary và commit message đề xuất rồi chờ approval rõ ràng.
 
+## S8 — Hoàn thiện code-review protocol trong `harnix-check`
+
+File: `src/skills/harnix-check/SKILL.md`, `src/templates/harnix/agents.ts`, `test/workflow/skill-sources.test.ts`, `test/workflow/history-regressions.test.ts`, platform parity fixture, `package.json` và `CHANGELOG.md`.
+
+- Research frozen `obra/superpowers` revision đã khóa và lưu fact/inference/adapt/reject trong task-owned artifact; checkout chỉ là nguồn đọc tạm, không vendor hoặc chạy upstream.
+- RED static contract chứng minh description hiện không trigger standalone code review/review feedback và body thiếu bounded scope, structured finding, omitted-check/residual-risk report cùng verdict.
+- GREEN cập nhật đúng một `harnix-check`: chọn working-tree diff, explicit commit range hoặc bounded paths; review read-only; compliance trước quality/security; finding có severity, file/line, defect, impact, evidence và fix direction; verdict `ready|ready-with-fixes|not-ready`; feedback vẫn là hypothesis và mọi mutation route qua lifecycle.
+- Giữ bảy canonical skill. Không thêm subagent/Git/merge/PR requirement, không tự checkout/move HEAD, không tự fix, không thêm platform-specific review protocol.
+- Đồng bộ AGENTS wording để standalone code review trỏ rõ tới `harnix-check`; platform adapters tiếp tục cài cùng canonical SKILL byte content.
+- Tăng patch version và cập nhật changelog trong cùng slice trước completion persistence.
+- Verification: observed RED rồi GREEN cho `test/workflow/skill-sources.test.ts`; routing/history regression; platform setup/global-adapter parity; build, typecheck, lint, full test và release scan theo completion gate.
+- Rollback: revert prose/test/version slice; managed global files của người dùng không bị chạm trong repository implementation.
+
+## S9 — Đồng bộ stage owner và checkpoint contract
+
+File: `src/core/workflow.ts`, `src/skills/harnix-brainstorm/SKILL.md`, `src/skills/harnix-implement/SKILL.md`, `src/skills/harnix-finish-work/SKILL.md`, `src/skills/harnix-continue/SKILL.md`, `test/workflow/routing.test.ts`, `test/workflow/skill-sources.test.ts` và `CHANGELOG.md`.
+
+- RED router fixture chứng minh valid `blocked/verifying+replan` hiện route Brainstorm thay vì Continue; static skill fixture chứng minh Implement nhận debugging và Finish từ chối finishing dù Continue/router giao finishing cho Finish.
+- GREEN đưa blocked branch trước replan, giới hạn Implement ở `ready/ready|in_progress/implementing`, và khóa handoff `verifying/verifying -> verifying/finishing -> Finish -> completed/finishing`.
+- Brainstorm chỉ nhận no-active/planning owner state; Continue giữ quyền restore mọi active task trước stage routing.
+- Giữ frozen TaskRecord v1, bảy skill và public CLI; không thêm status, checkpoint, command hoặc platform surface.
+- Verification: observed RED/GREEN cho router + skill source, neighboring workflow/platform tests, quick validation cho cả bảy skill, rồi exact acceptance sequence.
+- Rollback: revert pure routing/prose/test slice; không migrate task schema hoặc user data.
+
+## S10 — Authorized global tool-session smoke và platform drift
+
+File: `src/configurators/antigravity.ts`, `test/platform/global-adapters.test.ts`, `docs/GLOBAL_SETUP_REFACTOR_PLAN.md`, `docs/IMPLEMENTATION_PLAN.md`, task research/evidence và real/disposable Harnix-owned global surfaces đã preview.
+
+- Chạy setup dry-run/apply trên injected test home, kiểm non-Harnix no-op, initialized bounded context, plugin validator, uninstall preview/apply và unrelated-config preservation.
+- Launch đúng Kiro/Antigravity/Codex tool khi executable/credential cho phép; tách skill discovery, hook execution, precedence và trust thành claim độc lập.
+- RED runtime-derived assertion cho Antigravity rule frontmatter; GREEN thêm metadata tối thiểu và update hai managed plugin root sau preview.
+- Không bypass Codex hook trust, không copy credential vào test home và không suy session prompt/model reply thành hook execution nếu thiếu objective event/output evidence.
+- Persist Kiro/Codex external blocker nếu không thể có activation evidence; resume verification sau khi exact hook được review/trust hoặc platform session cung cấp authoritative evidence. Một manual platform probe chỉ được defer bằng explicit user decision, phải giữ residual risk và không được đổi thành active claim.
+
 ## Traceability từ requirement tới implementation
 
 | Requirement | Slice | RED hoặc exception chính | Fresh verification |
@@ -216,7 +250,10 @@ File: `.harnix/config.yaml`, `.harnix/.template-hashes.json`, `.harnix/workflow.
 | R8 | S3, S5 | Router hiện ép mọi implementation thành Full, bỏ active state và không có reason code | Decision-table contract + static description test + representative host eval |
 | R9 | S0, S3, S5 | Pattern ba bước hiện không biểu diễn Plan/Verify/Persist và recovery loop | Normative parity + phase/state decision table + skip-phase regression eval |
 | R10 | S3, S5 | Router/skill hiện chưa tách work kind khỏi action; standalone review, test-only và hotfix chưa có contract/eval đầy đủ | Work-kind decision table + skill profile tests + representative cross-platform prompt eval |
+| R11 | S8 | Description/body hiện chưa khóa review trigger, bounded scope, structured finding, verdict và residual-risk behavior | Skill-source RED/GREEN + routing/history regression + platform parity + release gates |
+| R12 | S9 | Router xét replan trước blocked; Implement/Debug và Check/Finish incoming state overlap hoặc mâu thuẫn | Blocked-precedence decision fixture + cross-skill ownership assertions + completion tests |
+| R13 | S10 | File/validator pass nhưng real session có thể không execute hook; Antigravity rule bị runtime parser từ chối | Fake-home lifecycle + real tool discovery + objective event/output probe + conservative Doctor status |
 
 ## Bàn giao triển khai
 
-Khi người dùng yêu cầu triển khai, tiếp tục **chính active task này**: review lại PRD/plan, persist transition sang `in_progress/implementing`, thực hiện S0 trước rồi S1. Giữ S2–S6 là các slice tiếp theo của cùng task; S7 đóng verification/release. Dừng và quay lại planning nếu strict validation đòi hỏi bịa historical evidence, đổi frozen contract hoặc ghi đè managed content đã được người dùng sửa.
+Người dùng đã cấp full authority để hoàn tất chính active task này, gồm S9, dependency validation, self-host reconciliation và disposable-profile G10 smoke. Task giữ toàn bộ failed/passing evidence và đã sửa contained Antigravity frontmatter defect. Ngày 2026-08-13 user explicit defer Kiro CLI manual hook activation và xác nhận đã trust Codex hook; fresh Codex CLI probe không dùng bypass đã chứng minh hook-injected developer context. Kiro vẫn có implementation/automated coverage và không được claim active; không commit/push và không bypass trust.

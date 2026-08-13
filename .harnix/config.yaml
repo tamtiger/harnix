@@ -1,12 +1,13 @@
 generator: harnix
-schemaVersion: 1
+schemaVersion: 2
 developer: TamNT167
 languages: []
+technologies: []
 packages: []
 platforms: []
 context:
   maxCharacters: 24000
   tokenApproximation: 4
 runtime:
-  fullContext: false
   research: conditional
+  fullContext: false

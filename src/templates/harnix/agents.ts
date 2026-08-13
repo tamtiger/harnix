@@ -48,7 +48,7 @@ Use the skills in this order when their stage applies:
 
 - harnix-brainstorm: establish scope, acceptance criteria, validation, and the ready gate.
 - harnix-implement: implement a ready task; use RED-GREEN-REFACTOR for behavior changes unless a documented exception applies.
-- harnix-check: run compliance checks before quality and security checks, using fresh evidence.
+- harnix-check: perform standalone read-only code review or active-task verification; use bounded scope, evidence-backed findings, then compliance before quality and security.
 - harnix-finish-work: complete and archive only after every acceptance criterion and required check passes.
 - harnix-research and harnix-debug: use only for material unknowns or failures; harnix-continue restores persisted work.
 

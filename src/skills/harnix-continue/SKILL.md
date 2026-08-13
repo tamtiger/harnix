@@ -33,6 +33,8 @@ Load the TaskRecord, required artifacts for its mode/status, checkpoint, blocker
 | `blocked` with unchanged blocker | report blocker and resume status; do not pretend progress |
 | `completed` still active | validate completion persistence, then repair pointer/archive only within the documented workflow |
 
+Blocked state takes precedence over its checkpoint. Never route a blocked `replan`, `debugging`, or `finishing` checkpoint directly to another stage owner until Continue validates that the blocker has changed and resumes the task to its recorded status.
+
 Do not interpret `ready` as proof that the ready gate passed when artifacts contradict it. Route to `replan` if a material decision, placeholder, or contract gap is visible.
 
 ## Recover partial persistence

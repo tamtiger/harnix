@@ -154,6 +154,24 @@ Contract theo nhóm:
 
 Coverage chỉ được tuyên bố khi có ba lớp evidence cho từng representative work kind: deterministic route decision, static skill-description/procedure contract và host prompt eval trên Kiro/Antigravity/Codex. Keyword presence trong SKILL.md hoặc một unit test generic không đủ.
 
+### R11 — Code-review protocol có thể discover và kiểm chứng
+
+`harnix-check` phải được kích hoạt trực tiếp cho standalone code review, active-task verification và review-feedback evaluation mà không thêm skill hoặc workflow mới. Standalone review phải chọn phạm vi có giới hạn từ request và repository evidence (working-tree diff, explicit commit range hoặc file/path), chỉ đọc code/diff/test thực sự cần thiết và không mutate working tree, index, HEAD, task state hoặc external review system.
+
+Finding phải được sắp theo severity thực tế và có vị trí chính xác, defect, impact, evidence và fix direction; verdict phân biệt ready, ready-with-fixes và not-ready. Khi không có finding, report vẫn phải nêu scope đã kiểm tra, check bị bỏ qua và residual risk thay vì suy diễn “không thấy lỗi” thành correctness proof. Feedback nhận được là technical hypothesis: verify từng item với requirement/code/test, clarify ambiguity trước mutation, xử lý từng finding theo blocking order và route Brainstorm/Implement/Debug trước mọi fix.
+
+Harnix adapt discipline từ frozen Superpowers `requesting-code-review` và `receiving-code-review`, nhưng reject mandatory subagent, mandatory Git SHA/merge gate, praise ceremony, auto-fix và GitHub-specific reply behavior. Một canonical `harnix-check/SKILL.md` phải được cài byte-identical trên Kiro, Antigravity và Codex.
+
+### R12 — Stage owner và checkpoint không mâu thuẫn
+
+Active task routing phải xét `blocked` trước mọi checkpoint để blocker không bị bypass bởi `replan`. `harnix-debug` là owner duy nhất của `in_progress|verifying` tại checkpoint `debugging`; `harnix-implement` chỉ nhận `ready/ready` đã được authorize hoặc `in_progress/implementing`. Sau khi Check xác nhận toàn bộ prerequisite xanh, task phải persist `verifying/finishing` trước khi Finish chạy; `harnix-finish-work` chỉ nhận state đó và chuyển atomically sang `completed/finishing`, ghi journal rồi clear đúng active pointer.
+
+Router decision table và static skill contract phải kiểm tra cùng mapping để prose không thể drift khỏi production policy. Blocked task hợp lệ luôn route `harnix-continue`, bất kể checkpoint thuộc resume status nào.
+
+### R13 — Authorized global tool-session evidence không overclaim
+
+Sau khi user cấp explicit authorization, active task phải chạy fake-home lifecycle và bounded real-tool probes cho Kiro, Antigravity và Codex. Skill discovery, hook execution, trust và precedence là các claim riêng: validator/file presence không chứng minh hook active. Defect nội bộ có RED/GREEN phải được sửa trong task; credential, interactive trust hoặc platform behavior chưa chứng minh phải persist thành blocker thay vì bypass. User có thể explicit defer một platform-specific manual activation probe mà không xóa implementation hoặc automated coverage của platform đó; waiver và residual risk phải được persist, và Harnix không được claim platform đó active.
+
 ## Taxonomy workflow đã khóa
 
 | Khái niệm | Số lượng | Contract |
@@ -198,6 +216,9 @@ Hook chỉ làm activation và inject bản tóm tắt có giới hạn; không 
 7. Giữ một workflow và bảy skill; harden router/description/eval thay vì tạo workflow mới.
 8. Giữ Evidence → Requirements như artifact backbone nhưng thêm Plan, Verify và Persist vào lifecycle; adapt practice từ RIPER/EPCC/spec-driven workflow, không adopt package hoặc Git behavior của chúng.
 9. Giữ work kind trực giao với action/mode; mở rộng Check cho standalone read-only review thay vì thêm review skill, và khóa test/hotfix profile bằng eval.
+10. Hoàn thiện protocol review trong `harnix-check`; không tạo skill thứ tám vì không có state, artifact hoặc transition semantic mới.
+11. Mỗi legal checkpoint có một stage owner; blocked precedence và finishing handoff được khóa bằng router lẫn skill-source regression tests.
+12. Manual global smoke dùng evidence theo từng platform; không dùng bypass trust, không copy credential và không hạ readiness để che external blocker.
 
 ## Acceptance và traceability
 
@@ -214,3 +235,6 @@ Hook chỉ làm activation và inject bản tóm tắt có giới hạn; không 
 | R8 | Active task và normalized request facts route có reason code; status/checkpoint map đúng owner; prompt eval không overclaim | S3, S5 |
 | R9 | Mỗi semantic phase map duy nhất tới state/artifact/skill/gate; Lite/Full không tạo workflow thứ hai; Plan/Verify/Persist không bị bỏ qua | S0, S3, S5 |
 | R10 | Feature/fix/hotfix/review/refactor/test và các operational work kind có deterministic route, skill owner, evidence profile và forbidden shortcut | S3, S5 |
+| R11 | `harnix-check` trigger được review, khóa bounded scope/finding/verdict/feedback contract và giữ platform parity mà không thêm skill | S8 |
+| R12 | Blocked/replan, Debug/Implement và Check/Finish route thống nhất giữa router, skill prose và completion persistence | S9 |
+| R13 | Disposable lifecycle pass; Antigravity rule/hook có runtime evidence; Kiro/Codex chỉ active khi có external hook/trust evidence | S10 |

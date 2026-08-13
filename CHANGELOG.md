@@ -2,7 +2,17 @@
 
 Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
-Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; các mục dưới đây theo commit cho đến khi versioning/release workflow được triển khai.
+Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
+
+## [0.6.9] - 2026-08-13
+
+### Changed
+
+- `harnix-check` now activates for standalone code review and review-feedback evaluation, uses bounded read-only scope, and reports evidence-backed findings with calibrated severity, precise locations, fix direction, verdict, omitted checks, and residual risk.
+- Generated project instructions now route standalone code review explicitly to `harnix-check` while preserving one seven-skill workflow and requiring a normal task before any review-driven fix.
+- Workflow routing now gives blocked tasks precedence over replanning, assigns debugging exclusively to `harnix-debug`, and requires the explicit `verifying/finishing` handoff before completion persistence.
+- Added a self-host regression that keeps this repository's managed workflow, manifest, config, common guide, and repository-map cache aligned with the packaged lifecycle.
+- Antigravity's packaged global rule now includes valid rule frontmatter, preventing the current Desktop/CLI plugin loader from rejecting the rule and skipping its Harnix activation surface.
 
 ## [0.6.8] - 2026-08-13
 

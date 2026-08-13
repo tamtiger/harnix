@@ -70,6 +70,7 @@ describe("user-global platform desired-surface renderers", () => {
       expect(fileContent(skill)).not.toContain("C:\\");
     }
     expect(ANTIGRAVITY_GLOBAL_RULE).toContain("## Harnix activation guard");
+    expect(ANTIGRAVITY_GLOBAL_RULE).toMatch(/^---\nname: harnix\ndescription: .+\n---\n/u);
     expect(ANTIGRAVITY_GLOBAL_RULE).toContain(".harnix/config.yaml");
     expect(ANTIGRAVITY_GLOBAL_RULE).toContain("nearest ancestor or workspace root");
     expect(ANTIGRAVITY_GLOBAL_RULE).toContain("no such root exists or its state is invalid");

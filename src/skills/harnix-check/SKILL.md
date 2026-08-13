@@ -1,9 +1,9 @@
 ---
 name: harnix-check
-description: Use when Harnix implementation needs fresh compliance, correctness, security, maintainability, or review-feedback verification before completion.
+description: Use when Harnix needs a standalone read-only code review, review feedback evaluation, or fresh active-task compliance, correctness, security, and maintainability verification before completion.
 ---
 
-# Verify a Harnix task
+# Review and verify Harnix work
 
 Evidence precedes claims. Verify compliance first, then quality and security. Read every required result and preserve failures exactly.
 
@@ -21,6 +21,22 @@ Use one of two profiles:
 - **Active-task verification:** accept `in_progress` only after implementation scope and focused checks are complete, or resume `verifying/verifying`. Before running checks, persist `verifying` if not already recorded. Inspect current status/diff so verification covers actual changes, including user edits that must not be attributed to Harnix.
 
 If a review request also asks for a code change, the finding is a hypothesis: route to planning/implementation before mutation rather than silently applying it from the read-only profile.
+
+## Standalone code-review protocol
+
+Bound the review before inspecting code. Honor an explicit commit range or file/path scope. Otherwise use the current working-tree diff when available, plus only the surrounding requirements, implementation, and tests needed to assess it. If no diff exists, agree or infer the smallest bounded paths from the request and state that scope. Use read-only inspection such as `git diff`, `git show`, and file reads; never move HEAD, change the index, create a worktree, or mutate an external review system.
+
+Review requirements and behavioral compliance before correctness, security, maintainability, tests, compatibility, and operational risk. Read the relevant code rather than inferring behavior from filenames, summaries, or test names. Run focused checks only when they materially support or falsify a finding, and report any omitted checks.
+
+Report findings first, ordered by actual severity. Every finding must include:
+
+- severity and a precise `file:line` location;
+- the concrete defect or risk and when it occurs;
+- why the impact matters for this repository;
+- the code, diff, test, or command evidence supporting it;
+- a concise fix direction when it is not obvious.
+
+End with a verdict of `ready`, `ready-with-fixes`, or `not-ready`, plus the reviewed scope and residual risk. If no findings remain, say so explicitly but still name the scope, omitted checks, and residual risk; absence of a visible defect is not proof of correctness. Do not require praise, a reviewer subagent, Git history, or a merge operation.
 
 ## Evidence rule
 
@@ -61,7 +77,9 @@ Fresh focused output cannot substitute for a required full gate. A full gate can
 
 ## Review feedback discipline
 
-Treat reviewer feedback as a technical hypothesis, not an instruction to accept blindly. Verify each item against current code and contract. Classify severity and blocking impact. Fix one confirmed issue at a time through `harnix-debug` or `harnix-implement`, then rerun the evidence that originally failed. Explain evidence-based disagreement concisely.
+Treat reviewer feedback as a technical hypothesis, not an instruction to accept blindly. Read the complete feedback, clarify ambiguous or coupled items before mutation, and verify each item against current requirements, code, tests, compatibility, and user decisions. Classify severity and blocking impact. Explain evidence-based disagreement concisely.
+
+When fixes are authorized through an active task, handle one confirmed item at a time in blocking order through `harnix-debug` or `harnix-implement`, then rerun the evidence that originally failed. Review feedback alone never grants permission to edit files, reply on an external system, or change Git state.
 
 ## Persist
 
@@ -71,7 +89,7 @@ For every check, record timestamp, command or inspection, scope, exit/result, an
 
 - Compliance or quality defect: persist failed evidence and the next action; route to `harnix-debug` or `replan`.
 - External/repository blocker: remain resumable and report the precise condition without claiming completion.
-- All required criteria and gates green: hand to `harnix-finish-work`.
+- All required criteria and gates green: persist `verifying/finishing`, reread the saved task, then hand to `harnix-finish-work`.
 
 Do not fix unrelated findings, weaken gates, or declare success from absence of visible errors.
 

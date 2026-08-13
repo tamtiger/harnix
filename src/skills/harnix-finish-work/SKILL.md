@@ -15,7 +15,7 @@ Read `.harnix/workflow.md`, the active task, and its recorded evidence.
 
 ## Incoming state
 
-Accept only `verifying/verifying` with every required acceptance criterion `met` or explicitly `waived`, every required validation backed by fresh evidence, and no unresolved blocker. If any prerequisite is missing, stop and return to `harnix-check`.
+Accept only `verifying/finishing` with every required acceptance criterion `met` or explicitly `waived`, every required validation backed by fresh evidence, and no unresolved blocker. If any prerequisite is missing or the checkpoint is still `verifying`, stop and return to `harnix-check`.
 
 ## Final state review
 

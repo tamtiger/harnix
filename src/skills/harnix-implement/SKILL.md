@@ -15,7 +15,7 @@ Read `.harnix/workflow.md`, the active task, and only task-relevant code/spec co
 
 ## Incoming state
 
-Accept a valid `ready/ready` task whose original request authorizes implementation, or an `in_progress` task resumed at `implementing` or `debugging`. Preserve unrelated and user-owned changes.
+Accept a valid `ready/ready` task whose original request authorizes implementation, or a task resumed at `in_progress/implementing`. Preserve unrelated and user-owned changes. Route every debugging checkpoint to `harnix-debug`; do not overlap its ownership.
 
 Review the plan critically before product edits:
 

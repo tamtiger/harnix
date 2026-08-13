@@ -662,9 +662,9 @@ The 2026-08-10 repository review found lifecycle and persisted-state gaps that w
 
 Historical Phase 1–4 checkmarks record their original checkpoints; they do not supersede Phase 5 regression evidence.
 
-## 9B. Phase 6 — User-global platform integrations (automated implementation complete; manual smoke pending authorization)
+## 9B. Phase 6 — User-global platform integrations (complete in the authorized scope)
 
-Yêu cầu ngày 2026-08-11 thay đổi `setup` từ project-local sang user-global cho Kiro, Antigravity và Codex. G0–G9 và phần automated của G10 đã hoàn tất với fresh evidence trong current working tree; các checkmark Phase 1–5 chỉ mô tả behavior cũ đã hoàn tất. Disposable-profile/tool-session smoke vẫn chưa chạy vì cần explicit authorization, nên Phase 6 chưa được claim completed trong real user platform session.
+Yêu cầu ngày 2026-08-11 thay đổi `setup` từ project-local sang user-global cho Kiro, Antigravity và Codex. G0–G9 và phần automated của G10 đã hoàn tất; các checkmark Phase 1–5 chỉ mô tả behavior cũ đã hoàn tất. Ngày 2026-08-13 user đã authorize manual smoke: disposable lifecycle và skill discovery pass, Antigravity runtime probe phát hiện rồi sửa rule frontmatter và chứng minh hook output, còn Codex exact hook được review/trust và fresh real-profile CLI probe chứng minh context injection mà không bypass. User explicit defer Kiro CLI manual hook activation; implementation và automated Kiro coverage vẫn giữ nguyên, còn activation chưa được claim.
 
 Trong phạm vi Phase 6, constraint cũ “không global config mutation” và các frozen project-local platform paths bị supersede bởi explicit, Harnix-owned user-global customization. Các cấm đoán về global runtime, memory, credential, MCP, permission mutation, telemetry và silent network vẫn giữ nguyên.
 
@@ -675,7 +675,7 @@ Kế hoạch, official path/schema snapshot, migration policy, work breakdown v�
 - [x] G4–G6 chuyển Kiro, Antigravity Desktop/CLI và Codex sang official current user-global surfaces.
 - [x] G7–G8 tách lifecycle global/project và cleanup project-local integration cũ một cách explicit; legacy cleanup chỉ có thể xóa standalone path đúng source/path do manifest v1 chứng minh, còn root/shared file chỉ inventory.
 - [x] G9 cập nhật templates/AGENTS guard, release scripts và chạy full automated acceptance với fake-home/project fixtures.
-- [ ] G10 manual disposable-profile/tool-session smoke: chưa chạy do chưa có explicit authorization; không được dùng profile thật, và automated evidence không được suy diễn thành activation thực tế.
+- [x] G10 manual disposable-profile/tool-session smoke: lifecycle/protocol/skill discovery, Antigravity hook probe và Codex exact-hook trust/activation đã pass without bypass; Kiro CLI manual hook activation được user explicit defer và không được claim active.
 
 ## 10. Required test inventory
 

@@ -15,7 +15,7 @@ For an initialized project, read `.harnix/workflow.md`, `.harnix/tasks/.active`,
 
 ## Incoming state
 
-Accept either no active task or one active task still owned by planning. If `.active` names an unfinished task, restore it instead of creating a duplicate. If it is already `in_progress` or `verifying`, hand off to `harnix-continue`.
+Accept either no active task or one active task still owned by `planning|replan`. If `.active` names an unfinished task, restore it instead of creating a duplicate. Hand any active task outside `planning|replan` to `harnix-continue`, including ready, in-progress, verifying, blocked, or completed-active state.
 
 Classify the request:
 

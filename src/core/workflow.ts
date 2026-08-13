@@ -62,7 +62,8 @@ export function implementationStrategy(kind: "behavior" | "docs" | "wiring" | "s
 }
 export function evidenceSupportsScope(evidence: Evidence, requiredScope: "focused" | "full", checkScope: "focused" | "full"): boolean { return evidence.result === "pass" && (requiredScope === "focused" || checkScope === "full"); }
 export async function finishWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, now = new Date().toISOString(), dependencies: WorkflowFinishDependencies = {}): Promise<TaskRecord> {
-  if (task.status !== "verifying" || !canCompleteTask(task, Date.parse(now))) throw new Error("Task requires fresh complete verification before finishing.");
+  if (task.status !== "verifying" || task.checkpoint !== "finishing") throw new Error("Task requires the verifying/finishing checkpoint before completion persistence.");
+  if (!canCompleteTask(task, Date.parse(now))) throw new Error("Task requires fresh complete verification before finishing.");
   const completed = transitionTask(task, "completed", "finishing", now);
   await (dependencies.saveTask ?? saveTask)(harnixRoot, completed);
   await (dependencies.appendJournal ?? appendJournal)(journalPath, { generator: "harnix", schemaVersion: 1, id: `${completed.id}-completion`, recordedAt: now, developer, taskId: completed.id, kind: "completion", summary: `Completed: ${completed.title}`, evidenceIds: completionEvidenceIds(completed) });
@@ -89,6 +90,7 @@ function completionEvidenceIds(task: TaskRecord): string[] {
 
 function routeActiveTask(request: WorkflowRouteFacts, active: NonNullable<WorkflowRouteFacts["activeTask"]>): WorkflowRouteDecision {
   if (!isKnownActiveState(active)) return decision("fail-closed", undefined, "harnix-continue", "invalid-active-state");
+  if (active.status === "blocked") return decision("resume", active.mode, "harnix-continue", "active-stage");
   if (active.status === "planning" || active.checkpoint === "replan") return decision("resume", active.mode, "harnix-brainstorm", "active-replan");
   if (active.status === "ready") {
     if (active.checkpoint !== "ready") return decision("resume", active.mode, "harnix-brainstorm", "active-replan");
@@ -101,7 +103,6 @@ function routeActiveTask(request: WorkflowRouteFacts, active: NonNullable<Workfl
     if (active.checkpoint === "debugging") return decision("resume", active.mode, "harnix-debug", "active-stage");
     return active.checkpoint === "finishing" ? decision("resume", active.mode, "harnix-finish-work", "active-stage") : decision("resume", active.mode, "harnix-check", "active-stage");
   }
-  if (active.status === "blocked") return decision("resume", active.mode, "harnix-continue", "active-stage");
   return decision("fail-closed", undefined, "harnix-continue", "invalid-active-state");
 }
 

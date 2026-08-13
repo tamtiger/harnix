@@ -2,7 +2,7 @@
 
 ## 1. Trạng thái và quyết định sản phẩm
 
-Tài liệu này là kế hoạch triển khai và decision record cho Phase 6, lập ngày **2026-08-11** từ yêu cầu mới và tài liệu chính thức hiện hành của Kiro, Antigravity và Codex. G0–G9 cùng toàn bộ automated isolated-home acceptance đã hoàn tất với fresh evidence trong current working tree. Manual smoke trong tool session thật của disposable profile/test home chưa chạy vì chưa có explicit authorization; nó vẫn là acceptance ngoài fixture và không được thay bằng claim activation thực tế.
+Tài liệu này là kế hoạch triển khai và decision record cho Phase 6, lập ngày **2026-08-11** từ yêu cầu mới và tài liệu chính thức hiện hành của Kiro, Antigravity và Codex. G0–G9 cùng toàn bộ automated isolated-home acceptance đã hoàn tất. Ngày 2026-08-13 người dùng đã cấp explicit authorization cho manual smoke, sau đó explicit defer Kiro CLI hook activation. Fake-home lifecycle, protocol output, Kiro/Antigravity skill discovery, Antigravity plugin validation/activation probe, Codex exact-hook trust/activation và safe uninstall đã pass; Kiro vẫn được giữ đầy đủ implementation/automated coverage nhưng manual activation không chặn G10 trong scope hiện tại.
 
 Quyết định đích:
 
@@ -355,7 +355,7 @@ Không tự động copy hoặc xóa các surface project-local từ bản cũ.
 
 Critical path: `G0 -> G1 -> G2 -> G3 -> (G4, G5, G6) -> G7 -> G8 -> G9 -> G10`.
 
-Trạng thái delivery: G0–G9 và phần automated của G10 đã hoàn tất với fresh evidence trong current working tree. G10 manual disposable-profile/tool-session smoke vẫn pending explicit authorization; không sử dụng real user profile và không suy automated evidence thành activation thật.
+Trạng thái delivery: G0–G10 đã hoàn tất trong scope được người dùng phê duyệt. Manual smoke đã chạy trên injected test home lẫn session thật có giới hạn. Antigravity rule-frontmatter defect được tái hiện, sửa bằng RED/GREEN và objective hook probe đã trả bounded context. Codex exact hook đã được người dùng review/trust; fresh real-profile CLI probe không dùng bypass nhận đúng hook-injected developer context. Kiro CLI global hook không fire trong default hoặc `--v3` non-interactive probe và được người dùng explicit defer; không claim Kiro hook active từ file presence hoặc validator output.
 
 ## 11. Test và acceptance bắt buộc
 
@@ -432,4 +432,4 @@ Refactor chỉ hoàn tất khi:
 - Không có Kiro/Antigravity/Codex setup output project-local mới; root `AGENTS.md` do `init` tạo là exception đã khóa. Không có duplicate hook, absolute home path, secret, permission change, runtime copy hoặc silent network.
 - Tất cả automated gates và manual disposable-profile smoke pass với fresh evidence.
 
-Trạng thái hiện tại: automated gates/isolated-home smoke đã pass với fresh evidence trong current working tree; manual disposable-profile/tool-session smoke chưa chạy vì thiếu explicit authorization và vẫn là điều kiện acceptance còn lại.
+Trạng thái hiện tại: automated gates và command-side disposable lifecycle pass. Manual session chứng minh skill discovery trên Kiro/Antigravity, objective Antigravity hook execution sau rule-frontmatter fix, và Codex exact-hook trust/activation không dùng bypass. Kiro CLI global JSON-v1 hook chưa fire trong probe; người dùng đã explicit defer manual Kiro activation nên finding này được giữ như residual risk, không phải completion blocker hiện tại.

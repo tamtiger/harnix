@@ -37,6 +37,7 @@ describe("hidden workflow persistence operations", () => {
     await saveWorkflow(root, { task: { ...verifying, status: "ready", checkpoint: "ready" } });
     await saveWorkflow(root, { task: { ...verifying, status: "in_progress", checkpoint: "implementing" } });
     await saveWorkflow(root, { task: verifying });
+    await saveWorkflow(root, { task: { ...verifying, checkpoint: "finishing", updatedAt: new Date().toISOString() } });
 
     await expect(finishWorkflow(root)).resolves.toMatchObject({ status: "completed", checkpoint: "finishing" });
     expect((await inspectWorkflow(root)).activeTask).toBeNull();

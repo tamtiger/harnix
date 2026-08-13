@@ -17,6 +17,11 @@ export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK = {
 } as const;
 
 export const ANTIGRAVITY_GLOBAL_RULE = [
+  "---",
+  "name: harnix",
+  "description: Activate Harnix workflow guidance only inside an initialized Harnix project.",
+  "---",
+  "",
   "# Harnix",
   "",
   "## Harnix activation guard",

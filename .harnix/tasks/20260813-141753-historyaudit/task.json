@@ -4,34 +4,187 @@
   "id": "20260813-141753-historyaudit",
   "title": "Kiểm toán và lập kế hoạch refactor workflow Harnix",
   "mode": "full",
-  "status": "blocked",
-  "checkpoint": "verifying",
-  "goal": "Phân tích lịch sử Harnix có thể truy cập trên Codex, kiểm tra task artifact và workflow routing, rồi khóa PRD/plan refactor theo Evidence-Gated Lifecycle để sẵn sàng triển khai.",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Phân tích lịch sử Harnix có thể truy cập trên Codex, harden workflow theo Evidence-Gated Lifecycle và hoàn thiện protocol code review có thể discover trong harnix-check.",
   "nonGoals": [
-    "Sửa historical task artifact để che finding, hoặc global Codex integration/profile thật khi chưa có authority riêng.",
+    "Sửa historical task artifact để che finding, bypass platform hook trust hoặc copy credential vào disposable profile.",
     "Tuyên bố đã bao phủ history/log mà Codex hoặc repository không cung cấp.",
     "Commit, tạo branch, push, publish hoặc tạo pull request."
   ],
-  "blocker": {
-    "kind": "authority",
-    "summary": "Cần authority riêng cho hai completion gate còn lại: (1) manual G10 smoke trên disposable platform profile; (2) rebaseline self-host .harnix state, gồm quyết định thay canonical workflow hay giữ nội dung user-modified.",
-    "nextAction": "Khi người dùng cấp authority, chạy manual G10 bằng profile disposable, thực hiện self-host reconciliation theo lựa chọn đã duyệt, rồi quay lại verifying để ghi fresh evidence và finish.",
-    "resumeStatus": "verifying"
-  },
   "acceptanceCriteria": [
-    {"id":"history-coverage","text":"Báo cáo nêu rõ các Codex thread/log đã đọc, khoảng thời gian, độ tin cậy và dữ liệu không truy cập được.","status":"met","evidenceIds":["e-history-coverage","e-implementation-acceptance"]},
-    {"id":"artifact-integrity","text":"Toàn bộ task, journal, active pointer và source-of-truth artifact trong .harnix được kiểm tra bằng validation có thể tái lập, với sự thật tách khỏi suy luận.","status":"met","evidenceIds":["e-artifact-integrity","e-implementation-acceptance"]},
-    {"id":"research-provenance","text":"Một câu hỏi chưa biết có ảnh hưởng lớn được research từ nguồn chính thức/sơ cấp với URL, ngày truy cập, version/revision, sự thật, suy luận và bất định còn lại.","status":"met","evidenceIds":["e-research-provenance","e-implementation-acceptance"]},
-    {"id":"findings-plan","text":"Báo cáo kiểm toán ưu tiên finding theo severity/impact và chia kế hoạch triển khai thành các slice có file, RED/exception, validation, migration và rollback.","status":"met","evidenceIds":["e-findings-plan","e-implementation-acceptance"]},
-    {"id":"ready-gate","text":"PRD, plan và research nhất quán, không có placeholder hoặc quyết định kỹ thuật bị giấu; task dừng ở ready và không sửa product code.","status":"met","evidenceIds":["e-ready-review","e-translation-ready-review","e-task-refactor-ready-review","e-workflow-routing-ready-review","e-workflow-pattern-ready-review","e-work-kind-coverage-ready-review","e-implementation-acceptance"]},
-    {"id":"artifact-pattern","text":"Task giải thích pattern hiện tại, pattern khuyến nghị và phân vai canonical cho task state, audit, research, PRD, plan và implementation.","status":"met","evidenceIds":["e-task-pattern-refactor","e-workflow-pattern-comparison","e-implementation-acceptance"]},
-    {"id":"implementation-boundary","text":"Task giải thích rõ PRD khác plan, tại sao không có implement.md hoặc production implementation, và trigger chính xác để tiếp tục cùng task sang implementing.","status":"met","evidenceIds":["e-task-pattern-refactor","e-task-refactor-ready-review","e-implementation-acceptance"]},
-    {"id":"workflow-inventory","text":"Task phân biệt chính xác canonical workflow, entry route, persisted status, checkpoint, stage skill và verification stage hiện có.","status":"met","evidenceIds":["e-workflow-routing-audit","e-implementation-acceptance"]},
-    {"id":"routing-detection","text":"Task đánh giá bằng source/test evidence workflow hiện tại được detect ở đâu, case hiện tại có route đúng không và khoảng trống nào khiến detection chưa thể được tuyên bố deterministic/cross-platform.","status":"met","evidenceIds":["e-workflow-routing-audit","e-workflow-routing-tests-pass","e-workflow-routing-ready-review","e-implementation-acceptance"]},
-    {"id":"workflow-completeness","text":"PRD và plan khóa quyết định có cần workflow/skill mới hay không, kèm tiêu chuẩn bổ sung và research provenance từ nguồn chính thức.","status":"met","evidenceIds":["e-workflow-routing-audit","e-workflow-routing-ready-review","e-workflow-pattern-comparison","e-work-kind-coverage-audit","e-implementation-acceptance"]},
-    {"id":"workflow-pattern-comparison","text":"Task phân loại và so sánh Evidence → Requirements → Execution, RIPER, EPCC, spec-driven workflow và inner-loop pattern bằng source provenance, fit, giới hạn và phần được adopt/reject.","status":"met","evidenceIds":["e-workflow-pattern-comparison","e-implementation-acceptance"]},
-    {"id":"workflow-recommendation","text":"PRD và plan khóa một lifecycle được đề xuất, map semantic phase vào state/checkpoint/artifact/skill/gate hiện có và không tạo workflow hoặc skill trùng lặp.","status":"met","evidenceIds":["e-workflow-pattern-comparison","e-workflow-pattern-ready-review","e-implementation-acceptance"]},
-    {"id":"work-kind-coverage","text":"Task đánh giá feature, bugfix, hotfix, review-only, review-and-fix, refactor, test-only, failing-test và operational work kind; khóa route/skill/evidence profile cùng regression eval cho gap còn lại.","status":"met","evidenceIds":["e-work-kind-coverage-audit","e-work-kind-coverage-ready-review","e-implementation-acceptance"]}
+    {
+      "id": "history-coverage",
+      "text": "Báo cáo nêu rõ các Codex thread/log đã đọc, khoảng thời gian, độ tin cậy và dữ liệu không truy cập được.",
+      "status": "met",
+      "evidenceIds": [
+        "e-history-coverage",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "artifact-integrity",
+      "text": "Toàn bộ task, journal, active pointer và source-of-truth artifact trong .harnix được kiểm tra bằng validation có thể tái lập, với sự thật tách khỏi suy luận.",
+      "status": "met",
+      "evidenceIds": [
+        "e-artifact-integrity",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "research-provenance",
+      "text": "Một câu hỏi chưa biết có ảnh hưởng lớn được research từ nguồn chính thức/sơ cấp với URL, ngày truy cập, version/revision, sự thật, suy luận và bất định còn lại.",
+      "status": "met",
+      "evidenceIds": [
+        "e-research-provenance",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "findings-plan",
+      "text": "Báo cáo kiểm toán ưu tiên finding theo severity/impact và chia kế hoạch triển khai thành các slice có file, RED/exception, validation, migration và rollback.",
+      "status": "met",
+      "evidenceIds": [
+        "e-findings-plan",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "ready-gate",
+      "text": "PRD, plan và research nhất quán, không có placeholder hoặc quyết định kỹ thuật bị giấu; task dừng ở ready và không sửa product code.",
+      "status": "met",
+      "evidenceIds": [
+        "e-ready-review",
+        "e-translation-ready-review",
+        "e-task-refactor-ready-review",
+        "e-workflow-routing-ready-review",
+        "e-workflow-pattern-ready-review",
+        "e-work-kind-coverage-ready-review",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "artifact-pattern",
+      "text": "Task giải thích pattern hiện tại, pattern khuyến nghị và phân vai canonical cho task state, audit, research, PRD, plan và implementation.",
+      "status": "met",
+      "evidenceIds": [
+        "e-task-pattern-refactor",
+        "e-workflow-pattern-comparison",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "implementation-boundary",
+      "text": "Task giải thích rõ PRD khác plan, tại sao không có implement.md hoặc production implementation, và trigger chính xác để tiếp tục cùng task sang implementing.",
+      "status": "met",
+      "evidenceIds": [
+        "e-task-pattern-refactor",
+        "e-task-refactor-ready-review",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "workflow-inventory",
+      "text": "Task phân biệt chính xác canonical workflow, entry route, persisted status, checkpoint, stage skill và verification stage hiện có.",
+      "status": "met",
+      "evidenceIds": [
+        "e-workflow-routing-audit",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "routing-detection",
+      "text": "Task đánh giá bằng source/test evidence workflow hiện tại được detect ở đâu, case hiện tại có route đúng không và khoảng trống nào khiến detection chưa thể được tuyên bố deterministic/cross-platform.",
+      "status": "met",
+      "evidenceIds": [
+        "e-workflow-routing-audit",
+        "e-workflow-routing-tests-pass",
+        "e-workflow-routing-ready-review",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "workflow-completeness",
+      "text": "PRD và plan khóa quyết định có cần workflow/skill mới hay không, kèm tiêu chuẩn bổ sung và research provenance từ nguồn chính thức.",
+      "status": "met",
+      "evidenceIds": [
+        "e-workflow-routing-audit",
+        "e-workflow-routing-ready-review",
+        "e-workflow-pattern-comparison",
+        "e-work-kind-coverage-audit",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "workflow-pattern-comparison",
+      "text": "Task phân loại và so sánh Evidence → Requirements → Execution, RIPER, EPCC, spec-driven workflow và inner-loop pattern bằng source provenance, fit, giới hạn và phần được adopt/reject.",
+      "status": "met",
+      "evidenceIds": [
+        "e-workflow-pattern-comparison",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "workflow-recommendation",
+      "text": "PRD và plan khóa một lifecycle được đề xuất, map semantic phase vào state/checkpoint/artifact/skill/gate hiện có và không tạo workflow hoặc skill trùng lặp.",
+      "status": "met",
+      "evidenceIds": [
+        "e-workflow-pattern-comparison",
+        "e-workflow-pattern-ready-review",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "work-kind-coverage",
+      "text": "Task đánh giá feature, bugfix, hotfix, review-only, review-and-fix, refactor, test-only, failing-test và operational work kind; khóa route/skill/evidence profile cùng regression eval cho gap còn lại.",
+      "status": "met",
+      "evidenceIds": [
+        "e-work-kind-coverage-audit",
+        "e-work-kind-coverage-ready-review",
+        "e-implementation-acceptance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "code-review-protocol",
+      "text": "harnix-check được kích hoạt cho standalone review và review feedback, dùng bounded read-only scope, structured evidence-backed findings/verdict, giữ bảy skill và platform byte parity.",
+      "status": "met",
+      "evidenceIds": [
+        "e-code-review-focused-green",
+        "e-code-review-compliance",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "skill-state-owner-consistency",
+      "text": "Blocked task luôn route Continue trước replan, Debug sở hữu checkpoint debugging, và Finish nhận đúng verifying/finishing sau verification gate với regression coverage.",
+      "status": "met",
+      "evidenceIds": [
+        "e-final-s9-green",
+        "e-authorized-scope-final-gates"
+      ]
+    },
+    {
+      "id": "global-tool-session-smoke",
+      "text": "Authorized disposable/real tool smoke tách skill discovery khỏi hook activation; Antigravity và Codex có runtime evidence, còn Kiro manual activation được explicit defer mà không xóa platform coverage hoặc claim active.",
+      "status": "met",
+      "evidenceIds": [
+        "e-final-global-tool-session-pass",
+        "e-authorized-scope-final-gates"
+      ]
+    }
   ],
   "relevantPaths": [
     ".harnix/tasks",
@@ -54,16 +207,85 @@
     "src/commands",
     "test"
   ],
-  "relevantSpecs": ["docs/HARNIX_PRD.md","docs/HARNIX_WORKFLOW.md","docs/IMPLEMENTATION_PLAN.md",".harnix/workflow.md"],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    ".harnix/workflow.md"
+  ],
   "validationPlan": [
-    {"id":"history-inventory","description":"Lập inventory các Codex thread có thể truy cập và ghi rõ giới hạn coverage.","scope":"focused","required":true},
-    {"id":"artifact-audit","description":"Validate mọi TaskRecord/JournalEntry và đối chiếu active state, evidence, timestamp, version cùng Git history bằng inspection read-only có giới hạn.","scope":"focused","required":true},
-    {"id":"planning-consistency","description":"Parse task JSON, kiểm tra audit artifact có đủ section bắt buộc, source provenance, không còn placeholder chưa giải quyết, rồi kiểm tra whitespace diff.","command":"git diff --check","scope":"full","required":true},
-    {"id":"workflow-routing-audit","description":"Đối chiếu canonical workflow/status/checkpoint/skill inventory, route helper usages, task hiện tại và research source; kiểm tra R8 map tới implementation/eval mà không thêm workflow trùng lặp.","scope":"focused","required":true},
-    {"id":"workflow-routing-baseline-tests","description":"Chạy focused baseline cho route policy hiện có và canonical seven-skill source contract bằng local Windows shim của workspace.","command":".\\node_modules\\.bin\\vitest.CMD run test/workflow/routing.test.ts test/workflow/skill-sources.test.ts","scope":"focused","required":true},
-    {"id":"workflow-pattern-research","description":"Kiểm tra source provenance, fact/inference/uncertainty, pattern category và R9/S0-S3-S5 trace cho Evidence-Gated Lifecycle; parse JSON và kiểm tra whitespace diff.","command":"git diff --check","scope":"focused","required":true},
-    {"id":"work-kind-coverage-audit","description":"Đối chiếu route helper, bảy canonical skill và normative workflow với ma trận feature/bugfix/hotfix/review/refactor/test/operational; kiểm tra R10 map S3/S5 và không thêm workflow hoặc skill trùng lặp.","scope":"focused","required":true},
-    {"id":"existing-workflow-tests","description":"Chạy test task-state và workflow routing hiện có khi workspace đã cài dependency.","command":"pnpm exec vitest run test/unit/task-state.test.ts test/workflow/routing.test.ts","scope":"focused","required":false}
+    {
+      "id": "history-inventory",
+      "description": "Lập inventory các Codex thread có thể truy cập và ghi rõ giới hạn coverage.",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "artifact-audit",
+      "description": "Validate mọi TaskRecord/JournalEntry và đối chiếu active state, evidence, timestamp, version cùng Git history bằng inspection read-only có giới hạn.",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "planning-consistency",
+      "description": "Parse task JSON, kiểm tra audit artifact có đủ section bắt buộc, source provenance, không còn placeholder chưa giải quyết, rồi kiểm tra whitespace diff.",
+      "command": "git diff --check",
+      "scope": "full",
+      "required": true
+    },
+    {
+      "id": "workflow-routing-audit",
+      "description": "Đối chiếu canonical workflow/status/checkpoint/skill inventory, route helper usages, task hiện tại và research source; kiểm tra R8 map tới implementation/eval mà không thêm workflow trùng lặp.",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "workflow-routing-baseline-tests",
+      "description": "Chạy focused baseline cho route policy hiện có và canonical seven-skill source contract bằng local Windows shim của workspace.",
+      "command": ".\\node_modules\\.bin\\vitest.CMD run test/workflow/routing.test.ts test/workflow/skill-sources.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "workflow-pattern-research",
+      "description": "Kiểm tra source provenance, fact/inference/uncertainty, pattern category và R9/S0-S3-S5 trace cho Evidence-Gated Lifecycle; parse JSON và kiểm tra whitespace diff.",
+      "command": "git diff --check",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "work-kind-coverage-audit",
+      "description": "Đối chiếu route helper, bảy canonical skill và normative workflow với ma trận feature/bugfix/hotfix/review/refactor/test/operational; kiểm tra R10 map S3/S5 và không thêm workflow hoặc skill trùng lặp.",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "existing-workflow-tests",
+      "description": "Chạy test task-state và workflow routing hiện có khi workspace đã cài dependency.",
+      "command": "pnpm exec vitest run test/unit/task-state.test.ts test/workflow/routing.test.ts",
+      "scope": "focused",
+      "required": false
+    },
+    {
+      "id": "code-review-skill-tests",
+      "description": "Kiểm tra trigger, bounded read-only scope, structured finding/verdict/feedback contract, seven-skill invariant và platform byte parity.",
+      "command": "pnpm exec vitest run test/workflow/skill-sources.test.ts test/workflow/history-regressions.test.ts test/workflow/routing.test.ts test/platform/setup.test.ts test/platform/global-adapters.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "skill-state-owner-tests",
+      "description": "Kiểm tra blocked precedence, checkpoint-to-skill ownership và verifying/finishing completion handoff bằng router/skill contract tests.",
+      "command": "pnpm exec vitest run test/workflow/routing.test.ts test/workflow/skill-sources.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "global-tool-session-smoke",
+      "description": "Chạy authorized fake-home lifecycle và real-tool session probes; require objective skill/hook/trust evidence per platform, không bypass hoặc copy credential.",
+      "scope": "full",
+      "required": true
+    }
   ],
   "evidence": [
     {
@@ -306,7 +528,9 @@
       "recordedAt": "2026-08-13T17:07:28.1564598+07:00",
       "result": "pass",
       "summary": "Implementation preserved the bounded Codex-history coverage and did not claim access to unavailable transcript or terminal history.",
-      "artifactPaths": [".harnix/tasks/20260813-141753-historyaudit/audit-report.md"]
+      "artifactPaths": [
+        ".harnix/tasks/20260813-141753-historyaudit/audit-report.md"
+      ]
     },
     {
       "id": "e-implementation-integrity",
@@ -314,7 +538,10 @@
       "recordedAt": "2026-08-13T17:07:28.1564598+07:00",
       "result": "pass",
       "summary": "Fresh Doctor inspection found no active-state error; historical task and journal drift is reported without rewrite.",
-      "artifactPaths": ["src/core/tasks/task.ts", "src/commands/doctor.ts"]
+      "artifactPaths": [
+        "src/core/tasks/task.ts",
+        "src/commands/doctor.ts"
+      ]
     },
     {
       "id": "e-implementation-planning",
@@ -323,7 +550,9 @@
       "result": "pass",
       "exitCode": 0,
       "summary": "git diff --check passed after the implementation and release-gate changes.",
-      "artifactPaths": [".harnix/tasks/20260813-141753-historyaudit/task.json"]
+      "artifactPaths": [
+        ".harnix/tasks/20260813-141753-historyaudit/task.json"
+      ]
     },
     {
       "id": "e-implementation-routing",
@@ -331,7 +560,11 @@
       "recordedAt": "2026-08-13T17:07:28.1564598+07:00",
       "result": "pass",
       "summary": "Typed action/work-kind/risk routing, active-state precedence, and standalone review behavior are implemented in source and regression tests.",
-      "artifactPaths": ["src/core/workflow.ts", "test/workflow/routing.test.ts", "test/workflow/history-regressions.test.ts"]
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "test/workflow/routing.test.ts",
+        "test/workflow/history-regressions.test.ts"
+      ]
     },
     {
       "id": "e-implementation-routing-tests",
@@ -340,7 +573,9 @@
       "result": "pass",
       "exitCode": 0,
       "summary": "pnpm test:acceptance passed all workflow files, including routing, hidden workflow, template, source-contract, and history regression coverage.",
-      "artifactPaths": ["test/workflow"]
+      "artifactPaths": [
+        "test/workflow"
+      ]
     },
     {
       "id": "e-implementation-pattern",
@@ -349,7 +584,11 @@
       "result": "pass",
       "exitCode": 0,
       "summary": "Generated guidance now expresses the Evidence-Gated Lifecycle without imposing Harnix release rules on consumer repositories.",
-      "artifactPaths": ["src/templates/harnix/agents.ts", "src/templates/harnix/workflow.ts", "src/skills/harnix-finish-work/SKILL.md"]
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "src/skills/harnix-finish-work/SKILL.md"
+      ]
     },
     {
       "id": "e-implementation-work-kind",
@@ -357,14 +596,23 @@
       "recordedAt": "2026-08-13T17:07:28.1564598+07:00",
       "result": "pass",
       "summary": "Feature, bugfix, hotfix, review-only, review-and-fix, refactor, test, and operational work kinds share one lifecycle with explicit route evidence.",
-      "artifactPaths": ["src/core/workflow.ts", "src/skills/harnix-check/SKILL.md", "test/workflow/history-regressions.test.ts"]
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "src/skills/harnix-check/SKILL.md",
+        "test/workflow/history-regressions.test.ts"
+      ]
     },
     {
       "id": "e-implementation-acceptance",
       "recordedAt": "2026-08-13T17:07:28.1564598+07:00",
       "result": "pass",
       "summary": "Fresh build, lint, typecheck, 319-test suite, acceptance aggregator, tarball smoke, performance, footprint, release scan, and whitespace check passed; no active-state Doctor error remains.",
-      "artifactPaths": ["CHANGELOG.md", "package.json", "src", "test"]
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "src",
+        "test"
+      ]
     },
     {
       "id": "e-final-history",
@@ -372,7 +620,9 @@
       "recordedAt": "2026-08-13T17:12:29.9756146+07:00",
       "result": "pass",
       "summary": "Final implementation did not expand the bounded history claim.",
-      "artifactPaths": [".harnix/tasks/20260813-141753-historyaudit/audit-report.md"]
+      "artifactPaths": [
+        ".harnix/tasks/20260813-141753-historyaudit/audit-report.md"
+      ]
     },
     {
       "id": "e-final-integrity",
@@ -380,7 +630,11 @@
       "recordedAt": "2026-08-13T17:12:29.9756146+07:00",
       "result": "pass",
       "summary": "Final task, journal, active-pointer, and safe historical-artifact regression coverage passed.",
-      "artifactPaths": ["src/core/tasks/task.ts", "src/commands/doctor.ts", "test/integration/doctor.test.ts"]
+      "artifactPaths": [
+        "src/core/tasks/task.ts",
+        "src/commands/doctor.ts",
+        "test/integration/doctor.test.ts"
+      ]
     },
     {
       "id": "e-final-consistency",
@@ -389,7 +643,9 @@
       "result": "pass",
       "exitCode": 0,
       "summary": "Final git diff --check passed.",
-      "artifactPaths": [".harnix/tasks/20260813-141753-historyaudit/task.json"]
+      "artifactPaths": [
+        ".harnix/tasks/20260813-141753-historyaudit/task.json"
+      ]
     },
     {
       "id": "e-final-routing",
@@ -397,7 +653,10 @@
       "recordedAt": "2026-08-13T17:12:29.9756146+07:00",
       "result": "pass",
       "summary": "Final router rejects blocked checkpoint/resume-status mismatches and preserves action/work-kind/risk semantics.",
-      "artifactPaths": ["src/core/workflow.ts", "test/workflow/routing.test.ts"]
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "test/workflow/routing.test.ts"
+      ]
     },
     {
       "id": "e-final-routing-tests",
@@ -406,7 +665,9 @@
       "result": "pass",
       "exitCode": 0,
       "summary": "Final full and acceptance test suites passed with workflow routing, history regression, and hidden workflow coverage.",
-      "artifactPaths": ["test/workflow"]
+      "artifactPaths": [
+        "test/workflow"
+      ]
     },
     {
       "id": "e-final-pattern",
@@ -415,7 +676,10 @@
       "result": "pass",
       "exitCode": 0,
       "summary": "Final template and skill sources retain the consumer-safe Evidence-Gated Lifecycle wording.",
-      "artifactPaths": ["src/templates/harnix", "src/skills"]
+      "artifactPaths": [
+        "src/templates/harnix",
+        "src/skills"
+      ]
     },
     {
       "id": "e-final-work-kind",
@@ -423,16 +687,283 @@
       "recordedAt": "2026-08-13T17:12:29.9756146+07:00",
       "result": "pass",
       "summary": "Final regression coverage retains feature, fix, hotfix, review, refactor, and test distinctions in one workflow.",
-      "artifactPaths": ["test/workflow/history-regressions.test.ts"]
+      "artifactPaths": [
+        "test/workflow/history-regressions.test.ts"
+      ]
     },
     {
       "id": "e-final-acceptance",
       "recordedAt": "2026-08-13T17:12:29.9756146+07:00",
       "result": "pass",
       "summary": "Final automated sequence passed: build, lint, typecheck, full test, acceptance, packaging, fake-home tarball smoke, performance, footprint, release scan, and whitespace check.",
-      "artifactPaths": ["CHANGELOG.md", "package.json", "src", "test"]
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "src",
+        "test"
+      ]
+    },
+    {
+      "id": "e-code-review-red",
+      "checkId": "code-review-skill-tests",
+      "recordedAt": "2026-08-13T18:51:50.1972768+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Focused skill-source RED failed because harnix-check description did not contain code review and its body did not contain the bounded review protocol.",
+      "artifactPaths": [
+        "test/workflow/skill-sources.test.ts",
+        "src/skills/harnix-check/SKILL.md"
+      ]
+    },
+    {
+      "id": "e-code-review-focused-green",
+      "checkId": "code-review-skill-tests",
+      "recordedAt": "2026-08-13T18:51:50.1972768+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused workflow GREEN passed 23/23 assertions; platform setup/global-adapter parity passed 20/20 assertions for the canonical seven-skill content.",
+      "artifactPaths": [
+        "src/skills/harnix-check/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/history-regressions.test.ts",
+        "test/workflow/routing.test.ts",
+        "test/platform/setup.test.ts",
+        "test/platform/global-adapters.test.ts"
+      ]
+    },
+    {
+      "id": "e-code-review-skill-validator-omitted",
+      "checkId": "code-review-skill-tests",
+      "recordedAt": "2026-08-13T18:51:50.1972768+07:00",
+      "result": "skipped",
+      "exitCode": 1,
+      "summary": "skill-creator quick_validate.py could not import PyYAML. A temporary dependency download was not authorized by policy, so no package was installed; Harnix catalog frontmatter validation remains covered by project tests.",
+      "artifactPaths": [
+        "src/skills/harnix-check/SKILL.md",
+        "src/skills/catalog.ts"
+      ]
+    },
+    {
+      "id": "e-code-review-compliance",
+      "recordedAt": "2026-08-13T18:54:02.5016698+07:00",
+      "result": "pass",
+      "summary": "Diff review confirmed R11/S8 scope: one canonical harnix-check gained discoverable bounded read-only review semantics, upstream checkout was not vendored or executed, no eighth skill/workflow or Git/profile mutation was added, and version/changelog were updated.",
+      "artifactPaths": [
+        ".harnix/tasks/20260813-141753-historyaudit/research/code-review-skill-upstream.md",
+        ".harnix/tasks/20260813-141753-historyaudit/prd.md",
+        ".harnix/tasks/20260813-141753-historyaudit/plan.md",
+        "src/skills/harnix-check/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        "package.json",
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "id": "e-code-review-broader-gates-blocked",
+      "recordedAt": "2026-08-13T18:54:02.5016698+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Fresh build, lint and typecheck passed. Full test ran 321 assertions: 319 passed, 1 skipped and package-contract failed because pre-existing untracked pnpm-workspace.yaml exists, violating the frozen single-package/no-workspace invariant. Exact pnpm install was not authorized and later gates were not run after the required stop-on-failure boundary.",
+      "artifactPaths": [
+        "test/unit/package-contract.test.ts",
+        "pnpm-workspace.yaml",
+        "package.json",
+        "src",
+        "test"
+      ]
+    },
+    {
+      "id": "e-blocker-resolved-full-authority",
+      "recordedAt": "2026-08-13T20:12:12.2297760+07:00",
+      "result": "pass",
+      "summary": "The pre-existing pnpm-workspace.yaml is absent and the user explicitly authorized dependency validation, self-host reconciliation, disposable-profile smoke, and completion work; the task resumed to verifying/debugging without discarding prior evidence.",
+      "artifactPaths": [
+        ".harnix/tasks/20260813-141753-historyaudit/task.json"
+      ]
+    },
+    {
+      "id": "e-s9-state-owner-red",
+      "checkId": "skill-state-owner-tests",
+      "recordedAt": "2026-08-13T20:13:24.0000000+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Focused RED produced three expected failures: blocked/replan routed Brainstorm instead of Continue, completion accepted verifying/verifying without an explicit finishing checkpoint, and skill prose lacked the single-owner contract.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "src/skills",
+        "test/workflow/routing.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "e-final-history-coverage",
+      "checkId": "history-inventory",
+      "recordedAt": "2026-08-13T20:40:00.0000000+07:00",
+      "result": "pass",
+      "summary": "Final bounded review preserved the original six-thread history coverage and did not expand claims to unavailable or deleted Codex transcripts.",
+      "artifactPaths": [
+        ".harnix/tasks/20260813-141753-historyaudit/audit-report.md"
+      ]
+    },
+    {
+      "id": "e-final-artifact-audit",
+      "checkId": "artifact-audit",
+      "recordedAt": "2026-08-13T20:40:00.0000000+07:00",
+      "result": "pass",
+      "summary": "Fresh Doctor and task inspection found no active-state error; self-host config, canonical workflow, managed guide and repo-map are current while historical journal/task warnings remain preserved and non-fixable.",
+      "artifactPaths": [
+        ".harnix/config.yaml",
+        ".harnix/workflow.md",
+        ".harnix/tasks",
+        ".harnix/workspace"
+      ]
+    },
+    {
+      "id": "e-final-planning-consistency",
+      "checkId": "planning-consistency",
+      "recordedAt": "2026-08-13T20:40:00.0000000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final task/PRD/plan/research update is internally traceable and git diff --check exited 0; only Windows LF-to-CRLF working-copy notices were emitted.",
+      "artifactPaths": [
+        ".harnix/tasks/20260813-141753-historyaudit",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    },
+    {
+      "id": "e-final-routing-audit",
+      "checkId": "workflow-routing-audit",
+      "recordedAt": "2026-08-13T20:40:00.0000000+07:00",
+      "result": "pass",
+      "summary": "Final source review confirms blocked precedence, one owner per debugging/implementing/finishing checkpoint and conservative external platform readiness.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "src/skills",
+        "src/commands/global-doctor.ts"
+      ]
+    },
+    {
+      "id": "e-final-routing-baseline",
+      "checkId": "workflow-routing-baseline-tests",
+      "recordedAt": "2026-08-13T20:40:00.0000000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final full and acceptance suites passed the router and canonical skill-source tests; full suite was 323 passed with one platform-conditional skip.",
+      "artifactPaths": [
+        "test/workflow/routing.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "e-final-pattern-research",
+      "checkId": "workflow-pattern-research",
+      "recordedAt": "2026-08-13T20:40:00.0000000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final workflow/template/skill sources retain the Evidence-Gated Lifecycle, explicit finishing handoff and conservative platform evidence rules; whitespace validation passed.",
+      "artifactPaths": [
+        "docs/HARNIX_WORKFLOW.md",
+        "src/templates/harnix/workflow.ts",
+        "src/skills"
+      ]
+    },
+    {
+      "id": "e-final-work-kind-audit",
+      "checkId": "work-kind-coverage-audit",
+      "recordedAt": "2026-08-13T20:40:00.0000000+07:00",
+      "result": "pass",
+      "summary": "Final routing/history regression suite retains the requested feature, fix, hotfix, review, refactor, test and operational work-kind mappings in one workflow.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "test/workflow/history-regressions.test.ts"
+      ]
+    },
+    {
+      "id": "e-final-code-review-skill",
+      "checkId": "code-review-skill-tests",
+      "recordedAt": "2026-08-13T20:40:00.0000000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "All seven canonical skills passed skill-creator quick validation under UTF-8, and final platform/workflow acceptance preserved byte parity and the bounded harnix-check review protocol.",
+      "artifactPaths": [
+        "src/skills",
+        "test/workflow/skill-sources.test.ts",
+        "test/platform/global-adapters.test.ts"
+      ]
+    },
+    {
+      "id": "e-final-s9-green",
+      "checkId": "skill-state-owner-tests",
+      "recordedAt": "2026-08-13T20:40:00.0000000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN passed 29/29 neighboring workflow assertions and final acceptance passed all routing/skill/completion tests with blocked precedence and verifying/finishing enforcement.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "src/skills",
+        "test/workflow/routing.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "e-final-global-tool-session-blocked",
+      "checkId": "global-tool-session-smoke",
+      "recordedAt": "2026-08-13T20:40:00.0000000+07:00",
+      "result": "fail",
+      "summary": "Authorized smoke passed fake-home install/protocol/uninstall preservation, seven-skill discovery on Kiro and Antigravity, plugin validation, and objective Antigravity hook execution after the rule-frontmatter fix. Completion remains blocked because Kiro 2.16.0 global JSON-v1 hook did not fire in default or --v3 non-interactive probes and Codex remains installed-pending-trust until exact /hooks review/trust and activation evidence.",
+      "artifactPaths": [
+        ".harnix/tasks/20260813-141753-historyaudit/research/global-tool-session-validation.md",
+        "src/configurators/antigravity.ts",
+        "test/platform/global-adapters.test.ts",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
+      ]
+    },
+    {
+      "id": "e-final-automated-acceptance",
+      "recordedAt": "2026-08-13T20:40:00.0000000+07:00",
+      "result": "pass",
+      "summary": "Exact final sequence passed: frozen install, build, lint, typecheck, 323-test full suite, acceptance aggregator, pack check, all-platform tarball smoke, init performance, 87.63% footprint reduction, release scan and git diff check.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "src",
+        "test",
+        "docs"
+      ]
+    },
+    {
+      "id": "e-final-global-tool-session-pass",
+      "checkId": "global-tool-session-smoke",
+      "recordedAt": "2026-08-13T20:54:05.4260709+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "User explicitly deferred Kiro CLI manual hook activation without removing Kiro implementation or automated coverage and without claiming it active. The exact Codex hook hash is persisted as trusted; a fresh real-profile codex-cli 0.147.0-alpha.6.6 read-only ephemeral probe, without --dangerously-bypass-hook-trust, returned HOOK_CONTEXT_PRESENT from automatically injected developer context. Antigravity objective activation and disposable lifecycle evidence remain green.",
+      "artifactPaths": [
+        ".harnix/tasks/20260813-141753-historyaudit/research/global-tool-session-validation.md",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    },
+    {
+      "id": "e-authorized-scope-final-gates",
+      "recordedAt": "2026-08-13T20:56:41.6472006+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "After the authorized Kiro deferral and Codex activation evidence were persisted, the exact completion sequence passed: frozen install, build, lint, typecheck, full suite (323 passed, one platform-conditional skip), acceptance aggregator, pack check, all-platform tarball smoke, init measurement (343.48 ms worst), footprint measurement (87.63% reduction), release scan and git diff check.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "src",
+        "test",
+        "docs",
+        ".harnix/tasks/20260813-141753-historyaudit"
+      ]
     }
   ],
   "createdAt": "2026-08-13T14:17:53.0959962+07:00",
-  "updatedAt": "2026-08-13T17:14:57.1803977+07:00"
+  "updatedAt": "2026-08-13T13:57:58.756Z",
+  "completedAt": "2026-08-13T13:57:58.756Z"
 }

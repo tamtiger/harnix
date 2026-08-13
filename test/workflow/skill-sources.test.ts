@@ -32,6 +32,14 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "compliance",
     "quality and security",
     "standalone read-only review",
+    "working-tree diff",
+    "explicit commit range",
+    "bounded paths",
+    "file:line",
+    "fix direction",
+    "ready-with-fixes",
+    "omitted checks",
+    "residual risk",
   ],
   "harnix-finish-work": [
     "active pointer",
@@ -91,6 +99,30 @@ describe("canonical Harnix workflow skill sources", () => {
 
     expect(workflowSource).not.toContain("body: \"Incoming state:");
     expect(workflowSource).not.toContain("export const workflowSkills: SkillTemplate[] = [");
+  });
+
+  it("makes the check skill discoverable for code review and review feedback", async () => {
+    const content = await readSkill("harnix-check");
+    const description = content.match(/^---\n[\s\S]*?description:\s*(.+)\n---/u)?.[1] ?? "";
+
+    expect(description.toLowerCase()).toContain("code review");
+    expect(description.toLowerCase()).toContain("review feedback");
+    expect(content).not.toMatch(/dispatch a code reviewer subagent|before merge to main|auto-?fix/iu);
+  });
+
+  it("keeps each persisted checkpoint owned by one stage skill", async () => {
+    const brainstorm = await readSkill("harnix-brainstorm");
+    const implement = await readSkill("harnix-implement");
+    const check = await readSkill("harnix-check");
+    const finish = await readSkill("harnix-finish-work");
+    const continuation = await readSkill("harnix-continue");
+
+    expect(brainstorm).toContain("outside `planning|replan`");
+    expect(implement).toContain("`in_progress/implementing`");
+    expect(implement).not.toContain("`implementing` or `debugging`");
+    expect(check).toContain("persist `verifying/finishing`");
+    expect(finish).toContain("Accept only `verifying/finishing`");
+    expect(continuation).toContain("Blocked state takes precedence over its checkpoint");
   });
 });
 
