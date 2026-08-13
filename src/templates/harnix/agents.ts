@@ -54,13 +54,15 @@ Use the skills in this order when their stage applies:
 
 The persisted lifecycle is planning -> ready -> in_progress -> verifying -> completed. A blocked task resumes only to its recorded status. Do not skip gates or treat stale, partial, or inferred output as verification.
 
+Use Evidence → Requirements → Plan → Execute → Verify → Persist as the semantic lifecycle. Feature, bugfix, hotfix, refactor, test, docs, maintenance, migration, dependency, security, performance, and release are work kinds that choose risk and validation, not separate workflows. Standalone read-only code review is Bypass; review-and-fix is a task mutation.
+
 Operating rules:
 
 - Preserve user-owned files, tasks, specs, research, journals, credentials, and unrelated configuration.
 - Keep generated paths repository-relative and never expose secrets, prompts, or machine-specific absolute paths in output.
 - Run harnix doctor when managed files, platform setup, or project state may have drifted.
 - For explicit implementation-stage discovery in an initialized project, run \`harnix repo-map --query <text>\`. It returns cache-only navigation hints; use \`harnix doctor --fix\` to rebuild a missing, stale, or invalid cache. Platform hooks must not invoke repository-map queries or refreshes.
-- Before recording any task as \`completed\`, increment the package patch version and update \`CHANGELOG.md\`; include both in that task's final verification.
+- Before recording any task as \`completed\`, follow this project's release/version instruction when one exists; do not invent package or changelog side effects.
 - Require explicit user authorization for destructive, networked, installation, upgrade, purge, or externally visible actions.
 - Never commit, branch, create a worktree, merge, push, publish, or create a pull request automatically.
 - Before any commit, show the proposed changes and commit message, then wait for explicit user approval.

@@ -10,7 +10,7 @@ const temporaryRepository = useTemporaryRepositories();
 
 describe("task state", () => {
   it("applies task transitions and learning threshold", async () => {
-    const task = validateTask({ generator: "harnix", schemaVersion: 1, id: "20260807-120000-x", title: "x", mode: "lite", status: "planning", checkpoint: "planning", goal: "x", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: "x", updatedAt: "x" } as TaskRecord);
+    const task = validateTask({ generator: "harnix", schemaVersion: 1, id: "20260807-120000-x", title: "x", mode: "lite", status: "planning", checkpoint: "planning", goal: "x", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp } as TaskRecord);
     expect(transitionTask(task, "ready", "ready").status).toBe("ready");
     const root = await temporaryRepository(); await saveTask(root, task); await setActiveTask(root, task.id);
     expect((await resolveActiveTask(root))?.id).toBe(task.id); await clearActiveTask(root, task.id); expect(await resolveActiveTask(root)).toBeUndefined();
@@ -48,7 +48,7 @@ describe("task state", () => {
 
   it("archives only completed tasks and preserves task data", async () => {
     const root = await temporaryRepository(); const task = taskFixture();
-    const evidence = { id: "e", recordedAt: "x", result: "pass" as const, summary: "ok", artifactPaths: [] };
+    const evidence = { id: "e", recordedAt: timestamp, result: "pass" as const, summary: "ok", artifactPaths: [] };
     const completed = transitionTask({ ...task, evidence: [evidence], acceptanceCriteria: [{ ...task.acceptanceCriteria[0]!, status: "met", evidenceIds: ["e"] }] }, "ready", "ready");
     const inProgress = transitionTask(completed, "in_progress", "implementing"); const verifying = transitionTask(inProgress, "verifying", "verifying"); const done = transitionTask(verifying, "completed", "finishing");
     await saveTask(root, done); await setActiveTask(root, done.id); await archiveTask(root, done); expect(await resolveActiveTask(root)).toBeUndefined(); expect((await readFile(join(root, "tasks", done.id, "task.json"), "utf8"))).toContain(done.id);
@@ -64,9 +64,9 @@ describe("task state", () => {
     const task = taskFixture();
     const blocker = { kind: "external" as const, summary: "Waiting for upstream", nextAction: "Retry after the upstream incident", resumeStatus: "planning" as const };
 
-    const blocked = transitionTask(task, "blocked", "debugging", undefined, blocker);
+    const blocked = transitionTask(task, "blocked", "planning", undefined, blocker);
 
-    expect(blocked).toMatchObject({ status: "blocked", checkpoint: "debugging", blocker });
+    expect(blocked).toMatchObject({ status: "blocked", checkpoint: "planning", blocker });
     expect(transitionTask(blocked, "planning", "planning").blocker).toBeUndefined();
   });
 
@@ -79,8 +79,18 @@ describe("task state", () => {
     expect(() => validateTask({ ...taskFixture(), evidence: [{ id: "e" }] })).toThrow("Evidence");
     expect(() => validateTask({ ...taskFixture(), acceptanceCriteria: [{ id: "a", text: "x", status: "bad", evidenceIds: [] }] })).toThrow("Acceptance");
   });
+
+  it("rejects unsafe references, invalid timestamps, duplicate IDs, and illegal status/checkpoint combinations", () => {
+    expect(() => validateTask({ ...taskFixture(), createdAt: "not-a-time" })).toThrow("timestamp");
+    expect(() => validateTask({ ...taskFixture(), relevantPaths: ["../escape"] })).toThrow("path");
+    expect(() => validateTask({ ...taskFixture(), validationPlan: [{ id: "check", description: "x", scope: "focused", required: true }], evidence: [{ id: "e", checkId: "missing", recordedAt: timestamp, result: "pass", summary: "x", artifactPaths: [] }] })).toThrow("check");
+    expect(() => validateTask({ ...taskFixture(), acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }, { id: "a", text: "y", status: "pending", evidenceIds: [] }] })).toThrow(/duplicate/iu);
+    expect(() => validateTask({ ...taskFixture(), status: "ready", checkpoint: "implementing" })).toThrow("checkpoint");
+  });
 });
 
+const timestamp = "2026-08-13T00:00:00.000Z";
+
 function taskFixture(): TaskRecord {
-  return { generator: "harnix", schemaVersion: 1, id: "20260807-120000-x", title: "x", mode: "lite", status: "planning", checkpoint: "planning", goal: "x", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: "x", updatedAt: "x" };
+  return { generator: "harnix", schemaVersion: 1, id: "20260807-120000-x", title: "x", mode: "lite", status: "planning", checkpoint: "planning", goal: "x", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp };
 }

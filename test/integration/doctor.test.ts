@@ -8,11 +8,34 @@ import { setupPlatforms } from "../../src/commands/setup.js";
 import { GlobalManagedTransactionError } from "../../src/utils/global-managed-files.js";
 import { readManifest, writeManifest } from "../../src/utils/managed-files.js";
 import { sha256 } from "../../src/utils/hashing.js";
+import type { TaskRecord } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-doctor-");
 const temporaryUserHome = useTemporaryUserHomes("harnix-doctor-home-");
+const timestamp = "2026-08-13T00:00:00.000Z";
+
+function taskRecord(id: string, status: "in_progress" | "completed", checkpoint: "implementing" | "finishing"): TaskRecord {
+  return {
+    generator: "harnix" as const,
+    schemaVersion: 1 as const,
+    id,
+    title: id,
+    mode: "lite" as const,
+    status,
+    checkpoint,
+    goal: "test",
+    nonGoals: [],
+    acceptanceCriteria: [],
+    relevantPaths: [],
+    relevantSpecs: [],
+    validationPlan: [],
+    evidence: [],
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+}
 
 function globalOptions(home: string) {
   return {
@@ -23,6 +46,63 @@ function globalOptions(home: string) {
 }
 
 describe("diagnoseProject Doctor v2", () => {
+  it("reports completed task drift as a warning but fails closed for an invalid active task", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const taskRoot = join(root, ".harnix", "tasks");
+    const historical = taskRecord("20260813-120000-history", "completed", "finishing");
+    historical.evidence = [{ id: "e", checkId: "check", recordedAt: timestamp, result: "pass", summary: "missing exit code", artifactPaths: [] }];
+    historical.validationPlan = [{ id: "check", description: "run", command: "test", scope: "focused", required: true }];
+    historical.acceptanceCriteria = [{ id: "a", text: "done", status: "met", evidenceIds: ["e"] }];
+    historical.completedAt = timestamp;
+    await mkdir(join(taskRoot, historical.id), { recursive: true });
+    await writeFile(join(taskRoot, historical.id, "task.json"), JSON.stringify(historical));
+
+    const warning = await diagnoseProject({ root, ...globalOptions(home) });
+    expect(warning.project.status).toBe("ready");
+    expect(warning.project.findings).toContainEqual(expect.objectContaining({ code: "task-invalid-historical", severity: "warning", path: `tasks/${historical.id}/task.json` }));
+
+    const active = taskRecord("20260813-120001-active", "in_progress", "implementing");
+    active.createdAt = "invalid";
+    await mkdir(join(taskRoot, active.id), { recursive: true });
+    await writeFile(join(taskRoot, active.id, "task.json"), JSON.stringify(active));
+    await writeFile(join(taskRoot, ".active"), `${active.id}\n`);
+
+    const invalid = await diagnoseProject({ root, ...globalOptions(home) });
+    expect(invalid.project.status).toBe("invalid");
+    expect(invalid.project.findings).toContainEqual(expect.objectContaining({ code: "task-invalid-active", severity: "error", path: `tasks/${active.id}/task.json` }));
+  });
+
+  it("reports malformed and unlinked historical journal records without rewriting them", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const journal = join(root, ".harnix", "workspace", "tam", "journal", "2026-08-13.jsonl");
+    await mkdir(join(root, ".harnix", "workspace", "tam", "journal"), { recursive: true });
+    await writeFile(journal, ["not json", JSON.stringify({ generator: "harnix", schemaVersion: 1, id: "orphan", recordedAt: timestamp, developer: "tam", taskId: "20260813-120000-unknown", kind: "completion", summary: "orphan", evidenceIds: [] })].join("\n") + "\n");
+
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+
+    expect(report.project.status).toBe("ready");
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "journal-malformed", severity: "warning", path: "workspace/tam/journal/2026-08-13.jsonl" }));
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "journal-task-unlinked", severity: "warning", path: "workspace/tam/journal/2026-08-13.jsonl" }));
+    await expect(readFile(journal, "utf8")).resolves.toContain("not json");
+  });
+
+  it("reports an unsafe artifact path on a completed historical task without invalidating the record", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const historical = taskRecord("20260813-120000-artifact", "completed", "finishing");
+    historical.completedAt = timestamp;
+    historical.evidence = [{ id: "e", recordedAt: timestamp, result: "pass", summary: "retained record", artifactPaths: ["../expired-artifact.txt"] }];
+    await mkdir(join(root, ".harnix", "tasks", historical.id), { recursive: true });
+    await writeFile(join(root, ".harnix", "tasks", historical.id, "task.json"), JSON.stringify(historical));
+
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+
+    expect(report.project.status).toBe("ready");
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "task-evidence-artifact-unsafe", severity: "warning", path: `tasks/${historical.id}/task.json` }));
+    expect(report.project.findings).not.toContainEqual(expect.objectContaining({ code: "task-invalid-historical", path: `tasks/${historical.id}/task.json` }));
+  });
   it("reports config v1 as fixable and migrates it only with explicit fix", async () => {
     const root = await temporaryRepository(); const home = await temporaryUserHome();
     await initializeProject({ developer: "tam", root, yes: true });

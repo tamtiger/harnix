@@ -7,18 +7,19 @@ import { saveTask, setActiveTask, type TaskRecord } from "../../src/core/tasks/t
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
+const timestamp = "2026-08-13T00:00:00.000Z";
 
 describe("internal context", () => {
   it("returns empty output for an uninitialized project and JSON for Codex", async () => {
     const root = await temporaryRepository(); expect(await renderInternalContext(root, "kiro")).toBe("");
     await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" })); await mkdir(join(root, "docs"), { recursive: true }); await writeFile(join(root, "docs", "a.md"), "context");
-    const task: TaskRecord = { generator: "harnix", schemaVersion: 1, id: "20260807-120000-task", title: "t", mode: "lite", status: "in_progress", checkpoint: "implementing", goal: "t", nonGoals: [], acceptanceCriteria: [], relevantPaths: ["docs/a.md"], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: "x", updatedAt: "x" };
+    const task: TaskRecord = { generator: "harnix", schemaVersion: 1, id: "20260807-120000-task", title: "t", mode: "lite", status: "in_progress", checkpoint: "implementing", goal: "t", nonGoals: [], acceptanceCriteria: [], relevantPaths: ["docs/a.md"], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp };
     await saveTask(join(root, ".harnix"), task); await setActiveTask(join(root, ".harnix"), task.id);
     expect(JSON.parse(await renderInternalContext(root, "codex"))).toMatchObject({ hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: expect.stringContaining("context") } });
   });
   it("bounds Codex hook context and fails closed for corrupt Harnix state", async () => {
     const root = await temporaryRepository(); await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" })); await mkdir(join(root, "docs"), { recursive: true }); await writeFile(join(root, "docs", "large.md"), "x".repeat(10_000));
-    const task: TaskRecord = { generator: "harnix", schemaVersion: 1, id: "20260807-120000-large", title: "t", mode: "lite", status: "in_progress", checkpoint: "implementing", goal: "t", nonGoals: [], acceptanceCriteria: [], relevantPaths: ["docs/large.md"], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: "x", updatedAt: "x" };
+    const task: TaskRecord = { generator: "harnix", schemaVersion: 1, id: "20260807-120000-large", title: "t", mode: "lite", status: "in_progress", checkpoint: "implementing", goal: "t", nonGoals: [], acceptanceCriteria: [], relevantPaths: ["docs/large.md"], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp };
     await saveTask(join(root, ".harnix"), task); await setActiveTask(join(root, ".harnix"), task.id);
     const output = JSON.parse(await renderInternalContext(root, "codex")) as { hookSpecificOutput: { additionalContext: string } }; expect(output.hookSpecificOutput.additionalContext.length).toBeLessThanOrEqual(2500);
     await writeFile(join(root, ".harnix", "config.yaml"), "not: [valid"); await expect(renderInternalContext(root, "codex")).rejects.toThrow();
@@ -32,7 +33,7 @@ describe("internal context", () => {
     await mkdir(join(root, "docs"), { recursive: true });
     await writeFile(join(root, "docs", "large.md"), "x".repeat(1_000_000));
     await writeFile(join(root, "docs", "small.md"), "small hook context\n");
-    const task: TaskRecord = { generator: "harnix", schemaVersion: 1, id: "20260811-120000-bounded", title: "t", mode: "lite", status: "in_progress", checkpoint: "implementing", goal: "t", nonGoals: [], acceptanceCriteria: [], relevantPaths: ["docs/large.md", "docs/small.md"], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: "x", updatedAt: "x" };
+    const task: TaskRecord = { generator: "harnix", schemaVersion: 1, id: "20260811-120000-bounded", title: "t", mode: "lite", status: "in_progress", checkpoint: "implementing", goal: "t", nonGoals: [], acceptanceCriteria: [], relevantPaths: ["docs/large.md", "docs/small.md"], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp };
     await saveTask(join(root, ".harnix"), task); await setActiveTask(join(root, ".harnix"), task.id);
 
     const output = JSON.parse(await renderInternalContextForHook({ fallbackCwd: root, platform: "codex", event: { cwd: root } })) as { hookSpecificOutput: { additionalContext: string } };
@@ -76,7 +77,7 @@ describe("internal context", () => {
     await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" }));
     await mkdir(join(root, "docs"), { recursive: true });
     await writeFile(join(root, "docs", "context.md"), "first invocation context");
-    const task: TaskRecord = { generator: "harnix", schemaVersion: 1, id: "20260811-120000-invocation", title: "t", mode: "lite", status: "in_progress", checkpoint: "implementing", goal: "t", nonGoals: [], acceptanceCriteria: [], relevantPaths: ["docs/context.md"], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: "x", updatedAt: "x" };
+    const task: TaskRecord = { generator: "harnix", schemaVersion: 1, id: "20260811-120000-invocation", title: "t", mode: "lite", status: "in_progress", checkpoint: "implementing", goal: "t", nonGoals: [], acceptanceCriteria: [], relevantPaths: ["docs/context.md"], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp };
     await saveTask(join(root, ".harnix"), task); await setActiveTask(join(root, ".harnix"), task.id);
 
     const first = JSON.parse(await renderInternalContextForHook({ fallbackCwd: root, platform: "antigravity", event: { cwd: root, invocationNum: 0 } })) as { injectSteps: Array<{ ephemeralMessage: string }> };
@@ -95,7 +96,7 @@ describe("internal context", () => {
     await Promise.all([first, second].map(async (root, index) => {
       await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: `tam-${index}` }));
       await mkdir(join(root, "docs"), { recursive: true }); await writeFile(join(root, "docs", "private.md"), `private-${index}`);
-      const task: TaskRecord = { generator: "harnix", schemaVersion: 1, id: `20260811-12000${index}-root`, title: "t", mode: "lite", status: "in_progress", checkpoint: "implementing", goal: "t", nonGoals: [], acceptanceCriteria: [], relevantPaths: ["docs/private.md"], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: "x", updatedAt: "x" };
+      const task: TaskRecord = { generator: "harnix", schemaVersion: 1, id: `20260811-12000${index}-root`, title: "t", mode: "lite", status: "in_progress", checkpoint: "implementing", goal: "t", nonGoals: [], acceptanceCriteria: [], relevantPaths: ["docs/private.md"], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp };
       await saveTask(join(root, ".harnix"), task); await setActiveTask(join(root, ".harnix"), task.id);
     }));
 

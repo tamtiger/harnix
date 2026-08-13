@@ -15,6 +15,7 @@ import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces
 import { searchMemory } from "./commands/mem.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
+import { finishWorkflow, inspectWorkflow, saveWorkflow } from "./commands/internal-workflow.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
@@ -23,6 +24,7 @@ import { GlobalManagedTransactionError } from "./utils/global-managed-files.js";
 export interface ProgramOptions {
   interactive?: boolean | undefined;
   hookEventInput?: (() => Promise<string>) | undefined;
+  workflowInput?: (() => Promise<string>) | undefined;
   homeResolver?: HomeResolver | undefined;
   environment?: Readonly<Record<string, string | undefined>> | undefined;
   commandLookup?: HookCommandLookup | undefined;
@@ -139,6 +141,20 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   });
   repoMap.command("query").requiredOption("--query <text>").option("--limit <count>", "Maximum results", "20").action(async (options: { query: string; limit: string }) => {
     process.stdout.write(`${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query, parseRepoMapLimit(options.limit)))}\n`);
+  });
+  const workflow = internal.command("workflow", { hidden: true });
+  workflow.command("inspect").action(async () => {
+    process.stdout.write(`${JSON.stringify(await inspectWorkflow(await resolveProjectRoot(process.cwd())))}\n`);
+  });
+  workflow.command("save").action(async () => {
+    const input = programOptions.workflowInput ? await programOptions.workflowInput() : await readBoundedStdin();
+    if (!input) throw new Error("Workflow save requires a bounded JSON envelope on stdin.");
+    let envelope: unknown;
+    try { envelope = JSON.parse(input) as unknown; } catch { throw new Error("Workflow save requires valid JSON."); }
+    process.stdout.write(`${JSON.stringify(await saveWorkflow(await resolveProjectRoot(process.cwd()), envelope as Parameters<typeof saveWorkflow>[1]))}\n`);
+  });
+  workflow.command("finish").action(async () => {
+    process.stdout.write(`${JSON.stringify(await finishWorkflow(await resolveProjectRoot(process.cwd())))}\n`);
   });
   program.addCommand(internal, { hidden: true });
   return program;

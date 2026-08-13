@@ -3,7 +3,9 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import { readConfigDocument, type HarnixConfigV2 } from "../core/config/config.js";
 import { diagnoseRepoMap, refreshRepoMap } from "../core/repo-map/service.js";
 import { ownershipState, readManifest, type ManagedEntry, type ManagedManifest } from "../utils/managed-files.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
+import { normalizeRepositoryPath, resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
+import { validateTask } from "../core/tasks/task.js";
+import { searchJournal, type JournalEntry } from "../core/journal/journal.js";
 import { desiredFiles, updateProject } from "./update.js";
 import {
   diagnoseGlobalIntegrations,
@@ -189,6 +191,7 @@ async function diagnoseProjectSection(root: string): Promise<DoctorProjectSectio
   for (const [path] of desired) if (!manifest.entries.some((entry) => entry.scope === "project" && entry.path === path)) findings.push(finding("managed-untracked", "warning", path, "Desired project file is not yet owned by Harnix.", true));
 
   await inspectUntrackedLegacySurfaces(root, manifest, findings);
+  await inspectTaskRecords(root, findings);
   await inspectSensitiveFiles(root, findings);
   await inspectPermissions(root, manifest, findings);
   const repoMap = await diagnoseRepoMap(root);
@@ -196,7 +199,102 @@ async function diagnoseProjectSection(root: string): Promise<DoctorProjectSectio
     const severity = repoMap === "invalid" ? "error" : "warning";
     findings.push(finding(`repo-map-${repoMap}`, severity, ".harnix/cache/repo-map-v1.json", `Repository map cache is ${repoMap}; run doctor --fix to rebuild it.`, true));
   }
-  return { status: "ready", findings: sortFindings(findings) };
+  return { status: findings.some((entry) => entry.severity === "error") ? "invalid" : "ready", findings: sortFindings(findings) };
+}
+
+async function inspectTaskRecords(root: string, findings: DoctorFinding[]): Promise<void> {
+  const activePath = await resolveSafeHarnixPath(root, "tasks/.active");
+  let activeId: string | undefined;
+  try {
+    const value = (await readFile(activePath, "utf8")).trim();
+    if (value.length > 0) activeId = value;
+  } catch (error: unknown) {
+    if (!isMissing(error)) findings.push(finding("active-pointer-unreadable", "error", "tasks/.active", redact(error, root), false));
+  }
+
+  const tasks = new Map<string, ReturnType<typeof validateTask>>();
+  try {
+    const entries = await readdir(await resolveSafeHarnixPath(root, "tasks"), { encoding: "utf8", withFileTypes: true });
+    let activeFound = activeId === undefined;
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const logicalPath = `tasks/${entry.name}/task.json`;
+      try {
+        const path = await resolveSafeProjectPath(root, `.harnix/${logicalPath}`);
+        const source = JSON.parse(await readFile(path, "utf8")) as unknown;
+        let task: ReturnType<typeof validateTask>;
+        try {
+          task = validateTask(source);
+        } catch (error: unknown) {
+          if (entry.name === activeId) throw error;
+          task = validateTask(source, { allowUnsafeCompletedEvidenceArtifacts: true });
+          if (task.status !== "completed" || !task.evidence.some((evidence) => evidence.artifactPaths.some((artifactPath) => !isSafeRepositoryPath(artifactPath)))) throw error;
+          findings.push(finding("task-evidence-artifact-unsafe", "warning", logicalPath, "A completed historical task references an unsafe or expired artifact path and was preserved without rewrite.", false));
+        }
+        tasks.set(task.id, task);
+        if (entry.name === activeId) {
+          activeFound = true;
+          if (task.status === "completed") findings.push(finding("task-active-completed", "error", logicalPath, "The active pointer references a completed task and must be repaired before continuation.", false));
+        }
+        if (task.mode === "full") {
+          for (const artifact of ["prd.md", "plan.md"]) {
+            try { await stat(await resolveSafeProjectPath(root, `.harnix/tasks/${task.id}/${artifact}`)); }
+            catch { findings.push(finding("task-full-artifact-missing", task.id === activeId ? "error" : "warning", `tasks/${task.id}/${artifact}`, "A Full task is missing a required planning artifact.", false)); }
+          }
+        }
+      } catch {
+        const active = entry.name === activeId;
+        findings.push(finding(active ? "task-invalid-active" : "task-invalid-historical", active ? "error" : "warning", logicalPath, active ? "The active task record is invalid and continuation must fail closed." : "A historical task record is invalid and was preserved without rewrite.", false));
+      }
+    }
+    if (!activeFound) findings.push(finding("active-pointer-missing-task", "error", "tasks/.active", "The active pointer does not identify a readable task record.", false));
+  } catch (error: unknown) {
+    if (!isMissing(error)) findings.push(finding("task-root-unreadable", "error", "tasks", redact(error, root), false));
+  }
+  await inspectJournalRecords(root, tasks, findings);
+}
+
+async function inspectJournalRecords(root: string, tasks: ReadonlyMap<string, ReturnType<typeof validateTask>>, findings: DoctorFinding[]): Promise<void> {
+  let developers;
+  try {
+    developers = await readdir(await resolveSafeHarnixPath(root, "workspace"), { encoding: "utf8", withFileTypes: true });
+  } catch (error: unknown) {
+    if (!isMissing(error)) findings.push(finding("journal-root-unreadable", "warning", "workspace", redact(error, root), false));
+    return;
+  }
+  for (const developer of developers) {
+    if (!developer.isDirectory()) continue;
+    const journalRoot = `workspace/${developer.name}/journal`;
+    let files;
+    try {
+      files = await readdir(await resolveSafeHarnixPath(root, journalRoot), { encoding: "utf8", withFileTypes: true });
+    } catch (error: unknown) {
+      if (!isMissing(error)) findings.push(finding("journal-root-unreadable", "warning", journalRoot, redact(error, root), false));
+      continue;
+    }
+    for (const file of files) {
+      if (!file.isFile() || !file.name.endsWith(".jsonl")) continue;
+      const logicalPath = `${journalRoot}/${file.name}`;
+      try {
+        const journal = await searchJournal(await resolveSafeHarnixPath(root, logicalPath));
+        if (journal.malformed > 0) findings.push(finding("journal-malformed", "warning", logicalPath, "A historical journal contains malformed records and was preserved without rewrite.", false));
+        for (const entry of journal.entries) inspectJournalLink(entry, tasks, logicalPath, findings);
+      } catch (error: unknown) {
+        findings.push(finding("journal-unreadable", "warning", logicalPath, redact(error, root), false));
+      }
+    }
+  }
+}
+
+function inspectJournalLink(entry: JournalEntry, tasks: ReadonlyMap<string, ReturnType<typeof validateTask>>, path: string, findings: DoctorFinding[]): void {
+  if (!entry.taskId) return;
+  const task = tasks.get(entry.taskId);
+  if (!task) {
+    findings.push(finding("journal-task-unlinked", "warning", path, "A historical journal references an unknown task and was preserved without rewrite.", false));
+    return;
+  }
+  const evidenceIds = new Set(task.evidence.map((evidence) => evidence.id));
+  if (entry.evidenceIds.some((id) => !evidenceIds.has(id))) findings.push(finding("journal-evidence-unlinked", "warning", path, "A historical journal references evidence absent from its task and was preserved without rewrite.", false));
 }
 
 async function inspectLegacyEntry(root: string, entry: ManagedEntry, findings: DoctorFinding[]): Promise<void> {
@@ -336,6 +434,11 @@ function redact(value: unknown, root: string): string {
 
 function containsSecret(value: string): boolean {
   return /(?:token|secret|password|api[_-]?key)\s*[=:]\s*['"]?[^\s,'"]{8,}/iu.test(value);
+}
+
+function isSafeRepositoryPath(value: string): boolean {
+  try { return normalizeRepositoryPath(value, { allowRoot: true }) === value; }
+  catch { return false; }
 }
 
 function isMissing(error: unknown): boolean {

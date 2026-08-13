@@ -33,7 +33,7 @@ Confirm that evidence still describes the current files. If files changed after 
 
 Use this order:
 
-1. increment the package patch version and update `CHANGELOG.md`; include both in the task's final verification evidence;
+1. follow the project-specific release instruction when one exists; do not invent package-version or changelog side effects;
 2. write the task `status` as `completed`, checkpoint `finishing`, `completedAt`, and final evidence links;
 3. persist the journal/archive material required by the project workflow;
 4. clear `.harnix/tasks/.active` only when it still points to this exact task;

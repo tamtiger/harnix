@@ -15,7 +15,12 @@ Read `.harnix/workflow.md`, the active task, and the smallest verification conte
 
 ## Incoming state
 
-Accept `in_progress` only after implementation scope and focused checks are complete, or resume `verifying/verifying`. Before running checks, persist `verifying` if not already recorded. Inspect current status/diff so verification covers actual changes, including user edits that must not be attributed to Harnix.
+Use one of two profiles:
+
+- **Standalone read-only review:** no active task and no mutation. Inspect the requested diff/code, report only evidence-backed findings with severity and precise location, and do not create task state, persist evidence, or fix files.
+- **Active-task verification:** accept `in_progress` only after implementation scope and focused checks are complete, or resume `verifying/verifying`. Before running checks, persist `verifying` if not already recorded. Inspect current status/diff so verification covers actual changes, including user edits that must not be attributed to Harnix.
+
+If a review request also asks for a code change, the finding is a hypothesis: route to planning/implementation before mutation rather than silently applying it from the read-only profile.
 
 ## Evidence rule
 

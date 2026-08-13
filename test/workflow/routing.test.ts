@@ -10,10 +10,15 @@ import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
-function task(evidenceAt: string, scope: "focused" | "full" = "full"): TaskRecord { return { generator: "harnix", schemaVersion: 1, id: "20260807-120000-task", title: "t", mode: "lite", status: "verifying", checkpoint: "verifying", goal: "t", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "met", evidenceIds: ["e"] }], relevantPaths: [], relevantSpecs: [], validationPlan: [{ id: "check", description: "verify", scope, required: true }], evidence: [{ id: "e", checkId: "check", recordedAt: evidenceAt, result: "pass", summary: "ok", artifactPaths: [] }], createdAt: "x", updatedAt: "x" }; }
+function task(evidenceAt: string, scope: "focused" | "full" = "full"): TaskRecord { return { generator: "harnix", schemaVersion: 1, id: "20260807-120000-task", title: "t", mode: "lite", status: "verifying", checkpoint: "verifying", goal: "t", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "met", evidenceIds: ["e"] }], relevantPaths: [], relevantSpecs: [], validationPlan: [{ id: "check", description: "verify", scope, required: true }], evidence: [{ id: "e", checkId: "check", recordedAt: evidenceAt, result: "pass", summary: "ok", artifactPaths: [] }], createdAt: "2026-08-07T00:00:00.000Z", updatedAt: "2026-08-07T00:00:00.000Z" }; }
 describe("workflow routing and completion evidence", () => {
-  it("routes bypass, forced, and material requests deterministically", () => {
-    expect(routeWorkflow({ intent: "question" })).toBe("bypass"); expect(routeWorkflow({ intent: "docs" })).toBe("lite"); expect(routeWorkflow({ intent: "fix", forceMode: "full" })).toBe("full"); expect(routeWorkflow({ intent: "fix", materialUnknown: true })).toBe("full");
+  it("routes action, work kind, risk, and active state deterministically", () => {
+    expect(routeWorkflow({ action: "review", workKind: "refactor", mutation: "none", riskSignals: [] })).toMatchObject({ entry: "bypass", owner: "harnix-check", reasonCodes: ["standalone-review"] });
+    expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [] })).toMatchObject({ entry: "create", mode: "lite", owner: "harnix-brainstorm", reasonCodes: ["low-risk-lite"] });
+    expect(routeWorkflow({ action: "change", workKind: "hotfix", mutation: "project", riskSignals: ["security-sensitive"] })).toMatchObject({ entry: "create", mode: "full", reasonCodes: ["risk-full"] });
+    expect(routeWorkflow({ action: "change", workKind: "bugfix", mutation: "project", riskSignals: [], activeTask: { mode: "lite", status: "ready", checkpoint: "ready" } })).toMatchObject({ entry: "resume", owner: "harnix-implement", reasonCodes: ["active-ready-authorized"] });
+    expect(routeWorkflow({ action: "plan", workKind: "refactor", mutation: "task-artifact", riskSignals: [], activeTask: { mode: "full", status: "ready", checkpoint: "ready" } })).toMatchObject({ entry: "resume", owner: "harnix-brainstorm", reasonCodes: ["active-replan"] });
+    expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [], activeTask: { mode: "lite", status: "blocked", checkpoint: "implementing", blocker: { kind: "decision", summary: "need decision", nextAction: "decide", resumeStatus: "ready" } } })).toMatchObject({ entry: "fail-closed", reasonCodes: ["invalid-active-state"] });
   });
   it("requires fresh required evidence for completion", () => {
     const now = Date.parse("2026-08-07T10:00:00Z"); expect(canCompleteTask(task("2026-08-07T09:30:00Z"), now)).toBe(true); expect(canCompleteTask(task("2026-08-07T06:00:00Z"), now)).toBe(false);
@@ -83,6 +88,16 @@ describe("workflow routing and completion evidence", () => {
     const current = task("2026-08-07T09:30:00Z");
     current.evidence.push({ id: "e-fail", checkId: "check", recordedAt: "2026-08-07T09:45:00Z", result: "fail", exitCode: 1, summary: "failed", artifactPaths: [] });
     expect(canCompleteTask(current, Date.parse("2026-08-07T10:00:00Z"))).toBe(false);
+  });
+  it("journals only criterion-supporting and latest required passing evidence", async () => {
+    const root = await temporaryRepository(); const current = new Date().toISOString(); const ready = task(current);
+    ready.evidence.push({ id: "old-failure", checkId: "check", recordedAt: new Date(Date.parse(current) - 60_000).toISOString(), result: "fail", exitCode: 1, summary: "old failure", artifactPaths: [] });
+    await saveTask(root, ready); await setActiveTask(root, ready.id);
+    await finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", ready, current);
+
+    const journal = await readFile(join(root, "journal.jsonl"), "utf8");
+    expect(journal).toContain('"e"');
+    expect(journal).not.toContain("old-failure");
   });
   it("should_clear_blocker_when_blocked_task_resumes", () => {
     const current = { ...task("2026-08-07T09:30:00Z"), status: "blocked" as const, blocker: { kind: "repository" as const, summary: "locked", nextAction: "retry", resumeStatus: "verifying" as const } };

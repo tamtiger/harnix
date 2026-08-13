@@ -4,6 +4,15 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; các mục dưới đây theo commit cho đến khi versioning/release workflow được triển khai.
 
+## [0.6.8] - 2026-08-13
+
+### Changed
+
+- Workflow routing now explicitly distinguishes requested action, work kind, mutation scope, risk, active state, and stage owner; standalone code review stays read-only while review-and-fix enters the normal task lifecycle.
+- Added hidden JSON-only workflow inspect/save/finish operations with legal transition, evidence-preservation, Full-artifact, completion-journal, and active-pointer safeguards.
+- Task and Doctor integrity checks now validate status/checkpoint and evidence relationships, report historical task/journal drift without rewriting it, and retain completed records whose transient artifact paths are no longer safe.
+- Generated consumer instructions use the repository's own release instruction instead of imposing Harnix package-version or changelog rules.
+
 ## [0.6.7] - 2026-08-13
 
 ### Fixed

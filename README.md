@@ -274,7 +274,7 @@ triage -> planning -> ready -> implementing -> verifying -> finishing -> complet
 - Full dùng cho thay đổi cross-layer, security-sensitive, material unknown hoặc yêu cầu implementation lớn; có thêm PRD/plan và research khi cần.
 - Câu hỏi chỉ đọc có thể bypass việc tạo task.
 - Finish yêu cầu fresh verification, mọi acceptance criterion đạt hoặc được waiver hợp lệ, sau đó journal evidence và clear active task.
-- Trước khi persist bất kỳ task nào là `completed`, tăng patch version trong `package.json`, cập nhật `CHANGELOG.md` và đưa các thay đổi đó vào final verification của chính task đó.
+- Trước khi persist bất kỳ task nào là `completed`, tuân theo release/version instruction của chính repository nếu có; Harnix không tự suy diễn `package.json` hoặc `CHANGELOG.md` side effect cho consumer.
 
 Xem [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) để biết transition, gate và artifact contract chi tiết.
 

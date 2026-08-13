@@ -31,12 +31,14 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "exit code",
     "compliance",
     "quality and security",
+    "standalone read-only review",
   ],
   "harnix-finish-work": [
     "active pointer",
     "completed",
     "Never commit",
     "residual risks",
+    "project-specific release instruction",
   ],
   "harnix-continue": [
     "routing table",

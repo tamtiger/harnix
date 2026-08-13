@@ -168,7 +168,7 @@ Trước `completed`, agent:
 3. Ghi evidence, outcome, residual risks và omitted checks.
 4. Ghi journal entry; tạo learning candidate chỉ từ non-obvious evidence.
 5. Promote learning vào spec chỉ khi có explicit approval hoặc recurrence/evidence gate, dưới dạng diff reviewable.
-6. Tăng patch version của package và cập nhật `CHANGELOG.md` trong chính task đó.
+6. Tuân theo release/version instruction của repository khi có; không tự suy diễn package hoặc changelog side effect cho consumer.
 7. Archive/complete task state bằng atomic write.
 
 Finish báo đúng trạng thái thực tế. Không biến Git integration thành điều kiện hoàn thành của Harnix.

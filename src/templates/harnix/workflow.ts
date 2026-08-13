@@ -10,6 +10,8 @@ This workflow applies only after locating the nearest initialized project ancest
 
 Use one active task and the canonical sequence: planning → ready → in_progress → verifying → completed. A task may be blocked only by a concrete decision, authority, credential, external dependency, or repository condition, and resumes only to its recorded status. Debugging, replan, and finishing are checkpoints, not alternate workflows.
 
+The Evidence-Gated Lifecycle is Restore/Triage → Evidence → Requirements → Plan/Ready → Execute → Verify → Persist/Finish. Debug/Replan is a feedback loop and Blocked/Continue restores the recorded stage. Feature, bugfix, hotfix, refactor, test, docs, maintenance, migration, dependency, security, performance, and release are work kinds, not additional workflows: select Lite/Full from actual risk and preserve the same gates. A standalone read-only code review is Bypass and reports evidence-backed findings without mutation; review-and-fix enters the normal task lifecycle.
+
 ## Persist and restore state
 
 1. Read \`.harnix/tasks/.active\` before creating work. If it names an unfinished valid task, resume from its persisted status and checkpoint instead of creating a duplicate.
@@ -36,7 +38,7 @@ Verification has two ordered stages: (1) compliance with the request, PRD/spec, 
 
 Fresh \`harnix init\` builds the structural repository-map cache. For explicit implementation-stage discovery, query it with \`harnix repo-map --query <text>\`; use \`harnix doctor --fix\` to safely rebuild a missing, stale, or invalid cache. Treat results as bounded navigation hints: read only the selected files, never source or secret content from the cache, and do not add these operations to platform hooks. Global instructions and hooks must remain fast no-write/no-network paths and must not invoke repository-map queries or refreshes.
 
-Increase the package patch version and update \`CHANGELOG.md\` before recording any task as \`completed\`; include the version change in that task's verification. Finish only when every criterion is met or explicitly waived with a reason, required evidence is fresh, and persisted state is updated safely. Before any commit, show the proposed changes and commit message, then wait for explicit user approval. Do not commit, branch, push, merge, publish, or create a PR automatically.
+Before recording any task as \`completed\`, follow this project's release/version instruction when one exists; do not invent package or changelog side effects. Finish only when every criterion is met or explicitly waived with a reason, required evidence is fresh, and persisted state is updated safely. Before any commit, show the proposed changes and commit message, then wait for explicit user approval. Do not commit, branch, push, merge, publish, or create a PR automatically.
 `;
 
 export { renderSkill, workflowSkills, type SkillTemplate } from "../../skills/catalog.js";
