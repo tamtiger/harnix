@@ -5,13 +5,13 @@ import { sha256 } from "../../utils/hashing.js";
 
 export interface ContextEntry { path: string; reason: string; priority: number; pinned: boolean; states: string[]; contentHash?: string; }
 export interface ContextManifest { generator: "harnix"; schemaVersion: 1; taskId: string; maxCharacters: number; entries: ContextEntry[]; omitted: Array<{ path: string; reason: "budget" | "duplicate" | "missing" | "unsafe" }>; }
-export interface ContextSignals { taskId?: string; references?: string[]; activePaths?: string[]; languages?: string[]; guides?: string[]; }
+export interface ContextSignals { taskId?: string; references?: string[]; activePaths?: string[]; languages?: string[]; technologies?: string[]; guides?: string[]; }
 
 export function rankContext(entries: ContextEntry[], signals: ContextSignals = {}): ContextEntry[] {
-  const refs = normalizedSet(signals.references), active = normalizedSet(signals.activePaths), langs = normalizedSet(signals.languages), guides = normalizedSet(signals.guides);
+  const refs = normalizedSet(signals.references), active = normalizedSet(signals.activePaths), langs = normalizedSet(signals.languages), technologies = normalizedSet(signals.technologies), guides = normalizedSet(signals.guides);
   const unique = new Map<string, ContextEntry>();
   for (const entry of entries) { const path = normalizeRepositoryPath(entry.path); if (!unique.has(path)) unique.set(path, { ...entry, path }); }
-  return [...unique.values()].map((entry) => ({ ...entry, priority: entry.priority + (entry.pinned ? 1000 : 0) + (refs.has(entry.path) ? 500 : 0) + (active.has(entry.path) ? 250 : 0) + (langs.has(entry.path) ? 100 : 0) + (guides.has(entry.path) ? 25 : 0) })).sort(compareEntries);
+  return [...unique.values()].map((entry) => ({ ...entry, priority: entry.priority + (entry.pinned ? 1000 : 0) + (refs.has(entry.path) ? 500 : 0) + (active.has(entry.path) ? 250 : 0) + (langs.has(entry.path) || technologies.has(entry.path) ? 100 : 0) + (guides.has(entry.path) ? 25 : 0) })).sort(compareEntries);
 }
 
 export async function buildContext(

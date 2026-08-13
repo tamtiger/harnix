@@ -28,7 +28,8 @@ describe("initializeProject", () => {
     expect(agentInstructions).toContain("Do not run setup or harnix init automatically");
     expect(agentInstructions).toContain("nearest initialized project ancestor or workspace root");
     expect(agentInstructions).toContain("## Project profile");
-    expect(agentInstructions).toContain("- Languages: Vue.");
+    expect(agentInstructions).toContain("- Languages: not specified.");
+    expect(agentInstructions).toContain("- Technologies: Vue.");
     expect(agentInstructions).toContain("- Package paths: `.`.");
     expect(agentInstructions).not.toContain("Detected repository");
     expect(agentInstructions).not.toContain("Project-local skills are generated");
@@ -53,10 +54,12 @@ describe("initializeProject", () => {
       status: "initialized",
       developer: "tam",
       languages: [],
+      technologies: [],
+      detection: { matches: [] },
       created: [
         ".harnix/.template-hashes.json",
         ".harnix/config.yaml",
-        ".harnix/spec/guides/common-rules.md",
+        ".harnix/spec/guides/common/engineering.md",
         ".harnix/workflow.md",
         "AGENTS.md",
       ],
@@ -86,10 +89,10 @@ describe("initializeProject", () => {
   it("should_seed_relevant_rules_when_initializing_detected_project", async () => {
     const root = await fixture(); await writeFile(join(root, "package.json"), JSON.stringify({ dependencies: { vue: "latest" } }));
     await initializeProject({ developer: "tam", root, yes: true });
-    const common = await readFile(join(root, ".harnix", "spec", "guides", "common-rules.md"), "utf8");
-    expect(common).toContain("Acceptance and verification");
-    expect(common).toContain("Repository conventions");
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "vue.md"), "utf8")).resolves.toContain("Vue rules");
+    const common = await readFile(join(root, ".harnix", "spec", "guides", "common", "engineering.md"), "utf8");
+    expect(common).toContain("broader gates");
+    expect(common).toContain("repository instructions");
+    await expect(readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "vue", "engineering.md"), "utf8")).resolves.toContain("Vue engineering");
   });
   it("should_detect_php_composer_projects_and_seed_php_guidance", async () => {
     const root = await fixture();
@@ -98,19 +101,18 @@ describe("initializeProject", () => {
     await initializeProject({ developer: "tam", root, yes: true });
 
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("- php");
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "php.md"), "utf8")).resolves.toContain("PHP rules");
+    await expect(readFile(join(root, ".harnix", "spec", "guides", "languages", "php", "engineering.md"), "utf8")).resolves.toContain("PHP engineering");
     await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toContain("- Languages: PHP.");
   });
   it("should_seed_actionable_dotnet_abp_guidance_instead_of_a_placeholder", async () => {
-    const root = await fixture(); await writeFile(join(root, "sample.sln"), "");
+    const root = await fixture(); await writeFile(join(root, "sample.csproj"), '<Project><PackageReference Include="Volo.Abp.Core" /></Project>');
 
     await initializeProject({ developer: "tam", root, yes: true });
 
-    const guide = await readFile(join(root, ".harnix", "spec", "guides", "csharp-dotnet-abp.md"), "utf8");
+    const guide = `${await readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "abp", "engineering.md"), "utf8")}\n${await readFile(join(root, ".harnix", "spec", "guides", "technologies", "runtime", "dotnet", "engineering.md"), "utf8")}`;
     expect(guide).toContain("ABP authorization policies");
-    expect(guide).toContain("AsNoTracking");
-    expect(guide).toContain("CancellationToken");
-    expect(guide).toContain("xUnit");
+    expect(guide).toContain("no-tracking");
+    expect(guide).toContain("tenant isolation");
   });
   it("should_preserve_existing_agent_instructions_when_initializing", async () => {
     const root = await fixture(); await writeFile(join(root, "AGENTS.md"), "# User instructions\n");

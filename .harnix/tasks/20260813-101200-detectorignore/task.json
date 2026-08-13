@@ -1,0 +1,117 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-101200-detectorignore",
+  "title": "Loại trừ thư mục agent tooling khỏi stack detection",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Detector không được suy ra language/technology của consumer project từ script, hook hoặc metadata trong các thư mục agent/tooling.",
+  "nonGoals": [
+    "Thay đổi catalog language/technology.",
+    "Ghi đè config của project webhook ingress hiện có.",
+    "Loại trừ source application hợp lệ ngoài các namespace tooling."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ignore-agent-tooling",
+      "text": "Detector bỏ qua .agents, .kiro, .gemini, .trellis và .understand-anything.",
+      "status": "met",
+      "evidenceIds": [
+        "e-detector-agent-tooling-green"
+      ]
+    },
+    {
+      "id": "preserve-source-detection",
+      "text": "Source application bên ngoài các namespace đó vẫn được nhận diện.",
+      "status": "met",
+      "evidenceIds": [
+        "e-detector-real-project"
+      ]
+    },
+    {
+      "id": "detector-quality",
+      "text": "Focused detector tests, lint và typecheck pass.",
+      "status": "met",
+      "evidenceIds": [
+        "e-detector-quality-green"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/utils/detection.ts",
+    "test/unit/detection.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "detector-focused",
+      "description": "Run detection regression tests.",
+      "command": "pnpm exec vitest run test/unit/detection.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "detector-quality",
+      "description": "Run lint and typecheck.",
+      "command": "pnpm lint && pnpm typecheck",
+      "scope": "full",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-detector-agent-tooling-red",
+      "checkId": "detector-focused",
+      "recordedAt": "2026-08-13T10:40:17+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "New regression fixture reproduced false JavaScript/Python detection from .agents/.kiro/.gemini/.trellis/.understand-anything tooling scripts.",
+      "artifactPaths": [
+        "test/unit/detection.test.ts",
+        "src/utils/detection.ts"
+      ]
+    },
+    {
+      "id": "e-detector-agent-tooling-green",
+      "checkId": "detector-focused",
+      "recordedAt": "2026-08-13T10:40:52+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused detector suite passed 10 tests after agent/tooling namespace exclusions were added.",
+      "artifactPaths": [
+        "src/utils/detection.ts",
+        "test/unit/detection.test.ts"
+      ]
+    },
+    {
+      "id": "e-detector-real-project",
+      "recordedAt": "2026-08-13T10:41:00+07:00",
+      "result": "pass",
+      "summary": "Read-only detection on frt-payment-webhook-ingress now returned only csharp with abp and dotnet; no JavaScript or Python matches remained.",
+      "artifactPaths": [
+        "src/utils/detection.ts"
+      ]
+    },
+    {
+      "id": "e-detector-quality-green",
+      "checkId": "detector-quality",
+      "recordedAt": "2026-08-13T10:41:30+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Lint and typecheck passed; git diff --check passed with only existing line-ending warnings.",
+      "artifactPaths": [
+        "src/utils/detection.ts",
+        "test/unit/detection.test.ts",
+        "docs/HARNIX_PRD.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "CHANGELOG.md"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-13T03:39:52.906Z",
+  "updatedAt": "2026-08-13T03:42:53.293Z",
+  "completedAt": "2026-08-13T03:42:53.293Z"
+}

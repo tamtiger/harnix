@@ -2,7 +2,7 @@
 
 import { Command, Option } from "commander";
 
-import { initializeProject } from "./commands/init.js";
+import { initializeProject, parseInitProfile } from "./commands/init.js";
 import { setupPlatforms, type HookCommandLookup } from "./commands/setup.js";
 import { resolveProjectRoot } from "./utils/paths.js";
 import { runInternalContextCommand } from "./commands/internal-context-cli.js";
@@ -35,13 +35,14 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   program.command("init")
     .option("--user <name>", "Override the detected developer journal ID")
     .option("--languages <csv>", "Override auto-detected language IDs")
+    .option("--technologies <csv>", "Override auto-detected technology IDs")
     .option("--dry-run", "Preview without writing")
     .addOption(new Option("--yes", "Deprecated compatibility option; init no longer prompts").hideHelp())
-    .action(async (options: { yes?: boolean; user?: string; languages?: string; dryRun?: boolean }) => {
+    .action(async (options: { yes?: boolean; user?: string; languages?: string; technologies?: string; dryRun?: boolean }) => {
       const environment = { ...process.env, ...(programOptions.environment ?? {}) };
       const developer = options.user ?? defaultDeveloperId(environment);
-      const languages = options.languages === undefined || options.languages.trim() === "" ? undefined : options.languages.split(",").map((language) => language.trim()).filter(Boolean);
-      const result = await initializeProject({ developer, dryRun: options.dryRun, languages: languages as never, root: await resolveProjectRoot(process.cwd()), yes: options.yes });
+      const profile = parseInitProfile(options.languages, options.technologies);
+      const result = await initializeProject({ developer, dryRun: options.dryRun, languages: profile.languages, technologies: profile.technologies, warnings: profile.warnings, root: await resolveProjectRoot(process.cwd()), yes: options.yes });
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
   program.command("setup").option("--kiro", "Install Kiro user-global integration").option("--antigravity", "Install Antigravity user-global integration").option("--codex", "Install Codex user-global integration").option("--dry-run", "Preview user-global changes without writing").option("--json", "Output stable JSON").action(async (options: { kiro?: boolean; antigravity?: boolean; codex?: boolean; dryRun?: boolean }) => {

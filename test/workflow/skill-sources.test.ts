@@ -93,5 +93,5 @@ describe("canonical Harnix workflow skill sources", () => {
 });
 
 async function readSkill(name: (typeof skillNames)[number]): Promise<string> {
-  return readFile(fileURLToPath(new URL(`../../src/skills/${name}/SKILL.md`, import.meta.url)), "utf8");
+  return (await readFile(fileURLToPath(new URL(`../../src/skills/${name}/SKILL.md`, import.meta.url)), "utf8")).replaceAll("\r\n", "\n");
 }

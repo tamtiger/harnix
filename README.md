@@ -110,7 +110,7 @@ Hai lệnh cài từ npm ở trên sẽ trả `404` cho đến khi `@tamtiger/ha
 Từ thư mục gốc dự án:
 
 ```powershell
-# Khởi tạo .harnix và tự động phát hiện ngôn ngữ/framework
+# Khởi tạo .harnix và tự động phát hiện language/technology độc lập
 harnix init
 
 # Cài integration một lần cho user profile; có thể chạy ngoài project
@@ -124,10 +124,10 @@ harnix doctor --json
 Nếu muốn chỉ định ngôn ngữ, dùng danh sách phân cách bằng dấu phẩy:
 
 ```powershell
-harnix init --languages vue,typescript-nestjs
+harnix init --languages typescript --technologies vue
 ```
 
-Khi bỏ qua `--languages`, Harnix đọc marker dự án một cách local và deterministic. Các language/framework ID hiện được nhận diện gồm C#/.NET ABP, NestJS, Python, Java/Spring, Go, React web và Vue.
+Khi bỏ qua override, Harnix đọc bounded repository evidence local và deterministic. Source-language IDs là `csharp`, `typescript`, `javascript`, `php`, `python`, `java`, `go`; technology IDs ban đầu là `dotnet`, `abp`, `nestjs`, `spring`, `react-web`, `vue`, `codeigniter`. Framework/runtime evidence không tự khẳng định source language.
 
 ## CLI
 
@@ -136,16 +136,17 @@ Khi bỏ qua `--languages`, Harnix đọc marker dự án một cách local và 
 Tạo các file `.harnix` cần thiết, rule liên quan và root `AGENTS.md` bootstrap để AI agent biết cách đọc workflow Harnix. Init không prompt, không tạo thư mục rỗng và không overwrite file người dùng đã có.
 
 ```text
-harnix init [--user <name>] [--languages <csv>]
+harnix init [--user <name>] [--languages <csv>] [--technologies <csv>]
            [--dry-run]
 ```
 
 - Không cần option cho trường hợp thông thường: Harnix lấy developer journal ID từ user hệ điều hành và tự detect stack.
 - `--user`: override developer journal ID; chỉ cần khi muốn namespace khác hoặc CI cần giá trị cố định.
-- `--languages`: override detection bằng danh sách language ID.
+- `--languages`: override source-language detection bằng danh sách ID.
+- `--technologies`: override technology detection bằng danh sách ID.
 - `--dry-run`: kiểm tra kế hoạch mà không ghi file.
 
-Output gồm `status`, developer/languages đã chọn và các mảng path `created`, `updated`, `unchanged`, `preserved`, `warnings`.
+Output gồm `status`, developer, languages/technologies đã chọn, bounded repository-relative `detection.matches` và các mảng path `created`, `updated`, `unchanged`, `preserved`, `warnings`. Config v1 hiện hữu không bị init rescan/migrate; dùng `update` hoặc `doctor --fix` cho migration explicit.
 
 `init` chỉ tạo và quản lý namespace `.harnix/`. Nó không kiểm tra, migrate, overwrite hoặc xóa `.trellis`, `.trellis-pro` hay các skill `trellis-*` đang có trong repository. `setup` là user-global nên không cần chạy lại theo từng project; trước khi kích hoạt, global skills/hook phải resolve project Harnix initialized gần nhất từ cwd hoặc workspace roots (kể cả ancestor), rồi mới dùng `.harnix/config.yaml` của project đó.
 

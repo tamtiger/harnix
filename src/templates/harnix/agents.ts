@@ -1,35 +1,22 @@
+import type { LanguageId, TechnologyId } from "../../catalog/catalog.js";
 import type { PackageConfig } from "../../core/config/config.js";
-import type { LanguageId } from "../../utils/detection.js";
 import { packageVersion } from "../../version.js";
 
 export interface AgentsProjectProfile {
   languages: readonly LanguageId[];
+  technologies: readonly TechnologyId[];
   packages: readonly Pick<PackageConfig, "path">[];
 }
 
-const languageLabels: Record<LanguageId, string> = {
-  "csharp-dotnet-abp": "C#/.NET/ABP",
-  go: "Go",
-  "java-spring": "Java/Spring",
-  php: "PHP",
-  python: "Python",
-  "react-web": "React web",
-  "typescript-nestjs": "TypeScript/NestJS",
-  vue: "Vue",
-};
+const languageLabels: Record<LanguageId, string> = { csharp: "C#", go: "Go", java: "Java", javascript: "JavaScript", php: "PHP", python: "Python", typescript: "TypeScript" };
+const technologyLabels: Record<TechnologyId, string> = { abp: "ABP", codeigniter: "CodeIgniter", dotnet: ".NET", nestjs: "NestJS", "react-web": "React web", spring: "Spring", vue: "Vue" };
 
 export function renderAgentsTemplate(profile: AgentsProjectProfile): string {
+  const languages = profile.languages.map((id) => languageLabels[id]).join(", ") || "not specified";
+  const technologies = profile.technologies.map((id) => technologyLabels[id]).join(", ") || "not specified";
+  const packagePaths = profile.packages.map(({ path }) => `\`${path}\``).join(", ") || "not specified";
   return `# Project agent instructions
 
-${renderHarnixAgentsBlock(profile)}
-`;
-}
-
-function renderHarnixAgentsBlock(profile: AgentsProjectProfile): string {
-  const languages = profile.languages.map((language) => languageLabels[language]).join(", ") || "not specified";
-  const packagePaths = profile.packages.map(({ path }) => `\`${path}\``).join(", ") || "not specified";
-
-  return `<!-- harnix:begin -->
 ## Harnix
 
 - Version: ${packageVersion}.
@@ -39,6 +26,7 @@ function renderHarnixAgentsBlock(profile: AgentsProjectProfile): string {
 ## Project profile
 
 - Languages: ${languages}.
+- Technologies: ${technologies}.
 - Package paths: ${packagePaths}.
 
 Treat this profile as an initialization-time discovery seed. Verify current manifests, source, tests, and repository instructions before selecting bounded task context; do not bulk-load the repository.
@@ -74,5 +62,5 @@ Operating rules:
 - Require explicit user authorization for destructive, networked, installation, upgrade, purge, or externally visible actions.
 - Never commit, branch, create a worktree, merge, push, publish, or create a pull request automatically.
 - If the CLI, a required skill, or persisted state is unavailable or invalid, report the problem instead of inventing Harnix state or schemas.
-<!-- harnix:end -->`;
+`;
 }

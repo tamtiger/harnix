@@ -76,7 +76,7 @@ Context candidates được rank theo thứ tự ưu tiên:
 4. Language/framework.
 5. Cross-project guide.
 
-Deduplicate theo normalized repo-relative path và content identity. Frozen scorer tại `IMPLEMENTATION_PLAN.md` dùng pin 1000, task/acceptance 500, active package/path 250, language/framework 100, guide 25; signals cộng dồn và tie-break bằng normalized path. Enforce `maxCharacters` cùng `tokenApproximation`; khi thiếu budget, inject phần điểm cao nhất và luôn liệt kê file bị bỏ. Full-context là explicit override, không phải default.
+Deduplicate theo normalized repo-relative path và content identity. Frozen scorer tại `IMPLEMENTATION_PLAN.md` dùng pin 1000, task/acceptance 500, active package/path 250, một bounded language-or-technology bonus 100, guide 25; signals cộng dồn và tie-break bằng normalized path. Enforce `maxCharacters` cùng `tokenApproximation`; khi thiếu budget, inject phần điểm cao nhất và luôn liệt kê file bị bỏ. Full-context là explicit override, không phải default.
 
 ### 3.3 Managed ownership model
 
@@ -156,7 +156,7 @@ Chỉ chuyển thể nội dung liên quan:
 - C#/.NET/ABP được viết pack Harnix: nullable, async/cancellation, DI, DDD/repository/application services, authorization/validation, EF Core/ABP, xUnit.
 - React Native bị tách khỏi React web và không được seed.
 
-Precedence: repository convention > user-modified project spec > language/framework pack > common pack > packaged fallback.
+Precedence: repository convention > user-modified project spec > selected technology/domain guide > selected source-language guide > common guide > packaged fallback.
 
 ## 6. Security analysis
 
@@ -198,7 +198,7 @@ Các quyết định này là guardrail chống scope creep. Thay đổi cần c
 |---|---|---|
 | Root/path safety | `src/utils/paths.ts` | nested Git/worktree, Unicode/spaces, traversal, symlink |
 | Config/schema | `src/core/config/**` | exact frozen types, valid/corrupt, migrations, future version, unknown-key round trip |
-| Detection | `src/utils/detection.ts` | 7 language/framework fixtures, packages, package managers |
+| Detection | `src/catalog/**`, `src/utils/detection.ts` | independent language/technology evidence, packages, exclusions and package managers |
 | Managed files | `src/utils/{hashing,managed-files,atomic-write}.ts` plus Phase 6 global ownership/lock boundary | modified/deleted/obsolete/corrupt/rollback, fragment collision, permission mode and concurrent-edit preservation |
 | Context budget | `src/core/context/**` | rank, dedupe, pins, truncation disclosure, full override |
 | Journal/learning | `src/core/journal/**`, `learning.ts` | malformed/Unicode/newest-first/confidence/promotion |

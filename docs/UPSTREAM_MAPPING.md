@@ -126,16 +126,18 @@ Mapping rules:
 | ECC source pack | Harnix target | Strategy |
 |---|---|---|
 | `rules/common/{coding-style,patterns,security,testing,code-review,performance}.md` | `src/rules/common/**` | Condense high-signal principles, MIT attribution |
-| `rules/typescript/**` | `src/rules/typescript-nestjs/**` | Adapt TypeScript + add NestJS boundaries |
-| `rules/python/**` | `src/rules/python/**` | Adapt; FastAPI-specific material only when detected/relevant |
-| `rules/golang/**` | `src/rules/go/**` | Adapt naming and concise content |
-| `rules/vue/**` | `src/rules/vue/**` | Adapt |
-| `rules/java/**` | `src/rules/java-spring/**` | Adapt + Spring validation/security/transactions/Testcontainers |
-| `rules/react/**` | `src/rules/react-web/**` | Adapt; explicitly exclude React Native |
-| `rules/csharp/**` | `src/rules/csharp-dotnet-abp/**` | Select useful base, build Harnix-specific ABP guidance |
+| `rules/typescript/**` | `src/guides/languages/typescript/**`, `src/guides/technologies/framework/nestjs/**` | Separate TypeScript from NestJS boundaries |
+| `rules/python/**` | `src/guides/languages/python/**` | Adapt; framework material only when independently detected/relevant |
+| `rules/golang/**` | `src/guides/languages/go/**` | Adapt naming and concise content |
+| `rules/vue/**` | `src/guides/technologies/framework/vue/**` | Adapt as technology guidance |
+| `rules/java/**` | `src/guides/languages/java/**`, `src/guides/technologies/framework/spring/**` | Separate Java from Spring validation/security/transactions |
+| `rules/react/**` | `src/guides/technologies/library/react-web/**` | Adapt; explicitly exclude React Native |
+| `rules/csharp/**` | `src/guides/languages/csharp/**`, `src/guides/technologies/{runtime/dotnet,framework/abp}/**` | Separate C#, .NET and Harnix-specific ABP guidance |
 | Other ECC rules/integrations | — | Remove from package and output |
 
 ## 8. Workflow synthesis mapping
+
+Stack/catalog architecture uses only researched patterns rather than vendored runtime code: GitHub Linguist informs source-language separation and generated/vendor exclusions; Vercel and Netlify inform declarative positive/negative detector relations; ECC informs evidence-backed minimal mapping; Awesome Copilot/Cursor catalogs inform guide metadata and activation. Harnix owns the typed IDs, confidence thresholds, migration contract, validator, selectors and content. No external guide text enters the package without a separately frozen revision/license/adaptation mapping.
 
 ### 8.1 Trellis workflow mapping
 

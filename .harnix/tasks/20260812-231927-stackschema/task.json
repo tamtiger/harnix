@@ -4,8 +4,8 @@
   "id": "20260812-231927-stackschema",
   "title": "Củng cố workflow skill và xây catalog stack/guide dựa trên bằng chứng",
   "mode": "full",
-  "status": "in_progress",
-  "checkpoint": "implementing",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Củng cố bảy workflow skill Harnix từ các upstream đã khóa thành source SKILL.md có thể kiểm chứng, sau đó refactor profiling để ngôn ngữ nguồn tách khỏi catalog technology có kiểu, detection giữ bằng chứng giải thích được và thư viện rule/guide mở rộng có metadata, provenance cùng cơ chế chọn an toàn.",
   "nonGoals": [
     "Thêm platform ngoài Kiro, Antigravity và Codex.",
@@ -22,7 +22,8 @@
       "status": "met",
       "evidenceIds": [
         "e-skill-focused-green",
-        "e-skill-quality-green"
+        "e-skill-quality-green",
+        "e-catalog-final-focused"
       ]
     },
     {
@@ -31,7 +32,8 @@
       "status": "met",
       "evidenceIds": [
         "e-skill-focused-green",
-        "e-skill-pressure-evals"
+        "e-skill-pressure-evals",
+        "e-catalog-final-focused"
       ]
     },
     {
@@ -41,56 +43,81 @@
       "evidenceIds": [
         "e-skill-focused-green",
         "e-skill-release-green",
-        "e-codex-global-update"
+        "e-codex-global-update",
+        "e-catalog-final-release"
       ]
     },
     {
       "id": "ac-catalogs",
       "text": "Catalog language, technology và guide được đóng gói có ID ổn định, metadata có kiểu, thứ tự xác định, provenance và không phụ thuộc detector hoặc platform code.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "e-catalog-final-focused",
+        "e-catalog-final-compliance"
+      ]
     },
     {
       "id": "ac-schema",
       "text": "Config v2 lưu mảng ID language và technology độc lập ở project và package; kind của technology chỉ là metadata trong catalog, không lặp lại trong config; các unknown key tương thích được giữ lại khi parse và serialize.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "e-catalog-final-focused",
+        "e-catalog-final-quality"
+      ]
     },
     {
       "id": "ac-migration",
       "text": "Mọi stack ID hợp lệ của config v1 có mapping v2 xác định và có tài liệu; migration rõ ràng, atomic, idempotent, giữ unknown field, từ chối schema tương lai hoặc hỏng, và không yêu cầu quét lại repository.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "e-catalog-final-focused",
+        "e-catalog-final-quality"
+      ]
     },
     {
       "id": "ac-detection",
       "text": "Detection báo language và technology độc lập với bằng chứng có giới hạn và confidence tier, hỗ trợ tín hiệu dương, bắt buộc, âm và ưu tiên, đồng thời không nhận nhầm ABP, Spring, Laravel hoặc CodeIgniter từ manifest chung.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "e-catalog-final-focused",
+        "e-catalog-final-compliance"
+      ]
     },
     {
       "id": "ac-guides",
       "text": "Guide selection ghép guidance common, language và technology/domain ngày càng cụ thể từ metadata, tôn trọng activation theo path/task, ghi provenance và không nạp nội dung thư viện không liên quan.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "e-catalog-final-focused",
+        "e-catalog-final-compliance"
+      ]
     },
     {
       "id": "ac-consumers",
       "text": "Kết quả init CLI/API, override, AGENTS project profile, managed update, doctor và context ranking dùng stack profile mới, không còn lưu compound ID như giá trị schema hiện tại.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "e-catalog-final-focused",
+        "e-catalog-final-quality"
+      ]
     },
     {
       "id": "ac-preservation",
       "text": "Update project v1 tạo guide theo catalog được chọn, chỉ xóa combined guide cũ còn nguyên bản, và giữ guide đã sửa hoặc nội dung không thuộc Harnix với báo cáo rõ ràng.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "e-catalog-final-focused",
+        "e-catalog-final-compliance"
+      ]
     },
     {
       "id": "ac-contracts",
       "text": "PRD, workflow, implementation schema, README, changelog, fixture, attribution và release scan mô tả nhất quán contract stack/guide mới cùng hành vi tương thích chuyển tiếp.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "e-catalog-final-quality",
+        "e-catalog-final-release"
+      ]
     }
   ],
   "relevantPaths": [
@@ -116,6 +143,7 @@
     "src/rules",
     "src/templates/harnix/agents.ts",
     "test/unit/config.test.ts",
+    "test/unit/catalog.test.ts",
     "test/unit/detection.test.ts",
     "test/unit/rules.test.ts",
     "test/unit/context.test.ts",
@@ -229,8 +257,161 @@
         "pnpm-workspace.yaml",
         "test/unit/package-contract.test.ts"
       ]
+    },
+    {
+      "id": "e-catalog-ready-review",
+      "recordedAt": "2026-08-13T09:09:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Active-task review locked the previously missing predicate, catalog, provenance, evidence, output and source-language independence contracts. Fresh pre-change baseline passed 8 focused files/71 tests plus typecheck, lint and git diff --check; pnpm-workspace.yaml was absent at review time, so its historical invariant failure is not treated as a current blocker.",
+      "artifactPaths": [
+        ".harnix/tasks/20260812-231927-stackschema/prd.md",
+        ".harnix/tasks/20260812-231927-stackschema/plan.md",
+        "test/unit/config.test.ts",
+        "test/unit/detection.test.ts",
+        "test/unit/rules.test.ts",
+        "test/unit/context.test.ts",
+        "test/integration/init.test.ts",
+        "test/integration/update.test.ts",
+        "test/integration/doctor.test.ts",
+        "test/integration/cli.test.ts"
+      ]
+    },
+    {
+      "id": "e-catalog-focused-green",
+      "checkId": "catalog-focused",
+      "recordedAt": "2026-08-13T09:43:30+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "RED/GREEN slices completed for catalog validation, config v2 migration, bounded evidence detection, guide selection/materialization, CLI/init/update/doctor/context consumers. The focused S1-S6 run passed 11 files and 98 tests; the subsequent catalog/guide audit passed 3 files and 26 tests.",
+      "artifactPaths": [
+        "src/catalog",
+        "src/guides",
+        "src/utils/stack.ts",
+        "src/utils/detection.ts",
+        "src/core/config/config.ts",
+        "src/core/context/context.ts",
+        "src/commands/init.ts",
+        "src/commands/update.ts",
+        "src/commands/doctor.ts",
+        "test/unit/catalog.test.ts",
+        "test/unit/config.test.ts",
+        "test/unit/detection.test.ts",
+        "test/unit/rules.test.ts",
+        "test/unit/context.test.ts"
+      ]
+    },
+    {
+      "id": "e-catalog-full-suite-green",
+      "checkId": "catalog-quality",
+      "recordedAt": "2026-08-13T09:41:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh full Vitest regression passed 44 files with 297 tests passing and one existing platform-specific skip. Typecheck, lint, production build and git diff --check also passed on the current tree.",
+      "artifactPaths": [
+        "test",
+        "dist"
+      ]
+    },
+    {
+      "id": "e-catalog-full-suite-crlf-fail",
+      "checkId": "catalog-quality",
+      "recordedAt": "2026-08-13T09:40:00+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "An earlier full-suite run exposed one LF-only workflow-skill regex against CRLF source files. The failure was retained, the test was normalized at the input boundary, and subsequent focused/full runs passed.",
+      "artifactPaths": [
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "e-catalog-sandbox-spawn-fail",
+      "checkId": "catalog-quality",
+      "recordedAt": "2026-08-13T09:46:00+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Restricted-process attempts to run build, Vitest and child-process artifact scripts returned Windows spawn EPERM. The same commands were rerun with explicit process permission and passed; this records the environmental failure rather than hiding it.",
+      "artifactPaths": [
+        "tsup.config.ts",
+        "vitest.config.ts",
+        "scripts/pack-check.mjs",
+        "scripts/measure-footprint.mjs"
+      ]
+    },
+    {
+      "id": "e-catalog-final-focused",
+      "checkId": "catalog-focused",
+      "recordedAt": "2026-08-13T09:51:45+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "The exact active-task focused command passed 14 test files and 118 tests after final regression fixes for deep globs, extension ordering, typed CLI overrides and modified legacy-guide preservation.",
+      "artifactPaths": [
+        "src/catalog",
+        "src/guides",
+        "src/utils/detection.ts",
+        "src/core/config/config.ts",
+        "src/commands/init.ts",
+        "src/commands/update.ts",
+        "src/commands/doctor.ts",
+        "test/unit/catalog.test.ts",
+        "test/unit/config.test.ts",
+        "test/unit/detection.test.ts",
+        "test/unit/rules.test.ts",
+        "test/integration/update.test.ts"
+      ]
+    },
+    {
+      "id": "e-catalog-final-quality",
+      "checkId": "catalog-quality",
+      "recordedAt": "2026-08-13T09:52:30+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh locked install, typecheck, lint and production build passed. Full Vitest passed 44 files with 300 tests passing and one platform-specific atomic-write skip.",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "src",
+        "test",
+        "dist"
+      ]
+    },
+    {
+      "id": "e-catalog-final-release",
+      "checkId": "catalog-release",
+      "recordedAt": "2026-08-13T09:54:30+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Acceptance suites, pack check, fake-home tarball smoke for Kiro/Antigravity/Codex individually and together, performance, footprint, release scan and git diff --check passed. Init worst was 262.695 ms; generated footprint reduction was 89.266%; release scan covered secrets, paths, surfaces, package/bin, imports, hooks, attribution and non-project context performance.",
+      "artifactPaths": [
+        "package.json",
+        "scripts/pack-check.mjs",
+        "scripts/smoke-tarball.mjs",
+        "scripts/measure-init.mjs",
+        "scripts/measure-footprint.mjs",
+        "scripts/scan-release.mjs",
+        ".artifacts/tamtiger-harnix-0.6.0.tgz"
+      ]
+    },
+    {
+      "id": "e-catalog-final-compliance",
+      "recordedAt": "2026-08-13T09:54:45+07:00",
+      "result": "pass",
+      "summary": "Final compliance and quality review confirmed independent language/technology persistence, catalog-driven ID validation, bounded no-exec detection, repository-relative evidence, safe guide globs and topological composition, atomic explicit migration, bounded context ranking, provenance, and preservation of modified legacy/unowned content. Normative docs and public transition guidance are consistent with config v2.",
+      "artifactPaths": [
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "README.md",
+        "CHANGELOG.md",
+        "src/catalog",
+        "src/guides",
+        "src/utils/detection.ts",
+        "src/core/config/config.ts",
+        "src/core/context/context.ts"
+      ]
     }
   ],
   "createdAt": "2026-08-12T23:19:27+07:00",
-  "updatedAt": "2026-08-13T00:00:23+07:00"
+  "updatedAt": "2026-08-13T02:58:14.130Z",
+  "completedAt": "2026-08-13T02:58:14.130Z"
 }

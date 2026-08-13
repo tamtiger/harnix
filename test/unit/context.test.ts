@@ -20,8 +20,16 @@ describe("context", () => {
       { path: "reference.md", reason: "", priority: 0, pinned: false, states: [] },
       { path: "pinned.md", reason: "", priority: 0, pinned: true, states: [] },
     ];
-    const ranked = rankContext(entries, { references: ["reference.md"], activePaths: ["active.md"], languages: ["language.md"], guides: ["guide.md"] });
+    const ranked = rankContext(entries, { references: ["reference.md"], activePaths: ["active.md"], languages: ["language.md"], technologies: ["language.md"], guides: ["guide.md"] });
     expect(ranked.map((item) => item.path)).toEqual(["pinned.md", "reference.md", "active.md", "language.md", "guide.md"]);
+    expect(ranked.find(({ path }) => path === "language.md")?.priority).toBe(100);
+  });
+
+  it("applies one bounded stack bonus when either or both profile facets match", () => {
+    const entries = [{ path: "stack.md", reason: "", priority: 0, pinned: false, states: [] }];
+    expect(rankContext(entries, { languages: ["stack.md"] })[0]?.priority).toBe(100);
+    expect(rankContext(entries, { technologies: ["stack.md"] })[0]?.priority).toBe(100);
+    expect(rankContext(entries, { languages: ["stack.md"], technologies: ["stack.md"] })[0]?.priority).toBe(100);
   });
 
   it("budgets context and discloses omitted sources", async () => {

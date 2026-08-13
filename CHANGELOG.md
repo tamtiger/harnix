@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; các mục dưới đây theo commit cho đến khi versioning/release workflow được triển khai.
 
+## [0.6.1] - 2026-08-13
+
+### Changed
+
+- Generated project `AGENTS.md` bootstrap no longer includes Harnix begin/end markers; the independent marker-based Codex user-global reconciliation contract is unchanged.
+- Stack profiling is moving to config v2 with independent source-language and typed technology IDs, explicit no-rescan v1 migration, bounded explainable detector evidence, and a metadata-driven guide catalog. The frozen contract prevents framework/runtime markers from overclaiming source languages and preserves compatible unknown configuration fields.
+- Detection also ignores agent/tooling namespaces, preventing their hooks and helper scripts from being persisted as consumer-project language evidence.
+
 ## [0.6.0] - 2026-08-12
 
 ### Changed
@@ -115,6 +123,7 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 - Quyết định sản phẩm Harnix, contract v1, workflow và provenance upstream được chốt tại commit `d01239f`.
 
+[0.6.1]: https://github.com/tamtiger/harnix/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/tamtiger/harnix/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/tamtiger/harnix/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/tamtiger/harnix/compare/v0.3.0...v0.4.0

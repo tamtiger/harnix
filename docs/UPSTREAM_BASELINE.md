@@ -120,6 +120,8 @@ Research revalidation on **2026-08-11** freezes the target below. It is the curr
 No global runtime, `~/.harnix`, credentials, MCP, permission/trust bypass, absolute path, or silent network is permitted. Per-root sidecar manifests, injected fake homes in tests, conservative fragment ownership, locking and rollback are mandatory.
 ## 8. License và provenance policy
 
+The stack/guide refactor additionally records architecture references to GitHub Linguist, Vercel framework registry, Netlify framework-info, GitHub Awesome Copilot, Awesome Cursor Rules and Fallow in the active task research. These are design references only, not vendored code/content and not new runtime dependencies. Any later content adaptation must add an immutable revision, license and item-level mapping before release.
+
 - Giữ `LICENSE` AGPL-3.0 và copyright/notices của Trellis cho derived code.
 - Thêm `NOTICE` ghi URL, SHA và copyright của cả ba nguồn.
 - Nội dung ECC/Superpowers sao chép hoặc chuyển thể phải giữ MIT attribution. Ưu tiên viết lại concise bằng ngôn ngữ Harnix thay vì vendor nguyên khối.

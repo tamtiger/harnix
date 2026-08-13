@@ -16,7 +16,7 @@ describe("workflow templates", () => {
 
     await initializeProject({ root, developer: "tam", yes: true });
 
-    await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toBe(renderAgentsTemplate({ languages: [], packages: [] }));
+    await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toBe(renderAgentsTemplate({ languages: [], technologies: [], packages: [] }));
     await expect(readFile(join(root, ".harnix", "workflow.md"), "utf8")).resolves.toBe(workflowTemplate);
     const agentInstructions = await readFile(join(root, "AGENTS.md"), "utf8");
     expect(agentInstructions).toContain("explicit user-global integration");
@@ -30,6 +30,8 @@ describe("workflow templates", () => {
     expect(agentInstructions).toContain("project-local coding-agent harness");
     expect(agentInstructions).toContain("Do not run setup or harnix init automatically");
     expect(agentInstructions).toContain("nearest initialized project ancestor or workspace root");
+    expect(agentInstructions).not.toContain("<!-- harnix:begin -->");
+    expect(agentInstructions).not.toContain("<!-- harnix:end -->");
     expect(agentInstructions).not.toContain("Detected repository");
     expect(agentInstructions).not.toContain("Project-local skills are generated");
     expect(agentInstructions).not.toMatch(/\.(?:kiro|gemini|codex)\//u);

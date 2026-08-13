@@ -93,6 +93,32 @@ Union `TechnologyId` ban đầu giữ phạm vi hiện có và thêm CodeIgniter
 ## Contract catalog
 
 ```ts
+type Confidence = "confirmed" | "probable" | "weak";
+type GuideId = string;
+
+interface Provenance {
+  source: string;
+  license: string;
+  adaptedAt: string; // YYYY-MM-DD
+}
+
+type DetectorPredicate =
+  | { kind: "file"; glob: string }
+  | {
+      kind: "dependency";
+      ecosystem: "npm" | "composer" | "nuget" | "maven" | "gradle";
+      name: string;
+    }
+  | { kind: "content"; glob: string; contains: string };
+
+interface LanguageDescriptor {
+  id: LanguageId;
+  label: string;
+  detectors: DetectorExpression[];
+  guideIds: GuideId[];
+  provenance: Provenance;
+}
+
 interface TechnologyDescriptor {
   id: TechnologyId;
   kind: TechnologyKind;
@@ -101,10 +127,11 @@ interface TechnologyDescriptor {
   implies?: { languages?: LanguageId[]; technologies?: TechnologyId[] };
   supersedes?: TechnologyId[];
   guideIds: GuideId[];
+  provenance: Provenance;
 }
 
 interface DetectorExpression {
-  confidence: "confirmed" | "probable" | "weak";
+  confidence: Confidence;
   allOf?: DetectorPredicate[];
   anyOf?: DetectorPredicate[];
   noneOf?: DetectorPredicate[];
@@ -123,13 +150,47 @@ interface GuideDescriptor {
   };
   activation: "always" | "path" | "task";
   priority: number;
+  contentPath: string;
   extends?: GuideId[];
   supersedes?: GuideId[];
-  provenance: { source: string; license: string; adaptedAt: string };
+  provenance: Provenance;
+}
+
+interface DetectionEvidence {
+  kind: DetectorPredicate["kind"];
+  path: string; // repository-relative POSIX path only
+  detail: string; // bounded identifier/marker, never file content or secret value
+}
+
+interface DetectionMatch {
+  id: LanguageId | TechnologyId;
+  facet: "language" | "technology";
+  kind: "language" | TechnologyKind;
+  confidence: Confidence;
+  evidence: DetectionEvidence[];
+  source: "catalog";
 }
 ```
 
-Predicate là kiểm tra khai báo có giới hạn trên filename, path, dependency key trong manifest và content được chọn. Không predicate nào được chạy code project. Validator từ chối ID trùng, reference thiếu, glob/path không an toàn, cycle và supersedence xung đột.
+`file.glob` và `content.glob` chỉ dùng POSIX-relative literals, `*` và `**`; không chấp nhận absolute path, drive prefix, backslash, `.`/`..`, NUL, brace/extglob hoặc character class. `content.contains` là literal bounded, không phải regex. Dependency collector chỉ đọc manifest ecosystem đã biết với byte/depth/count limit; không chạy package manager hoặc code project.
+
+Mỗi expression phải có ít nhất một predicate dương trong `allOf` hoặc `anyOf`. Khi cả hai có mặt, mọi `allOf` và ít nhất một `anyOf` phải match; không `noneOf` nào được match. Mảng có mặt phải không rỗng và không chứa predicate trùng. Match của nhiều expression cho cùng ID giữ confidence mạnh nhất và hợp nhất evidence theo thứ tự ổn định. Thứ tự confidence là `confirmed > probable > weak`.
+
+Validator nhận toàn bộ language, technology và guide catalog làm input thuần; từ chối ID trùng, enum/confidence/provenance thiếu hoặc sai, reference `implies`/`guideIds`/`extends`/`supersedes` thiếu, self-reference, cycle, supersedence xung đột, unsafe glob/content path, duplicate predicate và `contentPath` không an toàn hoặc trùng. Catalog module không import filesystem collector, command, UI hoặc platform configurator. Source guide được import thành text ở build time và test hai chiều với descriptor qua `contentPath`; runtime không duyệt source tree.
+
+Kind ban đầu được khóa như sau:
+
+| Technology | Kind | Quan hệ |
+|---|---|---|
+| `dotnet` | `runtime` | không tự suy ra C# nếu chỉ có `global.json`/solution metadata |
+| `abp` | `framework` | implies `dotnet`; language được detector nguồn xác lập riêng |
+| `nestjs` | `framework` | không tự suy ra TypeScript nếu repository không có evidence TypeScript |
+| `spring` | `framework` | không tự suy ra Java nếu repository không có evidence Java |
+| `react-web` | `library` | loại React Native bằng negative evidence; language xác lập riêng |
+| `vue` | `framework` | language xác lập riêng |
+| `codeigniter` | `framework` | language PHP xác lập riêng |
+
+Không dùng `supersedes` để xóa runtime/framework bổ sung hợp lệ như `abp` + `dotnet`; quan hệ này chỉ giải quyết hai technology cạnh tranh cho cùng vai trò khi catalog tương lai có case cụ thể.
 
 ## Mapping migration v1
 
@@ -148,13 +209,13 @@ Migration chỉ chuyển nghĩa đã lưu; không quét lại hay đoán JavaScr
 
 ## Hành vi detection
 
-Detection trả `{ id, kind, confidence, evidence, source }` trước khi normalize thành ID config.
+Detection trả `DetectionMatch[]` trước khi normalize thành ID config. Evidence được dedupe và sort theo `path`, `kind`, `detail`; mỗi match và toàn bộ result có giới hạn số item/ký tự. Collector bỏ symlink thay vì follow và không trả absolute path.
 
 - Composer chung hoặc source PHP chỉ nhận PHP; `codeigniter/framework` hay marker canonical có giới hạn mới nhận CodeIgniter. Composer một mình không có nghĩa Laravel hoặc CodeIgniter.
-- `.csproj`, `.sln` hoặc `global.json` nhận C# cùng .NET; chỉ dependency/reference ABP mới thêm ABP.
-- Maven hoặc Gradle nhận Java; chỉ dependency/plugin Spring mới thêm Spring.
-- Dependency NestJS nhận TypeScript cùng NestJS.
-- Dependency React/Vue nhận technology; evidence TypeScript chọn TypeScript, nếu không thì evidence JavaScript có giới hạn chọn JavaScript.
+- `.csproj` hoặc source `.cs` nhận C#; `.csproj`, `global.json` hoặc solution metadata có giới hạn nhận .NET; chỉ dependency/reference ABP mới thêm ABP. `.sln`/`global.json` một mình không khẳng định C#.
+- Source `.java` nhận Java; Maven/Gradle chỉ là ecosystem/build evidence; dependency/plugin Spring mới thêm Spring. Build file chung một mình không khẳng định Java hoặc Spring.
+- Dependency NestJS nhận NestJS; `tsconfig.json`/source TypeScript mới nhận TypeScript. NestJS một mình không khẳng định source language.
+- Dependency React/Vue nhận technology; evidence source/`tsconfig` chọn TypeScript hoặc JavaScript độc lập, không suy language từ framework dependency.
 - Path generated, vendored, dependency, cache, documentation-only, binary và symlink escape bị bỏ qua.
 - `confirmed` cần dependency manifest hoặc match config/content có thẩm quyền; `probable` dùng marker canonical; `weak` dùng extension fallback. Chỉ evidence confirmed/probable tự chọn technology guide. Evidence weak được báo để xác nhận và có thể đóng góp cho language.
 - `supersedes` ưu tiên technology cụ thể hơn mà không làm mất evidence.
@@ -180,7 +241,7 @@ Guide được adapt phải ghi URL upstream, license, ngày adapt và ownership
 ## CLI và output
 
 - `harnix init` giữ `--languages <csv>` và thêm `--technologies <csv>`.
-- JSON result thêm `technologies` đã sort, cùng evidence trong view detection/diagnostic nhưng không lưu absolute path hoặc secret content.
+- `InitProjectResult` thêm `technologies` đã sort và `detection: { matches: DetectionMatch[] }`. Với project đã init, `detection.matches` rỗng vì lệnh không rescan; với project mới/dry-run, field phản ánh detection trước override. Override quyết định config nhưng không sửa evidence; warning nêu facet nào đã override. Không lưu evidence vào config v2.
 - Compound value legacy truyền qua `--languages` là alias chuyển tiếp, normalize kèm warning và không bao giờ được ghi thành ID config v2.
 - Config v1 hiện hữu không bị mutate trong `init`; `update` hoặc `doctor --fix` mới migration rõ ràng.
 - Root `AGENTS.md` render riêng dòng `Languages:` và `Technologies:`.
@@ -190,6 +251,7 @@ Guide được adapt phải ghi URL upstream, license, ngày adapt và ownership
 
 - Read không có side effect. Migration explicit, giữ permission, atomic và idempotent.
 - Config v1 vẫn đọc được trong giai đoạn chuyển tiếp; config v2 là format duy nhất được ghi mới.
+- Compatible unknown keys được giữ ở top level và trong từng package/context/runtime object. Known field luôn được validate/serialize theo v2; unknown key không được phép shadow hoặc thay đổi nghĩa field known.
 - Guide đã sửa hoặc không thuộc Harnix được giữ và báo cáo; chỉ file cũ nguyên bản do Harnix quản lý mới được xóa.
 - Test không chạm user profile thật, không network, không package command và không chạy code project.
 - PHP detection chưa commit của người dùng được giữ và trở thành baseline evidence PHP chung.

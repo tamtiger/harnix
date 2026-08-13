@@ -120,7 +120,7 @@ Transition sang `ready` phải được persist trước khi Planning kết thú
 
 ### 5.4 Implementing
 
-Agent load task artifacts và context nhỏ nhất liên quan tới bước hiện tại. Với mỗi checkpoint:
+Agent load task artifacts và context nhỏ nhất liên quan tới bước hiện tại. Config language/technology values are discovery seeds; the agent confirms current manifests/source/tests and selects only guide metadata/content applicable to the active paths/topics. Read-only workflow routing never migrates config. Với mỗi checkpoint:
 
 1. Review plan critical với source/test hiện tại; nếu có material gap thì persist checkpoint `replan`, không đoán rồi code. Sau khi plan pass, persist `in_progress` với checkpoint `implementing` trước product edit đầu tiên; resume phải dùng status/checkpoint đã lưu.
 2. Chọn một behavior/deliverable có thể kiểm chứng.

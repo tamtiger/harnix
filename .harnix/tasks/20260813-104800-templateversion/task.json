@@ -1,0 +1,141 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-104800-templateversion",
+  "title": "Bỏ marker khỏi AGENTS bootstrap và tăng patch version",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Generated project AGENTS.md không còn lộ marker Harnix, đồng thời package phát hành patch version mới.",
+  "nonGoals": [
+    "Thay đổi marker của Codex user-global managed block.",
+    "Thay đổi nội dung workflow ngoài marker bootstrap.",
+    "Thay đổi major hoặc minor version."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "plain-project-bootstrap",
+      "text": "Project AGENTS bootstrap không chứa harnix begin/end markers và vẫn giữ hướng dẫn Harnix.",
+      "status": "met",
+      "evidenceIds": [
+        "e-bootstrap-marker-green"
+      ]
+    },
+    {
+      "id": "global-marker-preservation",
+      "text": "Codex global managed selector vẫn dùng marker để reconciliation an toàn.",
+      "status": "met",
+      "evidenceIds": [
+        "e-global-marker-green"
+      ]
+    },
+    {
+      "id": "patch-release-metadata",
+      "text": "Package version và changelog phản ánh patch version 0.6.1.",
+      "status": "met",
+      "evidenceIds": [
+        "e-release-metadata-inspection"
+      ]
+    },
+    {
+      "id": "template-quality",
+      "text": "Focused template tests, lint và typecheck pass.",
+      "status": "met",
+      "evidenceIds": [
+        "e-template-quality-green"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/templates/harnix/agents.ts",
+    "src/configurators/codex.ts",
+    "test/workflow/templates.test.ts",
+    "package.json",
+    "CHANGELOG.md"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "templates-focused",
+      "description": "Run project bootstrap and Codex global template regression tests.",
+      "command": "pnpm exec vitest run test/workflow/templates.test.ts test/platform/codex-global.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "template-quality",
+      "description": "Run lint and typecheck after template and metadata changes.",
+      "command": "pnpm lint && pnpm typecheck",
+      "scope": "broader",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-bootstrap-marker-red",
+      "checkId": "templates-focused",
+      "recordedAt": "2026-08-13T10:45:32+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "New regression assertion reproduced begin/end markers in the generated project AGENTS bootstrap.",
+      "artifactPaths": [
+        "test/workflow/templates.test.ts",
+        "src/templates/harnix/agents.ts"
+      ]
+    },
+    {
+      "id": "e-bootstrap-marker-green",
+      "checkId": "templates-focused",
+      "recordedAt": "2026-08-13T10:46:02+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Generated project bootstrap passed explicit no-marker assertions while retaining Harnix instructions.",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "e-global-marker-green",
+      "checkId": "templates-focused",
+      "recordedAt": "2026-08-13T10:46:02+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Codex global template tests passed, preserving the independent marker-based selector used for safe global reconciliation.",
+      "artifactPaths": [
+        "src/configurators/codex.ts",
+        "test/platform/codex-global.test.ts"
+      ]
+    },
+    {
+      "id": "e-release-metadata-inspection",
+      "recordedAt": "2026-08-13T10:52:00+07:00",
+      "result": "pass",
+      "summary": "Inspected package.json and CHANGELOG.md: release metadata is patch version 0.6.1 with its documented bootstrap-marker change.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "id": "e-template-quality-green",
+      "checkId": "template-quality",
+      "recordedAt": "2026-08-13T10:46:02+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused template suite passed 4 tests; lint and typecheck both passed.",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts",
+        "test/platform/codex-global.test.ts",
+        "package.json"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-13T10:48:00+07:00",
+  "updatedAt": "2026-08-13T10:54:00+07:00",
+  "completedAt": "2026-08-13T10:54:00+07:00"
+}

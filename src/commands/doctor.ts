@@ -1,6 +1,6 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 
-import { readConfig, type HarnixConfigV1 } from "../core/config/config.js";
+import { readConfigDocument, type HarnixConfigV2 } from "../core/config/config.js";
 import { ownershipState, readManifest, type ManagedEntry, type ManagedManifest } from "../utils/managed-files.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import { desiredFiles, updateProject } from "./update.js";
@@ -136,9 +136,11 @@ async function diagnoseGlobals(options: DoctorOptions): Promise<GlobalIntegratio
 
 async function diagnoseProjectSection(root: string): Promise<DoctorProjectSection> {
   const findings: DoctorFinding[] = [];
-  let config: HarnixConfigV1;
+  let config: HarnixConfigV2;
   try {
-    config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
+    const document = await readConfigDocument(await resolveSafeHarnixPath(root, "config.yaml"));
+    config = document.config;
+    if (document.sourceSchemaVersion === 1) findings.push(finding("config-outdated", "warning", ".harnix/config.yaml", "Config schema v1 is valid but outdated; run doctor --fix or update to migrate it without rescanning.", true));
   } catch (error: unknown) {
     if (isMissing(error)) {
       return { status: "not-initialized", findings: [finding("project-not-initialized", "info", ".harnix/config.yaml", "No initialized Harnix project was found in this directory.", false)] };
@@ -154,6 +156,12 @@ async function diagnoseProjectSection(root: string): Promise<DoctorProjectSectio
   }
 
   const desired = new Map(desiredFiles(config).map((file) => [file.entry.path, file]));
+  const projectLanguages = new Set(config.languages), projectTechnologies = new Set(config.technologies);
+  for (const packageConfig of config.packages) {
+    const missingLanguages = packageConfig.languages.filter((id) => !projectLanguages.has(id));
+    const missingTechnologies = packageConfig.technologies.filter((id) => !projectTechnologies.has(id));
+    if (missingLanguages.length > 0 || missingTechnologies.length > 0) findings.push(finding("profile-conflict", "warning", ".harnix/config.yaml", `Package ${packageConfig.path} contains profile IDs absent from the project union.`, false));
+  }
   for (const entry of manifest.entries) {
     if (entry.scope !== "project") {
       await inspectLegacyEntry(root, entry, findings);

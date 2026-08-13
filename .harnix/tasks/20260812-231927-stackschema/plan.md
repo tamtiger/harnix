@@ -23,6 +23,31 @@ Checkpoint:
 - Detection catalog và guide catalog là hai contract riêng.
 - Ý tưởng kiến trúc được attribution; không copy content ngoài trước khi freeze revision/license.
 
+### Review checkpoint 2026-08-13
+
+Resume target là S0, không phải S2/S3. Normative docs hiện vẫn khóa `LanguageId` compound và config v1, nên chưa được sửa runtime catalog/config cho tới khi source-of-truth patch của S0 pass consistency review.
+
+Các contract từng còn mơ hồ đã được khóa trong task PRD trước handoff:
+
+- `DetectorPredicate` là discriminated union `file | dependency | content`; glob chỉ hỗ trợ POSIX literal, `*`, `**`, content match là bounded literal và expression có semantics `allOf`/`anyOf`/`noneOf` xác định.
+- Catalog có `LanguageDescriptor`, `TechnologyDescriptor`, `GuideDescriptor`, provenance chung, `contentPath`, reference/cycle validation và initial technology-kind mapping cụ thể.
+- Language evidence phải độc lập với framework/runtime evidence. NestJS không tự suy ra TypeScript; Spring/build file không tự suy ra Java; `.sln`/`global.json` không tự suy ra C#; React/Vue không tự suy ra JavaScript hoặc TypeScript.
+- Detection output dùng `DetectionMatch`/`DetectionEvidence` bounded, redacted, deterministic. Init result thêm `technologies` và `detection.matches`; evidence không được persist vào config.
+- Compatible unknown key round-trip áp dụng ở top-level và nested package/context/runtime object.
+
+S0 là docs-first exception cho TDD: verification thay cho RED runtime test gồm link/schema consistency search, `pnpm lint`, `pnpm typecheck`, `git diff --check`, và review rằng bảy-command/platform/global contracts không đổi. Sau S0 mới bắt đầu RED `test/unit/catalog.test.ts`.
+
+### Immediate implementation handoff
+
+1. **S0a — normative schema:** thay mục config v1 trong `docs/IMPLEMENTATION_PLAN.md` bằng parse compatibility v1 + write schema v2; thêm exact catalog/detection/guide types và mapping v1. Không đổi TaskRecord, journal, project/global managed manifest hoặc Doctor report schema version.
+2. **S0b — product/workflow:** cập nhật `docs/HARNIX_PRD.md` và `docs/HARNIX_WORKFLOW.md` cho language/technology, explicit migration, read-only no-write, confidence/evidence và guide activation.
+3. **S0c — public/provenance:** cập nhật `README.md`, `CHANGELOG.md`, `docs/UPSTREAM_MAPPING.md`, `docs/UPSTREAM_BASELINE.md`; phân biệt nguồn architecture research với content adaptation. Không thêm guide content ngoài trong slice này.
+4. **S0 verify:** chạy consistency search để không còn compound ID được mô tả như v2 language, rồi `pnpm lint`, `pnpm typecheck`, `git diff --check`.
+5. **S1 RED:** tạo `test/unit/catalog.test.ts` trước, cover duplicate IDs, invalid enum/confidence/provenance, unsafe glob/contentPath, empty/duplicate predicates, missing/cyclic references, deterministic ordering và frozen descriptor snapshot.
+6. **S1 GREEN:** tạo `src/catalog/types.ts`, `src/catalog/catalog.ts`, `src/catalog/validation.ts` và `src/utils/stack.ts`. Catalog chỉ phụ thuộc pure types/data; `utils/stack.ts` sở hữu normalization/mapping v1 và có thể import catalog, không có filesystem/CLI/platform import ngược vào catalog.
+
+S1 không đổi config persistence, detector filesystem, rules seeding hoặc CLI. Những consumer đó bắt đầu ở S2 trở đi, nhờ vậy RED/GREEN đầu tiên review được độc lập và không gộp migration với detection rewrite.
+
 ## S1 — Thêm type và validator cho catalog
 
 Tạo module ít dependency dưới `src/catalog/` hoặc `src/utils/stack.ts`. Định nghĩa `LanguageId`, `TechnologyId`, `TechnologyKind`, detector predicate/expression, guide metadata, label, validator, normalization, reference, provenance và mapping v1. Config/core được import catalog; catalog không import detector filesystem, command, UI hoặc platform template.
@@ -85,7 +110,7 @@ Compliance review phải xác nhận không field hiện tại nào lưu technol
 
 Quality/security review phải xác nhận catalog order deterministic, path/glob an toàn, read có giới hạn, evidence được redact, reference/cycle được validate, config replacement atomic, context bound, package footprint và không lộ machine path/secret.
 
-Điều kiện repository đã biết: `pnpm-workspace.yaml` untracked do user sở hữu hiện làm package-invariant test fail. Không xóa hoặc sửa file này; nếu final gate vẫn bị chặn thì báo riêng.
+Evidence lịch sử ngày 2026-08-12 từng ghi `pnpm-workspace.yaml` untracked làm package-invariant test fail. Tại review 2026-08-13 file này không còn hiện diện và worktree trước review sạch; không suy diễn ai đã xóa nó. Full-suite/final gate vẫn phải chạy fresh và mọi user-owned file xuất hiện lại phải được giữ nguyên.
 
 ## Thứ tự giao hàng
 

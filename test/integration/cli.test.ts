@@ -15,6 +15,23 @@ const temporaryUserHome = useTemporaryUserHomes("harnix-cli-user-home-");
 afterEach(() => { process.chdir(originalCwd); process.exitCode = originalExitCode; vi.restoreAllMocks(); });
 
 describe.sequential("CLI", () => {
+  it("accepts independent language and technology overrides", async () => {
+    const root = await fixture(); process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    await createProgram({ environment: { USERNAME: "tam" } }).parseAsync(["node", "harnix", "init", "--languages", "typescript", "--technologies", "nestjs,vue"], { from: "node" });
+    const config = await readFile(join(root, ".harnix", "config.yaml"), "utf8");
+    expect(config).toContain("languages:\n  - typescript");
+    expect(config).toContain("technologies:\n  - nestjs\n  - vue");
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({ languages: ["typescript"], technologies: ["nestjs", "vue"] });
+  });
+
+  it("rejects unknown profile overrides before creating project state", async () => {
+    const root = await fixture(); process.chdir(root);
+    vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    await expect(runCli(["node", "harnix", "init", "--technologies", "unknown-tech"], { environment: { USERNAME: "tam" } })).resolves.toBe(2);
+    await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
   it("should_configure_multiple_user_global_platforms_when_automation_flags_are_used", async () => {
     const root = await fixture(); process.chdir(root);
     const home = await temporaryUserHome();

@@ -6,6 +6,7 @@ import { buildContext, loadContextManifest } from "../core/context/context.js";
 import { resolveActiveTask } from "../core/tasks/task.js";
 import { findInitializedProject } from "../utils/project-discovery.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
+import { guideOutputPath, selectGuideSources } from "../guides/catalog.js";
 
 export type InternalContextPlatform = "kiro" | "antigravity" | "codex";
 
@@ -50,16 +51,33 @@ export async function renderInternalContext(
   if (!active) return emptyInitializedProjectPayload(platform);
 
   const contextPath = await resolveSafeProjectPath(harnixRoot, `tasks/${active.id}/context.json`);
-  const entries = await exists(contextPath)
+  const taskEntries = await exists(contextPath)
     ? (await loadContextManifest(contextPath)).entries
     : active.relevantPaths.map((path) => ({ path, reason: "task reference", priority: 0, pinned: false, states: ["implementing"] }));
+  const selectedGuides = selectGuideSources({
+    activePaths: active.relevantPaths,
+    languages: config.languages,
+    technologies: config.technologies,
+    topics: taskTopics(active.title, active.goal),
+  });
+  const guidePaths = selectedGuides.map(guideOutputPath);
+  const entries = [
+    ...taskEntries,
+    ...guidePaths.map((path) => ({ path, reason: "applicable guide", priority: 0, pinned: false, states: ["implementing", "verifying"] })),
+  ];
   const cap = platform === "codex" ? 2_500 : Math.min(config.context.maxCharacters, 8_000);
   const bounded = options.forceBounded === true;
   const output = await buildContext(
     root,
     entries,
     bounded ? cap : config.context.maxCharacters,
-    { taskId: active.id, references: active.relevantPaths },
+    {
+      taskId: active.id,
+      references: active.relevantPaths,
+      guides: guidePaths,
+      languages: selectedGuides.filter(({ descriptor }) => descriptor.appliesTo.languages?.length).map(guideOutputPath),
+      technologies: selectedGuides.filter(({ descriptor }) => descriptor.appliesTo.technologies?.length).map(guideOutputPath),
+    },
     bounded ? false : config.runtime.fullContext,
     bounded ? MAX_HOOK_CONTEXT_ENTRIES : undefined,
   );
@@ -138,6 +156,10 @@ function boundedContext(source: string, omittedPaths: string[], cap: number): st
   const disclosure = `Omitted: ${omittedPaths.join(", ") || "none"}`;
   const contentBudget = Math.max(0, cap - disclosure.length - 2);
   return `${source.slice(0, contentBudget)}\n\n${disclosure}`.slice(0, cap);
+}
+
+function taskTopics(...values: string[]): string[] {
+  return [...new Set(values.join(" ").toLowerCase().match(/[a-z0-9-]+/gu) ?? [])].sort();
 }
 
 function normalizeHookEvent(value: unknown): NormalizedHookEvent {

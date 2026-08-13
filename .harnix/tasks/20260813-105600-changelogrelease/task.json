@@ -1,0 +1,99 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-105600-changelogrelease",
+  "title": "Gộp release notes chưa phát hành vào 0.6.1",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "CHANGELOG phản ánh 0.6.1 chỉ chứa hai entry hiện tại chuyển từ 0.6.0, bên cạnh entry bootstrap marker của 0.6.1.",
+  "nonGoals": [
+    "Sửa nội dung release notes của 0.5.0 hoặc cũ hơn.",
+    "Thay đổi package version hoặc mã nguồn.",
+    "Tạo tag, commit hoặc publish package."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "coalesced-release-notes",
+      "text": "Chỉ entry stack profiling và detection agent/tooling được chuyển từ 0.6.0 vào 0.6.1; heading và các entry còn lại của 0.6.0 được giữ lại.",
+      "status": "met",
+      "evidenceIds": [
+        "e-release-scope-green"
+      ]
+    },
+    {
+      "id": "release-links",
+      "text": "Reference 0.6.1 so sánh từ v0.6.0 đến v0.6.1, và reference 0.6.0 được khôi phục.",
+      "status": "met",
+      "evidenceIds": [
+        "e-release-scope-green"
+      ]
+    },
+    {
+      "id": "changelog-validity",
+      "text": "Changelog có heading version đúng thứ tự và diff không chứa whitespace error.",
+      "status": "met",
+      "evidenceIds": [
+        "e-changelog-diff-green"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "changelog-structure",
+      "description": "Inspect version headings, release notes, and comparison references with a deterministic read-only check.",
+      "command": "PowerShell changelog structure inspection",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "changelog-diff",
+      "description": "Check changed Markdown for whitespace errors.",
+      "command": "git diff --check",
+      "scope": "focused",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-changelog-security-scope",
+      "checkId": "changelog-structure",
+      "recordedAt": "2026-08-13T10:59:00+07:00",
+      "result": "pass",
+      "summary": "Inspection confirmed the Security section is historically owned by 0.5.0, not 0.6.0; it remains unchanged while only 0.6.0 Changed entries are coalesced into 0.6.1.",
+      "artifactPaths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "id": "e-release-scope-green",
+      "checkId": "changelog-structure",
+      "recordedAt": "2026-08-13T11:04:00+07:00",
+      "result": "pass",
+      "summary": "0.6.1 contains exactly the bootstrap marker entry plus the two current entries moved from 0.6.0 (stack profiling and agent/tooling detection); 0.6.0 retains its other nine entries.",
+      "artifactPaths": [
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "id": "e-changelog-diff-green",
+      "checkId": "changelog-diff",
+      "recordedAt": "2026-08-13T11:04:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Changelog structure and release references were inspected; git diff --check passed with existing line-ending warnings only.",
+      "artifactPaths": [
+        "CHANGELOG.md"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-13T10:56:00+07:00",
+  "updatedAt": "2026-08-13T11:06:00+07:00",
+  "completedAt": "2026-08-13T11:06:00+07:00"
+}

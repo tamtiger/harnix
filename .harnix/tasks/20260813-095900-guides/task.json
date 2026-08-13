@@ -1,0 +1,132 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260813-095900-guides",
+  "title": "Mở rộng guide kỹ thuật từ nguồn chính thức",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Viết lại các guide trong src/guides thành hướng dẫn thực dụng, đầy đủ và nhất quán cho các language và technology Harnix hỗ trợ, dựa trên tài liệu chính thức hiện hành.",
+  "nonGoals": [
+    "Thay đổi catalog, detector, config hoặc CLI.",
+    "Sao chép nguyên văn tài liệu bên ngoài hoặc thêm dependency runtime.",
+    "Mở rộng thêm language hay technology mới."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "guide-depth",
+      "text": "Mỗi guide có nội dung kỹ thuật thực dụng, cụ thể cho phạm vi của nó và không chỉ là placeholder.",
+      "status": "met",
+      "evidenceIds": [
+        "e-guides-focused-pass"
+      ]
+    },
+    {
+      "id": "guide-consistency",
+      "text": "Guide common/language/technology bổ sung cho nhau, không mâu thuẫn và không lặp lại framework guidance vào language guide.",
+      "status": "met",
+      "evidenceIds": [
+        "e-guides-focused-pass"
+      ]
+    },
+    {
+      "id": "guide-sources",
+      "text": "Các khuyến nghị có thể truy ngược về tài liệu chính thức hoặc chuẩn kỹ thuật phù hợp; nội dung được diễn đạt lại.",
+      "status": "met",
+      "evidenceIds": [
+        "e-guides-official-research"
+      ]
+    },
+    {
+      "id": "guide-quality",
+      "text": "Catalog mapping, lint, typecheck và test guide liên quan đều pass.",
+      "status": "met",
+      "evidenceIds": [
+        "e-guides-quality-pass"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/guides",
+    "src/guides/catalog.ts",
+    "test/unit/rules.test.ts",
+    "test/workflow/skill-sources.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "guides-focused",
+      "description": "Verify guide catalog/materialization tests and Markdown source mapping.",
+      "command": "pnpm exec vitest run test/unit/rules.test.ts test/workflow/skill-sources.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "guides-quality",
+      "description": "Run lint, typecheck and full test suite.",
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "scope": "full",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-guides-full-suite-assertion-fail",
+      "checkId": "guides-quality",
+      "recordedAt": "2026-08-13T10:08:00+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "First full suite found two integration assertions that expected legacy guide wording (broader gates and ABP authorization policies). The substantive replacement retained those compatibility phrases and the focused/full reruns passed.",
+      "artifactPaths": [
+        "src/guides/common/engineering.md",
+        "src/guides/technologies/framework/abp/engineering.md",
+        "test/integration/init.test.ts"
+      ]
+    },
+    {
+      "id": "e-guides-focused-pass",
+      "checkId": "guides-focused",
+      "recordedAt": "2026-08-13T10:08:25+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Guide catalog/materialization/source tests and init integration regression passed: 3 files, 18 tests.",
+      "artifactPaths": [
+        "src/guides",
+        "src/guides/catalog.ts",
+        "test/unit/rules.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/integration/init.test.ts"
+      ]
+    },
+    {
+      "id": "e-guides-quality-pass",
+      "checkId": "guides-quality",
+      "recordedAt": "2026-08-13T10:09:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Lint, typecheck, production build and fresh full Vitest all passed. Full suite: 44 files, 301 tests passing, one platform-specific skip. git diff --check also passed.",
+      "artifactPaths": [
+        "src/guides",
+        "test/unit/rules.test.ts",
+        "test",
+        "dist"
+      ]
+    },
+    {
+      "id": "e-guides-official-research",
+      "recordedAt": "2026-08-13T10:09:00+07:00",
+      "result": "pass",
+      "summary": "Official documentation matrix for C#/.NET, Go, Java, JavaScript/TypeScript, PHP, Python, ABP, NestJS, Spring Boot, CodeIgniter, React and Vue was recorded. Harnix guides paraphrase the resulting recommendations without copied upstream prose.",
+      "artifactPaths": [
+        ".harnix/tasks/20260813-095900-guides/research/official-sources.md"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-13T03:02:25.588Z",
+  "updatedAt": "2026-08-13T03:10:04.634Z",
+  "completedAt": "2026-08-13T03:10:04.634Z"
+}

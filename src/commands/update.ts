@@ -1,7 +1,7 @@
 import { access } from "node:fs/promises";
 
-import { readConfig, type HarnixConfigV1 } from "../core/config/config.js";
-import { commonRules, languageRule } from "../rules/rules.js";
+import { migrateConfig, readConfig, type HarnixConfigV2 } from "../core/config/config.js";
+import { guideOutputPath, selectGuideSources } from "../guides/catalog.js";
 import { workflowTemplate } from "../templates/harnix/workflow.js";
 import { reconcileManagedFiles, readManifest, writeManifest, type DesiredManagedFile, type ManagedManifest } from "../utils/managed-files.js";
 import { sha256 } from "../utils/hashing.js";
@@ -16,7 +16,7 @@ export interface UpdateProjectResult { created: string[]; updated: string[]; pre
 export async function updateProject(options: UpdateProjectOptions): Promise<UpdateProjectResult> {
   const configPath = await resolveSafeHarnixPath(options.root, "config.yaml");
   const manifestPath = await resolveSafeHarnixPath(options.root, ".template-hashes.json");
-  const config = await readConfig(configPath);
+  const config = (await migrateConfig(configPath)).config;
   const manifest = await loadManifest(manifestPath);
   const desired = desiredFiles(config);
   const legacyEntries = manifest.entries.filter((entry) => entry.scope !== "project");
@@ -45,13 +45,12 @@ export async function baselineManagedTemplates(root: string): Promise<void> {
  * Phase 6 deliberately ignores platform selection: project update owns project
  * data and the root AGENTS bootstrap, never legacy project-local platform surfaces.
  */
-export function desiredFiles(config: Pick<HarnixConfigV1, "languages" | "packages">): DesiredManagedFile[] {
-  const files: DesiredManagedFile[] = [managed("AGENTS.md", "agents-bootstrap", "project", renderAgentsTemplate(config)), managed(".harnix/workflow.md", "workflow", "project", workflowTemplate), managed(".harnix/spec/guides/common-rules.md", "common-rules", "project", commonRules)];
-  for (const language of config.languages) {
-    const content = languageRule(language);
-    if (content) files.push(managed(`.harnix/spec/guides/${language}.md`, `rules-${language}`, "project", content));
-  }
-  return files;
+export function desiredFiles(config: Pick<HarnixConfigV2, "languages" | "technologies" | "packages">): DesiredManagedFile[] {
+  return [
+    managed("AGENTS.md", "agents-bootstrap", "project", renderAgentsTemplate(config)),
+    managed(".harnix/workflow.md", "workflow", "project", workflowTemplate),
+    ...selectGuideSources(config).map((source) => managed(guideOutputPath(source), `guide-${source.descriptor.id}`, "project", source.content)),
+  ];
 }
 
 function managed(path: string, sourceId: string, scope: "project" | "kiro" | "antigravity" | "codex", content: string): DesiredManagedFile {

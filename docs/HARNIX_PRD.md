@@ -131,22 +131,20 @@ harnix mem [query]
 harnix doctor [--fix] [--global] [--json]
 ```
 
-Vẫn chỉ có bảy public commands. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user` và `--languages` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix internal context --platform <id>` chỉ là platform-hook protocol, không xuất hiện trong public help và không phải supported public API; exact stdin/stdout/bounds nằm trong `IMPLEMENTATION_PLAN.md` mục 4.7.
+Vẫn chỉ có bảy public commands. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix internal context --platform <id>` chỉ là platform-hook protocol, không xuất hiện trong public help và không phải supported public API; exact stdin/stdout/bounds nằm trong `IMPLEMENTATION_PLAN.md` mục 4.7.
 
 ## 8. Init requirements
 
 - Resolve root từ nested directory/existing worktree trên Windows, macOS, Linux, Unicode/spaces.
-- Bỏ qua `.git`, `node_modules`, `vendor`, `bin`, `obj`, `dist`, `build`, coverage/cache.
-- Detect:
-  - `.csproj`/`.sln` và ABP indicators → C#/.NET/ABP.
-  - `package.json` và NestJS indicators → TypeScript/NestJS.
-  - Python manifests → Python.
-  - Maven/Gradle và Spring indicators → Java/Spring.
-  - `go.mod` → Go.
-  - React dependencies → React web.
-  - Vue dependencies → Vue.
+- Bỏ qua `.git`, Harnix/agent tooling (`.harnix`, `.agents`, `.kiro`, `.gemini`, `.codex`, `.claude`, `.trellis`, `.understand-anything`), `node_modules`, `vendor`, `bin`, `obj`, `dist`, `build`, coverage/cache.
+- Detect language and technology independently with bounded evidence:
+  - C# source/project evidence; `.NET` metadata; ABP package/content evidence.
+  - TypeScript/JavaScript source/config evidence; independent NestJS, React web and Vue dependencies with React Native exclusion.
+  - PHP/Composer evidence and authoritative CodeIgniter dependencies.
+  - Python manifests/source; Java source plus independent Spring dependency/content evidence; Go modules/source.
+  - Generic solution, Maven, Gradle or Composer markers never assert a specific framework or unrelated source language.
 - Detect packages, package manager và verification commands nhưng không execute.
-- Non-interactive by default: infer a safe developer journal ID from the current OS user and auto-detect languages. `--user` and `--languages` are optional deterministic overrides for CI/tests.
+- Non-interactive by default: infer a safe developer journal ID from the current OS user and auto-detect languages/technologies. `--user`, `--languages` and `--technologies` are optional deterministic overrides for CI/tests; legacy compound language aliases normalize with a warning and are never persisted in v2.
 
 Init chỉ tạo:
 
@@ -198,11 +196,11 @@ Phase 6 supersedes every former project-local platform setup path. `init` contin
 The root `AGENTS.md` bootstrap that `init` creates when absent is retained for project onboarding. It is not a setup-owned Codex platform surface.
 ## 10. Config, context, journal and learning
 
-Normative schemas cho `.harnix/config.yaml`, project managed manifest, task/evidence, optional context manifest, journal/learning, global ownership manifest và Doctor JSON v2 nằm tại `IMPLEMENTATION_PLAN.md` mục 4 và `GLOBAL_SETUP_REFACTOR_PLAN.md`. Implementation không được tự đổi field/enum/path/transition mà không cập nhật PRD/workflow, migration và tests trong cùng change. Config migrations explicit, preserve compatible unknown keys và reject future versions. `config.platforms` remains parse-compatible for v1 but is deprecated and ignored for desired global setup.
+Normative schemas cho `.harnix/config.yaml`, stack/guide catalog, project managed manifest, task/evidence, optional context manifest, journal/learning, global ownership manifest và Doctor JSON v2 nằm tại `IMPLEMENTATION_PLAN.md` mục 4 và `GLOBAL_SETUP_REFACTOR_PLAN.md`. Implementation không được tự đổi field/enum/path/transition mà không cập nhật PRD/workflow, migration và tests trong cùng change. Config v2 lưu `languages` và `technologies` độc lập ở project/package; technology kind chỉ nằm trong packaged catalog. Config v1 vẫn đọc được và chỉ được migrate explicit bởi `update` hoặc `doctor --fix`, không rescan; compatible unknown keys được giữ và future/corrupt state bị reject. `config.platforms` remains deprecated and ignored for desired global setup.
 
 Context:
 
-- Rank theo pin, task/acceptance reference, active package/path, language/framework và cross-project relevance.
+- Rank theo pin, task/acceptance reference, active package/path, language/technology guide và cross-project relevance; một entry chỉ nhận một bounded stack bonus dù match cả hai facet.
 - Deduplicate theo normalized repo-relative source/content.
 - Enforce configurable character/token approximation budget.
 - Khi truncate, inject phần điểm cao nhất và liệt kê omitted files.
@@ -305,19 +303,22 @@ Language/package profile trong `.harnix/config.yaml` chỉ là init-time discove
 Bug/failure dùng reproduce → evidence → root cause → one hypothesis → minimal failing test → regression protection → fix. Sau ba failed hypotheses cho cùng symptom, reassess architecture và replan nếu cần. Behavior change ưu tiên RED–GREEN–REFACTOR; docs/trivial wiring/generated snapshots có thể dùng documented exception và strongest alternative verification.
 
 Ready gate bắt buộc observable acceptance criteria, affected contract/scope, validation plan, resolved material unknowns, placeholder/consistency/decision self-review và artifacts tương xứng mode. Contract chưa quyết định không được đẩy vào một implementation “freeze” step để lách gate. Material research lưu task/source/date/conclusion/remaining uncertainty. Implement phải critical-review plan và quan sát RED fail đúng lý do trước GREEN. Check stage 1 là PRD/spec/acceptance compliance; stage 2 là correctness, tests, security, maintainability và unnecessary complexity; từng claim map tới fresh command/inspection cùng full output/exit. Finish archive/complete state, journal evidence/validated learning và không commit/push/merge/PR. Continue route từ persisted status/checkpoint và load smallest relevant journal/spec slice; corrupt/future state fail closed.
-## 15. Rules integration
+## 15. Guide catalog and rules integration
 
 Precedence:
 
 ```text
 repository conventions
 > user-modified project specs
-> language/framework pack
-> common pack
+> selected technology/domain guide
+> selected language guide
+> common guide
 > packaged fallback
 ```
 
-Ship concise rules cho common; C#/.NET/ABP; TypeScript/NestJS; Python; Java/Spring; Go; React web; Vue. C# gồm nullable, async/cancellation, DI, DDD/repository/application services, authorization/validation, EF Core/ABP, xUnit. Java gồm validation, transactions, Spring Security, persistence boundaries, JUnit/Testcontainers. React web gồm accessibility/client security/Testing Library và tách React Native. Chỉ seed relevant content và giữ attribution.
+Harnix ships a typed guide registry and focused Markdown under `src/guides/common`, `src/guides/languages/<language>` and `src/guides/technologies/<kind>/<technology>`. Metadata selects common, source-language and increasingly specific technology/domain content by profile, path and task topic. Short rules may be always active; path guides and task skills load only when applicable. Only selected content is materialized and loaded. Descriptor/content mapping, priority, composition, supersedence and provenance are validated; user-modified or unowned content is preserved.
+
+Initial IDs cover source languages C#, TypeScript, JavaScript, PHP, Python, Java and Go plus .NET, ABP, NestJS, Spring, React web, Vue and CodeIgniter technologies. Detection is evidence-based and independent across facets: generic Composer/Maven/Gradle/solution metadata cannot assert a specific framework or source language. Packaged content starts by decomposing guidance Harnix already owns; external text requires a frozen upstream revision, license review, mapping and release-scan evidence before adaptation.
 
 ## 16. Security requirements
 
@@ -339,7 +340,7 @@ Tất cả filesystem tests dùng isolated temporary repositories **và injected
 1. Unit: detection; config/migrations; context ranking/budget; project/global hash manifests; permission-preserving atomic writes; user path safety; lock/stale-lock/rollback; journal; learning; Doctor v2.
 2. CLI: all seven commands; setup outside an initialized repository; project/global update/uninstall scope; idempotence; modified/deleted/corrupt/future project and global schemas.
 3. Migration: discovery, dry-run, transform, preservation, mixed/conflict, rollback, cleanup.
-4. Fixtures: .NET/ABP, NestJS, Python, Java/Spring, Go, React, Vue, multilingual monorepo.
+4. Fixtures: independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue and multilingual/multi-technology monorepo.
 5. Platform: Kiro global JSON-v1 hook; Antigravity Desktop/CLI plugins and multi-root invocation; Codex global skills/AGENTS/nested hook schema; relevant rules only and no machine paths.
 6. Codex: preserve global `AGENTS.md` and unrelated hook groups, `AGENTS.override.md` detection, `CODEX_HOME`, Windows launcher resolution, pending-trust/retrust flow, no duplicate injection, preserve user files.
 7. Workflow evals: routing, research, debug, TDD exception, two-stage review, fresh verification, budget disclosure, finish/continue, promotion.

@@ -40,7 +40,8 @@ harnix/
 │   ├── commands/            # init, setup, update, upgrade, uninstall, mem, doctor
 │   ├── configurators/       # kiro.ts, antigravity.ts, codex.ts only
 │   ├── templates/           # harnix + platform content
-│   ├── rules/               # common + seven selected language/framework packs
+│   ├── catalog/             # pure language/technology/guide metadata + validation
+│   ├── guides/              # common/language/technology Markdown sources
 │   ├── skills/              # five core + research/debug optional
 │   ├── agents/              # optional roles only
 │   ├── migration/           # discover, preview, plan, apply, verify, cleanup
@@ -78,10 +79,10 @@ Filesystem, clock, process runner, version lookup, prompt dependencies and user-
 
 Các contract project-data trong mục này là normative cho implementation v1. Phase 6 supersedes former platform setup paths and the Doctor v1 shape with the global contracts in `GLOBAL_SETUP_REFACTOR_PLAN.md`; any field, enum, path or transition change still requires matching PRD/workflow, migration and test updates in the same change.
 
-### 4.1 `.harnix/config.yaml`
+### 4.1 `.harnix/config.yaml` v1 compatibility and v2 write schema
 
 ```ts
-type LanguageId =
+type LegacyStackId =
   | "csharp-dotnet-abp"
   | "typescript-nestjs"
   | "php"
@@ -91,19 +92,24 @@ type LanguageId =
   | "react-web"
   | "vue";
 
+type LanguageId = "csharp" | "typescript" | "javascript" | "php" | "python" | "java" | "go";
+type TechnologyId = "dotnet" | "abp" | "nestjs" | "spring" | "react-web" | "vue" | "codeigniter";
+
 type PlatformId = "kiro" | "antigravity" | "codex";
 
-interface PackageConfig {
+interface PackageConfigV2 {
   path: string;              // normalized repo-relative POSIX path; "." for root
   languages: LanguageId[];   // unique, lexicographically sorted
+  technologies: TechnologyId[]; // unique, lexicographically sorted
+  [compatibleUnknown: string]: unknown;
 }
 
 interface HarnixConfigV1 {
   generator: "harnix";
   schemaVersion: 1;
   developer: string;         // journal namespace ID matching ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$
-  languages: LanguageId[];   // project union, unique and sorted
-  packages: PackageConfig[]; // unique by path and sorted by path
+  languages: LegacyStackId[];
+  packages: Array<{ path: string; languages: LegacyStackId[]; [compatibleUnknown: string]: unknown }>;
   platforms: PlatformId[];   // v1 parse compatibility only; deprecated and ignored for desired global setup
   context: {
     maxCharacters: number;   // positive integer, default 24000
@@ -113,10 +119,36 @@ interface HarnixConfigV1 {
     research: "conditional";
     fullContext: boolean;
   };
+  [compatibleUnknown: string]: unknown;
+}
+
+interface HarnixConfigV2 {
+  generator: "harnix";
+  schemaVersion: 2;
+  developer: string;
+  languages: LanguageId[];
+  technologies: TechnologyId[];
+  packages: PackageConfigV2[];
+  platforms: PlatformId[];   // deprecated compatibility field; ignored by global setup
+  context: { maxCharacters: number; tokenApproximation: number; [compatibleUnknown: string]: unknown };
+  runtime: { research: "conditional"; fullContext: boolean; [compatibleUnknown: string]: unknown };
+  [compatibleUnknown: string]: unknown;
 }
 ```
 
-YAML serialization dùng đúng shape trên, deterministic key order và LF trong golden fixtures. Schema migration explicit `N -> N+1`; future versions bị reject. Compatible unknown user keys được round-trip preserve nhưng core logic chỉ đọc known fields. Arrays duplicate, absolute/package-escape path, developer không khớp safe ID pattern và invalid enum fail validation trước write.
+New init and every config write use v2 only. Reads classify input as valid v1, valid v2, corrupt or future without writing. Explicit `update` and `doctor --fix` migrate v1 atomically and permission-preservingly; read-only commands and `init` on an existing project never migrate. Migration maps `csharp-dotnet-abp -> csharp + dotnet,abp`, `typescript-nestjs -> typescript + nestjs`, `java-spring -> java + spring`, plain `php|python|go` to the matching language, and historical `react-web|vue` to technology only. It never rescans the repository.
+
+YAML serialization is deterministic with LF golden fixtures. Compatible unknown user keys round-trip at top level and inside package/context/runtime objects; core logic ignores them and known keys cannot be shadowed. Duplicate/unsorted arrays, absolute/package-escape paths, unsafe developer IDs, invalid enums, corrupt YAML and future schema fail before write.
+
+### 4.1A Stack, detector and guide catalogs
+
+The packaged pure catalog owns stable language/technology IDs, labels, technology kind (`framework|runtime|platform|library|database|tool|infrastructure|domain`), declarative detector expressions, guide references and provenance. Initial technology kinds are: `dotnet:runtime`, `abp|nestjs|spring|vue|codeigniter:framework`, `react-web:library`. Catalog code must not import filesystem collectors, commands, terminal UI or platform adapters.
+
+Detector predicates are the discriminated union `file(glob)`, `dependency(ecosystem,name)` and `content(glob,contains)`. Expressions require a positive `allOf` or `anyOf`; both combine conjunctively and `noneOf` excludes. Globs are safe repository-relative POSIX patterns supporting literals, `*` and `**` only; content matching is bounded literal matching, never regex or code execution. Validation rejects duplicate IDs/predicates, invalid enum/confidence/provenance, unsafe paths, missing/self/cyclic `implies`, `guideIds`, `extends` or `supersedes` references, conflicting supersedence and duplicate guide content paths.
+
+Detection returns deterministic bounded matches with facet, technology kind or `language`, confidence `confirmed|probable|weak`, repository-relative evidence `{kind,path,detail}` and source `catalog`. Language is established independently from framework/runtime: NestJS does not imply TypeScript, Spring/build metadata does not imply Java, `.sln`/`global.json` does not imply C#, and React/Vue do not imply JavaScript or TypeScript. Config auto-selection uses confirmed/probable technology matches; weak evidence remains reviewable.
+
+Guide descriptors declare ID/title/description/category, language/technology/path/topic applicability, activation `always|path|task`, priority, `contentPath`, composition/supersedence and provenance. Packaged Markdown is imported at build time; source tests prove a one-to-one descriptor/content mapping. Selection order is common, language, then increasingly specific technology/domain, with priority and ID as deterministic tie-breakers. Only selected content is materialized below `.harnix/spec/guides/`.
 
 ### 4.2 Project managed manifest
 
@@ -231,7 +263,7 @@ interface ContextManifestV1 {
 }
 ```
 
-Deterministic base score là pin `1000`, explicit task/acceptance reference `500`, active package/path `250`, detected language/framework `100`, cross-project guide `25`; applicable signals cộng dồn, sau đó sort pinned → score/priority descending → normalized path ascending. Context loader không execute included text, không follow external symlink và luôn disclose omitted entries. Explicit full-context bypasses budget only, không bypass path safety/dedupe/source listing.
+Deterministic base score là pin `1000`, explicit task/acceptance reference `500`, active package/path `250`, applicable language-or-technology profile `100` (một bounded stack bonus dù cả hai facet match), cross-project guide `25`; applicable signals cộng dồn, sau đó sort pinned → score/priority descending → normalized path ascending. Context loader không execute included text, không follow external symlink và luôn disclose omitted entries. Explicit full-context bypasses budget only, không bypass path safety/dedupe/source listing.
 
 ### 4.5 Journal and learning
 
@@ -324,7 +356,7 @@ Fixtures cover non-Harnix no-op, corrupt/malformed optional input, Unicode/space
 
 ### 4.8 Common CLI result semantics
 
-Mọi public command dùng stderr cho actionable error/warning và stdout cho requested data/output. Exit `0` là success/clean intentional no-op/dry-run; exit `1` là operation hoặc diagnostic hoàn tất nhưng có actionable finding/conflict/failure; exit `2` là invalid usage/config/schema/root hoặc deterministic internal failure. Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated/machine-readable output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. `--json` (nơi được hỗ trợ) emits exactly one document; `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. `init` is always non-interactive and emits one `InitProjectResult` document with `scope: "project"`, `status: "initialized" | "already-initialized" | "planned"`, detected developer/languages, and sorted `created`, `updated`, `unchanged`, `preserved`, `warnings` arrays. `--yes` is not part of the public init syntax; a hidden no-op compatibility alias may remain for v0.5 callers.
+Mọi public command dùng stderr cho actionable error/warning và stdout cho requested data/output. Exit `0` là success/clean intentional no-op/dry-run; exit `1` là operation hoặc diagnostic hoàn tất nhưng có actionable finding/conflict/failure; exit `2` là invalid usage/config/schema/root hoặc deterministic internal failure. Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated/machine-readable output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. `--json` (nơi được hỗ trợ) emits exactly one document; `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. `init` is always non-interactive and emits one `InitProjectResult` with project status, developer, sorted languages/technologies, bounded `detection.matches`, and sorted created/updated/unchanged/preserved/warnings arrays. Existing projects return empty detection matches because init does not rescan; new/dry-run projects report pre-override evidence and warnings identify overridden facets. `--yes` is not part of the public init syntax; a hidden no-op compatibility alias may remain for v0.5 callers.
 ## 5. Phase 0 — Documentation và baseline checkpoint
 
 ### Task 0.1: Chuẩn hóa PRD
@@ -400,7 +432,7 @@ Phase 1–5 task checkmarks below are historical delivery evidence. Their former
 **Create:** `src/utils/detection.ts`; fixture repositories.
 
 - [x] RED tests for C#/.NET/ABP, NestJS, Python, Java/Spring, Go, React, Vue and monorepo.
-- [x] Test ignored `node_modules/vendor/bin/obj/dist/build` trees.
+- [x] Test ignored `node_modules/vendor/bin/obj/dist/build` trees and agent/tooling namespaces (`.agents`, `.kiro`, `.gemini`, `.trellis`, `.understand-anything`).
 - [x] Detect package manager and available verification scripts without executing them.
 - [x] Return deterministic sorted languages/packages/commands.
 
@@ -462,7 +494,7 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 
 **Create:** `src/core/context/**`
 
-- [x] RED ranking tests lock 4.4 additive scores, tie-break, pin, task reference, active package/path, language/framework and guide priority.
+- [x] RED ranking tests lock 4.4 additive scores, tie-break, pin, task reference, active package/path, bounded language-or-technology profile bonus and guide priority.
 - [x] RED tests for dedupe, deterministic ties, budget boundary and omitted-files disclosure.
 - [x] Persist optional per-state `context.json`; Lite may keep small relevant-path refs in `task.json` without a second artifact.
 - [x] Explicit full-context override bypasses budget but retains source list.
@@ -652,7 +684,7 @@ Kế hoạch, official path/schema snapshot, migration policy, work breakdown v�
 | Unit | detection, config migrations, context rank/budget, project/global manifests, permission-preserving atomic writes, home/path containment, locks, rollback, journal, learning, Doctor v2 |
 | CLI integration | all seven commands, project/global scope, setup outside a project, idempotence, modified/deleted files, corrupt/future project/global schemas |
 | Migration | discovery, dry-run, copy/transform, preservation, conflict, rollback, cleanup |
-| Fixtures | .NET/ABP, NestJS, Python, Java/Spring, Go, React, Vue, multilingual monorepo |
+| Fixtures | independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue, multilingual/multi-technology monorepo |
 | Platform | Kiro user-global JSON hook, Antigravity Desktop/CLI plugin snapshots and multi-root protocol, Codex user-global schema, relevant rules, no machine path |
 | Codex | global AGENTS preservation, skills metadata, nested hooks Windows/Linux, `CODEX_HOME`/override/trust/duplicate coverage, user-owned files |
 | Workflow eval | routing, research, debug, TDD exception, reviews, verification, budget, finish/continue, promotion |

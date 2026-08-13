@@ -23,6 +23,37 @@ function globalOptions(home: string) {
 }
 
 describe("diagnoseProject Doctor v2", () => {
+  it("reports config v1 as fixable and migrates it only with explicit fix", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const configPath = join(root, ".harnix", "config.yaml");
+    const v1 = [
+      "generator: harnix", "schemaVersion: 1", "developer: tam", "languages: [typescript-nestjs]",
+      "packages: [{ path: ., languages: [typescript-nestjs] }]", "platforms: []",
+      "context: { maxCharacters: 24000, tokenApproximation: 4 }", "runtime: { research: conditional, fullContext: false }", "unknown: keep", "",
+    ].join("\n");
+    await writeFile(configPath, v1);
+
+    const before = await diagnoseProject({ root, ...globalOptions(home) });
+    expect(before.project.findings).toContainEqual(expect.objectContaining({ code: "config-outdated", fixable: true }));
+    await expect(readFile(configPath, "utf8")).resolves.toBe(v1);
+
+    const fixed = await diagnoseProject({ root, fix: true, ...globalOptions(home) });
+    expect(fixed.project.findings).not.toContainEqual(expect.objectContaining({ code: "config-outdated" }));
+    const migrated = await readFile(configPath, "utf8");
+    expect(migrated).toContain("schemaVersion: 2"); expect(migrated).toContain("- typescript"); expect(migrated).toContain("- nestjs"); expect(migrated).toContain("unknown: keep");
+  });
+
+  it("reports package profile IDs absent from the project union", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const configPath = join(root, ".harnix", "config.yaml");
+    const config = await readFile(configPath, "utf8");
+    await writeFile(configPath, config.replace("packages: []", "packages:\n  - path: .\n    languages: [go]\n    technologies: [vue]"));
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "profile-conflict", severity: "warning" }));
+  });
+
   it("should_report_project_not_initialized_but_still_inspect_global_integrations", async () => {
     const root = await temporaryRepository(); const home = await temporaryUserHome();
 
