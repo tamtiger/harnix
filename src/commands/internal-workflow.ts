@@ -72,7 +72,8 @@ export async function finishWorkflow(root: string, now = new Date().toISOString(
   const task = await resolveActiveTask(harnixRoot);
   if (!task) throw new Error("Workflow finish requires an active task.");
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
-  const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${now.slice(0, 10)}.jsonl`);
+  const journalDate = task.status === "completed" ? task.completedAt! : now;
+  const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${journalDate.slice(0, 10)}.jsonl`);
   return finishWorkflowTask(harnixRoot, journalPath, config.developer, task, now);
 }
 

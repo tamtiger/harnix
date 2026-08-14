@@ -37,11 +37,94 @@ describe("global managed files", () => {
     expect(validateGlobalManagedManifest(manifest)).toEqual(manifest);
     expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], selector: undefined }] })).toThrow(GlobalManagedManifestError);
     expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], kind: "file", selector: markerSelector }] })).toThrow("must not use a selector");
+    expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], selector: { type: "markers", begin: "<!-- harnix:begin -->", end: "harnix:begin" } }] })).toThrow("overlap");
     expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], path: "../AGENTS.md" }] })).toThrow("safe");
     expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], path: "skills/\0invalid" }] })).toThrow("safe");
     expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], sourceId: "agents\0invalid" }] })).toThrow("safe canonical values");
     expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[1], selector: { ...jsonSelector, pointer: "hooks/UserPromptSubmit" } }] })).toThrow("canonical JSON pointer");
     expect(() => validateGlobalManagedManifest({ ...manifest, entries: [manifest.entries[0], { ...manifest.entries[0], sourceId: "another-source" }] })).toThrow("overlap");
+    expect(() => validateGlobalManagedManifest({
+      ...manifest,
+      entries: [
+        { ...manifest.entries[0], sourceId: "agents-a", selector: { type: "markers", begin: "<!-- harnix:a -->", end: "<!-- harnix:shared -->" } },
+        { ...manifest.entries[0], sourceId: "agents-b", selector: { type: "markers", begin: "<!-- harnix:shared -->", end: "<!-- harnix:b -->" } },
+      ],
+    })).toThrow("overlap");
+    expect(() => validateGlobalManagedManifest({
+      ...manifest,
+      entries: [
+        { ...manifest.entries[0], sourceId: "agents-a", selector: { type: "markers", begin: "<!-- harnix:a -->", end: "<!-- harnix:shared boundary -->" } },
+        { ...manifest.entries[0], sourceId: "agents-b", selector: { type: "markers", begin: "harnix:shared", end: "<!-- harnix:b -->" } },
+      ],
+    })).toThrow("overlap");
+  });
+
+  it("rejects desired marker content that would make the next reconciliation malformed", async () => {
+    const root = await temporaryGlobalRoot();
+
+    await expect(reconcileGlobalManagedFiles({
+      root,
+      manifestPath: "harnix/managed.json",
+      platform: "codex",
+      generatorVersion: "0.6.0",
+      desired: [{
+        path: "AGENTS.md",
+        sourceId: "agents",
+        kind: "managed-block",
+        selector: markerSelector,
+        content: "Safe text followed by <!-- harnix:begin --> a nested marker.",
+      }],
+    })).rejects.toThrow(/marker content/i);
+
+    await expect(access(join(root.path, "AGENTS.md"))).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("rejects a desired JSON member that does not match its own stable selector", async () => {
+    const root = await temporaryGlobalRoot();
+
+    await expect(reconcileGlobalManagedFiles({
+      root,
+      manifestPath: "harnix/managed.json",
+      platform: "codex",
+      generatorVersion: "0.6.0",
+      desired: [{
+        path: "hooks.json",
+        sourceId: "hook",
+        kind: "json-member",
+        selector: jsonSelector,
+        member: { id: "different-id", command: "harnix internal context --platform codex" },
+      }],
+    })).rejects.toThrow(/does not match/i);
+
+    await expect(access(join(root.path, "hooks.json"))).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("treats prototype-named JSON pointer tokens as own data without mutating prototypes", async () => {
+    const root = await temporaryGlobalRoot();
+    const selector = { type: "json-array-member" as const, pointer: "/__proto__/hooks", memberId: "harnix-context" };
+
+    try {
+      await reconcileGlobalManagedFiles({
+        root,
+        manifestPath: "harnix/managed.json",
+        platform: "codex",
+        generatorVersion: "0.6.0",
+        desired: [{
+          path: "hooks.json",
+          sourceId: "hook",
+          kind: "json-member",
+          selector,
+          member: { id: "harnix-context", command: "harnix internal context --platform codex" },
+        }],
+      });
+
+      const document = JSON.parse(await readFile(join(root.path, "hooks.json"), "utf8")) as Record<string, unknown>;
+      expect(Object.hasOwn(document, "__proto__")).toBe(true);
+      expect((document.__proto__ as { hooks: unknown[] }).hooks).toHaveLength(1);
+      expect(Object.hasOwn(Object.prototype, "hooks")).toBe(false);
+    } finally {
+      delete (Object.prototype as { hooks?: unknown }).hooks;
+    }
   });
 
   it("preserves a pre-existing whole target as an untracked collision and never claims it", async () => {

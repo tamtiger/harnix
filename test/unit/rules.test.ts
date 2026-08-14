@@ -1,4 +1,4 @@
-import { access, readdir, readFile, symlink, writeFile } from "node:fs/promises";
+import { access, mkdir, readdir, readFile, symlink, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -58,6 +58,16 @@ describe("guide catalog and rule seeding", () => {
     await writeFile(join(root, ".harnix", "spec", "guides", "common", "engineering.md"), "user change");
     const second = await seedRules({ root, languages: ["typescript"], technologies: [] });
     expect(second.preserved).toContain(".harnix/spec/guides/common/engineering.md");
+  });
+
+  it("preserves an existing directory collision instead of treating it as a missing guide", async () => {
+    const root = await temporaryRepository();
+    const collision = join(root, ".harnix", "spec", "guides", "common", "engineering.md");
+    await mkdir(collision, { recursive: true });
+
+    const result = await seedRules({ root, languages: [], technologies: [] });
+
+    expect(result.preserved).toContain(".harnix/spec/guides/common/engineering.md");
   });
 
   it("rejects an external symlink when seeding guides", async () => {

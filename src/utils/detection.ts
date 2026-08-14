@@ -13,6 +13,7 @@ import {
   type TechnologyDescriptor,
   type TechnologyId,
 } from "../catalog/catalog.js";
+import { matchesSafeGlob } from "./safe-glob.js";
 
 export type { DetectionMatch, LanguageId, TechnologyId } from "../catalog/catalog.js";
 export type PackageManager = "pnpm" | "yarn" | "npm" | "bun";
@@ -143,12 +144,12 @@ async function evaluateExpression(expression: DetectorExpression, facts: Detecti
 
 async function matchPredicate(predicate: DetectorPredicate, facts: DetectionFacts): Promise<DetectionEvidence[]> {
   if (predicate.kind === "file") {
-    return facts.files.filter((file) => matchesGlob(file.path, predicate.glob)).slice(0, maxEvidencePerMatch).map((file) => ({ detail: predicate.glob, kind: "file", path: file.path }));
+    return facts.files.filter((file) => matchesSafeGlob(file.path, predicate.glob)).slice(0, maxEvidencePerMatch).map((file) => ({ detail: predicate.glob, kind: "file", path: file.path }));
   }
   if (predicate.kind === "dependency") {
     return facts.dependencies.filter((fact) => fact.ecosystem === predicate.ecosystem && fact.name === predicate.name).slice(0, maxEvidencePerMatch).map((fact) => ({ detail: `${fact.ecosystem}:${fact.name}`, kind: "dependency", path: fact.path }));
   }
-  const candidates = facts.files.filter((file) => matchesGlob(file.path, predicate.glob));
+  const candidates = facts.files.filter((file) => matchesSafeGlob(file.path, predicate.glob));
   const evidence: DetectionEvidence[] = [];
   for (const file of candidates) {
     const content = await readBoundedText(file);
@@ -233,19 +234,6 @@ async function readBoundedText(file: CollectedFile): Promise<string | undefined>
     if ((await stat(file.absolute)).size > maxReadableBytes) return undefined;
     return await readFile(file.absolute, "utf8");
   } catch { return undefined; }
-}
-
-function matchesGlob(path: string, glob: string): boolean {
-  let pattern = "^";
-  for (let index = 0; index < glob.length; index += 1) {
-    const character = glob[index]!;
-    if (character === "*" && glob[index + 1] === "*") {
-      if (glob[index + 2] === "/") { pattern += "(?:.*/)?"; index += 2; }
-      else { pattern += ".*"; index += 1; }
-    } else if (character === "*") pattern += "[^/]*";
-    else pattern += /[\\^$.*+?()[\]{}|]/u.test(character) ? `\\${character}` : character;
-  }
-  return new RegExp(`${pattern}$`, "u").test(path);
 }
 
 function uniqueEvidence(values: DetectionEvidence[]): DetectionEvidence[] {

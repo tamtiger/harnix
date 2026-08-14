@@ -4,6 +4,44 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.0] - 2026-08-14
+
+### Changed
+
+- Nâng repository lên release `1.0.0` sau khi hoàn tất review/refactor toàn diện và đồng bộ package, CLI, self-host generator metadata cùng tài liệu trạng thái.
+- Đồng bộ `metadata.version` của cả bảy canonical workflow skills với package version và thêm regression contract để ngăn version drift trong các release sau.
+- Giữ nguyên toàn bộ version lịch sử trong changelog, migration fixtures và Harnix task evidence; thay đổi này không phải tuyên bố package đã được publish lên npm.
+
+## [0.6.17] - 2026-08-14
+
+### Fixed
+
+- Global managed fragments nay fail closed trước khi ghi nếu content tự chứa marker boundary hoặc JSON member không match stable selector; JSON pointer/key như `__proto__` được xử lý bằng own properties trên object không prototype để tránh prototype mutation và data loss.
+- Repo-map không còn loại nhầm file hợp lệ bắt đầu bằng `..`, validate mọi scan limit là positive integer và dùng code-unit ordering xuyên inventory, outline, cache và search tie-break.
+- Public diagnostics và release scanner che/phát hiện thêm UNC, Windows forward-slash, macOS user paths cùng unquoted high-signal secrets; scanner có negative controls để không tự match escaped code/HTTPS URLs, còn init/rule seeding không nuốt permission/I/O errors hay ghi đè directory collision.
+
+### Changed
+
+- Hợp nhất bounded stdin, safe glob và filesystem existence probes thành các pure utilities có boundary regressions dùng chung.
+- Tách pure marker, RFC 6901/JSON tree và manifest error khỏi global reconciliation transaction; module hotspot giảm 190 dòng trong khi giữ public API và rollback semantics.
+- Hoàn tất continuation audit toàn repository với coverage matrix, severity/root cause/disposition/verification cho F1–F9; phần skill content version từ `0.6.16` được giữ như một slice nhỏ trong baseline tổng thể.
+
+## [0.6.16] - 2026-08-14
+
+### Added
+
+- Bảy canonical workflow skills nay công bố content version độc lập qua `metadata.version: "1.0.0"`; catalog validate SemVer và expose version trong `SkillTemplate` trong khi ba platform vẫn cài byte-identical `SKILL.md`.
+
+### Fixed
+
+- Workflow finish có thể recover an toàn từ `completed/finishing` còn active sau journal/archive failure, không ghi duplicate completion journal và chỉ clear matching active pointer.
+- Global managed manifest fail closed khi marker begin/end của một hoặc nhiều managed blocks trùng hay chứa chéo, tránh fragment dùng chung boundary rồi hỏng khi reconcile/remove.
+- Khóa transitive dev-tool dependencies về `nanoid@3.3.18` và `esbuild@0.28.1` để loại các advisory hiện hành trong khi giữ Node.js `>=18` và toolchain `tsup`/Vitest hiện có.
+
+### Changed
+
+- Đồng bộ PRD, workflow, implementation plan, README và agent guide với skill-version contract cùng evidence status hiện tại của Phase 6.
+
 ## [0.6.15] - 2026-08-14
 
 ### Changed

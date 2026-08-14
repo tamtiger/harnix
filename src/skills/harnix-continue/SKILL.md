@@ -1,6 +1,8 @@
 ---
 name: harnix-continue
 description: Use when an initialized Harnix project may have an unfinished, interrupted, blocked, or partially persisted task that must resume safely.
+metadata:
+  version: "1.0.0"
 ---
 
 # Continue persisted Harnix work
@@ -36,6 +38,8 @@ Read the hidden workflow inspection projection and its always-present `contextDr
 | `completed` still active | validate completion persistence, then repair pointer/archive only within the documented workflow |
 
 Blocked state takes precedence over its checkpoint. Never route a blocked `replan`, `debugging`, or `finishing` checkpoint directly to another stage owner until Continue validates that the blocker has changed and resumes the task to its recorded status.
+
+For `completed/finishing` still active, rerun the hidden workflow finish recovery. It reuses the deterministic completion journal ID, appends the journal only when missing, and clears only the matching active pointer; it must not demand new verification for completion already persisted durably.
 
 Do not interpret `ready` as proof that the ready gate passed when artifacts contradict it. Route to `replan` if a material decision, placeholder, or contract gap is visible.
 

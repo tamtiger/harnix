@@ -1,0 +1,375 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260814-142615-repository-review-refactor-continuation",
+  "title": "Tiếp tục review và refactor toàn repository",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Hoàn tất review có hệ thống và refactor toàn repository; coi skill version là một slice nhỏ đã có trong baseline thay vì mục tiêu độc lập.",
+  "nonGoals": [
+    "Không thêm platform, package, workspace, service hoặc compatibility surface mới.",
+    "Không rewrite task completion history hoặc tách skill version thành task mục tiêu riêng.",
+    "Không chạm real user profile hay thực hiện Git mutation.",
+    "Không refactor thuần style hoặc tạo abstraction suy đoán."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "audit-systematic",
+      "text": "Audit matrix bao phủ mọi subsystem/file group đã định nghĩa, mỗi finding có severity, evidence, root cause, disposition và verification; không dùng gate xanh thay cho review.",
+      "status": "met",
+      "evidenceIds": [
+        "audit-coverage-pass",
+        "release-gates-pass"
+      ]
+    },
+    {
+      "id": "correctness-safety",
+      "text": "Mọi finding P0–P2 về correctness, data safety, security hoặc public contract được sửa bằng regression evidence hoặc có explicit user-authorized waiver; không còn finding blocking.",
+      "status": "met",
+      "evidenceIds": [
+        "focused-regressions-pass",
+        "release-gates-pass"
+      ]
+    },
+    {
+      "id": "maintainability-refactor",
+      "text": "Các refactor được chọn có bằng chứng giảm duplication, complexity hoặc coupling và giữ nguyên public behavior; không thêm abstraction suy đoán.",
+      "status": "met",
+      "evidenceIds": [
+        "audit-coverage-pass",
+        "focused-regressions-pass",
+        "release-gates-pass"
+      ]
+    },
+    {
+      "id": "prior-slice-preserved",
+      "text": "Skill version cùng các thay đổi baseline từ task trước vẫn là một phần của refactor tổng thể và tiếp tục pass source/catalog/platform parity checks.",
+      "status": "met",
+      "evidenceIds": [
+        "focused-regressions-pass",
+        "release-gates-pass"
+      ]
+    },
+    {
+      "id": "dependency-health",
+      "text": "Production và development dependency graph không còn advisory từ mức low trở lên và vẫn giữ Node.js >=18, one-package, one-bin, no-workspace contracts.",
+      "status": "met",
+      "evidenceIds": [
+        "dependency-audit-pass",
+        "release-gates-pass"
+      ]
+    },
+    {
+      "id": "documentation-release",
+      "text": "Normative docs, implementation state, package patch version, self-host metadata và CHANGELOG phản ánh đầy đủ kết quả của toàn bộ đợt review/refactor.",
+      "status": "met",
+      "evidenceIds": [
+        "docs-release-review-pass",
+        "release-gates-pass"
+      ]
+    },
+    {
+      "id": "quality-gates",
+      "text": "Focused regressions và toàn bộ automated acceptance/release gates pass trên current tree với fake/disposable homes.",
+      "status": "met",
+      "evidenceIds": [
+        "release-gates-pass"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/.template-hashes.json",
+    ".pnpmfile.mjs",
+    "CHANGELOG.md",
+    "README.md",
+    "docs",
+    "package.json",
+    "pnpm-lock.yaml",
+    "scripts",
+    "src",
+    "test"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "audit-coverage",
+      "description": "Inspect the complete repository audit matrix and verify subsystem coverage, evidence, severity and disposition.",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "audit-systematic",
+        "maintainability-refactor"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "docs/**/*.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.{md,ts}",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "focused-regressions",
+      "description": "Run focused unit, integration, workflow and safety regressions for confirmed findings and retained baseline behavior.",
+      "command": "pnpm test:unit; pnpm test:integration; pnpm test:workflow; pnpm test:safety",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "correctness-safety",
+        "maintainability-refactor",
+        "prior-slice-preserved"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/**/*.ts",
+        "src/skills/**/*.md",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "dependency-audit",
+      "description": "Audit production and complete dependency trees and inspect the exact local resolution contract.",
+      "command": "pnpm audit --prod --audit-level low; pnpm audit --audit-level low; pnpm vitest run test/unit/package-contract.test.ts",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "dependency-health"
+      ],
+      "inputs": [
+        ".pnpmfile.mjs",
+        "@task-contract",
+        "package.json",
+        "pnpm-lock.yaml",
+        "test/unit/package-contract.test.ts"
+      ]
+    },
+    {
+      "id": "docs-release-review",
+      "description": "Review normative documentation, package version, self-host metadata and changelog consistency after all findings close.",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "documentation-release"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**/*.md",
+        "package.json"
+      ]
+    },
+    {
+      "id": "release-gates",
+      "description": "Run the exact frozen install, build, test, acceptance, packaging, smoke, performance, footprint, security scan and diff gates.",
+      "command": "pnpm install --frozen-lockfile; pnpm build; pnpm lint; pnpm typecheck; pnpm test; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "audit-systematic",
+        "correctness-safety",
+        "dependency-health",
+        "documentation-release",
+        "maintainability-refactor",
+        "prior-slice-preserved",
+        "quality-gates"
+      ],
+      "inputs": [
+        ".pnpmfile.mjs",
+        "@task-contract",
+        "CHANGELOG.md",
+        "docs/**/*.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.md",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "managed-repomap-safety-red",
+      "recordedAt": "2026-08-14T07:40:38.0550746Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: 14 regression failures confirmed marker/JSON self-corruption, prototype-key data loss, repo-map containment/ordering/limit validation, machine-path/secret scan gaps and directory-collision preservation.",
+      "artifactPaths": [
+        "test/unit/global-managed-files.test.ts",
+        "test/unit/repo-map/service.test.ts",
+        "test/unit/rules.test.ts",
+        "test/integration/cli.test.ts",
+        "test/safety/release-scanner.test.ts"
+      ]
+    },
+    {
+      "id": "managed-repomap-safety-green",
+      "recordedAt": "2026-08-14T07:40:38.0550746Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 5 focused files, 86 tests pass after fail-closed managed fragment validation, prototype-safe JSON, deterministic repo-map limits/order/containment, strict existence checks and expanded redaction/scanning.",
+      "artifactPaths": [
+        "src/utils/global-managed-files.ts",
+        "src/core/repo-map",
+        "src/utils/filesystem.ts",
+        "src/rules/rules.ts",
+        "src/commands/init.ts",
+        "src/cli-program.ts",
+        "scripts/scan-release.mjs"
+      ]
+    },
+    {
+      "id": "utility-refactor-red",
+      "recordedAt": "2026-08-14T07:47:02.5614275Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: bounded-input và safe-glob test suites chưa có module dùng chung; filesystem probe tests xác nhận contract strict đã được tạo.",
+      "artifactPaths": [
+        "test/unit/bounded-input.test.ts",
+        "test/unit/safe-glob.test.ts",
+        "test/unit/filesystem.test.ts"
+      ]
+    },
+    {
+      "id": "refactor-focused-green",
+      "recordedAt": "2026-08-14T07:47:02.5614275Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 10 focused files/125 tests, typecheck và lint pass; duplicate stdin/glob removed, pure marker/JSON modules split, hotspot giảm 1.247 xuống 1.057 dòng.",
+      "artifactPaths": [
+        "src/utils/bounded-input.ts",
+        "src/utils/safe-glob.ts",
+        "src/utils/filesystem.ts",
+        "src/utils/global-managed-json.ts",
+        "src/utils/global-managed-markers.ts",
+        "src/utils/global-managed-error.ts",
+        ".harnix/tasks/20260814-142615-repository-review-refactor-continuation/research/repository-audit.md"
+      ]
+    },
+    {
+      "id": "release-gates-scan-failure",
+      "checkId": "release-gates",
+      "inputDigest": "0c0f1954d6a838cfcac43b4f795014516395904c378b7e4ac35968d8df534bda",
+      "recordedAt": "2026-08-14T07:52:37.9867463Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Exact release sequence passed through footprint, then scan:release rejected the packed bundle as containing a machine path. Narrow debugging required; no completion claim.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "test/safety/release-scanner.test.ts"
+      ]
+    },
+    {
+      "id": "release-scanner-self-match-red",
+      "recordedAt": "2026-08-14T07:55:23.3490369Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Debug RED: generic UNC branch matched code-like escaped separators; initial narrowed forward-UNC branch then matched HTTPS license URLs. Both negative controls reproduced the release failure.",
+      "artifactPaths": [
+        "test/safety/release-scanner.test.ts"
+      ]
+    },
+    {
+      "id": "release-scanner-self-match-green",
+      "recordedAt": "2026-08-14T07:55:23.3490369Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Debug GREEN: 30 scanner tests and scan:release pass after limiting UNC detection to backslash server/share or device-drive syntax; true UNC fixtures remain rejected.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "test/safety/release-scanner.test.ts"
+      ]
+    },
+    {
+      "recordedAt": "2026-08-14T08:03:21.4891069Z",
+      "exitCode": 0,
+      "checkId": "audit-coverage",
+      "result": "pass",
+      "id": "audit-coverage-pass",
+      "inputDigest": "a0455f0cc478cb8a170fb74ea0d1f47e38c7d5bfa335fb44f6219aa79d5ac2ac",
+      "artifactPaths": [
+        ".harnix/tasks/20260814-142615-repository-review-refactor-continuation/research/repository-audit.md",
+        "docs/REVIEW_REFACTOR_PLAN.md"
+      ],
+      "summary": "Audit repository hoàn tất trên 13 subsystem; 9/9 findings có severity, evidence, root cause, disposition và verification; không còn finding blocking."
+    },
+    {
+      "recordedAt": "2026-08-14T08:03:21.4891069Z",
+      "exitCode": 0,
+      "checkId": "focused-regressions",
+      "result": "pass",
+      "id": "focused-regressions-pass",
+      "inputDigest": "7259013a387f56df544bb07b4ed8c71b615570e64d636a38552c26fdd21e9fe5",
+      "artifactPaths": [
+        "test/unit",
+        "test/integration",
+        "test/workflow",
+        "test/safety"
+      ],
+      "summary": "Focused regressions pass: unit 185 pass/1 permission-mode skip trên Windows, integration 83 pass, workflow 55 pass, safety 36 pass."
+    },
+    {
+      "recordedAt": "2026-08-14T08:03:21.4891069Z",
+      "exitCode": 0,
+      "checkId": "dependency-audit",
+      "result": "pass",
+      "id": "dependency-audit-pass",
+      "inputDigest": "f98044cfe90c1abb4e9dd9826d119472977a52221a0a546c41fc576949be2361",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml",
+        ".pnpmfile.mjs",
+        "test/unit/package-contract.test.ts"
+      ],
+      "summary": "Production và full dependency audit không có vulnerability; package contract 2/2 pass, giữ Node >=18, one-package, one-bin và no-workspace."
+    },
+    {
+      "recordedAt": "2026-08-14T08:03:21.4891069Z",
+      "exitCode": 0,
+      "checkId": "docs-release-review",
+      "result": "pass",
+      "id": "docs-release-review-pass",
+      "inputDigest": "d8bb2783cda3a469cdf5836aaaecbda821d8da38b48a48d9c2bf2d9fa50012e6",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "package.json",
+        ".harnix/.template-hashes.json"
+      ],
+      "summary": "Docs, implementation state, changelog, package và self-host metadata đồng bộ ở 0.6.17; CLI báo đúng 0.6.17."
+    },
+    {
+      "recordedAt": "2026-08-14T08:03:21.4891069Z",
+      "exitCode": 0,
+      "checkId": "release-gates",
+      "result": "pass",
+      "id": "release-gates-pass",
+      "inputDigest": "0304d4aa6c46d070e0756caac81d1276412e658b5ca6bc51c1a372b885e151e7",
+      "artifactPaths": [
+        "package.json",
+        "scripts",
+        "src",
+        "test",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ],
+      "summary": "Exact frozen release sequence pass: install/build/lint/typecheck, full test và acceptance, pack/tarball smoke, init/footprint, release scan và git diff --check; tarball smoke pass cho Kiro, Antigravity, Codex và all."
+    }
+  ],
+  "createdAt": "2026-08-14T07:26:15.0475298Z",
+  "updatedAt": "2026-08-14T08:03:31.075Z",
+  "completedAt": "2026-08-14T08:03:31.075Z"
+}

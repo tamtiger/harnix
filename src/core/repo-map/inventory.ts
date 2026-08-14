@@ -1,10 +1,11 @@
 import { lstat, readFile, realpath } from "node:fs/promises";
-import { relative, resolve } from "node:path";
+import { isAbsolute, relative, resolve, sep } from "node:path";
 
 import { globby } from "globby";
 
 import { normalizeRepositoryPath } from "../../utils/paths.js";
 import { defaultRepoMapLimits, type RepoMapInventory, type RepoMapLimits } from "./types.js";
+import { compareCodeUnits } from "./order.js";
 
 const ignoredDirectoryNames = new Set([
   ".agents", ".cache", ".claude", ".codex", ".gemini", ".git", ".harnix", ".kiro", ".next", ".pytest_cache", ".trellis", ".turbo", ".understand-anything",
@@ -13,6 +14,7 @@ const ignoredDirectoryNames = new Set([
 const secretPath = /(?:^|\/)(?:\.env[^/]*|[^/]*(?:credential|secret|token)[^/]*|id_rsa[^/]*|[^/]*\.(?:pem|key))$/iu;
 
 export async function inventoryRepository(root: string, limits: RepoMapLimits = defaultRepoMapLimits): Promise<RepoMapInventory> {
+  assertRepoMapLimits(limits);
   const resolvedRoot = resolve(root);
   const realRoot = await realpath(resolvedRoot);
   const candidates = (await globby("**/*", {
@@ -22,7 +24,7 @@ export async function inventoryRepository(root: string, limits: RepoMapLimits = 
     followSymbolicLinks: false,
     gitignore: true,
     onlyFiles: true,
-  })).sort((left, right) => left.localeCompare(right));
+  })).sort(compareCodeUnits);
   const files: RepoMapInventory["files"] = [];
   const skipped: string[] = [];
   let totalBytes = 0;
@@ -65,7 +67,7 @@ export async function inventoryRepository(root: string, limits: RepoMapLimits = 
       skipped.push(path);
     }
   }
-  return { files, skipped: [...new Set(skipped)].sort((left, right) => left.localeCompare(right)) };
+  return { files, skipped: [...new Set(skipped)].sort(compareCodeUnits) };
 }
 
 function isHardExcluded(path: string): boolean {
@@ -74,5 +76,11 @@ function isHardExcluded(path: string): boolean {
 
 function isContained(root: string, candidate: string): boolean {
   const value = relative(root, candidate);
-  return value === "" || (!value.startsWith("..") && !value.includes("..\\") && !value.includes("../"));
+  return value === "" || (!isAbsolute(value) && value !== ".." && !value.startsWith(`..${sep}`));
+}
+
+export function assertRepoMapLimits(limits: RepoMapLimits): void {
+  for (const [name, value] of Object.entries(limits)) {
+    if (!Number.isInteger(value) || value <= 0) throw new Error(`Repo map ${name} must be a positive integer.`);
+  }
 }

@@ -1,5 +1,3 @@
-import { access } from "node:fs/promises";
-
 import type { DetectionMatch, LanguageId, TechnologyId } from "../catalog/catalog.js";
 import { stackCatalog } from "../catalog/catalog.js";
 import { createConfig, readConfig, writeConfig } from "../core/config/config.js";
@@ -7,6 +5,7 @@ import { refreshRepoMap } from "../core/repo-map/service.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import { detectProject } from "../utils/detection.js";
 import { writeManifest } from "../utils/managed-files.js";
+import { pathExists } from "../utils/filesystem.js";
 import { normalizeLegacyStackIds, legacyStackIds, type LegacyStackId } from "../utils/stack.js";
 import { desiredFiles, updateProject } from "./update.js";
 
@@ -103,4 +102,3 @@ function isTechnologyId(value: string): value is TechnologyId { return technolog
 function isLegacyStackId(value: string): value is LegacyStackId { return legacyIds.has(value); }
 function sorted<T extends string>(values: readonly T[]): T[] { return [...new Set(values)].sort((left, right) => left.localeCompare(right)); }
 async function classifyDesiredPaths(root: string, paths: string[]): Promise<{ created: string[]; preserved: string[] }> { const items = await Promise.all(paths.map(async (path) => ({ exists: await pathExists(await resolveSafeProjectPath(root, path)), path }))); return { created: items.filter(({ exists }) => !exists).map(({ path }) => path), preserved: items.filter(({ exists }) => exists).map(({ path }) => path) }; }
-async function pathExists(path: string): Promise<boolean> { try { await access(path); return true; } catch { return false; } }

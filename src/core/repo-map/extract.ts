@@ -3,6 +3,7 @@ import { basename, dirname, extname } from "node:path";
 
 import { sha256 } from "../../utils/hashing.js";
 import type { RepoMapFileKind, RepoMapInventoryFile, RepoMapRecordV1 } from "./types.js";
+import { compareCodeUnits } from "./order.js";
 
 const languageByExtension: Readonly<Record<string, string>> = {
   cs: "csharp", go: "go", java: "java", js: "javascript", jsx: "javascript", mjs: "javascript", cjs: "javascript",
@@ -47,12 +48,12 @@ function imports(content: string): string[] {
 }
 
 function bounded(values: readonly string[], count: number, length: number): string[] {
-  return [...new Set(values.map((value) => value.trim()).filter((value) => value.length > 0 && value.length <= length && !secretValue.test(value)))].sort((left, right) => left.localeCompare(right)).slice(0, count);
+  return [...new Set(values.map((value) => value.trim()).filter((value) => value.length > 0 && value.length <= length && !secretValue.test(value)))].sort(compareCodeUnits).slice(0, count);
 }
 
 function nearestPackage(path: string, roots: readonly string[]): string {
   const directory = dirname(path).replaceAll("\\", "/");
-  return [...roots].sort((left, right) => right.length - left.length || left.localeCompare(right)).find((root) => root === "" || directory === root || directory.startsWith(`${root}/`)) ?? "";
+  return [...roots].sort((left, right) => right.length - left.length || compareCodeUnits(left, right)).find((root) => root === "" || directory === root || directory.startsWith(`${root}/`)) ?? "";
 }
 
 function fileKind(path: string, extension: string): RepoMapFileKind {

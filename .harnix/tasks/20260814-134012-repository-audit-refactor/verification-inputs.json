@@ -1,0 +1,2222 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260814-134012-repository-audit-refactor",
+  "snapshots": [
+    {
+      "evidenceId": "audit-review-pass-1",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "audit-review",
+      "taskContractHash": "05da7badfbeea4bb1bb7c9b768e4312fb2cc10404a83b6ca452494b42e5a1be2",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b34b2c55a60f95cde6e0ab7457e2993c99d1f8c1d81dbe652b94d5dd3b31a911"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "fac0eccb905b7f08165d68d9546eb1858a781c29ce0a9e130f16d45221d43bfd"
+        },
+        {
+          "path": "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+          "sha256": "32ce8fa19f3b3d72c584c56218b90836075ff90c67def668af1bc18c324c8dc2"
+        },
+        {
+          "path": "docs/HARNESS_RESEARCH.md",
+          "sha256": "663e92a2a8b60a52b8b7ac755d2a189ad584a7ab8e94cdb2477a1c619439ad3a"
+        },
+        {
+          "path": "docs/HARNIX_PRD.md",
+          "sha256": "b7fe1e0cb05bd64e91796207dc24f96ccb2b1d341f322149496caa1f29a76057"
+        },
+        {
+          "path": "docs/HARNIX_WORKFLOW.md",
+          "sha256": "f197ca863a8ce4c2e6d857428b865e505578e5292d302c390ece642ed1998fe8"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "56aa548ef5b670f855c5aca2c31397007b3bd636fdfb02f3d2c2c16b7d59d5b7"
+        },
+        {
+          "path": "docs/REVIEW_REFACTOR_PLAN.md",
+          "sha256": "ce6fcf8647f576a42872f86325ccb32707e489ee832466a15209dcb588a4a67a"
+        },
+        {
+          "path": "docs/UPSTREAM_BASELINE.md",
+          "sha256": "47aef9aeaa2eb8ad372fce1c5b203c97e8dd63ecf0621fea81e5a9b71e740b22"
+        },
+        {
+          "path": "docs/UPSTREAM_MAPPING.md",
+          "sha256": "ad999cdc9f111256aad7e8523b27f3cddc951e0aadec1788c2aee5bf340356c0"
+        },
+        {
+          "path": "docs/prompts/harness-capability-research.md",
+          "sha256": "7d397924ab6da01e44f8525ced7a5e20889ca10f85eac7aac8ca842625e80c45"
+        },
+        {
+          "path": "docs/prompts/workflow-scenario-audit.md",
+          "sha256": "708dfe8587a1d228d04fcfd642bf8f159334e59d3bd89dfbc806f5a0cc914257"
+        },
+        {
+          "path": "package.json",
+          "sha256": "a7e586b81c4ce614f767f9a2132bbf09a3181105901cccc84e8633b0981711c0"
+        },
+        {
+          "path": "scripts/isolated-user-home.mjs",
+          "sha256": "86b3a8328dfc41ddf8bf448c9b9a60a2b49776e902980e6e30821887f222b638"
+        },
+        {
+          "path": "scripts/measure-footprint.mjs",
+          "sha256": "160560a4d199c3017a1549cdc968294ef997e7d8269152c3cbe3aac3b165e67a"
+        },
+        {
+          "path": "scripts/measure-init.mjs",
+          "sha256": "ebe77b1693dacbf5173036af49c5f393ac479537bd58194363a6b8fb16521733"
+        },
+        {
+          "path": "scripts/pack-check.mjs",
+          "sha256": "4828d25e00f1dd1ee1f73c78bf6843d55a596bebdac41be0738bbeead40e4950"
+        },
+        {
+          "path": "scripts/scan-release.mjs",
+          "sha256": "18d1d8635dc6ddb773328a5b16f8d530bc71a3ebcebdeb6059652ffe4b7e8cdb"
+        },
+        {
+          "path": "scripts/smoke-tarball.mjs",
+          "sha256": "8d43f169bf77ad88eb986129c63351b192eaa885a6447b35feb6985fac122e21"
+        },
+        {
+          "path": "src/catalog/catalog.ts",
+          "sha256": "6fdbf32343b8def492e2da2a1766f84a9b90ebbf75b5b9882cea7b3e1091eaaf"
+        },
+        {
+          "path": "src/catalog/types.ts",
+          "sha256": "ef07d06d25080759715750fb52abba150d2674d6da69d24f4eb3287b96d0dce9"
+        },
+        {
+          "path": "src/catalog/validation.ts",
+          "sha256": "48c289f080cc2a0c8ca95c6795f176765ad76b4fc67a8c2c6463de96dabc0323"
+        },
+        {
+          "path": "src/cli-program.ts",
+          "sha256": "dc1f972caadaf125550713b671b44cced9b74d6f472c2b4a524dfbe37bd448a4"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "5ea77d8af068244ce6777ce08291a7b3c40971e61014ef7c2ac979e08ec79acf"
+        },
+        {
+          "path": "src/commands/doctor.ts",
+          "sha256": "b48faf483583463d03891d6083a48ef5ba5b6417b5d6def11123d0ea26ebb396"
+        },
+        {
+          "path": "src/commands/global-doctor.ts",
+          "sha256": "61cb7ed3769f624d88ac0f02f62c9dc440605a67f4d7cdd47df50ed352c2d850"
+        },
+        {
+          "path": "src/commands/global-uninstall.ts",
+          "sha256": "48d98bd961a995b747fded57e92f9d630f777067a95e368f75d47691a185f392"
+        },
+        {
+          "path": "src/commands/global-update.ts",
+          "sha256": "29800634492bb8642a0d81c6e44b30220fb1037438f0f0c26ee708ee64559fdd"
+        },
+        {
+          "path": "src/commands/init.ts",
+          "sha256": "09b9f2bd47e1784ed30851a518ac5228f428ad5ea35e1b7d49370a53b010b685"
+        },
+        {
+          "path": "src/commands/internal-context-cli.ts",
+          "sha256": "4facd4a0a6797b3f83906979257e4e83ff1c241d36a79a00a675be2f1a97c646"
+        },
+        {
+          "path": "src/commands/internal-context.ts",
+          "sha256": "f4b3cb6a1ff488df9413be76b7775a5db8ad999694447f42b11e027784fcdcde"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "26750c9b96271d1c3bb48db50c6c5378a1af0f8bd536d0fbf0a31fc1e8c3908e"
+        },
+        {
+          "path": "src/commands/legacy-project-surfaces.ts",
+          "sha256": "1a2a71d0061bc7400edb07cd0ca44ec1173ec33f55d2612a2ba2443a90e14f25"
+        },
+        {
+          "path": "src/commands/mem.ts",
+          "sha256": "ab151680f6771ef66c91cc877f8e1e93fc486ec076a98e57f38832f2f4aa058a"
+        },
+        {
+          "path": "src/commands/repo-map-internal.ts",
+          "sha256": "b2dd816008b1b903766dfd948204ccefc902e68b8448d0a0fa7866a0ce96c2f0"
+        },
+        {
+          "path": "src/commands/setup.ts",
+          "sha256": "b83473aab2ed189e94e2ce13c657eaa32298c400d7fedc736763a3ea84785b41"
+        },
+        {
+          "path": "src/commands/uninstall.ts",
+          "sha256": "8627f08f085ae1d2dfd8932e3995306d04fee2c3682f10097038e9dc75c24fa8"
+        },
+        {
+          "path": "src/commands/update.ts",
+          "sha256": "29524933108014bd3737e2afc950eccf287131e660652984a13ec060413daeab"
+        },
+        {
+          "path": "src/commands/upgrade.ts",
+          "sha256": "669787464dee9cc0e6f42dfd2fc00409371ca8017c684d13006ef0e859993d4d"
+        },
+        {
+          "path": "src/configurators/antigravity.ts",
+          "sha256": "35316ec1fb854852e4fa30aec54ac18b7d42fc9609901fb04ab88fe60174c6fe"
+        },
+        {
+          "path": "src/configurators/codex.ts",
+          "sha256": "852be466f87eadd887ea49ff383babfdf04b58c70f34185dfbe2a91e0e2a0406"
+        },
+        {
+          "path": "src/configurators/kiro.ts",
+          "sha256": "68c2759eef1942a2d038d52a8195e19d63586a55c83719fb1155dbd9c7604fe2"
+        },
+        {
+          "path": "src/core/config/config.ts",
+          "sha256": "14a280bddb6caebd350093302c772ffd27f8f6f75248fae75d613b1f00d9ce74"
+        },
+        {
+          "path": "src/core/context/context.ts",
+          "sha256": "921682b6337f27561c5d7ba3b7d66d83078ef8ec0da0de20f30230bb0dfcca88"
+        },
+        {
+          "path": "src/core/journal/journal.ts",
+          "sha256": "2048110cc011a8aaa69d720c168494f20e4a2f1b843b6b07da9d082a53c00a2f"
+        },
+        {
+          "path": "src/core/journal/learning.ts",
+          "sha256": "a31dc2919bce5ef03b31dfe4a8c867e00b5222747a3da4ae4df079b40dec7af0"
+        },
+        {
+          "path": "src/core/journal/promotion.ts",
+          "sha256": "e3e15e71598e04e0d91027f928d051966014ea628da09360820cd879731a998c"
+        },
+        {
+          "path": "src/core/repo-map/extract.ts",
+          "sha256": "2015f0a283b95fb43e33ae9a7e6732754f8b1b3e93790233743fbdf263d07f2d"
+        },
+        {
+          "path": "src/core/repo-map/inventory.ts",
+          "sha256": "b872e68856e3dce9874bb18b46de7a205fa66613dbefc32bec67d70f5490bfe0"
+        },
+        {
+          "path": "src/core/repo-map/search.ts",
+          "sha256": "d7f8a52ae158fd819b70637a7a47fad22244e922b5e01f7953fc5c1770919f3e"
+        },
+        {
+          "path": "src/core/repo-map/service.ts",
+          "sha256": "b72179c2ffab98d69b66ee39e6706066013ab20e37455210a6ed8f95e8ace199"
+        },
+        {
+          "path": "src/core/repo-map/store.ts",
+          "sha256": "215057a3ef81f5ab38f3475ed61740218eb7c9020a2dbad2a16cc692d58318f4"
+        },
+        {
+          "path": "src/core/repo-map/types.ts",
+          "sha256": "2b84931c3369ada1933c91489f6b45779377d147293f0ed7340da00052325491"
+        },
+        {
+          "path": "src/core/research.ts",
+          "sha256": "2df5ffe0b8ac319dd9274e2ea2afab19221848ee7f8cfa36feedca4f2192ce5f"
+        },
+        {
+          "path": "src/core/tasks/task.ts",
+          "sha256": "6f57d5aaab7a683957453ce2a766fab26ec22f6b8a60895cb02951610039e7ff"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "f2f66895a50c9e75df9af4d842901b8b62d7ce58a8b38b579d17322217937bae"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "353614cfee31fadcf58964f21d23178118fbdaff74e3b5f78e40960121b09389"
+        },
+        {
+          "path": "src/guides/catalog.ts",
+          "sha256": "ab8fc39b3146928f9a5d2fac945cc736c5648a844144cb2ced3737f5b4d201fd"
+        },
+        {
+          "path": "src/index.ts",
+          "sha256": "22925db5271d1065a84c5e3d30b33868cde246210d586310fe03aa146d2ec686"
+        },
+        {
+          "path": "src/migration/discovery.ts",
+          "sha256": "b31418725b51119fc68fcae02809986538c5b5e2ddac6729d4c8fbf0b5e3701d"
+        },
+        {
+          "path": "src/migration/migrate.ts",
+          "sha256": "36132ca2cea25d9c716da71400dfbe4598212e5d45ce5af181980a8ae0220e24"
+        },
+        {
+          "path": "src/rules/rules.ts",
+          "sha256": "58cc8df9728e16ffb5c6f8953e77ec2691b345fbc986f683221af8c1eecc1891"
+        },
+        {
+          "path": "src/skills/catalog.ts",
+          "sha256": "b1bd584626168f13b181762df93c67befc3d74d0fc1d8708ad786e525a4d82dc"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "013c15b9a50ffc273d56a28c7195c2241e9e0fba6a8fc6d61842c98284629f9f"
+        },
+        {
+          "path": "src/templates/harnix/managed-workflow.ts",
+          "sha256": "dd0e05af5f8b0ae4d7fb0678a72ced82beae781b1be3e32a2ba3a9490ba7a9fd"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "342d8254742be1938ee35af5a83fd15ce82605b3a8bdab6b34e7ae2eedf18c75"
+        },
+        {
+          "path": "src/types/markdown.d.ts",
+          "sha256": "18d8d3ada1a0823b02cec03af991c4f8afccdbf10a088529e2f651309242848f"
+        },
+        {
+          "path": "src/utils/atomic-write.ts",
+          "sha256": "5bb9c924a98a5f33897a296e04e365b6e8ffbc5f5a5732359d9dd98c273e70ea"
+        },
+        {
+          "path": "src/utils/detection.ts",
+          "sha256": "ddc2e58c3d1fb230b2a53f44ee70fa9a6dc262f7b751492e12e6bf703900f879"
+        },
+        {
+          "path": "src/utils/file-lock.ts",
+          "sha256": "e52611f920d934bcc55ccd8e293ec50859d84f713868b870789c38d362654051"
+        },
+        {
+          "path": "src/utils/global-managed-files.ts",
+          "sha256": "ebc94e9db26ea541035088a3c78baec5823c73483bd0b45cc5ab1314dda8d712"
+        },
+        {
+          "path": "src/utils/harnix-launcher.ts",
+          "sha256": "35207a2b75de0c1be0be9af5c6569eefea9058d0d62383cd217586bf57f3aa49"
+        },
+        {
+          "path": "src/utils/hashing.ts",
+          "sha256": "a53fa1daaab60f2c3465e01022e6c28d1db9a197ad13ad6248dd46bd460883d7"
+        },
+        {
+          "path": "src/utils/managed-files.ts",
+          "sha256": "a398083a77de8981f866e005b562dd10b3f57b4a2abc4695ec9ad289cf856d12"
+        },
+        {
+          "path": "src/utils/paths.ts",
+          "sha256": "98efad3f446a16f2c37122e78bb896a84cc76b839fbe44964bf397bfd7cf82b0"
+        },
+        {
+          "path": "src/utils/project-discovery.ts",
+          "sha256": "496450af8295479e2a7ca86d5aa0d6358bfc8b66794e25074262c68e4bcc745c"
+        },
+        {
+          "path": "src/utils/stack.ts",
+          "sha256": "25e5975141cd9222f3cc94486dd4c1027a8a676fa6754d164e336bc58db230d0"
+        },
+        {
+          "path": "src/utils/user-paths.ts",
+          "sha256": "c85c124621e4faec3568b2aee3d283e501bbd7a4480624bef9d1e3989acc7256"
+        },
+        {
+          "path": "src/version.ts",
+          "sha256": "848382340f3138ca932c38cced55ab6f61860e446a4f3f40297f3deb5c4bbf9d"
+        },
+        {
+          "path": "test/integration/cli.test.ts",
+          "sha256": "c804911189f7384bd3d690ba7d181a58ed47328ca0e3deeae1a0a585907418cd"
+        },
+        {
+          "path": "test/integration/doctor.test.ts",
+          "sha256": "2700d61bfa3ea57c0951f6667f09dfc8d4a168453212fe147d0532bc5b984b50"
+        },
+        {
+          "path": "test/integration/global-doctor.test.ts",
+          "sha256": "4b7c24bf9f12ee91b4c0d855c31d77dfacb0bc21ceda87c0badb8a7bd09317c9"
+        },
+        {
+          "path": "test/integration/global-lifecycle.test.ts",
+          "sha256": "1e35241ded831ddfda7e85789fe4da1631511d622567deed5f4d589747886cac"
+        },
+        {
+          "path": "test/integration/init.test.ts",
+          "sha256": "69a167af1c34d28b017dd7a325f0759c7ba8b75bd963c7ba43c4744728941b3c"
+        },
+        {
+          "path": "test/integration/memory.test.ts",
+          "sha256": "83ed934d0b2cdfa2e8b2998ef3ebe1319035a5fb94d7f03d9d3945452dc50917"
+        },
+        {
+          "path": "test/integration/project-state-safety.test.ts",
+          "sha256": "e47a368022e97424d04296ff664e4338bf57f0a57769ca4b17b97db7e58ca524"
+        },
+        {
+          "path": "test/integration/repo-map/doctor.test.ts",
+          "sha256": "e11cbfa5d07ab22893238fd6cc26ba7c04c759030008e5b55dccf9fee38756c1"
+        },
+        {
+          "path": "test/integration/repo-map/incremental.test.ts",
+          "sha256": "3b5a51a06224cb184cf3ab85eba5042f446a05d9cc755db9a52eab04800522ee"
+        },
+        {
+          "path": "test/integration/repo-map/internal.test.ts",
+          "sha256": "a00ed254e4e09e37232935a3b2da12c8de04b7bd467871a426545c3440530606"
+        },
+        {
+          "path": "test/integration/uninstall.test.ts",
+          "sha256": "73839b800b1b34f7e61571bb31b96c48cc779a3be60dea6eb41b0df83b3c846c"
+        },
+        {
+          "path": "test/integration/update.test.ts",
+          "sha256": "3d4fb5b161aa94f02ec5339a16e8142ad1276e9353035eb08e9518fbeaf25ea9"
+        },
+        {
+          "path": "test/integration/upgrade.test.ts",
+          "sha256": "c6aed79577101ef526dbc50b3c16c0b7c9708ccbb59163a1610c365e795ae8cb"
+        },
+        {
+          "path": "test/migration/discovery.test.ts",
+          "sha256": "521633e27ffcfaa1ff2c430e23a9a29abe0c15ce6c76af8c9d0219e2d0c3fc43"
+        },
+        {
+          "path": "test/migration/migrate.test.ts",
+          "sha256": "ed33b6895be248d6c225e7030adb81f1fd35f5671d3512f7c89079b885cbd08a"
+        },
+        {
+          "path": "test/platform/codex-global.test.ts",
+          "sha256": "e6ed164c35dae15bc2a0869abfa23eaa2d8aa68eba58eb5c48b35f2c52a6bff2"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "8c093fbf56aaf5cd00320bd3325bca15bd67b23ec7dd594a64bda2e15cfec119"
+        },
+        {
+          "path": "test/platform/setup.test.ts",
+          "sha256": "81ce5abd247d399ca10d3054e50737ea6b1e07cdbb8202f88fd17f82d03b61e1"
+        },
+        {
+          "path": "test/safety/isolated-user-home.test.ts",
+          "sha256": "8628d309ce2db60fc8ce7f9de2a00795f894459cec8e6c866605d804971aa8f5"
+        },
+        {
+          "path": "test/safety/path-boundaries.test.ts",
+          "sha256": "e09df7cea669cd462337ed805e67e053c19eecb105cf51ba8ba9f7ef232348e7"
+        },
+        {
+          "path": "test/safety/platform-boundaries.test.ts",
+          "sha256": "485b8d98b0da64af4248015608e0c8a114470147dc9e0c98b5d4892ffe32c15a"
+        },
+        {
+          "path": "test/safety/release-scanner.test.ts",
+          "sha256": "135cb918cb1d7db30b706b00b222824b6f502bbb8e55eb20913f289508fc1af0"
+        },
+        {
+          "path": "test/safety/user-global-paths.test.ts",
+          "sha256": "1355d2c2778c867f9eede4127306b0f1ed16c48a61ffdae53063fd587832563e"
+        },
+        {
+          "path": "test/support/temporary-repository.ts",
+          "sha256": "b099ab09957c907551a6b34012ded84c043bc3fae9f6f2d9c0122009998cb0b5"
+        },
+        {
+          "path": "test/support/temporary-user-home.ts",
+          "sha256": "c0dca64d9dd3441e0ba1f5674f63630532e3be5b41d01777e2645c2acae38a7e"
+        },
+        {
+          "path": "test/unit/atomic-write.test.ts",
+          "sha256": "9b2205686c5c86b3b1747e898def455c919357eba6e4b96a411f10c79940f63d"
+        },
+        {
+          "path": "test/unit/catalog.test.ts",
+          "sha256": "5780660b3b09e2b472c0575a457c993b4c93e30e4c21bb323633df4c4c62c15f"
+        },
+        {
+          "path": "test/unit/cli-fast-path.test.ts",
+          "sha256": "c1ef973bf482d084ccfb046d9057f88bbfa22c135c91c3ce264fc56545d6337a"
+        },
+        {
+          "path": "test/unit/config.test.ts",
+          "sha256": "8471655c8ae56009b6937f83a54f2e23b956a37bbac9719e4d03593c7952bf5b"
+        },
+        {
+          "path": "test/unit/context.test.ts",
+          "sha256": "3bc897bac7603adefdbb66ec4638127104ea3abe3e5ed335e8ccfb8cf388c50d"
+        },
+        {
+          "path": "test/unit/detection.test.ts",
+          "sha256": "b6f538423e7e1a068614c99c32529d1e9a36c676e77b1f66830efdd26749080f"
+        },
+        {
+          "path": "test/unit/file-lock.test.ts",
+          "sha256": "42f1d32707a05adf741d0194cb1b21f87962de4702eafa9321d6d35141763ae8"
+        },
+        {
+          "path": "test/unit/global-managed-files.test.ts",
+          "sha256": "f4eb6894be437a5227af59b304a2af81c66c1c18ac8e04e59587e482c139d3fb"
+        },
+        {
+          "path": "test/unit/global-uninstall.test.ts",
+          "sha256": "ad00244e3ba9fd87155ed5f572435d0fe08ae45ba2699653da26051bacf7d511"
+        },
+        {
+          "path": "test/unit/harnix-launcher.test.ts",
+          "sha256": "856fe54f1dbd2ea5567549c6e7ea8d0913d13bd7255f12a580ba3e0732e7b000"
+        },
+        {
+          "path": "test/unit/journal.test.ts",
+          "sha256": "308b231c7a0e086f16a8bb6d677dfa03e661be8299e049be5243a2039dd9ce1f"
+        },
+        {
+          "path": "test/unit/legacy-project-surfaces.test.ts",
+          "sha256": "dcd0ef72820c5f94520aac353699faab2d4190f2a6a4c790ab5c41d564db41a0"
+        },
+        {
+          "path": "test/unit/managed-files.test.ts",
+          "sha256": "ad84b01e12372ced1f5a68eb3150d748623221c3268d966364c1a6393abc5f0d"
+        },
+        {
+          "path": "test/unit/package-contract.test.ts",
+          "sha256": "7e9310d7bffef70032370e7381c5a4f5b7b4fd6c87111f2778f0e1a24dddd7b2"
+        },
+        {
+          "path": "test/unit/paths.test.ts",
+          "sha256": "9dc111b000cc415c061d06c4ee28ebd37c2912b2b3df50913ddc2f54ac6b6eab"
+        },
+        {
+          "path": "test/unit/project-discovery.test.ts",
+          "sha256": "e3ba1a721c93a92e440ac8bfb83cd13689d648bef622dec1bbb23a73595a73a1"
+        },
+        {
+          "path": "test/unit/repo-map/service.test.ts",
+          "sha256": "4cfd407b518153ed15cc9de699704da6651103a70e133d351d524075ecc56883"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "1a84652b24ab778812bd3be35b91c53bcc2b7b920e8475f4e74bcd76a00f1720"
+        },
+        {
+          "path": "test/unit/task-state.test.ts",
+          "sha256": "30f63193b06f3391402e805d3ade6962f08eb6aa9959517cc4f5ee080fa7b3d7"
+        },
+        {
+          "path": "test/unit/user-paths.test.ts",
+          "sha256": "bade1898c385f5865db087f9053f93a635bdf2cb389bc0e3c295fa1524ffeab0"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "d2d912b9a17b562286aeecd942e2f1cdfd2da8b0e73e4309a72e36b6de0b1e3e"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "f80c5252e36c235c781a8d68563d1171f3329cf79d709469b1b87b3bd0fd914b"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "0502124467196eadb2bf3effc14b05ab98a90b3ac7a9f121b00536c5b372bceb"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "04c3fbae28a67fb132a7193ff00169c1b3bbe3144ba1d763f74e870516470036"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "57c05dafe545e7da739f3e2fa8366485195e9fe3777a12eac787ac74cea6c184"
+        }
+      ],
+      "inputDigest": "2d441a9fd88eeefa36dc5d122386c162cd7e33d4e194e7b4d2ee3a732fc290b9"
+    },
+    {
+      "evidenceId": "audit-review-pass-2",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "audit-review",
+      "taskContractHash": "3fac6297f90a28bd57b7b24e535d05598ea729099b117d56e26183b7beed3388",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b214bf61bddc8c040b0c61858b44e6000cb51ae863063a26b52f6c5c6d915c49"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "fac0eccb905b7f08165d68d9546eb1858a781c29ce0a9e130f16d45221d43bfd"
+        },
+        {
+          "path": "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+          "sha256": "32ce8fa19f3b3d72c584c56218b90836075ff90c67def668af1bc18c324c8dc2"
+        },
+        {
+          "path": "docs/HARNESS_RESEARCH.md",
+          "sha256": "663e92a2a8b60a52b8b7ac755d2a189ad584a7ab8e94cdb2477a1c619439ad3a"
+        },
+        {
+          "path": "docs/HARNIX_PRD.md",
+          "sha256": "b7fe1e0cb05bd64e91796207dc24f96ccb2b1d341f322149496caa1f29a76057"
+        },
+        {
+          "path": "docs/HARNIX_WORKFLOW.md",
+          "sha256": "f197ca863a8ce4c2e6d857428b865e505578e5292d302c390ece642ed1998fe8"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "56aa548ef5b670f855c5aca2c31397007b3bd636fdfb02f3d2c2c16b7d59d5b7"
+        },
+        {
+          "path": "docs/REVIEW_REFACTOR_PLAN.md",
+          "sha256": "33cd9d576a7ca05fa86140c74188dec22ba64f294899c8f3a509954154aea706"
+        },
+        {
+          "path": "docs/UPSTREAM_BASELINE.md",
+          "sha256": "47aef9aeaa2eb8ad372fce1c5b203c97e8dd63ecf0621fea81e5a9b71e740b22"
+        },
+        {
+          "path": "docs/UPSTREAM_MAPPING.md",
+          "sha256": "ad999cdc9f111256aad7e8523b27f3cddc951e0aadec1788c2aee5bf340356c0"
+        },
+        {
+          "path": "docs/prompts/harness-capability-research.md",
+          "sha256": "7d397924ab6da01e44f8525ced7a5e20889ca10f85eac7aac8ca842625e80c45"
+        },
+        {
+          "path": "docs/prompts/workflow-scenario-audit.md",
+          "sha256": "708dfe8587a1d228d04fcfd642bf8f159334e59d3bd89dfbc806f5a0cc914257"
+        },
+        {
+          "path": "package.json",
+          "sha256": "2c58e84081affab93d1eaa813f6170f35e50f19159272ffa3dab2d5427e3bde3"
+        },
+        {
+          "path": "scripts/isolated-user-home.mjs",
+          "sha256": "86b3a8328dfc41ddf8bf448c9b9a60a2b49776e902980e6e30821887f222b638"
+        },
+        {
+          "path": "scripts/measure-footprint.mjs",
+          "sha256": "160560a4d199c3017a1549cdc968294ef997e7d8269152c3cbe3aac3b165e67a"
+        },
+        {
+          "path": "scripts/measure-init.mjs",
+          "sha256": "ebe77b1693dacbf5173036af49c5f393ac479537bd58194363a6b8fb16521733"
+        },
+        {
+          "path": "scripts/pack-check.mjs",
+          "sha256": "4828d25e00f1dd1ee1f73c78bf6843d55a596bebdac41be0738bbeead40e4950"
+        },
+        {
+          "path": "scripts/scan-release.mjs",
+          "sha256": "18d1d8635dc6ddb773328a5b16f8d530bc71a3ebcebdeb6059652ffe4b7e8cdb"
+        },
+        {
+          "path": "scripts/smoke-tarball.mjs",
+          "sha256": "8d43f169bf77ad88eb986129c63351b192eaa885a6447b35feb6985fac122e21"
+        },
+        {
+          "path": "src/catalog/catalog.ts",
+          "sha256": "6fdbf32343b8def492e2da2a1766f84a9b90ebbf75b5b9882cea7b3e1091eaaf"
+        },
+        {
+          "path": "src/catalog/types.ts",
+          "sha256": "ef07d06d25080759715750fb52abba150d2674d6da69d24f4eb3287b96d0dce9"
+        },
+        {
+          "path": "src/catalog/validation.ts",
+          "sha256": "48c289f080cc2a0c8ca95c6795f176765ad76b4fc67a8c2c6463de96dabc0323"
+        },
+        {
+          "path": "src/cli-program.ts",
+          "sha256": "dc1f972caadaf125550713b671b44cced9b74d6f472c2b4a524dfbe37bd448a4"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "5ea77d8af068244ce6777ce08291a7b3c40971e61014ef7c2ac979e08ec79acf"
+        },
+        {
+          "path": "src/commands/doctor.ts",
+          "sha256": "b48faf483583463d03891d6083a48ef5ba5b6417b5d6def11123d0ea26ebb396"
+        },
+        {
+          "path": "src/commands/global-doctor.ts",
+          "sha256": "61cb7ed3769f624d88ac0f02f62c9dc440605a67f4d7cdd47df50ed352c2d850"
+        },
+        {
+          "path": "src/commands/global-uninstall.ts",
+          "sha256": "48d98bd961a995b747fded57e92f9d630f777067a95e368f75d47691a185f392"
+        },
+        {
+          "path": "src/commands/global-update.ts",
+          "sha256": "29800634492bb8642a0d81c6e44b30220fb1037438f0f0c26ee708ee64559fdd"
+        },
+        {
+          "path": "src/commands/init.ts",
+          "sha256": "09b9f2bd47e1784ed30851a518ac5228f428ad5ea35e1b7d49370a53b010b685"
+        },
+        {
+          "path": "src/commands/internal-context-cli.ts",
+          "sha256": "4facd4a0a6797b3f83906979257e4e83ff1c241d36a79a00a675be2f1a97c646"
+        },
+        {
+          "path": "src/commands/internal-context.ts",
+          "sha256": "f4b3cb6a1ff488df9413be76b7775a5db8ad999694447f42b11e027784fcdcde"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "26750c9b96271d1c3bb48db50c6c5378a1af0f8bd536d0fbf0a31fc1e8c3908e"
+        },
+        {
+          "path": "src/commands/legacy-project-surfaces.ts",
+          "sha256": "1a2a71d0061bc7400edb07cd0ca44ec1173ec33f55d2612a2ba2443a90e14f25"
+        },
+        {
+          "path": "src/commands/mem.ts",
+          "sha256": "ab151680f6771ef66c91cc877f8e1e93fc486ec076a98e57f38832f2f4aa058a"
+        },
+        {
+          "path": "src/commands/repo-map-internal.ts",
+          "sha256": "b2dd816008b1b903766dfd948204ccefc902e68b8448d0a0fa7866a0ce96c2f0"
+        },
+        {
+          "path": "src/commands/setup.ts",
+          "sha256": "b83473aab2ed189e94e2ce13c657eaa32298c400d7fedc736763a3ea84785b41"
+        },
+        {
+          "path": "src/commands/uninstall.ts",
+          "sha256": "8627f08f085ae1d2dfd8932e3995306d04fee2c3682f10097038e9dc75c24fa8"
+        },
+        {
+          "path": "src/commands/update.ts",
+          "sha256": "29524933108014bd3737e2afc950eccf287131e660652984a13ec060413daeab"
+        },
+        {
+          "path": "src/commands/upgrade.ts",
+          "sha256": "669787464dee9cc0e6f42dfd2fc00409371ca8017c684d13006ef0e859993d4d"
+        },
+        {
+          "path": "src/configurators/antigravity.ts",
+          "sha256": "35316ec1fb854852e4fa30aec54ac18b7d42fc9609901fb04ab88fe60174c6fe"
+        },
+        {
+          "path": "src/configurators/codex.ts",
+          "sha256": "852be466f87eadd887ea49ff383babfdf04b58c70f34185dfbe2a91e0e2a0406"
+        },
+        {
+          "path": "src/configurators/kiro.ts",
+          "sha256": "68c2759eef1942a2d038d52a8195e19d63586a55c83719fb1155dbd9c7604fe2"
+        },
+        {
+          "path": "src/core/config/config.ts",
+          "sha256": "14a280bddb6caebd350093302c772ffd27f8f6f75248fae75d613b1f00d9ce74"
+        },
+        {
+          "path": "src/core/context/context.ts",
+          "sha256": "921682b6337f27561c5d7ba3b7d66d83078ef8ec0da0de20f30230bb0dfcca88"
+        },
+        {
+          "path": "src/core/journal/journal.ts",
+          "sha256": "2048110cc011a8aaa69d720c168494f20e4a2f1b843b6b07da9d082a53c00a2f"
+        },
+        {
+          "path": "src/core/journal/learning.ts",
+          "sha256": "a31dc2919bce5ef03b31dfe4a8c867e00b5222747a3da4ae4df079b40dec7af0"
+        },
+        {
+          "path": "src/core/journal/promotion.ts",
+          "sha256": "e3e15e71598e04e0d91027f928d051966014ea628da09360820cd879731a998c"
+        },
+        {
+          "path": "src/core/repo-map/extract.ts",
+          "sha256": "2015f0a283b95fb43e33ae9a7e6732754f8b1b3e93790233743fbdf263d07f2d"
+        },
+        {
+          "path": "src/core/repo-map/inventory.ts",
+          "sha256": "b872e68856e3dce9874bb18b46de7a205fa66613dbefc32bec67d70f5490bfe0"
+        },
+        {
+          "path": "src/core/repo-map/search.ts",
+          "sha256": "d7f8a52ae158fd819b70637a7a47fad22244e922b5e01f7953fc5c1770919f3e"
+        },
+        {
+          "path": "src/core/repo-map/service.ts",
+          "sha256": "b72179c2ffab98d69b66ee39e6706066013ab20e37455210a6ed8f95e8ace199"
+        },
+        {
+          "path": "src/core/repo-map/store.ts",
+          "sha256": "215057a3ef81f5ab38f3475ed61740218eb7c9020a2dbad2a16cc692d58318f4"
+        },
+        {
+          "path": "src/core/repo-map/types.ts",
+          "sha256": "2b84931c3369ada1933c91489f6b45779377d147293f0ed7340da00052325491"
+        },
+        {
+          "path": "src/core/research.ts",
+          "sha256": "2df5ffe0b8ac319dd9274e2ea2afab19221848ee7f8cfa36feedca4f2192ce5f"
+        },
+        {
+          "path": "src/core/tasks/task.ts",
+          "sha256": "6f57d5aaab7a683957453ce2a766fab26ec22f6b8a60895cb02951610039e7ff"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "f2f66895a50c9e75df9af4d842901b8b62d7ce58a8b38b579d17322217937bae"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "353614cfee31fadcf58964f21d23178118fbdaff74e3b5f78e40960121b09389"
+        },
+        {
+          "path": "src/guides/catalog.ts",
+          "sha256": "ab8fc39b3146928f9a5d2fac945cc736c5648a844144cb2ced3737f5b4d201fd"
+        },
+        {
+          "path": "src/index.ts",
+          "sha256": "22925db5271d1065a84c5e3d30b33868cde246210d586310fe03aa146d2ec686"
+        },
+        {
+          "path": "src/migration/discovery.ts",
+          "sha256": "b31418725b51119fc68fcae02809986538c5b5e2ddac6729d4c8fbf0b5e3701d"
+        },
+        {
+          "path": "src/migration/migrate.ts",
+          "sha256": "36132ca2cea25d9c716da71400dfbe4598212e5d45ce5af181980a8ae0220e24"
+        },
+        {
+          "path": "src/rules/rules.ts",
+          "sha256": "58cc8df9728e16ffb5c6f8953e77ec2691b345fbc986f683221af8c1eecc1891"
+        },
+        {
+          "path": "src/skills/catalog.ts",
+          "sha256": "b1bd584626168f13b181762df93c67befc3d74d0fc1d8708ad786e525a4d82dc"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "013c15b9a50ffc273d56a28c7195c2241e9e0fba6a8fc6d61842c98284629f9f"
+        },
+        {
+          "path": "src/templates/harnix/managed-workflow.ts",
+          "sha256": "dd0e05af5f8b0ae4d7fb0678a72ced82beae781b1be3e32a2ba3a9490ba7a9fd"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "342d8254742be1938ee35af5a83fd15ce82605b3a8bdab6b34e7ae2eedf18c75"
+        },
+        {
+          "path": "src/types/markdown.d.ts",
+          "sha256": "18d8d3ada1a0823b02cec03af991c4f8afccdbf10a088529e2f651309242848f"
+        },
+        {
+          "path": "src/utils/atomic-write.ts",
+          "sha256": "5bb9c924a98a5f33897a296e04e365b6e8ffbc5f5a5732359d9dd98c273e70ea"
+        },
+        {
+          "path": "src/utils/detection.ts",
+          "sha256": "ddc2e58c3d1fb230b2a53f44ee70fa9a6dc262f7b751492e12e6bf703900f879"
+        },
+        {
+          "path": "src/utils/file-lock.ts",
+          "sha256": "e52611f920d934bcc55ccd8e293ec50859d84f713868b870789c38d362654051"
+        },
+        {
+          "path": "src/utils/global-managed-files.ts",
+          "sha256": "ebc94e9db26ea541035088a3c78baec5823c73483bd0b45cc5ab1314dda8d712"
+        },
+        {
+          "path": "src/utils/harnix-launcher.ts",
+          "sha256": "35207a2b75de0c1be0be9af5c6569eefea9058d0d62383cd217586bf57f3aa49"
+        },
+        {
+          "path": "src/utils/hashing.ts",
+          "sha256": "a53fa1daaab60f2c3465e01022e6c28d1db9a197ad13ad6248dd46bd460883d7"
+        },
+        {
+          "path": "src/utils/managed-files.ts",
+          "sha256": "a398083a77de8981f866e005b562dd10b3f57b4a2abc4695ec9ad289cf856d12"
+        },
+        {
+          "path": "src/utils/paths.ts",
+          "sha256": "98efad3f446a16f2c37122e78bb896a84cc76b839fbe44964bf397bfd7cf82b0"
+        },
+        {
+          "path": "src/utils/project-discovery.ts",
+          "sha256": "496450af8295479e2a7ca86d5aa0d6358bfc8b66794e25074262c68e4bcc745c"
+        },
+        {
+          "path": "src/utils/stack.ts",
+          "sha256": "25e5975141cd9222f3cc94486dd4c1027a8a676fa6754d164e336bc58db230d0"
+        },
+        {
+          "path": "src/utils/user-paths.ts",
+          "sha256": "c85c124621e4faec3568b2aee3d283e501bbd7a4480624bef9d1e3989acc7256"
+        },
+        {
+          "path": "src/version.ts",
+          "sha256": "848382340f3138ca932c38cced55ab6f61860e446a4f3f40297f3deb5c4bbf9d"
+        },
+        {
+          "path": "test/integration/cli.test.ts",
+          "sha256": "c804911189f7384bd3d690ba7d181a58ed47328ca0e3deeae1a0a585907418cd"
+        },
+        {
+          "path": "test/integration/doctor.test.ts",
+          "sha256": "2700d61bfa3ea57c0951f6667f09dfc8d4a168453212fe147d0532bc5b984b50"
+        },
+        {
+          "path": "test/integration/global-doctor.test.ts",
+          "sha256": "4b7c24bf9f12ee91b4c0d855c31d77dfacb0bc21ceda87c0badb8a7bd09317c9"
+        },
+        {
+          "path": "test/integration/global-lifecycle.test.ts",
+          "sha256": "1e35241ded831ddfda7e85789fe4da1631511d622567deed5f4d589747886cac"
+        },
+        {
+          "path": "test/integration/init.test.ts",
+          "sha256": "69a167af1c34d28b017dd7a325f0759c7ba8b75bd963c7ba43c4744728941b3c"
+        },
+        {
+          "path": "test/integration/memory.test.ts",
+          "sha256": "83ed934d0b2cdfa2e8b2998ef3ebe1319035a5fb94d7f03d9d3945452dc50917"
+        },
+        {
+          "path": "test/integration/project-state-safety.test.ts",
+          "sha256": "e47a368022e97424d04296ff664e4338bf57f0a57769ca4b17b97db7e58ca524"
+        },
+        {
+          "path": "test/integration/repo-map/doctor.test.ts",
+          "sha256": "e11cbfa5d07ab22893238fd6cc26ba7c04c759030008e5b55dccf9fee38756c1"
+        },
+        {
+          "path": "test/integration/repo-map/incremental.test.ts",
+          "sha256": "3b5a51a06224cb184cf3ab85eba5042f446a05d9cc755db9a52eab04800522ee"
+        },
+        {
+          "path": "test/integration/repo-map/internal.test.ts",
+          "sha256": "a00ed254e4e09e37232935a3b2da12c8de04b7bd467871a426545c3440530606"
+        },
+        {
+          "path": "test/integration/uninstall.test.ts",
+          "sha256": "73839b800b1b34f7e61571bb31b96c48cc779a3be60dea6eb41b0df83b3c846c"
+        },
+        {
+          "path": "test/integration/update.test.ts",
+          "sha256": "3d4fb5b161aa94f02ec5339a16e8142ad1276e9353035eb08e9518fbeaf25ea9"
+        },
+        {
+          "path": "test/integration/upgrade.test.ts",
+          "sha256": "c6aed79577101ef526dbc50b3c16c0b7c9708ccbb59163a1610c365e795ae8cb"
+        },
+        {
+          "path": "test/migration/discovery.test.ts",
+          "sha256": "521633e27ffcfaa1ff2c430e23a9a29abe0c15ce6c76af8c9d0219e2d0c3fc43"
+        },
+        {
+          "path": "test/migration/migrate.test.ts",
+          "sha256": "ed33b6895be248d6c225e7030adb81f1fd35f5671d3512f7c89079b885cbd08a"
+        },
+        {
+          "path": "test/platform/codex-global.test.ts",
+          "sha256": "e6ed164c35dae15bc2a0869abfa23eaa2d8aa68eba58eb5c48b35f2c52a6bff2"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "8c093fbf56aaf5cd00320bd3325bca15bd67b23ec7dd594a64bda2e15cfec119"
+        },
+        {
+          "path": "test/platform/setup.test.ts",
+          "sha256": "81ce5abd247d399ca10d3054e50737ea6b1e07cdbb8202f88fd17f82d03b61e1"
+        },
+        {
+          "path": "test/safety/isolated-user-home.test.ts",
+          "sha256": "8628d309ce2db60fc8ce7f9de2a00795f894459cec8e6c866605d804971aa8f5"
+        },
+        {
+          "path": "test/safety/path-boundaries.test.ts",
+          "sha256": "e09df7cea669cd462337ed805e67e053c19eecb105cf51ba8ba9f7ef232348e7"
+        },
+        {
+          "path": "test/safety/platform-boundaries.test.ts",
+          "sha256": "485b8d98b0da64af4248015608e0c8a114470147dc9e0c98b5d4892ffe32c15a"
+        },
+        {
+          "path": "test/safety/release-scanner.test.ts",
+          "sha256": "135cb918cb1d7db30b706b00b222824b6f502bbb8e55eb20913f289508fc1af0"
+        },
+        {
+          "path": "test/safety/user-global-paths.test.ts",
+          "sha256": "1355d2c2778c867f9eede4127306b0f1ed16c48a61ffdae53063fd587832563e"
+        },
+        {
+          "path": "test/support/temporary-repository.ts",
+          "sha256": "b099ab09957c907551a6b34012ded84c043bc3fae9f6f2d9c0122009998cb0b5"
+        },
+        {
+          "path": "test/support/temporary-user-home.ts",
+          "sha256": "c0dca64d9dd3441e0ba1f5674f63630532e3be5b41d01777e2645c2acae38a7e"
+        },
+        {
+          "path": "test/unit/atomic-write.test.ts",
+          "sha256": "9b2205686c5c86b3b1747e898def455c919357eba6e4b96a411f10c79940f63d"
+        },
+        {
+          "path": "test/unit/catalog.test.ts",
+          "sha256": "5780660b3b09e2b472c0575a457c993b4c93e30e4c21bb323633df4c4c62c15f"
+        },
+        {
+          "path": "test/unit/cli-fast-path.test.ts",
+          "sha256": "c1ef973bf482d084ccfb046d9057f88bbfa22c135c91c3ce264fc56545d6337a"
+        },
+        {
+          "path": "test/unit/config.test.ts",
+          "sha256": "8471655c8ae56009b6937f83a54f2e23b956a37bbac9719e4d03593c7952bf5b"
+        },
+        {
+          "path": "test/unit/context.test.ts",
+          "sha256": "3bc897bac7603adefdbb66ec4638127104ea3abe3e5ed335e8ccfb8cf388c50d"
+        },
+        {
+          "path": "test/unit/detection.test.ts",
+          "sha256": "b6f538423e7e1a068614c99c32529d1e9a36c676e77b1f66830efdd26749080f"
+        },
+        {
+          "path": "test/unit/file-lock.test.ts",
+          "sha256": "42f1d32707a05adf741d0194cb1b21f87962de4702eafa9321d6d35141763ae8"
+        },
+        {
+          "path": "test/unit/global-managed-files.test.ts",
+          "sha256": "f4eb6894be437a5227af59b304a2af81c66c1c18ac8e04e59587e482c139d3fb"
+        },
+        {
+          "path": "test/unit/global-uninstall.test.ts",
+          "sha256": "ad00244e3ba9fd87155ed5f572435d0fe08ae45ba2699653da26051bacf7d511"
+        },
+        {
+          "path": "test/unit/harnix-launcher.test.ts",
+          "sha256": "856fe54f1dbd2ea5567549c6e7ea8d0913d13bd7255f12a580ba3e0732e7b000"
+        },
+        {
+          "path": "test/unit/journal.test.ts",
+          "sha256": "308b231c7a0e086f16a8bb6d677dfa03e661be8299e049be5243a2039dd9ce1f"
+        },
+        {
+          "path": "test/unit/legacy-project-surfaces.test.ts",
+          "sha256": "dcd0ef72820c5f94520aac353699faab2d4190f2a6a4c790ab5c41d564db41a0"
+        },
+        {
+          "path": "test/unit/managed-files.test.ts",
+          "sha256": "ad84b01e12372ced1f5a68eb3150d748623221c3268d966364c1a6393abc5f0d"
+        },
+        {
+          "path": "test/unit/package-contract.test.ts",
+          "sha256": "d6b1c893a7edb17d3d4eba0a87c1f42bcde5045f32a47dbb65f929be6772ddf0"
+        },
+        {
+          "path": "test/unit/paths.test.ts",
+          "sha256": "9dc111b000cc415c061d06c4ee28ebd37c2912b2b3df50913ddc2f54ac6b6eab"
+        },
+        {
+          "path": "test/unit/project-discovery.test.ts",
+          "sha256": "e3ba1a721c93a92e440ac8bfb83cd13689d648bef622dec1bbb23a73595a73a1"
+        },
+        {
+          "path": "test/unit/repo-map/service.test.ts",
+          "sha256": "4cfd407b518153ed15cc9de699704da6651103a70e133d351d524075ecc56883"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "1a84652b24ab778812bd3be35b91c53bcc2b7b920e8475f4e74bcd76a00f1720"
+        },
+        {
+          "path": "test/unit/task-state.test.ts",
+          "sha256": "30f63193b06f3391402e805d3ade6962f08eb6aa9959517cc4f5ee080fa7b3d7"
+        },
+        {
+          "path": "test/unit/user-paths.test.ts",
+          "sha256": "bade1898c385f5865db087f9053f93a635bdf2cb389bc0e3c295fa1524ffeab0"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "d2d912b9a17b562286aeecd942e2f1cdfd2da8b0e73e4309a72e36b6de0b1e3e"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "f80c5252e36c235c781a8d68563d1171f3329cf79d709469b1b87b3bd0fd914b"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "0502124467196eadb2bf3effc14b05ab98a90b3ac7a9f121b00536c5b372bceb"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "04c3fbae28a67fb132a7193ff00169c1b3bbe3144ba1d763f74e870516470036"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "57c05dafe545e7da739f3e2fa8366485195e9fe3777a12eac787ac74cea6c184"
+        }
+      ],
+      "inputDigest": "b72a3d32b0d4704d80e3e917adfdd93885e09505985d36b9d45412b2042d4a37"
+    },
+    {
+      "evidenceId": "dependency-audit-pass-1",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "dependency-audit",
+      "taskContractHash": "3fac6297f90a28bd57b7b24e535d05598ea729099b117d56e26183b7beed3388",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b34b2c55a60f95cde6e0ab7457e2993c99d1f8c1d81dbe652b94d5dd3b31a911"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "package.json",
+          "sha256": "2c58e84081affab93d1eaa813f6170f35e50f19159272ffa3dab2d5427e3bde3"
+        },
+        {
+          "path": "pnpm-lock.yaml",
+          "sha256": "d79786f7194c8c3da6a40f283b99537bfd8be358fcec5571fd84eaef6819a40e"
+        }
+      ],
+      "inputDigest": "391ad0ef4514955911b8afe42ad40144cd109206373c1766974691bdd0de5b33"
+    },
+    {
+      "evidenceId": "dependency-audit-pass-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "dependency-audit",
+      "taskContractHash": "3fac6297f90a28bd57b7b24e535d05598ea729099b117d56e26183b7beed3388",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b214bf61bddc8c040b0c61858b44e6000cb51ae863063a26b52f6c5c6d915c49"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "package.json",
+          "sha256": "2c58e84081affab93d1eaa813f6170f35e50f19159272ffa3dab2d5427e3bde3"
+        },
+        {
+          "path": "pnpm-lock.yaml",
+          "sha256": "d79786f7194c8c3da6a40f283b99537bfd8be358fcec5571fd84eaef6819a40e"
+        }
+      ],
+      "inputDigest": "6cbacde0ede1c72047feb69d483f7150489211d3ffddbe1fbb829d89af860cbe"
+    },
+    {
+      "evidenceId": "dependency-hook-pass-1",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "dependency-resolution-hook-tests",
+      "taskContractHash": "3fac6297f90a28bd57b7b24e535d05598ea729099b117d56e26183b7beed3388",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b34b2c55a60f95cde6e0ab7457e2993c99d1f8c1d81dbe652b94d5dd3b31a911"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": ".pnpmfile.mjs",
+          "sha256": "f0d7116d961d8dfba430fdb98275bb79338b0cfd1725c74b016cf63b059e9e0c"
+        },
+        {
+          "path": "package.json",
+          "sha256": "2c58e84081affab93d1eaa813f6170f35e50f19159272ffa3dab2d5427e3bde3"
+        },
+        {
+          "path": "pnpm-lock.yaml",
+          "sha256": "d79786f7194c8c3da6a40f283b99537bfd8be358fcec5571fd84eaef6819a40e"
+        },
+        {
+          "path": "test/unit/package-contract.test.ts",
+          "sha256": "d6b1c893a7edb17d3d4eba0a87c1f42bcde5045f32a47dbb65f929be6772ddf0"
+        }
+      ],
+      "inputDigest": "af2e9d8aaa76fbc12d5c0a44129aa3284194c01c408385e389744c98b71cf3c5"
+    },
+    {
+      "evidenceId": "dependency-hook-pass-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "dependency-resolution-hook-tests",
+      "taskContractHash": "3fac6297f90a28bd57b7b24e535d05598ea729099b117d56e26183b7beed3388",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b214bf61bddc8c040b0c61858b44e6000cb51ae863063a26b52f6c5c6d915c49"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": ".pnpmfile.mjs",
+          "sha256": "f0d7116d961d8dfba430fdb98275bb79338b0cfd1725c74b016cf63b059e9e0c"
+        },
+        {
+          "path": "package.json",
+          "sha256": "2c58e84081affab93d1eaa813f6170f35e50f19159272ffa3dab2d5427e3bde3"
+        },
+        {
+          "path": "pnpm-lock.yaml",
+          "sha256": "d79786f7194c8c3da6a40f283b99537bfd8be358fcec5571fd84eaef6819a40e"
+        },
+        {
+          "path": "test/unit/package-contract.test.ts",
+          "sha256": "d6b1c893a7edb17d3d4eba0a87c1f42bcde5045f32a47dbb65f929be6772ddf0"
+        }
+      ],
+      "inputDigest": "3d3cad61a872641bd74ff00ac489a271d3b2585f542ae572c87a1506ba50f294"
+    },
+    {
+      "evidenceId": "managed-marker-pass",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "managed-marker-tests",
+      "taskContractHash": "05da7badfbeea4bb1bb7c9b768e4312fb2cc10404a83b6ca452494b42e5a1be2",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "59cb0fdfdbf96cb6e67767cc5a1237b242fdd767917f96633e0435b6807b1945"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "src/utils/global-managed-files.ts",
+          "sha256": "ebc94e9db26ea541035088a3c78baec5823c73483bd0b45cc5ab1314dda8d712"
+        },
+        {
+          "path": "test/unit/global-managed-files.test.ts",
+          "sha256": "f4eb6894be437a5227af59b304a2af81c66c1c18ac8e04e59587e482c139d3fb"
+        }
+      ],
+      "inputDigest": "13727f7b4d31b3e8c0774a3eb4996620df0199020787f2d32d5add12a72ece87"
+    },
+    {
+      "evidenceId": "managed-marker-pass-2",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "managed-marker-tests",
+      "taskContractHash": "05da7badfbeea4bb1bb7c9b768e4312fb2cc10404a83b6ca452494b42e5a1be2",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b34b2c55a60f95cde6e0ab7457e2993c99d1f8c1d81dbe652b94d5dd3b31a911"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "src/utils/global-managed-files.ts",
+          "sha256": "ebc94e9db26ea541035088a3c78baec5823c73483bd0b45cc5ab1314dda8d712"
+        },
+        {
+          "path": "test/unit/global-managed-files.test.ts",
+          "sha256": "f4eb6894be437a5227af59b304a2af81c66c1c18ac8e04e59587e482c139d3fb"
+        }
+      ],
+      "inputDigest": "05b8cf17f7e57da2c56c0462fa89177ac8fedc29e83931b3ff732388289a1e4a"
+    },
+    {
+      "evidenceId": "managed-marker-pass-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "managed-marker-tests",
+      "taskContractHash": "3fac6297f90a28bd57b7b24e535d05598ea729099b117d56e26183b7beed3388",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b214bf61bddc8c040b0c61858b44e6000cb51ae863063a26b52f6c5c6d915c49"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "src/utils/global-managed-files.ts",
+          "sha256": "ebc94e9db26ea541035088a3c78baec5823c73483bd0b45cc5ab1314dda8d712"
+        },
+        {
+          "path": "test/unit/global-managed-files.test.ts",
+          "sha256": "f4eb6894be437a5227af59b304a2af81c66c1c18ac8e04e59587e482c139d3fb"
+        }
+      ],
+      "inputDigest": "5c5afe9bf6b4d15bb27d39bf144b2fe95d7df0fefd9db1bb876b7638797bd2f0"
+    },
+    {
+      "evidenceId": "release-gates-pass-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "release-gates",
+      "taskContractHash": "3fac6297f90a28bd57b7b24e535d05598ea729099b117d56e26183b7beed3388",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b214bf61bddc8c040b0c61858b44e6000cb51ae863063a26b52f6c5c6d915c49"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "5b1b34608a50d77393c29da3de02aae69877cd06369ca39059bed1ace9f043d3"
+        },
+        {
+          "path": "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+          "sha256": "32ce8fa19f3b3d72c584c56218b90836075ff90c67def668af1bc18c324c8dc2"
+        },
+        {
+          "path": "docs/HARNESS_RESEARCH.md",
+          "sha256": "663e92a2a8b60a52b8b7ac755d2a189ad584a7ab8e94cdb2477a1c619439ad3a"
+        },
+        {
+          "path": "docs/HARNIX_PRD.md",
+          "sha256": "b7fe1e0cb05bd64e91796207dc24f96ccb2b1d341f322149496caa1f29a76057"
+        },
+        {
+          "path": "docs/HARNIX_WORKFLOW.md",
+          "sha256": "f197ca863a8ce4c2e6d857428b865e505578e5292d302c390ece642ed1998fe8"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "56aa548ef5b670f855c5aca2c31397007b3bd636fdfb02f3d2c2c16b7d59d5b7"
+        },
+        {
+          "path": "docs/REVIEW_REFACTOR_PLAN.md",
+          "sha256": "33cd9d576a7ca05fa86140c74188dec22ba64f294899c8f3a509954154aea706"
+        },
+        {
+          "path": "docs/UPSTREAM_BASELINE.md",
+          "sha256": "47aef9aeaa2eb8ad372fce1c5b203c97e8dd63ecf0621fea81e5a9b71e740b22"
+        },
+        {
+          "path": "docs/UPSTREAM_MAPPING.md",
+          "sha256": "ad999cdc9f111256aad7e8523b27f3cddc951e0aadec1788c2aee5bf340356c0"
+        },
+        {
+          "path": "docs/prompts/harness-capability-research.md",
+          "sha256": "7d397924ab6da01e44f8525ced7a5e20889ca10f85eac7aac8ca842625e80c45"
+        },
+        {
+          "path": "docs/prompts/workflow-scenario-audit.md",
+          "sha256": "708dfe8587a1d228d04fcfd642bf8f159334e59d3bd89dfbc806f5a0cc914257"
+        },
+        {
+          "path": "package.json",
+          "sha256": "2c58e84081affab93d1eaa813f6170f35e50f19159272ffa3dab2d5427e3bde3"
+        },
+        {
+          "path": "pnpm-lock.yaml",
+          "sha256": "d79786f7194c8c3da6a40f283b99537bfd8be358fcec5571fd84eaef6819a40e"
+        },
+        {
+          "path": "scripts/isolated-user-home.mjs",
+          "sha256": "86b3a8328dfc41ddf8bf448c9b9a60a2b49776e902980e6e30821887f222b638"
+        },
+        {
+          "path": "scripts/measure-footprint.mjs",
+          "sha256": "160560a4d199c3017a1549cdc968294ef997e7d8269152c3cbe3aac3b165e67a"
+        },
+        {
+          "path": "scripts/measure-init.mjs",
+          "sha256": "ebe77b1693dacbf5173036af49c5f393ac479537bd58194363a6b8fb16521733"
+        },
+        {
+          "path": "scripts/pack-check.mjs",
+          "sha256": "4828d25e00f1dd1ee1f73c78bf6843d55a596bebdac41be0738bbeead40e4950"
+        },
+        {
+          "path": "scripts/scan-release.mjs",
+          "sha256": "18d1d8635dc6ddb773328a5b16f8d530bc71a3ebcebdeb6059652ffe4b7e8cdb"
+        },
+        {
+          "path": "scripts/smoke-tarball.mjs",
+          "sha256": "8d43f169bf77ad88eb986129c63351b192eaa885a6447b35feb6985fac122e21"
+        },
+        {
+          "path": "src/catalog/catalog.ts",
+          "sha256": "6fdbf32343b8def492e2da2a1766f84a9b90ebbf75b5b9882cea7b3e1091eaaf"
+        },
+        {
+          "path": "src/catalog/types.ts",
+          "sha256": "ef07d06d25080759715750fb52abba150d2674d6da69d24f4eb3287b96d0dce9"
+        },
+        {
+          "path": "src/catalog/validation.ts",
+          "sha256": "48c289f080cc2a0c8ca95c6795f176765ad76b4fc67a8c2c6463de96dabc0323"
+        },
+        {
+          "path": "src/cli-program.ts",
+          "sha256": "dc1f972caadaf125550713b671b44cced9b74d6f472c2b4a524dfbe37bd448a4"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "5ea77d8af068244ce6777ce08291a7b3c40971e61014ef7c2ac979e08ec79acf"
+        },
+        {
+          "path": "src/commands/doctor.ts",
+          "sha256": "b48faf483583463d03891d6083a48ef5ba5b6417b5d6def11123d0ea26ebb396"
+        },
+        {
+          "path": "src/commands/global-doctor.ts",
+          "sha256": "61cb7ed3769f624d88ac0f02f62c9dc440605a67f4d7cdd47df50ed352c2d850"
+        },
+        {
+          "path": "src/commands/global-uninstall.ts",
+          "sha256": "48d98bd961a995b747fded57e92f9d630f777067a95e368f75d47691a185f392"
+        },
+        {
+          "path": "src/commands/global-update.ts",
+          "sha256": "29800634492bb8642a0d81c6e44b30220fb1037438f0f0c26ee708ee64559fdd"
+        },
+        {
+          "path": "src/commands/init.ts",
+          "sha256": "09b9f2bd47e1784ed30851a518ac5228f428ad5ea35e1b7d49370a53b010b685"
+        },
+        {
+          "path": "src/commands/internal-context-cli.ts",
+          "sha256": "4facd4a0a6797b3f83906979257e4e83ff1c241d36a79a00a675be2f1a97c646"
+        },
+        {
+          "path": "src/commands/internal-context.ts",
+          "sha256": "f4b3cb6a1ff488df9413be76b7775a5db8ad999694447f42b11e027784fcdcde"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "26750c9b96271d1c3bb48db50c6c5378a1af0f8bd536d0fbf0a31fc1e8c3908e"
+        },
+        {
+          "path": "src/commands/legacy-project-surfaces.ts",
+          "sha256": "1a2a71d0061bc7400edb07cd0ca44ec1173ec33f55d2612a2ba2443a90e14f25"
+        },
+        {
+          "path": "src/commands/mem.ts",
+          "sha256": "ab151680f6771ef66c91cc877f8e1e93fc486ec076a98e57f38832f2f4aa058a"
+        },
+        {
+          "path": "src/commands/repo-map-internal.ts",
+          "sha256": "b2dd816008b1b903766dfd948204ccefc902e68b8448d0a0fa7866a0ce96c2f0"
+        },
+        {
+          "path": "src/commands/setup.ts",
+          "sha256": "b83473aab2ed189e94e2ce13c657eaa32298c400d7fedc736763a3ea84785b41"
+        },
+        {
+          "path": "src/commands/uninstall.ts",
+          "sha256": "8627f08f085ae1d2dfd8932e3995306d04fee2c3682f10097038e9dc75c24fa8"
+        },
+        {
+          "path": "src/commands/update.ts",
+          "sha256": "29524933108014bd3737e2afc950eccf287131e660652984a13ec060413daeab"
+        },
+        {
+          "path": "src/commands/upgrade.ts",
+          "sha256": "669787464dee9cc0e6f42dfd2fc00409371ca8017c684d13006ef0e859993d4d"
+        },
+        {
+          "path": "src/configurators/antigravity.ts",
+          "sha256": "35316ec1fb854852e4fa30aec54ac18b7d42fc9609901fb04ab88fe60174c6fe"
+        },
+        {
+          "path": "src/configurators/codex.ts",
+          "sha256": "852be466f87eadd887ea49ff383babfdf04b58c70f34185dfbe2a91e0e2a0406"
+        },
+        {
+          "path": "src/configurators/kiro.ts",
+          "sha256": "68c2759eef1942a2d038d52a8195e19d63586a55c83719fb1155dbd9c7604fe2"
+        },
+        {
+          "path": "src/core/config/config.ts",
+          "sha256": "14a280bddb6caebd350093302c772ffd27f8f6f75248fae75d613b1f00d9ce74"
+        },
+        {
+          "path": "src/core/context/context.ts",
+          "sha256": "921682b6337f27561c5d7ba3b7d66d83078ef8ec0da0de20f30230bb0dfcca88"
+        },
+        {
+          "path": "src/core/journal/journal.ts",
+          "sha256": "2048110cc011a8aaa69d720c168494f20e4a2f1b843b6b07da9d082a53c00a2f"
+        },
+        {
+          "path": "src/core/journal/learning.ts",
+          "sha256": "a31dc2919bce5ef03b31dfe4a8c867e00b5222747a3da4ae4df079b40dec7af0"
+        },
+        {
+          "path": "src/core/journal/promotion.ts",
+          "sha256": "e3e15e71598e04e0d91027f928d051966014ea628da09360820cd879731a998c"
+        },
+        {
+          "path": "src/core/repo-map/extract.ts",
+          "sha256": "2015f0a283b95fb43e33ae9a7e6732754f8b1b3e93790233743fbdf263d07f2d"
+        },
+        {
+          "path": "src/core/repo-map/inventory.ts",
+          "sha256": "b872e68856e3dce9874bb18b46de7a205fa66613dbefc32bec67d70f5490bfe0"
+        },
+        {
+          "path": "src/core/repo-map/search.ts",
+          "sha256": "d7f8a52ae158fd819b70637a7a47fad22244e922b5e01f7953fc5c1770919f3e"
+        },
+        {
+          "path": "src/core/repo-map/service.ts",
+          "sha256": "b72179c2ffab98d69b66ee39e6706066013ab20e37455210a6ed8f95e8ace199"
+        },
+        {
+          "path": "src/core/repo-map/store.ts",
+          "sha256": "215057a3ef81f5ab38f3475ed61740218eb7c9020a2dbad2a16cc692d58318f4"
+        },
+        {
+          "path": "src/core/repo-map/types.ts",
+          "sha256": "2b84931c3369ada1933c91489f6b45779377d147293f0ed7340da00052325491"
+        },
+        {
+          "path": "src/core/research.ts",
+          "sha256": "2df5ffe0b8ac319dd9274e2ea2afab19221848ee7f8cfa36feedca4f2192ce5f"
+        },
+        {
+          "path": "src/core/tasks/task.ts",
+          "sha256": "6f57d5aaab7a683957453ce2a766fab26ec22f6b8a60895cb02951610039e7ff"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "f2f66895a50c9e75df9af4d842901b8b62d7ce58a8b38b579d17322217937bae"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "353614cfee31fadcf58964f21d23178118fbdaff74e3b5f78e40960121b09389"
+        },
+        {
+          "path": "src/guides/catalog.ts",
+          "sha256": "ab8fc39b3146928f9a5d2fac945cc736c5648a844144cb2ced3737f5b4d201fd"
+        },
+        {
+          "path": "src/index.ts",
+          "sha256": "22925db5271d1065a84c5e3d30b33868cde246210d586310fe03aa146d2ec686"
+        },
+        {
+          "path": "src/migration/discovery.ts",
+          "sha256": "b31418725b51119fc68fcae02809986538c5b5e2ddac6729d4c8fbf0b5e3701d"
+        },
+        {
+          "path": "src/migration/migrate.ts",
+          "sha256": "36132ca2cea25d9c716da71400dfbe4598212e5d45ce5af181980a8ae0220e24"
+        },
+        {
+          "path": "src/rules/rules.ts",
+          "sha256": "58cc8df9728e16ffb5c6f8953e77ec2691b345fbc986f683221af8c1eecc1891"
+        },
+        {
+          "path": "src/skills/catalog.ts",
+          "sha256": "b1bd584626168f13b181762df93c67befc3d74d0fc1d8708ad786e525a4d82dc"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "29cb64b233583df9f4334e50d51417e12c510b86fb9e6e81e7c6744d9aaab802"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "ac4e6bfac8937686a51a598d660f52613c82c42b6af3c877468c390d1147a504"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "fce4e046c3d88795f54027052902a672c5d14025d8ce47050c6cd3d43ac9f897"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "664f19a036adacb6db9f9a101440106a1e2fd48dcb54f6a14ec738df5a0d8d8d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "72f7ec6535b2d54791775d11e7eb9011ce4df3482930546a26cea718bb663f29"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "29716942c5e9907f5c12681f894e28975b13328d3ee0727b54727996cea14553"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "b90e0e31cbf2cea3cb71054f62e14c5ed1ee6572343af31e8df8ab41fa12d145"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "013c15b9a50ffc273d56a28c7195c2241e9e0fba6a8fc6d61842c98284629f9f"
+        },
+        {
+          "path": "src/templates/harnix/managed-workflow.ts",
+          "sha256": "dd0e05af5f8b0ae4d7fb0678a72ced82beae781b1be3e32a2ba3a9490ba7a9fd"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "342d8254742be1938ee35af5a83fd15ce82605b3a8bdab6b34e7ae2eedf18c75"
+        },
+        {
+          "path": "src/types/markdown.d.ts",
+          "sha256": "18d8d3ada1a0823b02cec03af991c4f8afccdbf10a088529e2f651309242848f"
+        },
+        {
+          "path": "src/utils/atomic-write.ts",
+          "sha256": "5bb9c924a98a5f33897a296e04e365b6e8ffbc5f5a5732359d9dd98c273e70ea"
+        },
+        {
+          "path": "src/utils/detection.ts",
+          "sha256": "ddc2e58c3d1fb230b2a53f44ee70fa9a6dc262f7b751492e12e6bf703900f879"
+        },
+        {
+          "path": "src/utils/file-lock.ts",
+          "sha256": "e52611f920d934bcc55ccd8e293ec50859d84f713868b870789c38d362654051"
+        },
+        {
+          "path": "src/utils/global-managed-files.ts",
+          "sha256": "ebc94e9db26ea541035088a3c78baec5823c73483bd0b45cc5ab1314dda8d712"
+        },
+        {
+          "path": "src/utils/harnix-launcher.ts",
+          "sha256": "35207a2b75de0c1be0be9af5c6569eefea9058d0d62383cd217586bf57f3aa49"
+        },
+        {
+          "path": "src/utils/hashing.ts",
+          "sha256": "a53fa1daaab60f2c3465e01022e6c28d1db9a197ad13ad6248dd46bd460883d7"
+        },
+        {
+          "path": "src/utils/managed-files.ts",
+          "sha256": "a398083a77de8981f866e005b562dd10b3f57b4a2abc4695ec9ad289cf856d12"
+        },
+        {
+          "path": "src/utils/paths.ts",
+          "sha256": "98efad3f446a16f2c37122e78bb896a84cc76b839fbe44964bf397bfd7cf82b0"
+        },
+        {
+          "path": "src/utils/project-discovery.ts",
+          "sha256": "496450af8295479e2a7ca86d5aa0d6358bfc8b66794e25074262c68e4bcc745c"
+        },
+        {
+          "path": "src/utils/stack.ts",
+          "sha256": "25e5975141cd9222f3cc94486dd4c1027a8a676fa6754d164e336bc58db230d0"
+        },
+        {
+          "path": "src/utils/user-paths.ts",
+          "sha256": "c85c124621e4faec3568b2aee3d283e501bbd7a4480624bef9d1e3989acc7256"
+        },
+        {
+          "path": "src/version.ts",
+          "sha256": "848382340f3138ca932c38cced55ab6f61860e446a4f3f40297f3deb5c4bbf9d"
+        },
+        {
+          "path": "test/integration/cli.test.ts",
+          "sha256": "c804911189f7384bd3d690ba7d181a58ed47328ca0e3deeae1a0a585907418cd"
+        },
+        {
+          "path": "test/integration/doctor.test.ts",
+          "sha256": "2700d61bfa3ea57c0951f6667f09dfc8d4a168453212fe147d0532bc5b984b50"
+        },
+        {
+          "path": "test/integration/global-doctor.test.ts",
+          "sha256": "4b7c24bf9f12ee91b4c0d855c31d77dfacb0bc21ceda87c0badb8a7bd09317c9"
+        },
+        {
+          "path": "test/integration/global-lifecycle.test.ts",
+          "sha256": "1e35241ded831ddfda7e85789fe4da1631511d622567deed5f4d589747886cac"
+        },
+        {
+          "path": "test/integration/init.test.ts",
+          "sha256": "69a167af1c34d28b017dd7a325f0759c7ba8b75bd963c7ba43c4744728941b3c"
+        },
+        {
+          "path": "test/integration/memory.test.ts",
+          "sha256": "83ed934d0b2cdfa2e8b2998ef3ebe1319035a5fb94d7f03d9d3945452dc50917"
+        },
+        {
+          "path": "test/integration/project-state-safety.test.ts",
+          "sha256": "e47a368022e97424d04296ff664e4338bf57f0a57769ca4b17b97db7e58ca524"
+        },
+        {
+          "path": "test/integration/repo-map/doctor.test.ts",
+          "sha256": "e11cbfa5d07ab22893238fd6cc26ba7c04c759030008e5b55dccf9fee38756c1"
+        },
+        {
+          "path": "test/integration/repo-map/incremental.test.ts",
+          "sha256": "3b5a51a06224cb184cf3ab85eba5042f446a05d9cc755db9a52eab04800522ee"
+        },
+        {
+          "path": "test/integration/repo-map/internal.test.ts",
+          "sha256": "a00ed254e4e09e37232935a3b2da12c8de04b7bd467871a426545c3440530606"
+        },
+        {
+          "path": "test/integration/uninstall.test.ts",
+          "sha256": "73839b800b1b34f7e61571bb31b96c48cc779a3be60dea6eb41b0df83b3c846c"
+        },
+        {
+          "path": "test/integration/update.test.ts",
+          "sha256": "3d4fb5b161aa94f02ec5339a16e8142ad1276e9353035eb08e9518fbeaf25ea9"
+        },
+        {
+          "path": "test/integration/upgrade.test.ts",
+          "sha256": "c6aed79577101ef526dbc50b3c16c0b7c9708ccbb59163a1610c365e795ae8cb"
+        },
+        {
+          "path": "test/migration/discovery.test.ts",
+          "sha256": "521633e27ffcfaa1ff2c430e23a9a29abe0c15ce6c76af8c9d0219e2d0c3fc43"
+        },
+        {
+          "path": "test/migration/migrate.test.ts",
+          "sha256": "ed33b6895be248d6c225e7030adb81f1fd35f5671d3512f7c89079b885cbd08a"
+        },
+        {
+          "path": "test/platform/codex-global.test.ts",
+          "sha256": "e6ed164c35dae15bc2a0869abfa23eaa2d8aa68eba58eb5c48b35f2c52a6bff2"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "8c093fbf56aaf5cd00320bd3325bca15bd67b23ec7dd594a64bda2e15cfec119"
+        },
+        {
+          "path": "test/platform/setup.test.ts",
+          "sha256": "81ce5abd247d399ca10d3054e50737ea6b1e07cdbb8202f88fd17f82d03b61e1"
+        },
+        {
+          "path": "test/safety/isolated-user-home.test.ts",
+          "sha256": "8628d309ce2db60fc8ce7f9de2a00795f894459cec8e6c866605d804971aa8f5"
+        },
+        {
+          "path": "test/safety/path-boundaries.test.ts",
+          "sha256": "e09df7cea669cd462337ed805e67e053c19eecb105cf51ba8ba9f7ef232348e7"
+        },
+        {
+          "path": "test/safety/platform-boundaries.test.ts",
+          "sha256": "485b8d98b0da64af4248015608e0c8a114470147dc9e0c98b5d4892ffe32c15a"
+        },
+        {
+          "path": "test/safety/release-scanner.test.ts",
+          "sha256": "135cb918cb1d7db30b706b00b222824b6f502bbb8e55eb20913f289508fc1af0"
+        },
+        {
+          "path": "test/safety/user-global-paths.test.ts",
+          "sha256": "1355d2c2778c867f9eede4127306b0f1ed16c48a61ffdae53063fd587832563e"
+        },
+        {
+          "path": "test/support/temporary-repository.ts",
+          "sha256": "b099ab09957c907551a6b34012ded84c043bc3fae9f6f2d9c0122009998cb0b5"
+        },
+        {
+          "path": "test/support/temporary-user-home.ts",
+          "sha256": "c0dca64d9dd3441e0ba1f5674f63630532e3be5b41d01777e2645c2acae38a7e"
+        },
+        {
+          "path": "test/unit/atomic-write.test.ts",
+          "sha256": "9b2205686c5c86b3b1747e898def455c919357eba6e4b96a411f10c79940f63d"
+        },
+        {
+          "path": "test/unit/catalog.test.ts",
+          "sha256": "5780660b3b09e2b472c0575a457c993b4c93e30e4c21bb323633df4c4c62c15f"
+        },
+        {
+          "path": "test/unit/cli-fast-path.test.ts",
+          "sha256": "c1ef973bf482d084ccfb046d9057f88bbfa22c135c91c3ce264fc56545d6337a"
+        },
+        {
+          "path": "test/unit/config.test.ts",
+          "sha256": "8471655c8ae56009b6937f83a54f2e23b956a37bbac9719e4d03593c7952bf5b"
+        },
+        {
+          "path": "test/unit/context.test.ts",
+          "sha256": "3bc897bac7603adefdbb66ec4638127104ea3abe3e5ed335e8ccfb8cf388c50d"
+        },
+        {
+          "path": "test/unit/detection.test.ts",
+          "sha256": "b6f538423e7e1a068614c99c32529d1e9a36c676e77b1f66830efdd26749080f"
+        },
+        {
+          "path": "test/unit/file-lock.test.ts",
+          "sha256": "42f1d32707a05adf741d0194cb1b21f87962de4702eafa9321d6d35141763ae8"
+        },
+        {
+          "path": "test/unit/global-managed-files.test.ts",
+          "sha256": "f4eb6894be437a5227af59b304a2af81c66c1c18ac8e04e59587e482c139d3fb"
+        },
+        {
+          "path": "test/unit/global-uninstall.test.ts",
+          "sha256": "ad00244e3ba9fd87155ed5f572435d0fe08ae45ba2699653da26051bacf7d511"
+        },
+        {
+          "path": "test/unit/harnix-launcher.test.ts",
+          "sha256": "856fe54f1dbd2ea5567549c6e7ea8d0913d13bd7255f12a580ba3e0732e7b000"
+        },
+        {
+          "path": "test/unit/journal.test.ts",
+          "sha256": "308b231c7a0e086f16a8bb6d677dfa03e661be8299e049be5243a2039dd9ce1f"
+        },
+        {
+          "path": "test/unit/legacy-project-surfaces.test.ts",
+          "sha256": "dcd0ef72820c5f94520aac353699faab2d4190f2a6a4c790ab5c41d564db41a0"
+        },
+        {
+          "path": "test/unit/managed-files.test.ts",
+          "sha256": "ad84b01e12372ced1f5a68eb3150d748623221c3268d966364c1a6393abc5f0d"
+        },
+        {
+          "path": "test/unit/package-contract.test.ts",
+          "sha256": "d6b1c893a7edb17d3d4eba0a87c1f42bcde5045f32a47dbb65f929be6772ddf0"
+        },
+        {
+          "path": "test/unit/paths.test.ts",
+          "sha256": "9dc111b000cc415c061d06c4ee28ebd37c2912b2b3df50913ddc2f54ac6b6eab"
+        },
+        {
+          "path": "test/unit/project-discovery.test.ts",
+          "sha256": "e3ba1a721c93a92e440ac8bfb83cd13689d648bef622dec1bbb23a73595a73a1"
+        },
+        {
+          "path": "test/unit/repo-map/service.test.ts",
+          "sha256": "4cfd407b518153ed15cc9de699704da6651103a70e133d351d524075ecc56883"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "1a84652b24ab778812bd3be35b91c53bcc2b7b920e8475f4e74bcd76a00f1720"
+        },
+        {
+          "path": "test/unit/task-state.test.ts",
+          "sha256": "30f63193b06f3391402e805d3ade6962f08eb6aa9959517cc4f5ee080fa7b3d7"
+        },
+        {
+          "path": "test/unit/user-paths.test.ts",
+          "sha256": "bade1898c385f5865db087f9053f93a635bdf2cb389bc0e3c295fa1524ffeab0"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "d2d912b9a17b562286aeecd942e2f1cdfd2da8b0e73e4309a72e36b6de0b1e3e"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "f80c5252e36c235c781a8d68563d1171f3329cf79d709469b1b87b3bd0fd914b"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "0502124467196eadb2bf3effc14b05ab98a90b3ac7a9f121b00536c5b372bceb"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "04c3fbae28a67fb132a7193ff00169c1b3bbe3144ba1d763f74e870516470036"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "57c05dafe545e7da739f3e2fa8366485195e9fe3777a12eac787ac74cea6c184"
+        }
+      ],
+      "inputDigest": "6d371c970fd4c4169779bf6cd718eb546386da0eb31d4fe21b17842576345036"
+    },
+    {
+      "evidenceId": "self-host-version-pass-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "self-host-version-tests",
+      "taskContractHash": "3fac6297f90a28bd57b7b24e535d05598ea729099b117d56e26183b7beed3388",
+      "entries": [
+        {
+          "path": ".harnix/.template-hashes.json",
+          "sha256": "fbb8404fe2fd73497559d52452cbf0c4427849527aa7e5347492ea27a3e45085"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b214bf61bddc8c040b0c61858b44e6000cb51ae863063a26b52f6c5c6d915c49"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "package.json",
+          "sha256": "2c58e84081affab93d1eaa813f6170f35e50f19159272ffa3dab2d5427e3bde3"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "0502124467196eadb2bf3effc14b05ab98a90b3ac7a9f121b00536c5b372bceb"
+        }
+      ],
+      "inputDigest": "6f3646a7a58e083d700b844fce7979f240da4a68894ff58467d3fda5ba8c55a7"
+    },
+    {
+      "evidenceId": "skill-version-pass-1",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "skill-version-tests",
+      "taskContractHash": "05da7badfbeea4bb1bb7c9b768e4312fb2cc10404a83b6ca452494b42e5a1be2",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "636945a3a17d2fbd323564e033b5d74e6692715fe41958cacf59de9bdadaac89"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "src/skills/catalog.ts",
+          "sha256": "b1bd584626168f13b181762df93c67befc3d74d0fc1d8708ad786e525a4d82dc"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "29cb64b233583df9f4334e50d51417e12c510b86fb9e6e81e7c6744d9aaab802"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "ac4e6bfac8937686a51a598d660f52613c82c42b6af3c877468c390d1147a504"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "eec780c181622b296b92cf558efc975e3dfa6b63abbaa16736fa89fd13d74443"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "664f19a036adacb6db9f9a101440106a1e2fd48dcb54f6a14ec738df5a0d8d8d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "72f7ec6535b2d54791775d11e7eb9011ce4df3482930546a26cea718bb663f29"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "29716942c5e9907f5c12681f894e28975b13328d3ee0727b54727996cea14553"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "b90e0e31cbf2cea3cb71054f62e14c5ed1ee6572343af31e8df8ab41fa12d145"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "8c093fbf56aaf5cd00320bd3325bca15bd67b23ec7dd594a64bda2e15cfec119"
+        },
+        {
+          "path": "test/platform/setup.test.ts",
+          "sha256": "81ce5abd247d399ca10d3054e50737ea6b1e07cdbb8202f88fd17f82d03b61e1"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "04c3fbae28a67fb132a7193ff00169c1b3bbe3144ba1d763f74e870516470036"
+        }
+      ],
+      "inputDigest": "1958e720a791a39ecf918ac0f06ccbff5b8fdadbee3548a5ab99386f91ea5893"
+    },
+    {
+      "evidenceId": "skill-version-pass-2",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "skill-version-tests",
+      "taskContractHash": "05da7badfbeea4bb1bb7c9b768e4312fb2cc10404a83b6ca452494b42e5a1be2",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b34b2c55a60f95cde6e0ab7457e2993c99d1f8c1d81dbe652b94d5dd3b31a911"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "src/skills/catalog.ts",
+          "sha256": "b1bd584626168f13b181762df93c67befc3d74d0fc1d8708ad786e525a4d82dc"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "29cb64b233583df9f4334e50d51417e12c510b86fb9e6e81e7c6744d9aaab802"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "ac4e6bfac8937686a51a598d660f52613c82c42b6af3c877468c390d1147a504"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "fce4e046c3d88795f54027052902a672c5d14025d8ce47050c6cd3d43ac9f897"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "664f19a036adacb6db9f9a101440106a1e2fd48dcb54f6a14ec738df5a0d8d8d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "72f7ec6535b2d54791775d11e7eb9011ce4df3482930546a26cea718bb663f29"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "29716942c5e9907f5c12681f894e28975b13328d3ee0727b54727996cea14553"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "b90e0e31cbf2cea3cb71054f62e14c5ed1ee6572343af31e8df8ab41fa12d145"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "8c093fbf56aaf5cd00320bd3325bca15bd67b23ec7dd594a64bda2e15cfec119"
+        },
+        {
+          "path": "test/platform/setup.test.ts",
+          "sha256": "81ce5abd247d399ca10d3054e50737ea6b1e07cdbb8202f88fd17f82d03b61e1"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "04c3fbae28a67fb132a7193ff00169c1b3bbe3144ba1d763f74e870516470036"
+        }
+      ],
+      "inputDigest": "c35628319bea6891d97168c3d5a473beaede9f7a5bf6f7af5bd019169c91d725"
+    },
+    {
+      "evidenceId": "skill-version-pass-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "skill-version-tests",
+      "taskContractHash": "3fac6297f90a28bd57b7b24e535d05598ea729099b117d56e26183b7beed3388",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b214bf61bddc8c040b0c61858b44e6000cb51ae863063a26b52f6c5c6d915c49"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "src/skills/catalog.ts",
+          "sha256": "b1bd584626168f13b181762df93c67befc3d74d0fc1d8708ad786e525a4d82dc"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "29cb64b233583df9f4334e50d51417e12c510b86fb9e6e81e7c6744d9aaab802"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "ac4e6bfac8937686a51a598d660f52613c82c42b6af3c877468c390d1147a504"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "fce4e046c3d88795f54027052902a672c5d14025d8ce47050c6cd3d43ac9f897"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "664f19a036adacb6db9f9a101440106a1e2fd48dcb54f6a14ec738df5a0d8d8d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "72f7ec6535b2d54791775d11e7eb9011ce4df3482930546a26cea718bb663f29"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "29716942c5e9907f5c12681f894e28975b13328d3ee0727b54727996cea14553"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "b90e0e31cbf2cea3cb71054f62e14c5ed1ee6572343af31e8df8ab41fa12d145"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "8c093fbf56aaf5cd00320bd3325bca15bd67b23ec7dd594a64bda2e15cfec119"
+        },
+        {
+          "path": "test/platform/setup.test.ts",
+          "sha256": "81ce5abd247d399ca10d3054e50737ea6b1e07cdbb8202f88fd17f82d03b61e1"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "04c3fbae28a67fb132a7193ff00169c1b3bbe3144ba1d763f74e870516470036"
+        }
+      ],
+      "inputDigest": "668effbcb3549e64665ac7dca84f56a57919e04ee7775324caa5931911968c1d"
+    },
+    {
+      "evidenceId": "workflow-recovery-pass",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "workflow-recovery-tests",
+      "taskContractHash": "05da7badfbeea4bb1bb7c9b768e4312fb2cc10404a83b6ca452494b42e5a1be2",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "fb847da1f4d3ef113404f958b3287f94c4265f23e994a7562929638a0725c434"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "512ef1d7a0acf86245ab70358b53d696d718ee6368aa42bc980eaef6d20b626f"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "22894b31d0112364577335f43570a1f83f9974ff3f936bae257311d2eb2a1137"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "fce4e046c3d88795f54027052902a672c5d14025d8ce47050c6cd3d43ac9f897"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "f3b9ea80d201f17cfcc8ea82e88e57ac87d5f763c720130ac2958e2319f3c35a"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "c149792fb030000594642556ad222e78a5958bc30c1073d59ce03ef7906cf0d6"
+        }
+      ],
+      "inputDigest": "91f3a14cf97ff1c3b539d1eaecec4127cb1ed5d4890187596588f500bc764d51"
+    },
+    {
+      "evidenceId": "workflow-recovery-pass-2",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "workflow-recovery-tests",
+      "taskContractHash": "05da7badfbeea4bb1bb7c9b768e4312fb2cc10404a83b6ca452494b42e5a1be2",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b34b2c55a60f95cde6e0ab7457e2993c99d1f8c1d81dbe652b94d5dd3b31a911"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "26750c9b96271d1c3bb48db50c6c5378a1af0f8bd536d0fbf0a31fc1e8c3908e"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "353614cfee31fadcf58964f21d23178118fbdaff74e3b5f78e40960121b09389"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "fce4e046c3d88795f54027052902a672c5d14025d8ce47050c6cd3d43ac9f897"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        }
+      ],
+      "inputDigest": "94233f66c7f9ab18ce60bc9a69790d6b3f269290ec7baad5231f3ff7ad8ae10a"
+    },
+    {
+      "evidenceId": "workflow-recovery-pass-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-134012-repository-audit-refactor",
+      "checkId": "workflow-recovery-tests",
+      "taskContractHash": "3fac6297f90a28bd57b7b24e535d05598ea729099b117d56e26183b7beed3388",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/plan.md",
+          "sha256": "b214bf61bddc8c040b0c61858b44e6000cb51ae863063a26b52f6c5c6d915c49"
+        },
+        {
+          "path": ".harnix/tasks/20260814-134012-repository-audit-refactor/prd.md",
+          "sha256": "78413e0d3c95df9d71dcafac68bce7129312fcde05bc2a3e431e55e2f52877ba"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "26750c9b96271d1c3bb48db50c6c5378a1af0f8bd536d0fbf0a31fc1e8c3908e"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "353614cfee31fadcf58964f21d23178118fbdaff74e3b5f78e40960121b09389"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "fce4e046c3d88795f54027052902a672c5d14025d8ce47050c6cd3d43ac9f897"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        }
+      ],
+      "inputDigest": "d20333dceefd5e15c4309d7d030ce019c6dce374ece46409cbea1cf69cfe5fc7"
+    }
+  ]
+}

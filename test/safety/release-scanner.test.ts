@@ -44,13 +44,31 @@ async function writeFixtureFile(root: string, relativePath: string, content: str
 describe("release scanner negative fixtures", () => {
   it.each([
     ["machine_path", "C:\\Users\\release-user\\secret.txt", /Machine path found/u],
+    ["machine_path_forward_slash", "C:/Users/release-user/secret.txt", /Machine path found/u],
+    ["machine_path_macos", "/Users/release-user/secret.txt", /Machine path found/u],
+    ["machine_path_unc", "\\\\server\\private-share\\release-user\\secret.txt", /Machine path found/u],
     ["secret", 'api_key = "12345678"', /Potential secret found/u],
+    ["unquoted_secret", "token=12345678", /Potential secret found/u],
     ["required_todo", "REQUIRED TODO: ship this", /Required TODO found/u],
   ])("should_reject_%s_when_packaged_text_contains_a_release_violation", async (_category, content, error) => {
     const root = await fixture();
     const file = await writeFixtureFile(root, "dist/index.js", content);
 
     await expect(scanTextFiles([file], "negative fixture", false)).rejects.toThrow(error);
+  });
+
+  it("should_accept_code_like_escaped_path_separators_without_treating_them_as_a_UNC_path", async () => {
+    const root = await fixture();
+    const file = await writeFixtureFile(root, "dist/index.js", 'const separators = ["\\\\", "/"];\n');
+
+    await expect(scanTextFiles([file], "negative control", false)).resolves.toBeUndefined();
+  });
+
+  it("should_accept_an_HTTPS_URL_without_treating_its_authority_as_a_UNC_path", async () => {
+    const root = await fixture();
+    const file = await writeFixtureFile(root, "LICENSE", "License text: https://www.gnu.org/licenses/example\n");
+
+    await expect(scanTextFiles([file], "negative control", false)).resolves.toBeUndefined();
   });
 
   it.each([

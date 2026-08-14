@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -56,6 +56,22 @@ describe("package invariant", () => {
       "test:workflow",
       "typecheck",
     ]);
+  });
+
+  it("pins only the audited vulnerable transitive tool resolutions without creating a workspace", async () => {
+    const pnpmfileUrl = pathToFileURL(resolve(repositoryRoot, ".pnpmfile.mjs")).href;
+    const { hooks } = await import(pnpmfileUrl) as {
+      hooks: {
+        readPackage: (pkg: { name: string; version: string; dependencies?: Record<string, string> }) => { dependencies?: Record<string, string> };
+        updateConfig: (config: { allowBuilds?: Record<string, boolean> }) => { allowBuilds?: Record<string, boolean> };
+      };
+    };
+
+    expect(hooks.readPackage({ name: "tsup", version: "8.5.1", dependencies: { esbuild: "^0.27.0" } }).dependencies).toEqual({ esbuild: "0.28.1" });
+    expect(hooks.readPackage({ name: "postcss", version: "8.5.25", dependencies: { nanoid: "^3.3.16" } }).dependencies).toEqual({ nanoid: "3.3.18" });
+    expect(hooks.readPackage({ name: "unrelated", version: "1.0.0", dependencies: { esbuild: "^0.27.0" } }).dependencies).toEqual({ esbuild: "^0.27.0" });
+    expect(hooks.updateConfig({ allowBuilds: { "unrelated-package": false } }).allowBuilds).toEqual({ esbuild: true, "unrelated-package": false });
+    expect(existsSync(resolve(repositoryRoot, "pnpm-workspace.yaml"))).toBe(false);
   });
 });
 

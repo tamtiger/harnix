@@ -1,0 +1,220 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260814-150553-release-version-1-0-0",
+  "title": "Đồng bộ release version 1.0.0",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Nâng version hiện hành của repository lên 1.0.0 và khóa đồng bộ package, CLI, self-host metadata, tài liệu release và bảy canonical skills.",
+  "nonGoals": [
+    "Không sửa version lịch sử trong CHANGELOG, fixtures migration hoặc task evidence đã hoàn tất.",
+    "Không publish package, commit, push hoặc mutate user-global integrations.",
+    "Không thay đổi behavior ngoài contract version synchronization."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "release-evidence",
+      "text": "CHANGELOG và tài liệu trạng thái ghi rõ release 1.0.0 sau đợt refactor, không rewrite lịch sử phiên bản cũ.",
+      "status": "met",
+      "evidenceIds": [
+        "version-inventory-pass",
+        "release-gates-pass"
+      ]
+    },
+    {
+      "id": "repository-version",
+      "text": "Package manifest, lockfile, CLI --version và self-host generator metadata hiện hành đều báo 1.0.0.",
+      "status": "met",
+      "evidenceIds": [
+        "version-inventory-pass",
+        "version-contract-pass",
+        "release-gates-pass"
+      ]
+    },
+    {
+      "id": "skill-version",
+      "text": "Cả bảy canonical skills có metadata.version 1.0.0 và automated contract buộc skill version khớp package version.",
+      "status": "met",
+      "evidenceIds": [
+        "version-inventory-pass",
+        "version-contract-pass",
+        "release-gates-pass"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/.template-hashes.json",
+    "CHANGELOG.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/REVIEW_REFACTOR_PLAN.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "package.json",
+    "pnpm-lock.yaml",
+    "README.md",
+    "src/skills",
+    "test/platform/setup.test.ts",
+    "test/workflow/skill-sources.test.ts"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "release-gates",
+      "description": "Run the exact frozen install, build, test, acceptance, packaging, smoke, performance, footprint, security scan and diff gates.",
+      "command": "pnpm install --frozen-lockfile; pnpm build; pnpm lint; pnpm typecheck; pnpm test; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "release-evidence",
+        "repository-version",
+        "skill-version"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        ".pnpmfile.mjs",
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**/*.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.md",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "version-contract",
+      "description": "Verify package, CLI, self-host manifest and every canonical skill expose the same 1.0.0 release contract.",
+      "command": "pnpm vitest run test/workflow/skill-sources.test.ts test/workflow/self-host.test.ts test/unit/package-contract.test.ts; pnpm build; node dist/cli.js --version",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "repository-version",
+        "skill-version"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        "@task-contract",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/skills/**/*.md",
+        "test/unit/package-contract.test.ts",
+        "test/workflow/self-host.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "version-inventory",
+      "description": "Inspect every current release/version source and confirm 1.0.0 synchronization while historical evidence remains unchanged.",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "release-evidence",
+        "repository-version",
+        "skill-version"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "docs/REVIEW_REFACTOR_PLAN.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "package.json",
+        "src/skills/**/*.md"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "skill-package-version-red",
+      "recordedAt": "2026-08-14T08:08:30.1243488Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: skill source contract failed exactly because package remained 0.6.17 while all seven skill metadata versions were 1.0.0.",
+      "artifactPaths": [
+        "test/workflow/skill-sources.test.ts",
+        "package.json",
+        "src/skills"
+      ]
+    },
+    {
+      "id": "skill-package-version-green",
+      "recordedAt": "2026-08-14T08:08:30.1243488Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 23 focused tests pass across canonical skill sources, platform setup, self-host metadata and package contract after synchronizing release 1.0.0.",
+      "artifactPaths": [
+        "test/workflow/skill-sources.test.ts",
+        "test/platform/setup.test.ts",
+        "test/workflow/self-host.test.ts",
+        "test/unit/package-contract.test.ts"
+      ]
+    },
+    {
+      "id": "version-inventory-pass",
+      "checkId": "version-inventory",
+      "inputDigest": "76934568d444ec29b5791784aa82ad1ef748a5d2d542f8b43c5d0f9ef0498caa",
+      "recordedAt": "2026-08-14T08:08:58.6666394Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Inventory trước/sau ổn định: package và self-host metadata là 1.0.0; đúng 7 canonical skills đều 1.0.0; không còn contract độc lập gây drift; 0.6.17 chỉ còn ở CHANGELOG lịch sử.",
+      "artifactPaths": [
+        "package.json",
+        ".harnix/.template-hashes.json",
+        "src/skills",
+        "README.md",
+        "CHANGELOG.md",
+        "docs"
+      ]
+    },
+    {
+      "id": "version-contract-pass",
+      "checkId": "version-contract",
+      "inputDigest": "bf9837fa85cca563e9ba9195162d53fdd16cba18cb08ad2317ac98246575cced",
+      "recordedAt": "2026-08-14T08:09:30.0804112Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Required version contract pass: 7/7 focused tests, build thành công và CLI --version trả đúng 1.0.0 trên snapshot ổn định.",
+      "artifactPaths": [
+        "package.json",
+        ".harnix/.template-hashes.json",
+        "src/skills",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/self-host.test.ts",
+        "test/unit/package-contract.test.ts"
+      ]
+    },
+    {
+      "id": "release-gates-pass",
+      "checkId": "release-gates",
+      "inputDigest": "0a5fa608908aa9ead705f4d4af97c941a894d86526eb3f53f79e2646bfb6e742",
+      "recordedAt": "2026-08-14T08:11:29.1973797Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact release sequence pass cho 1.0.0: frozen install, build/lint/typecheck, 390 pass/1 Windows skip, acceptance, package/tarball smoke cả ba platform, performance/footprint, release scan và diff check.",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "CHANGELOG.md",
+        "README.md",
+        "docs",
+        "src/skills",
+        "test"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-14T08:05:53.1902922Z",
+  "updatedAt": "2026-08-14T08:11:29.787Z",
+  "completedAt": "2026-08-14T08:11:29.787Z"
+}

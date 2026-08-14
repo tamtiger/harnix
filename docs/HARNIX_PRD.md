@@ -10,7 +10,7 @@
 | Repository root | Resolved dynamically; no machine-specific path is part of product output |
 | Package / executable | `@tamtiger/harnix` / `harnix` |
 | Project data / generator / skills | `.harnix/` / `harnix` / `harnix-*` |
-| Status | **Implementation-ready**; Phase 6 implementation and automated gates are complete with fresh evidence in the current working tree. Disposable-profile/tool-session smoke remains pending explicit authorization and is not evidence of real-user activation. |
+| Status | **Implemented in the authorized scope**; Phase 6, automated gates and workflow freshness C1–C3 have fresh evidence. Manual sessions proved Kiro/Antigravity skill discovery, Antigravity hook execution and Codex exact-hook trust/activation; Kiro CLI global hook activation is explicitly deferred and not claimed. |
 
 Tài liệu này là nguồn yêu cầu sản phẩm chính. `HARNIX_WORKFLOW.md` là contract chuẩn cho state/transition/gate/artifact của workflow; `IMPLEMENTATION_PLAN.md`, `HARNESS_RESEARCH.md`, `UPSTREAM_MAPPING.md` và `UPSTREAM_BASELINE.md` giải thích cách triển khai và provenance. Khi có mâu thuẫn về product behavior, PRD được ưu tiên; khi chi tiết workflow không được PRD quy định, `HARNIX_WORKFLOW.md` được ưu tiên, trừ khi yêu cầu mới của người dùng ghi rõ override.
 
@@ -296,7 +296,7 @@ Core skills:
 
 Optional focused skills: `harnix-research` cho full-mode material unknowns và `harnix-debug` cho bugs/failures. Không tạo skill mới nếu behavior thuộc core skill.
 
-Source of truth của từng skill là file thật `src/skills/harnix-*/SKILL.md`, không phải string prose nhúng trong `workflow.ts`. Build nhúng Markdown vào `dist` để không cần runtime filesystem/network. Kiro, Antigravity và Codex cài cùng byte content canonical; frontmatter chỉ có `name`/`description`, activation guard và behavior stage nằm trong source đó. Test bắt buộc kiểm tra frontmatter, bảy skill đầy đủ, ready/TDD/debug/verification/resume guardrail và parity giữa platform.
+Source of truth của từng skill là file thật `src/skills/harnix-*/SKILL.md`, không phải string prose nhúng trong `workflow.ts`. Build nhúng Markdown vào `dist` để không cần runtime filesystem/network. Kiro, Antigravity và Codex cài cùng byte content canonical; frontmatter có `name`, `description` và `metadata.version`, trong đó version semantic của mọi skill phải đồng bộ với package release. Activation guard và behavior stage nằm trong source đó. Test bắt buộc kiểm tra frontmatter, bảy skill đầy đủ, version đồng bộ package, ready/TDD/debug/verification/resume guardrail và parity giữa platform.
 
 - **Lite:** thay đổi tập trung, rủi ro thấp, ít decision; task record tối thiểu vẫn có acceptance, validation và evidence. LOC chỉ là tín hiệu, không phải luật.
 - **Full:** feature, integration, migration, architecture/refactor, security-sensitive hoặc multi-layer; task `prd.md` + `plan.md`, conditional `design.md`/research và decision-complete plan.
@@ -372,7 +372,7 @@ Harnix không hoàn thành cho tới khi fresh output chứng minh:
 - Mọi criterion/adopted capability trace tới code/test; deviations ghi rõ.
 - License/NOTICE attribution đúng cho Trellis, ECC và Superpowers.
 
-Delivery evidence status on 2026-08-11: Phase 6 implementation and automated isolated-home gates are complete with fresh evidence in the current working tree. The disposable-profile/tool-session smoke is intentionally not run without explicit authorization; it remains an external acceptance item and does not establish a real-user `active`, `shadowed` or `unsupported-version` claim.
+Delivery evidence status through 2026-08-14: Phase 6 implementation and automated isolated-home gates are complete. Repository review continuation F1–F9 hardens managed JSON/markers, repo-map determinism/limits, diagnostics/release privacy, filesystem preservation and duplicated pure utilities; skill content version remains one small baseline slice. Authorized manual sessions proved Kiro/Antigravity skill discovery, objective Antigravity hook execution, and Codex exact-hook trust/activation without bypass. Kiro CLI global hook activation remains explicitly deferred and must not be claimed; `active`, `shadowed` and `unsupported-version` still require authoritative external evidence.
 
 ## Repository map v1
 

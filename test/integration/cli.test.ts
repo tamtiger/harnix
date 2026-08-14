@@ -168,6 +168,17 @@ describe.sequential("CLI", () => {
     expect(message).not.toContain(windowsPath);
     expect(message).not.toContain(unixPath);
   });
+  it.each([
+    ["UNC", "\\\\server\\private-share\\users\\tam\\secret.txt"],
+    ["Windows device", "\\\\?\\C:\\Users\\Tam Nguyen\\secret.txt"],
+    ["Windows forward slash", "C:/Users/Tam Nguyen/secret.txt"],
+    ["macOS user", "/Users/tam nguyen/secret.txt"],
+  ])("should_redact_an_unquoted_%s_machine_path", (_kind, path) => {
+    const message = redactPublicErrorMessage(new Error(`Lifecycle failure at ${path}`));
+
+    expect(message).toContain("[PATH]");
+    expect(message).not.toContain(path);
+  });
   it("should_report_safe_partial_rollback_paths_for_global_lifecycle_failures", () => {
     const message = redactPublicErrorMessage(new GlobalManagedTransactionError(
       "Global managed reconciliation failed; attempted writes were rolled back conservatively.",

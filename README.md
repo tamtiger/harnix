@@ -8,7 +8,7 @@ Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
 ## Trạng thái
 
-Phase 5 review/refactor đã hoàn tất. Implementation Phase 6 cho user-global integrations của Kiro, Antigravity và Codex cùng toàn bộ automated acceptance đã pass với fresh evidence trên current working tree. Đây chưa phải là claim về một package đã publish. Manual smoke trên tool session thật trong disposable Windows profile/test home chưa được chạy vì chưa có explicit authorization để mutate profile ngoài test fixture. Vì vậy Harnix không claim discovery/activation thực tế trong tool của người dùng; xem [kế hoạch global setup](docs/GLOBAL_SETUP_REFACTOR_PLAN.md) để biết acceptance còn lại. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
+Phase 5 review/refactor, Phase 6 user-global integrations và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt. Continuation audit ngày 2026-08-14 đã xử lý các finding F1–F9 về managed JSON/marker, repo-map, privacy scan, preservation và duplication; skill version chỉ là một slice nhỏ của baseline này. Exact automated acceptance/release sequence dùng fake home đã pass với fresh evidence trên release `1.0.0`. Manual session trước đó đã chứng minh skill discovery cho Kiro/Antigravity, Antigravity hook execution và Codex exact-hook trust/activation; Kiro CLI global hook activation được người dùng explicit defer nên Harnix không claim capability đó. Đây chưa phải claim về package đã publish. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
 
 ## Đặc điểm sản phẩm
 
@@ -278,7 +278,7 @@ triage -> planning -> ready -> implementing -> verifying -> finishing -> complet
 
 Xem [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) để biết transition, gate và artifact contract chi tiết.
 
-Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
+Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release, hiện là `1.0.0`. Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
 
 ## Dữ liệu dự án
 
@@ -339,7 +339,7 @@ pnpm test:safety
 
 Mọi filesystem test dùng temporary repository cô lập và disposable fake user home injected; không mutate profile/config thật hoặc gọi install/network thật ngoài boundary explicit. Tarball smoke dùng ít nhất hai root tạm độc lập: fake home cho setup và project cho init/context.
 
-Automated Phase 6 gates đã pass với fresh evidence trên current working tree. Manual smoke vẫn là acceptance ngoài test fixture và **chưa được chạy**: dùng disposable Windows profile để mở session trong từng platform; explicit test home chỉ phù hợp command-side check nếu tool cũng được launch cùng home đó. Kiểm `harnix setup --kiro --antigravity --codex --dry-run`, sau đó chạy `harnix setup --kiro --antigravity --codex`, kiểm non-Harnix no-op và initialized-project context, review/trust Codex hook qua `/hooks`, chạy `harnix doctor`, preview bằng `harnix uninstall --global --kiro --antigravity --codex`, rồi chỉ apply `harnix uninstall --global --kiro --antigravity --codex --yes` sau khi đã kiểm target. Không dùng profile thật nếu chưa có explicit authorization.
+Automated Phase 6 gates đã pass với fresh evidence trên fake homes. Manual session evidence hiện có chứng minh skill discovery trên Kiro/Antigravity, Antigravity hook execution và Codex exact-hook trust/activation; Kiro CLI global hook chưa fire trong probe đã được phê duyệt và được explicit defer. Mọi lần revalidation tiếp theo vẫn phải dùng disposable profile hoặc explicit authorization, preview setup/uninstall targets trước mutation và không được suy capability chỉ từ file presence.
 
 ## Tài liệu
 

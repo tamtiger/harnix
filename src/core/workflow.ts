@@ -1,7 +1,7 @@
 import { basename, dirname } from "node:path";
 import { inspectContextDrift, loadContextManifest, type ContextDrift } from "./context/context.js";
 import type { Evidence, TaskMode, TaskRecord } from "./tasks/task.js";
-import { appendJournal } from "./journal/journal.js";
+import { appendJournal, searchJournal } from "./journal/journal.js";
 import { archiveTask, saveTask, transitionTask } from "./tasks/task.js";
 import { resolveActiveTask } from "./tasks/task.js";
 import { resolveSafeProjectPath } from "../utils/paths.js";
@@ -24,6 +24,7 @@ export interface WorkflowRouteDecision { entry: WorkflowEntry; mode?: TaskMode; 
 export interface WorkflowFinishDependencies {
   saveTask?: typeof saveTask;
   appendJournal?: typeof appendJournal;
+  searchJournal?: typeof searchJournal;
   archiveTask?: typeof archiveTask;
 }
 
@@ -83,15 +84,29 @@ export function implementationStrategy(kind: "behavior" | "docs" | "wiring" | "s
 }
 export function evidenceSupportsScope(evidence: Evidence, requiredScope: "focused" | "full", checkScope: "focused" | "full"): boolean { return evidence.result === "pass" && (requiredScope === "focused" || checkScope === "full"); }
 export async function finishWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, now = new Date().toISOString(), dependencies: WorkflowFinishDependencies = {}): Promise<TaskRecord> {
-  if (task.status !== "verifying" || task.checkpoint !== "finishing") throw new Error("Task requires the verifying/finishing checkpoint before completion persistence.");
-  if (task.schemaVersion === 2) {
-    const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
-    await assertVerificationInputsFresh(projectRoot, harnixRoot, task);
+  const recoveringCompletedTask = task.status === "completed" && task.checkpoint === "finishing";
+  if (!recoveringCompletedTask && (task.status !== "verifying" || task.checkpoint !== "finishing")) {
+    throw new Error("Task requires the verifying/finishing checkpoint or a completed/finishing recovery state.");
   }
-  if (!canCompleteTask(task, Date.parse(now))) throw new Error("Task requires fresh complete verification before finishing.");
-  const completed = transitionTask(task, "completed", "finishing", now);
-  await (dependencies.saveTask ?? saveTask)(harnixRoot, completed);
-  await (dependencies.appendJournal ?? appendJournal)(journalPath, { generator: "harnix", schemaVersion: 1, id: `${completed.id}-completion`, recordedAt: now, developer, taskId: completed.id, kind: "completion", summary: `Completed: ${completed.title}`, evidenceIds: completionEvidenceIds(completed) });
+  let completed = task;
+  if (!recoveringCompletedTask) {
+    if (task.schemaVersion === 2) {
+      const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
+      await assertVerificationInputsFresh(projectRoot, harnixRoot, task);
+    }
+    if (!canCompleteTask(task, Date.parse(now))) throw new Error("Task requires fresh complete verification before finishing.");
+    completed = transitionTask(task, "completed", "finishing", now);
+    await (dependencies.saveTask ?? saveTask)(harnixRoot, completed);
+  }
+  const completionEntry = { generator: "harnix" as const, schemaVersion: 1 as const, id: `${completed.id}-completion`, recordedAt: completed.completedAt ?? now, developer, taskId: completed.id, kind: "completion" as const, summary: `Completed: ${completed.title}`, evidenceIds: completionEvidenceIds(completed) };
+  if (!recoveringCompletedTask) {
+    await (dependencies.appendJournal ?? appendJournal)(journalPath, completionEntry);
+  } else {
+    const journal = await (dependencies.searchJournal ?? searchJournal)(journalPath);
+    if (!journal.entries.some((entry) => entry.id === completionEntry.id)) {
+      await (dependencies.appendJournal ?? appendJournal)(journalPath, completionEntry);
+    }
+  }
   await (dependencies.archiveTask ?? archiveTask)(harnixRoot, completed);
   return completed;
 }
@@ -148,6 +163,7 @@ function routeActiveTask(request: WorkflowRouteFacts, active: NonNullable<Workfl
     if (active.checkpoint === "debugging") return decision("resume", active.mode, "harnix-debug", "active-stage");
     return active.checkpoint === "finishing" ? decision("resume", active.mode, "harnix-finish-work", "active-stage") : decision("resume", active.mode, "harnix-check", "active-stage");
   }
+  if (active.status === "completed") return decision("resume", active.mode, "harnix-continue", "completed-active");
   return decision("fail-closed", undefined, "harnix-continue", "invalid-active-state");
 }
 

@@ -18,6 +18,7 @@ describe("workflow routing and completion evidence", () => {
     expect(routeWorkflow({ action: "change", workKind: "hotfix", mutation: "project", riskSignals: ["security-sensitive"] })).toMatchObject({ entry: "create", mode: "full", reasonCodes: ["risk-full"] });
     expect(routeWorkflow({ action: "change", workKind: "bugfix", mutation: "project", riskSignals: [], activeTask: { mode: "lite", status: "ready", checkpoint: "ready" } })).toMatchObject({ entry: "resume", owner: "harnix-implement", reasonCodes: ["active-ready-authorized"] });
     expect(routeWorkflow({ action: "plan", workKind: "refactor", mutation: "task-artifact", riskSignals: [], activeTask: { mode: "full", status: "ready", checkpoint: "ready" } })).toMatchObject({ entry: "resume", owner: "harnix-brainstorm", reasonCodes: ["active-replan"] });
+    expect(routeWorkflow({ action: "change", workKind: "refactor", mutation: "project", riskSignals: [], activeTask: { mode: "full", status: "completed", checkpoint: "finishing" } })).toMatchObject({ entry: "resume", owner: "harnix-continue", reasonCodes: ["completed-active"] });
     expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [], activeTask: { mode: "lite", status: "blocked", checkpoint: "implementing", blocker: { kind: "decision", summary: "need decision", nextAction: "decide", resumeStatus: "ready" } } })).toMatchObject({ entry: "fail-closed", reasonCodes: ["invalid-active-state"] });
     expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [], activeTask: { mode: "full", status: "blocked", checkpoint: "replan", blocker: { kind: "decision", summary: "need decision", nextAction: "decide", resumeStatus: "verifying" } } })).toMatchObject({ entry: "resume", owner: "harnix-continue", reasonCodes: ["active-stage"] });
   });
@@ -76,7 +77,9 @@ describe("workflow routing and completion evidence", () => {
   });
   it("finishes only verified tasks and journals evidence without Git work", async () => {
     const root = await temporaryRepository(); const current = new Date().toISOString(); const ready = task(current);
-    await saveTask(root, ready); await setActiveTask(root, ready.id); const finished = await finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", ready, current);
+    await saveTask(root, ready); await setActiveTask(root, ready.id); const finished = await finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", ready, current, {
+      searchJournal: async () => { throw new Error("normal completion must not scan the journal"); },
+    });
     expect(finished.status).toBe("completed"); expect(await readFile(join(root, "journal.jsonl"), "utf8")).toContain("Completed: t");
     expect((await loadTask(join(root, "tasks", ready.id, "task.json"))).status).toBe("completed");
     expect(await resolveActiveTask(root)).toBeUndefined();
@@ -99,6 +102,13 @@ describe("workflow routing and completion evidence", () => {
     expect(calls).toEqual(["save", "journal", "archive"]);
     expect((await loadTask(join(root, "tasks", verifying.id, "task.json"))).status).toBe("completed");
     expect((await resolveActiveTask(root))?.id).toBe(verifying.id);
+
+    const completed = await loadTask(join(root, "tasks", verifying.id, "task.json"));
+    await finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", completed, current);
+
+    expect(await resolveActiveTask(root)).toBeUndefined();
+    const journalEntries = (await readFile(join(root, "journal.jsonl"), "utf8")).trim().split("\n").map((line) => JSON.parse(line) as { id: string });
+    expect(journalEntries.filter((entry) => entry.id === `${verifying.id}-completion`)).toHaveLength(1);
   });
   it("should_retain_verifying_task_and_active_pointer_when_completion_persistence_fails", async () => {
     const root = await temporaryRepository(); const current = new Date().toISOString(); const verifying = task(current); const calls: string[] = [];

@@ -104,8 +104,8 @@ export async function scanTextFiles(files, scope, generated) {
     const content = await readFile(file);
     if (content.includes(0)) continue;
     const text = content.toString("utf8");
-    if (/C:\\Users\\|\/home\/[^/]+\//u.test(text)) throw new Error(`Machine path found in ${scope}: ${file}.`);
-    if (/(?:api[_-]?key|password|secret|token)\s*[=:]\s*['"][^'"]{8,}/iu.test(text)) throw new Error(`Potential secret found in ${scope}: ${file}.`);
+    if (/(?:[A-Za-z]:[\\/]Users[\\/]|\/(?:home|Users)\/[^/]+\/|\\\\(?:\?\\[A-Za-z]:\\|[A-Za-z0-9._-]+\\[A-Za-z0-9$._-]+\\))/u.test(text)) throw new Error(`Machine path found in ${scope}: ${file}.`);
+    if (/(?:api[_-]?key|password|secret|token)\s*[=:]\s*(?:['"][^'"]{8,}|[A-Za-z0-9][A-Za-z0-9._~+/-]{7,})/iu.test(text)) throw new Error(`Potential secret found in ${scope}: ${file}.`);
     if (/(?:REQUIRED\s+TODO|TODO\s*\(required\))/iu.test(text)) throw new Error(`Required TODO found in ${scope}: ${file}.`);
     if (generated && /gemini-cli|claude|cursor|windsurf/iu.test(text)) throw new Error(`Forbidden platform surface found in generated output: ${file}.`);
     if (generated && /@mindfoldhq\/trellis|@tamtiger\/trellis/iu.test(text)) throw new Error(`Forbidden legacy product reference found in generated output: ${file}.`);

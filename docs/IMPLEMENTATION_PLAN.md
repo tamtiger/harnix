@@ -618,7 +618,7 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 ### Phase 3 hardening: canonical skill sources (2026-08-13)
 
 - [x] RED chứng minh source `src/skills/harnix-*/SKILL.md` chưa tồn tại và prose bị duplicate trong `workflow.ts`.
-- [x] Bảy source canonical adapt behavior đã chọn từ frozen Trellis/ECC/Superpowers, có trigger frontmatter, activation guard, incoming/persist/exit và provenance.
+- [x] Bảy source canonical adapt behavior đã chọn từ frozen Trellis/ECC/Superpowers, có trigger frontmatter, semantic `metadata.version` đồng bộ package release, activation guard, incoming/persist/exit và provenance.
 - [x] Raw Markdown được nhúng vào bundle; Kiro/Antigravity/Codex render byte-identical content và không còn renderer skill guard riêng.
 - [x] Focused source/workflow/platform tests green.
 - [x] Forward behavior eval, typecheck, lint, build, platform/setup suites, pack/tarball/release gates và fake-home update đều green trước khi đóng hardening slice.
@@ -718,6 +718,17 @@ Nghiên cứu ngày 2026-08-14 tại task `20260814-081624-harness-capability-re
 - [x] C3: canonical verification inputs, hidden snapshot, save-time race check, immutable sidecar và finish-time recomputation.
 - [x] C1–C3 focused unit/workflow/migration/Doctor fixtures green.
 - [x] Đồng bộ release metadata và chạy fresh exact acceptance mục 11 trước khi đóng hardening.
+
+## 9D. Repository review/refactor continuation — F1–F9
+
+Yêu cầu ngày 2026-08-14 xác nhận skill content version chỉ là một slice nhỏ và đợt review/refactor toàn repository phải tiếp tục. Audit matrix, root cause, disposition và focused evidence nằm trong active Harnix task `20260814-142615-repository-review-refactor-continuation`.
+
+- [x] F1–F2: harden managed JSON/marker preflight, prototype-safe JSON tree và idempotent stable selector.
+- [x] F3: mở rộng public redaction/release scanning cho machine paths và unquoted high-signal secrets.
+- [x] F4–F5: sửa repo-map containment, deterministic code-unit ordering và positive-integer limits.
+- [x] F6: dùng strict existence probe bảo toàn mọi existing node và propagate non-`ENOENT` failure.
+- [x] F7–F9: hợp nhất bounded stdin/safe glob và tách pure marker/JSON khỏi transaction hotspot.
+- [x] Fresh required checks, exact acceptance mục 11 và dependency audits pass trên current tree ngày 2026-08-14; global lifecycle/smoke chỉ dùng fake/disposable homes.
 
 ## 10. Required test inventory
 

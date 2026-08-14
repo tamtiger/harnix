@@ -1,5 +1,25 @@
 import { chmod, readFile, readdir, rm, stat } from "node:fs/promises";
 import { atomicWriteFile } from "./atomic-write.js";
+import { GlobalManagedManifestError } from "./global-managed-error.js";
+import {
+  canonicalJson,
+  createJsonDocument,
+  defaultJsonMemberMatcher,
+  findExistingJsonArray,
+  findOrCreateJsonArray,
+  normalizeJsonValue,
+  parseCanonicalJsonPointer,
+  parseJsonDocument,
+  serializeJsonDocument,
+} from "./global-managed-json.js";
+import {
+  appendManagedBlock,
+  canonicalManagedBlock,
+  locateManagedBlock,
+  markersOverlap,
+  markerTokensOverlap,
+  renderManagedBlock,
+} from "./global-managed-markers.js";
 import { sha256 } from "./hashing.js";
 import { normalizeUserRelativePath, resolveSafeUserPath, type UserPathRoot } from "./user-paths.js";
 
@@ -176,9 +196,7 @@ interface LoadedGlobalManifest {
   content: string | undefined;
 }
 
-export class GlobalManagedManifestError extends Error {
-  override name = "GlobalManagedManifestError";
-}
+export { GlobalManagedManifestError } from "./global-managed-error.js";
 
 export class GlobalManagedTransactionError extends Error {
   override name = "GlobalManagedTransactionError";
@@ -391,8 +409,8 @@ function validateSelector(kind: GlobalManagedKind, value: unknown): GlobalManage
     throw new GlobalManagedManifestError("Fragment global entries require a selector.");
   }
   if (kind === "managed-block") {
-    if (value.type !== "markers" || typeof value.begin !== "string" || typeof value.end !== "string" || !isNonEmptyText(value.begin) || !isNonEmptyText(value.end) || value.begin === value.end) {
-      throw new GlobalManagedManifestError("Managed-block entries require distinct non-empty markers.");
+    if (value.type !== "markers" || typeof value.begin !== "string" || typeof value.end !== "string" || !isNonEmptyText(value.begin) || !isNonEmptyText(value.end) || markerTokensOverlap(value.begin, value.end)) {
+      throw new GlobalManagedManifestError("Managed-block entries require distinct non-empty markers that do not overlap.");
     }
     return { type: "markers", begin: value.begin, end: value.end };
   }
@@ -480,10 +498,17 @@ function entryFromDesired(desired: DesiredGlobalManagedFile, generatorVersion: s
     if (typeof desired.content !== "string") {
       throw new GlobalManagedManifestError("Managed-block global content must be text.");
     }
+    if (desired.content.includes(desired.selector.begin) || desired.content.includes(desired.selector.end)) {
+      throw new GlobalManagedManifestError("Managed-block marker content must not contain its own boundary markers.");
+    }
     const fragment = renderManagedBlock(desired.selector, desired.content);
     return validateGlobalManagedEntry({ path: desired.path, sourceId: desired.sourceId, kind: desired.kind, selector: desired.selector, generatedHash: sha256(canonicalManagedBlock(fragment)), generatorVersion });
   }
   const member = normalizeJsonValue(desired.member);
+  const matcher = desired.memberMatcher ?? defaultJsonMemberMatcher;
+  if (!matcher(member, desired.selector)) {
+    throw new GlobalManagedManifestError("A desired JSON member does not match its own stable selector.");
+  }
   return validateGlobalManagedEntry({ path: desired.path, sourceId: desired.sourceId, kind: desired.kind, selector: desired.selector, generatedHash: sha256(canonicalJson(member)), generatorVersion });
 }
 
@@ -936,212 +961,6 @@ function selectorKey(selector: GlobalManagedSelector | undefined): string {
   return `json-array-member\u0000${selector.pointer}\u0000${selector.memberId}`;
 }
 
-function markersOverlap(left: MarkerSelector, right: MarkerSelector): boolean {
-  return left.begin === right.begin || left.end === right.end || left.begin.includes(right.begin) || right.begin.includes(left.begin) || left.end.includes(right.end) || right.end.includes(left.end);
-}
-
-function renderManagedBlock(selector: MarkerSelector, content: string): string {
-  const normalizedContent = content.replaceAll("\r\n", "\n").replace(/^\n+|\n+$/gu, "");
-  return `${selector.begin}\n${normalizedContent}\n${selector.end}`;
-}
-
-function canonicalManagedBlock(content: string): string {
-  return content.replaceAll("\r\n", "\n");
-}
-
-function appendManagedBlock(content: string, fragment: string): string {
-  if (content.length === 0) {
-    return `${fragment}\n`;
-  }
-  const suffix = content.endsWith("\n") ? content : `${content}\n`;
-  return `${suffix}\n${fragment}\n`;
-}
-
-type LocatedManagedBlock = { kind: "missing" } | { kind: "malformed" } | { kind: "found"; start: number; end: number; value: string };
-
-function locateManagedBlock(content: string, selector: MarkerSelector): LocatedManagedBlock {
-  const begins = findAll(content, selector.begin);
-  const ends = findAll(content, selector.end);
-  if (begins.length === 0 && ends.length === 0) {
-    return { kind: "missing" };
-  }
-  if (begins.length !== 1 || ends.length !== 1 || begins[0]! >= ends[0]!) {
-    return { kind: "malformed" };
-  }
-  const start = begins[0]!;
-  const end = ends[0]! + selector.end.length;
-  return { kind: "found", start, end, value: content.slice(start, end) };
-}
-
-function findAll(content: string, value: string): number[] {
-  const indexes: number[] = [];
-  let offset = 0;
-  while (offset <= content.length) {
-    const index = content.indexOf(value, offset);
-    if (index < 0) {
-      return indexes;
-    }
-    indexes.push(index);
-    offset = index + value.length;
-  }
-  return indexes;
-}
-
-function defaultJsonMemberMatcher(candidate: JsonValue, selector: JsonArrayMemberSelector): boolean {
-  return isJsonObject(candidate) && candidate.id === selector.memberId;
-}
-
-function parseJsonDocument(content: string): JsonValue {
-  return normalizeJsonValue(JSON.parse(content) as unknown);
-}
-
-function createJsonDocument(selector: JsonArrayMemberSelector): JsonValue {
-  const tokens = parseCanonicalJsonPointer(selector.pointer);
-  const root: JsonValue = tokens.length === 0 ? [] : {};
-  if (findOrCreateJsonArray(root, selector) === undefined) {
-    throw new GlobalManagedManifestError("The JSON pointer cannot create an array document safely.");
-  }
-  return root;
-}
-
-function findOrCreateJsonArray(document: JsonValue, selector: JsonArrayMemberSelector): JsonValue[] | undefined {
-  const tokens = parseCanonicalJsonPointer(selector.pointer);
-  if (tokens.length === 0) {
-    return Array.isArray(document) ? document : undefined;
-  }
-  let current: JsonValue = document;
-  for (let index = 0; index < tokens.length; index += 1) {
-    const token = tokens[index]!;
-    const last = index === tokens.length - 1;
-    if (isJsonObject(current)) {
-      if (!(token in current)) {
-        current[token] = last ? [] : {};
-      }
-      current = current[token]!;
-      if (last) {
-        return Array.isArray(current) ? current : undefined;
-      }
-      continue;
-    }
-    if (Array.isArray(current)) {
-      const position = parseArrayIndex(token);
-      if (position === undefined || position >= current.length) {
-        return undefined;
-      }
-      current = current[position]!;
-      if (last) {
-        return Array.isArray(current) ? current : undefined;
-      }
-      continue;
-    }
-    return undefined;
-  }
-  return undefined;
-}
-
-function findExistingJsonArray(document: JsonValue, selector: JsonArrayMemberSelector): JsonValue[] | undefined {
-  const tokens = parseCanonicalJsonPointer(selector.pointer);
-  let current: JsonValue = document;
-  for (const token of tokens) {
-    if (isJsonObject(current)) {
-      if (!(token in current)) {
-        return undefined;
-      }
-      current = current[token]!;
-      continue;
-    }
-    if (Array.isArray(current)) {
-      const position = parseArrayIndex(token);
-      if (position === undefined || position >= current.length) {
-        return undefined;
-      }
-      current = current[position]!;
-      continue;
-    }
-    return undefined;
-  }
-  return Array.isArray(current) ? current : undefined;
-}
-
-function parseArrayIndex(value: string): number | undefined {
-  if (!/^(?:0|[1-9][0-9]*)$/u.test(value)) {
-    return undefined;
-  }
-  const parsed = Number(value);
-  return Number.isSafeInteger(parsed) ? parsed : undefined;
-}
-
-function serializeJsonDocument(value: JsonValue): string {
-  return `${JSON.stringify(value, null, 2)}\n`;
-}
-
-function canonicalJson(value: JsonValue): string {
-  return JSON.stringify(normalizeJsonValue(value));
-}
-
-function normalizeJsonValue(value: unknown): JsonValue {
-  if (value === null || typeof value === "string" || typeof value === "boolean") {
-    return value;
-  }
-  if (typeof value === "number") {
-    if (!Number.isFinite(value)) {
-      throw new GlobalManagedManifestError("A JSON member must not contain a non-finite number.");
-    }
-    return value;
-  }
-  if (Array.isArray(value)) {
-    return value.map(normalizeJsonValue);
-  }
-  if (isRecord(value)) {
-    const normalized: { [key: string]: JsonValue } = {};
-    for (const key of Object.keys(value).sort((left, right) => left.localeCompare(right))) {
-      normalized[key] = normalizeJsonValue(value[key]);
-    }
-    return normalized;
-  }
-  throw new GlobalManagedManifestError("A JSON member must contain only JSON-compatible values.");
-}
-
-function parseCanonicalJsonPointer(pointer: string): string[] {
-  if (pointer === "") {
-    return [];
-  }
-  if (!pointer.startsWith("/")) {
-    throw new GlobalManagedManifestError("A JSON pointer must start with '/'.");
-  }
-  const tokens = pointer.slice(1).split("/").map(unescapeJsonPointerToken);
-  const canonical = `/${tokens.map(escapeJsonPointerToken).join("/")}`;
-  if (canonical !== pointer) {
-    throw new GlobalManagedManifestError("A JSON pointer must use canonical RFC 6901 escaping.");
-  }
-  return tokens;
-}
-
-function unescapeJsonPointerToken(token: string): string {
-  let output = "";
-  for (let index = 0; index < token.length; index += 1) {
-    const character = token[index]!;
-    if (character !== "~") {
-      output += character;
-      continue;
-    }
-    const escaped = token[index + 1];
-    if (escaped === "0") {
-      output += "~";
-    } else if (escaped === "1") {
-      output += "/";
-    } else {
-      throw new GlobalManagedManifestError("A JSON pointer contains an invalid escape.");
-    }
-    index += 1;
-  }
-  return output;
-}
-
-function escapeJsonPointerToken(token: string): string {
-  return token.replaceAll("~", "~0").replaceAll("/", "~1");
-}
-
 function serializeManifest(manifest: GlobalManagedManifestV1): string {
   return `${JSON.stringify(manifest, null, 2)}\n`;
 }
@@ -1228,10 +1047,6 @@ function isNonEmptyText(value: string): boolean {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isJsonObject(value: JsonValue): value is { [key: string]: JsonValue } {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 

@@ -1,10 +1,11 @@
-import { mkdir, readFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 import type { LanguageId, TechnologyId } from "../catalog/catalog.js";
 import { guideOutputPath, guideSources, selectGuideSources } from "../guides/catalog.js";
 import { atomicWriteFile } from "../utils/atomic-write.js";
 import { resolveSafeProjectPath } from "../utils/paths.js";
+import { pathExists } from "../utils/filesystem.js";
 
 export const commonRules = guideSources.find(({ descriptor }) => descriptor.id === "common-engineering")!.content;
 export const attribution = { source: "Harnix-authored adaptations informed by ECC/Superpowers research", license: "MIT-compatible adaptation metadata; see NOTICE" } as const;
@@ -22,12 +23,10 @@ export async function seedRules(options: SeedRulesOptions): Promise<SeedRulesRes
   const paths: string[] = [], preserved: string[] = [];
   for (const file of files) {
     const absolute = await resolveSafeProjectPath(options.root, file.path);
-    if (!options.force && await exists(absolute)) { preserved.push(file.path); continue; }
+    if (!options.force && await pathExists(absolute)) { preserved.push(file.path); continue; }
     await mkdir(join(absolute, ".."), { recursive: true });
     await atomicWriteFile(absolute, file.content);
     paths.push(file.path);
   }
   return { paths, preserved };
 }
-
-async function exists(path: string): Promise<boolean> { try { await readFile(path); return true; } catch { return false; } }

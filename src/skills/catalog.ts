@@ -11,6 +11,7 @@ import researchSource from "./harnix-research/SKILL.md";
 export interface SkillTemplate {
   name: string;
   description: string;
+  version: string;
   body: string;
   content: string;
 }
@@ -39,8 +40,8 @@ function parseSkillSource(rawSource: string): SkillTemplate {
   }
 
   const frontmatter: unknown = parse(match[1]!);
-  if (!isRecord(frontmatter) || Object.keys(frontmatter).sort().join(",") !== "description,name") {
-    throw new Error("Harnix skill frontmatter must contain only name and description.");
+  if (!isRecord(frontmatter) || Object.keys(frontmatter).sort().join(",") !== "description,metadata,name") {
+    throw new Error("Harnix skill frontmatter must contain name, description, and metadata.version.");
   }
   if (typeof frontmatter.name !== "string" || !/^harnix-[a-z0-9-]+$/u.test(frontmatter.name)) {
     throw new Error("Harnix skill name is invalid.");
@@ -48,12 +49,19 @@ function parseSkillSource(rawSource: string): SkillTemplate {
   if (typeof frontmatter.description !== "string" || !frontmatter.description.startsWith("Use when ")) {
     throw new Error("Harnix skill description must start with 'Use when '.");
   }
+  if (!isRecord(frontmatter.metadata)
+    || Object.keys(frontmatter.metadata).join(",") !== "version"
+    || typeof frontmatter.metadata.version !== "string"
+    || !/^\d+\.\d+\.\d+$/u.test(frontmatter.metadata.version)) {
+    throw new Error("Harnix skill metadata.version must be a semantic version string.");
+  }
 
   return {
     body: match[2]!,
     content,
     description: frontmatter.description,
     name: frontmatter.name,
+    version: frontmatter.metadata.version,
   };
 }
 

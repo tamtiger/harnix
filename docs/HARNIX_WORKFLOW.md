@@ -230,7 +230,7 @@ Tasks, research và journal là user-owned. Packaged `workflow.md` và seed spec
 
 Platform adapters cho Kiro, Antigravity và Codex phải giữ cùng state/gate semantics. Hook, steering hoặc skill syntax có thể khác nhưng không được tạo platform-specific workflow.
 
-Source canonical của bảy skill nằm tại `src/skills/harnix-*/SKILL.md`. Build nhúng raw Markdown vào package; runtime không đọc source tree hoặc network. Cả ba adapter phải cài byte-identical canonical `SKILL.md`, gồm activation guard và provenance, thay vì prepend các bản guard/prose riêng có thể drift.
+Source canonical của bảy skill nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi source có portable `metadata.version`; contract test buộc version semantic này đồng bộ với package release. Build nhúng raw Markdown vào package; runtime không đọc source tree hoặc network. Cả ba adapter phải cài byte-identical canonical `SKILL.md`, gồm version, activation guard và provenance, thay vì prepend các bản guard/prose riêng có thể drift.
 
 ## 8. Required behavior evals
 

@@ -15,6 +15,31 @@ describe("repository map service", () => {
 
     expect(map.records.map(({ path }) => path)).toEqual(["src/B.ts", "src/a.ts"]);
   });
+  it("uses code-unit ordering for persisted outlines", () => {
+    const value = record("src/order.ts");
+    value.headings = ["B", "a"];
+
+    expect(createRepoMap([value]).records[0]?.headings).toEqual(["B", "a"]);
+  });
+  it("indexes a contained filename that begins with two dots", async () => {
+    const root = await temporaryRepository();
+    await writeFile(join(root, "..source.ts"), "export const legitimateSource = true;\n");
+
+    const refreshed = await refreshRepoMap({ root });
+
+    expect(refreshed.map.records.map(({ path }) => path)).toContain("..source.ts");
+  });
+  it.each([
+    ["concurrency", 0],
+    ["maxBytesPerFile", -1],
+    ["maxFiles", 1.5],
+    ["maxTotalBytes", Number.NaN],
+  ] as const)("rejects an invalid %s repo-map limit", async (name, value) => {
+    const root = await temporaryRepository();
+    const limits = { concurrency: 1, maxBytesPerFile: 100, maxFiles: 10, maxTotalBytes: 1_000, [name]: value };
+
+    await expect(refreshRepoMap({ root, limits })).rejects.toThrow(/positive integer/i);
+  });
   it("builds a deterministic structural cache and returns bounded lexical results", async () => {
     const root = await temporaryRepository();
     await mkdir(join(root, "src"), { recursive: true });

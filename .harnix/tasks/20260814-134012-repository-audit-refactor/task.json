@@ -1,0 +1,715 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260814-134012-repository-audit-refactor",
+  "title": "Audit và refactor toàn repository, bổ sung version cho skills",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Đưa repository về trạng thái được audit toàn diện, sửa các finding có bằng chứng và bổ sung canonical skill version tương thích trên cả ba platform.",
+  "nonGoals": [
+    "Không thêm platform, package, workspace hoặc service mới.",
+    "Không chạm real user profile hoặc thực hiện Git mutation.",
+    "Không refactor thuần sở thích hay thay frozen contract ngoài scope được user yêu cầu."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "audit-complete",
+      "text": "Audit toàn repository ghi nhận finding theo severity với file/contract/reproduction và chỉ triển khai finding có bằng chứng.",
+      "status": "met",
+      "evidenceIds": [
+        "audit-review-pass-2"
+      ]
+    },
+    {
+      "id": "docs-consistent",
+      "text": "Tài liệu normative và implementation phản ánh nhất quán behavior và trạng thái delivery sau thay đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "audit-review-pass-2"
+      ]
+    },
+    {
+      "id": "quality-gates",
+      "text": "Focused tests và toàn bộ automated acceptance/release gates bắt buộc pass trên current tree với fake hoặc disposable homes.",
+      "status": "met",
+      "evidenceIds": [
+        "self-host-version-pass-final",
+        "release-gates-pass-final"
+      ]
+    },
+    {
+      "id": "skill-version",
+      "text": "Bảy canonical Harnix skills có version metadata hợp lệ, catalog expose version và Kiro, Antigravity, Codex cài byte-identical canonical content.",
+      "status": "met",
+      "evidenceIds": [
+        "skill-version-pass-final"
+      ]
+    },
+    {
+      "id": "workflow-recovery",
+      "text": "Completed-active partial persistence được route và recover an toàn mà không xóa nhầm active pointer hoặc tạo completion state không nhất quán.",
+      "status": "met",
+      "evidenceIds": [
+        "workflow-recovery-pass-final"
+      ]
+    },
+    {
+      "id": "manifest-marker-safety",
+      "text": "Global managed manifest từ chối mọi managed-block selector có marker token trùng hoặc chứa chéo để các fragment cùng path không thể overlap khi reconcile hoặc remove.",
+      "status": "met",
+      "evidenceIds": [
+        "managed-marker-pass-final"
+      ]
+    },
+    {
+      "id": "dependency-security",
+      "text": "Production và development dependency tree không còn advisory từ mức low trở lên trên lockfile hiện tại, không phá Node.js >=18 hoặc required build/test gates.",
+      "status": "met",
+      "evidenceIds": [
+        "dependency-audit-pass-final",
+        "dependency-hook-pass-final"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "docs",
+    "package.json",
+    "pnpm-lock.yaml",
+    "scripts",
+    "src",
+    "test",
+    ".harnix/.template-hashes.json",
+    ".pnpmfile.mjs"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "audit-review",
+      "description": "Review repository compliance, correctness, security, architecture, tests, performance and findings traceability.",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "audit-complete",
+        "docs-consistent"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "docs/**/*.md",
+        "package.json",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "release-gates",
+      "description": "Run the exact automated build, test, acceptance, packaging, smoke, performance, footprint, release scan and diff gates.",
+      "command": "pnpm build; pnpm lint; pnpm typecheck; pnpm test; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "audit-complete",
+        "docs-consistent",
+        "quality-gates",
+        "skill-version",
+        "workflow-recovery"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "docs/**/*.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "src/skills/**/*.md",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "skill-version-tests",
+      "description": "Run skill source, catalog and platform parity tests for canonical version metadata.",
+      "command": "pnpm vitest run test/workflow/skill-sources.test.ts test/platform/global-adapters.test.ts test/platform/setup.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "skill-version"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/skills/**/*.md",
+        "src/skills/catalog.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/platform/setup.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "workflow-recovery-tests",
+      "description": "Run workflow routing and internal workflow tests for completed-active partial-persistence recovery.",
+      "command": "pnpm vitest run test/workflow/routing.test.ts test/workflow/internal-workflow.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "workflow-recovery"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "src/core/workflow.ts",
+        "src/skills/harnix-continue/SKILL.md",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "managed-marker-tests",
+      "description": "Run global managed manifest regression tests for cross-token marker overlap safety.",
+      "command": "pnpm vitest run test/unit/global-managed-files.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "manifest-marker-safety"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/utils/global-managed-files.ts",
+        "test/unit/global-managed-files.test.ts"
+      ]
+    },
+    {
+      "id": "self-host-version-tests",
+      "description": "Verify the tracked self-host template manifest matches the current package generator version.",
+      "command": "pnpm vitest run test/workflow/self-host.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "quality-gates"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        "@task-contract",
+        "package.json",
+        "test/workflow/self-host.test.ts"
+      ]
+    },
+    {
+      "id": "dependency-audit",
+      "description": "Audit production and full dependency trees against current registry advisories.",
+      "command": "pnpm audit --prod --audit-level low; pnpm audit --audit-level low",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "dependency-security"
+      ],
+      "inputs": [
+        "@task-contract",
+        "package.json",
+        "pnpm-lock.yaml"
+      ]
+    },
+    {
+      "id": "dependency-resolution-hook-tests",
+      "description": "Verify the local pnpm hook pins only audited vulnerable transitive resolutions, allowlists only esbuild builds, and preserves the no-workspace contract.",
+      "command": "pnpm vitest run test/unit/package-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "dependency-security"
+      ],
+      "inputs": [
+        ".pnpmfile.mjs",
+        "@task-contract",
+        "package.json",
+        "pnpm-lock.yaml",
+        "test/unit/package-contract.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "skill-version-red",
+      "checkId": "skill-version-tests",
+      "recordedAt": "2026-08-14T06:46:05.6686738Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: canonical skill frontmatter chưa có metadata.version và installed Codex skill không chứa version.",
+      "artifactPaths": [
+        "test/workflow/skill-sources.test.ts",
+        "test/platform/setup.test.ts"
+      ]
+    },
+    {
+      "id": "skill-version-test-parser-adjustment",
+      "checkId": "skill-version-tests",
+      "recordedAt": "2026-08-14T06:46:06.6686738Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Sau GREEN ban đầu, test regex cũ giả định description đứng sát closing frontmatter; đã sửa test để đọc description theo dòng.",
+      "artifactPaths": [
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "skill-version-pass-1",
+      "checkId": "skill-version-tests",
+      "recordedAt": "2026-08-14T06:46:32.0944837Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "24 focused skill source, adapter parity và injected-home setup tests pass; snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        "src/skills/catalog.ts",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "test/workflow/skill-sources.test.ts"
+      ],
+      "inputDigest": "1958e720a791a39ecf918ac0f06ccbff5b8fdadbee3548a5ab99386f91ea5893"
+    },
+    {
+      "id": "workflow-recovery-red",
+      "checkId": "workflow-recovery-tests",
+      "recordedAt": "2026-08-14T06:47:46.8578947Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: completed-active bị route invalid và retry finish từ completed/finishing bị từ chối; 2/20 assertions fail đúng boundary.",
+      "artifactPaths": [
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "workflow-recovery-pass",
+      "checkId": "workflow-recovery-tests",
+      "recordedAt": "2026-08-14T06:48:06.9835019Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "33 workflow routing/internal tests pass; completed-active route, idempotent journal recovery và exact active-pointer cleanup được chứng minh.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "src/skills/harnix-continue/SKILL.md",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "91f3a14cf97ff1c3b539d1eaecec4127cb1ed5d4890187596588f500bc764d51"
+    },
+    {
+      "id": "managed-marker-red",
+      "checkId": "managed-marker-tests",
+      "recordedAt": "2026-08-14T06:49:11.0655249Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: validator chấp nhận sidecar nơi selector A.end trùng B.begin; 1/17 test fail tại overlap boundary.",
+      "artifactPaths": [
+        "test/unit/global-managed-files.test.ts"
+      ]
+    },
+    {
+      "id": "managed-marker-pass",
+      "checkId": "managed-marker-tests",
+      "recordedAt": "2026-08-14T06:49:29.3804368Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "17 global managed-file tests pass; same-selector và cross-selector marker containment/equality đều fail closed.",
+      "artifactPaths": [
+        "src/utils/global-managed-files.ts",
+        "test/unit/global-managed-files.test.ts"
+      ],
+      "inputDigest": "13727f7b4d31b3e8c0774a3eb4996620df0199020787f2d32d5add12a72ece87"
+    },
+    {
+      "id": "docs-release-tdd-exception",
+      "recordedAt": "2026-08-14T06:50:15.3129551Z",
+      "result": "skipped",
+      "summary": "TDD exception: docs status, normative metadata wording, package patch version và CHANGELOG không có behavioral RED có ý nghĩa; dùng exact text scan, skill schema/parity, build/typecheck và full release gates thay thế.",
+      "artifactPaths": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "package.json"
+      ]
+    },
+    {
+      "id": "audit-review-fail-cross-day-journal",
+      "checkId": "audit-review",
+      "recordedAt": "2026-08-14T06:54:43.0203006Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Compliance finding P1: completed/finishing recovery chọn journal path theo ngày retry; khi archive fail sau journal write rồi retry qua UTC date boundary, cùng completion ID có thể bị append sang journal ngày mới. Snapshot trước/sau ổn định; cần regression test và fix tại finishWorkflow.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "src/core/workflow.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "inputDigest": "1db6bb6c506de4de966760416d968a20e51adbff4874c5d33c2eb2da5bbec6d7"
+    },
+    {
+      "id": "debug-cross-day-fixture-fail",
+      "recordedAt": "2026-08-14T06:56:29.9089301Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Lần tái hiện đầu fail ở fixture vì completed task còn criterion pending; production hypothesis chưa được kiểm tra. Đã sửa fixture để tạo completed state hợp lệ.",
+      "artifactPaths": [
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "debug-cross-day-red",
+      "recordedAt": "2026-08-14T06:56:29.9099301Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED đúng boundary: finishWorkflow retry 2026-08-14 đã tạo journal 2026-08-14 dù completion entry đã tồn tại ở journal 2026-08-13.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "debug-cross-day-green",
+      "recordedAt": "2026-08-14T06:56:29.9109301Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Giả thuyết được xác nhận: journal path dùng retry time. Fix chọn completedAt cho completed recovery; 34 routing/internal workflow tests pass, gồm regression qua UTC day boundary.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "src/core/workflow.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "debug-normal-finish-scan-red",
+      "recordedAt": "2026-08-14T06:57:41.6555778Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: normal completion gọi injected searchJournal và fail, chứng minh journal scan nằm trên hot path dù chỉ recovery cần idempotency lookup.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "debug-normal-finish-scan-green",
+      "recordedAt": "2026-08-14T06:57:41.6565778Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: normal finish append trực tiếp; chỉ completed recovery search theo deterministic ID. 34 workflow tests pass.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "test/workflow/routing.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "audit-review-pass-1",
+      "checkId": "audit-review",
+      "recordedAt": "2026-08-14T06:58:30.2630479Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Compliance review pass sau fixes: 134 inputs ổn định; diff nằm trong scope, 7 skill version hợp lệ, docs/package/changelog nhất quán, không thêm process/network/credential surface hoặc placeholder. Không còn finding blocking tại stage 1.",
+      "artifactPaths": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "src/commands/internal-workflow.ts",
+        "src/core/workflow.ts",
+        "src/skills/catalog.ts",
+        "src/utils/global-managed-files.ts"
+      ],
+      "inputDigest": "2d441a9fd88eeefa36dc5d122386c162cd7e33d4e194e7b4d2ee3a732fc290b9"
+    },
+    {
+      "id": "skill-version-pass-2",
+      "checkId": "skill-version-tests",
+      "recordedAt": "2026-08-14T06:58:56.0262968Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "24/24 canonical skill source, catalog version, byte-parity và injected-home platform setup tests pass; snapshot ổn định.",
+      "artifactPaths": [
+        "src/skills/catalog.ts",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "test/workflow/skill-sources.test.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/platform/setup.test.ts"
+      ],
+      "inputDigest": "c35628319bea6891d97168c3d5a473beaede9f7a5bf6f7af5bd019169c91d725"
+    },
+    {
+      "id": "workflow-recovery-pass-2",
+      "checkId": "workflow-recovery-tests",
+      "recordedAt": "2026-08-14T06:59:20.6999949Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "34/34 routing/internal workflow tests pass; completed-active recovery, cross-day journal identity, no duplicate entry, matching-pointer cleanup và no-scan normal hot path đều được chứng minh.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "src/core/workflow.ts",
+        "src/skills/harnix-continue/SKILL.md",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "94233f66c7f9ab18ce60bc9a69790d6b3f269290ec7baad5231f3ff7ad8ae10a"
+    },
+    {
+      "id": "managed-marker-pass-2",
+      "checkId": "managed-marker-tests",
+      "recordedAt": "2026-08-14T06:59:42.7504322Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "17/17 global managed-file tests pass; same-selector và mọi cặp begin/end cross-selector equality/containment đều fail closed.",
+      "artifactPaths": [
+        "src/utils/global-managed-files.ts",
+        "test/unit/global-managed-files.test.ts"
+      ],
+      "inputDigest": "05b8cf17f7e57da2c56c0462fa89177ac8fedc29e83931b3ff732388289a1e4a"
+    },
+    {
+      "id": "release-gates-fail-self-host-version",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-14T07:00:56.5885212Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Frozen install, build, lint và typecheck pass; pnpm test dừng với 1/357 fail vì self-host template manifest còn generatorVersion 0.6.15 trong khi package là 0.6.16. Snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        "package.json",
+        "test/workflow/self-host.test.ts"
+      ],
+      "inputDigest": "76e1ad13059b0469f5e3636f87a9f42ab695f9f5f660f0d67d43bf5f17b13c6c"
+    },
+    {
+      "id": "debug-self-host-version-green",
+      "recordedAt": "2026-08-14T07:01:41.8168552Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Đồng bộ hai self-host generatorVersion sang 0.6.16; focused self-host test pass 1/1. Đây là generated snapshot update theo package patch.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        "package.json",
+        "test/workflow/self-host.test.ts"
+      ]
+    },
+    {
+      "id": "dependency-audit-red",
+      "checkId": "dependency-audit",
+      "recordedAt": "2026-08-14T07:04:51.6922538Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Production dependencies sạch; full dev tree fail với nanoid 3.3.17 (high, GHSA-2v37-7h3g-55p8) và esbuild 0.27.7 (low Windows dev-server path traversal, GHSA-g7r4-m6w7-qqqr).",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml"
+      ]
+    },
+    {
+      "id": "dependency-package-override-rejected",
+      "recordedAt": "2026-08-14T07:12:14.9501499Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Pnpm 11 cảnh báo package.json#pnpm.overrides bị ignore; không giữ cấu hình giả và không claim lockfile đã đổi.",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml"
+      ]
+    },
+    {
+      "id": "dependency-pnpmfile-red",
+      "recordedAt": "2026-08-14T07:12:14.9511499Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: package-contract test không tìm thấy .pnpmfile.mjs, chứng minh security resolution hook chưa tồn tại.",
+      "artifactPaths": [
+        "test/unit/package-contract.test.ts"
+      ]
+    },
+    {
+      "id": "dependency-build-allowlist-red",
+      "recordedAt": "2026-08-14T07:12:14.9521499Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Forced install re-resolve patched versions nhưng fail ERR_PNPM_IGNORED_BUILDS cho esbuild; pnpm tự tạo workspace placeholder đã được loại bỏ để giữ frozen no-workspace contract.",
+      "artifactPaths": [
+        ".pnpmfile.mjs",
+        "pnpm-lock.yaml"
+      ]
+    },
+    {
+      "id": "dependency-hook-green",
+      "recordedAt": "2026-08-14T07:12:14.9531499Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "2/2 package-contract tests pass; no pnpm-workspace.yaml; graph resolve duy nhất nanoid 3.3.18 và esbuild 0.28.1; updateConfig chỉ allow esbuild build.",
+      "artifactPaths": [
+        ".pnpmfile.mjs",
+        "pnpm-lock.yaml",
+        "test/unit/package-contract.test.ts"
+      ]
+    },
+    {
+      "id": "dependency-audit-pass-1",
+      "checkId": "dependency-audit",
+      "recordedAt": "2026-08-14T07:12:38.2537828Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Production và full dependency audits đều báo No known vulnerabilities found; snapshot package/lock/task contract ổn định.",
+      "artifactPaths": [
+        ".pnpmfile.mjs",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "inputDigest": "391ad0ef4514955911b8afe42ad40144cd109206373c1766974691bdd0de5b33"
+    },
+    {
+      "id": "dependency-hook-pass-1",
+      "checkId": "dependency-resolution-hook-tests",
+      "recordedAt": "2026-08-14T07:13:04.8394534Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "2/2 package invariant tests pass: exact audited resolution rules, esbuild-only build allowlist, unrelated package preservation và no pnpm-workspace.yaml.",
+      "artifactPaths": [
+        ".pnpmfile.mjs",
+        "pnpm-lock.yaml",
+        "test/unit/package-contract.test.ts"
+      ],
+      "inputDigest": "af2e9d8aaa76fbc12d5c0a44129aa3284194c01c408385e389744c98b71cf3c5"
+    },
+    {
+      "id": "audit-review-pass-2",
+      "checkId": "audit-review",
+      "recordedAt": "2026-08-14T07:15:41.2807305Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final compliance review pass trên 134 stable inputs: scope/docs/contracts/version/no-workspace/one-package/7 skill metadata/security exception closure đều nhất quán; không còn finding blocking.",
+      "artifactPaths": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/REVIEW_REFACTOR_PLAN.md",
+        "src/commands/internal-workflow.ts",
+        "src/core/workflow.ts",
+        "src/skills/catalog.ts",
+        "src/utils/global-managed-files.ts",
+        ".pnpmfile.mjs"
+      ],
+      "inputDigest": "b72a3d32b0d4704d80e3e917adfdd93885e09505985d36b9d45412b2042d4a37"
+    },
+    {
+      "id": "skill-version-pass-final",
+      "checkId": "skill-version-tests",
+      "recordedAt": "2026-08-14T07:17:32.9609901Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Vitest: 3 files, 24 tests passed; metadata.version 1.0.0 và byte parity giữa source/installed skills được xác nhận.",
+      "artifactPaths": [
+        "src/skills/catalog.ts",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "test/workflow/skill-sources.test.ts",
+        "test/platform/setup.test.ts"
+      ],
+      "inputDigest": "668effbcb3549e64665ac7dca84f56a57919e04ee7775324caa5931911968c1d"
+    },
+    {
+      "id": "workflow-recovery-pass-final",
+      "checkId": "workflow-recovery-tests",
+      "recordedAt": "2026-08-14T07:18:05.2544676Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "34/34 routing và internal workflow tests pass; completed-active recovery, cross-day journal identity, idempotency và no-scan normal path được xác nhận.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "src/core/workflow.ts",
+        "src/skills/harnix-continue/SKILL.md",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "d20333dceefd5e15c4309d7d030ce019c6dce374ece46409cbea1cf69cfe5fc7"
+    },
+    {
+      "id": "managed-marker-pass-final",
+      "checkId": "managed-marker-tests",
+      "recordedAt": "2026-08-14T07:18:23.9223865Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "17/17 global managed-file tests pass; marker token trùng hoặc chứa nhau trong và chéo selectors đều bị từ chối.",
+      "artifactPaths": [
+        "src/utils/global-managed-files.ts",
+        "test/unit/global-managed-files.test.ts"
+      ],
+      "inputDigest": "5c5afe9bf6b4d15bb27d39bf144b2fe95d7df0fefd9db1bb876b7638797bd2f0"
+    },
+    {
+      "id": "self-host-version-pass-final",
+      "checkId": "self-host-version-tests",
+      "recordedAt": "2026-08-14T07:18:43.5548127Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "1/1 self-host test pass; template manifest generatorVersion khớp package 0.6.16.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        "package.json",
+        "test/workflow/self-host.test.ts"
+      ],
+      "inputDigest": "6f3646a7a58e083d700b844fce7979f240da4a68894ff58467d3fda5ba8c55a7"
+    },
+    {
+      "id": "dependency-hook-pass-final",
+      "checkId": "dependency-resolution-hook-tests",
+      "recordedAt": "2026-08-14T07:19:03.3412424Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "2/2 package contract tests pass; exact audited pins, esbuild-only build allowlist, unrelated package preservation và no-workspace contract được xác nhận.",
+      "artifactPaths": [
+        ".pnpmfile.mjs",
+        "pnpm-lock.yaml",
+        "test/unit/package-contract.test.ts"
+      ],
+      "inputDigest": "3d3cad61a872641bd74ff00ac489a271d3b2585f542ae572c87a1506ba50f294"
+    },
+    {
+      "id": "dependency-audit-pass-final",
+      "checkId": "dependency-audit",
+      "recordedAt": "2026-08-14T07:19:24.9845179Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Production và full dependency audits đều báo No known vulnerabilities found ở audit-level low; snapshot ổn định.",
+      "artifactPaths": [
+        ".pnpmfile.mjs",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "inputDigest": "6cbacde0ede1c72047feb69d483f7150489211d3ffddbe1fbb829d89af860cbe"
+    },
+    {
+      "id": "release-gates-pass-final",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-14T07:21:29.9089359Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Frozen install, build, lint, typecheck, full tests, acceptance subsets, pack check, 4 tarball smoke combinations, performance, footprint, release scan và git diff --check đều pass. init median 516.5 ms, worst 574.6 ms; footprint 193824 bytes/50 files, giảm 85.57%; release tarball 0.6.16 sạch.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src",
+        "test",
+        "scripts"
+      ],
+      "inputDigest": "6d371c970fd4c4169779bf6cd718eb546386da0eb31d4fe21b17842576345036"
+    }
+  ],
+  "createdAt": "2026-08-14T06:40:11.9959237Z",
+  "updatedAt": "2026-08-14T07:22:06.663Z",
+  "completedAt": "2026-08-14T07:22:06.663Z"
+}

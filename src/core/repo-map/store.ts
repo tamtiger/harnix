@@ -5,6 +5,7 @@ import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { sha256 } from "../../utils/hashing.js";
 import { normalizeRepositoryPath, resolveSafeHarnixPath } from "../../utils/paths.js";
 import type { RepoMapRecordV1, RepoMapV1 } from "./types.js";
+import { compareCodeUnits } from "./order.js";
 
 export const repoMapRelativePath = "cache/repo-map-v1.json";
 
@@ -57,10 +58,10 @@ function isSensitive(value: string): boolean { return sensitive.test(value); }
 function hash(value: unknown): value is string { return typeof value === "string" && /^[a-f0-9]{64}$/u.test(value); }
 function integer(value: unknown): value is number { return typeof value === "number" && Number.isInteger(value) && value >= 0; }
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
-function compareRepositoryPaths(left: string, right: string): number { return left < right ? -1 : left > right ? 1 : 0; }
+const compareRepositoryPaths = compareCodeUnits;
 function stringArray(value: unknown, count: number, length: number): string[] {
   if (!Array.isArray(value) || value.length > count || !value.every((item) => typeof item === "string" && item.length > 0 && item.length <= length)) throw new Error("Invalid repo map outline.");
-  const sorted = [...value].sort((left, right) => left.localeCompare(right));
+  const sorted = [...value].sort(compareCodeUnits);
   if (sorted.some((item, index) => item !== value[index]) || new Set(value).size !== value.length) throw new Error("Repo map outline must be sorted and unique.");
   return value;
 }

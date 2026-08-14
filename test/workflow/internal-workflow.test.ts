@@ -3,7 +3,8 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { finishWorkflow, inspectWorkflow, saveWorkflow, snapshotWorkflow } from "../../src/commands/internal-workflow.js";
-import { createTaskV2MigrationEvidence, type TaskRecord, type TaskRecordV1 } from "../../src/core/tasks/task.js";
+import { appendJournal } from "../../src/core/journal/journal.js";
+import { createTaskV2MigrationEvidence, saveTask, setActiveTask, transitionTask, type TaskRecord, type TaskRecordV1 } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 import { initializeProject } from "../../src/commands/init.js";
 import { sha256 } from "../../src/utils/hashing.js";
@@ -64,6 +65,42 @@ describe("hidden workflow persistence operations", () => {
     await expect(finishWorkflow(root)).resolves.toMatchObject({ status: "completed", checkpoint: "finishing" });
     expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [] } });
     await expect(readFile(join(root, ".harnix", "tasks", verifying.id, "task.json"), "utf8")).resolves.toContain("completed");
+  });
+
+  it("recovers a completed task from its original journal date across a UTC day boundary", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const completedAt = "2026-08-13T23:59:59.000Z";
+    const retryAt = "2026-08-14T00:00:01.000Z";
+    const completionEvidence = { id: "e", checkId: "check", recordedAt: completedAt, result: "pass" as const, exitCode: 0, summary: "verified", artifactPaths: [] };
+    const verifying = {
+      ...task("verifying", "finishing"),
+      acceptanceCriteria: [{ id: "a", text: "done", status: "met" as const, evidenceIds: [completionEvidence.id] }],
+      evidence: [completionEvidence],
+    };
+    const completed = transitionTask(verifying, "completed", "finishing", completedAt);
+    const harnixRoot = join(root, ".harnix");
+    const originalJournal = join(harnixRoot, "workspace", "tam", "journal", "2026-08-13.jsonl");
+    const retryJournal = join(harnixRoot, "workspace", "tam", "journal", "2026-08-14.jsonl");
+    await saveTask(harnixRoot, completed);
+    await setActiveTask(harnixRoot, completed.id);
+    await appendJournal(originalJournal, {
+      generator: "harnix",
+      schemaVersion: 1,
+      id: `${completed.id}-completion`,
+      recordedAt: completedAt,
+      developer: "tam",
+      taskId: completed.id,
+      kind: "completion",
+      summary: `Completed: ${completed.title}`,
+      evidenceIds: [],
+    });
+
+    await expect(finishWorkflow(root, retryAt)).resolves.toMatchObject({ status: "completed" });
+    await expect(readFile(retryJournal, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    const journal = await readFile(originalJournal, "utf8");
+    expect(journal.match(new RegExp(`${completed.id}-completion`, "gu"))).toHaveLength(1);
+    expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [] } });
   });
 
   it("rejects a new Full task unless its required artifacts are persisted with it", async () => {

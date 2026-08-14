@@ -47,6 +47,7 @@ describe("setupPlatforms user-global lifecycle", () => {
     await expect(readFile(join(home, ".kiro", "hooks", "harnix-context.json"), "utf8")).resolves.toContain('"UserPromptSubmit"');
     await expect(readFile(join(home, ".gemini", "config", "plugins", "harnix", "plugin.json"), "utf8")).resolves.toContain('"name": "harnix"');
     await expect(readFile(join(home, ".gemini", "antigravity-cli", "plugins", "harnix", "hooks.json"), "utf8")).resolves.toContain('"PreInvocation"');
+    await expect(readFile(join(home, ".agents", "skills", "harnix-implement", "SKILL.md"), "utf8")).resolves.toContain(`metadata:\n  version: "${packageVersion}"`);
     await expect(readFile(join(home, ".agents", "skills", "harnix-implement", "SKILL.md"), "utf8")).resolves.toContain("nearest ancestor or workspace root containing `.harnix/config.yaml`");
     await expect(readFile(join(home, "codex-home", "hooks.json"), "utf8")).resolves.toContain('"hooks"');
     await expect(access(join(nonHarnixDirectory, ".harnix", "config.yaml"))).rejects.toMatchObject({ code: "ENOENT" });

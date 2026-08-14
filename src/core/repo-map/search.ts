@@ -2,6 +2,7 @@ import MiniSearch from "minisearch";
 
 import { normalizeRepositoryPath } from "../../utils/paths.js";
 import type { RepoMapQueryResult, RepoMapQuerySignals, RepoMapRecordV1, RepoMapV1 } from "./types.js";
+import { compareCodeUnits } from "./order.js";
 
 interface SearchDocument {
   id: string;
@@ -27,7 +28,7 @@ export function searchRepoMap(map: RepoMapV1, query: string, limit = 20, signals
     if (record === undefined) return [];
     const ranked = rank(record, Math.round(candidate.score * 10), taskTerms, relevant, signals.packagePath, languageTerms);
     return [ranked];
-  }).sort((left, right) => right.score - left.score || left.path.localeCompare(right.path)).slice(0, limit);
+  }).sort((left, right) => right.score - left.score || compareCodeUnits(left.path, right.path)).slice(0, limit);
 }
 
 function rank(record: RepoMapRecordV1, base: number, taskTerms: Set<string>, relevant: Set<string>, packagePath: string | undefined, languageTerms: Set<string>): RepoMapQueryResult {
@@ -44,7 +45,7 @@ function rank(record: RepoMapRecordV1, base: number, taskTerms: Set<string>, rel
   return {
     outline: { extension: record.extension, headings: record.headings, identifiers: record.identifiers, importTargets: record.importTargets, kind: record.kind, packagePath: record.packagePath, ...(record.language === undefined ? {} : { language: record.language }) },
     path: record.path,
-    reasons: reasons.sort((left, right) => left.localeCompare(right)),
+    reasons: reasons.sort(compareCodeUnits),
     score,
   };
 }

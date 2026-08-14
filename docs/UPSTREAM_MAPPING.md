@@ -168,7 +168,7 @@ Stack/catalog architecture uses only researched patterns rather than vendored ru
 | `finishing-a-development-branch` | `harnix-finish-work` only for verification concept | Branch/merge/push/PR menu rejected; integration remains explicit user-owned action |
 | Universal skill invocation/worktree/subagent chain | — | Rejected; one canonical workflow routes focused skills only when state requires them |
 
-Bảy adaptation được lưu dưới dạng source thật tại `src/skills/harnix-*/SKILL.md`. `workflow.ts` không giữ một bản prose thứ hai; build nhúng source Markdown và cả ba platform cài cùng byte content. `harnix-brainstorm` bổ sung decision inventory, contract/placeholder/consistency self-review; `harnix-implement` bổ sung critical plan review và observed RED; `harnix-check` map claim sang fresh output/exit; debug/research/continue/finish giữ các stop/persistence rule tương ứng nhưng tiếp tục loại universal approval, worktree, subagent, commit, branch và PR behavior.
+Bảy adaptation được lưu dưới dạng source thật tại `src/skills/harnix-*/SKILL.md`, mỗi source có semantic `metadata.version` đồng bộ package release. `workflow.ts` không giữ một bản prose thứ hai; build nhúng source Markdown và cả ba platform cài cùng byte content. `harnix-brainstorm` bổ sung decision inventory, contract/placeholder/consistency self-review; `harnix-implement` bổ sung critical plan review và observed RED; `harnix-check` map claim sang fresh output/exit; debug/research/continue/finish giữ các stop/persistence rule tương ứng nhưng tiếp tục loại universal approval, worktree, subagent, commit, branch và PR behavior.
 ## 9. Removal verification
 
 Release scan must prove absence outside allowed research/migration/license contexts:

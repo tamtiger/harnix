@@ -20,6 +20,7 @@ import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
 import { GlobalManagedTransactionError } from "./utils/global-managed-files.js";
+import { readBoundedInput } from "./utils/bounded-input.js";
 
 export interface ProgramOptions {
   interactive?: boolean | undefined;
@@ -132,7 +133,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   const internal = new Command("internal");
   internal.command("context").option("--platform <platform>").action(async (options: { platform: "kiro" | "antigravity" | "codex" }) => {
     if (!options.platform || !["kiro", "antigravity", "codex"].includes(options.platform)) throw new Error("--platform must be kiro, antigravity, or codex.");
-    const hookInput = programOptions.hookEventInput ? await programOptions.hookEventInput() : process.stdin.isTTY === true ? "" : await readBoundedStdin();
+    const hookInput = programOptions.hookEventInput ? await programOptions.hookEventInput() : process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin);
     await runInternalContextCommand({ hookInput, platform: options.platform });
   });
   const repoMap = internal.command("repo-map", { hidden: true });
@@ -147,7 +148,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     process.stdout.write(`${JSON.stringify(await inspectWorkflow(await resolveProjectRoot(process.cwd())))}\n`);
   });
   workflow.command("save").action(async () => {
-    const input = programOptions.workflowInput ? await programOptions.workflowInput() : await readBoundedStdin();
+    const input = programOptions.workflowInput ? await programOptions.workflowInput() : await readBoundedInput(process.stdin);
     if (!input) throw new Error("Workflow save requires a bounded JSON envelope on stdin.");
     let envelope: unknown;
     try { envelope = JSON.parse(input) as unknown; } catch { throw new Error("Workflow save requires valid JSON."); }
@@ -199,21 +200,10 @@ export function redactPublicErrorMessage(error: unknown): string {
     : "";
   return `${message}${rollbackDetail}`
     .replaceAll(process.cwd(), "[PROJECT]")
-    .replace(/(['"])(?:[A-Za-z]:\\|\/)[^'"\r\n]+\1/gu, "'[PROJECT]'")
+    .replace(/(['"])(?:[A-Za-z]:[\\/]|\/|\\\\)[^'"\r\n]+\1/gu, "'[PROJECT]'")
     // File-lock and filesystem errors commonly include an unquoted absolute
     // path. Redact the rest of that diagnostic segment rather than leaking a
     // user profile merely because the path contains spaces.
-    .replace(/(?:[A-Za-z]:[\\/]|\/(?:home|Users|tmp|var\/folders)\/)[^\r\n]*/gu, "[PATH]")
+    .replace(/(?:\\\\(?:\?\\)?[^\\/\r\n]+[\\/]|[A-Za-z]:[\\/]|\/(?:home|Users|tmp|var\/folders)\/)[^\r\n]*/gu, "[PATH]")
     .replace(/((?:token|secret|password|api[_-]?key)\s*[=:]\s*)[^\s,]+/giu, "$1[REDACTED]");
-}
-
-async function readBoundedStdin(): Promise<string | undefined> {
-  const chunks: Buffer[] = []; let length = 0;
-  for await (const chunk of process.stdin) {
-    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk));
-    length += buffer.length;
-    if (length > 65_536) return undefined;
-    chunks.push(buffer);
-  }
-  return Buffer.concat(chunks).toString("utf8");
 }

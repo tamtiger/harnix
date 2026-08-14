@@ -20,8 +20,8 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 ## Current state
 
 - Documentation readiness has passed.
-- Phase 1–5 implementation is complete. Phase 6 is active; follow `docs/GLOBAL_SETUP_REFACTOR_PLAN.md` from G0 onward.
-- Continue from the first unchecked task in the active phase in `docs/IMPLEMENTATION_PLAN.md` unless the user changes priority; explicitly deferred Phase 4 extensions do not block earlier phases.
+- Phase 1–6 and workflow freshness hardening C1–C3 are complete in their authorized scope. Follow the current active `.harnix` task when one exists.
+- With no active task, continue from the first unchecked task in `docs/IMPLEMENTATION_PLAN.md` unless the user changes priority; explicitly deferred extensions and Kiro CLI manual activation do not invalidate completed automated scope.
 - Do not invent a second package, workspace, service, or compatibility surface.
 
 ## Non-negotiable product boundaries

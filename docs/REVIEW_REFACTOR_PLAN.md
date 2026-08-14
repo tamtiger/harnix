@@ -83,7 +83,7 @@ Các regression scenario quan trọng gồm migration với legacy content thậ
 
 Phase 5 chỉ hoàn tất khi mọi checkbox phía trên có code/test evidence hiện tại, toàn bộ acceptance sequence pass từ dependency state sạch, tarball đã kiểm tra pass smoke test cho mọi tổ hợp platform, runtime và development audit không còn advisory chưa được chấp nhận, đồng thời `CHANGELOG.md` có thay đổi người dùng trong mục `Unreleased`.
 
-Exception dependency hiện được chấp nhận là `GHSA-g7r4-m6w7-qqqr` trong `esbuild@0.27.7`, chỉ được kéo vào bởi `tsup@8.5.1`. Advisory ảnh hưởng development server của esbuild trên Windows; Harnix chỉ gọi tsup cho one-shot build và không expose server đó. `esbuild@0.28.1` đã được patch nhưng nằm ngoài range `^0.27.0` mà tsup khai báo tại thời điểm 2026-08-10. pnpm 11 yêu cầu `pnpm-workspace.yaml` cho transitive override, xung đột với contract no-workspace đã đóng băng của Harnix. Cần review exception này trước 2026-09-10 hoặc tại release/dependency gate kế tiếp, tùy mốc nào đến trước, và gỡ bỏ ngay khi tsup phát hành range tương thích.
+Exception `GHSA-g7r4-m6w7-qqqr` từng được chấp nhận cho `esbuild@0.27.7` qua `tsup@8.5.1` vào 2026-08-10 đã được đóng ngày 2026-08-14. Harnix dùng local `.pnpmfile.mjs` `readPackage` hook với exact package/version/range match để resolve `esbuild@0.28.1`, đồng thời resolve `nanoid@3.3.18` cho advisory mới GHSA-2v37-7h3g-55p8. Cách này giữ no-workspace contract; mọi thay đổi upstream về package/version/range sẽ không bị hook sửa âm thầm mà phải quay lại dependency review.
 
 ## 7. Bằng chứng hoàn tất — 2026-08-11
 
@@ -93,5 +93,19 @@ Exception dependency hiện được chấp nhận là `GHSA-g7r4-m6w7-qqqr` tro
 - Fixture init đại diện: ba lần chạy, median 393,45 ms và worst 452,74 ms, thấp hơn gate 5 giây.
 - Footprint: 16.393 bytes trên 33 file, giảm 98,78% so với upstream baseline đã đóng băng.
 - Release scan: tarball đã kiểm tra cùng generated fixture pass secrets, machine path, required TODO, forbidden surface, one-package/bin, dead import, duplicate hook và attribution check; scanner có fixture âm cho từng category công bố.
-- `pnpm audit --prod --audit-level low`: zero advisory. Full audit chỉ còn advisory esbuild development-only đã chấp nhận ở trên.
+- Tại evidence 2026-08-11, `pnpm audit --prod --audit-level low` zero advisory và full audit còn exception esbuild development-only; exception lịch sử này đã được đóng bằng resolution hook cùng fresh audit ngày 2026-08-14 như ghi phía trên.
 - Các major upgrade hiện có của Commander, Inquirer, ESLint và Vitest yêu cầu Node 20/22+, nên được hoãn để giữ contract Node 18; mọi version trong range tương thích hiện tại đã được cài đặt.
+
+## 8. Continuation audit toàn repository — 2026-08-14
+
+Task `20260814-142615-repository-review-refactor-continuation` tiếp tục mục tiêu review/refactor toàn repository sau khi xác nhận skill content version chỉ là một lát cắt nhỏ, không phải task mục tiêu độc lập. Coverage matrix mới kiểm tra docs, package/build/dependencies, CLI, lifecycle project/global, core workflow, memory/research, repo-map, migration, filesystem primitives, templates/skills/guides, release scripts và test harness.
+
+Chín finding F1–F9 đã được xử lý bằng observed RED và focused GREEN: prototype-safe managed JSON; desired fragment preflight; machine-path/secret redaction; repo-map containment/order/limits; strict filesystem existence; shared bounded input/safe glob; và split pure marker/JSON khỏi global transaction hotspot. Evidence chi tiết, root cause và disposition được lưu trong research artifact của task. Completion chỉ được claim sau fresh dependency audit và exact acceptance sequence mục 11; repository sau refactor được đồng bộ ở release `1.0.0`.
+
+Fresh completion evidence ngày 2026-08-14:
+
+- Production và full dependency audit: không có known vulnerability từ mức Low; package contract 2/2 pass.
+- Exact sequence mục 11 exit 0 từ frozen install đến `git diff --check`; full/acceptance suites có 390 pass và một permission-mode skip hợp lệ trên Windows.
+- Tarball smoke pass cho Kiro, Antigravity, Codex và tổ hợp cả ba trên fake home; không chạm user profile thật.
+- Init fixture worst 510,24 ms; footprint 193.824 bytes/50 files, giảm 85,57% so với frozen baseline.
+- Release scan kiểm 16 packaged files và 50 generated files; non-Harnix hook p95 176,32 ms. Scanner giữ true UNC detection nhưng có negative controls chống tự match escaped code và HTTPS URLs.

@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import { runInternalContextCommand } from "./commands/internal-context-cli.js";
 import type { InternalContextPlatform } from "./commands/internal-context.js";
+import { readBoundedInput } from "./utils/bounded-input.js";
 
 /**
  * Returns a platform only for the fixed command shape emitted by Harnix's
@@ -18,23 +19,11 @@ export function canonicalInternalContextPlatform(argv: readonly string[]): Inter
   return platform === "kiro" || platform === "antigravity" || platform === "codex" ? platform : undefined;
 }
 
-async function readBoundedStdin(): Promise<string | undefined> {
-  const chunks: Buffer[] = [];
-  let length = 0;
-  for await (const chunk of process.stdin) {
-    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk));
-    length += buffer.length;
-    if (length > 65_536) return undefined;
-    chunks.push(buffer);
-  }
-  return Buffer.concat(chunks).toString("utf8");
-}
-
 export async function runEntrypoint(argv = process.argv): Promise<number> {
   const platform = canonicalInternalContextPlatform(argv);
   if (platform !== undefined) {
     try {
-      const hookInput = process.stdin.isTTY === true ? "" : await readBoundedStdin();
+      const hookInput = process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin);
       await runInternalContextCommand({ hookInput, platform });
     } catch {
       // The fixed command shape is emitted only by global hooks. A broken

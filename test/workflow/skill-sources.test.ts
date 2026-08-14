@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
+import { workflowSkills } from "../../src/skills/catalog.js";
+
 const skillNames = [
   "harnix-brainstorm",
   "harnix-implement",
@@ -92,13 +94,18 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
 
 describe("canonical Harnix workflow skill sources", () => {
   it("stores all seven discoverable skills as real, self-contained SKILL.md files", async () => {
+    const packageVersion = JSON.parse(
+      await readFile(fileURLToPath(new URL("../../package.json", import.meta.url)), "utf8"),
+    ) as { version: string };
+
     for (const name of skillNames) {
       const content = await readSkill(name);
       const frontmatter = content.match(/^---\n([\s\S]*?)\n---\n/u)?.[1] ?? "";
 
       expect(frontmatter).toContain(`name: ${name}`);
       expect(frontmatter).toMatch(/description: ["']?Use when\b/u);
-      expect(frontmatter).not.toMatch(/^\s*(?:metadata|version|license):/mu);
+      expect(frontmatter).toContain(`metadata:\n  version: "${packageVersion.version}"`);
+      expect(frontmatter).not.toMatch(/^version:/mu);
       expect(content).toContain("## Harnix activation guard");
       expect(content).toContain("`.harnix/config.yaml`");
       expect(content).toContain("## Incoming state");
@@ -114,6 +121,10 @@ describe("canonical Harnix workflow skill sources", () => {
         expect(content.toLowerCase(), `${name} is missing behavior: ${needle}`).toContain(needle.toLowerCase());
       }
     }
+
+    expect(workflowSkills.map(({ name, version }) => ({ name, version }))).toEqual(
+      skillNames.map((name) => ({ name, version: packageVersion.version })),
+    );
   });
 
   it("keeps skill prose out of the TypeScript workflow template", async () => {
@@ -125,7 +136,7 @@ describe("canonical Harnix workflow skill sources", () => {
 
   it("makes the check skill discoverable for code review and review feedback", async () => {
     const content = await readSkill("harnix-check");
-    const description = content.match(/^---\n[\s\S]*?description:\s*(.+)\n---/u)?.[1] ?? "";
+    const description = content.match(/^description:\s*(.+)$/mu)?.[1] ?? "";
 
     expect(description.toLowerCase()).toContain("code review");
     expect(description.toLowerCase()).toContain("review feedback");

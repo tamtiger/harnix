@@ -1,5 +1,6 @@
 import type { GuideDescriptor, LanguageId, TechnologyId } from "../catalog/catalog.js";
 import { validateStackCatalog, stackCatalog } from "../catalog/catalog.js";
+import { matchesSafeGlob } from "../utils/safe-glob.js";
 import commonEngineering from "./common/engineering.md";
 import csharpEngineering from "./languages/csharp/engineering.md";
 import goEngineering from "./languages/go/engineering.md";
@@ -60,7 +61,7 @@ export function selectGuideSources(selection: GuideSelection, sources: readonly 
     const applies = descriptor.appliesTo;
     if ((applies.languages?.length ?? 0) > 0 && !applies.languages!.some((id) => languageIds.has(id))) return false;
     if ((applies.technologies?.length ?? 0) > 0 && !applies.technologies!.some((id) => technologyIds.has(id))) return false;
-    if (descriptor.activation === "path" && !applies.paths?.some((glob) => selection.activePaths?.some((path) => matchesGlob(path, glob)))) return false;
+    if (descriptor.activation === "path" && !applies.paths?.some((glob) => selection.activePaths?.some((path) => matchesSafeGlob(path, glob)))) return false;
     if (descriptor.activation === "task" && !applies.topics?.some((topic) => selection.topics?.includes(topic))) return false;
     return true;
   });
@@ -98,15 +99,3 @@ export function selectGuideSources(selection: GuideSelection, sources: readonly 
 export function guideOutputPath(source: GuideSource): string { return `.harnix/spec/guides/${source.descriptor.contentPath}`; }
 
 function layer(descriptor: GuideDescriptor): number { return descriptor.appliesTo.technologies?.length ? 2 : descriptor.appliesTo.languages?.length ? 1 : 0; }
-function matchesGlob(path: string, glob: string): boolean {
-  let pattern = "^";
-  for (let index = 0; index < glob.length; index += 1) {
-    const character = glob[index]!;
-    if (character === "*" && glob[index + 1] === "*") {
-      if (glob[index + 2] === "/") { pattern += "(?:.*/)?"; index += 2; }
-      else { pattern += ".*"; index += 1; }
-    } else if (character === "*") pattern += "[^/]*";
-    else pattern += /[\\^$.*+?()[\]{}|]/u.test(character) ? `\\${character}` : character;
-  }
-  return new RegExp(`${pattern}$`, "u").test(path);
-}
