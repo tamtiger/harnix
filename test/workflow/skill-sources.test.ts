@@ -26,6 +26,10 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "TaskRecord schema v2",
     "criterionIds",
     "@task-contract",
+    "context checkpoint",
+    "assumptions and inferences",
+    "no blocking question remains",
+    "not a second approval gate",
   ],
   "harnix-implement": [
     "Review the plan critically",

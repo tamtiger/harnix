@@ -100,6 +100,8 @@ Agent đọc project instructions, relevant docs/code/tests và dirty state trư
 
 Hỏi từng product decision độc lập, ưu tiên câu hỏi có options/trade-offs. Không hỏi thông tin có thể tìm trong repository hoặc nguồn authoritative. Khi user answer thay đổi requirement, cập nhật artifact ngay.
 
+Trước khi hỏi một blocking question, và một lần nữa trước ready self-review, agent phải trình bày `context checkpoint` ngắn gồm outcome/user value đã hiểu, constraint và repository fact đã xác nhận, decision suy ra từ bằng chứng hoặc user instruction, assumptions and inferences còn ngầm định, cùng material choices chưa giải quyết kèm recommendation/trade-off. Nếu còn material choice có thể đổi outcome, hỏi đúng một câu rồi cập nhật checkpoint sau câu trả lời. Nếu no blocking question remains, nói rõ vì sao request và evidence đã quyết định vấn đề rồi tiếp tục; checkpoint này is not a second approval gate.
+
 ### 5.3 Ready gate
 
 Task chỉ sang `ready` khi:

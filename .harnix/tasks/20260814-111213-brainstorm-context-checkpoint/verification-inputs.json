@@ -1,0 +1,287 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260814-111213-brainstorm-context-checkpoint",
+  "snapshots": [
+    {
+      "evidenceId": "acceptance-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-111213-brainstorm-context-checkpoint",
+      "checkId": "acceptance",
+      "taskContractHash": "2c1e070f959e1a2a4ab9ee639b4598e22dc3ad01d5a27c29314cbf75e6c5d310",
+      "entries": [
+        {
+          "path": ".harnix/.template-hashes.json",
+          "sha256": "709f7107d99a42e5bbc4701dd2051603105e6be44ec1dddf6b2d3e9c3f0447e0"
+        },
+        {
+          "path": ".harnix/workflow.md",
+          "sha256": "e8506e645ad3f4880beec824fe358072310d82e0321e5a0b366a926da8e1439b"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "4fa8a669954edde66df8eb2447de40c15a363d30fd3c7f2fdd06740537a6df5a"
+        },
+        {
+          "path": "docs/HARNIX_WORKFLOW.md",
+          "sha256": "927c9c6d6a9bae4e18950730bfc21acc1d13a421060a2d86270d697a590070c4"
+        },
+        {
+          "path": "package.json",
+          "sha256": "6eb5e1961d72c68c8bad7d015cbc00de8369f1d64883045dea826e1c29ab4438"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "25461fb4589c8a72f61fdfe7be0f10a5bda330d0e4ddc32d436bf1a14ad8df5d"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "342d8254742be1938ee35af5a83fd15ce82605b3a8bdab6b34e7ae2eedf18c75"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "a9bd8f427e3debad0e469d32edb6559f343ad56302ead7bcc0556bc03a3fb45f"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "57c05dafe545e7da739f3e2fa8366485195e9fe3777a12eac787ac74cea6c184"
+        }
+      ],
+      "inputDigest": "bc2144495b7b3829530e37bb862142a232fb299515da933b4f6afbffe5b2e145"
+    },
+    {
+      "evidenceId": "brainstorm-context-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-111213-brainstorm-context-checkpoint",
+      "checkId": "brainstorm-context-focused",
+      "taskContractHash": "2c1e070f959e1a2a4ab9ee639b4598e22dc3ad01d5a27c29314cbf75e6c5d310",
+      "entries": [
+        {
+          "path": "docs/HARNIX_WORKFLOW.md",
+          "sha256": "927c9c6d6a9bae4e18950730bfc21acc1d13a421060a2d86270d697a590070c4"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "25461fb4589c8a72f61fdfe7be0f10a5bda330d0e4ddc32d436bf1a14ad8df5d"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "342d8254742be1938ee35af5a83fd15ce82605b3a8bdab6b34e7ae2eedf18c75"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "a9bd8f427e3debad0e469d32edb6559f343ad56302ead7bcc0556bc03a3fb45f"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "57c05dafe545e7da739f3e2fa8366485195e9fe3777a12eac787ac74cea6c184"
+        }
+      ],
+      "inputDigest": "bfebae452e2600ea0cf94a070d35c650f65360622d7d7deb6bc5521560f5c6b2"
+    },
+    {
+      "evidenceId": "brainstorm-context-green",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-111213-brainstorm-context-checkpoint",
+      "checkId": "brainstorm-context-focused",
+      "taskContractHash": "5f9faf1c595b9517903a2c2eaf5f6b2d199d3166634d565eeb0d4b8223d7e26d",
+      "entries": [
+        {
+          "path": "docs/HARNIX_WORKFLOW.md",
+          "sha256": "927c9c6d6a9bae4e18950730bfc21acc1d13a421060a2d86270d697a590070c4"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "25461fb4589c8a72f61fdfe7be0f10a5bda330d0e4ddc32d436bf1a14ad8df5d"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "342d8254742be1938ee35af5a83fd15ce82605b3a8bdab6b34e7ae2eedf18c75"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "a9bd8f427e3debad0e469d32edb6559f343ad56302ead7bcc0556bc03a3fb45f"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "57c05dafe545e7da739f3e2fa8366485195e9fe3777a12eac787ac74cea6c184"
+        }
+      ],
+      "inputDigest": "2730528b6847ccb09cf16a57e823c55b99cc8fb4f201e4a81791e8ebd876044d"
+    },
+    {
+      "evidenceId": "brainstorm-context-green-v2",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-111213-brainstorm-context-checkpoint",
+      "checkId": "brainstorm-context-focused",
+      "taskContractHash": "41de179263d3f8309bb49b108660bd2b299f1c83dda2bebd917e8107babca319",
+      "entries": [
+        {
+          "path": "docs/HARNIX_WORKFLOW.md",
+          "sha256": "927c9c6d6a9bae4e18950730bfc21acc1d13a421060a2d86270d697a590070c4"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "25461fb4589c8a72f61fdfe7be0f10a5bda330d0e4ddc32d436bf1a14ad8df5d"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "342d8254742be1938ee35af5a83fd15ce82605b3a8bdab6b34e7ae2eedf18c75"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "a9bd8f427e3debad0e469d32edb6559f343ad56302ead7bcc0556bc03a3fb45f"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "57c05dafe545e7da739f3e2fa8366485195e9fe3777a12eac787ac74cea6c184"
+        }
+      ],
+      "inputDigest": "ad8d89c549010bc60e1093db2365a45b2935dc87fb7f96b7cf1ae53b88d03b75"
+    },
+    {
+      "evidenceId": "quality-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-111213-brainstorm-context-checkpoint",
+      "checkId": "quality",
+      "taskContractHash": "2c1e070f959e1a2a4ab9ee639b4598e22dc3ad01d5a27c29314cbf75e6c5d310",
+      "entries": [
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "4fa8a669954edde66df8eb2447de40c15a363d30fd3c7f2fdd06740537a6df5a"
+        },
+        {
+          "path": "docs/HARNIX_WORKFLOW.md",
+          "sha256": "927c9c6d6a9bae4e18950730bfc21acc1d13a421060a2d86270d697a590070c4"
+        },
+        {
+          "path": "package.json",
+          "sha256": "6eb5e1961d72c68c8bad7d015cbc00de8369f1d64883045dea826e1c29ab4438"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "25461fb4589c8a72f61fdfe7be0f10a5bda330d0e4ddc32d436bf1a14ad8df5d"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "342d8254742be1938ee35af5a83fd15ce82605b3a8bdab6b34e7ae2eedf18c75"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "a9bd8f427e3debad0e469d32edb6559f343ad56302ead7bcc0556bc03a3fb45f"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "57c05dafe545e7da739f3e2fa8366485195e9fe3777a12eac787ac74cea6c184"
+        }
+      ],
+      "inputDigest": "c40c08cc9ea3e627a69eec8d64931f3b85116389a43fc37d3575235733b2ae9b"
+    },
+    {
+      "evidenceId": "quality-green-pre-acceptance",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-111213-brainstorm-context-checkpoint",
+      "checkId": "quality",
+      "taskContractHash": "41de179263d3f8309bb49b108660bd2b299f1c83dda2bebd917e8107babca319",
+      "entries": [
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "4fa8a669954edde66df8eb2447de40c15a363d30fd3c7f2fdd06740537a6df5a"
+        },
+        {
+          "path": "docs/HARNIX_WORKFLOW.md",
+          "sha256": "927c9c6d6a9bae4e18950730bfc21acc1d13a421060a2d86270d697a590070c4"
+        },
+        {
+          "path": "package.json",
+          "sha256": "6eb5e1961d72c68c8bad7d015cbc00de8369f1d64883045dea826e1c29ab4438"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "25461fb4589c8a72f61fdfe7be0f10a5bda330d0e4ddc32d436bf1a14ad8df5d"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "342d8254742be1938ee35af5a83fd15ce82605b3a8bdab6b34e7ae2eedf18c75"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "a9bd8f427e3debad0e469d32edb6559f343ad56302ead7bcc0556bc03a3fb45f"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "57c05dafe545e7da739f3e2fa8366485195e9fe3777a12eac787ac74cea6c184"
+        }
+      ],
+      "inputDigest": "38b9f4f813984a3196fdb735a559577c9a27cfd8c1a23a6bc65570ab08c28966"
+    },
+    {
+      "evidenceId": "self-host-parity-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-111213-brainstorm-context-checkpoint",
+      "checkId": "self-host-parity",
+      "taskContractHash": "2c1e070f959e1a2a4ab9ee639b4598e22dc3ad01d5a27c29314cbf75e6c5d310",
+      "entries": [
+        {
+          "path": ".harnix/.template-hashes.json",
+          "sha256": "709f7107d99a42e5bbc4701dd2051603105e6be44ec1dddf6b2d3e9c3f0447e0"
+        },
+        {
+          "path": ".harnix/workflow.md",
+          "sha256": "e8506e645ad3f4880beec824fe358072310d82e0321e5a0b366a926da8e1439b"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "342d8254742be1938ee35af5a83fd15ce82605b3a8bdab6b34e7ae2eedf18c75"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "0502124467196eadb2bf3effc14b05ab98a90b3ac7a9f121b00536c5b372bceb"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "57c05dafe545e7da739f3e2fa8366485195e9fe3777a12eac787ac74cea6c184"
+        }
+      ],
+      "inputDigest": "d4768a391a44d115bac3fd817177e54c77da268f079bd98f188f4bac3183d205"
+    },
+    {
+      "evidenceId": "self-host-parity-green",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260814-111213-brainstorm-context-checkpoint",
+      "checkId": "self-host-parity",
+      "taskContractHash": "41de179263d3f8309bb49b108660bd2b299f1c83dda2bebd917e8107babca319",
+      "entries": [
+        {
+          "path": ".harnix/.template-hashes.json",
+          "sha256": "709f7107d99a42e5bbc4701dd2051603105e6be44ec1dddf6b2d3e9c3f0447e0"
+        },
+        {
+          "path": ".harnix/workflow.md",
+          "sha256": "e8506e645ad3f4880beec824fe358072310d82e0321e5a0b366a926da8e1439b"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "342d8254742be1938ee35af5a83fd15ce82605b3a8bdab6b34e7ae2eedf18c75"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "0502124467196eadb2bf3effc14b05ab98a90b3ac7a9f121b00536c5b372bceb"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "57c05dafe545e7da739f3e2fa8366485195e9fe3777a12eac787ac74cea6c184"
+        }
+      ],
+      "inputDigest": "93c95c3a844e2001ae4af2f811b60af313e8d7b6eeafd4c0c427390b02b704da"
+    }
+  ]
+}

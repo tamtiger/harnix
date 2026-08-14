@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [0.6.15] - 2026-08-14
+
+### Changed
+
+- `harnix-brainstorm` nay luôn trình bày context checkpoint trước ready gate, gồm outcome, constraint, repository-derived decision, giả định và material choice còn mở để người dùng có thể sửa hiểu nhầm trước implementation.
+- Brainstorm vẫn evidence-first: chỉ hỏi từng blocking question khi câu trả lời có thể đổi outcome; nếu không còn blocker thì nói rõ lý do và tiếp tục mà không thêm approval lần hai.
+- Canonical workflow, project template và regression tests được đồng bộ với contract context checkpoint.
+
 ## [0.6.14] - 2026-08-14
 
 ### Added

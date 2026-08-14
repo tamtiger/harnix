@@ -1,0 +1,310 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260814-111213-brainstorm-context-checkpoint",
+  "title": "Bổ sung context checkpoint cho Brainstorm",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bắt buộc harnix-brainstorm trình bày context đã hiểu, giả định và quyết định còn mở trước ready gate để người dùng có thể sửa hiểu nhầm mà không thêm approval nghi thức.",
+  "nonGoals": [
+    "Không tạo skill before-dev hoặc skill Brainstorm mới.",
+    "Không bắt buộc hỏi khi repository và yêu cầu đã quyết định đầy đủ.",
+    "Không thêm approval lần hai trước implementation.",
+    "Không thay đổi public CLI, task status hoặc checkpoint schema."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "context-checkpoint",
+      "text": "Trước ready gate, Brainstorm luôn trình bày context checkpoint ngắn gồm mục tiêu, ràng buộc, quyết định suy ra từ repository, giả định và lựa chọn material còn mở.",
+      "status": "met",
+      "evidenceIds": [
+        "brainstorm-context-final",
+        "quality-final",
+        "acceptance-final"
+      ]
+    },
+    {
+      "id": "question-routing",
+      "text": "Brainstorm chỉ hỏi từng câu khi lựa chọn material có thể đổi outcome; nếu không còn blocker thì nói rõ vì sao không cần hỏi và tiếp tục mà không xin approval lần hai.",
+      "status": "met",
+      "evidenceIds": [
+        "brainstorm-context-final",
+        "quality-final",
+        "acceptance-final"
+      ]
+    },
+    {
+      "id": "parity-release",
+      "text": "Canonical workflow, project template, skill source, regression tests, patch version, changelog và self-host hash được đồng bộ.",
+      "status": "met",
+      "evidenceIds": [
+        "self-host-parity-final",
+        "quality-final",
+        "acceptance-final"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "package.json",
+    "src/skills/harnix-brainstorm/SKILL.md",
+    "src/templates/harnix/workflow.ts",
+    "test/workflow/skill-sources.test.ts",
+    "test/workflow/templates.test.ts",
+    ".harnix/.template-hashes.json",
+    ".harnix/workflow.md"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    ".harnix/workflow.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "brainstorm-context-focused",
+      "description": "Chạy test source skill và workflow template cho context checkpoint.",
+      "command": "pnpm exec vitest run test/workflow/skill-sources.test.ts test/workflow/templates.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "context-checkpoint",
+        "question-routing"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_WORKFLOW.md",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "quality",
+      "description": "Chạy build, lint, typecheck, workflow tests, release scan và diff check.",
+      "command": "pnpm build && pnpm lint && pnpm typecheck && pnpm test:workflow && pnpm scan:release && git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "context-checkpoint",
+        "parity-release",
+        "question-routing"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "package.json",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "self-host-parity",
+      "description": "Chạy test self-host file và workflow template parity.",
+      "command": "pnpm exec vitest run test/workflow/self-host.test.ts test/workflow/templates.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "parity-release"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        ".harnix/workflow.md",
+        "@task-contract",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/self-host.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "acceptance",
+      "description": "Chạy exact acceptance mục 11 gồm test đầy đủ, package, smoke, performance, footprint, release scan và diff check.",
+      "command": "pnpm install --frozen-lockfile && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm test:acceptance && pnpm pack:check && pnpm smoke:tarball && pnpm measure:init && pnpm measure:footprint && pnpm scan:release && git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "context-checkpoint",
+        "parity-release",
+        "question-routing"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        ".harnix/workflow.md",
+        "@task-contract",
+        "CHANGELOG.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "package.json",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "brainstorm-context-red",
+      "checkId": "brainstorm-context-focused",
+      "recordedAt": "2026-08-14T04:15:02.8133064Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: 2 test thất bại đúng vì skill và workflow template chưa có context checkpoint contract; 4 test lân cận pass.",
+      "artifactPaths": [
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "brainstorm-context-green",
+      "checkId": "brainstorm-context-focused",
+      "recordedAt": "2026-08-14T04:15:03.8264279Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 6/6 skill-source và workflow-template tests pass; snapshot trước/sau trùng khớp.",
+      "artifactPaths": [
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "docs/HARNIX_WORKFLOW.md",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "2730528b6847ccb09cf16a57e823c55b99cc8fb4f201e4a81791e8ebd876044d"
+    },
+    {
+      "id": "brainstorm-context-green-v2",
+      "checkId": "brainstorm-context-focused",
+      "recordedAt": "2026-08-14T04:17:38.1493159Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh GREEN sau monotonic replan: 6/6 skill-source và template tests pass, digest trước/sau trùng khớp.",
+      "artifactPaths": [
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "docs/HARNIX_WORKFLOW.md",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "ad8d89c549010bc60e1093db2365a45b2935dc87fb7f96b7cf1ae53b88d03b75"
+    },
+    {
+      "id": "self-host-parity-green",
+      "checkId": "self-host-parity",
+      "recordedAt": "2026-08-14T04:17:39.1571471Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Self-host parity đạt 3/3 tests; file workflow, template, manifest hash và version đồng nhất với digest ổn định.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        ".harnix/workflow.md",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/self-host.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "93c95c3a844e2001ae4af2f811b60af313e8d7b6eeafd4c0c427390b02b704da"
+    },
+    {
+      "id": "compliance-review-green",
+      "recordedAt": "2026-08-14T04:18:11.2859928Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Compliance review phạm vi skill/workflow/template/tests/release metadata không còn finding; context checkpoint minh bạch giả định nhưng không tạo câu hỏi hoặc approval nghi thức.",
+      "artifactPaths": [
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "docs/HARNIX_WORKFLOW.md",
+        ".harnix/workflow.md",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "quality-green-pre-acceptance",
+      "checkId": "quality",
+      "recordedAt": "2026-08-14T04:19:20.6164777Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Build, lint, typecheck, 54 workflow tests, release scan và diff check đạt mã thoát 0; review ghi nhận scan dùng tarball 0.6.14 nên chưa dùng evidence này để đóng release 0.6.15.",
+      "artifactPaths": [
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "docs/HARNIX_WORKFLOW.md",
+        "test/workflow",
+        "scripts/scan-release.mjs"
+      ],
+      "inputDigest": "38b9f4f813984a3196fdb735a559577c9a27cfd8c1a23a6bc65570ab08c28966"
+    },
+    {
+      "id": "brainstorm-context-final",
+      "checkId": "brainstorm-context-focused",
+      "recordedAt": "2026-08-14T04:22:21.2025751Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh final focused gate: 6/6 skill-source và template tests pass với digest ổn định.",
+      "artifactPaths": [
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "docs/HARNIX_WORKFLOW.md",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "bfebae452e2600ea0cf94a070d35c650f65360622d7d7deb6bc5521560f5c6b2"
+    },
+    {
+      "id": "self-host-parity-final",
+      "checkId": "self-host-parity",
+      "recordedAt": "2026-08-14T04:22:22.2025751Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh final self-host gate: 3/3 parity tests pass, workflow file và managed manifest khớp template 0.6.15.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        ".harnix/workflow.md",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/self-host.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "d4768a391a44d115bac3fd817177e54c77da268f079bd98f188f4bac3183d205"
+    },
+    {
+      "id": "quality-final",
+      "checkId": "quality",
+      "recordedAt": "2026-08-14T04:22:23.2025751Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh final quality gate: build, lint, typecheck, 54 workflow tests, release scan và git diff --check đều pass.",
+      "artifactPaths": [
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "docs/HARNIX_WORKFLOW.md",
+        "test/workflow",
+        "scripts/scan-release.mjs"
+      ],
+      "inputDigest": "c40c08cc9ea3e627a69eec8d64931f3b85116389a43fc37d3575235733b2ae9b"
+    },
+    {
+      "id": "acceptance-final",
+      "checkId": "acceptance",
+      "recordedAt": "2026-08-14T04:22:24.2025751Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact acceptance mục 11 đạt mã thoát 0: 355 test pass, 1 skip; acceptance suites, pack 0.6.15, tarball smoke, performance, footprint, release scan và diff check đều pass.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "scripts/pack-check.mjs",
+        "scripts/smoke-tarball.mjs",
+        "scripts/measure-init.mjs",
+        "scripts/measure-footprint.mjs",
+        "scripts/scan-release.mjs"
+      ],
+      "inputDigest": "bc2144495b7b3829530e37bb862142a232fb299515da933b4f6afbffe5b2e145"
+    }
+  ],
+  "createdAt": "2026-08-14T04:12:13.2390430Z",
+  "updatedAt": "2026-08-14T04:22:33.292Z",
+  "completedAt": "2026-08-14T04:22:33.292Z"
+}

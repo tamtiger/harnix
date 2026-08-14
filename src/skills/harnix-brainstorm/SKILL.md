@@ -40,6 +40,18 @@ Ask at most one blocking question at a time. Include why it matters, your recomm
 
 For a broad request, split independently testable deliverables before refining implementation details. Keep one active task; record ordering and ownership rather than inventing hidden dependency state.
 
+## Context checkpoint before ready
+
+Before asking a blocking question, and again before the ready self-review, present a concise context checkpoint containing:
+
+- the outcome and user value currently understood;
+- confirmed constraints and repository facts;
+- decisions established by repository evidence or explicit user instruction;
+- assumptions and inferences that could otherwise remain implicit;
+- unresolved material choices, each with a recommendation and trade-off.
+
+If a material choice remains, ask exactly one blocking question and update the checkpoint after the answer. If no blocking question remains, state why the request and evidence decide the matter, then continue. This checkpoint is not a second approval gate: do not ask the user to approve an already decision-complete plan unless new authority or a new material decision is required.
+
 ## Build decision-complete artifacts
 
 Persist `planning` before any product edit. Record:
