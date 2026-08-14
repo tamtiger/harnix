@@ -52,6 +52,8 @@ Persist `planning` before any product edit. Record:
 - focused and broader validation commands;
 - one explicit material-unknown decision, with task-owned research when needed.
 
+Create new work as TaskRecord schema v2. Every validation check records sorted unique `criterionIds` and sorted unique `inputs`; every required check covers at least one criterion, every non-waived criterion is covered by a required check, and every input list contains `@task-contract`. A behavioral check also names at least one safe repository-relative POSIX file or glob. Treat these definitions as frozen obligations after first persistence.
+
 Use a short lowercase task slug with a hyphen between words so the task directory and active pointer remain readable, for example `workflow-audit-fix`; append only the documented deterministic numeric collision suffix. Validate the complete task ID before writing. If the current frozen validator cannot represent the requested hyphenated slug, keep state valid, record the contract change explicitly, and do not fabricate or persist an invalid ID.
 
 Full tasks require `prd.md` and `plan.md`. Add `design.md` only when it materially clarifies boundaries or data flow. Plans must identify concrete files and interfaces, order RED–GREEN slices, and state what each verification proves. Put a Markdown implementation checklist near the top of `plan.md` with one stable item per independently verifiable slice. Leave every item unchecked at planning time; an implementation owner checks an item only after its stated work and focused evidence are complete. The checklist is a progress view, not a replacement for TaskRecord criteria or evidence.
@@ -66,6 +68,7 @@ Before changing the checkpoint to `ready`, run every item:
 - **Contract completeness:** field names, enums, inputs, outputs, errors, precedence, migration, and ownership semantics are exact where they affect implementation.
 - **Placeholder scan:** no `TBD`, `TODO`, “handle appropriately”, “similar to above”, unnamed type, or deferred choice can change the implementation.
 - **Consistency scan:** PRD, plan, research, task record, and repository instructions do not contradict one another.
+- **Context freshness:** when continuation reported stale context, treat `contextDrift` as authoritative navigation evidence, complete context reselection, and do not return to ready until changed, missing, unreadable, and unverified paths are resolved or explicitly excluded.
 - **Scope check:** the task is small enough to implement and verify without mixing independent products.
 - **Dirty-worktree check:** unrelated or user-owned changes are identified and preservation is explicit.
 - **Tracking check:** the task name is readable and hyphen-separated, and the implementation checklist maps one-to-one to the ordered implementation slices.
@@ -74,7 +77,9 @@ Do not mark the task `ready` while any item fails. Keep `status` at its current 
 
 ## Persist
 
-Write the canonical TaskRecord fields only. Update artifacts as decisions change, then persist `ready/ready` only after the self-review passes. Do not fabricate evidence or acceptance status. Plan-only requests stop at `ready`.
+Write the canonical TaskRecord schema v2 fields only for a new task. Update artifacts as decisions change, then persist `ready/ready` only after the self-review passes. Do not fabricate evidence or acceptance status. Plan-only requests stop at `ready`.
+
+An unfinished legacy schema v1 task may migrate to v2 only after explicit authorization is recorded at checkpoint `replan`, using the exact migration evidence produced by Harnix while preserving prior criteria and evidence. Never migrate a completed task or rewrite legacy state during ordinary planning, update, Doctor, or continuation.
 
 ## Exit
 

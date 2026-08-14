@@ -77,7 +77,7 @@ Filesystem, clock, process runner, version lookup, prompt dependencies and user-
 
 ## 4. Frozen state and schema contracts
 
-Các contract project-data trong mục này là normative cho implementation v1. Phase 6 supersedes former platform setup paths and the Doctor v1 shape with the global contracts in `GLOBAL_SETUP_REFACTOR_PLAN.md`; any field, enum, path or transition change still requires matching PRD/workflow, migration and test updates in the same change.
+Các contract project-data trong mục này là normative cho implementation hiện tại. Phase 6 supersedes former platform setup paths and the Doctor v1 shape with the global contracts in `GLOBAL_SETUP_REFACTOR_PLAN.md`; TaskRecord v2 ở mục 4.3 supersedes schema v1 cho task mới nhưng giữ exact legacy reader. Any field, enum, path or transition change still requires matching PRD/workflow, migration and test updates in the same change.
 
 ### 4.1 `.harnix/config.yaml` v1 compatibility and v2 write schema
 
@@ -180,7 +180,7 @@ Phase 6 adds `GlobalManagedManifestV1` exactly as specified in `GLOBAL_SETUP_REF
 
 File: `.harnix/tasks/<task-id>/task.json`; `<task-id>` là lowercase `YYYYMMDD-HHMMSS-<kebab-slug>`, trong đó slug có một hoặc nhiều token alphanumeric không rỗng, phân tách bằng đúng một dấu `-`; collision chỉ append deterministic numeric suffix. Uppercase, empty segment, leading/trailing hyphen, traversal và path separator đều không hợp lệ. Active task được lưu bằng repo-relative task ID trong `.harnix/tasks/.active`, atomic replace; completed task xóa pointer chỉ khi pointer vẫn trỏ đúng task.
 
-Mọi transition vào `ready` yêu cầu acceptance criteria không rỗng, có ít nhất một validation check `required: true`, và với Full thì `prd.md`/`plan.md` phải được safe-resolve rồi đọc lại là không rỗng. Sau lần persist đầu tiên, acceptance criterion ID/text và required validation-check ID/description/command/scope/required là monotonic obligations: payload sau không được xoá, đổi tên, demote hoặc mutate in-place. Clarification thêm obligation mới; criterion cũ chỉ được đổi status/evidence hoặc explicit waiver có reason.
+Mọi transition vào `ready` yêu cầu acceptance criteria không rỗng, có ít nhất một validation check `required: true`, và với Full thì `prd.md`/`plan.md` phải được safe-resolve rồi đọc lại là không rỗng. Sau lần persist đầu tiên, acceptance criterion ID/text và required validation-check ID/description/command/scope/required là monotonic obligations; ở v2, `criterionIds` và `inputs` cũng bất biến. Payload sau không được xoá, đổi tên, demote hoặc mutate in-place. Clarification thêm obligation mới; criterion cũ chỉ được đổi status/evidence hoặc explicit waiver có reason.
 
 ```ts
 type TaskMode = "lite" | "full";
@@ -237,9 +237,37 @@ interface TaskRecordV1 {
   updatedAt: string;
   completedAt?: string;
 }
+
+interface ValidationCheckV2 {
+  id: string;
+  description: string;
+  command?: string;
+  scope: "focused" | "full";
+  required: boolean;
+  criterionIds: string[];
+  inputs: string[];
+}
+
+interface EvidenceRecordV2 extends EvidenceRecordV1 {
+  inputDigest?: string;
+}
+
+interface TaskRecordV2 extends Omit<TaskRecordV1, "schemaVersion" | "validationPlan" | "evidence"> {
+  schemaVersion: 2;
+  validationPlan: ValidationCheckV2[];
+  evidence: EvidenceRecordV2[];
+}
 ```
 
-Legal persisted transitions: `planning -> ready -> in_progress -> verifying -> completed`; any non-completed state may enter `blocked` and resume only to its recorded prior status. `debugging`, `replan` and `finishing` are checkpoints, not additional persisted statuses. Illegal jump, malformed/future record hoặc acceptance/evidence reference lỗi fail closed. Full task bắt buộc `prd.md` + `plan.md`; `design.md`, `research/` và `context.json` conditional. Lite giữ toàn bộ minimum trace trong `task.json`. Validation invariants: `met` criterion cần ít nhất một existing evidence ID; `waived` cần non-empty `waiverReason`; command evidence cần integer `exitCode`; `blocked` cần blocker + matching `resumeStatus`; `completed` cần `completedAt`, không blocker và mọi required criterion `met|waived`.
+Task mới dùng schema v2. `criterionIds` phải unique/valid; required check phải map ít nhất một criterion và mọi non-waived criterion phải được ít nhất một required check bao phủ. `inputs` là danh sách sorted unique không rỗng, luôn chứa `@task-contract`; các entry còn lại là safe project-relative POSIX file/glob. Check có từ khóa `repository|source|file|build|test|lint|typecheck|package|runtime|code|compile|smoke|acceptance` trong ID/description/command phải có ít nhất một repository input. Absolute path, backslash, empty segment, `.`/`..`, traversal và symlink/junction escape bị reject; mỗi pattern phải match ít nhất một file.
+
+Snapshot chuẩn gồm canonical task contract (task ID/mode, criterion ID/text, toàn bộ validation definition), Full `prd.md`/`plan.md`, và sorted `{path,sha256}` của repository input. `inputDigest` là SHA-256 lowercase của canonical JSON `{schemaVersion:2,taskId,checkId,taskContractHash,entries}`. Hidden `harnix internal workflow snapshot --check <id>` chỉ đọc state/input. Required passing evidence v2 phải có digest 64-hex; save recompute và chỉ chấp nhận digest hiện tại, rồi ghi immutable task-owned `.harnix/tasks/<id>/verification-inputs.json` keyed by evidence ID. Sidecar chỉ chứa ID, relative path và hash, không chứa source body, secret, absolute path, prompt, environment hoặc command output.
+
+Completion v2 yêu cầu latest fresh pass của từng required check, criterion-linked evidence nằm trong giao của `criterion.evidenceIds` và check có `criterionIds` chứa criterion đó, đồng thời finish recompute snapshot khớp sidecar. Drift fail closed với check ID cùng safe relative `changed`/`missing` paths; unreadable/unsafe/empty match cũng fail. Timestamp freshness không thay thế input freshness. Unscoped evidence và pre-migration evidence không digest không chứng minh completion v2.
+
+Schema v1 vẫn được đọc đúng semantics cũ. Completed v1 được byte-preserve. Unfinished v1 chỉ migrate rõ ràng sang v2 khi cả previous/candidate ở checkpoint `replan`, status không đổi, acceptance criteria và prior evidence giữ nguyên, rồi append đúng evidence ID `task-schema-v1-to-v2`; downgrade bị reject. Legacy pass trước migration có thể được bảo toàn mà không có digest nhưng không hỗ trợ completion v2. `update` và Doctor không rewrite; Doctor chỉ emit `legacy-task-schema` (`warning` cho unfinished, `info` cho completed).
+
+Legal persisted transitions: `planning -> ready -> in_progress -> verifying -> completed`; any non-completed state may enter `blocked` and resume only to its recorded prior status. `debugging`, `replan` and `finishing` are checkpoints, not additional persisted statuses. Illegal jump, malformed/future record hoặc acceptance/evidence reference lỗi fail closed. Full task bắt buộc `prd.md` + `plan.md`; `design.md`, `research/`, `context.json` và `verification-inputs.json` conditional. Lite giữ toàn bộ minimum trace trong `task.json`. Validation invariants chung: `met` criterion cần ít nhất một existing evidence ID; `waived` cần non-empty `waiverReason`; command evidence cần integer `exitCode`; `blocked` cần blocker + matching `resumeStatus`; `completed` cần `completedAt`, không blocker và mọi required criterion `met|waived`.
 
 ### 4.4 Context manifest
 
@@ -266,6 +294,8 @@ interface ContextManifestV1 {
 ```
 
 Deterministic base score là pin `1000`, explicit task/acceptance reference `500`, active package/path `250`, applicable language-or-technology profile `100` (một bounded stack bonus dù cả hai facet match), cross-project guide `25`; applicable signals cộng dồn, sau đó sort pinned → score/priority descending → normalized path ascending. Context loader không execute included text, không follow external symlink và luôn disclose omitted entries. Explicit full-context bypasses budget only, không bypass path safety/dedupe/source listing.
+
+Hidden inspect/continue luôn project `contextDrift: {state,changes}` với state `not-recorded|current|stale` và sorted relative changes `changed|missing|unreadable|unverified`. Không có manifest/hash là `not-recorded`; mixed hashed/unhashed là `stale` với entry thiếu hash `unverified`. Chỉ đọc path đã liệt kê và safe-resolve dưới root. Continue gặp `stale` phải persist cùng status với checkpoint `replan` trước khi dùng lại context và route Brainstorm để reselect; không tự sửa source hay manifest. `not-recorded` trên legacy state chỉ được disclose, không tự ép migration/replan.
 
 ### 4.5 Journal and learning
 
@@ -679,17 +709,27 @@ Kế hoạch, official path/schema snapshot, migration policy, work breakdown v�
 - [x] G9 cập nhật templates/AGENTS guard, release scripts và chạy full automated acceptance với fake-home/project fixtures.
 - [x] G10 manual disposable-profile/tool-session smoke: lifecycle/protocol/skill discovery, Antigravity hook probe và Codex exact-hook trust/activation đã pass without bypass; Kiro CLI manual hook activation được user explicit defer và không được claim active.
 
+## 9C. Workflow freshness hardening — C1–C3
+
+Nghiên cứu ngày 2026-08-14 tại task `20260814-081624-harness-capability-research` bổ sung guardrail resume/completion mà không mở rộng platform hoặc runtime service.
+
+- [x] C1: deterministic `contextDrift` projection và stale-context `replan` routing.
+- [x] C2: TaskRecord v2 coverage graph, criterion/check evidence intersection, exact v1 compatibility và explicit replan migration.
+- [x] C3: canonical verification inputs, hidden snapshot, save-time race check, immutable sidecar và finish-time recomputation.
+- [x] C1–C3 focused unit/workflow/migration/Doctor fixtures green.
+- [x] Đồng bộ release metadata và chạy fresh exact acceptance mục 11 trước khi đóng hardening.
+
 ## 10. Required test inventory
 
 | Suite | Required coverage |
 |---|---|
-| Unit | detection, config migrations, context rank/budget, project/global manifests, permission-preserving atomic writes, home/path containment, locks, rollback, journal, learning, Doctor v2 |
+| Unit | detection, config/task migrations, context rank/budget/drift, verification input snapshots, project/global manifests, permission-preserving atomic writes, home/path containment, locks, rollback, journal, learning, Doctor v2 |
 | CLI integration | all eight commands, project/global scope, setup outside a project, init repo-map creation, cache-only repo-map query, idempotence, modified/deleted files, corrupt/future project/global schemas |
 | Migration | discovery, dry-run, copy/transform, preservation, conflict, rollback, cleanup |
 | Fixtures | independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue, multilingual/multi-technology monorepo |
 | Platform | Kiro user-global JSON hook, Antigravity Desktop/CLI plugin snapshots and multi-root protocol, Codex user-global schema, relevant rules, no machine path |
 | Codex | global AGENTS preservation, skills metadata, nested hooks Windows/Linux, `CODEX_HOME`/override/trust/duplicate coverage, user-owned files |
-| Workflow eval | routing, research, debug, TDD exception, reviews, verification, budget, finish/continue, promotion |
+| Workflow eval | routing, research, debug, TDD exception, reviews, criterion-linked/digest verification, budget, finish/continue, context replan, promotion |
 | Safety | traversal/symlink/junction, hook no-op/injection, secrets, global uninstall confirmation, data preservation, collisions, locks and duplicate/legacy hooks |
 | Packaging | one package/bin, tarball contents, fake-home + project smoke tests, forbidden project-local setup surface scan |
 

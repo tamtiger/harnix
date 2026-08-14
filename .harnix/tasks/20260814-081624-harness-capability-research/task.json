@@ -1,0 +1,294 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260814-081624-harness-capability-research",
+  "title": "Nghiên cứu năng lực cho coding-agent harness Harnix",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Hoàn tất nghiên cứu năng lực và áp dụng quy tắc bắt buộc dùng tiếng Việt khi tạo task Harnix vào AGENTS.md cùng template AGENTS.md.",
+  "nonGoals": [
+    "Mở rộng Harnix ra ngoài một package, một executable, ba platform được hỗ trợ hoặc các global integration đã được ghi lại.",
+    "Thêm telemetry, hosted service, daemon, marketplace, global memory, silent runtime network, default MCP hoặc cơ chế điều phối multi-agent bắt buộc.",
+    "Commit, tạo branch/worktree, push, publish hoặc tạo pull request.",
+    "Dịch code identifier, command, đường dẫn, schema field hoặc trích dẫn nguồn khi việc dịch làm sai nghĩa kỹ thuật."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "repository-baseline",
+      "text": "Nghiên cứu ghi lại hành vi hiện tại của Harnix, guardrail, mục tiêu chủ ý không thực hiện và khoảng trống đã được chứng minh bằng bằng chứng repository file:dòng.",
+      "status": "met",
+      "evidenceIds": [
+        "e-repository-baseline"
+      ]
+    },
+    {
+      "id": "primary-source-coverage",
+      "text": "Registry nguồn bao phủ Trellis, ECC, Superpowers, Kiro, Antigravity, Codex và ít nhất tám harness/framework khác bằng nguồn sơ cấp hiện hành với URL, revision/version, ngày truy cập, license, nhận định được hỗ trợ và giới hạn.",
+      "status": "met",
+      "evidenceIds": [
+        "e-research-coverage"
+      ]
+    },
+    {
+      "id": "normalized-decisions",
+      "text": "Các cơ chế được chuẩn hóa và loại bỏ trùng lặp, ánh xạ tới cơ chế tương đương/khoảng trống của Harnix, chấm đủ bảy tiêu chí 0–5, áp hard-gate và phân loại adopt/adapt/defer/reject/research-more với lý do riêng cho Harnix.",
+      "status": "met",
+      "evidenceIds": [
+        "e-decision-traceability"
+      ]
+    },
+    {
+      "id": "bounded-backlog",
+      "text": "Kế hoạch chọn tối đa năm năng lực vượt qua hard-gate, ưu tiên từ một đến ba hạng mục có tỷ lệ giá trị/độ phức tạp cao nhất và mô tả tác động hợp đồng, migration, bảo toàn, provenance, các lát cắt RED–GREEN, verification, kích thước, phụ thuộc và bất định.",
+      "status": "met",
+      "evidenceIds": [
+        "e-decision-traceability"
+      ]
+    },
+    {
+      "id": "ready-gate",
+      "text": "Danh mục quyết định, rà soát placeholder, độ đầy đủ của hợp đồng, tính nhất quán, phạm vi và việc bảo toàn working tree có thay đổi đều được kiểm tra; task dừng tại ready/ready nếu không còn điểm mơ hồ đáng kể.",
+      "status": "met",
+      "evidenceIds": [
+        "e-ready-self-review"
+      ]
+    },
+    {
+      "id": "vietnamese-task-language",
+      "text": "AGENTS.md của repository quy định mọi task Harnix và nội dung do task sở hữu mà agent tạo phải dùng tiếng Việt, ngoại trừ identifier, command, path, schema field và trích dẫn cần giữ nguyên để bảo đảm chính xác.",
+      "status": "met",
+      "evidenceIds": [
+        "v2-policy-green"
+      ]
+    },
+    {
+      "id": "vietnamese-task-template",
+      "text": "Template AGENTS.md được đóng gói phát sinh cùng quy tắc tiếng Việt và regression test tập trung chứng minh root AGENTS.md cùng template đã render đều chứa chính sách này.",
+      "status": "met",
+      "evidenceIds": [
+        "v2-policy-green"
+      ]
+    },
+    {
+      "id": "vietnamese-task-release",
+      "text": "Thay đổi được đồng bộ version/changelog, vượt qua kiểm thử template tập trung và các quality/workflow gate cần thiết mà không ghi đè thay đổi sẵn có do người dùng sở hữu.",
+      "status": "met",
+      "evidenceIds": [
+        "v2-policy-green",
+        "v3-quality-green",
+        "v4-acceptance-green"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/tasks/20260814-081624-harness-capability-research/task.json",
+    ".harnix/tasks/20260814-081624-harness-capability-research/prd.md",
+    ".harnix/tasks/20260814-081624-harness-capability-research/plan.md",
+    ".harnix/tasks/20260814-081624-harness-capability-research/research",
+    "docs/prompts/harness-capability-research.md",
+    "AGENTS.md",
+    "src/templates/harnix/agents.ts",
+    "test/workflow/templates.test.ts",
+    "package.json",
+    "CHANGELOG.md"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    ".harnix/workflow.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "docs/UPSTREAM_BASELINE.md",
+    "README.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "research-coverage",
+      "description": "Kiểm tra registry nguồn cuối cùng và các tài liệu nghiên cứu về độ bao phủ nguồn sơ cấp bắt buộc, version/revision hiện tại, ngày truy cập, license, nhận định được hỗ trợ và giới hạn.",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "decision-traceability",
+      "description": "Kiểm tra từng năng lực trong danh sách rút gọn về bằng chứng khoảng trống repository, điểm theo từng tiêu chí, kết quả hard-gate, tác động hợp đồng/migration, các lát cắt RED–GREEN và ánh xạ verification.",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "ready-self-review",
+      "description": "Chạy kiểm tra danh mục quyết định, placeholder, tính nhất quán, phạm vi, độ đầy đủ của artifact và bảo toàn working tree có thay đổi trước khi lưu ready/ready.",
+      "scope": "full",
+      "required": true
+    },
+    {
+      "id": "vietnamese-policy-focused",
+      "description": "Chạy regression test tập trung chứng minh root AGENTS.md và AGENTS template đã render cùng chứa chính xác chính sách tạo task bằng tiếng Việt.",
+      "command": "pnpm exec vitest run test/workflow/templates.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "vietnamese-policy-quality",
+      "description": "Xác minh build, lint, typecheck và canonical workflow suite sau thay đổi AGENTS template.",
+      "command": "pnpm build && pnpm lint && pnpm typecheck && pnpm test:workflow",
+      "scope": "full",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-repository-baseline",
+      "recordedAt": "2026-08-14T01:33:35.9304213Z",
+      "result": "pass",
+      "summary": "Kiểm tra ở cấp dòng đã xác nhận hành vi hiện tại của workflow, context, evidence, learning, platform và guardrail trong Harnix, đồng thời cô lập ba khoảng trống được repository chứng minh mà không thay đổi file production.",
+      "artifactPaths": [
+        "docs/HARNIX_PRD.md",
+        "src/core/workflow.ts",
+        "src/core/tasks/task.ts",
+        "src/core/context/context.ts",
+        "src/core/journal/learning.ts"
+      ]
+    },
+    {
+      "id": "e-research-coverage",
+      "checkId": "research-coverage",
+      "recordedAt": "2026-08-14T01:33:35.9304213Z",
+      "result": "pass",
+      "summary": "Registry nguồn sơ cấp bao phủ Trellis, ECC, Superpowers, Kiro, Antigravity, Codex và 11 nguồn harness/framework hiện hành hoặc được ghi rõ là lịch sử, kèm chủ sở hữu, URL, revision/version, ngày truy cập, license, nhận định được hỗ trợ và giới hạn.",
+      "artifactPaths": [
+        ".harnix/tasks/20260814-081624-harness-capability-research/research/01-supported-platform-and-baseline-mechanisms.md",
+        ".harnix/tasks/20260814-081624-harness-capability-research/research/02-current-harness-mechanisms.md",
+        ".harnix/tasks/20260814-081624-harness-capability-research/research/03-capability-decisions.md"
+      ]
+    },
+    {
+      "id": "e-decision-traceability",
+      "checkId": "decision-traceability",
+      "recordedAt": "2026-08-14T01:33:35.9304213Z",
+      "result": "pass",
+      "summary": "Mười hai năng lực đã chuẩn hóa được loại bỏ trùng lặp, chấm theo đủ bảy tiêu chí có trọng số, áp hard-gate và phân loại; đúng ba phương án thích nghi vượt qua có bằng chứng khoảng trống Harnix cùng kế hoạch đầy đủ quyết định về hợp đồng, migration, bảo toàn, provenance, RED-GREEN và verification.",
+      "artifactPaths": [
+        ".harnix/tasks/20260814-081624-harness-capability-research/research/03-capability-decisions.md",
+        ".harnix/tasks/20260814-081624-harness-capability-research/plan.md"
+      ]
+    },
+    {
+      "id": "e-ready-self-review",
+      "checkId": "ready-self-review",
+      "recordedAt": "2026-08-14T01:33:35.9304213Z",
+      "result": "pass",
+      "summary": "Tự rà soát cổng ready đã đạt: 11 mục đầu ra bắt buộc, 6 nguồn bắt buộc cộng 11 nguồn bổ sung, 12 quyết định đã chuẩn hóa, 3 ưu tiên backlog, đầy đủ artifact Full, không có dấu triển khai chưa giải quyết, active pointer khớp và git diff --check thoát 0; thay đổi có trước tại .harnix/.template-hashes.json vẫn nằm ngoài phạm vi task.",
+      "artifactPaths": [
+        ".harnix/tasks/20260814-081624-harness-capability-research/task.json",
+        ".harnix/tasks/20260814-081624-harness-capability-research/prd.md",
+        ".harnix/tasks/20260814-081624-harness-capability-research/plan.md",
+        ".harnix/tasks/20260814-081624-harness-capability-research/research/03-capability-decisions.md"
+      ]
+    },
+    {
+      "id": "v1-policy-red",
+      "checkId": "vietnamese-policy-focused",
+      "recordedAt": "2026-08-14T01:56:48.8103935Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED hợp lệ: kiểm thử template tập trung chạy 2 test, 1 test thất bại đúng tại assertion vì root AGENTS.md chưa chứa chính sách tạo/cập nhật task Harnix bằng tiếng Việt; 1 test lân cận vẫn đạt.",
+      "artifactPaths": [
+        "test/workflow/templates.test.ts",
+        "AGENTS.md",
+        "src/templates/harnix/agents.ts"
+      ]
+    },
+    {
+      "id": "v2-policy-green",
+      "checkId": "vietnamese-policy-focused",
+      "recordedAt": "2026-08-14T01:57:21.2372951Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: bộ kiểm thử template tập trung đạt 2/2; regression xác nhận root AGENTS.md và AGENTS.md do renderAgentsTemplate tạo ra cùng chứa nguyên văn chính sách bắt buộc dùng tiếng Việt cho nội dung do task sở hữu, với ngoại lệ kỹ thuật đã khóa.",
+      "artifactPaths": [
+        "AGENTS.md",
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "v3-quality-self-host-fail",
+      "checkId": "vietnamese-policy-quality",
+      "recordedAt": "2026-08-14T01:59:25.2808404Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Quality gate: build, lint và typecheck đạt; bộ kiểm thử workflow chạy 46 test với 45 đạt, 1 thất bại ở tính ngang bằng byte khi self-host. Kiểm tra phân biệt xác nhận working tree .harnix/workflow.md có 41 CRLF trong khi template chuẩn dùng LF; hash Git blob vẫn trùng do chuẩn hóa dòng mới.",
+      "artifactPaths": [
+        ".harnix/workflow.md",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/self-host.test.ts"
+      ]
+    },
+    {
+      "id": "v3-self-host-repair-green",
+      "recordedAt": "2026-08-14T02:00:51.7720902Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Debug GREEN: sau khi khôi phục .harnix/workflow.md về LF chuẩn và đúng nguyên văn, kiểm thử self-host tập trung đạt 1/1. Không nới assertion hoặc thay đổi hành vi workflow đã đóng gói.",
+      "artifactPaths": [
+        ".harnix/workflow.md",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/self-host.test.ts"
+      ]
+    },
+    {
+      "id": "v3-quality-green",
+      "checkId": "vietnamese-policy-quality",
+      "recordedAt": "2026-08-14T02:01:27.6375762Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Quality GREEN cuối: build, lint, typecheck đều thoát 0; bộ kiểm thử workflow chuẩn đạt 46/46 test trên 8 file, gồm chính sách template, tính ngang bằng self-host, routing, context và lưu bền vững workflow.",
+      "artifactPaths": [
+        "AGENTS.md",
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts",
+        "package.json",
+        "CHANGELOG.md",
+        ".harnix/.template-hashes.json",
+        ".harnix/workflow.md"
+      ]
+    },
+    {
+      "id": "v4-compliance-pass",
+      "recordedAt": "2026-08-14T02:05:21.0014966Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Giai đoạn 1 kiểm tra tuân thủ không có phát hiện: chính sách chính xác xuất hiện ở root AGENTS.md và template đã render, regression kiểm cả hai bề mặt, ngoại lệ token kỹ thuật đúng phạm vi, C1-C3 không bị triển khai, version/manifest/changelog đồng bộ và checklist V1-V3 hoàn tất.",
+      "artifactPaths": [
+        "AGENTS.md",
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts",
+        ".harnix/tasks/20260814-081624-harness-capability-research/prd.md",
+        ".harnix/tasks/20260814-081624-harness-capability-research/plan.md"
+      ]
+    },
+    {
+      "id": "v4-acceptance-green",
+      "checkId": "vietnamese-policy-quality",
+      "recordedAt": "2026-08-14T02:05:21.0014966Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Giai đoạn 2 và chuỗi chấp nhận chính xác ở mục 11 đều đạt: cài đặt đóng băng, build/lint/typecheck, kiểm thử đầy đủ đạt 333 với 1 test bỏ qua theo platform, các bộ kiểm thử chấp nhận đạt 148+78+9+22+46+30, pack/smoke đạt trên 4 tổ hợp platform, thời gian init tệ nhất 376.7629 ms, footprint 50 file/172638 byte với mức giảm 87.15%, release scan sạch và git diff --check thoát 0.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "AGENTS.md",
+        "src/templates/harnix/agents.ts",
+        "test",
+        ".artifacts"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-14T08:16:24.6455208+07:00",
+  "updatedAt": "2026-08-14T02:05:31.863Z",
+  "completedAt": "2026-08-14T02:05:31.863Z"
+}

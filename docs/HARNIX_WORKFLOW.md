@@ -154,18 +154,18 @@ Verification có hai stage theo thứ tự:
 
 Review feedback phải được hiểu và kiểm tra với codebase trước khi áp dụng; feedback không tự động trở thành requirement. Fix theo từng finding và rerun check bị ảnh hưởng.
 
-Mỗi evidence record gồm command/check, thời điểm, exit/result và concise summary. Evidence phải fresh, full-scope tương xứng claim và chạy trên current tree. Partial check chỉ chứng minh phạm vi partial.
+Mỗi evidence record gồm command/check, thời điểm, exit/result và concise summary. Với TaskRecord v2, required pass còn phải có `inputDigest` từ cùng snapshot trước/sau check. Evidence phải fresh, full-scope tương xứng claim và chạy trên current tree. Partial check chỉ chứng minh phạm vi partial.
 
 Mỗi claim phải map tới command/inspection thực sự chứng minh claim đó. Agent đọc output liên quan và exit/result đầy đủ; passing rerun không được xóa failed evidence trước đó. Review feedback là technical hypothesis cần kiểm tra với code/contract, không phải requirement tự động.
 
-Persist `verifying` trước check đầu tiên. Ghi từng evidence ngay sau khi check kết thúc; failed evidence giữ task recoverable ở `verifying` hoặc route rõ sang Debugging, không bị thay thế im lặng bởi summary mới hơn.
+Persist `verifying` trước check đầu tiên. Với mỗi required check v2, chạy hidden `harnix internal workflow snapshot --check <id>` ngay trước và sau non-mutating check; chỉ persist pass khi hai digest bằng nhau. Save recompute digest trước khi ghi immutable task-owned sidecar. Ghi từng evidence ngay sau khi check kết thúc; failed evidence giữ task recoverable ở `verifying` hoặc route rõ sang Debugging, không bị thay thế im lặng bởi summary mới hơn.
 
 ### 5.7 Finishing
 
 Trước `completed`, agent:
 
 1. Reread acceptance criteria và kiểm tra diff/current state.
-2. Chạy final verification cần thiết và đọc output/exit code.
+2. Chạy final verification cần thiết và đọc output/exit code; hidden finish recompute mọi latest required snapshot v2, không chỉ dựa timestamp.
 3. Ghi evidence, outcome, residual risks và omitted checks.
 4. Ghi journal entry; tạo learning candidate chỉ từ non-obvious evidence.
 5. Promote learning vào spec chỉ khi có explicit approval hoặc recurrence/evidence gate, dưới dạng diff reviewable.
@@ -181,6 +181,8 @@ Khi người dùng yêu cầu commit sau khi task hoàn tất, agent phải trì
 Continue resolve active task rồi load theo thứ tự: task record → artifact của current state → last checkpoint/evidence → smallest relevant journal/spec slice. Nó route từ status/checkpoint, không dựa vào trí nhớ hội thoại và không suy diễn approval đã mất sau compaction.
 
 Nếu không có active task, báo ngắn gọn và quay về Triage. Nếu state không nhất quán hoặc artifact malformed/future-version, fail closed và đề xuất repair; không tự đoán rồi overwrite.
+
+Inspect/continue luôn trả `contextDrift`. `stale` nghĩa ít nhất một manifest path changed, missing, unreadable hoặc unverified; Continue phải giữ nguyên status, persist checkpoint `replan`, rồi route Brainstorm để reselect context trước khi dùng lại. `not-recorded` được disclose cho legacy task nhưng không tự ép replan. Không tự sửa source hoặc `context.json`.
 
 ### 5.9 Blocked
 
@@ -198,12 +200,13 @@ Blocked chỉ dùng khi không thể tiến bộ an toàn do user-owned decision
       design.md         # Conditional
       plan.md           # Full only
       context.json      # Conditional ranked sources and per-state scope
+      verification-inputs.json # Conditional immutable v2 evidence snapshots
       research/         # Conditional, one topic per file
   workspace/<developer>/
     journal/              # created lazily on first journal write
 ```
 
-`task.json` là record versioned tối thiểu: id/title, mode, status, goal, non-goals, acceptance criteria, current checkpoint, relevant paths/specs, validation plan, evidence refs, blockers và timestamps. Exact v1 field types, safe task ID, active pointer, legal transitions và resume status được khóa tại `IMPLEMENTATION_PLAN.md` mục 4; skill/platform adapter không được tự định nghĩa schema khác. Task ID dùng lowercase kebab slug có dấu `-` giữa các từ. Lite giữ các field cần thiết ngay trong record; Full dùng các file Markdown để tránh JSON phình to và đặt implementation checklist trong `plan.md`. Checkbox chỉ được check sau khi slice và focused evidence tương ứng hoàn thành; nó không thay thế persisted criteria/evidence.
+`task.json` là record versioned tối thiểu: id/title, mode, status, goal, non-goals, acceptance criteria, current checkpoint, relevant paths/specs, validation plan, evidence refs, blockers và timestamps. Task mới dùng exact TaskRecord v2: required check có immutable `criterionIds`/`inputs`, `@task-contract`, coverage đầy đủ, và pass evidence có `inputDigest`. Exact v1 reader vẫn giữ cho legacy; chỉ unfinished v1 ở explicit `replan` được migrate với deterministic migration evidence, completed v1 không rewrite. Safe task ID, active pointer, legal transitions và resume status được khóa tại `IMPLEMENTATION_PLAN.md` mục 4; skill/platform adapter không được tự định nghĩa schema khác. Task ID dùng lowercase kebab slug có dấu `-` giữa các từ. Lite giữ các field cần thiết ngay trong record; Full dùng các file Markdown để tránh JSON phình to và đặt implementation checklist trong `plan.md`. Checkbox chỉ được check sau khi slice và focused evidence tương ứng hoàn thành; nó không thay thế persisted criteria/evidence.
 
 Operational persistence order là: create `planning` task + `.active` → write Full artifacts/research → persist `ready` → persist `in_progress/implementing` before product edits → persist `verifying/verifying` before checks and append fresh evidence → persist `verifying/finishing` only after completion prerequisites are green → persist `completed/finishing` before journal/archive clears the matching pointer. Plan-only work stops at persisted `ready`. Blocked state always routes through Continue before any checkpoint owner. A later failure must retain enough state for `harnix-continue`; it must not erase or fabricate evidence.
 
@@ -242,8 +245,9 @@ Evals phải chứng minh:
 - TDD exception có reason và alternate verification.
 - Compliance chạy trước quality; review feedback được verify, không blind-apply.
 - Stale/partial evidence không cho phép completion claim.
+- Criterion/evidence v2 phải giao đúng declared check; changed/missing/unreadable/unsafe input hoặc task-contract drift chặn save/finish.
 - Finish không commit/push/merge/PR và journal/promotion đúng gate.
-- Continue phục hồi đúng state với bounded context và fail closed trên corrupt/future state.
+- Continue phục hồi đúng state với bounded context, project context drift xác định và fail closed trên corrupt/future state.
 - Cùng fixture cho kết quả workflow tương đương trên Kiro, Antigravity và Codex.
 - Global hooks/instructions are a fast no-op in a non-Harnix workspace, activate only with safe bounded project context, and never turn malformed optional hook input into a blocked prompt.
 - Fresh init creates the validated repo map; workflow stages may use `harnix repo-map --query <text> [--limit <count>]` for bounded candidate discovery. Hooks never invoke repo-map operations; only `doctor --fix` and the hidden compatibility refresh can rebuild a cache after init.

@@ -4,6 +4,32 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [0.6.14] - 2026-08-14
+
+### Added
+
+- Hidden workflow inspect/continue nay project `contextDrift` xác định từ context manifest, gồm `changed`, `missing`, `unreadable` và `unverified`, để continuation bắt buộc replan trước context reselection khi state cũ.
+- TaskRecord schema v2 bổ sung `criterionIds`, `inputs`/`@task-contract`, criterion-check evidence intersection, canonical `inputDigest`, hidden snapshot command và immutable task-owned verification-input sidecar.
+
+### Changed
+
+- New tasks use schema v2; exact v1 reading remains compatible, completed v1 is preserved, unfinished v1 can migrate only through explicit `replan` evidence, and Doctor reports `legacy-task-schema` without rewriting task data.
+- Workflow save recomputes input snapshots to reject stale verification races, while finish recomputes latest required snapshots and reports only check IDs with safe relative changed/missing paths.
+- PRD, canonical workflow, implementation contracts, harness research, upstream mapping, seven workflow skills, project agent template and focused safety/migration fixtures now describe and enforce the same C1–C3 contract.
+
+## [0.6.13] - 2026-08-14
+
+### Changed
+
+- Việt hóa toàn bộ văn xuôi hướng người đọc trong hồ sơ task nghiên cứu năng lực harness, gồm `task.json`, PRD, kế hoạch và ba tài liệu nghiên cứu, đồng thời bảo toàn schema, ID, lệnh, đường dẫn, URL, revision, hash, timestamp và code literal.
+
+## [0.6.12] - 2026-08-14
+
+### Changed
+
+- Root `AGENTS.md` và template `AGENTS.md` được đóng gói nay yêu cầu agent luôn dùng tiếng Việt khi tạo hoặc cập nhật nội dung task Harnix, đồng thời giữ nguyên identifier, command, path, schema field và trích dẫn nguồn khi cần cho độ chính xác kỹ thuật.
+- Bổ sung regression test bảo đảm policy ngôn ngữ task xuất hiện đồng nhất trên cả repository và project mới được khởi tạo.
+
 ## [0.6.11] - 2026-08-13
 
 ### Changed

@@ -15,7 +15,7 @@ import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces
 import { searchMemory } from "./commands/mem.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
-import { finishWorkflow, inspectWorkflow, saveWorkflow } from "./commands/internal-workflow.js";
+import { finishWorkflow, inspectWorkflow, saveWorkflow, snapshotWorkflow } from "./commands/internal-workflow.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
@@ -152,6 +152,9 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     let envelope: unknown;
     try { envelope = JSON.parse(input) as unknown; } catch { throw new Error("Workflow save requires valid JSON."); }
     process.stdout.write(`${JSON.stringify(await saveWorkflow(await resolveProjectRoot(process.cwd()), envelope as Parameters<typeof saveWorkflow>[1]))}\n`);
+  });
+  workflow.command("snapshot").requiredOption("--check <id>").action(async (options: { check: string }) => {
+    process.stdout.write(`${JSON.stringify(await snapshotWorkflow(await resolveProjectRoot(process.cwd()), options.check))}\n`);
   });
   workflow.command("finish").action(async () => {
     process.stdout.write(`${JSON.stringify(await finishWorkflow(await resolveProjectRoot(process.cwd())))}\n`);

@@ -59,6 +59,8 @@ core -X-> Commander/Inquirer/platform templates
 
 Use the single state machine in `docs/HARNIX_WORKFLOW.md`. Lite and Full are ceremony levels, not separate workflows.
 
+Luôn dùng tiếng Việt khi tạo và cập nhật task Harnix, gồm nội dung hướng người dùng trong `task.json`, `prd.md`, `plan.md`, `design.md`, research và journal. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
+
 For each implementation task:
 
 1. Confirm the relevant plan task, acceptance criteria, frozen schema, and affected files.
@@ -71,6 +73,8 @@ For each implementation task:
 8. Before marking any task `completed`, increment the package patch version and update `CHANGELOG.md`; do this before completion persistence, not as a later follow-up.
 9. Update `CHANGELOG.md` with user-visible implementation changes before committing.
 10. Report actual evidence, omitted checks, residual risks, and next task. Do not claim success from stale or partial output.
+
+Create new tasks as TaskRecord schema v2. Required checks must map `criterionIds` to acceptance criteria, declare safe sorted `inputs` including `@task-contract`, and persist passing `inputDigest` values through the hidden workflow snapshot/save path. Read v1 records unchanged; migrate only an unfinished v1 task with explicit authorization at checkpoint `replan`. On continuation, treat `contextDrift: stale` as a mandatory replan before context reselection.
 
 Docs-only, trivial wiring, or generated snapshots may use the documented TDD exception, but must record the reason and use the strongest meaningful alternative verification.
 

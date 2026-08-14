@@ -46,6 +46,22 @@ function globalOptions(home: string) {
 }
 
 describe("diagnoseProject Doctor v2", () => {
+  it("reports legacy TaskRecord schema without rewriting it", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const legacy = taskRecord("20260813-120000-legacy", "in_progress", "implementing");
+    const path = join(root, ".harnix", "tasks", legacy.id, "task.json");
+    await mkdir(join(root, ".harnix", "tasks", legacy.id), { recursive: true });
+    const source = `${JSON.stringify(legacy, null, 2)}\n`;
+    await writeFile(path, source);
+    await writeFile(join(root, ".harnix", "tasks", ".active"), `${legacy.id}\n`);
+
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "legacy-task-schema", severity: "warning", path: `tasks/${legacy.id}/task.json`, fixable: false }));
+    await expect(readFile(path, "utf8")).resolves.toBe(source);
+  });
+
   it("reports completed task drift as a warning but fails closed for an invalid active task", async () => {
     const root = await temporaryRepository(); const home = await temporaryUserHome();
     await initializeProject({ developer: "tam", root, yes: true });

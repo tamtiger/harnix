@@ -152,7 +152,7 @@ Stack/catalog architecture uses only researched patterns rather than vendored ru
 | Rollback | `Debugging` / `Replan` | Explicit transitions dựa trên root cause hoặc requirement/architecture defect |
 | Spec update | Finishing learning candidate/promotion | Evidence + recurrence hoặc explicit approval; reviewable diff |
 | Mandatory commit + auto-commit archive | — | Rejected; finish không mutate Git integration state |
-| Continue from status/artifacts | `Continue` | Persisted status + checkpoint + bounded context; corrupt/future state fail closed |
+| Continue from status/artifacts | `Continue` | Persisted status + checkpoint + bounded context; `contextDrift: stale` persist `replan` trước reselection; corrupt/future state fail closed |
 
 ### 8.2 Superpowers behavior mapping
 
@@ -160,7 +160,7 @@ Stack/catalog architecture uses only researched patterns rather than vendored ru
 |---|---|---|
 | `brainstorming` | `Triage`/`Planning`/`Ready`, `harnix-brainstorm` | Context-first convergence; approval chỉ khi user requested checkpoint hoặc decision chưa resolved, không universal hard gate |
 | `systematic-debugging` | `harnix-debug` | Concise evidence/hypothesis loop, three-failure architecture reset |
-| `verification-before-completion` | `harnix-check`, `harnix-finish-work` | Fresh command/exit evidence gate |
+| `verification-before-completion` | `harnix-check`, `harnix-finish-work` | Fresh command/exit evidence + TaskRecord v2 criterion/check intersection + canonical input snapshot recomputed ở save/finish |
 | `test-driven-development` | `harnix-implement` | Adaptive meaningful RED–GREEN–REFACTOR, documented exceptions |
 | `writing-plans` | Full `harnix-brainstorm`, `plan.md` | File/interface-level decision-complete plan; no placeholder, mandatory commits or execution-mode handoff |
 | `executing-plans` | `harnix-implement` | Small verifiable checkpoints and stop/replan rules; no required worktree/subagent |

@@ -1,0 +1,146 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260814-091323-viet-hoa-ho-so-nghien-cuu",
+  "title": "Việt hóa toàn bộ hồ sơ nghiên cứu năng lực harness",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Việt hóa toàn bộ nội dung hướng người đọc trong task nghiên cứu 20260814-081624-harness-capability-research, đồng thời bảo toàn các hợp đồng kỹ thuật và bằng chứng lịch sử.",
+  "nonGoals": [
+    "Không thay đổi kết luận nghiên cứu, quyết định sản phẩm hoặc phạm vi triển khai đã được ghi nhận.",
+    "Không dịch schema field, enum, ID, command, đường dẫn, URL, revision, hash, tên sản phẩm hoặc literal kỹ thuật cần giữ nguyên.",
+    "Không commit, push, publish hoặc tạo pull request."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "noi-dung-tieng-viet",
+      "text": "Toàn bộ văn xuôi hướng người đọc trong task.json, prd.md, plan.md và ba file research được viết bằng tiếng Việt.",
+      "status": "met",
+      "evidenceIds": [
+        "v1-compliance-pass"
+      ]
+    },
+    {
+      "id": "bao-toan-hop-dong",
+      "text": "Schema, enum, ID, trạng thái hoàn tất, liên kết bằng chứng, command, đường dẫn, URL, revision, hash và mốc thời gian của task nguồn được bảo toàn.",
+      "status": "met",
+      "evidenceIds": [
+        "v2-bat-bien-pass"
+      ]
+    },
+    {
+      "id": "xac-thuc-ban-dich",
+      "text": "Task JSON hợp lệ, cấu trúc Markdown và liên kết còn nguyên, không còn các đoạn văn xuôi tiếng Anh đã biết, và git diff không có lỗi khoảng trắng.",
+      "status": "met",
+      "evidenceIds": [
+        "v1-compliance-pass",
+        "v2-bat-bien-pass",
+        "v3-task-json-pass",
+        "v4-acceptance-pass"
+      ]
+    },
+    {
+      "id": "dong-bo-phat-hanh",
+      "text": "Phiên bản vá, changelog và metadata generator được cập nhật theo quy tắc hoàn tất task của dự án.",
+      "status": "met",
+      "evidenceIds": [
+        "v3-task-json-pass",
+        "v4-acceptance-pass"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/tasks/20260814-081624-harness-capability-research/task.json",
+    ".harnix/tasks/20260814-081624-harness-capability-research/prd.md",
+    ".harnix/tasks/20260814-081624-harness-capability-research/plan.md",
+    ".harnix/tasks/20260814-081624-harness-capability-research/research/01-supported-platform-and-baseline-mechanisms.md",
+    ".harnix/tasks/20260814-081624-harness-capability-research/research/02-current-harness-mechanisms.md",
+    ".harnix/tasks/20260814-081624-harness-capability-research/research/03-capability-decisions.md",
+    "package.json",
+    "CHANGELOG.md",
+    ".harnix/.template-hashes.json"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    ".harnix/workflow.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "kiem-tra-bat-bien",
+      "description": "So sánh dữ liệu kỹ thuật trước và sau bản dịch để xác nhận chỉ văn xuôi hướng người đọc thay đổi.",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "kiem-tra-task-json",
+      "description": "Parse và validate task.json nguồn bằng TaskRecord v1 sau khi Việt hóa.",
+      "command": "pnpm build && node -e \"import('./dist/index.js')\"",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "kiem-tra-chat-luong",
+      "description": "Chạy build, lint, typecheck, kiểm thử workflow và kiểm tra diff.",
+      "command": "pnpm build && pnpm lint && pnpm typecheck && pnpm test:workflow && git diff --check",
+      "scope": "full",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "v1-compliance-pass",
+      "recordedAt": "2026-08-14T02:26:50.9501201Z",
+      "result": "pass",
+      "summary": "Rà soát tuân thủ xác nhận văn xuôi hướng người đọc trong cả sáu file nguồn đã được Việt hóa, không còn heading hoặc câu tiếng Anh đã biết, không triển khai C1-C3 và không thay đổi runtime.",
+      "artifactPaths": [
+        ".harnix/tasks/20260814-081624-harness-capability-research/task.json",
+        ".harnix/tasks/20260814-081624-harness-capability-research/prd.md",
+        ".harnix/tasks/20260814-081624-harness-capability-research/plan.md",
+        ".harnix/tasks/20260814-081624-harness-capability-research/research"
+      ]
+    },
+    {
+      "id": "v2-bat-bien-pass",
+      "checkId": "kiem-tra-bat-bien",
+      "recordedAt": "2026-08-14T02:26:50.9501201Z",
+      "result": "pass",
+      "summary": "SHA-256 của phép chiếu kỹ thuật task.json và của code fence, inline literal, URL, số dòng bảng trong năm file Markdown khớp chính xác baseline trước khi dịch.",
+      "artifactPaths": [
+        ".harnix/tasks/20260814-091323-viet-hoa-ho-so-nghien-cuu/research/baseline-bat-bien.md",
+        ".harnix/tasks/20260814-081624-harness-capability-research"
+      ]
+    },
+    {
+      "id": "v3-task-json-pass",
+      "checkId": "kiem-tra-task-json",
+      "recordedAt": "2026-08-14T02:26:50.9501201Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Build thoát 0; task.json nguồn parse thành công và validateTask xác nhận TaskRecord v1 completed/finishing vẫn hợp lệ; packageVersion là 0.6.13.",
+      "artifactPaths": [
+        ".harnix/tasks/20260814-081624-harness-capability-research/task.json",
+        "package.json",
+        "dist"
+      ]
+    },
+    {
+      "id": "v4-acceptance-pass",
+      "checkId": "kiem-tra-chat-luong",
+      "recordedAt": "2026-08-14T02:26:50.9501201Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Chuỗi acceptance mục 11 thoát 0: install/build/lint/typecheck; 333 test đạt và 1 skip theo platform; các suite acceptance đạt 148+78+9+22+46+30; pack/smoke đạt 4 tổ hợp; init tệ nhất 359.0741 ms; footprint 50 file/172638 byte, giảm 87.15%; release scan sạch; git diff --check thoát 0.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        ".harnix/.template-hashes.json",
+        ".harnix/tasks/20260814-081624-harness-capability-research",
+        ".artifacts"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-14T02:13:23.7164406Z",
+  "updatedAt": "2026-08-14T02:26:55.561Z",
+  "completedAt": "2026-08-14T02:26:55.561Z"
+}

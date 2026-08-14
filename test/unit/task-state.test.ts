@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createLearningCandidate, isPromotionEligible } from "../../src/core/journal/learning.js";
 import { promotionProposal } from "../../src/core/journal/promotion.js";
-import { archiveTask, clearActiveTask, resolveActiveTask, saveTask, saveTaskWithArtifacts, setActiveTask, transitionTask, validateTask, type TaskRecord } from "../../src/core/tasks/task.js";
+import { archiveTask, clearActiveTask, createTaskV2MigrationEvidence, resolveActiveTask, saveTask, saveTaskWithArtifacts, setActiveTask, transitionTask, validateTask, type TaskRecord } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -71,8 +71,75 @@ describe("task state", () => {
   });
 
   it("rejects future schema and malformed task records", () => {
-    expect(() => validateTask({ ...taskFixture(), schemaVersion: 2 })).toThrow("unsupported");
+    expect(() => validateTask({ ...taskFixture(), schemaVersion: 3 })).toThrow("unsupported");
     expect(() => validateTask({ ...taskFixture(), checkpoint: "unknown" })).toThrow("invalid");
+  });
+
+  it("accepts TaskRecord v2 with explicit criterion coverage and verification inputs", () => {
+    expect(validateTask(taskV2Fixture())).toMatchObject({
+      schemaVersion: 2,
+      validationPlan: [{ criterionIds: ["a"], inputs: ["@task-contract", "src/**/*.ts"] }],
+    });
+  });
+
+  it("rejects incomplete or unsafe TaskRecord v2 validation contracts", () => {
+    const fixture = taskV2Fixture();
+    const check = fixture.validationPlan[0]!;
+    for (const validationPlan of [
+      [{ ...check, criterionIds: [] }],
+      [{ ...check, criterionIds: ["missing"] }],
+      [{ ...check, criterionIds: ["a", "a"] }],
+      [{ ...check, inputs: [] }],
+      [{ ...check, inputs: ["src/**/*.ts"] }],
+      [{ ...check, inputs: ["@task-contract", "../escape"] }],
+      [{ ...check, inputs: ["src/**/*.ts", "@task-contract"] }],
+    ]) expect(() => validateTask({ ...fixture, validationPlan })).toThrow();
+
+    expect(() => validateTask({
+      ...fixture,
+      acceptanceCriteria: [...fixture.acceptanceCriteria, { id: "b", text: "b", status: "pending", evidenceIds: [] }],
+      validationPlan: [{ ...check, criterionIds: ["b", "a"] }],
+    })).toThrow(/criterion/iu);
+    expect(() => validateTask({ ...fixture, validationPlan: [{ ...check, inputs: ["@task-contract", "!src/**/*.ts"] }] })).toThrow(/input/iu);
+
+    expect(() => validateTask({
+      ...fixture,
+      acceptanceCriteria: [...fixture.acceptanceCriteria, { id: "orphan", text: "orphan", status: "pending", evidenceIds: [] }],
+    })).toThrow(/criterion|coverage/iu);
+    expect(() => validateTask({
+      ...fixture,
+      acceptanceCriteria: [...fixture.acceptanceCriteria, { id: "bad id", text: "waived", status: "waived", evidenceIds: [], waiverReason: "not applicable" }],
+    })).toThrow(/criterion/iu);
+  });
+
+  it("requires repository inputs for behavioral TaskRecord v2 checks and digests for passing evidence", () => {
+    const fixture = taskV2Fixture();
+    expect(() => validateTask({
+      ...fixture,
+      validationPlan: [{ ...fixture.validationPlan[0]!, inputs: ["@task-contract"] }],
+    })).toThrow(/input/iu);
+    expect(() => validateTask({
+      ...fixture,
+      evidence: [{ id: "e", checkId: "check", recordedAt: timestamp, result: "pass", exitCode: 0, summary: "ok", artifactPaths: [] }],
+    })).toThrow(/digest/iu);
+    expect(() => validateTask({
+      ...fixture,
+      evidence: [{ id: "e", checkId: "check", recordedAt: timestamp, result: "pass", exitCode: 0, summary: "ok", artifactPaths: [], inputDigest: "A".repeat(64) }],
+    })).toThrow(/digest/iu);
+  });
+
+  it("preserves pre-migration v1 evidence without allowing new undigested v2 passes", () => {
+    const fixture = taskV2Fixture();
+    const legacyPass = { id: "legacy", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "legacy", artifactPaths: [] };
+    expect(() => validateTask({
+      ...fixture,
+      acceptanceCriteria: [{ ...fixture.acceptanceCriteria[0]!, status: "met", evidenceIds: ["legacy"] }],
+      evidence: [legacyPass, createTaskV2MigrationEvidence(fixture.id, "2026-08-13T00:01:00.000Z")],
+    })).not.toThrow();
+    expect(() => validateTask({
+      ...fixture,
+      evidence: [createTaskV2MigrationEvidence(fixture.id, timestamp), { ...legacyPass, id: "new" }],
+    })).toThrow(/digest/iu);
   });
 
   it("accepts readable kebab-case task slugs and rejects unsafe task IDs", async () => {
@@ -114,4 +181,21 @@ const timestamp = "2026-08-13T00:00:00.000Z";
 
 function taskFixture(): TaskRecord {
   return { generator: "harnix", schemaVersion: 1, id: "20260807-120000-x", title: "x", mode: "lite", status: "planning", checkpoint: "planning", goal: "x", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp };
+}
+
+function taskV2Fixture() {
+  return {
+    ...taskFixture(),
+    schemaVersion: 2 as const,
+    acceptanceCriteria: [{ id: "a", text: "x", status: "pending" as const, evidenceIds: [] }],
+    validationPlan: [{
+      id: "check",
+      description: "Run unit tests",
+      command: "pnpm test",
+      scope: "focused" as const,
+      required: true,
+      criterionIds: ["a"],
+      inputs: ["@task-contract", "src/**/*.ts"],
+    }],
+  };
 }

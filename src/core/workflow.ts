@@ -1,7 +1,11 @@
+import { basename, dirname } from "node:path";
+import { inspectContextDrift, loadContextManifest, type ContextDrift } from "./context/context.js";
 import type { Evidence, TaskMode, TaskRecord } from "./tasks/task.js";
 import { appendJournal } from "./journal/journal.js";
 import { archiveTask, saveTask, transitionTask } from "./tasks/task.js";
 import { resolveActiveTask } from "./tasks/task.js";
+import { resolveSafeProjectPath } from "../utils/paths.js";
+import { assertVerificationInputsFresh } from "./verification/input-freshness.js";
 
 export type WorkflowEntry = "bypass" | "create" | "resume" | "wait" | "fail-closed";
 export type WorkflowAction = "inspect" | "plan" | "change" | "review" | "verify";
@@ -58,9 +62,16 @@ export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceA
     const previous = latestByCheck.get(evidence.checkId);
     if (!previous || evidenceTime(evidence) >= evidenceTime(previous)) latestByCheck.set(evidence.checkId, evidence);
   }
-  const freshPasses = task.evidence.filter((evidence) => evidence.result === "pass" && isFresh(evidence, now, maxEvidenceAgeMs) && (!evidence.checkId || latestByCheck.get(evidence.checkId)?.id === evidence.id));
+  const freshPasses = task.evidence.filter((evidence) => evidence.result === "pass" && isFresh(evidence, now, maxEvidenceAgeMs) && (!evidence.checkId || latestByCheck.get(evidence.checkId)?.id === evidence.id) && (task.schemaVersion === 1 || isInputDigest(evidence.inputDigest)));
   if (required.some((check) => !freshPasses.some((evidence) => evidence.checkId === check.id))) return false;
-  return task.acceptanceCriteria.every((criterion) => criterion.status === "waived" || (criterion.status === "met" && criterion.evidenceIds.some((id) => freshPasses.some((evidence) => evidence.id === id))));
+  if (task.schemaVersion === 1) {
+    return task.acceptanceCriteria.every((criterion) => criterion.status === "waived" || (criterion.status === "met" && criterion.evidenceIds.some((id) => freshPasses.some((evidence) => evidence.id === id))));
+  }
+  const checks = new Map(task.validationPlan.map((check) => [check.id, check]));
+  return task.acceptanceCriteria.every((criterion) => criterion.status === "waived" || (criterion.status === "met" && criterion.evidenceIds.some((id) => {
+    const evidence = freshPasses.find((candidate) => candidate.id === id);
+    return evidence?.checkId !== undefined && checks.get(evidence.checkId)?.criterionIds.includes(criterion.id) === true;
+  })));
 }
 export function shouldResearch(materialUnknown: boolean): boolean { return materialUnknown; }
 export function shouldReassessArchitecture(failedHypotheses: number): boolean { return failedHypotheses >= 3; }
@@ -73,6 +84,10 @@ export function implementationStrategy(kind: "behavior" | "docs" | "wiring" | "s
 export function evidenceSupportsScope(evidence: Evidence, requiredScope: "focused" | "full", checkScope: "focused" | "full"): boolean { return evidence.result === "pass" && (requiredScope === "focused" || checkScope === "full"); }
 export async function finishWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, now = new Date().toISOString(), dependencies: WorkflowFinishDependencies = {}): Promise<TaskRecord> {
   if (task.status !== "verifying" || task.checkpoint !== "finishing") throw new Error("Task requires the verifying/finishing checkpoint before completion persistence.");
+  if (task.schemaVersion === 2) {
+    const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
+    await assertVerificationInputsFresh(projectRoot, harnixRoot, task);
+  }
   if (!canCompleteTask(task, Date.parse(now))) throw new Error("Task requires fresh complete verification before finishing.");
   const completed = transitionTask(task, "completed", "finishing", now);
   await (dependencies.saveTask ?? saveTask)(harnixRoot, completed);
@@ -80,22 +95,42 @@ export async function finishWorkflowTask(harnixRoot: string, journalPath: string
   await (dependencies.archiveTask ?? archiveTask)(harnixRoot, completed);
   return completed;
 }
-export async function continueWorkflowTask(harnixRoot: string): Promise<{ task: TaskRecord; contextPaths: string[] } | undefined> {
+export async function continueWorkflowTask(harnixRoot: string): Promise<{ task: TaskRecord; contextPaths: string[]; contextDrift: ContextDrift } | undefined> {
   const task = await resolveActiveTask(harnixRoot);
-  return task === undefined ? undefined : { task, contextPaths: [...new Set([...task.relevantPaths, ...task.relevantSpecs])].sort((left, right) => left.localeCompare(right)) };
+  if (task === undefined) return undefined;
+  const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
+  return {
+    task,
+    contextPaths: [...new Set([...task.relevantPaths, ...task.relevantSpecs])].sort((left, right) => left.localeCompare(right)),
+    contextDrift: await taskContextDrift(projectRoot, harnixRoot, task),
+  };
 }
 export function verificationStages(): ["compliance", "quality-security"] { return ["compliance", "quality-security"]; }
 export function isWithinRequestedScope(requested: string[], proposed: string[]): boolean { const allowed = new Set(requested); return proposed.every((item) => allowed.has(item)); }
 
 function isFresh(evidence: Evidence, now: number, maxAgeMs: number): boolean { const timestamp = Date.parse(evidence.recordedAt); return Number.isFinite(timestamp) && timestamp <= now && now - timestamp <= maxAgeMs; }
 function evidenceTime(evidence: Evidence): number { const parsed = Date.parse(evidence.recordedAt); return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY; }
+function isInputDigest(value: unknown): value is string { return typeof value === "string" && /^[a-f0-9]{64}$/u.test(value); }
 function completionEvidenceIds(task: TaskRecord): string[] {
   const supporting = new Set(task.acceptanceCriteria.filter((criterion) => criterion.status === "met").flatMap((criterion) => criterion.evidenceIds));
   for (const check of task.validationPlan.filter((candidate) => candidate.required)) {
-    const latest = task.evidence.filter((evidence) => evidence.checkId === check.id && evidence.result === "pass").sort((left, right) => evidenceTime(right) - evidenceTime(left))[0];
+    let latest: Evidence | undefined;
+    for (const evidence of task.evidence) {
+      if (evidence.checkId === check.id && evidence.result === "pass" && (latest === undefined || evidenceTime(evidence) >= evidenceTime(latest))) latest = evidence;
+    }
     if (latest) supporting.add(latest.id);
   }
   return [...supporting].sort((left, right) => left.localeCompare(right));
+}
+
+export async function taskContextDrift(projectRoot: string, harnixRoot: string, task: TaskRecord): Promise<ContextDrift> {
+  try {
+    const path = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}/context.json`);
+    return inspectContextDrift(projectRoot, await loadContextManifest(path));
+  } catch (error: unknown) {
+    if (isMissing(error)) return inspectContextDrift(projectRoot, undefined);
+    throw error;
+  }
 }
 
 function routeActiveTask(request: WorkflowRouteFacts, active: NonNullable<WorkflowRouteFacts["activeTask"]>): WorkflowRouteDecision {
@@ -129,3 +164,5 @@ function isKnownActiveState(active: NonNullable<WorkflowRouteFacts["activeTask"]
 function decision(entry: WorkflowEntry, mode: TaskMode | undefined, owner: WorkflowStageOwner | undefined, ...reasonCodes: string[]): WorkflowRouteDecision {
   return { entry, ...(mode === undefined ? {} : { mode }), ...(owner === undefined ? {} : { owner }), reasonCodes };
 }
+
+function isMissing(error: unknown): boolean { return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"; }

@@ -44,6 +44,8 @@ Map every claim to the command, inspection, or artifact that proves it. Run that
 
 For non-command checks, record what was inspected, the exact scope, time, result, and concise conclusion. Never expose secrets or machine-specific paths in persisted/public evidence.
 
+For each TaskRecord schema v2 required check, capture `harnix internal workflow snapshot --check <id>` immediately before the non-mutating check and again after its complete output is read. Persist a passing evidence item only when the two snapshots have the same `inputDigest`, and attach that digest to the evidence. A mismatch, empty glob, missing input, unreadable input, or unsafe path is failed freshness evidence, not a warning to ignore.
+
 ## Stage 1: compliance
 
 Read the user's latest request, task goal/non-goals, PRD/design/plan, applicable repository instructions, and acceptance criteria. Inspect the diff and mapped tests.
@@ -83,7 +85,7 @@ When fixes are authorized through an active task, handle one confirmed item at a
 
 ## Persist
 
-For every check, record timestamp, command or inspection, scope, exit/result, and outcome. Keep failed evidence; do not overwrite history with a passing rerun. Link acceptance criteria to fresh evidence IDs. Remain `verifying` while any required item is failed, missing, stale, or unread.
+For every check, record timestamp, command or inspection, scope, exit/result, outcome, and required v2 `inputDigest`. Keep failed evidence; do not overwrite history with a passing rerun. Link acceptance criteria only to fresh passing evidence whose declared `criterionIds` contains that criterion. Remain `verifying` while any required item is failed, missing, stale, or unread.
 
 ## Exit
 

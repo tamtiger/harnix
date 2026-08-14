@@ -1,0 +1,312 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260814-093533-taskrecord-v2-context-freshness",
+  "title": "Triển khai context drift và TaskRecord v2",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Triển khai đầy đủ C1–C3: chẩn đoán context drift khi tiếp tục, ánh xạ tiêu chí tới kiểm tra bắt buộc và evidence gắn với snapshot input xác định.",
+  "nonGoals": [
+    "Không thêm daemon, watcher, telemetry, hosted service, global memory, platform mới hoặc multi-agent bắt buộc.",
+    "Không tự động sửa source, context manifest, task v1 cũ hoặc trust/permission của host.",
+    "Không lưu source body, secret, đường dẫn tuyệt đối, prompt, reasoning, environment hoặc command output trong digest/snapshot.",
+    "Không commit, tạo branch/worktree, push, publish hoặc tạo pull request."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "c1-context-drift",
+      "text": "Workflow inspect/resume luôn báo contextDrift xác định; file changed, missing, unreadable và unverified được phát hiện an toàn, còn context cũ buộc skill Continue lưu checkpoint replan trước khi sử dụng.",
+      "status": "met",
+      "evidenceIds": [
+        "c1-compliance-green",
+        "compliance-review-green"
+      ]
+    },
+    {
+      "id": "c2-taskrecord-v2",
+      "text": "TaskRecord v2 bắt buộc criterionIds và inputs hợp lệ, đóng băng định nghĩa kiểm tra bắt buộc, yêu cầu evidence đúng giao điểm criterion/check, vẫn đọc chính xác v1 và chỉ migrate v1 chưa hoàn tất khi được ủy quyền rõ ràng.",
+      "status": "met",
+      "evidenceIds": [
+        "c2-c3-compliance-green",
+        "compliance-review-green"
+      ]
+    },
+    {
+      "id": "c3-input-freshness",
+      "text": "Required pass evidence v2 dùng inputDigest 64 hex từ snapshot @task-contract và input repository an toàn; save và finish fail closed khi snapshot đổi, thiếu, không đọc được hoặc không khớp, với diagnostic chỉ chứa check ID và đường dẫn tương đối an toàn.",
+      "status": "met",
+      "evidenceIds": [
+        "c2-c3-compliance-green",
+        "compliance-review-green"
+      ]
+    },
+    {
+      "id": "preservation-compatibility",
+      "text": "Task/journal v1 đã hoàn tất vẫn đọc được và nguyên byte; update/Doctor không tự viết lại dữ liệu user-owned; public command/JSON/exit semantics và đúng ba platform không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "c2-c3-compliance-green",
+        "compliance-review-green"
+      ]
+    },
+    {
+      "id": "docs-skills-release",
+      "text": "PRD, workflow, implementation plan, harness research, migration/Doctor behavior, workflow skills/templates, version, changelog và provenance được đồng bộ trong cùng thay đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "docs-parity-green",
+        "c2-c3-compliance-green",
+        "compliance-review-green"
+      ]
+    },
+    {
+      "id": "verification",
+      "text": "Focused RED–GREEN evidence, compliance review, quality/security review và toàn bộ acceptance mục 11 đều đạt bằng output mới.",
+      "status": "met",
+      "evidenceIds": [
+        "compliance-review-green",
+        "quality-review-green",
+        "exact-acceptance-green"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/context/context.ts",
+    "src/core/tasks/task.ts",
+    "src/core/workflow.ts",
+    "src/core/verification/input-freshness.ts",
+    "src/commands/internal-workflow.ts",
+    "src/cli-program.ts",
+    "src/skills",
+    "src/templates",
+    "test/unit/context.test.ts",
+    "test/unit/task-state.test.ts",
+    "test/unit/verification-inputs.test.ts",
+    "test/workflow/internal-workflow.test.ts",
+    "test/workflow/skill-sources.test.ts",
+    "test/integration/doctor.test.ts",
+    "test/migration",
+    "test/safety",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "package.json",
+    "CHANGELOG.md",
+    ".harnix/.template-hashes.json"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    ".harnix/workflow.md",
+    ".harnix/tasks/20260814-081624-harness-capability-research/plan.md",
+    ".harnix/tasks/20260814-081624-harness-capability-research/research/03-capability-decisions.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "c1-focused",
+      "description": "Kiểm tra context drift, workflow projection và routing Continue.",
+      "command": "pnpm exec vitest run test/unit/context.test.ts test/workflow/internal-workflow.test.ts test/workflow/routing.test.ts test/workflow/skill-sources.test.ts",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "c2-c3-focused",
+      "description": "Kiểm tra TaskRecord v1/v2, coverage, migration, snapshot input, digest và completion freshness.",
+      "command": "pnpm exec vitest run test/unit/task-state.test.ts test/unit/verification-inputs.test.ts test/workflow/internal-workflow.test.ts test/migration",
+      "scope": "focused",
+      "required": true
+    },
+    {
+      "id": "quality",
+      "description": "Chạy build, lint, typecheck, workflow, safety, migration và platform suites.",
+      "command": "pnpm build && pnpm lint && pnpm typecheck && pnpm test:workflow && pnpm test:safety && pnpm test:migration && pnpm test:platform",
+      "scope": "full",
+      "required": true
+    },
+    {
+      "id": "acceptance",
+      "description": "Chạy chính xác chuỗi acceptance mục 11 gồm test đầy đủ, package, smoke, performance, footprint, release scan và diff check.",
+      "command": "pnpm install --frozen-lockfile && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm test:acceptance && pnpm pack:check && pnpm smoke:tarball && pnpm measure:init && pnpm measure:footprint && pnpm scan:release && git diff --check",
+      "scope": "full",
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "c1-red",
+      "checkId": "c1-focused",
+      "recordedAt": "2026-08-14T02:40:00.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: context drift API/projection/routing tests failed because C1 behavior was absent.",
+      "artifactPaths": [
+        "test/unit/context.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "c1-green",
+      "checkId": "c1-focused",
+      "recordedAt": "2026-08-14T02:40:09.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 42 context drift, hidden workflow, routing and skill-source tests passed.",
+      "artifactPaths": [
+        "test/unit/context.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "c2-c3-red",
+      "checkId": "c2-c3-focused",
+      "recordedAt": "2026-08-14T02:41:42.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: schema v2, criterion intersection, migration and input freshness tests exposed the missing contracts.",
+      "artifactPaths": [
+        "test/unit/task-state.test.ts",
+        "test/unit/verification-inputs.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "c2-c3-green",
+      "checkId": "c2-c3-focused",
+      "recordedAt": "2026-08-14T02:52:19.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 41 TaskRecord v1/v2, migration, snapshot, sidecar, race, finish and symlink tests passed.",
+      "artifactPaths": [
+        "test/unit/task-state.test.ts",
+        "test/unit/verification-inputs.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/migration"
+      ]
+    },
+    {
+      "id": "docs-parity-green",
+      "recordedAt": "2026-08-14T03:01:02.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Docs/templates exception verified by 29 parity/schema tests plus successful build, lint and typecheck.",
+      "artifactPaths": [
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "src/skills",
+        "src/templates"
+      ]
+    },
+    {
+      "id": "debug-migration-race-red",
+      "recordedAt": "2026-08-14T03:04:01.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Compliance RED: hidden save incorrectly treated preserved pre-migration v1 pass evidence as a new v2 snapshot.",
+      "artifactPaths": [
+        "src/core/verification/input-freshness.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "debug-migration-race-green",
+      "recordedAt": "2026-08-14T03:04:24.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN: hidden save now excludes every previously persisted evidence ID regardless of source schema.",
+      "artifactPaths": [
+        "src/core/verification/input-freshness.ts",
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "c1-compliance-green",
+      "checkId": "c1-focused",
+      "recordedAt": "2026-08-14T03:08:20.3259372Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh compliance gate: 48 C1 context, workflow, routing and skill tests passed.",
+      "artifactPaths": [
+        "src/core/context/context.ts",
+        "src/core/workflow.ts",
+        "src/commands/internal-workflow.ts",
+        "test/unit/context.test.ts"
+      ]
+    },
+    {
+      "id": "c2-c3-compliance-green",
+      "checkId": "c2-c3-focused",
+      "recordedAt": "2026-08-14T03:08:21.3259372Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh compliance gate: 68 schema, sidecar, migration, Doctor, CLI and parity tests passed.",
+      "artifactPaths": [
+        "src/core/tasks/task.ts",
+        "src/core/verification/input-freshness.ts",
+        "src/commands/doctor.ts",
+        "test/unit/task-state.test.ts",
+        "test/unit/verification-inputs.test.ts"
+      ]
+    },
+    {
+      "id": "compliance-review-green",
+      "recordedAt": "2026-08-14T03:08:22.3259372Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Compliance review found and fixed three boundary defects; final scope, compatibility, safety, docs and public CLI inspection has no remaining finding.",
+      "artifactPaths": [
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/core",
+        "src/commands",
+        "src/skills",
+        "src/templates",
+        "test"
+      ]
+    },
+    {
+      "id": "quality-review-green",
+      "checkId": "quality",
+      "recordedAt": "2026-08-14T03:14:07.1743696Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh quality/security gate đạt: build, lint, typecheck, 54 workflow, 30 safety, 9 migration và 22 platform tests đều pass.",
+      "artifactPaths": [
+        "src",
+        "test/workflow",
+        "test/safety",
+        "test/migration",
+        "test/platform"
+      ]
+    },
+    {
+      "id": "exact-acceptance-green",
+      "checkId": "acceptance",
+      "recordedAt": "2026-08-14T03:14:08.1812431Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact acceptance mục 11 đạt mã thoát 0: 355 test toàn bộ (1 skipped), acceptance suites 161 unit/79 integration/9 migration/22 platform/54 workflow/30 safety; pack, tarball smoke, init/footprint measurement, release scan và git diff --check đều pass.",
+      "artifactPaths": [
+        "package.json",
+        "scripts/pack-check.mjs",
+        "scripts/smoke-tarball.mjs",
+        "scripts/measure-init.mjs",
+        "scripts/measure-footprint.mjs",
+        "scripts/scan-release.mjs"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-14T02:35:33.584239Z",
+  "updatedAt": "2026-08-14T03:14:15.161Z",
+  "completedAt": "2026-08-14T03:14:15.161Z"
+}

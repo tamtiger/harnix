@@ -1,8 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { readConfig } from "../core/config/config.js";
-import { finishWorkflowTask } from "../core/workflow.js";
+import { finishWorkflowTask, taskContextDrift } from "../core/workflow.js";
+import type { ContextDrift } from "../core/context/context.js";
 import {
   loadTask,
+  createTaskV2MigrationEvidence,
   resolveActiveTask,
   saveTask,
   saveTaskWithArtifacts,
@@ -15,16 +17,25 @@ import {
   type TaskRecord,
 } from "../core/tasks/task.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
+import {
+  computeVerificationInputSnapshot,
+  persistNewVerificationInputSnapshots,
+  type VerificationInputSnapshot,
+} from "../core/verification/input-freshness.js";
 
 export interface WorkflowSaveEnvelope {
   task: unknown;
   artifacts?: TaskArtifacts | undefined;
 }
 
-/** Hidden transport for agents; it preserves TaskRecord v1 and is deliberately JSON-only. */
-export async function inspectWorkflow(root: string): Promise<{ activeTask: TaskRecord | null }> {
+/** Hidden transport for agents; it preserves TaskRecord state and is deliberately JSON-only. */
+export async function inspectWorkflow(root: string): Promise<{ activeTask: TaskRecord | null; contextDrift: ContextDrift }> {
   const harnixRoot = await resolveSafeHarnixPath(root);
-  return { activeTask: await resolveActiveTask(harnixRoot) ?? null };
+  const activeTask = await resolveActiveTask(harnixRoot) ?? null;
+  return {
+    activeTask,
+    contextDrift: activeTask === null ? { state: "not-recorded", changes: [] } : await taskContextDrift(root, harnixRoot, activeTask),
+  };
 }
 
 export async function saveWorkflow(root: string, envelope: WorkflowSaveEnvelope): Promise<TaskRecord> {
@@ -36,6 +47,7 @@ export async function saveWorkflow(root: string, envelope: WorkflowSaveEnvelope)
 
   if (active && active.id !== candidate.id) throw new Error("Workflow save may update only the active task.");
   if (existing) {
+    assertSchemaEvolution(existing, candidate);
     preserveEvidence(existing.evidence, candidate.evidence);
     preserveObligations(existing, candidate);
     assertLegalTransition(existing, candidate);
@@ -46,6 +58,9 @@ export async function saveWorkflow(root: string, envelope: WorkflowSaveEnvelope)
 
   if (candidate.status === "completed") throw new Error("Workflow completion must use internal workflow finish.");
   if (candidate.status === "ready") await assertReadyRequirements(harnixRoot, candidate);
+  if (candidate.schemaVersion === 2) {
+    await persistNewVerificationInputSnapshots(root, harnixRoot, existing?.evidence ?? [], candidate);
+  }
   if (envelope.artifacts) await saveTaskWithArtifacts(harnixRoot, candidate, envelope.artifacts);
   else await saveTask(harnixRoot, candidate);
   if (!existing) await setActiveTask(harnixRoot, candidate.id);
@@ -89,6 +104,32 @@ function preserveObligations(previous: TaskRecord, next: TaskRecord): void {
     if (candidate.description !== check.description || candidate.command !== check.command || candidate.scope !== check.scope) {
       throw new Error(`Workflow save cannot mutate required validation check ${check.id}; add a check instead.`);
     }
+    if (previous.schemaVersion === 2 && next.schemaVersion === 2 && (JSON.stringify(candidate.criterionIds) !== JSON.stringify(check.criterionIds) || JSON.stringify(candidate.inputs) !== JSON.stringify(check.inputs))) {
+      throw new Error(`Workflow save cannot mutate required validation check ${check.id}; add a check instead.`);
+    }
+  }
+}
+
+export async function snapshotWorkflow(root: string, checkId: string): Promise<VerificationInputSnapshot> {
+  const harnixRoot = await resolveSafeHarnixPath(root);
+  const task = await resolveActiveTask(harnixRoot);
+  if (task === undefined) throw new Error("Workflow verification snapshot requires an active task.");
+  if (task.schemaVersion !== 2) throw new Error("Workflow verification snapshot requires TaskRecord schema v2.");
+  return computeVerificationInputSnapshot(root, task, checkId);
+}
+
+function assertSchemaEvolution(previous: TaskRecord, next: TaskRecord): void {
+  if (previous.schemaVersion === next.schemaVersion) return;
+  if (previous.schemaVersion === 2) throw new Error("Workflow save cannot downgrade TaskRecord schema.");
+  if (previous.status === "completed" || previous.checkpoint !== "replan" || next.checkpoint !== "replan" || previous.status !== next.status) {
+    throw new Error("TaskRecord v1 to v2 migration is allowed only for an unfinished task at the replan checkpoint.");
+  }
+  if (JSON.stringify(previous.acceptanceCriteria) !== JSON.stringify(next.acceptanceCriteria)) {
+    throw new Error("TaskRecord v1 to v2 migration must preserve acceptance criteria exactly.");
+  }
+  const expected = createTaskV2MigrationEvidence(previous.id, next.updatedAt);
+  if (next.evidence.length !== previous.evidence.length + 1 || JSON.stringify(next.evidence.slice(0, previous.evidence.length)) !== JSON.stringify(previous.evidence) || JSON.stringify(next.evidence.at(-1)) !== JSON.stringify(expected)) {
+    throw new Error("TaskRecord v1 to v2 migration requires exact appended migration evidence.");
   }
 }
 

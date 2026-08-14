@@ -119,6 +119,17 @@ Harnix kết hợp hai nguồn bằng một state machine chuẩn tại `docs/HA
 - Harnix loại mandatory commit/worktree/subagent/PR và auto-commit archive; finish chỉ verify, journal và complete state.
 
 Skill chỉ sở hữu một đoạn state machine; skill không được định nghĩa transition cạnh tranh. Kiro, Antigravity và Codex có syntax adapter khác nhau nhưng cùng behavior eval fixtures.
+
+### 3.7 Revalidation 2026-08-14: context drift và freshness theo input
+
+Nghiên cứu task `20260814-081624-harness-capability-research` đã đối chiếu contract hiện tại với failure modes resume/completion và chốt ba capability nội bộ, không thêm platform/service:
+
+- **C1 — context drift:** hidden inspect/continue luôn project `contextDrift`; hash thay đổi, file thiếu, unreadable và manifest entry không có hash được phân loại xác định. `stale` chỉ route qua persisted `replan` và context reselection, không tự sửa source/manifest.
+- **C2 — TaskRecord v2:** required checks sở hữu `criterionIds`/`inputs`; completion đòi criterion-linked evidence giao đúng declared check. V1 vẫn đọc nguyên semantics; completed v1 byte-preserved, unfinished v1 chỉ explicit migrate tại `replan` với deterministic migration evidence. Doctor chỉ báo `legacy-task-schema`.
+- **C3 — input freshness:** `@task-contract`, Full PRD/plan và safe repository globs tạo canonical SHA-256 `inputDigest`. Hidden snapshot chạy trước/sau check; save recompute để phát hiện race và ghi immutable relative-path/hash sidecar; finish recompute để chặn changed/missing/unreadable/unsafe input. Không persist source body, secret, absolute path, prompt, environment hay command output.
+
+Thiết kế sidecar task-owned được chọn thay vì watcher/daemon vì giữ workflow local, deterministic, no-network và cho diagnostic path-level mà không nhét per-file hash vào evidence công khai. Timestamp-only freshness bị thay thế cho TaskRecord v2; pre-migration v1 evidence vẫn bảo toàn nhưng không chứng minh completion v2.
+
 ## 4. Platform research decisions
 
 Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapters described by earlier Phase 1–5 research are retained only as legacy/provenance evidence; the current adopted contract is `GLOBAL_SETUP_REFACTOR_PLAN.md` §§2, 6–9.

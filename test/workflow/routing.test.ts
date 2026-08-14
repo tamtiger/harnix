@@ -5,7 +5,7 @@ import { canCompleteTask, continueWorkflowTask, evidenceSupportsScope, finishWor
 import { appendJournal } from "../../src/core/journal/journal.js";
 import { loadTask, resolveActiveTask, saveTask, setActiveTask, transitionTask } from "../../src/core/tasks/task.js";
 import { createResearchFinding } from "../../src/core/research.js";
-import type { TaskRecord } from "../../src/core/tasks/task.js";
+import type { TaskRecord, TaskRecordV2 } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -29,6 +29,35 @@ describe("workflow routing and completion evidence", () => {
   });
   it("requires fresh required evidence for completion", () => {
     const now = Date.parse("2026-08-07T10:00:00Z"); expect(canCompleteTask(task("2026-08-07T09:30:00Z"), now)).toBe(true); expect(canCompleteTask(task("2026-08-07T06:00:00Z"), now)).toBe(false);
+  });
+  it("requires TaskRecord v2 criterion evidence to intersect its declared check", () => {
+    const now = Date.parse("2026-08-07T10:00:00Z");
+    const digest = "a".repeat(64);
+    const candidate: TaskRecordV2 = {
+      ...task("2026-08-07T09:30:00Z"),
+      schemaVersion: 2 as const,
+      acceptanceCriteria: [
+        { id: "a", text: "done", status: "met" as const, evidenceIds: ["e2"] },
+        { id: "b", text: "waived", status: "waived" as const, evidenceIds: [], waiverReason: "not required" },
+      ],
+      validationPlan: [
+        { id: "check-a", description: "Run unit tests", scope: "full" as const, required: true, criterionIds: ["a"], inputs: ["@task-contract", "src/**/*.ts"] },
+        { id: "check-b", description: "Review documentation", scope: "full" as const, required: true, criterionIds: ["b"], inputs: ["@task-contract"] },
+      ],
+      evidence: [
+        { id: "e1", checkId: "check-a", recordedAt: "2026-08-07T09:30:00Z", result: "pass" as const, summary: "ok", artifactPaths: [], inputDigest: digest },
+        { id: "e2", checkId: "check-b", recordedAt: "2026-08-07T09:31:00Z", result: "pass" as const, summary: "ok", artifactPaths: [], inputDigest: digest },
+      ],
+    };
+    expect(canCompleteTask(candidate, now)).toBe(false);
+    expect(canCompleteTask({ ...candidate, acceptanceCriteria: [{ ...candidate.acceptanceCriteria[0]!, evidenceIds: ["e1"] }, candidate.acceptanceCriteria[1]!] }, now)).toBe(true);
+    const undigestedEvidence = candidate.evidence.map((evidence) => {
+      if (evidence.id !== "e1") return evidence;
+      const withoutDigest = { ...evidence };
+      delete withoutDigest.inputDigest;
+      return withoutDigest;
+    });
+    expect(canCompleteTask({ ...candidate, acceptanceCriteria: [{ ...candidate.acceptanceCriteria[0]!, evidenceIds: ["e1"] }, candidate.acceptanceCriteria[1]!], evidence: undigestedEvidence }, now)).toBe(false);
   });
   it("does not treat empty completion obligations as complete", () => {
     expect(canCompleteTask({ ...task("2026-08-07T09:30:00Z"), acceptanceCriteria: [], validationPlan: [], evidence: [] }, Date.parse("2026-08-07T10:00:00Z"))).toBe(false);
@@ -127,7 +156,8 @@ describe("workflow routing and completion evidence", () => {
   });
   it("continues from persisted active state with minimum deduplicated context", async () => {
     const root = await temporaryRepository(); const active = { ...task(new Date().toISOString()), relevantPaths: ["b", "a"], relevantSpecs: ["a", "spec"] };
-    await saveTask(root, active); await setActiveTask(root, active.id); expect((await continueWorkflowTask(root))?.contextPaths).toEqual(["a", "b", "spec"]);
+    await saveTask(root, active); await setActiveTask(root, active.id);
+    expect(await continueWorkflowTask(root)).toMatchObject({ contextPaths: ["a", "b", "spec"], contextDrift: { state: "not-recorded", changes: [] } });
   });
   it("runs compliance before quality/security and rejects scope creep", () => {
     expect(verificationStages()).toEqual(["compliance", "quality-security"]); expect(isWithinRequestedScope(["workflow"], ["workflow"])).toBe(true); expect(isWithinRequestedScope(["workflow"], ["workflow", "new-framework"])).toBe(false);

@@ -21,6 +21,11 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "hyphen between words",
     "implementation checklist",
     "Do not mark the task `ready`",
+    "stale context",
+    "context reselection",
+    "TaskRecord schema v2",
+    "criterionIds",
+    "@task-contract",
   ],
   "harnix-implement": [
     "Review the plan critically",
@@ -28,6 +33,8 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "minimal implementation",
     "technical feedback",
     "implementation checklist",
+    "internal workflow snapshot",
+    "inputDigest",
   ],
   "harnix-check": [
     "Map every claim",
@@ -43,6 +50,8 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "ready-with-fixes",
     "omitted checks",
     "residual risk",
+    "internal workflow snapshot",
+    "inputDigest",
   ],
   "harnix-finish-work": [
     "active pointer",
@@ -50,12 +59,18 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "Never commit",
     "residual risks",
     "project-specific release instruction",
+    "verification-inputs.json",
   ],
   "harnix-continue": [
     "routing table",
     "planning",
     "in_progress",
     "verifying",
+    "contextDrift",
+    "checkpoint `replan`",
+    "reselect context",
+    "legacy-task-schema",
+    "v1 to v2 migration",
   ],
   "harnix-research": [
     "source authority",

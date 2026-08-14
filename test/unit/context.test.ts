@@ -1,12 +1,52 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildContext, loadContextManifest, rankContext, saveContextManifest } from "../../src/core/context/context.js";
+import { buildContext, inspectContextDrift, loadContextManifest, rankContext, saveContextManifest, type ContextManifest } from "../../src/core/context/context.js";
+import { sha256 } from "../../src/utils/hashing.js";
+import { UnsafeProjectPathError } from "../../src/utils/paths.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
 describe("context", () => {
+  it("reports deterministic current, changed, missing, unreadable, and unverified context state", async () => {
+    const root = await temporaryRepository();
+    await writeFile(join(root, "current.md"), "current");
+    await writeFile(join(root, "changed.md"), "changed-now");
+    await writeFile(join(root, "unreadable.md"), "private");
+    const manifest = contextManifest([
+      { path: "current.md", contentHash: sha256("current") },
+      { path: "changed.md", contentHash: sha256("changed-before") },
+      { path: "missing.md", contentHash: sha256("missing-before") },
+      { path: "unreadable.md", contentHash: sha256("private") },
+      { path: "unverified.md" },
+    ]);
+
+    await expect(inspectContextDrift(root, manifest, {
+      readFile: async (path) => path.endsWith("unreadable.md") ? Promise.reject(new Error("SECRET_ABSOLUTE_PATH")) : readFile(path, "utf8"),
+    })).resolves.toEqual({
+      state: "stale",
+      changes: [
+        { path: "changed.md", kind: "changed" },
+        { path: "missing.md", kind: "missing" },
+        { path: "unreadable.md", kind: "unreadable" },
+        { path: "unverified.md", kind: "unverified" },
+      ],
+    });
+    await expect(inspectContextDrift(root, contextManifest([{ path: "current.md", contentHash: sha256("current") }]))).resolves.toEqual({ state: "current", changes: [] });
+    await expect(inspectContextDrift(root, undefined)).resolves.toEqual({ state: "not-recorded", changes: [] });
+  });
+
+  it("reports a path-containment escape as unreadable without exposing the external target", async () => {
+    const root = await temporaryRepository();
+    await expect(inspectContextDrift(root, contextManifest([{ path: "linked.md", contentHash: sha256("secret") }]), {
+      resolvePath: async () => { throw new UnsafeProjectPathError("SECRET_ABSOLUTE_PATH"); },
+    })).resolves.toEqual({
+      state: "stale",
+      changes: [{ path: "linked.md", kind: "unreadable" }],
+    });
+  });
+
   it("ranks pins and additive signals with deterministic ties", () => {
     const ranked = rankContext([{ path: "b", reason: "", priority: 0, pinned: false, states: [] }, { path: "a", reason: "", priority: 0, pinned: true, states: [] }], { references: ["b"] });
     expect(ranked.map((item) => item.path)).toEqual(["a", "b"]);
@@ -108,3 +148,14 @@ describe("context", () => {
     expect(result.manifest.omitted).toContainEqual({ path: "oversized.md", reason: "budget" });
   });
 });
+
+function contextManifest(entries: Array<{ path: string; contentHash?: string }>): ContextManifest {
+  return {
+    generator: "harnix",
+    schemaVersion: 1,
+    taskId: "task",
+    maxCharacters: 1000,
+    entries: entries.map((entry) => ({ ...entry, reason: "test", priority: 0, pinned: false, states: [] })),
+    omitted: [],
+  };
+}

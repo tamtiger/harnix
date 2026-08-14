@@ -27,7 +27,7 @@ Reread:
 - current diff/status and user-owned changes;
 - omitted checks, waivers, and residual risks.
 
-Confirm that evidence still describes the current files. If files changed after the last relevant check, verification is stale and must run again.
+Confirm that evidence still describes the current files. For TaskRecord schema v2, treat the task-owned `verification-inputs.json` snapshot as immutable workflow state and use hidden workflow finish so Harnix recomputes every latest required pass. If it reports changed/missing relative paths or a task-contract mismatch, verification is stale and must run again; timestamps alone are insufficient.
 
 ## Persist completion safely
 

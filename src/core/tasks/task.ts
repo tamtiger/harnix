@@ -6,11 +6,33 @@ export type TaskMode = "lite" | "full";
 export type TaskStatus = "planning" | "ready" | "in_progress" | "verifying" | "blocked" | "completed";
 export type WorkflowCheckpoint = "triage" | "planning" | "ready" | "implementing" | "debugging" | "replan" | "verifying" | "finishing";
 export interface AcceptanceCriterion { id: string; text: string; status: "pending" | "met" | "waived"; evidenceIds: string[]; waiverReason?: string; }
-export interface ValidationCheck { id: string; description: string; command?: string; scope: "focused" | "full"; required: boolean; }
-export interface Evidence { id: string; checkId?: string; recordedAt: string; result: "pass" | "fail" | "skipped"; exitCode?: number; summary: string; artifactPaths: string[]; }
+interface ValidationCheckBase { id: string; description: string; command?: string; scope: "focused" | "full"; required: boolean; }
+export interface ValidationCheckV1 extends ValidationCheckBase { criterionIds?: never; inputs?: never; }
+export interface ValidationCheckV2 extends ValidationCheckBase { criterionIds: string[]; inputs: string[]; }
+export type ValidationCheck = ValidationCheckV1 | ValidationCheckV2;
+interface EvidenceBase { id: string; checkId?: string; recordedAt: string; result: "pass" | "fail" | "skipped"; exitCode?: number; summary: string; artifactPaths: string[]; }
+export interface EvidenceV1 extends EvidenceBase { inputDigest?: never; }
+export interface EvidenceV2 extends EvidenceBase { inputDigest?: string; }
+export type Evidence = EvidenceV1 | EvidenceV2;
 export interface TaskBlocker { kind: "decision" | "authority" | "credential" | "external" | "repository"; summary: string; nextAction: string; resumeStatus: "planning" | "ready" | "in_progress" | "verifying"; }
-export interface TaskRecord { generator: "harnix"; schemaVersion: 1; id: string; title: string; mode: TaskMode; status: TaskStatus; checkpoint: WorkflowCheckpoint; goal: string; nonGoals: string[]; acceptanceCriteria: AcceptanceCriterion[]; relevantPaths: string[]; relevantSpecs: string[]; validationPlan: ValidationCheck[]; evidence: Evidence[]; blocker?: TaskBlocker; createdAt: string; updatedAt: string; completedAt?: string; }
+interface TaskRecordBase { generator: "harnix"; id: string; title: string; mode: TaskMode; status: TaskStatus; checkpoint: WorkflowCheckpoint; goal: string; nonGoals: string[]; acceptanceCriteria: AcceptanceCriterion[]; relevantPaths: string[]; relevantSpecs: string[]; blocker?: TaskBlocker; createdAt: string; updatedAt: string; completedAt?: string; }
+export interface TaskRecordV1 extends TaskRecordBase { schemaVersion: 1; validationPlan: ValidationCheckV1[]; evidence: EvidenceV1[]; }
+export interface TaskRecordV2 extends TaskRecordBase { schemaVersion: 2; validationPlan: ValidationCheckV2[]; evidence: EvidenceV2[]; }
+export type TaskRecord = TaskRecordV1 | TaskRecordV2;
 export interface TaskValidationOptions { allowUnsafeCompletedEvidenceArtifacts?: boolean | undefined; }
+
+export const TASK_V2_MIGRATION_EVIDENCE_ID = "task-schema-v1-to-v2";
+export const TASK_V2_MIGRATION_SUMMARY = "Migrated TaskRecord schema from v1 to v2 with explicit authorization at replan.";
+
+export function createTaskV2MigrationEvidence(taskId: string, recordedAt: string): EvidenceV2 {
+  return {
+    id: TASK_V2_MIGRATION_EVIDENCE_ID,
+    recordedAt,
+    result: "pass",
+    summary: TASK_V2_MIGRATION_SUMMARY,
+    artifactPaths: [`.harnix/tasks/${taskId}/task.json`],
+  };
+}
 
 export class TaskValidationError extends Error { override name = "TaskValidationError"; }
 const taskIdPattern = /^\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$/u;
@@ -24,15 +46,17 @@ const legalCheckpoints: Record<Exclude<TaskStatus, "blocked">, readonly Workflow
 };
 
 export function validateTask(value: unknown, options: TaskValidationOptions = {}): TaskRecord {
-  if (!isRecord(value) || value.generator !== "harnix" || value.schemaVersion !== 1) throw new TaskValidationError("Invalid or unsupported task record.");
+  if (!isRecord(value) || value.generator !== "harnix" || (value.schemaVersion !== 1 && value.schemaVersion !== 2)) throw new TaskValidationError("Invalid or unsupported task record.");
   for (const key of ["id", "title", "goal", "createdAt", "updatedAt"]) if (typeof value[key] !== "string") throw new TaskValidationError(`Task ${key} is required.`);
   if (!taskIdPattern.test(String(value.id)) || !["lite", "full"].includes(String(value.mode)) || !Object.keys(transitions).includes(String(value.status)) || !["triage", "planning", "ready", "implementing", "debugging", "replan", "verifying", "finishing"].includes(String(value.checkpoint))) throw new TaskValidationError("Task identity, mode, status, or checkpoint is invalid.");
   if (!Array.isArray(value.nonGoals) || !Array.isArray(value.acceptanceCriteria) || !Array.isArray(value.relevantPaths) || !Array.isArray(value.relevantSpecs) || !Array.isArray(value.validationPlan) || !Array.isArray(value.evidence)) throw new TaskValidationError("Task arrays are required.");
   if (!isIsoTimestamp(value.createdAt) || !isIsoTimestamp(value.updatedAt) || Date.parse(value.updatedAt) < Date.parse(value.createdAt)) throw new TaskValidationError("Task timestamp is invalid.");
   if (!(value.nonGoals as unknown[]).every((item) => typeof item === "string") || !(value.relevantPaths as unknown[]).every((item) => typeof item === "string") || !(value.relevantSpecs as unknown[]).every((item) => typeof item === "string")) throw new TaskValidationError("Task path and goal arrays are invalid.");
   if (!(value.validationPlan as unknown[]).every((item) => isRecord(item) && validId(item.id) && typeof item.description === "string" && ["focused", "full"].includes(String(item.scope)) && typeof item.required === "boolean" && (item.command === undefined || typeof item.command === "string"))) throw new TaskValidationError("Validation plan is invalid.");
+  if (value.schemaVersion === 1 && !(value.validationPlan as unknown[]).every((item) => isRecord(item) && item.criterionIds === undefined && item.inputs === undefined)) throw new TaskValidationError("TaskRecord v1 validation plan is invalid.");
   const allowUnsafeCompletedEvidenceArtifacts = options.allowUnsafeCompletedEvidenceArtifacts === true && value.status === "completed";
   if (!(value.evidence as unknown[]).every((item) => isRecord(item) && validId(item.id) && (item.checkId === undefined || validId(item.checkId)) && typeof item.recordedAt === "string" && isIsoTimestamp(item.recordedAt) && ["pass", "fail", "skipped"].includes(String(item.result)) && (item.exitCode === undefined || Number.isInteger(item.exitCode)) && typeof item.summary === "string" && Array.isArray(item.artifactPaths) && (allowUnsafeCompletedEvidenceArtifacts || (item.artifactPaths as unknown[]).every(isSafeRepositoryPath)))) throw new TaskValidationError("Evidence is invalid.");
+  if (value.schemaVersion === 1 && !(value.evidence as unknown[]).every((item) => isRecord(item) && item.inputDigest === undefined)) throw new TaskValidationError("TaskRecord v1 evidence is invalid.");
   if (!(value.acceptanceCriteria as unknown[]).every((item) => isRecord(item) && typeof item.id === "string" && typeof item.text === "string" && ["pending", "met", "waived"].includes(String(item.status)) && Array.isArray(item.evidenceIds) && (item.evidenceIds as unknown[]).every((id) => typeof id === "string"))) throw new TaskValidationError("Acceptance criteria are invalid.");
   ensureUnique((value.acceptanceCriteria as AcceptanceCriterion[]).map((item) => item.id), "acceptance criterion");
   ensureUnique((value.validationPlan as ValidationCheck[]).map((item) => item.id), "validation check");
@@ -45,6 +69,7 @@ export function validateTask(value: unknown, options: TaskValidationOptions = {}
     if (check === undefined) throw new TaskValidationError("Evidence check reference is invalid.");
     if (check.command !== undefined && !Number.isInteger(evidence.exitCode)) throw new TaskValidationError("Command evidence requires an integer exit code.");
   }
+  if (value.schemaVersion === 2) validateV2Contracts(value, checks);
   const evidenceIds = new Set((value.evidence as Evidence[]).map((e) => e.id));
   for (const criterion of value.acceptanceCriteria as AcceptanceCriterion[]) {
     if ((criterion.status === "met" && !criterion.evidenceIds.some((id) => evidenceIds.has(id))) || (criterion.status === "waived" && !criterion.waiverReason?.trim())) throw new TaskValidationError("Acceptance criterion evidence/waiver is invalid.");
@@ -56,6 +81,44 @@ export function validateTask(value: unknown, options: TaskValidationOptions = {}
   if (!legalCheckpoints[checkpointOwner].includes(value.checkpoint as WorkflowCheckpoint)) throw new TaskValidationError("Task status/checkpoint combination is invalid.");
   if (value.status === "completed" && (!value.completedAt || !isIsoTimestamp(value.completedAt) || Date.parse(value.completedAt) < Date.parse(value.updatedAt) || (value.acceptanceCriteria as AcceptanceCriterion[]).some((criterion) => criterion.status === "pending"))) throw new TaskValidationError("Completed task is missing completion requirements.");
   return value as unknown as TaskRecord;
+}
+
+function validateV2Contracts(value: Record<string, unknown>, checks: Map<string, ValidationCheck>): void {
+  const criteria = value.acceptanceCriteria as AcceptanceCriterion[];
+  if (criteria.some((criterion) => !validId(criterion.id))) throw new TaskValidationError("TaskRecord v2 acceptance criterion ID is invalid.");
+  const criterionIds = new Set(criteria.map((criterion) => criterion.id));
+  const validationPlan = value.validationPlan as ValidationCheckV2[];
+  for (const check of validationPlan) {
+    if (!Array.isArray(check.criterionIds) || !check.criterionIds.every(validId) || !isSortedUnique(check.criterionIds) || (check.required && check.criterionIds.length === 0)) {
+      throw new TaskValidationError("TaskRecord v2 validation criterion coverage is invalid.");
+    }
+    if (check.criterionIds.some((id) => !criterionIds.has(id))) throw new TaskValidationError("TaskRecord v2 validation criterion reference is invalid.");
+    if (!Array.isArray(check.inputs) || check.inputs.length === 0 || !check.inputs.every(isSafeVerificationInput) || !isSortedUnique(check.inputs) || !check.inputs.includes("@task-contract")) {
+      throw new TaskValidationError("TaskRecord v2 validation inputs are invalid.");
+    }
+    if (isBehavioralCheck(check) && check.inputs.every((input) => input === "@task-contract")) {
+      throw new TaskValidationError("Behavioral TaskRecord v2 validation requires a repository input.");
+    }
+  }
+  const covered = new Set(validationPlan.filter((check) => check.required).flatMap((check) => check.criterionIds));
+  if (criteria.some((criterion) => criterion.status !== "waived" && !covered.has(criterion.id))) {
+    throw new TaskValidationError("TaskRecord v2 criterion coverage is incomplete.");
+  }
+  const evidenceList = value.evidence as EvidenceV2[];
+  const migrationIndex = evidenceList.findIndex((evidence) => evidence.id === TASK_V2_MIGRATION_EVIDENCE_ID);
+  if (migrationIndex >= 0 && JSON.stringify(evidenceList[migrationIndex]) !== JSON.stringify(createTaskV2MigrationEvidence(String(value.id), evidenceList[migrationIndex]!.recordedAt))) {
+    throw new TaskValidationError("TaskRecord v2 migration evidence is invalid.");
+  }
+  for (const [index, evidence] of evidenceList.entries()) {
+    const check = evidence.checkId === undefined ? undefined : checks.get(evidence.checkId);
+    const preservedLegacyPass = migrationIndex > index;
+    if (evidence.result === "pass" && check?.required === true && !isInputDigest(evidence.inputDigest) && !preservedLegacyPass) {
+      throw new TaskValidationError("Required passing TaskRecord v2 evidence requires a valid input digest.");
+    }
+    if (evidence.inputDigest !== undefined && !isInputDigest(evidence.inputDigest)) {
+      throw new TaskValidationError("TaskRecord v2 evidence input digest is invalid.");
+    }
+  }
 }
 
 export function transitionTask(task: TaskRecord, status: TaskStatus, checkpoint: WorkflowCheckpoint, now = new Date().toISOString(), blocker?: TaskBlocker): TaskRecord {
@@ -122,3 +185,14 @@ function isIsoTimestamp(value: unknown): value is string { return typeof value =
 function validId(value: unknown): value is string { return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/u.test(value); }
 function isSafeRepositoryPath(value: unknown): value is string { if (typeof value !== "string") return false; try { return normalizeRepositoryPath(value, { allowRoot: true }) === value; } catch { return false; } }
 function ensureUnique(ids: readonly string[], label: string): void { if (new Set(ids).size !== ids.length) throw new TaskValidationError(`Duplicate ${label} ID.`); }
+function isSortedUnique(values: readonly string[]): boolean { return new Set(values).size === values.length && values.every((value, index) => index === 0 || values[index - 1]! < value); }
+function isSafeVerificationInput(value: unknown): value is string {
+  if (value === "@task-contract") return true;
+  if (typeof value !== "string" || value.length === 0 || value.startsWith("!") || value.includes("\\") || value.startsWith("/") || /^[A-Za-z]:/u.test(value) || value.includes("\0")) return false;
+  const segments = value.split("/");
+  return segments.every((segment) => segment.length > 0 && segment !== "." && segment !== "..");
+}
+function isBehavioralCheck(check: ValidationCheckV2): boolean {
+  return /(?:^|[^a-z])(repository|source|file|build|test|lint|typecheck|package|runtime|code|compile|smoke|acceptance)(?:$|[^a-z])/iu.test(`${check.id} ${check.description} ${check.command ?? ""}`);
+}
+function isInputDigest(value: unknown): value is string { return typeof value === "string" && /^[a-f0-9]{64}$/u.test(value); }

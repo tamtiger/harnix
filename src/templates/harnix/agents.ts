@@ -52,12 +52,14 @@ Use the skills in this order when their stage applies:
 - harnix-finish-work: complete and archive only after every acceptance criterion and required check passes.
 - harnix-research and harnix-debug: use only for material unknowns or failures; harnix-continue restores persisted work.
 
-The persisted lifecycle is planning -> ready -> in_progress -> verifying -> completed. A blocked task resumes only to its recorded status. Do not skip gates or treat stale, partial, or inferred output as verification.
+The persisted lifecycle is planning -> ready -> in_progress -> verifying -> completed. New tasks use TaskRecord schema v2 with criterion-linked checks and input snapshots; schema v1 is legacy read-only unless explicitly migrated at replan. A blocked task resumes only to its recorded status. Do not skip gates or treat stale, partial, or inferred output as verification.
 
 Use Evidence → Requirements → Plan → Execute → Verify → Persist as the semantic lifecycle. Feature, bugfix, hotfix, refactor, test, docs, maintenance, migration, dependency, security, performance, and release are work kinds that choose risk and validation, not separate workflows. Standalone read-only code review is Bypass; review-and-fix is a task mutation.
 
 Operating rules:
 
+- Luôn dùng tiếng Việt khi tạo và cập nhật task Harnix, gồm nội dung hướng người dùng trong \`task.json\`, \`prd.md\`, \`plan.md\`, \`design.md\`, research và journal. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
+- On continuation, inspect \`contextDrift\`; stale context returns to replan before reselection. For each required v2 check, use the hidden workflow snapshot before and after verification and persist only a matching \`inputDigest\`.
 - Preserve user-owned files, tasks, specs, research, journals, credentials, and unrelated configuration.
 - Keep generated paths repository-relative and never expose secrets, prompts, or machine-specific absolute paths in output.
 - Run harnix doctor when managed files, platform setup, or project state may have drifted.
