@@ -60,3 +60,6 @@ export interface RepoMapQueryResult {
   reasons: string[];
   outline: Pick<RepoMapRecordV1, "extension" | "packagePath" | "language" | "kind" | "identifiers" | "headings" | "importTargets">;
 }
+
+export type RepoMapRankerVersion = 1 | 2;
+export interface RepoMapRankingOptions { rankerVersion?: RepoMapRankerVersion | undefined; }

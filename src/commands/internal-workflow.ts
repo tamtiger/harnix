@@ -17,6 +17,9 @@ import {
   type TaskRecord,
 } from "../core/tasks/task.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
+import { createContextSelectionSnapshot } from "../core/context/selection-freshness.js";
+import { contextSelectionInput } from "../core/workflow.js";
+import { auditReadyTrace, type ReadyTraceReportV1 } from "../core/tasks/ready-trace.js";
 import {
   computeVerificationInputSnapshot,
   persistNewVerificationInputSnapshots,
@@ -34,7 +37,7 @@ export async function inspectWorkflow(root: string): Promise<{ activeTask: TaskR
   const activeTask = await resolveActiveTask(harnixRoot) ?? null;
   return {
     activeTask,
-    contextDrift: activeTask === null ? { state: "not-recorded", changes: [] } : await taskContextDrift(root, harnixRoot, activeTask),
+    contextDrift: activeTask === null ? { state: "not-recorded", changes: [], selectionChanges: [] } : await taskContextDrift(root, harnixRoot, activeTask),
   };
 }
 
@@ -57,11 +60,17 @@ export async function saveWorkflow(root: string, envelope: WorkflowSaveEnvelope)
   }
 
   if (candidate.status === "completed") throw new Error("Workflow completion must use workflow --finish.");
-  if (candidate.status === "ready") await assertReadyRequirements(harnixRoot, candidate);
+  if (candidate.status === "ready") await assertReadyRequirements(harnixRoot, candidate, envelope.artifacts);
   if (candidate.schemaVersion === 2) {
     await persistNewVerificationInputSnapshots(root, harnixRoot, existing?.evidence ?? [], candidate);
   }
-  if (envelope.artifacts) await saveTaskWithArtifacts(harnixRoot, candidate, envelope.artifacts);
+  const artifacts = envelope.artifacts?.context === undefined
+    ? envelope.artifacts
+    : {
+      ...envelope.artifacts,
+      contextSelection: createContextSelectionSnapshot(await contextSelectionInput(root, harnixRoot, candidate, envelope.artifacts.context, true)),
+    };
+  if (artifacts) await saveTaskWithArtifacts(harnixRoot, candidate, artifacts);
   else await saveTask(harnixRoot, candidate);
   if (!existing) await setActiveTask(harnixRoot, candidate.id);
   return candidate;
@@ -119,6 +128,18 @@ export async function snapshotWorkflow(root: string, checkId: string): Promise<V
   return computeVerificationInputSnapshot(root, task, checkId);
 }
 
+export async function auditWorkflow(root: string): Promise<ReadyTraceReportV1> {
+  const harnixRoot = await resolveSafeHarnixPath(root);
+  const task = await resolveActiveTask(harnixRoot);
+  if (task === undefined || task.mode !== "full") throw new Error("Workflow ready audit requires an active Full task.");
+  const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
+  const [prd, plan] = await Promise.all([
+    readFile(await resolveSafeProjectPath(taskDirectory, "prd.md"), "utf8"),
+    readFile(await resolveSafeProjectPath(taskDirectory, "plan.md"), "utf8"),
+  ]);
+  return auditReadyTrace({ task, prd, plan });
+}
+
 function assertSchemaEvolution(previous: TaskRecord, next: TaskRecord): void {
   if (previous.schemaVersion === next.schemaVersion) return;
   if (previous.schemaVersion === 2) throw new Error("Workflow save cannot downgrade TaskRecord schema.");
@@ -134,7 +155,7 @@ function assertSchemaEvolution(previous: TaskRecord, next: TaskRecord): void {
   }
 }
 
-async function assertReadyRequirements(harnixRoot: string, task: TaskRecord): Promise<void> {
+async function assertReadyRequirements(harnixRoot: string, task: TaskRecord, artifacts?: TaskArtifacts): Promise<void> {
   if (task.acceptanceCriteria.length === 0) throw new Error("Workflow ready requires at least one acceptance criterion.");
   if (!task.validationPlan.some((check) => check.required)) throw new Error("Workflow ready requires at least one required validation check.");
   if (task.mode !== "full") return;
@@ -144,10 +165,11 @@ async function assertReadyRequirements(harnixRoot: string, task: TaskRecord): Pr
     const prdPath = await resolveSafeProjectPath(taskDirectory, "prd.md");
     const planPath = await resolveSafeProjectPath(taskDirectory, "plan.md");
     const [prd, plan] = await Promise.all([
-      readFile(prdPath, "utf8"),
-      readFile(planPath, "utf8"),
+      artifacts?.prd ?? readFile(prdPath, "utf8"),
+      artifacts?.plan ?? readFile(planPath, "utf8"),
     ]);
     if (!prd.trim() || !plan.trim()) throw new Error("Full tasks require non-empty prd.md and plan.md at ready.");
+    if (auditReadyTrace({ task, prd, plan }).status !== "pass") throw new Error("Full task ready trace audit failed; run harnix workflow --audit-ready.");
   } catch (error: unknown) {
     if (isMissing(error)) throw new Error("Full tasks require non-empty prd.md and plan.md at ready.");
     throw error;

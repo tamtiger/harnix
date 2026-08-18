@@ -13,8 +13,8 @@
       "path": ".harnix/workflow.md",
       "sourceId": "workflow",
       "scope": "project",
-      "generatedHash": "bc8606eb40a84319840f75ac8cb10a100c366c4672cdcb2625ccae1c5bb677f6",
-      "generatorVersion": "1.0.7"
+      "generatedHash": "c8e5900af6e240b86cf17f46305c54cada9c6a551572f2b797fa3a927e950216",
+      "generatorVersion": "1.0.8"
     }
   ]
 }

@@ -1,0 +1,549 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260818-214545-context-selection-freshness",
+  "title": "Triển khai bốn capability harness đã chọn",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Triển khai trong một Full task bốn capability đã được research chọn: context selection-basis freshness, deterministic ready trace audit, untrusted learning-promotion guard và dependency-aware repo-map ranking; mỗi CAP có RED→GREEN checkpoint, compatibility/rollback riêng và cùng đi qua exact acceptance trước completion.",
+  "nonGoals": [
+    "Không triển khai các capability deferred/rejected: living spec/spec delta, explicit no-spec marker, network platform probe, context condenser, auto-memory, hosted runtime, mandatory multi-agent hoặc workflow presets.",
+    "Không thêm ContextManifest v2, LearningCandidate v2, RepoMap v2, package/workspace/service/platform mới, telemetry, daemon, embedding, vector database hoặc silent runtime network.",
+    "Không tự rewrite PRD/plan/spec, tự promote learning, tự sửa journal, tự refresh/scan repo-map trong inspect/hook hoặc tự chạy test từ repo-map query.",
+    "Không lưu raw source, secret, credential value, prompt, environment, command output hoặc đường dẫn tuyệt đối trong sidecar, diagnostics, learning review hay repo-map output.",
+    "Không commit, branch, worktree, merge, push, publish hoặc tạo pull request."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "selection-snapshot-contract",
+      "text": "Khi context được persist qua hidden workflow transport, Harnix validate ContextManifest v1, tạo atomically task-owned context-selection.json v1 và bind taskId, selectorVersion, repo-map inventoryFingerprint, canonical selectionInputHash cùng selectionResultHash; sidecar chỉ chứa hash/fingerprint và metadata repository-relative an toàn.",
+      "status": "met",
+      "evidenceIds": [
+        "selection-contract-focused-final-20260818",
+        "exact-acceptance-final-20260818"
+      ]
+    },
+    {
+      "id": "selection-drift-inspection",
+      "text": "workflow --inspect/continue luôn trả contextDrift xác định với selectionChanges sorted; cache inventory, task/config/guide signals hoặc selector version đổi làm state stale với reason tương ứng, content-only drift vẫn giữ diagnostic path hiện tại, còn snapshot không đổi trả current.",
+      "status": "met",
+      "evidenceIds": [
+        "selection-workflow-focused-final-20260818",
+        "exact-acceptance-final-20260818"
+      ]
+    },
+    {
+      "id": "legacy-safety-compatibility",
+      "text": "Context manifest v1 không có sidecar vẫn đọc được và được disclose not-recorded thay vì tự migrate; sidecar/cache thiếu, corrupt, future, task mismatch hoặc binding mismatch fail closed không lộ path máy; hook ngoài project vẫn no-op và không scan/refresh/query/write repo-map.",
+      "status": "met",
+      "evidenceIds": [
+        "selection-contract-focused-final-20260818",
+        "selection-workflow-focused-final-20260818",
+        "exact-acceptance-final-20260818"
+      ]
+    },
+    {
+      "id": "docs-release",
+      "text": "PRD, workflow, implementation plan, harness research/mapping, canonical skills/templates, package patch version và CHANGELOG mô tả cùng một contract sidecar, replan và rollback; ba capability roadmap còn lại vẫn được defer thành task riêng.",
+      "status": "waived",
+      "evidenceIds": [],
+      "waiverReason": "Yêu cầu người dùng ngày 2026-08-18 mở rộng active task từ CAP-01 sang triển khai toàn bộ bốn CAP; phần deferral trong criterion cũ không còn là outcome mong muốn. Obligation docs/release thay thế được thêm bằng criterion program-docs-release."
+    },
+    {
+      "id": "verification",
+      "text": "Mỗi behavior slice có RED trước GREEN, sau đó compliance review, quality/security review và toàn bộ acceptance sequence mục 11 đều pass bằng evidence mới, gồm cold-path performance và fake-home tarball smoke.",
+      "status": "met",
+      "evidenceIds": [
+        "exact-acceptance-final-20260818"
+      ]
+    },
+    {
+      "id": "ready-trace-contract",
+      "text": "Full PRD/plan có grammar trace v1 bounded và deterministic; hidden workflow --audit-ready trả ReadyTraceReportV1 JSON ổn định, phát hiện criterion/slice/check/path/placeholder lỗi mà không execute Markdown hoặc lộ source/path máy.",
+      "status": "met",
+      "evidenceIds": [
+        "ready-trace-focused-final-20260818",
+        "program-quality-security-final-20260818"
+      ]
+    },
+    {
+      "id": "ready-trace-enforcement",
+      "text": "Mọi Full transition hoặc re-transition vào ready sau khi capability được cài phải pass cùng ready-trace auditor; Lite không thêm ceremony, task completed/ready lịch sử byte-preserve và unfinished legacy chỉ nhận obligation khi explicit replan.",
+      "status": "met",
+      "evidenceIds": [
+        "ready-trace-focused-final-20260818",
+        "program-quality-security-final-20260818"
+      ]
+    },
+    {
+      "id": "learning-review-boundary",
+      "text": "Promotion proposal serialize statement như untrusted JSON-string data trong boundary không thể thoát, kèm statementHash, sorted provenance/evidence và sorted risk categories; eligibility formula và LearningCandidate v1 không đổi, không auto-promote hoặc auto-edit spec.",
+      "status": "met",
+      "evidenceIds": [
+        "learning-guard-focused-final-20260818",
+        "program-quality-security-final-20260818"
+      ]
+    },
+    {
+      "id": "learning-doctor-safety",
+      "text": "Doctor phát hiện suspicious persistent-learning categories bằng finding redacted, deterministic, fixable false và không sửa journal; malicious fixtures không lộ credential/URL/command value còn benign Unicode/multiline vẫn round-trip.",
+      "status": "met",
+      "evidenceIds": [
+        "learning-guard-focused-final-20260818",
+        "program-quality-security-final-20260818"
+      ]
+    },
+    {
+      "id": "repo-map-graph-ranking",
+      "text": "Repo-map ranker v2 xây graph in-memory bounded từ relative importTargets đã resolve an toàn, mở rộng candidate tối đa hai hop và áp capped dependency-neighbor/referenced-by/centrality bonus với reasons/tie-break deterministic.",
+      "status": "met",
+      "evidenceIds": [
+        "repo-map-ranking-focused-final-20260818",
+        "program-quality-security-final-20260818"
+      ]
+    },
+    {
+      "id": "repo-map-ranking-compatibility",
+      "text": "repo-map --query giữ cache-only JSON shape, limit 1..20, RepoMapV1 và lexical ranker v1 rollback path; external/unresolved/ambiguous/traversal imports bị bỏ, graph caps và ranking eval cải thiện dependency fixtures mà không giảm existing queries hoặc cold-path/footprint gates.",
+      "status": "met",
+      "evidenceIds": [
+        "repo-map-ranking-focused-final-20260818",
+        "program-quality-security-final-20260818"
+      ]
+    },
+    {
+      "id": "program-docs-release",
+      "text": "PRD, design, plan, workflow, implementation plan, harness research/mapping, canonical skills/templates, package patch version và CHANGELOG đồng bộ cả bốn CAP trong cùng change; deferred/rejected boundaries và một-package/ba-platform contract được giữ.",
+      "status": "met",
+      "evidenceIds": [
+        "program-quality-security-final-20260818"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/.template-hashes.json",
+    "CHANGELOG.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "package.json",
+    "README.md",
+    "scripts/measure-init.mjs",
+    "src/cli-program.ts",
+    "src/commands/doctor.ts",
+    "src/commands/internal-context.ts",
+    "src/commands/internal-workflow.ts",
+    "src/core/context/context.ts",
+    "src/core/context/selection-freshness.ts",
+    "src/core/journal/journal.ts",
+    "src/core/journal/learning-safety.ts",
+    "src/core/journal/learning.ts",
+    "src/core/journal/promotion.ts",
+    "src/core/repo-map/graph.ts",
+    "src/core/repo-map/search.ts",
+    "src/core/repo-map/service.ts",
+    "src/core/repo-map/store.ts",
+    "src/core/repo-map/types.ts",
+    "src/core/tasks/ready-trace.ts",
+    "src/core/tasks/task.ts",
+    "src/core/workflow.ts",
+    "src/skills/harnix-brainstorm/SKILL.md",
+    "src/skills/harnix-check/SKILL.md",
+    "src/skills/harnix-continue/SKILL.md",
+    "src/skills/harnix-debug/SKILL.md",
+    "src/skills/harnix-finish-work/SKILL.md",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-research/SKILL.md",
+    "src/templates/harnix/agents.ts",
+    "src/templates/harnix/workflow.ts",
+    "src/utils/project-discovery.ts",
+    "test/integration/doctor.test.ts",
+    "test/integration/memory.test.ts",
+    "test/integration/repo-map/incremental.test.ts",
+    "test/integration/repo-map/internal.test.ts",
+    "test/migration",
+    "test/safety",
+    "test/safety/release-scanner.test.ts",
+    "test/unit/context.test.ts",
+    "test/unit/journal.test.ts",
+    "test/unit/learning-safety.test.ts",
+    "test/unit/ready-trace.test.ts",
+    "test/unit/repo-map/graph-ranking.test.ts",
+    "test/unit/repo-map/service.test.ts",
+    "test/workflow/cli-contract.test.ts",
+    "test/workflow/internal-context.test.ts",
+    "test/workflow/internal-workflow.test.ts",
+    "test/workflow/routing.test.ts",
+    "test/workflow/skill-sources.test.ts",
+    "test/workflow/templates.test.ts"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    ".harnix/workflow.md",
+    ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+    ".harnix/tasks/20260814-093533-taskrecord-v2-context-freshness/task.json"
+  ],
+  "validationPlan": [
+    {
+      "id": "selection-contract-focused",
+      "description": "RED/GREEN unit tests cho canonical selection snapshot, hash determinism, validation, atomic sidecar persistence và binding với ContextManifest v1/repo-map cache.",
+      "command": "pnpm exec vitest run test/unit/context.test.ts test/unit/repo-map/service.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "legacy-safety-compatibility",
+        "selection-snapshot-contract"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/context/**",
+        "src/core/repo-map/**",
+        "src/core/tasks/task.ts",
+        "test/unit/context.test.ts",
+        "test/unit/repo-map/service.test.ts"
+      ]
+    },
+    {
+      "id": "selection-workflow-focused",
+      "description": "RED/GREEN workflow tests cho selectionChanges, current/stale/not-recorded, replan routing, corrupt state và hook no-op/no-I/O regression.",
+      "command": "pnpm exec vitest run test/workflow/internal-workflow.test.ts test/workflow/internal-context.test.ts test/workflow/routing.test.ts test/workflow/skill-sources.test.ts test/safety",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "legacy-safety-compatibility",
+        "selection-drift-inspection"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-context.ts",
+        "src/commands/internal-workflow.ts",
+        "src/core/workflow.ts",
+        "src/skills/**",
+        "src/templates/**",
+        "test/safety/**",
+        "test/workflow/internal-context.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "docs-release-focused",
+      "description": "Xác minh frozen contract, skill/template parity, build/lint/typecheck, patch version và changelog đồng bộ.",
+      "command": "pnpm build && pnpm lint && pnpm typecheck && pnpm exec vitest run test/workflow/skill-sources.test.ts",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "docs-release",
+        "legacy-safety-compatibility",
+        "selection-drift-inspection",
+        "selection-snapshot-contract"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "package.json",
+        "src/**",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "exact-acceptance",
+      "description": "Chạy chính xác acceptance sequence mục 11 sau compliance và quality/security review, gồm full tests, package, fake-home smoke, performance, footprint, release scan và diff check.",
+      "command": "pnpm install --frozen-lockfile && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm test:acceptance && pnpm pack:check && pnpm smoke:tarball && pnpm measure:init && pnpm measure:footprint && pnpm scan:release && git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "docs-release",
+        "legacy-safety-compatibility",
+        "selection-drift-inspection",
+        "selection-snapshot-contract",
+        "verification"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "docs/**",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "ready-trace-focused",
+      "description": "RED/GREEN ready-trace grammar, bounded parser, stable diagnostics, hidden audit, Full ready enforcement, Lite và legacy compatibility.",
+      "command": "pnpm exec vitest run test/unit/ready-trace.test.ts test/workflow/internal-workflow.test.ts test/workflow/skill-sources.test.ts test/workflow/templates.test.ts test/migration test/safety",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ready-trace-contract",
+        "ready-trace-enforcement"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/ready-trace.ts",
+        "src/core/tasks/task.ts",
+        "src/skills/**",
+        "src/templates/**",
+        "test/migration/**",
+        "test/safety/**",
+        "test/unit/ready-trace.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "learning-guard-focused",
+      "description": "RED/GREEN untrusted learning analyzer/renderer, hash/provenance, Doctor redaction/no-fix và journal/memory compatibility.",
+      "command": "pnpm exec vitest run test/unit/learning-safety.test.ts test/unit/journal.test.ts test/integration/memory.test.ts test/integration/doctor.test.ts test/safety/release-scanner.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "learning-doctor-safety",
+        "learning-review-boundary"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/doctor.ts",
+        "src/core/journal/**",
+        "test/integration/doctor.test.ts",
+        "test/integration/memory.test.ts",
+        "test/safety/release-scanner.test.ts",
+        "test/unit/journal.test.ts",
+        "test/unit/learning-safety.test.ts"
+      ]
+    },
+    {
+      "id": "repo-map-ranking-focused",
+      "description": "RED/GREEN bounded dependency graph, safe resolver, ranker v1 parity/v2 bonuses, ranking eval, integration và safety limits.",
+      "command": "pnpm exec vitest run test/unit/repo-map/graph-ranking.test.ts test/unit/repo-map/service.test.ts test/integration/repo-map/incremental.test.ts test/integration/repo-map/internal.test.ts test/safety",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "repo-map-graph-ranking",
+        "repo-map-ranking-compatibility"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/repo-map/**",
+        "test/integration/repo-map/incremental.test.ts",
+        "test/integration/repo-map/internal.test.ts",
+        "test/safety/**",
+        "test/unit/repo-map/**"
+      ]
+    },
+    {
+      "id": "program-quality-security",
+      "description": "Chạy build, lint, typecheck, workflow, safety, integration, unit và release scan cho integration của cả bốn CAP.",
+      "command": "pnpm build && pnpm lint && pnpm typecheck && pnpm test:workflow && pnpm test:safety && pnpm test:integration && pnpm test:unit && pnpm scan:release",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "learning-doctor-safety",
+        "learning-review-boundary",
+        "program-docs-release",
+        "ready-trace-contract",
+        "ready-trace-enforcement",
+        "repo-map-graph-ranking",
+        "repo-map-ranking-compatibility"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "docs/**",
+        "package.json",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "selection-contract-focused-20260818",
+      "checkId": "selection-contract-focused",
+      "recordedAt": "2026-08-18T15:47:51.8505940Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "22 kiểm thử focused pass; snapshot canonical, persistence, binding và repo-map service giữ cùng inputDigest trước/sau.",
+      "artifactPaths": [],
+      "inputDigest": "3d5afa1e708033cff5c34a27e621495a0417bb4c08718849cbb37fd1ba200d0d"
+    },
+    {
+      "id": "selection-workflow-focused-20260818",
+      "checkId": "selection-workflow-focused",
+      "recordedAt": "2026-08-18T15:48:40.3520098Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "84 kiểm thử workflow, hook, routing, skill và safety pass; digest trước/sau không đổi.",
+      "artifactPaths": [],
+      "inputDigest": "5c4877690368fca03572208580e9946c24c7fb0ee05fc068fad1394bfa022553"
+    },
+    {
+      "id": "ready-trace-focused-20260818",
+      "checkId": "ready-trace-focused",
+      "recordedAt": "2026-08-18T15:49:02.8220988Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "70 kiểm thử ready trace, readiness, migration, template và safety pass với inputDigest ổn định.",
+      "artifactPaths": [],
+      "inputDigest": "29f6b87dd183c6874f0c0b489df170461d1b30c353fcca73e0a22c1ca871459a"
+    },
+    {
+      "id": "learning-guard-focused-20260818",
+      "checkId": "learning-guard-focused",
+      "recordedAt": "2026-08-18T15:49:26.5444058Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "58 kiểm thử learning boundary, journal, memory, Doctor và release scanner pass; digest trước/sau không đổi.",
+      "artifactPaths": [],
+      "inputDigest": "67d94467952a38c0525e6136da3a7f1b0b9eab8584cb4e950f5bba5915fa680e"
+    },
+    {
+      "id": "repo-map-ranking-focused-20260818",
+      "checkId": "repo-map-ranking-focused",
+      "recordedAt": "2026-08-18T15:49:47.2667637Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "50 kiểm thử graph/ranker, cache integration và safety pass, gồm node/edge caps; digest trước/sau không đổi.",
+      "artifactPaths": [],
+      "inputDigest": "f9d494787b7de1f2892799b72d7456e863e03593428c2a22408c5f9675333344"
+    },
+    {
+      "id": "docs-release-focused-20260818",
+      "checkId": "docs-release-focused",
+      "recordedAt": "2026-08-18T15:50:21.8900238Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Build, lint, typecheck và 4 skill-source contract tests pass; package/docs/template release digest ổn định.",
+      "artifactPaths": [],
+      "inputDigest": "8f12531732f3a273580a558d1aec18df8586353044ad52230296d6bc22eff481"
+    },
+    {
+      "id": "program-quality-security-timeout-20260818",
+      "checkId": "program-quality-security",
+      "recordedAt": "2026-08-18T15:58:41.4241083Z",
+      "result": "fail",
+      "exitCode": 124,
+      "summary": "Broader gate bị dừng sau hơn 8 phút tại release scan do tarball install không thoát dưới sandbox dependency-store; không coi là pass và sẽ rerun ngoài sandbox.",
+      "artifactPaths": [],
+      "inputDigest": "df29c0137045b3a0b3ee2412dc41a283ef9b8d3424b5821eab4ec5ead6a7fd9f"
+    },
+    {
+      "id": "program-quality-security-stale-tarball-20260818",
+      "checkId": "program-quality-security",
+      "recordedAt": "2026-08-18T15:59:46.4584023Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Build/lint/typecheck và workflow/safety/integration/unit pass, nhưng release scan fail vì .artifacts còn tarball 1.0.7 với Codex hook cũ; cần pack:check 1.0.8 rồi rerun nguyên gate.",
+      "artifactPaths": [],
+      "inputDigest": "df29c0137045b3a0b3ee2412dc41a283ef9b8d3424b5821eab4ec5ead6a7fd9f"
+    },
+    {
+      "id": "program-quality-security-pass-20260818",
+      "checkId": "program-quality-security",
+      "recordedAt": "2026-08-18T16:00:40.7426148Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Build/lint/typecheck, 59 workflow, 36 safety, 87 integration, 203 unit tests và release scan tarball 1.0.8 pass; non-Harnix median 133.95 ms, p95/max 174.54 ms; digest ổn định.",
+      "artifactPaths": [],
+      "inputDigest": "df29c0137045b3a0b3ee2412dc41a283ef9b8d3424b5821eab4ec5ead6a7fd9f"
+    },
+    {
+      "id": "selection-contract-focused-final-20260818",
+      "checkId": "selection-contract-focused",
+      "recordedAt": "2026-08-18T16:03:55.6616889Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final snapshot: 22 context/repo-map service tests pass; digest ổn định.",
+      "artifactPaths": [],
+      "inputDigest": "d6b7da0f4c3ed575373e4a820ce2016c17039d1bb015e4740087e5cbe8f7f5a4"
+    },
+    {
+      "id": "selection-workflow-focused-final-20260818",
+      "checkId": "selection-workflow-focused",
+      "recordedAt": "2026-08-18T16:03:55.6626889Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final snapshot: 84 workflow/hook/routing/safety tests pass; digest ổn định.",
+      "artifactPaths": [],
+      "inputDigest": "c6c119a26be27df711f68bd565f5c81fb16132b42b4ad318ae1f7325780c9179"
+    },
+    {
+      "id": "ready-trace-focused-final-20260818",
+      "checkId": "ready-trace-focused",
+      "recordedAt": "2026-08-18T16:03:55.6636889Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final snapshot: 70 ready-trace/migration/template/safety tests pass; digest ổn định.",
+      "artifactPaths": [],
+      "inputDigest": "19b724abf0c514147d1414e00dd1e26dd1a724999064b9ab24f14783ea71e341"
+    },
+    {
+      "id": "learning-guard-focused-final-20260818",
+      "checkId": "learning-guard-focused",
+      "recordedAt": "2026-08-18T16:03:55.6646889Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final snapshot: 58 learning/journal/memory/Doctor/release tests pass; digest ổn định.",
+      "artifactPaths": [],
+      "inputDigest": "29729bdfee8257dbf687f9867af8fefce6bef9e0a0fd8aab996390155f62c68f"
+    },
+    {
+      "id": "repo-map-ranking-focused-final-20260818",
+      "checkId": "repo-map-ranking-focused",
+      "recordedAt": "2026-08-18T16:03:55.6656889Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final snapshot: 50 graph/ranker/integration/safety tests pass; digest ổn định.",
+      "artifactPaths": [],
+      "inputDigest": "49b7087b37231b781c1b2d34bbd62c9242ab7ba2b30394009cf1ebd33cd06731"
+    },
+    {
+      "id": "docs-release-focused-final-20260818",
+      "checkId": "docs-release-focused",
+      "recordedAt": "2026-08-18T16:04:28.8129842Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final docs snapshot: build, lint, typecheck và 4 skill-source contract tests pass; digest ổn định.",
+      "artifactPaths": [],
+      "inputDigest": "fefb6737b5fddc60116554621e2b632603d708ac4cba9b1d3e7799934471a96e"
+    },
+    {
+      "id": "program-quality-security-final-20260818",
+      "checkId": "program-quality-security",
+      "recordedAt": "2026-08-18T16:05:26.1456638Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final broader gate: build/lint/typecheck, 59 workflow, 36 safety, 87 integration, 203 unit tests và release scan 1.0.8 pass; non-Harnix median 132.16 ms, p95/max 151.33 ms; digest ổn định.",
+      "artifactPaths": [],
+      "inputDigest": "75b8e89e832ab864d62daf0630645b769f2cd24becd9902f4565df3275fb9be3"
+    },
+    {
+      "id": "exact-acceptance-final-20260818",
+      "checkId": "exact-acceptance",
+      "recordedAt": "2026-08-18T16:07:59.8849075Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final exact acceptance mục 11 pass: install/build/lint/typecheck, toàn bộ test và acceptance, pack/fake-home smoke, performance, footprint, release scan 1.0.8 và git diff --check; init median 351.60 ms, worst 353.74 ms; footprint 208713 bytes/50 files, giảm 84.47%; hook ngoài project median 134.86 ms, p95/max 152.64 ms.",
+      "artifactPaths": [],
+      "inputDigest": "239e500cdde1a378047499502248d85124fa0c10ce5bfd9a76f8b673a58dea58"
+    }
+  ],
+  "createdAt": "2026-08-18T14:45:45.806Z",
+  "updatedAt": "2026-08-18T16:08:11.904Z",
+  "completedAt": "2026-08-18T16:08:11.904Z"
+}

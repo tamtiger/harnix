@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.8] - 2026-08-18
+
+### Changed
+
+- Bổ sung context selection-basis sidecar và selectionChanges để resume phát hiện stale candidate inventory, selector và task/config/guide signals mà không chạy repo-map trong hook.
+- Thêm deterministic Full ready-trace audit, hidden workflow action và readiness enforcement với bounded diagnostics.
+- Bọc persistent learning trong JSON untrusted boundary, thêm redacted no-fix Doctor risk findings và dependency-aware repo-map ranker v2 với lexical v1 rollback.
+
 ## [1.0.7] - 2026-08-18
 
 ### Changed

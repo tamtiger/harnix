@@ -7,6 +7,7 @@ import { normalizeRepositoryPath, resolveSafeHarnixPath, resolveSafeProjectPath 
 import { compareCodeUnits } from "../utils/order.js";
 import { validateTask } from "../core/tasks/task.js";
 import { searchJournal, type JournalEntry } from "../core/journal/journal.js";
+import { analyzeLearningStatement, type LearningRiskKind } from "../core/journal/learning-safety.js";
 import { desiredFiles, updateProject } from "./update.js";
 import {
   diagnoseGlobalIntegrations,
@@ -283,6 +284,15 @@ async function inspectJournalRecords(root: string, tasks: ReadonlyMap<string, Re
         const journal = await searchJournal(await resolveSafeHarnixPath(root, logicalPath));
         if (journal.malformed > 0) findings.push(finding("journal-malformed", "warning", logicalPath, "A historical journal contains malformed records and was preserved without rewrite.", false));
         for (const entry of journal.entries) inspectJournalLink(entry, tasks, logicalPath, findings);
+        const learningRisks = new Set<LearningRiskKind>();
+        for (const entry of journal.entries) {
+          if (entry.kind !== "learning" || entry.learning === undefined) continue;
+          for (const risk of analyzeLearningStatement(entry.learning.statement).findings) learningRisks.add(risk);
+        }
+        if (learningRisks.size > 0) {
+          const categories = [...learningRisks].sort(compareCodeUnits);
+          findings.push(finding("persistent-learning-suspicious", "warning", logicalPath, `Suspicious persistent learning data categories: ${categories.join(", ")}; review as untrusted data.`, false));
+        }
       } catch (error: unknown) {
         findings.push(finding("journal-unreadable", "warning", logicalPath, redact(error, root), false));
       }

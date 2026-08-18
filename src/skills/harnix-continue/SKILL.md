@@ -2,7 +2,7 @@
 name: harnix-continue
 description: Use when an initialized Harnix project may have an unfinished, interrupted, blocked, or partially persisted task that must resume safely.
 metadata:
-  version: "1.0.7"
+  version: "1.0.8"
 ---
 
 # Continue persisted Harnix work
@@ -21,7 +21,7 @@ Read `.harnix/tasks/.active`. If it is absent or empty, return to request triage
 
 Load the TaskRecord, required artifacts for its mode/status, checkpoint, blocker/resume fields, acceptance criteria, evidence references, and only the context needed by the next stage. Verify referenced task-owned paths before trusting them.
 
-Run `harnix workflow --inspect` and read its active TaskRecord projection plus always-present `contextDrift`. If its state is `stale`, do not rely on the saved context. For a non-blocked unfinished task, persist the same task status with checkpoint `replan`, preserve all evidence and obligations, then route to `harnix-brainstorm` to reselect context. `not-recorded` is disclosed for legacy tasks but does not force replan. Never repair source files or the context manifest automatically.
+Run `harnix workflow --inspect` and read its active TaskRecord projection plus always-present `contextDrift`. Inspect both path-level `changes` and selection-basis `selectionChanges`; inventory, selector-version, or task/config/guide signal drift is as stale as changed source content. If state is `stale`, do not rely on the saved context. For a non-blocked unfinished task, persist the same task status with checkpoint `replan`, preserve all evidence and obligations, then route to `harnix-brainstorm` to reselect context. `not-recorded` is disclosed for legacy manifests without a selection sidecar but does not force replan. Never refresh repo-map, repair source files, or rewrite context artifacts automatically.
 
 ## Routing table
 

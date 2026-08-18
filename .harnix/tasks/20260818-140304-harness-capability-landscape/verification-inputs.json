@@ -1,0 +1,108 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260818-140304-harness-capability-landscape",
+  "snapshots": [
+    {
+      "evidenceId": "gap-consistency-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-140304-harness-capability-landscape",
+      "checkId": "check-gap-consistency",
+      "taskContractHash": "f09e2c9b6cf493ef585c9007dc47752b8b046bb639b1882af347bc2c3af93ab5",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-140304-harness-capability-landscape/plan.md",
+          "sha256": "409a5462c31c933907b0b8c657913a1807b58b245ae544d303b88227a44b65e0"
+        },
+        {
+          "path": ".harnix/tasks/20260818-140304-harness-capability-landscape/prd.md",
+          "sha256": "adda939447eaadf51a6245e143821d9733fa3b2b7b15c2eb74b0d43c82bcb01d"
+        },
+        {
+          "path": ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+          "sha256": "6918866021f1e55b1ea033d15d9f10c786233e76b24682bcb038a76e951908b6"
+        },
+        {
+          "path": "docs/HARNESS_RESEARCH.md",
+          "sha256": "63d090cf1c4405d7b9935ca4922b54031d66d774225aad8d90a950b59bbf7a57"
+        },
+        {
+          "path": "docs/HARNIX_PRD.md",
+          "sha256": "2f28acfd9f0dfd32ee14672a6527348e7aea6a2bbf477641c622f28a402a0de9"
+        },
+        {
+          "path": "docs/HARNIX_WORKFLOW.md",
+          "sha256": "cbd4f817fc3272ba0a54fd12ac4a031b1bd22cef5a73fc12ea22e14dce76b63c"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "cea208b0737614dceb3d115fb978b890bbd9e31b3da9fa5646008d650127e38a"
+        },
+        {
+          "path": "docs/UPSTREAM_MAPPING.md",
+          "sha256": "abdb2f6f43fa772dc06c0b0fc8aebc692185782799a200901f898856bce0971c"
+        }
+      ],
+      "inputDigest": "493447069c80cc56b9e5fd494d30ca71366d71fc49bf1aa0d9ee38df0d01306c"
+    },
+    {
+      "evidenceId": "recommendation-quality-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-140304-harness-capability-landscape",
+      "checkId": "check-recommendation-quality",
+      "taskContractHash": "f09e2c9b6cf493ef585c9007dc47752b8b046bb639b1882af347bc2c3af93ab5",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-140304-harness-capability-landscape/plan.md",
+          "sha256": "409a5462c31c933907b0b8c657913a1807b58b245ae544d303b88227a44b65e0"
+        },
+        {
+          "path": ".harnix/tasks/20260818-140304-harness-capability-landscape/prd.md",
+          "sha256": "adda939447eaadf51a6245e143821d9733fa3b2b7b15c2eb74b0d43c82bcb01d"
+        },
+        {
+          "path": ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+          "sha256": "6918866021f1e55b1ea033d15d9f10c786233e76b24682bcb038a76e951908b6"
+        },
+        {
+          "path": "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+          "sha256": "973fbbf095bc2d142e539b03cd9155e8fc9f6217754786bfdd99ae331a1615eb"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "cea208b0737614dceb3d115fb978b890bbd9e31b3da9fa5646008d650127e38a"
+        }
+      ],
+      "inputDigest": "030d7cb80ad53ccb66a030abd440802c9f231dd00c04f32735f95130128bc8b8"
+    },
+    {
+      "evidenceId": "source-traceability-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-140304-harness-capability-landscape",
+      "checkId": "check-source-traceability",
+      "taskContractHash": "f09e2c9b6cf493ef585c9007dc47752b8b046bb639b1882af347bc2c3af93ab5",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-140304-harness-capability-landscape/plan.md",
+          "sha256": "409a5462c31c933907b0b8c657913a1807b58b245ae544d303b88227a44b65e0"
+        },
+        {
+          "path": ".harnix/tasks/20260818-140304-harness-capability-landscape/prd.md",
+          "sha256": "adda939447eaadf51a6245e143821d9733fa3b2b7b15c2eb74b0d43c82bcb01d"
+        },
+        {
+          "path": ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+          "sha256": "6918866021f1e55b1ea033d15d9f10c786233e76b24682bcb038a76e951908b6"
+        },
+        {
+          "path": "docs/UPSTREAM_BASELINE.md",
+          "sha256": "fdcd93da2a9886cb0b73f1086c7e2a970de2fa2f0d6bc6a9ea65746d299108f0"
+        }
+      ],
+      "inputDigest": "0fbcde557e410eac0d053fb1a0e1cfe97f4a26aa7ab0a0e213c459fa8ed22077"
+    }
+  ]
+}

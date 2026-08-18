@@ -2,7 +2,7 @@
 name: harnix-finish-work
 description: Use when a Harnix task is fully verified and needs safe completion persistence, journaling, active-pointer cleanup, and an evidence-based handoff.
 metadata:
-  version: "1.0.7"
+  version: "1.0.8"
 ---
 
 # Finish verified Harnix work
@@ -43,7 +43,7 @@ Use this order:
 
 Never clear the active pointer first. Never mark completed merely because time or budget is ending. Preserve recoverable task state if a later step fails.
 
-Do not promote project learning automatically. Record a reviewable learning candidate only when the workflow contract and evidence threshold allow it; user-owned specs remain user-owned.
+Do not promote project learning automatically. Record a reviewable learning candidate only when the workflow contract and evidence threshold allow it; render its statement solely as JSON-string data inside the fixed Harnix untrusted-learning boundary, keep risk findings redacted, and leave user-owned specs unchanged until explicit review.
 
 ## Persist
 

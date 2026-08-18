@@ -295,7 +295,25 @@ interface ContextManifestV1 {
 
 Deterministic base score là pin `1000`, explicit task/acceptance reference `500`, active package/path `250`, applicable language-or-technology profile `100` (một bounded stack bonus dù cả hai facet match), cross-project guide `25`; applicable signals cộng dồn, sau đó sort pinned → score/priority descending → normalized path ascending. Context loader không execute included text, không follow external symlink và luôn disclose omitted entries. Explicit full-context bypasses budget only, không bypass path safety/dedupe/source listing.
 
-Hidden inspect/continue luôn project `contextDrift: {state,changes}` với state `not-recorded|current|stale` và sorted relative changes `changed|missing|unreadable|unverified`. Không có manifest/hash là `not-recorded`; mixed hashed/unhashed là `stale` với entry thiếu hash `unverified`. Chỉ đọc path đã liệt kê và safe-resolve dưới root. Continue gặp `stale` phải persist cùng status với checkpoint `replan` trước khi dùng lại context và route Brainstorm để reselect; không tự sửa source hay manifest. `not-recorded` trên legacy state chỉ được disclose, không tự ép migration/replan.
+Hidden inspect/continue luôn project `contextDrift: {state,changes,selectionChanges}` với state `not-recorded|current|stale`, sorted relative path changes `changed|missing|unreadable|unverified` và sorted selection-basis changes theo §4.4A. Không có manifest/hash là `not-recorded`; mixed hashed/unhashed là `stale` với entry thiếu hash `unverified`. Chỉ đọc path đã liệt kê và safe-resolve dưới root. Continue gặp `stale` phải persist cùng status với checkpoint `replan` trước khi dùng lại context và route Brainstorm để reselect; không tự sửa source hay manifest. `not-recorded` trên legacy state chỉ được disclose, không tự ép migration/replan.
+
+### 4.4A Context selection freshness sidecar v1
+
+Explicit hidden context persistence atomically writes a task-owned `.harnix/tasks/<task-id>/context-selection.json` beside `context.json`:
+
+```ts
+interface ContextSelectionSnapshotV1 {
+  generator: "harnix";
+  schemaVersion: 1;
+  taskId: string;
+  selectorVersion: 1;
+  inventoryFingerprint: string;
+  selectionInputHash: string;
+  selectionResultHash: string;
+}
+```
+
+`selectionInputHash` canonicalizes task relevant paths/specs, known config profile/package/context/runtime facets, selected guide paths, selector version and validated repo-map inventory fingerprint. `selectionResultHash` canonicalizes sorted included/omitted selection metadata and deliberately excludes `contentHash`. Inspect returns `contextDrift.selectionChanges` sorted from `inventory-changed|inventory-unavailable|selection-signals-changed|selector-version-changed`; any content or selection change is `stale`. Manifest v1 without sidecar remains readable and is `not-recorded` when content is clean. Corrupt/future/task/result binding fails closed; missing/invalid current cache produces `inventory-unavailable` without scan, refresh, query or write.
 
 ### 4.5 Journal and learning
 
@@ -327,6 +345,18 @@ interface JournalEntryV1 {
 ```
 
 Candidate normalization dedupe `sourceTaskIds`/`evidenceIds`; `occurrences` bằng số source task độc lập. Deterministic confidence là `min(1, 0.4 + 0.2*min(distinctTasks,2) + 0.1*min(distinctEvidence,2))`. Không có explicit approval thì chỉ eligible để đề xuất khi distinct tasks >=2, distinct evidence >=2 và confidence >=0.8; write vào spec vẫn cần finish/review action rõ và luôn reviewable. Không hidden/global promotion.
+
+### 4.5A Untrusted learning review boundary
+
+`LearningCandidateV1` persisted shape và eligibility formula không đổi. `promotionProposal()` trả `PromotionProposalV2` với `review: {statementHash,sourceTaskIds,evidenceIds,findings}`; findings thuộc `command-like|credential-like|instruction-override|url-like`, sorted và không giữ matched values. Statement tối đa 64 KiB cho proposal, được render duy nhất dưới `Statement-JSON: <JSON.stringify(statement)>` trong fixed Harnix untrusted-learning boundary. Doctor union categories trên mỗi journal file thành một `persistent-learning-suspicious` warning, logical path only, `fixable:false`; `doctor --fix` không sửa journal hoặc spec.
+
+### 4.5B Full ready trace v1
+
+Full `prd.md` dùng level-three `AC` headings với criterion ID backtick-wrapped; Full `plan.md` dùng checklist và level-three `Slice` blocks với slice ID backtick-wrapped cùng backtick lists `Criteria:`, `Checks:` và `Paths:`. Parser bỏ fenced code, cap 1 MiB/artifact, 4096 chars/line, 256 slices và 1024 references; slice IDs match `^[A-Z][A-Z0-9-]*$`. Hidden `workflow --audit-ready` trả stable `ReadyTraceReportV1` JSON, không echo body/absolute path. Auditor bắt missing/duplicate/orphan/unknown/unsafe/placeholder trace và là gate cho mọi Full transition/re-transition vào `ready`; Lite và historical completed/ready records không bị rewrite.
+
+### 4.5C Dependency-aware repo-map ranker
+
+RepoMapV1/cache/public query JSON không đổi. Internal ranker default v2 resolves only relative `./|../` imports by exact, extensionless, then `index.*`; external, absolute, root traversal and targets with more than four matches are omitted. In-memory graph caps 10,000 nodes/100,000 edges; query uses 50 lexical seeds, at most 200 candidates and depth 2. Bonuses are direct dependency `+120`, direct importer `+100`, depth two `+40`, and inbound centrality `min(50,5*count)`; reasons are stable and final tie-break remains score descending then code-unit path ascending. Internal injected ranker v1 retains lexical rollback behavior; graph is never persisted or used by global hooks.
 
 ### 4.6 Doctor JSON v2
 
@@ -731,11 +761,21 @@ Yêu cầu ngày 2026-08-14 xác nhận skill content version chỉ là một sl
 - [x] F7–F9: hợp nhất bounded stdin/safe glob và tách pure marker/JSON khỏi transaction hotspot.
 - [x] Fresh required checks, exact acceptance mục 11 và dependency audits pass trên current tree ngày 2026-08-14; global lifecycle/smoke chỉ dùng fake/disposable homes.
 
+## 9E. Adopted harness capabilities — CAP-01–CAP-04
+
+Research task `20260818-140304-harness-capability-landscape` selected four bounded capabilities for the Full implementation task `20260818-214545-context-selection-freshness`.
+
+- [x] CAP-01: context selection-basis sidecar, drift projection, legacy/cache/hook compatibility.
+- [x] CAP-02: bounded deterministic ready-trace audit, hidden action and Full readiness enforcement.
+- [x] CAP-03: untrusted learning serialization/hash/risk metadata and redacted no-fix Doctor finding.
+- [x] CAP-04: safe bounded dependency graph, default ranker v2, v1 rollback and ranking eval.
+- [x] Cross-CAP canonical docs/skills/templates, patch release, two-stage review and exact acceptance.
+
 ## 10. Required test inventory
 
 | Suite | Required coverage |
 |---|---|
-| Unit | detection, config/task migrations, context rank/budget/drift, verification input snapshots, project/global manifests, permission-preserving atomic writes, home/path containment, locks, rollback, journal, learning, Doctor v2 |
+| Unit | detection, config/task migrations, context rank/budget/content+selection drift, ready trace, verification input snapshots, repo-map graph/ranker v1-v2, project/global manifests, permission-preserving atomic writes, home/path containment, locks, rollback, journal/learning safety, Doctor v2 |
 | CLI integration | all eight commands, project/global scope, setup outside a project, init repo-map creation, cache-only repo-map query, idempotence, modified/deleted files, corrupt/future project/global schemas |
 | Migration | discovery, dry-run, copy/transform, preservation, conflict, rollback, cleanup |
 | Fixtures | independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue, multilingual/multi-technology monorepo |

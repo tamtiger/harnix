@@ -2,7 +2,7 @@ import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { finishWorkflow, inspectWorkflow, saveWorkflow, snapshotWorkflow } from "../../src/commands/internal-workflow.js";
+import { auditWorkflow, finishWorkflow, inspectWorkflow, saveWorkflow, snapshotWorkflow } from "../../src/commands/internal-workflow.js";
 import { appendJournal } from "../../src/core/journal/journal.js";
 import { createTaskV2MigrationEvidence, saveTask, setActiveTask, transitionTask, type TaskRecord, type TaskRecordV1 } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
@@ -34,10 +34,49 @@ describe("hidden workflow persistence operations", () => {
     await expect(readFile(contextPath, "utf8")).resolves.toBe(`${JSON.stringify(context, null, 2)}\n`);
   });
 
+  it("persists selection freshness and reports task or inventory drift without refreshing the repo map", async () => {
+    const root = await temporaryRepository();
+    await writeFile(join(root, "tracked.md"), "tracked content");
+    await initializeProject({ root, developer: "tam", yes: true });
+    const planning = { ...task("planning", "planning"), relevantPaths: ["tracked.md"] };
+    const context = {
+      generator: "harnix" as const,
+      schemaVersion: 1 as const,
+      taskId: planning.id,
+      maxCharacters: 1000,
+      entries: [{ path: "tracked.md", reason: "test", priority: 0, pinned: false, states: [], contentHash: sha256("tracked content") }],
+      omitted: [],
+    };
+
+    await saveWorkflow(root, { task: planning, artifacts: { context } });
+    await expect(inspectWorkflow(root)).resolves.toMatchObject({
+      contextDrift: { state: "current", changes: [], selectionChanges: [] },
+    });
+    const selectionPath = join(root, ".harnix", "tasks", planning.id, "context-selection.json");
+    await expect(readFile(selectionPath, "utf8")).resolves.not.toContain("tracked content");
+
+    const changedSignals = { ...planning, relevantPaths: ["docs/**"], updatedAt: "2026-08-13T00:01:00.000Z" };
+    await saveWorkflow(root, { task: changedSignals });
+    await expect(inspectWorkflow(root)).resolves.toMatchObject({
+      contextDrift: { state: "stale", changes: [], selectionChanges: ["selection-signals-changed"] },
+    });
+
+    await saveWorkflow(root, { task: { ...planning, updatedAt: "2026-08-13T00:02:00.000Z" } });
+    await rm(join(root, ".harnix", "cache", "repo-map-v1.json"));
+    await expect(inspectWorkflow(root)).resolves.toMatchObject({
+      contextDrift: { state: "stale", changes: [], selectionChanges: ["inventory-unavailable"] },
+    });
+
+    await writeFile(selectionPath, "not-json");
+    const corrupt = await inspectWorkflow(root).then(() => undefined, (error: unknown) => error as Error);
+    expect(corrupt?.message).toBe("Context selection snapshot is unreadable or invalid.");
+    expect(corrupt?.message).not.toContain(root);
+  });
+
   it("inspects, creates a planning task, and rejects evidence mutation or an illegal jump", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [] } });
+    expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
 
     const planning = task("planning", "planning");
     await expect(saveWorkflow(root, { task: planning })).resolves.toMatchObject({ id: planning.id, status: "planning" });
@@ -63,7 +102,7 @@ describe("hidden workflow persistence operations", () => {
     await saveWorkflow(root, { task: { ...verifying, checkpoint: "finishing", updatedAt: new Date().toISOString() } });
 
     await expect(finishWorkflow(root)).resolves.toMatchObject({ status: "completed", checkpoint: "finishing" });
-    expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [] } });
+    expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
     await expect(readFile(join(root, ".harnix", "tasks", verifying.id, "task.json"), "utf8")).resolves.toContain("completed");
   });
 
@@ -100,7 +139,7 @@ describe("hidden workflow persistence operations", () => {
     await expect(readFile(retryJournal, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
     const journal = await readFile(originalJournal, "utf8");
     expect(journal.match(new RegExp(`${completed.id}-completion`, "gu"))).toHaveLength(1);
-    expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [] } });
+    expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
   });
 
   it("rejects a new Full task unless its required artifacts are persisted with it", async () => {
@@ -110,6 +149,30 @@ describe("hidden workflow persistence operations", () => {
 
     await expect(saveWorkflow(root, { task: full })).rejects.toThrow("prd.md and plan.md");
     await expect(saveWorkflow(root, { task: full, artifacts: { prd: "# PRD\n", plan: "# Plan\n" } })).resolves.toMatchObject({ id: full.id });
+  });
+
+  it("audits deterministic trace coverage and enforces it on Full readiness", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const full = { ...task("planning", "planning"), mode: "full" as const, relevantPaths: ["src/a.ts"] };
+    const prd = "# PRD\n### AC `a`\nDone.\n";
+    const plan = [
+      "# Plan",
+      "- [ ] `CAP-A` — implement",
+      "### Slice `CAP-A`",
+      "Criteria: `a`",
+      "Checks: `check`",
+      "Paths: `src/a.ts`",
+      "",
+    ].join("\n");
+    await saveWorkflow(root, { task: full, artifacts: { prd, plan } });
+    await expect(auditWorkflow(root)).resolves.toMatchObject({ status: "pass", diagnostics: [] });
+
+    await writeFile(join(root, ".harnix", "tasks", full.id, "plan.md"), "# Plan\nTODO\n");
+    const ready = { ...full, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
+    await expect(auditWorkflow(root)).resolves.toMatchObject({ status: "fail" });
+    await expect(saveWorkflow(root, { task: ready })).rejects.toThrow("ready trace audit failed");
+    await expect(saveWorkflow(root, { task: ready, artifacts: { prd, plan } })).resolves.toMatchObject({ status: "ready" });
   });
 
   it("rejects readiness when acceptance or required validation gates are empty", async () => {

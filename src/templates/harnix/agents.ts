@@ -60,6 +60,7 @@ Workflow persistence transport is hidden and agent-only:
 
 - \`harnix workflow --inspect\` returns the active TaskRecord and \`contextDrift\`; run it before creating or resuming work.
 - \`harnix workflow --save\` accepts one bounded JSON envelope on stdin with shape \`{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts> }\`. Stage skills use it for planning state, legal transitions, artifacts, and evidence; never edit task.json directly.
+- \`harnix workflow --audit-ready\` deterministically validates Full PRD/plan criterion, slice, check, path, and placeholder trace before readiness.
 - \`harnix workflow --snapshot --check <id>\` computes the TaskRecord v2 freshness digest immediately before and after a required non-mutating check.
 - \`harnix workflow --finish\` is the only completion transport; it revalidates freshness, writes completion/journal state, and clears only the matching active pointer.
 
@@ -68,7 +69,7 @@ These commands are not supported public user APIs and remain absent from public 
 Operating rules:
 
 - Luôn dùng tiếng Việt khi tạo và cập nhật task Harnix, gồm nội dung hướng người dùng trong \`task.json\`, \`prd.md\`, \`plan.md\`, \`design.md\`, research và journal. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
-- On continuation, inspect \`contextDrift\`; stale context returns to replan before reselection. For each required v2 check, use hidden \`workflow --snapshot\` before and after verification and persist only a matching \`inputDigest\`.
+- On continuation, inspect both path \`changes\` and selection-basis \`selectionChanges\` in \`contextDrift\`; stale context returns to replan before reselection. For each required v2 check, use hidden \`workflow --snapshot\` before and after verification and persist only a matching \`inputDigest\`.
 - Preserve user-owned files, tasks, specs, research, journals, credentials, and unrelated configuration.
 - Keep generated paths repository-relative and never expose secrets, prompts, or machine-specific absolute paths in output.
 - Run harnix doctor when managed files, platform setup, or project state may have drifted.

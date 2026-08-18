@@ -208,13 +208,15 @@ Context:
 - Khi truncate, inject phần điểm cao nhất và liệt kê omitted files.
 - Full-context override explicit và vẫn ghi source list.
 - Research findings lưu cùng task với source/date, không global injection.
-- Hidden inspect/continue luôn trả `contextDrift`; changed, missing, unreadable hoặc unverified manifest input tạo `stale`, buộc persist cùng status/checkpoint `replan` trước context reselection. Không tự sửa source/context manifest.
+- Explicit hidden context persistence ghi `context.json` cùng task-owned `context-selection.json` v1, bind `taskId`, selector version, repo-map `inventoryFingerprint`, canonical selection-input hash và selection-result hash; sidecar không chứa source body, task prose, secret hoặc absolute path.
+- Hidden inspect/continue luôn trả `contextDrift` gồm path `changes` và selection-basis `selectionChanges`; content, inventory, selector version hoặc task/config/guide signal drift tạo `stale`, buộc persist cùng status/checkpoint `replan` trước context reselection. Manifest v1 chưa có sidecar vẫn đọc và disclose `not-recorded`; inspect/hook không scan, refresh hoặc write repo-map.
 
 Task verification:
 
 - TaskRecord v2 required checks map acceptance bằng immutable `criterionIds`, khai báo sorted safe `inputs` có `@task-contract`, và behavioral check bind repository file/glob.
 - Required pass evidence mang `inputDigest` SHA-256 của canonical task contract, Full PRD/plan và sorted repository input hashes. Save recompute để chặn race; finish recompute latest required snapshots từ immutable task-owned sidecar.
 - Criterion chỉ `met` cho completion khi linked evidence là fresh pass của check có declared `criterionIds` chứa criterion đó. Changed/missing/unreadable/unsafe/empty input hoặc contract drift fail closed; diagnostics không lộ source body, secret hay absolute path.
+- Full PRD/plan dùng ready-trace grammar v1: `### AC` headings, checklist/detail slice ID, `Criteria`, `Checks` và safe `Paths`. Hidden `workflow --audit-ready` parse bounded Markdown ngoài code fences, trả stable JSON diagnostics và cùng auditor chặn mọi Full transition/re-transition vào `ready`; Lite và historical completed/ready records không nhận retroactive ceremony.
 
 Journal/learning:
 
@@ -222,7 +224,7 @@ Journal/learning:
 - Missing workspace, malformed entry, Unicode/spaces không crash toàn command.
 - Candidate gồm source task, statement, evidence, occurrences, confidence.
 - Promotion vào spec cần repeated independent evidence hoặc explicit finish approval.
-- Promotion reviewable trong diff; không daemon, hidden skill generation, global memory.
+- Promotion reviewable trong diff; statement chỉ được render dưới `Statement-JSON: <JSON.stringify(statement)>` trong fixed untrusted-learning boundary, kèm exact SHA-256, sorted provenance/evidence và redacted risk categories. Doctor gộp tối đa một `persistent-learning-suspicious` warning mỗi journal file, `fixable:false`, không echo matched value và không sửa journal/spec. Không daemon, hidden skill generation, global memory hoặc automatic promotion.
 
 ## 11. Managed-file lifecycle
 
@@ -261,7 +263,7 @@ Search newest-first với query/user/limit/json; include candidate confidence/ev
 
 Doctor uses JSON v2: `project` has status `ready|not-initialized|invalid`; `globalIntegrations` separately reports every supported platform as `not-installed|installed|active|installed-pending-trust|binary-unavailable|shadowed|precedence-unknown|unsupported-version|drifted|invalid`. It works outside a Harnix project and treats `project:not-initialized` as info. The enum supports authoritative external evidence, but the regular CLI does not run a platform-version probe or infer activation/precedence from installed files: `active`, `shadowed` and `unsupported-version` are reported only when that evidence is supplied at the integration boundary; otherwise it returns the conservative installed/trust/binary/precedence state.
 
-Offline deterministic checks include schemas, hashes, missing/modified/obsolete, `legacy-task-schema`, duplicate/legacy injection, skill frontmatter, hooks, unsafe paths, attribution, platform drift, embedded secrets, broad permissions and injection-prone commands. Secret values are redacted và Doctor không migrate task record. Exit 0 is safe/no actionable finding, exit 1 is actionable warning/drift, and exit 2 is invalid usage or unsafe/corrupt/future project/global state. `--fix` alone only repairs safe project-managed issues; `--fix --global` only reconciles safe missing/unchanged global entries and never trusts Codex hooks, enables permissions/features, or changes a modified user fragment.
+Offline deterministic checks include schemas, hashes, missing/modified/obsolete, `legacy-task-schema`, duplicate/legacy injection, suspicious persistent-learning categories, skill frontmatter, hooks, unsafe paths, attribution, platform drift, embedded secrets, broad permissions and injection-prone commands. Secret values are redacted và Doctor không migrate task record hoặc rewrite journal. Exit 0 is safe/no actionable finding, exit 1 is actionable warning/drift, and exit 2 is invalid usage or unsafe/corrupt/future project/global state. `--fix` alone only repairs safe project-managed issues; `--fix --global` only reconciles safe missing/unchanged global entries and never trusts Codex hooks, enables permissions/features, or changes a modified user fragment.
 
 ## 13. Legacy compatibility boundary
 
@@ -305,7 +307,7 @@ Source of truth của từng skill là file thật `src/skills/harnix-*/SKILL.md
 
 Yêu cầu rõ kiểu build/fix/implement/change cho phép chuyển từ ready sang implementing trong phạm vi đã yêu cầu; không xin approval lần hai. Plan-only request hoặc explicit review checkpoint dừng ở `ready`. Product decision chưa giải quyết, scope expansion, destructive/external action hoặc thiếu authority mới cần hỏi.
 
-Workflow phải operational từ generated project artifacts: restore `.harnix/tasks/.active`; persist task `planning` trước product edits; persist `ready`, `in_progress/implementing`, và `verifying` trước hành động của stage kế tiếp; ghi evidence ngay sau check; persist `completed` trước journal/archive. Task ID phải dùng lowercase kebab slug dễ đọc và vẫn fail closed với unsafe path. Ready persistence bắt buộc ít nhất một acceptance criterion và một required validation check; ở v2 mọi non-waived criterion phải được required check bao phủ. Sau lần persist đầu, criterion ID/text và required-check ID/definition, gồm `criterionIds`/`inputs`, không được xoá, đổi tên, demote hoặc sửa in-place. Clarification dùng obligation bổ sung; obligation không còn áp dụng dùng explicit waiver có lý do. Full artifacts phải tồn tại, an toàn và không rỗng trên disk tại mỗi ready transition; `plan.md` có implementation checklist ánh xạ một-một với các slice, chỉ check sau focused evidence và không thay thế TaskRecord evidence. Mỗi generated skill phải nêu incoming state, persisted action, và exit/handoff; không dựa vào conversation memory để giả định transition.
+Workflow phải operational từ generated project artifacts: restore `.harnix/tasks/.active`; persist task `planning` trước product edits; persist `ready`, `in_progress/implementing`, và `verifying` trước hành động của stage kế tiếp; ghi evidence ngay sau check; persist `completed` trước journal/archive. Task ID phải dùng lowercase kebab slug dễ đọc và vẫn fail closed với unsafe path. Ready persistence bắt buộc ít nhất một acceptance criterion và một required validation check; ở v2 mọi non-waived criterion phải được required check bao phủ. Sau lần persist đầu, criterion ID/text và required-check ID/definition, gồm `criterionIds`/`inputs`, không được xoá, đổi tên, demote hoặc sửa in-place. Clarification dùng obligation bổ sung; obligation không còn áp dụng dùng explicit waiver có lý do. Full artifacts phải tồn tại, an toàn, không rỗng và pass deterministic ready-trace auditor tại mỗi ready transition; `plan.md` có implementation checklist ánh xạ một-một với các slice, criterion, required check và safe path, chỉ check sau focused evidence và không thay thế TaskRecord evidence. Mỗi generated skill phải nêu incoming state, persisted action, và exit/handoff; không dựa vào conversation memory để giả định transition.
 
 Language/package profile trong `.harnix/config.yaml` chỉ là init-time discovery seed. Agent phải đối chiếu manifest, source, test và project instructions hiện tại, chọn context có budget, và không bulk-load repository chỉ vì profile thiếu hoặc stale.
 
@@ -339,7 +341,7 @@ Initial IDs cover source languages C#, TypeScript, JavaScript, PHP, Python, Java
 - Shared JSON/Markdown merge does not touch sensitive or unrelated keys/content; global setup never changes MCP, credentials, permissions, trust, model or provider configuration.
 - Purge/migration exact preview và explicit intent.
 - Atomic writes, rollback, source preservation có injected-failure tests.
-- Không execute spec/context/journal content. Repository-derived excerpt phải nằm trong explicit untrusted-data boundary dùng chung cho Kiro, Antigravity và Codex; fixed boundary và omission disclosure đều tính vào output budget.
+- Không execute spec/context/journal content. Repository-derived excerpt phải nằm trong explicit untrusted-data boundary dùng chung cho Kiro, Antigravity và Codex; learning statement dùng boundary riêng và JSON-string serialization. Fixed boundary và omission disclosure đều tính vào output budget.
 - Không network trong init/setup/update/uninstall/mem/doctor.
 
 ## 17. Required tests
@@ -376,7 +378,7 @@ Delivery evidence status through 2026-08-18: Phase 6 implementation and automate
 
 ## Repository map v1
 
-Repo-map is disposable project cache at `.harnix/cache/repo-map-v1.json`, containing only deterministic repository-relative structural metadata and SHA-256 fingerprints—never source bodies, literals, secrets, absolute paths, a daemon, embeddings, or network data. Fresh `harnix init`, hidden `harnix repo-map --refresh`, and project `doctor --fix` may safely rebuild it. Public `harnix repo-map --query <text> [--limit <count>]` is cache-only and always emits JSON; global hooks never scan, refresh, write, or query it.
+Repo-map is disposable project cache at `.harnix/cache/repo-map-v1.json`, containing only deterministic repository-relative structural metadata and SHA-256 fingerprints—never source bodies, literals, secrets, absolute paths, a daemon, embeddings, or network data. Fresh `harnix init`, hidden `harnix repo-map --refresh`, and project `doctor --fix` may safely rebuild it. Public `harnix repo-map --query <text> [--limit <count>]` is cache-only and always emits the v1 JSON shape. Default ranker v2 resolves only safe relative cached `importTargets`, builds a bounded in-memory graph (10k nodes, 100k edges, two hops, 200 candidates), then applies capped dependency-neighbor, referenced-by and inbound-centrality bonuses with stable tie-breaking. Internal ranker v1 preserves lexical rollback behavior; neither ranker persists graph state. Global hooks never scan, refresh, write, or query repo-map.
 
 ## 19. Provenance and requirement history
 

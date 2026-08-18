@@ -1,0 +1,209 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260818-140304-harness-capability-landscape",
+  "title": "Nghiên cứu capability harness cần thiết cho Harnix",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Xác định bằng nguồn sơ cấp một tập nhỏ capability có giá trị cao để harden Harnix mà không mở rộng product boundary.",
+  "nonGoals": [
+    "Không triển khai hoặc sửa source code, frozen contract, package version hay CHANGELOG.",
+    "Không thêm platform, package, service, telemetry, daemon, marketplace, default MCP, global memory hoặc mandatory subagent.",
+    "Không commit, branch, worktree, push, publish hoặc tạo PR."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-landscape",
+      "text": "Báo cáo khảo sát 10–20 ứng viên chất lượng, phân nhóm direct/adjacent/general/excluded và trace các kết luận quan trọng tới nguồn sơ cấp có URL, revision hoặc version, ngày truy cập và license khi xác định được.",
+      "status": "met",
+      "evidenceIds": [
+        "source-traceability-final"
+      ]
+    },
+    {
+      "id": "ac-gap-analysis",
+      "text": "Mỗi capability được so với behavior hiện tại của Harnix để phân biệt capability mới, hardening, cải tiến nội bộ, trùng lặp và demo-only feature bằng repository evidence.",
+      "status": "met",
+      "evidenceIds": [
+        "gap-consistency-final",
+        "compliance-review-final"
+      ]
+    },
+    {
+      "id": "ac-selection",
+      "text": "Capability matrix dùng khung adopt/adapt/defer/reject, điểm số có trọng số và chọn không quá năm roadmap item với problem, thiết kế tối thiểu, non-goals, rủi ro, acceptance criteria và verification strategy.",
+      "status": "met",
+      "evidenceIds": [
+        "recommendation-quality-final",
+        "quality-security-review-final"
+      ]
+    },
+    {
+      "id": "ac-boundaries",
+      "text": "Mọi recommendation giữ một package/một bin, đúng ba platform, offline/no-silent-network, không auto-Git, không mandatory subagent và bảo toàn user-owned state; kết luận không mở rộng scope được chấp nhận nếu bằng chứng không đủ mạnh.",
+      "status": "met",
+      "evidenceIds": [
+        "gap-consistency-final",
+        "compliance-review-final"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_BASELINE.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    ".harnix/workflow.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-source-traceability",
+      "description": "Kiểm tra landscape, nguồn sơ cấp, revision/version, license, ngày truy cập và fact/inference separation trong báo cáo research.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-landscape"
+      ],
+      "inputs": [
+        ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+        "@task-contract",
+        "docs/UPSTREAM_BASELINE.md"
+      ]
+    },
+    {
+      "id": "check-gap-consistency",
+      "description": "Đối chiếu từng gap và recommendation với PRD, workflow, research cũ, implementation plan và mapping hiện tại để loại trùng lặp hoặc boundary drift.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-boundaries",
+        "ac-gap-analysis"
+      ],
+      "inputs": [
+        ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+        "@task-contract",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "docs/UPSTREAM_MAPPING.md"
+      ]
+    },
+    {
+      "id": "check-recommendation-quality",
+      "description": "Kiểm tra scoring, evidence threshold, thiết kế tối thiểu, acceptance criteria, verification strategy, deferred/rejected scope và roadmap không quá năm item.",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-selection"
+      ],
+      "inputs": [
+        ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+        "@task-contract",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "gap-inspection-literal-fail",
+      "checkId": "check-gap-consistency",
+      "recordedAt": "2026-08-18T14:14:29.891Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Kiểm tra compliance đầu tiên fail vì assertion chỉ tìm literal auto-Git trong khi báo cáo dùng cụm Automatic Git; inspection đã xác nhận nội dung boundary có mặt, không có defect artifact.",
+      "artifactPaths": [
+        ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md"
+      ]
+    },
+    {
+      "id": "recommendation-row-scope-fail",
+      "checkId": "check-recommendation-quality",
+      "recordedAt": "2026-08-18T14:14:29.892Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Kiểm tra quality đầu tiên đếm bảy priority row vì regex quét cả bảng quyết định cuối; scope lại đúng riêng mục Roadmap cho kết quả bốn item.",
+      "artifactPaths": [
+        ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md"
+      ]
+    },
+    {
+      "id": "source-traceability-final",
+      "checkId": "check-source-traceability",
+      "recordedAt": "2026-08-18T14:14:29.893Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final source audit pass: 17 ứng viên, 34 URL, ngày truy cập, license/trạng thái, fact/inference separation và không có TBD/TODO; snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+        "docs/UPSTREAM_BASELINE.md"
+      ],
+      "inputDigest": "0fbcde557e410eac0d053fb1a0e1cfe97f4a26aa7ab0a0e213c459fa8ed22077"
+    },
+    {
+      "id": "gap-consistency-final",
+      "checkId": "check-gap-consistency",
+      "recordedAt": "2026-08-18T14:14:29.894Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final compliance audit pass: bốn gap khớp source hiện tại, đủ product boundaries, bốn proposal được chọn và các surface presets/auto-memory/multi-agent bị reject; snapshot ổn định.",
+      "artifactPaths": [
+        ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "docs/UPSTREAM_MAPPING.md"
+      ],
+      "inputDigest": "493447069c80cc56b9e5fd494d30ca71366d71fc49bf1aa0d9ee38df0d01306c"
+    },
+    {
+      "id": "recommendation-quality-final",
+      "checkId": "check-recommendation-quality",
+      "recordedAt": "2026-08-18T14:14:29.895Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final recommendation audit pass: 11 capability scored theo weighted formula, bốn proposal có problem/design/non-goal/security/acceptance/verification/rollback, roadmap đúng bốn item; snapshot ổn định.",
+      "artifactPaths": [
+        ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ],
+      "inputDigest": "030d7cb80ad53ccb66a030abd440802c9f231dd00c04f32735f95130128bc8b8"
+    },
+    {
+      "id": "compliance-review-final",
+      "recordedAt": "2026-08-18T14:14:29.896Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Compliance review không có finding mở: báo cáo chỉ tạo task-owned research, không sửa source/frozen contract/version/changelog, giữ một package/một bin, đúng ba platform và không thêm network/service/auto-Git/subagent bắt buộc.",
+      "artifactPaths": [
+        ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md",
+        "AGENTS.md",
+        "docs/HARNIX_PRD.md"
+      ]
+    },
+    {
+      "id": "quality-security-review-final",
+      "recordedAt": "2026-08-18T14:14:29.897Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Quality/security review không có finding mở: report 306 dòng, 34 external URL, không có machine path, secret hoặc placeholder; learning-promotion risk được phân biệt fact/inference và recommendation không claim upstream guarantee.",
+      "artifactPaths": [
+        ".harnix/tasks/20260818-140304-harness-capability-landscape/research/harness-capabilities.md"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-18T14:03:04.158Z",
+  "updatedAt": "2026-08-18T14:14:34.310Z",
+  "completedAt": "2026-08-18T14:14:34.310Z"
+}

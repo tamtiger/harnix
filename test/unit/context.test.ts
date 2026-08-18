@@ -2,6 +2,14 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildContext, inspectContextDrift, loadContextManifest, rankContext, saveContextManifest, type ContextManifest } from "../../src/core/context/context.js";
+import {
+  createContextSelectionSnapshot,
+  inspectContextSelectionChanges,
+  loadContextSelectionSnapshot,
+  saveContextSelectionSnapshot,
+  validateContextSelectionSnapshot,
+  type ContextSelectionInput,
+} from "../../src/core/context/selection-freshness.js";
 import { sha256 } from "../../src/utils/hashing.js";
 import { UnsafeProjectPathError } from "../../src/utils/paths.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
@@ -32,9 +40,10 @@ describe("context", () => {
         { path: "unreadable.md", kind: "unreadable" },
         { path: "unverified.md", kind: "unverified" },
       ],
+      selectionChanges: [],
     });
-    await expect(inspectContextDrift(root, contextManifest([{ path: "current.md", contentHash: sha256("current") }]))).resolves.toEqual({ state: "current", changes: [] });
-    await expect(inspectContextDrift(root, undefined)).resolves.toEqual({ state: "not-recorded", changes: [] });
+    await expect(inspectContextDrift(root, contextManifest([{ path: "current.md", contentHash: sha256("current") }]))).resolves.toEqual({ state: "current", changes: [], selectionChanges: [] });
+    await expect(inspectContextDrift(root, undefined)).resolves.toEqual({ state: "not-recorded", changes: [], selectionChanges: [] });
   });
 
   it("reports a path-containment escape as unreadable without exposing the external target", async () => {
@@ -44,6 +53,7 @@ describe("context", () => {
     })).resolves.toEqual({
       state: "stale",
       changes: [{ path: "linked.md", kind: "unreadable" }],
+      selectionChanges: [],
     });
   });
 
@@ -81,6 +91,88 @@ describe("context", () => {
   it("persists and reloads a validated context manifest", async () => {
     const root = await temporaryRepository(); const task = { generator: "harnix" as const, schemaVersion: 1 as const, taskId: "x", maxCharacters: 10, entries: [], omitted: [] };
     await saveContextManifest(root, task); expect(await loadContextManifest(join(root, "context.json"))).toEqual(task);
+  });
+
+  it("creates a deterministic selection snapshot without binding content hashes", () => {
+    const manifest = contextManifest([
+      { path: "src/a.ts", contentHash: sha256("a") },
+      { path: "src/b.ts", contentHash: sha256("before") },
+    ]);
+    manifest.omitted = [{ path: "docs/z.md", reason: "budget" }];
+    const input = {
+      config: {
+        context: { maxCharacters: 10_000, tokenApproximation: 4 },
+        languages: ["typescript"],
+        packages: [{ languages: ["typescript"], path: ".", technologies: [] }],
+        runtime: { fullContext: false, research: "conditional" as const },
+        technologies: [],
+      },
+      inventoryFingerprint: sha256("inventory"),
+      manifest,
+      selectedGuidePaths: [".harnix/spec/guides/common/engineering.md"],
+      task: { id: "task", relevantPaths: ["src/**", "docs/**"], relevantSpecs: ["AGENTS.md"] },
+    } satisfies ContextSelectionInput;
+
+    const first = createContextSelectionSnapshot(input);
+    const contentOnlyChange = createContextSelectionSnapshot({
+      ...input,
+      manifest: { ...manifest, entries: manifest.entries.map((entry) => ({ ...entry, contentHash: sha256(`changed:${entry.path}`) })) },
+      task: { ...input.task, relevantPaths: [...input.task.relevantPaths].reverse() },
+    });
+
+    expect(first).toEqual(contentOnlyChange);
+    expect(first).toMatchObject({
+      generator: "harnix",
+      schemaVersion: 1,
+      taskId: "task",
+      selectorVersion: 1,
+      inventoryFingerprint: sha256("inventory"),
+    });
+    expect(first.selectionInputHash).toMatch(/^[a-f0-9]{64}$/u);
+    expect(first.selectionResultHash).toMatch(/^[a-f0-9]{64}$/u);
+    expect(JSON.stringify(first)).not.toContain("before");
+  });
+
+  it("persists and rejects invalid context selection snapshots", async () => {
+    const root = await temporaryRepository();
+    const snapshot = {
+      generator: "harnix" as const,
+      schemaVersion: 1 as const,
+      taskId: "task",
+      selectorVersion: 1 as const,
+      inventoryFingerprint: sha256("inventory"),
+      selectionInputHash: sha256("input"),
+      selectionResultHash: sha256("result"),
+    };
+    await saveContextSelectionSnapshot(root, snapshot);
+    await expect(loadContextSelectionSnapshot(join(root, "context-selection.json"))).resolves.toEqual(snapshot);
+    expect(() => validateContextSelectionSnapshot({ ...snapshot, schemaVersion: 2 })).toThrow("Invalid or unsupported context selection snapshot.");
+    expect(() => validateContextSelectionSnapshot({ ...snapshot, selectionResultHash: "secret" })).toThrow("Invalid or unsupported context selection snapshot.");
+  });
+
+  it("classifies selection drift without duplicating inventory or selector changes", () => {
+    const manifest = contextManifest([{ path: "src/a.ts", contentHash: sha256("a") }]);
+    const base = {
+      config: {
+        context: { maxCharacters: 10_000, tokenApproximation: 4 },
+        languages: ["typescript"],
+        packages: [],
+        runtime: { fullContext: false, research: "conditional" as const },
+        technologies: [],
+      },
+      inventoryFingerprint: sha256("inventory"),
+      manifest,
+      selectedGuidePaths: [".harnix/spec/guides/common/engineering.md"],
+      task: { id: "task", relevantPaths: ["src/**"], relevantSpecs: ["AGENTS.md"] },
+    } satisfies ContextSelectionInput;
+    const snapshot = createContextSelectionSnapshot(base);
+
+    expect(inspectContextSelectionChanges(snapshot, base)).toEqual([]);
+    expect(inspectContextSelectionChanges(snapshot, { ...base, inventoryFingerprint: sha256("changed") })).toEqual(["inventory-changed"]);
+    expect(inspectContextSelectionChanges(snapshot, { ...base, currentSelectorVersion: 2 })).toEqual(["selector-version-changed"]);
+    expect(inspectContextSelectionChanges(snapshot, { ...base, task: { ...base.task, relevantPaths: ["docs/**"] } })).toEqual(["selection-signals-changed"]);
+    expect(inspectContextSelectionChanges(snapshot, { ...base, inventoryFingerprint: "" })).toEqual(["inventory-unavailable"]);
+    expect(() => inspectContextSelectionChanges({ ...snapshot, taskId: "other" }, base)).toThrow("binding");
   });
 
   it("full context bypasses budget while retaining source disclosure", async () => {

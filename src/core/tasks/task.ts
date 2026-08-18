@@ -1,6 +1,8 @@
 import { mkdir, readFile } from "node:fs/promises";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "../../utils/paths.js";
+import { contextSelectionResultHash, saveContextSelectionSnapshot, validateContextSelectionSnapshot, type ContextSelectionSnapshotV1 } from "../context/selection-freshness.js";
+import { saveContextManifest, validateContextManifest, type ContextManifest } from "../context/context.js";
 
 export type TaskMode = "lite" | "full";
 export type TaskStatus = "planning" | "ready" | "in_progress" | "verifying" | "blocked" | "completed";
@@ -136,12 +138,18 @@ export function updateTaskCheckpoint(task: TaskRecord, checkpoint: WorkflowCheck
 }
 
 export async function saveTask(root: string, task: TaskRecord): Promise<void> { const valid = validateTask(task); const directory = await resolveSafeProjectPath(root, `tasks/${valid.id}`); const path = await resolveSafeProjectPath(root, `tasks/${valid.id}/task.json`); await mkdir(directory, { recursive: true }); await atomicWriteFile(path, JSON.stringify(valid, null, 2) + "\n"); }
-export interface TaskArtifacts { prd?: string; plan?: string; design?: string; research?: Record<string, string>; }
+export interface TaskArtifacts { prd?: string; plan?: string; design?: string; research?: Record<string, string>; context?: ContextManifest; contextSelection?: ContextSelectionSnapshotV1; }
 export async function saveTaskWithArtifacts(root: string, task: TaskRecord, artifacts: TaskArtifacts = {}): Promise<void> {
   if (task.mode === "full") {
     if (!artifacts.prd?.trim() || !artifacts.plan?.trim()) throw new TaskValidationError("Full tasks require prd.md and plan.md.");
   } else if (artifacts.prd || artifacts.plan) throw new TaskValidationError("Lite tasks must not create full ceremony artifacts.");
   if (artifacts.research) for (const [name, content] of Object.entries(artifacts.research)) if (!/^[a-z0-9][a-z0-9._-]*\.md$/u.test(name) || !content.trim()) throw new TaskValidationError("Research artifact name or content is invalid.");
+  if ((artifacts.context === undefined) !== (artifacts.contextSelection === undefined)) throw new TaskValidationError("Context persistence requires both manifest and selection snapshot.");
+  if (artifacts.context && artifacts.contextSelection) {
+    const manifest = validateContextManifest(artifacts.context);
+    const snapshot = validateContextSelectionSnapshot(artifacts.contextSelection);
+    if (manifest.taskId !== task.id || snapshot.taskId !== task.id || snapshot.selectionResultHash !== contextSelectionResultHash(manifest)) throw new TaskValidationError("Context persistence task binding is invalid.");
+  }
   await saveTask(root, task);
   const directory = await resolveSafeProjectPath(root, `tasks/${task.id}`);
   if (task.mode === "full") {
@@ -151,6 +159,10 @@ export async function saveTaskWithArtifacts(root: string, task: TaskRecord, arti
   if (artifacts.design?.trim()) await atomicWriteFile(await resolveSafeProjectPath(directory, "design.md"), artifacts.design);
   if (artifacts.research) for (const [name, content] of Object.entries(artifacts.research)) {
     await atomicWriteFile(await resolveSafeProjectPath(directory, `research/${name}`), content);
+  }
+  if (artifacts.context && artifacts.contextSelection) {
+    await saveContextManifest(directory, artifacts.context);
+    await saveContextSelectionSnapshot(directory, artifacts.contextSelection);
   }
 }
 export async function loadTask(path: string): Promise<TaskRecord> { return validateTask(JSON.parse(await readFile(path, "utf8")) as unknown); }

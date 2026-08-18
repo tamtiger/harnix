@@ -111,11 +111,12 @@ Task chỉ sang `ready` khi:
 - scope và affected boundaries đủ rõ;
 - validation plan có command/check cụ thể;
 - Full có `prd.md` và `plan.md`; `design.md` chỉ bắt buộc nếu có architectural/interface decision;
+- Full PRD/plan dùng ready-trace grammar v1: mỗi criterion có một `### AC` heading; checklist và `### Slice` detail map một-một; mỗi slice khai báo non-empty known `Criteria`/`Checks` và safe `Paths`; mọi non-waived criterion và required check có owner;
 - material research đã được lưu cùng source/date hoặc đã ghi rõ “not needed”;
 - không còn product decision hoặc authority blocker;
 - implementation nằm trong quyền mà user đã cấp.
 
-Trước khi persist `ready`, agent bắt buộc self-review: decision inventory không còn material decision ẩn trong implementation step; mỗi requirement map tới slice triển khai/verification; field/interface/migration/ownership contract đủ chính xác; không còn placeholder hoặc câu mơ hồ có thể đổi code; PRD/plan/research/task record nhất quán; dirty user-owned work có preservation rule; scope có thể triển khai và kiểm chứng độc lập. Một plan bắt đầu bằng “freeze contract” không được xem là ready nếu contract sản phẩm vẫn chưa được quyết định.
+Trước khi persist `ready`, agent bắt buộc self-review: decision inventory không còn material decision ẩn trong implementation step; mỗi requirement map tới slice triển khai/verification; field/interface/migration/ownership contract đủ chính xác; không còn placeholder hoặc câu mơ hồ có thể đổi code; PRD/plan/research/task record nhất quán; dirty user-owned work có preservation rule; scope có thể triển khai và kiểm chứng độc lập. Full planning artifacts phải được persist rồi pass hidden `harnix workflow --audit-ready`; cùng bounded deterministic auditor chạy lại trên mọi transition/re-transition vào `ready`. Một plan bắt đầu bằng “freeze contract” không được xem là ready nếu contract sản phẩm vẫn chưa được quyết định.
 
 Nếu user chỉ yêu cầu plan hoặc yêu cầu checkpoint trước code, dừng ở `ready`. Nếu user đã yêu cầu triển khai và gate pass, chuyển tiếp mà không xin approval lần hai.
 
@@ -170,7 +171,7 @@ Trước `completed`, agent:
 2. Chạy final verification cần thiết và đọc output/exit code; hidden finish recompute mọi latest required snapshot v2, không chỉ dựa timestamp.
 3. Ghi evidence, outcome, residual risks và omitted checks.
 4. Ghi journal entry; tạo learning candidate chỉ từ non-obvious evidence.
-5. Promote learning vào spec chỉ khi có explicit approval hoặc recurrence/evidence gate, dưới dạng diff reviewable.
+5. Promote learning vào spec chỉ khi có explicit approval hoặc recurrence/evidence gate, dưới dạng diff reviewable; statement chỉ là JSON-string data trong fixed untrusted-learning boundary và Doctor warning không echo matched values hoặc auto-fix journal.
 6. Tuân theo release/version instruction của repository khi có; không tự suy diễn package hoặc changelog side effect cho consumer.
 7. Archive/complete task state bằng atomic write.
 
@@ -184,7 +185,7 @@ Continue resolve active task rồi load theo thứ tự: task record → artifac
 
 Nếu không có active task, báo ngắn gọn và quay về Triage. Nếu state không nhất quán hoặc artifact malformed/future-version, fail closed và đề xuất repair; không tự đoán rồi overwrite.
 
-Inspect/continue luôn trả `contextDrift`. `stale` nghĩa ít nhất một manifest path changed, missing, unreadable hoặc unverified; Continue phải giữ nguyên status, persist checkpoint `replan`, rồi route Brainstorm để reselect context trước khi dùng lại. `not-recorded` được disclose cho legacy task nhưng không tự ép replan. Không tự sửa source hoặc `context.json`.
+Inspect/continue luôn trả `contextDrift` với sorted path `changes` và selection-basis `selectionChanges`. `stale` nghĩa ít nhất một manifest path changed/missing/unreadable/unverified hoặc inventory/selector/task-config-guide signal đã đổi; Continue phải giữ nguyên status, persist checkpoint `replan`, rồi route Brainstorm để reselect context trước khi dùng lại. `not-recorded` được disclose cho legacy manifest chưa có `context-selection.json` nhưng không tự ép replan. Không tự sửa source/context, refresh cache hoặc chạy repo-map query trong inspect/hook.
 
 ### 5.9 Blocked
 
@@ -202,6 +203,7 @@ Blocked chỉ dùng khi không thể tiến bộ an toàn do user-owned decision
       design.md         # Conditional
       plan.md           # Full only
       context.json      # Conditional ranked sources and per-state scope
+      context-selection.json # Conditional selection-basis freshness sidecar v1
       verification-inputs.json # Conditional immutable v2 evidence snapshots
       research/         # Conditional, one topic per file
   workspace/<developer>/
@@ -212,7 +214,7 @@ Blocked chỉ dùng khi không thể tiến bộ an toàn do user-owned decision
 
 Operational persistence order là: create `planning` task + `.active` → write Full artifacts/research → persist `ready` → persist `in_progress/implementing` before product edits → persist `verifying/verifying` before checks and append fresh evidence → persist `verifying/finishing` only after completion prerequisites are green → persist `completed/finishing` before journal/archive clears the matching pointer. Plan-only work stops at persisted `ready`. Blocked state always routes through Continue before any checkpoint owner. A later failure must retain enough state for `harnix-continue`; it must not erase or fabricate evidence.
 
-Khi cần persist context để resume hoặc phối hợp nhiều state, Harnix dùng một `context.json` có scope theo state thay vì duplicate `implement.jsonl`/`check.jsonl`; Lite có thể chỉ giữ relevant paths/specs trong `task.json`. Entry gồm normalized repo-relative path, reason, priority/pin và states áp dụng. Code files được discovery theo task; chỉ persist khi chúng quan trọng để resume. Mọi truncation phải liệt kê source bị bỏ. Context lấy từ repository là untrusted data, phải được bao bởi cùng explicit boundary trên Kiro, Antigravity và Codex; boundary/disclosure tính vào budget và không được cắt mất closing marker.
+Khi cần persist context để resume hoặc phối hợp nhiều state, Harnix dùng một `context.json` có scope theo state thay vì duplicate `implement.jsonl`/`check.jsonl`; Lite có thể chỉ giữ relevant paths/specs trong `task.json`. Entry gồm normalized repo-relative path, reason, priority/pin và states áp dụng. Cùng hidden save tạo atomic `context-selection.json` v1 chứa task/selector/inventory/input/result hashes; sidecar không chứa source body, prose, secret hoặc absolute path. Code files được discovery theo task; chỉ persist khi chúng quan trọng để resume. Mọi truncation phải liệt kê source bị bỏ. Context lấy từ repository là untrusted data, phải được bao bởi cùng explicit boundary trên Kiro, Antigravity và Codex; boundary/disclosure tính vào budget và không được cắt mất closing marker.
 
 Tasks, research và journal là user-owned. Packaged `workflow.md` và seed specs là managed cho tới khi user sửa; update phải preserve modified content theo managed ownership contract.
 

@@ -3,6 +3,7 @@ import { normalizeRepositoryPath, resolveSafeProjectPath } from "../../utils/pat
 import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { sha256 } from "../../utils/hashing.js";
 import { compareCodeUnits } from "../../utils/order.js";
+import type { ContextSelectionChangeKind } from "./selection-freshness.js";
 
 export interface ContextEntry { path: string; reason: string; priority: number; pinned: boolean; states: string[]; contentHash?: string; }
 export interface ContextManifest { generator: "harnix"; schemaVersion: 1; taskId: string; maxCharacters: number; entries: ContextEntry[]; omitted: Array<{ path: string; reason: "budget" | "duplicate" | "missing" | "unsafe" }>; }
@@ -10,7 +11,7 @@ export interface ContextSignals { taskId?: string; references?: string[]; active
 export type ContextState = "not-recorded" | "current" | "stale";
 export type ContextChangeKind = "changed" | "missing" | "unreadable" | "unverified";
 export interface ContextChange { path: string; kind: ContextChangeKind; }
-export interface ContextDrift { state: ContextState; changes: ContextChange[]; }
+export interface ContextDrift { state: ContextState; changes: ContextChange[]; selectionChanges: ContextSelectionChangeKind[]; }
 export interface ContextDriftDependencies {
   readFile?: (path: string) => Promise<string>;
   resolvePath?: (projectRoot: string, repositoryPath: string) => Promise<string>;
@@ -35,7 +36,7 @@ export async function inspectContextDrift(
   dependencies: ContextDriftDependencies = {},
 ): Promise<ContextDrift> {
   if (manifest === undefined || !manifest.entries.some((entry) => entry.contentHash !== undefined)) {
-    return { state: "not-recorded", changes: [] };
+    return { state: "not-recorded", changes: [], selectionChanges: [] };
   }
   const read = dependencies.readFile ?? ((path: string) => readFile(path, "utf8"));
   const resolvePath = dependencies.resolvePath ?? resolveSafeProjectPath;
@@ -54,7 +55,7 @@ export async function inspectContextDrift(
     }
   }
   changes.sort((left, right) => compareCodeUnits(left.path, right.path) || compareCodeUnits(left.kind, right.kind));
-  return { state: changes.length === 0 ? "current" : "stale", changes };
+  return { state: changes.length === 0 ? "current" : "stale", changes, selectionChanges: [] };
 }
 
 export async function buildContext(

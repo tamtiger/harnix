@@ -52,6 +52,15 @@ src/templates/rules/skills ──> data/content only
 src/core -X-> terminal UI, Commander, Inquirer, platform templates
 ```
 
+The 2026-08-18 adopted capability boundaries remain in the same dependency direction:
+
+| Harnix-owned module | Basis | Ownership/removal boundary |
+|---|---|---|
+| `core/context/selection-freshness.ts` | Trellis scoped-context resume semantics, reimplemented | Hash-only sidecar; no watcher, raw source cache or ContextManifest v2 |
+| `core/tasks/ready-trace.ts` | Superpowers decision-complete planning discipline, reimplemented | Deterministic bounded parser; no LLM judge or Markdown execution |
+| `core/journal/learning-safety.ts` + `promotion.ts` | Trellis/ECC evidence learning, security adaptation | JSON-string review boundary and category-only diagnostics; no auto-promotion/spec rewrite |
+| `core/repo-map/graph.ts` + `search.ts` | Repository dependency navigation pattern, Harnix-authored | Safe cached structural graph only; no AST service, embedding, persisted graph or network |
+
 Public exports chỉ gồm supported programmatic boundaries được ghi trong `src/index.ts`; consumer không được dựa vào deep imports. Commander/Inquirer nằm ở CLI layer. Filesystem/process/network dependencies được inject ở nơi cần test deterministic.
 
 ## 4. Command mapping
@@ -63,8 +72,8 @@ Public exports chỉ gồm supported programmatic boundaries được ghi trong 
 | `harnix update [--global]` | Template hash/fetch/prune | Offline project template reconcile by default; global reconcile uses per-root ownership manifests |
 | `harnix upgrade` | Upgrade command | `@tamtiger/harnix`, installed/available versions, injected network/process deps |
 | `harnix uninstall [--purge|--global|--legacy-project-surfaces]` | Uninstall scrubbers | Project purge remains separate; global/legacy cleanup preview and confirmation preserve modified/untracked content |
-| `harnix mem [query]` | Mem search concepts | Project JSONL/structured journals, Unicode/malformed handling, learning metadata |
-| `harnix doctor [--fix] [--global]` | New + ECC doctor ideas | Doctor JSON v2 projects + global integrations, meaningful exit codes, conservative scoped fix, no network |
+| `harnix mem [query]` | Mem search concepts | Project JSONL/structured journals, Unicode/malformed handling, learning metadata; statements remain untrusted review data |
+| `harnix doctor [--fix] [--global]` | New + ECC doctor ideas | Doctor JSON v2 projects + global integrations, redacted suspicious-learning categories, meaningful exit codes, conservative scoped fix, no network/journal rewrite |
 | Trellis `workflow` | — | Removed; exactly one Harnix workflow |
 | Trellis `channel` | — | Removed completely |
 
@@ -146,13 +155,13 @@ Stack/catalog architecture uses only researched patterns rather than vendored ru
 | Request classification + task consent | `Triage` | Bypass read-only work; explicit mutation request authorizes in-scope implementation, không xin consent tạo task riêng |
 | Requirement exploration | `Planning` | Repo evidence first, ask only user-owned decisions, acceptance/non-goals/validation bắt buộc |
 | `prd.md`, `design.md`, `implement.md` | Lite `task.json`; Full `prd.md` + `plan.md`; conditional `design.md` | Artifact proportionality, không tạo empty ceremony files |
-| `implement.jsonl` + `check.jsonl` | `context.json` scoped by state | Một ranked/budgeted manifest, dedupe và truncation disclosure |
-| `task.py start` after second approval | `Ready` gate | Proceed automatically nếu original request đã cho implementation; dừng khi plan-only/checkpoint/blocker |
+| `implement.jsonl` + `check.jsonl` | `context.json` scoped by state + `context-selection.json` | Một ranked/budgeted manifest, dedupe/truncation disclosure và hash-only selection-basis freshness |
+| `task.py start` after second approval | `Ready` gate + ready trace v1 | Deterministic criterion/slice/check/path audit; proceed automatically nếu original request đã cho implementation; dừng khi plan-only/checkpoint/blocker |
 | Implement/check phase | `Implementing` → `Verifying` | Single-agent capable; compliance trước quality; delegation optional |
 | Rollback | `Debugging` / `Replan` | Explicit transitions dựa trên root cause hoặc requirement/architecture defect |
-| Spec update | Finishing learning candidate/promotion | Evidence + recurrence hoặc explicit approval; reviewable diff |
+| Spec update | Finishing learning candidate/promotion | Evidence + recurrence hoặc explicit approval; JSON-string untrusted boundary, redacted categories và reviewable diff |
 | Mandatory commit + auto-commit archive | — | Rejected; finish không mutate Git integration state |
-| Continue from status/artifacts | `Continue` | Persisted status + checkpoint + bounded context; `contextDrift: stale` persist `replan` trước reselection; corrupt/future state fail closed |
+| Continue from status/artifacts | `Continue` | Persisted status + checkpoint + bounded context; content hoặc selection-basis `contextDrift: stale` persist `replan` trước reselection; corrupt/future state fail closed |
 
 ### 8.2 Superpowers behavior mapping
 

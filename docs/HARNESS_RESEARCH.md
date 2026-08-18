@@ -130,6 +130,19 @@ Nghiên cứu task `20260814-081624-harness-capability-research` đã đối chi
 
 Thiết kế sidecar task-owned được chọn thay vì watcher/daemon vì giữ workflow local, deterministic, no-network và cho diagnostic path-level mà không nhét per-file hash vào evidence công khai. Timestamp-only freshness bị thay thế cho TaskRecord v2; pre-migration v1 evidence vẫn bảo toàn nhưng không chứng minh completion v2.
 
+### 3.8 Adoption 2026-08-18: four bounded harness capabilities
+
+Research task `20260818-140304-harness-capability-landscape` compared current agent harness patterns and selected exactly four `adapt` items that strengthen existing Harnix boundaries without adding a package, service, platform or network path:
+
+| Capability | Decision | Harnix adaptation | Rejected expansion |
+|---|---|---|---|
+| Context selection-basis freshness | `adapt` | Task-owned hash-only sidecar binds task/config/guide/selector/cache inputs and selected-result metadata; inspect reports deterministic `selectionChanges` | ContextManifest v2, watcher, auto-refresh, hook-time repo-map I/O |
+| Deterministic ready trace | `adapt` | Bounded line parser proves PRD criterion ↔ plan slice ↔ required check/safe path and gates Full readiness | LLM judge, arbitrary Markdown execution, Lite ceremony, historical rewrite |
+| Untrusted learning promotion guard | `adapt` | Exact hash + sorted provenance/risk categories; statement is JSON-string review data inside a fixed boundary; Doctor warning is redacted/no-fix | Semantic malware claim, auto-promotion, spec/journal rewrite, URL/command execution |
+| Dependency-aware repo-map ranking | `adapt` | Safe relative import resolver and bounded two-hop in-memory graph add capped bonuses; cache/public schema stay v1 and lexical ranker v1 remains rollback | AST server, embedding/vector DB, persisted graph, runtime scan/network |
+
+The four capabilities are implemented as independent pure core boundaries with focused RED→GREEN gates, then integrated through the existing hidden workflow, Doctor and cache-only query commands. Living spec/spec delta, no-spec markers, platform network probes, context condensers, auto-memory, hosted runtime, workflow presets and mandatory multi-agent behavior remain deferred or rejected.
+
 ## 4. Platform research decisions
 
 Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapters described by earlier Phase 1–5 research are retained only as legacy/provenance evidence; the current adopted contract is `GLOBAL_SETUP_REFACTOR_PLAN.md` §§2, 6–9.
@@ -179,6 +192,9 @@ Precedence: repository convention > user-modified project spec > selected techno
 | Hooks | duplicate execution, shell injection, untrusted project | one surface/platform; bounded args/output; Windows override; doctor trust/duplicate checks |
 | Upgrade | command injection/network in tests | `execFile` argument arrays; injected version/network/process dependencies; no real install in tests |
 | Doctor | secret disclosure | report path/type, redact values; deterministic local scan only |
+| Ready trace | artifact injection, unbounded parse, false readiness | ignore fenced examples; size/line/slice/reference caps; stable IDs/codes only; no Markdown execution |
+| Learning review | persistent prompt injection, credential/URL/command disclosure | JSON-string statement boundary, exact hash, category-only Doctor warning, no auto-fix/promotion |
+| Repo-map graph | traversal, dependency explosion, ranking nondeterminism | relative-only resolver, ambiguity/resource caps, code-unit order, in-memory graph and ranker-v1 rollback |
 | Uninstall | irreversible data loss | default removes unchanged managed files only; purge preview + confirmation + safe-root checks |
 | Context | prompt injection/data overexposure | scoped local sources, budget, omission disclosure, no automatic external retrieval |
 
@@ -187,7 +203,7 @@ Precedence: repository convention > user-modified project spec > selected techno
 ### Deferred
 
 - Optional Codex role agents nếu official schema chưa ổn định hoặc không cần parity.
-- More sophisticated semantic context ranking; release đầu dùng deterministic signals.
+- Semantic/embedding context ranking remains deferred; the adopted dependency-aware repo-map ranker is deterministic structural ranking over existing cache v1 metadata only.
 - Extra framework packs ngoài bảy target languages/frameworks.
 - Remote spec synchronization; `update` chỉ dùng packaged templates.
 

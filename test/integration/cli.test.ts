@@ -144,7 +144,7 @@ describe.sequential("CLI", () => {
 
     await createProgram({ interactive: false }).parseAsync(["node", "harnix", "workflow", "--inspect"], { from: "node" });
 
-    expect(JSON.parse(output.mock.calls.map((call) => String(call[0])).join(""))).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [] } });
+    expect(JSON.parse(output.mock.calls.map((call) => String(call[0])).join(""))).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
   });
   it("should_return_usage_exit_without_stack_when_public_input_is_invalid", async () => {
     const root = await fixture(); process.chdir(root);

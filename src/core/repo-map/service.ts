@@ -2,7 +2,7 @@ import { extractRepoMapRecord } from "./extract.js";
 import { inventoryRepository } from "./inventory.js";
 import { createRepoMap, readRepoMap, writeRepoMap } from "./store.js";
 import { searchRepoMap } from "./search.js";
-import { defaultRepoMapLimits, type RepoMapLimits, type RepoMapQueryResult, type RepoMapQuerySignals, type RepoMapV1 } from "./types.js";
+import { defaultRepoMapLimits, type RepoMapLimits, type RepoMapQueryResult, type RepoMapQuerySignals, type RepoMapRankerVersion, type RepoMapV1 } from "./types.js";
 
 export interface RefreshRepoMapOptions {
   root: string;
@@ -14,6 +14,7 @@ export interface QueryRepoMapOptions {
   query: string;
   limit?: number | undefined;
   signals?: RepoMapQuerySignals | undefined;
+  rankerVersion?: RepoMapRankerVersion | undefined;
 }
 
 export type QueryRepoMapResult = { status: "ready"; map: RepoMapV1; results: RepoMapQueryResult[] } | { status: "missing" | "invalid"; results: [] };
@@ -40,7 +41,7 @@ export async function queryRepoMap(options: QueryRepoMapOptions): Promise<QueryR
   catch (error: unknown) {
     return isMissing(error) ? { results: [], status: "missing" } : { results: [], status: "invalid" };
   }
-  return { map, results: searchRepoMap(map, options.query, options.limit ?? 20, options.signals), status: "ready" };
+  return { map, results: searchRepoMap(map, options.query, options.limit ?? 20, options.signals, { rankerVersion: options.rankerVersion }), status: "ready" };
 }
 
 /** Explicit doctor inventory: scans safely but never writes or refreshes the cache. */

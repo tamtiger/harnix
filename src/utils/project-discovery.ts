@@ -51,6 +51,10 @@ async function nearestInitializedRoot(start: string): Promise<InitializedProject
       return { kind: "ready", root: await realpath(current) };
     } catch (error: unknown) {
       if (error instanceof UnsafeProjectPathError) return { kind: "invalid" };
+      // A global hook can start below a directory whose ancestors are not
+      // readable by the current process. Treat that branch as unavailable so
+      // explicitly supplied workspace roots can still be considered safely.
+      if (isInaccessible(error)) return { kind: "none" };
       if (!isMissing(error)) throw error;
     }
     const parent = dirname(current);
@@ -70,4 +74,11 @@ async function isUsableAbsoluteDirectory(value: string | undefined): Promise<boo
 
 function isMissing(error: unknown): boolean {
   return typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT";
+}
+
+function isInaccessible(error: unknown): boolean {
+  return typeof error === "object"
+    && error !== null
+    && "code" in error
+    && ["EACCES", "EPERM"].includes(String((error as { code?: unknown }).code));
 }
