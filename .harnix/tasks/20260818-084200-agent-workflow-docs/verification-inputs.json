@@ -1,0 +1,1285 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260818-084200-agent-workflow-docs",
+  "snapshots": [
+    {
+      "evidenceId": "acceptance-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-084200-agent-workflow-docs",
+      "checkId": "check-acceptance",
+      "taskContractHash": "0675a4bd0a9c698cd04bb08aaa7a729320cb3b197219c1d9eb7e952ac49507bb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/plan.md",
+          "sha256": "8e5b6926f118401e6105d013381aebf7473d1b070bf6055e6e21472af85f5301"
+        },
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/prd.md",
+          "sha256": "8b621c075bb7a442be77c07d38b382f58347d2abf55fa99fa0268a1d610daa8d"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "ebbfb1d4f867945604871c85ef641bd73c86fd6725f95708ada5cdecfed6e31c"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "a071f747aeb68fb321f7108802dcc812901ea8151fc747ba22eb432903aaff3d"
+        },
+        {
+          "path": "README.md",
+          "sha256": "4df80f6d7985abffeb5e95b022415f4c1182abfbd86c34a87b4606b4cdc40517"
+        },
+        {
+          "path": "package.json",
+          "sha256": "ec62070d884af0b304b3312797267ab4e2734edb835d0334ae241b28597a9d63"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "01297f090acafd420d41b3c735ca015a6f8b5e0ef5a986988c0e7bc0f35e10cd"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "5d6f78ccb475bfb7256e3382a67b4b9ee9d2aa0db5426e72a63ebe439769e5af"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "b9dfcfd36e6da76da0342435670a65475d267febd338fe97da93868eb3192486"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "7bc2cda81e2821ab08e0ff0e38b84548be597b46422634315f3acf97b8dcd26d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "4c0b512115e7c58320b6c7601c7af640beaad90c40f2e432f8a9b2b607276a1f"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "7a677dcf2c8a032db19bb01323e3d5e2644fe09ed7ccb5694154fe07102b6300"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "86a2aba51fbe588dd89eee4f8301711f2b56c520814b80d7990874e3c7bad76e"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "ee806ad901c40f25e71943b9f1ad6c69ece738d6050ea587de55e4807a925ae8"
+        },
+        {
+          "path": "src/templates/harnix/managed-workflow.ts",
+          "sha256": "60fbdc20d69b02cd4ec5517b8323bffb133976a8ed1809eeac5a1f2cdd70ced9"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "3b55171d2c42facff5ef56f8afc7d8f8860d985dfa59551f312f19b242e844d3"
+        },
+        {
+          "path": "test/integration/cli.test.ts",
+          "sha256": "29999e4920fdea8d742248c7a9f2375944491db67f852abd98d5000aa39a9947"
+        },
+        {
+          "path": "test/integration/doctor.test.ts",
+          "sha256": "2700d61bfa3ea57c0951f6667f09dfc8d4a168453212fe147d0532bc5b984b50"
+        },
+        {
+          "path": "test/integration/global-doctor.test.ts",
+          "sha256": "4b7c24bf9f12ee91b4c0d855c31d77dfacb0bc21ceda87c0badb8a7bd09317c9"
+        },
+        {
+          "path": "test/integration/global-lifecycle.test.ts",
+          "sha256": "1e35241ded831ddfda7e85789fe4da1631511d622567deed5f4d589747886cac"
+        },
+        {
+          "path": "test/integration/init.test.ts",
+          "sha256": "69a167af1c34d28b017dd7a325f0759c7ba8b75bd963c7ba43c4744728941b3c"
+        },
+        {
+          "path": "test/integration/memory.test.ts",
+          "sha256": "83ed934d0b2cdfa2e8b2998ef3ebe1319035a5fb94d7f03d9d3945452dc50917"
+        },
+        {
+          "path": "test/integration/project-state-safety.test.ts",
+          "sha256": "e47a368022e97424d04296ff664e4338bf57f0a57769ca4b17b97db7e58ca524"
+        },
+        {
+          "path": "test/integration/repo-map/doctor.test.ts",
+          "sha256": "e11cbfa5d07ab22893238fd6cc26ba7c04c759030008e5b55dccf9fee38756c1"
+        },
+        {
+          "path": "test/integration/repo-map/incremental.test.ts",
+          "sha256": "3b5a51a06224cb184cf3ab85eba5042f446a05d9cc755db9a52eab04800522ee"
+        },
+        {
+          "path": "test/integration/repo-map/internal.test.ts",
+          "sha256": "a00ed254e4e09e37232935a3b2da12c8de04b7bd467871a426545c3440530606"
+        },
+        {
+          "path": "test/integration/uninstall.test.ts",
+          "sha256": "73839b800b1b34f7e61571bb31b96c48cc779a3be60dea6eb41b0df83b3c846c"
+        },
+        {
+          "path": "test/integration/update.test.ts",
+          "sha256": "3d4fb5b161aa94f02ec5339a16e8142ad1276e9353035eb08e9518fbeaf25ea9"
+        },
+        {
+          "path": "test/integration/upgrade.test.ts",
+          "sha256": "c6aed79577101ef526dbc50b3c16c0b7c9708ccbb59163a1610c365e795ae8cb"
+        },
+        {
+          "path": "test/migration/discovery.test.ts",
+          "sha256": "521633e27ffcfaa1ff2c430e23a9a29abe0c15ce6c76af8c9d0219e2d0c3fc43"
+        },
+        {
+          "path": "test/migration/migrate.test.ts",
+          "sha256": "ed33b6895be248d6c225e7030adb81f1fd35f5671d3512f7c89079b885cbd08a"
+        },
+        {
+          "path": "test/platform/codex-global.test.ts",
+          "sha256": "e6ed164c35dae15bc2a0869abfa23eaa2d8aa68eba58eb5c48b35f2c52a6bff2"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "8c093fbf56aaf5cd00320bd3325bca15bd67b23ec7dd594a64bda2e15cfec119"
+        },
+        {
+          "path": "test/platform/setup.test.ts",
+          "sha256": "843f9098715d778e9c4adde12c0c1db258f988b98d6cbaeb4b33e9defc81df4c"
+        },
+        {
+          "path": "test/safety/isolated-user-home.test.ts",
+          "sha256": "8628d309ce2db60fc8ce7f9de2a00795f894459cec8e6c866605d804971aa8f5"
+        },
+        {
+          "path": "test/safety/path-boundaries.test.ts",
+          "sha256": "e09df7cea669cd462337ed805e67e053c19eecb105cf51ba8ba9f7ef232348e7"
+        },
+        {
+          "path": "test/safety/platform-boundaries.test.ts",
+          "sha256": "485b8d98b0da64af4248015608e0c8a114470147dc9e0c98b5d4892ffe32c15a"
+        },
+        {
+          "path": "test/safety/release-scanner.test.ts",
+          "sha256": "e09d3502fd714227d5088071ab2353603ad00aeb4a790b741d622984f72c51fa"
+        },
+        {
+          "path": "test/safety/user-global-paths.test.ts",
+          "sha256": "1355d2c2778c867f9eede4127306b0f1ed16c48a61ffdae53063fd587832563e"
+        },
+        {
+          "path": "test/unit/atomic-write.test.ts",
+          "sha256": "9b2205686c5c86b3b1747e898def455c919357eba6e4b96a411f10c79940f63d"
+        },
+        {
+          "path": "test/unit/bounded-input.test.ts",
+          "sha256": "8c8b2bf8cb06f74ff012b3b5c2a0a809426953e1e9cd8583d633b14c428a0c3e"
+        },
+        {
+          "path": "test/unit/catalog.test.ts",
+          "sha256": "5780660b3b09e2b472c0575a457c993b4c93e30e4c21bb323633df4c4c62c15f"
+        },
+        {
+          "path": "test/unit/cli-fast-path.test.ts",
+          "sha256": "c1ef973bf482d084ccfb046d9057f88bbfa22c135c91c3ce264fc56545d6337a"
+        },
+        {
+          "path": "test/unit/config.test.ts",
+          "sha256": "900c5b8fdc2c203ae8f9db08a39c0c7ecef9643312cc69ccdac1e00bc3af799e"
+        },
+        {
+          "path": "test/unit/context.test.ts",
+          "sha256": "3bc897bac7603adefdbb66ec4638127104ea3abe3e5ed335e8ccfb8cf388c50d"
+        },
+        {
+          "path": "test/unit/detection.test.ts",
+          "sha256": "b6f538423e7e1a068614c99c32529d1e9a36c676e77b1f66830efdd26749080f"
+        },
+        {
+          "path": "test/unit/file-lock.test.ts",
+          "sha256": "42f1d32707a05adf741d0194cb1b21f87962de4702eafa9321d6d35141763ae8"
+        },
+        {
+          "path": "test/unit/filesystem.test.ts",
+          "sha256": "dafa991dd33ce314032debeaeeb330ee0e755e3ab2ef0204c57ecaebf7f4760f"
+        },
+        {
+          "path": "test/unit/global-managed-files.test.ts",
+          "sha256": "baecad02067cd0becfa0988d01537e6a0560e197c67f5e68fe3cd2b4b6e08ad0"
+        },
+        {
+          "path": "test/unit/global-uninstall.test.ts",
+          "sha256": "ad00244e3ba9fd87155ed5f572435d0fe08ae45ba2699653da26051bacf7d511"
+        },
+        {
+          "path": "test/unit/harnix-launcher.test.ts",
+          "sha256": "856fe54f1dbd2ea5567549c6e7ea8d0913d13bd7255f12a580ba3e0732e7b000"
+        },
+        {
+          "path": "test/unit/journal.test.ts",
+          "sha256": "308b231c7a0e086f16a8bb6d677dfa03e661be8299e049be5243a2039dd9ce1f"
+        },
+        {
+          "path": "test/unit/legacy-project-surfaces.test.ts",
+          "sha256": "dcd0ef72820c5f94520aac353699faab2d4190f2a6a4c790ab5c41d564db41a0"
+        },
+        {
+          "path": "test/unit/managed-files.test.ts",
+          "sha256": "ad84b01e12372ced1f5a68eb3150d748623221c3268d966364c1a6393abc5f0d"
+        },
+        {
+          "path": "test/unit/package-contract.test.ts",
+          "sha256": "2a89044854619b596e1fa41cfa4016fd1164927dffeebbf0a1bcdf522b206f52"
+        },
+        {
+          "path": "test/unit/paths.test.ts",
+          "sha256": "9dc111b000cc415c061d06c4ee28ebd37c2912b2b3df50913ddc2f54ac6b6eab"
+        },
+        {
+          "path": "test/unit/project-discovery.test.ts",
+          "sha256": "e3ba1a721c93a92e440ac8bfb83cd13689d648bef622dec1bbb23a73595a73a1"
+        },
+        {
+          "path": "test/unit/repo-map/service.test.ts",
+          "sha256": "fc95e7971b7ad52b1e0386f0fdfc6810d447996926a16971b9c518778d62afd0"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "f1e562befa94ddfc49504744d9f8a52f9f3fe89b23c80d6185421c86d785704b"
+        },
+        {
+          "path": "test/unit/safe-glob.test.ts",
+          "sha256": "c0fed1ec56db26a9f351e16f9ec1cd121704c4e4287cf0c844aee24fc910765f"
+        },
+        {
+          "path": "test/unit/task-state.test.ts",
+          "sha256": "30f63193b06f3391402e805d3ade6962f08eb6aa9959517cc4f5ee080fa7b3d7"
+        },
+        {
+          "path": "test/unit/user-paths.test.ts",
+          "sha256": "bade1898c385f5865db087f9053f93a635bdf2cb389bc0e3c295fa1524ffeab0"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "d2d912b9a17b562286aeecd942e2f1cdfd2da8b0e73e4309a72e36b6de0b1e3e"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "7042487d886cdb67ebe59dae4f8e227e598a7915a6bf55f5bcd425597575f386"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "787739619f38eb5d6f2a96a7c5be706453faafbb2da8b6c9423e76697a336512"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "23d3a8875d7af5e5e73207d94ef6951bd12ea3501d68beb8c91da7051d033baa"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "799a391c237e8ab6719d5538791348dc244c57edbbdd4056e898e969437112ae"
+        }
+      ],
+      "inputDigest": "77260ab25600c8294e9afc62d3e6c7984e5dd437e298160e37112356e2d21eaf"
+    },
+    {
+      "evidenceId": "acceptance-pass-1",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-084200-agent-workflow-docs",
+      "checkId": "check-acceptance",
+      "taskContractHash": "0675a4bd0a9c698cd04bb08aaa7a729320cb3b197219c1d9eb7e952ac49507bb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/plan.md",
+          "sha256": "6b6337f31f3730967fdfb72d3bf9cc5c074bf9b32bafa46df724069e42a9ba97"
+        },
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/prd.md",
+          "sha256": "8b621c075bb7a442be77c07d38b382f58347d2abf55fa99fa0268a1d610daa8d"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "ebbfb1d4f867945604871c85ef641bd73c86fd6725f95708ada5cdecfed6e31c"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "a071f747aeb68fb321f7108802dcc812901ea8151fc747ba22eb432903aaff3d"
+        },
+        {
+          "path": "README.md",
+          "sha256": "4df80f6d7985abffeb5e95b022415f4c1182abfbd86c34a87b4606b4cdc40517"
+        },
+        {
+          "path": "package.json",
+          "sha256": "ec62070d884af0b304b3312797267ab4e2734edb835d0334ae241b28597a9d63"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "01297f090acafd420d41b3c735ca015a6f8b5e0ef5a986988c0e7bc0f35e10cd"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "5d6f78ccb475bfb7256e3382a67b4b9ee9d2aa0db5426e72a63ebe439769e5af"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "b9dfcfd36e6da76da0342435670a65475d267febd338fe97da93868eb3192486"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "7bc2cda81e2821ab08e0ff0e38b84548be597b46422634315f3acf97b8dcd26d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "4c0b512115e7c58320b6c7601c7af640beaad90c40f2e432f8a9b2b607276a1f"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "7a677dcf2c8a032db19bb01323e3d5e2644fe09ed7ccb5694154fe07102b6300"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "86a2aba51fbe588dd89eee4f8301711f2b56c520814b80d7990874e3c7bad76e"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "ee806ad901c40f25e71943b9f1ad6c69ece738d6050ea587de55e4807a925ae8"
+        },
+        {
+          "path": "src/templates/harnix/managed-workflow.ts",
+          "sha256": "60fbdc20d69b02cd4ec5517b8323bffb133976a8ed1809eeac5a1f2cdd70ced9"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "3b55171d2c42facff5ef56f8afc7d8f8860d985dfa59551f312f19b242e844d3"
+        },
+        {
+          "path": "test/integration/cli.test.ts",
+          "sha256": "29999e4920fdea8d742248c7a9f2375944491db67f852abd98d5000aa39a9947"
+        },
+        {
+          "path": "test/integration/doctor.test.ts",
+          "sha256": "2700d61bfa3ea57c0951f6667f09dfc8d4a168453212fe147d0532bc5b984b50"
+        },
+        {
+          "path": "test/integration/global-doctor.test.ts",
+          "sha256": "4b7c24bf9f12ee91b4c0d855c31d77dfacb0bc21ceda87c0badb8a7bd09317c9"
+        },
+        {
+          "path": "test/integration/global-lifecycle.test.ts",
+          "sha256": "1e35241ded831ddfda7e85789fe4da1631511d622567deed5f4d589747886cac"
+        },
+        {
+          "path": "test/integration/init.test.ts",
+          "sha256": "69a167af1c34d28b017dd7a325f0759c7ba8b75bd963c7ba43c4744728941b3c"
+        },
+        {
+          "path": "test/integration/memory.test.ts",
+          "sha256": "83ed934d0b2cdfa2e8b2998ef3ebe1319035a5fb94d7f03d9d3945452dc50917"
+        },
+        {
+          "path": "test/integration/project-state-safety.test.ts",
+          "sha256": "e47a368022e97424d04296ff664e4338bf57f0a57769ca4b17b97db7e58ca524"
+        },
+        {
+          "path": "test/integration/repo-map/doctor.test.ts",
+          "sha256": "e11cbfa5d07ab22893238fd6cc26ba7c04c759030008e5b55dccf9fee38756c1"
+        },
+        {
+          "path": "test/integration/repo-map/incremental.test.ts",
+          "sha256": "3b5a51a06224cb184cf3ab85eba5042f446a05d9cc755db9a52eab04800522ee"
+        },
+        {
+          "path": "test/integration/repo-map/internal.test.ts",
+          "sha256": "a00ed254e4e09e37232935a3b2da12c8de04b7bd467871a426545c3440530606"
+        },
+        {
+          "path": "test/integration/uninstall.test.ts",
+          "sha256": "73839b800b1b34f7e61571bb31b96c48cc779a3be60dea6eb41b0df83b3c846c"
+        },
+        {
+          "path": "test/integration/update.test.ts",
+          "sha256": "3d4fb5b161aa94f02ec5339a16e8142ad1276e9353035eb08e9518fbeaf25ea9"
+        },
+        {
+          "path": "test/integration/upgrade.test.ts",
+          "sha256": "c6aed79577101ef526dbc50b3c16c0b7c9708ccbb59163a1610c365e795ae8cb"
+        },
+        {
+          "path": "test/migration/discovery.test.ts",
+          "sha256": "521633e27ffcfaa1ff2c430e23a9a29abe0c15ce6c76af8c9d0219e2d0c3fc43"
+        },
+        {
+          "path": "test/migration/migrate.test.ts",
+          "sha256": "ed33b6895be248d6c225e7030adb81f1fd35f5671d3512f7c89079b885cbd08a"
+        },
+        {
+          "path": "test/platform/codex-global.test.ts",
+          "sha256": "e6ed164c35dae15bc2a0869abfa23eaa2d8aa68eba58eb5c48b35f2c52a6bff2"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "8c093fbf56aaf5cd00320bd3325bca15bd67b23ec7dd594a64bda2e15cfec119"
+        },
+        {
+          "path": "test/platform/setup.test.ts",
+          "sha256": "843f9098715d778e9c4adde12c0c1db258f988b98d6cbaeb4b33e9defc81df4c"
+        },
+        {
+          "path": "test/safety/isolated-user-home.test.ts",
+          "sha256": "8628d309ce2db60fc8ce7f9de2a00795f894459cec8e6c866605d804971aa8f5"
+        },
+        {
+          "path": "test/safety/path-boundaries.test.ts",
+          "sha256": "e09df7cea669cd462337ed805e67e053c19eecb105cf51ba8ba9f7ef232348e7"
+        },
+        {
+          "path": "test/safety/platform-boundaries.test.ts",
+          "sha256": "485b8d98b0da64af4248015608e0c8a114470147dc9e0c98b5d4892ffe32c15a"
+        },
+        {
+          "path": "test/safety/release-scanner.test.ts",
+          "sha256": "e09d3502fd714227d5088071ab2353603ad00aeb4a790b741d622984f72c51fa"
+        },
+        {
+          "path": "test/safety/user-global-paths.test.ts",
+          "sha256": "1355d2c2778c867f9eede4127306b0f1ed16c48a61ffdae53063fd587832563e"
+        },
+        {
+          "path": "test/unit/atomic-write.test.ts",
+          "sha256": "9b2205686c5c86b3b1747e898def455c919357eba6e4b96a411f10c79940f63d"
+        },
+        {
+          "path": "test/unit/bounded-input.test.ts",
+          "sha256": "8c8b2bf8cb06f74ff012b3b5c2a0a809426953e1e9cd8583d633b14c428a0c3e"
+        },
+        {
+          "path": "test/unit/catalog.test.ts",
+          "sha256": "5780660b3b09e2b472c0575a457c993b4c93e30e4c21bb323633df4c4c62c15f"
+        },
+        {
+          "path": "test/unit/cli-fast-path.test.ts",
+          "sha256": "c1ef973bf482d084ccfb046d9057f88bbfa22c135c91c3ce264fc56545d6337a"
+        },
+        {
+          "path": "test/unit/config.test.ts",
+          "sha256": "900c5b8fdc2c203ae8f9db08a39c0c7ecef9643312cc69ccdac1e00bc3af799e"
+        },
+        {
+          "path": "test/unit/context.test.ts",
+          "sha256": "3bc897bac7603adefdbb66ec4638127104ea3abe3e5ed335e8ccfb8cf388c50d"
+        },
+        {
+          "path": "test/unit/detection.test.ts",
+          "sha256": "b6f538423e7e1a068614c99c32529d1e9a36c676e77b1f66830efdd26749080f"
+        },
+        {
+          "path": "test/unit/file-lock.test.ts",
+          "sha256": "42f1d32707a05adf741d0194cb1b21f87962de4702eafa9321d6d35141763ae8"
+        },
+        {
+          "path": "test/unit/filesystem.test.ts",
+          "sha256": "dafa991dd33ce314032debeaeeb330ee0e755e3ab2ef0204c57ecaebf7f4760f"
+        },
+        {
+          "path": "test/unit/global-managed-files.test.ts",
+          "sha256": "baecad02067cd0becfa0988d01537e6a0560e197c67f5e68fe3cd2b4b6e08ad0"
+        },
+        {
+          "path": "test/unit/global-uninstall.test.ts",
+          "sha256": "ad00244e3ba9fd87155ed5f572435d0fe08ae45ba2699653da26051bacf7d511"
+        },
+        {
+          "path": "test/unit/harnix-launcher.test.ts",
+          "sha256": "856fe54f1dbd2ea5567549c6e7ea8d0913d13bd7255f12a580ba3e0732e7b000"
+        },
+        {
+          "path": "test/unit/journal.test.ts",
+          "sha256": "308b231c7a0e086f16a8bb6d677dfa03e661be8299e049be5243a2039dd9ce1f"
+        },
+        {
+          "path": "test/unit/legacy-project-surfaces.test.ts",
+          "sha256": "dcd0ef72820c5f94520aac353699faab2d4190f2a6a4c790ab5c41d564db41a0"
+        },
+        {
+          "path": "test/unit/managed-files.test.ts",
+          "sha256": "ad84b01e12372ced1f5a68eb3150d748623221c3268d966364c1a6393abc5f0d"
+        },
+        {
+          "path": "test/unit/package-contract.test.ts",
+          "sha256": "2a89044854619b596e1fa41cfa4016fd1164927dffeebbf0a1bcdf522b206f52"
+        },
+        {
+          "path": "test/unit/paths.test.ts",
+          "sha256": "9dc111b000cc415c061d06c4ee28ebd37c2912b2b3df50913ddc2f54ac6b6eab"
+        },
+        {
+          "path": "test/unit/project-discovery.test.ts",
+          "sha256": "e3ba1a721c93a92e440ac8bfb83cd13689d648bef622dec1bbb23a73595a73a1"
+        },
+        {
+          "path": "test/unit/repo-map/service.test.ts",
+          "sha256": "fc95e7971b7ad52b1e0386f0fdfc6810d447996926a16971b9c518778d62afd0"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "f1e562befa94ddfc49504744d9f8a52f9f3fe89b23c80d6185421c86d785704b"
+        },
+        {
+          "path": "test/unit/safe-glob.test.ts",
+          "sha256": "c0fed1ec56db26a9f351e16f9ec1cd121704c4e4287cf0c844aee24fc910765f"
+        },
+        {
+          "path": "test/unit/task-state.test.ts",
+          "sha256": "30f63193b06f3391402e805d3ade6962f08eb6aa9959517cc4f5ee080fa7b3d7"
+        },
+        {
+          "path": "test/unit/user-paths.test.ts",
+          "sha256": "bade1898c385f5865db087f9053f93a635bdf2cb389bc0e3c295fa1524ffeab0"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "d2d912b9a17b562286aeecd942e2f1cdfd2da8b0e73e4309a72e36b6de0b1e3e"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "7042487d886cdb67ebe59dae4f8e227e598a7915a6bf55f5bcd425597575f386"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "787739619f38eb5d6f2a96a7c5be706453faafbb2da8b6c9423e76697a336512"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "23d3a8875d7af5e5e73207d94ef6951bd12ea3501d68beb8c91da7051d033baa"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "799a391c237e8ab6719d5538791348dc244c57edbbdd4056e898e969437112ae"
+        }
+      ],
+      "inputDigest": "609c734f93403aa3932a06c84dbf2a4cf335b3d8ecddb65c2aef93295239a36c"
+    },
+    {
+      "evidenceId": "green-guidance-contract-1",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-084200-agent-workflow-docs",
+      "checkId": "check-guidance-contract",
+      "taskContractHash": "0675a4bd0a9c698cd04bb08aaa7a729320cb3b197219c1d9eb7e952ac49507bb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/plan.md",
+          "sha256": "c128a04499c8e8912227f8b8ff813fcf2646a5660a59cd054377db0277ef9200"
+        },
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/prd.md",
+          "sha256": "8b621c075bb7a442be77c07d38b382f58347d2abf55fa99fa0268a1d610daa8d"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "ebbfb1d4f867945604871c85ef641bd73c86fd6725f95708ada5cdecfed6e31c"
+        },
+        {
+          "path": "README.md",
+          "sha256": "947663f259bfcb9cd6673b63e87a59ee2bcd67d1febd4e07572db23e1b300b79"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "61fae3ef8aa223926d0d562f0bd46cfd12c7306462b6ac6a59b42d6fadaf6d3a"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "354d4827ceac0df7bfc95a64a59383d88e4503e060f3f7083f0cf832ee57c593"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "d620643d10c4f2b06f415f6940503764a09c9bf5c271c87d8a30c3434beabf62"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "7c919ae936f11a17504646cfc2bf8bd4e43c50b0213dd1081e9216f94e6afda9"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "96d10e1e582794ef21c81aad91ac82cfbc97f7f41d74c62a34169cb89bebaeff"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "f79269ee95b6d166dfcee254caba7d8ac0134b48ae79929f7db4e8d77fc816bd"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "bdbaabca5b8d50338f49817c46b8bf15b6e8ca3f87948c0822e3a78d7e99563a"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "ee806ad901c40f25e71943b9f1ad6c69ece738d6050ea587de55e4807a925ae8"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "3b55171d2c42facff5ef56f8afc7d8f8860d985dfa59551f312f19b242e844d3"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "7042487d886cdb67ebe59dae4f8e227e598a7915a6bf55f5bcd425597575f386"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "787739619f38eb5d6f2a96a7c5be706453faafbb2da8b6c9423e76697a336512"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "1c4e66f577297031b58b04d9f1e3888be7b3a60b4edee7349c8b0692cbe824b3"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "39c6c39c890f7c500ac7e355e88b23566cc9ce83e82269fbb3314ea2aa5d2bb2"
+        }
+      ],
+      "inputDigest": "ebbd798dc693c2cd3cf2d3c2c1c2a10abd72df37bfb371e523cdfe2b823ee464"
+    },
+    {
+      "evidenceId": "green-guidance-contract-2",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-084200-agent-workflow-docs",
+      "checkId": "check-guidance-contract",
+      "taskContractHash": "0675a4bd0a9c698cd04bb08aaa7a729320cb3b197219c1d9eb7e952ac49507bb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/plan.md",
+          "sha256": "4551e5082f5fe8844472c542f690ac355f5588889c59bbfc349f22c182e362cf"
+        },
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/prd.md",
+          "sha256": "8b621c075bb7a442be77c07d38b382f58347d2abf55fa99fa0268a1d610daa8d"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "ebbfb1d4f867945604871c85ef641bd73c86fd6725f95708ada5cdecfed6e31c"
+        },
+        {
+          "path": "README.md",
+          "sha256": "4df80f6d7985abffeb5e95b022415f4c1182abfbd86c34a87b4606b4cdc40517"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "01297f090acafd420d41b3c735ca015a6f8b5e0ef5a986988c0e7bc0f35e10cd"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "5d6f78ccb475bfb7256e3382a67b4b9ee9d2aa0db5426e72a63ebe439769e5af"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "b9dfcfd36e6da76da0342435670a65475d267febd338fe97da93868eb3192486"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "7bc2cda81e2821ab08e0ff0e38b84548be597b46422634315f3acf97b8dcd26d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "4c0b512115e7c58320b6c7601c7af640beaad90c40f2e432f8a9b2b607276a1f"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "7a677dcf2c8a032db19bb01323e3d5e2644fe09ed7ccb5694154fe07102b6300"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "86a2aba51fbe588dd89eee4f8301711f2b56c520814b80d7990874e3c7bad76e"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "ee806ad901c40f25e71943b9f1ad6c69ece738d6050ea587de55e4807a925ae8"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "3b55171d2c42facff5ef56f8afc7d8f8860d985dfa59551f312f19b242e844d3"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "7042487d886cdb67ebe59dae4f8e227e598a7915a6bf55f5bcd425597575f386"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "787739619f38eb5d6f2a96a7c5be706453faafbb2da8b6c9423e76697a336512"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "23d3a8875d7af5e5e73207d94ef6951bd12ea3501d68beb8c91da7051d033baa"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "799a391c237e8ab6719d5538791348dc244c57edbbdd4056e898e969437112ae"
+        }
+      ],
+      "inputDigest": "09d306d84c99d26075be7bc67b7de0d7f7649e7c69a5f0a99a96cfa39e8c0072"
+    },
+    {
+      "evidenceId": "green-guidance-contract-3",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-084200-agent-workflow-docs",
+      "checkId": "check-guidance-contract",
+      "taskContractHash": "0675a4bd0a9c698cd04bb08aaa7a729320cb3b197219c1d9eb7e952ac49507bb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/plan.md",
+          "sha256": "6b6337f31f3730967fdfb72d3bf9cc5c074bf9b32bafa46df724069e42a9ba97"
+        },
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/prd.md",
+          "sha256": "8b621c075bb7a442be77c07d38b382f58347d2abf55fa99fa0268a1d610daa8d"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "ebbfb1d4f867945604871c85ef641bd73c86fd6725f95708ada5cdecfed6e31c"
+        },
+        {
+          "path": "README.md",
+          "sha256": "4df80f6d7985abffeb5e95b022415f4c1182abfbd86c34a87b4606b4cdc40517"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "01297f090acafd420d41b3c735ca015a6f8b5e0ef5a986988c0e7bc0f35e10cd"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "5d6f78ccb475bfb7256e3382a67b4b9ee9d2aa0db5426e72a63ebe439769e5af"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "b9dfcfd36e6da76da0342435670a65475d267febd338fe97da93868eb3192486"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "7bc2cda81e2821ab08e0ff0e38b84548be597b46422634315f3acf97b8dcd26d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "4c0b512115e7c58320b6c7601c7af640beaad90c40f2e432f8a9b2b607276a1f"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "7a677dcf2c8a032db19bb01323e3d5e2644fe09ed7ccb5694154fe07102b6300"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "86a2aba51fbe588dd89eee4f8301711f2b56c520814b80d7990874e3c7bad76e"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "ee806ad901c40f25e71943b9f1ad6c69ece738d6050ea587de55e4807a925ae8"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "3b55171d2c42facff5ef56f8afc7d8f8860d985dfa59551f312f19b242e844d3"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "7042487d886cdb67ebe59dae4f8e227e598a7915a6bf55f5bcd425597575f386"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "787739619f38eb5d6f2a96a7c5be706453faafbb2da8b6c9423e76697a336512"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "23d3a8875d7af5e5e73207d94ef6951bd12ea3501d68beb8c91da7051d033baa"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "799a391c237e8ab6719d5538791348dc244c57edbbdd4056e898e969437112ae"
+        }
+      ],
+      "inputDigest": "741cd81d09946d26a740a0908551532adb67274be0f7943ac561fc8f9269e19f"
+    },
+    {
+      "evidenceId": "guidance-contract-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-084200-agent-workflow-docs",
+      "checkId": "check-guidance-contract",
+      "taskContractHash": "0675a4bd0a9c698cd04bb08aaa7a729320cb3b197219c1d9eb7e952ac49507bb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/plan.md",
+          "sha256": "8e5b6926f118401e6105d013381aebf7473d1b070bf6055e6e21472af85f5301"
+        },
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/prd.md",
+          "sha256": "8b621c075bb7a442be77c07d38b382f58347d2abf55fa99fa0268a1d610daa8d"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "ebbfb1d4f867945604871c85ef641bd73c86fd6725f95708ada5cdecfed6e31c"
+        },
+        {
+          "path": "README.md",
+          "sha256": "4df80f6d7985abffeb5e95b022415f4c1182abfbd86c34a87b4606b4cdc40517"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "01297f090acafd420d41b3c735ca015a6f8b5e0ef5a986988c0e7bc0f35e10cd"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "5d6f78ccb475bfb7256e3382a67b4b9ee9d2aa0db5426e72a63ebe439769e5af"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "b9dfcfd36e6da76da0342435670a65475d267febd338fe97da93868eb3192486"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "7bc2cda81e2821ab08e0ff0e38b84548be597b46422634315f3acf97b8dcd26d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "4c0b512115e7c58320b6c7601c7af640beaad90c40f2e432f8a9b2b607276a1f"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "7a677dcf2c8a032db19bb01323e3d5e2644fe09ed7ccb5694154fe07102b6300"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "86a2aba51fbe588dd89eee4f8301711f2b56c520814b80d7990874e3c7bad76e"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "ee806ad901c40f25e71943b9f1ad6c69ece738d6050ea587de55e4807a925ae8"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "3b55171d2c42facff5ef56f8afc7d8f8860d985dfa59551f312f19b242e844d3"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "7042487d886cdb67ebe59dae4f8e227e598a7915a6bf55f5bcd425597575f386"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "787739619f38eb5d6f2a96a7c5be706453faafbb2da8b6c9423e76697a336512"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "23d3a8875d7af5e5e73207d94ef6951bd12ea3501d68beb8c91da7051d033baa"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "799a391c237e8ab6719d5538791348dc244c57edbbdd4056e898e969437112ae"
+        }
+      ],
+      "inputDigest": "fdd0c858c6cf95c29a332b96f5ae1ce28f979ae53953e011ce4faa1e529c4c11"
+    },
+    {
+      "evidenceId": "quality-gates-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-084200-agent-workflow-docs",
+      "checkId": "check-quality-gates",
+      "taskContractHash": "0675a4bd0a9c698cd04bb08aaa7a729320cb3b197219c1d9eb7e952ac49507bb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/plan.md",
+          "sha256": "8e5b6926f118401e6105d013381aebf7473d1b070bf6055e6e21472af85f5301"
+        },
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/prd.md",
+          "sha256": "8b621c075bb7a442be77c07d38b382f58347d2abf55fa99fa0268a1d610daa8d"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "ebbfb1d4f867945604871c85ef641bd73c86fd6725f95708ada5cdecfed6e31c"
+        },
+        {
+          "path": "README.md",
+          "sha256": "4df80f6d7985abffeb5e95b022415f4c1182abfbd86c34a87b4606b4cdc40517"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "01297f090acafd420d41b3c735ca015a6f8b5e0ef5a986988c0e7bc0f35e10cd"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "5d6f78ccb475bfb7256e3382a67b4b9ee9d2aa0db5426e72a63ebe439769e5af"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "b9dfcfd36e6da76da0342435670a65475d267febd338fe97da93868eb3192486"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "7bc2cda81e2821ab08e0ff0e38b84548be597b46422634315f3acf97b8dcd26d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "4c0b512115e7c58320b6c7601c7af640beaad90c40f2e432f8a9b2b607276a1f"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "7a677dcf2c8a032db19bb01323e3d5e2644fe09ed7ccb5694154fe07102b6300"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "86a2aba51fbe588dd89eee4f8301711f2b56c520814b80d7990874e3c7bad76e"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "ee806ad901c40f25e71943b9f1ad6c69ece738d6050ea587de55e4807a925ae8"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "3b55171d2c42facff5ef56f8afc7d8f8860d985dfa59551f312f19b242e844d3"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "7042487d886cdb67ebe59dae4f8e227e598a7915a6bf55f5bcd425597575f386"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "787739619f38eb5d6f2a96a7c5be706453faafbb2da8b6c9423e76697a336512"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "23d3a8875d7af5e5e73207d94ef6951bd12ea3501d68beb8c91da7051d033baa"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "799a391c237e8ab6719d5538791348dc244c57edbbdd4056e898e969437112ae"
+        }
+      ],
+      "inputDigest": "f534b75dbe68774620c433be5b2747c0a2ff1861cf141fc348483df20488429f"
+    },
+    {
+      "evidenceId": "quality-gates-pass",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-084200-agent-workflow-docs",
+      "checkId": "check-quality-gates",
+      "taskContractHash": "0675a4bd0a9c698cd04bb08aaa7a729320cb3b197219c1d9eb7e952ac49507bb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/plan.md",
+          "sha256": "6b6337f31f3730967fdfb72d3bf9cc5c074bf9b32bafa46df724069e42a9ba97"
+        },
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/prd.md",
+          "sha256": "8b621c075bb7a442be77c07d38b382f58347d2abf55fa99fa0268a1d610daa8d"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "ebbfb1d4f867945604871c85ef641bd73c86fd6725f95708ada5cdecfed6e31c"
+        },
+        {
+          "path": "README.md",
+          "sha256": "4df80f6d7985abffeb5e95b022415f4c1182abfbd86c34a87b4606b4cdc40517"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "01297f090acafd420d41b3c735ca015a6f8b5e0ef5a986988c0e7bc0f35e10cd"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "5d6f78ccb475bfb7256e3382a67b4b9ee9d2aa0db5426e72a63ebe439769e5af"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "b9dfcfd36e6da76da0342435670a65475d267febd338fe97da93868eb3192486"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "7bc2cda81e2821ab08e0ff0e38b84548be597b46422634315f3acf97b8dcd26d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "4c0b512115e7c58320b6c7601c7af640beaad90c40f2e432f8a9b2b607276a1f"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "7a677dcf2c8a032db19bb01323e3d5e2644fe09ed7ccb5694154fe07102b6300"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "86a2aba51fbe588dd89eee4f8301711f2b56c520814b80d7990874e3c7bad76e"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "ee806ad901c40f25e71943b9f1ad6c69ece738d6050ea587de55e4807a925ae8"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "3b55171d2c42facff5ef56f8afc7d8f8860d985dfa59551f312f19b242e844d3"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "7042487d886cdb67ebe59dae4f8e227e598a7915a6bf55f5bcd425597575f386"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "787739619f38eb5d6f2a96a7c5be706453faafbb2da8b6c9423e76697a336512"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "23d3a8875d7af5e5e73207d94ef6951bd12ea3501d68beb8c91da7051d033baa"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "799a391c237e8ab6719d5538791348dc244c57edbbdd4056e898e969437112ae"
+        }
+      ],
+      "inputDigest": "7e1d0ab872f4d89b8535cd06322b52e4fa5e40511192c12ffc6bee39b5552ffb"
+    },
+    {
+      "evidenceId": "release-metadata-final",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-084200-agent-workflow-docs",
+      "checkId": "check-release-metadata",
+      "taskContractHash": "0675a4bd0a9c698cd04bb08aaa7a729320cb3b197219c1d9eb7e952ac49507bb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/plan.md",
+          "sha256": "8e5b6926f118401e6105d013381aebf7473d1b070bf6055e6e21472af85f5301"
+        },
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/prd.md",
+          "sha256": "8b621c075bb7a442be77c07d38b382f58347d2abf55fa99fa0268a1d610daa8d"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "a071f747aeb68fb321f7108802dcc812901ea8151fc747ba22eb432903aaff3d"
+        },
+        {
+          "path": "package.json",
+          "sha256": "ec62070d884af0b304b3312797267ab4e2734edb835d0334ae241b28597a9d63"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "01297f090acafd420d41b3c735ca015a6f8b5e0ef5a986988c0e7bc0f35e10cd"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "5d6f78ccb475bfb7256e3382a67b4b9ee9d2aa0db5426e72a63ebe439769e5af"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "b9dfcfd36e6da76da0342435670a65475d267febd338fe97da93868eb3192486"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "7bc2cda81e2821ab08e0ff0e38b84548be597b46422634315f3acf97b8dcd26d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "4c0b512115e7c58320b6c7601c7af640beaad90c40f2e432f8a9b2b607276a1f"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "7a677dcf2c8a032db19bb01323e3d5e2644fe09ed7ccb5694154fe07102b6300"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "86a2aba51fbe588dd89eee4f8301711f2b56c520814b80d7990874e3c7bad76e"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "23d3a8875d7af5e5e73207d94ef6951bd12ea3501d68beb8c91da7051d033baa"
+        }
+      ],
+      "inputDigest": "bf858beed42816808782fc7f715c8390dae2e53bde45461800f9a359b64a8748"
+    },
+    {
+      "evidenceId": "release-metadata-pass-1",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-084200-agent-workflow-docs",
+      "checkId": "check-release-metadata",
+      "taskContractHash": "0675a4bd0a9c698cd04bb08aaa7a729320cb3b197219c1d9eb7e952ac49507bb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/plan.md",
+          "sha256": "4551e5082f5fe8844472c542f690ac355f5588889c59bbfc349f22c182e362cf"
+        },
+        {
+          "path": ".harnix/tasks/20260818-084200-agent-workflow-docs/prd.md",
+          "sha256": "8b621c075bb7a442be77c07d38b382f58347d2abf55fa99fa0268a1d610daa8d"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "a071f747aeb68fb321f7108802dcc812901ea8151fc747ba22eb432903aaff3d"
+        },
+        {
+          "path": "package.json",
+          "sha256": "ec62070d884af0b304b3312797267ab4e2734edb835d0334ae241b28597a9d63"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "01297f090acafd420d41b3c735ca015a6f8b5e0ef5a986988c0e7bc0f35e10cd"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "5d6f78ccb475bfb7256e3382a67b4b9ee9d2aa0db5426e72a63ebe439769e5af"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "b9dfcfd36e6da76da0342435670a65475d267febd338fe97da93868eb3192486"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "7bc2cda81e2821ab08e0ff0e38b84548be597b46422634315f3acf97b8dcd26d"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "4c0b512115e7c58320b6c7601c7af640beaad90c40f2e432f8a9b2b607276a1f"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "7a677dcf2c8a032db19bb01323e3d5e2644fe09ed7ccb5694154fe07102b6300"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "86a2aba51fbe588dd89eee4f8301711f2b56c520814b80d7990874e3c7bad76e"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "23d3a8875d7af5e5e73207d94ef6951bd12ea3501d68beb8c91da7051d033baa"
+        }
+      ],
+      "inputDigest": "df0fb51f03420fe9604bff21693cd5994d41f79aff6177196cbba35cc1914c02"
+    }
+  ]
+}

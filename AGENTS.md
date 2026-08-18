@@ -21,7 +21,7 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 
 - Documentation readiness has passed.
 - Phase 1–6 and workflow freshness hardening C1–C3 are complete in their authorized scope. Follow the current active `.harnix` task when one exists.
-- With no active task, continue from the first unchecked task in `docs/IMPLEMENTATION_PLAN.md` unless the user changes priority; explicitly deferred extensions and Kiro CLI manual activation do not invalidate completed automated scope.
+- Only when the user requests implementation, no active task exists, and the user has not set another priority, continue from the first unchecked task in `docs/IMPLEMENTATION_PLAN.md`; explicitly deferred extensions and Kiro CLI manual activation do not invalidate completed automated scope.
 - Do not invent a second package, workspace, service, or compatibility surface.
 
 ## Non-negotiable product boundaries
@@ -58,6 +58,10 @@ core -X-> Commander/Inquirer/platform templates
 ## Implementation workflow
 
 Use the single state machine in `docs/HARNIX_WORKFLOW.md`. Lite and Full are ceremony levels, not separate workflows.
+
+Before any Harnix action, locate the nearest initialized ancestor or workspace root containing a valid `.harnix/config.yaml`, read `.harnix/workflow.md`, and inspect `.harnix/tasks/.active`. If the project state is absent or invalid, report it instead of creating state or running `harnix init` automatically.
+
+Classify every request as Bypass, Lite, or Full before selecting work. Read-only explanations and reviews use Bypass without task mutation. Resume an active task through `harnix-continue`; otherwise use `harnix-brainstorm` for planning, `harnix-implement` for authorized implementation, `harnix-check` for compliance then quality/security verification, and `harnix-finish-work` only after fresh green evidence. Use `harnix-research` and `harnix-debug` only for a material unknown or reproducible failure.
 
 Luôn dùng tiếng Việt khi tạo và cập nhật task Harnix, gồm nội dung hướng người dùng trong `task.json`, `prd.md`, `plan.md`, `design.md`, research và journal. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
 

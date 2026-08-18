@@ -66,6 +66,7 @@ describe("package invariant", () => {
       "test:unit",
       "test:workflow",
       "typecheck",
+      "version:sync",
     ]);
   });
 

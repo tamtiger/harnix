@@ -1,0 +1,381 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260818-084200-agent-workflow-docs",
+  "title": "Hoàn thiện hướng dẫn agent và tài liệu workflow Harnix",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bảo đảm agent đọc instruction có thể route và persist đầy đủ workflow Harnix, đồng thời README mô tả chính xác luồng sử dụng và ownership.",
+  "nonGoals": [
+    "Không thay đổi tám public command hoặc biến hidden workflow transport thành public API.",
+    "Không thay đổi TaskRecord schema, transition, hook protocol hoặc platform path.",
+    "Không sửa dữ liệu task và journal lịch sử được Doctor báo warning."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-root-routing",
+      "text": "Root AGENTS.md buộc mọi request qua activation/triage, giữ Bypass cho read-only và chỉ tiếp tục implementation plan khi người dùng yêu cầu thay đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "green-guidance-contract-2",
+        "green-guidance-contract-3",
+        "guidance-contract-final"
+      ]
+    },
+    {
+      "id": "ac-transport",
+      "text": "Consumer AGENTS/workflow và các stage skill chỉ dẫn chính xác inspect, save JSON envelope, snapshot và finish để agent persist TaskRecord v2 an toàn mà không đoán contract.",
+      "status": "met",
+      "evidenceIds": [
+        "green-guidance-contract-2",
+        "green-guidance-contract-3",
+        "quality-gates-pass",
+        "guidance-contract-final",
+        "quality-gates-final"
+      ]
+    },
+    {
+      "id": "ac-readme-flow",
+      "text": "README có happy path end-to-end từ init/setup/trust tới yêu cầu tự nhiên trong agent, skill discovery, routing và cách hiểu Doctor.",
+      "status": "met",
+      "evidenceIds": [
+        "green-guidance-contract-2",
+        "green-guidance-contract-3",
+        "guidance-contract-final"
+      ]
+    },
+    {
+      "id": "ac-readme-ownership",
+      "text": "README mô tả nhất quán root AGENTS bootstrap, managed-until-edited specs/workflow, user-owned tasks/research/journal và không còn ví dụ Doctor lặp.",
+      "status": "met",
+      "evidenceIds": [
+        "green-guidance-contract-2",
+        "green-guidance-contract-3",
+        "guidance-contract-final"
+      ]
+    },
+    {
+      "id": "ac-regression",
+      "text": "Contract tests thất bại khi thiếu routing hoặc persistence transport và toàn bộ focused/full gates liên quan đều pass.",
+      "status": "met",
+      "evidenceIds": [
+        "acceptance-pass-1",
+        "guidance-contract-final",
+        "quality-gates-final",
+        "acceptance-final"
+      ]
+    },
+    {
+      "id": "ac-release",
+      "text": "Package patch version và CHANGELOG phản ánh thay đổi hướng dẫn agent trước khi task hoàn tất.",
+      "status": "met",
+      "evidenceIds": [
+        "release-metadata-pass-1",
+        "release-metadata-final"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "package.json",
+    "src/skills",
+    "src/templates/harnix/agents.ts",
+    "src/templates/harnix/workflow.ts",
+    "test/workflow"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-guidance-contract",
+      "description": "Chạy contract tests cho root AGENTS, consumer templates, canonical skills và hidden CLI registration.",
+      "command": "pnpm exec vitest run test/workflow/templates.test.ts test/workflow/skill-sources.test.ts test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-readme-flow",
+        "ac-readme-ownership",
+        "ac-regression",
+        "ac-root-routing",
+        "ac-transport"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "README.md",
+        "src/skills/harnix-*/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/*.test.ts"
+      ]
+    },
+    {
+      "id": "check-quality-gates",
+      "description": "Chạy lint, typecheck và build để xác minh source/template thay đổi hợp lệ.",
+      "command": "pnpm lint; pnpm typecheck; pnpm build",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-regression",
+        "ac-transport"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "README.md",
+        "src/skills/harnix-*/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/*.test.ts"
+      ]
+    },
+    {
+      "id": "check-release-metadata",
+      "description": "Kiểm tra patch version và changelog cho thay đổi user-visible.",
+      "command": "pnpm exec vitest run test/workflow/skill-sources.test.ts; git diff --check",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-release"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json",
+        "src/skills/harnix-*/SKILL.md",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "check-acceptance",
+      "description": "Chạy toàn bộ acceptance suites để phát hiện regression workflow, integration, migration, platform và safety.",
+      "command": "pnpm test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-regression"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/skills/harnix-*/SKILL.md",
+        "src/templates/harnix/*.ts",
+        "test/**/*.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "red-guidance-contract",
+      "checkId": "check-guidance-contract",
+      "recordedAt": "2026-08-18T01:41:38.9725833Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED xác nhận 3 test fail vì root AGENTS thiếu triage có điều kiện, generated workflow thiếu inspect/save/finish và canonical skills thiếu exact save transport; CLI registration vẫn pass.",
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "green-guidance-contract-1",
+      "checkId": "check-guidance-contract",
+      "recordedAt": "2026-08-18T01:45:05.2461962Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN: 3 test files, 9 tests pass cho root routing, consumer template/workflow transport, bảy canonical skills, README contract và hidden CLI registration.",
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "ebbd798dc693c2cd3cf2d3c2c1c2a10abd72df37bfb371e523cdfe2b823ee464"
+    },
+    {
+      "id": "green-guidance-contract-2",
+      "checkId": "check-guidance-contract",
+      "recordedAt": "2026-08-18T01:46:38.7983512Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh focused contract run sau version/sync: 3 files, 9 tests pass; snapshot trước/sau cùng digest.",
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "09d306d84c99d26075be7bc67b7de0d7f7649e7c69a5f0a99a96cfa39e8c0072"
+    },
+    {
+      "id": "release-metadata-pass-1",
+      "checkId": "check-release-metadata",
+      "recordedAt": "2026-08-18T01:47:03.0987739Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Skill version contract: 1 file/4 tests pass; git diff --check exit 0. Git chỉ báo informational CRLF conversion warnings.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "test/workflow/skill-sources.test.ts"
+      ],
+      "inputDigest": "df0fb51f03420fe9604bff21693cd5994d41f79aff6177196cbba35cc1914c02"
+    },
+    {
+      "id": "green-guidance-contract-3",
+      "checkId": "check-guidance-contract",
+      "recordedAt": "2026-08-18T01:47:36.1794551Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final implementation-focused run trên checklist hiện tại: 3 files, 9 tests pass; snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "741cd81d09946d26a740a0908551532adb67274be0f7943ac561fc8f9269e19f"
+    },
+    {
+      "id": "compliance-review-pass",
+      "recordedAt": "2026-08-18T01:48:07.8610103Z",
+      "result": "pass",
+      "summary": "Compliance inspection toàn bộ working-tree diff: sáu finding đã được xử lý; non-goals về public CLI, TaskRecord/transition, hook/platform contract và historical state đều được giữ.",
+      "artifactPaths": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/skills/harnix-check/SKILL.md",
+        "src/skills/harnix-continue/SKILL.md",
+        "src/skills/harnix-debug/SKILL.md",
+        "src/skills/harnix-finish-work/SKILL.md",
+        "src/skills/harnix-implement/SKILL.md",
+        "src/skills/harnix-research/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "quality-gates-pass",
+      "checkId": "check-quality-gates",
+      "recordedAt": "2026-08-18T01:48:45.0963320Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint, pnpm typecheck và pnpm build đều exit 0; build ESM/DTS 1.0.2 thành công, không có warning chất lượng.",
+      "artifactPaths": [
+        "package.json",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "7e1d0ab872f4d89b8535cd06322b52e4fa5e40511192c12ffc6bee39b5552ffb"
+    },
+    {
+      "id": "acceptance-pass-1",
+      "checkId": "check-acceptance",
+      "recordedAt": "2026-08-18T01:50:42.0511661Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:acceptance: 395 passed, 1 skipped đúng thiết kế trên Windows; exit 0.",
+      "artifactPaths": [
+        "test/unit",
+        "test/integration",
+        "test/migration",
+        "test/platform",
+        "test/workflow",
+        "test/safety"
+      ],
+      "inputDigest": "609c734f93403aa3932a06c84dbf2a4cf335b3d8ecddb65c2aef93295239a36c"
+    },
+    {
+      "id": "guidance-contract-final",
+      "checkId": "check-guidance-contract",
+      "recordedAt": "2026-08-18T01:52:49.1898787Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh final contract run: 3 files và 9 tests pass; snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "fdd0c858c6cf95c29a332b96f5ae1ce28f979ae53953e011ce4faa1e529c4c11"
+    },
+    {
+      "id": "quality-gates-final",
+      "checkId": "check-quality-gates",
+      "recordedAt": "2026-08-18T01:53:21.5905285Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh final quality run: lint, typecheck và build 1.0.2 đều exit 0; snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        "package.json",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "f534b75dbe68774620c433be5b2747c0a2ff1861cf141fc348483df20488429f"
+    },
+    {
+      "id": "release-metadata-final",
+      "checkId": "check-release-metadata",
+      "recordedAt": "2026-08-18T01:53:48.9704776Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh final release metadata run: skill source contract 4 tests pass và git diff --check exit 0; chỉ có cảnh báo chuyển đổi LF/CRLF.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "test/workflow/skill-sources.test.ts"
+      ],
+      "inputDigest": "bf858beed42816808782fc7f715c8390dae2e53bde45461800f9a359b64a8748"
+    },
+    {
+      "id": "acceptance-final",
+      "checkId": "check-acceptance",
+      "recordedAt": "2026-08-18T01:54:31.5879741Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh final acceptance run: 395 tests pass, 1 atomic chmod test skip đúng thiết kế trên Windows; snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        "test/unit",
+        "test/integration",
+        "test/migration",
+        "test/platform",
+        "test/workflow",
+        "test/safety"
+      ],
+      "inputDigest": "77260ab25600c8294e9afc62d3e6c7984e5dd437e298160e37112356e2d21eaf"
+    },
+    {
+      "id": "completion-gates-pass",
+      "recordedAt": "2026-08-18T01:54:53.3429086Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact mục 11 pass theo thứ tự: frozen install, build, lint, typecheck, test, acceptance, pack check, fake-home tarball smoke, init/footprint measurements, release scan và git diff check. Không chạy smoke trên user profile thật; global installed copies chưa được cập nhật vì không có authorization.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "test"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-18T01:40:05.1750474Z",
+  "updatedAt": "2026-08-18T01:55:01.152Z",
+  "completedAt": "2026-08-18T01:55:01.152Z"
+}

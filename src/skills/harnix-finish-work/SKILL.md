@@ -2,7 +2,7 @@
 name: harnix-finish-work
 description: Use when a Harnix task is fully verified and needs safe completion persistence, journaling, active-pointer cleanup, and an evidence-based handoff.
 metadata:
-  version: "1.0.1"
+  version: "1.0.5"
 ---
 
 # Finish verified Harnix work
@@ -29,17 +29,17 @@ Reread:
 - current diff/status and user-owned changes;
 - omitted checks, waivers, and residual risks.
 
-Confirm that evidence still describes the current files. For TaskRecord schema v2, treat the task-owned `verification-inputs.json` snapshot as immutable workflow state and use hidden workflow finish so Harnix recomputes every latest required pass. If it reports changed/missing relative paths or a task-contract mismatch, verification is stale and must run again; timestamps alone are insufficient.
+Confirm that evidence still describes the current files. For TaskRecord schema v2, treat the task-owned `verification-inputs.json` snapshot as immutable workflow state and use `harnix workflow finish` so Harnix recomputes every latest required pass. If it reports changed/missing relative paths or a task-contract mismatch, verification is stale and must run again; timestamps alone are insufficient.
 
 ## Persist completion safely
 
 Use this order:
 
 1. follow the project-specific release instruction when one exists; do not invent package-version or changelog side effects;
-2. write the task `status` as `completed`, checkpoint `finishing`, `completedAt`, and final evidence links;
-3. persist the journal/archive material required by the project workflow;
-4. clear `.harnix/tasks/.active` only when it still points to this exact task;
-5. reread the written state and report any partial persistence failure.
+2. confirm `harnix workflow inspect` still returns this exact task at `verifying/finishing`;
+3. run `harnix workflow finish` exactly once and read its complete JSON result; do not prewrite `completed`, the journal, or `.active` directly;
+4. confirm the returned task is `completed/finishing` and a new inspection has no active task;
+5. report any partial persistence failure without retrying a different mutation path.
 
 Never clear the active pointer first. Never mark completed merely because time or budget is ending. Preserve recoverable task state if a later step fails.
 
@@ -47,7 +47,7 @@ Do not promote project learning automatically. Record a reviewable learning cand
 
 ## Persist
 
-Record actual completion time, evidence, waivers, omitted checks, residual risks, and any remaining manual action. Do not fabricate a clean worktree or claim unrelated changes as part of the task.
+Before finish, record actual evidence, waivers, omitted checks, residual risks, and any remaining manual action through `harnix workflow save` with one bounded JSON envelope on stdin. Completion time and journal/archive state belong to `harnix workflow finish`. Do not fabricate a clean worktree or claim unrelated changes as part of the task.
 
 ## Exit
 

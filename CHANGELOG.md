@@ -4,6 +4,37 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.5] - 2026-08-18
+
+### Changed
+
+- Thêm version:sync để đồng bộ package metadata, bảy canonical skill và CHANGELOG an toàn, idempotent.
+
+## [1.0.4] - 2026-08-18
+
+### Fixed
+
+- `AGENTS.md` do `harnix init` sinh ra nay nêu rõ và liên kết trực tiếp tới `.harnix/workflow.md` như nguồn workflow chính trước khi agent phân loại, persist hoặc hoàn tất task.
+
+## [1.0.3] - 2026-08-18
+
+### Changed
+
+- Rút gọn hidden agent persistence transport từ `harnix internal workflow ...` thành `harnix workflow ...`; bốn operation `inspect`, `save`, `snapshot` và `finish` giữ nguyên JSON, validation và freshness semantics, nhưng command cũ không còn compatibility alias.
+- Đồng bộ CLI registration, canonical workflow docs, README, consumer templates, bảy stage skills và workflow contract tests với namespace mới; `harnix internal context` vẫn là protocol riêng cho platform hook.
+
+## [1.0.2] - 2026-08-18
+
+### Fixed
+
+- Root `AGENTS.md` nay luôn triage Bypass/Lite/Full trước khi chọn việc, chỉ tiếp tục implementation plan khi người dùng thực sự yêu cầu thay đổi và route rõ từng stage owner.
+- Consumer AGENTS/workflow cùng bảy canonical skills nay mô tả đầy đủ hidden `inspect|save|snapshot|finish` transport, JSON stdin envelope, TaskRecord v2 fields và completion ownership để agent không ghi trực tiếp workflow state.
+- README nay có happy path từ `init`/global setup/trust tới yêu cầu tự nhiên trong coding agent, diễn giải Doctor, ownership đúng cho bootstrap/spec/workflow/task/research/journal và không còn ví dụ Doctor lặp.
+
+### Changed
+
+- Đồng bộ package, README và `metadata.version` của bảy canonical workflow skills ở source release `1.0.2`; public CLI, TaskRecord schema, transition và platform integration contract không đổi.
+
 ## [1.0.1] - 2026-08-17
 
 ### Fixed

@@ -1,6 +1,6 @@
 {
   "name": "@tamtiger/harnix",
-  "version": "1.0.1",
+  "version": "1.0.5",
   "description": "Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, and Codex integrations.",
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -38,7 +38,8 @@
     "smoke:tarball": "node scripts/smoke-tarball.mjs",
     "measure:init": "node scripts/measure-init.mjs",
     "measure:footprint": "node scripts/measure-footprint.mjs",
-    "scan:release": "node scripts/scan-release.mjs"
+    "scan:release": "node scripts/scan-release.mjs",
+    "version:sync": "node scripts/version-sync.mjs"
   },
   "dependencies": {
     "commander": "^13.1.0",

@@ -1,0 +1,368 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260818-095800-version-sync-script",
+  "title": "Tự động đồng bộ version release",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cung cấp script an toàn để đồng bộ package version, metadata skill và CHANGELOG thay vì sửa thủ công.",
+  "nonGoals": [
+    "Không publish package, commit hoặc cập nhật global integration.",
+    "Không tự chạy build hoặc update self-host manifest trong script version."
+  ],
+  "acceptanceCriteria": [
+    {
+      "status": "met",
+      "text": "Lệnh version sync chỉ chấp nhận semver patch/minor/major tăng dần và chặn input/summary không hợp lệ.",
+      "evidenceIds": [
+        "version-sync-green",
+        "version-sync-final"
+      ],
+      "id": "ac-version-validation"
+    },
+    {
+      "status": "met",
+      "text": "Lệnh đồng bộ package.json, bảy source skill metadata và CHANGELOG; chạy lại cùng version không duplicate entry.",
+      "evidenceIds": [
+        "version-sync-green",
+        "quality-green",
+        "version-sync-final",
+        "quality-final-2",
+        "acceptance-final-2"
+      ],
+      "id": "ac-sync"
+    },
+    {
+      "status": "met",
+      "text": "Package script và README hướng dẫn rõ lệnh sync và bước build/update self-host tiếp theo.",
+      "evidenceIds": [
+        "quality-final",
+        "acceptance-green",
+        "guidance-final",
+        "quality-final-2",
+        "acceptance-final-2"
+      ],
+      "id": "ac-guidance"
+    },
+    {
+      "status": "met",
+      "text": "Release metadata của thay đổi này được đồng bộ qua chính version sync script trước completion.",
+      "evidenceIds": [
+        "release-green",
+        "release-final-2"
+      ],
+      "id": "ac-release"
+    }
+  ],
+  "relevantPaths": [
+    "scripts/version-sync.mjs",
+    "package.json",
+    "CHANGELOG.md",
+    "README.md",
+    "src/skills",
+    "test/unit/version-sync.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "scope": "focused",
+      "inputs": [
+        "@task-contract",
+        "scripts/version-sync.mjs",
+        "src/skills/harnix-*/SKILL.md",
+        "test/unit/version-sync.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ],
+      "command": "pnpm exec vitest run test/unit/version-sync.test.ts test/workflow/skill-sources.test.ts",
+      "criterionIds": [
+        "ac-sync",
+        "ac-version-validation"
+      ],
+      "id": "check-version-sync",
+      "required": true,
+      "description": "Kiểm tra validation, cập nhật atomically scoped và idempotency của version sync script."
+    },
+    {
+      "scope": "full",
+      "inputs": [
+        "@task-contract",
+        "package.json",
+        "scripts/version-sync.mjs",
+        "src/skills/harnix-*/SKILL.md",
+        "test/unit/version-sync.test.ts"
+      ],
+      "command": "pnpm lint; pnpm typecheck; pnpm build",
+      "criterionIds": [
+        "ac-guidance",
+        "ac-sync"
+      ],
+      "id": "check-quality",
+      "required": true,
+      "description": "Chạy lint, typecheck và build cho script/package metadata."
+    },
+    {
+      "scope": "focused",
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/version-sync.mjs"
+      ],
+      "command": "git diff --check",
+      "criterionIds": [
+        "ac-release"
+      ],
+      "id": "check-release",
+      "required": true,
+      "description": "Kiểm tra version/changelog/diff sau khi script sync."
+    },
+    {
+      "scope": "full",
+      "inputs": [
+        "@task-contract",
+        "package.json",
+        "scripts/version-sync.mjs",
+        "src/skills/harnix-*/SKILL.md",
+        "test/**/*.test.ts"
+      ],
+      "command": "pnpm test:acceptance",
+      "criterionIds": [
+        "ac-guidance",
+        "ac-sync"
+      ],
+      "id": "check-acceptance",
+      "required": true,
+      "description": "Chạy acceptance suite để phát hiện regression release/template."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "version-sync-typecheck-failure",
+      "checkId": "check-quality",
+      "recordedAt": "2026-08-18T04:04:10.1250752Z",
+      "result": "fail",
+      "exitCode": 2,
+      "summary": "pnpm typecheck báo TS7016: test TypeScript import scripts/version-sync.mjs nhưng module chưa có declaration. Lint/build/update chạy sau đó không biến quality check thành pass.",
+      "artifactPaths": [
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts"
+      ],
+      "inputDigest": "40155eb828c3c455ea1556e856c67f9ae1f7f1799ed85ce8fdf0c185019202e6"
+    },
+    {
+      "id": "typecheck-recovery",
+      "recordedAt": "2026-08-18T04:05:02.0017022Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Dynamic import typed trong test loại TS7016 mà không cần declaration file ngoài frozen release inputs; pnpm typecheck và focused version-sync test đều pass.",
+      "artifactPaths": [
+        "test/unit/version-sync.test.ts",
+        "scripts/version-sync.mjs"
+      ]
+    },
+    {
+      "id": "version-sync-green",
+      "checkId": "check-version-sync",
+      "recordedAt": "2026-08-18T04:05:47.2086577Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused suites pass (6 tests); script run thật nâng 1.0.4 lên 1.0.5, cập nhật package/bảy skill/changelog và rerun trả changed:false.",
+      "artifactPaths": [
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts",
+        "src/skills",
+        "CHANGELOG.md",
+        "package.json"
+      ],
+      "inputDigest": "31c285a106014b2cb236b5b88a2e8307782f7420dfd75b2b8fd09a6310be1aa8"
+    },
+    {
+      "id": "quality-green",
+      "checkId": "check-quality",
+      "recordedAt": "2026-08-18T04:05:47.2138187Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint, pnpm typecheck và pnpm build đều exit 0 sau typecheck recovery; snapshot ổn định.",
+      "artifactPaths": [
+        "package.json",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts"
+      ],
+      "inputDigest": "1017d777e1b10eaee79438511224ce7b497a623f92dbbc88611d7431ead5dfd4"
+    },
+    {
+      "id": "release-green",
+      "checkId": "check-release",
+      "recordedAt": "2026-08-18T04:05:47.2138805Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "git diff --check exit 0; package 1.0.5 và CHANGELOG entry được tạo bằng version-sync script; chỉ có line-ending warnings thông tin.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/version-sync.mjs"
+      ],
+      "inputDigest": "853668feb9189bec7cc50bef269cfee69df1832c4ea34841f5ac00850efb4faf"
+    },
+    {
+      "id": "package-contract-failure",
+      "checkId": "check-acceptance",
+      "recordedAt": "2026-08-18T04:06:19.9576227Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Acceptance unit package-contract failed because expected package script allowlist lacked newly added version:sync; no runtime/script defect observed.",
+      "artifactPaths": [
+        "package.json",
+        "test/unit/package-contract.test.ts"
+      ],
+      "inputDigest": "2310c7344221c06e79750b26e918dcc5feacb18eecb6a89b4ecdb18720615eb3"
+    },
+    {
+      "id": "quality-final",
+      "checkId": "check-quality",
+      "recordedAt": "2026-08-18T04:07:23.6731564Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final pnpm lint, pnpm typecheck và pnpm build đều pass; snapshot ổn định.",
+      "artifactPaths": [
+        "package.json",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts",
+        "test/unit/package-contract.test.ts"
+      ],
+      "inputDigest": "1017d777e1b10eaee79438511224ce7b497a623f92dbbc88611d7431ead5dfd4"
+    },
+    {
+      "id": "release-final",
+      "checkId": "check-release",
+      "recordedAt": "2026-08-18T04:07:23.6781253Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final git diff --check pass; release metadata 1.0.5 remains synchronized by script.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/version-sync.mjs"
+      ],
+      "inputDigest": "853668feb9189bec7cc50bef269cfee69df1832c4ea34841f5ac00850efb4faf"
+    },
+    {
+      "id": "acceptance-green",
+      "checkId": "check-acceptance",
+      "recordedAt": "2026-08-18T04:07:23.6781830Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final pnpm test:acceptance pass: 397 passed, 1 expected Windows skip; snapshot ổn định.",
+      "artifactPaths": [
+        "test/unit",
+        "test/integration",
+        "test/migration",
+        "test/platform",
+        "test/workflow",
+        "test/safety"
+      ],
+      "inputDigest": "e42b8823cb7ba35827d8d02c9ed7e8d91e400e75a9ae0841f817bfff26194e5b"
+    },
+    {
+      "id": "readme-drift-red",
+      "recordedAt": "2026-08-18T04:12:02.586Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Focused RED test proved version-sync left managed current-version claims in README at 1.0.4 after synchronizing a 1.0.5 fixture.",
+      "artifactPaths": [
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts",
+        "README.md"
+      ]
+    },
+    {
+      "id": "readme-drift-green",
+      "recordedAt": "2026-08-18T04:12:02.586Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN test passes: version-sync updates both managed README current-version claims, repairs same-version README drift, and remains idempotent.",
+      "artifactPaths": [
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts",
+        "README.md"
+      ]
+    },
+    {
+      "id": "version-sync-final",
+      "checkId": "check-version-sync",
+      "recordedAt": "2026-08-18T04:14:17.051Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused suites pass: 2 files, 6 tests. Script validates strict increasing semver, updates package/seven source skills/changelog/managed README claims, repairs same-version README drift, and is idempotent.",
+      "artifactPaths": [
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "README.md"
+      ],
+      "inputDigest": "87211c801a1e49227eb60787f7781a8959f163d7ad1d9c41c4878a7f6e9e23b8"
+    },
+    {
+      "id": "quality-final-2",
+      "checkId": "check-quality",
+      "recordedAt": "2026-08-18T04:14:17.051Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint, pnpm typecheck, and pnpm build all exit 0 after final implementation.",
+      "artifactPaths": [
+        "package.json",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts"
+      ],
+      "inputDigest": "775b8b89a7e6d01f58f45d24742a5b835bf7f2d5f0e4b709191bbd9b7b3911f8"
+    },
+    {
+      "id": "release-final-2",
+      "checkId": "check-release",
+      "recordedAt": "2026-08-18T04:14:17.051Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "git diff --check exits 0 after final README guidance review; package remains 1.0.5 and release metadata was generated by version-sync.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "scripts/version-sync.mjs"
+      ],
+      "inputDigest": "b27bb52c3a372088bb215c21edcdbd48df307ec099e1d56544d6895c2c923ff8"
+    },
+    {
+      "id": "guidance-final",
+      "recordedAt": "2026-08-18T04:14:17.051Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Manual final review confirms README documents pnpm version:sync with next version 1.0.6, repeatable summaries, managed README claims, and separate build/self-host update steps.",
+      "artifactPaths": [
+        "README.md"
+      ]
+    },
+    {
+      "id": "acceptance-final-2",
+      "checkId": "check-acceptance",
+      "recordedAt": "2026-08-18T04:14:17.051Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final pnpm test:acceptance passes: 397 tests passed, 1 expected Windows skip; full snapshot stable.",
+      "artifactPaths": [
+        "test/unit",
+        "test/integration",
+        "test/migration",
+        "test/platform",
+        "test/workflow",
+        "test/safety"
+      ],
+      "inputDigest": "7e59af396071860fb1db3deb4e56e2427d6685dae0ef9eedb89eb77f8521cd1c"
+    }
+  ],
+  "createdAt": "2026-08-18T04:00:33.5629346Z",
+  "updatedAt": "2026-08-18T04:14:26.921Z",
+  "completedAt": "2026-08-18T04:14:26.921Z"
+}

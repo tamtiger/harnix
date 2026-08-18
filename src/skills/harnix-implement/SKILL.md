@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or already in progress and needs plan review, test-first implementation, refactoring, or technical feedback handling.
 metadata:
-  version: "1.0.1"
+  version: "1.0.5"
 ---
 
 # Implement a ready Harnix task
@@ -59,7 +59,7 @@ Write the minimal implementation that satisfies the test and the frozen contract
 
 Run the focused test and relevant neighboring tests. Fix production code when the contract is right; do not rewrite the test to bless an incorrect implementation.
 
-For a TaskRecord schema v2 required check, run `harnix internal workflow snapshot --check <id>` immediately before the non-mutating verification command. After reading the complete result and exit code, run the same hidden snapshot again. Record a passing evidence item only when both `inputDigest` values are identical; set that exact lowercase digest on the evidence and persist it immediately. If the digest changes, the pattern is empty, or an input is missing/unreadable, do not claim GREEN—resolve the drift and rerun the check.
+For a TaskRecord schema v2 required check, run `harnix workflow snapshot --check <id>` immediately before the non-mutating verification command. After reading the complete result and exit code, run the same hidden snapshot again. Record a passing evidence item only when both `inputDigest` values are identical; set that exact lowercase digest on the evidence and persist it immediately. If the digest changes, the pattern is empty, or an input is missing/unreadable, do not claim GREEN—resolve the drift and rerun the check.
 
 ### REFACTOR
 
@@ -87,7 +87,7 @@ Use `harnix-debug` for a reproducible failure. Return to planning for a requirem
 
 ## Persist
 
-Keep `in_progress/implementing` with the last completed slice, current failing/passing command, concise result, and next step. Check an implementation-plan item only after that slice's work and focused evidence are complete; never infer progress from an unchecked/checked box alone, and never erase earlier failure evidence. Record documented exceptions and alternate evidence. For v2 required passes, preserve the matching `inputDigest`; the workflow-owned `verification-inputs.json` sidecar is not a user-editable evidence shortcut. Move to `verifying/verifying` only after all implementation checklist items, implementation slices, and focused checks are complete.
+Use `harnix workflow save` with one bounded JSON envelope on stdin for every checkpoint, legal transition, artifact update, and evidence append; start from `harnix workflow inspect` output and never edit `task.json` directly. Keep `in_progress/implementing` with the last completed slice, current failing/passing command, concise result, and next step. Check an implementation-plan item only after that slice's work and focused evidence are complete; never infer progress from an unchecked/checked box alone, and never erase earlier failure evidence. Record documented exceptions and alternate evidence. For v2 required passes, preserve the matching `inputDigest`; the workflow-owned `verification-inputs.json` sidecar is not a user-editable evidence shortcut. Move to `verifying/verifying` only after all implementation checklist items, implementation slices, and focused checks are complete.
 
 ## Exit
 

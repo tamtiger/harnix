@@ -1,0 +1,294 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260818-085700-short-workflow-cli",
+  "title": "Rút gọn CLI persistence workflow",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Rút gọn namespace workflow persistence cho agent bằng cách bỏ từ internal nhưng giữ an toàn, hidden visibility và JSON transport.",
+  "nonGoals": [
+    "Không đổi semantics của inspect, save, snapshot hoặc finish.",
+    "Không biến workflow transport thành public supported API nếu không được quyết định rõ.",
+    "Không thay đổi internal context hook protocol."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-short-cli",
+      "text": "Bốn workflow transport dùng namespace ngắn thống nhất không chứa từ internal.",
+      "status": "met",
+      "evidenceIds": [
+        "short-cli-focused-green",
+        "short-cli-final"
+      ]
+    },
+    {
+      "id": "ac-guidance-sync",
+      "text": "CLI registration, templates, canonical skills, docs và tests dùng nhất quán namespace đã chọn.",
+      "status": "met",
+      "evidenceIds": [
+        "short-cli-focused-green",
+        "short-cli-final"
+      ]
+    },
+    {
+      "id": "ac-behavior",
+      "text": "Inspect, save, snapshot và finish giữ nguyên JSON/validation/freshness semantics; visibility và compatibility tuân theo quyết định đã chốt.",
+      "status": "met",
+      "evidenceIds": [
+        "short-cli-focused-green",
+        "quality-green",
+        "short-cli-final",
+        "quality-final"
+      ]
+    },
+    {
+      "id": "ac-regression",
+      "text": "Focused CLI/workflow tests và acceptance suite liên quan pass.",
+      "status": "met",
+      "evidenceIds": [
+        "short-cli-focused-green",
+        "quality-green",
+        "acceptance-green",
+        "short-cli-final",
+        "quality-final",
+        "acceptance-final"
+      ]
+    },
+    {
+      "id": "ac-release",
+      "text": "Patch version và CHANGELOG phản ánh thay đổi user-visible trước completion.",
+      "status": "met",
+      "evidenceIds": [
+        "release-metadata-green",
+        "release-final"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/cli-program.ts",
+    "src/commands/internal-workflow.ts",
+    "src/templates/harnix/agents.ts",
+    "src/templates/harnix/workflow.ts",
+    "src/skills",
+    "docs",
+    "README.md",
+    "test/workflow"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-short-cli",
+      "description": "Kiểm tra registration hidden namespace, workflow transport và generated guidance dùng command ngắn thống nhất.",
+      "command": "pnpm exec vitest run test/workflow/cli-contract.test.ts test/workflow/templates.test.ts test/workflow/skill-sources.test.ts test/workflow/internal-workflow.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-behavior",
+        "ac-guidance-sync",
+        "ac-regression",
+        "ac-short-cli"
+      ],
+      "inputs": [
+        "@task-contract",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "src/skills/harnix-*/SKILL.md",
+        "src/templates/harnix/*.ts",
+        "test/workflow/*.test.ts"
+      ]
+    },
+    {
+      "id": "check-quality",
+      "description": "Chạy lint, typecheck và build cho đổi registration/docs source.",
+      "command": "pnpm lint; pnpm typecheck; pnpm build",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-behavior",
+        "ac-regression"
+      ],
+      "inputs": [
+        "@task-contract",
+        "package.json",
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "src/templates/harnix/*.ts",
+        "test/workflow/*.test.ts"
+      ]
+    },
+    {
+      "id": "check-release",
+      "description": "Kiểm tra version/changelog và whitespace diff.",
+      "command": "git diff --check",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-release"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json"
+      ]
+    },
+    {
+      "id": "check-acceptance",
+      "description": "Chạy acceptance suites để phát hiện regression workflow/CLI.",
+      "command": "pnpm test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-regression"
+      ],
+      "inputs": [
+        "@task-contract",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "src/skills/harnix-*/SKILL.md",
+        "src/templates/harnix/*.ts",
+        "test/**/*.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "short-cli-focused-green",
+      "checkId": "check-short-cli",
+      "recordedAt": "2026-08-18T03:13:19.6741626Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "RED xác nhận namespace mới chưa tồn tại; sau đổi registration/docs, 4 focused files với 23 tests pass và snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/templates.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "inputDigest": "33325a0e2194634b9eb30a139f097bb90022186b30b1ea892800696dce7812f1"
+    },
+    {
+      "id": "quality-green",
+      "checkId": "check-quality",
+      "recordedAt": "2026-08-18T03:14:01.3194411Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint, pnpm typecheck và pnpm build cho 1.0.3 đều exit 0; snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        "package.json",
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts"
+      ],
+      "inputDigest": "48b5531f0658083c016bc9c21ee86830d152630185a3ff221853965b715bef92"
+    },
+    {
+      "id": "release-metadata-green",
+      "checkId": "check-release",
+      "recordedAt": "2026-08-18T03:14:13.7004294Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Version 1.0.3, bảy skill metadata và CHANGELOG đã đồng bộ; git diff --check exit 0, chỉ cảnh báo LF/CRLF thông tin.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/skills"
+      ],
+      "inputDigest": "cfcbfc236ea4355fe165d63c7b46f7aeb52505ee9590a7216512efc08401cc60"
+    },
+    {
+      "id": "acceptance-green",
+      "checkId": "check-acceptance",
+      "recordedAt": "2026-08-18T03:15:02.0285258Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:acceptance pass: 395 tests, 1 expected Windows skip; snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        "test/unit",
+        "test/integration",
+        "test/migration",
+        "test/platform",
+        "test/workflow",
+        "test/safety"
+      ],
+      "inputDigest": "230e7502b7d4b84bc9a19d0df327def5195ad372259adea3be0b1d7a2ebc0610"
+    },
+    {
+      "id": "short-cli-final",
+      "checkId": "check-short-cli",
+      "recordedAt": "2026-08-18T03:16:03.6484375Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final focused suite: 4 files, 23 tests pass; snapshot stable.",
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/templates.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "inputDigest": "d8fb9efcb33cd1c90987e790945f02e200a14451b2112ca27f7f8812f528a119"
+    },
+    {
+      "id": "quality-final",
+      "checkId": "check-quality",
+      "recordedAt": "2026-08-18T03:16:03.6540423Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final lint, typecheck và build pass; snapshot stable.",
+      "artifactPaths": [
+        "package.json",
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts"
+      ],
+      "inputDigest": "25d3b51fb226529a6b98f14bd6b304696e08a96fa52284f8e760ee0102b15291"
+    },
+    {
+      "id": "release-final",
+      "checkId": "check-release",
+      "recordedAt": "2026-08-18T03:16:03.6541238Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "git diff --check pass; version 1.0.3 and CHANGELOG synchronized.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json"
+      ],
+      "inputDigest": "48a50200b0586de1f60156f06060a980125e629b909fb2a7686b6ccdc043402b"
+    },
+    {
+      "id": "acceptance-final",
+      "checkId": "check-acceptance",
+      "recordedAt": "2026-08-18T03:16:03.6541400Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final acceptance: 395 passed, 1 expected Windows skip; snapshot stable.",
+      "artifactPaths": [
+        "test/unit",
+        "test/integration",
+        "test/migration",
+        "test/platform",
+        "test/workflow",
+        "test/safety"
+      ],
+      "inputDigest": "920210aeddac4486539dbcf66925e97b25264618f7ba2a5f7e4c73a66d02a136"
+    }
+  ],
+  "createdAt": "2026-08-18T02:57:03.1553092Z",
+  "updatedAt": "2026-08-18T03:16:14.655Z",
+  "completedAt": "2026-08-18T03:16:14.655Z"
+}

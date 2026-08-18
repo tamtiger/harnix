@@ -1,0 +1,307 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260818-091500-agent-template-workflow-ref",
+  "snapshots": [
+    {
+      "evidenceId": "acceptance-green",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-091500-agent-template-workflow-ref",
+      "checkId": "check-acceptance",
+      "taskContractHash": "fe96c0f72c2330d7418a51a4fa616af5a726c4aa33316912f4a451cea6c13c6b",
+      "entries": [
+        {
+          "path": "package.json",
+          "sha256": "ec62a8d60481a3510a83d698017b884d2e979dd950f7730b1fdf8c0d502f6e8d"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "e216e348765969bf4536ac34016982241967d09135019b9a8e1a0685ecfd80da"
+        },
+        {
+          "path": "test/integration/cli.test.ts",
+          "sha256": "29999e4920fdea8d742248c7a9f2375944491db67f852abd98d5000aa39a9947"
+        },
+        {
+          "path": "test/integration/doctor.test.ts",
+          "sha256": "2700d61bfa3ea57c0951f6667f09dfc8d4a168453212fe147d0532bc5b984b50"
+        },
+        {
+          "path": "test/integration/global-doctor.test.ts",
+          "sha256": "4b7c24bf9f12ee91b4c0d855c31d77dfacb0bc21ceda87c0badb8a7bd09317c9"
+        },
+        {
+          "path": "test/integration/global-lifecycle.test.ts",
+          "sha256": "1e35241ded831ddfda7e85789fe4da1631511d622567deed5f4d589747886cac"
+        },
+        {
+          "path": "test/integration/init.test.ts",
+          "sha256": "69a167af1c34d28b017dd7a325f0759c7ba8b75bd963c7ba43c4744728941b3c"
+        },
+        {
+          "path": "test/integration/memory.test.ts",
+          "sha256": "83ed934d0b2cdfa2e8b2998ef3ebe1319035a5fb94d7f03d9d3945452dc50917"
+        },
+        {
+          "path": "test/integration/project-state-safety.test.ts",
+          "sha256": "e47a368022e97424d04296ff664e4338bf57f0a57769ca4b17b97db7e58ca524"
+        },
+        {
+          "path": "test/integration/repo-map/doctor.test.ts",
+          "sha256": "e11cbfa5d07ab22893238fd6cc26ba7c04c759030008e5b55dccf9fee38756c1"
+        },
+        {
+          "path": "test/integration/repo-map/incremental.test.ts",
+          "sha256": "3b5a51a06224cb184cf3ab85eba5042f446a05d9cc755db9a52eab04800522ee"
+        },
+        {
+          "path": "test/integration/repo-map/internal.test.ts",
+          "sha256": "a00ed254e4e09e37232935a3b2da12c8de04b7bd467871a426545c3440530606"
+        },
+        {
+          "path": "test/integration/uninstall.test.ts",
+          "sha256": "73839b800b1b34f7e61571bb31b96c48cc779a3be60dea6eb41b0df83b3c846c"
+        },
+        {
+          "path": "test/integration/update.test.ts",
+          "sha256": "3d4fb5b161aa94f02ec5339a16e8142ad1276e9353035eb08e9518fbeaf25ea9"
+        },
+        {
+          "path": "test/integration/upgrade.test.ts",
+          "sha256": "c6aed79577101ef526dbc50b3c16c0b7c9708ccbb59163a1610c365e795ae8cb"
+        },
+        {
+          "path": "test/migration/discovery.test.ts",
+          "sha256": "521633e27ffcfaa1ff2c430e23a9a29abe0c15ce6c76af8c9d0219e2d0c3fc43"
+        },
+        {
+          "path": "test/migration/migrate.test.ts",
+          "sha256": "ed33b6895be248d6c225e7030adb81f1fd35f5671d3512f7c89079b885cbd08a"
+        },
+        {
+          "path": "test/platform/codex-global.test.ts",
+          "sha256": "e6ed164c35dae15bc2a0869abfa23eaa2d8aa68eba58eb5c48b35f2c52a6bff2"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "8c093fbf56aaf5cd00320bd3325bca15bd67b23ec7dd594a64bda2e15cfec119"
+        },
+        {
+          "path": "test/platform/setup.test.ts",
+          "sha256": "843f9098715d778e9c4adde12c0c1db258f988b98d6cbaeb4b33e9defc81df4c"
+        },
+        {
+          "path": "test/safety/isolated-user-home.test.ts",
+          "sha256": "8628d309ce2db60fc8ce7f9de2a00795f894459cec8e6c866605d804971aa8f5"
+        },
+        {
+          "path": "test/safety/path-boundaries.test.ts",
+          "sha256": "e09df7cea669cd462337ed805e67e053c19eecb105cf51ba8ba9f7ef232348e7"
+        },
+        {
+          "path": "test/safety/platform-boundaries.test.ts",
+          "sha256": "485b8d98b0da64af4248015608e0c8a114470147dc9e0c98b5d4892ffe32c15a"
+        },
+        {
+          "path": "test/safety/release-scanner.test.ts",
+          "sha256": "e09d3502fd714227d5088071ab2353603ad00aeb4a790b741d622984f72c51fa"
+        },
+        {
+          "path": "test/safety/user-global-paths.test.ts",
+          "sha256": "1355d2c2778c867f9eede4127306b0f1ed16c48a61ffdae53063fd587832563e"
+        },
+        {
+          "path": "test/unit/atomic-write.test.ts",
+          "sha256": "9b2205686c5c86b3b1747e898def455c919357eba6e4b96a411f10c79940f63d"
+        },
+        {
+          "path": "test/unit/bounded-input.test.ts",
+          "sha256": "8c8b2bf8cb06f74ff012b3b5c2a0a809426953e1e9cd8583d633b14c428a0c3e"
+        },
+        {
+          "path": "test/unit/catalog.test.ts",
+          "sha256": "5780660b3b09e2b472c0575a457c993b4c93e30e4c21bb323633df4c4c62c15f"
+        },
+        {
+          "path": "test/unit/cli-fast-path.test.ts",
+          "sha256": "c1ef973bf482d084ccfb046d9057f88bbfa22c135c91c3ce264fc56545d6337a"
+        },
+        {
+          "path": "test/unit/config.test.ts",
+          "sha256": "900c5b8fdc2c203ae8f9db08a39c0c7ecef9643312cc69ccdac1e00bc3af799e"
+        },
+        {
+          "path": "test/unit/context.test.ts",
+          "sha256": "3bc897bac7603adefdbb66ec4638127104ea3abe3e5ed335e8ccfb8cf388c50d"
+        },
+        {
+          "path": "test/unit/detection.test.ts",
+          "sha256": "b6f538423e7e1a068614c99c32529d1e9a36c676e77b1f66830efdd26749080f"
+        },
+        {
+          "path": "test/unit/file-lock.test.ts",
+          "sha256": "42f1d32707a05adf741d0194cb1b21f87962de4702eafa9321d6d35141763ae8"
+        },
+        {
+          "path": "test/unit/filesystem.test.ts",
+          "sha256": "dafa991dd33ce314032debeaeeb330ee0e755e3ab2ef0204c57ecaebf7f4760f"
+        },
+        {
+          "path": "test/unit/global-managed-files.test.ts",
+          "sha256": "baecad02067cd0becfa0988d01537e6a0560e197c67f5e68fe3cd2b4b6e08ad0"
+        },
+        {
+          "path": "test/unit/global-uninstall.test.ts",
+          "sha256": "ad00244e3ba9fd87155ed5f572435d0fe08ae45ba2699653da26051bacf7d511"
+        },
+        {
+          "path": "test/unit/harnix-launcher.test.ts",
+          "sha256": "856fe54f1dbd2ea5567549c6e7ea8d0913d13bd7255f12a580ba3e0732e7b000"
+        },
+        {
+          "path": "test/unit/journal.test.ts",
+          "sha256": "308b231c7a0e086f16a8bb6d677dfa03e661be8299e049be5243a2039dd9ce1f"
+        },
+        {
+          "path": "test/unit/legacy-project-surfaces.test.ts",
+          "sha256": "dcd0ef72820c5f94520aac353699faab2d4190f2a6a4c790ab5c41d564db41a0"
+        },
+        {
+          "path": "test/unit/managed-files.test.ts",
+          "sha256": "ad84b01e12372ced1f5a68eb3150d748623221c3268d966364c1a6393abc5f0d"
+        },
+        {
+          "path": "test/unit/package-contract.test.ts",
+          "sha256": "2a89044854619b596e1fa41cfa4016fd1164927dffeebbf0a1bcdf522b206f52"
+        },
+        {
+          "path": "test/unit/paths.test.ts",
+          "sha256": "9dc111b000cc415c061d06c4ee28ebd37c2912b2b3df50913ddc2f54ac6b6eab"
+        },
+        {
+          "path": "test/unit/project-discovery.test.ts",
+          "sha256": "e3ba1a721c93a92e440ac8bfb83cd13689d648bef622dec1bbb23a73595a73a1"
+        },
+        {
+          "path": "test/unit/repo-map/service.test.ts",
+          "sha256": "fc95e7971b7ad52b1e0386f0fdfc6810d447996926a16971b9c518778d62afd0"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "f1e562befa94ddfc49504744d9f8a52f9f3fe89b23c80d6185421c86d785704b"
+        },
+        {
+          "path": "test/unit/safe-glob.test.ts",
+          "sha256": "c0fed1ec56db26a9f351e16f9ec1cd121704c4e4287cf0c844aee24fc910765f"
+        },
+        {
+          "path": "test/unit/task-state.test.ts",
+          "sha256": "30f63193b06f3391402e805d3ade6962f08eb6aa9959517cc4f5ee080fa7b3d7"
+        },
+        {
+          "path": "test/unit/user-paths.test.ts",
+          "sha256": "bade1898c385f5865db087f9053f93a635bdf2cb389bc0e3c295fa1524ffeab0"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "d2d912b9a17b562286aeecd942e2f1cdfd2da8b0e73e4309a72e36b6de0b1e3e"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "a213ce74aa90a1aa47dc4ec548585551710c540aa8e62dc53f666e34630deff8"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "da6fcd74f756437e8c36643603562960f9a34ce64de47fa4150e3e13de708d22"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "22da6093775709b4f92247a6d5c0b00617b1d5652bc78d0d2b2cd1e646f67eb7"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b8324587882047670326fe59ffefd0512b3380708cf20fd270067cd7710be96c"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "0bad361252220b393b91ed4cd08ea0709c26e3e6871f0a6cd6a7ecd919d12316"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "787739619f38eb5d6f2a96a7c5be706453faafbb2da8b6c9423e76697a336512"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "0be885b02614cfc5e93d42569cb03ca371c88de921185d936d45695d01221f6e"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "5636b0ef31d34a0f6da7e139a0fd0fa55f4bae5c3762c923f772c00f232d3367"
+        }
+      ],
+      "inputDigest": "4e65bebcd03318388bb8e4394a99ac5571c7b56b5c197600e542d679c1bfc371"
+    },
+    {
+      "evidenceId": "quality-green",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-091500-agent-template-workflow-ref",
+      "checkId": "check-quality",
+      "taskContractHash": "fe96c0f72c2330d7418a51a4fa616af5a726c4aa33316912f4a451cea6c13c6b",
+      "entries": [
+        {
+          "path": "package.json",
+          "sha256": "ec62a8d60481a3510a83d698017b884d2e979dd950f7730b1fdf8c0d502f6e8d"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "e216e348765969bf4536ac34016982241967d09135019b9a8e1a0685ecfd80da"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "5636b0ef31d34a0f6da7e139a0fd0fa55f4bae5c3762c923f772c00f232d3367"
+        }
+      ],
+      "inputDigest": "a79633242f4008431346d2a86f7c4f5b6815b81ec04894e38809e2c26e4842b8"
+    },
+    {
+      "evidenceId": "release-green",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-091500-agent-template-workflow-ref",
+      "checkId": "check-release",
+      "taskContractHash": "fe96c0f72c2330d7418a51a4fa616af5a726c4aa33316912f4a451cea6c13c6b",
+      "entries": [
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "4a1c54ed1d3af086a40c5dda78029a1d52f26bbb8e116303311ba1f47b085872"
+        },
+        {
+          "path": "package.json",
+          "sha256": "ec62a8d60481a3510a83d698017b884d2e979dd950f7730b1fdf8c0d502f6e8d"
+        }
+      ],
+      "inputDigest": "b76b1f5df1e834e6e795790bd763573507e9ff8d8eb57d426d117054504a1268"
+    },
+    {
+      "evidenceId": "template-green",
+      "generator": "harnix",
+      "schemaVersion": 1,
+      "taskId": "20260818-091500-agent-template-workflow-ref",
+      "checkId": "check-template",
+      "taskContractHash": "fe96c0f72c2330d7418a51a4fa616af5a726c4aa33316912f4a451cea6c13c6b",
+      "entries": [
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "e216e348765969bf4536ac34016982241967d09135019b9a8e1a0685ecfd80da"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "5636b0ef31d34a0f6da7e139a0fd0fa55f4bae5c3762c923f772c00f232d3367"
+        }
+      ],
+      "inputDigest": "51413e483aeafda4be348e898ab087f98c37cc3e0392be27a3d73accfde0733d"
+    }
+  ]
+}

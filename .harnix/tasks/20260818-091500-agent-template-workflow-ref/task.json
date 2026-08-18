@@ -1,0 +1,217 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260818-091500-agent-template-workflow-ref",
+  "title": "Làm rõ tham chiếu workflow trong agent template",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Để AGENTS.md do Harnix sinh ra nêu rõ và liên kết trực tiếp tới workflow nguồn của task.",
+  "nonGoals": [
+    "Không thay đổi state machine, task schema hoặc workflow CLI.",
+    "Không thay đổi global platform integration."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-workflow-ref",
+      "status": "met",
+      "evidenceIds": [
+        "template-green"
+      ],
+      "text": "AGENTS.md template nêu `.harnix/workflow.md` là nguồn workflow và có liên kết trực tiếp tới file đó."
+    },
+    {
+      "id": "ac-init-regression",
+      "status": "met",
+      "evidenceIds": [
+        "template-green",
+        "quality-green",
+        "acceptance-green"
+      ],
+      "text": "Khởi tạo project vẫn sinh AGENTS.md khớp template và test contract xác nhận reference."
+    },
+    {
+      "id": "ac-release",
+      "status": "met",
+      "evidenceIds": [
+        "release-green"
+      ],
+      "text": "Patch version và CHANGELOG phản ánh thay đổi template trước completion."
+    }
+  ],
+  "relevantPaths": [
+    "src/templates/harnix/agents.ts",
+    "test/workflow/templates.test.ts",
+    "package.json",
+    "CHANGELOG.md"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "command": "pnpm exec vitest run test/workflow/templates.test.ts",
+      "id": "check-template",
+      "scope": "focused",
+      "criterionIds": [
+        "ac-init-regression",
+        "ac-workflow-ref"
+      ],
+      "description": "Kiểm tra contract template AGENTS.md và init output có direct workflow reference.",
+      "required": true,
+      "inputs": [
+        "@task-contract",
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "command": "pnpm lint; pnpm typecheck; pnpm build",
+      "id": "check-quality",
+      "scope": "full",
+      "criterionIds": [
+        "ac-init-regression"
+      ],
+      "description": "Chạy lint, typecheck và build cho thay đổi template.",
+      "required": true,
+      "inputs": [
+        "@task-contract",
+        "package.json",
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "command": "git diff --check",
+      "id": "check-release",
+      "scope": "focused",
+      "criterionIds": [
+        "ac-release"
+      ],
+      "description": "Kiểm tra metadata release và whitespace diff.",
+      "required": true,
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json"
+      ]
+    },
+    {
+      "command": "pnpm test:acceptance",
+      "id": "check-acceptance",
+      "scope": "full",
+      "criterionIds": [
+        "ac-init-regression"
+      ],
+      "description": "Chạy acceptance suite để phát hiện regression template/init.",
+      "required": true,
+      "inputs": [
+        "@task-contract",
+        "package.json",
+        "src/templates/harnix/agents.ts",
+        "test/**/*.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "template-green",
+      "checkId": "check-template",
+      "recordedAt": "2026-08-18T03:52:45.4428967Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "RED chứng minh template chưa có direct link; sau thay đổi, focused template/init test pass với 2 tests và snapshot ổn định.",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "51413e483aeafda4be348e898ab087f98c37cc3e0392be27a3d73accfde0733d"
+    },
+    {
+      "id": "quality-green",
+      "checkId": "check-quality",
+      "recordedAt": "2026-08-18T03:53:17.2576847Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint, pnpm typecheck và pnpm build cho release 1.0.4 đều exit 0; snapshot ổn định.",
+      "artifactPaths": [
+        "package.json",
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "a79633242f4008431346d2a86f7c4f5b6815b81ec04894e38809e2c26e4842b8"
+    },
+    {
+      "id": "release-green",
+      "checkId": "check-release",
+      "recordedAt": "2026-08-18T03:53:17.2654382Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "CHANGELOG và package version 1.0.4 đã đồng bộ; git diff --check exit 0, chỉ có cảnh báo line-ending thông tin.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json"
+      ],
+      "inputDigest": "b76b1f5df1e834e6e795790bd763573507e9ff8d8eb57d426d117054504a1268"
+    },
+    {
+      "id": "self-host-version-drift",
+      "checkId": "check-acceptance",
+      "recordedAt": "2026-08-18T03:53:58.3857342Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:acceptance dừng ở self-host: .harnix/.template-hashes.json ghi workflow generatorVersion 1.0.3 trong khi package source là 1.0.4; giả thuyết xác nhận là self-host managed metadata chưa được update sau patch bump.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        "package.json",
+        "test/workflow/self-host.test.ts"
+      ],
+      "inputDigest": "4e65bebcd03318388bb8e4394a99ac5571c7b56b5c197600e542d679c1bfc371"
+    },
+    {
+      "id": "self-host-metadata-recovered",
+      "recordedAt": "2026-08-18T03:54:09.8713451Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "node dist\\\\cli.js update cập nhật metadata managed cho workflow/spec và preserve các file self-host đã sửa; đây là recovery cho generatorVersion stale.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        ".harnix/workflow.md",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "id": "acceptance-green",
+      "checkId": "check-acceptance",
+      "recordedAt": "2026-08-18T03:54:47.1053776Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:acceptance pass sau khi đồng bộ self-host metadata: 395 passed, 1 expected Windows skip; snapshot ổn định.",
+      "artifactPaths": [
+        "test/unit",
+        "test/integration",
+        "test/migration",
+        "test/platform",
+        "test/workflow",
+        "test/safety"
+      ],
+      "inputDigest": "4e65bebcd03318388bb8e4394a99ac5571c7b56b5c197600e542d679c1bfc371"
+    },
+    {
+      "id": "final-compliance-review",
+      "recordedAt": "2026-08-18T03:55:08.3635140Z",
+      "result": "pass",
+      "summary": "Review cuối đối chiếu task, diff template/test/release và four required input digests: không có finding compliance, security hoặc maintainability; thay đổi không mở public CLI/global integration surface.",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts",
+        "package.json",
+        "CHANGELOG.md"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-18T03:51:18.6828145Z",
+  "updatedAt": "2026-08-18T03:55:16.124Z",
+  "completedAt": "2026-08-18T03:55:16.124Z"
+}

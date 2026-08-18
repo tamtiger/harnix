@@ -2,7 +2,7 @@
 name: harnix-continue
 description: Use when an initialized Harnix project may have an unfinished, interrupted, blocked, or partially persisted task that must resume safely.
 metadata:
-  version: "1.0.1"
+  version: "1.0.5"
 ---
 
 # Continue persisted Harnix work
@@ -21,7 +21,7 @@ Read `.harnix/tasks/.active`. If it is absent or empty, return to request triage
 
 Load the TaskRecord, required artifacts for its mode/status, checkpoint, blocker/resume fields, acceptance criteria, evidence references, and only the context needed by the next stage. Verify referenced task-owned paths before trusting them.
 
-Read the hidden workflow inspection projection and its always-present `contextDrift`. If its state is `stale`, do not rely on the saved context. For a non-blocked unfinished task, persist the same task status with checkpoint `replan`, preserve all evidence and obligations, then route to `harnix-brainstorm` to reselect context. `not-recorded` is disclosed for legacy tasks but does not force replan. Never repair source files or the context manifest automatically.
+Run `harnix workflow inspect` and read its active TaskRecord projection plus always-present `contextDrift`. If its state is `stale`, do not rely on the saved context. For a non-blocked unfinished task, persist the same task status with checkpoint `replan`, preserve all evidence and obligations, then route to `harnix-brainstorm` to reselect context. `not-recorded` is disclosed for legacy tasks but does not force replan. Never repair source files or the context manifest automatically.
 
 ## Routing table
 
@@ -59,7 +59,7 @@ Doctor finding `legacy-task-schema` is diagnostic only. Continue reads schema v1
 
 ## Persist
 
-Ordinary continuation is read-only until the owning skill performs its documented transition. The single workflow-owned exception is stale context: persist checkpoint `replan` on the same unfinished status before context reselection. If a safe metadata repair is authorized and required, record exactly what was repaired and why. Keep blocker, resume status, failed evidence, and next step intact.
+Ordinary continuation is read-only until the owning skill performs its documented transition. The single workflow-owned exception is stale context: send the inspected TaskRecord with checkpoint `replan` through a bounded JSON envelope on stdin to `harnix workflow save`, preserving the same unfinished status before context reselection. Never edit `task.json` directly. If a safe metadata repair is authorized and required, record exactly what was repaired and why. Keep blocker, resume status, failed evidence, and next step intact.
 
 ## Exit
 

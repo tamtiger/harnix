@@ -22,6 +22,17 @@ The Evidence-Gated Lifecycle is Restore/Triage → Evidence → Requirements →
 
 Plan-only requests stop at `ready`. When the user requested implementation, a passed ready gate authorizes the transition to `in_progress` without another approval prompt.
 
+### Agent persistence transport
+
+Hidden workflow commands are the only persistence/freshness transport for stage skills; they are not supported public user APIs:
+
+- `harnix workflow inspect` returns `{ activeTask, contextDrift }`. Inspect before creating or resuming work and use the returned TaskRecord as the base for an update.
+- `harnix workflow save` reads one bounded JSON envelope on stdin with shape `{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts> }`. `TaskArtifacts` may contain `prd`, `plan`, `design`, and a `research` map keyed by safe `.md` names. Full tasks include non-empty `prd` and `plan` whenever artifacts are sent.
+- `harnix workflow snapshot --check <id>` is read-only and returns the current `inputDigest` for one declared v2 check.
+- `harnix workflow finish` accepts no task body. Run it only from `verifying/finishing`; it revalidates every latest required pass, writes `completed/finishing`, appends the deterministic journal record, and clears only the matching active pointer.
+
+A TaskRecord v2 contains only: `generator`, `schemaVersion`, `id`, `title`, `mode`, `status`, `checkpoint`, `goal`, `nonGoals`, `acceptanceCriteria`, `relevantPaths`, `relevantSpecs`, optional `blocker`, `validationPlan`, `evidence`, `createdAt`, `updatedAt`, and optional `completedAt`. The nested contracts are `acceptanceCriteria: [{ id, text, status, evidenceIds, waiverReason? }]`, `validationPlan: [{ id, description, command?, scope, required, criterionIds, inputs }]`, `evidence: [{ id, checkId?, recordedAt, result, exitCode?, summary, artifactPaths, inputDigest? }]`, and `blocker: { kind, summary, nextAction, resumeStatus }`. Use ISO timestamps, preserve existing evidence and frozen obligations, send only legal status/checkpoint transitions, and never edit task.json directly.
+
 ## Ready gate
 
 Before implementation, record the goal, non-goals, observable acceptance criteria, relevant paths/specs, exact affected contracts, and a validation plan. Ready requires at least one criterion and one required validation check; every non-waived criterion maps to a required check, and v2 checks declare sorted unique `criterionIds` plus sorted unique `inputs` containing `@task-contract`. Behavioral checks also bind at least one safe repository file/glob. Full also requires non-empty safe task-owned `prd.md` and `plan.md`. After first persistence, do not remove or mutate criterion identity/text or required-check identity/definition; add clarifications as new obligations and use an explicit reasoned waiver when an old criterion no longer applies. Resolve material product, compatibility, risk, scope, and authority decisions first.
@@ -36,7 +47,7 @@ A clear user request to implement authorizes work within the passed scope; ask a
 
 Before product edits, review the plan critically against current source and tests; a material gap routes to replan. For behavior changes, use RED → GREEN → REFACTOR, explicitly verifying that RED fails for the expected reason, keeping GREEN minimal, and refactoring only while green. Preserve unrelated/user-owned content and load only task-relevant context. Verify technical feedback against the current contract instead of applying it blindly.
 
-Verification has two ordered stages: (1) compliance with the request, PRD/spec, and acceptance criteria; (2) correctness, tests, security, maintainability, and unnecessary complexity. Map every claim to a fresh command/inspection, read its relevant full output and exit/result, then record it without erasing earlier failures. For each v2 required check, run `harnix internal workflow snapshot --check <id>` immediately before and after the non-mutating check; persist a pass only when both `inputDigest` values match. Use focused evidence before the required broader gate; never infer success from stale or partial output.
+Verification has two ordered stages: (1) compliance with the request, PRD/spec, and acceptance criteria; (2) correctness, tests, security, maintainability, and unnecessary complexity. Map every claim to a fresh command/inspection, read its relevant full output and exit/result, then record it without erasing earlier failures. For each v2 required check, run `harnix workflow snapshot --check <id>` immediately before and after the non-mutating check; persist a pass only when both `inputDigest` values match. Use focused evidence before the required broader gate; never infer success from stale or partial output.
 
 Fresh `harnix init` builds the structural repository-map cache. For explicit implementation-stage discovery, query it with `harnix repo-map --query <text>`; use `harnix doctor --fix` to safely rebuild a missing, stale, or invalid cache. Treat results as bounded navigation hints: read only the selected files, never source or secret content from the cache, and do not add these operations to platform hooks. Global instructions and hooks must remain fast no-write/no-network paths and must not invoke repository-map queries or refreshes.
 

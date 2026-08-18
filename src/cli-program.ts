@@ -143,7 +143,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   repoMap.command("query").requiredOption("--query <text>").option("--limit <count>", "Maximum results", "20").action(async (options: { query: string; limit: string }) => {
     process.stdout.write(`${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query, parseRepoMapLimit(options.limit)))}\n`);
   });
-  const workflow = internal.command("workflow", { hidden: true });
+  const workflow = program.command("workflow", { hidden: true });
   workflow.command("inspect").action(async () => {
     process.stdout.write(`${JSON.stringify(await inspectWorkflow(await resolveProjectRoot(process.cwd())))}\n`);
   });

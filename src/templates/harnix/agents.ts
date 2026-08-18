@@ -21,7 +21,7 @@ export function renderAgentsTemplate(profile: AgentsProjectProfile): string {
 
 - Version: ${packageVersion}.
 - Role: project-local coding-agent harness for workflow state, task evidence, concise engineering guidance, and diagnostics.
-- Scope: the Harnix CLI manages this project's .harnix lifecycle; this root AGENTS bootstrap and .harnix/workflow.md drive coding tasks. Platform integrations, when explicitly installed, are user-global and never project-local setup output.
+- Scope: the Harnix CLI manages this project's .harnix lifecycle; this root AGENTS bootstrap and [\`.harnix/workflow.md\`](.harnix/workflow.md) drive coding tasks. Read the workflow before classifying, persisting, or completing task work. Platform integrations, when explicitly installed, are user-global and never project-local setup output.
 
 ## Project profile
 
@@ -55,6 +55,15 @@ Use the skills in this order when their stage applies:
 The persisted lifecycle is planning -> ready -> in_progress -> verifying -> completed. New tasks use TaskRecord schema v2 with criterion-linked checks and input snapshots; schema v1 is legacy read-only unless explicitly migrated at replan. A blocked task resumes only to its recorded status. Do not skip gates or treat stale, partial, or inferred output as verification.
 
 Use Evidence → Requirements → Plan → Execute → Verify → Persist as the semantic lifecycle. Feature, bugfix, hotfix, refactor, test, docs, maintenance, migration, dependency, security, performance, and release are work kinds that choose risk and validation, not separate workflows. Standalone read-only code review is Bypass; review-and-fix is a task mutation.
+
+Workflow persistence transport is hidden and agent-only:
+
+- \`harnix workflow inspect\` returns the active TaskRecord and \`contextDrift\`; run it before creating or resuming work.
+- \`harnix workflow save\` accepts one bounded JSON envelope on stdin with shape \`{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts> }\`. Stage skills use it for planning state, legal transitions, artifacts, and evidence; never edit task.json directly.
+- \`harnix workflow snapshot --check <id>\` computes the TaskRecord v2 freshness digest immediately before and after a required non-mutating check.
+- \`harnix workflow finish\` is the only completion transport; it revalidates freshness, writes completion/journal state, and clears only the matching active pointer.
+
+These commands are not supported public user APIs and remain absent from public help. Read the exact envelope and TaskRecord v2 field contract in \`.harnix/workflow.md\` before saving state.
 
 Operating rules:
 

@@ -132,7 +132,7 @@ harnix doctor [--fix] [--global]
 harnix repo-map --query <text> [--limit <count>]
 ```
 
-Có tám public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix internal context --platform <id>` là platform-hook protocol; hidden `harnix internal workflow inspect|save|snapshot|finish` là agent persistence/freshness transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
+Có tám public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix internal context --platform <id>` là platform-hook protocol; hidden `harnix workflow inspect|save|snapshot|finish` là agent persistence/freshness transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
 
 ## 8. Init requirements
 

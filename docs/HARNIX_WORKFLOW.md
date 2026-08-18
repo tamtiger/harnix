@@ -160,7 +160,7 @@ Mỗi evidence record gồm command/check, thời điểm, exit/result và conci
 
 Mỗi claim phải map tới command/inspection thực sự chứng minh claim đó. Agent đọc output liên quan và exit/result đầy đủ; passing rerun không được xóa failed evidence trước đó. Review feedback là technical hypothesis cần kiểm tra với code/contract, không phải requirement tự động.
 
-Persist `verifying` trước check đầu tiên. Với mỗi required check v2, chạy hidden `harnix internal workflow snapshot --check <id>` ngay trước và sau non-mutating check; chỉ persist pass khi hai digest bằng nhau. Save recompute digest trước khi ghi immutable task-owned sidecar. Ghi từng evidence ngay sau khi check kết thúc; failed evidence giữ task recoverable ở `verifying` hoặc route rõ sang Debugging, không bị thay thế im lặng bởi summary mới hơn.
+Persist `verifying` trước check đầu tiên. Với mỗi required check v2, chạy hidden `harnix workflow snapshot --check <id>` ngay trước và sau non-mutating check; chỉ persist pass khi hai digest bằng nhau. Save recompute digest trước khi ghi immutable task-owned sidecar. Ghi từng evidence ngay sau khi check kết thúc; failed evidence giữ task recoverable ở `verifying` hoặc route rõ sang Debugging, không bị thay thế im lặng bởi summary mới hơn.
 
 ### 5.7 Finishing
 
