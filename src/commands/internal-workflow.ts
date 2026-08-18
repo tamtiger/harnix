@@ -56,7 +56,7 @@ export async function saveWorkflow(root: string, envelope: WorkflowSaveEnvelope)
     if (candidate.mode === "full" && !envelope.artifacts) throw new Error("Full tasks require prd.md and plan.md.");
   }
 
-  if (candidate.status === "completed") throw new Error("Workflow completion must use workflow finish.");
+  if (candidate.status === "completed") throw new Error("Workflow completion must use workflow --finish.");
   if (candidate.status === "ready") await assertReadyRequirements(harnixRoot, candidate);
   if (candidate.schemaVersion === 2) {
     await persistNewVerificationInputSnapshots(root, harnixRoot, existing?.evidence ?? [], candidate);

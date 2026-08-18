@@ -32,7 +32,7 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "assumptions and inferences",
     "no blocking question remains",
     "not a second approval gate",
-    "harnix workflow save",
+    "harnix workflow --save",
     "bounded JSON envelope on stdin",
   ],
   "harnix-implement": [
@@ -41,9 +41,9 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "minimal implementation",
     "technical feedback",
     "implementation checklist",
-    "workflow snapshot",
+    "workflow --snapshot",
     "inputDigest",
-    "harnix workflow save",
+    "harnix workflow --save",
   ],
   "harnix-check": [
     "Map every claim",
@@ -59,9 +59,9 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "ready-with-fixes",
     "omitted checks",
     "residual risk",
-    "workflow snapshot",
+    "workflow --snapshot",
     "inputDigest",
-    "harnix workflow save",
+    "harnix workflow --save",
   ],
   "harnix-finish-work": [
     "active pointer",
@@ -70,7 +70,7 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "residual risks",
     "project-specific release instruction",
     "verification-inputs.json",
-    "harnix workflow finish",
+    "harnix workflow --finish",
   ],
   "harnix-continue": [
     "routing table",
@@ -82,22 +82,22 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "reselect context",
     "legacy-task-schema",
     "v1 to v2 migration",
-    "harnix workflow inspect",
-    "harnix workflow save",
+    "harnix workflow --inspect",
+    "harnix workflow --save",
   ],
   "harnix-research": [
     "source authority",
     "facts from inferences",
     "remaining uncertainty",
     "one material unknown",
-    "harnix workflow save",
+    "harnix workflow --save",
   ],
   "harnix-debug": [
     "root cause",
     "one falsifiable hypothesis",
     "contained recovery",
     "three failed hypotheses",
-    "harnix workflow save",
+    "harnix workflow --save",
   ],
 };
 
@@ -164,7 +164,7 @@ describe("canonical Harnix workflow skill sources", () => {
     expect(implement).not.toContain("`implementing` or `debugging`");
     expect(check).toContain("persist `verifying/finishing`");
     expect(finish).toContain("Accept only `verifying/finishing`");
-    expect(finish).toContain("run `harnix workflow finish` exactly once");
+    expect(finish).toContain("run `harnix workflow --finish` exactly once");
     expect(finish).not.toContain("write the task `status` as `completed`");
     expect(continuation).toContain("Blocked state takes precedence over its checkpoint");
   });

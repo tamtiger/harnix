@@ -42,7 +42,7 @@ describe("Codex global surface plan", () => {
       member: {
         hooks: [{
           type: "command",
-          command: "harnix internal context --platform codex",
+          command: "harnix context --platform codex",
           timeout: 5,
           additionalContextLimit: 2500,
         }],
@@ -83,7 +83,7 @@ describe("Codex global surface plan", () => {
     const hooks = JSON.parse(await readFile(join(roots.codex.config.path, "hooks.json"), "utf8")) as { hooks: { UserPromptSubmit: unknown[] } };
     expect(hooks.hooks.UserPromptSubmit).toHaveLength(2);
     expect(hooks.hooks.UserPromptSubmit[0]).toMatchObject({ hooks: [{ command: "user-context" }] });
-    expect(hooks.hooks.UserPromptSubmit[1]).toMatchObject({ hooks: [{ command: "harnix internal context --platform codex" }] });
+    expect(hooks.hooks.UserPromptSubmit[1]).toMatchObject({ hooks: [{ command: "harnix context --platform codex" }] });
 
     const hook = plan.config.find((file): file is DesiredGlobalJsonMember => file.kind === "json-member");
     expect(hook?.memberMatcher?.({ hooks: [{ type: "command", command: "user-edited-command", timeout: 99, additionalContextLimit: 2500 }] }, CODEX_GLOBAL_HOOK_SELECTOR)).toBe(true);

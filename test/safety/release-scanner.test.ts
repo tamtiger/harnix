@@ -150,8 +150,8 @@ describe("release scanner negative fixtures", () => {
     await writeFixtureFile(home, ".codex/hooks.json", JSON.stringify({
       hooks: {
         UserPromptSubmit: [
-          { hooks: [{ command: "harnix internal context --platform codex", type: "command" }] },
-          { hooks: [{ command: "harnix internal context --platform codex", type: "command" }] },
+          { hooks: [{ command: "harnix context --platform codex", type: "command" }] },
+          { hooks: [{ command: "harnix context --platform codex", type: "command" }] },
         ],
       },
     }));
@@ -163,17 +163,17 @@ describe("release scanner negative fixtures", () => {
     const home = await fixture();
     await writeFixtureFile(home, ".codex/hooks.json", JSON.stringify({
       hooks: {
-        UserPromptSubmit: [{ hooks: [{ command: "harnix internal context --platform codex", type: "command" }] }],
+        UserPromptSubmit: [{ hooks: [{ command: "harnix context --platform codex", type: "command" }] }],
       },
     }));
     await writeFixtureFile(home, ".kiro/hooks/harnix-context.json", JSON.stringify({
-      hooks: [{ action: { command: "harnix internal context --platform kiro" } }],
+      hooks: [{ action: { command: "harnix context --platform kiro" } }],
       version: "v1",
     }));
     for (const root of [".gemini/config/plugins/harnix", ".gemini/antigravity-cli/plugins/harnix"]) {
       await writeFixtureFile(home, `${root}/hooks.json`, JSON.stringify({
         "harnix-context": {
-          PreInvocation: [{ command: "harnix internal context --platform antigravity", type: "command" }],
+          PreInvocation: [{ command: "harnix context --platform antigravity", type: "command" }],
         },
       }));
     }

@@ -1,0 +1,428 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260818-150339-flatten-cli-commands",
+  "title": "Chuẩn hóa CLI về một command và action flags",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Loại toàn bộ nested CLI command, giữ một command token sau harnix và biểu diễn action phụ bằng flags mà không đổi behavior cốt lõi.",
+  "nonGoals": [
+    "Không thêm public platform hoặc package mới.",
+    "Không giữ compatibility alias nested cũ.",
+    "Không tự cập nhật user profile thật, commit, push hoặc publish."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-single-command-surface",
+      "text": "Mọi CLI invocation chỉ dùng một command token sau harnix; action phụ của repo-map và workflow là mutually-exclusive flags, còn context là top-level hidden command.",
+      "status": "met",
+      "evidenceIds": [
+        "check-cli-contract-final",
+        "check-generated-contracts-final",
+        "check-exact-acceptance-final",
+        "compliance-review-final"
+      ]
+    },
+    {
+      "id": "ac-hook-migration",
+      "text": "Kiro, Antigravity và Codex sinh hook harnix context --platform <id>; global lifecycle thay fragment Harnix cũ chưa sửa và bảo toàn fragment người dùng đã chỉnh.",
+      "status": "met",
+      "evidenceIds": [
+        "check-hook-lifecycle-final",
+        "check-exact-acceptance-final"
+      ]
+    },
+    {
+      "id": "ac-transport-parity",
+      "text": "repo-map --query/--refresh và workflow --inspect/--save/--snapshot/--finish giữ nguyên input, output, exit, freshness và persistence behavior của transport cũ.",
+      "status": "met",
+      "evidenceIds": [
+        "check-cli-contract-final",
+        "check-hook-lifecycle-final",
+        "check-exact-acceptance-final"
+      ]
+    },
+    {
+      "id": "ac-release",
+      "text": "Docs, templates, skills, package version và CHANGELOG đồng bộ contract command một tầng; exact acceptance sequence pass với fresh evidence.",
+      "status": "met",
+      "evidenceIds": [
+        "check-generated-contracts-final",
+        "check-exact-acceptance-final",
+        "quality-security-review-final"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/cli-program.ts",
+    "src/configurators",
+    "src/skills",
+    "src/templates",
+    "test",
+    "scripts",
+    "docs",
+    "README.md",
+    "package.json",
+    "CHANGELOG.md",
+    ".harnix/workflow.md"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "required": true,
+      "scope": "focused",
+      "id": "check-cli-contract",
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/internal-context-cli.ts",
+        "src/commands/internal-workflow.ts",
+        "src/commands/repo-map-internal.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/repo-map/internal.test.ts",
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "criterionIds": [
+        "ac-single-command-surface",
+        "ac-transport-parity"
+      ],
+      "description": "Xác minh top-level command registration, action-flag exclusivity, context validation và không còn nested command tree.",
+      "command": "pnpm exec vitest run test/workflow/cli-contract.test.ts test/integration/cli.test.ts test/integration/repo-map/internal.test.ts test/workflow/internal-workflow.test.ts"
+    },
+    {
+      "required": true,
+      "scope": "focused",
+      "id": "check-hook-lifecycle",
+      "inputs": [
+        "@task-contract",
+        "scripts/scan-release.mjs",
+        "src/configurators/*.ts",
+        "src/utils/global-managed-*.ts",
+        "test/integration/doctor.test.ts",
+        "test/integration/global-doctor.test.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/platform/*.test.ts",
+        "test/unit/global-managed-files.test.ts",
+        "test/unit/global-uninstall.test.ts"
+      ],
+      "criterionIds": [
+        "ac-hook-migration",
+        "ac-transport-parity"
+      ],
+      "description": "Xác minh ba adapter dùng context command mới và global setup/update/doctor/uninstall migration bảo toàn ownership.",
+      "command": "pnpm exec vitest run test/platform test/integration/global-lifecycle.test.ts test/integration/global-doctor.test.ts test/integration/doctor.test.ts test/unit/global-managed-files.test.ts test/unit/global-uninstall.test.ts"
+    },
+    {
+      "required": true,
+      "scope": "focused",
+      "id": "check-generated-contracts",
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/*.md",
+        "package.json",
+        "scripts/*.mjs",
+        "src/skills/harnix-*/SKILL.md",
+        "src/templates/harnix/*.ts",
+        "test/safety/release-scanner.test.ts",
+        "test/unit/version-sync.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "criterionIds": [
+        "ac-release",
+        "ac-single-command-surface"
+      ],
+      "description": "Xác minh generated workflow, skill sources, release scanner và version metadata chỉ tham chiếu command một tầng.",
+      "command": "pnpm exec vitest run test/workflow/skill-sources.test.ts test/workflow/templates.test.ts test/safety/release-scanner.test.ts test/unit/version-sync.test.ts"
+    },
+    {
+      "required": true,
+      "scope": "full",
+      "id": "check-exact-acceptance",
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/*.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.test.ts"
+      ],
+      "criterionIds": [
+        "ac-hook-migration",
+        "ac-release",
+        "ac-single-command-surface",
+        "ac-transport-parity"
+      ],
+      "description": "Chạy exact acceptance sequence của release sau khi checklist và version đã khóa.",
+      "command": "pnpm install --frozen-lockfile; pnpm build; pnpm lint; pnpm typecheck; pnpm test; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check"
+    }
+  ],
+  "evidence": [
+    {
+      "recordedAt": "2026-08-18T08:07:37.5599594+00:00",
+      "result": "fail",
+      "id": "single-command-red",
+      "exitCode": 1,
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts",
+        "test/integration/repo-map/internal.test.ts",
+        "test/integration/cli.test.ts"
+      ],
+      "checkId": "check-cli-contract",
+      "summary": "RED pass về mặt regression: 3 files chạy, 4 tests fail đúng vì còn internal/workflow command tree, thiếu top-level context và repo-map vẫn bắt buộc --query nên không nhận --refresh."
+    },
+    {
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "test/workflow/cli-contract.test.ts",
+        "test/integration/repo-map/internal.test.ts",
+        "test/integration/cli.test.ts"
+      ],
+      "id": "cli-action-flags-focused-green",
+      "summary": "CLI focused GREEN: 3 files, 24 tests pass; context top-level hidden, repo-map query/refresh flags và workflow action flags không còn nested command tree.",
+      "recordedAt": "2026-08-18T08:10:28.7916598+00:00",
+      "exitCode": 0,
+      "result": "pass"
+    },
+    {
+      "artifactPaths": [
+        "src/configurators",
+        "test/platform",
+        "test/integration/global-lifecycle.test.ts"
+      ],
+      "id": "hook-command-red",
+      "summary": "Hook RED: 10 failures xác nhận ba adapter và managed fixtures vẫn phát sinh harnix internal context; unchanged legacy hook chưa migrate sang command mới.",
+      "recordedAt": "2026-08-18T08:10:28.7926598+00:00",
+      "exitCode": 1,
+      "result": "fail"
+    },
+    {
+      "artifactPaths": [
+        "src/configurators",
+        "test/platform",
+        "test/unit/global-managed-files.test.ts",
+        "test/unit/global-uninstall.test.ts",
+        "test/integration/global-lifecycle.test.ts"
+      ],
+      "id": "hook-command-focused-green",
+      "summary": "Hook GREEN: 6 files, 61 tests pass; ba platform phát sinh harnix context, unchanged legacy Kiro hook được update và modified hook được preserve.",
+      "recordedAt": "2026-08-18T08:10:28.7936598+00:00",
+      "exitCode": 0,
+      "result": "pass"
+    },
+    {
+      "recordedAt": "2026-08-18T08:15:20.9105746+00:00",
+      "artifactPaths": [
+        "src/skills",
+        "src/templates",
+        "docs",
+        "README.md",
+        "scripts/scan-release.mjs",
+        "test/workflow",
+        "test/safety/release-scanner.test.ts"
+      ],
+      "result": "pass",
+      "id": "generated-contracts-pre-final-green",
+      "exitCode": 0,
+      "summary": "Generated contract suite pass: 4 files, 38 tests; skills, templates, release scanner và version sync dùng action-flag syntax."
+    },
+    {
+      "recordedAt": "2026-08-18T08:15:20.9115746+00:00",
+      "artifactPaths": [
+        "test/integration/global-lifecycle.test.ts"
+      ],
+      "result": "fail",
+      "id": "migration-fixture-typecheck-fail",
+      "exitCode": 2,
+      "summary": "Typecheck review bắt regression fixture clone giữ readonly command và sau đó thiếu non-null assertion; chỉ ảnh hưởng test type shape, không phải production runtime."
+    },
+    {
+      "recordedAt": "2026-08-18T08:15:20.9125746+00:00",
+      "artifactPaths": [
+        "test/integration/global-lifecycle.test.ts"
+      ],
+      "result": "pass",
+      "id": "migration-fixture-typecheck-green",
+      "exitCode": 0,
+      "summary": "Đổi clone fixture sang mutable bounded shape và non-null assertion; typecheck, lint và focused suites pass."
+    },
+    {
+      "recordedAt": "2026-08-18T08:15:20.9135746+00:00",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "test/workflow/cli-contract.test.ts"
+      ],
+      "result": "pass",
+      "id": "repo-map-refresh-help-review-fix",
+      "exitCode": 0,
+      "summary": "Compliance review phát hiện --refresh bị lộ trong public repo-map help; chuyển sang hidden Option nhưng giữ harnix repo-map --refresh hoạt động, focused CLI tests/typecheck/lint pass."
+    },
+    {
+      "id": "acceptance-windows-ebusy",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:acceptance thất bại tại test global uninstall do Windows trả EBUSY khi rmdir một thư mục skill tạm; pnpm test ngay trước đó pass 56 files, 401 tests và 1 skipped.",
+      "artifactPaths": [
+        "src/commands/global-uninstall.ts",
+        "test/unit/global-uninstall.test.ts"
+      ],
+      "recordedAt": "2026-08-18T08:18:25.8087418+00:00"
+    },
+    {
+      "id": "windows-ebusy-hypothesis-1",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Giả thuyết 1 được xác nhận là failure intermittent môi trường: test global-uninstall vừa pass trong full suite, fail một lần do EBUSY ở rmdir, rồi reproducer hẹp pass 1 file/9 tests mà không đổi code. Không sửa production behavior; quay lại acceptance.",
+      "artifactPaths": [
+        "test/unit/global-uninstall.test.ts"
+      ],
+      "recordedAt": "2026-08-18T08:18:47.4013996+00:00"
+    },
+    {
+      "id": "pre-final-exact-acceptance-green",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact acceptance đã pass sau một lần retry có điều tra: frozen install, build, lint, typecheck, full test 56 files/401 pass/1 skip, acceptance suites, pack, fake-home tarball smoke, init median 379.67 ms, footprint giảm 84.86%, release scan và git diff --check.",
+      "artifactPaths": [
+        "package.json",
+        "src",
+        "test",
+        "scripts",
+        "docs"
+      ],
+      "recordedAt": "2026-08-18T08:20:39.7490728+00:00"
+    },
+    {
+      "id": "check-cli-contract-final",
+      "checkId": "check-cli-contract",
+      "result": "pass",
+      "exitCode": 0,
+      "inputDigest": "fceb79ce7f0caaac1cfa9ff421508ca4d0ebc95b8e5fe65ab254d725f815c796",
+      "summary": "Required CLI contract pass: 4 files, 39 tests; command một tầng, action exclusivity, rejection nested syntax và workflow persistence parity đều xanh với snapshot ổn định.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "test/workflow/cli-contract.test.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/repo-map/internal.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "recordedAt": "2026-08-18T08:21:00.7669951+00:00"
+    },
+    {
+      "id": "check-hook-lifecycle-final",
+      "checkId": "check-hook-lifecycle",
+      "result": "pass",
+      "exitCode": 0,
+      "inputDigest": "90e84ed2db6f5113b19ebfd95bf477c47c02045d22950deddc9f91dc3e10c17c",
+      "summary": "Required hook lifecycle pass: 8 files, 91 tests; Kiro, Antigravity, Codex phát sinh context command mới, unchanged legacy hook được migrate và modified hook được preserve.",
+      "artifactPaths": [
+        "src/configurators",
+        "src/utils/global-managed-files.ts",
+        "src/utils/global-managed-roots.ts",
+        "test/platform",
+        "test/integration/global-lifecycle.test.ts",
+        "test/integration/global-doctor.test.ts",
+        "test/integration/doctor.test.ts",
+        "test/unit/global-managed-files.test.ts",
+        "test/unit/global-uninstall.test.ts"
+      ],
+      "recordedAt": "2026-08-18T08:21:20.6355917+00:00"
+    },
+    {
+      "id": "check-generated-contracts-final",
+      "checkId": "check-generated-contracts",
+      "result": "pass",
+      "exitCode": 0,
+      "inputDigest": "17e28bf8fcfbcf06acf4a98e2a92894c7def22fb69e1536bf3b03dbe4656bd5a",
+      "summary": "Required generated contracts pass: 4 files, 38 tests; skills, templates, docs/release scanner và version 1.0.7 đồng bộ command một tầng.",
+      "artifactPaths": [
+        "src/skills",
+        "src/templates",
+        "docs",
+        "README.md",
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/scan-release.mjs",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts",
+        "test/safety/release-scanner.test.ts",
+        "test/unit/version-sync.test.ts"
+      ],
+      "recordedAt": "2026-08-18T08:21:37.0961052+00:00"
+    },
+    {
+      "id": "check-exact-acceptance-final",
+      "checkId": "check-exact-acceptance",
+      "result": "pass",
+      "exitCode": 0,
+      "inputDigest": "b03137896814db77e12520d2c2316ae7df1b916b6d13205c59ac2683e1b17801",
+      "summary": "Final exact acceptance pass trên contract đã khóa: frozen install, build, lint, typecheck, 56 files/401 tests pass/1 skip, acceptance 68 files/401 tests pass/1 skip theo nhóm, pack, fake-home tarball smoke ba platform, init median 359.55 ms, footprint giảm 84.86%, release scan và diff check.",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "src",
+        "test",
+        "scripts",
+        "docs",
+        "README.md",
+        "CHANGELOG.md"
+      ],
+      "recordedAt": "2026-08-18T08:24:03.7565758+00:00"
+    },
+    {
+      "id": "compliance-review-final",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Compliance review không còn finding: main help giữ 8 public commands; context/workflow và repo-map --refresh hidden; không còn active nested syntax ngoài migration/history fixtures có chủ đích; product boundary một package/một bin giữ nguyên.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "docs",
+        "README.md",
+        "src/skills",
+        "src/templates",
+        "test/workflow/cli-contract.test.ts"
+      ],
+      "recordedAt": "2026-08-18T08:24:03.7634715+00:00"
+    },
+    {
+      "id": "quality-security-review-final",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Quality/security review không có finding mở: action flags mutually exclusive, snapshot/check dependency fail closed, hook lifecycle bảo toàn modified user content, release scan không thấy secret, machine path, forbidden surface hay duplicate hook.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "src/configurators",
+        "test",
+        "scripts/scan-release.mjs"
+      ],
+      "recordedAt": "2026-08-18T08:24:03.7635676+00:00"
+    },
+    {
+      "id": "finish-handoff",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Không bỏ qua required check. Không chạy migration trên user profile thật, commit, push hay publish theo non-goals. Residual risk duy nhất: một EBUSY temp-directory flake trên Windows đã không tái hiện ở reproducer hẹp và hai vòng suite sau.",
+      "artifactPaths": [
+        ".harnix/tasks/20260818-150339-flatten-cli-commands/plan.md",
+        "CHANGELOG.md"
+      ],
+      "recordedAt": "2026-08-18T08:24:20.0647454+00:00"
+    }
+  ],
+  "createdAt": "2026-08-18T08:06:03.6066185+00:00",
+  "updatedAt": "2026-08-18T08:24:27.913Z",
+  "completedAt": "2026-08-18T08:24:27.913Z"
+}

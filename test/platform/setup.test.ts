@@ -277,7 +277,7 @@ describe("setupPlatforms user-global lifecycle", () => {
     const hooks = JSON.parse(await readFile(hooksPath, "utf8")) as {
       hooks: { UserPromptSubmit: Array<{ hooks: Array<{ command?: string; additionalContextLimit?: number }> }> };
     };
-    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix internal context --platform codex"));
+    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix context --platform codex"));
     if (group === undefined || group.hooks[0] === undefined) throw new Error("Expected the installed Codex Harnix hook.");
     group.hooks[0].command = "user-edited-harnix-command";
     await writeFile(hooksPath, `${JSON.stringify(hooks, null, 2)}\n`);
@@ -307,7 +307,7 @@ describe("setupPlatforms user-global lifecycle", () => {
     const hooks = JSON.parse(await readFile(hooksPath, "utf8")) as {
       hooks: { UserPromptSubmit: Array<{ hooks: Array<{ command?: string; additionalContextLimit?: number; type?: string }> }> };
     };
-    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix internal context --platform codex"));
+    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix context --platform codex"));
     if (group === undefined || group.hooks[0] === undefined) throw new Error("Expected the installed Codex Harnix hook.");
     group.hooks[0].command = "user-edited-all-hook-identifiers";
     group.hooks[0].additionalContextLimit = 42;
@@ -339,7 +339,7 @@ describe("setupPlatforms user-global lifecycle", () => {
     const hooks = JSON.parse(await readFile(hooksPath, "utf8")) as {
       hooks: { UserPromptSubmit: Array<{ hooks: Array<{ additionalContextLimit?: number; command?: string; type?: string }> }> };
     };
-    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix internal context --platform codex"));
+    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix context --platform codex"));
     if (group === undefined || group.hooks[0] === undefined) throw new Error("Expected the installed Codex Harnix hook.");
     group.hooks[0].command = "user-custom-context";
     group.hooks[0].additionalContextLimit = 999;

@@ -40,7 +40,7 @@ describe("user-global platform desired-surface renderers", () => {
       "steering/harnix.md",
       "hooks/harnix-context.json",
     ]);
-    expect(KIRO_GLOBAL_CONTEXT_HOOK_COMMAND).toBe("harnix internal context --platform kiro");
+    expect(KIRO_GLOBAL_CONTEXT_HOOK_COMMAND).toBe("harnix context --platform kiro");
     expect(KIRO_GLOBAL_CONTEXT_HOOK).toEqual({
       version: "v1",
       hooks: [{
@@ -120,7 +120,7 @@ describe("user-global platform desired-surface renderers", () => {
     ]);
     expect(ANTIGRAVITY_GLOBAL_PLUGIN_MANIFEST).toEqual({ name: "harnix" });
     expect(JSON.parse(fileContent(byPath.get("plugin.json")))).toEqual(ANTIGRAVITY_GLOBAL_PLUGIN_MANIFEST);
-    expect(ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND).toBe("harnix internal context --platform antigravity");
+    expect(ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND).toBe("harnix context --platform antigravity");
     expect(ANTIGRAVITY_GLOBAL_CONTEXT_HOOK).toEqual({
       "harnix-context": {
         PreInvocation: [{

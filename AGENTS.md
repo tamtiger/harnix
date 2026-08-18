@@ -99,7 +99,7 @@ Important adapter constraints:
 - Codex uses `$HOME/.agents/skills/harnix-*`, a managed conditional block in `$CODEX_HOME/AGENTS.md`, and a nested `$CODEX_HOME/hooks.json` handler. Do not write `config.toml`; preserve unrelated text/handlers. Report `installed-pending-trust` until the user reviews the hook in `/hooks`.
 - Each platform root owns a separate validated sidecar manifest. Reconcile only unchanged Harnix fragments, preserve collisions/modified content, lock in stable order, and rollback conservatively.
 - `update --global`, `doctor --fix --global`, and `uninstall --global ... --yes` operate on global integrations. `uninstall --purge --yes` remains project-only. Legacy project surfaces require explicit `--legacy-project-surfaces [--yes]` cleanup.
-- The hidden `harnix internal context` command must be a fast, no-write/no-network no-op outside an initialized project. Global instructions and hooks must include the same activation guard.
+- The hidden `harnix context` command must be a fast, no-write/no-network no-op outside an initialized project. Global instructions and hooks must include the same activation guard.
 
 ## Required package scripts
 

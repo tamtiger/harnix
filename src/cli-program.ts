@@ -127,40 +127,55 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     if (result.project.status === "invalid" || result.globalIntegrations.some((integration) => integration.status === "invalid")) process.exitCode = 2;
     else if (!result.ok) process.exitCode = 1;
   });
-  program.command("repo-map").requiredOption("--query <text>", "Search the structural repository map").option("--limit <count>", "Maximum results", "20").action(async (options: { query: string; limit: string }) => {
-    process.stdout.write(`${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query, parseRepoMapLimit(options.limit)))}\n`);
-  });
-  const internal = new Command("internal");
-  internal.command("context").option("--platform <platform>").action(async (options: { platform: "kiro" | "antigravity" | "codex" }) => {
+  program.command("repo-map")
+    .option("--query <text>", "Search the structural repository map")
+    .option("--limit <count>", "Maximum results")
+    .addOption(new Option("--refresh", "Rebuild the structural repository map").hideHelp())
+    .action(async (options: { query?: string; limit?: string; refresh?: boolean }) => {
+      const actionCount = Number(options.query !== undefined) + Number(options.refresh === true);
+      if (actionCount !== 1) throw new Error("repo-map requires exactly one of --query or --refresh.");
+      if (options.refresh) {
+        if (options.limit !== undefined) throw new Error("--limit requires repo-map --query.");
+        process.stdout.write(`${JSON.stringify(await refreshRepoMapInternal(process.cwd()))}\n`);
+        return;
+      }
+      process.stdout.write(`${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query!, parseRepoMapLimit(options.limit ?? "20")))}\n`);
+    });
+  program.command("context", { hidden: true }).option("--platform <platform>").action(async (options: { platform: "kiro" | "antigravity" | "codex" }) => {
     if (!options.platform || !["kiro", "antigravity", "codex"].includes(options.platform)) throw new Error("--platform must be kiro, antigravity, or codex.");
     const hookInput = programOptions.hookEventInput ? await programOptions.hookEventInput() : process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin);
     await runInternalContextCommand({ hookInput, platform: options.platform });
   });
-  const repoMap = internal.command("repo-map", { hidden: true });
-  repoMap.command("refresh").action(async () => {
-    process.stdout.write(`${JSON.stringify(await refreshRepoMapInternal(process.cwd()))}\n`);
-  });
-  repoMap.command("query").requiredOption("--query <text>").option("--limit <count>", "Maximum results", "20").action(async (options: { query: string; limit: string }) => {
-    process.stdout.write(`${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query, parseRepoMapLimit(options.limit)))}\n`);
-  });
-  const workflow = program.command("workflow", { hidden: true });
-  workflow.command("inspect").action(async () => {
-    process.stdout.write(`${JSON.stringify(await inspectWorkflow(await resolveProjectRoot(process.cwd())))}\n`);
-  });
-  workflow.command("save").action(async () => {
-    const input = programOptions.workflowInput ? await programOptions.workflowInput() : await readBoundedInput(process.stdin);
-    if (!input) throw new Error("Workflow save requires a bounded JSON envelope on stdin.");
-    let envelope: unknown;
-    try { envelope = JSON.parse(input) as unknown; } catch { throw new Error("Workflow save requires valid JSON."); }
-    process.stdout.write(`${JSON.stringify(await saveWorkflow(await resolveProjectRoot(process.cwd()), envelope as Parameters<typeof saveWorkflow>[1]))}\n`);
-  });
-  workflow.command("snapshot").requiredOption("--check <id>").action(async (options: { check: string }) => {
-    process.stdout.write(`${JSON.stringify(await snapshotWorkflow(await resolveProjectRoot(process.cwd()), options.check))}\n`);
-  });
-  workflow.command("finish").action(async () => {
-    process.stdout.write(`${JSON.stringify(await finishWorkflow(await resolveProjectRoot(process.cwd())))}\n`);
-  });
-  program.addCommand(internal, { hidden: true });
+  program.command("workflow", { hidden: true })
+    .option("--inspect", "Inspect active workflow state")
+    .option("--save", "Persist workflow state from stdin")
+    .option("--snapshot", "Snapshot one required check")
+    .option("--finish", "Finish the active workflow task")
+    .option("--check <id>", "Required check ID for --snapshot")
+    .action(async (options: { inspect?: boolean; save?: boolean; snapshot?: boolean; finish?: boolean; check?: string }) => {
+      const actionCount = [options.inspect, options.save, options.snapshot, options.finish].filter((selected) => selected === true).length;
+      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --save, --snapshot, or --finish.");
+      if (options.snapshot !== true && options.check !== undefined) throw new Error("--check requires workflow --snapshot.");
+      if (options.snapshot === true && options.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
+      const root = await resolveProjectRoot(process.cwd());
+      if (options.inspect) {
+        process.stdout.write(`${JSON.stringify(await inspectWorkflow(root))}\n`);
+        return;
+      }
+      if (options.save) {
+        const input = programOptions.workflowInput ? await programOptions.workflowInput() : await readBoundedInput(process.stdin);
+        if (!input) throw new Error("Workflow save requires a bounded JSON envelope on stdin.");
+        let envelope: unknown;
+        try { envelope = JSON.parse(input) as unknown; } catch { throw new Error("Workflow save requires valid JSON."); }
+        process.stdout.write(`${JSON.stringify(await saveWorkflow(root, envelope as Parameters<typeof saveWorkflow>[1]))}\n`);
+        return;
+      }
+      if (options.snapshot) {
+        process.stdout.write(`${JSON.stringify(await snapshotWorkflow(root, options.check!))}\n`);
+        return;
+      }
+      process.stdout.write(`${JSON.stringify(await finishWorkflow(root))}\n`);
+    });
   return program;
 }
 

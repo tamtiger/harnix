@@ -73,7 +73,7 @@ export async function runReleaseScan(options = {}) {
     await mkdir(ordinaryWorkspace);
     const nonHarnixContextPerformance = measureNonHarnixContextFastPath(installedCli, ordinaryWorkspace, integrationEnvironment);
     if ((await readdir(ordinaryWorkspace)).length !== 0) {
-      throw new Error("Non-Harnix internal context must not write to the workspace.");
+      throw new Error("Non-Harnix context hook must not write to the workspace.");
     }
 
     process.stdout.write(`${JSON.stringify({ package: packageJson.name, tarball: tarballs[0], packagedFiles: packagedFiles.length, generatedFiles: generatedFiles.length, nonHarnixContextPerformance, scanned: ["secrets", "machine-paths", "required-todos", "forbidden-surfaces", "one-package", "one-bin", "dead-imports", "duplicate-hooks", "attribution", "non-harnix-context-performance"] })}\n`);
@@ -166,12 +166,12 @@ export async function assertNoProjectLocalPlatformSurfaces(project) {
 
 export async function assertSingleHooks(home) {
   const codex = JSON.parse(await readFile(join(home, ".codex", "hooks.json"), "utf8"));
-  const codexCount = hookCommands(codex.hooks?.UserPromptSubmit).filter((command) => command === "harnix internal context --platform codex").length;
+  const codexCount = hookCommands(codex.hooks?.UserPromptSubmit).filter((command) => command === "harnix context --platform codex").length;
   if (codexCount !== 1) throw new Error(`Expected one Codex Harnix hook, found ${codexCount}.`);
 
   const kiro = JSON.parse(await readFile(join(home, ".kiro", "hooks", "harnix-context.json"), "utf8"));
   const kiroCount = (Array.isArray(kiro.hooks) ? kiro.hooks.map((hook) => hook?.action?.command) : [])
-    .filter((command) => command === "harnix internal context --platform kiro").length;
+    .filter((command) => command === "harnix context --platform kiro").length;
   if (kiroCount !== 1) throw new Error(`Expected one Kiro Harnix hook, found ${kiroCount}.`);
 
   for (const pluginRoot of [
@@ -181,7 +181,7 @@ export async function assertSingleHooks(home) {
     const pluginHooks = JSON.parse(await readFile(join(home, ...pluginRoot.split("/"), "hooks.json"), "utf8"));
     const entries = pluginHooks?.["harnix-context"]?.PreInvocation;
     const count = (Array.isArray(entries) ? entries : [])
-      .filter((entry) => entry?.command === "harnix internal context --platform antigravity").length;
+      .filter((entry) => entry?.command === "harnix context --platform antigravity").length;
     if (count !== 1) throw new Error(`Expected one Antigravity Harnix hook in ${pluginRoot}, found ${count}.`);
   }
 }
@@ -211,7 +211,7 @@ export function measureNonHarnixContextFastPath(cli, workspace, environment) {
 
 export function assertNonHarnixContextNoOutput(stdout, stderr = "") {
   if (stdout.trim().length !== 0 || stderr.trim().length !== 0) {
-    throw new Error("Non-Harnix internal context must not emit output.");
+    throw new Error("Non-Harnix context hook must not emit output.");
   }
 }
 
@@ -221,7 +221,7 @@ export function assertNonHarnixContextPerformance(samples) {
   const p95 = percentile(sorted, 0.95);
   const max = sorted.at(-1);
   if (median >= 300 || p95 >= 750 || max === undefined || max >= 1000) {
-    throw new Error(`Non-Harnix internal context startup exceeds release thresholds: median=${median.toFixed(1)}ms p95=${p95.toFixed(1)}ms max=${max?.toFixed(1) ?? "unknown"}ms.`);
+    throw new Error(`Non-Harnix context hook startup exceeds release thresholds: median=${median.toFixed(1)}ms p95=${p95.toFixed(1)}ms max=${max?.toFixed(1) ?? "unknown"}ms.`);
   }
   return { max, median, p95, repetitions: samples.length, samples };
 }

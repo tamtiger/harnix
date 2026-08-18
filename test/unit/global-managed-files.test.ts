@@ -17,6 +17,8 @@ const temporaryRoot = useTemporaryRepositories("harnix-global-managed-");
 
 const markerSelector = { type: "markers" as const, begin: "<!-- harnix:begin -->", end: "<!-- harnix:end -->" };
 const jsonSelector = { type: "json-array-member" as const, pointer: "/hooks/UserPromptSubmit", memberId: "harnix-context" };
+const legacyCodexContextCommand = "harnix internal context --platform codex";
+const codexContextCommand = "harnix context --platform codex";
 
 async function temporaryGlobalRoot(logicalPath = "~/test-global"): Promise<UserPathRoot> {
   return createVerifiedUserRoot(await temporaryRoot(), logicalPath);
@@ -92,7 +94,7 @@ describe("global managed files", () => {
         sourceId: "hook",
         kind: "json-member",
         selector: jsonSelector,
-        member: { id: "different-id", command: "harnix internal context --platform codex" },
+        member: { id: "different-id", command: codexContextCommand },
       }],
     })).rejects.toThrow(/does not match/i);
 
@@ -114,7 +116,7 @@ describe("global managed files", () => {
           sourceId: "hook",
           kind: "json-member",
           selector,
-          member: { id: "harnix-context", command: "harnix internal context --platform codex" },
+          member: { id: "harnix-context", command: codexContextCommand },
         }],
       });
 
@@ -313,7 +315,7 @@ describe("global managed files", () => {
     };
     const first = await reconcileGlobalManagedFiles({
       ...base,
-      desired: [{ path: "hooks.json", sourceId: "hook", kind: "json-member", selector: jsonSelector, member: { id: "harnix-context", command: "harnix internal context --platform codex", timeout: 5 } }],
+      desired: [{ path: "hooks.json", sourceId: "hook", kind: "json-member", selector: jsonSelector, member: { id: "harnix-context", command: legacyCodexContextCommand, timeout: 5 } }],
     });
     const afterInstall = JSON.parse(await readFile(hooksPath, "utf8")) as { hooks: { UserPromptSubmit: Array<Record<string, unknown>> } };
     expect(afterInstall.hooks.UserPromptSubmit).toEqual(expect.arrayContaining([expect.objectContaining({ id: "user-handler" }), expect.objectContaining({ id: "harnix-context", timeout: 5 })]));
@@ -323,10 +325,10 @@ describe("global managed files", () => {
     const updated = await reconcileGlobalManagedFiles({
       ...base,
       generatorVersion: "0.7.0",
-      desired: [{ path: "hooks.json", sourceId: "hook", kind: "json-member", selector: jsonSelector, member: { id: "harnix-context", command: "harnix internal context --platform codex", timeout: 6 } }],
+      desired: [{ path: "hooks.json", sourceId: "hook", kind: "json-member", selector: jsonSelector, member: { id: "harnix-context", command: codexContextCommand, timeout: 6 } }],
     });
     const afterUpdate = JSON.parse(await readFile(hooksPath, "utf8")) as { hooks: { UserPromptSubmit: Array<Record<string, unknown>> } };
-    expect(afterUpdate.hooks.UserPromptSubmit).toEqual(expect.arrayContaining([expect.objectContaining({ id: "user-handler", command: "user command changed" }), expect.objectContaining({ id: "harnix-context", timeout: 6 })]));
+    expect(afterUpdate.hooks.UserPromptSubmit).toEqual(expect.arrayContaining([expect.objectContaining({ id: "user-handler", command: "user command changed" }), expect.objectContaining({ id: "harnix-context", command: codexContextCommand, timeout: 6 })]));
     expect(updated.updated).toEqual(["hooks.json#hook"]);
 
     const harnixMember = afterUpdate.hooks.UserPromptSubmit.find((member) => member.id === "harnix-context");
@@ -352,7 +354,7 @@ describe("global managed files", () => {
       manifestPath: "harnix/managed.json",
       platform: "codex",
       generatorVersion: "0.6.0",
-      desired: [{ path: "hooks.json", sourceId: "hook", kind: "json-member", selector: jsonSelector, member: { id: "harnix-context", command: "harnix internal context --platform codex" } }],
+      desired: [{ path: "hooks.json", sourceId: "hook", kind: "json-member", selector: jsonSelector, member: { id: "harnix-context", command: codexContextCommand } }],
     });
 
     expect(JSON.parse(await readFile(hooksPath, "utf8")).hooks.UserPromptSubmit[0].command).toBe("someone else");

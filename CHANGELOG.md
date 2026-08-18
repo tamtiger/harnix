@@ -4,6 +4,13 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.7] - 2026-08-18
+
+### Changed
+
+- Chuẩn hóa CLI để mỗi invocation chỉ có một command token; repo-map và workflow chọn action bằng mutually-exclusive flags.
+- Đổi platform hooks sang harnix context --platform, migrate fragment cũ chưa sửa và bảo toàn hook người dùng đã chỉnh.
+
 ## [1.0.6] - 2026-08-18
 
 ### Changed

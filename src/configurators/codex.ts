@@ -17,7 +17,7 @@ export const CODEX_GLOBAL_HOOK_SELECTOR: JsonArrayMemberSelector = {
   pointer: "/hooks/UserPromptSubmit",
   memberId: "harnix-context",
 };
-export const CODEX_GLOBAL_CONTEXT_COMMAND = "harnix internal context --platform codex";
+export const CODEX_GLOBAL_CONTEXT_COMMAND = "harnix context --platform codex";
 
 const codexGlobalSkillGuard = "First locate the nearest ancestor or workspace root containing `.harnix/config.yaml`. Activate Harnix only when that root exists and its Harnix state is valid. If no such root exists or its state is invalid, do not apply Harnix workflow, read project state, or create files.";
 

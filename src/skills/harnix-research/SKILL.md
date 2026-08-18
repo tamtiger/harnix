@@ -2,7 +2,7 @@
 name: harnix-research
 description: Use when one material product, dependency, security, compatibility, or architecture unknown could change a Harnix planning or debugging decision.
 metadata:
-  version: "1.0.6"
+  version: "1.0.7"
 ---
 
 # Research one material unknown
@@ -42,7 +42,7 @@ Stop when additional sources are unlikely to change the decision. If evidence re
 
 ## Persist
 
-Write one task-owned research artifact under the active task's `research/` directory by sending a bounded JSON envelope on stdin to `harnix workflow save`; include the inspected TaskRecord and `artifacts.research`, plus the existing non-empty `prd` and `plan` when the active task is Full. Never edit task or research files directly. The research artifact contains:
+Write one task-owned research artifact under the active task's `research/` directory by sending a bounded JSON envelope on stdin to `harnix workflow --save`; include the inspected TaskRecord and `artifacts.research`, plus the existing non-empty `prd` and `plan` when the active task is Full. Never edit task or research files directly. The research artifact contains:
 
 - task ID, date, and one material unknown;
 - sources with URL/revision/version and access date where relevant;

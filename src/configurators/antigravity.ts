@@ -2,7 +2,7 @@ import type { DesiredGlobalManagedFile } from "../utils/global-managed-files.js"
 import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "../templates/harnix/activation.js";
 import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
 
-export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix internal context --platform antigravity";
+export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix context --platform antigravity";
 
 /** The official plugin marker schema accepts this namespaced name and no extra fields. */
 export const ANTIGRAVITY_GLOBAL_PLUGIN_MANIFEST = { name: "harnix" } as const;

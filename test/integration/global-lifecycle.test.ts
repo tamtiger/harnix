@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { setupPlatforms } from "../../src/commands/setup.js";
 import { uninstallGlobalIntegrations } from "../../src/commands/global-uninstall.js";
 import { updateGlobalPlatforms } from "../../src/commands/global-update.js";
+import { KIRO_GLOBAL_CONTEXT_HOOK } from "../../src/configurators/kiro.js";
 import { sha256 } from "../../src/utils/hashing.js";
 import { resolveUserPlatformRoots } from "../../src/utils/user-paths.js";
 import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
@@ -107,6 +108,42 @@ describe("global integration lifecycle", () => {
     await expect(access(obsoletePath)).rejects.toMatchObject({ code: "ENOENT" });
     const after = JSON.parse(await readFile(manifestPath, "utf8")) as { entries: Array<{ path: string }> };
     expect(after.entries.some((entry) => entry.path === "legacy/harnix.md")).toBe(false);
+  });
+
+  it("should_migrate_an_unchanged_nested_context_command_and_preserve_a_modified_hook", async () => {
+    const migratedHome = await temporaryUserHome();
+    const preservedHome = await temporaryUserHome();
+    for (const [home, modified] of [[migratedHome, false], [preservedHome, true]] as const) {
+      const environment = { CODEX_HOME: join(home, "codex") };
+      const homeResolver = async () => home;
+      await setupPlatforms({ commandLookup: async () => true, environment, homeResolver, platforms: ["kiro"] });
+      const hookPath = join(home, ".kiro", "hooks", "harnix-context.json");
+      const manifestPath = join(home, ".kiro", "harnix", "managed.json");
+      const legacyHook = JSON.parse(JSON.stringify(KIRO_GLOBAL_CONTEXT_HOOK)) as { hooks: Array<{ action: { command: string } }> };
+      legacyHook.hooks[0]!.action.command = "harnix internal context --platform kiro";
+      const legacyContent = `${JSON.stringify(legacyHook, null, 2)}\n`;
+      const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+        entries: Array<{ path: string; sourceId: string; kind: string; generatedHash: string; generatorVersion: string }>;
+      };
+      const hookEntry = manifest.entries.find((entry) => entry.path === "hooks/harnix-context.json");
+      if (hookEntry === undefined) throw new Error("Expected the owned Kiro hook entry.");
+      hookEntry.generatedHash = sha256(legacyContent);
+      hookEntry.generatorVersion = "1.0.6";
+      await writeFile(hookPath, modified ? legacyContent.replace('"timeout": 5', '"timeout": 99') : legacyContent);
+      await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+      const result = await updateGlobalPlatforms({ commandLookup: async () => true, environment, homeResolver, platforms: ["kiro"] });
+      const content = await readFile(hookPath, "utf8");
+      if (modified) {
+        expect(result.platforms[0]).toMatchObject({ platform: "kiro", readiness: "drifted" });
+        expect(content).toContain("harnix internal context --platform kiro");
+        expect(content).toContain('"timeout": 99');
+      } else {
+        expect(result.platforms[0]).toMatchObject({ platform: "kiro", readiness: "installed" });
+        expect(content).toContain("harnix context --platform kiro");
+        expect(content).not.toContain("harnix internal context");
+      }
+    }
   });
 
   it("should_migrate_the_antigravity_rule_path_without_overwriting_a_modified_legacy_rule", async () => {

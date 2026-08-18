@@ -2,7 +2,7 @@
 name: harnix-brainstorm
 description: Use when a Harnix project needs request triage, requirements, design, planning, or a trustworthy ready gate before implementation.
 metadata:
-  version: "1.0.6"
+  version: "1.0.7"
 ---
 
 # Plan a Harnix task
@@ -91,7 +91,7 @@ Do not mark the task `ready` while any item fails. Keep `status` at its current 
 
 ## Persist
 
-Write the canonical TaskRecord schema v2 fields only for a new task. Send one bounded JSON envelope on stdin to `harnix workflow save`, shaped as `{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts> }`; include non-empty `prd` and `plan` for Full task artifacts. Update artifacts as decisions change, then persist `ready/ready` only after the self-review passes. Never edit `task.json` or `.active` directly, and do not fabricate evidence or acceptance status. Plan-only requests stop at `ready`.
+Write the canonical TaskRecord schema v2 fields only for a new task. Send one bounded JSON envelope on stdin to `harnix workflow --save`, shaped as `{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts> }`; include non-empty `prd` and `plan` for Full task artifacts. Update artifacts as decisions change, then persist `ready/ready` only after the self-review passes. Never edit `task.json` or `.active` directly, and do not fabricate evidence or acceptance status. Plan-only requests stop at `ready`.
 
 An unfinished legacy schema v1 task may migrate to v2 only after explicit authorization is recorded at checkpoint `replan`, using the exact migration evidence produced by Harnix while preserving prior criteria and evidence. Never migrate a completed task or rewrite legacy state during ordinary planning, update, Doctor, or continuation.
 

@@ -54,7 +54,7 @@ Version snapshot tại thời điểm research:
 4. Hai project khác nhau có thể cùng ghi/xóa một file global nếu tiếp tục dùng project manifest.
 5. Test hiện chỉ có temporary repository; đổi path trực tiếp có nguy cơ chạm `%USERPROFILE%` thật.
 6. Atomic replacement chưa có contract bảo toàn permission mode của shared global config.
-7. `harnix internal context` xử lý một `cwd`; Antigravity cung cấp `workspacePaths[]` và có thể là multi-folder Project.
+7. `harnix context` xử lý một `cwd`; Antigravity cung cấp `workspacePaths[]` và có thể là multi-folder Project.
 
 ## 4. Kiến trúc đích
 
@@ -232,7 +232,7 @@ Schema giữ các enum `active`, `shadowed` và `unsupported-version` để nh�
       "trigger": "UserPromptSubmit",
       "action": {
         "type": "command",
-        "command": "harnix internal context --platform kiro"
+        "command": "harnix context --platform kiro"
       },
       "timeout": 5,
       "enabled": true
@@ -257,7 +257,7 @@ Schema giữ các enum `active`, `shadowed` và `unsupported-version` để nh�
     "PreInvocation": [
       {
         "type": "command",
-        "command": "harnix internal context --platform antigravity",
+        "command": "harnix context --platform antigravity",
         "timeout": 5
       }
     ]
@@ -294,7 +294,7 @@ Schema giữ các enum `active`, `shadowed` và `unsupported-version` để nh�
         "hooks": [
           {
             "type": "command",
-            "command": "harnix internal context --platform codex",
+            "command": "harnix context --platform codex",
             "timeout": 5,
             "additionalContextLimit": 2500
           }
@@ -318,7 +318,7 @@ Mọi global skill/rule/instruction phải bắt đầu bằng guard tương đ�
 3. Nếu có, đọc `.harnix/workflow.md`, active task và bounded context theo contract hiện tại; route mọi ordinary user request thành Bypass/Lite/Full kể cả khi prompt không nhắc Harnix.
 4. Nếu state initialized hiện hữu nhưng corrupt hoặc inaccessible, không đọc thêm project data; trả warning ngắn, platform-specific và đã redact, hướng dẫn dùng doctor nhưng không block host agent.
 
-`harnix internal context` phải:
+`harnix context` phải:
 
 - Không network, không write, không log prompt/transcript/credential.
 - Exit `0` và không output ở non-Harnix repo. Riêng Antigravity, optional event malformed cũng phải đi theo empty no-op; `{ "injectSteps": [] }` chỉ hợp lệ sau khi đã xác định initialized project nhưng không inject context.

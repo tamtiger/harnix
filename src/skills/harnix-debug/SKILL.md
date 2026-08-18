@@ -2,7 +2,7 @@
 name: harnix-debug
 description: Use when a Harnix implementation or verification has a reproducible bug, failing test, unexpected behavior, loop, or repeated unsuccessful fix.
 metadata:
-  version: "1.0.6"
+  version: "1.0.7"
 ---
 
 # Debug with evidence
@@ -58,7 +58,7 @@ If three failed hypotheses address the same symptom, stop. Do not attempt a four
 
 ## Persist
 
-For each hypothesis record symptom, evidence, hypothesis, discriminating check, result, and next decision. Persist checkpoints and appended evidence through `harnix workflow save` with one bounded JSON envelope on stdin based on `harnix workflow inspect`; never edit `task.json` directly. Preserve earlier failed attempts. For a confirmed cause, link the regression evidence and focused GREEN result. Keep machine paths and secrets out of persisted/public reports.
+For each hypothesis record symptom, evidence, hypothesis, discriminating check, result, and next decision. Persist checkpoints and appended evidence through `harnix workflow --save` with one bounded JSON envelope on stdin based on `harnix workflow --inspect`; never edit `task.json` directly. Preserve earlier failed attempts. For a confirmed cause, link the regression evidence and focused GREEN result. Keep machine paths and secrets out of persisted/public reports.
 
 ## Exit
 

@@ -126,16 +126,25 @@ describe.sequential("CLI", () => {
     expect(first).toMatch(/^\{[\s\S]*\}\n$/u);
     expect(JSON.parse(first)).toEqual(expect.objectContaining({ generator: "harnix", schemaVersion: 2, ok: true, project: { status: "ready", findings: [] }, summary: { errors: 0, warnings: 0, fixed: 0 } }));
   });
-  it("should_use_validated_hook_event_cwd_when_internal_context_is_invoked", async () => {
+  it("should_use_validated_hook_event_cwd_when_context_is_invoked", async () => {
     const root = await fixture(); const elsewhere = await fixture();
     process.chdir(root);
     await createProgram({ interactive: false }).parseAsync(["node", "harnix", "init", "--yes", "--user", "tam"], { from: "node" });
     process.chdir(elsewhere);
     const output = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
-    await createProgram({ interactive: false, hookEventInput: async () => JSON.stringify({ cwd: root }) }).parseAsync(["node", "harnix", "internal", "context", "--platform", "codex"], { from: "node" });
+    await createProgram({ interactive: false, hookEventInput: async () => JSON.stringify({ cwd: root }) }).parseAsync(["node", "harnix", "context", "--platform", "codex"], { from: "node" });
 
     expect(output).toHaveBeenCalledWith(expect.stringContaining("hookSpecificOutput"));
+  });
+  it("should_dispatch_hidden_workflow_actions_from_flags", async () => {
+    const root = await fixture(); process.chdir(root);
+    await createProgram({ interactive: false }).parseAsync(["node", "harnix", "init", "--user", "tam"], { from: "node" });
+    const output = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await createProgram({ interactive: false }).parseAsync(["node", "harnix", "workflow", "--inspect"], { from: "node" });
+
+    expect(JSON.parse(output.mock.calls.map((call) => String(call[0])).join(""))).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [] } });
   });
   it("should_return_usage_exit_without_stack_when_public_input_is_invalid", async () => {
     const root = await fixture(); process.chdir(root);

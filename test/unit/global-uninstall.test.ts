@@ -108,7 +108,7 @@ describe("global integration uninstall", () => {
       hooks: { UserPromptSubmit: Array<{ hooks: Array<{ command?: string; timeout?: number; type?: string }> }> };
     };
     hooks.hooks.UserPromptSubmit.unshift({ hooks: [{ command: "user hook", timeout: 1, type: "command" }] });
-    const harnixGroup = hooks.hooks.UserPromptSubmit.find((group) => group.hooks.some((hook) => hook.command === "harnix internal context --platform codex"));
+    const harnixGroup = hooks.hooks.UserPromptSubmit.find((group) => group.hooks.some((hook) => hook.command === "harnix context --platform codex"));
     if (harnixGroup === undefined || harnixGroup.hooks[0] === undefined) throw new Error("Expected the installed Codex Harnix hook.");
     harnixGroup.hooks[0].timeout = 99;
     await writeFile(hooksPath, `${JSON.stringify(hooks, null, 2)}\n`);
@@ -121,7 +121,7 @@ describe("global integration uninstall", () => {
     await expect(readFile(agentsPath, "utf8")).resolves.toContain("User-modified Harnix");
     await expect(access(join(roots.codex.config.path, "harnix", "managed.json"))).resolves.toBeUndefined();
     const after = JSON.parse(await readFile(hooksPath, "utf8")) as { hooks: { UserPromptSubmit: Array<{ hooks: Array<{ command?: string; timeout?: number }> }> } };
-    expect(after.hooks.UserPromptSubmit).toEqual(expect.arrayContaining([expect.objectContaining({ hooks: [expect.objectContaining({ command: "user hook" })] }), expect.objectContaining({ hooks: [expect.objectContaining({ command: "harnix internal context --platform codex", timeout: 99 })] })]));
+    expect(after.hooks.UserPromptSubmit).toEqual(expect.arrayContaining([expect.objectContaining({ hooks: [expect.objectContaining({ command: "user hook" })] }), expect.objectContaining({ hooks: [expect.objectContaining({ command: "harnix context --platform codex", timeout: 99 })] })]));
   });
 
   it("preserves a colliding Codex Harnix hook identity instead of deleting either matching group", async () => {
@@ -130,7 +130,7 @@ describe("global integration uninstall", () => {
     const hooks = JSON.parse(await readFile(hooksPath, "utf8")) as {
       hooks: { UserPromptSubmit: Array<{ hooks: Array<{ command?: string; timeout?: number; type?: string }> }> };
     };
-    const harnixGroup = hooks.hooks.UserPromptSubmit.find((group) => group.hooks.some((hook) => hook.command === "harnix internal context --platform codex"));
+    const harnixGroup = hooks.hooks.UserPromptSubmit.find((group) => group.hooks.some((hook) => hook.command === "harnix context --platform codex"));
     if (harnixGroup === undefined) throw new Error("Expected the installed Codex Harnix hook.");
     hooks.hooks.UserPromptSubmit.push(JSON.parse(JSON.stringify(harnixGroup)) as typeof harnixGroup);
     await writeFile(hooksPath, `${JSON.stringify(hooks, null, 2)}\n`);

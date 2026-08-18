@@ -2,7 +2,7 @@ import type { DesiredGlobalManagedFile } from "../utils/global-managed-files.js"
 import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "../templates/harnix/activation.js";
 import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
 
-export const KIRO_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix internal context --platform kiro";
+export const KIRO_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix context --platform kiro";
 
 export const KIRO_GLOBAL_CONTEXT_HOOK = {
   version: "v1",

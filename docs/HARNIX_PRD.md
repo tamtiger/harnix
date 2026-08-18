@@ -132,7 +132,7 @@ harnix doctor [--fix] [--global]
 harnix repo-map --query <text> [--limit <count>]
 ```
 
-Có tám public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix internal context --platform <id>` là platform-hook protocol; hidden `harnix workflow inspect|save|snapshot|finish` là agent persistence/freshness transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
+Có tám public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix context --platform <id>` là platform-hook protocol; hidden `harnix workflow` yêu cầu đúng một action flag trong `--inspect|--save|--snapshot|--finish` và là agent persistence/freshness transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
 
 ## 8. Init requirements
 
@@ -167,7 +167,7 @@ Phase 6 supersedes every former project-local platform setup path. `init` contin
 
 - `setup` requires one or more platform flags, does not call `resolveProjectRoot`, and does not read or write `.harnix/config.yaml`.
 - `--dry-run` returns exact logical targets and planned states without writing. Re-run is byte-idempotent reconciliation for selected platforms.
-- Runtime stays in the installed package. The fixed hook command is `harnix internal context --platform <id>`; binary lookup is injected and a missing launcher returns `binary-unavailable`, never a false readiness claim.
+- Runtime stays in the installed package. The fixed hook command is `harnix context --platform <id>`; binary lookup is injected and a missing launcher returns `binary-unavailable`, never a false readiness claim.
 - Human/JSON results contain per-platform created, updated, unchanged, preserved and warning paths plus readiness. Output never exposes an absolute home path.
 - Each target root owns an independent sidecar manifest; no `~/.harnix` is created and no project manifest can claim shared global files. Manifests store relative paths only, reject corrupt/future/unsafe data before write, preserve collisions and user edits, and use stable-order locking, permission-preserving atomic writes and conservative rollback.
 - Every global instruction, skill and hook starts with an activation guard: find the nearest initialized project ancestor/root from the event cwd or workspace roots, rather than checking only the current workspace directory. Khi guard pass, global instruction phải route mọi ordinary user request qua Bypass/Lite/Full kể cả khi prompt không nhắc Harnix; no `.harnix/config.yaml` means fast no-op with no output/write/init. A known initialized project whose state cannot be read safely emits only a concise redacted platform-specific warning, fails closed for project data, and must not block the hosting agent.
@@ -176,7 +176,7 @@ Phase 6 supersedes every former project-local platform setup path. `init` contin
 
 - User surfaces are `~/.kiro/skills/harnix-*/SKILL.md`, `~/.kiro/steering/harnix.md`, and `~/.kiro/hooks/harnix-context.json`.
 - Steering is conditional: it directs the agent to `.harnix/workflow.md` only for an initialized project. Skills are global and not derived from whichever project happens to run setup.
-- The dedicated JSON-v1 hook has one enabled `UserPromptSubmit` command action, fixed to `harnix internal context --platform kiro`, with timeout 5 seconds. It runs from project root; a non-Harnix repository exits 0 with empty stdout.
+- The dedicated JSON-v1 hook has one enabled `UserPromptSubmit` command action, fixed to `harnix context --platform kiro`, with timeout 5 seconds. It runs from project root; a non-Harnix repository exits 0 with empty stdout.
 - Doctor inventories old workspace-hook duplication. Its schema reserves `unsupported-version`, but the regular CLI deliberately does not run a Kiro version/capability probe: that status is valid only when authoritative external capability evidence reaches the lifecycle boundary. Without it, Kiro is conservatively `installed` or `binary-unavailable`; setup never changes permission settings, MCP or trusted-command policy.
 
 ### 9.2 Antigravity
@@ -365,7 +365,7 @@ Harnix không hoàn thành cho tới khi fresh output chứng minh:
 - `pnpm smoke:tarball` uses two independent temporary roots: a fake user home for global Kiro/Antigravity/Codex setup and one-or-more temporary projects for init/context; it must never mutate real profile/config.
 - `test:acceptance` gồm clean/seeded unsafe Doctor JSON v2 fixtures and isolated-home global lifecycle fixtures.
 - `pnpm measure:init` fail nếu documented non-migration fixture có worst run >=5 giây.
-- Non-Harnix `internal context` cold-path fixture measures startup/event parsing: median <300ms, p95 <750ms and no sample >1s on supported CI OS.
+- Non-Harnix `harnix context` cold-path fixture measures startup/event parsing: median <300ms, p95 <750ms and no sample >1s on supported CI OS.
 - `pnpm measure:footprint` fail nếu consumer footprint không giảm ít nhất 50% theo `UPSTREAM_BASELINE.md`.
 - `pnpm scan:release` fail trên public old branding/package/path, second package/workspace, unsupported adapter, dead packaged import, secret, accidental absolute path, required TODO hoặc duplicate hook.
 - `git diff --check` pass; a disposable Windows profile/manual smoke confirms dry-run targets, setup discovery, no-op/activation, Codex `/hooks` trust, doctor and uninstall without altering unrelated global config. A real profile requires explicit authorization.
@@ -376,7 +376,7 @@ Delivery evidence status through 2026-08-18: Phase 6 implementation and automate
 
 ## Repository map v1
 
-Repo-map is disposable project cache at `.harnix/cache/repo-map-v1.json`, containing only deterministic repository-relative structural metadata and SHA-256 fingerprints—never source bodies, literals, secrets, absolute paths, a daemon, embeddings, or network data. Fresh `harnix init`, hidden `harnix internal repo-map refresh`, and project `doctor --fix` may safely rebuild it. Public `harnix repo-map --query <text> [--limit <count>]` is cache-only and always emits JSON; global hooks never scan, refresh, write, or query it.
+Repo-map is disposable project cache at `.harnix/cache/repo-map-v1.json`, containing only deterministic repository-relative structural metadata and SHA-256 fingerprints—never source bodies, literals, secrets, absolute paths, a daemon, embeddings, or network data. Fresh `harnix init`, hidden `harnix repo-map --refresh`, and project `doctor --fix` may safely rebuild it. Public `harnix repo-map --query <text> [--limit <count>]` is cache-only and always emits JSON; global hooks never scan, refresh, write, or query it.
 
 ## 19. Provenance and requirement history
 
