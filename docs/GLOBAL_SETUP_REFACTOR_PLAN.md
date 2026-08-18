@@ -2,7 +2,7 @@
 
 ## 1. Trạng thái và quyết định sản phẩm
 
-Tài liệu này là kế hoạch triển khai và decision record cho Phase 6, lập ngày **2026-08-11** từ yêu cầu mới và tài liệu chính thức hiện hành của Kiro, Antigravity và Codex. G0–G9 cùng toàn bộ automated isolated-home acceptance đã hoàn tất. Ngày 2026-08-13 người dùng đã cấp explicit authorization cho manual smoke, sau đó explicit defer Kiro CLI hook activation. Fake-home lifecycle, protocol output, Kiro/Antigravity skill discovery, Antigravity plugin validation/activation probe, Codex exact-hook trust/activation và safe uninstall đã pass; Kiro vẫn được giữ đầy đủ implementation/automated coverage nhưng manual activation không chặn G10 trong scope hiện tại.
+Tài liệu này là kế hoạch triển khai và decision record cho Phase 6, lập ngày **2026-08-11** từ yêu cầu mới và tài liệu chính thức hiện hành của Kiro, Antigravity và Codex. G0–G9 cùng toàn bộ automated isolated-home acceptance đã hoàn tất. Manual evidence ngày 2026-08-13 được giữ theo timestamp lịch sử. Revalidation disposable ngày 2026-08-18 chứng minh `agy` implicit routing/no-op sau migration sang `rules/AGENTS.md`, nhưng print mode vẫn load 0 plugin hook; Kiro/Codex fake profiles thiếu login và Codex pending trust. Current surface status vì vậy được giữ conservative thay vì suy từ file presence hoặc historical run.
 
 Quyết định đích:
 
@@ -21,8 +21,8 @@ Quyết định đích:
 | Platform surface | Skills | Instruction/rule | Hooks | Ghi chú |
 |---|---|---|---|---|
 | Kiro IDE/CLI | `~/.kiro/skills/harnix-*/SKILL.md` | `~/.kiro/steering/harnix.md` | `~/.kiro/hooks/harnix-context.json` | User và workspace scopes được merge; workspace skill cùng tên ưu tiên. Hook dùng JSON v1 và trigger `UserPromptSubmit`. |
-| Antigravity Desktop/IDE | `~/.gemini/config/plugins/harnix/skills/harnix-*/SKILL.md` | `~/.gemini/config/plugins/harnix/rules/harnix.md` | `~/.gemini/config/plugins/harnix/hooks.json` | Plugin global được auto-discover cho mọi workspace; `plugin.json` là bắt buộc. |
-| Antigravity CLI (`agy`) | `~/.gemini/antigravity-cli/plugins/harnix/skills/harnix-*/SKILL.md` | `~/.gemini/antigravity-cli/plugins/harnix/rules/harnix.md` | `~/.gemini/antigravity-cli/plugins/harnix/hooks.json` | CLI dùng vùng staging riêng; không giả định plugin Desktop tự được CLI load. |
+| Antigravity Desktop/IDE | `~/.gemini/config/plugins/harnix/skills/harnix-*/SKILL.md` | `~/.gemini/config/plugins/harnix/rules/AGENTS.md` | `~/.gemini/config/plugins/harnix/hooks.json` | Plugin global được auto-discover cho mọi workspace; `plugin.json` là bắt buộc; standalone AGENTS rule always-on không có frontmatter. |
+| Antigravity CLI (`agy`) | `~/.gemini/antigravity-cli/plugins/harnix/skills/harnix-*/SKILL.md` | `~/.gemini/antigravity-cli/plugins/harnix/rules/AGENTS.md` | `~/.gemini/antigravity-cli/plugins/harnix/hooks.json` | CLI dùng vùng staging riêng; không giả định plugin Desktop tự được CLI load; standalone AGENTS rule always-on không có frontmatter. |
 | Codex CLI/IDE | `$HOME/.agents/skills/harnix-*/SKILL.md` | `$CODEX_HOME/AGENTS.md`, mặc định `~/.codex/AGENTS.md` | `$CODEX_HOME/hooks.json`, mặc định `~/.codex/hooks.json` | Skill user-global **không nằm trong `.codex/skills`**. Global và repo hook sources được merge. |
 
 Nguồn xác minh:
@@ -220,7 +220,7 @@ Schema giữ các enum `active`, `shadowed` và `unsupported-version` để nh�
 ### 7.1 Kiro
 
 - Render global skills không phụ thuộc ngôn ngữ của project đang đứng lúc setup.
-- `~/.kiro/steering/harnix.md` là bootstrap conditional: chỉ hướng dẫn đọc `.harnix/workflow.md` khi `.harnix/config.yaml` tồn tại.
+- `~/.kiro/steering/harnix.md` là bootstrap conditional: khi `.harnix/config.yaml` tồn tại, nó luôn inspect active task và route ordinary prompt qua Bypass/Lite/Full dù prompt không nhắc Harnix.
 - Hook dedicated file dùng schema hiện hành:
 
 ```json
@@ -248,6 +248,7 @@ Schema giữ các enum `active`, `shadowed` và `unsupported-version` để nh�
 
 - Cài cùng một namespaced Harnix plugin vào cả Desktop và CLI roots; hai bản dùng cùng renderer nhưng manifest/ownership độc lập.
 - `plugin.json` chỉ khai báo field được official schema chấp nhận; không sinh MCP hoặc settings.
+- `rules/AGENTS.md` là standalone always-on rule không frontmatter. Sau activation guard, rule inspect active task và route ordinary prompt qua Bypass/Lite/Full dù prompt không nhắc Harnix.
 - `hooks.json` có Harnix-owned `PreInvocation` command handler cố định:
 
 ```json
@@ -281,7 +282,7 @@ Schema giữ các enum `active`, `shadowed` và `unsupported-version` để nh�
 ### 7.3 Codex
 
 - Skills cài vào `$HOME/.agents/skills/harnix-*`; đây là official user scope.
-- Merge một managed conditional block vào `$CODEX_HOME/AGENTS.md`, giữ toàn bộ text ngoài marker. Nếu `AGENTS.override.md` làm block bị shadow, doctor cảnh báo.
+- Merge một managed conditional block vào `$CODEX_HOME/AGENTS.md`, giữ toàn bộ text ngoài marker. Khi activation guard pass, block inspect active task và route ordinary prompt qua Bypass/Lite/Full dù prompt không nhắc Harnix. Nếu `AGENTS.override.md` làm block bị shadow, doctor cảnh báo.
 - Không tạo hoặc sửa `[harnix]` trong `config.toml`; setup không cần đổi model, sandbox, approval, provider, auth, MCP hay feature flags.
 - Merge current nested handler vào `$CODEX_HOME/hooks.json`, giữ unrelated events/groups/handlers:
 
@@ -314,7 +315,7 @@ Mọi global skill/rule/instruction phải bắt đầu bằng guard tương đ�
 
 1. Tìm initialized project ancestor/root gần nhất và an toàn từ cwd/workspace event; không yêu cầu `.harnix/config.yaml` nằm ngay trong current workspace directory.
 2. Nếu không có `.harnix/config.yaml`, không áp dụng workflow và không tự chạy `harnix init`.
-3. Nếu có, đọc `.harnix/workflow.md`, active task và bounded context theo contract hiện tại.
+3. Nếu có, đọc `.harnix/workflow.md`, active task và bounded context theo contract hiện tại; route mọi ordinary user request thành Bypass/Lite/Full kể cả khi prompt không nhắc Harnix.
 4. Nếu state initialized hiện hữu nhưng corrupt hoặc inaccessible, không đọc thêm project data; trả warning ngắn, platform-specific và đã redact, hướng dẫn dùng doctor nhưng không block host agent.
 
 `harnix internal context` phải:
@@ -336,6 +337,7 @@ Không tự động copy hoặc xóa các surface project-local từ bản cũ.
 4. Explicit legacy cleanup chỉ xóa unchanged **standalone** path khi project manifest v1 chứng minh đúng source/path Harnix sở hữu; modified/untracked luôn preserve. Root/shared files như `AGENTS.md`, `GEMINI.md`, `.codex` config/hooks và arbitrary user file chỉ inventory, không bao giờ là deletion target.
 5. Root `AGENTS.md` bootstrap do `init` đã tạo được giữ để tương thích với yêu cầu agent onboarding hiện tại; đây là explicit `init` exception, không phải platform surface do `setup` tạo. Global Codex block phải ngắn và conditional để tránh mâu thuẫn. Việc bỏ root bootstrap là product decision riêng, không nằm trong refactor này.
 6. Setup từ repo A rồi repo B trên cùng fake/user home phải byte-idempotent và không thay ownership theo repo cuối cùng.
+7. Global update chuyển Antigravity rule cũ `rules/harnix.md` sang `rules/AGENTS.md`: xóa file cũ chỉ khi hash còn khớp ownership manifest; preserve và báo drift nếu người dùng đã sửa.
 
 ## 10. Work breakdown và dependency
 
@@ -355,7 +357,7 @@ Không tự động copy hoặc xóa các surface project-local từ bản cũ.
 
 Critical path: `G0 -> G1 -> G2 -> G3 -> (G4, G5, G6) -> G7 -> G8 -> G9 -> G10`.
 
-Trạng thái delivery: G0–G10 đã hoàn tất trong scope được người dùng phê duyệt. Manual smoke đã chạy trên injected test home lẫn session thật có giới hạn. Antigravity rule-frontmatter defect được tái hiện, sửa bằng RED/GREEN và objective hook probe đã trả bounded context. Codex exact hook đã được người dùng review/trust; fresh real-profile CLI probe không dùng bypass nhận đúng hook-injected developer context. Kiro CLI global hook không fire trong default hoặc `--v3` non-interactive probe và được người dùng explicit defer; không claim Kiro hook active từ file presence hoặc validator output.
+Trạng thái delivery: G0–G10 đã hoàn tất trong scope được người dùng phê duyệt. Historical manual smoke được giữ làm dated evidence. Fresh revalidation 2026-08-18 sửa thêm implicit-activation/rule-path defect bằng RED/GREEN; disposable `agy` trả đúng routing và non-Harnix control, không còn invalid rule trigger, nhưng vẫn báo 0 hook file trong print mode. Kiro/Codex fake profiles không có login và Codex pending trust; không claim các hook/surface đó active từ file presence, validator hoặc evidence cũ.
 
 ## 11. Test và acceptance bắt buộc
 
@@ -432,4 +434,4 @@ Refactor chỉ hoàn tất khi:
 - Không có Kiro/Antigravity/Codex setup output project-local mới; root `AGENTS.md` do `init` tạo là exception đã khóa. Không có duplicate hook, absolute home path, secret, permission change, runtime copy hoặc silent network.
 - Tất cả automated gates và manual disposable-profile smoke pass với fresh evidence.
 
-Trạng thái hiện tại: automated gates và command-side disposable lifecycle pass. Manual session chứng minh skill discovery trên Kiro/Antigravity, objective Antigravity hook execution sau rule-frontmatter fix, và Codex exact-hook trust/activation không dùng bypass. Kiro CLI global JSON-v1 hook chưa fire trong probe; người dùng đã explicit defer manual Kiro activation nên finding này được giữ như residual risk, không phải completion blocker hiện tại.
+Trạng thái hiện tại: automated gates và command-side disposable lifecycle pass. Fresh `agy 1.1.1` cold session chứng minh implicit rule activation/no-op nhưng không chứng minh plugin hook execution trong print mode. Kiro/Codex fake profiles không có login, Codex hook chưa được trust trong disposable profile, và GUI surfaces không có isolated OS profile; các surface này được ghi `not-run`/conservative, không phải active.

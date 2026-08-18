@@ -5,6 +5,7 @@ import type {
   JsonValue,
   MarkerSelector,
 } from "../utils/global-managed-files.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "../templates/harnix/activation.js";
 import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
 
 const begin = "<!-- harnix:begin -->";
@@ -23,6 +24,8 @@ const codexGlobalSkillGuard = "First locate the nearest ancestor or workspace ro
 export const codexGlobalAgentsContent = `## Harnix
 
 ${codexGlobalSkillGuard}
+
+${HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS.join("\n")}
 
 For an initialized Harnix project, read \`.harnix/workflow.md\` and the minimum relevant \`.harnix\` context before acting. Preserve user-owned project files and use fresh verification before completing work. Do not auto-commit, push, or create a pull request.`;
 

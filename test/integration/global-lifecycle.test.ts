@@ -12,6 +12,16 @@ import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
 const temporaryUserHome = useTemporaryUserHomes("harnix-global-lifecycle-");
 
 describe("global integration lifecycle", () => {
+  const legacyAntigravityRule = [
+    "---",
+    "name: harnix",
+    "description: Activate Harnix workflow guidance only inside an initialized Harnix project.",
+    "---",
+    "",
+    "# Harnix",
+    "",
+  ].join("\n");
+
   it("should_preserve_deleted_owned_files_by_default_and_restore_them_only_when_global_update_is_explicit", async () => {
     const home = await temporaryUserHome();
     const environment = { CODEX_HOME: join(home, "codex") };
@@ -97,6 +107,42 @@ describe("global integration lifecycle", () => {
     await expect(access(obsoletePath)).rejects.toMatchObject({ code: "ENOENT" });
     const after = JSON.parse(await readFile(manifestPath, "utf8")) as { entries: Array<{ path: string }> };
     expect(after.entries.some((entry) => entry.path === "legacy/harnix.md")).toBe(false);
+  });
+
+  it("should_migrate_the_antigravity_rule_path_without_overwriting_a_modified_legacy_rule", async () => {
+    const home = await temporaryUserHome();
+    const environment = { CODEX_HOME: join(home, "codex") };
+    const homeResolver = async () => home;
+    await setupPlatforms({ commandLookup: async () => true, environment, homeResolver, platforms: ["antigravity"] });
+
+    const pluginRoots = [
+      join(home, ".gemini", "config", "plugins", "harnix"),
+      join(home, ".gemini", "antigravity-cli", "plugins", "harnix"),
+    ];
+    for (const pluginRoot of pluginRoots) {
+      const manifestPath = join(pluginRoot, ".managed.json");
+      const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+        entries: Array<{ path: string; sourceId: string; kind: string; generatedHash: string; generatorVersion: string }>;
+      };
+      const ruleEntry = manifest.entries.find((entry) => entry.sourceId === "antigravity-global-rule");
+      expect(ruleEntry).toBeDefined();
+      await rm(join(pluginRoot, "rules", "AGENTS.md"), { force: true });
+      await mkdir(join(pluginRoot, "rules"), { recursive: true });
+      await writeFile(join(pluginRoot, "rules", "harnix.md"), legacyAntigravityRule);
+      Object.assign(ruleEntry!, { path: "rules/harnix.md", generatedHash: sha256(legacyAntigravityRule) });
+      manifest.entries.sort((left, right) => `${left.path}\u0000${left.sourceId}`.localeCompare(`${right.path}\u0000${right.sourceId}`));
+      await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+    }
+    await writeFile(join(pluginRoots[1]!, "rules", "harnix.md"), `${legacyAntigravityRule}# user edit\n`);
+
+    const result = await updateGlobalPlatforms({ commandLookup: async () => true, environment, homeResolver, platforms: ["antigravity"] });
+
+    expect(result.platforms).toEqual([expect.objectContaining({ platform: "antigravity", readiness: "drifted" })]);
+    await expect(access(join(pluginRoots[0]!, "rules", "harnix.md"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(readFile(join(pluginRoots[1]!, "rules", "harnix.md"), "utf8")).resolves.toContain("# user edit");
+    for (const pluginRoot of pluginRoots) {
+      await expect(readFile(join(pluginRoot, "rules", "AGENTS.md"), "utf8")).resolves.toContain("# Harnix");
+    }
   });
 
   it("should_ignore_corrupt_or_platform_mismatched_sidecars_when_auto_discovering_global_integrations", async () => {

@@ -146,14 +146,14 @@ Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapte
 ### Kiro
 
 - Global user surface is `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md` and `~/.kiro/hooks/harnix-context.json`; skills are not derived from the setup cwd languages.
-- Steering uses a conditional Harnix-project guard. One JSON-v1 `UserPromptSubmit` command handler runs the fixed installed `harnix` command with timeout 5.
+- Steering uses a conditional Harnix-project guard and explicitly routes ordinary prompts without requiring the user to name Harnix. One JSON-v1 `UserPromptSubmit` command handler runs the fixed installed `harnix` command with timeout 5.
 - Capability detection distinguishes supported IDE/CLI global hooks from legacy Kiro; doctor reports unsupported versions and stale workspace hook duplication rather than generating an old schema.
 - Không tạo cơ chế install thứ hai, permission/trusted-command mutation hoặc runtime scripts trong consumer.
 
 ### Antigravity
 
 - Executable thực tế là `agy`; setup/doctor không dùng lệnh Gemini CLI. Physical `.gemini` namespace does not change the public Antigravity identity.
-- Use two independently owned global plugins: Desktop `~/.gemini/config/plugins/harnix` and CLI `~/.gemini/antigravity-cli/plugins/harnix`. Each has only official `plugin.json`, Harnix skills/rule and a fixed `PreInvocation` command handler.
+- Use two independently owned global plugins: Desktop `~/.gemini/config/plugins/harnix` and CLI `~/.gemini/antigravity-cli/plugins/harnix`. Each has only official `plugin.json`, Harnix skills, an always-on `rules/AGENTS.md` without frontmatter, and a fixed `PreInvocation` command handler. The rule explicitly routes ordinary prompts without requiring the user to name Harnix.
 - Handler returns `injectSteps` only for the first invocation. It selects a valid cwd project first, otherwise one initialized workspace path; a multi-root ambiguity preserves data privacy and emits only a short warning.
 - No MCP/settings/account/registry/credential/permission mutation, no machine path and no project `GEMINI.md`/skills setup output. Doctor distinguishes verified `shadowed` from `precedence-unknown`.
 

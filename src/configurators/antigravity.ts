@@ -1,4 +1,5 @@
 import type { DesiredGlobalManagedFile } from "../utils/global-managed-files.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "../templates/harnix/activation.js";
 import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
 
 export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix internal context --platform antigravity";
@@ -17,17 +18,13 @@ export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK = {
 } as const;
 
 export const ANTIGRAVITY_GLOBAL_RULE = [
-  "---",
-  "name: harnix",
-  "description: Activate Harnix workflow guidance only inside an initialized Harnix project.",
-  "---",
-  "",
   "# Harnix",
   "",
   "## Harnix activation guard",
   "",
   "First locate the nearest ancestor or workspace root containing .harnix/config.yaml.",
   "Apply this rule only when that root exists and its Harnix state is valid; then read .harnix/workflow.md and follow the matching Harnix skill with bounded context.",
+  ...HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
   "If no such root exists or its state is invalid, do not apply the Harnix workflow, create Harnix state, or run harnix init.",
   "",
 ].join("\n");
@@ -51,7 +48,7 @@ export function antigravityGlobalPluginDesiredFiles(): DesiredGlobalManagedFile[
       content: renderSkill(skill),
     })),
     {
-      path: "rules/harnix.md",
+      path: "rules/AGENTS.md",
       sourceId: "antigravity-global-rule",
       kind: "file",
       content: ANTIGRAVITY_GLOBAL_RULE,

@@ -14,7 +14,7 @@ import {
   kiroGlobalDesiredFiles,
 } from "../../src/configurators/kiro.js";
 import { renderSkill, workflowSkills } from "../../src/templates/harnix/workflow.js";
-import { createCodexGlobalSurfacePlan } from "../../src/configurators/codex.js";
+import { codexGlobalAgentsContent, createCodexGlobalSurfacePlan } from "../../src/configurators/codex.js";
 import type { DesiredGlobalManagedFile } from "../../src/utils/global-managed-files.js";
 
 function fileContent(file: DesiredGlobalManagedFile | undefined): string {
@@ -25,6 +25,8 @@ function fileContent(file: DesiredGlobalManagedFile | undefined): string {
 }
 
 describe("user-global platform desired-surface renderers", () => {
+  const implicitActivationInstruction = "apply this workflow to every ordinary user request even when the user does not mention Harnix";
+
   it("should_render_language_independent_kiro_global_surfaces_when_setup_has_no_project_context", () => {
     const first = kiroGlobalDesiredFiles();
     const second = kiroGlobalDesiredFiles();
@@ -70,12 +72,21 @@ describe("user-global platform desired-surface renderers", () => {
       expect(fileContent(skill)).not.toContain("C:\\");
     }
     expect(ANTIGRAVITY_GLOBAL_RULE).toContain("## Harnix activation guard");
-    expect(ANTIGRAVITY_GLOBAL_RULE).toMatch(/^---\nname: harnix\ndescription: .+\n---\n/u);
+    expect(ANTIGRAVITY_GLOBAL_RULE).toMatch(/^# Harnix\n/u);
+    expect(ANTIGRAVITY_GLOBAL_RULE).not.toMatch(/^---\n/u);
     expect(ANTIGRAVITY_GLOBAL_RULE).toContain(".harnix/config.yaml");
     expect(ANTIGRAVITY_GLOBAL_RULE).toContain("nearest ancestor or workspace root");
     expect(ANTIGRAVITY_GLOBAL_RULE).toContain("no such root exists or its state is invalid");
     expect(KIRO_GLOBAL_STEERING).toContain("nearest ancestor or workspace root");
     expect(KIRO_GLOBAL_STEERING).toContain("no such root exists or its state is invalid");
+  });
+
+  it("should_route_ordinary_requests_without_requiring_the_user_to_name_harnix", () => {
+    for (const instructions of [KIRO_GLOBAL_STEERING, ANTIGRAVITY_GLOBAL_RULE, codexGlobalAgentsContent]) {
+      expect(instructions).toContain(implicitActivationInstruction);
+      expect(instructions).toContain("classify the request as Bypass, Lite, or Full before acting");
+      expect(instructions).toContain("If no such root exists or its state is invalid");
+    }
   });
 
   it("should_render_byte-identical_canonical_skill_sources_for_every_platform", () => {
@@ -104,7 +115,7 @@ describe("user-global platform desired-surface renderers", () => {
     expect(desktopPlan.map((file) => file.path)).toEqual([
       "plugin.json",
       ...workflowSkills.map((skill) => `skills/${skill.name}/SKILL.md`),
-      "rules/harnix.md",
+      "rules/AGENTS.md",
       "hooks.json",
     ]);
     expect(ANTIGRAVITY_GLOBAL_PLUGIN_MANIFEST).toEqual({ name: "harnix" });
@@ -120,7 +131,7 @@ describe("user-global platform desired-surface renderers", () => {
       },
     });
     expect(JSON.parse(fileContent(byPath.get("hooks.json")))).toEqual(ANTIGRAVITY_GLOBAL_CONTEXT_HOOK);
-    expect(fileContent(byPath.get("rules/harnix.md"))).toBe(ANTIGRAVITY_GLOBAL_RULE);
+    expect(fileContent(byPath.get("rules/AGENTS.md"))).toBe(ANTIGRAVITY_GLOBAL_RULE);
     expect(desktopPlan.map((file) => file.path).some((path) => path.startsWith("/") || path.includes(".."))).toBe(false);
   });
 });

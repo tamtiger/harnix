@@ -1,0 +1,529 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260818-131942-workflow-simulation-audit",
+  "title": "Mô phỏng và kiểm toán toàn bộ workflow đa nền tảng",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Chứng minh bằng fixture và runtime probe rằng Harnix route, persist, khôi phục, xác minh và tự kích hoạt đúng trên Kiro, Antigravity và Codex; sửa mọi defect có reproduction trong phạm vi.",
+  "nonGoals": [
+    "Không chạm user profile thật, không tự cài ứng dụng hoặc bypass trust/permission.",
+    "Không commit, branch, push, publish hoặc tạo PR.",
+    "Không đổi frozen contract chỉ để làm test dễ hơn hoặc ép Harnix chạy ngoài initialized project."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-workflow-matrix",
+      "text": "Scenario matrix chứng minh routing, ready gate, TDD/debug, evidence freshness, continue/blocked/migration và finish bằng deterministic temporary fixtures.",
+      "status": "met",
+      "evidenceIds": [
+        "workflow-matrix-final-green",
+        "exact-acceptance-final-green"
+      ]
+    },
+    {
+      "id": "ac-implicit-activation",
+      "text": "Mỗi Kiro IDE/CLI, Antigravity Desktop/agy và Codex surface khả dụng được cold-session probe bằng ordinary prompt không nhắc Harnix; surface không khả dụng có bằng chứng not-run và không bị claim active.",
+      "status": "met",
+      "evidenceIds": [
+        "platform-activation-final-green",
+        "runtime-probes-final-complete"
+      ]
+    },
+    {
+      "id": "ac-platform-safety",
+      "text": "Platform/global lifecycle giữ no-op ngoài project Harnix, bounded redacted context, independent fake homes, idempotency, preservation, rollback và không chạm profile thật.",
+      "status": "met",
+      "evidenceIds": [
+        "platform-activation-final-green",
+        "runtime-probes-final-complete",
+        "exact-acceptance-final-green"
+      ]
+    },
+    {
+      "id": "ac-defect-remediation",
+      "text": "Mọi defect được chứng minh có RED reproduction, root cause, GREEN regression protection và không làm yếu activation guard hoặc frozen workflow contract.",
+      "status": "met",
+      "evidenceIds": [
+        "workflow-matrix-final-green",
+        "platform-activation-final-green",
+        "exact-acceptance-final-green"
+      ]
+    },
+    {
+      "id": "ac-release-gate",
+      "text": "Patch version, canonical skill metadata, README managed version claims và CHANGELOG được đồng bộ; exact acceptance sequence pass với fresh evidence trước completion.",
+      "status": "met",
+      "evidenceIds": [
+        "release-final-green",
+        "exact-acceptance-final-green"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src",
+    "test",
+    "scripts",
+    "docs",
+    "package.json",
+    "CHANGELOG.md",
+    "README.md",
+    ".harnix/workflow.md"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "AGENTS.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-workflow-matrix",
+      "description": "Chạy focused workflow và state-freshness scenarios cho routing, gates, recovery, migration và completion.",
+      "command": "pnpm exec vitest run test/workflow test/unit/task-state.test.ts test/unit/verification-inputs.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-defect-remediation",
+        "ac-workflow-matrix"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/task.ts",
+        "src/core/verification/input-freshness.ts",
+        "src/core/workflow.ts",
+        "src/skills/harnix-*/SKILL.md",
+        "test/unit/task-state.test.ts",
+        "test/unit/verification-inputs.test.ts",
+        "test/workflow/*.test.ts"
+      ]
+    },
+    {
+      "id": "check-platform-activation",
+      "description": "Kiểm tra adapter, implicit activation contract, hook protocol và global lifecycle trên fake homes; đối chiếu runtime probe các tool surface khả dụng.",
+      "command": "pnpm exec vitest run test/platform test/integration/global-lifecycle.test.ts test/workflow/internal-context.test.ts test/safety/isolated-user-home.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-defect-remediation",
+        "ac-implicit-activation",
+        "ac-platform-safety"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-context*.ts",
+        "src/configurators/*.ts",
+        "src/skills/harnix-*/SKILL.md",
+        "src/templates/harnix/*.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/platform/*.test.ts",
+        "test/safety/isolated-user-home.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "check-runtime-probes",
+      "description": "Ghi nhận cold-session runtime activation evidence hoặc conservative not-run cho Kiro IDE/CLI, Antigravity Desktop/agy và Codex mà không dùng real profile.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-implicit-activation",
+        "ac-platform-safety"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "src/configurators/*.ts",
+        "src/skills/harnix-*/SKILL.md",
+        "test/platform/*.test.ts"
+      ]
+    },
+    {
+      "id": "check-release",
+      "description": "Kiểm tra patch version, CHANGELOG, managed version claims và whitespace diff.",
+      "command": "git diff --check",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-release-gate"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "scripts/version-sync.mjs",
+        "src/skills/harnix-*/SKILL.md"
+      ]
+    },
+    {
+      "id": "check-exact-acceptance",
+      "description": "Chạy exact acceptance sequence gồm install, build, lint, typecheck, tests, package smoke, performance, footprint, release scan và diff check.",
+      "command": "pnpm install --frozen-lockfile; pnpm build; pnpm lint; pnpm typecheck; pnpm test; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-defect-remediation",
+        "ac-platform-safety",
+        "ac-release-gate",
+        "ac-workflow-matrix"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/*.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "baseline-pnpm-exec-failure",
+      "checkId": "check-workflow-matrix",
+      "recordedAt": "2026-08-18T06:21:52.6232832Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Baseline không khởi chạy Vitest vì pnpm exec không prepend node_modules/.bin trong shell hiện tại; direct bin và package script xác nhận Vitest đã cài, nên đây là PATH execution-state failure chứ chưa phải product defect.",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml"
+      ]
+    },
+    {
+      "id": "workflow-baseline-green",
+      "checkId": "check-workflow-matrix",
+      "recordedAt": "2026-08-18T06:34:08.8869698Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Baseline workflow/state suite pass ngoài sandbox sau khi PATH được khôi phục: 10 files, 79 tests; snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "src/core/tasks/task.ts",
+        "test/workflow",
+        "test/unit/task-state.test.ts",
+        "test/unit/verification-inputs.test.ts"
+      ],
+      "inputDigest": "85a4ef7c28f1ca225d5ce9479fc79d6683961acf05daebc027c3c1034a3b6e57"
+    },
+    {
+      "id": "platform-baseline-green",
+      "checkId": "check-platform-activation",
+      "recordedAt": "2026-08-18T06:34:08.8889118Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Baseline adapter/global lifecycle suite pass ngoài sandbox: 6 files, 39 tests trên fake-home fixtures; snapshot trước/sau ổn định.",
+      "artifactPaths": [
+        "src/configurators",
+        "src/commands/internal-context.ts",
+        "test/platform",
+        "test/integration/global-lifecycle.test.ts",
+        "test/safety/isolated-user-home.test.ts"
+      ],
+      "inputDigest": "79bd7e79f07041c7baff15ebcca7a85532602a72d7b755edb02051916757f678"
+    },
+    {
+      "id": "antigravity-runtime-red",
+      "recordedAt": "2026-08-18T06:34:08.8889960Z",
+      "result": "fail",
+      "exitCode": 0,
+      "summary": "Disposable agy 1.1.1 probe: plugin validate xử lý 7 skills và 1 hook nhưng cold-session canary trả NO-CONTEXT; diagnostic log đã redact báo 0 hook file được load và rule trigger hiện tại invalid. Official install/enable, clean install và workspace plugin không đổi kết quả.",
+      "artifactPaths": [
+        "src/configurators/antigravity.ts",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
+      ]
+    },
+    {
+      "id": "implicit-activation-contract-red",
+      "checkId": "check-platform-activation",
+      "recordedAt": "2026-08-18T06:37:29.3566303Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Focused RED xác nhận 4 failure đúng phạm vi: Antigravity còn frontmatter/path rules/harnix.md, ba global instruction chưa bắt buộc route ordinary prompt không nhắc Harnix, và migration chưa tạo rules/AGENTS.md hoặc loại bỏ fragment cũ không đổi.",
+      "artifactPaths": [
+        "test/integration/global-lifecycle.test.ts",
+        "test/platform/global-adapters.test.ts"
+      ]
+    },
+    {
+      "id": "implicit-activation-focused-green",
+      "recordedAt": "2026-08-18T06:43:44.9879306Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused RED→GREEN pass: 2 files, 13 tests; ba adapter có implicit routing contract, Antigravity dùng rules/AGENTS.md không frontmatter, unchanged legacy rule bị xóa và modified legacy rule được preserve.",
+      "artifactPaths": [
+        "src/configurators",
+        "test/integration/global-lifecycle.test.ts",
+        "test/platform/global-adapters.test.ts"
+      ]
+    },
+    {
+      "id": "agy-implicit-runtime-green",
+      "recordedAt": "2026-08-18T06:43:44.9947669Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Disposable agy 1.1.1 cold session: plugin validate xử lý 7 skills/1 hook; ordinary initialized-project prompt trả ROUTING=Bypass, Lite, Full và CURRENT=Bypass; non-Harnix control trả ROUTING=NONE; diagnostic không còn invalid rule trigger. Hook manager vẫn báo 0 hook file, nên chỉ claim implicit instruction activation.",
+      "artifactPaths": [
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "src/configurators/antigravity.ts",
+        "test/platform/global-adapters.test.ts"
+      ]
+    },
+    {
+      "id": "kiro-codex-runtime-not-run",
+      "recordedAt": "2026-08-18T06:43:44.9948738Z",
+      "result": "skipped",
+      "exitCode": 1,
+      "summary": "Disposable Kiro CLI dừng ở Not logged in; disposable Codex báo Not logged in và integration vẫn installed-pending-trust. Kiro IDE, Antigravity Desktop và Codex IDE không có isolated GUI profile. Không dùng real credential, login, hook trust bypass hoặc real-profile prompt.",
+      "artifactPaths": [
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "src/configurators/codex.ts",
+        "src/configurators/kiro.ts"
+      ]
+    },
+    {
+      "id": "probe-isolation-deviation",
+      "recordedAt": "2026-08-18T06:43:44.9949047Z",
+      "result": "fail",
+      "exitCode": 0,
+      "summary": "Một lệnh codex exec --help trước khi set fake CODEX_HOME đã thử housekeeping temp alias dưới profile thật; hệ điều hành từ chối cả cleanup và create nên không có write thành công. Mọi Codex probe sau đó đều set HOME, USERPROFILE và CODEX_HOME vào disposable root.",
+      "artifactPaths": [
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
+      ]
+    },
+    {
+      "id": "platform-activation-required-green",
+      "checkId": "check-platform-activation",
+      "recordedAt": "2026-08-18T06:45:14.6489308Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Required platform/global suite pass với snapshot ổn định: 6 files, 41 tests; bao phủ adapter implicit activation, fake-home lifecycle, rule-path migration, context protocol và isolated user home.",
+      "artifactPaths": [
+        "src/configurators",
+        "test/integration/global-lifecycle.test.ts",
+        "test/platform",
+        "test/safety/isolated-user-home.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ],
+      "inputDigest": "32b93f64f51075b3784abef81df11be0be8aea13e724b7b826b4a1925bc4f2d4"
+    },
+    {
+      "id": "runtime-probes-required-complete",
+      "checkId": "check-runtime-probes",
+      "recordedAt": "2026-08-18T06:45:35.9683334Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Runtime probe contract hoàn tất với stable snapshot: agy implicit routing/no-op pass; Kiro/Codex/GUI surfaces thiếu disposable login/trust/profile được ghi conservative not-run; Antigravity print-mode hook vẫn unproven và không bị claim active.",
+      "artifactPaths": [
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "src/configurators",
+        "test/platform"
+      ],
+      "inputDigest": "31dfec2257ec74eea529d5da33c8c07b81950cb58fa05ba79de7aff6f835106c"
+    },
+    {
+      "id": "review-readme-version-marker-fail",
+      "recordedAt": "2026-08-18T06:46:13.8580575Z",
+      "result": "fail",
+      "exitCode": 0,
+      "summary": "Compliance review phát hiện README đã đổi managed marker source release hiện là thành source release vẫn là; scripts/version-sync.mjs chỉ nhận marker canonical nên patch bump sẽ fail nếu không sửa.",
+      "artifactPaths": [
+        "README.md",
+        "scripts/version-sync.mjs"
+      ]
+    },
+    {
+      "id": "review-readme-version-marker-green",
+      "recordedAt": "2026-08-18T06:46:37.2449290Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Khôi phục canonical README marker và focused version-sync suite pass: 1 file, 2 tests; patch bump có thể cập nhật cả hai managed version claims.",
+      "artifactPaths": [
+        "README.md",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts"
+      ]
+    },
+    {
+      "id": "exact-acceptance-platform-boundary-fail",
+      "checkId": "check-exact-acceptance",
+      "recordedAt": "2026-08-18T06:48:42.2802541Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Exact acceptance lần 1 pass install/build/lint/typecheck nhưng dừng ở pnpm test: 1/400 test fail vì helper activation.ts làm src/configurators vượt frozen đúng ba adapter files; các gate sau chưa chạy.",
+      "artifactPaths": [
+        "src/configurators/activation.ts",
+        "test/safety/platform-boundaries.test.ts"
+      ]
+    },
+    {
+      "id": "platform-boundary-helper-green",
+      "recordedAt": "2026-08-18T06:49:16.9196780Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Chuyển shared implicit instruction sang template layer; focused safety+adapter pass 2 files/7 tests, lint và typecheck pass; src/configurators trở lại đúng ba adapter.",
+      "artifactPaths": [
+        "src/configurators",
+        "src/templates/harnix/activation.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/safety/platform-boundaries.test.ts"
+      ]
+    },
+    {
+      "id": "exact-acceptance-smoke-path-fail",
+      "checkId": "check-exact-acceptance",
+      "recordedAt": "2026-08-18T06:50:24.3085716Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Exact acceptance lần 2 pass install/build/lint/typecheck/test/test:acceptance/pack:check rồi dừng smoke:tarball vì smoke script còn expect legacy Antigravity rules/harnix.md; performance/footprint/release scan chưa chạy.",
+      "artifactPaths": [
+        "scripts/smoke-tarball.mjs",
+        "src/configurators/antigravity.ts"
+      ]
+    },
+    {
+      "id": "tarball-smoke-rule-path-green",
+      "recordedAt": "2026-08-18T06:51:00.3874974Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Cập nhật tarball smoke sang rules/AGENTS.md; pack:check và bốn fake-home smoke combinations Kiro/Antigravity/Codex pass.",
+      "artifactPaths": [
+        "scripts/smoke-tarball.mjs",
+        "src/configurators/antigravity.ts"
+      ]
+    },
+    {
+      "id": "exact-acceptance-pre-final-green",
+      "recordedAt": "2026-08-18T06:52:46.4924386Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact acceptance lần 3 pass toàn bộ 12 commands; pnpm test 399 pass/1 conditional skip, acceptance suites pass, 4 tarball smoke pass, init worst 368.06ms, footprint reduction 84.87%, release scan và diff check sạch; snapshot digest ổn định.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "scripts",
+        "src",
+        "test"
+      ]
+    },
+    {
+      "checkId": "check-workflow-matrix",
+      "recordedAt": "2026-08-18T06:55:59.6591633+00:00",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "src/core/tasks/task.ts",
+        "test/workflow",
+        "test/unit/task-state.test.ts",
+        "test/unit/verification-inputs.test.ts"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "id": "workflow-matrix-final-green",
+      "summary": "Fresh final workflow/state suite pass trên checklist đã khóa: 10 files, 79 tests; snapshot đầu vào ổn định.",
+      "inputDigest": "ce8dd4d38e94bec60b6b2433b9a9c11e680d7bb9e45f2de85f9356ed5046deaa"
+    },
+    {
+      "checkId": "check-platform-activation",
+      "recordedAt": "2026-08-18T06:55:59.6601633+00:00",
+      "artifactPaths": [
+        "src/configurators",
+        "src/templates/harnix/activation.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/platform",
+        "test/safety/isolated-user-home.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "id": "platform-activation-final-green",
+      "summary": "Fresh final platform/global suite pass: 6 files, 41 tests; bao phủ implicit instruction, migration, fake-home lifecycle, hook/context protocol và isolation.",
+      "inputDigest": "1cca754a00d3e670c600724e6f23694176beaac12dbd6a93ffa67f4e5231b3ce"
+    },
+    {
+      "checkId": "check-runtime-probes",
+      "recordedAt": "2026-08-18T06:55:59.6611633+00:00",
+      "artifactPaths": [
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "src/configurators",
+        "test/platform"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "id": "runtime-probes-final-complete",
+      "summary": "Fresh runtime evidence hoàn tất trên fake home: agy ordinary prompt route Bypass/Lite/Full và non-Harnix no-op; Kiro/Codex/GUI thiếu isolated login/trust/profile được ghi not-run; không claim Antigravity print-mode hook active.",
+      "inputDigest": "3300d4c60fd7a2c5bf10ad0379945d62e07444c26f2f15dc4a8f2a39edace0a5"
+    },
+    {
+      "checkId": "check-release",
+      "recordedAt": "2026-08-18T06:55:59.6621633+00:00",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/skills"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "id": "release-final-green",
+      "summary": "Patch 1.0.6, CHANGELOG, README managed claims và canonical skill metadata đồng bộ; git diff --check pass.",
+      "inputDigest": "6d82bf0dc677762e8df3e7572e9bbd0e0319537eb70d70b4fa749bd1fefa4b56"
+    },
+    {
+      "checkId": "check-exact-acceptance",
+      "recordedAt": "2026-08-18T06:55:59.6631633+00:00",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "scripts",
+        "src",
+        "test"
+      ],
+      "exitCode": 0,
+      "result": "pass",
+      "id": "exact-acceptance-final-green",
+      "summary": "Exact acceptance cuối pass đủ 12 commands: install/build/lint/typecheck, 399 tests pass và 1 conditional skip, acceptance suites, pack, 4 tarball smoke combinations, init worst 343.82ms, footprint reduction 84.87%, release scan và diff check.",
+      "inputDigest": "a16af24310d2a55d29fe35be700808a7a013a53e5e2e89e188209dc413baa418"
+    },
+    {
+      "artifactPaths": [
+        "AGENTS.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src",
+        "test"
+      ],
+      "summary": "Compliance review cuối không còn finding: giữ đúng ba platform, guard initialized-project, no-op ngoài project, frozen contracts, ownership/preservation và dependency direction; defect README marker và configurator boundary đã có regression protection.",
+      "result": "pass",
+      "recordedAt": "2026-08-18T06:55:59.6641633+00:00",
+      "exitCode": 0,
+      "id": "compliance-review-final"
+    },
+    {
+      "artifactPaths": [
+        "src/configurators",
+        "src/utils",
+        "test/integration/global-lifecycle.test.ts",
+        "test/platform",
+        "test/safety"
+      ],
+      "summary": "Quality/security review cuối không còn finding actionable: path migration bảo toàn modified legacy rule, fake-home tests không chạm profile thật, context bị bound/redact và runtime claims được giữ conservative.",
+      "result": "pass",
+      "recordedAt": "2026-08-18T06:55:59.6651633+00:00",
+      "exitCode": 0,
+      "id": "quality-security-review-final"
+    }
+  ],
+  "createdAt": "2026-08-18T06:19:42.3813623Z",
+  "updatedAt": "2026-08-18T06:56:30.379Z",
+  "completedAt": "2026-08-18T06:56:30.379Z"
+}

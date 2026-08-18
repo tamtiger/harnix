@@ -10,7 +10,7 @@
 | Repository root | Resolved dynamically; no machine-specific path is part of product output |
 | Package / executable | `@tamtiger/harnix` / `harnix` |
 | Project data / generator / skills | `.harnix/` / `harnix` / `harnix-*` |
-| Status | **Implemented in the authorized scope**; Phase 6, automated gates and workflow freshness C1–C3 have fresh evidence. Manual sessions proved Kiro/Antigravity skill discovery, Antigravity hook execution and Codex exact-hook trust/activation; Kiro CLI global hook activation is explicitly deferred and not claimed. |
+| Status | **Implemented in the authorized scope**; Phase 6 and workflow freshness C1–C3 are implemented. Revalidation 2026-08-18 proved disposable `agy` implicit routing/no-op control; current `agy --print` hook loading, Kiro/Codex disposable login/trust and GUI surfaces remain conservative/not-run rather than being inferred active. |
 
 Tài liệu này là nguồn yêu cầu sản phẩm chính. `HARNIX_WORKFLOW.md` là contract chuẩn cho state/transition/gate/artifact của workflow; `IMPLEMENTATION_PLAN.md`, `HARNESS_RESEARCH.md`, `UPSTREAM_MAPPING.md` và `UPSTREAM_BASELINE.md` giải thích cách triển khai và provenance. Khi có mâu thuẫn về product behavior, PRD được ưu tiên; khi chi tiết workflow không được PRD quy định, `HARNIX_WORKFLOW.md` được ưu tiên, trừ khi yêu cầu mới của người dùng ghi rõ override.
 
@@ -170,7 +170,7 @@ Phase 6 supersedes every former project-local platform setup path. `init` contin
 - Runtime stays in the installed package. The fixed hook command is `harnix internal context --platform <id>`; binary lookup is injected and a missing launcher returns `binary-unavailable`, never a false readiness claim.
 - Human/JSON results contain per-platform created, updated, unchanged, preserved and warning paths plus readiness. Output never exposes an absolute home path.
 - Each target root owns an independent sidecar manifest; no `~/.harnix` is created and no project manifest can claim shared global files. Manifests store relative paths only, reject corrupt/future/unsafe data before write, preserve collisions and user edits, and use stable-order locking, permission-preserving atomic writes and conservative rollback.
-- Every global instruction, skill and hook starts with an activation guard: find the nearest initialized project ancestor/root from the event cwd or workspace roots, rather than checking only the current workspace directory; no `.harnix/config.yaml` means fast no-op with no output/write/init. A known initialized project whose state cannot be read safely emits only a concise redacted platform-specific warning, fails closed for project data, and must not block the hosting agent.
+- Every global instruction, skill and hook starts with an activation guard: find the nearest initialized project ancestor/root from the event cwd or workspace roots, rather than checking only the current workspace directory. Khi guard pass, global instruction phải route mọi ordinary user request qua Bypass/Lite/Full kể cả khi prompt không nhắc Harnix; no `.harnix/config.yaml` means fast no-op with no output/write/init. A known initialized project whose state cannot be read safely emits only a concise redacted platform-specific warning, fails closed for project data, and must not block the hosting agent.
 
 ### 9.1 Kiro
 
@@ -183,7 +183,7 @@ Phase 6 supersedes every former project-local platform setup path. `init` contin
 
 - Public identity/flag remains Antigravity/`--antigravity`; executable discovery uses `agy`, not Gemini CLI.
 - Install the same namespaced Harnix plugin independently at `~/.gemini/config/plugins/harnix` (Desktop/IDE) and `~/.gemini/antigravity-cli/plugins/harnix` (CLI). Each has its own ownership manifest.
-- `plugin.json` contains only official fields. The plugin owns Harnix skills, conditional rule, and a `PreInvocation` fixed command handler in `hooks.json`; it never creates MCP/settings, touches credentials/accounts/registry, or hardcodes a machine path.
+- `plugin.json` contains only official fields. The plugin owns Harnix skills, always-on activation-guard rule tại `rules/AGENTS.md` không có frontmatter, and a `PreInvocation` fixed command handler in `hooks.json`; it never creates MCP/settings, touches credentials/accounts/registry, or hardcodes a machine path.
 - The handler injects only on the initial invocation and outputs `{ "injectSteps": [...] }`. It exits `0` with empty stdout for a non-Harnix workspace or malformed optional event; `{ "injectSteps": [] }` is emitted only after an initialized project is known and the invocation is later or no context applies. It chooses a valid cwd root first, then exactly one initialized `workspacePaths[]` root; ambiguity does not read project data and yields a short warning.
 - File presence alone is not active. Doctor reports `active` or `shadowed` only when authoritative external activation/precedence evidence is supplied; otherwise Antigravity is `precedence-unknown`. The regular CLI does not probe an Antigravity version or infer precedence from files.
 
@@ -372,7 +372,7 @@ Harnix không hoàn thành cho tới khi fresh output chứng minh:
 - Mọi criterion/adopted capability trace tới code/test; deviations ghi rõ.
 - License/NOTICE attribution đúng cho Trellis, ECC và Superpowers.
 
-Delivery evidence status through 2026-08-14: Phase 6 implementation and automated isolated-home gates are complete. Repository review continuation F1–F9 hardens managed JSON/markers, repo-map determinism/limits, diagnostics/release privacy, filesystem preservation and duplicated pure utilities; skill content version remains one small baseline slice. Authorized manual sessions proved Kiro/Antigravity skill discovery, objective Antigravity hook execution, and Codex exact-hook trust/activation without bypass. Kiro CLI global hook activation remains explicitly deferred and must not be claimed; `active`, `shadowed` and `unsupported-version` still require authoritative external evidence.
+Delivery evidence status through 2026-08-18: Phase 6 implementation and automated isolated-home gates are complete. Repository review continuation F1–F9 hardens managed JSON/markers, repo-map determinism/limits, diagnostics/release privacy, filesystem preservation and duplicated pure utilities. Historical authorized sessions are retained as dated evidence, while fresh disposable revalidation proved `agy` implicit routing/no-op but not print-mode hook loading; Kiro/Codex disposable sessions lacked login and Codex trust. `active`, `shadowed` and `unsupported-version` still require current authoritative external evidence.
 
 ## Repository map v1
 

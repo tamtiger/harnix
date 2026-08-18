@@ -84,7 +84,7 @@ async function assertExpectedGlobalSurfaces(home, platforms) {
   }
   if (platforms.includes("--antigravity")) {
     for (const pluginRoot of [".gemini/config/plugins/harnix", ".gemini/antigravity-cli/plugins/harnix"]) {
-      expected.push(`${pluginRoot}/.managed.json`, `${pluginRoot}/hooks.json`, `${pluginRoot}/plugin.json`, `${pluginRoot}/rules/harnix.md`);
+      expected.push(`${pluginRoot}/.managed.json`, `${pluginRoot}/hooks.json`, `${pluginRoot}/plugin.json`, `${pluginRoot}/rules/AGENTS.md`);
     }
   }
   if (platforms.includes("--codex")) {

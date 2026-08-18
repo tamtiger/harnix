@@ -1,7 +1,7 @@
 {
   "extractorVersion": 1,
   "generator": "harnix",
-  "inventoryFingerprint": "21610d32467d16fb1c7d8be5848238ab4b8a5d5cfb7365792463b3ac049c52e6",
+  "inventoryFingerprint": "e696c948abc85643943205f7d9a40eda5abb4a2cc0b66e6dc72ce1a17c1d482c",
   "records": [
     {
       "byteLength": 75,
@@ -33,8 +33,8 @@
       "language": "javascript"
     },
     {
-      "byteLength": 9304,
-      "contentHash": "fac0eccb905b7f08165d68d9546eb1858a781c29ce0a9e130f16d45221d43bfd",
+      "byteLength": 10050,
+      "contentHash": "ebbfb1d4f867945604871c85ef641bd73c86fd6725f95708ada5cdecfed6e31c",
       "extension": "md",
       "headings": [
         "Architecture rules",
@@ -58,8 +58,8 @@
       "path": "AGENTS.md"
     },
     {
-      "byteLength": 25472,
-      "contentHash": "5ba9f8ebf766d3c28891b7f97f853f4dbb06fc4a0319bf0637524ed019accf2f",
+      "byteLength": 27991,
+      "contentHash": "132b42e2cb7890f3cc30e9ece66c0019aa472a48eea41fb6c82becc1c63d5985",
       "extension": "md",
       "headings": [
         "Added",
@@ -81,6 +81,7 @@
       ],
       "identifiers": [
         "is",
+        "m",
         "regardless"
       ],
       "importTargets": [],
@@ -118,8 +119,8 @@
       "path": "NOTICE"
     },
     {
-      "byteLength": 20216,
-      "contentHash": "4d2e6aa0e9507575245c14853c16d9a3c46f9ba7884f4da553c63cf1c0ef9b7a",
+      "byteLength": 24748,
+      "contentHash": "9bf22441565d4d31d92b2e4df7327c33543f1d88125ed2b35af568ac14a1dd55",
       "extension": "md",
       "headings": [
         "CLI",
@@ -137,7 +138,7 @@
         "Trạng thái",
         "Tài liệu",
         "Tích hợp platform",
-        "Workflow sử dụng"
+        "Từ yêu cầu người dùng đến workflow agent"
       ],
       "identifiers": [
         "kh",
@@ -149,8 +150,8 @@
       "path": "README.md"
     },
     {
-      "byteLength": 34611,
-      "contentHash": "24b924495752c548391f2330868c901d5bffa036dafe5235af0197ca067363cb",
+      "byteLength": 35219,
+      "contentHash": "7104cb8796d31cb1601f2c6d8cad6c2fed0f6650eb1485609a69f7e4908c128e",
       "extension": "md",
       "headings": [
         "1. Trạng thái và quyết định sản phẩm",
@@ -182,8 +183,8 @@
       "path": "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
     },
     {
-      "byteLength": 20333,
-      "contentHash": "663e92a2a8b60a52b8b7ac755d2a189ad584a7ab8e94cdb2477a1c619439ad3a",
+      "byteLength": 20328,
+      "contentHash": "eb39068f38f4bda879b208893172187c3b77a8d6a0e7c5516c926170288b0538",
       "extension": "md",
       "headings": [
         "1. Khung quyết định",
@@ -212,8 +213,8 @@
       "path": "docs/HARNESS_RESEARCH.md"
     },
     {
-      "byteLength": 39619,
-      "contentHash": "9ae2f400c236cf7763c5788a88baee7a7790f959166faa8596306e90ee7e5952",
+      "byteLength": 39744,
+      "contentHash": "abd327f1b046a5cdacd3bd4d22469a31b4ace73a7456c4791f1e59eed9afaed2",
       "extension": "md",
       "headings": [
         "1. Document status",
@@ -244,8 +245,8 @@
       "path": "docs/HARNIX_PRD.md"
     },
     {
-      "byteLength": 23809,
-      "contentHash": "1c799e6b38aaac73e2b3b3de01d223ebc03b48cc743f4c7bb81a1f12c9c7d525",
+      "byteLength": 23964,
+      "contentHash": "e8eeb59dae7f328a5f81a16ada70fd99f9c481a89a9675217f1ee1a5504b016d",
       "extension": "md",
       "headings": [
         "1. Purpose and authority",
@@ -279,8 +280,8 @@
       "path": "docs/HARNIX_WORKFLOW.md"
     },
     {
-      "byteLength": 60480,
-      "contentHash": "9a5892484615a68b7f928395da729d84cee16593339cfcf006ad3460b4444322",
+      "byteLength": 60649,
+      "contentHash": "bc4fcbd54f02badc9406163b0732b1203d0b67bac0e13fc34dfce6c09d492923",
       "extension": "md",
       "headings": [
         "1. Mục tiêu",
@@ -392,8 +393,8 @@
       "path": "docs/UPSTREAM_BASELINE.md"
     },
     {
-      "byteLength": 15989,
-      "contentHash": "392224d4c87dbbe5c71c3355b5f1a63a88191055536f0207722c56b7148b4923",
+      "byteLength": 16032,
+      "contentHash": "695cce14d024387aedc7c10b7401dce1a8a9fee20ec180374e87d571a5b6f045",
       "extension": "md",
       "headings": [
         "1. Nguyên tắc mapping",
@@ -493,8 +494,8 @@
       "language": "javascript"
     },
     {
-      "byteLength": 1845,
-      "contentHash": "c011102fdd0ab817a6c69918b998a26671e59a84de7815bc23527bfb8922e3f4",
+      "byteLength": 1897,
+      "contentHash": "cdfe12cced25e97baf015ae0f4297f5cdb6567c573300a090eb3e12fb93c577c",
       "extension": "json",
       "headings": [],
       "identifiers": [],
@@ -692,8 +693,8 @@
       "language": "javascript"
     },
     {
-      "byteLength": 4866,
-      "contentHash": "8d43f169bf77ad88eb986129c63351b192eaa885a6447b35feb6985fac122e21",
+      "byteLength": 4765,
+      "contentHash": "b1729516bc698fb0af5166f02417678c5d0582e77c2c66a8111cb8dc7cc46058",
       "extension": "mjs",
       "headings": [],
       "identifiers": [
@@ -734,6 +735,56 @@
       "kind": "source",
       "packagePath": "",
       "path": "scripts/smoke-tarball.mjs",
+      "language": "javascript"
+    },
+    {
+      "byteLength": 7455,
+      "contentHash": "df2f4c20e1ce3e9a8fb5528d37c8ac096a89c55ff989ff7b686a0d92b056db07",
+      "extension": "mjs",
+      "headings": [],
+      "identifiers": [
+        "assertSkillVersions",
+        "atomicWrite",
+        "canonicalSkillPaths",
+        "changelog",
+        "changelogPath",
+        "compareVersions",
+        "comparison",
+        "current",
+        "directory",
+        "entries",
+        "entry",
+        "firstRelease",
+        "frontmatter",
+        "heading",
+        "index",
+        "insertChangelogEntry",
+        "isDirectExecution",
+        "mode",
+        "nextPackageText",
+        "nextReadme",
+        "normalizeSummaries",
+        "normalizedSummaries",
+        "packageDocument",
+        "packagePath",
+        "packageText",
+        "parseArguments",
+        "parseVersion",
+        "path",
+        "readme",
+        "readmePath",
+        "relativePath",
+        "replaceReadmeVersion"
+      ],
+      "importTargets": [
+        "node:crypto",
+        "node:fs/promises",
+        "node:path",
+        "node:url"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "scripts/version-sync.mjs",
       "language": "javascript"
     },
     {
@@ -832,8 +883,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 15561,
-      "contentHash": "77b05133088cc1d8d7cb0b8e68f6e7e270eb5a4e29454fb56f8dbe4c939e08ea",
+      "byteLength": 15351,
+      "contentHash": "435f8878560a574edb78504a224fcd037e60cc8f0df0a3cae02e9aed78fd8427",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -1250,8 +1301,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 9352,
-      "contentHash": "8a51482b706b44d728ad0a3247dfb475439451b5bf3867ac2048a8ee6ad9f80f",
+      "byteLength": 9272,
+      "contentHash": "6f9bfe5091c3926c1b5071f55973f9b713f01759dcd8928b5cf22ada0c8ce73b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -1556,8 +1607,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2373,
-      "contentHash": "6a4dfc422464cf2950592345626751dbb8ab5644a4305974b1bd53be0e2240bb",
+      "byteLength": 2372,
+      "contentHash": "591e3ec9730527f19a810e751c5d282c4b8fa8e636c835680c724b6e3b29985a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -1568,6 +1619,7 @@
         "antigravityGlobalPluginDesiredFiles"
       ],
       "importTargets": [
+        "../templates/harnix/activation.js",
         "../templates/harnix/workflow.js",
         "../utils/global-managed-files.js"
       ],
@@ -1577,8 +1629,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4091,
-      "contentHash": "d31fbb85157c93fd5a0b159e0652e59e779538cb8b23018e5cc586a5c90a5891",
+      "byteLength": 4237,
+      "contentHash": "59f4131d3bbec2a0361b7b735a686e73f9efd6b53a47b204a0cc0bc7aa48fe28",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -1598,6 +1650,7 @@
         "renderCodexGlobalSkill"
       ],
       "importTargets": [
+        "../templates/harnix/activation.js",
         "../templates/harnix/workflow.js",
         "../utils/global-managed-files.js"
       ],
@@ -1607,8 +1660,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1879,
-      "contentHash": "e360d1a28f5a2c4404c345a414bde593cc14b34a429f07cb0e0a4e7a24363423",
+      "byteLength": 2016,
+      "contentHash": "c69ee6edee611b25a6548de230976c9e37fe9b5dcf6c1ad4f57833c4a62d2d2e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -1618,6 +1671,7 @@
         "kiroGlobalDesiredFiles"
       ],
       "importTargets": [
+        "../templates/harnix/activation.js",
         "../templates/harnix/workflow.js",
         "../utils/global-managed-files.js"
       ],
@@ -2691,8 +2745,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8645,
-      "contentHash": "5f742d38258439d80dc58daf0e1f1e75bc3ae03b02f1fb42abd6f9c4c407928e",
+      "byteLength": 8890,
+      "contentHash": "067830ef5ea8140b3cca217df7b4a03d269c9bf24f56b27054aa15582d0fc8de",
       "extension": "md",
       "headings": [
         "Build decision-complete artifacts",
@@ -2716,8 +2770,8 @@
       "path": "src/skills/harnix-brainstorm/SKILL.md"
     },
     {
-      "byteLength": 7711,
-      "contentHash": "9fe4f4ed5fa22515dbdecd9df4f00fe0a59e4eed23c0af6f7890604978578b1c",
+      "byteLength": 7904,
+      "contentHash": "5613de4ded7f37184c375f14a3e3c413674c38073315b3ca2a2076764a21faad",
       "extension": "md",
       "headings": [
         "Evidence rule",
@@ -2743,8 +2797,8 @@
       "path": "src/skills/harnix-check/SKILL.md"
     },
     {
-      "byteLength": 5115,
-      "contentHash": "9a78f714fe3e031f3eca3f6b3fb70255abc120c35cd686d2b21a560120dfab37",
+      "byteLength": 5271,
+      "contentHash": "0f7e0e79ce6c0a9083f1b6b315a9adb8b8dada646b3bd9f4b0023bb28f548da6",
       "extension": "md",
       "headings": [
         "Continue persisted Harnix work",
@@ -2766,8 +2820,8 @@
       "path": "src/skills/harnix-continue/SKILL.md"
     },
     {
-      "byteLength": 4224,
-      "contentHash": "e0a3d592780027663b867505d09b1474a31e55111a9a94fe087af410aebcb722",
+      "byteLength": 4405,
+      "contentHash": "304607db08e30b29c745a1ec8649fb704fb73d60326ef274b1973ba1b9b3a03b",
       "extension": "md",
       "headings": [
         "Capture the failure",
@@ -2790,8 +2844,8 @@
       "path": "src/skills/harnix-debug/SKILL.md"
     },
     {
-      "byteLength": 3776,
-      "contentHash": "644f8ee107b5d90e25050fa9c56628d80e1508d5096035ab43418d0a0af7720c",
+      "byteLength": 4004,
+      "contentHash": "69a3aa26837b1a9527db04b183241f7d002b348dcfcbcead35fbd6a7a20615ea",
       "extension": "md",
       "headings": [
         "Exit",
@@ -2803,15 +2857,17 @@
         "Persist completion safely",
         "Upstream basis"
       ],
-      "identifiers": [],
+      "identifiers": [
+        "actual"
+      ],
       "importTargets": [],
       "kind": "documentation",
       "packagePath": "",
       "path": "src/skills/harnix-finish-work/SKILL.md"
     },
     {
-      "byteLength": 6844,
-      "contentHash": "37c82a6ac3ec637889cce9a75670b4411607b61e0af642d4c8bd3776043f6aa5",
+      "byteLength": 7059,
+      "contentHash": "f203f4fce913e7c9e5075d6f7c4e562730a5eb615e5ef41ffcce0b904e35efbb",
       "extension": "md",
       "headings": [
         "Documented TDD exceptions",
@@ -2839,8 +2895,8 @@
       "path": "src/skills/harnix-implement/SKILL.md"
     },
     {
-      "byteLength": 3737,
-      "contentHash": "8df026e0f419212298576b14892aca6b442739d71e2fda8f07be7bb4d3f48de4",
+      "byteLength": 4005,
+      "contentHash": "f8a66b419e2af500d8228b61233c25aeb3f58c1d5efc83c1477983ff2ec1406a",
       "extension": "md",
       "headings": [
         "Exit",
@@ -2859,8 +2915,22 @@
       "path": "src/skills/harnix-research/SKILL.md"
     },
     {
-      "byteLength": 6824,
-      "contentHash": "ae873d8454ffbd333a277867bcb7b66ffc2d691bc913e4ce09e720777008cc60",
+      "byteLength": 287,
+      "contentHash": "9957269985a818d442fd5ea6a9a22948ffb3b72998dd6ad34d6c397458194552",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/templates/harnix/activation.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 7859,
+      "contentHash": "452bfdf07fd653005a4da71735c44d5b0016909991d1689aaf3327862c6e3f8c",
       "extension": "ts",
       "headings": [
         "Harnix",
@@ -2915,10 +2985,11 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8526,
-      "contentHash": "6dca51f0da3ba2bc1a48fa6872bfb55dbd03d00022efcc99c89fb56f8bc8bae5",
+      "byteLength": 10388,
+      "contentHash": "6337118015309de24898880a9d9b2f1599142a90606518630202af0d3d3d1a66",
       "extension": "ts",
       "headings": [
+        "Agent persistence transport",
         "Implement and verify",
         "Persist and restore state",
         "Ready gate",
@@ -3682,8 +3753,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7755,
-      "contentHash": "1e35241ded831ddfda7e85789fe4da1631511d622567deed5f4d589747886cac",
+      "byteLength": 10154,
+      "contentHash": "1b612e7810def25f0e3268416b750187de11b8112cd7420a886d57436dab985d",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -3692,13 +3763,17 @@
         "environment",
         "home",
         "homeResolver",
+        "legacyAntigravityRule",
         "manifest",
         "manifestPath",
         "obsoleteContent",
         "obsoletePath",
+        "pluginRoot",
+        "pluginRoots",
         "restored",
         "result",
         "roots",
+        "ruleEntry",
         "temporaryUserHome"
       ],
       "importTargets": [
@@ -4039,8 +4114,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6038,
-      "contentHash": "0909cf5fb1783a50555e4e8b506e684901b385a7eb4ad5b3a42907c15f9aaeb4",
+      "byteLength": 6713,
+      "contentHash": "b3266f059c73b133664e4504a969b2fe1e33047bb192bda2a09dc9340f379d60",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -4053,6 +4128,8 @@
         "fileContent",
         "files",
         "first",
+        "implicitActivationInstruction",
+        "instructions",
         "kiroSkills",
         "platforms",
         "second",
@@ -4722,8 +4799,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5001,
-      "contentHash": "1778b4515f5a335446ea8321ccf119913e60f6f4dbc1b2e897d3901d51f13a8a",
+      "byteLength": 5070,
+      "contentHash": "4f23a9b595bda57ba97f2e648dbd953fdaa5ef491a4756ce8c75732cd7aafebd",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5007,8 +5084,35 @@
       "language": "typescript"
     },
     {
-      "byteLength": 959,
-      "contentHash": "f80c5252e36c235c781a8d68563d1171f3329cf79d709469b1b87b3bd0fd914b",
+      "byteLength": 3908,
+      "contentHash": "290071910eabfa74f06cf7879cf9a2ab122e98f27ccb3048ab88c9e6983a28c0",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "SyncVersion",
+        "VersionSyncResult",
+        "changelog",
+        "directory",
+        "fixture",
+        "name",
+        "root",
+        "roots",
+        "skillNames"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:os",
+        "node:path",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/version-sync.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1422,
+      "contentHash": "a213ce74aa90a1aa47dc4ec548585551710c540aa8e62dc53f666e34630deff8",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5207,8 +5311,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5916,
-      "contentHash": "75f2ca3367ef07cecc48c051acc332edb0cfcec4e82fd37c4ead9b9c53d9eb02",
+      "byteLength": 6260,
+      "contentHash": "faad699bde196485643c6576a3e9dbce147ba531c08d93f8c3e23e4b373bbb0a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5241,12 +5345,13 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7073,
-      "contentHash": "299c12a4551c6317b0ff9a752753e8cfa086548352d60391c4374292ca0e5f13",
+      "byteLength": 9544,
+      "contentHash": "713acbfa21268ff16fb0abb4250b111c7a23e368d317f734ae1ce3e656c236dc",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "agentInstructions",
+        "readme",
         "repositoryAgentInstructions",
         "root",
         "skill",

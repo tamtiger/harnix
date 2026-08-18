@@ -104,7 +104,7 @@ Mapping rules:
 | Upstream | Harnix |
 |---|---|
 | Upstream Gemini/adjacent ideas | Reimplement two namespaced Antigravity **user-global** plugins; executable preflight dùng `agy` |
-| Physical `.gemini` namespace | Desktop `~/.gemini/config/plugins/harnix` and CLI `~/.gemini/antigravity-cli/plugins/harnix`; public identity is Antigravity |
+| Physical `.gemini` namespace | Desktop `~/.gemini/config/plugins/harnix` and CLI `~/.gemini/antigravity-cli/plugins/harnix`; each uses always-on `rules/AGENTS.md` without frontmatter; public identity is Antigravity |
 | User Antigravity state | Only Harnix-owned plugin fragments; no unrelated settings, accounts, registry, MCP or credentials |
 | Trellis commands/agents | Focused Harnix workflow parity; no mandatory agents |
 | Shared runtime scripts | Installed `harnix` executable |

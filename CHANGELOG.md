@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.6] - 2026-08-18
+
+### Changed
+
+- Bổ sung implicit Harnix routing cho ordinary prompt trên Kiro, Antigravity và Codex mà không yêu cầu người dùng nhắc Harnix, vẫn giữ activation guard no-op ngoài initialized project.
+- Chuyển Antigravity sang always-on rules/AGENTS.md không frontmatter; global update xóa legacy rule chưa sửa, preserve legacy rule đã sửa và có regression coverage.
+- Revalidate bằng disposable agy cold session, ghi conservative not-run cho surface thiếu login/trust/profile và không suy hook activation từ file presence hoặc validator.
+
 ## [1.0.5] - 2026-08-18
 
 ### Changed

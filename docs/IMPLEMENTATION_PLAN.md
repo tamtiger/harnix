@@ -696,7 +696,7 @@ Historical Phase 1–4 checkmarks record their original checkpoints; they do not
 
 ## 9B. Phase 6 — User-global platform integrations (complete in the authorized scope)
 
-Yêu cầu ngày 2026-08-11 thay đổi `setup` từ project-local sang user-global cho Kiro, Antigravity và Codex. G0–G9 và phần automated của G10 đã hoàn tất; các checkmark Phase 1–5 chỉ mô tả behavior cũ đã hoàn tất. Ngày 2026-08-13 user đã authorize manual smoke: disposable lifecycle và skill discovery pass, Antigravity runtime probe phát hiện rồi sửa rule frontmatter và chứng minh hook output, còn Codex exact hook được review/trust và fresh real-profile CLI probe chứng minh context injection mà không bypass. User explicit defer Kiro CLI manual hook activation; implementation và automated Kiro coverage vẫn giữ nguyên, còn activation chưa được claim.
+Yêu cầu ngày 2026-08-11 thay đổi `setup` từ project-local sang user-global cho Kiro, Antigravity và Codex. G0–G9 và phần automated của G10 đã hoàn tất; các checkmark Phase 1–5 chỉ mô tả behavior cũ đã hoàn tất. Dated manual evidence ngày 2026-08-13 được giữ làm lịch sử. Revalidation disposable ngày 2026-08-18 chứng minh `agy` implicit routing/no-op sau rule migration nhưng print mode vẫn load 0 hook file; Kiro/Codex fake profiles thiếu login và Codex pending trust. Current activation chỉ được claim theo fresh surface evidence, không suy từ historical run hoặc file presence.
 
 Trong phạm vi Phase 6, constraint cũ “không global config mutation” và các frozen project-local platform paths bị supersede bởi explicit, Harnix-owned user-global customization. Các cấm đoán về global runtime, memory, credential, MCP, permission mutation, telemetry và silent network vẫn giữ nguyên.
 
@@ -707,7 +707,8 @@ Kế hoạch, official path/schema snapshot, migration policy, work breakdown v�
 - [x] G4–G6 chuyển Kiro, Antigravity Desktop/CLI và Codex sang official current user-global surfaces.
 - [x] G7–G8 tách lifecycle global/project và cleanup project-local integration cũ một cách explicit; legacy cleanup chỉ có thể xóa standalone path đúng source/path do manifest v1 chứng minh, còn root/shared file chỉ inventory.
 - [x] G9 cập nhật templates/AGENTS guard, release scripts và chạy full automated acceptance với fake-home/project fixtures.
-- [x] G10 manual disposable-profile/tool-session smoke: lifecycle/protocol/skill discovery, Antigravity hook probe và Codex exact-hook trust/activation đã pass without bypass; Kiro CLI manual hook activation được user explicit defer và không được claim active.
+- [x] G10 historical manual disposable-profile/tool-session smoke đã hoàn tất trong authorized scope; revalidation 2026-08-18 giữ current status conservative per surface và không dùng login/trust bypass.
+- [x] Revalidation 2026-08-18: global Kiro steering, Antigravity rule và Codex AGENTS block bắt buộc implicit routing cho ordinary prompt không nhắc Harnix; Antigravity chuyển sang always-on `rules/AGENTS.md` không frontmatter, với ownership migration xóa file cũ không đổi và preserve file cũ đã sửa.
 
 ## 9C. Workflow freshness hardening — C1–C3
 
@@ -738,7 +739,7 @@ Yêu cầu ngày 2026-08-14 xác nhận skill content version chỉ là một sl
 | CLI integration | all eight commands, project/global scope, setup outside a project, init repo-map creation, cache-only repo-map query, idempotence, modified/deleted files, corrupt/future project/global schemas |
 | Migration | discovery, dry-run, copy/transform, preservation, conflict, rollback, cleanup |
 | Fixtures | independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue, multilingual/multi-technology monorepo |
-| Platform | Kiro user-global JSON hook, Antigravity Desktop/CLI plugin snapshots and multi-root protocol, Codex user-global schema, relevant rules, no machine path |
+| Platform | Kiro user-global JSON hook + implicit steering, Antigravity Desktop/CLI `rules/AGENTS.md` snapshots/path migration and multi-root protocol, Codex user-global schema + implicit AGENTS block, no machine path |
 | Codex | global AGENTS preservation, skills metadata, nested hooks Windows/Linux, `CODEX_HOME`/override/trust/duplicate coverage, user-owned files |
 | Workflow eval | routing, research, debug, TDD exception, reviews, criterion-linked/digest verification, budget, finish/continue, context replan, promotion |
 | Safety | traversal/symlink/junction, hook no-op/injection, secrets, global uninstall confirmation, data preservation, collisions, locks and duplicate/legacy hooks |
