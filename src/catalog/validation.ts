@@ -7,6 +7,7 @@ import type {
   StackCatalog,
   TechnologyDescriptor,
 } from "./types.js";
+import { compareCodeUnits } from "../utils/order.js";
 
 const languageIds = new Set(["csharp", "typescript", "javascript", "php", "python", "java", "go"]);
 const technologyIds = new Set(["dotnet", "abp", "nestjs", "spring", "react-web", "vue", "codeigniter"]);
@@ -182,7 +183,7 @@ function normalizeExpressions(values: DetectorExpression[]): DetectorExpression[
     ...(value.allOf === undefined ? {} : { allOf: sortedByJson(value.allOf) }),
     ...(value.anyOf === undefined ? {} : { anyOf: sortedByJson(value.anyOf) }),
     ...(value.noneOf === undefined ? {} : { noneOf: sortedByJson(value.noneOf) }),
-  })).sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right)));
+  })).sort((left, right) => compareCodeUnits(JSON.stringify(left), JSON.stringify(right)));
 }
 
 function assertUniqueIds(values: Array<{ id: string }>, label: string): void {
@@ -218,8 +219,8 @@ function assertUniqueByJson(values: unknown[], label: string): void {
   if (new Set(serialized).size !== serialized.length) throw new CatalogValidationError(`${label} must be unique.`);
 }
 
-function sorted<T extends string>(values: T[]): T[] { return [...values].sort((left, right) => left.localeCompare(right)); }
-function sortedByJson<T>(values: T[]): T[] { return [...values].sort((left, right) => JSON.stringify(left).localeCompare(JSON.stringify(right))); }
-function byId<T extends { id: string }>(left: T, right: T): number { return left.id.localeCompare(right.id); }
+function sorted<T extends string>(values: T[]): T[] { return [...values].sort(compareCodeUnits); }
+function sortedByJson<T>(values: T[]): T[] { return [...values].sort((left, right) => compareCodeUnits(JSON.stringify(left), JSON.stringify(right))); }
+function byId<T extends { id: string }>(left: T, right: T): number { return compareCodeUnits(left.id, right.id); }
 function isNonEmpty(value: unknown): value is string { return typeof value === "string" && value.trim().length > 0; }
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }

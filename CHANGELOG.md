@@ -4,6 +4,19 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.1] - 2026-08-17
+
+### Fixed
+
+- Dùng code-unit comparator và locale-independent case normalization cho production output deterministic, sửa config Unicode có thể tự tạo thứ tự rồi tự reject và loại locale drift khỏi manifest, lifecycle, diagnostic, context cùng repo-map search.
+- Package contract không còn xem pnpm store, task history hoặc test fixture là package publishable; self-host verification áp dụng cùng normalized line-ending semantics với managed ownership.
+- Self-host test nay validate committed repo-map bằng canonical reader, cache được regenerate để public query không còn trả `invalid`, và inventory loại hard-excluded tree trước khi enumerate/output.
+
+### Changed
+
+- Đồng bộ package, CLI, bảy canonical workflow skill, self-host generator metadata và current-state documentation ở release `1.0.1`; schema, dependency, baseline, fixture và version lịch sử được giữ nguyên.
+- Hoàn tất audit repository ngày 2026-08-17 với năm finding F1–F5 có reproduction, root cause, remediation và regression evidence; thay đổi này không tuyên bố package đã được publish lên npm.
+
 ## [1.0.0] - 2026-08-14
 
 ### Changed

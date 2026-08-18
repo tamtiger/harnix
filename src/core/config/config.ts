@@ -3,6 +3,7 @@ import { parse, stringify } from "yaml";
 
 import type { LanguageId, TechnologyId } from "../../catalog/catalog.js";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
+import { compareCodeUnits } from "../../utils/order.js";
 import { normalizeRepositoryPath } from "../../utils/paths.js";
 import { legacyStackIds, normalizeLegacyStackIds, type LegacyStackId } from "../../utils/stack.js";
 
@@ -240,14 +241,14 @@ function normalizePackages(values: PackageConfig[]): PackageConfig[] {
     languages: sortUnique(item.languages),
     technologies: sortUnique(item.technologies),
     ...unknownEntries(item, packageKeys),
-  })).sort((left, right) => left.path.localeCompare(right.path));
+  })).sort((left, right) => compareCodeUnits(left.path, right.path));
 }
 
 function unknownEntries(value: Record<string, unknown>, known: Set<string>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(value).filter(([key]) => !known.has(key)));
 }
 
-function sortUnique<T extends string>(values: T[]): T[] { return [...new Set(values)].sort((left, right) => left.localeCompare(right)); }
+function sortUnique<T extends string>(values: T[]): T[] { return [...new Set(values)].sort(compareCodeUnits); }
 function assertSortedUnique(values: string[], field: string): void {
   if (new Set(values).size !== values.length || values.some((value, index) => index > 0 && values[index - 1]! >= value)) throw new ConfigValidationError(`${field} must be unique and sorted.`);
 }

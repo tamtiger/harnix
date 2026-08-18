@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { readConfig, validateDeveloperId } from "../core/config/config.js";
 import { searchJournal, type JournalEntry } from "../core/journal/journal.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
+import { compareCodeUnits } from "../utils/order.js";
 
 export interface MemOptions { root: string; query?: string | undefined; user?: string | undefined; limit?: number | undefined; }
 export interface MemResult { entries: JournalEntry[]; malformed: number; }
@@ -20,7 +21,7 @@ export async function searchMemory(options: MemOptions): Promise<MemResult> {
   for (const name of names) {
     const result = await searchJournal(join(journalRoot, name), { developer, limit, ...(options.query === undefined ? {} : { query: options.query }) });
     malformed += result.malformed;
-    entries = [...entries, ...result.entries].sort((left, right) => right.recordedAt.localeCompare(left.recordedAt) || right.id.localeCompare(left.id)).slice(0, limit);
+    entries = [...entries, ...result.entries].sort((left, right) => compareCodeUnits(right.recordedAt, left.recordedAt) || compareCodeUnits(right.id, left.id)).slice(0, limit);
   }
   return { entries, malformed };
 }

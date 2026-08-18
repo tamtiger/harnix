@@ -8,7 +8,7 @@ Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
 ## Trạng thái
 
-Phase 5 review/refactor, Phase 6 user-global integrations và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt. Continuation audit ngày 2026-08-14 đã xử lý các finding F1–F9 về managed JSON/marker, repo-map, privacy scan, preservation và duplication; skill version chỉ là một slice nhỏ của baseline này. Exact automated acceptance/release sequence dùng fake home đã pass với fresh evidence trên release `1.0.0`. Manual session trước đó đã chứng minh skill discovery cho Kiro/Antigravity, Antigravity hook execution và Codex exact-hook trust/activation; Kiro CLI global hook activation được người dùng explicit defer nên Harnix không claim capability đó. Đây chưa phải claim về package đã publish. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
+Phase 5 review/refactor, Phase 6 user-global integrations và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt. Audit ngày 2026-08-17 đã sửa deterministic ordering cho Unicode, test isolation với local pnpm store, self-host line endings, repo-map validity và hard-excluded traversal; source release hiện là `1.0.1`. Manual session trước đó đã chứng minh skill discovery cho Kiro/Antigravity, Antigravity hook execution và Codex exact-hook trust/activation; Kiro CLI global hook activation được người dùng explicit defer nên Harnix không claim capability đó. Đây chưa phải claim về package đã publish. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
 
 ## Đặc điểm sản phẩm
 
@@ -278,7 +278,7 @@ triage -> planning -> ready -> implementing -> verifying -> finishing -> complet
 
 Xem [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) để biết transition, gate và artifact contract chi tiết.
 
-Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release, hiện là `1.0.0`. Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
+Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release, hiện là `1.0.1`. Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
 
 ## Dữ liệu dự án
 

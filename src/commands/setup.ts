@@ -4,6 +4,7 @@ import { antigravityGlobalPluginDesiredFiles } from "../configurators/antigravit
 import { createCodexGlobalSurfacePlan, matchesCodexGlobalContextHookGroup } from "../configurators/codex.js";
 import { kiroGlobalDesiredFiles } from "../configurators/kiro.js";
 import { acquireHarnixFileLock, parseHarnixFileLockRecord, type HarnixFileLockRecord } from "../utils/file-lock.js";
+import { compareCodeUnits } from "../utils/order.js";
 import {
   globalManagedReconciliationOrderKey,
   reconcileGlobalManagedRoots,
@@ -259,7 +260,7 @@ async function hasOnlyHarnixLock(target: ReconciliationTarget): Promise<boolean>
 }
 
 async function acquireLocks(targets: readonly ReconciliationTarget[], lockAcquirer: GlobalSetupLockAcquirer): Promise<AcquiredSetupLock[]> {
-  const ordered = [...targets].sort((left, right) => globalManagedReconciliationOrderKey(left.reconciliation).localeCompare(globalManagedReconciliationOrderKey(right.reconciliation)));
+  const ordered = [...targets].sort((left, right) => compareCodeUnits(globalManagedReconciliationOrderKey(left.reconciliation), globalManagedReconciliationOrderKey(right.reconciliation)));
   const locks: AcquiredSetupLock[] = [];
   try {
     for (const target of ordered) {

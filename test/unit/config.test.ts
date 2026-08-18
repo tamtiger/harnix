@@ -30,6 +30,18 @@ describe("Harnix config v2", () => {
     });
   });
 
+  it("should_sort_unicode_package_paths_by_code_unit_when_creating_config", () => {
+    const config = createConfig({
+      developer: "tam",
+      packages: [
+        { path: "ä-package", languages: [], technologies: [] },
+        { path: "z-package", languages: [], technologies: [] },
+      ],
+    });
+
+    expect(config.packages.map(({ path }) => path)).toEqual(["z-package", "ä-package"]);
+  });
+
   it.each([
     [{ developer: "invalid user" }],
     [{ languages: ["invalid"] }],

@@ -1,6 +1,7 @@
 import type { GuideDescriptor, LanguageId, TechnologyId } from "../catalog/catalog.js";
 import { validateStackCatalog, stackCatalog } from "../catalog/catalog.js";
 import { matchesSafeGlob } from "../utils/safe-glob.js";
+import { compareCodeUnits } from "../utils/order.js";
 import commonEngineering from "./common/engineering.md";
 import csharpEngineering from "./languages/csharp/engineering.md";
 import goEngineering from "./languages/go/engineering.md";
@@ -91,7 +92,7 @@ export function selectGuideSources(selection: GuideSelection, sources: readonly 
     }
     visiting.delete(source.descriptor.id); visited.add(source.descriptor.id); ordered.push(source);
   };
-  const stable = [...retained.values()].sort((left, right) => layer(left.descriptor) - layer(right.descriptor) || left.descriptor.priority - right.descriptor.priority || left.descriptor.id.localeCompare(right.descriptor.id));
+  const stable = [...retained.values()].sort((left, right) => layer(left.descriptor) - layer(right.descriptor) || left.descriptor.priority - right.descriptor.priority || compareCodeUnits(left.descriptor.id, right.descriptor.id));
   for (const source of stable) visit(source);
   return ordered;
 }

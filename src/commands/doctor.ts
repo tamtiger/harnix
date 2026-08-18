@@ -4,6 +4,7 @@ import { readConfigDocument, type HarnixConfigV2 } from "../core/config/config.j
 import { diagnoseRepoMap, refreshRepoMap } from "../core/repo-map/service.js";
 import { ownershipState, readManifest, type ManagedEntry, type ManagedManifest } from "../utils/managed-files.js";
 import { normalizeRepositoryPath, resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
+import { compareCodeUnits } from "../utils/order.js";
 import { validateTask } from "../core/tasks/task.js";
 import { searchJournal, type JournalEntry } from "../core/journal/journal.js";
 import { desiredFiles, updateProject } from "./update.js";
@@ -422,7 +423,7 @@ function report(project: DoctorProjectSection, globalIntegrations: GlobalIntegra
 
 function sortFindings(findings: readonly DoctorFinding[]): DoctorFinding[] {
   const order = { error: 0, warning: 1, info: 2 } as const;
-  return [...findings].sort((left, right) => order[left.severity] - order[right.severity] || left.code.localeCompare(right.code) || (left.path ?? "").localeCompare(right.path ?? ""));
+  return [...findings].sort((left, right) => order[left.severity] - order[right.severity] || compareCodeUnits(left.code, right.code) || compareCodeUnits(left.path ?? "", right.path ?? ""));
 }
 
 function finding(code: string, severity: DoctorFinding["severity"], path: string | undefined, message: string, fixable: boolean): DoctorFinding {

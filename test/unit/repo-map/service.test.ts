@@ -44,15 +44,24 @@ describe("repository map service", () => {
     const root = await temporaryRepository();
     await mkdir(join(root, "src"), { recursive: true });
     await mkdir(join(root, "docs"), { recursive: true });
+    await mkdir(join(root, ".git", "objects"), { recursive: true });
+    await mkdir(join(root, ".harnix", "tasks"), { recursive: true });
     await mkdir(join(root, "node_modules", "ignored"), { recursive: true });
     await writeFile(join(root, "src", "payment-service.ts"), "export class PaymentService {\n  async charge(invoiceId: string) { return invoiceId; }\n}\n");
     await writeFile(join(root, "docs", "payments.md"), "# Payment service\n\nOperational notes.\n");
     await writeFile(join(root, ".env.local"), "API_KEY=fixture-secret-value-should-not-persist\n");
+    await writeFile(join(root, ".git", "objects", "fixture"), "git internals are not inventory candidates\n");
+    await writeFile(join(root, ".harnix", "tasks", "fixture.json"), "{}\n");
     await writeFile(join(root, "node_modules", "ignored", "index.js"), "export const leaked = 'not indexed';\n");
 
     const refreshed = await refreshRepoMap({ root });
 
     expect(refreshed.map.records.map(({ path }) => path)).toEqual(["docs/payments.md", "src/payment-service.ts"]);
+    expect(refreshed.skipped).not.toEqual(expect.arrayContaining([
+      ".git/objects/fixture",
+      ".harnix/tasks/fixture.json",
+      "node_modules/ignored/index.js",
+    ]));
     const cache = await readFile(repoMapCachePath(root), "utf8");
     expect(cache).not.toContain("fixture-secret-value-should-not-persist");
     expect(cache).not.toContain("async charge(invoiceId");

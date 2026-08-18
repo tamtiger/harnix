@@ -5,12 +5,13 @@ import { globby } from "globby";
 
 import { normalizeRepositoryPath } from "../../utils/paths.js";
 import { defaultRepoMapLimits, type RepoMapInventory, type RepoMapLimits } from "./types.js";
-import { compareCodeUnits } from "./order.js";
+import { compareCodeUnits } from "../../utils/order.js";
 
-const ignoredDirectoryNames = new Set([
+const ignoredDirectoryNameList = [
   ".agents", ".cache", ".claude", ".codex", ".gemini", ".git", ".harnix", ".kiro", ".next", ".pytest_cache", ".trellis", ".turbo", ".understand-anything",
-  "__pycache__", "node_modules", "vendor", "bin", "obj", "dist", "build", "coverage",
-]);
+  "__pycache__", "bin", "build", "coverage", "dist", "node_modules", "obj", "vendor",
+] as const;
+const ignoredDirectoryNames = new Set<string>(ignoredDirectoryNameList);
 const secretPath = /(?:^|\/)(?:\.env[^/]*|[^/]*(?:credential|secret|token)[^/]*|id_rsa[^/]*|[^/]*\.(?:pem|key))$/iu;
 
 export async function inventoryRepository(root: string, limits: RepoMapLimits = defaultRepoMapLimits): Promise<RepoMapInventory> {
@@ -23,6 +24,7 @@ export async function inventoryRepository(root: string, limits: RepoMapLimits = 
     dot: true,
     followSymbolicLinks: false,
     gitignore: true,
+    ignore: ignoredDirectoryNameList.map((name) => `**/${name}/**`),
     onlyFiles: true,
   })).sort(compareCodeUnits);
   const files: RepoMapInventory["files"] = [];

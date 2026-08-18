@@ -2,6 +2,7 @@ import { readFile, stat } from "node:fs/promises";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "../../utils/paths.js";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { sha256 } from "../../utils/hashing.js";
+import { compareCodeUnits } from "../../utils/order.js";
 
 export interface ContextEntry { path: string; reason: string; priority: number; pinned: boolean; states: string[]; contentHash?: string; }
 export interface ContextManifest { generator: "harnix"; schemaVersion: 1; taskId: string; maxCharacters: number; entries: ContextEntry[]; omitted: Array<{ path: string; reason: "budget" | "duplicate" | "missing" | "unsafe" }>; }
@@ -52,7 +53,7 @@ export async function inspectContextDrift(
       changes.push({ path: entry.path, kind: isMissing(error) ? "missing" : "unreadable" });
     }
   }
-  changes.sort((left, right) => left.path.localeCompare(right.path) || left.kind.localeCompare(right.kind));
+  changes.sort((left, right) => compareCodeUnits(left.path, right.path) || compareCodeUnits(left.kind, right.kind));
   return { state: changes.length === 0 ? "current" : "stale", changes };
 }
 
@@ -117,7 +118,7 @@ export function validateContextManifest(value: unknown): ContextManifest {
   for (const item of value.omitted) if (!isRecord(item) || typeof item.path !== "string" || !["budget", "duplicate", "missing", "unsafe"].includes(String(item.reason))) throw new Error("Invalid omitted context entry.");
   return value as unknown as ContextManifest;
 }
-function compareEntries(left: ContextEntry, right: ContextEntry): number { return Number(right.pinned) - Number(left.pinned) || right.priority - left.priority || left.path.localeCompare(right.path); }
+function compareEntries(left: ContextEntry, right: ContextEntry): number { return Number(right.pinned) - Number(left.pinned) || right.priority - left.priority || compareCodeUnits(left.path, right.path); }
 function normalizedSet(values: string[] | undefined): Set<string> { return new Set((values ?? []).map((value) => normalizeRepositoryPath(value))); }
 function isUnsafe(error: unknown): boolean { return error instanceof Error && error.name === "UnsafeProjectPathError"; }
 function isMissing(error: unknown): boolean { return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"; }

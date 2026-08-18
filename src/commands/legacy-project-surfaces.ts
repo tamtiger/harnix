@@ -3,6 +3,7 @@ import { lstat, readFile, rm } from "node:fs/promises";
 import { sha256 } from "../utils/hashing.js";
 import { readManifest, writeManifest, type ManagedEntry, type ManagedManifest } from "../utils/managed-files.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
+import { compareCodeUnits } from "../utils/order.js";
 
 export interface CleanupLegacyProjectSurfacesOptions {
   root: string;
@@ -36,7 +37,7 @@ export async function cleanupLegacyProjectSurfaces(
   const manifestPath = await resolveSafeHarnixPath(options.root, ".template-hashes.json");
   const manifest = await readOptionalManifest(manifestPath);
   const legacyEntries = (manifest?.entries ?? []).filter(isCanonicalLegacyProjectSurface);
-  const targets = legacyEntries.map((entry) => entry.path).sort((left, right) => left.localeCompare(right));
+  const targets = legacyEntries.map((entry) => entry.path).sort(compareCodeUnits);
 
   if (!options.yes) {
     return {
@@ -85,8 +86,8 @@ export async function cleanupLegacyProjectSurfaces(
   return {
     scope: "legacy-project-surfaces",
     targets,
-    removed: removed.sort((left, right) => left.localeCompare(right)),
-    preserved: preserved.sort((left, right) => left.localeCompare(right)),
+    removed: removed.sort(compareCodeUnits),
+    preserved: preserved.sort(compareCodeUnits),
     confirmationRequired: false,
   };
 }

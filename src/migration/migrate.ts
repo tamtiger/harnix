@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { createConfig, writeConfig } from "../core/config/config.js";
 import { atomicWriteFile } from "../utils/atomic-write.js";
 import { sha256 } from "../utils/hashing.js";
+import { compareCodeUnits } from "../utils/order.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import { workflowTemplate } from "../templates/harnix/workflow.js";
 import { discoverLegacy } from "./discovery.js";
@@ -61,14 +62,14 @@ async function inventoryLegacyFiles(root: string, legacy: string[], conflicts: s
       }
     }
   }
-  return files.sort((left, right) => left.destination.localeCompare(right.destination) || left.sourceRelative.localeCompare(right.sourceRelative));
+  return files.sort((left, right) => compareCodeUnits(left.destination, right.destination) || compareCodeUnits(left.sourceRelative, right.sourceRelative));
 }
 async function walkFiles(directory: string, relativeDirectory: string): Promise<InventoryFile[]> {
   let entries;
   try { entries = await readdir(directory, { withFileTypes: true }); }
   catch (error: unknown) { if (isMissing(error)) return []; throw error; }
   const files: InventoryFile[] = [];
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.sort((left, right) => compareCodeUnits(left.name, right.name))) {
     if (entry.isSymbolicLink()) throw new Error(`Legacy migration refuses symbolic link ${relativeDirectory}/${entry.name}.`);
     const source = join(directory, entry.name), destination = `${relativeDirectory}/${entry.name}`.replaceAll("\\", "/");
     if (entry.isDirectory()) files.push(...await walkFiles(source, destination));

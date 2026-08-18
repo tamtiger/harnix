@@ -2,7 +2,7 @@ import MiniSearch from "minisearch";
 
 import { normalizeRepositoryPath } from "../../utils/paths.js";
 import type { RepoMapQueryResult, RepoMapQuerySignals, RepoMapRecordV1, RepoMapV1 } from "./types.js";
-import { compareCodeUnits } from "./order.js";
+import { compareCodeUnits } from "../../utils/order.js";
 
 interface SearchDocument {
   id: string;
@@ -55,5 +55,5 @@ function terms(record: RepoMapRecordV1): string {
 }
 
 function normalizeTerm(value: string): string {
-  return value.toLocaleLowerCase().replaceAll(/[^\p{L}\p{N}_-]+/gu, " ").trim();
+  return value.toLowerCase().replaceAll(/[^\p{L}\p{N}_-]+/gu, " ").trim();
 }

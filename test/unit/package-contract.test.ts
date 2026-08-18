@@ -1,13 +1,17 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
+import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const temporaryRepository = useTemporaryRepositories("harnix-package-contract-");
+const nonProductDirectories = new Set([".artifacts", ".git", ".harnix", ".pnpm-store", "coverage", "dist", "node_modules", "test"]);
 
 function findPackageJsonFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-    if (entry.name === ".git" || entry.name === "node_modules" || entry.name === "dist") {
+    if (entry.isDirectory() && nonProductDirectories.has(entry.name)) {
       return [];
     }
 
@@ -17,6 +21,13 @@ function findPackageJsonFiles(directory: string): string[] {
     }
 
     return entry.name === "package.json" ? [entryPath] : [];
+  });
+}
+
+function findFiles(directory: string, extension: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    return entry.isDirectory() ? findFiles(path, extension) : entry.isFile() && entry.name.endsWith(extension) ? [path] : [];
   });
 }
 
@@ -72,6 +83,30 @@ describe("package invariant", () => {
     expect(hooks.readPackage({ name: "unrelated", version: "1.0.0", dependencies: { esbuild: "^0.27.0" } }).dependencies).toEqual({ esbuild: "^0.27.0" });
     expect(hooks.updateConfig({ allowBuilds: { "unrelated-package": false } }).allowBuilds).toEqual({ esbuild: true, "unrelated-package": false });
     expect(existsSync(resolve(repositoryRoot, "pnpm-workspace.yaml"))).toBe(false);
+  });
+
+  it("should_ignore_non_product_package_manifests_when_checking_the_single_package_contract", async () => {
+    const root = await temporaryRepository();
+    const productPackage = join(root, "packages", "product", "package.json");
+    const paths = [
+      join(root, "package.json"),
+      productPackage,
+      join(root, ".harnix", "tasks", "audit", "package.json"),
+      join(root, ".pnpm-store", "v11", ".tmp", "package.json"),
+      join(root, "test", "fixtures", "package.json"),
+    ];
+    await Promise.all(paths.map(async (path) => {
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, "{}\n");
+    }));
+
+    expect(findPackageJsonFiles(root).sort()).toEqual([join(root, "package.json"), productPackage].sort());
+  });
+
+  it("should_avoid_locale_sensitive_primitives_in_deterministic_production_paths", () => {
+    const offenders = findFiles(join(repositoryRoot, "src"), ".ts").filter((path) => /\.localeCompare\(|\.toLocale(?:Lower|Upper)Case\(/u.test(readFileSync(path, "utf8")));
+
+    expect(offenders).toEqual([]);
   });
 });
 

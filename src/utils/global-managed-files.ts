@@ -1,6 +1,7 @@
 import { chmod, readFile, readdir, rm, stat } from "node:fs/promises";
 import { atomicWriteFile } from "./atomic-write.js";
 import { GlobalManagedManifestError } from "./global-managed-error.js";
+import { compareCodeUnits } from "./order.js";
 import {
   canonicalJson,
   createJsonDocument,
@@ -283,7 +284,7 @@ export async function reconcileGlobalManagedFiles(options: ReconcileGlobalManage
  * platform locks in the same order before entering this transaction.
  */
 export async function reconcileGlobalManagedRoots(options: ReconcileGlobalManagedRootsOptions): Promise<GlobalManagedReconcileResult[]> {
-  const ordered = options.reconciliations.map((reconciliation, index) => ({ reconciliation, index })).sort((left, right) => globalManagedReconciliationOrderKey(left.reconciliation).localeCompare(globalManagedReconciliationOrderKey(right.reconciliation)));
+  const ordered = options.reconciliations.map((reconciliation, index) => ({ reconciliation, index })).sort((left, right) => compareCodeUnits(globalManagedReconciliationOrderKey(left.reconciliation), globalManagedReconciliationOrderKey(right.reconciliation)));
   assertUniqueReconciliationRoots(ordered.map(({ reconciliation }) => reconciliation));
   const prepared: Array<PlannedGlobalReconciliation & { index: number }> = [];
   for (const item of ordered) {
@@ -809,7 +810,7 @@ async function buildPlans(
   manifestOriginal: string | undefined,
 ): Promise<PlannedWrite[]> {
   const plans: PlannedWrite[] = [];
-  for (const state of [...states.values()].sort((left, right) => left.relativePath.localeCompare(right.relativePath))) {
+  for (const state of [...states.values()].sort((left, right) => compareCodeUnits(left.relativePath, right.relativePath))) {
     if (state.current === state.original) {
       continue;
     }
@@ -928,7 +929,7 @@ function entryKey(entry: Pick<GlobalManagedEntry, "path" | "sourceId">): string 
 }
 
 function compareEntries(left: GlobalManagedEntry, right: GlobalManagedEntry): number {
-  return entryKey(left).localeCompare(entryKey(right));
+  return compareCodeUnits(entryKey(left), entryKey(right));
 }
 
 /** Safe, deterministic lock/reconciliation order key; it contains no physical home path. */

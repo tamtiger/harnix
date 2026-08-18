@@ -1,4 +1,5 @@
 import type { LanguageId, TechnologyId } from "../catalog/catalog.js";
+import { compareCodeUnits } from "./order.js";
 
 export type LegacyStackId = "csharp-dotnet-abp" | "typescript-nestjs" | "php" | "python" | "java-spring" | "go" | "react-web" | "vue";
 
@@ -28,5 +29,5 @@ export function normalizeLegacyStackIds(ids: readonly LegacyStackId[]): StackPro
 }
 
 function sorted<T extends string>(values: readonly T[]): T[] {
-  return [...new Set(values)].sort((left, right) => left.localeCompare(right));
+  return [...new Set(values)].sort(compareCodeUnits);
 }

@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { compareCodeUnits } from "../utils/order.js";
 
 import { antigravityGlobalPluginDesiredFiles } from "../configurators/antigravity.js";
 import {
@@ -481,8 +482,8 @@ function finding(
 function sortFindings(findings: readonly GlobalDoctorFinding[]): GlobalDoctorFinding[] {
   const order = { error: 0, warning: 1, info: 2 } as const;
   return [...findings].sort((left, right) => order[left.severity] - order[right.severity]
-    || left.code.localeCompare(right.code)
-    || (left.path ?? "").localeCompare(right.path ?? ""));
+    || compareCodeUnits(left.code, right.code)
+    || compareCodeUnits(left.path ?? "", right.path ?? ""));
 }
 
 async function safeCommandLookup(lookup: GlobalDoctorCommandLookup): Promise<boolean> {

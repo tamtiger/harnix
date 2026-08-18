@@ -1,4 +1,5 @@
 import { acquireHarnixFileLock } from "../utils/file-lock.js";
+import { compareCodeUnits } from "../utils/order.js";
 import { rmdir } from "node:fs/promises";
 import {
   GlobalManagedManifestError,
@@ -141,7 +142,7 @@ function ownedPluginDirectories(entries: readonly GlobalManagedEntry[]): string[
 function uniqueDeepestFirst(paths: readonly string[]): string[] {
   return [...new Set(paths)].sort((left, right) => {
     const depth = right.split("/").length - left.split("/").length;
-    return depth === 0 ? right.localeCompare(left) : depth;
+    return depth === 0 ? compareCodeUnits(right, left) : depth;
   });
 }
 
@@ -251,7 +252,7 @@ function createReconciliation(target: GlobalUninstallTarget): ReconcileGlobalMan
 }
 
 async function acquireLocks(targets: readonly GlobalUninstallTarget[], lockAcquirer: GlobalUninstallLockAcquirer): Promise<GlobalUninstallLock[]> {
-  const ordered = [...targets].sort((left, right) => globalManagedReconciliationOrderKey(createReconciliation(left)).localeCompare(globalManagedReconciliationOrderKey(createReconciliation(right))));
+  const ordered = [...targets].sort((left, right) => compareCodeUnits(globalManagedReconciliationOrderKey(createReconciliation(left)), globalManagedReconciliationOrderKey(createReconciliation(right))));
   const locks: GlobalUninstallLock[] = [];
   try {
     for (const target of ordered) {
@@ -274,7 +275,7 @@ function resultFromTargets(
     scope: "user",
     platforms: platforms.map((platform) => {
       const platformTargets = targets.filter((target) => target.publicPlatform === platform);
-      const targetsForPlatform = platformTargets.flatMap((target) => target.entries.map((entry) => displayEntry(target.root, entry))).sort((left, right) => left.localeCompare(right));
+      const targetsForPlatform = platformTargets.flatMap((target) => target.entries.map((entry) => displayEntry(target.root, entry))).sort(compareCodeUnits);
       const removed = platformTargets.flatMap((target) => (outcomes.get(target)?.deleted ?? []).map((label) => displayLabel(target.root, label)));
       const preserved = platformTargets.flatMap((target) => (outcomes.get(target)?.preserved ?? []).map((label) => displayLabel(target.root, label)));
       return {
@@ -311,7 +312,7 @@ function normalizePlatforms(platforms: readonly GlobalUninstallPlatform[]): Glob
 }
 
 function uniqueSorted(values: readonly string[]): string[] {
-  return [...new Set(values)].sort((left, right) => left.localeCompare(right));
+  return [...new Set(values)].sort(compareCodeUnits);
 }
 
 function isMissingPathError(error: unknown): boolean {

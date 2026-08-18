@@ -3,6 +3,7 @@ import { resolveActiveTask } from "../core/tasks/task.js";
 import { queryRepoMap, refreshRepoMap } from "../core/repo-map/service.js";
 import { findInitializedProject } from "../utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
+import { compareCodeUnits } from "../utils/order.js";
 
 export async function refreshRepoMapInternal(cwd: string): Promise<unknown> {
   const root = await initializedRoot(cwd);
@@ -37,5 +38,5 @@ async function initializedRoot(cwd: string): Promise<string> {
 }
 
 function terms(...values: string[]): string[] {
-  return [...new Set(values.join(" ").toLocaleLowerCase().match(/[\p{L}\p{N}_-]+/gu) ?? [])].sort((left, right) => left.localeCompare(right));
+  return [...new Set(values.join(" ").toLowerCase().match(/[\p{L}\p{N}_-]+/gu) ?? [])].sort(compareCodeUnits);
 }

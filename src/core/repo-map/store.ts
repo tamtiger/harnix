@@ -3,9 +3,9 @@ import { join } from "node:path";
 
 import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { sha256 } from "../../utils/hashing.js";
+import { compareCodeUnits } from "../../utils/order.js";
 import { normalizeRepositoryPath, resolveSafeHarnixPath } from "../../utils/paths.js";
 import type { RepoMapRecordV1, RepoMapV1 } from "./types.js";
-import { compareCodeUnits } from "./order.js";
 
 export const repoMapRelativePath = "cache/repo-map-v1.json";
 

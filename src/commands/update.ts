@@ -8,6 +8,7 @@ import { sha256 } from "../utils/hashing.js";
 import { packageVersion } from "../version.js";
 import { renderAgentsTemplate } from "../templates/harnix/agents.js";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
+import { compareCodeUnits } from "../utils/order.js";
 
 export interface UpdateProjectOptions { root: string; restoreDeleted?: boolean | undefined; }
 export interface UpdateProjectResult { created: string[]; updated: string[]; metadataUpdated: string[]; preserved: string[]; deleted: string[]; obsolete: string[]; }
@@ -37,7 +38,7 @@ export async function baselineManagedTemplates(root: string): Promise<void> {
   const current = await loadManifest(manifestPath);
   const desired = desiredFiles(config);
   const paths = new Set(desired.map((file) => file.entry.path));
-  const entries = [...current.entries.filter((entry) => entry.scope !== "project" || !paths.has(entry.path)), ...desired.map(({ entry, content }) => ({ ...entry, generatedHash: sha256(content), generatorVersion: packageVersion }))].sort((left, right) => left.path.localeCompare(right.path));
+  const entries = [...current.entries.filter((entry) => entry.scope !== "project" || !paths.has(entry.path)), ...desired.map(({ entry, content }) => ({ ...entry, generatedHash: sha256(content), generatorVersion: packageVersion }))].sort((left, right) => compareCodeUnits(left.path, right.path));
   await writeManifest(manifestPath, { generator: "harnix", schemaVersion: 1, entries });
 }
 
@@ -61,7 +62,7 @@ function mergeManifestEntries(projectManifest: ManagedManifest, legacyEntries: M
   return {
     generator: "harnix",
     schemaVersion: 1,
-    entries: [...projectManifest.entries, ...legacyEntries].sort((left, right) => left.path.localeCompare(right.path)),
+    entries: [...projectManifest.entries, ...legacyEntries].sort((left, right) => compareCodeUnits(left.path, right.path)),
   };
 }
 

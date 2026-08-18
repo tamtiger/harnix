@@ -1,5 +1,6 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { basename, dirname, relative, resolve } from "node:path";
+import { compareCodeUnits } from "./order.js";
 
 import {
   stackCatalog,
@@ -70,7 +71,7 @@ export async function detectProject(projectRoot: string): Promise<ProjectDetecti
 async function collectFiles(root: string, directory: string, depth: number, collected: CollectedFile[]): Promise<CollectedFile[]> {
   if (depth > maxDepth || collected.length >= maxFiles) return collected;
   const entries = await readdir(directory, { withFileTypes: true });
-  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+  for (const entry of entries.sort((left, right) => compareCodeUnits(left.name, right.name))) {
     if (collected.length >= maxFiles || entry.isSymbolicLink()) continue;
     const absolute = resolve(directory, entry.name);
     if (entry.isDirectory()) {
@@ -80,7 +81,7 @@ async function collectFiles(root: string, directory: string, depth: number, coll
       if (path.length > 0 && !path.startsWith("../")) collected.push({ absolute, path });
     }
   }
-  return collected.sort((left, right) => left.path.localeCompare(right.path));
+  return collected.sort((left, right) => compareCodeUnits(left.path, right.path));
 }
 
 async function collectDependencies(files: CollectedFile[]): Promise<DependencyFact[]> {
@@ -97,7 +98,7 @@ async function collectDependencies(files: CollectedFile[]): Promise<DependencyFa
       .flatMap((group) => Object.keys(isRecord(group) ? group : {}))
       .map((name): DependencyFact => ({ ecosystem: "composer", name, path: file.path }));
   }));
-  return results.flat().sort((left, right) => `${left.path}\0${left.ecosystem}\0${left.name}`.localeCompare(`${right.path}\0${right.ecosystem}\0${right.name}`));
+  return results.flat().sort((left, right) => compareCodeUnits(`${left.path}\0${left.ecosystem}\0${left.name}`, `${right.path}\0${right.ecosystem}\0${right.name}`));
 }
 
 async function evaluateFacts(facts: DetectionFacts): Promise<DetectionMatch[]> {
@@ -192,7 +193,7 @@ async function detectPackages(facts: DetectionFacts, packageManager: PackageMana
     const manifest = await readJsonObject(file) as PackageManifest | undefined;
     return { languages, technologies, packageManager, path: packagePath, verificationCommands: detectVerificationCommands(manifest, packageManager) } satisfies DetectedPackage;
   }));
-  return results.filter((item): item is DetectedPackage => item !== undefined).sort((left, right) => left.path.localeCompare(right.path));
+  return results.filter((item): item is DetectedPackage => item !== undefined).sort((left, right) => compareCodeUnits(left.path, right.path));
 }
 
 function fallbackPackage(matches: DetectionMatch[], packageManager: PackageManager | undefined): DetectedPackage[] {
@@ -242,9 +243,9 @@ function uniqueEvidence(values: DetectionEvidence[]): DetectionEvidence[] {
     const key = `${value.path}\0${value.kind}\0${value.detail}`;
     if (seen.has(key)) return false;
     seen.add(key); return true;
-  }).sort((left, right) => `${left.path}\0${left.kind}\0${left.detail}`.localeCompare(`${right.path}\0${right.kind}\0${right.detail}`));
+  }).sort((left, right) => compareCodeUnits(`${left.path}\0${left.kind}\0${left.detail}`, `${right.path}\0${right.kind}\0${right.detail}`));
 }
 
-function compareMatches(left: DetectionMatch, right: DetectionMatch): number { return `${left.facet}\0${left.id}`.localeCompare(`${right.facet}\0${right.id}`); }
-function sorted<T extends string>(values: T[]): T[] { return [...new Set(values)].sort((left, right) => left.localeCompare(right)); }
+function compareMatches(left: DetectionMatch, right: DetectionMatch): number { return compareCodeUnits(`${left.facet}\0${left.id}`, `${right.facet}\0${right.id}`); }
+function sorted<T extends string>(values: T[]): T[] { return [...new Set(values)].sort(compareCodeUnits); }
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }

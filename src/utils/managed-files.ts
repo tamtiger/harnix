@@ -3,6 +3,7 @@ import { atomicWriteFile } from "./atomic-write.js";
 import type { AtomicFileSystem } from "./atomic-write.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "./paths.js";
 import { sha256 } from "./hashing.js";
+import { compareCodeUnits } from "./order.js";
 
 export type ManagedScope = "project" | "kiro" | "antigravity" | "codex";
 export interface ManagedEntry { path: string; sourceId: string; scope: ManagedScope; generatedHash: string; generatorVersion: string; }
@@ -65,7 +66,7 @@ export async function reconcileManagedFiles(
   const oldByPath = new Map(manifest.entries.map((entry) => [entry.path, entry]));
   const result: ReconcileResult = { created: [], updated: [], metadataUpdated: [], preserved: [], deleted: [], obsolete: [] };
   const nextEntries: ManagedEntry[] = [];
-  for (const file of desired.sort((a, b) => a.entry.path.localeCompare(b.entry.path))) {
+  for (const file of desired.sort((a, b) => compareCodeUnits(a.entry.path, b.entry.path))) {
     const entry = { ...file.entry, generatorVersion: options.generatorVersion };
     const previous = oldByPath.get(entry.path);
     const state = await ownershipState(projectRoot, entry, previous);
@@ -113,7 +114,7 @@ export async function reconcileManagedFiles(
       nextEntries.push(obsolete);
     }
   }
-  return { manifest: validateManifest({ generator: "harnix", schemaVersion: 1, entries: nextEntries.sort((left, right) => left.path.localeCompare(right.path)) }), result };
+  return { manifest: validateManifest({ generator: "harnix", schemaVersion: 1, entries: nextEntries.sort((left, right) => compareCodeUnits(left.path, right.path)) }), result };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }

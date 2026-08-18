@@ -1,0 +1,448 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260817-205313-repository-review-refactor-version-sync",
+  "title": "Review, refactor và đồng bộ version toàn repository",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Review toàn repository bằng bằng chứng fresh, sửa các finding có tác động thật và đồng bộ mọi current-release surface theo đúng phân loại version.",
+  "nonGoals": [
+    "Không thêm platform, package, workspace, service hoặc compatibility surface mới.",
+    "Không thay đổi frozen schema, protocol, enum, path hoặc exit semantics nếu không có finding bắt buộc và cập nhật contract đầy đủ.",
+    "Không sửa version lịch sử, fixture, baseline hoặc dependency/toolchain chỉ để làm kết quả tìm kiếm đồng nhất.",
+    "Không chạm real user profile, không commit, branch, push, publish hoặc tạo pull request.",
+    "Không refactor thuần style hoặc tạo abstraction suy đoán."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "audit-systematic",
+      "text": "Audit coverage matrix bao phủ các subsystem bắt buộc; mỗi finding có ID, severity, contract, vị trí, evidence, impact, root cause, remediation, disposition và focused verification.",
+      "status": "met",
+      "evidenceIds": [
+        "audit-coverage-final-pass",
+        "audit-artifacts-final-pass",
+        "release-gates-final-pass"
+      ]
+    },
+    {
+      "id": "remediation-evidence",
+      "text": "Mọi finding P0-P2 được xác nhận được sửa tối thiểu bằng observed RED, GREEN và regression protection, hoặc defer/needs-decision với lý do hợp lệ; không còn finding blocking khi hoàn tất.",
+      "status": "met",
+      "evidenceIds": [
+        "audit-artifacts-final-pass",
+        "focused-regressions-final-pass",
+        "release-gates-final-pass"
+      ]
+    },
+    {
+      "id": "version-inventory-sync",
+      "text": "Inventory version phân loại mọi occurrence quan trọng; package, runtime/CLI, bảy canonical skills, generated self-host metadata và current-state docs đồng bộ với release cuối, còn schema/dependency/baseline/history được bảo toàn đúng nghĩa.",
+      "status": "met",
+      "evidenceIds": [
+        "audit-artifacts-final-pass",
+        "version-sync-final-pass",
+        "release-gates-final-pass"
+      ]
+    },
+    {
+      "id": "contract-preservation",
+      "text": "Refactor giữ dependency direction, public JSON/exit behavior, data-preservation và đúng ba platform; không tạo forbidden surface hoặc làm yếu test/gate.",
+      "status": "met",
+      "evidenceIds": [
+        "focused-regressions-final-pass",
+        "version-sync-final-pass",
+        "release-gates-final-pass"
+      ]
+    },
+    {
+      "id": "fresh-release-gates",
+      "text": "Toàn bộ acceptance sequence mục 11 pass fresh trên current tree với fake/disposable homes; mọi omitted/manual check và residual risk được ghi rõ.",
+      "status": "met",
+      "evidenceIds": [
+        "release-gates-final-pass"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/.template-hashes.json",
+    "CHANGELOG.md",
+    "README.md",
+    "docs",
+    "package.json",
+    "pnpm-lock.yaml",
+    "scripts",
+    "src",
+    "test"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/REVIEW_REFACTOR_PLAN.md",
+    "docs/UPSTREAM_BASELINE.md",
+    "docs/UPSTREAM_MAPPING.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "audit-coverage",
+      "description": "Inspect the task-owned repository audit and version inventory for complete subsystem coverage, finding evidence, classification and disposition.",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "audit-systematic",
+        "remediation-evidence"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "docs/**/*.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.{md,ts}",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "focused-regressions",
+      "description": "Run focused repository, lifecycle, platform, workflow and safety regressions for confirmed findings and preserved contracts.",
+      "command": "pnpm test:unit; pnpm test:integration; pnpm test:platform; pnpm test:workflow; pnpm test:safety",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "contract-preservation",
+        "remediation-evidence"
+      ],
+      "inputs": [
+        "@task-contract",
+        "scripts/*.mjs",
+        "src/**/*.md",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "version-sync",
+      "description": "Build and verify package, runtime CLI, canonical skill metadata, generated self-host metadata and current-release documentation consistency.",
+      "command": "pnpm build; node dist/cli.js --version; pnpm vitest run test/unit/package-contract.test.ts test/workflow/skill-sources.test.ts test/integration/cli.test.ts",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "contract-preservation",
+        "version-inventory-sync"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "src/skills/**/*.md",
+        "src/version.ts",
+        "test/integration/cli.test.ts",
+        "test/unit/package-contract.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "release-gates",
+      "description": "Run the exact frozen install, build, lint, typecheck, full test, acceptance, packaging, tarball smoke, performance, footprint, release scan and diff sequence.",
+      "command": "pnpm install --frozen-lockfile; pnpm build; pnpm lint; pnpm typecheck; pnpm test; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "audit-systematic",
+        "contract-preservation",
+        "fresh-release-gates",
+        "remediation-evidence",
+        "version-inventory-sync"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        ".pnpmfile.mjs",
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**/*.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.md",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "audit-artifacts",
+      "description": "Inspect the exact task-owned repository audit and version inventory for complete finding fields, classification, disposition and verification mapping.",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "audit-systematic",
+        "remediation-evidence",
+        "version-inventory-sync"
+      ],
+      "inputs": [
+        ".harnix/tasks/20260817-205313-repository-review-refactor-version-sync/research/repository-audit.md",
+        ".harnix/tasks/20260817-205313-repository-review-refactor-version-sync/research/version-inventory.md",
+        "@task-contract"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "baseline-full-test-red",
+      "recordedAt": "2026-08-17T14:05:07.439Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED baseline: full suite chạy 390 test với 388 pass, 1 Windows permission-mode skip và 2 fail do package scanner quét .pnpm-store cùng self-host raw CRLF/LF mismatch.",
+      "artifactPaths": [
+        "test/unit/package-contract.test.ts",
+        "test/workflow/self-host.test.ts"
+      ]
+    },
+    {
+      "id": "baseline-repo-map-invalid",
+      "recordedAt": "2026-08-17T14:05:07.439Z",
+      "result": "fail",
+      "exitCode": 0,
+      "summary": "RED baseline: public repo-map query trả status invalid vì committed outline order không còn hợp canonical code-unit validator.",
+      "artifactPaths": [
+        ".harnix/cache/repo-map-v1.json",
+        "src/core/repo-map/store.ts",
+        "test/workflow/self-host.test.ts"
+      ]
+    },
+    {
+      "id": "repo-map-inventory-red",
+      "recordedAt": "2026-08-17T14:11:24.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED bổ sung: repo-map service có 7/8 test pass và fixture xác nhận .git, .harnix, node_modules vẫn bị enumerate rồi trả trong skipped.",
+      "artifactPaths": [
+        "src/core/repo-map/inventory.ts",
+        "test/unit/repo-map/service.test.ts"
+      ]
+    },
+    {
+      "id": "focused-remediation-green",
+      "recordedAt": "2026-08-17T14:11:45.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN: config/package/self-host regressions pass 19/19; repo-map service pass 8/8 sau khi loại hard-excluded tree trước enumeration.",
+      "artifactPaths": [
+        "src/core/config/config.ts",
+        "src/core/repo-map/inventory.ts",
+        "src/utils/order.ts",
+        "test/unit/config.test.ts",
+        "test/unit/package-contract.test.ts",
+        "test/unit/repo-map/service.test.ts",
+        "test/workflow/self-host.test.ts"
+      ]
+    },
+    {
+      "id": "locale-primitives-red",
+      "recordedAt": "2026-08-17T14:14:07.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Stage-1 review RED: source-contract test tìm đúng 2 locale-sensitive primitive còn lại trong repo-map term normalization.",
+      "artifactPaths": [
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/search.ts",
+        "test/unit/package-contract.test.ts"
+      ]
+    },
+    {
+      "id": "locale-primitives-green",
+      "recordedAt": "2026-08-17T14:14:23.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: package contract và neighboring repo-map suites pass 13/13 sau khi dùng locale-independent Unicode case normalization.",
+      "artifactPaths": [
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/search.ts",
+        "test/unit/package-contract.test.ts",
+        "test/unit/repo-map/service.test.ts",
+        "test/integration/repo-map/internal.test.ts"
+      ]
+    },
+    {
+      "id": "audit-coverage-review-fail",
+      "checkId": "audit-coverage",
+      "recordedAt": "2026-08-17T14:15:24.031Z",
+      "result": "fail",
+      "summary": "Compliance inspection giữ nguyên input digest nhưng finding F4 chưa có dòng Regression tách biệt; cần bổ sung focused verification field trước khi pass.",
+      "artifactPaths": [
+        ".harnix/tasks/20260817-205313-repository-review-refactor-version-sync/research/repository-audit.md"
+      ]
+    },
+    {
+      "id": "audit-input-gap-fail",
+      "recordedAt": "2026-08-17T14:15:53.161Z",
+      "result": "fail",
+      "summary": "Compliance review xác nhận audit-coverage snapshot chưa bao gồm hai research artifact mà description yêu cầu inspect; thêm required audit-artifacts check với exact inputs.",
+      "artifactPaths": [
+        ".harnix/tasks/20260817-205313-repository-review-refactor-version-sync/research/repository-audit.md",
+        ".harnix/tasks/20260817-205313-repository-review-refactor-version-sync/research/version-inventory.md"
+      ]
+    },
+    {
+      "id": "audit-coverage-pass",
+      "checkId": "audit-coverage",
+      "recordedAt": "2026-08-17T14:16:22.374Z",
+      "result": "pass",
+      "summary": "Compliance inspection: 39 changed product/test/doc files, 0 locale-sensitive production primitives, 0 reverse core imports, đúng 3 configurator và 7 canonical skill; không còn finding blocking trong reviewed source scope.",
+      "artifactPaths": [
+        "AGENTS.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/utils/order.ts",
+        "test/unit/package-contract.test.ts"
+      ],
+      "inputDigest": "e47e6c0325ab4d698fa31c568ffa084476560f5d9b60c9463f805110ca6cca0e"
+    },
+    {
+      "id": "audit-artifacts-pass",
+      "checkId": "audit-artifacts",
+      "recordedAt": "2026-08-17T14:16:56.239Z",
+      "result": "pass",
+      "summary": "Audit artifacts fresh: coverage matrix có 14 subsystem; F1–F5 đều đủ contract/impact/root cause/remediation/regression/disposition; inventory phân loại 10 current/history/schema/dependency surfaces và static current version đều là 1.0.1.",
+      "artifactPaths": [
+        ".harnix/tasks/20260817-205313-repository-review-refactor-version-sync/research/repository-audit.md",
+        ".harnix/tasks/20260817-205313-repository-review-refactor-version-sync/research/version-inventory.md"
+      ],
+      "inputDigest": "de3a5c513c5eef07867ab80f17b2e7d83611d6ef15a3e934a52bbdd47744eef7"
+    },
+    {
+      "id": "focused-regressions-pass",
+      "checkId": "focused-regressions",
+      "recordedAt": "2026-08-17T14:17:53.845Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh focused suites pass: unit 188 pass/1 Windows permission skip, integration 83, platform 22, workflow 56, safety 36; tổng 385 pass và 1 skip hợp lệ.",
+      "artifactPaths": [
+        "src",
+        "test"
+      ],
+      "inputDigest": "4820187a32d433bcabdcc24c33618a22095bcbcb9c54fa7931e1c2561aca52e1"
+    },
+    {
+      "id": "version-sync-pass",
+      "checkId": "version-sync",
+      "recordedAt": "2026-08-17T14:18:44.516Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Build pass; built CLI trả 1.0.1; package contract, 7-skill source parity/version và CLI integration pass 28/28 với static current docs/self-host metadata cùng version.",
+      "artifactPaths": [
+        "package.json",
+        "README.md",
+        "CHANGELOG.md",
+        ".harnix/.template-hashes.json",
+        "src/skills",
+        "dist/cli.js"
+      ],
+      "inputDigest": "8ae42bdf417ed17c905f824fdc938be08133cf719d5ba644a7ca1372266877e3"
+    },
+    {
+      "id": "release-gates-pass",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-17T14:20:24.301Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact sequence pass: frozen install/build/lint/typecheck; full và acceptance đều 394 pass/1 Windows skip; pack + fake-home tarball smoke cho Kiro/Antigravity/Codex; init median 305.7994ms, worst 326.5642ms; footprint 193840 bytes/50 files, giảm 85.57%; release scan 16 packaged/50 generated, non-Harnix context p95 130.3247ms; diff check sạch. Không chạy manual real-profile/Kiro activation vì ngoài authority và đã explicit deferred.",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts",
+        "src",
+        "test",
+        ".artifacts"
+      ],
+      "inputDigest": "31b1b922771f0593e7f7168869456a585c68d905aa1aa193b33e762c2c9f5464"
+    },
+    {
+      "id": "audit-coverage-final-pass",
+      "checkId": "audit-coverage",
+      "recordedAt": "2026-08-17T14:20:57.953Z",
+      "result": "pass",
+      "summary": "Final-contract compliance inspection pass: 39 changed product/test/doc files, 0 locale-sensitive production primitives, 0 reverse core imports, đúng 3 configurator và 7 canonical skill; diff check sạch.",
+      "artifactPaths": [
+        "AGENTS.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/utils/order.ts",
+        "test/unit/package-contract.test.ts"
+      ],
+      "inputDigest": "9eefe264c9e7f160a2c883674778cfd687c0ab4a56ee65f7c0980cd08e02f27f"
+    },
+    {
+      "id": "audit-artifacts-final-pass",
+      "checkId": "audit-artifacts",
+      "recordedAt": "2026-08-17T14:21:12.672Z",
+      "result": "pass",
+      "summary": "Final-contract audit artifacts pass: 14 subsystem rows; F1–F5 đủ 5/5 contract, impact, root cause, remediation, regression và disposition; version inventory có 10 classified rows.",
+      "artifactPaths": [
+        ".harnix/tasks/20260817-205313-repository-review-refactor-version-sync/research/repository-audit.md",
+        ".harnix/tasks/20260817-205313-repository-review-refactor-version-sync/research/version-inventory.md"
+      ],
+      "inputDigest": "7f21339d7f22136fadb1341cb38cd4973561fdcd5e5df5fc7d7009965ed0d223"
+    },
+    {
+      "id": "focused-regressions-final-pass",
+      "checkId": "focused-regressions",
+      "recordedAt": "2026-08-17T14:21:52.741Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final-contract focused suites pass: unit 188 pass/1 Windows skip, integration 83, platform 22, workflow 56, safety 36; tổng 385 pass và 1 skip hợp lệ.",
+      "artifactPaths": [
+        "src",
+        "test"
+      ],
+      "inputDigest": "ee3416809d1e8ddd8065ec9230610c6a589c833ddac474d31a4ce35c7cf81364"
+    },
+    {
+      "id": "version-sync-final-pass",
+      "checkId": "version-sync",
+      "recordedAt": "2026-08-17T14:22:23.176Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final-contract build pass; CLI trả 1.0.1; package/skill source/version/CLI integration pass 28/28.",
+      "artifactPaths": [
+        "package.json",
+        "README.md",
+        "CHANGELOG.md",
+        ".harnix/.template-hashes.json",
+        "src/skills",
+        "dist/cli.js"
+      ],
+      "inputDigest": "f440b99adbfd1f5022c49c20aa142cd7f87a9548e0a31f2ce9b0ea007ec96d7b"
+    },
+    {
+      "id": "release-gates-final-pass",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-17T14:24:07.478Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final-contract exact sequence pass: frozen install/build/lint/typecheck; full và acceptance 394 pass/1 Windows skip; pack + fake-home tarball smoke ba platform; init median 319.4107ms, worst 323.6856ms; footprint 193840 bytes/50 files, giảm 85.57%; scan 16 packaged/50 generated, non-Harnix context p95 132.8994ms; diff check sạch. Manual real-profile/Kiro activation omitted do ngoài authority và đã explicit deferred.",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts",
+        "src",
+        "test",
+        ".artifacts"
+      ],
+      "inputDigest": "cfda6ab1d4af4a4569d97335ea0da452dfb261c0f3bf643a8ea78b33d77cfb02"
+    }
+  ],
+  "createdAt": "2026-08-17T13:53:13.146Z",
+  "updatedAt": "2026-08-17T14:24:23.616Z",
+  "completedAt": "2026-08-17T14:24:23.616Z"
+}

@@ -5,6 +5,7 @@ import { appendJournal, searchJournal } from "./journal/journal.js";
 import { archiveTask, saveTask, transitionTask } from "./tasks/task.js";
 import { resolveActiveTask } from "./tasks/task.js";
 import { resolveSafeProjectPath } from "../utils/paths.js";
+import { compareCodeUnits } from "../utils/order.js";
 import { assertVerificationInputsFresh } from "./verification/input-freshness.js";
 
 export type WorkflowEntry = "bypass" | "create" | "resume" | "wait" | "fail-closed";
@@ -116,7 +117,7 @@ export async function continueWorkflowTask(harnixRoot: string): Promise<{ task: 
   const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
   return {
     task,
-    contextPaths: [...new Set([...task.relevantPaths, ...task.relevantSpecs])].sort((left, right) => left.localeCompare(right)),
+    contextPaths: [...new Set([...task.relevantPaths, ...task.relevantSpecs])].sort(compareCodeUnits),
     contextDrift: await taskContextDrift(projectRoot, harnixRoot, task),
   };
 }
@@ -135,7 +136,7 @@ function completionEvidenceIds(task: TaskRecord): string[] {
     }
     if (latest) supporting.add(latest.id);
   }
-  return [...supporting].sort((left, right) => left.localeCompare(right));
+  return [...supporting].sort(compareCodeUnits);
 }
 
 export async function taskContextDrift(projectRoot: string, harnixRoot: string, task: TaskRecord): Promise<ContextDrift> {

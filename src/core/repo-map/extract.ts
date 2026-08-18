@@ -3,7 +3,7 @@ import { basename, dirname, extname } from "node:path";
 
 import { sha256 } from "../../utils/hashing.js";
 import type { RepoMapFileKind, RepoMapInventoryFile, RepoMapRecordV1 } from "./types.js";
-import { compareCodeUnits } from "./order.js";
+import { compareCodeUnits } from "../../utils/order.js";
 
 const languageByExtension: Readonly<Record<string, string>> = {
   cs: "csharp", go: "go", java: "java", js: "javascript", jsx: "javascript", mjs: "javascript", cjs: "javascript",

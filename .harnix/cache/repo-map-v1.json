@@ -1,7 +1,7 @@
 {
   "extractorVersion": 1,
   "generator": "harnix",
-  "inventoryFingerprint": "1dbee7396f7103f1418fbad792df9b6d37306ab4a9d4504fa4a8c3846d81a68f",
+  "inventoryFingerprint": "21610d32467d16fb1c7d8be5848238ab4b8a5d5cfb7365792463b3ac049c52e6",
   "records": [
     {
       "byteLength": 75,
@@ -15,8 +15,26 @@
       "path": ".gitignore"
     },
     {
-      "byteLength": 8427,
-      "contentHash": "802680f40ff2a27082766d5ed86a1d735b05b78cd4cb86678707113c01e2b872",
+      "byteLength": 964,
+      "contentHash": "f0d7116d961d8dfba430fdb98275bb79338b0cfd1725c74b016cf63b059e9e0c",
+      "extension": "mjs",
+      "headings": [],
+      "identifiers": [
+        "auditedResolutions",
+        "hooks",
+        "readPackage",
+        "resolution",
+        "updateConfig"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": ".pnpmfile.mjs",
+      "language": "javascript"
+    },
+    {
+      "byteLength": 9304,
+      "contentHash": "fac0eccb905b7f08165d68d9546eb1858a781c29ce0a9e130f16d45221d43bfd",
       "extension": "md",
       "headings": [
         "Architecture rules",
@@ -40,26 +58,26 @@
       "path": "AGENTS.md"
     },
     {
-      "byteLength": 17285,
-      "contentHash": "634b3b88950deda0d4384d010a02686dc180fc56eaf82dd1206499d5edf222f7",
+      "byteLength": 25472,
+      "contentHash": "5ba9f8ebf766d3c28891b7f97f853f4dbb06fc4a0319bf0637524ed019accf2f",
       "extension": "md",
       "headings": [
+        "Added",
+        "Changed",
+        "Changelog",
+        "Fixed",
+        "Security",
         "[0.1.0] - 2026-08-05",
         "[0.2.0] - 2026-08-07",
         "[0.3.0] - 2026-08-07",
         "[0.4.0] - 2026-08-07",
         "[0.5.0] - 2026-08-11",
         "[0.6.0] - 2026-08-12",
-        "[0.6.1] - 2026-08-13",
-        "[0.6.2] - 2026-08-13",
-        "[0.6.3] - 2026-08-13",
-        "[0.6.4] - 2026-08-13",
-        "[0.6.5] - 2026-08-13",
-        "[0.6.6] - 2026-08-13",
-        "[0.6.7] - 2026-08-13",
-        "[0.6.8] - 2026-08-13",
-        "[0.6.9] - 2026-08-13",
-        "[Documentation baseline] - 2026-08-05"
+        "[0.6.10] - 2026-08-13",
+        "[0.6.11] - 2026-08-13",
+        "[0.6.12] - 2026-08-14",
+        "[0.6.13] - 2026-08-14",
+        "[0.6.14] - 2026-08-14"
       ],
       "identifiers": [
         "is",
@@ -100,26 +118,26 @@
       "path": "NOTICE"
     },
     {
-      "byteLength": 20376,
-      "contentHash": "d5fb0d42361662a0ac697421421e428c5a244c754ce1ee9f0790f24f64799de3",
+      "byteLength": 20216,
+      "contentHash": "4d2e6aa0e9507575245c14853c16d9a3c46f9ba7884f4da553c63cf1c0ef9b7a",
       "extension": "md",
       "headings": [
-        "`doctor`",
-        "`init`",
-        "`mem`",
-        "`repo-map`",
-        "`setup`",
-        "`uninstall`",
-        "`update`",
-        "`upgrade`",
-        "Cài đặt và chạy từ source",
-        "Cài integration một lần cho user profile; có thể chạy ngoài project",
-        "Chạy không cần đăng ký global",
         "CLI",
-        "Đặc điểm sản phẩm",
-        "Đăng ký lệnh `harnix` global từ source",
+        "Chạy không cần đăng ký global",
+        "Cài integration một lần cho user profile; có thể chạy ngoài project",
+        "Cài đặt và chạy từ source",
+        "Dùng trong CI",
         "Dữ liệu dự án",
-        "Dùng trong CI"
+        "Harnix",
+        "Khởi tạo .harnix và tự động phát hiện language/technology độc lập",
+        "Kiểm tra drift, hook, path safety và secret exposure",
+        "Nguồn gốc và giấy phép",
+        "Phát triển Harnix",
+        "Quick start",
+        "Trạng thái",
+        "Tài liệu",
+        "Tích hợp platform",
+        "Workflow sử dụng"
       ],
       "identifiers": [
         "kh",
@@ -131,8 +149,8 @@
       "path": "README.md"
     },
     {
-      "byteLength": 34302,
-      "contentHash": "c58ef30b120c028323375d0cb4e69b0fc53443748a9935b97330aa487e8a8986",
+      "byteLength": 34611,
+      "contentHash": "24b924495752c548391f2330868c901d5bffa036dafe5235af0197ca067363cb",
       "extension": "md",
       "headings": [
         "1. Trạng thái và quyết định sản phẩm",
@@ -153,10 +171,10 @@
         "6.2 Update, doctor và uninstall"
       ],
       "identifiers": [
-        "cho",
         "DoctorReportV2",
         "GlobalManagedManifestV1",
-        "GlobalSetupResult"
+        "GlobalSetupResult",
+        "cho"
       ],
       "importTargets": [],
       "kind": "documentation",
@@ -164,8 +182,8 @@
       "path": "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
     },
     {
-      "byteLength": 18612,
-      "contentHash": "14168cde8bccfac4a91db31302e3057ead74444019ed9ce5cf9fa7ef53b1529c",
+      "byteLength": 20333,
+      "contentHash": "663e92a2a8b60a52b8b7ac755d2a189ad584a7ab8e94cdb2477a1c619439ad3a",
       "extension": "md",
       "headings": [
         "1. Khung quyết định",
@@ -177,13 +195,13 @@
         "3.4 Learning model",
         "3.5 Verification model",
         "3.6 Workflow synthesis",
+        "3.7 Revalidation 2026-08-14: context drift và freshness theo input",
         "4. Platform research decisions",
         "5. Rules strategy",
         "6. Security analysis",
         "7. Deferred và rejected scope",
         "8. Trace tới acceptance",
-        "Antigravity",
-        "Codex"
+        "Antigravity"
       ],
       "identifiers": [
         "does"
@@ -194,8 +212,8 @@
       "path": "docs/HARNESS_RESEARCH.md"
     },
     {
-      "byteLength": 36394,
-      "contentHash": "a12a6bc72d73fd0baa69795dad000e232c3b812c9f66a8bb79d952fb44e36741",
+      "byteLength": 39619,
+      "contentHash": "9ae2f400c236cf7763c5788a88baee7a7790f959166faa8596306e90ee7e5952",
       "extension": "md",
       "headings": [
         "1. Document status",
@@ -226,8 +244,8 @@
       "path": "docs/HARNIX_PRD.md"
     },
     {
-      "byteLength": 20252,
-      "contentHash": "37261fcff84e2173b2aab45338ca38d425c11307dba70ecc5d0a10c4cd126f7d",
+      "byteLength": 23809,
+      "contentHash": "1c799e6b38aaac73e2b3b3de01d223ebc03b48cc743f4c7bb81a1f12c9c7d525",
       "extension": "md",
       "headings": [
         "1. Purpose and authority",
@@ -261,8 +279,8 @@
       "path": "docs/HARNIX_WORKFLOW.md"
     },
     {
-      "byteLength": 52867,
-      "contentHash": "9dd887d22a28e292aad98811bd27ca5fedb9f7eb2e452525df19bc54965cd804",
+      "byteLength": 60480,
+      "contentHash": "9a5892484615a68b7f928395da729d84cee16593339cfcf006ad3460b4444322",
       "extension": "md",
       "headings": [
         "1. Mục tiêu",
@@ -284,24 +302,18 @@
       ],
       "identifiers": [
         "AcceptanceCriterionV1",
-        "and",
-        "any",
         "ContextEntryV1",
         "ContextManifestV1",
         "CriterionStatus",
-        "date",
-        "directory",
         "DoctorFinding",
         "DoctorReportV2",
         "EvidenceRecordV1",
+        "EvidenceRecordV2",
         "EvidenceResult",
         "HarnixConfigV1",
         "HarnixConfigV2",
-        "ho",
         "ID",
-        "is",
         "JournalEntryV1",
-        "kh",
         "LanguageId",
         "LearningCandidateV1",
         "LegacyStackId",
@@ -309,12 +321,18 @@
         "ManagedManifestV1",
         "PackageConfigV2",
         "PlatformId",
-        "sang",
         "TaskMode",
         "TaskRecordV1",
+        "TaskRecordV2",
         "TaskStatus",
         "TechnologyId",
-        "their"
+        "ValidationCheckV1",
+        "ValidationCheckV2",
+        "WorkflowCheckpoint",
+        "and",
+        "any",
+        "date",
+        "directory"
       ],
       "importTargets": [],
       "kind": "documentation",
@@ -322,8 +340,8 @@
       "path": "docs/IMPLEMENTATION_PLAN.md"
     },
     {
-      "byteLength": 9866,
-      "contentHash": "ce6fcf8647f576a42872f86325ccb32707e489ee832466a15209dcb588a4a67a",
+      "byteLength": 11687,
+      "contentHash": "b1ed5f0f75e388424bd218482e3171bbd86912037805843b5c7d891146da5692",
       "extension": "md",
       "headings": [
         "1. Trạng thái và mục tiêu",
@@ -333,6 +351,7 @@
         "5. Chiến lược test",
         "6. Completion gate",
         "7. Bằng chứng hoàn tất — 2026-08-11",
+        "8. Continuation audit toàn repository — 2026-08-14",
         "Kế hoạch review và refactor Harnix",
         "P0 — an toàn dữ liệu và correctness của workflow",
         "P1 — đầy đủ lifecycle và diagnostic",
@@ -373,8 +392,8 @@
       "path": "docs/UPSTREAM_BASELINE.md"
     },
     {
-      "byteLength": 15759,
-      "contentHash": "93a03902401cc58e6bec5d4b2b4f0da97b550ab73387f2e630c255434c2e60ff",
+      "byteLength": 15989,
+      "contentHash": "392224d4c87dbbe5c71c3355b5f1a63a88191055536f0207722c56b7148b4923",
       "extension": "md",
       "headings": [
         "1. Nguyên tắc mapping",
@@ -401,6 +420,64 @@
       "path": "docs/UPSTREAM_MAPPING.md"
     },
     {
+      "byteLength": 14144,
+      "contentHash": "5d6a77d1e6d7ba0ea80178e2113908fb2f54ea4c6ac2525ddfab7a0047d0f8ec",
+      "extension": "md",
+      "headings": [
+        "1. Executive summary",
+        "10. Ready-gate result",
+        "11. Final recommendation",
+        "2. Repository baseline",
+        "3. Source registry",
+        "4. Harness comparison matrix",
+        "5. Normalized capability catalog",
+        "6. Feature decision matrix",
+        "7. Recommended backlog",
+        "8. Explicitly rejected ideas",
+        "9. Research conflicts và uncertainty",
+        "Chuẩn hóa capability",
+        "Chọn backlog",
+        "Chứng minh Harnix gap",
+        "Decision categories",
+        "Guardrails không được phá vỡ"
+      ],
+      "identifiers": [
+        "c"
+      ],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "docs/prompts/harness-capability-research.md"
+    },
+    {
+      "byteLength": 16296,
+      "contentHash": "7d22a2dba6853024d432a8d1671e230f40713bbfca70843a6d2a76777211d61b",
+      "extension": "md",
+      "headings": [
+        "1. Executive verdict",
+        "2. Verification ledger",
+        "3. Scenario matrix",
+        "4. Findings",
+        "5. Workflow weakness map",
+        "6. Remediation research",
+        "7. Recommended backlog",
+        "8. Final recommendation",
+        "Chế độ làm việc và activation guard",
+        "Context, safety và adversarial behavior",
+        "Contract phải kiểm chứng",
+        "Debug, replan và recovery",
+        "Implementation và verification",
+        "Metrics",
+        "Mục tiêu",
+        "Phân loại weakness"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "docs/prompts/workflow-scenario-audit.md"
+    },
+    {
       "byteLength": 468,
       "contentHash": "e3bcfe604e015803f57d889c34cdf0e6a6f4d941d65f561791d3b7737f539470",
       "extension": "mjs",
@@ -417,7 +494,7 @@
     },
     {
       "byteLength": 1845,
-      "contentHash": "5534a65f610b86a7ace7bb30567ec60ef8d757c59c6d20bd1812cae87d99c798",
+      "contentHash": "c011102fdd0ab817a6c69918b998a26671e59a84de7815bc23527bfb8922e3f4",
       "extension": "json",
       "headings": [],
       "identifiers": [],
@@ -429,8 +506,8 @@
       "path": "package.json"
     },
     {
-      "byteLength": 99516,
-      "contentHash": "a784e6ac83bc059558be7b1750544d43db5529b83cfd49becd6283802bbb9a91",
+      "byteLength": 90999,
+      "contentHash": "d79786f7194c8c3da6a40f283b99537bfd8be358fcec5571fd84eaef6819a40e",
       "extension": "yaml",
       "headings": [],
       "identifiers": [],
@@ -560,8 +637,8 @@
       "language": "javascript"
     },
     {
-      "byteLength": 17551,
-      "contentHash": "18d1d8635dc6ddb773328a5b16f8d530bc71a3ebcebdeb6059652ffe4b7e8cdb",
+      "byteLength": 17675,
+      "contentHash": "2eec270d2cbc317217eb7bb6bb774f83e1a690ceb4316d591d1547a396790ef0",
       "extension": "mjs",
       "headings": [],
       "identifiers": [
@@ -572,9 +649,9 @@
         "assertExpectedGlobalSurfaces",
         "assertLivePackagedImport",
         "assertNoDeadPackagedImports",
+        "assertNoProjectLocalPlatformSurfaces",
         "assertNonHarnixContextNoOutput",
         "assertNonHarnixContextPerformance",
-        "assertNoProjectLocalPlatformSurfaces",
         "assertSingleHarnixExecutable",
         "assertSingleHooks",
         "assertTarballListing",
@@ -707,18 +784,18 @@
       "language": "typescript"
     },
     {
-      "byteLength": 13619,
-      "contentHash": "48c289f080cc2a0c8ca95c6795f176765ad76b4fc67a8c2c6463de96dabc0323",
+      "byteLength": 13654,
+      "contentHash": "d7b4519db87f2af4dbb837622d8e4c5506a3583e07db2c65c315630c8d9a2fd4",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "CatalogValidationError",
         "assertAcyclic",
         "assertReferences",
         "assertUniqueByJson",
         "assertUniqueIds",
         "assertUniqueStrings",
         "byId",
-        "CatalogValidationError",
         "confidences",
         "contentPaths",
         "descriptor",
@@ -746,6 +823,7 @@
         "safeDependencyName"
       ],
       "importTargets": [
+        "../utils/order.js",
         "./types.js"
       ],
       "kind": "source",
@@ -754,15 +832,14 @@
       "language": "typescript"
     },
     {
-      "byteLength": 15571,
-      "contentHash": "55ff4d7590c76692889a46c28e6b54946652ed580d7ac34699035e32583e6ea5",
+      "byteLength": 15561,
+      "contentHash": "77b05133088cc1d8d7cb0b8e68f6e7e270eb5a4e29454fb56f8dbe4c939e08ea",
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "buffer",
+        "HookCommandLookup",
+        "ProgramOptions",
         "candidate",
-        "chunk",
-        "chunks",
         "commanderExit",
         "confirmationRequired",
         "createProgram",
@@ -770,11 +847,9 @@
         "developer",
         "envelope",
         "environment",
-        "HookCommandLookup",
         "hookInput",
         "input",
         "internal",
-        "length",
         "limit",
         "message",
         "normalized",
@@ -782,9 +857,7 @@
         "platforms",
         "profile",
         "program",
-        "ProgramOptions",
         "projectModeCount",
-        "readBoundedStdin",
         "redactPublicErrorMessage",
         "repoMap",
         "result",
@@ -807,6 +880,7 @@
         "./commands/uninstall.js",
         "./commands/update.js",
         "./commands/upgrade.js",
+        "./utils/bounded-input.js",
         "./utils/global-managed-files.js",
         "./utils/paths.js",
         "./utils/user-paths.js",
@@ -819,28 +893,24 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2239,
-      "contentHash": "5ea77d8af068244ce6777ce08291a7b3c40971e61014ef7c2ac979e08ec79acf",
+      "byteLength": 1910,
+      "contentHash": "130dfbfae33d3d8d00d8e3eb044951599972a264bb927915e25c46409a16e540",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "args",
-        "buffer",
         "canonicalInternalContextPlatform",
-        "chunk",
-        "chunks",
         "entryPath",
         "hookInput",
         "isCliEntryPoint",
-        "length",
         "platform",
-        "readBoundedStdin",
         "runEntrypoint"
       ],
       "importTargets": [
         "./cli-program.js",
         "./commands/internal-context-cli.js",
         "./commands/internal-context.js",
+        "./utils/bounded-input.js",
         "node:fs",
         "node:url"
       ],
@@ -850,11 +920,24 @@
       "language": "typescript"
     },
     {
-      "byteLength": 24118,
-      "contentHash": "e1ad71c0568ebfda69cfad82ce3bc98ee52fbeebcb62da2b05dc1e0dc4fcc34c",
+      "byteLength": 24462,
+      "contentHash": "c494bea1eed847a633c3e7785674d7e927b42ba7e46b9e924ce6095bc0260a38",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "CodexTrustLookup",
+        "DoctorFinding",
+        "DoctorOptions",
+        "DoctorProjectSection",
+        "DoctorProjectStatus",
+        "DoctorReport",
+        "GlobalDoctorCommandLookup",
+        "GlobalIntegrationCapabilityLookup",
+        "GlobalIntegrationDiagnosis",
+        "HarnixConfigV2",
+        "JournalEntry",
+        "ManagedEntry",
+        "ManagedManifest",
         "active",
         "activeFound",
         "activeId",
@@ -866,7 +949,6 @@
         "belongsToGlobalPlatform",
         "cache",
         "candidates",
-        "CodexTrustLookup",
         "config",
         "containsSecret",
         "desired",
@@ -874,19 +956,7 @@
         "developers",
         "diagnoseGlobals",
         "diagnoseProject",
-        "diagnoseProjectSection",
-        "directory",
-        "DoctorFinding",
-        "DoctorOptions",
-        "DoctorProjectSection",
-        "DoctorProjectStatus",
-        "DoctorReport",
-        "document",
-        "duplicateHook",
-        "end",
-        "entries",
-        "entry",
-        "errors"
+        "diagnoseProjectSection"
       ],
       "importTargets": [
         "../core/config/config.js",
@@ -895,6 +965,7 @@
         "../core/tasks/task.js",
         "../utils/global-managed-files.js",
         "../utils/managed-files.js",
+        "../utils/order.js",
         "../utils/paths.js",
         "../utils/user-paths.js",
         "./global-doctor.js",
@@ -908,35 +979,15 @@
       "language": "typescript"
     },
     {
-      "byteLength": 23154,
-      "contentHash": "61cb7ed3769f624d88ac0f02f62c9dc440605a67f4d7cdd47df50ed352c2d850",
+      "byteLength": 23211,
+      "contentHash": "3737a6019273cc7eb4a0ae8fa082a6fcceeb0e95403a061009f74ec06c05fed3",
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "additionalFindings",
-        "capability",
-        "capabilityFinding",
         "CodexTrustLookup",
         "CodexTrustState",
-        "collisionFindings",
-        "configuredHome",
-        "content",
-        "defaultCommandLookup",
-        "desired",
         "DesiredGlobalManagedFile",
-        "desiredKeys",
-        "diagnoseGlobalIntegrations",
         "DiagnoseGlobalIntegrationsOptions",
-        "diagnoses",
-        "displayLabel",
-        "drifted",
-        "entry",
-        "entryLabel",
-        "finalizeInspection",
-        "finding",
-        "findingForManagedWarning",
-        "findings",
-        "findingsFromReconciliation",
         "GlobalDoctorCommandLookup",
         "GlobalDoctorFinding",
         "GlobalDoctorPlatform",
@@ -944,7 +995,27 @@
         "GlobalIntegrationCapability",
         "GlobalIntegrationCapabilityLookup",
         "GlobalIntegrationDiagnosis",
-        "GlobalIntegrationStatus"
+        "GlobalIntegrationStatus",
+        "GlobalJsonMemberMatcher",
+        "GlobalManagedManifestV1",
+        "GlobalManagedReconcileResult",
+        "GlobalManagedWarning",
+        "GlobalPlatform",
+        "HomeResolver",
+        "PlatformInspection",
+        "TargetInspection",
+        "UserPathRoot",
+        "UserPlatformRoots",
+        "additionalFindings",
+        "capability",
+        "capabilityFinding",
+        "collisionFindings",
+        "configuredHome",
+        "content",
+        "defaultCommandLookup",
+        "desired",
+        "desiredKeys",
+        "diagnoseGlobalIntegrations"
       ],
       "importTargets": [
         "../configurators/antigravity.js",
@@ -952,6 +1023,7 @@
         "../configurators/kiro.js",
         "../utils/global-managed-files.js",
         "../utils/harnix-launcher.js",
+        "../utils/order.js",
         "../utils/user-paths.js",
         "../version.js",
         "node:fs/promises",
@@ -963,11 +1035,25 @@
       "language": "typescript"
     },
     {
-      "byteLength": 14394,
-      "contentHash": "48d98bd961a995b747fded57e92f9d630f777067a95e368f75d47691a185f392",
+      "byteLength": 14399,
+      "contentHash": "6bb4c7edebae4e786828bf3f28d67525e293e05b6a16b0a6cfb801bcbba5f7b4",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "GlobalJsonMemberMatcher",
+        "GlobalManagedEntry",
+        "GlobalPlatform",
+        "GlobalUninstallLock",
+        "GlobalUninstallLockAcquirer",
+        "GlobalUninstallOptions",
+        "GlobalUninstallPlatform",
+        "GlobalUninstallPlatformResult",
+        "GlobalUninstallResult",
+        "GlobalUninstallTarget",
+        "HomeResolver",
+        "ReconcileGlobalManagedFilesOptions",
+        "SelectedUserPlatformRoots",
+        "UserPathRoot",
         "absolutePath",
         "acquireLocks",
         "activeTargets",
@@ -983,28 +1069,15 @@
         "emptiedTargets",
         "entries",
         "entry",
-        "GlobalJsonMemberMatcher",
-        "GlobalManagedEntry",
-        "GlobalPlatform",
-        "GlobalUninstallLock",
-        "GlobalUninstallLockAcquirer",
-        "GlobalUninstallOptions",
-        "GlobalUninstallPlatform",
-        "GlobalUninstallPlatformResult",
-        "GlobalUninstallResult",
-        "GlobalUninstallTarget",
-        "HomeResolver",
         "isMissingPathError",
         "isNonEmptyOrNotDirectory",
-        "isTestProcess",
-        "length",
-        "loadTargets",
-        "locks"
+        "isTestProcess"
       ],
       "importTargets": [
         "../configurators/codex.js",
         "../utils/file-lock.js",
         "../utils/global-managed-files.js",
+        "../utils/order.js",
         "../utils/user-paths.js",
         "../version.js",
         "node:fs/promises"
@@ -1022,18 +1095,18 @@
       "identifiers": [
         "GlobalPlatform",
         "GlobalSetupPlatform",
-        "hasValidSidecar",
         "HomeResolver",
         "HookCommandLookup",
+        "SetupPlatformsResult",
+        "UpdateGlobalPlatformsOptions",
+        "hasValidSidecar",
         "installedPlatforms",
         "isMissing",
         "isTestProcess",
         "manifest",
         "roots",
         "selected",
-        "SetupPlatformsResult",
-        "updateGlobalPlatforms",
-        "UpdateGlobalPlatformsOptions"
+        "updateGlobalPlatforms"
       ],
       "importTargets": [
         "../utils/global-managed-files.js",
@@ -1046,11 +1119,15 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7280,
-      "contentHash": "09b9f2bd47e1784ed30851a518ac5228f428ad5ea35e1b7d49370a53b010b685",
+      "byteLength": 7186,
+      "contentHash": "a78a21f65d931301f396bf6a6ada65137da209bca9bd4c3d2f81c0ae62bbc0e9",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "InitializeProjectOptions",
+        "InitializeProjectResult",
+        "LegacyStackId",
+        "ParsedInitProfile",
         "classifyDesiredPaths",
         "config",
         "configPath",
@@ -1058,8 +1135,6 @@
         "desired",
         "detection",
         "initializeProject",
-        "InitializeProjectOptions",
-        "InitializeProjectResult",
         "invalidLanguages",
         "invalidTechnologies",
         "isLanguageId",
@@ -1070,30 +1145,29 @@
         "languages",
         "legacy",
         "legacyIds",
-        "LegacyStackId",
         "manifestExists",
         "manifestPath",
         "mapped",
-        "ParsedInitProfile",
         "parseInitProfile",
-        "pathExists",
         "planned",
         "reconciled",
         "requestedLanguages",
         "result",
         "sorted",
-        "technologies"
+        "technologies",
+        "technologyIds"
       ],
       "importTargets": [
         "../catalog/catalog.js",
         "../core/config/config.js",
         "../core/repo-map/service.js",
         "../utils/detection.js",
+        "../utils/filesystem.js",
         "../utils/managed-files.js",
+        "../utils/order.js",
         "../utils/paths.js",
         "../utils/stack.js",
-        "./update.js",
-        "node:fs/promises"
+        "./update.js"
       ],
       "kind": "source",
       "packagePath": "",
@@ -1106,12 +1180,12 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "event",
         "InternalContextPlatform",
+        "RunInternalContextCommandOptions",
+        "event",
         "output",
         "parseOptionalHookInput",
-        "runInternalContextCommand",
-        "RunInternalContextCommandOptions"
+        "runInternalContextCommand"
       ],
       "importTargets": [
         "./internal-context.js"
@@ -1122,16 +1196,23 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8946,
-      "contentHash": "503acaaa3591adb4ba8a530f6ef8438ce82a291739b6d0995f1d9d7ebac05663",
+      "byteLength": 9523,
+      "contentHash": "c2d33a61f36816d2c1ac5777343f6d88b9a460c0099fd768d791c9068e45f15f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "InternalContextPlatform",
+        "MAX_HOOK_CONTEXT_ENTRIES",
+        "NormalizedHookEvent",
+        "REDACTED_PROJECT_STATE_WARNING",
+        "RenderInternalContextForHookOptions",
+        "RenderInternalContextOptions",
         "active",
         "bounded",
         "boundedContext",
         "cap",
         "config",
+        "content",
         "contentBudget",
         "contextPath",
         "cwd",
@@ -1142,23 +1223,16 @@
         "event",
         "exists",
         "formatPlatformPayload",
+        "framedSuffix",
         "guidePaths",
         "harnixRoot",
-        "InternalContextPlatform",
         "invocationNum",
         "isRecord",
-        "MAX_HOOK_CONTEXT_ENTRIES",
-        "NormalizedHookEvent",
         "normalizeHookEvent",
         "optional",
         "output",
         "project",
-        "REDACTED_PROJECT_STATE_WARNING",
-        "renderInternalContext",
-        "renderInternalContextForHook",
-        "RenderInternalContextForHookOptions",
-        "RenderInternalContextOptions",
-        "safeAbsoluteDirectory"
+        "renderInternalContext"
       ],
       "importTargets": [
         "../core/config/config.js",
@@ -1176,38 +1250,52 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4109,
-      "contentHash": "d7ba9deefd9d53eccaa38fedf8f653a30c365f962af401e41e1c29ab1d80f141",
+      "byteLength": 9352,
+      "contentHash": "8a51482b706b44d728ad0a3247dfb475439451b5bf3867ac2048a8ee6ad9f80f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "Evidence",
+        "TaskArtifacts",
+        "TaskRecord",
+        "VerificationInputSnapshot",
+        "WorkflowSaveEnvelope",
         "active",
+        "activeTask",
         "assertLegalTransition",
+        "assertReadyRequirements",
+        "assertSchemaEvolution",
         "byId",
         "candidate",
+        "check",
         "config",
+        "criterion",
         "evidence",
-        "Evidence",
         "existing",
+        "expected",
         "finishWorkflow",
         "harnixRoot",
         "inspectWorkflow",
         "isMissing",
         "isRecord",
+        "journalDate",
         "journalPath",
         "loadExistingTask",
+        "nextChecks",
+        "nextCriteria",
+        "planPath",
+        "prdPath",
         "preserveEvidence",
-        "saveWorkflow",
-        "task",
-        "TaskArtifacts",
-        "TaskRecord",
-        "WorkflowSaveEnvelope"
+        "preserveObligations"
       ],
       "importTargets": [
         "../core/config/config.js",
+        "../core/context/context.js",
         "../core/tasks/task.js",
+        "../core/verification/input-freshness.js",
         "../core/workflow.js",
-        "../utils/paths.js"
+        "../utils/paths.js",
+        "node:fs/promises"
       ],
       "kind": "source",
       "packagePath": "",
@@ -1215,26 +1303,26 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5924,
-      "contentHash": "1a2a71d0061bc7400edb07cd0ca44ec1173ec33f55d2612a2ba2443a90e14f25",
+      "byteLength": 5896,
+      "contentHash": "5a4cceaa0a57997b050e9bc79609b4843d5ef50083b974b1b4c1eb5d40ba84f3",
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "absolutePath",
-        "cleanupLegacyProjectSurfaces",
         "CleanupLegacyProjectSurfacesOptions",
         "CleanupLegacyProjectSurfacesResult",
-        "content",
-        "inspected",
         "InspectedLegacyTarget",
+        "LegacyTargetState",
+        "ManagedEntry",
+        "ManagedManifest",
+        "absolutePath",
+        "cleanupLegacyProjectSurfaces",
+        "content",
         "inspectLegacyTarget",
+        "inspected",
         "isCanonicalLegacyProjectSurface",
         "isLegacySkill",
         "isMissingPathError",
         "legacyEntries",
-        "LegacyTargetState",
-        "ManagedEntry",
-        "ManagedManifest",
         "manifest",
         "manifestPath",
         "metadata",
@@ -1250,6 +1338,7 @@
       "importTargets": [
         "../utils/hashing.js",
         "../utils/managed-files.js",
+        "../utils/order.js",
         "../utils/paths.js",
         "node:fs/promises"
       ],
@@ -1259,19 +1348,19 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1725,
-      "contentHash": "ab151680f6771ef66c91cc877f8e1e93fc486ec076a98e57f38832f2f4aa058a",
+      "byteLength": 1785,
+      "contentHash": "91e9b803ed027771771db87da7b0729980d52eccf7b50a776faed43d5587e8e7",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "JournalEntry",
+        "MemOptions",
+        "MemResult",
         "config",
         "developer",
         "entries",
-        "JournalEntry",
         "journalRoot",
         "limit",
-        "MemOptions",
-        "MemResult",
         "name",
         "names",
         "result",
@@ -1280,6 +1369,7 @@
       "importTargets": [
         "../core/config/config.js",
         "../core/journal/journal.js",
+        "../utils/order.js",
         "../utils/paths.js",
         "node:fs/promises",
         "node:path"
@@ -1290,8 +1380,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1794,
-      "contentHash": "b2dd816008b1b903766dfd948204ccefc902e68b8448d0a0fa7866a0ce96c2f0",
+      "byteLength": 1813,
+      "contentHash": "7b53f0938471465f9430150d705d92049a6a3eb4cbadc490baac5521238402fd",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -1307,6 +1397,7 @@
         "../core/config/config.js",
         "../core/repo-map/service.js",
         "../core/tasks/task.js",
+        "../utils/order.js",
         "../utils/paths.js",
         "../utils/project-discovery.js"
       ],
@@ -1316,22 +1407,12 @@
       "language": "typescript"
     },
     {
-      "byteLength": 15150,
-      "contentHash": "b83473aab2ed189e94e2ce13c657eaa32298c400d7fedc736763a3ea84785b41",
+      "byteLength": 15206,
+      "contentHash": "6a000f21f74a554e11aaa176abd57f3073d88f2f64f02974e0a4d0c577598688",
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "acquiredLocks",
         "AcquiredSetupLock",
-        "acquireLocks",
-        "aggregate",
-        "codex",
-        "createTarget",
-        "createTargets",
-        "defaultCommandLookup",
-        "desired",
-        "displayResultLabel",
-        "entries",
         "GlobalIntegrationReadiness",
         "GlobalJsonMemberMatcher",
         "GlobalManagedReconcileResult",
@@ -1341,18 +1422,28 @@
         "GlobalSetupPlatform",
         "GlobalSetupPlatformResult",
         "HarnixFileLockRecord",
-        "hasDrift",
-        "hasOnlyHarnixLock",
         "HomeResolver",
         "HookCommandLookup",
-        "isTestProcess",
-        "isUnownedRootCollision",
-        "launcherAvailable",
-        "lockedIndex",
-        "lockedOutcomes",
-        "lockedTargets",
-        "lockedTargetSet",
-        "lockPath"
+        "ReconcileGlobalManagedFilesOptions",
+        "ReconciliationTarget",
+        "SelectedUserPlatformRoots",
+        "SetupPlatformsOptions",
+        "SetupPlatformsResult",
+        "UserPathRoot",
+        "VersionLookup",
+        "acquireLocks",
+        "acquiredLocks",
+        "aggregate",
+        "codex",
+        "createTarget",
+        "createTargets",
+        "defaultCommandLookup",
+        "desired",
+        "displayResultLabel",
+        "entries",
+        "hasDrift",
+        "hasOnlyHarnixLock",
+        "isTestProcess"
       ],
       "importTargets": [
         "../configurators/antigravity.js",
@@ -1362,6 +1453,7 @@
         "../utils/file-lock.js",
         "../utils/global-managed-files.js",
         "../utils/harnix-launcher.js",
+        "../utils/order.js",
         "../utils/user-paths.js",
         "../version.js",
         "node:fs/promises"
@@ -1377,11 +1469,11 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "UninstallOptions",
+        "UninstallResult",
         "harnixRoot",
         "purgeTargets",
-        "UninstallOptions",
-        "uninstallProject",
-        "UninstallResult"
+        "uninstallProject"
       ],
       "importTargets": [
         "../utils/paths.js",
@@ -1393,32 +1485,32 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4397,
-      "contentHash": "c33e54c6b55db7e86fe69e7382ae1ae5297c4c2c41c027a3c7815b883e1fb7bf",
+      "byteLength": 4482,
+      "contentHash": "22272192b311082d58e3e87b4a4d15035f3db9954e50a1a57207e4ff1e6b6fe8",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "DesiredManagedFile",
+        "HarnixConfigV2",
+        "ManagedManifest",
+        "UpdateProjectOptions",
+        "UpdateProjectResult",
         "baselineManagedTemplates",
         "config",
         "configPath",
         "current",
         "desired",
         "desiredFiles",
-        "DesiredManagedFile",
         "entries",
-        "HarnixConfigV2",
         "legacyEntries",
         "loadManifest",
         "managed",
-        "ManagedManifest",
         "manifest",
         "manifestPath",
         "mergeManifestEntries",
         "paths",
         "reconciled",
-        "updateProject",
-        "UpdateProjectOptions",
-        "UpdateProjectResult"
+        "updateProject"
       ],
       "importTargets": [
         "../core/config/config.js",
@@ -1427,6 +1519,7 @@
         "../templates/harnix/workflow.js",
         "../utils/hashing.js",
         "../utils/managed-files.js",
+        "../utils/order.js",
         "../utils/paths.js",
         "../version.js",
         "node:fs/promises"
@@ -1442,16 +1535,16 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "available",
         "AvailableVersionLookup",
+        "UpgradeOptions",
+        "UpgradeResult",
+        "UpgradeRunner",
+        "available",
         "command",
         "defaultRunner",
         "execFileAsync",
         "runner",
-        "upgradeHarnix",
-        "UpgradeOptions",
-        "UpgradeResult",
-        "UpgradeRunner"
+        "upgradeHarnix"
       ],
       "importTargets": [
         "node:child_process",
@@ -1489,15 +1582,15 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "are",
-        "begin",
         "CODEX_GLOBAL_AGENTS_SELECTOR",
         "CODEX_GLOBAL_CONTEXT_COMMAND",
         "CODEX_GLOBAL_HOOK_SELECTOR",
+        "CodexGlobalSurfacePlan",
+        "are",
+        "begin",
         "codexGlobalAgentsContent",
         "codexGlobalContextHookGroup",
         "codexGlobalSkillGuard",
-        "CodexGlobalSurfacePlan",
         "createCodexGlobalSurfacePlan",
         "end",
         "isJsonRecord",
@@ -1534,11 +1627,21 @@
       "language": "typescript"
     },
     {
-      "byteLength": 12330,
-      "contentHash": "14a280bddb6caebd350093302c772ffd27f8f6f75248fae75d613b1f00d9ce74",
+      "byteLength": 12360,
+      "contentHash": "388dffeb2725e49211cb70cb22a9b04564124b1350d9e0f06ca8dd8de3cf6a1d",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "ConfigDocument",
+        "ConfigValidationError",
+        "CreateConfigOptions",
+        "HarnixConfig",
+        "HarnixConfigV1",
+        "HarnixConfigV2",
+        "LegacyPackageConfig",
+        "LegacyStackId",
+        "PackageConfig",
+        "PlatformId",
         "assertContext",
         "assertIds",
         "assertPackages",
@@ -1547,16 +1650,10 @@
         "assertPlatforms",
         "assertRuntime",
         "assertSortedUnique",
-        "ConfigDocument",
-        "ConfigValidationError",
         "contextKeys",
         "createConfig",
-        "CreateConfigOptions",
         "developerPattern",
         "document",
-        "HarnixConfig",
-        "HarnixConfigV1",
-        "HarnixConfigV2",
         "isMissingFile",
         "isPositiveInteger",
         "isPositiveNumber",
@@ -1564,17 +1661,14 @@
         "item",
         "languageIds",
         "legacyIds",
-        "LegacyPackageConfig",
-        "LegacyStackId",
         "migrateConfig",
-        "normalizedPath",
         "normalizePackages",
-        "normalizeV1",
-        "orderedConfig"
+        "normalizeV1"
       ],
       "importTargets": [
         "../../catalog/catalog.js",
         "../../utils/atomic-write.js",
+        "../../utils/order.js",
         "../../utils/paths.js",
         "../../utils/stack.js",
         "node:fs/promises",
@@ -1586,23 +1680,33 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6631,
-      "contentHash": "b65fc93cbf5708718b862934273f8bc3ff009d06e47a7955ce4bb7d1eb4439a8",
+      "byteLength": 9104,
+      "contentHash": "5e967525f8aee54eea9bc92ff08a1e1fe8f1424c468724a96fd63b59dcb17468",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "ContextChange",
+        "ContextChangeKind",
+        "ContextDrift",
+        "ContextDriftDependencies",
+        "ContextEntry",
+        "ContextManifest",
+        "ContextSignals",
+        "ContextState",
+        "UNTRUSTED_CONTEXT_PREFIX",
+        "UNTRUSTED_CONTEXT_SUFFIX",
         "buildContext",
+        "changes",
         "chunk",
         "compareEntries",
         "content",
         "contentHash",
-        "ContextEntry",
-        "ContextManifest",
-        "ContextSignals",
         "entries",
         "entry",
         "header",
+        "inspectContextDrift",
         "inspectedEntries",
+        "isMissing",
         "isRecord",
         "isUnsafe",
         "item",
@@ -1612,16 +1716,12 @@
         "path",
         "previous",
         "rankContext",
-        "ranked",
-        "refs",
-        "saveContextManifest",
-        "size",
-        "unique",
-        "validateContextManifest"
+        "ranked"
       ],
       "importTargets": [
         "../../utils/atomic-write.js",
         "../../utils/hashing.js",
+        "../../utils/order.js",
         "../../utils/paths.js",
         "node:fs/promises"
       ],
@@ -1636,6 +1736,7 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "JournalEntry",
         "appendJournal",
         "appendQueues",
         "current",
@@ -1643,7 +1744,6 @@
         "entry",
         "isMissing",
         "isRecord",
-        "JournalEntry",
         "limit",
         "line",
         "malformed",
@@ -1670,9 +1770,9 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "LearningCandidate",
         "createLearningCandidate",
         "isPromotionEligible",
-        "LearningCandidate",
         "sourceTaskIds"
       ],
       "importTargets": [],
@@ -1698,8 +1798,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4077,
-      "contentHash": "2015f0a283b95fb43e33ae9a7e6732754f8b1b3e93790233743fbdf263d07f2d",
+      "byteLength": 4112,
+      "contentHash": "172083af7978c0dc3c1651fa3e1bbad4fb450c6cac6601124db1adcd25edc4af",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -1725,6 +1825,7 @@
       ],
       "importTargets": [
         "../../utils/hashing.js",
+        "../../utils/order.js",
         "./types.js",
         "node:fs/promises",
         "node:path"
@@ -1735,14 +1836,18 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2943,
-      "contentHash": "b872e68856e3dce9874bb18b46de7a205fa66613dbefc32bec67d70f5490bfe0",
+      "byteLength": 3377,
+      "contentHash": "50f1ef19d51209af1be6c2c6eaa61bb88eee9661271f1571d3e95cf2421731a0",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "RepoMapInventory",
+        "RepoMapLimits",
+        "assertRepoMapLimits",
         "candidate",
         "candidates",
         "files",
+        "ignoredDirectoryNameList",
         "ignoredDirectoryNames",
         "inventoryRepository",
         "isContained",
@@ -1751,8 +1856,6 @@
         "path",
         "realFile",
         "realRoot",
-        "RepoMapInventory",
-        "RepoMapLimits",
         "resolvedRoot",
         "sample",
         "secretPath",
@@ -1761,6 +1864,7 @@
         "value"
       ],
       "importTargets": [
+        "../../utils/order.js",
         "../../utils/paths.js",
         "./types.js",
         "globby",
@@ -1773,30 +1877,31 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3741,
-      "contentHash": "d7f8a52ae158fd819b70637a7a47fad22244e922b5e01f7953fc5c1770919f3e",
+      "byteLength": 3768,
+      "contentHash": "09209116d59decb0fce4b5350741fbea9c7e5b2060d9b51abf3aa1ffedcbbbaa",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "SearchDocument",
         "index",
         "languageTerms",
         "matchedTaskTerms",
-        "normalizedQuery",
         "normalizeTerm",
+        "normalizedQuery",
         "rank",
         "ranked",
         "reasons",
         "record",
-        "records",
         "recordTerms",
+        "records",
         "relevant",
         "score",
-        "SearchDocument",
         "searchRepoMap",
         "taskTerms",
         "terms"
       ],
       "importTargets": [
+        "../../utils/order.js",
         "../../utils/paths.js",
         "./types.js",
         "minisearch"
@@ -1812,6 +1917,14 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "QueryRepoMapOptions",
+        "QueryRepoMapResult",
+        "RefreshRepoMapOptions",
+        "RepoMapHealth",
+        "RepoMapLimits",
+        "RepoMapQueryResult",
+        "RepoMapQuerySignals",
+        "RepoMapV1",
         "current",
         "diagnoseRepoMap",
         "index",
@@ -1824,18 +1937,10 @@
         "previous",
         "previousRecords",
         "queryRepoMap",
-        "QueryRepoMapOptions",
-        "QueryRepoMapResult",
         "readPreviousRecords",
         "record",
         "records",
         "refreshRepoMap",
-        "RefreshRepoMapOptions",
-        "RepoMapHealth",
-        "RepoMapLimits",
-        "RepoMapQueryResult",
-        "RepoMapQuerySignals",
-        "RepoMapV1",
         "results",
         "value"
       ],
@@ -1852,8 +1957,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4830,
-      "contentHash": "215057a3ef81f5ab38f3475ed61740218eb7c9020a2dbad2a16cc692d58318f4",
+      "byteLength": 4784,
+      "contentHash": "de9ee71c7c8f94e77d9c723dd8573b44a545df107949db5a0af1a36089338b98",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -1883,6 +1988,7 @@
       "importTargets": [
         "../../utils/atomic-write.js",
         "../../utils/hashing.js",
+        "../../utils/order.js",
         "../../utils/paths.js",
         "./types.js",
         "node:fs/promises",
@@ -1899,7 +2005,6 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "defaultRepoMapLimits",
         "RepoMapFileKind",
         "RepoMapInventory",
         "RepoMapInventoryFile",
@@ -1907,7 +2012,8 @@
         "RepoMapQueryResult",
         "RepoMapQuerySignals",
         "RepoMapRecordV1",
-        "RepoMapV1"
+        "RepoMapV1",
+        "defaultRepoMapLimits"
       ],
       "importTargets": [],
       "kind": "source",
@@ -1921,8 +2027,8 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "createResearchFinding",
         "ResearchFinding",
+        "createResearchFinding",
         "saveResearchFinding"
       ],
       "importTargets": [
@@ -1935,12 +2041,33 @@
       "language": "typescript"
     },
     {
-      "byteLength": 14182,
-      "contentHash": "bf6256b30d28d86d0ef80589c22e372e688dbd39b5b2a8f4a55e67793ccc4902",
+      "byteLength": 19869,
+      "contentHash": "3171905f5af46031b68bb043c6a1ca4a773bbed17972ba5ea66a6f3e35e55f2e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "AcceptanceCriterion",
+        "Evidence",
+        "EvidenceBase",
+        "EvidenceV1",
+        "EvidenceV2",
+        "TASK_V2_MIGRATION_EVIDENCE_ID",
+        "TASK_V2_MIGRATION_SUMMARY",
+        "TaskArtifacts",
+        "TaskBlocker",
+        "TaskMode",
+        "TaskRecord",
+        "TaskRecordBase",
+        "TaskRecordV1",
+        "TaskRecordV2",
+        "TaskStatus",
+        "TaskValidationError",
+        "TaskValidationOptions",
+        "ValidationCheck",
+        "ValidationCheckBase",
+        "ValidationCheckV1",
+        "ValidationCheckV2",
+        "WorkflowCheckpoint",
         "activePath",
         "allowUnsafeCompletedEvidenceArtifacts",
         "archiveTask",
@@ -1948,30 +2075,9 @@
         "checkpointOwner",
         "checks",
         "clearActiveTask",
-        "criterion",
-        "directory",
-        "ensureUnique",
-        "evidence",
-        "Evidence",
-        "evidenceIds",
-        "isIsoTimestamp",
-        "isMissing",
-        "isRecord",
-        "isSafeRepositoryPath",
-        "key",
-        "legalCheckpoints",
-        "loadTask",
-        "path",
-        "resolveActiveTask",
-        "saveTask",
-        "saveTaskWithArtifacts",
-        "setActiveTask",
-        "TaskArtifacts",
-        "TaskBlocker",
-        "taskId",
-        "TaskMode",
-        "TaskRecord",
-        "TaskStatus"
+        "covered",
+        "createTaskV2MigrationEvidence",
+        "criteria"
       ],
       "importTargets": [
         "../../utils/atomic-write.js",
@@ -1984,16 +2090,80 @@
       "language": "typescript"
     },
     {
-      "byteLength": 10189,
-      "contentHash": "155872f7b757ee3245693b6533bde657627796e29d474bdb13a62b075434c189",
+      "byteLength": 11357,
+      "contentHash": "f2f66895a50c9e75df9af4d842901b8b62d7ce58a8b38b579d17322217937bae",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "StoredVerificationInputSnapshot",
+        "VerificationInputChange",
+        "VerificationInputEntry",
+        "VerificationInputSidecar",
+        "VerificationInputSnapshot",
+        "addition",
+        "additions",
+        "assertVerificationInputsFresh",
+        "byEvidenceId",
+        "canonicalCheck",
+        "canonicalTaskContract",
+        "changes",
+        "check",
+        "compareText",
+        "compareVerificationInputSnapshots",
+        "computeVerificationInputSnapshot",
+        "current",
+        "currentByPath",
+        "digestPayload",
+        "entries",
+        "entry",
+        "evidence",
+        "evidenceIds",
+        "existing",
+        "hash",
+        "hashBytes",
+        "hashText",
+        "input",
+        "isCanonicalSafePath",
+        "isMissing",
+        "isRecord",
+        "isSidecar"
+      ],
+      "importTargets": [
+        "../../utils/atomic-write.js",
+        "../../utils/paths.js",
+        "../tasks/task.js",
+        "globby",
+        "node:crypto",
+        "node:fs/promises"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/verification/input-freshness.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 13397,
+      "contentHash": "3f53ff07fb1106a62c597b4e6c650414915d36ffa6b9459e3475f1a87efc988d",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "ContextDrift",
+        "ImplementationStrategy",
+        "WorkflowAction",
+        "WorkflowEntry",
+        "WorkflowFinishDependencies",
+        "WorkflowRiskSignal",
+        "WorkflowRouteDecision",
+        "WorkflowRouteFacts",
+        "WorkflowStageOwner",
+        "WorkflowWorkKind",
         "active",
         "allowed",
         "canCompleteTask",
         "check",
+        "checks",
         "completed",
+        "completionEntry",
         "completionEvidenceIds",
         "continueWorkflowTask",
         "decision",
@@ -2003,28 +2173,21 @@
         "finishWorkflowTask",
         "freshPasses",
         "implementationStrategy",
-        "ImplementationStrategy",
         "isFresh",
+        "isInputDigest",
         "isKnownActiveState",
+        "isMissing",
         "isWithinRequestedScope",
-        "latest",
-        "latestByCheck",
-        "legal",
-        "mode",
-        "nextWorkflowStatus",
-        "parsed",
-        "previous",
-        "required",
-        "routeActiveTask",
-        "routeWorkflow",
-        "shouldReassessArchitecture",
-        "shouldResearch",
-        "supporting",
-        "task"
+        "journal"
       ],
       "importTargets": [
+        "../utils/order.js",
+        "../utils/paths.js",
+        "./context/context.js",
         "./journal/journal.js",
-        "./tasks/task.js"
+        "./tasks/task.js",
+        "./verification/input-freshness.js",
+        "node:path"
       ],
       "kind": "source",
       "packagePath": "",
@@ -2032,34 +2195,30 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7810,
-      "contentHash": "ab8fc39b3146928f9a5d2fac945cc736c5648a844144cb2ced3737f5b4d201fd",
+      "byteLength": 7366,
+      "contentHash": "da405a7e8bda63d09cc6904ddf6135e0998f4ab36e037c13f9ddbd312c5c3551",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "GuideSelection",
+        "GuideSource",
         "applies",
         "byId",
-        "character",
         "composed",
         "dependency",
         "extended",
         "guide",
         "guideOutputPath",
-        "GuideSelection",
-        "GuideSource",
         "guideSources",
         "id",
         "includeExtended",
-        "index",
         "languageIds",
         "layer",
-        "matchesGlob",
         "ordered",
-        "pattern",
         "provenance",
         "retained",
-        "selected",
         "selectGuideSources",
+        "selected",
         "source",
         "stable",
         "superseded",
@@ -2067,6 +2226,8 @@
       ],
       "importTargets": [
         "../catalog/catalog.js",
+        "../utils/order.js",
+        "../utils/safe-glob.js",
         "./common/engineering.md",
         "./languages/csharp/engineering.md",
         "./languages/go/engineering.md",
@@ -2406,11 +2567,16 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8687,
-      "contentHash": "36132ca2cea25d9c716da71400dfbe4598212e5d45ce5af181980a8ae0220e24",
+      "byteLength": 8750,
+      "contentHash": "0b563d85c6239d3863e2c40bfd20a884ff271c11ec9911a74bbbcbd6fdabd77d",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "InventoryFile",
+        "MigrateOptions",
+        "MigrateResult",
+        "MigrationDependencies",
+        "MigrationFile",
         "byDestination",
         "canSafelyCleanupLegacyRoot",
         "cleaned",
@@ -2431,18 +2597,13 @@
         "file",
         "files",
         "hashBytes",
-        "InventoryFile",
         "inventoryLegacyFiles",
         "isMissing",
         "legacy",
         "manifest",
         "marker",
         "metadata",
-        "migrateLegacyProject",
-        "MigrateOptions",
-        "MigrateResult",
-        "MigrationDependencies",
-        "MigrationFile"
+        "migrateLegacyProject"
       ],
       "importTargets": [
         "../core/config/config.js",
@@ -2450,6 +2611,7 @@
         "../utils/atomic-write.js",
         "../utils/hashing.js",
         "../utils/managed-files.js",
+        "../utils/order.js",
         "../utils/paths.js",
         "../version.js",
         "./discovery.js",
@@ -2463,28 +2625,28 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1875,
-      "contentHash": "58cc8df9728e16ffb5c6f8953e77ec2691b345fbc986f683221af8c1eecc1891",
+      "byteLength": 1795,
+      "contentHash": "a5c74212cdb7dff2985657a85c920a9cd5fb181f1042dbcd9b9690025b8599b3",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "SeedRulesOptions",
+        "SeedRulesResult",
+        "StackSelection",
         "absolute",
         "attribution",
         "commonRules",
         "composeRules",
-        "exists",
         "file",
         "files",
         "paths",
-        "seedRules",
-        "SeedRulesOptions",
-        "SeedRulesResult",
-        "StackSelection"
+        "seedRules"
       ],
       "importTargets": [
         "../catalog/catalog.js",
         "../guides/catalog.js",
         "../utils/atomic-write.js",
+        "../utils/filesystem.js",
         "../utils/paths.js",
         "node:fs/promises",
         "node:path"
@@ -2495,11 +2657,12 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2526,
-      "contentHash": "9b9135eb7b6cc12d3447d7cf0f5447e8ff4583ac8a2af67d129a332f7f06f55f",
+      "byteLength": 3012,
+      "contentHash": "59f8934b5759b256e7727fa42b8f2e996d7f929110b1a434f53314686c74a748",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "SkillTemplate",
         "canonicalSources",
         "content",
         "frontmatter",
@@ -2509,7 +2672,6 @@
         "parseSkillSource",
         "renderSkill",
         "skill",
-        "SkillTemplate",
         "validateSkillSet",
         "workflowSkills"
       ],
@@ -2529,11 +2691,12 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5596,
-      "contentHash": "03472fd905cbc0ac61a0d87e36ded895e2861ebe659add4fd3cd43af1a2188f0",
+      "byteLength": 8645,
+      "contentHash": "5f742d38258439d80dc58daf0e1f1e75bc3ae03b02f1fb42abd6f9c4c407928e",
       "extension": "md",
       "headings": [
         "Build decision-complete artifacts",
+        "Context checkpoint before ready",
         "Exit",
         "Explore evidence before questions",
         "Harnix activation guard",
@@ -2544,7 +2707,8 @@
         "Upstream basis"
       ],
       "identifiers": [
-        "ordering"
+        "ordering",
+        "the"
       ],
       "importTargets": [],
       "kind": "documentation",
@@ -2552,8 +2716,8 @@
       "path": "src/skills/harnix-brainstorm/SKILL.md"
     },
     {
-      "byteLength": 7114,
-      "contentHash": "905285d37448c514353f7fa3a513de11ca259423bf209820fe5d565b14a29d7b",
+      "byteLength": 7711,
+      "contentHash": "9fe4f4ed5fa22515dbdecd9df4f00fe0a59e4eed23c0af6f7890604978578b1c",
       "extension": "md",
       "headings": [
         "Evidence rule",
@@ -2579,8 +2743,8 @@
       "path": "src/skills/harnix-check/SKILL.md"
     },
     {
-      "byteLength": 3775,
-      "contentHash": "1f86832a1684a875c1ec99bcc9f5ac7141d47ee84d7aceb69a016ac940e97156",
+      "byteLength": 5115,
+      "contentHash": "9a78f714fe3e031f3eca3f6b3fb70255abc120c35cd686d2b21a560120dfab37",
       "extension": "md",
       "headings": [
         "Continue persisted Harnix work",
@@ -2602,8 +2766,8 @@
       "path": "src/skills/harnix-continue/SKILL.md"
     },
     {
-      "byteLength": 4124,
-      "contentHash": "b7b2abebdbae1bb2d1594ed1f92f253d7887587b094ca4cbf27694ee28f67742",
+      "byteLength": 4224,
+      "contentHash": "e0a3d592780027663b867505d09b1474a31e55111a9a94fe087af410aebcb722",
       "extension": "md",
       "headings": [
         "Capture the failure",
@@ -2626,8 +2790,8 @@
       "path": "src/skills/harnix-debug/SKILL.md"
     },
     {
-      "byteLength": 3493,
-      "contentHash": "edb1d47cf2bdedefe180b9d3a0440d535ac34fcc9f7356574ee697bf930cde2a",
+      "byteLength": 3776,
+      "contentHash": "644f8ee107b5d90e25050fa9c56628d80e1508d5096035ab43418d0a0af7720c",
       "extension": "md",
       "headings": [
         "Exit",
@@ -2646,8 +2810,8 @@
       "path": "src/skills/harnix-finish-work/SKILL.md"
     },
     {
-      "byteLength": 5643,
-      "contentHash": "d343af36b71950e1d475b7a08eab2fc31ca93bfd51e9b0909c1678897f0adf17",
+      "byteLength": 6844,
+      "contentHash": "37c82a6ac3ec637889cce9a75670b4411607b61e0af642d4c8bd3776043f6aa5",
       "extension": "md",
       "headings": [
         "Documented TDD exceptions",
@@ -2675,8 +2839,8 @@
       "path": "src/skills/harnix-implement/SKILL.md"
     },
     {
-      "byteLength": 3646,
-      "contentHash": "23b9e836a18a4d65951ef8816b82107feaed3fc71800383848cef39f993ce4a9",
+      "byteLength": 3737,
+      "contentHash": "8df026e0f419212298576b14892aca6b442739d71e2fda8f07be7bb4d3f48de4",
       "extension": "md",
       "headings": [
         "Exit",
@@ -2695,8 +2859,8 @@
       "path": "src/skills/harnix-research/SKILL.md"
     },
     {
-      "byteLength": 6087,
-      "contentHash": "edcaf48e544bc6e7ad31423910fe8edd8cbad2c4dc826a6d1bffdfade5a2a943",
+      "byteLength": 6824,
+      "contentHash": "ae873d8454ffbd333a277867bcb7b66ffc2d691bc913e4ce09e720777008cc60",
       "extension": "ts",
       "headings": [
         "Harnix",
@@ -2723,22 +2887,23 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1924,
-      "contentHash": "dd0e05af5f8b0ae4d7fb0678a72ced82beae781b1be3e32a2ba3a9490ba7a9fd",
+      "byteLength": 1983,
+      "contentHash": "41dac0969a4f1ced486f706227ab7e8aa7a178c1eaa213aa44d8fff8d32fba98",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "WorkflowManifest",
         "ensureManagedWorkflow",
         "entry",
         "manifest",
         "optional",
         "previous",
-        "WorkflowManifest",
         "workflowPath"
       ],
       "importTargets": [
         "../../utils/atomic-write.js",
         "../../utils/hashing.js",
+        "../../utils/order.js",
         "../../utils/paths.js",
         "../../version.js",
         "./workflow.js",
@@ -2750,8 +2915,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6472,
-      "contentHash": "b0e4b10f126c680cd06748c565d5094d219a0344cb0e6459e952c0e57b5b5a8e",
+      "byteLength": 8526,
+      "contentHash": "6dca51f0da3ba2bc1a48fa6872bfb55dbd03d00022efcc99c89fb56f8bc8bae5",
       "extension": "ts",
       "headings": [
         "Implement and verify",
@@ -2760,8 +2925,8 @@
         "Route the request"
       ],
       "identifiers": [
-        "it",
         "SkillTemplate",
+        "it",
         "the",
         "workflowTemplate"
       ],
@@ -2794,8 +2959,8 @@
       "headings": [],
       "identifiers": [
         "AtomicFileSystem",
-        "atomicWriteFile",
         "AtomicWriteOptions",
+        "atomicWriteFile",
         "defaultFilesystem",
         "existingMode",
         "filesystem",
@@ -2814,27 +2979,32 @@
       "language": "typescript"
     },
     {
-      "byteLength": 14268,
-      "contentHash": "ddc2e58c3d1fb230b2a53f44ee70fa9a6dc262f7b751492e12e6bf703900f879",
+      "byteLength": 679,
+      "contentHash": "a28067c831cff4e8fa362b037d074361a2ceff1df7a127c238bce6918d1bd7b8",
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "absolute",
-        "allEvidence",
-        "applyTechnologyImplications",
-        "candidates",
-        "changed",
-        "character",
-        "collectDependencies",
+        "buffer",
+        "chunk",
+        "chunks",
+        "defaultMaximumInputBytes",
+        "length",
+        "readBoundedInput"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/utils/bounded-input.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 13800,
+      "contentHash": "1af380f25c33dee2eb6657a6beda8c58f8d86971619090b3b7bb43cb5894f447",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
         "CollectedFile",
-        "collectFiles",
-        "compareMatches",
-        "confidence",
-        "confidenceRank",
-        "content",
-        "dependencies",
         "DependencyFact",
-        "descriptor",
         "DetectedPackage",
         "DetectionConfidence",
         "DetectionEvidence",
@@ -2842,18 +3012,34 @@
         "DetectionMatch",
         "DetectorExpression",
         "DetectorPredicate",
+        "LanguageDescriptor",
+        "LanguageId",
+        "PackageManager",
+        "PackageManifest",
+        "ProjectDetection",
+        "TechnologyDescriptor",
+        "TechnologyId",
+        "absolute",
+        "allEvidence",
+        "applyTechnologyImplications",
+        "candidates",
+        "changed",
+        "collectDependencies",
+        "collectFiles",
+        "compareMatches",
+        "confidence",
+        "confidenceRank",
+        "content",
+        "dependencies",
+        "descriptor",
         "detectPackageManager",
         "detectPackages",
-        "detectProject",
-        "detectVerificationCommands",
-        "entries",
-        "entry",
-        "evaluated",
-        "evaluateDescriptor",
-        "evaluateExpression"
+        "detectProject"
       ],
       "importTargets": [
         "../catalog/catalog.js",
+        "./order.js",
+        "./safe-glob.js",
         "node:fs/promises",
         "node:path"
       ],
@@ -2868,14 +3054,6 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "acquireHarnixFileLock",
-        "assertDuration",
-        "clock",
-        "currentProcessIdentity",
-        "deadline",
-        "defaultFilesystem",
-        "defaultProcessIdentity",
-        "defaultProcessIdentityInspector",
         "FileLockClock",
         "FileLockError",
         "FileLockFileSystem",
@@ -2884,13 +3062,21 @@
         "FileLockProcessIdentity",
         "FileLockProcessIdentityInspector",
         "FileLockTimeoutError",
-        "filesystem",
         "HarnixFileLock",
         "HarnixFileLockRecord",
+        "InvalidHarnixFileLockError",
+        "acquireHarnixFileLock",
+        "assertDuration",
+        "clock",
+        "currentProcessIdentity",
+        "deadline",
+        "defaultFilesystem",
+        "defaultProcessIdentity",
+        "defaultProcessIdentityInspector",
+        "filesystem",
         "identity",
         "inspectExistingLock",
         "inspectOwner",
-        "InvalidHarnixFileLockError",
         "is",
         "isAbsolutePath",
         "isAlreadyExists",
@@ -2913,47 +3099,83 @@
       "language": "typescript"
     },
     {
-      "byteLength": 50296,
-      "contentHash": "7b44344d10cd4746af43ae9bc1c816507ec3779b1630fcd1702c446bfc325e01",
+      "byteLength": 607,
+      "contentHash": "08d74acfedd37b9ac552d2f320e16e77865bb12327e774658c6916efe2b965aa",
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "absoluteByRelativePath",
-        "absoluteLockPath",
-        "absolutePath",
-        "appendManagedBlock",
-        "applyPlans",
-        "applyTransaction",
-        "array",
-        "assertSnapshotUnchangedImmediatelyBeforeApply",
-        "assertUniqueReconciliationRoots",
-        "attempted",
-        "begins",
-        "buildPlans",
-        "byPath",
-        "canonical",
-        "canonicalJson",
-        "canonicalManagedBlock",
-        "captureSnapshot",
-        "character",
-        "compareEntries",
-        "content",
-        "createJsonDocument",
-        "current",
-        "defaultJsonMemberMatcher",
-        "desired",
+        "Stat",
+        "isMissingPathError",
+        "pathExists"
+      ],
+      "importTargets": [
+        "node:fs/promises"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/utils/filesystem.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 109,
+      "contentHash": "17bf78d169bddfff661d7ada92fa9e4c0c465eee22745ca6e9aea7058c2cb681",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "GlobalManagedManifestError"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/utils/global-managed-error.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 44183,
+      "contentHash": "570c868e22a05583b63daf424a2026b631ff65b4512bc0456533b1608ae45568",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
         "DesiredGlobalFile",
         "DesiredGlobalJsonMember",
         "DesiredGlobalManagedBlock",
         "DesiredGlobalManagedFile",
-        "disposition",
-        "document",
-        "emptyResult",
-        "end"
+        "FileSnapshot",
+        "GlobalJsonMemberMatcher",
+        "GlobalManagedEntry",
+        "GlobalManagedKind",
+        "GlobalManagedManifestV1",
+        "GlobalManagedReconcileResult",
+        "GlobalManagedRemover",
+        "GlobalManagedSelector",
+        "GlobalManagedTransactionError",
+        "GlobalManagedWarning",
+        "GlobalManagedWriter",
+        "GlobalPlatform",
+        "JsonArrayMemberSelector",
+        "JsonValue",
+        "LoadedGlobalManifest",
+        "MarkerSelector",
+        "PlannedGlobalReconciliation",
+        "PlannedWrite",
+        "PreparedDesired",
+        "ReconcileGlobalManagedFilesOptions",
+        "ReconcileGlobalManagedRootsOptions",
+        "TargetState",
+        "TransactionPlan",
+        "UserPathRoot",
+        "absoluteByRelativePath",
+        "absoluteLockPath",
+        "absolutePath",
+        "applyPlans"
       ],
       "importTargets": [
         "./atomic-write.js",
+        "./global-managed-error.js",
+        "./global-managed-json.js",
+        "./global-managed-markers.js",
         "./hashing.js",
+        "./order.js",
         "./user-paths.js",
         "node:fs/promises"
       ],
@@ -2963,16 +3185,94 @@
       "language": "typescript"
     },
     {
+      "byteLength": 5578,
+      "contentHash": "40cb7a06648919d06adc3a9b6f0ccd1c3bbc23ced082bf2d4db0f0eb29449e63",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "canonical",
+        "canonicalJson",
+        "character",
+        "compareCodeUnits",
+        "createJsonDocument",
+        "current",
+        "defaultJsonMemberMatcher",
+        "escapeJsonPointerToken",
+        "escaped",
+        "findExistingJsonArray",
+        "findOrCreateJsonArray",
+        "index",
+        "isJsonObject",
+        "isRecord",
+        "jsonObject",
+        "key",
+        "last",
+        "normalizeJsonValue",
+        "normalized",
+        "output",
+        "parseArrayIndex",
+        "parseCanonicalJsonPointer",
+        "parseJsonDocument",
+        "parsed",
+        "position",
+        "root",
+        "serializeJsonDocument",
+        "token",
+        "tokens",
+        "unescapeJsonPointerToken"
+      ],
+      "importTargets": [
+        "./global-managed-error.js",
+        "./global-managed-files.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/utils/global-managed-json.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 2088,
+      "contentHash": "c9cef073a4653857af6ab645fc209f7c7166c7f50a8ffe9ef69dddbb5a952694",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "LocatedManagedBlock",
+        "appendManagedBlock",
+        "begins",
+        "canonicalManagedBlock",
+        "end",
+        "ends",
+        "findAll",
+        "index",
+        "indexes",
+        "locateManagedBlock",
+        "markerTokensOverlap",
+        "markersOverlap",
+        "normalizedContent",
+        "offset",
+        "renderManagedBlock",
+        "start",
+        "suffix"
+      ],
+      "importTargets": [
+        "./global-managed-files.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/utils/global-managed-markers.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 1372,
       "contentHash": "35207a2b75de0c1be0be9af5c6569eefea9058d0d62383cd217586bf57f3aa49",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "HarnixLauncherRunner",
+        "LookupHarnixLauncherOptions",
         "defaultRunner",
         "execFileAsync",
-        "HarnixLauncherRunner",
         "lookupHarnixLauncher",
-        "LookupHarnixLauncherOptions",
         "runner"
       ],
       "importTargets": [
@@ -3002,33 +3302,34 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6704,
-      "contentHash": "7229ec259394bfd0df50e5abdb29c9b3cc4bc8598159fdd2ffb56827767d01b3",
+      "byteLength": 7097,
+      "contentHash": "9ac6c7d916039263939f48fbbf87bbda5ce97d9a1b1f21d7a3b3e6e46f6d2bf2",
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "content",
         "DesiredManagedFile",
-        "entries",
-        "entry",
-        "file",
-        "isMissing",
-        "isRecord",
         "ManagedEntry",
         "ManagedManifest",
         "ManagedManifestError",
         "ManagedScope",
+        "OwnershipState",
+        "ReconcileResult",
+        "content",
+        "entries",
+        "entry",
+        "file",
+        "generatedHash",
+        "isMissing",
+        "isRecord",
         "nextEntries",
         "obsolete",
         "obsoleteState",
         "oldByPath",
         "ownershipState",
-        "OwnershipState",
         "path",
         "previous",
         "readManifest",
         "reconcileManagedFiles",
-        "ReconcileResult",
         "result",
         "state",
         "target",
@@ -3038,6 +3339,7 @@
       "importTargets": [
         "./atomic-write.js",
         "./hashing.js",
+        "./order.js",
         "./paths.js",
         "node:fs/promises",
         "yaml"
@@ -3048,11 +3350,28 @@
       "language": "typescript"
     },
     {
+      "byteLength": 125,
+      "contentHash": "61bc8cf0f2a44527ad18559827794c72e3d0dc589b82499a78a9f38e728c4e10",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "compareCodeUnits"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/utils/order.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 4218,
       "contentHash": "98efad3f446a16f2c37122e78bb896a84cc76b839fbe44964bf397bfd7cf82b0",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "GitRootLookup",
+        "NormalizeRepositoryPathOptions",
+        "UnsafeProjectPathError",
         "candidate",
         "containsTraversal",
         "current",
@@ -3060,27 +3379,24 @@
         "findGitRoot",
         "findRealExistingAncestor",
         "gitRoot",
-        "GitRootLookup",
         "isContainedPath",
         "isMissingPathError",
+        "normalizeRepositoryPath",
         "normalized",
         "normalizedPath",
-        "normalizeRepositoryPath",
-        "NormalizeRepositoryPathOptions",
         "parent",
         "pathToCandidate",
         "realExistingAncestor",
         "realRoot",
         "relativePath",
-        "resolved",
-        "resolvedCwd",
-        "resolvedRoot",
         "resolveProjectRoot",
         "resolveSafeHarnixPath",
         "resolveSafeProjectPath",
+        "resolved",
+        "resolvedCwd",
+        "resolvedRoot",
         "result",
-        "root",
-        "UnsafeProjectPathError"
+        "root"
       ],
       "importTargets": [
         "node:child_process",
@@ -3099,13 +3415,13 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "FindInitializedProjectOptions",
+        "InitializedProjectResolution",
         "config",
         "current",
         "discovered",
         "findInitializedProject",
-        "FindInitializedProjectOptions",
         "fromCwd",
-        "InitializedProjectResolution",
         "invalid",
         "isMissing",
         "isUsableAbsoluteDirectory",
@@ -3125,20 +3441,39 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1409,
-      "contentHash": "25e5975141cd9222f3cc94486dd4c1027a8a676fa6754d164e336bc58db230d0",
+      "byteLength": 772,
+      "contentHash": "fa4c349d77090bee2e495f6d2059359fc3c98d1be597525a64fad44bf1565b99",
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "legacyMappings",
+        "character",
+        "index",
+        "matchesSafeGlob",
+        "pattern",
+        "regexSyntax"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/utils/safe-glob.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1428,
+      "contentHash": "81ef4f77a9be266e22666c0fbebd28c0e14f60e2a726b416d1e1ba88004566a0",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
         "LegacyStackId",
+        "StackProfile",
+        "legacyMappings",
         "legacyStackIds",
         "normalizeLegacyStackIds",
-        "sorted",
-        "StackProfile"
+        "sorted"
       ],
       "importTargets": [
-        "../catalog/catalog.js"
+        "../catalog/catalog.js",
+        "./order.js"
       ],
       "kind": "source",
       "packagePath": "",
@@ -3151,6 +3486,13 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "HomeResolver",
+        "ResolveUserPlatformRootsOptions",
+        "SelectedUserPlatformRoots",
+        "UnsafeUserPathError",
+        "UserGlobalPlatform",
+        "UserPathRoot",
+        "UserPlatformRoots",
         "assertCodexHome",
         "assertDirectoryIfItExists",
         "candidate",
@@ -3167,22 +3509,15 @@
         "findRealExistingAncestor",
         "hasControlCharacter",
         "home",
-        "HomeResolver",
         "isAbsolutePath",
         "isContainedPath",
         "isFilesystemRoot",
         "isMissingPathError",
         "isSafeLogicalPath",
         "native",
-        "normalized",
-        "normalizedPath",
         "normalizeUserRelativePath",
-        "parent",
-        "path",
-        "pathToCandidate",
-        "realExistingAncestor",
-        "realpathIfExists",
-        "realRoot"
+        "normalized",
+        "normalizedPath"
       ],
       "importTargets": [
         "node:fs/promises",
@@ -3212,8 +3547,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 13050,
-      "contentHash": "c804911189f7384bd3d690ba7d181a58ed47328ca0e3deeae1a0a585907418cd",
+      "byteLength": 13571,
+      "contentHash": "29999e4920fdea8d742248c7a9f2375944491db67f852abd98d5000aa39a9947",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -3253,8 +3588,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 22621,
-      "contentHash": "03f826f346383466b33b046185489bb35c4a49fec1240d31f84435875f49ffdd",
+      "byteLength": 23618,
+      "contentHash": "2700d61bfa3ea57c0951f6667f09dfc8d4a168453212fe147d0532bc5b984b50",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -3274,6 +3609,7 @@
         "invalid",
         "journal",
         "kiro",
+        "legacy",
         "manifest",
         "manifestPath",
         "migrated",
@@ -3284,12 +3620,11 @@
         "report",
         "root",
         "secret",
+        "source",
         "steering",
         "taskRecord",
         "taskRoot",
-        "temporaryRepository",
-        "temporaryUserHome",
-        "timestamp"
+        "temporaryRepository"
       ],
       "importTargets": [
         "../../src/commands/doctor.js",
@@ -3570,8 +3905,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8279,
-      "contentHash": "cbe127d62816269023497999df8d3a5893cb9de93bbdaf86f0f3d2ebf5331501",
+      "byteLength": 9180,
+      "contentHash": "c07ee8147b1d1940bff439cbcc0cd2ed1815193ffb82511f596c2ba140da4fd7",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -3587,6 +3922,7 @@
         "modifiedLegacyOriginal",
         "modifiedLegacyPath",
         "obsolete",
+        "reconciled",
         "result",
         "root",
         "temporaryRepository",
@@ -3598,6 +3934,7 @@
         "../../src/core/config/config.js",
         "../../src/utils/hashing.js",
         "../../src/utils/managed-files.js",
+        "../../src/version.js",
         "../support/temporary-repository.js",
         "node:fs/promises",
         "node:path",
@@ -3678,8 +4015,8 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
-        "agents",
         "DesiredGlobalJsonMember",
+        "agents",
         "home",
         "hook",
         "hooks",
@@ -3735,8 +4072,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 21387,
-      "contentHash": "43227835c422a70ee244125fbb37b590aa4febbdb05a5587165dc8b015d530f7",
+      "byteLength": 21553,
+      "contentHash": "843f9098715d778e9c4adde12c0c1db258f988b98d6cbaeb4b33e9defc81df4c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -3791,9 +4128,9 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "IsolatedUserHomeModule",
         "environment",
         "home",
-        "IsolatedUserHomeModule",
         "launcherDirectory",
         "pathKey"
       ],
@@ -3842,20 +4179,21 @@
       "language": "typescript"
     },
     {
-      "byteLength": 10113,
-      "contentHash": "135cb918cb1d7db30b706b00b222824b6f502bbb8e55eb20913f289508fc1af0",
+      "byteLength": 11172,
+      "contentHash": "e09d3502fd714227d5088071ab2353603ad00aeb4a790b741d622984f72c51fa",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "ReleaseScanner",
         "file",
         "fixture",
         "home",
         "path",
         "project",
         "releaseScanner",
-        "ReleaseScanner",
         "root",
         "samples",
+        "separators",
         "shared",
         "slowMedian",
         "slowP95",
@@ -3965,11 +4303,32 @@
       "language": "typescript"
     },
     {
+      "byteLength": 1170,
+      "contentHash": "8c8b2bf8cb06f74ff012b3b5c2a0a809426953e1e9cd8583d633b14c428a0c3e",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "consumed",
+        "input",
+        "value"
+      ],
+      "importTargets": [
+        "../../src/utils/bounded-input.js",
+        "ab",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/bounded-input.test.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 5014,
       "contentHash": "5780660b3b09e2b472c0575a457c993b4c93e30e4c21bb323633df4c4c62c15f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "StackCatalog",
         "candidate",
         "catalog",
         "conflicting",
@@ -3978,7 +4337,6 @@
         "missing",
         "normalized",
         "provenance",
-        "StackCatalog",
         "unsafe",
         "value"
       ],
@@ -4007,8 +4365,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5661,
-      "contentHash": "a79057f51560711eba04d9b365a8d325dd599b14cb23bdf2acb8bfc07ceb24f1",
+      "byteLength": 6060,
+      "contentHash": "57a6106c671d904a9fc85e6335bac91fb5def9ab77d6e2b182288a800c407d12",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -4034,12 +4392,15 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4978,
-      "contentHash": "f625083274a5da9528dbe357afc4555c5c37bd24474c793ecc518020fc4cdac9",
+      "byteLength": 10095,
+      "contentHash": "d40d7a5cd80eac4625e1cace222896506136875943d900e5923a41e780c08db6",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "ContextManifest",
+        "contextManifest",
         "entries",
+        "manifest",
         "ranked",
         "result",
         "root",
@@ -4048,6 +4409,8 @@
       ],
       "importTargets": [
         "../../src/core/context/context.js",
+        "../../src/utils/hashing.js",
+        "../../src/utils/paths.js",
         "../support/temporary-repository.js",
         "node:fs/promises",
         "node:path",
@@ -4065,15 +4428,15 @@
       "headings": [],
       "identifiers": [
         "App",
+        "Example",
+        "Main",
+        "Sample",
         "createFixture",
         "destination",
-        "Example",
         "external",
-        "Main",
         "native",
         "result",
         "root",
-        "Sample",
         "web",
         "writeFixtureFile"
       ],
@@ -4095,11 +4458,11 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "FileLockClock",
+        "HarnixFileLockRecord",
         "clock",
         "clockAt",
-        "FileLockClock",
         "freshPath",
-        "HarnixFileLockRecord",
         "home",
         "inspections",
         "lock",
@@ -4126,11 +4489,30 @@
       "language": "typescript"
     },
     {
-      "byteLength": 26522,
-      "contentHash": "b576f12ff42337e826d4e701eea127ade2cd031396816a45d8af7a11370207ef",
+      "byteLength": 817,
+      "contentHash": "dafa991dd33ce314032debeaeeb330ee0e755e3ab2ef0204c57ecaebf7f4760f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "denied",
+        "missing"
+      ],
+      "importTargets": [
+        "../../src/utils/filesystem.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/filesystem.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 30141,
+      "contentHash": "baecad02067cd0becfa0988d01537e6a0560e197c67f5e68fe3cd2b4b6e08ad0",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "UserPathRoot",
         "afterInstall",
         "afterUpdate",
         "agentsPath",
@@ -4138,6 +4520,7 @@
         "collision",
         "concurrentRoot",
         "concurrentTarget",
+        "document",
         "failure",
         "first",
         "firstRequest",
@@ -4160,9 +4543,7 @@
         "second",
         "secondManifest",
         "secondRequest",
-        "target",
-        "temporaryGlobalRoot",
-        "temporaryRoot"
+        "selector"
       ],
       "importTargets": [
         "../../src/utils/atomic-write.js",
@@ -4185,6 +4566,7 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "UserPlatformRoots",
         "acquired",
         "after",
         "agentsPath",
@@ -4204,8 +4586,7 @@
         "released",
         "result",
         "roots",
-        "temporaryUserHome",
-        "UserPlatformRoots"
+        "temporaryUserHome"
       ],
       "importTargets": [
         "../../src/commands/global-uninstall.js",
@@ -4253,9 +4634,9 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "JournalEntry",
         "all",
         "entries",
-        "JournalEntry",
         "limited",
         "path",
         "result",
@@ -4280,11 +4661,11 @@
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "ManifestEntry",
         "agentsPath",
         "canonicalSkillPath",
         "external",
         "manifest",
-        "ManifestEntry",
         "modifiedPath",
         "non",
         "nonRegularSkillPath",
@@ -4341,19 +4722,30 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2010,
-      "contentHash": "c7431fb16fa3ab061f2372651a6e896c945c3dc54a700c6e1a9b5cad3c1068cb",
+      "byteLength": 5001,
+      "contentHash": "1778b4515f5a335446ea8321ccf119913e60f6f4dbc1b2e897d3901d51f13a8a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "entryPath",
+        "findFiles",
         "findPackageJsonFiles",
+        "nonProductDirectories",
+        "offenders",
         "packageJson",
         "packageJsonPath",
-        "repositoryRoot"
+        "path",
+        "paths",
+        "pnpmfileUrl",
+        "productPackage",
+        "repositoryRoot",
+        "root",
+        "temporaryRepository"
       ],
       "importTargets": [
+        "../support/temporary-repository.js",
         "node:fs",
+        "node:fs/promises",
         "node:path",
         "node:url",
         "vitest"
@@ -4417,20 +4809,23 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2710,
-      "contentHash": "4cfd407b518153ed15cc9de699704da6651103a70e133d351d524075ecc56883",
+      "byteLength": 4275,
+      "contentHash": "455c05ce37ac0ff4a9ae590d9746838b7be9642278d74847ce2d2b91d717926f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "PaymentService",
         "cache",
         "leaked",
+        "legitimateSource",
+        "limits",
         "map",
-        "PaymentService",
         "query",
         "record",
         "refreshed",
         "root",
-        "temporaryRepository"
+        "temporaryRepository",
+        "value"
       ],
       "importTargets": [
         "../../../src/core/repo-map/service.js",
@@ -4447,20 +4842,22 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6718,
-      "contentHash": "1a84652b24ab778812bd3be35b91c53bcc2b7b920e8475f4e74bcd76a00f1720",
+      "byteLength": 7200,
+      "contentHash": "f1e562befa94ddfc49504744d9f8a52f9f3fe89b23c80d6185421c86d785704b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "GuideSource",
         "base",
+        "collision",
         "diskPaths",
         "entries",
         "external",
         "first",
         "guideRoot",
-        "GuideSource",
         "markdownFiles",
         "nested",
+        "result",
         "root",
         "second",
         "selected",
@@ -4481,25 +4878,47 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7527,
-      "contentHash": "928af73fbc1ecfad67a6013b4294c7e4326a6a4de20905973f8a985b27afe818",
+      "byteLength": 651,
+      "contentHash": "c0fed1ec56db26a9f351e16f9ec1cd121704c4e4287cf0c844aee24fc910765f",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [],
+      "importTargets": [
+        "../../src/utils/safe-glob.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/safe-glob.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 12297,
+      "contentHash": "d0998ce2c5ff5622a155695f79dfa74e4a884427e0943ffa3e93b5b5e52503b8",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "TaskRecord",
         "blocked",
         "blocker",
         "candidate",
+        "check",
         "completed",
         "done",
         "evidence",
         "external",
+        "fixture",
+        "id",
         "inProgress",
+        "legacyPass",
+        "readable",
         "root",
         "task",
         "taskFixture",
-        "TaskRecord",
+        "taskV2Fixture",
         "temporaryRepository",
         "timestamp",
+        "validationPlan",
         "verifying"
       ],
       "importTargets": [
@@ -4542,11 +4961,61 @@
       "language": "typescript"
     },
     {
-      "byteLength": 484,
-      "contentHash": "841b04a3e4efa36a12593f02e9153ae4c261b99c5dee159c5154d855e2cee8c8",
+      "byteLength": 7481,
+      "contentHash": "d2d912b9a17b562286aeecd942e2f1cdfd2da8b0e73e4309a72e36b6de0b1e3e",
       "extension": "ts",
       "headings": [],
-      "identifiers": [],
+      "identifiers": [
+        "a",
+        "b",
+        "changed",
+        "changedCriterion",
+        "evidenceOne",
+        "evidenceTwo",
+        "external",
+        "first",
+        "firstTask",
+        "fixtureRepository",
+        "harnixRoot",
+        "linked",
+        "missing",
+        "previous",
+        "recordedAt",
+        "root",
+        "second",
+        "secondTask",
+        "snapshot",
+        "stored",
+        "task",
+        "taskFixture",
+        "temporaryRepository",
+        "timestamp",
+        "unmatched",
+        "withoutB"
+      ],
+      "importTargets": [
+        "../../src/core/tasks/task.js",
+        "../../src/core/verification/input-freshness.js",
+        "../support/temporary-repository.js",
+        "node:fs/promises",
+        "node:path",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/verification-inputs.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 959,
+      "contentHash": "f80c5252e36c235c781a8d68563d1171f3329cf79d709469b1b87b3bd0fd914b",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "internal",
+        "snapshot",
+        "workflow"
+      ],
       "importTargets": [
         "../../src/cli-program.js",
         "vitest"
@@ -4572,11 +5041,13 @@
       "language": "typescript"
     },
     {
-      "byteLength": 10238,
-      "contentHash": "381fd7dfdb249082e1837494c2427ae49bbbb584e7b85f0a7d6232783163695f",
+      "byteLength": 12738,
+      "contentHash": "aae9f8bb6534d8415c42603efa2514c1d9090d95bfcd52cdad70d3f3cbf05aa5",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "TaskRecord",
+        "antigravity",
         "antigravityFirst",
         "antigravityLater",
         "codex",
@@ -4589,10 +5060,11 @@
         "malformedInvocation",
         "missingInvocation",
         "output",
+        "payload",
+        "payloads",
         "root",
         "second",
         "task",
-        "TaskRecord",
         "temporaryRepository",
         "timestamp"
       ],
@@ -4611,24 +5083,50 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4167,
-      "contentHash": "a052b5b9a556338b025a1fd12a1e40207e4aaa7213a07daca9cd0280d5449e98",
+      "byteLength": 20649,
+      "contentHash": "27bbe8f07eae7dbefb4031889731c578f16edd08170c55b9b0bfdfcdef043d85",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "TaskRecord",
+        "TaskRecordV1",
+        "candidate",
+        "completed",
+        "completedAt",
+        "completionEvidence",
+        "context",
+        "contextPath",
+        "empty",
+        "expanded",
         "full",
+        "harnixRoot",
+        "journal",
+        "legacyPass",
+        "migrationTime",
+        "originalJournal",
         "planning",
         "ready",
+        "replanning",
+        "retryAt",
+        "retryJournal",
         "root",
+        "sidecar",
+        "sidecarPath",
+        "snapshot",
         "task",
+        "taskV2",
         "temporaryRepository",
         "timestamp",
-        "verifying"
+        "value",
+        "verifying",
+        "withEvidence"
       ],
       "importTargets": [
         "../../src/commands/init.js",
         "../../src/commands/internal-workflow.js",
+        "../../src/core/journal/journal.js",
         "../../src/core/tasks/task.js",
+        "../../src/utils/hashing.js",
         "../support/temporary-repository.js",
         "node:fs/promises",
         "node:path",
@@ -4640,25 +5138,31 @@
       "language": "typescript"
     },
     {
-      "byteLength": 12662,
-      "contentHash": "b082a9074541390d33a594bcfc41d07cee44de40c65c3a0be9afdd3c93d53787",
+      "byteLength": 16822,
+      "contentHash": "b05cc5b78f2644201cd0419bd0cc67bca158f392a3a86259aae50748cfb8c3a2",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "active",
         "calls",
+        "candidate",
+        "completed",
         "current",
+        "digest",
         "evidence",
         "finding",
         "finished",
         "focused",
         "journal",
+        "journalEntries",
         "now",
         "ready",
         "root",
         "task",
         "temporaryRepository",
-        "verifying"
+        "undigestedEvidence",
+        "verifying",
+        "withoutDigest"
       ],
       "importTargets": [
         "../../src/core/journal/journal.js",
@@ -4676,8 +5180,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1467,
-      "contentHash": "62b42bafa0bbcb1c00ed8583cd8a46537eb5459cae5c78740909e53cc6b174eb",
+      "byteLength": 1807,
+      "contentHash": "691e13dbf228d460aef3a3e5b92f3619e1d7fb37cedbcce74d38f64ff1c85d6f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -4688,6 +5192,7 @@
         "workflowEntry"
       ],
       "importTargets": [
+        "../../src/core/repo-map/store.js",
         "../../src/templates/harnix/workflow.js",
         "../../src/utils/hashing.js",
         "../../src/version.js",
@@ -4702,8 +5207,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4795,
-      "contentHash": "cea9467b848436412dace0abb1bbad9df0ed1fbfb1b0a35df96d6a2401f2229e",
+      "byteLength": 5916,
+      "contentHash": "75f2ca3367ef07cecc48c051acc332edb0cfcec4e82fd37c4ead9b9c53d9eb02",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -4718,12 +5223,14 @@
         "implement",
         "name",
         "needle",
+        "packageVersion",
         "readSkill",
         "skillNames",
         "workflowSkills",
         "workflowSource"
       ],
       "importTargets": [
+        "../../src/skills/catalog.js",
         "node:fs/promises",
         "node:url",
         "vitest"
@@ -4734,15 +5241,17 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5528,
-      "contentHash": "80cdfa01ff8cdbf4a96bb27f9aa639734b64b64c56190b3a511fba412a5df189",
+      "byteLength": 7073,
+      "contentHash": "299c12a4551c6317b0ff9a752753e8cfa086548352d60391c4374292ca0e5f13",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "agentInstructions",
+        "repositoryAgentInstructions",
         "root",
         "skill",
-        "temporaryRepository"
+        "temporaryRepository",
+        "vietnameseTaskPolicy"
       ],
       "importTargets": [
         "../../src/commands/init.js",
