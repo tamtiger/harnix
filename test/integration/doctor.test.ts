@@ -8,7 +8,7 @@ import { setupPlatforms } from "../../src/commands/setup.js";
 import { GlobalManagedTransactionError } from "../../src/utils/global-managed-files.js";
 import { readManifest, writeManifest } from "../../src/utils/managed-files.js";
 import { sha256 } from "../../src/utils/hashing.js";
-import type { TaskRecord } from "../../src/core/tasks/task.js";
+import { cancelTask, type TaskRecord } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
 
@@ -59,6 +59,28 @@ describe("diagnoseProject Doctor v2", () => {
     const report = await diagnoseProject({ root, ...globalOptions(home) });
 
     expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "legacy-task-schema", severity: "warning", path: `tasks/${legacy.id}/task.json`, fixable: false }));
+    await expect(readFile(path, "utf8")).resolves.toBe(source);
+  });
+
+  it("treats a cancelled legacy task as terminal and fails closed when it remains active", async () => {
+    const root = await temporaryRepository(); const home = await temporaryUserHome();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const cancelled = cancelTask(
+      taskRecord("20260813-120000-cancelled", "in_progress", "implementing"),
+      { reason: "Người dùng dừng task không còn cần thiết.", authorizedBy: "user" },
+      timestamp,
+    );
+    const path = join(root, ".harnix", "tasks", cancelled.id, "task.json");
+    await mkdir(join(root, ".harnix", "tasks", cancelled.id), { recursive: true });
+    const source = `${JSON.stringify(cancelled, null, 2)}\n`;
+    await writeFile(path, source);
+    await writeFile(join(root, ".harnix", "tasks", ".active"), `${cancelled.id}\n`);
+
+    const report = await diagnoseProject({ root, ...globalOptions(home) });
+
+    expect(report.project.status).toBe("invalid");
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "legacy-task-schema", severity: "info", path: `tasks/${cancelled.id}/task.json`, fixable: false }));
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "task-active-cancelled", severity: "error", path: `tasks/${cancelled.id}/task.json`, fixable: false }));
     await expect(readFile(path, "utf8")).resolves.toBe(source);
   });
 

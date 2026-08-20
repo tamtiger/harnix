@@ -2,9 +2,9 @@ import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { auditWorkflow, finishWorkflow, inspectWorkflow, saveWorkflow, snapshotWorkflow } from "../../src/commands/internal-workflow.js";
+import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, saveWorkflow, snapshotWorkflow } from "../../src/commands/internal-workflow.js";
 import { appendJournal } from "../../src/core/journal/journal.js";
-import { createTaskV2MigrationEvidence, saveTask, setActiveTask, transitionTask, type TaskRecord, type TaskRecordV1 } from "../../src/core/tasks/task.js";
+import { cancelTask, createTaskV2MigrationEvidence, saveTask, setActiveTask, transitionTask, type TaskRecord, type TaskRecordV1 } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 import { initializeProject } from "../../src/commands/init.js";
 import { sha256 } from "../../src/utils/hashing.js";
@@ -139,6 +139,58 @@ describe("hidden workflow persistence operations", () => {
     await expect(readFile(retryJournal, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
     const journal = await readFile(originalJournal, "utf8");
     expect(journal.match(new RegExp(`${completed.id}-completion`, "gu"))).toHaveLength(1);
+    expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
+  });
+
+  it("cancels an active task through the hidden transport and writes its cancellation journal", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const planning = task("planning", "planning");
+    planning.evidence = [{ id: "failed", recordedAt: timestamp, result: "fail", exitCode: 1, summary: "blocked", artifactPaths: [] }];
+    await saveWorkflow(root, { task: planning });
+
+    await expect(cancelWorkflow(root, { reason: "Người dùng dừng task.", authorizedBy: "user" }, timestamp)).resolves.toMatchObject({
+      status: "cancelled",
+      checkpoint: "cancelling",
+      cancelledAt: timestamp,
+    });
+    expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
+    const journal = await readFile(join(root, ".harnix", "workspace", "tam", "journal", "2026-08-13.jsonl"), "utf8");
+    expect(journal).toContain('"kind":"cancellation"');
+    expect(journal).toContain('"failed"');
+  });
+
+  it("requires workflow --cancel instead of allowing save to forge a cancelled task", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const planning = task("planning", "planning");
+    await saveWorkflow(root, { task: planning });
+    await expect(saveWorkflow(root, { task: {
+      ...planning,
+      status: "cancelled",
+      checkpoint: "cancelling",
+      cancellation: { reason: "forged", authorizedBy: "user" },
+      cancelledAt: "2026-08-13T00:01:00.000Z",
+      updatedAt: "2026-08-13T00:01:00.000Z",
+    } })).rejects.toThrow(/workflow --cancel/iu);
+  });
+
+  it("recovers a cancelled task into its original journal date across a UTC day boundary", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const cancelledAt = "2026-08-13T23:59:59.000Z";
+    const retryAt = "2026-08-14T00:00:01.000Z";
+    const cancelled = cancelTask(task("planning", "planning"), { reason: "Stop safely", authorizedBy: "user" }, cancelledAt);
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, cancelled);
+    await setActiveTask(harnixRoot, cancelled.id);
+
+    await expect(cancelWorkflow(root, undefined, retryAt)).resolves.toMatchObject({ status: "cancelled", cancelledAt });
+
+    const originalJournal = join(harnixRoot, "workspace", "tam", "journal", "2026-08-13.jsonl");
+    const retryJournal = join(harnixRoot, "workspace", "tam", "journal", "2026-08-14.jsonl");
+    await expect(readFile(originalJournal, "utf8")).resolves.toContain(`${cancelled.id}-cancellation`);
+    await expect(readFile(retryJournal, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
     expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
   });
 

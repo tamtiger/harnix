@@ -1,13 +1,13 @@
 ---
 name: harnix-finish-work
-description: Use when a Harnix task is fully verified and needs safe completion persistence, journaling, active-pointer cleanup, and an evidence-based handoff.
+description: Use when a Harnix task needs safe completion or explicit cancellation persistence, journaling, active-pointer cleanup, and an evidence-based handoff.
 metadata:
-  version: "1.0.8"
+  version: "1.0.9"
 ---
 
-# Finish verified Harnix work
+# Finish or cancel Harnix work
 
-Complete persisted workflow state without changing Git integration state. Verification must already be real and current.
+Close persisted workflow state truthfully without changing Git integration state. Successful completion requires current verification; explicit cancellation preserves incomplete or failed evidence without claiming success.
 
 ## Harnix activation guard
 
@@ -17,7 +17,13 @@ Read `.harnix/workflow.md`, the active task, and its recorded evidence.
 
 ## Incoming state
 
-Accept only `verifying/finishing` with every required acceptance criterion `met` or explicitly `waived`, every required validation backed by fresh evidence, and no unresolved blocker. If any prerequisite is missing or the checkpoint is still `verifying`, stop and return to `harnix-check`.
+Accept only one of these inputs:
+
+- Accept only `verifying/finishing` for completion, with every required criterion `met` or explicitly `waived`, every required validation backed by fresh evidence, and no unresolved blocker;
+- any unfinished state plus an explicit user instruction to cancel the task and a concise non-secret reason;
+- Accept `cancelled/cancelling` only for partial cancellation recovery.
+
+If completion prerequisites are missing, stop and return to `harnix-check`; never reinterpret “complete” as cancellation without clarifying when the user's intent is ambiguous.
 
 ## Final state review
 
@@ -43,15 +49,25 @@ Use this order:
 
 Never clear the active pointer first. Never mark completed merely because time or budget is ending. Preserve recoverable task state if a later step fails.
 
-Do not promote project learning automatically. Record a reviewable learning candidate only when the workflow contract and evidence threshold allow it; render its statement solely as JSON-string data inside the fixed Harnix untrusted-learning boundary, keep risk findings redacted, and leave user-owned specs unchanged until explicit review.
+## Persist cancellation safely
+
+Cancellation does not run completion gates, change criteria, delete evidence, or bump a release version merely to close the task. Use this order:
+
+1. confirm explicit user authority and a concise reason without credentials, prompts, command output, or machine paths;
+2. confirm `harnix workflow --inspect` still returns the intended unfinished task, or `cancelled/cancelling` for recovery;
+3. for the first cancellation, send `{ "reason": <text>, "authorizedBy": "user" }` as bounded JSON on stdin and run `harnix workflow --cancel`; for recovery, run `harnix workflow --cancel` without replacing persisted cancellation metadata;
+4. confirm the result is `cancelled/cancelling`, its evidence is unchanged, and a new inspection has no active task;
+5. report the outcome as cancelled/incomplete, never completed.
+
+The command persists terminal task state before the cancellation journal and clears only the matching active pointer last. On partial failure, preserve `cancelled/cancelling` for idempotent recovery instead of editing `.active` or the journal directly.
 
 ## Persist
 
-Before finish, record actual evidence, waivers, omitted checks, residual risks, and any remaining manual action through `harnix workflow --save` with one bounded JSON envelope on stdin. Completion time and journal/archive state belong to `harnix workflow --finish`. Do not fabricate a clean worktree or claim unrelated changes as part of the task.
+Before successful finish, record actual evidence, waivers, omitted checks, residual risks, and any remaining manual action through `harnix workflow --save` with one bounded JSON envelope on stdin. Completion time and journal/archive state belong to `harnix workflow --finish`; cancellation metadata and its journal/archive state belong to `harnix workflow --cancel`. Do not fabricate a clean worktree or claim unrelated changes as part of the task.
 
 ## Exit
 
-Report the delivered outcome first, followed by fresh verification evidence, omitted checks, and residual risks. If completion persistence was partial, report the exact durable state and recovery step.
+Report the delivered outcome first, followed by fresh verification evidence, omitted checks, and residual risks. For cancellation, say explicitly that the task ended incomplete and why. If terminal persistence was partial, report the exact durable state and recovery step.
 
 Never commit, branch, merge, push, publish, create a pull request, delete a worktree, or discard user changes. Those are separate user-authorized actions outside Harnix finishing.
 

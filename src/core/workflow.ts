@@ -5,9 +5,9 @@ import { inspectContextSelectionChanges, loadContextSelectionSnapshot, type Cont
 import { readConfig } from "./config/config.js";
 import { readRepoMap } from "./repo-map/store.js";
 import { guideOutputPath, selectGuideSources } from "../guides/catalog.js";
-import type { Evidence, TaskMode, TaskRecord } from "./tasks/task.js";
+import type { Evidence, TaskCancellation, TaskMode, TaskRecord } from "./tasks/task.js";
 import { appendJournal, searchJournal } from "./journal/journal.js";
-import { archiveTask, saveTask, transitionTask } from "./tasks/task.js";
+import { archiveTask, cancelTask, saveTask, transitionTask } from "./tasks/task.js";
 import { resolveActiveTask } from "./tasks/task.js";
 import { resolveSafeProjectPath } from "../utils/paths.js";
 import { compareCodeUnits } from "../utils/order.js";
@@ -116,6 +116,36 @@ export async function finishWorkflowTask(harnixRoot: string, journalPath: string
   await (dependencies.archiveTask ?? archiveTask)(harnixRoot, completed);
   return completed;
 }
+export async function cancelWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, cancellation: TaskCancellation | undefined, now = new Date().toISOString(), dependencies: WorkflowFinishDependencies = {}): Promise<TaskRecord> {
+  const recoveringCancelledTask = task.status === "cancelled" && task.checkpoint === "cancelling";
+  let cancelled = task;
+  if (!recoveringCancelledTask) {
+    if (cancellation === undefined) throw new Error("Workflow cancellation requires explicit user authority and a reason.");
+    cancelled = cancelTask(task, cancellation, now);
+    await (dependencies.saveTask ?? saveTask)(harnixRoot, cancelled);
+  }
+  const cancellationEntry = {
+    generator: "harnix" as const,
+    schemaVersion: 1 as const,
+    id: `${cancelled.id}-cancellation`,
+    recordedAt: cancelled.cancelledAt!,
+    developer,
+    taskId: cancelled.id,
+    kind: "cancellation" as const,
+    summary: `Cancelled: ${cancelled.title} — ${cancelled.cancellation!.reason}`,
+    evidenceIds: cancelled.evidence.map((evidence) => evidence.id),
+  };
+  if (!recoveringCancelledTask) {
+    await (dependencies.appendJournal ?? appendJournal)(journalPath, cancellationEntry);
+  } else {
+    const journal = await (dependencies.searchJournal ?? searchJournal)(journalPath);
+    if (!journal.entries.some((entry) => entry.id === cancellationEntry.id)) {
+      await (dependencies.appendJournal ?? appendJournal)(journalPath, cancellationEntry);
+    }
+  }
+  await (dependencies.archiveTask ?? archiveTask)(harnixRoot, cancelled);
+  return cancelled;
+}
 export async function continueWorkflowTask(harnixRoot: string): Promise<{ task: TaskRecord; contextPaths: string[]; contextDrift: ContextDrift } | undefined> {
   const task = await resolveActiveTask(harnixRoot);
   if (task === undefined) return undefined;
@@ -143,7 +173,6 @@ function completionEvidenceIds(task: TaskRecord): string[] {
   }
   return [...supporting].sort(compareCodeUnits);
 }
-
 export async function taskContextDrift(projectRoot: string, harnixRoot: string, task: TaskRecord): Promise<ContextDrift> {
   try {
     const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
@@ -207,12 +236,13 @@ function routeActiveTask(request: WorkflowRouteFacts, active: NonNullable<Workfl
     return active.checkpoint === "finishing" ? decision("resume", active.mode, "harnix-finish-work", "active-stage") : decision("resume", active.mode, "harnix-check", "active-stage");
   }
   if (active.status === "completed") return decision("resume", active.mode, "harnix-continue", "completed-active");
+  if (active.status === "cancelled") return decision("resume", active.mode, "harnix-continue", "cancelled-active");
   return decision("fail-closed", undefined, "harnix-continue", "invalid-active-state");
 }
 
 function isKnownActiveState(active: NonNullable<WorkflowRouteFacts["activeTask"]>): boolean {
   const legal: Record<TaskRecord["status"], readonly TaskRecord["checkpoint"][]> = {
-    planning: ["triage", "planning", "replan"], ready: ["ready", "replan"], in_progress: ["implementing", "debugging", "replan"], verifying: ["verifying", "debugging", "replan", "finishing"], completed: ["finishing"], blocked: ["triage", "planning", "ready", "implementing", "debugging", "replan", "verifying", "finishing"],
+    planning: ["triage", "planning", "replan"], ready: ["ready", "replan"], in_progress: ["implementing", "debugging", "replan"], verifying: ["verifying", "debugging", "replan", "finishing"], completed: ["finishing"], cancelled: ["cancelling"], blocked: ["triage", "planning", "ready", "implementing", "debugging", "replan", "verifying", "finishing"],
   };
   if (active.status === "blocked") {
     return active.blocker !== undefined && legal[active.blocker.resumeStatus].includes(active.checkpoint);

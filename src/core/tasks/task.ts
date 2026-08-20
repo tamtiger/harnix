@@ -5,8 +5,8 @@ import { contextSelectionResultHash, saveContextSelectionSnapshot, validateConte
 import { saveContextManifest, validateContextManifest, type ContextManifest } from "../context/context.js";
 
 export type TaskMode = "lite" | "full";
-export type TaskStatus = "planning" | "ready" | "in_progress" | "verifying" | "blocked" | "completed";
-export type WorkflowCheckpoint = "triage" | "planning" | "ready" | "implementing" | "debugging" | "replan" | "verifying" | "finishing";
+export type TaskStatus = "planning" | "ready" | "in_progress" | "verifying" | "blocked" | "completed" | "cancelled";
+export type WorkflowCheckpoint = "triage" | "planning" | "ready" | "implementing" | "debugging" | "replan" | "verifying" | "finishing" | "cancelling";
 export interface AcceptanceCriterion { id: string; text: string; status: "pending" | "met" | "waived"; evidenceIds: string[]; waiverReason?: string; }
 interface ValidationCheckBase { id: string; description: string; command?: string; scope: "focused" | "full"; required: boolean; }
 export interface ValidationCheckV1 extends ValidationCheckBase { criterionIds?: never; inputs?: never; }
@@ -17,7 +17,8 @@ export interface EvidenceV1 extends EvidenceBase { inputDigest?: never; }
 export interface EvidenceV2 extends EvidenceBase { inputDigest?: string; }
 export type Evidence = EvidenceV1 | EvidenceV2;
 export interface TaskBlocker { kind: "decision" | "authority" | "credential" | "external" | "repository"; summary: string; nextAction: string; resumeStatus: "planning" | "ready" | "in_progress" | "verifying"; }
-interface TaskRecordBase { generator: "harnix"; id: string; title: string; mode: TaskMode; status: TaskStatus; checkpoint: WorkflowCheckpoint; goal: string; nonGoals: string[]; acceptanceCriteria: AcceptanceCriterion[]; relevantPaths: string[]; relevantSpecs: string[]; blocker?: TaskBlocker; createdAt: string; updatedAt: string; completedAt?: string; }
+export interface TaskCancellation { reason: string; authorizedBy: "user"; }
+interface TaskRecordBase { generator: "harnix"; id: string; title: string; mode: TaskMode; status: TaskStatus; checkpoint: WorkflowCheckpoint; goal: string; nonGoals: string[]; acceptanceCriteria: AcceptanceCriterion[]; relevantPaths: string[]; relevantSpecs: string[]; blocker?: TaskBlocker; cancellation?: TaskCancellation; createdAt: string; updatedAt: string; completedAt?: string; cancelledAt?: string; }
 export interface TaskRecordV1 extends TaskRecordBase { schemaVersion: 1; validationPlan: ValidationCheckV1[]; evidence: EvidenceV1[]; }
 export interface TaskRecordV2 extends TaskRecordBase { schemaVersion: 2; validationPlan: ValidationCheckV2[]; evidence: EvidenceV2[]; }
 export type TaskRecord = TaskRecordV1 | TaskRecordV2;
@@ -38,19 +39,29 @@ export function createTaskV2MigrationEvidence(taskId: string, recordedAt: string
 
 export class TaskValidationError extends Error { override name = "TaskValidationError"; }
 const taskIdPattern = /^\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$/u;
-const transitions: Record<TaskStatus, TaskStatus[]> = { planning: ["ready", "blocked"], ready: ["in_progress", "blocked"], in_progress: ["verifying", "blocked"], verifying: ["completed", "blocked"], blocked: ["planning", "ready", "in_progress", "verifying"], completed: [] };
+const transitions: Record<TaskStatus, TaskStatus[]> = {
+  planning: ["ready", "blocked"],
+  ready: ["in_progress", "blocked"],
+  in_progress: ["verifying", "blocked"],
+  verifying: ["completed", "blocked"],
+  blocked: ["planning", "ready", "in_progress", "verifying"],
+  completed: [],
+  cancelled: [],
+};
+const cancellableStatuses = new Set<TaskStatus>(["planning", "ready", "in_progress", "verifying", "blocked"]);
 const legalCheckpoints: Record<Exclude<TaskStatus, "blocked">, readonly WorkflowCheckpoint[]> = {
   planning: ["triage", "planning", "replan"],
   ready: ["ready", "replan"],
   in_progress: ["implementing", "debugging", "replan"],
   verifying: ["verifying", "debugging", "replan", "finishing"],
   completed: ["finishing"],
+  cancelled: ["cancelling"],
 };
 
 export function validateTask(value: unknown, options: TaskValidationOptions = {}): TaskRecord {
   if (!isRecord(value) || value.generator !== "harnix" || (value.schemaVersion !== 1 && value.schemaVersion !== 2)) throw new TaskValidationError("Invalid or unsupported task record.");
   for (const key of ["id", "title", "goal", "createdAt", "updatedAt"]) if (typeof value[key] !== "string") throw new TaskValidationError(`Task ${key} is required.`);
-  if (!taskIdPattern.test(String(value.id)) || !["lite", "full"].includes(String(value.mode)) || !Object.keys(transitions).includes(String(value.status)) || !["triage", "planning", "ready", "implementing", "debugging", "replan", "verifying", "finishing"].includes(String(value.checkpoint))) throw new TaskValidationError("Task identity, mode, status, or checkpoint is invalid.");
+  if (!taskIdPattern.test(String(value.id)) || !["lite", "full"].includes(String(value.mode)) || !Object.keys(transitions).includes(String(value.status)) || !["triage", "planning", "ready", "implementing", "debugging", "replan", "verifying", "finishing", "cancelling"].includes(String(value.checkpoint))) throw new TaskValidationError("Task identity, mode, status, or checkpoint is invalid.");
   if (!Array.isArray(value.nonGoals) || !Array.isArray(value.acceptanceCriteria) || !Array.isArray(value.relevantPaths) || !Array.isArray(value.relevantSpecs) || !Array.isArray(value.validationPlan) || !Array.isArray(value.evidence)) throw new TaskValidationError("Task arrays are required.");
   if (!isIsoTimestamp(value.createdAt) || !isIsoTimestamp(value.updatedAt) || Date.parse(value.updatedAt) < Date.parse(value.createdAt)) throw new TaskValidationError("Task timestamp is invalid.");
   if (!(value.nonGoals as unknown[]).every((item) => typeof item === "string") || !(value.relevantPaths as unknown[]).every((item) => typeof item === "string") || !(value.relevantSpecs as unknown[]).every((item) => typeof item === "string")) throw new TaskValidationError("Task path and goal arrays are invalid.");
@@ -79,6 +90,13 @@ export function validateTask(value: unknown, options: TaskValidationOptions = {}
   if (value.status === "blocked" && (!isRecord(value.blocker) || !["decision", "authority", "credential", "external", "repository"].includes(String(value.blocker.kind)) || typeof value.blocker.summary !== "string" || typeof value.blocker.nextAction !== "string" || !["planning", "ready", "in_progress", "verifying"].includes(String(value.blocker.resumeStatus)))) throw new TaskValidationError("Blocked task blocker is invalid.");
   if (value.status === "blocked" && !value.blocker) throw new TaskValidationError("Blocked tasks require a blocker.");
   if (value.status !== "blocked" && value.blocker !== undefined) throw new TaskValidationError("Only blocked tasks may retain a blocker.");
+  if (value.status === "cancelled") {
+    if (!isRecord(value.cancellation) || !isCancellationReason(value.cancellation.reason) || value.cancellation.authorizedBy !== "user" || !isIsoTimestamp(value.cancelledAt) || Date.parse(value.cancelledAt) < Date.parse(String(value.updatedAt)) || value.completedAt !== undefined) {
+      throw new TaskValidationError("Cancelled task is missing cancellation requirements.");
+    }
+  } else if (value.cancellation !== undefined || value.cancelledAt !== undefined) {
+    throw new TaskValidationError("Only cancelled tasks may retain cancellation metadata.");
+  }
   const checkpointOwner: Exclude<TaskStatus, "blocked"> = value.status === "blocked" ? (value.blocker as TaskBlocker).resumeStatus : value.status as Exclude<TaskStatus, "blocked">;
   if (!legalCheckpoints[checkpointOwner].includes(value.checkpoint as WorkflowCheckpoint)) throw new TaskValidationError("Task status/checkpoint combination is invalid.");
   if (value.status === "completed" && (!value.completedAt || !isIsoTimestamp(value.completedAt) || Date.parse(value.completedAt) < Date.parse(value.updatedAt) || (value.acceptanceCriteria as AcceptanceCriterion[]).some((criterion) => criterion.status === "pending"))) throw new TaskValidationError("Completed task is missing completion requirements.");
@@ -132,8 +150,17 @@ export function transitionTask(task: TaskRecord, status: TaskStatus, checkpoint:
   return validateTask({ ...withoutBlocker, ...(status === "blocked" ? { blocker } : {}), status, checkpoint, updatedAt: now, ...(status === "completed" ? { completedAt: now } : {}) });
 }
 
+export function cancelTask(task: TaskRecord, cancellation: TaskCancellation, now = new Date().toISOString()): TaskRecord {
+  if (!cancellableStatuses.has(task.status)) throw new TaskValidationError(`Cannot cancel terminal ${task.status} task.`);
+  const reason = cancellation.reason.trim();
+  if (!isCancellationReason(reason)) throw new TaskValidationError("Task cancellation reason is invalid.");
+  const withoutBlocker = { ...task };
+  delete withoutBlocker.blocker;
+  return validateTask({ ...withoutBlocker, status: "cancelled", checkpoint: "cancelling", cancellation: { reason, authorizedBy: cancellation.authorizedBy }, updatedAt: now, cancelledAt: now });
+}
+
 export function updateTaskCheckpoint(task: TaskRecord, checkpoint: WorkflowCheckpoint, now = new Date().toISOString()): TaskRecord {
-  if (task.status === "blocked" || task.status === "completed") throw new TaskValidationError("Cannot update the checkpoint for blocked or completed tasks.");
+  if (task.status === "blocked" || task.status === "completed" || task.status === "cancelled") throw new TaskValidationError("Cannot update the checkpoint for blocked or terminal tasks.");
   return validateTask({ ...task, checkpoint, updatedAt: now });
 }
 
@@ -187,13 +214,14 @@ export async function clearActiveTask(harnixRoot: string, taskId: string): Promi
 }
 export async function archiveTask(harnixRoot: string, task: TaskRecord): Promise<void> {
   const valid = validateTask(task);
-  if (valid.status !== "completed") throw new TaskValidationError("Only completed tasks can be archived.");
+  if (valid.status !== "completed" && valid.status !== "cancelled") throw new TaskValidationError("Only terminal tasks can be archived.");
   await clearActiveTask(harnixRoot, valid.id);
 }
 function validateTaskId(value: string): void { if (!taskIdPattern.test(value)) throw new TaskValidationError("Task ID is unsafe."); }
 function isMissing(error: unknown): boolean { return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"; }
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
 function isIsoTimestamp(value: unknown): value is string { return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u.test(value) && Number.isFinite(Date.parse(value)); }
+function isCancellationReason(value: unknown): value is string { return typeof value === "string" && value.length > 0 && value.length <= 1_000 && value === value.trim() && [...value].every((character) => { const codePoint = character.codePointAt(0)!; return codePoint > 31 && codePoint !== 127; }); }
 function validId(value: unknown): value is string { return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/u.test(value); }
 function isSafeRepositoryPath(value: unknown): value is string { if (typeof value !== "string") return false; try { return normalizeRepositoryPath(value, { allowRoot: true }) === value; } catch { return false; } }
 function ensureUnique(ids: readonly string[], label: string): void { if (new Set(ids).size !== ids.length) throw new TaskValidationError(`Duplicate ${label} ID.`); }

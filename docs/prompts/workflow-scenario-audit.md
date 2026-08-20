@@ -68,8 +68,8 @@ Phase 6 và `GLOBAL_SETUP_REFACTOR_PLAN.md` supersede platform setup contract pr
 
 ## Contract phải kiểm chứng
 
-- Một state machine: `planning -> ready -> in_progress -> verifying -> completed`.
-- Mọi non-completed state có thể blocked và chỉ resume về recorded prior status.
+- Một success state machine: `planning -> ready -> in_progress -> verifying -> completed`, cộng terminal `cancelled/cancelling` cho explicit user-authorized incomplete closure.
+- Mọi unfinished state có thể blocked và chỉ resume về recorded prior status, hoặc cancel rõ ràng mà không giả pass evidence.
 - `debugging`, `replan`, `finishing` là checkpoint, không phải status mới.
 - Bypass không tạo task.
 - Lite dùng compact task record; Full bắt buộc `prd.md` và `plan.md`.

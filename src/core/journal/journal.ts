@@ -4,7 +4,7 @@ import { dirname } from "node:path";
 import { createInterface } from "node:readline";
 import type { LearningCandidate } from "./learning.js";
 import { validateLearningCandidate } from "./learning.js";
-export interface JournalEntry { generator: "harnix"; schemaVersion: 1; id: string; recordedAt: string; developer: string; taskId?: string; kind: "checkpoint" | "completion" | "learning" | "note"; summary: string; evidenceIds: string[]; learning?: LearningCandidate; }
+export interface JournalEntry { generator: "harnix"; schemaVersion: 1; id: string; recordedAt: string; developer: string; taskId?: string; kind: "checkpoint" | "completion" | "cancellation" | "learning" | "note"; summary: string; evidenceIds: string[]; learning?: LearningCandidate; }
 const appendQueues = new Map<string, Promise<void>>();
 export async function appendJournal(path: string, entry: JournalEntry): Promise<void> {
   const valid = validateJournalEntry(entry), previous = appendQueues.get(path) ?? Promise.resolve();
@@ -31,7 +31,7 @@ export async function searchJournal(path: string, options: { query?: string; dev
   return { entries: entries.reverse(), malformed };
 }
 export function validateJournalEntry(value: unknown): JournalEntry {
-  if (!isRecord(value) || value.generator !== "harnix" || value.schemaVersion !== 1 || typeof value.id !== "string" || value.id.length === 0 || typeof value.recordedAt !== "string" || !Number.isFinite(Date.parse(value.recordedAt)) || typeof value.developer !== "string" || typeof value.summary !== "string" || !["checkpoint", "completion", "learning", "note"].includes(String(value.kind)) || !Array.isArray(value.evidenceIds) || !value.evidenceIds.every((id) => typeof id === "string")) throw new Error("Invalid journal entry.");
+  if (!isRecord(value) || value.generator !== "harnix" || value.schemaVersion !== 1 || typeof value.id !== "string" || value.id.length === 0 || typeof value.recordedAt !== "string" || !Number.isFinite(Date.parse(value.recordedAt)) || typeof value.developer !== "string" || typeof value.summary !== "string" || !["checkpoint", "completion", "cancellation", "learning", "note"].includes(String(value.kind)) || !Array.isArray(value.evidenceIds) || !value.evidenceIds.every((id) => typeof id === "string")) throw new Error("Invalid journal entry.");
   if (value.taskId !== undefined && typeof value.taskId !== "string") throw new Error("Invalid journal task ID.");
   const learning = value.learning === undefined ? undefined : validateLearningCandidate(value.learning);
   if (value.kind === "learning" && learning === undefined) throw new Error("Learning journal entries require a candidate.");

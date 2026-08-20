@@ -146,6 +146,36 @@ describe.sequential("CLI", () => {
 
     expect(JSON.parse(output.mock.calls.map((call) => String(call[0])).join(""))).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
   });
+  it("should_cancel_an_active_task_from_a_bounded_json_envelope", async () => {
+    const root = await fixture(); process.chdir(root);
+    await createProgram({ interactive: false }).parseAsync(["node", "harnix", "init", "--user", "tam"], { from: "node" });
+    const timestamp = "2026-08-19T00:00:00.000Z";
+    const planning = {
+      generator: "harnix", schemaVersion: 1, id: "20260819-000000-cancel-me", title: "Cancel me", mode: "lite", status: "planning", checkpoint: "planning",
+      goal: "Stop safely", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [],
+      validationPlan: [{ id: "check", description: "verify", scope: "focused", required: true }], evidence: [], createdAt: timestamp, updatedAt: timestamp,
+    };
+    const output = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    await createProgram({ interactive: false, workflowInput: async () => JSON.stringify({ task: planning }) }).parseAsync(["node", "harnix", "workflow", "--save"], { from: "node" });
+    output.mockClear();
+
+    await createProgram({ interactive: false, workflowInput: async () => JSON.stringify({ reason: "Người dùng dừng task.", authorizedBy: "user" }) }).parseAsync(["node", "harnix", "workflow", "--cancel"], { from: "node" });
+
+    expect(JSON.parse(output.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({ status: "cancelled", checkpoint: "cancelling" });
+    await writeFile(join(root, ".harnix", "tasks", ".active"), `${planning.id}\n`);
+    output.mockClear();
+    const ttyDescriptor = Object.getOwnPropertyDescriptor(process.stdin, "isTTY");
+    Object.defineProperty(process.stdin, "isTTY", { configurable: true, value: true });
+    try {
+      await createProgram({ interactive: false }).parseAsync(["node", "harnix", "workflow", "--cancel"], { from: "node" });
+    } finally {
+      if (ttyDescriptor) Object.defineProperty(process.stdin, "isTTY", ttyDescriptor);
+      else Reflect.deleteProperty(process.stdin, "isTTY");
+    }
+
+    expect(JSON.parse(output.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({ status: "cancelled", checkpoint: "cancelling" });
+    await expect(readFile(join(root, ".harnix", "tasks", ".active"), "utf8")).resolves.toBe("");
+  });
   it("should_return_usage_exit_without_stack_when_public_input_is_invalid", async () => {
     const root = await fixture(); process.chdir(root);
     const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);

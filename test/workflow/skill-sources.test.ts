@@ -71,6 +71,8 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "project-specific release instruction",
     "verification-inputs.json",
     "harnix workflow --finish",
+    "cancelled/cancelling",
+    "harnix workflow --cancel",
   ],
   "harnix-continue": [
     "routing table",
@@ -84,6 +86,8 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "v1 to v2 migration",
     "harnix workflow --inspect",
     "harnix workflow --save",
+    "cancelled/cancelling",
+    "separately through EOF",
   ],
   "harnix-research": [
     "source authority",
@@ -165,8 +169,11 @@ describe("canonical Harnix workflow skill sources", () => {
     expect(check).toContain("persist `verifying/finishing`");
     expect(finish).toContain("Accept only `verifying/finishing`");
     expect(finish).toContain("run `harnix workflow --finish` exactly once");
+    expect(finish).toContain("Accept `cancelled/cancelling` only for partial cancellation recovery");
+    expect(finish).toContain("run `harnix workflow --cancel`");
     expect(finish).not.toContain("write the task `status` as `completed`");
     expect(continuation).toContain("Blocked state takes precedence over its checkpoint");
+    expect(continuation).toContain("Read only that owner skill, separately through EOF");
   });
 });
 

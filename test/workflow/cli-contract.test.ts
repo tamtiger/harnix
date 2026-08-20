@@ -18,7 +18,7 @@ describe("CLI command contract", () => {
     expect((context as { _hidden?: boolean } | undefined)?._hidden).toBe(true);
     expect(repoMap?.options.map((option) => option.long)).toEqual(["--query", "--limit", "--refresh"]);
     expect(repoMap?.options.find((option) => option.long === "--refresh")?.hidden).toBe(true);
-    expect(workflow?.options.map((option) => option.long)).toEqual(["--inspect", "--save", "--snapshot", "--audit-ready", "--finish", "--check"]);
+    expect(workflow?.options.map((option) => option.long)).toEqual(["--inspect", "--save", "--snapshot", "--audit-ready", "--finish", "--cancel", "--check"]);
   });
 
   it("keeps the workflow transport hidden and rejects ambiguous action flags", async () => {

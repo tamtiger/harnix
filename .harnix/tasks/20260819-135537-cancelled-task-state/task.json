@@ -1,0 +1,546 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260819-135537-cancelled-task-state",
+  "title": "Bổ sung trạng thái cancelled và kỷ luật tải skill",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cho phép đóng an toàn một task không hoàn tất bằng trạng thái cancelled có audit trail, đồng thời ngăn việc batch-load nhiều skill làm output bị truncate.",
+  "nonGoals": [
+    "Không biến cancelled thành completed hoặc bỏ qua completion verification.",
+    "Không tự diễn giải yêu cầu complete thành quyền cancel nếu người dùng chưa xác nhận ý định bỏ task.",
+    "Không thêm public command, platform mới, package mới hoặc Git automation.",
+    "Không đặt giới hạn kích thước tùy ý hay cắt bỏ nội dung bắt buộc của skill."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-cancel-terminal",
+      "text": "Task chưa hoàn tất, kể cả blocked, chỉ chuyển sang terminal cancelled qua thao tác cancel riêng có lý do không rỗng và authority user; task lưu cancelledAt, xóa blocker và không cần giả lập required check pass.",
+      "status": "met",
+      "evidenceIds": [
+        "e-cancel-core-fresh",
+        "e-static-quality-fresh-2",
+        "e-acceptance-fresh",
+        "e-release-gates-fresh"
+      ]
+    },
+    {
+      "id": "ac-cancel-audit",
+      "text": "Cancel persist task trước, ghi journal cancellation giữ tham chiếu evidence hiện có, rồi chỉ clear active pointer khớp; lỗi giữa chừng giữ state có thể retry idempotent.",
+      "status": "met",
+      "evidenceIds": [
+        "e-cancel-core-fresh",
+        "e-static-quality-fresh-2",
+        "e-acceptance-fresh",
+        "e-release-gates-fresh"
+      ]
+    },
+    {
+      "id": "ac-cancel-compatibility",
+      "text": "TaskRecord v1/v2 cũ tiếp tục đọc được; completed semantics không đổi; cancelled active recovery route qua Continue đến owner kết thúc và task cancelled không thể resume hay complete.",
+      "status": "met",
+      "evidenceIds": [
+        "e-doctor-cancel-fresh",
+        "e-cancel-core-fresh",
+        "e-static-quality-fresh-2",
+        "e-acceptance-fresh",
+        "e-release-gates-fresh"
+      ]
+    },
+    {
+      "id": "ac-skill-loading",
+      "text": "Workflow và canonical skills hướng agent chỉ đọc skill của stage owner hiện tại, từng file riêng đến EOF khi output có thể bị giới hạn; ba platform vẫn cài canonical skill byte-identical.",
+      "status": "met",
+      "evidenceIds": [
+        "e-skill-loading-fresh",
+        "e-version-sync-fresh",
+        "e-static-quality-fresh-2",
+        "e-acceptance-fresh",
+        "e-release-gates-fresh"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/cli-program.ts",
+    "src/commands/internal-workflow.ts",
+    "src/core/journal/journal.ts",
+    "src/core/tasks/task.ts",
+    "src/core/workflow.ts",
+    "src/skills/harnix-continue/SKILL.md",
+    "src/skills/harnix-finish-work/SKILL.md",
+    "src/templates/harnix/agents.ts",
+    "src/templates/harnix/workflow.ts",
+    "test/integration/cli.test.ts",
+    "test/unit/task-state.test.ts",
+    "test/workflow/internal-workflow.test.ts",
+    "test/workflow/routing.test.ts",
+    "test/workflow/skill-sources.test.ts",
+    "test/workflow/templates.test.ts",
+    "docs/prompts/workflow-scenario-audit.md",
+    "README.md",
+    "scripts/version-sync.mjs",
+    "test/unit/version-sync.test.ts",
+    "src/commands/doctor.ts",
+    "test/integration/doctor.test.ts",
+    "test/workflow/cli-contract.test.ts"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "cancel-core-focused",
+      "description": "Run focused task-state, routing, hidden workflow and CLI cancellation tests.",
+      "command": "pnpm exec vitest run test/unit/task-state.test.ts test/workflow/routing.test.ts test/workflow/internal-workflow.test.ts test/integration/cli.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-cancel-audit",
+        "ac-cancel-compatibility",
+        "ac-cancel-terminal"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "src/core/journal/journal.ts",
+        "src/core/tasks/task.ts",
+        "src/core/workflow.ts",
+        "test/integration/cli.test.ts",
+        "test/unit/task-state.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "skill-loading-focused",
+      "description": "Run canonical skill and generated template contract tests, including byte-identical platform rendering.",
+      "command": "pnpm exec vitest run test/workflow/skill-sources.test.ts test/workflow/templates.test.ts test/platform/global-adapters.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-skill-loading"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/skills/harnix-continue/SKILL.md",
+        "src/skills/harnix-finish-work/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "static-quality",
+      "description": "Build, lint and typecheck the changed workflow contracts.",
+      "command": "pnpm run build && pnpm run lint && pnpm run typecheck",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-cancel-audit",
+        "ac-cancel-compatibility",
+        "ac-cancel-terminal",
+        "ac-skill-loading"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "package.json",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "acceptance-suite",
+      "description": "Run the full acceptance test suite for workflow, migration, platform and safety compatibility.",
+      "command": "pnpm run test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-cancel-audit",
+        "ac-cancel-compatibility",
+        "ac-cancel-terminal",
+        "ac-skill-loading"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "package.json",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "release-gates",
+      "description": "Run package, tarball, performance, footprint and release scans after version synchronization.",
+      "command": "pnpm run pack:check && pnpm run smoke:tarball && pnpm run measure:init && pnpm run measure:footprint && pnpm run scan:release",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-cancel-audit",
+        "ac-cancel-compatibility",
+        "ac-cancel-terminal",
+        "ac-skill-loading"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "version-sync-docs",
+      "description": "Verify package, canonical skill metadata, README and changelog version synchronization.",
+      "command": "pnpm run version:sync -- 1.0.9",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-cancel-audit",
+        "ac-cancel-compatibility",
+        "ac-cancel-terminal",
+        "ac-skill-loading"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "scripts/version-sync.mjs",
+        "src/skills/*/SKILL.md"
+      ]
+    },
+    {
+      "description": "Doctor phân loại cancelled là terminal và fail closed khi pointer chưa được dọn",
+      "command": "pnpm exec vitest run test/integration/doctor.test.ts",
+      "criterionIds": [
+        "ac-cancel-compatibility"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/doctor.ts",
+        "src/core/tasks/task.ts",
+        "test/integration/doctor.test.ts"
+      ],
+      "required": true,
+      "id": "doctor-cancel-focused",
+      "scope": "focused"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-cancel-state-red",
+      "recordedAt": "2026-08-19T06:58:11.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: task-state suite có 2 failure đúng do cancelTask chưa tồn tại; 15 test lân cận pass.",
+      "artifactPaths": [
+        "test/unit/task-state.test.ts"
+      ]
+    },
+    {
+      "id": "e-cancel-workflow-red",
+      "recordedAt": "2026-08-19T06:59:27.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: routing/persistence có 3 failure đúng do cancelled active chưa route và cancelWorkflowTask chưa tồn tại; 19 test lân cận pass.",
+      "artifactPaths": [
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "e-cancel-cli-red",
+      "recordedAt": "2026-08-19T07:00:35.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: hidden workflow/CLI có 3 failure đúng do cancelWorkflow và --cancel chưa tồn tại; 37 test lân cận pass.",
+      "artifactPaths": [
+        "test/integration/cli.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "e-skill-loading-red",
+      "recordedAt": "2026-08-19T07:01:42.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: skill/template suite có 4 failure đúng do single-owner loading, --cancel và cancelled recovery guidance chưa được render.",
+      "artifactPaths": [
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "e-implementation-focused-green",
+      "recordedAt": "2026-08-19T07:06:52.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused implementation GREEN: cancellation core/CLI 80/80 và skill/template/platform parity 11/11 pass; đây là implementation checkpoint, chưa thay thế required snapshot evidence.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/task.ts",
+        "src/core/workflow.ts",
+        "src/skills/harnix-continue/SKILL.md",
+        "src/skills/harnix-finish-work/SKILL.md"
+      ]
+    },
+    {
+      "id": "e-static-preflight-fail",
+      "recordedAt": "2026-08-19T07:09:10.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Preflight: build và typecheck pass nhưng lint fail 1 lỗi no-control-regex tại cancellation reason validator; không ghi nhận combined gate pass.",
+      "artifactPaths": [
+        "src/core/tasks/task.ts"
+      ]
+    },
+    {
+      "id": "e-static-preflight-green",
+      "recordedAt": "2026-08-19T07:09:55.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Sau khi đổi regex sang code-point validation, build, lint và typecheck chạy riêng đều exit 0.",
+      "artifactPaths": [
+        "src/core/tasks/task.ts"
+      ]
+    },
+    {
+      "id": "e-version-sync-implementation",
+      "recordedAt": "2026-08-19T07:08:43.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "version:sync tăng package từ 1.0.8 lên 1.0.9, đồng bộ bảy canonical skill, README và CHANGELOG; required idempotence check sẽ chạy lại trong verification.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/skills"
+      ]
+    },
+    {
+      "id": "e-compliance-doctor-gap",
+      "recordedAt": "2026-08-19T07:10:44.344Z",
+      "result": "fail",
+      "summary": "Compliance review finding: Doctor chỉ phân loại completed là terminal; cancelled schema v1 bị cảnh báo như unfinished và cancelled active thiếu finding recovery. Root path đã khoanh tại src/commands/doctor.ts.",
+      "artifactPaths": [
+        "src/commands/doctor.ts",
+        "test/integration/doctor.test.ts"
+      ]
+    },
+    {
+      "result": "fail",
+      "exitCode": 1,
+      "artifactPaths": [
+        "test/integration/doctor.test.ts"
+      ],
+      "summary": "Focused Doctor regression: 20 pass, 1 fail vì cancelled active vẫn bị báo project ready thay vì invalid.",
+      "recordedAt": "2026-08-19T07:12:53.508Z",
+      "id": "e-doctor-cancel-red",
+      "checkId": "doctor-cancel-focused"
+    },
+    {
+      "result": "fail",
+      "summary": "Lần chạy debug trung gian: Doctor 21/21 pass, CLI chỉ fail do mock isTTY không tồn tại rồi assertion kỳ vọng xóa file thay vì atomic clear thành chuỗi rỗng.",
+      "id": "e-cli-tty-test-harness-fail",
+      "artifactPaths": [
+        "test/integration/cli.test.ts"
+      ],
+      "recordedAt": "2026-08-19T07:14:36.266Z",
+      "exitCode": 1
+    },
+    {
+      "result": "pass",
+      "summary": "Focused debug GREEN: Doctor 21/21 và CLI 22/22 pass, gồm cancelled legacy diagnosis và TTY cancellation recovery không chờ stdin.",
+      "id": "e-doctor-cli-debug-green",
+      "artifactPaths": [
+        "src/commands/doctor.ts",
+        "src/cli-program.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/doctor.test.ts"
+      ],
+      "recordedAt": "2026-08-19T07:14:36.266Z",
+      "exitCode": 0
+    },
+    {
+      "checkId": "doctor-cancel-focused",
+      "recordedAt": "2026-08-19T07:16:04.422Z",
+      "result": "pass",
+      "exitCode": 0,
+      "artifactPaths": [
+        "test/integration/doctor.test.ts"
+      ],
+      "inputDigest": "a7dd2001918fd8329cd7d0bbea88d11f1fb969d1132e55c25177585009652c38",
+      "id": "e-doctor-cancel-fresh",
+      "summary": "Fresh Doctor focused verification: 21/21 tests pass; snapshot trước/sau khớp."
+    },
+    {
+      "checkId": "cancel-core-focused",
+      "recordedAt": "2026-08-19T07:16:39.301Z",
+      "inputDigest": "69b82c728cbc7de58664907b79196531884c8b1ad7c4744dd1a87b05380f8151",
+      "exitCode": 0,
+      "summary": "Fresh cancellation core/CLI verification: 4 files, 80/80 tests pass; snapshot trước/sau khớp.",
+      "id": "e-cancel-core-fresh",
+      "result": "pass",
+      "artifactPaths": [
+        "test/unit/task-state.test.ts",
+        "test/workflow/routing.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/integration/cli.test.ts"
+      ]
+    },
+    {
+      "id": "e-skill-loading-fresh",
+      "inputDigest": "152b4a81249847d048b81ddf9f26613a3c15aa123200552ffd17c33ceb500af7",
+      "result": "pass",
+      "artifactPaths": [
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts",
+        "test/platform/global-adapters.test.ts"
+      ],
+      "summary": "Fresh skill loading verification: 3 files, 11/11 tests pass; canonical skills và ba platform byte-identical, snapshot trước/sau khớp.",
+      "recordedAt": "2026-08-19T07:17:08.329Z",
+      "exitCode": 0,
+      "checkId": "skill-loading-focused"
+    },
+    {
+      "inputDigest": "ef65412b477aa87c544fee0db4e98c3d3bce6b632ccc64d04d97c0ed20248c1f",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/skills"
+      ],
+      "exitCode": 0,
+      "id": "e-version-sync-fresh",
+      "checkId": "version-sync-docs",
+      "result": "pass",
+      "recordedAt": "2026-08-19T07:17:32.068Z",
+      "summary": "Fresh version sync verification: 1.0.9 đã đồng bộ, changed=false; snapshot trước/sau khớp."
+    },
+    {
+      "artifactPaths": [
+        "src",
+        "test",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ],
+      "exitCode": 0,
+      "id": "e-static-quality-fresh",
+      "recordedAt": "2026-08-19T07:18:10.734Z",
+      "inputDigest": "a33b9c45af015f02e369d6234ce8e49255b1ce93cebff38ac42cb09c47978255",
+      "result": "pass",
+      "checkId": "static-quality",
+      "summary": "Fresh static quality gate: build, lint và typecheck đều exit 0; snapshot trước/sau khớp."
+    },
+    {
+      "exitCode": 1,
+      "id": "e-acceptance-first-fail",
+      "recordedAt": "2026-08-19T07:19:07.219Z",
+      "result": "fail",
+      "summary": "Fresh acceptance attempt: unit 205 pass/1 skipped, integration 89 pass, migration 9 pass, platform 23 pass; workflow 62 pass/2 fail do CLI contract thiếu --cancel và self-host workflow chưa reconcile.",
+      "inputDigest": "2adc1bacdda11cf378d47cbf9dbda516a8c353d78e53913e8e7a9d237bc219ff",
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/self-host.test.ts",
+        ".harnix/workflow.md"
+      ],
+      "checkId": "acceptance-suite"
+    },
+    {
+      "summary": "Focused workflow regression GREEN: cli-contract và self-host 5/5 pass sau khi thêm --cancel và reconcile .harnix/workflow.md qua harnix update.",
+      "exitCode": 0,
+      "id": "e-acceptance-regression-green",
+      "result": "pass",
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/self-host.test.ts",
+        ".harnix/workflow.md",
+        ".harnix/.template-hashes.json"
+      ],
+      "recordedAt": "2026-08-19T07:20:17.648Z"
+    },
+    {
+      "inputDigest": "050587567648babeac900eb2d2b735b3f640a31b2d221468a56e0ca989214b79",
+      "recordedAt": "2026-08-19T07:20:53.282Z",
+      "summary": "Fresh static quality rerun sau regression fix: build, lint và typecheck đều exit 0; snapshot trước/sau khớp.",
+      "id": "e-static-quality-fresh-2",
+      "result": "pass",
+      "checkId": "static-quality",
+      "artifactPaths": [
+        "src",
+        "test",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ],
+      "exitCode": 0
+    },
+    {
+      "recordedAt": "2026-08-19T07:21:39.649Z",
+      "summary": "Fresh full acceptance suite: 426 pass, 1 platform-dependent unit test skipped; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "test"
+      ],
+      "inputDigest": "8857c9160956e87490e17c4603411d3887808d936d888c3c79f974e976ede49e",
+      "checkId": "acceptance-suite",
+      "id": "e-acceptance-fresh",
+      "exitCode": 0,
+      "result": "pass"
+    },
+    {
+      "result": "pass",
+      "artifactPaths": [
+        ".artifacts/tamtiger-harnix-1.0.9.tgz"
+      ],
+      "inputDigest": "b537d910e2716d2fe602578d56d51dd025b928034732083e6056c4d14a4fd24f",
+      "summary": "Fresh release gates pass: package/tarball smoke đủ Kiro-Antigravity-Codex; init worst 357.64ms; footprint giảm 83.54%; release scan sạch; snapshot trước/sau khớp.",
+      "exitCode": 0,
+      "recordedAt": "2026-08-19T07:22:35.895Z",
+      "id": "e-release-gates-fresh",
+      "checkId": "release-gates"
+    },
+    {
+      "summary": "Exact section 11 sequence pass end-to-end trong 74.2s: frozen install, build/lint/typecheck, pnpm test, acceptance, package/smoke/performance/footprint/release scan và git diff --check.",
+      "id": "e-section-11-fresh",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml",
+        ".artifacts/tamtiger-harnix-1.0.9.tgz"
+      ],
+      "recordedAt": "2026-08-19T07:24:14.818Z",
+      "result": "pass",
+      "exitCode": 0
+    },
+    {
+      "recordedAt": "2026-08-19T07:24:57.425Z",
+      "artifactPaths": [
+        ".harnix/tasks/20260819-135537-cancelled-task-state/verification-inputs.json"
+      ],
+      "result": "pass",
+      "summary": "Final review: 4/4 criteria met, 7/7 required checks fresh, không waiver/blocker. Fake-home tarball smoke đã pass; không chạy lại disposable real Windows profile smoke vì chưa có explicit authorization. Không commit/push/publish.",
+      "id": "e-finish-review"
+    }
+  ],
+  "createdAt": "2026-08-19T06:55:37.548Z",
+  "updatedAt": "2026-08-19T07:25:00.666Z",
+  "completedAt": "2026-08-19T07:25:00.666Z"
+}

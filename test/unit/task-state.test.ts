@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createLearningCandidate, isPromotionEligible } from "../../src/core/journal/learning.js";
 import { promotionProposal } from "../../src/core/journal/promotion.js";
-import { archiveTask, clearActiveTask, createTaskV2MigrationEvidence, resolveActiveTask, saveTask, saveTaskWithArtifacts, setActiveTask, transitionTask, validateTask, type TaskRecord } from "../../src/core/tasks/task.js";
+import { archiveTask, cancelTask, clearActiveTask, createTaskV2MigrationEvidence, resolveActiveTask, saveTask, saveTaskWithArtifacts, setActiveTask, transitionTask, validateTask, type TaskRecord } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -46,7 +46,7 @@ describe("task state", () => {
     await expect(readFile(join(external, "tasks", ".active"), "utf8")).resolves.toBe(`${task.id}\n`);
   });
 
-  it("archives only completed tasks and preserves task data", async () => {
+  it("archives only terminal tasks and preserves task data", async () => {
     const root = await temporaryRepository(); const task = taskFixture();
     const evidence = { id: "e", recordedAt: timestamp, result: "pass" as const, summary: "ok", artifactPaths: [] };
     const completed = transitionTask({ ...task, evidence: [evidence], acceptanceCriteria: [{ ...task.acceptanceCriteria[0]!, status: "met", evidenceIds: ["e"] }] }, "ready", "ready");
@@ -73,6 +73,50 @@ describe("task state", () => {
   it("rejects future schema and malformed task records", () => {
     expect(() => validateTask({ ...taskFixture(), schemaVersion: 3 })).toThrow("unsupported");
     expect(() => validateTask({ ...taskFixture(), checkpoint: "unknown" })).toThrow("invalid");
+  });
+
+  it("cancels any unfinished task with explicit user authority and preserves its evidence", async () => {
+    const root = await temporaryRepository();
+    const planning = taskFixture();
+    planning.evidence.push({ id: "failed-check", recordedAt: timestamp, result: "fail", exitCode: 1, summary: "MongoDB permission denied", artifactPaths: [] });
+    const blocked = transitionTask(planning, "blocked", "planning", timestamp, {
+      kind: "credential",
+      summary: "Missing test credential",
+      nextAction: "Provide an isolated test connection",
+      resumeStatus: "planning",
+    });
+
+    const cancelled = cancelTask(blocked, { reason: "Người dùng chọn dừng task để chuyển ưu tiên.", authorizedBy: "user" }, laterTimestamp);
+
+    expect(cancelled).toMatchObject({
+      status: "cancelled",
+      checkpoint: "cancelling",
+      cancelledAt: laterTimestamp,
+      cancellation: { reason: "Người dùng chọn dừng task để chuyển ưu tiên.", authorizedBy: "user" },
+      evidence: [{ id: "failed-check", result: "fail" }],
+    });
+    expect(cancelled.blocker).toBeUndefined();
+    expect(() => transitionTask(planning, "cancelled", "cancelling", laterTimestamp)).toThrow(/illegal task transition/iu);
+    expect(() => transitionTask(cancelled, "planning", "planning", laterTimestamp)).toThrow(/cancelled|transition/iu);
+
+    await saveTask(root, cancelled);
+    await setActiveTask(root, cancelled.id);
+    await archiveTask(root, cancelled);
+    expect(await resolveActiveTask(root)).toBeUndefined();
+  });
+
+  it("rejects cancellation without a concise reason and rejects cancellation of completed tasks", () => {
+    const planning = taskFixture();
+    expect(() => cancelTask(planning, { reason: "", authorizedBy: "user" }, laterTimestamp)).toThrow(/reason/iu);
+
+    const ready = transitionTask(planning, "ready", "ready", timestamp);
+    const inProgress = transitionTask(ready, "in_progress", "implementing", timestamp);
+    const verifying = transitionTask(inProgress, "verifying", "verifying", timestamp);
+    const completed = transitionTask({
+      ...verifying,
+      acceptanceCriteria: [{ ...verifying.acceptanceCriteria[0]!, status: "waived", waiverReason: "Explicitly not applicable." }],
+    }, "completed", "finishing", timestamp);
+    expect(() => cancelTask(completed, { reason: "Too late", authorizedBy: "user" }, laterTimestamp)).toThrow(/completed|terminal/iu);
   });
 
   it("accepts TaskRecord v2 with explicit criterion coverage and verification inputs", () => {
@@ -178,6 +222,7 @@ describe("task state", () => {
 });
 
 const timestamp = "2026-08-13T00:00:00.000Z";
+const laterTimestamp = "2026-08-13T00:01:00.000Z";
 
 function taskFixture(): TaskRecord {
   return { generator: "harnix", schemaVersion: 1, id: "20260807-120000-x", title: "x", mode: "lite", status: "planning", checkpoint: "planning", goal: "x", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp };

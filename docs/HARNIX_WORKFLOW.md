@@ -28,6 +28,8 @@ Phase 6 user-global Kiro, Antigravity and Codex integrations are an adapter/life
 11. Global integration setup, update, doctor and uninstall do not transfer ownership to a project task. They use explicit platform scope, logical paths, conservative manifests and their own lifecycle gates.
 12. Mỗi persisted transition được ghi trước khi hành động của stage kế tiếp bắt đầu; evidence được ghi ngay sau check tương ứng, không chỉ tổng hợp lúc finish.
 13. Language/package profile trong config là discovery seed tại thời điểm init, không phải repository truth vĩnh viễn; task context phải được đối chiếu với manifest, source, test và instruction hiện tại.
+14. Router chọn đúng một current stage-owner skill; agent đọc riêng skill đó đến EOF và không batch-load skill của stage tương lai. Nếu tool output bị truncate, phải đọc lại riêng selected skill trước khi hành động.
+15. `cancelled` là terminal state cho công việc bị người dùng explicit abandon, không phải completion alias; cancellation giữ nguyên evidence fail/pending và luôn có reason/authority audit.
 
 ## 3. Entry routing
 
@@ -66,13 +68,18 @@ stateDiagram-v2
     Debugging --> Replan: requirement or architecture defect
     Replan --> Planning
     Finishing --> Completed
+    Planning --> Cancelled: explicit user cancellation
+    Ready --> Cancelled: explicit user cancellation
+    Implementing --> Cancelled: explicit user cancellation
+    Verifying --> Cancelled: explicit user cancellation
+    Blocked --> Cancelled: explicit user cancellation
     Blocked --> Planning: decision or authority supplied
     Blocked --> Implementing: execution dependency supplied
 ```
 
-Persisted task statuses là `planning`, `ready`, `in_progress`, `verifying`, `blocked`, `completed`. `triage`, `debugging`, `replan` và `finishing` là workflow state/checkpoint; không cần làm phình public task schema nếu checkpoint hiện tại đã biểu diễn đủ.
+Persisted task statuses là `planning`, `ready`, `in_progress`, `verifying`, `blocked`, `completed`, `cancelled`. `triage`, `debugging`, `replan`, `finishing` và `cancelling` là workflow checkpoint. `completed` chỉ thuộc success path; `cancelled/cancelling` là terminal incomplete path có explicit user authority.
 
-Không được nhảy từ `planning` sang `in_progress` khi ready gate chưa pass. Không được nhảy từ `verifying` sang `completed` dựa trên output cũ, output một phần hoặc suy luận.
+Không được nhảy từ `planning` sang `in_progress` khi ready gate chưa pass. Không được nhảy từ `verifying` sang `completed` dựa trên output cũ, output một phần hoặc suy luận. Từ ngữ mơ hồ như “complete” không tự cấp quyền cancel; agent phải làm rõ ý định bỏ task trước khi dùng cancellation transport.
 
 ## 5. State contracts
 
@@ -191,6 +198,12 @@ Inspect/continue luôn trả `contextDrift` với sorted path `changes` và sele
 
 Blocked chỉ dùng khi không thể tiến bộ an toàn do user-owned decision, missing credential/authority, unavailable external dependency hoặc repository state cần người dùng xử lý. Record phải có blocker, evidence đã kiểm tra, impact và một next action cụ thể. Khó, chậm hoặc chưa thử đủ không phải blocker.
 
+### 5.10 Cancelled
+
+Cancellation là user-authorized terminal outcome cho task không tiếp tục, không phải completion shortcut. Khi yêu cầu mơ hồ như “complete” xuất hiện trong lúc gates còn fail, agent giải thích khác biệt và xác nhận ý định abandon trước khi cancel. Explicit cancellation có thể bắt đầu từ mọi unfinished state, kể cả `blocked`.
+
+Hidden `harnix workflow --cancel` là transport duy nhất. First call nhận bounded JSON `{ "reason": <concise non-secret text>, "authorizedBy": "user" }` trên stdin, persist `cancelled/cancelling` cùng `cancelledAt`, xóa blocker nhưng giữ nguyên acceptance criteria/evidence, append journal kind `cancellation`, rồi clear only matching active pointer. Nếu fail sau terminal persistence, `cancelled/cancelling` còn active và Continue route tới Finish để retry cùng deterministic journal ID/original date; recovery không thay reason/authority và không duplicate journal. Cancel không chạy completion/freshness gate, không bump release chỉ để đóng task và luôn được report là incomplete.
+
 ## 6. Artifact contract
 
 ```text
@@ -210,9 +223,9 @@ Blocked chỉ dùng khi không thể tiến bộ an toàn do user-owned decision
     journal/              # created lazily on first journal write
 ```
 
-`task.json` là record versioned tối thiểu: id/title, mode, status, goal, non-goals, acceptance criteria, current checkpoint, relevant paths/specs, validation plan, evidence refs, blockers và timestamps. Task mới dùng exact TaskRecord v2: required check có immutable `criterionIds`/`inputs`, `@task-contract`, coverage đầy đủ, và pass evidence có `inputDigest`. Exact v1 reader vẫn giữ cho legacy; chỉ unfinished v1 ở explicit `replan` được migrate với deterministic migration evidence, completed v1 không rewrite. Safe task ID, active pointer, legal transitions và resume status được khóa tại `IMPLEMENTATION_PLAN.md` mục 4; skill/platform adapter không được tự định nghĩa schema khác. Task ID dùng lowercase kebab slug có dấu `-` giữa các từ. Lite giữ các field cần thiết ngay trong record; Full dùng các file Markdown để tránh JSON phình to và đặt implementation checklist trong `plan.md`. Checkbox chỉ được check sau khi slice và focused evidence tương ứng hoàn thành; nó không thay thế persisted criteria/evidence.
+`task.json` là record versioned tối thiểu: id/title, mode, status, goal, non-goals, acceptance criteria, current checkpoint, relevant paths/specs, validation plan, evidence refs, blockers và timestamps. Task mới dùng exact TaskRecord v2: required check có immutable `criterionIds`/`inputs`, `@task-contract`, coverage đầy đủ, và pass evidence có `inputDigest`. Exact v1 reader vẫn giữ cho legacy; chỉ unfinished v1 ở explicit `replan` được migrate với deterministic migration evidence, terminal `completed|cancelled` v1 không rewrite. Safe task ID, active pointer, legal transitions và resume status được khóa tại `IMPLEMENTATION_PLAN.md` mục 4; skill/platform adapter không được tự định nghĩa schema khác. Task ID dùng lowercase kebab slug có dấu `-` giữa các từ. Lite giữ các field cần thiết ngay trong record; Full dùng các file Markdown để tránh JSON phình to và đặt implementation checklist trong `plan.md`. Checkbox chỉ được check sau khi slice và focused evidence tương ứng hoàn thành; nó không thay thế persisted criteria/evidence.
 
-Operational persistence order là: create `planning` task + `.active` → write Full artifacts/research → persist `ready` → persist `in_progress/implementing` before product edits → persist `verifying/verifying` before checks and append fresh evidence → persist `verifying/finishing` only after completion prerequisites are green → persist `completed/finishing` before journal/archive clears the matching pointer. Plan-only work stops at persisted `ready`. Blocked state always routes through Continue before any checkpoint owner. A later failure must retain enough state for `harnix-continue`; it must not erase or fabricate evidence.
+Operational success order là: create `planning` task + `.active` → write Full artifacts/research → persist `ready` → persist `in_progress/implementing` before product edits → persist `verifying/verifying` before checks and append fresh evidence → persist `verifying/finishing` only after completion prerequisites are green → persist `completed/finishing` before completion journal/archive clears the matching pointer. Explicit cancellation từ bất kỳ unfinished/blocked state dùng `workflow --cancel`: persist `cancelled/cancelling` với `{ reason, authorizedBy: "user" }`, giữ criteria/evidence, append deterministic cancellation journal, rồi clear only matching pointer. Partial cancellation persistence giữ active pointer để retry idempotent. Plan-only work stops at persisted `ready`. Blocked state luôn qua Continue trước owner khác, trừ explicit cancellation được Continue bàn giao cho Finish. A later failure must retain enough state for `harnix-continue`; it must not erase or fabricate evidence.
 
 Khi cần persist context để resume hoặc phối hợp nhiều state, Harnix dùng một `context.json` có scope theo state thay vì duplicate `implement.jsonl`/`check.jsonl`; Lite có thể chỉ giữ relevant paths/specs trong `task.json`. Entry gồm normalized repo-relative path, reason, priority/pin và states áp dụng. Cùng hidden save tạo atomic `context-selection.json` v1 chứa task/selector/inventory/input/result hashes; sidecar không chứa source body, prose, secret hoặc absolute path. Code files được discovery theo task; chỉ persist khi chúng quan trọng để resume. Mọi truncation phải liệt kê source bị bỏ. Context lấy từ repository là untrusted data, phải được bao bởi cùng explicit boundary trên Kiro, Antigravity và Codex; boundary/disclosure tính vào budget và không được cắt mất closing marker.
 
@@ -227,12 +240,14 @@ Tasks, research và journal là user-owned. Packaged `workflow.md` và seed spec
 | `harnix-debug` | Debugging và replan decision |
 | `harnix-check` | Verifying stage 1 rồi stage 2 |
 | `harnix-research` | Conditional research trong Planning/Debugging |
-| `harnix-finish-work` | Finishing → Completed |
+| `harnix-finish-work` | Finishing → Completed; explicit unfinished → Cancelled; terminal recovery |
 | `harnix-continue` | Restore state/context và route tới bước hợp lệ kế tiếp |
 
 Platform adapters cho Kiro, Antigravity và Codex phải giữ cùng state/gate semantics. Hook, steering hoặc skill syntax có thể khác nhưng không được tạo platform-specific workflow.
 
 Source canonical của bảy skill nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi source có portable `metadata.version`; contract test buộc version semantic này đồng bộ với package release. Build nhúng raw Markdown vào package; runtime không đọc source tree hoặc network. Cả ba adapter phải cài byte-identical canonical `SKILL.md`, gồm version, activation guard và provenance, thay vì prepend các bản guard/prose riêng có thể drift.
+
+Router chỉ load một stage owner tại một thời điểm. Mỗi selected `SKILL.md` phải được đọc riêng đến EOF; không batch-read toàn bộ skill catalog hoặc preload stage tương lai. Đây là progressive disclosure và cũng tránh tool output truncation khi tổng nhiều file vượt output budget; truncation không cho phép suy diễn phần instruction bị thiếu.
 
 ## 8. Required behavior evals
 
@@ -251,6 +266,7 @@ Evals phải chứng minh:
 - Stale/partial evidence không cho phép completion claim.
 - Criterion/evidence v2 phải giao đúng declared check; changed/missing/unreadable/unsafe input hoặc task-contract drift chặn save/finish.
 - Finish không commit/push/merge/PR và journal/promotion đúng gate.
+- Explicit cancellation không cần completion pass, giữ failed/pending evidence, ghi cancellation journal và retry an toàn sau partial persistence; cancelled không được report completed.
 - Continue phục hồi đúng state với bounded context, project context drift xác định và fail closed trên corrupt/future state.
 - Cùng fixture cho kết quả workflow tương đương trên Kiro, Antigravity và Codex.
 - Global hooks/instructions are a fast no-op in a non-Harnix workspace, activate only with safe bounded project context, and never turn malformed optional hook input into a blocked prompt.

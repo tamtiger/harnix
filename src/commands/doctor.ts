@@ -234,12 +234,14 @@ async function inspectTaskRecords(root: string, findings: DoctorFinding[]): Prom
           findings.push(finding("task-evidence-artifact-unsafe", "warning", logicalPath, "A completed historical task references an unsafe or expired artifact path and was preserved without rewrite.", false));
         }
         tasks.set(task.id, task);
+        const terminal = task.status === "completed" || task.status === "cancelled";
         if (task.schemaVersion === 1) {
-          findings.push(finding("legacy-task-schema", task.status === "completed" ? "info" : "warning", logicalPath, "TaskRecord schema v1 is preserved; migrate an unfinished task explicitly only from a replan checkpoint.", false));
+          findings.push(finding("legacy-task-schema", terminal ? "info" : "warning", logicalPath, "TaskRecord schema v1 is preserved; migrate an unfinished task explicitly only from a replan checkpoint.", false));
         }
         if (entry.name === activeId) {
           activeFound = true;
           if (task.status === "completed") findings.push(finding("task-active-completed", "error", logicalPath, "The active pointer references a completed task and must be repaired before continuation.", false));
+          if (task.status === "cancelled") findings.push(finding("task-active-cancelled", "error", logicalPath, "The active pointer references a cancelled task with incomplete cancellation persistence; run cancellation recovery before continuation.", false));
         }
         if (task.mode === "full") {
           for (const artifact of ["prd.md", "plan.md"]) {

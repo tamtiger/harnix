@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { readConfig } from "../core/config/config.js";
-import { finishWorkflowTask, taskContextDrift } from "../core/workflow.js";
+import { cancelWorkflowTask, finishWorkflowTask, taskContextDrift } from "../core/workflow.js";
 import type { ContextDrift } from "../core/context/context.js";
 import {
   loadTask,
@@ -13,6 +13,7 @@ import {
   updateTaskCheckpoint,
   validateTask,
   type Evidence,
+  type TaskCancellation,
   type TaskArtifacts,
   type TaskRecord,
 } from "../core/tasks/task.js";
@@ -43,6 +44,7 @@ export async function inspectWorkflow(root: string): Promise<{ activeTask: TaskR
 
 export async function saveWorkflow(root: string, envelope: WorkflowSaveEnvelope): Promise<TaskRecord> {
   if (!isRecord(envelope)) throw new Error("Workflow save envelope is invalid.");
+  if (isRecord(envelope.task) && envelope.task.status === "cancelled") throw new Error("Workflow cancellation must use workflow --cancel.");
   const candidate = validateTask(envelope.task);
   const harnixRoot = await resolveSafeHarnixPath(root);
   const active = await resolveActiveTask(harnixRoot);
@@ -84,6 +86,18 @@ export async function finishWorkflow(root: string, now = new Date().toISOString(
   const journalDate = task.status === "completed" ? task.completedAt! : now;
   const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${journalDate.slice(0, 10)}.jsonl`);
   return finishWorkflowTask(harnixRoot, journalPath, config.developer, task, now);
+}
+
+export async function cancelWorkflow(root: string, envelope: unknown, now = new Date().toISOString()): Promise<TaskRecord> {
+  const harnixRoot = await resolveSafeHarnixPath(root);
+  const task = await resolveActiveTask(harnixRoot);
+  if (!task) throw new Error("Workflow cancellation requires an active task.");
+  const recovering = task.status === "cancelled" && task.checkpoint === "cancelling";
+  const cancellation = recovering ? undefined : validateCancellationEnvelope(envelope);
+  const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
+  const journalDate = recovering ? task.cancelledAt! : now;
+  const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${journalDate.slice(0, 10)}.jsonl`);
+  return cancelWorkflowTask(harnixRoot, journalPath, config.developer, task, cancellation, now);
 }
 
 async function loadExistingTask(harnixRoot: string, id: string): Promise<TaskRecord | undefined> {
@@ -186,3 +200,9 @@ function assertLegalTransition(previous: TaskRecord, next: TaskRecord): void {
 
 function isMissing(error: unknown): boolean { return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"; }
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
+function validateCancellationEnvelope(value: unknown): TaskCancellation {
+  if (!isRecord(value) || typeof value.reason !== "string" || value.authorizedBy !== "user") {
+    throw new Error("Workflow cancellation requires bounded JSON with reason and authorizedBy=user.");
+  }
+  return { reason: value.reason, authorizedBy: "user" };
+}

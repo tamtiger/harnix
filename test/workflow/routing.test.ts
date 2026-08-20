@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { canCompleteTask, continueWorkflowTask, evidenceSupportsScope, finishWorkflowTask, implementationStrategy, isWithinRequestedScope, nextWorkflowStatus, routeWorkflow, shouldReassessArchitecture, shouldResearch, validateFullReadyArtifact, verificationStages } from "../../src/core/workflow.js";
+import { cancelWorkflowTask, canCompleteTask, continueWorkflowTask, evidenceSupportsScope, finishWorkflowTask, implementationStrategy, isWithinRequestedScope, nextWorkflowStatus, routeWorkflow, shouldReassessArchitecture, shouldResearch, validateFullReadyArtifact, verificationStages } from "../../src/core/workflow.js";
 import { appendJournal } from "../../src/core/journal/journal.js";
 import { loadTask, resolveActiveTask, saveTask, setActiveTask, transitionTask } from "../../src/core/tasks/task.js";
 import { createResearchFinding } from "../../src/core/research.js";
@@ -19,6 +19,7 @@ describe("workflow routing and completion evidence", () => {
     expect(routeWorkflow({ action: "change", workKind: "bugfix", mutation: "project", riskSignals: [], activeTask: { mode: "lite", status: "ready", checkpoint: "ready" } })).toMatchObject({ entry: "resume", owner: "harnix-implement", reasonCodes: ["active-ready-authorized"] });
     expect(routeWorkflow({ action: "plan", workKind: "refactor", mutation: "task-artifact", riskSignals: [], activeTask: { mode: "full", status: "ready", checkpoint: "ready" } })).toMatchObject({ entry: "resume", owner: "harnix-brainstorm", reasonCodes: ["active-replan"] });
     expect(routeWorkflow({ action: "change", workKind: "refactor", mutation: "project", riskSignals: [], activeTask: { mode: "full", status: "completed", checkpoint: "finishing" } })).toMatchObject({ entry: "resume", owner: "harnix-continue", reasonCodes: ["completed-active"] });
+    expect(routeWorkflow({ action: "change", workKind: "refactor", mutation: "project", riskSignals: [], activeTask: { mode: "full", status: "cancelled", checkpoint: "cancelling" } })).toMatchObject({ entry: "resume", owner: "harnix-continue", reasonCodes: ["cancelled-active"] });
     expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [], activeTask: { mode: "lite", status: "blocked", checkpoint: "implementing", blocker: { kind: "decision", summary: "need decision", nextAction: "decide", resumeStatus: "ready" } } })).toMatchObject({ entry: "fail-closed", reasonCodes: ["invalid-active-state"] });
     expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [], activeTask: { mode: "full", status: "blocked", checkpoint: "replan", blocker: { kind: "decision", summary: "need decision", nextAction: "decide", resumeStatus: "verifying" } } })).toMatchObject({ entry: "resume", owner: "harnix-continue", reasonCodes: ["active-stage"] });
   });
@@ -109,6 +110,47 @@ describe("workflow routing and completion evidence", () => {
     expect(await resolveActiveTask(root)).toBeUndefined();
     const journalEntries = (await readFile(join(root, "journal.jsonl"), "utf8")).trim().split("\n").map((line) => JSON.parse(line) as { id: string });
     expect(journalEntries.filter((entry) => entry.id === `${verifying.id}-completion`)).toHaveLength(1);
+  });
+  it("cancels without completion evidence and journals the preserved failure before clearing the active pointer", async () => {
+    const root = await temporaryRepository(); const current = new Date().toISOString();
+    const failing = {
+      ...task(current),
+      status: "blocked" as const,
+      checkpoint: "verifying" as const,
+      acceptanceCriteria: [{ id: "a", text: "done", status: "pending" as const, evidenceIds: [] }],
+      evidence: [{ id: "mongo-failure", checkId: "check", recordedAt: current, result: "fail" as const, exitCode: 1, summary: "createIndexes denied", artifactPaths: [] }],
+      blocker: { kind: "credential" as const, summary: "Missing MongoDB test permissions", nextAction: "Provide an isolated test connection", resumeStatus: "verifying" as const },
+    };
+    await saveTask(root, failing); await setActiveTask(root, failing.id);
+
+    const cancelled = await cancelWorkflowTask(root, join(root, "journal.jsonl"), "tam", failing, { reason: "Người dùng chọn dừng task.", authorizedBy: "user" }, current);
+
+    expect(cancelled).toMatchObject({ status: "cancelled", checkpoint: "cancelling", cancellation: { authorizedBy: "user" } });
+    expect(await resolveActiveTask(root)).toBeUndefined();
+    const journal = await readFile(join(root, "journal.jsonl"), "utf8");
+    expect(journal).toContain('"kind":"cancellation"');
+    expect(journal).toContain('"mongo-failure"');
+    expect(journal).not.toContain('"kind":"completion"');
+  });
+  it("recovers cancelled persistence idempotently after active-pointer cleanup fails", async () => {
+    const root = await temporaryRepository(); const current = new Date().toISOString(); const active = task(current); const calls: string[] = [];
+    await saveTask(root, active); await setActiveTask(root, active.id);
+
+    await expect(cancelWorkflowTask(root, join(root, "journal.jsonl"), "tam", active, { reason: "Stop safely", authorizedBy: "user" }, current, {
+      saveTask: async (...args) => { calls.push("save"); await saveTask(...args); },
+      appendJournal: async (...args) => { calls.push("journal"); await appendJournal(...args); },
+      archiveTask: async () => { calls.push("archive"); throw new Error("active pointer write failed"); },
+    })).rejects.toThrow("active pointer write failed");
+    expect(calls).toEqual(["save", "journal", "archive"]);
+
+    const persisted = await loadTask(join(root, "tasks", active.id, "task.json"));
+    expect(persisted.status).toBe("cancelled");
+    expect((await resolveActiveTask(root))?.id).toBe(active.id);
+
+    await cancelWorkflowTask(root, join(root, "journal.jsonl"), "tam", persisted, undefined, new Date(Date.parse(current) + 86_400_000).toISOString());
+    expect(await resolveActiveTask(root)).toBeUndefined();
+    const entries = (await readFile(join(root, "journal.jsonl"), "utf8")).trim().split("\n").map((line) => JSON.parse(line) as { id: string });
+    expect(entries.filter((entry) => entry.id === `${active.id}-cancellation`)).toHaveLength(1);
   });
   it("should_retain_verifying_task_and_active_pointer_when_completion_persistence_fails", async () => {
     const root = await temporaryRepository(); const current = new Date().toISOString(); const verifying = task(current); const calls: string[] = [];

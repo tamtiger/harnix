@@ -4,6 +4,13 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.9] - 2026-08-19
+
+### Changed
+
+- Bổ sung terminal state cancelled với explicit user authority, cancellation journal và idempotent active-pointer recovery mà không bỏ completion gate.
+- Route agent tới một current stage-owner skill và đọc riêng đến EOF để tránh batch output truncation, giữ canonical skill byte-identical trên ba platform.
+
 ## [1.0.8] - 2026-08-18
 
 ### Changed

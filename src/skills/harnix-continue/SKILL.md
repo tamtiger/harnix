@@ -2,7 +2,7 @@
 name: harnix-continue
 description: Use when an initialized Harnix project may have an unfinished, interrupted, blocked, or partially persisted task that must resume safely.
 metadata:
-  version: "1.0.8"
+  version: "1.0.9"
 ---
 
 # Continue persisted Harnix work
@@ -14,6 +14,8 @@ Restore truth from disk, validate it, and route to the owner of the current stag
 Locate the nearest ancestor or workspace root containing `.harnix/config.yaml`.
 Activate Harnix only when that root exists and its Harnix state is valid. If no such root exists or its state is invalid, do not apply the Harnix workflow, read project state, create files, or run `harnix init`; report the condition instead.
 Read `.harnix/workflow.md` before routing.
+
+Route to one current stage owner before loading more instructions. Read only that owner skill, separately through EOF; do not batch-read or preload skills for later stages. If tool output is truncated, reread the selected `SKILL.md` alone until EOF before acting.
 
 ## Incoming state
 
@@ -36,10 +38,13 @@ Run `harnix workflow --inspect` and read its active TaskRecord projection plus a
 | `verifying/finishing` with green prerequisites | `harnix-finish-work` |
 | `blocked` with unchanged blocker | report blocker and resume status; do not pretend progress |
 | `completed` still active | validate completion persistence, then repair pointer/archive only within the documented workflow |
+| `cancelled/cancelling` still active | route to `harnix-finish-work` for cancellation journal/pointer recovery only |
 
 Blocked state takes precedence over its checkpoint. Never route a blocked `replan`, `debugging`, or `finishing` checkpoint directly to another stage owner until Continue validates that the blocker has changed and resumes the task to its recorded status.
 
 For `completed/finishing` still active, rerun the hidden `workflow --finish` recovery. It reuses the deterministic completion journal ID, appends the journal only when missing, and clears only the matching active pointer; it must not demand new verification for completion already persisted durably.
+
+For an explicit user request to abandon an unfinished task, clarify cancellation when wording such as “complete” could mean successful completion, then route to `harnix-finish-work`; do not relabel failed evidence as pass. For `cancelled/cancelling` still active, rerun `harnix workflow --cancel` without replacing the persisted reason or authority. Recovery reuses the deterministic cancellation journal ID and original `cancelledAt` date, then clears only the matching active pointer.
 
 Do not interpret `ready` as proof that the ready gate passed when artifacts contradict it. Route to `replan` if a material decision, placeholder, or contract gap is visible.
 
@@ -55,7 +60,7 @@ When state and artifacts disagree:
 
 Never silently downgrade schema, discard evidence, clear a blocker, or advance a status to make the record convenient.
 
-Doctor finding `legacy-task-schema` is diagnostic only. Continue reads schema v1 exactly and does not rewrite it. An unfinished v1 to v2 migration is owned by planning at checkpoint `replan`, requires explicit authorization and exact migration evidence, and preserves prior criteria/evidence; completed v1 records remain byte-preserved.
+Doctor finding `legacy-task-schema` is diagnostic only. Continue reads schema v1 exactly and does not rewrite it. An unfinished v1 to v2 migration is owned by planning at checkpoint `replan`, requires explicit authorization and exact migration evidence, and preserves prior criteria/evidence; terminal `completed|cancelled` v1 records remain byte-preserved.
 
 ## Persist
 

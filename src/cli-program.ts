@@ -15,7 +15,7 @@ import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces
 import { searchMemory } from "./commands/mem.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
-import { auditWorkflow, finishWorkflow, inspectWorkflow, saveWorkflow, snapshotWorkflow } from "./commands/internal-workflow.js";
+import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, saveWorkflow, snapshotWorkflow } from "./commands/internal-workflow.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
@@ -152,10 +152,11 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--snapshot", "Snapshot one required check")
     .option("--audit-ready", "Audit Full-task ready trace")
     .option("--finish", "Finish the active workflow task")
+    .option("--cancel", "Cancel the active workflow task")
     .option("--check <id>", "Required check ID for --snapshot")
-    .action(async (options: { inspect?: boolean; save?: boolean; snapshot?: boolean; auditReady?: boolean; finish?: boolean; check?: string }) => {
-      const actionCount = [options.inspect, options.save, options.snapshot, options.auditReady, options.finish].filter((selected) => selected === true).length;
-      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --save, --snapshot, --audit-ready, or --finish.");
+    .action(async (options: { inspect?: boolean; save?: boolean; snapshot?: boolean; auditReady?: boolean; finish?: boolean; cancel?: boolean; check?: string }) => {
+      const actionCount = [options.inspect, options.save, options.snapshot, options.auditReady, options.finish, options.cancel].filter((selected) => selected === true).length;
+      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --save, --snapshot, --audit-ready, --finish, or --cancel.");
       if (options.snapshot !== true && options.check !== undefined) throw new Error("--check requires workflow --snapshot.");
       if (options.snapshot === true && options.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
       const root = await resolveProjectRoot(process.cwd());
@@ -177,6 +178,13 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       }
       if (options.auditReady) {
         process.stdout.write(`${JSON.stringify(await auditWorkflow(root))}\n`);
+        return;
+      }
+      if (options.cancel) {
+        const input = programOptions.workflowInput ? await programOptions.workflowInput() : process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin);
+        let envelope: unknown;
+        try { envelope = input ? JSON.parse(input) as unknown : undefined; } catch { throw new Error("Workflow cancellation requires valid bounded JSON."); }
+        process.stdout.write(`${JSON.stringify(await cancelWorkflow(root, envelope))}\n`);
         return;
       }
       process.stdout.write(`${JSON.stringify(await finishWorkflow(root))}\n`);
