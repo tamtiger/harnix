@@ -141,7 +141,7 @@ Research task `20260818-140304-harness-capability-landscape` compared current ag
 | Untrusted learning promotion guard | `adapt` | Exact hash + sorted provenance/risk categories; statement is JSON-string review data inside a fixed boundary; Doctor warning is redacted/no-fix | Semantic malware claim, auto-promotion, spec/journal rewrite, URL/command execution |
 | Dependency-aware repo-map ranking | `adapt` | Safe relative import resolver and bounded two-hop in-memory graph add capped bonuses; cache/public schema stay v1 and lexical ranker v1 remains rollback | AST server, embedding/vector DB, persisted graph, runtime scan/network |
 
-The four capabilities are implemented as independent pure core boundaries with focused RED→GREEN gates, then integrated through the existing hidden workflow, Doctor and cache-only query commands. Living spec/spec delta, no-spec markers, platform network probes, context condensers, auto-memory, hosted runtime, workflow presets and mandatory multi-agent behavior remain deferred or rejected.
+The four capabilities are implemented as independent pure core boundaries with focused RED→GREEN gates, then integrated through the existing hidden workflow, Doctor and cache-only query commands. Harnix additionally exposes an explicit, evidence-gated project-local `workflow --learn` append transport and `mem --learning` filter; this is reviewable capture, not auto-memory or promotion. Living spec/spec delta, no-spec markers, platform network probes, context condensers, auto-memory, hosted runtime, workflow presets and mandatory multi-agent behavior remain deferred or rejected.
 
 ## 4. Platform research decisions
 

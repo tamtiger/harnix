@@ -15,7 +15,7 @@ import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces
 import { searchMemory } from "./commands/mem.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
-import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, saveWorkflow, snapshotWorkflow } from "./commands/internal-workflow.js";
+import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow } from "./commands/internal-workflow.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
@@ -110,8 +110,8 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
         : result.platforms.some((platform) => platform.confirmationRequired);
       if (confirmationRequired) process.exitCode = 2;
     });
-  program.command("mem").argument("[query]").option("--query <query>").option("--user <id>").option("--limit <count>").action(async (query: string | undefined, options: { query?: string; user?: string; limit?: string }) => {
-    const limit = options.limit === undefined ? undefined : /^\d+$/u.test(options.limit) ? Number(options.limit) : Number.NaN; if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) throw new Error("--limit must be a positive integer."); const result = await searchMemory({ root: await resolveProjectRoot(process.cwd()), query: options.query ?? query, user: options.user, limit }); process.stdout.write(`${JSON.stringify(result)}\n`);
+  program.command("mem").argument("[query]").option("--query <query>").option("--user <id>").option("--limit <count>").option("--learning", "Return only learning candidates").action(async (query: string | undefined, options: { query?: string; user?: string; limit?: string; learning?: boolean }) => {
+    const limit = options.limit === undefined ? undefined : /^\d+$/u.test(options.limit) ? Number(options.limit) : Number.NaN; if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) throw new Error("--limit must be a positive integer."); const result = await searchMemory({ root: await resolveProjectRoot(process.cwd()), query: options.query ?? query, user: options.user, limit, learningOnly: options.learning }); process.stdout.write(`${JSON.stringify(result)}\n`);
   });
   program.command("doctor").option("--fix", "Repair safe, unchanged managed files").option("--global", "Allow --fix to reconcile safe global integration drift").action(async (options: { fix?: boolean; global?: boolean }) => {
     const result = await diagnoseProject({
@@ -153,10 +153,11 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--audit-ready", "Audit Full-task ready trace")
     .option("--finish", "Finish the active workflow task")
     .option("--cancel", "Cancel the active workflow task")
+    .option("--learn", "Record one eligible project-local learning candidate")
     .option("--check <id>", "Required check ID for --snapshot")
-    .action(async (options: { inspect?: boolean; save?: boolean; snapshot?: boolean; auditReady?: boolean; finish?: boolean; cancel?: boolean; check?: string }) => {
-      const actionCount = [options.inspect, options.save, options.snapshot, options.auditReady, options.finish, options.cancel].filter((selected) => selected === true).length;
-      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --save, --snapshot, --audit-ready, --finish, or --cancel.");
+    .action(async (options: { inspect?: boolean; save?: boolean; snapshot?: boolean; auditReady?: boolean; finish?: boolean; cancel?: boolean; learn?: boolean; check?: string }) => {
+      const actionCount = [options.inspect, options.save, options.snapshot, options.auditReady, options.finish, options.cancel, options.learn].filter((selected) => selected === true).length;
+      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --save, --snapshot, --audit-ready, --finish, --cancel, or --learn.");
       if (options.snapshot !== true && options.check !== undefined) throw new Error("--check requires workflow --snapshot.");
       if (options.snapshot === true && options.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
       const root = await resolveProjectRoot(process.cwd());
@@ -185,6 +186,13 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
         let envelope: unknown;
         try { envelope = input ? JSON.parse(input) as unknown : undefined; } catch { throw new Error("Workflow cancellation requires valid bounded JSON."); }
         process.stdout.write(`${JSON.stringify(await cancelWorkflow(root, envelope))}\n`);
+        return;
+      }
+      if (options.learn) {
+        const input = programOptions.workflowInput ? await programOptions.workflowInput() : await readBoundedInput(process.stdin);
+        let envelope: unknown;
+        try { envelope = input ? JSON.parse(input) as unknown : undefined; } catch { throw new Error("Workflow learning capture requires valid bounded JSON."); }
+        process.stdout.write(`${JSON.stringify(await recordLearningWorkflow(root, envelope))}\n`);
         return;
       }
       process.stdout.write(`${JSON.stringify(await finishWorkflow(root))}\n`);

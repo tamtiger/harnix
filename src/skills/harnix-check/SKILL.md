@@ -2,7 +2,7 @@
 name: harnix-check
 description: Use when Harnix needs a standalone read-only code review, review feedback evaluation, or fresh active-task compliance, correctness, security, and maintainability verification before completion.
 metadata:
-  version: "1.0.9"
+  version: "1.0.10"
 ---
 
 # Review and verify Harnix work

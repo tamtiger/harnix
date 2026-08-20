@@ -2,7 +2,7 @@ import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, saveWorkflow, snapshotWorkflow } from "../../src/commands/internal-workflow.js";
+import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow } from "../../src/commands/internal-workflow.js";
 import { appendJournal } from "../../src/core/journal/journal.js";
 import { cancelTask, createTaskV2MigrationEvidence, saveTask, setActiveTask, transitionTask, type TaskRecord, type TaskRecordV1 } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
@@ -192,6 +192,57 @@ describe("hidden workflow persistence operations", () => {
     await expect(readFile(originalJournal, "utf8")).resolves.toContain(`${cancelled.id}-cancellation`);
     await expect(readFile(retryJournal, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
     expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
+  });
+
+  it("records one eligible learning candidate from fresh finishing provenance and retries idempotently", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const now = "2026-08-20T23:59:00.000Z";
+    const harnixRoot = join(root, ".harnix");
+    const previousEvidence = { id: "e-previous", checkId: "check", recordedAt: now, result: "pass" as const, exitCode: 0, summary: "previous", artifactPaths: [] };
+    const previous = {
+      ...task("completed", "finishing"),
+      id: "20260812-120000-previous-learning-source",
+      acceptanceCriteria: [{ id: "a", text: "done", status: "met" as const, evidenceIds: [previousEvidence.id] }],
+      evidence: [previousEvidence],
+      completedAt: now,
+      updatedAt: now,
+    };
+    const currentEvidence = { id: "e-current", checkId: "check", recordedAt: now, result: "pass" as const, exitCode: 0, summary: "current", artifactPaths: [] };
+    const current = {
+      ...task("verifying", "finishing"),
+      acceptanceCriteria: [{ id: "a", text: "done", status: "met" as const, evidenceIds: [currentEvidence.id] }],
+      evidence: [currentEvidence],
+      updatedAt: now,
+    };
+    await saveTask(harnixRoot, previous);
+    await saveTask(harnixRoot, current);
+    await setActiveTask(harnixRoot, current.id);
+    const envelope = { candidate: { id: "workflow-parity", statement: "pnpm test\nhttps://example.invalid/review", sourceTaskIds: [current.id, previous.id], evidenceIds: [currentEvidence.id, previousEvidence.id] } };
+
+    const created = await recordLearningWorkflow(root, envelope, "2026-08-20T23:59:59.000Z");
+    const retried = await recordLearningWorkflow(root, envelope, "2026-08-21T00:00:01.000Z");
+
+    expect(created).toMatchObject({ created: true, eligible: true, findings: ["command-like", "url-like"], entry: { kind: "learning", learning: { id: "workflow-parity", occurrences: 2, confidence: 1, status: "candidate" } } });
+    expect(retried).toEqual({ ...created, created: false });
+    await expect(recordLearningWorkflow(root, { candidate: { ...envelope.candidate, statement: "Changed statement." } }, "2026-08-21T00:00:02.000Z")).rejects.toThrow(/conflict/iu);
+    await expect(recordLearningWorkflow(root, { candidate: { ...envelope.candidate, id: "unknown-evidence", evidenceIds: [...envelope.candidate.evidenceIds, "e-injected"] } }, "2026-08-21T00:00:02.000Z")).rejects.toThrow(/evidence/iu);
+    await expect(recordLearningWorkflow(root, { candidate: { ...envelope.candidate, id: "oversized", statement: "x".repeat(65_537) } }, "2026-08-21T00:00:02.000Z")).rejects.toThrow(/64 KiB/iu);
+    await expect(readFile(join(harnixRoot, "workspace", "tam", "journal", "2026-08-21.jsonl"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("rejects learning capture below the threshold or with unknown provenance", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const now = new Date().toISOString();
+    const currentEvidence = { id: "e-current", checkId: "check", recordedAt: now, result: "pass" as const, exitCode: 0, summary: "current", artifactPaths: [] };
+    const current = { ...task("verifying", "finishing"), acceptanceCriteria: [{ id: "a", text: "done", status: "met" as const, evidenceIds: [currentEvidence.id] }], evidence: [currentEvidence], updatedAt: now };
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, current);
+    await setActiveTask(harnixRoot, current.id);
+
+    await expect(recordLearningWorkflow(root, { candidate: { id: "single", statement: "Single observation.", sourceTaskIds: [current.id], evidenceIds: [currentEvidence.id] } }, now)).rejects.toThrow(/eligible/iu);
+    await expect(recordLearningWorkflow(root, { candidate: { id: "unknown", statement: "Unknown source.", sourceTaskIds: [current.id, "20260812-120000-missing"], evidenceIds: [currentEvidence.id, "e-missing"] } }, now)).rejects.toThrow(/source task/iu);
   });
 
   it("rejects a new Full task unless its required artifacts are persisted with it", async () => {

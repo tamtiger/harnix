@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { appendJournal, searchJournal, type JournalEntry } from "../../src/core/journal/journal.js";
+import { appendJournal, appendJournalIdempotent, searchJournal, type JournalEntry } from "../../src/core/journal/journal.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -23,5 +23,33 @@ describe("journal", () => {
     expect(all.entries).toHaveLength(40);
     expect(new Set(all.entries.map((journalEntry) => journalEntry.id)).size).toBe(40);
     expect(limited.entries.map((journalEntry) => journalEntry.id)).toEqual(["39", "38", "37", "36", "35"]);
+  });
+
+  it("appends a deterministic entry once across retries and rejects conflicting reuse", async () => {
+    const root = await temporaryRepository();
+    const journalRoot = join(root, "journal");
+    const firstPath = join(journalRoot, "2026-08-20.jsonl");
+    const retryPath = join(journalRoot, "2026-08-21.jsonl");
+    const entry: JournalEntry = {
+      generator: "harnix",
+      schemaVersion: 1,
+      id: "task-learning-safe-retry",
+      recordedAt: "2026-08-20T23:59:59.000Z",
+      developer: "tam",
+      taskId: "task",
+      kind: "learning",
+      summary: "Learning candidate: safe-retry",
+      evidenceIds: ["e1", "e2"],
+      learning: { id: "safe-retry", statement: "Keep retries idempotent.", sourceTaskIds: ["task", "task-old"], evidenceIds: ["e1", "e2"], occurrences: 2, confidence: 0.8, status: "candidate" },
+    };
+
+    await expect(appendJournalIdempotent(journalRoot, firstPath, entry)).resolves.toMatchObject({ created: true, entry });
+    await expect(appendJournalIdempotent(journalRoot, retryPath, { ...entry, recordedAt: "2026-08-21T00:00:01.000Z" })).resolves.toMatchObject({ created: false, entry });
+    await expect(appendJournalIdempotent(journalRoot, retryPath, { ...entry, learning: { ...entry.learning!, statement: "Changed statement." } })).rejects.toThrow(/conflict/iu);
+
+    const first = await searchJournal(firstPath);
+    const retry = await searchJournal(retryPath);
+    expect(first.entries).toHaveLength(1);
+    expect(retry.entries).toHaveLength(0);
   });
 });

@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.10] - 2026-08-20
+
+### Changed
+
+- Bổ sung vòng review memory project-local: finish-stage có thể ghi learning candidate đủ provenance qua hidden workflow transport idempotent, fail closed và không tự promotion.
+- Thêm harnix mem --learning để lọc candidate newest-first, compose với query, user và limit mà không đổi default JSON contract.
+- Đồng bộ canonical finish guidance, workflow template và tài liệu safety cho Kiro, Antigravity và Codex.
+
 ## [1.0.9] - 2026-08-19
 
 ### Changed

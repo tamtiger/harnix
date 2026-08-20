@@ -7,14 +7,14 @@
       "sourceId": "guide-common-engineering",
       "scope": "project",
       "generatedHash": "cb07c1bb7396b23466aac655be6c0cd827022ed8f4d5da48706e0565ec4fa361",
-      "generatorVersion": "1.0.9"
+      "generatorVersion": "1.0.10"
     },
     {
       "path": ".harnix/workflow.md",
       "sourceId": "workflow",
       "scope": "project",
-      "generatedHash": "4fee1809c6cb912daaece7cc2bc7eb49ca7f1f4616974df34d93b3c4a200a9fe",
-      "generatorVersion": "1.0.9"
+      "generatedHash": "8c1028628dad704ffdb3aec033f12c7c9499af2c5602ba5fbd902a80ab387442",
+      "generatorVersion": "1.0.10"
     }
   ]
 }

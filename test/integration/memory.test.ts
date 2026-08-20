@@ -65,4 +65,19 @@ describe("searchMemory", () => {
 
     await expect(searchMemory({ root })).resolves.toEqual({ entries: [], malformed: 1 });
   });
+
+  it("filters learning entries before applying query and limit without changing the default result", async () => {
+    const root = await initializedRepository();
+    const journal = join(root, ".harnix", "workspace", "tam", "journal");
+    await mkdir(journal, { recursive: true });
+    const completion = { generator: "harnix", schemaVersion: 1, id: "completion", recordedAt: "2026-08-20T00:00:01.000Z", developer: "tam", kind: "completion", summary: "Completed: workflow", evidenceIds: [] };
+    const learning = {
+      generator: "harnix", schemaVersion: 1, id: "learning", recordedAt: "2026-08-20T00:00:00.000Z", developer: "tam", kind: "learning", summary: "Learning candidate: workflow-parity", evidenceIds: ["e1", "e2"],
+      learning: { id: "workflow-parity", statement: "Keep workflow surfaces aligned.", sourceTaskIds: ["t1", "t2"], evidenceIds: ["e1", "e2"], occurrences: 2, confidence: 0.8, status: "candidate" },
+    };
+    await writeFile(join(journal, "2026-08-20.jsonl"), `${JSON.stringify(learning)}\n${JSON.stringify(completion)}\n`);
+
+    await expect(searchMemory({ root })).resolves.toMatchObject({ entries: [{ id: "completion" }, { id: "learning" }] });
+    await expect(searchMemory({ root, learningOnly: true, query: "WORKFLOW", limit: 1 })).resolves.toMatchObject({ entries: [{ id: "learning", kind: "learning" }], malformed: 0 });
+  });
 });

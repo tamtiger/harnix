@@ -6,8 +6,10 @@ import { readConfig } from "./config/config.js";
 import { readRepoMap } from "./repo-map/store.js";
 import { guideOutputPath, selectGuideSources } from "../guides/catalog.js";
 import type { Evidence, TaskCancellation, TaskMode, TaskRecord } from "./tasks/task.js";
-import { appendJournal, searchJournal } from "./journal/journal.js";
-import { archiveTask, cancelTask, saveTask, transitionTask } from "./tasks/task.js";
+import { appendJournal, appendJournalIdempotent, searchJournal, type JournalEntry } from "./journal/journal.js";
+import { createCapturedLearningCandidate, type LearningCaptureInput } from "./journal/learning.js";
+import { analyzeLearningStatement, type LearningRiskKind } from "./journal/learning-safety.js";
+import { archiveTask, cancelTask, loadTask, saveTask, transitionTask } from "./tasks/task.js";
 import { resolveActiveTask } from "./tasks/task.js";
 import { resolveSafeProjectPath } from "../utils/paths.js";
 import { compareCodeUnits } from "../utils/order.js";
@@ -33,6 +35,7 @@ export interface WorkflowFinishDependencies {
   searchJournal?: typeof searchJournal;
   archiveTask?: typeof archiveTask;
 }
+export interface WorkflowLearningResult { entry: JournalEntry; eligible: true; created: boolean; findings: LearningRiskKind[]; }
 
 export function routeWorkflow(request: WorkflowRouteFacts): WorkflowRouteDecision {
   const active = request.activeTask;
@@ -96,11 +99,7 @@ export async function finishWorkflowTask(harnixRoot: string, journalPath: string
   }
   let completed = task;
   if (!recoveringCompletedTask) {
-    if (task.schemaVersion === 2) {
-      const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
-      await assertVerificationInputsFresh(projectRoot, harnixRoot, task);
-    }
-    if (!canCompleteTask(task, Date.parse(now))) throw new Error("Task requires fresh complete verification before finishing.");
+    await assertTaskReadyForFinishing(harnixRoot, task, now);
     completed = transitionTask(task, "completed", "finishing", now);
     await (dependencies.saveTask ?? saveTask)(harnixRoot, completed);
   }
@@ -115,6 +114,41 @@ export async function finishWorkflowTask(harnixRoot: string, journalPath: string
   }
   await (dependencies.archiveTask ?? archiveTask)(harnixRoot, completed);
   return completed;
+}
+export async function recordWorkflowLearning(harnixRoot: string, journalRoot: string, journalPath: string, developer: string, task: TaskRecord, input: LearningCaptureInput, now = new Date().toISOString()): Promise<WorkflowLearningResult> {
+  await assertTaskReadyForFinishing(harnixRoot, task, now);
+  const candidate = createCapturedLearningCandidate(input);
+  const analysis = analyzeLearningStatement(candidate.statement);
+  if (analysis.oversized) throw new Error("Learning statement exceeds the 64 KiB review limit.");
+  if (!candidate.sourceTaskIds.includes(task.id)) throw new Error("Workflow learning provenance must include the active task.");
+  const knownEvidenceIds = new Set<string>();
+  for (const sourceTaskId of candidate.sourceTaskIds) {
+    let sourceTask: TaskRecord;
+    if (sourceTaskId === task.id) sourceTask = task;
+    else {
+      try { sourceTask = await loadTask(await resolveSafeProjectPath(harnixRoot, `tasks/${sourceTaskId}/task.json`)); }
+      catch (error: unknown) { if (isMissing(error)) throw new Error(`Learning source task ${sourceTaskId} does not exist.`); throw error; }
+      if (sourceTask.status !== "completed") throw new Error(`Learning source task ${sourceTaskId} is not completed.`);
+    }
+    const sourceEvidenceIds = new Set(sourceTask.evidence.map((evidence) => evidence.id));
+    for (const evidenceId of sourceEvidenceIds) knownEvidenceIds.add(evidenceId);
+    if (!candidate.evidenceIds.some((evidenceId) => sourceEvidenceIds.has(evidenceId))) throw new Error(`Learning source task ${sourceTaskId} has no referenced evidence.`);
+  }
+  if (candidate.evidenceIds.some((evidenceId) => !knownEvidenceIds.has(evidenceId))) throw new Error("Workflow learning provenance contains unknown evidence.");
+  const entry: JournalEntry = {
+    generator: "harnix",
+    schemaVersion: 1,
+    id: `${task.id}-${candidate.id}-learning`,
+    recordedAt: now,
+    developer,
+    taskId: task.id,
+    kind: "learning",
+    summary: `Learning candidate: ${candidate.id}`,
+    evidenceIds: candidate.evidenceIds,
+    learning: candidate,
+  };
+  const appended = await appendJournalIdempotent(journalRoot, journalPath, entry);
+  return { ...appended, eligible: true, findings: analysis.findings };
 }
 export async function cancelWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, cancellation: TaskCancellation | undefined, now = new Date().toISOString(), dependencies: WorkflowFinishDependencies = {}): Promise<TaskRecord> {
   const recoveringCancelledTask = task.status === "cancelled" && task.checkpoint === "cancelling";
@@ -173,6 +207,15 @@ function completionEvidenceIds(task: TaskRecord): string[] {
   }
   return [...supporting].sort(compareCodeUnits);
 }
+async function assertTaskReadyForFinishing(harnixRoot: string, task: TaskRecord, now: string): Promise<void> {
+  if (task.status !== "verifying" || task.checkpoint !== "finishing") throw new Error("Workflow learning capture requires an active verifying/finishing task.");
+  if (task.schemaVersion === 2) {
+    const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
+    await assertVerificationInputsFresh(projectRoot, harnixRoot, task);
+  }
+  if (!canCompleteTask(task, Date.parse(now))) throw new Error("Task requires fresh complete verification before finishing.");
+}
+
 export async function taskContextDrift(projectRoot: string, harnixRoot: string, task: TaskRecord): Promise<ContextDrift> {
   try {
     const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);

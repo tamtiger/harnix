@@ -1,0 +1,592 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260820-082432-memory-learning-review-loop",
+  "title": "Khép kín vòng review memory thành learning candidate",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cho phép finish-stage ghi một learning candidate project-local đủ provenance qua transport chuẩn và giúp người dùng lọc lại candidate bằng harnix mem mà không tự động promotion hoặc sửa spec.",
+  "nonGoals": [
+    "Không thêm auto-memory, global memory, daemon, telemetry, network hoặc model runtime.",
+    "Không tự động promotion learning thành spec, rule, skill hoặc source code.",
+    "Không backfill hay rewrite journal lịch sử và không đổi LearningCandidateV1 hoặc JournalEntryV1.",
+    "Không thêm semantic classifier, keyword-based recommendation engine hoặc inference rằng chủ đề lặp lại vẫn là bug mở.",
+    "Không mở rộng platform, package, service hoặc Git automation."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-learning-capture",
+      "text": "Hidden workflow transport ghi idempotent đúng một learning candidate đủ ngưỡng từ active verifying/finishing task, tính occurrences/confidence trong runtime và fail closed với provenance task/evidence không hợp lệ.",
+      "status": "met",
+      "evidenceIds": [
+        "e-learning-capture-verification",
+        "e-learning-safety-verification",
+        "e-acceptance-verification"
+      ]
+    },
+    {
+      "id": "ac-learning-mem",
+      "text": "harnix mem --learning trả JSON newest-first chỉ gồm learning entries, vẫn hỗ trợ query, user và limit, đồng thời giữ nguyên hành vi/output hiện tại khi không có flag.",
+      "status": "met",
+      "evidenceIds": [
+        "e-mem-learning-verification",
+        "e-acceptance-verification"
+      ]
+    },
+    {
+      "id": "ac-learning-safety",
+      "text": "Learning statement và provenance được giới hạn, validate và xử lý như untrusted data; retry không duplicate, conflict fail closed, Doctor redaction giữ nguyên và không có journal/spec mutation ngoài append được phép.",
+      "status": "met",
+      "evidenceIds": [
+        "e-learning-capture-verification",
+        "e-learning-safety-verification",
+        "e-release-gates-verification"
+      ]
+    },
+    {
+      "id": "ac-learning-workflow",
+      "text": "Finish guidance kiểm tra project-local memory và chỉ ghi candidate khi recurrence/evidence đạt contract; nếu không đủ thì finish vẫn tiếp tục và không tạo learning giả, với canonical skill/template parity trên Kiro, Antigravity và Codex.",
+      "status": "met",
+      "evidenceIds": [
+        "e-skill-learning-verification",
+        "e-acceptance-verification",
+        "e-release-gates-verification"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "package.json",
+    "src/cli-program.ts",
+    "src/commands/doctor.ts",
+    "src/commands/internal-workflow.ts",
+    "src/commands/mem.ts",
+    "src/core/journal/journal.ts",
+    "src/core/journal/learning-safety.ts",
+    "src/core/journal/learning.ts",
+    "src/core/journal/promotion.ts",
+    "src/core/workflow.ts",
+    "src/skills/harnix-finish-work/SKILL.md",
+    "src/templates/harnix/workflow.ts",
+    "test/integration/cli.test.ts",
+    "test/integration/doctor.test.ts",
+    "test/integration/memory.test.ts",
+    "test/platform/global-adapters.test.ts",
+    "test/unit/journal.test.ts",
+    "test/unit/learning-safety.test.ts",
+    "test/workflow/internal-workflow.test.ts",
+    "test/workflow/skill-sources.test.ts",
+    "test/workflow/templates.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "learning-capture-focused",
+      "description": "Verify bounded learning capture, provenance validation, eligibility calculation and idempotent workflow transport.",
+      "command": "pnpm exec vitest run test/unit/journal.test.ts test/workflow/internal-workflow.test.ts test/integration/cli.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-learning-capture",
+        "ac-learning-safety"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "src/core/journal/journal.ts",
+        "src/core/journal/learning-safety.ts",
+        "src/core/journal/learning.ts",
+        "src/core/workflow.ts",
+        "test/integration/cli.test.ts",
+        "test/unit/journal.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "mem-learning-focused",
+      "description": "Verify mem learning filtering, query/user/limit composition, ordering, malformed tolerance and legacy default output.",
+      "command": "pnpm exec vitest run test/integration/memory.test.ts test/integration/cli.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-learning-mem",
+        "ac-learning-safety"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/mem.ts",
+        "src/core/journal/journal.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/memory.test.ts"
+      ]
+    },
+    {
+      "id": "learning-safety-focused",
+      "description": "Verify persistent-learning size and untrusted-boundary protections plus redacted non-fixable Doctor diagnostics.",
+      "command": "pnpm exec vitest run test/unit/learning-safety.test.ts test/integration/doctor.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-learning-capture",
+        "ac-learning-safety"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/doctor.ts",
+        "src/core/journal/learning-safety.ts",
+        "src/core/journal/promotion.ts",
+        "test/integration/doctor.test.ts",
+        "test/unit/learning-safety.test.ts"
+      ]
+    },
+    {
+      "id": "skill-learning-loop",
+      "description": "Verify finish-stage learning guidance and byte-identical canonical rendering for all three supported platforms.",
+      "command": "pnpm exec vitest run test/workflow/skill-sources.test.ts test/workflow/templates.test.ts test/platform/global-adapters.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-learning-safety",
+        "ac-learning-workflow"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/skills/harnix-finish-work/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "static-quality",
+      "description": "Build, lint and typecheck the complete repository after the learning-loop implementation.",
+      "command": "pnpm run build && pnpm run lint && pnpm run typecheck",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-learning-capture",
+        "ac-learning-mem",
+        "ac-learning-safety",
+        "ac-learning-workflow"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "acceptance-suite",
+      "description": "Run the full acceptance test suite for workflow, migration, platform and safety compatibility.",
+      "command": "pnpm run test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-learning-capture",
+        "ac-learning-mem",
+        "ac-learning-safety",
+        "ac-learning-workflow"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "package.json",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "release-gates",
+      "description": "Run package, tarball, performance, footprint and release scans after version synchronization.",
+      "command": "pnpm run pack:check && pnpm run smoke:tarball && pnpm run measure:init && pnpm run measure:footprint && pnpm run scan:release",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-learning-capture",
+        "ac-learning-mem",
+        "ac-learning-safety",
+        "ac-learning-workflow"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "version-sync-docs",
+      "description": "Verify package, canonical skill metadata, README and changelog version synchronization for 1.0.10.",
+      "command": "pnpm run version:sync -- 1.0.10",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-learning-capture",
+        "ac-learning-mem",
+        "ac-learning-safety",
+        "ac-learning-workflow"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "scripts/version-sync.mjs",
+        "src/skills/*/SKILL.md"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e-learning-capture-red",
+      "checkId": "learning-capture-focused",
+      "recordedAt": "2026-08-20T01:36:37.385Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: 4 focused failures đúng do appendJournalIdempotent, recordLearningWorkflow và hidden --learn chưa tồn tại; 43 test lân cận pass.",
+      "artifactPaths": [
+        "test/integration/cli.test.ts",
+        "test/unit/journal.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "e-mem-learning-red",
+      "checkId": "mem-learning-focused",
+      "recordedAt": "2026-08-20T01:36:37.385Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: mem filter test trả completion mới nhất thay vì learning entry vì learningOnly chưa được implement; 3 test memory lân cận pass.",
+      "artifactPaths": [
+        "test/integration/memory.test.ts"
+      ]
+    },
+    {
+      "id": "e-skill-learning-red",
+      "checkId": "skill-learning-loop",
+      "recordedAt": "2026-08-20T01:36:37.385Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: skill/template suite có 2 failure đúng do thiếu harnix mem --learning và workflow --learn guidance; 9 test parity lân cận pass.",
+      "artifactPaths": [
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "e-learning-capture-focused-green",
+      "checkId": "learning-capture-focused",
+      "recordedAt": "2026-08-20T01:43:45.387Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh learning capture GREEN: journal/internal-workflow/CLI 47/47 tests pass; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "test/integration/cli.test.ts",
+        "test/unit/journal.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "inputDigest": "8b442587bb6a8c376a0176a4d5ec174572a89dd1d7f7ff3179d34866d5bd7b98"
+    },
+    {
+      "id": "e-mem-learning-focused-green",
+      "checkId": "mem-learning-focused",
+      "recordedAt": "2026-08-20T01:45:26.7112131Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh mem learning GREEN: memory/CLI 27/27 tests pass; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "test/integration/cli.test.ts",
+        "test/integration/memory.test.ts"
+      ],
+      "inputDigest": "432e084cd5a15dcd84dbcf18efa535089a9cc7f4460b662b6aa592c28c658dd9"
+    },
+    {
+      "id": "e-learning-safety-focused-green",
+      "checkId": "learning-safety-focused",
+      "recordedAt": "2026-08-20T01:45:54.1703802Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh learning safety GREEN: learning-safety/Doctor 24/24 tests pass; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "test/integration/doctor.test.ts",
+        "test/unit/learning-safety.test.ts"
+      ],
+      "inputDigest": "8e0b0d12d10452c86798161e50aee1a223c8ac283d05f6707d675f564243299c"
+    },
+    {
+      "id": "e-skill-learning-loop-green",
+      "checkId": "skill-learning-loop",
+      "recordedAt": "2026-08-20T01:46:19.5403782Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh finish skill/template parity GREEN: 11/11 tests pass trên canonical skill, workflow template và global adapters; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "src/skills/harnix-finish-work/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "f4d64d01370a3049da718833ade0a98666bd1ced2226f5cfaad1c6df15b42cbc"
+    },
+    {
+      "id": "e-version-sync-docs-green",
+      "checkId": "version-sync-docs",
+      "recordedAt": "2026-08-20T01:47:13.2867456Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh version sync GREEN: package, bảy canonical skill, README và CHANGELOG đã đồng bộ idempotent ở 1.0.10; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/skills/harnix-finish-work/SKILL.md"
+      ],
+      "inputDigest": "be45116d179191802a1df3dec22b6746b12b1f7cc9a50b825dcca644cdeebdcf"
+    },
+    {
+      "id": "e-compliance-provenance-gap",
+      "recordedAt": "2026-08-20T01:48:26.7562606Z",
+      "result": "fail",
+      "summary": "Compliance review fail: workflow learning chỉ kiểm tra mỗi source có ít nhất một evidence, nhưng chưa reject evidenceId thừa không thuộc bất kỳ source task nào; trái design yêu cầu mọi evidence ID được validate từ task records.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "e-debug-provenance-red",
+      "recordedAt": "2026-08-20T01:49:01.7602032Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Hypothesis 1 confirmed: source-local any-match check là root cause; regression test với e-injected resolve và append thay vì reject, trong khi 20 test lân cận pass.",
+      "artifactPaths": [
+        "test/workflow/internal-workflow.test.ts",
+        "src/core/workflow.ts"
+      ]
+    },
+    {
+      "id": "e-debug-provenance-green",
+      "recordedAt": "2026-08-20T01:49:31.2921849Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fix provenance GREEN: union evidence của toàn bộ source tasks được kiểm chứng và evidenceId không thuộc source bị reject; internal-workflow 21/21 tests pass.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "e-compliance-review-pass",
+      "recordedAt": "2026-08-20T01:50:06.2484862Z",
+      "result": "pass",
+      "summary": "Compliance review pass sau fix: request, PRD/design/plan, CLI/core/journal/skill/template/docs và mapped tests khớp bốn criteria; scope giữ project-local, JSON-only, no network/auto-promotion/spec mutation/Git automation; git diff --check pass.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "src/commands/mem.ts",
+        "src/core/journal/journal.ts",
+        "src/core/journal/learning.ts",
+        "src/core/workflow.ts",
+        "src/skills/harnix-finish-work/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    },
+    {
+      "id": "e-learning-capture-verification",
+      "checkId": "learning-capture-focused",
+      "recordedAt": "2026-08-20T01:50:32.9323330Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh verification: learning capture/journal/CLI 47/47 tests pass sau provenance fix; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "test/integration/cli.test.ts",
+        "test/unit/journal.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "inputDigest": "aa09ee8625e5725e18ae9a7c9538a686048c97b2cc7306dd7720ce9f4f403cd7"
+    },
+    {
+      "id": "e-mem-learning-verification",
+      "checkId": "mem-learning-focused",
+      "recordedAt": "2026-08-20T01:51:04.8175718Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh verification: mem learning filter và CLI 27/27 tests pass; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "test/integration/cli.test.ts",
+        "test/integration/memory.test.ts"
+      ],
+      "inputDigest": "041121e5e8d50903cac367c7b5f666b5b4088365fbf49d69b6657a720f635392"
+    },
+    {
+      "id": "e-learning-safety-verification",
+      "checkId": "learning-safety-focused",
+      "recordedAt": "2026-08-20T01:51:23.6767129Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh verification: learning safety và Doctor redaction 24/24 tests pass; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "test/integration/doctor.test.ts",
+        "test/unit/learning-safety.test.ts"
+      ],
+      "inputDigest": "de01f58966cd79a2fb1bb3caad66ade4c90a5dda77df7bf023b553fded945e6a"
+    },
+    {
+      "id": "e-skill-learning-verification",
+      "checkId": "skill-learning-loop",
+      "recordedAt": "2026-08-20T01:51:42.4387010Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh verification: canonical finish skill/template/global adapter parity 11/11 tests pass; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "src/skills/harnix-finish-work/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "04b0479423ca9b3c49de11bb8c7e160db0d185182519790720e62d3f65d4b9cc"
+    },
+    {
+      "id": "e-version-sync-verification",
+      "checkId": "version-sync-docs",
+      "recordedAt": "2026-08-20T01:51:59.8217954Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh verification: version:sync 1.0.10 idempotent, package/skills/README/CHANGELOG đồng bộ; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/skills/harnix-finish-work/SKILL.md"
+      ],
+      "inputDigest": "0713de32e6b96a201816348a790339258c60f3a36ece96424c519baa5d69f768"
+    },
+    {
+      "id": "e-static-quality-verification",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-20T01:52:34.6350528Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh full static quality pass: build, ESLint và TypeScript typecheck đều exit 0, không warning gate; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "dist/cli.js",
+        "src",
+        "test"
+      ],
+      "inputDigest": "626c6fa662a1462e07bc81a73fa4327452c31c475588c8ff432e943273ec599a"
+    },
+    {
+      "id": "e-acceptance-self-host-red",
+      "checkId": "acceptance-suite",
+      "recordedAt": "2026-08-20T01:53:25.2547763Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Full acceptance fail tại self-host: unit 206 pass/1 skip, integration 91 pass, migration 9 pass, platform 23 pass; workflow có 65 pass và 1 fail vì .harnix manifest generatorVersion còn 1.0.9 thay vì 1.0.10. Snapshot trước/sau khớp.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        ".harnix/workflow.md",
+        "test/workflow/self-host.test.ts"
+      ],
+      "inputDigest": "4951f0c39fc2dc53a22d889b8296d4db1b66389cfd12bac6721ed0651b9d061f"
+    },
+    {
+      "id": "e-self-host-version-green",
+      "recordedAt": "2026-08-20T01:53:50.3826055Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Self-host recovery GREEN: CLI 1.0.10 update chỉ đồng bộ managed metadata; self-host 2/2 tests pass và không sửa user-owned content.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        ".harnix/workflow.md",
+        "test/workflow/self-host.test.ts"
+      ]
+    },
+    {
+      "id": "e-acceptance-verification",
+      "checkId": "acceptance-suite",
+      "recordedAt": "2026-08-20T01:54:31.2862872Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh full acceptance pass: unit 206 pass/1 skip, integration 91, migration 9, platform 23, workflow 66 và safety 36; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "test/unit",
+        "test/integration",
+        "test/migration",
+        "test/platform",
+        "test/workflow",
+        "test/safety"
+      ],
+      "inputDigest": "4951f0c39fc2dc53a22d889b8296d4db1b66389cfd12bac6721ed0651b9d061f"
+    },
+    {
+      "id": "e-release-gates-verification",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-20T01:55:36.1517441Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh release gates pass: pack/smoke cả ba platform, init median 315.23 ms worst 341.49 ms, footprint 226164 bytes/50 files (83.17% reduction), release scan 16 packaged files và non-Harnix p95 174.63 ms; snapshot trước/sau khớp.",
+      "artifactPaths": [
+        "package.json",
+        "scripts",
+        "src",
+        "test"
+      ],
+      "inputDigest": "caa61b8aad6fcaa1ece1a8344d3322a99881e67a91dbaeff68195bb5a6704d2b"
+    },
+    {
+      "id": "e-section11-exact-pass",
+      "recordedAt": "2026-08-20T01:58:27.1859798Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact section 11 sequence pass từ frozen install qua build/lint/typecheck/test/acceptance/package/smoke/performance/footprint/release scan và git diff --check; mọi command exit 0.",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts",
+        "src",
+        "test"
+      ]
+    },
+    {
+      "id": "e-quality-security-review-pass",
+      "recordedAt": "2026-08-20T01:58:27.1880125Z",
+      "result": "pass",
+      "summary": "Quality/security review pass: correctness, RED regression, bounded input, safe paths, provenance, redaction, idempotence, deterministic order, packaging và no-network/no-auto-promotion boundaries không còn finding blocking. Một Windows permission unit test bị skip theo condition hiện hữu; interactive disposable tool sessions không rerun và không claim active.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "src/commands/mem.ts",
+        "src/core/journal/journal.ts",
+        "src/core/journal/learning.ts",
+        "src/core/workflow.ts",
+        "test"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-20T01:24:32.026Z",
+  "updatedAt": "2026-08-20T01:59:17.602Z",
+  "completedAt": "2026-08-20T01:59:17.602Z"
+}

@@ -223,6 +223,8 @@ Journal/learning:
 - Project-local, newest-first, query theo user/limit và JSON.
 - Missing workspace, malformed entry, Unicode/spaces không crash toàn command.
 - Candidate gồm source task, statement, evidence, occurrences, confidence.
+- Public `harnix mem --learning` filter learning entries trước query/limit, giữ newest-first và JSON shape hiện tại khi không có flag.
+- Hidden `workflow --learn` chỉ nhận bounded candidate-only JSON tại active `verifying/finishing`; runtime revalidate completion freshness, source task/evidence provenance, 64 KiB và eligibility, tự tính derived fields rồi append idempotent một `JournalEntryV1`. Retry identical không duplicate; conflict fail closed; action không đổi TaskRecord/spec/active pointer.
 - Promotion vào spec cần repeated independent evidence hoặc explicit finish approval.
 - Promotion reviewable trong diff; statement chỉ được render dưới `Statement-JSON: <JSON.stringify(statement)>` trong fixed untrusted-learning boundary, kèm exact SHA-256, sorted provenance/evidence và redacted risk categories. Doctor gộp tối đa một `persistent-learning-suspicious` warning mỗi journal file, `fixable:false`, không echo matched value và không sửa journal/spec. Không daemon, hidden skill generation, global memory hoặc automatic promotion.
 

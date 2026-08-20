@@ -101,6 +101,7 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("harnix workflow --inspect");
     expect(workflowTemplate).toContain("harnix workflow --save");
     expect(workflowTemplate).toContain("harnix workflow --finish");
+    expect(workflowTemplate).toContain("harnix workflow --learn");
     expect(workflowTemplate).toContain("harnix workflow --cancel");
     expect(workflowTemplate).toContain("one current stage-owner skill");
     expect(workflowTemplate).toContain("separately through EOF");

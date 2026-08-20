@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { readConfig } from "../core/config/config.js";
-import { cancelWorkflowTask, finishWorkflowTask, taskContextDrift } from "../core/workflow.js";
+import { cancelWorkflowTask, finishWorkflowTask, recordWorkflowLearning, taskContextDrift, type WorkflowLearningResult } from "../core/workflow.js";
+import type { LearningCaptureInput } from "../core/journal/learning.js";
 import type { ContextDrift } from "../core/context/context.js";
 import {
   loadTask,
@@ -98,6 +99,17 @@ export async function cancelWorkflow(root: string, envelope: unknown, now = new 
   const journalDate = recovering ? task.cancelledAt! : now;
   const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${journalDate.slice(0, 10)}.jsonl`);
   return cancelWorkflowTask(harnixRoot, journalPath, config.developer, task, cancellation, now);
+}
+
+export async function recordLearningWorkflow(root: string, envelope: unknown, now = new Date().toISOString()): Promise<WorkflowLearningResult> {
+  const input = validateLearningEnvelope(envelope);
+  const harnixRoot = await resolveSafeHarnixPath(root);
+  const task = await resolveActiveTask(harnixRoot);
+  if (!task) throw new Error("Workflow learning capture requires an active task.");
+  const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
+  const journalRoot = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal`);
+  const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${now.slice(0, 10)}.jsonl`);
+  return recordWorkflowLearning(harnixRoot, journalRoot, journalPath, config.developer, task, input, now);
 }
 
 async function loadExistingTask(harnixRoot: string, id: string): Promise<TaskRecord | undefined> {
@@ -205,4 +217,8 @@ function validateCancellationEnvelope(value: unknown): TaskCancellation {
     throw new Error("Workflow cancellation requires bounded JSON with reason and authorizedBy=user.");
   }
   return { reason: value.reason, authorizedBy: "user" };
+}
+function validateLearningEnvelope(value: unknown): LearningCaptureInput {
+  if (!isRecord(value) || Object.keys(value).length !== 1 || !isRecord(value.candidate)) throw new Error("Workflow learning capture requires bounded JSON with a candidate object.");
+  return value.candidate as unknown as LearningCaptureInput;
 }

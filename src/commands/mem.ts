@@ -6,7 +6,7 @@ import { searchJournal, type JournalEntry } from "../core/journal/journal.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import { compareCodeUnits } from "../utils/order.js";
 
-export interface MemOptions { root: string; query?: string | undefined; user?: string | undefined; limit?: number | undefined; }
+export interface MemOptions { root: string; query?: string | undefined; user?: string | undefined; limit?: number | undefined; learningOnly?: boolean | undefined; }
 export interface MemResult { entries: JournalEntry[]; malformed: number; }
 
 export async function searchMemory(options: MemOptions): Promise<MemResult> {
@@ -19,7 +19,7 @@ export async function searchMemory(options: MemOptions): Promise<MemResult> {
   const limit = Math.max(1, options.limit ?? 20);
   let entries: JournalEntry[] = [], malformed = 0;
   for (const name of names) {
-    const result = await searchJournal(join(journalRoot, name), { developer, limit, ...(options.query === undefined ? {} : { query: options.query }) });
+    const result = await searchJournal(join(journalRoot, name), { developer, limit, ...(options.learningOnly === true ? { kind: "learning" as const } : {}), ...(options.query === undefined ? {} : { query: options.query }) });
     malformed += result.malformed;
     entries = [...entries, ...result.entries].sort((left, right) => compareCodeUnits(right.recordedAt, left.recordedAt) || compareCodeUnits(right.id, left.id)).slice(0, limit);
   }

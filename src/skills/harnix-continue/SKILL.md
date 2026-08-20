@@ -2,7 +2,7 @@
 name: harnix-continue
 description: Use when an initialized Harnix project may have an unfinished, interrupted, blocked, or partially persisted task that must resume safely.
 metadata:
-  version: "1.0.9"
+  version: "1.0.10"
 ---
 
 # Continue persisted Harnix work

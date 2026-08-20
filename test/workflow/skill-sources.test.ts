@@ -171,6 +171,9 @@ describe("canonical Harnix workflow skill sources", () => {
     expect(finish).toContain("run `harnix workflow --finish` exactly once");
     expect(finish).toContain("Accept `cancelled/cancelling` only for partial cancellation recovery");
     expect(finish).toContain("run `harnix workflow --cancel`");
+    expect(finish).toContain("harnix mem --learning");
+    expect(finish).toContain("harnix workflow --learn");
+    expect(finish).toContain("does not meet the threshold");
     expect(finish).not.toContain("write the task `status` as `completed`");
     expect(continuation).toContain("Blocked state takes precedence over its checkpoint");
     expect(continuation).toContain("Read only that owner skill, separately through EOF");

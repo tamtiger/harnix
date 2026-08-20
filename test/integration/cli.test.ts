@@ -146,6 +146,18 @@ describe.sequential("CLI", () => {
 
     expect(JSON.parse(output.mock.calls.map((call) => String(call[0])).join(""))).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
   });
+  it("should_recognize_the_hidden_learning_action_and_require_an_active_finishing_task", async () => {
+    const root = await fixture(); process.chdir(root);
+    await createProgram({ interactive: false }).parseAsync(["node", "harnix", "init", "--user", "tam"], { from: "node" });
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    const workflowInput = async () => JSON.stringify({ candidate: { id: "learning", statement: "statement", sourceTaskIds: ["a", "b"], evidenceIds: ["e1", "e2"] } });
+
+    await expect(runCli(["node", "harnix", "workflow", "--learn"], { interactive: false, workflowInput })).resolves.toBe(2);
+
+    const message = stderr.mock.calls.flatMap((call) => call).join("");
+    expect(message).toContain("active task");
+    expect(message).not.toContain("unknown option");
+  });
   it("should_cancel_an_active_task_from_a_bounded_json_envelope", async () => {
     const root = await fixture(); process.chdir(root);
     await createProgram({ interactive: false }).parseAsync(["node", "harnix", "init", "--user", "tam"], { from: "node" });
