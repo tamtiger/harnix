@@ -150,8 +150,8 @@ Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapte
 ### Codex
 
 - Official user skill surface là `$HOME/.agents/skills/harnix-*`; skill metadata/triggers vẫn phải cụ thể.
-- Merge block conditional ngắn vào `$CODEX_HOME/AGENTS.md` và nested `UserPromptSubmit` handler vào `$CODEX_HOME/hooks.json`; preserve all unrelated content/groups/handlers and detect `AGENTS.override.md` shadowing.
-- Không tạo/sửa `config.toml`, model/reasoning/sandbox/approval/MCP/provider/auth hoặc feature flags. Constant hook command must resolve through Windows pnpm/npm shim smoke without a persisted absolute executable.
+- Merge block conditional ngắn vào `$CODEX_HOME/AGENTS.md` và nested `UserPromptSubmit` handler vào managed block trong `$CODEX_HOME/config.toml`; preserve all unrelated TOML content and detect `AGENTS.override.md` shadowing. Migrate unchanged legacy Harnix JSON hook conservatively.
+- Không sửa model/reasoning/sandbox/approval/MCP/provider/auth hoặc feature flags. Constant hook command must resolve through Windows pnpm/npm shim smoke without a persisted absolute executable.
 - Hook command requires user `/hooks` review/trust. File presence means `installed-pending-trust`, not `active`; Harnix never bypasses trust.
 - `.codex/agents/` remains optional only when current official surface supports it; it is not a workflow dependency.
 - Không tạo legacy custom prompts hoặc slash-command shims.

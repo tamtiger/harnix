@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.11] - 2026-08-21
+
+### Changed
+
+- Chuyển Codex Harnix hook sang managed inline config.toml và migrate hooks.json cũ an toàn để loại bỏ cảnh báo mixed hook source.
+
 ## [1.0.10] - 2026-08-20
 
 ### Changed

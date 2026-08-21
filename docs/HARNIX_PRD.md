@@ -190,8 +190,8 @@ Phase 6 supersedes every former project-local platform setup path. `init` contin
 ### 9.3 Codex
 
 - User skills are `$HOME/.agents/skills/harnix-*/SKILL.md`; they are not repository `.agents/skills` setup output.
-- Setup merges a short conditional Harnix block into `$CODEX_HOME/AGENTS.md`, preserving every byte outside markers, and a nested `UserPromptSubmit` handler into `$CODEX_HOME/hooks.json`, preserving unrelated events/groups/handlers.
-- Setup does not create or change `$CODEX_HOME/config.toml`, model, reasoning, sandbox, approval, provider/auth, MCP or feature flags. `AGENTS.override.md` shadowing and legacy project hooks are doctor findings.
+- Setup merges a short conditional Harnix block into `$CODEX_HOME/AGENTS.md`, preserving every byte outside markers, and a nested `UserPromptSubmit` handler into a managed block in `$CODEX_HOME/config.toml`, preserving unrelated settings and hooks.
+- Setup does not change model, reasoning, sandbox, approval, provider/auth, MCP or feature flags. An unchanged legacy Harnix hook in `$CODEX_HOME/hooks.json` is migrated conservatively; modified or colliding content is preserved and reported. `AGENTS.override.md` shadowing and legacy project hooks are doctor findings.
 - The fixed nested hook command has timeout 5 seconds and `additionalContextLimit: 2500`. Windows launcher smoke must prove a pnpm/npm `.cmd` shim resolves; no absolute executable or automatic trust bypass is allowed.
 - Codex hook files are initially `installed-pending-trust`. User review/trust through `/hooks` is necessary but not sufficient for an `active` claim: activation additionally needs authoritative external evidence. Changed hook content requires review again, and the regular CLI never assumes trust or activation from file presence.
 

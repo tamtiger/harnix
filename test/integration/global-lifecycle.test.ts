@@ -5,7 +5,9 @@ import { describe, expect, it } from "vitest";
 import { setupPlatforms } from "../../src/commands/setup.js";
 import { uninstallGlobalIntegrations } from "../../src/commands/global-uninstall.js";
 import { updateGlobalPlatforms } from "../../src/commands/global-update.js";
+import { CODEX_GLOBAL_HOOK_SELECTOR, codexGlobalContextHookGroup } from "../../src/configurators/codex.js";
 import { KIRO_GLOBAL_CONTEXT_HOOK } from "../../src/configurators/kiro.js";
+import { canonicalJson } from "../../src/utils/global-managed-json.js";
 import { sha256 } from "../../src/utils/hashing.js";
 import { resolveUserPlatformRoots } from "../../src/utils/user-paths.js";
 import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
@@ -142,6 +144,53 @@ describe("global integration lifecycle", () => {
         expect(result.platforms[0]).toMatchObject({ platform: "kiro", readiness: "installed" });
         expect(content).toContain("harnix context --platform kiro");
         expect(content).not.toContain("harnix internal context");
+      }
+    }
+  });
+
+  it("should_migrate_the_legacy_codex_json_hook_to_config_toml_without_deleting_user_hooks", async () => {
+    const migratedHome = await temporaryUserHome();
+    const preservedHome = await temporaryUserHome();
+    for (const [home, modified] of [[migratedHome, false], [preservedHome, true]] as const) {
+      const environment = { CODEX_HOME: join(home, "codex") };
+      const homeResolver = async () => home;
+      await setupPlatforms({ commandLookup: async () => true, environment, homeResolver, platforms: ["codex"] });
+      const configPath = join(home, "codex", "config.toml");
+      const hooksPath = join(home, "codex", "hooks.json");
+      const manifestPath = join(home, "codex", "harnix", "managed.json");
+      const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+        entries: Array<{ path: string; sourceId: string; kind: string; selector?: unknown; generatedHash: string; generatorVersion: string }>;
+      };
+      const hookEntry = manifest.entries.find((entry) => entry.sourceId === "codex-global-context-hook");
+      if (hookEntry === undefined) throw new Error("Expected the owned Codex hook entry.");
+      const legacyGroup = JSON.parse(JSON.stringify(codexGlobalContextHookGroup)) as { hooks: Array<{ command?: string; timeout?: number }> };
+      const originalLegacyGroup = JSON.parse(JSON.stringify(legacyGroup)) as typeof legacyGroup;
+      if (modified && legacyGroup.hooks[0] !== undefined) legacyGroup.hooks[0].timeout = 99;
+      const legacyContent = `${JSON.stringify({ hooks: { UserPromptSubmit: [{ hooks: [{ type: "command", command: "user hook" }] }, legacyGroup] } }, null, 2)}\n`;
+      await writeFile(configPath, "[hooks.state]\n");
+      await writeFile(hooksPath, legacyContent);
+      Object.assign(hookEntry, {
+        kind: "json-member",
+        path: "hooks.json",
+        selector: CODEX_GLOBAL_HOOK_SELECTOR,
+        generatedHash: sha256(canonicalJson(originalLegacyGroup)),
+        generatorVersion: "1.0.6",
+      });
+      manifest.entries.sort((left, right) => `${left.path}\u0000${left.sourceId}`.localeCompare(`${right.path}\u0000${right.sourceId}`));
+      await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+      const result = await updateGlobalPlatforms({ commandLookup: async () => true, environment, homeResolver, platforms: ["codex"] });
+      const config = await readFile(configPath, "utf8");
+      const hooks = await readFile(hooksPath, "utf8");
+      expect(config).toContain("[[hooks.UserPromptSubmit]]");
+      expect(config).toContain("[hooks.state]");
+      if (modified) {
+        expect(result.platforms[0]).toMatchObject({ platform: "codex", readiness: "drifted" });
+        expect(hooks).toContain('"timeout": 99');
+      } else {
+        expect(result.platforms[0]).toMatchObject({ platform: "codex", readiness: "installed-pending-trust" });
+        expect(hooks).toContain('"command": "user hook"');
+        expect(hooks).not.toContain("harnix context --platform codex");
       }
     }
   });

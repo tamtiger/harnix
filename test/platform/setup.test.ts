@@ -49,7 +49,7 @@ describe("setupPlatforms user-global lifecycle", () => {
     await expect(readFile(join(home, ".gemini", "antigravity-cli", "plugins", "harnix", "hooks.json"), "utf8")).resolves.toContain('"PreInvocation"');
     await expect(readFile(join(home, ".agents", "skills", "harnix-implement", "SKILL.md"), "utf8")).resolves.toContain(`metadata:\n  version: "${packageVersion}"`);
     await expect(readFile(join(home, ".agents", "skills", "harnix-implement", "SKILL.md"), "utf8")).resolves.toContain("nearest ancestor or workspace root containing `.harnix/config.yaml`");
-    await expect(readFile(join(home, "codex-home", "hooks.json"), "utf8")).resolves.toContain('"hooks"');
+    await expect(readFile(join(home, "codex-home", "config.toml"), "utf8")).resolves.toContain("[[hooks.UserPromptSubmit]]");
     await expect(access(join(nonHarnixDirectory, ".harnix", "config.yaml"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(nonHarnixDirectory, ".kiro"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(nonHarnixDirectory, ".gemini"))).rejects.toMatchObject({ code: "ENOENT" });
@@ -85,7 +85,7 @@ describe("setupPlatforms user-global lifecycle", () => {
     expect(result.platforms.flatMap((platform) => platform.created)).toEqual(expect.arrayContaining([
       "~/.kiro/hooks/harnix-context.json",
       "~/.agents/skills/harnix-implement/SKILL.md",
-      "$CODEX_HOME/hooks.json#codex-global-context-hook",
+      "$CODEX_HOME/config.toml#codex-global-context-hook",
     ]));
     expect(JSON.stringify(result)).not.toContain(home);
     await expect(access(join(home, ".kiro"))).rejects.toMatchObject({ code: "ENOENT" });
@@ -273,24 +273,17 @@ describe("setupPlatforms user-global lifecycle", () => {
       platforms: ["codex"] as const,
     };
     await setupPlatforms(options);
-    const hooksPath = join(home, "codex-home", "hooks.json");
-    const hooks = JSON.parse(await readFile(hooksPath, "utf8")) as {
-      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ command?: string; additionalContextLimit?: number }> }> };
-    };
-    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix context --platform codex"));
-    if (group === undefined || group.hooks[0] === undefined) throw new Error("Expected the installed Codex Harnix hook.");
-    group.hooks[0].command = "user-edited-harnix-command";
-    await writeFile(hooksPath, `${JSON.stringify(hooks, null, 2)}\n`);
+    const configPath = join(home, "codex-home", "config.toml");
+    const config = await readFile(configPath, "utf8");
+    await writeFile(configPath, config.replace('command = "harnix context --platform codex"', 'command = "user-edited-harnix-command"'));
 
     const rerun = await setupPlatforms(options);
-    const after = JSON.parse(await readFile(hooksPath, "utf8")) as {
-      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ command?: string }> }> };
-    };
+    const after = await readFile(configPath, "utf8");
 
     expect(rerun.platforms[0]).toMatchObject({ platform: "codex", readiness: "drifted" });
-    expect(rerun.platforms[0]?.preserved).toContain("$CODEX_HOME/hooks.json#codex-global-context-hook");
-    expect(after.hooks.UserPromptSubmit).toHaveLength(1);
-    expect(after.hooks.UserPromptSubmit[0]?.hooks[0]?.command).toBe("user-edited-harnix-command");
+    expect(rerun.platforms[0]?.preserved).toContain("$CODEX_HOME/config.toml#codex-global-context-hook");
+    expect(after).toContain('command = "user-edited-harnix-command"');
+    expect(after.match(/# harnix:codex-hook:begin/gu)).toHaveLength(1);
   });
 
   it("should_preserve_a_codex_hook_when_its_context_limit_or_type_is_edited", async () => {
@@ -303,26 +296,21 @@ describe("setupPlatforms user-global lifecycle", () => {
       platforms: ["codex"] as const,
     };
     await setupPlatforms(options);
-    const hooksPath = join(home, "codex-home", "hooks.json");
-    const hooks = JSON.parse(await readFile(hooksPath, "utf8")) as {
-      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ command?: string; additionalContextLimit?: number; type?: string }> }> };
-    };
-    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix context --platform codex"));
-    if (group === undefined || group.hooks[0] === undefined) throw new Error("Expected the installed Codex Harnix hook.");
-    group.hooks[0].command = "user-edited-all-hook-identifiers";
-    group.hooks[0].additionalContextLimit = 42;
-    group.hooks[0].type = "user-edited-type";
-    await writeFile(hooksPath, `${JSON.stringify(hooks, null, 2)}\n`);
+    const configPath = join(home, "codex-home", "config.toml");
+    const config = await readFile(configPath, "utf8");
+    await writeFile(configPath, config
+      .replace('command = "harnix context --platform codex"', 'command = "user-edited-all-hook-identifiers"')
+      .replace("additionalContextLimit = 2500", "additionalContextLimit = 42")
+      .replace('type = "command"', 'type = "user-edited-type"'));
 
     const rerun = await setupPlatforms(options);
-    const after = JSON.parse(await readFile(hooksPath, "utf8")) as {
-      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ additionalContextLimit?: number; type?: string }> }> };
-    };
+    const after = await readFile(configPath, "utf8");
 
     expect(rerun.platforms[0]).toMatchObject({ platform: "codex", readiness: "drifted" });
-    expect(rerun.platforms[0]?.preserved).toContain("$CODEX_HOME/hooks.json#codex-global-context-hook");
-    expect(after.hooks.UserPromptSubmit).toHaveLength(1);
-    expect(after.hooks.UserPromptSubmit[0]?.hooks[0]).toMatchObject({ command: "user-edited-all-hook-identifiers", additionalContextLimit: 42, type: "user-edited-type" });
+    expect(rerun.platforms[0]?.preserved).toContain("$CODEX_HOME/config.toml#codex-global-context-hook");
+    expect(after).toContain('command = "user-edited-all-hook-identifiers"');
+    expect(after).toContain("additionalContextLimit = 42");
+    expect(after).toContain('type = "user-edited-type"');
   });
 
   it("should_preserve_a_codex_hook_when_all_harnix_identity_fields_are_edited", async () => {
@@ -335,26 +323,21 @@ describe("setupPlatforms user-global lifecycle", () => {
       platforms: ["codex"] as const,
     };
     await setupPlatforms(options);
-    const hooksPath = join(home, "codex-home", "hooks.json");
-    const hooks = JSON.parse(await readFile(hooksPath, "utf8")) as {
-      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ additionalContextLimit?: number; command?: string; type?: string }> }> };
-    };
-    const group = hooks.hooks.UserPromptSubmit.find((candidate) => candidate.hooks.some((handler) => handler.command === "harnix context --platform codex"));
-    if (group === undefined || group.hooks[0] === undefined) throw new Error("Expected the installed Codex Harnix hook.");
-    group.hooks[0].command = "user-custom-context";
-    group.hooks[0].additionalContextLimit = 999;
-    group.hooks[0].type = "user-command";
-    await writeFile(hooksPath, `${JSON.stringify(hooks, null, 2)}\n`);
+    const configPath = join(home, "codex-home", "config.toml");
+    const config = await readFile(configPath, "utf8");
+    await writeFile(configPath, config
+      .replace('command = "harnix context --platform codex"', 'command = "user-custom-context"')
+      .replace("additionalContextLimit = 2500", "additionalContextLimit = 999")
+      .replace('type = "command"', 'type = "user-command"'));
 
     const rerun = await setupPlatforms(options);
-    const after = JSON.parse(await readFile(hooksPath, "utf8")) as {
-      hooks: { UserPromptSubmit: Array<{ hooks: Array<{ additionalContextLimit?: number; command?: string; type?: string }> }> };
-    };
+    const after = await readFile(configPath, "utf8");
 
     expect(rerun.platforms[0]).toMatchObject({ platform: "codex", readiness: "drifted" });
-    expect(rerun.platforms[0]?.preserved).toContain("$CODEX_HOME/hooks.json#codex-global-context-hook");
-    expect(after.hooks.UserPromptSubmit).toHaveLength(1);
-    expect(after.hooks.UserPromptSubmit[0]?.hooks[0]).toMatchObject({ additionalContextLimit: 999, command: "user-custom-context", type: "user-command" });
+    expect(rerun.platforms[0]?.preserved).toContain("$CODEX_HOME/config.toml#codex-global-context-hook");
+    expect(after).toContain('command = "user-custom-context"');
+    expect(after).toContain("additionalContextLimit = 999");
+    expect(after).toContain('type = "user-command"');
   });
 
   it("should_install_but_report_binary_unavailable_and_reject_user_root_symlink_escape", async () => {

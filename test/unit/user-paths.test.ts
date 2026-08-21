@@ -38,7 +38,7 @@ describe("user-global paths", () => {
 
     expect(roots.codex.config.path).toBe(join(home, ".codex"));
     expect(roots.codex.config.logicalPath).toBe("~/.codex");
-    expect(roots.codex.config.display("hooks.json")).toBe("~/.codex/hooks.json");
+    expect(roots.codex.config.display("config.toml")).toBe("~/.codex/config.toml");
   });
 
   it.each(["", ".", "../outside", "skills/../../outside", "/outside", "C:\\outside"]) (

@@ -1,0 +1,426 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260821-142441-codex-hook-config-warning",
+  "title": "Sửa cảnh báo hook Codex do trộn hooks.json và config.toml",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Loại bỏ cảnh báo xuất hiện mỗi lần mở Codex bằng cách để hook Harnix dùng đúng một nguồn cấu hình trong config.toml, đồng thời migrate hooks.json cũ an toàn và bảo toàn dữ liệu người dùng.",
+  "nonGoals": [
+    "Không sửa hoặc xóa model, notify, telemetry, trust, MCP hay cấu hình không thuộc Harnix.",
+    "Không ghi vào profile người dùng thật trong test và không tự động mở/sửa config.toml thật của người dùng.",
+    "Không thay đổi schema hook UserPromptSubmit, lệnh harnix context, hoặc thêm runtime/network service."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-codex-single-source",
+      "text": "Codex global setup/update chỉ tạo đúng một nguồn hook Harnix trong config.toml, không còn tạo hooks.json mới, và config có thể đồng tồn tại với [hooks.state] do Codex quản lý mà không phát sinh cảnh báo mixed hook source.",
+      "status": "met",
+      "evidenceIds": [
+        "codex-hook-focused-final"
+      ]
+    },
+    {
+      "id": "ac-codex-migration",
+      "text": "Migration từ hooks.json cũ chỉ xóa fragment Harnix còn nguyên hash; hooks không liên quan và fragment Harnix đã bị người dùng sửa được giữ nguyên và báo preserved/conflict.",
+      "status": "met",
+      "evidenceIds": [
+        "codex-hook-focused-final",
+        "codex-doctor-safety-final"
+      ]
+    },
+    {
+      "id": "ac-codex-preservation",
+      "text": "AGENTS.md, skills, config.toml và sidecar manifest được reconcile atomic, giữ nguyên nội dung không thuộc Harnix, không lộ absolute path/secret và vẫn báo pending trust cho hook chưa được review.",
+      "status": "met",
+      "evidenceIds": [
+        "codex-hook-focused-final",
+        "codex-doctor-safety-final",
+        "static-quality-final",
+        "release-gates-final"
+      ]
+    },
+    {
+      "id": "ac-codex-release",
+      "text": "Tài liệu contract, package patch version và CHANGELOG được cập nhật trước khi hoàn tất; build, acceptance, package, fake-home smoke và release scan đều pass.",
+      "status": "met",
+      "evidenceIds": [
+        "version-docs-sync-final",
+        "static-quality-final",
+        "acceptance-suite-final",
+        "release-gates-final"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "package.json",
+    "src/commands/global-doctor.ts",
+    "src/commands/global-uninstall.ts",
+    "src/commands/setup.ts",
+    "src/configurators/codex.ts",
+    "src/utils/global-managed-files.ts",
+    "test/integration/global-doctor.test.ts",
+    "test/integration/global-lifecycle.test.ts",
+    "test/platform/codex-global.test.ts",
+    "test/platform/setup.test.ts",
+    "test/unit/global-managed-files.test.ts",
+    "test/unit/global-uninstall.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "codex-hook-focused",
+      "description": "Kiểm tra RED/GREEN cho single-source config.toml, mixed [hooks.state], migration hooks.json và bảo toàn hook người dùng trong fake home.",
+      "command": "pnpm exec vitest run test/platform/codex-global.test.ts test/platform/setup.test.ts test/integration/global-lifecycle.test.ts test/unit/global-uninstall.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-codex-migration",
+        "ac-codex-preservation",
+        "ac-codex-single-source"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/configurators/codex.ts",
+        "src/utils/global-managed-files.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/platform/codex-global.test.ts",
+        "test/platform/setup.test.ts",
+        "test/unit/global-uninstall.test.ts"
+      ]
+    },
+    {
+      "id": "codex-doctor-safety",
+      "description": "Kiểm tra doctor/update/uninstall không claim sai readiness, preserve config và không tạo duplicate hook sau migration.",
+      "command": "pnpm exec vitest run test/integration/global-doctor.test.ts test/integration/global-lifecycle.test.ts test/unit/global-managed-files.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-codex-migration",
+        "ac-codex-preservation"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/global-doctor.ts",
+        "src/commands/global-uninstall.ts",
+        "src/utils/global-managed-files.ts",
+        "test/integration/global-doctor.test.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/unit/global-managed-files.test.ts"
+      ]
+    },
+    {
+      "id": "static-quality",
+      "description": "Build, lint và typecheck toàn repository sau thay đổi adapter Codex.",
+      "command": "pnpm run build && pnpm run lint && pnpm run typecheck",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-codex-migration",
+        "ac-codex-preservation",
+        "ac-codex-release",
+        "ac-codex-single-source"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "acceptance-suite",
+      "description": "Chạy acceptance suite đầy đủ cho workflow, migration, platform và safety.",
+      "command": "pnpm run test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-codex-migration",
+        "ac-codex-preservation",
+        "ac-codex-single-source"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "release-gates",
+      "description": "Kiểm tra package, fake-home tarball smoke, performance, footprint và release scan.",
+      "command": "pnpm run pack:check && pnpm run smoke:tarball && pnpm run measure:init && pnpm run measure:footprint && pnpm run scan:release",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-codex-preservation",
+        "ac-codex-release",
+        "ac-codex-single-source"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "version-docs-sync",
+      "description": "Xác minh package patch version, canonical skill metadata, README và CHANGELOG đồng bộ sau fix.",
+      "command": "pnpm run version:sync -- 1.0.11",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-codex-release"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "scripts/version-sync.mjs",
+        "src/skills/*/SKILL.md"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "codex-hook-red-regression",
+      "checkId": "codex-hook-focused",
+      "recordedAt": "2026-08-21T07:35:52.3967787Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: test platform Codex fail với implementation cũ vì chưa có managed marker block trong config.toml.",
+      "artifactPaths": [
+        "test/platform/codex-global.test.ts"
+      ]
+    },
+    {
+      "id": "codex-hook-focused-green",
+      "checkId": "codex-hook-focused",
+      "recordedAt": "2026-08-21T07:35:52.3967787Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 4 test files, 38 tests pass; single-source config.toml, [hooks.state], migration unchanged/modified legacy JSON, preservation, uninstall và pending-trust đều được kiểm tra trong fake home. Snapshot trước/sau giữ nguyên inputDigest.",
+      "artifactPaths": [
+        "src/configurators/codex.ts",
+        "test/platform/codex-global.test.ts",
+        "test/platform/setup.test.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/unit/global-uninstall.test.ts"
+      ],
+      "inputDigest": "e7221ec6597ec8d6b6461500a017a12989ca934c1e0085979e3c2e2d8cfaeec0"
+    },
+    {
+      "id": "codex-doctor-safety-green",
+      "checkId": "codex-doctor-safety",
+      "recordedAt": "2026-08-21T07:36:21.6474458Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Doctor, lifecycle migration và managed-file safety pass: 41 tests xanh, fake home giữ unrelated content, modified legacy hook và ownership/conflict được bảo toàn.",
+      "artifactPaths": [
+        "src/commands/global-doctor.ts",
+        "src/commands/global-uninstall.ts",
+        "src/utils/global-managed-files.ts",
+        "test/integration/global-doctor.test.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/unit/global-managed-files.test.ts"
+      ],
+      "inputDigest": "51acf733da7ab450f68156072c1865a67a17894a5cefc531d7441b5613716ee1"
+    },
+    {
+      "id": "version-docs-sync-green",
+      "checkId": "version-docs-sync",
+      "recordedAt": "2026-08-21T07:36:48.8127131Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Package patch version 1.0.11, canonical skill metadata, README và CHANGELOG đồng bộ; version sync idempotent pass. Snapshot trước/sau giữ nguyên inputDigest.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "README.md",
+        "scripts/version-sync.mjs"
+      ],
+      "inputDigest": "582ceb7262fd5b1440944279a0cbeec0aceb8246e1d343c57c67a28a003f82c9"
+    },
+    {
+      "id": "static-quality-green",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-21T07:37:23.5886453Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Build tsup, ESLint và TypeScript typecheck đều pass; không có lỗi hoặc warning chất lượng tĩnh.",
+      "artifactPaths": [
+        "src/configurators/codex.ts",
+        "test/platform/codex-global.test.ts",
+        "package.json"
+      ],
+      "inputDigest": "1910beb57991cea821622bd74954d1e8d556684374d52b69360e8b44f3182b39"
+    },
+    {
+      "id": "acceptance-suite-self-host-fail",
+      "checkId": "acceptance-suite",
+      "recordedAt": "2026-08-21T07:38:55.0791524Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Lần chạy acceptance đầu dừng ở self-host vì .harnix template manifest còn generatorVersion 1.0.10 sau patch bump; đã sửa metadata generated và chạy lại.",
+      "artifactPaths": [
+        "test/workflow/self-host.test.ts",
+        ".harnix/.template-hashes.json"
+      ]
+    },
+    {
+      "id": "acceptance-suite-green",
+      "checkId": "acceptance-suite",
+      "recordedAt": "2026-08-21T07:38:55.0791524Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Acceptance suite pass: unit 206 pass/1 skip, integration 92 pass, migration 9 pass, platform 24 pass, workflow 66 pass, safety 36 pass. Snapshot trước/sau sau self-host recovery giữ nguyên inputDigest.",
+      "artifactPaths": [
+        "test/unit",
+        "test/integration",
+        "test/migration",
+        "test/platform",
+        "test/workflow",
+        "test/safety",
+        ".harnix/.template-hashes.json"
+      ],
+      "inputDigest": "6a4e9c7b3c78215d22f4f2de36bca2eda18ac02390da67450d30085b51ad6b8c"
+    },
+    {
+      "id": "release-gates-green",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-21T07:39:51.0666150Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Release gates pass: pack:check, fake-home tarball smoke cho Kiro/Antigravity/Codex, measure:init, measure:footprint và scan:release đều xanh; tarball 1.0.11 và scanner kiểm tra một Codex hook trong config.toml.",
+      "artifactPaths": [
+        "package.json",
+        "scripts/pack-check.mjs",
+        "scripts/smoke-tarball.mjs",
+        "scripts/measure-init.mjs",
+        "scripts/measure-footprint.mjs",
+        "scripts/scan-release.mjs",
+        "CHANGELOG.md"
+      ],
+      "inputDigest": "de883c571b0df9720641c681cef3c31437f0522485754f9afca8e132c4bb083f"
+    },
+    {
+      "id": "codex-hook-focused-final",
+      "checkId": "codex-hook-focused",
+      "recordedAt": "2026-08-21T07:43:45.228Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh focused GREEN: 38 tests pass after final plan checkpoint; Codex config.toml source, legacy migration and preservation remain green.",
+      "artifactPaths": [
+        "src/configurators/codex.ts",
+        "test/platform/codex-global.test.ts",
+        "test/platform/setup.test.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/unit/global-uninstall.test.ts"
+      ],
+      "inputDigest": "4a6ffe3305fb4cb3521d6197c3e53b38097a7842aeda4e37fed3def0c80e1778"
+    },
+    {
+      "id": "codex-doctor-safety-final",
+      "checkId": "codex-doctor-safety",
+      "recordedAt": "2026-08-21T07:43:45.228Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh doctor/update/uninstall safety GREEN: 41 tests pass.",
+      "artifactPaths": [
+        "src/commands/global-doctor.ts",
+        "src/commands/global-uninstall.ts",
+        "src/utils/global-managed-files.ts",
+        "test/integration/global-doctor.test.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/unit/global-managed-files.test.ts"
+      ],
+      "inputDigest": "ddbd1577f40d64e035e96ba3d96d02054b519f76e8ec54d66153eab7a6c3f1b4"
+    },
+    {
+      "id": "static-quality-final",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-21T07:43:45.228Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh build, lint and typecheck GREEN.",
+      "artifactPaths": [
+        "src/configurators/codex.ts",
+        "test/platform/codex-global.test.ts",
+        "package.json"
+      ],
+      "inputDigest": "622ec10cd1b8ff5cddcef6dc253ab98b4cf2aaa59cc615e97038835f1c8809e8"
+    },
+    {
+      "id": "acceptance-suite-final",
+      "checkId": "acceptance-suite",
+      "recordedAt": "2026-08-21T07:43:45.228Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh full acceptance GREEN: unit 206 pass/1 skip, integration 92, migration 9, platform 24, workflow 66, safety 36.",
+      "artifactPaths": [
+        "test/unit",
+        "test/integration",
+        "test/migration",
+        "test/platform",
+        "test/workflow",
+        "test/safety",
+        ".harnix/.template-hashes.json"
+      ],
+      "inputDigest": "92a4a698e489024b2deeefba033de65c096844b2c97ff37ab5e5b4b501d394e8"
+    },
+    {
+      "id": "version-docs-sync-final",
+      "checkId": "version-docs-sync",
+      "recordedAt": "2026-08-21T07:43:45.228Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh idempotent version/docs sync GREEN at 1.0.11.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "README.md",
+        "scripts/version-sync.mjs"
+      ],
+      "inputDigest": "145527535c1d441a2785ca1005b1745f53a323be5c1a5325fc035142677b1b50"
+    },
+    {
+      "id": "release-gates-final",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-21T07:43:45.228Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh release gates GREEN: package, fake-home tarball smoke, measurements and release scan.",
+      "artifactPaths": [
+        "package.json",
+        "scripts/pack-check.mjs",
+        "scripts/smoke-tarball.mjs",
+        "scripts/measure-init.mjs",
+        "scripts/measure-footprint.mjs",
+        "scripts/scan-release.mjs",
+        "CHANGELOG.md"
+      ],
+      "inputDigest": "fe8b6c5e034e02dfeb469d83f4e4d23d8e25736d98a539b13f3230e952734e2e"
+    }
+  ],
+  "createdAt": "2026-08-21T07:24:41.4705307Z",
+  "updatedAt": "2026-08-21T07:45:40.571Z",
+  "completedAt": "2026-08-21T07:45:40.571Z"
+}

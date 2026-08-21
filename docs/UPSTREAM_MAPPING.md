@@ -125,8 +125,8 @@ Mapping rules:
 | Broad Codex templates/agents/config | Minimal native surfaces verified against current official docs |
 | Root `AGENTS.md` overwrite risk | Managed conditional block in `$CODEX_HOME/AGENTS.md` preserving all outside text |
 | Platform-specific skill copies | User `$HOME/.agents/skills/harnix-*` with valid frontmatter |
-| Python session scripts | One nested `$CODEX_HOME/hooks.json` `UserPromptSubmit` handler invoking hidden installed-runtime context protocol, bounded output and Windows shim smoke |
-| Config replacement | No `config.toml` mutation; preserve unrelated global hooks/instructions |
+| Python session scripts | One inline `$CODEX_HOME/config.toml` `UserPromptSubmit` handler invoking hidden installed-runtime context protocol, bounded output and Windows shim smoke |
+| Config replacement | Managed TOML block in `config.toml`; preserve unrelated settings/hooks and migrate unchanged legacy `hooks.json` content |
 | Mandatory implement/check/research agents | Optional research/independent-review roles; core workflow independent |
 | Legacy prompts/commands | Removed; skills are primary |
 

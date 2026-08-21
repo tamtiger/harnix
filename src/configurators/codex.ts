@@ -10,8 +10,11 @@ import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
 
 const begin = "<!-- harnix:begin -->";
 const end = "<!-- harnix:end -->";
+const hookBegin = "# harnix:codex-hook:begin";
+const hookEnd = "# harnix:codex-hook:end";
 
 export const CODEX_GLOBAL_AGENTS_SELECTOR: MarkerSelector = { type: "markers", begin, end };
+export const CODEX_GLOBAL_HOOK_BLOCK_SELECTOR: MarkerSelector = { type: "markers", begin: hookBegin, end: hookEnd };
 export const CODEX_GLOBAL_HOOK_SELECTOR: JsonArrayMemberSelector = {
   type: "json-array-member",
   pointer: "/hooks/UserPromptSubmit",
@@ -38,6 +41,13 @@ export const codexGlobalContextHookGroup: JsonValue = {
   }],
 };
 
+export const codexGlobalContextHookConfig = `[[hooks.UserPromptSubmit]]
+[[hooks.UserPromptSubmit.hooks]]
+additionalContextLimit = 2500
+command = "${CODEX_GLOBAL_CONTEXT_COMMAND}"
+timeout = 5
+type = "command"`;
+
 export interface CodexGlobalSurfacePlan {
   /** Root-relative files for the global `$HOME/.agents` root. */
   readonly skills: readonly DesiredGlobalManagedFile[];
@@ -60,12 +70,10 @@ export function createCodexGlobalSurfacePlan(): CodexGlobalSurfacePlan {
         sourceId: "codex-global-agents",
       },
       {
-        kind: "json-member",
-        member: codexGlobalContextHookGroup,
-        memberMatcher: matchesCodexGlobalContextHookGroup,
-        preserveIfUnmatched: true,
-        path: "hooks.json",
-        selector: CODEX_GLOBAL_HOOK_SELECTOR,
+        content: codexGlobalContextHookConfig,
+        kind: "managed-block",
+        path: "config.toml",
+        selector: CODEX_GLOBAL_HOOK_BLOCK_SELECTOR,
         sourceId: "codex-global-context-hook",
       },
     ],

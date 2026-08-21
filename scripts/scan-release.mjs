@@ -129,7 +129,7 @@ export async function assertExpectedGlobalSurfaces(home) {
     ".agents/skills",
     ".codex/AGENTS.md",
     ".codex/harnix/managed.json",
-    ".codex/hooks.json",
+    ".codex/config.toml",
     ".gemini/antigravity-cli/plugins/harnix/.managed.json",
     ".gemini/antigravity-cli/plugins/harnix/hooks.json",
     ".gemini/antigravity-cli/plugins/harnix/plugin.json",
@@ -165,8 +165,8 @@ export async function assertNoProjectLocalPlatformSurfaces(project) {
 }
 
 export async function assertSingleHooks(home) {
-  const codex = JSON.parse(await readFile(join(home, ".codex", "hooks.json"), "utf8"));
-  const codexCount = hookCommands(codex.hooks?.UserPromptSubmit).filter((command) => command === "harnix context --platform codex").length;
+  const codex = await readFile(join(home, ".codex", "config.toml"), "utf8");
+  const codexCount = codex.split("harnix context --platform codex").length - 1;
   if (codexCount !== 1) throw new Error(`Expected one Codex Harnix hook, found ${codexCount}.`);
 
   const kiro = JSON.parse(await readFile(join(home, ".kiro", "hooks", "harnix-context.json"), "utf8"));
@@ -299,14 +299,6 @@ function packageNameFromSpecifier(specifier) {
 
 function relativePackagePath(packageRoot, file) {
   return file.slice(resolve(packageRoot).length + 1).replaceAll("\\", "/");
-}
-
-function hookCommands(entries) {
-  if (!Array.isArray(entries)) return [];
-  return entries.flatMap((entry) => [
-    typeof entry?.command === "string" ? entry.command : undefined,
-    ...(Array.isArray(entry?.hooks) ? entry.hooks.map((hook) => typeof hook?.command === "string" ? hook.command : undefined) : []),
-  ]).filter((command) => typeof command === "string");
 }
 
 function importSpecifiers(source) {

@@ -147,25 +147,14 @@ describe("release scanner negative fixtures", () => {
 
   it("should_reject_duplicate_harnix_hook_when_global_fixture_contains_two_codex_entries", async () => {
     const home = await fixture();
-    await writeFixtureFile(home, ".codex/hooks.json", JSON.stringify({
-      hooks: {
-        UserPromptSubmit: [
-          { hooks: [{ command: "harnix context --platform codex", type: "command" }] },
-          { hooks: [{ command: "harnix context --platform codex", type: "command" }] },
-        ],
-      },
-    }));
+    await writeFixtureFile(home, ".codex/config.toml", "[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ncommand = \"harnix context --platform codex\"\n\n[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ncommand = \"harnix context --platform codex\"\n");
 
     await expect(assertSingleHooks(home)).rejects.toThrow(/one Codex Harnix hook, found 2/u);
   });
 
   it("should_accept_current_user_global_hook_locations_when_each_platform_has_one_handler", async () => {
     const home = await fixture();
-    await writeFixtureFile(home, ".codex/hooks.json", JSON.stringify({
-      hooks: {
-        UserPromptSubmit: [{ hooks: [{ command: "harnix context --platform codex", type: "command" }] }],
-      },
-    }));
+    await writeFixtureFile(home, ".codex/config.toml", "[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ncommand = \"harnix context --platform codex\"\n");
     await writeFixtureFile(home, ".kiro/hooks/harnix-context.json", JSON.stringify({
       hooks: [{ action: { command: "harnix context --platform kiro" } }],
       version: "v1",

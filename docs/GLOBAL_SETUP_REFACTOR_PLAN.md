@@ -23,7 +23,7 @@ Quyết định đích:
 | Kiro IDE/CLI | `~/.kiro/skills/harnix-*/SKILL.md` | `~/.kiro/steering/harnix.md` | `~/.kiro/hooks/harnix-context.json` | User và workspace scopes được merge; workspace skill cùng tên ưu tiên. Hook dùng JSON v1 và trigger `UserPromptSubmit`. |
 | Antigravity Desktop/IDE | `~/.gemini/config/plugins/harnix/skills/harnix-*/SKILL.md` | `~/.gemini/config/plugins/harnix/rules/AGENTS.md` | `~/.gemini/config/plugins/harnix/hooks.json` | Plugin global được auto-discover cho mọi workspace; `plugin.json` là bắt buộc; standalone AGENTS rule always-on không có frontmatter. |
 | Antigravity CLI (`agy`) | `~/.gemini/antigravity-cli/plugins/harnix/skills/harnix-*/SKILL.md` | `~/.gemini/antigravity-cli/plugins/harnix/rules/AGENTS.md` | `~/.gemini/antigravity-cli/plugins/harnix/hooks.json` | CLI dùng vùng staging riêng; không giả định plugin Desktop tự được CLI load; standalone AGENTS rule always-on không có frontmatter. |
-| Codex CLI/IDE | `$HOME/.agents/skills/harnix-*/SKILL.md` | `$CODEX_HOME/AGENTS.md`, mặc định `~/.codex/AGENTS.md` | `$CODEX_HOME/hooks.json`, mặc định `~/.codex/hooks.json` | Skill user-global **không nằm trong `.codex/skills`**. Global và repo hook sources được merge. |
+| Codex CLI/IDE | `$HOME/.agents/skills/harnix-*/SKILL.md` | `$CODEX_HOME/AGENTS.md`, mặc định `~/.codex/AGENTS.md` | `$CODEX_HOME/config.toml`, mặc định `~/.codex/config.toml` | Skill user-global **không nằm trong `.codex/skills`**. Hook nằm inline cùng config source để tránh Codex mixed-source warning; legacy Harnix JSON được migrate conservatively. |
 
 Nguồn xác minh:
 
@@ -41,7 +41,7 @@ Version snapshot tại thời điểm research:
 
 - Kiro `.kiro/hooks/harnix-context.kiro.hook` với `promptSubmit -> runCommand` là project-local schema cũ; target mới là user-global JSON v1 `UserPromptSubmit`.
 - Antigravity `.gemini/skills` và root `GEMINI.md` là project surface cũ. Target mới là hai namespaced plugin global riêng cho Desktop và CLI.
-- Codex project `.agents/skills`, `.codex/hooks.json` và custom `[harnix]` trong `.codex/config.toml` không còn là output của `setup`. Global skill đi vào `$HOME/.agents/skills`, còn hook dùng nested current schema trong `$CODEX_HOME/hooks.json`.
+- Codex project `.agents/skills`, `.codex/hooks.json` và custom `[harnix]` trong `.codex/config.toml` không còn là output của `setup`. Global skill đi vào `$HOME/.agents/skills`, còn hook dùng nested current schema trong managed `$CODEX_HOME/config.toml` block.
 - `config.platforms` trong `.harnix/config.yaml` không còn là nguồn ownership/install state. Giữ field này để đọc config v1 backward-compatible, nhưng deprecate và ignore cho global setup.
 
 ## 3. Khoảng cách của code hiện tại
@@ -283,27 +283,19 @@ Schema giữ các enum `active`, `shadowed` và `unsupported-version` để nh�
 
 - Skills cài vào `$HOME/.agents/skills/harnix-*`; đây là official user scope.
 - Merge một managed conditional block vào `$CODEX_HOME/AGENTS.md`, giữ toàn bộ text ngoài marker. Khi activation guard pass, block inspect active task và route ordinary prompt qua Bypass/Lite/Full dù prompt không nhắc Harnix. Nếu `AGENTS.override.md` làm block bị shadow, doctor cảnh báo.
-- Không tạo hoặc sửa `[harnix]` trong `config.toml`; setup không cần đổi model, sandbox, approval, provider, auth, MCP hay feature flags.
-- Merge current nested handler vào `$CODEX_HOME/hooks.json`, giữ unrelated events/groups/handlers:
+- Không tạo hoặc sửa `[harnix]` trong `config.toml`; setup không đổi model, sandbox, approval, provider, auth, MCP hay feature flags.
+- Merge current nested handler vào managed block trong `$CODEX_HOME/config.toml`, giữ unrelated settings/hooks:
 
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "harnix context --platform codex",
-            "timeout": 5,
-            "additionalContextLimit": 2500
-          }
-        ]
-      }
-    ]
-  }
-}
+```toml
+[[hooks.UserPromptSubmit]]
+[[hooks.UserPromptSubmit.hooks]]
+additionalContextLimit = 2500
+command = "harnix context --platform codex"
+timeout = 5
+type = "command"
 ```
+
+- An unchanged legacy Harnix member in `$CODEX_HOME/hooks.json` is removed after the TOML block is installed; modified or colliding legacy content is preserved and reported.
 
 - Không dùng `harnix.exe` hardcoded. Trước khi freeze Windows snapshot, smoke test phải chứng minh command cố định resolve được pnpm/npm `.cmd` shim từ Codex hook environment; nếu cần `commandWindows`, giá trị vẫn là constant không chứa absolute path.
 - Hook sources được merge bởi Codex, nên doctor phát hiện project-local Harnix hook cũ và đề xuất explicit cleanup để tránh inject hai lần.

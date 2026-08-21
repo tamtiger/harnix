@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -6,14 +6,36 @@ import {
   CODEX_GLOBAL_AGENTS_SELECTOR,
   CODEX_GLOBAL_HOOK_SELECTOR,
   createCodexGlobalSurfacePlan,
+  matchesCodexGlobalContextHookGroup,
 } from "../../src/configurators/codex.js";
-import { reconcileGlobalManagedFiles, type DesiredGlobalJsonMember } from "../../src/utils/global-managed-files.js";
+import { reconcileGlobalManagedFiles } from "../../src/utils/global-managed-files.js";
 import { resolveUserPlatformRoots } from "../../src/utils/user-paths.js";
 import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
 
 const temporaryUserHome = useTemporaryUserHomes("harnix-codex-global-");
 
 describe("Codex global surface plan", () => {
+  it("uses one inline config source when Codex has its hook trust state", async () => {
+    const home = await temporaryUserHome();
+    const roots = await resolveUserPlatformRoots({ homeResolver: async () => home, environment: {} });
+    await mkdir(roots.codex.config.path, { recursive: true });
+    await writeFile(join(roots.codex.config.path, "config.toml"), "[features]\nhooks = true\n\n[hooks.state]\n");
+    const plan = createCodexGlobalSurfacePlan();
+
+    await reconcileGlobalManagedFiles({
+      desired: plan.config,
+      generatorVersion: "0.6.0",
+      manifestPath: "harnix/managed.json",
+      platform: "codex",
+      root: roots.codex.config,
+    });
+
+    const config = await readFile(join(roots.codex.config.path, "config.toml"), "utf8");
+    expect(config).toContain("# harnix:codex-hook:begin");
+    expect(config).toContain("[[hooks.UserPromptSubmit]]");
+    await expect(access(join(roots.codex.config.path, "hooks.json"))).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
   it("renders only root-relative global skills plus conditional AGENTS and the current nested hook shape", () => {
     const plan = createCodexGlobalSurfacePlan();
 
@@ -21,7 +43,7 @@ describe("Codex global surface plan", () => {
     expect(plan.skills.every((file) => file.kind === "file" && /^skills\/harnix-[a-z-]+\/SKILL\.md$/u.test(file.path))).toBe(true);
     expect(plan.skills.every((file) => file.path.startsWith(".") === false)).toBe(true);
     expect(plan.skills.every((file) => file.kind !== "file" || file.content.includes(".harnix/config.yaml"))).toBe(true);
-    expect(plan.config.map((file) => file.path)).toEqual(["AGENTS.md", "hooks.json"]);
+    expect(plan.config.map((file) => file.path)).toEqual(["AGENTS.md", "config.toml"]);
 
     const agents = plan.config.find((file) => file.path === "AGENTS.md");
     expect(agents).toMatchObject({
@@ -34,22 +56,15 @@ describe("Codex global surface plan", () => {
     expect(agents.content).toContain("no such root exists or its state is invalid");
     expect(agents.content).not.toContain("<!-- harnix:begin -->");
 
-    const hook = plan.config.find((file) => file.path === "hooks.json");
+    const hook = plan.config.find((file) => file.path === "config.toml");
     expect(hook).toMatchObject({
-      kind: "json-member",
-      selector: CODEX_GLOBAL_HOOK_SELECTOR,
+      kind: "managed-block",
+      selector: { type: "markers", begin: "# harnix:codex-hook:begin", end: "# harnix:codex-hook:end" },
       sourceId: "codex-global-context-hook",
-      member: {
-        hooks: [{
-          type: "command",
-          command: "harnix context --platform codex",
-          timeout: 5,
-          additionalContextLimit: 2500,
-        }],
-      },
+      content: expect.stringContaining("[[hooks.UserPromptSubmit]]"),
     });
-    if (hook?.kind !== "json-member") throw new Error("Expected hooks.json to contain a managed JSON member.");
-    expect(JSON.stringify(hook.member)).not.toContain("harnix.exe");
+    if (hook?.kind !== "managed-block") throw new Error("Expected config.toml to contain a managed TOML block.");
+    expect(hook.content).not.toContain("harnix.exe");
     expect(JSON.stringify(plan)).not.toContain(process.cwd());
     expect(JSON.stringify(plan)).not.toMatch(/[A-Za-z]:\\\\/u);
     expect(JSON.stringify(plan)).not.toContain("/home/");
@@ -62,12 +77,7 @@ describe("Codex global surface plan", () => {
     const roots = await resolveUserPlatformRoots({ homeResolver: async () => home, environment: {} });
     await mkdir(roots.codex.config.path, { recursive: true });
     await writeFile(join(roots.codex.config.path, "AGENTS.md"), "# User instructions\n\nPreserve this text.\n");
-    await writeFile(join(roots.codex.config.path, "hooks.json"), `${JSON.stringify({
-      description: "User hooks",
-      hooks: {
-        UserPromptSubmit: [{ hooks: [{ type: "command", command: "user-context", timeout: 1 }] }],
-      },
-    }, null, 2)}\n`);
+    await writeFile(join(roots.codex.config.path, "config.toml"), "[hooks.state]\nuser = true\n");
     const plan = createCodexGlobalSurfacePlan();
 
     await reconcileGlobalManagedFiles({
@@ -80,13 +90,11 @@ describe("Codex global surface plan", () => {
 
     await expect(readFile(join(roots.codex.config.path, "AGENTS.md"), "utf8")).resolves.toContain("# User instructions\n\nPreserve this text.");
     await expect(readFile(join(roots.codex.config.path, "AGENTS.md"), "utf8")).resolves.toContain(CODEX_GLOBAL_AGENTS_SELECTOR.begin);
-    const hooks = JSON.parse(await readFile(join(roots.codex.config.path, "hooks.json"), "utf8")) as { hooks: { UserPromptSubmit: unknown[] } };
-    expect(hooks.hooks.UserPromptSubmit).toHaveLength(2);
-    expect(hooks.hooks.UserPromptSubmit[0]).toMatchObject({ hooks: [{ command: "user-context" }] });
-    expect(hooks.hooks.UserPromptSubmit[1]).toMatchObject({ hooks: [{ command: "harnix context --platform codex" }] });
+    const config = await readFile(join(roots.codex.config.path, "config.toml"), "utf8");
+    expect(config).toContain("[hooks.state]\nuser = true");
+    expect(config).toContain("[[hooks.UserPromptSubmit]]");
 
-    const hook = plan.config.find((file): file is DesiredGlobalJsonMember => file.kind === "json-member");
-    expect(hook?.memberMatcher?.({ hooks: [{ type: "command", command: "user-edited-command", timeout: 99, additionalContextLimit: 2500 }] }, CODEX_GLOBAL_HOOK_SELECTOR)).toBe(true);
-    expect(hook?.memberMatcher?.({ hooks: [{ type: "command", command: "user-context" }] }, CODEX_GLOBAL_HOOK_SELECTOR)).toBe(false);
+    expect(matchesCodexGlobalContextHookGroup({ hooks: [{ type: "command", command: "user-edited-command", timeout: 99, additionalContextLimit: 2500 }] }, CODEX_GLOBAL_HOOK_SELECTOR)).toBe(true);
+    expect(matchesCodexGlobalContextHookGroup({ hooks: [{ type: "command", command: "user-context" }] }, CODEX_GLOBAL_HOOK_SELECTOR)).toBe(false);
   });
 });

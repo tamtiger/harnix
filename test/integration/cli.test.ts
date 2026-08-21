@@ -45,8 +45,8 @@ describe.sequential("CLI", () => {
     await createProgram(programOptions).parseAsync(["node", "harnix", "setup", "--kiro", "--codex"], { from: "node" });
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("- vue");
     await expect(readFile(join(home, ".kiro", "hooks", "harnix-context.json"), "utf8")).resolves.toContain("UserPromptSubmit");
-    await expect(readFile(join(home, "codex", "hooks.json"), "utf8")).resolves.toContain("UserPromptSubmit");
-    await expect(readFile(join(root, ".codex", "hooks.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(readFile(join(home, "codex", "config.toml"), "utf8")).resolves.toContain("UserPromptSubmit");
+    await expect(readFile(join(root, ".codex", "config.toml"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
   });
   it("should_restore_deleted_user_global_integrations_only_when_global_restore_is_explicit", async () => {
     const root = await fixture(); const home = await temporaryUserHome(); process.chdir(root);

@@ -88,7 +88,7 @@ async function assertExpectedGlobalSurfaces(home, platforms) {
     }
   }
   if (platforms.includes("--codex")) {
-    expected.push(".agents/harnix/managed.json", ".agents/skills", ".codex/AGENTS.md", ".codex/harnix/managed.json", ".codex/hooks.json");
+    expected.push(".agents/harnix/managed.json", ".agents/skills", ".codex/AGENTS.md", ".codex/harnix/managed.json", ".codex/config.toml");
   }
   for (const relativePath of expected) {
     try {

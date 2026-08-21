@@ -74,7 +74,7 @@ async function assertExpectedGlobalSurfaces(homeRoot) {
     ".agents/skills",
     ".codex/AGENTS.md",
     ".codex/harnix/managed.json",
-    ".codex/hooks.json",
+    ".codex/config.toml",
     ".gemini/antigravity-cli/plugins/harnix/.managed.json",
     ".gemini/config/plugins/harnix/.managed.json",
     ".kiro/harnix/managed.json",

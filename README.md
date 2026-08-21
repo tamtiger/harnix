@@ -8,7 +8,7 @@ Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
 ## Trạng thái
 
-Phase 5 review/refactor, Phase 6 user-global integrations và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt. Audit ngày 2026-08-18 đã bổ sung implicit routing cho ordinary prompt trên Kiro/Antigravity/Codex và chuyển Antigravity sang always-on `rules/AGENTS.md`; source release hiện là `1.0.10` cho tới khi completion gate đồng bộ patch version. Disposable `agy 1.1.1` session đã chứng minh initialized project tự route Bypass/Lite/Full và non-Harnix no-op, nhưng print mode vẫn chưa load plugin hook. Kiro/Codex disposable profiles không có login và Codex còn pending trust, nên các surface đó không bị claim active. Đây chưa phải claim về package đã publish. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
+Phase 5 review/refactor, Phase 6 user-global integrations và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt. Audit ngày 2026-08-18 đã bổ sung implicit routing cho ordinary prompt trên Kiro/Antigravity/Codex và chuyển Antigravity sang always-on `rules/AGENTS.md`; source release hiện là `1.0.11` cho tới khi completion gate đồng bộ patch version. Disposable `agy 1.1.1` session đã chứng minh initialized project tự route Bypass/Lite/Full và non-Harnix no-op, nhưng print mode vẫn chưa load plugin hook. Kiro/Codex disposable profiles không có login và Codex còn pending trust, nên các surface đó không bị claim active. Đây chưa phải claim về package đã publish. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
 
 ## Đặc điểm sản phẩm
 
@@ -281,9 +281,9 @@ Chỉ dùng `--apply` khi muốn chạy npm upgrade explicit.
 |---|---|---|
 | Kiro | `kiro` / `--kiro` | `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, `~/.kiro/hooks/harnix-context.json` |
 | Antigravity | `antigravity` / `--antigravity` | Desktop `~/.gemini/config/plugins/harnix` và CLI `~/.gemini/antigravity-cli/plugins/harnix`, mỗi plugin dùng always-on `rules/AGENTS.md` không frontmatter |
-| Codex | `codex` / `--codex` | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/hooks.json` |
+| Codex | `codex` / `--codex` | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/config.toml` |
 
-Kiro hook dùng JSON-v1 `UserPromptSubmit`; Antigravity hook trả `injectSteps` chỉ tại invocation đầu trong initialized project; Codex hook dùng nested `UserPromptSubmit` schema và cần người dùng review/trust qua `/hooks`. Activation guard resolve initialized project gần nhất từ cwd/workspace roots, kể cả ancestor của cwd, thay vì chỉ xét thư mục workspace hiện tại. Nếu không tìm thấy project đó hoặc event Antigravity malformed, `harnix context` exit `0` và stdout rỗng; Antigravity chỉ trả `{ "injectSteps": [] }` khi đã xác định initialized project nhưng invocation đã qua lượt đầu hoặc không có context áp dụng. Nếu project đã được xác định nhưng state không đọc an toàn, Harnix không inject project data mà trả warning ngắn, redact và platform-specific để chạy `harnix doctor`; host agent vẫn không bị block. Các surface không liên quan được bảo toàn. Harnix không copy runtime script, không ghi absolute home path, không thêm `config.toml` key Codex, và không tạo platform surface mới trong project. Root `AGENTS.md` bootstrap do `init` tạo là ngoại lệ tương thích.
+Kiro hook dùng JSON-v1 `UserPromptSubmit`; Antigravity hook trả `injectSteps` chỉ tại invocation đầu trong initialized project; Codex hook dùng nested `UserPromptSubmit` inline trong `config.toml` và cần người dùng review/trust qua `/hooks`. Activation guard resolve initialized project gần nhất từ cwd/workspace roots, kể cả ancestor của cwd, thay vì chỉ xét thư mục workspace hiện tại. Nếu không tìm thấy project đó hoặc event Antigravity malformed, `harnix context` exit `0` và stdout rỗng; Antigravity chỉ trả `{ "injectSteps": [] }` khi đã xác định initialized project nhưng invocation đã qua lượt đầu hoặc không có context áp dụng. Nếu project đã được xác định nhưng state không đọc an toàn, Harnix không inject project data mà trả warning ngắn, redact và platform-specific để chạy `harnix doctor`; host agent vẫn không bị block. Các surface không liên quan được bảo toàn. Harnix không copy runtime script, không ghi absolute home path, không ghi config ngoài managed hook block, và không tạo platform surface mới trong project. Root `AGENTS.md` bootstrap do `init` tạo là ngoại lệ tương thích.
 
 ## Workflow sử dụng
 
@@ -305,7 +305,7 @@ triage -> planning -> ready -> implementing -> verifying -> finishing -> complet
 
 Xem [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) để biết transition, gate và artifact contract chi tiết.
 
-Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release, hiện là `1.0.10`. Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
+Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release, hiện là `1.0.11`. Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
 
 ## Dữ liệu dự án
 
