@@ -19,7 +19,7 @@ export function normalizeRepositoryPath(
   value: string,
   options: NormalizeRepositoryPathOptions = {},
 ): string {
-  if (value.length === 0 || isAbsolute(value) || win32.isAbsolute(value)) {
+  if (value.length === 0 || hasUnsafeRepositoryPathCharacter(value) || isAbsolute(value) || win32.isAbsolute(value)) {
     throw new UnsafeProjectPathError("A repository path must be non-empty and relative.");
   }
 
@@ -45,6 +45,13 @@ export function normalizeRepositoryPath(
   }
 
   return resolved.join("/");
+}
+
+function hasUnsafeRepositoryPathCharacter(value: string): boolean {
+  return [...value].some((character) => {
+    const codePoint = character.codePointAt(0)!;
+    return codePoint <= 0x1f || codePoint >= 0x7f && codePoint <= 0x9f || codePoint === 0x2028 || codePoint === 0x2029;
+  });
 }
 
 export async function findGitRoot(cwd: string): Promise<string | undefined> {

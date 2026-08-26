@@ -153,18 +153,38 @@ function emptyInitializedProjectPayload(platform: InternalContextPlatform): stri
 }
 
 function boundedContext(source: string, omittedPaths: string[], cap: number): string {
-  const disclosure = `Omitted: ${omittedPaths.join(", ") || "none"}`;
-  if (source.startsWith(UNTRUSTED_CONTEXT_PREFIX) && source.endsWith(UNTRUSTED_CONTEXT_SUFFIX)) {
-    const framedSuffix = `${UNTRUSTED_CONTEXT_SUFFIX}\n\n${disclosure}`;
-    const contentBudget = cap - UNTRUSTED_CONTEXT_PREFIX.length - framedSuffix.length;
-    if (contentBudget >= 0) {
-      const content = source.slice(UNTRUSTED_CONTEXT_PREFIX.length, -UNTRUSTED_CONTEXT_SUFFIX.length);
-      return `${UNTRUSTED_CONTEXT_PREFIX}${content.slice(0, contentBudget)}${framedSuffix}`;
-    }
-    return disclosure.slice(0, cap);
-  }
-  const contentBudget = Math.max(0, cap - disclosure.length - 2);
-  return `${source.slice(0, contentBudget)}\n\n${disclosure}`.slice(0, cap);
+  const sourceContent = source.startsWith(UNTRUSTED_CONTEXT_PREFIX) && source.endsWith(UNTRUSTED_CONTEXT_SUFFIX)
+    ? source.slice(UNTRUSTED_CONTEXT_PREFIX.length, -UNTRUSTED_CONTEXT_SUFFIX.length)
+    : source;
+  const frameBudget = cap - UNTRUSTED_CONTEXT_PREFIX.length - UNTRUSTED_CONTEXT_SUFFIX.length;
+  if (frameBudget < 0) return "";
+
+  const separator = "\n\n";
+  const disclosure = boundedOmissionDisclosure(omittedPaths, frameBudget);
+  const contentBudget = Math.max(0, frameBudget - disclosure.length - separator.length);
+  const content = sourceContent.slice(0, contentBudget);
+  const actualSeparator = content.length > 0 && disclosure.length > 0 ? separator : "";
+  return `${UNTRUSTED_CONTEXT_PREFIX}${content}${actualSeparator}${disclosure}${UNTRUSTED_CONTEXT_SUFFIX}`;
+}
+
+function boundedOmissionDisclosure(paths: string[], cap: number): string {
+  const disclosure = `Omitted: ${paths.length === 0 ? "none" : paths.map(serializeOmissionPath).join(", ")}`;
+  if (disclosure.length <= cap) return disclosure;
+  const summary = `Omitted: ${paths.length} path${paths.length === 1 ? "" : "s"} (details truncated)`;
+  return summary.slice(0, cap);
+}
+
+function serializeOmissionPath(path: string): string {
+  return [...JSON.stringify(path)].map((character) => {
+    const codePoint = character.codePointAt(0)!;
+    const mustEscape = codePoint === 0x26
+      || codePoint === 0x3c
+      || codePoint === 0x3e
+      || codePoint >= 0x7f && codePoint <= 0x9f
+      || codePoint === 0x2028
+      || codePoint === 0x2029;
+    return mustEscape ? `\\u${codePoint.toString(16).padStart(4, "0")}` : character;
+  }).join("");
 }
 
 function taskTopics(...values: string[]): string[] {

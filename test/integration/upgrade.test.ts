@@ -3,6 +3,15 @@ import { describe, expect, it } from "vitest";
 import { upgradeHarnix } from "../../src/commands/upgrade.js";
 
 describe("upgradeHarnix", () => {
+  it("should_report_an_explicit_null_when_the_offline_available_version_is_unknown", async () => {
+    await expect(upgradeHarnix({ installedVersion: "0.1.0" })).resolves.toEqual({
+      installed: "0.1.0",
+      available: null,
+      command: ["npm", "install", "--save-dev", "@tamtiger/harnix@latest"],
+      applied: false,
+    });
+  });
+
   it("should_remain_offline_until_an_explicit_apply_runner_is_requested", async () => {
     let ran = false;
 

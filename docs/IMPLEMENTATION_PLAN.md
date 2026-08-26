@@ -174,11 +174,11 @@ Manifest replacement là atomic. This project manifest owns only `.harnix/**` te
 
 ### 4.2A Global managed manifest
 
-Phase 6 adds `GlobalManagedManifestV1` exactly as specified in `GLOBAL_SETUP_REFACTOR_PLAN.md` §5. It is a separate sidecar per verified Kiro, Antigravity Desktop, Antigravity CLI or Codex root, with only root-relative POSIX paths. Each entry has a stable `sourceId`, kind `file|managed-block|json-member`, generated hash/version and a required non-overlapping selector for fragments. Shared JSON array members are identified by stable `memberId` plus exact structural signature, never an array index. Corrupt/future data fails before write; a multi-platform transaction preflights all targets, locks in stable order, writes its manifest last and rolls back only when the disk still equals the output Harnix wrote.
+Phase 6 adds `GlobalManagedManifestV1` exactly as specified in `GLOBAL_SETUP_REFACTOR_PLAN.md` §5. It is a separate sidecar per verified Kiro, Antigravity Desktop, Antigravity CLI or Codex root, with only root-relative POSIX paths. Each entry has a stable `sourceId`, kind `file|managed-block|json-member`, generated hash/version and a required non-overlapping selector for fragments. Shared JSON array members are identified by stable `memberId` plus exact structural signature, never an array index. Corrupt/future data fails before write; a multi-platform transaction preflights all targets, locks in stable order, writes its manifest last and rolls back only when the disk still equals the output Harnix wrote. Mỗi canonical `managed.lock` path là directory chứa một unique UUID owner-token file với record schema v1. `mkdir(..., { recursive: false })` tạo candidate; candidate chỉ được trả ownership sau khi token là sole entry và exact bytes vẫn khớp. Stale/release cleanup đọc lại rồi unlink đúng observed token, sau đó gọi non-recursive `rmdir`; token identity đã đổi hoặc replacement directory có token khác thì preserve và retry/bounded timeout. Empty hoặc malformed Harnix token chỉ được reclaim sau stale threshold; live/identity-unknown owner và legacy single-file lock luôn fail closed.
 
 ### 4.3 Task record and workflow state
 
-File: `.harnix/tasks/<task-id>/task.json`; `<task-id>` là lowercase `YYYYMMDD-HHMMSS-<kebab-slug>`, trong đó slug có một hoặc nhiều token alphanumeric không rỗng, phân tách bằng đúng một dấu `-`; collision chỉ append deterministic numeric suffix. Uppercase, empty segment, leading/trailing hyphen, traversal và path separator đều không hợp lệ. Active task được lưu bằng repo-relative task ID trong `.harnix/tasks/.active`, atomic replace; terminal `completed|cancelled` task xóa pointer chỉ khi pointer vẫn trỏ đúng task.
+File: `.harnix/tasks/<task-id>/task.json`; `<task-id>` là lowercase `YYYYMMDD-HHMMSS-<kebab-slug>`, trong đó slug có một hoặc nhiều token alphanumeric không rỗng, phân tách bằng đúng một dấu `-`; collision chỉ append deterministic numeric suffix. Uppercase, empty segment, leading/trailing hyphen, traversal và path separator đều không hợp lệ. Active task được lưu bằng repo-relative task ID trong `.harnix/tasks/.active`, atomic replace; terminal `completed|cancelled` task xóa pointer chỉ khi pointer vẫn trỏ đúng task. Pointer rỗng là idle; pointer non-empty trỏ tới task file bị thiếu hoặc invalid phải throw typed invalid-state error và giữ nguyên pointer, không được project thành idle.
 
 Mọi transition vào `ready` yêu cầu acceptance criteria không rỗng, có ít nhất một validation check `required: true`, và với Full thì `prd.md`/`plan.md` phải được safe-resolve rồi đọc lại là không rỗng. Sau lần persist đầu tiên, acceptance criterion ID/text và required validation-check ID/description/command/scope/required là monotonic obligations; ở v2, `criterionIds` và `inputs` cũng bất biến. Payload sau không được xoá, đổi tên, demote hoặc mutate in-place. Clarification thêm obligation mới; criterion cũ chỉ được đổi status/evidence hoặc explicit waiver có reason.
 
@@ -261,7 +261,7 @@ interface TaskRecordV2 extends Omit<TaskRecordV1, "schemaVersion" | "validationP
 }
 ```
 
-Task mới dùng schema v2. `criterionIds` phải unique/valid; required check phải map ít nhất một criterion và mọi non-waived criterion phải được ít nhất một required check bao phủ. `inputs` là danh sách sorted unique không rỗng, luôn chứa `@task-contract`; các entry còn lại là safe project-relative POSIX file/glob. Check có từ khóa `repository|source|file|build|test|lint|typecheck|package|runtime|code|compile|smoke|acceptance` trong ID/description/command phải có ít nhất một repository input. Absolute path, backslash, empty segment, `.`/`..`, traversal và symlink/junction escape bị reject; mỗi pattern phải match ít nhất một file.
+Task mới chỉ được tạo bằng schema v2; workflow transport reject new v1 nhưng direct reader vẫn hỗ trợ exact historical v1. Cả hai version dùng exact recursive allowlist cho TaskRecord, acceptance criterion, validation check, evidence, blocker và cancellation; unknown top-level hoặc nested key bị reject. `criterionIds` phải unique/valid; required check phải map ít nhất một criterion và mọi non-waived criterion phải được ít nhất một required check bao phủ. `inputs` là danh sách sorted unique không rỗng, luôn chứa `@task-contract`; các entry còn lại là safe project-relative POSIX file/glob. Check có từ khóa `repository|source|file|build|test|lint|typecheck|package|runtime|code|compile|smoke|acceptance` trong ID/description/command phải có ít nhất một repository input. Absolute path, backslash, empty segment, `.`/`..`, traversal và symlink/junction escape bị reject; mỗi pattern phải match ít nhất một file. Mode là monotonic: Lite có thể promote sang Full với required artifacts/gates, nhưng persisted Full không được downgrade về Lite ở bất kỳ unfinished transition nào.
 
 Snapshot chuẩn gồm canonical task contract (task ID/mode, criterion ID/text, toàn bộ validation definition), Full `prd.md`/`plan.md`, và sorted `{path,sha256}` của repository input. `inputDigest` là SHA-256 lowercase của canonical JSON `{schemaVersion:2,taskId,checkId,taskContractHash,entries}`. Hidden `harnix workflow --snapshot --check <id>` chỉ đọc state/input. Required passing evidence v2 phải có digest 64-hex; save recompute và chỉ chấp nhận digest hiện tại, rồi ghi immutable task-owned `.harnix/tasks/<id>/verification-inputs.json` keyed by evidence ID. Sidecar chỉ chứa ID, relative path và hash, không chứa source body, secret, absolute path, prompt, environment hoặc command output.
 
@@ -295,7 +295,7 @@ interface ContextManifestV1 {
 }
 ```
 
-Deterministic base score là pin `1000`, explicit task/acceptance reference `500`, active package/path `250`, applicable language-or-technology profile `100` (một bounded stack bonus dù cả hai facet match), cross-project guide `25`; applicable signals cộng dồn, sau đó sort pinned → score/priority descending → normalized path ascending. Context loader không execute included text, không follow external symlink và luôn disclose omitted entries. Explicit full-context bypasses budget only, không bypass path safety/dedupe/source listing.
+Deterministic base score là pin `1000`, explicit task/acceptance reference `500`, active package/path `250`, applicable language-or-technology profile `100` (một bounded stack bonus dù cả hai facet match), cross-project guide `25`; applicable signals cộng dồn, sau đó sort pinned → score/priority descending → normalized path ascending. Context loader không execute included text, không follow external symlink và luôn disclose omitted entries. Repository paths reject C0/C1 control characters cùng U+2028/U+2029. Platform payload serializes omitted paths with `JSON.stringify`; opening marker, excerpts, disclosure and closing marker share one hard character budget, and disclosure remains entirely inside the fixed untrusted repository boundary even when no excerpt fits. Explicit full-context bypasses budget only, không bypass path safety/dedupe/source listing.
 
 Hidden inspect/continue luôn project `contextDrift: {state,changes,selectionChanges}` với state `not-recorded|current|stale`, sorted relative path changes `changed|missing|unreadable|unverified` và sorted selection-basis changes theo §4.4A. Không có manifest/hash là `not-recorded`; mixed hashed/unhashed là `stale` với entry thiếu hash `unverified`. Chỉ đọc path đã liệt kê và safe-resolve dưới root. Continue gặp `stale` phải persist cùng status với checkpoint `replan` trước khi dùng lại context và route Brainstorm để reselect; không tự sửa source hay manifest. `not-recorded` trên legacy state chỉ được disclose, không tự ép migration/replan.
 
@@ -404,7 +404,7 @@ Consumer expecting v1 receives an explicit schema mismatch, never a misleading f
 
 ### 4.7 Internal platform-hook protocol
 
-`harnix context --platform <kiro|antigravity|codex>` is a packaged hidden command, not public API and does not increase the eight-command public contract. It:
+`harnix context --platform <kiro|antigravity|codex>` is the only packaged fast-path hook command, not public API and does not increase the eight-command public contract. Legacy `harnix internal context ...` is not an alias and must fall through to regular CLI rejection. Release performance measurement invokes the exact canonical installed command. The hidden command:
 
 1. accepts bounded optional hook-event JSON from stdin, validates `cwd` and bounded `workspacePaths[]`, and falls back safely to process cwd;
 2. resolves the **nearest** initialized project ancestor/root from cwd or workspace roots using safe realpath containment, including non-Git workspaces, deduplicated symlink-equivalent roots; it must not require the current workspace directory itself to contain `.harnix`;
@@ -422,7 +422,21 @@ Repository excerpts in every platform payload use the same explicit untrusted-da
 
 ### 4.8 Common CLI result semantics
 
-Mọi public command dùng stderr cho actionable error/warning và stdout cho exactly one JSON document. Exit `0` là success/clean intentional no-op/dry-run; exit `1` là operation hoặc diagnostic hoàn tất nhưng có actionable finding/conflict/failure; exit `2` là invalid usage/config/schema/root hoặc deterministic internal failure. Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. Project `update` returns sorted `created`, content `updated`, metadata-only `metadataUpdated`, `preserved`, `deleted` và `obsolete`; một path metadata-only không được claim là content update. `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. `init` is always non-interactive and emits one `InitProjectResult` with project status, developer, sorted languages/technologies, bounded `detection.matches`, and sorted created/updated/unchanged/preserved/warnings arrays. Existing projects return empty detection matches because init does not rescan; new/dry-run projects report pre-override evidence and warnings identify overridden facets. `--yes` is not part of the public init syntax; a hidden no-op compatibility alias may remain for v0.5 callers.
+Mọi public command dùng stderr cho actionable error/warning và stdout cho exactly one JSON document. Exit `0` là success/clean intentional no-op/dry-run; exit `1` là operation hoặc diagnostic hoàn tất nhưng có actionable finding/conflict/failure; exit `2` là invalid usage/config/schema/root hoặc deterministic internal failure. Public command throw trước normal result dùng exact envelope dưới đây trên stdout và cùng redacted `message` trên stderr; hidden `context`/`workflow` không emit envelope để giữ hook/workflow protocol:
+
+```ts
+interface PublicCliErrorV1 {
+  generator: "harnix";
+  schemaVersion: 1;
+  ok: false;
+  error: {
+    exitCode: 1 | 2;
+    message: string;
+  };
+}
+```
+
+Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. Project `update` returns sorted `created`, content `updated`, metadata-only `metadataUpdated`, `preserved`, `deleted` và `obsolete`; một path metadata-only không được claim là content update. `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. Readiness khác `installed` hoặc warning không rỗng được ghi actionable lên stderr và trả exit `1`; clean `installed` trả `0`. `upgrade` always returns `{ installed: string, available: string|null, command: string[], applied: boolean }`; absent injected lookup means offline `available:null`, and only explicit `--apply` invokes the fixed npm executable/argument array. `init` is always non-interactive and emits one `InitProjectResult` with project status, developer, sorted languages/technologies, bounded `detection.matches`, and sorted created/updated/unchanged/preserved/warnings arrays. Existing projects return empty detection matches because init does not rescan; new/dry-run projects report pre-override evidence and warnings identify overridden facets. `--yes` is not part of the public init syntax; a hidden no-op compatibility alias may remain for v0.5 callers.
 ## 5. Phase 0 — Documentation và baseline checkpoint
 
 ### Task 0.1: Chuẩn hóa PRD
@@ -668,7 +682,7 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 
 ### Task 4.2: Upgrade
 
-- [x] Report installed and available versions.
+- [x] Report installed and always-present `available: string|null`; default offline CLI uses `null`, while an authorized host can inject a lookup.
 - [x] Present safe npm upgrade path for `@tamtiger/harnix`.
 - [x] Use `execFile` argument arrays and injected version/network/process dependencies.
 - [x] Tests prove no network/install process is invoked unless injected fake permits it.

@@ -14,6 +14,7 @@ export async function syncVersion({ root = process.cwd(), version, summaries, da
   const packagePath = join(targetRoot, "package.json");
   const changelogPath = join(targetRoot, "CHANGELOG.md");
   const readmePath = join(targetRoot, "README.md");
+  const selfHostManifestPath = join(targetRoot, ".harnix", ".template-hashes.json");
   const packageText = await readFile(packagePath, "utf8");
   const packageDocument = JSON.parse(packageText);
   if (typeof packageDocument.version !== "string") throw new Error("package.json must contain a string version.");
@@ -22,6 +23,8 @@ export async function syncVersion({ root = process.cwd(), version, summaries, da
   const skillPaths = await canonicalSkillPaths(targetRoot);
   const changelog = await readFile(changelogPath, "utf8");
   const readme = await readFile(readmePath, "utf8");
+  const selfHostManifest = await readFile(selfHostManifestPath, "utf8");
+  const nextSelfHostManifest = replaceSelfHostGeneratorVersion(selfHostManifest, version, selfHostManifestPath);
   const heading = `## [${version}] - ${date}`;
   const versionEntry = new RegExp(`^## \\[${version.replaceAll(".", "\\.")}\\] - \\d{4}-\\d{2}-\\d{2}$`, "mu");
 
@@ -29,10 +32,17 @@ export async function syncVersion({ root = process.cwd(), version, summaries, da
   if (comparison === 0) {
     if (!versionEntry.test(changelog)) throw new Error(`CHANGELOG.md does not contain a release entry for ${version}.`);
     await assertSkillVersions(skillPaths, version);
+    const updated = [];
+    if (nextSelfHostManifest !== selfHostManifest) {
+      await atomicWrite(selfHostManifestPath, nextSelfHostManifest);
+      updated.push(".harnix/.template-hashes.json");
+    }
     const nextReadme = replaceReadmeVersion(readme, version);
-    if (nextReadme === readme) return { changed: false, previousVersion: packageDocument.version, updated: [], version };
-    await atomicWrite(readmePath, nextReadme);
-    return { changed: true, previousVersion: packageDocument.version, updated: ["README.md"], version };
+    if (nextReadme !== readme) {
+      await atomicWrite(readmePath, nextReadme);
+      updated.push("README.md");
+    }
+    return { changed: updated.length > 0, previousVersion: packageDocument.version, updated, version };
   }
   if (normalizedSummaries.length === 0) throw new Error("At least one non-empty --summary is required for a new release version.");
   if (versionEntry.test(changelog)) throw new Error(`CHANGELOG.md already contains version ${version}.`);
@@ -48,6 +58,9 @@ export async function syncVersion({ root = process.cwd(), version, summaries, da
     await atomicWrite(skillPath, replaceSkillVersion(source, version, skillPath));
     updated.push(relativePath(targetRoot, skillPath));
   }
+
+  await atomicWrite(selfHostManifestPath, nextSelfHostManifest);
+  updated.push(".harnix/.template-hashes.json");
 
   await atomicWrite(changelogPath, insertChangelogEntry(changelog, heading, normalizedSummaries));
   updated.push("CHANGELOG.md");
@@ -115,6 +128,25 @@ function replaceReadmeVersion(readme, version) {
     return updated.replace(pattern, replacement);
   }, readme);
 }
+
+function replaceSelfHostGeneratorVersion(source, version, path) {
+  let document;
+  try {
+    document = JSON.parse(source);
+  } catch {
+    throw new Error(`Self-host manifest is not valid JSON: ${path}.`);
+  }
+  if (!isRecord(document) || document.generator !== "harnix" || document.schemaVersion !== 1 || !Array.isArray(document.entries) || document.entries.length === 0) {
+    throw new Error(`Self-host manifest has an invalid structure: ${path}.`);
+  }
+  if (!document.entries.every((entry) => isRecord(entry) && typeof entry.generatorVersion === "string")) {
+    throw new Error(`Self-host manifest has an invalid generatorVersion entry: ${path}.`);
+  }
+  if (document.entries.every(({ generatorVersion }) => generatorVersion === version)) return source;
+  return `${JSON.stringify({ ...document, entries: document.entries.map((entry) => ({ ...entry, generatorVersion: version })) }, null, 2)}\n`;
+}
+
+function isRecord(value) { return typeof value === "object" && value !== null && !Array.isArray(value); }
 
 async function atomicWrite(path, contents) {
   const mode = (await stat(path)).mode;

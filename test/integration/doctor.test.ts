@@ -280,12 +280,16 @@ describe("diagnoseProject Doctor v2", () => {
     await initializeProject({ developer: "tam", root, yes: true });
     await setupPlatforms({ ...globalOptions(home), platforms: ["kiro"] });
     const steering = join(home, ".kiro", "steering", "harnix.md");
+    const repoMap = join(root, ".harnix", "cache", "repo-map-v1.json");
     await rm(steering);
+    await rm(repoMap);
 
     const report = await diagnoseProject({ root, fix: true, global: true, ...globalOptions(home) });
 
     expect(report.summary.fixed).toBeGreaterThan(0);
     await expect(readFile(steering, "utf8")).resolves.toContain("Harnix activation guard");
+    await expect(access(repoMap)).rejects.toMatchObject({ code: "ENOENT" });
+    expect(report.project.findings).toContainEqual(expect.objectContaining({ code: "repo-map-missing", fixable: true }));
   });
 
   it("should_report_preserved_concurrent_global_edits_when_global_fix_rolls_back_partially", async () => {

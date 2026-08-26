@@ -3,12 +3,12 @@
 import { Command, Option } from "commander";
 
 import { initializeProject, parseInitProfile } from "./commands/init.js";
-import { setupPlatforms, type HookCommandLookup } from "./commands/setup.js";
+import { setupPlatforms, type HookCommandLookup, type SetupPlatformsResult } from "./commands/setup.js";
 import { resolveProjectRoot } from "./utils/paths.js";
 import { runInternalContextCommand } from "./commands/internal-context-cli.js";
 import { updateProject } from "./commands/update.js";
 import { updateGlobalPlatforms } from "./commands/global-update.js";
-import { upgradeHarnix } from "./commands/upgrade.js";
+import { upgradeHarnix, type AvailableVersionLookup } from "./commands/upgrade.js";
 import { uninstallProject } from "./commands/uninstall.js";
 import { uninstallGlobalIntegrations } from "./commands/global-uninstall.js";
 import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces.js";
@@ -31,6 +31,18 @@ export interface ProgramOptions {
   commandLookup?: HookCommandLookup | undefined;
   /** Test/integration injection for externally verified platform capability evidence. */
   capabilityLookup?: GlobalIntegrationCapabilityLookup | undefined;
+  /** Optional explicit available-version lookup; the default upgrade path remains offline. */
+  availableVersionLookup?: AvailableVersionLookup | undefined;
+}
+
+export interface PublicCliErrorV1 {
+  readonly generator: "harnix";
+  readonly schemaVersion: 1;
+  readonly ok: false;
+  readonly error: {
+    readonly exitCode: 1 | 2;
+    readonly message: string;
+  };
 }
 
 export function createProgram(programOptions: ProgramOptions = {}): Command {
@@ -59,6 +71,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       platforms,
     });
     process.stdout.write(`${JSON.stringify(result)}\n`);
+    reportActionableSetupReadiness(result);
   });
   program.command("update").option("--restore", "Restore explicitly deleted managed files").option("--global", "Reconcile user-global platform integrations").option("--kiro", "Select Kiro for --global").option("--antigravity", "Select Antigravity for --global").option("--codex", "Select Codex for --global").option("--dry-run", "Preview global changes without writing").action(async (options: { restore?: boolean; global?: boolean; kiro?: boolean; antigravity?: boolean; codex?: boolean; dryRun?: boolean }) => {
     const platforms = (["kiro", "antigravity", "codex"] as const).filter((platform) => options[platform]);
@@ -76,7 +89,12 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     process.stdout.write(`${JSON.stringify(result)}\n`);
   });
   program.command("upgrade").option("--apply", "Run the displayed npm upgrade command").action(async (options: { apply?: boolean }) => {
-    const result = await upgradeHarnix({ installedVersion: packageVersion, apply: options.apply }); process.stdout.write(`${JSON.stringify(result)}\n`);
+    const result = await upgradeHarnix({
+      installedVersion: packageVersion,
+      ...(programOptions.availableVersionLookup === undefined ? {} : { availableVersion: programOptions.availableVersionLookup }),
+      apply: options.apply,
+    });
+    process.stdout.write(`${JSON.stringify(result)}\n`);
   });
   program.command("uninstall")
     .option("--purge", "Remove only this project's .harnix data")
@@ -218,15 +236,25 @@ function parseRepoMapLimit(value: string): number {
 
 export async function runCli(argv = process.argv, programOptions: ProgramOptions = {}): Promise<number> {
   process.exitCode = undefined;
+  const hiddenProtocol = isHiddenProtocolInvocation(argv);
+  const program = createProgram(programOptions);
+  if (!hiddenProtocol) program.configureOutput({ writeErr: () => undefined });
   try {
-    await createProgram(programOptions).parseAsync(argv);
+    await program.parseAsync(argv);
     return typeof process.exitCode === "number" ? process.exitCode : 0;
   } catch (error: unknown) {
     const commanderExit = typeof error === "object" && error !== null && "code" in error && String(error.code).startsWith("commander.");
-    if (commanderExit) return "exitCode" in error && error.exitCode === 0 ? 0 : 2;
-    process.stderr.write(`${redactPublicErrorMessage(error)}\n`);
-    return 2;
+    if (commanderExit && "exitCode" in error && error.exitCode === 0) return 0;
+    const exitCode = 2;
+    const message = redactPublicErrorMessage(error);
+    if (!commanderExit || !hiddenProtocol) process.stderr.write(`${message}\n`);
+    if (!hiddenProtocol) process.stdout.write(`${JSON.stringify(publicCliError(message, exitCode))}\n`);
+    return exitCode;
   }
+}
+
+export function publicCliError(message: string, exitCode: 1 | 2): PublicCliErrorV1 {
+  return { generator: "harnix", schemaVersion: 1, ok: false, error: { exitCode, message } };
 }
 
 export function redactPublicErrorMessage(error: unknown): string {
@@ -242,4 +270,21 @@ export function redactPublicErrorMessage(error: unknown): string {
     // user profile merely because the path contains spaces.
     .replace(/(?:\\\\(?:\?\\)?[^\\/\r\n]+[\\/]|[A-Za-z]:[\\/]|\/(?:home|Users|tmp|var\/folders)\/)[^\r\n]*/gu, "[PATH]")
     .replace(/((?:token|secret|password|api[_-]?key)\s*[=:]\s*)[^\s,]+/giu, "$1[REDACTED]");
+}
+
+function isHiddenProtocolInvocation(argv: readonly string[]): boolean {
+  return argv[2] === "context" || argv[2] === "workflow";
+}
+
+function reportActionableSetupReadiness(result: SetupPlatformsResult): void {
+  const actionable = result.platforms.filter((platform) => platform.readiness !== "installed" || platform.warnings.length > 0);
+  if (actionable.length === 0) return;
+  for (const platform of actionable) {
+    if (platform.warnings.length === 0) {
+      process.stderr.write(`${platform.platform}: setup readiness is ${platform.readiness}.\n`);
+      continue;
+    }
+    for (const warning of platform.warnings) process.stderr.write(`${platform.platform}: ${redactPublicErrorMessage(new Error(warning))}\n`);
+  }
+  process.exitCode = 1;
 }

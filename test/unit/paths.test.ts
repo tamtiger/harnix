@@ -25,6 +25,18 @@ describe("normalizeRepositoryPath", () => {
       expect(() => normalizeRepositoryPath(unsafePath)).toThrow(UnsafeProjectPathError);
     },
   );
+
+  it.each([
+    "docs/line\nbreak.md",
+    "docs/carriage\rreturn.md",
+    "docs/tab\tname.md",
+    "docs/control\u0001name.md",
+    "docs/next-line\u0085name.md",
+    "docs/line-separator\u2028name.md",
+    "docs/paragraph-separator\u2029name.md",
+  ])("rejects repository paths containing control or line-separator characters", (unsafePath) => {
+    expect(() => normalizeRepositoryPath(unsafePath)).toThrow(UnsafeProjectPathError);
+  });
 });
 
 describe("resolveProjectRoot", () => {

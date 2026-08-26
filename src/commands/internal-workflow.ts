@@ -54,10 +54,12 @@ export async function saveWorkflow(root: string, envelope: WorkflowSaveEnvelope)
   if (active && active.id !== candidate.id) throw new Error("Workflow save may update only the active task.");
   if (existing) {
     assertSchemaEvolution(existing, candidate);
+    if (existing.mode === "full" && candidate.mode !== "full") throw new Error("Workflow save cannot downgrade a Full task to Lite mode.");
     preserveEvidence(existing.evidence, candidate.evidence);
     preserveObligations(existing, candidate);
     assertLegalTransition(existing, candidate);
   } else {
+    if (candidate.schemaVersion !== 2) throw new Error("Workflow save requires TaskRecord schema v2 for every new task.");
     if (active || candidate.status !== "planning") throw new Error("Workflow save may create only a planning task when no task is active.");
     if (candidate.mode === "full" && !envelope.artifacts) throw new Error("Full tasks require prd.md and plan.md.");
   }

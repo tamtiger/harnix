@@ -1,6 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createProgram, runCli } from "../../src/cli-program.js";
+
+afterEach(() => vi.restoreAllMocks());
 
 describe("CLI command contract", () => {
   it("exposes eight supported commands without exposing hidden/internal commands", () => {
@@ -23,6 +25,8 @@ describe("CLI command contract", () => {
 
   it("keeps the workflow transport hidden and rejects ambiguous action flags", async () => {
     const workflow = createProgram().commands.find((command) => command.name() === "workflow");
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     expect(workflow?.commands).toEqual([]);
     expect((workflow as { _hidden?: boolean } | undefined)?._hidden).toBe(true);
@@ -31,6 +35,14 @@ describe("CLI command contract", () => {
     await expect(runCli(["node", "harnix", "workflow", "--snapshot"])).resolves.toBe(2);
     await expect(runCli(["node", "harnix", "workflow", "--inspect", "--check", "check"])).resolves.toBe(2);
     await expect(runCli(["node", "harnix", "workflow", "inspect"])).resolves.toBe(2);
+    expect(stdout.mock.calls.map((call) => String(call[0])).join("")).toBe("");
+
     await expect(runCli(["node", "harnix", "internal", "context", "--platform", "codex"])).resolves.toBe(2);
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+      generator: "harnix",
+      schemaVersion: 1,
+      ok: false,
+      error: { exitCode: 2, message: "error: unknown command 'internal'" },
+    });
   });
 });

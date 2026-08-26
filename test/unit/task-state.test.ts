@@ -1,4 +1,4 @@
-import { access, readFile, symlink } from "node:fs/promises";
+import { access, readFile, rm, symlink } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createLearningCandidate, isPromotionEligible } from "../../src/core/journal/learning.js";
@@ -73,6 +73,35 @@ describe("task state", () => {
   it("rejects future schema and malformed task records", () => {
     expect(() => validateTask({ ...taskFixture(), schemaVersion: 3 })).toThrow("unsupported");
     expect(() => validateTask({ ...taskFixture(), checkpoint: "unknown" })).toThrow("invalid");
+  });
+
+  it("rejects unknown fields at every TaskRecord schema boundary", () => {
+    const fixture = taskV2Fixture();
+    const criterion = fixture.acceptanceCriteria[0]!;
+    const check = fixture.validationPlan[0]!;
+    const failedEvidence = { id: "failed", checkId: check.id, recordedAt: timestamp, result: "fail" as const, exitCode: 1, summary: "failed", artifactPaths: [] };
+
+    expect(() => validateTask({ ...fixture, unexpected: true })).toThrow(/field|schema/iu);
+    expect(() => validateTask({ ...fixture, acceptanceCriteria: [{ ...criterion, unexpected: true }] })).toThrow(/field|schema/iu);
+    expect(() => validateTask({ ...fixture, validationPlan: [{ ...check, unexpected: true }] })).toThrow(/field|schema/iu);
+    expect(() => validateTask({ ...fixture, evidence: [{ ...failedEvidence, unexpected: true }] })).toThrow(/field|schema/iu);
+    expect(() => validateTask({
+      ...fixture,
+      status: "blocked",
+      checkpoint: "planning",
+      blocker: { kind: "repository", summary: "blocked", nextAction: "retry", resumeStatus: "planning", unexpected: true },
+    })).toThrow(/field|schema/iu);
+  });
+
+  it("fails closed when the active pointer references a missing task record", async () => {
+    const root = await temporaryRepository();
+    const task = taskFixture();
+    await saveTask(root, task);
+    await setActiveTask(root, task.id);
+    await rm(join(root, "tasks", task.id), { recursive: true });
+
+    await expect(resolveActiveTask(root)).rejects.toThrow(/active task pointer|missing task/iu);
+    await expect(readFile(join(root, "tasks", ".active"), "utf8")).resolves.toBe(`${task.id}\n`);
   });
 
   it("cancels any unfinished task with explicit user authority and preserves its evidence", async () => {

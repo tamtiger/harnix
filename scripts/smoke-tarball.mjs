@@ -26,8 +26,8 @@ for (const platforms of [["--kiro"], ["--antigravity"], ["--codex"], ["--kiro", 
       pathPrefix: join(project, "node_modules", ".bin"),
     });
     run(process.execPath, [cli, "init", "--user", "smoke", "--languages", "vue"], project, environment);
-    const setup = run(process.execPath, [cli, "setup", ...platforms], project, environment);
-    assertGlobalSetupResult(setup.stdout, platforms, home);
+    const setup = run(process.execPath, [cli, "setup", ...platforms], project, environment, [0, 1]);
+    assertGlobalSetupResult(setup, platforms, home);
     await assertNoProjectLocalPlatformSurfaces(project);
     await assertExpectedGlobalSurfaces(home, platforms);
     process.stdout.write(`${JSON.stringify({ platforms, ok: true })}\n`);
@@ -40,15 +40,16 @@ for (const platforms of [["--kiro"], ["--antigravity"], ["--codex"], ["--kiro", 
   }
 }
 
-function run(executable, args, cwd, env) {
+function run(executable, args, cwd, env, expectedStatuses = [0]) {
   const result = spawnSync(executable, args, { cwd, encoding: "utf8", env, windowsHide: true });
-  if (result.status !== 0) {
+  if (!expectedStatuses.includes(result.status)) {
     throw new Error(`${args.join(" ")} failed: ${result.error?.message ?? result.stderr ?? result.stdout ?? "unknown"}`);
   }
   return result;
 }
 
-function assertGlobalSetupResult(output, platforms, home) {
+function assertGlobalSetupResult(processResult, platforms, home) {
+  const { status, stderr, stdout: output } = processResult;
   let result;
   try {
     result = JSON.parse(output);
@@ -60,7 +61,12 @@ function assertGlobalSetupResult(output, platforms, home) {
   if (result.scope !== "user" || JSON.stringify(actual) !== JSON.stringify(selected)) {
     throw new Error(`setup returned an unexpected global result: ${output}`);
   }
-  if (output.includes(home)) throw new Error("setup JSON exposed the physical disposable home path.");
+  const actionable = result.platforms.some((platform) => platform?.readiness !== "installed" || !Array.isArray(platform?.warnings) || platform.warnings.length > 0);
+  const expectedStatus = actionable ? 1 : 0;
+  if (status !== expectedStatus) throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result.`);
+  if (actionable && stderr.trim().length === 0) throw new Error("setup omitted stderr guidance for an actionable readiness result.");
+  if (!actionable && stderr.trim().length > 0) throw new Error(`setup emitted unexpected stderr for a clean install: ${stderr}`);
+  if (output.includes(home) || stderr.includes(home)) throw new Error("setup exposed the physical disposable home path.");
 }
 
 async function assertNoProjectLocalPlatformSurfaces(project) {

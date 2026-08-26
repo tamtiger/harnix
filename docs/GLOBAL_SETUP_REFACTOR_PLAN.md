@@ -129,7 +129,7 @@ Ownership rules:
 - Manifest corrupt/future version làm lệnh fail trước write.
 - Manifest được ghi cuối transaction. Multi-platform setup preflight toàn bộ, acquire lock theo thứ tự ổn định, snapshot affected state và rollback các write đã áp dụng nếu một bước thất bại. Rollback chỉ restore snapshot khi disk hash vẫn bằng exact output Harnix vừa ghi; nếu editor/tool khác đã sửa đồng thời, preserve content mới và report `partial-rollback`.
 - Atomic replacement phải giữ permission mode hiện tại của file, đặc biệt với global config có thể chứa dữ liệu nhạy cảm.
-- Lock file có schema gồm generator/version, owner PID, process start time, acquired time và operation ID; có bounded wait, stale-owner detection/reclaim và crash-recovery tests. Harnix lock không được giả định khóa được editor/platform process.
+- Canonical lock path là directory chứa đúng một unique UUID owner-token file; token record có schema gồm generator/version, owner PID, process start time, acquired time và operation ID. Candidate dùng exclusive `mkdir`, chỉ thành owner sau sole-token verification; stale/release cleanup unlink exact observed token rồi non-recursive `rmdir`, có bounded wait và crash/interleaving tests. Legacy single-file lock được preserve/fail closed. Harnix lock không được giả định khóa được editor/platform process.
 
 ## 6. Contract CLI mới
 

@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow } from "../../src/commands/internal-workflow.js";
 import { appendJournal } from "../../src/core/journal/journal.js";
-import { cancelTask, createTaskV2MigrationEvidence, saveTask, setActiveTask, transitionTask, type TaskRecord, type TaskRecordV1 } from "../../src/core/tasks/task.js";
+import { cancelTask, createTaskV2MigrationEvidence, saveTask, setActiveTask, transitionTask, type TaskRecord, type TaskRecordV1, type TaskRecordV2 } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 import { initializeProject } from "../../src/commands/init.js";
 import { sha256 } from "../../src/utils/hashing.js";
@@ -16,7 +16,7 @@ describe("hidden workflow persistence operations", () => {
   it("projects stale context drift from the persisted manifest without mutating it", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const planning = task("planning", "planning");
+    const planning = taskV2("planning", "planning");
     await saveWorkflow(root, { task: planning });
     await writeFile(join(root, "tracked.md"), "new content");
     const contextPath = join(root, ".harnix", "tasks", planning.id, "context.json");
@@ -38,7 +38,7 @@ describe("hidden workflow persistence operations", () => {
     const root = await temporaryRepository();
     await writeFile(join(root, "tracked.md"), "tracked content");
     await initializeProject({ root, developer: "tam", yes: true });
-    const planning = { ...task("planning", "planning"), relevantPaths: ["tracked.md"] };
+    const planning = { ...taskV2("planning", "planning"), relevantPaths: ["tracked.md"] };
     const context = {
       generator: "harnix" as const,
       schemaVersion: 1 as const,
@@ -78,11 +78,13 @@ describe("hidden workflow persistence operations", () => {
     await initializeProject({ root, developer: "tam", yes: true });
     expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
 
-    const planning = task("planning", "planning");
+    await writeFile(join(root, "input.ts"), "export const value = 1;\n");
+    const planning = taskV2("planning", "planning", ["@task-contract", "input.ts"]);
     await expect(saveWorkflow(root, { task: planning })).resolves.toMatchObject({ id: planning.id, status: "planning" });
     expect(await inspectWorkflow(root)).toMatchObject({ activeTask: { id: planning.id }, contextDrift: { state: "not-recorded", changes: [] } });
 
-    const ready = { ...planning, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z", evidence: [{ id: "e", recordedAt: timestamp, result: "pass" as const, summary: "kept", artifactPaths: [] }] };
+    const snapshot = await snapshotWorkflow(root, "check");
+    const ready = { ...planning, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z", evidence: [{ id: "e", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "kept", artifactPaths: [], inputDigest: snapshot.inputDigest }] };
     await saveWorkflow(root, { task: ready });
     await expect(saveWorkflow(root, { task: { ...ready, evidence: [{ ...ready.evidence[0]!, summary: "mutated" }] } })).rejects.toThrow("evidence");
     await expect(saveWorkflow(root, { task: { ...ready, status: "verifying", checkpoint: "verifying" } })).rejects.toThrow("Illegal task transition");
@@ -95,7 +97,9 @@ describe("hidden workflow persistence operations", () => {
     verifying.validationPlan = [{ id: "check", description: "check", scope: "focused", required: true }];
     verifying.evidence = [{ id: "e", checkId: "check", recordedAt: new Date().toISOString(), result: "pass", summary: "ok", artifactPaths: [] }];
     verifying.acceptanceCriteria = [{ id: "a", text: "done", status: "met", evidenceIds: ["e"] }];
-    await saveWorkflow(root, { task: { ...verifying, status: "planning", checkpoint: "planning" } });
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, { ...verifying, status: "planning", checkpoint: "planning" });
+    await setActiveTask(harnixRoot, verifying.id);
     await saveWorkflow(root, { task: { ...verifying, status: "ready", checkpoint: "ready" } });
     await saveWorkflow(root, { task: { ...verifying, status: "in_progress", checkpoint: "implementing" } });
     await saveWorkflow(root, { task: verifying });
@@ -145,7 +149,7 @@ describe("hidden workflow persistence operations", () => {
   it("cancels an active task through the hidden transport and writes its cancellation journal", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const planning = task("planning", "planning");
+    const planning = taskV2("planning", "planning");
     planning.evidence = [{ id: "failed", recordedAt: timestamp, result: "fail", exitCode: 1, summary: "blocked", artifactPaths: [] }];
     await saveWorkflow(root, { task: planning });
 
@@ -163,7 +167,7 @@ describe("hidden workflow persistence operations", () => {
   it("requires workflow --cancel instead of allowing save to forge a cancelled task", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const planning = task("planning", "planning");
+    const planning = taskV2("planning", "planning");
     await saveWorkflow(root, { task: planning });
     await expect(saveWorkflow(root, { task: {
       ...planning,
@@ -248,16 +252,40 @@ describe("hidden workflow persistence operations", () => {
   it("rejects a new Full task unless its required artifacts are persisted with it", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const full = { ...task("planning", "planning"), mode: "full" as const };
+    const full = { ...taskV2("planning", "planning"), mode: "full" as const };
 
     await expect(saveWorkflow(root, { task: full })).rejects.toThrow("prd.md and plan.md");
     await expect(saveWorkflow(root, { task: full, artifacts: { prd: "# PRD\n", plan: "# Plan\n" } })).resolves.toMatchObject({ id: full.id });
   });
 
+  it("rejects a new TaskRecord v1 while preserving direct legacy-state loading", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const legacy = task("planning", "planning");
+
+    await expect(saveWorkflow(root, { task: legacy })).rejects.toThrow(/new task.*schema v2|schema v2.*new task/iu);
+
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, legacy);
+    await setActiveTask(harnixRoot, legacy.id);
+    await expect(inspectWorkflow(root)).resolves.toMatchObject({ activeTask: { id: legacy.id, schemaVersion: 1 } });
+  });
+
+  it("prevents a Full task from downgrading to Lite before readiness", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const full = { ...taskV2("planning", "planning"), mode: "full" as const };
+    await saveWorkflow(root, { task: full, artifacts: { prd: "# PRD\n", plan: "# Plan\n" } });
+
+    await expect(saveWorkflow(root, {
+      task: { ...full, mode: "lite", status: "ready", checkpoint: "ready", updatedAt: "2026-08-13T00:01:00.000Z" },
+    })).rejects.toThrow(/Full.*Lite|downgrade.*mode/iu);
+  });
+
   it("audits deterministic trace coverage and enforces it on Full readiness", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const full = { ...task("planning", "planning"), mode: "full" as const, relevantPaths: ["src/a.ts"] };
+    const full = { ...taskV2("planning", "planning"), mode: "full" as const, relevantPaths: ["src/a.ts"] };
     const prd = "# PRD\n### AC `a`\nDone.\n";
     const plan = [
       "# Plan",
@@ -282,7 +310,9 @@ describe("hidden workflow persistence operations", () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
     const empty = { ...task("planning", "planning"), acceptanceCriteria: [], validationPlan: [] };
-    await saveWorkflow(root, { task: empty });
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, empty);
+    await setActiveTask(harnixRoot, empty.id);
 
     await expect(saveWorkflow(root, { task: { ...empty, status: "ready", checkpoint: "ready", updatedAt: "2026-08-13T00:01:00.000Z" } })).rejects.toThrow("acceptance");
     await expect(saveWorkflow(root, { task: { ...empty, acceptanceCriteria: [{ id: "a", text: "done", status: "pending" as const, evidenceIds: [] }], status: "ready", checkpoint: "ready", updatedAt: "2026-08-13T00:01:00.000Z" } })).rejects.toThrow("required validation");
@@ -292,7 +322,9 @@ describe("hidden workflow persistence operations", () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
     const planning = task("planning", "planning");
-    await saveWorkflow(root, { task: planning });
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, planning);
+    await setActiveTask(harnixRoot, planning.id);
     const ready = { ...planning, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
     await saveWorkflow(root, { task: ready });
 
@@ -330,7 +362,9 @@ describe("hidden workflow persistence operations", () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
     const planning = task("planning", "planning");
-    await saveWorkflow(root, { task: planning });
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, planning);
+    await setActiveTask(harnixRoot, planning.id);
     const migrationTime = "2026-08-13T00:02:00.000Z";
     const candidate = {
       ...planning,
@@ -358,7 +392,9 @@ describe("hidden workflow persistence operations", () => {
       acceptanceCriteria: [{ id: "a", text: "done", status: "met", evidenceIds: ["legacy"] }],
       evidence: [legacyPass],
     };
-    await saveWorkflow(root, { task: replanning });
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, replanning);
+    await setActiveTask(harnixRoot, replanning.id);
     const migrationTime = "2026-08-13T00:01:00.000Z";
     const candidate = {
       ...replanning,
@@ -422,7 +458,9 @@ describe("hidden workflow persistence operations", () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
     const planning = task("planning", "planning");
-    await saveWorkflow(root, { task: planning });
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, planning);
+    await setActiveTask(harnixRoot, planning.id);
     const expanded: TaskRecord = {
       ...planning,
       acceptanceCriteria: [
@@ -444,7 +482,7 @@ describe("hidden workflow persistence operations", () => {
   it("rechecks non-empty Full artifacts immediately before readiness", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const full = { ...task("planning", "planning"), mode: "full" as const };
+    const full = { ...taskV2("planning", "planning"), mode: "full" as const };
     await saveWorkflow(root, { task: full, artifacts: { prd: "# PRD\n", plan: "# Plan\n" } });
     const ready = { ...full, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
 
@@ -460,7 +498,7 @@ function task(status: TaskRecord["status"], checkpoint: TaskRecord["checkpoint"]
   return { generator: "harnix", schemaVersion: 1, id: "20260813-120000-workflow", title: "workflow", mode: "lite", status, checkpoint, goal: "test", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [{ id: "check", description: "verify", command: "pnpm test", scope: "full", required: true }], evidence: [], createdAt: timestamp, updatedAt: timestamp };
 }
 
-function taskV2(status: TaskRecord["status"], checkpoint: TaskRecord["checkpoint"], inputs = ["@task-contract", "src/**/*.ts"]) {
+function taskV2(status: TaskRecord["status"], checkpoint: TaskRecord["checkpoint"], inputs = ["@task-contract", "src/**/*.ts"]): TaskRecordV2 {
   return {
     ...task(status, checkpoint),
     schemaVersion: 2 as const,

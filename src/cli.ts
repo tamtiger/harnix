@@ -14,8 +14,8 @@ import { readBoundedInput } from "./utils/bounded-input.js";
  */
 export function canonicalInternalContextPlatform(argv: readonly string[]): InternalContextPlatform | undefined {
   const args = argv.slice(2);
-  if (args.length !== 4 || args[0] !== "internal" || args[1] !== "context" || args[2] !== "--platform") return undefined;
-  const platform = args[3];
+  if (args.length !== 3 || args[0] !== "context" || args[1] !== "--platform") return undefined;
+  const platform = args[2];
   return platform === "kiro" || platform === "antigravity" || platform === "codex" ? platform : undefined;
 }
 

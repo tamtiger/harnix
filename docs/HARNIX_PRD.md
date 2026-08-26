@@ -132,7 +132,7 @@ harnix doctor [--fix] [--global]
 harnix repo-map --query <text> [--limit <count>]
 ```
 
-Có tám public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix context --platform <id>` là platform-hook protocol; hidden `harnix workflow` yêu cầu đúng một action flag trong `--inspect|--save|--snapshot|--audit-ready|--finish|--cancel` và là agent persistence/freshness/terminal transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
+Có tám public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Public failure trước normal result emit exact `PublicCliErrorV1` đã redaction trên stdout và cùng actionable message trên stderr; exit nằm trong envelope và tuân theo semantics `1|2`. Hidden `context`/`workflow` giữ protocol output riêng, không nhận public error envelope. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix context --platform <id>` là platform-hook protocol; hidden `harnix workflow` yêu cầu đúng một action flag trong `--inspect|--save|--snapshot|--audit-ready|--finish|--cancel|--learn` và là agent persistence/freshness/terminal transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
 
 ## 8. Init requirements
 
@@ -168,8 +168,8 @@ Phase 6 supersedes every former project-local platform setup path. `init` contin
 - `setup` requires one or more platform flags, does not call `resolveProjectRoot`, and does not read or write `.harnix/config.yaml`.
 - `--dry-run` returns exact logical targets and planned states without writing. Re-run is byte-idempotent reconciliation for selected platforms.
 - Runtime stays in the installed package. The fixed hook command is `harnix context --platform <id>`; binary lookup is injected and a missing launcher returns `binary-unavailable`, never a false readiness claim.
-- Human/JSON results contain per-platform created, updated, unchanged, preserved and warning paths plus readiness. Output never exposes an absolute home path.
-- Each target root owns an independent sidecar manifest; no `~/.harnix` is created and no project manifest can claim shared global files. Manifests store relative paths only, reject corrupt/future/unsafe data before write, preserve collisions and user edits, and use stable-order locking, permission-preserving atomic writes and conservative rollback.
+- Human/JSON results contain per-platform created, updated, unchanged, preserved and warning paths plus readiness. Readiness khác `installed` hoặc warning không rỗng là actionable exit `1`, không phải success `0`; output never exposes an absolute home path.
+- Each target root owns an independent sidecar manifest; no `~/.harnix` is created and no project manifest can claim shared global files. Manifests store relative paths only, reject corrupt/future/unsafe data before write, preserve collisions and user edits, and use stable-order locking, permission-preserving atomic writes and conservative rollback. Mỗi canonical `managed.lock` path là directory chứa unique owner-token record schema v1; ownership chỉ hợp lệ sau sole-token verification, còn reclaim/release chỉ unlink exact token rồi non-recursive `rmdir`. Legacy single-file lock được preserve/fail closed.
 - Every global instruction, skill and hook starts with an activation guard: find the nearest initialized project ancestor/root from the event cwd or workspace roots, rather than checking only the current workspace directory. Khi guard pass, global instruction phải route mọi ordinary user request qua Bypass/Lite/Full kể cả khi prompt không nhắc Harnix; no `.harnix/config.yaml` means fast no-op with no output/write/init. A known initialized project whose state cannot be read safely emits only a concise redacted platform-specific warning, fails closed for project data, and must not block the hosting agent.
 
 ### 9.1 Kiro
@@ -198,14 +198,14 @@ Phase 6 supersedes every former project-local platform setup path. `init` contin
 The root `AGENTS.md` bootstrap that `init` creates when absent is retained for project onboarding. It is not a setup-owned Codex platform surface.
 ## 10. Config, context, journal and learning
 
-Normative schemas cho `.harnix/config.yaml`, stack/guide catalog, project managed manifest, TaskRecord v1/v2, verification-input sidecar, optional context manifest, journal/learning, global ownership manifest và Doctor JSON v2 nằm tại `IMPLEMENTATION_PLAN.md` mục 4 và `GLOBAL_SETUP_REFACTOR_PLAN.md`. Implementation không được tự đổi field/enum/path/transition mà không cập nhật PRD/workflow, migration và tests trong cùng change. Task mới dùng v2; terminal `completed|cancelled` v1 được byte-preserve, unfinished v1 chỉ migrate explicit tại `replan`, còn update/Doctor chỉ chẩn đoán `legacy-task-schema`. Config v2 lưu `languages` và `technologies` độc lập ở project/package; technology kind chỉ nằm trong packaged catalog. Config v1 vẫn đọc được và chỉ được migrate explicit bởi `update` hoặc `doctor --fix`, không rescan; compatible unknown keys được giữ và future/corrupt state bị reject. `config.platforms` remains deprecated and ignored for desired global setup.
+Normative schemas cho `.harnix/config.yaml`, stack/guide catalog, project managed manifest, TaskRecord v1/v2, verification-input sidecar, optional context manifest, journal/learning, global ownership manifest và Doctor JSON v2 nằm tại `IMPLEMENTATION_PLAN.md` mục 4 và `GLOBAL_SETUP_REFACTOR_PLAN.md`. Implementation không được tự đổi field/enum/path/transition mà không cập nhật PRD/workflow, migration và tests trong cùng change. Task mới dùng exact v2; unknown top-level/nested field bị reject. Terminal `completed|cancelled` v1 được byte-preserve, unfinished v1 chỉ migrate explicit tại `replan`, Full không downgrade về Lite, và `.active` trỏ tới task không tồn tại phải fail closed thay vì được hiểu là không có task. Update/Doctor chỉ chẩn đoán `legacy-task-schema`. Config v2 lưu `languages` và `technologies` độc lập ở project/package; technology kind chỉ nằm trong packaged catalog. Config v1 vẫn đọc được và chỉ được migrate explicit bởi `update` hoặc `doctor --fix`, không rescan; compatible unknown keys được giữ và future/corrupt state bị reject. `config.platforms` remains deprecated and ignored for desired global setup.
 
 Context:
 
 - Rank theo pin, task/acceptance reference, active package/path, language/technology guide và cross-project relevance; một entry chỉ nhận một bounded stack bonus dù match cả hai facet.
 - Deduplicate theo normalized repo-relative source/content.
 - Enforce configurable character/token approximation budget.
-- Khi truncate, inject phần điểm cao nhất và liệt kê omitted files.
+- Khi truncate, inject phần điểm cao nhất và liệt kê omitted files. Omission disclosure được JSON-serialize, tính trong cùng budget và luôn nằm trước closing marker của fixed untrusted repository boundary; path chứa C0/C1 hoặc Unicode line separator bị reject.
 - Full-context override explicit và vẫn ghi source list.
 - Research findings lưu cùng task với source/date, không global injection.
 - Explicit hidden context persistence ghi `context.json` cùng task-owned `context-selection.json` v1, bind `taskId`, selector version, repo-map `inventoryFingerprint`, canonical selection-input hash và selection-result hash; sidecar không chứa source body, task prose, secret hoặc absolute path.
@@ -241,7 +241,7 @@ Project manifest versioned SHA-256 lưu normalized repository-relative path, sou
 | Obsolete unchanged | Remove |
 | Obsolete modified | Preserve |
 
-Content/manifest uses atomic replacement. Reject traversal, absolute keys, unsafe roots, symlink/junction escape and corrupt/future manifests. A partial write keeps the previous valid state. Tasks/journals are never managed; specs/workflow are project-managed only until user modification. A global fragment hash covers only the Harnix fragment, never unrelated user content; non-overlapping selectors are required for a shared file.
+Content/manifest uses atomic replacement. Reject traversal, absolute keys, unsafe roots, symlink/junction escape and corrupt/future manifests. A partial write keeps the previous valid state. Tasks/journals are never managed; specs/workflow are project-managed only until user modification. A global fragment hash covers only the Harnix fragment, never unrelated user content; non-overlapping selectors are required for a shared file. Stale-lock reclaim mang theo exact bytes đã inspect và đọc lại ngay trước remove; nếu identity/content đã đổi thì replacement lock được giữ nguyên và contender retry/timeout.
 
 ## 12. Lifecycle commands
 
@@ -251,7 +251,7 @@ Content/manifest uses atomic replacement. Reject traversal, absolute keys, unsaf
 
 ### Upgrade
 
-Báo installed/available version và npm upgrade path cho `@tamtiger/harnix`. Dùng argument arrays và injected network/version/process dependencies để tests không gọi network/install thật.
+Báo installed/available version và npm upgrade path cho `@tamtiger/harnix`. Result luôn có `available: string|null`; offline default là `null`, còn host chỉ nhận version khi inject explicit lookup. Dùng argument arrays và injected version/process dependencies để không gọi network/install ngầm; chỉ `--apply` mới chạy install process.
 
 ### Uninstall
 
@@ -351,7 +351,7 @@ Initial IDs cover source languages C#, TypeScript, JavaScript, PHP, Python, Java
 Tất cả filesystem tests dùng isolated temporary repositories **và injected disposable user homes**; they must not read or write a real user profile:
 
 1. Unit: detection; config/migrations; context ranking/budget; project/global hash manifests; permission-preserving atomic writes; user path safety; lock/stale-lock/rollback; journal; learning; Doctor v2.
-2. CLI: all seven commands; setup outside an initialized repository; project/global update/uninstall scope; idempotence; modified/deleted/corrupt/future project and global schemas.
+2. CLI: all eight public commands; setup outside an initialized repository; project/global update/uninstall scope; idempotence; modified/deleted/corrupt/future project and global schemas.
 3. Migration: discovery, dry-run, transform, preservation, mixed/conflict, rollback, cleanup.
 4. Fixtures: independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue and multilingual/multi-technology monorepo.
 5. Platform: Kiro global JSON-v1 hook; Antigravity Desktop/CLI plugins and multi-root invocation; Codex global skills/AGENTS/nested hook schema; relevant rules only and no machine paths.

@@ -1,0 +1,1128 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260826-041901-review-findings-remediation",
+  "title": "Khắc phục toàn bộ finding từ review toàn diện",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Loại bỏ các lỗ hổng context injection, race lock, sai phạm scope/state/CLI và độ lệch tài liệu để acceptance/release gate phản ánh đúng hành vi Harnix được phát hành.",
+  "nonGoals": [
+    "Không thêm platform, service, daemon, telemetry hoặc compatibility alias mới.",
+    "Không gọi network ngầm; upgrade mặc định vẫn offline và chỉ cài đặt khi người dùng truyền --apply.",
+    "Không sửa profile người dùng thật, commit, branch, push, publish hoặc tạo pull request."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-cli-contract",
+      "text": "Mọi lỗi public CLI emit đúng một JSON error document đã redaction, dùng exit 1/2 theo frozen semantics; setup với readiness actionable không trả success và upgrade báo trạng thái available rõ ràng qua dependency lookup được inject mà không gọi network ngầm.",
+      "status": "met",
+      "evidenceIds": [
+        "final-acceptance-suite",
+        "final-cli-hook-protocol",
+        "final-static-quality"
+      ]
+    },
+    {
+      "id": "ac-context-boundary",
+      "text": "Repository path chứa control character hoặc line separator bị reject và mọi omission disclosure được serialize, tính trong budget, nằm hoàn toàn trong fixed untrusted repository boundary trên Kiro, Antigravity và Codex.",
+      "status": "met",
+      "evidenceIds": [
+        "final-acceptance-suite",
+        "final-context-security",
+        "final-static-quality"
+      ]
+    },
+    {
+      "id": "ac-doctor-scope",
+      "text": "doctor --fix chỉ sửa project và doctor --fix --global chỉ reconcile global state; cả hai giữ JSON/exit semantics và không mutate scope còn lại.",
+      "status": "met",
+      "evidenceIds": [
+        "final-acceptance-suite",
+        "final-doctor-global-scope",
+        "final-static-quality"
+      ]
+    },
+    {
+      "id": "ac-docs-release",
+      "text": "README và normative docs mô tả đúng tám public commands, toàn bộ hidden workflow actions, error/upgrade/lock/workflow semantics; package patch version và CHANGELOG được đồng bộ trước completion.",
+      "status": "met",
+      "evidenceIds": [
+        "final-lock-protocol-docs",
+        "final-release-gates",
+        "final-self-host-version-sync",
+        "final-static-quality",
+        "final-version-docs-sync"
+      ]
+    },
+    {
+      "id": "ac-hook-fast-path",
+      "text": "Chỉ canonical harnix context --platform <id> dùng bounded fail-open fast path; legacy internal context không còn chạy và release scanner đo đúng installed command với cold-path thresholds.",
+      "status": "met",
+      "evidenceIds": [
+        "final-acceptance-suite",
+        "final-cli-hook-protocol",
+        "final-release-gates",
+        "final-static-quality"
+      ]
+    },
+    {
+      "id": "ac-lock-ownership",
+      "text": "Stale lock reclaim không thể xóa lock vừa được process khác tạo; contention, stale recovery, timeout và release đều giữ exclusive ownership bằng deterministic regression coverage.",
+      "status": "met",
+      "evidenceIds": [
+        "final-acceptance-suite",
+        "final-lock-directory-integration",
+        "final-lock-ownership",
+        "final-lock-protocol-docs",
+        "final-static-quality"
+      ]
+    },
+    {
+      "id": "ac-workflow-invariants",
+      "text": "Task mới chỉ dùng exact TaskRecord v2, Full task không thể downgrade sang Lite, extra field bị reject theo version/nested schema và dangling active pointer fail closed thay vì giả vờ idle.",
+      "status": "met",
+      "evidenceIds": [
+        "final-acceptance-suite",
+        "final-static-quality",
+        "final-workflow-invariants"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/.template-hashes.json",
+    "CHANGELOG.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "package.json",
+    "README.md",
+    "scripts/measure-footprint.mjs",
+    "scripts/scan-release.mjs",
+    "scripts/smoke-tarball.mjs",
+    "scripts/version-sync.mjs",
+    "src/cli-program.ts",
+    "src/cli.ts",
+    "src/commands/doctor.ts",
+    "src/commands/internal-context.ts",
+    "src/commands/internal-workflow.ts",
+    "src/commands/upgrade.ts",
+    "src/core/context/context.ts",
+    "src/core/tasks/task.ts",
+    "src/skills",
+    "src/utils/file-lock.ts",
+    "src/utils/global-managed-files.ts",
+    "src/utils/paths.ts",
+    "test/integration/cli.test.ts",
+    "test/integration/doctor.test.ts",
+    "test/integration/upgrade.test.ts",
+    "test/platform/setup.test.ts",
+    "test/safety/path-boundaries.test.ts",
+    "test/safety/release-scanner.test.ts",
+    "test/unit/cli-fast-path.test.ts",
+    "test/unit/context.test.ts",
+    "test/unit/file-lock.test.ts",
+    "test/unit/global-managed-files.test.ts",
+    "test/unit/paths.test.ts",
+    "test/unit/task-state.test.ts",
+    "test/unit/version-sync.test.ts",
+    "test/workflow/cli-contract.test.ts",
+    "test/workflow/internal-context.test.ts",
+    "test/workflow/internal-workflow.test.ts",
+    "test/workflow/self-host.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "acceptance-suite",
+      "description": "Chạy acceptance suite đầy đủ cho unit, integration, migration, platform, workflow và safety sau toàn bộ remediation.",
+      "command": "pnpm run test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-cli-contract",
+        "ac-context-boundary",
+        "ac-doctor-scope",
+        "ac-hook-fast-path",
+        "ac-lock-ownership",
+        "ac-workflow-invariants"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "cli-hook-protocol",
+      "description": "Kiểm tra JSON/exit contract, setup readiness, upgrade lookup, canonical context fast path, legacy rejection và release scanner.",
+      "command": "pnpm exec vitest run test/unit/cli-fast-path.test.ts test/integration/cli.test.ts test/integration/upgrade.test.ts test/workflow/cli-contract.test.ts test/safety/release-scanner.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-cli-contract",
+        "ac-hook-fast-path"
+      ],
+      "inputs": [
+        "@task-contract",
+        "scripts/scan-release.mjs",
+        "src/cli-program.ts",
+        "src/cli.ts",
+        "src/commands/upgrade.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/upgrade.test.ts",
+        "test/safety/release-scanner.test.ts",
+        "test/unit/cli-fast-path.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ]
+    },
+    {
+      "id": "context-security",
+      "description": "Kiểm tra path control character và omission disclosure luôn được escape, bounded và giữ trong untrusted context frame.",
+      "command": "pnpm exec vitest run test/unit/paths.test.ts test/unit/context.test.ts test/workflow/internal-context.test.ts test/safety/path-boundaries.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-context-boundary"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-context.ts",
+        "src/core/context/context.ts",
+        "src/utils/paths.ts",
+        "test/safety/path-boundaries.test.ts",
+        "test/unit/context.test.ts",
+        "test/unit/paths.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "doctor-global-scope",
+      "description": "Kiểm tra doctor project/global fix scope, JSON result và actionable exit code bằng repository và fake home cô lập.",
+      "command": "pnpm exec vitest run test/integration/doctor.test.ts test/integration/cli.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-doctor-scope"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/doctor.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/doctor.test.ts"
+      ]
+    },
+    {
+      "id": "lock-ownership",
+      "description": "Kiểm tra stale-lock compare-before-reclaim, concurrent replacement ownership, timeout và release semantics.",
+      "command": "pnpm exec vitest run test/unit/file-lock.test.ts test/integration/global-lifecycle.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-lock-ownership"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/utils/file-lock.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/unit/file-lock.test.ts"
+      ]
+    },
+    {
+      "id": "release-gates",
+      "description": "Kiểm tra package, tarball fake-home, init performance, footprint và release scanner sau patch release.",
+      "command": "pnpm run pack:check && pnpm run smoke:tarball && pnpm run measure:init && pnpm run measure:footprint && pnpm run scan:release",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-release",
+        "ac-hook-fast-path"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "self-host-version-sync",
+      "description": "Xác minh version-sync đồng bộ package, canonical skills và self-host generator metadata, đồng thời self-host surfaces vẫn khớp canonical sources.",
+      "command": "pnpm run version:sync -- 1.0.12 && pnpm exec vitest run test/unit/version-sync.test.ts test/workflow/self-host.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-release"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        "@task-contract",
+        "package.json",
+        "scripts/version-sync.mjs",
+        "src/skills/*/SKILL.md",
+        "test/unit/version-sync.test.ts",
+        "test/workflow/self-host.test.ts"
+      ]
+    },
+    {
+      "id": "static-quality",
+      "description": "Build, lint và typecheck toàn repository sau thay đổi security, workflow và CLI.",
+      "command": "pnpm run build && pnpm run lint && pnpm run typecheck",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-cli-contract",
+        "ac-context-boundary",
+        "ac-docs-release",
+        "ac-doctor-scope",
+        "ac-hook-fast-path",
+        "ac-lock-ownership",
+        "ac-workflow-invariants"
+      ],
+      "inputs": [
+        "@task-contract",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "version-docs-sync",
+      "description": "Xác minh package 1.0.12, canonical skill metadata, README, normative docs và CHANGELOG đồng bộ.",
+      "command": "pnpm run version:sync -- 1.0.12",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-release"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "package.json",
+        "scripts/version-sync.mjs",
+        "src/skills/*/SKILL.md"
+      ]
+    },
+    {
+      "id": "workflow-invariants",
+      "description": "Kiểm tra exact TaskRecord v1/v2, new-task v2-only, mode monotonic và dangling active-pointer fail-closed behavior.",
+      "command": "pnpm exec vitest run test/unit/task-state.test.ts test/workflow/internal-workflow.test.ts test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-workflow-invariants"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts",
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "lock-directory-integration",
+      "description": "Xác minh canonical lock-directory, unique-token ownership, stale/release interleaving, legacy file fail-closed và setup/reconcile root ownership.",
+      "command": "pnpm exec vitest run test/unit/file-lock.test.ts test/unit/global-managed-files.test.ts test/platform/setup.test.ts test/integration/global-lifecycle.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-lock-ownership"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/setup.ts",
+        "src/utils/file-lock.ts",
+        "src/utils/global-managed-files.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/platform/setup.test.ts",
+        "test/unit/file-lock.test.ts",
+        "test/unit/global-managed-files.test.ts"
+      ]
+    },
+    {
+      "id": "lock-protocol-docs",
+      "description": "Inspect canonical lock-directory semantics, legacy fail-closed behavior và changelog/README/normative documentation consistency.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-release",
+        "ac-lock-ownership"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "docs/HARNIX_PRD.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/utils/file-lock.ts",
+        "test/unit/file-lock.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "context-security-red",
+      "checkId": "context-security",
+      "recordedAt": "2026-08-26T04:24:04.442Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: 8 regression assertions fail vì control/line-separator path chưa bị reject và omission-only payload chưa có shared untrusted boundary.",
+      "artifactPaths": [
+        "test/unit/paths.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "context-security-green",
+      "checkId": "context-security",
+      "recordedAt": "2026-08-26T04:25:24.716Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 4 files, 44 tests pass; C0/C1 và Unicode line separators bị reject, omission-only metadata được JSON-serialize trong shared bounded boundary. Snapshot trước/sau trùng khớp.",
+      "artifactPaths": [
+        "src/commands/internal-context.ts",
+        "src/utils/paths.ts",
+        "test/unit/paths.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ],
+      "inputDigest": "03adbe1ad109bdc03b36d11e997db8a75e2bf6942acd90f5b18066d11e4b8632"
+    },
+    {
+      "id": "lock-ownership-red",
+      "checkId": "lock-ownership",
+      "recordedAt": "2026-08-26T04:28:32.520Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: contender xóa replacement lock được tạo sau stale-owner inspection và acquire sai; 1/8 test fail đúng race interleaving.",
+      "artifactPaths": [
+        "test/unit/file-lock.test.ts"
+      ]
+    },
+    {
+      "id": "lock-ownership-green",
+      "checkId": "lock-ownership",
+      "recordedAt": "2026-08-26T04:29:49.213Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 18 tests pass; stale reclaim giữ observed bytes, replacement mismatch không bị xóa và global lifecycle contention vẫn xanh. Snapshot trước/sau trùng khớp.",
+      "artifactPaths": [
+        "src/utils/file-lock.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/unit/file-lock.test.ts"
+      ],
+      "inputDigest": "dfe190c58903dec1aa452a907a145f2eab243a39420db00ebf2a956fced1258c"
+    },
+    {
+      "id": "doctor-global-scope-red",
+      "checkId": "doctor-global-scope",
+      "recordedAt": "2026-08-26T04:30:29.880Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: doctor --fix --global tái tạo repo-map project bị thiếu; focused test fail đúng scope leak.",
+      "artifactPaths": [
+        "test/integration/doctor.test.ts"
+      ]
+    },
+    {
+      "id": "doctor-global-scope-green",
+      "checkId": "doctor-global-scope",
+      "recordedAt": "2026-08-26T04:31:07.460Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 44 tests pass; global fix khôi phục global entry nhưng giữ repo-map project bị thiếu và project-only fix không đổi global state. Snapshot ổn định.",
+      "artifactPaths": [
+        "src/commands/doctor.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/doctor.test.ts"
+      ],
+      "inputDigest": "8b2542da3a400598e87f248029e8738778f3d2ec3569377a174aa1246f7e6e00"
+    },
+    {
+      "id": "workflow-invariants-red",
+      "checkId": "workflow-invariants",
+      "recordedAt": "2026-08-26T04:32:58.476Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: 4 focused tests fail vì extra fields được giữ, dangling active trả idle, new v1 được tạo và Full task downgrade sang Lite/ready.",
+      "artifactPaths": [
+        "test/unit/task-state.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "workflow-invariants-green",
+      "checkId": "workflow-invariants",
+      "recordedAt": "2026-08-26T04:36:16.438Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 3 files, 45 tests pass; exact v1/v2 schema, v2-only creation, Full mode monotonicity và dangling active pointer fail-closed đều được xác minh. Snapshot trước/sau trùng khớp.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts",
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "inputDigest": "8a4fb5e9354f014e746ecac5ebf62677da7796f6dffb4021c300dd5f313f35d4"
+    },
+    {
+      "id": "cli-hook-protocol-red",
+      "checkId": "cli-hook-protocol",
+      "recordedAt": "2026-08-26T04:39:08.467Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: 9 assertions fail, xác nhận fast path còn dùng legacy internal context, scanner benchmark sai command, lỗi public CLI không có JSON envelope, setup actionable vẫn exit 0 và upgrade không expose/inject available version.",
+      "artifactPaths": [
+        "test/unit/cli-fast-path.test.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/upgrade.test.ts",
+        "test/safety/release-scanner.test.ts"
+      ]
+    },
+    {
+      "id": "cli-hook-protocol-green",
+      "checkId": "cli-hook-protocol",
+      "recordedAt": "2026-08-26T04:41:09.509Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 5 files, 63 tests pass; canonical context fast path và scanner command, hidden stdout isolation, PublicCliErrorV1, actionable setup exit/stderr và injected offline upgrade availability đều được xác minh. Snapshot trước/sau trùng khớp.",
+      "artifactPaths": [
+        "src/cli.ts",
+        "src/cli-program.ts",
+        "src/commands/upgrade.ts",
+        "scripts/scan-release.mjs",
+        "test/unit/cli-fast-path.test.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/upgrade.test.ts",
+        "test/workflow/cli-contract.test.ts",
+        "test/safety/release-scanner.test.ts"
+      ],
+      "inputDigest": "8ebefacc7ed3300e57322035628499d9f3d80de5d970220fc836bb600ad573cd"
+    },
+    {
+      "id": "version-docs-sync-green",
+      "checkId": "version-docs-sync",
+      "recordedAt": "2026-08-26T04:45:29.148Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Ngoại lệ TDD docs/version: version-sync idempotent trả changed:false; package 1.0.12, CHANGELOG, README, ba normative docs và bảy canonical skill metadata đã đồng bộ. Snapshot trước/sau trùng khớp.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/skills/harnix-check/SKILL.md",
+        "src/skills/harnix-continue/SKILL.md",
+        "src/skills/harnix-debug/SKILL.md",
+        "src/skills/harnix-finish-work/SKILL.md",
+        "src/skills/harnix-implement/SKILL.md",
+        "src/skills/harnix-research/SKILL.md"
+      ],
+      "inputDigest": "a182e5fbd0d8a2b0cb93c89174d700bef3a0f098a9dbbcf27be5f9d8f5496c42"
+    },
+    {
+      "id": "static-quality-red",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-26T04:46:26.092Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Build pass nhưng lint fail tại src/utils/paths.ts vì no-control-regex; typecheck chưa chạy trong chained gate. Chuyển control-range regex sang explicit code-point predicate trước khi rerun.",
+      "artifactPaths": [
+        "src/utils/paths.ts"
+      ]
+    },
+    {
+      "id": "static-quality-red-2",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-26T04:47:02.877Z",
+      "result": "fail",
+      "exitCode": 2,
+      "summary": "Build và lint pass; typecheck phát hiện taskV2 test helper suy luận evidence là never[]. Bổ sung explicit TaskRecordV2 return annotation, không đổi runtime behavior.",
+      "artifactPaths": [
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "static-quality-green",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-26T04:48:16.3036374Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: build, ESLint và TypeScript noEmit đều pass sau khi thay control-range regex bằng code-point predicate và annotate test helper là TaskRecordV2. Snapshot trước/sau trùng khớp.",
+      "artifactPaths": [
+        "src/utils/paths.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "inputDigest": "c4593a0ac1a878432fb36695f1233cb93f630296d6a8d5bedf467490e68e7be9"
+    },
+    {
+      "id": "acceptance-suite-red",
+      "checkId": "acceptance-suite",
+      "recordedAt": "2026-08-26T04:49:23.9783884Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Unit, integration, migration và platform pass; workflow self-host fail vì .harnix/.template-hashes.json còn generatorVersion 1.0.11 sau khi package đã lên 1.0.12. Safety chưa chạy trong chained gate.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts",
+        "test/workflow/self-host.test.ts"
+      ]
+    },
+    {
+      "id": "acceptance-suite-green",
+      "checkId": "acceptance-suite",
+      "recordedAt": "2026-08-26T04:51:15.5853872Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 59 test files, 450 tests pass và 1 test platform-specific được skip; unit, integration, migration, platform, workflow và safety đều xanh. Version-sync hiện đồng bộ cả self-host manifest. Snapshot trước/sau trùng khớp.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts",
+        "test/workflow/self-host.test.ts"
+      ],
+      "inputDigest": "b7249a4d38e794dd31979d91c30bdce66809d8805d6e528281de8392c1745709"
+    },
+    {
+      "id": "release-gates-red",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-26T04:51:57.8038005Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pack:check pass; smoke:tarball dừng tại setup --antigravity vì script vẫn coi actionable exit 1 là process failure trước khi validate JSON/readiness. Các gate sau chưa chạy.",
+      "artifactPaths": [
+        "scripts/smoke-tarball.mjs"
+      ]
+    },
+    {
+      "id": "release-gates-red-2",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-26T04:53:11.1135642Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pack:check, bốn tarball smoke cases và measure:init pass (median 361.54 ms, worst 366.95 ms); measure:footprint còn coi actionable setup exit 1 là failure. scan:release chưa chạy.",
+      "artifactPaths": [
+        "scripts/measure-footprint.mjs",
+        "scripts/scan-release.mjs",
+        "scripts/smoke-tarball.mjs"
+      ]
+    },
+    {
+      "id": "release-gates-green",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-26T04:54:30.1211266Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: pack và 4 fake-home tarball smoke cases pass; init median 370.46 ms/worst 377.74 ms; footprint 226094 bytes/50 files, giảm 83.17%; release scan sạch, context cold-path median 158.21 ms và p95/max 192.62 ms. Snapshot trước/sau trùng khớp.",
+      "artifactPaths": [
+        "scripts/measure-footprint.mjs",
+        "scripts/scan-release.mjs",
+        "scripts/smoke-tarball.mjs"
+      ],
+      "inputDigest": "d1043f4c8a901f1ecae3a1e599f1e2543c2b97daf57b428764143d7603b5b111"
+    },
+    {
+      "id": "self-host-version-sync-green",
+      "checkId": "self-host-version-sync",
+      "recordedAt": "2026-08-26T04:56:32.0553413Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: version-sync idempotent trả changed:false; 2 files/4 tests xác minh package, bảy canonical skills, self-host manifest và canonical workflow surfaces cùng ở 1.0.12. Snapshot trước/sau trùng khớp.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts",
+        "test/workflow/self-host.test.ts"
+      ],
+      "inputDigest": "41ffdfff00054c6bdcaebdc469ee502b2b7cc3a9eb13ee20d65307c8a248f725"
+    },
+    {
+      "id": "compliance-review-red",
+      "recordedAt": "2026-08-26T05:00:44.4496405Z",
+      "result": "fail",
+      "summary": "Compliance inspection của current working-tree diff, task PRD/plan và normative docs: workflow --audit-ready báo orphan-required-check self-host-version-sync; docs/HARNIX_PRD.md còn claim all seven commands dù public contract có tám.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-041901-review-findings-remediation/plan.md",
+        "docs/HARNIX_PRD.md"
+      ]
+    },
+    {
+      "id": "compliance-review-green",
+      "recordedAt": "2026-08-26T05:01:28.5267170Z",
+      "result": "pass",
+      "summary": "Compliance re-review của task PRD/plan, README và normative docs: tám public commands được mô tả nhất quán, self-host-version-sync đã map vào DOCS-RELEASE và deterministic ready audit pass không diagnostics.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-041901-review-findings-remediation/plan.md",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    },
+    {
+      "id": "quality-security-review-red",
+      "recordedAt": "2026-08-26T05:05:05.9425748Z",
+      "result": "fail",
+      "summary": "Quality/security review phát hiện hai lỗi còn tồn tại: boundedContext luôn chèn separator nên có thể vượt maxCharacters 2 ký tự và omission path có thể giả mạo marker đóng; stale-lock compare/read rồi rm vẫn có TOCTOU cho phép xóa lock replacement sau lần đọc cuối.",
+      "artifactPaths": [
+        "src/commands/internal-context.ts",
+        "src/utils/file-lock.ts",
+        "test/workflow/internal-context.test.ts",
+        "test/unit/file-lock.test.ts"
+      ]
+    },
+    {
+      "id": "context-boundary-debug-red",
+      "recordedAt": "2026-08-26T05:09:07.9829745Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Giả thuyết xác nhận: focused reproducer có 2/11 test fail; omission path tạo marker đóng thứ hai và frame-only payload vượt cap đúng 2 ký tự vì separator vô điều kiện.",
+      "artifactPaths": [
+        "src/commands/internal-context.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "context-boundary-debug-green",
+      "recordedAt": "2026-08-26T05:09:07.9839745Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN: 1 file, 11 tests pass; delimiter-shaped path được Unicode-escape và separator chỉ xuất hiện khi có cả content lẫn disclosure trong budget.",
+      "artifactPaths": [
+        "src/commands/internal-context.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "lock-ownership-debug-red",
+      "recordedAt": "2026-08-26T05:09:48.3387965Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Giả thuyết xác nhận: deterministic filesystem hook thay lock sau final identity read nhưng trước rm; contender resolve thành owner mới thay vì timeout, chứng minh compare-then-remove trên một file không bảo đảm CAS.",
+      "artifactPaths": [
+        "src/utils/file-lock.ts",
+        "test/unit/file-lock.test.ts"
+      ]
+    },
+    {
+      "id": "lock-directory-protocol-research",
+      "recordedAt": "2026-08-26T05:11:51.8836301Z",
+      "result": "pass",
+      "summary": "Research chốt protocol: mkdir recursive:false làm primitive create-if-absent; ownership chỉ hợp lệ sau sole unique-token verification; stale/release unlink đúng token rồi rmdir không recursive. rename bị loại vì không có no-overwrite contract portable; legacy file lock được preserve fail-closed.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-041901-review-findings-remediation/research/lock-directory-protocol.md"
+      ]
+    },
+    {
+      "id": "lock-protocol-replan",
+      "recordedAt": "2026-08-26T05:12:19.5058838Z",
+      "result": "pass",
+      "summary": "Replan chốt canonical lock-directory với unique token và sole-token verification; mở rộng scope sang setup/global reconciliation, thêm immutable required check mới và giữ legacy single-file lock fail-closed.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-041901-review-findings-remediation/prd.md",
+        ".harnix/tasks/20260826-041901-review-findings-remediation/plan.md",
+        ".harnix/tasks/20260826-041901-review-findings-remediation/research/lock-directory-protocol.md"
+      ]
+    },
+    {
+      "id": "lock-protocol-ready-audit",
+      "recordedAt": "2026-08-26T05:13:51.6372955Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Replan ready audit pass không diagnostics; lock-directory integration check được map vào ac-lock-ownership và scope implementation đã bao phủ setup/reconcile/tests.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-041901-review-findings-remediation/prd.md",
+        ".harnix/tasks/20260826-041901-review-findings-remediation/plan.md"
+      ]
+    },
+    {
+      "id": "lock-directory-debug-green",
+      "recordedAt": "2026-08-26T05:21:26.7357364Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN sau replan: 4 files, 57 tests pass; directory candidate/sole-token ownership, two replacement interleavings, stale/malformed recovery, legacy file fail-closed và setup/root reconciliation đều được xác minh. Lint và typecheck cũng pass.",
+      "artifactPaths": [
+        "src/utils/file-lock.ts",
+        "src/commands/setup.ts",
+        "src/utils/global-managed-files.ts",
+        "test/unit/file-lock.test.ts",
+        "test/unit/global-managed-files.test.ts",
+        "test/platform/setup.test.ts",
+        "test/integration/global-lifecycle.test.ts"
+      ]
+    },
+    {
+      "id": "lock-reclaim-timeout-review-red",
+      "recordedAt": "2026-08-26T05:24:39.0983878Z",
+      "result": "fail",
+      "summary": "Quality review phát hiện failed reclaim luôn continue trước deadline check, có thể busy-loop nếu replacement liên tục cũng bị đánh dấu dead; yêu cầu chỉ immediate retry khi directory thực sự đã được dọn.",
+      "artifactPaths": [
+        "src/utils/file-lock.ts",
+        "test/unit/file-lock.test.ts"
+      ]
+    },
+    {
+      "id": "compliance-review-green-2",
+      "recordedAt": "2026-08-26T05:24:39.0993878Z",
+      "result": "pass",
+      "summary": "Compliance re-review sau lock replan: ready audit pass không diagnostics; task PRD/plan, README, PRD, implementation plan và global setup plan mô tả nhất quán canonical lock-directory, exact-token cleanup và legacy fail-closed.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-041901-review-findings-remediation/prd.md",
+        ".harnix/tasks/20260826-041901-review-findings-remediation/plan.md",
+        "README.md",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "docs/HARNIX_PRD.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    },
+    {
+      "id": "quality-security-review-green-2",
+      "recordedAt": "2026-08-26T05:24:39.1003878Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Quality/security re-review sạch: failed reclaim đi qua bounded timeout; 4 files/58 tests pass, ESLint và TypeScript noEmit pass. Không còn finding actionable; cross-version legacy file lock được document là preserved/fail-closed.",
+      "artifactPaths": [
+        "src/commands/internal-context.ts",
+        "src/commands/setup.ts",
+        "src/utils/file-lock.ts",
+        "src/utils/global-managed-files.ts",
+        "test/platform/setup.test.ts",
+        "test/unit/file-lock.test.ts",
+        "test/unit/global-managed-files.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "broad-pre-final-red",
+      "recordedAt": "2026-08-26T05:26:03.6912368Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Broad pre-final: build/lint/typecheck và acceptance pass (60 files, 454 pass, 1 platform skip); pack, 4 smoke cases, init và footprint pass. scan:release fail vì potential-secret regex match trong generated cli source map; cần phân loại true secret hay false positive.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "src/utils/file-lock.ts"
+      ]
+    },
+    {
+      "id": "release-scanner-false-positive-red",
+      "recordedAt": "2026-08-26T05:29:18.5824077Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: source-map scan khớp token: ObservedLockToken và focused regression có 1/32 test fail; regex đang coi TypeScript type reference là unquoted credential.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "src/utils/file-lock.ts",
+        "test/safety/release-scanner.test.ts"
+      ]
+    },
+    {
+      "id": "release-scanner-false-positive-green",
+      "recordedAt": "2026-08-26T05:29:18.5886287Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 34 focused scanner tests pass; PascalCase type annotation sau colon được phân loại an toàn trong khi quoted, numeric, lowercase và colon secrets vẫn bị chặn. Full scan:release pass trên tarball, 16 packaged files, 50 generated files; context median 162.00 ms, max/p95 187.52 ms.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "test/safety/release-scanner.test.ts"
+      ]
+    },
+    {
+      "id": "release-scanner-scope-red",
+      "recordedAt": "2026-08-26T05:31:41.4273439Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED từ security self-review: ngoại lệ PascalCase toàn cục bỏ lọt object value token: MySecretToken trong sourcesContent; 1/35 focused test fail.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "test/safety/release-scanner.test.ts"
+      ]
+    },
+    {
+      "id": "release-scanner-scope-green",
+      "recordedAt": "2026-08-26T05:31:41.4330708Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 35 focused safety tests và ESLint pass; scanner parse source map và chỉ ignore PascalCase ở exact TypeScript TypeReferenceNode, còn object/config assignment vẫn bị reject. Full scan:release pass; context median 152.44 ms, max/p95 190.99 ms.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "test/safety/release-scanner.test.ts"
+      ]
+    },
+    {
+      "id": "final-version-docs-sync",
+      "checkId": "version-docs-sync",
+      "recordedAt": "2026-08-26T05:36:35.3858111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh pass: version-sync 1.0.12 idempotent, changed:false; package, CHANGELOG, README, normative docs và canonical skill metadata đồng bộ; snapshot ổn định.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "scripts/version-sync.mjs",
+        "src/skills"
+      ],
+      "inputDigest": "63f278965114152065701b228068af7a12bb98cabb05383b5d093970c0819e9b"
+    },
+    {
+      "id": "final-self-host-version-sync",
+      "checkId": "self-host-version-sync",
+      "recordedAt": "2026-08-26T05:36:35.3868111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh pass: version-sync changed:false và 2 files/4 tests xác minh package, canonical skills, self-host manifest cùng version 1.0.12; snapshot ổn định.",
+      "artifactPaths": [
+        ".harnix/.template-hashes.json",
+        "package.json",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts",
+        "test/workflow/self-host.test.ts"
+      ],
+      "inputDigest": "aa49771b04a2e86dc730e74898f0d86d31b55b7a5dd8ff4eb0c0d18adce46e07"
+    },
+    {
+      "id": "final-context-security",
+      "checkId": "context-security",
+      "recordedAt": "2026-08-26T05:36:35.3878111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh pass: 4 files/46 tests xác minh control/line-separator rejection, escaped omission metadata, fixed boundary và exact character cap; snapshot ổn định.",
+      "artifactPaths": [
+        "src/commands/internal-context.ts",
+        "src/core/context/context.ts",
+        "src/utils/paths.ts",
+        "test/safety/path-boundaries.test.ts",
+        "test/unit/context.test.ts",
+        "test/unit/paths.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ],
+      "inputDigest": "127ba9307e9013e513de6812e04a545d4544067e8fdc366a05513190cd19bfa7"
+    },
+    {
+      "id": "final-doctor-global-scope",
+      "checkId": "doctor-global-scope",
+      "recordedAt": "2026-08-26T05:36:35.3888111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh pass: 2 files/46 tests xác minh project/global doctor fix không mutate chéo scope và giữ JSON/exit contract; snapshot ổn định.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "src/commands/doctor.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/doctor.test.ts"
+      ],
+      "inputDigest": "ba74262e158ed9a82243f15a223e2e10c7e1747c88bd9a27e14520cea44b73a9"
+    },
+    {
+      "id": "final-workflow-invariants",
+      "checkId": "workflow-invariants",
+      "recordedAt": "2026-08-26T05:36:35.3898111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh pass: 3 files/45 tests xác minh exact v1/v2 schema, v2-only creation, Full mode monotonic và dangling pointer fail closed; snapshot ổn định.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts",
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "inputDigest": "47e113e7703a92469211c7173b64b2acb8ce909f1683ceb4f2dc5378be4eb2b3"
+    },
+    {
+      "id": "final-lock-ownership",
+      "checkId": "lock-ownership",
+      "recordedAt": "2026-08-26T05:36:35.3908111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh pass: 2 files/21 tests xác minh stale/replacement/timeout/release ownership interleavings; snapshot ổn định.",
+      "artifactPaths": [
+        "src/utils/file-lock.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/unit/file-lock.test.ts"
+      ],
+      "inputDigest": "a7827b9e4f4ed13ea60f27466ade518a3ee3aaacec1501c348d5efa014bdbff6"
+    },
+    {
+      "id": "final-lock-directory-integration",
+      "checkId": "lock-directory-integration",
+      "recordedAt": "2026-08-26T05:36:35.3918111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh pass: 4 files/58 tests xác minh unique-token lock-directory, setup/reconcile ownership, stale recovery và legacy file fail-closed; snapshot ổn định.",
+      "artifactPaths": [
+        "src/commands/setup.ts",
+        "src/utils/file-lock.ts",
+        "src/utils/global-managed-files.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/platform/setup.test.ts",
+        "test/unit/file-lock.test.ts",
+        "test/unit/global-managed-files.test.ts"
+      ],
+      "inputDigest": "ad65190f1179df1147ee7877cd1ba763ef80eac54dcbe5b9d6145ac8edc1261c"
+    },
+    {
+      "id": "final-cli-hook-protocol",
+      "checkId": "cli-hook-protocol",
+      "recordedAt": "2026-08-26T05:36:35.3928111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh pass: 5 files/67 tests xác minh canonical context hook, JSON errors, actionable setup exit, offline upgrade lookup và AST-aware release scanner; snapshot ổn định.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "src/cli-program.ts",
+        "src/cli.ts",
+        "src/commands/upgrade.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/upgrade.test.ts",
+        "test/safety/release-scanner.test.ts",
+        "test/unit/cli-fast-path.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ],
+      "inputDigest": "3bb0fe0c32710ed7cf5df71c8f18551aa703d4a2c947133a1c63ee4205ee5f83"
+    },
+    {
+      "id": "final-static-quality",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-26T05:36:35.3938111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh pass: tsup build, ESLint và TypeScript noEmit đều xanh; snapshot ổn định.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "src",
+        "test"
+      ],
+      "inputDigest": "1c7467a3ecc69ffef0c6acba1c8937170c94f334c095f2aca97c74c5f6f198dc"
+    },
+    {
+      "id": "final-acceptance-suite",
+      "checkId": "acceptance-suite",
+      "recordedAt": "2026-08-26T05:36:35.3948111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh pass: 59 test files, 460 tests pass và 1 test platform-specific skip; unit, integration, migration, platform, workflow và safety đều xanh; snapshot ổn định.",
+      "artifactPaths": [
+        "src",
+        "test"
+      ],
+      "inputDigest": "b79cc59c1858963fca9a82a3b459e1d73526ac8754f35b2f22bc795e27f6767d"
+    },
+    {
+      "id": "final-lock-protocol-docs",
+      "checkId": "lock-protocol-docs",
+      "recordedAt": "2026-08-26T05:36:35.3958111Z",
+      "result": "pass",
+      "summary": "Fresh manual inspection: source, tests, README, CHANGELOG, PRD, implementation plan và global setup plan nhất quán về sole-token ownership, exact-token unlink, non-recursive rmdir và legacy file fail-closed; snapshot ổn định.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "docs/HARNIX_PRD.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/utils/file-lock.ts",
+        "test/unit/file-lock.test.ts"
+      ],
+      "inputDigest": "5f7cbaf9bfc0099568a9122624ddf3563a748d553e56210111311fabc753413a"
+    },
+    {
+      "id": "final-release-gates",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-26T05:36:35.3968111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh pass: pack, 4 fake-home tarball smoke cases, init median 391.40 ms/worst 397.79 ms, footprint 226094 bytes/50 files giảm 83.17%, release scan sạch và context median 151.77 ms/max 184.81 ms; snapshot ổn định.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/measure-footprint.mjs",
+        "scripts/scan-release.mjs",
+        "scripts/smoke-tarball.mjs"
+      ],
+      "inputDigest": "f53527b9fc1d1cb2a9d5a49f64a89d6028680f80a26ab8058d2be4beeeb2c323"
+    },
+    {
+      "id": "compliance-review-green-3",
+      "recordedAt": "2026-08-26T05:36:35.3978111Z",
+      "result": "pass",
+      "summary": "Final compliance review: workflow ready audit pass không diagnostics; task plan hoàn tất và README/normative docs/CHANGELOG nhất quán với tám public commands, hidden workflow contract, canonical lock-directory và package 1.0.12.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-041901-review-findings-remediation/plan.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "package.json"
+      ]
+    },
+    {
+      "id": "quality-security-review-green-3",
+      "recordedAt": "2026-08-26T05:36:35.3988111Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final quality/security review không còn finding actionable: source-map secret scan chỉ bỏ qua exact TypeReferenceNode theo TypeScript AST, vẫn reject object/config value; focused safety, lint, full acceptance và release scan đều xanh.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "src/utils/file-lock.ts",
+        "test/safety/release-scanner.test.ts",
+        "test/unit/file-lock.test.ts"
+      ]
+    },
+    {
+      "id": "exact-completion-gate-green",
+      "recordedAt": "2026-08-26T05:38:57.7386668Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact §11 sequence pass 12/12: frozen install, build, lint, typecheck, pnpm test và test:acceptance (mỗi lượt 59 files/460 pass/1 platform skip), pack, 4 tarball smoke cases, init median 366.89 ms/worst 385.31 ms, footprint 226094 bytes/50 files giảm 83.17%, release scan sạch với context median 157.49 ms/max 190.56 ms, git diff --check pass.",
+      "artifactPaths": [
+        "docs/IMPLEMENTATION_PLAN.md",
+        "package.json",
+        "scripts/measure-footprint.mjs",
+        "scripts/scan-release.mjs",
+        "scripts/smoke-tarball.mjs"
+      ]
+    },
+    {
+      "id": "finish-handoff-review",
+      "recordedAt": "2026-08-26T05:38:57.7396668Z",
+      "result": "pass",
+      "summary": "Không có waiver hoặc blocker. Automated fake-home/global lifecycle đã pass; không chạy lại logged-in GUI hook/trust smoke trên disposable Windows OS profile vì không có explicit authorization, nên không claim external hook active và giữ historical status conservative. Residual compatibility đã document: legacy single-file lock được preserve/fail-closed. Không tạo learning candidate vì không có statement mới đạt ngưỡng hai source task độc lập.",
+      "artifactPaths": [
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "README.md",
+        "src/utils/file-lock.ts"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-26T04:19:01.426Z",
+  "updatedAt": "2026-08-26T05:39:07.635Z",
+  "completedAt": "2026-08-26T05:39:07.635Z"
+}

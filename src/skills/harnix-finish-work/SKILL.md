@@ -2,7 +2,7 @@
 name: harnix-finish-work
 description: Use when a Harnix task needs safe completion or explicit cancellation persistence, journaling, active-pointer cleanup, and an evidence-based handoff.
 metadata:
-  version: "1.0.11"
+  version: "1.0.12"
 ---
 
 # Finish or cancel Harnix work

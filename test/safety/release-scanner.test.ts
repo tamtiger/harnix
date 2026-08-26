@@ -14,6 +14,7 @@ type ReleaseScanner = {
   assertSingleHarnixExecutable(packageJson: { bin?: Record<string, string> }): void;
   assertSingleHooks(home: string): Promise<void>;
   assertTarballListing(listing: string[]): Promise<void>;
+  contextFastPathArguments(platform: "kiro" | "antigravity" | "codex"): string[];
   scanTextFiles(files: string[], scope: string, generated: boolean): Promise<void>;
 };
 
@@ -28,6 +29,7 @@ const {
   assertSingleHarnixExecutable,
   assertSingleHooks,
   assertTarballListing,
+  contextFastPathArguments,
   scanTextFiles,
 } = releaseScanner;
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
@@ -49,6 +51,8 @@ describe("release scanner negative fixtures", () => {
     ["machine_path_unc", "\\\\server\\private-share\\release-user\\secret.txt", /Machine path found/u],
     ["secret", 'api_key = "12345678"', /Potential secret found/u],
     ["unquoted_secret", "token=12345678", /Potential secret found/u],
+    ["unquoted_alphabetic_secret", "token=abcdefgh", /Potential secret found/u],
+    ["unquoted_colon_secret", "token: abcdefgh", /Potential secret found/u],
     ["required_todo", "REQUIRED TODO: ship this", /Required TODO found/u],
   ])("should_reject_%s_when_packaged_text_contains_a_release_violation", async (_category, content, error) => {
     const root = await fixture();
@@ -69,6 +73,32 @@ describe("release scanner negative fixtures", () => {
     const file = await writeFixtureFile(root, "LICENSE", "License text: https://www.gnu.org/licenses/example\n");
 
     await expect(scanTextFiles([file], "negative control", false)).resolves.toBeUndefined();
+  });
+
+  it("should_accept_a_capitalized_TypeScript_type_annotation_without_treating_it_as_a_secret", async () => {
+    const root = await fixture();
+    const file = await writeFixtureFile(root, "dist/index.js.map", JSON.stringify({
+      mappings: "",
+      names: [],
+      sources: ["../src/file-lock.ts"],
+      sourcesContent: ["type LockSnapshot = { token: ObservedLockToken; secret: Credential };\n"],
+      version: 3,
+    }));
+
+    await expect(scanTextFiles([file], "negative control", false)).resolves.toBeUndefined();
+  });
+
+  it("should_reject_a_PascalCase_object_value_in_a_source_map_when_it_is_not_a_type_annotation", async () => {
+    const root = await fixture();
+    const file = await writeFixtureFile(root, "dist/index.js.map", JSON.stringify({
+      mappings: "",
+      names: [],
+      sources: ["../src/config.ts"],
+      sourcesContent: ["const config = { token: MySecretToken };\n"],
+      version: 3,
+    }));
+
+    await expect(scanTextFiles([file], "negative fixture", false)).rejects.toThrow(/Potential secret found/u);
   });
 
   it.each([
@@ -199,6 +229,10 @@ describe("release scanner negative fixtures", () => {
       p95: 300,
       repetitions: 15,
     });
+  });
+
+  it("should_benchmark_the_canonical_installed_context_hook_command", () => {
+    expect(contextFastPathArguments("antigravity")).toEqual(["context", "--platform", "antigravity"]);
   });
 
   it("should_reject_cold_non_harnix_context_metrics_when_a_release_threshold_is_exceeded", () => {

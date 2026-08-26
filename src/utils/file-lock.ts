@@ -1,6 +1,6 @@
-import { mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
-import { dirname, isAbsolute, resolve, win32 } from "node:path";
+import { lstat, mkdir, readFile, readdir, rm, rmdir, writeFile } from "node:fs/promises";
+import { dirname, isAbsolute, join, resolve, win32 } from "node:path";
 
 import { packageVersion } from "../version.js";
 
@@ -12,6 +12,12 @@ export interface HarnixFileLockRecord {
   processStartedAt: string;
   acquiredAt: string;
   operationId: string;
+}
+
+export interface HarnixFileLockSnapshot {
+  readonly record: HarnixFileLockRecord;
+  readonly recordName: string;
+  readonly source: string;
 }
 
 export type FileLockOwnerState = "alive" | "dead" | "unknown";
@@ -33,11 +39,20 @@ export interface FileLockClock {
   sleep(milliseconds: number): Promise<void>;
 }
 
+export interface FileLockStats {
+  readonly mtimeMs: number;
+  isDirectory(): boolean;
+  isFile(): boolean;
+  isSymbolicLink(): boolean;
+}
+
 export interface FileLockFileSystem {
-  mkdir(directory: string, options: { recursive: true }): Promise<unknown>;
+  lstat(path: string): Promise<FileLockStats>;
+  mkdir(directory: string, options: { recursive: boolean }): Promise<unknown>;
   readFile(path: string, encoding: "utf8"): Promise<string>;
+  readdir(path: string): Promise<string[]>;
   rm(path: string, options: { force: true }): Promise<void>;
-  stat(path: string): Promise<{ mtimeMs: number }>;
+  rmdir(path: string): Promise<void>;
   writeFile(path: string, content: string, options: { encoding: "utf8"; flag: "wx" }): Promise<void>;
 }
 
@@ -55,6 +70,7 @@ export interface FileLockOptions {
 
 export interface HarnixFileLock {
   readonly path: string;
+  readonly recordPath: string;
   readonly record: HarnixFileLockRecord;
   release(): Promise<void>;
 }
@@ -71,6 +87,19 @@ export class InvalidHarnixFileLockError extends FileLockError {
   override name = "InvalidHarnixFileLockError";
 }
 
+interface ObservedLockToken {
+  readonly name: string;
+  readonly path: string;
+  readonly source: string;
+}
+
+type ExistingLockInspection =
+  | { action: "wait" }
+  | { action: "invalid"; reason: string }
+  | { action: "reclaim"; tokens: ObservedLockToken[] };
+
+const lockRecordNamePattern = /^owner-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.json$/u;
+
 const systemClock: FileLockClock = {
   now: () => Date.now(),
   sleep: async (milliseconds) => new Promise((resolveSleep) => setTimeout(resolveSleep, milliseconds)),
@@ -85,18 +114,19 @@ const currentProcessIdentity: FileLockProcessIdentity = Object.freeze({
 });
 
 const defaultFilesystem: FileLockFileSystem = {
+  lstat: async (path) => lstat(path),
   mkdir: async (directory, options) => mkdir(directory, options),
   readFile: async (path, encoding) => readFile(path, encoding),
+  readdir: async (path) => readdir(path),
   rm: async (path, options) => rm(path, options),
-  stat: async (path) => stat(path),
+  rmdir: async (path) => rmdir(path),
   writeFile: async (path, content, options) => writeFile(path, content, options),
 };
 
 /**
- * Acquires an exclusive Harnix-owned lock. A dead owner or an old partial write
- * can be reclaimed; a live or identity-unknown owner is never removed by this
- * process. Foreign PID start times are unavailable by default, so callers that
- * need PID-reuse detection can inject a platform-specific inspector.
+ * Acquires an exclusive Harnix-owned lock directory. The canonical directory
+ * is created with mkdir and contains one unique owner-token record. Ownership
+ * is returned only after the token is verified as the directory's sole entry.
  */
 export async function acquireHarnixFileLock(lockPath: string, options: FileLockOptions = {}): Promise<HarnixFileLock> {
   if (!isAbsolutePath(lockPath)) throw new FileLockError("A lock path must be absolute.");
@@ -112,7 +142,7 @@ export async function acquireHarnixFileLock(lockPath: string, options: FileLockO
   const staleAfterMs = options.staleAfterMs ?? 300_000;
   const processIdentity = options.processIdentity ?? defaultProcessIdentity;
   const ownerInspector = options.ownerInspector
-    ?? ((record: HarnixFileLockRecord) => inspectOwner(record, options.processIdentityInspector ?? defaultProcessIdentityInspector));
+    ?? ((existingRecord: HarnixFileLockRecord) => inspectOwner(existingRecord, options.processIdentityInspector ?? defaultProcessIdentityInspector));
   const operationId = options.operationId ?? randomUUID();
   if (operationId.trim().length === 0 || operationId.includes("\0")) throw new FileLockError("operationId must be non-empty and safe.");
 
@@ -134,19 +164,43 @@ export async function acquireHarnixFileLock(lockPath: string, options: FileLockO
   await filesystem.mkdir(dirname(path), { recursive: true });
 
   while (true) {
+    let candidateCreated = false;
     try {
-      await filesystem.writeFile(path, serialized, { encoding: "utf8", flag: "wx" });
-      return { path, record, release: async () => releaseOwnedLock(filesystem, path, serialized) };
+      await filesystem.mkdir(path, { recursive: false });
+      candidateCreated = true;
     } catch (error: unknown) {
       if (!isAlreadyExists(error)) throw error;
     }
 
-    const state = await inspectExistingLock(path, filesystem, clock, staleAfterMs, ownerInspector);
-    if (state === "reclaim") {
-      await filesystem.rm(path, { force: true });
-      continue;
+    if (candidateCreated) {
+      const recordName = createLockRecordName();
+      const recordPath = join(path, recordName);
+      let candidateFailed = false;
+      let candidateError: unknown;
+      try {
+        await filesystem.writeFile(recordPath, serialized, { encoding: "utf8", flag: "wx" });
+        if (await isSoleOwnedToken(filesystem, path, recordName, serialized)) {
+          return {
+            path,
+            recordPath,
+            record,
+            release: async () => { await removeOwnedToken(filesystem, path, { name: recordName, path: recordPath, source: serialized }); },
+          };
+        }
+      } catch (error: unknown) {
+        candidateFailed = true;
+        candidateError = error;
+      }
+      await removeOwnedToken(filesystem, path, { name: recordName, path: recordPath, source: serialized });
+      if (candidateFailed && !isCandidateLost(candidateError)) throw candidateError;
+    } else {
+      const inspection = await inspectExistingLock(path, filesystem, clock, staleAfterMs, ownerInspector);
+      if (inspection.action === "reclaim") {
+        if (await removeObservedLock(filesystem, path, inspection.tokens)) continue;
+      }
+      if (inspection.action === "invalid") throw new InvalidHarnixFileLockError(inspection.reason);
     }
-    if (state === "invalid") throw new InvalidHarnixFileLockError("The existing Harnix lock is invalid and not stale.");
+
     const remaining = deadline - clock.now();
     if (remaining <= 0) throw new FileLockTimeoutError(`Timed out waiting for Harnix lock: ${path}`);
     await clock.sleep(Math.min(retryDelayMs, remaining));
@@ -167,39 +221,160 @@ export function parseHarnixFileLockRecord(value: unknown): HarnixFileLockRecord 
   return value as unknown as HarnixFileLockRecord;
 }
 
+/** Reads a stable lock-directory snapshot for setup ownership preflight. */
+export async function readHarnixFileLockSnapshot(
+  lockPath: string,
+  filesystem: FileLockFileSystem = defaultFilesystem,
+): Promise<HarnixFileLockSnapshot> {
+  if (!isAbsolutePath(lockPath)) throw new FileLockError("A lock path must be absolute.");
+  const path = resolve(lockPath);
+  const metadata = await filesystem.lstat(path);
+  if (!metadata.isDirectory() || metadata.isSymbolicLink()) {
+    throw new InvalidHarnixFileLockError("The Harnix lock path is not an owned lock directory.");
+  }
+  const entries = await filesystem.readdir(path);
+  if (entries.length !== 1 || !isLockRecordName(entries[0]!)) {
+    throw new InvalidHarnixFileLockError("The Harnix lock directory must contain exactly one owner token.");
+  }
+  const recordName = entries[0]!;
+  const recordPath = join(path, recordName);
+  const recordMetadata = await filesystem.lstat(recordPath);
+  if (!recordMetadata.isFile() || recordMetadata.isSymbolicLink()) {
+    throw new InvalidHarnixFileLockError("The Harnix lock owner token is invalid.");
+  }
+  const source = await filesystem.readFile(recordPath, "utf8");
+  return { record: parseHarnixFileLockRecord(JSON.parse(source)), recordName, source };
+}
+
 async function inspectExistingLock(
   path: string,
   filesystem: FileLockFileSystem,
   clock: FileLockClock,
   staleAfterMs: number,
   ownerInspector: (record: HarnixFileLockRecord) => Promise<FileLockOwnerState>,
-): Promise<"wait" | "reclaim" | "invalid"> {
-  let source: string;
+): Promise<ExistingLockInspection> {
+  let directoryMetadata: FileLockStats;
   try {
-    source = await filesystem.readFile(path, "utf8");
+    directoryMetadata = await filesystem.lstat(path);
   } catch (error: unknown) {
-    if (isMissing(error)) return "wait";
+    if (isMissing(error)) return { action: "wait" };
     throw error;
   }
-
-  let record: HarnixFileLockRecord;
-  try {
-    record = parseHarnixFileLockRecord(JSON.parse(source));
-  } catch {
-    const metadata = await filesystem.stat(path);
-    return clock.now() - metadata.mtimeMs >= staleAfterMs ? "reclaim" : "invalid";
+  if (!directoryMetadata.isDirectory() || directoryMetadata.isSymbolicLink()) {
+    return { action: "invalid", reason: "The existing Harnix lock uses an unsupported or unsafe non-directory format." };
   }
 
-  return (await ownerInspector(record)) === "dead" ? "reclaim" : "wait";
+  let entries: string[];
+  try {
+    entries = await filesystem.readdir(path);
+  } catch (error: unknown) {
+    if (isMissing(error) || isNotDirectory(error)) return { action: "wait" };
+    throw error;
+  }
+  if (entries.length === 0) {
+    return clock.now() - directoryMetadata.mtimeMs >= staleAfterMs
+      ? { action: "reclaim", tokens: [] }
+      : { action: "wait" };
+  }
+  if (entries.some((name) => !isLockRecordName(name))) {
+    return { action: "invalid", reason: "The existing Harnix lock directory contains an unrecognized entry." };
+  }
+
+  const tokens: ObservedLockToken[] = [];
+  for (const name of [...entries].sort()) {
+    const tokenPath = join(path, name);
+    let tokenMetadata: FileLockStats;
+    let source: string;
+    try {
+      tokenMetadata = await filesystem.lstat(tokenPath);
+      if (!tokenMetadata.isFile() || tokenMetadata.isSymbolicLink()) {
+        return { action: "invalid", reason: "The existing Harnix lock owner token is invalid." };
+      }
+      source = await filesystem.readFile(tokenPath, "utf8");
+    } catch (error: unknown) {
+      if (isMissing(error) || isNotDirectory(error)) return { action: "wait" };
+      throw error;
+    }
+
+    let existingRecord: HarnixFileLockRecord;
+    try {
+      existingRecord = parseHarnixFileLockRecord(JSON.parse(source));
+    } catch {
+      if (clock.now() - tokenMetadata.mtimeMs < staleAfterMs) return { action: "wait" };
+      tokens.push({ name, path: tokenPath, source });
+      continue;
+    }
+    if (await ownerInspector(existingRecord) !== "dead") return { action: "wait" };
+    tokens.push({ name, path: tokenPath, source });
+  }
+  return { action: "reclaim", tokens };
 }
 
-async function releaseOwnedLock(filesystem: FileLockFileSystem, path: string, serializedRecord: string): Promise<void> {
+async function isSoleOwnedToken(
+  filesystem: FileLockFileSystem,
+  path: string,
+  recordName: string,
+  serializedRecord: string,
+): Promise<boolean> {
   try {
-    if (await filesystem.readFile(path, "utf8") !== serializedRecord) return;
-    await filesystem.rm(path, { force: true });
+    const entries = await filesystem.readdir(path);
+    return entries.length === 1
+      && entries[0] === recordName
+      && await filesystem.readFile(join(path, recordName), "utf8") === serializedRecord;
   } catch (error: unknown) {
-    if (!isMissing(error)) throw error;
+    if (isMissing(error) || isNotDirectory(error)) return false;
+    throw error;
   }
+}
+
+async function removeObservedLock(
+  filesystem: FileLockFileSystem,
+  path: string,
+  tokens: readonly ObservedLockToken[],
+): Promise<boolean> {
+  for (const token of tokens) {
+    try {
+      if (await filesystem.readFile(token.path, "utf8") !== token.source) return false;
+      await filesystem.rm(token.path, { force: true });
+    } catch (error: unknown) {
+      if (!isMissing(error) && !isNotDirectory(error)) throw error;
+    }
+  }
+  return removeEmptyLockDirectory(filesystem, path);
+}
+
+async function removeOwnedToken(
+  filesystem: FileLockFileSystem,
+  path: string,
+  token: ObservedLockToken,
+): Promise<boolean> {
+  try {
+    const source = await filesystem.readFile(token.path, "utf8");
+    if (source !== token.source) return false;
+    await filesystem.rm(token.path, { force: true });
+  } catch (error: unknown) {
+    if (!isMissing(error) && !isNotDirectory(error)) throw error;
+  }
+  return removeEmptyLockDirectory(filesystem, path);
+}
+
+async function removeEmptyLockDirectory(filesystem: FileLockFileSystem, path: string): Promise<boolean> {
+  try {
+    await filesystem.rmdir(path);
+    return true;
+  } catch (error: unknown) {
+    if (isMissing(error)) return true;
+    if (isNotDirectory(error) || isDirectoryNotEmpty(error)) return false;
+    throw error;
+  }
+}
+
+function createLockRecordName(): string {
+  return `owner-${randomUUID()}.json`;
+}
+
+function isLockRecordName(value: string): boolean {
+  return lockRecordNamePattern.test(value);
 }
 
 function defaultProcessIdentity(): FileLockProcessIdentity {
@@ -237,11 +412,27 @@ function isAbsolutePath(path: string): boolean {
 }
 
 function isAlreadyExists(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "EEXIST";
+  return hasErrorCode(error, "EEXIST");
+}
+
+function isCandidateLost(error: unknown): boolean {
+  return isMissing(error) || isNotDirectory(error) || isAlreadyExists(error);
 }
 
 function isMissing(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
+  return hasErrorCode(error, "ENOENT");
+}
+
+function isNotDirectory(error: unknown): boolean {
+  return hasErrorCode(error, "ENOTDIR");
+}
+
+function isDirectoryNotEmpty(error: unknown): boolean {
+  return hasErrorCode(error, "ENOTEMPTY") || hasErrorCode(error, "EEXIST");
+}
+
+function hasErrorCode(error: unknown, code: string): boolean {
+  return typeof error === "object" && error !== null && "code" in error && error.code === code;
 }
 
 function isIsoDate(value: string): boolean {

@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.12] - 2026-08-26
+
+### Changed
+
+- Hardening context boundary, canonical unique-token lock-directory ownership (gồm post-read replacement race và legacy file fail-closed), doctor scope và exact workflow state invariants từ review toàn diện.
+- Chuẩn hóa canonical context fast path, PublicCliErrorV1, actionable setup exit và offline upgrade availability contract.
+- Đồng bộ regression coverage, tarball/footprint/release scanner với actionable setup exit và phân loại source-map TypeScript type reference không làm yếu secret detection; đồng bộ self-host manifest qua `version:sync`, README và normative docs với package cùng bảy canonical workflow skills.
+
 ## [1.0.11] - 2026-08-21
 
 ### Changed

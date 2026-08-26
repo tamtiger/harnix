@@ -70,7 +70,7 @@ export async function diagnoseProject(options: DoctorOptions): Promise<DoctorRep
   let globalRollbackPartial: string[] = [];
 
   if (options.fix) {
-    if (project.status === "ready") {
+    if (!options.global && project.status === "ready") {
       try {
         const reconciliation = await updateProject({ root: options.root });
         fixed += reconciliation.created.length + reconciliation.updated.length + reconciliation.deleted.length;

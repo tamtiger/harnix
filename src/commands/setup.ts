@@ -1,9 +1,10 @@
 import type { PlatformId } from "../core/config/config.js";
-import { readFile, readdir } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
+import { basename } from "node:path";
 import { antigravityGlobalPluginDesiredFiles } from "../configurators/antigravity.js";
 import { createCodexGlobalSurfacePlan, matchesCodexGlobalContextHookGroup } from "../configurators/codex.js";
 import { kiroGlobalDesiredFiles } from "../configurators/kiro.js";
-import { acquireHarnixFileLock, parseHarnixFileLockRecord, type HarnixFileLockRecord } from "../utils/file-lock.js";
+import { acquireHarnixFileLock, readHarnixFileLockSnapshot, type HarnixFileLockRecord } from "../utils/file-lock.js";
 import { compareCodeUnits } from "../utils/order.js";
 import {
   globalManagedReconciliationOrderKey,
@@ -23,6 +24,7 @@ export type GlobalIntegrationReadiness = "installed" | "installed-pending-trust"
 export type HookCommandLookup = (command: string) => Promise<boolean>;
 export interface GlobalSetupLock {
   readonly path?: string;
+  readonly recordPath?: string;
   readonly record?: HarnixFileLockRecord;
   release(): Promise<void>;
 }
@@ -204,13 +206,14 @@ function createTarget(
 }
 
 function reconciliationWithOwnedRootLock(target: ReconciliationTarget, lock: GlobalSetupLock): ReconcileGlobalManagedFilesOptions {
-  if (!target.preserveUnownedRoot || lock.record === undefined) {
+  if (!target.preserveUnownedRoot || lock.record === undefined || lock.recordPath === undefined) {
     return target.reconciliation;
   }
   return {
     ...target.reconciliation,
     ownedRootLockContent: `${JSON.stringify(lock.record)}\n`,
     ownedRootLockPath: target.lockPath,
+    ownedRootLockRecordName: basename(lock.recordPath),
   };
 }
 
@@ -252,7 +255,7 @@ async function hasOnlyHarnixLock(target: ReconciliationTarget): Promise<boolean>
     const lockPath = await resolveSafeGlobalPath(target.root, target.lockPath);
     const entries = await readdir(target.root.path);
     if (entries.length !== 1 || entries[0] !== target.lockPath) return false;
-    parseHarnixFileLockRecord(JSON.parse(await readFile(lockPath, "utf8")) as unknown);
+    await readHarnixFileLockSnapshot(lockPath);
     return true;
   } catch {
     return false;

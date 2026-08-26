@@ -134,6 +134,8 @@ export interface ReconcileGlobalManagedFilesOptions {
    * collision and prevents Harnix from claiming the root.
    */
   ownedRootLockPath?: string;
+  /** Unique owner-token filename inside the lock directory. */
+  ownedRootLockRecordName?: string;
   /** Exact bytes of the lock acquired by this operation; never infer ownership from a lock filename alone. */
   ownedRootLockContent?: string;
   /**
@@ -319,7 +321,7 @@ async function preflightGlobalManagedFiles(options: ReconcileGlobalManagedFilesO
   if (options.preserveUnownedRoot
     && loadedManifest.content === undefined
     && await pathExists(options.root.path)
-    && !await rootContainsOnlyOwnedLock(options.root, options.ownedRootLockPath, options.ownedRootLockContent)) {
+    && !await rootContainsOnlyOwnedLock(options.root, options.ownedRootLockPath, options.ownedRootLockRecordName, options.ownedRootLockContent)) {
     const result = emptyResult(loadedManifest.manifest);
     for (const item of prepared) {
       preserve(result, entryLabel(item.entry), "untracked-collision", "The pre-existing namespaced integration root has no Harnix ownership sidecar.");
@@ -989,15 +991,27 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
-async function rootContainsOnlyOwnedLock(root: UserPathRoot, lockPath: string | undefined, lockContent: string | undefined): Promise<boolean> {
-  if (lockPath === undefined || lockContent === undefined || lockPath.includes("/")) {
+async function rootContainsOnlyOwnedLock(
+  root: UserPathRoot,
+  lockPath: string | undefined,
+  lockRecordName: string | undefined,
+  lockContent: string | undefined,
+): Promise<boolean> {
+  if (lockPath === undefined || lockRecordName === undefined || lockContent === undefined || lockPath.includes("/") || lockRecordName.includes("/")) {
     return false;
   }
   const normalizedLockPath = normalizeGlobalPath(lockPath);
+  const normalizedRecordName = normalizeGlobalPath(lockRecordName);
   const absoluteLockPath = await resolveSafeGlobalPath(root, normalizedLockPath);
+  const absoluteRecordPath = await resolveSafeGlobalPath(root, `${normalizedLockPath}/${normalizedRecordName}`);
   try {
-    const entries = await readdir(root.path);
-    return entries.length === 1 && entries[0] === normalizedLockPath && await readFile(absoluteLockPath, "utf8") === lockContent;
+    const rootEntries = await readdir(root.path);
+    const lockEntries = await readdir(absoluteLockPath);
+    return rootEntries.length === 1
+      && rootEntries[0] === normalizedLockPath
+      && lockEntries.length === 1
+      && lockEntries[0] === normalizedRecordName
+      && await readFile(absoluteRecordPath, "utf8") === lockContent;
   } catch (error: unknown) {
     if (isMissingPathError(error)) {
       return false;

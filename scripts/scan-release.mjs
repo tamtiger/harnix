@@ -14,6 +14,7 @@ const runtimeDependencyFields = ["dependencies", "optionalDependencies", "peerDe
 const packageImportExtensions = ["", ".js", ".mjs", ".cjs", ".json"];
 const executableExtensions = new Set([".cjs", ".js", ".mjs"]);
 const builtinSpecifiers = new Set([...builtinModules, ...builtinModules.map((name) => `node:${name}`)]);
+const potentialSecretPattern = /(?:api[_-]?key|password|secret|token)\s*([=:])\s*(?:['"][^'"]{8,}|([A-Za-z0-9][A-Za-z0-9._~+/-]{7,}))/giu;
 
 export async function runReleaseScan(options = {}) {
   const root = options.root ?? repositoryRoot;
@@ -63,7 +64,8 @@ export async function runReleaseScan(options = {}) {
     const fixture = join(temporary, "fixture");
     await mkdir(fixture);
     run(process.execPath, [installedCli, "init", "--user", "scan", "--languages", "vue"], fixture, integrationEnvironment);
-    run(process.execPath, [installedCli, "setup", "--kiro", "--antigravity", "--codex"], fixture, integrationEnvironment);
+    const setup = run(process.execPath, [installedCli, "setup", "--kiro", "--antigravity", "--codex"], fixture, integrationEnvironment, undefined, [0, 1]);
+    assertSetupExitContract(setup);
     const generatedFiles = [...await walk(fixture), ...await walk(userHome)];
     await scanTextFiles(generatedFiles, "generated fixture", true);
     await assertExpectedGlobalSurfaces(userHome);
@@ -105,11 +107,63 @@ export async function scanTextFiles(files, scope, generated) {
     if (content.includes(0)) continue;
     const text = content.toString("utf8");
     if (/(?:[A-Za-z]:[\\/]Users[\\/]|\/(?:home|Users)\/[^/]+\/|\\\\(?:\?\\[A-Za-z]:\\|[A-Za-z0-9._-]+\\[A-Za-z0-9$._-]+\\))/u.test(text)) throw new Error(`Machine path found in ${scope}: ${file}.`);
-    if (/(?:api[_-]?key|password|secret|token)\s*[=:]\s*(?:['"][^'"]{8,}|[A-Za-z0-9][A-Za-z0-9._~+/-]{7,})/iu.test(text)) throw new Error(`Potential secret found in ${scope}: ${file}.`);
+    if (containsPotentialSecret(text, file)) throw new Error(`Potential secret found in ${scope}: ${file}.`);
     if (/(?:REQUIRED\s+TODO|TODO\s*\(required\))/iu.test(text)) throw new Error(`Required TODO found in ${scope}: ${file}.`);
     if (generated && /gemini-cli|claude|cursor|windsurf/iu.test(text)) throw new Error(`Forbidden platform surface found in generated output: ${file}.`);
     if (generated && /@mindfoldhq\/trellis|@tamtiger\/trellis/iu.test(text)) throw new Error(`Forbidden legacy product reference found in generated output: ${file}.`);
   }
+}
+
+function containsPotentialSecret(text, file) {
+  if (extname(file) === ".map") {
+    const sourceMap = parseSourceMap(text);
+    if (sourceMap !== undefined) {
+      const metadata = JSON.stringify({ ...sourceMap, sourcesContent: [] });
+      if (containsPotentialSecretText(metadata, [])) return true;
+      return sourceMap.sourcesContent.some((source, index) => {
+        if (typeof source !== "string") return false;
+        const sourceName = typeof sourceMap.sources[index] === "string" ? sourceMap.sources[index] : "source.ts";
+        return containsPotentialSecretText(source, typeReferenceRanges(source, sourceName));
+      });
+    }
+  }
+  return containsPotentialSecretText(text, []);
+}
+
+function containsPotentialSecretText(text, ignoredTypeReferenceRanges) {
+  for (const match of text.matchAll(potentialSecretPattern)) {
+    const [, separator, unquotedValue] = match;
+    const valueStart = unquotedValue === undefined || match.index === undefined
+      ? -1
+      : match.index + match[0].lastIndexOf(unquotedValue);
+    const isTypeReference = valueStart >= 0 && ignoredTypeReferenceRanges.some(
+      ([start, end]) => valueStart >= start && valueStart + unquotedValue.length <= end,
+    );
+    if (separator === ":" && unquotedValue !== undefined && isTypeReference) continue;
+    return true;
+  }
+  return false;
+}
+
+function parseSourceMap(text) {
+  try {
+    const value = JSON.parse(text);
+    if (typeof value !== "object" || value === null || !Array.isArray(value.sources) || !Array.isArray(value.sourcesContent)) return undefined;
+    return value;
+  } catch {
+    return undefined;
+  }
+}
+
+function typeReferenceRanges(source, fileName) {
+  const sourceFile = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true);
+  const ranges = [];
+  const visit = (node) => {
+    if (ts.isTypeReferenceNode(node)) ranges.push([node.getStart(sourceFile), node.getEnd()]);
+    ts.forEachChild(node, visit);
+  };
+  ts.forEachChild(sourceFile, visit);
+  return ranges;
 }
 
 export async function assertNoDeadPackagedImports(packageRoot, packageJson, options = {}) {
@@ -201,12 +255,16 @@ export function measureNonHarnixContextFastPath(cli, workspace, environment) {
   const samples = [];
   for (let index = 0; index < 15; index += 1) {
     const started = performance.now();
-    const result = run(process.execPath, [cli, "internal", "context", "--platform", "antigravity"], workspace, environment, input);
+    const result = run(process.execPath, [cli, ...contextFastPathArguments("antigravity")], workspace, environment, input);
     const duration = performance.now() - started;
     assertNonHarnixContextNoOutput(result.stdout, result.stderr);
     samples.push(duration);
   }
   return assertNonHarnixContextPerformance(samples);
+}
+
+export function contextFastPathArguments(platform) {
+  return ["context", "--platform", platform];
 }
 
 export function assertNonHarnixContextNoOutput(stdout, stderr = "") {
@@ -317,7 +375,7 @@ function importSpecifiers(source) {
   return [...specifiers];
 }
 
-function run(executable, args, cwd, env, input) {
+function run(executable, args, cwd, env, input, expectedStatuses = [0]) {
   const result = spawnSync(executable, args, {
     cwd,
     encoding: "utf8",
@@ -325,8 +383,22 @@ function run(executable, args, cwd, env, input) {
     ...(input === undefined ? {} : { input }),
     windowsHide: true,
   });
-  if (result.status !== 0) throw new Error(`${executable} ${args.join(" ")} failed: ${result.error?.message ?? result.stderr ?? result.stdout ?? "unknown"}`);
+  if (!expectedStatuses.includes(result.status)) throw new Error(`${executable} ${args.join(" ")} failed: ${result.error?.message ?? result.stderr ?? result.stdout ?? "unknown"}`);
   return result;
+}
+
+function assertSetupExitContract({ status, stderr, stdout }) {
+  let result;
+  try {
+    result = JSON.parse(stdout);
+  } catch {
+    throw new Error(`setup did not return valid JSON: ${stdout}`);
+  }
+  if (result?.scope !== "user" || !Array.isArray(result.platforms)) throw new Error(`setup returned an unexpected global result: ${stdout}`);
+  const actionable = result.platforms.some((platform) => platform?.readiness !== "installed" || !Array.isArray(platform?.warnings) || platform.warnings.length > 0);
+  const expectedStatus = actionable ? 1 : 0;
+  if (status !== expectedStatus) throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result.`);
+  if (actionable !== (stderr.trim().length > 0)) throw new Error("setup stderr did not match its actionable readiness result.");
 }
 
 async function walk(directory) {

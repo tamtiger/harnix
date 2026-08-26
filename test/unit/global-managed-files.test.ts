@@ -19,6 +19,7 @@ const markerSelector = { type: "markers" as const, begin: "<!-- harnix:begin -->
 const jsonSelector = { type: "json-array-member" as const, pointer: "/hooks/UserPromptSubmit", memberId: "harnix-context" };
 const legacyCodexContextCommand = "harnix internal context --platform codex";
 const codexContextCommand = "harnix context --platform codex";
+const lockRecordName = "owner-00000000-0000-4000-8000-000000000001.json";
 
 async function temporaryGlobalRoot(logicalPath = "~/test-global"): Promise<UserPathRoot> {
   return createVerifiedUserRoot(await temporaryRoot(), logicalPath);
@@ -172,8 +173,8 @@ describe("global managed files", () => {
 
   it("permits only its own lock-created plugin root but preserves concurrent root content", async () => {
     const lockOnlyRoot = await temporaryGlobalRoot("~/lock-only-plugin");
-    await mkdir(lockOnlyRoot.path, { recursive: true });
-    await writeFile(join(lockOnlyRoot.path, ".managed.lock"), "harnix-owned lock\n");
+    await mkdir(join(lockOnlyRoot.path, ".managed.lock"), { recursive: true });
+    await writeFile(join(lockOnlyRoot.path, ".managed.lock", lockRecordName), "harnix-owned lock\n");
 
     await reconcileGlobalManagedFiles({
       root: lockOnlyRoot,
@@ -183,14 +184,15 @@ describe("global managed files", () => {
       preserveUnownedRoot: true,
       ownedRootLockContent: "harnix-owned lock\n",
       ownedRootLockPath: ".managed.lock",
+      ownedRootLockRecordName: lockRecordName,
       desired: [{ path: "plugin.json", sourceId: "plugin", kind: "file", content: "{\"name\":\"harnix\"}\n" }],
     });
     await expect(access(join(lockOnlyRoot.path, "plugin.json"))).resolves.toBeUndefined();
     await expect(access(join(lockOnlyRoot.path, ".managed.json"))).resolves.toBeUndefined();
 
     const concurrentRoot = await temporaryGlobalRoot("~/concurrent-plugin");
-    await mkdir(concurrentRoot.path, { recursive: true });
-    await writeFile(join(concurrentRoot.path, ".managed.lock"), "harnix-owned lock\n");
+    await mkdir(join(concurrentRoot.path, ".managed.lock"), { recursive: true });
+    await writeFile(join(concurrentRoot.path, ".managed.lock", lockRecordName), "harnix-owned lock\n");
     await writeFile(join(concurrentRoot.path, "plugin.json"), "user plugin\n");
     const collision = await reconcileGlobalManagedFiles({
       root: concurrentRoot,
@@ -200,6 +202,7 @@ describe("global managed files", () => {
       preserveUnownedRoot: true,
       ownedRootLockContent: "harnix-owned lock\n",
       ownedRootLockPath: ".managed.lock",
+      ownedRootLockRecordName: lockRecordName,
       desired: [{ path: "hooks.json", sourceId: "hook", kind: "file", content: "{}\n" }],
     });
 
@@ -209,8 +212,8 @@ describe("global managed files", () => {
     expect(collision.warnings).toContainEqual(expect.objectContaining({ code: "untracked-collision", path: "hooks.json" }));
 
     const unprovenLockRoot = await temporaryGlobalRoot("~/unproven-plugin-lock");
-    await mkdir(unprovenLockRoot.path, { recursive: true });
-    await writeFile(join(unprovenLockRoot.path, ".managed.lock"), "harnix-owned lock\n");
+    await mkdir(join(unprovenLockRoot.path, ".managed.lock"), { recursive: true });
+    await writeFile(join(unprovenLockRoot.path, ".managed.lock", lockRecordName), "harnix-owned lock\n");
     const unproven = await reconcileGlobalManagedFiles({
       root: unprovenLockRoot,
       manifestPath: ".managed.json",

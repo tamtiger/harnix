@@ -149,6 +149,7 @@ describe.sequential("CLI", () => {
   it("should_recognize_the_hidden_learning_action_and_require_an_active_finishing_task", async () => {
     const root = await fixture(); process.chdir(root);
     await createProgram({ interactive: false }).parseAsync(["node", "harnix", "init", "--user", "tam"], { from: "node" });
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
     const workflowInput = async () => JSON.stringify({ candidate: { id: "learning", statement: "statement", sourceTaskIds: ["a", "b"], evidenceIds: ["e1", "e2"] } });
 
@@ -157,15 +158,16 @@ describe.sequential("CLI", () => {
     const message = stderr.mock.calls.flatMap((call) => call).join("");
     expect(message).toContain("active task");
     expect(message).not.toContain("unknown option");
+    expect(stdout.mock.calls.map((call) => String(call[0])).join("")).toBe("");
   });
   it("should_cancel_an_active_task_from_a_bounded_json_envelope", async () => {
     const root = await fixture(); process.chdir(root);
     await createProgram({ interactive: false }).parseAsync(["node", "harnix", "init", "--user", "tam"], { from: "node" });
     const timestamp = "2026-08-19T00:00:00.000Z";
     const planning = {
-      generator: "harnix", schemaVersion: 1, id: "20260819-000000-cancel-me", title: "Cancel me", mode: "lite", status: "planning", checkpoint: "planning",
+      generator: "harnix", schemaVersion: 2, id: "20260819-000000-cancel-me", title: "Cancel me", mode: "lite", status: "planning", checkpoint: "planning",
       goal: "Stop safely", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [],
-      validationPlan: [{ id: "check", description: "verify", scope: "focused", required: true }], evidence: [], createdAt: timestamp, updatedAt: timestamp,
+      validationPlan: [{ id: "check", description: "verify", scope: "focused", required: true, criterionIds: ["a"], inputs: ["@task-contract"] }], evidence: [], createdAt: timestamp, updatedAt: timestamp,
     };
     const output = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     await createProgram({ interactive: false, workflowInput: async () => JSON.stringify({ task: planning }) }).parseAsync(["node", "harnix", "workflow", "--save"], { from: "node" });
@@ -190,6 +192,7 @@ describe.sequential("CLI", () => {
   });
   it("should_return_usage_exit_without_stack_when_public_input_is_invalid", async () => {
     const root = await fixture(); process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     await expect(runCli(["node", "harnix", "mem", "--limit", "nope"])).resolves.toBe(2);
@@ -198,9 +201,18 @@ describe.sequential("CLI", () => {
     expect(message).toContain("positive integer");
     expect(message).not.toContain("Error:");
     expect(message).not.toContain(root);
+    const output = stdout.mock.calls.map((call) => String(call[0])).join("");
+    expect(output).toMatch(/^\{[^\r\n]+\}\n$/u);
+    expect(JSON.parse(output)).toEqual({
+      generator: "harnix",
+      schemaVersion: 1,
+      ok: false,
+      error: { exitCode: 2, message: "--limit must be a positive integer." },
+    });
   });
   it("should_redact_project_paths_when_command_state_is_missing", async () => {
     const root = await fixture(); process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     await expect(runCli(["node", "harnix", "mem"])).resolves.toBe(2);
@@ -209,6 +221,30 @@ describe.sequential("CLI", () => {
     expect(message).toContain("[PROJECT]");
     expect(message).not.toContain(root);
     expect(message).not.toContain("Error:");
+    const errorDocument = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { error: { message: string } };
+    expect(errorDocument.error.message).toContain("[PROJECT]");
+    expect(errorDocument.error.message).not.toContain(root);
+  });
+  it("should_return_exit_one_and_stderr_warning_for_actionable_setup_readiness", async () => {
+    const root = await fixture(); const home = await temporaryUserHome(); process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    const programOptions = { commandLookup: async () => false, environment: { CODEX_HOME: join(home, "codex") }, homeResolver: async () => home };
+
+    await expect(runCli(["node", "harnix", "setup", "--kiro"], programOptions)).resolves.toBe(1);
+
+    const result = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { platforms: Array<{ readiness: string }> };
+    expect(result.platforms).toEqual([expect.objectContaining({ readiness: "binary-unavailable" })]);
+    const warning = stderr.mock.calls.map((call) => String(call[0])).join("");
+    expect(warning).toContain("not found on PATH");
+    expect(warning).not.toContain(home);
+  });
+  it("should_inject_available_version_lookup_into_the_public_upgrade_result", async () => {
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await expect(runCli(["node", "harnix", "upgrade"], { availableVersionLookup: async () => "9.9.9" })).resolves.toBe(0);
+
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({ installed: expect.any(String), available: "9.9.9", applied: false });
   });
   it("should_redact_unquoted_windows_and_unix_user_paths_from_lifecycle_errors", () => {
     const windowsPath = "C:\\Users\\Tam Nguyen\\.kiro\\harnix\\managed.lock";
