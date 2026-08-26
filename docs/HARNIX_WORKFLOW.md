@@ -31,7 +31,7 @@ Phase 6 user-global Kiro, Antigravity and Codex integrations are an adapter/life
 14. Router chọn đúng một current stage-owner skill; agent đọc riêng skill đó đến EOF và không batch-load skill của stage tương lai. Nếu tool output bị truncate, phải đọc lại riêng selected skill trước khi hành động.
 15. `cancelled` là terminal state cho công việc bị người dùng explicit abandon, không phải completion alias; cancellation giữ nguyên evidence fail/pending và luôn có reason/authority audit.
 16. Task mới là exact TaskRecord v2; unknown top-level/nested field và dangling `.active` pointer đều fail closed. Lite có thể promote sang Full, nhưng Full không bao giờ downgrade về Lite.
-17. Public `harnix status`, `tasks`, `audit` và `repo-map --query|--impact` chỉ cung cấp bounded read-only visibility/navigation; chúng không thay hidden inspect/continue, không route stage, không chạy verification và không ghi task, cache hoặc journal.
+17. Public `harnix status`, `tasks`, `context-report`, `checks`, `audit` và `repo-map --query|--impact` chỉ cung cấp bounded read-only visibility/navigation/explanation; chúng không thay hidden inspect/continue, không route stage, không chạy verification và không ghi task, cache hoặc journal. Public `harnix resume <task-id> [--dry-run]` là ngoại lệ mutation hẹp: chỉ phục hồi exact validated unfinished-task pointer khi không có active task, không thay workflow state, transcript, Git hoặc evidence và không overwrite collision.
 
 ## 3. Entry routing
 
@@ -196,7 +196,9 @@ Continue resolve active task rồi load theo thứ tự: task record → artifac
 
 Người dùng hoặc agent có thể chạy public `harnix status` trước Continue để xem `id`/mode/status/checkpoint, aggregate acceptance/check progress, context freshness, bounded attention và đúng một `nextAction`. Projection không emit task title/goal, criterion/check/blocker prose, validation command, prompt, secret hoặc absolute path; không có active task là clean success. `status` không thay hidden `workflow --inspect`, không quyết định transition và không được dùng làm completion evidence.
 
-Khi `.active` rỗng, public `harnix tasks [--limit] [--status]` có thể tìm bounded local task records mà không đọc artifact/journal body; malformed record được cô lập và active item hợp lệ được pin khi match filter. Index chỉ là discovery: nó không chọn, resume hoặc sửa active pointer. Public `harnix audit` có thể hiển thị exact Full readiness và completion blocker code/ID hiện tại, nhưng không chạy/fix check, không transition và không biến verdict thành verification evidence.
+Khi `.active` rỗng, public `harnix tasks [--limit] [--status]` có thể tìm bounded local task records mà không đọc artifact/journal body; malformed record được cô lập và active item hợp lệ được pin khi match filter. Index chỉ là discovery. Khi người dùng chọn exact unfinished ID, `harnix resume <task-id> --dry-run` preview cùng validation/collision checks và invocation không dry-run chỉ atomic replace pointer; lệnh không restore transcript, model session, Git hoặc workflow stage và không thay active task khác. Sau pointer recovery, Continue vẫn đọc persisted status/checkpoint/evidence và route đúng owner.
+
+Public `harnix context-report --platform <id> [--limit]` dùng cùng bounded effective builder với hidden hook nhưng chỉ emit relative metadata, trusted reason codes và drift/truncation. Public `harnix checks [--limit]` dùng cùng required-check freshness classifier với status/audit nhưng chỉ emit categorical causes và bounded changed/missing input paths; nó không chạy validation. Public `harnix audit` hiển thị exact Full readiness và completion blocker code/ID hiện tại. Ba report đều read-only, không transition/fix state hoặc biến verdict thành verification evidence, và không emit private prose/content/hash/command/secret/absolute path.
 
 Nếu không có active task, báo ngắn gọn và quay về Triage. Nếu state không nhất quán hoặc artifact malformed/future-version, fail closed và đề xuất repair; không tự đoán rồi overwrite.
 
@@ -278,6 +280,9 @@ Evals phải chứng minh:
 - Continue phục hồi đúng state với bounded context, project context drift xác định và fail closed trên corrupt/future state.
 - Public `harnix status` từ nested initialized path trả projection deterministic, dưới 2 KiB cho fixture đại diện, phân loại đúng v1 age/v2 digest freshness và không ghi file hoặc echo private task prose.
 - Public `harnix tasks` cô lập record malformed dưới scan/file cap, giữ filter/order/active-pin deterministic và không đọc private artifact/journal body hoặc đổi pointer.
+- Public `harnix resume` chỉ kích hoạt exact valid unfinished task khi pointer absent/empty, preview no-write, idempotent cùng pointer và fail closed với collision/corrupt/terminal state.
+- Public `harnix context-report` giữ parity với hidden effective selection, bounded theo platform/limit/byte cap, chỉ trả trusted metadata và không làm lộ content/raw reason/hash/task prose.
+- Public `harnix checks` phân loại v1 age/v2 immutable input freshness với stable reason codes, bounded changed/missing paths và không chạy check hoặc ghi state.
 - Public `harnix audit` tách readiness/completion, reuse exact ready-trace/input-freshness semantics, chỉ emit stable code/ID/count và không chạy check, sửa state hoặc tự hoàn tất task.
 - Mọi capability external-derived đang được duy trì có entry machine-checkable trong `docs/HARNESS_FEATURE_PROVENANCE.json`; immutable ref/license/evidence và concrete code/test/docs targets đều được regression kiểm tra.
 - Cùng fixture cho kết quả workflow tương đương trên Kiro, Antigravity và Codex.

@@ -44,9 +44,12 @@ describe("workflow templates", () => {
     expect(agentInstructions).toContain("nearest initialized project ancestor or workspace root");
     expect(agentInstructions).toContain("harnix repo-map --query <text>");
     expect(agentInstructions).toContain("harnix repo-map --impact <path>");
-    expect(agentInstructions).toContain("Public commands are init, setup, update, upgrade, uninstall, mem, status, tasks, audit, doctor, and repo-map");
+    expect(agentInstructions).toContain("Public commands are init, setup, update, upgrade, uninstall, mem, status, tasks, resume, context-report, checks, audit, doctor, and repo-map");
     expect(agentInstructions).toContain("Public harnix status is a bounded read-only view");
     expect(agentInstructions).toContain("Public harnix tasks is a bounded resilient local task index");
+    expect(agentInstructions).toContain("harnix resume restores only an exact validated unfinished-task pointer");
+    expect(agentInstructions).toContain("Public harnix context-report explains effective hook-context metadata");
+    expect(agentInstructions).toContain("harnix checks explains required-check freshness and changed inputs");
     expect(agentInstructions).toContain("public harnix audit exposes exact readiness/completion blocker codes and IDs");
     expect(agentInstructions).toContain("cache-only navigation hints");
     expect(agentInstructions).toContain("harnix doctor --fix");
@@ -127,6 +130,9 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("harnix repo-map --impact <path>");
     expect(workflowTemplate).toContain("Public harnix status is an optional bounded read-only projection");
     expect(workflowTemplate).toContain("Public harnix tasks provides a bounded resilient local task index");
+    expect(workflowTemplate).toContain("harnix resume restores only an explicitly selected exact unfinished-task pointer");
+    expect(workflowTemplate).toContain("Public harnix context-report explains effective hook-context metadata");
+    expect(workflowTemplate).toContain("harnix checks explains required-check freshness and changed inputs");
     expect(workflowTemplate).toContain("harnix audit exposes exact readiness/completion blocker codes and IDs");
     expect(workflowTemplate).toContain("must not invoke repository-map queries, impact, or refreshes");
     expect(workflowTemplate).not.toContain("Increase the package patch version");

@@ -5,8 +5,8 @@ import { createProgram, runCli } from "../../src/cli-program.js";
 afterEach(() => vi.restoreAllMocks());
 
 describe("CLI command contract", () => {
-  it("exposes eleven supported commands without exposing hidden/internal commands", () => {
-    expect(createProgram().commands.filter((command) => !(command as { _hidden?: boolean })._hidden).map((command) => command.name())).toEqual(["init", "setup", "update", "upgrade", "uninstall", "mem", "status", "tasks", "audit", "doctor", "repo-map"]);
+  it("exposes fourteen supported commands without exposing hidden/internal commands", () => {
+    expect(createProgram().commands.filter((command) => !(command as { _hidden?: boolean })._hidden).map((command) => command.name())).toEqual(["init", "setup", "update", "upgrade", "uninstall", "mem", "status", "tasks", "resume", "context-report", "checks", "audit", "doctor", "repo-map"]);
   });
 
   it("registers single-command action flags without nested command trees", () => {
@@ -15,6 +15,9 @@ describe("CLI command contract", () => {
     const repoMap = program.commands.find((command) => command.name() === "repo-map");
     const status = program.commands.find((command) => command.name() === "status");
     const tasks = program.commands.find((command) => command.name() === "tasks");
+    const resume = program.commands.find((command) => command.name() === "resume");
+    const contextReport = program.commands.find((command) => command.name() === "context-report");
+    const checks = program.commands.find((command) => command.name() === "checks");
     const audit = program.commands.find((command) => command.name() === "audit");
     const workflow = program.commands.find((command) => command.name() === "workflow");
 
@@ -25,6 +28,9 @@ describe("CLI command contract", () => {
     expect(repoMap?.options.find((option) => option.long === "--refresh")?.hidden).toBe(true);
     expect(status?.options).toEqual([]);
     expect(tasks?.options.map((option) => option.long)).toEqual(["--limit", "--status"]);
+    expect(resume?.options.map((option) => option.long)).toEqual(["--dry-run"]);
+    expect(contextReport?.options.map((option) => option.long)).toEqual(["--platform", "--limit"]);
+    expect(checks?.options.map((option) => option.long)).toEqual(["--limit"]);
     expect(audit?.options).toEqual([]);
     expect(workflow?.options.map((option) => option.long)).toEqual(["--inspect", "--save", "--snapshot", "--audit-ready", "--finish", "--cancel", "--learn", "--check"]);
   });

@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or already in progress and needs plan review, test-first implementation, refactoring, or technical feedback handling.
 metadata:
-  version: "1.0.13"
+  version: "1.0.14"
 ---
 
 # Implement a ready Harnix task

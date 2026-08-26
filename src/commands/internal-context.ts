@@ -2,11 +2,11 @@ import { access } from "node:fs/promises";
 import { isAbsolute, win32 } from "node:path";
 
 import { readConfig } from "../core/config/config.js";
-import { buildContext, loadContextManifest, UNTRUSTED_CONTEXT_PREFIX, UNTRUSTED_CONTEXT_SUFFIX } from "../core/context/context.js";
+import { UNTRUSTED_CONTEXT_PREFIX, UNTRUSTED_CONTEXT_SUFFIX } from "../core/context/context.js";
+import { buildEffectiveContext } from "../core/context/effective-context.js";
 import { resolveActiveTask } from "../core/tasks/task.js";
 import { findInitializedProject } from "../utils/project-discovery.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
-import { guideOutputPath, selectGuideSources } from "../guides/catalog.js";
+import { resolveSafeHarnixPath } from "../utils/paths.js";
 
 export type InternalContextPlatform = "kiro" | "antigravity" | "codex";
 
@@ -29,7 +29,6 @@ interface NormalizedHookEvent {
   readonly workspacePaths: string[];
 }
 
-const MAX_HOOK_CONTEXT_ENTRIES = 64;
 const REDACTED_PROJECT_STATE_WARNING = "Harnix context unavailable: initialized project state cannot be read safely. Run harnix doctor for details.";
 
 /**
@@ -50,38 +49,8 @@ export async function renderInternalContext(
   const active = await resolveActiveTask(harnixRoot);
   if (!active) return emptyInitializedProjectPayload(platform);
 
-  const contextPath = await resolveSafeProjectPath(harnixRoot, `tasks/${active.id}/context.json`);
-  const taskEntries = await exists(contextPath)
-    ? (await loadContextManifest(contextPath)).entries
-    : active.relevantPaths.map((path) => ({ path, reason: "task reference", priority: 0, pinned: false, states: ["implementing"] }));
-  const selectedGuides = selectGuideSources({
-    activePaths: active.relevantPaths,
-    languages: config.languages,
-    technologies: config.technologies,
-    topics: taskTopics(active.title, active.goal),
-  });
-  const guidePaths = selectedGuides.map(guideOutputPath);
-  const entries = [
-    ...taskEntries,
-    ...guidePaths.map((path) => ({ path, reason: "applicable guide", priority: 0, pinned: false, states: ["implementing", "verifying"] })),
-  ];
-  const cap = platform === "codex" ? 2_500 : Math.min(config.context.maxCharacters, 8_000);
-  const bounded = options.forceBounded === true;
-  const output = await buildContext(
-    root,
-    entries,
-    bounded ? cap : config.context.maxCharacters,
-    {
-      taskId: active.id,
-      references: active.relevantPaths,
-      guides: guidePaths,
-      languages: selectedGuides.filter(({ descriptor }) => descriptor.appliesTo.languages?.length).map(guideOutputPath),
-      technologies: selectedGuides.filter(({ descriptor }) => descriptor.appliesTo.technologies?.length).map(guideOutputPath),
-    },
-    bounded ? false : config.runtime.fullContext,
-    bounded ? MAX_HOOK_CONTEXT_ENTRIES : undefined,
-  );
-  const text = boundedContext(output.text, output.manifest.omitted.map((item) => item.path), cap);
+  const output = await buildEffectiveContext({ projectRoot: root, harnixRoot, config, task: active, platform, forceBounded: options.forceBounded });
+  const text = boundedContext(output.text, output.manifest.omitted.map((item) => item.path), output.budget.maxCharacters);
   return formatPlatformPayload(platform, text);
 }
 
@@ -185,10 +154,6 @@ function serializeOmissionPath(path: string): string {
       || codePoint === 0x2029;
     return mustEscape ? `\\u${codePoint.toString(16).padStart(4, "0")}` : character;
   }).join("");
-}
-
-function taskTopics(...values: string[]): string[] {
-  return [...new Set(values.join(" ").toLowerCase().match(/[a-z0-9-]+/gu) ?? [])].sort();
 }
 
 function normalizeHookEvent(value: unknown): NormalizedHookEvent {

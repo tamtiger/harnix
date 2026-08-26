@@ -10,6 +10,7 @@ const expectedFeatureIds = [
   "adaptive-tdd",
   "atomic-managed-ownership",
   "conditional-research",
+  "context-selection-explanation",
   "context-selection-freshness",
   "dependency-aware-repo-map",
   "deterministic-ready-trace",
@@ -23,9 +24,11 @@ const expectedFeatureIds = [
   "task-audit-readiness",
   "task-history-index",
   "task-lifecycle",
+  "task-resume-recovery",
   "task-status-next-action",
   "two-stage-review",
   "untrusted-learning-promotion",
+  "verification-freshness-explanation",
 ];
 
 interface RegistrySource {

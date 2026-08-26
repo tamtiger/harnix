@@ -160,6 +160,18 @@ Batch được chọn gồm:
 
 Mỗi capability có provenance tách biệt để không overclaim nguồn: status/next-action tham khảo behavior Trellis, ECC, Spec Kit và BMAD với Cline issues làm pain signal; task index tham khảo Cline task history cùng issue #4359/discussion #10480; dependency impact tham khảo Aider repo-map cùng issue #3603/#4239; task audit tham khảo Spec Kit `analyze`/discussion #1917 và BMAD readiness flow/issue #2079. Tất cả là clean-room Harnix implementation, không copy source/prose. Daemon/watch/statusline, SQLite/global database, model/session compaction, Git checkpoint, cost tracking, cloud UI, heuristic auto-remediation và worker/multi-agent orchestration tiếp tục bị reject vì phá product boundary hoặc ownership. Chi tiết source, metric, scoring, rollback và bất định nằm trong research artifacts của task; registry canonical ghi repo/ref/date/license/evidence/adaptation/code/test/docs cho từng feature để về sau nhận biết bằng máy. `NOTICE` chỉ đổi khi thực sự reuse/adapt nội dung tạo nghĩa vụ attribution, không vì clean-room behavioral reference.
 
+### 3.10 Revalidation 2026-08-26: recovery và explainability thực tế
+
+Task `20260826-154348-harness-feature-expansion` tiếp tục từ batch observability bằng current primary sources và issue signal, đồng thời tái hiện ba gap local: unfinished TaskRecord vẫn tồn tại nhưng pointer rỗng; effective context selector có dữ liệu selected/omitted nhưng public user không xem được; immutable verification snapshot biết changed/missing path nhưng status/audit chỉ hiện aggregate stale ID. Current mechanism evidence gồm Codex `a26f1806a4f4b8cfec2ea1be129963815a61e58c`, Spec Kit `c58a8487461052b4fa65e626df167521d297b184`, BMAD `9376e1f9e5b1214c024bb20b81adff5eb447820a` và VS Code docs `af6d23706c3a59b91767b2f69de7d97d02bef9cc`; frozen ownership refs không đổi.
+
+Weighted hard gate chọn ba clean-room adaptation:
+
+- `HX-RESUME-01` / provenance `task-resume-recovery`: exact-ID unfinished-task pointer recovery, dry-run và collision fail-close; không session store, transcript replay hoặc Git restore.
+- `HX-CONTEXT-REPORT-01` / provenance `context-selection-explanation`: metadata-only explanation từ cùng effective builder với hook, platform budget và deterministic truncation; không content/raw reason/hash.
+- `HX-CHECKS-01` / provenance `verification-freshness-explanation`: required-check state cùng categorical snapshot/input causes và bounded changed/missing relative paths; không chạy command hoặc sửa evidence.
+
+Usage reports từ OpenCode/Claude Code chỉ chứng minh pain về discoverability/context privacy, không được ghi làm code provenance. Registry machine-checkable là bắt buộc trong cùng change: mỗi feature derived phải note source/ref/date/license, adaptation delta và concrete code/test/docs paths để maintainer sau này nhận biết nguồn. Exact contract, score matrix, rejected candidates và remaining uncertainty nằm tại task research `research/next-capability-mechanisms.md`.
+
 ## 4. Platform research decisions
 
 Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapters described by earlier Phase 1–5 research are retained only as legacy/provenance evidence; the current adopted contract is `GLOBAL_SETUP_REFACTOR_PLAN.md` §§2, 6–9.
@@ -223,6 +235,7 @@ Precedence: repository convention > user-modified project spec > selected techno
 - Semantic/embedding context ranking remains deferred; the adopted dependency-aware repo-map ranker is deterministic structural ranking over existing cache v1 metadata only.
 - Extra framework packs ngoài bảy target languages/frameworks.
 - Remote spec synchronization; `update` chỉ dùng packaged templates.
+- Fuzzy task-body/history search; exact metadata index và exact-ID resume đã giải quyết recovery path mà không đọc private prose.
 
 ### Rejected
 
@@ -231,6 +244,7 @@ Precedence: repository convention > user-modified project spec > selected techno
 - Global daemon/observer/runtime hoặc silent network calls.
 - Default MCP, multi-model gateway, AgentShield bundling.
 - Automatic Git commit/branch/worktree/merge/push/PR.
+- Transcript/session import-export-replay, Git checkpoint rewind, automatic context compaction/token accounting và background notification monitor.
 - Mandatory subagents và hàng trăm generic skills.
 - Multiple install mechanisms cho cùng platform.
 
@@ -251,6 +265,9 @@ Các quyết định này là guardrail chống scope creep. Thay đổi cần c
 | Lifecycle/migration | `src/commands/**`, `src/migration/**` | project/global scope, legacy conflicts, rollback, purge/global-uninstall safety |
 | Doctor | `src/commands/doctor.ts` | stable ordered/redacted Doctor JSON v2 + unsafe/duplicate/legacy/global/secret fixtures |
 | Task status/next action | `src/core/status.ts`, `src/commands/status.ts` | no-active/active, precedence, v1 age/v2 digest freshness, privacy, bounded payload và no-write nested-root integration |
+| Exact task recovery | `src/core/tasks/task-resume.ts`, `src/commands/resume.ts` | absent/same/different/invalid pointer, missing/malformed/oversized/terminal candidate, dry-run/no-write và pointer-only mutation |
+| Effective context explanation | `src/core/context/effective-context.ts`, `src/commands/context-report.ts` | hidden-hook parity, dynamic/persisted selection, platform caps, trusted reasons, drift, privacy, truncation và no-write |
+| Required-check explanation | `src/core/verification/check-report.ts`, `src/commands/checks.ts` | v1 age/v2 sidecar/input matrix, append-order tie, changed/missing path, status/audit parity, privacy, truncation và no-write |
 | Harness feature provenance | `docs/HARNESS_FEATURE_PROVENANCE.json` | exact allowlists, sorted immutable sources, safe existing code/test/docs paths và pinned feature-ID set |
 
 Chi tiết task order và gates nằm trong `IMPLEMENTATION_PLAN.md`; phân loại reuse/remove/build nằm trong `UPSTREAM_MAPPING.md`.

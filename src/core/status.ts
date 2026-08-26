@@ -1,8 +1,8 @@
 import type { ContextDrift } from "./context/context.js";
-import type { Evidence, TaskMode, TaskRecord, TaskStatus, WorkflowCheckpoint } from "./tasks/task.js";
-import { computeVerificationInputSnapshot, loadVerificationInputSidecar, type StoredVerificationInputSnapshot } from "./verification/input-freshness.js";
+import type { TaskMode, TaskRecord, TaskStatus, WorkflowCheckpoint } from "./tasks/task.js";
+import { inspectRequiredChecks, type RequiredCheckState } from "./verification/check-report.js";
 
-export type RequiredCheckState = "passed" | "failed" | "stale" | "pending";
+export type { RequiredCheckState } from "./verification/check-report.js";
 
 export type StatusNextActionCode =
   | "resolve-blocker"
@@ -101,28 +101,7 @@ export async function inspectRequiredCheckEvidence(
   now = Date.now(),
   maxEvidenceAgeMs = 60 * 60 * 1_000,
 ): Promise<RequiredCheckState[]> {
-  let storedByEvidence = new Map<string, StoredVerificationInputSnapshot>();
-  if (task.schemaVersion === 2) {
-    try {
-      const sidecar = await loadVerificationInputSidecar(harnixRoot, task.id);
-      storedByEvidence = new Map(sidecar?.snapshots.map((snapshot) => [snapshot.evidenceId, snapshot]) ?? []);
-    } catch {
-      storedByEvidence = new Map();
-    }
-  }
-  return Promise.all(task.validationPlan.filter((check) => check.required).map(async (check) => {
-    const evidence = latestEvidence(task.evidence, check.id);
-    const base = classifyEvidence(evidence, now, maxEvidenceAgeMs);
-    if (base !== "passed" || task.schemaVersion === 1 || evidence === undefined) return base;
-    const stored = storedByEvidence.get(evidence.id);
-    if (stored === undefined || stored.checkId !== check.id || stored.inputDigest !== evidence.inputDigest) return "stale";
-    try {
-      const current = await computeVerificationInputSnapshot(projectRoot, task, check.id);
-      return current.inputDigest === stored.inputDigest ? "passed" : "stale";
-    } catch {
-      return "stale";
-    }
-  }));
+  return (await inspectRequiredChecks(projectRoot, harnixRoot, task, now, maxEvidenceAgeMs)).map((inspection) => inspection.state);
 }
 
 function result(activeTask: StatusActiveTask | null, code: StatusNextActionCode, attention: StatusAttention[]): HarnixStatusResultV1 {
@@ -145,23 +124,6 @@ function countChecks(states: readonly RequiredCheckState[]): StatusProgress["req
   const progress = { passed: 0, failed: 0, stale: 0, pending: 0, total: states.length };
   for (const state of states) progress[state] += 1;
   return progress;
-}
-
-function classifyEvidence(evidence: Evidence | undefined, now: number, maxAgeMs: number): RequiredCheckState {
-  if (evidence === undefined || evidence.result === "skipped") return "pending";
-  if (evidence.result === "fail") return "failed";
-  const timestamp = Date.parse(evidence.recordedAt);
-  if (!Number.isFinite(timestamp) || timestamp > now || now - timestamp > maxAgeMs) return "stale";
-  return "passed";
-}
-
-function latestEvidence(evidence: readonly Evidence[], checkId: string): Evidence | undefined {
-  let latest: Evidence | undefined;
-  for (const candidate of evidence) {
-    if (candidate.checkId !== checkId) continue;
-    if (latest === undefined || Date.parse(candidate.recordedAt) >= Date.parse(latest.recordedAt)) latest = candidate;
-  }
-  return latest;
 }
 
 function nextAction(task: TaskRecord, contextDrift: ContextDrift, checks: StatusProgress["requiredChecks"]): StatusNextActionCode {

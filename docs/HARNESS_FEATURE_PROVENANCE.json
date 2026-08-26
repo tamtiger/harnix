@@ -103,6 +103,47 @@
       }
     },
     {
+      "id": "context-selection-explanation",
+      "capability": "Bounded metadata explanation of the effective context selected for a platform hook",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "microsoft/vscode-docs",
+          "url": "https://github.com/microsoft/vscode-docs",
+          "ref": "af6d23706c3a59b91767b2f69de7d97d02bef9cc",
+          "sourceDate": "2026-08-26",
+          "license": "Documentation CC BY 3.0 US; code MIT",
+          "evidenceUrls": [
+            "https://github.com/microsoft/vscode-docs/blob/af6d23706c3a59b91767b2f69de7d97d02bef9cc/LICENSE",
+            "https://github.com/microsoft/vscode-docs/blob/af6d23706c3a59b91767b2f69de7d97d02bef9cc/docs/agents/concepts/context.md"
+          ]
+        }
+      ],
+      "adaptation": "Reuses Harnix's actual bounded hook-selection builder to expose only relative selected, omitted, budget, and drift metadata with derived categorical reasons; it does not expose file content, raw saved reasons, hashes, task prose, secrets, token accounting, compaction, or model-context ownership.",
+      "implementation": {
+        "code": [
+          "src/commands/context-report.ts",
+          "src/commands/internal-context.ts",
+          "src/core/context/effective-context.ts"
+        ],
+        "tests": [
+          "test/integration/context-report.test.ts",
+          "test/unit/effective-context.test.ts",
+          "test/workflow/internal-context.test.ts"
+        ],
+        "docs": [
+          "README.md",
+          "docs/HARNESS_FEATURE_PROVENANCE.json",
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/IMPLEMENTATION_PLAN.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
       "id": "context-selection-freshness",
       "capability": "Detect drift in the basis used to select resumable task context",
       "decision": "adapt",
@@ -641,6 +682,68 @@
       }
     },
     {
+      "id": "task-resume-recovery",
+      "capability": "Exact recovery of an unfinished local task through the active pointer",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "bmad-code-org/BMAD-METHOD",
+          "url": "https://github.com/bmad-code-org/BMAD-METHOD",
+          "ref": "9376e1f9e5b1214c024bb20b81adff5eb447820a",
+          "sourceDate": "2026-08-26",
+          "license": "MIT with trademark notice",
+          "evidenceUrls": [
+            "https://github.com/bmad-code-org/BMAD-METHOD/blob/9376e1f9e5b1214c024bb20b81adff5eb447820a/LICENSE",
+            "https://github.com/bmad-code-org/BMAD-METHOD/blob/9376e1f9e5b1214c024bb20b81adff5eb447820a/docs/reference/build-auto.md"
+          ]
+        },
+        {
+          "repository": "github/spec-kit",
+          "url": "https://github.com/github/spec-kit",
+          "ref": "c58a8487461052b4fa65e626df167521d297b184",
+          "sourceDate": "2026-08-26",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/LICENSE",
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/docs/reference/workflows.md"
+          ]
+        },
+        {
+          "repository": "openai/codex",
+          "url": "https://github.com/openai/codex",
+          "ref": "a26f1806a4f4b8cfec2ea1be129963815a61e58c",
+          "sourceDate": "2026-08-26",
+          "license": "Apache-2.0",
+          "evidenceUrls": [
+            "https://github.com/openai/codex/blob/a26f1806a4f4b8cfec2ea1be129963815a61e58c/LICENSE",
+            "https://github.com/openai/codex/blob/a26f1806a4f4b8cfec2ea1be129963815a61e58c/codex-rs/exec/src/cli.rs"
+          ]
+        }
+      ],
+      "adaptation": "Recovers only an exact canonical, validated, unfinished Harnix TaskRecord by atomically restoring its active pointer when no conflicting task is active; it adds dry-run and fail-closed collision handling without restoring transcripts, model sessions, Git state, or changing workflow/evidence.",
+      "implementation": {
+        "code": [
+          "src/commands/resume.ts",
+          "src/core/tasks/task-resume.ts"
+        ],
+        "tests": [
+          "test/integration/resume.test.ts",
+          "test/unit/task-resume.test.ts",
+          "test/workflow/cli-contract.test.ts"
+        ],
+        "docs": [
+          "README.md",
+          "docs/HARNESS_FEATURE_PROVENANCE.json",
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/IMPLEMENTATION_PLAN.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
       "id": "task-status-next-action",
       "capability": "Bounded public active-task progress, attention, and deterministic next action",
       "decision": "adapt",
@@ -808,6 +911,59 @@
         "docs": [
           "docs/HARNESS_RESEARCH.md",
           "docs/HARNIX_PRD.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "verification-freshness-explanation",
+      "capability": "Bounded explanation of required-check freshness and changed verification inputs",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "bmad-code-org/BMAD-METHOD",
+          "url": "https://github.com/bmad-code-org/BMAD-METHOD",
+          "ref": "9376e1f9e5b1214c024bb20b81adff5eb447820a",
+          "sourceDate": "2026-08-26",
+          "license": "MIT with trademark notice",
+          "evidenceUrls": [
+            "https://github.com/bmad-code-org/BMAD-METHOD/blob/9376e1f9e5b1214c024bb20b81adff5eb447820a/LICENSE",
+            "https://github.com/bmad-code-org/BMAD-METHOD/blob/9376e1f9e5b1214c024bb20b81adff5eb447820a/docs/reference/workflow-map.md"
+          ]
+        },
+        {
+          "repository": "github/spec-kit",
+          "url": "https://github.com/github/spec-kit",
+          "ref": "c58a8487461052b4fa65e626df167521d297b184",
+          "sourceDate": "2026-08-26",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/LICENSE",
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/docs/reference/workflows.md"
+          ]
+        }
+      ],
+      "adaptation": "Projects Harnix's existing latest-evidence and immutable input-snapshot semantics into sorted categorical states and bounded relative changed or missing paths; it never runs validation, rewrites evidence, reveals commands, hashes, prose, secrets, or performs heuristic remediation.",
+      "implementation": {
+        "code": [
+          "src/commands/checks.ts",
+          "src/core/status.ts",
+          "src/core/verification/check-report.ts"
+        ],
+        "tests": [
+          "test/integration/audit.test.ts",
+          "test/integration/checks.test.ts",
+          "test/integration/status.test.ts",
+          "test/unit/check-report.test.ts"
+        ],
+        "docs": [
+          "README.md",
+          "docs/HARNESS_FEATURE_PROVENANCE.json",
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/IMPLEMENTATION_PLAN.md",
           "docs/UPSTREAM_MAPPING.md"
         ]
       }

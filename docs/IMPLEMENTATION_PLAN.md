@@ -37,7 +37,7 @@ harnix/
 │   │   ├── context/         # rank, dedupe, budget, disclosure
 │   │   ├── journal/         # entries, search, learning candidates
 │   │   └── project.ts       # project-level service boundary
-│   ├── commands/            # init, setup, update, upgrade, uninstall, mem, status, doctor
+│   ├── commands/            # init, setup, update, upgrade, uninstall, mem, status, tasks, resume, context-report, checks, audit, doctor, repo-map
 │   ├── configurators/       # kiro.ts, antigravity.ts, codex.ts only
 │   ├── templates/           # harnix + platform content
 │   ├── catalog/             # pure language/technology/guide metadata + validation
@@ -406,9 +406,27 @@ Behavioral research alone does not claim copied code. `NOTICE` changes only when
 
 `harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]` is mutually exclusive with `--query` and hidden `--refresh`; `--depth` is impact-only. The target must be one exact normalized non-root repository-relative POSIX path. It reads RepoMapV1 only, returns direct outgoing dependencies plus unique reverse dependents from cycle-safe BFS up to depth (default 2), sorts dependents by distance then code-unit path, and applies limit independently to both directions (default 20). Stable status is `ready|missing|invalid|not-found`; every non-ready result preserves the same JSON shape with empty lists and false truncation flags. The action never scans source, reads snippets, refreshes/writes cache, infers dynamic dependencies, changes cache schema, or runs in a global hook.
 
-### 4.5H Public task audit v1
+### 4.5H Public exact task resume v1
 
-`harnix audit` is the eleventh public command. No active task is a clean success with `{generator,schemaVersion,activeTask:null}`. Active output contains exactly `id`, `mode`, `status`, `checkpoint`, `readiness`, `completion`. Full readiness reuses the exact bounded ready-trace auditor while stripping diagnostic message prose; each diagnostic contains only `code`, `artifact`, optional `id`, optional `line`. Artifact read failure becomes `unavailable` plus `artifact-unavailable`; Lite readiness is `not-applicable`.
+`harnix resume <task-id> [--dry-run]` is the eleventh public command. It accepts one canonical task ID only; candidate record reads are capped at 1 MiB and active pointer reads at 1 KiB. Candidate directory/record identity, exact TaskRecord schema and unfinished status are validated before any mutation. An absent/empty pointer yields `would-resume` in dry-run or permission-preserving atomic replacement followed by `resumed`; an already matching valid unfinished pointer yields `already-active` without a write. A malformed/dangling/terminal pointer, another active task, or a missing/malformed/oversized/terminal candidate fails closed without overwrite.
+
+`TaskResumeResultV1` has exact top-level fields `generator`, `schemaVersion`, `scope`, `dryRun`, `outcome`, `task`, `nextAction`. `scope` is `project`; `outcome` is `would-resume|resumed|already-active`; task contains only `id`, `mode`, `status`, `checkpoint`; next action is the fixed `inspect-active-task` instruction. The command changes only `.harnix/tasks/.active`: it never edits a TaskRecord, evidence, sidecar or artifact, performs a transition, restores a transcript/model session/Git state, or calls network. Sequential state is atomic and fail-closed; no cross-process compare-and-swap guarantee is claimed.
+
+### 4.5I Public effective-context explanation v1
+
+`harnix context-report --platform <kiro|antigravity|codex> [--limit <1..50>]` is the twelfth public command and defaults to 20 details per category. It shares one effective-context builder with hidden `harnix context`: persisted context entries plus applicable guides when a manifest exists, otherwise task `relevantPaths` plus applicable guides. Bounded mode is identical to hook selection: Codex 2,500 characters; Kiro/Antigravity `min(config.context.maxCharacters, 8000)`; maximum 64 inspected entries.
+
+`ContextReportResultV1` has exact top-level fields `generator`, `schemaVersion`, `scope`, `platform`, `filter`, `activeTask`; no active task is clean success with `activeTask:null`. Active output contains only task `id`, `budget`, bounded `drift`, `summary`, `selected`, `omitted`. Selected items contain `path`, sorted derived `reasonCodes`, `priority`, `pinned`; allowed reason codes are `applicable-guide|persisted-selection|pinned|task-reference`. Omitted items retain only relative path and `budget|duplicate|missing|unsafe`. Raw reason/states, content, hash, task prose, hook event, secret and absolute path are forbidden. Limit applies independently to selected, omitted and drift changes; the entire serialized result is capped at 262,144 UTF-8 bytes by dropping deterministic whole tail items and setting count/truncation fields. The command never writes or calls network, and hidden hook payload/activation behavior remains regression-locked.
+
+### 4.5J Public required-check freshness explanation v1
+
+`harnix checks [--limit <1..50>]` is the thirteenth public command and defaults to 20 required checks. `ChecksReportResultV1` has exact top-level fields `generator`, `schemaVersion`, `scope`, `filter`, `activeTask`; no active task is clean success. Active output contains task `id|mode|status|checkpoint`, aggregate summary and code-unit-sorted checks. Each item contains only `id`, `state`, sorted `reasonCodes`, `changeSummary`, and at most 20 relative `changed|missing` paths. Limit truncates whole check records; the 262,144-byte result cap first drops detail paths, then whole tail checks, while preserving full counts and truncation flags.
+
+The classifier is shared by checks and status/audit projections. Latest evidence uses timestamp then append-order tie behavior. `no-evidence|latest-skipped` is pending, `latest-failed` is failed, and invalid/future/expired pass is stale. A v1 fresh pass is passed. A v2 fresh pass requires matching immutable sidecar/evidence digest and current input digest; safe categorical causes are `snapshot-missing|snapshot-invalid|snapshot-mismatch|task-contract-changed|inputs-changed|inputs-missing|inputs-unavailable`. No check description/command, evidence ID/summary/time/hash/input pattern, criterion/task prose, secret or absolute path is emitted. The command never executes validation, writes state/evidence/sidecars, or calls network.
+
+### 4.5K Public task audit v1
+
+`harnix audit` is the fourteenth public command. No active task is a clean success with `{generator,schemaVersion,activeTask:null}`. Active output contains exactly `id`, `mode`, `status`, `checkpoint`, `readiness`, `completion`. Full readiness reuses the exact bounded ready-trace auditor while stripping diagnostic message prose; each diagnostic contains only `code`, `artifact`, optional `id`, optional `line`. Artifact read failure becomes `unavailable` plus `artifact-unavailable`; Lite readiness is `not-applicable`.
 
 Completion separates criteria `{met,waived,pending,total,pendingIds}` from required checks `{passed,failed,stale,pending,total,failedIds,staleIds,pendingIds}`. A criterion counts as met only when persisted met and supported by fresh evidence under completion semantics; waived remains waived and every other state is pending. Required checks reuse the exact latest-evidence, one-hour age, v2 immutable sidecar and freshly recomputed input-digest semantics used by status/finish. ID lists sort code-unit. Completion passes only with non-empty criteria/checks, every criterion completion-ready and every required check passed. Audit never runs a command, edits artifacts/state, advances workflow, calls network, or emits private prose/commands/secrets/absolute paths; an audit pass is visibility, not verification evidence.
 
@@ -454,7 +472,7 @@ Consumer expecting v1 receives an explicit schema mismatch, never a misleading f
 
 ### 4.7 Internal platform-hook protocol
 
-`harnix context --platform <kiro|antigravity|codex>` is the only packaged fast-path hook command, not public API and does not increase the eleven-command public contract. Legacy `harnix internal context ...` is not an alias and must fall through to regular CLI rejection. Release performance measurement invokes the exact canonical installed command. The hidden command:
+`harnix context --platform <kiro|antigravity|codex>` is the only packaged fast-path hook command, not public API and does not increase the fourteen-command public contract. Legacy `harnix internal context ...` is not an alias and must fall through to regular CLI rejection. Release performance measurement invokes the exact canonical installed command. The hidden command:
 
 1. accepts bounded optional hook-event JSON from stdin, validates `cwd` and bounded `workspacePaths[]`, and falls back safely to process cwd;
 2. resolves the **nearest** initialized project ancestor/root from cwd or workspace roots using safe realpath containment, including non-Git workspaces, deduplicated symlink-equivalent roots; it must not require the current workspace directory itself to contain `.harnix`;
@@ -486,7 +504,7 @@ interface PublicCliErrorV1 {
 }
 ```
 
-Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. Project `update` returns sorted `created`, content `updated`, metadata-only `metadataUpdated`, `preserved`, `deleted` và `obsolete`; một path metadata-only không được claim là content update. `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. Readiness khác `installed` hoặc warning không rỗng được ghi actionable lên stderr và trả exit `1`; clean `installed` trả `0`. `upgrade` always returns `{ installed: string, available: string|null, command: string[], applied: boolean }`; absent injected lookup means offline `available:null`, and only explicit `--apply` invokes the fixed npm executable/argument array. `init` is always non-interactive and emits one `InitProjectResult` with project status, developer, sorted languages/technologies, bounded `detection.matches`, and sorted created/updated/unchanged/preserved/warnings arrays. Existing projects return empty detection matches because init does not rescan; new/dry-run projects report pre-override evidence and warnings identify overridden facets. `status`, `tasks`, `audit` and repo-map impact return the bounded read-only projections in §§4.5D/4.5F–H and treat no active task or a missing cache according to their stable result contracts. `--yes` is not part of the public init syntax; a hidden no-op compatibility alias may remain for v0.5 callers.
+Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. Project `update` returns sorted `created`, content `updated`, metadata-only `metadataUpdated`, `preserved`, `deleted` và `obsolete`; một path metadata-only không được claim là content update. `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. Readiness khác `installed` hoặc warning không rỗng được ghi actionable lên stderr và trả exit `1`; clean `installed` trả `0`. `upgrade` always returns `{ installed: string, available: string|null, command: string[], applied: boolean }`; absent injected lookup means offline `available:null`, and only explicit `--apply` invokes the fixed npm executable/argument array. `init` is always non-interactive and emits one `InitProjectResult` with project status, developer, sorted languages/technologies, bounded `detection.matches`, and sorted created/updated/unchanged/preserved/warnings arrays. Existing projects return empty detection matches because init does not rescan; new/dry-run projects report pre-override evidence and warnings identify overridden facets. `status`, `tasks`, `context-report`, `checks`, `audit` and repo-map impact return the bounded read-only projections in §§4.5D/4.5F–G/4.5I–K; `resume` uses the pointer-only mutation in §4.5H. No-active/missing-cache cases follow their stable result contracts. `--yes` is not part of the public init syntax; a hidden no-op compatibility alias may remain for v0.5 callers.
 ## 5. Phase 0 — Documentation và baseline checkpoint
 
 ### Task 0.1: Chuẩn hóa PRD
@@ -851,12 +869,22 @@ Research task `20260826-132459-harness-ux-research-improvements` revalidated the
 - [x] HX-PROVENANCE-01: canonical `HARNESS_FEATURE_PROVENANCE.json` backfill với exact-schema/source/ref/date/license/evidence/adaptation/path regression.
 - Completion gate: đồng bộ generated workflow và patch release, rồi chạy compliance-before-quality review cùng fresh exact acceptance mục 11.
 
+## 9G. Task recovery và explainability — HX-RESUME-01/HX-CONTEXT-REPORT-01/HX-CHECKS-01
+
+Research task `20260826-154348-harness-feature-expansion` revalidated current primary mechanisms và usage signals, tái hiện ba local gaps rồi chỉ chọn adaptation vượt fit/privacy/license hard gate. Transcript/session store, Git rewind, daemon notification, fuzzy task-body indexing và automatic model-context ownership tiếp tục nằm ngoài scope.
+
+- [x] HX-RESUME-01: exact unfinished-task `harnix resume`, dry-run, bounded validation, collision fail-close và pointer-only atomic mutation.
+- [x] HX-CONTEXT-REPORT-01: shared effective-context builder cùng metadata-only `harnix context-report`, platform cap, drift/truncation và hidden-hook parity regressions.
+- [x] HX-CHECKS-01: structured required-check classifier cùng read-only `harnix checks`, path-level freshness causes, output bounds/privacy và status/audit parity.
+- [x] HX-PROVENANCE-02: registry IDs `context-selection-explanation`, `task-resume-recovery`, `verification-freshness-explanation` map immutable refs/licenses tới concrete code/test/docs paths.
+- Completion gate: README/canonical docs/templates, patch release, compliance-before-quality review và fresh exact acceptance mục 11.
+
 ## 10. Required test inventory
 
 | Suite | Required coverage |
 |---|---|
-| Unit | detection, config/task migrations, task status/index/audit, context rank/budget/content+selection drift, ready trace, verification input snapshots, repo-map graph/ranker/impact, project/global manifests, permission-preserving atomic writes, home/path containment, locks, rollback, journal/learning safety, Doctor v2 |
-| CLI integration | all eleven commands, bounded/no-write/private status/tasks/audit from nested initialized paths, v1 age and v2 digest freshness, project/global scope, setup outside a project, init repo-map creation, cache-only repo-map query/impact, idempotence, modified/deleted files, corrupt/future project/global schemas |
+| Unit | detection, config/task migrations, task status/index/resume/audit, shared effective context rank/budget/content+selection drift, required-check classifier/input snapshots, ready trace, repo-map graph/ranker/impact, project/global manifests, permission-preserving atomic writes, home/path containment, locks, rollback, journal/learning safety, Doctor v2 |
+| CLI integration | all fourteen commands, bounded/no-write/private status/tasks/context-report/checks/audit plus pointer-only resume from nested initialized paths, v1 age and v2 digest freshness, collision/malformed/privacy/truncation fixtures, project/global scope, setup outside a project, init repo-map creation, cache-only repo-map query/impact, idempotence, modified/deleted files, corrupt/future project/global schemas |
 | Migration | discovery, dry-run, copy/transform, preservation, conflict, rollback, cleanup |
 | Fixtures | independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue, multilingual/multi-technology monorepo |
 | Platform | Kiro user-global JSON hook + implicit steering, Antigravity Desktop/CLI `rules/AGENTS.md` snapshots/path migration and multi-root protocol, Codex user-global schema + implicit AGENTS block, no machine path |

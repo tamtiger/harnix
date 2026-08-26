@@ -8,7 +8,7 @@ Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
 ## Trạng thái
 
-Phase 5 review/refactor, Phase 6 user-global integrations và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt. Audit ngày 2026-08-18 đã bổ sung implicit routing cho ordinary prompt trên Kiro/Antigravity/Codex và chuyển Antigravity sang always-on `rules/AGENTS.md`; source release hiện là `1.0.13` sau đợt hardening review toàn diện. Disposable `agy 1.1.1` session đã chứng minh initialized project tự route Bypass/Lite/Full và non-Harnix no-op, nhưng print mode vẫn chưa load plugin hook. Kiro/Codex disposable profiles không có login và Codex còn pending trust, nên các surface đó không bị claim active. Đây chưa phải claim về package đã publish. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
+Phase 5 review/refactor, Phase 6 user-global integrations và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt. Audit ngày 2026-08-18 đã bổ sung implicit routing cho ordinary prompt trên Kiro/Antigravity/Codex và chuyển Antigravity sang always-on `rules/AGENTS.md`; source release hiện là `1.0.14` sau batch task recovery và explainability cho effective context/required-check freshness. Disposable `agy 1.1.1` session đã chứng minh initialized project tự route Bypass/Lite/Full và non-Harnix no-op, nhưng print mode vẫn chưa load plugin hook. Kiro/Codex disposable profiles không có login và Codex còn pending trust, nên các surface đó không bị claim active. Đây chưa phải claim về package đã publish. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
 
 ## Đặc điểm sản phẩm
 
@@ -131,8 +131,14 @@ harnix init
 # Xem task hiện tại, tiến độ verification và bước tiếp theo
 harnix status
 
-# Xem lịch sử task local và audit các gate đang chặn task active
+# Xem lịch sử task local; preview rồi phục hồi một unfinished task theo exact ID
 harnix tasks --limit 20
+harnix resume 20260826-120000-example-task --dry-run
+harnix resume 20260826-120000-example-task
+
+# Giải thích context thực tế và freshness của required checks mà không chạy check
+harnix context-report --platform codex
+harnix checks
 harnix audit
 
 # Xem dependency/dependent impact từ repo-map cache
@@ -163,7 +169,7 @@ Public CLI quản lý harness và diagnostics; coding agent dùng các skill Har
 3. Với Codex, mở `/hooks`, review và trust đúng Harnix hook hiện tại. Với platform khác, đọc readiness/warnings từ setup và `harnix doctor`; file tồn tại không tự chứng minh activation hoặc precedence.
 4. Mở Kiro, Antigravity hoặc Codex tại initialized repository. Global instruction tìm ancestor/workspace root gần nhất có `.harnix/config.yaml`; nếu không tìm thấy state hợp lệ, hook no-op và agent phải báo thay vì tự chạy `harnix init`.
 5. Gửi yêu cầu tự nhiên, ví dụ: “thêm retry có backoff cho payment webhook và cập nhật test”. Agent đọc `.harnix/workflow.md`, inspect active task, route Bypass/Lite/Full, rồi dùng `harnix-brainstorm`, `harnix-implement`, `harnix-check` và `harnix-finish-work` theo stage. `harnix-continue`, `harnix-research` và `harnix-debug` chỉ chạy khi trạng thái tương ứng yêu cầu.
-6. Chạy `harnix status` để xem active task và bước tiếp theo; dùng `harnix tasks` để tìm task local, `harnix audit` để thấy readiness/completion blocker, và `harnix repo-map --impact <path>` để điều hướng dependency impact từ cache mà không đọc source body. Chạy `harnix doctor` khi cần kiểm tra project/global drift. `ok: false` với `errors: 0` nghĩa là còn warning actionable hoặc external/manual state; `--fix` chỉ sửa issue an toàn được ownership contract cho phép và không trust hook thay người dùng.
+6. Chạy `harnix status` để xem active task và bước tiếp theo. Dùng `harnix tasks` để tìm task local; nếu `.active` đang rỗng và muốn nối lại một unfinished task cụ thể, preview bằng `harnix resume <task-id> --dry-run` rồi chạy lại không có `--dry-run`. Dùng `harnix context-report --platform <id>` để xem metadata context hook thực tế, `harnix checks` để biết check nào stale và input nào đổi/thiếu, `harnix audit` để thấy readiness/completion blocker, và `harnix repo-map --impact <path>` để điều hướng dependency impact từ cache mà không đọc source body. Chạy `harnix doctor` khi cần kiểm tra project/global drift. `ok: false` với `errors: 0` nghĩa là còn warning actionable hoặc external/manual state; `--fix` chỉ sửa issue an toàn được ownership contract cho phép và không trust hook thay người dùng.
 
 `harnix workflow` với đúng một action flag trong `--inspect|--save|--snapshot|--audit-ready|--finish|--cancel|--learn` là transport hidden dành cho stage skills, không phải public API cho người dùng. Nếu agent báo thiếu skill/hook, kiểm tra setup/readiness thay vì yêu cầu agent mô phỏng workflow hoặc ghi trực tiếp task state.
 
@@ -234,6 +240,36 @@ harnix tasks [--limit <1..100>] [--status <TaskStatus>]
 ```
 
 Default limit là 20. Harnix scan tối đa 1.000 safe task records, validate từng record độc lập, bỏ qua record malformed nhưng báo `status: "partial"`, và pin active task hợp lệ trước các kết quả còn lại. Filter status áp dụng trước limit; mỗi item chỉ có `id`, `mode`, `status`, `checkpoint`, `active`, `updatedAt`. Command không đổi active pointer, không ghi file và không gọi network.
+
+### `resume`
+
+Phục hồi active pointer tới đúng một unfinished TaskRecord đã biết ID:
+
+```text
+harnix resume <task-id> [--dry-run]
+```
+
+Candidate phải có canonical ID, record tối đa 1 MiB, khớp directory, qua exact-schema validation và chưa `completed|cancelled`. Pointer absent/empty cho phép preview `would-resume` hoặc atomic write thành `resumed`; pointer đã trỏ cùng task trả `already-active` không ghi lại. Pointer malformed/dangling/terminal hoặc đang trỏ task khác đều fail closed, không bị overwrite. Lệnh chỉ sửa `.harnix/tasks/.active`: không chuyển stage, sửa TaskRecord/evidence, chạy workflow, phục hồi transcript/model session/Git state hay gọi network.
+
+### `context-report`
+
+Giải thích metadata context mà hidden hook thực sự sẽ chọn cho một platform:
+
+```text
+harnix context-report --platform <kiro|antigravity|codex> [--limit <1..50>]
+```
+
+Default limit là 20. Report dùng chung effective-context builder với hidden `harnix context`: Codex có cap 2.500 ký tự, Kiro/Antigravity dùng `min(config.context.maxCharacters, 8000)`, tối đa 64 candidate entries. Output gồm budget, selected/omitted relative paths, trusted categorical reason codes và bounded drift/selection changes; khi chưa có persisted manifest, candidate được dựng từ task `relevantPaths` cùng applicable guides. Report không trả file content, raw reason, state payload, hash, task prose, secret hoặc absolute path; không ghi file, gọi network hay làm đổi hook payload.
+
+### `checks`
+
+Giải thích trạng thái freshness của từng required check mà không tự chạy validation:
+
+```text
+harnix checks [--limit <1..50>]
+```
+
+Default limit là 20. Mỗi item chỉ có check ID, state `passed|failed|stale|pending`, trusted reason codes và tối đa 20 relative input paths `changed|missing`. TaskRecord v1 giữ age semantics; v2 dùng cùng immutable snapshot, task-contract hash và recomputed input digest với `status`, `audit` và completion gate. Output không chứa description/command, evidence prose/time/hash, criterion/task prose, secret hoặc absolute path. Lệnh read-only, no-network và không biến report thành verification evidence.
 
 ### `audit`
 
@@ -347,7 +383,7 @@ triage -> planning -> ready -> implementing -> verifying -> finishing -> complet
 
 Xem [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) để biết transition, gate và artifact contract chi tiết.
 
-Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release, hiện là `1.0.13`. Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
+Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release, hiện là `1.0.14`. Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
 
 ## Dữ liệu dự án
 

@@ -1,0 +1,518 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260826-154348-harness-feature-expansion",
+  "title": "Research và triển khai batch feature Harnix tiếp theo",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Tiếp tục khảo sát harness hiện hành, chứng minh gap Harnix và triển khai tối đa ba feature có giá trị trải nghiệm cao mà vẫn giữ sản phẩm lean, local và deterministic.",
+  "nonGoals": [
+    "Không thêm package, executable, platform, telemetry, daemon, hosted service, marketplace, default MCP hoặc silent runtime network.",
+    "Không thêm global memory, mandatory multi-agent, automatic Git integration, prompt/session replay hoặc model-runtime ownership.",
+    "Không chọn feature chỉ vì phổ biến; mỗi feature triển khai phải có local reproduction, real-usage signal và primary mechanism evidence.",
+    "Không đổi frozen schema, transition, path, exit semantics hoặc global integration surface nếu chưa khóa đồng thời migration, docs và tests.",
+    "Không tự commit, branch, worktree, merge, push, publish hoặc tạo pull request."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-current-research",
+      "text": "Primary-source research hiện hành phân biệt feature mới hoặc thay đổi gần đây, chứng minh từng Harnix gap bằng local evidence và chấm adopt/adapt/defer/reject trước khi chọn tối đa ba capability.",
+      "status": "met",
+      "evidenceIds": [
+        "research-decision-quality-pass-final-20260826"
+      ]
+    },
+    {
+      "id": "ac-delivered-value",
+      "text": "Batch được chọn có exact public/internal contract, observable user value và regression bảo vệ; mọi behavior change được triển khai bằng RED–GREEN–REFACTOR trước completion.",
+      "status": "met",
+      "evidenceIds": [
+        "task-resume-contract-pass-final-20260826",
+        "context-report-contract-pass-final-20260826",
+        "checks-report-contract-pass-final-20260826",
+        "selected-feature-acceptance-pass-final-20260826",
+        "static-quality-pass-final-20260826"
+      ]
+    },
+    {
+      "id": "ac-product-boundaries",
+      "text": "Implementation giữ một package/bin, đúng Kiro-Antigravity-Codex, local/offline deterministic behavior, bounded privacy và không mở rộng các non-goal Harnix.",
+      "status": "met",
+      "evidenceIds": [
+        "task-resume-contract-pass-final-20260826",
+        "context-report-contract-pass-final-20260826",
+        "checks-report-contract-pass-final-20260826",
+        "selected-feature-acceptance-pass-final-20260826",
+        "static-quality-pass-final-20260826",
+        "release-gates-pass-final-20260826"
+      ]
+    },
+    {
+      "id": "ac-provenance",
+      "text": "Mỗi external-derived feature có stable provenance entry với immutable source ref, date, license, evidence, adaptation delta và existing code/test/docs paths.",
+      "status": "met",
+      "evidenceIds": [
+        "provenance-completeness-pass-final-20260826",
+        "static-quality-pass-final-20260826",
+        "release-gates-pass-final-20260826"
+      ]
+    },
+    {
+      "id": "ac-quality-release",
+      "text": "Canonical docs, README, CHANGELOG và patch version đồng bộ; compliance review, quality/security review và exact acceptance/release gates pass fresh.",
+      "status": "met",
+      "evidenceIds": [
+        "selected-feature-acceptance-pass-final-20260826",
+        "static-quality-pass-final-20260826",
+        "release-gates-pass-final-20260826"
+      ]
+    },
+    {
+      "id": "ac-task-resume",
+      "text": "Lệnh public `harnix resume <task-id> [--dry-run]` chỉ khôi phục exact validated unfinished TaskRecord khi không có active task, idempotent với cùng pointer và fail closed trước mọi collision, pointer/candidate không hợp lệ hoặc task terminal mà không sửa TaskRecord.",
+      "status": "met",
+      "evidenceIds": [
+        "task-resume-contract-pass-final-20260826"
+      ]
+    },
+    {
+      "id": "ac-context-report",
+      "text": "Lệnh public `harnix context-report --platform <kiro|antigravity|codex> [--limit <1..50>]` giải thích bounded effective hook selection và persisted drift bằng metadata repository-relative đã phân loại, dùng cùng selector với hidden context nhưng không lộ content, raw reason, hash, task prose, secret hoặc absolute path.",
+      "status": "met",
+      "evidenceIds": [
+        "context-report-contract-pass-final-20260826"
+      ]
+    },
+    {
+      "id": "ac-checks-report",
+      "text": "Lệnh public `harnix checks [--limit <1..50>]` giải thích deterministic state và freshness reason của required checks, gồm bounded changed/missing input paths khi xác định được, mà không chạy validation command, gọi network, sửa task/evidence hoặc lộ command, evidence summary, hash, task prose hay absolute path.",
+      "status": "met",
+      "evidenceIds": [
+        "checks-report-contract-pass-final-20260826"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/tasks/20260826-154348-harness-feature-expansion",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNESS_FEATURE_PROVENANCE.json",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_BASELINE.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "package.json",
+    "scripts",
+    "src",
+    "test"
+  ],
+  "relevantSpecs": [
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_BASELINE.md",
+    "docs/UPSTREAM_MAPPING.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "research-decision-quality",
+      "description": "Inspect current primary sources, local reproductions, normalized capability scoring, guardrails và decision matrix.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-current-research"
+      ],
+      "inputs": [
+        ".harnix/tasks/20260826-154348-harness-feature-expansion/research/*.md",
+        "@task-contract",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/HARNIX_PRD.md",
+        "docs/UPSTREAM_BASELINE.md",
+        "docs/UPSTREAM_MAPPING.md"
+      ]
+    },
+    {
+      "id": "selected-feature-acceptance",
+      "description": "Chạy full acceptance suite cho toàn bộ feature batch đã khóa.",
+      "command": "pnpm run test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-delivered-value",
+        "ac-product-boundaries"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "provenance-completeness",
+      "description": "Xác minh canonical provenance registry và mọi target code-test-doc tồn tại.",
+      "command": "pnpm exec vitest run test/workflow/provenance.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-provenance"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNESS_FEATURE_PROVENANCE.json",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "test/workflow/provenance.test.ts"
+      ]
+    },
+    {
+      "id": "static-quality",
+      "description": "Build, lint và typecheck repository sau toàn bộ batch.",
+      "command": "pnpm run build && pnpm run lint && pnpm run typecheck",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-delivered-value",
+        "ac-product-boundaries",
+        "ac-provenance",
+        "ac-quality-release"
+      ],
+      "inputs": [
+        "@task-contract",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "release-gates",
+      "description": "Kiểm tra package, fake-home tarball smoke, performance, footprint và release scan.",
+      "command": "pnpm run pack:check && pnpm run smoke:tarball && pnpm run measure:init && pnpm run measure:footprint && pnpm run scan:release",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-product-boundaries",
+        "ac-provenance",
+        "ac-quality-release"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "task-resume-contract",
+      "description": "Kiểm tra exact-ID resume, dry-run, idempotency, terminal/collision/corruption fail-closed, atomic pointer-only mutation và public redaction.",
+      "command": "pnpm exec vitest run test/unit/task-resume.test.ts test/integration/resume.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-delivered-value",
+        "ac-product-boundaries",
+        "ac-task-resume"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/resume.ts",
+        "src/core/tasks/task-resume.ts",
+        "test/integration/resume.test.ts",
+        "test/unit/task-resume.test.ts"
+      ]
+    },
+    {
+      "id": "context-report-contract",
+      "description": "Kiểm tra parity với effective hidden-context selector, platform caps, dynamic fallback, drift/truncation và metadata-only privacy.",
+      "command": "pnpm exec vitest run test/unit/effective-context.test.ts test/integration/context-report.test.ts test/workflow/internal-context.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-context-report",
+        "ac-delivered-value",
+        "ac-product-boundaries"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/context-report.ts",
+        "src/commands/internal-context.ts",
+        "src/core/context/context.ts",
+        "src/core/context/effective-context.ts",
+        "test/integration/context-report.test.ts",
+        "test/unit/effective-context.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "checks-report-contract",
+      "description": "Kiểm tra v1 age semantics, v2 immutable-snapshot diagnostics, deterministic ordering/truncation, no-write/no-execute behavior và public redaction.",
+      "command": "pnpm exec vitest run test/unit/check-report.test.ts test/integration/checks.test.ts test/integration/status.test.ts test/integration/audit.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-checks-report",
+        "ac-delivered-value",
+        "ac-product-boundaries"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/checks.ts",
+        "src/core/status.ts",
+        "src/core/verification/check-report.ts",
+        "src/core/verification/input-freshness.ts",
+        "test/integration/audit.test.ts",
+        "test/integration/checks.test.ts",
+        "test/integration/status.test.ts",
+        "test/unit/check-report.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-resume-contract-pass-20260826",
+      "checkId": "task-resume-contract",
+      "recordedAt": "2026-08-26T09:10:22.524Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused resume contract pass: 2 files, 5 tests; pre/post input digest khớp.",
+      "artifactPaths": [
+        "src/commands/resume.ts",
+        "src/core/tasks/task-resume.ts",
+        "test/integration/resume.test.ts",
+        "test/unit/task-resume.test.ts"
+      ],
+      "inputDigest": "eb2abd6e346b7db81a1e0464699b42defb4c3ae60c486aed7b15e09db8d5e501"
+    },
+    {
+      "id": "context-report-contract-pass-20260826",
+      "checkId": "context-report-contract",
+      "recordedAt": "2026-08-26T09:15:13.045Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused context-report contract pass: 3 files, 15 tests; hidden-hook parity và pre/post digest đều giữ nguyên.",
+      "artifactPaths": [
+        "src/commands/context-report.ts",
+        "src/core/context/effective-context.ts",
+        "test/integration/context-report.test.ts",
+        "test/unit/effective-context.test.ts"
+      ],
+      "inputDigest": "66584bc136d3e10020686587a08e7bc219425943d7eb0509df35a9e24ed200f0"
+    },
+    {
+      "id": "checks-report-contract-pass-20260826",
+      "checkId": "checks-report-contract",
+      "recordedAt": "2026-08-26T09:19:21.763Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused checks-report contract pass: 4 files, 13 tests; status/audit parity và pre/post digest đều giữ nguyên.",
+      "artifactPaths": [
+        "src/commands/checks.ts",
+        "src/core/verification/check-report.ts",
+        "test/integration/checks.test.ts",
+        "test/unit/check-report.test.ts"
+      ],
+      "inputDigest": "dc27df47e1f43245df7d1b7879b5efb64dd819d4fb61e61a42d03aa24560aff1"
+    },
+    {
+      "id": "privacy-parser-redaction-red-20260826",
+      "recordedAt": "2026-08-26T09:33:54.0215926Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED xác nhận context-report và checks làm lộ JSON parser canary từ persisted state malformed: 2 regression fail đúng triệu chứng.",
+      "artifactPaths": [
+        "src/commands/checks.ts",
+        "src/commands/context-report.ts",
+        "test/integration/checks.test.ts",
+        "test/integration/context-report.test.ts"
+      ]
+    },
+    {
+      "id": "privacy-parser-redaction-green-20260826",
+      "recordedAt": "2026-08-26T09:33:54.0225926Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN sau redaction tại public command boundary: 2 files, 8 tests pass; typecheck pass và parser canary không xuất hiện.",
+      "artifactPaths": [
+        "src/commands/checks.ts",
+        "src/commands/context-report.ts",
+        "test/integration/checks.test.ts",
+        "test/integration/context-report.test.ts"
+      ]
+    },
+    {
+      "id": "resume-bounded-read-hardening-pass-20260826",
+      "recordedAt": "2026-08-26T09:34:53.4262545Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Pre-read stat cap cho pointer/task record giữ post-read race check; resume focused 2 files, 5 tests pass và typecheck pass.",
+      "artifactPaths": [
+        "src/core/tasks/task-resume.ts",
+        "test/integration/resume.test.ts",
+        "test/unit/task-resume.test.ts"
+      ]
+    },
+    {
+      "id": "research-decision-quality-pass-final-20260826",
+      "checkId": "research-decision-quality",
+      "recordedAt": "2026-08-26T09:37:04.9774774Z",
+      "result": "pass",
+      "summary": "Fresh inspection xác nhận local reproduction, current primary refs/licenses, usage signals, fact/inference split, weighted hard gate, locked contracts, provenance impact và remaining uncertainty.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-154348-harness-feature-expansion/research/next-capability-mechanisms.md",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_MAPPING.md"
+      ],
+      "inputDigest": "6d9ce053acf27dd662e2ddc8934937e3b010e9f0ff5fea25cb4550b259e0009b"
+    },
+    {
+      "id": "task-resume-contract-pass-final-20260826",
+      "checkId": "task-resume-contract",
+      "recordedAt": "2026-08-26T09:37:33.2330650Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh resume contract pass: 2 files, 5 tests; exact-ID, dry-run, idempotency, collision/corruption/terminal fail-close, parser redaction và pre-read size cap.",
+      "artifactPaths": [
+        "src/commands/resume.ts",
+        "src/core/tasks/task-resume.ts",
+        "test/integration/resume.test.ts",
+        "test/unit/task-resume.test.ts"
+      ],
+      "inputDigest": "0f22482130c58a8fab89311f5533cdcace83b90c20a95045b94d245491abdd51"
+    },
+    {
+      "id": "context-report-contract-pass-final-20260826",
+      "checkId": "context-report-contract",
+      "recordedAt": "2026-08-26T09:39:17.294Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh context-report contract pass: 3 files, 16 tests; shared selector/hook parity, platform caps, fallback, drift/limit, no-write và malformed-state parser redaction.",
+      "artifactPaths": [
+        "src/commands/context-report.ts",
+        "src/core/context/effective-context.ts",
+        "test/integration/context-report.test.ts",
+        "test/unit/effective-context.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ],
+      "inputDigest": "1d13a4358a45eccb656ea22d7a6d193cb82c7601f0206a2923c0a6ef29d9fc4a"
+    },
+    {
+      "id": "checks-report-contract-pass-final-20260826",
+      "checkId": "checks-report-contract",
+      "recordedAt": "2026-08-26T09:39:46.768Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh checks-report contract pass: 4 files, 14 tests; v1/v2 freshness, deterministic ordering/truncation, status/audit parity, no-write/no-execute và malformed-state parser redaction.",
+      "artifactPaths": [
+        "src/commands/checks.ts",
+        "src/core/verification/check-report.ts",
+        "test/integration/checks.test.ts",
+        "test/integration/status.test.ts",
+        "test/integration/audit.test.ts",
+        "test/unit/check-report.test.ts"
+      ],
+      "inputDigest": "f6f2033921990d6cdbd36879bf97e82698235fc9e6497e1b124dc8a2da9478c6"
+    },
+    {
+      "id": "provenance-completeness-pass-final-20260826",
+      "checkId": "provenance-completeness",
+      "recordedAt": "2026-08-26T09:40:09.282Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh provenance registry pass: 1 file, 2 tests; registry hợp lệ và mọi code-test-doc target của 22 capability đều tồn tại.",
+      "artifactPaths": [
+        "docs/HARNESS_FEATURE_PROVENANCE.json",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "test/workflow/provenance.test.ts"
+      ],
+      "inputDigest": "73f82d2ef9b2683c3d98c086db16cd10f75b843888fda0f4c2e8488403a3be98"
+    },
+    {
+      "id": "static-quality-pass-final-20260826",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-26T09:40:46.942Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh exact static-quality gate pass: tsup ESM+DTS build, ESLint và TypeScript noEmit; pre/post digest khớp.",
+      "artifactPaths": [
+        "src",
+        "test",
+        "scripts",
+        "dist"
+      ],
+      "inputDigest": "e1d0cb3b739bec479966f7ce6ecd6eb0037ffe9f4d9d4ed3aed44b7b23b65cd9"
+    },
+    {
+      "id": "selected-feature-acceptance-pass-final-20260826",
+      "checkId": "selected-feature-acceptance",
+      "recordedAt": "2026-08-26T09:42:14.043Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh full acceptance pass: unit 247 pass/1 skip, integration 119, migration 9, platform 25, workflow 74 và safety 41; tổng 515 pass/1 skip, digest trước/sau khớp.",
+      "artifactPaths": [
+        "src",
+        "test",
+        "docs/HARNIX_PRD.md"
+      ],
+      "inputDigest": "da21aeadb239ed4d401cc71cf5244ef1867ef14ff252de839d4e7632a1e0390c"
+    },
+    {
+      "id": "release-gates-pass-final-20260826",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-26T09:43:21.443Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh exact release gate pass: pack/fake-home smoke cả 3 platform, init median 417.16 ms worst 441.26 ms, footprint 236406 bytes/50 files (82.40% reduction), release scan sạch; digest khớp.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "scripts",
+        "tamtiger-harnix-1.0.14.tgz"
+      ],
+      "inputDigest": "f320733a82d9a1b3908c42a14bbe43f09a71b84d2798a9a7bd7ea9c723afa19f"
+    },
+    {
+      "id": "section-11-acceptance-pass-final-20260826",
+      "recordedAt": "2026-08-26T09:45:56.278Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh exact mục 11 pass từ frozen install qua build/lint/typecheck, 515-test suite, acceptance 515 pass/1 skip, package/fake-home smoke, init worst 667.36 ms, footprint giảm 82.40%, release scan và git diff --check.",
+      "artifactPaths": [
+        "package.json",
+        "pnpm-lock.yaml",
+        "src",
+        "test",
+        "scripts",
+        "README.md",
+        "CHANGELOG.md",
+        "docs"
+      ]
+    },
+    {
+      "id": "finishing-review-pass-final-20260826",
+      "recordedAt": "2026-08-26T09:46:42.969Z",
+      "result": "pass",
+      "summary": "Final compliance rồi quality/security review pass; 8/8 criteria và 8/8 required checks current. Không waiver. Exact mục 11 pass. Omitted có chủ đích: không chạm real user profile; global adapter surface không đổi và fake-home tarball smoke đủ ba platform pass. Residual activation/trust claims giữ nguyên theo tài liệu hiện hành.",
+      "artifactPaths": [
+        "README.md",
+        "CHANGELOG.md",
+        "docs",
+        "src",
+        "test",
+        ".harnix/tasks/20260826-154348-harness-feature-expansion"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-26T08:45:06.3926201Z",
+  "updatedAt": "2026-08-26T09:46:53.104Z",
+  "completedAt": "2026-08-26T09:46:53.104Z"
+}

@@ -15,6 +15,9 @@ import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces
 import { searchMemory } from "./commands/mem.js";
 import { inspectProjectStatus } from "./commands/status.js";
 import { listProjectTasks } from "./commands/tasks.js";
+import { resumeProjectTask } from "./commands/resume.js";
+import { reportProjectContext } from "./commands/context-report.js";
+import { reportProjectChecks } from "./commands/checks.js";
 import { auditProjectTask } from "./commands/audit.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
@@ -151,6 +154,27 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
         ...(status === undefined ? {} : { status }),
       });
       process.stdout.write(`${JSON.stringify(result)}\n`);
+    });
+  program.command("resume")
+    .description("Activate an exact unfinished Harnix task")
+    .argument("<task-id>", "Exact Harnix task ID")
+    .option("--dry-run", "Preview without writing the active pointer")
+    .action(async (taskId: string, options: { dryRun?: boolean }) => {
+      process.stdout.write(`${JSON.stringify(await resumeProjectTask(process.cwd(), taskId, options.dryRun === true))}\n`);
+    });
+  program.command("context-report")
+    .description("Explain bounded effective Harnix hook context metadata")
+    .option("--platform <platform>", "Target Kiro, Antigravity, or Codex")
+    .option("--limit <count>", "Maximum details per context category", "20")
+    .action(async (options: { platform?: string; limit: string }) => {
+      const platform = parseReportPlatform(options.platform);
+      process.stdout.write(`${JSON.stringify(await reportProjectContext(process.cwd(), platform, parseReportLimit(options.limit, "context-report")))}\n`);
+    });
+  program.command("checks")
+    .description("Explain required Harnix check freshness metadata")
+    .option("--limit <count>", "Maximum required checks", "20")
+    .action(async (options: { limit: string }) => {
+      process.stdout.write(`${JSON.stringify(await reportProjectChecks(process.cwd(), parseReportLimit(options.limit, "checks"), programOptions.statusClock?.() ?? Date.now()))}\n`);
     });
   program.command("audit").description("Audit active-task readiness and completion blockers").action(async () => {
     process.stdout.write(`${JSON.stringify(await auditProjectTask(process.cwd(), programOptions.statusClock?.() ?? Date.now()))}\n`);
@@ -311,6 +335,18 @@ function parseTaskStatus(value: string | undefined): TaskStatus | undefined {
   const statuses: readonly TaskStatus[] = ["planning", "ready", "in_progress", "verifying", "blocked", "completed", "cancelled"];
   if (!statuses.includes(value as TaskStatus)) throw new Error("--status must be planning, ready, in_progress, verifying, blocked, completed, or cancelled.");
   return value as TaskStatus;
+}
+
+function parseReportPlatform(value: string | undefined): "kiro" | "antigravity" | "codex" {
+  if (value !== "kiro" && value !== "antigravity" && value !== "codex") throw new Error("--platform must be kiro, antigravity, or codex.");
+  return value;
+}
+
+function parseReportLimit(value: string, command: "context-report" | "checks"): number {
+  if (!/^\d+$/u.test(value)) throw new Error(`--limit must be an integer between 1 and 50 for ${command}.`);
+  const limit = Number(value);
+  if (limit < 1 || limit > 50) throw new Error(`--limit must be an integer between 1 and 50 for ${command}.`);
+  return limit;
 }
 
 export function publicCliError(message: string, exitCode: 1 | 2): PublicCliErrorV1 {

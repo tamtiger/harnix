@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.14] - 2026-08-26
+
+### Changed
+
+- Thêm public harnix resume để phục hồi exact unfinished-task pointer với dry-run, bounded validation và collision fail-close.
+- Thêm metadata-only harnix context-report và harnix checks để giải thích effective hook context cùng required-check freshness mà không lộ private content hoặc chạy validation.
+- Đồng bộ shared context/check classifiers, README, canonical contracts, consumer templates và machine-checkable provenance cho ba capability mới.
+
 ## [1.0.13] - 2026-08-26
 
 ### Changed

@@ -33,7 +33,7 @@ Treat this profile as an initialization-time discovery seed. Verify current mani
 
 ## Harnix workflow
 
-Use harnix --help or harnix <command> --help for exact CLI syntax; do not guess flags. Public commands are init, setup, update, upgrade, uninstall, mem, status, tasks, audit, doctor, and repo-map. They manage the harness, visibility, navigation, and diagnostics, not coding-task stage transitions.
+Use harnix --help or harnix <command> --help for exact CLI syntax; do not guess flags. Public commands are init, setup, update, upgrade, uninstall, mem, status, tasks, resume, context-report, checks, audit, doctor, and repo-map. They manage the harness, explicit task-pointer recovery, visibility, navigation, and diagnostics, not coding-task stage transitions.
 
 \`harnix init\` creates this project's .harnix state and root AGENTS bootstrap. It does not install platform integrations. \`harnix setup --kiro\`, \`harnix setup --antigravity\`, and \`harnix setup --codex\` are explicit user-global integration operations: they may run from any directory and affect only the selected user integration, not this repository. Do not run setup or harnix init automatically. Run a selected setup only with explicit user authorization; if a required global skill or hook is unavailable, report that instead of simulating it.
 
@@ -41,10 +41,10 @@ Activation guard and before work:
 
 1. Locate the nearest initialized project ancestor or workspace root containing .harnix/config.yaml. If none exists or its state is invalid, do not apply Harnix workflow, read Harnix project state, create state, or run harnix init; report the problem.
 2. Read .harnix/workflow.md and .harnix/config.yaml, verify the current repository evidence, then load only the context relevant to the request.
-3. If .harnix/tasks/.active identifies an unfinished task, use harnix-continue and resume its persisted status, checkpoint, and evidence.
+3. If .harnix/tasks/.active identifies an unfinished task, use harnix-continue and continue its persisted status, checkpoint, and evidence. If no task is active and the user explicitly selects an exact unfinished ID discovered with \`harnix tasks\`, \`harnix resume <task-id> [--dry-run]\` may restore only the active pointer before harnix-continue.
 4. Otherwise classify the request as Bypass, Lite, or Full using .harnix/workflow.md. Read-only answers may bypass task creation; implementation work follows the selected workflow.
 
-Public harnix status is a bounded read-only view of the active task's persisted state, aggregate progress, context freshness, attention, and next action. Public harnix tasks is a bounded resilient local task index that never selects or resumes a record; public harnix audit exposes exact readiness/completion blocker codes and IDs without running checks. These commands do not replace workflow inspect, mutate task state, or prove completion; they deliberately omit task prose, commands, prompts, secrets, and absolute paths.
+Public harnix status is a bounded read-only view of the active task's persisted state, aggregate progress, context freshness, attention, and next action. Public harnix tasks is a bounded resilient local task index that never selects a record; harnix resume restores only an exact validated unfinished-task pointer and never replaces another active task. Public harnix context-report explains effective hook-context metadata, harnix checks explains required-check freshness and changed inputs, and public harnix audit exposes exact readiness/completion blocker codes and IDs without running checks. Except for resume's explicit pointer write, these commands are read-only. None replaces workflow inspect/continue, performs a stage transition, or proves completion; outputs deliberately omit task prose, commands, prompts, contents, hashes, secrets, and absolute paths.
 
 Use the skills in this order when their stage applies:
 

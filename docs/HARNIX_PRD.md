@@ -45,7 +45,7 @@ Harnix được phát triển từ baseline kỹ thuật [mindfold-ai/Trellis](h
 - **Safe by default:** preview migration/purge và fail closed khi path/hash/schema không chắc chắn.
 - **YAGNI:** không thêm platform, orchestration, service hoặc generic skill ngoài nhu cầu.
 - **Single-agent capable:** subagent có thể hữu ích nhưng không phải dependency.
-- **Offline lifecycle:** init/setup/update/uninstall/mem/status/tasks/audit/repo-map/doctor không silent network.
+- **Offline lifecycle:** init/setup/update/uninstall/mem/status/tasks/resume/context-report/checks/audit/repo-map/doctor không silent network.
 
 ## 5. Scope
 
@@ -57,6 +57,7 @@ Harnix được phát triển từ baseline kỹ thuật [mindfold-ai/Trellis](h
 - Stack/package-manager/verification detection.
 - Kiro, Antigravity và Codex native user-global integrations with project-activation guards.
 - Managed lifecycle, migration, doctor, update, upgrade, uninstall, memory query.
+- Bounded task observability, exact unfinished-task pointer recovery, effective-context explanation và required-check freshness explanation.
 - Concise common và stack-specific engineering rules.
 - Safe resolution của existing Git root/worktree; Harnix không tự tạo worktree.
 
@@ -86,7 +87,7 @@ Harnix được phát triển từ baseline kỹ thuật [mindfold-ai/Trellis](h
 harnix/
 ├── src/
 │   ├── core/               # tasks, context, journal, learning, config
-│   ├── commands/           # init, setup, update, upgrade, uninstall, mem, status, tasks, audit, doctor
+│   ├── commands/           # init, setup, update, upgrade, uninstall, mem, status, tasks, resume, context-report, checks, audit, doctor
 │   ├── configurators/      # kiro.ts, antigravity.ts, codex.ts only
 │   ├── templates/          # harnix + three platforms + shared
 │   ├── rules/              # common + selected stack packs
@@ -130,13 +131,16 @@ harnix uninstall --legacy-project-surfaces [--yes]
 harnix mem [query]
 harnix status
 harnix tasks [--limit <1..100>] [--status <TaskStatus>]
+harnix resume <task-id> [--dry-run]
+harnix context-report --platform <kiro|antigravity|codex> [--limit <1..50>]
+harnix checks [--limit <1..50>]
 harnix audit
 harnix doctor [--fix] [--global]
 harnix repo-map --query <text> [--limit <count>]
 harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]
 ```
 
-Có mười một public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Public failure trước normal result emit exact `PublicCliErrorV1` đã redaction trên stdout và cùng actionable message trên stderr; exit nằm trong envelope và tuân theo semantics `1|2`. Hidden `context`/`workflow` giữ protocol output riêng, không nhận public error envelope. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix context --platform <id>` là platform-hook protocol; hidden `harnix workflow` yêu cầu đúng một action flag trong `--inspect|--save|--snapshot|--audit-ready|--finish|--cancel|--learn` và là agent persistence/freshness/terminal transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
+Có mười bốn public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Public failure trước normal result emit exact `PublicCliErrorV1` đã redaction trên stdout và cùng actionable message trên stderr; exit nằm trong envelope và tuân theo semantics `1|2`. Hidden `context`/`workflow` giữ protocol output riêng, không nhận public error envelope. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix context --platform <id>` là platform-hook protocol; hidden `harnix workflow` yêu cầu đúng một action flag trong `--inspect|--save|--snapshot|--audit-ready|--finish|--cancel|--learn` và là agent persistence/freshness/terminal transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
 
 ## 8. Init requirements
 
@@ -277,6 +281,24 @@ Required-check state dùng latest evidence theo timestamp rồi persisted append
 
 Top-level fields là `generator`, `schemaVersion`, `scope`, `status`, `filter`, `summary`, `activeTaskId`, `attention`, `tasks`. `scope` luôn `project`; `status` là `ready|partial`, trong đó `partial` chỉ khi có invalid record hoặc active pointer không resolve. Scan/result truncation là bounded normal behavior và có flag riêng. Mỗi task chỉ emit `id`, `mode`, `status`, `checkpoint`, `active`, `updatedAt`; title, goal, prompt, criterion/check/blocker prose, evidence summary, validation command, secret và absolute path không được emit. Command không đọc artifact/journal body, ghi state, gọi network hoặc refresh cache.
 
+### Resume
+
+`harnix resume <task-id> [--dry-run]` resolve ancestor initialized gần nhất và phục hồi duy nhất `.harnix/tasks/.active` tới exact unfinished TaskRecord. Task ID phải canonical; record tối đa 1 MiB, directory/record ID khớp, exact-schema hợp lệ và status không terminal. Pointer tối đa 1 KiB; absent/empty cho phép `would-resume` hoặc atomic write thành `resumed`, còn cùng exact valid task trả `already-active` không write. Pointer malformed/dangling/terminal hoặc đang trỏ task khác, candidate missing/malformed/oversized/terminal đều fail closed bằng public error exit 2 và không overwrite.
+
+Success `TaskResumeResultV1` chỉ gồm `generator`, `schemaVersion`, `scope`, `dryRun`, `outcome`, task `id|mode|status|checkpoint` và deterministic `nextAction`. Mutation duy nhất là permission-preserving atomic replacement của pointer; command không sửa TaskRecord/evidence/artifact, chuyển workflow, phục hồi transcript/model session/Git state hoặc gọi network. `--dry-run` thực hiện cùng validation/collision checks nhưng không ghi file.
+
+### Context report
+
+`harnix context-report --platform <kiro|antigravity|codex> [--limit <1..50>]` emit `ContextReportResultV1` read-only; default limit 20, no active task là success với `activeTask:null`. Active report dùng cùng effective builder với hidden context ở bounded hook mode: Codex cap 2.500 characters; Kiro/Antigravity cap `min(config.context.maxCharacters, 8000)`; tối đa 64 inspected entries. Chưa có `context.json` thì candidate là task `relevantPaths` cộng applicable guides; đã có manifest thì dùng persisted entries cộng applicable guides.
+
+Output active chỉ gồm task ID, platform budget, aggregate candidate/selected/omitted counts, selected relative paths với trusted sorted reason codes `applicable-guide|persisted-selection|pinned|task-reference`, omitted relative paths với `budget|duplicate|missing|unsafe`, và bounded context/selection drift metadata. `--limit` áp riêng cho selected, omitted và drift changes. Toàn JSON tối đa 262.144 UTF-8 bytes bằng deterministic whole-item tail omission; report không trả content, raw persisted reason/state, hash, task prose, hook event, secret hoặc absolute path, không ghi file/network và không làm đổi hidden hook payload.
+
+### Checks
+
+`harnix checks [--limit <1..50>]` emit `ChecksReportResultV1` read-only; default limit 20, no active task là success với `activeTask:null`. Required checks sort code-unit. Mỗi item chỉ gồm ID, state `passed|failed|stale|pending`, trusted sorted reason codes và tối đa 20 relative `changed|missing` input paths; aggregate giữ full counts cùng returned/truncation flags. Toàn JSON tối đa 262.144 UTF-8 bytes bằng deterministic whole-item tail omission.
+
+Classifier dùng latest evidence theo timestamp rồi append order. No evidence/latest skipped là pending; latest fail là failed; pass quá một giờ hoặc timestamp invalid/future là stale; v1 fresh pass là passed. v2 fresh pass cần matching immutable sidecar/evidence digest và recomputed current input digest. Missing/invalid/mismatch sidecar, task contract change, changed/missing/unavailable inputs được biểu diễn bằng categorical reason code, không throw private detail. Command không trả description/validation command, evidence ID/summary/time/hash/input glob, criterion/task prose, secret hoặc absolute path; không chạy check, sửa state/sidecar/evidence hoặc gọi network.
+
 ### Audit
 
 `harnix audit` resolve ancestor initialized gần nhất và emit `TaskAuditResultV1` read-only; không có active task là success với `activeTask:null`. Active projection chỉ gồm `id`, `mode`, `status`, `checkpoint`, `readiness`, `completion`. Full readiness chạy cùng bounded deterministic ready-trace auditor nhưng strip diagnostic message; mỗi diagnostic chỉ có stable `code`, `artifact`, optional `id` và optional `line`. Artifact read failure trở thành readiness `unavailable` với `artifact-unavailable`; Lite readiness là `not-applicable`.
@@ -366,14 +388,14 @@ Initial IDs cover source languages C#, TypeScript, JavaScript, PHP, Python, Java
 - Purge/migration exact preview và explicit intent.
 - Atomic writes, rollback, source preservation có injected-failure tests.
 - Không execute spec/context/journal content. Repository-derived excerpt phải nằm trong explicit untrusted-data boundary dùng chung cho Kiro, Antigravity và Codex; learning statement dùng boundary riêng và JSON-string serialization. Fixed boundary và omission disclosure đều tính vào output budget.
-- Không network trong init/setup/update/uninstall/mem/status/tasks/audit/repo-map/doctor.
+- Không network trong init/setup/update/uninstall/mem/status/tasks/resume/context-report/checks/audit/repo-map/doctor.
 
 ## 17. Required tests
 
 Tất cả filesystem tests dùng isolated temporary repositories **và injected disposable user homes**; they must not read or write a real user profile:
 
 1. Unit: detection; config/migrations; context ranking/budget; project/global hash manifests; permission-preserving atomic writes; user path safety; lock/stale-lock/rollback; journal; learning; Doctor v2.
-2. CLI: all eleven public commands; status/tasks/audit from nested initialized paths plus no-active/active/fresh/stale/malformed/no-write/privacy fixtures; repo-map query/impact cache-only fixtures; setup outside an initialized repository; project/global update/uninstall scope; idempotence; modified/deleted/corrupt/future project and global schemas.
+2. CLI: all fourteen public commands; status/tasks/resume/context-report/checks/audit from nested initialized paths plus no-active/active/collision/fresh/stale/malformed/no-write/privacy/bounded fixtures; repo-map query/impact cache-only fixtures; setup outside an initialized repository; project/global update/uninstall scope; idempotence; modified/deleted/corrupt/future project and global schemas.
 3. Migration: discovery, dry-run, transform, preservation, mixed/conflict, rollback, cleanup.
 4. Fixtures: independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue and multilingual/multi-technology monorepo.
 5. Platform: Kiro global JSON-v1 hook; Antigravity Desktop/CLI plugins and multi-root invocation; Codex global skills/AGENTS/nested hook schema; relevant rules only and no machine paths.
