@@ -164,7 +164,9 @@ describe("canonical Harnix workflow skill sources", () => {
     const continuation = await readSkill("harnix-continue");
 
     expect(brainstorm).toContain("outside `planning|replan`");
+    expect(brainstorm).toContain("guarded re-entry");
     expect(implement).toContain("`in_progress/implementing`");
+    expect(implement).toContain("guarded re-entry to `ready/ready`");
     expect(implement).not.toContain("`implementing` or `debugging`");
     expect(check).toContain("persist `verifying/finishing`");
     expect(finish).toContain("Accept only `verifying/finishing`");
@@ -176,6 +178,7 @@ describe("canonical Harnix workflow skill sources", () => {
     expect(finish).toContain("does not meet the threshold");
     expect(finish).not.toContain("write the task `status` as `completed`");
     expect(continuation).toContain("Blocked state takes precedence over its checkpoint");
+    expect(continuation).toContain("audited guarded re-entry");
     expect(continuation).toContain("Read only that owner skill, separately through EOF");
   });
 });

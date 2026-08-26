@@ -18,6 +18,18 @@ Trellis được lấy bằng partial clone `--filter=blob:none --branch main`; 
 
 Không commit, merge, push hoặc tạo PR trong quá trình triển khai Harnix nếu người dùng không yêu cầu riêng.
 
+### 2.1 Current upstream revalidation 2026-08-26
+
+Frozen refs ở mục 2 tiếp tục là ownership/reproducibility baseline. Read-only revalidation ngày 2026-08-26 chỉ ghi current observation để đánh giá feature drift; không thay SHA đã khóa, không thêm remote vào active Harnix repository và không chạy code upstream.
+
+| Nguồn | Current ref quan sát | Delta từ frozen ref | License xác nhận lại | Ảnh hưởng tới Harnix |
+|---|---|---|---|---|
+| [mindfold-ai/Trellis](https://github.com/mindfold-ai/Trellis/commit/64e663694201005bc87766ef22de89b8da3d4d79) | `64e663694201005bc87766ef22de89b8da3d4d79`, 2026-08-21 | 54 commit; 303 file, +16.952/-5.392 | AGPL-3.0-or-later | Adapt bounded status/continue observability; không nhập channel, worker, watcher hoặc platform breadth |
+| [affaan-m/ECC](https://github.com/affaan-m/ECC/tree/d8409a4b0813771235555e32e3d8046a73988bfa) | `d8409a4b0813771235555e32e3d8046a73988bfa`, 2026-08-19; release line `v2.1.0` | 77 commit; 468 file, +33.937/-3.122 | MIT | Adapt deterministic status/attention/next-action projection; không dùng SQLite, global state, cloud hoặc statusline |
+| [obra/superpowers](https://github.com/obra/superpowers/releases/tag/v6.3.0) | `b36e0829c6d0140e93cfef2ca599b1b07d4a7797`, `v6.3.0`, 2026-08-12 | Một squash release; 40 file, +2.888/-67 | MIT | Existing adaptive ceremony/evidence/resume discipline đã đủ; không thêm mandatory subagent/worktree/commit |
+
+Nguồn, method, diff evidence và remaining uncertainty đầy đủ nằm tại `.harnix/tasks/20260826-132459-harness-ux-research-improvements/research/upstream-revalidation.md`. Mapping machine-checkable của từng maintained external-derived feature nằm trong `docs/HARNESS_FEATURE_PROVENANCE.json`; current research ref và frozen implementation ref có thể cùng tồn tại khi vai trò của chúng khác nhau.
+
 ## 3. Kiểm chứng bảo toàn PRD
 
 Trước khi gắn lịch sử upstream, PRD gốc (khi đó là `docs/PRD.md`, nay được chuẩn hóa thành `docs/HARNIX_PRD.md`) được sao lưu tạm và so sánh SHA-256 theo byte:
@@ -127,6 +139,7 @@ The stack/guide refactor additionally records architecture references to GitHub 
 - Nội dung ECC/Superpowers sao chép hoặc chuyển thể phải giữ MIT attribution. Ưu tiên viết lại concise bằng ngôn ngữ Harnix thay vì vendor nguyên khối.
 - Tên Trellis chỉ được tồn tại trong source research, migration compatibility, license/attribution và Git history; không xuất hiện trong public API, help hoặc output dự án mới.
 - Mỗi file vendored đáng kể phải có header/source note khi license hoặc provenance yêu cầu; các ý tưởng triển khai lại được trace trong `HARNESS_RESEARCH.md`.
+- Mỗi maintained external-derived capability phải có một entry trong `HARNESS_FEATURE_PROVENANCE.json` với immutable ref/date/license/evidence, adaptation delta và concrete existing code/test/docs paths. Clean-room behavioral research không tự tạo claim copied code hoặc nghĩa vụ `NOTICE`.
 
 ## 9. Lệnh tái lập baseline
 

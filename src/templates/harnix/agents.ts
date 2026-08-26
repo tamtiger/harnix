@@ -33,7 +33,7 @@ Treat this profile as an initialization-time discovery seed. Verify current mani
 
 ## Harnix workflow
 
-Use harnix --help or harnix <command> --help for exact CLI syntax; do not guess flags. Public commands are init, setup, update, upgrade, uninstall, mem, doctor, and repo-map. They manage the harness and diagnostics, not coding-task stage transitions.
+Use harnix --help or harnix <command> --help for exact CLI syntax; do not guess flags. Public commands are init, setup, update, upgrade, uninstall, mem, status, tasks, audit, doctor, and repo-map. They manage the harness, visibility, navigation, and diagnostics, not coding-task stage transitions.
 
 \`harnix init\` creates this project's .harnix state and root AGENTS bootstrap. It does not install platform integrations. \`harnix setup --kiro\`, \`harnix setup --antigravity\`, and \`harnix setup --codex\` are explicit user-global integration operations: they may run from any directory and affect only the selected user integration, not this repository. Do not run setup or harnix init automatically. Run a selected setup only with explicit user authorization; if a required global skill or hook is unavailable, report that instead of simulating it.
 
@@ -43,6 +43,8 @@ Activation guard and before work:
 2. Read .harnix/workflow.md and .harnix/config.yaml, verify the current repository evidence, then load only the context relevant to the request.
 3. If .harnix/tasks/.active identifies an unfinished task, use harnix-continue and resume its persisted status, checkpoint, and evidence.
 4. Otherwise classify the request as Bypass, Lite, or Full using .harnix/workflow.md. Read-only answers may bypass task creation; implementation work follows the selected workflow.
+
+Public harnix status is a bounded read-only view of the active task's persisted state, aggregate progress, context freshness, attention, and next action. Public harnix tasks is a bounded resilient local task index that never selects or resumes a record; public harnix audit exposes exact readiness/completion blocker codes and IDs without running checks. These commands do not replace workflow inspect, mutate task state, or prove completion; they deliberately omit task prose, commands, prompts, secrets, and absolute paths.
 
 Use the skills in this order when their stage applies:
 
@@ -76,7 +78,7 @@ Operating rules:
 - Preserve user-owned files, tasks, specs, research, journals, credentials, and unrelated configuration.
 - Keep generated paths repository-relative and never expose secrets, prompts, or machine-specific absolute paths in output.
 - Run harnix doctor when managed files, platform setup, or project state may have drifted.
-- For explicit implementation-stage discovery in an initialized project, run \`harnix repo-map --query <text>\`. It returns cache-only navigation hints; use \`harnix doctor --fix\` to rebuild a missing, stale, or invalid cache. Platform hooks must not invoke repository-map queries or refreshes.
+- For explicit implementation-stage discovery in an initialized project, run \`harnix repo-map --query <text>\`; for an exact cached file, use \`harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]\`. Both return cache-only navigation hints rather than dynamic call-graph proof; use \`harnix doctor --fix\` to rebuild a missing, stale, or invalid cache. Platform hooks must not invoke repository-map query, impact, or refresh.
 - Before recording any task as \`completed\`, follow this project's release/version instruction when one exists; do not invent package or changelog side effects.
 - Require explicit user authorization for destructive, networked, installation, upgrade, purge, or externally visible actions.
 - Never commit, branch, create a worktree, merge, push, publish, or create a pull request automatically.

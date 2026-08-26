@@ -90,6 +90,52 @@ describe("hidden workflow persistence operations", () => {
     await expect(saveWorkflow(root, { task: { ...ready, status: "verifying", checkpoint: "verifying" } })).rejects.toThrow("Illegal task transition");
   });
 
+  it("re-enters ready only from replan and reruns the Full ready gate", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const planning = { ...taskV2("planning", "planning"), mode: "full" as const, relevantPaths: ["src/a.ts"] };
+    const prd = "# PRD\n### AC `a`\nDone.\n";
+    const plan = [
+      "# Plan",
+      "- [ ] `CAP-A` — implement",
+      "### Slice `CAP-A`",
+      "Criteria: `a`",
+      "Checks: `check`",
+      "Paths: `src/a.ts`",
+      "",
+    ].join("\n");
+    await saveWorkflow(root, { task: planning, artifacts: { prd, plan } });
+
+    const ready = { ...planning, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
+    await saveWorkflow(root, { task: ready });
+    const readyReplan = { ...ready, checkpoint: "replan" as const, updatedAt: "2026-08-13T00:01:30.000Z" };
+    await saveWorkflow(root, { task: readyReplan });
+    const readyAgain = { ...readyReplan, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:45.000Z" };
+    await expect(saveWorkflow(root, { task: readyAgain })).resolves.toMatchObject({ status: "ready", checkpoint: "ready" });
+
+    const inProgress = { ...readyAgain, status: "in_progress" as const, checkpoint: "implementing" as const, updatedAt: "2026-08-13T00:02:00.000Z" };
+    await saveWorkflow(root, { task: inProgress });
+    await expect(saveWorkflow(root, { task: { ...inProgress, status: "ready", checkpoint: "ready", updatedAt: "2026-08-13T00:03:00.000Z" } })).rejects.toThrow("Illegal task transition");
+
+    const implementationReplan = { ...inProgress, checkpoint: "replan" as const, updatedAt: "2026-08-13T00:04:00.000Z" };
+    await saveWorkflow(root, { task: implementationReplan });
+    await expect(saveWorkflow(root, {
+      task: { ...implementationReplan, acceptanceCriteria: [{ ...implementationReplan.acceptanceCriteria[0]!, text: "mutated" }] },
+    })).rejects.toThrow("acceptance criterion");
+    await writeFile(join(root, ".harnix", "tasks", planning.id, "plan.md"), "# Plan\nTODO\n");
+    const reready = { ...implementationReplan, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:05:00.000Z" };
+    await expect(saveWorkflow(root, { task: reready })).rejects.toThrow("ready trace audit failed");
+    await expect(saveWorkflow(root, { task: reready, artifacts: { prd, plan } })).resolves.toMatchObject({ status: "ready", checkpoint: "ready" });
+
+    const resumed = { ...reready, status: "in_progress" as const, checkpoint: "implementing" as const, updatedAt: "2026-08-13T00:06:00.000Z" };
+    await saveWorkflow(root, { task: resumed });
+    const verifying = { ...resumed, status: "verifying" as const, checkpoint: "verifying" as const, updatedAt: "2026-08-13T00:07:00.000Z" };
+    await saveWorkflow(root, { task: verifying });
+    const verificationReplan = { ...verifying, checkpoint: "replan" as const, updatedAt: "2026-08-13T00:08:00.000Z" };
+    await saveWorkflow(root, { task: verificationReplan });
+    await expect(saveWorkflow(root, { task: { ...verificationReplan, status: "ready", checkpoint: "ready", updatedAt: "2026-08-13T00:09:00.000Z" } })).resolves.toMatchObject({ status: "ready", checkpoint: "ready" });
+  });
+
   it("finishes only the active task after fresh verification and clears only its matching pointer", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });

@@ -1,11 +1,14 @@
+import { execFile } from "node:child_process";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 
 interface VersionSyncResult { changed: boolean; previousVersion: string; updated: readonly string[]; version: string; }
 type SyncVersion = (options: { date?: string; root: string; summaries: readonly string[]; version: string }) => Promise<VersionSyncResult>;
 const { syncVersion } = await import(new URL("../../scripts/version-sync.mjs", import.meta.url).href) as { syncVersion: SyncVersion };
+const execFileAsync = promisify(execFile);
 
 const roots: string[] = [];
 const skillNames = ["harnix-brainstorm", "harnix-check", "harnix-continue", "harnix-debug", "harnix-finish-work", "harnix-implement", "harnix-research"];
@@ -40,6 +43,15 @@ describe("version sync", () => {
 
     await expect(syncVersion({ root, summaries: ["x"], version: "1.0.3" })).rejects.toThrow("greater than current version");
     await expect(syncVersion({ root, summaries: [], version: "1.0.5" })).rejects.toThrow("summary");
+  });
+
+  it("accepts the pnpm argument separator used by the documented release command", async () => {
+    const root = await fixture();
+    const script = join(process.cwd(), "scripts", "version-sync.mjs");
+
+    const { stdout } = await execFileAsync(process.execPath, [script, "--", "1.0.5", "--summary", "Đồng bộ release metadata qua pnpm."], { cwd: root });
+
+    expect(JSON.parse(stdout)).toMatchObject({ changed: true, previousVersion: "1.0.4", version: "1.0.5" });
   });
 });
 

@@ -163,7 +163,8 @@ async function atomicWrite(path, contents) {
 function relativePath(root, path) { return path.slice(root.length + 1).replaceAll("\\", "/"); }
 
 function parseArguments(argumentsList) {
-  const [version, ...rest] = argumentsList;
+  const normalizedArguments = argumentsList[0] === "--" ? argumentsList.slice(1) : argumentsList;
+  const [version, ...rest] = normalizedArguments;
   const summaries = [];
   for (let index = 0; index < rest.length; index += 1) {
     if (rest[index] !== "--summary") throw new Error(`Unknown argument: ${rest[index]}`);

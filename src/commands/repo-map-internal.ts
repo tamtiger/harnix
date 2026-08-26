@@ -1,6 +1,6 @@
 import { readConfig } from "../core/config/config.js";
 import { resolveActiveTask } from "../core/tasks/task.js";
-import { queryRepoMap, refreshRepoMap } from "../core/repo-map/service.js";
+import { impactRepoMap, queryRepoMap, refreshRepoMap } from "../core/repo-map/service.js";
 import { findInitializedProject } from "../utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
 import { compareCodeUnits } from "../utils/order.js";
@@ -29,6 +29,12 @@ export async function queryRepoMapInternal(cwd: string, query: string, limit: nu
     },
   });
   return { results: result.results, scope: "project", status: result.status };
+}
+
+export async function impactRepoMapInternal(cwd: string, target: string, depth: number, limit: number): Promise<unknown> {
+  const root = await initializedRoot(cwd);
+  await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
+  return impactRepoMap({ root, target, depth, limit });
 }
 
 async function initializedRoot(cwd: string): Promise<string> {

@@ -5,21 +5,27 @@ import { createProgram, runCli } from "../../src/cli-program.js";
 afterEach(() => vi.restoreAllMocks());
 
 describe("CLI command contract", () => {
-  it("exposes eight supported commands without exposing hidden/internal commands", () => {
-    expect(createProgram().commands.filter((command) => !(command as { _hidden?: boolean })._hidden).map((command) => command.name())).toEqual(["init", "setup", "update", "upgrade", "uninstall", "mem", "doctor", "repo-map"]);
+  it("exposes eleven supported commands without exposing hidden/internal commands", () => {
+    expect(createProgram().commands.filter((command) => !(command as { _hidden?: boolean })._hidden).map((command) => command.name())).toEqual(["init", "setup", "update", "upgrade", "uninstall", "mem", "status", "tasks", "audit", "doctor", "repo-map"]);
   });
 
   it("registers single-command action flags without nested command trees", () => {
     const program = createProgram();
     const context = program.commands.find((command) => command.name() === "context");
     const repoMap = program.commands.find((command) => command.name() === "repo-map");
+    const status = program.commands.find((command) => command.name() === "status");
+    const tasks = program.commands.find((command) => command.name() === "tasks");
+    const audit = program.commands.find((command) => command.name() === "audit");
     const workflow = program.commands.find((command) => command.name() === "workflow");
 
     expect(program.commands.find((command) => command.name() === "internal")).toBeUndefined();
     expect(program.commands.every((command) => command.commands.length === 0)).toBe(true);
     expect((context as { _hidden?: boolean } | undefined)?._hidden).toBe(true);
-    expect(repoMap?.options.map((option) => option.long)).toEqual(["--query", "--limit", "--refresh"]);
+    expect(repoMap?.options.map((option) => option.long)).toEqual(["--query", "--impact", "--limit", "--depth", "--refresh"]);
     expect(repoMap?.options.find((option) => option.long === "--refresh")?.hidden).toBe(true);
+    expect(status?.options).toEqual([]);
+    expect(tasks?.options.map((option) => option.long)).toEqual(["--limit", "--status"]);
+    expect(audit?.options).toEqual([]);
     expect(workflow?.options.map((option) => option.long)).toEqual(["--inspect", "--save", "--snapshot", "--audit-ready", "--finish", "--cancel", "--learn", "--check"]);
   });
 

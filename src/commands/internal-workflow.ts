@@ -209,6 +209,11 @@ function assertLegalTransition(previous: TaskRecord, next: TaskRecord): void {
     updateTaskCheckpoint(previous, next.checkpoint, next.updatedAt);
     return;
   }
+  const reenteringReadyFromReplan = next.status === "ready"
+    && next.checkpoint === "ready"
+    && previous.checkpoint === "replan"
+    && (previous.status === "in_progress" || previous.status === "verifying");
+  if (reenteringReadyFromReplan) return;
   transitionTask(previous, next.status, next.checkpoint, next.updatedAt, next.blocker);
 }
 

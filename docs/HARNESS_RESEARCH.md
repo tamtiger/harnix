@@ -143,6 +143,23 @@ Research task `20260818-140304-harness-capability-landscape` compared current ag
 
 The four capabilities are implemented as independent pure core boundaries with focused RED→GREEN gates, then integrated through the existing hidden workflow, Doctor and cache-only query commands. Harnix additionally exposes an explicit, evidence-gated project-local `workflow --learn` append transport and `mem --learning` filter; this is reviewable capture, not auto-memory or promotion. Living spec/spec delta, no-spec markers, platform network probes, context condensers, auto-memory, hosted runtime, workflow presets and mandatory multi-agent behavior remain deferred or rejected.
 
+### 3.9 Revalidation 2026-08-26: task observability, navigation, audit và provenance
+
+Task `20260826-132459-harness-ux-research-improvements` giữ nguyên frozen baseline để tái lập, đồng thời quan sát current heads của ba upstream gốc: Trellis `64e663694201005bc87766ef22de89b8da3d4d79` (54 commit; 303 file, +16.952/-5.392), ECC `d8409a4b0813771235555e32e3d8046a73988bfa` (77 commit; 468 file, +33.937/-3.122) và Superpowers `b36e0829c6d0140e93cfef2ca599b1b07d4a7797`/`v6.3.0` (một squash release; 40 file, +2.888/-67). License tương ứng vẫn là AGPL-3.0-or-later, MIT và MIT. Current refs chỉ là dated observation, không thay frozen ownership/provenance refs.
+
+Landscape screening dùng 12 repository và deep-dive 8: ba upstream gốc, Spec Kit, BMAD, Cline, Aider và Goose. Tín hiệu hội tụ là status/resume/next-step từ persisted state, local task history resilient, on-demand dependency navigation và pre-implementation gate visibility. Các issue/discussion Cline, Aider, Spec Kit, BMAD, Trellis, Goose và ECC cung cấp real-usage evidence về resume mơ hồ, task discovery nhiều bước, context dependency thiếu hoặc phình, record hỏng làm mất history và readiness loop. Local reproduction cho thấy hidden `workflow --inspect` trả 6.890 byte trên một dense JSON line, Doctor trộn 34 warning, repository có 36 task directories nhưng không có public index, cache đã có adjacency nhưng không expose exact impact, và public user không có completion audit dù Harnix đã persist đủ status/checkpoint/evidence/context state.
+
+Batch được chọn gồm:
+
+- `HX-STATUS-01`: public `harnix status` read-only, count-only, không network/write và không expose private task prose.
+- `HX-NEXT-01`: một deterministic `nextAction` cùng ordered bounded `attention`, dựa trên persisted status, context drift và required-check freshness.
+- `HX-TASKS-01`: public `harnix tasks` scan bounded, validate từng local task record độc lập, pin active task hợp lệ và degrade thành `partial` thay vì để một record hỏng làm mất toàn bộ history.
+- `HX-IMPACT-01`: `harnix repo-map --impact` dùng exact path và cache v1 hiện hữu để trả direct dependencies/reverse dependents cycle-safe, depth/limit bounded, không scan source hoặc đổi cache schema.
+- `HX-AUDIT-01`: public `harnix audit` tách Full readiness khỏi completion blockers, reuse ready-trace/input-freshness exact semantics và chỉ emit stable code/ID/count.
+- `HX-PROVENANCE-01`: `docs/HARNESS_FEATURE_PROVENANCE.json` backfill mọi maintained external-derived capability và regression exact schema/path/ref/license/evidence.
+
+Mỗi capability có provenance tách biệt để không overclaim nguồn: status/next-action tham khảo behavior Trellis, ECC, Spec Kit và BMAD với Cline issues làm pain signal; task index tham khảo Cline task history cùng issue #4359/discussion #10480; dependency impact tham khảo Aider repo-map cùng issue #3603/#4239; task audit tham khảo Spec Kit `analyze`/discussion #1917 và BMAD readiness flow/issue #2079. Tất cả là clean-room Harnix implementation, không copy source/prose. Daemon/watch/statusline, SQLite/global database, model/session compaction, Git checkpoint, cost tracking, cloud UI, heuristic auto-remediation và worker/multi-agent orchestration tiếp tục bị reject vì phá product boundary hoặc ownership. Chi tiết source, metric, scoring, rollback và bất định nằm trong research artifacts của task; registry canonical ghi repo/ref/date/license/evidence/adaptation/code/test/docs cho từng feature để về sau nhận biết bằng máy. `NOTICE` chỉ đổi khi thực sự reuse/adapt nội dung tạo nghĩa vụ attribution, không vì clean-room behavioral reference.
+
 ## 4. Platform research decisions
 
 Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapters described by earlier Phase 1–5 research are retained only as legacy/provenance evidence; the current adopted contract is `GLOBAL_SETUP_REFACTOR_PLAN.md` §§2, 6–9.
@@ -233,5 +250,7 @@ Các quyết định này là guardrail chống scope creep. Thay đổi cần c
 | Platforms/hooks | `src/configurators/{kiro,antigravity,codex}.ts`, Home/Platform root resolvers, hidden internal context handler | user-global snapshots, stdin/stdout protocol, activation guard, bounds, idempotence, fake home and no machine paths |
 | Lifecycle/migration | `src/commands/**`, `src/migration/**` | project/global scope, legacy conflicts, rollback, purge/global-uninstall safety |
 | Doctor | `src/commands/doctor.ts` | stable ordered/redacted Doctor JSON v2 + unsafe/duplicate/legacy/global/secret fixtures |
+| Task status/next action | `src/core/status.ts`, `src/commands/status.ts` | no-active/active, precedence, v1 age/v2 digest freshness, privacy, bounded payload và no-write nested-root integration |
+| Harness feature provenance | `docs/HARNESS_FEATURE_PROVENANCE.json` | exact allowlists, sorted immutable sources, safe existing code/test/docs paths và pinned feature-ID set |
 
 Chi tiết task order và gates nằm trong `IMPLEMENTATION_PLAN.md`; phân loại reuse/remove/build nằm trong `UPSTREAM_MAPPING.md`.

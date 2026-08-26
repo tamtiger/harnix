@@ -43,6 +43,11 @@ describe("workflow templates", () => {
     expect(agentInstructions).toContain("Before any commit, show the proposed changes and commit message, then wait for explicit user approval");
     expect(agentInstructions).toContain("nearest initialized project ancestor or workspace root");
     expect(agentInstructions).toContain("harnix repo-map --query <text>");
+    expect(agentInstructions).toContain("harnix repo-map --impact <path>");
+    expect(agentInstructions).toContain("Public commands are init, setup, update, upgrade, uninstall, mem, status, tasks, audit, doctor, and repo-map");
+    expect(agentInstructions).toContain("Public harnix status is a bounded read-only view");
+    expect(agentInstructions).toContain("Public harnix tasks is a bounded resilient local task index");
+    expect(agentInstructions).toContain("public harnix audit exposes exact readiness/completion blocker codes and IDs");
     expect(agentInstructions).toContain("cache-only navigation hints");
     expect(agentInstructions).toContain("harnix doctor --fix");
     expect(agentInstructions).toContain("harnix workflow --inspect");
@@ -55,7 +60,7 @@ describe("workflow templates", () => {
     expect(agentInstructions).toContain('{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts> }');
     expect(agentInstructions).toContain("bounded JSON envelope on stdin");
     expect(agentInstructions).toContain("never edit task.json directly");
-    expect(agentInstructions).toContain("must not invoke repository-map queries or refreshes");
+    expect(agentInstructions).toContain("must not invoke repository-map query, impact, or refresh");
     expect(agentInstructions).not.toContain("<!-- harnix:begin -->");
     expect(agentInstructions).not.toContain("<!-- harnix:end -->");
     expect(agentInstructions).not.toContain("Detected repository");
@@ -82,6 +87,8 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("do not create files or automatically run `harnix init`");
     expect(workflowTemplate).toContain("Bypass");
     expect(workflowTemplate).toContain("Ready gate");
+    expect(workflowTemplate).toContain("guarded re-entry");
+    expect(workflowTemplate).toContain("generic task state machine remains forward-only");
     expect(workflowTemplate).toContain("RED → GREEN → REFACTOR");
     expect(workflowTemplate).toContain("## Persist and restore state");
     expect(workflowTemplate).toContain("Before product edits, persist");
@@ -117,7 +124,11 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("discovery seeds, not complete repository truth");
     expect(workflowTemplate).toContain("Plan-only requests stop at `ready`");
     expect(workflowTemplate).toContain("harnix repo-map --query <text>");
-    expect(workflowTemplate).toContain("must not invoke repository-map queries or refreshes");
+    expect(workflowTemplate).toContain("harnix repo-map --impact <path>");
+    expect(workflowTemplate).toContain("Public harnix status is an optional bounded read-only projection");
+    expect(workflowTemplate).toContain("Public harnix tasks provides a bounded resilient local task index");
+    expect(workflowTemplate).toContain("harnix audit exposes exact readiness/completion blocker codes and IDs");
+    expect(workflowTemplate).toContain("must not invoke repository-map queries, impact, or refreshes");
     expect(workflowTemplate).not.toContain("Increase the package patch version");
     expect(workflowTemplate).not.toContain("update `CHANGELOG.md`");
     expect(workflowTemplate).toContain("Before any commit, show the proposed changes and commit message, then wait for explicit user approval");

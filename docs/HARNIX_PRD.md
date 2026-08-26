@@ -45,7 +45,7 @@ Harnix được phát triển từ baseline kỹ thuật [mindfold-ai/Trellis](h
 - **Safe by default:** preview migration/purge và fail closed khi path/hash/schema không chắc chắn.
 - **YAGNI:** không thêm platform, orchestration, service hoặc generic skill ngoài nhu cầu.
 - **Single-agent capable:** subagent có thể hữu ích nhưng không phải dependency.
-- **Offline lifecycle:** init/setup/update/uninstall/mem/doctor không silent network.
+- **Offline lifecycle:** init/setup/update/uninstall/mem/status/tasks/audit/repo-map/doctor không silent network.
 
 ## 5. Scope
 
@@ -86,7 +86,7 @@ Harnix được phát triển từ baseline kỹ thuật [mindfold-ai/Trellis](h
 harnix/
 ├── src/
 │   ├── core/               # tasks, context, journal, learning, config
-│   ├── commands/           # init, setup, update, upgrade, uninstall, mem, doctor
+│   ├── commands/           # init, setup, update, upgrade, uninstall, mem, status, tasks, audit, doctor
 │   ├── configurators/      # kiro.ts, antigravity.ts, codex.ts only
 │   ├── templates/          # harnix + three platforms + shared
 │   ├── rules/              # common + selected stack packs
@@ -128,11 +128,15 @@ harnix uninstall --purge [--yes]
 harnix uninstall --global --kiro|--antigravity|--codex [--yes]
 harnix uninstall --legacy-project-surfaces [--yes]
 harnix mem [query]
+harnix status
+harnix tasks [--limit <1..100>] [--status <TaskStatus>]
+harnix audit
 harnix doctor [--fix] [--global]
 harnix repo-map --query <text> [--limit <count>]
+harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]
 ```
 
-Có tám public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Public failure trước normal result emit exact `PublicCliErrorV1` đã redaction trên stdout và cùng actionable message trên stderr; exit nằm trong envelope và tuân theo semantics `1|2`. Hidden `context`/`workflow` giữ protocol output riêng, không nhận public error envelope. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix context --platform <id>` là platform-hook protocol; hidden `harnix workflow` yêu cầu đúng một action flag trong `--inspect|--save|--snapshot|--audit-ready|--finish|--cancel|--learn` và là agent persistence/freshness/terminal transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
+Có mười một public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Public failure trước normal result emit exact `PublicCliErrorV1` đã redaction trên stdout và cùng actionable message trên stderr; exit nằm trong envelope và tuân theo semantics `1|2`. Hidden `context`/`workflow` giữ protocol output riêng, không nhận public error envelope. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix context --platform <id>` là platform-hook protocol; hidden `harnix workflow` yêu cầu đúng một action flag trong `--inspect|--save|--snapshot|--audit-ready|--finish|--cancel|--learn` và là agent persistence/freshness/terminal transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
 
 ## 8. Init requirements
 
@@ -261,6 +265,24 @@ Báo installed/available version và npm upgrade path cho `@tamtiger/harnix`. Re
 
 Search newest-first với query/user/limit/json; include candidate confidence/evidence nhưng không promote; malformed data xử lý graceful.
 
+### Status
+
+`harnix status` resolve ancestor initialized gần nhất, validate config/task state và emit `HarnixStatusResultV1` read-only. Với active task, output chỉ chứa `id`, `mode`, `status`, `checkpoint`, aggregate acceptance/required-check counts, context state/counts, một deterministic `nextAction` và bounded ordered `attention`; title/goal/criterion/check/blocker prose, validation command, prompt, secret và absolute path không được emit. Không có active task là success với `activeTask:null` và `no-active-task`.
+
+Required-check state dùng latest evidence theo timestamp rồi persisted append order, đồng nhất với completion/input-freshness semantics. Missing/latest skipped là `pending`, latest fail là `failed`, pass quá một giờ hoặc ở tương lai là `stale`. TaskRecord v2 pass chỉ là `passed` khi evidence digest, immutable sidecar và recomputed current input digest cùng khớp; missing/unreadable/mismatch fail closed thành `stale`. TaskRecord v1 giữ age-only semantics. Command không ghi state, refresh cache, gọi network hoặc thêm flag `--json`.
+
+### Tasks
+
+`harnix tasks [--limit <1..100>] [--status <TaskStatus>]` resolve ancestor initialized gần nhất và emit `TaskIndexResultV1` chỉ từ task records local. Default limit là 20. Command đọc tối đa 1.000 safe task directories: candidate ID sort code-unit giảm dần, active candidate hợp lệ luôn nằm trong scan budget, từng record được exact-schema validate độc lập, và malformed record chỉ tăng `invalid` thay vì làm mất history hợp lệ. Output pin active record đã match filter, sau đó sort `updatedAt` giảm dần và ID giảm dần; status filter không ép active record vượt qua filter.
+
+Top-level fields là `generator`, `schemaVersion`, `scope`, `status`, `filter`, `summary`, `activeTaskId`, `attention`, `tasks`. `scope` luôn `project`; `status` là `ready|partial`, trong đó `partial` chỉ khi có invalid record hoặc active pointer không resolve. Scan/result truncation là bounded normal behavior và có flag riêng. Mỗi task chỉ emit `id`, `mode`, `status`, `checkpoint`, `active`, `updatedAt`; title, goal, prompt, criterion/check/blocker prose, evidence summary, validation command, secret và absolute path không được emit. Command không đọc artifact/journal body, ghi state, gọi network hoặc refresh cache.
+
+### Audit
+
+`harnix audit` resolve ancestor initialized gần nhất và emit `TaskAuditResultV1` read-only; không có active task là success với `activeTask:null`. Active projection chỉ gồm `id`, `mode`, `status`, `checkpoint`, `readiness`, `completion`. Full readiness chạy cùng bounded deterministic ready-trace auditor nhưng strip diagnostic message; mỗi diagnostic chỉ có stable `code`, `artifact`, optional `id` và optional `line`. Artifact read failure trở thành readiness `unavailable` với `artifact-unavailable`; Lite readiness là `not-applicable`.
+
+Completion gồm `status`, `criteria`, `requiredChecks`. `criteria` là completion-ready partition `met|waived|pending|total` cùng sorted `pendingIds`: persisted met chỉ được tính met khi có fresh supporting evidence theo finish semantics. `requiredChecks` có `passed|failed|stale|pending|total` cùng sorted `failedIds|staleIds|pendingIds`, tái dùng exact latest-evidence, one-hour age và TaskRecord v2 sidecar/current-input freshness của status/finish. Completion chỉ pass khi criteria/checks non-empty, mọi criterion ready và mọi required check pass. Audit không chạy command, sửa artifact/state, chuyển workflow, gọi network hoặc echo title/goal/prose/command/secret/absolute path; audit pass không phải completion evidence.
+
 ### Doctor
 
 Doctor uses JSON v2: `project` has status `ready|not-initialized|invalid`; `globalIntegrations` separately reports every supported platform as `not-installed|installed|active|installed-pending-trust|binary-unavailable|shadowed|precedence-unknown|unsupported-version|drifted|invalid`. It works outside a Harnix project and treats `project:not-initialized` as info. The enum supports authoritative external evidence, but the regular CLI does not run a platform-version probe or infer activation/precedence from installed files: `active`, `shadowed` and `unsupported-version` are reported only when that evidence is supplied at the integration boundary; otherwise it returns the conservative installed/trust/binary/precedence state.
@@ -344,14 +366,14 @@ Initial IDs cover source languages C#, TypeScript, JavaScript, PHP, Python, Java
 - Purge/migration exact preview và explicit intent.
 - Atomic writes, rollback, source preservation có injected-failure tests.
 - Không execute spec/context/journal content. Repository-derived excerpt phải nằm trong explicit untrusted-data boundary dùng chung cho Kiro, Antigravity và Codex; learning statement dùng boundary riêng và JSON-string serialization. Fixed boundary và omission disclosure đều tính vào output budget.
-- Không network trong init/setup/update/uninstall/mem/doctor.
+- Không network trong init/setup/update/uninstall/mem/status/tasks/audit/repo-map/doctor.
 
 ## 17. Required tests
 
 Tất cả filesystem tests dùng isolated temporary repositories **và injected disposable user homes**; they must not read or write a real user profile:
 
 1. Unit: detection; config/migrations; context ranking/budget; project/global hash manifests; permission-preserving atomic writes; user path safety; lock/stale-lock/rollback; journal; learning; Doctor v2.
-2. CLI: all eight public commands; setup outside an initialized repository; project/global update/uninstall scope; idempotence; modified/deleted/corrupt/future project and global schemas.
+2. CLI: all eleven public commands; status/tasks/audit from nested initialized paths plus no-active/active/fresh/stale/malformed/no-write/privacy fixtures; repo-map query/impact cache-only fixtures; setup outside an initialized repository; project/global update/uninstall scope; idempotence; modified/deleted/corrupt/future project and global schemas.
 3. Migration: discovery, dry-run, transform, preservation, mixed/conflict, rollback, cleanup.
 4. Fixtures: independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue and multilingual/multi-technology monorepo.
 5. Platform: Kiro global JSON-v1 hook; Antigravity Desktop/CLI plugins and multi-root invocation; Codex global skills/AGENTS/nested hook schema; relevant rules only and no machine paths.
@@ -375,18 +397,21 @@ Harnix không hoàn thành cho tới khi fresh output chứng minh:
 - `git diff --check` pass; a disposable Windows profile/manual smoke confirms dry-run targets, setup discovery, no-op/activation, Codex `/hooks` trust, doctor and uninstall without altering unrelated global config. A real profile requires explicit authorization.
 - Mọi criterion/adopted capability trace tới code/test; deviations ghi rõ.
 - License/NOTICE attribution đúng cho Trellis, ECC và Superpowers.
+- `docs/HARNESS_FEATURE_PROVENANCE.json` exact-schema regression pass; mỗi external-derived capability có immutable ref/date/license/evidence, adaptation delta và existing code/test/docs targets.
 
-Delivery evidence status through 2026-08-18: Phase 6 implementation and automated isolated-home gates are complete. Repository review continuation F1–F9 hardens managed JSON/markers, repo-map determinism/limits, diagnostics/release privacy, filesystem preservation and duplicated pure utilities. Historical authorized sessions are retained as dated evidence, while fresh disposable revalidation proved `agy` implicit routing/no-op but not print-mode hook loading; Kiro/Codex disposable sessions lacked login and Codex trust. `active`, `shadowed` and `unsupported-version` still require current authoritative external evidence.
+Delivery evidence status through 2026-08-26: Phase 6 implementation and automated isolated-home gates are complete. Repository review continuation F1–F9 hardens managed JSON/markers, repo-map determinism/limits, diagnostics/release privacy, filesystem preservation and duplicated pure utilities. The current research-driven batch adds bounded public task status/next action, resilient local task index, cache-only dependency impact, deterministic readiness/completion audit and machine-checked per-feature provenance after revalidating three upstreams and eight deep dives. Historical authorized sessions are retained as dated evidence, while fresh disposable revalidation proved `agy` implicit routing/no-op but not print-mode hook loading; Kiro/Codex disposable sessions lacked login and Codex trust. `active`, `shadowed` and `unsupported-version` still require current authoritative external evidence.
 
 ## Repository map v1
 
-Repo-map is disposable project cache at `.harnix/cache/repo-map-v1.json`, containing only deterministic repository-relative structural metadata and SHA-256 fingerprints—never source bodies, literals, secrets, absolute paths, a daemon, embeddings, or network data. Fresh `harnix init`, hidden `harnix repo-map --refresh`, and project `doctor --fix` may safely rebuild it. Public `harnix repo-map --query <text> [--limit <count>]` is cache-only and always emits the v1 JSON shape. Default ranker v2 resolves only safe relative cached `importTargets`, builds a bounded in-memory graph (10k nodes, 100k edges, two hops, 200 candidates), then applies capped dependency-neighbor, referenced-by and inbound-centrality bonuses with stable tie-breaking. Internal ranker v1 preserves lexical rollback behavior; neither ranker persists graph state. Global hooks never scan, refresh, write, or query repo-map.
+Repo-map is disposable project cache at `.harnix/cache/repo-map-v1.json`, containing only deterministic repository-relative structural metadata and SHA-256 fingerprints—never source bodies, literals, secrets, absolute paths, a daemon, embeddings, or network data. Fresh `harnix init`, hidden `harnix repo-map --refresh`, and project `doctor --fix` may safely rebuild it. Public `harnix repo-map --query <text> [--limit <count>]` is cache-only and always emits the v1 JSON shape. Default ranker v2 resolves only safe relative cached `importTargets`, builds a bounded in-memory graph (10k nodes, 100k edges, two hops, 200 candidates), then applies capped dependency-neighbor, referenced-by and inbound-centrality bonuses with stable tie-breaking. Internal ranker v1 preserves lexical rollback behavior; neither ranker persists graph state.
+
+Public `harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]` is mutually exclusive with query/hidden refresh and accepts only an exact normalized non-root repository-relative POSIX path. It reads cache v1 only, returns direct outgoing dependencies and unique reverse dependents with BFS distance up to depth (default 2), sorts by distance then code-unit path, and applies limit independently to both directions (default 20). Stable result status is `ready|missing|invalid|not-found`; every non-ready result keeps the same JSON fields with empty lists and false truncation flags. Impact never scans source, refreshes/writes cache, infers dynamic dependencies, or changes the cache schema. Global hooks never scan, refresh, write, query, or request impact from repo-map.
 
 ## 19. Provenance and requirement history
 
 PRD ban đầu dùng working title “Trellis Pro”, pnpm monorepo/two packages, `.trellis/`, Kiro/Gemini và project-local Python scripts. Sau research và product decisions, Harnix thay thế bằng single package, `.harnix/`, installed-package runtime, Kiro/Antigravity/Codex, cùng managed lifecycle, migration, doctor, context budget, learning và safety contracts.
 
-Lịch sử này giải thích provenance/migration, không tạo public alias hoặc old output. Chi tiết mapping và decisions nằm trong các tài liệu research.
+Lịch sử này giải thích provenance/migration, không tạo public alias hoặc old output. Chi tiết mapping và decisions nằm trong các tài liệu research; registry machine-checkable hiện hành là `docs/HARNESS_FEATURE_PROVENANCE.json`, và mọi feature harness-derived mới phải được thêm vào registry trước completion.
 
 ## 20. Delivery phases
 

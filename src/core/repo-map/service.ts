@@ -2,6 +2,7 @@ import { extractRepoMapRecord } from "./extract.js";
 import { inventoryRepository } from "./inventory.js";
 import { createRepoMap, readRepoMap, writeRepoMap } from "./store.js";
 import { searchRepoMap } from "./search.js";
+import { createRepoMapImpact, createUnavailableRepoMapImpact, type RepoMapImpactOptions, type RepoMapImpactResultV1 } from "./impact.js";
 import { defaultRepoMapLimits, type RepoMapLimits, type RepoMapQueryResult, type RepoMapQuerySignals, type RepoMapRankerVersion, type RepoMapV1 } from "./types.js";
 
 export interface RefreshRepoMapOptions {
@@ -42,6 +43,15 @@ export async function queryRepoMap(options: QueryRepoMapOptions): Promise<QueryR
     return isMissing(error) ? { results: [], status: "missing" } : { results: [], status: "invalid" };
   }
   return { map, results: searchRepoMap(map, options.query, options.limit ?? 20, options.signals, { rankerVersion: options.rankerVersion }), status: "ready" };
+}
+
+export async function impactRepoMap(options: RepoMapImpactOptions & { readonly root: string }): Promise<RepoMapImpactResultV1> {
+  let map: RepoMapV1;
+  try { map = await readRepoMap(options.root); }
+  catch (error: unknown) {
+    return createUnavailableRepoMapImpact(isMissing(error) ? "missing" : "invalid", options);
+  }
+  return createRepoMapImpact(map, options);
 }
 
 /** Explicit doctor inventory: scans safely but never writes or refreshes the cache. */

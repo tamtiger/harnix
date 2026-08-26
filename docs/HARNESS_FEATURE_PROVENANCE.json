@@ -1,0 +1,816 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "reviewedAt": "2026-08-26",
+  "features": [
+    {
+      "id": "adaptive-tdd",
+      "capability": "Meaningful RED-GREEN-REFACTOR with documented exceptions",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "obra/superpowers",
+          "url": "https://github.com/obra/superpowers",
+          "ref": "44c9b2d6e889982ac18c27d05a19fefe335194e1",
+          "sourceDate": "2026-07-28",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/obra/superpowers/blob/44c9b2d6e889982ac18c27d05a19fefe335194e1/LICENSE",
+            "https://github.com/obra/superpowers/commit/44c9b2d6e889982ac18c27d05a19fefe335194e1"
+          ]
+        }
+      ],
+      "adaptation": "Keeps observable RED before GREEN and fresh focused checks while allowing recorded exceptions for docs, generated snapshots, and trivial wiring; mandatory worktrees, subagents, and commits are removed.",
+      "implementation": {
+        "code": [
+          "src/skills/harnix-implement/SKILL.md"
+        ],
+        "tests": [
+          "test/workflow/skill-sources.test.ts"
+        ],
+        "docs": [
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "atomic-managed-ownership",
+      "capability": "Atomic managed-file replacement with ownership preservation",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "mindfold-ai/Trellis",
+          "url": "https://github.com/mindfold-ai/Trellis",
+          "ref": "516b34e3591001b28fda5e2d4df3f717e82f5785",
+          "sourceDate": "2026-08-01",
+          "license": "AGPL-3.0-or-later",
+          "evidenceUrls": [
+            "https://github.com/mindfold-ai/Trellis/blob/516b34e3591001b28fda5e2d4df3f717e82f5785/LICENSE",
+            "https://github.com/mindfold-ai/Trellis/commit/516b34e3591001b28fda5e2d4df3f717e82f5785"
+          ]
+        }
+      ],
+      "adaptation": "Reimplements atomic replacement and hash-owned reconciliation with permission preservation, safe relative paths, and conservative collision handling for one Harnix package.",
+      "implementation": {
+        "code": [
+          "src/utils/atomic-write.ts",
+          "src/utils/managed-files.ts"
+        ],
+        "tests": [
+          "test/unit/atomic-write.test.ts",
+          "test/unit/managed-files.test.ts"
+        ],
+        "docs": [
+          "docs/HARNIX_PRD.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "conditional-research",
+      "capability": "Research only for a material product, security, compatibility, or architecture unknown",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "affaan-m/ECC",
+          "url": "https://github.com/affaan-m/ECC",
+          "ref": "f1fec0e53934737d3b3b8388b0fd1651e8b62f4f",
+          "sourceDate": "2026-08-04",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/affaan-m/ECC/blob/f1fec0e53934737d3b3b8388b0fd1651e8b62f4f/LICENSE",
+            "https://github.com/affaan-m/ECC/commit/f1fec0e53934737d3b3b8388b0fd1651e8b62f4f"
+          ]
+        }
+      ],
+      "adaptation": "Narrows research-first guidance to one decision-changing unknown at a time, local evidence first, primary sources, explicit stopping conditions, and task-owned findings.",
+      "implementation": {
+        "code": [
+          "src/skills/harnix-research/SKILL.md"
+        ],
+        "tests": [
+          "test/workflow/skill-sources.test.ts"
+        ],
+        "docs": [
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "context-selection-freshness",
+      "capability": "Detect drift in the basis used to select resumable task context",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "github/spec-kit",
+          "url": "https://github.com/github/spec-kit",
+          "ref": "c58a8487461052b4fa65e626df167521d297b184",
+          "sourceDate": "2026-08-25",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/LICENSE",
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/workflows/README.md"
+          ]
+        },
+        {
+          "repository": "mindfold-ai/Trellis",
+          "url": "https://github.com/mindfold-ai/Trellis",
+          "ref": "516b34e3591001b28fda5e2d4df3f717e82f5785",
+          "sourceDate": "2026-08-01",
+          "license": "AGPL-3.0-or-later",
+          "evidenceUrls": [
+            "https://github.com/mindfold-ai/Trellis/blob/516b34e3591001b28fda5e2d4df3f717e82f5785/LICENSE",
+            "https://github.com/mindfold-ai/Trellis/commit/516b34e3591001b28fda5e2d4df3f717e82f5785"
+          ]
+        }
+      ],
+      "adaptation": "Adds a Harnix-owned hash-only sidecar binding inventory, selector, task/config/guide signals, and selected-result metadata; it never watches, refreshes, or stores source bodies.",
+      "implementation": {
+        "code": [
+          "src/core/context/selection-freshness.ts",
+          "src/core/workflow.ts"
+        ],
+        "tests": [
+          "test/workflow/internal-context.test.ts",
+          "test/workflow/internal-workflow.test.ts"
+        ],
+        "docs": [
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "dependency-aware-repo-map",
+      "capability": "Bounded dependency-aware repository-map ranking",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "Aider-AI/aider",
+          "url": "https://github.com/Aider-AI/aider",
+          "ref": "5dc9490bb35f9729ef2c95d00a19ccd30c26339c",
+          "sourceDate": "2026-08-26",
+          "license": "Apache-2.0",
+          "evidenceUrls": [
+            "https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/LICENSE.txt",
+            "https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/aider/website/docs/repomap.md"
+          ]
+        }
+      ],
+      "adaptation": "Uses sanitized import metadata and a capped in-memory two-hop graph bonus while retaining Harnix lexical ranking, deterministic POSIX-path ties, cache v1, and no embeddings or network.",
+      "implementation": {
+        "code": [
+          "src/core/repo-map/graph.ts",
+          "src/core/repo-map/search.ts"
+        ],
+        "tests": [
+          "test/unit/repo-map/graph-ranking.test.ts"
+        ],
+        "docs": [
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "deterministic-ready-trace",
+      "capability": "Bounded deterministic trace from Full-task criteria to slices, checks, and paths",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "github/spec-kit",
+          "url": "https://github.com/github/spec-kit",
+          "ref": "c58a8487461052b4fa65e626df167521d297b184",
+          "sourceDate": "2026-08-25",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/LICENSE",
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/workflows/README.md"
+          ]
+        },
+        {
+          "repository": "obra/superpowers",
+          "url": "https://github.com/obra/superpowers",
+          "ref": "44c9b2d6e889982ac18c27d05a19fefe335194e1",
+          "sourceDate": "2026-07-28",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/obra/superpowers/blob/44c9b2d6e889982ac18c27d05a19fefe335194e1/LICENSE",
+            "https://github.com/obra/superpowers/commit/44c9b2d6e889982ac18c27d05a19fefe335194e1"
+          ]
+        }
+      ],
+      "adaptation": "Replaces human-only consistency guidance with a bounded line parser and stable diagnostics; no LLM judge, Markdown execution, or Lite-task ceremony is introduced.",
+      "implementation": {
+        "code": [
+          "src/commands/internal-workflow.ts",
+          "src/core/tasks/ready-trace.ts"
+        ],
+        "tests": [
+          "test/unit/ready-trace.test.ts",
+          "test/workflow/internal-workflow.test.ts"
+        ],
+        "docs": [
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "doctor-evaluation",
+      "capability": "Offline deterministic health diagnostics and workflow behavior evaluations",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "affaan-m/ECC",
+          "url": "https://github.com/affaan-m/ECC",
+          "ref": "f1fec0e53934737d3b3b8388b0fd1651e8b62f4f",
+          "sourceDate": "2026-08-04",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/affaan-m/ECC/blob/f1fec0e53934737d3b3b8388b0fd1651e8b62f4f/LICENSE",
+            "https://github.com/affaan-m/ECC/commit/f1fec0e53934737d3b3b8388b0fd1651e8b62f4f"
+          ]
+        }
+      ],
+      "adaptation": "Implements Harnix-specific JSON diagnostics, redaction, ownership checks, fake-home fixtures, and behavior evals without telemetry, model scoring, or cloud state.",
+      "implementation": {
+        "code": [
+          "src/commands/doctor.ts"
+        ],
+        "tests": [
+          "test/integration/doctor.test.ts"
+        ],
+        "docs": [
+          "docs/HARNIX_PRD.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "evidence-first-debugging",
+      "capability": "Root-cause debugging with one hypothesis and regression protection",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "obra/superpowers",
+          "url": "https://github.com/obra/superpowers",
+          "ref": "44c9b2d6e889982ac18c27d05a19fefe335194e1",
+          "sourceDate": "2026-07-28",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/obra/superpowers/blob/44c9b2d6e889982ac18c27d05a19fefe335194e1/LICENSE",
+            "https://github.com/obra/superpowers/commit/44c9b2d6e889982ac18c27d05a19fefe335194e1"
+          ]
+        }
+      ],
+      "adaptation": "Scopes the discipline to reproducible Harnix failures, persists debugging checkpoints, and reassesses assumptions after three failed hypotheses without mandatory subagent dispatch.",
+      "implementation": {
+        "code": [
+          "src/skills/harnix-debug/SKILL.md"
+        ],
+        "tests": [
+          "test/workflow/skill-sources.test.ts"
+        ],
+        "docs": [
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "fresh-verification",
+      "capability": "Fresh evidence before completion with input-bound verification",
+      "decision": "adopt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "obra/superpowers",
+          "url": "https://github.com/obra/superpowers",
+          "ref": "44c9b2d6e889982ac18c27d05a19fefe335194e1",
+          "sourceDate": "2026-07-28",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/obra/superpowers/blob/44c9b2d6e889982ac18c27d05a19fefe335194e1/LICENSE",
+            "https://github.com/obra/superpowers/commit/44c9b2d6e889982ac18c27d05a19fefe335194e1"
+          ]
+        }
+      ],
+      "adaptation": "Adopts evidence-before-claims and extends it with Harnix TaskRecord v2 check ownership, pre/post snapshots, immutable digest sidecars, age bounds, and finish-time recomputation.",
+      "implementation": {
+        "code": [
+          "src/core/verification/input-freshness.ts",
+          "src/core/workflow.ts",
+          "src/skills/harnix-finish-work/SKILL.md"
+        ],
+        "tests": [
+          "test/unit/verification-inputs.test.ts",
+          "test/workflow/internal-workflow.test.ts",
+          "test/workflow/routing.test.ts"
+        ],
+        "docs": [
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "project-journal-continue",
+      "capability": "Project-local journal and status-driven continuation",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "mindfold-ai/Trellis",
+          "url": "https://github.com/mindfold-ai/Trellis",
+          "ref": "516b34e3591001b28fda5e2d4df3f717e82f5785",
+          "sourceDate": "2026-08-01",
+          "license": "AGPL-3.0-or-later",
+          "evidenceUrls": [
+            "https://github.com/mindfold-ai/Trellis/blob/516b34e3591001b28fda5e2d4df3f717e82f5785/LICENSE",
+            "https://github.com/mindfold-ai/Trellis/commit/516b34e3591001b28fda5e2d4df3f717e82f5785"
+          ]
+        }
+      ],
+      "adaptation": "Keeps local bounded journal slices and routes resume from persisted status/checkpoint/context drift; global memory, channels, workers, and automatic Git operations are removed.",
+      "implementation": {
+        "code": [
+          "src/core/journal/journal.ts",
+          "src/core/workflow.ts",
+          "src/skills/harnix-continue/SKILL.md"
+        ],
+        "tests": [
+          "test/unit/journal.test.ts",
+          "test/workflow/routing.test.ts"
+        ],
+        "docs": [
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "repository-impact-navigation",
+      "capability": "Exact-path dependency and reverse-dependent navigation from the repository-map cache",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "Aider-AI/aider",
+          "url": "https://github.com/Aider-AI/aider",
+          "ref": "5dc9490bb35f9729ef2c95d00a19ccd30c26339c",
+          "sourceDate": "2026-08-26",
+          "license": "Apache-2.0",
+          "evidenceUrls": [
+            "https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/LICENSE.txt",
+            "https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/aider/repomap.py",
+            "https://github.com/Aider-AI/aider/blob/5dc9490bb35f9729ef2c95d00a19ccd30c26339c/aider/website/docs/repomap.md",
+            "https://github.com/Aider-AI/aider/issues/3603",
+            "https://github.com/Aider-AI/aider/issues/4239"
+          ]
+        }
+      ],
+      "adaptation": "Exposes only Harnix's existing sanitized static-import cache as an exact-path, depth-bounded, cycle-safe traversal with deterministic directional limits and stable failure states; it adds no source scan, snippet retrieval, embedding, dynamic-call inference, or cache migration.",
+      "implementation": {
+        "code": [
+          "src/commands/repo-map-internal.ts",
+          "src/core/repo-map/impact.ts",
+          "src/core/repo-map/service.ts",
+          "src/skills/harnix-implement/SKILL.md",
+          "src/templates/harnix/agents.ts",
+          "src/templates/harnix/workflow.ts"
+        ],
+        "tests": [
+          "test/integration/repo-map/internal.test.ts",
+          "test/unit/repo-map/impact.test.ts",
+          "test/workflow/cli-contract.test.ts",
+          "test/workflow/skill-sources.test.ts",
+          "test/workflow/templates.test.ts"
+        ],
+        "docs": [
+          "README.md",
+          "docs/HARNESS_FEATURE_PROVENANCE.json",
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/IMPLEMENTATION_PLAN.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "rules-guides",
+      "capability": "Focused language and technology engineering guidance",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "affaan-m/ECC",
+          "url": "https://github.com/affaan-m/ECC",
+          "ref": "f1fec0e53934737d3b3b8388b0fd1651e8b62f4f",
+          "sourceDate": "2026-08-04",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/affaan-m/ECC/blob/f1fec0e53934737d3b3b8388b0fd1651e8b62f4f/LICENSE",
+            "https://github.com/affaan-m/ECC/commit/f1fec0e53934737d3b3b8388b0fd1651e8b62f4f"
+          ]
+        }
+      ],
+      "adaptation": "Condenses attributed high-signal guidance into a typed Harnix catalog selected by detected language, technology, path, and task topic instead of installing a broad rule pack.",
+      "implementation": {
+        "code": [
+          "src/guides/catalog.ts",
+          "src/rules/rules.ts"
+        ],
+        "tests": [
+          "test/unit/catalog.test.ts",
+          "test/unit/rules.test.ts"
+        ],
+        "docs": [
+          "docs/HARNIX_PRD.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "scoped-context",
+      "capability": "Bounded task- and phase-relevant repository context",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "affaan-m/ECC",
+          "url": "https://github.com/affaan-m/ECC",
+          "ref": "f1fec0e53934737d3b3b8388b0fd1651e8b62f4f",
+          "sourceDate": "2026-08-04",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/affaan-m/ECC/blob/f1fec0e53934737d3b3b8388b0fd1651e8b62f4f/LICENSE",
+            "https://github.com/affaan-m/ECC/commit/f1fec0e53934737d3b3b8388b0fd1651e8b62f4f"
+          ]
+        },
+        {
+          "repository": "mindfold-ai/Trellis",
+          "url": "https://github.com/mindfold-ai/Trellis",
+          "ref": "516b34e3591001b28fda5e2d4df3f717e82f5785",
+          "sourceDate": "2026-08-01",
+          "license": "AGPL-3.0-or-later",
+          "evidenceUrls": [
+            "https://github.com/mindfold-ai/Trellis/blob/516b34e3591001b28fda5e2d4df3f717e82f5785/LICENSE",
+            "https://github.com/mindfold-ai/Trellis/commit/516b34e3591001b28fda5e2d4df3f717e82f5785"
+          ]
+        }
+      ],
+      "adaptation": "Ranks safe repository-relative entries under a character budget, wraps untrusted excerpts, discloses omissions, and avoids dumping all specs or executing context content.",
+      "implementation": {
+        "code": [
+          "src/commands/internal-context.ts",
+          "src/core/context/context.ts"
+        ],
+        "tests": [
+          "test/unit/context.test.ts",
+          "test/workflow/internal-context.test.ts"
+        ],
+        "docs": [
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "task-audit-readiness",
+      "capability": "Read-only deterministic readiness and completion audit for the active task",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "bmad-code-org/BMAD-METHOD",
+          "url": "https://github.com/bmad-code-org/BMAD-METHOD",
+          "ref": "9376e1f9e5b1214c024bb20b81adff5eb447820a",
+          "sourceDate": "2026-08-26",
+          "license": "MIT with trademark notice",
+          "evidenceUrls": [
+            "https://github.com/bmad-code-org/BMAD-METHOD/blob/9376e1f9e5b1214c024bb20b81adff5eb447820a/LICENSE",
+            "https://github.com/bmad-code-org/BMAD-METHOD/blob/9376e1f9e5b1214c024bb20b81adff5eb447820a/docs/reference/workflow-map.md",
+            "https://github.com/bmad-code-org/BMAD-METHOD/issues/2079"
+          ]
+        },
+        {
+          "repository": "github/spec-kit",
+          "url": "https://github.com/github/spec-kit",
+          "ref": "c58a8487461052b4fa65e626df167521d297b184",
+          "sourceDate": "2026-08-25",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/LICENSE",
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/docs/quickstart.md",
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/templates/commands/analyze.md",
+            "https://github.com/github/spec-kit/discussions/1917"
+          ]
+        }
+      ],
+      "adaptation": "Reuses Harnix's exact ready-trace, criterion-support, and input-freshness contracts to expose separate readiness and completion states with stable codes and sorted IDs; it deliberately omits heuristic recommendations and never runs checks, edits artifacts, advances workflow, or reveals private prose.",
+      "implementation": {
+        "code": [
+          "src/commands/audit.ts",
+          "src/core/tasks/task-audit.ts",
+          "src/skills/harnix-check/SKILL.md",
+          "src/templates/harnix/agents.ts",
+          "src/templates/harnix/workflow.ts"
+        ],
+        "tests": [
+          "test/integration/audit.test.ts",
+          "test/unit/task-audit.test.ts",
+          "test/workflow/cli-contract.test.ts",
+          "test/workflow/skill-sources.test.ts",
+          "test/workflow/templates.test.ts"
+        ],
+        "docs": [
+          "README.md",
+          "docs/HARNESS_FEATURE_PROVENANCE.json",
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/IMPLEMENTATION_PLAN.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "task-history-index",
+      "capability": "Bounded resilient index of local Harnix task records",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "cline/cline",
+          "url": "https://github.com/cline/cline",
+          "ref": "6fc40127a6f464c202bc086773ee2f430a0f7b72",
+          "sourceDate": "2026-08-26",
+          "license": "Apache-2.0",
+          "evidenceUrls": [
+            "https://github.com/cline/cline/blob/6fc40127a6f464c202bc086773ee2f430a0f7b72/LICENSE",
+            "https://github.com/cline/cline/blob/6fc40127a6f464c202bc086773ee2f430a0f7b72/docs/core-workflows/task-management.mdx",
+            "https://github.com/cline/cline/discussions/10480",
+            "https://github.com/cline/cline/issues/4359"
+          ]
+        }
+      ],
+      "adaptation": "Indexes only independently validated project-local Harnix task records under strict file and scan caps, isolates malformed entries, pins a valid active result, and returns state/timestamps only; it does not import conversation history, fuzzy search, checkpoints, prompt bodies, or Git restore behavior.",
+      "implementation": {
+        "code": [
+          "src/commands/tasks.ts",
+          "src/core/tasks/task-index.ts",
+          "src/skills/harnix-continue/SKILL.md",
+          "src/templates/harnix/agents.ts",
+          "src/templates/harnix/workflow.ts"
+        ],
+        "tests": [
+          "test/integration/tasks.test.ts",
+          "test/unit/task-index.test.ts",
+          "test/workflow/cli-contract.test.ts",
+          "test/workflow/skill-sources.test.ts",
+          "test/workflow/templates.test.ts"
+        ],
+        "docs": [
+          "README.md",
+          "docs/HARNESS_FEATURE_PROVENANCE.json",
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/IMPLEMENTATION_PLAN.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "task-lifecycle",
+      "capability": "Persisted task state, artifacts, legal transitions, and completion/cancellation recovery",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "mindfold-ai/Trellis",
+          "url": "https://github.com/mindfold-ai/Trellis",
+          "ref": "516b34e3591001b28fda5e2d4df3f717e82f5785",
+          "sourceDate": "2026-08-01",
+          "license": "AGPL-3.0-or-later",
+          "evidenceUrls": [
+            "https://github.com/mindfold-ai/Trellis/blob/516b34e3591001b28fda5e2d4df3f717e82f5785/LICENSE",
+            "https://github.com/mindfold-ai/Trellis/commit/516b34e3591001b28fda5e2d4df3f717e82f5785"
+          ]
+        }
+      ],
+      "adaptation": "Defines one Harnix state machine with Lite/Full ceremony, strict versioned records, atomic task-owned artifacts, monotonic obligations, explicit cancellation, and no automatic Git lifecycle.",
+      "implementation": {
+        "code": [
+          "src/commands/internal-workflow.ts",
+          "src/core/tasks/task.ts",
+          "src/core/workflow.ts"
+        ],
+        "tests": [
+          "test/unit/task-state.test.ts",
+          "test/workflow/internal-workflow.test.ts",
+          "test/workflow/routing.test.ts"
+        ],
+        "docs": [
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "task-status-next-action",
+      "capability": "Bounded public active-task progress, attention, and deterministic next action",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "affaan-m/ECC",
+          "url": "https://github.com/affaan-m/ECC",
+          "ref": "d8409a4b0813771235555e32e3d8046a73988bfa",
+          "sourceDate": "2026-08-19",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/affaan-m/ECC/blob/d8409a4b0813771235555e32e3d8046a73988bfa/LICENSE",
+            "https://github.com/affaan-m/ECC/blob/d8409a4b0813771235555e32e3d8046a73988bfa/commands/loop-status.md",
+            "https://github.com/affaan-m/ECC/blob/d8409a4b0813771235555e32e3d8046a73988bfa/scripts/status.js",
+            "https://github.com/affaan-m/ECC/issues/2694"
+          ]
+        },
+        {
+          "repository": "bmad-code-org/BMAD-METHOD",
+          "url": "https://github.com/bmad-code-org/BMAD-METHOD",
+          "ref": "9376e1f9e5b1214c024bb20b81adff5eb447820a",
+          "sourceDate": "2026-08-26",
+          "license": "MIT with trademark notice",
+          "evidenceUrls": [
+            "https://github.com/bmad-code-org/BMAD-METHOD/blob/9376e1f9e5b1214c024bb20b81adff5eb447820a/LICENSE",
+            "https://github.com/bmad-code-org/BMAD-METHOD/blob/9376e1f9e5b1214c024bb20b81adff5eb447820a/docs/reference/build-auto.md",
+            "https://github.com/bmad-code-org/BMAD-METHOD/blob/9376e1f9e5b1214c024bb20b81adff5eb447820a/docs/reference/workflow-map.md"
+          ]
+        },
+        {
+          "repository": "cline/cline",
+          "url": "https://github.com/cline/cline",
+          "ref": "6fc40127a6f464c202bc086773ee2f430a0f7b72",
+          "sourceDate": "2026-08-26",
+          "license": "Apache-2.0",
+          "evidenceUrls": [
+            "https://github.com/cline/cline/blob/6fc40127a6f464c202bc086773ee2f430a0f7b72/LICENSE",
+            "https://github.com/cline/cline/blob/6fc40127a6f464c202bc086773ee2f430a0f7b72/docs/core-workflows/task-management.mdx",
+            "https://github.com/cline/cline/issues/12388",
+            "https://github.com/cline/cline/issues/13239",
+            "https://github.com/cline/cline/issues/9948"
+          ]
+        },
+        {
+          "repository": "github/spec-kit",
+          "url": "https://github.com/github/spec-kit",
+          "ref": "c58a8487461052b4fa65e626df167521d297b184",
+          "sourceDate": "2026-08-25",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/LICENSE",
+            "https://github.com/github/spec-kit/blob/c58a8487461052b4fa65e626df167521d297b184/workflows/README.md"
+          ]
+        },
+        {
+          "repository": "mindfold-ai/Trellis",
+          "url": "https://github.com/mindfold-ai/Trellis",
+          "ref": "64e663694201005bc87766ef22de89b8da3d4d79",
+          "sourceDate": "2026-08-21",
+          "license": "AGPL-3.0-or-later",
+          "evidenceUrls": [
+            "https://github.com/mindfold-ai/Trellis/blob/64e663694201005bc87766ef22de89b8da3d4d79/LICENSE",
+            "https://github.com/mindfold-ai/Trellis/issues/470",
+            "https://github.com/mindfold-ai/Trellis/issues/549"
+          ]
+        }
+      ],
+      "adaptation": "Clean-room Harnix projection reads existing local task, evidence, input-freshness, and context-drift contracts; it emits counts and static codes only, with no database, watcher, statusline, model state, task prose, or network.",
+      "implementation": {
+        "code": [
+          "src/commands/status.ts",
+          "src/core/status.ts",
+          "src/templates/harnix/agents.ts",
+          "src/templates/harnix/workflow.ts"
+        ],
+        "tests": [
+          "test/integration/status.test.ts",
+          "test/unit/status.test.ts",
+          "test/workflow/cli-contract.test.ts",
+          "test/workflow/templates.test.ts"
+        ],
+        "docs": [
+          "README.md",
+          "docs/HARNESS_FEATURE_PROVENANCE.json",
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/IMPLEMENTATION_PLAN.md",
+          "docs/UPSTREAM_BASELINE.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "two-stage-review",
+      "capability": "Compliance review before quality, security, and maintainability review",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "obra/superpowers",
+          "url": "https://github.com/obra/superpowers",
+          "ref": "44c9b2d6e889982ac18c27d05a19fefe335194e1",
+          "sourceDate": "2026-07-28",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/obra/superpowers/blob/44c9b2d6e889982ac18c27d05a19fefe335194e1/LICENSE",
+            "https://github.com/obra/superpowers/commit/44c9b2d6e889982ac18c27d05a19fefe335194e1"
+          ]
+        }
+      ],
+      "adaptation": "Separates contract compliance from correctness, security, maintainability, and complexity review while keeping the process single-agent compatible and evidence-based.",
+      "implementation": {
+        "code": [
+          "src/skills/harnix-check/SKILL.md"
+        ],
+        "tests": [
+          "test/workflow/skill-sources.test.ts"
+        ],
+        "docs": [
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "untrusted-learning-promotion",
+      "capability": "Review boundary and redacted diagnostics for persistent learning candidates",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "affaan-m/ECC",
+          "url": "https://github.com/affaan-m/ECC",
+          "ref": "f1fec0e53934737d3b3b8388b0fd1651e8b62f4f",
+          "sourceDate": "2026-08-04",
+          "license": "MIT",
+          "evidenceUrls": [
+            "https://github.com/affaan-m/ECC/blob/f1fec0e53934737d3b3b8388b0fd1651e8b62f4f/LICENSE",
+            "https://github.com/affaan-m/ECC/commit/f1fec0e53934737d3b3b8388b0fd1651e8b62f4f"
+          ]
+        },
+        {
+          "repository": "mindfold-ai/Trellis",
+          "url": "https://github.com/mindfold-ai/Trellis",
+          "ref": "516b34e3591001b28fda5e2d4df3f717e82f5785",
+          "sourceDate": "2026-08-01",
+          "license": "AGPL-3.0-or-later",
+          "evidenceUrls": [
+            "https://github.com/mindfold-ai/Trellis/blob/516b34e3591001b28fda5e2d4df3f717e82f5785/LICENSE",
+            "https://github.com/mindfold-ai/Trellis/commit/516b34e3591001b28fda5e2d4df3f717e82f5785"
+          ]
+        }
+      ],
+      "adaptation": "Treats candidate statements as JSON-string data inside a fixed boundary, binds exact hashes and provenance, and emits category-only Doctor warnings; it never auto-promotes or rewrites user specs.",
+      "implementation": {
+        "code": [
+          "src/core/journal/learning-safety.ts",
+          "src/core/journal/promotion.ts"
+        ],
+        "tests": [
+          "test/unit/learning-safety.test.ts"
+        ],
+        "docs": [
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    }
+  ]
+}

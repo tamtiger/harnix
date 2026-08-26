@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or already in progress and needs plan review, test-first implementation, refactoring, or technical feedback handling.
 metadata:
-  version: "1.0.12"
+  version: "1.0.13"
 ---
 
 # Implement a ready Harnix task
@@ -28,11 +28,13 @@ Review the plan critically before product edits:
 - compare the plan to current source and tests, not stale assumptions.
 - confirm the implementation checklist exists, is ordered consistently with the slices, and has no item pre-checked without persisted evidence.
 
-If the plan has a critical gap, do not guess and do not code around it. Persist checkpoint `replan`, describe the exact missing decision or contradiction, and hand back to `harnix-brainstorm`. If the task is ready, persist `in_progress/implementing` before the first product edit.
+If the plan has a critical gap, do not guess and do not code around it. Persist the same unfinished status at checkpoint `replan`, describe the exact missing decision or contradiction, and hand back to `harnix-brainstorm`. Brainstorm must pass the ready audit and use the guarded re-entry to `ready/ready`; do not resume implementation directly from `replan`. If the task is ready, persist `in_progress/implementing` before the first product edit.
 
 ## Load bounded context
 
 Read task artifacts, nearest project instructions, relevant specs, affected implementation, neighboring interfaces, current tests, and the current diff. Treat `.harnix/config.yaml` language/package values as discovery hints, not complete truth. Do not bulk-load the repository.
+
+When the initialized project has a current repo-map cache, `harnix repo-map --impact <exact-posix-path> [--depth <1..3>] [--limit <1..20>]` may narrow direct dependency/dependent inspection for an already selected file. Treat it only as a bounded static-import navigation hint: verify the chosen source files directly, never claim dynamic call-graph completeness, and do not refresh/write the cache from this step.
 
 ## RED–GREEN–REFACTOR
 

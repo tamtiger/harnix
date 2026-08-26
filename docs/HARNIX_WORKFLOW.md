@@ -31,6 +31,7 @@ Phase 6 user-global Kiro, Antigravity and Codex integrations are an adapter/life
 14. Router chọn đúng một current stage-owner skill; agent đọc riêng skill đó đến EOF và không batch-load skill của stage tương lai. Nếu tool output bị truncate, phải đọc lại riêng selected skill trước khi hành động.
 15. `cancelled` là terminal state cho công việc bị người dùng explicit abandon, không phải completion alias; cancellation giữ nguyên evidence fail/pending và luôn có reason/authority audit.
 16. Task mới là exact TaskRecord v2; unknown top-level/nested field và dangling `.active` pointer đều fail closed. Lite có thể promote sang Full, nhưng Full không bao giờ downgrade về Lite.
+17. Public `harnix status`, `tasks`, `audit` và `repo-map --query|--impact` chỉ cung cấp bounded read-only visibility/navigation; chúng không thay hidden inspect/continue, không route stage, không chạy verification và không ghi task, cache hoặc journal.
 
 ## 3. Entry routing
 
@@ -130,11 +131,13 @@ Nếu user chỉ yêu cầu plan hoặc yêu cầu checkpoint trước code, d�
 
 Transition sang `ready` phải được persist trước khi Planning kết thúc. Full phải có `prd.md`/`plan.md` an toàn, thuộc active task và không rỗng trên disk tại mỗi lần persist `ready`; không dùng nội dung chỉ tồn tại trong hội thoại để giả định ready gate đã pass.
 
+Một task chưa terminal ở `ready`, `in_progress` hoặc `verifying` chỉ được tái nhập `ready/ready` qua guarded re-entry của hidden `workflow --save` khi persisted checkpoint ngay trước đó là `replan`. Guarded re-entry phải chạy lại toàn bộ ready gate, giữ nguyên obligations/evidence và không mở một generic backward transition trong `transitionTask`; mọi `in_progress|verifying -> ready` không đi qua `replan` tiếp tục bị từ chối.
+
 ### 5.4 Implementing
 
 Agent load task artifacts và context nhỏ nhất liên quan tới bước hiện tại. Config language/technology values are discovery seeds; the agent confirms current manifests/source/tests and selects only guide metadata/content applicable to the active paths/topics. Read-only workflow routing never migrates config. Với mỗi checkpoint:
 
-1. Review plan critical với source/test hiện tại; nếu có material gap thì persist checkpoint `replan`, không đoán rồi code. Sau khi plan pass, persist `in_progress` với checkpoint `implementing` trước product edit đầu tiên; resume phải dùng status/checkpoint đã lưu.
+1. Review plan critical với source/test hiện tại; nếu có material gap thì persist checkpoint `replan`, không đoán rồi code. Brainstorm cập nhật artifacts/obligations, pass lại ready audit và dùng guarded re-entry vào `ready/ready` trước khi Implement tiếp tục. Sau khi plan pass, persist `in_progress` với checkpoint `implementing` trước product edit đầu tiên; resume phải dùng status/checkpoint đã lưu.
 2. Chọn một behavior/deliverable có thể kiểm chứng.
 3. Dùng RED → quan sát fail đúng lý do → GREEN tối thiểu → REFACTOR khi vẫn green cho behavior change.
 4. Ghi exception cho docs-only, trivial wiring, generated snapshots hoặc trường hợp test-first không có tín hiệu; dùng verification mạnh nhất thay thế.
@@ -190,6 +193,10 @@ Khi người dùng yêu cầu commit sau khi task hoàn tất, agent phải trì
 ### 5.8 Continue
 
 Continue resolve active task rồi load theo thứ tự: task record → artifact của current state → last checkpoint/evidence → smallest relevant journal/spec slice. Nó route từ status/checkpoint, không dựa vào trí nhớ hội thoại và không suy diễn approval đã mất sau compaction.
+
+Người dùng hoặc agent có thể chạy public `harnix status` trước Continue để xem `id`/mode/status/checkpoint, aggregate acceptance/check progress, context freshness, bounded attention và đúng một `nextAction`. Projection không emit task title/goal, criterion/check/blocker prose, validation command, prompt, secret hoặc absolute path; không có active task là clean success. `status` không thay hidden `workflow --inspect`, không quyết định transition và không được dùng làm completion evidence.
+
+Khi `.active` rỗng, public `harnix tasks [--limit] [--status]` có thể tìm bounded local task records mà không đọc artifact/journal body; malformed record được cô lập và active item hợp lệ được pin khi match filter. Index chỉ là discovery: nó không chọn, resume hoặc sửa active pointer. Public `harnix audit` có thể hiển thị exact Full readiness và completion blocker code/ID hiện tại, nhưng không chạy/fix check, không transition và không biến verdict thành verification evidence.
 
 Nếu không có active task, báo ngắn gọn và quay về Triage. Nếu state không nhất quán hoặc artifact malformed/future-version, fail closed và đề xuất repair; không tự đoán rồi overwrite.
 
@@ -269,6 +276,10 @@ Evals phải chứng minh:
 - Finish không commit/push/merge/PR và journal/promotion đúng gate.
 - Explicit cancellation không cần completion pass, giữ failed/pending evidence, ghi cancellation journal và retry an toàn sau partial persistence; cancelled không được report completed.
 - Continue phục hồi đúng state với bounded context, project context drift xác định và fail closed trên corrupt/future state.
+- Public `harnix status` từ nested initialized path trả projection deterministic, dưới 2 KiB cho fixture đại diện, phân loại đúng v1 age/v2 digest freshness và không ghi file hoặc echo private task prose.
+- Public `harnix tasks` cô lập record malformed dưới scan/file cap, giữ filter/order/active-pin deterministic và không đọc private artifact/journal body hoặc đổi pointer.
+- Public `harnix audit` tách readiness/completion, reuse exact ready-trace/input-freshness semantics, chỉ emit stable code/ID/count và không chạy check, sửa state hoặc tự hoàn tất task.
+- Mọi capability external-derived đang được duy trì có entry machine-checkable trong `docs/HARNESS_FEATURE_PROVENANCE.json`; immutable ref/license/evidence và concrete code/test/docs targets đều được regression kiểm tra.
 - Cùng fixture cho kết quả workflow tương đương trên Kiro, Antigravity và Codex.
 - Global hooks/instructions are a fast no-op in a non-Harnix workspace, activate only with safe bounded project context, and never turn malformed optional hook input into a blocked prompt.
-- Fresh init creates the validated repo map; workflow stages may use `harnix repo-map --query <text> [--limit <count>]` for bounded candidate discovery. Hooks never invoke repo-map operations; only `doctor --fix` and the hidden compatibility refresh can rebuild a cache after init.
+- Fresh init creates the validated repo map; workflow stages may use `harnix repo-map --query <text> [--limit <count>]` for bounded candidate discovery or `harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]` for exact cached dependency/dependent navigation. Results remain hints rather than call-graph completeness claims. Hooks never invoke repo-map operations; only `doctor --fix` and the hidden compatibility refresh can rebuild a cache after init.

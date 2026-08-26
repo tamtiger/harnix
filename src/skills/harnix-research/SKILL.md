@@ -2,7 +2,7 @@
 name: harnix-research
 description: Use when one material product, dependency, security, compatibility, or architecture unknown could change a Harnix planning or debugging decision.
 metadata:
-  version: "1.0.12"
+  version: "1.0.13"
 ---
 
 # Research one material unknown

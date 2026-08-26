@@ -4,6 +4,18 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.13] - 2026-08-26
+
+### Changed
+
+- Thêm public harnix status read-only với progress, freshness, attention và deterministic next action mà không lộ task prose hoặc ghi state.
+- Thêm public harnix tasks resilient với scan/file cap, per-record validation, status filter, active pin và malformed isolation mà không đọc private artifact/history body.
+- Thêm cache-only harnix repo-map --impact để xem direct dependencies và reverse dependents theo exact path, depth/limit bounded và deterministic ordering.
+- Thêm public harnix audit để tách readiness khỏi completion blockers bằng exact ready-trace/input-freshness semantics mà không chạy check, sửa state hoặc tự chuyển workflow.
+- Thêm registry provenance machine-checkable cho mọi capability harness-derived, kèm revalidation ba upstream, landscape evidence và canonical docs mapping.
+- Sửa guarded replan re-entry để task ready/in-progress/verifying có thể quay lại audited ready state sau persisted replan mà không mở generic backward transition.
+- Cho phép version-sync nhận pnpm argument separator đúng như acceptance command đã tài liệu hóa.
+
 ## [1.0.12] - 2026-08-26
 
 ### Changed

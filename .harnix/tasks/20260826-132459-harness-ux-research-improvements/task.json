@@ -1,0 +1,936 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260826-132459-harness-ux-research-improvements",
+  "title": "Nghiên cứu harness và cải tiến trải nghiệm Harnix theo bằng chứng",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Revalidate ba upstream gốc và harness landscape hiện tại, rồi triển khai một batch gồm status, task index, dependency impact, task audit và provenance với bằng chứng thực tế cùng verification đo được.",
+  "nonGoals": [
+    "Không thêm package, executable, platform, compatibility alias, telemetry, daemon, hosted service, marketplace hoặc default MCP.",
+    "Không thêm global memory, silent runtime network, worker network, mandatory subagents hoặc workflow-template switching.",
+    "Không sửa profile người dùng thật, tự commit, branch, worktree, merge, push, publish hoặc tạo pull request.",
+    "Không triển khai feature chỉ dựa trên popularity, README marketing hoặc một anecdote đơn lẻ.",
+    "Không index prompt/conversation content, suy diễn call graph hoặc dynamic import, hay để audit tự chạy command, sửa artifact hoặc chuyển workflow."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-capability-selection",
+      "text": "Một batch P0/P1 coherent chỉ được chọn khi gap Harnix được tái hiện, user outcome và metric trước/sau rõ ràng, complexity/rollback chấp nhận được; mọi candidate còn lại có quyết định experiment, defer hoặc reject với lý do.",
+      "status": "met",
+      "evidenceIds": [
+        "research-source-traceability-green",
+        "final-product-boundary-safety-green",
+        "final-research-source-traceability-green"
+      ]
+    },
+    {
+      "id": "ac-docs-release",
+      "text": "Research artifacts, canonical docs và CHANGELOG nhất quán; package patch version được tăng trước completion và exact acceptance/release sequence pass fresh.",
+      "status": "met",
+      "evidenceIds": [
+        "final-acceptance-suite-green",
+        "final-provenance-completeness-green",
+        "final-release-gates-green",
+        "final-static-quality-green",
+        "final-version-docs-sync-green"
+      ]
+    },
+    {
+      "id": "ac-implementation-quality",
+      "text": "Mọi behavior change có observed RED rồi GREEN, focused regression, compliance review và quality/security/maintainability review; không còn finding actionable trước completion.",
+      "status": "met",
+      "evidenceIds": [
+        "status-contract-green",
+        "replan-reentry-green",
+        "task-index-green",
+        "repo-impact-green",
+        "task-audit-green",
+        "final-acceptance-suite-green",
+        "final-static-quality-green",
+        "final-status-contract-green",
+        "final-repo-impact-contract-green",
+        "final-task-audit-contract-green",
+        "final-task-index-contract-green",
+        "final-replan-reentry-contract-green",
+        "final-review-no-findings"
+      ]
+    },
+    {
+      "id": "ac-landscape-evidence",
+      "text": "Research shortlist 8–12 repository, deep-dive ít nhất 5 và mỗi apply candidate có hai bằng chứng độc lập gồm một real-usage signal và một implementation/docs/reproduction signal.",
+      "status": "met",
+      "evidenceIds": [
+        "research-source-traceability-green",
+        "final-research-source-traceability-green"
+      ]
+    },
+    {
+      "id": "ac-product-boundaries",
+      "text": "Batch giữ một package/bin, đúng Kiro-Antigravity-Codex, local/offline deterministic behavior, fake-home isolation và không mở rộng các non-goals Harnix.",
+      "status": "met",
+      "evidenceIds": [
+        "final-acceptance-suite-green",
+        "final-product-boundary-safety-green",
+        "final-release-gates-green",
+        "final-static-quality-green"
+      ]
+    },
+    {
+      "id": "ac-provenance-completeness",
+      "text": "Mỗi feature triển khai có stable ID, source URL/ref/date/license/evidence, adopt-adapt delta, Harnix code/tests và lifecycle status trong docs; provenance check fail khi mapping thiếu hoặc target không tồn tại.",
+      "status": "met",
+      "evidenceIds": [
+        "final-provenance-completeness-green",
+        "final-release-gates-green",
+        "final-static-quality-green",
+        "final-version-docs-sync-green",
+        "final-provenance-registry-contract-green"
+      ]
+    },
+    {
+      "id": "ac-upstream-revalidation",
+      "text": "Trellis, ECC và Superpowers được đối chiếu frozen/current với URL, ref, ngày, license, feature delta, issue/release evidence và mapping Harnix; active repository không nhận upstream remote.",
+      "status": "met",
+      "evidenceIds": [
+        "research-source-traceability-green",
+        "final-research-source-traceability-green"
+      ]
+    },
+    {
+      "id": "ac-status-observability",
+      "text": "Public harnix status trả JSON v1 bounded gồm active-task identity không nhạy cảm, aggregate acceptance/required-check progress, context counts, đúng một deterministic next action và ordered attention theo contract đã khóa.",
+      "status": "met",
+      "evidenceIds": [
+        "status-contract-green",
+        "final-status-contract-green"
+      ]
+    },
+    {
+      "id": "ac-status-safety",
+      "text": "Status chỉ đọc state local của initialized project, không network/ghi file, không echo prompt/prose/command/secret/absolute path, giữ public JSON/error semantics và payload representative dưới 2 KiB.",
+      "status": "met",
+      "evidenceIds": [
+        "status-contract-green",
+        "final-status-contract-green"
+      ]
+    },
+    {
+      "id": "ac-repo-impact",
+      "text": "Public harnix repo-map --impact nhận exact repository-relative POSIX path, depth 1..3 và limit 1..20 mỗi direction; trả cache-only direct dependencies cùng reverse dependents có distance theo thứ tự deterministic, với stable missing, invalid và not-found states mà không refresh, đọc source hoặc đổi cache schema.",
+      "status": "met",
+      "evidenceIds": [
+        "repo-impact-green",
+        "final-repo-impact-contract-green"
+      ]
+    },
+    {
+      "id": "ac-task-audit",
+      "text": "Public harnix audit trả JSON v1 read-only cho active task: no-active thành công, Full readiness dùng deterministic ready-trace, Lite là not-applicable, completion liệt kê bounded criterion/check state và stable IDs; command không echo private prose/command/absolute path, không network, không chạy/fix check và không chuyển workflow.",
+      "status": "met",
+      "evidenceIds": [
+        "task-audit-green",
+        "final-task-audit-contract-green"
+      ]
+    },
+    {
+      "id": "ac-task-index",
+      "text": "Public harnix tasks trả JSON v1 bounded cho task records local, hỗ trợ limit 1..100 và exact status filter, pin active rồi sort updatedAt giảm dần với ID tie-break, scan tối đa 1.000 safe directories và degrade gracefully bằng invalid/truncation counts mà không lộ title, goal, prompt, evidence prose, command, secret hoặc absolute path.",
+      "status": "met",
+      "evidenceIds": [
+        "task-index-green",
+        "final-task-index-contract-green"
+      ]
+    },
+    {
+      "id": "ac-replan-reentry",
+      "text": "Hidden workflow save cho phép unfinished ready, in_progress hoặc verifying task đang ở checkpoint replan tái nhập ready/ready chỉ sau ready gate hiện hành; backward transition không có replan, terminal transition và obligation/evidence mutation vẫn bị reject.",
+      "status": "met",
+      "evidenceIds": [
+        "replan-reentry-green",
+        "final-replan-reentry-contract-green"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/.template-hashes.json",
+    ".harnix/tasks/20260826-132459-harness-ux-research-improvements",
+    "CHANGELOG.md",
+    "NOTICE",
+    "README.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_BASELINE.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "package.json",
+    "scripts",
+    "src",
+    "test",
+    "docs/HARNESS_FEATURE_PROVENANCE.json",
+    "src/cli-program.ts",
+    "src/commands/status.ts",
+    "src/core/status.ts",
+    "test/integration/status.test.ts",
+    "test/unit/status.test.ts",
+    "test/workflow/provenance.test.ts",
+    "src/commands/audit.ts",
+    "src/commands/tasks.ts",
+    "src/core/repo-map/impact.ts",
+    "src/core/tasks/task-audit.ts",
+    "src/core/tasks/task-index.ts",
+    "test/integration/audit.test.ts",
+    "test/integration/tasks.test.ts",
+    "test/unit/repo-map/impact.test.ts",
+    "test/unit/task-audit.test.ts",
+    "test/unit/task-index.test.ts",
+    "src/commands/internal-workflow.ts",
+    "src/core/tasks/task.ts",
+    "test/workflow/internal-workflow.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_BASELINE.md",
+    "docs/UPSTREAM_MAPPING.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "acceptance-suite",
+      "description": "Chạy unit, integration, migration, platform, workflow và safety suites sau toàn bộ research-driven implementation.",
+      "command": "pnpm run test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-release",
+        "ac-implementation-quality",
+        "ac-product-boundaries"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/**/*.md",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "product-boundary-safety",
+      "description": "Xác minh safety và platform suites giữ fake-home isolation, đúng ba platform và không mở rộng runtime surfaces.",
+      "command": "pnpm run test:safety && pnpm run test:platform",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-capability-selection",
+        "ac-product-boundaries"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "src/**/*.ts",
+        "test/platform/**/*.ts",
+        "test/safety/**/*.ts"
+      ]
+    },
+    {
+      "id": "provenance-completeness",
+      "description": "Xác minh mọi implemented harness feature có canonical provenance mapping đầy đủ và trỏ tới code/test tồn tại.",
+      "command": "pnpm exec vitest run test/workflow/provenance.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-release",
+        "ac-provenance-completeness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "NOTICE",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_BASELINE.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "test/workflow/provenance.test.ts"
+      ]
+    },
+    {
+      "id": "release-gates",
+      "description": "Kiểm tra package, fake-home tarball smoke, init performance, footprint và release scanner.",
+      "command": "pnpm run pack:check && pnpm run smoke:tarball && pnpm run measure:init && pnpm run measure:footprint && pnpm run scan:release",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-release",
+        "ac-product-boundaries",
+        "ac-provenance-completeness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "NOTICE",
+        "package.json",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "research-source-traceability",
+      "description": "Inspect frozen/current upstream evidence, landscape/deep-dive coverage, real-usage sources, decision matrix và source citations.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-capability-selection",
+        "ac-landscape-evidence",
+        "ac-upstream-revalidation"
+      ],
+      "inputs": [
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/research/*.md",
+        "@task-contract",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_BASELINE.md",
+        "docs/UPSTREAM_MAPPING.md"
+      ]
+    },
+    {
+      "id": "static-quality",
+      "description": "Build, lint và typecheck toàn repository sau batch cải tiến.",
+      "command": "pnpm run build && pnpm run lint && pnpm run typecheck",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-release",
+        "ac-implementation-quality",
+        "ac-product-boundaries",
+        "ac-provenance-completeness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "version-docs-sync",
+      "description": "Xác minh package 1.0.13, canonical skill metadata, self-host manifest, docs và CHANGELOG đồng bộ.",
+      "command": "pnpm run version:sync -- 1.0.13",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-release",
+        "ac-provenance-completeness"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**/*.md",
+        "package.json",
+        "scripts/version-sync.mjs",
+        "src/skills/*/SKILL.md"
+      ]
+    },
+    {
+      "id": "provenance-registry-contract",
+      "description": "Xác minh registry JSON canonical có exact schema, source immutable, license/evidence và safe existing code-test-doc paths cho mọi capability external-derived.",
+      "command": "pnpm exec vitest run test/workflow/provenance.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-provenance-completeness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNESS_FEATURE_PROVENANCE.json",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "test/workflow/provenance.test.ts"
+      ]
+    },
+    {
+      "id": "status-contract",
+      "description": "Xác minh public status schema, progress/freshness, next-action precedence, privacy, payload bound và no-write behavior trên fake repositories.",
+      "command": "pnpm exec vitest run test/unit/status.test.ts test/integration/status.test.ts test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-implementation-quality",
+        "ac-status-observability",
+        "ac-status-safety"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "src/cli-program.ts",
+        "src/commands/status.ts",
+        "src/core/status.ts",
+        "test/integration/status.test.ts",
+        "test/unit/status.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ]
+    },
+    {
+      "id": "repo-impact-contract",
+      "description": "Xác minh exact-path impact traversal, depth/limit bounds, deterministic dependency ordering, cache failure states, privacy và no-write behavior.",
+      "command": "pnpm exec vitest run test/unit/repo-map/impact.test.ts test/integration/repo-map/internal.test.ts test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-implementation-quality",
+        "ac-repo-impact"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "src/cli-program.ts",
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/impact.ts",
+        "src/core/repo-map/service.ts",
+        "src/core/repo-map/types.ts",
+        "test/integration/repo-map/internal.test.ts",
+        "test/unit/repo-map/impact.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ]
+    },
+    {
+      "id": "task-audit-contract",
+      "description": "Xác minh public readiness/completion projection, no-active/Lite/Full semantics, freshness IDs, privacy, bounds và no mutation.",
+      "command": "pnpm exec vitest run test/unit/task-audit.test.ts test/integration/audit.test.ts test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-implementation-quality",
+        "ac-task-audit"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "src/cli-program.ts",
+        "src/commands/audit.ts",
+        "src/core/tasks/task-audit.ts",
+        "test/integration/audit.test.ts",
+        "test/unit/task-audit.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ]
+    },
+    {
+      "id": "task-index-contract",
+      "description": "Xác minh bounded task listing, filter/order/scan semantics, malformed-record isolation, privacy, public CLI và no-write behavior.",
+      "command": "pnpm exec vitest run test/unit/task-index.test.ts test/integration/tasks.test.ts test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-implementation-quality",
+        "ac-task-index"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "src/cli-program.ts",
+        "src/commands/tasks.ts",
+        "src/core/tasks/task-index.ts",
+        "test/integration/tasks.test.ts",
+        "test/unit/task-index.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ]
+    },
+    {
+      "id": "replan-reentry-contract",
+      "description": "Xác minh guarded ready re-entry từ replan, ready audit enforcement và rejection cho backward/terminal/obligation-unsafe transitions.",
+      "command": "pnpm exec vitest run test/workflow/internal-workflow.test.ts test/workflow/routing.test.ts test/workflow/skill-sources.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-implementation-quality",
+        "ac-replan-reentry"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_WORKFLOW.md",
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/task.ts",
+        "src/core/workflow.ts",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/skills/harnix-continue/SKILL.md",
+        "src/skills/harnix-implement/SKILL.md",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "lint-provenance-regex-red",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-26T07:01:37.8147340Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Typecheck pass; ESLint fail tại provenance.test.ts vì no-useless-escape cho character class.",
+      "artifactPaths": [
+        "test/workflow/provenance.test.ts"
+      ]
+    },
+    {
+      "id": "lint-provenance-regex-green",
+      "recordedAt": "2026-08-26T07:02:32.737Z",
+      "result": "pass",
+      "summary": "Xác nhận root cause là escape thừa; ESLint và provenance regression pass sau fix một dòng.",
+      "artifactPaths": [
+        "test/workflow/provenance.test.ts"
+      ]
+    },
+    {
+      "id": "version-sync-pnpm-separator-red",
+      "checkId": "version-docs-sync",
+      "recordedAt": "2026-08-26T07:11:54.733Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Lệnh frozen pnpm run version:sync -- 1.0.13 fail vì pnpm 11 chuyển dấu -- vào argv và parser coi 1.0.13 là unknown argument.",
+      "artifactPaths": [
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts"
+      ]
+    },
+    {
+      "id": "version-sync-pnpm-separator-green",
+      "recordedAt": "2026-08-26T07:14:29.826Z",
+      "result": "pass",
+      "summary": "Focused regression xác nhận parser nhận pnpm separator; version 1.0.13, skill metadata và self-host generator metadata đã đồng bộ.",
+      "artifactPaths": [
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts",
+        "package.json",
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "id": "focused-harness-batch-green",
+      "recordedAt": "2026-08-26T07:14:29.826Z",
+      "result": "pass",
+      "summary": "26 focused test pass cho status, provenance, CLI, templates, self-host và version sync sau canonical docs update.",
+      "artifactPaths": [
+        "docs/HARNESS_FEATURE_PROVENANCE.json",
+        "src/core/status.ts",
+        "src/commands/status.ts",
+        "test/integration/status.test.ts",
+        "test/unit/status.test.ts",
+        "test/workflow/provenance.test.ts"
+      ]
+    },
+    {
+      "id": "research-source-traceability-green",
+      "checkId": "research-source-traceability",
+      "recordedAt": "2026-08-26T07:18:04.875Z",
+      "result": "pass",
+      "summary": "Manual/source assertions pass: 3 upstream current refs và license, 12 shortlist, 7 deep-dive, 3 selected features, real-usage signals, rollback/bất định và origin-only remote; pre/post digest khớp.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/research/upstream-revalidation.md",
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/research/harness-landscape.md",
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/research/real-world-ux-evidence.md",
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/research/capability-decision-matrix.md"
+      ],
+      "inputDigest": "ab3b1e5e14b3a1c58f9237ca791cfce9eb0e3293333283a9cc6faf7f6c691dda"
+    },
+    {
+      "id": "quality-status-tiebreak-red",
+      "recordedAt": "2026-08-26T07:19:43.852Z",
+      "result": "fail",
+      "summary": "Quality review xác nhận status chọn evidence đồng timestamp theo ID, trái completion/input-freshness contract đã khóa theo append order; nextAction có thể bất đồng với finish.",
+      "artifactPaths": [
+        "src/core/status.ts",
+        "src/core/workflow.ts",
+        "src/core/verification/input-freshness.ts",
+        "test/unit/verification-inputs.test.ts"
+      ]
+    },
+    {
+      "id": "quality-status-tiebreak-green",
+      "recordedAt": "2026-08-26T07:20:55.934Z",
+      "result": "pass",
+      "summary": "44 focused test pass sau khi status dùng persisted append order, đồng nhất completion/input-freshness; future pass vẫn stale và attention giữ thứ tự.",
+      "artifactPaths": [
+        "src/core/status.ts",
+        "test/integration/status.test.ts",
+        "test/unit/verification-inputs.test.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "status-contract-green",
+      "checkId": "status-contract",
+      "recordedAt": "2026-08-26T07:21:31.552Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "18 test pass: public command/schema, no-active/nested/no-write/privacy/payload, progress, append-order tie, future age, v2 digest, nextAction và attention.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "src/commands/status.ts",
+        "src/core/status.ts",
+        "test/integration/status.test.ts",
+        "test/unit/status.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ],
+      "inputDigest": "eacb138c27f1d4eeff5f0bcefa27455b98a49f2d62c8fe7cde5160e5526f61c8"
+    },
+    {
+      "id": "scope-expansion-replan",
+      "recordedAt": "2026-08-26T07:23:50.074Z",
+      "result": "pass",
+      "summary": "Người dùng yêu cầu mở rộng batch vượt status; quay lại replan để đánh giá và triển khai thêm capability có tác động trải nghiệm rõ ràng, giữ nguyên bằng chứng trước đó.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/plan.md"
+      ]
+    },
+    {
+      "id": "replan-ready-transition-red",
+      "recordedAt": "2026-08-26T07:36:56.227Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Reproducer deterministic: artifacts đã pass audit-ready nhưng workflow --save reject verifying/replan sang ready/ready với Illegal task transition verifying -> ready; forward-only transition table thiếu guarded replan re-entry.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/task.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "replan-reentry-green",
+      "checkId": "replan-reentry-contract",
+      "recordedAt": "2026-08-26T07:43:24.567Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "50 focused test pass: guarded ready re-entry hoạt động cho ready, in_progress và verifying tại replan; ready audit, obligation preservation và non-replan rejection vẫn được khóa.",
+      "artifactPaths": [
+        "docs/HARNIX_WORKFLOW.md",
+        "src/commands/internal-workflow.ts",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/skills/harnix-continue/SKILL.md",
+        "src/skills/harnix-implement/SKILL.md",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "inputDigest": "a81bf10001c571cc9dd02b80488dcfa38d03c7011366a7f2f2197c602d519b3c"
+    },
+    {
+      "id": "task-index-typecheck-red",
+      "recordedAt": "2026-08-26T07:50:26.885Z",
+      "result": "fail",
+      "exitCode": 2,
+      "summary": "Typecheck tái hiện lỗi TS2322: conditional array của attention bị widen, không khớp tuple union trong TaskIndexResultV1.",
+      "artifactPaths": [
+        "src/core/tasks/task-index.ts"
+      ]
+    },
+    {
+      "id": "task-index-typecheck-green",
+      "recordedAt": "2026-08-26T07:50:26.885Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Root cause được xác nhận là type inference; annotation theo TaskIndexResultV1 attention làm typecheck pass và 10 task-index regression vẫn xanh.",
+      "artifactPaths": [
+        "src/core/tasks/task-index.ts",
+        "test/integration/tasks.test.ts",
+        "test/unit/task-index.test.ts"
+      ]
+    },
+    {
+      "id": "task-index-green",
+      "checkId": "task-index-contract",
+      "recordedAt": "2026-08-26T07:51:52.295Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "10 test pass cho public task index: exact JSON/filter/order, active pin, scan cap 1.000, malformed isolation, privacy, public errors và no-write.",
+      "artifactPaths": [
+        "docs/HARNIX_PRD.md",
+        "src/cli-program.ts",
+        "src/commands/tasks.ts",
+        "src/core/tasks/task-index.ts",
+        "test/integration/tasks.test.ts",
+        "test/unit/task-index.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ],
+      "inputDigest": "423962499bffafe5662a80eeec002010fd58b4d8b9151f6aa4d836e8e2cc0f4c"
+    },
+    {
+      "id": "repo-impact-green",
+      "checkId": "repo-impact-contract",
+      "recordedAt": "2026-08-26T07:55:37.708Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "9 test pass cho cache-only dependency impact: exact path, direct dependencies, reverse BFS depth/cycle, independent limits, deterministic order, missing/invalid/not-found, CLI exclusivity và no-write.",
+      "artifactPaths": [
+        "docs/HARNIX_PRD.md",
+        "src/cli-program.ts",
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/impact.ts",
+        "src/core/repo-map/service.ts",
+        "test/integration/repo-map/internal.test.ts",
+        "test/unit/repo-map/impact.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ],
+      "inputDigest": "b68211dc80692f13d8245040d0e23f5ed710dad21cab94df61415943f30e541d"
+    },
+    {
+      "id": "task-audit-typecheck-red",
+      "recordedAt": "2026-08-26T08:00:58.870Z",
+      "result": "fail",
+      "exitCode": 2,
+      "summary": "Typecheck tái hiện TS2532 tại v2 criterion check lookup vì optional criterionIds của ValidationCheck union chưa được guard.",
+      "artifactPaths": [
+        "src/core/tasks/task-audit.ts"
+      ]
+    },
+    {
+      "id": "task-audit-typecheck-green",
+      "recordedAt": "2026-08-26T08:00:58.870Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Optional chaining tại criterionIds sửa đúng union boundary; typecheck pass và 11 task-audit regression tiếp tục xanh.",
+      "artifactPaths": [
+        "src/core/tasks/task-audit.ts",
+        "test/integration/audit.test.ts",
+        "test/unit/task-audit.test.ts"
+      ]
+    },
+    {
+      "id": "task-audit-green",
+      "checkId": "task-audit-contract",
+      "recordedAt": "2026-08-26T08:02:06.927Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "11 test pass cho public task audit: no-active, Lite/Full readiness, stripped diagnostics, artifact-unavailable, completion-ready criteria, sorted blocker IDs, current v2 freshness, privacy, payload và no-write.",
+      "artifactPaths": [
+        "docs/HARNIX_PRD.md",
+        "src/cli-program.ts",
+        "src/commands/audit.ts",
+        "src/core/tasks/task-audit.ts",
+        "test/integration/audit.test.ts",
+        "test/unit/task-audit.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ],
+      "inputDigest": "3a79075645f52dd645379c607b8e5a4bc3733981a16ce20e3a9166abd9bbcc4f"
+    },
+    {
+      "id": "final-acceptance-suite-green",
+      "checkId": "acceptance-suite",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact acceptance suite pass: 67 test files, 499 pass và 1 skip có chủ đích; toàn bộ unit, integration, migration, platform, workflow và safety xanh.",
+      "artifactPaths": [
+        "package.json",
+        "src/cli-program.ts",
+        "test/workflow/cli-contract.test.ts"
+      ],
+      "inputDigest": "ea49a611d3bf7332423516169bc0d1df0852e835c245674b9d5c59507d53238a"
+    },
+    {
+      "id": "final-product-boundary-safety-green",
+      "checkId": "product-boundary-safety",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact safety + platform gate pass: 41 safety test và 25 platform test; fake-home isolation và đúng Kiro, Antigravity, Codex được giữ.",
+      "artifactPaths": [
+        "docs/HARNIX_PRD.md",
+        "test/safety/platform-boundaries.test.ts",
+        "test/platform/setup.test.ts"
+      ],
+      "inputDigest": "36d37def8b534b3146d76e8b6335439a9b2a337703e80498b017fc78e0efc0b9"
+    },
+    {
+      "id": "final-provenance-completeness-green",
+      "checkId": "provenance-completeness",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Hai provenance regression pass; canonical mapping, immutable source metadata và target paths đầy đủ.",
+      "artifactPaths": [
+        "docs/HARNESS_FEATURE_PROVENANCE.json",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "test/workflow/provenance.test.ts"
+      ],
+      "inputDigest": "26940bd4e6939d9c0e1d7c78c447358c27f056c0bbd28d1eb9d555e33cf3e6df"
+    },
+    {
+      "id": "final-release-gates-green",
+      "checkId": "release-gates",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact release chain pass: pack check, 4 fake-home tarball smoke combinations, init median 433.14 ms, footprint giảm 82.49% và release scan sạch.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "scripts/scan-release.mjs",
+        "scripts/smoke-tarball.mjs"
+      ],
+      "inputDigest": "980e67f54db4added35fd82fbb928f8858aabfe0e3e28eda633416c6b5d5aeb9"
+    },
+    {
+      "id": "final-research-source-traceability-green",
+      "checkId": "research-source-traceability",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Manual/source assertions pass: 3 upstream gốc, 12 shortlist, 8 deep-dive; batch status/next/provenance/tasks/impact/audit có real-usage + mechanism evidence, immutable ref/license/adaptation mapping và repository chỉ có origin.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/research/upstream-revalidation.md",
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/research/harness-landscape.md",
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/research/real-world-ux-evidence.md",
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/research/capability-decision-matrix.md",
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/research/expanded-capability-selection.md"
+      ],
+      "inputDigest": "a992856ef7cbd1ff1b559c4386c5967c8a0b89c067632f376428436e33a4f510"
+    },
+    {
+      "id": "final-static-quality-green",
+      "checkId": "static-quality",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact build, ESLint và TypeScript noEmit đều pass sau toàn bộ batch.",
+      "artifactPaths": [
+        "package.json",
+        "src/cli-program.ts",
+        "test/workflow/cli-contract.test.ts"
+      ],
+      "inputDigest": "eb5a9e44a3ac93a29cf07479828ed060e0f09a27822d41abefef4e3e58277139"
+    },
+    {
+      "id": "final-version-docs-sync-green",
+      "checkId": "version-docs-sync",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Version sync 1.0.13 pass idempotent với changed=false; package, skills, self-host manifest, docs và CHANGELOG đồng bộ.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "scripts/version-sync.mjs",
+        "src/skills/harnix-check/SKILL.md"
+      ],
+      "inputDigest": "f3c2cf4bddcdbc040b8da99e458babd91a7645d6f4e9229ddad9a3ad4397809a"
+    },
+    {
+      "id": "final-provenance-registry-contract-green",
+      "checkId": "provenance-registry-contract",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Registry contract pass: exact schema/ID set, sorted safe existing code-test-doc paths, source ref/license/evidence đầy đủ.",
+      "artifactPaths": [
+        "docs/HARNESS_FEATURE_PROVENANCE.json",
+        "docs/UPSTREAM_MAPPING.md",
+        "test/workflow/provenance.test.ts"
+      ],
+      "inputDigest": "c3c530c916ea2146ce7110356ff839a83effbe67bb7a88120e98a42bbe8aadf1"
+    },
+    {
+      "id": "final-status-contract-green",
+      "checkId": "status-contract",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "18 focused test pass cho public status schema, freshness, privacy, bound, no-write và deterministic next action.",
+      "artifactPaths": [
+        "src/commands/status.ts",
+        "src/core/status.ts",
+        "test/integration/status.test.ts",
+        "test/unit/status.test.ts"
+      ],
+      "inputDigest": "c9a5d331071acef324b12adc69544c54ebe48045f993a48cec995b8a8730856e"
+    },
+    {
+      "id": "final-repo-impact-contract-green",
+      "checkId": "repo-impact-contract",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "9 focused test pass cho exact-path cached impact, traversal depth/cycle, independent bounds, stable failures và no-write.",
+      "artifactPaths": [
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/impact.ts",
+        "test/integration/repo-map/internal.test.ts",
+        "test/unit/repo-map/impact.test.ts"
+      ],
+      "inputDigest": "1116e8324b5b62b4979be8b30c1c08683c6878f68d2f82f276ea6cec18ce4fff"
+    },
+    {
+      "id": "final-task-audit-contract-green",
+      "checkId": "task-audit-contract",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "11 focused test pass cho readiness/completion audit, stable blocker IDs, freshness, privacy, bounds và no mutation.",
+      "artifactPaths": [
+        "src/commands/audit.ts",
+        "src/core/tasks/task-audit.ts",
+        "test/integration/audit.test.ts",
+        "test/unit/task-audit.test.ts"
+      ],
+      "inputDigest": "f1a07ae9fc30dd08a63ae1d65915df1bee4364b4e885822b715fa32a818ceb8d"
+    },
+    {
+      "id": "final-task-index-contract-green",
+      "checkId": "task-index-contract",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "10 focused test pass cho bounded task listing, exact filter/order, active pin, malformed isolation, privacy và no-write.",
+      "artifactPaths": [
+        "src/commands/tasks.ts",
+        "src/core/tasks/task-index.ts",
+        "test/integration/tasks.test.ts",
+        "test/unit/task-index.test.ts"
+      ],
+      "inputDigest": "9e8c9ea49bd0be38b7ee6a0bafb0ec7ef31b2bd1a2e1bc455287f1444b1cd4cc"
+    },
+    {
+      "id": "final-replan-reentry-contract-green",
+      "checkId": "replan-reentry-contract",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "50 focused test pass cho guarded replan re-entry, ready audit, obligation preservation và rejection của transition không hợp lệ.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/task.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ],
+      "inputDigest": "5def0cc3c5fe624906e4762db97fda63ffb2aa9841d806cd99718b4187e704dc"
+    },
+    {
+      "id": "final-review-no-findings",
+      "recordedAt": "2026-08-26T08:27:22.911Z",
+      "result": "pass",
+      "summary": "Compliance review rồi quality/security/maintainability review độc lập không còn finding actionable; scope, privacy, bounds, deterministic ordering, failure semantics và product boundaries đều khớp contract.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "src/core/status.ts",
+        "src/core/tasks/task-index.ts",
+        "src/core/repo-map/impact.ts",
+        "src/core/tasks/task-audit.ts",
+        "src/commands/internal-workflow.ts"
+      ]
+    },
+    {
+      "id": "final-handoff-residuals",
+      "recordedAt": "2026-08-26T08:28:21.528Z",
+      "result": "pass",
+      "summary": "Không có waiver. Không rerun disposable Windows GUI/profile activation cho Kiro, Antigravity, Codex vì batch không đổi platform setup và thao tác đó cần explicit profile/login/trust authority; historical Phase 6 evidence vẫn được giữ, automated fake-home tarball smoke đã pass. Giới hạn còn lại theo thiết kế: tasks báo partial khi gặp historical record lỗi; impact chỉ phản ánh static imports trong cache v1; audit chỉ hiển thị và không tự sửa/chạy check. Memory review không tạo learning candidate trùng. Không có manual action bắt buộc; commit/publish chưa thực hiện.",
+      "artifactPaths": [
+        "docs/IMPLEMENTATION_PLAN.md",
+        "docs/HARNESS_RESEARCH.md",
+        ".harnix/tasks/20260826-132459-harness-ux-research-improvements/research/expanded-capability-selection.md"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-26T06:27:38.2983694Z",
+  "updatedAt": "2026-08-26T08:28:31.689Z",
+  "completedAt": "2026-08-26T08:28:31.689Z"
+}

@@ -60,6 +60,10 @@ The 2026-08-18 adopted capability boundaries remain in the same dependency direc
 | `core/tasks/ready-trace.ts` | Superpowers decision-complete planning discipline, reimplemented | Deterministic bounded parser; no LLM judge or Markdown execution |
 | `core/journal/learning-safety.ts` + `promotion.ts` | Trellis/ECC evidence learning, security adaptation | JSON-string review boundary and category-only diagnostics; no auto-promotion/spec rewrite |
 | `core/repo-map/graph.ts` + `search.ts` | Repository dependency navigation pattern, Harnix-authored | Safe cached structural graph only; no AST service, embedding, persisted graph or network |
+| `core/status.ts` | Trellis/ECC/Spec Kit/BMAD status-resume patterns, clean-room reimplemented | Count-only persisted-state projection; no database, watcher, task prose, model/session state or network |
+| `core/tasks/task-index.ts` | Cline local task-history/discovery pattern, clean-room reimplemented | Independently validated bounded records and malformed isolation; no conversation store, fuzzy search, checkpoints or Git restore |
+| `core/repo-map/impact.ts` | Aider dependency-graph/on-demand navigation pattern, clean-room reimplemented | Exact cached static-import traversal only; no scan, source snippets, dynamic call graph, embedding or cache migration |
+| `core/tasks/task-audit.ts` | Spec Kit analyze + BMAD implementation-readiness pattern, clean-room reimplemented | Exact Harnix ready-trace/freshness states and stable IDs; no heuristic verdict, auto-remediation, command execution or transition |
 
 Public exports chỉ gồm supported programmatic boundaries được ghi trong `src/index.ts`; consumer không được dựa vào deep imports. Commander/Inquirer nằm ở CLI layer. Filesystem/process/network dependencies được inject ở nơi cần test deterministic.
 
@@ -73,6 +77,10 @@ Public exports chỉ gồm supported programmatic boundaries được ghi trong 
 | `harnix upgrade` | Upgrade command | `@tamtiger/harnix`, installed/available versions, injected network/process deps |
 | `harnix uninstall [--purge|--global|--legacy-project-surfaces]` | Uninstall scrubbers | Project purge remains separate; global/legacy cleanup preview and confirmation preserve modified/untracked content |
 | `harnix mem [query]` | Mem search concepts | Project JSONL/structured journals, Unicode/malformed handling, learning metadata; statements remain untrusted review data |
+| `harnix status` | Trellis/ECC/Spec Kit/BMAD status-resume-next-step patterns | Nearest initialized project, bounded read-only JSON v1, deterministic progress/freshness/attention/next action; no task prose, writes or network |
+| `harnix tasks [--limit] [--status]` | Cline local task history/search plus real malformed-history failures | Bounded exact-state index, per-record validation, active pin and partial-state disclosure; no prompt/history body, fuzzy search or restore |
+| `harnix audit` | Spec Kit analyze and BMAD implementation-readiness checks | Separate deterministic readiness/completion projection using Harnix's exact gates; visibility only, no check execution, mutation or heuristic blocking |
+| `harnix repo-map --query|--impact` | Aider repository-map and on-demand dependency navigation | Cache-only lexical candidate search or exact directional dependency impact; no source scan/snippet, embeddings or dynamic-call claim |
 | `harnix doctor [--fix] [--global]` | New + ECC doctor ideas | Doctor JSON v2 projects + global integrations, redacted suspicious-learning categories, meaningful exit codes, conservative scoped fix, no network/journal rewrite |
 | Trellis `workflow` | — | Removed; exactly one Harnix workflow |
 | Trellis `channel` | — | Removed completely |
@@ -206,3 +214,7 @@ Before porting a source file, implementation must choose one of:
 4. Remove it and add an invariant test preventing accidental reintroduction.
 
 No component may enter the package merely because it exists upstream.
+
+Mọi maintained feature dùng behavior, code hoặc content từ external harness phải đồng thời thêm/cập nhật một stable entry trong `docs/HARNESS_FEATURE_PROVENANCE.json`. Entry ghi `adopt|adapt`, lifecycle, từng source repository/HTTPS URL/immutable 40-hex ref/source date/license/evidence URL, Harnix adaptation delta và sorted concrete existing `code`/`tests`/`docs` paths. `test/workflow/provenance.test.ts` pin feature-ID set, exact allowlists, sort/uniqueness, safe path và path existence; canonical research/mapping cùng expected-ID regression phải đổi trong cùng task trước completion.
+
+Behavioral reference không đồng nghĩa copied code. Chỉ cập nhật `NOTICE` hoặc source header khi reuse/adaptation thực tế tạo nghĩa vụ license; clean-room evidence vẫn được ghi trong registry để provenance dễ nhận biết mà không overclaim nguồn sở hữu implementation.

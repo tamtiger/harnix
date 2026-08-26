@@ -4,7 +4,7 @@ import { Command, Option } from "commander";
 
 import { initializeProject, parseInitProfile } from "./commands/init.js";
 import { setupPlatforms, type HookCommandLookup, type SetupPlatformsResult } from "./commands/setup.js";
-import { resolveProjectRoot } from "./utils/paths.js";
+import { normalizeRepositoryPath, resolveProjectRoot } from "./utils/paths.js";
 import { runInternalContextCommand } from "./commands/internal-context-cli.js";
 import { updateProject } from "./commands/update.js";
 import { updateGlobalPlatforms } from "./commands/global-update.js";
@@ -13,14 +13,18 @@ import { uninstallProject } from "./commands/uninstall.js";
 import { uninstallGlobalIntegrations } from "./commands/global-uninstall.js";
 import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces.js";
 import { searchMemory } from "./commands/mem.js";
+import { inspectProjectStatus } from "./commands/status.js";
+import { listProjectTasks } from "./commands/tasks.js";
+import { auditProjectTask } from "./commands/audit.js";
 import { diagnoseProject } from "./commands/doctor.js";
-import { queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
+import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
 import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow } from "./commands/internal-workflow.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
 import { GlobalManagedTransactionError } from "./utils/global-managed-files.js";
 import { readBoundedInput } from "./utils/bounded-input.js";
+import type { TaskStatus } from "./core/tasks/task.js";
 
 export interface ProgramOptions {
   interactive?: boolean | undefined;
@@ -33,6 +37,8 @@ export interface ProgramOptions {
   capabilityLookup?: GlobalIntegrationCapabilityLookup | undefined;
   /** Optional explicit available-version lookup; the default upgrade path remains offline. */
   availableVersionLookup?: AvailableVersionLookup | undefined;
+  /** Test/integration injection for deterministic status evidence freshness. */
+  statusClock?: (() => number) | undefined;
 }
 
 export interface PublicCliErrorV1 {
@@ -131,6 +137,24 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   program.command("mem").argument("[query]").option("--query <query>").option("--user <id>").option("--limit <count>").option("--learning", "Return only learning candidates").action(async (query: string | undefined, options: { query?: string; user?: string; limit?: string; learning?: boolean }) => {
     const limit = options.limit === undefined ? undefined : /^\d+$/u.test(options.limit) ? Number(options.limit) : Number.NaN; if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) throw new Error("--limit must be a positive integer."); const result = await searchMemory({ root: await resolveProjectRoot(process.cwd()), query: options.query ?? query, user: options.user, limit, learningOnly: options.learning }); process.stdout.write(`${JSON.stringify(result)}\n`);
   });
+  program.command("status").description("Summarize the active Harnix task and next action").action(async () => {
+    process.stdout.write(`${JSON.stringify(await inspectProjectStatus(process.cwd(), programOptions.statusClock?.() ?? Date.now()))}\n`);
+  });
+  program.command("tasks")
+    .description("List bounded Harnix task metadata")
+    .option("--limit <count>", "Maximum task records")
+    .option("--status <status>", "Filter by exact task status")
+    .action(async (options: { limit?: string; status?: string }) => {
+      const status = parseTaskStatus(options.status);
+      const result = await listProjectTasks(process.cwd(), {
+        limit: parseTaskLimit(options.limit ?? "20"),
+        ...(status === undefined ? {} : { status }),
+      });
+      process.stdout.write(`${JSON.stringify(result)}\n`);
+    });
+  program.command("audit").description("Audit active-task readiness and completion blockers").action(async () => {
+    process.stdout.write(`${JSON.stringify(await auditProjectTask(process.cwd(), programOptions.statusClock?.() ?? Date.now()))}\n`);
+  });
   program.command("doctor").option("--fix", "Repair safe, unchanged managed files").option("--global", "Allow --fix to reconcile safe global integration drift").action(async (options: { fix?: boolean; global?: boolean }) => {
     const result = await diagnoseProject({
       ...(programOptions.capabilityLookup === undefined ? {} : { capabilityLookup: programOptions.capabilityLookup }),
@@ -147,16 +171,23 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   });
   program.command("repo-map")
     .option("--query <text>", "Search the structural repository map")
+    .option("--impact <path>", "Show cached dependency impact for an exact path")
     .option("--limit <count>", "Maximum results")
+    .option("--depth <count>", "Reverse-dependent traversal depth for --impact")
     .addOption(new Option("--refresh", "Rebuild the structural repository map").hideHelp())
-    .action(async (options: { query?: string; limit?: string; refresh?: boolean }) => {
-      const actionCount = Number(options.query !== undefined) + Number(options.refresh === true);
-      if (actionCount !== 1) throw new Error("repo-map requires exactly one of --query or --refresh.");
+    .action(async (options: { query?: string; impact?: string; limit?: string; depth?: string; refresh?: boolean }) => {
+      const actionCount = Number(options.query !== undefined) + Number(options.impact !== undefined) + Number(options.refresh === true);
+      if (actionCount !== 1) throw new Error("repo-map requires exactly one of --query, --impact, or --refresh.");
       if (options.refresh) {
-        if (options.limit !== undefined) throw new Error("--limit requires repo-map --query.");
+        if (options.limit !== undefined || options.depth !== undefined) throw new Error("--limit and --depth are not valid with repo-map --refresh.");
         process.stdout.write(`${JSON.stringify(await refreshRepoMapInternal(process.cwd()))}\n`);
         return;
       }
+      if (options.impact !== undefined) {
+        process.stdout.write(`${JSON.stringify(await impactRepoMapInternal(process.cwd(), parseRepoMapImpactPath(options.impact), parseRepoMapDepth(options.depth ?? "2"), parseRepoMapLimit(options.limit ?? "20")))}\n`);
+        return;
+      }
+      if (options.depth !== undefined) throw new Error("--depth requires repo-map --impact.");
       process.stdout.write(`${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query!, parseRepoMapLimit(options.limit ?? "20")))}\n`);
     });
   program.command("context", { hidden: true }).option("--platform <platform>").action(async (options: { platform: "kiro" | "antigravity" | "codex" }) => {
@@ -251,6 +282,35 @@ export async function runCli(argv = process.argv, programOptions: ProgramOptions
     if (!hiddenProtocol) process.stdout.write(`${JSON.stringify(publicCliError(message, exitCode))}\n`);
     return exitCode;
   }
+}
+
+function parseRepoMapDepth(value: string): number {
+  if (!/^\d+$/u.test(value)) throw new Error("--depth must be an integer between 1 and 3.");
+  const depth = Number(value);
+  if (depth < 1 || depth > 3) throw new Error("--depth must be an integer between 1 and 3.");
+  return depth;
+}
+
+function parseRepoMapImpactPath(value: string): string {
+  let normalized: string;
+  try { normalized = normalizeRepositoryPath(value); }
+  catch { throw new Error("--impact must be an exact normalized repository-relative POSIX path."); }
+  if (normalized !== value || value.includes("\\")) throw new Error("--impact must be an exact normalized repository-relative POSIX path.");
+  return normalized;
+}
+
+function parseTaskLimit(value: string): number {
+  if (!/^\d+$/u.test(value)) throw new Error("--limit must be an integer between 1 and 100 for tasks.");
+  const limit = Number(value);
+  if (limit < 1 || limit > 100) throw new Error("--limit must be an integer between 1 and 100 for tasks.");
+  return limit;
+}
+
+function parseTaskStatus(value: string | undefined): TaskStatus | undefined {
+  if (value === undefined) return undefined;
+  const statuses: readonly TaskStatus[] = ["planning", "ready", "in_progress", "verifying", "blocked", "completed", "cancelled"];
+  if (!statuses.includes(value as TaskStatus)) throw new Error("--status must be planning, ready, in_progress, verifying, blocked, completed, or cancelled.");
+  return value as TaskStatus;
 }
 
 export function publicCliError(message: string, exitCode: 1 | 2): PublicCliErrorV1 {

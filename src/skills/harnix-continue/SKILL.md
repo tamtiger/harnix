@@ -2,7 +2,7 @@
 name: harnix-continue
 description: Use when an initialized Harnix project may have an unfinished, interrupted, blocked, or partially persisted task that must resume safely.
 metadata:
-  version: "1.0.12"
+  version: "1.0.13"
 ---
 
 # Continue persisted Harnix work
@@ -25,6 +25,8 @@ Load the TaskRecord, required artifacts for its mode/status, checkpoint, blocker
 
 Run `harnix workflow --inspect` and read its active TaskRecord projection plus always-present `contextDrift`. Inspect both path-level `changes` and selection-basis `selectionChanges`; inventory, selector-version, or task/config/guide signal drift is as stale as changed source content. If state is `stale`, do not rely on the saved context. For a non-blocked unfinished task, persist the same task status with checkpoint `replan`, preserve all evidence and obligations, then route to `harnix-brainstorm` to reselect context. `not-recorded` is disclosed for legacy manifests without a selection sidecar but does not force replan. Never refresh repo-map, repair source files, or rewrite context artifacts automatically.
 
+Public `harnix tasks [--limit] [--status]` may be used as bounded discovery when no valid active task is selected or the user asks for local task history. Treat it as read-only identity/state metadata: it does not select, resume, repair, or change `.active`, and a `partial` result requires preserving its invalid-record/active-pointer warning rather than guessing from omitted task prose.
+
 ## Routing table
 
 | Persisted state | Route |
@@ -46,7 +48,7 @@ For `completed/finishing` still active, rerun the hidden `workflow --finish` rec
 
 For an explicit user request to abandon an unfinished task, clarify cancellation when wording such as “complete” could mean successful completion, then route to `harnix-finish-work`; do not relabel failed evidence as pass. For `cancelled/cancelling` still active, rerun `harnix workflow --cancel` without replacing the persisted reason or authority. Recovery reuses the deterministic cancellation journal ID and original `cancelledAt` date, then clears only the matching active pointer.
 
-Do not interpret `ready` as proof that the ready gate passed when artifacts contradict it. Route to `replan` if a material decision, placeholder, or contract gap is visible.
+Do not interpret `ready` as proof that the ready gate passed when artifacts contradict it. Route to `replan` if a material decision, placeholder, or contract gap is visible. A `ready|in_progress|verifying` task may later re-enter `ready/ready` only through Brainstorm's audited guarded re-entry from its persisted `replan` checkpoint; Continue must not simulate a backward transition.
 
 ## Recover partial persistence
 
