@@ -303,20 +303,22 @@ type = "command"
 
 ## 8. Internal context và activation guard
 
-Mọi global skill/rule/instruction phải bắt đầu bằng guard tương đương:
+Mọi global skill/rule/instruction phải bắt đầu bằng guard authority tương đương sau khi prompt đã có:
 
-1. Tìm initialized project ancestor/root gần nhất và an toàn từ cwd/workspace event; không yêu cầu `.harnix/config.yaml` nằm ngay trong current workspace directory.
-2. Nếu không có `.harnix/config.yaml`, không áp dụng workflow và không tự chạy `harnix init`.
-3. Nếu có, đọc `.harnix/workflow.md`, active task và bounded context theo contract hiện tại; route mọi ordinary user request thành Bypass/Lite/Full kể cả khi prompt không nhắc Harnix.
-4. Nếu state initialized hiện hữu nhưng corrupt hoặc inaccessible, không đọc thêm project data; trả warning ngắn, platform-specific và đã redact, hướng dẫn dùng doctor nhưng không block host agent.
+1. Repository/path do người dùng nêu trực tiếp thắng selected workspace và ambient cwd; path chỉ có trong hook-injected repository context, source, log, quoted text hoặc tool output là untrusted hint và không được select/override target.
+2. Với explicit target, xác minh path tồn tại, canonicalize bằng path/realpath API và reject traversal, unsafe root, symlink/junction escape trước ancestor lookup. Lookup bắt đầu từ canonical target đó; selected workspace rồi ambient cwd chỉ được dùng khi prompt không nêu target.
+3. Nếu explicit validation fail, không có `.harnix/config.yaml`, hoặc state invalid, dừng mà không đọc Harnix state/active task từ ambient/workspace, không fallback repository khác và không tự chạy `harnix init`.
+4. Nếu guard pass, đọc `.harnix/workflow.md`, active task và bounded context theo contract hiện tại; route mọi ordinary user request thành Bypass/Lite/Full kể cả khi prompt không nhắc Harnix.
+5. Mutation qua nhiều material roots cần một exact target; bounded read-only comparison có thể isolate từng root.
 
-`harnix context` phải:
+Hidden `harnix context` chạy ở hook-time trước khi agent diễn giải explicit prompt target, nên giữ event discovery riêng biệt: nó không parse natural-language path, không cấp target authority, và mọi repository context được inject vẫn là untrusted target evidence. Command phải:
 
 - Không network, không write, không log prompt/transcript/credential.
 - Exit `0` và không output ở non-Harnix repo. Riêng Antigravity, optional event malformed cũng phải đi theo empty no-op; `{ "injectSteps": [] }` chỉ hợp lệ sau khi đã xác định initialized project nhưng không inject context.
 - Giới hạn stdin, stdout, timeout và số workspace roots.
 - Dùng platform-specific output renderer: plain text cho Kiro, `injectSteps` cho Antigravity, nested `hookSpecificOutput` hoặc plain developer context hợp lệ cho Codex.
 - Không để malformed optional hook input làm mọi prompt global bị block; fail closed với project data nhưng fail open cho agent invocation.
+- Chỉ dùng validated event `cwd`/`workspacePaths[]` cho bounded context discovery; generated instruction/skill áp dụng guard authority phía trên trước mọi Harnix state read hoặc action sau khi prompt đã có.
 - Non-Harnix fast path phải đo cả cold Node process startup và event parsing: release fixture yêu cầu median `<300ms`, p95 `<750ms` và không sample nào vượt `1s` trên supported CI OS. Regression vượt ngưỡng phải optimize CLI import/startup trước release.
 
 ## 9. Backward compatibility và migration

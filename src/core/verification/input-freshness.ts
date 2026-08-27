@@ -41,6 +41,7 @@ export interface VerificationInputSidecar {
 export async function computeVerificationInputSnapshot(projectRoot: string, task: TaskRecordV2, checkId: string): Promise<VerificationInputSnapshot> {
   const check = task.validationPlan.find((candidate) => candidate.id === checkId);
   if (check === undefined) throw new Error(`Verification input check ${checkId} is not declared.`);
+  const activeTaskRecordPath = `.harnix/tasks/${task.id}/task.json`;
   const paths = new Set<string>();
   for (const input of check.inputs) {
     if (input === "@task-contract") continue;
@@ -53,7 +54,10 @@ export async function computeVerificationInputSnapshot(projectRoot: string, task
       onlyFiles: true,
     });
     if (matches.length === 0) throw new Error(`Verification input pattern for check ${checkId} matched no files.`);
-    for (const match of matches) paths.add(normalizeRepositoryPath(match));
+    for (const match of matches) {
+      const normalized = normalizeRepositoryPath(match);
+      if (normalized !== activeTaskRecordPath) paths.add(normalized);
+    }
   }
   if (task.mode === "full") {
     paths.add(`.harnix/tasks/${task.id}/plan.md`);

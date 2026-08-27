@@ -107,6 +107,23 @@ describe("external harness feature provenance", () => {
       }
     }
   });
+
+  it("records target authority as Harnix self-audit work without inventing external provenance", async () => {
+    const [registryText, research, mapping, plan] = await Promise.all([
+      readFile(resolve(root, registryPath), "utf8"),
+      readFile(resolve(root, "docs/HARNESS_RESEARCH.md"), "utf8"),
+      readFile(resolve(root, "docs/UPSTREAM_MAPPING.md"), "utf8"),
+      readFile(resolve(root, "docs/IMPLEMENTATION_PLAN.md"), "utf8"),
+    ]);
+    const registry = JSON.parse(registryText) as ProvenanceRegistry;
+
+    for (const document of [research, mapping, plan]) {
+      expect(document).toContain("HX-TARGET-01");
+      expect(document).toContain("harnix-self-audit");
+    }
+    expect(registry.features.map((feature) => feature.id)).toEqual(expectedFeatureIds);
+    expect(registry.features.map((feature) => feature.id)).not.toContain("target-root-authority");
+  });
 });
 
 function exactKeys(value: object): string[] {

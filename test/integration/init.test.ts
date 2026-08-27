@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { initializeProject } from "../../src/commands/init.js";
+import { HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const fixture = useTemporaryRepositories("harnix-init-");
@@ -28,7 +29,15 @@ describe("initializeProject", () => {
     expect(agentInstructions).toContain("harnix setup --codex");
     expect(agentInstructions).toContain("explicit user-global integration");
     expect(agentInstructions).toContain("Do not run setup or harnix init automatically");
-    expect(agentInstructions).toContain("nearest initialized project ancestor or workspace root");
+    for (const instruction of HARNIX_TARGET_AUTHORITY_INSTRUCTIONS) {
+      expect(agentInstructions).toContain(instruction);
+    }
+    const lastTargetGuardIndex = agentInstructions.indexOf(HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.at(-1)!);
+    expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("## Project profile"));
+    expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("Read .harnix/workflow.md"));
+    expect(agentInstructions).toContain("Use this profile only when this AGENTS root is the selected Harnix root resolved by the target-authority guard");
+    expect(agentInstructions).not.toContain("this AGENTS root is the selected target");
+    expect(agentInstructions).toContain("Read .harnix/workflow.md and .harnix/config.yaml from the selected Harnix root");
     expect(agentInstructions).toContain("## Project profile");
     expect(agentInstructions).toContain("- Languages: not specified.");
     expect(agentInstructions).toContain("- Technologies: Vue.");

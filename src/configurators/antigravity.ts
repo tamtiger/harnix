@@ -1,5 +1,5 @@
 import type { DesiredGlobalManagedFile } from "../utils/global-managed-files.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "../templates/harnix/activation.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../templates/harnix/activation.js";
 import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
 
 export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix context --platform antigravity";
@@ -22,10 +22,9 @@ export const ANTIGRAVITY_GLOBAL_RULE = [
   "",
   "## Harnix activation guard",
   "",
-  "First locate the nearest ancestor or workspace root containing .harnix/config.yaml.",
-  "Apply this rule only when that root exists and its Harnix state is valid; then read .harnix/workflow.md and follow the matching Harnix skill with bounded context.",
+  ...HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
+  "After the guard passes, read .harnix/workflow.md and follow the matching Harnix skill with bounded context.",
   ...HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
-  "If no such root exists or its state is invalid, do not apply the Harnix workflow, create Harnix state, or run harnix init.",
   "",
 ].join("\n");
 

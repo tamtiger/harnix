@@ -1,5 +1,5 @@
 import type { DesiredGlobalManagedFile } from "../utils/global-managed-files.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "../templates/harnix/activation.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../templates/harnix/activation.js";
 import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
 
 export const KIRO_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix context --platform kiro";
@@ -23,10 +23,9 @@ export const KIRO_GLOBAL_STEERING = [
   "",
   "## Harnix activation guard",
   "",
-  "First locate the nearest ancestor or workspace root containing .harnix/config.yaml.",
-  "Apply this steering only when that root exists and its Harnix state is valid; then read .harnix/workflow.md and use the installed Harnix skills with bounded project context.",
+  ...HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
+  "After the guard passes, read .harnix/workflow.md and use the installed Harnix skills with bounded project context.",
   ...HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
-  "If no such root exists or its state is invalid, do not apply the Harnix workflow, create Harnix state, or run harnix init.",
   "",
 ].join("\n");
 

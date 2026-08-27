@@ -1,0 +1,1231 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260826-165933-codex-harnix-runtime-audit",
+  "title": "Áp dụng target-root precedence từ runtime audit",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Triển khai và hoàn tất HX-TARGET-01 với target-root precedence fail-closed, deterministic scenario coverage và freshness evidence không tự tham chiếu active task.json, đồng thời giữ parity Kiro, Antigravity và Codex.",
+  "nonGoals": [
+    "Không triển khai semantic planning-artifact freshness đầy đủ của HX-FRESHNESS-01, HX-PREFLIGHT-01, HX-TRACE-01, HX-DELEGATION-01 hoặc thay policy evidence một giờ; scope mở rộng chỉ xử lý self-reference của active task.json để task hiện tại có thể lưu fresh evidence đúng contract.",
+    "Không thêm natural-language path parser, public CLI, TaskRecord/state schema, telemetry, daemon, network, automatic Git hoặc platform ngoài Kiro, Antigravity và Codex.",
+    "Không chạy setup trên real user profile, tự trust hook, ghi credential hoặc overwrite managed/user-modified content không còn đúng ownership hash.",
+    "Không gán feature cho upstream harness hoặc đổi external provenance registry/NOTICE nếu implementation chỉ dùng evidence harnix-self-audit.",
+    "Không commit, branch, push, publish hoặc tạo pull request nếu chưa có yêu cầu và approval riêng theo project policy."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-log-coverage",
+      "text": "Mọi Codex task/thread và local Harnix task/journal liên quan được kiểm kê, đọc hết phần khả dụng, định lượng coverage/date range và disclose chính xác mọi inaccessible hoặc partial source.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-log-coverage-artifact-pass-20260826",
+        "ev-log-coverage-quality-preclose-20260827",
+        "ev-log-coverage-quality-final-20260827"
+      ]
+    },
+    {
+      "id": "ac-timeline-baseline",
+      "text": "Mỗi run liên quan có redacted step trace gắn timestamp/version/route/state/action/read-write/result/retry và baseline chỉ dùng số đo có evidence, field thiếu ghi unknown.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-timeline-baseline-artifact-pass-20260826",
+        "ev-timeline-baseline-quality-preclose-20260827",
+        "ev-timeline-baseline-quality-final-20260827"
+      ]
+    },
+    {
+      "id": "ac-simulation-coverage",
+      "text": "Current source/tarball chạy ít nhất 30 disposable end-to-end runs bao phủ 12 scenario; deterministic critical scenarios lặp ít nhất năm lần và so output, exit, manifest, hash, transition cùng write set.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-simulation-evidence-quality-final-20260826",
+        "ev-simulation-evidence-quality-preclose-20260827",
+        "ev-simulation-evidence-quality-final-20260827"
+      ]
+    },
+    {
+      "id": "ac-finding-quality",
+      "text": "Mỗi finding trace tới historical step hoặc current simulation, có root cause, ownership, severity, confidence, frequency, impact, waste, reproduction, proposal, test, risk và disposition; log cũ đơn lẻ không thành current confirmed issue.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-findings-root-cause-quality-final-20260826",
+        "ev-findings-root-cause-quality-preclose-20260827",
+        "ev-findings-root-cause-quality-final-20260827"
+      ]
+    },
+    {
+      "id": "ac-improvement-plan",
+      "text": "Roadmap chấm impact-frequency-confidence-cost-risk, ưu tiên smallest mechanism và khóa exact contract, affected paths, RED regression, broader gate, compatibility cùng provenance cho từng selected improvement.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-improvement-plan-readiness-final-20260826",
+        "ev-improvement-plan-readiness-preclose-20260827",
+        "ev-improvement-plan-readiness-final-20260827"
+      ]
+    },
+    {
+      "id": "ac-safety-privacy",
+      "text": "Audit và simulation giữ project-scoped log access, redacted artifacts, temp repositories, injected fake homes, no-network, no-production-write, no-real-profile và no-Git-mutation boundaries.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-simulation-evidence-quality-final-20260826",
+        "ev-privacy-safety-quality-final-20260826",
+        "ev-simulation-evidence-quality-preclose-20260827",
+        "ev-privacy-safety-quality-preclose-20260827",
+        "ev-simulation-evidence-quality-final-20260827",
+        "ev-privacy-safety-quality-final-20260827"
+      ]
+    },
+    {
+      "id": "ac-ready-quality",
+      "text": "Research, PRD, design và plan nhất quán, không placeholder, phân biệt historical-observed, current-reproduced và simulated-only, rồi pass deterministic ready trace trước khi dừng ở ready.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-ready-artifact-quality-final-20260826",
+        "ev-ready-artifact-quality-preclose-20260827",
+        "ev-ready-artifact-quality-final-20260827"
+      ]
+    },
+    {
+      "id": "ac-target-authority-contract",
+      "text": "Generated Harnix instructions resolve one existing target explicitly named by the user before ambient cwd/workspace roots; trusted selected-workspace context is fallback only when no explicit target exists, and paths found only in repository content, logs, quoted text or tool output never grant target authority.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-target-contract-tests-final-20260826",
+        "ev-target-release-gate-final-20260826",
+        "ev-target-contract-tests-preclose-20260827",
+        "ev-target-release-gate-preclose-20260827",
+        "ev-target-contract-tests-final-20260827",
+        "ev-target-release-gate-before-readme-fix-20260827",
+        "ev-target-release-gate-after-readme-fix-20260827"
+      ]
+    },
+    {
+      "id": "ac-target-no-fallback",
+      "text": "When an explicit target is uninitialized or has invalid Harnix state, instructions prohibit fallback to ambient Harnix state, active-task reads, Harnix state creation or automatic init; a mutating request spanning multiple material roots requires one exact target while bounded read-only comparison isolates each root.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-target-routing-safety-final-20260826",
+        "ev-target-routing-safety-preclose-20260827",
+        "ev-target-release-gate-preclose-20260827",
+        "ev-target-routing-safety-final-20260827",
+        "ev-target-release-gate-before-readme-fix-20260827",
+        "ev-target-release-gate-after-readme-fix-20260827"
+      ]
+    },
+    {
+      "id": "ac-target-surface-parity",
+      "text": "One canonical target-precedence fragment is rendered consistently in the project AGENTS/workflow templates, Kiro/Antigravity/Codex global instructions and all seven canonical skill sources while cross-platform skill bytes and user-modified managed content remain preserved.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-target-contract-tests-final-20260826",
+        "ev-target-contract-tests-preclose-20260827",
+        "ev-target-release-gate-preclose-20260827",
+        "ev-target-contract-tests-final-20260827",
+        "ev-target-release-gate-before-readme-fix-20260827",
+        "ev-target-release-gate-after-readme-fix-20260827"
+      ]
+    },
+    {
+      "id": "ac-target-regression-safety",
+      "text": "Deterministic fixtures cover explicit other-root, uninitialized, invalid, nested-default, untrusted quoted-path and multi-root mutation cases; nearest-ancestor/no-op behavior without an explicit target remains unchanged and no parser, public API, network or hook-time write is added.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-target-routing-safety-final-20260826",
+        "ev-target-routing-safety-preclose-20260827",
+        "ev-target-release-gate-preclose-20260827",
+        "ev-target-routing-safety-final-20260827",
+        "ev-target-release-gate-before-readme-fix-20260827",
+        "ev-target-release-gate-after-readme-fix-20260827"
+      ]
+    },
+    {
+      "id": "ac-target-docs-provenance",
+      "text": "PRD, workflow, implementation plan, README, research and mapping document the exact target contract and origin harnix-self-audit; the external provenance registry and NOTICE change only if external behavior, code or content is actually adopted or adapted.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-target-docs-provenance-final-20260826",
+        "ev-target-docs-provenance-preclose-20260827",
+        "ev-target-release-gate-preclose-20260827",
+        "ev-target-docs-provenance-final-20260827",
+        "ev-target-release-gate-before-readme-fix-20260827",
+        "ev-target-docs-provenance-after-readme-fix-20260827",
+        "ev-target-release-gate-after-readme-fix-20260827"
+      ]
+    },
+    {
+      "id": "ac-target-release-readiness",
+      "text": "Before completion the package patch version, seven skill metadata versions and CHANGELOG are synchronized, and focused workflow/platform/safety checks plus full acceptance, pack, smoke, footprint and release scans pass with fresh evidence.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-target-release-gate-final-20260826",
+        "ev-final-suite-and-diff-pass-20260826",
+        "ev-target-release-gate-preclose-20260827",
+        "ev-target-release-gate-before-readme-fix-20260827",
+        "ev-target-release-gate-after-readme-fix-20260827"
+      ]
+    },
+    {
+      "id": "ac-verification-self-reference",
+      "text": "Khi required input glob match task.json của chính active task, snapshot bỏ raw self-entry và tiếp tục bind immutable @task-contract; task.json của task khác vẫn được raw-hash, sidecar/schema cũ vẫn đọc unchanged, và lưu pass evidence không làm check tự stale.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-verification-self-reference-preclose-20260827",
+        "ev-verification-self-reference-final-20260827"
+      ]
+    },
+    {
+      "id": "ac-target-missing-fail-closed",
+      "text": "Generated instructions yêu cầu explicit target phải tồn tại, được canonicalize bằng path/realpath và vượt safety boundary trước ancestor lookup; missing, traversal hoặc symlink/junction escape dừng fail-closed mà không đọc ambient Harnix state.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-target-scenario-contract-preclose-20260827",
+        "ev-target-scenario-contract-final-20260827"
+      ]
+    },
+    {
+      "id": "ac-target-scenario-fixtures",
+      "text": "Deterministic structured fixtures chứng minh explicit other-root, missing, uninitialized, invalid, nested-default, untrusted quoted-path và multi-root mutation chọn đúng action/read set, gồm ambient canary zero-access, mà không thêm natural-language parser hoặc public API.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-target-scenario-contract-preclose-20260827",
+        "ev-target-scenario-contract-final-20260827"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs",
+    "package.json",
+    "scripts",
+    "src",
+    "test"
+  ],
+  "relevantSpecs": [
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_MAPPING.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "log-coverage-quality",
+      "description": "Kiểm tra inventory arithmetic, pagination/turn completeness, date/version binding và exact inaccessible disclosures.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-log-coverage"
+      ],
+      "inputs": [
+        ".harnix/tasks/*/task.json",
+        ".harnix/workspace/*/journal/*.jsonl",
+        "@task-contract",
+        "docs/HARNIX_WORKFLOW.md"
+      ]
+    },
+    {
+      "id": "timeline-baseline-quality",
+      "description": "Kiểm tra step-trace schema, temporal version map, measured-only baseline và ownership classification.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-timeline-baseline"
+      ],
+      "inputs": [
+        ".harnix/tasks/*/task.json",
+        ".harnix/workspace/*/journal/*.jsonl",
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json"
+      ]
+    },
+    {
+      "id": "simulation-evidence-quality",
+      "description": "Kiểm tra ít nhất 30 disposable runs, 12-scenario coverage, five-repeat deterministic comparisons, containment và cleanup.",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-safety-privacy",
+        "ac-simulation-coverage"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "findings-root-cause-quality",
+      "description": "Kiểm tra evidence trace, current reproduction, deduplication, ownership và root-cause gate của toàn bộ finding.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-finding-quality"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "improvement-plan-readiness",
+      "description": "Kiểm tra scoring, selected/deferred/rejected decisions, exact contracts, RED paths, compatibility và provenance impact.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-improvement-plan"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "privacy-safety-quality",
+      "description": "Kiểm tra task artifacts không chứa raw prompt, secret, machine path, real-home mutation, network claim hoặc unsupported agent-level inference.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-safety-privacy"
+      ],
+      "inputs": [
+        ".harnix/tasks/*/*.md",
+        "@task-contract",
+        "test/safety/*.test.ts"
+      ]
+    },
+    {
+      "id": "ready-artifact-quality",
+      "description": "Kiểm tra PRD/design/plan/research consistency, placeholder absence, criteria-check-path coverage và ready-trace grammar.",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-ready-quality"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_WORKFLOW.md",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "target-contract-tests",
+      "description": "Run focused target-root instruction, generated-surface and canonical skill parity tests.",
+      "command": "pnpm exec vitest run test/unit/activation-instructions.test.ts test/workflow/templates.test.ts test/workflow/skill-sources.test.ts test/platform/global-adapters.test.ts test/platform/codex-global.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-target-authority-contract",
+        "ac-target-surface-parity"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/configurators/*.ts",
+        "src/skills/harnix-*/SKILL.md",
+        "src/templates/harnix/*.ts",
+        "test/platform/*.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/*.test.ts"
+      ]
+    },
+    {
+      "id": "target-routing-safety",
+      "description": "Run target-routing, internal-context and safety regression tests for no-fallback and unchanged default discovery.",
+      "command": "pnpm exec vitest run test/workflow/routing.test.ts test/workflow/internal-context.test.ts test/safety",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-target-no-fallback",
+        "ac-target-regression-safety"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-context.ts",
+        "src/core/context/*.ts",
+        "src/templates/harnix/*.ts",
+        "test/safety/*.test.ts",
+        "test/workflow/internal-context.test.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "target-docs-provenance",
+      "description": "Verify canonical target-root documentation and self-audit provenance without inventing an external harness source.",
+      "command": "pnpm exec vitest run test/workflow/provenance.test.ts test/workflow/templates.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-target-docs-provenance"
+      ],
+      "inputs": [
+        "@task-contract",
+        "README.md",
+        "docs/HARNESS_FEATURE_PROVENANCE.json",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "test/workflow/provenance.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "target-release-gate",
+      "description": "Run build, lint, typecheck, full acceptance, package smoke, performance, footprint and release safety gates on the synchronized release.",
+      "command": "pnpm run build && pnpm run lint && pnpm run typecheck && pnpm run test:acceptance && pnpm run pack:check && pnpm run smoke:tarball && pnpm run measure:init && pnpm run measure:footprint && pnpm run scan:release",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-target-authority-contract",
+        "ac-target-docs-provenance",
+        "ac-target-no-fallback",
+        "ac-target-regression-safety",
+        "ac-target-release-readiness",
+        "ac-target-surface-parity"
+      ],
+      "inputs": [
+        ".harnix/.template-hashes.json",
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**/*.md",
+        "package.json",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "verification-self-reference",
+      "description": "Run verification snapshot/save/check-report regressions for active task.json self-reference while preserving raw hashing for other tasks and legacy sidecars.",
+      "command": "pnpm exec vitest run test/unit/verification-inputs.test.ts test/workflow/internal-workflow.test.ts test/integration/checks.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-verification-self-reference"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "src/core/verification/*.ts",
+        "test/integration/checks.test.ts",
+        "test/unit/verification-inputs.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "target-scenario-contract",
+      "description": "Run structured target-authority scenario, safe canonicalization wording and ambient-canary contract regressions.",
+      "command": "pnpm exec vitest run test/unit/activation-instructions.test.ts test/workflow/routing.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-target-missing-fail-closed",
+        "ac-target-scenario-fixtures"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/templates/harnix/activation.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-target-contract-red-20260826",
+      "recordedAt": "2026-08-26T18:08:22.6031042+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED hợp lệ: 2/2 test thất bại vì canonical target-authority fragment chưa tồn tại và mọi generated surface chưa có contract precedence/no-fallback.",
+      "artifactPaths": [
+        "test/unit/activation-instructions.test.ts"
+      ]
+    },
+    {
+      "id": "ev-target-surfaces-green-20260826",
+      "recordedAt": "2026-08-26T18:08:22.6031042+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN: 5 test files, 16 tests pass cho canonical fragment, project templates, ba global adapters và byte-identical skill rendering.",
+      "artifactPaths": [
+        "src/templates/harnix/activation.ts",
+        "test/unit/activation-instructions.test.ts"
+      ]
+    },
+    {
+      "id": "ev-target-docs-provenance-green-20260826",
+      "recordedAt": "2026-08-26T18:10:53.0210845+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused docs/provenance GREEN: 3 test files, 7 tests pass; canonical docs ghi HX-TARGET-01 origin harnix-self-audit và external registry giữ nguyên 22 feature IDs.",
+      "artifactPaths": [
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "test/workflow/provenance.test.ts"
+      ]
+    },
+    {
+      "id": "ev-target-release-preflight-fail-init-assertion-20260826",
+      "recordedAt": "2026-08-26T18:13:05.0373790+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Preliminary release gate dừng tại integration init: generated AGENTS chứa canonical target-authority contract mới nhưng một assertion còn yêu cầu literal nearest-root cũ; unit 249/250 và integration 118/119 đã chạy trước điểm dừng.",
+      "artifactPaths": [
+        "test/integration/init.test.ts"
+      ]
+    },
+    {
+      "id": "ev-debug-init-contract-green-20260826",
+      "recordedAt": "2026-08-26T18:13:50.2952212+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Root cause xác nhận là assertion integration duy nhất còn khóa literal guard cũ; thay bằng canonical fragment loop và focused init suite pass 7/7.",
+      "artifactPaths": [
+        "test/integration/init.test.ts"
+      ]
+    },
+    {
+      "id": "ev-target-release-preflight-green-20260826",
+      "recordedAt": "2026-08-26T18:15:17.6096139+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Preliminary release gate pass: build/lint/typecheck; acceptance 518 pass, 1 skip; four fake-home tarball platform combinations; init worst 374.57 ms; footprint reduction 80.20%; release scan sạch.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "test/integration/init.test.ts"
+      ]
+    },
+    {
+      "id": "ev-compliance-target-review-20260826",
+      "recordedAt": "2026-08-26T18:16:29.9546839+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Compliance review pass, không có finding: exact target authority/no-fallback/multi-root contract hiện diện ở canonical fragment, generated project/global surfaces và đủ 7 skill; không đổi CLI/schema/core hook runtime, external registry hoặc NOTICE; diff-check sạch.",
+      "artifactPaths": [
+        "src/templates/harnix/activation.ts",
+        "docs/HARNIX_PRD.md",
+        "test/unit/activation-instructions.test.ts"
+      ]
+    },
+    {
+      "id": "ev-target-contract-tests-final-20260826",
+      "checkId": "target-contract-tests",
+      "recordedAt": "2026-08-26T18:17:03.1276029+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Required target contract gate pass: 5 files, 16 tests xác nhận exact clause order, project/global render parity và canonical skill source parity; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        "test/unit/activation-instructions.test.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "ce453dfffdabacbea000883cb14d999540ddc0efdd447995038a3c567ad83ded"
+    },
+    {
+      "id": "ev-target-routing-safety-final-20260826",
+      "checkId": "target-routing-safety",
+      "recordedAt": "2026-08-26T18:17:51.9587580+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Required routing/safety gate pass: 7 files, 74 tests cho route, nearest/workspace context, outside-project no-op, path/platform/user-home và release safety; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        "test/workflow/routing.test.ts",
+        "test/workflow/internal-context.test.ts",
+        "test/safety"
+      ],
+      "inputDigest": "ce9919c21c912aaec129fa7cff21784071a8d16f71e626aba8626e79ee5c2f36"
+    },
+    {
+      "id": "ev-target-docs-provenance-final-20260826",
+      "checkId": "target-docs-provenance",
+      "recordedAt": "2026-08-26T18:17:51.9587580+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Required docs/provenance gate pass: 2 files, 5 tests xác nhận canonical docs, self-audit origin và unchanged exact external registry set; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        "test/workflow/provenance.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "0ef18d3cc376d287dd45ec3882f0eb8a52a23831f854ef2f88fbe9748a0011c2"
+    },
+    {
+      "id": "ev-target-release-gate-final-20260826",
+      "checkId": "target-release-gate",
+      "recordedAt": "2026-08-26T18:19:49.5663964+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Required release gate pass: build/lint/typecheck; acceptance 518 pass, 1 skip; four fake-home tarball combinations; init worst 382.51 ms; footprint reduction 80.20%; package/release scan sạch; pre/post digest khớp 184 inputs.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        ".harnix/.template-hashes.json"
+      ],
+      "inputDigest": "105af0d964653f6615469fbe3894a9efb2dce41ffa8df8bc22321a2892d86531"
+    },
+    {
+      "id": "ev-simulation-evidence-quality-final-20260826",
+      "checkId": "simulation-evidence-quality",
+      "recordedAt": "2026-08-26T18:24:41.7812704+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Artifact audit pass: contract simulation 48/48 và actual CLI simulation 36/36, tổng 84 lượt; đủ 12 scenario ở cả hai lớp, 139 child process, 0 unexpected write và containment fake-home/no-network/no-Git được xác nhận; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/simulation-ledger.md"
+      ],
+      "inputDigest": "b35d8faf6bee82fa9c22f2e96af737ce0f047b21405b82b0481b1ab7d8ee34d5"
+    },
+    {
+      "id": "ev-findings-root-cause-quality-final-20260826",
+      "checkId": "findings-root-cause-quality",
+      "recordedAt": "2026-08-26T18:24:41.7812704+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Artifact audit pass: 5 current finding đều có evidence class, owner, severity, confidence, frequency, disposition và 5 section phân tích chi tiết; ranh giới host-owned, historical và closed issue được giữ; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/findings-root-causes.md"
+      ],
+      "inputDigest": "39ebaeafc4cf2112fdf59c40165a11d798e894cb29918c57ca363afd3f3cc273"
+    },
+    {
+      "id": "ev-improvement-plan-readiness-final-20260826",
+      "checkId": "improvement-plan-readiness",
+      "recordedAt": "2026-08-26T18:24:41.7812704+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Artifact audit pass: roadmap đủ 6 candidate, 4 selected/1 experimental/1 deferred, scoring, RED/implementation/gates/acceptance, task boundaries và provenance rule origin harnix-self-audit; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/improvement-roadmap.md"
+      ],
+      "inputDigest": "ec319e1a9733d3fd8d14d7848652d126f472fc8bde0c3c6181a9d7531f3ef77a"
+    },
+    {
+      "id": "ev-privacy-safety-quality-final-20260826",
+      "checkId": "privacy-safety-quality",
+      "recordedAt": "2026-08-26T18:24:41.7812704+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Privacy/safety pass: active task Markdown/JSON không có machine-specific absolute path hay credential/private-key token; test/safety đạt 5 files, 41 tests; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research",
+        "test/safety"
+      ],
+      "inputDigest": "3fb17b6f115254a05f2d8998b558867d112814308bbc20c85b237dfe9d86d7d2"
+    },
+    {
+      "id": "ev-ready-artifact-quality-final-20260826",
+      "checkId": "ready-artifact-quality",
+      "recordedAt": "2026-08-26T18:24:41.7812704+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Ready artifact pass: workflow --audit-ready trả pass không diagnostic; internal-workflow và routing đạt 2 files, 46 tests; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "8c6cc271e7af4c06940fbadc21a5c5e7f37a22c247d938a8da03d794ff1a8b56"
+    },
+    {
+      "id": "ev-log-coverage-artifact-pass-20260826",
+      "recordedAt": "2026-08-26T18:28:25.3037065+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Substantive artifact assertion pass: 82/82 rollout, 89.840/89.840 JSON lines, 39 task records, 38 journal entries và 19 sidecar được kiểm kê; cutoff/date-version binding, arithmetic và bốn coverage gap đều explicit.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/log-coverage-and-timeline.md"
+      ]
+    },
+    {
+      "id": "ev-timeline-baseline-artifact-pass-20260826",
+      "recordedAt": "2026-08-26T18:28:25.3037065+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Substantive artifact assertion pass: đủ M01-M15, W01-W27 và G01-G40; trace vocabulary, version era, state/result, read-write, retry/efficiency, measured-only baseline và unknown preservation đều hiện diện.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/run-ledger.md",
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/log-coverage-and-timeline.md"
+      ]
+    },
+    {
+      "id": "ev-final-suite-and-diff-pass-20260826",
+      "recordedAt": "2026-08-26T18:28:25.3037065+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final supplementary gate pass: pnpm test đạt 74 files, 518 tests pass và 1 skip; git diff --check exit 0, chỉ có line-ending warnings.",
+      "artifactPaths": [
+        "test",
+        "package.json"
+      ]
+    },
+    {
+      "id": "ev-log-coverage-binding-fail-20260826",
+      "checkId": "log-coverage-quality",
+      "recordedAt": "2026-08-26T18:28:25.3037065+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Artifact assertions và pre/post digest 77788b901672aec1872f5ffaee0173bf238f3d607672f2dded7c90d1bcd2493e đều pass, nhưng required input glob chứa active task.json; lưu chính pass evidence sẽ đổi hash 922e94d3… thành hash khác và làm evidence stale ngay lập tức.",
+      "artifactPaths": [
+        "src/core/verification/input-freshness.ts",
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/task.json"
+      ]
+    },
+    {
+      "id": "ev-timeline-baseline-binding-fail-20260826",
+      "checkId": "timeline-baseline-quality",
+      "recordedAt": "2026-08-26T18:28:25.3037065+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Artifact assertions và pre/post digest f377ded6cc2cb4503d6525f944510a6e9ac7ca7348c91d411fd3b3355aa62a34 đều pass, nhưng required input glob chứa active task.json; workflow save phải đổi chính input đang được chứng thực nên không thể tạo fresh pass evidence.",
+      "artifactPaths": [
+        "src/core/verification/input-freshness.ts",
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/task.json"
+      ]
+    },
+    {
+      "id": "ev-self-reference-red-20260827",
+      "recordedAt": "2026-08-27T03:07:57.457Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED hợp lệ: 3 test fail vì active task.json còn nằm trong raw snapshot và workflow save làm required evidence stale ngay sau khi lưu.",
+      "artifactPaths": [
+        "test/unit/verification-inputs.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "ev-self-reference-green-20260827",
+      "recordedAt": "2026-08-27T03:07:57.457Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN: 2 test files, 34 tests pass; active task.json được de-dup qua @task-contract, task khác vẫn raw-hash và post-save snapshot còn fresh.",
+      "artifactPaths": [
+        "src/core/verification/input-freshness.ts",
+        "test/unit/verification-inputs.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "ev-target-contract-replan-red-20260827",
+      "recordedAt": "2026-08-27T03:07:57.457Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED hợp lệ: 2 test fail vì canonical instructions và generated surfaces thiếu existing/realpath/safety/fail-closed target clauses.",
+      "artifactPaths": [
+        "test/unit/activation-instructions.test.ts"
+      ]
+    },
+    {
+      "id": "ev-target-contract-replan-green-20260827",
+      "recordedAt": "2026-08-27T03:07:57.457Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN: 3 tests pass cho exact safe target clauses, surface parity và 12 structured scenario/canary cases không thêm prompt parser.",
+      "artifactPaths": [
+        "src/templates/harnix/activation.ts",
+        "src/skills",
+        "test/unit/activation-instructions.test.ts"
+      ]
+    },
+    {
+      "id": "ev-log-coverage-quality-preclose-20260827",
+      "checkId": "log-coverage-quality",
+      "recordedAt": "2026-08-27T03:18:01.939Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh artifact audit pass: ledger vẫn chứng minh 82/82 rollout, 89.840/89.840 JSON lines, 39 task records, 38 journal entries, 19 sidecar, arithmetic/date-version binding và bốn coverage gap công khai.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/log-coverage-and-timeline.md"
+      ],
+      "inputDigest": "44f9434d778f482a750bf7bd936146314fc624fef003ae8bc04c921e767479c6"
+    },
+    {
+      "id": "ev-timeline-baseline-quality-preclose-20260827",
+      "checkId": "timeline-baseline-quality",
+      "recordedAt": "2026-08-27T03:18:39.804Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh artifact audit pass: M01–M15, W01–W27 và G01–G40 đều hiện diện; trace vocabulary, version era, state/result, read-write, retry/efficiency, measured closed-turn baseline và unknown preservation còn đầy đủ.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/run-ledger.md",
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/log-coverage-and-timeline.md"
+      ],
+      "inputDigest": "87e24e63423bb12ea3b08beb808c1619b27913e03cdffdcfcdf2b74ebb61316f"
+    },
+    {
+      "id": "ev-simulation-evidence-quality-preclose-20260827",
+      "checkId": "simulation-evidence-quality",
+      "recordedAt": "2026-08-27T03:19:15.204Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh artifact audit pass: ledger giữ contract simulation 48/48, actual CLI 36/36, đủ 12 scenario, five-repeat deterministic signatures, 139 child processes, zero unexpected write và fake-home/no-network/no-Git containment.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/simulation-ledger.md"
+      ],
+      "inputDigest": "36cce88874ece28aa24246491507d9986e017f47fa510948ed56a337916b6c14"
+    },
+    {
+      "id": "ev-findings-root-cause-quality-preclose-20260827",
+      "checkId": "findings-root-cause-quality",
+      "recordedAt": "2026-08-27T03:19:19.107Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh artifact audit pass: năm current finding còn có evidence class/owner/severity/confidence/frequency/disposition trong registry và năm section root-cause riêng với reproduction/evidence, impact, proposal, RED/risk hoặc defer rationale.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/findings-root-causes.md"
+      ],
+      "inputDigest": "dc33f3483a8027dd679c97dc099d32a8a295f15e369669070aea0fe9d1f948f3"
+    },
+    {
+      "id": "ev-improvement-plan-readiness-preclose-20260827",
+      "checkId": "improvement-plan-readiness",
+      "recordedAt": "2026-08-27T03:19:22.769Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh artifact audit pass: roadmap còn đủ sáu candidate với scoring impact/frequency/confidence/cost/risk, bốn selected, một experimental, một deferred, cùng RED, implementation, gates, acceptance, task boundaries và provenance rule.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/improvement-roadmap.md"
+      ],
+      "inputDigest": "39caba11af636ec90218bd89e98a787e4227d4d2c77b49d4265f3512549813ac"
+    },
+    {
+      "id": "ev-privacy-safety-quality-preclose-20260827",
+      "checkId": "privacy-safety-quality",
+      "recordedAt": "2026-08-27T03:20:06.444Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh privacy/safety pass: recursive active-task Markdown scan không thấy machine-specific absolute path, private-key/cloud/GitHub credential pattern; toàn bộ test/safety xanh và pre/post digest khớp.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit",
+        "test/safety"
+      ],
+      "inputDigest": "334a3ab1a65916535d1161f0973edd78efd9d55dc834282ea477727e6af89f54"
+    },
+    {
+      "id": "ev-ready-artifact-quality-preclose-20260827",
+      "checkId": "ready-artifact-quality",
+      "recordedAt": "2026-08-27T03:20:16.481Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh ready-artifact pass: deterministic workflow --audit-ready không có diagnostic; internal workflow và routing regressions xanh, xác nhận criteria/check/path trace cùng replan artifacts nhất quán.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/prd.md",
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/plan.md",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "87c6388428a02de69d882ecfb34207cdd975a71ae3e13b1dcd73e2a0b8614035"
+    },
+    {
+      "id": "ev-target-contract-tests-preclose-20260827",
+      "checkId": "target-contract-tests",
+      "recordedAt": "2026-08-27T03:20:48.217Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh required target-contract gate pass: canonical clause order, existing/realpath/safety validation, generated project/global surface parity, seven skill sources và cross-platform installed skill bytes đều xanh.",
+      "artifactPaths": [
+        "src/templates/harnix/activation.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/platform/codex-global.test.ts",
+        "test/workflow/templates.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ],
+      "inputDigest": "468ffa5b0e27598937a3b1b93188501dae420e971bb6eb29b37a8ad538883899"
+    },
+    {
+      "id": "ev-target-routing-safety-preclose-20260827",
+      "checkId": "target-routing-safety",
+      "recordedAt": "2026-08-27T03:20:56.618Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh required routing/safety gate pass: request routing, nearest/workspace context fallback, outside-project no-op, path/user-home/platform/release safety và no-fallback boundaries đều xanh.",
+      "artifactPaths": [
+        "test/workflow/routing.test.ts",
+        "test/workflow/internal-context.test.ts",
+        "test/safety"
+      ],
+      "inputDigest": "dcaf0e4cff3a9738f3ba9968ff98f555ea632c60285b3e185da3d6c057b0bd57"
+    },
+    {
+      "id": "ev-target-docs-provenance-preclose-20260827",
+      "checkId": "target-docs-provenance",
+      "recordedAt": "2026-08-27T03:21:05.279Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh required docs/provenance gate pass: canonical docs/templates ghi exact target and hook boundary plus active-task self-exclusion; self-audit ownership được giữ và external provenance registry/NOTICE không bị invent.",
+      "artifactPaths": [
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "test/workflow/provenance.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "116693687a7224ff7f576fc17df58e9cd6d6a0a0baf72a060f7be897b3b7b396"
+    },
+    {
+      "id": "ev-verification-self-reference-preclose-20260827",
+      "checkId": "verification-self-reference",
+      "recordedAt": "2026-08-27T03:21:15.214Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh required self-reference gate pass: exact active task.json raw entry được bỏ qua @task-contract, other task raw hash vẫn drift, legacy sidecar đọc unchanged và hidden save giữ post-save check fresh.",
+      "artifactPaths": [
+        "src/core/verification/input-freshness.ts",
+        "test/unit/verification-inputs.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/integration/checks.test.ts"
+      ],
+      "inputDigest": "4f6fa8bbaa0be34ed5ab8099d386ab7db27f914a92a7bff632d2d39d14823394"
+    },
+    {
+      "id": "ev-target-scenario-contract-preclose-20260827",
+      "checkId": "target-scenario-contract",
+      "recordedAt": "2026-08-27T03:21:23.724Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh required structured scenario gate pass: 12-case target oracle và ambient canary khóa missing/uninitialized/invalid/other-root/nested/untrusted/multi-root outcomes; no prompt parser hoặc public API được thêm.",
+      "artifactPaths": [
+        "src/templates/harnix/activation.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "512436c88a1d007eb9492643cca0d623c57d55b018d87749113f8ea658703912"
+    },
+    {
+      "id": "ev-target-release-gate-preclose-20260827",
+      "checkId": "target-release-gate",
+      "recordedAt": "2026-08-27T03:23:24.137Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Fresh required release gate pass: build/lint/typecheck; acceptance 522 pass, 1 skip; pack check và bốn fake-home tarball platform combinations; init worst 601.27 ms; footprint reduction 78.96%; release scan sạch; pre/post digest khớp 184 inputs.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        ".harnix/.template-hashes.json",
+        "test"
+      ],
+      "inputDigest": "e9d8bfe5f289fd02ad9385a7a5242923608567b37f993c3eb02202a377548b0a"
+    },
+    {
+      "id": "ev-final-compliance-review-20260827",
+      "recordedAt": "2026-08-27T03:26:53.852Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Stage 1 compliance review pass, không có finding: diff khớp task goal/non-goals và AC; exact active task.json self-exclusion vẫn bind immutable @task-contract và raw-hash other tasks; target validation/hook boundary có parity; 1.0.16/CHANGELOG/self-host đồng bộ; external provenance registry và NOTICE không đổi; git diff --check exit 0.",
+      "artifactPaths": [
+        "src/core/verification/input-freshness.ts",
+        "src/templates/harnix/activation.ts",
+        "test/unit/verification-inputs.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "README.md",
+        "package.json",
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "id": "ev-log-coverage-quality-final-20260827",
+      "checkId": "log-coverage-quality",
+      "recordedAt": "2026-08-27T03:27:47.540Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final artifact audit pass trên planning hash đã khóa: 82/82 rollout, 89.840/89.840 JSON lines, 39 task records, 38 journal entries, 19 sidecar, exact arithmetic/date-version binding và bốn coverage gap công khai.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/log-coverage-and-timeline.md"
+      ],
+      "inputDigest": "3afd0e8d8e748b830f123966b1ed26d87df2560f27c3ae1ba5e1d7e811baaf25"
+    },
+    {
+      "id": "ev-timeline-baseline-quality-final-20260827",
+      "checkId": "timeline-baseline-quality",
+      "recordedAt": "2026-08-27T03:27:51.439Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final timeline/baseline audit pass: M01–M15, W01–W27, G01–G40, trace vocabulary, version/state/result/read-write/retry fields, measured closed-turn baseline và unknown preservation đều đầy đủ.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/run-ledger.md",
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/log-coverage-and-timeline.md"
+      ],
+      "inputDigest": "11f3ceac434674e12232b1c4785b53b1ddc55a99d0e9f7c992f6692af1ac7d18"
+    },
+    {
+      "id": "ev-simulation-evidence-quality-final-20260827",
+      "checkId": "simulation-evidence-quality",
+      "recordedAt": "2026-08-27T03:27:57.230Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final simulation artifact audit pass: contract 48/48, actual CLI 36/36, 12 scenarios, five-repeat signatures, 139 child processes, zero unexpected writes và fake-home/no-network/no-Git containment.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/simulation-ledger.md"
+      ],
+      "inputDigest": "76fee6673cefe8cf74f8d73e646d9cf00aa4d37eda3921d59c0fbcc340b50b1b"
+    },
+    {
+      "id": "ev-findings-root-cause-quality-final-20260827",
+      "checkId": "findings-root-cause-quality",
+      "recordedAt": "2026-08-27T03:28:01.370Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final findings audit pass: năm current finding có registry evidence/owner/severity/confidence/frequency/disposition và năm root-cause section với reproduction/evidence, impact, proposal, RED/risk hoặc defer rationale.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/findings-root-causes.md"
+      ],
+      "inputDigest": "23920a9bce78d3ed58763bbdb3eb414be4cae1c3c9d18bf02c483650da3570b7"
+    },
+    {
+      "id": "ev-improvement-plan-readiness-final-20260827",
+      "checkId": "improvement-plan-readiness",
+      "recordedAt": "2026-08-27T03:28:05.888Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final roadmap audit pass: sáu candidate với impact/frequency/confidence/cost/risk scoring, bốn selected, một experimental, một deferred, RED/implementation/gates/acceptance/task-boundary/provenance đầy đủ.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/research/improvement-roadmap.md"
+      ],
+      "inputDigest": "4d95a7d4e68e9b2d45bfef348abc9c4f3cbd799cda581f05c961660345018a19"
+    },
+    {
+      "id": "ev-privacy-safety-quality-final-20260827",
+      "checkId": "privacy-safety-quality",
+      "recordedAt": "2026-08-27T03:28:15.995Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final privacy/safety pass: recursive active-task Markdown scan không có machine absolute path/private-key/cloud/GitHub credential pattern; test/safety xanh 41/41; pre/post digest khớp.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit",
+        "test/safety"
+      ],
+      "inputDigest": "6384e113819a42700f61bfe209ad3591ebd3f7d2e4b180cb220744642980082b"
+    },
+    {
+      "id": "ev-ready-artifact-quality-final-20260827",
+      "checkId": "ready-artifact-quality",
+      "recordedAt": "2026-08-27T03:28:28.409Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final ready-artifact pass: workflow --audit-ready không diagnostic; internal-workflow và routing xanh 47/47 trên final planning hash; criteria/check/path trace và replan artifacts nhất quán.",
+      "artifactPaths": [
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/prd.md",
+        ".harnix/tasks/20260826-165933-codex-harnix-runtime-audit/plan.md",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "bfd804944378672768437ffeeb60a1bf9bf44078fd7841123fd5b7418bb0f027"
+    },
+    {
+      "id": "ev-target-contract-tests-final-20260827",
+      "checkId": "target-contract-tests",
+      "recordedAt": "2026-08-27T03:28:56.041Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final target-contract gate pass: 5 files/17 tests xác nhận clause order, existing/realpath/safety validation, project/global parity, seven skill sources và cross-platform installed bytes; pre/post/post-save digest khớp.",
+      "artifactPaths": [
+        "src/templates/harnix/activation.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/platform/codex-global.test.ts",
+        "test/workflow/templates.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ],
+      "inputDigest": "319c25090b06bb0d6c7f812b1e38a6c43988b78f5355638e37ce5e0374b30778"
+    },
+    {
+      "id": "ev-target-routing-safety-final-20260827",
+      "checkId": "target-routing-safety",
+      "recordedAt": "2026-08-27T03:29:04.631Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final routing/safety gate pass: 7 files/74 tests cho routing, nearest/workspace fallback, outside-project no-op, path/user-home/platform/release safety và no-fallback; pre/post/post-save digest khớp.",
+      "artifactPaths": [
+        "test/workflow/routing.test.ts",
+        "test/workflow/internal-context.test.ts",
+        "test/safety"
+      ],
+      "inputDigest": "ad445deca3ba8c9ea6c56d89bad104a9acbd17ea922517f2b9f275f4e53e31f3"
+    },
+    {
+      "id": "ev-target-docs-provenance-final-20260827",
+      "checkId": "target-docs-provenance",
+      "recordedAt": "2026-08-27T03:29:12.522Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final docs/provenance gate pass: 2 files/5 tests xác nhận exact target/hook/self-reference docs, Harnix self-audit ownership và unchanged external registry set; pre/post/post-save digest khớp.",
+      "artifactPaths": [
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "test/workflow/provenance.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "1d11c5913675435b7f42779b8a78ed23d2ec7d9400b3ae7edfa789293963c150"
+    },
+    {
+      "id": "ev-verification-self-reference-final-20260827",
+      "checkId": "verification-self-reference",
+      "recordedAt": "2026-08-27T03:29:23.347Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final self-reference gate pass: 3 files/38 tests chứng minh exact active task.json de-dup qua @task-contract, other task raw-hash drift, legacy sidecar unchanged và hidden save/post-save report fresh.",
+      "artifactPaths": [
+        "src/core/verification/input-freshness.ts",
+        "test/unit/verification-inputs.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/integration/checks.test.ts"
+      ],
+      "inputDigest": "221114c06b6626c5d0a2ae573a2847f5af783d7856f582146e2de746eb616e80"
+    },
+    {
+      "id": "ev-target-scenario-contract-final-20260827",
+      "checkId": "target-scenario-contract",
+      "recordedAt": "2026-08-27T03:29:31.767Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final structured scenario gate pass: 2 files/25 tests gồm 12-case authority oracle và ambient canary cho missing/unsafe/uninitialized/invalid/other-root/nested/untrusted/multi-root; không thêm prompt parser/API.",
+      "artifactPaths": [
+        "src/templates/harnix/activation.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "ccf59a27a035850a1f0ebb67f4f591a1ae6ac0d8dfeeefacda8a8c042eb9cd1d"
+    },
+    {
+      "id": "ev-target-release-gate-before-readme-fix-20260827",
+      "checkId": "target-release-gate",
+      "recordedAt": "2026-08-27T03:31:29.007Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Required release command completed green before final compliance wording fix: build/lint/typecheck; acceptance 522 pass, 1 skip; pack plus four fake-home smoke combinations; init worst 457.49 ms; footprint reduction 78.96%; scan sạch; pre/post digest khớp. Evidence này sẽ stale có chủ đích khi README được sửa.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "README.md",
+        "test"
+      ],
+      "inputDigest": "b3dd44d66cd17cd5ec7e86367bc26c005035819721d6394b3576b96f736f9685"
+    },
+    {
+      "id": "ev-final-compliance-readme-order-fail-20260827",
+      "recordedAt": "2026-08-27T03:31:29.007Z",
+      "result": "fail",
+      "summary": "Stage 1 compliance finding Low: README gộp missing/invalid Harnix state vào nhóm dừng trước ancestor lookup; canonical contract chỉ path validation failure dừng trước lookup, còn missing/invalid Harnix root phải dừng sau lookup từ validated target mà không ambient fallback.",
+      "artifactPaths": [
+        "README.md",
+        "src/templates/harnix/activation.ts",
+        "docs/HARNIX_PRD.md"
+      ]
+    },
+    {
+      "id": "ev-readme-target-order-red-20260827",
+      "recordedAt": "2026-08-27T03:32:44.879Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Docs-only RED reproducer thất bại đúng nguyên nhân: README chưa tách path-validation failures trước ancestor lookup khỏi missing/invalid Harnix state chỉ xác định sau lookup.",
+      "artifactPaths": [
+        "README.md"
+      ]
+    },
+    {
+      "id": "ev-readme-target-order-green-20260827",
+      "recordedAt": "2026-08-27T03:32:44.879Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Contained docs GREEN: README tách đúng validation-before-lookup và Harnix-state-after-lookup/no-ambient-fallback clauses; git diff --check exit 0. TDD exception dùng strongest meaningful exact-text reproducer vì change chỉ sửa user-facing contract prose.",
+      "artifactPaths": [
+        "README.md",
+        "src/templates/harnix/activation.ts"
+      ]
+    },
+    {
+      "id": "ev-target-docs-provenance-after-readme-fix-20260827",
+      "checkId": "target-docs-provenance",
+      "recordedAt": "2026-08-27T03:33:11.418Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Post-finding docs/provenance rerun pass: 2 files/5 tests; README now separates path validation before ancestor lookup from missing/invalid Harnix state after lookup, while self-audit ownership and external registry set remain exact.",
+      "artifactPaths": [
+        "README.md",
+        "test/workflow/provenance.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "fff273bebc1149f337086a18287ecba46d2d79f9f98203fb267582b29ae9d752"
+    },
+    {
+      "id": "ev-target-release-gate-after-readme-fix-20260827",
+      "checkId": "target-release-gate",
+      "recordedAt": "2026-08-27T03:35:02.082Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final required release gate after README compliance fix: build/lint/typecheck; acceptance 522 pass, 1 skip; pack check và bốn fake-home tarball combinations; init worst 396.49 ms; footprint reduction 78.96%; release scan sạch; pre/post digest khớp 184 inputs.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "README.md",
+        ".harnix/.template-hashes.json",
+        "test"
+      ],
+      "inputDigest": "d6e61b99a5848ebb2188411e0266e2737a6ddc574aa5178c0d8f0b45a9694a33"
+    },
+    {
+      "id": "ev-section-11-exact-acceptance-final-20260827",
+      "recordedAt": "2026-08-27T03:39:02.5128207+00:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Chuỗi acceptance chính xác theo docs/IMPLEMENTATION_PLAN.md Section 11 exit 0: frozen install, build, lint, typecheck; pnpm test 522 pass/1 skip; test:acceptance 522 pass/1 skip; pack check; bốn smoke tarball fake-home; init median 447.16 ms và worst 1673.55 ms; footprint reduction 78.96%; release scan sạch với non-Harnix context max 384.42 ms; git diff --check chỉ có cảnh báo line-ending.",
+      "artifactPaths": [
+        "docs/IMPLEMENTATION_PLAN.md",
+        "package.json",
+        "scripts/measure-init.mjs",
+        "scripts/measure-footprint.mjs",
+        "scripts/scan-release.mjs",
+        "scripts/smoke-tarball.mjs"
+      ]
+    },
+    {
+      "id": "ev-final-staged-review-resolved-20260827",
+      "recordedAt": "2026-08-27T03:39:02.5128207+00:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Review hai tầng hoàn tất: Stage 1 phát hiện một finding Low về thứ tự diễn đạt README, RED reproducer xác nhận và post-fix docs/release gates đều xanh; Stage 2 quality/security không có finding. Public checks báo 13/13 passed, audit báo 16/16 criteria met và 13/13 required checks fresh.",
+      "artifactPaths": [
+        "README.md",
+        "src/core/verification/input-freshness.ts",
+        "src/templates/harnix/activation.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/unit/verification-inputs.test.ts"
+      ]
+    },
+    {
+      "id": "ev-final-boundaries-and-risk-20260827",
+      "recordedAt": "2026-08-27T03:39:02.5128207+00:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Boundary review: không chạy setup trên real user profile, không tự trust/activate real host hook, không network, production write hoặc Git mutation. Residual risk là instruction-level target routing vẫn phụ thuộc host/model diễn giải canonical clauses; structured oracle chỉ kiểm chứng contract/action/read-set, không tuyên bố là natural-language parser. Không tạo learning candidate vì observation đã được ghi trong spec/contract hiện tại.",
+      "artifactPaths": [
+        "docs/HARNIX_WORKFLOW.md",
+        "src/templates/harnix/activation.ts",
+        "test/unit/activation-instructions.test.ts"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-26T16:59:33.3860656+07:00",
+  "updatedAt": "2026-08-27T03:39:22.711Z",
+  "completedAt": "2026-08-27T03:39:22.711Z"
+}

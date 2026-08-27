@@ -1,0 +1,309 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260827-105553-agent-template-guard-order",
+  "title": "Đưa target guard lên đầu agent template",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bảo đảm project AGENTS template áp dụng target-authority guard trước mọi project-specific profile hoặc chỉ dẫn đọc Harnix state, rồi chỉ đọc workflow/config của selected target.",
+  "nonGoals": [
+    "Không thay đổi chín clause canonical target-authority, global adapter, hook protocol hoặc behavior của bảy stage skill.",
+    "Không thêm natural-language path parser, public CLI, schema, network hoặc platform mới.",
+    "Không chạy setup trên real user profile, không commit/push và không ghi đè thay đổi chưa commit của task trước."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-agent-template-order",
+      "text": "Rendered project AGENTS đặt toàn bộ canonical target-authority guard trước project profile và trước mọi chỉ dẫn đọc .harnix/workflow.md, .harnix/config.yaml hoặc active task.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-agent-template-order-required-20260827",
+        "ev-agent-template-order-required-final-20260827"
+      ]
+    },
+    {
+      "id": "ac-agent-template-target-scope",
+      "text": "Sau khi guard pass, template nói rõ project profile và workflow/config được dùng từ selected target; init-generated AGENTS giữ contract này và existing unrelated template behavior không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-agent-template-order-required-20260827",
+        "ev-agent-template-order-required-final-20260827"
+      ]
+    },
+    {
+      "id": "ac-release-readiness",
+      "text": "Package patch version, bảy skill metadata và CHANGELOG được đồng bộ; focused template tests và exact completion acceptance sequence đều pass trên worktree hiện tại.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-agent-template-release-required-20260827",
+        "ev-agent-template-release-required-final-20260827"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "package.json",
+    "src/templates/harnix/agents.ts",
+    "src/skills",
+    "test/integration/init.test.ts",
+    "test/workflow/templates.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "agent-template-order",
+      "description": "Run focused canonical guard, rendered template and init-output regressions, including ordering and selected-target scope.",
+      "command": "pnpm exec vitest run test/unit/activation-instructions.test.ts test/workflow/templates.test.ts test/integration/init.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-agent-template-order",
+        "ac-agent-template-target-scope"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/templates/harnix/activation.ts",
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "agent-template-release",
+      "description": "Run exact Section 11 install, build, static checks, full tests, packaging, fake-home smoke, performance, footprint, release scan and diff check.",
+      "command": "pnpm install --frozen-lockfile && pnpm build && pnpm lint && pnpm typecheck && pnpm test && pnpm test:acceptance && pnpm pack:check && pnpm smoke:tarball && pnpm measure:init && pnpm measure:footprint && pnpm scan:release && git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-release-readiness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-agent-template-order-red-20260827",
+      "recordedAt": "2026-08-27T10:57:07.5646429+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Focused RED đúng nguyên nhân: templates/init có 2 test fail vì canonical guard còn nằm sau version/project profile và generated AGENTS chưa ràng buộc profile cùng workflow/config vào selected target.",
+      "artifactPaths": [
+        "test/integration/init.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "ev-agent-template-order-green-20260827",
+      "recordedAt": "2026-08-27T10:57:55.7010721+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN sau implementation: 3 files/12 tests pass; canonical guard được render trước version/profile, profile chỉ dùng cho selected target và workflow/config chỉ được đọc từ selected Harnix root sau guard.",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "ev-agent-template-order-required-20260827",
+      "checkId": "agent-template-order",
+      "recordedAt": "2026-08-27T10:58:39.0210586+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Required focused gate pass với pre/post digest khớp: 3 files/12 tests xác nhận đủ canonical clauses, guard đứng trước version/profile/workflow read và init-generated AGENTS chỉ dùng profile/workflow/config từ selected target.",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "dee172b27a9b353589ccab45aefa9ac5489a410ab526445fbde96e27aca1c63e"
+    },
+    {
+      "id": "ev-agent-template-release-windows-contention-fail-20260827",
+      "checkId": "agent-template-release",
+      "recordedAt": "2026-08-27T11:00:02.9116861+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Exact Section 11 dừng tại pnpm test: 513 pass/1 skip, 9 fail trên 6 file; failure đều là Windows temp-file EPERM rename hoặc timeout 5 giây dưới full-suite concurrency, không có assertion failure của agent-template. Build/lint/typecheck đã pass trước điểm dừng.",
+      "artifactPaths": [
+        "src/utils/atomic-write.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/doctor.test.ts",
+        "test/integration/init.test.ts",
+        "test/platform/setup.test.ts",
+        "test/unit/global-uninstall.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "ev-debug-windows-contention-isolated-green-20260827",
+      "recordedAt": "2026-08-27T11:00:50.4170436+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Giả thuyết full-suite Windows temp/CPU contention được xác nhận: internal-workflow chạy cô lập pass 25/25 và platform setup pass 17/17; init suite liên quan đã pass 7/7 trong focused gate. Không sửa production code vì failure không deterministic và không thuộc agent-template path.",
+      "artifactPaths": [
+        "test/integration/init.test.ts",
+        "test/platform/setup.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "ev-agent-template-release-required-20260827",
+      "checkId": "agent-template-release",
+      "recordedAt": "2026-08-27T11:04:21.0714531+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact Section 11 rerun exit 0 với pre/post digest khớp: frozen install/build/lint/typecheck; pnpm test và test:acceptance mỗi lượt 522 pass/1 skip; pack check; bốn fake-home smoke; init median 531.38 ms/worst 742.52 ms; footprint reduction 78.93%; release scan sạch, non-Harnix context max 396.14 ms; git diff --check chỉ có CRLF warnings.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/measure-footprint.mjs",
+        "scripts/measure-init.mjs",
+        "scripts/scan-release.mjs",
+        "scripts/smoke-tarball.mjs",
+        "src/templates/harnix/agents.ts",
+        "test"
+      ],
+      "inputDigest": "e34f72347f6bab07fd8ea36dc52e719d787d5bc7b65c6c7afeb1eb3f732370ed"
+    },
+    {
+      "id": "ev-agent-template-compliance-review-20260827",
+      "recordedAt": "2026-08-27T11:04:21.0837530+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Independent Stage 1 compliance review không có finding: guard đứng trước version/profile/state-read directives; selected-target scope map đúng acceptance; 1.0.17/CHANGELOG/bảy skill metadata đồng bộ; scoped diff-check sạch. Worktree cũ được tách khỏi attribution của task này.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "ev-agent-template-quality-nested-target-fail-20260827",
+      "recordedAt": "2026-08-27T11:06:45.6430031+07:00",
+      "result": "fail",
+      "summary": "Stage 2 finding Low: template đồng nhất this AGENTS root với selected target, nhưng explicit target có thể là file/thư mục con rồi ancestor-resolve thành Harnix root; wording có thể làm agent bỏ qua bootstrap/profile hợp lệ và mâu thuẫn với selected Harnix root ở Before work.",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "ev-agent-template-nested-root-red-20260827",
+      "recordedAt": "2026-08-27T11:08:00.7715465+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Focused RED đúng regression nested-target: 2 test fail vì output còn đồng nhất this AGENTS root với selected target thay vì Harnix root đã được target-authority guard resolve.",
+      "artifactPaths": [
+        "test/integration/init.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "ev-agent-template-nested-root-green-20260827",
+      "recordedAt": "2026-08-27T11:08:33.0475852+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Focused GREEN sau quality fix: 3 files/12 tests pass; scope và profile dùng selected Harnix root do target-authority guard resolve, kể cả khi explicit target là file hoặc thư mục con.",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "ev-agent-template-order-required-final-20260827",
+      "checkId": "agent-template-order",
+      "recordedAt": "2026-08-27T11:09:00.2420349+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Required focused gate pass với pre/post digest khớp: 3 files/12 tests khóa guard ordering và xác nhận scope/profile dùng selected Harnix root do target-authority guard resolve, kể cả nested target.",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "5d9c41e4a33f90ae2311d8c53d6f9f47d0f5704cf95f677031030b08c9906ca0"
+    },
+    {
+      "id": "ev-agent-template-release-required-final-20260827",
+      "checkId": "agent-template-release",
+      "recordedAt": "2026-08-27T11:11:09.7942778+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact Section 11 exit 0 với pre/post digest khớp: frozen install/build/lint/typecheck; pnpm test 522 pass/1 skip; acceptance unit 252/1 skip, integration 119, migration 9, platform 25, workflow 76, safety 41; pack và bốn fake-home smoke pass; init median 374.82 ms/worst 407.08 ms; footprint reduction 78.93%; release scan sạch, non-Harnix max 210.58 ms; diff check chỉ có CRLF warnings.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/measure-footprint.mjs",
+        "scripts/measure-init.mjs",
+        "scripts/scan-release.mjs",
+        "scripts/smoke-tarball.mjs",
+        "src/templates/harnix/agents.ts",
+        "test"
+      ],
+      "inputDigest": "3911dc1477258fd50d362a1b108e6d9f4f8cea9230df45b08b200f24fc707dbb"
+    },
+    {
+      "id": "ev-agent-template-compliance-final-20260827",
+      "recordedAt": "2026-08-27T11:12:17.7920413+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Stage 1 compliance final không có finding: exact requested template hardening, guard ordering, selected-root scope, version 1.0.17, CHANGELOG và regression coverage khớp; public checks 2/2 và audit 3/3 pass.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "package.json",
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "ev-agent-template-quality-final-20260827",
+      "recordedAt": "2026-08-27T11:12:17.8000815+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Independent Stage 2 re-review không còn finding: wording phân biệt literal file/subdir target với ancestor-resolved Harnix root; tests khóa positive/negative wording và ordering; focused re-review 9/9 pass, scoped diff-check sạch ngoài CRLF warnings.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "ev-agent-template-finish-review-20260827",
+      "recordedAt": "2026-08-27T11:12:40.4202749+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final handoff review: không có waiver; omitted đúng scope gồm real user-profile setup/trust và runtime compliance trên mọi host/model. Residual risk là instruction-level interpretation, không có runtime prompt parser. Không tạo learning candidate vì memory không có candidate sẵn và quan sát hiện tại đã được project spec/guard hiện hành bao phủ.",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-27T10:55:53.2913111+07:00",
+  "updatedAt": "2026-08-27T04:12:48.323Z",
+  "completedAt": "2026-08-27T04:12:48.323Z"
+}

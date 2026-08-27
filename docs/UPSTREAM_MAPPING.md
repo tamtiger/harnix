@@ -192,6 +192,16 @@ Stack/catalog architecture uses only researched patterns rather than vendored ru
 | Universal skill invocation/worktree/subagent chain | — | Rejected; one canonical workflow routes focused skills only when state requires them |
 
 Bảy adaptation được lưu dưới dạng source thật tại `src/skills/harnix-*/SKILL.md`, mỗi source có semantic `metadata.version` đồng bộ package release. `workflow.ts` không giữ một bản prose thứ hai; build nhúng source Markdown và cả ba platform cài cùng byte content. `harnix-brainstorm` bổ sung decision inventory, contract/placeholder/consistency self-review; `harnix-implement` bổ sung critical plan review và observed RED; `harnix-check` map claim sang fresh output/exit; debug/research/continue/finish giữ các stop/persistence rule tương ứng nhưng tiếp tục loại universal approval, worktree, subagent, commit, branch và PR behavior.
+
+### 8.3 Harnix self-audit ownership mapping
+
+| Capability | Origin/evidence | Harnix location | Ownership decision |
+|---|---|---|---|
+| Target-root authority trước ambient context (`HX-TARGET-01`) | `harnix-self-audit`; task `20260826-165933-codex-harnix-runtime-audit`, finding `F-CUR-02`, mechanism `M04` | `src/templates/harnix/activation.ts`, project/global templates, bảy `src/skills/harnix-*/SKILL.md`, structured target scenario/ambient-canary tests | Harnix-owned instruction contract; explicit target được validate trước ancestor lookup, hook-injected context không cấp authority; không có external source, không thêm external provenance registry entry và không đổi `NOTICE` |
+| Active TaskRecord snapshot self-exclusion | `harnix-self-audit`; cùng task, verification replan ngày 2026-08-27 | `src/core/verification/input-freshness.ts`, unit + hidden-workflow regression tests, TaskRecord v2 docs/templates | Harnix-owned correctness repair; omit exact active `task.json` raw entry vì `@task-contract` đã bind, vẫn raw-hash other tasks và giữ sidecar v1; không thêm external provenance/attribution |
+
+Mapping này tách self-observed product correction khỏi external-derived capability. Nếu implementation tương lai lấy behavior, code hoặc content từ harness ngoài, mục 10 bắt buộc supersede ownership decision này bằng registry/source/ref/license/evidence đầy đủ trước completion.
+
 ## 9. Removal verification
 
 Release scan must prove absence outside allowed research/migration/license contexts:

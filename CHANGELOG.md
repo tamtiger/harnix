@@ -4,6 +4,27 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.17] - 2026-08-27
+
+### Changed
+
+- Đưa target-authority guard lên đầu project AGENTS template và ràng buộc profile/workflow vào selected Harnix root đã resolve.
+- Thêm regression tests khóa ordering cho rendered và init-generated AGENTS output.
+
+## [1.0.16] - 2026-08-27
+
+### Changed
+
+- Ngăn input glob của active TaskRecord tự làm stale evidence, vẫn raw-hash task lịch sử và giữ sidecar v1.
+- Xác thực explicit target trước ancestor lookup, giữ hook-injected context không có target authority và bổ sung structured ambient-canary coverage.
+
+## [1.0.15] - 2026-08-26
+
+### Changed
+
+- Resolve explicit user repository targets before ambient cwd/workspace across generated Harnix instructions and canonical skills, with invalid-target no-fallback safeguards.
+- Document HX-TARGET-01 as Harnix self-audit ownership while preserving the external feature-provenance registry and NOTICE.
+
 ## [1.0.14] - 2026-08-26
 
 ### Changed

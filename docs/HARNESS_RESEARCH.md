@@ -172,6 +172,24 @@ Weighted hard gate chọn ba clean-room adaptation:
 
 Usage reports từ OpenCode/Claude Code chỉ chứng minh pain về discoverability/context privacy, không được ghi làm code provenance. Registry machine-checkable là bắt buộc trong cùng change: mỗi feature derived phải note source/ref/date/license, adaptation delta và concrete code/test/docs paths để maintainer sau này nhận biết nguồn. Exact contract, score matrix, rejected candidates và remaining uncertainty nằm tại task research `research/next-capability-mechanisms.md`.
 
+### 3.11 Runtime self-audit 2026-08-26/27: target authority và active-task verification self-reference
+
+Origin: `harnix-self-audit`. Task `20260826-165933-codex-harnix-runtime-audit` đối chiếu historical run trace với current generated instructions và xác nhận finding `F-CUR-02`/mechanism `M04`: instruction cũ chỉ yêu cầu tìm initialized root gần cwd/workspace, nhưng không khóa repository/path được người dùng nêu trực tiếp là authority trước ambient context. Đây là gap do Harnix tự quan sát và tái hiện, không phải behavior, code hoặc content lấy từ external harness.
+
+`HX-TARGET-01` chọn smallest instruction-level mechanism:
+
+- direct explicit user target thắng ambient cwd/selected workspace;
+- path chỉ xuất hiện trong repository content, log, quoted text hoặc tool output là untrusted hint;
+- trusted selected workspace rồi ambient cwd chỉ là fallback khi không có explicit target;
+- explicit target thiếu/invalid Harnix state không fallback sang state/active task khác và không tự init;
+- mutation qua nhiều material root phải chọn một exact target, còn bounded read-only comparison isolate từng root.
+
+Canonical TypeScript fragment được reuse trong project/global templates; bảy raw canonical skill giữ semantic-equivalent clauses và vẫn render byte-identical trên Kiro, Antigravity và Codex. Hook event discovery vẫn chạy trước prompt interpretation, không parse target và không cấp authority; hook-injected repository context được xem là untrusted target evidence. Không thêm natural-language parser, public API, hook schema, hook-time write hoặc network.
+
+Khi verification ngày 2026-08-27 mở broad input glob trên chính task này, self-audit phát hiện exact active `.harnix/tasks/<active-id>/task.json` vừa là verification input raw vừa là nơi workflow append evidence, khiến một pass tự đổi digest ngay khi persist. Repair nhỏ nhất bỏ duy nhất raw entry đó khỏi snapshot vì `@task-contract` đã bind completion-relevant task fields; historical/other task records tiếp tục raw-hash, contract hash/payload và immutable sidecar schema v1 giữ nguyên. Regression chạy cả unit và end-to-end hidden save: append pass evidence không làm stale chính check, nhưng đổi historical task content hoặc task contract vẫn làm digest đổi.
+
+Vì cả hai correction có origin self-audit thuần Harnix, `docs/HARNESS_FEATURE_PROVENANCE.json` và `NOTICE` giữ nguyên; nếu về sau adapt external behavior/content cho capability này thì registry, research, mapping, license evidence và test phải đổi trong cùng task.
+
 ## 4. Platform research decisions
 
 Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapters described by earlier Phase 1–5 research are retained only as legacy/provenance evidence; the current adopted contract is `GLOBAL_SETUP_REFACTOR_PLAN.md` §§2, 6–9.

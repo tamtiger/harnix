@@ -5,7 +5,7 @@ import type {
   JsonValue,
   MarkerSelector,
 } from "../utils/global-managed-files.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "../templates/harnix/activation.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../templates/harnix/activation.js";
 import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
 
 const begin = "<!-- harnix:begin -->";
@@ -22,11 +22,9 @@ export const CODEX_GLOBAL_HOOK_SELECTOR: JsonArrayMemberSelector = {
 };
 export const CODEX_GLOBAL_CONTEXT_COMMAND = "harnix context --platform codex";
 
-const codexGlobalSkillGuard = "First locate the nearest ancestor or workspace root containing `.harnix/config.yaml`. Activate Harnix only when that root exists and its Harnix state is valid. If no such root exists or its state is invalid, do not apply Harnix workflow, read project state, or create files.";
-
 export const codexGlobalAgentsContent = `## Harnix
 
-${codexGlobalSkillGuard}
+${HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.join("\n")}
 
 ${HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS.join("\n")}
 

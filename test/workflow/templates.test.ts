@@ -2,6 +2,7 @@ import { access, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { initializeProject } from "../../src/commands/init.js";
+import { HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
 import { renderAgentsTemplate } from "../../src/templates/harnix/agents.js";
 import { ensureManagedWorkflow } from "../../src/templates/harnix/managed-workflow.js";
 import { workflowSkills, workflowTemplate } from "../../src/templates/harnix/workflow.js";
@@ -29,7 +30,7 @@ describe("workflow templates", () => {
     expect(agentInstructions).toContain(vietnameseTaskPolicy);
     expect(agentInstructions).toContain("explicit user-global integration");
     expect(agentInstructions).toContain(`- Version: ${packageVersion}.`);
-    expect(agentInstructions).toContain("## Harnix\n\n- Version:");
+    expect(agentInstructions).toContain("## Harnix\n\nTarget authority and activation guard:");
     expect(agentInstructions).toContain("## Project profile");
     expect(agentInstructions).toContain("- Languages: not specified.");
     expect(agentInstructions).toContain("- Package paths: not specified.");
@@ -41,7 +42,16 @@ describe("workflow templates", () => {
     expect(agentInstructions).not.toContain("increment the package patch version");
     expect(agentInstructions).not.toContain("update `CHANGELOG.md`");
     expect(agentInstructions).toContain("Before any commit, show the proposed changes and commit message, then wait for explicit user approval");
-    expect(agentInstructions).toContain("nearest initialized project ancestor or workspace root");
+    for (const instruction of HARNIX_TARGET_AUTHORITY_INSTRUCTIONS) {
+      expect(agentInstructions).toContain(instruction);
+    }
+    const lastTargetGuardIndex = agentInstructions.indexOf(HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.at(-1)!);
+    expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("- Version:"));
+    expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("## Project profile"));
+    expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("Read .harnix/workflow.md"));
+    expect(agentInstructions).toContain("Use this profile only when this AGENTS root is the selected Harnix root resolved by the target-authority guard");
+    expect(agentInstructions).not.toContain("this AGENTS root is the selected target");
+    expect(agentInstructions).toContain("Read .harnix/workflow.md and .harnix/config.yaml from the selected Harnix root");
     expect(agentInstructions).toContain("harnix repo-map --query <text>");
     expect(agentInstructions).toContain("harnix repo-map --impact <path>");
     expect(agentInstructions).toContain("Public commands are init, setup, update, upgrade, uninstall, mem, status, tasks, resume, context-report, checks, audit, doctor, and repo-map");
@@ -85,9 +95,10 @@ describe("workflow templates", () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
 
-    expect(workflowTemplate).toContain("nearest initialized project ancestor or workspace root");
+    for (const instruction of HARNIX_TARGET_AUTHORITY_INSTRUCTIONS) {
+      expect(workflowTemplate).toContain(instruction);
+    }
     expect(workflowTemplate).toContain("explicit user-global operation");
-    expect(workflowTemplate).toContain("do not create files or automatically run `harnix init`");
     expect(workflowTemplate).toContain("Bypass");
     expect(workflowTemplate).toContain("Ready gate");
     expect(workflowTemplate).toContain("guarded re-entry");

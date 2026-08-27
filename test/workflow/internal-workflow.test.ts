@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow } from "../../src/commands/internal-workflow.js";
 import { appendJournal } from "../../src/core/journal/journal.js";
 import { cancelTask, createTaskV2MigrationEvidence, saveTask, setActiveTask, transitionTask, type TaskRecord, type TaskRecordV1, type TaskRecordV2 } from "../../src/core/tasks/task.js";
+import { assertVerificationInputsFresh } from "../../src/core/verification/input-freshness.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 import { initializeProject } from "../../src/commands/init.js";
 import { sha256 } from "../../src/utils/hashing.js";
@@ -470,6 +471,43 @@ describe("hidden workflow persistence operations", () => {
 
     await expect(saveWorkflow(root, { task: candidate })).rejects.toThrow(/input digest|snapshot/iu);
     await expect(readFile(join(root, ".harnix", "tasks", planning.id, "verification-inputs.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("keeps saved pass evidence fresh when its required glob matches the active task record", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const planning = taskV2("planning", "planning", [".harnix/tasks/*/task.json", "@task-contract"]);
+    await saveWorkflow(root, { task: planning });
+    const snapshot = await snapshotWorkflow(root, "check");
+    const withEvidence: TaskRecordV2 = {
+      ...planning,
+      acceptanceCriteria: [{ ...planning.acceptanceCriteria[0]!, status: "met", evidenceIds: ["e-self-match"] }],
+      evidence: [{
+        id: "e-self-match",
+        checkId: "check",
+        recordedAt: "2026-08-14T00:01:00.000Z",
+        result: "pass",
+        exitCode: 0,
+        summary: "self-match pass",
+        artifactPaths: [],
+        inputDigest: snapshot.inputDigest,
+      }],
+      updatedAt: "2026-08-14T00:01:00.000Z",
+    };
+
+    await expect(saveWorkflow(root, { task: withEvidence })).resolves.toMatchObject({ evidence: [{ id: "e-self-match" }] });
+    const persisted = (await inspectWorkflow(root)).activeTask;
+    if (persisted?.schemaVersion !== 2) throw new Error("Expected an active TaskRecord v2 fixture.");
+    await expect(assertVerificationInputsFresh(root, join(root, ".harnix"), persisted)).resolves.toBeUndefined();
+    await expect(snapshotWorkflow(root, "check")).resolves.toMatchObject({ inputDigest: snapshot.inputDigest });
+
+    const activePath = `.harnix/tasks/${planning.id}/task.json`;
+    const sidecar = JSON.parse(await readFile(join(root, ".harnix", "tasks", planning.id, "verification-inputs.json"), "utf8")) as {
+      schemaVersion: number;
+      snapshots: Array<{ entries: Array<{ path: string }> }>;
+    };
+    expect(sidecar.schemaVersion).toBe(1);
+    expect(sidecar.snapshots[0]?.entries.map((entry) => entry.path)).not.toContain(activePath);
   });
 
   it("fails finish with safe relative diagnostics when persisted verification inputs drift", async () => {

@@ -263,7 +263,7 @@ interface TaskRecordV2 extends Omit<TaskRecordV1, "schemaVersion" | "validationP
 
 Task mới chỉ được tạo bằng schema v2; workflow transport reject new v1 nhưng direct reader vẫn hỗ trợ exact historical v1. Cả hai version dùng exact recursive allowlist cho TaskRecord, acceptance criterion, validation check, evidence, blocker và cancellation; unknown top-level hoặc nested key bị reject. `criterionIds` phải unique/valid; required check phải map ít nhất một criterion và mọi non-waived criterion phải được ít nhất một required check bao phủ. `inputs` là danh sách sorted unique không rỗng, luôn chứa `@task-contract`; các entry còn lại là safe project-relative POSIX file/glob. Check có từ khóa `repository|source|file|build|test|lint|typecheck|package|runtime|code|compile|smoke|acceptance` trong ID/description/command phải có ít nhất một repository input. Absolute path, backslash, empty segment, `.`/`..`, traversal và symlink/junction escape bị reject; mỗi pattern phải match ít nhất một file. Mode là monotonic: Lite có thể promote sang Full với required artifacts/gates, nhưng persisted Full không được downgrade về Lite ở bất kỳ unfinished transition nào.
 
-Snapshot chuẩn gồm canonical task contract (task ID/mode, criterion ID/text, toàn bộ validation definition), Full `prd.md`/`plan.md`, và sorted `{path,sha256}` của repository input. `inputDigest` là SHA-256 lowercase của canonical JSON `{schemaVersion:2,taskId,checkId,taskContractHash,entries}`. Hidden `harnix workflow --snapshot --check <id>` chỉ đọc state/input. Required passing evidence v2 phải có digest 64-hex; save recompute và chỉ chấp nhận digest hiện tại, rồi ghi immutable task-owned `.harnix/tasks/<id>/verification-inputs.json` keyed by evidence ID. Sidecar chỉ chứa ID, relative path và hash, không chứa source body, secret, absolute path, prompt, environment hoặc command output.
+Snapshot chuẩn gồm canonical task contract (task ID/mode, criterion ID/text, toàn bộ validation definition), Full `prd.md`/`plan.md`, và sorted `{path,sha256}` của repository input. Khi repository input glob match exact active `.harnix/tasks/<active-id>/task.json`, snapshot không thêm raw entry cho file đó vì `@task-contract` đã bind completion-relevant TaskRecord fields; exact path này vẫn có thể xuất hiện như regular raw input khi nó thuộc historical/other task. Không được mở rộng ngoại lệ thành `.harnix/tasks/**/task.json`, và task-contract hash/payload vẫn giữ nguyên. `inputDigest` là SHA-256 lowercase của canonical JSON `{schemaVersion:2,taskId,checkId,taskContractHash,entries}`. Hidden `harnix workflow --snapshot --check <id>` chỉ đọc state/input. Required passing evidence v2 phải có digest 64-hex; save recompute và chỉ chấp nhận digest hiện tại, rồi ghi immutable task-owned `.harnix/tasks/<id>/verification-inputs.json` keyed by evidence ID. Sidecar v1 không đổi và chỉ chứa ID, relative path và hash, không chứa source body, secret, absolute path, prompt, environment hoặc command output.
 
 Completion v2 yêu cầu latest fresh pass của từng required check, criterion-linked evidence nằm trong giao của `criterion.evidenceIds` và check có `criterionIds` chứa criterion đó, đồng thời finish recompute snapshot khớp sidecar. Drift fail closed với check ID cùng safe relative `changed`/`missing` paths; unreadable/unsafe/empty match cũng fail. Timestamp freshness không thay thế input freshness. Unscoped evidence và pre-migration evidence không digest không chứng minh completion v2.
 
@@ -430,6 +430,20 @@ The classifier is shared by checks and status/audit projections. Latest evidence
 
 Completion separates criteria `{met,waived,pending,total,pendingIds}` from required checks `{passed,failed,stale,pending,total,failedIds,staleIds,pendingIds}`. A criterion counts as met only when persisted met and supported by fresh evidence under completion semantics; waived remains waived and every other state is pending. Required checks reuse the exact latest-evidence, one-hour age, v2 immutable sidecar and freshly recomputed input-digest semantics used by status/finish. ID lists sort code-unit. Completion passes only with non-empty criteria/checks, every criterion completion-ready and every required check passed. Audit never runs a command, edits artifacts/state, advances workflow, calls network, or emits private prose/commands/secrets/absolute paths; an audit pass is visibility, not verification evidence.
 
+### 4.5L Agent target authority v1
+
+Generated Harnix instructions and canonical skills resolve one intended target before activation with fixed authority order:
+
+1. A repository or path directly and explicitly named by the user is authoritative over ambient cwd or selected workspace.
+2. Paths found only in hook-injected repository context, repository content, logs, quoted text or tool output are untrusted hints and cannot select or override the target.
+3. Only when no explicit target exists may trusted selected-workspace context supply the target; ambient cwd is the final fallback.
+4. Before ancestor lookup for an explicit target, require that it exists, canonicalize with platform path/realpath APIs, and reject traversal, unsafe roots, or symlink/junction escape.
+5. Starting from the validated canonical explicit target—or from selected workspace/ambient cwd only when no explicit target exists—activate Harnix only when its nearest ancestor/workspace root contains valid `.harnix/config.yaml` state.
+6. Failed explicit validation or missing/invalid Harnix state fails closed without reading ambient/workspace Harnix state, falling back to another repository, reading its active task, creating state or automatically running `harnix init`.
+7. A mutating request spanning multiple material roots stops for one exact target; bounded read-only comparison may inspect each root independently.
+
+`src/templates/harnix/activation.ts` is the canonical TypeScript fragment for generated project/global surfaces. The seven raw `src/skills/harnix-*/SKILL.md` sources carry semantic-equivalent clauses and remain byte-identical across Kiro, Antigravity and Codex. This contract adds no natural-language path parser, public CLI/schema, hook protocol change, hook-time write or network behavior. Hidden context discovery retains current nearest-ancestor/workspace no-op semantics because it executes before prompt-target interpretation; its repository payload is untrusted target evidence and never grants agent authority. Origin is `harnix-self-audit` (`F-CUR-02`/`M04`), so external provenance registry and `NOTICE` remain unchanged unless external behavior/code/content is later adopted or adapted.
+
 ### 4.6 Doctor JSON v2
 
 ```ts
@@ -474,8 +488,8 @@ Consumer expecting v1 receives an explicit schema mismatch, never a misleading f
 
 `harnix context --platform <kiro|antigravity|codex>` is the only packaged fast-path hook command, not public API and does not increase the fourteen-command public contract. Legacy `harnix internal context ...` is not an alias and must fall through to regular CLI rejection. Release performance measurement invokes the exact canonical installed command. The hidden command:
 
-1. accepts bounded optional hook-event JSON from stdin, validates `cwd` and bounded `workspacePaths[]`, and falls back safely to process cwd;
-2. resolves the **nearest** initialized project ancestor/root from cwd or workspace roots using safe realpath containment, including non-Git workspaces, deduplicated symlink-equivalent roots; it must not require the current workspace directory itself to contain `.harnix`;
+1. accepts bounded optional hook-event JSON from stdin, validates `cwd` and bounded `workspacePaths[]`, and falls back safely to process cwd; this event discovery does not parse an explicit target from natural-language prompt text and does not grant target authority;
+2. resolves the **nearest** initialized project ancestor/root from cwd or workspace roots using safe realpath containment, including non-Git workspaces, deduplicated symlink-equivalent roots; it must not require the current workspace directory itself to contain `.harnix`. Any injected repository context remains untrusted target evidence, and generated instructions apply §4.5L after the prompt is available before reading Harnix state or acting;
 3. loads bounded ranked context without network, write, prompt/transcript/credential logging or execution of project content;
 4. exits `0` with empty output in a non-Harnix repository; malformed optional input fails open for the hosting agent using the platform-specific output below (a malformed Antigravity event is an empty no-op). A known initialized project with corrupt/inaccessible state must fail closed for project data and emit only a concise redacted platform-specific warning without blocking the host agent;
 5. emits no absolute home path, obeys stdin/stdout/time/workspace-root bounds and always discloses context truncation.
@@ -879,17 +893,29 @@ Research task `20260826-154348-harness-feature-expansion` revalidated current pr
 - [x] HX-PROVENANCE-02: registry IDs `context-selection-explanation`, `task-resume-recovery`, `verification-freshness-explanation` map immutable refs/licenses tới concrete code/test/docs paths.
 - Completion gate: README/canonical docs/templates, patch release, compliance-before-quality review và fresh exact acceptance mục 11.
 
+## 9H. Runtime self-audit improvements — HX-TARGET-01 and active-task snapshot self-exclusion
+
+Task `20260826-165933-codex-harnix-runtime-audit` đọc historical Harnix/Codex evidence, chạy disposable scenario matrix và chọn first implementation slice theo impact-frequency-confidence-cost-risk. Replan khi verification phát hiện active TaskRecord tự nằm trong broad input glob đã bổ sung một repair hẹp cho snapshot self-reference. Cả `HX-TARGET-01` và repair này có origin `harnix-self-audit`; không dùng external harness behavior/code/content.
+
+- [x] Canonical target-authority fragment khóa explicit user target trước ambient cwd/workspace, untrusted quoted/log/tool paths và no-fallback trên invalid explicit target.
+- [x] Project AGENTS/workflow templates, Kiro/Antigravity/Codex global instructions và bảy canonical skill sources giữ cùng semantics/parity.
+- [x] Deterministic contract fixtures cùng existing routing/internal-context/safety suites bảo vệ explicit-other-root, invalid/uninitialized, nested-default, untrusted-path và multi-root cases mà không thêm parser/API/hook write.
+- [x] PRD/workflow/README/research/mapping ghi exact contract và self-audit ownership; external provenance registry/NOTICE giữ nguyên có regression.
+- [x] Active task's exact `.harnix/tasks/<active-id>/task.json` không tự đổi digest khi workflow append evidence; `@task-contract` vẫn bind completion-relevant fields, historical task records tiếp tục raw-hash và sidecar v1 không đổi.
+- [x] Structured 12-scenario target fixture khóa expected target, ambient-access canary và missing-target fail-closed semantics mà không biến test oracle thành runtime prompt parser.
+- Completion gate: reconcile self-host workflow theo ownership, đồng bộ patch release/skill metadata/CHANGELOG, compliance-before-quality review và fresh exact acceptance mục 11.
+
 ## 10. Required test inventory
 
 | Suite | Required coverage |
 |---|---|
-| Unit | detection, config/task migrations, task status/index/resume/audit, shared effective context rank/budget/content+selection drift, required-check classifier/input snapshots, ready trace, repo-map graph/ranker/impact, project/global manifests, permission-preserving atomic writes, home/path containment, locks, rollback, journal/learning safety, Doctor v2 |
+| Unit | detection, config/task migrations, task status/index/resume/audit, shared effective context rank/budget/content+selection drift, required-check classifier/input snapshots including exact active-task self-exclusion plus historical-task raw hashing, ready trace, structured target scenario/ambient canaries, repo-map graph/ranker/impact, project/global manifests, permission-preserving atomic writes, home/path containment, locks, rollback, journal/learning safety, Doctor v2 |
 | CLI integration | all fourteen commands, bounded/no-write/private status/tasks/context-report/checks/audit plus pointer-only resume from nested initialized paths, v1 age and v2 digest freshness, collision/malformed/privacy/truncation fixtures, project/global scope, setup outside a project, init repo-map creation, cache-only repo-map query/impact, idempotence, modified/deleted files, corrupt/future project/global schemas |
 | Migration | discovery, dry-run, copy/transform, preservation, conflict, rollback, cleanup |
 | Fixtures | independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue, multilingual/multi-technology monorepo |
 | Platform | Kiro user-global JSON hook + implicit steering, Antigravity Desktop/CLI `rules/AGENTS.md` snapshots/path migration and multi-root protocol, Codex user-global schema + implicit AGENTS block, no machine path |
 | Codex | global AGENTS preservation, skills metadata, nested hooks Windows/Linux, `CODEX_HOME`/override/trust/duplicate coverage, user-owned files |
-| Workflow eval | routing, research, debug, TDD exception, reviews, criterion-linked/digest verification, budget, finish/continue, context replan, promotion, exact external-feature provenance/path registry |
+| Workflow eval | routing, research, debug, TDD exception, reviews, criterion-linked/digest verification without active TaskRecord self-invalidation, budget, finish/continue, context replan, promotion, exact external-feature provenance/path registry |
 | Safety | traversal/symlink/junction, hook no-op/injection, secrets, global uninstall confirmation, data preservation, collisions, locks and duplicate/legacy hooks |
 | Packaging | one package/bin, tarball contents, fake-home + project smoke tests, forbidden project-local setup surface scan |
 

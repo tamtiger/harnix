@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { mkdir, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -31,6 +32,80 @@ describe("verification input freshness", () => {
       "src/b.ts",
     ]);
     expect(JSON.stringify(first)).not.toContain(root);
+  });
+
+  it("deduplicates the active task record through @task-contract while raw-hashing other task records", async () => {
+    const root = await fixtureRepository();
+    const task = taskFixture();
+    const activePath = `.harnix/tasks/${task.id}/task.json`;
+    const historicalId = "20260813-120000-historical-task";
+    const historicalPath = `.harnix/tasks/${historicalId}/task.json`;
+    const historicalContent = "{\"historical\":true}\n";
+    const withTaskRecords = {
+      ...task,
+      validationPlan: [{ ...task.validationPlan[0]!, inputs: [".harnix/tasks/*/task.json", "@task-contract"] }],
+    };
+    await mkdir(join(root, ".harnix", "tasks", historicalId), { recursive: true });
+    await writeFile(join(root, activePath), `${JSON.stringify(withTaskRecords, null, 2)}\n`);
+    await writeFile(join(root, historicalPath), historicalContent);
+
+    const before = await computeVerificationInputSnapshot(root, withTaskRecords, "check");
+    expect(before.entries.map((entry) => entry.path)).not.toContain(activePath);
+    expect(before.entries).toContainEqual({
+      path: historicalPath,
+      sha256: createHash("sha256").update(historicalContent, "utf8").digest("hex"),
+    });
+
+    const withPassEvidence: TaskRecordV2 = {
+      ...withTaskRecords,
+      status: "verifying",
+      checkpoint: "verifying",
+      acceptanceCriteria: [{ ...withTaskRecords.acceptanceCriteria[0]!, status: "met", evidenceIds: ["e-pass"] }],
+      evidence: [{
+        id: "e-pass",
+        checkId: "check",
+        recordedAt: "2026-08-14T00:01:00.000Z",
+        result: "pass",
+        exitCode: 0,
+        summary: "pass",
+        artifactPaths: [],
+        inputDigest: before.inputDigest,
+      }],
+      updatedAt: "2026-08-14T00:01:00.000Z",
+    };
+    await writeFile(join(root, activePath), `${JSON.stringify(withPassEvidence, null, 2)}\n`);
+
+    const afterEvidenceSave = await computeVerificationInputSnapshot(root, withPassEvidence, "check");
+    expect(afterEvidenceSave).toEqual(before);
+
+    await writeFile(join(root, historicalPath), "{\"historical\":false}\n");
+    const afterHistoricalChange = await computeVerificationInputSnapshot(root, withPassEvidence, "check");
+    expect(afterHistoricalChange.inputDigest).not.toBe(afterEvidenceSave.inputDigest);
+    expect(compareVerificationInputSnapshots(afterEvidenceSave, afterHistoricalChange)).toEqual([{ path: historicalPath, kind: "changed" }]);
+  });
+
+  it("detects task-contract drift without treating the active task record as a raw input", async () => {
+    const root = await fixtureRepository();
+    const task = taskFixture();
+    const activePath = `.harnix/tasks/${task.id}/task.json`;
+    const withActiveRecord = {
+      ...task,
+      validationPlan: [{ ...task.validationPlan[0]!, inputs: [activePath, "@task-contract"] }],
+    };
+    await writeFile(join(root, activePath), `${JSON.stringify(withActiveRecord, null, 2)}\n`);
+    const previous = await computeVerificationInputSnapshot(root, withActiveRecord, "check");
+
+    const changedContract = {
+      ...withActiveRecord,
+      acceptanceCriteria: [{ ...withActiveRecord.acceptanceCriteria[0]!, text: "Changed acceptance contract" }],
+    };
+    await writeFile(join(root, activePath), `${JSON.stringify(changedContract, null, 2)}\n`);
+    const changed = await computeVerificationInputSnapshot(root, changedContract, "check");
+
+    expect(previous.entries.map((entry) => entry.path)).not.toContain(activePath);
+    expect(changed.taskContractHash).not.toBe(previous.taskContractHash);
+    expect(changed.inputDigest).not.toBe(previous.inputDigest);
+    expect(compareVerificationInputSnapshots(previous, changed)).toEqual([]);
   });
 
   it("changes the digest and reports only safe relative changed or missing paths", async () => {
