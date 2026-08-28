@@ -2,12 +2,14 @@
 name: harnix-finish-work
 description: Use when a Harnix task needs safe completion or explicit cancellation persistence, journaling, active-pointer cleanup, and an evidence-based handoff.
 metadata:
-  version: "1.0.17"
+  version: "1.0.18"
 ---
 
 # Finish or cancel Harnix work
 
 Close persisted workflow state truthfully without changing Git integration state. Successful completion requires current verification; explicit cancellation preserves incomplete or failed evidence without claiming success.
+
+Finish is product-read-only: it may persist workflow state, journal/archive data, one eligible learning candidate, cancellation metadata, and matching-pointer cleanup, but it must not edit product docs, code, package version, changelog, generated sources, or release metadata.
 
 ## Harnix activation guard
 
@@ -30,7 +32,7 @@ Accept only one of these inputs:
 - any unfinished state plus an explicit user instruction to cancel the task and a concise non-secret reason;
 - Accept `cancelled/cancelling` only for partial cancellation recovery.
 
-If completion prerequisites are missing, stop and return to `harnix-check`; never reinterpret “complete” as cancellation without clarifying when the user's intent is ambiguous.
+If completion prerequisites are missing, stop and return to the owning stage. Missing release preparation must persist the same `verifying` status at checkpoint `replan` and route to `harnix-brainstorm`; only its audited guarded re-entry to `ready/ready` may hand back to implementation. Missing or stale evidence returns to `harnix-check`. Never repair product files in Finish or reinterpret “complete” as cancellation without clarifying when the user's intent is ambiguous.
 
 ## Final state review
 
@@ -48,9 +50,9 @@ Confirm that evidence still describes the current files. For TaskRecord schema v
 
 Use this order:
 
-1. follow the project-specific release instruction when one exists; do not invent package-version or changelog side effects;
+1. confirm release preparation was already included in verified inputs; if not, persist `verifying/replan` and route through Brainstorm without changing product files;
 2. confirm `harnix workflow --inspect` still returns this exact task at `verifying/finishing`;
-3. run `harnix workflow --finish` exactly once and read its complete JSON result; do not prewrite `completed`, the journal, or `.active` directly;
+3. reuse current required passes instead of redundantly rerunning them, then run `harnix workflow --finish` exactly once so it recomputes freshness and read its complete JSON result; do not prewrite `completed`, the journal, or `.active` directly;
 4. confirm the returned task is `completed/finishing` and a new inspection has no active task;
 5. report any partial persistence failure without retrying a different mutation path.
 
@@ -78,7 +80,7 @@ If the observation does not meet the threshold, is already represented by the cu
 
 ## Persist
 
-Before successful finish, record actual evidence, waivers, omitted checks, residual risks, and any remaining manual action through `harnix workflow --save` with one bounded JSON envelope on stdin. Completion time and journal/archive state belong to `harnix workflow --finish`; cancellation metadata and its journal/archive state belong to `harnix workflow --cancel`. Do not fabricate a clean worktree or claim unrelated changes as part of the task.
+Call `harnix workflow --save` before successful finish only when new evidence, a waiver, or a required checkpoint has not yet been persisted. Never append a duplicate summary merely to restate omitted checks, residual risks, or manual action: those belong in the final handoff because TaskRecord has no separate summary fields for them. When inspection already returns the exact task at `verifying/finishing` with current prerequisites, call `harnix workflow --finish` directly and exactly once. Completion time and journal/archive state belong to `harnix workflow --finish`; cancellation metadata and its journal/archive state belong to `harnix workflow --cancel`. Do not fabricate a clean worktree or claim unrelated changes as part of the task.
 
 ## Exit
 

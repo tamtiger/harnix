@@ -14,6 +14,7 @@ import {
   kiroGlobalDesiredFiles,
 } from "../../src/configurators/kiro.js";
 import { renderSkill, workflowSkills } from "../../src/templates/harnix/workflow.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
 import { codexGlobalAgentsContent, createCodexGlobalSurfacePlan } from "../../src/configurators/codex.js";
 import type { DesiredGlobalManagedFile } from "../../src/utils/global-managed-files.js";
 
@@ -25,8 +26,6 @@ function fileContent(file: DesiredGlobalManagedFile | undefined): string {
 }
 
 describe("user-global platform desired-surface renderers", () => {
-  const implicitActivationInstruction = "apply this workflow to every ordinary user request even when the user does not mention Harnix";
-
   it("should_render_language_independent_kiro_global_surfaces_when_setup_has_no_project_context", () => {
     const first = kiroGlobalDesiredFiles();
     const second = kiroGlobalDesiredFiles();
@@ -83,10 +82,14 @@ describe("user-global platform desired-surface renderers", () => {
 
   it("should_route_ordinary_requests_without_requiring_the_user_to_name_harnix", () => {
     for (const instructions of [KIRO_GLOBAL_STEERING, ANTIGRAVITY_GLOBAL_RULE, codexGlobalAgentsContent]) {
-      expect(instructions).toContain(implicitActivationInstruction);
-      expect(instructions).toContain("classify the request as Bypass, Lite, or Full before acting");
+      for (const clause of HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS) expect(instructions).toContain(clause);
+      expect(instructions.indexOf("classify the latest request")).toBeLessThan(instructions.indexOf("consulting any active task"));
+      expect(instructions).toContain("leaves an unrelated active task unchanged");
+      expect(instructions).toContain("workflow --preflight");
       expect(instructions).toContain("If no such root exists or its state is invalid");
     }
+    expect(codexGlobalAgentsContent).toContain("Obvious Bypass does not load unrelated workflow/task state");
+    expect(codexGlobalAgentsContent).not.toContain("For an initialized Harnix project, read `.harnix/workflow.md`");
   });
 
   it("should_render_byte-identical_canonical_skill_sources_for_every_platform", () => {

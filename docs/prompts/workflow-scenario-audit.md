@@ -145,7 +145,7 @@ Validator output hoặc file presence không được thay thế external activa
 
 19. `WF-19 Standalone review`: Bypass, read-only, compliance trước quality, evidence-backed findings.
 20. `WF-20 Review and fix`: dùng normal lifecycle, xác minh feedback, không refactor ngoài scope.
-21. `WF-21 Finish`: fresh evidence, version/changelog trước completion, journal và exact active-pointer cleanup, không Git mutation.
+21. `WF-21 Finish`: release/version/changelog đã được chuẩn bị và verify trước khi vào Finish; Finish product-read-only chỉ recompute fresh evidence, journal và exact active-pointer cleanup, không sửa product file hay Git mutation.
 22. `WF-22 Premature finish`: pending criterion, evidence thiếu exit code hoặc required gate chưa chạy phải ngăn completion.
 
 ### Context, safety và adversarial behavior

@@ -41,6 +41,24 @@ describe("required check report", () => {
     const validSidecar = await readFile(sidecarPath, "utf8");
     const now = Date.parse("2026-08-26T01:00:00.000Z");
 
+    const oldButCurrent: TaskRecordV2 = { ...task, evidence: [{ ...task.evidence[0]!, recordedAt: "2026-08-20T00:00:00.000Z" }] };
+    expect((await inspectRequiredChecks(root, harnixRoot, oldButCurrent, now))[0]).toMatchObject({ state: "passed", reasonCodes: [] });
+    const legacySnapshot = await computeVerificationInputSnapshot(root, base, "gate", { schemaVersion: 1 });
+    const legacyNestedOld: TaskRecordV2 = {
+      ...base,
+      evidence: [{ id: "legacy-pass", checkId: "gate", recordedAt: "2026-08-20T00:00:00.000Z", result: "pass", exitCode: 0, summary: "private", artifactPaths: [], inputDigest: legacySnapshot.inputDigest }],
+    };
+    await writeFile(sidecarPath, `${JSON.stringify({
+      generator: "harnix",
+      schemaVersion: 1,
+      taskId: base.id,
+      snapshots: [{ evidenceId: "legacy-pass", ...legacySnapshot }],
+    }, null, 2)}\n`);
+    expect((await inspectRequiredChecks(root, harnixRoot, legacyNestedOld, now))[0]).toMatchObject({ state: "passed", reasonCodes: [] });
+    await writeFile(sidecarPath, validSidecar);
+    const future: TaskRecordV2 = { ...task, evidence: [{ ...task.evidence[0]!, recordedAt: "2026-08-26T01:00:01.000Z" }] };
+    expect((await inspectRequiredChecks(root, harnixRoot, future, now))[0]).toMatchObject({ state: "stale", reasonCodes: ["evidence-expired"] });
+
     await writeFile(join(root, "src", "a.ts"), "a2\n");
     let report = (await inspectRequiredChecks(root, harnixRoot, task, now))[0]!;
     expect(report).toMatchObject({ state: "stale", reasonCodes: ["inputs-changed"], changes: [{ path: "src/a.ts", kind: "changed" }] });

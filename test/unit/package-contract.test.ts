@@ -68,6 +68,7 @@ describe("package invariant", () => {
       "typecheck",
       "version:sync",
     ]);
+    expect(packageJson.scripts?.["test:acceptance"]).toBe("pnpm run test:unit && pnpm run test:integration && pnpm run test:migration && pnpm run test:platform && pnpm run test:workflow && pnpm run test:safety");
   });
 
   it("pins only the audited vulnerable transitive tool resolutions without creating a workspace", async () => {

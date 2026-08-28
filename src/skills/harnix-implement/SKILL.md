@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or already in progress and needs plan review, test-first implementation, refactoring, or technical feedback handling.
 metadata:
-  version: "1.0.17"
+  version: "1.0.18"
 ---
 
 # Implement a ready Harnix task
@@ -70,6 +70,8 @@ Run the focused test and relevant neighboring tests. Fix production code when th
 
 For a TaskRecord schema v2 required check, run `harnix workflow --snapshot --check <id>` immediately before the non-mutating verification command. After reading the complete result and exit code, run the same hidden snapshot again. Record a passing evidence item only when both `inputDigest` values are identical; set that exact lowercase digest on the evidence and persist it immediately. If the digest changes, the pattern is empty, or an input is missing/unreadable, do not claim GREEN—resolve the drift and rerun the check.
 
+Before running a check, inspect preflight/check state once. Reuse a required check already reported `passed` when its current `inputDigest` still matches; this evidence reuse avoids executing the same check twice for the same digest in one user request. Persist a stable failed run with its `inputDigest` so Check can distinguish a changed input from a repeated identical failure.
+
 ### REFACTOR
 
 Only while green, remove duplication, improve names, and restore architectural boundaries. Re-run the focused checks after refactoring. Add the next behavior through a new RED.
@@ -81,6 +83,10 @@ Docs-only wording, generated snapshots, trivial wiring, or mechanically moved ca
 ## Handle technical feedback
 
 When the user or a reviewer proposes a change, read the complete feedback, restate the technical requirement, verify it against the codebase, and evaluate whether it is correct for this contract. Apply one item at a time and test it. Push back with evidence when feedback conflicts with repository facts or requirements; never accept or reject it performatively.
+
+## Release preparation
+
+Inspect current diff/task evidence before release preparation. Bump a package version at most once, amend the same changelog entry on resume, and regenerate managed output whenever its canonical input changes. Complete all required release-visible edits during implementation and before `verifying`, then include them in final snapshots. Docs-only work uses focused docs/schema/parity checks and does not automatically expand into package-wide gates unless the task contract or project instructions require them. The finish stage must not create release-visible changes.
 
 ## Stop and route
 
@@ -96,7 +102,7 @@ Use `harnix-debug` for a reproducible failure. Return to planning for a requirem
 
 ## Persist
 
-Use `harnix workflow --save` with one bounded JSON envelope on stdin for every checkpoint, legal transition, artifact update, and evidence append; start from `harnix workflow --inspect` output and never edit `task.json` directly. Keep `in_progress/implementing` with the last completed slice, current failing/passing command, concise result, and next step. Check an implementation-plan item only after that slice's work and focused evidence are complete; never infer progress from an unchecked/checked box alone, and never erase earlier failure evidence. Record documented exceptions and alternate evidence. For v2 required passes, preserve the matching `inputDigest`; the workflow-owned `verification-inputs.json` sidecar is not a user-editable evidence shortcut. Move to `verifying/verifying` only after all implementation checklist items, implementation slices, and focused checks are complete.
+Use `harnix workflow --save` with one bounded JSON envelope on stdin for every checkpoint, legal transition, artifact update, and evidence append; start from `harnix workflow --inspect` output and never edit `task.json` directly. Keep `in_progress/implementing` with the last completed slice, current failing/passing command, concise result, and next step. Check an implementation-plan item only after that slice's work and focused evidence are complete; inside the plan's bounded execution-note markers, use only inert `check:<id>=pending|passed|failed|skipped[@<ISO-Z>]` or `slice:<id>=...` lines, never prose or a requirement, decision, criterion, check definition, or path contract. Never infer progress from a checkbox alone or erase earlier failure evidence. Record documented exceptions and alternate evidence. For v2 required passes, preserve the matching `inputDigest`; the workflow-owned `verification-inputs.json` sidecar is not a user-editable evidence shortcut. Move to `verifying/verifying` only after all implementation checklist items, implementation slices, and focused checks are complete.
 
 ## Exit
 

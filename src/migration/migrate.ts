@@ -7,7 +7,7 @@ import { atomicWriteFile } from "../utils/atomic-write.js";
 import { sha256 } from "../utils/hashing.js";
 import { compareCodeUnits } from "../utils/order.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
-import { workflowTemplate } from "../templates/harnix/workflow.js";
+import { WORKFLOW_SOURCE_ID, workflowTemplate } from "../templates/harnix/workflow.js";
 import { discoverLegacy } from "./discovery.js";
 import { packageVersion } from "../version.js";
 
@@ -28,7 +28,7 @@ export async function migrateLegacyProject(options: MigrateOptions, dependencies
     const developer = options.developer ?? "migration";
     await writeConfig(join(stagedTree, "config.yaml"), createConfig({ developer }));
     await atomicWriteFile(join(stagedTree, "workflow.md"), workflowTemplate);
-    await atomicWriteFile(join(stagedTree, ".template-hashes.json"), `${JSON.stringify({ generator: "harnix", schemaVersion: 1, entries: [{ path: ".harnix/workflow.md", sourceId: "workflow", scope: "project", generatedHash: sha256(workflowTemplate), generatorVersion: packageVersion }] }, null, 2)}\n`);
+    await atomicWriteFile(join(stagedTree, ".template-hashes.json"), `${JSON.stringify({ generator: "harnix", schemaVersion: 1, entries: [{ path: ".harnix/workflow.md", sourceId: WORKFLOW_SOURCE_ID, scope: "project", generatedHash: sha256(workflowTemplate), generatorVersion: packageVersion }] }, null, 2)}\n`);
     for (const file of migrationFiles) await atomicWriteFile(join(stagedTree, ...file.destination.split("/")), await readFile(file.source));
     await dependencies.beforeVerifyStage?.(stagedTree);
     await verifyStage(stagedTree, migrationFiles);

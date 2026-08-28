@@ -145,6 +145,17 @@ describe.sequential("CLI", () => {
     await createProgram({ interactive: false }).parseAsync(["node", "harnix", "workflow", "--inspect"], { from: "node" });
 
     expect(JSON.parse(output.mock.calls.map((call) => String(call[0])).join(""))).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
+    output.mockClear();
+    await createProgram({ interactive: false }).parseAsync(["node", "harnix", "workflow", "--preflight"], { from: "node" });
+    expect(JSON.parse(output.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+      generator: "harnix",
+      schemaVersion: 1,
+      activeTask: null,
+      contextDrift: "not-recorded",
+      requiredChecks: { passed: [], failed: [], stale: [], pending: [] },
+      retryLimitReached: [],
+      nextStage: "brainstorm",
+    });
   });
   it("should_recognize_the_hidden_learning_action_and_require_an_active_finishing_task", async () => {
     const root = await fixture(); process.chdir(root);

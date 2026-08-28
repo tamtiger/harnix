@@ -38,13 +38,14 @@ export interface WorkflowFinishDependencies {
 export interface WorkflowLearningResult { entry: JournalEntry; eligible: true; created: boolean; findings: LearningRiskKind[]; }
 
 export function routeWorkflow(request: WorkflowRouteFacts): WorkflowRouteDecision {
-  const active = request.activeTask;
-  if (active) return routeActiveTask(request, active);
-  if (request.mutation === "none") {
+  if (request.mutation === "none" && (request.action === "inspect" || request.action === "review")) {
     return request.action === "review"
       ? decision("bypass", undefined, "harnix-check", "standalone-review")
       : decision("bypass", undefined, undefined, "read-only");
   }
+  const active = request.activeTask;
+  if (active) return routeActiveTask(request, active);
+  if (request.mutation === "none") return decision("bypass", undefined, undefined, "read-only");
   const mode = request.explicitMode ?? (request.riskSignals.length > 0 ? "full" : "lite");
   if (request.explicitMode) {
     return decision(
@@ -72,7 +73,7 @@ export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceA
     const previous = latestByCheck.get(evidence.checkId);
     if (!previous || evidenceTime(evidence) >= evidenceTime(previous)) latestByCheck.set(evidence.checkId, evidence);
   }
-  const freshPasses = task.evidence.filter((evidence) => evidence.result === "pass" && isFresh(evidence, now, maxEvidenceAgeMs) && (!evidence.checkId || latestByCheck.get(evidence.checkId)?.id === evidence.id) && (task.schemaVersion === 1 || isInputDigest(evidence.inputDigest)));
+  const freshPasses = task.evidence.filter((evidence) => evidence.result === "pass" && isFresh(evidence, now, maxEvidenceAgeMs, task.schemaVersion === 1) && (!evidence.checkId || latestByCheck.get(evidence.checkId)?.id === evidence.id) && (task.schemaVersion === 1 || isInputDigest(evidence.inputDigest)));
   if (required.some((check) => !freshPasses.some((evidence) => evidence.checkId === check.id))) return false;
   if (task.schemaVersion === 1) {
     return task.acceptanceCriteria.every((criterion) => criterion.status === "waived" || (criterion.status === "met" && criterion.evidenceIds.some((id) => freshPasses.some((evidence) => evidence.id === id))));
@@ -85,6 +86,23 @@ export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceA
 }
 export function shouldResearch(materialUnknown: boolean): boolean { return materialUnknown; }
 export function shouldReassessArchitecture(failedHypotheses: number): boolean { return failedHypotheses >= 3; }
+export type VerificationRetryDisposition = "run" | "debug" | "stop";
+export function verificationRetryDisposition(task: TaskRecord, checkId: string, now = Date.now()): VerificationRetryDisposition {
+  const attempts = task.evidence
+    .map((evidence, index) => ({ evidence, index }))
+    .filter(({ evidence }) => evidence.checkId === checkId
+      && evidence.result !== "skipped"
+      && (evidence.result !== "pass" || isFresh(evidence, now, Number.POSITIVE_INFINITY, false)))
+    .sort((left, right) => evidenceTime(left.evidence) === evidenceTime(right.evidence)
+      ? left.index - right.index
+      : evidenceTime(left.evidence) < evidenceTime(right.evidence) ? -1 : 1)
+    .map(({ evidence }) => evidence);
+  const latest = attempts.at(-1);
+  if (latest?.result !== "fail") return "run";
+  const previous = attempts.at(-2);
+  if (previous?.result !== "fail") return "debug";
+  return "stop";
+}
 export type ImplementationStrategy = "red-green-refactor" | "documented-exception";
 export function implementationStrategy(kind: "behavior" | "docs" | "wiring" | "snapshot", exceptionReason?: string, alternateVerification?: string): ImplementationStrategy {
   if (kind === "behavior") return "red-green-refactor";
@@ -193,7 +211,10 @@ export async function continueWorkflowTask(harnixRoot: string): Promise<{ task: 
 export function verificationStages(): ["compliance", "quality-security"] { return ["compliance", "quality-security"]; }
 export function isWithinRequestedScope(requested: string[], proposed: string[]): boolean { const allowed = new Set(requested); return proposed.every((item) => allowed.has(item)); }
 
-function isFresh(evidence: Evidence, now: number, maxAgeMs: number): boolean { const timestamp = Date.parse(evidence.recordedAt); return Number.isFinite(timestamp) && timestamp <= now && now - timestamp <= maxAgeMs; }
+function isFresh(evidence: Evidence, now: number, maxAgeMs: number, enforceMaxAge = true): boolean {
+  const timestamp = Date.parse(evidence.recordedAt);
+  return Number.isFinite(timestamp) && timestamp <= now && (!enforceMaxAge || now - timestamp <= maxAgeMs);
+}
 function evidenceTime(evidence: Evidence): number { const parsed = Date.parse(evidence.recordedAt); return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY; }
 function isInputDigest(value: unknown): value is string { return typeof value === "string" && /^[a-f0-9]{64}$/u.test(value); }
 function completionEvidenceIds(task: TaskRecord): string[] {

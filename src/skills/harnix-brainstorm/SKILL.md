@@ -2,12 +2,14 @@
 name: harnix-brainstorm
 description: Use when a Harnix project needs request triage, requirements, design, planning, or a trustworthy ready gate before implementation.
 metadata:
-  version: "1.0.17"
+  version: "1.0.18"
 ---
 
 # Plan a Harnix task
 
 Turn a request into decision-complete, testable task state. Inspect evidence before asking questions. Treat `ready` as a gate, not a label.
+
+Classify the latest request before consulting any active task. An obvious Bypass explanation, generic status request, or standalone read-only review exits without reading or mutating an unrelated task. An explicit Harnix-task status request may use bounded public `harnix status` without resuming it. For project-scoped Lite/Full work or an explicit request to inspect/continue persisted work, use hidden `harnix workflow --preflight` before selecting the stage owner; `nextStage: await` at `ready` means the persisted task itself does not grant implementation authority.
 
 ## Harnix activation guard
 
@@ -20,7 +22,7 @@ Before any ancestor lookup for an explicit target, verify that the target path e
 If explicit-target validation fails, stop and report the problem without reading Harnix state from the ambient current directory or selected workspace.
 Starting from the validated canonical explicit target, or from the selected workspace or ambient directory only when no explicit target exists, locate the nearest ancestor or workspace root containing `.harnix/config.yaml`; activate Harnix only when that root exists and its Harnix state is valid.
 If no such root exists or its state is invalid, do not fall back to another repository's Harnix state, apply Harnix workflow, read Harnix project state or active task, create Harnix state, or run `harnix init`; report the problem.
-For an initialized project, read `.harnix/workflow.md`, `.harnix/tasks/.active`, and only the minimum relevant project context.
+Only after the latest request passes the Bypass route, for project-scoped Lite/Full or explicit inspect/continue work in an initialized project, read `.harnix/workflow.md`, `.harnix/tasks/.active`, and only the minimum relevant project context.
 
 ## Incoming state
 
@@ -28,9 +30,11 @@ Accept either no active task or one active task still owned by `planning|replan`
 
 Classify the request:
 
-- **Bypass:** explanation, review, status, or a trivial action needing no persisted task state.
+- **Bypass:** read-only explanation, standalone review, generic status, or another non-project-state action that neither edits repository files nor needs persisted task state. Any repository file mutation is Lite or Full.
 - **Lite:** localized low-risk change with an obvious contract and focused validation.
 - **Full:** cross-layer, migration-heavy, security-sensitive, externally researched, or materially uncertain work.
+
+Docs-only prose or formatting defaults to Lite unless it changes a frozen public contract, spans material layers, or introduces a real product decision.
 
 The user's initial request may authorize implementation. Do not require a second ceremonial approval after a genuine ready gate. Ask again only for an unresolved user-owned decision, new authority, destructive/external action, or material scope expansion.
 
@@ -73,11 +77,11 @@ Persist `planning` before any product edit. Record:
 - focused and broader validation commands;
 - one explicit material-unknown decision, with task-owned research when needed.
 
-Create new work as TaskRecord schema v2. Every validation check records sorted unique `criterionIds` and sorted unique `inputs`; every required check covers at least one criterion, every non-waived criterion is covered by a required check, and every input list contains `@task-contract`. A behavioral check also names at least one safe repository-relative POSIX file or glob. Treat these definitions as frozen obligations after first persistence.
+Create new work as TaskRecord schema v2. Every validation check records sorted unique `criterionIds` and sorted unique `inputs`; every required check covers at least one criterion, every non-waived criterion is covered by a required check, and every input list contains `@task-contract`. A behavioral check also names at least one safe repository-relative POSIX file or glob. Draft definitions may converge during planning and become frozen obligations at the first persisted `ready`.
 
 Use a short lowercase task slug with a hyphen between words so the task directory and active pointer remain readable, for example `workflow-audit-fix`; append only the documented deterministic numeric collision suffix. Validate the complete task ID before writing. If the current frozen validator cannot represent the requested hyphenated slug, keep state valid, record the contract change explicitly, and do not fabricate or persist an invalid ID.
 
-Full tasks require `prd.md` and `plan.md`. Add `design.md` only when it materially clarifies boundaries or data flow. Use ready-trace grammar v1: each TaskRecord criterion has one level-three `AC` heading whose ID is backtick-wrapped in `prd.md`; each plan slice has one checklist item, one level-three `Slice` block with a backtick-wrapped ID, and non-empty `Criteria:`, `Checks:`, and `Paths:` backtick references. Plans must identify concrete files and interfaces, order RED–GREEN slices, and state what each verification proves. Put the implementation checklist near the top of `plan.md` with one stable item per independently verifiable slice. Leave every item unchecked at planning time; an implementation owner checks an item only after its stated work and focused evidence are complete. The checklist is a progress view, not a replacement for TaskRecord criteria or evidence.
+Full tasks require `prd.md` and `plan.md`. Add `design.md` only when it materially clarifies boundaries or data flow. Use ready-trace grammar v1: each TaskRecord criterion has one level-three `AC` heading whose ID is backtick-wrapped in `prd.md`; each plan slice has one checklist item, one level-three `Slice` block with a backtick-wrapped ID, and non-empty `Criteria:`, `Checks:`, and `Paths:` backtick references. Plans must identify concrete files and interfaces, order RED–GREEN slices, and state what each verification proves. Put the implementation checklist near the top of `plan.md` with one stable item per independently verifiable slice. Leave every item unchecked at planning time; an implementation owner checks an item only after its stated work and focused evidence are complete. The checklist is a progress view, not a replacement for TaskRecord criteria or evidence. Optional mutable execution notes belong only between exact `<!-- harnix:execution-notes:begin -->` and `<!-- harnix:execution-notes:end -->` markers. The region is limited to 100 lines and 16,384 characters; each non-empty line must use inert `check:<id>=pending|passed|failed|skipped[@<ISO-Z>]` or `slice:<id>=...` status grammar. Never place prose, a requirement, criterion, check definition, path contract, or decision inside it.
 
 ## Ready self-review
 
@@ -95,13 +99,15 @@ Before changing the checkpoint to `ready`, run every item:
 - **Tracking check:** the task name is readable and hyphen-separated, and the implementation checklist maps one-to-one to the ordered implementation slices.
 - **Deterministic trace audit:** persist the planning artifacts, run `harnix workflow --audit-ready`, and resolve every bounded diagnostic before the Full task enters or re-enters `ready`.
 
-Do not mark the task `ready` while any item fails. Keep `status` at its current legal planning state, use checkpoint `replan` when revising a previously prepared task, and report the exact gap. A plan may intentionally begin with a contract-freeze slice only when that slice resolves implementation detail rather than an undecided product contract; otherwise the plan is not ready.
+Do not mark the task `ready` while any item fails. Keep `status` at its current legal planning state, use checkpoint `replan` when revising a previously prepared task, and report the exact gap. Task obligations freeze at the first persisted `ready`, not during ordinary draft refinement. A plan may intentionally begin with a contract-freeze slice only when that slice resolves implementation detail rather than an undecided product contract; otherwise the plan is not ready.
+
+The persisted-replan sequence below is the only guarded re-entry for revising a post-ready task.
 
 ## Persist
 
-Write the canonical TaskRecord schema v2 fields only for a new task. Send one bounded JSON envelope on stdin to `harnix workflow --save`, shaped as `{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts> }`; include non-empty `prd` and `plan` for Full task artifacts. Update and persist planning artifacts as decisions change, run the hidden ready audit for Full work, then persist `ready/ready` only after the self-review and audit pass. For an existing `ready|in_progress|verifying` task, this is a guarded re-entry: its immediately previous persisted checkpoint must be `replan`, the ready gate reruns, and obligations/evidence remain preserved; never manufacture a direct backward transition. Never edit `task.json` or `.active` directly, and do not fabricate evidence or acceptance status. Plan-only requests stop at `ready`.
+Write the canonical TaskRecord schema v2 fields only for a new task. Send one bounded JSON envelope on stdin to `harnix workflow --save`, shaped as `{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts>, "contractRevision"?: { "reason": <text> } }`; include non-empty `prd` and `plan` for Full task artifacts. Update and persist planning artifacts as decisions change, run the hidden ready audit for Full work, then persist `ready/ready` only after the self-review and audit pass. For a post-ready obligation revision, use this exact order: (1) persist the same unfinished status at checkpoint `replan`; (2) save the revised task/artifacts with one 10–1000 character `contractRevision.reason` while status/checkpoint remain unchanged at replan; (3) use the returned TaskRecord containing Harnix's appended revision audit evidence; (4) run `harnix workflow --audit-ready` against that persisted revision; (5) only after a passing audit, send a separate `ready/ready` save without `contractRevision`. Never mutate a criterion mapped by recorded check evidence or a check with passing evidence. A check with only non-passing `fail|skipped` evidence may be retired by keeping its ID and definition unchanged, setting only `required: false`, and adding a new required replacement ID with equivalent criterion coverage; any passing evidence freezes it. Exact replay of the same revision envelope is idempotent. Never manufacture a direct backward transition, edit `task.json` or `.active` directly, or fabricate evidence or acceptance status. Plan-only requests stop at `ready`.
 
-An unfinished legacy schema v1 task may migrate to v2 only after explicit authorization is recorded at checkpoint `replan`, using the exact migration evidence produced by Harnix while preserving prior criteria and evidence. Never migrate a terminal `completed|cancelled` task or rewrite legacy state during ordinary planning, update, Doctor, or continuation.
+An unfinished legacy schema v1 task may migrate to v2 only after explicit authorization is recorded at checkpoint `replan`. Preserve acceptance criteria and prior evidence exactly; preserve every required check's ID/description/command/scope/required fields while adding its v2 `criterionIds`/`inputs`, and add only optional new validation checks—not criteria—in the migration save. Append exactly `{ "id": "task-schema-v1-to-v2", "recordedAt": <candidate.updatedAt>, "result": "pass", "summary": "Migrated TaskRecord schema from v1 to v2 with explicit authorization at replan.", "artifactPaths": [".harnix/tasks/<task-id>/task.json"] }`. Migration provenance does not turn the result into an editable native v2 draft; a later obligation change requires the audited persisted-replan `contractRevision` path. Never migrate a terminal `completed|cancelled` task or rewrite legacy state during ordinary planning, update, Doctor, or continuation.
 
 ## Exit
 

@@ -21,7 +21,7 @@ import { reportProjectChecks } from "./commands/checks.js";
 import { auditProjectTask } from "./commands/audit.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
-import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow } from "./commands/internal-workflow.js";
+import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, preflightWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow } from "./commands/internal-workflow.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
@@ -221,6 +221,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   });
   program.command("workflow", { hidden: true })
     .option("--inspect", "Inspect active workflow state")
+    .option("--preflight", "Inspect bounded workflow routing metadata")
     .option("--save", "Persist workflow state from stdin")
     .option("--snapshot", "Snapshot one required check")
     .option("--audit-ready", "Audit Full-task ready trace")
@@ -228,9 +229,9 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--cancel", "Cancel the active workflow task")
     .option("--learn", "Record one eligible project-local learning candidate")
     .option("--check <id>", "Required check ID for --snapshot")
-    .action(async (options: { inspect?: boolean; save?: boolean; snapshot?: boolean; auditReady?: boolean; finish?: boolean; cancel?: boolean; learn?: boolean; check?: string }) => {
-      const actionCount = [options.inspect, options.save, options.snapshot, options.auditReady, options.finish, options.cancel, options.learn].filter((selected) => selected === true).length;
-      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --save, --snapshot, --audit-ready, --finish, --cancel, or --learn.");
+    .action(async (options: { inspect?: boolean; preflight?: boolean; save?: boolean; snapshot?: boolean; auditReady?: boolean; finish?: boolean; cancel?: boolean; learn?: boolean; check?: string }) => {
+      const actionCount = [options.inspect, options.preflight, options.save, options.snapshot, options.auditReady, options.finish, options.cancel, options.learn].filter((selected) => selected === true).length;
+      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --preflight, --save, --snapshot, --audit-ready, --finish, --cancel, or --learn.");
       if (options.snapshot !== true && options.check !== undefined) throw new Error("--check requires workflow --snapshot.");
       if (options.snapshot === true && options.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
       const root = await resolveProjectRoot(process.cwd());
@@ -238,12 +239,16 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
         process.stdout.write(`${JSON.stringify(await inspectWorkflow(root))}\n`);
         return;
       }
+      if (options.preflight) {
+        process.stdout.write(`${JSON.stringify(await preflightWorkflow(root))}\n`);
+        return;
+      }
       if (options.save) {
         const input = programOptions.workflowInput ? await programOptions.workflowInput() : await readBoundedInput(process.stdin);
         if (!input) throw new Error("Workflow save requires a bounded JSON envelope on stdin.");
         let envelope: unknown;
         try { envelope = JSON.parse(input) as unknown; } catch { throw new Error("Workflow save requires valid JSON."); }
-        process.stdout.write(`${JSON.stringify(await saveWorkflow(root, envelope as Parameters<typeof saveWorkflow>[1]))}\n`);
+        process.stdout.write(`${JSON.stringify(await saveWorkflow(root, envelope))}\n`);
         return;
       }
       if (options.snapshot) {

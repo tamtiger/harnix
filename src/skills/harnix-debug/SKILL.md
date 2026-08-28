@@ -2,7 +2,7 @@
 name: harnix-debug
 description: Use when a Harnix implementation or verification has a reproducible bug, failing test, unexpected behavior, loop, or repeated unsuccessful fix.
 metadata:
-  version: "1.0.17"
+  version: "1.0.18"
 ---
 
 # Debug with evidence
@@ -25,6 +25,10 @@ Read `.harnix/workflow.md`, the active task, current failure evidence, and only 
 ## Incoming state
 
 Accept `in_progress` or `verifying` with a reproducible failure or unexpected result. Persist checkpoint `debugging` while retaining the owning status and previous evidence. Do not use debugging as a substitute for an unresolved requirement or product decision; route those to `replan`.
+
+## Scope gate
+
+Before reproducing or fixing anything, compare the failure with the latest user request, task goal and non-goals, `relevantPaths`, plan slice, and granted authority. If it is outside the task goal, unrelated to a required check, or needs new authority, persist only the bounded diagnosis and route to replan or ask the user; do not absorb it into the current fix.
 
 ## Capture the failure
 
@@ -61,7 +65,7 @@ After confirming the cause:
 
 Use the smallest reversible action. Do not claim reset, auto-healing, service recovery, or configuration changes that were not actually performed.
 
-If three failed hypotheses address the same symptom, stop. Do not attempt a fourth speculative fix. Reassess requirements, boundaries, and architecture with the user or return to planning/replan. Three failed hypotheses indicate that the mental model or architecture may be wrong, not that more patches are needed.
+Allow one automatic debug/remediation round for the current verification failure. Any failed rerun after that round stops automatic work; a second identical failure with the same check, `inputDigest`, exit code, and normalized summary is the strongest deterministic stop signal. Skipped evidence and invalid/future-dated passes never reset this breaker; only a current valid pass does. Yield the persisted blocker. If three distinct failed hypotheses address the same symptom, stop; do not attempt a fourth speculative fix. Reassess requirements, boundaries, and architecture with the user or return to planning/replan. Three failed hypotheses indicate that the mental model or architecture may be wrong, not that more patches are needed.
 
 ## Persist
 

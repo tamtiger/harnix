@@ -1,0 +1,402 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260827-152949-workflow-convergence-fix",
+  "title": "Khắc phục vòng lặp workflow và tinh gọn agent guidance",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Làm workflow Harnix hội tụ hữu hạn cho tác vụ docs và implementation bằng routing theo ý định mới nhất, freshness tương thích ngược, sửa contract có audit, reuse evidence, retry guard và guidance nhất quán.",
+  "nonGoals": [
+    "Không thay đổi ba nền tảng được hỗ trợ, thêm package/bin/service/telemetry/network hoặc natural-language target parser.",
+    "Không ghi vào user-global Kiro, Antigravity hoặc Codex profile thật; chỉ sửa canonical source và kiểm thử bằng fake home.",
+    "Không commit, branch, worktree, push, publish hoặc tạo pull request.",
+    "Không coi giới hạn scheduler/auto-continuation của Codex host là lỗi runtime có thể enforce hoàn toàn từ Harnix."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-contract-replan",
+      "text": "Required criteria và check được chỉnh tự do trong planning trước ready; sau ready chỉ được supersede tại persisted replan bằng audit marker có lý do, và pass evidence cũ không thể chứng minh contract check đã đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "contract-replan-pass-01"
+      ]
+    },
+    {
+      "id": "ac-docs-release-policy",
+      "text": "Docs-only low-risk mặc định dùng Lite với focused validation; version và CHANGELOG được chuẩn bị đúng một lần trước verifying khi release policy áp dụng, còn finish không sửa product input sau verification.",
+      "status": "met",
+      "evidenceIds": [
+        "managed-parity-pass-01",
+        "release-gate-pass-01"
+      ]
+    },
+    {
+      "id": "ac-input-freshness",
+      "text": "Evidence mới dùng snapshot planning-contract-v1 nên checkbox, line ending, trailing whitespace và bounded execution-note changes không làm stale, trong khi semantic PRD/plan changes vẫn stale; snapshot v1 lịch sử tiếp tục raw-hash và corrupt data fail closed.",
+      "status": "met",
+      "evidenceIds": [
+        "freshness-convergence-pass-01",
+        "preflight-transport-pass-01"
+      ]
+    },
+    {
+      "id": "ac-intent-routing",
+      "text": "Bypass/read-only intent mới nhất được route trước active task mà không mutate task; project mutation vẫn resume đúng stage và hidden preflight trả metadata bounded, read-only để tránh nhiều lượt inspect.",
+      "status": "met",
+      "evidenceIds": [
+        "managed-parity-pass-01",
+        "preflight-transport-pass-01"
+      ]
+    },
+    {
+      "id": "ac-managed-parity",
+      "text": "Canonical workflow, project/global templates và bảy skill truyền đạt cùng contract hội tụ với một stage owner, sourceId workflow thống nhất, không ghi real user home và không mở rộng platform surface.",
+      "status": "met",
+      "evidenceIds": [
+        "managed-parity-pass-01",
+        "release-gate-pass-01"
+      ]
+    },
+    {
+      "id": "ac-release-readiness",
+      "text": "Package patch, bảy skill metadata, README/CHANGELOG và self-host managed hashes đồng bộ; exact acceptance gate đã tối ưu nhưng không yếu hơn và toàn bộ fresh gate pass.",
+      "status": "met",
+      "evidenceIds": [
+        "release-gate-pass-01"
+      ]
+    },
+    {
+      "id": "ac-stage-guidance",
+      "text": "Verification tái sử dụng required pass còn current, chỉ chạy missing/failed/stale checks; hai failure giống nhau trên cùng check/input dừng rerun và route debug/replan/blocker; Low nonblocking findings không tự mở lại task, còn debug ngoài goal/relevantPaths phải xin mở rộng scope.",
+      "status": "met",
+      "evidenceIds": [
+        "freshness-convergence-pass-01",
+        "managed-parity-pass-01"
+      ]
+    },
+    {
+      "id": "ac-verification-convergence",
+      "text": "TaskRecord v2 dùng content-digest freshness không hết hạn theo một giờ nhưng vẫn reject future timestamps; v1 giữ age-only policy, save artifact/evidence không tự tạo stale state và completion dùng cùng một freshness implementation.",
+      "status": "met",
+      "evidenceIds": [
+        "contract-replan-pass-01",
+        "freshness-convergence-pass-01",
+        "preflight-transport-pass-01"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs",
+    "package.json",
+    "scripts",
+    "src",
+    "test"
+  ],
+  "relevantSpecs": [
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_MAPPING.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "contract-replan",
+      "description": "Kiểm chứng freeze-at-ready, audited replan supersede, evidence preservation và pass-evidence safety.",
+      "command": "pnpm exec vitest run test/workflow/internal-workflow.test.ts test/unit/task-state.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-contract-replan",
+        "ac-verification-convergence"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "freshness-convergence",
+      "description": "Kiểm chứng mixed snapshot v1/v2, canonical planning digest, v2 no-age treadmill, v1 age policy, retry guard và completion parity.",
+      "command": "pnpm exec vitest run test/unit/check-report.test.ts test/unit/status.test.ts test/unit/task-audit.test.ts test/unit/verification-inputs.test.ts test/workflow/routing.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-input-freshness",
+        "ac-stage-guidance",
+        "ac-verification-convergence"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/status.ts",
+        "src/core/tasks/task-audit.ts",
+        "src/core/verification/check-report.ts",
+        "src/core/verification/input-freshness.ts",
+        "src/core/workflow.ts",
+        "test/unit/check-report.test.ts",
+        "test/unit/status.test.ts",
+        "test/unit/task-audit.test.ts",
+        "test/unit/verification-inputs.test.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "managed-parity",
+      "description": "Kiểm chứng lean activation/preflight, docs-only và finish/review/debug guidance, sourceId parity cùng ba platform fake-home surfaces.",
+      "command": "pnpm exec vitest run test/unit/activation-instructions.test.ts test/workflow/skill-sources.test.ts test/workflow/templates.test.ts test/integration/init.test.ts test/platform/global-adapters.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-release-policy",
+        "ac-intent-routing",
+        "ac-managed-parity",
+        "ac-stage-guidance"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "src/configurators/*.ts",
+        "src/skills/*/SKILL.md",
+        "src/templates/harnix/*.ts",
+        "test/integration/init.test.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "preflight-transport",
+      "description": "Kiểm chứng hidden preflight bounded/no-write/no-network, latest-intent route và workflow save dùng artifact candidate khi tạo snapshot.",
+      "command": "pnpm exec vitest run test/integration/cli.test.ts test/workflow/internal-workflow.test.ts test/workflow/routing.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-input-freshness",
+        "ac-intent-routing",
+        "ac-verification-convergence"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "src/core/verification/*.ts",
+        "src/core/workflow.ts",
+        "test/integration/cli.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "release-gate",
+      "description": "Chạy exact Section 11 đã loại duplicate all-suite nhưng giữ static, acceptance, package, fake-home, performance, footprint, release và diff gates.",
+      "command": "pnpm install --frozen-lockfile && pnpm build && pnpm lint && pnpm typecheck && pnpm test:acceptance && pnpm pack:check && pnpm smoke:tarball && pnpm measure:init && pnpm measure:footprint && pnpm scan:release && git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-release-policy",
+        "ac-managed-parity",
+        "ac-release-readiness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**/*.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "release-gate-fail-01",
+      "checkId": "release-gate",
+      "recordedAt": "2026-08-27T16:56:41.0334689+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Acceptance dừng tại unit test global-managed-files transaction rollback; không tự động sửa hoặc rerun theo retry budget.",
+      "artifactPaths": [
+        "test/unit/global-managed-files.test.ts"
+      ]
+    },
+    {
+      "id": "atomic-rename-regression-pass",
+      "recordedAt": "2026-08-27T17:06:21.2656875+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Xác nhận transient Windows rename là khoảng trống: regression RED với EPERM, sau bounded retry thì atomic-write và global-managed focused suite GREEN 24 pass, 1 platform skip.",
+      "artifactPaths": [
+        "src/utils/atomic-write.ts",
+        "test/unit/atomic-write.test.ts",
+        "test/unit/global-managed-files.test.ts"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-08-27T17:08:04.8456429+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa đường dẫn test planning bị sai sang fixture task-state hiện hữu để freshness snapshot fail-closed và check chạy đủ scope.",
+      "artifactPaths": [
+        ".harnix/tasks/20260827-152949-workflow-convergence-fix/task.json"
+      ]
+    },
+    {
+      "id": "contract-replan-pass-01",
+      "checkId": "contract-replan",
+      "recordedAt": "2026-08-27T17:08:42.0202457+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Corrected contract-replan scope GREEN: 65 tests pass và pre/post inputDigest khớp.",
+      "artifactPaths": [
+        "test/workflow/internal-workflow.test.ts",
+        "test/unit/task-state.test.ts"
+      ],
+      "inputDigest": "a88ce061e97fa047dc1890f8ee4ba6a929c381fce09310df31323e4996d529fb"
+    },
+    {
+      "id": "freshness-convergence-pass-01",
+      "checkId": "freshness-convergence",
+      "recordedAt": "2026-08-27T17:09:02.9842585+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Freshness convergence GREEN: 56 tests pass và pre/post inputDigest khớp.",
+      "artifactPaths": [
+        "test/unit/check-report.test.ts",
+        "test/unit/status.test.ts",
+        "test/unit/task-audit.test.ts",
+        "test/unit/verification-inputs.test.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "3b0fc6301080960e91c07d4e4ea8f0cdadd6e830573c1fecc516490aabef7157"
+    },
+    {
+      "id": "managed-parity-fail-01",
+      "checkId": "managed-parity",
+      "recordedAt": "2026-08-27T17:09:45.3890526+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Managed parity failed vì init integration còn assertion bootstrap legacy sau khi canonical AGENTS chuyển sang latest-intent preflight.",
+      "artifactPaths": [
+        "test/integration/init.test.ts"
+      ],
+      "inputDigest": "95c6a761e17afaea08f6c7649c5fe2a4755fca26a8e75e4af75ce093554cb045"
+    },
+    {
+      "id": "managed-parity-fail-02",
+      "checkId": "managed-parity",
+      "recordedAt": "2026-08-27T17:10:29.2182636+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Managed-parity rerun vẫn fail tại assertion legacy harnix setup --codex; canonical init output dùng combined setup syntax. Dừng theo retry breaker sau failed rerun.",
+      "artifactPaths": [
+        "test/integration/init.test.ts"
+      ],
+      "inputDigest": "750b5831204ad95959b6918a948977c5eaa74e9cf671952fbd2d76fe5bd5f335"
+    },
+    {
+      "id": "managed-parity-debug-pass-01",
+      "recordedAt": "2026-08-28T10:07:16.3572262+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Debug xác nhận root cause là assertion legacy trong test/integration/init.test.ts kỳ vọng setup --codex riêng lẻ; cập nhật assertion sang command shape user-global hợp nhất và focused managed-parity suite GREEN 24 pass.",
+      "artifactPaths": [
+        "test/integration/init.test.ts"
+      ]
+    },
+    {
+      "id": "managed-parity-pass-01",
+      "checkId": "managed-parity",
+      "recordedAt": "2026-08-28T10:08:11.0435816+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Managed parity GREEN: activation instructions, skill sources, workflow/templates, init integration và global adapters pass 24 tests; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts",
+        "test/integration/init.test.ts",
+        "test/platform/global-adapters.test.ts"
+      ],
+      "inputDigest": "e69bd25474682d0a58ba14a22c9996687f8d342a66d5b1bdf9b25a7a536146ab"
+    },
+    {
+      "id": "preflight-transport-pass-01",
+      "checkId": "preflight-transport",
+      "recordedAt": "2026-08-28T10:08:51.5672837+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Preflight transport GREEN: CLI, internal workflow và routing focused suites pass 96 tests; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        "test/integration/cli.test.ts",
+        "test/workflow/internal-workflow.test.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "9a6e67b6c77acce161a11a1f9585ca16e41a4937e9c16b1bcd3be4f5223f886a"
+    },
+    {
+      "id": "release-gate-fail-02",
+      "checkId": "release-gate",
+      "recordedAt": "2026-08-28T10:10:25.0652585+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Release gate dừng tại test/workflow/cli-contract.test.ts vì contract test workflow flag list thiếu --preflight sau khi hidden preflight transport được thêm; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts"
+      ],
+      "inputDigest": "5ffc80c1451d63096ff5dfc53df482b9777fb9c5cd586369122a30c211f94bfb"
+    },
+    {
+      "id": "release-gate-debug-pass-01",
+      "recordedAt": "2026-08-28T10:11:01.8381888+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Debug xác nhận release-gate fail do test/workflow/cli-contract.test.ts chưa include --preflight trong workflow hidden flag snapshot; cập nhật contract test và focused cli-contract GREEN 3 pass.",
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts"
+      ]
+    },
+    {
+      "id": "release-gate-pass-01",
+      "checkId": "release-gate",
+      "recordedAt": "2026-08-28T10:12:58.3749269+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Release gate GREEN: pnpm install --frozen-lockfile, build, lint, typecheck, test:acceptance (unit 258 pass/1 skip, integration 119 pass, migration 9 pass, platform 25 pass, workflow 103 pass, safety 41 pass), pack-check, smoke:tarball, measure:init median 334.98ms, measure:footprint 319373 bytes/50 files, scan:release và git diff --check pass; pre/post inputDigest khớp.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "README.md",
+        "docs",
+        "src",
+        "test",
+        "scripts"
+      ],
+      "inputDigest": "eb86d40fb1896a496b263072bc1e83cc2eaa07abdec27e97f5156d43b147641d"
+    },
+    {
+      "id": "finish-readiness-review-01",
+      "recordedAt": "2026-08-28T10:13:59.5691348+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Final finish review: active task ở verifying/finishing, 8/8 acceptance criteria met, 5/5 required checks current/pass, không có waiver hoặc omitted required check; mem --learning không có candidate đủ điều kiện.",
+      "artifactPaths": [
+        ".harnix/tasks/20260827-152949-workflow-convergence-fix/task.json"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-27T15:29:49.1306802+07:00",
+  "updatedAt": "2026-08-28T03:14:06.925Z",
+  "completedAt": "2026-08-28T03:14:06.925Z"
+}

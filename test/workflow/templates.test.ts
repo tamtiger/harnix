@@ -1,4 +1,5 @@
 import { access, readFile, writeFile } from "node:fs/promises";
+import { Buffer } from "node:buffer";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { initializeProject } from "../../src/commands/init.js";
@@ -13,6 +14,18 @@ const temporaryRepository = useTemporaryRepositories();
 const vietnameseTaskPolicy = "Luôn dùng tiếng Việt khi tạo và cập nhật task Harnix, gồm nội dung hướng người dùng trong `task.json`, `prd.md`, `plan.md`, `design.md`, research và journal. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.";
 
 describe("workflow templates", () => {
+  it("keeps the bootstrap lean and routes latest Bypass intent before active-task continuation", () => {
+    const agentInstructions = renderAgentsTemplate({ languages: [], technologies: [], packages: [] });
+
+    expect(Buffer.byteLength(agentInstructions, "utf8")).toBeLessThan(8_192);
+    expect(agentInstructions.indexOf("Classify the latest request")).toBeLessThan(agentInstructions.indexOf("active task"));
+    expect(agentInstructions).toContain("workflow --preflight");
+    expect(agentInstructions).toContain("unrelated active task unchanged");
+    expect(workflowTemplate).toContain("Convergence and evidence reuse");
+    expect(workflowTemplate).toContain("reported `passed`");
+    expect(workflowTemplate).toContain("Release preparation");
+    expect(workflowTemplate).toContain("Finish is product-read-only");
+  });
   it("keeps the init bootstrap project-local while directing opt-in setup to user-global integrations", async () => {
     const root = await temporaryRepository();
 
@@ -24,7 +37,7 @@ describe("workflow templates", () => {
     const repositoryAgentInstructions = await readFile(join(process.cwd(), "AGENTS.md"), "utf8");
     const readme = await readFile(join(process.cwd(), "README.md"), "utf8");
     expect(repositoryAgentInstructions).toContain(vietnameseTaskPolicy);
-    expect(repositoryAgentInstructions).toContain("Classify every request as Bypass, Lite, or Full");
+    expect(repositoryAgentInstructions).toContain("Classify the latest request as Bypass, Lite, or Full before reading `.harnix/tasks/.active`");
     expect(repositoryAgentInstructions).toContain("Only when the user requests implementation");
     expect(repositoryAgentInstructions).not.toContain("With no active task, continue from the first unchecked task");
     expect(agentInstructions).toContain(vietnameseTaskPolicy);
@@ -54,26 +67,13 @@ describe("workflow templates", () => {
     expect(agentInstructions).toContain("Read .harnix/workflow.md and .harnix/config.yaml from the selected Harnix root");
     expect(agentInstructions).toContain("harnix repo-map --query <text>");
     expect(agentInstructions).toContain("harnix repo-map --impact <path>");
-    expect(agentInstructions).toContain("Public commands are init, setup, update, upgrade, uninstall, mem, status, tasks, resume, context-report, checks, audit, doctor, and repo-map");
-    expect(agentInstructions).toContain("Public harnix status is a bounded read-only view");
-    expect(agentInstructions).toContain("Public harnix tasks is a bounded resilient local task index");
-    expect(agentInstructions).toContain("harnix resume restores only an exact validated unfinished-task pointer");
-    expect(agentInstructions).toContain("Public harnix context-report explains effective hook-context metadata");
-    expect(agentInstructions).toContain("harnix checks explains required-check freshness and changed inputs");
-    expect(agentInstructions).toContain("public harnix audit exposes exact readiness/completion blocker codes and IDs");
-    expect(agentInstructions).toContain("cache-only navigation hints");
-    expect(agentInstructions).toContain("harnix doctor --fix");
-    expect(agentInstructions).toContain("harnix workflow --inspect");
-    expect(agentInstructions).toContain("harnix workflow --save");
-    expect(agentInstructions).toContain("harnix workflow --snapshot --check <id>");
-    expect(agentInstructions).toContain("harnix workflow --finish");
-    expect(agentInstructions).toContain("harnix workflow --cancel");
+    expect(agentInstructions).toContain("workflow --preflight");
     expect(agentInstructions).toContain("one current stage-owner skill");
     expect(agentInstructions).not.toContain("harnix internal workflow");
-    expect(agentInstructions).toContain('{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts> }');
-    expect(agentInstructions).toContain("bounded JSON envelope on stdin");
-    expect(agentInstructions).toContain("never edit task.json directly");
+    expect(agentInstructions).toContain("never edit `task.json`");
     expect(agentInstructions).toContain("must not invoke repository-map query, impact, or refresh");
+    expect(agentInstructions).toContain("Release preparation belongs to implementation");
+    expect(agentInstructions).toContain("Finish is product-read-only");
     expect(agentInstructions).not.toContain("<!-- harnix:begin -->");
     expect(agentInstructions).not.toContain("<!-- harnix:end -->");
     expect(agentInstructions).not.toContain("Detected repository");
@@ -127,7 +127,7 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("one current stage-owner skill");
     expect(workflowTemplate).toContain("separately through EOF");
     expect(workflowTemplate).not.toContain("harnix internal workflow");
-    expect(workflowTemplate).toContain('{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts> }');
+    expect(workflowTemplate).toContain('{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts>, "contractRevision"?: { "reason": <text> } }');
     expect(workflowTemplate).toContain("acceptanceCriteria: [{ id, text, status, evidenceIds, waiverReason? }]");
     expect(workflowTemplate).toContain("validationPlan: [{ id, description, command?, scope, required, criterionIds, inputs }]");
     expect(workflowTemplate).toContain("evidence: [{ id, checkId?, recordedAt, result, exitCode?, summary, artifactPaths, inputDigest? }]");
@@ -158,5 +158,25 @@ describe("workflow templates", () => {
     await ensureManagedWorkflow(root);
 
     await expect(readFile(join(root, ".harnix", "workflow.md"), "utf8")).resolves.toBe("user workflow");
+  });
+
+  it("reconciles the legacy managed-workflow source ID to the canonical workflow ID", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const manifestPath = join(root, ".harnix", ".template-hashes.json");
+    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      entries: Array<{ path: string; sourceId: string }>;
+    };
+    const workflowEntry = manifest.entries.find((entry) => entry.path === ".harnix/workflow.md");
+    expect(workflowEntry).toBeDefined();
+    workflowEntry!.sourceId = "harnix-workflow";
+    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+
+    await ensureManagedWorkflow(root);
+
+    const reconciled = JSON.parse(await readFile(manifestPath, "utf8")) as {
+      entries: Array<{ path: string; sourceId: string }>;
+    };
+    expect(reconciled.entries.find((entry) => entry.path === ".harnix/workflow.md")?.sourceId).toBe("workflow");
   });
 });

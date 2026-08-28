@@ -188,7 +188,7 @@ function criterionHasFreshSupport(
   const checks = new Map(task.validationPlan.map((check) => [check.id, check]));
   return criterion.evidenceIds.some((id) => {
     const evidence = evidenceById.get(id);
-    if (evidence === undefined || evidence.result !== "pass" || !isFreshEvidence(evidence, now)) return false;
+    if (evidence === undefined || evidence.result !== "pass" || !isFreshEvidence(evidence, now, task.schemaVersion === 1)) return false;
     if (evidence.checkId !== undefined && latestByCheck.get(evidence.checkId)?.id !== evidence.id) return false;
     if (evidence.checkId !== undefined && stateByCheck.has(evidence.checkId) && stateByCheck.get(evidence.checkId) !== "passed") return false;
     if (task.schemaVersion === 1) return true;
@@ -197,7 +197,7 @@ function criterionHasFreshSupport(
   });
 }
 
-function isFreshEvidence(evidence: Evidence, now: number, maxAgeMs = 60 * 60 * 1_000): boolean {
+function isFreshEvidence(evidence: Evidence, now: number, enforceMaxAge: boolean, maxAgeMs = 60 * 60 * 1_000): boolean {
   const recordedAt = Date.parse(evidence.recordedAt);
-  return Number.isFinite(recordedAt) && recordedAt <= now && now - recordedAt <= maxAgeMs;
+  return Number.isFinite(recordedAt) && recordedAt <= now && (!enforceMaxAge || now - recordedAt <= maxAgeMs);
 }

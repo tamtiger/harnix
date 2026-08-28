@@ -34,7 +34,43 @@ describe("atomicWriteFile", () => {
       "interrupted replacement",
     );
     await expect(readFile(target, "utf8")).resolves.toBe("old");
+    expect(filesystem.rename).toHaveBeenCalledTimes(1);
     expect(filesystem.rm).toHaveBeenCalledWith(`${target}.fixed.tmp`, { force: true });
+  });
+
+  it("retries a bounded transient Windows replacement failure before cleaning the temporary file", async () => {
+    const directory = await createTemporaryDirectory();
+    const target = join(directory, "state.json");
+    const transient = Object.assign(new Error("temporarily locked"), { code: "EPERM", syscall: "rename" });
+    const filesystem: AtomicFileSystem = {
+      mkdir: vi.fn(),
+      rename: vi.fn().mockRejectedValueOnce(transient).mockResolvedValueOnce(undefined),
+      rm: vi.fn(),
+      writeFile: vi.fn(),
+    };
+
+    await atomicWriteFile(target, "new", {
+      filesystem,
+      randomSuffix: () => "fixed",
+      renameRetryDelaysMs: [0],
+    });
+
+    expect(filesystem.rename).toHaveBeenCalledTimes(2);
+    expect(filesystem.rm).not.toHaveBeenCalled();
+
+    const exhaustedFilesystem: AtomicFileSystem = {
+      mkdir: vi.fn(),
+      rename: vi.fn().mockRejectedValue(transient),
+      rm: vi.fn(),
+      writeFile: vi.fn(),
+    };
+    await expect(atomicWriteFile(target, "new", {
+      filesystem: exhaustedFilesystem,
+      randomSuffix: () => "exhausted",
+      renameRetryDelaysMs: [0, 0],
+    })).rejects.toBe(transient);
+    expect(exhaustedFilesystem.rename).toHaveBeenCalledTimes(3);
+    expect(exhaustedFilesystem.rm).toHaveBeenCalledWith(`${target}.exhausted.tmp`, { force: true });
   });
 
   it("copies an existing permission mode to the sibling replacement before rename", async () => {

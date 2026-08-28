@@ -28,7 +28,7 @@ ${HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.join("\n")}
 
 ${HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS.join("\n")}
 
-For an initialized Harnix project, read \`.harnix/workflow.md\` and the minimum relevant \`.harnix\` context before acting. Preserve user-owned project files and use fresh verification before completing work. Do not auto-commit, push, or create a pull request.`;
+Only after a request is classified as project-scoped Lite/Full or explicitly asks to inspect/continue Harnix work, read \`.harnix/workflow.md\` and the minimum relevant \`.harnix\` context. Obvious Bypass does not load unrelated workflow/task state. Preserve user-owned project files and use fresh verification before completing work. Do not auto-commit, push, or create a pull request.`;
 
 export const codexGlobalContextHookGroup: JsonValue = {
   hooks: [{

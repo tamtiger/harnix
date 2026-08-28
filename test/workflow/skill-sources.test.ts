@@ -68,7 +68,7 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "completed",
     "Never commit",
     "residual risks",
-    "project-specific release instruction",
+    "product-read-only",
     "verification-inputs.json",
     "harnix workflow --finish",
     "cancelled/cancelling",
@@ -180,6 +180,46 @@ describe("canonical Harnix workflow skill sources", () => {
     expect(continuation).toContain("Blocked state takes precedence over its checkpoint");
     expect(continuation).toContain("audited guarded re-entry");
     expect(continuation).toContain("Read only that owner skill, separately through EOF");
+  });
+
+  it("enforces bounded convergence, evidence reuse, and product-read-only finish across stage owners", async () => {
+    const brainstorm = await readSkill("harnix-brainstorm");
+    const implement = await readSkill("harnix-implement");
+    const check = await readSkill("harnix-check");
+    const finish = await readSkill("harnix-finish-work");
+    const continuation = await readSkill("harnix-continue");
+    const research = await readSkill("harnix-research");
+    const debug = await readSkill("harnix-debug");
+
+    expect(brainstorm.indexOf("Classify the latest request")).toBeLessThan(brainstorm.indexOf("active task"));
+    expect(brainstorm).toContain("Docs-only prose or formatting defaults to Lite");
+    expect(brainstorm).toContain("freeze at the first persisted `ready`");
+    expect(implement).toContain("Release preparation");
+    expect(implement).toContain("before `verifying`");
+    expect(implement).toContain("reuse");
+    expect(implement).toContain("failed run");
+    expect(implement).toContain("inputDigest");
+    expect(check).toContain("reported `passed`");
+    expect(check).toContain("one automatic remediation round");
+    expect(check).toContain("Low/P3");
+    expect(check).toContain("residual");
+    expect(check).not.toContain("Do not rely on an earlier run");
+    expect(check).not.toContain("one confirmed item at a time");
+    expect(debug).toContain("Scope gate");
+    expect(debug).toContain("outside the task goal");
+    expect(debug).toContain("second identical failure");
+    expect(finish).toContain("product-read-only");
+    expect(finish).toContain("only when new evidence");
+    expect(finish).toContain("Never append a duplicate summary");
+    expect(finish).not.toContain("project-specific release instruction");
+    expect(continuation).toContain("unrelated active task");
+    expect(continuation).toContain("generic status request");
+    expect(continuation).toContain("explicit Harnix-task status request");
+    expect(continuation.indexOf("Classify the latest request")).toBeLessThan(continuation.indexOf("read `.harnix/workflow.md` after this classification"));
+    expect(continuation).toContain("same drift");
+    expect(brainstorm).toContain("inert `check:<id>=pending|passed|failed|skipped[@<ISO-Z>]`");
+    expect(implement).toContain("inert `check:<id>=pending|passed|failed|skipped[@<ISO-Z>]`");
+    expect(research).toContain("no new source or evidence");
   });
 });
 

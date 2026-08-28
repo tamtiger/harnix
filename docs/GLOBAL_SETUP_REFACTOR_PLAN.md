@@ -220,7 +220,7 @@ Schema giữ các enum `active`, `shadowed` và `unsupported-version` để nh�
 ### 7.1 Kiro
 
 - Render global skills không phụ thuộc ngôn ngữ của project đang đứng lúc setup.
-- `~/.kiro/steering/harnix.md` là bootstrap conditional: khi `.harnix/config.yaml` tồn tại, nó luôn inspect active task và route ordinary prompt qua Bypass/Lite/Full dù prompt không nhắc Harnix.
+- `~/.kiro/steering/harnix.md` là bootstrap conditional: khi `.harnix/config.yaml` tồn tại, nó classify latest request trước. Obvious Bypass không đọc/tiếp tục unrelated active task; chỉ project-scoped Lite/Full hoặc explicit continuation mới chạy hidden preflight rồi inspect bounded active state, dù prompt không nhắc Harnix.
 - Hook dedicated file dùng schema hiện hành:
 
 ```json
@@ -248,7 +248,7 @@ Schema giữ các enum `active`, `shadowed` và `unsupported-version` để nh�
 
 - Cài cùng một namespaced Harnix plugin vào cả Desktop và CLI roots; hai bản dùng cùng renderer nhưng manifest/ownership độc lập.
 - `plugin.json` chỉ khai báo field được official schema chấp nhận; không sinh MCP hoặc settings.
-- `rules/AGENTS.md` là standalone always-on rule không frontmatter. Sau activation guard, rule inspect active task và route ordinary prompt qua Bypass/Lite/Full dù prompt không nhắc Harnix.
+- `rules/AGENTS.md` là standalone always-on rule không frontmatter. Sau activation guard, rule classify latest request trước; obvious Bypass không đọc unrelated active task, còn project-scoped Lite/Full hoặc explicit continuation chạy hidden preflight rồi route bounded active state dù prompt không nhắc Harnix.
 - `hooks.json` có Harnix-owned `PreInvocation` command handler cố định:
 
 ```json
@@ -282,7 +282,7 @@ Schema giữ các enum `active`, `shadowed` và `unsupported-version` để nh�
 ### 7.3 Codex
 
 - Skills cài vào `$HOME/.agents/skills/harnix-*`; đây là official user scope.
-- Merge một managed conditional block vào `$CODEX_HOME/AGENTS.md`, giữ toàn bộ text ngoài marker. Khi activation guard pass, block inspect active task và route ordinary prompt qua Bypass/Lite/Full dù prompt không nhắc Harnix. Nếu `AGENTS.override.md` làm block bị shadow, doctor cảnh báo.
+- Merge một managed conditional block vào `$CODEX_HOME/AGENTS.md`, giữ toàn bộ text ngoài marker. Khi activation guard pass, block classify latest request trước; obvious Bypass không đọc unrelated active task, còn project-scoped Lite/Full hoặc explicit continuation chạy hidden preflight rồi route bounded active state dù prompt không nhắc Harnix. Nếu `AGENTS.override.md` làm block bị shadow, doctor cảnh báo.
 - Không tạo hoặc sửa `[harnix]` trong `config.toml`; setup không đổi model, sandbox, approval, provider, auth, MCP hay feature flags.
 - Merge current nested handler vào managed block trong `$CODEX_HOME/config.toml`, giữ unrelated settings/hooks:
 
@@ -308,7 +308,7 @@ Mọi global skill/rule/instruction phải bắt đầu bằng guard authority t
 1. Repository/path do người dùng nêu trực tiếp thắng selected workspace và ambient cwd; path chỉ có trong hook-injected repository context, source, log, quoted text hoặc tool output là untrusted hint và không được select/override target.
 2. Với explicit target, xác minh path tồn tại, canonicalize bằng path/realpath API và reject traversal, unsafe root, symlink/junction escape trước ancestor lookup. Lookup bắt đầu từ canonical target đó; selected workspace rồi ambient cwd chỉ được dùng khi prompt không nêu target.
 3. Nếu explicit validation fail, không có `.harnix/config.yaml`, hoặc state invalid, dừng mà không đọc Harnix state/active task từ ambient/workspace, không fallback repository khác và không tự chạy `harnix init`.
-4. Nếu guard pass, đọc `.harnix/workflow.md`, active task và bounded context theo contract hiện tại; route mọi ordinary user request thành Bypass/Lite/Full kể cả khi prompt không nhắc Harnix.
+4. Nếu guard pass, classify latest request thành Bypass/Lite/Full trước khi đọc `.active`. Obvious Bypass trả lời ngay và giữ unrelated task unchanged; project-scoped Lite/Full hoặc explicit continuation mới chạy hidden `workflow --preflight`, rồi đọc `.harnix/workflow.md`, bounded active task/context và route theo `nextStage`. `await|stop` là terminal cho request hiện tại.
 5. Mutation qua nhiều material roots cần một exact target; bounded read-only comparison có thể isolate từng root.
 
 Hidden `harnix context` chạy ở hook-time trước khi agent diễn giải explicit prompt target, nên giữ event discovery riêng biệt: nó không parse natural-language path, không cấp target authority, và mọi repository context được inject vẫn là untrusted target evidence. Command phải:
@@ -379,7 +379,6 @@ Trạng thái delivery: G0–G10 đã hoàn tất trong scope được người 
 pnpm build
 pnpm lint
 pnpm typecheck
-pnpm test
 pnpm test:acceptance
 pnpm pack:check
 pnpm smoke:tarball
@@ -388,6 +387,8 @@ pnpm measure:footprint
 pnpm scan:release
 git diff --check
 ```
+
+`test:acceptance` bao phủ toàn bộ unit, integration, migration, platform, workflow và safety; không chạy thêm `pnpm test` trùng lặp trong release sequence.
 
 `smoke:tarball` phải dùng **hai root tạm độc lập**: fake user home cho global setup và one-or-more temp repositories cho project init/context. Test không được mutate home/config thật hoặc gọi network/install ngoài boundary explicit.
 

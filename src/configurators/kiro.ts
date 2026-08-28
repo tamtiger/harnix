@@ -24,7 +24,6 @@ export const KIRO_GLOBAL_STEERING = [
   "## Harnix activation guard",
   "",
   ...HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
-  "After the guard passes, read .harnix/workflow.md and use the installed Harnix skills with bounded project context.",
   ...HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
   "",
 ].join("\n");

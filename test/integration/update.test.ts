@@ -126,7 +126,7 @@ describe("updateProject", () => {
     await writeManifest(manifestPath, {
       ...manifest,
       entries: manifest.entries.map((entry) => entry.path === ".harnix/workflow.md"
-        ? { ...entry, generatorVersion: "0.0.0" }
+        ? { ...entry, sourceId: "harnix-workflow", generatorVersion: "0.0.0" }
         : entry),
     });
 
@@ -136,5 +136,6 @@ describe("updateProject", () => {
     expect(result.updated).not.toContain(".harnix/workflow.md");
     expect(result.metadataUpdated).toEqual([".harnix/workflow.md"]);
     expect(reconciled.entries.find(({ path }) => path === ".harnix/workflow.md")?.generatorVersion).toBe(packageVersion);
+    expect(reconciled.entries.find(({ path }) => path === ".harnix/workflow.md")?.sourceId).toBe("workflow");
   });
 });

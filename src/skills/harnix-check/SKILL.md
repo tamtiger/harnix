@@ -2,7 +2,7 @@
 name: harnix-check
 description: Use when Harnix needs a standalone read-only code review, review feedback evaluation, or fresh active-task compliance, correctness, security, and maintainability verification before completion.
 metadata:
-  version: "1.0.17"
+  version: "1.0.18"
 ---
 
 # Review and verify Harnix work
@@ -20,13 +20,13 @@ Before any ancestor lookup for an explicit target, verify that the target path e
 If explicit-target validation fails, stop and report the problem without reading Harnix state from the ambient current directory or selected workspace.
 Starting from the validated canonical explicit target, or from the selected workspace or ambient directory only when no explicit target exists, locate the nearest ancestor or workspace root containing `.harnix/config.yaml`; activate Harnix only when that root exists and its Harnix state is valid.
 If no such root exists or its state is invalid, do not fall back to another repository's Harnix state, apply Harnix workflow, read Harnix project state or active task, create Harnix state, or run `harnix init`; report the problem.
-Read `.harnix/workflow.md`, the active task, and the smallest verification context.
+Read `.harnix/workflow.md`. Read the active task and smallest verification context only for the active-task profile; standalone Bypass review leaves unrelated task state unread and unchanged.
 
 ## Incoming state
 
 Use one of two profiles:
 
-- **Standalone read-only review:** no active task and no mutation. Inspect the requested diff/code, report only evidence-backed findings with severity and precise location, and do not create task state, persist evidence, or fix files.
+- **Standalone read-only review:** no task mutation, whether or not an unrelated active task exists. Inspect the requested diff/code, report only evidence-backed findings with severity and precise location, and do not create task state, persist evidence, or fix files.
 - **Active-task verification:** accept `in_progress` only after implementation scope and focused checks are complete, or resume `verifying/verifying`. Before running checks, persist `verifying` if not already recorded. Inspect current status/diff so verification covers actual changes, including user edits that must not be attributed to Harnix.
 
 If a review request also asks for a code change, the finding is a hypothesis: route to planning/implementation before mutation rather than silently applying it from the read-only profile.
@@ -49,13 +49,19 @@ End with a verdict of `ready`, `ready-with-fixes`, or `not-ready`, plus the revi
 
 ## Evidence rule
 
-Map every claim to the command, inspection, or artifact that proves it. Run that evidence now. Read the complete relevant output and exit code. Do not rely on an earlier run, partial output, another agent's summary, or “it should pass.”
+Map every claim to the command, inspection, or artifact that proves it. Read the complete relevant output and exit code. A required check already reported `passed` is reusable when its current `inputDigest` matches; rerun only pending, failed, stale, or affected checks. A summary without the underlying persisted evidence is not proof.
 
 For non-command checks, record what was inspected, the exact scope, time, result, and concise conclusion. Never expose secrets or machine-specific paths in persisted/public evidence.
 
 Public `harnix audit` may be used as a bounded preflight view of readiness/completion blocker codes and IDs. Its result never substitutes for reading the governing artifacts, running a declared check, capturing pre/post input snapshots, or recording fresh evidence; audit does not execute or fix anything.
 
 For each TaskRecord schema v2 required check, capture `harnix workflow --snapshot --check <id>` immediately before the non-mutating check and again after its complete output is read. Persist a passing evidence item only when the two snapshots have the same `inputDigest`, and attach that digest to the evidence. A mismatch, empty glob, missing input, unreadable input, or unsafe path is failed freshness evidence, not a warning to ignore.
+
+## Convergence rule
+
+Inspect static compliance and the current preflight/check state before expensive commands. Never execute the same check twice for the same `inputDigest` in one user request. Permit at most one automatic remediation round for blocking findings, then rerun only affected evidence. Any failed rerun after that round must stop automatic work; an identical check/digest/exit/normalized-summary fingerprint is the strongest deterministic stop signal. Skipped evidence and invalid/future-dated passes never reset the breaker; only a current valid pass does. Preserve the failure and yield a concrete blocker or replan route.
+
+Only acceptance/spec violations, required-gate failures, or material correctness, security, data-loss, and compatibility defects block completion. Batch those blockers before remediation. Low/P3 maintainability or style findings outside frozen obligations are residual risk, not a reason to reopen implementation or repeat a gate.
 
 ## Stage 1: compliance
 
@@ -75,7 +81,7 @@ Do not continue to completion with a compliance defect. Route code defects to `h
 
 ## Stage 2: quality and security
 
-After compliance passes, run the focused validation plan, then the required broader gates in order. Review:
+After compliance passes, reuse current matching passes and run only pending, failed, stale, or affected focused checks, then any still-required broader gates in order. Review:
 
 - correctness and regression coverage;
 - meaningful test behavior, including observed RED when required;
@@ -92,11 +98,11 @@ Fresh focused output cannot substitute for a required full gate. A full gate can
 
 Treat reviewer feedback as a technical hypothesis, not an instruction to accept blindly. Read the complete feedback, clarify ambiguous or coupled items before mutation, and verify each item against current requirements, code, tests, compatibility, and user decisions. Classify severity and blocking impact. Explain evidence-based disagreement concisely.
 
-When fixes are authorized through an active task, handle one confirmed item at a time in blocking order through `harnix-debug` or `harnix-implement`, then rerun the evidence that originally failed. Review feedback alone never grants permission to edit files, reply on an external system, or change Git state.
+When fixes are authorized through an active task, batch confirmed blockers and route one bounded remediation round through `harnix-debug` or `harnix-implement`, then rerun only the evidence affected by those changes. Review feedback alone never grants permission to edit files, reply on an external system, or change Git state.
 
 ## Persist
 
-For every check, record timestamp, command or inspection, scope, exit/result, outcome, and required v2 `inputDigest`. Append that evidence and every verification checkpoint through a bounded JSON envelope on stdin to `harnix workflow --save`; start from `harnix workflow --inspect` output and never edit `task.json` directly. Keep failed evidence; do not overwrite history with a passing rerun. Link acceptance criteria only to fresh passing evidence whose declared `criterionIds` contains that criterion. Remain `verifying` while any required item is failed, missing, stale, or unread.
+For every newly executed check, record timestamp, command or inspection, scope, exit/result, and outcome. Required v2 passes carry the validated `inputDigest`; a stable failed run carries it when the snapshot was available, while an empty/missing/unreadable input failure remains persistable without inventing a digest. Append that evidence and every verification checkpoint through a bounded JSON envelope on stdin to `harnix workflow --save`; start from `harnix workflow --inspect` output and never edit `task.json` directly. Keep failed evidence; do not overwrite history with a passing rerun. Link acceptance criteria only to current passing evidence whose declared `criterionIds` contains that criterion. Remain `verifying` while any required item is failed, missing, stale, or unread.
 
 ## Exit
 

@@ -24,9 +24,9 @@ describe("initializeProject", () => {
     const repoMapPath = join(root, ".harnix", "cache", "repo-map-v1.json");
     await expect(access(repoMapPath)).resolves.toBeUndefined();
     const agentInstructions = await readFile(join(root, "AGENTS.md"), "utf8");
-    expect(agentInstructions).toContain("CLI manages this project's .harnix lifecycle");
-    expect(agentInstructions).toContain("harnix --help");
-    expect(agentInstructions).toContain("harnix setup --codex");
+    expect(agentInstructions).toContain("## Route before restoring");
+    expect(agentInstructions).toContain("Classify the latest request before consulting any active task");
+    expect(agentInstructions).toContain("harnix setup --kiro|--antigravity|--codex");
     expect(agentInstructions).toContain("explicit user-global integration");
     expect(agentInstructions).toContain("Do not run setup or harnix init automatically");
     for (const instruction of HARNIX_TARGET_AUTHORITY_INSTRUCTIONS) {
@@ -44,15 +44,15 @@ describe("initializeProject", () => {
     expect(agentInstructions).toContain("- Package paths: `.`.");
     expect(agentInstructions).not.toContain("Detected repository");
     expect(agentInstructions).not.toContain("Project-local skills are generated");
-    expect(agentInstructions).toContain("not coding-task stage transitions");
-    expect(agentInstructions).toContain("Bypass, Lite, or Full");
+    expect(agentInstructions).toContain("harnix workflow --preflight");
+    expect(agentInstructions).toContain("nextStage: await");
     expect(agentInstructions).toContain("harnix-brainstorm");
     expect(agentInstructions).toContain("harnix-implement");
     expect(agentInstructions).toContain("harnix-check");
     expect(agentInstructions).toContain("harnix-finish-work");
     expect(agentInstructions).toContain("harnix-continue");
-    expect(agentInstructions).toContain("planning -> ready -> in_progress -> verifying -> completed");
-    expect(agentInstructions).toContain("harnix doctor");
+    expect(agentInstructions).toContain("The canonical lifecycle, TaskRecord schema");
+    expect(agentInstructions).toContain("never edit `task.json` or `.active` directly");
     await expect(readFile(join(root, "keep.txt"), "utf8")).resolves.toBe("user content");
     await writeFile(join(root, "added-after-init.ts"), "export const stale = true;\n");
     await initializeProject({ developer: "tam", root, yes: true });

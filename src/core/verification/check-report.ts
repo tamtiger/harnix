@@ -53,7 +53,7 @@ export async function inspectRequiredChecks(
     if (evidence.result === "skipped") return inspection(check.id, "pending", ["latest-skipped"]);
     if (evidence.result === "fail") return inspection(check.id, "failed", ["latest-failed"]);
     const timestamp = Date.parse(evidence.recordedAt);
-    if (!Number.isFinite(timestamp) || timestamp > now || now - timestamp > maxEvidenceAgeMs) return inspection(check.id, "stale", ["evidence-expired"]);
+    if (!Number.isFinite(timestamp) || timestamp > now || (task.schemaVersion === 1 && now - timestamp > maxEvidenceAgeMs)) return inspection(check.id, "stale", ["evidence-expired"]);
     if (task.schemaVersion === 1) return inspection(check.id, "passed", []);
     if (sidecarInvalid) return inspection(check.id, "stale", ["snapshot-invalid"]);
 
@@ -62,7 +62,7 @@ export async function inspectRequiredChecks(
     if (stored.checkId !== check.id || stored.inputDigest !== evidence.inputDigest) return inspection(check.id, "stale", ["snapshot-mismatch"]);
 
     let current;
-    try { current = await computeVerificationInputSnapshot(projectRoot, task, check.id); }
+    try { current = await computeVerificationInputSnapshot(projectRoot, task, check.id, { schemaVersion: stored.schemaVersion }); }
     catch { return inspection(check.id, "stale", ["inputs-unavailable"]); }
     if (current.inputDigest === stored.inputDigest) return inspection(check.id, "passed", []);
 

@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.18] - 2026-08-27
+
+### Changed
+
+- Ngăn vòng lặp workflow bằng latest-intent routing, preflight hữu hạn, evidence reuse và retry breaker.
+- Thêm planning freshness semantic, save transaction serialized, replay fail-closed và regression cho self-referential evidence.
+- Retry hữu hạn transient `EPERM|EACCES|EBUSY` khi atomic rename trên Windows để full-suite/global reconciliation không fail ngẫu nhiên dưới tải.
+
 ## [1.0.17] - 2026-08-27
 
 ### Changed

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { sha256 } from "../../utils/hashing.js";
 import { compareCodeUnits } from "../../utils/order.js";
-import { workflowTemplate } from "./workflow.js";
+import { WORKFLOW_SOURCE_ID, workflowTemplate } from "./workflow.js";
 import { packageVersion } from "../../version.js";
 import { resolveSafeHarnixPath } from "../../utils/paths.js";
 
@@ -14,7 +14,7 @@ export async function ensureManagedWorkflow(root: string): Promise<void> {
   const previous = manifest.entries.find((entry) => entry.path === ".harnix/workflow.md");
   if (workflow.length > 0 && (!previous || sha256(workflow) !== previous.generatedHash)) return;
   await atomicWriteFile(workflowPath, workflowTemplate);
-  const entry = { path: ".harnix/workflow.md", sourceId: "harnix-workflow", scope: "project", generatedHash: sha256(workflowTemplate), generatorVersion: packageVersion };
+  const entry = { path: ".harnix/workflow.md", sourceId: WORKFLOW_SOURCE_ID, scope: "project", generatedHash: sha256(workflowTemplate), generatorVersion: packageVersion };
   manifest.entries = [...manifest.entries.filter((item) => item.path !== entry.path), entry].sort((left, right) => compareCodeUnits(left.path, right.path));
   await atomicWriteFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 }

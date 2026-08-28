@@ -2,7 +2,7 @@
 name: harnix-research
 description: Use when one material product, dependency, security, compatibility, or architecture unknown could change a Harnix planning or debugging decision.
 metadata:
-  version: "1.0.17"
+  version: "1.0.18"
 ---
 
 # Research one material unknown
@@ -25,6 +25,8 @@ Read `.harnix/workflow.md` and the calling task/checkpoint.
 ## Incoming state
 
 Accept planning/replan or debugging with one material unknown stated as a decision question. If the request is broad, decompose it and choose only the highest-impact unknown. Do not research merely to decorate an already decided plan.
+
+Run at most one bounded research pass for the same unknown in one user request. Reuse a prior current conclusion when there is no new source or evidence that could change it; report the remaining uncertainty rather than repeating the same searches.
 
 Write before searching:
 

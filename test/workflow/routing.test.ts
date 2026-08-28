@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { cancelWorkflowTask, canCompleteTask, continueWorkflowTask, evidenceSupportsScope, finishWorkflowTask, implementationStrategy, isWithinRequestedScope, nextWorkflowStatus, routeWorkflow, shouldReassessArchitecture, shouldResearch, validateFullReadyArtifact, verificationStages } from "../../src/core/workflow.js";
+import { cancelWorkflowTask, canCompleteTask, continueWorkflowTask, evidenceSupportsScope, finishWorkflowTask, implementationStrategy, isWithinRequestedScope, nextWorkflowStatus, routeWorkflow, shouldReassessArchitecture, shouldResearch, validateFullReadyArtifact, verificationRetryDisposition, verificationStages } from "../../src/core/workflow.js";
 import { appendJournal } from "../../src/core/journal/journal.js";
 import { loadTask, resolveActiveTask, saveTask, setActiveTask, transitionTask } from "../../src/core/tasks/task.js";
 import { createResearchFinding } from "../../src/core/research.js";
@@ -32,6 +32,24 @@ describe("workflow routing and completion evidence", () => {
   it("requires fresh required evidence for completion", () => {
     const now = Date.parse("2026-08-07T10:00:00Z"); expect(canCompleteTask(task("2026-08-07T09:30:00Z"), now)).toBe(true); expect(canCompleteTask(task("2026-08-07T06:00:00Z"), now)).toBe(false);
   });
+  it("honors the latest read-only intent before an unrelated active task", () => {
+    const activeTask = { mode: "full" as const, status: "in_progress" as const, checkpoint: "implementing" as const };
+
+    expect(routeWorkflow({ action: "inspect", workKind: "docs", mutation: "none", riskSignals: [], activeTask })).toEqual({
+      entry: "bypass",
+      reasonCodes: ["read-only"],
+    });
+    expect(routeWorkflow({ action: "review", workKind: "refactor", mutation: "none", riskSignals: [], activeTask })).toEqual({
+      entry: "bypass",
+      owner: "harnix-check",
+      reasonCodes: ["standalone-review"],
+    });
+    expect(routeWorkflow({ action: "verify", workKind: "test", mutation: "none", riskSignals: [], activeTask })).toMatchObject({
+      entry: "resume",
+      owner: "harnix-implement",
+      reasonCodes: ["active-stage"],
+    });
+  });
   it("requires TaskRecord v2 criterion evidence to intersect its declared check", () => {
     const now = Date.parse("2026-08-07T10:00:00Z");
     const digest = "a".repeat(64);
@@ -60,6 +78,45 @@ describe("workflow routing and completion evidence", () => {
       return withoutDigest;
     });
     expect(canCompleteTask({ ...candidate, acceptanceCriteria: [{ ...candidate.acceptanceCriteria[0]!, evidenceIds: ["e1"] }, candidate.acceptanceCriteria[1]!], evidence: undigestedEvidence }, now)).toBe(false);
+  });
+  it("keeps digest-backed v2 evidence current across long pauses while rejecting future evidence", () => {
+    const now = Date.parse("2026-08-07T10:00:00Z");
+    const digest = "a".repeat(64);
+    const oldPass: TaskRecordV2 = {
+      ...task("2026-08-01T09:30:00Z"),
+      schemaVersion: 2,
+      acceptanceCriteria: [{ id: "a", text: "done", status: "met", evidenceIds: ["e"] }],
+      validationPlan: [{ id: "check", description: "verify", scope: "full", required: true, criterionIds: ["a"], inputs: ["@task-contract", "src/**/*.ts"] }],
+      evidence: [{ id: "e", checkId: "check", recordedAt: "2026-08-01T09:30:00Z", result: "pass", summary: "ok", artifactPaths: [], inputDigest: digest }],
+    };
+
+    expect(canCompleteTask(oldPass, now)).toBe(true);
+    expect(canCompleteTask({ ...oldPass, evidence: [{ ...oldPass.evidence[0]!, recordedAt: "2026-08-07T10:00:01Z" }] }, now)).toBe(false);
+  });
+  it("stops after one failed remediation round and resets only after a pass", () => {
+    const digest = "b".repeat(64);
+    const base: TaskRecordV2 = {
+      ...task("2026-08-07T09:30:00Z"),
+      schemaVersion: 2,
+      acceptanceCriteria: [{ id: "a", text: "done", status: "pending", evidenceIds: [] }],
+      validationPlan: [{ id: "check", description: "verify", command: "pnpm test", scope: "full", required: true, criterionIds: ["a"], inputs: ["@task-contract", "src/**/*.ts"] }],
+      evidence: [],
+    };
+    const first = { id: "f1", checkId: "check", recordedAt: "2026-08-07T09:30:00Z", result: "fail" as const, exitCode: 1, summary: "  SAME   FAILURE ", artifactPaths: [], inputDigest: digest };
+    const second = { ...first, id: "f2", recordedAt: "2026-08-07T09:31:00Z", summary: "same failure" };
+
+    expect(verificationRetryDisposition(base, "check")).toBe("run");
+    expect(verificationRetryDisposition({ ...base, evidence: [first] }, "check")).toBe("debug");
+    expect(verificationRetryDisposition({ ...base, evidence: [first, second] }, "check")).toBe("stop");
+    expect(verificationRetryDisposition({ ...base, evidence: [first, { ...second, inputDigest: "c".repeat(64) }] }, "check")).toBe("stop");
+    expect(verificationRetryDisposition({ ...base, evidence: [second, first] }, "check")).toBe("stop");
+    const skipped = { ...first, id: "s", recordedAt: "2026-08-07T09:30:30Z", result: "skipped" as const };
+    expect(verificationRetryDisposition({ ...base, evidence: [first, skipped, second] }, "check")).toBe("stop");
+    const pass = { ...first, id: "p", recordedAt: "2026-08-07T09:30:30Z", result: "pass" as const };
+    expect(verificationRetryDisposition({ ...base, evidence: [first, pass, second] }, "check")).toBe("debug");
+    const now = Date.parse("2026-08-07T09:32:00Z");
+    const futurePass = { ...pass, recordedAt: "2026-08-08T09:30:30Z" };
+    expect(verificationRetryDisposition({ ...base, evidence: [first, futurePass, second] }, "check", now)).toBe("stop");
   });
   it("does not treat empty completion obligations as complete", () => {
     expect(canCompleteTask({ ...task("2026-08-07T09:30:00Z"), acceptanceCriteria: [], validationPlan: [], evidence: [] }, Date.parse("2026-08-07T10:00:00Z"))).toBe(false);

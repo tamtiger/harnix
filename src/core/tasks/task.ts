@@ -181,6 +181,10 @@ export function updateTaskCheckpoint(task: TaskRecord, checkpoint: WorkflowCheck
 export async function saveTask(root: string, task: TaskRecord): Promise<void> { const valid = validateTask(task); const directory = await resolveSafeProjectPath(root, `tasks/${valid.id}`); const path = await resolveSafeProjectPath(root, `tasks/${valid.id}/task.json`); await mkdir(directory, { recursive: true }); await atomicWriteFile(path, JSON.stringify(valid, null, 2) + "\n"); }
 export interface TaskArtifacts { prd?: string; plan?: string; design?: string; research?: Record<string, string>; context?: ContextManifest; contextSelection?: ContextSelectionSnapshotV1; }
 export async function saveTaskWithArtifacts(root: string, task: TaskRecord, artifacts: TaskArtifacts = {}): Promise<void> {
+  await saveTaskArtifacts(root, task, artifacts);
+  await saveTask(root, task);
+}
+export function validateTaskArtifacts(task: TaskRecord, artifacts: TaskArtifacts = {}): void {
   if (task.mode === "full") {
     if (!artifacts.prd?.trim() || !artifacts.plan?.trim()) throw new TaskValidationError("Full tasks require prd.md and plan.md.");
   } else if (artifacts.prd || artifacts.plan) throw new TaskValidationError("Lite tasks must not create full ceremony artifacts.");
@@ -191,8 +195,11 @@ export async function saveTaskWithArtifacts(root: string, task: TaskRecord, arti
     const snapshot = validateContextSelectionSnapshot(artifacts.contextSelection);
     if (manifest.taskId !== task.id || snapshot.taskId !== task.id || snapshot.selectionResultHash !== contextSelectionResultHash(manifest)) throw new TaskValidationError("Context persistence task binding is invalid.");
   }
-  await saveTask(root, task);
+}
+export async function saveTaskArtifacts(root: string, task: TaskRecord, artifacts: TaskArtifacts = {}): Promise<void> {
+  validateTaskArtifacts(task, artifacts);
   const directory = await resolveSafeProjectPath(root, `tasks/${task.id}`);
+  await mkdir(directory, { recursive: true });
   if (task.mode === "full") {
     await atomicWriteFile(await resolveSafeProjectPath(directory, "prd.md"), artifacts.prd!);
     await atomicWriteFile(await resolveSafeProjectPath(directory, "plan.md"), artifacts.plan!);

@@ -2,7 +2,7 @@
 name: harnix-continue
 description: Use when an initialized Harnix project may have an unfinished, interrupted, blocked, or partially persisted task that must resume safely.
 metadata:
-  version: "1.0.17"
+  version: "1.0.18"
 ---
 
 # Continue persisted Harnix work
@@ -20,17 +20,19 @@ Before any ancestor lookup for an explicit target, verify that the target path e
 If explicit-target validation fails, stop and report the problem without reading Harnix state from the ambient current directory or selected workspace.
 Starting from the validated canonical explicit target, or from the selected workspace or ambient directory only when no explicit target exists, locate the nearest ancestor or workspace root containing `.harnix/config.yaml`; activate Harnix only when that root exists and its Harnix state is valid.
 If no such root exists or its state is invalid, do not fall back to another repository's Harnix state, apply Harnix workflow, read Harnix project state or active task, create Harnix state, or run `harnix init`; report the problem.
-Read `.harnix/workflow.md` before routing.
-
 Route to one current stage owner before loading more instructions. Read only that owner skill, separately through EOF; do not batch-read or preload skills for later stages. If tool output is truncated, reread the selected `SKILL.md` alone until EOF before acting.
 
 ## Incoming state
+
+Classify the latest request before restoring persisted work. An obvious Bypass explanation, generic status request, or standalone read-only review leaves an unrelated active task unchanged; answer it without loading task prose or routing to a stage owner. An explicit Harnix-task status request may use bounded public `harnix status` without resuming the task or loading a stage-owner skill.
+
+For project-scoped Lite/Full work or an explicit request to inspect or continue persisted work, read `.harnix/workflow.md` after this classification and before loading task state.
 
 Read `.harnix/tasks/.active`. If it is absent or empty, return to request triage without creating a task. If it points outside the safe task root, to a missing record, or to malformed/future state, fail closed and provide repair-only guidance.
 
 Load the TaskRecord, required artifacts for its mode/status, checkpoint, blocker/resume fields, acceptance criteria, evidence references, and only the context needed by the next stage. Verify referenced task-owned paths before trusting them.
 
-Run `harnix workflow --inspect` and read its active TaskRecord projection plus always-present `contextDrift`. Inspect both path-level `changes` and selection-basis `selectionChanges`; inventory, selector-version, or task/config/guide signal drift is as stale as changed source content. If state is `stale`, do not rely on the saved context. For a non-blocked unfinished task, persist the same task status with checkpoint `replan`, preserve all evidence and obligations, then route to `harnix-brainstorm` to reselect context. `not-recorded` is disclosed for legacy manifests without a selection sidecar but does not force replan. Never refresh repo-map, repair source files, or rewrite context artifacts automatically.
+Run `harnix workflow --inspect` and read its active TaskRecord projection plus always-present `contextDrift`. Inspect both path-level `changes` and selection-basis `selectionChanges`; inventory, selector-version, or task/config/guide signal drift is as stale as changed source content. If state is `stale`, do not rely on the saved context. For a non-blocked unfinished task, persist the same task status with checkpoint `replan`, preserve all evidence and obligations, then route to `harnix-brainstorm` to reselect context. If the same drift remains after one replan and context reselection in the current request, stop and report the unchanged paths/signals instead of cycling again. `not-recorded` is disclosed for legacy manifests without a selection sidecar but does not force replan. Never refresh repo-map, repair source files, or rewrite context artifacts automatically.
 
 Public `harnix tasks [--limit] [--status]` may be used as bounded discovery when no valid active task is selected or the user asks for local task history. Treat it as read-only identity/state metadata: it does not select, resume, repair, or change `.active`, and a `partial` result requires preserving its invalid-record/active-pointer warning rather than guessing from omitted task prose.
 

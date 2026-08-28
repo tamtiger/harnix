@@ -23,7 +23,6 @@ export const ANTIGRAVITY_GLOBAL_RULE = [
   "## Harnix activation guard",
   "",
   ...HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
-  "After the guard passes, read .harnix/workflow.md and follow the matching Harnix skill with bounded context.",
   ...HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
   "",
 ].join("\n");
