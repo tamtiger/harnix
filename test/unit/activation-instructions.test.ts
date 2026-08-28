@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ANTIGRAVITY_GLOBAL_RULE } from "../../src/configurators/antigravity.js";
 import { codexGlobalAgentsContent } from "../../src/configurators/codex.js";
 import { KIRO_GLOBAL_STEERING } from "../../src/configurators/kiro.js";
-import { HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
 import { renderAgentsTemplate } from "../../src/templates/harnix/agents.js";
 import { workflowSkills, workflowTemplate } from "../../src/templates/harnix/workflow.js";
 
@@ -249,6 +249,21 @@ describe("Harnix target authority instructions", () => {
         const clauseIndex = surface.indexOf(clause);
         expect(clauseIndex, `missing target-authority clause: ${clause}`).toBeGreaterThan(previousIndex);
         previousIndex = clauseIndex;
+      }
+    }
+  });
+
+  it("keeps standalone research in the read-only Bypass contract on implicit surfaces", () => {
+    const projectAgents = renderAgentsTemplate({ languages: [], technologies: [], packages: [] });
+    const implicitSurfaces = [projectAgents, KIRO_GLOBAL_STEERING, ANTIGRAVITY_GLOBAL_RULE, codexGlobalAgentsContent];
+
+    expect(HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS.join("\n")).toContain("standalone read-only research");
+    expect(HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS).toContain(
+      "A review or research request that changes repository or task artifacts enters the normal Lite or Full lifecycle instead of Bypass.",
+    );
+    for (const surface of implicitSurfaces) {
+      for (const clause of HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS) {
+        expect(surface, `missing implicit-activation clause: ${clause}`).toContain(clause);
       }
     }
   });

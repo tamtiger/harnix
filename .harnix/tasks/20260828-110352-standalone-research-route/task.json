@@ -1,0 +1,247 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260828-110352-standalone-research-route",
+  "title": "Bổ sung route research read-only độc lập",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Định tuyến standalone research qua harnix-research mà không đọc hoặc mutate active task, đồng thời giữ nguyên task-scoped research.",
+  "nonGoals": [
+    "Không thêm skill thứ tám hoặc public CLI.",
+    "Không đổi persisted task schema, hook protocol, MCP hoặc network behavior.",
+    "Không thay đổi research artifact contract trong planning/replan/debugging."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-standalone-research-route",
+      "text": "Router định tuyến action research chỉ đọc qua Bypass owner harnix-research trước unrelated active task với reason code ổn định.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-routing-20260828-041054",
+        "green-managed-parity-20260828-041642"
+      ]
+    },
+    {
+      "id": "ac-research-profile",
+      "text": "Canonical harnix-research tách standalone read-only profile khỏi active-task profile và không persist ở standalone.",
+      "status": "met",
+      "evidenceIds": [
+        "green-managed-parity-20260828-041642"
+      ]
+    },
+    {
+      "id": "ac-managed-parity",
+      "text": "Canonical docs, activation, templates và ba platform giữ semantics/parity cho contract mới mà không thêm skill hoặc surface.",
+      "status": "met",
+      "evidenceIds": [
+        "green-managed-parity-20260828-041642",
+        "green-release-gate-20260828-042120"
+      ]
+    },
+    {
+      "id": "ac-release-readiness",
+      "text": "Patch release metadata hoàn tất trước verifying và mọi focused cùng exact release gate bắt buộc đều pass.",
+      "status": "met",
+      "evidenceIds": [
+        "green-release-gate-20260828-042120"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/workflow.md",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "package.json",
+    "pnpm-lock.yaml",
+    "src/core/workflow.ts",
+    "src/skills/harnix-research/SKILL.md",
+    "src/templates/harnix/activation.ts",
+    "src/templates/harnix/agents.ts",
+    "src/templates/harnix/workflow.ts",
+    "test/platform/global-adapters.test.ts",
+    "test/unit/activation-instructions.test.ts",
+    "test/workflow/history-regressions.test.ts",
+    "test/workflow/routing.test.ts",
+    "test/workflow/skill-sources.test.ts",
+    "test/workflow/templates.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_MAPPING.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "focused-routing",
+      "description": "Xác nhận standalone research Bypass, owner/reason và latest-intent precedence.",
+      "command": "pnpm exec vitest run test/workflow/routing.test.ts test/workflow/history-regressions.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-standalone-research-route"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/workflow.ts",
+        "test/workflow/history-regressions.test.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "managed-parity",
+      "description": "Xác nhận research profiles, activation/workflow templates và platform skill parity.",
+      "command": "pnpm exec vitest run test/unit/activation-instructions.test.ts test/workflow/skill-sources.test.ts test/workflow/templates.test.ts test/platform/global-adapters.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-managed-parity",
+        "ac-research-profile",
+        "ac-standalone-research-route"
+      ],
+      "inputs": [
+        ".harnix/workflow.md",
+        "@task-contract",
+        "AGENTS.md",
+        "src/skills/harnix-research/SKILL.md",
+        "src/templates/harnix/activation.ts",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "release-gate",
+      "description": "Chạy exact acceptance sequence mục 11 và xác nhận package, docs, safety, tarball cùng generated output.",
+      "command": "pnpm install --frozen-lockfile; pnpm build; pnpm lint; pnpm typecheck; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-managed-parity",
+        "ac-release-readiness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**/*.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "red-focused-routing-20260828-040847",
+      "checkId": "focused-routing",
+      "recordedAt": "2026-08-28T04:09:05.601Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED xác nhận router chưa gán harnix-research/standalone-research và unrelated active task còn chiếm route.",
+      "artifactPaths": [],
+      "inputDigest": "4f42d69a019851a2275f9702eee25b0112c26e26755aee63255df490e035f54d"
+    },
+    {
+      "id": "red-managed-parity-20260828-040924",
+      "checkId": "managed-parity",
+      "recordedAt": "2026-08-28T04:09:42.709Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED xác nhận skill, implicit activation và project workflow chưa có standalone read-only research profile.",
+      "artifactPaths": [],
+      "inputDigest": "ae34c1de7ffa324a4032064ff140cc281e67b575dc530ad6f2ef8067bfede73c"
+    },
+    {
+      "id": "green-focused-routing-20260828-041054",
+      "checkId": "focused-routing",
+      "recordedAt": "2026-08-28T04:11:15.728Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 30/30 focused routing/history tests pass; standalone research thắng unrelated active task và task-scoped research vẫn vào planning.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "test/workflow/history-regressions.test.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "507c56905b2f00bb7cb9eb0642d34a4c56d5afba66683c585e1bf2e21aae1dfc"
+    },
+    {
+      "id": "green-managed-parity-20260828-041642",
+      "checkId": "managed-parity",
+      "recordedAt": "2026-08-28T04:17:41.2238062Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 19/19 parity tests pass; standalone research dùng Bypass không đọc/persist active task và ba platform giữ canonical semantics.",
+      "artifactPaths": [
+        "src/skills/harnix-research/SKILL.md",
+        "src/templates/harnix/activation.ts",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "cb6e8f6b15ffe6c03ac6996f2b23dd41b96bdd8a8a6685c840dd98c0bae0e592"
+    },
+    {
+      "id": "green-release-gate-20260828-042120",
+      "checkId": "release-gate",
+      "recordedAt": "2026-08-28T04:22:41.0463174Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact release gate pass: frozen install, build, lint, typecheck, 558 acceptance tests, pack, fake-home tarball smoke, init/footprint measures, release scan và git diff --check đều exit 0; một Windows-conditional test skipped.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/UPSTREAM_MAPPING.md",
+        ".harnix/workflow.md",
+        "AGENTS.md"
+      ],
+      "inputDigest": "64b469a36f0486043b0f1e6a63ef5bb7bf24c5fa2dfd40abbc903c3429664967"
+    },
+    {
+      "id": "verification-review-20260828-042400",
+      "recordedAt": "2026-08-28T04:24:11.6426674Z",
+      "result": "pass",
+      "summary": "Compliance rồi quality/security review pass: 4/4 criterion đúng scope; routing precedence, standalone no-persist profile, platform parity, regression coverage, release metadata, package/safety boundaries không có finding blocking hoặc residual Low/P3.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "src/skills/harnix-research/SKILL.md",
+        "src/templates/harnix/activation.ts",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/routing.test.ts",
+        "test/workflow/history-regressions.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-28T04:04:01.003Z",
+  "updatedAt": "2026-08-28T04:24:41.871Z",
+  "completedAt": "2026-08-28T04:24:41.871Z"
+}

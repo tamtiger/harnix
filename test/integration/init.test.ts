@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { initializeProject } from "../../src/commands/init.js";
-import { HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const fixture = useTemporaryRepositories("harnix-init-");
@@ -25,7 +25,9 @@ describe("initializeProject", () => {
     await expect(access(repoMapPath)).resolves.toBeUndefined();
     const agentInstructions = await readFile(join(root, "AGENTS.md"), "utf8");
     expect(agentInstructions).toContain("## Route before restoring");
-    expect(agentInstructions).toContain("Classify the latest request before consulting any active task");
+    for (const instruction of HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS) {
+      expect(agentInstructions).toContain(instruction);
+    }
     expect(agentInstructions).toContain("harnix setup --kiro|--antigravity|--codex");
     expect(agentInstructions).toContain("explicit user-global integration");
     expect(agentInstructions).toContain("Do not run setup or harnix init automatically");

@@ -16,10 +16,10 @@ import { compareCodeUnits } from "../utils/order.js";
 import { assertVerificationInputsFresh } from "./verification/input-freshness.js";
 
 export type WorkflowEntry = "bypass" | "create" | "resume" | "wait" | "fail-closed";
-export type WorkflowAction = "inspect" | "plan" | "change" | "review" | "verify";
+export type WorkflowAction = "inspect" | "plan" | "change" | "review" | "research" | "verify";
 export type WorkflowWorkKind = "feature" | "bugfix" | "hotfix" | "refactor" | "test" | "docs" | "maintenance" | "migration" | "dependency" | "security" | "performance" | "release";
 export type WorkflowRiskSignal = "material-unknown" | "cross-layer" | "security-sensitive" | "migration" | "contract-change" | "architecture-refactor" | "multi-layer" | "complex-rollback";
-export type WorkflowStageOwner = "harnix-brainstorm" | "harnix-implement" | "harnix-debug" | "harnix-check" | "harnix-finish-work" | "harnix-continue";
+export type WorkflowStageOwner = "harnix-brainstorm" | "harnix-implement" | "harnix-debug" | "harnix-check" | "harnix-research" | "harnix-finish-work" | "harnix-continue";
 export interface WorkflowRouteFacts {
   mutation: "none" | "task-artifact" | "project";
   action: WorkflowAction;
@@ -38,10 +38,10 @@ export interface WorkflowFinishDependencies {
 export interface WorkflowLearningResult { entry: JournalEntry; eligible: true; created: boolean; findings: LearningRiskKind[]; }
 
 export function routeWorkflow(request: WorkflowRouteFacts): WorkflowRouteDecision {
-  if (request.mutation === "none" && (request.action === "inspect" || request.action === "review")) {
-    return request.action === "review"
-      ? decision("bypass", undefined, "harnix-check", "standalone-review")
-      : decision("bypass", undefined, undefined, "read-only");
+  if (request.mutation === "none") {
+    if (request.action === "review") return decision("bypass", undefined, "harnix-check", "standalone-review");
+    if (request.action === "research") return decision("bypass", undefined, "harnix-research", "standalone-research");
+    if (request.action === "inspect") return decision("bypass", undefined, undefined, "read-only");
   }
   const active = request.activeTask;
   if (active) return routeActiveTask(request, active);

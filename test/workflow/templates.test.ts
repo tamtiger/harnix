@@ -3,7 +3,7 @@ import { Buffer } from "node:buffer";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { initializeProject } from "../../src/commands/init.js";
-import { HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
 import { renderAgentsTemplate } from "../../src/templates/harnix/agents.js";
 import { ensureManagedWorkflow } from "../../src/templates/harnix/managed-workflow.js";
 import { workflowSkills, workflowTemplate } from "../../src/templates/harnix/workflow.js";
@@ -16,11 +16,18 @@ const vietnameseTaskPolicy = "Luôn dùng tiếng Việt khi tạo và cập nh�
 describe("workflow templates", () => {
   it("keeps the bootstrap lean and routes latest Bypass intent before active-task continuation", () => {
     const agentInstructions = renderAgentsTemplate({ languages: [], technologies: [], packages: [] });
+    const lastTargetGuardIndex = agentInstructions.indexOf(HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.at(-1)!);
+    const firstImplicitRoutingIndex = agentInstructions.indexOf(HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS[0]);
 
     expect(Buffer.byteLength(agentInstructions, "utf8")).toBeLessThan(8_192);
-    expect(agentInstructions.indexOf("Classify the latest request")).toBeLessThan(agentInstructions.indexOf("active task"));
+    expect(lastTargetGuardIndex).toBeLessThan(firstImplicitRoutingIndex);
+    expect(firstImplicitRoutingIndex).toBeLessThan(agentInstructions.indexOf("workflow --preflight"));
     expect(agentInstructions).toContain("workflow --preflight");
     expect(agentInstructions).toContain("unrelated active task unchanged");
+    expect(agentInstructions).toContain("standalone read-only research");
+    expect(agentInstructions).toContain("Use the exact `nextStage` returned by preflight");
+    expect(agentInstructions).not.toContain("passes, Classify");
+    expect(workflowTemplate).toContain("standalone read-only research");
     expect(workflowTemplate).toContain("Convergence and evidence reuse");
     expect(workflowTemplate).toContain("reported `passed`");
     expect(workflowTemplate).toContain("Release preparation");
@@ -38,6 +45,11 @@ describe("workflow templates", () => {
     const readme = await readFile(join(process.cwd(), "README.md"), "utf8");
     expect(repositoryAgentInstructions).toContain(vietnameseTaskPolicy);
     expect(repositoryAgentInstructions).toContain("Classify the latest request as Bypass, Lite, or Full before reading `.harnix/tasks/.active`");
+    expect(repositoryAgentInstructions).toContain("standalone read-only research");
+    expect(repositoryAgentInstructions).toContain("follow the exact `nextStage` returned by preflight");
+    expect(repositoryAgentInstructions).toContain("Use `harnix-continue` only when `nextStage` selects it");
+    expect(repositoryAgentInstructions).toContain("changes repository or task artifacts enters the normal Lite or Full lifecycle instead of Bypass");
+    expect(repositoryAgentInstructions).not.toContain("then resume the active task through `harnix-continue`");
     expect(repositoryAgentInstructions).toContain("Only when the user requests implementation");
     expect(repositoryAgentInstructions).not.toContain("With no active task, continue from the first unchecked task");
     expect(agentInstructions).toContain(vietnameseTaskPolicy);
@@ -82,6 +94,8 @@ describe("workflow templates", () => {
     expect(agentInstructions).not.toContain("commandWindows");
     expect(readme).toContain("## Từ yêu cầu người dùng đến workflow agent");
     expect(readme).toContain("Gửi yêu cầu tự nhiên");
+    expect(readme).toContain("standalone read-only research");
+    expect(readme).toContain("thay đổi file repository hoặc task artifact phải đi vào lifecycle Lite/Full");
     expect(readme).toContain("Public CLI quản lý harness và diagnostics; coding agent dùng các skill Harnix để chuyển stage");
     expect(readme).toContain("Seed specs và `.harnix/workflow.md` được Harnix quản lý cho đến khi người dùng sửa");
     expect(readme).toContain("Task, research và journal luôn là dữ liệu người dùng");

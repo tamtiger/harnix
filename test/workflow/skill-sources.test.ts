@@ -94,6 +94,9 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "facts from inferences",
     "remaining uncertainty",
     "one material unknown",
+    "Standalone read-only research",
+    "Task-scoped research",
+    "do not read or mutate active task state",
     "harnix workflow --save",
   ],
   "harnix-debug": [
@@ -154,6 +157,17 @@ describe("canonical Harnix workflow skill sources", () => {
     expect(description.toLowerCase()).toContain("code review");
     expect(description.toLowerCase()).toContain("review feedback");
     expect(content).not.toMatch(/dispatch a code reviewer subagent|before merge to main|auto-?fix/iu);
+  });
+
+  it("makes the research skill safe for standalone and task-scoped profiles", async () => {
+    const content = await readSkill("harnix-research");
+    const description = content.match(/^description:\s*(.+)$/mu)?.[1] ?? "";
+
+    expect(description.toLowerCase()).toContain("standalone read-only research");
+    expect(content).toContain("**Standalone read-only research:**");
+    expect(content).toContain("**Task-scoped research:**");
+    expect(content).toContain("do not read or mutate active task state");
+    expect(content).toContain("Do not create task state, persist an artifact, or modify product files");
   });
 
   it("keeps each persisted checkpoint owned by one stage skill", async () => {

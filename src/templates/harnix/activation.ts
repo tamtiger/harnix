@@ -12,6 +12,9 @@ export const HARNIX_TARGET_AUTHORITY_INSTRUCTIONS = [
 
 export const HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS = [
   "After the guard passes, classify the latest request as Bypass, Lite, or Full before consulting any active task.",
-  "An obvious Bypass explanation, generic status request, or standalone read-only review leaves an unrelated active task unchanged and exits without Harnix task mutation; an explicit Harnix-task status request may use bounded public `harnix status` without resuming work.",
+  "An obvious Bypass explanation, generic status request, standalone read-only review, or standalone read-only research leaves an unrelated active task unchanged and exits without Harnix task mutation; an explicit Harnix-task status request may use bounded public `harnix status` without resuming work.",
+  "Route standalone read-only review to `harnix-check` and standalone read-only research to `harnix-research` without consulting active task state.",
+  "A review or research request that changes repository or task artifacts enters the normal Lite or Full lifecycle instead of Bypass.",
   "Only for project-scoped Lite or Full work, or an explicit request to inspect or continue the active task, run the hidden `harnix workflow --preflight`, then read `.harnix/workflow.md` and one current stage-owner skill; a ready-task preflight returns `await` until the current request supplies implementation authority.",
+  "Use the exact `nextStage` returned by preflight; use `harnix-continue` only when `nextStage` selects it for interrupted or partial persisted state, and treat `await` or `stop` as mandatory stop points.",
 ] as const;

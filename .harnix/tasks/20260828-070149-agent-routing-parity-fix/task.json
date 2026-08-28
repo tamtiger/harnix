@@ -1,0 +1,250 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260828-070149-agent-routing-parity-fix",
+  "title": "Đồng bộ contract routing của agent và README",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Loại bỏ divergence giữa agent tự vận hành, project agent template và README bằng canonical implicit activation clauses cùng routing chính xác theo nextStage.",
+  "nonGoals": [
+    "Không thay đổi public CLI, persisted task schema, hook protocol hoặc platform filesystem contract.",
+    "Không thêm skill, agent, package, service hoặc workflow state mới.",
+    "Không hoàn tác hay viết lại các thay đổi hợp lệ của task standalone research đã hoàn tất."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-next-stage-routing",
+      "text": "Root AGENTS.md yêu cầu owner tuân theo đúng nextStage từ preflight và chỉ dùng harnix-continue khi nextStage chọn owner này hoặc khi khôi phục persisted work được yêu cầu rõ.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-agent-contract-20260828-070711",
+        "green-focused-agent-contract-release-20260828-070856",
+        "green-release-gate-20260828-071447"
+      ]
+    },
+    {
+      "id": "ac-project-canonical-parity",
+      "text": "Project agent template render nguyên văn mọi HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS và parity test phát hiện được bất kỳ canonical clause nào bị thiếu.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-agent-contract-20260828-070711",
+        "green-focused-agent-contract-release-20260828-070856",
+        "green-release-gate-20260828-071447"
+      ]
+    },
+    {
+      "id": "ac-readonly-terminology",
+      "text": "AGENTS.md, generated project agent và README dùng nhất quán standalone read-only research, sửa lỗi viết hoa giữa câu, và nêu rõ research có mutation đi vào lifecycle Lite hoặc Full.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-agent-contract-20260828-070711",
+        "green-focused-agent-contract-release-20260828-070856",
+        "green-release-gate-20260828-071447"
+      ]
+    },
+    {
+      "id": "ac-release-readiness",
+      "text": "Patch release metadata được cập nhật đúng một lần và focused checks cùng exact release gate bắt buộc đều pass với evidence hiện hành.",
+      "status": "met",
+      "evidenceIds": [
+        "green-release-gate-20260828-071447"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "package.json",
+    "pnpm-lock.yaml",
+    "src/skills/harnix-brainstorm/SKILL.md",
+    "src/skills/harnix-check/SKILL.md",
+    "src/skills/harnix-continue/SKILL.md",
+    "src/skills/harnix-debug/SKILL.md",
+    "src/skills/harnix-finish-work/SKILL.md",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-research/SKILL.md",
+    "src/templates/harnix/activation.ts",
+    "src/templates/harnix/agents.ts",
+    "test/platform/global-adapters.test.ts",
+    "test/unit/activation-instructions.test.ts",
+    "test/workflow/templates.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "focused-agent-contract",
+      "description": "Xác nhận exact canonical clauses, nextStage ownership và terminology/mutation boundary trên project cùng global surfaces.",
+      "command": "pnpm exec vitest run test/unit/activation-instructions.test.ts test/workflow/templates.test.ts test/platform/global-adapters.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-next-stage-routing",
+        "ac-project-canonical-parity",
+        "ac-readonly-terminology"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "README.md",
+        "src/templates/harnix/activation.ts",
+        "src/templates/harnix/agents.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "release-gate",
+      "description": "Chạy exact acceptance sequence mục 11 để xác nhận build, package, docs, safety, tarball và generated output.",
+      "command": "pnpm install --frozen-lockfile; pnpm build; pnpm lint; pnpm typecheck; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-next-stage-routing",
+        "ac-project-canonical-parity",
+        "ac-readonly-terminology",
+        "ac-release-readiness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**/*.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/*.mjs",
+        "src/**/*",
+        "test/**/*"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "red-focused-agent-contract-20260828-070536",
+      "checkId": "focused-agent-contract",
+      "recordedAt": "2026-08-28T07:05:36.146Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "RED: 3 contract assertions fail đúng finding; canonical mutation clause, project exact implicit clauses và root nextStage/read-only wording chưa được implement.",
+      "artifactPaths": [
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "fc7ba607c58a86baef89070fde421b3d3cccfa76ea13847f8a4dbcf18c011e71"
+    },
+    {
+      "id": "green-focused-agent-contract-20260828-070711",
+      "checkId": "focused-agent-contract",
+      "recordedAt": "2026-08-28T07:07:11.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN: 13/13 focused agent, activation và platform parity tests pass; project template render exact canonical clauses, root dùng nextStage và read-only mutation boundary nhất quán.",
+      "artifactPaths": [
+        "AGENTS.md",
+        "README.md",
+        "src/templates/harnix/activation.ts",
+        "src/templates/harnix/agents.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "5ef0921689f3cfa370bcb499de94c76fdd6623d50c1a937fd1de160f918f1598"
+    },
+    {
+      "id": "green-focused-agent-contract-release-20260828-070856",
+      "checkId": "focused-agent-contract",
+      "recordedAt": "2026-08-28T07:08:56.168Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "GREEN sau release prep: 13/13 focused tests pass với package/README version 1.0.20 và input digest hiện hành.",
+      "artifactPaths": [
+        "README.md",
+        "package.json",
+        "CHANGELOG.md",
+        "src/templates/harnix/activation.ts",
+        "src/templates/harnix/agents.ts"
+      ],
+      "inputDigest": "96325ec80b1a805b2533129303f410fb25317e0810094b7742b10df64de29286"
+    },
+    {
+      "id": "red-release-gate-20260828-071030",
+      "checkId": "release-gate",
+      "recordedAt": "2026-08-28T07:10:30.169Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Release gate dừng tại test:acceptance: unit 259 pass/1 skip; integration có 1 assertion stale trong init.test.ts còn yêu cầu wording chữ hoa trước canonical target guard.",
+      "artifactPaths": [
+        "test/integration/init.test.ts",
+        "src/templates/harnix/agents.ts"
+      ],
+      "inputDigest": "06f570b4941801a8e5023b6b24e76608e2b739d91f9afdaed53b944f3eb08199"
+    },
+    {
+      "id": "debug-init-canonical-assertion-20260828-071103",
+      "recordedAt": "2026-08-28T07:11:03.063Z",
+      "result": "pass",
+      "summary": "Giả thuyết được xác nhận: init.test.ts khóa literal cũ có chữ hoa, trong khi renderAgentsTemplate đã chủ đích render exact canonical implicit clause sau target guard; sửa test dùng canonical array sẽ phân biệt contract với wording stale.",
+      "artifactPaths": [
+        "test/integration/init.test.ts",
+        "src/templates/harnix/activation.ts",
+        "src/templates/harnix/agents.ts"
+      ]
+    },
+    {
+      "id": "green-init-canonical-assertion-20260828-071132",
+      "recordedAt": "2026-08-28T07:11:32.419Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Debug GREEN: test/integration/init.test.ts dùng canonical implicit array và pass 7/7; không đổi production behavior.",
+      "artifactPaths": [
+        "test/integration/init.test.ts"
+      ]
+    },
+    {
+      "id": "green-release-gate-20260828-071447",
+      "checkId": "release-gate",
+      "recordedAt": "2026-08-28T07:14:47.588Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Exact release gate pass sau remediation: frozen install, build, lint, typecheck, 558 acceptance tests, pack, fake-home tarball smoke, init/footprint measures, release scan và git diff --check đều exit 0; một Windows-conditional test skipped.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "README.md",
+        "AGENTS.md",
+        "src/templates/harnix/activation.ts",
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "2363b317674a8bb8278d4396d9d2463cdfdd7de49a94bfb19bcc3d34eb9dea92"
+    },
+    {
+      "id": "verification-review-20260828-071637",
+      "recordedAt": "2026-08-28T07:16:37.675Z",
+      "result": "pass",
+      "summary": "Compliance rồi quality/security review pass: 4/4 criterion đúng scope; canonical nextStage ownership, project/global exact parity, read-only mutation boundary, regression coverage và release 1.0.20 đều có current evidence; không có finding blocking.",
+      "artifactPaths": [
+        "AGENTS.md",
+        "README.md",
+        "src/templates/harnix/activation.ts",
+        "src/templates/harnix/agents.ts",
+        "test/integration/init.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/templates.test.ts",
+        "CHANGELOG.md",
+        "package.json"
+      ]
+    }
+  ],
+  "createdAt": "2026-08-28T07:01:49.356Z",
+  "updatedAt": "2026-08-28T07:17:21.252Z",
+  "completedAt": "2026-08-28T07:17:21.252Z"
+}

@@ -14,6 +14,7 @@ function task(evidenceAt: string, scope: "focused" | "full" = "full"): TaskRecor
 describe("workflow routing and completion evidence", () => {
   it("routes action, work kind, risk, and active state deterministically", () => {
     expect(routeWorkflow({ action: "review", workKind: "refactor", mutation: "none", riskSignals: [] })).toMatchObject({ entry: "bypass", owner: "harnix-check", reasonCodes: ["standalone-review"] });
+    expect(routeWorkflow({ action: "research", workKind: "dependency", mutation: "none", riskSignals: ["material-unknown"] })).toMatchObject({ entry: "bypass", owner: "harnix-research", reasonCodes: ["standalone-research"] });
     expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [] })).toMatchObject({ entry: "create", mode: "lite", owner: "harnix-brainstorm", reasonCodes: ["low-risk-lite"] });
     expect(routeWorkflow({ action: "change", workKind: "hotfix", mutation: "project", riskSignals: ["security-sensitive"] })).toMatchObject({ entry: "create", mode: "full", reasonCodes: ["risk-full"] });
     expect(routeWorkflow({ action: "change", workKind: "bugfix", mutation: "project", riskSignals: [], activeTask: { mode: "lite", status: "ready", checkpoint: "ready" } })).toMatchObject({ entry: "resume", owner: "harnix-implement", reasonCodes: ["active-ready-authorized"] });
@@ -43,6 +44,11 @@ describe("workflow routing and completion evidence", () => {
       entry: "bypass",
       owner: "harnix-check",
       reasonCodes: ["standalone-review"],
+    });
+    expect(routeWorkflow({ action: "research", workKind: "dependency", mutation: "none", riskSignals: ["material-unknown"], activeTask })).toEqual({
+      entry: "bypass",
+      owner: "harnix-research",
+      reasonCodes: ["standalone-research"],
     });
     expect(routeWorkflow({ action: "verify", workKind: "test", mutation: "none", riskSignals: [], activeTask })).toMatchObject({
       entry: "resume",

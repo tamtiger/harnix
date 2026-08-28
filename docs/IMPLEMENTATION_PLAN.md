@@ -967,6 +967,16 @@ Task `20260827-152949-workflow-convergence-fix` xử lý self-audit về agent/t
 - [x] Release preparation is resume-aware before verification; Finish is product-read-only; package-wide gates apply only when the task/release scope requires them.
 - Completion gate: synchronize canonical docs/templates/seven skill versions and managed workflow ownership, then run compliance-before-quality review plus the fresh non-duplicative acceptance sequence in §11.
 
+## 9J. Standalone read-only research routing
+
+Task `20260828-110352-standalone-research-route` sửa self-audit consistency gap giữa Bypass routing và `harnix-research`. Origin là `harnix-self-audit`; không thêm external-derived behavior hoặc provenance entry.
+
+- [x] Internal router nhận action `research` và route mutation-free request tới `harnix-research` với reason `standalone-research` trước khi consult active task.
+- [x] Canonical `harnix-research` tách standalone read-only Bypass khỏi task-scoped Planning/Replan/Debugging, giữ persistence và handoff đúng từng profile.
+- [x] Project/global generated instructions cùng Kiro, Antigravity và Codex giữ parity; standalone research không tạo/inspect/mutate task kể cả khi có unrelated active task.
+- [x] PRD/workflow/README/research/mapping ghi contract và Harnix self-audit ownership; external provenance registry/NOTICE giữ nguyên.
+- Completion gate: synchronize patch release, skill metadata, changelog và managed output, rồi chạy compliance-before-quality review cùng fresh exact acceptance sequence ở §11.
+
 ## 10. Required test inventory
 
 | Suite | Required coverage |

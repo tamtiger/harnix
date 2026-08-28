@@ -1,7 +1,7 @@
 import type { LanguageId, TechnologyId } from "../../catalog/catalog.js";
 import type { PackageConfig } from "../../core/config/config.js";
 import { packageVersion } from "../../version.js";
-import { HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "./activation.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "./activation.js";
 
 export interface AgentsProjectProfile {
   languages: readonly LanguageId[];
@@ -12,6 +12,7 @@ export interface AgentsProjectProfile {
 const languageLabels: Record<LanguageId, string> = { csharp: "C#", go: "Go", java: "Java", javascript: "JavaScript", php: "PHP", python: "Python", typescript: "TypeScript" };
 const technologyLabels: Record<TechnologyId, string> = { abp: "ABP", codeigniter: "CodeIgniter", dotnet: ".NET", nestjs: "NestJS", "react-web": "React web", spring: "Spring", vue: "Vue" };
 const targetAuthorityInstructions = HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.map((instruction) => `- ${instruction}`).join("\n");
+const implicitActivationInstructions = HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS.join("\n\n");
 
 export function renderAgentsTemplate(profile: AgentsProjectProfile): string {
   const languages = profile.languages.map((id) => languageLabels[id]).join(", ") || "not specified";
@@ -19,8 +20,6 @@ export function renderAgentsTemplate(profile: AgentsProjectProfile): string {
   const packagePaths = profile.packages.map(({ path }) => `\`${path}\``).join(", ") || "not specified";
 
   return `# Project agent instructions
-
-After the target-authority guard below passes, Classify the latest request before consulting any active task.
 
 ## Harnix
 
@@ -42,23 +41,25 @@ Use this profile only when this AGENTS root is the selected Harnix root resolved
 
 ## Route before restoring
 
-Classify the latest request before consulting any active task:
+${implicitActivationInstructions}
 
-- **Bypass:** explanation, generic status request, or standalone read-only review. Answer directly and leave an unrelated active task unchanged. An explicit Harnix-task status request may use bounded public \`harnix status\` without resuming work.
+Apply the matching ceremony profile:
+
+- **Bypass:** use the read-only route above without inspecting or mutating task state.
 - **Lite:** localized low-risk change with a clear contract and focused validation. Docs-only prose or formatting defaults to Lite.
 - **Full:** cross-layer, migration-heavy, security-sensitive, or materially uncertain work.
 
-For an obvious Bypass request, do not inspect or mutate task state. For Lite/Full work, or when the user explicitly asks to inspect or continue persisted work, run hidden \`harnix workflow --preflight\`. Read .harnix/workflow.md and .harnix/config.yaml from the selected Harnix root (canonical workflow: [\`.harnix/workflow.md\`](.harnix/workflow.md)), then load only one current stage-owner skill. The preflight is bounded routing metadata; it is not proof of completion, and \`nextStage: await\` at \`ready\` requires the latest request—not stale conversation memory—to authorize implementation.
+Read .harnix/workflow.md and .harnix/config.yaml from the selected Harnix root (canonical workflow: [\`.harnix/workflow.md\`](.harnix/workflow.md)) only after the route above requires project state. The preflight is bounded routing metadata, not proof of completion, and \`nextStage: await\` at \`ready\` requires the latest request rather than stale conversation memory to authorize implementation.
 
-Use the stage owner named by persisted state:
+Use the exact \`nextStage\` returned by preflight for project-scoped work, and otherwise use the standalone owner named by the route above:
 
 - \`harnix-brainstorm\` for triage, planning, replan, and the ready gate.
 - \`harnix-implement\` for authorized ready or in-progress work.
 - \`harnix-check\` for standalone review or active compliance/quality verification.
 - \`harnix-debug\` only for a reproducible in-scope failure.
-- \`harnix-research\` only for one material unknown.
+- \`harnix-research\` for standalone read-only research or one task-scoped material unknown.
 - \`harnix-finish-work\` only for verified completion or explicit cancellation.
-- \`harnix-continue\` for interrupted or partial persisted state.
+- \`harnix-continue\` only for interrupted or partial persisted state when selected by \`nextStage\`.
 
 Read the selected \`SKILL.md\` through EOF; do not preload later skills. The canonical lifecycle, TaskRecord schema, legal transitions, hidden envelopes, freshness rules, retry breaker, and exact commands live in \`.harnix/workflow.md\`; do not duplicate or invent them here.
 

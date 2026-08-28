@@ -18,9 +18,9 @@ Platform setup is a separate, explicit user-global operation and does not create
 
 ## Route the request
 
-Classify the latest request before consulting any active task. An obvious Bypass request exits without loading or mutating an unrelated active task. A generic status/explanation request stays Bypass; an explicit request for Harnix task status may use bounded public `harnix status` without resuming work. Only project-scoped Lite/Full work, or an explicit request to inspect/continue persisted work, proceeds to hidden preflight and stage routing.
+Classify the latest request before consulting any active task. An obvious Bypass request exits without loading or mutating an unrelated active task. A generic status/explanation, standalone read-only review, or standalone read-only research request stays Bypass; an explicit request for Harnix task status may use bounded public `harnix status` without resuming work. Only project-scoped Lite/Full work, or an explicit request to inspect/continue persisted work, proceeds to hidden preflight and stage routing.
 
-- **Bypass:** read-only explanation or a non-project-state action that neither edits repository files nor needs persisted task state. Any repository file mutation is Lite or Full.
+- **Bypass:** read-only explanation, standalone review/research, or another non-project-state action that neither edits repository files nor needs persisted task state. Route standalone review to `harnix-check` and standalone research to `harnix-research` without consulting active task state. Any repository file mutation is Lite or Full.
 - **Lite:** localized, low-risk implementation with clear scope; persist a compact task record. Docs-only prose or formatting defaults to Lite unless it changes a frozen public contract or contains a material product decision.
 - **Full:** cross-layer, security-sensitive, migration-heavy, or materially uncertain work; persist PRD/plan and targeted research when needed.
 
@@ -28,7 +28,7 @@ Use one active task and the canonical success sequence: planning → ready → i
 
 Route to one current stage-owner skill before loading detailed instructions. Read that selected `SKILL.md` separately through EOF; do not batch-read or preload later-stage skills. If tool output is truncated, reread only the selected skill until EOF before acting.
 
-The Evidence-Gated Lifecycle is Restore/Triage → Evidence → Requirements → Plan/Ready → Execute → Verify → Persist/Finish. Debug/Replan is a feedback loop and Blocked/Continue restores the recorded stage. Feature, bugfix, hotfix, refactor, test, docs, maintenance, migration, dependency, security, performance, and release are work kinds, not additional workflows: select Lite/Full from actual risk and preserve the same gates. A standalone read-only code review is Bypass and reports evidence-backed findings without mutation; review-and-fix enters the normal task lifecycle.
+The Evidence-Gated Lifecycle is Restore/Triage → Evidence → Requirements → Plan/Ready → Execute → Verify → Persist/Finish. Debug/Replan is a feedback loop and Blocked/Continue restores the recorded stage. Feature, bugfix, hotfix, refactor, test, docs, maintenance, migration, dependency, security, performance, and release are work kinds, not additional workflows: select Lite/Full from actual risk and preserve the same gates. A standalone read-only code review or standalone read-only research pass is Bypass and reports evidence without task mutation; review/research that changes project or task artifacts enters the normal lifecycle.
 
 ## Persist and restore state
 

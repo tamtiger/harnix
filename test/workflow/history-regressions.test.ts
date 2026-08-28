@@ -13,6 +13,11 @@ describe("history-derived workflow regressions", () => {
     expect(routeWorkflow({ action: "change", workKind: "bugfix", mutation: "project", riskSignals: [] })).toMatchObject({ entry: "create", owner: "harnix-brainstorm" });
   });
 
+  it("keeps standalone research read-only while task-scoped research enters planning", () => {
+    expect(routeWorkflow({ action: "research", workKind: "dependency", mutation: "none", riskSignals: ["material-unknown"] })).toMatchObject({ entry: "bypass", owner: "harnix-research" });
+    expect(routeWorkflow({ action: "research", workKind: "dependency", mutation: "project", riskSignals: ["material-unknown"] })).toMatchObject({ entry: "create", mode: "full", owner: "harnix-brainstorm" });
+  });
+
   it("keeps hotfix gates and test work distinctions", () => {
     expect(routeWorkflow({ action: "change", workKind: "hotfix", mutation: "project", riskSignals: ["complex-rollback"] })).toMatchObject({ mode: "full" });
     expect(routeWorkflow({ action: "inspect", workKind: "test", mutation: "none", riskSignals: [] })).toMatchObject({ entry: "bypass" });

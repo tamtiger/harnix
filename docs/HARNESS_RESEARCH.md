@@ -190,6 +190,14 @@ Khi verification ngày 2026-08-27 mở broad input glob trên chính task này, 
 
 Vì cả hai correction có origin self-audit thuần Harnix, `docs/HARNESS_FEATURE_PROVENANCE.json` và `NOTICE` giữ nguyên; nếu về sau adapt external behavior/content cho capability này thì registry, research, mapping, license evidence và test phải đổi trong cùng task.
 
+### 3.12 Runtime self-audit 2026-08-28: standalone read-only research routing
+
+Origin: `harnix-self-audit`. Task `20260828-110352-standalone-research-route` phát hiện router và generated guidance đã có standalone review Bypass nhưng vẫn mô tả `harnix-research` chỉ như task-scoped material-unknown owner. Kết quả là một yêu cầu research độc lập có thể bị ép đọc/tiếp tục unrelated active task hoặc không có deterministic stage owner.
+
+Correction nhỏ nhất thêm action `research` vào internal router và hai profile rõ ràng cho canonical `harnix-research`: standalone read-only Bypass trả sources/facts/inference/conclusion/uncertainty trực tiếp mà không đọc hoặc mutate active task, còn task-scoped research chỉ chạy từ planning/replan/debugging và giữ task-owned artifact contract hiện có. Project/global templates cùng Kiro, Antigravity và Codex tiếp tục cài một canonical skill byte-identical; không thêm public CLI/schema, network mặc định, task type hoặc platform-specific workflow.
+
+Behavior này được suy ra từ self-audit consistency của Harnix, không lấy từ external harness. Vì vậy `docs/HARNESS_FEATURE_PROVENANCE.json` và `NOTICE` không đổi; parity, routing và inactive-task regression tests là evidence sở hữu của Harnix.
+
 ## 4. Platform research decisions
 
 Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapters described by earlier Phase 1–5 research are retained only as legacy/provenance evidence; the current adopted contract is `GLOBAL_SETUP_REFACTOR_PLAN.md` §§2, 6–9.

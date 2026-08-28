@@ -41,7 +41,7 @@ If explicit-target validation fails, its Harnix root is missing, or its state is
 
 ### 3.1 Bypass
 
-Không tạo task cho câu hỏi, giải thích, read-only review, generic status report hoặc yêu cầu không làm thay đổi project. Phân loại intent này trước khi đọc `.active`; một unrelated active task không bị load, đổi checkpoint hoặc tiếp tục. Explicit Harnix-task status có thể dùng bounded public `harnix status` nhưng không resume/mutate task. Nếu review phát hiện vấn đề, chỉ chuyển sang task khi người dùng yêu cầu sửa hoặc yêu cầu ban đầu đã bao gồm implementation.
+Không tạo task cho câu hỏi, giải thích, standalone read-only review, standalone read-only research, generic status report hoặc yêu cầu không làm thay đổi project. Phân loại intent này trước khi đọc `.active`; một unrelated active task không bị load, đổi checkpoint hoặc tiếp tục. Standalone review route tới `harnix-check`; standalone research route tới profile Bypass của `harnix-research`; cả hai trả evidence trực tiếp và không consult active task state. Explicit Harnix-task status có thể dùng bounded public `harnix status` nhưng không resume/mutate task. Nếu review/research dẫn tới yêu cầu sửa hoặc persist project/task artifact, chỉ chuyển sang lifecycle khi người dùng yêu cầu mutation hoặc yêu cầu ban đầu đã bao gồm implementation.
 
 ### 3.2 Lite
 
@@ -60,7 +60,7 @@ Agent tự chọn mức nhẹ nhất vẫn kiểm soát được rủi ro. Chỉ
 ```mermaid
 stateDiagram-v2
     [*] --> Triage
-    Triage --> Bypass: read-only / answer
+    Triage --> Bypass: read-only / review / research
     Triage --> Planning: change requested
     Bypass --> [*]
     Planning --> Ready: ready gate passes
@@ -93,7 +93,8 @@ Không được nhảy từ `planning` sang `in_progress` khi ready gate chưa p
 
 Input là user intent cùng trạng thái repository hiện tại. Agent:
 
-- phân loại latest request là Bypass/Lite/Full và xác định yêu cầu có cho phép mutation hay chỉ review trước khi đọc active task;
+- phân loại latest request là Bypass/Lite/Full và xác định yêu cầu có cho phép mutation hay chỉ review/research trước khi đọc active task;
+- route standalone review tới `harnix-check` và standalone research tới `harnix-research` mà không đọc/mutate active task;
 - với Lite/Full hoặc explicit continuation, chạy hidden `harnix workflow --preflight`, rồi kiểm tra active task để tiếp tục thay vì tạo duplicate;
 - ghi lý do routing ngắn trong task record khi tạo task;
 - không suy diễn quyền cho destructive action, external mutation hoặc scope mở rộng.
@@ -259,7 +260,7 @@ Tasks, research và journal là user-owned. Packaged `workflow.md` và seed spec
 | `harnix-implement` | Ready → Implementing, checkpoints, adaptive TDD |
 | `harnix-debug` | Debugging và replan decision |
 | `harnix-check` | Verifying stage 1 rồi stage 2 |
-| `harnix-research` | Conditional research trong Planning/Debugging |
+| `harnix-research` | Standalone read-only research ở Bypass; conditional task-scoped research trong Planning/Replan/Debugging |
 | `harnix-finish-work` | Finishing → Completed; explicit unfinished → Cancelled; terminal recovery |
 | `harnix-continue` | Restore state/context và route tới bước hợp lệ kế tiếp |
 
@@ -273,7 +274,7 @@ Router chỉ load một stage owner tại một thời điểm. Mỗi selected `
 
 Evals phải chứng minh:
 
-- Latest Bypass không tạo/inspect/mutate task và giữ unrelated active task unchanged; Lite và Full tạo đúng artifact tối thiểu qua bounded preflight.
+- Latest Bypass không tạo/inspect/mutate task và giữ unrelated active task unchanged; standalone review/research route đúng owner; Lite và Full tạo đúng artifact tối thiểu qua bounded preflight.
 - Explicit implementation request không bị hỏi approval lần hai; plan-only request dừng ở `ready`.
 - Ambiguous routing chỉ hỏi khi outcome/cost thực sự khác.
 - Ready gate chặn missing acceptance, validation, decision hoặc required Full artifact.

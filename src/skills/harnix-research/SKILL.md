@@ -1,13 +1,13 @@
 ---
 name: harnix-research
-description: Use when one material product, dependency, security, compatibility, or architecture unknown could change a Harnix planning or debugging decision.
+description: Use when Harnix needs standalone read-only research or one material product, dependency, security, compatibility, or architecture unknown could change an active planning or debugging decision.
 metadata:
-  version: "1.0.18"
+  version: "1.0.20"
 ---
 
 # Research one material unknown
 
-Research only what can change the current decision. Persist sources, facts, inference, conclusion, and uncertainty so planning or debugging can proceed without repeating the search.
+Research only what can change the current decision. Return or persist sources, facts, inference, conclusion, and uncertainty without inventing task state.
 
 ## Harnix activation guard
 
@@ -20,11 +20,16 @@ Before any ancestor lookup for an explicit target, verify that the target path e
 If explicit-target validation fails, stop and report the problem without reading Harnix state from the ambient current directory or selected workspace.
 Starting from the validated canonical explicit target, or from the selected workspace or ambient directory only when no explicit target exists, locate the nearest ancestor or workspace root containing `.harnix/config.yaml`; activate Harnix only when that root exists and its Harnix state is valid.
 If no such root exists or its state is invalid, do not fall back to another repository's Harnix state, apply Harnix workflow, read Harnix project state or active task, create Harnix state, or run `harnix init`; report the problem.
-Read `.harnix/workflow.md` and the calling task/checkpoint.
+Read `.harnix/workflow.md`. For task-scoped research, also read the calling task/checkpoint. For standalone research, do not read or mutate active task state.
 
 ## Incoming state
 
-Accept planning/replan or debugging with one material unknown stated as a decision question. If the request is broad, decompose it and choose only the highest-impact unknown. Do not research merely to decorate an already decided plan.
+Use one of two profiles:
+
+- **Standalone read-only research:** accept a Bypass request that asks one decision-relevant research question without project mutation. Do not read or mutate active task state, even when an unrelated task exists. Bound the requested sources and output, then return a report directly to the user.
+- **Task-scoped research:** accept planning/replan or debugging with one material unknown stated as a decision question. Read only the calling task context needed to resolve it and return the decision to that owner.
+
+If the request is broad, decompose it and choose only the highest-impact unknown. Do not research merely to decorate an already decided plan.
 
 Run at most one bounded research pass for the same unknown in one user request. Reuse a prior current conclusion when there is no new source or evidence that could change it; report the remaining uncertainty rather than repeating the same searches.
 
@@ -51,7 +56,9 @@ Stop when additional sources are unlikely to change the decision. If evidence re
 
 ## Persist
 
-Write one task-owned research artifact under the active task's `research/` directory by sending a bounded JSON envelope on stdin to `harnix workflow --save`; include the inspected TaskRecord and `artifacts.research`, plus the existing non-empty `prd` and `plan` when the active task is Full. Never edit task or research files directly. The research artifact contains:
+For standalone read-only research: Do not create task state, persist an artifact, or modify product files. Return sources, repository evidence, facts, inferences, conclusion, limitations, and remaining uncertainty in the response only.
+
+For task-scoped research, write one task-owned research artifact under the active task's `research/` directory by sending a bounded JSON envelope on stdin to `harnix workflow --save`; include the inspected TaskRecord and `artifacts.research`, plus the existing non-empty `prd` and `plan` when the active task is Full. Never edit task or research files directly. The research artifact contains:
 
 - task ID, date, and one material unknown;
 - sources with URL/revision/version and access date where relevant;
@@ -65,8 +72,9 @@ Do not write global memory, modify product code, or advance task status from thi
 
 ## Exit
 
-Return the decision and remaining uncertainty to `harnix-brainstorm` or `harnix-debug`. If the answer changes a material contract, require replan before implementation continues. If it confirms the existing plan, update the calling artifact and rerun its gate.
+- Standalone read-only research: report the decision, sources, facts, inferences, limitations, and remaining uncertainty; do not hand off to a task owner.
+- Task-scoped research: return the decision and remaining uncertainty to `harnix-brainstorm` or `harnix-debug`. If the answer changes a material contract, require replan before implementation continues. If it confirms the existing plan, update the calling artifact and rerun its gate.
 
 ## Upstream basis
 
-Adapted for Harnix from Trellis conditional research at `516b34e3591001b28fda5e2d4df3f717e82f5785` and ECC `deep-research` at `f1fec0e53934737d3b3b8388b0fd1651e8b62f4f`. Harnix removes mandatory MCPs, fixed source counts, and mandatory subagents; research remains bounded by one decision.
+Adapted for Harnix from Trellis conditional research at `516b34e3591001b28fda5e2d4df3f717e82f5785` and ECC `deep-research` at `f1fec0e53934737d3b3b8388b0fd1651e8b62f4f`. Harnix removes mandatory MCPs, fixed source counts, and mandatory subagents; research remains bounded by one decision. The standalone read-only profile is a Harnix self-audit correction and does not add external-derived behavior.

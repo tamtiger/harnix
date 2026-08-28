@@ -2,7 +2,7 @@
 name: harnix-brainstorm
 description: Use when a Harnix project needs request triage, requirements, design, planning, or a trustworthy ready gate before implementation.
 metadata:
-  version: "1.0.18"
+  version: "1.0.20"
 ---
 
 # Plan a Harnix task
