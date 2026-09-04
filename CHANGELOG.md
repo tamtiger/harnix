@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.0.21] - 2026-09-04
+
+### Fixed
+
+- Sửa lỗi task không bao giờ finish được khi một evidence có timestamp không hợp lệ hoặc ở tương lai (`recordedAt > now`) che khuất một pass hợp lệ ghi sau đó, khiến required check kẹt vĩnh viễn ở `stale`/`evidence-expired`. Việc chọn latest evidence giờ ưu tiên evidence hợp lệ thời gian hơn evidence future-dated/invalid ở `check-report`, `canCompleteTask`, `criterionHasFreshSupport` và `assertVerificationInputsFresh`, đồng thời giữ fail-closed khi chỉ có future evidence và bảo toàn tie-break theo thứ tự append.
+
 ## [1.0.20] - 2026-08-28
 
 ### Changed

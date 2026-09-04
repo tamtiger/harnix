@@ -9,7 +9,7 @@ import type { Evidence, TaskCancellation, TaskMode, TaskRecord } from "./tasks/t
 import { appendJournal, appendJournalIdempotent, searchJournal, type JournalEntry } from "./journal/journal.js";
 import { createCapturedLearningCandidate, type LearningCaptureInput } from "./journal/learning.js";
 import { analyzeLearningStatement, type LearningRiskKind } from "./journal/learning-safety.js";
-import { archiveTask, cancelTask, loadTask, saveTask, transitionTask } from "./tasks/task.js";
+import { archiveTask, cancelTask, loadTask, saveTask, selectLatestEvidence, transitionTask } from "./tasks/task.js";
 import { resolveActiveTask } from "./tasks/task.js";
 import { resolveSafeProjectPath } from "../utils/paths.js";
 import { compareCodeUnits } from "../utils/order.js";
@@ -68,10 +68,9 @@ export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceA
   const required = task.validationPlan.filter((check) => check.required);
   if (task.acceptanceCriteria.length === 0 || required.length === 0) return false;
   const latestByCheck = new Map<string, Evidence>();
-  for (const evidence of task.evidence) {
-    if (!evidence.checkId) continue;
-    const previous = latestByCheck.get(evidence.checkId);
-    if (!previous || evidenceTime(evidence) >= evidenceTime(previous)) latestByCheck.set(evidence.checkId, evidence);
+  for (const checkId of new Set(task.evidence.map((evidence) => evidence.checkId).filter((id): id is string => Boolean(id)))) {
+    const latest = selectLatestEvidence(task.evidence, checkId, now);
+    if (latest) latestByCheck.set(checkId, latest);
   }
   const freshPasses = task.evidence.filter((evidence) => evidence.result === "pass" && isFresh(evidence, now, maxEvidenceAgeMs, task.schemaVersion === 1) && (!evidence.checkId || latestByCheck.get(evidence.checkId)?.id === evidence.id) && (task.schemaVersion === 1 || isInputDigest(evidence.inputDigest)));
   if (required.some((check) => !freshPasses.some((evidence) => evidence.checkId === check.id))) return false;

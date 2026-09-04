@@ -5,6 +5,7 @@ import { canCompleteTask } from "../workflow.js";
 import { compareCodeUnits } from "../../utils/order.js";
 import { resolveSafeProjectPath } from "../../utils/paths.js";
 import { auditReadyTrace, type ReadyTraceDiagnosticCode } from "./ready-trace.js";
+import { selectLatestEvidence } from "./task.js";
 import type { AcceptanceCriterion, Evidence, TaskMode, TaskRecord, TaskStatus, WorkflowCheckpoint } from "./task.js";
 
 type TaskAuditArtifact = "prd.md" | "plan.md" | "task.json";
@@ -180,10 +181,9 @@ function criterionHasFreshSupport(
 ): boolean {
   const evidenceById = new Map(task.evidence.map((evidence) => [evidence.id, evidence]));
   const latestByCheck = new Map<string, Evidence>();
-  for (const evidence of task.evidence) {
-    if (evidence.checkId === undefined) continue;
-    const previous = latestByCheck.get(evidence.checkId);
-    if (previous === undefined || Date.parse(evidence.recordedAt) >= Date.parse(previous.recordedAt)) latestByCheck.set(evidence.checkId, evidence);
+  for (const checkId of new Set(task.evidence.map((evidence) => evidence.checkId).filter((id): id is string => id !== undefined))) {
+    const latest = selectLatestEvidence(task.evidence, checkId, now);
+    if (latest) latestByCheck.set(checkId, latest);
   }
   const checks = new Map(task.validationPlan.map((check) => [check.id, check]));
   return criterion.evidenceIds.some((id) => {

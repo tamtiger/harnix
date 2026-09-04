@@ -37,6 +37,28 @@ export function createTaskV2MigrationEvidence(taskId: string, recordedAt: string
   };
 }
 
+// Selects the representative evidence for a check. Time-valid evidence (finite
+// timestamp not in the future relative to `now`) is preferred over invalid or
+// future-dated evidence so an immutable future-dated record cannot mask a later
+// legitimate pass. Within the same validity class the newer `recordedAt` wins,
+// and exact ties keep append order (the later array element wins).
+export function selectLatestEvidence(evidence: readonly Evidence[], checkId: string, now = Date.now()): Evidence | undefined {
+  let latest: Evidence | undefined;
+  let latestTime = Number.NaN;
+  let latestValid = false;
+  for (const candidate of evidence) {
+    if (candidate.checkId !== checkId) continue;
+    const time = Date.parse(candidate.recordedAt);
+    const valid = Number.isFinite(time) && time <= now;
+    if (latest === undefined || (valid && !latestValid) || (valid === latestValid && time >= latestTime)) {
+      latest = candidate;
+      latestTime = time;
+      latestValid = valid;
+    }
+  }
+  return latest;
+}
+
 export class TaskValidationError extends Error { override name = "TaskValidationError"; }
 const taskIdPattern = /^\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const taskRecordKeys = new Set(["acceptanceCriteria", "blocker", "cancellation", "cancelledAt", "checkpoint", "completedAt", "createdAt", "evidence", "generator", "goal", "id", "mode", "nonGoals", "relevantPaths", "relevantSpecs", "schemaVersion", "status", "title", "updatedAt", "validationPlan"]);

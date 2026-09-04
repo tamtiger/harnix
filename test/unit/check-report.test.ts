@@ -59,6 +59,17 @@ describe("required check report", () => {
     const future: TaskRecordV2 = { ...task, evidence: [{ ...task.evidence[0]!, recordedAt: "2026-08-26T01:00:01.000Z" }] };
     expect((await inspectRequiredChecks(root, harnixRoot, future, now))[0]).toMatchObject({ state: "stale", reasonCodes: ["evidence-expired"] });
 
+    const futureThenValid: TaskRecordV2 = {
+      ...task,
+      evidence: [
+        { ...task.evidence[0]!, id: "gate-future", recordedAt: "2026-08-26T01:00:01.000Z" },
+        { ...task.evidence[0]!, id: "gate-valid", recordedAt: "2026-08-26T00:59:00.000Z" },
+      ],
+    };
+    await persistNewVerificationInputSnapshots(root, harnixRoot, [], futureThenValid);
+    expect((await inspectRequiredChecks(root, harnixRoot, futureThenValid, now))[0]).toMatchObject({ state: "passed", reasonCodes: [] });
+    await writeFile(sidecarPath, validSidecar);
+
     await writeFile(join(root, "src", "a.ts"), "a2\n");
     let report = (await inspectRequiredChecks(root, harnixRoot, task, now))[0]!;
     expect(report).toMatchObject({ state: "stale", reasonCodes: ["inputs-changed"], changes: [{ path: "src/a.ts", kind: "changed" }] });

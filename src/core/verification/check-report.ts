@@ -1,5 +1,6 @@
 import { compareCodeUnits } from "../../utils/order.js";
-import type { Evidence, TaskRecord } from "../tasks/task.js";
+import { selectLatestEvidence } from "../tasks/task.js";
+import type { TaskRecord } from "../tasks/task.js";
 import {
   compareVerificationInputSnapshots,
   computeVerificationInputSnapshot,
@@ -48,7 +49,7 @@ export async function inspectRequiredChecks(
   }
 
   return Promise.all(task.validationPlan.filter((check) => check.required).map(async (check): Promise<RequiredCheckInspection> => {
-    const evidence = latestEvidence(task.evidence, check.id);
+    const evidence = selectLatestEvidence(task.evidence, check.id, now);
     if (evidence === undefined) return inspection(check.id, "pending", ["no-evidence"]);
     if (evidence.result === "skipped") return inspection(check.id, "pending", ["latest-skipped"]);
     if (evidence.result === "fail") return inspection(check.id, "failed", ["latest-failed"]);
@@ -83,13 +84,4 @@ function inspection(
   changes: readonly VerificationInputChange[] = [],
 ): RequiredCheckInspection {
   return { id, state, reasonCodes, changes };
-}
-
-function latestEvidence(evidence: readonly Evidence[], checkId: string): Evidence | undefined {
-  let latest: Evidence | undefined;
-  for (const candidate of evidence) {
-    if (candidate.checkId !== checkId) continue;
-    if (latest === undefined || Date.parse(candidate.recordedAt) >= Date.parse(latest.recordedAt)) latest = candidate;
-  }
-  return latest;
 }

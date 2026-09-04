@@ -4,6 +4,7 @@ import { mkdir, readFile } from "node:fs/promises";
 
 import { globby } from "globby";
 
+import { selectLatestEvidence } from "../tasks/task.js";
 import type { TaskRecordV2, ValidationCheckV2 } from "../tasks/task.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "../../utils/paths.js";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
@@ -192,10 +193,7 @@ export async function assertVerificationInputsFresh(projectRoot: string, harnixR
   const sidecar = await loadVerificationInputSidecar(harnixRoot, task.id);
   const storedByEvidence = new Map(sidecar?.snapshots.map((snapshot) => [snapshot.evidenceId, snapshot]) ?? []);
   for (const check of task.validationPlan.filter((candidate) => candidate.required)) {
-    let latest: TaskRecordV2["evidence"][number] | undefined;
-    for (const evidence of task.evidence) {
-      if (evidence.checkId === check.id && (latest === undefined || Date.parse(evidence.recordedAt) >= Date.parse(latest.recordedAt))) latest = evidence;
-    }
+    const latest = selectLatestEvidence(task.evidence, check.id);
     if (latest?.result !== "pass") continue;
     const stored = storedByEvidence.get(latest.id);
     if (stored === undefined || stored.inputDigest !== latest.inputDigest) throw new Error(`Verification input snapshot is missing or invalid for check ${check.id}.`);
