@@ -53,6 +53,24 @@ describe("internal context", () => {
     await expect(renderInternalContextForHook({ fallbackCwd: root, platform: "antigravity", event: { cwd: root, invocationNum: "0" } })).resolves.toBe("");
   });
 
+  it("should_emit_plain_text_for_claude_and_stay_a_no_op_outside_an_initialized_project", async () => {
+    const root = await temporaryRepository();
+    await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" }));
+    await mkdir(join(root, "docs"), { recursive: true });
+    await writeFile(join(root, "docs", "a.md"), "context");
+    const task: TaskRecord = { generator: "harnix", schemaVersion: 1, id: "20260916-120000-claude", title: "t", mode: "lite", status: "in_progress", checkpoint: "implementing", goal: "t", nonGoals: [], acceptanceCriteria: [], relevantPaths: ["docs/a.md"], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp };
+    await saveTask(join(root, ".harnix"), task);
+    await setActiveTask(join(root, ".harnix"), task.id);
+    const uninitialized = await temporaryRepository();
+
+    const initialized = await renderInternalContextForHook({ fallbackCwd: root, platform: "claude", event: { cwd: root } });
+
+    expect(initialized.startsWith("{")).toBe(false);
+    expect(initialized).toContain("context");
+    await expect(renderInternalContextForHook({ fallbackCwd: uninitialized, platform: "claude", event: { cwd: uninitialized } })).resolves.toBe("");
+    await expect(renderInternalContextForHook({ fallbackCwd: uninitialized, platform: "claude", event: "{not-json" })).resolves.toBe("");
+  });
+
   it("should_emit_a_redacted_platform_warning_when_initialized_project_state_is_corrupt", async () => {
     const root = await temporaryRepository();
     await mkdir(join(root, ".harnix"), { recursive: true });

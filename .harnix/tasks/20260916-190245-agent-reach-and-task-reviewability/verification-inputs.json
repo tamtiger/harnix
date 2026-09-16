@@ -1,0 +1,1273 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260916-190245-agent-reach-and-task-reviewability",
+  "snapshots": [
+    {
+      "evidenceId": "green-focused-human-view-20260916-192200",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260916-190245-agent-reach-and-task-reviewability",
+      "checkId": "focused-human-view",
+      "taskContractHash": "9bfd49d5b1d7d76c03b404e9b8ccb4a4b0a1454a7b0fbe0859e154bacb30d77e",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/plan.md",
+          "sha256": "5d6bf5cb5bfb7d5c44578c6324ae1954fa1f14504b95c6a1e8bef49c343f7371",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/prd.md",
+          "sha256": "b2a5aa5e9f80f2ef158e34c2e62182afec6188b0f2dc856bdd62b63490b6c137",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/cli-program.ts",
+          "sha256": "078b33208ef2e39c0b116f50e0f0f14f43c722b4e0b9e034bf5fb8bb5617fe43",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/human-report.ts",
+          "sha256": "790264637b14ac389334931a854c4cd2f92595e795dd82c3f39baa45d3a3dcb2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/cli.test.ts",
+          "sha256": "ad4c2d02af5c166e01c48b303303f3f88ba769899dc3995ff17064810c5fa5be",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/human-report.test.ts",
+          "sha256": "66b3359dd7fd91c40cac55ad8c8d2b3563727b6f426abe034e4b7e9cfe9b6378",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/status.test.ts",
+          "sha256": "2876eeeca6800191c524f9319d985ccec61e1e78e23b05866726af7c5742845f",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "1401f5387d41befd82b906f6558a1abe3995c8ecf9b0606445604b94bcf31bbd"
+    },
+    {
+      "evidenceId": "green-focused-skill-cli-20260916-192200",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260916-190245-agent-reach-and-task-reviewability",
+      "checkId": "focused-skill-cli",
+      "taskContractHash": "9bfd49d5b1d7d76c03b404e9b8ccb4a4b0a1454a7b0fbe0859e154bacb30d77e",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/plan.md",
+          "sha256": "5d6bf5cb5bfb7d5c44578c6324ae1954fa1f14504b95c6a1e8bef49c343f7371",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/prd.md",
+          "sha256": "b2a5aa5e9f80f2ef158e34c2e62182afec6188b0f2dc856bdd62b63490b6c137",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/cli-program.ts",
+          "sha256": "078b33208ef2e39c0b116f50e0f0f14f43c722b4e0b9e034bf5fb8bb5617fe43",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/skills.ts",
+          "sha256": "3f844cd44001b8803b8c32b41a532d4f2313bc3b93e46d9d5143c90b4722eef5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/catalog.ts",
+          "sha256": "aa1fc4d3e92b24b550117e170ca7e345472305d568db7d641857ff3c68614b2d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "092f679fa63bd8b7449c787e87a60a13764c54526737b17287de516028bc647d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "8a5abce025e76863ea1621e468df8a75135a8e1cf4985e589a554ac58136ffe5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/skills.test.ts",
+          "sha256": "ee55bc1466deac197f302c6a4db8bbc2c1989e58d9abb3275d4c78e81ea6f10e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "017cd82267e6f8ae4fd29fe256ef7ce91c3e5ef288bcb408ba41ce85f072f7dd",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "abca4de4166b9ebf35a5fd04cadf6e5a1aaab1fa4e51d3a66142f9dd81c0fcfe",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "3e88324b36fb620620eb3ffcda6e10acdb60176060311361790a6cd8d9e9ac3e"
+    },
+    {
+      "evidenceId": "green-focused-task-rationale-20260916-192200",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260916-190245-agent-reach-and-task-reviewability",
+      "checkId": "focused-task-rationale",
+      "taskContractHash": "9bfd49d5b1d7d76c03b404e9b8ccb4a4b0a1454a7b0fbe0859e154bacb30d77e",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/plan.md",
+          "sha256": "5d6bf5cb5bfb7d5c44578c6324ae1954fa1f14504b95c6a1e8bef49c343f7371",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/prd.md",
+          "sha256": "b2a5aa5e9f80f2ef158e34c2e62182afec6188b0f2dc856bdd62b63490b6c137",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/tasks/task.ts",
+          "sha256": "0285ec49d6fb5328e31b5d96ef8a88f3f207a6a27a3372541e911bee303cf89e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "588399b514b55757484e4b069796e270a55f22fa4e88abdcb819dc085689b842",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-state.test.ts",
+          "sha256": "03415590f33af41ce0a447ea21f99e7f15c1fda6cb3cbe7d2f769b342c15860a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "1e1070624b0161999e28fe6cfbb8c2f86f24e615e8f56e962b3801f4757cb4d6",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "62a1c1919351345d19fc409961f3ff4a0d5ae4a9986eb7911d90717319e0ed56"
+    },
+    {
+      "evidenceId": "green-focused-transport-20260916-192200",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260916-190245-agent-reach-and-task-reviewability",
+      "checkId": "focused-transport",
+      "taskContractHash": "9bfd49d5b1d7d76c03b404e9b8ccb4a4b0a1454a7b0fbe0859e154bacb30d77e",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/plan.md",
+          "sha256": "5d6bf5cb5bfb7d5c44578c6324ae1954fa1f14504b95c6a1e8bef49c343f7371",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/prd.md",
+          "sha256": "b2a5aa5e9f80f2ef158e34c2e62182afec6188b0f2dc856bdd62b63490b6c137",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/cli-program.ts",
+          "sha256": "078b33208ef2e39c0b116f50e0f0f14f43c722b4e0b9e034bf5fb8bb5617fe43",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "a84820ad2b50e853265bf2629fd951e077ae3fbaae3d05c8e070b558e6c59d74",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "017cd82267e6f8ae4fd29fe256ef7ce91c3e5ef288bcb408ba41ce85f072f7dd",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "bdff9a7d356fee7245bbee575be2df1c59652a0b2f615226415756e27e041afb",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "7d9ebf16aff2f39ba92507c55887edf319e59e272a8ea6159a771b6734e3a6b9"
+    },
+    {
+      "evidenceId": "green-managed-parity-20260916-192200",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260916-190245-agent-reach-and-task-reviewability",
+      "checkId": "managed-parity",
+      "taskContractHash": "9bfd49d5b1d7d76c03b404e9b8ccb4a4b0a1454a7b0fbe0859e154bacb30d77e",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/plan.md",
+          "sha256": "5d6bf5cb5bfb7d5c44578c6324ae1954fa1f14504b95c6a1e8bef49c343f7371",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/prd.md",
+          "sha256": "b2a5aa5e9f80f2ef158e34c2e62182afec6188b0f2dc856bdd62b63490b6c137",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "cd66420c4bfbb08841bf5522b4031d11c3a183cb473367aebff11cc2d3b479b7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "d9e5e1dbcd301389d1be19a5600d5dea0b2271e95a147b70de632a1b4e540bf3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "a35b327b00b41d61bd962f282d6abd6b82f19ac7637fbaa511ae9a32e93076ad",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "77538eb94f6703bbfa9763bd44a6a210c765d91f3ed409ed8d1cd5a90042ce2a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "5fae9c8ba6d7aef607cba4cb2ef8b60d3a2a5d05c40d9ceebe164acdbc088130",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "2d5c27b4ba817972effd64abed569b1831e785d0a4a68504fa2592532ea2e4d9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "f213cd2995adf4a77254e5116c33437721dbde9cabb240c52cb07cdf89173ec4",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "a20497d7f744cd3b63ffebd3b9d29f3ce6850ac82af9eeaed5b7eabf7ff39a72",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/activation.ts",
+          "sha256": "0b8313bb8b57211da73e967a530c8db4fe5c260eebbe1131ac8ecadb33ec03e7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "092f679fa63bd8b7449c787e87a60a13764c54526737b17287de516028bc647d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/global-surface.ts",
+          "sha256": "9c4e5c5045b2ecc4ec2d9f6a09586559877fd5bda7dbceb1afd5d7b7b227d984",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/managed-workflow.ts",
+          "sha256": "760e65ac2a7c4207c37837b561a190d1982d3520e853c636b8e0e1687cca9ddc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "8a5abce025e76863ea1621e468df8a75135a8e1cf4985e589a554ac58136ffe5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "c17f29eff4f325bb867f120079957b20a245f1bd653d12505ed7e222c410336b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/activation-instructions.test.ts",
+          "sha256": "e033a1a958a4aa39854236226befe64b483245e83a95dd4f44e4d7738b9b49ef",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "691e13dbf228d460aef3a3e5b92f3619e1d7fb37cedbcce74d38f64ff1c85d6f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "cc15c5632c8e2379f1c458cd0a88cbeeb3223b58948a9d024ff1aa9d85579223",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "b90c7ae12c131ea44d2bc174f167880b388168b462abcf0c14d455a5fc6748b9"
+    },
+    {
+      "evidenceId": "green-release-gate-20260916-192200",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260916-190245-agent-reach-and-task-reviewability",
+      "checkId": "release-gate",
+      "taskContractHash": "9bfd49d5b1d7d76c03b404e9b8ccb4a4b0a1454a7b0fbe0859e154bacb30d77e",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/plan.md",
+          "sha256": "5d6bf5cb5bfb7d5c44578c6324ae1954fa1f14504b95c6a1e8bef49c343f7371",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260916-190245-agent-reach-and-task-reviewability/prd.md",
+          "sha256": "b2a5aa5e9f80f2ef158e34c2e62182afec6188b0f2dc856bdd62b63490b6c137",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "cd66420c4bfbb08841bf5522b4031d11c3a183cb473367aebff11cc2d3b479b7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "2a55d9032b6993457cd9c31e6ed16cad992473396ac3bef7c06ad848c283493d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "README.md",
+          "sha256": "c476c395c9ee13619ffdf15993f73ae8f139f566c888a61ff28a741aedbe1a2d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+          "sha256": "713dc610f8d07b9302c5d407d90b1270b31c290c877e3a4cfd77e39460b4cbf4",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/HARNESS_RESEARCH.md",
+          "sha256": "887fd0992b40a1599d8081f9fb42611b7c0949c1400bd07c44a7f7f90573c358",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/HARNIX_PRD.md",
+          "sha256": "f0e6ae198511d3b3de0b901f1e7d800e3195ae2e9b71169b2e7fd267f28b760d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/HARNIX_WORKFLOW.md",
+          "sha256": "f982500a54fc3b1486f4e451808e0d7af449a17c9184e481ed83d93c9e4b8f37",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "2f3ddb3cdd594134775f94856a5e089118868fc8eea902bfdfa9bf689c122ea0",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/REVIEW_REFACTOR_PLAN.md",
+          "sha256": "8ce69c025b9246de4c9adad62bd7277c2850decb501efd693460a57fe77dbb11",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/UPSTREAM_BASELINE.md",
+          "sha256": "d45b810fb7cb438e5ccfd5fb8c40b3454fbfcf79f418e71a7d3dea3324cbe4a9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/UPSTREAM_MAPPING.md",
+          "sha256": "b47549c488826334f8a321a12d2e4e0fd980a5d3203f1e3dab79b72ab37c214b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/prompts/harness-capability-research.md",
+          "sha256": "5d6a77d1e6d7ba0ea80178e2113908fb2f54ea4c6ac2525ddfab7a0047d0f8ec",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/prompts/review-refactor-claude-setup.md",
+          "sha256": "1ea691361ac1705a6c1fa08de40958376aeccd191654d6518b4e0eae7b016f14",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/prompts/workflow-scenario-audit.md",
+          "sha256": "f6a59d4171f85d757ca83eba054ffd45433dbf3c1481c9d9b042454612de813e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "package.json",
+          "sha256": "781ff6b31a1a4569981d74375d6495fa53867347ff65c79b401f52278c929434",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "scripts/isolated-user-home.mjs",
+          "sha256": "53ffc7e6bbf92210a9d34af0130f1202ff587580095ef372c516e37cd1217dc9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "scripts/measure-footprint.mjs",
+          "sha256": "f77f0b2f1a232912ebd1b334c6e55c4365f4eb8814b62b407bc08e08b05fd613",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "scripts/measure-init.mjs",
+          "sha256": "cbf81a57887594d5af77f5cbf62562fcb023647db6812ceb4fc0f91104a34758",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "scripts/pack-check.mjs",
+          "sha256": "7b1798067e84ff878e535f4a113dfa6134b13b1fe789c85cd2153241920bbcaf",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "scripts/scan-release.mjs",
+          "sha256": "6db665489307a79a66112409c5d5b228517a8a243f68d6a36c637b64b4d53a21",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "scripts/smoke-tarball.mjs",
+          "sha256": "bd7c8de070692eab965cc95e118e3252ffdd56b82710a0e4a09df323cf2e98c7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "scripts/version-sync.mjs",
+          "sha256": "6e8ae26d708e2588a83475751a44c281460d9e260f4b96a496cad37422bfb9ed",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/catalog/catalog.ts",
+          "sha256": "6aa8f15a0074d87ef52377a050efb175a0c6ca0a7a1cc0e603ca80d1a9038776",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/catalog/types.ts",
+          "sha256": "7d40009eb01118ca4990c0140798139c9961c43e6cbfc87b2876714b28fe4b32",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/catalog/validation.ts",
+          "sha256": "b81057e0fb73ab6720a88a36fb335021a621728c3c365e23a5cfc855c0a1f47a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/cli-program.ts",
+          "sha256": "078b33208ef2e39c0b116f50e0f0f14f43c722b4e0b9e034bf5fb8bb5617fe43",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/cli.ts",
+          "sha256": "d5fc29af6fff464498db45ec2dd01d0bc702a588e7b454cb734ca5f44acb4db2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/audit.ts",
+          "sha256": "4822900e0f6f681d6366002cd1565506ade8786579be21daa81f10028c942ac9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/checks.ts",
+          "sha256": "8514b8768916fe6ef36d9b9bb47a0df82db5a659a3078403a786a37da30ee12a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/context-report.ts",
+          "sha256": "2dfee16c4626556569ba9ee0e174d7b8211fb3c1cf871c234b061290d14cff05",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/doctor.ts",
+          "sha256": "b9001c7aa6526fb1c9d995b1317e7c23ce33903b8c3b355a2ecfe8d864911010",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/global-doctor.ts",
+          "sha256": "45610cb566964db050c966d1d0b4080fa57f2b9ad73d44daf05f8f94ef7f3fd1",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/global-uninstall.ts",
+          "sha256": "66641ebda83620441832fa2181c05444e1335aa2267ca514f1c07ddc78b7cd2c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/global-update.ts",
+          "sha256": "1c6c788b1dffc4e0be58a6e06333160e0fe239e51af059e90e24424095617472",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/human-report.ts",
+          "sha256": "790264637b14ac389334931a854c4cd2f92595e795dd82c3f39baa45d3a3dcb2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/init.ts",
+          "sha256": "1132c4df2bbda470624f3807488b8feeed9a967e185ac9bbdfe5ef1146c0f759",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/internal-context-cli.ts",
+          "sha256": "df7cf8f1a75a782df6599f2270d9fa53c945f1d150475244a7d059a6e46758d9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/internal-context.ts",
+          "sha256": "40389e8be9aece1afdde9a91379e1dcb345a08bab36ff28b0f27d5843d7eaeaf",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "a84820ad2b50e853265bf2629fd951e077ae3fbaae3d05c8e070b558e6c59d74",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/legacy-project-surfaces.ts",
+          "sha256": "72e05955c8e8d375bedb00dca23768042ec5ec5ad029c98bfcda255e0724498b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/mem.ts",
+          "sha256": "4d90e71c4d81084239b2b89dfe6147f9669ce1ec76ffbc774cb18b4a63c98bc2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/repo-map-internal.ts",
+          "sha256": "6de33c26a8c8bfc661ea266fdb4008aa00c1947fe4e71ae6aa2549691e5f813d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/resume.ts",
+          "sha256": "a60ae3b21301db33c8e87ad92179751682700b367ffc532531c977a6e529c64a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/setup.ts",
+          "sha256": "30786cdcc4d4631562908e31e91f306dba259aafc26c02f9eb01696b63048dfe",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/skills.ts",
+          "sha256": "3f844cd44001b8803b8c32b41a532d4f2313bc3b93e46d9d5143c90b4722eef5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/status.ts",
+          "sha256": "e961575adc668d0b594c7d7be20192138053975b4058e80d1f1581eb1e651bb0",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/tasks.ts",
+          "sha256": "3616de65b7bf89bb4df93c37b11f5c2088190320690d6ce3cc797efeef159a76",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/uninstall.ts",
+          "sha256": "0ea478f378af10bd752f30382550ac831a26c5b50a069694280c72b98927757f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/update.ts",
+          "sha256": "26e8aab10d407a47c2b1aeb0828d1e45fdb652c514cf6cd3b9554fea6b978554",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/upgrade.ts",
+          "sha256": "2c59c08e1d7b68c0f785368e787d19bf8471d90013094ffe7250544f6c24c86c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/configurators/antigravity.ts",
+          "sha256": "8306ea048eece1c3a7dd81c5541cd329474de0f3decb01440b7158901105b716",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/configurators/claude.ts",
+          "sha256": "b0c953444289f614c57a98af3fa3c3aabcea3e0df394a54f040e0ae1b205b3ca",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/configurators/codex.ts",
+          "sha256": "6173b6a8a8fe5f6cdec16728492c493a5dd864b6618dcc7d8656feb325f4c068",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/configurators/kiro.ts",
+          "sha256": "8bce8fdc6a0620a67a2c07ab856a47b4a32c54a1756e56c50d6b5f204b0af54a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/config/config.ts",
+          "sha256": "376ffbffa6e3365440583d0cfa58a498a8073fcbe9769cfeda3f8511a48a6339",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/context/context.ts",
+          "sha256": "42cc6451a380c249f1f0e018ea8890960001c83c59f87d3aefaade6f231f8920",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/context/effective-context.ts",
+          "sha256": "ebd0b3819977fa7c67aee5aeb22c22e1e64f020b06454f52c6b816723e3fa258",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/context/selection-freshness.ts",
+          "sha256": "ef7d34b61fac6fcc2023a546407f25aa6819fb879dfd71fcf4c60b91a10caa52",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/journal/journal.ts",
+          "sha256": "db0807ea332103ccbe583c1fdb12b3a19c54940b13357730fa15650d1eef8c0e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/journal/learning-safety.ts",
+          "sha256": "f901e0ebb99cd5f15aa1d3951931976d531fe03372449d11dcf49d1b2a2fbee1",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/journal/learning.ts",
+          "sha256": "581c37d595c314b0c88ca2ef8c5a8027ef2fdfc70b48c6f38ddb49cea426792c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/journal/promotion.ts",
+          "sha256": "5638b8ce31d71cc5d0e7bc30fc65547a95afe17d32a120b66be7457d2b790de7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/repo-map/extract.ts",
+          "sha256": "37974e995db0c6ff23c7bea9e9a40eb7dceb7803d2b36f849301c442b8b9454b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/repo-map/graph.ts",
+          "sha256": "6e82904c0c5b1f76499d9afa51e9028a3e88f01ee9af2b70f77b1527c8ec56c9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/repo-map/impact.ts",
+          "sha256": "6b411e6eb2cd39dc80836c0bb7bd1da00ff4f5276fb302a452d8f1906eae49c7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/repo-map/inventory.ts",
+          "sha256": "6e9fb79d152c08956b295fea72202c5a5c088826c7e5f07c7cc0bd00157de749",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/repo-map/search.ts",
+          "sha256": "3b386e0e81a6233e4386fe1cc9c12689595b2f9ccea882b4b9a9959a3badc347",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/repo-map/service.ts",
+          "sha256": "e9b6351bac27eaf80a4bb7e5f96177c48bded63e1d049eefa9e98931f2329738",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/repo-map/store.ts",
+          "sha256": "b2e63a2eb2a1c27cb8013e7b448f1bd66e031ab7fcd4e0b7c74e5e8d6d2a9c07",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/repo-map/types.ts",
+          "sha256": "ae299b77bd71ab93f83ed586b8f3b1567f457ba82e04a69f86c3b80cbfbd3e8a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/research.ts",
+          "sha256": "6e189b98938ce476e815edd01b20f88aa995f6ebb16a7f10fd5c12c18683edc3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/status.ts",
+          "sha256": "96be4a12740ce175d78e2e5050594c61d9d4eb85997868274a8aba6ba23b8550",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/tasks/ready-trace.ts",
+          "sha256": "34e0f74d42bdbf2cba6cc476a2e29aa23f264184311c22384b7475ca44f74b6f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/tasks/task-audit.ts",
+          "sha256": "3eccc2fc8511433733b93cbbb6b2cb7bff888bdc483c04217917117c3e62e1db",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/tasks/task-index.ts",
+          "sha256": "19feaee93959ebeaa9c2a58368cd65084e20312c0a8db99fe76703311d15d100",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/tasks/task-resume.ts",
+          "sha256": "4ede80ed5c0f9a9f17481c81dd82419b23881db68424d955a57931a30601e5ed",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/tasks/task.ts",
+          "sha256": "0285ec49d6fb5328e31b5d96ef8a88f3f207a6a27a3372541e911bee303cf89e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/check-report.ts",
+          "sha256": "edc529fa8616a182e1e81b26e9dce5c97ea2379283e207fd94310084dda696ac",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "588399b514b55757484e4b069796e270a55f22fa4e88abdcb819dc085689b842",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "8e54c5f1b6cd4f621f3dbfbd87492a2f763b127cfc8435f6570db3e787446f6a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/catalog.ts",
+          "sha256": "2af7dcc0f91f7990f3a3dea5776b57ea9af90c6ed146b2533ac4ec35d330e82b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/index.ts",
+          "sha256": "d5953bc84c6fd9f91060797b71cd50a8d52fc18cefc3d91cbf8997278542b5bd",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/migration/discovery.ts",
+          "sha256": "0aca9f66b1c3d01ea2b7afd06fbe713ef45e08296cb6c7f8dca0f3d61b95b103",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/migration/migrate.ts",
+          "sha256": "4795b088682b065094df42531aed3ee6e0f8c0cc9ce278b5b61d959f20e0f4c5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/rules/rules.ts",
+          "sha256": "13b29303d9db80efe2eaa37612b1165db8b32415f4185275e862a71afb4639f7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/catalog.ts",
+          "sha256": "aa1fc4d3e92b24b550117e170ca7e345472305d568db7d641857ff3c68614b2d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/activation.ts",
+          "sha256": "0b8313bb8b57211da73e967a530c8db4fe5c260eebbe1131ac8ecadb33ec03e7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "092f679fa63bd8b7449c787e87a60a13764c54526737b17287de516028bc647d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/global-surface.ts",
+          "sha256": "9c4e5c5045b2ecc4ec2d9f6a09586559877fd5bda7dbceb1afd5d7b7b227d984",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/managed-workflow.ts",
+          "sha256": "760e65ac2a7c4207c37837b561a190d1982d3520e853c636b8e0e1687cca9ddc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/workflow.ts",
+          "sha256": "8a5abce025e76863ea1621e468df8a75135a8e1cf4985e589a554ac58136ffe5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/types/markdown.d.ts",
+          "sha256": "0c68b0f383ec05b9f1b082e1479b08f80ea850f0bc2f4a9d8e52178c140bedea",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/atomic-write.ts",
+          "sha256": "ec0da63dd507d3bf979c31e0a1c72503e48039a01ffe189e206e440ede250f37",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/bounded-input.ts",
+          "sha256": "b69ff743a41d7358294f4fc8bb8a6a4fed2702bd055d17a471518e02d9c2c449",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/detection.ts",
+          "sha256": "835cd109c3b8d29f33ffeeeab846fe393be556792253af66d961b6509c7cac88",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/file-lock.ts",
+          "sha256": "31f84992e54807992a846eb7bf6b794a4ef5e3ce0b53d48c71e4d77d130e6611",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/filesystem.ts",
+          "sha256": "910d471c36963aba43fd7b903a25a1432debeca8fa892a9b3503c8aaad4c2fbc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/global-managed-error.ts",
+          "sha256": "3adfe8ad4d4a151d40d9cb2cbf01443814db8c18844a566f22c4131feecc3acf",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/global-managed-files.ts",
+          "sha256": "9335f0d426b185036f016f105f56fd6e2a2ca294f97673adf632a96654c20081",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/global-managed-json.ts",
+          "sha256": "ba763013188791cb857771194a2eefee162ef5979e140999976fb47dbefb4d04",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/global-managed-markers.ts",
+          "sha256": "57b7bf2bb382c11c78e34f093b17f6aa1e6c2b2f503f0edcc12ad1dd73650acb",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/harnix-launcher.ts",
+          "sha256": "891545fc3bb75f71930bbe398202b8b41877f2b7619d80bf04ab27ce580eda12",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/hashing.ts",
+          "sha256": "3c45354fae3808a4b31854d2efcbf7370e6f5df9dd5fcba7368e6b8d723a2408",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/managed-files.ts",
+          "sha256": "cad0bae86d71eb85a5881ae9234364e3129c334ac0d9c55cebb80515c7818987",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/order.ts",
+          "sha256": "61bc8cf0f2a44527ad18559827794c72e3d0dc589b82499a78a9f38e728c4e10",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/paths.ts",
+          "sha256": "facb1adfafe8cbf4057417ff1d9c3353e80e37cb0f649bbf87de25227d8e98ee",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/project-discovery.ts",
+          "sha256": "2c58b8a0d6b1e6c6b451509d80a3416178dbca3dc5a0d2dbf10a4473cf8d8bf5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/safe-glob.ts",
+          "sha256": "d3ddd407b2a9ee270b0aac0f2149168f374ac822ae8e8359324f09e5de04e911",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/stack.ts",
+          "sha256": "ce761cfb1cd5b12cde0c41882437788fd9ede574edde0c3943d39a0c46c251c2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/user-paths.ts",
+          "sha256": "a04b19da7e52bca58c9dabc987dfa1cd471c9768243f34897c4d8e725d364a84",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/version.ts",
+          "sha256": "c03cbbbde5ad08c1547845268a701b9f249fefaf3a53331cae350112548fe7e9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/audit.test.ts",
+          "sha256": "d9357ea1e368a0936b051f3f4432d3984e4ea5e73b4b595a44d6eb4c9b901ce2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/checks.test.ts",
+          "sha256": "a84f187b04008194944c43a0edf68d9e432d3ad04b7ac40f1e17eea18f7515b7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/cli.test.ts",
+          "sha256": "ad4c2d02af5c166e01c48b303303f3f88ba769899dc3995ff17064810c5fa5be",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/context-report.test.ts",
+          "sha256": "c0716d4b0e719a625b1e94b1ab36ada157d561ef9001294ed26bfb1591604935",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/doctor.test.ts",
+          "sha256": "2ca3451eeafa0d896984871808b46afc2d3ead977bb748a21480d288780947ef",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/global-doctor.test.ts",
+          "sha256": "0dccaf29d50d8e1c3685fa8d302b2c57b0ec5e07ddd7c220d62bacd1a40b94b6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/global-lifecycle.test.ts",
+          "sha256": "2b99ec80e78cb5473f8f9202f98e6f97bbfc1ac6dbbb0e8bab60fba63a38d00b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/human-report.test.ts",
+          "sha256": "66b3359dd7fd91c40cac55ad8c8d2b3563727b6f426abe034e4b7e9cfe9b6378",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/init.test.ts",
+          "sha256": "544572be21badfd69841886f0941ff7536482fa1d9807bb62f8da30a13b112c3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/memory.test.ts",
+          "sha256": "8b136fdee02d6baa37770b057136f950bb840ecefd83a3a0c9cf27493d7f2414",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/project-state-safety.test.ts",
+          "sha256": "d974fc9b15d384fd034632e32eb3bf65cef6d1720587d8c19fb6a896e43756fa",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/repo-map/doctor.test.ts",
+          "sha256": "a5fef0d57725ab6baf71c998abde5c996a7e3da14d3d793e06fbaf84b19db1cf",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/repo-map/incremental.test.ts",
+          "sha256": "b8ccba33b5630cc3102b2f45a3785fd4c0047305e1b9f49c3dc7ef98e5fde85d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/repo-map/internal.test.ts",
+          "sha256": "3321f80511df2c657419813a2bd7342554a48d295ccddfabfad1bf266a78cf94",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/resume.test.ts",
+          "sha256": "bbc76675023b2cd70f941fbe521206210607a97bddec8d90033511e1c924a754",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/skills.test.ts",
+          "sha256": "ee55bc1466deac197f302c6a4db8bbc2c1989e58d9abb3275d4c78e81ea6f10e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/status.test.ts",
+          "sha256": "2876eeeca6800191c524f9319d985ccec61e1e78e23b05866726af7c5742845f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/tasks.test.ts",
+          "sha256": "d5cae5a2db63582c05ca60de89ddfa9c62765064e88ab6cba320ab0d1f8dc6b0",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/uninstall.test.ts",
+          "sha256": "2f816f7b877d79d1a5c968b90fce28333f53c90a239d49a85b13d47035c73962",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/update.test.ts",
+          "sha256": "297d9d1077d5aac8d1522c62dad65cf79293ac0f7bb10f0425854e5cc31c57a8",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/upgrade.test.ts",
+          "sha256": "c4f784ff0e922455033e6cdeb46e9652a315a1425279eecdfcd83c46d62b1bd4",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/migration/discovery.test.ts",
+          "sha256": "880ba6154a88c4591b7d0a4eaff42f4e5ee27420eb7b23c20e55754eeb4639c5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/migration/migrate.test.ts",
+          "sha256": "a811369d4f6114dbc39935da41deb7b49c55a65cc25b6d177f151bb230b132a6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/platform/claude-global.test.ts",
+          "sha256": "ab76666816b84cecdd1d59dd4776a6a0882f3deaa8e835fb73f2cc68e5db6e23",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/platform/codex-global.test.ts",
+          "sha256": "3cc252afab51c167674e906c97f02d3a98de48a08899a02783d06c0981eb49ac",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "c17f29eff4f325bb867f120079957b20a245f1bd653d12505ed7e222c410336b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/platform/setup.test.ts",
+          "sha256": "00a05e9060318ba488ebec30c8e117e7adf5e30079c365c3d68284c001dd0500",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/isolated-user-home.test.ts",
+          "sha256": "8006cfc0627ad4106198fb0e53d9f6ab687e9b9b68474e971251032055bf66a9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/path-boundaries.test.ts",
+          "sha256": "0c1b17fea38cbc2a454db6dca41f06cb8ff91c0392b43ee15b9b9f937479d6c5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/platform-boundaries.test.ts",
+          "sha256": "bd3197f0652b272db8e4c2a823dae16b5b94ddcbb64345c2ac2ec5531b89b416",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/release-scanner.test.ts",
+          "sha256": "8f85c1053f92330be734a6a40749d0acf4ac5a063f00fed796386e500cb787ec",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/user-global-paths.test.ts",
+          "sha256": "b3d457db5bc35ad29b3cff83b4ddc4327806badb4e1d28e41e1d7d55e0ceac8b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/support/temporary-repository.ts",
+          "sha256": "3852a1533e0cad93d15f6619ac82e2cb581784f00cc59c5d01e7ef372f2ada2d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/support/temporary-user-home.ts",
+          "sha256": "9b5080e84eb114d02f55669fc15266905c0a9b6db04cfec5c49570262bbf9a17",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/activation-instructions.test.ts",
+          "sha256": "e033a1a958a4aa39854236226befe64b483245e83a95dd4f44e4d7738b9b49ef",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/atomic-write.test.ts",
+          "sha256": "ff8308a0cfd0723d791b39df50d0f0603c4c3ddd13fc1cfa65e909b4a64cd23b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/bounded-input.test.ts",
+          "sha256": "69941b9c0969d270dbda7b7a6e13bca62708ded0e210fdbc85dca438980df2f6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/catalog.test.ts",
+          "sha256": "a818f206b7eb8ddbd009cdcd8b0e879efa7eb279c09585b98364fc9584cb7b41",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/check-report.test.ts",
+          "sha256": "61b707a71c94afffa52cb363b8181d9036503d401e9e267a0e0c6abda8599a68",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/cli-fast-path.test.ts",
+          "sha256": "4f737ad2034af067607c8de06d228e2bb290a9bd5dbf52cf29113bb4e3222e5e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/config.test.ts",
+          "sha256": "4b4bb8a928fc86cc6cbcca94a1fed44fb8d087c47aaeb2520f0e9f562aea3077",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/context.test.ts",
+          "sha256": "eba1dee1d3b94bc30ceae7885c6176513d8345cd5d09a5644625f41a4376ca1b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/detection.test.ts",
+          "sha256": "e0f86800e442aa6488f6e459686115ab8a2b0193de1bb6c46aca12cef4dd694b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/effective-context.test.ts",
+          "sha256": "ce89893e76db0b8d500f3ca9c4287f682b34ce12f41547873ce0d7de46c4b6ce",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/file-lock.test.ts",
+          "sha256": "3b6aa8a3dda9610ca56fab4998449b0e548c39b5b001a228151f0d0820e9542d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/filesystem.test.ts",
+          "sha256": "2bded85c449428628da4223eb71a2e1e8dd514bd40e43013ee85b9e8104bbcf8",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/global-managed-files.test.ts",
+          "sha256": "633ccaba68b1f8804a1eb7628722a417fcd1000144e96cd346886c6dd4272006",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/global-uninstall.test.ts",
+          "sha256": "8eee505c0a28e96a5a3d882ba894f66f91815d0b3f7f1f61d98b31b93686b557",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/harnix-launcher.test.ts",
+          "sha256": "4a9a752f562678a07515583d48f098a0d7421ff388928cbfc11b59e797789624",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/journal.test.ts",
+          "sha256": "29a07b7ccbde72e7dd40cc92c02f6ea3c02823d18f747d0dbcc96618d31849fd",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/learning-safety.test.ts",
+          "sha256": "d834ef5c88bd77fb7c67a1aecbf020f5be8ad7a49988a131657dbee8503d924f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/legacy-project-surfaces.test.ts",
+          "sha256": "9279ae377f5f8ca2c47a2f7c5b06c0892cc1ece52a5d784912e967ab3699abeb",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/managed-files.test.ts",
+          "sha256": "e744fe9c6cbabb50abd3102ae3acfb87ed7c72058f2a767b7a98cf8aeaf58dd1",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/package-contract.test.ts",
+          "sha256": "64672afbe111e77c24a63fb915f010550a700153a63dbfb3ca068293b0b4c4dc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/paths.test.ts",
+          "sha256": "7758a47a2e33b0265f8b89416579538c8e88864f4145f9bbb796d1af8914b369",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/project-discovery.test.ts",
+          "sha256": "24c2638ed0c3f8a04e5024d2535eece917cabba7341d818762b063b918ffcdc6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/ready-trace.test.ts",
+          "sha256": "199e02c9c272e89b2dc878d83b579f75eee60134c24b340d627b669e0487dd70",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/repo-map/graph-ranking.test.ts",
+          "sha256": "f803af1465ac7482c9fef45610a227d6890119e0cb754bea65ca5ded026450ed",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/repo-map/impact.test.ts",
+          "sha256": "560c6a1638f3e879e20a5167b2824c7c2c25f2dc5b68ec10f14d14ca7412ef9c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/repo-map/service.test.ts",
+          "sha256": "db5fc74c39f885c55f1ae7c1eee6de50d3554472090fb9d7a54bead68da124e3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "8af44a95c2fd0267678773f5a22052bd3e6b6fb81e2c29f9696786213054900c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/safe-glob.test.ts",
+          "sha256": "463e2d7bdf733177befa6a04f6ab7c18256d793a5ffdf6249d67a4eb22791c7b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/status.test.ts",
+          "sha256": "3380b0d5673fba48d111be051da5afcbdef80e6e6644e5cc99029eb35680d122",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-audit.test.ts",
+          "sha256": "9a08dd9449d07ec17aa0c273647be31d45a7bb3438aad5320b226e15d086845e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-index.test.ts",
+          "sha256": "75fc9c9467f3dfd084a598257b179ad4be43d1076bb03da29d879d8a10c60e21",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-resume.test.ts",
+          "sha256": "bf074f5ad377e21b375b73b156728ae3a9a37bf1586572bb3ae02a29b190bdb3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-state.test.ts",
+          "sha256": "03415590f33af41ce0a447ea21f99e7f15c1fda6cb3cbe7d2f769b342c15860a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/user-paths.test.ts",
+          "sha256": "26ac5a9a891a6306610365ac6fbfaddc690036adb571f183fe749a1ff1265220",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "1e1070624b0161999e28fe6cfbb8c2f86f24e615e8f56e962b3801f4757cb4d6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/version-sync.test.ts",
+          "sha256": "beda10ca25fa4b56e30bb8e893936c578916180325d50dd9131bd4e7b73f103d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "017cd82267e6f8ae4fd29fe256ef7ce91c3e5ef288bcb408ba41ce85f072f7dd",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "9b5ad559d2d33b363f841c8a4f5ee04a334376abfa34430f80dfd11eebe61cbb",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "7769466e465a163ead71895ead2b92b99a8a2ac8cf09f625371cce6e36578ca8",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "bdff9a7d356fee7245bbee575be2df1c59652a0b2f615226415756e27e041afb",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/provenance.test.ts",
+          "sha256": "e59044df03781df82053940b1ad0b03a3ec76efa05f2695a5a8ae1eda8ee1839",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "1695fa7ed45633a0fee6729ad053cfd076a30bf108d48c20a69d8633fd190ceb",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "691e13dbf228d460aef3a3e5b92f3619e1d7fb37cedbcce74d38f64ff1c85d6f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "cc15c5632c8e2379f1c458cd0a88cbeeb3223b58948a9d024ff1aa9d85579223",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "abca4de4166b9ebf35a5fd04cadf6e5a1aaab1fa4e51d3a66142f9dd81c0fcfe",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "33bcb1545f93a4b3619190dbb8de6d6eab8dff808b51fd0fa6f8109d1ef96baf"
+    }
+  ]
+}

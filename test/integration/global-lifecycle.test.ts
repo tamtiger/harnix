@@ -43,6 +43,48 @@ describe("global integration lifecycle", () => {
     await expect(access(join(home, ".agents"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
+  it("should_update_and_uninstall_claude_while_preserving_unrelated_user_settings_and_memory", async () => {
+    const home = await temporaryUserHome();
+    const environment = { CODEX_HOME: join(home, "codex") };
+    const options = { commandLookup: async () => true, environment, homeResolver: async () => home };
+    await mkdir(join(home, ".claude"), { recursive: true });
+    await writeFile(join(home, ".claude", "CLAUDE.md"), "# Notes" + "\n" + "\n" + "Prefer pnpm." + "\n", "utf8");
+
+    await setupPlatforms({ ...options, platforms: ["claude"] });
+    const discovered = await updateGlobalPlatforms(options);
+
+    expect(discovered.platforms.map((platform) => platform.platform)).toEqual(["claude"]);
+
+    const uninstalled = await uninstallGlobalIntegrations({ environment, homeResolver: async () => home, platforms: ["claude"], yes: true });
+    const memory = await readFile(join(home, ".claude", "CLAUDE.md"), "utf8");
+    const settings = JSON.parse(await readFile(join(home, ".claude", "settings.json"), "utf8"));
+
+    expect(uninstalled.platforms.map((platform) => platform.platform)).toEqual(["claude"]);
+    expect(memory).toContain("Prefer pnpm.");
+    expect(memory).not.toContain("<!-- harnix:begin -->");
+    expect(settings.hooks?.UserPromptSubmit ?? []).toEqual([]);
+    await expect(access(join(home, ".claude", "skills", "harnix-implement"))).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("should_preserve_a_user_modified_claude_hook_group_instead_of_reinstalling_a_duplicate", async () => {
+    const home = await temporaryUserHome();
+    const environment = { CODEX_HOME: join(home, "codex") };
+    const options = { commandLookup: async () => true, environment, homeResolver: async () => home };
+    await setupPlatforms({ ...options, platforms: ["claude"] });
+
+    const settingsPath = join(home, ".claude", "settings.json");
+    const edited = JSON.parse(await readFile(settingsPath, "utf8"));
+    edited.hooks.UserPromptSubmit[0].hooks[0].timeout = 20;
+    await writeFile(settingsPath, JSON.stringify(edited, null, 2) + "\n", "utf8");
+
+    const result = await updateGlobalPlatforms(options);
+    const settings = JSON.parse(await readFile(settingsPath, "utf8"));
+
+    expect(result.platforms[0]).toMatchObject({ platform: "claude", readiness: "drifted" });
+    expect(settings.hooks.UserPromptSubmit).toHaveLength(1);
+    expect(settings.hooks.UserPromptSubmit[0].hooks[0].timeout).toBe(20);
+  });
+
   it("should_noop_when_global_update_finds_no_owned_platform_manifest", async () => {
     const home = await temporaryUserHome();
 

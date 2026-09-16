@@ -30,6 +30,13 @@ describe("Harnix config v2", () => {
     });
   });
 
+  it("should_accept_claude_as_a_supported_platform_when_creating_config", () => {
+    const config = createConfig({ developer: "tam", platforms: ["kiro", "claude", "claude"] });
+
+    expect(config.platforms).toEqual(["claude", "kiro"]);
+    expect(() => validateConfig(config)).not.toThrow();
+  });
+
   it("should_sort_unicode_package_paths_by_code_unit_when_creating_config", () => {
     const config = createConfig({
       developer: "tam",

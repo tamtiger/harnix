@@ -12,11 +12,12 @@ import {
   type GlobalPlatform,
   type ReconcileGlobalManagedFilesOptions,
 } from "../utils/global-managed-files.js";
+import { matchesClaudeGlobalContextHookGroup } from "../configurators/claude.js";
 import { matchesCodexGlobalContextHookGroup } from "../configurators/codex.js";
 import { resolveSelectedUserPlatformRoots, type HomeResolver, type SelectedUserPlatformRoots, type UserPathRoot } from "../utils/user-paths.js";
 import { packageVersion } from "../version.js";
 
-export type GlobalUninstallPlatform = "kiro" | "antigravity" | "codex";
+export type GlobalUninstallPlatform = "kiro" | "antigravity" | "codex" | "claude";
 
 export interface GlobalUninstallLock {
   release(): Promise<void>;
@@ -214,6 +215,16 @@ function createTargetDescriptors(platforms: readonly GlobalUninstallPlatform[], 
       { publicPlatform: "antigravity", root: requireSelectedRoot(roots.antigravityCli, "Antigravity CLI"), manifestPath: ".managed.json", lockPath: ".managed.lock", platform: "antigravity-cli" },
     );
   }
+  if (platforms.includes("claude")) {
+    targets.push({
+      publicPlatform: "claude",
+      root: requireSelectedRoot(roots.claude, "Claude"),
+      manifestPath: "harnix/managed.json",
+      lockPath: "harnix/managed.lock",
+      platform: "claude",
+      memberMatchers: new Map([["claude-global-context-hook", matchesClaudeGlobalContextHookGroup]]),
+    });
+  }
   if (platforms.includes("codex")) {
     const codex = requireSelectedRoot(roots.codex, "Codex");
     targets.push(
@@ -305,8 +316,8 @@ function normalizePlatforms(platforms: readonly GlobalUninstallPlatform[]): Glob
   if (normalized.length === 0) {
     throw new Error("At least one platform must be selected for global uninstall.");
   }
-  if (normalized.some((platform) => platform !== "kiro" && platform !== "antigravity" && platform !== "codex")) {
-    throw new Error("Only Kiro, Antigravity, and Codex are supported for global uninstall.");
+  if (normalized.some((platform) => platform !== "kiro" && platform !== "antigravity" && platform !== "codex" && platform !== "claude")) {
+    throw new Error("Only Kiro, Antigravity, Codex, and Claude Code are supported for global uninstall.");
   }
   return normalized;
 }

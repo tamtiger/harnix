@@ -2,7 +2,7 @@
 name: harnix-finish-work
 description: Use when a Harnix task needs safe completion or explicit cancellation persistence, journaling, active-pointer cleanup, and an evidence-based handoff.
 metadata:
-  version: "1.0.21"
+  version: "1.1.3"
 ---
 
 # Finish or cancel Harnix work
@@ -89,6 +89,8 @@ Report the delivered outcome first, followed by fresh verification evidence, omi
 Never commit, branch, merge, push, publish, create a pull request, delete a worktree, or discard user changes. Those are separate user-authorized actions outside Harnix finishing.
 
 When a user requests a commit, first show the proposed changes and commit message, then wait for explicit approval before staging or committing.
+
+Before finishing, record every accepted residual risk as a `residualRisks` item with `id`, `text` and `severity` so it survives the conversation. Residual risk is review data outside the task contract: it never waives a criterion, downgrades a failed check, or replaces a required pass. Point the user to the task-owned, always-regenerated `review.md` for a plain-file summary of the finished task instead of running a command.
 
 ## Upstream basis
 

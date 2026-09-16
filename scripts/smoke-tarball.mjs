@@ -11,7 +11,7 @@ const artifacts = join(repository, ".artifacts");
 const tarball = (await readdir(artifacts)).find((name) => name.endsWith(".tgz"));
 if (!tarball) throw new Error("Run pnpm pack:check before smoke:tarball.");
 
-for (const platforms of [["--kiro"], ["--antigravity"], ["--codex"], ["--kiro", "--antigravity", "--codex"]]) {
+for (const platforms of [["--kiro"], ["--antigravity"], ["--codex"], ["--claude"], ["--kiro", "--antigravity", "--codex", "--claude"]]) {
   const home = await mkdtemp(join(tmpdir(), "harnix-smoke-home-"));
   const packageManagerHome = await mkdtemp(join(tmpdir(), "harnix-smoke-package-manager-home-"));
   const project = await mkdtemp(join(tmpdir(), "harnix-smoke-project-"));
@@ -70,7 +70,7 @@ function assertGlobalSetupResult(processResult, platforms, home) {
 }
 
 async function assertNoProjectLocalPlatformSurfaces(project) {
-  const forbidden = [".agents", ".codex", ".gemini", ".kiro", "GEMINI.md"];
+  const forbidden = [".agents", ".claude", ".codex", ".gemini", ".kiro", "GEMINI.md"];
   const present = [];
   for (const name of forbidden) {
     try {
@@ -95,6 +95,9 @@ async function assertExpectedGlobalSurfaces(home, platforms) {
   }
   if (platforms.includes("--codex")) {
     expected.push(".agents/harnix/managed.json", ".agents/skills", ".codex/AGENTS.md", ".codex/harnix/managed.json", ".codex/config.toml");
+  }
+  if (platforms.includes("--claude")) {
+    expected.push(".claude/harnix/managed.json", ".claude/skills", ".claude/CLAUDE.md", ".claude/settings.json");
   }
   for (const relativePath of expected) {
     try {

@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or already in progress and needs plan review, test-first implementation, refactoring, or technical feedback handling.
 metadata:
-  version: "1.0.21"
+  version: "1.1.3"
 ---
 
 # Implement a ready Harnix task
@@ -102,7 +102,7 @@ Use `harnix-debug` for a reproducible failure. Return to planning for a requirem
 
 ## Persist
 
-Use `harnix workflow --save` with one bounded JSON envelope on stdin for every checkpoint, legal transition, artifact update, and evidence append; start from `harnix workflow --inspect` output and never edit `task.json` directly. Keep `in_progress/implementing` with the last completed slice, current failing/passing command, concise result, and next step. Check an implementation-plan item only after that slice's work and focused evidence are complete; inside the plan's bounded execution-note markers, use only inert `check:<id>=pending|passed|failed|skipped[@<ISO-Z>]` or `slice:<id>=...` lines, never prose or a requirement, decision, criterion, check definition, or path contract. Never infer progress from a checkbox alone or erase earlier failure evidence. Record documented exceptions and alternate evidence. For v2 required passes, preserve the matching `inputDigest`; the workflow-owned `verification-inputs.json` sidecar is not a user-editable evidence shortcut. Move to `verifying/verifying` only after all implementation checklist items, implementation slices, and focused checks are complete.
+Use the narrowest transport that carries the change. `harnix workflow --transition <status>/<checkpoint>` moves the persisted active record and accepts no task body, so a stage change cannot drop evidence. `harnix workflow --evidence` appends exactly one evidence item from a bounded `{ "evidence": <Evidence> }` envelope on stdin. Use `harnix workflow --save` with one bounded JSON envelope when artifacts, obligations, or a contract revision change in the same step; start from `harnix workflow --inspect` output, consult `harnix workflow --schema` when the exact shape is unclear, and never edit `task.json` directly. Keep `in_progress/implementing` with the last completed slice, current failing/passing command, concise result, and next step. Check an implementation-plan item only after that slice's work and focused evidence are complete; inside the plan's bounded execution-note markers, use only inert `check:<id>=pending|passed|failed|skipped[@<ISO-Z>]` or `slice:<id>=...` lines, never prose or a requirement, decision, criterion, check definition, or path contract. Never infer progress from a checkbox alone or erase earlier failure evidence. Record documented exceptions and alternate evidence. For v2 required passes, preserve the matching `inputDigest`; the workflow-owned `verification-inputs.json` sidecar is not a user-editable evidence shortcut. Move to `verifying/verifying` only after all implementation checklist items, implementation slices, and focused checks are complete.
 
 ## Exit
 

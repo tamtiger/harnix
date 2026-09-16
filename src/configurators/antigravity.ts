@@ -1,6 +1,5 @@
 import type { DesiredGlobalManagedFile } from "../utils/global-managed-files.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../templates/harnix/activation.js";
-import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
+import { globalSkillDesiredFiles, HARNIX_GLOBAL_ACTIVATION_DOCUMENT } from "../templates/harnix/global-surface.js";
 
 export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix context --platform antigravity";
 
@@ -17,15 +16,7 @@ export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK = {
   },
 } as const;
 
-export const ANTIGRAVITY_GLOBAL_RULE = [
-  "# Harnix",
-  "",
-  "## Harnix activation guard",
-  "",
-  ...HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
-  ...HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
-  "",
-].join("\n");
+export const ANTIGRAVITY_GLOBAL_RULE = HARNIX_GLOBAL_ACTIVATION_DOCUMENT;
 
 /**
  * Pure plugin plan shared unchanged by the Desktop and CLI plugin roots. The
@@ -39,12 +30,7 @@ export function antigravityGlobalPluginDesiredFiles(): DesiredGlobalManagedFile[
       kind: "file",
       content: JSON.stringify(ANTIGRAVITY_GLOBAL_PLUGIN_MANIFEST, null, 2) + "\n",
     },
-    ...workflowSkills.map((skill): DesiredGlobalManagedFile => ({
-      path: "skills/" + skill.name + "/SKILL.md",
-      sourceId: "antigravity-skill-" + skill.name,
-      kind: "file",
-      content: renderSkill(skill),
-    })),
+    ...globalSkillDesiredFiles("antigravity-skill"),
     {
       path: "rules/AGENTS.md",
       sourceId: "antigravity-global-rule",

@@ -1,4 +1,4 @@
-import { mkdir, readFile } from "node:fs/promises";
+import { access, mkdir, readFile } from "node:fs/promises";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "../../utils/paths.js";
 import { contextSelectionResultHash, saveContextSelectionSnapshot, validateContextSelectionSnapshot, type ContextSelectionSnapshotV1 } from "../context/selection-freshness.js";
@@ -18,9 +18,12 @@ export interface EvidenceV2 extends EvidenceBase { inputDigest?: string; }
 export type Evidence = EvidenceV1 | EvidenceV2;
 export interface TaskBlocker { kind: "decision" | "authority" | "credential" | "external" | "repository"; summary: string; nextAction: string; resumeStatus: "planning" | "ready" | "in_progress" | "verifying"; }
 export interface TaskCancellation { reason: string; authorizedBy: "user"; }
+/** Review data: why the task looks like this. Deliberately outside the completion contract. */
+export interface TaskDecision { id: string; text: string; rationale: string; }
+export interface TaskResidualRisk { id: string; text: string; severity: "low" | "medium" | "high"; }
 interface TaskRecordBase { generator: "harnix"; id: string; title: string; mode: TaskMode; status: TaskStatus; checkpoint: WorkflowCheckpoint; goal: string; nonGoals: string[]; acceptanceCriteria: AcceptanceCriterion[]; relevantPaths: string[]; relevantSpecs: string[]; blocker?: TaskBlocker; cancellation?: TaskCancellation; createdAt: string; updatedAt: string; completedAt?: string; cancelledAt?: string; }
 export interface TaskRecordV1 extends TaskRecordBase { schemaVersion: 1; validationPlan: ValidationCheckV1[]; evidence: EvidenceV1[]; }
-export interface TaskRecordV2 extends TaskRecordBase { schemaVersion: 2; validationPlan: ValidationCheckV2[]; evidence: EvidenceV2[]; }
+export interface TaskRecordV2 extends TaskRecordBase { schemaVersion: 2; validationPlan: ValidationCheckV2[]; evidence: EvidenceV2[]; decisions?: TaskDecision[]; residualRisks?: TaskResidualRisk[]; }
 export type TaskRecord = TaskRecordV1 | TaskRecordV2;
 export interface TaskValidationOptions { allowUnsafeCompletedEvidenceArtifacts?: boolean | undefined; }
 
@@ -61,14 +64,58 @@ export function selectLatestEvidence(evidence: readonly Evidence[], checkId: str
 
 export class TaskValidationError extends Error { override name = "TaskValidationError"; }
 const taskIdPattern = /^\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$/u;
-const taskRecordKeys = new Set(["acceptanceCriteria", "blocker", "cancellation", "cancelledAt", "checkpoint", "completedAt", "createdAt", "evidence", "generator", "goal", "id", "mode", "nonGoals", "relevantPaths", "relevantSpecs", "schemaVersion", "status", "title", "updatedAt", "validationPlan"]);
-const acceptanceCriterionKeys = new Set(["evidenceIds", "id", "status", "text", "waiverReason"]);
+
+/**
+ * Single source of truth for the top-level TaskRecord field set. Both the
+ * runtime allowlist (`assertExactKeys`) and the public `--schema` transport
+ * read this same manifest, so a field added here without updating anything
+ * else still shows up correctly everywhere; there is no second literal list
+ * to forget.
+ */
+export const TASK_RECORD_FIELDS: readonly { readonly name: string; readonly required: boolean; readonly sinceSchemaVersion: 1 | 2 }[] = [
+  { name: "acceptanceCriteria", required: true, sinceSchemaVersion: 1 },
+  { name: "blocker", required: false, sinceSchemaVersion: 1 },
+  { name: "cancellation", required: false, sinceSchemaVersion: 1 },
+  { name: "cancelledAt", required: false, sinceSchemaVersion: 1 },
+  { name: "checkpoint", required: true, sinceSchemaVersion: 1 },
+  { name: "completedAt", required: false, sinceSchemaVersion: 1 },
+  { name: "createdAt", required: true, sinceSchemaVersion: 1 },
+  { name: "decisions", required: false, sinceSchemaVersion: 2 },
+  { name: "evidence", required: true, sinceSchemaVersion: 1 },
+  { name: "generator", required: true, sinceSchemaVersion: 1 },
+  { name: "goal", required: true, sinceSchemaVersion: 1 },
+  { name: "id", required: true, sinceSchemaVersion: 1 },
+  { name: "mode", required: true, sinceSchemaVersion: 1 },
+  { name: "nonGoals", required: true, sinceSchemaVersion: 1 },
+  { name: "relevantPaths", required: true, sinceSchemaVersion: 1 },
+  { name: "relevantSpecs", required: true, sinceSchemaVersion: 1 },
+  { name: "residualRisks", required: false, sinceSchemaVersion: 2 },
+  { name: "schemaVersion", required: true, sinceSchemaVersion: 1 },
+  { name: "status", required: true, sinceSchemaVersion: 1 },
+  { name: "title", required: true, sinceSchemaVersion: 1 },
+  { name: "updatedAt", required: true, sinceSchemaVersion: 1 },
+  { name: "validationPlan", required: true, sinceSchemaVersion: 1 },
+];
+const taskRecordKeys = new Set(TASK_RECORD_FIELDS.filter((field) => field.sinceSchemaVersion === 1).map((field) => field.name));
+const taskRecordV2Keys = new Set(TASK_RECORD_FIELDS.map((field) => field.name));
+export const decisionKeys = new Set(["id", "rationale", "text"]);
+export const residualRiskKeys = new Set(["id", "severity", "text"]);
+export const acceptanceCriterionKeys = new Set(["evidenceIds", "id", "status", "text", "waiverReason"]);
 const validationCheckV1Keys = new Set(["command", "description", "id", "required", "scope"]);
-const validationCheckV2Keys = new Set([...validationCheckV1Keys, "criterionIds", "inputs"]);
+export const validationCheckV2Keys = new Set([...validationCheckV1Keys, "criterionIds", "inputs"]);
 const evidenceV1Keys = new Set(["artifactPaths", "checkId", "exitCode", "id", "recordedAt", "result", "summary"]);
-const evidenceV2Keys = new Set([...evidenceV1Keys, "inputDigest"]);
-const blockerKeys = new Set(["kind", "nextAction", "resumeStatus", "summary"]);
+export const evidenceV2Keys = new Set([...evidenceV1Keys, "inputDigest"]);
+export const blockerKeys = new Set(["kind", "nextAction", "resumeStatus", "summary"]);
 const cancellationKeys = new Set(["authorizedBy", "reason"]);
+
+/** Read-only manifest for `workflow --schema`; derives from the same allowlists `validateTask` enforces. */
+export function taskRecordFieldManifest(schemaVersion: 1 | 2): { required: string[]; optional: string[] } {
+  const fields = TASK_RECORD_FIELDS.filter((field) => field.sinceSchemaVersion <= schemaVersion);
+  return {
+    required: fields.filter((field) => field.required).map((field) => field.name).sort(),
+    optional: fields.filter((field) => !field.required).map((field) => field.name).sort(),
+  };
+}
 const transitions: Record<TaskStatus, TaskStatus[]> = {
   planning: ["ready", "blocked"],
   ready: ["in_progress", "blocked"],
@@ -90,7 +137,7 @@ const legalCheckpoints: Record<Exclude<TaskStatus, "blocked">, readonly Workflow
 
 export function validateTask(value: unknown, options: TaskValidationOptions = {}): TaskRecord {
   if (!isRecord(value) || value.generator !== "harnix" || (value.schemaVersion !== 1 && value.schemaVersion !== 2)) throw new TaskValidationError("Invalid or unsupported task record.");
-  assertExactKeys(value, taskRecordKeys, "TaskRecord");
+  assertExactKeys(value, value.schemaVersion === 2 ? taskRecordV2Keys : taskRecordKeys, "TaskRecord");
   for (const key of ["id", "title", "goal", "createdAt", "updatedAt"]) if (typeof value[key] !== "string") throw new TaskValidationError(`Task ${key} is required.`);
   if (!taskIdPattern.test(String(value.id)) || !["lite", "full"].includes(String(value.mode)) || !Object.keys(transitions).includes(String(value.status)) || !["triage", "planning", "ready", "implementing", "debugging", "replan", "verifying", "finishing", "cancelling"].includes(String(value.checkpoint))) throw new TaskValidationError("Task identity, mode, status, or checkpoint is invalid.");
   if (!Array.isArray(value.nonGoals) || !Array.isArray(value.acceptanceCriteria) || !Array.isArray(value.relevantPaths) || !Array.isArray(value.relevantSpecs) || !Array.isArray(value.validationPlan) || !Array.isArray(value.evidence)) throw new TaskValidationError("Task arrays are required.");
@@ -122,6 +169,8 @@ export function validateTask(value: unknown, options: TaskValidationOptions = {}
     if ((criterion.status === "met" && !criterion.evidenceIds.some((id) => evidenceIds.has(id))) || (criterion.status === "waived" && !criterion.waiverReason?.trim())) throw new TaskValidationError("Acceptance criterion evidence/waiver is invalid.");
   }
   if (value.status === "blocked" && (!isRecord(value.blocker) || !["decision", "authority", "credential", "external", "repository"].includes(String(value.blocker.kind)) || typeof value.blocker.summary !== "string" || typeof value.blocker.nextAction !== "string" || !["planning", "ready", "in_progress", "verifying"].includes(String(value.blocker.resumeStatus)))) throw new TaskValidationError("Blocked task blocker is invalid.");
+  validateRationale(value.decisions, decisionKeys, "Task decision", (item) => typeof item.rationale === "string" && isBoundedText(item.rationale));
+  validateRationale(value.residualRisks, residualRiskKeys, "Task residual risk", (item) => ["low", "medium", "high"].includes(String(item.severity)));
   if (isRecord(value.blocker)) assertExactKeys(value.blocker, blockerKeys, "Task blocker");
   if (value.status === "blocked" && !value.blocker) throw new TaskValidationError("Blocked tasks require a blocker.");
   if (value.status !== "blocked" && value.blocker !== undefined) throw new TaskValidationError("Only blocked tasks may retain a blocker.");
@@ -200,7 +249,102 @@ export function updateTaskCheckpoint(task: TaskRecord, checkpoint: WorkflowCheck
   return validateTask({ ...task, checkpoint, updatedAt: now });
 }
 
-export async function saveTask(root: string, task: TaskRecord): Promise<void> { const valid = validateTask(task); const directory = await resolveSafeProjectPath(root, `tasks/${valid.id}`); const path = await resolveSafeProjectPath(root, `tasks/${valid.id}/task.json`); await mkdir(directory, { recursive: true }); await atomicWriteFile(path, JSON.stringify(valid, null, 2) + "\n"); }
+/**
+ * `review.md` is a derived, always-overwritten human-reading surface: it is
+ * never a source of truth and carries no obligation. It intentionally omits
+ * `prd.md`/`plan.md` prose so review-only edits (a later decision, a residual
+ * risk noted at finish) never touch the Full task's hashed planning inputs
+ * and cannot invalidate already-passed evidence.
+ */
+export async function saveTask(root: string, task: TaskRecord): Promise<void> {
+  const valid = validateTask(task);
+  const directory = await resolveSafeProjectPath(root, `tasks/${valid.id}`);
+  const path = await resolveSafeProjectPath(root, `tasks/${valid.id}/task.json`);
+  await mkdir(directory, { recursive: true });
+  await atomicWriteFile(path, JSON.stringify(valid, null, 2) + "\n");
+  const artifacts = {
+    prd: await exists(await resolveSafeProjectPath(directory, "prd.md")),
+    plan: await exists(await resolveSafeProjectPath(directory, "plan.md")),
+    design: await exists(await resolveSafeProjectPath(directory, "design.md")),
+  };
+  await atomicWriteFile(await resolveSafeProjectPath(directory, "review.md"), renderTaskReview(valid, artifacts));
+}
+
+async function exists(path: string): Promise<boolean> {
+  try { await access(path); return true; }
+  catch { return false; }
+}
+
+function renderTaskReview(task: TaskRecord, artifacts: { prd: boolean; plan: boolean; design: boolean }): string {
+  const lines: string[] = [
+    `# ${task.title}`,
+    "",
+    `- **ID:** ${task.id}`,
+    `- **Mode:** ${task.mode}`,
+    `- **Status:** ${task.status}/${task.checkpoint}`,
+    `- **Created:** ${task.createdAt}`,
+    `- **Updated:** ${task.updatedAt}`,
+    "",
+    "## Goal",
+    "",
+    task.goal,
+  ];
+  if (task.nonGoals.length > 0) {
+    lines.push("", "## Non-goals", "", ...task.nonGoals.map((item) => `- ${item}`));
+  }
+  if (artifacts.prd || artifacts.plan || artifacts.design) {
+    lines.push("", "## Artifacts", "");
+    if (artifacts.prd) lines.push("- [`prd.md`](./prd.md) — outcome, scope, acceptance criteria narrative.");
+    if (artifacts.plan) lines.push("- [`plan.md`](./plan.md) — implementation checklist and slices.");
+    if (artifacts.design) lines.push("- [`design.md`](./design.md) — architecture/interface decisions.");
+  }
+  lines.push("", "## Acceptance criteria", "");
+  if (task.acceptanceCriteria.length === 0) {
+    lines.push("_None recorded yet._");
+  } else {
+    for (const criterion of task.acceptanceCriteria) {
+      const waiver = criterion.status === "waived" && criterion.waiverReason ? ` — ${criterion.waiverReason}` : "";
+      lines.push(`- \`${criterion.id}\` (${criterion.status}): ${criterion.text}${waiver}`);
+    }
+  }
+  lines.push("", "## Required checks", "");
+  const requiredChecks = task.validationPlan.filter((check) => check.required);
+  if (requiredChecks.length === 0) {
+    lines.push("_None recorded yet._");
+  } else {
+    for (const check of requiredChecks) {
+      const latest = selectLatestEvidence(task.evidence, check.id);
+      const state = latest ? `${latest.result} (${latest.recordedAt})` : "chưa chạy / not yet run";
+      lines.push(`- \`${check.id}\` (${check.scope}): ${check.description} — ${state}`);
+    }
+  }
+  const decisions = "decisions" in task ? task.decisions : undefined;
+  if (decisions && decisions.length > 0) {
+    lines.push("", "## Decisions", "");
+    for (const decision of decisions) lines.push(`- **${decision.id}** — ${decision.text}`, `  - _Why:_ ${decision.rationale}`);
+  }
+  const residualRisks = "residualRisks" in task ? task.residualRisks : undefined;
+  if (residualRisks && residualRisks.length > 0) {
+    lines.push("", "## Residual risks", "");
+    for (const risk of residualRisks) lines.push(`- **${risk.id}** (${risk.severity}) — ${risk.text}`);
+  }
+  if (task.blocker) {
+    lines.push("", "## Blocker", "", `- **Kind:** ${task.blocker.kind}`, `- **Summary:** ${task.blocker.summary}`, `- **Next action:** ${task.blocker.nextAction}`);
+  }
+  if (task.cancellation) {
+    lines.push("", "## Cancellation", "", `- **Reason:** ${task.cancellation.reason}`);
+  }
+  lines.push("", "## Evidence", "");
+  if (task.evidence.length === 0) {
+    lines.push("_None recorded yet._");
+  } else {
+    for (const item of task.evidence) {
+      const check = item.checkId ? `\`${item.checkId}\` — ` : "";
+      lines.push(`- ${check}${item.result} (${item.recordedAt}): ${item.summary}`);
+    }
+  }
+  return `${lines.join("\n")}\n`;
+}
 export interface TaskArtifacts { prd?: string; plan?: string; design?: string; research?: Record<string, string>; context?: ContextManifest; contextSelection?: ContextSelectionSnapshotV1; }
 export async function saveTaskWithArtifacts(root: string, task: TaskRecord, artifacts: TaskArtifacts = {}): Promise<void> {
   await saveTaskArtifacts(root, task, artifacts);
@@ -267,6 +411,26 @@ export async function archiveTask(harnixRoot: string, task: TaskRecord): Promise
   if (valid.status !== "completed" && valid.status !== "cancelled") throw new TaskValidationError("Only terminal tasks can be archived.");
   await clearActiveTask(harnixRoot, valid.id);
 }
+function isBoundedText(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0 && value.length <= 2_000;
+}
+
+function validateRationale(
+  value: unknown,
+  allowed: ReadonlySet<string>,
+  label: string,
+  isValidItem: (item: Record<string, unknown>) => boolean,
+): void {
+  if (value === undefined) return;
+  if (!Array.isArray(value)) throw new TaskValidationError(`${label} list must be an array.`);
+  for (const item of value) {
+    if (!isRecord(item)) throw new TaskValidationError(`${label} must be an object.`);
+    assertExactKeys(item, allowed, label);
+    if (!validId(item.id) || !isBoundedText(item.text) || !isValidItem(item)) throw new TaskValidationError(`${label} is invalid.`);
+  }
+  ensureUnique(value.map((item: Record<string, unknown>) => String(item.id)), label.toLowerCase());
+}
+
 function validateTaskId(value: string): void { if (!taskIdPattern.test(value)) throw new TaskValidationError("Task ID is unsafe."); }
 function isMissing(error: unknown): boolean { return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"; }
 function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }

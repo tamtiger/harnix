@@ -2,7 +2,7 @@
 name: harnix-check
 description: Use when Harnix needs a standalone read-only code review, review feedback evaluation, or fresh active-task compliance, correctness, security, and maintainability verification before completion.
 metadata:
-  version: "1.0.21"
+  version: "1.1.3"
 ---
 
 # Review and verify Harnix work
@@ -111,6 +111,8 @@ For every newly executed check, record timestamp, command or inspection, scope, 
 - All required criteria and gates green: persist `verifying/finishing`, reread the saved task, then hand to `harnix-finish-work`.
 
 Do not fix unrelated findings, weaken gates, or declare success from absence of visible errors.
+
+Append each verification result with `harnix workflow --evidence`, which takes a bounded `{ "evidence": <Evidence> }` envelope on stdin and preserves every earlier item; reserve `harnix workflow --save` for a step that also changes artifacts or obligations.
 
 ## Upstream basis
 

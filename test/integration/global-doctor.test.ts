@@ -63,6 +63,7 @@ describe("diagnoseGlobalIntegrations", () => {
       { platform: "kiro", status: "not-installed" },
       { platform: "antigravity", status: "not-installed" },
       { platform: "codex", status: "not-installed" },
+      { platform: "claude", status: "not-installed" },
     ]);
     expect(integrations.flatMap((integration) => integration.findings).every((finding) => !(finding.path ?? "").includes(home))).toBe(true);
     expect(commandLookups).toBe(0);
@@ -118,6 +119,7 @@ describe("diagnoseGlobalIntegrations", () => {
       { platform: "kiro", status: "installed" },
       { platform: "antigravity", status: "precedence-unknown" },
       { platform: "codex", status: "installed-pending-trust" },
+      { platform: "claude", status: "not-installed" },
     ]);
     const codex = integrations.find((integration) => integration.platform === "codex");
     expect(codex?.findings).toContainEqual(expect.objectContaining({ code: "codex-trust-pending", severity: "warning" }));
@@ -136,6 +138,7 @@ describe("diagnoseGlobalIntegrations", () => {
         kiro: "unsupported-version" as const,
         antigravity: "shadowed" as const,
         codex: "active" as const,
+        claude: "active" as const,
       })[platform],
       codexTrustLookup: async () => "trusted",
       commandLookup: async () => true,
@@ -147,6 +150,7 @@ describe("diagnoseGlobalIntegrations", () => {
       { platform: "kiro", status: "unsupported-version" },
       { platform: "antigravity", status: "shadowed" },
       { platform: "codex", status: "active" },
+      { platform: "claude", status: "not-installed" },
     ]);
     expect(integrations[0]?.findings).toContainEqual(expect.objectContaining({ code: "global-unsupported-version", severity: "warning" }));
     expect(integrations[1]?.findings).toContainEqual(expect.objectContaining({ code: "global-integration-shadowed", severity: "warning" }));

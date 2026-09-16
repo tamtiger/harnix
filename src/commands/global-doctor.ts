@@ -7,6 +7,7 @@ import {
   createCodexGlobalSurfacePlan,
   matchesCodexGlobalContextHookGroup,
 } from "../configurators/codex.js";
+import { claudeGlobalDesiredFiles, matchesClaudeGlobalContextHookGroup } from "../configurators/claude.js";
 import { kiroGlobalDesiredFiles } from "../configurators/kiro.js";
 import {
   readGlobalManagedManifest,
@@ -28,7 +29,7 @@ import {
 import { packageVersion } from "../version.js";
 import { lookupHarnixLauncher } from "../utils/harnix-launcher.js";
 
-const publicPlatforms = ["kiro", "antigravity", "codex"] as const;
+const publicPlatforms = ["kiro", "antigravity", "codex", "claude"] as const;
 export type GlobalDoctorPlatform = (typeof publicPlatforms)[number];
 export type GlobalIntegrationStatus =
   | "not-installed"
@@ -419,6 +420,15 @@ function targetsFor(platform: GlobalDoctorPlatform, roots: UserPlatformRoots): G
         root: roots.antigravityCli,
       },
     ];
+  }
+  if (platform === "claude") {
+    return [{
+      desired: claudeGlobalDesiredFiles(),
+      manifestPath: "harnix/managed.json",
+      memberMatchers: new Map([["claude-global-context-hook", matchesClaudeGlobalContextHookGroup]]),
+      platform: "claude",
+      root: roots.claude,
+    }];
   }
   const plan = createCodexGlobalSurfacePlan();
   return [

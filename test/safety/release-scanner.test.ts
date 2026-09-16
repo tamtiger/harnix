@@ -111,6 +111,13 @@ describe("release scanner negative fixtures", () => {
     await expect(scanTextFiles([file], "negative fixture", true)).rejects.toThrow(error);
   });
 
+  it("should_allow_supported_claude_platform_surface_in_generated_output", async () => {
+    const root = await fixture();
+    const file = await writeFixtureFile(root, ".harnix/generated.md", "harnix setup --claude installs ~/.claude skills.");
+
+    await expect(scanTextFiles([file], "generated fixture", true)).resolves.toBeUndefined();
+  });
+
   it("should_reject_unsafe_or_workspace_tarball_entries_when_release_listing_is_invalid", async () => {
     await expect(assertTarballListing(["package/package.json", "../escape"])).rejects.toThrow(/unsafe path/u);
     await expect(assertTarballListing(["package/package.json", "package/pnpm-workspace.yaml"])).rejects.toThrow(/workspace file/u);

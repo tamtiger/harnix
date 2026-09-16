@@ -2,7 +2,7 @@
 name: harnix-brainstorm
 description: Use when a Harnix project needs request triage, requirements, design, planning, or a trustworthy ready gate before implementation.
 metadata:
-  version: "1.0.21"
+  version: "1.1.3"
 ---
 
 # Plan a Harnix task
@@ -63,7 +63,7 @@ Before asking a blocking question, and again before the ready self-review, prese
 - assumptions and inferences that could otherwise remain implicit;
 - unresolved material choices, each with a recommendation and trade-off.
 
-If a material choice remains, ask exactly one blocking question and update the checkpoint after the answer. If no blocking question remains, state why the request and evidence decide the matter, then continue. This checkpoint is not a second approval gate: do not ask the user to approve an already decision-complete plan unless new authority or a new material decision is required.
+Persist the durable part of this checkpoint on the TaskRecord: each settled choice becomes one `decisions` item with `id`, `text` and `rationale`, so a later reviewer or another agent reads why the task looks like this instead of reconstructing it from a transcript. These fields are review data, not obligations: they sit outside the task contract hash and never substitute for an acceptance criterion. They surface automatically in the task-owned, always-regenerated `review.md`; never author or hand-edit that file directly. If a material choice remains, ask exactly one blocking question and update the checkpoint after the answer. If no blocking question remains, state why the request and evidence decide the matter, then continue. This checkpoint is not a second approval gate: do not ask the user to approve an already decision-complete plan unless new authority or a new material decision is required.
 
 ## Build decision-complete artifacts
 

@@ -5,8 +5,8 @@ import { createProgram, runCli } from "../../src/cli-program.js";
 afterEach(() => vi.restoreAllMocks());
 
 describe("CLI command contract", () => {
-  it("exposes fourteen supported commands without exposing hidden/internal commands", () => {
-    expect(createProgram().commands.filter((command) => !(command as { _hidden?: boolean })._hidden).map((command) => command.name())).toEqual(["init", "setup", "update", "upgrade", "uninstall", "mem", "status", "tasks", "resume", "context-report", "checks", "audit", "doctor", "repo-map"]);
+  it("exposes fifteen supported commands without exposing hidden/internal commands", () => {
+    expect(createProgram().commands.filter((command) => !(command as { _hidden?: boolean })._hidden).map((command) => command.name())).toEqual(["init", "setup", "update", "upgrade", "uninstall", "mem", "status", "tasks", "resume", "context-report", "checks", "audit", "skill", "doctor", "repo-map"]);
   });
 
   it("registers single-command action flags without nested command trees", () => {
@@ -32,7 +32,7 @@ describe("CLI command contract", () => {
     expect(contextReport?.options.map((option) => option.long)).toEqual(["--platform", "--limit"]);
     expect(checks?.options.map((option) => option.long)).toEqual(["--limit"]);
     expect(audit?.options).toEqual([]);
-    expect(workflow?.options.map((option) => option.long)).toEqual(["--inspect", "--preflight", "--save", "--snapshot", "--audit-ready", "--finish", "--cancel", "--learn", "--check"]);
+    expect(workflow?.options.map((option) => option.long)).toEqual(["--inspect", "--preflight", "--save", "--snapshot", "--audit-ready", "--finish", "--cancel", "--learn", "--transition", "--evidence", "--schema", "--check"]);
   });
 
   it("keeps the workflow transport hidden and rejects ambiguous action flags", async () => {
@@ -47,6 +47,9 @@ describe("CLI command contract", () => {
     await expect(runCli(["node", "harnix", "workflow", "--snapshot"])).resolves.toBe(2);
     await expect(runCli(["node", "harnix", "workflow", "--inspect", "--check", "check"])).resolves.toBe(2);
     await expect(runCli(["node", "harnix", "workflow", "inspect"])).resolves.toBe(2);
+    await expect(runCli(["node", "harnix", "workflow", "--transition", "verifying"])).resolves.toBe(2);
+    await expect(runCli(["node", "harnix", "workflow", "--schema", "--evidence"])).resolves.toBe(2);
+
     expect(stdout.mock.calls.map((call) => String(call[0])).join("")).toBe("");
 
     await expect(runCli(["node", "harnix", "internal", "context", "--platform", "codex"])).resolves.toBe(2);

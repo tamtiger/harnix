@@ -7,7 +7,7 @@ import { compareCodeUnits } from "../../utils/order.js";
 import { normalizeRepositoryPath } from "../../utils/paths.js";
 import { legacyStackIds, normalizeLegacyStackIds, type LegacyStackId } from "../../utils/stack.js";
 
-export type PlatformId = "kiro" | "antigravity" | "codex";
+export type PlatformId = "kiro" | "antigravity" | "codex" | "claude";
 
 export interface LegacyPackageConfig {
   path: string;
@@ -65,7 +65,7 @@ export interface CreateConfigOptions {
 const languageIds = new Set<LanguageId>(["csharp", "typescript", "javascript", "php", "python", "java", "go"]);
 const technologyIds = new Set<TechnologyId>(["dotnet", "abp", "nestjs", "spring", "react-web", "vue", "codeigniter"]);
 const legacyIds = new Set<LegacyStackId>(legacyStackIds);
-const platformIds = new Set<PlatformId>(["kiro", "antigravity", "codex"]);
+const platformIds = new Set<PlatformId>(["kiro", "antigravity", "codex", "claude"]);
 const developerPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u;
 const topLevelKeys = new Set(["generator", "schemaVersion", "developer", "languages", "technologies", "packages", "platforms", "context", "runtime"]);
 const packageKeys = new Set(["path", "languages", "technologies"]);

@@ -9,6 +9,7 @@ import { runInternalContextCommand } from "./commands/internal-context-cli.js";
 import { updateProject } from "./commands/update.js";
 import { updateGlobalPlatforms } from "./commands/global-update.js";
 import { upgradeHarnix, type AvailableVersionLookup } from "./commands/upgrade.js";
+import { reportSkill, reportSkillCatalog } from "./commands/skills.js";
 import { uninstallProject } from "./commands/uninstall.js";
 import { uninstallGlobalIntegrations } from "./commands/global-uninstall.js";
 import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces.js";
@@ -21,7 +22,7 @@ import { reportProjectChecks } from "./commands/checks.js";
 import { auditProjectTask } from "./commands/audit.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
-import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, preflightWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow } from "./commands/internal-workflow.js";
+import { appendEvidenceWorkflow, auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, preflightWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow, transitionWorkflow, workflowEnvelopeSchema } from "./commands/internal-workflow.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
@@ -70,8 +71,8 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       const result = await initializeProject({ developer, dryRun: options.dryRun, languages: profile.languages, technologies: profile.technologies, warnings: profile.warnings, root: await resolveProjectRoot(process.cwd()), yes: options.yes });
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
-  program.command("setup").option("--kiro", "Install Kiro user-global integration").option("--antigravity", "Install Antigravity user-global integration").option("--codex", "Install Codex user-global integration").option("--dry-run", "Preview user-global changes without writing").action(async (options: { kiro?: boolean; antigravity?: boolean; codex?: boolean; dryRun?: boolean }) => {
-    const platforms = (["kiro", "antigravity", "codex"] as const).filter((platform) => options[platform]);
+  program.command("setup").option("--kiro", "Install Kiro user-global integration").option("--antigravity", "Install Antigravity user-global integration").option("--codex", "Install Codex user-global integration").option("--claude", "Install Claude Code user-global integration").option("--dry-run", "Preview user-global changes without writing").action(async (options: { kiro?: boolean; antigravity?: boolean; codex?: boolean; claude?: boolean; dryRun?: boolean }) => {
+    const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
     const result = await setupPlatforms({
       ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
       ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
@@ -82,9 +83,9 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     process.stdout.write(`${JSON.stringify(result)}\n`);
     reportActionableSetupReadiness(result);
   });
-  program.command("update").option("--restore", "Restore explicitly deleted managed files").option("--global", "Reconcile user-global platform integrations").option("--kiro", "Select Kiro for --global").option("--antigravity", "Select Antigravity for --global").option("--codex", "Select Codex for --global").option("--dry-run", "Preview global changes without writing").action(async (options: { restore?: boolean; global?: boolean; kiro?: boolean; antigravity?: boolean; codex?: boolean; dryRun?: boolean }) => {
-    const platforms = (["kiro", "antigravity", "codex"] as const).filter((platform) => options[platform]);
-    if (!options.global && (platforms.length > 0 || options.dryRun)) throw new Error("--kiro, --antigravity, --codex, and --dry-run require update --global.");
+  program.command("update").option("--restore", "Restore explicitly deleted managed files").option("--global", "Reconcile user-global platform integrations").option("--kiro", "Select Kiro for --global").option("--antigravity", "Select Antigravity for --global").option("--codex", "Select Codex for --global").option("--claude", "Select Claude Code for --global").option("--dry-run", "Preview global changes without writing").action(async (options: { restore?: boolean; global?: boolean; kiro?: boolean; antigravity?: boolean; codex?: boolean; claude?: boolean; dryRun?: boolean }) => {
+    const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
+    if (!options.global && (platforms.length > 0 || options.dryRun)) throw new Error("--kiro, --antigravity, --codex, --claude, and --dry-run require update --global.");
     const result = options.global
       ? await updateGlobalPlatforms({
         ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
@@ -112,12 +113,13 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--kiro", "Select Kiro for --global")
     .option("--antigravity", "Select Antigravity for --global")
     .option("--codex", "Select Codex for --global")
+    .option("--claude", "Select Claude Code for --global")
     .option("--yes", "Confirm the selected destructive action")
-    .action(async (options: { purge?: boolean; global?: boolean; legacyProjectSurfaces?: boolean; kiro?: boolean; antigravity?: boolean; codex?: boolean; yes?: boolean }) => {
-      const platforms = (["kiro", "antigravity", "codex"] as const).filter((platform) => options[platform]);
+    .action(async (options: { purge?: boolean; global?: boolean; legacyProjectSurfaces?: boolean; kiro?: boolean; antigravity?: boolean; codex?: boolean; claude?: boolean; yes?: boolean }) => {
+      const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
       const projectModeCount = Number(options.purge === true) + Number(options.legacyProjectSurfaces === true);
       if (projectModeCount > 1 || (options.global === true && projectModeCount > 0)) throw new Error("--global, --purge, and --legacy-project-surfaces are mutually exclusive.");
-      if (!options.global && platforms.length > 0) throw new Error("--kiro, --antigravity, and --codex require uninstall --global.");
+      if (!options.global && platforms.length > 0) throw new Error("--kiro, --antigravity, --codex, and --claude require uninstall --global.");
       if (options.global && platforms.length === 0) throw new Error("uninstall --global requires at least one platform flag.");
       if (!options.global && projectModeCount === 0) throw new Error("Specify one of --purge, --global, or --legacy-project-surfaces.");
 
@@ -140,9 +142,11 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   program.command("mem").argument("[query]").option("--query <query>").option("--user <id>").option("--limit <count>").option("--learning", "Return only learning candidates").action(async (query: string | undefined, options: { query?: string; user?: string; limit?: string; learning?: boolean }) => {
     const limit = options.limit === undefined ? undefined : /^\d+$/u.test(options.limit) ? Number(options.limit) : Number.NaN; if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) throw new Error("--limit must be a positive integer."); const result = await searchMemory({ root: await resolveProjectRoot(process.cwd()), query: options.query ?? query, user: options.user, limit, learningOnly: options.learning }); process.stdout.write(`${JSON.stringify(result)}\n`);
   });
-  program.command("status").description("Summarize the active Harnix task and next action").action(async () => {
-    process.stdout.write(`${JSON.stringify(await inspectProjectStatus(process.cwd(), programOptions.statusClock?.() ?? Date.now()))}\n`);
-  });
+  program.command("status")
+    .description("Summarize the active Harnix task and next action")
+    .action(async () => {
+      process.stdout.write(`${JSON.stringify(await inspectProjectStatus(process.cwd(), programOptions.statusClock?.() ?? Date.now()))}\n`);
+    });
   program.command("tasks")
     .description("List bounded Harnix task metadata")
     .option("--limit <count>", "Maximum task records")
@@ -164,7 +168,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     });
   program.command("context-report")
     .description("Explain bounded effective Harnix hook context metadata")
-    .option("--platform <platform>", "Target Kiro, Antigravity, or Codex")
+    .option("--platform <platform>", "Target Kiro, Antigravity, Codex, or Claude Code")
     .option("--limit <count>", "Maximum details per context category", "20")
     .action(async (options: { platform?: string; limit: string }) => {
       const platform = parseReportPlatform(options.platform);
@@ -179,6 +183,12 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   program.command("audit").description("Audit active-task readiness and completion blockers").action(async () => {
     process.stdout.write(`${JSON.stringify(await auditProjectTask(process.cwd(), programOptions.statusClock?.() ?? Date.now()))}\n`);
   });
+  program.command("skill")
+    .argument("[name]", "Canonical Harnix skill name, for example harnix-implement")
+    .description("Print the canonical Harnix skill catalog or one skill's instructions")
+    .action((name: string | undefined) => {
+      process.stdout.write(`${JSON.stringify(name === undefined ? reportSkillCatalog() : reportSkill(name))}\n`);
+    });
   program.command("doctor").option("--fix", "Repair safe, unchanged managed files").option("--global", "Allow --fix to reconcile safe global integration drift").action(async (options: { fix?: boolean; global?: boolean }) => {
     const result = await diagnoseProject({
       ...(programOptions.capabilityLookup === undefined ? {} : { capabilityLookup: programOptions.capabilityLookup }),
@@ -214,8 +224,8 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       if (options.depth !== undefined) throw new Error("--depth requires repo-map --impact.");
       process.stdout.write(`${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query!, parseRepoMapLimit(options.limit ?? "20")))}\n`);
     });
-  program.command("context", { hidden: true }).option("--platform <platform>").action(async (options: { platform: "kiro" | "antigravity" | "codex" }) => {
-    if (!options.platform || !["kiro", "antigravity", "codex"].includes(options.platform)) throw new Error("--platform must be kiro, antigravity, or codex.");
+  program.command("context", { hidden: true }).option("--platform <platform>").action(async (options: { platform: "kiro" | "antigravity" | "codex" | "claude" }) => {
+    if (!options.platform || !["kiro", "antigravity", "codex", "claude"].includes(options.platform)) throw new Error("--platform must be kiro, antigravity, codex, or claude.");
     const hookInput = programOptions.hookEventInput ? await programOptions.hookEventInput() : process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin);
     await runInternalContextCommand({ hookInput, platform: options.platform });
   });
@@ -228,10 +238,14 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--finish", "Finish the active workflow task")
     .option("--cancel", "Cancel the active workflow task")
     .option("--learn", "Record one eligible project-local learning candidate")
+    .option("--transition <status/checkpoint>", "Move the active task to one legal status/checkpoint")
+    .option("--evidence", "Append exactly one evidence item from stdin")
+    .option("--schema", "Describe the save envelope schema")
     .option("--check <id>", "Required check ID for --snapshot")
-    .action(async (options: { inspect?: boolean; preflight?: boolean; save?: boolean; snapshot?: boolean; auditReady?: boolean; finish?: boolean; cancel?: boolean; learn?: boolean; check?: string }) => {
-      const actionCount = [options.inspect, options.preflight, options.save, options.snapshot, options.auditReady, options.finish, options.cancel, options.learn].filter((selected) => selected === true).length;
-      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --preflight, --save, --snapshot, --audit-ready, --finish, --cancel, or --learn.");
+    .action(async (options: { inspect?: boolean; preflight?: boolean; save?: boolean; snapshot?: boolean; auditReady?: boolean; finish?: boolean; cancel?: boolean; learn?: boolean; check?: string; transition?: string; evidence?: boolean; schema?: boolean }) => {
+      const actionCount = [options.inspect, options.preflight, options.save, options.snapshot, options.auditReady, options.finish, options.cancel, options.learn, options.evidence, options.schema].filter((selected) => selected === true).length
+        + (options.transition === undefined ? 0 : 1);
+      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --preflight, --save, --transition, --evidence, --schema, --snapshot, --audit-ready, --finish, --cancel, or --learn.");
       if (options.snapshot !== true && options.check !== undefined) throw new Error("--check requires workflow --snapshot.");
       if (options.snapshot === true && options.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
       const root = await resolveProjectRoot(process.cwd());
@@ -249,6 +263,24 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
         let envelope: unknown;
         try { envelope = JSON.parse(input) as unknown; } catch { throw new Error("Workflow save requires valid JSON."); }
         process.stdout.write(`${JSON.stringify(await saveWorkflow(root, envelope))}\n`);
+        return;
+      }
+      if (options.transition !== undefined) {
+        const [status, checkpoint, ...rest] = options.transition.split("/");
+        if (!status || !checkpoint || rest.length > 0) throw new Error("workflow --transition requires <status>/<checkpoint>.");
+        process.stdout.write(`${JSON.stringify(await transitionWorkflow(root, status, checkpoint))}\n`);
+        return;
+      }
+      if (options.evidence) {
+        const input = programOptions.workflowInput ? await programOptions.workflowInput() : await readBoundedInput(process.stdin);
+        if (!input) throw new Error("Workflow evidence requires a bounded JSON envelope on stdin.");
+        let envelope: unknown;
+        try { envelope = JSON.parse(input) as unknown; } catch { throw new Error("Workflow evidence requires valid JSON."); }
+        process.stdout.write(`${JSON.stringify(await appendEvidenceWorkflow(root, envelope))}\n`);
+        return;
+      }
+      if (options.schema) {
+        process.stdout.write(`${JSON.stringify(workflowEnvelopeSchema())}\n`);
         return;
       }
       if (options.snapshot) {
@@ -342,8 +374,8 @@ function parseTaskStatus(value: string | undefined): TaskStatus | undefined {
   return value as TaskStatus;
 }
 
-function parseReportPlatform(value: string | undefined): "kiro" | "antigravity" | "codex" {
-  if (value !== "kiro" && value !== "antigravity" && value !== "codex") throw new Error("--platform must be kiro, antigravity, or codex.");
+function parseReportPlatform(value: string | undefined): "kiro" | "antigravity" | "codex" | "claude" {
+  if (value !== "kiro" && value !== "antigravity" && value !== "codex" && value !== "claude") throw new Error("--platform must be kiro, antigravity, codex, or claude.");
   return value;
 }
 

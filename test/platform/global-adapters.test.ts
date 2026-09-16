@@ -107,6 +107,21 @@ describe("user-global platform desired-surface renderers", () => {
     }
   });
 
+  it("should_keep_stable_per_platform_skill_source_ids_when_the_shared_plan_is_reused", () => {
+    const platforms: readonly (readonly [string, readonly DesiredGlobalManagedFile[]])[] = [
+      ["kiro-skill", kiroGlobalDesiredFiles()],
+      ["antigravity-skill", antigravityGlobalPluginDesiredFiles()],
+      ["codex-global-skill", [...createCodexGlobalSurfacePlan().skills]],
+    ];
+
+    for (const [prefix, files] of platforms) {
+      const skills = files.filter((file) => file.path.startsWith("skills/"));
+
+      expect(skills.map((file) => file.sourceId)).toEqual(workflowSkills.map((skill) => `${prefix}-${skill.name}`));
+      expect(skills.map((file) => file.path)).toEqual(workflowSkills.map((skill) => `skills/${skill.name}/SKILL.md`));
+    }
+  });
+
   it("should_render_identical_root_relative_antigravity_plugin_when_reused_for_desktop_and_cli", () => {
     const desktopPlan = antigravityGlobalPluginDesiredFiles();
     const cliPlan = antigravityGlobalPluginDesiredFiles();

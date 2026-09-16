@@ -1,6 +1,5 @@
 import type { DesiredGlobalManagedFile } from "../utils/global-managed-files.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../templates/harnix/activation.js";
-import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
+import { globalSkillDesiredFiles, HARNIX_GLOBAL_ACTIVATION_DOCUMENT } from "../templates/harnix/global-surface.js";
 
 export const KIRO_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix context --platform kiro";
 
@@ -18,15 +17,7 @@ export const KIRO_GLOBAL_CONTEXT_HOOK = {
   }],
 } as const;
 
-export const KIRO_GLOBAL_STEERING = [
-  "# Harnix",
-  "",
-  "## Harnix activation guard",
-  "",
-  ...HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
-  ...HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
-  "",
-].join("\n");
+export const KIRO_GLOBAL_STEERING = HARNIX_GLOBAL_ACTIVATION_DOCUMENT;
 
 /**
  * Pure, root-relative user-global Kiro plan. The lifecycle supplies the
@@ -34,12 +25,7 @@ export const KIRO_GLOBAL_STEERING = [
  */
 export function kiroGlobalDesiredFiles(): DesiredGlobalManagedFile[] {
   return [
-    ...workflowSkills.map((skill): DesiredGlobalManagedFile => ({
-      path: "skills/" + skill.name + "/SKILL.md",
-      sourceId: "kiro-skill-" + skill.name,
-      kind: "file",
-      content: renderSkill(skill),
-    })),
+    ...globalSkillDesiredFiles("kiro-skill"),
     {
       path: "steering/harnix.md",
       sourceId: "kiro-steering",

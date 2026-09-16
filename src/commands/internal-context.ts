@@ -8,7 +8,7 @@ import { resolveActiveTask } from "../core/tasks/task.js";
 import { findInitializedProject } from "../utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
 
-export type InternalContextPlatform = "kiro" | "antigravity" | "codex";
+export type InternalContextPlatform = "kiro" | "antigravity" | "codex" | "claude";
 
 export interface RenderInternalContextForHookOptions {
   readonly platform: InternalContextPlatform;

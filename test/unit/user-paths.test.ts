@@ -32,6 +32,23 @@ describe("user-global paths", () => {
     expect(Object.values({ ...roots, codex: undefined }).every((root) => root === undefined || !root.logicalPath.includes(home))).toBe(true);
   });
 
+  it("derives the Claude root from the injected home and honours CLAUDE_CONFIG_DIR", async () => {
+    const home = await temporaryUserHome();
+    const derived = await resolveSelectedUserPlatformRoots(["claude"], { homeResolver: async () => home, environment: {} });
+    const relocated = await resolveSelectedUserPlatformRoots(["claude"], {
+      homeResolver: async () => home,
+      environment: { CLAUDE_CONFIG_DIR: join(home, "custom-claude") },
+    });
+
+    expect(derived.claude?.path).toBe(join(home, ".claude"));
+    expect(derived.claude?.logicalPath).toBe("~/.claude");
+    expect(derived.claude?.display("settings.json")).toBe("~/.claude/settings.json");
+    expect(relocated.claude?.path).toBe(join(home, "custom-claude"));
+    expect(relocated.claude?.logicalPath).toBe("$CLAUDE_CONFIG_DIR");
+    expect(derived.kiro).toBeUndefined();
+    expect(derived.codex).toBeUndefined();
+  });
+
   it("uses the default Codex root when CODEX_HOME is absent and renders child paths logically", async () => {
     const home = await temporaryUserHome();
     const roots = await resolveUserPlatformRoots({ homeResolver: async () => home, environment: {} });

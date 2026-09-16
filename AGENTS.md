@@ -2,7 +2,7 @@
 
 ## Mission
 
-Build Harnix as a lean coding-agent harness for exactly Kiro, Antigravity, and Codex. Project workflow data remains local in `.harnix/`; Phase 6 platform integrations are explicit, Harnix-owned **user-global** customizations. The product is one npm package (`@tamtiger/harnix`) and one executable (`harnix`).
+Build Harnix as a lean coding-agent harness for exactly Kiro, Antigravity, Codex, and Claude Code. Project workflow data remains local in `.harnix/`; Phase 6 platform integrations are explicit, Harnix-owned **user-global** customizations. The product is one npm package (`@tamtiger/harnix`) and one executable (`harnix`).
 
 ## Sources of truth
 
@@ -28,11 +28,11 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 
 - TypeScript ESM, Node.js `>=18`, pnpm, Commander.js, Inquirer, tsup, and Vitest.
 - Exactly one publishable `package.json` and one `harnix` bin.
-- Supported platforms are Kiro, Antigravity, and Codex only.
+- Supported platforms are Kiro, Antigravity, Codex, and Claude Code only.
 - Antigravity public identity/flag is `antigravity`/`--antigravity`; its executable is `agy`. The physical `.gemini` namespace does not make Gemini CLI a supported platform.
 - Runtime code stays in the installed package. Never copy runtime scripts into consumer repositories.
 - No telemetry, daemon, hosted service, marketplace, default MCP, global memory, or silent runtime network.
-- User-global setup is limited to the documented Kiro, Antigravity, and Codex files. Never create `~/.harnix`, mutate real user homes in tests, or infer global ownership from a project manifest.
+- User-global setup is limited to the documented Kiro, Antigravity, Codex, and Claude Code files. Never create `~/.harnix`, mutate real user homes in tests, or infer global ownership from a project manifest.
 - No channel/forum/worker network, workflow-template switching, mandatory subagents, or automatic Git integration.
 - Never auto-commit, branch, create a worktree, merge, push, publish, or create a PR.
 - Before any commit, show the proposed changes and commit message, then wait for explicit user approval. A request to commit does not authorize skipping this review.
@@ -96,10 +96,13 @@ Phase 6 supersedes the former project-local platform paths while preserving the 
 
 Important adapter constraints:
 
-- Public Harnix commands always emit JSON; do not add or require a `--json` flag.
-- `harnix setup --kiro|--antigravity|--codex [--dry-run]` is user-global only. It must not resolve a project root or read `.harnix/config.yaml`.
+- Public Harnix commands always emit JSON by default; do not add or require a `--json` flag or a human-summary flag. Task review happens by opening the task's generated `.harnix/tasks/<id>/review.md`, not by running a command.
+- `harnix skill [name]` is the canonical skill source for any agent, including one on a platform Harnix never configures. Never copy `SKILL.md` into a consumer repository.
+- Hidden `workflow --transition` and `--evidence` are bounded partial transports; `--save` remains required whenever artifacts, obligations or a contract revision change.
+- `harnix setup --kiro|--antigravity|--codex|--claude [--dry-run]` is user-global only. It must not resolve a project root or read `.harnix/config.yaml`.
 - Kiro uses `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, and one `~/.kiro/hooks/harnix-context.json` JSON-v1 `UserPromptSubmit` handler.
 - Antigravity uses independent Desktop and CLI plugins below `~/.gemini/config/plugins/harnix` and `~/.gemini/antigravity-cli/plugins/harnix`; never write MCP/settings/credentials.
+- Claude Code uses `~/.claude/skills/harnix-*`, a marker block in `~/.claude/CLAUDE.md`, and one owned `harnix-context` group inside `hooks.UserPromptSubmit` in `~/.claude/settings.json`. `CLAUDE_CONFIG_DIR` relocates that root. Claude Code reads `CLAUDE.md`, not `AGENTS.md`; `UserPromptSubmit` has no matcher. Never touch `~/.claude.json`, credentials, MCP servers, `projects/`, `history` or `todos/`.
 - Codex uses `$HOME/.agents/skills/harnix-*`, a managed conditional block in `$CODEX_HOME/AGENTS.md`, and a managed inline `$CODEX_HOME/config.toml` hook block. Preserve unrelated TOML settings, `[hooks.state]`, text, and handlers; migrate an unchanged legacy Harnix hook from `$CODEX_HOME/hooks.json` when present. Report `installed-pending-trust` until the user reviews the hook in `/hooks`.
 - Each platform root owns a separate validated sidecar manifest. Reconcile only unchanged Harnix fragments, preserve collisions/modified content, lock in stable order, and rollback conservatively.
 - `update --global`, `doctor --fix --global`, and `uninstall --global ... --yes` operate on global integrations. `uninstall --purge --yes` remains project-only. Legacy project surfaces require explicit `--legacy-project-surfaces [--yes]` cleanup.

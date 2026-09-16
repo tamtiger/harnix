@@ -6,7 +6,7 @@ import type {
   MarkerSelector,
 } from "../utils/global-managed-files.js";
 import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../templates/harnix/activation.js";
-import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
+import { globalSkillDesiredFiles } from "../templates/harnix/global-surface.js";
 
 const begin = "<!-- harnix:begin -->";
 const end = "<!-- harnix:end -->";
@@ -75,12 +75,7 @@ export function createCodexGlobalSurfacePlan(): CodexGlobalSurfacePlan {
         sourceId: "codex-global-context-hook",
       },
     ],
-    skills: workflowSkills.map((skill) => ({
-      content: renderCodexGlobalSkill(skill),
-      kind: "file" as const,
-      path: `skills/${skill.name}/SKILL.md`,
-      sourceId: `codex-global-skill-${skill.name}`,
-    })),
+    skills: globalSkillDesiredFiles("codex-global-skill"),
   };
 }
 
@@ -99,10 +94,6 @@ export const matchesCodexGlobalContextHookGroup: GlobalJsonMemberMatcher = (cand
     && typeof handler.command === "string"
     && (handler.command === CODEX_GLOBAL_CONTEXT_COMMAND || handler.additionalContextLimit === 2500));
 };
-
-function renderCodexGlobalSkill(skill: (typeof workflowSkills)[number]): string {
-  return renderSkill(skill);
-}
 
 function isJsonRecord(value: JsonValue): value is { [key: string]: JsonValue } {
   return typeof value === "object" && value !== null && !Array.isArray(value);

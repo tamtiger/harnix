@@ -2,6 +2,7 @@ import type { PlatformId } from "../core/config/config.js";
 import { readdir } from "node:fs/promises";
 import { basename } from "node:path";
 import { antigravityGlobalPluginDesiredFiles } from "../configurators/antigravity.js";
+import { claudeGlobalDesiredFiles, matchesClaudeGlobalContextHookGroup } from "../configurators/claude.js";
 import { createCodexGlobalSurfacePlan, matchesCodexGlobalContextHookGroup } from "../configurators/codex.js";
 import { kiroGlobalDesiredFiles } from "../configurators/kiro.js";
 import { acquireHarnixFileLock, readHarnixFileLockSnapshot, type HarnixFileLockRecord } from "../utils/file-lock.js";
@@ -30,8 +31,6 @@ export interface GlobalSetupLock {
 }
 /** Injectable only for deterministic lifecycle tests. */
 export type GlobalSetupLockAcquirer = (path: string) => Promise<GlobalSetupLock>;
-/** @deprecated Kept only for source compatibility while project-local setup callers migrate. */
-export type VersionLookup = (executable: string, args: string[]) => Promise<string | undefined>;
 
 export interface SetupPlatformsOptions {
   readonly platforms: readonly GlobalSetupPlatform[];
@@ -45,10 +44,6 @@ export interface SetupPlatformsOptions {
   readonly restoreDeleted?: boolean | undefined;
   /** Test-only lock injection; production uses Harnix's cross-process lock. */
   readonly lockAcquirer?: GlobalSetupLockAcquirer | undefined;
-  /** @deprecated Ignored. Global setup never resolves or reads a project root. */
-  readonly root?: string | undefined;
-  /** @deprecated Ignored. Platform capability discovery is reported by Doctor. */
-  readonly versionLookup?: VersionLookup | undefined;
 }
 
 export interface GlobalSetupPlatformResult {
@@ -157,6 +152,20 @@ function createTargets(
       createTarget("antigravity", requireSelectedRoot(roots.antigravityDesktop, "Antigravity Desktop"), ".managed.json", ".managed.lock", "antigravity-desktop", desired, dryRun, removeObsolete, restoreDeleted, undefined, true),
       createTarget("antigravity", requireSelectedRoot(roots.antigravityCli, "Antigravity CLI"), ".managed.json", ".managed.lock", "antigravity-cli", desired, dryRun, removeObsolete, restoreDeleted, undefined, true),
     );
+  }
+  if (platforms.includes("claude")) {
+    targets.push(createTarget(
+      "claude",
+      requireSelectedRoot(roots.claude, "Claude"),
+      "harnix/managed.json",
+      "harnix/managed.lock",
+      "claude",
+      claudeGlobalDesiredFiles(),
+      dryRun,
+      removeObsolete,
+      restoreDeleted,
+      new Map([["claude-global-context-hook", matchesClaudeGlobalContextHookGroup]]),
+    ));
   }
   if (platforms.includes("codex")) {
     const plan = createCodexGlobalSurfacePlan();

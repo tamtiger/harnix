@@ -1,0 +1,150 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260916-222500-task-review-markdown",
+  "title": "File review.md cho mỗi task",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cho người dùng review task Harnix bằng cách mở một file markdown thuần, không phải chạy CLI command.",
+  "nonGoals": [
+    "Không xoá hoặc đổi hành vi --human đã có.",
+    "Không chèn nội dung rationale vào prd.md/plan.md vì hai file đó luôn nằm trong input hash của mọi required check.",
+    "Không thêm review.md vào managed-file reconciliation."
+  ],
+  "decisions": [
+    {
+      "id": "d1-separate-file",
+      "text": "review.md là file riêng, không chèn vào prd.md/plan.md.",
+      "rationale": "prd.md/plan.md luôn nằm trong input hash của mọi required check cho Full task; chèn rationale vào đó sẽ làm stale evidence đang pass mỗi khi thêm một quyết định."
+    },
+    {
+      "id": "d2-hook-savetask",
+      "text": "Regenerate review.md ngay trong saveTask thay vì từng transport.",
+      "rationale": "saveTask là điểm ghi task.json duy nhất mà mọi transport (--save/--transition/--evidence/--finish/--cancel) đều đi qua, nên hook ở đây đảm bảo đồng bộ tự động."
+    }
+  ],
+  "residualRisks": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-review-md-generated",
+      "text": "review.md tồn tại và phản ánh đúng title/status/checkpoint/goal/non-goals/acceptance criteria/evidence sau mỗi saveTask, không lộ absolute path.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-review-md-20260916223500"
+      ]
+    },
+    {
+      "id": "ac-review-md-rationale",
+      "text": "review.md hiện đủ decisions/residualRisks khi có, bỏ qua khi không có.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-review-md-20260916223500"
+      ]
+    },
+    {
+      "id": "ac-review-md-no-hash-impact",
+      "text": "Thêm/sửa decisions/residualRisks không đổi taskContractHash/inputDigest của check đã pass.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-review-md-20260916223500"
+      ]
+    },
+    {
+      "id": "ac-docs-sync",
+      "text": "PRD và IMPLEMENTATION_PLAN mô tả review.md là artifact tham khảo tự sinh, không phải obligation.",
+      "status": "met",
+      "evidenceIds": [
+        "green-docs-release-gate-20260916223500"
+      ]
+    },
+    {
+      "id": "ac-release-readiness",
+      "text": "Patch version và changelog cập nhật một lần trước verifying; exact acceptance sequence pass.",
+      "status": "met",
+      "evidenceIds": [
+        "green-docs-release-gate-20260916223500"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task.ts",
+    "test/unit/task-state.test.ts",
+    "test/unit/verification-inputs.test.ts",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "README.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "focused-review-md",
+      "description": "Xác nhận review.md sinh đúng nội dung, hiện/ẩn rationale đúng điều kiện, và không đổi task contract hash.",
+      "command": "pnpm exec vitest run test/unit/task-state.test.ts test/unit/verification-inputs.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-review-md-generated",
+        "ac-review-md-no-hash-impact",
+        "ac-review-md-rationale"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts",
+        "test/unit/verification-inputs.test.ts"
+      ]
+    },
+    {
+      "id": "docs-release-gate",
+      "description": "Chạy exact acceptance sequence và xác nhận docs mô tả nhất quán review.md.",
+      "command": "pnpm build; pnpm lint; pnpm typecheck; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-sync",
+        "ac-release-readiness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "package.json",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "green-focused-review-md-20260916223500",
+      "checkId": "focused-review-md",
+      "recordedAt": "2026-09-16T13:46:03.761Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "37 test pass: review.md sinh đúng title/status/goal/non-goals/acceptance criteria/evidence, hiện decisions/residualRisks kèm rationale/severity khi có và bỏ qua khi không, regenerate đúng nội dung mới sau save thứ hai, không lộ absolute path, và không đổi taskContractHash/inputDigest khi chỉ thêm rationale.",
+      "artifactPaths": [],
+      "inputDigest": "291a215968aa0e4c0a06b88116cad77440bc0ac04da3bcbcdcd5a40039f8ac5f"
+    },
+    {
+      "id": "green-docs-release-gate-20260916223500",
+      "checkId": "docs-release-gate",
+      "recordedAt": "2026-09-16T13:46:04.084Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Toàn bộ exact acceptance sequence exit 0: build, lint, typecheck, test:acceptance (590 pass, 1 skipped), pack:check, smoke:tarball, measure:init, measure:footprint, scan:release, git diff --check. PRD/IMPLEMENTATION_PLAN/README mô tả review.md là artifact tham khảo tự sinh; sửa luôn hai chỗ còn sót 'đúng ba platform' từ task Claude Code trước.",
+      "artifactPaths": [],
+      "inputDigest": "da8c9e41b9f2e3542de916db9f541c9c80c862a9b2b4dc16b44b863000d45ada"
+    }
+  ],
+  "createdAt": "2026-09-16T13:42:11.394Z",
+  "updatedAt": "2026-09-16T13:46:05.850Z",
+  "completedAt": "2026-09-16T13:46:05.850Z"
+}

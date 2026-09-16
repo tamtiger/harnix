@@ -16,6 +16,22 @@ import { useTemporaryRepositories } from "../support/temporary-repository.js";
 const temporaryRepository = useTemporaryRepositories("harnix-inputs-");
 
 describe("verification input freshness", () => {
+  it("should_keep_the_task_contract_hash_stable_when_only_review_rationale_changes", async () => {
+    const root = await fixtureRepository();
+    const task = taskFixture();
+    const annotated: TaskRecordV2 = {
+      ...task,
+      decisions: [{ id: "d1", text: "Ghi quyet dinh", rationale: "De agent khac hieu ly do." }],
+      residualRisks: [{ id: "r1", text: "Rui ro con lai", severity: "low" }],
+    };
+
+    const base = await computeVerificationInputSnapshot(root, task, "check");
+    const withRationale = await computeVerificationInputSnapshot(root, annotated, "check");
+
+    expect(withRationale.taskContractHash).toBe(base.taskContractHash);
+    expect(withRationale.inputDigest).toBe(base.inputDigest);
+  });
+
   it("hashes canonical task contract, Full artifacts, and sorted repository inputs deterministically", async () => {
     const root = await fixtureRepository();
     const task = taskFixture();

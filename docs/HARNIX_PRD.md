@@ -31,7 +31,7 @@ Harnix được phát triển từ baseline kỹ thuật [mindfold-ai/Trellis](h
 | 5 | Re-init/update overwrite customizations | Versioned hash manifest và conservative ownership |
 | 6 | Scripts/hooks duplicate | Runtime từ package đã cài; mỗi platform một mechanism |
 | 7 | Thiếu stack-specific standards | Detect stack và seed concise relevant rules |
-| 8 | Quá nhiều platform/surface | Chỉ Kiro, Antigravity và Codex |
+| 8 | Quá nhiều platform/surface | Chỉ Kiro, Antigravity, Codex và Claude Code |
 | 9 | Workflow/channel quá phức tạp | Một workflow; không forum/worker network |
 | 10 | Completion claim thiếu evidence | Fresh verification gate và two-stage review |
 | 11 | Legacy install bị merge âm thầm | Preview, explicit migration, verify, rollback, preserve source |
@@ -55,7 +55,7 @@ Harnix được phát triển từ baseline kỹ thuật [mindfold-ai/Trellis](h
 - Task/spec/context/journal/learning project-local.
 - Dual-mode brainstorm, adaptive TDD, systematic debugging, two-stage review.
 - Stack/package-manager/verification detection.
-- Kiro, Antigravity và Codex native user-global integrations with project-activation guards.
+- Kiro, Antigravity, Codex và Claude Code native user-global integrations with project-activation guards.
 - Managed lifecycle, migration, doctor, update, upgrade, uninstall, memory query.
 - Bounded task observability, exact unfinished-task pointer recovery, effective-context explanation và required-check freshness explanation.
 - Concise common và stack-specific engineering rules.
@@ -121,26 +121,27 @@ CLI có help rõ, actionable errors và non-zero exit khi thất bại:
 
 ```text
 harnix init [--user <name>] [--languages <csv>] [--dry-run]
-harnix setup --kiro|--antigravity|--codex [--dry-run]
+harnix setup --kiro|--antigravity|--codex|--claude [--dry-run]
 harnix update [--restore]
-harnix update --global [--kiro|--antigravity|--codex] [--restore] [--dry-run]
+harnix update --global [--kiro|--antigravity|--codex|--claude] [--restore] [--dry-run]
 harnix upgrade
 harnix uninstall --purge [--yes]
-harnix uninstall --global --kiro|--antigravity|--codex [--yes]
+harnix uninstall --global --kiro|--antigravity|--codex|--claude [--yes]
 harnix uninstall --legacy-project-surfaces [--yes]
 harnix mem [query]
 harnix status
 harnix tasks [--limit <1..100>] [--status <TaskStatus>]
 harnix resume <task-id> [--dry-run]
-harnix context-report --platform <kiro|antigravity|codex> [--limit <1..50>]
+harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]
 harnix checks [--limit <1..50>]
 harnix audit
+harnix skill [name]
 harnix doctor [--fix] [--global]
 harnix repo-map --query <text> [--limit <count>]
 harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]
 ```
 
-Có mười bốn public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Public failure trước normal result emit exact `PublicCliErrorV1` đã redaction trên stdout và cùng actionable message trên stderr; exit nằm trong envelope và tuân theo semantics `1|2`. Hidden `context`/`workflow` giữ protocol output riêng, không nhận public error envelope. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix context --platform <id>` là platform-hook protocol; hidden `harnix workflow` yêu cầu đúng một action flag trong `--preflight|--inspect|--save|--snapshot|--audit-ready|--finish|--cancel|--learn` và là agent routing/persistence/freshness/terminal transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
+Có mười lăm public commands. Mọi public command luôn emit đúng một JSON document; không cần `--json`. Public failure trước normal result emit exact `PublicCliErrorV1` đã redaction trên stdout và cùng actionable message trên stderr; exit nằm trong envelope và tuân theo semantics `1|2`. Hidden `context`/`workflow` giữ protocol output riêng, không nhận public error envelope. Platform flags là explicit authorization cho global mutation; `--global` không tạo command mới. Init không destructive và không prompt: lệnh tối giản là `harnix init`; `--user`, `--languages` và `--technologies` chỉ override giá trị tự phát hiện. `--yes` chỉ còn cần cho destructive uninstall. Packaged hidden `harnix context --platform <id>` là platform-hook protocol; hidden `harnix workflow` yêu cầu đúng một action flag trong `--preflight|--inspect|--save|--transition|--evidence|--schema|--snapshot|--audit-ready|--finish|--cancel|--learn` và là agent routing/persistence/freshness/terminal transport. Chúng không xuất hiện trong public help và không phải supported public API; frozen behavior nằm trong `IMPLEMENTATION_PLAN.md` mục 4.
 
 ## 8. Init requirements
 
@@ -206,6 +207,14 @@ Phase 6 supersedes every former project-local platform setup path. `init` contin
 - Setup does not change model, reasoning, sandbox, approval, provider/auth, MCP or feature flags. An unchanged legacy Harnix hook in `$CODEX_HOME/hooks.json` is migrated conservatively; modified or colliding content is preserved and reported. `AGENTS.override.md` shadowing and legacy project hooks are doctor findings.
 - The fixed nested hook command has timeout 5 seconds and `additionalContextLimit: 2500`. Windows launcher smoke must prove a pnpm/npm `.cmd` shim resolves; no absolute executable or automatic trust bypass is allowed.
 - Codex hook files are initially `installed-pending-trust`. User review/trust through `/hooks` is necessary but not sufficient for an `active` claim: activation additionally needs authoritative external evidence. Changed hook content requires review again, and the regular CLI never assumes trust or activation from file presence.
+
+### 9.4 Claude Code
+
+- User surfaces are `~/.claude/skills/harnix-*/SKILL.md`, a marker block in `~/.claude/CLAUDE.md`, and one owned `harnix-context` group inside `hooks.UserPromptSubmit` in `~/.claude/settings.json`. `CLAUDE_CONFIG_DIR` relocates that root exactly as `CODEX_HOME` relocates the Codex root.
+- Claude Code reads `CLAUDE.md`, not `AGENTS.md`, so the activation guard lives in user memory. Setup preserves every byte outside its markers.
+- `UserPromptSubmit` has no matcher support, so the owned member is one `{ hooks: [...] }` group holding the fixed command `harnix context --platform claude` with timeout 5 seconds. Unrelated groups in the same array are preserved and never reinterpreted; a user-edited Harnix group is preserved and reported as drift instead of being duplicated.
+- The hook emits plain-text stdout, which Claude Code adds as prompt context. A non-Harnix directory exits 0 with empty stdout.
+- Setup never writes `~/.claude.json`, credentials, MCP servers, `projects/`, `history` or `todos/`, and never changes permissions, sandbox or model settings. Claude Code reloads settings hooks from disk, so Harnix reports readiness `installed` or `binary-unavailable` and never claims `active` without authoritative external evidence.
 
 The root `AGENTS.md` bootstrap that `init` creates when absent is retained for project onboarding. It is not a setup-owned Codex platform surface.
 ## 10. Config, context, journal and learning
@@ -297,7 +306,7 @@ Hidden save chỉ có crash-recovery exception hẹp: khi task commit đã tồn
 
 ### Context report
 
-`harnix context-report --platform <kiro|antigravity|codex> [--limit <1..50>]` emit `ContextReportResultV1` read-only; default limit 20, no active task là success với `activeTask:null`. Active report dùng cùng effective builder với hidden context ở bounded hook mode: Codex cap 2.500 characters; Kiro/Antigravity cap `min(config.context.maxCharacters, 8000)`; tối đa 64 inspected entries. Chưa có `context.json` thì candidate là task `relevantPaths` cộng applicable guides; đã có manifest thì dùng persisted entries cộng applicable guides.
+`harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]` emit `ContextReportResultV1` read-only; default limit 20, no active task là success với `activeTask:null`. Active report dùng cùng effective builder với hidden context ở bounded hook mode: Codex cap 2.500 characters; Kiro/Antigravity/Claude Code cap `min(config.context.maxCharacters, 8000)`; tối đa 64 inspected entries. Chưa có `context.json` thì candidate là task `relevantPaths` cộng applicable guides; đã có manifest thì dùng persisted entries cộng applicable guides.
 
 Output active chỉ gồm task ID, platform budget, aggregate candidate/selected/omitted counts, selected relative paths với trusted sorted reason codes `applicable-guide|persisted-selection|pinned|task-reference`, omitted relative paths với `budget|duplicate|missing|unsafe`, và bounded context/selection drift metadata. `--limit` áp riêng cho selected, omitted và drift changes. Toàn JSON tối đa 262.144 UTF-8 bytes bằng deterministic whole-item tail omission; report không trả content, raw persisted reason/state, hash, task prose, hook event, secret hoặc absolute path, không ghi file/network và không làm đổi hidden hook payload.
 
@@ -356,6 +365,7 @@ Source of truth của từng skill là file thật `src/skills/harnix-*/SKILL.md
 
 - **Lite:** thay đổi tập trung, rủi ro thấp, ít decision; task record tối thiểu vẫn có acceptance, validation và evidence. LOC chỉ là tín hiệu, không phải luật.
 - **Full:** feature, integration, migration, architecture/refactor, security-sensitive hoặc multi-layer; task `prd.md` + `plan.md`, conditional `design.md`/research và decision-complete plan.
+- Mỗi `saveTask` cũng regenerate `.harnix/tasks/<id>/review.md`: một trang tổng hợp thuần cho người đọc (title, status/checkpoint, goal, non-goals, acceptance criteria, `decisions`/`residualRisks` khi có, blocker/cancellation khi có, evidence) để review task mà không cần mở `task.json` hay chạy command. File này derived-only, luôn bị ghi đè, không thuộc `TaskArtifacts`, không nằm trong `inputs` mặc định của bất kỳ required check nào, và không ảnh hưởng `taskContractHash`.
 - **Ambiguous:** tự chọn mức nhẹ nhất kiểm soát được rủi ro; chỉ hỏi full brainstorm hay quick implementation khi outcome/cost khác đáng kể.
 - Explicit `--lite`/`--full` override heuristic. Forced Lite với risk signal vốn chọn Full phải giữ Lite nhưng emit `explicit-lite-risk-conflict`; cả hai mode vẫn giữ common compliance và quality/security gates.
 
@@ -403,7 +413,7 @@ Initial IDs cover source languages C#, TypeScript, JavaScript, PHP, Python, Java
 Tất cả filesystem tests dùng isolated temporary repositories **và injected disposable user homes**; they must not read or write a real user profile:
 
 1. Unit: detection; config/migrations; context ranking/budget; project/global hash manifests; permission-preserving atomic writes; user path safety; lock/stale-lock/rollback; journal; learning; Doctor v2.
-2. CLI: all fourteen public commands; status/tasks/resume/context-report/checks/audit from nested initialized paths plus no-active/active/collision/fresh/stale/malformed/no-write/privacy/bounded fixtures; repo-map query/impact cache-only fixtures; setup outside an initialized repository; project/global update/uninstall scope; idempotence; modified/deleted/corrupt/future project and global schemas.
+2. CLI: all fifteen public commands; status/tasks/resume/context-report/checks/audit from nested initialized paths plus no-active/active/collision/fresh/stale/malformed/no-write/privacy/bounded fixtures; repo-map query/impact cache-only fixtures; setup outside an initialized repository; project/global update/uninstall scope; idempotence; modified/deleted/corrupt/future project and global schemas.
 3. Migration: discovery, dry-run, transform, preservation, mixed/conflict, rollback, cleanup.
 4. Fixtures: independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue and multilingual/multi-technology monorepo.
 5. Platform: Kiro global JSON-v1 hook; Antigravity Desktop/CLI plugins and multi-root invocation; Codex global skills/AGENTS/nested hook schema; relevant rules only and no machine paths.

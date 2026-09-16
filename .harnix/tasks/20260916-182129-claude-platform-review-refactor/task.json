@@ -1,0 +1,264 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260916-182129-claude-platform-review-refactor",
+  "title": "Review, refactor và bổ sung platform Claude",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bổ sung Claude Code làm user-global platform ngang hàng Kiro/Antigravity/Codex sau khi loại bỏ trùng lặp configurator và deprecated surface đã được review chứng minh.",
+  "nonGoals": [
+    "Không tách internal-workflow.ts khi chưa có defect chứng minh; ghi nhận là residual risk.",
+    "Không đổi dòng chỉ thị tiếng Việt trong AGENTS template theo quyết định của người dùng.",
+    "Không thêm skill thứ tám, MCP, telemetry, network service hoặc persisted schema mới.",
+    "Không chạm credentials, mcpServers, projects/, history hoặc todos/ trong ~/.claude."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-claude-global-surface",
+      "text": "setup --claude ghi đúng ba fragment user-global dưới ~/.claude, idempotent, dry-run không ghi và bảo toàn nội dung không liên quan.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-claude-configurator-202609161146200",
+        "green-focused-lifecycle-parity-202609161146201"
+      ]
+    },
+    {
+      "id": "ac-claude-lifecycle-parity",
+      "text": "update/doctor/uninstall --global cùng context và context-report cho claude có parity đầy đủ với ba platform hiện hữu.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-lifecycle-parity-202609161146201"
+      ]
+    },
+    {
+      "id": "ac-configurator-dedupe",
+      "text": "Bốn configurator dùng chung một nguồn canonical cho skill plan và activation guard mà không đổi byte output của ba platform cũ.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-claude-configurator-202609161146200",
+        "green-managed-parity-202609161146202"
+      ]
+    },
+    {
+      "id": "ac-dead-surface-removal",
+      "text": "VersionLookup, versionLookup và root bị xoá khỏi SetupPlatformsOptions và mọi gate vẫn xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-lifecycle-parity-202609161146201",
+        "green-release-gate-202609161146203"
+      ]
+    },
+    {
+      "id": "ac-contract-docs-sync",
+      "text": "Platform set mở rộng nhất quán trong normative docs, AGENTS, template, README và release scanner vẫn chặn platform không hỗ trợ.",
+      "status": "met",
+      "evidenceIds": [
+        "green-managed-parity-202609161146202",
+        "green-release-gate-202609161146203"
+      ]
+    },
+    {
+      "id": "ac-release-readiness",
+      "text": "Patch version, changelog, skill metadata và self-host manifest cập nhật một lần trước verifying và exact acceptance sequence pass.",
+      "status": "met",
+      "evidenceIds": [
+        "green-release-gate-202609161146203"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/.template-hashes.json",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "package.json",
+    "scripts/scan-release.mjs",
+    "src/cli-program.ts",
+    "src/commands/doctor.ts",
+    "src/commands/global-doctor.ts",
+    "src/commands/global-uninstall.ts",
+    "src/commands/global-update.ts",
+    "src/commands/internal-context.ts",
+    "src/commands/setup.ts",
+    "src/configurators/antigravity.ts",
+    "src/configurators/claude.ts",
+    "src/configurators/codex.ts",
+    "src/configurators/kiro.ts",
+    "src/core/config/config.ts",
+    "src/templates/harnix/activation.ts",
+    "src/templates/harnix/agents.ts",
+    "src/templates/harnix/workflow.ts",
+    "src/utils/global-managed-files.ts",
+    "src/utils/user-paths.ts",
+    "test/integration/cli.test.ts",
+    "test/integration/global-doctor.test.ts",
+    "test/integration/global-lifecycle.test.ts",
+    "test/platform/claude-global.test.ts",
+    "test/platform/global-adapters.test.ts",
+    "test/platform/setup.test.ts",
+    "test/safety/release-scanner.test.ts",
+    "test/safety/user-global-paths.test.ts",
+    "test/unit/config.test.ts",
+    "test/unit/global-uninstall.test.ts",
+    "test/unit/user-paths.test.ts",
+    "test/workflow/templates.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/prompts/review-refactor-claude-setup.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "focused-claude-configurator",
+      "description": "Xác nhận platform set mở rộng, plan thuần của configurator claude, root an toàn ~/.claude và dedupe không đổi output ba platform cũ.",
+      "command": "pnpm exec vitest run test/unit/config.test.ts test/safety/release-scanner.test.ts test/platform/claude-global.test.ts test/platform/global-adapters.test.ts test/unit/user-paths.test.ts test/safety/user-global-paths.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-claude-global-surface",
+        "ac-configurator-dedupe",
+        "ac-contract-docs-sync"
+      ],
+      "inputs": [
+        "@task-contract",
+        "scripts/scan-release.mjs",
+        "src/configurators/*.ts",
+        "src/core/config/config.ts",
+        "src/templates/harnix/*.ts",
+        "src/utils/global-managed-files.ts",
+        "src/utils/user-paths.ts",
+        "test/platform/claude-global.test.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/safety/release-scanner.test.ts",
+        "test/safety/user-global-paths.test.ts",
+        "test/unit/config.test.ts",
+        "test/unit/user-paths.test.ts"
+      ]
+    },
+    {
+      "id": "focused-lifecycle-parity",
+      "description": "Xác nhận vòng đời user-global đầy đủ cho claude trên fake home và chứng minh deprecated surface không còn caller.",
+      "command": "pnpm exec vitest run test/platform/setup.test.ts test/integration/global-doctor.test.ts test/integration/global-lifecycle.test.ts test/unit/global-uninstall.test.ts test/integration/cli.test.ts test/workflow/internal-context.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-claude-global-surface",
+        "ac-claude-lifecycle-parity",
+        "ac-dead-surface-removal"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/doctor.ts",
+        "src/commands/global-doctor.ts",
+        "src/commands/global-uninstall.ts",
+        "src/commands/global-update.ts",
+        "src/commands/internal-context.ts",
+        "src/commands/setup.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/global-doctor.test.ts",
+        "test/integration/global-lifecycle.test.ts",
+        "test/platform/setup.test.ts",
+        "test/unit/global-uninstall.test.ts",
+        "test/workflow/internal-context.test.ts"
+      ]
+    },
+    {
+      "id": "managed-parity",
+      "description": "Xác nhận activation instructions, workflow/AGENTS template và skill parity giữ nguyên semantics trên cả bốn platform.",
+      "command": "pnpm exec vitest run test/unit/activation-instructions.test.ts test/workflow/skill-sources.test.ts test/workflow/templates.test.ts test/workflow/self-host.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-configurator-dedupe",
+        "ac-contract-docs-sync"
+      ],
+      "inputs": [
+        ".harnix/workflow.md",
+        "@task-contract",
+        "AGENTS.md",
+        "src/skills/**/SKILL.md",
+        "src/templates/harnix/*.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/self-host.test.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "release-gate",
+      "description": "Chạy exact acceptance sequence mục 11 gồm lint, typecheck, build, toàn bộ test, pack, tarball smoke, measurement và release scan.",
+      "command": "pnpm build; pnpm lint; pnpm typecheck; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-contract-docs-sync",
+        "ac-dead-surface-removal",
+        "ac-release-readiness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**/*.md",
+        "package.json",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "green-focused-claude-configurator-202609161146200",
+      "checkId": "focused-claude-configurator",
+      "recordedAt": "2026-09-16T11:46:20.253Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "77 test pass: platform set nhận claude giữ sorted/unique, release scanner vẫn chặn gemini-cli/cursor/windsurf, plan thuần của configurator claude đúng ba fragment, root ~/.claude an toàn với CLAUDE_CONFIG_DIR, và source id của ba platform cũ không đổi sau dedupe.",
+      "artifactPaths": [],
+      "inputDigest": "f76e1bc521e89353ddbaf9ee9d78da8ad86ed4e51d6a122524134c45a9ee66aa"
+    },
+    {
+      "id": "green-focused-lifecycle-parity-202609161146201",
+      "checkId": "focused-lifecycle-parity",
+      "recordedAt": "2026-09-16T11:46:21.253Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "88 test pass: setup/dry-run/idempotent, bảo toàn CLAUDE.md và settings.json của người dùng, không chạm ~/.claude.json, update phát hiện drift và giữ hook người dùng sửa, uninstall gỡ sạch fragment Harnix, doctor báo claude, CLI --claude hoạt động, context --platform claude là plain-text no-op ngoài project.",
+      "artifactPaths": [],
+      "inputDigest": "fa61a5e41d9d3274d287f35935c7b17e664bc23d281619986572656938e26e8c"
+    },
+    {
+      "id": "green-managed-parity-202609161146202",
+      "checkId": "managed-parity",
+      "recordedAt": "2026-09-16T11:46:22.253Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "16 test pass: activation instructions, skill sources, workflow/AGENTS template và self-host output giữ nguyên semantics sau khi rút nguồn canonical dùng chung.",
+      "artifactPaths": [],
+      "inputDigest": "0d9b689147e03c8c8515cb8ff07bfe652fe4be0ad0f3a7a2c980885b1d7553fd"
+    },
+    {
+      "id": "green-release-gate-202609161146203",
+      "checkId": "release-gate",
+      "recordedAt": "2026-09-16T11:46:23.253Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Toàn bộ exact acceptance sequence exit 0: build, lint, typecheck, test:acceptance (572 pass, 1 skipped), pack:check, smoke:tarball (gồm --claude và tổ hợp bốn platform trên fake home), measure:init, measure:footprint, scan:release, git diff --check.",
+      "artifactPaths": [],
+      "inputDigest": "d86159ee0ee68b8c6d0b3187dff0abe89ed3332900193ed02434dadec4eb0c00"
+    }
+  ],
+  "createdAt": "2026-09-16T11:23:03.603Z",
+  "updatedAt": "2026-09-16T11:46:44.087Z",
+  "completedAt": "2026-09-16T11:46:44.087Z"
+}

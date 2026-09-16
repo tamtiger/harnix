@@ -58,6 +58,58 @@ describe("setupPlatforms user-global lifecycle", () => {
     await expect(access(join(nonHarnixDirectory, ".codex"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
+  it("should_install_the_three_owned_claude_fragments_and_preserve_unrelated_user_settings", async () => {
+    const home = await temporaryUserHome();
+    await mkdir(join(home, ".claude"), { recursive: true });
+    await writeFile(join(home, ".claude", "CLAUDE.md"), "# My notes\n\nAlways use pnpm.\n", "utf8");
+    await writeFile(join(home, ".claude", "settings.json"), JSON.stringify({
+      hooks: { UserPromptSubmit: [{ hooks: [{ type: "command", command: "my-own-hook" }] }] },
+      theme: "dark",
+    }, null, 2) + "\n", "utf8");
+    await writeFile(join(home, ".claude.json"), JSON.stringify({ mcpServers: {} }) + "\n", "utf8");
+
+    const result = await setupPlatforms({
+      commandLookup: async () => true,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      platforms: ["claude"],
+    });
+
+    const memory = await readFile(join(home, ".claude", "CLAUDE.md"), "utf8");
+    const settings = JSON.parse(await readFile(join(home, ".claude", "settings.json"), "utf8"));
+
+    expect(result.platforms.map((platform) => platform.platform)).toEqual(["claude"]);
+    expect(JSON.stringify(result)).not.toContain(home);
+    await expect(readFile(join(home, ".claude", "skills", "harnix-implement", "SKILL.md"), "utf8"))
+      .resolves.toContain(`metadata:\n  version: "${packageVersion}"`);
+    expect(memory).toContain("Always use pnpm.");
+    expect(memory).toContain("<!-- harnix:begin -->");
+    expect(memory).toContain("harnix/config.yaml");
+    expect(settings.theme).toBe("dark");
+    expect(settings.hooks.UserPromptSubmit).toHaveLength(2);
+    expect(settings.hooks.UserPromptSubmit[0]).toEqual({ hooks: [{ type: "command", command: "my-own-hook" }] });
+    expect(settings.hooks.UserPromptSubmit[1]).toEqual({ hooks: [{ command: "harnix context --platform claude", timeout: 5, type: "command" }] });
+    await expect(readFile(join(home, ".claude.json"), "utf8")).resolves.toBe(JSON.stringify({ mcpServers: {} }) + "\n");
+  });
+
+  it("should_reinstall_claude_idempotently_without_duplicating_the_prompt_hook", async () => {
+    const home = await temporaryUserHome();
+    const options = {
+      commandLookup: async () => true,
+      environment: fakeEnvironment(home),
+      homeResolver: async () => home,
+      platforms: ["claude"] as const,
+    };
+
+    await setupPlatforms({ ...options, platforms: [...options.platforms] });
+    const second = await setupPlatforms({ ...options, platforms: [...options.platforms] });
+    const settings = JSON.parse(await readFile(join(home, ".claude", "settings.json"), "utf8"));
+
+    expect(second.platforms[0]?.created).toEqual([]);
+    expect(second.platforms[0]?.unchanged.length).toBeGreaterThan(0);
+    expect(settings.hooks.UserPromptSubmit).toHaveLength(1);
+  });
+
   it("should_not_validate_an_unselected_codex_home_when_installing_only_kiro", async () => {
     const home = await temporaryUserHome();
 

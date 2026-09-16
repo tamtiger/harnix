@@ -1,0 +1,350 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260916-190245-agent-reach-and-task-reviewability",
+  "title": "Mở đường cho mọi agent và làm task review được",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cho mọi coding agent lấy được skill canonical và chạy đúng workflow Harnix, cho agent persist state qua transport bounded, và cho người dùng review được task cùng lý do đằng sau nó.",
+  "nonGoals": [
+    "Không copy bảy SKILL.md vào consumer repository; canonical asset vẫn nằm trong package.",
+    "Không thêm skill thứ tám, platform thứ năm, MCP, telemetry hoặc network service.",
+    "Không đổi canonicalTaskContract, digest payload, hook protocol hoặc transition table.",
+    "Không tách internal-workflow.ts trong phạm vi này."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-skill-reach",
+      "text": "harnix skill trả catalog bảy skill và nội dung canonical của một skill, fail closed với tên sai, chạy được ngoài project và không ghi gì.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-skill-cli-20260916-192200",
+        "green-release-gate-20260916-192200"
+      ]
+    },
+    {
+      "id": "ac-template-reach",
+      "text": "AGENTS và workflow template chỉ tham chiếu nguồn tồn tại sau init, nêu harnix skill và .harnix/spec/guides, và mô tả hành vi khi CLI không khả dụng.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-skill-cli-20260916-192200",
+        "green-managed-parity-20260916-192200"
+      ]
+    },
+    {
+      "id": "ac-bounded-transport",
+      "text": "workflow --transition, --evidence và --schema hoạt động bounded, từ chối transition bất hợp lệ và không xoá evidence cũ.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-transport-20260916-192200",
+        "green-managed-parity-20260916-192200"
+      ]
+    },
+    {
+      "id": "ac-task-rationale",
+      "text": "TaskRecord v2 chấp nhận decisions và residualRisks tuỳ chọn, v1 từ chối, và taskContractHash không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-task-rationale-20260916-192200"
+      ]
+    },
+    {
+      "id": "ac-human-review",
+      "text": "status, tasks, checks và audit hỗ trợ --human mà vẫn giữ JSON làm output mặc định không cần flag.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-human-view-20260916-192200"
+      ]
+    },
+    {
+      "id": "ac-contract-docs-sync",
+      "text": "Normative docs mô tả nhất quán mười lăm public command, transport mới, trường TaskRecord mới và nguồn skill mới.",
+      "status": "met",
+      "evidenceIds": [
+        "green-managed-parity-20260916-192200",
+        "green-release-gate-20260916-192200"
+      ]
+    },
+    {
+      "id": "ac-release-readiness",
+      "text": "Minor version, changelog, skill metadata và self-host manifest cập nhật một lần trước verifying và exact acceptance sequence pass.",
+      "status": "met",
+      "evidenceIds": [
+        "green-release-gate-20260916-192200"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/.template-hashes.json",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "package.json",
+    "src/cli-program.ts",
+    "src/commands/human-report.ts",
+    "src/commands/internal-workflow.ts",
+    "src/commands/skills.ts",
+    "src/core/tasks/task.ts",
+    "src/skills/harnix-brainstorm/SKILL.md",
+    "src/skills/harnix-check/SKILL.md",
+    "src/skills/harnix-continue/SKILL.md",
+    "src/skills/harnix-finish-work/SKILL.md",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/catalog.ts",
+    "src/templates/harnix/agents.ts",
+    "src/templates/harnix/workflow.ts",
+    "test/integration/human-report.test.ts",
+    "test/integration/skills.test.ts",
+    "test/integration/status.test.ts",
+    "test/unit/activation-instructions.test.ts",
+    "test/unit/task-state.test.ts",
+    "test/unit/verification-inputs.test.ts",
+    "test/workflow/cli-contract.test.ts",
+    "test/workflow/internal-workflow.test.ts",
+    "test/workflow/skill-sources.test.ts",
+    "test/workflow/templates.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "focused-skill-cli",
+      "description": "Xác nhận public command skill và template chỉ trỏ tới nguồn tồn tại sau init.",
+      "command": "pnpm exec vitest run test/integration/skills.test.ts test/workflow/cli-contract.test.ts test/workflow/templates.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-skill-reach",
+        "ac-template-reach"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/skills.ts",
+        "src/skills/catalog.ts",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/integration/skills.test.ts",
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "focused-transport",
+      "description": "Xác nhận transition, evidence và schema transport bounded và fail closed.",
+      "command": "pnpm exec vitest run test/workflow/internal-workflow.test.ts test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-bounded-transport"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/internal-workflow.ts",
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "focused-task-rationale",
+      "description": "Xác nhận trường rationale tuỳ chọn hợp lệ ở v2, bị từ chối ở v1, và không đổi task contract hash.",
+      "command": "pnpm exec vitest run test/unit/task-state.test.ts test/unit/verification-inputs.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-task-rationale"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/task.ts",
+        "src/core/verification/input-freshness.ts",
+        "test/unit/task-state.test.ts",
+        "test/unit/verification-inputs.test.ts"
+      ]
+    },
+    {
+      "id": "focused-human-view",
+      "description": "Xác nhận --human in tóm tắt an toàn và JSON vẫn là mặc định không cần flag.",
+      "command": "pnpm exec vitest run test/integration/human-report.test.ts test/integration/status.test.ts test/integration/cli.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-human-review"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/human-report.ts",
+        "test/integration/cli.test.ts",
+        "test/integration/human-report.test.ts",
+        "test/integration/status.test.ts"
+      ]
+    },
+    {
+      "id": "managed-parity",
+      "description": "Xác nhận skill canonical, activation instructions và template giữ parity sau khi mô tả transport và nguồn skill mới.",
+      "command": "pnpm exec vitest run test/workflow/skill-sources.test.ts test/unit/activation-instructions.test.ts test/workflow/self-host.test.ts test/platform/global-adapters.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-bounded-transport",
+        "ac-contract-docs-sync",
+        "ac-template-reach"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "src/skills/**/SKILL.md",
+        "src/templates/harnix/*.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/unit/activation-instructions.test.ts",
+        "test/workflow/self-host.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "release-gate",
+      "description": "Chạy exact acceptance sequence gồm lint, typecheck, build, toàn bộ test, pack, tarball smoke, measurement và release scan.",
+      "command": "pnpm build; pnpm lint; pnpm typecheck; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-contract-docs-sync",
+        "ac-release-readiness",
+        "ac-skill-reach"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**/*.md",
+        "package.json",
+        "scripts/*.mjs",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "green-focused-skill-cli-20260916-192200",
+      "checkId": "focused-skill-cli",
+      "recordedAt": "2026-09-16T12:23:09.779Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "13 test pass: harnix skill trả catalog bảy stage owner và nội dung byte-identical, fail closed với tên sai hoặc không an toàn, CLI công bố đúng mười lăm public command, và AGENTS/workflow template chỉ trỏ tới harnix skill cùng .harnix/spec/guides thay vì SKILL.md không tồn tại sau init.",
+      "artifactPaths": [],
+      "inputDigest": "3e88324b36fb620620eb3ffcda6e10acdb60176060311361790a6cd8d9e9ac3e"
+    },
+    {
+      "id": "green-focused-transport-20260916-192200",
+      "checkId": "focused-transport",
+      "recordedAt": "2026-09-16T12:23:10.231Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "53 test pass: --transition đổi trạng thái từ record đã persist mà không nhận task body và giữ nguyên evidence, transition bất hợp lệ cùng cancelled bị từ chối, --evidence append đúng một item và từ chối trùng id hoặc envelope sai, --schema read-only và không lộ đường dẫn.",
+      "artifactPaths": [],
+      "inputDigest": "7d9ebf16aff2f39ba92507c55887edf319e59e272a8ea6159a771b6734e3a6b9"
+    },
+    {
+      "id": "green-focused-task-rationale-20260916-192200",
+      "checkId": "focused-task-rationale",
+      "recordedAt": "2026-09-16T12:23:10.586Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "34 test pass: TaskRecord v2 chấp nhận decisions và residualRisks với id an toàn cùng text bounded, schema v1 từ chối chúng như unknown field, và taskContractHash cùng inputDigest không đổi khi chỉ thêm rationale.",
+      "artifactPaths": [],
+      "inputDigest": "62a1c1919351345d19fc409961f3ff4a0d5ae4a9986eb7911d90717319e0ed56"
+    },
+    {
+      "id": "green-focused-human-view-20260916-192200",
+      "checkId": "focused-human-view",
+      "recordedAt": "2026-09-16T12:23:10.937Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Test pass: --human in tóm tắt đọc được cho status và audit, không parse được như JSON, không chứa absolute path và không ghi file; cùng lệnh không có flag vẫn trả đúng một JSON document như trước.",
+      "artifactPaths": [],
+      "inputDigest": "1401f5387d41befd82b906f6558a1abe3995c8ecf9b0606445604b94bcf31bbd"
+    },
+    {
+      "id": "green-managed-parity-20260916-192200",
+      "checkId": "managed-parity",
+      "recordedAt": "2026-09-16T12:23:11.303Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Test pass: skill canonical mô tả transport mới và nghĩa vụ ghi decisions/residualRisks, activation instructions giữ nguyên semantics, self-host workflow.md khớp template, và bốn platform vẫn nhận cùng byte skill.",
+      "artifactPaths": [],
+      "inputDigest": "b90c7ae12c131ea44d2bc174f167880b388168b462abcf0c14d455a5fc6748b9"
+    },
+    {
+      "id": "green-release-gate-20260916-192200",
+      "checkId": "release-gate",
+      "recordedAt": "2026-09-16T12:23:11.715Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Toàn bộ exact acceptance sequence exit 0: build, lint, typecheck, test:acceptance (588 pass, 1 skipped), pack:check, smoke:tarball bốn platform trên fake home, measure:init, measure:footprint (giảm 75,2% so với baseline), scan:release, git diff --check.",
+      "artifactPaths": [],
+      "inputDigest": "33bcb1545f93a4b3619190dbb8de6d6eab8dff808b51fd0fa6f8109d1ef96baf"
+    }
+  ],
+  "createdAt": "2026-09-16T12:04:30.009Z",
+  "updatedAt": "2026-09-16T12:23:29.730Z",
+  "decisions": [
+    {
+      "id": "d1-skill-by-command",
+      "text": "Skill phân phối qua harnix skill <name> thay vì copy SKILL.md vào từng repository.",
+      "rationale": "Footprint project không tăng, không có bản sao stale để reconcile, nội dung luôn khớp version đang chạy, và ranh giới runtime-nằm-trong-package được giữ nguyên."
+    },
+    {
+      "id": "d2-minor-version",
+      "text": "Bump minor lên 1.1.0 thay vì patch.",
+      "rationale": "Change thêm public command thứ mười lăm và trường schema mới, nên semver yêu cầu minor; quy tắc repo được đọc là bump đúng một lần, không phải luôn patch."
+    },
+    {
+      "id": "d3-human-flag",
+      "text": "Thêm --human thay vì đổi output mặc định.",
+      "rationale": "JSON vẫn là mặc định và không cần flag nào để lấy, nên contract không-cần---json được giữ trong khi người dùng vẫn đọc được trạng thái."
+    },
+    {
+      "id": "d4-rationale-outside-contract",
+      "text": "decisions và residualRisks nằm ngoài canonicalTaskContract.",
+      "rationale": "Chúng là review data, không phải obligation; để ngoài hash nên thêm chúng không làm stale evidence đang pass và không thể dùng để lách gate."
+    },
+    {
+      "id": "d5-transport-reuses-save",
+      "text": "transition và evidence route qua saveWorkflow thay vì tự ghi task.",
+      "rationale": "Mọi validation, lock, immutability và replay guard hiện có tiếp tục áp dụng; transport mới chỉ thu hẹp bề mặt đầu vào chứ không tạo đường ghi thứ hai."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r1-internal-workflow-size",
+      "text": "internal-workflow.ts vẫn lớn và chưa tách; chưa có defect nào chứng minh việc tách.",
+      "severity": "low"
+    },
+    {
+      "id": "r2-gnu-tar-windows",
+      "text": "scan:release và smoke:tarball fail dưới GNU tar của Git Bash trên Windows vì đường dẫn D:\\ bị hiểu là remote host; phải chạy qua PowerShell.",
+      "severity": "medium"
+    },
+    {
+      "id": "r3-instruction-density",
+      "text": "workflow.md vẫn khoảng 25KB với đoạn văn rất dài; mật độ chữ có thể làm giảm adherence ở model yếu.",
+      "severity": "medium"
+    },
+    {
+      "id": "r4-skill-requires-cli",
+      "text": "Agent không chạy được command sẽ không lấy được skill; template có nêu fallback nhưng không có nguồn thay thế trong repo.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-09-16T12:23:29.730Z"
+}

@@ -7,7 +7,7 @@ Tài liệu này là kế hoạch triển khai và decision record cho Phase 6, 
 Quyết định đích:
 
 - `harnix init` tiếp tục khởi tạo state của từng project trong `.harnix/`.
-- `harnix setup --kiro --antigravity --codex` cài integration ở **user scope**, chạy được từ bất kỳ thư mục nào và không yêu cầu project hiện tại có `.harnix/config.yaml`.
+- `harnix setup --kiro --antigravity --codex --claude` cài integration ở **user scope**, chạy được từ bất kỳ thư mục nào và không yêu cầu project hiện tại có `.harnix/config.yaml`.
 - Skill, instruction/rule và hook global chỉ kích hoạt workflow sau khi guard resolve project initialized gần nhất từ cwd hoặc workspace roots, kể cả ancestor của cwd; không chỉ kiểm tra thư mục workspace hiện tại. Nếu không tìm thấy `.harnix/config.yaml` của project đó, chúng phải no-op nhanh, không chặn prompt và không tạo state.
 - Runtime vẫn nằm trong package npm đã cài. Setup chỉ materialize customization files; không copy runtime script, credential, MCP config hoặc permission policy.
 - Mọi file global được quản lý bằng ownership manifest riêng theo platform root. Không dùng manifest của một project để sở hữu file dùng chung và không tạo `~/.harnix`.
@@ -136,7 +136,7 @@ Ownership rules:
 ### 6.1 Setup
 
 ```text
-harnix setup --kiro|--antigravity|--codex [nhiều flag]
+harnix setup --kiro|--antigravity|--codex|--claude [nhiều flag]
              [--dry-run]
 ```
 
@@ -170,7 +170,7 @@ interface GlobalSetupResult {
 - `harnix update --global [platform flags]` reconcile global installation; nếu không có platform flag thì dùng các platform có manifest hợp lệ.
 - `harnix doctor` trong Harnix project trả hai section: `project` và `globalIntegrations`. Ngoài Harnix project, nó vẫn trả được `globalIntegrations` thay vì ENOENT.
 - `harnix doctor --fix --global` mới được sửa safe global drift; `--fix` project không tự mutate user home.
-- `harnix uninstall --global --kiro|--antigravity|--codex [--yes]` preview rồi chỉ gỡ selected global integration. Thiếu `--yes` trả confirmation-required và không write.
+- `harnix uninstall --global --kiro|--antigravity|--codex|--claude [--yes]` preview rồi chỉ gỡ selected global integration. Thiếu `--yes` trả confirmation-required và không write.
 - `harnix uninstall --purge --yes` chỉ xóa project `.harnix`; tuyệt đối không suy diễn thành xóa global setup.
 - `harnix uninstall --legacy-project-surfaces [--yes]` preview rồi chỉ xóa unchanged **standalone** path legacy khi project manifest v1 chứng minh đúng source/path Harnix sở hữu. Root/shared file là inventory-only. Flag này mutually exclusive với `--global` và `--purge`; không thêm public command thứ tám.
 

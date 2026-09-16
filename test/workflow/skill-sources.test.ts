@@ -17,6 +17,8 @@ const skillNames = [
 
 const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = {
   "harnix-brainstorm": [
+    "review.md",
+    "`decisions`",
     "decision inventory",
     "observable acceptance criteria",
     "placeholder scan",
@@ -36,6 +38,8 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "bounded JSON envelope on stdin",
   ],
   "harnix-implement": [
+    "workflow --transition",
+    "workflow --evidence",
     "Review the plan critically",
     "Verify RED",
     "minimal implementation",
@@ -46,6 +50,7 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "harnix workflow --save",
   ],
   "harnix-check": [
+    "workflow --evidence",
     "Map every claim",
     "exit code",
     "compliance",
@@ -64,6 +69,8 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "harnix workflow --save",
   ],
   "harnix-finish-work": [
+    "review.md",
+    "`residualRisks`",
     "active pointer",
     "completed",
     "Never commit",

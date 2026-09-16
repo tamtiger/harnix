@@ -2,9 +2,9 @@ import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, preflightWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow } from "../../src/commands/internal-workflow.js";
+import { appendEvidenceWorkflow, auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, preflightWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow, transitionWorkflow, workflowEnvelopeSchema } from "../../src/commands/internal-workflow.js";
 import { appendJournal } from "../../src/core/journal/journal.js";
-import { cancelTask, createTaskV2MigrationEvidence, saveTask, setActiveTask, transitionTask, type TaskRecord, type TaskRecordV1, type TaskRecordV2 } from "../../src/core/tasks/task.js";
+import { acceptanceCriterionKeys, blockerKeys, cancelTask, createTaskV2MigrationEvidence, evidenceV2Keys, saveTask, setActiveTask, taskRecordFieldManifest, transitionTask, validationCheckV2Keys, type TaskRecord, type TaskRecordV1, type TaskRecordV2 } from "../../src/core/tasks/task.js";
 import { assertVerificationInputsFresh, computeVerificationInputSnapshot } from "../../src/core/verification/input-freshness.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 import { initializeProject } from "../../src/commands/init.js";
@@ -14,6 +14,93 @@ const temporaryRepository = useTemporaryRepositories();
 const timestamp = "2026-08-13T00:00:00.000Z";
 
 describe("hidden workflow persistence operations", () => {
+  it("should_transition_the_active_task_without_a_task_body_and_preserve_evidence", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const planning = taskV2("planning", "planning");
+    await saveWorkflow(root, { task: planning });
+    const ready = { ...planning, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
+    await saveWorkflow(root, { task: ready });
+    const working = {
+      ...ready,
+      status: "in_progress" as const,
+      checkpoint: "implementing" as const,
+      updatedAt: "2026-08-13T00:02:00.000Z",
+      evidence: [{ id: "red-check", checkId: "check", recordedAt: "2026-08-13T00:02:00.000Z", result: "fail" as const, exitCode: 1, summary: "RED", artifactPaths: [] }],
+    };
+    await saveWorkflow(root, { task: working });
+
+    const transitioned = await transitionWorkflow(root, "verifying", "verifying");
+
+    expect(transitioned.status).toBe("verifying");
+    expect(transitioned.checkpoint).toBe("verifying");
+    expect(transitioned.evidence).toHaveLength(1);
+    expect(transitioned.evidence[0]?.id).toBe("red-check");
+    expect(transitioned.acceptanceCriteria).toEqual(working.acceptanceCriteria);
+    expect(transitioned.validationPlan).toEqual(working.validationPlan);
+    await expect(inspectWorkflow(root)).resolves.toMatchObject({ activeTask: { status: "verifying", checkpoint: "verifying" } });
+  });
+
+  it("should_reject_an_illegal_transition_and_a_missing_active_task", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+
+    await expect(transitionWorkflow(root, "verifying", "verifying")).rejects.toThrow(/active task/u);
+
+    await saveWorkflow(root, { task: taskV2("planning", "planning") });
+
+    await expect(transitionWorkflow(root, "completed", "finishing")).rejects.toThrow();
+    await expect(transitionWorkflow(root, "cancelled", "cancelling")).rejects.toThrow(/--cancel/u);
+    await expect(inspectWorkflow(root)).resolves.toMatchObject({ activeTask: { status: "planning", checkpoint: "planning" } });
+  });
+
+  it("should_append_exactly_one_evidence_item_without_removing_history", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const planning = taskV2("planning", "planning");
+    await saveWorkflow(root, { task: planning });
+    const ready = { ...planning, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
+    await saveWorkflow(root, { task: ready });
+    await saveWorkflow(root, { task: { ...ready, status: "in_progress" as const, checkpoint: "implementing" as const, updatedAt: "2026-08-13T00:02:00.000Z" } });
+
+    const first = await appendEvidenceWorkflow(root, { evidence: { id: "red-1", checkId: "check", recordedAt: "2026-08-13T00:03:00.000Z", result: "fail", exitCode: 1, summary: "RED", artifactPaths: [] } });
+    const second = await appendEvidenceWorkflow(root, { evidence: { id: "red-2", checkId: "check", recordedAt: "2026-08-13T00:04:00.000Z", result: "fail", exitCode: 1, summary: "still RED", artifactPaths: [] } });
+
+    expect(first.evidence.map((item) => item.id)).toEqual(["red-1"]);
+    expect(second.evidence.map((item) => item.id)).toEqual(["red-1", "red-2"]);
+    await expect(appendEvidenceWorkflow(root, { evidence: { id: "red-1", checkId: "check", recordedAt: "2026-08-13T00:05:00.000Z", result: "pass", exitCode: 0, summary: "dup", artifactPaths: [] } })).rejects.toThrow();
+    await expect(appendEvidenceWorkflow(root, { task: {}, evidence: {} })).rejects.toThrow();
+  });
+
+  it("should_describe_the_save_envelope_schema_without_writing", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+
+    const schema = workflowEnvelopeSchema();
+
+    expect(schema.generator).toBe("harnix");
+    expect(schema.schemaVersion).toBe(1);
+    expect(Object.keys(schema.envelope).sort()).toEqual(["artifacts", "contractRevision", "task"]);
+    expect(schema.taskRecord.required).toContain("acceptanceCriteria");
+    expect(schema.taskRecord.required).toContain("validationPlan");
+    expect(JSON.stringify(schema)).not.toContain(root);
+    await expect(inspectWorkflow(root)).resolves.toMatchObject({ activeTask: null });
+  });
+
+  it("should_derive_the_schema_taskRecord_field_lists_from_the_same_manifest_validateTask_enforces", () => {
+    // This is a structural guarantee, not a coincidence: workflowEnvelopeSchema
+    // must call the exported task.ts manifest directly rather than keep a
+    // second hardcoded list, so a field added to TaskRecordV2 shows up here
+    // automatically instead of silently going stale.
+    const schema = workflowEnvelopeSchema();
+
+    expect(schema.taskRecord).toEqual(taskRecordFieldManifest(2));
+    expect(schema.nested.acceptanceCriteria.sort()).toEqual([...acceptanceCriterionKeys].sort());
+    expect(schema.nested.validationPlan.sort()).toEqual([...validationCheckV2Keys].sort());
+    expect(schema.nested.evidence.sort()).toEqual([...evidenceV2Keys].sort());
+    expect(schema.nested.blocker.sort()).toEqual([...blockerKeys].sort());
+  });
+
   it("returns bounded read-only preflight metadata without task prose", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });

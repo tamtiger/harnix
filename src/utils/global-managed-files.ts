@@ -24,7 +24,7 @@ import {
 import { sha256 } from "./hashing.js";
 import { normalizeUserRelativePath, resolveSafeUserPath, type UserPathRoot } from "./user-paths.js";
 
-export type GlobalPlatform = "kiro" | "antigravity-desktop" | "antigravity-cli" | "codex";
+export type GlobalPlatform = "kiro" | "antigravity-desktop" | "antigravity-cli" | "codex" | "claude";
 export type GlobalManagedKind = "file" | "managed-block" | "json-member";
 
 export interface MarkerSelector {
@@ -1050,7 +1050,7 @@ function isMissingPathError(error: unknown): error is NodeJS.ErrnoException {
 }
 
 function isGlobalPlatform(value: unknown): value is GlobalPlatform {
-  return value === "kiro" || value === "antigravity-desktop" || value === "antigravity-cli" || value === "codex";
+  return value === "kiro" || value === "antigravity-desktop" || value === "antigravity-cli" || value === "codex" || value === "claude";
 }
 
 function isGlobalManagedKind(value: string): value is GlobalManagedKind {

@@ -44,17 +44,19 @@ async function installedPlatforms(options: UpdateGlobalPlatformsOptions): Promis
     ...(options.environment === undefined ? {} : { environment: options.environment }),
     ...(options.homeResolver === undefined ? {} : { homeResolver: options.homeResolver }),
   });
-  const [kiro, antigravityDesktop, antigravityCli, codexConfig, codexSkills] = await Promise.all([
+  const [kiro, antigravityDesktop, antigravityCli, codexConfig, codexSkills, claude] = await Promise.all([
     hasValidSidecar(roots.kiro, "harnix/managed.json", "kiro"),
     hasValidSidecar(roots.antigravityDesktop, ".managed.json", "antigravity-desktop"),
     hasValidSidecar(roots.antigravityCli, ".managed.json", "antigravity-cli"),
     hasValidSidecar(roots.codex.config, "harnix/managed.json", "codex"),
     hasValidSidecar(roots.codex.skills, "harnix/managed.json", "codex"),
+    hasValidSidecar(roots.claude, "harnix/managed.json", "claude"),
   ]);
   return [
     ...(kiro ? ["kiro" as const] : []),
     ...(antigravityDesktop || antigravityCli ? ["antigravity" as const] : []),
     ...(codexConfig || codexSkills ? ["codex" as const] : []),
+    ...(claude ? ["claude" as const] : []),
   ];
 }
 

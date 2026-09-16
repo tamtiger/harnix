@@ -2,13 +2,13 @@
 
 Harnix là coding-agent harness chạy cục bộ trong repository. Harnix biến yêu cầu thành task có phạm vi và tiêu chí nghiệm thu rõ ràng, chọn context phù hợp trong giới hạn, hướng dẫn triển khai/kiểm chứng và lưu bằng chứng cùng knowledge có thể tái sử dụng.
 
-Harnix hỗ trợ đúng ba nền tảng: Kiro, Antigravity và Codex.
+Harnix hỗ trợ đúng bốn nền tảng: Kiro, Antigravity, Codex và Claude Code.
 
 Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
 ## Trạng thái
 
-Phase 5 review/refactor, Phase 6 user-global integrations và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt. Audit ngày 2026-08-18 đã bổ sung implicit routing cho ordinary prompt trên Kiro/Antigravity/Codex và chuyển Antigravity sang always-on `rules/AGENTS.md`; source release hiện là `1.0.21` sau batch task recovery/explainability, hardening target-root authority trước ambient context và bổ sung standalone read-only research Bypass không consult active task. Disposable `agy 1.1.1` session đã chứng minh initialized project tự route Bypass/Lite/Full và non-Harnix no-op, nhưng print mode vẫn chưa load plugin hook. Kiro/Codex disposable profiles không có login và Codex còn pending trust, nên các surface đó không bị claim active. Đây chưa phải claim về package đã publish. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
+Phase 5 review/refactor, Phase 6 user-global integrations và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt. Audit ngày 2026-08-18 đã bổ sung implicit routing cho ordinary prompt trên Kiro/Antigravity/Codex và chuyển Antigravity sang always-on `rules/AGENTS.md`; source release hiện là `1.1.3` sau batch task recovery/explainability, hardening target-root authority trước ambient context và bổ sung standalone read-only research Bypass không consult active task. Disposable `agy 1.1.1` session đã chứng minh initialized project tự route Bypass/Lite/Full và non-Harnix no-op, nhưng print mode vẫn chưa load plugin hook. Kiro/Codex disposable profiles không có login và Codex còn pending trust, nên các surface đó không bị claim active. Đây chưa phải claim về package đã publish. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
 
 ## Đặc điểm sản phẩm
 
@@ -145,8 +145,8 @@ harnix audit
 harnix repo-map --impact src/core/tasks/task.ts --depth 2
 
 # Cài integration một lần cho user profile; có thể chạy ngoài project
-harnix setup --kiro --antigravity --codex --dry-run
-harnix setup --kiro --antigravity --codex
+harnix setup --kiro --antigravity --codex --claude --dry-run
+harnix setup --kiro --antigravity --codex --claude
 
 # Kiểm tra drift, hook, path safety và secret exposure
 harnix doctor
@@ -201,10 +201,10 @@ Output của mọi public command luôn là một JSON document. Nếu public co
 Materialize tích hợp user-global cho platform được chọn. Lệnh chạy được ở mọi thư mục, không resolve project root, không đọc `.harnix/config.yaml` và yêu cầu ít nhất một platform flag:
 
 ```text
-harnix setup --kiro|--antigravity|--codex [--dry-run]
+harnix setup --kiro|--antigravity|--codex|--claude [--dry-run]
 ```
 
-Có thể chọn nhiều flag trong một lần chạy. Mỗi invocation chỉ resolve/validate user root của platform đã chọn; ví dụ `CODEX_HOME` lỗi không làm `harnix setup --kiro` thất bại. `--dry-run` trả exact logical targets và planned state mà không ghi file. Kết quả trả status per platform/file: created, updated, unchanged, preserved, warnings và readiness. Readiness khác `installed` hoặc warnings không rỗng vẫn trả đúng một result JSON, đồng thời ghi warning đã redaction vào stderr và exit `1`; clean `installed` exit `0`. CLI tự xác minh file state, launcher và trust requirement đã biết; nó không tự chạy platform-version probe hoặc suy diễn activation/precedence từ file tồn tại. Các status `active`, `shadowed` và `unsupported-version` chỉ hợp lệ khi lifecycle boundary nhận được bằng chứng external authoritative; không có bằng chứng đó, Antigravity được báo `precedence-unknown`, Kiro là `installed`/`binary-unavailable`, và Codex là `installed-pending-trust`.
+Có thể chọn nhiều flag trong một lần chạy. Mỗi invocation chỉ resolve/validate user root của platform đã chọn; ví dụ `CODEX_HOME` lỗi không làm `harnix setup --kiro` thất bại. `--dry-run` trả exact logical targets và planned state mà không ghi file. Kết quả trả status per platform/file: created, updated, unchanged, preserved, warnings và readiness. Readiness khác `installed` hoặc warnings không rỗng vẫn trả đúng một result JSON, đồng thời ghi warning đã redaction vào stderr và exit `1`; clean `installed` exit `0`. CLI tự xác minh file state, launcher và trust requirement đã biết; nó không tự chạy platform-version probe hoặc suy diễn activation/precedence từ file tồn tại. Các status `active`, `shadowed` và `unsupported-version` chỉ hợp lệ khi lifecycle boundary nhận được bằng chứng external authoritative; không có bằng chứng đó, Antigravity được báo `precedence-unknown`, Kiro và Claude Code là `installed`/`binary-unavailable`, và Codex là `installed-pending-trust`.
 
 Setup dùng manifest sidecar độc lập cho từng platform root, chỉ update fragment Harnix chưa bị sửa, preserve collision/unrelated content và không copy runtime. Nếu launcher `harnix` không resolve được trong environment hook, files vẫn có thể được cài nhưng result là `binary-unavailable`, không phải ready.
 
@@ -258,7 +258,8 @@ Candidate phải có canonical ID, record tối đa 1 MiB, khớp directory, qua
 Giải thích metadata context mà hidden hook thực sự sẽ chọn cho một platform:
 
 ```text
-harnix context-report --platform <kiro|antigravity|codex> [--limit <1..50>]
+harnix skill [name]
+harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]
 ```
 
 Default limit là 20. Report dùng chung effective-context builder với hidden `harnix context`: Codex có cap 2.500 ký tự, Kiro/Antigravity dùng `min(config.context.maxCharacters, 8000)`, tối đa 64 candidate entries. Output gồm budget, selected/omitted relative paths, trusted categorical reason codes và bounded drift/selection changes; khi chưa có persisted manifest, candidate được dựng từ task `relevantPaths` cùng applicable guides. Report không trả file content, raw reason, state payload, hash, task prose, secret hoặc absolute path; không ghi file, gọi network hay làm đổi hook payload.
@@ -357,6 +358,19 @@ harnix upgrade --apply
 
 Result luôn có `{ installed, available, command, applied }`. `available` là version string khi host inject một lookup đã được ủy quyền, còn CLI offline mặc định trả `null` thay vì bỏ field hoặc tự gọi registry. Chỉ dùng `--apply` khi muốn chạy npm upgrade explicit; process vẫn dùng executable và argument array cố định.
 
+## Skill cho mọi agent
+
+```bash
+harnix skill                    # catalog bảy stage owner
+harnix skill harnix-implement   # nội dung canonical của một skill
+```
+
+`harnix init` không ghi skill vào repository: canonical asset nằm trong package đã cài. Bất kỳ agent nào — kể cả trên tool Harnix không hề cấu hình — đều chạy `harnix skill <name>` và đọc field `content` để có đúng byte mà platform setup cài ra. Nhờ vậy không có bản sao stale trong repo và nội dung luôn khớp version đang chạy. Guidance kỹ thuật chọn lúc init nằm ở `.harnix/spec/guides/`.
+
+## Review một task
+
+Mở trực tiếp `.harnix/tasks/<id>/review.md` — không cần chạy command nào. File này tự động được ghi lại mỗi khi task được persist (qua `--save`, `--transition`, `--evidence`, `--finish`, hoặc `--cancel`), luôn phản ánh trạng thái mới nhất: title, status/checkpoint, goal, non-goals, acceptance criteria, `decisions`/`residualRisks` (nếu có ghi), blocker/cancellation (nếu có), và evidence. Đây là trang derived-only để đọc, không phải nguồn sự thật — không chỉnh sửa tay, và nội dung của nó không nằm trong bất kỳ input hash nào nên ghi thêm một quyết định hay rủi ro sau khi check đã pass không làm evidence đó bị coi là stale.
+
 ## Tích hợp platform
 
 | Platform | Identity/flag | User-global surface Harnix tạo |
@@ -364,8 +378,9 @@ Result luôn có `{ installed, available, command, applied }`. `available` là v
 | Kiro | `kiro` / `--kiro` | `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, `~/.kiro/hooks/harnix-context.json` |
 | Antigravity | `antigravity` / `--antigravity` | Desktop `~/.gemini/config/plugins/harnix` và CLI `~/.gemini/antigravity-cli/plugins/harnix`, mỗi plugin dùng always-on `rules/AGENTS.md` không frontmatter |
 | Codex | `codex` / `--codex` | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/config.toml` |
+| Claude Code | `claude` / `--claude` | `~/.claude/skills/harnix-*`, marker block trong `~/.claude/CLAUDE.md`, một group `harnix-context` trong `hooks.UserPromptSubmit` của `~/.claude/settings.json` (`CLAUDE_CONFIG_DIR` đổi root) |
 
-Kiro hook dùng JSON-v1 `UserPromptSubmit`; Antigravity hook trả `injectSteps` chỉ tại invocation đầu trong initialized project; Codex hook dùng nested `UserPromptSubmit` inline trong `config.toml` và cần người dùng review/trust qua `/hooks`. Generated instructions resolve/validate explicit user target trước ambient cwd/workspace, rồi activation guard mới tìm initialized ancestor/root của target đã chọn. Hidden hook protocol chạy trước prompt interpretation nên vẫn resolve event cwd/workspace roots như cũ, không parse natural-language path và không cấp target authority; repository context nó inject là untrusted target evidence. Nếu không tìm thấy project đó hoặc event Antigravity malformed, `harnix context` exit `0` và stdout rỗng; Antigravity chỉ trả `{ "injectSteps": [] }` khi đã xác định initialized project nhưng invocation đã qua lượt đầu hoặc không có context áp dụng. Nếu project đã được xác định nhưng state không đọc an toàn, Harnix không inject project data mà trả warning ngắn, redact và platform-specific để chạy `harnix doctor`; host agent vẫn không bị block. Các surface không liên quan được bảo toàn. Harnix không copy runtime script, không ghi absolute home path, không ghi config ngoài managed hook block, và không tạo platform surface mới trong project. Root `AGENTS.md` bootstrap do `init` tạo là ngoại lệ tương thích.
+Kiro hook dùng JSON-v1 `UserPromptSubmit`; Antigravity hook trả `injectSteps` chỉ tại invocation đầu trong initialized project; Codex hook dùng nested `UserPromptSubmit` inline trong `config.toml` và cần người dùng review/trust qua `/hooks`; Claude Code hook là một group trong mảng `hooks.UserPromptSubmit` của `settings.json`, in plain-text stdout để Claude Code nạp làm context, và `UserPromptSubmit` không hỗ trợ `matcher`. Harnix không bao giờ ghi `~/.claude.json`, credentials, MCP server, `projects/`, `history` hay `todos/`. Generated instructions resolve/validate explicit user target trước ambient cwd/workspace, rồi activation guard mới tìm initialized ancestor/root của target đã chọn. Hidden hook protocol chạy trước prompt interpretation nên vẫn resolve event cwd/workspace roots như cũ, không parse natural-language path và không cấp target authority; repository context nó inject là untrusted target evidence. Nếu không tìm thấy project đó hoặc event Antigravity malformed, `harnix context` exit `0` và stdout rỗng; Antigravity chỉ trả `{ "injectSteps": [] }` khi đã xác định initialized project nhưng invocation đã qua lượt đầu hoặc không có context áp dụng. Nếu project đã được xác định nhưng state không đọc an toàn, Harnix không inject project data mà trả warning ngắn, redact và platform-specific để chạy `harnix doctor`; host agent vẫn không bị block. Các surface không liên quan được bảo toàn. Harnix không copy runtime script, không ghi absolute home path, không ghi config ngoài managed hook block, và không tạo platform surface mới trong project. Root `AGENTS.md` bootstrap do `init` tạo là ngoại lệ tương thích.
 
 ## Workflow sử dụng
 
@@ -388,7 +403,7 @@ triage -> planning -> ready -> implementing -> verifying -> finishing -> complet
 
 Xem [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) để biết transition, gate và artifact contract chi tiết.
 
-Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release, hiện là `1.0.21`. Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
+Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release, hiện là `1.1.3`. Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
 
 ## Dữ liệu dự án
 

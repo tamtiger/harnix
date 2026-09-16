@@ -8,16 +8,21 @@ import type { LearningCaptureInput } from "../core/journal/learning.js";
 import { validateContextManifest, type ContextDrift } from "../core/context/context.js";
 import {
   loadTask,
+  acceptanceCriterionKeys,
+  blockerKeys,
   createTaskV2MigrationEvidence,
+  evidenceV2Keys,
   TASK_V2_MIGRATION_EVIDENCE_ID,
   resolveActiveTask,
   saveTask,
   saveTaskArtifacts,
   setActiveTask,
+  taskRecordFieldManifest,
   transitionTask,
   updateTaskCheckpoint,
   validateTaskArtifacts,
   validateTask,
+  validationCheckV2Keys,
   type Evidence,
   type TaskCancellation,
   type TaskArtifacts,
@@ -156,6 +161,87 @@ async function prepareWorkflowArtifacts(
       ...artifacts,
       contextSelection: createContextSelectionSnapshot(await contextSelectionInput(root, harnixRoot, task, artifacts.context, true)),
     };
+}
+
+/**
+ * Bounded partial transport. It never accepts a task body: the persisted
+ * active record is the only source, so a stage owner cannot drop evidence or
+ * silently rewrite an obligation while changing state. Every guard, lock and
+ * immutability rule of the full save path still applies.
+ */
+export async function transitionWorkflow(root: string, status: string, checkpoint: string, now = new Date().toISOString()): Promise<TaskRecord> {
+  if (status === "cancelled") throw new Error("Workflow cancellation must use workflow --cancel.");
+  const harnixRoot = await resolveSafeHarnixPath(root);
+  const task = await resolveActiveTask(harnixRoot);
+  if (!task) throw new Error("Workflow transition requires an active task.");
+  return saveWorkflow(root, { task: { ...task, status, checkpoint, updatedAt: laterTimestamp(task.updatedAt, now) } });
+}
+
+/**
+ * Appends exactly one evidence item to the active task. Existing evidence is
+ * never sent by the caller, so a malformed round-trip cannot erase history.
+ */
+export async function appendEvidenceWorkflow(root: string, envelope: unknown, now = new Date().toISOString()): Promise<TaskRecord> {
+  const evidence = validateEvidenceEnvelope(envelope);
+  const harnixRoot = await resolveSafeHarnixPath(root);
+  const task = await resolveActiveTask(harnixRoot);
+  if (!task) throw new Error("Workflow evidence capture requires an active task.");
+  return saveWorkflow(root, {
+    task: { ...task, evidence: [...task.evidence, evidence], updatedAt: laterTimestamp(task.updatedAt, now) },
+  });
+}
+
+export interface WorkflowEnvelopeSchemaV1 {
+  generator: "harnix";
+  schemaVersion: 1;
+  envelope: Record<string, string>;
+  taskRecord: { required: string[]; optional: string[] };
+  nested: { acceptanceCriteria: string[]; validationPlan: string[]; evidence: string[]; blocker: string[] };
+  transports: Record<string, string>;
+}
+
+/** Read-only self-description so an agent can build a valid envelope before its first save fails. */
+export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
+  return {
+    generator: "harnix",
+    schemaVersion: 1,
+    envelope: {
+      task: "TaskRecord, required",
+      artifacts: "optional { prd?, plan?, design?, research?: { <safe>.md: text }, context? }",
+      contractRevision: "optional { reason: 10-1000 characters }, accepted only at an unchanged replan checkpoint",
+    },
+    // Derived from the exact same allowlists `validateTask` enforces, so this
+    // transport cannot drift from the real schema: a field added to
+    // TaskRecordV2 without updating this function is impossible by
+    // construction, since there is no second literal list to forget.
+    taskRecord: taskRecordFieldManifest(2),
+    nested: {
+      acceptanceCriteria: [...acceptanceCriterionKeys].sort(),
+      validationPlan: [...validationCheckV2Keys].sort(),
+      evidence: [...evidenceV2Keys].sort(),
+      blocker: [...blockerKeys].sort(),
+    },
+    transports: {
+      "--save": "Full record plus artifacts. Required for obligations, artifacts and contract revisions.",
+      "--transition": "Status and checkpoint only, read from the persisted record.",
+      "--evidence": "Append exactly one evidence item.",
+      "--finish": "Terminal completion; accepts no body.",
+      "--cancel": "Terminal cancellation; the only cancellation transport.",
+    },
+  };
+}
+
+function laterTimestamp(previous: string, now: string): string {
+  return Date.parse(now) > Date.parse(previous) ? now : previous;
+}
+
+function validateEvidenceEnvelope(value: unknown): Evidence {
+  if (!isRecord(value) || Object.keys(value).sort().join(",") !== "evidence") {
+    throw new Error("Workflow evidence requires a bounded JSON envelope shaped { \"evidence\": <Evidence> }.");
+  }
+  const evidence = value.evidence;
+  if (!isRecord(evidence)) throw new Error("Workflow evidence item must be an object.");
+  return evidence as unknown as Evidence;
 }
 
 export async function finishWorkflow(root: string, now = new Date().toISOString()): Promise<TaskRecord> {

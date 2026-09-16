@@ -4,6 +4,41 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.3] - 2026-09-16
+
+### Changed
+
+- review.md giờ liệt kê required checks với evidence mới nhất hoặc 'chưa chạy', kèm timestamp và liên kết tới prd.md/plan.md/design.md khi các file đó tồn tại.
+- Đưa review.md vào workflow.md/AGENTS.md canonical (ship tới mọi consumer project) và vào skill harnix-brainstorm/harnix-finish-work, để agent chạy ở repo bất kỳ cũng biết nó tồn tại.
+
+## [1.1.2] - 2026-09-16
+
+### Changed
+
+- workflow --schema giờ derive taskRecord/nested trực tiếp từ manifest export của task.ts, không còn danh sách field hardcode song song với validator.
+- Gỡ bỏ --human khỏi status/tasks/checks/audit; review một task giờ chỉ qua .harnix/tasks/<id>/review.md.
+
+## [1.1.1] - 2026-09-16
+
+### Changed
+
+- Thêm review.md tự sinh cho mỗi task, cho phép review bằng cách mở file markdown thay vì chạy CLI command; file này không nằm trong task contract hash nên không làm stale evidence đã pass.
+
+## [1.1.0] - 2026-09-16
+
+### Changed
+
+- Thêm public command harnix skill để mọi agent lấy được skill canonical mà không cần platform setup, và trỏ AGENTS/workflow template tới nguồn skill cùng .harnix/spec/guides có thật.
+- Thêm bounded transport harnix workflow --transition, --evidence và --schema để đổi trạng thái hoặc ghi evidence mà không phải round-trip toàn bộ TaskRecord.
+- Thêm trường review tuỳ chọn decisions và residualRisks cho TaskRecord v2, nằm ngoài task contract hash, cùng flag --human cho status, tasks, checks và audit.
+
+## [1.0.22] - 2026-09-16
+
+### Changed
+
+- Bổ sung Claude Code làm user-global platform integration thứ tư với skills, marker block trong CLAUDE.md và một owned group hooks.UserPromptSubmit trong settings.json.
+- Rút nguồn canonical dùng chung cho skill plan và activation-guard document của mọi configurator, và xoá deprecated setup surface không còn caller.
+
 ## [1.0.21] - 2026-09-04
 
 ### Fixed

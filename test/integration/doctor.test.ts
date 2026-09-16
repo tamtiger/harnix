@@ -219,6 +219,7 @@ describe("diagnoseProject Doctor v2", () => {
       { platform: "kiro", status: "not-installed" },
       { platform: "antigravity", status: "not-installed" },
       { platform: "codex", status: "not-installed" },
+      { platform: "claude", status: "not-installed" },
     ]);
   });
 
@@ -248,6 +249,7 @@ describe("diagnoseProject Doctor v2", () => {
         kiro: "unsupported-version" as const,
         antigravity: "shadowed" as const,
         codex: "active" as const,
+        claude: "active" as const,
       })[platform],
       codexTrustLookup: async () => "trusted",
       root,
@@ -257,6 +259,7 @@ describe("diagnoseProject Doctor v2", () => {
       { platform: "kiro", status: "unsupported-version" },
       { platform: "antigravity", status: "shadowed" },
       { platform: "codex", status: "active" },
+      { platform: "claude", status: "not-installed" },
     ]);
   });
 

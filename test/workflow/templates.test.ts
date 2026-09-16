@@ -33,6 +33,45 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("Release preparation");
     expect(workflowTemplate).toContain("Finish is product-read-only");
   });
+  it("should_only_reference_skill_and_guide_sources_that_exist_after_init", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const agentInstructions = await readFile(join(root, "AGENTS.md"), "utf8");
+
+    expect(agentInstructions).toContain("harnix skill <name>");
+    expect(agentInstructions).toContain(".harnix/spec/guides/");
+    expect(agentInstructions).toContain("harnix skill");
+    expect(workflowTemplate).toContain("harnix skill <name>");
+    expect(workflowTemplate).toContain(".harnix/spec/guides/");
+
+    for (const skill of workflowSkills) {
+      await expect(access(join(root, ".harnix", "skills", skill.name, "SKILL.md"))).rejects.toMatchObject({ code: "ENOENT" });
+    }
+    expect(agentInstructions).not.toMatch(/Read the selected `SKILL\.md` through EOF; do not preload/u);
+  });
+
+  it("should_tell_an_agent_what_to_do_when_the_harnix_cli_is_unavailable", () => {
+    const agentInstructions = renderAgentsTemplate({ languages: [], technologies: [], packages: [] });
+
+    expect(agentInstructions).toContain("not installed or not on PATH");
+    expect(agentInstructions).toContain("do not invent");
+  });
+
+  it("should_point_the_agent_and_the_user_at_the_generated_task_review_file", async () => {
+    // review.md is written by the installed package's saveTask, not by init;
+    // this only proves the canonical templates that DO ship to every
+    // consumer project — AGENTS.md and workflow.md — mention it, so an agent
+    // running in an unrelated repository still knows it exists.
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const agentInstructions = await readFile(join(root, "AGENTS.md"), "utf8");
+
+    expect(agentInstructions).toContain("review.md");
+    expect(workflowTemplate).toContain("review.md");
+    expect(workflowTemplate).toMatch(/review\.md[^.]*derived|derived[^.]*review\.md/iu);
+    expect(workflowTemplate).not.toMatch(/edit `review\.md`|edit review\.md/iu);
+  });
+
   it("keeps the init bootstrap project-local while directing opt-in setup to user-global integrations", async () => {
     const root = await temporaryRepository();
 

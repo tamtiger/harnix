@@ -20,6 +20,7 @@ export interface UserPathRoot {
 }
 
 export interface UserPlatformRoots {
+  readonly claude: UserPathRoot;
   readonly kiro: UserPathRoot;
   readonly antigravityDesktop: UserPathRoot;
   readonly antigravityCli: UserPathRoot;
@@ -30,7 +31,7 @@ export interface UserPlatformRoots {
 }
 
 /** Public integration identities used to resolve only authorized platform roots. */
-export type UserGlobalPlatform = "kiro" | "antigravity" | "codex";
+export type UserGlobalPlatform = "kiro" | "antigravity" | "codex" | "claude";
 
 /**
  * A deliberately partial root set. Global lifecycle commands receive only the
@@ -38,6 +39,7 @@ export type UserGlobalPlatform = "kiro" | "antigravity" | "codex";
  * all-platform discovery continues to use the complete UserPlatformRoots.
  */
 export interface SelectedUserPlatformRoots {
+  readonly claude?: UserPathRoot | undefined;
   readonly kiro?: UserPathRoot | undefined;
   readonly antigravityDesktop?: UserPathRoot | undefined;
   readonly antigravityCli?: UserPathRoot | undefined;
@@ -62,13 +64,14 @@ const defaultHomeResolver: HomeResolver = async () => homedir();
 export async function resolveUserPlatformRoots(
   options: ResolveUserPlatformRootsOptions = {},
 ): Promise<UserPlatformRoots> {
-  const roots = await resolveSelectedUserPlatformRoots(["kiro", "antigravity", "codex"], options);
-  if (roots.kiro === undefined || roots.antigravityDesktop === undefined || roots.antigravityCli === undefined || roots.codex === undefined) {
+  const roots = await resolveSelectedUserPlatformRoots(["kiro", "antigravity", "codex", "claude"], options);
+  if (roots.kiro === undefined || roots.antigravityDesktop === undefined || roots.antigravityCli === undefined || roots.codex === undefined || roots.claude === undefined) {
     throw new UnsafeUserPathError("All supported user platform roots could not be resolved.");
   }
   return {
     antigravityCli: roots.antigravityCli,
     antigravityDesktop: roots.antigravityDesktop,
+    claude: roots.claude,
     codex: roots.codex,
     kiro: roots.kiro,
   };
@@ -86,6 +89,7 @@ export async function resolveSelectedUserPlatformRoots(
   const selected = new Set(platforms);
   const home = await createVerifiedUserRoot(await (options.homeResolver ?? defaultHomeResolver)(), "~");
   const roots: {
+    claude?: UserPathRoot;
     kiro?: UserPathRoot;
     antigravityDesktop?: UserPathRoot;
     antigravityCli?: UserPathRoot;
@@ -115,6 +119,12 @@ export async function resolveSelectedUserPlatformRoots(
         : await createVerifiedUserRoot(assertCodexHome(codexHome), "$CODEX_HOME"),
       skills: await createDerivedUserRoot(home, ".agents", "~/.agents"),
     };
+  }
+  if (selected.has("claude")) {
+    const claudeConfigDirectory = (options.environment ?? process.env).CLAUDE_CONFIG_DIR;
+    roots.claude = claudeConfigDirectory === undefined
+      ? await createDerivedUserRoot(home, ".claude", "~/.claude")
+      : await createVerifiedUserRoot(assertNamedHome(claudeConfigDirectory, "CLAUDE_CONFIG_DIR"), "$CLAUDE_CONFIG_DIR");
   }
   return roots;
 }
@@ -202,14 +212,19 @@ function hasControlCharacter(value: string): boolean {
 }
 
 function assertCodexHome(value: string): string {
+  return assertNamedHome(value, "CODEX_HOME");
+}
+
+function assertNamedHome(value: string, variable: string): string {
   if (value.trim().length === 0 || value.includes("\0")) {
-    throw new UnsafeUserPathError("CODEX_HOME must be a non-empty absolute directory when set.");
+    throw new UnsafeUserPathError(`${variable} must be a non-empty absolute directory when set.`);
   }
   return value;
 }
 
 function isSafeLogicalPath(value: string): boolean {
-  return value === "~" || value === "$CODEX_HOME" || value.startsWith("~/") || value.startsWith("$CODEX_HOME/");
+  const roots = ["$CODEX_HOME", "$CLAUDE_CONFIG_DIR"];
+  return value === "~" || value.startsWith("~/") || roots.some((root) => value === root || value.startsWith(`${root}/`));
 }
 
 function isAbsolutePath(value: string): boolean {

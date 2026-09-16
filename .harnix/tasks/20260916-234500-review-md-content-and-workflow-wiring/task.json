@@ -1,0 +1,176 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260916-234500-review-md-content-and-workflow-wiring",
+  "title": "Hoàn thiện nội dung review.md và đưa vào workflow canonical",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "review.md đủ thông tin để biết task còn thiếu gì, và mọi agent ở bất kỳ repo nào cũng biết review.md tồn tại qua workflow/AGENTS template và skill canonical.",
+  "nonGoals": [
+    "Không thêm freshness/digest computation vào review.md.",
+    "Không liệt kê research/*.md trong Artifacts.",
+    "Không đổi cơ chế regenerate (vẫn hook trong saveTask)."
+  ],
+  "decisions": [
+    {
+      "id": "d1-cheap-required-checks",
+      "text": "Required checks list dùng validationPlan + selectLatestEvidence có sẵn, không tính lại freshness/digest.",
+      "rationale": "saveTask chạy trên mọi persist; tính freshness cần đọc file nguồn theo glob, chi phí I/O không tương xứng với một trang chỉ để đọc."
+    },
+    {
+      "id": "d2-two-surfaces",
+      "text": "Wiring review.md vào cả canonical template (workflow.ts/agents.ts) lẫn skill, không chỉ meta-doc của repo Harnix.",
+      "rationale": "docs/HARNIX_PRD.md và IMPLEMENTATION_PLAN.md là tài liệu nội bộ cho người phát triển Harnix; workflowTemplate/agents.ts mới là thứ thực sự ship vào .harnix/workflow.md và AGENTS.md của mọi consumer project."
+    }
+  ],
+  "residualRisks": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-review-md-required-checks",
+      "text": "review.md liệt kê mọi required check kèm evidence mới nhất hoặc 'chưa chạy'.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-review-content-20260916235500"
+      ]
+    },
+    {
+      "id": "ac-review-md-metadata",
+      "text": "review.md hiện timestamp và Artifacts đúng file tồn tại trên đĩa.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-review-content-20260916235500"
+      ]
+    },
+    {
+      "id": "ac-workflow-canonical-wiring",
+      "text": "workflowTemplate và renderAgentsTemplate nhắc review.md trong output sinh cho consumer project.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-template-wiring-20260916235500"
+      ]
+    },
+    {
+      "id": "ac-skill-wiring",
+      "text": "harnix-finish-work và harnix-brainstorm nhắc review.md.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-template-wiring-20260916235500"
+      ]
+    },
+    {
+      "id": "ac-release-readiness",
+      "text": "Patch version và changelog cập nhật một lần trước verifying; exact acceptance sequence pass.",
+      "status": "met",
+      "evidenceIds": [
+        "green-release-gate-20260916235500"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task.ts",
+    "src/templates/harnix/workflow.ts",
+    "src/templates/harnix/agents.ts",
+    "src/skills/harnix-finish-work/SKILL.md",
+    "src/skills/harnix-brainstorm/SKILL.md",
+    "test/unit/task-state.test.ts",
+    "test/workflow/templates.test.ts",
+    "test/workflow/skill-sources.test.ts",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "focused-review-content",
+      "description": "Xác nhận review.md hiện required checks, timestamp và artifacts đúng.",
+      "command": "pnpm exec vitest run test/unit/task-state.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-review-md-metadata",
+        "ac-review-md-required-checks"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts"
+      ]
+    },
+    {
+      "id": "focused-template-wiring",
+      "description": "Xác nhận review.md được nhắc trong canonical template và skill.",
+      "command": "pnpm exec vitest run test/workflow/templates.test.ts test/workflow/skill-sources.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-skill-wiring",
+        "ac-workflow-canonical-wiring"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/skills/harnix-finish-work/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "release-gate",
+      "description": "Chạy exact acceptance sequence.",
+      "command": "pnpm build; pnpm lint; pnpm typecheck; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-release-readiness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "green-focused-review-content-20260916235500",
+      "checkId": "focused-review-content",
+      "recordedAt": "2026-09-16T14:37:03.517Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "23 test pass: review.md hiện Required checks (evidence mới nhất hoặc 'chưa chạy'), timestamp createdAt/updatedAt, và mục Artifacts chỉ liệt kê đúng prd.md/plan.md/design.md thực sự tồn tại trên đĩa (Lite task không có Artifacts).",
+      "artifactPaths": [],
+      "inputDigest": "3cb285c6027d4856ae843d27aef9cd820d1e35e8f3e608d64414503ce2b9a8ca"
+    },
+    {
+      "id": "green-focused-template-wiring-20260916235500",
+      "checkId": "focused-template-wiring",
+      "recordedAt": "2026-09-16T14:37:03.846Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "13 test pass: workflowTemplate và renderAgentsTemplate (ship vào mọi consumer project qua harnix init/update) đều nhắc review.md là derived/không hand-edit; skill harnix-brainstorm và harnix-finish-work cũng nhắc review.md. Init project mới xác nhận AGENTS.md sinh ra chứa review.md.",
+      "artifactPaths": [],
+      "inputDigest": "6221bb6d5446c2aa84e19988227fb930608ab0dde084d1181563028d4fe8dfd2"
+    },
+    {
+      "id": "green-release-gate-20260916235500",
+      "checkId": "release-gate",
+      "recordedAt": "2026-09-16T14:37:04.254Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Toàn bộ exact acceptance sequence exit 0: build, lint, typecheck, test:acceptance (590 pass, 1 skipped), pack:check, smoke:tarball, measure:init, measure:footprint (giảm 75%), scan:release, git diff --check.",
+      "artifactPaths": [],
+      "inputDigest": "d873d94923af6833423b814a812a4b66420e3354d84eceaedeb25f77e214e8d2"
+    }
+  ],
+  "createdAt": "2026-09-16T14:29:55.439Z",
+  "updatedAt": "2026-09-16T14:37:06.054Z",
+  "completedAt": "2026-09-16T14:37:06.054Z"
+}

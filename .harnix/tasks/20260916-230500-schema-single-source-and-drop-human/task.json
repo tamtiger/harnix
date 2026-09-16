@@ -1,0 +1,159 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260916-230500-schema-single-source-and-drop-human",
+  "title": "workflow --schema một nguồn sự thật, bỏ --human",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "workflow --schema không thể lệch khỏi validator thật; --human bị gỡ vì người dùng review task qua review.md, không qua CLI.",
+  "nonGoals": [
+    "Không đổi hành vi review.md.",
+    "Không đổi persisted schema hay hook protocol."
+  ],
+  "decisions": [
+    {
+      "id": "d1-export-manifest",
+      "text": "Export một manifest field duy nhất từ task.ts thay vì hai list song song.",
+      "rationale": "Bất kỳ field mới nào thêm vào TaskRecordV2 tự động phản ánh đúng ở --schema mà không cần nhớ sửa nơi thứ hai."
+    },
+    {
+      "id": "d2-remove-human-not-deprecate",
+      "text": "Xoá hẳn --human, không chỉ ẩn hoặc deprecate.",
+      "rationale": "Người dùng xác nhận rõ ràng cách review là mở file .md; giữ code chết không dùng chỉ tăng bề mặt bảo trì."
+    }
+  ],
+  "residualRisks": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-schema-single-source",
+      "text": "workflow --schema derive taskRecord/nested từ export thật của task.ts, không còn literal riêng.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-schema-source-20260916231000"
+      ]
+    },
+    {
+      "id": "ac-human-removed",
+      "text": "--human không còn hợp lệ trên status/tasks/checks/audit; gọi nó trả exit 2 unknown option.",
+      "status": "met",
+      "evidenceIds": [
+        "green-focused-drop-human-20260916231000"
+      ]
+    },
+    {
+      "id": "ac-release-readiness",
+      "text": "Patch version và changelog cập nhật một lần trước verifying; exact acceptance sequence pass.",
+      "status": "met",
+      "evidenceIds": [
+        "green-release-gate-20260916231000"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task.ts",
+    "src/commands/internal-workflow.ts",
+    "src/cli-program.ts",
+    "test/workflow/internal-workflow.test.ts",
+    "test/workflow/cli-contract.test.ts",
+    "test/integration/status.test.ts",
+    "AGENTS.md",
+    "README.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "focused-schema-source",
+      "description": "Xác nhận workflow --schema derive từ manifest thật của task.ts.",
+      "command": "pnpm exec vitest run test/workflow/internal-workflow.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-schema-single-source"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/task.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "focused-drop-human",
+      "description": "Xác nhận --human bị gỡ hoàn toàn và bị reject đúng cách.",
+      "command": "pnpm exec vitest run test/workflow/cli-contract.test.ts test/integration/status.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-human-removed"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "test/integration/status.test.ts",
+        "test/workflow/cli-contract.test.ts"
+      ]
+    },
+    {
+      "id": "release-gate",
+      "description": "Chạy exact acceptance sequence và xác nhận docs không còn nhắc --human.",
+      "command": "pnpm build; pnpm lint; pnpm typecheck; pnpm test:acceptance; pnpm pack:check; pnpm smoke:tarball; pnpm measure:init; pnpm measure:footprint; pnpm scan:release; git diff --check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-release-readiness"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**/*.md",
+        "package.json",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "green-focused-schema-source-20260916231000",
+      "checkId": "focused-schema-source",
+      "recordedAt": "2026-09-16T14:07:32.536Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "51 test pass: workflow --schema derive taskRecord/nested trực tiếp từ taskRecordFieldManifest/acceptanceCriterionKeys/validationCheckV2Keys/evidenceV2Keys/blockerKeys export của task.ts. Verify thủ công: thêm field giả vào manifest mà không sửa internal-workflow.ts khiến --schema tự phản ánh field đó ngay, chứng minh không còn literal riêng để lệch.",
+      "artifactPaths": [],
+      "inputDigest": "eae1c98380322fd950185cb8be2d7b60d1268e05a2225f1368f01fab70d528c5"
+    },
+    {
+      "id": "green-focused-drop-human-20260916231000",
+      "checkId": "focused-drop-human",
+      "recordedAt": "2026-09-16T14:07:32.857Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "9 test pass: --human bị gỡ khỏi status/tasks/checks/audit, human-report.ts và test của nó đã xoá, gọi --human trả exit 2 kèm 'unknown option', status/audit vẫn trả đúng JSON như trước.",
+      "artifactPaths": [],
+      "inputDigest": "d79e8e329ca390c8dda2152a77789147edd5202cba6a1c62dca85ab550f37e7e"
+    },
+    {
+      "id": "green-release-gate-20260916231000",
+      "checkId": "release-gate",
+      "recordedAt": "2026-09-16T14:07:33.166Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Toàn bộ exact acceptance sequence exit 0: build, lint, typecheck, test:acceptance (588 pass, 1 skipped), pack:check, smoke:tarball, measure:init, measure:footprint, scan:release, git diff --check. AGENTS.md/README.md/IMPLEMENTATION_PLAN.md không còn nhắc --human.",
+      "artifactPaths": [],
+      "inputDigest": "e178321b9113cd5aab05013e48c0fc7c8f21425e1e10cc1018f72e79e3d8f95c"
+    }
+  ],
+  "createdAt": "2026-09-16T14:05:06.326Z",
+  "updatedAt": "2026-09-16T14:07:34.903Z",
+  "completedAt": "2026-09-16T14:07:34.903Z"
+}

@@ -20,6 +20,30 @@ afterEach(() => {
 });
 
 describe.sequential("status command", () => {
+  it("should_reject_the_removed_human_flag_on_status_and_audit_without_writing", async () => {
+    // `--human` was removed: task review happens by opening the task's
+    // generated `review.md`, not by running a CLI summary flag. This guards
+    // against silently reintroducing a half-wired flag on these commands.
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    process.chdir(root);
+    const before = await snapshotTree(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    await expect(runCli(["node", "harnix", "status", "--human"])).resolves.toBe(2);
+    expect(stderr.mock.calls.map((call) => String(call[0])).join("")).toContain("unknown option");
+    stderr.mockClear();
+    await expect(runCli(["node", "harnix", "audit", "--human"])).resolves.toBe(2);
+    expect(stderr.mock.calls.map((call) => String(call[0])).join("")).toContain("unknown option");
+    stdout.mockClear();
+    await expect(runCli(["node", "harnix", "status"])).resolves.toBe(0);
+    const json = stdout.mock.calls.map((call) => String(call[0])).join("");
+
+    expect(JSON.parse(json)).toMatchObject({ generator: "harnix", activeTask: null });
+    await expect(snapshotTree(root)).resolves.toEqual(before);
+  });
+
   it("returns a bounded no-active-task result without changing project files", async () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });

@@ -109,7 +109,7 @@ export async function scanTextFiles(files, scope, generated) {
     if (/(?:[A-Za-z]:[\\/]Users[\\/]|\/(?:home|Users)\/[^/]+\/|\\\\(?:\?\\[A-Za-z]:\\|[A-Za-z0-9._-]+\\[A-Za-z0-9$._-]+\\))/u.test(text)) throw new Error(`Machine path found in ${scope}: ${file}.`);
     if (containsPotentialSecret(text, file)) throw new Error(`Potential secret found in ${scope}: ${file}.`);
     if (/(?:REQUIRED\s+TODO|TODO\s*\(required\))/iu.test(text)) throw new Error(`Required TODO found in ${scope}: ${file}.`);
-    if (generated && /gemini-cli|claude|cursor|windsurf/iu.test(text)) throw new Error(`Forbidden platform surface found in generated output: ${file}.`);
+    if (generated && /gemini-cli|cursor|windsurf/iu.test(text)) throw new Error(`Forbidden platform surface found in generated output: ${file}.`);
     if (generated && /@mindfoldhq\/trellis|@tamtiger\/trellis/iu.test(text)) throw new Error(`Forbidden legacy product reference found in generated output: ${file}.`);
   }
 }

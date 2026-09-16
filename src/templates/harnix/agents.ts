@@ -61,11 +61,15 @@ Use the exact \`nextStage\` returned by preflight for project-scoped work, and o
 - \`harnix-finish-work\` only for verified completion or explicit cancellation.
 - \`harnix-continue\` only for interrupted or partial persisted state when selected by \`nextStage\`.
 
-Read the selected \`SKILL.md\` through EOF; do not preload later skills. The canonical lifecycle, TaskRecord schema, legal transitions, hidden envelopes, freshness rules, retry breaker, and exact commands live in \`.harnix/workflow.md\`; do not duplicate or invent them here.
+Skills are not repository files. Run \`harnix skill <name>\` to get the selected owner and read its \`content\` through EOF; run \`harnix skill\` for the catalog. Do not preload later skills. The canonical lifecycle, TaskRecord schema, legal transitions, hidden envelopes, freshness rules, retry breaker, and exact commands live in \`.harnix/workflow.md\`; do not duplicate or invent them here.
+
+Engineering guidance selected for this project lives in \`.harnix/spec/guides/\`. Read only the guide files relevant to the files you are changing.
+
+Every persisted task also has \`.harnix/tasks/<id>/review.md\`, a derived read-only summary (goal, criteria, required checks, decisions, residual risks, evidence) regenerated automatically on every save. Point the user there for a plain-file review instead of running a command or reading \`task.json\`; never hand-edit it.
 
 ## Operating rules
 
-- \`harnix init\` is project-local. \`harnix setup --kiro|--antigravity|--codex\` is user-global. Do not run setup or harnix init automatically.
+- \`harnix init\` is project-local. \`harnix setup --kiro|--antigravity|--codex|--claude\` is user-global. Do not run setup or harnix init automatically.
 - Luôn dùng tiếng Việt khi tạo và cập nhật task Harnix, gồm nội dung hướng người dùng trong \`task.json\`, \`prd.md\`, \`plan.md\`, \`design.md\`, research và journal. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
 - Preserve user-owned files, tasks, evidence, specs, research, journals, credentials, and unrelated configuration.
 - Use hidden workflow transport for state changes; never edit \`task.json\` or \`.active\` directly.
@@ -74,6 +78,6 @@ Read the selected \`SKILL.md\` through EOF; do not preload later skills. The can
 - Require explicit authority for destructive, networked, installation, upgrade, purge, or externally visible actions.
 - Never commit, branch, create a worktree, merge, push, publish, or create a pull request automatically.
 - Before any commit, show the proposed changes and commit message, then wait for explicit user approval.
-- If Harnix state, CLI, or a required skill is unavailable or invalid, report that instead of inventing state.
+- If Harnix state, CLI, or a required skill is unavailable or invalid, report that instead of inventing state. When \`harnix\` is not installed or not on PATH, say so and stop: do not invent task state, skip the workflow, or edit \`.harnix\` by hand.
 `;
 }

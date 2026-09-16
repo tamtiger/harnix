@@ -248,6 +248,167 @@ describe("task state", () => {
     expect(() => validateTask({ ...taskFixture(), acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }, { id: "a", text: "y", status: "pending", evidenceIds: [] }] })).toThrow(/duplicate/iu);
     expect(() => validateTask({ ...taskFixture(), status: "ready", checkpoint: "implementing" })).toThrow("checkpoint");
   });
+  it("should_accept_optional_rationale_fields_on_schema_v2_and_reject_them_on_v1", () => {
+    const base = {
+      generator: "harnix" as const,
+      schemaVersion: 2 as const,
+      id: "20260916-120000-rationale",
+      title: "t",
+      mode: "lite" as const,
+      status: "planning" as const,
+      checkpoint: "planning" as const,
+      goal: "g",
+      nonGoals: [],
+      acceptanceCriteria: [],
+      relevantPaths: [],
+      relevantSpecs: [],
+      validationPlan: [],
+      evidence: [],
+      createdAt: "2026-09-16T00:00:00.000Z",
+      updatedAt: "2026-09-16T00:00:00.000Z",
+    };
+    const decisions = [{ id: "d1", text: "Skill phân phối bằng command", rationale: "Không tăng footprint và luôn khớp version." }];
+    const residualRisks = [{ id: "r1", text: "internal-workflow.ts vẫn lớn", severity: "low" as const }];
+
+    expect(validateTask({ ...base, decisions, residualRisks })).toMatchObject({ decisions, residualRisks });
+    expect((validateTask(base) as { decisions?: unknown }).decisions).toBeUndefined();
+    expect(() => validateTask({ ...base, schemaVersion: 1, decisions })).toThrow(/unknown schema field/u);
+    expect(() => validateTask({ ...base, decisions: [{ id: "bad id", text: "x", rationale: "y" }] })).toThrow();
+    expect(() => validateTask({ ...base, decisions: [{ id: "d1", text: "", rationale: "y" }] })).toThrow();
+    expect(() => validateTask({ ...base, decisions: [{ id: "d1", text: "x", rationale: "y", extra: 1 }] })).toThrow(/unknown schema field/u);
+    expect(() => validateTask({ ...base, residualRisks: [{ id: "r1", text: "x", severity: "catastrophic" }] })).toThrow();
+    expect(() => validateTask({ ...base, decisions: [{ id: "d1", text: "x", rationale: "y" }, { id: "d1", text: "z", rationale: "w" }] })).toThrow(/Duplicate/u);
+  });
+
+  it("should_generate_a_plain_review_markdown_file_alongside_task_json_for_direct_review", async () => {
+    const root = await temporaryRepository();
+    const base = {
+      generator: "harnix" as const,
+      schemaVersion: 2 as const,
+      id: "20260916-220000-review-md",
+      title: "Chan brute-force o endpoint login",
+      mode: "full" as const,
+      status: "in_progress" as const,
+      checkpoint: "implementing" as const,
+      goal: "Chan brute-force login bang rate limit.",
+      nonGoals: ["Khong doi session/token hien tai."],
+      acceptanceCriteria: [
+        { id: "ac-a", text: "Lan thu thu 6 bi chan.", status: "met" as const, evidenceIds: ["e1"] },
+        { id: "ac-b", text: "Reset counter khi thanh cong.", status: "pending" as const, evidenceIds: [] },
+      ],
+      relevantPaths: ["src/auth/rate-limit.ts"],
+      relevantSpecs: [],
+      decisions: [{ id: "d1", text: "Dung in-memory counter.", rationale: "Chua co multi-instance deployment." }],
+      residualRisks: [{ id: "r1", text: "Khong chia se giua nhieu instance.", severity: "medium" as const }],
+      validationPlan: [
+        { id: "check", description: "Run tests", command: "pnpm test", scope: "full" as const, required: true, criterionIds: ["ac-a", "ac-b"], inputs: ["@task-contract", "src/**/*.ts"] },
+        { id: "release-gate", description: "Run release gate", command: "pnpm test:acceptance", scope: "full" as const, required: true, criterionIds: ["ac-a"], inputs: ["@task-contract", "src/**/*.ts"] },
+      ],
+      evidence: [{ id: "e1", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "GREEN", artifactPaths: [], inputDigest: "a".repeat(64) }],
+      createdAt: timestamp,
+      updatedAt: "2026-09-16T23:50:00.000Z",
+    };
+
+    await saveTask(root, base);
+    const reviewPath = join(root, "tasks", base.id, "review.md");
+    const review = await readFile(reviewPath, "utf8");
+
+    expect(review).toContain(base.title);
+    expect(review).toContain("in_progress");
+    expect(review).toContain(base.goal);
+    expect(review).toContain("Khong doi session/token hien tai.");
+    expect(review).toContain("ac-a");
+    expect(review).toContain("met");
+    expect(review).toContain("ac-b");
+    expect(review).toContain("pending");
+    expect(review).toContain(timestamp);
+    expect(review).toContain("2026-09-16T23:50:00.000Z");
+    expect(review).toContain("Required checks");
+    expect(review).toContain("`check`");
+    expect(review).toContain("`release-gate`");
+    expect(review).toContain("GREEN");
+    expect(review).toMatch(/release-gate[^\n]*chưa chạy|release-gate[^\n]*not yet run/u);
+    expect(review).toContain("Dung in-memory counter.");
+    expect(review).toContain("Chua co multi-instance deployment.");
+    expect(review).toContain("Khong chia se giua nhieu instance.");
+    expect(review).toContain("medium");
+    expect(review).toContain("GREEN");
+    expect(review).not.toContain(root);
+    expect(review.startsWith("{")).toBe(false);
+  });
+
+  it("should_list_only_the_planning_artifacts_that_actually_exist_on_disk", async () => {
+    const root = await temporaryRepository();
+    const fullTask = {
+      generator: "harnix" as const,
+      schemaVersion: 2 as const,
+      id: "20260916-234500-review-artifacts-full",
+      title: "Full task with prd and plan",
+      mode: "full" as const,
+      status: "planning" as const,
+      checkpoint: "planning" as const,
+      goal: "g",
+      nonGoals: [],
+      acceptanceCriteria: [],
+      relevantPaths: [],
+      relevantSpecs: [],
+      validationPlan: [],
+      evidence: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    await saveTaskWithArtifacts(root, fullTask, { prd: "# prd", plan: "# plan" });
+    const fullReview = await readFile(join(root, "tasks", fullTask.id, "review.md"), "utf8");
+
+    expect(fullReview).toContain("prd.md");
+    expect(fullReview).toContain("plan.md");
+    expect(fullReview).not.toContain("design.md");
+
+    const liteTask = { ...fullTask, id: "20260916-234500-review-artifacts-lite", mode: "lite" as const, title: "Lite task" };
+    await saveTask(root, liteTask);
+    const liteReview = await readFile(join(root, "tasks", liteTask.id, "review.md"), "utf8");
+
+    expect(liteReview).not.toContain("prd.md");
+    expect(liteReview).not.toContain("plan.md");
+    expect(liteReview).not.toContain("## Artifacts");
+  });
+
+  it("should_omit_decisions_and_residual_risk_sections_when_absent_and_regenerate_on_every_save", async () => {
+    const root = await temporaryRepository();
+    const minimal = {
+      generator: "harnix" as const,
+      schemaVersion: 2 as const,
+      id: "20260916-220100-review-md-minimal",
+      title: "Minimal task",
+      mode: "lite" as const,
+      status: "planning" as const,
+      checkpoint: "planning" as const,
+      goal: "g",
+      nonGoals: [],
+      acceptanceCriteria: [],
+      relevantPaths: [],
+      relevantSpecs: [],
+      validationPlan: [],
+      evidence: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+
+    await saveTask(root, minimal);
+    const reviewPath = join(root, "tasks", minimal.id, "review.md");
+    const first = await readFile(reviewPath, "utf8");
+
+    expect(first).not.toContain("Decisions");
+    expect(first).not.toContain("Residual");
+
+    const updated = { ...minimal, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-09-16T22:02:00.000Z" };
+    await saveTask(root, updated);
+    const second = await readFile(reviewPath, "utf8");
+
+    expect(second).toContain("ready");
+    expect(second).not.toBe(first);
+  });
+
 });
 
 const timestamp = "2026-08-13T00:00:00.000Z";
