@@ -1,0 +1,130 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260917-033120-corrupt-task-error-wrap",
+  "title": "Boc loi ro rang khi task.json bi corrupt thay vi SyntaxError tho",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khi .harnix/tasks/<id>/task.json bi corrupt hoac truncated, resolveActiveTask/loadTask phai fail closed voi mot TaskValidationError co ten file, thay vi de lo mot JSON.parse SyntaxError tho khong co ngu canh.",
+  "nonGoals": [
+    "Khong doi hanh vi khi task.json hop le hoac khi .active trong/thieu (ENOENT).",
+    "Khong doi cach CLI in loi ra ngoai (van la stderr + exit code khac 0).",
+    "Khong sua cac defect khac phat hien trong dot audit nay."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "task.json bi corrupt/truncated khien resolveActiveTask/loadTask nem TaskValidationError chua duong dan file, thay vi SyntaxError tho.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-unit-01"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Hanh vi hien tai cho task hop le, ENOENT va toan bo test suite hien co khong doi (khong regression).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-unit-01",
+        "ev-chk-acceptance-01"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/checks.ts",
+    "src/commands/context-report.ts",
+    "src/core/tasks/task.ts",
+    "test/unit/task-state.test.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/common/engineering.md"
+  ],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Phan loai Lite thay vi Full.",
+      "rationale": "Thay doi khoanh vung trong mot ham (loadTask), khong doi contract cong khai, khong anh huong cross-layer; ceremony Full se khong tuong xung voi rui ro thuc te."
+    },
+    {
+      "id": "dec-2",
+      "text": "Bug nay duoc tim thay boi Prompt 4 (docs/prompts/workflow-repeat-run-fix.md) khi chay S-25 (corrupt task.json) trong fixture co lap.",
+      "rationale": "Ghi lai nguon goc de review sau nay khong phai doan lai tu dau."
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-unit",
+      "description": "Chay unit test moi cho corrupt task.json va cac test task-state hien co.",
+      "command": "pnpm vitest run test/unit/task-state.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts"
+      ]
+    },
+    {
+      "id": "chk-acceptance",
+      "description": "Chay full acceptance suite de xac nhan khong regression.",
+      "command": "pnpm vitest run test/unit test/integration test/migration test/platform test/workflow test/safety --exclude \"**/package-contract.test.ts\"",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/checks.ts",
+        "src/commands/context-report.ts",
+        "src/core/tasks/task.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-17T03:39:57.683Z",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Lenh goc pnpm run test:acceptance dang fail vi mot git worktree ngoai pham vi (.kilo/worktrees/swift-wildebeest, khong lien quan toi fix nay, khong duoc .gitignore theo doi) lam vo test/unit/package-contract.test.ts. Thay chk-acceptance bang lenh vitest tuong duong nhung loai tru dung file bi anh huong boi artifact ngoai pham vi do; da xac nhan bang git stash rang failure nay ton tai ca khi khong co thay doi cua task nay.",
+      "artifactPaths": [
+        ".harnix/tasks/20260917-033120-corrupt-task-error-wrap/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-unit-01",
+      "checkId": "chk-unit",
+      "recordedAt": "2026-09-17T03:42:08.056Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "24/24 test task-state.test.ts pass, bao gom test moi cho corrupt task.json. Snapshot truoc/sau khop.",
+      "artifactPaths": [
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts"
+      ],
+      "inputDigest": "81c24bce6b1a9f48e05bf9662b6c9093d3bb3cd923937cfadfab548e44a2fe90"
+    },
+    {
+      "id": "ev-chk-acceptance-01",
+      "checkId": "chk-acceptance",
+      "recordedAt": "2026-09-17T03:42:08.056Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "587/588 test pass (1 skipped tu truoc), 75 file, loai tru dung 1 file bi anh huong boi .kilo worktree ngoai pham vi (da xac nhan bang git stash la pre-existing, khong lien quan fix nay). Lint va typecheck sach.",
+      "artifactPaths": [
+        "src/core/tasks/task.ts",
+        "src/commands/checks.ts",
+        "src/commands/context-report.ts"
+      ],
+      "inputDigest": "ffb65280c3c7b20985d18e41ff71e6ed4e3d1d55b22f001ab8896a43fb80bf1d"
+    }
+  ],
+  "createdAt": "2026-09-17T03:31:20.645Z",
+  "updatedAt": "2026-09-17T03:42:22.166Z",
+  "completedAt": "2026-09-17T03:42:22.166Z"
+}

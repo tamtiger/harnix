@@ -3,7 +3,7 @@ import { Buffer } from "node:buffer";
 import { readConfig, type PlatformId } from "../core/config/config.js";
 import { buildEffectiveContext, type EffectiveContextReasonCode } from "../core/context/effective-context.js";
 import type { ContextChange, ContextDrift, ContextManifest } from "../core/context/context.js";
-import { resolveActiveTask } from "../core/tasks/task.js";
+import { resolveActiveTask, TaskValidationError } from "../core/tasks/task.js";
 import { taskContextDrift } from "../core/workflow.js";
 import { findInitializedProject } from "../utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
@@ -120,6 +120,8 @@ function serializedBytes(value: ContextReportResultV1): number {
 }
 
 function redactContextReportParserError(error: unknown): never {
-  if (error instanceof SyntaxError) throw new Error("Context report state is unavailable; run harnix doctor.");
+  if (error instanceof SyntaxError || (error instanceof TaskValidationError && error.cause instanceof SyntaxError)) {
+    throw new Error("Context report state is unavailable; run harnix doctor.");
+  }
   throw error;
 }

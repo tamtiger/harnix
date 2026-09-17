@@ -1,0 +1,54 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260917-033120-corrupt-task-error-wrap",
+  "snapshots": [
+    {
+      "evidenceId": "ev-chk-acceptance-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260917-033120-corrupt-task-error-wrap",
+      "checkId": "chk-acceptance",
+      "taskContractHash": "964d40ba87ba0aa3cbb68c88b807ddf91dbad0dd7d434c22c702b2309b4dd151",
+      "entries": [
+        {
+          "path": "src/commands/checks.ts",
+          "sha256": "d5263e80d7f17ab25fa3317bf0227f6f47f5e2ed2068a67a019662c9e48e80b9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/context-report.ts",
+          "sha256": "d46ee561a47963b7f28fb6f14401d291aa7b9501523723a1e1dadce9e0f99686",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/tasks/task.ts",
+          "sha256": "d030cfc9df3f6440f57eceb2c7a7c947ba98e07fe98218f176ae92b18f66b570",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "ffb65280c3c7b20985d18e41ff71e6ed4e3d1d55b22f001ab8896a43fb80bf1d"
+    },
+    {
+      "evidenceId": "ev-chk-unit-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260917-033120-corrupt-task-error-wrap",
+      "checkId": "chk-unit",
+      "taskContractHash": "964d40ba87ba0aa3cbb68c88b807ddf91dbad0dd7d434c22c702b2309b4dd151",
+      "entries": [
+        {
+          "path": "src/core/tasks/task.ts",
+          "sha256": "d030cfc9df3f6440f57eceb2c7a7c947ba98e07fe98218f176ae92b18f66b570",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-state.test.ts",
+          "sha256": "191486bba9139f5e9d8e59788f29187f34d07100255b5b7dbd6a9e47eeac2d43",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "81c24bce6b1a9f48e05bf9662b6c9093d3bb3cd923937cfadfab548e44a2fe90"
+    }
+  ]
+}

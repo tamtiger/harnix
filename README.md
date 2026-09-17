@@ -1,14 +1,41 @@
 # Harnix
 
+**Version:** `1.1.5`
+
 Harnix là coding-agent harness chạy cục bộ trong repository. Harnix biến yêu cầu thành task có phạm vi và tiêu chí nghiệm thu rõ ràng, chọn context phù hợp trong giới hạn, hướng dẫn triển khai/kiểm chứng và lưu bằng chứng cùng knowledge có thể tái sử dụng.
 
 Harnix hỗ trợ đúng bốn nền tảng: Kiro, Antigravity, Codex và Claude Code.
 
 Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
+## Mục lục
+
+- [Trạng thái](#trạng-thái)
+- [Đặc điểm sản phẩm](#đặc-điểm-sản-phẩm)
+- [Workflow agent](#workflow-agent)
+- [Yêu cầu](#yêu-cầu)
+- [Cài đặt và chạy từ source](#cài-đặt-và-chạy-từ-source)
+- [Quick start](#quick-start)
+- [Từ yêu cầu người dùng đến workflow agent](#từ-yêu-cầu-người-dùng-đến-workflow-agent)
+- [CLI](#cli)
+- [Skill cho mọi agent](#skill-cho-mọi-agent)
+- [Review một task](#review-một-task)
+- [Tích hợp platform](#tích-hợp-platform)
+- [Workflow sử dụng](#workflow-sử-dụng)
+- [Dữ liệu dự án](#dữ-liệu-dự-án)
+- [Dùng trong CI](#dùng-trong-ci)
+- [Phát triển Harnix](#phát-triển-harnix)
+- [Tài liệu](#tài-liệu)
+- [Nguồn gốc và giấy phép](#nguồn-gốc-và-giấy-phép)
+
 ## Trạng thái
 
-Phase 5 review/refactor, Phase 6 user-global integrations và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt. Audit ngày 2026-08-18 đã bổ sung implicit routing cho ordinary prompt trên Kiro/Antigravity/Codex và chuyển Antigravity sang always-on `rules/AGENTS.md`; source release hiện là `1.1.3` sau batch task recovery/explainability, hardening target-root authority trước ambient context và bổ sung standalone read-only research Bypass không consult active task. Disposable `agy 1.1.1` session đã chứng minh initialized project tự route Bypass/Lite/Full và non-Harnix no-op, nhưng print mode vẫn chưa load plugin hook. Kiro/Codex disposable profiles không có login và Codex còn pending trust, nên các surface đó không bị claim active. Đây chưa phải claim về package đã publish. Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
+- Phase 5 (review/refactor), Phase 6 (user-global integrations) và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt.
+- Audit ngày 2026-08-18 đã bổ sung implicit routing cho ordinary prompt trên Kiro/Antigravity/Codex và chuyển Antigravity sang always-on `rules/AGENTS.md`.
+- Release nguồn hiện tại (xem version ở đầu trang) theo sau batch task recovery/explainability, hardening target-root authority trước ambient context, và bổ sung standalone read-only research Bypass không consult active task.
+- Disposable `agy 1.1.1` session đã chứng minh initialized project tự route Bypass/Lite/Full và non-Harnix no-op, nhưng print mode vẫn chưa load plugin hook.
+- Kiro/Codex disposable profiles không có login và Codex còn pending trust, nên các surface đó không bị claim active — đây chưa phải claim về package đã publish.
+- Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
 
 ## Đặc điểm sản phẩm
 
@@ -403,7 +430,7 @@ triage -> planning -> ready -> implementing -> verifying -> finishing -> complet
 
 Xem [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) để biết transition, gate và artifact contract chi tiết.
 
-Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release, hiện là `1.1.3`. Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
+Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release (xem version ở đầu trang). Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
 
 ## Dữ liệu dự án
 
@@ -444,7 +471,7 @@ pnpm build
 node dist\cli.js update
 ```
 
-Lệnh chỉ nhận version `x.y.z` tăng dần, đồng bộ `package.json`, toàn bộ canonical `src/skills/harnix-*/SKILL.md`, `generatorVersion` trong self-host `.harnix/.template-hashes.json`, hai current-version claim được quản lý trong `README.md` và `CHANGELOG.md`. Mỗi task chỉ bump một lần trước Verifying; khi resume, chạy lại cùng version để amend đúng release entry/metadata hoặc regenerate output thay vì tăng version lần nữa. `build` và `update` vẫn là bước riêng để refresh runtime cùng managed content metadata, đồng thời preserve các file Harnix đã bị người dùng sửa.
+Lệnh chỉ nhận version `x.y.z` tăng dần, đồng bộ `package.json`, toàn bộ canonical `src/skills/harnix-*/SKILL.md`, `generatorVersion` trong self-host `.harnix/.template-hashes.json`, một current-version claim duy nhất được quản lý trong `README.md` (dòng `**Version:**` đầu trang), cộng CHANGELOG.md. Mỗi task chỉ bump một lần trước Verifying; khi resume, chạy lại cùng version để amend đúng release entry/metadata hoặc regenerate output thay vì tăng version lần nữa. `build` và `update` vẫn là bước riêng để refresh runtime cùng managed content metadata, đồng thời preserve các file Harnix đã bị người dùng sửa.
 
 Quality gate đầy đủ:
 

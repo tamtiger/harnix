@@ -119,14 +119,10 @@ function insertChangelogEntry(changelog, heading, summaries) {
 }
 
 function replaceReadmeVersion(readme, version) {
-  const replacements = [
-    [/source release hiện là `[^`\r\n]+`/u, `source release hiện là \`${version}\``],
-    [/với package release, hiện là `[^`\r\n]+`/u, `với package release, hiện là \`${version}\``]
-  ];
-  return replacements.reduce((updated, [pattern, replacement]) => {
-    if (!pattern.test(updated)) throw new Error(`README.md is missing a managed current-version claim: ${replacement}.`);
-    return updated.replace(pattern, replacement);
-  }, readme);
+  const pattern = /\*\*Version:\*\* `[^`\r\n]+`/u;
+  const replacement = `**Version:** \`${version}\``;
+  if (!pattern.test(readme)) throw new Error(`README.md is missing a managed current-version claim: ${replacement}.`);
+  return readme.replace(pattern, replacement);
 }
 
 function replaceSelfHostGeneratorVersion(source, version, path) {

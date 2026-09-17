@@ -4,6 +4,18 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.5] - 2026-09-17
+
+### Changed
+
+- README chi con dung mot version badge ngay dau trang; xoa hai cho nhac version rai rac; scripts/version-sync.mjs va test dong bo theo dung mot managed marker; them Muc luc va viet lai Trang thai thanh bullet.
+
+## [1.1.4] - 2026-09-17
+
+### Changed
+
+- resolveActiveTask/loadTask boc task.json corrupt/truncated thanh TaskValidationError co ten file thay vi de lo JSON.parse SyntaxError tho; giu nguyen redaction o harnix checks/context-report bang cach kiem tra error.cause.
+
 ## [1.1.3] - 2026-09-16
 
 ### Changed

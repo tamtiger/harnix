@@ -9,7 +9,7 @@ import {
   type RequiredCheckState,
 } from "../core/verification/check-report.js";
 import type { VerificationInputChange } from "../core/verification/input-freshness.js";
-import { resolveActiveTask } from "../core/tasks/task.js";
+import { resolveActiveTask, TaskValidationError } from "../core/tasks/task.js";
 import { compareCodeUnits } from "../utils/order.js";
 import { findInitializedProject } from "../utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
@@ -124,6 +124,8 @@ function serializedBytes(value: ChecksReportResultV1): number {
 }
 
 function redactChecksParserError(error: unknown): never {
-  if (error instanceof SyntaxError) throw new Error("Checks task state is unavailable; run harnix doctor.");
+  if (error instanceof SyntaxError || (error instanceof TaskValidationError && error.cause instanceof SyntaxError)) {
+    throw new Error("Checks task state is unavailable; run harnix doctor.");
+  }
   throw error;
 }

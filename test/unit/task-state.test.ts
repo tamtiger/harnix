@@ -1,9 +1,9 @@
-import { access, readFile, rm, symlink } from "node:fs/promises";
+import { access, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createLearningCandidate, isPromotionEligible } from "../../src/core/journal/learning.js";
 import { promotionProposal } from "../../src/core/journal/promotion.js";
-import { archiveTask, cancelTask, clearActiveTask, createTaskV2MigrationEvidence, resolveActiveTask, saveTask, saveTaskWithArtifacts, setActiveTask, transitionTask, validateTask, type TaskRecord } from "../../src/core/tasks/task.js";
+import { archiveTask, cancelTask, clearActiveTask, createTaskV2MigrationEvidence, loadTask, resolveActiveTask, saveTask, saveTaskWithArtifacts, setActiveTask, TaskValidationError, transitionTask, validateTask, type TaskRecord } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -44,6 +44,17 @@ describe("task state", () => {
     await expect(clearActiveTask(root, task.id)).rejects.toThrow("symbolic link");
 
     await expect(readFile(join(external, "tasks", ".active"), "utf8")).resolves.toBe(`${task.id}\n`);
+  });
+
+  it("wraps a corrupt task.json in a TaskValidationError naming the file instead of a raw JSON.parse SyntaxError", async () => {
+    const root = await temporaryRepository(); const task = taskFixture();
+    await saveTask(root, task); await setActiveTask(root, task.id);
+    const taskJsonPath = join(root, "tasks", task.id, "task.json");
+    await writeFile(taskJsonPath, '{"generator":"harnix","schemaVersion":2,"id":"20260807-1200', "utf8"); // truncated mid-string
+
+    await expect(resolveActiveTask(root)).rejects.toThrow(TaskValidationError);
+    await expect(resolveActiveTask(root)).rejects.toThrow(taskJsonPath);
+    await expect(loadTask(taskJsonPath)).rejects.toThrow(TaskValidationError);
   });
 
   it("archives only terminal tasks and preserves task data", async () => {

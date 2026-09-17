@@ -379,7 +379,13 @@ export async function saveTaskArtifacts(root: string, task: TaskRecord, artifact
     await saveContextSelectionSnapshot(directory, artifacts.contextSelection);
   }
 }
-export async function loadTask(path: string): Promise<TaskRecord> { return validateTask(JSON.parse(await readFile(path, "utf8")) as unknown); }
+export async function loadTask(path: string): Promise<TaskRecord> {
+  const raw = await readFile(path, "utf8");
+  let parsed: unknown;
+  try { parsed = JSON.parse(raw); }
+  catch (cause) { throw new TaskValidationError(`Task record is corrupt or truncated JSON: ${path}`, { cause }); }
+  return validateTask(parsed);
+}
 export async function setActiveTask(harnixRoot: string, taskId: string): Promise<void> {
   validateTaskId(taskId);
   await atomicWriteFile(await resolveSafeProjectPath(harnixRoot, "tasks/.active"), `${taskId}\n`);

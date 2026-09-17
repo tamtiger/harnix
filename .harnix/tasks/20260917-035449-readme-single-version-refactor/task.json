@@ -1,0 +1,215 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260917-035449-readme-single-version-refactor",
+  "title": "README: mot version duy nhat o dau trang, refactor lai noi dung",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "README.md chi hien thi version o dung mot cho ngay dau trang (ngay duoi H1), xoa cac cho nhac lai version rai rac giua bai, va lam gon lai cau truc/prose ma khong doi y nghia ky thuat. scripts/version-sync.mjs va test cua no phai dong bo theo dung mot marker version thay vi hai.",
+  "nonGoals": [
+    "Khong doi noi dung ky thuat/hanh vi cua tung command trong phan CLI (chi doi cau truc/trinh bay, khong doi fact).",
+    "Khong doi CHANGELOG.md hay cach quan ly version cua no.",
+    "Khong them badge npm/CI dong (khong co registry that de trai vao).",
+    "Khong doi cac file docs/ khac ngoai README.md."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "README.md hien thi dung mot chuoi version, ngay duoi tieu de H1, va khong con chuoi version nao khac lap lai giua bai (tru CHANGELOG.md khong bi dong).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-readme-structure-01"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "scripts/version-sync.mjs chi con quan ly dung mot managed version-claim pattern trong README.md (khong con hai pattern nhu truoc); prose trong README mo ta dung 'mot' claim, khong con 'hai'.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-readme-structure-01",
+        "ev-chk-version-sync-unit-01"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "test/unit/version-sync.test.ts duoc cap nhat theo dung contract moi (mot marker) va toan bo suite lien quan pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-version-sync-unit-01",
+        "ev-chk-acceptance-01"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "README duoc bo sung muc luc (Muc luc) sau dong version va phan 'Trang thai' duoc viet lai thanh bullet ro rang, giu nguyen moi fact hien co, khong xoa hay bop meo thong tin.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-readme-structure-01"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "pnpm version:sync chay end-to-end thanh cong voi contract moi (bump version that, ghi dung mot vi tri trong README), lint/typecheck/build/test:acceptance (tru phan .kilo pre-existing da biet) deu xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-version-sync-e2e-01",
+        "ev-chk-acceptance-01"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "package.json",
+    "scripts/version-sync.mjs",
+    "test/unit/version-sync.test.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/common/engineering.md"
+  ],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Phan loai Full thay vi Lite.",
+      "rationale": "Thay doi dong thoi mot documented/tested contract (so managed version marker trong README) o ca script tooling va test, khong con la 'docs-only prose'; theo dung rule routing cua chinh Harnix (doi frozen contract khong duoc mac dinh Lite)."
+    },
+    {
+      "id": "dec-2",
+      "text": "Badge version dat ngay sau H1, dang '**Version:** `x.y.z`', tach rieng khoi cau chuyen 'chua publish npm' (van giu o Trang thai).",
+      "rationale": "Nguoi dung yeu cau 'mot cho ngay dau trang'; tach version so khoi narrative status giup mot vi tri duy nhat de quet mat, con status van giai thich ngu canh."
+    },
+    {
+      "id": "dec-3",
+      "text": "Pham vi refactor noi dung: gioi han o Muc luc moi va viet lai bullet cho 'Trang thai'; giu nguyen cau truc H2/H3 va noi dung ky thuat cua cac phan CLI/platform khac.",
+      "rationale": "Yeu cau 'refactor lai noi dung' khong neu chi tiet; rewrite toan bo 500 dong ky thuat da duoc kiem chung se tang rui ro sai lech fact ma khong co tin hieu ro rang can thiet. Bounded scope duoc neu ro trong bao cao cho nguoi dung, khong am tham thu hep."
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-version-sync-unit",
+      "description": "Chay test unit cho version-sync voi contract mot marker moi.",
+      "command": "pnpm vitest run test/unit/version-sync.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "@task-contract",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts"
+      ]
+    },
+    {
+      "id": "chk-readme-structure",
+      "description": "Kiem tra README chi co dung mot chuoi version va co muc luc.",
+      "command": "node -e \"const fs=require('node:fs');const t=fs.readFileSync('README.md','utf8');const b=String.fromCharCode(96);const hits=(t.match(new RegExp(b+'1[.]1[.][0-9]+'+b,'g'))||[]).length;if(hits!==1){console.error('expected exactly one version string, found '+hits);process.exit(1)}if(!t.includes('Muc luc')&&!t.includes('Mục lục')){console.error('missing table of contents section');process.exit(1)}console.log('readme structure ok')\"",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-4"
+      ],
+      "inputs": [
+        "@task-contract",
+        "README.md"
+      ]
+    },
+    {
+      "id": "chk-acceptance",
+      "description": "Chay lint, typecheck, build va full acceptance suite (loai tru file bi anh huong boi worktree ngoai pham vi da biet truoc).",
+      "command": "pnpm run lint && pnpm run typecheck && pnpm build && pnpm vitest run test/unit test/integration test/migration test/platform test/workflow test/safety --exclude \"**/package-contract.test.ts\"",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3",
+        "ac-5"
+      ],
+      "inputs": [
+        "@task-contract",
+        "scripts/version-sync.mjs",
+        "src/core",
+        "test"
+      ]
+    },
+    {
+      "id": "chk-version-sync-e2e",
+      "description": "Chay pnpm version:sync that (bump version) va xac nhan README chi doi dung mot vi tri.",
+      "command": "pnpm version:sync",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "@task-contract",
+        "README.md",
+        "package.json",
+        "scripts/version-sync.mjs"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-version-sync-unit-01",
+      "checkId": "chk-version-sync-unit",
+      "recordedAt": "2026-09-17T04:05:43.892Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "3/3 test version-sync.test.ts pass voi contract mot marker moi (RED da quan sat truoc do voi ly do dung: thieu managed current-version claim).",
+      "artifactPaths": [
+        "README.md",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts"
+      ],
+      "inputDigest": "b320e57514606a87b0185cb2960ceb740f1e53a66f2da035dd4bdf24c18d20b5"
+    },
+    {
+      "id": "ev-chk-readme-structure-01",
+      "checkId": "chk-readme-structure",
+      "recordedAt": "2026-09-17T04:05:43.892Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "README chi con dung 1 chuoi version (1.1.5) va co muc Muc luc voi 17 lien ket khop dung 17/18 heading con lai.",
+      "artifactPaths": [
+        "README.md",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts"
+      ],
+      "inputDigest": "8fc917b756cde7c205c3d10ee680a3d580e3739132bfb04c7f9b6e47cc710018"
+    },
+    {
+      "id": "ev-chk-acceptance-01",
+      "checkId": "chk-acceptance",
+      "recordedAt": "2026-09-17T04:05:43.892Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "lint/typecheck/build sach; 587/588 test pass (1 skip tu truoc), 75 file, loai tru dung test/unit/package-contract.test.ts (pre-existing .kilo worktree, khong lien quan task nay).",
+      "artifactPaths": [
+        "README.md",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts"
+      ],
+      "inputDigest": "ee8f6ddbe1537a449e6b40c9791061b48adef01abfe9769cc11f5220a54b6b43"
+    },
+    {
+      "id": "ev-chk-version-sync-e2e-01",
+      "checkId": "chk-version-sync-e2e",
+      "recordedAt": "2026-09-17T04:05:43.892Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Da chay that node scripts/version-sync.mjs 1.1.5 --summary ...; ket qua changed:true, cap nhat dung 1 vi tri version trong README.md cung package.json/CHANGELOG.md/skill metadata/self-host manifest; state hien tai on dinh, snapshot truoc/sau khop.",
+      "artifactPaths": [
+        "README.md",
+        "scripts/version-sync.mjs",
+        "test/unit/version-sync.test.ts"
+      ],
+      "inputDigest": "8e6ffdafa20db42b8895de0e2a09449675392362c2c4402d70ebe568686b3212"
+    }
+  ],
+  "createdAt": "2026-09-17T03:58:21.849Z",
+  "updatedAt": "2026-09-17T04:06:01.256Z",
+  "completedAt": "2026-09-17T04:06:01.256Z"
+}

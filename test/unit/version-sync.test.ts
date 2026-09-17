@@ -25,15 +25,16 @@ describe("version sync", () => {
     const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
     expect(changelog).toContain("## [1.0.5] - 2026-08-18");
     expect(changelog).toContain("- Đồng bộ release metadata qua script.");
-    await expect(readFile(join(root, "README.md"), "utf8")).resolves.toContain("source release hiện là `1.0.5`");
-    await expect(readFile(join(root, "README.md"), "utf8")).resolves.toContain("với package release, hiện là `1.0.5`");
+    const readmeAfterFirstSync = await readFile(join(root, "README.md"), "utf8");
+    expect(readmeAfterFirstSync).toContain("**Version:** `1.0.5`");
+    expect(readmeAfterFirstSync.match(/`1\.0\.5`/gu)).toHaveLength(1);
     await expect(selfHostGeneratorVersions(root)).resolves.toEqual(["1.0.5", "1.0.5"]);
 
-    await writeFile(join(root, "README.md"), "source release hiện là `1.0.4`\n\nvới package release, hiện là `1.0.4`\n");
+    await writeFile(join(root, "README.md"), "# Fixture\n\n**Version:** `1.0.4`\n");
     await writeSelfHostManifest(root, "1.0.4");
     await expect(syncVersion({ date: "2026-08-19", root, summaries: ["Đồng bộ release metadata qua script."], version: "1.0.5" })).resolves.toMatchObject({ changed: true, updated: [".harnix/.template-hashes.json", "README.md"], version: "1.0.5" });
     expect((await readFile(join(root, "CHANGELOG.md"), "utf8")).match(/^## \[1\.0\.5\]/gmu)).toHaveLength(1);
-    await expect(readFile(join(root, "README.md"), "utf8")).resolves.toContain("source release hiện là `1.0.5`");
+    await expect(readFile(join(root, "README.md"), "utf8")).resolves.toContain("**Version:** `1.0.5`");
     await expect(selfHostGeneratorVersions(root)).resolves.toEqual(["1.0.5", "1.0.5"]);
     await expect(syncVersion({ date: "2026-08-19", root, summaries: ["Đồng bộ release metadata qua script."], version: "1.0.5" })).resolves.toMatchObject({ changed: false, version: "1.0.5" });
   });
@@ -60,7 +61,7 @@ async function fixture(): Promise<string> {
   roots.push(root);
   await writeFile(join(root, "package.json"), `${JSON.stringify({ name: "fixture", version: "1.0.4" }, null, 2)}\n`);
   await writeFile(join(root, "CHANGELOG.md"), "# Changelog\n\nIntro\n\n## [1.0.4] - 2026-08-17\n");
-  await writeFile(join(root, "README.md"), "source release hiện là `1.0.4`\n\nvới package release, hiện là `1.0.4`\n");
+  await writeFile(join(root, "README.md"), "# Fixture\n\n**Version:** `1.0.4`\n");
   await mkdir(join(root, ".harnix"), { recursive: true });
   await writeSelfHostManifest(root, "1.0.4");
   for (const name of skillNames) {
