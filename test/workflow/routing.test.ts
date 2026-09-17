@@ -24,6 +24,16 @@ describe("workflow routing and completion evidence", () => {
     expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [], activeTask: { mode: "lite", status: "blocked", checkpoint: "implementing", blocker: { kind: "decision", summary: "need decision", nextAction: "decide", resumeStatus: "ready" } } })).toMatchObject({ entry: "fail-closed", reasonCodes: ["invalid-active-state"] });
     expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [], activeTask: { mode: "full", status: "blocked", checkpoint: "replan", blocker: { kind: "decision", summary: "need decision", nextAction: "decide", resumeStatus: "verifying" } } })).toMatchObject({ entry: "resume", owner: "harnix-continue", reasonCodes: ["active-stage"] });
   });
+  it("bypasses a docs-only or literal-value-only edit unless it forces tracked risk, and leaves an active task unchanged", () => {
+    expect(routeWorkflow({ action: "change", workKind: "docs", mutation: "docs-only", riskSignals: [] })).toMatchObject({ entry: "bypass", reasonCodes: ["docs-only-bypass"] });
+    expect(routeWorkflow({ action: "change", workKind: "maintenance", mutation: "literal-value", riskSignals: [] })).toMatchObject({ entry: "bypass", reasonCodes: ["literal-value-bypass"] });
+    expect(routeWorkflow({ action: "change", workKind: "docs", mutation: "docs-only", riskSignals: ["contract-change"] })).toMatchObject({ entry: "create", mode: "full", reasonCodes: ["risk-full"] });
+    expect(routeWorkflow({ action: "change", workKind: "docs", mutation: "docs-only", riskSignals: ["material-unknown"] })).toMatchObject({ entry: "create", mode: "full" });
+    expect(routeWorkflow({
+      action: "change", workKind: "maintenance", mutation: "literal-value", riskSignals: [],
+      activeTask: { mode: "full", status: "in_progress", checkpoint: "implementing" },
+    })).toMatchObject({ entry: "bypass", reasonCodes: ["literal-value-bypass"] });
+  });
   it("keeps explicit mode precedence while diagnosing forced Lite risk conflicts", () => {
     expect(routeWorkflow({ action: "change", workKind: "security", mutation: "project", explicitMode: "lite", riskSignals: ["security-sensitive"] })).toMatchObject({ mode: "lite", reasonCodes: ["explicit-lite", "explicit-lite-risk-conflict"] });
     expect(routeWorkflow({ action: "change", workKind: "feature", mutation: "project", explicitMode: "lite", riskSignals: ["contract-change"] })).toMatchObject({ mode: "lite", reasonCodes: ["explicit-lite", "explicit-lite-risk-conflict"] });

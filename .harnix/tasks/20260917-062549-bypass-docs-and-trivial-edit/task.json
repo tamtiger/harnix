@@ -1,0 +1,269 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260917-062549-bypass-docs-and-trivial-edit",
+  "title": "Mo rong Bypass: docs-only edit va bounded literal-value edit khong can tao task",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Hien tai Harnix bat buoc MOI repository file mutation phai la Lite hoac Full (khong co ngoai le), ke ca sua docs/prompts thuan tuy hoac doi mot literal value don le. Nguoi dung yeu cau: doi voi docs-only edit (bao gom viet/sua prompt duoi docs/) va bounded literal-value-only edit (mot hang so, toi da hai file, khong doi behavior/interface/schema), khong can tao task Harnix - route thanh Bypass. Cap nhat contract nay dong bo o moi noi dinh nghia no.",
+  "nonGoals": [
+    "Khong doi state machine cot loi (planning->ready->in_progress->verifying->completed) hay cac gate/transition hien co cho Lite/Full.",
+    "Khong noi long yeu cau task cho bat ky thay doi behavior/interface/schema/security nao, du nho.",
+    "Khong doi docs/HARNIX_PRD.md (frozen product spec o muc truu tuong hon, khong mau thuan voi thay doi nay, de scope nho gon).",
+    "Khong dong bo lai src/core/workflow.ts's routeWorkflow() reference model va test cua no trong task nay - day la mot pure decision-table KHONG duoc goi boi bat ky live CLI command nao (da xac nhan qua grep), chi dung de pin contract cho test. Ghi lai la mot residual gap duoc hoan trong bao cao, khong am tham bo qua."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Bullet Bypass trong src/templates/harnix/workflow.ts liet ke ro: docs-only edit (bao gom viet/sua prompt) va bounded literal-value-only edit deu la Bypass, tru khi doi frozen public contract hoac chua material product decision.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-templates-unit-01"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "src/skills/harnix-brainstorm/SKILL.md duoc cap nhat dong bo cung dinh nghia Bypass moi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-skill-unit-01"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "src/templates/harnix/agents.ts (AGENTS.md bootstrap ngan gon) duoc cap nhat tham chieu ngan gon toi carve-out moi, khong vuot byte budget 8192 cua ban rong.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-templates-unit-01"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": ".harnix/workflow.md va AGENTS.md that cua repo nay duoc dong bo dung wording moi (workflow.md qua harnix update tu template; AGENTS.md hand-sync vi khong duoc self-host manifest quan ly).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-selfhost-sync-01"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "docs/HARNIX_WORKFLOW.md muc 3.1 Bypass duoc cap nhat de khong con documentation-drift so voi contract moi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-docs-sync-01"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "test/workflow/skill-sources.test.ts va test/workflow/templates.test.ts duoc cap nhat theo text moi; lint/typecheck/build/full acceptance suite (tru test/unit/package-contract.test.ts da biet la pre-existing/ngoai pham vi) deu xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-acceptance-01"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "src/skills/harnix-brainstorm/SKILL.md",
+    "src/templates/harnix/agents.ts",
+    "src/templates/harnix/workflow.ts",
+    "test/workflow/skill-sources.test.ts",
+    "test/workflow/templates.test.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/common/engineering.md"
+  ],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Phan loai Full thay vi Lite.",
+      "rationale": "Doi ranh gioi Bypass/Lite/Full - mot frozen public contract - dong thoi tren nhieu file (template, skill, self-hosted docs, docs nguon); cross-layer va anh huong moi consumer project qua harnix init/update."
+    },
+    {
+      "id": "dec-2",
+      "text": "'Docs-only' giu nguyen y nghia da co (prose/formatting, khong doi executable behavior); chi doi HAU QUA tu 'mac dinh Lite' thanh 'mac dinh Bypass', van giu dung safety valve cu: neu doi frozen public contract hoac chua material product decision thi van la Lite/Full.",
+      "rationale": "Giu tinh nhat quan voi khai niem da co, giam rui ro dinh nghia lai tu dau; an toan valve khong doi nen khong mo loophole moi cho cac thay doi thuc su quan trong duoi vo boc 'docs'."
+    },
+    {
+      "id": "dec-3",
+      "text": "Khong dong bo src/core/workflow.ts's routeWorkflow()/test cua no trong task nay.",
+      "rationale": "Da xac nhan qua grep: routeWorkflow() khong duoc goi boi bat ky src/commands/* nao - la pure reference model chi ton tai de test pin contract, khong anh huong hanh vi agent thuc te (agent doc prose truc tiep). Dong bo no se doi type 'mutation' va can them nhieu test case moi, vuot pham vi 'bo ceremony cho docs/trivial edit' ma nguoi dung yeu cau. Ghi ro day la residual gap, khong phai bi bo sot."
+    },
+    {
+      "id": "dec-4",
+      "text": "Khong doi docs/HARNIX_PRD.md trong task nay.",
+      "rationale": "PRD hien tai mo ta Bypass o muc truu tuong hon, khong truc tiep mau thuan voi thay doi nay (khong liet ke chi tiet 'docs-only mac dinh Lite'); giu scope gon, tranh mo rong sang frozen product spec khong can thiet."
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-skill-unit",
+      "description": "Chay test/workflow/skill-sources.test.ts voi text Bypass moi.",
+      "command": "pnpm vitest run test/workflow/skill-sources.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "chk-templates-unit",
+      "description": "Chay test/workflow/templates.test.ts voi text Bypass moi va byte budget AGENTS.md.",
+      "command": "pnpm vitest run test/workflow/templates.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/templates/harnix/agents.ts",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "chk-selfhost-sync",
+      "description": "Xac nhan .harnix/workflow.md va AGENTS.md that cua repo chua dung text Bypass moi.",
+      "command": "node -e \"const fs=require('node:fs');const needle='literal-value-only edit';const w=fs.readFileSync('.harnix/workflow.md','utf8');const a=fs.readFileSync('AGENTS.md','utf8');if(!w.includes(needle)){console.error('workflow.md out of sync');process.exit(1)}if(!a.includes('docs-only')&&!a.includes('literal-value')){console.error('AGENTS.md out of sync');process.exit(1)}console.log('selfhost sync ok')\"",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        ".harnix/workflow.md",
+        "@task-contract",
+        "AGENTS.md"
+      ]
+    },
+    {
+      "id": "chk-docs-sync",
+      "description": "Xac nhan docs/HARNIX_WORKFLOW.md muc 3.1 da cap nhat.",
+      "command": "node -e \"const fs=require('node:fs');const t=fs.readFileSync('docs/HARNIX_WORKFLOW.md','utf8');if(!t.includes('literal-value')&&!t.includes('docs-only')){console.error('HARNIX_WORKFLOW.md section 3.1 not updated');process.exit(1)}console.log('docs sync ok')\"",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_WORKFLOW.md"
+      ]
+    },
+    {
+      "id": "chk-acceptance",
+      "description": "Chay lint, typecheck, build va full acceptance suite (loai tru file bi anh huong boi worktree ngoai pham vi da biet truoc).",
+      "command": "pnpm run lint && pnpm run typecheck && pnpm build && pnpm vitest run test/unit test/integration test/migration test/platform test/workflow test/safety --exclude \"**/package-contract.test.ts\"",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-6"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix",
+        "test"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-skill-unit-01",
+      "checkId": "chk-skill-unit",
+      "recordedAt": "2026-09-17T06:31:38.632Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "6/6 test skill-sources.test.ts pass voi wording Bypass moi trong harnix-brainstorm.",
+      "artifactPaths": [
+        "src/templates/harnix/workflow.ts",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        ".harnix/workflow.md",
+        "AGENTS.md",
+        "docs/HARNIX_WORKFLOW.md"
+      ],
+      "inputDigest": "60e228b958dc80cf8866c198a14986949844a38c4d593d954d9f77d646fa7eb5"
+    },
+    {
+      "id": "ev-chk-templates-unit-01",
+      "checkId": "chk-templates-unit",
+      "recordedAt": "2026-09-17T06:31:38.632Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "7/7 test templates.test.ts pass; workflowTemplate va AGENTS.md empty-profile deu chua dung carve-out moi, byte budget 8192 van dat.",
+      "artifactPaths": [
+        "src/templates/harnix/workflow.ts",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        ".harnix/workflow.md",
+        "AGENTS.md",
+        "docs/HARNIX_WORKFLOW.md"
+      ],
+      "inputDigest": "3b8dc0541b9776b9041da91cfa6725a4a9fc8db41fe927c04df62b35062f9d47"
+    },
+    {
+      "id": "ev-chk-selfhost-sync-01",
+      "checkId": "chk-selfhost-sync",
+      "recordedAt": "2026-09-17T06:31:38.632Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": ".harnix/workflow.md (regenerate qua harnix update) va AGENTS.md (hand-sync) that cua repo deu chua dung wording moi.",
+      "artifactPaths": [
+        "src/templates/harnix/workflow.ts",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        ".harnix/workflow.md",
+        "AGENTS.md",
+        "docs/HARNIX_WORKFLOW.md"
+      ],
+      "inputDigest": "04482b27bb99693dd264fd683c1ef7fc05ad1c8579356078a72350e8fac6ce11"
+    },
+    {
+      "id": "ev-chk-docs-sync-01",
+      "checkId": "chk-docs-sync",
+      "recordedAt": "2026-09-17T06:31:38.632Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "docs/HARNIX_WORKFLOW.md muc 3.1 da cap nhat dung carve-out moi.",
+      "artifactPaths": [
+        "src/templates/harnix/workflow.ts",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        ".harnix/workflow.md",
+        "AGENTS.md",
+        "docs/HARNIX_WORKFLOW.md"
+      ],
+      "inputDigest": "b20007d31260b532ea5224a27e496fae52ce219d4dd8efa0035c35d101c55d0c"
+    },
+    {
+      "id": "ev-chk-acceptance-01",
+      "checkId": "chk-acceptance",
+      "recordedAt": "2026-09-17T06:31:38.632Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "lint/typecheck/build sach; 587/588 test pass (1 skip tu truoc), 75 file, loai tru dung test/unit/package-contract.test.ts (pre-existing .kilo worktree, khong lien quan task nay).",
+      "artifactPaths": [
+        "src/templates/harnix/workflow.ts",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/agents.ts",
+        ".harnix/workflow.md",
+        "AGENTS.md",
+        "docs/HARNIX_WORKFLOW.md"
+      ],
+      "inputDigest": "d3dc8fe1c673bec394bfbfef5e2ac39854e171138ffeb45a26e4d3b3dd60f142"
+    }
+  ],
+  "createdAt": "2026-09-17T06:25:49.765Z",
+  "updatedAt": "2026-09-17T06:31:54.881Z",
+  "completedAt": "2026-09-17T06:31:54.881Z"
+}

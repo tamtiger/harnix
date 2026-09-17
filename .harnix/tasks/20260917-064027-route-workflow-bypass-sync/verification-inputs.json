@@ -1,0 +1,434 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260917-064027-route-workflow-bypass-sync",
+  "snapshots": [
+    {
+      "evidenceId": "ev-chk-acceptance-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260917-064027-route-workflow-bypass-sync",
+      "checkId": "chk-acceptance",
+      "taskContractHash": "d5e908e410fa4cf070c28518d266c9a0ddcac5784e5386f57936846c4a78d901",
+      "entries": [
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "1a7bbd183289857b9dfff4ba2e0a5d450fff63ccf7a28954cd214e30139c1f25",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/audit.test.ts",
+          "sha256": "300af87f2fcd6e7c5ff61ce63d3db0fb9084636c550ba8febdff2a65fb40e521",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/checks.test.ts",
+          "sha256": "990ee0206ccb32f22f8e781148a6f8bce9d6f6515e0c294046187aa66c7df02b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/cli.test.ts",
+          "sha256": "0d4d65d09939829111f632de0f57f3c35e4548a8d718db01e480fbb5aaff933a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/context-report.test.ts",
+          "sha256": "1dafd22da6b1492c785092a5235a8ba37911cb2d3f55c52c3fa3b938e3331277",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/doctor.test.ts",
+          "sha256": "9d467ee7ea94c68e4a495178211af618917792c177b76bdcdacb28cf538e540f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/global-doctor.test.ts",
+          "sha256": "01346c5fa6accad9ace8ed8a20324e39b8478bf0e9aa2e319650639bc8bfee6e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/global-lifecycle.test.ts",
+          "sha256": "91829760e7672d739efd59d181d16c902123b6fa05e380f82d9e6356349ffe78",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/init.test.ts",
+          "sha256": "6fdf7132a0cc98b83a500d43571fbe267ad1e724b0cbf5d3fcf22ff58401ced2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/memory.test.ts",
+          "sha256": "8b136fdee02d6baa37770b057136f950bb840ecefd83a3a0c9cf27493d7f2414",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/project-state-safety.test.ts",
+          "sha256": "e47a368022e97424d04296ff664e4338bf57f0a57769ca4b17b97db7e58ca524",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/repo-map/doctor.test.ts",
+          "sha256": "e11cbfa5d07ab22893238fd6cc26ba7c04c759030008e5b55dccf9fee38756c1",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/repo-map/incremental.test.ts",
+          "sha256": "3b5a51a06224cb184cf3ab85eba5042f446a05d9cc755db9a52eab04800522ee",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/repo-map/internal.test.ts",
+          "sha256": "4056fa809b36902efd455abbbc1adf623e6dfd2d1782df1a511bfeb938b32c64",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/resume.test.ts",
+          "sha256": "1f6dc38f97785fd54a7d67501ace20ac1db96af9f8b0b481722d6e5d8f29f361",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/skills.test.ts",
+          "sha256": "5d63e171b459539aeb281aba96deebc676b6d9fc76cb9fee5202f9992db90bcf",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/status.test.ts",
+          "sha256": "80e1c3c274589342be0ee66938e34e6d5911650929b1389f9d5f9c992667a115",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/tasks.test.ts",
+          "sha256": "049be605a7679b387d5640344a2feeb86c7e32b517a681f36141500f776bc8e2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/uninstall.test.ts",
+          "sha256": "73839b800b1b34f7e61571bb31b96c48cc779a3be60dea6eb41b0df83b3c846c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/update.test.ts",
+          "sha256": "3ae896c7873970fb34ba28a379d21696b199233699d84f9ec8e77d5bbe429f28",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/upgrade.test.ts",
+          "sha256": "a143fb4716ebb12518814dc524e5c713da9e2159c137ccaf37d9a0afd23ccaab",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/migration/discovery.test.ts",
+          "sha256": "521633e27ffcfaa1ff2c430e23a9a29abe0c15ce6c76af8c9d0219e2d0c3fc43",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/migration/migrate.test.ts",
+          "sha256": "ed33b6895be248d6c225e7030adb81f1fd35f5671d3512f7c89079b885cbd08a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/platform/claude-global.test.ts",
+          "sha256": "1c117cf08312d0f48c30ca939317143d6ce77d6ae48fe549288c2e4575929a11",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/platform/codex-global.test.ts",
+          "sha256": "a7fa15f804bc637289ee5f412490bc0cee8e9f5d9b9eeb97f336474128667657",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/platform/global-adapters.test.ts",
+          "sha256": "cc84110c7b796d25e7aeb1e628b6b4aeac895d2c0ee852cfeca162e80a947494",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/platform/setup.test.ts",
+          "sha256": "dd33027e428ce47371abd7d10934cf57462e1134e563639258aa742fca741435",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/isolated-user-home.test.ts",
+          "sha256": "8628d309ce2db60fc8ce7f9de2a00795f894459cec8e6c866605d804971aa8f5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/path-boundaries.test.ts",
+          "sha256": "e09df7cea669cd462337ed805e67e053c19eecb105cf51ba8ba9f7ef232348e7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/platform-boundaries.test.ts",
+          "sha256": "d1d8a904b9c13358406d80e69006e289fdf88187000b5a2cf5ec5fa1e4b4667e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/release-scanner.test.ts",
+          "sha256": "ee38c36a0efa68e225bf4e17f3417795e6cd74eacc99bf72efd13c337a46b386",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/user-global-paths.test.ts",
+          "sha256": "1355d2c2778c867f9eede4127306b0f1ed16c48a61ffdae53063fd587832563e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/support/temporary-repository.ts",
+          "sha256": "b099ab09957c907551a6b34012ded84c043bc3fae9f6f2d9c0122009998cb0b5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/support/temporary-user-home.ts",
+          "sha256": "c0dca64d9dd3441e0ba1f5674f63630532e3be5b41d01777e2645c2acae38a7e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/activation-instructions.test.ts",
+          "sha256": "c285a2cc6df654955a52a955f63bdfd4243cc475c38d077883ae9121d4aaf7fc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/atomic-write.test.ts",
+          "sha256": "422501423750fc37e5f213108e10efcf86c2e45dd010355f9c2547a710f164dc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/bounded-input.test.ts",
+          "sha256": "8c8b2bf8cb06f74ff012b3b5c2a0a809426953e1e9cd8583d633b14c428a0c3e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/catalog.test.ts",
+          "sha256": "5780660b3b09e2b472c0575a457c993b4c93e30e4c21bb323633df4c4c62c15f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/check-report.test.ts",
+          "sha256": "696cc8ebcc720ec741c2b06838a50f78e079e1b9ffe765a72aa67593a5f9638c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/cli-fast-path.test.ts",
+          "sha256": "1b20055c51a507fff8171716407546e62f6028b1b722893b10efa1a6b2eb7180",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/config.test.ts",
+          "sha256": "c06580b7fdbf01ffa4652691d7adbe990e2a9290b2cabe472d0b7973e2ca8ed7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/context.test.ts",
+          "sha256": "55c8dd002aef128df15a05d77f8bc572afc186dfcc2d242f1a3897d37171df1a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/detection.test.ts",
+          "sha256": "b6f538423e7e1a068614c99c32529d1e9a36c676e77b1f66830efdd26749080f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/effective-context.test.ts",
+          "sha256": "71549ff5c8b1189dd8605778a64a25cf9220cfdcf9c1acfc8665d63490efb61d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/file-lock.test.ts",
+          "sha256": "12112db52480ea5e1a9adca743c7bfe182bcf4ad0975ef2448e6c41d030ccf18",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/filesystem.test.ts",
+          "sha256": "dafa991dd33ce314032debeaeeb330ee0e755e3ab2ef0204c57ecaebf7f4760f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/global-managed-files.test.ts",
+          "sha256": "315486709fc30794b4cf6116274177d01768e1f2c2e6f5b9f1e8e53a77b9ad1e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/global-uninstall.test.ts",
+          "sha256": "48e3e2d59904ab26a60fa544a82bec9e2090a10cd7dcf580af53a11c2e207272",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/harnix-launcher.test.ts",
+          "sha256": "856fe54f1dbd2ea5567549c6e7ea8d0913d13bd7255f12a580ba3e0732e7b000",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/journal.test.ts",
+          "sha256": "29a07b7ccbde72e7dd40cc92c02f6ea3c02823d18f747d0dbcc96618d31849fd",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/learning-safety.test.ts",
+          "sha256": "72e11e37f05ed983f8200742fba7676698e70c223e303208efc468ba911e2b09",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/legacy-project-surfaces.test.ts",
+          "sha256": "dcd0ef72820c5f94520aac353699faab2d4190f2a6a4c790ab5c41d564db41a0",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/managed-files.test.ts",
+          "sha256": "ad84b01e12372ced1f5a68eb3150d748623221c3268d966364c1a6393abc5f0d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/package-contract.test.ts",
+          "sha256": "09602db19f23885d117834a7b806097f335a3534cb4e0727bb0ad48b2a812318",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/paths.test.ts",
+          "sha256": "d4e822037719103c6a5520f858c7ebc029c095fac61cb789fb58c2995fcbb149",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/project-discovery.test.ts",
+          "sha256": "e3ba1a721c93a92e440ac8bfb83cd13689d648bef622dec1bbb23a73595a73a1",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/ready-trace.test.ts",
+          "sha256": "af37b3599f3463de5322a41385378b052c091ad652fba9f6408f4026da37712a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/repo-map/graph-ranking.test.ts",
+          "sha256": "3847926c75609b40a2cb82bc31a915918c6c76eb307d52a58f06ed607e56b193",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/repo-map/impact.test.ts",
+          "sha256": "f4e48eb634f7c7b6fa4f098c99dfadfd2f9a1679000cad32f3835aa0bb44910c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/repo-map/service.test.ts",
+          "sha256": "fc95e7971b7ad52b1e0386f0fdfc6810d447996926a16971b9c518778d62afd0",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "f1e562befa94ddfc49504744d9f8a52f9f3fe89b23c80d6185421c86d785704b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/safe-glob.test.ts",
+          "sha256": "c0fed1ec56db26a9f351e16f9ec1cd121704c4e4287cf0c844aee24fc910765f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/status.test.ts",
+          "sha256": "55272710f692d60677b0b836cfd5bd9ed2ae9160c0cf430a0b8084eae99fa0dd",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-audit.test.ts",
+          "sha256": "d5265086598bc8b7db19bc50435289110ff8d931e8ece59cc55eae7cdd2d7fd5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-index.test.ts",
+          "sha256": "a9fedca2d75e40383df43a9913546e8c5ecaefbb97a057ea70986ae76f99a5e2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-resume.test.ts",
+          "sha256": "65cac3046517cfb3e2cc5e1c1236536d28c1c3ac42f453f028e2b97c0de680c2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-state.test.ts",
+          "sha256": "191486bba9139f5e9d8e59788f29187f34d07100255b5b7dbd6a9e47eeac2d43",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/user-paths.test.ts",
+          "sha256": "21d11ff214edd9acd3553f2a4f23c579677d0f5e82f3dff268f0ee610cf67577",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "df683585e52d4b75c4719c17c34d83c05eb42a2480c9c1dcac53597ae7320a8b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/version-sync.test.ts",
+          "sha256": "427ffd6498423680690df8659e0fe3ecafa18e30a5ae6836556589da72111aef",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "8d12c3f1162cce6423bb1cbbb63abb2430ec4fb20cc1c97a929af25e9ea29bb8",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "76f80cc09b10258c9bbe5a0ed27d37829df0902e38ba62689b443dd07b83a42a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "3277253e4511b0d95888d84caf36c0af211c35a14c21cb2318c56e2318244ded",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "297af311c8fc9926339e07b7eb0e2989f8f2377daf6301e4ced122dbefec0425",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/provenance.test.ts",
+          "sha256": "f97609013b6b2e8bda8be84600f705efea27d677f3441f673d9ded7acb7ff8cd",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "78c8ac5c036d1a08b9c008c1fd1f7bbe8927e5b5735bd636d34a6f614fb9903d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "787739619f38eb5d6f2a96a7c5be706453faafbb2da8b6c9423e76697a336512",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "e0f27b82201636ff50485be84b76eb5ba49070dc05d0b6e9d454209f9fa4c460",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "d16a04297a29b1a3559c722592b6e41c31d0a7ea05ab9cb784439bf4efa84cf6",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "bdb3b1e424856a5495254d97fae8e2ec6988e731799603a732c74cbcaf478e30"
+    },
+    {
+      "evidenceId": "ev-chk-routing-unit-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260917-064027-route-workflow-bypass-sync",
+      "checkId": "chk-routing-unit",
+      "taskContractHash": "d5e908e410fa4cf070c28518d266c9a0ddcac5784e5386f57936846c4a78d901",
+      "entries": [
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "1a7bbd183289857b9dfff4ba2e0a5d450fff63ccf7a28954cd214e30139c1f25",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "78c8ac5c036d1a08b9c008c1fd1f7bbe8927e5b5735bd636d34a6f614fb9903d",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "7df7249e6253fbf710edbfb1c77d3e1f6b91704cfe4660c5ca8cdf9f3624bc15"
+    }
+  ]
+}

@@ -1,0 +1,198 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260917-043217-agent-language-rule-scope",
+  "title": "Mo rong rule tieng Viet trong AGENTS.md/template sang giao tiep voi nguoi dung",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Rule 'Luon dung tieng Viet' trong canonical AGENTS.md template hien chi noi ro ve noi dung task Harnix (task.json/prd.md/plan.md/design.md/research/journal), khong noi ro ve giao tiep/tra loi truc tiep voi nguoi dung, dan toi truong hop mot agent tra loi chat tieng Viet nhung lai viet task artifact bang tieng Anh. Rule phai duoc viet lai de bao phu ro rang ca hai, ap dung dong bo cho AGENTS.md cua repo nay va template shipped cho moi consumer project.",
+  "nonGoals": [
+    "Khong doi rule thanh dieu kien hoa qua .harnix/config.yaml (da duoc ghi nhan la mot lua chon rieng trong docs/prompts/review-refactor-claude-setup.md, khong phai yeu cau lan nay).",
+    "Khong doi noi dung nao khac trong AGENTS.md template ngoai bullet rule ngon ngu.",
+    "Khong doi cac prompt lich su duoi docs/prompts/ (chi la ban ghi audit tai mot thoi diem, khong phai template song)."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Bullet rule trong src/templates/harnix/agents.ts noi ro ca hai: (a) giao tiep truc tiep voi nguoi dung va (b) tao/cap nhat task Harnix deu dung tieng Viet, giu nguyen phan giu lai code identifier/command/path/field name.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-templates-unit-01"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "test/workflow/templates.test.ts duoc cap nhat dung theo text rule moi va van xac nhan ca renderAgentsTemplate() rong va AGENTS.md that cua repo nay deu chua dung rule moi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-templates-unit-01"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "AGENTS.md that cua repo nay duoc phat hien la mot tai lieu duy tri rieng (khong sinh byte-for-byte tu renderAgentsTemplate() - phat hien trong luc thuc hien, khong phai gia dinh ban dau); doan rule tieng Viet hien co trong file nay duoc cap nhat dung wording moi, cung noi dung voi template.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-agents-selfhost-01"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "renderAgentsTemplate({ languages: [], technologies: [], packages: [] }) van duoi 8192 byte sau khi them rule.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-templates-unit-01"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Lint/typecheck/build/full acceptance suite (tru test/unit/package-contract.test.ts da biet la pre-existing/ngoai pham vi) deu xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-acceptance-01"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "src/templates/harnix/agents.ts",
+    "test/workflow/templates.test.ts",
+    "package.json",
+    "CHANGELOG.md"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/common/engineering.md"
+  ],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Phan loai Full thay vi Lite.",
+      "rationale": "Doi mot canonical, self-hosted, test-enforced template duoc ship toi moi consumer project qua harnix init/update; day la frozen public contract, khong phai docs-only prose don le."
+    },
+    {
+      "id": "dec-2",
+      "text": "Viet lai thanh mot bullet duy nhat neu ro ca giao tiep va task artifact, thay vi tach thanh hai bullet.",
+      "rationale": "AGENTS.md co test rieng giu bootstrap 'lean' (duoi 8192 byte cho ban rong); gop chung mot cau ro rang tranh phinh to ma van dong bo hai khia canh de khong bi 'miss' rieng le nhu truong hop da xay ra."
+    },
+    {
+      "id": "dec-3",
+      "text": "Khong dieu kien hoa rule bang .harnix/config.yaml trong lan nay.",
+      "rationale": "Day la mot cau hoi thiet ke rieng da duoc ghi nhan truoc do (docs/prompts/review-refactor-claude-setup.md dong 77); yeu cau hien tai chi la mo rong pham vi rule dang co, khong phai xem xet lai toan bo chinh sach hardcode ngon ngu cho moi consumer."
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-templates-unit",
+      "description": "Chay test/workflow/templates.test.ts voi rule moi.",
+      "command": "pnpm vitest run test/workflow/templates.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-4"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "chk-agents-selfhost",
+      "description": "Kiem tra AGENTS.md that cua repo chua dung cau rule moi (dong bo noi dung voi template, khong phai regenerate toan bo file).",
+      "command": "node -e 'const fs=require(\"node:fs\");const b=String.fromCharCode(96);const needle=\"Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (\" + b + \"task.json\" + b + \", \" + b + \"prd.md\" + b + \", \" + b + \"plan.md\" + b + \", \" + b + \"design.md\" + b + \", research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.\";const t=fs.readFileSync(\"AGENTS.md\",\"utf8\");if(!t.includes(needle)){console.error(\"AGENTS.md rule text out of sync with template\");process.exit(1)}console.log(\"agents.md rule text ok\")'",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "src/templates/harnix/agents.ts"
+      ]
+    },
+    {
+      "id": "chk-acceptance",
+      "description": "Chay lint, typecheck, build va full acceptance suite (loai tru file bi anh huong boi worktree ngoai pham vi da biet truoc).",
+      "command": "pnpm run lint && pnpm run typecheck && pnpm build && pnpm vitest run test/unit test/integration test/migration test/platform test/workflow test/safety --exclude \"**/package-contract.test.ts\"",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/templates/harnix/agents.ts",
+        "test"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-17T04:37:34.080Z",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Ban dau gia dinh AGENTS.md that cua repo nay duoc self-host tu renderAgentsTemplate() nen dat ac-3 la 'khop byte-for-byte'. Thuc te kiem tra cho thay AGENTS.md that la mot tai lieu cau truc rieng, cu hon, khong duoc quan ly qua .harnix/.template-hashes.json (khong co entry agents-bootstrap), va harnix update coi no la 'modified'/preserved chu khong regenerate. Sua ac-3 va chk-agents-selfhost de phan anh dung thuc te: chi can dong bo dung cau rule, khong phai toan bo file.",
+      "artifactPaths": [
+        ".harnix/tasks/20260917-043217-agent-language-rule-scope/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-09-17T04:45:08.062Z",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Command truoc cua chk-agents-selfhost bi vo shell quoting khi nhung mot chuoi tieng Viet chua backtick vao trong node -e wrapper bang dau ngoac kep long nhau (cung loai loi da tung gap o task Prompt 4 truoc do). Thay bang command dung dau nhay don bao ngoai va String.fromCharCode(96) cho backtick, da test thuc te chay dung truoc khi persist.",
+      "artifactPaths": [
+        ".harnix/tasks/20260917-043217-agent-language-rule-scope/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-templates-unit-01",
+      "checkId": "chk-templates-unit",
+      "recordedAt": "2026-09-17T04:48:39.662Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "7/7 test templates.test.ts pass voi rule moi (ca renderAgentsTemplate rong va AGENTS.md that cua repo deu chua dung cau rule moi).",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "AGENTS.md",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "03a78a9f40b317dec926337d84e37fb815a8d7256f45e689acc5f42e704f1f6a"
+    },
+    {
+      "id": "ev-chk-agents-selfhost-01",
+      "checkId": "chk-agents-selfhost",
+      "recordedAt": "2026-09-17T04:48:39.662Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "AGENTS.md that cua repo da duoc hand-sync dung cau rule moi (khong phai regenerate toan bo file boi harnix update, vi AGENTS.md khong duoc self-host manifest quan ly - phat hien trong luc lam, da replan ac-3/chk-agents-selfhost cho khop thuc te).",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "AGENTS.md",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "c7feea8264b15e228e716c11907ed48b5ddbf99a552bfbc1cea3958e65a0f389"
+    },
+    {
+      "id": "ev-chk-acceptance-01",
+      "checkId": "chk-acceptance",
+      "recordedAt": "2026-09-17T04:48:39.662Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "lint/typecheck/build sach; 587/588 test pass (1 skip tu truoc), 75 file, loai tru dung test/unit/package-contract.test.ts (pre-existing .kilo worktree, khong lien quan task nay).",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "AGENTS.md",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "8962ac0f55d91c7df6b9e2ddccfe66e2e96e70fe72bb64c40fd4be83adcda779"
+    }
+  ],
+  "createdAt": "2026-09-17T04:32:17.103Z",
+  "updatedAt": "2026-09-17T04:48:53.732Z",
+  "completedAt": "2026-09-17T04:48:53.732Z"
+}

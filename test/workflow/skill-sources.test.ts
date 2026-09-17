@@ -213,7 +213,7 @@ describe("canonical Harnix workflow skill sources", () => {
     const debug = await readSkill("harnix-debug");
 
     expect(brainstorm.indexOf("Classify the latest request")).toBeLessThan(brainstorm.indexOf("active task"));
-    expect(brainstorm).toContain("Docs-only prose or formatting defaults to Lite");
+    expect(brainstorm).toContain("bounded literal-value-only edit");
     expect(brainstorm).toContain("freeze at the first persisted `ready`");
     expect(implement).toContain("Release preparation");
     expect(implement).toContain("before `verifying`");

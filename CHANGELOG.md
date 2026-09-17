@@ -4,6 +4,24 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.8] - 2026-09-17
+
+### Changed
+
+- routeWorkflow() dong bo voi carve-out Bypass docs-only/literal-value: them mutation 'docs-only'/'literal-value', bypass tru khi co risk signal contract-change/material-unknown; them test moi trong routing.test.ts.
+
+## [1.1.7] - 2026-09-17
+
+### Changed
+
+- Bypass mo rong: docs-only edit (bao gom viet/sua prompt) va bounded literal-value-only edit (mot hang so, toi da hai file, khong doi behavior/interface/schema) khong con can tao task Harnix, tru khi doi frozen contract hoac chua material product decision. Dong bo o workflow.ts, harnix-brainstorm, agents.ts, AGENTS.md va docs/HARNIX_WORKFLOW.md.
+
+## [1.1.6] - 2026-09-17
+
+### Changed
+
+- Rule tieng Viet trong AGENTS.md template mo rong ro sang giao tiep truc tiep voi nguoi dung, khong chi noi dung task Harnix; dong bo lai wording trong AGENTS.md that cua repo va test/workflow/templates.test.ts.
+
 ## [1.1.5] - 2026-09-17
 
 ### Changed

@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `1.1.5`
+**Version:** `1.1.8`
 
 Harnix là coding-agent harness chạy cục bộ trong repository. Harnix biến yêu cầu thành task có phạm vi và tiêu chí nghiệm thu rõ ràng, chọn context phù hợp trong giới hạn, hướng dẫn triển khai/kiểm chứng và lưu bằng chứng cùng knowledge có thể tái sử dụng.
 

@@ -46,7 +46,7 @@ ${implicitActivationInstructions}
 Apply the matching ceremony profile:
 
 - **Bypass:** use the read-only route above without inspecting or mutating task state.
-- **Lite:** localized low-risk change with a clear contract and focused validation. Docs-only prose or formatting defaults to Lite.
+- **Lite:** localized low-risk change with a clear contract and focused validation, beyond the Bypass docs-only/bounded literal-value carve-outs in \`.harnix/workflow.md\`.
 - **Full:** cross-layer, migration-heavy, security-sensitive, or materially uncertain work.
 
 Read .harnix/workflow.md and .harnix/config.yaml from the selected Harnix root (canonical workflow: [\`.harnix/workflow.md\`](.harnix/workflow.md)) only after the route above requires project state. The preflight is bounded routing metadata, not proof of completion, and \`nextStage: await\` at \`ready\` requires the latest request rather than stale conversation memory to authorize implementation.
@@ -70,7 +70,7 @@ Every persisted task also has \`.harnix/tasks/<id>/review.md\`, a derived read-o
 ## Operating rules
 
 - \`harnix init\` is project-local. \`harnix setup --kiro|--antigravity|--codex|--claude\` is user-global. Do not run setup or harnix init automatically.
-- Luôn dùng tiếng Việt khi tạo và cập nhật task Harnix, gồm nội dung hướng người dùng trong \`task.json\`, \`prd.md\`, \`plan.md\`, \`design.md\`, research và journal. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
+- Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (\`task.json\`, \`prd.md\`, \`plan.md\`, \`design.md\`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
 - Preserve user-owned files, tasks, evidence, specs, research, journals, credentials, and unrelated configuration.
 - Use hidden workflow transport for state changes; never edit \`task.json\` or \`.active\` directly.
 - Use \`harnix repo-map --query <text>\` or \`harnix repo-map --impact <path>\` only as bounded implementation-stage navigation hints. Platform hooks must not invoke repository-map query, impact, or refresh.

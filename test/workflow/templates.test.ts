@@ -11,7 +11,7 @@ import { packageVersion } from "../../src/version.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
-const vietnameseTaskPolicy = "Luôn dùng tiếng Việt khi tạo và cập nhật task Harnix, gồm nội dung hướng người dùng trong `task.json`, `prd.md`, `plan.md`, `design.md`, research và journal. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.";
+const vietnameseTaskPolicy = "Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (`task.json`, `prd.md`, `plan.md`, `design.md`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.";
 
 describe("workflow templates", () => {
   it("keeps the bootstrap lean and routes latest Bypass intent before active-task continuation", () => {
@@ -153,6 +153,8 @@ describe("workflow templates", () => {
     }
     expect(workflowTemplate).toContain("explicit user-global operation");
     expect(workflowTemplate).toContain("Bypass");
+    expect(workflowTemplate).toContain("bounded literal-value-only edit");
+    expect(workflowTemplate).toContain("authoring/updating a prompt document");
     expect(workflowTemplate).toContain("Ready gate");
     expect(workflowTemplate).toContain("guarded re-entry");
     expect(workflowTemplate).toContain("generic task state machine remains forward-only");

@@ -1,0 +1,140 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260917-064027-route-workflow-bypass-sync",
+  "title": "Dong bo routeWorkflow() voi carve-out Bypass docs-only/literal-value moi",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "src/core/workflow.ts's routeWorkflow() la pure reference model duoc test/workflow/routing.test.ts va history-regressions.test.ts pin, nhung chua phan anh carve-out Bypass moi (docs-only edit, bounded literal-value edit) da them vao prose o task truoc. Mo rong type WorkflowRouteFacts.mutation va logic routeWorkflow() de dong bo, kem test moi.",
+  "nonGoals": [
+    "Khong doi bat ky command CLI nao trong src/commands/ - da xac nhan routeWorkflow() khong duoc goi boi runtime nao.",
+    "Khong doi cac nhanh logic hien co cho mutation 'none'/'task-artifact'/'project'.",
+    "Khong doi workKind, action hay cac risk signal khac ngoai viec dung 'contract-change' va 'material-unknown' lam safety valve."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "WorkflowRouteFacts.mutation them hai gia tri moi 'docs-only' va 'literal-value'.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-routing-unit-01"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "routeWorkflow() tra ve entry bypass voi reason code 'docs-only-bypass'/'literal-value-bypass' cho hai mutation moi khi khong co risk signal 'contract-change' hoac 'material-unknown'; khi co mot trong hai signal do, request duoc xu ly nhu mutation 'project' binh thuong (Lite/Full theo risk).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-routing-unit-01"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Bypass tu hai mutation moi giu active task khong doi (bo qua truoc khi vao routeActiveTask), giong cach cac Bypass khac (review/research/inspect) hien dang hoat dong.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-routing-unit-01"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "test/workflow/routing.test.ts co it nhat 4 test case moi: docs-only bypass, literal-value bypass, docs-only + contract-change khong bypass (van Lite/Full theo risk), va bypass giu active task nguyen ven; toan bo 24 assertion cu van pass khong doi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-routing-unit-01",
+        "ev-chk-acceptance-01"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow.ts",
+    "test/workflow/routing.test.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/common/engineering.md"
+  ],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Phan loai Lite.",
+      "rationale": "Localized o dung 2 file (mot core module, mot test file), khong doi contract be ngoai (workflow.md/skill khong doi), khong cross-layer."
+    },
+    {
+      "id": "dec-2",
+      "text": "Khi risk signal buoc tracked, remap request sang mutation 'project' ngay dau ham thay vi sua rai rac nhieu nhanh ben duoi.",
+      "rationale": "Giu thay doi toi thieu, tan dung toan bo logic Lite/Full/active-task hien co ma khong phai doi tung nhanh rieng le cho hai gia tri mutation moi."
+    },
+    {
+      "id": "dec-3",
+      "text": "Dung dung hai risk signal co san 'contract-change' va 'material-unknown' lam safety valve, khong them risk signal moi.",
+      "rationale": "Khop chinh xac wording prose da viet: 'unless it changes a frozen public contract or embeds a material product decision' - hai khai niem nay da co san dinh nghia trong enum WorkflowRiskSignal."
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-routing-unit",
+      "description": "Chay test/workflow/routing.test.ts va history-regressions.test.ts voi mutation type moi.",
+      "command": "pnpm vitest run test/workflow/routing.test.ts test/workflow/history-regressions.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/workflow.ts",
+        "test/workflow/routing.test.ts"
+      ]
+    },
+    {
+      "id": "chk-acceptance",
+      "description": "Chay lint, typecheck, build va full acceptance suite (loai tru file bi anh huong boi worktree ngoai pham vi da biet truoc).",
+      "command": "pnpm run lint && pnpm run typecheck && pnpm build && pnpm vitest run test/unit test/integration test/migration test/platform test/workflow test/safety --exclude \"**/package-contract.test.ts\"",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/workflow.ts",
+        "test"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-routing-unit-01",
+      "checkId": "chk-routing-unit",
+      "recordedAt": "2026-09-17T06:44:15.195Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "31/31 test routing.test.ts + history-regressions.test.ts pass, gom 5 assertion moi cho docs-only/literal-value bypass va safety valve; 24 assertion cu khong doi.",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "7df7249e6253fbf710edbfb1c77d3e1f6b91704cfe4660c5ca8cdf9f3624bc15"
+    },
+    {
+      "id": "ev-chk-acceptance-01",
+      "checkId": "chk-acceptance",
+      "recordedAt": "2026-09-17T06:44:15.195Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "lint/typecheck/build sach; 588/589 test pass (1 skip tu truoc), 75 file, loai tru dung test/unit/package-contract.test.ts (pre-existing .kilo worktree, khong lien quan task nay).",
+      "artifactPaths": [
+        "src/core/workflow.ts",
+        "test/workflow/routing.test.ts"
+      ],
+      "inputDigest": "bdb3b1e424856a5495254d97fae8e2ec6988e731799603a732c74cbcaf478e30"
+    }
+  ],
+  "createdAt": "2026-09-17T06:40:27.224Z",
+  "updatedAt": "2026-09-17T06:44:28.236Z",
+  "completedAt": "2026-09-17T06:44:28.236Z"
+}

@@ -21,7 +21,7 @@ export type WorkflowWorkKind = "feature" | "bugfix" | "hotfix" | "refactor" | "t
 export type WorkflowRiskSignal = "material-unknown" | "cross-layer" | "security-sensitive" | "migration" | "contract-change" | "architecture-refactor" | "multi-layer" | "complex-rollback";
 export type WorkflowStageOwner = "harnix-brainstorm" | "harnix-implement" | "harnix-debug" | "harnix-check" | "harnix-research" | "harnix-finish-work" | "harnix-continue";
 export interface WorkflowRouteFacts {
-  mutation: "none" | "task-artifact" | "project";
+  mutation: "none" | "task-artifact" | "project" | "docs-only" | "literal-value";
   action: WorkflowAction;
   workKind: WorkflowWorkKind;
   explicitMode?: TaskMode;
@@ -38,6 +38,11 @@ export interface WorkflowFinishDependencies {
 export interface WorkflowLearningResult { entry: JournalEntry; eligible: true; created: boolean; findings: LearningRiskKind[]; }
 
 export function routeWorkflow(request: WorkflowRouteFacts): WorkflowRouteDecision {
+  if (request.mutation === "docs-only" || request.mutation === "literal-value") {
+    const forcesTracked = request.riskSignals.includes("contract-change") || request.riskSignals.includes("material-unknown");
+    if (!forcesTracked) return decision("bypass", undefined, undefined, request.mutation === "docs-only" ? "docs-only-bypass" : "literal-value-bypass");
+    request = { ...request, mutation: "project" };
+  }
   if (request.mutation === "none") {
     if (request.action === "review") return decision("bypass", undefined, "harnix-check", "standalone-review");
     if (request.action === "research") return decision("bypass", undefined, "harnix-research", "standalone-research");

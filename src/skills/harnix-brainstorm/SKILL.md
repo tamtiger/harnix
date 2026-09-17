@@ -2,7 +2,7 @@
 name: harnix-brainstorm
 description: Use when a Harnix project needs request triage, requirements, design, planning, or a trustworthy ready gate before implementation.
 metadata:
-  version: "1.1.5"
+  version: "1.1.8"
 ---
 
 # Plan a Harnix task
@@ -30,11 +30,11 @@ Accept either no active task or one active task still owned by `planning|replan`
 
 Classify the request:
 
-- **Bypass:** read-only explanation, standalone review, generic status, or another non-project-state action that neither edits repository files nor needs persisted task state. Any repository file mutation is Lite or Full.
-- **Lite:** localized low-risk change with an obvious contract and focused validation.
+- **Bypass:** read-only explanation, standalone review, generic status, a docs-only edit (prose, formatting, or authoring/updating a prompt document), or a bounded literal-value-only edit (one numeric, string, or enum constant changed in at most two files, with no behavior, interface, or schema change) — unless the docs edit changes a frozen public contract, spans material layers, or introduces a real product decision, in which case classify it as Lite or Full instead. None of these Bypass cases need persisted task state.
+- **Lite:** localized low-risk change with an obvious contract and focused validation, beyond the Bypass carve-outs above.
 - **Full:** cross-layer, migration-heavy, security-sensitive, externally researched, or materially uncertain work.
 
-Docs-only prose or formatting defaults to Lite unless it changes a frozen public contract, spans material layers, or introduces a real product decision.
+Any other repository file mutation is Lite or Full.
 
 The user's initial request may authorize implementation. Do not require a second ceremonial approval after a genuine ready gate. Ask again only for an unresolved user-owned decision, new authority, destructive/external action, or material scope expansion.
 
