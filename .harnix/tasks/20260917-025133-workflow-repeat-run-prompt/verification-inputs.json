@@ -1,0 +1,44 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260917-025133-workflow-repeat-run-prompt",
+  "snapshots": [
+    {
+      "evidenceId": "ev-chk-references-v3-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260917-025133-workflow-repeat-run-prompt",
+      "checkId": "chk-references-v3",
+      "taskContractHash": "da35f840a6b1c278d942fa2852cf0ff4834123b337ae1d162b1aab5d08f03a02",
+      "entries": [
+        {
+          "path": "docs/prompts/workflow-repeat-run-fix.md",
+          "sha256": "ed90ae951faf06a5dc0ba71b779ca3c6e2b5609a2b9f463d0a1cbe275721df22",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "package.json",
+          "sha256": "94f066cda5248e46d9eee29c7e2b641f97518d09d57806c185e5cc0df02f16bb",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "a744f0b1835e158c6c95ae5341bf49a7655bb3a7b5a7472b8c83c6fb88751a60"
+    },
+    {
+      "evidenceId": "ev-chk-structure-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260917-025133-workflow-repeat-run-prompt",
+      "checkId": "chk-structure",
+      "taskContractHash": "da35f840a6b1c278d942fa2852cf0ff4834123b337ae1d162b1aab5d08f03a02",
+      "entries": [
+        {
+          "path": "docs/prompts/workflow-repeat-run-fix.md",
+          "sha256": "ed90ae951faf06a5dc0ba71b779ca3c6e2b5609a2b9f463d0a1cbe275721df22",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "99dfcfd73fdf727844a5930fc3cee7e090a6022e2b2af3bc75c1f1068dad3209"
+    }
+  ]
+}
