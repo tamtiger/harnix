@@ -2,57 +2,101 @@
 
 **Version:** `1.1.8`
 
-Harnix là coding-agent harness chạy cục bộ trong repository. Harnix biến yêu cầu thành task có phạm vi và tiêu chí nghiệm thu rõ ràng, chọn context phù hợp trong giới hạn, hướng dẫn triển khai/kiểm chứng và lưu bằng chứng cùng knowledge có thể tái sử dụng.
-
-Harnix hỗ trợ đúng bốn nền tảng: Kiro, Antigravity, Codex và Claude Code.
+Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex hoặc Claude Code), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
 Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
 ## Mục lục
 
-- [Trạng thái](#trạng-thái)
-- [Đặc điểm sản phẩm](#đặc-điểm-sản-phẩm)
-- [Workflow agent](#workflow-agent)
-- [Yêu cầu](#yêu-cầu)
-- [Cài đặt và chạy từ source](#cài-đặt-và-chạy-từ-source)
-- [Quick start](#quick-start)
-- [Từ yêu cầu người dùng đến workflow agent](#từ-yêu-cầu-người-dùng-đến-workflow-agent)
-- [CLI](#cli)
-- [Skill cho mọi agent](#skill-cho-mọi-agent)
-- [Review một task](#review-một-task)
+- [Harnix giải quyết vấn đề gì?](#harnix-giải-quyết-vấn-đề-gì)
+- [Yêu cầu hệ thống](#yêu-cầu-hệ-thống)
+- [Cài đặt](#cài-đặt)
+- [Bắt đầu nhanh](#bắt-đầu-nhanh)
+- [Harnix hoạt động như thế nào](#harnix-hoạt-động-như-thế-nào)
+- [Các lệnh CLI thường dùng](#các-lệnh-cli-thường-dùng)
+- [Xem lại một task](#xem-lại-một-task)
 - [Tích hợp platform](#tích-hợp-platform)
-- [Workflow sử dụng](#workflow-sử-dụng)
-- [Dữ liệu dự án](#dữ-liệu-dự-án)
+- [Dữ liệu dự án (.harnix/)](#dữ-liệu-dự-án-harnix)
 - [Dùng trong CI](#dùng-trong-ci)
-- [Phát triển Harnix](#phát-triển-harnix)
-- [Tài liệu](#tài-liệu)
+- [Đóng góp / phát triển Harnix](#đóng-góp--phát-triển-harnix)
+- [Tài liệu đầy đủ](#tài-liệu-đầy-đủ)
 - [Nguồn gốc và giấy phép](#nguồn-gốc-và-giấy-phép)
 
-## Trạng thái
+## Harnix giải quyết vấn đề gì?
 
-- Phase 5 (review/refactor), Phase 6 (user-global integrations) và workflow freshness C1–C3 đã hoàn tất trong scope được phê duyệt.
-- Audit ngày 2026-08-18 đã bổ sung implicit routing cho ordinary prompt trên Kiro/Antigravity/Codex và chuyển Antigravity sang always-on `rules/AGENTS.md`.
-- Release nguồn hiện tại (xem version ở đầu trang) theo sau batch task recovery/explainability, hardening target-root authority trước ambient context, và bổ sung standalone read-only research Bypass không consult active task.
-- Disposable `agy 1.1.1` session đã chứng minh initialized project tự route Bypass/Lite/Full và non-Harnix no-op, nhưng print mode vẫn chưa load plugin hook.
-- Kiro/Codex disposable profiles không có login và Codex còn pending trust, nên các surface đó không bị claim active — đây chưa phải claim về package đã publish.
-- Package chưa được publish lên npm; khi sử dụng từ source, hãy chạy CLI qua `pnpm` như hướng dẫn bên dưới.
+Khi làm việc với một coding agent, hai vấn đề hay gặp là: agent quên mất mình đang làm gì giữa chừng, và không ai biết agent đã thực sự kiểm chứng thay đổi hay chưa. Harnix gắn một quy trình làm việc (workflow) cố định vào agent để giải quyết việc đó:
 
-## Đặc điểm sản phẩm
+- **Một npm package** (`@tamtiger/harnix`) và **một executable** (`harnix`).
+- Hỗ trợ đúng 4 nền tảng agent: **Kiro, Antigravity, Codex và Claude Code**.
+- Dữ liệu task nằm gọn trong `.harnix/` của từng project; tích hợp platform là cấu hình user-global, cài một lần, dùng cho mọi project.
+- Chạy hoàn toàn local, mặc định không cần network, không telemetry, không daemon, không hosted service.
+- **Không bao giờ tự động commit, branch, merge, push, publish hay tạo pull request** — trước mọi commit, Harnix luôn trình bày thay đổi và commit message đề xuất, rồi chờ bạn duyệt.
+- Package hiện **chưa publish lên npm**; dùng trực tiếp từ source theo hướng dẫn cài đặt bên dưới.
 
-- Một npm package: `@tamtiger/harnix`
-- Một executable: `harnix`
-- Project data nằm trong namespace `.harnix/`; platform integration là user-global, explicit và Harnix-owned.
-- Runtime chạy local, mặc định không cần network.
-- Một workflow state machine duy nhất với hai mức ceremony: Lite và Full.
-- Không telemetry, daemon, hosted service, global memory hoặc bắt buộc điều phối multi-agent.
-- Không tự động commit, branch, worktree, merge, push, publish hay tạo pull request.
-- Trước mọi commit, Harnix phải trình bày thay đổi và commit message đề xuất, rồi chờ người dùng approve rõ ràng.
+## Yêu cầu hệ thống
 
-Antigravity có identity public là `antigravity`, flag là `--antigravity` và executable là `agy`. Phase 6 cài plugin Harnix namespaced vào hai user roots độc lập cho Desktop và CLI; không sửa MCP, account, registry, credential, permission policy hoặc state không thuộc Harnix.
+- Node.js `>=18`
+- pnpm `11.4.0` hoặc tương thích
+- Một repository dự án có quyền đọc/ghi
 
-## Workflow agent
+## Cài đặt
 
-Luồng chính của Harnix là:
+```powershell
+git clone https://github.com/tamtiger/harnix.git
+Set-Location harnix
+pnpm install --frozen-lockfile
+pnpm build
+pnpm add -g .          # đăng ký lệnh `harnix` dùng được ở mọi nơi trong PowerShell
+
+Get-Command harnix
+harnix --help
+```
+
+Lưu ý:
+
+- pnpm 11 không còn `pnpm link --global`; dùng `pnpm add -g .` để đăng ký binary khai báo trong `bin` của `package.json`.
+- Nếu `pnpm add -g .` báo không tìm thấy global bin directory, chạy `pnpm setup`, mở lại cửa sổ PowerShell mới (để nhận `PATH` vừa được `pnpm setup` thêm vào), rồi chạy lại `pnpm add -g .`.
+- Muốn gỡ bản global: `pnpm remove -g @tamtiger/harnix`.
+- Không muốn cài global? Gọi trực tiếp `node C:\path\to\harnix\dist\cli.js` thay cho `harnix` trong mọi ví dụ ở tài liệu này.
+- Khi package được publish lên npm, có thể cài bằng `pnpm add -D @tamtiger/harnix` (project-local) hoặc `pnpm add -g @tamtiger/harnix` (global) — hiện tại hai lệnh này sẽ trả `404`.
+
+## Bắt đầu nhanh
+
+Sau khi đã có lệnh `harnix` (bước Cài đặt ở trên), làm theo 4 bước sau trong **repository bạn muốn Harnix quản lý** (khác với repo `harnix` bạn vừa clone):
+
+```powershell
+# 1. Vào project cần dùng Harnix và khởi tạo
+Set-Location C:\path\to\your-project
+harnix init
+
+# 2. Cài tích hợp cho platform agent bạn đang dùng (chỉ cần làm 1 lần, dùng chung cho mọi project)
+harnix setup --claude        # hoặc --kiro / --antigravity / --codex, có thể chọn nhiều cờ cùng lúc
+
+# 3. Mở Kiro / Antigravity / Codex / Claude Code ngay tại project này và gửi yêu cầu bình thường,
+#    ví dụ: "thêm retry có backoff cho payment webhook và cập nhật test"
+#    -> Harnix tự phân loại yêu cầu và dẫn dắt agent qua đúng quy trình, không cần bạn gõ lệnh nào thêm.
+
+# 4. Xem task hiện tại và bước tiếp theo bất cứ lúc nào
+harnix status
+```
+
+Vài lệnh hữu ích khác khi mới dùng:
+
+```powershell
+harnix doctor              # kiểm tra drift, hook, path safety và secret exposure
+harnix tasks --limit 20    # xem lịch sử task local
+harnix resume <task-id>    # tiếp tục một task chưa hoàn thành, theo đúng ID
+```
+
+Muốn chỉ định sẵn ngôn ngữ/công nghệ thay vì để Harnix tự phát hiện:
+
+```powershell
+harnix init --languages typescript --technologies vue
+```
+
+## Harnix hoạt động như thế nào
+
+Luồng chính:
 
 ```text
 harnix init -> harnix setup + trust hook -> yêu cầu tự nhiên với agent
@@ -60,358 +104,15 @@ harnix init -> harnix setup + trust hook -> yêu cầu tự nhiên với agent
                                       -> implementing -> verifying -> finishing -> completed
 ```
 
-Sau khi khởi tạo repository và cài/trust integration cho platform đang dùng, chỉ cần gửi yêu cầu bình thường cho Kiro, Antigravity hoặc Codex. Agent phân loại yêu cầu mới nhất là Bypass, Lite hoặc Full trước; Bypass không đọc/tiếp tục task không liên quan, standalone read-only review route tới `harnix-check`, standalone read-only research route tới `harnix-research`, còn Lite/Full mới chạy hidden preflight rồi đọc `.harnix/workflow.md` và route stage phù hợp. Review hoặc research có thay đổi file repository hoặc task artifact phải đi vào lifecycle Lite/Full thay vì Bypass. Người dùng không cần gọi lệnh để tự tạo, chuyển stage hoặc hoàn tất task.
+Bạn không cần gọi lệnh để tự tạo, chuyển stage hay hoàn tất task — agent làm việc đó thông qua các skill Harnix. Mỗi yêu cầu mới được agent phân loại trước:
 
-Xem [cách dùng từ yêu cầu đến workflow](#từ-yêu-cầu-người-dùng-đến-workflow-agent) để cài đặt từng bước, hoặc [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) để xem đầy đủ state machine, gate và artifact contract. `harnix workflow` dùng đúng một action flag trong `--preflight|--inspect|--save|--snapshot|--audit-ready|--finish|--cancel|--learn`; đây là transport hidden cho các skill, không phải public API.
-
-## Yêu cầu
-
-- Node.js `>=18`
-- pnpm `11.4.0` hoặc tương thích
-- Một repository dự án có quyền đọc/ghi
-- Executable nền tảng tương ứng nếu muốn kiểm tra readiness; test và setup fixture vẫn có thể chạy offline.
-
-## Cài đặt và chạy từ source
-
-```powershell
-git clone https://github.com/tamtiger/harnix.git
-Set-Location harnix
-pnpm install --frozen-lockfile
-pnpm build
-```
-
-### Đăng ký lệnh `harnix` global từ source
-
-Package hiện chưa được publish lên npm. Để gọi trực tiếp `harnix` trong mọi PowerShell, build và đăng ký binary local từ thư mục repository Harnix:
-
-```powershell
-Set-Location C:\FPT\MyProject\harnix
-pnpm install --frozen-lockfile
-pnpm build
-pnpm add -g .
-
-# Xác nhận PowerShell tìm thấy executable
-Get-Command harnix
-harnix --help
-```
-
-Với pnpm 11, không dùng `pnpm link --global`; lệnh này đã bị loại bỏ. Dùng `pnpm add -g .` để đăng ký binary khai báo trong trường `bin` của `package.json`.
-
-Nếu `pnpm add -g .` báo không tìm thấy global bin directory, hoặc `Get-Command harnix` vẫn không tìm thấy lệnh, chạy:
-
-```powershell
-pnpm setup
-pnpm bin -g
-```
-
-Sau `pnpm setup`, đóng toàn bộ cửa sổ PowerShell, mở cửa sổ mới rồi chạy lại `pnpm add -g .` và `harnix --help`. `pnpm setup` tạo `PNPM_HOME` và thêm thư mục global bin vào `PATH`; terminal đang mở trước đó thường chưa nhận biến môi trường mới.
-
-Khi source thay đổi, chạy lại `pnpm build`. Nếu muốn đăng ký lại bản global một cách rõ ràng, chạy lại `pnpm add -g .`. Để gỡ bản global:
-
-```powershell
-pnpm remove -g @tamtiger/harnix
-```
-
-Sau khi đăng ký thành công, có thể chuyển sang repository cần quản lý và chạy:
-
-```powershell
-Set-Location C:\path\to\consumer-project
-harnix init
-harnix setup --codex
-harnix doctor
-```
-
-### Chạy không cần đăng ký global
-
-Các ví dụ bên dưới dùng lệnh `harnix` với giả định binary đã nằm trên `PATH` hoặc package đã được cài vào dự án. Khi chạy trực tiếp từ source chưa publish, thay `harnix` bằng `node C:\path\to\harnix\dist\cli.js`.
-
-Trong repository cần quản lý, chạy binary đã build:
-
-```powershell
-node C:\path\to\harnix\dist\cli.js --help
-```
-
-Khi package đã được publish, có thể cài project-local và gọi qua `pnpm exec`:
-
-```powershell
-pnpm add -D @tamtiger/harnix
-pnpm exec harnix --help
-```
-
-Hoặc cài global từ npm:
-
-```powershell
-pnpm add -g @tamtiger/harnix
-harnix --help
-```
-
-Hai lệnh cài từ npm ở trên sẽ trả `404` cho đến khi `@tamtiger/harnix` được publish thành công trên npm registry.
-
-## Quick start
-
-Từ thư mục gốc dự án:
-
-```powershell
-# Khởi tạo .harnix và tự động phát hiện language/technology độc lập
-harnix init
-
-# Xem task hiện tại, tiến độ verification và bước tiếp theo
-harnix status
-
-# Xem lịch sử task local; preview rồi phục hồi một unfinished task theo exact ID
-harnix tasks --limit 20
-harnix resume 20260826-120000-example-task --dry-run
-harnix resume 20260826-120000-example-task
-
-# Giải thích context thực tế và freshness của required checks mà không chạy check
-harnix context-report --platform codex
-harnix checks
-harnix audit
-
-# Xem dependency/dependent impact từ repo-map cache
-harnix repo-map --impact src/core/tasks/task.ts --depth 2
-
-# Cài integration một lần cho user profile; có thể chạy ngoài project
-harnix setup --kiro --antigravity --codex --claude --dry-run
-harnix setup --kiro --antigravity --codex --claude
-
-# Kiểm tra drift, hook, path safety và secret exposure
-harnix doctor
-```
-
-Nếu muốn chỉ định ngôn ngữ, dùng danh sách phân cách bằng dấu phẩy:
-
-```powershell
-harnix init --languages typescript --technologies vue
-```
-
-Khi bỏ qua override, Harnix đọc bounded repository evidence local và deterministic. Source-language IDs là `csharp`, `typescript`, `javascript`, `php`, `python`, `java`, `go`; technology IDs ban đầu là `dotnet`, `abp`, `nestjs`, `spring`, `react-web`, `vue`, `codeigniter`. Framework/runtime evidence không tự khẳng định source language.
-
-## Từ yêu cầu người dùng đến workflow agent
-
-Public CLI quản lý harness và diagnostics; coding agent dùng các skill Harnix để chuyển stage. Người dùng không chạy lệnh public riêng để tạo, bắt đầu hoặc hoàn tất task.
-
-1. Trong consumer repository, chạy `harnix init` một lần.
-2. Preview rồi cài đúng integration cần dùng, ví dụ `harnix setup --codex --dry-run` và `harnix setup --codex`. Setup là user-global nên không cần lặp lại cho từng project.
-3. Với Codex, mở `/hooks`, review và trust đúng Harnix hook hiện tại. Với platform khác, đọc readiness/warnings từ setup và `harnix doctor`; file tồn tại không tự chứng minh activation hoặc precedence.
-4. Mở Kiro, Antigravity hoặc Codex tại initialized repository. Nếu yêu cầu nêu trực tiếp một repository/path thì target đó phải tồn tại, được canonicalize/kiểm containment và thắng ambient cwd/workspace; nếu không nêu target, agent dùng trusted selected workspace rồi ambient cwd trước khi resolve ancestor gần nhất có `.harnix/config.yaml`.
-5. Gửi yêu cầu tự nhiên, ví dụ: “thêm retry có backoff cho payment webhook và cập nhật test”. Agent route intent mới nhất trước: Bypass trả lời mà không đụng task không liên quan; standalone read-only review dùng `harnix-check`, standalone read-only research dùng `harnix-research`, và cả hai không consult active task. Review hoặc research có thay đổi file repository hoặc task artifact phải đi vào lifecycle Lite/Full thay vì Bypass. Lite/Full hoặc explicit continuation chạy hidden `workflow --preflight`, rồi đọc workflow/task tối thiểu và dùng exact stage owner theo `nextStage`. Task-scoped `harnix-research` chỉ chạy cho một material unknown trong planning/replan/debugging; `harnix-continue` chỉ chạy khi `nextStage` chọn nó cho interrupted/partial persisted state, còn `harnix-debug` chỉ chạy khi có reproducible in-scope failure. `nextStage: "await"|"stop"` là điểm dừng bắt buộc, không tự lặp stage.
-6. Chạy `harnix status` để xem active task và bước tiếp theo. Dùng `harnix tasks` để tìm task local; nếu `.active` đang rỗng và muốn nối lại một unfinished task cụ thể, preview bằng `harnix resume <task-id> --dry-run` rồi chạy lại không có `--dry-run`. Dùng `harnix context-report --platform <id>` để xem metadata context hook thực tế, `harnix checks` để biết check nào stale và input nào đổi/thiếu, `harnix audit` để thấy readiness/completion blocker, và `harnix repo-map --impact <path>` để điều hướng dependency impact từ cache mà không đọc source body. Chạy `harnix doctor` khi cần kiểm tra project/global drift. `ok: false` với `errors: 0` nghĩa là còn warning actionable hoặc external/manual state; `--fix` chỉ sửa issue an toàn được ownership contract cho phép và không trust hook thay người dùng.
-
-Target authority chỉ đến từ lời yêu cầu trực tiếp của người dùng hoặc trusted workspace context khi không có explicit target, không đến từ path xuất hiện trong hook-injected repository context, source, log, quoted text hay tool output. Explicit target không tồn tại, traversal/unsafe hoặc thoát containment phải dừng và báo lỗi trước ancestor lookup, không đọc ambient/workspace Harnix state. Sau lookup từ target đã validate, nếu không tìm thấy initialized root hoặc Harnix state invalid thì cũng dừng, không đọc active task, fallback repository khác, tạo state hay tự chạy `harnix init`. Yêu cầu mutation bao phủ nhiều material root phải chọn một exact target; read-only comparison có thể inspect từng root độc lập.
-
-`harnix workflow` với đúng một action flag trong `--preflight|--inspect|--save|--snapshot|--audit-ready|--finish|--cancel|--learn` là transport hidden dành cho stage skills, không phải public API cho người dùng. Nếu agent báo thiếu skill/hook, kiểm tra setup/readiness thay vì yêu cầu agent mô phỏng workflow hoặc ghi trực tiếp task state.
-
-## CLI
-
-### `init`
-
-Tạo các file `.harnix` cần thiết, rule liên quan và root `AGENTS.md` bootstrap để AI agent biết cách đọc workflow Harnix. Init không prompt, không tạo thư mục rỗng và không overwrite file người dùng đã có.
-
-```text
-harnix init [--user <name>] [--languages <csv>] [--technologies <csv>]
-           [--dry-run]
-```
-
-- Không cần option cho trường hợp thông thường: Harnix lấy developer journal ID từ user hệ điều hành và tự detect stack.
-- `--user`: override developer journal ID; chỉ cần khi muốn namespace khác hoặc CI cần giá trị cố định.
-- `--languages`: override source-language detection bằng danh sách ID.
-- `--technologies`: override technology detection bằng danh sách ID.
-- `--dry-run`: kiểm tra kế hoạch mà không ghi file.
-
-Output của mọi public command luôn là một JSON document. Nếu public command thất bại trước khi có result riêng, stdout nhận `PublicCliErrorV1`, ví dụ `{ "generator": "harnix", "schemaVersion": 1, "ok": false, "error": { "exitCode": 2, "message": "..." } }`; `exitCode` chỉ có thể là `1` hoặc `2`. Cùng message đã redaction được ghi vào stderr, không có stack trace hoặc machine path. Hai hidden protocol `context` và `workflow` giữ output contract riêng và không emit envelope này. Với `init`, document gồm `status`, developer, languages/technologies đã chọn, bounded repository-relative `detection.matches` và các mảng path `created`, `updated`, `unchanged`, `preserved`, `warnings`. Fresh init còn tạo `.harnix/cache/repo-map-v1.json`; config v1 hiện hữu không bị init rescan/migrate; dùng `update` hoặc `doctor --fix` cho migration explicit.
-
-`init` tạo và quản lý namespace `.harnix/`, đồng thời có thể tạo root `AGENTS.md` bootstrap khi path này chưa tồn tại. Nó không kiểm tra, migrate, overwrite hoặc xóa `.trellis`, `.trellis-pro` hay các skill `trellis-*` đang có trong repository. `setup` là user-global nên không cần chạy lại theo từng project; trước khi kích hoạt, global skills/hook phải resolve project Harnix initialized gần nhất từ cwd hoặc workspace roots (kể cả ancestor), rồi mới dùng `.harnix/config.yaml` của project đó.
-
-### `setup`
-
-Materialize tích hợp user-global cho platform được chọn. Lệnh chạy được ở mọi thư mục, không resolve project root, không đọc `.harnix/config.yaml` và yêu cầu ít nhất một platform flag:
-
-```text
-harnix setup --kiro|--antigravity|--codex|--claude [--dry-run]
-```
-
-Có thể chọn nhiều flag trong một lần chạy. Mỗi invocation chỉ resolve/validate user root của platform đã chọn; ví dụ `CODEX_HOME` lỗi không làm `harnix setup --kiro` thất bại. `--dry-run` trả exact logical targets và planned state mà không ghi file. Kết quả trả status per platform/file: created, updated, unchanged, preserved, warnings và readiness. Readiness khác `installed` hoặc warnings không rỗng vẫn trả đúng một result JSON, đồng thời ghi warning đã redaction vào stderr và exit `1`; clean `installed` exit `0`. CLI tự xác minh file state, launcher và trust requirement đã biết; nó không tự chạy platform-version probe hoặc suy diễn activation/precedence từ file tồn tại. Các status `active`, `shadowed` và `unsupported-version` chỉ hợp lệ khi lifecycle boundary nhận được bằng chứng external authoritative; không có bằng chứng đó, Antigravity được báo `precedence-unknown`, Kiro và Claude Code là `installed`/`binary-unavailable`, và Codex là `installed-pending-trust`.
-
-Setup dùng manifest sidecar độc lập cho từng platform root, chỉ update fragment Harnix chưa bị sửa, preserve collision/unrelated content và không copy runtime. Nếu launcher `harnix` không resolve được trong environment hook, files vẫn có thể được cài nhưng result là `binary-unavailable`, không phải ready.
-
-### `update`
-
-Đồng bộ managed files theo config hiện tại:
-
-```text
-harnix update
-harnix update --restore
-harnix update --global
-harnix update --global --restore
-harnix update --global --kiro --codex
-harnix update --global --kiro --codex --dry-run
-```
-
-`update` không flag đồng bộ project-managed templates như `.harnix/workflow.md`, seed specs và root `AGENTS.md` bootstrap khi Harnix đang sở hữu path đó. `update --global` reconcile integration user-global; nếu không chỉ định platform, chỉ dùng platform có global manifest hợp lệ. Mặc định, file managed đã bị người dùng xóa sẽ được báo cáo nhưng không tự khôi phục. Dùng `--restore` khi muốn khôi phục rõ ràng. File obsolete chưa bị sửa sẽ được xóa; file obsolete đã sửa được giữ lại. File managed đã được người dùng sửa được preserve; task, research, journal và file không thuộc Harnix không bị chạm vào.
-
-### `status`
-
-Đọc project initialized gần nhất và trả một projection nhỏ, read-only của active workflow:
-
-```text
-harnix status
-```
-
-Khi có task, JSON v1 chỉ gồm `id`, `mode`, `status`, `checkpoint`, aggregate acceptance/required-check progress, context state/counts, một `nextAction` và bounded `attention`. TaskRecord v1 giữ age-based freshness một giờ. TaskRecord v2 không hết hạn chỉ vì thời gian trôi qua: required pass chỉ được tính `passed` khi immutable verification sidecar và input digest hiện tại cùng khớp; evidence có timestamp tương lai vẫn invalid. Output không echo task title/goal, criterion/check/blocker prose, command, prompt, secret hoặc absolute path. Khi không có active task, command vẫn exit `0` với `activeTask: null` và `nextAction.code: "no-active-task"`. Command không có `--json`, không ghi file và không gọi network.
-
-### `tasks`
-
-Liệt kê bounded task history local mà không đọc artifact, journal hoặc prompt body:
-
-```text
-harnix tasks [--limit <1..100>] [--status <TaskStatus>]
-```
-
-Default limit là 20. Harnix scan tối đa 1.000 safe task records, validate từng record độc lập, bỏ qua record malformed nhưng báo `status: "partial"`, và pin active task hợp lệ trước các kết quả còn lại. Filter status áp dụng trước limit; mỗi item chỉ có `id`, `mode`, `status`, `checkpoint`, `active`, `updatedAt`. Command không đổi active pointer, không ghi file và không gọi network.
-
-### `resume`
-
-Phục hồi active pointer tới đúng một unfinished TaskRecord đã biết ID:
-
-```text
-harnix resume <task-id> [--dry-run]
-```
-
-Candidate phải có canonical ID, record tối đa 1 MiB, khớp directory, qua exact-schema validation và chưa `completed|cancelled`. Pointer absent/empty cho phép preview `would-resume` hoặc atomic write thành `resumed`; pointer đã trỏ cùng task trả `already-active` không ghi lại. Pointer malformed/dangling/terminal hoặc đang trỏ task khác đều fail closed, không bị overwrite. Lệnh chỉ sửa `.harnix/tasks/.active`: không chuyển stage, sửa TaskRecord/evidence, chạy workflow, phục hồi transcript/model session/Git state hay gọi network.
-
-### `context-report`
-
-Giải thích metadata context mà hidden hook thực sự sẽ chọn cho một platform:
-
-```text
-harnix skill [name]
-harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]
-```
-
-Default limit là 20. Report dùng chung effective-context builder với hidden `harnix context`: Codex có cap 2.500 ký tự, Kiro/Antigravity dùng `min(config.context.maxCharacters, 8000)`, tối đa 64 candidate entries. Output gồm budget, selected/omitted relative paths, trusted categorical reason codes và bounded drift/selection changes; khi chưa có persisted manifest, candidate được dựng từ task `relevantPaths` cùng applicable guides. Report không trả file content, raw reason, state payload, hash, task prose, secret hoặc absolute path; không ghi file, gọi network hay làm đổi hook payload.
-
-### `checks`
-
-Giải thích trạng thái freshness của từng required check mà không tự chạy validation:
-
-```text
-harnix checks [--limit <1..50>]
-```
-
-Default limit là 20. Mỗi item chỉ có check ID, state `passed|failed|stale|pending`, trusted reason codes và tối đa 20 relative input paths `changed|missing`. TaskRecord v1 giữ age semantics. TaskRecord v2 luôn dùng top-level sidecar schema v1 và có thể giữ historical nested snapshot v1 raw-hash hoặc tạo nested snapshot v2 mới với immutable `@task-contract`, raw source entries và semantic `planning-contract-v1` cho `prd.md`/`plan.md`; TaskRecord version—not nested snapshot version—chọn TTL, nên v2 không có wall-clock expiry. Checklist state, bounded execution note và structural whitespace không làm stale, còn nội dung contract thì có. Nếu input glob match exact active `.harnix/tasks/<active-id>/task.json`, raw file entry đó được bỏ vì `@task-contract` đã bind completion-relevant fields; historical/other task records vẫn raw-hash. Output không chứa description/command, evidence prose/time/hash, criterion/task prose, secret hoặc absolute path. Lệnh read-only, no-network và không biến report thành verification evidence.
-
-The active task's exact workflow-owned `verification-inputs.json` is likewise excluded from raw matches so a broad glob cannot make the evidence sidecar hash itself. This exception is narrow; matching records and sidecars belonging to historical/other tasks remain raw-hashed.
-
-### `audit`
-
-Hiển thị các gate readiness/completion của active task mà không tự chạy hoặc sửa chúng:
-
-```text
-harnix audit
-```
-
-Full task dùng cùng deterministic ready-trace với workflow; Lite trả readiness `not-applicable`. Completion tách criterion `met|waived|pending` và required check `passed|failed|stale|pending`, kèm stable sorted IDs để biết chính xác blocker. Không có active task là success với `activeTask: null`. Output không chứa title/goal, prose, command, secret hoặc absolute path; audit pass chỉ là visibility, không phải verification evidence và không chuyển workflow.
-
-### `doctor`
-
-Doctor JSON v2 kiểm tra project và global integrations riêng: config/manifest, ownership, missing/modified/obsolete files, injection marker, hook schema, Codex trust drift, skill frontmatter, unsafe path, secret và permission drift. Doctor vẫn hoạt động ngoài Harnix project để báo global integrations:
-
-```text
-harnix doctor
-harnix doctor --fix
-harnix doctor --fix --global
-```
-
-`--fix` không có `--global` chỉ sửa project issue an toàn. `--fix --global` chỉ reconcile entry global missing/unchanged; không trust Codex hook, enable permission/feature hay sửa user fragment. `doctor` không tự probe version nền tảng hoặc suy activation/precedence từ file; `active`, `shadowed` và `unsupported-version` chỉ được report khi có bằng chứng external authoritative. Exit code:
-
-- `0`: global state đọc an toàn, không warning/error; `project:not-initialized` ngoài project chỉ là info.
-- `1`: warning actionable, gồm pending trust, binary unavailable, shadowed/precedence unknown, unsupported version hoặc drift.
-- `2`: usage không hợp lệ, project/global manifest/schema corrupt/future hoặc path không an toàn.
-
-### `mem`
-
-Tìm journal memory theo query, developer và giới hạn kết quả:
-
-```text
-harnix mem "database migration"
-harnix mem --user tam --limit 10
-harnix mem --query "timeout"
-harnix mem --learning --limit 20
-```
-
-`--learning` filter trước query/limit và chỉ trả các journal entry kind `learning`; không có flag thì shape `{ entries, malformed }` và behavior tìm kiếm hiện tại được giữ nguyên. Journal malformed được đếm và bỏ qua; memory search không tự promote learning thành rule.
-
-### `repo-map`
-
-Tìm tối đa 20 candidate files từ structural cache do `init` tạo; output luôn là JSON:
-
-```text
-harnix repo-map --query <text> [--limit <count>]
-harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]
-```
-
-Ví dụ:
-
-```powershell
-harnix repo-map --query "payment webhook retry" --limit 10
-harnix repo-map --impact src/payments/webhook.ts --depth 2 --limit 10
-```
-
-`--query` trả candidate files được lexical/dependency rank. `--impact` nhận exact normalized repository-relative POSIX path, trả direct dependencies và reverse dependents tới depth 1–3, sort theo distance rồi path, và áp dụng limit độc lập cho hai chiều. Hai action mutually exclusive. Cả hai chỉ đọc cache `.harnix/cache/repo-map-v1.json`, không scan source, đọc snippet, suy diễn dynamic call hay tự rebuild. Dùng `harnix doctor --fix` nếu cache missing, stale hoặc invalid.
-
-### `uninstall`
-
-Gỡ project data hoặc một global integration theo scope explicit:
-
-```text
-harnix uninstall --purge
-harnix uninstall --purge --yes
-harnix uninstall --global --kiro --yes
-harnix uninstall --legacy-project-surfaces
-harnix uninstall --legacy-project-surfaces --yes
-```
-
-`--purge --yes` chỉ xóa `.harnix` project; không suy diễn thành gỡ global setup. `--global` chỉ gỡ platform đã chọn, preview trước và yêu cầu `--yes`. `--legacy-project-surfaces` chỉ xóa path legacy **standalone** khi manifest project v1 chứng minh đúng source/path Harnix sở hữu và content vẫn unchanged. File root/shared — gồm `AGENTS.md`, `GEMINI.md`, `.codex` config/hook và file người dùng bất kỳ — chỉ được inventory, không là deletion target; modified/untracked content luôn được preserve. Hai flag này mutually exclusive với `--purge`.
-
-### `upgrade`
-
-Upgrade mặc định chỉ hiển thị kế hoạch, không chạy network/install:
-
-```text
-harnix upgrade
-harnix upgrade --apply
-```
-
-Result luôn có `{ installed, available, command, applied }`. `available` là version string khi host inject một lookup đã được ủy quyền, còn CLI offline mặc định trả `null` thay vì bỏ field hoặc tự gọi registry. Chỉ dùng `--apply` khi muốn chạy npm upgrade explicit; process vẫn dùng executable và argument array cố định.
-
-## Skill cho mọi agent
-
-```bash
-harnix skill                    # catalog bảy stage owner
-harnix skill harnix-implement   # nội dung canonical của một skill
-```
-
-`harnix init` không ghi skill vào repository: canonical asset nằm trong package đã cài. Bất kỳ agent nào — kể cả trên tool Harnix không hề cấu hình — đều chạy `harnix skill <name>` và đọc field `content` để có đúng byte mà platform setup cài ra. Nhờ vậy không có bản sao stale trong repo và nội dung luôn khớp version đang chạy. Guidance kỹ thuật chọn lúc init nằm ở `.harnix/spec/guides/`.
-
-## Review một task
-
-Mở trực tiếp `.harnix/tasks/<id>/review.md` — không cần chạy command nào. File này tự động được ghi lại mỗi khi task được persist (qua `--save`, `--transition`, `--evidence`, `--finish`, hoặc `--cancel`), luôn phản ánh trạng thái mới nhất: title, status/checkpoint, goal, non-goals, acceptance criteria, `decisions`/`residualRisks` (nếu có ghi), blocker/cancellation (nếu có), và evidence. Đây là trang derived-only để đọc, không phải nguồn sự thật — không chỉnh sửa tay, và nội dung của nó không nằm trong bất kỳ input hash nào nên ghi thêm một quyết định hay rủi ro sau khi check đã pass không làm evidence đó bị coi là stale.
-
-## Tích hợp platform
-
-| Platform | Identity/flag | User-global surface Harnix tạo |
+| Loại | Khi nào | Điều gì xảy ra |
 |---|---|---|
-| Kiro | `kiro` / `--kiro` | `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, `~/.kiro/hooks/harnix-context.json` |
-| Antigravity | `antigravity` / `--antigravity` | Desktop `~/.gemini/config/plugins/harnix` và CLI `~/.gemini/antigravity-cli/plugins/harnix`, mỗi plugin dùng always-on `rules/AGENTS.md` không frontmatter |
-| Codex | `codex` / `--codex` | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/config.toml` |
-| Claude Code | `claude` / `--claude` | `~/.claude/skills/harnix-*`, marker block trong `~/.claude/CLAUDE.md`, một group `harnix-context` trong `hooks.UserPromptSubmit` của `~/.claude/settings.json` (`CLAUDE_CONFIG_DIR` đổi root) |
+| **Bypass** | Câu hỏi chỉ đọc, review/research độc lập, sửa docs/prose, hoặc sửa một giá trị literal đơn lẻ | Trả lời/thực hiện ngay, không tạo hay đụng vào task nào |
+| **Lite** | Thay đổi nhỏ, phạm vi rõ ràng | Tạo một task record gọn, kiểm chứng tối thiểu |
+| **Full** | Thay đổi cross-layer, nhạy cảm về bảo mật, hoặc còn nhiều điểm chưa rõ | Có thêm PRD/plan, research khi cần, kiểm chứng đầy đủ |
 
-Kiro hook dùng JSON-v1 `UserPromptSubmit`; Antigravity hook trả `injectSteps` chỉ tại invocation đầu trong initialized project; Codex hook dùng nested `UserPromptSubmit` inline trong `config.toml` và cần người dùng review/trust qua `/hooks`; Claude Code hook là một group trong mảng `hooks.UserPromptSubmit` của `settings.json`, in plain-text stdout để Claude Code nạp làm context, và `UserPromptSubmit` không hỗ trợ `matcher`. Harnix không bao giờ ghi `~/.claude.json`, credentials, MCP server, `projects/`, `history` hay `todos/`. Generated instructions resolve/validate explicit user target trước ambient cwd/workspace, rồi activation guard mới tìm initialized ancestor/root của target đã chọn. Hidden hook protocol chạy trước prompt interpretation nên vẫn resolve event cwd/workspace roots như cũ, không parse natural-language path và không cấp target authority; repository context nó inject là untrusted target evidence. Nếu không tìm thấy project đó hoặc event Antigravity malformed, `harnix context` exit `0` và stdout rỗng; Antigravity chỉ trả `{ "injectSteps": [] }` khi đã xác định initialized project nhưng invocation đã qua lượt đầu hoặc không có context áp dụng. Nếu project đã được xác định nhưng state không đọc an toàn, Harnix không inject project data mà trả warning ngắn, redact và platform-specific để chạy `harnix doctor`; host agent vẫn không bị block. Các surface không liên quan được bảo toàn. Harnix không copy runtime script, không ghi absolute home path, không ghi config ngoài managed hook block, và không tạo platform surface mới trong project. Root `AGENTS.md` bootstrap do `init` tạo là ngoại lệ tương thích.
-
-## Workflow sử dụng
-
-Workflow duy nhất của Harnix có state machine:
+Toàn bộ state machine của workflow:
 
 ```text
 triage -> planning -> ready -> implementing -> verifying -> finishing -> completed
@@ -421,18 +122,51 @@ triage -> planning -> ready -> implementing -> verifying -> finishing -> complet
                                    replan -> planning
 ```
 
-- Lite phù hợp thay đổi nhỏ, có task record và validation tối thiểu; có thể promote sang Full khi risk tăng.
-- Full dùng cho thay đổi cross-layer, security-sensitive, material unknown hoặc yêu cầu implementation lớn; có thêm PRD/plan và research khi cần. Một task đã là Full không được downgrade về Lite.
-- Câu hỏi chỉ đọc có thể bypass việc tạo task.
-- Verification reuse current passing evidence khi digest khớp, chỉ rerun check affected và dừng automatic work nếu rerun sau đúng một remediation round vẫn fail; `skipped` hoặc pass có timestamp invalid/tương lai không reset breaker, chỉ current valid pass mới reset.
-- Release/version preparation do contract của repository yêu cầu phải hoàn tất trong Implementing trước khi vào Verifying, với tối đa một version bump cho task; resume chỉ amend cùng changelog entry và regenerate managed output khi cần.
-- Finish yêu cầu fresh verification và mọi acceptance criterion đạt hoặc được waiver hợp lệ, nhưng product-read-only: chỉ journal/workflow/learning/pointer state được phép đổi trước khi clear active task.
+Chi tiết đầy đủ (transition, gate, artifact contract) nằm ở [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) — README này chỉ cần đủ để bạn hiểu luồng tổng quát.
 
-Xem [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) để biết transition, gate và artifact contract chi tiết.
+## Các lệnh CLI thường dùng
 
-Bảy workflow skill được cài global nhưng source reviewable nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi skill công bố `metadata.version` và contract test buộc version này đồng bộ với package release (xem version ở đầu trang). Harnix nhúng trực tiếp các file này vào package và cài cùng nội dung cho Kiro, Antigravity và Codex; skill không được sinh từ các string rút gọn riêng theo platform.
+Mọi output của public command đều là JSON. Dưới đây là các lệnh bạn sẽ dùng thường xuyên nhất; danh sách đầy đủ options và output shape nằm ở [Yêu cầu sản phẩm](docs/HARNIX_PRD.md#12-lifecycle-commands).
 
-## Dữ liệu dự án
+| Lệnh | Dùng để làm gì |
+|---|---|
+| `harnix init [--languages <csv>] [--technologies <csv>] [--dry-run]` | Khởi tạo `.harnix/` trong project, tự phát hiện ngôn ngữ/công nghệ |
+| `harnix setup --kiro\|--antigravity\|--codex\|--claude [--dry-run]` | Cài tích hợp user-global cho platform agent (chạy 1 lần, dùng cho mọi project) |
+| `harnix status` | Xem task đang active, tiến độ và bước tiếp theo |
+| `harnix tasks [--limit <n>] [--status <status>]` | Liệt kê lịch sử task local |
+| `harnix resume <task-id> [--dry-run]` | Tiếp tục một task chưa hoàn thành theo đúng ID |
+| `harnix context-report --platform <id>` | Xem context nào thực sự được đưa vào agent |
+| `harnix checks` | Xem check nào đã stale, input nào đổi/thiếu |
+| `harnix audit` | Xem readiness/completion blocker của task hiện tại |
+| `harnix repo-map --query <text>` / `--impact <path>` | Tìm file liên quan hoặc dependency impact từ cache |
+| `harnix doctor [--fix] [--global]` | Kiểm tra drift, hook, path safety, secret exposure; tự sửa issue an toàn |
+| `harnix update [--global] [--restore]` | Đồng bộ lại managed files theo config hiện tại |
+| `harnix uninstall --purge` / `--global --kiro --yes` | Gỡ dữ liệu project hoặc một tích hợp global |
+| `harnix mem "<query>"` | Tìm journal memory theo từ khóa |
+| `harnix skill [name]` | Xem catalog skill hoặc nội dung một skill cụ thể |
+
+Một vài quy ước chung đáng nhớ:
+
+- Nếu public command lỗi trước khi có kết quả riêng, bạn sẽ nhận `PublicCliErrorV1` trên stdout với `exitCode` là `1` (warning) hoặc `2` (lỗi sử dụng/schema).
+- `harnix doctor --fix` chỉ sửa issue được xác định là an toàn; nó không tự trust hook hay bật permission thay bạn.
+- `harnix workflow` (với các cờ `--preflight|--inspect|--save|...`) là transport nội bộ dành cho skill của agent, **không phải** lệnh bạn cần gõ tay.
+
+## Xem lại một task
+
+Mở trực tiếp `.harnix/tasks/<id>/review.md` — không cần chạy command nào. File này tự động cập nhật mỗi khi task được lưu, luôn phản ánh trạng thái mới nhất: title, status, goal, acceptance criteria, quyết định, rủi ro còn lại, blocker (nếu có) và evidence. Đây là trang chỉ để đọc — đừng chỉnh sửa tay.
+
+## Tích hợp platform
+
+| Platform | Identity / flag | Nơi Harnix tạo file (user-global) |
+|---|---|---|
+| Kiro | `kiro` / `--kiro` | `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, `~/.kiro/hooks/harnix-context.json` |
+| Antigravity | `antigravity` / `--antigravity` (executable: `agy`) | `~/.gemini/config/plugins/harnix` (Desktop) và `~/.gemini/antigravity-cli/plugins/harnix` (CLI) |
+| Codex | `codex` / `--codex` | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/config.toml` |
+| Claude Code | `claude` / `--claude` | `~/.claude/skills/harnix-*`, marker block trong `~/.claude/CLAUDE.md`, group `harnix-context` trong `hooks.UserPromptSubmit` của `~/.claude/settings.json` |
+
+`harnix setup` chạy được ở bất kỳ thư mục nào, chỉ cần chọn platform flag, không cần đứng trong project. Với Codex, sau khi setup bạn cần mở `/hooks` và tự trust hook. Harnix không bao giờ ghi vào `~/.claude.json`, credentials, MCP server, hay các file không thuộc phạm vi quản lý của nó. Chi tiết đầy đủ về hook protocol nằm ở [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) và [Yêu cầu sản phẩm](docs/HARNIX_PRD.md#9-user-global-setup-and-platform-requirements).
+
+## Dữ liệu dự án (.harnix/)
 
 ```text
 .harnix/
@@ -444,7 +178,7 @@ Bảy workflow skill được cài global nhưng source reviewable nằm tại `
   workspace/<developer>/journal/ # tạo lazy khi ghi journal đầu tiên
 ```
 
-Seed specs và `.harnix/workflow.md` được Harnix quản lý cho đến khi người dùng sửa; sau đó update phải preserve nội dung. Canonical managed source của workflow có `sourceId: "workflow"`; manifest legacy dùng alias `harnix-workflow` chỉ được normalize khi content/ownership vẫn khớp, không sinh entry trùng. Task, research và journal luôn là dữ liệu người dùng. Task mới phải là exact TaskRecord v2; unknown top-level hoặc nested field bị reject, và `.active` trỏ tới task không tồn tại là invalid state chứ không phải idle. Verification giữ top-level sidecar schema v1 để tương thích, còn nested snapshot v2 phân biệt raw hash với semantic planning-contract normalization. Hidden save validate rồi ghi artifact → sidecar → `task.json` làm commit marker, và rollback theo exact forward bytes để không overwrite thay đổi đồng thời. Harnix dùng atomic write, normalized POSIX path và containment check để hạn chế mất dữ liệu hoặc path escape qua symlink/junction. Global lock là một canonical `managed.lock` directory chứa unique owner-token record; candidate chỉ thành owner sau sole-token verification. Reclaim/release chỉ unlink exact token đã đọc rồi `rmdir` không recursive, nên delayed cleanup không xóa replacement; legacy single-file lock được preserve và fail closed.
+Seed specs và `workflow.md` được Harnix quản lý cho đến khi bạn tự sửa chúng — sau đó `update` sẽ luôn preserve nội dung bạn đã đổi. Task, research và journal luôn là dữ liệu của bạn, Harnix không tự sửa hay xoá. Chi tiết về format/schema nằm ở [Yêu cầu sản phẩm](docs/HARNIX_PRD.md#10-config-context-journal-and-learning).
 
 ## Dùng trong CI
 
@@ -455,15 +189,13 @@ harnix init --user ci
 harnix doctor
 ```
 
-Không truyền credential vào command line hoặc generated output. Harnix không tự gọi network trong runtime; chỉ `upgrade --apply` và các bước dependency/package manager explicit mới cần network.
+Không truyền credential vào command line hay output. Harnix không tự gọi network trong runtime bình thường; chỉ `upgrade --apply` và các bước dependency/package manager explicit mới cần network.
 
-## Phát triển Harnix
+## Đóng góp / phát triển Harnix
 
-Toolchain gồm Node.js `>=18`, pnpm, TypeScript, tsup, ESLint, Commander.js, Inquirer và Vitest.
+Toolchain: Node.js `>=18`, pnpm, TypeScript, tsup, ESLint, Commander.js, Inquirer, Vitest.
 
-### Đồng bộ version release
-
-Không sửa thủ công version trong `package.json` hoặc `metadata.version` của các skill. Dùng một hoặc nhiều `--summary` để tạo release entry rõ ràng trong changelog:
+Không sửa tay version trong `package.json` hay `metadata.version` của skill. Dùng script đồng bộ:
 
 ```powershell
 pnpm version:sync 1.0.6 --summary "Mô tả thay đổi release"
@@ -471,9 +203,7 @@ pnpm build
 node dist\cli.js update
 ```
 
-Lệnh chỉ nhận version `x.y.z` tăng dần, đồng bộ `package.json`, toàn bộ canonical `src/skills/harnix-*/SKILL.md`, `generatorVersion` trong self-host `.harnix/.template-hashes.json`, một current-version claim duy nhất được quản lý trong `README.md` (dòng `**Version:**` đầu trang), cộng CHANGELOG.md. Mỗi task chỉ bump một lần trước Verifying; khi resume, chạy lại cùng version để amend đúng release entry/metadata hoặc regenerate output thay vì tăng version lần nữa. `build` và `update` vẫn là bước riêng để refresh runtime cùng managed content metadata, đồng thời preserve các file Harnix đã bị người dùng sửa.
-
-Quality gate đầy đủ:
+Quality gate đầy đủ trước khi coi một thay đổi là hoàn tất:
 
 ```text
 pnpm install --frozen-lockfile
@@ -489,31 +219,15 @@ pnpm scan:release
 git diff --check
 ```
 
-`test:acceptance` đã chạy đầy đủ sáu thư mục unit, integration, migration, platform, workflow và safety; sequence trên không chạy thêm `pnpm test` trùng lặp.
+`test:acceptance` đã chạy đủ sáu suite (`test:unit`, `test:integration`, `test:migration`, `test:platform`, `test:workflow`, `test:safety`) nên không cần chạy `pnpm test` lặp lại. Mọi filesystem test dùng repository tạm và fake user home injected, không đụng vào profile/config thật.
 
-Các suite riêng lẻ:
+## Tài liệu đầy đủ
 
-```text
-pnpm test:unit
-pnpm test:integration
-pnpm test:migration
-pnpm test:platform
-pnpm test:workflow
-pnpm test:safety
-```
-
-Mọi filesystem test dùng temporary repository cô lập và disposable fake user home injected; không mutate profile/config thật hoặc gọi install/network thật ngoài boundary explicit. Tarball smoke dùng ít nhất hai root tạm độc lập: fake home cho setup và project cho init/context.
-
-Automated Phase 6 gates dùng fake homes. Revalidation 2026-08-18 chứng minh `agy` implicit instruction activation/no-op control nhưng vẫn thấy 0 plugin hook file trong print mode; Kiro/Codex fake profiles không có login và Codex pending trust. Vì vậy current runtime claim chỉ áp dụng cho surface có cold-session evidence; file presence, validator output và historical session không được tự động nâng surface khác thành active. Mọi lần revalidation tiếp theo vẫn phải dùng disposable profile hoặc explicit authorization, preview setup/uninstall targets trước mutation và không được suy capability chỉ từ file presence.
-
-## Tài liệu
-
-- [Yêu cầu sản phẩm](docs/HARNIX_PRD.md)
-- [Workflow chuẩn](docs/HARNIX_WORKFLOW.md)
+- [Yêu cầu sản phẩm](docs/HARNIX_PRD.md) — scope, CLI contract, requirement chi tiết
+- [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) — state machine, gate, artifact contract
 - [Kế hoạch triển khai](docs/IMPLEMENTATION_PLAN.md)
 - [Kế hoạch review/refactor](docs/REVIEW_REFACTOR_PLAN.md)
 - [Quyết định nghiên cứu harness](docs/HARNESS_RESEARCH.md)
-- [Registry provenance feature harness](docs/HARNESS_FEATURE_PROVENANCE.json)
 - [Ánh xạ upstream](docs/UPSTREAM_MAPPING.md)
 - [Baseline upstream cố định](docs/UPSTREAM_BASELINE.md)
 - [Hướng dẫn coding agent](AGENTS.md)
@@ -521,6 +235,6 @@ Automated Phase 6 gates dùng fake homes. Revalidation 2026-08-18 chứng minh `
 
 ## Nguồn gốc và giấy phép
 
-Harnix là implementation phái sinh có chọn lọc, được xây dựng dựa trên nghiên cứu từ mindfold-ai/Trellis, ECC và Superpowers. SHA nguồn, giấy phép, quyết định tái sử dụng và chính sách attribution được mô tả trong [UPSTREAM_BASELINE.md](docs/UPSTREAM_BASELINE.md) và [UPSTREAM_MAPPING.md](docs/UPSTREAM_MAPPING.md). Mỗi capability external-derived đang được duy trì còn có stable ID, source/ref/date/license/evidence và code/test/docs mapping trong [HARNESS_FEATURE_PROVENANCE.json](docs/HARNESS_FEATURE_PROVENANCE.json); các nguồn research clean-room bổ sung không tự tạo claim sao chép code hoặc nghĩa vụ NOTICE.
+Harnix là implementation phái sinh có chọn lọc, xây dựng dựa trên nghiên cứu từ mindfold-ai/Trellis, ECC và Superpowers. Chi tiết provenance từng capability (source, license, evidence, code/test/docs mapping) nằm ở [UPSTREAM_BASELINE.md](docs/UPSTREAM_BASELINE.md), [UPSTREAM_MAPPING.md](docs/UPSTREAM_MAPPING.md) và [HARNESS_FEATURE_PROVENANCE.json](docs/HARNESS_FEATURE_PROVENANCE.json).
 
-Package sử dụng giấy phép AGPL-3.0-or-later và giữ attribution MIT cho nội dung chuyển thể từ ECC và Superpowers. Xem [LICENSE](LICENSE) và [NOTICE](NOTICE).
+Package dùng giấy phép **AGPL-3.0-or-later** và giữ attribution MIT cho nội dung chuyển thể từ ECC và Superpowers. Xem [LICENSE](LICENSE) và [NOTICE](NOTICE).
