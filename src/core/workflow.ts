@@ -77,7 +77,18 @@ export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceA
     const latest = selectLatestEvidence(task.evidence, checkId, now);
     if (latest) latestByCheck.set(checkId, latest);
   }
-  const freshPasses = task.evidence.filter((evidence) => evidence.result === "pass" && isFresh(evidence, now, maxEvidenceAgeMs, task.schemaVersion === 1) && (!evidence.checkId || latestByCheck.get(evidence.checkId)?.id === evidence.id) && (task.schemaVersion === 1 || isInputDigest(evidence.inputDigest)));
+  const freshPasses = task.evidence.filter((evidence) => {
+    if (evidence.result !== "pass" || !isFresh(evidence, now, maxEvidenceAgeMs, task.schemaVersion === 1)) return false;
+    if (evidence.checkId !== undefined) {
+      const latest = latestByCheck.get(evidence.checkId);
+      if (task.schemaVersion === 1) {
+        if (latest?.id !== evidence.id) return false;
+      } else if (latest === undefined || latest.result !== "pass" || latest.inputDigest !== evidence.inputDigest) {
+        return false;
+      }
+    }
+    return task.schemaVersion === 1 || isInputDigest(evidence.inputDigest);
+  });
   if (required.some((check) => !freshPasses.some((evidence) => evidence.checkId === check.id))) return false;
   if (task.schemaVersion === 1) {
     return task.acceptanceCriteria.every((criterion) => criterion.status === "waived" || (criterion.status === "met" && criterion.evidenceIds.some((id) => freshPasses.some((evidence) => evidence.id === id))));

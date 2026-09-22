@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.9] - 2026-09-22
+
+### Changed
+
+- Sua loi criterionHasFreshSupport/canCompleteTask tinh sai acceptance criteria pending khi mot required check bao phu nhieu tieu chi (chi chap nhan evidence co id trung voi evidence moi nhat tuyet doi thay vi bat ky evidence nao co inputDigest con hop le); cai thien thong bao loi stale cua workflow --finish de neu evidence id/recordedAt; bo sung canh bao ve khoang ho thoi gian truoc --finish trong SKILL.md cua harnix-finish-work.
+
 ## [1.1.8] - 2026-09-17
 
 ### Changed

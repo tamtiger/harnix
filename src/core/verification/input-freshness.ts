@@ -200,7 +200,7 @@ export async function assertVerificationInputsFresh(projectRoot: string, harnixR
     const current = await computeVerificationInputSnapshot(projectRoot, task, check.id, { schemaVersion: stored.schemaVersion });
     if (current.inputDigest === stored.inputDigest) continue;
     const paths = compareVerificationInputSnapshots(stored, current).map((change) => `${change.kind}:${change.path}`);
-    throw new Error(`Verification inputs are stale for check ${check.id}${paths.length === 0 ? "" : ` (${paths.join(", ")})`}.`);
+    throw new Error(`Verification inputs are stale for check ${check.id}: evidence ${latest.id} recorded at ${latest.recordedAt} no longer matches current content${paths.length === 0 ? "" : ` (${paths.join(", ")})`}.`);
   }
 }
 

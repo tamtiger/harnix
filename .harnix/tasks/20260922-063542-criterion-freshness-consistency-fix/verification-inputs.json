@@ -1,0 +1,424 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+  "snapshots": [
+    {
+      "evidenceId": "ev-chk-criterion-fresh-support-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-criterion-fresh-support",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "2b753027c771f7cca472ec928aae9ce558fee4cd63f9b80cd722e369bd28fea3",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/tasks/task-audit.ts",
+          "sha256": "f8712136743ff58267a8afb50b19c13c714dc2296ae345dc62250de9c69c38fc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "a138e34f17022dc34aefb9d2d33486faee7fa07d21593df0f8e98319354135f9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-audit.test.ts",
+          "sha256": "16d9606bed573cb7c030e0e23a2306488230a8494983b0c482dfb74d498a57a5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "57c21e4df2673c35f6a88fbe824f982269c5d5a808522ce62a99f6fee65cc54e",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "327b5e947224add27990e1f953507e193d6bbac0c791abab96c5f3ea889d7ed0"
+    },
+    {
+      "evidenceId": "ev-chk-criterion-fresh-support-02",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-criterion-fresh-support",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "5aa4867b0b9135c44862c0b084139267159b04b0dbec9e3fc6ee31bf3d7f79f5",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/tasks/task-audit.ts",
+          "sha256": "f8712136743ff58267a8afb50b19c13c714dc2296ae345dc62250de9c69c38fc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "a138e34f17022dc34aefb9d2d33486faee7fa07d21593df0f8e98319354135f9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-audit.test.ts",
+          "sha256": "16d9606bed573cb7c030e0e23a2306488230a8494983b0c482dfb74d498a57a5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "57c21e4df2673c35f6a88fbe824f982269c5d5a808522ce62a99f6fee65cc54e",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "c25b6944a65b1e91ac77acf4adebda087daaf162c4e6a1bc0798ee994ee04a2b"
+    },
+    {
+      "evidenceId": "ev-chk-criterion-fresh-support-03",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-criterion-fresh-support",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "e3c1f539d4c80216e4b93b4f5c85166295a2705be11635d9d812be872bf06f76",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/tasks/task-audit.ts",
+          "sha256": "f8712136743ff58267a8afb50b19c13c714dc2296ae345dc62250de9c69c38fc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "a138e34f17022dc34aefb9d2d33486faee7fa07d21593df0f8e98319354135f9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/task-audit.test.ts",
+          "sha256": "16d9606bed573cb7c030e0e23a2306488230a8494983b0c482dfb74d498a57a5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "57c21e4df2673c35f6a88fbe824f982269c5d5a808522ce62a99f6fee65cc54e",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "8efa18fffd883c583942f5fd5c14ae6d95068699899696f9ee5f8c2735529579"
+    },
+    {
+      "evidenceId": "ev-chk-finish-stale-message-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-finish-stale-message",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "2b753027c771f7cca472ec928aae9ce558fee4cd63f9b80cd722e369bd28fea3",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "e87e32ad3cb8b19f7abf3ad44f26475fa162499c8f254f0e537fb0b06f7cd85c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "a3f6c06a9265d04396788feed4dd7582f425baccaf8ce4fe49b5045ef4dea525",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "297af311c8fc9926339e07b7eb0e2989f8f2377daf6301e4ced122dbefec0425",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "4d7d02383cbdc01db36ce63b8874b4ad6c97b81c10647f82bbbb004f9da40468"
+    },
+    {
+      "evidenceId": "ev-chk-finish-stale-message-02",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-finish-stale-message",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "5aa4867b0b9135c44862c0b084139267159b04b0dbec9e3fc6ee31bf3d7f79f5",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "e87e32ad3cb8b19f7abf3ad44f26475fa162499c8f254f0e537fb0b06f7cd85c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "a3f6c06a9265d04396788feed4dd7582f425baccaf8ce4fe49b5045ef4dea525",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "297af311c8fc9926339e07b7eb0e2989f8f2377daf6301e4ced122dbefec0425",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "88c9ad4be2c0b57cd8bbabe87d0a60c17f5f2bb94a8b0eee4b05b46b90c003d8"
+    },
+    {
+      "evidenceId": "ev-chk-finish-stale-message-03",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-finish-stale-message",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "e3c1f539d4c80216e4b93b4f5c85166295a2705be11635d9d812be872bf06f76",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "e87e32ad3cb8b19f7abf3ad44f26475fa162499c8f254f0e537fb0b06f7cd85c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/verification-inputs.test.ts",
+          "sha256": "a3f6c06a9265d04396788feed4dd7582f425baccaf8ce4fe49b5045ef4dea525",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "297af311c8fc9926339e07b7eb0e2989f8f2377daf6301e4ced122dbefec0425",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "114dc326714dbd83d0d3864e7b97bc879322583c60c37bd7428cee59ca0b9627"
+    },
+    {
+      "evidenceId": "ev-chk-finish-work-skill-docs-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-finish-work-skill-docs",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "2b753027c771f7cca472ec928aae9ce558fee4cd63f9b80cd722e369bd28fea3",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "0c9b2a56f6d42df94a58c421c7ee43c2c3ab7b0e7e58b58299c4952ed91a158a",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "0ab18fa719f74d2ac74210a0603802871689f0324c82cc68bab43b53a94befaf"
+    },
+    {
+      "evidenceId": "ev-chk-finish-work-skill-docs-02",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-finish-work-skill-docs",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "5aa4867b0b9135c44862c0b084139267159b04b0dbec9e3fc6ee31bf3d7f79f5",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "0c9b2a56f6d42df94a58c421c7ee43c2c3ab7b0e7e58b58299c4952ed91a158a",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "3bbacf2e77c05572e101d3fd7d23e354dc4332f0e69a69f239c928ac8a1398a6"
+    },
+    {
+      "evidenceId": "ev-chk-finish-work-skill-docs-03",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-finish-work-skill-docs",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "e3c1f539d4c80216e4b93b4f5c85166295a2705be11635d9d812be872bf06f76",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "0c9b2a56f6d42df94a58c421c7ee43c2c3ab7b0e7e58b58299c4952ed91a158a",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "e61ebea5b67015e743b6818c04ac77e6e4e99913aaa1693edac9e0e3ef4de84b"
+    },
+    {
+      "evidenceId": "ev-chk-finish-work-skill-docs-04",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-finish-work-skill-docs",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "e3c1f539d4c80216e4b93b4f5c85166295a2705be11635d9d812be872bf06f76",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "752ff816b616ac43851063e4eb8e0bcbc29b18999e4309b4f1b317922e6cfe76",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "8378932f75281b64f07c99047fdd4c142ccc3562c47e0aae98d33c455dbc4eed"
+    },
+    {
+      "evidenceId": "ev-chk-full-suite-02",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-full-suite",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "5aa4867b0b9135c44862c0b084139267159b04b0dbec9e3fc6ee31bf3d7f79f5",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/tasks/task-audit.ts",
+          "sha256": "f8712136743ff58267a8afb50b19c13c714dc2296ae345dc62250de9c69c38fc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "e87e32ad3cb8b19f7abf3ad44f26475fa162499c8f254f0e537fb0b06f7cd85c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "a138e34f17022dc34aefb9d2d33486faee7fa07d21593df0f8e98319354135f9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "0c9b2a56f6d42df94a58c421c7ee43c2c3ab7b0e7e58b58299c4952ed91a158a",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "699563a30314b2d10861067d4f3ea90957fe09806cbb3aa26a2cfc2830b44e56"
+    },
+    {
+      "evidenceId": "ev-chk-full-suite-04",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-063542-criterion-freshness-consistency-fix",
+      "checkId": "chk-full-suite",
+      "taskContractHash": "999db1bcf36f0084ed7698277f89399a1e13e868751dd89cccc0332dd17d876f",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/plan.md",
+          "sha256": "e3c1f539d4c80216e4b93b4f5c85166295a2705be11635d9d812be872bf06f76",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-063542-criterion-freshness-consistency-fix/prd.md",
+          "sha256": "e67183ecaf5135f883805b67589faa300ae9f88e60afed0da970f987a2a9fee1",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/tasks/task-audit.ts",
+          "sha256": "f8712136743ff58267a8afb50b19c13c714dc2296ae345dc62250de9c69c38fc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "e87e32ad3cb8b19f7abf3ad44f26475fa162499c8f254f0e537fb0b06f7cd85c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/workflow.ts",
+          "sha256": "a138e34f17022dc34aefb9d2d33486faee7fa07d21593df0f8e98319354135f9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "752ff816b616ac43851063e4eb8e0bcbc29b18999e4309b4f1b317922e6cfe76",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "d4fb01a723f84a623f8d167ac1f0fc8608dfaacfbaf6be1dc4e897a0a466f4fa"
+    }
+  ]
+}

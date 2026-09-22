@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `1.1.8`
+**Version:** `1.1.9`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex hoặc Claude Code), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -13,6 +13,7 @@ Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 - [Cài đặt](#cài-đặt)
 - [Bắt đầu nhanh](#bắt-đầu-nhanh)
 - [Harnix hoạt động như thế nào](#harnix-hoạt-động-như-thế-nào)
+- [Từ yêu cầu người dùng đến workflow agent](#từ-yêu-cầu-người-dùng-đến-workflow-agent)
 - [Các lệnh CLI thường dùng](#các-lệnh-cli-thường-dùng)
 - [Xem lại một task](#xem-lại-một-task)
 - [Tích hợp platform](#tích-hợp-platform)
@@ -123,6 +124,17 @@ triage -> planning -> ready -> implementing -> verifying -> finishing -> complet
 ```
 
 Chi tiết đầy đủ (transition, gate, artifact contract) nằm ở [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) — README này chỉ cần đủ để bạn hiểu luồng tổng quát.
+
+## Từ yêu cầu người dùng đến workflow agent
+
+**Gửi yêu cầu tự nhiên** cho agent (Kiro, Antigravity, Codex, Claude Code) ngay trong project đã `harnix init` — không cần gõ lệnh `harnix` nào trước. Agent tự phân loại yêu cầu đó trước khi chạm vào task đang active:
+
+- Một câu hỏi chỉ đọc, một review độc lập, hoặc một **standalone read-only research** không tạo hay đụng vào task nào — agent trả lời/thực hiện ngay rồi dừng lại (Bypass).
+- Ngược lại, bất kỳ yêu cầu nào **thay đổi file repository hoặc task artifact phải đi vào lifecycle Lite/Full** — tạo hoặc tiếp tục một task record, đi qua đúng các stage `planning -> ready -> implementing -> verifying -> finishing -> completed`.
+
+**Public CLI quản lý harness và diagnostics; coding agent dùng các skill Harnix để chuyển stage.** Bạn hầu như không bao giờ tự gõ `harnix workflow --save/--transition/--evidence/...` — các skill đó chỉ dành cho agent dùng nội bộ. Bạn dùng CLI để xem trạng thái (`harnix status`, `harnix audit`, `harnix checks`) hoặc bảo trì cấu hình (`harnix doctor`, `harnix update`).
+
+**Seed specs và `.harnix/workflow.md` được Harnix quản lý cho đến khi người dùng sửa** — sau lần chỉnh sửa đầu tiên, `harnix update` sẽ luôn giữ nguyên phần bạn đã đổi. Ngược lại: **Task, research và journal luôn là dữ liệu người dùng** — Harnix không bao giờ tự sửa hay xoá nội dung bên trong `.harnix/tasks/`, research hay journal của bạn.
 
 ## Các lệnh CLI thường dùng
 

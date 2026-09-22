@@ -95,6 +95,26 @@ describe("workflow routing and completion evidence", () => {
     });
     expect(canCompleteTask({ ...candidate, acceptanceCriteria: [{ ...candidate.acceptanceCriteria[0]!, evidenceIds: ["e1"] }, candidate.acceptanceCriteria[1]!], evidence: undigestedEvidence }, now)).toBe(false);
   });
+  it("treats every criterion mapped to a passed multi-criteria check as met, not only the one pinned to the check's absolute-latest evidence", () => {
+    const now = Date.parse("2026-08-07T10:00:00Z");
+    const digest = "a".repeat(64);
+    const candidate: TaskRecordV2 = {
+      ...task("2026-08-07T09:30:00Z"),
+      schemaVersion: 2 as const,
+      acceptanceCriteria: [
+        { id: "a", text: "done a", status: "met" as const, evidenceIds: ["e1"] },
+        { id: "b", text: "done b", status: "met" as const, evidenceIds: ["e2"] },
+      ],
+      validationPlan: [
+        { id: "shared-check", description: "Run unit tests", scope: "full" as const, required: true, criterionIds: ["a", "b"], inputs: ["@task-contract", "src/**/*.ts"] },
+      ],
+      evidence: [
+        { id: "e1", checkId: "shared-check", recordedAt: "2026-08-07T09:30:00Z", result: "pass" as const, summary: "ok", artifactPaths: [], inputDigest: digest },
+        { id: "e2", checkId: "shared-check", recordedAt: "2026-08-07T09:31:00Z", result: "pass" as const, summary: "ok", artifactPaths: [], inputDigest: digest },
+      ],
+    };
+    expect(canCompleteTask(candidate, now)).toBe(true);
+  });
   it("keeps digest-backed v2 evidence current across long pauses while rejecting future evidence", () => {
     const now = Date.parse("2026-08-07T10:00:00Z");
     const digest = "a".repeat(64);

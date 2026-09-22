@@ -207,6 +207,32 @@ describe("verification input freshness", () => {
     await expect(assertVerificationInputsFresh(root, harnixRoot, passed)).rejects.toThrow(new RegExp(`changed:${historicalSidecar.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}`, "u"));
   });
 
+  it("names the stale evidence id and recordedAt alongside the changed paths", async () => {
+    const root = await fixtureRepository();
+    const harnixRoot = join(root, ".harnix");
+    const task = taskFixture();
+    const snapshot = await computeVerificationInputSnapshot(root, task, "check");
+    const pass = {
+      id: "ev-source-pass",
+      checkId: "check",
+      recordedAt: "2026-08-14T00:01:00.000Z",
+      result: "pass" as const,
+      exitCode: 0,
+      summary: "ok",
+      artifactPaths: [],
+      inputDigest: snapshot.inputDigest,
+    };
+    const passed: TaskRecordV2 = { ...task, evidence: [pass] };
+    await persistNewVerificationInputSnapshots(root, harnixRoot, [], passed);
+    await expect(assertVerificationInputsFresh(root, harnixRoot, passed)).resolves.toBeUndefined();
+
+    await writeFile(join(root, "src", "a.ts"), "export const a = 2;\n");
+
+    await expect(assertVerificationInputsFresh(root, harnixRoot, passed)).rejects.toThrow(
+      new RegExp(`evidence ${pass.id} recorded at ${pass.recordedAt.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}`, "u"),
+    );
+  });
+
   it("detects task-contract drift without treating the active task record as a raw input", async () => {
     const root = await fixtureRepository();
     const task = taskFixture();

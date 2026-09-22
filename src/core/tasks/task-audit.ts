@@ -189,7 +189,14 @@ function criterionHasFreshSupport(
   return criterion.evidenceIds.some((id) => {
     const evidence = evidenceById.get(id);
     if (evidence === undefined || evidence.result !== "pass" || !isFreshEvidence(evidence, now, task.schemaVersion === 1)) return false;
-    if (evidence.checkId !== undefined && latestByCheck.get(evidence.checkId)?.id !== evidence.id) return false;
+    if (evidence.checkId !== undefined) {
+      const latest = latestByCheck.get(evidence.checkId);
+      if (task.schemaVersion === 1) {
+        if (latest?.id !== evidence.id) return false;
+      } else if (latest === undefined || latest.result !== "pass" || latest.inputDigest !== evidence.inputDigest) {
+        return false;
+      }
+    }
     if (evidence.checkId !== undefined && stateByCheck.has(evidence.checkId) && stateByCheck.get(evidence.checkId) !== "passed") return false;
     if (task.schemaVersion === 1) return true;
     if (!/^[a-f0-9]{64}$/u.test(evidence.inputDigest ?? "") || evidence.checkId === undefined) return false;

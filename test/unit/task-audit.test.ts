@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { createNoActiveTaskAudit, createTaskAudit, type TaskAuditDependencies } from "../../src/core/tasks/task-audit.js";
 import type { RequiredCheckState } from "../../src/core/status.js";
-import type { TaskRecordV1 } from "../../src/core/tasks/task.js";
+import type { TaskRecordV1, TaskRecordV2 } from "../../src/core/tasks/task.js";
 
 const now = Date.parse("2026-08-26T01:00:00.000Z");
 
@@ -113,6 +113,48 @@ describe("task audit", () => {
     expect(result.activeTask?.completion).toEqual({
       status: "pass",
       criteria: { met: 1, waived: 0, pending: 0, total: 1, pendingIds: [] },
+      requiredChecks: { passed: 1, failed: 0, stale: 0, pending: 0, total: 1, failedIds: [], staleIds: [], pendingIds: [] },
+    });
+  });
+
+  it("treats every criterion mapped to a passed multi-criteria check as met, not only the one pinned to the check's absolute-latest evidence", async () => {
+    const task: TaskRecordV2 = {
+      generator: "harnix",
+      schemaVersion: 2,
+      id: "20260826-120000-multi-criteria-check",
+      title: "multi-criteria check freshness",
+      mode: "lite",
+      status: "verifying",
+      checkpoint: "verifying",
+      goal: "shared check covers two criteria",
+      nonGoals: [],
+      acceptanceCriteria: [
+        { id: "a", text: "criterion a", status: "met", evidenceIds: ["ev-a"] },
+        { id: "b", text: "criterion b", status: "met", evidenceIds: ["ev-b"] },
+      ],
+      relevantPaths: [],
+      relevantSpecs: [],
+      validationPlan: [{
+        id: "shared-check",
+        description: "shared check",
+        scope: "focused",
+        required: true,
+        criterionIds: ["a", "b"],
+        inputs: ["@task-contract", "src/x.ts"],
+      }],
+      evidence: [
+        { id: "ev-a", checkId: "shared-check", recordedAt: "2026-08-26T00:58:00.000Z", result: "pass", summary: "ok", artifactPaths: [], inputDigest: "f".repeat(64) },
+        { id: "ev-b", checkId: "shared-check", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", summary: "ok", artifactPaths: [], inputDigest: "f".repeat(64) },
+      ],
+      createdAt: "2026-08-26T00:00:00.000Z",
+      updatedAt: "2026-08-26T00:59:00.000Z",
+    };
+
+    const result = await createTaskAudit("project", "harnix", task, now, dependencies(["passed"]));
+
+    expect(result.activeTask?.completion).toEqual({
+      status: "pass",
+      criteria: { met: 2, waived: 0, pending: 0, total: 2, pendingIds: [] },
       requiredChecks: { passed: 1, failed: 0, stale: 0, pending: 0, total: 1, failedIds: [], staleIds: [], pendingIds: [] },
     });
   });

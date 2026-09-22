@@ -2,7 +2,7 @@
 name: harnix-finish-work
 description: Use when a Harnix task needs safe completion or explicit cancellation persistence, journaling, active-pointer cleanup, and an evidence-based handoff.
 metadata:
-  version: "1.1.8"
+  version: "1.1.9"
 ---
 
 # Finish or cancel Harnix work
@@ -45,6 +45,8 @@ Reread:
 - omitted checks, waivers, and residual risks.
 
 Confirm that evidence still describes the current files. For TaskRecord schema v2, treat the task-owned `verification-inputs.json` snapshot as immutable workflow state and use `harnix workflow --finish` so Harnix recomputes every latest required pass. If it reports changed/missing relative paths or a task-contract mismatch, verification is stale and must run again; timestamps alone are insufficient.
+
+`--finish` recomputes freshness against file content at the exact moment it runs, so any edit between recording the final passing evidence and calling `--finish`—including an editor autoSave or a format-on-save hook silently touching an already-verified file—will legitimately reopen that check as stale. The stale error names the specific evidence id and its `recordedAt` alongside the changed/missing paths, so read it to tell a real snapshot problem apart from a file that was simply edited again after evidence was recorded.
 
 ## Persist completion safely
 
