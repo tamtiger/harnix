@@ -1,0 +1,383 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260922-095659-plan-artifact-grammar-guard",
+  "snapshots": [
+    {
+      "evidenceId": "ev-chk-checks-reason-code-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-095659-plan-artifact-grammar-guard",
+      "checkId": "chk-checks-reason-code",
+      "taskContractHash": "d3c7b7be2d93c57259cc7998b074d3a9d9a82df308cd80f1d5cd5970f4ad89aa",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/plan.md",
+          "sha256": "2faf13eac9c101f056dab886507c4f089c8ed7c2a00d7a124173058ed7432df8",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/prd.md",
+          "sha256": "afabf9bd9b8b49d1e7a5a6765d4497fcacf2f122437da9a7a8664e040561752a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/verification/check-report.ts",
+          "sha256": "8d7cf13af4b1cd71e6ed97bef553e537067f682d6a700e0118817aa01fae87ab",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "819c73ac1dbf7c7e84b3d386ae671d0f2ff842c667b645f33c28c6c00163fb39",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/check-report.test.ts",
+          "sha256": "07948222da1a83e52beaf68d56c0f3167e4c8be15e8fffdda0990c20c65077bb",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "1ebc0c6eb168eb86f4056d60a85c4e0da5ed1fc05b1f6890b85fc333cd109b0e"
+    },
+    {
+      "evidenceId": "ev-chk-checks-reason-code-02",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-095659-plan-artifact-grammar-guard",
+      "checkId": "chk-checks-reason-code",
+      "taskContractHash": "d3c7b7be2d93c57259cc7998b074d3a9d9a82df308cd80f1d5cd5970f4ad89aa",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/plan.md",
+          "sha256": "2faf13eac9c101f056dab886507c4f089c8ed7c2a00d7a124173058ed7432df8",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/prd.md",
+          "sha256": "afabf9bd9b8b49d1e7a5a6765d4497fcacf2f122437da9a7a8664e040561752a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/verification/check-report.ts",
+          "sha256": "8d7cf13af4b1cd71e6ed97bef553e537067f682d6a700e0118817aa01fae87ab",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "819c73ac1dbf7c7e84b3d386ae671d0f2ff842c667b645f33c28c6c00163fb39",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/check-report.test.ts",
+          "sha256": "07948222da1a83e52beaf68d56c0f3167e4c8be15e8fffdda0990c20c65077bb",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "1ebc0c6eb168eb86f4056d60a85c4e0da5ed1fc05b1f6890b85fc333cd109b0e"
+    },
+    {
+      "evidenceId": "ev-chk-checks-reason-code-03",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-095659-plan-artifact-grammar-guard",
+      "checkId": "chk-checks-reason-code",
+      "taskContractHash": "d3c7b7be2d93c57259cc7998b074d3a9d9a82df308cd80f1d5cd5970f4ad89aa",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/plan.md",
+          "sha256": "c77d1485b5190dfab4d6cabae63ac97ec952e5863fbc2cb29829a0e77186f94e",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/prd.md",
+          "sha256": "afabf9bd9b8b49d1e7a5a6765d4497fcacf2f122437da9a7a8664e040561752a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/verification/check-report.ts",
+          "sha256": "8d7cf13af4b1cd71e6ed97bef553e537067f682d6a700e0118817aa01fae87ab",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "819c73ac1dbf7c7e84b3d386ae671d0f2ff842c667b645f33c28c6c00163fb39",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/check-report.test.ts",
+          "sha256": "07948222da1a83e52beaf68d56c0f3167e4c8be15e8fffdda0990c20c65077bb",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "b51c84f027109a62475cec8a218e62f5bd9455d589d4e5528875f74457fb9f02"
+    },
+    {
+      "evidenceId": "ev-chk-docs-sync-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-095659-plan-artifact-grammar-guard",
+      "checkId": "chk-docs-sync",
+      "taskContractHash": "d3c7b7be2d93c57259cc7998b074d3a9d9a82df308cd80f1d5cd5970f4ad89aa",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/plan.md",
+          "sha256": "2faf13eac9c101f056dab886507c4f089c8ed7c2a00d7a124173058ed7432df8",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/prd.md",
+          "sha256": "afabf9bd9b8b49d1e7a5a6765d4497fcacf2f122437da9a7a8664e040561752a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "a0b16d406ab4399f68eab98559827835ad09eaa256d315d0d224a8958bde5685",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "f1bc30f465b39763a9a646fc392f39c364b0d49a5c9d6cb1ad1ee4ec06921277"
+    },
+    {
+      "evidenceId": "ev-chk-docs-sync-02",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-095659-plan-artifact-grammar-guard",
+      "checkId": "chk-docs-sync",
+      "taskContractHash": "d3c7b7be2d93c57259cc7998b074d3a9d9a82df308cd80f1d5cd5970f4ad89aa",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/plan.md",
+          "sha256": "2faf13eac9c101f056dab886507c4f089c8ed7c2a00d7a124173058ed7432df8",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/prd.md",
+          "sha256": "afabf9bd9b8b49d1e7a5a6765d4497fcacf2f122437da9a7a8664e040561752a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "a0b16d406ab4399f68eab98559827835ad09eaa256d315d0d224a8958bde5685",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "f1bc30f465b39763a9a646fc392f39c364b0d49a5c9d6cb1ad1ee4ec06921277"
+    },
+    {
+      "evidenceId": "ev-chk-docs-sync-03",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-095659-plan-artifact-grammar-guard",
+      "checkId": "chk-docs-sync",
+      "taskContractHash": "d3c7b7be2d93c57259cc7998b074d3a9d9a82df308cd80f1d5cd5970f4ad89aa",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/plan.md",
+          "sha256": "c77d1485b5190dfab4d6cabae63ac97ec952e5863fbc2cb29829a0e77186f94e",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/prd.md",
+          "sha256": "afabf9bd9b8b49d1e7a5a6765d4497fcacf2f122437da9a7a8664e040561752a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "a0b16d406ab4399f68eab98559827835ad09eaa256d315d0d224a8958bde5685",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "604f2216903930ec445f245e7d54d69ebe1c20efa033980276f9626d60897e39"
+    },
+    {
+      "evidenceId": "ev-chk-full-suite-02",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-095659-plan-artifact-grammar-guard",
+      "checkId": "chk-full-suite",
+      "taskContractHash": "d3c7b7be2d93c57259cc7998b074d3a9d9a82df308cd80f1d5cd5970f4ad89aa",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/plan.md",
+          "sha256": "2faf13eac9c101f056dab886507c4f089c8ed7c2a00d7a124173058ed7432df8",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/prd.md",
+          "sha256": "afabf9bd9b8b49d1e7a5a6765d4497fcacf2f122437da9a7a8664e040561752a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "a0b16d406ab4399f68eab98559827835ad09eaa256d315d0d224a8958bde5685",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "0de03213c4fbba8d8e33ad403f85984cb222aab62584509f1e42287874f4d9e2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/check-report.ts",
+          "sha256": "8d7cf13af4b1cd71e6ed97bef553e537067f682d6a700e0118817aa01fae87ab",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "819c73ac1dbf7c7e84b3d386ae671d0f2ff842c667b645f33c28c6c00163fb39",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "71222447bfcc516f506908445483d1a5a4cf340d302b22f3aef93915fc759242"
+    },
+    {
+      "evidenceId": "ev-chk-full-suite-03",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-095659-plan-artifact-grammar-guard",
+      "checkId": "chk-full-suite",
+      "taskContractHash": "d3c7b7be2d93c57259cc7998b074d3a9d9a82df308cd80f1d5cd5970f4ad89aa",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/plan.md",
+          "sha256": "c77d1485b5190dfab4d6cabae63ac97ec952e5863fbc2cb29829a0e77186f94e",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/prd.md",
+          "sha256": "afabf9bd9b8b49d1e7a5a6765d4497fcacf2f122437da9a7a8664e040561752a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "a0b16d406ab4399f68eab98559827835ad09eaa256d315d0d224a8958bde5685",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "0de03213c4fbba8d8e33ad403f85984cb222aab62584509f1e42287874f4d9e2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/check-report.ts",
+          "sha256": "8d7cf13af4b1cd71e6ed97bef553e537067f682d6a700e0118817aa01fae87ab",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "819c73ac1dbf7c7e84b3d386ae671d0f2ff842c667b645f33c28c6c00163fb39",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "d3da0afe5dd84e78f3cddba2c399e1aa6951846637fae5ae5b136a90cf3b27f4"
+    },
+    {
+      "evidenceId": "ev-chk-save-grammar-guard-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-095659-plan-artifact-grammar-guard",
+      "checkId": "chk-save-grammar-guard",
+      "taskContractHash": "d3c7b7be2d93c57259cc7998b074d3a9d9a82df308cd80f1d5cd5970f4ad89aa",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/plan.md",
+          "sha256": "2faf13eac9c101f056dab886507c4f089c8ed7c2a00d7a124173058ed7432df8",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/prd.md",
+          "sha256": "afabf9bd9b8b49d1e7a5a6765d4497fcacf2f122437da9a7a8664e040561752a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "0de03213c4fbba8d8e33ad403f85984cb222aab62584509f1e42287874f4d9e2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "819c73ac1dbf7c7e84b3d386ae671d0f2ff842c667b645f33c28c6c00163fb39",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b1444f1974696d3fb97d1ca5c829228169989c5426e52993b1cba7dede2ac673",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "d282b284488b9bd00e2db01d7459dceb7fa5bccf1dd6b71b05d189960ba4fe99"
+    },
+    {
+      "evidenceId": "ev-chk-save-grammar-guard-02",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-095659-plan-artifact-grammar-guard",
+      "checkId": "chk-save-grammar-guard",
+      "taskContractHash": "d3c7b7be2d93c57259cc7998b074d3a9d9a82df308cd80f1d5cd5970f4ad89aa",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/plan.md",
+          "sha256": "2faf13eac9c101f056dab886507c4f089c8ed7c2a00d7a124173058ed7432df8",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/prd.md",
+          "sha256": "afabf9bd9b8b49d1e7a5a6765d4497fcacf2f122437da9a7a8664e040561752a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "0de03213c4fbba8d8e33ad403f85984cb222aab62584509f1e42287874f4d9e2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "819c73ac1dbf7c7e84b3d386ae671d0f2ff842c667b645f33c28c6c00163fb39",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b1444f1974696d3fb97d1ca5c829228169989c5426e52993b1cba7dede2ac673",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "d282b284488b9bd00e2db01d7459dceb7fa5bccf1dd6b71b05d189960ba4fe99"
+    },
+    {
+      "evidenceId": "ev-chk-save-grammar-guard-03",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260922-095659-plan-artifact-grammar-guard",
+      "checkId": "chk-save-grammar-guard",
+      "taskContractHash": "d3c7b7be2d93c57259cc7998b074d3a9d9a82df308cd80f1d5cd5970f4ad89aa",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/plan.md",
+          "sha256": "c77d1485b5190dfab4d6cabae63ac97ec952e5863fbc2cb29829a0e77186f94e",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/prd.md",
+          "sha256": "afabf9bd9b8b49d1e7a5a6765d4497fcacf2f122437da9a7a8664e040561752a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "0de03213c4fbba8d8e33ad403f85984cb222aab62584509f1e42287874f4d9e2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "819c73ac1dbf7c7e84b3d386ae671d0f2ff842c667b645f33c28c6c00163fb39",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "b1444f1974696d3fb97d1ca5c829228169989c5426e52993b1cba7dede2ac673",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "288a236c7be5abfc2fc7a5fce123361a7f2e87c1e08e366f3038f9d42cab47a5"
+    }
+  ]
+}

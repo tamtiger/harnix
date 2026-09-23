@@ -5,6 +5,7 @@ import {
   compareVerificationInputSnapshots,
   computeVerificationInputSnapshot,
   loadVerificationInputSidecar,
+  PlanningArtifactGrammarError,
   type StoredVerificationInputSnapshot,
   type VerificationInputChange,
 } from "./input-freshness.js";
@@ -18,6 +19,7 @@ export type RequiredCheckReasonCode =
   | "latest-failed"
   | "latest-skipped"
   | "no-evidence"
+  | "plan-artifact-invalid"
   | "snapshot-invalid"
   | "snapshot-mismatch"
   | "snapshot-missing"
@@ -64,7 +66,10 @@ export async function inspectRequiredChecks(
 
     let current;
     try { current = await computeVerificationInputSnapshot(projectRoot, task, check.id, { schemaVersion: stored.schemaVersion }); }
-    catch { return inspection(check.id, "stale", ["inputs-unavailable"]); }
+    catch (error) {
+      if (error instanceof PlanningArtifactGrammarError) return inspection(check.id, "stale", ["plan-artifact-invalid"]);
+      return inspection(check.id, "stale", ["inputs-unavailable"]);
+    }
     if (current.inputDigest === stored.inputDigest) return inspection(check.id, "passed", []);
 
     const changes = compareVerificationInputSnapshots(stored, current);

@@ -992,6 +992,33 @@ describe("hidden workflow persistence operations", () => {
     await expect(readFile(sidecarPath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
   });
 
+  it("rejects a plan.md save whose execution-notes region violates the inert status grammar, even without new evidence in the same call", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const planning = { ...taskV2("planning", "planning"), mode: "full" as const };
+    const validPlan = [
+      "# Plan",
+      "- [ ] `S1` — do thing",
+      "",
+      "<!-- harnix:execution-notes:begin -->",
+      "slice:S1=passed",
+      "<!-- harnix:execution-notes:end -->",
+      "",
+    ].join("\n");
+    const initialArtifacts = { prd: "# PRD\nRequirement.\n", plan: validPlan };
+    await saveWorkflow(root, { task: planning, artifacts: initialArtifacts });
+    const taskPath = join(root, ".harnix", "tasks", planning.id, "task.json");
+    const planPath = join(root, ".harnix", "tasks", planning.id, "plan.md");
+    const taskBefore = await readFile(taskPath, "utf8");
+
+    const badPlan = validPlan.replace("slice:S1=passed", "slice:S1=done");
+    const next = { ...planning, updatedAt: "2026-08-14T00:01:00.000Z" };
+
+    await expect(saveWorkflow(root, { task: next, artifacts: { ...initialArtifacts, plan: badPlan } })).rejects.toThrow(/inert check\/slice status grammar/iu);
+    await expect(readFile(planPath, "utf8")).resolves.toBe(validPlan);
+    await expect(readFile(taskPath, "utf8")).resolves.toBe(taskBefore);
+  });
+
   it("keeps saved pass evidence fresh when its required glob matches the active task record", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });

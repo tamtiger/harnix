@@ -38,6 +38,7 @@ import {
 import { contextSelectionInput } from "../core/workflow.js";
 import { auditReadyTrace, type ReadyTraceReportV1 } from "../core/tasks/ready-trace.js";
 import {
+  canonicalizePlanningArtifactV1,
   computeVerificationInputSnapshot,
   persistNewVerificationInputSnapshots,
   type VerificationInputSnapshot,
@@ -91,7 +92,7 @@ async function saveWorkflowLocked(
   if (active && active.id !== candidate.id) throw new Error("Workflow save may update only the active task.");
   if (existing && isAppliedContractRevisionReplay(existing, candidate, envelope.contractRevision)) {
     const artifacts = await prepareWorkflowArtifacts(root, harnixRoot, candidate, envelope.artifacts);
-    if (artifacts) validateTaskArtifacts(candidate, artifacts);
+    if (artifacts) { validateTaskArtifacts(candidate, artifacts); assertValidPlanArtifact(candidate, artifacts); }
     await assertReplayArtifactsMatch(harnixRoot, candidate, artifacts);
     if (active === undefined) await setActiveTask(harnixRoot, candidate.id);
     return existing;
@@ -101,7 +102,7 @@ async function saveWorkflowLocked(
       throw new Error("Workflow save with a missing active pointer requires an exact task replay; select an inactive task through harnix resume.");
     }
     const artifacts = await prepareWorkflowArtifacts(root, harnixRoot, candidate, envelope.artifacts);
-    if (artifacts) validateTaskArtifacts(candidate, artifacts);
+    if (artifacts) { validateTaskArtifacts(candidate, artifacts); assertValidPlanArtifact(candidate, artifacts); }
     await assertReplayArtifactsMatch(harnixRoot, candidate, artifacts);
     await setActiveTask(harnixRoot, candidate.id);
     return existing;
@@ -121,7 +122,7 @@ async function saveWorkflowLocked(
   if (candidate.status === "completed") throw new Error("Workflow completion must use workflow --finish.");
   if (candidate.status === "ready") await assertReadyRequirements(harnixRoot, candidate, envelope.artifacts);
   const artifacts = await prepareWorkflowArtifacts(root, harnixRoot, candidate, envelope.artifacts);
-  if (artifacts) validateTaskArtifacts(candidate, artifacts);
+  if (artifacts) { validateTaskArtifacts(candidate, artifacts); assertValidPlanArtifact(candidate, artifacts); }
   const rollbackSnapshot = await captureWorkflowSaveFiles(harnixRoot, candidate, artifacts);
   await assertWorkflowSaveFilesUnchanged(rollbackSnapshot);
   let taskCommitted = false;
@@ -275,6 +276,10 @@ export async function recordLearningWorkflow(root: string, envelope: unknown, no
   const journalRoot = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal`);
   const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${now.slice(0, 10)}.jsonl`);
   return recordWorkflowLearning(harnixRoot, journalRoot, journalPath, config.developer, task, input, now);
+}
+
+function assertValidPlanArtifact(candidate: TaskRecord, artifacts: TaskArtifacts): void {
+  if (candidate.mode === "full" && artifacts.plan !== undefined) canonicalizePlanningArtifactV1(artifacts.plan, "plan");
 }
 
 async function loadExistingTask(harnixRoot: string, id: string): Promise<TaskRecord | undefined> {

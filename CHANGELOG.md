@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.10] - 2026-09-23
+
+### Changed
+
+- Sua loi harnix workflow --save chi validate ngu phap execution-notes cua plan.md khi co evidence moi trong cung lan save; them PlanningArtifactGrammarError va reason code plan-artifact-invalid de audit/checks phan biet duoc corruption ngu phap voi input that su bi thieu.
+
 ## [1.1.9] - 2026-09-22
 
 ### Changed

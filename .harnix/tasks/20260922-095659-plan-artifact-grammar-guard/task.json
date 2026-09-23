@@ -1,0 +1,275 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260922-095659-plan-artifact-grammar-guard",
+  "title": "Chặn corruption ngữ pháp execution-notes tại --save, phân biệt rõ nguyên nhân ở audit/checks",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "harnix workflow --save không bao giờ ghi xuống đĩa một plan.md có execution-notes sai ngữ pháp; nếu một task cũ đã lỡ bị corrupt, harnix audit/checks/preflight báo đúng reasonCodes: [\"plan-artifact-invalid\"] thay vì inputs-unavailable mơ hồ.",
+  "nonGoals": [
+    "Không đổi field/schema JSON nào khác của ChecksReportResultV1/TaskAuditResultV1, chỉ thêm 1 giá trị vào union RequiredCheckReasonCode đã có",
+    "Không hồi cứu/tự động sửa các task cũ đã lỡ bị corrupt trước khi có fix này",
+    "Không đổi ngữ pháp execution-notes hiện có, không đổi giới hạn 100 dòng/16384 ký tự",
+    "Không đổi hành vi assertVerificationInputsFresh/--finish (đã báo lỗi đúng/rõ ràng từ trước)"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "save-rejects-malformed-plan-grammar",
+      "text": "harnix workflow --save (hàm saveWorkflowLocked) từ chối ngay lập tức — trước khi ghi bất kỳ file nào, trước khi persist task.json — bất kỳ plan.md nào (của task Full) có execution-notes vi phạm ngữ pháp hiện có, dù lần --save đó có kèm evidence required-check mới hay không. Áp dụng nhất quán tại cả 3 nhánh gọi validateTaskArtifacts trong saveWorkflowLocked.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-save-grammar-guard-03"
+      ]
+    },
+    {
+      "id": "checks-distinguish-artifact-corruption",
+      "text": "Khi computeVerificationInputSnapshot thất bại vì ngữ pháp execution-notes của plan.md/prd.md sai (ném PlanningArtifactGrammarError), inspectRequiredChecks trả về reasonCodes: [\"plan-artifact-invalid\"] thay vì inputs-unavailable. Mọi nguyên nhân inputs-unavailable khác (file input thật sự thiếu/không đọc được, glob rỗng) không đổi. docs/IMPLEMENTATION_PLAN.md §4.5J liệt kê thêm plan-artifact-invalid trong cùng lần sửa.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-checks-reason-code-03",
+        "ev-chk-docs-sync-03"
+      ]
+    },
+    {
+      "id": "no-regression-existing-behavior",
+      "text": "Toàn bộ test hiện có trong test/unit/check-report.test.ts, test/workflow/internal-workflow.test.ts, và cổng kiểm chứng rộng (pnpm build && pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:workflow) tiếp tục pass nguyên trạng sau khi thêm validate mới.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-03"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/internal-workflow.ts",
+    "src/core/verification/check-report.ts",
+    "src/core/verification/input-freshness.ts",
+    "src/core/tasks/task.ts",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "test/unit/check-report.test.ts",
+    "test/workflow/internal-workflow.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "AGENTS.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-save-grammar-guard",
+      "description": "Test xác nhận workflow --save chặn plan.md sai ngữ pháp execution-notes ngay lập tức, kể cả khi không kèm evidence mới",
+      "command": "pnpm exec vitest run test/workflow/internal-workflow.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "save-rejects-malformed-plan-grammar"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "src/core/verification/input-freshness.ts",
+        "test/workflow/internal-workflow.test.ts"
+      ]
+    },
+    {
+      "id": "chk-checks-reason-code",
+      "description": "Test xác nhận inspectRequiredChecks phân biệt plan-artifact-invalid với inputs-unavailable",
+      "command": "pnpm exec vitest run test/unit/check-report.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "checks-distinguish-artifact-corruption"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/verification/check-report.ts",
+        "src/core/verification/input-freshness.ts",
+        "test/unit/check-report.test.ts"
+      ]
+    },
+    {
+      "id": "chk-docs-sync",
+      "description": "Xác nhận docs/IMPLEMENTATION_PLAN.md mục 4.5J liệt kê thêm plan-artifact-invalid",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "checks-distinguish-artifact-corruption"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    },
+    {
+      "id": "chk-full-suite",
+      "description": "Cổng kiểm chứng rộng: build, lint, typecheck, test:unit, test:workflow",
+      "command": "pnpm build && pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:workflow",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "checks-distinguish-artifact-corruption",
+        "no-regression-existing-behavior",
+        "save-rejects-malformed-plan-grammar"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/commands/internal-workflow.ts",
+        "src/core/verification/check-report.ts",
+        "src/core/verification/input-freshness.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-22T10:09:38.000Z",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa lại 2 mô tả check (chk-docs-sync, chk-full-suite) bị thiếu dấu tiếng Việt do lỗi soạn thảo; không đổi ID, phạm vi, hay ý nghĩa.",
+      "artifactPaths": [
+        ".harnix/tasks/20260922-095659-plan-artifact-grammar-guard/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-save-grammar-guard-01",
+      "checkId": "chk-save-grammar-guard",
+      "recordedAt": "2026-09-22T17:17:09.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/internal-workflow.test.ts: 52 passed (incl. new save-rejects-malformed-plan-grammar test)",
+      "artifactPaths": [],
+      "inputDigest": "d282b284488b9bd00e2db01d7459dceb7fa5bccf1dd6b71b05d189960ba4fe99"
+    },
+    {
+      "id": "ev-chk-checks-reason-code-01",
+      "checkId": "chk-checks-reason-code",
+      "recordedAt": "2026-09-22T17:17:50.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/check-report.test.ts: 3 passed (incl. new plan-artifact-invalid distinction test)",
+      "artifactPaths": [],
+      "inputDigest": "1ebc0c6eb168eb86f4056d60a85c4e0da5ed1fc05b1f6890b85fc333cd109b0e"
+    },
+    {
+      "id": "ev-chk-docs-sync-01",
+      "checkId": "chk-docs-sync",
+      "recordedAt": "2026-09-22T17:18:20.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Manual review: docs/IMPLEMENTATION_PLAN.md muc 4.5J liet ke plan-artifact-invalid dung 1 lan, dung vi tri, khong doi cau truc con lai",
+      "artifactPaths": [
+        "docs/IMPLEMENTATION_PLAN.md"
+      ],
+      "inputDigest": "f1bc30f465b39763a9a646fc392f39c364b0d49a5c9d6cb1ad1ee4ec06921277"
+    },
+    {
+      "id": "ev-chk-full-suite-01",
+      "checkId": "chk-full-suite",
+      "recordedAt": "2026-09-22T17:16:00.000Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm build/lint/typecheck pass; pnpm test:unit fails at test/unit/package-contract.test.ts because findPackageJsonFiles also finds a new .kilo/worktrees/axiomatic-justice/package.json (a fresh git worktree, HEAD detached at this repo's latest commit, created by an external tool, unrelated to this task's changed files). Confirmed via git status that only the 6 files this task touches are modified.",
+      "artifactPaths": [],
+      "inputDigest": "71222447bfcc516f506908445483d1a5a4cf340d302b22f3aef93915fc759242"
+    },
+    {
+      "id": "ev-chk-save-grammar-guard-02",
+      "checkId": "chk-save-grammar-guard",
+      "recordedAt": "2026-09-22T10:20:34.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/internal-workflow.test.ts: 52 passed; re-recorded with correct UTC recordedAt after ev-01 mistakenly used a local-time value copied from vitest's Start-at log line",
+      "artifactPaths": [],
+      "inputDigest": "d282b284488b9bd00e2db01d7459dceb7fa5bccf1dd6b71b05d189960ba4fe99"
+    },
+    {
+      "id": "ev-chk-checks-reason-code-02",
+      "checkId": "chk-checks-reason-code",
+      "recordedAt": "2026-09-22T10:20:48.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/check-report.test.ts: 3 passed; re-recorded with correct UTC recordedAt after ev-01 mistakenly used a local-time value",
+      "artifactPaths": [],
+      "inputDigest": "1ebc0c6eb168eb86f4056d60a85c4e0da5ed1fc05b1f6890b85fc333cd109b0e"
+    },
+    {
+      "id": "ev-chk-docs-sync-02",
+      "checkId": "chk-docs-sync",
+      "recordedAt": "2026-09-22T10:20:56.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Manual review: docs/IMPLEMENTATION_PLAN.md muc 4.5J co plan-artifact-invalid dung 1 lan dung vi tri; re-recorded with correct UTC recordedAt after ev-01 mistakenly used a local-time value",
+      "artifactPaths": [
+        "docs/IMPLEMENTATION_PLAN.md"
+      ],
+      "inputDigest": "f1bc30f465b39763a9a646fc392f39c364b0d49a5c9d6cb1ad1ee4ec06921277"
+    },
+    {
+      "id": "ev-chk-full-suite-02",
+      "checkId": "chk-full-suite",
+      "recordedAt": "2026-09-23T00:59:50.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm build && pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:workflow: exit 0, 387 tests passed after removing the unrelated .kilo/worktrees/axiomatic-justice git worktree",
+      "artifactPaths": [],
+      "inputDigest": "71222447bfcc516f506908445483d1a5a4cf340d302b22f3aef93915fc759242"
+    },
+    {
+      "id": "ev-chk-save-grammar-guard-03",
+      "checkId": "chk-save-grammar-guard",
+      "recordedAt": "2026-09-23T01:01:13.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/internal-workflow.test.ts: 52 passed; final re-record after plan.md checklist/execution-notes were finalized",
+      "artifactPaths": [],
+      "inputDigest": "288a236c7be5abfc2fc7a5fce123361a7f2e87c1e08e366f3038f9d42cab47a5"
+    },
+    {
+      "id": "ev-chk-checks-reason-code-03",
+      "checkId": "chk-checks-reason-code",
+      "recordedAt": "2026-09-23T01:01:28.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/check-report.test.ts: 3 passed; final re-record after plan.md checklist/execution-notes were finalized",
+      "artifactPaths": [],
+      "inputDigest": "b51c84f027109a62475cec8a218e62f5bd9455d589d4e5528875f74457fb9f02"
+    },
+    {
+      "id": "ev-chk-docs-sync-03",
+      "checkId": "chk-docs-sync",
+      "recordedAt": "2026-09-23T01:01:43.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Manual review: docs/IMPLEMENTATION_PLAN.md section 4.5J lists plan-artifact-invalid exactly once, correct position; final re-record after plan.md checklist/execution-notes were finalized",
+      "artifactPaths": [
+        "docs/IMPLEMENTATION_PLAN.md"
+      ],
+      "inputDigest": "604f2216903930ec445f245e7d54d69ebe1c20efa033980276f9626d60897e39"
+    },
+    {
+      "id": "ev-chk-full-suite-03",
+      "checkId": "chk-full-suite",
+      "recordedAt": "2026-09-23T01:02:46.000Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm build && pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:workflow: exit 0, 387 tests passed; final re-record after plan.md checklist/execution-notes were finalized",
+      "artifactPaths": [],
+      "inputDigest": "d3da0afe5dd84e78f3cddba2c399e1aa6951846637fae5ae5b136a90cf3b27f4"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "root-cause-confirmed",
+      "text": "Xác nhận qua test tái hiện thật: persistNewVerificationInputSnapshots chỉ gọi computeVerificationInputSnapshot (nơi validate ngữ pháp) khi có evidence pass/fail mới trong cùng lần --save; nếu không, plan.md được saveTaskArtifacts ghi thẳng xuống đĩa mà không qua validate nào.",
+      "rationale": "Đọc trực tiếp src/core/tasks/task.ts (validateTaskArtifacts/saveTaskArtifacts) và src/core/verification/input-freshness.ts (persistNewVerificationInputSnapshots), rồi viết test tạm tái hiện đúng chuỗi sự kiện người dùng mô tả, xác nhận audit/checks nuốt lỗi thành inputs-unavailable trong khi finish báo lỗi rõ ràng."
+    },
+    {
+      "id": "scope-both-save-guard-and-reason-code",
+      "text": "Sửa cả chặn tại --save lẫn thêm reason code plan-artifact-invalid ở check-report.ts, thay vì chỉ chặn tại --save.",
+      "rationale": "Người dùng chọn phương án rộng hơn qua AskUserQuestion để vừa ngăn corruption mới vừa chẩn đoán rõ các task cũ đã lỡ bị corrupt trước khi có fix; chấp nhận đây là thay đổi vào enum RequiredCheckReasonCode công khai đã đóng băng, nên cập nhật docs/IMPLEMENTATION_PLAN.md §4.5J trong cùng lần theo đúng AGENTS.md mục Frozen contracts."
+    }
+  ],
+  "createdAt": "2026-09-22T09:56:59.000Z",
+  "updatedAt": "2026-09-23T01:03:53.076Z",
+  "completedAt": "2026-09-23T01:03:53.076Z"
+}

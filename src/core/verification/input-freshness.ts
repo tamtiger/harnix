@@ -11,6 +11,8 @@ import { atomicWriteFile } from "../../utils/atomic-write.js";
 
 export type VerificationInputNormalizer = "planning-contract-v1" | "raw-v1";
 
+export class PlanningArtifactGrammarError extends Error { override name = "PlanningArtifactGrammarError"; }
+
 export interface VerificationInputEntryV1 {
   path: string;
   sha256: string;
@@ -287,13 +289,13 @@ export function canonicalizePlanningArtifactV1(source: string, artifact: "plan" 
   for (const rawLine of source.replace(/\r\n?/gu, "\n").split("\n")) {
     const line = normalizePlanningLineWhitespace(rawLine, artifact);
     if (artifact === "plan" && fence === undefined && rawLine === begin) {
-      if (insideNotes) throw new Error("Planning execution-note marker is nested or malformed.");
+      if (insideNotes) throw new PlanningArtifactGrammarError("Planning execution-note marker is nested or malformed.");
       insideNotes = true;
       output.push(begin);
       continue;
     }
     if (artifact === "plan" && fence === undefined && rawLine === end) {
-      if (!insideNotes) throw new Error("Planning execution-note marker is unmatched or malformed.");
+      if (!insideNotes) throw new PlanningArtifactGrammarError("Planning execution-note marker is unmatched or malformed.");
       insideNotes = false;
       output.push(end);
       continue;
@@ -305,10 +307,10 @@ export function canonicalizePlanningArtifactV1(source: string, artifact: "plan" 
         || executionNoteLines > maxExecutionNoteLines
         || executionNoteCharacters > maxExecutionNoteCharacters
         || /^\s*(?:#{1,6}\s|(?:Criteria|Checks|Paths):)/u.test(rawLine)) {
-        throw new Error("Planning execution-note region is malformed, too large, or contains contract syntax.");
+        throw new PlanningArtifactGrammarError("Planning execution-note region is malformed, too large, or contains contract syntax.");
       }
       if (rawLine.trim().length > 0 && !executionNotePattern.test(rawLine.trim())) {
-        throw new Error("Planning execution-note region accepts only inert check/slice status grammar.");
+        throw new PlanningArtifactGrammarError("Planning execution-note region accepts only inert check/slice status grammar.");
       }
       continue;
     }
@@ -325,7 +327,7 @@ export function canonicalizePlanningArtifactV1(source: string, artifact: "plan" 
       ? line.replace(/^(\s*-\s+)\[[ xX]\](\s+`[A-Z][A-Z0-9-]*`\s+—\s+.+)$/u, "$1[ ]$2")
       : line);
   }
-  if (insideNotes) throw new Error("Planning execution-note marker is unclosed or malformed.");
+  if (insideNotes) throw new PlanningArtifactGrammarError("Planning execution-note marker is unclosed or malformed.");
   return output.join("\n");
 }
 function normalizePlanningLineWhitespace(line: string, artifact: "plan" | "prd"): string {

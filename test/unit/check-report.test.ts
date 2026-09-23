@@ -101,6 +101,38 @@ describe("required check report", () => {
     expect(report).toMatchObject({ state: "stale", reasonCodes: ["snapshot-invalid"], changes: [] });
     expect(JSON.stringify(report)).not.toContain("PRIVATE_SIDECAR_CANARY");
   });
+
+  it("distinguishes malformed plan.md execution-notes grammar from a genuinely unavailable input", async () => {
+    const root = await temporaryRepository();
+    const harnixRoot = join(root, ".harnix");
+    const base: TaskRecordV2 = { ...v2Task(), mode: "full" };
+    await mkdir(join(root, "src"), { recursive: true });
+    await mkdir(join(harnixRoot, "tasks", base.id), { recursive: true });
+    await writeFile(join(root, "src", "a.ts"), "a1\n");
+    await writeFile(join(root, "src", "b.ts"), "b1\n");
+    await writeFile(join(harnixRoot, "tasks", base.id, "prd.md"), "# PRD\n");
+    const validPlan = [
+      "# Plan",
+      "- [ ] `S1` — do thing",
+      "",
+      "<!-- harnix:execution-notes:begin -->",
+      "slice:S1=passed",
+      "<!-- harnix:execution-notes:end -->",
+      "",
+    ].join("\n");
+    await writeFile(join(harnixRoot, "tasks", base.id, "plan.md"), validPlan);
+
+    const snapshot = await computeVerificationInputSnapshot(root, base, "gate");
+    const task: TaskRecordV2 = { ...base, evidence: [{ id: "pass", checkId: "gate", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", exitCode: 0, summary: "private", artifactPaths: [], inputDigest: snapshot.inputDigest }] };
+    await persistNewVerificationInputSnapshots(root, harnixRoot, [], task);
+    const now = Date.parse("2026-08-26T01:00:00.000Z");
+    expect((await inspectRequiredChecks(root, harnixRoot, task, now))[0]).toMatchObject({ state: "passed", reasonCodes: [] });
+
+    const badPlan = validPlan.replace("slice:S1=passed", "slice:S1=done");
+    await writeFile(join(harnixRoot, "tasks", base.id, "plan.md"), badPlan);
+    const report = (await inspectRequiredChecks(root, harnixRoot, task, now))[0]!;
+    expect(report).toMatchObject({ state: "stale", reasonCodes: ["plan-artifact-invalid"] });
+  });
 });
 
 function v1Task(): TaskRecordV1 {
