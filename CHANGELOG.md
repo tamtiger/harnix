@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.11] - 2026-09-23
+
+### Changed
+
+- Bổ sung mẫu secret có cấu trúc (AWS, GitHub, Stripe, Slack, Google, Anthropic, private key, JWT, connection string database) vào pnpm run scan:release; thêm danh sách suppression và taxonomy lỗi cụ thể vào skill harnix-check để giảm nhiễu review; bổ sung hướng dẫn quản lý tiến trình nền, cấm nhúng ID kế hoạch vào code artifact, và kinh tế tool-call vào guide kỹ thuật chung; thêm PostgreSQL, MySQL, SQL Server, MongoDB, Redis làm technology hạng nhất — harnix init tự nhận diện và harnix setup seed đúng guide kỹ thuật tương ứng
+
 ## [1.1.10] - 2026-09-23
 
 ### Changed

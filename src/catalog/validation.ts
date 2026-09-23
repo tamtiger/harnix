@@ -10,7 +10,7 @@ import type {
 import { compareCodeUnits } from "../utils/order.js";
 
 const languageIds = new Set(["csharp", "typescript", "javascript", "php", "python", "java", "go"]);
-const technologyIds = new Set(["dotnet", "abp", "nestjs", "spring", "react-web", "vue", "codeigniter"]);
+const technologyIds = new Set(["dotnet", "abp", "nestjs", "spring", "react-web", "vue", "codeigniter", "postgresql", "mysql", "sqlserver", "mongodb", "redis"]);
 const technologyKinds = new Set(["framework", "runtime", "platform", "library", "database", "tool", "infrastructure", "domain"]);
 const confidences = new Set(["confirmed", "probable", "weak"]);
 const ecosystems = new Set(["npm", "composer", "nuget", "maven", "gradle"]);

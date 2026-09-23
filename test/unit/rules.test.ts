@@ -3,10 +3,84 @@ import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { guideSources, selectGuideSources, type GuideSource } from "../../src/guides/catalog.js";
-import { attribution, composeRules, seedRules } from "../../src/rules/rules.js";
+import { attribution, commonRules, composeRules, seedRules } from "../../src/rules/rules.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
+
+describe("common engineering guide content", () => {
+  it("covers background process discipline, stable code artifacts, and tool-call economy", () => {
+    const lower = commonRules.toLowerCase();
+    for (const needle of [
+      "background process",
+      "orphan",
+      "port is busy",
+      "only stop a process it started",
+      "plan id",
+      "criterion id",
+      "check id",
+      "commit message",
+      "batch independent reads",
+      "authorization",
+      "data integrity",
+      "contract drift",
+      "error cascade",
+    ]) {
+      expect(lower, `commonRules is missing: ${needle}`).toContain(needle.toLowerCase());
+    }
+  });
+});
+
+describe("database guide selection", () => {
+  it("selects a relational vendor guide together with the shared relational base guide", () => {
+    for (const technology of ["postgresql", "mysql", "sqlserver"] as const) {
+      const selected = selectGuideSources({ languages: [], technologies: [technology] });
+      const ids = selected.map(({ descriptor }) => descriptor.id);
+      expect(ids, technology).toContain(`technology-${technology}`);
+      expect(ids, technology).toContain("technology-database-relational");
+      expect(ids.indexOf("technology-database-relational"), technology).toBeLessThan(ids.indexOf(`technology-${technology}`));
+    }
+  });
+
+  it("selects only the vendor guide for MongoDB and Redis, without the relational base", () => {
+    for (const technology of ["mongodb", "redis"] as const) {
+      const selected = selectGuideSources({ languages: [], technologies: [technology] });
+      const ids = selected.map(({ descriptor }) => descriptor.id);
+      expect(ids, technology).toContain(`technology-${technology}`);
+      expect(ids, technology).not.toContain("technology-database-relational");
+    }
+  });
+
+  it("selects no database guide when the stack has no database technology", () => {
+    const selected = selectGuideSources({ languages: ["typescript"], technologies: ["nestjs"] });
+    expect(selected.map(({ descriptor }) => descriptor.id).some((id) => id.startsWith("technology-database") || ["postgresql", "mysql", "sqlserver", "mongodb", "redis"].some((db) => id === `technology-${db}`))).toBe(false);
+  });
+
+  it("seeds database guides at the expected path under .harnix/spec/guides", async () => {
+    const root = await temporaryRepository();
+    const result = await seedRules({ root, languages: [], technologies: ["postgresql", "redis"] });
+    expect(result.paths).toEqual(expect.arrayContaining([
+      ".harnix/spec/guides/technologies/database/relational/engineering.md",
+      ".harnix/spec/guides/technologies/database/postgresql/engineering.md",
+      ".harnix/spec/guides/technologies/database/redis/engineering.md",
+    ]));
+  });
+
+  it("contains no string shaped like a structured secret in any database guide", async () => {
+    const releaseScanner = await import(new URL("../../scripts/scan-release.mjs", import.meta.url).href) as {
+      scanTextFiles(files: string[], scope: string, generated: boolean): Promise<void>;
+    };
+    const root = await temporaryRepository();
+    const databaseGuides = guideSources.filter(({ descriptor }) => descriptor.contentPath.startsWith("technologies/database/"));
+    expect(databaseGuides.length).toBeGreaterThanOrEqual(6);
+    const files = await Promise.all(databaseGuides.map(async ({ content, descriptor }, index) => {
+      const path = join(root, `guide-${index}.md`);
+      await writeFile(path, content);
+      return { descriptor, path };
+    }));
+    await expect(releaseScanner.scanTextFiles(files.map(({ path }) => path), "database guide check", false)).resolves.toBeUndefined();
+  });
+});
 
 describe("guide catalog and rule seeding", () => {
   it("selects common, language, then technology guides deterministically", () => {
@@ -78,7 +152,7 @@ describe("guide catalog and rule seeding", () => {
   });
 
   it("exposes packaged content and attribution for every descriptor", async () => {
-    expect(guideSources.length).toBe(15);
+    expect(guideSources.length).toBe(21);
     expect(guideSources.every(({ content, descriptor }) => content.startsWith("# ") && descriptor.provenance.source.length > 0)).toBe(true);
     expect(attribution.license).toContain("MIT"); expect(attribution.source).toContain("ECC");
     const root = await temporaryRepository(); await seedRules({ root, languages: ["php"], technologies: ["codeigniter"] });

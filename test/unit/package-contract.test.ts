@@ -7,7 +7,9 @@ import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const temporaryRepository = useTemporaryRepositories("harnix-package-contract-");
-const nonProductDirectories = new Set([".artifacts", ".git", ".harnix", ".pnpm-store", "coverage", "dist", "node_modules", "test"]);
+// docs/** may hold untracked, user-owned third-party material (e.g. vendored skill bundles)
+// that is not part of the Harnix package and is never counted toward the single-package contract.
+const nonProductDirectories = new Set([".artifacts", ".git", ".harnix", ".pnpm-store", "coverage", "dist", "docs", "node_modules", "test"]);
 
 function findPackageJsonFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {

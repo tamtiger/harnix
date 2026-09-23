@@ -2,7 +2,7 @@
 name: harnix-check
 description: Use when Harnix needs a standalone read-only code review, review feedback evaluation, or fresh active-task compliance, correctness, security, and maintainability verification before completion.
 metadata:
-  version: "1.1.10"
+  version: "1.1.11"
 ---
 
 # Review and verify Harnix work
@@ -63,6 +63,17 @@ Inspect static compliance and the current preflight/check state before expensive
 
 Only acceptance/spec violations, required-gate failures, or material correctness, security, data-loss, and compatibility defects block completion. Batch those blockers before remediation. Low/P3 maintainability or style findings outside frozen obligations are residual risk, not a reason to reopen implementation or repeat a gate.
 
+## Suppressions
+
+Do not report a finding in any of these categories; they generate noise without changing what ships:
+
+- redundancy that aids readability, such as a check restated for clarity when it costs nothing;
+- a request to add a comment explaining why a threshold was chosen — thresholds change and the comment rots;
+- a consistency-only change, such as reshaping one value to match how a sibling constant is guarded, with no behavior difference;
+- a harmless no-op, such as a filter that can never remove anything given the current input shape;
+- a style or formatting preference that a linter already enforces or could enforce;
+- anything already addressed in the diff being reviewed — read the complete diff before flagging a gap it already closes.
+
 ## Stage 1: compliance
 
 Read the user's latest request, task goal/non-goals, PRD/design/plan, applicable repository instructions, and acceptance criteria. Inspect the diff and mapped tests.
@@ -92,6 +103,8 @@ After compliance passes, reuse current matching passes and run only pending, fai
 - cross-layer data/error flow when multiple layers changed;
 - packaging, footprint, attribution, and release scanning when applicable.
 
+Concrete patterns worth flagging under those categories include: a find-or-create without a unique constraint, letting a concurrent call create a duplicate row; a status transition missing an atomic `WHERE old-status` guard on its `UPDATE`; a token or credential comparison using `==` instead of a constant-time comparison; output from an LLM or other untrusted generator written to storage or used in a query without validation; and an N+1 query pattern from loading an association inside a loop instead of eager-loading it.
+
 Fresh focused output cannot substitute for a required full gate. A full gate cannot prove a criterion it does not exercise.
 
 ## Review feedback discipline
@@ -116,4 +129,4 @@ Append each verification result with `harnix workflow --evidence`, which takes a
 
 ## Upstream basis
 
-Adapted for Harnix from Trellis `check` at `516b34e3591001b28fda5e2d4df3f717e82f5785` and Superpowers `verification-before-completion`, `requesting-code-review`, and `receiving-code-review` at `44c9b2d6e889982ac18c27d05a19fefe335194e1`. Mandatory reviewer subagents and Git integration are removed.
+Adapted for Harnix from Trellis `check` at `516b34e3591001b28fda5e2d4df3f717e82f5785` and Superpowers `verification-before-completion`, `requesting-code-review`, and `receiving-code-review` at `44c9b2d6e889982ac18c27d05a19fefe335194e1`. Mandatory reviewer subagents and Git integration are removed. Suppression categories and Stage 2 defect examples are Harnix-authored, informed by patterns commonly documented across community code-review checklists.

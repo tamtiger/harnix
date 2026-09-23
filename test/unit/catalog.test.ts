@@ -23,13 +23,36 @@ describe("stack catalog", () => {
       { id: "abp", kind: "framework" },
       { id: "codeigniter", kind: "framework" },
       { id: "dotnet", kind: "runtime" },
+      { id: "mongodb", kind: "database" },
+      { id: "mysql", kind: "database" },
       { id: "nestjs", kind: "framework" },
+      { id: "postgresql", kind: "database" },
       { id: "react-web", kind: "library" },
+      { id: "redis", kind: "database" },
       { id: "spring", kind: "framework" },
+      { id: "sqlserver", kind: "database" },
       { id: "vue", kind: "framework" },
     ]);
     expect(catalog.technologies.find(({ id }) => id === "abp")?.implies).toEqual({ technologies: ["dotnet"] });
     expect(catalog.technologies.find(({ id }) => id === "nestjs")?.implies).toBeUndefined();
+  });
+
+  it("declares five database technologies with a confirmed or probable detector and no unsupported dependency ecosystem", () => {
+    const catalog = validateStackCatalog(candidate());
+    const databaseIds = ["mongodb", "mysql", "postgresql", "redis", "sqlserver"] as const;
+
+    for (const id of databaseIds) {
+      const descriptor = catalog.technologies.find((technology) => technology.id === id);
+      expect(descriptor?.kind, id).toBe("database");
+      const hasStrongDetector = descriptor?.detectors.some((detector) => detector.confidence === "confirmed" || detector.confidence === "probable");
+      expect(hasStrongDetector, `${id} must have a confirmed or probable detector`).toBe(true);
+    }
+
+    const allPredicates = catalog.technologies.flatMap((technology) => technology.detectors.flatMap((detector) => [
+      ...(detector.allOf ?? []), ...(detector.anyOf ?? []), ...(detector.noneOf ?? []),
+    ]));
+    const unsupportedEcosystemPredicate = allPredicates.find((predicate) => predicate.kind === "dependency" && ["gradle", "maven", "nuget"].includes(predicate.ecosystem));
+    expect(unsupportedEcosystemPredicate).toBeUndefined();
   });
 
   it("normalizes descriptor, reference and predicate order without mutating the input", () => {

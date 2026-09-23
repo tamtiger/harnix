@@ -1,5 +1,5 @@
 export type LanguageId = "csharp" | "typescript" | "javascript" | "php" | "python" | "java" | "go";
-export type TechnologyId = "dotnet" | "abp" | "nestjs" | "spring" | "react-web" | "vue" | "codeigniter";
+export type TechnologyId = "dotnet" | "abp" | "nestjs" | "spring" | "react-web" | "vue" | "codeigniter" | "postgresql" | "mysql" | "sqlserver" | "mongodb" | "redis";
 export type TechnologyKind = "framework" | "runtime" | "platform" | "library" | "database" | "tool" | "infrastructure" | "domain";
 export type DetectionConfidence = "confirmed" | "probable" | "weak";
 export type DetectorEcosystem = "npm" | "composer" | "nuget" | "maven" | "gradle";

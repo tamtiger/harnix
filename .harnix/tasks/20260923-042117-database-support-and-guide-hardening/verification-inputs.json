@@ -1,0 +1,495 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260923-042117-database-support-and-guide-hardening",
+  "snapshots": [
+    {
+      "evidenceId": "ev-chk-catalog-detection-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-catalog-detection",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/catalog/catalog.ts",
+          "sha256": "fb95c5f14e2657399e523e950677e3696d2fcb0c97117de1bba8a218063d6dac",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/catalog/types.ts",
+          "sha256": "ace081165709a280aa409c627421a0074e6d29d1672ba3717e8d1c685cec8ba5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/catalog/validation.ts",
+          "sha256": "ce8df8d060fb9342a400e9b7fbe9c2342cbc266c79ab6e266d09d935d5774de1",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/detection.ts",
+          "sha256": "a58d194920fa90857a12d5c761e39ef4a9149f30bb4d04cbf04680d949e7b4a3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/catalog.test.ts",
+          "sha256": "2feef6fef431be7dfa74dc54af7e3c989c191d5d13f14e3e90e77f5028c628f5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/detection.test.ts",
+          "sha256": "dcaa42a36e774f574fa5e4973114384ecde89d07374870934940cc31d8300c63",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "0a57bcaf49c4baa6127462a9a3661a499bf83906cb69adb85524d2ed83c46ef6"
+    },
+    {
+      "evidenceId": "ev-chk-docs-parity-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-docs-parity",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "docs/HARNIX_PRD.md",
+          "sha256": "8260fdf4927cf3f7064298393c7a170fab66ec44ad4b438bc2b4688bc1e1c6ad",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/IMPLEMENTATION_PLAN.md",
+          "sha256": "4d405d85ec563442d88ada43aa87f70989e261fb0a1d407f0dd207e11db2ca0d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/catalog/types.ts",
+          "sha256": "ace081165709a280aa409c627421a0074e6d29d1672ba3717e8d1c685cec8ba5",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "2dce0b3143d7e065fc9cf2be9c76dc5654bfd7dd5f1a195e6574643a11e73ebe"
+    },
+    {
+      "evidenceId": "ev-chk-guide-content-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-guide-content",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/guides/common/engineering.md",
+          "sha256": "29766e3d0fd70c130821057bfcc59df2aaaae5acc2d1ee775c41a1eabc3db8d7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "4e52aeff4d79bb3f175d89a83af2137c9364efdde97926197e4685e165246a48",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "40750a49399450c8ecbae95be2fe8edbe1d9b3615e5f1c7ebf4c534e14e93ad9"
+    },
+    {
+      "evidenceId": "ev-chk-guide-content-02",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-guide-content",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/guides/common/engineering.md",
+          "sha256": "29766e3d0fd70c130821057bfcc59df2aaaae5acc2d1ee775c41a1eabc3db8d7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "72cea69b65b42cf4e800368d869ab6b760ddeab7a344b4a61cdb033317071a9c",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "714844d5464b97fb57dad757ec78fcc344963de0c970568fbdb5314e5b6db91c"
+    },
+    {
+      "evidenceId": "ev-chk-guide-selection-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-guide-selection",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/guides/catalog.ts",
+          "sha256": "7ef52942a18f587ca2789f0ac87694516676e6a19b6c9fabba18a72057b9c6ad",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/mongodb/engineering.md",
+          "sha256": "cf6a2248962bd1a23485a178293914ba327ba49c725151fd0b05ff9f792ed574",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/mysql/engineering.md",
+          "sha256": "e7ffafd9305aa7472682183fd9a44b6c74eea677e31480a7680a5747e5ffa3d9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/postgresql/engineering.md",
+          "sha256": "4b0c56df682525db5184910d918a663274e87df31083d7714a9e8df0226f7469",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/redis/engineering.md",
+          "sha256": "e4d8da6a29e977775d8e1be9dc63886ada5a63f2ed981cf1a852d01c4a7969d3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/relational/engineering.md",
+          "sha256": "b48caf6e43eee200d4f4ba1d41d0baf54e2ff1436af42d849ccb2b1941669332",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/sqlserver/engineering.md",
+          "sha256": "49fbdf0dbdcbf7fab6cacee1c2eadf59f7d0f21651309877c85a55803e320552",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "72cea69b65b42cf4e800368d869ab6b760ddeab7a344b4a61cdb033317071a9c",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "fe567d2428a1236c3d1e26d8a2f7b0919d8fcf481e3354e48148a159874068ed"
+    },
+    {
+      "evidenceId": "ev-chk-init-detection-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-init-detection",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/catalog/catalog.ts",
+          "sha256": "fb95c5f14e2657399e523e950677e3696d2fcb0c97117de1bba8a218063d6dac",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/commands/init.ts",
+          "sha256": "c500c66b96d0a54ea3a33e40b3d4177a8e42e674d586b274c7d20aaf12fb865c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/config/config.ts",
+          "sha256": "fd4bb1e0db55f5f8076b69cdb7ad1bc6fab16781c9b9551b2cc78db61b71980c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/detection.ts",
+          "sha256": "a58d194920fa90857a12d5c761e39ef4a9149f30bb4d04cbf04680d949e7b4a3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/integration/init.test.ts",
+          "sha256": "2183f3ab2216e39ba3dbf98130826a9149d6dee5f6106305b9d72e49cd51095f",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "2b521ea9ef4296e93816822295f8507f40363b86ef3549fdba11383f55d8ed34"
+    },
+    {
+      "evidenceId": "ev-chk-release-gate-03",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-release-gate",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "sha256": "91c6b33f87b114083e3045a9d789220eb8fb8aaa68b6e3bb1637cac93fad0af7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "package.json",
+          "sha256": "f93ad0ba6a2f252d694086cf938428f9a9d2b5f654c3f7758c5552047fca5707",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "scripts/scan-release.mjs",
+          "sha256": "51dc4e4d0c9f82f8062c6c9ee5ff027d39084cca77fd7394f64456b6694ab8df",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "6af73e8e2684919b0beb6eb7512b337bb34503b6d314959dfc9f0b8b96e463a4"
+    },
+    {
+      "evidenceId": "ev-chk-secret-scan-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-secret-scan",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "13ad59b03e1d577d88abd9a15496c2949b5d350d1e5f076cc74f345787e4d4c9",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "scripts/scan-release.mjs",
+          "sha256": "c5c5a8eb879e35943ce6e6f0a3db29974c72d7cc410a27379426e5694ce77dd6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/release-scanner.test.ts",
+          "sha256": "3f5f68e0364bd5cde71eb5f6873be7bd08e400aef572024ea0a0ffce096b86c1",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "bfc865746c9cb0cd475f917f6b99da1829378a8206d052bf26bb087a6c2c7659"
+    },
+    {
+      "evidenceId": "ev-chk-secret-scan-02",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-secret-scan",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "scripts/scan-release.mjs",
+          "sha256": "c5c5a8eb879e35943ce6e6f0a3db29974c72d7cc410a27379426e5694ce77dd6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/release-scanner.test.ts",
+          "sha256": "3f5f68e0364bd5cde71eb5f6873be7bd08e400aef572024ea0a0ffce096b86c1",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "b7c5e23db1c9b2e9d4f49c4dfe625b0b92344af81a975f0caa55e5f249b41279"
+    },
+    {
+      "evidenceId": "ev-chk-secret-scan-03",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-secret-scan",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "scripts/scan-release.mjs",
+          "sha256": "51dc4e4d0c9f82f8062c6c9ee5ff027d39084cca77fd7394f64456b6694ab8df",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/safety/release-scanner.test.ts",
+          "sha256": "3f5f68e0364bd5cde71eb5f6873be7bd08e400aef572024ea0a0ffce096b86c1",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "a27ca4e997c9a6a479ef0f9ff7c7902478b02fe5655dee948e54f9b5d57565b3"
+    },
+    {
+      "evidenceId": "ev-chk-skill-content-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-skill-content",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "c21f054ae99c15025813536ff1ddca0b0f33d9dddcd16b665370c1394728a95c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "58ac9135407fe1e3b64c1b5880e23ae631c3aa79437ea2807427e098301d3cc1",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "c16cd03f525711b3df1875ff4b6ed1a41f2c134057aeeba6dc818344d39a8f34"
+    },
+    {
+      "evidenceId": "ev-chk-skill-content-02",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-skill-content",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "6ebfbe81473d7a5bf969e2134e07fd3bdacb3fd5e19c0d527237caebb34f6808",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "58ac9135407fe1e3b64c1b5880e23ae631c3aa79437ea2807427e098301d3cc1",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "3c481a88c005fbb1b3c8d4f35fcf9cd3b49f98f5196a6ceffbd978a22855943f"
+    },
+    {
+      "evidenceId": "ev-chk-static-analysis-01",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260923-042117-database-support-and-guide-hardening",
+      "checkId": "chk-static-analysis",
+      "taskContractHash": "dfb22da94b31da67bc2137675f0872c3bc2e93c9cf5935f8a281acca5e07687b",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/plan.md",
+          "sha256": "eb443191272942389580d8044fc3d8dd7d0bc236fb87cd0e828a363dab6b1484",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/prd.md",
+          "sha256": "c7e501c83cd3eb59806289c294ac0baa6c1b327317d1f3b8b0368de00e919ffb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/catalog/types.ts",
+          "sha256": "ace081165709a280aa409c627421a0074e6d29d1672ba3717e8d1c685cec8ba5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/catalog/validation.ts",
+          "sha256": "ce8df8d060fb9342a400e9b7fbe9c2342cbc266c79ab6e266d09d935d5774de1",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/config/config.ts",
+          "sha256": "fd4bb1e0db55f5f8076b69cdb7ad1bc6fab16781c9b9551b2cc78db61b71980c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "dcf92ce9b023eac3633ae83c21ee4511abfe37371e0dd66479095edadccf2e39",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "cbe5a05cd48fbc412ba2000297aa63873f3e96d2b522569555519e1270e2ea6a"
+    }
+  ]
+}

@@ -10,7 +10,7 @@ export interface AgentsProjectProfile {
 }
 
 const languageLabels: Record<LanguageId, string> = { csharp: "C#", go: "Go", java: "Java", javascript: "JavaScript", php: "PHP", python: "Python", typescript: "TypeScript" };
-const technologyLabels: Record<TechnologyId, string> = { abp: "ABP", codeigniter: "CodeIgniter", dotnet: ".NET", nestjs: "NestJS", "react-web": "React web", spring: "Spring", vue: "Vue" };
+const technologyLabels: Record<TechnologyId, string> = { abp: "ABP", codeigniter: "CodeIgniter", dotnet: ".NET", mongodb: "MongoDB", mysql: "MySQL", nestjs: "NestJS", postgresql: "PostgreSQL", "react-web": "React web", redis: "Redis", spring: "Spring", sqlserver: "SQL Server", vue: "Vue" };
 const targetAuthorityInstructions = HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.map((instruction) => `- ${instruction}`).join("\n");
 const implicitActivationInstructions = HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS.join("\n\n");
 

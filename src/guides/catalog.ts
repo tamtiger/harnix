@@ -17,6 +17,12 @@ import springEngineering from "./technologies/framework/spring/engineering.md";
 import vueEngineering from "./technologies/framework/vue/engineering.md";
 import reactWebEngineering from "./technologies/library/react-web/engineering.md";
 import dotnetEngineering from "./technologies/runtime/dotnet/engineering.md";
+import databaseRelationalEngineering from "./technologies/database/relational/engineering.md";
+import postgresqlEngineering from "./technologies/database/postgresql/engineering.md";
+import mysqlEngineering from "./technologies/database/mysql/engineering.md";
+import sqlserverEngineering from "./technologies/database/sqlserver/engineering.md";
+import mongodbEngineering from "./technologies/database/mongodb/engineering.md";
+import redisEngineering from "./technologies/database/redis/engineering.md";
 
 export interface GuideSource { descriptor: GuideDescriptor; content: string }
 export interface GuideSelection {
@@ -28,8 +34,8 @@ export interface GuideSelection {
 
 const provenance = { adaptedAt: "2026-08-13", license: "MIT-compatible adaptation metadata; see NOTICE", source: "Harnix-authored adaptations informed by ECC/Superpowers research" } as const;
 
-function guide(id: string, title: string, contentPath: string, content: string, appliesTo: GuideDescriptor["appliesTo"], priority: number, activation: GuideDescriptor["activation"] = "always"): GuideSource {
-  return { descriptor: { activation, appliesTo, category: "guide", contentPath, description: `${title} guidance`, id, priority, provenance, title }, content };
+function guide(id: string, title: string, contentPath: string, content: string, appliesTo: GuideDescriptor["appliesTo"], priority: number, activation: GuideDescriptor["activation"] = "always", extends_?: GuideDescriptor["extends"]): GuideSource {
+  return { descriptor: { activation, appliesTo, category: "guide", contentPath, description: `${title} guidance`, extends: extends_, id, priority, provenance, title }, content };
 }
 
 export const guideSources: GuideSource[] = [
@@ -48,6 +54,12 @@ export const guideSources: GuideSource[] = [
   guide("technology-vue", "Vue", "technologies/framework/vue/engineering.md", vueEngineering, { technologies: ["vue"] }, 20),
   guide("technology-react-web", "React web", "technologies/library/react-web/engineering.md", reactWebEngineering, { technologies: ["react-web"] }, 20),
   guide("technology-dotnet", ".NET", "technologies/runtime/dotnet/engineering.md", dotnetEngineering, { technologies: ["dotnet"] }, 20),
+  guide("technology-database-relational", "Relational database", "technologies/database/relational/engineering.md", databaseRelationalEngineering, { technologies: ["postgresql", "mysql", "sqlserver"] }, 20),
+  guide("technology-postgresql", "PostgreSQL", "technologies/database/postgresql/engineering.md", postgresqlEngineering, { technologies: ["postgresql"] }, 20, "always", ["technology-database-relational"]),
+  guide("technology-mysql", "MySQL", "technologies/database/mysql/engineering.md", mysqlEngineering, { technologies: ["mysql"] }, 20, "always", ["technology-database-relational"]),
+  guide("technology-sqlserver", "SQL Server", "technologies/database/sqlserver/engineering.md", sqlserverEngineering, { technologies: ["sqlserver"] }, 20, "always", ["technology-database-relational"]),
+  guide("technology-mongodb", "MongoDB", "technologies/database/mongodb/engineering.md", mongodbEngineering, { technologies: ["mongodb"] }, 20),
+  guide("technology-redis", "Redis", "technologies/database/redis/engineering.md", redisEngineering, { technologies: ["redis"] }, 20),
 ];
 
 validateStackCatalog({

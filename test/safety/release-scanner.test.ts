@@ -61,6 +61,32 @@ describe("release scanner negative fixtures", () => {
     await expect(scanTextFiles([file], "negative fixture", false)).rejects.toThrow(error);
   });
 
+  it.each([
+    ["aws_access_key", "AKIA" + "IOSFODNN7EXAMPLE"],
+    ["github_classic_token", "gh" + "p_16C7e42F292c6912E7710c838347Ae178B4a"],
+    ["github_fine_grained_token", "github_pat_" + "11AAAAAAA0aaaaaaaaaaaa_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+    ["stripe_live_key", "sk_live_" + "4eC39HqLyjWDarjtT1zdp7dc"],
+    ["stripe_restricted_key", "rk_live_" + "4eC39HqLyjWDarjtT1zdp7dc"],
+    ["slack_token", "xoxb-" + "1234567890-abcdefghijklmnop"],
+    ["google_api_key", "AIza" + "SyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY"],
+    ["anthropic_api_key", "sk-ant-" + "api03-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"],
+    ["private_key_header", "-----BEGIN " + "RSA PRIVATE KEY-----"],
+    ["jwt_three_part_token", "eyJhbGciOiJIUzI1NiJ9" + "." + "eyJzdWIiOiIxMjMifQ" + "." + "abcdefghijklmnopqrstuv"],
+    ["database_connection_string_with_credential", "postgres://admin:" + "Sup3rS3cret" + "@db.internal:5432/app"],
+  ])("should_reject_%s_when_packaged_text_contains_a_structured_secret", async (_category, content) => {
+    const root = await fixture();
+    const file = await writeFixtureFile(root, "dist/index.js", content);
+
+    await expect(scanTextFiles([file], "negative fixture", false)).rejects.toThrow(/Potential secret found/u);
+  });
+
+  it("should_accept_ordinary_prose_and_identifiers_without_a_structured_secret_shape", async () => {
+    const root = await fixture();
+    const file = await writeFixtureFile(root, "dist/index.js", "export const releaseNotes = \"See CHANGELOG for the AKIA-style example naming convention.\";\n");
+
+    await expect(scanTextFiles([file], "negative control", false)).resolves.toBeUndefined();
+  });
+
   it("should_accept_code_like_escaped_path_separators_without_treating_them_as_a_UNC_path", async () => {
     const root = await fixture();
     const file = await writeFixtureFile(root, "dist/index.js", 'const separators = ["\\\\", "/"];\n');

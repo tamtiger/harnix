@@ -63,7 +63,7 @@ export interface CreateConfigOptions {
 }
 
 const languageIds = new Set<LanguageId>(["csharp", "typescript", "javascript", "php", "python", "java", "go"]);
-const technologyIds = new Set<TechnologyId>(["dotnet", "abp", "nestjs", "spring", "react-web", "vue", "codeigniter"]);
+const technologyIds = new Set<TechnologyId>(["dotnet", "abp", "nestjs", "spring", "react-web", "vue", "codeigniter", "postgresql", "mysql", "sqlserver", "mongodb", "redis"]);
 const legacyIds = new Set<LegacyStackId>(legacyStackIds);
 const platformIds = new Set<PlatformId>(["kiro", "antigravity", "codex", "claude"]);
 const developerPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u;

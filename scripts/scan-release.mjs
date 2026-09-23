@@ -1,7 +1,7 @@
 import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from "node:fs/promises";
 import { builtinModules, createRequire } from "node:module";
 import { tmpdir } from "node:os";
-import { dirname, extname, join, resolve } from "node:path";
+import { dirname, extname, join, relative, resolve } from "node:path";
 import { performance } from "node:perf_hooks";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -15,6 +15,23 @@ const packageImportExtensions = ["", ".js", ".mjs", ".cjs", ".json"];
 const executableExtensions = new Set([".cjs", ".js", ".mjs"]);
 const builtinSpecifiers = new Set([...builtinModules, ...builtinModules.map((name) => `node:${name}`)]);
 const potentialSecretPattern = /(?:api[_-]?key|password|secret|token)\s*([=:])\s*(?:['"][^'"]{8,}|([A-Za-z0-9][A-Za-z0-9._~+/-]{7,}))/giu;
+
+// High-confidence: a fixed vendor prefix plus a structured token body. These formats are
+// specific enough that a genuine TypeScript type name or identifier cannot collide with them,
+// so no type-reference exclusion is needed here.
+const structuredSecretPatterns = [
+  { name: "AWS access key", pattern: /AKIA[0-9A-Z]{16}/u },
+  { name: "GitHub token", pattern: /gh[pousr]_[A-Za-z0-9_]{36,255}/u },
+  { name: "GitHub fine-grained token", pattern: /github_pat_[A-Za-z0-9_]{22,}/u },
+  { name: "Stripe live/restricted key", pattern: /(?:sk|rk)_live_[0-9a-zA-Z]{24,}/u },
+  { name: "Slack token", pattern: /xox[baprs]-[0-9a-zA-Z-]{10,}/u },
+  { name: "Google API key", pattern: /AIza[0-9A-Za-z_-]{35}/u },
+  { name: "Anthropic API key", pattern: /sk-ant-[A-Za-z0-9_-]{40,}/u },
+  { name: "private key header", pattern: /-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----/u },
+  { name: "JWT", pattern: /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/u },
+  // Medium-confidence: a database connection string that embeds a credential before the host.
+  { name: "database connection string with credential", pattern: /(?:postgres|postgresql|mysql|mongodb(?:\+srv)?|redis|sqlserver|mssql):\/\/[^\s'"/@]+:[^\s'"/@]+@/u },
+];
 
 export async function runReleaseScan(options = {}) {
   const root = options.root ?? repositoryRoot;
@@ -30,9 +47,10 @@ export async function runReleaseScan(options = {}) {
     await mkdir(packageManagerHome);
     await mkdir(userHome);
     const tarball = join(artifacts, tarballs[0]);
-    const listing = run("tar", ["-tzf", tarball], root).stdout.split(/\r?\n/u).filter(Boolean);
+    const tarballArchiveArgument = toTarArgumentPath(relative(root, tarball));
+    const listing = run("tar", ["-tzf", tarballArchiveArgument], root).stdout.split(/\r?\n/u).filter(Boolean);
     await assertTarballListing(listing);
-    run("tar", ["-xzf", tarball, "-C", temporary], root);
+    run("tar", ["-xzf", tarballArchiveArgument, "-C", toTarArgumentPath(temporary)], root);
 
     const unpacked = join(temporary, "package");
     const packedPackageJson = JSON.parse(await readFile(join(unpacked, "package.json"), "utf8"));
@@ -142,7 +160,7 @@ function containsPotentialSecretText(text, ignoredTypeReferenceRanges) {
     if (separator === ":" && unquotedValue !== undefined && isTypeReference) continue;
     return true;
   }
-  return false;
+  return structuredSecretPatterns.some(({ pattern }) => pattern.test(text));
 }
 
 function parseSourceMap(text) {
@@ -373,6 +391,14 @@ function importSpecifiers(source) {
   };
   ts.forEachChild(file, visit);
   return [...specifiers];
+}
+
+// A raw absolute Windows path containing backslashes is misparsed by MSYS/Git-Bash `tar` on
+// this platform (a colon after the drive letter is read as a remote-host spec). Forward slashes
+// are accepted by Windows path APIs and sidestep the MSYS translation layer entirely; this is a
+// no-op on POSIX, where paths never contain a backslash.
+function toTarArgumentPath(path) {
+  return path.replaceAll("\\", "/");
 }
 
 function run(executable, args, cwd, env, input, expectedStatuses = [0]) {

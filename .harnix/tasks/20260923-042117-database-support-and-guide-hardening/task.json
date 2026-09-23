@@ -1,0 +1,565 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260923-042117-database-support-and-guide-hardening",
+  "title": "Hỗ trợ database hạng nhất trong catalog và siết guide/skill/scan từ nghiên cứu ak-quick-setup",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bổ sung pattern secret có cấu trúc vào cổng release, siết ranh giới nhiễu và taxonomy lỗi cho harnix-check, thêm kỷ luật tiến trình nền cùng artifact ổn định vào guide chung, và đưa năm database (PostgreSQL, MySQL, SQL Server, MongoDB, Redis) thành technology hạng nhất có detector và guide riêng.",
+  "nonGoals": [
+    "Không mở rộng src/utils/detection.ts để thu thập dependency nuget/maven/gradle.",
+    "Không nhập bất kỳ skill ak-* hoặc agent nào dưới dạng file vào Harnix.",
+    "Không nhập nội dung reference gắn version của AK vào language/technology guide hiện có.",
+    "Không adopt defense-in-depth bốn lớp của AK vì mâu thuẫn với nguyên tắc parse-once-at-the-boundary hiện có.",
+    "Không sửa hay xoá docs/ak-quick-setup/ (untracked, thuộc sở hữu người dùng).",
+    "Không thêm database nào ngoài năm ID đã chốt."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "release-scan-detects-structured-secrets",
+      "text": "scanTextFiles trong scripts/scan-release.mjs ném lỗi khi gặp bất kỳ định dạng secret có cấu trúc nào trong nhóm high-confidence: khoá AWS, GitHub token classic và fine-grained, Stripe live/restricted key, Slack token, Google API key, khoá Anthropic, header private key, JWT ba phần, và connection string database chứa credential. Đồng thời pnpm run scan:release tiếp tục pass trên tarball và fixture hiện tại, chứng minh không có false positive trên nội dung hợp lệ đang được đóng gói.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-secret-scan-03"
+      ]
+    },
+    {
+      "id": "check-skill-defines-review-noise-bounds",
+      "text": "src/skills/harnix-check/SKILL.md chứa danh sách tường minh những loại finding không được báo cáo (ít nhất: dư thừa giúp dễ đọc, yêu cầu thêm comment giải thích ngưỡng, thay đổi chỉ nhằm nhất quán, no-op vô hại, vấn đề style thuộc về linter, và bất kỳ điều gì đã được xử lý ngay trong diff đang review), cộng taxonomy mẫu lỗi cụ thể cho Stage 2 gồm ít nhất: find-or-create thiếu unique constraint, status transition thiếu điều kiện atomic, so sánh token không dùng constant-time, output của LLM ghi vào lưu trữ hoặc truy vấn mà không validate, và N+1 trong vòng lặp. Nội dung trả về nguyên vẹn qua harnix skill harnix-check.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-skill-content-02"
+      ]
+    },
+    {
+      "id": "common-guide-adds-process-and-artifact-discipline",
+      "text": "src/guides/common/engineering.md chứa hướng dẫn quản lý tiến trình nền (theo dõi tiến trình đã khởi động, tái dùng hoặc dừng thay vì đổi cổng khi cổng bận, dừng khi task hoặc session kết thúc, chỉ dừng tiến trình mình sở hữu), quy tắc không nhúng ID kế hoạch, số phase, ID tiêu chí hay ID check vào comment, tên test, tên migration hoặc commit message, và quy tắc kinh tế tool-call. Danh sách unhappy-path hiện có được mở rộng thêm các chiều authorization, data integrity, integration/contract drift và error cascade.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-guide-content-02"
+      ]
+    },
+    {
+      "id": "catalog-supports-five-databases",
+      "text": "stackCatalog.technologies chứa đúng năm descriptor mới với kind database và ID mongodb, mysql, postgresql, redis, sqlserver. Mỗi descriptor có ít nhất một detector confirmed hợp lệ theo validateStackCatalog, và detection trên fixture repo nhận diện đúng từng database qua dependency npm hoặc qua content glob cho csproj, pom.xml, build.gradle. Không descriptor nào dùng detector dependency với ecosystem nuget, maven hoặc gradle.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-catalog-detection-01"
+      ]
+    },
+    {
+      "id": "database-guides-selected-by-stack",
+      "text": "Mỗi database có một file guide dưới src/guides/technologies/database/, cộng một guide nền dùng chung cho nhóm quan hệ được các guide quan hệ tham chiếu qua extends. selectGuideSources trả về đúng guide vendor kèm guide nền khi stack chứa database tương ứng, và không trả về guide database nào khi stack không chứa database. seedRules ghi các file đó vào đúng đường dẫn dưới .harnix/spec/guides/. Không file guide nào chứa chuỗi khớp pattern secret mới.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-guide-selection-01"
+      ]
+    },
+    {
+      "id": "technology-id-sync-complete",
+      "text": "Cả bốn điểm đồng bộ cùng liệt kê đủ năm ID mới: union TechnologyId trong src/catalog/types.ts, tập technologyIds trong src/catalog/validation.ts (chạy lúc module load bên trong validateStackCatalog), tập technologyIds trong src/core/config/config.ts, và bản ghi technologyLabels trong src/templates/harnix/agents.ts. parseInitProfile chấp nhận từng ID mới qua cờ --technologies và từ chối ID không hợp lệ. pnpm run typecheck và pnpm run lint đều xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-static-analysis-01"
+      ]
+    },
+    {
+      "id": "init-detects-databases-end-to-end",
+      "text": "initializeProject tự nhận diện database mà không cần cờ --technologies: trên fixture repo có package.json khai báo pg hoặc mongodb, và trên fixture có csproj chứa Npgsql hoặc pom.xml chứa driver PostgreSQL, file .harnix/config.yaml được ghi ra chứa đúng technology ID database tương ứng, và detection.matches chứa match với facet technology cùng kind database. Vì selectedTechnologies loại bỏ match có confidence weak, mọi detector database phải đạt confirmed hoặc probable mới được auto-select.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-init-detection-01"
+      ]
+    },
+    {
+      "id": "frozen-contract-docs-updated-same-change",
+      "text": "docs/IMPLEMENTATION_PLAN.md muc 4 cập nhật khai báo TechnologyId và mục 4.1A cập nhật danh sách technology kind ban đầu để phản ánh năm database mới; docs/HARNIX_PRD.md mô tả hỗ trợ database ở mức sản phẩm. Cả hai nằm trong cùng lần thay đổi với code, không để lại tài liệu lệch.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-docs-parity-01"
+      ]
+    },
+    {
+      "id": "release-artifacts-prepared",
+      "text": "package.json tăng patch version đúng một lần và CHANGELOG.md có một mục duy nhất mô tả các thay đổi hướng người dùng. pnpm run build, pnpm run scan:release và pnpm run test:acceptance đều pass với evidence tươi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-release-gate-03"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "package.json",
+    "scripts/scan-release.mjs",
+    "src/catalog/catalog.ts",
+    "src/catalog/types.ts",
+    "src/catalog/validation.ts",
+    "src/commands/init.ts",
+    "src/core/config/config.ts",
+    "src/guides/catalog.ts",
+    "src/guides/common/engineering.md",
+    "src/guides/technologies/database",
+    "src/skills/harnix-check/SKILL.md",
+    "src/templates/harnix/agents.ts",
+    "src/utils/detection.ts",
+    "test/integration/init.test.ts",
+    "test/safety/release-scanner.test.ts",
+    "test/unit/catalog.test.ts",
+    "test/unit/detection.test.ts",
+    "test/unit/rules.test.ts",
+    "test/workflow/skill-sources.test.ts"
+  ],
+  "relevantSpecs": [
+    "AGENTS.md",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-catalog-detection",
+      "description": "Test xác nhận năm technology database hợp lệ trong catalog và được detection nhận diện đúng trên fixture",
+      "command": "pnpm exec vitest run test/unit/catalog.test.ts test/unit/detection.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "catalog-supports-five-databases"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/catalog/catalog.ts",
+        "src/catalog/types.ts",
+        "src/catalog/validation.ts",
+        "src/utils/detection.ts",
+        "test/unit/catalog.test.ts",
+        "test/unit/detection.test.ts"
+      ]
+    },
+    {
+      "id": "chk-init-detection",
+      "description": "Test tích hợp xác nhận harnix init tự nhận diện database và ghi đúng vào config mà không cần cờ ghi đè",
+      "command": "pnpm exec vitest run test/integration/init.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "init-detects-databases-end-to-end"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/catalog/catalog.ts",
+        "src/commands/init.ts",
+        "src/core/config/config.ts",
+        "src/utils/detection.ts",
+        "test/integration/init.test.ts"
+      ]
+    },
+    {
+      "id": "chk-docs-parity",
+      "description": "Kiểm tra bằng đọc đối chiếu rằng IMPLEMENTATION_PLAN và HARNIX_PRD phản ánh đúng union TechnologyId cuối cùng",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "frozen-contract-docs-updated-same-change"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/catalog/types.ts"
+      ]
+    },
+    {
+      "id": "chk-guide-content",
+      "description": "Test xác nhận guide chung chứa kỷ luật tiến trình nền, artifact ổn định, kinh tế tool-call và unhappy-path mở rộng",
+      "command": "pnpm exec vitest run test/unit/rules.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "common-guide-adds-process-and-artifact-discipline"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/guides/common/engineering.md",
+        "test/unit/rules.test.ts"
+      ]
+    },
+    {
+      "id": "chk-guide-selection",
+      "description": "Test xác nhận guide database được chọn và ghi đúng theo stack, và không guide nào chứa chuỗi khớp pattern secret",
+      "command": "pnpm exec vitest run test/unit/rules.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "database-guides-selected-by-stack"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/guides/catalog.ts",
+        "src/guides/technologies/database/**/*.md",
+        "test/unit/rules.test.ts"
+      ]
+    },
+    {
+      "id": "chk-release-gate",
+      "description": "Cổng release rộng: build, quét release và toàn bộ chuỗi acceptance",
+      "command": "pnpm run build && pnpm run scan:release && pnpm run test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "release-artifacts-prepared"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/scan-release.mjs"
+      ]
+    },
+    {
+      "id": "chk-secret-scan",
+      "description": "Test hồi quy xác nhận scanTextFiles chặn mọi định dạng secret có cấu trúc và không false positive trên nội dung hợp lệ",
+      "command": "pnpm exec vitest run test/safety/release-scanner.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "release-scan-detects-structured-secrets"
+      ],
+      "inputs": [
+        "@task-contract",
+        "scripts/scan-release.mjs",
+        "test/safety/release-scanner.test.ts"
+      ]
+    },
+    {
+      "id": "chk-skill-content",
+      "description": "Test xác nhận nội dung canonical của harnix-check chứa suppression list và taxonomy mẫu lỗi cụ thể",
+      "command": "pnpm exec vitest run test/workflow/skill-sources.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "check-skill-defines-review-noise-bounds"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/skills/harnix-check/SKILL.md",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "chk-static-analysis",
+      "description": "Typecheck và lint xác nhận cả bốn điểm đồng bộ TechnologyId đã đầy đủ",
+      "command": "pnpm run typecheck && pnpm run lint",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "technology-id-sync-complete"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/catalog/types.ts",
+        "src/catalog/validation.ts",
+        "src/core/config/config.ts",
+        "src/templates/harnix/agents.ts"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "five-databases-chosen",
+      "text": "Catalog nhận đúng năm database: postgresql, mysql, sqlserver, mongodb, redis.",
+      "rationale": "Người dùng chọn phương án năm DB khi được hỏi. Bốn DB đầu phủ đủ các stack Harnix hỗ trợ (ABP và .NET mặc định SQL Server, CodeIgniter dùng MySQL, NestJS dùng Postgres và Mongo, Spring dùng Postgres hoặc MySQL); Redis được thêm theo lựa chọn tường minh dù là cache-store khác thể loại."
+    },
+    {
+      "id": "no-detection-engine-change",
+      "text": "Detector database dùng dependency npm/composer cộng content glob, không mở rộng detection engine.",
+      "rationale": "src/utils/detection.ts chỉ thu thập dependency npm và composer; nuget, maven, gradle có trong type DetectorEcosystem nhưng không bao giờ được collect. Spring và ABP đã dùng content glob vì cùng lý do này."
+    },
+    {
+      "id": "technology-kind-already-supports-database",
+      "text": "Không đổi enum TechnologyKind.",
+      "rationale": "src/catalog/types.ts đã khai báo sẵn giá trị database trong TechnologyKind; chỉ union TechnologyId cần mở rộng."
+    },
+    {
+      "id": "guides-keep-principle-prose-genre",
+      "text": "Guide database viết theo thể loại prose nguyên lý, không phải reference gắn API hay version.",
+      "rationale": "Toàn bộ 15 guide hiện có theo thể loại này và tổng chỉ 386 dòng; nội dung gắn version sẽ mục và Harnix không có cơ chế bảo trì, trong khi measure:footprint cho thấy footprint là ràng buộc được đo."
+    },
+    {
+      "id": "guides-must-not-contain-secret-shaped-strings",
+      "text": "Guide và skill không được chứa chuỗi ví dụ mang hình dạng secret, đặc biệt là connection string.",
+      "rationale": "Nội dung guide được bundle vào dist/ và scan:release quét toàn bộ tarball. Pattern medium-confidence cho connection string sẽ khớp một ví dụ có credential và tự làm hỏng cổng release."
+    },
+    {
+      "id": "relational-guides-share-base-via-extends",
+      "text": "Ba guide quan hệ tham chiếu một guide nền qua trường extends.",
+      "rationale": "GuideDescriptor đã có sẵn cơ chế extends và selectGuideSources đã xử lý nó; dùng lại tránh lặp nguyên tắc quan hệ ba lần."
+    },
+    {
+      "id": "four-not-three-sync-points",
+      "text": "Việc mở rộng TechnologyId phải chạm đủ bốn nơi, trong đó src/catalog/validation.ts là nơi nguy hiểm nhất.",
+      "rationale": "Người dùng yêu cầu rà lại phần detect lúc harnix init. Rà soát phát hiện validation.ts dòng 13 giữ một tập technologyIds hardcode thứ tư mà bản kế hoạch đầu bỏ sót; validateStackCatalog chạy ngay lúc module load của catalog.ts nên bỏ sót nó làm chính catalog không import nổi. Ngược lại src/commands/init.ts dòng 42 suy ra tập ID từ stackCatalog nên không cần sửa, và init không có prompt tương tác liệt kê technology."
+    },
+    {
+      "id": "database-detectors-must-not-be-weak-only",
+      "text": "Mọi detector database phải đạt confirmed hoặc probable, không được chỉ có weak.",
+      "rationale": "selectedTechnologies trong src/utils/detection.ts lọc bỏ match có confidence weak trước khi ghi vào config, nên một detector chỉ đạt weak sẽ hiện trong detection.matches nhưng không bao giờ được auto-select lúc harnix init."
+    },
+    {
+      "id": "fixed-tar-absolute-path-bug",
+      "text": "Sua scripts/scan-release.mjs de dung archive path tuong doi (relative(root, tarball)) va forward-slash cho -C, thay vi absolute Windows path nguyen ban.",
+      "rationale": "pnpm run scan:release that bai 100% tren may nay vi GNU tar (chay qua Git-Bash/MSYS) hieu C:... hoac C:/... o vi tri doi so archive (-f) la mot remote-host spec (loi Cannot connect to C:). Da kiem chung bang script doc lap: dung archive path tuong doi (giong pack-check.mjs da lam dung tu truoc) sua triet de, forward-slash rieng cho -C cung xac nhan hoat dong. scan-release.mjs da nam trong relevantPaths cua task nay (sua o slice S2) va sua truc tiep phuc vu tieu chi release-artifacts-prepared, nen day la sua loi trong pham vi, khong phai scope creep."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "jwt-pattern-false-positive",
+      "text": "Pattern JWT có thể false-positive trên một blob base64 vô hại trong dist; slice S2 phải chạy scan:release thật để loại trừ trước khi coi là xong.",
+      "severity": "medium"
+    },
+    {
+      "id": "older-harnix-rejects-new-config",
+      "text": "Một config .harnix/config.yaml ghi bởi bản Harnix mới có ID database sẽ bị bản cũ từ chối vì tập technologyIds cũ không chứa ID đó; đây là hành vi fail-closed mong muốn nhưng cần ghi trong CHANGELOG.",
+      "severity": "low"
+    },
+    {
+      "id": "common-guide-footprint-growth",
+      "text": "Guide chung là guide always nên mọi dòng thêm vào đều tính vào footprint của mọi dự án; slice S6 phải giữ mức tăng có kiểm soát.",
+      "severity": "low"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-23T04:33:53Z",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Rà lại phần nhận diện lúc harnix init theo yêu cầu người dùng: phát hiện src/catalog/validation.ts giữ tập technologyIds hardcode thứ tư mà kế hoạch đầu bỏ sót, và selectedTechnologies lọc bỏ confidence weak. Bổ sung tiêu chí init-detects-databases-end-to-end cùng check chk-init-detection, mở rộng tiêu chí đồng bộ lên đủ bốn điểm.",
+      "artifactPaths": [
+        ".harnix/tasks/20260923-042117-database-support-and-guide-hardening/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-secret-scan-01",
+      "checkId": "chk-secret-scan",
+      "recordedAt": "2026-09-23T04:41:17Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/safety/release-scanner.test.ts: 48/48 pass, gồm 11 mẫu secret có cấu trúc mới (AWS/GitHub classic+fine-grained/Stripe live+restricted/Slack/Google/Anthropic/private-key-header/JWT/DB-connection-string) và 1 case đối chứng không false-positive. Xác nhận bổ sung bằng cách chạy scanTextFiles thật trên tarball đã đóng gói (16 file, script tạm ngoài task) do pnpm run scan:release bị chặn bởi lỗi môi trường Windows/Git-Bash tar tiền hữu (absolute drive-letter path bị hiểu nhầm thành remote host) không liên quan tới thay đổi này; đã xác nhận lỗi này tái hiện với path tuyệt đối bất kể nội dung scanner.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "test/safety/release-scanner.test.ts"
+      ],
+      "inputDigest": "bfc865746c9cb0cd475f917f6b99da1829378a8206d052bf26bb087a6c2c7659"
+    },
+    {
+      "id": "ev-chk-skill-content-01",
+      "checkId": "chk-skill-content",
+      "recordedAt": "2026-09-23T04:43:56Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/skill-sources.test.ts: 6/6 pass. harnix-check/SKILL.md nay co muc Suppressions (6 loai finding bi cam bao cao) va taxonomy Stage 2 cu the (find-or-create/unique constraint, status transition atomic, constant-time comparison, LLM output chua validate, N+1); noi dung con 132 dong, duoi gioi han 500.",
+      "artifactPaths": [
+        "src/skills/harnix-check/SKILL.md",
+        "test/workflow/skill-sources.test.ts"
+      ],
+      "inputDigest": "c16cd03f525711b3df1875ff4b6ed1a41f2c134057aeeba6dc818344d39a8f34"
+    },
+    {
+      "id": "ev-chk-guide-content-01",
+      "checkId": "chk-guide-content",
+      "recordedAt": "2026-09-23T04:46:38Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/rules.test.ts: 11/11 pass. engineering.md nay co muc Manage background processes and shared resources, muc Work efficiently across tool calls, bullet cam nhung plan/criterion/check ID vao code artifact trong Deliver with evidence, va dong unhappy-path mo rong them data integrity/error cascade/contract drift. Guide con 53 dong.",
+      "artifactPaths": [
+        "src/guides/common/engineering.md",
+        "test/unit/rules.test.ts"
+      ],
+      "inputDigest": "40750a49399450c8ecbae95be2fe8edbe1d9b3615e5f1c7ebf4c534e14e93ad9"
+    },
+    {
+      "id": "ev-chk-catalog-detection-01",
+      "checkId": "chk-catalog-detection",
+      "recordedAt": "2026-09-23T05:01:28Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/catalog.test.ts test/unit/detection.test.ts: 22/22 pass. 5 database descriptor (mongodb/mysql/postgresql/redis/sqlserver) co kind database, detector confirmed qua npm dependency (pg/mysql2/mongodb/ioredis) hoac content glob (*.csproj chua Npgsql/Microsoft.Data.SqlClient, pom.xml chua postgresql), khong descriptor nao dung ecosystem nuget/maven/gradle.",
+      "artifactPaths": [
+        "src/catalog/catalog.ts",
+        "src/catalog/types.ts",
+        "src/catalog/validation.ts",
+        "test/unit/catalog.test.ts",
+        "test/unit/detection.test.ts"
+      ],
+      "inputDigest": "0a57bcaf49c4baa6127462a9a3661a499bf83906cb69adb85524d2ed83c46ef6"
+    },
+    {
+      "id": "ev-chk-init-detection-01",
+      "checkId": "chk-init-detection",
+      "recordedAt": "2026-09-23T05:01:28Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/init.test.ts: 8/8 pass. initializeProject tu nhan dien database (postgresql tu npm:pg, mongodb tu npm:mongodb) khong can co --technologies, ghi dung ID vao .harnix/config.yaml, detection.matches chua facet technology kind database.",
+      "artifactPaths": [
+        "src/commands/init.ts",
+        "test/integration/init.test.ts"
+      ],
+      "inputDigest": "2b521ea9ef4296e93816822295f8507f40363b86ef3549fdba11383f55d8ed34"
+    },
+    {
+      "id": "ev-chk-guide-selection-01",
+      "checkId": "chk-guide-selection",
+      "recordedAt": "2026-09-23T05:01:28Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/rules.test.ts: 16/16 pass. selectGuideSources tra ve guide nen technology-database-relational truoc guide vendor cho postgresql/mysql/sqlserver, chi tra guide rieng cho mongodb/redis, khong tra guide database nao khi stack khong co DB. seedRules ghi dung duong dan. Quet 6 file guide bang scanTextFiles that (khong mock) xac nhan khong chuoi nao khop pattern secret moi.",
+      "artifactPaths": [
+        "src/guides/catalog.ts",
+        "test/unit/rules.test.ts"
+      ],
+      "inputDigest": "fe567d2428a1236c3d1e26d8a2f7b0919d8fcf481e3354e48148a159874068ed"
+    },
+    {
+      "id": "ev-chk-static-analysis-01",
+      "checkId": "chk-static-analysis",
+      "recordedAt": "2026-09-23T05:01:28Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm run typecheck: xanh (exit 0), xac nhan ca 4 diem dong bo TechnologyId nhat quan (types.ts, validation.ts, config.ts, agents.ts Record duoc TS ep exhaustive). pnpm run lint tren toan repo hien dang bi chan boi mot loi tien huu KHONG lien quan: eslint.config.mjs chua co 'docs/**' trong ignores nen quet ca docs/ak-quick-setup/ (thu muc untracked, ngoai pham vi task, co san tu truoc phien lam viec nay) sinh 25291 loi tu file JS ben thu ba (vd mermaid.min.js). Da xac nhan bang scoped lint 'eslint . --ignore-pattern docs/**' tren dung cung mot bo file: 0 loi, exit 0 -- moi file trong src/test/scripts deu sach. Khong sua eslint.config.mjs vi ngoai relevantPaths cua task nay va la quyet dinh cua nguoi dung (giu hay xoa docs/ak-quick-setup/).",
+      "artifactPaths": [
+        "src/catalog/types.ts",
+        "src/catalog/validation.ts",
+        "src/core/config/config.ts",
+        "src/templates/harnix/agents.ts"
+      ],
+      "inputDigest": "cbe5a05cd48fbc412ba2000297aa63873f3e96d2b522569555519e1270e2ea6a"
+    },
+    {
+      "id": "ev-chk-docs-parity-01",
+      "checkId": "chk-docs-parity",
+      "recordedAt": "2026-09-23T05:04:01Z",
+      "result": "pass",
+      "summary": "Doc doi chieu: docs/IMPLEMENTATION_PLAN.md dong 96 (union TechnologyId) khop byte-for-byte voi src/catalog/types.ts dong 2, ca hai cung liet ke postgresql|mysql|sqlserver|mongodb|redis. Muc 4.1A da them 'postgresql|mysql|sqlserver|mongodb|redis:database' vao danh sach technology kind ban dau va giai thich detector dung dependency(npm|composer)+content, khong dung nuget|maven|gradle. docs/HARNIX_PRD.md muc 15 da mo ta 5 database o muc san pham, bao gom quan he chia se guide qua extends va MongoDB/Redis dung rieng.",
+      "artifactPaths": [
+        "docs/HARNIX_PRD.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/catalog/types.ts"
+      ],
+      "inputDigest": "2dce0b3143d7e065fc9cf2be9c76dc5654bfd7dd5f1a195e6574643a11e73ebe"
+    },
+    {
+      "id": "ev-chk-release-gate-01",
+      "checkId": "chk-release-gate",
+      "recordedAt": "2026-09-23T05:09:37Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm run build: pass (exit 0). pnpm run scan:release: that bai boi loi moi truong Windows/Git-Bash tar tien huu (khong lien quan) -- tar hieu nham drive-letter path tuyet doi thanh remote-host spec ('Cannot connect to C:'); da xac nhan bang cach unpack tarball qua duong dan tuong doi (giong pack-check.mjs) roi goi scanTextFiles that: 0 loi tren 16 file dong goi. pnpm run test:acceptance: that bai duy nhat tai test/unit/package-contract.test.ts 'ships one publishable Harnix package' -- ham quet tim thay 11 package.json thay vi 1, nhung 10/11 la nhieu tien huu ngoai pham vi: 9 file duoi docs/ak-quick-setup/ (untracked, non-goal cua task nay) va 1 file duoi .kilo/worktrees/phantom-amount/ (worktree mo coi, khong track boi git, khong tao boi task nay). Da xac nhan bang cach chay lai chinh ham findPackageJsonFiles voi 'docs' va '.kilo' duoc them vao nonProductDirectories: ket qua dung 1 package.json (goc). Tat ca 616 test con lai cua test:acceptance (unit tru 1 test nay, integration 127, migration 9, platform 33, workflow 117, safety 54) deu pass. KHONG sua eslint.config.mjs, package-contract.test.ts, xoa docs/ak-quick-setup/, hay xoa worktree vi ca bon deu ngoai relevantPaths cua task va la hanh dong pha huy/quyet dinh can nguoi dung uy quyen truoc.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "scripts/scan-release.mjs",
+        "test/unit/package-contract.test.ts",
+        ".kilo/worktrees/phantom-amount"
+      ],
+      "inputDigest": "a33be9256949b0057c5428c92192e48dfde154beff4e62eb62ae8b923d16fb58"
+    },
+    {
+      "id": "ev-chk-secret-scan-02",
+      "checkId": "chk-secret-scan",
+      "recordedAt": "2026-09-23T06:15:22Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Rerun sau khi task-contract doi do cac slice sau (S3-S12) tiep tuc tick checklist: pnpm exec vitest run test/safety/release-scanner.test.ts van 48/48 pass, khong doi hanh vi.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "test/safety/release-scanner.test.ts"
+      ],
+      "inputDigest": "b7c5e23db1c9b2e9d4f49c4dfe625b0b92344af81a975f0caa55e5f249b41279"
+    },
+    {
+      "id": "ev-chk-skill-content-02",
+      "checkId": "chk-skill-content",
+      "recordedAt": "2026-09-23T06:15:22Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Rerun sau khi SKILL.md doi metadata.version do pnpm run version:sync (1.1.10 -> 1.1.11): pnpm exec vitest run test/workflow/skill-sources.test.ts van 6/6 pass, noi dung suppression/taxonomy khong doi.",
+      "artifactPaths": [
+        "src/skills/harnix-check/SKILL.md",
+        "test/workflow/skill-sources.test.ts"
+      ],
+      "inputDigest": "3c481a88c005fbb1b3c8d4f35fcf9cd3b49f98f5196a6ceffbd978a22855943f"
+    },
+    {
+      "id": "ev-chk-guide-content-02",
+      "checkId": "chk-guide-content",
+      "recordedAt": "2026-09-23T06:15:22Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Rerun sau khi test/unit/rules.test.ts duoc mo rong them describe block 'database guide selection' o slice S9: pnpm exec vitest run test/unit/rules.test.ts van 16/16 pass, noi dung engineering.md khong doi tu lan pass truoc.",
+      "artifactPaths": [
+        "src/guides/common/engineering.md",
+        "test/unit/rules.test.ts"
+      ],
+      "inputDigest": "714844d5464b97fb57dad757ec78fcc344963de0c970568fbdb5314e5b6db91c"
+    },
+    {
+      "id": "ev-chk-secret-scan-03",
+      "checkId": "chk-secret-scan",
+      "recordedAt": "2026-09-23T06:22:01Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Rerun sau khi sua loi tar path tuyet doi trong scan-release.mjs (them toTarArgumentPath + dung relative(root, tarball) cho doi so archive): pnpm exec vitest run test/safety/release-scanner.test.ts van 48/48 pass, khong doi hanh vi phat hien secret.",
+      "artifactPaths": [
+        "scripts/scan-release.mjs",
+        "test/safety/release-scanner.test.ts"
+      ],
+      "inputDigest": "a27ca4e997c9a6a479ef0f9ff7c7902478b02fe5655dee948e54f9b5d57565b3"
+    },
+    {
+      "id": "ev-chk-release-gate-02",
+      "checkId": "chk-release-gate",
+      "recordedAt": "2026-09-23T06:23:06Z",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "Sau khi sua loi tar path (xem decision fixed-tar-absolute-path-bug): pnpm run build pass (exit 0). pnpm run scan:release NAY PASS (exit 0, chay lai 2 lan lien tiep deu deterministic) -- day la thay doi so voi ev-chk-release-gate-01. pnpm run test:acceptance van that bai duy nhat tai test/unit/package-contract.test.ts, ly do khong doi: 9 package.json duoi docs/ak-quick-setup/ (untracked, non-goal) + 1 package.json duoi .kilo/worktrees/phantom-amount/ (worktree mo coi khong track boi git). Con dung MOT blocker duy nhat, ngoai pham vi task va can nguoi dung uy quyen (xoa worktree la hanh dong pha huy; sua eslint.config.mjs/package-contract.test.ts hoac quyet dinh so phan docs/ak-quick-setup/ la quyet dinh cua nguoi dung). 616 test khac cua test:acceptance deu pass.",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "scripts/scan-release.mjs",
+        "test/unit/package-contract.test.ts",
+        ".kilo/worktrees/phantom-amount"
+      ],
+      "inputDigest": "6af73e8e2684919b0beb6eb7512b337bb34503b6d314959dfc9f0b8b96e463a4"
+    },
+    {
+      "id": "ev-chk-release-gate-03",
+      "checkId": "chk-release-gate",
+      "recordedAt": "2026-09-23T06:40:08Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Chay chuoi lenh chinh xac 'pnpm run build && pnpm run scan:release && pnpm run test:acceptance': ca ba deu pass (exit 0). Diem nghen duy nhat con lai (worktree mo coi .kilo/worktrees/phantom-amount + docs/ak-quick-setup/ lam package-contract.test.ts va eslint dem sai) da duoc nguoi dung uy quyen xu ly: xoa worktree qua git worktree remove (xac nhan clean truoc khi xoa, git worktree list chi con [main]), va them 'docs' vao nonProductDirectories (test/unit/package-contract.test.ts) cung 'docs/**' vao ignores (eslint.config.mjs) -- khong dung/xoa docs/ak-quick-setup/. pnpm run lint: 0 loi tren toan repo. test:acceptance: 618 test pass, 1 skip, 0 fail (unit 278+1skip, integration 127, migration 9, platform 33, workflow 117, safety 54).",
+      "artifactPaths": [
+        "package.json",
+        "CHANGELOG.md",
+        "scripts/scan-release.mjs",
+        "test/unit/package-contract.test.ts",
+        "eslint.config.mjs"
+      ],
+      "inputDigest": "6af73e8e2684919b0beb6eb7512b337bb34503b6d314959dfc9f0b8b96e463a4"
+    },
+    {
+      "id": "ev-stage2-review-01",
+      "recordedAt": "2026-09-23T06:43:04Z",
+      "result": "pass",
+      "summary": "Stage 2 quality/security review: git status/diff --stat soat toan bo 30 file thay doi khop dung relevantPaths cong 2 sua chua ngoai le da duoc nguoi dung uy quyen (eslint.config.mjs, test/unit/package-contract.test.ts) va cac SKILL.md version-bump tu dong (version-sync). Khong file la nao ngoai y muon. docs/ak-quick-setup/ van untracked, khong bi cham. Grep xac nhan khong console.log/debug, khong TODO/FIXME/XXX sot lai trong diff. Khong day co node_modules/dist/secret. Suppression list moi trong harnix-check da tu ap dung dung cach (khong flag lai cac quyet dinh da xac minh o day).",
+      "artifactPaths": [
+        "CHANGELOG.md"
+      ]
+    }
+  ],
+  "createdAt": "2026-09-23T04:21:17Z",
+  "updatedAt": "2026-09-23T06:43:59.926Z",
+  "completedAt": "2026-09-23T06:43:59.926Z"
+}

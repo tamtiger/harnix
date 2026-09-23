@@ -9,6 +9,24 @@ import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const fixture = useTemporaryRepositories("harnix-init-");
 
+describe("initializeProject database detection", () => {
+  it("auto-detects a database technology without an override flag and writes it into config.yaml", async () => {
+    const root = await fixture();
+    await writeFile(join(root, "package.json"), '{"dependencies":{"pg":"1","mongodb":"1"}}');
+
+    const result = await initializeProject({ developer: "tam", root, yes: true });
+
+    expect(result.technologies).toEqual(expect.arrayContaining(["mongodb", "postgresql"]));
+    const config = await readFile(join(root, ".harnix", "config.yaml"), "utf8");
+    expect(config).toContain("- mongodb");
+    expect(config).toContain("- postgresql");
+    expect(result.detection.matches).toEqual(expect.arrayContaining([
+      expect.objectContaining({ facet: "technology", id: "postgresql", kind: "database" }),
+      expect.objectContaining({ facet: "technology", id: "mongodb", kind: "database" }),
+    ]));
+  });
+});
+
 describe("initializeProject", () => {
   it("creates only the approved Harnix tree and is idempotent", async () => {
     const root = await fixture();

@@ -83,6 +83,32 @@ describe("detectProject", () => {
     await expect(detectProject(web)).resolves.toMatchObject({ languages: ["javascript"], technologies: ["react-web"] });
   });
 
+  it("detects each database technology through its dependency or content evidence", async () => {
+    const npmCases: Array<[string, Record<string, string>]> = [
+      ["postgresql", { pg: "1" }],
+      ["mysql", { mysql2: "1" }],
+      ["mongodb", { mongodb: "1" }],
+      ["redis", { ioredis: "1" }],
+    ];
+    for (const [technology, dependencies] of npmCases) {
+      const root = await createFixture();
+      await writeFixtureFile(root, "package.json", JSON.stringify({ dependencies }));
+      await expect(detectProject(root), technology).resolves.toMatchObject({ technologies: [technology] });
+    }
+
+    const postgresDotnet = await createFixture();
+    await writeFixtureFile(postgresDotnet, "src/App/App.csproj", '<Project><ItemGroup><PackageReference Include="Npgsql" /></ItemGroup></Project>');
+    await expect(detectProject(postgresDotnet)).resolves.toMatchObject({ technologies: expect.arrayContaining(["postgresql"]) });
+
+    const sqlServerDotnet = await createFixture();
+    await writeFixtureFile(sqlServerDotnet, "src/App/App.csproj", '<Project><ItemGroup><PackageReference Include="Microsoft.Data.SqlClient" /></ItemGroup></Project>');
+    await expect(detectProject(sqlServerDotnet)).resolves.toMatchObject({ technologies: expect.arrayContaining(["sqlserver"]) });
+
+    const postgresJava = await createFixture();
+    await writeFixtureFile(postgresJava, "pom.xml", "<project><dependencies><dependency><artifactId>postgresql</artifactId></dependency></dependencies></project>");
+    await expect(detectProject(postgresJava)).resolves.toMatchObject({ technologies: expect.arrayContaining(["postgresql"]) });
+  });
+
   it("detects a monorepo deterministically with package profiles and verification commands", async () => {
     const root = await createFixture();
     await writeFixtureFile(root, "pnpm-lock.yaml");

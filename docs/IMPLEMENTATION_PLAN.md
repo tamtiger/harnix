@@ -93,7 +93,7 @@ type LegacyStackId =
   | "vue";
 
 type LanguageId = "csharp" | "typescript" | "javascript" | "php" | "python" | "java" | "go";
-type TechnologyId = "dotnet" | "abp" | "nestjs" | "spring" | "react-web" | "vue" | "codeigniter";
+type TechnologyId = "dotnet" | "abp" | "nestjs" | "spring" | "react-web" | "vue" | "codeigniter" | "postgresql" | "mysql" | "sqlserver" | "mongodb" | "redis";
 
 type PlatformId = "kiro" | "antigravity" | "codex" | "claude";
 
@@ -142,7 +142,7 @@ YAML serialization is deterministic with LF golden fixtures. Compatible unknown 
 
 ### 4.1A Stack, detector and guide catalogs
 
-The packaged pure catalog owns stable language/technology IDs, labels, technology kind (`framework|runtime|platform|library|database|tool|infrastructure|domain`), declarative detector expressions, guide references and provenance. Initial technology kinds are: `dotnet:runtime`, `abp|nestjs|spring|vue|codeigniter:framework`, `react-web:library`. Catalog code must not import filesystem collectors, commands, terminal UI or platform adapters.
+The packaged pure catalog owns stable language/technology IDs, labels, technology kind (`framework|runtime|platform|library|database|tool|infrastructure|domain`), declarative detector expressions, guide references and provenance. Initial technology kinds are: `dotnet:runtime`, `abp|nestjs|spring|vue|codeigniter:framework`, `react-web:library`, `postgresql|mysql|sqlserver|mongodb|redis:database`. Database detectors use only `dependency(npm|composer)` and `content` predicates, never `dependency(nuget|maven|gradle)`, because collectors never gather nuget/maven/gradle dependency facts; a .NET or Java database driver is matched through its package name inside `*.csproj`/`pom.xml`/`build.gradle*` content instead. Catalog code must not import filesystem collectors, commands, terminal UI or platform adapters.
 
 Detector predicates are the discriminated union `file(glob)`, `dependency(ecosystem,name)` and `content(glob,contains)`. Expressions require a positive `allOf` or `anyOf`; both combine conjunctively and `noneOf` excludes. Globs are safe repository-relative POSIX patterns supporting literals, `*` and `**` only; content matching is bounded literal matching, never regex or code execution. Validation rejects duplicate IDs/predicates, invalid enum/confidence/provenance, unsafe paths, missing/self/cyclic `implies`, `guideIds`, `extends` or `supersedes` references, conflicting supersedence and duplicate guide content paths.
 
