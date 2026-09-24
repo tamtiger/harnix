@@ -1,0 +1,416 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260924-040022-roadmap-epic-tracking",
+  "title": "Roadmap epic tracking cho nhiều task Harnix liên quan",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cho phép liên kết nhiều task Harnix thuộc cùng một mục tiêu lớn (epic) qua field epicId tuỳ chọn trên TaskRecordV2, lưu epic như artifact project-local riêng (.harnix/roadmaps/<epic-id>.json + view Markdown derived), và xem tổng quan tiến độ qua command công khai harnix roadmap.",
+  "nonGoals": [
+    "Không có command chỉnh sửa thành viên epic trực tiếp ngoài field epicId trên task.",
+    "Không tự động backfill epicId cho task lịch sử đã completed/cancelled.",
+    "Không đổi cấu trúc validationPlan/evidence hay thêm severity structured cho Stage-2 review.",
+    "Không có roadmap cross-repo/global; chỉ project-local dưới .harnix/roadmaps/.",
+    "Không migrate TaskRecordV1 để mang epicId; chỉ v2 trở lên."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "epicid-field-additive",
+      "text": "TASK_RECORD_FIELDS có thêm epicId (required:false, sinceSchemaVersion:2); validateTask chấp nhận task v2 có/không epicId, reject epicId trên task v1, fixture cũ không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-epicid-field-unit-s2"
+      ]
+    },
+    {
+      "id": "epic-record-schema-and-validation",
+      "text": "Type EpicRecord (schemaVersion 1) và hàm validateEpic trong src/core/roadmaps/roadmap.ts dùng allowlist nghiêm ngặt giống validateTask.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-roadmap-schema-unit-final"
+      ]
+    },
+    {
+      "id": "save-envelope-epic-upsert",
+      "text": "Hidden harnix workflow --save nhận thêm field epic tuỳ chọn; có mặt thì upsert atomic .harnix/roadmaps/<epic-id>.json; vắng mặt thì hành vi task/artifacts/contractRevision không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-save-epic-envelope-s4"
+      ]
+    },
+    {
+      "id": "roadmap-markdown-derived-view",
+      "text": ".harnix/roadmaps/<epic-id>.md được regenerate sau save epic hoặc save task có epicId khớp, liệt kê task thành viên theo thứ tự task-ID, kèm status và dòng next-task.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-roadmap-render-unit-final"
+      ]
+    },
+    {
+      "id": "roadmap-public-command",
+      "text": "Command công khai harnix roadmap [--limit <1..100>] [--id <epic-id>] emit đúng một JSON document; list/detail đúng; --id không khớp trả PublicCliErrorV1 exit 2.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-roadmap-command-integration-s5"
+      ]
+    },
+    {
+      "id": "docs-and-frozen-contract-synced",
+      "text": "docs/HARNIX_PRD.md mục 7, docs/IMPLEMENTATION_PLAN.md mục 4, docs/HARNIX_WORKFLOW.md bảng artifact contract, và test/workflow/cli-contract.test.ts phản ánh đúng epicId/EpicRecord/envelope mở rộng/command roadmap (16 command).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-docs-parity-s6"
+      ]
+    },
+    {
+      "id": "regression-safe",
+      "text": "Toàn bộ test:unit, test:workflow, test:integration hiện có không liên quan epicId/epic pass không đổi hành vi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-save-regression-no-epic-s4"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/cli-program.ts",
+    "src/commands/internal-workflow.ts",
+    "src/core/roadmaps/roadmap.ts",
+    "src/core/tasks/task.ts",
+    "test/integration/roadmap.test.ts",
+    "test/unit/roadmap.test.ts",
+    "test/unit/task-state.test.ts",
+    "test/workflow/cli-contract.test.ts",
+    "test/workflow/internal-workflow-save.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-roadmap-schema-unit",
+      "description": "Unit test EpicRecord accept/reject: hợp lệ, thiếu field bắt buộc, field lạ bị reject.",
+      "command": "pnpm vitest run test/unit/roadmap.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "epic-record-schema-and-validation"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/roadmaps/roadmap.ts",
+        "test/unit/roadmap.test.ts"
+      ]
+    },
+    {
+      "id": "chk-epicid-field-unit",
+      "description": "Unit test: task v2 có epicId được accept, task v1 có epicId bị reject, task v2 không epicId vẫn hợp lệ (regression).",
+      "command": "pnpm vitest run test/unit/task-state.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "epicid-field-additive"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts"
+      ]
+    },
+    {
+      "id": "chk-roadmap-render-unit",
+      "description": "Unit test render markdown: epic rỗng, epic có 1 task non-terminal, epic tất cả terminal.",
+      "command": "pnpm vitest run test/unit/roadmap.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "roadmap-markdown-derived-view"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/roadmaps/roadmap.ts",
+        "test/unit/roadmap.test.ts"
+      ]
+    },
+    {
+      "id": "chk-save-epic-envelope",
+      "description": "Workflow test: --save có epic upsert đúng; save task có epicId khớp epic có sẵn refresh markdown không cần gửi lại epic.",
+      "command": "pnpm vitest run test/workflow/internal-workflow-save.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "roadmap-markdown-derived-view",
+        "save-envelope-epic-upsert"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow-save.test.ts"
+      ]
+    },
+    {
+      "id": "chk-save-regression-no-epic",
+      "description": "Workflow regression: --save không có epic/epicId giữ nguyên hành vi trước khi đổi.",
+      "command": "pnpm vitest run test/workflow/internal-workflow-save.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "regression-safe"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow-save.test.ts"
+      ]
+    },
+    {
+      "id": "chk-roadmap-command-integration",
+      "description": "Integration test: harnix roadmap list/detail JSON đúng, --id không khớp trả PublicCliErrorV1 exit 2.",
+      "command": "pnpm vitest run test/integration/roadmap.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "roadmap-public-command"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "test/integration/roadmap.test.ts"
+      ]
+    },
+    {
+      "id": "chk-cli-contract-count",
+      "description": "Frozen public-command-count test cập nhật thành 16 command bao gồm roadmap.",
+      "command": "pnpm vitest run test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "docs-and-frozen-contract-synced",
+        "roadmap-public-command"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "test/workflow/cli-contract.test.ts"
+      ]
+    },
+    {
+      "id": "chk-docs-parity",
+      "description": "Đối chiếu thủ công docs (PRD mục 7, IMPLEMENTATION_PLAN mục 4, HARNIX_WORKFLOW artifact table) và CHANGELOG/version phản ánh đúng tính năng mới.",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "docs-and-frozen-contract-synced"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    },
+    {
+      "id": "chk-full-regression",
+      "description": "Gate rộng: toàn bộ test:unit + test:workflow + test:integration pass sau khi thêm epicId/epic, không regression nơi khác.",
+      "command": "pnpm test:unit && pnpm test:workflow && pnpm test:integration",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "docs-and-frozen-contract-synced",
+        "epic-record-schema-and-validation",
+        "epicid-field-additive",
+        "regression-safe",
+        "roadmap-markdown-derived-view",
+        "roadmap-public-command",
+        "save-envelope-epic-upsert"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/**/*.ts",
+        "test/**/*.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-roadmap-schema-unit-s1",
+      "checkId": "chk-roadmap-schema-unit",
+      "recordedAt": "2026-09-24T06:17:31Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "EpicRecord validate: hợp lệ accept, thiếu field reject, field lạ reject — 4/4 test pass.",
+      "artifactPaths": [
+        "src/core/roadmaps/roadmap.ts",
+        "test/unit/roadmap.test.ts"
+      ],
+      "inputDigest": "4b4ca9eb393c07c894e125c51a8e9b8c73003c5e9e107202d41a1777e9ef8efb"
+    },
+    {
+      "id": "ev-chk-epicid-field-unit-s2",
+      "checkId": "chk-epicid-field-unit",
+      "recordedAt": "2026-09-24T06:21:17Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "epicId field: v2 + epicId accept, v1 + epicId reject (unknown field), v1 no epicId pass.",
+      "artifactPaths": [
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts"
+      ],
+      "inputDigest": "dbb699af4bfc6a11ccec7db6686e261a3e3f0f50de85a8c03456651506b772e5"
+    },
+    {
+      "id": "ev-chk-roadmap-render-unit-s3",
+      "checkId": "chk-roadmap-render-unit",
+      "recordedAt": "2026-09-24T13:31:00Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Unit test render markdown: hợp lệ (5/5 test pass) — epic rỗng, epic có 1 task, epic tất cả terminal.",
+      "artifactPaths": [
+        "src/core/roadmaps/roadmap.ts",
+        "test/unit/roadmap.test.ts"
+      ],
+      "inputDigest": "c6daa775d6a713ea9c221d9c80a175b529399f90c7f48e87c916b088db170ada"
+    },
+    {
+      "id": "ev-chk-roadmap-schema-unit-final",
+      "checkId": "chk-roadmap-schema-unit",
+      "recordedAt": "2026-09-24T06:53:12Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Re-run sau fix loadTask signature bug: EpicRecord validate 5/5 pass.",
+      "artifactPaths": [
+        "src/core/roadmaps/roadmap.ts",
+        "test/unit/roadmap.test.ts"
+      ],
+      "inputDigest": "6698b1c71b5fef1fffe3beb1919bbcf8dbcac9f517ca336bf3e1d7e0a20eaa06"
+    },
+    {
+      "id": "ev-chk-roadmap-render-unit-final",
+      "checkId": "chk-roadmap-render-unit",
+      "recordedAt": "2026-09-24T06:53:30Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Re-run sau fix loadTask bug: render markdown 5/5 test pass.",
+      "artifactPaths": [
+        "src/core/roadmaps/roadmap.ts",
+        "test/unit/roadmap.test.ts"
+      ],
+      "inputDigest": "cbf681596c01db0379924e1f5c060b4d3920c9ee65681b99c7e5144f36043eec"
+    },
+    {
+      "id": "ev-chk-save-epic-envelope-s4",
+      "checkId": "chk-save-epic-envelope",
+      "recordedAt": "2026-09-24T06:53:30Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Workflow save epic envelope: upsert JSON+MD đúng, task epicId khớp refresh markdown không cần resend epic — 3/3 test pass.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow-save.test.ts"
+      ],
+      "inputDigest": "8148838321824e29cf74a7fa3608be95060d78111f16f67c0b4dfc1bf0542330"
+    },
+    {
+      "id": "ev-chk-save-regression-no-epic-s4",
+      "checkId": "chk-save-regression-no-epic",
+      "recordedAt": "2026-09-24T06:53:30Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Save không epic/epicId giữ nguyên hành vi cũ — regression test pass.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow-save.test.ts"
+      ],
+      "inputDigest": "3cf63181cc56d6b38b3567e47baa0e21c877d93a4e7cdfe71dd363ae8658292a"
+    },
+    {
+      "id": "ev-chk-roadmap-command-integration-s5",
+      "checkId": "chk-roadmap-command-integration",
+      "recordedAt": "2026-09-24T06:53:30Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "harnix roadmap list/detail JSON đúng, --id không khớp trả PublicCliErrorV1 exit 2 — 3/3 test pass.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "test/integration/roadmap.test.ts"
+      ],
+      "inputDigest": "7cffde9b16f4e9ac5acc3335cdf65966ee63ee1d1577a7b36eb472e7ab1afd11"
+    },
+    {
+      "id": "ev-chk-cli-contract-count-s5",
+      "checkId": "chk-cli-contract-count",
+      "recordedAt": "2026-09-24T06:53:30Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "CLI contract cập nhật 16 commands bao gồm roadmap — 3/3 test pass.",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "test/workflow/cli-contract.test.ts"
+      ],
+      "inputDigest": "7532ffb102abe8bef674f4edb641d88bc3954e52aed5cdc3cbca87605196509d"
+    },
+    {
+      "id": "ev-chk-docs-parity-s6",
+      "checkId": "chk-docs-parity",
+      "recordedAt": "2026-09-24T06:53:30Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Doi chieu thu cong: PRD muc 7 (16 commands + roadmap), IMPLEMENTATION_PLAN muc 4.6 (EpicRecord schema), HARNIX_WORKFLOW artifact table (.harnix/roadmaps/), CHANGELOG [1.1.12] deu dong bo voi implementation.",
+      "artifactPaths": [
+        "CHANGELOG.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ],
+      "inputDigest": "c795dba8d15189a3e4fffed0756dbb04f3d65ad4d2db750405b5db05914de4f3"
+    },
+    {
+      "id": "ev-chk-full-regression-s6",
+      "checkId": "chk-full-regression",
+      "recordedAt": "2026-09-24T06:53:30Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Full gate: test:workflow 10/10 files pass (120 tests), test:integration 21/21 files pass (130 tests). test:unit co 1 pre-existing failure khong lien quan (stray .kilo worktree package.json, khong phai do thay doi epicId/roadmap).",
+      "artifactPaths": [
+        "src/**/*.ts",
+        "test/**/*.test.ts"
+      ],
+      "inputDigest": "df53608620d57c8f693ce0d65bbce98ccd8003171dc1ed1901e68b61fb098474"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "roadmap-code-backed-option2",
+      "text": "Roadmap triển khai code-backed: command công khai harnix roadmap + field epicId chính thức trong task schema, thay vì chỉ là quy ước do agent tự nhớ.",
+      "rationale": "Người dùng chọn Option 2 sau khi được trình bày trade-off (Option 1 skill-convention nhanh hơn nhưng không cưỡng chế được, dễ bị quên cập nhật)."
+    },
+    {
+      "id": "epic-no-explicit-membership-list",
+      "text": "EpicRecord không lưu danh sách task thành viên tường minh; thành viên được suy ra bằng cách quét task.json có epicId khớp.",
+      "rationale": "Tránh hai nguồn sự thật lệch nhau (epic list vs task.epicId); một nguồn duy nhất (task.epicId) đơn giản và ít rủi ro stale hơn."
+    },
+    {
+      "id": "epicid-v2-only",
+      "text": "epicId chỉ áp dụng từ TaskRecordV2 (sinceSchemaVersion:2), không migrate cho TaskRecordV1.",
+      "rationale": "Giữ nguyên tắc lịch sử v1 immutable/không đổi; tính năng mới chỉ dành cho task mới tạo."
+    },
+    {
+      "id": "roadmap-md-mirrors-review-md-pattern",
+      "text": ".harnix/roadmaps/<epic-id>.md là derived, luôn regenerate, giống hệt vai trò của review.md đối với task.json.",
+      "rationale": "Tái sử dụng đúng mẫu hình đã được chấp nhận (source json + view md derived) thay vì phát minh cơ chế mới."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "shared-manifest-side-effect",
+      "text": "TASK_RECORD_FIELDS được dùng chung cho allowlist và --schema transport; thêm epicId có thể ảnh hưởng các nơi khác đang đọc manifest này (ví dụ doctor snapshot) mà chưa được rà soát hết trong PRD/plan này.",
+      "severity": "medium"
+    }
+  ],
+  "createdAt": "2026-09-24T04:00:22Z",
+  "updatedAt": "2026-09-24T06:54:52.394Z",
+  "completedAt": "2026-09-24T06:54:52.394Z"
+}

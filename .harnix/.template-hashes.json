@@ -6,15 +6,15 @@
       "path": ".harnix/spec/guides/common/engineering.md",
       "sourceId": "guide-common-engineering",
       "scope": "project",
-      "generatedHash": "cb07c1bb7396b23466aac655be6c0cd827022ed8f4d5da48706e0565ec4fa361",
-      "generatorVersion": "1.1.11"
+      "generatedHash": "29766e3d0fd70c130821057bfcc59df2aaaae5acc2d1ee775c41a1eabc3db8d7",
+      "generatorVersion": "1.1.12"
     },
     {
       "path": ".harnix/workflow.md",
       "sourceId": "workflow",
       "scope": "project",
-      "generatedHash": "75ffd5c6eeb873053645e0b5bed8ded217678b59f9fe1d8d15cf2c07105314b9",
-      "generatorVersion": "1.1.11"
+      "generatedHash": "2486f4157cf839698c8ca648502af53a0ba7156edcc22e6f3a7e2f933ddc86d1",
+      "generatorVersion": "1.1.12"
     }
   ]
 }

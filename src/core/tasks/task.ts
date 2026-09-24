@@ -81,6 +81,7 @@ export const TASK_RECORD_FIELDS: readonly { readonly name: string; readonly requ
   { name: "completedAt", required: false, sinceSchemaVersion: 1 },
   { name: "createdAt", required: true, sinceSchemaVersion: 1 },
   { name: "decisions", required: false, sinceSchemaVersion: 2 },
+  { name: "epicId", required: false, sinceSchemaVersion: 2 },
   { name: "evidence", required: true, sinceSchemaVersion: 1 },
   { name: "generator", required: true, sinceSchemaVersion: 1 },
   { name: "goal", required: true, sinceSchemaVersion: 1 },
@@ -140,6 +141,7 @@ export function validateTask(value: unknown, options: TaskValidationOptions = {}
   assertExactKeys(value, value.schemaVersion === 2 ? taskRecordV2Keys : taskRecordKeys, "TaskRecord");
   for (const key of ["id", "title", "goal", "createdAt", "updatedAt"]) if (typeof value[key] !== "string") throw new TaskValidationError(`Task ${key} is required.`);
   if (!taskIdPattern.test(String(value.id)) || !["lite", "full"].includes(String(value.mode)) || !Object.keys(transitions).includes(String(value.status)) || !["triage", "planning", "ready", "implementing", "debugging", "replan", "verifying", "finishing", "cancelling"].includes(String(value.checkpoint))) throw new TaskValidationError("Task identity, mode, status, or checkpoint is invalid.");
+  if (value.schemaVersion === 2 && value.epicId !== undefined && (!validId(String(value.epicId)))) throw new TaskValidationError("Task epicId is invalid.");
   if (!Array.isArray(value.nonGoals) || !Array.isArray(value.acceptanceCriteria) || !Array.isArray(value.relevantPaths) || !Array.isArray(value.relevantSpecs) || !Array.isArray(value.validationPlan) || !Array.isArray(value.evidence)) throw new TaskValidationError("Task arrays are required.");
   if (!isIsoTimestamp(value.createdAt) || !isIsoTimestamp(value.updatedAt) || Date.parse(value.updatedAt) < Date.parse(value.createdAt)) throw new TaskValidationError("Task timestamp is invalid.");
   if (!(value.nonGoals as unknown[]).every((item) => typeof item === "string") || !(value.relevantPaths as unknown[]).every((item) => typeof item === "string") || !(value.relevantSpecs as unknown[]).every((item) => typeof item === "string")) throw new TaskValidationError("Task path and goal arrays are invalid.");
@@ -439,8 +441,8 @@ function validateRationale(
 
 function validateTaskId(value: string): void { if (!taskIdPattern.test(value)) throw new TaskValidationError("Task ID is unsafe."); }
 function isMissing(error: unknown): boolean { return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"; }
-function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
-function isIsoTimestamp(value: unknown): value is string { return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u.test(value) && Number.isFinite(Date.parse(value)); }
+export function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
+export function isIsoTimestamp(value: unknown): value is string { return typeof value === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/u.test(value) && Number.isFinite(Date.parse(value)); }
 function isCancellationReason(value: unknown): value is string { return typeof value === "string" && value.length > 0 && value.length <= 1_000 && value === value.trim() && [...value].every((character) => { const codePoint = character.codePointAt(0)!; return codePoint > 31 && codePoint !== 127; }); }
 function validId(value: unknown): value is string { return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/u.test(value); }
 function isSafeRepositoryPath(value: unknown): value is string { if (typeof value !== "string") return false; try { return normalizeRepositoryPath(value, { allowRoot: true }) === value; } catch { return false; } }

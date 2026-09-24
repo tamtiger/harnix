@@ -16,6 +16,7 @@ import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces
 import { searchMemory } from "./commands/mem.js";
 import { inspectProjectStatus } from "./commands/status.js";
 import { listProjectTasks } from "./commands/tasks.js";
+import { listPublicRoadmaps, detailPublicRoadmap } from "./commands/roadmap.js";
 import { resumeProjectTask } from "./commands/resume.js";
 import { reportProjectContext } from "./commands/context-report.js";
 import { reportProjectChecks } from "./commands/checks.js";
@@ -158,6 +159,20 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
         ...(status === undefined ? {} : { status }),
       });
       process.stdout.write(`${JSON.stringify(result)}\n`);
+    });
+  program.command("roadmap")
+    .description("List or detail epic roadmaps")
+    .option("--limit <count>", "Maximum roadmap records", "20")
+    .option("--id <epic-id>", "Show details for a specific epic")
+    .action(async (options: { limit: string; id?: string }) => {
+      if (options.id) {
+        const result = await detailPublicRoadmap(process.cwd(), options.id);
+        process.stdout.write(`${JSON.stringify(result)}\n`);
+      } else {
+        const limit = parseTaskLimit(options.limit);
+        const result = await listPublicRoadmaps(process.cwd(), limit);
+        process.stdout.write(`${JSON.stringify(result)}\n`);
+      }
     });
   program.command("resume")
     .description("Activate an exact unfinished Harnix task")

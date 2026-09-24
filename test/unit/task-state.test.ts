@@ -445,3 +445,13 @@ function taskV2Fixture() {
     }],
   };
 }
+
+it("accepts epicId on TaskRecordV2, rejects on V1, accepts V2 without epicId", () => {
+  expect(() => validateTask({ schemaVersion: 2, epicId: "my-epic" })).toThrow(/required|task/iu);
+
+  const v1WithEpicId = { ...taskFixture(), epicId: "my-epic" };
+  expect(() => validateTask(v1WithEpicId)).toThrow(/unknown|field/iu);
+
+  const v1NoEpicId = taskFixture();
+  expect(() => validateTask(v1NoEpicId)).not.toThrow();
+});

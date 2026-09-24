@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.12] - 2026-09-24
+
+### Added
+
+- Thêm roadmap epic tracking: field `epicId` trên TaskRecordV2 cho phép nhóm nhiều task liên quan cùng một epic; type `EpicRecord` (schema v1) lưu metadata epic dưới `.harnix/roadmaps/<epic-id>.json` cùng derived markdown view; extend `harnix workflow --save` envelope với field `epic` để upsert atomic; command công khai `harnix roadmap [--limit <1..100>] [--id <epic-id>]` liệt kê hoặc chi tiết epic với task members và next-task line.
+
 ## [1.1.11] - 2026-09-23
 
 ### Changed

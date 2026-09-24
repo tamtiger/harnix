@@ -337,6 +337,25 @@ Hidden inspect/continue luôn project `contextDrift: {state,changes,selectionCha
 
 Explicit hidden context persistence atomically writes a task-owned `.harnix/tasks/<task-id>/context-selection.json` beside `context.json`:
 
+### 4.6 Roadmap epic tracking
+
+File: `.harnix/roadmaps/<epic-id>.json` và `.harnix/roadmaps/<epic-id>.md` (derived, always-overwritten, similar role to review.md).
+
+```ts
+interface EpicRecord {
+  generator: "harnix";
+  schemaVersion: 1;
+  id: string;                // lowercase kebab-slug matching ^[A-Za-z0-9][A-Za-z0-9._-]*$
+  title: string;             // 1–500 characters
+  goal: string;              // 1–2000 characters
+  nonGoals?: string[];       // optional array of strings
+  createdAt: string;         // ISO-8601
+  updatedAt: string;         // ISO-8601, must be >= createdAt
+}
+```
+
+TaskRecordV2 gains optional field `epicId: string | undefined` (required: false, sinceSchemaVersion: 2) for grouping multiple tasks under one epic. Validation accepts v2 task with/without epicId and rejects epicId on v1 tasks. Hidden `--save` envelope accepts optional field `epic?: EpicRecord`; when present, validates and upserts `.harnix/roadmaps/<epic-id>.json` atomically. After save, if `task.epicId` matches an existing epic, regenerates `.harnix/roadmaps/<epic-id>.md` listing members and next non-terminal task. Markdown is derived, never hand-edited, and regenerated on epic upsert or task-member update. Public command `harnix roadmap [--limit <1..100>] [--id <epic-id>]` lists epics or details one; missing/invalid --id returns PublicCliErrorV1 exit 2. List results include task counts (total, completed, cancelled); detail results include member list and next task. EpicRecord schema freeze = [1.1.12]; future evolution requires new schema version.
+
 ```ts
 interface ContextSelectionSnapshotV1 {
   generator: "harnix";

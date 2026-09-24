@@ -67,6 +67,8 @@ Engineering guidance selected for this project lives in \`.harnix/spec/guides/\`
 
 Every persisted task also has \`.harnix/tasks/<id>/review.md\`, a derived read-only summary (goal, criteria, required checks, decisions, residual risks, evidence) regenerated automatically on every save. Point the user there for a plain-file review instead of running a command or reading \`task.json\`; never hand-edit it.
 
+Optional \`epicId\` on TaskRecordV2 links a task to an epic; set it in a \`--save\` task body only on explicit user request. Send top-level \`epic\` (\`EpicRecord\` v1: id/title/goal) in a \`--save\` to create/update it; \`.harnix/roadmaps/<epic-id>.json\` is task-owned, its \`.md\` is derived. Public \`harnix roadmap [--limit] [--id]\` lists or details epics.
+
 ## Operating rules
 
 - \`harnix init\` is project-local. \`harnix setup --kiro|--antigravity|--codex|--claude\` is user-global. Do not run setup or harnix init automatically.

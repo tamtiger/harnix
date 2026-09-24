@@ -29,6 +29,7 @@ import {
   type TaskRecord,
   type TaskRecordV2,
 } from "../core/tasks/task.js";
+import { validateEpic, upsertEpic, renderRoadmapMarkdown, type EpicRecord } from "../core/roadmaps/roadmap.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import {
   contextSelectionResultHash,
@@ -54,6 +55,7 @@ export interface WorkflowSaveEnvelope {
   task: unknown;
   artifacts?: WorkflowSaveArtifacts | undefined;
   contractRevision?: { reason: string } | undefined;
+  epic?: unknown | undefined;
 }
 
 /** Hidden transport for agents; it preserves TaskRecord state and is deliberately JSON-only. */
@@ -121,6 +123,12 @@ async function saveWorkflowLocked(
 
   if (candidate.status === "completed") throw new Error("Workflow completion must use workflow --finish.");
   if (candidate.status === "ready") await assertReadyRequirements(harnixRoot, candidate, envelope.artifacts);
+
+  let validatedEpic: EpicRecord | undefined;
+  if (envelope.epic !== undefined) {
+    validatedEpic = validateEpic(envelope.epic);
+  }
+
   const artifacts = await prepareWorkflowArtifacts(root, harnixRoot, candidate, envelope.artifacts);
   if (artifacts) { validateTaskArtifacts(candidate, artifacts); assertValidPlanArtifact(candidate, artifacts); }
   const rollbackSnapshot = await captureWorkflowSaveFiles(harnixRoot, candidate, artifacts);
@@ -136,6 +144,16 @@ async function saveWorkflowLocked(
     }
     await saveTask(harnixRoot, candidate);
     taskCommitted = true;
+
+    // Handle epic upsert and markdown regeneration
+    if (validatedEpic) {
+      await upsertEpic(root, validatedEpic);
+    }
+    // Regenerate markdown if task has epicId matching an existing epic
+    if (candidate.schemaVersion === 2 && "epicId" in candidate && candidate.epicId !== undefined) {
+      const epicId = candidate.epicId as string;
+      await renderRoadmapMarkdown(root, epicId);
+    }
   } catch (error: unknown) {
     if (!taskCommitted) {
       try { await restoreWorkflowSaveFiles(rollbackSnapshot); }
@@ -210,6 +228,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       task: "TaskRecord, required",
       artifacts: "optional { prd?, plan?, design?, research?: { <safe>.md: text }, context? }",
       contractRevision: "optional { reason: 10-1000 characters }, accepted only at an unchanged replan checkpoint",
+      epic: "optional EpicRecord schema v1; when present, upserts .harnix/roadmaps/<epic-id>.json and regenerates markdown",
     },
     // Derived from the exact same allowlists `validateTask` enforces, so this
     // transport cannot drift from the real schema: a field added to
@@ -766,7 +785,7 @@ function canonicalJson(value: unknown): unknown {
 }
 function validateWorkflowSaveEnvelope(value: unknown): WorkflowSaveEnvelope {
   if (!isRecord(value)) throw new Error("Workflow save envelope is invalid.");
-  assertExactFields(value, new Set(["task", "artifacts", "contractRevision"]), "Workflow save envelope");
+  assertExactFields(value, new Set(["task", "artifacts", "contractRevision", "epic"]), "Workflow save envelope");
   if (!("task" in value)) throw new Error("Workflow save envelope requires task.");
   const envelope: WorkflowSaveEnvelope = { task: value.task };
   if (value.artifacts !== undefined) envelope.artifacts = validateWorkflowSaveArtifacts(value.artifacts);
@@ -775,6 +794,9 @@ function validateWorkflowSaveEnvelope(value: unknown): WorkflowSaveEnvelope {
     assertExactFields(value.contractRevision, new Set(["reason"]), "Workflow contractRevision");
     if (typeof value.contractRevision.reason !== "string") throw new Error("Workflow contractRevision.reason must be a string.");
     envelope.contractRevision = { reason: value.contractRevision.reason };
+  }
+  if (value.epic !== undefined) {
+    envelope.epic = value.epic;
   }
   return envelope;
 }

@@ -97,6 +97,7 @@ Phase 6 supersedes the former project-local platform paths while preserving the 
 Important adapter constraints:
 
 - Public Harnix commands always emit JSON by default; do not add or require a `--json` flag or a human-summary flag. Task review happens by opening the task's generated `.harnix/tasks/<id>/review.md`, not by running a command.
+- Optional `epicId` on TaskRecordV2 groups related tasks under one epic. Set it only when the user explicitly asks to link this task to a larger initiative, by including `epicId` in the task body of a `--save` envelope; send an optional top-level `epic` field (`EpicRecord` schema v1: `id`, `title`, `goal`, optional `nonGoals`) in the same or an earlier `--save` to create or update the epic itself. `.harnix/roadmaps/<epic-id>.json` is task-owned; `.harnix/roadmaps/<epic-id>.md` is derived and always regenerated. Public `harnix roadmap [--limit <1..100>] [--id <epic-id>]` lists epics or shows one epic's member tasks and next task; never invent an `epicId` without an explicit user decision.
 - `harnix skill [name]` is the canonical skill source for any agent, including one on a platform Harnix never configures. Never copy `SKILL.md` into a consumer repository.
 - Hidden `workflow --transition` and `--evidence` are bounded partial transports; `--save` remains required whenever artifacts, obligations or a contract revision change.
 - `harnix setup --kiro|--antigravity|--codex|--claude [--dry-run]` is user-global only. It must not resolve a project root or read `.harnix/config.yaml`.

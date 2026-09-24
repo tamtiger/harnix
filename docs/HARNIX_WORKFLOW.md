@@ -226,6 +226,9 @@ Hidden `harnix workflow --cancel` là transport duy nhất. First call nhận bo
 ```text
 .harnix/
   workflow.md
+  roadmaps/             # Project-local epic tracking
+    <epic-id>.json      # EpicRecord schema v1, task-owned via save
+    <epic-id>.md        # Derived, always-overwritten, lists members + next-task
   tasks/
     <task-id>/
       task.json
