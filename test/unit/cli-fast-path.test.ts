@@ -7,6 +7,7 @@ describe("CLI internal-context fast path", () => {
     expect(canonicalInternalContextPlatform(["node", "harnix", "context", "--platform", "antigravity"])).toBe("antigravity");
     expect(canonicalInternalContextPlatform(["node", "harnix", "context", "--platform", "kiro"])).toBe("kiro");
     expect(canonicalInternalContextPlatform(["node", "harnix", "context", "--platform", "codex"])).toBe("codex");
+    expect(canonicalInternalContextPlatform(["node", "harnix", "context", "--platform", "claude"])).toBe("claude");
   });
 
   it("should_keep_noncanonical_or_invalid_commands_on_the_regular_cli_path", () => {

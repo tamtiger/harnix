@@ -16,14 +16,22 @@ export function canonicalInternalContextPlatform(argv: readonly string[]): Inter
   const args = argv.slice(2);
   if (args.length !== 3 || args[0] !== "context" || args[1] !== "--platform") return undefined;
   const platform = args[2];
-  return platform === "kiro" || platform === "antigravity" || platform === "codex" ? platform : undefined;
+  return platform === "kiro" || platform === "antigravity" || platform === "codex" || platform === "claude" ? platform : undefined;
 }
+
+/**
+ * A hook host that writes the event payload but never closes the child's
+ * stdin (observed with some Claude Code invocation paths) must not hang this
+ * command forever; the hook's own timeout cannot save us from that because
+ * the process would still be blocked reading, not merely slow.
+ */
+const contextHookStdinIdleTimeoutMs = 2_000;
 
 export async function runEntrypoint(argv = process.argv): Promise<number> {
   const platform = canonicalInternalContextPlatform(argv);
   if (platform !== undefined) {
     try {
-      const hookInput = process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin);
+      const hookInput = process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
       await runInternalContextCommand({ hookInput, platform });
     } catch {
       // The fixed command shape is emitted only by global hooks. A broken

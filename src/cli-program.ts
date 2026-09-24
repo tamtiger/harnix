@@ -239,9 +239,14 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       if (options.depth !== undefined) throw new Error("--depth requires repo-map --impact.");
       process.stdout.write(`${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query!, parseRepoMapLimit(options.limit ?? "20")))}\n`);
     });
+  // A hook host that writes the event payload but never closes the child's
+  // stdin must not hang this command forever; the caller's own hook timeout
+  // cannot save us from that, since the process would still be blocked
+  // reading rather than merely slow.
+  const contextHookStdinIdleTimeoutMs = 2_000;
   program.command("context", { hidden: true }).option("--platform <platform>").action(async (options: { platform: "kiro" | "antigravity" | "codex" | "claude" }) => {
     if (!options.platform || !["kiro", "antigravity", "codex", "claude"].includes(options.platform)) throw new Error("--platform must be kiro, antigravity, codex, or claude.");
-    const hookInput = programOptions.hookEventInput ? await programOptions.hookEventInput() : process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin);
+    const hookInput = programOptions.hookEventInput ? await programOptions.hookEventInput() : process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
     await runInternalContextCommand({ hookInput, platform: options.platform });
   });
   program.command("workflow", { hidden: true })

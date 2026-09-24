@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.13] - 2026-09-24
+
+### Fixed
+
+- `harnix context --platform claude` có thể treo vô hạn nếu Claude Code không đóng stdin sau khi ghi hook payload: thêm "claude" vào allowlist fast-path còn thiếu trong `src/cli.ts` (trước đó luôn rơi vào Commander CLI đầy đủ), và thêm idle-timeout 2s cho việc đọc stdin của context hook — nếu không có dữ liệu mới trong khoảng đó, lệnh trả lời ngay với dữ liệu đã đọc được thay vì treo, đồng thời chủ động destroy stream để tiến trình thoát đúng lúc thay vì bị giữ bởi handle còn mở. `readBoundedInput` khác (workflow --save/--evidence) không đổi hành vi.
+
 ## [1.1.12] - 2026-09-24
 
 ### Added
