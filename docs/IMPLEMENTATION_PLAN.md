@@ -250,8 +250,11 @@ interface ValidationCheckV2 {
   inputs: string[];
 }
 
+interface EvidenceFindingV1 { id: string; text: string; severity: "low" | "medium" | "high" | "critical" }
+
 interface EvidenceRecordV2 extends EvidenceRecordV1 {
   inputDigest?: string;
+  findings?: EvidenceFindingV1[];
 }
 
 interface TaskRecordV2 extends Omit<TaskRecordV1, "schemaVersion" | "validationPlan" | "evidence"> {
@@ -267,6 +270,8 @@ interface TaskResidualRisk { id: string; text: string; severity: "low" | "medium
 ```
 
 `decisions` và `residualRisks` là review data chỉ có ở v2: chúng ghi lại vì sao task có hình dạng hiện tại và rủi ro nào được chấp nhận, để người review và agent kế nhiệm không phải dựng lại từ transcript. Mỗi item có `id` an toàn unique và `text` non-empty tối đa 2.000 ký tự. Hai trường này nằm **ngoài** canonical task contract, nên thêm hoặc sửa chúng không đổi `taskContractHash` và không làm stale evidence đang pass; chúng không bao giờ waive một criterion, hạ cấp một failed check hay thay thế một required pass. Schema v1 reject chúng như unknown field.
+
+`findings` là optional trên `EvidenceRecordV2`: mỗi finding có `id` an toàn unique trong evidence đó, `text` non-empty tối đa 2.000 ký tự, và `severity` đúng một trong `low|medium|high|critical`. Đây là cách máy đọc được để Stage-2 review lọc/ưu tiên phát hiện theo mức độ nghiêm trọng thay vì chỉ dựa vào `summary` văn xuôi tự do; hoàn toàn optional, không bắt buộc, và không đổi cách tính `taskContractHash`, ready-trace grammar, hay bất kỳ luật completion nào khác. Schema v1 reject `findings` như unknown field, giống `inputDigest`.
 
 Task mới chỉ được tạo bằng schema v2; workflow transport reject new v1 nhưng direct reader vẫn hỗ trợ exact historical v1. Cả hai version dùng exact recursive allowlist cho TaskRecord, acceptance criterion, validation check, evidence, blocker và cancellation; unknown top-level hoặc nested key bị reject. `criterionIds` phải unique/valid; required check phải map ít nhất một criterion và mọi non-waived criterion phải được ít nhất một required check bao phủ. `inputs` là danh sách sorted unique không rỗng, luôn chứa `@task-contract`; các entry còn lại là safe project-relative POSIX file/glob. Check có từ khóa `repository|source|file|build|test|lint|typecheck|package|runtime|code|compile|smoke|acceptance` trong ID/description/command phải có ít nhất một repository input. Absolute path, backslash, empty segment, `.`/`..`, traversal và symlink/junction escape bị reject; mỗi pattern phải match ít nhất một file. Mode là monotonic: Lite có thể promote sang Full với required artifacts/gates, nhưng persisted Full không được downgrade về Lite ở bất kỳ unfinished transition nào.
 

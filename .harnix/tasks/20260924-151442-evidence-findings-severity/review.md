@@ -1,0 +1,50 @@
+# Structured findings với severity trên EvidenceRecordV2
+
+- **ID:** 20260924-151442-evidence-findings-severity
+- **Mode:** full
+- **Status:** completed/finishing
+- **Created:** 2026-09-24T15:14:42+07:00
+- **Updated:** 2026-09-24T08:41:24.180Z
+
+**Verdict:** PASS — all acceptance criteria met or waived
+
+## Goal
+
+Thêm optional field findings[] có severity máy đọc được vào EvidenceRecordV2, cho phép Stage-2 review lọc/ưu tiên theo mức độ nghiêm trọng thay vì chỉ có summary văn xuôi tự do. Chạm frozen contract IMPLEMENTATION_PLAN.md mục 4.3, cần update đồng thời workflow/PRD/validator/test.
+
+## Non-goals
+
+- Không bắt buộc mọi evidence phải có findings.
+- Không đổi cách tính taskContractHash hay ready-trace grammar v1.
+- Không tự động sinh findings từ review — vẫn do agent/reviewer điền thủ công khi thấy cần.
+
+## Artifacts
+
+- [`prd.md`](./prd.md) — outcome, scope, acceptance criteria narrative.
+- [`plan.md`](./plan.md) — implementation checklist and slices.
+
+## Acceptance criteria
+
+- `finding-field-additive` (met): EvidenceRecordV2 có thêm optional findings?: EvidenceFindingV1[]; validateTask chấp nhận evidence có/không findings, reject findings trên EvidenceRecordV1 (unknown field).
+- `finding-shape-validated` (met): Mỗi EvidenceFindingV1 phải có id (safe slug), text (non-empty, bounded), severity thuộc đúng 4 giá trị low|medium|high|critical; sai bất kỳ field nào bị reject với thông báo rõ ràng.
+- `docs-and-frozen-contract-synced` (met): docs/IMPLEMENTATION_PLAN.md mục 4.3 mô tả đúng EvidenceFindingV1/findings? như frozen contract mới; docs/HARNIX_WORKFLOW.md đồng bộ nếu có bảng liệt kê Evidence fields.
+- `regression-safe` (met): Toàn bộ test hiện có liên quan evidence/task validation không regression hành vi cũ.
+
+## Required checks
+
+- `chk-finding-schema-unit` (focused): Unit test: EvidenceRecordV2 chấp nhận/reject findings đúng theo schema. — pass (2026-09-24T15:39:05+07:00)
+- `chk-finding-shape-unit` (focused): Unit test: mỗi finding validate đúng id/text/severity. — pass (2026-09-24T15:39:05+07:00)
+- `chk-docs-parity` (focused): Đối chiếu thủ công docs IMPLEMENTATION_PLAN mục 4.3 và HARNIX_WORKFLOW. — pass (2026-09-24T15:39:05+07:00)
+- `chk-full-regression` (full): Gate rộng: toàn bộ test:unit pass sau khi thêm findings, không regression. — pass (2026-09-24T15:39:05+07:00)
+
+## Decisions
+
+- **fix-preexisting-typecheck-lint-gaps** — Trong lúc chạy pnpm typecheck/lint cho slice S1+S2 (lần đầu tiên chạy 2 script này từ sau task roadmap-epic-tracking), phát hiện và sửa các lỗi type/lint có sẵn từ trước, không liên quan findings: (1) TaskRecordV2 thiếu epicId trong static type dù runtime validator đã chấp nhận; (2) EpicRecord cast sai kiểu trong validateEpic; (3) 3 chỗ "epicId" in task check thừa sau khi type đúng; (4) let/rm/import không dùng trong roadmap.ts/roadmap.test.ts.
+  - _Why:_ Đây là khoảng trống verification thực sự từ các task trước (chưa từng chạy typecheck/lint), không phải lỗi của findings/severity; sửa trực tiếp vì nhỏ, rõ ràng, không đụng frozen contract, theo đúng tinh thần tránh task ceremony cho fix nhỏ đã được đặc tả.
+
+## Evidence
+
+- `chk-finding-schema-unit` — pass (2026-09-24T15:39:05+07:00): pnpm vitest run test/unit/task-state.test.ts — pass — EvidenceRecordV2 chấp nhận findings, EvidenceRecordV1 reject findings (unknown field)
+- `chk-finding-shape-unit` — pass (2026-09-24T15:39:05+07:00): pnpm vitest run test/unit/task-state.test.ts — pass — id/text/severity sai đều bị reject, severity hợp lệ (critical) được accept
+- `chk-docs-parity` — pass (2026-09-24T15:39:05+07:00): Đối chiếu thủ công — pass — docs/IMPLEMENTATION_PLAN.md mục 4.3 đã có EvidenceFindingV1/findings? và đoạn giải thích; docs/HARNIX_WORKFLOW.md không có bảng Evidence field riêng nên không cần đổi
+- `chk-full-regression` — pass (2026-09-24T15:39:05+07:00): pnpm test:unit — pass — 289/290 pass (1 skipped), 1 lỗi cũ không liên quan (stray .kilo worktree); pnpm typecheck và pnpm lint cũng sạch (phát hiện và sửa luôn gap có sẵn từ task roadmap trước, ghi trong decisions)

@@ -1,4 +1,4 @@
-import { mkdir, writeFile, readdir } from "node:fs/promises";
+import { mkdir, readFile, writeFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { isIsoTimestamp, isRecord } from "../tasks/task.js";
 import { loadTask } from "../tasks/task.js";
@@ -60,7 +60,7 @@ export function validateEpic(value: unknown): EpicRecord {
     throw new RoadmapValidationError("Epic updatedAt must be >= createdAt.");
   }
 
-  return value as EpicRecord;
+  return value as unknown as EpicRecord;
 }
 
 // Helpers (mirrored from task.ts pattern).
@@ -81,6 +81,16 @@ export async function upsertEpic(root: string, epic: EpicRecord): Promise<void> 
   await renderRoadmapMarkdown(root, epic.id, epic);
 }
 
+/** Returns undefined when the epic record does not exist or fails to parse/validate. */
+export async function loadEpicRecord(root: string, epicId: string): Promise<EpicRecord | undefined> {
+  try {
+    const content = await readFile(join(root, ".harnix", "roadmaps", `${epicId}.json`), "utf8");
+    return validateEpic(JSON.parse(content));
+  } catch {
+    return undefined;
+  }
+}
+
 export async function renderRoadmapMarkdown(root: string, epicId: string, epic?: EpicRecord): Promise<void> {
   const mdPath = join(root, ".harnix", "roadmaps", `${epicId}.md`);
   const title = epic?.title || epicId;
@@ -89,7 +99,7 @@ export async function renderRoadmapMarkdown(root: string, epicId: string, epic?:
   // Collect tasks that belong to this epic
   const harnixRoot = join(root, ".harnix");
   const tasksDir = join(harnixRoot, "tasks");
-  let memberTasks: Array<{ id: string; status: string }> = [];
+  const memberTasks: Array<{ id: string; status: string }> = [];
 
   try {
     const taskDirs = await readdir(tasksDir, { withFileTypes: true });
@@ -101,7 +111,7 @@ export async function renderRoadmapMarkdown(root: string, epicId: string, epic?:
     for (const taskId of taskIds) {
       try {
         const task = await loadTask(join(tasksDir, taskId, "task.json"));
-        if (task.schemaVersion === 2 && "epicId" in task && task.epicId === epicId) {
+        if (task.schemaVersion === 2 && task.epicId === epicId) {
           memberTasks.push({ id: taskId, status: task.status });
         }
       } catch {
@@ -114,22 +124,14 @@ export async function renderRoadmapMarkdown(root: string, epicId: string, epic?:
 
   let memberLines = "";
   if (memberTasks.length === 0) {
-    memberLines = "\nNo task members yet.\n";
+    memberLines = "\n## Members (0 tasks)\n\nNo task members yet.\n";
   } else {
-    memberLines = "\n## Members\n\n";
-    memberLines += "| Task ID | Status |\n";
-    memberLines += "|---------|--------|\n";
-    for (const task of memberTasks) {
-      memberLines += `| ${task.id} | ${task.status} |\n`;
-    }
-
-    // Add next task line
-    const nextTask = memberTasks.find(t => t.status !== "completed" && t.status !== "cancelled");
-    if (nextTask) {
-      memberLines += `\n**Next task:** ${nextTask.id} (${nextTask.status})\n`;
-    } else {
-      memberLines += "\n**All tasks completed or cancelled.**\n";
-    }
+    memberLines = `\n## Members (${memberTasks.length} task${memberTasks.length === 1 ? "" : "s"})\n\n`;
+    memberLines += "| # | Task ID | Status |\n";
+    memberLines += "|---|---------|--------|\n";
+    memberTasks.forEach((task, index) => {
+      memberLines += `| ${index + 1} | ${task.id} | ${task.status} |\n`;
+    });
   }
 
   const content = `# Epic: ${title}${goal}${memberLines}`;

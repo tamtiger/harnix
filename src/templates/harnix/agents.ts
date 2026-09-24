@@ -46,7 +46,7 @@ ${implicitActivationInstructions}
 Apply the matching ceremony profile:
 
 - **Bypass:** use the read-only route above without inspecting or mutating task state.
-- **Lite:** localized low-risk change with a clear contract and focused validation, beyond the Bypass docs-only/bounded literal-value carve-outs in \`.harnix/workflow.md\`.
+- **Lite:** localized low-risk change with a clear contract and focused validation, beyond the Bypass docs-only/bounded literal-value/scoped-user-override carve-outs in \`.harnix/workflow.md\`.
 - **Full:** cross-layer, migration-heavy, security-sensitive, or materially uncertain work.
 
 Read .harnix/workflow.md and .harnix/config.yaml from the selected Harnix root (canonical workflow: [\`.harnix/workflow.md\`](.harnix/workflow.md)) only after the route above requires project state. The preflight is bounded routing metadata, not proof of completion, and \`nextStage: await\` at \`ready\` requires the latest request rather than stale conversation memory to authorize implementation.

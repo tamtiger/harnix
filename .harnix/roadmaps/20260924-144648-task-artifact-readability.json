@@ -1,0 +1,13 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260924-144648-task-artifact-readability",
+  "title": "Cải thiện khả năng đọc của task artifacts",
+  "goal": "Giảm văn xuôi tự do và trùng lặp trong task.json/prd.md/plan.md/review.md: tách rõ AC↔evidence qua dòng Verifies:, What/How trong mỗi Slice, quy ước Command→Result→Note cho evidence summary, ADR-lite cho design.md, dòng Verdict và gộp evidence rerun trùng lặp trong review.md, và severity structured trên EvidenceRecordV2 khi cần.",
+  "nonGoals": [
+    "Không retrofit prd.md/plan.md của task cũ đã completed/cancelled.",
+    "Không đổi frozen ready-trace grammar v1 hiện có."
+  ],
+  "createdAt": "2026-09-24T14:46:48+07:00",
+  "updatedAt": "2026-09-24T14:46:48+07:00"
+}

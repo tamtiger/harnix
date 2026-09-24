@@ -212,6 +212,39 @@ describe("task state", () => {
     })).toThrow(/digest/iu);
   });
 
+  it("accepts optional findings on EvidenceRecordV2 but rejects them on EvidenceRecordV1", () => {
+    const fixtureV2 = taskV2Fixture();
+    const withFindings = {
+      ...fixtureV2,
+      evidence: [{
+        id: "e", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "ok", artifactPaths: [], inputDigest: "a".repeat(64),
+        findings: [{ id: "f1", text: "Duplicate key in map iteration", severity: "medium" as const }],
+      }],
+      acceptanceCriteria: [{ id: "a", text: "x", status: "met" as const, evidenceIds: ["e"] }],
+    };
+    expect(() => validateTask(withFindings)).not.toThrow();
+
+    const withoutFindings = { ...fixtureV2, evidence: [{ id: "e", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "ok", artifactPaths: [], inputDigest: "a".repeat(64) }], acceptanceCriteria: [{ id: "a", text: "x", status: "met" as const, evidenceIds: ["e"] }] };
+    expect(() => validateTask(withoutFindings)).not.toThrow();
+
+    const v1WithFindings = {
+      ...taskFixture(),
+      evidence: [{ id: "e", checkId: undefined, recordedAt: timestamp, result: "pass" as const, summary: "ok", artifactPaths: [], findings: [{ id: "f1", text: "x", severity: "low" as const }] }],
+    };
+    expect(() => validateTask(v1WithFindings)).toThrow(/unknown schema field/iu);
+  });
+
+  it("rejects a finding with an invalid id, empty text, or an out-of-enum severity", () => {
+    const fixtureV2 = taskV2Fixture();
+    const baseEvidence = { id: "e", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "ok", artifactPaths: [], inputDigest: "a".repeat(64) };
+    const withCriterion = { ...fixtureV2, acceptanceCriteria: [{ id: "a", text: "x", status: "met" as const, evidenceIds: ["e"] }] };
+
+    expect(() => validateTask({ ...withCriterion, evidence: [{ ...baseEvidence, findings: [{ id: "bad id", text: "x", severity: "low" }] }] })).toThrow(/finding/iu);
+    expect(() => validateTask({ ...withCriterion, evidence: [{ ...baseEvidence, findings: [{ id: "f1", text: "", severity: "low" }] }] })).toThrow(/finding/iu);
+    expect(() => validateTask({ ...withCriterion, evidence: [{ ...baseEvidence, findings: [{ id: "f1", text: "x", severity: "catastrophic" }] }] })).toThrow(/finding/iu);
+    expect(() => validateTask({ ...withCriterion, evidence: [{ ...baseEvidence, findings: [{ id: "f1", text: "x", severity: "critical" }] }] })).not.toThrow();
+  });
+
   it("preserves pre-migration v1 evidence without allowing new undigested v2 passes", () => {
     const fixture = taskV2Fixture();
     const legacyPass = { id: "legacy", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "legacy", artifactPaths: [] };
@@ -418,6 +451,114 @@ describe("task state", () => {
 
     expect(second).toContain("ready");
     expect(second).not.toBe(first);
+  });
+
+  it("should_show_a_verdict_line_right_after_the_header_summarizing_overall_task_state", async () => {
+    const root = await temporaryRepository();
+    const pending = {
+      generator: "harnix" as const,
+      schemaVersion: 2 as const,
+      id: "20260924-150000-verdict-pending",
+      title: "Verdict pending case",
+      mode: "lite" as const,
+      status: "in_progress" as const,
+      checkpoint: "implementing" as const,
+      goal: "g",
+      nonGoals: [],
+      acceptanceCriteria: [
+        { id: "a", text: "x", status: "met" as const, evidenceIds: ["e1"] },
+        { id: "b", text: "y", status: "pending" as const, evidenceIds: [] },
+      ],
+      relevantPaths: [],
+      relevantSpecs: [],
+      validationPlan: [{ id: "check", description: "d", command: "pnpm test", scope: "full" as const, required: true, criterionIds: ["a", "b"], inputs: ["@task-contract", "src/**/*.ts"] }],
+      evidence: [{ id: "e1", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "s", artifactPaths: [], inputDigest: "a".repeat(64) }],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    await saveTask(root, pending);
+    const pendingReview = await readFile(join(root, "tasks", pending.id, "review.md"), "utf8");
+    const headerEnd = pendingReview.indexOf("## Goal");
+    const verdictLine = pendingReview.slice(0, headerEnd);
+    expect(verdictLine).toMatch(/Verdict.*PENDING.*1\/2/iu);
+
+    const completed = {
+      ...pending,
+      id: "20260924-150000-verdict-pass",
+      status: "completed" as const,
+      checkpoint: "finishing" as const,
+      acceptanceCriteria: [
+        { id: "a", text: "x", status: "met" as const, evidenceIds: ["e1"] },
+        { id: "b", text: "y", status: "met" as const, evidenceIds: ["e1"] },
+      ],
+      completedAt: laterTimestamp,
+      updatedAt: laterTimestamp,
+    };
+    await saveTask(root, completed);
+    const completedReview = await readFile(join(root, "tasks", completed.id, "review.md"), "utf8");
+    expect(completedReview.slice(0, completedReview.indexOf("## Goal"))).toMatch(/Verdict.*PASS/iu);
+
+    const blocked = {
+      ...pending,
+      id: "20260924-150000-verdict-blocked",
+      status: "blocked" as const,
+      checkpoint: "implementing" as const,
+      blocker: { kind: "external" as const, summary: "waiting on vendor", nextAction: "poll vendor", resumeStatus: "in_progress" as const },
+    };
+    await saveTask(root, blocked);
+    const blockedReview = await readFile(join(root, "tasks", blocked.id, "review.md"), "utf8");
+    expect(blockedReview.slice(0, blockedReview.indexOf("## Goal"))).toMatch(/Verdict.*BLOCKED.*external/iu);
+
+    const cancelled = {
+      ...pending,
+      id: "20260924-150000-verdict-cancelled",
+      status: "cancelled" as const,
+      checkpoint: "cancelling" as const,
+      cancellation: { reason: "no longer needed", authorizedBy: "user" as const },
+      cancelledAt: laterTimestamp,
+      updatedAt: laterTimestamp,
+    };
+    await saveTask(root, cancelled);
+    const cancelledReview = await readFile(join(root, "tasks", cancelled.id, "review.md"), "utf8");
+    expect(cancelledReview.slice(0, cancelledReview.indexOf("## Goal"))).toMatch(/Verdict.*CANCELLED/iu);
+  });
+
+  it("should_collapse_repeated_evidence_for_the_same_check_to_its_latest_entry_without_dropping_task_json_history", async () => {
+    const root = await temporaryRepository();
+    const task = {
+      generator: "harnix" as const,
+      schemaVersion: 2 as const,
+      id: "20260924-150100-evidence-dedupe",
+      title: "Evidence dedupe case",
+      mode: "lite" as const,
+      status: "in_progress" as const,
+      checkpoint: "implementing" as const,
+      goal: "g",
+      nonGoals: [],
+      acceptanceCriteria: [{ id: "a", text: "x", status: "pending" as const, evidenceIds: [] }],
+      relevantPaths: [],
+      relevantSpecs: [],
+      validationPlan: [{ id: "check", description: "d", command: "pnpm test", scope: "full" as const, required: true, criterionIds: ["a"], inputs: ["@task-contract", "src/**/*.ts"] }],
+      evidence: [
+        { id: "e1", checkId: "check", recordedAt: "2026-09-24T00:00:00.000Z", result: "fail" as const, exitCode: 1, summary: "RED-1", artifactPaths: [] },
+        { id: "e2", checkId: "check", recordedAt: "2026-09-24T00:01:00.000Z", result: "fail" as const, exitCode: 1, summary: "RED-2", artifactPaths: [] },
+        { id: "e3", checkId: "check", recordedAt: "2026-09-24T00:02:00.000Z", result: "pass" as const, exitCode: 0, summary: "GREEN", artifactPaths: [], inputDigest: "a".repeat(64) },
+      ],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    await saveTask(root, task);
+    const reviewPath = join(root, "tasks", task.id, "review.md");
+    const review = await readFile(reviewPath, "utf8");
+    const evidenceSection = review.slice(review.indexOf("## Evidence"));
+
+    expect(evidenceSection).toContain("GREEN");
+    expect(evidenceSection).not.toContain("RED-1");
+    expect(evidenceSection).not.toContain("RED-2");
+    expect(evidenceSection).toMatch(/2 (earlier|previous).*(rerun|attempt)/iu);
+
+    const persisted = JSON.parse(await readFile(join(root, "tasks", task.id, "task.json"), "utf8")) as { evidence: unknown[] };
+    expect(persisted.evidence).toHaveLength(3);
   });
 
 });

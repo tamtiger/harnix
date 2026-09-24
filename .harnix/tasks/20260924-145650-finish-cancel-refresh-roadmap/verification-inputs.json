@@ -1,0 +1,136 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260924-145650-finish-cancel-refresh-roadmap",
+  "snapshots": [
+    {
+      "evidenceId": "ev-chk-cancel-refresh",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260924-145650-finish-cancel-refresh-roadmap",
+      "checkId": "chk-cancel-refresh-unit",
+      "taskContractHash": "ca9ffec10e8a102129e5c95344f74c5d7e71a0641cc64e6a1c717b44b42a53cc",
+      "entries": [
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "c57edaa97d367f16deb1ea2c37c13ae972cf5205dfe3d2f3679a94abeed12e9a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow-save.test.ts",
+          "sha256": "4774f71f3b25fcc9629a14816945ad477842d12a64b8c4e1b5166fd409e433fb",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "748c5fc28fc35a68935c79682859d8bbf72ad999a5e9577e054d664749796a66"
+    },
+    {
+      "evidenceId": "ev-chk-finish-refresh",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260924-145650-finish-cancel-refresh-roadmap",
+      "checkId": "chk-finish-refresh-unit",
+      "taskContractHash": "ca9ffec10e8a102129e5c95344f74c5d7e71a0641cc64e6a1c717b44b42a53cc",
+      "entries": [
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "c57edaa97d367f16deb1ea2c37c13ae972cf5205dfe3d2f3679a94abeed12e9a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow-save.test.ts",
+          "sha256": "4774f71f3b25fcc9629a14816945ad477842d12a64b8c4e1b5166fd409e433fb",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "6bee753903811597aa3c131b8cc6a96148d8057900d12e728ef195825e6d769f"
+    },
+    {
+      "evidenceId": "ev-chk-no-epicid-regr",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260924-145650-finish-cancel-refresh-roadmap",
+      "checkId": "chk-no-epicid-regression",
+      "taskContractHash": "ca9ffec10e8a102129e5c95344f74c5d7e71a0641cc64e6a1c717b44b42a53cc",
+      "entries": [
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "c57edaa97d367f16deb1ea2c37c13ae972cf5205dfe3d2f3679a94abeed12e9a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow-save.test.ts",
+          "sha256": "4774f71f3b25fcc9629a14816945ad477842d12a64b8c4e1b5166fd409e433fb",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "e8f1a4384645dd36493b7ca71109c7cf4909fac705580336e61f3c5a0433cb49"
+    },
+    {
+      "evidenceId": "ev-chk-workflow-full-regr",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260924-145650-finish-cancel-refresh-roadmap",
+      "checkId": "chk-workflow-full-regression",
+      "taskContractHash": "ca9ffec10e8a102129e5c95344f74c5d7e71a0641cc64e6a1c717b44b42a53cc",
+      "entries": [
+        {
+          "path": "src/commands/internal-workflow.ts",
+          "sha256": "c57edaa97d367f16deb1ea2c37c13ae972cf5205dfe3d2f3679a94abeed12e9a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/cli-contract.test.ts",
+          "sha256": "f6416ccc41ce798746b0d7ddb303dcf6234edd17554ad88da882bdcf6943a47b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/history-regressions.test.ts",
+          "sha256": "76f80cc09b10258c9bbe5a0ed27d37829df0902e38ba62689b443dd07b83a42a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-context.test.ts",
+          "sha256": "3277253e4511b0d95888d84caf36c0af211c35a14c21cb2318c56e2318244ded",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow-save.test.ts",
+          "sha256": "4774f71f3b25fcc9629a14816945ad477842d12a64b8c4e1b5166fd409e433fb",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/internal-workflow.test.ts",
+          "sha256": "bdb96ce0c0ff9718ac0410ee45564530f6d928fcb21040bdc92920ba26ceb63b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/provenance.test.ts",
+          "sha256": "f97609013b6b2e8bda8be84600f705efea27d677f3441f673d9ded7acb7ff8cd",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/routing.test.ts",
+          "sha256": "57c21e4df2673c35f6a88fbe824f982269c5d5a808522ce62a99f6fee65cc54e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/self-host.test.ts",
+          "sha256": "787739619f38eb5d6f2a96a7c5be706453faafbb2da8b6c9423e76697a336512",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/skill-sources.test.ts",
+          "sha256": "58ac9135407fe1e3b64c1b5880e23ae631c3aa79437ea2807427e098301d3cc1",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "d16a04297a29b1a3559c722592b6e41c31d0a7ea05ab9cb784439bf4efa84cf6",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "e2b87232707d0dbac37999ce3aff792d2657b9b2d3b7f0fb1a45b4ba027d4616"
+    }
+  ]
+}

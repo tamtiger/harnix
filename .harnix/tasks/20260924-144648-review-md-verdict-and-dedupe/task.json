@@ -1,0 +1,180 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260924-144648-review-md-verdict-and-dedupe",
+  "title": "Thêm dòng Verdict và gộp evidence rerun trùng lặp trong review.md",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20260924-144648-task-artifact-readability",
+  "goal": "Cải thiện renderTaskReview trong src/core/tasks/task.ts: thêm dòng Verdict tóm tắt trạng thái tổng quan ngay sau header block, và gộp evidence cùng checkId trong mục Evidence để chỉ hiển thị lần chạy mới nhất kèm ghi chú số lần rerun trước đó, giúp reviewer không phải đọc hết file mới biết task pass hay chưa.",
+  "nonGoals": [
+    "Không đổi dữ liệu evidence trong task.json (append-only, immutable) — chỉ đổi cách hiển thị derived view review.md.",
+    "Không đổi TaskRecord schema, taskContractHash, hay ready-trace grammar v1.",
+    "Không thêm severity structured vào EvidenceRecordV2 (thuộc task Full riêng, cùng epic)."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "review-verdict-line",
+      "text": "review.md có dòng Verdict ngay sau header block (trước Goal) tóm tắt trạng thái tổng quan: PASS khi mọi criterion met/waived và mọi required check có evidence pass mới nhất; PENDING kèm số liệu X/Y criteria met khi chưa xong; BLOCKED kèm blocker.kind khi status=blocked; CANCELLED khi status=cancelled.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-verdict-line"
+      ]
+    },
+    {
+      "id": "review-evidence-dedup",
+      "text": "Trong mục Evidence, các entry cùng checkId được gộp: chỉ hiển thị entry mới nhất (theo recordedAt) kèm ghi chú số lần rerun trước đó nếu >1; entry không có checkId (ví dụ migration evidence) vẫn hiển thị riêng lẻ theo thứ tự cũ; dữ liệu evidence gốc trong task.json không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-evidence-dedup"
+      ]
+    },
+    {
+      "id": "review-regeneration-unchanged",
+      "text": "review.md vẫn được regenerate đúng ở mọi lần saveTask (--save/--transition/--evidence/--finish/--cancel); không đổi TaskRecord schema, obligations, hay taskContractHash.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-review-regen"
+      ]
+    },
+    {
+      "id": "regression-safe",
+      "text": "Toàn bộ test hiện có liên quan tới review.md/renderTaskReview trong test/unit/task-state.test.ts và test:unit tổng thể vẫn pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-regression-taskA"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task.ts",
+    "test/unit/task-state.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-verdict-line-unit",
+      "description": "Unit test: Verdict line xuat hien dung cho cac trang thai PASS/PENDING/BLOCKED/CANCELLED.",
+      "command": "pnpm vitest run test/unit/task-state.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "review-verdict-line"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts"
+      ]
+    },
+    {
+      "id": "chk-evidence-dedup-unit",
+      "description": "Unit test: nhieu evidence cung checkId chi hien thi 1 entry moi nhat kem ghi chu rerun count; task.json giu nguyen toan bo evidence.",
+      "command": "pnpm vitest run test/unit/task-state.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "review-evidence-dedup"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts"
+      ]
+    },
+    {
+      "id": "chk-review-regeneration-unit",
+      "description": "Unit test: review.md regenerate dung luc o --save/--transition/--evidence, khong doi taskContractHash.",
+      "command": "pnpm vitest run test/unit/task-state.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "review-regeneration-unchanged"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts"
+      ]
+    },
+    {
+      "id": "chk-full-regression",
+      "description": "Toan bo test:unit pass sau thay doi.",
+      "command": "pnpm test:unit",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "regression-safe"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/task.ts",
+        "test/unit/**/*.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-verdict-line",
+      "checkId": "chk-verdict-line-unit",
+      "recordedAt": "2026-09-24T14:52:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Verdict line dung sau header, truoc Goal: PASS/PENDING(X/Y)/BLOCKED(kind)/CANCELLED(reason) deu dung - test moi pass.",
+      "artifactPaths": [
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts"
+      ],
+      "inputDigest": "c4f96c80af367c5f23e5c89bb3360dec52d819b5eeb3ef995937742af398c70e"
+    },
+    {
+      "id": "ev-chk-evidence-dedup",
+      "checkId": "chk-evidence-dedup-unit",
+      "recordedAt": "2026-09-24T14:52:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Evidence cung checkId chi hien thi entry moi nhat kem ghi chu so lan rerun; task.json van giu du 3 evidence goc (khong mat du lieu) - test moi pass.",
+      "artifactPaths": [
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts"
+      ],
+      "inputDigest": "4f0c2b0b3f1ae35833da166cbd719ebac84908ad72cc8bb069ac77d7587bcb42"
+    },
+    {
+      "id": "ev-chk-review-regen",
+      "checkId": "chk-review-regeneration-unit",
+      "recordedAt": "2026-09-24T14:52:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "review.md van regenerate dung o moi lan saveTask; khong doi TaskRecord schema/taskContractHash - 27/27 test task-state.test.ts pass.",
+      "artifactPaths": [
+        "src/core/tasks/task.ts",
+        "test/unit/task-state.test.ts"
+      ],
+      "inputDigest": "da2edf5b7a6d161e1ac55be43063e4444cba726239b2f7af776d5cb75253337f"
+    },
+    {
+      "id": "ev-chk-full-regression-taskA",
+      "checkId": "chk-full-regression",
+      "recordedAt": "2026-09-24T14:52:00+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "test:unit 287 pass + 1 pre-existing failure khong lien quan (stray .kilo worktree); test:workflow 10/10 files (120 tests) pass; test:integration 21/21 files (130 tests) pass.",
+      "artifactPaths": [
+        "src/core/tasks/task.ts"
+      ],
+      "inputDigest": "21ba703092ab8a615f5404bbbed12354f0a324e201b5c514d96be816f9739040"
+    }
+  ],
+  "createdAt": "2026-09-24T14:46:48+07:00",
+  "updatedAt": "2026-09-24T07:54:18.009Z",
+  "decisions": [
+    {
+      "id": "roadmap-render-epic-title-bugfix",
+      "text": "Trong luc gan epicId cho task nay, phat hien bug: internal-workflow.ts goi renderRoadmapMarkdown(root, epicId) khong kem epic record khi task.epicId khop epic co san, lam mat title/goal cua epic (chi con hien thi bare ID). Da fix bang cach them loadEpicRecord() de doc lai epic tu disk truoc khi render lai, va tang cuong test lien quan trong internal-workflow-save.test.ts.",
+      "rationale": "Bug nay khong thuoc pham vi acceptance criteria cua task nay (review.md Verdict/dedupe), nhung duoc phat hien va sua ngay trong cung phien lam viec khi dogfood tinh nang roadmap de tao epic cho task nay; ghi lai o day de co provenance ro rang thay vi am tham sua khong dau vet."
+    }
+  ],
+  "completedAt": "2026-09-24T07:54:18.009Z"
+}

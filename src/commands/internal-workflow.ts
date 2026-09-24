@@ -29,7 +29,7 @@ import {
   type TaskRecord,
   type TaskRecordV2,
 } from "../core/tasks/task.js";
-import { validateEpic, upsertEpic, renderRoadmapMarkdown, type EpicRecord } from "../core/roadmaps/roadmap.js";
+import { validateEpic, upsertEpic, loadEpicRecord, renderRoadmapMarkdown, type EpicRecord } from "../core/roadmaps/roadmap.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import {
   contextSelectionResultHash,
@@ -149,10 +149,12 @@ async function saveWorkflowLocked(
     if (validatedEpic) {
       await upsertEpic(root, validatedEpic);
     }
-    // Regenerate markdown if task has epicId matching an existing epic
-    if (candidate.schemaVersion === 2 && "epicId" in candidate && candidate.epicId !== undefined) {
-      const epicId = candidate.epicId as string;
-      await renderRoadmapMarkdown(root, epicId);
+    // Regenerate markdown if task has epicId matching an existing epic, unless
+    // this same save already upserted (and rendered) that exact epic above.
+    if (candidate.schemaVersion === 2 && candidate.epicId !== undefined && candidate.epicId !== validatedEpic?.id) {
+      const epicId = candidate.epicId;
+      const epic = await loadEpicRecord(root, epicId);
+      await renderRoadmapMarkdown(root, epicId, epic);
     }
   } catch (error: unknown) {
     if (!taskCommitted) {
@@ -264,6 +266,18 @@ function validateEvidenceEnvelope(value: unknown): Evidence {
   return evidence as unknown as Evidence;
 }
 
+/**
+ * `finishWorkflowTask`/`cancelWorkflowTask` persist the terminal record via
+ * the low-level `saveTask`, not `saveWorkflowLocked`, so they never go
+ * through the epic-refresh step that a normal `--save` triggers. Without
+ * this, a task's roadmap entry would freeze at its last pre-terminal status.
+ */
+async function refreshLinkedEpicMarkdown(root: string, task: TaskRecord): Promise<void> {
+  if (task.schemaVersion !== 2 || task.epicId === undefined) return;
+  const epic = await loadEpicRecord(root, task.epicId);
+  await renderRoadmapMarkdown(root, task.epicId, epic);
+}
+
 export async function finishWorkflow(root: string, now = new Date().toISOString()): Promise<TaskRecord> {
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
@@ -271,7 +285,9 @@ export async function finishWorkflow(root: string, now = new Date().toISOString(
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
   const journalDate = task.status === "completed" ? task.completedAt! : now;
   const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${journalDate.slice(0, 10)}.jsonl`);
-  return finishWorkflowTask(harnixRoot, journalPath, config.developer, task, now);
+  const finished = await finishWorkflowTask(harnixRoot, journalPath, config.developer, task, now);
+  await refreshLinkedEpicMarkdown(root, finished);
+  return finished;
 }
 
 export async function cancelWorkflow(root: string, envelope: unknown, now = new Date().toISOString()): Promise<TaskRecord> {
@@ -283,7 +299,9 @@ export async function cancelWorkflow(root: string, envelope: unknown, now = new 
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
   const journalDate = recovering ? task.cancelledAt! : now;
   const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${journalDate.slice(0, 10)}.jsonl`);
-  return cancelWorkflowTask(harnixRoot, journalPath, config.developer, task, cancellation, now);
+  const cancelled = await cancelWorkflowTask(harnixRoot, journalPath, config.developer, task, cancellation, now);
+  await refreshLinkedEpicMarkdown(root, cancelled);
+  return cancelled;
 }
 
 export async function recordLearningWorkflow(root: string, envelope: unknown, now = new Date().toISOString()): Promise<WorkflowLearningResult> {

@@ -1,0 +1,181 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260924-145650-finish-cancel-refresh-roadmap",
+  "title": "Refresh roadmap markdown khi finish hoặc cancel task có epicId",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20260924-144648-task-artifact-readability",
+  "goal": "finishWorkflowTask và cancelWorkflowTask trong src/core/workflow.ts gọi saveTask trực tiếp, bỏ qua logic regenerate roadmap markdown chỉ tồn tại trong saveWorkflowLocked (src/commands/internal-workflow.ts). Kết quả: .harnix/roadmaps/<epic-id>.md không bao giờ phản ánh đúng status completed/cancelled cuối cùng của task, dù trạng thái trong task.json đã đúng. Sửa bằng cách thêm bước refresh roadmap markdown sau khi finishWorkflow/cancelWorkflow (public wrapper trong internal-workflow.ts) gọi xong core finish/cancel, tái sử dụng loadEpicRecord+renderRoadmapMarkdown đã có.",
+  "nonGoals": [
+    "Không đổi TaskRecord schema, EvidenceRecordV2, hay bất kỳ frozen contract nào khác.",
+    "Không đổi hành vi finish/cancel cho task không có epicId.",
+    "Không thêm severity structured vào EvidenceRecordV2 (thuộc task Full riêng, cùng epic)."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "finish-refreshes-roadmap",
+      "text": "harnix workflow --finish khi active task có epicId sẽ regenerate .harnix/roadmaps/<epic-id>.md phản ánh đúng status completed cuối cùng của task đó, load lại epic record đầy đủ (title/goal không bị mất, không fallback về bare ID).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-finish-refresh"
+      ]
+    },
+    {
+      "id": "cancel-refreshes-roadmap",
+      "text": "harnix workflow --cancel khi active task có epicId sẽ regenerate .harnix/roadmaps/<epic-id>.md phản ánh đúng status cancelled cuối cùng của task đó.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-cancel-refresh"
+      ]
+    },
+    {
+      "id": "no-epicid-unaffected",
+      "text": "Task không có epicId: finish/cancel hành vi và output không đổi so với trước; không có lỗi hay side-effect roadmap nào phát sinh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-no-epicid-regr"
+      ]
+    },
+    {
+      "id": "regression-safe",
+      "text": "Toàn bộ test hiện có trong test/workflow/internal-workflow.test.ts và test/workflow/internal-workflow-save.test.ts vẫn pass; test:workflow tổng thể không regression.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-workflow-full-regr"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/internal-workflow.ts",
+    "test/workflow/internal-workflow.test.ts",
+    "test/workflow/internal-workflow-save.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-finish-refresh-unit",
+      "description": "Test: finishWorkflow voi task co epicId regenerate dung .md voi status completed va epic title/goal day du.",
+      "command": "pnpm vitest run test/workflow/internal-workflow-save.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "finish-refreshes-roadmap"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow-save.test.ts"
+      ]
+    },
+    {
+      "id": "chk-cancel-refresh-unit",
+      "description": "Test: cancelWorkflow voi task co epicId regenerate dung .md voi status cancelled.",
+      "command": "pnpm vitest run test/workflow/internal-workflow-save.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "cancel-refreshes-roadmap"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow-save.test.ts"
+      ]
+    },
+    {
+      "id": "chk-no-epicid-regression",
+      "description": "Test: task khong co epicId, finish/cancel khong doi hanh vi/output.",
+      "command": "pnpm vitest run test/workflow/internal-workflow-save.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "no-epicid-unaffected"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow-save.test.ts"
+      ]
+    },
+    {
+      "id": "chk-workflow-full-regression",
+      "description": "Toan bo test:workflow pass sau thay doi.",
+      "command": "pnpm test:workflow",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "regression-safe"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "test/workflow/**/*.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-finish-refresh",
+      "checkId": "chk-finish-refresh-unit",
+      "recordedAt": "2026-09-24T15:05:32+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "finishWorkflow voi task co epicId regenerate dung .md voi status completed va epic title/goal day du - test moi pass.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow-save.test.ts"
+      ],
+      "inputDigest": "6bee753903811597aa3c131b8cc6a96148d8057900d12e728ef195825e6d769f"
+    },
+    {
+      "id": "ev-chk-cancel-refresh",
+      "checkId": "chk-cancel-refresh-unit",
+      "recordedAt": "2026-09-24T15:05:32+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "cancelWorkflow voi task co epicId regenerate dung .md voi status cancelled - test moi pass.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow-save.test.ts"
+      ],
+      "inputDigest": "748c5fc28fc35a68935c79682859d8bbf72ad999a5e9577e054d664749796a66"
+    },
+    {
+      "id": "ev-chk-no-epicid-regr",
+      "checkId": "chk-no-epicid-regression",
+      "recordedAt": "2026-09-24T15:05:32+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Task khong epicId: finish/cancel khong doi hanh vi, khong tao thu muc roadmaps - test moi pass.",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow-save.test.ts"
+      ],
+      "inputDigest": "e8f1a4384645dd36493b7ca71109c7cf4909fac705580336e61f3c5a0433cb49"
+    },
+    {
+      "id": "ev-chk-workflow-full-regr",
+      "checkId": "chk-workflow-full-regression",
+      "recordedAt": "2026-09-24T15:05:32+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "test:workflow 10/10 files (123 tests) pass sau thay doi finish/cancel refresh + doi format markdown (bo Next task line, them header count).",
+      "artifactPaths": [
+        "src/commands/internal-workflow.ts"
+      ],
+      "inputDigest": "e2b87232707d0dbac37999ce3aff792d2657b9b2d3b7f0fb1a45b4ba027d4616"
+    }
+  ],
+  "createdAt": "2026-09-24T14:56:50+07:00",
+  "updatedAt": "2026-09-24T08:07:44.354Z",
+  "decisions": [
+    {
+      "id": "roadmap-md-format-count-header-no-next-task",
+      "text": "Theo yeu cau nguoi dung, doi header bang Members trong roadmap markdown thanh \"## Members (N tasks)\" de ro day la danh sach day du, va bo dong \"**Next task:**\"/\"**All tasks completed or cancelled.**\" o cuoi (field nextTask trong JSON cua public command harnix roadmap --id khong doi, van con day du).",
+      "rationale": "Nguoi dung thay dinh dang cu (bang + dong Next task) de gay hieu nham la chi hien thi task hien tai + task ke tiep thay vi toan bo danh sach; header co so luong ro rang hon."
+    }
+  ],
+  "completedAt": "2026-09-24T08:07:44.354Z"
+}

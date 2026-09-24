@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or already in progress and needs plan review, test-first implementation, refactoring, or technical feedback handling.
 metadata:
-  version: "1.1.13"
+  version: "1.1.16"
 ---
 
 # Implement a ready Harnix task
@@ -69,6 +69,8 @@ Write the minimal implementation that satisfies the test and the frozen contract
 Run the focused test and relevant neighboring tests. Fix production code when the contract is right; do not rewrite the test to bless an incorrect implementation.
 
 For a TaskRecord schema v2 required check, run `harnix workflow --snapshot --check <id>` immediately before the non-mutating verification command. After reading the complete result and exit code, run the same hidden snapshot again. Record a passing evidence item only when both `inputDigest` values are identical; set that exact lowercase digest on the evidence and persist it immediately. If the digest changes, the pattern is empty, or an input is missing/unreadable, do not claim GREEN—resolve the drift and rerun the check.
+
+Write each evidence `summary` as command, then result, then any note, in that order — for example "pnpm vitest run test/x.test.ts — 5/5 pass — regression case for the empty-list branch" — instead of one undifferentiated sentence. A reader scanning `review.md` should find what ran and what happened without parsing prose for both.
 
 Before running a check, inspect preflight/check state once. Reuse a required check already reported `passed` when its current `inputDigest` still matches; this evidence reuse avoids executing the same check twice for the same digest in one user request. Persist a stable failed run with its `inputDigest` so Check can distinguish a changed input from a repeated identical failure.
 

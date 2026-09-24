@@ -1,8 +1,8 @@
-import { readFile, rm } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { renderRoadmapMarkdown, upsertEpic, validateEpic } from "../../src/core/roadmaps/roadmap.js";
+import { upsertEpic, validateEpic } from "../../src/core/roadmaps/roadmap.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 describe("EpicRecord validation", () => {

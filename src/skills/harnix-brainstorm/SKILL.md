@@ -2,7 +2,7 @@
 name: harnix-brainstorm
 description: Use when a Harnix project needs request triage, requirements, design, planning, or a trustworthy ready gate before implementation.
 metadata:
-  version: "1.1.13"
+  version: "1.1.16"
 ---
 
 # Plan a Harnix task
@@ -30,7 +30,7 @@ Accept either no active task or one active task still owned by `planning|replan`
 
 Classify the request:
 
-- **Bypass:** read-only explanation, standalone review, generic status, a docs-only edit (prose, formatting, or authoring/updating a prompt document), or a bounded literal-value-only edit (one numeric, string, or enum constant changed in at most two files, with no behavior, interface, or schema change) — unless the docs edit changes a frozen public contract, spans material layers, or introduces a real product decision, in which case classify it as Lite or Full instead. None of these Bypass cases need persisted task state.
+- **Bypass:** read-only explanation, standalone review, generic status, a docs-only edit (prose, formatting, or authoring/updating a prompt document), or a bounded literal-value-only edit (one numeric, string, or enum constant changed in at most two files, with no behavior, interface, or schema change) — unless the docs edit changes a frozen public contract, spans material layers, or introduces a real product decision, in which case classify it as Lite or Full instead. None of these Bypass cases need persisted task state. A scoped user override also applies: when the user explicitly asks, in that same message, to skip task creation for one small change they have already fully specified, apply it directly and say plainly that no task was created — this covers only that one change, never a standing license to skip Lite for ordinary project mutations.
 - **Lite:** localized low-risk change with an obvious contract and focused validation, beyond the Bypass carve-outs above.
 - **Full:** cross-layer, migration-heavy, security-sensitive, externally researched, or materially uncertain work.
 
@@ -82,6 +82,8 @@ Create new work as TaskRecord schema v2. Every validation check records sorted u
 Use a short lowercase task slug with a hyphen between words so the task directory and active pointer remain readable, for example `workflow-audit-fix`; append only the documented deterministic numeric collision suffix. Validate the complete task ID before writing. If the current frozen validator cannot represent the requested hyphenated slug, keep state valid, record the contract change explicitly, and do not fabricate or persist an invalid ID.
 
 Full tasks require `prd.md` and `plan.md`. Add `design.md` only when it materially clarifies boundaries or data flow. Use ready-trace grammar v1: each TaskRecord criterion has one level-three `AC` heading whose ID is backtick-wrapped in `prd.md`; each plan slice has one checklist item, one level-three `Slice` block with a backtick-wrapped ID, and non-empty `Criteria:`, `Checks:`, and `Paths:` backtick references. Plans must identify concrete files and interfaces, order RED–GREEN slices, and state what each verification proves. Put the implementation checklist near the top of `plan.md` with one stable item per independently verifiable slice. Leave every item unchecked at planning time; an implementation owner checks an item only after its stated work and focused evidence are complete. The checklist is a progress view, not a replacement for TaskRecord criteria or evidence. Optional mutable execution notes belong only between exact `<!-- harnix:execution-notes:begin -->` and `<!-- harnix:execution-notes:end -->` markers. The region is limited to 100 lines and 16,384 characters; each non-empty line must use inert `check:<id>=pending|passed|failed|skipped[@<ISO-Z>]` or `slice:<id>=...` status grammar. Never place prose, a requirement, criterion, check definition, path contract, or decision inside it.
+
+Write these artifacts so a reviewer can scan them without holding the whole task in their head, without adding to the frozen ready-trace grammar above. Under each `AC` heading in `prd.md`, add a short **Verifies:** line naming which check(s) prove it, so the criterion-to-evidence link is visible without cross-referencing `validationPlan`. Within each `Slice` block in `plan.md`, separate what the slice does from how it is verified instead of blending both into one paragraph. When a `design.md` is warranted, prefer a light ADR shape — Context, Decision, Consequences, and Alternatives considered — over free-form prose, so a later reader sees the trade-off, not just the outcome. These conventions apply only to artifacts written from now on; never retrofit a completed or historical task's `prd.md`/`plan.md`, since both are hashed under `planning-contract-v1` and an edit would falsely stale otherwise-valid evidence.
 
 ## Ready self-review
 

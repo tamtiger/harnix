@@ -13,8 +13,10 @@ export interface ValidationCheckV1 extends ValidationCheckBase { criterionIds?: 
 export interface ValidationCheckV2 extends ValidationCheckBase { criterionIds: string[]; inputs: string[]; }
 export type ValidationCheck = ValidationCheckV1 | ValidationCheckV2;
 interface EvidenceBase { id: string; checkId?: string; recordedAt: string; result: "pass" | "fail" | "skipped"; exitCode?: number; summary: string; artifactPaths: string[]; }
-export interface EvidenceV1 extends EvidenceBase { inputDigest?: never; }
-export interface EvidenceV2 extends EvidenceBase { inputDigest?: string; }
+export interface EvidenceV1 extends EvidenceBase { inputDigest?: never; findings?: never; }
+/** Machine-readable severity for Stage-2 review, in place of free-form summary prose alone. */
+export interface EvidenceFindingV1 { id: string; text: string; severity: "low" | "medium" | "high" | "critical"; }
+export interface EvidenceV2 extends EvidenceBase { inputDigest?: string; findings?: EvidenceFindingV1[]; }
 export type Evidence = EvidenceV1 | EvidenceV2;
 export interface TaskBlocker { kind: "decision" | "authority" | "credential" | "external" | "repository"; summary: string; nextAction: string; resumeStatus: "planning" | "ready" | "in_progress" | "verifying"; }
 export interface TaskCancellation { reason: string; authorizedBy: "user"; }
@@ -22,8 +24,8 @@ export interface TaskCancellation { reason: string; authorizedBy: "user"; }
 export interface TaskDecision { id: string; text: string; rationale: string; }
 export interface TaskResidualRisk { id: string; text: string; severity: "low" | "medium" | "high"; }
 interface TaskRecordBase { generator: "harnix"; id: string; title: string; mode: TaskMode; status: TaskStatus; checkpoint: WorkflowCheckpoint; goal: string; nonGoals: string[]; acceptanceCriteria: AcceptanceCriterion[]; relevantPaths: string[]; relevantSpecs: string[]; blocker?: TaskBlocker; cancellation?: TaskCancellation; createdAt: string; updatedAt: string; completedAt?: string; cancelledAt?: string; }
-export interface TaskRecordV1 extends TaskRecordBase { schemaVersion: 1; validationPlan: ValidationCheckV1[]; evidence: EvidenceV1[]; }
-export interface TaskRecordV2 extends TaskRecordBase { schemaVersion: 2; validationPlan: ValidationCheckV2[]; evidence: EvidenceV2[]; decisions?: TaskDecision[]; residualRisks?: TaskResidualRisk[]; }
+export interface TaskRecordV1 extends TaskRecordBase { schemaVersion: 1; validationPlan: ValidationCheckV1[]; evidence: EvidenceV1[]; epicId?: never; }
+export interface TaskRecordV2 extends TaskRecordBase { schemaVersion: 2; validationPlan: ValidationCheckV2[]; evidence: EvidenceV2[]; decisions?: TaskDecision[]; residualRisks?: TaskResidualRisk[]; epicId?: string; }
 export type TaskRecord = TaskRecordV1 | TaskRecordV2;
 export interface TaskValidationOptions { allowUnsafeCompletedEvidenceArtifacts?: boolean | undefined; }
 
@@ -105,7 +107,8 @@ export const acceptanceCriterionKeys = new Set(["evidenceIds", "id", "status", "
 const validationCheckV1Keys = new Set(["command", "description", "id", "required", "scope"]);
 export const validationCheckV2Keys = new Set([...validationCheckV1Keys, "criterionIds", "inputs"]);
 const evidenceV1Keys = new Set(["artifactPaths", "checkId", "exitCode", "id", "recordedAt", "result", "summary"]);
-export const evidenceV2Keys = new Set([...evidenceV1Keys, "inputDigest"]);
+export const evidenceV2Keys = new Set([...evidenceV1Keys, "inputDigest", "findings"]);
+const evidenceFindingKeys = new Set(["id", "severity", "text"]);
 export const blockerKeys = new Set(["kind", "nextAction", "resumeStatus", "summary"]);
 const cancellationKeys = new Set(["authorizedBy", "reason"]);
 
@@ -152,6 +155,18 @@ export function validateTask(value: unknown, options: TaskValidationOptions = {}
   if (!(value.evidence as unknown[]).every((item) => isRecord(item) && validId(item.id) && (item.checkId === undefined || validId(item.checkId)) && typeof item.recordedAt === "string" && isIsoTimestamp(item.recordedAt) && ["pass", "fail", "skipped"].includes(String(item.result)) && (item.exitCode === undefined || Number.isInteger(item.exitCode)) && typeof item.summary === "string" && Array.isArray(item.artifactPaths) && (allowUnsafeCompletedEvidenceArtifacts || (item.artifactPaths as unknown[]).every(isSafeRepositoryPath)))) throw new TaskValidationError("Evidence is invalid.");
   for (const item of value.evidence as Record<string, unknown>[]) assertExactKeys(item, value.schemaVersion === 1 ? evidenceV1Keys : evidenceV2Keys, "Evidence");
   if (value.schemaVersion === 1 && !(value.evidence as unknown[]).every((item) => isRecord(item) && item.inputDigest === undefined)) throw new TaskValidationError("TaskRecord v1 evidence is invalid.");
+  if (value.schemaVersion === 2) {
+    for (const item of value.evidence as Record<string, unknown>[]) {
+      if (item.findings === undefined) continue;
+      if (!Array.isArray(item.findings)) throw new TaskValidationError("Evidence finding is invalid.");
+      for (const finding of item.findings as unknown[]) {
+        if (!isRecord(finding) || !validId(finding.id) || !isBoundedText(finding.text) || !["low", "medium", "high", "critical"].includes(String(finding.severity))) {
+          throw new TaskValidationError("Evidence finding is invalid.");
+        }
+        assertExactKeys(finding, evidenceFindingKeys, "Evidence finding");
+      }
+    }
+  }
   if (!(value.acceptanceCriteria as unknown[]).every((item) => isRecord(item) && typeof item.id === "string" && typeof item.text === "string" && ["pending", "met", "waived"].includes(String(item.status)) && Array.isArray(item.evidenceIds) && (item.evidenceIds as unknown[]).every((id) => typeof id === "string"))) throw new TaskValidationError("Acceptance criteria are invalid.");
   for (const item of value.acceptanceCriteria as Record<string, unknown>[]) assertExactKeys(item, acceptanceCriterionKeys, "Acceptance criterion");
   ensureUnique((value.acceptanceCriteria as AcceptanceCriterion[]).map((item) => item.id), "acceptance criterion");
@@ -277,6 +292,14 @@ async function exists(path: string): Promise<boolean> {
   catch { return false; }
 }
 
+function renderVerdict(task: TaskRecord): string {
+  if (task.status === "cancelled") return `**Verdict:** CANCELLED — ${task.cancellation?.reason ?? "no reason recorded"}`;
+  if (task.status === "blocked") return `**Verdict:** BLOCKED (${task.blocker?.kind ?? "unknown"}) — ${task.blocker?.summary ?? "no summary recorded"}`;
+  if (task.status === "completed") return "**Verdict:** PASS — all acceptance criteria met or waived";
+  const met = task.acceptanceCriteria.filter((criterion) => criterion.status === "met" || criterion.status === "waived").length;
+  return `**Verdict:** PENDING — ${met}/${task.acceptanceCriteria.length} acceptance criteria met`;
+}
+
 function renderTaskReview(task: TaskRecord, artifacts: { prd: boolean; plan: boolean; design: boolean }): string {
   const lines: string[] = [
     `# ${task.title}`,
@@ -286,6 +309,8 @@ function renderTaskReview(task: TaskRecord, artifacts: { prd: boolean; plan: boo
     `- **Status:** ${task.status}/${task.checkpoint}`,
     `- **Created:** ${task.createdAt}`,
     `- **Updated:** ${task.updatedAt}`,
+    "",
+    renderVerdict(task),
     "",
     "## Goal",
     "",
@@ -340,9 +365,18 @@ function renderTaskReview(task: TaskRecord, artifacts: { prd: boolean; plan: boo
   if (task.evidence.length === 0) {
     lines.push("_None recorded yet._");
   } else {
+    const renderedCheckIds = new Set<string>();
     for (const item of task.evidence) {
-      const check = item.checkId ? `\`${item.checkId}\` — ` : "";
-      lines.push(`- ${check}${item.result} (${item.recordedAt}): ${item.summary}`);
+      if (item.checkId === undefined) {
+        lines.push(`- ${item.result} (${item.recordedAt}): ${item.summary}`);
+        continue;
+      }
+      if (renderedCheckIds.has(item.checkId)) continue;
+      renderedCheckIds.add(item.checkId);
+      const rerunCount = task.evidence.filter((candidate) => candidate.checkId === item.checkId).length - 1;
+      const latest = selectLatestEvidence(task.evidence, item.checkId) ?? item;
+      const rerunNote = rerunCount > 0 ? ` _(${rerunCount} earlier rerun${rerunCount > 1 ? "s" : ""} not shown; see task.json for full history)_` : "";
+      lines.push(`- \`${item.checkId}\` — ${latest.result} (${latest.recordedAt}): ${latest.summary}${rerunNote}`);
     }
   }
   return `${lines.join("\n")}\n`;

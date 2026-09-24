@@ -4,6 +4,32 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.16] - 2026-09-24
+
+### Added
+
+- `EvidenceRecordV2` có thêm optional `findings?: EvidenceFindingV1[]` (mỗi finding có `id`, `text`, `severity: low|medium|high|critical`) để Stage-2 review lọc/ưu tiên theo mức độ nghiêm trọng máy đọc được, thay vì chỉ dựa vào `summary` văn xuôi tự do. Hoàn toàn optional, backward-compatible, không đổi `taskContractHash`; `EvidenceRecordV1` reject `findings` như unknown field.
+
+### Fixed
+
+- `TaskRecordV2` static TypeScript type thiếu `epicId` dù runtime validator đã chấp nhận từ trước (gap từ task roadmap epic tracking); `pnpm typecheck`/`pnpm lint` giờ sạch — đây là các lỗi có sẵn chưa từng được verify vì 2 script này chưa được chạy sau task đó.
+
+## [1.1.15] - 2026-09-24
+
+### Fixed
+
+- `harnix workflow --finish`/`--cancel` giờ regenerate đúng `.harnix/roadmaps/<epic-id>.md` khi active task có `epicId`, phản ánh status `completed`/`cancelled` cuối cùng thay vì để roadmap kẹt ở status trước đó vĩnh viễn (finish/cancel trước đây ghi task qua đường đi riêng, bỏ qua bước refresh mà `--save` bình thường vẫn chạy).
+
+### Changed
+
+- Bảng Members trong roadmap markdown giờ có tiêu đề kèm số lượng (`## Members (N tasks)`) để rõ đây là danh sách đầy đủ; bỏ dòng `**Next task:**`/`**All tasks completed or cancelled.**` ở cuối file — field `nextTask` trong JSON của public command `harnix roadmap --id <epic-id>` không đổi.
+
+## [1.1.14] - 2026-09-24
+
+### Changed
+
+- `review.md` (derived task summary) giờ có dòng Verdict ngay sau header — PASS/PENDING (kèm số liệu criteria met)/BLOCKED (kèm loại blocker)/CANCELLED (kèm lý do) — để reviewer biết task pass hay chưa mà không cần đọc hết file. Mục Evidence gộp các entry cùng checkId, chỉ hiển thị lần chạy mới nhất kèm ghi chú số lần rerun trước đó; dữ liệu evidence gốc trong `task.json` không đổi (vẫn append-only, đầy đủ). Thêm quy ước văn phong mới cho task mới vào `harnix-brainstorm`/`harnix-implement`: dòng **Verifies:** dưới mỗi AC, tách What/How trong mỗi Slice, ADR-lite cho `design.md`, và thứ tự Command→Result→Note cho evidence summary — không áp dụng hồi tố cho task cũ.
+
 ## [1.1.13] - 2026-09-24
 
 ### Fixed
