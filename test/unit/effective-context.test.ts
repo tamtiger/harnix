@@ -13,10 +13,10 @@ describe("effective context", () => {
   it("uses platform hook caps and derives trusted reason codes for fallback paths", async () => {
     const root = await temporaryRepository();
     const harnixRoot = join(root, ".harnix");
-    await mkdir(join(harnixRoot, "spec", "guides", "common"), { recursive: true });
+    await mkdir(join(harnixRoot, "spec", "guides"), { recursive: true });
     await mkdir(join(root, "docs"), { recursive: true });
     await writeFile(join(root, "docs", "a.md"), "task context\n");
-    await writeFile(join(harnixRoot, "spec", "guides", "common", "engineering.md"), "guide context\n");
+    await writeFile(join(harnixRoot, "spec", "guides", "common.md"), "guide context\n");
     const config = createConfig({ developer: "tam" });
     config.runtime.fullContext = true;
     const task = activeTask(["docs/a.md"]);
@@ -25,9 +25,9 @@ describe("effective context", () => {
 
     expect(result.budget).toEqual({ maxCharacters: 2_500, maxEntries: 64 });
     expect(result.candidates).toBe(2);
-    expect(result.manifest.entries.map((entry) => entry.path)).toEqual(["docs/a.md", ".harnix/spec/guides/common/engineering.md"]);
+    expect(result.manifest.entries.map((entry) => entry.path)).toEqual(["docs/a.md", ".harnix/spec/guides/common.md"]);
     expect(result.reasonCodesByPath.get("docs/a.md")).toEqual(["task-reference"]);
-    expect(result.reasonCodesByPath.get(".harnix/spec/guides/common/engineering.md")).toEqual(["applicable-guide"]);
+    expect(result.reasonCodesByPath.get(".harnix/spec/guides/common.md")).toEqual(["applicable-guide"]);
     expect(result.text).toContain("task context");
     expect(result.text).toContain("guide context");
   });

@@ -84,7 +84,7 @@ async function writeSelfHostManifest(root: string, generatorVersion: string): Pr
     generator: "harnix",
     schemaVersion: 1,
     entries: [
-      { path: ".harnix/spec/guides/common/engineering.md", sourceId: "guide-common-engineering", scope: "project", generatedHash: "a".repeat(64), generatorVersion },
+      { path: ".harnix/spec/guides/common.md", sourceId: "guide-common-engineering", scope: "project", generatedHash: "a".repeat(64), generatorVersion },
       { path: ".harnix/workflow.md", sourceId: "workflow", scope: "project", generatedHash: "b".repeat(64), generatorVersion }
     ]
   };

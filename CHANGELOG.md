@@ -4,6 +4,18 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.20] - 2026-09-25
+
+### Changed
+
+- Flatten toàn bộ 21 tệp engineering guides hiện tại từ cấu trúc lồng `<category>/<name>/engineering.md` sang định dạng phẳng `<category>/<name>.md` (`src/guides/common.md`, `src/guides/languages/*.md`, `src/guides/technologies/*/*.md`), dọn dẹp các thư mục rỗng và cập nhật đường dẫn import trong `src/guides/catalog.ts`.
+- Nâng cấp và chuẩn hóa toàn diện nội dung 21 engineering guides cũ (`common.md`, 7 ngôn ngữ, 7 framework/runtime/library, 6 cơ sở dữ liệu): mở rộng chiều sâu kiến trúc, mẫu hình thiết kế thực chiến, an toàn bảo mật và kiểm thử, nâng dung lượng lên mức ~4.500 – 6.500 ký tự với 4 đề mục H2 chuyên sâu cho từng stack.
+- Mở rộng danh mục ngôn ngữ hỗ trợ: bổ sung 5 engineering guides mới (`rust.md`, `kotlin.md`, `swift.md`, `dart.md`, `cpp.md`) với kiến trúc, quy chuẩn mã nguồn, kiểm thử và xử lý an toàn đạt chuẩn chiều dài >= 3.000 ký tự và 4 đề mục H2.
+- Mở rộng danh mục framework hỗ trợ: bổ sung 8 engineering guides mới (`nextjs.md`, `fastapi.md`, `django.md`, `laravel.md`, `express.md`, `angular.md`, `gin.md`, `axum.md`) bao quát các chuẩn kiến trúc hiện đại, pipeline xử lý dữ liệu, xác thực và an toàn bảo mật.
+- Nâng cấp hệ thống định kiểu và thẩm định: cập nhật `LanguageId`, `TechnologyId` trong `src/catalog/types.ts` và bộ validation sets trong `src/catalog/validation.ts`.
+- Cập nhật catalog registry và tự động nhận diện: khai báo descriptors và metadata cho 5 ngôn ngữ và 8 framework trong `src/catalog/catalog.ts`, liên kết Next.js với React web qua trường `implies.technologies`, và mở rộng bộ nhận diện manifest (`Cargo.toml`, `Package.swift`, `pubspec.yaml`, `CMakeLists.txt`, `artisan`, `manage.py`, `go.mod`, package dependencies) trong `src/utils/detection.ts` mà không bổ sung runtime dependency bên ngoài.
+- Nâng cấp templates và test suites: cập nhật nhãn ngôn ngữ/công nghệ trong `src/templates/harnix/agents.ts`, đồng bộ `test/unit/catalog.test.ts`, `test/unit/rules.test.ts` (34 guides), và bổ sung test cases phát hiện stack mới trong `test/unit/detection.test.ts`.
+
 ## [1.1.19] - 2026-09-25
 
 ### Changed

@@ -1,0 +1,409 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260925-162700-upgrade-legacy-engineering-guides",
+  "snapshots": [
+    {
+      "evidenceId": "ev-full-build-and-test",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260925-162700-upgrade-legacy-engineering-guides",
+      "checkId": "check-full-build-and-test",
+      "taskContractHash": "8f78d3b449a0ff4d21d4eff937b500b5afd9e375662d00a427e5ce7633d28d66",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260925-162700-upgrade-legacy-engineering-guides/plan.md",
+          "sha256": "e4228fbd3029efd240a15225b628f4132ef102f46a987afe79491b975eb401fe",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260925-162700-upgrade-legacy-engineering-guides/prd.md",
+          "sha256": "c4ae35367add96c6a7fee5193fd4f0b48a92ad0f391697aaac06e2968cd67656",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/guides/catalog.ts",
+          "sha256": "c4c2106baa15468ca0a520cf7f00d1cfb73e91155f0d33eb4675b7e5fc28b193",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/common.md",
+          "sha256": "29766e3d0fd70c130821057bfcc59df2aaaae5acc2d1ee775c41a1eabc3db8d7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/cpp.md",
+          "sha256": "5ae2b3d2024fae03a737a665a9be0d9ea531212ee680016d9fa3cea26d7b2deb",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/csharp.md",
+          "sha256": "424170cd32160634d75138c5efeb5dfbe4160b39da9eb5b06a2f941a6a522583",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/dart.md",
+          "sha256": "bc0639d45b72900d32475c2728e8daecdde3db55c0c20340d15071d4f659b0c6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/go.md",
+          "sha256": "bc179dd7d4073134ec3a6a541325165837abff92d91151050263f67ebe200da6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/java.md",
+          "sha256": "05397b51e7161a053242c279e05d98ef1d0b9fc93f63df5446afaec10653fda3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/javascript.md",
+          "sha256": "6429de5c69f3ef5df41aac963f1cdcc38cd810c0f2443cffca31fe74129dc537",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/kotlin.md",
+          "sha256": "0a9b0b990ee414e76d7d158abf439b7ba626a8c62ebdcf958f3ebf67d7655832",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/php.md",
+          "sha256": "79bf83b254a8d09c304720e2c50efff9eff59d494fb242be7ad90077e59a44da",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/python.md",
+          "sha256": "d80a904b9fc12763325072b8990a4c0653b4e7a30b901c17524088479e5d557b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/rust.md",
+          "sha256": "764fd8928f55df0352522eb2563b1dae6cb417b66d7b4b21e02e406241715752",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/swift.md",
+          "sha256": "0fb5fad3f41dceaca144d32bca47accea0fb105b8175dad9a3173a5966af6b55",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/typescript.md",
+          "sha256": "41ca591006ba5b9f055f0895c34738ba5921e3aaabb8b081cd53b53e15ff0948",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/mongodb.md",
+          "sha256": "bdaf005a4933e6e9116fe25df65ef92c078716aa45d178026c085093ae2e17ec",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/mysql.md",
+          "sha256": "44d7e45e0968b36d54ac823c44a50c40ed453b616da010b0efb559041164d58a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/postgresql.md",
+          "sha256": "b1b80d111bfdcfc9f0428824e7ee04d1a63aaf0847d1e000e1e827aae50a6f8a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/redis.md",
+          "sha256": "084e96711158b94ec008e7c46162ace6a6cd15c13933c1ad8e195e4a6fb032d5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/relational.md",
+          "sha256": "092b9b3ebd0bfa70f325de3306493521af3b5f339b2005df9283eea55bf2f2ac",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/sqlserver.md",
+          "sha256": "fe7e3fb968e9f8c3acc9342de8a30a3228e96eb051caa217f88488683d8dc8d8",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/abp.md",
+          "sha256": "1deb3633508a99a5695679be7690ec8c14c1272c7c28364df270761c5e4fc4b0",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/angular.md",
+          "sha256": "e2e588b58995406f365028bd172eab088f9c20ac547f4e37a63f3f1e3ac78bee",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/axum.md",
+          "sha256": "67519d781fdbf44379f8ccaba88cd9951d69facbf8e5691758d3b2de5d55a73f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/codeigniter.md",
+          "sha256": "198fe547d27b82542bd79c1e95a58df21e998b59954bbfa529aa1cca54b746de",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/django.md",
+          "sha256": "eed9af18a808eea09623d8e8bf243d16ce8cdda90daba8d399ec559f4fe9a877",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/express.md",
+          "sha256": "18ed65c200ce4c4ef3417a875c98cd68d75b66eaf3dec1cc00b558047314ba4c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/fastapi.md",
+          "sha256": "8d4d4625f170f0e127416018536d21b9d85cddf0c746a483587ffc8931b0721e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/gin.md",
+          "sha256": "46a721f36a91f1ba484f08e8c5a2c81d45ad3ad94e346d7ee68fddb2db3f6fbe",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/laravel.md",
+          "sha256": "bb1f102fa397baa88494eb1ea71fd7f3efd98d9a7e55a39c0c2372bc2e5f9733",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/nestjs.md",
+          "sha256": "cd5f79101a40cd0a1ab5ebedd8f35e7164dcf07f0997efcdcf4c661194cb3bef",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/nextjs.md",
+          "sha256": "db718e41ade5a47b4afd909dbe619bbe0a33a232a1dd899d0f7a5a0490b0dd1d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/spring.md",
+          "sha256": "df75b48d5e80f4d8ccb02b53fd247b587bb73a5a920052ab2d97fd771a329882",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/vue.md",
+          "sha256": "c10978d85a3582ad45bcccadafe1364f7ba6efde2830fa26daa857e504856fda",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/library/react-web.md",
+          "sha256": "228b5f9bd88db8e0853d0c6d4a16fc8a17abb2c288ba7ae907a33840c73efda6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/runtime/dotnet.md",
+          "sha256": "0821c08457c86ec4361fe0dc9500b66b5c1ecee5d0017d90911449f58750d4a3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "8de51ddfd94da735a2e03df66fdae3a94880fe970bd3c2b88ae36cfa9f9f881d",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "df8a37df1ac651c020b335c9062c374613d864c8fd65e19b907893cfd87eadb9"
+    },
+    {
+      "evidenceId": "ev-guides-catalog-tests",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260925-162700-upgrade-legacy-engineering-guides",
+      "checkId": "check-guides-catalog-tests",
+      "taskContractHash": "8f78d3b449a0ff4d21d4eff937b500b5afd9e375662d00a427e5ce7633d28d66",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260925-162700-upgrade-legacy-engineering-guides/plan.md",
+          "sha256": "e4228fbd3029efd240a15225b628f4132ef102f46a987afe79491b975eb401fe",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260925-162700-upgrade-legacy-engineering-guides/prd.md",
+          "sha256": "c4ae35367add96c6a7fee5193fd4f0b48a92ad0f391697aaac06e2968cd67656",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/guides/catalog.ts",
+          "sha256": "c4c2106baa15468ca0a520cf7f00d1cfb73e91155f0d33eb4675b7e5fc28b193",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/common.md",
+          "sha256": "29766e3d0fd70c130821057bfcc59df2aaaae5acc2d1ee775c41a1eabc3db8d7",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/cpp.md",
+          "sha256": "5ae2b3d2024fae03a737a665a9be0d9ea531212ee680016d9fa3cea26d7b2deb",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/csharp.md",
+          "sha256": "424170cd32160634d75138c5efeb5dfbe4160b39da9eb5b06a2f941a6a522583",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/dart.md",
+          "sha256": "bc0639d45b72900d32475c2728e8daecdde3db55c0c20340d15071d4f659b0c6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/go.md",
+          "sha256": "bc179dd7d4073134ec3a6a541325165837abff92d91151050263f67ebe200da6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/java.md",
+          "sha256": "05397b51e7161a053242c279e05d98ef1d0b9fc93f63df5446afaec10653fda3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/javascript.md",
+          "sha256": "6429de5c69f3ef5df41aac963f1cdcc38cd810c0f2443cffca31fe74129dc537",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/kotlin.md",
+          "sha256": "0a9b0b990ee414e76d7d158abf439b7ba626a8c62ebdcf958f3ebf67d7655832",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/php.md",
+          "sha256": "79bf83b254a8d09c304720e2c50efff9eff59d494fb242be7ad90077e59a44da",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/python.md",
+          "sha256": "d80a904b9fc12763325072b8990a4c0653b4e7a30b901c17524088479e5d557b",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/rust.md",
+          "sha256": "764fd8928f55df0352522eb2563b1dae6cb417b66d7b4b21e02e406241715752",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/swift.md",
+          "sha256": "0fb5fad3f41dceaca144d32bca47accea0fb105b8175dad9a3173a5966af6b55",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/languages/typescript.md",
+          "sha256": "41ca591006ba5b9f055f0895c34738ba5921e3aaabb8b081cd53b53e15ff0948",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/mongodb.md",
+          "sha256": "bdaf005a4933e6e9116fe25df65ef92c078716aa45d178026c085093ae2e17ec",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/mysql.md",
+          "sha256": "44d7e45e0968b36d54ac823c44a50c40ed453b616da010b0efb559041164d58a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/postgresql.md",
+          "sha256": "b1b80d111bfdcfc9f0428824e7ee04d1a63aaf0847d1e000e1e827aae50a6f8a",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/redis.md",
+          "sha256": "084e96711158b94ec008e7c46162ace6a6cd15c13933c1ad8e195e4a6fb032d5",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/relational.md",
+          "sha256": "092b9b3ebd0bfa70f325de3306493521af3b5f339b2005df9283eea55bf2f2ac",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/database/sqlserver.md",
+          "sha256": "fe7e3fb968e9f8c3acc9342de8a30a3228e96eb051caa217f88488683d8dc8d8",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/abp.md",
+          "sha256": "1deb3633508a99a5695679be7690ec8c14c1272c7c28364df270761c5e4fc4b0",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/angular.md",
+          "sha256": "e2e588b58995406f365028bd172eab088f9c20ac547f4e37a63f3f1e3ac78bee",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/axum.md",
+          "sha256": "67519d781fdbf44379f8ccaba88cd9951d69facbf8e5691758d3b2de5d55a73f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/codeigniter.md",
+          "sha256": "198fe547d27b82542bd79c1e95a58df21e998b59954bbfa529aa1cca54b746de",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/django.md",
+          "sha256": "eed9af18a808eea09623d8e8bf243d16ce8cdda90daba8d399ec559f4fe9a877",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/express.md",
+          "sha256": "18ed65c200ce4c4ef3417a875c98cd68d75b66eaf3dec1cc00b558047314ba4c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/fastapi.md",
+          "sha256": "8d4d4625f170f0e127416018536d21b9d85cddf0c746a483587ffc8931b0721e",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/gin.md",
+          "sha256": "46a721f36a91f1ba484f08e8c5a2c81d45ad3ad94e346d7ee68fddb2db3f6fbe",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/laravel.md",
+          "sha256": "bb1f102fa397baa88494eb1ea71fd7f3efd98d9a7e55a39c0c2372bc2e5f9733",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/nestjs.md",
+          "sha256": "cd5f79101a40cd0a1ab5ebedd8f35e7164dcf07f0997efcdcf4c661194cb3bef",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/nextjs.md",
+          "sha256": "db718e41ade5a47b4afd909dbe619bbe0a33a232a1dd899d0f7a5a0490b0dd1d",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/spring.md",
+          "sha256": "df75b48d5e80f4d8ccb02b53fd247b587bb73a5a920052ab2d97fd771a329882",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/framework/vue.md",
+          "sha256": "c10978d85a3582ad45bcccadafe1364f7ba6efde2830fa26daa857e504856fda",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/library/react-web.md",
+          "sha256": "228b5f9bd88db8e0853d0c6d4a16fc8a17abb2c288ba7ae907a33840c73efda6",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/technologies/runtime/dotnet.md",
+          "sha256": "0821c08457c86ec4361fe0dc9500b66b5c1ecee5d0017d90911449f58750d4a3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "8de51ddfd94da735a2e03df66fdae3a94880fe970bd3c2b88ae36cfa9f9f881d",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "ca32f784ff526a4cf8648fe4217f52d6f98fbd0dd41e79623a3a548fe50a5eb4"
+    }
+  ]
+}

@@ -22,7 +22,7 @@ describe("repository self-host state", () => {
     expect(sha256(workflow)).toBe(sha256(workflowTemplate));
     expect(workflowEntry).toMatchObject({ generatedHash: sha256(workflowTemplate), generatorVersion: packageVersion });
     expect(config.schemaVersion).toBe(2);
-    await expect(access(join(root, ".harnix", "spec", "guides", "common", "engineering.md"))).resolves.toBeUndefined();
+    await expect(access(join(root, ".harnix", "spec", "guides", "common.md"))).resolves.toBeUndefined();
     await expect(access(join(root, ".harnix", "cache", "repo-map-v1.json"))).resolves.toBeUndefined();
   });
 

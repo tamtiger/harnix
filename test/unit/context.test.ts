@@ -109,7 +109,7 @@ describe("context", () => {
       },
       inventoryFingerprint: sha256("inventory"),
       manifest,
-      selectedGuidePaths: [".harnix/spec/guides/common/engineering.md"],
+      selectedGuidePaths: [".harnix/spec/guides/common.md"],
       task: { id: "task", relevantPaths: ["src/**", "docs/**"], relevantSpecs: ["AGENTS.md"] },
     } satisfies ContextSelectionInput;
 
@@ -162,7 +162,7 @@ describe("context", () => {
       },
       inventoryFingerprint: sha256("inventory"),
       manifest,
-      selectedGuidePaths: [".harnix/spec/guides/common/engineering.md"],
+      selectedGuidePaths: [".harnix/spec/guides/common.md"],
       task: { id: "task", relevantPaths: ["src/**"], relevantSpecs: ["AGENTS.md"] },
     } satisfies ContextSelectionInput;
     const snapshot = createContextSelectionSnapshot(base);

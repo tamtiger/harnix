@@ -1,0 +1,109 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260925-141702-guides-flatten-catalog-detection-expansion",
+  "snapshots": [
+    {
+      "evidenceId": "ev-full-build-and-test",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260925-141702-guides-flatten-catalog-detection-expansion",
+      "checkId": "check-full-build-and-test",
+      "taskContractHash": "a4838e07b3afe89e874947de1a9007c8289d15474649657b9d71daaabd747349",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260925-141702-guides-flatten-catalog-detection-expansion/plan.md",
+          "sha256": "3db2e99a835ed8e5b1de066efda0321a3cef9d3ee0d65d1947be3cc1e6cd1ab7",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260925-141702-guides-flatten-catalog-detection-expansion/prd.md",
+          "sha256": "9bc26cef4acd1fcf012f93ff9b15a9bbb4efdbaca51d2fa86b84c645edcc2ebb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/catalog/catalog.ts",
+          "sha256": "018b49fc1631b1bfb67348a39da924bbb90804c6d4a9b0d0359bd21d55070879",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/catalog/types.ts",
+          "sha256": "6ab39aa66ffaba2f5aaf5b51bba5e171ba2243a4bf2c013a68b5700e962827fc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/catalog.ts",
+          "sha256": "c4c2106baa15468ca0a520cf7f00d1cfb73e91155f0d33eb4675b7e5fc28b193",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/detection.ts",
+          "sha256": "a58d194920fa90857a12d5c761e39ef4a9149f30bb4d04cbf04680d949e7b4a3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "8de51ddfd94da735a2e03df66fdae3a94880fe970bd3c2b88ae36cfa9f9f881d",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "3773eaea460aa34eadb610e09a37cc414ee2f4ae41368bd831e268ff871241a0"
+    },
+    {
+      "evidenceId": "ev-guides-catalog-tests",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260925-141702-guides-flatten-catalog-detection-expansion",
+      "checkId": "check-guides-catalog-tests",
+      "taskContractHash": "a4838e07b3afe89e874947de1a9007c8289d15474649657b9d71daaabd747349",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260925-141702-guides-flatten-catalog-detection-expansion/plan.md",
+          "sha256": "3db2e99a835ed8e5b1de066efda0321a3cef9d3ee0d65d1947be3cc1e6cd1ab7",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260925-141702-guides-flatten-catalog-detection-expansion/prd.md",
+          "sha256": "9bc26cef4acd1fcf012f93ff9b15a9bbb4efdbaca51d2fa86b84c645edcc2ebb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/catalog/catalog.ts",
+          "sha256": "018b49fc1631b1bfb67348a39da924bbb90804c6d4a9b0d0359bd21d55070879",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/catalog/types.ts",
+          "sha256": "6ab39aa66ffaba2f5aaf5b51bba5e171ba2243a4bf2c013a68b5700e962827fc",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/guides/catalog.ts",
+          "sha256": "c4c2106baa15468ca0a520cf7f00d1cfb73e91155f0d33eb4675b7e5fc28b193",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/utils/detection.ts",
+          "sha256": "a58d194920fa90857a12d5c761e39ef4a9149f30bb4d04cbf04680d949e7b4a3",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/catalog.test.ts",
+          "sha256": "2f79d0aa219c8a990633b77c643c7bd390c2a0d39169b9c442f5b9f519c42109",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/detection.test.ts",
+          "sha256": "b04098d3858655c2dac487ba048803425e62a600d496813ff23a57520b204fbb",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/unit/rules.test.ts",
+          "sha256": "8de51ddfd94da735a2e03df66fdae3a94880fe970bd3c2b88ae36cfa9f9f881d",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "e24b28ad566a41a9c4e4b23f32a44f2648f074325c08f5f9ad6fcccd23a17430"
+    }
+  ]
+}

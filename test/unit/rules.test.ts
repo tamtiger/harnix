@@ -60,9 +60,9 @@ describe("database guide selection", () => {
     const root = await temporaryRepository();
     const result = await seedRules({ root, languages: [], technologies: ["postgresql", "redis"] });
     expect(result.paths).toEqual(expect.arrayContaining([
-      ".harnix/spec/guides/technologies/database/relational/engineering.md",
-      ".harnix/spec/guides/technologies/database/postgresql/engineering.md",
-      ".harnix/spec/guides/technologies/database/redis/engineering.md",
+      ".harnix/spec/guides/technologies/database/relational.md",
+      ".harnix/spec/guides/technologies/database/postgresql.md",
+      ".harnix/spec/guides/technologies/database/redis.md",
     ]));
   });
 
@@ -124,39 +124,39 @@ describe("guide catalog and rule seeding", () => {
     const root = await temporaryRepository();
     const first = await seedRules({ root, languages: ["typescript"], technologies: ["react-web", "nestjs"] });
     expect(first.paths).toEqual([
-      ".harnix/spec/guides/common/engineering.md",
-      ".harnix/spec/guides/languages/typescript/engineering.md",
-      ".harnix/spec/guides/technologies/framework/nestjs/engineering.md",
-      ".harnix/spec/guides/technologies/library/react-web/engineering.md",
+      ".harnix/spec/guides/common.md",
+      ".harnix/spec/guides/languages/typescript.md",
+      ".harnix/spec/guides/technologies/framework/nestjs.md",
+      ".harnix/spec/guides/technologies/library/react-web.md",
     ]);
-    await writeFile(join(root, ".harnix", "spec", "guides", "common", "engineering.md"), "user change");
+    await writeFile(join(root, ".harnix", "spec", "guides", "common.md"), "user change");
     const second = await seedRules({ root, languages: ["typescript"], technologies: [] });
-    expect(second.preserved).toContain(".harnix/spec/guides/common/engineering.md");
+    expect(second.preserved).toContain(".harnix/spec/guides/common.md");
   });
 
   it("preserves an existing directory collision instead of treating it as a missing guide", async () => {
     const root = await temporaryRepository();
-    const collision = join(root, ".harnix", "spec", "guides", "common", "engineering.md");
+    const collision = join(root, ".harnix", "spec", "guides", "common.md");
     await mkdir(collision, { recursive: true });
 
     const result = await seedRules({ root, languages: [], technologies: [] });
 
-    expect(result.preserved).toContain(".harnix/spec/guides/common/engineering.md");
+    expect(result.preserved).toContain(".harnix/spec/guides/common.md");
   });
 
   it("rejects an external symlink when seeding guides", async () => {
     const root = await temporaryRepository(); const external = await temporaryRepository();
     await symlink(external, join(root, ".harnix"), process.platform === "win32" ? "junction" : "dir");
     await expect(seedRules({ root, languages: ["go"], technologies: [] })).rejects.toThrow("symbolic link");
-    await expect(access(join(external, "spec", "guides", "common", "engineering.md"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(external, "spec", "guides", "common.md"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   it("exposes packaged content and attribution for every descriptor", async () => {
-    expect(guideSources.length).toBe(21);
+    expect(guideSources.length).toBe(34);
     expect(guideSources.every(({ content, descriptor }) => content.startsWith("# ") && descriptor.provenance.source.length > 0)).toBe(true);
     expect(attribution.license).toContain("MIT"); expect(attribution.source).toContain("ECC");
     const root = await temporaryRepository(); await seedRules({ root, languages: ["php"], technologies: ["codeigniter"] });
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "codeigniter", "engineering.md"), "utf8")).resolves.toContain("CodeIgniter");
+    await expect(readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "codeigniter.md"), "utf8")).resolves.toContain("CodeIgniter");
   });
 
   it("ships substantive, structured guidance instead of placeholder bullets", () => {

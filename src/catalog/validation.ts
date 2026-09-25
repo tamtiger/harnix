@@ -9,8 +9,8 @@ import type {
 } from "./types.js";
 import { compareCodeUnits } from "../utils/order.js";
 
-const languageIds = new Set(["csharp", "typescript", "javascript", "php", "python", "java", "go"]);
-const technologyIds = new Set(["dotnet", "abp", "nestjs", "spring", "react-web", "vue", "codeigniter", "postgresql", "mysql", "sqlserver", "mongodb", "redis"]);
+const languageIds = new Set(["csharp", "typescript", "javascript", "php", "python", "java", "go", "rust", "kotlin", "swift", "dart", "cpp"]);
+const technologyIds = new Set(["dotnet", "abp", "nestjs", "spring", "react-web", "vue", "codeigniter", "postgresql", "mysql", "sqlserver", "mongodb", "redis", "nextjs", "fastapi", "django", "laravel", "express", "angular", "gin", "axum"]);
 const technologyKinds = new Set(["framework", "runtime", "platform", "library", "database", "tool", "infrastructure", "domain"]);
 const confidences = new Set(["confirmed", "probable", "weak"]);
 const ecosystems = new Set(["npm", "composer", "nuget", "maven", "gradle"]);
@@ -144,7 +144,9 @@ function validateContentPath(value: string): void {
   } catch {
     throw new CatalogValidationError("Guide contentPath is unsafe.");
   }
-  if (!value.endsWith(".md") || !["common/", "languages/", "technologies/"].some((prefix) => value.startsWith(prefix))) throw new CatalogValidationError("Guide contentPath is unsafe.");
+  if (!value.endsWith(".md") || !(value === "common.md" || ["common/", "languages/", "technologies/"].some((prefix) => value.startsWith(prefix)))) {
+    throw new CatalogValidationError("Guide contentPath is unsafe.");
+  }
 }
 
 function normalizeLanguage(value: LanguageDescriptor): LanguageDescriptor {

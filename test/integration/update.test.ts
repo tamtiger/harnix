@@ -37,8 +37,8 @@ describe("updateProject", () => {
     expect(result.preserved).toContain(modifiedLegacyPath);
     await expect(access(join(root, legacyPath))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(readFile(join(root, modifiedLegacyPath), "utf8")).resolves.toBe("user-modified legacy Vue guidance\n");
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "languages", "typescript", "engineering.md"), "utf8")).resolves.toContain("TypeScript");
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "nestjs", "engineering.md"), "utf8")).resolves.toContain("NestJS");
+    await expect(readFile(join(root, ".harnix", "spec", "guides", "languages", "typescript.md"), "utf8")).resolves.toContain("TypeScript");
+    await expect(readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "nestjs.md"), "utf8")).resolves.toContain("NestJS");
     const config = await readFile(configPath, "utf8"); expect(config).toContain("schemaVersion: 2"); expect(config).toContain("unknown: keep");
   });
 
@@ -48,8 +48,8 @@ describe("updateProject", () => {
     const deleted = await updateProject({ root });
     expect(deleted.deleted).toContain(".harnix/workflow.md"); await expect(access(workflow)).rejects.toMatchObject({ code: "ENOENT" });
     await updateProject({ root, restoreDeleted: true }); await expect(readFile(workflow, "utf8")).resolves.toContain("Harnix workflow");
-    await writeFile(join(root, ".harnix", "spec", "guides", "common", "engineering.md"), "my rules\n");
-    await updateProject({ root }); await expect(readFile(join(root, ".harnix", "spec", "guides", "common", "engineering.md"), "utf8")).resolves.toBe("my rules\n");
+    await writeFile(join(root, ".harnix", "spec", "guides", "common.md"), "my rules\n");
+    await updateProject({ root }); await expect(readFile(join(root, ".harnix", "spec", "guides", "common.md"), "utf8")).resolves.toBe("my rules\n");
   });
   it("does not touch tasks, journals, or unrelated files", async () => {
     const root = await fixture();
@@ -63,19 +63,19 @@ describe("updateProject", () => {
   });
   it("should_remove_unchanged_obsolete_file_when_template_is_no_longer_desired", async () => {
     const root = await fixture();
-    const obsolete = join(root, ".harnix", "spec", "guides", "technologies", "framework", "vue", "engineering.md");
+    const obsolete = join(root, ".harnix", "spec", "guides", "technologies", "framework", "vue.md");
     const configPath = join(root, ".harnix", "config.yaml");
     const config = await readFile(configPath, "utf8");
     await writeFile(configPath, config.replace("technologies: []", "technologies:\n  - vue"));
     await updateProject({ root });
     await writeFile(configPath, config);
     const result = await updateProject({ root });
-    expect(result.deleted).toContain(".harnix/spec/guides/technologies/framework/vue/engineering.md");
+    expect(result.deleted).toContain(".harnix/spec/guides/technologies/framework/vue.md");
     await expect(access(obsolete)).rejects.toMatchObject({ code: "ENOENT" });
   });
   it("should_preserve_modified_obsolete_file_and_its_manifest_entry", async () => {
     const root = await fixture();
-    const obsolete = join(root, ".harnix", "spec", "guides", "technologies", "framework", "vue", "engineering.md");
+    const obsolete = join(root, ".harnix", "spec", "guides", "technologies", "framework", "vue.md");
     const configPath = join(root, ".harnix", "config.yaml");
     const baseConfig = await readFile(configPath, "utf8");
     await writeFile(configPath, baseConfig.replace("technologies: []", "technologies:\n  - vue"));
@@ -86,9 +86,9 @@ describe("updateProject", () => {
     const result = await updateProject({ root });
     const manifest = await readFile(join(root, ".harnix", ".template-hashes.json"), "utf8");
 
-    expect(result.preserved).toContain(".harnix/spec/guides/technologies/framework/vue/engineering.md");
+    expect(result.preserved).toContain(".harnix/spec/guides/technologies/framework/vue.md");
     await expect(readFile(obsolete, "utf8")).resolves.toBe("user-owned Vue guidance\n");
-    expect(manifest).toContain(".harnix/spec/guides/technologies/framework/vue/engineering.md");
+    expect(manifest).toContain(".harnix/spec/guides/technologies/framework/vue.md");
   });
 
   it("should_keep_legacy_platform_surfaces_out_of_project_update_ownership", async () => {

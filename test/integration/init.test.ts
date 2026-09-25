@@ -71,7 +71,7 @@ describe("initializeProject", () => {
     expect(agentInstructions).toContain("harnix-check");
     expect(agentInstructions).toContain("harnix-finish-work");
     expect(agentInstructions).toContain("harnix-continue");
-    expect(agentInstructions).toContain("The canonical lifecycle, TaskRecord schema");
+    expect(agentInstructions).toContain("Canonical lifecycle, schema, transitions, and rules live in `.harnix/workflow.md`");
     expect(agentInstructions).toContain("never edit `task.json` or `.active` directly");
     await expect(readFile(join(root, "keep.txt"), "utf8")).resolves.toBe("user content");
     await writeFile(join(root, "added-after-init.ts"), "export const stale = true;\n");
@@ -93,7 +93,7 @@ describe("initializeProject", () => {
         ".harnix/.template-hashes.json",
         ".harnix/cache/repo-map-v1.json",
         ".harnix/config.yaml",
-        ".harnix/spec/guides/common/engineering.md",
+        ".harnix/spec/guides/common.md",
         ".harnix/workflow.md",
         "AGENTS.md",
       ],
@@ -123,10 +123,10 @@ describe("initializeProject", () => {
   it("should_seed_relevant_rules_when_initializing_detected_project", async () => {
     const root = await fixture(); await writeFile(join(root, "package.json"), JSON.stringify({ dependencies: { vue: "latest" } }));
     await initializeProject({ developer: "tam", root, yes: true });
-    const common = await readFile(join(root, ".harnix", "spec", "guides", "common", "engineering.md"), "utf8");
+    const common = await readFile(join(root, ".harnix", "spec", "guides", "common.md"), "utf8");
     expect(common).toContain("broader gates");
     expect(common).toContain("repository instructions");
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "vue", "engineering.md"), "utf8")).resolves.toContain("Vue engineering");
+    await expect(readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "vue.md"), "utf8")).resolves.toContain("Vue engineering");
   });
   it("should_detect_php_composer_projects_and_seed_php_guidance", async () => {
     const root = await fixture();
@@ -135,7 +135,7 @@ describe("initializeProject", () => {
     await initializeProject({ developer: "tam", root, yes: true });
 
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("- php");
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "languages", "php", "engineering.md"), "utf8")).resolves.toContain("PHP engineering");
+    await expect(readFile(join(root, ".harnix", "spec", "guides", "languages", "php.md"), "utf8")).resolves.toContain("PHP engineering");
     await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toContain("- Languages: PHP.");
   });
   it("should_seed_actionable_dotnet_abp_guidance_instead_of_a_placeholder", async () => {
@@ -143,7 +143,7 @@ describe("initializeProject", () => {
 
     await initializeProject({ developer: "tam", root, yes: true });
 
-    const guide = `${await readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "abp", "engineering.md"), "utf8")}\n${await readFile(join(root, ".harnix", "spec", "guides", "technologies", "runtime", "dotnet", "engineering.md"), "utf8")}`;
+    const guide = `${await readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "abp.md"), "utf8")}\n${await readFile(join(root, ".harnix", "spec", "guides", "technologies", "runtime", "dotnet.md"), "utf8")}`;
     expect(guide).toContain("ABP authorization policies");
     expect(guide).toContain("no-tracking");
     expect(guide).toContain("tenant isolation");

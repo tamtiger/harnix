@@ -164,4 +164,65 @@ describe("detectProject", () => {
       packages: [{ languages: ["javascript"], technologies: ["vue"], packageManager: "npm", path: ".", verificationCommands: ["npm run test"] }],
     });
   });
+
+  it("detects new languages through their canonical manifests and source files", async () => {
+    const rustRoot = await createFixture();
+    await writeFixtureFile(rustRoot, "Cargo.toml", '[package]\nname = "rust-sample"');
+    await expect(detectProject(rustRoot)).resolves.toMatchObject({ languages: ["rust"] });
+
+    const swiftRoot = await createFixture();
+    await writeFixtureFile(swiftRoot, "Package.swift", "// swift-tools-version: 5.9");
+    await expect(detectProject(swiftRoot)).resolves.toMatchObject({ languages: ["swift"] });
+
+    const dartRoot = await createFixture();
+    await writeFixtureFile(dartRoot, "pubspec.yaml", "name: sample\nenvironment:\n  sdk: '>=3.0.0 <4.0.0'");
+    await expect(detectProject(dartRoot)).resolves.toMatchObject({ languages: ["dart"] });
+
+    const cppRoot = await createFixture();
+    await writeFixtureFile(cppRoot, "CMakeLists.txt", "cmake_minimum_required(VERSION 3.20)");
+    await expect(detectProject(cppRoot)).resolves.toMatchObject({ languages: ["cpp"] });
+
+    const kotlinRoot = await createFixture();
+    await writeFixtureFile(kotlinRoot, "src/main/kotlin/App.kt", "fun main() {}");
+    await expect(detectProject(kotlinRoot)).resolves.toMatchObject({ languages: ["kotlin"] });
+  });
+
+  it("detects new frameworks and respects framework implications", async () => {
+    const nextRoot = await createFixture();
+    await writeFixtureFile(nextRoot, "package.json", JSON.stringify({ dependencies: { next: "^14.0.0", react: "^18.0.0", "react-dom": "^18.0.0" } }));
+    await writeFixtureFile(nextRoot, "src/app/page.tsx", "export default function Page() { return null; }");
+    const nextResult = await detectProject(nextRoot);
+    expect(nextResult.technologies).toContain("nextjs");
+    expect(nextResult.technologies).toContain("react-web");
+
+    const laravelRoot = await createFixture();
+    await writeFixtureFile(laravelRoot, "composer.json", JSON.stringify({ require: { "laravel/framework": "^11.0" } }));
+    await writeFixtureFile(laravelRoot, "artisan", "#!/usr/bin/env php");
+    await expect(detectProject(laravelRoot)).resolves.toMatchObject({ technologies: ["laravel"] });
+
+    const expressRoot = await createFixture();
+    await writeFixtureFile(expressRoot, "package.json", JSON.stringify({ dependencies: { express: "^4.19.0" } }));
+    await expect(detectProject(expressRoot)).resolves.toMatchObject({ technologies: ["express"] });
+
+    const angularRoot = await createFixture();
+    await writeFixtureFile(angularRoot, "package.json", JSON.stringify({ dependencies: { "@angular/core": "^18.0.0" } }));
+    await expect(detectProject(angularRoot)).resolves.toMatchObject({ technologies: ["angular"] });
+
+    const fastapiRoot = await createFixture();
+    await writeFixtureFile(fastapiRoot, "requirements.txt", "fastapi>=0.110.0\nuvicorn>=0.28.0\n");
+    await expect(detectProject(fastapiRoot)).resolves.toMatchObject({ technologies: ["fastapi"] });
+
+    const djangoRoot = await createFixture();
+    await writeFixtureFile(djangoRoot, "manage.py", "#!/usr/bin/env python");
+    await expect(detectProject(djangoRoot)).resolves.toMatchObject({ technologies: ["django"] });
+
+    const ginRoot = await createFixture();
+    await writeFixtureFile(ginRoot, "go.mod", "module sample\n\nrequire github.com/gin-gonic/gin v1.9.1\n");
+    await expect(detectProject(ginRoot)).resolves.toMatchObject({ technologies: ["gin"] });
+
+    const axumRoot = await createFixture();
+    await writeFixtureFile(axumRoot, "Cargo.toml", '[package]\nname = "sample"\n\n[dependencies]\naxum = "0.7"\n');
+    await expect(detectProject(axumRoot)).resolves.toMatchObject({ technologies: ["axum"] });
+  });
 });
+

@@ -17,15 +17,23 @@ describe("stack catalog", () => {
     const catalog = validateStackCatalog(candidate());
 
     expect(catalog.languages.map(({ id }) => id)).toEqual([
-      "csharp", "go", "java", "javascript", "php", "python", "typescript",
+      "cpp", "csharp", "dart", "go", "java", "javascript", "kotlin", "php", "python", "rust", "swift", "typescript",
     ]);
     expect(catalog.technologies.map(({ id, kind }) => ({ id, kind }))).toEqual([
       { id: "abp", kind: "framework" },
+      { id: "angular", kind: "framework" },
+      { id: "axum", kind: "framework" },
       { id: "codeigniter", kind: "framework" },
+      { id: "django", kind: "framework" },
       { id: "dotnet", kind: "runtime" },
+      { id: "express", kind: "framework" },
+      { id: "fastapi", kind: "framework" },
+      { id: "gin", kind: "framework" },
+      { id: "laravel", kind: "framework" },
       { id: "mongodb", kind: "database" },
       { id: "mysql", kind: "database" },
       { id: "nestjs", kind: "framework" },
+      { id: "nextjs", kind: "framework" },
       { id: "postgresql", kind: "database" },
       { id: "react-web", kind: "library" },
       { id: "redis", kind: "database" },
@@ -34,6 +42,7 @@ describe("stack catalog", () => {
       { id: "vue", kind: "framework" },
     ]);
     expect(catalog.technologies.find(({ id }) => id === "abp")?.implies).toEqual({ technologies: ["dotnet"] });
+    expect(catalog.technologies.find(({ id }) => id === "nextjs")?.implies).toEqual({ technologies: ["react-web"] });
     expect(catalog.technologies.find(({ id }) => id === "nestjs")?.implies).toBeUndefined();
   });
 

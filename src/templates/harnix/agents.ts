@@ -9,8 +9,8 @@ export interface AgentsProjectProfile {
   packages: readonly Pick<PackageConfig, "path">[];
 }
 
-const languageLabels: Record<LanguageId, string> = { csharp: "C#", go: "Go", java: "Java", javascript: "JavaScript", php: "PHP", python: "Python", typescript: "TypeScript" };
-const technologyLabels: Record<TechnologyId, string> = { abp: "ABP", codeigniter: "CodeIgniter", dotnet: ".NET", mongodb: "MongoDB", mysql: "MySQL", nestjs: "NestJS", postgresql: "PostgreSQL", "react-web": "React web", redis: "Redis", spring: "Spring", sqlserver: "SQL Server", vue: "Vue" };
+const languageLabels: Record<LanguageId, string> = { csharp: "C#", go: "Go", java: "Java", javascript: "JavaScript", php: "PHP", python: "Python", typescript: "TypeScript", rust: "Rust", kotlin: "Kotlin", swift: "Swift", dart: "Dart", cpp: "C++" };
+const technologyLabels: Record<TechnologyId, string> = { abp: "ABP", codeigniter: "CodeIgniter", dotnet: ".NET", mongodb: "MongoDB", mysql: "MySQL", nestjs: "NestJS", postgresql: "PostgreSQL", "react-web": "React web", redis: "Redis", spring: "Spring", sqlserver: "SQL Server", vue: "Vue", nextjs: "Next.js", fastapi: "FastAPI", django: "Django", laravel: "Laravel", express: "Express", angular: "Angular", gin: "Gin", axum: "Axum" };
 const targetAuthorityInstructions = HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.map((instruction) => `- ${instruction}`).join("\n");
 const implicitActivationInstructions = HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS.join("\n\n");
 
