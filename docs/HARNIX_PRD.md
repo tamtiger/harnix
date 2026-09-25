@@ -335,7 +335,7 @@ Trellis/ECC/Superpowers chỉ còn là provenance và research history. Runtime 
 
 - `init` luôn tạo namespace `.harnix/` nếu namespace này chưa tồn tại.
 - Existing Trellis files được giữ nguyên và không bị migrate, overwrite, rename hoặc xóa.
-- Legacy project-local Kiro, Antigravity and Codex setup output is inventory-only after Phase 6: update never recreates it and doctor classifies it as unchanged/modified/untracked/duplicate-hook. Only explicit `uninstall --legacy-project-surfaces [--yes]` can remove a manifest-proven unchanged **standalone** path; root/shared instructions, Codex config/hooks and arbitrary files remain inventory-only.
+- Legacy project-local Kiro, Antigravity, Codex and Claude Code setup output is inventory-only after Phase 6: update never recreates it and doctor classifies it as unchanged/modified/untracked/duplicate-hook. Only explicit `uninstall --legacy-project-surfaces [--yes]` can remove a manifest-proven unchanged **standalone** path; root/shared instructions, Codex config/hooks and arbitrary files remain inventory-only.
 - Global setup from two repositories must remain byte-idempotent and must not transfer ownership to the most recent project.
 
 ## 14. Workflow and skills
@@ -414,7 +414,7 @@ Initial IDs cover source languages C#, TypeScript, JavaScript, PHP, Python, Java
 Tất cả filesystem tests dùng isolated temporary repositories **và injected disposable user homes**; they must not read or write a real user profile:
 
 1. Unit: detection; config/migrations; context ranking/budget; project/global hash manifests; permission-preserving atomic writes; user path safety; lock/stale-lock/rollback; journal; learning; Doctor v2.
-2. CLI: all fifteen public commands; status/tasks/resume/context-report/checks/audit from nested initialized paths plus no-active/active/collision/fresh/stale/malformed/no-write/privacy/bounded fixtures; repo-map query/impact cache-only fixtures; setup outside an initialized repository; project/global update/uninstall scope; idempotence; modified/deleted/corrupt/future project and global schemas.
+2. CLI: all sixteen public commands; status/tasks/resume/context-report/checks/audit from nested initialized paths plus no-active/active/collision/fresh/stale/malformed/no-write/privacy/bounded fixtures; repo-map query/impact cache-only fixtures; setup outside an initialized repository; project/global update/uninstall scope; idempotence; modified/deleted/corrupt/future project and global schemas.
 3. Migration: discovery, dry-run, transform, preservation, mixed/conflict, rollback, cleanup.
 4. Fixtures: independent C#/.NET/ABP, TypeScript/NestJS, PHP/CodeIgniter, Python, Java/Spring, Go, React web/Native exclusion, Vue and multilingual/multi-technology monorepo.
 5. Platform: Kiro global JSON-v1 hook; Antigravity Desktop/CLI plugins and multi-root invocation; Codex global skills/AGENTS/nested hook schema; relevant rules only and no machine paths.
@@ -462,6 +462,6 @@ Lịch sử này giải thích provenance/migration, không tạo public alias h
 - **Phase 3:** workflow skills/evals và Kiro/Antigravity/Codex parity; remove stale surfaces.
 - **Phase 4:** lifecycle commands, full migration, packaging, performance, footprint và polish.
 - **Phase 5:** review remediation, lifecycle/state safety and harness hardening.
-- **Phase 6:** explicit user-global Kiro, Antigravity and Codex integrations; global ownership, Doctor v2, legacy project-surface cleanup and disposable-profile acceptance.
+- **Phase 6:** explicit user-global Kiro, Antigravity, Codex, and Claude Code integrations; global ownership, Doctor v2, legacy project-surface cleanup and disposable-profile acceptance.
 
 Chi tiết file/task/test/exit criteria nằm trong `IMPLEMENTATION_PLAN.md`.

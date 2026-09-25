@@ -144,6 +144,14 @@ Mapping rules:
 | Mandatory implement/check/research agents | Optional research/independent-review roles; core workflow independent |
 | Legacy prompts/commands | Removed; skills are primary |
 
+### Claude Code
+
+| Upstream | Harnix |
+|---|---|
+| ECC / Trellis Claude Code | User-global `~/.claude` skills + marker block in `CLAUDE.md` + one owned `harnix-context` hook inside `UserPromptSubmit` in `settings.json` |
+| Native `projects/`, `todos/`, `history` | Ignored. Harnix uses `.harnix/` independent state. |
+| Trellis MCP | No default MCP server required. |
+
 ## 7. ECC content mapping
 
 | ECC source pack | Harnix target | Strategy |

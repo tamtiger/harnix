@@ -77,7 +77,7 @@ Filesystem, clock, process runner, version lookup, prompt dependencies and user-
 
 ## 4. Frozen state and schema contracts
 
-Các contract project-data trong mục này là normative cho implementation hiện tại. Phase 6 supersedes former platform setup paths and the Doctor v1 shape with the global contracts in `GLOBAL_SETUP_REFACTOR_PLAN.md`; TaskRecord v2 ở mục 4.3 supersedes schema v1 cho task mới nhưng giữ exact legacy reader. Any field, enum, path or transition change still requires matching PRD/workflow, migration and test updates in the same change.
+Các contract project-data trong mục này là normative cho implementation hiện tại. Phase 6 supersedes former platform setup paths and the Doctor v1 shape with the global contracts in `GLOBAL_SETUP_REFACTOR_PLAN.md`; TaskRecord v2 ở mục 4.5 supersedes schema v1 cho task mới nhưng giữ exact legacy reader. Any field, enum, path or transition change still requires matching PRD/workflow, migration and test updates in the same change.
 
 ### 4.1 `.harnix/config.yaml` v1 compatibility and v2 write schema
 
@@ -140,7 +140,7 @@ New init and every config write use v2 only. Reads classify input as valid v1, v
 
 YAML serialization is deterministic with LF golden fixtures. Compatible unknown user keys round-trip at top level and inside package/context/runtime objects; core logic ignores them and known keys cannot be shadowed. Duplicate/unsorted arrays, absolute/package-escape paths, unsafe developer IDs, invalid enums, corrupt YAML and future schema fail before write.
 
-### 4.1A Stack, detector and guide catalogs
+### 4.2 Stack, detector and guide catalogs
 
 The packaged pure catalog owns stable language/technology IDs, labels, technology kind (`framework|runtime|platform|library|database|tool|infrastructure|domain`), declarative detector expressions, guide references and provenance. Initial technology kinds are: `dotnet:runtime`, `abp|nestjs|spring|vue|codeigniter:framework`, `react-web:library`, `postgresql|mysql|sqlserver|mongodb|redis:database`. Database detectors use only `dependency(npm|composer)` and `content` predicates, never `dependency(nuget|maven|gradle)`, because collectors never gather nuget/maven/gradle dependency facts; a .NET or Java database driver is matched through its package name inside `*.csproj`/`pom.xml`/`build.gradle*` content instead. Catalog code must not import filesystem collectors, commands, terminal UI or platform adapters.
 
@@ -150,7 +150,7 @@ Detection returns deterministic bounded matches with facet, technology kind or `
 
 Guide descriptors declare ID/title/description/category, language/technology/path/topic applicability, activation `always|path|task`, priority, `contentPath`, composition/supersedence and provenance. Packaged Markdown is imported at build time; source tests prove a one-to-one descriptor/content mapping. Selection order is common, language, then increasingly specific technology/domain, with priority and ID as deterministic tie-breakers. Only selected content is materialized below `.harnix/spec/guides/`.
 
-### 4.2 Project managed manifest
+### 4.3 Project managed manifest
 
 File: `.harnix/.template-hashes.json`.
 
@@ -172,11 +172,11 @@ interface ManagedManifestV1 {
 
 Manifest replacement là atomic. This project manifest owns only `.harnix/**` templates and never global integration output; former platform entries are legacy inventory only. Canonical `.harnix/workflow.md` entry uses `sourceId: "workflow"`. Legacy `sourceId: "harnix-workflow"` is a metadata alias only: normalize it when the stored `generatedHash` still matches exact disk bytes; preserve and warn on user-modified content. Ownership state được suy ra từ desired template, stored entry và disk hash; không persist transient state. Project update result có `metadataUpdated: string[]` cho entry chỉ đổi manifest metadata; path đó vẫn thuộc `preserved` và không được đưa vào content `updated`. Không track tasks/journals. Reject duplicate/absolute/traversal keys, external symlinks, invalid hash và corrupt/future manifest. Legacy hash namespace không được tin; migration re-baseline từ disk/template evidence.
 
-### 4.2A Global managed manifest
+### 4.4 Global managed manifest
 
 Phase 6 adds `GlobalManagedManifestV1` exactly as specified in `GLOBAL_SETUP_REFACTOR_PLAN.md` §5. It is a separate sidecar per verified Kiro, Antigravity Desktop, Antigravity CLI, Codex or Claude Code root, with only root-relative POSIX paths. Each entry has a stable `sourceId`, kind `file|managed-block|json-member`, generated hash/version and a required non-overlapping selector for fragments. Shared JSON array members are identified by stable `memberId` plus exact structural signature, never an array index. Corrupt/future data fails before write; a multi-platform transaction preflights all targets, locks in stable order, writes its manifest last and rolls back only when the disk still equals the output Harnix wrote. Mỗi canonical `managed.lock` path là directory chứa một unique UUID owner-token file với record schema v1. `mkdir(..., { recursive: false })` tạo candidate; candidate chỉ được trả ownership sau khi token là sole entry và exact bytes vẫn khớp. Stale/release cleanup đọc lại rồi unlink đúng observed token, sau đó gọi non-recursive `rmdir`; token identity đã đổi hoặc replacement directory có token khác thì preserve và retry/bounded timeout. Empty hoặc malformed Harnix token chỉ được reclaim sau stale threshold; live/identity-unknown owner và legacy single-file lock luôn fail closed.
 
-### 4.3 Task record and workflow state
+### 4.5 Task record and workflow state
 
 File: `.harnix/tasks/<task-id>/task.json`; `<task-id>` là lowercase `YYYYMMDD-HHMMSS-<kebab-slug>`, trong đó slug có một hoặc nhiều token alphanumeric không rỗng, phân tách bằng đúng một dấu `-`; collision chỉ append deterministic numeric suffix. Uppercase, empty segment, leading/trailing hyphen, traversal và path separator đều không hợp lệ. Active task được lưu bằng repo-relative task ID trong `.harnix/tasks/.active`, atomic replace; terminal `completed|cancelled` task xóa pointer chỉ khi pointer vẫn trỏ đúng task. Pointer rỗng là idle; pointer non-empty trỏ tới task file bị thiếu hoặc invalid phải throw typed invalid-state error và giữ nguyên pointer, không được project thành idle.
 
@@ -310,7 +310,7 @@ Schema v1 vẫn được đọc đúng semantics cũ. Terminal `completed|cancel
 
 Legal success transitions: `planning -> ready -> in_progress -> verifying -> completed`; any unfinished state may enter `blocked` and resume only to its recorded prior status, hoặc chuyển terminal `cancelled/cancelling` qua hidden `workflow --cancel` khi có explicit user authority. `debugging`, `replan`, `finishing` và `cancelling` là checkpoints. `cancelled` cần non-empty concise `cancellation.reason`, `authorizedBy: "user"`, valid `cancelledAt`, không blocker/completedAt; nó giữ criteria/evidence nguyên trạng, không resume và không thỏa completion. `workflow --cancel` persist terminal task → append journal kind `cancellation` với deterministic ID → clear matching active pointer; retry từ `cancelled/cancelling` dùng original `cancelledAt` journal date và không duplicate. Illegal jump, malformed/future record hoặc acceptance/evidence reference lỗi fail closed. Full task bắt buộc `prd.md` + `plan.md`; `design.md`, `research/`, `context.json` và `verification-inputs.json` conditional. Lite giữ toàn bộ minimum trace trong `task.json`. Every `saveTask` call — the single write path shared by `--save`, `--transition`, `--evidence`, `--finish`, and `--cancel` — also regenerates `.harnix/tasks/<id>/review.md`, a derived, always-overwritten human-reading page (title, status/checkpoint, goal, non-goals, acceptance criteria, `decisions`/`residualRisks` when present, blocker/cancellation when present, evidence). It is not part of `TaskArtifacts`, carries no obligation, is never included in a required check's `inputs`, and never affects `taskContractHash`; a decision or residual risk recorded after a check has passed must not invalidate that evidence. Validation invariants chung: `met` criterion cần ít nhất một existing evidence ID; `waived` cần non-empty `waiverReason`; command evidence cần integer `exitCode`; `blocked` cần blocker + matching `resumeStatus`; `completed` cần `completedAt`, không blocker và mọi required criterion `met|waived`.
 
-### 4.4 Context manifest
+### 4.6 Context manifest
 
 Conditional file: `.harnix/tasks/<task-id>/context.json`. Lite có thể chỉ dùng `relevantPaths`/`relevantSpecs` trong task record.
 
@@ -338,11 +338,11 @@ Deterministic base score là pin `1000`, explicit task/acceptance reference `500
 
 Hidden inspect/continue luôn project `contextDrift: {state,changes,selectionChanges}` với state `not-recorded|current|stale`, sorted relative path changes `changed|missing|unreadable|unverified` và sorted selection-basis changes theo §4.4A. Không có manifest/hash là `not-recorded`; mixed hashed/unhashed là `stale` với entry thiếu hash `unverified`. Chỉ đọc path đã liệt kê và safe-resolve dưới root. Continue gặp `stale` phải persist cùng status với checkpoint `replan` trước khi dùng lại context và route Brainstorm để reselect; không tự sửa source hay manifest. `not-recorded` trên legacy state chỉ được disclose, không tự ép migration/replan.
 
-### 4.4A Context selection freshness sidecar v1
+### 4.7 Context selection freshness sidecar v1
 
 Explicit hidden context persistence atomically writes a task-owned `.harnix/tasks/<task-id>/context-selection.json` beside `context.json`:
 
-### 4.6 Roadmap epic tracking
+### 4.8 Roadmap epic tracking
 
 File: `.harnix/roadmaps/<epic-id>.json` và `.harnix/roadmaps/<epic-id>.md` (derived, always-overwritten, similar role to review.md).
 
@@ -375,7 +375,7 @@ interface ContextSelectionSnapshotV1 {
 
 `selectionInputHash` canonicalizes task relevant paths/specs, known config profile/package/context/runtime facets, selected guide paths, selector version and validated repo-map inventory fingerprint. `selectionResultHash` canonicalizes sorted included/omitted selection metadata and deliberately excludes `contentHash`. Inspect returns `contextDrift.selectionChanges` sorted from `inventory-changed|inventory-unavailable|selection-signals-changed|selector-version-changed`; any content or selection change is `stale`. Manifest v1 without sidecar remains readable and is `not-recorded` when content is clean. Corrupt/future/task/result binding fails closed; missing/invalid current cache produces `inventory-unavailable` without scan, refresh, query or write.
 
-### 4.5 Journal and learning
+### 4.9 Journal and learning
 
 Journal path: `.harnix/workspace/<developer>/journal/YYYY-MM-DD.jsonl`; namespace directory được tạo lazy khi ghi entry đầu tiên. Mỗi UTF-8 JSON object nằm trên một line, append bằng locked/atomic strategy phù hợp platform. Malformed lines được report và skip, không làm mất valid entries.
 
@@ -408,19 +408,19 @@ Candidate normalization dedupe `sourceTaskIds`/`evidenceIds`; `occurrences` bằ
 
 Public `harnix mem --learning` adds only a kind filter before the existing query/limit merge and preserves the default `{entries,malformed}` JSON contract. Hidden `workflow --learn` reads exact bounded stdin `{ "candidate": { "id", "statement", "sourceTaskIds", "evidenceIds" } }` only from active `verifying/finishing`; caller cannot set developer/path/time/status/occurrences/confidence. It reuses completion input freshness, requires the current task plus completed source tasks and at least one referenced evidence per source, enforces the frozen eligibility formula and 64 KiB limit, then appends deterministic ID `<current-task>-<candidate>-learning`. Identical retry across journal dates returns `created:false`; conflicting reuse fails. Output is `{entry,eligible:true,created,findings}` with sorted redacted finding categories. TaskRecord, active pointer, historical journal lines and specs remain unchanged.
 
-### 4.5A Untrusted learning review boundary
+### 4.10 Untrusted learning review boundary
 
 `LearningCandidateV1` persisted shape và eligibility formula không đổi. `promotionProposal()` trả `PromotionProposalV2` với `review: {statementHash,sourceTaskIds,evidenceIds,findings}`; findings thuộc `command-like|credential-like|instruction-override|url-like`, sorted và không giữ matched values. Statement tối đa 64 KiB cho proposal, được render duy nhất dưới `Statement-JSON: <JSON.stringify(statement)>` trong fixed Harnix untrusted-learning boundary. Doctor union categories trên mỗi journal file thành một `persistent-learning-suspicious` warning, logical path only, `fixable:false`; `doctor --fix` không sửa journal hoặc spec.
 
-### 4.5B Full ready trace v1
+### 4.11 Full ready trace v1
 
 Full `prd.md` dùng level-three `AC` headings với criterion ID backtick-wrapped; Full `plan.md` dùng checklist và level-three `Slice` blocks với slice ID backtick-wrapped cùng backtick lists `Criteria:`, `Checks:` và `Paths:`. Parser bỏ fenced code, cap 1 MiB/artifact, 4096 chars/line, 256 slices và 1024 references; slice IDs match `^[A-Z][A-Z0-9-]*$`. Hidden `workflow --transition <status>/<checkpoint>` không nhận task body: nó đọc active record đã persist, áp đúng một legal transition và đi qua cùng validation/lock/immutability của save path, nên đổi stage không thể làm rơi evidence hay ghi đè obligation; nó từ chối `cancelled` vì cancellation chỉ thuộc `--cancel`. Hidden `workflow --evidence` đọc bounded envelope `{ "evidence": <Evidence> }` trên stdin và append đúng một item. Hidden `workflow --schema` là read-only và trả contract của envelope, TaskRecord cùng transport mà không lộ project data. Hidden `workflow --audit-ready` trả stable `ReadyTraceReportV1` JSON, không echo body/absolute path. Auditor bắt missing/duplicate/orphan/unknown/unsafe/placeholder trace và là gate cho mọi Full transition/re-transition vào `ready`; Lite và historical completed/ready records không bị rewrite.
 
-### 4.5C Dependency-aware repo-map ranker
+### 4.12 Dependency-aware repo-map ranker
 
 RepoMapV1/cache/public query JSON không đổi. Internal ranker default v2 resolves only relative `./|../` imports by exact, extensionless, then `index.*`; external, absolute, root traversal and targets with more than four matches are omitted. In-memory graph caps 10,000 nodes/100,000 edges; query uses 50 lexical seeds, at most 200 candidates and depth 2. Bonuses are direct dependency `+120`, direct importer `+100`, depth two `+40`, and inbound centrality `min(50,5*count)`; reasons are stable and final tie-break remains score descending then code-unit path ascending. Internal injected ranker v1 retains lexical rollback behavior; graph is never persisted or used by global hooks.
 
-### 4.5D Public task status v1
+### 4.13 Public task status v1
 
 `harnix status` is the ninth public command. It resolves the nearest initialized ancestor without Git/process/network discovery, validates config and active task state, and emits exactly one JSON document without a `--json` option or any write:
 
@@ -448,49 +448,49 @@ Task prose, criterion/check descriptions, validation commands, blocker text, pro
 
 `nextAction` precedence is blocked → stale context → planning → ready → in-progress → verifying-not-green → verifying-green → terminal pointer recovery → no active. Stable codes are `resolve-blocker`, `replan-context`, `complete-planning`, `begin-implementation`, `continue-implementation`, `run-verification`, `finish-task`, `finalize-task`, and `no-active-task`. Attention order is `context-stale`, `required-check-failed`, `required-check-stale`; pending checks do not create pre-verification noise. Representative active output is below 2 KiB.
 
-### 4.5E External harness feature provenance v1
+### 4.14 External harness feature provenance v1
 
 `docs/HARNESS_FEATURE_PROVENANCE.json` is the canonical machine-checkable registry for maintained external-derived capabilities. Exact top-level fields are `generator`, `schemaVersion`, `reviewedAt`, `features`; feature/source/implementation objects also use exact allowlists. Feature IDs and source repositories are sorted unique. Each feature records `adopt|adapt`, lifecycle, immutable 40-hex source ref, source date, license, evidence URLs, Harnix adaptation delta, and sorted unique concrete code/test/docs paths. Every mapped path must normalize safely and exist. `test/workflow/provenance.test.ts` pins the current backfill set and fails on missing/unknown fields, mutable refs, duplicate/unsorted values, unsafe/glob/missing targets, or empty evidence.
 
 Behavioral research alone does not claim copied code. `NOTICE` changes only when reused code/content creates an attribution obligation; clean-room references still remain visible in the registry. Any future harness-derived feature must update registry, canonical research/mapping and the expected feature-ID regression in the same task before completion.
 
-### 4.5F Public resilient task index v1
+### 4.15 Public resilient task index v1
 
 `harnix tasks [--limit <1..100>] [--status <TaskStatus>]` is the tenth public command and defaults to 20 results. It reads at most 1,000 safe task-directory candidates, always reserves scan budget for the active candidate, exact-schema validates each record independently, and treats malformed/unreadable records as isolated invalid entries. A valid active task that matches the filter is pinned first; remaining results sort by `updatedAt` descending then code-unit ID descending. Status filtering occurs before the result limit and never bypasses the filter for active state.
 
 `TaskIndexResultV1` has exact top-level fields `generator`, `schemaVersion`, `scope`, `status`, `filter`, `summary`, `activeTaskId`, `attention`, `tasks`. `scope` is `project`; `status` is `ready|partial`, where only invalid records or an unavailable active pointer make the result partial. Scan/result truncation is bounded normal behavior exposed through summary flags. Each item contains only `id`, `mode`, `status`, `checkpoint`, `active`, `updatedAt`; title/goal, prompt, artifact/journal body, criterion/check/blocker prose, evidence summary, validation command, secret and absolute path are omitted. Record files are capped at 1 MiB, active pointer at 1 KiB. The command never writes, changes the pointer, refreshes cache, runs a process, or uses network.
 
-### 4.5G Public repo-map impact v1
+### 4.16 Public repo-map impact v1
 
 `harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]` is mutually exclusive with `--query` and hidden `--refresh`; `--depth` is impact-only. The target must be one exact normalized non-root repository-relative POSIX path. It reads RepoMapV1 only, returns direct outgoing dependencies plus unique reverse dependents from cycle-safe BFS up to depth (default 2), sorts dependents by distance then code-unit path, and applies limit independently to both directions (default 20). Stable status is `ready|missing|invalid|not-found`; every non-ready result preserves the same JSON shape with empty lists and false truncation flags. The action never scans source, reads snippets, refreshes/writes cache, infers dynamic dependencies, changes cache schema, or runs in a global hook.
 
-### 4.5H Public exact task resume v1
+### 4.17 Public exact task resume v1
 
 `harnix resume <task-id> [--dry-run]` is the eleventh public command. It accepts one canonical task ID only; candidate record reads are capped at 1 MiB and active pointer reads at 1 KiB. Candidate directory/record identity, exact TaskRecord schema and unfinished status are validated before any mutation. An absent/empty pointer yields `would-resume` in dry-run or permission-preserving atomic replacement followed by `resumed`; an already matching valid unfinished pointer yields `already-active` without a write. A malformed/dangling/terminal pointer, another active task, or a missing/malformed/oversized/terminal candidate fails closed without overwrite.
 
 `TaskResumeResultV1` has exact top-level fields `generator`, `schemaVersion`, `scope`, `dryRun`, `outcome`, `task`, `nextAction`. `scope` is `project`; `outcome` is `would-resume|resumed|already-active`; task contains only `id`, `mode`, `status`, `checkpoint`; next action is the fixed `inspect-active-task` instruction. The command changes only `.harnix/tasks/.active`: it never edits a TaskRecord, evidence, sidecar or artifact, performs a transition, restores a transcript/model session/Git state, or calls network. Sequential state is atomic and fail-closed; no cross-process compare-and-swap guarantee is claimed.
 
-### 4.5I Public effective-context explanation v1
+### 4.18 Public effective-context explanation v1
 
 `harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]` is the twelfth public command and defaults to 20 details per category. It shares one effective-context builder with hidden `harnix context`: persisted context entries plus applicable guides when a manifest exists, otherwise task `relevantPaths` plus applicable guides. Bounded mode is identical to hook selection: Codex 2,500 characters; Kiro/Antigravity/Claude Code `min(config.context.maxCharacters, 8000)`; maximum 64 inspected entries.
 
 `ContextReportResultV1` has exact top-level fields `generator`, `schemaVersion`, `scope`, `platform`, `filter`, `activeTask`; no active task is clean success with `activeTask:null`. Active output contains only task `id`, `budget`, bounded `drift`, `summary`, `selected`, `omitted`. Selected items contain `path`, sorted derived `reasonCodes`, `priority`, `pinned`; allowed reason codes are `applicable-guide|persisted-selection|pinned|task-reference`. Omitted items retain only relative path and `budget|duplicate|missing|unsafe`. Raw reason/states, content, hash, task prose, hook event, secret and absolute path are forbidden. Limit applies independently to selected, omitted and drift changes; the entire serialized result is capped at 262,144 UTF-8 bytes by dropping deterministic whole tail items and setting count/truncation fields. The command never writes or calls network, and hidden hook payload/activation behavior remains regression-locked.
 
-### 4.5J Public required-check freshness explanation v1
+### 4.19 Public required-check freshness explanation v1
 
 `harnix checks [--limit <1..50>]` is the thirteenth public command and defaults to 20 required checks. `ChecksReportResultV1` has exact top-level fields `generator`, `schemaVersion`, `scope`, `filter`, `activeTask`; no active task is clean success. Active output contains task `id|mode|status|checkpoint`, aggregate summary and code-unit-sorted checks. Each item contains only `id`, `state`, sorted `reasonCodes`, `changeSummary`, and at most 20 relative `changed|missing` paths. Limit truncates whole check records; the 262,144-byte result cap first drops detail paths, then whole tail checks, while preserving full counts and truncation flags.
 
 The classifier is shared by checks and status/audit projections. Latest evidence uses timestamp then append-order tie behavior. `no-evidence|latest-skipped` is pending, `latest-failed` is failed, and invalid/future pass is stale; only TaskRecord v1 has an expired-by-age state after one hour. A v2 fresh pass requires matching immutable sidecar/evidence digest and current input digest regardless of nested snapshot version; safe categorical causes are `snapshot-missing|snapshot-invalid|snapshot-mismatch|task-contract-changed|inputs-changed|inputs-missing|inputs-unavailable|plan-artifact-invalid`, where `plan-artifact-invalid` reports a malformed plan/prd execution-notes grammar distinctly from an otherwise-unavailable input. No check description/command, evidence ID/summary/time/hash/input pattern, criterion/task prose, secret or absolute path is emitted. The command never executes validation, writes state/evidence/sidecars, or calls network.
 
-### 4.5K Public task audit v1
+### 4.20 Public task audit v1
 
-`harnix skill [name]` is the fifteenth public command. Without an argument it emits the canonical catalog of the seven stage owners with `name`, `description` and `version` and no body text; with a name it emits that skill's canonical content byte-identical to what platform setup installs. An unknown or unsafe name fails closed. It reads only the packaged catalog: no project root, no filesystem access and no write, so an agent on a platform Harnix never configures still reaches the same instructions.
+`harnix skill [name]` is the sixteenth public command. Without an argument it emits the canonical catalog of the seven stage owners with `name`, `description` and `version` and no body text; with a name it emits that skill's canonical content byte-identical to what platform setup installs. An unknown or unsafe name fails closed. It reads only the packaged catalog: no project root, no filesystem access and no write, so an agent on a platform Harnix never configures still reaches the same instructions.
 
 `harnix audit` is the fourteenth public command. No active task is a clean success with `{generator,schemaVersion,activeTask:null}`. Active output contains exactly `id`, `mode`, `status`, `checkpoint`, `readiness`, `completion`. Full readiness reuses the exact bounded ready-trace auditor while stripping diagnostic message prose; each diagnostic contains only `code`, `artifact`, optional `id`, optional `line`. Artifact read failure becomes `unavailable` plus `artifact-unavailable`; Lite readiness is `not-applicable`.
 
 Completion separates criteria `{met,waived,pending,total,pendingIds}` from required checks `{passed,failed,stale,pending,total,failedIds,staleIds,pendingIds}`. A criterion counts as met only when persisted met and supported by fresh evidence under completion semantics; waived remains waived and every other state is pending. Required checks reuse the exact latest-evidence, v1 one-hour age, and v2 immutable-sidecar/current-input semantics used by status/finish. ID lists sort code-unit. Completion passes only with non-empty criteria/checks, every criterion completion-ready and every required check passed. Audit never runs a command, edits artifacts/state, advances workflow, calls network, or emits private prose/commands/secrets/absolute paths; an audit pass is visibility, not verification evidence.
 
-### 4.5L Agent target authority v1
+### 4.21 Agent target authority v1
 
 Generated Harnix instructions and canonical skills resolve one intended target before activation with fixed authority order:
 
@@ -504,7 +504,7 @@ Generated Harnix instructions and canonical skills resolve one intended target b
 
 `src/templates/harnix/activation.ts` is the canonical TypeScript fragment for generated project/global surfaces. The seven raw `src/skills/harnix-*/SKILL.md` sources carry semantic-equivalent clauses and remain byte-identical across Kiro, Antigravity and Codex. This contract adds no natural-language path parser, public CLI/schema, hook protocol change, hook-time write or network behavior. Hidden context discovery retains current nearest-ancestor/workspace no-op semantics because it executes before prompt-target interpretation; its repository payload is untrusted target evidence and never grants agent authority. Origin is `harnix-self-audit` (`F-CUR-02`/`M04`), so external provenance registry and `NOTICE` remain unchanged unless external behavior/code/content is later adopted or adapted.
 
-### 4.5M Hidden workflow preflight v1
+### 4.22 Hidden workflow preflight v1
 
 `harnix workflow --preflight` is hidden agent transport, not a public command. It emits exactly one bounded JSON object:
 
@@ -522,7 +522,7 @@ interface WorkflowPreflightResultV1 {
 
 Every ID list is code-unit sorted. Output omits title/goal/criterion/check/blocker prose, commands, paths, hashes, prompts, secrets and file contents. No active task returns `brainstorm`. Terminal recovery returns `continue` before context/input hashing. Otherwise stage precedence is blocked/terminal → stale context `continue` → retry-limit `stop` → planning/replan `brainstorm` → ready `await` → in-progress `implement|debug` → verifying debug → completion-ready finishing `finish` → `check`. Finishing requires non-empty obligations, green fresh required checks, and acceptance completion/link semantics; green/empty check buckets alone never route Finish. `ready` never implies implementation authority; the latest request router may choose Implement only when the current user request authorizes project mutation. Required-input freshness is recomputed only in `verifying`; earlier stages expose required IDs as pending without eagerly hashing broad globs. Two consecutive chronological failures for one required check exhaust the single automatic remediation round regardless of digest/summary changes; skipped evidence and invalid/future passes do not reset it, while a current valid pass does. Preflight performs no write, process spawn or network call.
 
-### 4.6 Doctor JSON v2
+### 4.23 Doctor JSON v2
 
 ```ts
 interface DoctorFinding {
@@ -562,12 +562,12 @@ interface DoctorReportV2 {
 
 Consumer expecting v1 receives an explicit schema mismatch, never a misleading flat object. Finding order is deterministic by severity/code/path and secrets are redacted. The regular CLI does not invoke platform-version probes or infer activation/precedence from installed files: `active`, `shadowed` and `unsupported-version` are valid only when authoritative external evidence is supplied at the lifecycle boundary; otherwise the report remains conservative (`installed`, `installed-pending-trust`, `binary-unavailable` or `precedence-unknown`). Exit `0` means global state was read safely with no warning/error; `project:not-initialized` outside a project is info. Exit `1` is an actionable warning (including pending trust, binary unavailable, precedence/version drift). Exit `2` is invalid usage or unsafe/corrupt/future project/global state. `--fix` repairs only safe project issues; `--fix --global` reconciles only safe missing/unchanged global entries and never changes trust, permissions, features or user-modified fragments.
 
-### 4.7 Internal platform-hook protocol
+### 4.24 Internal platform-hook protocol
 
-`harnix context --platform <kiro|antigravity|codex|claude>` is the only packaged fast-path hook command, not public API and does not increase the fifteen-command public contract. Legacy `harnix internal context ...` is not an alias and must fall through to regular CLI rejection. Release performance measurement invokes the exact canonical installed command. The hidden command:
+`harnix context --platform <kiro|antigravity|codex|claude>` is the only packaged fast-path hook command, not public API and does not increase the sixteen-command public contract. Legacy `harnix internal context ...` is not an alias and must fall through to regular CLI rejection. Release performance measurement invokes the exact canonical installed command. The hidden command:
 
 1. accepts bounded optional hook-event JSON from stdin, validates `cwd` and bounded `workspacePaths[]`, and falls back safely to process cwd; this event discovery does not parse an explicit target from natural-language prompt text and does not grant target authority;
-2. resolves the **nearest** initialized project ancestor/root from cwd or workspace roots using safe realpath containment, including non-Git workspaces, deduplicated symlink-equivalent roots; it must not require the current workspace directory itself to contain `.harnix`. Any injected repository context remains untrusted target evidence, and generated instructions apply §4.5L after the prompt is available before reading Harnix state or acting;
+2. resolves the **nearest** initialized project ancestor/root from cwd or workspace roots using safe realpath containment, including non-Git workspaces, deduplicated symlink-equivalent roots; it must not require the current workspace directory itself to contain `.harnix`. Any injected repository context remains untrusted target evidence, and generated instructions apply §4.21 after the prompt is available before reading Harnix state or acting;
 3. loads bounded ranked context without network, write, prompt/transcript/credential logging or execution of project content;
 4. exits `0` with empty output in a non-Harnix repository; malformed optional input fails open for the hosting agent using the platform-specific output below (a malformed Antigravity event is an empty no-op). A known initialized project with corrupt/inaccessible state must fail closed for project data and emit only a concise redacted platform-specific warning without blocking the host agent;
 5. emits no absolute home path, obeys stdin/stdout/time/workspace-root bounds and always discloses context truncation.
@@ -580,7 +580,7 @@ Global platform handlers use fixed, non-concatenated commands:
 
 Repository excerpts in every platform payload use the same explicit untrusted-data opening/closing boundary. Boundary and omission disclosure count toward the character cap; trimming preserves the closing marker and never expands the selected path set. Fixtures cover malicious README/comment/generated data, duplicate/oversized input, fake secret/traversal and nested-root noise, plus non-Harnix no-op, corrupt/malformed optional input, Unicode/spaces, nested Git/non-Git discovery, Antigravity zero/one/multi-root selection and ambiguity, bounded output, Codex Windows resolution, and cold-path performance (median <300ms, p95 <750ms, no sample >1s).
 
-### 4.8 Common CLI result semantics
+### 4.25 Common CLI result semantics
 
 Mọi public command dùng stderr cho actionable error/warning và stdout cho exactly one JSON document. Exit `0` là success/clean intentional no-op/dry-run; exit `1` là operation hoặc diagnostic hoàn tất nhưng có actionable finding/conflict/failure; exit `2` là invalid usage/config/schema/root hoặc deterministic internal failure. Public command throw trước normal result dùng exact envelope dưới đây trên stdout và cùng redacted `message` trên stderr; hidden `context`/`workflow` không emit envelope để giữ hook/workflow protocol:
 
@@ -596,7 +596,7 @@ interface PublicCliErrorV1 {
 }
 ```
 
-Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. Project `update` returns sorted `created`, content `updated`, metadata-only `metadataUpdated`, `preserved`, `deleted` và `obsolete`; một path metadata-only không được claim là content update. `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. Readiness khác `installed` hoặc warning không rỗng được ghi actionable lên stderr và trả exit `1`; clean `installed` trả `0`. `upgrade` always returns `{ installed: string, available: string|null, command: string[], applied: boolean }`; absent injected lookup means offline `available:null`, and only explicit `--apply` invokes the fixed npm executable/argument array. `init` is always non-interactive and emits one `InitProjectResult` with project status, developer, sorted languages/technologies, bounded `detection.matches`, and sorted created/updated/unchanged/preserved/warnings arrays. Existing projects return empty detection matches because init does not rescan; new/dry-run projects report pre-override evidence and warnings identify overridden facets. `status`, `tasks`, `context-report`, `checks`, `audit` and repo-map impact return the bounded read-only projections in §§4.5D/4.5F–G/4.5I–K; `resume` uses the pointer-only mutation in §4.5H. No-active/missing-cache cases follow their stable result contracts. `--yes` is not part of the public init syntax; a hidden no-op compatibility alias may remain for v0.5 callers.
+Không in secret values, stack trace mặc định hoặc machine-specific absolute path trong generated output; global output uses logical paths such as `~/.kiro/...` and `$CODEX_HOME/...`. Project `update` returns sorted `created`, content `updated`, metadata-only `metadataUpdated`, `preserved`, `deleted` và `obsolete`; một path metadata-only không được claim là content update. `setup` returns the Phase 6 `GlobalSetupResult` with scope `user`, per-platform readiness and created/updated/unchanged/preserved/warnings. Readiness khác `installed` hoặc warning không rỗng được ghi actionable lên stderr và trả exit `1`; clean `installed` trả `0`. `upgrade` always returns `{ installed: string, available: string|null, command: string[], applied: boolean }`; absent injected lookup means offline `available:null`, and only explicit `--apply` invokes the fixed npm executable/argument array. `init` is always non-interactive and emits one `InitProjectResult` with project status, developer, sorted languages/technologies, bounded `detection.matches`, and sorted created/updated/unchanged/preserved/warnings arrays. Existing projects return empty detection matches because init does not rescan; new/dry-run projects report pre-override evidence and warnings identify overridden facets. `status`, `tasks`, `context-report`, `checks`, `audit` and repo-map impact return the bounded read-only projections in §§4.5D/4.5F–G/4.5I–K; `resume` uses the pointer-only mutation in §4.17. No-active/missing-cache cases follow their stable result contracts. `--yes` is not part of the public init syntax; a hidden no-op compatibility alias may remain for v0.5 callers.
 ## 5. Phase 0 — Documentation và baseline checkpoint
 
 ### Task 0.1: Chuẩn hóa PRD
@@ -715,7 +715,7 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 
 **Create:** `src/utils/{hashing,managed-files}.ts`
 
-- [x] RED schema + ownership-state tests implement 4.2: create/update/preserve/deleted/obsolete unchanged/obsolete modified.
+- [x] RED schema + ownership-state tests implement 4.3: create/update/preserve/deleted/obsolete unchanged/obsolete modified.
 - [x] Normalize CRLF for content hash while preserving desired output bytes.
 - [x] Reject corrupt/future manifest, unsafe keys and external symlinks.
 - [x] Atomic manifest replacement and rollback tests.
@@ -724,7 +724,7 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 
 **Create:** `src/core/tasks/**`
 
-- [x] Implement exact 4.3 task/criterion/validation/evidence/blocker schema and `HARNIX_WORKFLOW.md` semantics; do not add implicit Git fields.
+- [x] Implement exact 4.5 task/criterion/validation/evidence/blocker schema and `HARNIX_WORKFLOW.md` semantics; do not add implicit Git fields.
 - [x] Test create/read/update/archive, malformed/future state and active task resolution.
 - [x] RED transition/gate tests: planning → ready → in_progress → verifying → completed; blocked resume; debugging/replan checkpoint; illegal jump fail closed.
 - [x] Full mode adds `prd.md`/`plan.md`, conditional `design.md`/`research`; Lite does not create empty ceremony files.
@@ -734,7 +734,7 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 
 **Create:** `src/core/context/**`
 
-- [x] RED ranking tests lock 4.4 additive scores, tie-break, pin, task reference, active package/path, bounded language-or-technology profile bonus and guide priority.
+- [x] RED ranking tests lock 4.6 additive scores, tie-break, pin, task reference, active package/path, bounded language-or-technology profile bonus and guide priority.
 - [x] RED tests for dedupe, deterministic ties, budget boundary and omitted-files disclosure.
 - [x] Persist optional per-state `context.json`; Lite may keep small relevant-path refs in `task.json` without a second artifact.
 - [x] Explicit full-context override bypasses budget but retains source list.
@@ -745,7 +745,7 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 **Create:** `src/core/journal/**`, `learning.ts`
 
 - [x] Test newest-first search, query/user/limit, Unicode/spaces, missing workspace and malformed entries.
-- [x] Implement exact 4.5 candidate dedupe, occurrence, confidence formula and proposal threshold.
+- [x] Implement exact 4.9 candidate dedupe, occurrence, confidence formula and proposal threshold.
 - [x] Test recurrence/explicit promotion gates and reviewable spec write.
 - [x] No automatic hidden/global promotion.
 
@@ -883,7 +883,7 @@ Historical implementation retained for provenance and isolated migration tests; 
 - [x] Redact secret values.
 - [x] `--fix` emits plan then repairs only safe managed issues.
 - [x] Never modify specs/tasks/journals/secrets/sensitive permissions/user-modified files.
-- [x] Stable 4.6 JSON ordering/redaction and 4.8 exit codes locked by fixtures.
+- [x] Stable 4.23 JSON ordering/redaction and 4.25 exit codes locked by fixtures.
 
 ### Task 4.7: Packaging, performance và footprint
 

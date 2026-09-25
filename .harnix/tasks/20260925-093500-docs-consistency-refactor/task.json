@@ -1,0 +1,485 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260925-093500-docs-consistency-refactor",
+  "title": "Review va refactor toan dien docs consistency ecosystem alignment research expansion",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Dua toan bo docs Harnix ve trang thai nhat quan voi implementation thuc te 4 platforms 16 commands mo rong research landscape va sua structural defect trong IMPLEMENTATION_PLAN.md",
+  "nonGoals": [
+    "Thay doi src code",
+    "Them platform moi",
+    "Thay doi frozen contract semantics"
+  ],
+  "relevantPaths": [
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-build-pass",
+      "text": "Build typecheck lint pass",
+      "status": "met",
+      "evidenceIds": [
+        "a4d96507-0781-4b05-b685-0b1abe30d57e"
+      ]
+    },
+    {
+      "id": "ac-changelog",
+      "text": "CHANGELOG.md updated",
+      "status": "met",
+      "evidenceIds": [
+        "3b2f8aee-0e81-4a4e-a99d-4ce01b6a4bde"
+      ]
+    },
+    {
+      "id": "ac-claude-research",
+      "text": "HARNESS_RESEARCH.md co Claude Code platform research section",
+      "status": "met",
+      "evidenceIds": [
+        "c0c8ff34-488c-45ef-a8ed-530f288080a5"
+      ]
+    },
+    {
+      "id": "ac-command-count",
+      "text": "PRD section 17 ghi dung sixteen public commands",
+      "status": "met",
+      "evidenceIds": [
+        "ba876334-446e-4f4b-ab01-53e5b5137054"
+      ]
+    },
+    {
+      "id": "ac-cross-doc-audit",
+      "text": "Zero grep remnants for old counts",
+      "status": "met",
+      "evidenceIds": [
+        "3e339f12-a082-4856-a8b3-4aef1275a25b"
+      ]
+    },
+    {
+      "id": "ac-deferred-mcp",
+      "text": "Section 7 Deferred updated with MCP note",
+      "status": "met",
+      "evidenceIds": [
+        "7782077a-5d1d-44e3-8851-af1d7c2d7ce4"
+      ]
+    },
+    {
+      "id": "ac-ecosystem-positioning",
+      "text": "HARNESS_RESEARCH.md co ecosystem positioning section",
+      "status": "met",
+      "evidenceIds": [
+        "0d230e26-be48-4173-8d10-f879d549a2ae"
+      ]
+    },
+    {
+      "id": "ac-impl-plan-structure",
+      "text": "IMPLEMENTATION_PLAN.md section 4 numbering lien tuc",
+      "status": "met",
+      "evidenceIds": [
+        "5b7487b3-8d7d-4ef5-b425-9b751261ce78"
+      ]
+    },
+    {
+      "id": "ac-no-contract-change",
+      "text": "Khong thay doi frozen contract semantics",
+      "status": "met",
+      "evidenceIds": [
+        "3f4a04ee-71ff-48c2-8615-44bf965bf89c"
+      ]
+    },
+    {
+      "id": "ac-pkg-desc",
+      "text": "package.json description mentions Claude Code",
+      "status": "met",
+      "evidenceIds": [
+        "f312ab2f-e3c0-4950-be3b-7a5b03d08721"
+      ]
+    },
+    {
+      "id": "ac-platform-naming",
+      "text": "Moi docs mention du 4 platforms",
+      "status": "met",
+      "evidenceIds": [
+        "3c6c4783-6ec4-4480-973f-2aaa427324e3"
+      ]
+    },
+    {
+      "id": "ac-rejected-update",
+      "text": "Section 7 Rejected updated",
+      "status": "met",
+      "evidenceIds": [
+        "10e3d4de-36d9-49b9-8fc9-7c31641d57ab"
+      ]
+    },
+    {
+      "id": "ac-upstream-mapping",
+      "text": "UPSTREAM_MAPPING.md section 6 has Claude Code",
+      "status": "met",
+      "evidenceIds": [
+        "0b72332a-9ae3-4b8e-ab43-8efb67ef518f"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-build",
+      "description": "Build typecheck lint pass",
+      "command": "pnpm build && pnpm typecheck && pnpm lint",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-build-pass"
+      ],
+      "inputs": [
+        "@task-contract",
+        "package.json",
+        "src/**/*.ts",
+        "tsconfig.json"
+      ]
+    },
+    {
+      "id": "check-changelog",
+      "description": "CHANGELOG has new entry for this refactor",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-changelog"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md"
+      ]
+    },
+    {
+      "id": "check-claude-section",
+      "description": "Claude Code research section exists in HARNESS_RESEARCH.md",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-claude-research"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNESS_RESEARCH.md"
+      ]
+    },
+    {
+      "id": "check-command-count",
+      "description": "Verify PRD says sixteen public commands",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-command-count"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_PRD.md"
+      ]
+    },
+    {
+      "id": "check-cross-doc-remnants",
+      "description": "Zero remnants in docs",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-cross-doc-audit"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "package.json"
+      ]
+    },
+    {
+      "id": "check-deferred",
+      "description": "Section 7 Deferred updated",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-deferred-mcp"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNESS_RESEARCH.md"
+      ]
+    },
+    {
+      "id": "check-ecosystem-section",
+      "description": "Ecosystem positioning section exists in HARNESS_RESEARCH.md",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-ecosystem-positioning"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNESS_RESEARCH.md"
+      ]
+    },
+    {
+      "id": "check-impl-numbering",
+      "description": "Verify section 4 numbering continuous no duplicates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-impl-plan-structure"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    },
+    {
+      "id": "check-no-semantic-change",
+      "description": "Diff review verifying frozen types enums paths unchanged",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-no-contract-change"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    },
+    {
+      "id": "check-pkg-desc",
+      "description": "package.json description",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-pkg-desc"
+      ],
+      "inputs": [
+        "@task-contract",
+        "package.json"
+      ]
+    },
+    {
+      "id": "check-platform-grep",
+      "description": "Grep docs for missing Claude Code patterns",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-platform-naming"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNESS_RESEARCH.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "package.json"
+      ]
+    },
+    {
+      "id": "check-rejected",
+      "description": "Section 7 Rejected updated",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-rejected-update"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNESS_RESEARCH.md"
+      ]
+    },
+    {
+      "id": "check-upstream",
+      "description": "Section 6 Upstream mapping updated",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-upstream-mapping"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/UPSTREAM_MAPPING.md"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "a4d96507-0781-4b05-b685-0b1abe30d57e",
+      "checkId": "check-build",
+      "result": "pass",
+      "summary": "pnpm build, typecheck, lint all passed cleanly",
+      "inputDigest": "4d2c1e580280e42fda9579079baf305be45917d476e614075b776f8911654fed",
+      "recordedAt": "2026-09-25T02:55:21.931Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "3b2f8aee-0e81-4a4e-a99d-4ce01b6a4bde",
+      "checkId": "check-changelog",
+      "result": "pass",
+      "summary": "Added 1.1.17 entry to CHANGELOG.md covering docs consistency and numbering",
+      "inputDigest": "d68a26344b5cabbd9747e42d2a246f6b1a066158d947ca7170cb64af7eec45b6",
+      "recordedAt": "2026-09-25T02:55:22.840Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "c0c8ff34-488c-45ef-a8ed-530f288080a5",
+      "checkId": "check-claude-section",
+      "result": "pass",
+      "summary": "Claude Code section added under Platform research decisions",
+      "inputDigest": "45b7c3d5283b4f52677c036730749d38484a0b0d8a23b3c28eab61e9d51b142c",
+      "recordedAt": "2026-09-25T02:55:23.653Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "ba876334-446e-4f4b-ab01-53e5b5137054",
+      "checkId": "check-command-count",
+      "result": "pass",
+      "summary": "Updated command count to 16 in PRD",
+      "inputDigest": "e46b73d7fe909c4fab17bd7d8ab350f15a01038d0c9faf3107276b07c5a988fc",
+      "recordedAt": "2026-09-25T02:55:24.461Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "3e339f12-a082-4856-a8b3-4aef1275a25b",
+      "checkId": "check-cross-doc-remnants",
+      "result": "pass",
+      "summary": "Grep confirmed no 15 command remnants remaining in repo",
+      "inputDigest": "6c9814921625a0c259208e3c2d54d64240f80af1142396c6d641f0e9245ce47c",
+      "recordedAt": "2026-09-25T02:55:25.348Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "7782077a-5d1d-44e3-8851-af1d7c2d7ce4",
+      "checkId": "check-deferred",
+      "result": "pass",
+      "summary": "MCP and Boomerang deferred items added to HARNESS_RESEARCH.md",
+      "inputDigest": "a6059a41f167667bc1f70dcf3702fd88fa106bcf3ce705c7e271572340e154f7",
+      "recordedAt": "2026-09-25T02:55:26.183Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "0d230e26-be48-4173-8d10-f879d549a2ae",
+      "checkId": "check-ecosystem-section",
+      "result": "pass",
+      "summary": "Meta-Harness ecosystem positioning section 9 added to HARNESS_RESEARCH.md",
+      "inputDigest": "67ced056f0c5020794b8b34c18120fb1e214a33b2b82822ecca3bac502b0da74",
+      "recordedAt": "2026-09-25T02:55:26.991Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "5b7487b3-8d7d-4ef5-b425-9b751261ce78",
+      "checkId": "check-impl-numbering",
+      "result": "pass",
+      "summary": "Section 4 successfully renumbered from 4.1 to 4.25 continuously",
+      "inputDigest": "50f692c01e724a37973b5658260e178fcde1f259b69bd85877e5695e19bf43d0",
+      "recordedAt": "2026-09-25T02:55:27.792Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "3f4a04ee-71ff-48c2-8615-44bf965bf89c",
+      "checkId": "check-no-semantic-change",
+      "result": "pass",
+      "summary": "Verified only section headers and internal cross references were modified; no semantic/frozen contracts changed",
+      "inputDigest": "67f357b51fe436a3b9baeaf432d2ffba51d6dfe6d56413a0aff0c56db1665f8e",
+      "recordedAt": "2026-09-25T02:55:28.539Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "f312ab2f-e3c0-4950-be3b-7a5b03d08721",
+      "checkId": "check-pkg-desc",
+      "result": "pass",
+      "summary": "Claude Code added to package.json description",
+      "inputDigest": "6bcd47b43bbcd8d7d32f911835fa8092eb848d1e2723b40391ec6dcdf0cfcc46",
+      "recordedAt": "2026-09-25T02:55:29.292Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "3c6c4783-6ec4-4480-973f-2aaa427324e3",
+      "checkId": "check-platform-grep",
+      "result": "pass",
+      "summary": "Verified 4 platforms consistently named across HARNESS_RESEARCH, PRD, WORKFLOW, package.json",
+      "inputDigest": "01d05abdf7e1b0015a21e809b49e7acf008a9a7f27278fcd3fc24f181376c025",
+      "recordedAt": "2026-09-25T02:55:30.321Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "10e3d4de-36d9-49b9-8fc9-7c31641d57ab",
+      "checkId": "check-rejected",
+      "result": "pass",
+      "summary": "Adversary Mode rejected item added to HARNESS_RESEARCH.md",
+      "inputDigest": "770112b6ca9ace4fa0640216c4ea1eae6bf21c8c7d7a4d43a2ae0989b56ec055",
+      "recordedAt": "2026-09-25T02:55:31.279Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    },
+    {
+      "id": "0b72332a-9ae3-4b8e-ab43-8efb67ef518f",
+      "checkId": "check-upstream",
+      "result": "pass",
+      "summary": "Claude Code mapping block added to UPSTREAM_MAPPING.md",
+      "inputDigest": "3906d1e0f87086169ce7f9bc7ce341d920bba7e312ac16ebf3f74456f13f6709",
+      "recordedAt": "2026-09-25T02:55:32.066Z",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "findings": []
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-docs-only",
+      "text": "Only docs changes no src code",
+      "rationale": "Implementations are complete"
+    },
+    {
+      "id": "d-impl-renumber",
+      "text": "Renumber section 4",
+      "rationale": "Fix split 4.4A without changing contract semantics"
+    },
+    {
+      "id": "d-platform-scope",
+      "text": "Keep exactly 4 platforms",
+      "rationale": "Research confirms no new platform qualifies"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "rr-numbering-ref",
+      "text": "Cross-references to old section 4.6",
+      "severity": "low"
+    }
+  ],
+  "createdAt": "2026-09-25T02:35:00.000Z",
+  "updatedAt": "2026-09-25T02:56:18.211Z",
+  "completedAt": "2026-09-25T02:56:18.211Z"
+}

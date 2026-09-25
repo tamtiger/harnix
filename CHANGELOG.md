@@ -4,6 +4,16 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.17] - 2026-09-25
+
+### Changed
+
+- Đồng bộ hóa 4 platforms (Kiro, Antigravity, Codex, Claude Code) trên toàn bộ docs (PRD, WORKFLOW, package.json).
+- Cập nhật số lượng lệnh public CLI (16 lệnh) trong PRD và IMPLEMENTATION_PLAN.md.
+- Renumber toàn bộ section 4 trong IMPLEMENTATION_PLAN.md liên tục không trùng lặp.
+- Mở rộng nghiên cứu ecosystem trong HARNESS_RESEARCH.md với định vị Meta-Harness, MCP for task state (deferred), Boomerang (deferred), và Adversary Mode (rejected).
+- Cập nhật ánh xạ upstream (Claude Code) trong UPSTREAM_MAPPING.md.
+
 ## [1.1.16] - 2026-09-24
 
 ### Added

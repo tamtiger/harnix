@@ -33,7 +33,7 @@ Trạng thái:
 | Trellis | Python runtime scripts trong project | `reject` | Có ích upstream | Footprint/context rất cao | Tăng executable attack surface | Runtime phải chạy từ package đã cài |
 | Trellis | Channel/forum/worker network | `reject` | Thấp cho scope | Rất cao | Concurrency, process và trust risk | Ngoài phạm vi; không mandatory orchestration |
 | Trellis | Workflow-template switching | `reject` | Thấp | Cao | Drift và update conflicts | Harnix có một workflow |
-| Trellis | 20+ configurators | `reject` | Không cần | Rất cao | Surface và test burden | Chỉ Kiro, Antigravity, Codex |
+| Trellis | 20+ configurators | `reject` | Không cần | Rất cao | Surface và test burden | Chỉ Kiro, Antigravity, Codex, Claude Code |
 | Trellis | Marketplace/global runtime | `reject` | Không cần | Cao | Global mutation/network risk | Project-local, không service/marketplace |
 | ECC | Research-first | `adapt` | Cao khi có unknown | Có thể tốn context | Primary sources, attribution | Chỉ full mode và material unknown/security/unstable fact |
 | ECC | Iterative retrieval | `adopt` | Rất cao | Giảm context | Không dump secrets/unrelated files | Load theo nhu cầu, dừng khi đủ evidence |
@@ -225,6 +225,13 @@ Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapte
 - Handler returns `injectSteps` only for the first invocation. It selects a valid cwd project first, otherwise one initialized workspace path; a multi-root ambiguity preserves data privacy and emits only a short warning.
 - No MCP/settings/account/registry/credential/permission mutation, no machine path and no project `GEMINI.md`/skills setup output. Doctor distinguishes verified `shadowed` from `precedence-unknown`.
 
+### Claude Code
+
+- Global user surface is `~/.claude/skills/harnix-*`, a marker block in `~/.claude/CLAUDE.md`, and one owned `harnix-context` group inside `hooks.UserPromptSubmit` in `~/.claude/settings.json`.
+- Claude Code reads `CLAUDE.md`, not `AGENTS.md`. `UserPromptSubmit` has no matcher field.
+- Respects `CLAUDE_CONFIG_DIR` to relocate that root.
+- Never touches `~/.claude.json`, credentials, MCP servers, `projects/`, `history` or `todos/`.
+
 ## 5. Rules strategy
 
 Chỉ chuyển thể nội dung liên quan:
@@ -258,6 +265,8 @@ Precedence: repository convention > user-modified project spec > selected techno
 ### Deferred
 
 - Optional Codex role agents nếu official schema chưa ổn định hoặc không cần parity.
+- MCP for task state (Task Master pattern) remains deferred pending stable cross-platform server protocols.
+- Boomerang sub-threading (Roo Code pattern) is deferred as it requires runtime multi-agent orchestration outside Harnix\'s single-task boundary.
 - Semantic/embedding context ranking remains deferred; the adopted dependency-aware repo-map ranker is deterministic structural ranking over existing cache v1 metadata only.
 - Extra framework packs ngoài bảy target languages/frameworks.
 - Remote spec synchronization; `update` chỉ dùng packaged templates.
@@ -266,6 +275,7 @@ Precedence: repository convention > user-modified project spec > selected techno
 ### Rejected
 
 - Channel/forum/worker network, dashboard, marketplace, telemetry, hosted service.
+- Adversary Mode / adversarial agent pairs (Goose pattern) are rejected as they break determinism and increase token cost without guaranteeing correctness.
 - Chinese localization và workflow-template switching.
 - Global daemon/observer/runtime hoặc silent network calls.
 - Default MCP, multi-model gateway, AgentShield bundling.
@@ -297,3 +307,11 @@ Các quyết định này là guardrail chống scope creep. Thay đổi cần c
 | Harness feature provenance | `docs/HARNESS_FEATURE_PROVENANCE.json` | exact allowlists, sorted immutable sources, safe existing code/test/docs paths và pinned feature-ID set |
 
 Chi tiết task order và gates nằm trong `IMPLEMENTATION_PLAN.md`; phân loại reuse/remove/build nằm trong `UPSTREAM_MAPPING.md`.
+
+## 9. Ecosystem positioning
+
+Harnix is positioned as a **Meta-Harness**, orchestrating cross-agent capabilities without being an agent itself. Research into the coding agent ecosystem (including Trellis, Spec Kit, BMAD, ECC, Roo Code, and Goose) confirms Harnix's unique value proposition:
+
+1. **Frozen contracts**: Unlike Trellis (fluid configuration) or BMAD (lacks persistent verification), Harnix forces strict schema versions on all task state.
+2. **Exact verification**: Harnix uses input-digest verification to prevent "stale pass" hallucinations.
+3. **Lean footprint**: At roughly 85-99% smaller footprint than Trellis Pro, Harnix maintains project hygiene.
