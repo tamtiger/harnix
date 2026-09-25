@@ -4,6 +4,17 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.19] - 2026-09-25
+
+### Changed
+
+- Đồng bộ hóa toàn diện 7 Canonical Skills: nâng `metadata.version` lên `1.1.19` và bổ sung điều khoản giao tiếp trực tiếp cùng nội dung task artifacts bắt buộc dùng Tiếng Việt.
+- Bổ sung quy chuẩn Epic Roadmap (khai báo và scaffold toàn bộ member tasks ngay từ đầu, tiền tố timestamp `YYYYMMDD-HHMMSS-`), quy tắc checklist `plan.md` đạt 100% `[x]` trước verifying, và kỷ luật commit approval 2 bước vào các skills liên quan (`harnix-brainstorm`, `harnix-implement`, `harnix-check`, `harnix-finish-work`).
+- Nâng cấp `harnix-check` với việc đối chiếu `.harnix/spec/guides/` và xác nhận checklist 100% `[x]` ở Stage 1 (compliance), kết hợp `harnix repo-map --impact` kiểm tra blast radius ở Stage 2 (quality/security).
+- Nâng cấp `harnix-debug` với việc phân tích structured `findings` từ `EvidenceRecordV2`, `harnix-finish-work` tự động báo cáo tiến độ và bàn giao task kế tiếp trong Epic Roadmap (`harnix roadmap --id <epic-id>`), `harnix-continue` phát hiện và tiếp tục công việc theo roadmap, và `harnix-research` khảo sát patterns nội bộ bằng `repo-map --query`.
+- Tối ưu hóa văn phong và cấu trúc `renderAgentsTemplate` trong `src/templates/harnix/agents.ts`: đưa khai báo version/role/scope lên đầu mục Harnix, sắp xếp lại thứ tự operating rules theo đúng vòng đời triển khai, bảo đảm byte length duy trì dưới ngưỡng 8,192 bytes với headroom an toàn (>300 bytes).
+- Bổ sung chỉ dẫn `repo-map` (`--query`, `--impact`) và `.harnix/spec/guides/` vào root `AGENTS.md`.
+
 ## [1.1.18] - 2026-09-25
 
 ### Added

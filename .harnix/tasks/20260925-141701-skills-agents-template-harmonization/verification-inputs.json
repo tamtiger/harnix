@@ -1,0 +1,130 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260925-141701-skills-agents-template-harmonization",
+  "snapshots": [
+    {
+      "evidenceId": "ev-full-build-and-test",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260925-141701-skills-agents-template-harmonization",
+      "checkId": "check-full-build-and-test",
+      "taskContractHash": "f1dd7b471f26af5660da6c4c89c2c3f260f3fe5acca2b200aad7e48fda64c0cb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260925-141701-skills-agents-template-harmonization/plan.md",
+          "sha256": "823bdffb8d6514f2974d8c40ba93429a3e454caf29e639281be33725d9f19247",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260925-141701-skills-agents-template-harmonization/prd.md",
+          "sha256": "28a86be985a82934d46d08b7e9ecfb95f6d8c0e22d9520d0af069e16016b72bb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "89f291416829258733688ffaa5cf78ede65445bd6e5b1612e77f587ade7157d2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "3233f931598b9e9ca28f34466914f85f86170e7b3569e59225fbd42f9cb6acb4",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "813c9e8126427c297b8eddc4616b692baa1c42a120f4181c6750215f24aef9e8"
+    },
+    {
+      "evidenceId": "ev-skills-audit",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260925-141701-skills-agents-template-harmonization",
+      "checkId": "check-skills-audit",
+      "taskContractHash": "f1dd7b471f26af5660da6c4c89c2c3f260f3fe5acca2b200aad7e48fda64c0cb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260925-141701-skills-agents-template-harmonization/plan.md",
+          "sha256": "823bdffb8d6514f2974d8c40ba93429a3e454caf29e639281be33725d9f19247",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260925-141701-skills-agents-template-harmonization/prd.md",
+          "sha256": "28a86be985a82934d46d08b7e9ecfb95f6d8c0e22d9520d0af069e16016b72bb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "89f291416829258733688ffaa5cf78ede65445bd6e5b1612e77f587ade7157d2",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-brainstorm/SKILL.md",
+          "sha256": "01c0903b3676ff2e9037e218529c0c53abf25396a3c1eb487fe03d4488ff4864",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-check/SKILL.md",
+          "sha256": "c01a98ce73e41a802533f238cf2a27f01123bed42c3498558765fa7419f7fc4c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-continue/SKILL.md",
+          "sha256": "e7212db8ce36a5a6217fb87466a7a3b5eaefda4b9662cb70f9a16f105bea8945",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-debug/SKILL.md",
+          "sha256": "81da225f18620d7847d739775c60449ca3555a4216faf5261ecd7ac6d043c763",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-finish-work/SKILL.md",
+          "sha256": "2318997a48c92c8f97b3203182ca4c8b3550940368f08e5b8eea19cedff791f9",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-implement/SKILL.md",
+          "sha256": "8bfd6ec75c62ea4cc16acee01025485d33b7f59578394401d9c03e94f9cbd5a8",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/skills/harnix-research/SKILL.md",
+          "sha256": "729905a73e4ade6035a6201de8c33c63d94d710ed55cdf752d59202dc9fb9bce",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "edf9e7317962071fb164393b1262ba76f0c9c8543149cc6c9ab1408b77fc5ba9"
+    },
+    {
+      "evidenceId": "ev-templates-test",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260925-141701-skills-agents-template-harmonization",
+      "checkId": "check-templates-test",
+      "taskContractHash": "f1dd7b471f26af5660da6c4c89c2c3f260f3fe5acca2b200aad7e48fda64c0cb",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260925-141701-skills-agents-template-harmonization/plan.md",
+          "sha256": "823bdffb8d6514f2974d8c40ba93429a3e454caf29e639281be33725d9f19247",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260925-141701-skills-agents-template-harmonization/prd.md",
+          "sha256": "28a86be985a82934d46d08b7e9ecfb95f6d8c0e22d9520d0af069e16016b72bb",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/templates/harnix/agents.ts",
+          "sha256": "3233f931598b9e9ca28f34466914f85f86170e7b3569e59225fbd42f9cb6acb4",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "test/workflow/templates.test.ts",
+          "sha256": "d16a04297a29b1a3559c722592b6e41c31d0a7ea05ab9cb784439bf4efa84cf6",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "b26499823a198dccac7cbb6d1e384fc47c74fd2de4d06bb70021d2f323807375"
+    }
+  ]
+}

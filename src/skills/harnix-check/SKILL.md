@@ -2,12 +2,14 @@
 name: harnix-check
 description: Use when Harnix needs a standalone read-only code review, review feedback evaluation, or fresh active-task compliance, correctness, security, and maintainability verification before completion.
 metadata:
-  version: "1.1.16"
+  version: "1.1.19"
 ---
 
 # Review and verify Harnix work
 
 Evidence precedes claims. Verify compliance first, then quality and security. Read every required result and preserve failures exactly.
+
+Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (`task.json`, `prd.md`, `plan.md`, `design.md`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
 
 ## Harnix activation guard
 
@@ -76,7 +78,9 @@ Do not report a finding in any of these categories; they generate noise without 
 
 ## Stage 1: compliance
 
-Read the user's latest request, task goal/non-goals, PRD/design/plan, applicable repository instructions, and acceptance criteria. Inspect the diff and mapped tests.
+Read the user's latest request, task goal/non-goals, PRD/design/plan, applicable repository instructions, and acceptance criteria. Read the applicable engineering guides in `.harnix/spec/guides/` (common and matching language/technology guides) to confirm that the changes obey established architectural patterns, compiler/type contracts, and error-handling conventions. Inspect the diff and mapped tests.
+
+Confirm that the `plan.md` checklist has reached 100% `[x]` completion before proceeding; compliance fails immediately if any checklist item remains unchecked.
 
 For each criterion:
 
@@ -92,7 +96,7 @@ Do not continue to completion with a compliance defect. Route code defects to `h
 
 ## Stage 2: quality and security
 
-After compliance passes, reuse current matching passes and run only pending, failed, stale, or affected focused checks, then any still-required broader gates in order. Review:
+After compliance passes, reuse current matching passes and run only pending, failed, stale, or affected focused checks, then any still-required broader gates in order. Use `harnix repo-map --impact <path>` to verify blast radius and confirm that dependent modules or imported contracts are not broken. Review:
 
 - correctness and regression coverage;
 - meaningful test behavior, including observed RED when required;

@@ -1,4 +1,4 @@
-# Goi 2: Nang cap verification diagnostics va structured findings
+# Gói 2: Nâng cấp verification diagnostics và structured findings
 
 - **ID:** 20260925-103501-verification-diagnostics-structured-findings
 - **Mode:** full

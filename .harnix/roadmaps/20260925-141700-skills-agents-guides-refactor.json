@@ -1,0 +1,14 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260925-141700-skills-agents-guides-refactor",
+  "title": "Refactor toàn diện Skills, AGENTS, Guides Flatten và Mở rộng Stack",
+  "goal": "Nâng cấp toàn bộ 7 canonical skills, AGENTS template, root AGENTS.md, flatten cấu trúc thư mục src/guides/ thành *.md, mở rộng độ phủ các ngôn ngữ/framework phổ biến và cập nhật auto-detection cùng context chuẩn của từng stack.",
+  "nonGoals": [
+    "Không phá vỡ backward compatibility của schema task hay config.yaml.",
+    "Không vượt quá 8,192 bytes cho renderAgentsTemplate.",
+    "Không thêm network service hay telemetry."
+  ],
+  "createdAt": "2026-09-25T07:20:16.302Z",
+  "updatedAt": "2026-09-25T07:20:16.302Z"
+}

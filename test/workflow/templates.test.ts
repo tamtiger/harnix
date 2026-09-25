@@ -93,8 +93,8 @@ describe("workflow templates", () => {
     expect(repositoryAgentInstructions).not.toContain("With no active task, continue from the first unchecked task");
     expect(agentInstructions).toContain(vietnameseTaskPolicy);
     expect(agentInstructions).toContain("explicit user-global integration");
-    expect(agentInstructions).toContain(`- Version: ${packageVersion}.`);
-    expect(agentInstructions).toContain("## Harnix\n\nTarget authority and activation guard:");
+    expect(agentInstructions).toContain(`## Harnix\n\n- Version: ${packageVersion}.`);
+    expect(agentInstructions).toContain("Target authority and activation guard:");
     expect(agentInstructions).toContain("## Project profile");
     expect(agentInstructions).toContain("- Languages: not specified.");
     expect(agentInstructions).toContain("- Package paths: not specified.");
@@ -109,8 +109,9 @@ describe("workflow templates", () => {
     for (const instruction of HARNIX_TARGET_AUTHORITY_INSTRUCTIONS) {
       expect(agentInstructions).toContain(instruction);
     }
+    const firstTargetGuardIndex = agentInstructions.indexOf(HARNIX_TARGET_AUTHORITY_INSTRUCTIONS[0]);
     const lastTargetGuardIndex = agentInstructions.indexOf(HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.at(-1)!);
-    expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("- Version:"));
+    expect(agentInstructions.indexOf("- Version:")).toBeLessThan(firstTargetGuardIndex);
     expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("## Project profile"));
     expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("Read .harnix/workflow.md"));
     expect(agentInstructions).toContain("Use this profile only when this AGENTS root is the selected Harnix root resolved by the target-authority guard");

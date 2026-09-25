@@ -2,12 +2,14 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or already in progress and needs plan review, test-first implementation, refactoring, or technical feedback handling.
 metadata:
-  version: "1.1.16"
+  version: "1.1.19"
 ---
 
 # Implement a ready Harnix task
 
 Review before coding, prove the behavior with a meaningful failing test, implement the smallest coherent change, and leave resumable evidence.
+
+Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (`task.json`, `prd.md`, `plan.md`, `design.md`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
 
 ## Harnix activation guard
 
@@ -41,7 +43,7 @@ If the plan has a critical gap, do not guess and do not code around it. Persist 
 
 Read task artifacts, nearest project instructions, relevant specs, affected implementation, neighboring interfaces, current tests, and the current diff. Read the applicable engineering guides in `.harnix/spec/guides/` for the languages and technologies touched by the task before writing code to align compiler contracts, runtime boundaries, error handling, and test design with project standards. Treat `.harnix/config.yaml` language/package values as discovery hints, not complete truth. Do not bulk-load the repository.
 
-When the initialized project has a current repo-map cache, `harnix repo-map --impact <exact-posix-path> [--depth <1..3>] [--limit <1..20>]` may narrow direct dependency/dependent inspection for an already selected file. Treat it only as a bounded static-import navigation hint: verify the chosen source files directly, never claim dynamic call-graph completeness, and do not refresh/write the cache from this step.
+When the initialized project has a current repo-map cache, run `harnix repo-map --query <text>` to locate newly needed internal symbols and schemas, and `harnix repo-map --impact <exact-posix-path> [--depth <1..3>] [--limit <1..20>]` to narrow direct dependency/dependent inspection for an already selected file. Treat them only as bounded static navigation hints: verify chosen source files directly, never claim dynamic call-graph completeness, and do not refresh/write the cache from this step.
 
 ## RED–GREEN–REFACTOR
 
@@ -104,7 +106,7 @@ Use `harnix-debug` for a reproducible failure. Return to planning for a requirem
 
 ## Persist
 
-Use the narrowest transport that carries the change. `harnix workflow --transition <status>/<checkpoint>` moves the persisted active record and accepts no task body, so a stage change cannot drop evidence. `harnix workflow --evidence` appends exactly one evidence item from a bounded `{ "evidence": <Evidence> }` envelope on stdin. Use `harnix workflow --save` with one bounded JSON envelope when artifacts, obligations, or a contract revision change in the same step; start from `harnix workflow --inspect` output, consult `harnix workflow --schema` when the exact shape is unclear, and never edit `task.json` directly. Keep `in_progress/implementing` with the last completed slice, current failing/passing command, concise result, and next step. Check an implementation-plan item only after that slice's work and focused evidence are complete; inside the plan's bounded execution-note markers, use only inert `check:<id>=pending|passed|failed|skipped[@<ISO-Z>]` or `slice:<id>=...` lines, never prose or a requirement, decision, criterion, check definition, or path contract. Never infer progress from a checkbox alone or erase earlier failure evidence. Record documented exceptions and alternate evidence. For v2 required passes, preserve the matching `inputDigest`; the workflow-owned `verification-inputs.json` sidecar is not a user-editable evidence shortcut. Move to `verifying/verifying` only after all implementation checklist items, implementation slices, and focused checks are complete.
+Use the narrowest transport that carries the change. `harnix workflow --transition <status>/<checkpoint>` moves the persisted active record and accepts no task body, so a stage change cannot drop evidence. `harnix workflow --evidence` appends exactly one evidence item from a bounded `{ "evidence": <Evidence> }` envelope on stdin. Use `harnix workflow --save` with one bounded JSON envelope when artifacts, obligations, or a contract revision change in the same step; start from `harnix workflow --inspect` output, consult `harnix workflow --schema` when the exact shape is unclear, and never edit `task.json` directly. Keep `in_progress/implementing` with the last completed slice, current failing/passing command, concise result, and next step. Check an implementation-plan item only after that slice's work and focused evidence are complete; mark `[x]` on the `plan.md` checklist as each slice completes. The checklist must reach 100% `[x]` before transitioning to `verifying/verifying`. Inside the plan's bounded execution-note markers, use only inert `check:<id>=pending|passed|failed|skipped[@<ISO-Z>]` or `slice:<id>=...` lines, never prose or a requirement, decision, criterion, check definition, or path contract. Never infer progress from a checkbox alone or erase earlier failure evidence. Record documented exceptions and alternate evidence. For v2 required passes, preserve the matching `inputDigest`; the workflow-owned `verification-inputs.json` sidecar is not a user-editable evidence shortcut. Move to `verifying/verifying` only after all implementation checklist items, implementation slices, and focused checks are complete.
 
 ## Exit
 
@@ -113,7 +115,7 @@ Use the narrowest transport that carries the change. `harnix workflow --transiti
 - Requirement/architecture gap: checkpoint `replan` and hand to `harnix-brainstorm`.
 - Implementation and focused checks complete: persist `verifying` and hand to `harnix-check`.
 
-Never create a branch, worktree, commit, push, merge, publish, or pull request unless the user separately authorizes that exact action.
+Never create a branch, worktree, commit, push, merge, publish, or pull request automatically. When the user requests a commit, first show the proposed changes and commit message, then wait for explicit user approval before staging or committing.
 
 ## Upstream basis
 

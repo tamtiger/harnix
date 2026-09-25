@@ -65,6 +65,9 @@ Classify the latest request as Bypass, Lite, or Full before reading `.harnix/tas
 
 Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (`task.json`, `prd.md`, `plan.md`, `design.md`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
 
+Engineering guidance selected for this project lives in `.harnix/spec/guides/`. Read only the guide files relevant to the files you are changing before implementing or verifying.
+Use `harnix repo-map --query <text>` or `harnix repo-map --impact <path>` only as bounded implementation-stage navigation hints. Platform hooks must not invoke repository-map query, impact, or refresh.
+
 For each implementation task:
 
 1. Confirm the relevant plan task, acceptance criteria, frozen schema, and affected files.

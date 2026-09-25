@@ -1,4 +1,4 @@
-# Goi 1: Lam robust ready-trace parser, modularize internal-workflow, va scaffold roadmap members
+# Gói 1: Làm robust ready-trace parser, modularize internal-workflow, và scaffold roadmap members
 
 - **ID:** 20260925-103500-ready-trace-robustness
 - **Mode:** full

@@ -1,0 +1,78 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260925-141702-guides-flatten-catalog-detection-expansion",
+  "epicId": "20260925-141700-skills-agents-guides-refactor",
+  "title": "Flatten cấu trúc src/guides/, mở rộng ngôn ngữ/framework và cập nhật Catalog Auto-Detection",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Flatten toàn bộ 21 guide files thành *.md, bổ sung 5 ngôn ngữ mới và 8 frameworks mới kèm context chuẩn của từng stack, cập nhật detection và tests.",
+  "nonGoals": [
+    "Không thay đổi frozen schema contracts của TaskRecord.",
+    "Không thêm third-party parser runtime dependencies."
+  ],
+  "relevantPaths": [
+    "src/catalog/catalog.ts",
+    "src/catalog/types.ts",
+    "src/guides/catalog.ts",
+    "src/utils/detection.ts",
+    "test/unit/catalog.test.ts",
+    "test/unit/detection.test.ts",
+    "test/unit/rules.test.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/languages/typescript/engineering.md"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-catalog-and-detection",
+      "text": "Cập nhật types.ts, catalog.ts và detection.ts cho tất cả các stack mới",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-flatten-guide-structure",
+      "text": "Toàn bộ 21 files trong src/guides/ được flatten thành *.md và cập nhật catalog.ts, spec paths",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-guide-quality-and-tests",
+      "text": "Mỗi guide mới đạt chuẩn >= 2.000 ký tự, >= 3 H2 sections và toàn bộ tests pass 100%",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-stack-expansion-guides",
+      "text": "Bổ sung 5 ngôn ngữ mới (rust, kotlin, swift, dart, cpp) và 8 frameworks mới kèm context chuẩn của từng stack",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-guides-catalog-tests",
+      "description": "Chạy unit tests cho catalog, detection và rules",
+      "command": "pnpm vitest run test/unit/catalog.test.ts test/unit/detection.test.ts test/unit/rules.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-catalog-and-detection",
+        "ac-flatten-guide-structure",
+        "ac-guide-quality-and-tests",
+        "ac-stack-expansion-guides"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/catalog/catalog.ts",
+        "src/guides/catalog.ts",
+        "src/utils/detection.ts"
+      ]
+    }
+  ],
+  "decisions": [],
+  "evidence": [],
+  "createdAt": "2026-09-25T07:20:16.302Z",
+  "updatedAt": "2026-09-25T07:20:16.302Z"
+}

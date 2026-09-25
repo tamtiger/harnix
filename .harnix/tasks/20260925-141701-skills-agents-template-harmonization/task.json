@@ -1,0 +1,189 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260925-141701-skills-agents-template-harmonization",
+  "epicId": "20260925-141700-skills-agents-guides-refactor",
+  "title": "Refactor và đồng bộ toàn diện 7 Canonical Skills, AGENTS.md và AGENTS Template",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Lấp toàn bộ khoảng trống cross-cutting giữa 7 skills, AGENTS template và root AGENTS.md: repo-map, spec/guides, Epic Roadmap, checklist 100% [x], structured findings, commit approval 2 bước, tiếng Việt, version sync 1.1.19, và bảo đảm renderAgentsTemplate < 8,192 bytes.",
+  "nonGoals": [
+    "Không thay đổi frozen schema contracts của TaskRecord.",
+    "Không vượt quá ngưỡng 8,192 bytes của renderAgentsTemplate."
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "src/skills/harnix-brainstorm/SKILL.md",
+    "src/skills/harnix-check/SKILL.md",
+    "src/skills/harnix-continue/SKILL.md",
+    "src/skills/harnix-debug/SKILL.md",
+    "src/skills/harnix-finish-work/SKILL.md",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-research/SKILL.md",
+    "src/templates/harnix/agents.ts",
+    "test/workflow/templates.test.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/languages/typescript/engineering.md"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-agents-template-budget",
+      "text": "Template agents.ts được tối ưu hóa câu chữ, bảo đảm byte length < 8,192 bytes và pass test/workflow/templates.test.ts",
+      "status": "met",
+      "evidenceIds": [
+        "ev-templates-test"
+      ]
+    },
+    {
+      "id": "ac-root-agents-harmonization",
+      "text": "Root AGENTS.md của repo Harnix được bổ sung đầy đủ chỉ dẫn repo-map và spec/guides",
+      "status": "met",
+      "evidenceIds": [
+        "ev-skills-audit"
+      ]
+    },
+    {
+      "id": "ac-skills-cross-cutting-gaps",
+      "text": "Tất cả 7 skills được bổ sung đầy đủ chỉ dẫn hành động về repo-map, spec/guides, Epic Roadmap, checklist [x], commit approval và tiếng Việt",
+      "status": "met",
+      "evidenceIds": [
+        "ev-skills-audit"
+      ]
+    },
+    {
+      "id": "ac-skills-version-sync",
+      "text": "Cả 7 file SKILL.md được đồng bộ version metadata lên 1.1.19",
+      "status": "met",
+      "evidenceIds": [
+        "ev-skills-audit"
+      ]
+    },
+    {
+      "id": "ac-verification-suite",
+      "text": "Toàn bộ test suite unit, integration và templates pass 100%",
+      "status": "met",
+      "evidenceIds": [
+        "ev-full-build-and-test"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-templates-test",
+      "description": "Chạy suite kiểm thử templates test/workflow/templates.test.ts",
+      "command": "pnpm vitest run test/workflow/templates.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-agents-template-budget"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "check-skills-audit",
+      "description": "Kiểm tra 7 skills đồng bộ version 1.1.19 và quy chuẩn cross-cutting qua test/unit/rules.test.ts",
+      "command": "pnpm vitest run test/unit/rules.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-root-agents-harmonization",
+        "ac-skills-cross-cutting-gaps",
+        "ac-skills-version-sync"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/skills/harnix-check/SKILL.md",
+        "src/skills/harnix-continue/SKILL.md",
+        "src/skills/harnix-debug/SKILL.md",
+        "src/skills/harnix-finish-work/SKILL.md",
+        "src/skills/harnix-implement/SKILL.md",
+        "src/skills/harnix-research/SKILL.md"
+      ]
+    },
+    {
+      "id": "check-full-build-and-test",
+      "description": "Chạy full build, typecheck, lint và unit tests toàn hệ thống",
+      "command": "pnpm build && pnpm typecheck && pnpm lint && pnpm test:unit",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-verification-suite"
+      ],
+      "inputs": [
+        "@task-contract",
+        "AGENTS.md",
+        "src/templates/harnix/agents.ts"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Giữ nguyên logic footprint dưới 8,192 bytes cho agents.ts bằng cách cô đọng văn phong tiếng Anh kỹ thuật",
+      "rationale": "Bảo vệ context window và thỏa mãn test gate test/workflow/templates.test.ts"
+    },
+    {
+      "id": "dec-2",
+      "text": "Bổ sung điều khoản Tiếng Việt trực tiếp vào cả 7 file SKILL.md",
+      "rationale": "Bảo đảm agent đọc bất kỳ skill nào theo lazy loading đều giao tiếp và viết artifacts bằng tiếng Việt"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-templates-test",
+      "checkId": "check-templates-test",
+      "recordedAt": "2026-09-25T07:29:55.926Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/templates.test.ts — passed 7/7 tests — đã kiểm chứng byte length < 8,192 bytes",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "inputDigest": "b26499823a198dccac7cbb6d1e384fc47c74fd2de4d06bb70021d2f323807375"
+    },
+    {
+      "id": "ev-skills-audit",
+      "checkId": "check-skills-audit",
+      "recordedAt": "2026-09-25T07:29:55.926Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/rules.test.ts — passed 16/16 tests — 7 skills đồng bộ version 1.1.19 và quy chuẩn cross-cutting",
+      "artifactPaths": [
+        "AGENTS.md",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/skills/harnix-check/SKILL.md",
+        "src/skills/harnix-continue/SKILL.md",
+        "src/skills/harnix-debug/SKILL.md",
+        "src/skills/harnix-finish-work/SKILL.md",
+        "src/skills/harnix-implement/SKILL.md",
+        "src/skills/harnix-research/SKILL.md"
+      ],
+      "inputDigest": "edf9e7317962071fb164393b1262ba76f0c9c8543149cc6c9ab1408b77fc5ba9"
+    },
+    {
+      "id": "ev-full-build-and-test",
+      "checkId": "check-full-build-and-test",
+      "recordedAt": "2026-09-25T07:29:55.926Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm build && pnpm typecheck && pnpm lint && pnpm test:unit — 292 unit tests passed, clean build và lint",
+      "artifactPaths": [
+        "src/templates/harnix/agents.ts",
+        "AGENTS.md"
+      ],
+      "inputDigest": "813c9e8126427c297b8eddc4616b692baa1c42a120f4181c6750215f24aef9e8"
+    }
+  ],
+  "createdAt": "2026-09-25T07:20:56.886Z",
+  "updatedAt": "2026-09-25T07:30:32.532Z",
+  "completedAt": "2026-09-25T07:30:32.532Z"
+}

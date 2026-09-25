@@ -2,12 +2,14 @@
 name: harnix-continue
 description: Use when an initialized Harnix project may have an unfinished, interrupted, blocked, or partially persisted task that must resume safely.
 metadata:
-  version: "1.1.16"
+  version: "1.1.19"
 ---
 
 # Continue persisted Harnix work
 
 Restore truth from disk, validate it, and route to the owner of the current stage. Do not reconstruct workflow state from conversation memory.
+
+Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (`task.json`, `prd.md`, `plan.md`, `design.md`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
 
 ## Harnix activation guard
 
@@ -28,7 +30,7 @@ Classify the latest request before restoring persisted work. An obvious Bypass e
 
 For project-scoped Lite/Full work or an explicit request to inspect or continue persisted work, read `.harnix/workflow.md` after this classification and before loading task state.
 
-Read `.harnix/tasks/.active`. If it is absent or empty, return to request triage without creating a task. If it points outside the safe task root, to a missing record, or to malformed/future state, fail closed and provide repair-only guidance.
+Read `.harnix/tasks/.active`. If it is absent or empty, check whether the user is asking to continue an epic or initiative: run `harnix roadmap` or `harnix roadmap --id <epic-id>` to identify the next pending member task and hand off to `harnix-brainstorm` or `harnix-implement` as appropriate. If no active task and no epic continuation was requested, return to request triage without creating a task. If `.active` points outside the safe task root, to a missing record, or to malformed/future state, fail closed and provide repair-only guidance.
 
 Load the TaskRecord, required artifacts for its mode/status, checkpoint, blocker/resume fields, acceptance criteria, evidence references, and only the context needed by the next stage. Verify referenced task-owned paths before trusting them.
 

@@ -2,12 +2,14 @@
 name: harnix-brainstorm
 description: Use when a Harnix project needs request triage, requirements, design, planning, or a trustworthy ready gate before implementation.
 metadata:
-  version: "1.1.16"
+  version: "1.1.19"
 ---
 
 # Plan a Harnix task
 
 Turn a request into decision-complete, testable task state. Inspect evidence before asking questions. Treat `ready` as a gate, not a label.
+
+Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (`task.json`, `prd.md`, `plan.md`, `design.md`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
 
 Classify the latest request before consulting any active task. An obvious Bypass explanation, generic status request, or standalone read-only review exits without reading or mutating an unrelated task. An explicit Harnix-task status request may use bounded public `harnix status` without resuming it. For project-scoped Lite/Full work or an explicit request to inspect/continue persisted work, use hidden `harnix workflow --preflight` before selecting the stage owner; `nextStage: await` at `ready` means the persisted task itself does not grant implementation authority.
 
@@ -53,7 +55,7 @@ Maintain a decision inventory with four groups:
 
 Ask at most one blocking question at a time. Include why it matters, your recommendation, and the trade-off. Do not manufacture a question when evidence and the request already decide the matter.
 
-For a broad request, split independently testable deliverables before refining implementation details. Keep one active task; record ordering and ownership rather than inventing hidden dependency state.
+For a broad request, split independently testable deliverables before refining implementation details. Keep one active task; record ordering and ownership rather than inventing hidden dependency state. When an initiative spans >=2 tasks or the user requests grouping into a larger initiative, an Epic Roadmap is mandatory: include `epicId` on the task, supply the top-level `epic` object (`EpicRecord` schema v1: `id`, `title`, `goal`, optional `nonGoals`) in the `--save` envelope, and upfront declare and scaffold all member tasks via `roadmapMembers`. Consistently follow the timestamp prefix convention `YYYYMMDD-HHMMSS-<name>` for both task and epic IDs. Inspect existing epics with `harnix roadmap` or `harnix roadmap --id <epic-id>`.
 
 ## Context checkpoint before ready
 
@@ -100,7 +102,8 @@ Before changing the checkpoint to `ready`, run every item:
 - **Context freshness:** when continuation reported stale context, treat `contextDrift` as authoritative navigation evidence, complete context reselection, and do not return to ready until changed, missing, unreadable, and unverified paths are resolved or explicitly excluded.
 - **Scope check:** the task is small enough to implement and verify without mixing independent products.
 - **Dirty-worktree check:** unrelated or user-owned changes are identified and preservation is explicit.
-- **Tracking check:** the task name is readable and hyphen-separated, and the implementation checklist maps one-to-one to the ordered implementation slices.
+- **Tracking check:** the task name is readable and hyphen-separated, the implementation checklist maps one-to-one to the ordered implementation slices, all checklist items start unchecked at planning, and the plan requires 100% `[x]` completion before transitioning to `verifying`.
+- **Commit discipline:** before any commit, show the proposed changes and commit message, then wait for explicit user approval. Never commit, push, or branch automatically.
 - **Deterministic trace audit:** persist the planning artifacts, run `harnix workflow --audit-ready`, and resolve every bounded diagnostic before the Full task enters or re-enters `ready`.
 
 Do not mark the task `ready` while any item fails. Keep `status` at its current legal planning state, use checkpoint `replan` when revising a previously prepared task, and report the exact gap. Task obligations freeze at the first persisted `ready`, not during ordinary draft refinement. A plan may intentionally begin with a contract-freeze slice only when that slice resolves implementation detail rather than an undecided product contract; otherwise the plan is not ready.

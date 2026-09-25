@@ -2,12 +2,14 @@
 name: harnix-finish-work
 description: Use when a Harnix task needs safe completion or explicit cancellation persistence, journaling, active-pointer cleanup, and an evidence-based handoff.
 metadata:
-  version: "1.1.16"
+  version: "1.1.19"
 ---
 
 # Finish or cancel Harnix work
 
 Close persisted workflow state truthfully without changing Git integration state. Successful completion requires current verification; explicit cancellation preserves incomplete or failed evidence without claiming success.
+
+Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (`task.json`, `prd.md`, `plan.md`, `design.md`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
 
 Finish is product-read-only: it may persist workflow state, journal/archive data, one eligible learning candidate, cancellation metadata, and matching-pointer cleanup, but it must not edit product docs, code, package version, changelog, generated sources, or release metadata.
 
@@ -41,6 +43,7 @@ Reread:
 - the user's latest scope;
 - task goal, non-goals, criteria, and validation plan;
 - recorded evidence and actual exit codes;
+- `plan.md` checklist: confirm that the implementation checklist has reached 100% `[x]` completion;
 - current diff/status and user-owned changes;
 - omitted checks, waivers, and residual risks.
 
@@ -93,6 +96,8 @@ Never commit, branch, merge, push, publish, create a pull request, delete a work
 When a user requests a commit, first show the proposed changes and commit message, then wait for explicit approval before staging or committing.
 
 Before finishing, record every accepted residual risk as a `residualRisks` item with `id`, `text` and `severity` so it survives the conversation. Residual risk is review data outside the task contract: it never waives a criterion, downgrades a failed check, or replaces a required pass. Point the user to the task-owned, always-regenerated `review.md` for a plain-file summary of the finished task instead of running a command.
+
+If the finished task belongs to an Epic (has `epicId`), inspect `.harnix/roadmaps/<epic-id>.json` or run `harnix roadmap --id <epic-id>` to report overall epic progress, completed member tasks, and explicitly recommend the next member task to the user.
 
 ## Upstream basis
 

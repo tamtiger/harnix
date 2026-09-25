@@ -2,12 +2,14 @@
 name: harnix-debug
 description: Use when a Harnix implementation or verification has a reproducible bug, failing test, unexpected behavior, loop, or repeated unsuccessful fix.
 metadata:
-  version: "1.1.16"
+  version: "1.1.19"
 ---
 
 # Debug with evidence
 
 Find the root cause before changing production behavior. Test one falsifiable hypothesis at a time and keep the recovery contained.
+
+Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (`task.json`, `prd.md`, `plan.md`, `design.md`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
 
 ## Harnix activation guard
 
@@ -34,6 +36,7 @@ Before reproducing or fixing anything, compare the failure with the latest user 
 
 Record before retrying:
 
+- inspect any structured `findings` recorded on the failed check's `EvidenceRecordV2` or query `harnix checks` to locate the exact file, line, and machine-readable failure reason;
 - expected and actual behavior;
 - exact command/tool, exit/result, and smallest reproducer;
 - last successful boundary and first observed bad boundary;
@@ -45,7 +48,7 @@ Reproduce with the narrowest command. If reproduction is unsafe or external, ins
 
 ## Investigate root cause
 
-Trace the data/control path backward from the symptom. At component boundaries, inspect what enters and leaves. Check recent changes, configuration, ownership, filesystem/path normalization, dependency state, and error propagation. Gather evidence before proposing a fix.
+Trace the data/control path backward from the symptom. When cross-module calls or dependencies are involved, run `harnix repo-map --impact <path>` to trace import chains and downstream impacts. Consult the project's engineering guides in `.harnix/spec/guides/` to ensure proposed fixes adhere to repository architecture, typing, and validation conventions. At component boundaries, inspect what enters and leaves. Check recent changes, configuration, ownership, filesystem/path normalization, dependency state, and error propagation. Gather evidence before proposing a fix.
 
 State one falsifiable hypothesis in this form:
 
