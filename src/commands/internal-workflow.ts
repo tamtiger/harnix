@@ -4,7 +4,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { readConfig } from "../core/config/config.js";
 import { canCompleteTask, cancelWorkflowTask, finishWorkflowTask, recordWorkflowLearning, taskContextDrift, verificationRetryDisposition, type WorkflowLearningResult } from "../core/workflow.js";
-import type { LearningCaptureInput } from "../core/journal/learning.js";
 import { validateContextManifest, type ContextDrift } from "../core/context/context.js";
 import {
   loadTask,
@@ -18,13 +17,10 @@ import {
   saveTaskArtifacts,
   setActiveTask,
   taskRecordFieldManifest,
-  transitionTask,
-  updateTaskCheckpoint,
   validateTaskArtifacts,
   validateTask,
   validationCheckV2Keys,
   type Evidence,
-  type TaskCancellation,
   type TaskArtifacts,
   type TaskRecord,
   type TaskRecordV2,
@@ -49,6 +45,18 @@ import { compareCodeUnits } from "../utils/order.js";
 import { atomicWriteFile } from "../utils/atomic-write.js";
 import { acquireHarnixFileLock } from "../utils/file-lock.js";
 import { sha256 } from "../utils/hashing.js";
+import {
+  assertExactFields,
+  assertLegalTransition,
+  isMissing,
+  isRecord,
+  laterTimestamp,
+  sameBytes,
+  semanticJsonEqual,
+  semanticTaskEqual,
+  validateCancellationEnvelope,
+  validateLearningEnvelope,
+} from "../core/tasks/workflow-helpers.js";
 
 export type WorkflowSaveArtifacts = Omit<TaskArtifacts, "contextSelection">;
 export interface WorkflowSaveEnvelope {
@@ -56,6 +64,7 @@ export interface WorkflowSaveEnvelope {
   artifacts?: WorkflowSaveArtifacts | undefined;
   contractRevision?: { reason: string } | undefined;
   epic?: unknown | undefined;
+  roadmapMembers?: TaskRecord[] | undefined;
 }
 
 /** Hidden transport for agents; it preserves TaskRecord state and is deliberately JSON-only. */
@@ -145,6 +154,20 @@ async function saveWorkflowLocked(
     await saveTask(harnixRoot, candidate);
     taskCommitted = true;
 
+    // Save any planned roadmap member tasks
+    if (envelope.roadmapMembers && envelope.roadmapMembers.length > 0) {
+      const targetEpicId = validatedEpic ? validatedEpic.id : candidate.schemaVersion === 2 ? candidate.epicId : undefined;
+      for (const member of envelope.roadmapMembers) {
+        if (member.schemaVersion !== 2 || member.status !== "planning") {
+          throw new Error(`Roadmap member task ${member.id} must be schemaVersion 2 and in planning status.`);
+        }
+        if (targetEpicId && member.epicId !== targetEpicId) {
+          throw new Error(`Roadmap member task ${member.id} epicId must match ${targetEpicId}.`);
+        }
+        await saveTask(harnixRoot, member);
+      }
+    }
+
     // Handle epic upsert and markdown regeneration
     if (validatedEpic) {
       await upsertEpic(root, validatedEpic);
@@ -227,15 +250,12 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
     generator: "harnix",
     schemaVersion: 1,
     envelope: {
-      task: "TaskRecord, required",
       artifacts: "optional { prd?, plan?, design?, research?: { <safe>.md: text }, context? }",
       contractRevision: "optional { reason: 10-1000 characters }, accepted only at an unchanged replan checkpoint",
       epic: "optional EpicRecord schema v1; when present, upserts .harnix/roadmaps/<epic-id>.json and regenerates markdown",
+      roadmapMembers: "optional TaskRecord[] schema v2 in planning state; saved as non-active member tasks with matching epicId",
+      task: "TaskRecord, required",
     },
-    // Derived from the exact same allowlists `validateTask` enforces, so this
-    // transport cannot drift from the real schema: a field added to
-    // TaskRecordV2 without updating this function is impossible by
-    // construction, since there is no second literal list to forget.
     taskRecord: taskRecordFieldManifest(2),
     nested: {
       acceptanceCriteria: [...acceptanceCriterionKeys].sort(),
@@ -251,10 +271,6 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--cancel": "Terminal cancellation; the only cancellation transport.",
     },
   };
-}
-
-function laterTimestamp(previous: string, now: string): string {
-  return Date.parse(now) > Date.parse(previous) ? now : previous;
 }
 
 function validateEvidenceEnvelope(value: unknown): Evidence {
@@ -412,10 +428,6 @@ async function recordForwardFileContent(snapshots: WorkflowFileSnapshot[], relat
   if (snapshot === undefined) return;
   try { snapshot.forward = await readFile(snapshot.path); }
   catch (error: unknown) { if (!isMissing(error)) throw error; }
-}
-
-function sameBytes(left: Uint8Array | undefined, right: Uint8Array | undefined): boolean {
-  return left === undefined || right === undefined ? left === right : Buffer.from(left).equals(Buffer.from(right));
 }
 
 function preserveObligations(previous: TaskRecord, next: TaskRecord, revision: WorkflowSaveEnvelope["contractRevision"]): TaskRecord {
@@ -750,19 +762,6 @@ async function assertReadyRequirements(harnixRoot: string, task: TaskRecord, art
   }
 }
 
-function assertLegalTransition(previous: TaskRecord, next: TaskRecord): void {
-  if (previous.status === next.status) {
-    updateTaskCheckpoint(previous, next.checkpoint, next.updatedAt);
-    return;
-  }
-  const reenteringReadyFromReplan = next.status === "ready"
-    && next.checkpoint === "ready"
-    && previous.checkpoint === "replan"
-    && (previous.status === "in_progress" || previous.status === "verifying");
-  if (reenteringReadyFromReplan) return;
-  transitionTask(previous, next.status, next.checkpoint, next.updatedAt, next.blocker);
-}
-
 function preflightStage(
   task: TaskRecord,
   contextDrift: ContextDrift["state"],
@@ -783,27 +782,9 @@ function preflightStage(
   return "check";
 }
 
-function isMissing(error: unknown): boolean { return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"; }
-function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
-function semanticTaskEqual(left: TaskRecord, right: TaskRecord): boolean {
-  const normalize = (task: TaskRecord) => ({
-    ...task,
-    acceptanceCriteria: [...task.acceptanceCriteria].sort((a, b) => compareCodeUnits(a.id, b.id)),
-    validationPlan: [...task.validationPlan].sort((a, b) => compareCodeUnits(a.id, b.id)),
-  });
-  return semanticJsonEqual(normalize(left), normalize(right));
-}
-function semanticJsonEqual(left: unknown, right: unknown): boolean {
-  return JSON.stringify(canonicalJson(left)) === JSON.stringify(canonicalJson(right));
-}
-function canonicalJson(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(canonicalJson);
-  if (!isRecord(value)) return value;
-  return Object.fromEntries(Object.keys(value).sort(compareCodeUnits).map((key) => [key, canonicalJson(value[key])]));
-}
 function validateWorkflowSaveEnvelope(value: unknown): WorkflowSaveEnvelope {
   if (!isRecord(value)) throw new Error("Workflow save envelope is invalid.");
-  assertExactFields(value, new Set(["task", "artifacts", "contractRevision", "epic"]), "Workflow save envelope");
+  assertExactFields(value, new Set(["task", "artifacts", "contractRevision", "epic", "roadmapMembers"]), "Workflow save envelope");
   if (!("task" in value)) throw new Error("Workflow save envelope requires task.");
   const envelope: WorkflowSaveEnvelope = { task: value.task };
   if (value.artifacts !== undefined) envelope.artifacts = validateWorkflowSaveArtifacts(value.artifacts);
@@ -816,8 +797,13 @@ function validateWorkflowSaveEnvelope(value: unknown): WorkflowSaveEnvelope {
   if (value.epic !== undefined) {
     envelope.epic = value.epic;
   }
+  if (value.roadmapMembers !== undefined) {
+    if (!Array.isArray(value.roadmapMembers)) throw new Error("Workflow save envelope roadmapMembers must be an array.");
+    envelope.roadmapMembers = value.roadmapMembers.map((m) => validateTask(m));
+  }
   return envelope;
 }
+
 function validateWorkflowSaveArtifacts(value: unknown): WorkflowSaveArtifacts {
   if (!isRecord(value)) throw new Error("Workflow save artifacts are invalid.");
   assertExactFields(value, new Set(["prd", "plan", "design", "research", "context"]), "Workflow save artifacts");
@@ -838,17 +824,4 @@ function validateWorkflowSaveArtifacts(value: unknown): WorkflowSaveArtifacts {
     artifacts.context = validateContextManifest(value.context);
   }
   return artifacts;
-}
-function assertExactFields(value: Record<string, unknown>, allowed: ReadonlySet<string>, label: string): void {
-  if (Object.keys(value).some((key) => !allowed.has(key))) throw new Error(`${label} contains an unknown schema field.`);
-}
-function validateCancellationEnvelope(value: unknown): TaskCancellation {
-  if (!isRecord(value) || typeof value.reason !== "string" || value.authorizedBy !== "user") {
-    throw new Error("Workflow cancellation requires bounded JSON with reason and authorizedBy=user.");
-  }
-  return { reason: value.reason, authorizedBy: "user" };
-}
-function validateLearningEnvelope(value: unknown): LearningCaptureInput {
-  if (!isRecord(value) || Object.keys(value).length !== 1 || !isRecord(value.candidate)) throw new Error("Workflow learning capture requires bounded JSON with a candidate object.");
-  return value.candidate as unknown as LearningCaptureInput;
 }

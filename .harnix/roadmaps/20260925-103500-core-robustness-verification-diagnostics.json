@@ -1,0 +1,13 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260925-103500-core-robustness-verification-diagnostics",
+  "title": "Refactor Core Architecture & Verification Diagnostics Enhancement",
+  "goal": "Cải thiện độ vững chắc của core parser ready-trace, tách nhỏ các module monolithic trong workflow, và nâng cấp hệ thống chẩn đoán lỗi verification failure với structured findings theo phong cách Superpowers.",
+  "nonGoals": [
+    "Không thêm platform mới ngoài 4 platform hiện tại (Kiro, Antigravity, Codex, Claude Code).",
+    "Không làm gãy backward compatibility của TaskRecord v1/v2 schema."
+  ],
+  "createdAt": "2026-09-25T03:32:15.558Z",
+  "updatedAt": "2026-09-25T03:32:15.558Z"
+}

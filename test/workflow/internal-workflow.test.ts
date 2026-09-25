@@ -80,7 +80,7 @@ describe("hidden workflow persistence operations", () => {
 
     expect(schema.generator).toBe("harnix");
     expect(schema.schemaVersion).toBe(1);
-    expect(Object.keys(schema.envelope).sort()).toEqual(["artifacts", "contractRevision", "epic", "task"]);
+    expect(Object.keys(schema.envelope).sort()).toEqual(["artifacts", "contractRevision", "epic", "roadmapMembers", "task"]);
     expect(schema.taskRecord.required).toContain("acceptanceCriteria");
     expect(schema.taskRecord.required).toContain("validationPlan");
     expect(JSON.stringify(schema)).not.toContain(root);

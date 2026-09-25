@@ -78,6 +78,36 @@ describe("ready trace", () => {
     expect(auditReadyTrace({ task: task(), prd: "x".repeat(1_048_577), plan: "# Plan" }).diagnostics).toContainEqual(expect.objectContaining({ artifact: "prd.md", code: "artifact-too-large" }));
     expect(auditReadyTrace({ task: task(), prd: `### AC \`criterion-a\`\n${"x".repeat(4097)}`, plan: "# Plan" }).diagnostics).toContainEqual(expect.objectContaining({ artifact: "prd.md", code: "line-too-long", line: 2 }));
   });
+  it("accepts hyphen, en-dash, and em-dash in checklist items", () => {
+    for (const dash of ["-", "–", "—"]) {
+      const report = auditReadyTrace({
+        task: task(),
+        prd: [
+          "# PRD",
+          "### AC `criterion-a`",
+          "Outcome A.",
+          "### AC `criterion-b`",
+          "Outcome B.",
+        ].join("\n"),
+        plan: [
+          "# Plan",
+          `- [ ] \`CAP-A\` ${dash} implement A`,
+          `- [x] \`CAP-B\` ${dash} implement B`,
+          "### Slice `CAP-A`",
+          "Criteria: `criterion-a`",
+          "Checks: `check-a`",
+          "Paths: `src/a.ts`",
+          "### Slice `CAP-B`",
+          "Criteria: `criterion-b`",
+          "Checks: `check-b`",
+          "Paths: `src/b/**`",
+        ].join("\n"),
+      });
+
+      expect(report.status).toBe("pass");
+      expect(report.diagnostics).toEqual([]);
+    }
+  });
 });
 
 function task(): TaskRecordV2 {

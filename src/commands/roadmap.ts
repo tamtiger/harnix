@@ -30,6 +30,8 @@ export interface RoadmapEpicSummary {
 export interface RoadmapTaskMember {
   readonly id: string;
   readonly status: string;
+  readonly title?: string;
+  readonly goal?: string;
 }
 
 export async function listPublicRoadmaps(
@@ -153,7 +155,12 @@ async function loadEpicMembers(root: string, epicId: string): Promise<RoadmapTas
       try {
         const task = await loadTask(join(tasksDir, taskId, "task.json"));
         if (task.schemaVersion === 2 && task.epicId === epicId) {
-          members.push({ id: taskId, status: task.status });
+          members.push({
+            id: taskId,
+            status: task.status,
+            title: task.title,
+            goal: task.goal,
+          });
         }
       } catch {
         // Skip tasks that cannot be loaded

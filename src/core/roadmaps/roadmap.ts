@@ -99,7 +99,13 @@ export async function renderRoadmapMarkdown(root: string, epicId: string, epic?:
   // Collect tasks that belong to this epic
   const harnixRoot = join(root, ".harnix");
   const tasksDir = join(harnixRoot, "tasks");
-  const memberTasks: Array<{ id: string; status: string }> = [];
+  const memberTasks: Array<{
+    id: string;
+    status: string;
+    title: string;
+    goal: string;
+    acceptanceCriteriaCount: number;
+  }> = [];
 
   try {
     const taskDirs = await readdir(tasksDir, { withFileTypes: true });
@@ -112,7 +118,13 @@ export async function renderRoadmapMarkdown(root: string, epicId: string, epic?:
       try {
         const task = await loadTask(join(tasksDir, taskId, "task.json"));
         if (task.schemaVersion === 2 && task.epicId === epicId) {
-          memberTasks.push({ id: taskId, status: task.status });
+          memberTasks.push({
+            id: taskId,
+            status: task.status,
+            title: task.title,
+            goal: task.goal,
+            acceptanceCriteriaCount: task.acceptanceCriteria?.length ?? 0,
+          });
         }
       } catch {
         // Skip tasks that cannot be loaded
@@ -127,10 +139,21 @@ export async function renderRoadmapMarkdown(root: string, epicId: string, epic?:
     memberLines = "\n## Members (0 tasks)\n\nNo task members yet.\n";
   } else {
     memberLines = `\n## Members (${memberTasks.length} task${memberTasks.length === 1 ? "" : "s"})\n\n`;
-    memberLines += "| # | Task ID | Status |\n";
-    memberLines += "|---|---------|--------|\n";
+    memberLines += "| # | Task ID | Title | Status |\n";
+    memberLines += "|---|---------|-------|--------|\n";
     memberTasks.forEach((task, index) => {
-      memberLines += `| ${index + 1} | ${task.id} | ${task.status} |\n`;
+      memberLines += `| ${index + 1} | \`${task.id}\` | ${task.title} | \`${task.status}\` |\n`;
+    });
+
+    memberLines += "\n## Task Overview & Scope\n\n";
+    memberTasks.forEach((task, index) => {
+      memberLines += `### ${index + 1}. \`${task.id}\` — ${task.title}\n\n`;
+      memberLines += `- **Trạng thái:** \`${task.status}\`\n`;
+      memberLines += `- **Mục tiêu:** ${task.goal}\n`;
+      if (task.acceptanceCriteriaCount > 0) {
+        memberLines += `- **Tiêu chí nghiệm thu:** ${task.acceptanceCriteriaCount} tiêu chí\n`;
+      }
+      memberLines += "\n";
     });
   }
 

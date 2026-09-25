@@ -4,6 +4,19 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.18] - 2026-09-25
+
+### Added
+
+- Hỗ trợ `roadmapMembers?: TaskRecord[]` trong hidden save envelope (`workflow --save`) cho phép scaffold tự động toàn bộ các member tasks phụ của một Epic Roadmap ngay từ lúc khởi tạo.
+- Bổ sung thông tin tiêu đề, mục tiêu, và số lượng tiêu chí nghiệm thu của từng member task vào markdown bảng roadmap và lệnh CLI `harnix roadmap`.
+- Tạo module `src/core/tasks/workflow-helpers.ts` bóc tách các hàm tiện ích validation, json so sánh, và chuyển đổi trạng thái từ `internal-workflow.ts`.
+
+### Changed
+
+- Nới lỏng regex parser checklist trong `src/core/tasks/ready-trace.ts` để chấp nhận linh hoạt các loại gạch nối (`-`, `–`, `—`) và khoảng trắng.
+- Cập nhật quy tắc workflow: khi có từ 2 task trở lên bắt buộc phải khởi tạo Epic Roadmap và khai báo đầy đủ tất cả member tasks của Epic ngay từ ngày đầu.
+
 ## [1.1.17] - 2026-09-25
 
 ### Changed

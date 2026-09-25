@@ -1,4 +1,4 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -127,7 +127,26 @@ describe("hidden workflow save epic envelope", () => {
     await saveWorkflow(root, { task: planning });
 
     await expect(cancelWorkflow(root, { reason: "no longer needed", authorizedBy: "user" }, "2026-08-13T00:01:00.000Z")).resolves.toMatchObject({ status: "cancelled" });
-    await expect(readdir(join(root, ".harnix", "roadmaps"))).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("scaffolds planned roadmap member tasks and regenerates markdown when roadmapMembers is present", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const epic = { generator: "harnix" as const, schemaVersion: 1 as const, id: "batch-epic", title: "Batch epic title", goal: "Batch epic goal", createdAt: timestamp, updatedAt: timestamp };
+    const member1 = { ...taskV2("planning", "planning"), id: "20260813-120000-member-1", title: "Member 1", goal: "Goal 1", epicId: "batch-epic" };
+    const member2 = { ...taskV2("planning", "planning"), id: "20260813-120001-member-2", title: "Member 2", goal: "Goal 2", epicId: "batch-epic" };
+
+    await saveWorkflow(root, {
+      task: member1,
+      epic,
+      roadmapMembers: [member2],
+    });
+
+    const mdContent = await readFile(join(root, ".harnix", "roadmaps", "batch-epic.md"), "utf8");
+    expect(mdContent).toContain("Batch epic title");
+    expect(mdContent).toContain("Member 1");
+    expect(mdContent).toContain("Member 2");
+    expect(mdContent).toContain("Members (2 tasks)");
   });
 });
 

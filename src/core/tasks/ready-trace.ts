@@ -89,7 +89,7 @@ export function auditReadyTrace(input: ReadyTraceInput): ReadyTraceReportV1 {
   const details = new Map<string, SliceDetail[]>();
   if (plan.bounded) {
     for (const entry of plan.lines) {
-      const match = /^- \[[ xX]\] `([^`]+)` — .+$/u.exec(entry.text);
+      const match = /^- \[[ xX]\] `([^`]+)`\s+[-–—]\s+.+$/u.exec(entry.text);
       if (match) addLine(checklist, match[1]!, entry.line);
     }
     for (let index = 0; index < plan.lines.length; index += 1) {

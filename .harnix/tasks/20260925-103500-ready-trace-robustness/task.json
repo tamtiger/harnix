@@ -1,0 +1,214 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260925-103500-ready-trace-robustness",
+  "epicId": "20260925-103500-core-robustness-verification-diagnostics",
+  "title": "Goi 1: Lam robust ready-trace parser, modularize internal-workflow, va scaffold roadmap members",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cải tiến parser ready-trace không bị kén ký tự dash, tách nhỏ module internal-workflow.ts, và hỗ trợ roadmapMembers trong save envelope.",
+  "nonGoals": [
+    "Không thay đổi frozen schema contracts của TaskRecord.",
+    "Không làm gián đoạn các task đã hoàn thành."
+  ],
+  "relevantPaths": [
+    "src/commands/internal-workflow.ts",
+    "src/core/tasks/ready-trace.ts",
+    "src/core/tasks/workflow-helpers.ts",
+    "test/workflow/internal-workflow-save.test.ts",
+    "test/workflow/internal-workflow.test.ts",
+    "test/workflow/ready-trace.test.ts"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-all-tests-green",
+      "text": "Full test suite, build, typecheck, lint pass cleanly",
+      "status": "met",
+      "evidenceIds": [
+        "ev-build-tests"
+      ]
+    },
+    {
+      "id": "ac-parser-dash-flexibility",
+      "text": "ready-trace parser accepts -, en-dash, and em-dash in checklist",
+      "status": "met",
+      "evidenceIds": [
+        "ev-parser-code"
+      ]
+    },
+    {
+      "id": "ac-parser-unit-tests",
+      "text": "Unit tests cover diverse dash characters in checklist",
+      "status": "met",
+      "evidenceIds": [
+        "ev-parser-tests"
+      ]
+    },
+    {
+      "id": "ac-roadmap-member-scaffolding",
+      "text": "Save envelope supports roadmapMembers to scaffold all planned epic tasks",
+      "status": "met",
+      "evidenceIds": [
+        "ev-roadmap-scaffold"
+      ]
+    },
+    {
+      "id": "ac-workflow-module-split",
+      "text": "Helper logic cleanly extracted from internal-workflow.ts",
+      "status": "met",
+      "evidenceIds": [
+        "ev-module-split"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-build-and-tests",
+      "description": "Verify full build, typecheck, lint and tests",
+      "command": "pnpm build && pnpm typecheck && pnpm lint && pnpm test:unit",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-all-tests-green"
+      ],
+      "inputs": [
+        "@task-contract",
+        "package.json",
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    {
+      "id": "check-module-split",
+      "description": "Verify internal-workflow modular extraction",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-workflow-module-split"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "src/core/tasks/workflow-helpers.ts"
+      ]
+    },
+    {
+      "id": "check-parser-code",
+      "description": "Check ready-trace.ts supports -, en-dash, and em-dash",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-parser-dash-flexibility"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/ready-trace.ts"
+      ]
+    },
+    {
+      "id": "check-parser-tests",
+      "description": "Run ready-trace unit tests",
+      "command": "pnpm vitest run test/workflow/ready-trace.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-parser-unit-tests"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/ready-trace.ts",
+        "test/workflow/ready-trace.test.ts"
+      ]
+    },
+    {
+      "id": "check-roadmap-scaffold",
+      "description": "Verify roadmapMembers support in save envelope and roadmap markdown sync",
+      "command": "pnpm vitest run test/workflow/internal-workflow-save.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-roadmap-member-scaffolding"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/internal-workflow.ts",
+        "test/workflow/internal-workflow-save.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-build-tests",
+      "checkId": "check-build-and-tests",
+      "recordedAt": "2026-09-25T04:23:14.620Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm build && pnpm typecheck && pnpm lint && pnpm test:unit passed cleanly",
+      "artifactPaths": [],
+      "inputDigest": "b5c0b9e3c38e55b957cd08eb323de0af0baa37ce3448ad1d53014bad4ddde368"
+    },
+    {
+      "id": "ev-module-split",
+      "checkId": "check-module-split",
+      "recordedAt": "2026-09-25T04:23:14.620Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Extracted workflow helpers to src/core/tasks/workflow-helpers.ts",
+      "artifactPaths": [],
+      "inputDigest": "f37313a67af986cef83f22d78c6fa647646dfdde9c2003e35acadf11508f52bc"
+    },
+    {
+      "id": "ev-parser-code",
+      "checkId": "check-parser-code",
+      "recordedAt": "2026-09-25T04:23:14.620Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Updated regex to [-–—] in ready-trace.ts",
+      "artifactPaths": [],
+      "inputDigest": "8b9be4932f4f637474e0c646aa567ae766e384894b8789a1833975261c36d047"
+    },
+    {
+      "id": "ev-parser-tests",
+      "checkId": "check-parser-tests",
+      "recordedAt": "2026-09-25T04:23:14.620Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "vitest run test/workflow/ready-trace.test.ts passed",
+      "artifactPaths": [],
+      "inputDigest": "a8c77de186bbd17bf994c5c8920caba9bafae132991d4b53437ae54c0015aa23"
+    },
+    {
+      "id": "ev-roadmap-scaffold",
+      "checkId": "check-roadmap-scaffold",
+      "recordedAt": "2026-09-25T04:23:14.620Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "vitest run test/workflow/internal-workflow-save.test.ts passed",
+      "artifactPaths": [],
+      "inputDigest": "34a603c73eb6c68131c5d00f06ef6a652d1689cba208279c6b517e0f5b2e9fe5"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-regex-dash",
+      "text": "Support [-–—] in checklist regex",
+      "rationale": "Avoid fragile failures caused by editor auto-formatting or varied markdown conventions"
+    },
+    {
+      "id": "d-extract-workflow-helpers",
+      "text": "Extract workflow envelope and snapshot helpers",
+      "rationale": "Keep command file focused on CLI routing and action handling"
+    },
+    {
+      "id": "d-roadmap-members-save",
+      "text": "Support roadmapMembers in save envelope",
+      "rationale": "Allow single-command scaffolding of all planned member tasks when initializing an epic"
+    }
+  ],
+  "residualRisks": [],
+  "createdAt": "2026-09-25T03:53:25.454Z",
+  "updatedAt": "2026-09-25T04:23:27.052Z",
+  "completedAt": "2026-09-25T04:23:27.052Z"
+}

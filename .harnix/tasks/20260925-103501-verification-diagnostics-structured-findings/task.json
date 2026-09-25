@@ -1,0 +1,96 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260925-103501-verification-diagnostics-structured-findings",
+  "epicId": "20260925-103500-core-robustness-verification-diagnostics",
+  "title": "Goi 2: Nang cap verification diagnostics va structured findings",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Nâng cấp hệ thống chẩn đoán lỗi verification failure với structured findings theo phong cách Superpowers.",
+  "nonGoals": [
+    "Không thay đổi frozen schema contracts của TaskRecord v1/v2.",
+    "Không đưa daemon hoặc network service vào runtime verification."
+  ],
+  "relevantPaths": [
+    "src/commands/checks.ts",
+    "src/core/verification/check-report.ts",
+    "src/core/verification/input-freshness.ts",
+    "test/unit/check-report.test.ts"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-structured-findings-capture",
+      "text": "Verification captures detailed failure context in structured findings",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-checks-reporting-findings",
+      "text": "Public checks command reports structured findings for debugging",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-diagnostics-unit-tests",
+      "text": "Unit tests cover failure findings capture and reporting",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-diagnostics-tests",
+      "description": "Run unit tests for verification diagnostics",
+      "command": "pnpm vitest run test/unit/check-report.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-diagnostics-unit-tests"
+      ],
+      "inputs": [
+        "@task-contract",
+        "test/unit/check-report.test.ts"
+      ]
+    },
+    {
+      "id": "check-findings-capture",
+      "description": "Verify failure findings capture in evidence recording",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-structured-findings-capture"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/verification/input-freshness.ts"
+      ]
+    },
+    {
+      "id": "check-checks-report",
+      "description": "Verify checks report includes structured findings",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-checks-reporting-findings"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/commands/checks.ts",
+        "src/core/verification/check-report.ts"
+      ]
+    }
+  ],
+  "evidence": [],
+  "decisions": [
+    {
+      "id": "d-structured-findings",
+      "text": "Use structured findings on EvidenceRecordV2",
+      "rationale": "Provide machine-readable diagnostics for debug stages instead of free-form strings"
+    }
+  ],
+  "residualRisks": [],
+  "createdAt": "2026-09-25T03:39:17.358Z",
+  "updatedAt": "2026-09-25T03:39:17.358Z"
+}
