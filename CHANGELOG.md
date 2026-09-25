@@ -17,6 +17,7 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 - Nới lỏng regex parser checklist trong `src/core/tasks/ready-trace.ts` để chấp nhận linh hoạt các loại gạch nối (`-`, `–`, `—`) và khoảng trắng.
 - Cập nhật quy tắc workflow: khi có từ 2 task trở lên bắt buộc phải khởi tạo Epic Roadmap và khai báo đầy đủ tất cả member tasks của Epic ngay từ ngày đầu.
+- Bổ sung hướng dẫn hành động thực tế trong skill `harnix-brainstorm` (chạy `harnix repo-map --query/--impact` khi khảo sát `relevantPaths`) và `harnix-implement` (đọc các spec guides trong `.harnix/spec/guides/` trước khi viết code).
 
 ## [1.1.17] - 2026-09-25
 

@@ -42,6 +42,8 @@ The user's initial request may authorize implementation. Do not require a second
 
 Inspect relevant instructions, code, tests, configs, docs, current diff, and related task history. Never ask the user for a fact the repository can answer.
 
+When the initialized project has a current repo-map cache, run `harnix repo-map --query <text>` to find candidate symbols and `harnix repo-map --impact <path>` to trace import dependencies for candidate `relevantPaths`. Before drafting criteria and validation commands, read the project's applicable engineering guides in `.harnix/spec/guides/` (common and matching language/technology guides) to align contracts and testing patterns with established repository standards.
+
 Maintain a decision inventory with four groups:
 
 1. confirmed repository facts;

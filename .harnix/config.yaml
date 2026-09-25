@@ -1,7 +1,8 @@
 generator: harnix
 schemaVersion: 2
 developer: TamNT167
-languages: []
+languages:
+  - typescript
 technologies: []
 packages: []
 platforms: []

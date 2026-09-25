@@ -39,7 +39,7 @@ If the plan has a critical gap, do not guess and do not code around it. Persist 
 
 ## Load bounded context
 
-Read task artifacts, nearest project instructions, relevant specs, affected implementation, neighboring interfaces, current tests, and the current diff. Treat `.harnix/config.yaml` language/package values as discovery hints, not complete truth. Do not bulk-load the repository.
+Read task artifacts, nearest project instructions, relevant specs, affected implementation, neighboring interfaces, current tests, and the current diff. Read the applicable engineering guides in `.harnix/spec/guides/` for the languages and technologies touched by the task before writing code to align compiler contracts, runtime boundaries, error handling, and test design with project standards. Treat `.harnix/config.yaml` language/package values as discovery hints, not complete truth. Do not bulk-load the repository.
 
 When the initialized project has a current repo-map cache, `harnix repo-map --impact <exact-posix-path> [--depth <1..3>] [--limit <1..20>]` may narrow direct dependency/dependent inspection for an already selected file. Treat it only as a bounded static-import navigation hint: verify the chosen source files directly, never claim dynamic call-graph completeness, and do not refresh/write the cache from this step.
 
