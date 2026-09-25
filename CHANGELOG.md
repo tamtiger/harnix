@@ -11,6 +11,7 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 - Hỗ trợ `roadmapMembers?: TaskRecord[]` trong hidden save envelope (`workflow --save`) cho phép scaffold tự động toàn bộ các member tasks phụ của một Epic Roadmap ngay từ lúc khởi tạo.
 - Bổ sung thông tin tiêu đề, mục tiêu, và số lượng tiêu chí nghiệm thu của từng member task vào markdown bảng roadmap và lệnh CLI `harnix roadmap`.
 - Tạo module `src/core/tasks/workflow-helpers.ts` bóc tách các hàm tiện ích validation, json so sánh, và chuyển đổi trạng thái từ `internal-workflow.ts`.
+- Mở rộng hệ thống verification diagnostics: forward structured findings từ `EvidenceRecordV2` vào kết quả kiểm tra `inspectRequiredChecks` và lệnh public `harnix checks` (`PublicCheckItemV1`), đồng thời bổ sung helper `createCheckFailureFinding` chuẩn hóa thông tin lỗi hỗ trợ stage `harnix-debug`.
 
 ### Changed
 

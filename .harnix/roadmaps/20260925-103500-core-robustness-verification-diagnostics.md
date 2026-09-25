@@ -6,7 +6,7 @@ Cải thiện độ vững chắc của core parser ready-trace, tách nhỏ cá
 | # | Task ID | Title | Status |
 |---|---------|-------|--------|
 | 1 | `20260925-103500-ready-trace-robustness` | Goi 1: Lam robust ready-trace parser, modularize internal-workflow, va scaffold roadmap members | `completed` |
-| 2 | `20260925-103501-verification-diagnostics-structured-findings` | Goi 2: Nang cap verification diagnostics va structured findings | `planning` |
+| 2 | `20260925-103501-verification-diagnostics-structured-findings` | Goi 2: Nang cap verification diagnostics va structured findings | `completed` |
 
 ## Task Overview & Scope
 
@@ -18,7 +18,7 @@ Cải thiện độ vững chắc của core parser ready-trace, tách nhỏ cá
 
 ### 2. `20260925-103501-verification-diagnostics-structured-findings` — Goi 2: Nang cap verification diagnostics va structured findings
 
-- **Trạng thái:** `planning`
+- **Trạng thái:** `completed`
 - **Mục tiêu:** Nâng cấp hệ thống chẩn đoán lỗi verification failure với structured findings theo phong cách Superpowers.
 - **Tiêu chí nghiệm thu:** 3 tiêu chí
 

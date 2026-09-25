@@ -2,7 +2,7 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { inspectRequiredChecks } from "../../src/core/verification/check-report.js";
+import { createCheckFailureFinding, inspectRequiredChecks } from "../../src/core/verification/check-report.js";
 import type { TaskRecordV1, TaskRecordV2 } from "../../src/core/tasks/task.js";
 import { computeVerificationInputSnapshot, persistNewVerificationInputSnapshots } from "../../src/core/verification/input-freshness.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
@@ -132,6 +132,42 @@ describe("required check report", () => {
     await writeFile(join(harnixRoot, "tasks", base.id, "plan.md"), badPlan);
     const report = (await inspectRequiredChecks(root, harnixRoot, task, now))[0]!;
     expect(report).toMatchObject({ state: "stale", reasonCodes: ["plan-artifact-invalid"] });
+  });
+
+  it("forwards structured findings from evidence to inspection results", async () => {
+    const finding1 = createCheckFailureFinding("err-1", "Test suite failed with exit code 1", "critical");
+    const finding2 = createCheckFailureFinding("warn-1", "Deprecated API usage", "low");
+
+    expect(finding1).toEqual({ id: "err-1", text: "Test suite failed with exit code 1", severity: "critical" });
+    expect(finding2).toEqual({ id: "warn-1", text: "Deprecated API usage", severity: "low" });
+
+    const base = v2Task();
+    const taskWithFindings: TaskRecordV2 = {
+      ...base,
+      evidence: [
+        {
+          id: "ev-failed",
+          checkId: "gate",
+          recordedAt: "2026-08-26T00:59:00.000Z",
+          result: "fail",
+          exitCode: 1,
+          summary: "Check gate failed",
+          artifactPaths: [],
+          inputDigest: "0".repeat(64),
+          findings: [finding1, finding2],
+        },
+      ],
+    };
+
+    const now = Date.parse("2026-08-26T01:00:00.000Z");
+    const reports = await inspectRequiredChecks("unused", "unused", taskWithFindings, now);
+
+    expect(reports[0]).toMatchObject({
+      id: "gate",
+      state: "failed",
+      reasonCodes: ["latest-failed"],
+      findings: [finding1, finding2],
+    });
   });
 });
 

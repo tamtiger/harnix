@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 
 import { readConfig } from "../core/config/config.js";
-import type { TaskMode, TaskStatus, WorkflowCheckpoint } from "../core/tasks/task.js";
+import type { EvidenceFindingV1, TaskMode, TaskStatus, WorkflowCheckpoint } from "../core/tasks/task.js";
 import {
   inspectRequiredChecks,
   type RequiredCheckInspection,
@@ -28,6 +28,7 @@ interface PublicCheckItemV1 {
     readonly truncated: boolean;
   };
   readonly changes: readonly VerificationInputChange[];
+  readonly findings?: readonly EvidenceFindingV1[];
 }
 
 export interface ChecksReportResultV1 {
@@ -81,6 +82,7 @@ export async function reportProjectChecks(cwd: string, limit: number, now = Date
         reasonCodes: item.reasonCodes,
         changeSummary: { changed, missing, returned: changes.length, truncated: changes.length < item.changes.length },
         changes,
+        ...(item.findings && item.findings.length > 0 ? { findings: item.findings } : {}),
       };
     });
     const resultTruncated = visible.length < inspections.length;

@@ -1,6 +1,5 @@
 import { compareCodeUnits } from "../../utils/order.js";
-import { selectLatestEvidence } from "../tasks/task.js";
-import type { TaskRecord } from "../tasks/task.js";
+import { selectLatestEvidence, type EvidenceFindingV1, type TaskRecord } from "../tasks/task.js";
 import {
   compareVerificationInputSnapshots,
   computeVerificationInputSnapshot,
@@ -30,6 +29,15 @@ export interface RequiredCheckInspection {
   readonly state: RequiredCheckState;
   readonly reasonCodes: readonly RequiredCheckReasonCode[];
   readonly changes: readonly VerificationInputChange[];
+  readonly findings?: readonly EvidenceFindingV1[] | undefined;
+}
+
+export function createCheckFailureFinding(
+  id: string,
+  text: string,
+  severity: "low" | "medium" | "high" | "critical" = "high",
+): EvidenceFindingV1 {
+  return { id, text, severity };
 }
 
 export async function inspectRequiredChecks(
@@ -53,24 +61,27 @@ export async function inspectRequiredChecks(
   return Promise.all(task.validationPlan.filter((check) => check.required).map(async (check): Promise<RequiredCheckInspection> => {
     const evidence = selectLatestEvidence(task.evidence, check.id, now);
     if (evidence === undefined) return inspection(check.id, "pending", ["no-evidence"]);
-    if (evidence.result === "skipped") return inspection(check.id, "pending", ["latest-skipped"]);
-    if (evidence.result === "fail") return inspection(check.id, "failed", ["latest-failed"]);
+    const findings = (task.schemaVersion === 2 && "findings" in evidence && Array.isArray((evidence as { findings?: EvidenceFindingV1[] }).findings))
+      ? (evidence as { findings?: EvidenceFindingV1[] }).findings
+      : undefined;
+    if (evidence.result === "skipped") return inspection(check.id, "pending", ["latest-skipped"], [], findings);
+    if (evidence.result === "fail") return inspection(check.id, "failed", ["latest-failed"], [], findings);
     const timestamp = Date.parse(evidence.recordedAt);
-    if (!Number.isFinite(timestamp) || timestamp > now || (task.schemaVersion === 1 && now - timestamp > maxEvidenceAgeMs)) return inspection(check.id, "stale", ["evidence-expired"]);
-    if (task.schemaVersion === 1) return inspection(check.id, "passed", []);
-    if (sidecarInvalid) return inspection(check.id, "stale", ["snapshot-invalid"]);
+    if (!Number.isFinite(timestamp) || timestamp > now || (task.schemaVersion === 1 && now - timestamp > maxEvidenceAgeMs)) return inspection(check.id, "stale", ["evidence-expired"], [], findings);
+    if (task.schemaVersion === 1) return inspection(check.id, "passed", [], [], findings);
+    if (sidecarInvalid) return inspection(check.id, "stale", ["snapshot-invalid"], [], findings);
 
     const stored = storedByEvidence.get(evidence.id);
-    if (stored === undefined) return inspection(check.id, "stale", ["snapshot-missing"]);
-    if (stored.checkId !== check.id || stored.inputDigest !== evidence.inputDigest) return inspection(check.id, "stale", ["snapshot-mismatch"]);
+    if (stored === undefined) return inspection(check.id, "stale", ["snapshot-missing"], [], findings);
+    if (stored.checkId !== check.id || stored.inputDigest !== evidence.inputDigest) return inspection(check.id, "stale", ["snapshot-mismatch"], [], findings);
 
     let current;
     try { current = await computeVerificationInputSnapshot(projectRoot, task, check.id, { schemaVersion: stored.schemaVersion }); }
     catch (error) {
-      if (error instanceof PlanningArtifactGrammarError) return inspection(check.id, "stale", ["plan-artifact-invalid"]);
-      return inspection(check.id, "stale", ["inputs-unavailable"]);
+      if (error instanceof PlanningArtifactGrammarError) return inspection(check.id, "stale", ["plan-artifact-invalid"], [], findings);
+      return inspection(check.id, "stale", ["inputs-unavailable"], [], findings);
     }
-    if (current.inputDigest === stored.inputDigest) return inspection(check.id, "passed", []);
+    if (current.inputDigest === stored.inputDigest) return inspection(check.id, "passed", [], [], findings);
 
     const changes = compareVerificationInputSnapshots(stored, current);
     const reasons = new Set<RequiredCheckReasonCode>();
@@ -78,7 +89,7 @@ export async function inspectRequiredChecks(
     if (changes.some((change) => change.kind === "changed")) reasons.add("inputs-changed");
     if (changes.some((change) => change.kind === "missing")) reasons.add("inputs-missing");
     if (reasons.size === 0) reasons.add("snapshot-mismatch");
-    return inspection(check.id, "stale", [...reasons].sort(compareCodeUnits), changes);
+    return inspection(check.id, "stale", [...reasons].sort(compareCodeUnits), changes, findings);
   }));
 }
 
@@ -87,6 +98,13 @@ function inspection(
   state: RequiredCheckState,
   reasonCodes: readonly RequiredCheckReasonCode[],
   changes: readonly VerificationInputChange[] = [],
+  findings?: readonly EvidenceFindingV1[],
 ): RequiredCheckInspection {
-  return { id, state, reasonCodes, changes };
+  return {
+    id,
+    state,
+    reasonCodes,
+    changes,
+    ...(findings !== undefined && findings.length > 0 ? { findings } : {}),
+  };
 }

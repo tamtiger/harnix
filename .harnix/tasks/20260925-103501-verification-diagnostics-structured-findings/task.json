@@ -5,8 +5,8 @@
   "epicId": "20260925-103500-core-robustness-verification-diagnostics",
   "title": "Goi 2: Nang cap verification diagnostics va structured findings",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Nâng cấp hệ thống chẩn đoán lỗi verification failure với structured findings theo phong cách Superpowers.",
   "nonGoals": [
     "Không thay đổi frozen schema contracts của TaskRecord v1/v2.",
@@ -23,20 +23,26 @@
     {
       "id": "ac-structured-findings-capture",
       "text": "Verification captures detailed failure context in structured findings",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-findings-capture"
+      ]
     },
     {
       "id": "ac-checks-reporting-findings",
       "text": "Public checks command reports structured findings for debugging",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-checks-report"
+      ]
     },
     {
       "id": "ac-diagnostics-unit-tests",
       "text": "Unit tests cover failure findings capture and reporting",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-diag-tests"
+      ]
     }
   ],
   "validationPlan": [
@@ -82,7 +88,38 @@
       ]
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "ev-diag-tests",
+      "checkId": "check-diagnostics-tests",
+      "recordedAt": "2026-09-25T06:29:12.082Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/check-report.test.ts passed cleanly",
+      "artifactPaths": [],
+      "inputDigest": "99bd99a5855c09a2fe3bdc7b11e8d731cff9c61ef9f5215eb9f70c165eee9df7"
+    },
+    {
+      "id": "ev-findings-capture",
+      "checkId": "check-findings-capture",
+      "recordedAt": "2026-09-25T06:29:12.082Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "createCheckFailureFinding and structured findings forwarded in check-report.ts",
+      "artifactPaths": [],
+      "inputDigest": "78138ebd27b59c506a8c2fd1cb2bad2f48644f0c28b7c5b211ef155162f6748c"
+    },
+    {
+      "id": "ev-checks-report",
+      "checkId": "check-checks-report",
+      "recordedAt": "2026-09-25T06:29:12.082Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Public checks command reports structured findings in PublicCheckItemV1",
+      "artifactPaths": [],
+      "inputDigest": "ffe9d66ea924f1aacdfae3ca9dbc23ca3a83b2c95dccdbd7c427bfd818a15a23"
+    }
+  ],
   "decisions": [
     {
       "id": "d-structured-findings",
@@ -92,5 +129,6 @@
   ],
   "residualRisks": [],
   "createdAt": "2026-09-25T03:39:17.358Z",
-  "updatedAt": "2026-09-25T03:39:17.358Z"
+  "updatedAt": "2026-09-25T06:29:42.829Z",
+  "completedAt": "2026-09-25T06:29:42.829Z"
 }

@@ -67,7 +67,7 @@ Engineering guidance selected for this project lives in \`.harnix/spec/guides/\`
 
 Every persisted task also has \`.harnix/tasks/<id>/review.md\`, a derived read-only summary (goal, criteria, required checks, decisions, residual risks, evidence) regenerated automatically on every save. Point the user there for a plain-file review instead of running a command or reading \`task.json\`; never hand-edit it.
 
-Optional \`epicId\` on TaskRecordV2 links a task to an epic; bắt buộc tạo Epic Roadmap khi một sáng kiến/kế hoạch gồm từ 2 task trở lên (hoặc khi người dùng yêu cầu). Lúc khởi tạo Epic Roadmap, BẮT BUỘC phải khai báo/khởi tạo đầy đủ tất cả member tasks của epic ngay từ đầu. Gửi top-level \`epic\` (\`EpicRecord\` v1: id/title/goal) trong \`--save\` để tạo/cập nhật; \`.harnix/roadmaps/<epic-id>.json\` là task-owned, \`.md\` là derived. Public \`harnix roadmap [--limit] [--id]\` hiển thị danh sách hoặc chi tiết epics.
+Optional \`epicId\` links a task to an epic; mandatory Epic Roadmap when initiative has >=2 tasks. Upfront declare all member tasks at initialization. Top-level \`epic\` in \`--save\` creates/updates; public \`harnix roadmap\` inspects.
 
 ## Operating rules
 
@@ -77,6 +77,7 @@ Optional \`epicId\` on TaskRecordV2 links a task to an epic; bắt buộc tạo 
 - Use hidden workflow transport for state changes; never edit \`task.json\` or \`.active\` directly.
 - Use \`harnix repo-map --query <text>\` or \`harnix repo-map --impact <path>\` only as bounded implementation-stage navigation hints. Platform hooks must not invoke repository-map query, impact, or refresh.
 - Release preparation belongs to implementation and must finish before \`verifying\`. Finish is product-read-only.
+- Mark \`[x]\` on \`plan.md\` checklist as each slice completes; checklist must reach 100% \`[x]\` before \`verifying\`.
 - Require explicit authority for destructive, networked, installation, upgrade, purge, or externally visible actions.
 - Never commit, branch, create a worktree, merge, push, publish, or create a pull request automatically.
 - Before any commit, show the proposed changes and commit message, then wait for explicit user approval.

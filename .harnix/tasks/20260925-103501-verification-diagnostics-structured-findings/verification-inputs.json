@@ -1,0 +1,90 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260925-103501-verification-diagnostics-structured-findings",
+  "snapshots": [
+    {
+      "evidenceId": "ev-checks-report",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260925-103501-verification-diagnostics-structured-findings",
+      "checkId": "check-checks-report",
+      "taskContractHash": "3fe337881d29bfd2045e818b936b63c8b067959e99654b50791ceed9489ee455",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260925-103501-verification-diagnostics-structured-findings/plan.md",
+          "sha256": "2f3333558d26303f0464ce538daa0c28a2234724dbfa2e7209d1752d64ec3b2a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260925-103501-verification-diagnostics-structured-findings/prd.md",
+          "sha256": "3bab8f07ce3bafcdece3a4b4a9438cf65fb83b688b9d65e2a494d44e176957b5",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/commands/checks.ts",
+          "sha256": "a0e0ffbf93d1c07911ea46517e21d96b475b30b6e71747e1b65e20c23519ddd4",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "src/core/verification/check-report.ts",
+          "sha256": "91f56f76d85978ce077f684e9e01f2774070ea6808c194f543e0770ec8a86269",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "ffe9d66ea924f1aacdfae3ca9dbc23ca3a83b2c95dccdbd7c427bfd818a15a23"
+    },
+    {
+      "evidenceId": "ev-diag-tests",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260925-103501-verification-diagnostics-structured-findings",
+      "checkId": "check-diagnostics-tests",
+      "taskContractHash": "3fe337881d29bfd2045e818b936b63c8b067959e99654b50791ceed9489ee455",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260925-103501-verification-diagnostics-structured-findings/plan.md",
+          "sha256": "2f3333558d26303f0464ce538daa0c28a2234724dbfa2e7209d1752d64ec3b2a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260925-103501-verification-diagnostics-structured-findings/prd.md",
+          "sha256": "3bab8f07ce3bafcdece3a4b4a9438cf65fb83b688b9d65e2a494d44e176957b5",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "test/unit/check-report.test.ts",
+          "sha256": "2200f56188496e3d0e4cd096532df932c057d3d173de1d612da3a916a8c85e7c",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "99bd99a5855c09a2fe3bdc7b11e8d731cff9c61ef9f5215eb9f70c165eee9df7"
+    },
+    {
+      "evidenceId": "ev-findings-capture",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260925-103501-verification-diagnostics-structured-findings",
+      "checkId": "check-findings-capture",
+      "taskContractHash": "3fe337881d29bfd2045e818b936b63c8b067959e99654b50791ceed9489ee455",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260925-103501-verification-diagnostics-structured-findings/plan.md",
+          "sha256": "2f3333558d26303f0464ce538daa0c28a2234724dbfa2e7209d1752d64ec3b2a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260925-103501-verification-diagnostics-structured-findings/prd.md",
+          "sha256": "3bab8f07ce3bafcdece3a4b4a9438cf65fb83b688b9d65e2a494d44e176957b5",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": "src/core/verification/input-freshness.ts",
+          "sha256": "819c73ac1dbf7c7e84b3d386ae671d0f2ff842c667b645f33c28c6c00163fb39",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "78138ebd27b59c506a8c2fd1cb2bad2f48644f0c28b7c5b211ef155162f6748c"
+    }
+  ]
+}

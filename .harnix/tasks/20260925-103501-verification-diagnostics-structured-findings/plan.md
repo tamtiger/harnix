@@ -2,9 +2,9 @@
 
 ## Checklist
 
-- [ ] `S1` — Mở rộng capture failure context trong evidence recording
-- [ ] `S2` — Cập nhật hiển thị findings trong checks report
-- [ ] `S3` — Bổ sung unit tests cho verification diagnostics
+- [x] `S1` — Mở rộng capture failure context trong evidence recording
+- [x] `S2` — Cập nhật hiển thị findings trong checks report
+- [x] `S3` — Bổ sung unit tests cho verification diagnostics
 
 ### Slice `S1`
 
