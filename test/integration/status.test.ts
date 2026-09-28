@@ -20,10 +20,11 @@ afterEach(() => {
 });
 
 describe.sequential("status command", () => {
-  it("should_reject_the_removed_human_flag_on_status_and_audit_without_writing", async () => {
+  it("should_reject_the_removed_human_flag_on_status_and_status_explain_without_writing", async () => {
     // `--human` was removed: task review happens by opening the task's
     // generated `review.md`, not by running a CLI summary flag. This guards
-    // against silently reintroducing a half-wired flag on these commands.
+    // against silently reintroducing a half-wired flag on status (which now
+    // subsumes the former audit/checks projections via --explain).
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });
     process.chdir(root);
@@ -34,7 +35,7 @@ describe.sequential("status command", () => {
     await expect(runCli(["node", "harnix", "status", "--human"])).resolves.toBe(2);
     expect(stderr.mock.calls.map((call) => String(call[0])).join("")).toContain("unknown option");
     stderr.mockClear();
-    await expect(runCli(["node", "harnix", "audit", "--human"])).resolves.toBe(2);
+    await expect(runCli(["node", "harnix", "status", "--explain", "--human"])).resolves.toBe(2);
     expect(stderr.mock.calls.map((call) => String(call[0])).join("")).toContain("unknown option");
     stdout.mockClear();
     await expect(runCli(["node", "harnix", "status"])).resolves.toBe(0);

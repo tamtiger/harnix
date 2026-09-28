@@ -134,8 +134,7 @@ harnix tasks [--limit <1..100>] [--status <TaskStatus>]
 harnix roadmap [--limit <1..100>] [--id <epic-id>]
 harnix resume <task-id> [--dry-run]
 harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]
-harnix checks [--limit <1..50>]
-harnix audit
+harnix status --explain [--limit <1..50>]
 harnix skill [name]
 harnix doctor [--fix] [--global]
 harnix repo-map --query <text> [--limit <count>]
@@ -317,13 +316,13 @@ Output active chỉ gồm task ID, platform budget, aggregate candidate/selected
 
 ### Checks
 
-`harnix checks [--limit <1..50>]` emit `ChecksReportResultV1` read-only; default limit 20, no active task là success với `activeTask:null`. Required checks sort code-unit. Mỗi item chỉ gồm ID, state `passed|failed|stale|pending`, trusted sorted reason codes và tối đa 20 relative `changed|missing` input paths; aggregate giữ full counts cùng returned/truncation flags. Toàn JSON tối đa 262.144 UTF-8 bytes bằng deterministic whole-item tail omission.
+`harnix status --explain [--limit <1..50>]` bổ sung projection `ChecksReportResultV1` dưới `explain.checks` (read-only); default limit 20, no active task là success với `activeTask:null`. Required checks sort code-unit. Mỗi item chỉ gồm ID, state `passed|failed|stale|pending`, trusted sorted reason codes và tối đa 20 relative `changed|missing` input paths; aggregate giữ full counts cùng returned/truncation flags. Toàn JSON tối đa 262.144 UTF-8 bytes bằng deterministic whole-item tail omission.
 
 Classifier dùng latest evidence theo timestamp rồi append order. No evidence/latest skipped là pending; latest fail là failed; invalid/future timestamp là stale; v1 còn stale khi quá một giờ. v2 pass cần matching immutable sidecar/evidence digest và recomputed current input digest, không age-expire. Missing/invalid/mismatch sidecar, task contract change, changed/missing/unavailable inputs được biểu diễn bằng categorical reason code, không throw private detail. Command không trả description/validation command, evidence ID/summary/time/hash/input glob, criterion/task prose, secret hoặc absolute path; không chạy check, sửa state/sidecar/evidence hoặc gọi network.
 
 ### Audit
 
-`harnix audit` resolve ancestor initialized gần nhất và emit `TaskAuditResultV1` read-only; không có active task là success với `activeTask:null`. Active projection chỉ gồm `id`, `mode`, `status`, `checkpoint`, `readiness`, `completion`. Full readiness chạy cùng bounded deterministic ready-trace auditor nhưng strip diagnostic message; mỗi diagnostic chỉ có stable `code`, `artifact`, optional `id` và optional `line`. Artifact read failure trở thành readiness `unavailable` với `artifact-unavailable`; Lite readiness là `not-applicable`.
+`harnix status --explain` bổ sung projection `TaskAuditResultV1` dưới `explain.audit`, resolve ancestor initialized gần nhất (read-only); không có active task là success với `activeTask:null`. Active projection chỉ gồm `id`, `mode`, `status`, `checkpoint`, `readiness`, `completion`. Full readiness chạy cùng bounded deterministic ready-trace auditor nhưng strip diagnostic message; mỗi diagnostic chỉ có stable `code`, `artifact`, optional `id` và optional `line`. Artifact read failure trở thành readiness `unavailable` với `artifact-unavailable`; Lite readiness là `not-applicable`.
 
 Completion gồm `status`, `criteria`, `requiredChecks`. `criteria` là completion-ready partition `met|waived|pending|total` cùng sorted `pendingIds`: persisted met chỉ được tính met khi có current supporting evidence theo finish semantics. `requiredChecks` có `passed|failed|stale|pending|total` cùng sorted `failedIds|staleIds|pendingIds`, tái dùng exact latest-evidence, v1 one-hour age và TaskRecord v2 sidecar/current-input freshness của status/finish. Completion chỉ pass khi criteria/checks non-empty, mọi criterion ready và mọi required check pass. Audit không chạy command, sửa artifact/state, chuyển workflow, gọi network hoặc echo title/goal/prose/command/secret/absolute path; audit pass không phải completion evidence.
 

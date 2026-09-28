@@ -4,6 +4,19 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [Unreleased] - 2026-09-28
+
+Đợt đại tu toàn diện (epic `20260928-180123-harnix-overhaul`). Mục này tích luỹ breaking change qua từng task; khi hoàn tất toàn bộ epic, `release-v2` sẽ đổi tiêu đề này thành `## [2.0.0] - <ngày phát hành>`.
+
+### Removed
+
+- Gỡ code không còn caller: `src/migration/**`, `src/rules/rules.ts`, `src/templates/harnix/managed-workflow.ts`, `src/core/research.ts` cùng test đi kèm. Nội dung rule đã nằm hoàn toàn trong `src/guides/`.
+
+### Changed
+
+- **Breaking:** gộp hai lệnh public `harnix checks` và `harnix audit` vào `harnix status --explain [--limit <1..50>]`. Kết quả nằm dưới `explain.checks` và `explain.audit`; lớp redaction chống lộ nội dung task hỏng được giữ nguyên. Dùng `harnix status --explain` thay cho hai lệnh cũ.
+- Suite `test:migration` chuyển thành suite tương thích dữ liệu cũ (đọc task v1/v2 và task có `context.json`) thay cho test của module migration đã gỡ.
+
 ## [1.1.22] - 2026-09-28
 
 ### Added

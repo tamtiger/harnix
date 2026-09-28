@@ -14,14 +14,12 @@ import { uninstallProject } from "./commands/uninstall.js";
 import { uninstallGlobalIntegrations } from "./commands/global-uninstall.js";
 import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces.js";
 import { searchMemory } from "./commands/mem.js";
-import { inspectProjectStatus } from "./commands/status.js";
+import { inspectProjectStatus, explainProjectStatus } from "./commands/status.js";
 import { listProjectTasks } from "./commands/tasks.js";
 import { listPublicRoadmaps, detailPublicRoadmap } from "./commands/roadmap.js";
 import { resumeProjectTask } from "./commands/resume.js";
 import { pauseProjectTask } from "./commands/pause.js";
 import { reportProjectContext } from "./commands/context-report.js";
-import { reportProjectChecks } from "./commands/checks.js";
-import { auditProjectTask } from "./commands/audit.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
 import { appendEvidenceWorkflow, auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, preflightWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow, transitionWorkflow, workflowEnvelopeSchema } from "./commands/internal-workflow.js";
@@ -59,7 +57,7 @@ export interface PublicCliErrorV1 {
 
 export function createProgram(programOptions: ProgramOptions = {}): Command {
   const program = new Command();
-  program.name("harnix").description("Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, and Codex integrations.").version(packageVersion).showSuggestionAfterError().exitOverride();
+  program.name("harnix").description("Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, Codex, and Claude Code integrations.").version(packageVersion).showSuggestionAfterError().exitOverride();
   program.command("init")
     .option("--user <name>", "Override the detected developer journal ID")
     .option("--languages <csv>", "Override auto-detected language IDs")
@@ -146,8 +144,14 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   });
   program.command("status")
     .description("Summarize the active Harnix task and next action")
-    .action(async () => {
-      process.stdout.write(`${JSON.stringify(await inspectProjectStatus(process.cwd(), programOptions.statusClock?.() ?? Date.now()))}\n`);
+    .option("--explain", "Include required-check freshness and readiness/completion blockers")
+    .option("--limit <count>", "Maximum required checks when --explain is set", "20")
+    .action(async (options: { explain?: boolean; limit: string }) => {
+      const now = programOptions.statusClock?.() ?? Date.now();
+      const result = options.explain === true
+        ? await explainProjectStatus(process.cwd(), parseReportLimit(options.limit, "status"), now)
+        : await inspectProjectStatus(process.cwd(), now);
+      process.stdout.write(`${JSON.stringify(result)}\n`);
     });
   program.command("tasks")
     .description("List bounded Harnix task metadata")
@@ -196,15 +200,6 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       const platform = parseReportPlatform(options.platform);
       process.stdout.write(`${JSON.stringify(await reportProjectContext(process.cwd(), platform, parseReportLimit(options.limit, "context-report")))}\n`);
     });
-  program.command("checks")
-    .description("Explain required Harnix check freshness metadata")
-    .option("--limit <count>", "Maximum required checks", "20")
-    .action(async (options: { limit: string }) => {
-      process.stdout.write(`${JSON.stringify(await reportProjectChecks(process.cwd(), parseReportLimit(options.limit, "checks"), programOptions.statusClock?.() ?? Date.now()))}\n`);
-    });
-  program.command("audit").description("Audit active-task readiness and completion blockers").action(async () => {
-    process.stdout.write(`${JSON.stringify(await auditProjectTask(process.cwd(), programOptions.statusClock?.() ?? Date.now()))}\n`);
-  });
   program.command("skill")
     .argument("[name]", "Canonical Harnix skill name, for example harnix-implement")
     .description("Print the canonical Harnix skill catalog or one skill's instructions")
@@ -406,7 +401,7 @@ function parseReportPlatform(value: string | undefined): "kiro" | "antigravity" 
   return value;
 }
 
-function parseReportLimit(value: string, command: "context-report" | "checks"): number {
+function parseReportLimit(value: string, command: "context-report" | "status"): number {
   if (!/^\d+$/u.test(value)) throw new Error(`--limit must be an integer between 1 and 50 for ${command}.`);
   const limit = Number(value);
   if (limit < 1 || limit > 50) throw new Error(`--limit must be an integer between 1 and 50 for ${command}.`);

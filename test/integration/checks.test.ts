@@ -19,7 +19,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe.sequential("checks command", () => {
+describe.sequential("status --explain (checks projection)", () => {
   it("classifies and sorts required v1 checks without exposing private check or evidence prose", async () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });
@@ -33,10 +33,10 @@ describe.sequential("checks command", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "checks", "--limit", "50"], { statusClock: () => now })).resolves.toBe(0);
+    await expect(runCli(["node", "harnix", "status", "--explain", "--limit", "50"], { statusClock: () => now })).resolves.toBe(0);
 
     const raw = output(stdout.mock.calls);
-    const result = JSON.parse(raw) as { activeTask: { summary: unknown; checks: Array<{ id: string; state: string; reasonCodes: string[]; changes: unknown[] }> } };
+    const result = (JSON.parse(raw) as { explain: { checks: { activeTask: { summary: unknown; checks: Array<{ id: string; state: string; reasonCodes: string[]; changes: unknown[] }> } } } }).explain.checks;
     expect(result).toMatchObject({ generator: "harnix", schemaVersion: 1, scope: "project", filter: { limit: 50 } });
     expect(result.activeTask.summary).toEqual({ passed: 1, failed: 1, stale: 1, pending: 2, total: 5, returned: 5, resultTruncated: false, detailsTruncated: false });
     expect(result.activeTask.checks.map(({ id, state, reasonCodes }) => ({ id, state, reasonCodes }))).toEqual([
@@ -51,8 +51,8 @@ describe.sequential("checks command", () => {
     await expect(snapshotTree(root)).resolves.toEqual(before);
 
     stdout.mockClear();
-    await expect(runCli(["node", "harnix", "checks", "--limit", "2"], { statusClock: () => now })).resolves.toBe(0);
-    expect(JSON.parse(output(stdout.mock.calls))).toMatchObject({ activeTask: { summary: { total: 5, returned: 2, resultTruncated: true, detailsTruncated: true } } });
+    await expect(runCli(["node", "harnix", "status", "--explain", "--limit", "2"], { statusClock: () => now })).resolves.toBe(0);
+    expect((JSON.parse(output(stdout.mock.calls)) as { explain: { checks: unknown } }).explain.checks).toMatchObject({ activeTask: { summary: { total: 5, returned: 2, resultTruncated: true, detailsTruncated: true } } });
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
 
@@ -76,10 +76,10 @@ describe.sequential("checks command", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "checks"], { statusClock: () => Date.parse("2026-08-26T01:00:00.000Z") })).resolves.toBe(0);
+    await expect(runCli(["node", "harnix", "status", "--explain"], { statusClock: () => Date.parse("2026-08-26T01:00:00.000Z") })).resolves.toBe(0);
 
     const raw = output(stdout.mock.calls);
-    expect(JSON.parse(raw)).toMatchObject({
+    expect((JSON.parse(raw) as { explain: { checks: unknown } }).explain.checks).toMatchObject({
       activeTask: {
         summary: { passed: 0, failed: 0, stale: 1, pending: 0, total: 1, returned: 1 },
         checks: [{
@@ -102,12 +102,12 @@ describe.sequential("checks command", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "checks"])).resolves.toBe(0);
-    expect(JSON.parse(output(stdout.mock.calls))).toEqual({ generator: "harnix", schemaVersion: 1, scope: "project", filter: { limit: 20 }, activeTask: null });
+    await expect(runCli(["node", "harnix", "status", "--explain"])).resolves.toBe(0);
+    expect((JSON.parse(output(stdout.mock.calls)) as { explain: { checks: unknown } }).explain.checks).toEqual({ generator: "harnix", schemaVersion: 1, scope: "project", filter: { limit: 20 }, activeTask: null });
 
     for (const limit of ["0", "51", "1.5", "private"]) {
       stdout.mockClear();
-      await expect(runCli(["node", "harnix", "checks", "--limit", limit])).resolves.toBe(2);
+      await expect(runCli(["node", "harnix", "status", "--explain", "--limit", limit])).resolves.toBe(2);
       expect(JSON.parse(output(stdout.mock.calls))).toMatchObject({ ok: false, error: { exitCode: 2 } });
     }
   });
@@ -124,14 +124,14 @@ describe.sequential("checks command", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "checks"])).resolves.toBe(2);
+    await expect(runCli(["node", "harnix", "status", "--explain"])).resolves.toBe(2);
 
     const raw = output(stdout.mock.calls);
     expect(JSON.parse(raw)).toMatchObject({
       generator: "harnix",
       schemaVersion: 1,
       ok: false,
-      error: { exitCode: 2, message: "Checks task state is unavailable; run harnix doctor." },
+      error: { exitCode: 2, message: "Status task state is unavailable; run harnix doctor." },
     });
     expect(raw).not.toContain("PRIVATE_TASK_PARSE_CANARY");
     expect(raw).not.toContain(root);

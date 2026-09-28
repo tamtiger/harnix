@@ -22,7 +22,7 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "decision inventory",
     "observable acceptance criteria",
     "placeholder scan",
-    "hyphen between words",
+    "hyphenated slug",
     "implementation checklist",
     "Do not mark the task `ready`",
     "stale context",

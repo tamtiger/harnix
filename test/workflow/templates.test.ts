@@ -3,9 +3,9 @@ import { Buffer } from "node:buffer";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { initializeProject } from "../../src/commands/init.js";
+import { updateProject } from "../../src/commands/update.js";
 import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
 import { renderAgentsTemplate } from "../../src/templates/harnix/agents.js";
-import { ensureManagedWorkflow } from "../../src/templates/harnix/managed-workflow.js";
 import { workflowSkills, workflowTemplate } from "../../src/templates/harnix/workflow.js";
 import { packageVersion } from "../../src/version.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
@@ -183,10 +183,10 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("one current stage-owner skill");
     expect(workflowTemplate).toContain("separately through EOF");
     expect(workflowTemplate).not.toContain("harnix internal workflow");
-    expect(workflowTemplate).toContain('{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts>, "contractRevision"?: { "reason": <text> } }');
+    expect(workflowTemplate).toContain('{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts>, "contractRevision"?: { "reason": <text> }, "epic"?: <EpicRecord>, "roadmapMembers"?: <TaskRecord[]> }');
     expect(workflowTemplate).toContain("acceptanceCriteria: [{ id, text, status, evidenceIds, waiverReason? }]");
     expect(workflowTemplate).toContain("validationPlan: [{ id, description, command?, scope, required, criterionIds, inputs }]");
-    expect(workflowTemplate).toContain("evidence: [{ id, checkId?, recordedAt, result, exitCode?, summary, artifactPaths, inputDigest? }]");
+    expect(workflowTemplate).toContain("evidence: [{ id, checkId?, recordedAt, result, exitCode?, summary, artifactPaths, inputDigest?, findings? }]");
     expect(workflowTemplate).toContain("cancellation?: { reason, authorizedBy: \"user\" }");
     expect(workflowTemplate).toContain("cancelledAt?");
     expect(workflowTemplate).toContain("never edit task.json directly");
@@ -199,8 +199,7 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("Public harnix tasks provides a bounded resilient local task index");
     expect(workflowTemplate).toContain("harnix resume restores only an explicitly selected exact unfinished-task pointer");
     expect(workflowTemplate).toContain("Public harnix context-report explains effective hook-context metadata");
-    expect(workflowTemplate).toContain("harnix checks explains required-check freshness and changed inputs");
-    expect(workflowTemplate).toContain("harnix audit exposes exact readiness/completion blocker codes and IDs");
+    expect(workflowTemplate).toContain("harnix status --explain adds required-check freshness with changed inputs plus exact readiness/completion blocker codes and IDs");
     expect(workflowTemplate).toContain("must not invoke repository-map queries, impact, or refreshes");
     expect(workflowTemplate).not.toContain("Increase the package patch version");
     expect(workflowTemplate).not.toContain("update `CHANGELOG.md`");
@@ -211,28 +210,9 @@ describe("workflow templates", () => {
       expect(skill.body).toContain("## Exit");
     }
     await writeFile(join(root, ".harnix", "workflow.md"), "user workflow");
-    await ensureManagedWorkflow(root);
+    await updateProject({ root });
 
     await expect(readFile(join(root, ".harnix", "workflow.md"), "utf8")).resolves.toBe("user workflow");
   });
 
-  it("reconciles the legacy managed-workflow source ID to the canonical workflow ID", async () => {
-    const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
-    const manifestPath = join(root, ".harnix", ".template-hashes.json");
-    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as {
-      entries: Array<{ path: string; sourceId: string }>;
-    };
-    const workflowEntry = manifest.entries.find((entry) => entry.path === ".harnix/workflow.md");
-    expect(workflowEntry).toBeDefined();
-    workflowEntry!.sourceId = "harnix-workflow";
-    await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-
-    await ensureManagedWorkflow(root);
-
-    const reconciled = JSON.parse(await readFile(manifestPath, "utf8")) as {
-      entries: Array<{ path: string; sourceId: string }>;
-    };
-    expect(reconciled.entries.find((entry) => entry.path === ".harnix/workflow.md")?.sourceId).toBe("workflow");
-  });
 });

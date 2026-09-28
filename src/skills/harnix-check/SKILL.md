@@ -55,7 +55,7 @@ Map every claim to the command, inspection, or artifact that proves it. Read the
 
 For non-command checks, record what was inspected, the exact scope, time, result, and concise conclusion. Never expose secrets or machine-specific paths in persisted/public evidence.
 
-Public `harnix audit` may be used as a bounded preflight view of readiness/completion blocker codes and IDs. Its result never substitutes for reading the governing artifacts, running a declared check, capturing pre/post input snapshots, or recording fresh evidence; audit does not execute or fix anything.
+Public `harnix status --explain` may be used as a bounded preflight view of required-check freshness plus readiness/completion blocker codes and IDs. Its result never substitutes for reading the governing artifacts, running a declared check, capturing pre/post input snapshots, or recording fresh evidence; audit does not execute or fix anything.
 
 For each TaskRecord schema v2 required check, capture `harnix workflow --snapshot --check <id>` immediately before the non-mutating check and again after its complete output is read. Persist a passing evidence item only when the two snapshots have the same `inputDigest`, and attach that digest to the evidence. A mismatch, empty glob, missing input, unreadable input, or unsafe path is failed freshness evidence, not a warning to ignore.
 

@@ -133,7 +133,7 @@ Chi tiết đầy đủ (transition, gate, artifact contract) nằm ở [Workflo
 - Một câu hỏi chỉ đọc, một review độc lập, hoặc một **standalone read-only research** không tạo hay đụng vào task nào — agent trả lời/thực hiện ngay rồi dừng lại (Bypass).
 - Ngược lại, bất kỳ yêu cầu nào **thay đổi file repository hoặc task artifact phải đi vào lifecycle Lite/Full** — tạo hoặc tiếp tục một task record, đi qua đúng các stage `planning -> ready -> implementing -> verifying -> finishing -> completed`.
 
-**Public CLI quản lý harness và diagnostics; coding agent dùng các skill Harnix để chuyển stage.** Bạn hầu như không bao giờ tự gõ `harnix workflow --save/--transition/--evidence/...` — các skill đó chỉ dành cho agent dùng nội bộ. Bạn dùng CLI để xem trạng thái (`harnix status`, `harnix audit`, `harnix checks`) hoặc bảo trì cấu hình (`harnix doctor`, `harnix update`).
+**Public CLI quản lý harness và diagnostics; coding agent dùng các skill Harnix để chuyển stage.** Bạn hầu như không bao giờ tự gõ `harnix workflow --save/--transition/--evidence/...` — các skill đó chỉ dành cho agent dùng nội bộ. Bạn dùng CLI để xem trạng thái (`harnix status`, `harnix status --explain`) hoặc bảo trì cấu hình (`harnix doctor`, `harnix update`).
 
 **Seed specs và `.harnix/workflow.md` được Harnix quản lý cho đến khi người dùng sửa** — sau lần chỉnh sửa đầu tiên, `harnix update` sẽ luôn giữ nguyên phần bạn đã đổi. Ngược lại: **Task, research và journal luôn là dữ liệu người dùng** — Harnix không bao giờ tự sửa hay xoá nội dung bên trong `.harnix/tasks/`, research hay journal của bạn.
 
@@ -150,8 +150,7 @@ Mọi output của public command đều là JSON. Dưới đây là các lệnh
 | `harnix pause [--dry-run]` | Tạm dừng task đang active, gỡ `.active` an toàn để chuyển hoặc tạo task mới |
 | `harnix resume <task-id> [--dry-run]` | Tiếp tục một task chưa hoàn thành theo đúng ID |
 | `harnix context-report --platform <id>` | Xem context nào thực sự được đưa vào agent |
-| `harnix checks` | Xem check nào đã stale, input nào đổi/thiếu |
-| `harnix audit` | Xem readiness/completion blocker của task hiện tại |
+| `harnix status --explain [--limit <n>]` | Xem check nào đã stale (input đổi/thiếu) và readiness/completion blocker của task hiện tại |
 | `harnix roadmap [--id <epic-id>] [--limit <n>]` | Xem danh sách Epic Roadmaps hoặc chi tiết tiến độ member tasks trong epic |
 | `harnix repo-map --query <text>` / `--impact <path>` | Tìm file liên quan hoặc dependency impact từ cache |
 | `harnix doctor [--fix] [--global]` | Kiểm tra drift, hook, path safety, secret exposure; tự sửa issue an toàn |

@@ -36,7 +36,7 @@ Before reproducing or fixing anything, compare the failure with the latest user 
 
 Record before retrying:
 
-- inspect any structured `findings` recorded on the failed check's `EvidenceRecordV2` or query `harnix checks` to locate the exact file, line, and machine-readable failure reason;
+- inspect any structured `findings` recorded on the failed check's `EvidenceRecordV2` or query `harnix status --explain` to locate the exact file, line, and machine-readable failure reason;
 - expected and actual behavior;
 - exact command/tool, exit/result, and smallest reproducer;
 - last successful boundary and first observed bad boundary;

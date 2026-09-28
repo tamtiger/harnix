@@ -478,12 +478,10 @@
       "adaptation": "Condenses attributed high-signal guidance into a typed Harnix catalog selected by detected language, technology, path, and task topic instead of installing a broad rule pack.",
       "implementation": {
         "code": [
-          "src/guides/catalog.ts",
-          "src/rules/rules.ts"
+          "src/guides/catalog.ts"
         ],
         "tests": [
-          "test/unit/catalog.test.ts",
-          "test/unit/rules.test.ts"
+          "test/unit/catalog.test.ts"
         ],
         "docs": [
           "docs/HARNIX_PRD.md",

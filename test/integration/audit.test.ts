@@ -19,7 +19,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe.sequential("audit command", () => {
+describe.sequential("status --explain (audit projection)", () => {
   it("returns no-active success without changing project files", async () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });
@@ -28,9 +28,9 @@ describe.sequential("audit command", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "audit"])).resolves.toBe(0);
+    await expect(runCli(["node", "harnix", "status", "--explain"])).resolves.toBe(0);
 
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({ generator: "harnix", schemaVersion: 1, activeTask: null });
+    expect((JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { explain: { audit: unknown } }).explain.audit).toEqual({ generator: "harnix", schemaVersion: 1, activeTask: null });
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
 
@@ -51,10 +51,10 @@ describe.sequential("audit command", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "audit"])).resolves.toBe(0);
+    await expect(runCli(["node", "harnix", "status", "--explain"])).resolves.toBe(0);
 
     const output = stdout.mock.calls.map((call) => String(call[0])).join("");
-    expect(JSON.parse(output)).toEqual({
+    expect((JSON.parse(output) as { explain: { audit: unknown } }).explain.audit).toEqual({
       generator: "harnix",
       schemaVersion: 1,
       activeTask: {
@@ -72,7 +72,7 @@ describe.sequential("audit command", () => {
     });
     for (const canary of ["PRIVATE_TITLE_CANARY", "PRIVATE_GOAL_CANARY", "PRIVATE_CHECK_CANARY", "PRIVATE_COMMAND_CANARY"]) expect(output).not.toContain(canary);
     expect(output).not.toContain(root);
-    expect(Buffer.byteLength(output, "utf8")).toBeLessThan(4_096);
+    expect(Buffer.byteLength(JSON.stringify((JSON.parse(output) as { explain: { audit: unknown } }).explain.audit), "utf8")).toBeLessThan(4_096);
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
 
@@ -105,16 +105,16 @@ describe.sequential("audit command", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "audit"], { statusClock: () => current })).resolves.toBe(0);
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
+    await expect(runCli(["node", "harnix", "status", "--explain"], { statusClock: () => current })).resolves.toBe(0);
+    expect((JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { explain: { audit: unknown } }).explain.audit).toMatchObject({
       activeTask: { completion: { status: "pass", criteria: { met: 1, pending: 0 }, requiredChecks: { passed: 1, stale: 0 } } },
     });
 
     await writeFile(join(root, "input.ts"), "export const value = 2;\n");
     const beforeStaleAudit = await snapshotTree(root);
     stdout.mockClear();
-    await expect(runCli(["node", "harnix", "audit"], { statusClock: () => current })).resolves.toBe(0);
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
+    await expect(runCli(["node", "harnix", "status", "--explain"], { statusClock: () => current })).resolves.toBe(0);
+    expect((JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { explain: { audit: unknown } }).explain.audit).toMatchObject({
       activeTask: {
         completion: {
           status: "fail",

@@ -4,7 +4,6 @@ import { describe, expect, it } from "vitest";
 import { cancelWorkflowTask, canCompleteTask, continueWorkflowTask, evidenceSupportsScope, finishWorkflowTask, implementationStrategy, isWithinRequestedScope, nextWorkflowStatus, routeWorkflow, shouldReassessArchitecture, shouldResearch, validateFullReadyArtifact, verificationRetryDisposition, verificationStages } from "../../src/core/workflow.js";
 import { appendJournal } from "../../src/core/journal/journal.js";
 import { loadTask, resolveActiveTask, saveTask, setActiveTask, transitionTask } from "../../src/core/tasks/task.js";
-import { createResearchFinding } from "../../src/core/research.js";
 import type { TaskRecord, TaskRecordV2 } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
@@ -291,13 +290,6 @@ describe("workflow routing and completion evidence", () => {
   it("should_clear_blocker_when_blocked_task_resumes", () => {
     const current = { ...task("2026-08-07T09:30:00Z"), status: "blocked" as const, blocker: { kind: "repository" as const, summary: "locked", nextAction: "retry", resumeStatus: "verifying" as const } };
     expect(transitionTask(current, "verifying", "verifying").blocker).toBeUndefined();
-  });
-  it("records research provenance only for material unknowns", () => {
-    const finding = createResearchFinding({ taskId: "t", topic: "compatibility", source: "official docs", researchedAt: "2026-08-07", conclusion: "supported", remainingUncertainty: "Platform smoke is still required.", materialUnknown: true });
-    expect(finding).toContain("Source: official docs");
-    expect(finding).toContain("## Remaining uncertainty\n\nPlatform smoke is still required.");
-    expect(() => createResearchFinding({ taskId: "t", topic: "known", source: "local", researchedAt: "2026-08-07", conclusion: "x", remainingUncertainty: "none", materialUnknown: false })).toThrow("material unknown");
-    expect(() => createResearchFinding({ taskId: "t", topic: "compatibility", source: "official docs", researchedAt: "2026-08-07", conclusion: "supported", remainingUncertainty: "", materialUnknown: true })).toThrow("provenance");
   });
   it("continues from persisted active state with minimum deduplicated context", async () => {
     const root = await temporaryRepository(); const active = { ...task(new Date().toISOString()), relevantPaths: ["b", "a"], relevantSpecs: ["a", "spec"] };
