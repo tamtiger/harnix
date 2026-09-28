@@ -76,11 +76,10 @@ For each implementation task:
 4. Implement the smallest change that makes the focused test pass.
 5. Refactor while green; avoid speculative abstractions and unsupported surfaces.
 6. Cập nhật đánh dấu `[x]` vào checklist của `plan.md` ngay khi hoàn thành từng slice/công việc; toàn bộ checklist trong `plan.md` phải đạt 100% `[x]` trước khi chuyển sang `verifying`.
-7. Run compliance review before quality/security review.
-8. At verification entry, reuse a required check already reported `passed` when its current `inputDigest` matches; run only pending, failed, stale, or affected checks, then the broader gate required by the phase.
-9. For release-visible package changes, increment the package patch version at most once and update the same `CHANGELOG.md` entry during implementation and before `verifying`; regenerate managed output whenever canonical input changes. Finish is product-read-only.
-10. Update `CHANGELOG.md` with user-visible implementation changes before committing.
-11. Report actual evidence, omitted checks, residual risks, and next task. Do not claim success from stale or partial output.
+7. For release-visible package changes, increment the package patch version at most once via `pnpm version:sync <version> --summary <text> [--kind added|changed|fixed]` and update the same `CHANGELOG.md` entry during implementation and before `verifying`; regenerate managed output whenever canonical input changes. Finish is product-read-only.
+8. Run compliance review before quality/security review.
+9. At verification entry, reuse a required check already reported `passed` when its current `inputDigest` matches; run only pending, failed, stale, or affected checks, then the broader gate required by the phase.
+10. Report actual evidence, omitted checks, residual risks, and next task. Do not claim success from stale or partial output.
 
 Create new tasks as TaskRecord schema v2. Required checks must map `criterionIds` to acceptance criteria, declare safe sorted `inputs` including `@task-contract`, and persist passing or snapshot-available stable failed `inputDigest` values through the hidden workflow snapshot/save path. Draft v2 obligations converge during planning and freeze at first persisted `ready`; audited `replan` plus `contractRevision.reason` may supersede only unproven obligations. A criterion mapped by recorded check evidence and every passing check remain immutable; a failed check is retired unchanged with a new required replacement ID. Historical v1 keeps first-persistence immutability and monotonic additions. If an input glob matches the active task's exact `.harnix/tasks/<active-id>/task.json`, omit that raw file entry because `@task-contract` already binds completion-relevant fields; raw-hash every historical/other task record. The top-level sidecar remains schema v1; historical nested snapshot v1 entries retain raw hashing, while new nested snapshot v2 entries declare a normalizer. Evidence age follows TaskRecord version: v1 keeps the one-hour rule; every v2 pass is digest-based and does not expire merely because time passed, including v2 tasks with a historical nested v1 snapshot. Read v1 task records unchanged; migrate only an unfinished v1 task with explicit authorization at checkpoint `replan`, preserving prior criteria/evidence and each required check's base definition while adding v2 mappings. Migration provenance keeps later obligation changes behind audited `contractRevision`. On continuation, treat `contextDrift: stale` as a mandatory replan before context reselection, but stop when the same drift remains after one reselection in the same request.
 
@@ -134,6 +133,7 @@ smoke:tarball
 measure:init
 measure:footprint
 scan:release
+version:sync
 ```
 
 Do not weaken, bypass, or silently skip these gates. Filesystem tests use isolated temporary repositories **and injected disposable user homes**; they must not mutate real global configuration or call real install/network operations.

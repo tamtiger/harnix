@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `1.1.20`
+**Version:** `1.1.21`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex hoặc Claude Code), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -212,7 +212,12 @@ Toolchain: Node.js `>=18`, pnpm, TypeScript, tsup, ESLint, Commander.js, Inquire
 Không sửa tay version trong `package.json` hay `metadata.version` của skill. Dùng script đồng bộ:
 
 ```powershell
-pnpm version:sync 1.0.6 --summary "Mô tả thay đổi release"
+# Bump version mới kèm tóm tắt và phân loại (kind: added | changed | fixed, mặc định changed):
+pnpm version:sync 1.1.22 --summary "Mô tả thay đổi release" --kind fixed
+
+# Hoặc đồng bộ lại metadata khi có drift cùng version:
+pnpm version:sync 1.1.22
+
 pnpm build
 node dist\cli.js update
 ```

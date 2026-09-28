@@ -8,7 +8,8 @@ import { defaultRepoMapLimits, type RepoMapInventory, type RepoMapLimits } from 
 import { compareCodeUnits } from "../../utils/order.js";
 
 const ignoredDirectoryNameList = [
-  ".agents", ".cache", ".claude", ".codex", ".gemini", ".git", ".harnix", ".kiro", ".next", ".pytest_cache", ".trellis", ".turbo", ".understand-anything",
+  ".agents", ".cache", ".claude", ".codex", ".gemini", ".git", ".harnix", ".kilo", ".kiro", ".next", ".pytest_cache", ".trellis", ".turbo", ".understand-anything",
+  ".worktrees",
   "__pycache__", "bin", "build", "coverage", "dist", "node_modules", "obj", "vendor",
 ] as const;
 const ignoredDirectoryNames = new Set<string>(ignoredDirectoryNameList);

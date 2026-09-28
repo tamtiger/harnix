@@ -40,6 +40,31 @@ describe("repository map service", () => {
 
     await expect(refreshRepoMap({ root, limits })).rejects.toThrow(/positive integer/i);
   });
+  it("excludes .worktrees directory (Kilo AI git worktrees) from inventory", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await mkdir(join(root, ".worktrees", "feature-branch", "src"), { recursive: true });
+    await writeFile(join(root, "src", "app.ts"), "export const app = true;\n");
+    await writeFile(join(root, ".worktrees", "feature-branch", "src", "app.ts"), "export const app = true;\n");
+    await writeFile(join(root, ".worktrees", "feature-branch", "package.json"), "{}\n");
+
+    const refreshed = await refreshRepoMap({ root });
+
+    expect(refreshed.map.records.map(({ path }) => path)).toEqual(["src/app.ts"]);
+    expect(refreshed.map.records.every(({ path }) => !path.startsWith(".worktrees/"))).toBe(true);
+  });
+  it("excludes nested .kilo worktrees directory from inventory", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await mkdir(join(root, "service", ".kilo", "worktrees", "my-branch", "src"), { recursive: true });
+    await writeFile(join(root, "src", "app.ts"), "export const app = true;\n");
+    await writeFile(join(root, "service", ".kilo", "worktrees", "my-branch", "src", "app.ts"), "export const app = true;\n");
+
+    const refreshed = await refreshRepoMap({ root });
+
+    expect(refreshed.map.records.map(({ path }) => path)).toContain("src/app.ts");
+    expect(refreshed.map.records.every(({ path }) => !path.includes("/.kilo/"))).toBe(true);
+  });
   it("builds a deterministic structural cache and returns bounded lexical results", async () => {
     const root = await temporaryRepository();
     await mkdir(join(root, "src"), { recursive: true });

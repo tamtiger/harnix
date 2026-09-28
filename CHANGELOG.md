@@ -4,6 +4,16 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.21] - 2026-09-28
+
+### Fixed
+
+- Repo-map inventory: thêm `.worktrees` và `.kilo` vào danh sách thư mục bị loại trừ. `.worktrees` là thư mục Kilo AI dùng để lưu git worktrees cục bộ; `.kilo` là thư mục nội bộ của Kilo AI platform — cả hai không liên quan đến mã nguồn dự án và gây bloat đáng kể trên các repo sử dụng Kilo AI (ví dụ: giảm 1.025 records, 1.87 MB → 1.27 MB trên payment-hub).
+
+### Changed
+
+- Script `scripts/version-sync.mjs`: bổ sung cờ `--kind <added|changed|fixed>` để phân loại đúng đề mục CHANGELOG, thẩm định tính hợp lệ theo lịch của ngày phát hành YYYY-MM-DD, tự động sửa các metadata version của skill bị lệch khi chạy đồng bộ lại (cùng version), và neo phạm vi cập nhật version chỉ bên trong YAML frontmatter của SKILL.md.
+
 ## [1.1.20] - 2026-09-25
 
 ### Changed

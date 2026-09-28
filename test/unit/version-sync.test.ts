@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 
 interface VersionSyncResult { changed: boolean; previousVersion: string; updated: readonly string[]; version: string; }
-type SyncVersion = (options: { date?: string; root: string; summaries: readonly string[]; version: string }) => Promise<VersionSyncResult>;
+type SyncVersion = (options: { date?: string; kind?: string; root: string; summaries: readonly string[]; version: string }) => Promise<VersionSyncResult>;
 const { syncVersion } = await import(new URL("../../scripts/version-sync.mjs", import.meta.url).href) as { syncVersion: SyncVersion };
 const execFileAsync = promisify(execFile);
 
@@ -53,6 +53,77 @@ describe("version sync", () => {
     const { stdout } = await execFileAsync(process.execPath, [script, "--", "1.0.5", "--summary", "Đồng bộ release metadata qua pnpm."], { cwd: root });
 
     expect(JSON.parse(stdout)).toMatchObject({ changed: true, previousVersion: "1.0.4", version: "1.0.5" });
+  });
+
+  // Fix #1: --kind flag
+  it("inserts ### Fixed section when --kind fixed is passed via CLI", async () => {
+    const root = await fixture();
+    const script = join(process.cwd(), "scripts", "version-sync.mjs");
+
+    const { stdout } = await execFileAsync(process.execPath, [script, "--", "1.0.5", "--summary", "Sửa lỗi X.", "--kind", "fixed"], { cwd: root });
+
+    expect(JSON.parse(stdout)).toMatchObject({ changed: true, version: "1.0.5" });
+    const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
+    expect(changelog).toContain("### Fixed");
+    expect(changelog).not.toContain("### Changed");
+    expect(changelog).toContain("- Sửa lỗi X.");
+  });
+
+  it("inserts ### Added section when kind: added is passed via API", async () => {
+    const root = await fixture();
+
+    await expect(syncVersion({ date: "2026-08-18", root, summaries: ["Tính năng mới Y."], version: "1.0.5", kind: "added" })).resolves.toMatchObject({ changed: true });
+    const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
+    expect(changelog).toContain("### Added");
+    expect(changelog).not.toContain("### Changed");
+  });
+
+  it("defaults to ### Changed when kind is omitted", async () => {
+    const root = await fixture();
+
+    await expect(syncVersion({ date: "2026-08-18", root, summaries: ["Cập nhật."], version: "1.0.5" })).resolves.toMatchObject({ changed: true });
+    const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
+    expect(changelog).toContain("### Changed");
+  });
+
+  it("rejects an unknown kind value", async () => {
+    const root = await fixture();
+
+    await expect(syncVersion({ date: "2026-08-18", root, summaries: ["x"], version: "1.0.5", kind: "refactor" })).rejects.toThrow(/kind/iu);
+  });
+
+  // Fix #2: re-sync auto-fixes stale skills
+  it("auto-fixes stale skill versions during re-sync instead of throwing", async () => {
+    const root = await fixture();
+    await syncVersion({ date: "2026-08-18", root, summaries: ["First bump."], version: "1.0.5" });
+    const skillPath = join(root, "src", "skills", "harnix-brainstorm", "SKILL.md");
+    await writeFile(skillPath, `---\nname: harnix-brainstorm\nmetadata:\n  version: "1.0.4"\n---\n`);
+
+    const result = await syncVersion({ date: "2026-08-18", root, summaries: [], version: "1.0.5" });
+
+    expect(result.updated).toContain("src/skills/harnix-brainstorm/SKILL.md");
+    await expect(readFile(skillPath, "utf8")).resolves.toContain('version: "1.0.5"');
+  });
+
+  // Fix #3: replaceSkillVersion anchors to frontmatter only
+  it("replaces only the frontmatter version and leaves matching body content untouched", async () => {
+    const root = await fixture();
+    const skillPath = join(root, "src", "skills", "harnix-brainstorm", "SKILL.md");
+    await writeFile(skillPath, `---\nname: harnix-brainstorm\nmetadata:\n  version: "1.0.4"\n---\n\nUse \`  version: "1.0.4"\` in your frontmatter.\n`);
+
+    await syncVersion({ date: "2026-08-18", root, summaries: ["Test."], version: "1.0.5" });
+
+    const content = await readFile(skillPath, "utf8");
+    expect(content).toContain('version: "1.0.5"');         // frontmatter updated
+    expect(content).toContain('`  version: "1.0.4"`');     // body left untouched
+  });
+
+  // Fix #4: invalid calendar date rejection
+  it("rejects an invalid calendar date even when format matches YYYY-MM-DD", async () => {
+    const root = await fixture();
+
+    await expect(syncVersion({ date: "2026-13-01", root, summaries: ["x"], version: "1.0.5" })).rejects.toThrow(/invalid.*date/iu);
+    await expect(syncVersion({ date: "2026-02-30", root, summaries: ["x"], version: "1.0.5" })).rejects.toThrow(/invalid.*date/iu);
   });
 });
 

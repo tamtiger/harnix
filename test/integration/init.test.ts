@@ -144,8 +144,8 @@ describe("initializeProject", () => {
     await initializeProject({ developer: "tam", root, yes: true });
 
     const guide = `${await readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "abp.md"), "utf8")}\n${await readFile(join(root, ".harnix", "spec", "guides", "technologies", "runtime", "dotnet.md"), "utf8")}`;
-    expect(guide).toContain("ABP authorization policies");
-    expect(guide).toContain("no-tracking");
+    expect(guide).toContain("Domain-Driven Design (DDD)");
+    expect(guide).toContain("Unit of Work");
     expect(guide).toContain("tenant isolation");
   });
   it("should_preserve_existing_agent_instructions_when_initializing", async () => {

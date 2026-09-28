@@ -4,12 +4,36 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const semverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u;
+const allowedKinds = new Set(["added", "changed", "fixed"]);
+const kindTitles = {
+  added: "Added",
+  changed: "Changed",
+  fixed: "Fixed",
+};
 
-export async function syncVersion({ root = process.cwd(), version, summaries, date = new Date().toISOString().slice(0, 10) }) {
+export async function syncVersion({
+  root = process.cwd(),
+  version,
+  summaries,
+  date = new Date().toISOString().slice(0, 10),
+  kind = "changed",
+}) {
   const targetRoot = resolve(root);
   const requested = parseVersion(version);
   const normalizedSummaries = normalizeSummaries(summaries);
   if (!/^\d{4}-\d{2}-\d{2}$/u.test(date)) throw new Error("Release date must use YYYY-MM-DD.");
+  const [year, month, day] = date.split("-").map(Number);
+  const parsedDate = new Date(Date.UTC(year, month - 1, day));
+  if (
+    parsedDate.getUTCFullYear() !== year ||
+    parsedDate.getUTCMonth() !== month - 1 ||
+    parsedDate.getUTCDate() !== day
+  ) {
+    throw new Error(`Release date is an invalid calendar date: ${date}.`);
+  }
+  if (!allowedKinds.has(kind)) {
+    throw new Error(`Release kind must be one of: ${[...allowedKinds].join(", ")}.`);
+  }
 
   const packagePath = join(targetRoot, "package.json");
   const changelogPath = join(targetRoot, "CHANGELOG.md");
@@ -31,8 +55,14 @@ export async function syncVersion({ root = process.cwd(), version, summaries, da
   if (comparison < 0) throw new Error(`Requested version ${version} must be greater than current version ${packageDocument.version}.`);
   if (comparison === 0) {
     if (!versionEntry.test(changelog)) throw new Error(`CHANGELOG.md does not contain a release entry for ${version}.`);
-    await assertSkillVersions(skillPaths, version);
     const updated = [];
+    for (const skillPath of skillPaths) {
+      const source = await readFile(skillPath, "utf8");
+      if (skillVersion(source, skillPath) !== version) {
+        await atomicWrite(skillPath, replaceSkillVersion(source, version, skillPath));
+        updated.push(relativePath(targetRoot, skillPath));
+      }
+    }
     if (nextSelfHostManifest !== selfHostManifest) {
       await atomicWrite(selfHostManifestPath, nextSelfHostManifest);
       updated.push(".harnix/.template-hashes.json");
@@ -62,7 +92,7 @@ export async function syncVersion({ root = process.cwd(), version, summaries, da
   await atomicWrite(selfHostManifestPath, nextSelfHostManifest);
   updated.push(".harnix/.template-hashes.json");
 
-  await atomicWrite(changelogPath, insertChangelogEntry(changelog, heading, normalizedSummaries));
+  await atomicWrite(changelogPath, insertChangelogEntry(changelog, heading, normalizedSummaries, kind));
   updated.push("CHANGELOG.md");
   await atomicWrite(readmePath, replaceReadmeVersion(readme, version));
   updated.push("README.md");
@@ -93,16 +123,12 @@ async function canonicalSkillPaths(root) {
   return skills;
 }
 
-async function assertSkillVersions(paths, version) {
-  for (const path of paths) {
-    const source = await readFile(path, "utf8");
-    if (skillVersion(source, path) !== version) throw new Error(`Skill metadata is not synchronized: ${path}.`);
-  }
-}
-
 function replaceSkillVersion(source, version, path) {
-  const current = skillVersion(source, path);
-  return source.replace(`  version: "${current}"`, `  version: "${version}"`);
+  const match = source.match(/^(---\r?\n[\s\S]*?\r?\n---)/u);
+  if (!match) throw new Error(`Missing frontmatter in ${path}.`);
+  const frontmatter = match[1];
+  const updatedFrontmatter = frontmatter.replace(/^ {2}version: "[^"\r\n]+"/mu, `  version: "${version}"`);
+  return updatedFrontmatter + source.slice(frontmatter.length);
 }
 
 function skillVersion(source, path) {
@@ -112,8 +138,9 @@ function skillVersion(source, path) {
   return versions[0][1];
 }
 
-function insertChangelogEntry(changelog, heading, summaries) {
-  const entry = `${heading}\n\n### Changed\n\n${summaries.map((summary) => `- ${summary}`).join("\n")}\n\n`;
+function insertChangelogEntry(changelog, heading, summaries, kind = "changed") {
+  const sectionTitle = kindTitles[kind] ?? "Changed";
+  const entry = `${heading}\n\n### ${sectionTitle}\n\n${summaries.map((summary) => `- ${summary}`).join("\n")}\n\n`;
   const firstRelease = changelog.search(/^## \[/mu);
   return firstRelease < 0 ? `${changelog.trimEnd()}\n\n${entry}` : `${changelog.slice(0, firstRelease)}${entry}${changelog.slice(firstRelease)}`;
 }
@@ -162,14 +189,23 @@ function parseArguments(argumentsList) {
   const normalizedArguments = argumentsList[0] === "--" ? argumentsList.slice(1) : argumentsList;
   const [version, ...rest] = normalizedArguments;
   const summaries = [];
+  let kind;
   for (let index = 0; index < rest.length; index += 1) {
-    if (rest[index] !== "--summary") throw new Error(`Unknown argument: ${rest[index]}`);
-    const summary = rest[index + 1];
-    if (!summary) throw new Error("--summary requires a value.");
-    summaries.push(summary);
-    index += 1;
+    if (rest[index] === "--summary") {
+      const summary = rest[index + 1];
+      if (!summary) throw new Error("--summary requires a value.");
+      summaries.push(summary);
+      index += 1;
+    } else if (rest[index] === "--kind") {
+      const value = rest[index + 1];
+      if (!value) throw new Error("--kind requires a value.");
+      kind = value;
+      index += 1;
+    } else {
+      throw new Error(`Unknown argument: ${rest[index]}`);
+    }
   }
-  return { summaries, version };
+  return { kind, summaries, version };
 }
 
 const isDirectExecution = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
