@@ -23,6 +23,8 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 - Phase 1–6 and workflow freshness hardening C1–C3 are complete in their authorized scope. Classify the latest request before consulting an active task; follow that task only for project-scoped work or an explicit continuation request.
 - Only when the user requests implementation, no active task exists, and the user has not set another priority, continue from the first unchecked task in `docs/IMPLEMENTATION_PLAN.md`; explicitly deferred extensions and Kiro CLI manual activation do not invalidate completed automated scope.
 - Do not invent a second package, workspace, service, or compatibility surface.
+- Active initiative: epic `20260928-180123-harnix-overhaul` (decisions in `docs/OVERHAUL_DECISIONS.md`, roadmap in `.harnix/roadmaps/20260928-180123-harnix-overhaul.md`). Follow its documented execution order, not the raw task-ID order. Its member tasks may change frozen contracts exactly as approved there, provided existing `.harnix/` data stays readable and each task updates the documents it affects.
+- Version exception for that epic only: member tasks do not bump the package version; the final `release-v2` task bumps to `2.0.0` once and writes a single consolidated `CHANGELOG.md` entry.
 
 ## Non-negotiable product boundaries
 

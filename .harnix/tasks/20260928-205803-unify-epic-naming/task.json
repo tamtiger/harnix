@@ -1,0 +1,103 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205803-unify-epic-naming",
+  "title": "[05] Thống nhất tên gọi epic và sửa renderer trang epic",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Dùng một tên epic ở mọi nơi: .harnix/roadmaps/ đổi thành .harnix/epics/; lệnh harnix roadmap [--limit] [--id] đổi thành harnix epic [--limit] (danh sách) và harnix epic <epic-id> (chi tiết, positional như harnix resume <task-id>); envelope roadmapMembers đổi thành epicMembers; src/core/roadmaps/roadmap.ts và src/commands/roadmap.ts đổi thành src/core/epics/epic.ts và src/commands/epic.ts. Giữ epicId, EpicRecord, field epic. harnix update và doctor --fix chuyển dữ liệu cũ từ .harnix/roadmaps/ sang .harnix/epics/; trước khi chuyển vẫn đọc được. Sửa 3 lỗi renderer: thiếu dòng trống trước heading Members, epic.nonGoals không được render, trang .md thiếu next task so với JSON. Bỏ hẳn tên roadmap trong 2.0.0 và ghi breaking change.",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test.",
+    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28).",
+    "Không đổi EpicRecord schema ngoài đường dẫn lưu; không đổi epicId của task."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-rename",
+      "text": "Không còn tên roadmap trong src, CLI, skill, template và docs hiện hành (trừ ghi chú migrate và CHANGELOG).",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-cli-epic",
+      "text": "harnix epic trả danh sách, harnix epic <epic-id> trả chi tiết kèm next task; id sai trả lỗi JSON exit 2; cli-contract.test được cập nhật.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-migrate-epics",
+      "text": "update và doctor --fix chuyển .harnix/roadmaps/*.json sang .harnix/epics/ không mất dữ liệu, idempotent; trước khi chuyển vẫn đọc được.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-epic-members",
+      "text": "Envelope hidden --save nhận epicMembers; skill và workflow.md dùng tên mới.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-epic-render",
+      "text": "Trang epic .md có dòng trống trước heading, render nonGoals và next task; có test snapshot.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-docs-sync",
+      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/core/roadmaps/**",
+    "src/commands/roadmap.ts",
+    "src/commands/internal-workflow.ts",
+    "src/cli-program.ts",
+    "src/commands/update.ts",
+    "src/commands/doctor.ts",
+    "src/skills/**",
+    "src/templates/**"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-cli-epic",
+        "ac-docs-sync",
+        "ac-epic-members",
+        "ac-epic-render",
+        "ac-migrate-epics",
+        "ac-rename"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    }
+  ],
+  "evidence": [],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:58:03.000+07:00",
+  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+}

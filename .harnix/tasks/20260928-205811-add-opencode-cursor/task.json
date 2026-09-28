@@ -1,0 +1,107 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205811-add-opencode-cursor",
+  "title": "[13] Thêm OpenCode và Cursor qua platform registry",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Thêm đúng hai nền tảng OpenCode và Cursor chỉ bằng bản ghi registry + fixture (chứng minh registry). OpenCode: marker block trong ~/.config/opencode/AGENTS.md giữ nội dung ngoài block; xử lý rõ rủi ro tạo file làm OpenCode ngừng dùng dự phòng ~/.claude/CLAUDE.md; skill qua skill sink chung; không có hook shell nên chạy chế độ không hook, không cài plugin JS mặc định. Cursor: không có file instruction global (User Rules chỉ qua UI) nên dựa vào skill + chế độ không hook; hook sessionStart trong ~/.cursor/hooks.json chỉ là tăng cường tùy chọn, bật khi đã xác minh schema additional_context; không dùng beforeSubmitPrompt. Chống trùng skill vì cả hai tool đọc nhiều thư mục (~/.agents/skills, ~/.claude/skills, ~/.cursor/skills, ~/.codex/skills, ~/.config/opencode/skills). Flag --opencode, --cursor cho setup/update/uninstall/doctor --global. Xác minh lại mọi đường dẫn, biến môi trường relocate root và schema hook bằng tài liệu chính thức lúc làm task (design.md §10).",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test.",
+    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28).",
+    "Không thêm tool nào khác ngoài OpenCode và Cursor.",
+    "Không cài plugin JS/extension mặc định, không ghi User Rules của Cursor bằng cơ chế không chính thức, không ghi file project-local, không đụng MCP/credentials/settings không thuộc Harnix."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-opencode-setup",
+      "text": "setup/update/doctor/uninstall --global --opencode chạy đúng qua fake home: marker block trong ~/.config/opencode/AGENTS.md, giữ nội dung ngoài block; hành vi với dự phòng ~/.claude/CLAUDE.md được chọn, test và ghi rõ.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-cursor-setup",
+      "text": "setup/update/doctor/uninstall --global --cursor chạy đúng qua fake home; skill được Cursor đọc thấy; hook sessionStart chỉ được cài khi schema đã xác minh, nếu không doctor báo rõ trạng thái hookless.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-no-duplicate-skills",
+      "text": "Khi cài nhiều nền tảng cùng lúc, mỗi tool chỉ thấy một bản mỗi skill harnix-* theo ma trận thư mục mà tool đó đọc; doctor cảnh báo khi có trùng.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-registry-only",
+      "text": "Hai nền tảng được thêm chỉ bằng bản ghi registry và fixture; không thêm nhánh theo tên nền tảng ngoài registry.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-verified-facts",
+      "text": "Đường dẫn, biến môi trường relocate root và schema hook của OpenCode/Cursor được xác minh bằng nguồn chính thức kèm ngày truy cập và ghi vào docs; điểm chưa xác minh được ghi rõ giới hạn.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-docs-sync",
+      "text": "PRD, ranh giới Supported platforms trong AGENTS.md, README và docs global setup được cập nhật trong cùng task.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/configurators/**",
+    "src/commands/setup.ts",
+    "src/commands/global-doctor.ts",
+    "src/commands/global-update.ts",
+    "src/commands/global-uninstall.ts",
+    "src/cli-program.ts",
+    "src/utils/user-paths.ts",
+    "docs/HARNIX_PRD.md",
+    "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+    "AGENTS.md",
+    "README.md"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-cursor-setup",
+        "ac-docs-sync",
+        "ac-no-duplicate-skills",
+        "ac-opencode-setup",
+        "ac-registry-only",
+        "ac-verified-facts"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    }
+  ],
+  "evidence": [],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:58:11.000+07:00",
+  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+}

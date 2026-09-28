@@ -1,0 +1,181 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "taskId": "20260928-180123-harnix-overhaul-audit",
+  "snapshots": [
+    {
+      "evidenceId": "ev-artifact-review",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260928-180123-harnix-overhaul-audit",
+      "checkId": "check-artifact-review",
+      "taskContractHash": "d1dd286a75c1be777845732d444da645cbf85a49c1e3182704dd99cf64ecc4c9",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/design.md",
+          "sha256": "61645c5a65a0ab715b89d6d8b22c1d70d56ee5db6b5cdfb960426c69aafb166f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/plan.md",
+          "sha256": "c2c3c34ecd5f39361ab6c7a0c8e3b665d91d38349021a61aa3cc462e696bcd6a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/prd.md",
+          "sha256": "3a3f95ea64edcfbac9db74ed2503b86d8ba28e71a7e4c8055e24c084459f2282",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/research/decision-register.md",
+          "sha256": "aad027e9d872b40b3068c787f5890c45f5c1620e5c4f4e697f31a7537ca7df1c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/research/external-research.md",
+          "sha256": "370a8937ec7e299ca5c035ea93d23be1255f563a1df289c926876f9b922c3678",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/research/inventory.md",
+          "sha256": "f8cf42c4b8459196e3ebfaed26a7f1cb46ba951f73e9d33136a8d8821a12b200",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/research/learning-redesign.md",
+          "sha256": "1ecc00b15cbb99ea14a687b1d12015f4d4eaa89ebf566ec3ae4fd49f697c8868",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/research/usage-evidence.md",
+          "sha256": "8f7bab30dbf74f1ac1f100d20664f4ec0e727f2563e4318d0dbc28ab72ef73d4",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "fe8b6651444f44ae4c57c1268b02aca707ec867d4074842a855e018eff1ae116",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/OVERHAUL_DECISIONS.md",
+          "sha256": "38a90f082393bbe238225b6a99b866b2523f024c838a4a5ceddd87160d9893a8",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "06b7f4270420d1dbc58fe1bbac2fca15e1fa2c5101c949b8244f61dac0344039"
+    },
+    {
+      "evidenceId": "ev-artifact-review-final",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260928-180123-harnix-overhaul-audit",
+      "checkId": "check-artifact-review",
+      "taskContractHash": "d1dd286a75c1be777845732d444da645cbf85a49c1e3182704dd99cf64ecc4c9",
+      "entries": [
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/design.md",
+          "sha256": "61645c5a65a0ab715b89d6d8b22c1d70d56ee5db6b5cdfb960426c69aafb166f",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/plan.md",
+          "sha256": "c2c3c34ecd5f39361ab6c7a0c8e3b665d91d38349021a61aa3cc462e696bcd6a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/prd.md",
+          "sha256": "3a3f95ea64edcfbac9db74ed2503b86d8ba28e71a7e4c8055e24c084459f2282",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/research/decision-register.md",
+          "sha256": "aad027e9d872b40b3068c787f5890c45f5c1620e5c4f4e697f31a7537ca7df1c",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/research/external-research.md",
+          "sha256": "370a8937ec7e299ca5c035ea93d23be1255f563a1df289c926876f9b922c3678",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/research/inventory.md",
+          "sha256": "f8cf42c4b8459196e3ebfaed26a7f1cb46ba951f73e9d33136a8d8821a12b200",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/research/learning-redesign.md",
+          "sha256": "1ecc00b15cbb99ea14a687b1d12015f4d4eaa89ebf566ec3ae4fd49f697c8868",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/research/usage-evidence.md",
+          "sha256": "8f7bab30dbf74f1ac1f100d20664f4ec0e727f2563e4318d0dbc28ab72ef73d4",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "fe8b6651444f44ae4c57c1268b02aca707ec867d4074842a855e018eff1ae116",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": "docs/OVERHAUL_DECISIONS.md",
+          "sha256": "38a90f082393bbe238225b6a99b866b2523f024c838a4a5ceddd87160d9893a8",
+          "normalizer": "raw-v1"
+        }
+      ],
+      "inputDigest": "06b7f4270420d1dbc58fe1bbac2fca15e1fa2c5101c949b8244f61dac0344039"
+    },
+    {
+      "evidenceId": "ev-roadmap",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260928-180123-harnix-overhaul-audit",
+      "checkId": "check-roadmap",
+      "taskContractHash": "d1dd286a75c1be777845732d444da645cbf85a49c1e3182704dd99cf64ecc4c9",
+      "entries": [
+        {
+          "path": ".harnix/roadmaps/20260928-180123-harnix-overhaul.json",
+          "sha256": "e8f664de55a8c349f391f5f3d4da07c146df77dc036e6f93dc77f372adf55074",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/plan.md",
+          "sha256": "c2c3c34ecd5f39361ab6c7a0c8e3b665d91d38349021a61aa3cc462e696bcd6a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/prd.md",
+          "sha256": "3a3f95ea64edcfbac9db74ed2503b86d8ba28e71a7e4c8055e24c084459f2282",
+          "normalizer": "planning-contract-v1"
+        }
+      ],
+      "inputDigest": "ce7836c0e80e8332b7152e7483b812f8402f5cfcc5a45de91c644537790610ed"
+    },
+    {
+      "evidenceId": "ev-roadmap-final",
+      "generator": "harnix",
+      "schemaVersion": 2,
+      "taskId": "20260928-180123-harnix-overhaul-audit",
+      "checkId": "check-roadmap",
+      "taskContractHash": "d1dd286a75c1be777845732d444da645cbf85a49c1e3182704dd99cf64ecc4c9",
+      "entries": [
+        {
+          "path": ".harnix/roadmaps/20260928-180123-harnix-overhaul.json",
+          "sha256": "e8f664de55a8c349f391f5f3d4da07c146df77dc036e6f93dc77f372adf55074",
+          "normalizer": "raw-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/plan.md",
+          "sha256": "c2c3c34ecd5f39361ab6c7a0c8e3b665d91d38349021a61aa3cc462e696bcd6a",
+          "normalizer": "planning-contract-v1"
+        },
+        {
+          "path": ".harnix/tasks/20260928-180123-harnix-overhaul-audit/prd.md",
+          "sha256": "3a3f95ea64edcfbac9db74ed2503b86d8ba28e71a7e4c8055e24c084459f2282",
+          "normalizer": "planning-contract-v1"
+        }
+      ],
+      "inputDigest": "ce7836c0e80e8332b7152e7483b812f8402f5cfcc5a45de91c644537790610ed"
+    }
+  ]
+}

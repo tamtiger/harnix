@@ -1,0 +1,119 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205759-fix-baseline",
+  "title": "[01] Đưa HEAD về xanh và sửa lệch validator C1–C3",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sửa 2 test đỏ sau commit pause (test/workflow/cli-contract.test.ts kỳ vọng 16 lệnh; test/workflow/self-host.test.ts hash workflow.md lệch), rebuild dist, sinh lại .harnix/workflow.md và .harnix/.template-hashes.json bằng harnix update (không sửa tay; root cause: commit e3713ce đổi template nhưng không sinh lại managed output), sửa mô tả CLI thiếu Claude Code (src/cli-program.ts:62), sửa C1–C3 (lệch thật giữa skill/workflow.md và validator: ví dụ slug không có tiền tố ngày giờ, danh sách field TaskRecord thiếu decisions/residualRisks/epicId/findings, envelope thiếu epic/roadmapMembers). Lỗi renderer roadmap thuộc unify-epic-naming. C4–C8 thuộc slim-instructions.",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test.",
+    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28).",
+    "Không sửa C4–C8 (skill sẽ được viết lại ở slim-instructions)."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-green",
+      "text": "pnpm test pass toàn bộ trên HEAD; dist chứa lệnh pause.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-suite"
+      ]
+    },
+    {
+      "id": "ac-contradictions",
+      "text": "C1–C3 trong research/inventory.md của task audit được sửa khớp validator.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-parity"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "test/workflow/cli-contract.test.ts",
+    "test/workflow/self-host.test.ts",
+    "src/cli-program.ts",
+    "src/skills/harnix-brainstorm/SKILL.md",
+    ".harnix/workflow.md"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toan bo typecheck, lint va test pass tren HEAD",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm typecheck && pnpm lint && pnpm test",
+      "criterionIds": [
+        "ac-green"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-contract-parity",
+      "description": "Template va skill khop validator (C1-C3): field list, envelope shape, task ID slug",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/workflow/templates.test.ts test/workflow/skill-sources.test.ts",
+      "criterionIds": [
+        "ac-contradictions"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/skill-sources.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-suite",
+      "checkId": "check-suite",
+      "recordedAt": "2026-09-28T21:28:44.000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck + lint + test: 82 file, 660 pass, 1 skip; HEAD xanh; dist co lenh pause.",
+      "artifactPaths": [
+        "test/workflow/cli-contract.test.ts",
+        "test/workflow/self-host.test.ts"
+      ],
+      "inputDigest": "c3349df04ad4959c1cf5a5f065ea869a240e1f1ab7b66989f9eb54168fd6b4fb"
+    },
+    {
+      "id": "ev-parity",
+      "checkId": "check-contract-parity",
+      "recordedAt": "2026-09-28T21:28:45.000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "templates.test.ts + skill-sources.test.ts pass: field list, envelope shape (epic/roadmapMembers), task ID slug khop validator.",
+      "artifactPaths": [
+        "src/templates/harnix/workflow.ts",
+        "src/skills/harnix-brainstorm/SKILL.md"
+      ],
+      "inputDigest": "a369dcf65d96cc8a673a3d8242de142a4bd5790a961bcb8113b4b5ce6a4b5f2d"
+    }
+  ],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:57:59.000+07:00",
+  "updatedAt": "2026-09-28T14:28:57.333Z",
+  "completedAt": "2026-09-28T14:28:57.333Z"
+}

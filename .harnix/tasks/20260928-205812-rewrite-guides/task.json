@@ -1,0 +1,84 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205812-rewrite-guides",
+  "title": "[14] Viết lại guides theo dạng lệnh + ràng buộc, bổ sung spec/project-facts",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Viết lại common và các guide ngôn ngữ/công nghệ còn giữ theo format ngắn (≤ 600 tok): lệnh verify chuẩn, ràng buộc bắt lỗi thật, lỗi thường gặp; sửa nội dung lỗi thời (Next.js, Django, Go); gỡ guide không đem lại khác biệt. KHÔNG chuyển guide thành SKILL.md — guides là bản dịch đúng của ECC rules/ (docs/UPSTREAM_MAPPING.md §7). Bổ sung .harnix/spec/project-facts.md (derived, sinh lại khi init/update) chứa stack đã xác nhận và lệnh verify theo package từ add-verify-detection.",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test.",
+    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28)."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-format",
+      "text": "Mọi guide ≤ 600 tok và có mục lệnh verify.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-stale",
+      "text": "Các nội dung lỗi thời đã nêu (Next.js, Django, Go) được sửa.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-project-facts",
+      "text": ".harnix/spec/project-facts.md được sinh tại init/update, chứa stack đã xác nhận và lệnh verify theo package; là derived, không phải user-owned.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-docs-sync",
+      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/guides/**",
+    "src/commands/init.ts",
+    "src/commands/update.ts",
+    "src/core/config/**"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-docs-sync",
+        "ac-format",
+        "ac-project-facts",
+        "ac-stale"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    }
+  ],
+  "evidence": [],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:58:12.000+07:00",
+  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+}

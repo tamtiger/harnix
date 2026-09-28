@@ -1,0 +1,106 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205806-standardize-tests",
+  "title": "[08] Chuẩn hóa cấu trúc và chất lượng test",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Hiện có 82 file test chia 7 suite (unit 38, integration 22, workflow 11, safety 5, platform 4, migration 2, support 2); file lớn nhất test/workflow/internal-workflow.test.ts 1.148 dòng; 6 module không có test trực tiếp (internal-context-cli.ts, repo-map-internal.ts, workflow-helpers.ts, global-surface.ts, global-managed-error.ts, global-managed-markers.ts); chưa đo coverage. Chuẩn hóa: cấu trúc thư mục test phản chiếu src; tên file <module>.test.ts; định nghĩa rõ mục đích từng suite (unit, integration, workflow, platform, safety); giữ suite migration làm suite tương thích dữ liệu cũ (task v1/v2, context.json, .harnix/roadmaps chuyển sang .harnix/epics) thay vì xoá, để script bắt buộc test:migration vẫn có nghĩa; tách test lớn theo module mới của restructure-code; builder dùng chung trong test/support cho TaskRecord, EpicRecord, repo tạm, home tạm, clock và múi giờ cố định; bổ sung test cho module chưa có; bật coverage bằng @vitest/coverage-v8 với ngưỡng bằng mức đo được hiện tại để chặn giảm.",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test.",
+    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28).",
+    "Không nới lỏng assertion để test pass; không gỡ test đang bảo vệ hành vi còn tồn tại.",
+    "Không tự cài @vitest/coverage-v8: cần mạng, phải hỏi người dùng trước khi cài."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-test-layout",
+      "text": "Thư mục test phản chiếu src và mọi file theo quy ước <module>.test.ts; có tài liệu ngắn mô tả mục đích từng suite.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-split-large-tests",
+      "text": "Không file test nào > 400 dòng.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-shared-builders",
+      "text": "Builder dùng chung cho TaskRecord, EpicRecord, repo tạm, home tạm, clock và múi giờ; không còn fixture dựng tay lặp lại giữa các file.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-untested-modules",
+      "text": "Mọi module trong src có ít nhất một test trực tiếp hoặc được ghi rõ lý do.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-coverage-floor",
+      "text": "pnpm test chạy coverage với ngưỡng bằng mức đo hiện tại; ngưỡng được ghi vào vitest.config.ts.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-no-weakening",
+      "text": "Số assertion và hành vi được kiểm không giảm; toàn bộ suite pass.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-docs-sync",
+      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "test/**",
+    "vitest.config.ts",
+    "package.json"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-coverage-floor",
+        "ac-docs-sync",
+        "ac-no-weakening",
+        "ac-shared-builders",
+        "ac-split-large-tests",
+        "ac-test-layout",
+        "ac-untested-modules"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    }
+  ],
+  "evidence": [],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:58:06.000+07:00",
+  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+}

@@ -1,0 +1,98 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205815-release-v2",
+  "title": "[17] Tinh gọn gate phát hành, rà nhất quán docs và phát hành 2.0.0",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Bỏ chạy trùng trong test:acceptance, rà 17 script; rà nhất quán lần cuối PRD/WORKFLOW/IMPLEMENTATION_PLAN/README (các task trước đã tự cập nhật docs của mình); bump version 2.0.0 một lần qua pnpm version:sync và viết một entry CHANGELOG tổng hợp toàn bộ epic, gồm các breaking change; chạy đủ acceptance sequence ở docs/IMPLEMENTATION_PLAN.md section 11 cùng fake-home tarball smoke.",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-gates",
+      "text": "Acceptance sequence không chạy lại cùng test hai lần và tổng thời gian giảm so với hiện tại.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-docs-consistency",
+      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN/README nhất quán với sản phẩm sau đại tu; không còn tham chiếu tới thành phần đã gỡ.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-version-2",
+      "text": "package.json và mọi nơi đồng bộ version là 2.0.0; CHANGELOG có đúng một entry 2.0.0 liệt kê breaking change và hướng dẫn migrate.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-acceptance",
+      "text": "Acceptance sequence section 11 (gồm format:check và coverage floor) và fake-home tarball smoke pass với evidence mới.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-managed-output",
+      "text": "Sau khi bump 2.0.0, .harnix/workflow.md và .harnix/.template-hashes.json được sinh lại (generatorVersion 2.0.0) và self-host test pass.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-no-exemptions",
+      "text": "Danh sách miễn trừ max-lines trống; mọi file trong src ≤ 300 dòng.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "package.json",
+    "CHANGELOG.md",
+    "docs/**",
+    "README.md",
+    "scripts/**"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-acceptance",
+        "ac-docs-consistency",
+        "ac-gates",
+        "ac-managed-output",
+        "ac-no-exemptions",
+        "ac-version-2"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    }
+  ],
+  "evidence": [],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:58:15.000+07:00",
+  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+}

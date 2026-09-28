@@ -1,0 +1,16 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260928-180123-harnix-overhaul",
+  "title": "Đại tu toàn diện Harnix",
+  "goal": "Vừa cắt vừa mở rộng: cắt bộ máy tự bảo vệ và code chết có bằng chứng 0 lần dùng; mở rộng verify từ 1 lên ≥ 8 hệ sinh thái với suite gate, registry khai báo cho 4 nền tảng hiện có rồi thêm OpenCode và Cursor, test-impact hint, spec/project-facts, extension point technique-skill, và giữ + tự động hoá learning. Kèm refactor cấu trúc code không đổi hành vi. Phát hành một lần dưới version 2.0.0.",
+  "nonGoals": [
+    "Không viết lại từ đầu.",
+    "Không thêm telemetry, dịch vụ hosted hay MCP mặc định.",
+    "Không mở rộng learning ra phạm vi cross-project/global.",
+    "Không thêm coding tool nào ngoài 4 nền tảng hiện có cùng OpenCode và Cursor.",
+    "Không bump version theo từng task; chỉ 2.0.0 một lần ở cuối epic."
+  ],
+  "createdAt": "2026-09-28T18:40:00.000+07:00",
+  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+}

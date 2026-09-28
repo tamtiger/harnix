@@ -1,0 +1,91 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205813-add-technique-skills",
+  "title": "[15] Thư viện technique-skill hẹp (5–10, có bằng chứng) + extension point",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Không cố khớp số lượng 292 skill của ECC. Chỉ ship 5–10 technique-skill cross-language có bằng chứng từ research/external-research.md (verification-gap lens, bugfix 'must remain working', flaky-test diagnosis, migration-safety review, security-review lens) dạng SKILL.md chuẩn Agent Skills, cài qua skill sink của add-platform-registry, agent tự chọn theo mô tả, không qua stage routing. Mở .harnix/spec/skills/ làm extension point cho dự án tự thêm skill riêng; Harnix chỉ cung cấp cơ chế discover/cài đặt.",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test.",
+    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28).",
+    "Không viết skill domain nghiệp vụ hay meta-harness trùng máy móc nội bộ."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-bounded-count",
+      "text": "Đúng 5–10 technique-skill được ship, mỗi skill trích dẫn bằng chứng cụ thể từ external-research.md.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-native-discovery",
+      "text": "Technique-skill có frontmatter name/description chuẩn, được cài vào skill sink, không đi qua preflight.nextStage; test xác nhận không lẫn với 5 skill stage-owner.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-project-skill-ext",
+      "text": ".harnix/spec/skills/ cho phép dự án tự thêm skill riêng; có fixture test.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-no-scope-creep",
+      "text": "Không technique-skill nào trùng phạm vi guides hoặc 5 skill stage-owner.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-docs-sync",
+      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/skills/**",
+    "src/configurators/**",
+    "src/commands/init.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-bounded-count",
+        "ac-docs-sync",
+        "ac-native-discovery",
+        "ac-no-scope-creep",
+        "ac-project-skill-ext"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    }
+  ],
+  "evidence": [],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:58:13.000+07:00",
+  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+}

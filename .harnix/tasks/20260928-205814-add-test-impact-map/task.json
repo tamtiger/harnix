@@ -1,0 +1,77 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205814-add-test-impact-map",
+  "title": "[16] Repo-map hướng test-impact",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Đổi hướng repo-map: thêm cạnh code→test theo import và quy ước đặt tên; lệnh repo-map --tests <path>; skill implement/verify dùng nó để chạy test bị ảnh hưởng trước rồi mới chạy suite; bỏ ranker không dùng.",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test.",
+    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28).",
+    "Không thay thế suite gate: test bị ảnh hưởng chỉ là bước nhanh, check mức project vẫn bắt buộc."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-tests-edge",
+      "text": "repo-map --tests trả đúng test bị ảnh hưởng trên fixture TS, Python, Go.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-skill-use",
+      "text": "Skill implement/verify hướng dẫn chạy test bị ảnh hưởng rồi suite package.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-docs-sync",
+      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/core/repo-map/**",
+    "src/commands/**",
+    "src/skills/**"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-docs-sync",
+        "ac-skill-use",
+        "ac-tests-edge"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    }
+  ],
+  "evidence": [],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:58:14.000+07:00",
+  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+}

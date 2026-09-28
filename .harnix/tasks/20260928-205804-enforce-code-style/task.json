@@ -1,0 +1,95 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205804-enforce-code-style",
+  "title": "[06] Thiết lập chuẩn định dạng và lint cho toàn repo",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Hiện repo chưa có formatter (không có Prettier/Biome), ESLint chỉ bật bộ recommended cơ bản, và có nhiều dòng rất dài (task.ts 47 dòng > 160 ký tự, templates/harnix/workflow.ts 38, catalog.ts 31, doctor.ts 30). Thêm Prettier làm devDependency (printWidth 120) cùng eslint-config-prettier; format một lần toàn bộ src, test, scripts trong một thay đổi thuần định dạng; bật typescript-eslint recommendedTypeChecked, max-lines 300 cho mỗi file (có danh sách miễn trừ tạm thời ghi rõ task nào gỡ), complexity, no-floating-promises; thêm script format và format:check, đưa format:check vào lint gate.",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test.",
+    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28).",
+    "Không đổi hành vi; thay đổi định dạng tách riêng khỏi mọi thay đổi logic.",
+    "Không tự cài package: pnpm add -D cần mạng, phải hỏi người dùng trước khi cài."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-formatter",
+      "text": "Prettier và eslint-config-prettier được cấu hình; pnpm format:check pass trên toàn repo sau một lần format.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-lint-rules",
+      "text": "ESLint bật recommendedTypeChecked, max-lines 300, complexity, no-floating-promises; pnpm lint pass; mọi vi phạm còn lại nằm trong danh sách miễn trừ tạm thời có ghi task chịu trách nhiệm gỡ.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-format-only",
+      "text": "Diff của bước format chỉ thay đổi định dạng: pnpm test pass không sửa assertion và output CLI giữ nguyên.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-scripts",
+      "text": "package.json có format và format:check; format:check nằm trong lint gate.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-docs-sync",
+      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "package.json",
+    "eslint.config.mjs",
+    ".prettierrc.json",
+    "src/**",
+    "test/**",
+    "scripts/**"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-docs-sync",
+        "ac-format-only",
+        "ac-formatter",
+        "ac-lint-rules",
+        "ac-scripts"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    }
+  ],
+  "evidence": [],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:58:04.000+07:00",
+  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+}

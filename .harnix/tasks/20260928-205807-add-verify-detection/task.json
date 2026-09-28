@@ -1,0 +1,93 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205807-add-verify-detection",
+  "title": "[09] Phát hiện lệnh verify đa ngôn ngữ, workspace và suite gate",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Phát hiện deterministic lệnh test/lint/typecheck/format theo manifest + lockfile + task runner cho npm/pnpm/yarn/bun, uv/poetry/pip, cargo, go, gradle/maven, dotnet, composer, swift, flutter; nearest-manifest-wins cho monorepo; ghi vào config.yaml verify:; lệnh public verify-plan. Suite gate: ready yêu cầu ít nhất một check mức project lấy từ verify-plan với inputs phủ toàn bộ source và test; finish từ chối khi check đó không có pass với digest hiện hành. Harness chỉ phát hiện và kiểm tra evidence, không tự chạy lệnh.",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test.",
+    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28).",
+    "Không thực thi lệnh verify trong harness."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-detect",
+      "text": "Fixture cho ≥ 8 hệ sinh thái sinh đúng lệnh verify.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-workspace",
+      "text": "Monorepo pnpm/Cargo/go.work/Maven modules sinh lệnh theo package.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-no-tests",
+      "text": "Repo không có test được báo rõ và phải khai báo check thay thế; không tính là pass.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-suite-gate",
+      "text": "Ready từ chối task thiếu check mức project phủ toàn bộ source+test; finish từ chối khi check đó không có pass với digest hiện hành; regression test tái hiện kịch bản task pause (check chỉ unit+integration) bị từ chối.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-docs-sync",
+      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/core/stack/**",
+    "src/catalog/**",
+    "src/core/config/**",
+    "src/core/workflow/**",
+    "src/commands/**"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-detect",
+        "ac-docs-sync",
+        "ac-no-tests",
+        "ac-suite-gate",
+        "ac-workspace"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    }
+  ],
+  "evidence": [],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:58:07.000+07:00",
+  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+}

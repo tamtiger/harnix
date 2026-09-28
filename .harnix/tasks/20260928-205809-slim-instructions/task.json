@@ -1,0 +1,106 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205809-slim-instructions",
+  "title": "[11] Tinh gọn lớp chỉ dẫn, gộp skill và sửa C4–C8",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Gộp 7 skill thành 5 (harnix-plan, harnix-implement, harnix-verify, harnix-review, harnix-debug) theo bảng trách nhiệm ở design.md §1; viết lại AGENTS.md root, .harnix/workflow.md, marker block các nền tảng theo bộ 8 rule trong design.md; guard một chỗ; chế độ không hook; test ngân sách token; sửa C4–C8; bảo đảm mọi status/checkpoint hợp lệ có đúng một skill chủ sở hữu.",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test.",
+    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28)."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-skills",
+      "text": "Catalog có đúng 5 skill mới, mỗi skill ≤ 2K tok; tên cũ được alias hoặc migrate khi update --global.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-budget",
+      "text": "Test đo: chỉ dẫn luôn nạp ≤ 1.5K tok, đường direct ≤ 4K, Full ≤ 15K.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-hookless",
+      "text": "Skill hoạt động đúng khi không có hook bằng cách tự gọi preflight.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-coverage-matrix",
+      "text": "Test liệt kê toàn bộ status/checkpoint hợp lệ (planning, replan, ready, in_progress/implementing, verifying/verifying, verifying/finishing, mọi blocked/*, cancelled, completed) và xác nhận mỗi trạng thái có đúng một skill chủ sở hữu.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-contradictions-c4-c8",
+      "text": "C4–C8 trong research/inventory.md của task audit không còn trong chỉ dẫn mới.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-template-exemptions",
+      "text": "src/templates/** được gỡ khỏi danh sách miễn trừ max-lines sau khi viết lại.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-docs-sync",
+      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/skills/**",
+    "src/templates/**",
+    "AGENTS.md",
+    ".harnix/workflow.md",
+    "src/configurators/**"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-budget",
+        "ac-contradictions-c4-c8",
+        "ac-coverage-matrix",
+        "ac-docs-sync",
+        "ac-hookless",
+        "ac-skills",
+        "ac-template-exemptions"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    }
+  ],
+  "evidence": [],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:58:09.000+07:00",
+  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+}

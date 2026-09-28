@@ -1,0 +1,270 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-180123-harnix-overhaul-audit",
+  "title": "Đại tu toàn diện Harnix: audit hiệu quả và lập roadmap",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Kiểm kê, đo hiệu quả bằng bằng chứng (lịch sử dogfooding + research bên ngoài) cho từng command, skill, rule, guide, workflow và dữ liệu .harnix; đưa ra quyết định Giữ/Đơn giản hóa/Gộp/Bỏ/Thêm và một Epic Roadmap thực thi được, theo docs/prompts/harnix-overhaul-audit.md.",
+  "nonGoals": [
+    "Không sửa code sản phẩm trong task audit này; refactor thuộc các member task của epic sau khi người dùng duyệt.",
+    "Không commit, push, tạo PR hay publish.",
+    "Không đụng cấu hình user-global thật."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-evidence-artifacts",
+      "text": "Có research/inventory.md, research/usage-evidence.md, research/external-research.md với số liệu, trích dẫn và tách fact/giả thuyết.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-artifact-review-final"
+      ]
+    },
+    {
+      "id": "ac-decision-register",
+      "text": "research/decision-register.md có đúng một quyết định có bằng chứng cho từng hạng mục chính, cùng tính năng mới và mục tiêu đo được; learning là GIỮ + THIẾT KẾ LẠI.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-artifact-review-final"
+      ]
+    },
+    {
+      "id": "ac-epic-roadmap",
+      "text": "Epic 20260928-180123-harnix-overhaul có đủ 17 member task ở planning, mỗi task có goal, nonGoals, acceptance criteria, decisions; thứ tự thực thi ghi tường minh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-roadmap-final"
+      ]
+    },
+    {
+      "id": "ac-round2-answers",
+      "text": "design.md trả lời đủ 7 câu hỏi vòng 2 của người dùng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-artifact-review-final"
+      ]
+    },
+    {
+      "id": "ac-round4-ecc-structure",
+      "text": "design.md §8 xác nhận rules/ và skills/ của ECC là hai hệ thống độc lập; rewrite-guides giữ phạm vi gốc; add-technique-skills giới hạn 5–10 skill cùng extension point.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-artifact-review-final"
+      ]
+    },
+    {
+      "id": "ac-review-fixes",
+      "text": "design.md §9–§13 ghi kết quả review trước implement và toàn bộ sửa đã áp vào epic và member task: thứ tự mới, OpenCode/Cursor, giờ Việt Nam, tên gọi thống nhất, chuẩn hóa code và test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-artifact-review-final"
+      ]
+    },
+    {
+      "id": "ac-approved-decisions-doc",
+      "text": "docs/OVERHAUL_DECISIONS.md ghi quyết định đã duyệt/bị loại; AGENTS.md trỏ tới epic và ghi ngoại lệ version 2.0.0.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-artifact-review-final"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "docs/OVERHAUL_DECISIONS.md",
+    "docs/prompts/harnix-overhaul-audit.md"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-artifact-review",
+      "description": "Đọc lại research, design.md và docs/OVERHAUL_DECISIONS.md, đối chiếu với decision register và roadmap",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-approved-decisions-doc",
+        "ac-decision-register",
+        "ac-evidence-artifacts",
+        "ac-review-fixes",
+        "ac-round2-answers",
+        "ac-round4-ecc-structure"
+      ],
+      "inputs": [
+        ".harnix/tasks/20260928-180123-harnix-overhaul-audit/design.md",
+        ".harnix/tasks/20260928-180123-harnix-overhaul-audit/research/*.md",
+        "@task-contract",
+        "AGENTS.md",
+        "docs/OVERHAUL_DECISIONS.md"
+      ]
+    },
+    {
+      "id": "check-roadmap",
+      "description": "Roadmap liệt kê đủ 17 member ở planning",
+      "scope": "focused",
+      "required": true,
+      "command": "node dist/cli.js roadmap --id 20260928-180123-harnix-overhaul",
+      "criterionIds": [
+        "ac-epic-roadmap"
+      ],
+      "inputs": [
+        ".harnix/roadmaps/20260928-180123-harnix-overhaul.json",
+        "@task-contract"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-28T13:20:00.000Z",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Người dùng yêu cầu dừng implement để review, và bổ sung OpenCode cùng Cursor vào epic; cập nhật AC ac-epic-roadmap (13 member) và ac-review-fixes, thêm decision d-add-opencode-cursor.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-180123-harnix-overhaul-audit/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-09-28T20:59:30.000+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Người dùng yêu cầu thêm task chuyển mọi thời gian sang giờ Việt Nam, thêm task thống nhất tên epic/roadmap, đổi tên và ID toàn bộ member theo quy ước và thứ tự thực thi; epic nay có 15 member.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-180123-harnix-overhaul-audit/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-09-28T21:20:00.000+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Người dùng yêu cầu chuẩn hóa toàn bộ code và test: thay split-god-modules bằng ba task enforce-code-style, restructure-code, standardize-tests; epic nay có 17 member, ID và thứ tự được đánh lại.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-180123-harnix-overhaul-audit/task.json"
+      ]
+    },
+    {
+      "id": "ev-artifact-review",
+      "checkId": "check-artifact-review",
+      "recordedAt": "2026-09-28T21:40:00.000+07:00",
+      "result": "pass",
+      "summary": "Doc lai research, design.md §1-§13 va docs/OVERHAUL_DECISIONS.md; doi chieu decision register: 7 AC deu co bang chung; learning GIU+THIET KE LAI; OpenCode/Cursor; gio VN; ten epic thong nhat; chuan hoa code/test khop.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-180123-harnix-overhaul-audit/design.md",
+        "docs/OVERHAUL_DECISIONS.md"
+      ],
+      "inputDigest": "06b7f4270420d1dbc58fe1bbac2fca15e1fa2c5101c949b8244f61dac0344039"
+    },
+    {
+      "id": "ev-roadmap",
+      "checkId": "check-roadmap",
+      "recordedAt": "2026-09-28T21:40:05.000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "harnix roadmap tra 18 member (17 task + audit), nextTask dung, moi member o planning.",
+      "artifactPaths": [
+        ".harnix/roadmaps/20260928-180123-harnix-overhaul.json"
+      ],
+      "inputDigest": "ce7836c0e80e8332b7152e7483b812f8402f5cfcc5a45de91c644537790610ed"
+    },
+    {
+      "id": "ev-artifact-review-final",
+      "checkId": "check-artifact-review",
+      "recordedAt": "2026-09-28T21:16:00.000+07:00",
+      "result": "pass",
+      "summary": "Doc lai research, design.md §1-§13, docs/OVERHAUL_DECISIONS.md; 6 AC do check nay phu deu co bang chung khop decision register.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-180123-harnix-overhaul-audit/design.md",
+        "docs/OVERHAUL_DECISIONS.md"
+      ],
+      "inputDigest": "06b7f4270420d1dbc58fe1bbac2fca15e1fa2c5101c949b8244f61dac0344039"
+    },
+    {
+      "id": "ev-roadmap-final",
+      "checkId": "check-roadmap",
+      "recordedAt": "2026-09-28T21:16:00.000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "harnix roadmap tra 18 member, nextTask dung, moi member o planning.",
+      "artifactPaths": [
+        ".harnix/roadmaps/20260928-180123-harnix-overhaul.json"
+      ],
+      "inputDigest": "ce7836c0e80e8332b7152e7483b812f8402f5cfcc5a45de91c644537790610ed"
+    }
+  ],
+  "createdAt": "2026-09-28T11:01:23.000Z",
+  "updatedAt": "2026-09-28T14:21:29.344Z",
+  "epicId": "20260928-180123-harnix-overhaul",
+  "decisions": [
+    {
+      "id": "d-full-mode",
+      "text": "Phân loại Full.",
+      "rationale": "Research bên ngoài, đa tầng, sẽ phá frozen contract."
+    },
+    {
+      "id": "d-audit-no-product-edit",
+      "text": "Task audit không sửa code sản phẩm; refactor nằm trong 17 member task.",
+      "rationale": "Prompt yêu cầu dừng ở pha 5 để người dùng duyệt."
+    },
+    {
+      "id": "d-learning-keep-redesign",
+      "text": "Learning: GIỮ + THIẾT KẾ LẠI (member automate-learning), không bỏ.",
+      "rationale": "Người dùng phản hồi; research/learning-redesign.md xác nhận vấn đề là điểm kích hoạt, không phải ý tưởng."
+    },
+    {
+      "id": "d-ecc-two-systems",
+      "text": "Guides giữ vai trò ECC rules/; skill mở rộng là hệ thống riêng, giới hạn 5–10 skill có bằng chứng + extension point .harnix/spec/skills/.",
+      "rationale": "Đọc trực tiếp repo ECC: rules/, skills/, agents/, commands/ là thư mục độc lập; phần lớn 292 skill nằm ngoài biên Harnix."
+    },
+    {
+      "id": "d-user-approvals",
+      "text": "Người dùng duyệt: phá frozen contract (dữ liệu cũ vẫn đọc được); version 2.0.0 bump một lần ở release-v2 thay vì patch mỗi task; về coding tool: ban đầu không thêm, sau đó đổi thành thêm đúng OpenCode và Cursor.",
+      "rationale": "Trả lời trực tiếp của người dùng 2026-09-28 cho 3 câu hỏi trong review trước implement, và yêu cầu bổ sung sau đó."
+    },
+    {
+      "id": "d-code-test-standard",
+      "text": "Thay split-god-modules bằng ba task chuẩn hóa: enforce-code-style (Prettier, ESLint type-checked, max-lines 300), restructure-code (đúng tầng commands -> core -> utils, tách module lớn), standardize-tests (cấu trúc test phản chiếu src, builder dùng chung, coverage floor).",
+      "rationale": "Người dùng yêu cầu chuẩn hóa toàn bộ code và test. Đo thực tế: không có formatter, 11 file >300 dòng, task.ts 47 dòng >160 ký tự, 11 command import node:fs trực tiếp, logic workflow nằm trong commands/, test lớn nhất 1.148 dòng, 6 module không có test trực tiếp, chưa đo coverage. Tách ba task để diff định dạng không lẫn với diff logic."
+    },
+    {
+      "id": "d-vn-time",
+      "text": "Thêm task localize-timestamps: mọi thời gian theo múi giờ cấu hình (repo này Asia/Ho_Chi_Minh), ISO 8601 kèm offset; dữ liệu của epic này được ghi lại ngay bằng +07:00; task lịch sử không ghi lại.",
+      "rationale": "Người dùng yêu cầu chuyển toàn bộ thời gian sang giờ Việt Nam; code hiện có 13 chỗ toISOString() luôn ra UTC; từng có task bị huỷ vì ID dùng UTC."
+    },
+    {
+      "id": "d-epic-naming",
+      "text": "Thêm task unify-epic-naming: dùng một tên epic ở mọi nơi (.harnix/epics/, harnix epic, epicMembers); đổi tên và ID toàn bộ member theo quy ước <động-từ>-<đối-tượng> và thứ tự thực thi.",
+      "rationale": "Người dùng chỉ ra roadmap và epicId không đồng bộ; một file trong roadmaps/ thực chất là một epic. Chi tiết ở design.md §12."
+    },
+    {
+      "id": "d-add-opencode-cursor",
+      "text": "Thêm OpenCode và Cursor bằng task riêng add-opencode-cursor ngay sau add-platform-registry; không thêm tool nào khác.",
+      "rationale": "Người dùng yêu cầu bổ sung hai tool này. Tách task riêng để add-platform-registry giữ phạm vi chuyển đổi 4 nền tảng hiện có, và việc thêm hai nền tảng là bằng chứng registry chỉ cần dữ liệu. Chi tiết và rủi ro (dự phòng ~/.claude/CLAUDE.md của OpenCode, Cursor không có instruction global, trùng skill) ở design.md §10."
+    },
+    {
+      "id": "d-no-finish-runner",
+      "text": "Bỏ ý tưởng finish tự chạy lại check; thay bằng suite gate dựa trên evidence trong add-verify-detection.",
+      "rationale": "Root cause sự cố pause: check chỉ chạy unit+integration, bỏ sót test:workflow; harness không có và không nên có process runner chạy lệnh từ task.json."
+    },
+    {
+      "id": "d-execution-order",
+      "text": "Thứ tự chuẩn: fix-baseline → remove-unused-machinery → simplify-task-contract → localize-timestamps → unify-epic-naming → enforce-code-style → restructure-code → standardize-tests → add-verify-detection → automate-learning → slim-instructions → add-platform-registry → add-opencode-cursor → rewrite-guides → add-technique-skills → add-test-impact-map → release-v2. ID của member tăng dần đúng thứ tự này và title có tiền tố [NN] tương ứng.",
+      "rationale": "Cắt trước tái cấu trúc; tái cấu trúc trước khi thêm hành vi; viết lại skill sau khi hành vi chốt; phát hành cuối cùng."
+    },
+    {
+      "id": "d-docs-per-task",
+      "text": "Mỗi member task phá contract tự cập nhật docs trong cùng task (ac-docs-sync); release-v2 chỉ rà nhất quán.",
+      "rationale": "AGENTS.md yêu cầu cập nhật docs bị ảnh hưởng trong cùng thay đổi."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-draft-checks",
+      "severity": "medium",
+      "text": "12 member task hiện chỉ có một check-suite chung; mỗi task phải bổ sung check tập trung khi planning trước khi ready, nếu không các AC định lượng sẽ không có bằng chứng riêng."
+    }
+  ],
+  "completedAt": "2026-09-28T14:21:29.344Z"
+}

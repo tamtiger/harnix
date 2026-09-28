@@ -1,0 +1,190 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-205800-remove-unused-machinery",
+  "title": "[02] Gỡ code chết và tính năng không được dùng",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Go code khong co caller (src/migration/**, src/rules/rules.ts, src/templates/harnix/managed-workflow.ts, src/core/research.ts) cung test/docs tham chieu; gop public command checks/audit/context-report vao status --explain; giu suite tuong thich du lieu cu. GIU learning/promotion.ts. Go context-selection DA CHUYEN sang task simplify-task-contract vi trung may moc save/verify/digest ma task do viet lai.",
+  "nonGoals": [
+    "Không commit/push/PR tự động.",
+    "Không đụng cấu hình user-global thật trong test.",
+    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28)."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-removed",
+      "text": "Các module liệt kê bị gỡ cùng test, docs, skill tham chiếu; effective-context.ts, journal/learning*.ts, promotion.ts còn nguyên.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-suite"
+      ]
+    },
+    {
+      "id": "ac-compat",
+      "text": "Task va journal lich su van doc duoc boi status/tasks/roadmap, khong loi (context.json van doc duoc; viec go persistence context.json thuoc simplify-task-contract).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-legacy"
+      ]
+    },
+    {
+      "id": "ac-status-explain",
+      "text": "status --explain trả đủ thông tin trước đây của checks/audit/context-report.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-suite"
+      ]
+    },
+    {
+      "id": "ac-migration-suite",
+      "text": "Sau khi gỡ src/migration/**, suite test:migration không rỗng: chuyển thành test tương thích dữ liệu cũ (đọc task v1/v2, task có context.json); test:acceptance vẫn pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-legacy"
+      ]
+    },
+    {
+      "id": "ac-cli-breaking",
+      "text": "cli-contract.test cập nhật danh sách lệnh; CHANGELOG (mục chưa phát hành của 2.0.0) ghi breaking change và hướng dẫn chuyển sang status --explain.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-suite"
+      ]
+    },
+    {
+      "id": "ac-docs-sync",
+      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-docs"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/migration/**",
+    "src/rules/rules.ts",
+    "src/templates/harnix/managed-workflow.ts",
+    "src/core/research.ts",
+    "src/core/context/selection-freshness.ts",
+    "src/core/context/context.ts",
+    "src/commands/checks.ts",
+    "src/commands/audit.ts",
+    "src/commands/context-report.ts",
+    "src/commands/status.ts",
+    "src/cli-program.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "typecheck + lint + test xanh sau khi go dead-code va gop status --explain",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm typecheck && pnpm lint && pnpm test",
+      "criterionIds": [
+        "ac-cli-breaking",
+        "ac-removed",
+        "ac-status-explain"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-legacy-compat",
+      "description": "Suite tuong thich du lieu cu doc duoc task v1/v2 va context.json",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/migration/legacy-data-compat.test.ts",
+      "criterionIds": [
+        "ac-compat",
+        "ac-migration-suite"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/task.ts",
+        "test/migration/legacy-data-compat.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs-sync",
+      "description": "Docs khong con tham chieu harnix checks/audit nhu lenh rieng",
+      "scope": "focused",
+      "required": true,
+      "command": "! grep -rn \"harnix checks|harnix audit\" docs/HARNIX_PRD.md docs/HARNIX_WORKFLOW.md docs/IMPLEMENTATION_PLAN.md README.md",
+      "criterionIds": [
+        "ac-docs-sync"
+      ],
+      "inputs": [
+        "@task-contract",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-draft-checks",
+      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
+      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    },
+    {
+      "id": "d-move-context-selection",
+      "text": "Go context-selection (selection-freshness.ts, persistence context.json) chuyen tu task nay sang simplify-task-contract.",
+      "rationale": "Task simplify-task-contract viet lai toan bo may save/verify/digest ma context-selection la mot phan; lam o hai task la double work va double risk."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-suite",
+      "checkId": "check-suite",
+      "recordedAt": "2026-09-28T22:07:18.000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "typecheck + lint + test xanh: 80 file, 635 pass, 1 skip.",
+      "artifactPaths": [
+        "src/commands/status.ts"
+      ],
+      "inputDigest": "d0333cf7895d895558f48351d47e5a27f93078a39563fad552cff893c073957a"
+    },
+    {
+      "id": "ev-legacy",
+      "checkId": "check-legacy-compat",
+      "recordedAt": "2026-09-28T22:07:19.000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "legacy-data-compat.test.ts pass: doc task v1, v2 + context.json.",
+      "artifactPaths": [
+        "test/migration/legacy-data-compat.test.ts"
+      ],
+      "inputDigest": "2f462ffa7c72b8d7dd99da1d09513e281f1b4e18281d49ea66f61c66251e2da6"
+    },
+    {
+      "id": "ev-docs",
+      "checkId": "check-docs-sync",
+      "recordedAt": "2026-09-28T22:07:20.000+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "grep xac nhan khong con tham chieu harnix checks/audit nhu lenh rieng.",
+      "artifactPaths": [
+        "docs/HARNIX_PRD.md"
+      ],
+      "inputDigest": "7d4397d0473fcfe1f728fe6ff4aad7d17a14a50d81f2049acd3067a8ab31c4e9"
+    }
+  ],
+  "epicId": "20260928-180123-harnix-overhaul",
+  "createdAt": "2026-09-28T20:58:00.000+07:00",
+  "updatedAt": "2026-09-28T15:08:09.610Z",
+  "completedAt": "2026-09-28T15:08:09.610Z"
+}
