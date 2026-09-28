@@ -2,7 +2,7 @@
 name: harnix-brainstorm
 description: Use when a Harnix project needs request triage, requirements, design, planning, or a trustworthy ready gate before implementation.
 metadata:
-  version: "1.1.21"
+  version: "1.1.22"
 ---
 
 # Plan a Harnix task
@@ -28,7 +28,7 @@ Only after the latest request passes the Bypass route, for project-scoped Lite/F
 
 ## Incoming state
 
-Accept either no active task or one active task still owned by `planning|replan`. If `.active` names an unfinished task, restore it instead of creating a duplicate. Hand any active task outside `planning|replan` to `harnix-continue`, including ready, in-progress, verifying, blocked, or completed-active state.
+Accept either no active task or one active task still owned by `planning|replan`. If `.active` names an unfinished task, restore it instead of creating a duplicate. When the user requests pausing the current active task (e.g. to create or switch to another task without cancelling or finishing), run `harnix pause` to clear the active pointer safely. Hand any active task outside `planning|replan` to `harnix-continue`, including ready, in-progress, verifying, blocked, or completed-active state.
 
 Classify the request:
 

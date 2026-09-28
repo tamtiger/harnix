@@ -18,6 +18,7 @@ import { inspectProjectStatus } from "./commands/status.js";
 import { listProjectTasks } from "./commands/tasks.js";
 import { listPublicRoadmaps, detailPublicRoadmap } from "./commands/roadmap.js";
 import { resumeProjectTask } from "./commands/resume.js";
+import { pauseProjectTask } from "./commands/pause.js";
 import { reportProjectContext } from "./commands/context-report.js";
 import { reportProjectChecks } from "./commands/checks.js";
 import { auditProjectTask } from "./commands/audit.js";
@@ -180,6 +181,12 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--dry-run", "Preview without writing the active pointer")
     .action(async (taskId: string, options: { dryRun?: boolean }) => {
       process.stdout.write(`${JSON.stringify(await resumeProjectTask(process.cwd(), taskId, options.dryRun === true))}\n`);
+    });
+  program.command("pause")
+    .description("Pause the active Harnix task by clearing the active pointer")
+    .option("--dry-run", "Preview without writing the active pointer")
+    .action(async (options: { dryRun?: boolean }) => {
+      process.stdout.write(`${JSON.stringify(await pauseProjectTask(process.cwd(), options.dryRun === true))}\n`);
     });
   program.command("context-report")
     .description("Explain bounded effective Harnix hook context metadata")

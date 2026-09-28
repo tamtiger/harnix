@@ -45,7 +45,7 @@ Harnix được phát triển từ baseline kỹ thuật [mindfold-ai/Trellis](h
 - **Safe by default:** preview migration/purge và fail closed khi path/hash/schema không chắc chắn.
 - **YAGNI:** không thêm platform, orchestration, service hoặc generic skill ngoài nhu cầu.
 - **Single-agent capable:** subagent có thể hữu ích nhưng không phải dependency.
-- **Offline lifecycle:** init/setup/update/uninstall/mem/status/tasks/resume/context-report/checks/audit/repo-map/doctor không silent network.
+- **Offline lifecycle:** init/setup/update/uninstall/mem/status/tasks/resume/pause/context-report/checks/audit/repo-map/doctor không silent network.
 
 ## 5. Scope
 
@@ -304,6 +304,10 @@ Top-level fields là `generator`, `schemaVersion`, `scope`, `status`, `filter`, 
 Success `TaskResumeResultV1` chỉ gồm `generator`, `schemaVersion`, `scope`, `dryRun`, `outcome`, task `id|mode|status|checkpoint` và deterministic `nextAction`. Mutation duy nhất là permission-preserving atomic replacement của pointer; command không sửa TaskRecord/evidence/artifact, chuyển workflow, phục hồi transcript/model session/Git state hoặc gọi network. `--dry-run` thực hiện cùng validation/collision checks nhưng không ghi file.
 
 Hidden save chỉ có crash-recovery exception hẹp: khi task commit đã tồn tại nhưng `.active` bị thiếu, exact persisted task/artifact replay hoặc exact committed contract-revision replay được repair pointer idempotently. Candidate inactive đã sửa bị reject; nó không được dùng hidden save để lách user-selected public `resume` boundary.
+
+### Pause
+
+`harnix pause [--dry-run]` resolve ancestor initialized gần nhất và gỡ con trỏ `.harnix/tasks/.active` một cách an toàn mà không làm mất trạng thái hay dữ liệu của active task. Nếu không có active task, trả về outcome `no-active-task`. Nếu có active task hợp lệ, trả về `would-pause` (khi `--dry-run`) hoặc `paused` (atomic clear pointer về chuỗi rỗng) kèm hướng dẫn `Run harnix resume <task-id> when ready to continue.`. Active pointer trỏ tới record missing/terminal/malformed đều fail closed bằng public error exit 2.
 
 ### Context report
 

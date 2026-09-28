@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `1.1.21`
+**Version:** `1.1.22`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex hoặc Claude Code), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -86,6 +86,7 @@ Vài lệnh hữu ích khác khi mới dùng:
 ```powershell
 harnix doctor              # kiểm tra drift, hook, path safety và secret exposure
 harnix tasks --limit 20    # xem lịch sử task local
+harnix pause               # tạm dừng task đang active để chuyển sang task khác
 harnix resume <task-id>    # tiếp tục một task chưa hoàn thành, theo đúng ID
 ```
 
@@ -146,6 +147,7 @@ Mọi output của public command đều là JSON. Dưới đây là các lệnh
 | `harnix setup --kiro\|--antigravity\|--codex\|--claude [--dry-run]` | Cài tích hợp user-global cho platform agent (chạy 1 lần, dùng cho mọi project) |
 | `harnix status` | Xem task đang active, tiến độ và bước tiếp theo |
 | `harnix tasks [--limit <n>] [--status <status>]` | Liệt kê lịch sử task local |
+| `harnix pause [--dry-run]` | Tạm dừng task đang active, gỡ `.active` an toàn để chuyển hoặc tạo task mới |
 | `harnix resume <task-id> [--dry-run]` | Tiếp tục một task chưa hoàn thành theo đúng ID |
 | `harnix context-report --platform <id>` | Xem context nào thực sự được đưa vào agent |
 | `harnix checks` | Xem check nào đã stale, input nào đổi/thiếu |

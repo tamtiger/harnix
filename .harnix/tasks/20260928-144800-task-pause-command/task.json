@@ -1,0 +1,186 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 2,
+  "id": "20260928-144800-task-pause-command",
+  "title": "Bổ sung lệnh harnix pause để tạm hoãn active task an toàn",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bổ sung lệnh public harnix pause [--dry-run] vào Harnix CLI và cập nhật các skill/rules để cho phép người dùng và coding agent tạm gác active task một cách an toàn mà không vi phạm nguyên tắc 'Never edit .active directly'.",
+  "nonGoals": [
+    "Không cho phép nhiều active task cùng lúc (giữ nguyên Invariant 1).",
+    "Không tự động commit, stash hay xóa working tree của Git.",
+    "Không thay đổi trạng thái của task sang completed hay cancelled khi pause."
+  ],
+  "relevantPaths": [
+    "src/cli-program.ts",
+    "src/commands/pause.ts",
+    "src/core/tasks/task-pause.ts",
+    "test/unit/task-pause.test.ts",
+    "test/integration/pause.test.ts",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/HARNIX_PRD.md",
+    "src/skills/harnix-brainstorm/SKILL.md",
+    "src/skills/harnix-continue/SKILL.md"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-pause-core-logic",
+      "text": "Module task-pause.ts xử lý logic xóa con trỏ active pointer một cách atomic, hỗ trợ dryRun, kiểm tra trạng thái active task và fail closed nếu task không hợp lệ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-unit-tests"
+      ]
+    },
+    {
+      "id": "ac-cli-pause-command",
+      "text": "CLI hỗ trợ lệnh harnix pause [--dry-run] trả về JSON schema chuẩn, với outcome paused, would-pause hoặc no-active-task.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-integration-tests"
+      ]
+    },
+    {
+      "id": "ac-skills-and-docs",
+      "text": "Cập nhật tài liệu (docs/HARNIX_WORKFLOW.md, docs/HARNIX_PRD.md) và các skills (harnix-brainstorm, harnix-continue) để hướng dẫn agent sử dụng harnix pause khi người dùng muốn tạm hoãn task.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-skills-and-docs"
+      ]
+    },
+    {
+      "id": "ac-tests-and-verification",
+      "text": "Đầy đủ unit tests và integration tests cho lệnh harnix pause, toàn bộ test suite pass sạch.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-full-verification"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-unit-tests",
+      "description": "Unit tests cho core task pause logic",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/task-pause.test.ts",
+      "criterionIds": [
+        "ac-pause-core-logic"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/core/tasks/task-pause.ts",
+        "test/unit/task-pause.test.ts"
+      ]
+    },
+    {
+      "id": "check-integration-tests",
+      "description": "Integration tests cho CLI harnix pause",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/integration/pause.test.ts",
+      "criterionIds": [
+        "ac-cli-pause-command"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/cli-program.ts",
+        "src/commands/pause.ts",
+        "test/integration/pause.test.ts"
+      ]
+    },
+    {
+      "id": "check-skills-and-docs",
+      "description": "Kiểm tra tính đầy đủ của tài liệu và skills",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/rules.test.ts",
+      "criterionIds": [
+        "ac-skills-and-docs"
+      ],
+      "inputs": [
+        "@task-contract",
+        "docs/HARNIX_WORKFLOW.md",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/skills/harnix-continue/SKILL.md"
+      ]
+    },
+    {
+      "id": "check-full-verification",
+      "description": "Toàn bộ test suite và typecheck pass",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm typecheck && pnpm test:unit && pnpm test:integration",
+      "criterionIds": [
+        "ac-tests-and-verification"
+      ],
+      "inputs": [
+        "@task-contract",
+        "src/**/*.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-unit-tests",
+      "checkId": "check-unit-tests",
+      "recordedAt": "2026-09-28T08:09:04.877Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Tat ca 4 unit tests cho core task pause logic deu pass.",
+      "inputDigest": "2f5b0df6ad5c31501cf231dcf0fc306c30304a19e8ec649d6c1d5c9e85dd9646",
+      "artifactPaths": [
+        "src/core/tasks/task-pause.ts",
+        "test/unit/task-pause.test.ts"
+      ]
+    },
+    {
+      "id": "ev-integration-tests",
+      "checkId": "check-integration-tests",
+      "recordedAt": "2026-09-28T08:09:27.870Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Integration test cho CLI harnix pause (dry-run, active pause, no-active) pass 100%.",
+      "inputDigest": "24d9d23cc5b48b9ddbcb99cd1e986de69cf1ec60baaf03624541173c68cd0a6e",
+      "artifactPaths": [
+        "src/commands/pause.ts",
+        "src/cli-program.ts",
+        "test/integration/pause.test.ts"
+      ]
+    },
+    {
+      "id": "ev-skills-and-docs",
+      "checkId": "check-skills-and-docs",
+      "recordedAt": "2026-09-28T08:09:54.772Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Tài liệu và skills đã được cập nhật đầy đủ và đồng bộ chuẩn quy tắc Harnix.",
+      "inputDigest": "5bdb361ba5e54157b80eeab936a527dc80698dcc079cbfd5d6f5deff17319b93",
+      "artifactPaths": [
+        "docs/HARNIX_WORKFLOW.md",
+        "src/skills/harnix-brainstorm/SKILL.md",
+        "src/skills/harnix-continue/SKILL.md"
+      ]
+    },
+    {
+      "id": "ev-full-verification",
+      "checkId": "check-full-verification",
+      "recordedAt": "2026-09-28T08:10:49.866Z",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "Toan bo typecheck, unit tests va integration tests pass 100%.",
+      "inputDigest": "7430a71c645a7ad8b5a18aa476fe65c5674eaf5b9dd287a85eea57f6750df35f",
+      "artifactPaths": [
+        "src/cli-program.ts",
+        "src/commands/pause.ts",
+        "src/core/tasks/task-pause.ts"
+      ]
+    }
+  ],
+  "createdAt": "2026-09-28T07:49:17.584Z",
+  "updatedAt": "2026-09-28T08:11:19.688Z",
+  "completedAt": "2026-09-28T08:11:19.688Z"
+}

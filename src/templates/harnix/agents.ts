@@ -75,7 +75,7 @@ Optional \`epicId\` links a task to an epic; mandatory Epic Roadmap when initiat
 - When \`harnix\` is not installed or not on PATH, or state/skill is invalid, say so and stop: do not invent task state, skip the workflow, or edit \`.harnix\` by hand.
 - Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (\`task.json\`, \`prd.md\`, \`plan.md\`, \`design.md\`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
 - Preserve user-owned files, tasks, evidence, specs, research, journals, credentials, and unrelated configuration.
-- Use hidden workflow transport for state changes; never edit \`task.json\` or \`.active\` directly.
+- Use hidden workflow transport for state changes; never edit \`task.json\` or \`.active\` directly. When the user requests pausing the active task to switch or start another task, use \`harnix pause\`.
 - Use \`harnix repo-map --query <text>\` or \`harnix repo-map --impact <path>\` only as bounded implementation-stage navigation hints. Platform hooks must not invoke repository-map query, impact, or refresh.
 - Mark \`[x]\` on \`plan.md\` checklist as each slice completes; checklist must reach 100% \`[x]\` before \`verifying\`.
 - Release preparation belongs to implementation and must finish before \`verifying\`. Finish is product-read-only.

@@ -86,7 +86,7 @@ export async function resumeTask(
   };
 }
 
-async function loadBoundedActiveTask(harnixRoot: string): Promise<TaskRecord | null> {
+export async function loadBoundedActiveTask(harnixRoot: string): Promise<TaskRecord | null> {
   const pointerPath = await resolveSafeProjectPath(harnixRoot, "tasks/.active");
   let source: string;
   try {
