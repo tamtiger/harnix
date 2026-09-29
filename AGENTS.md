@@ -120,6 +120,8 @@ Task 1.1 must define:
 
 ```text
 build
+format
+format:check
 lint
 typecheck
 test
@@ -137,6 +139,10 @@ measure:footprint
 scan:release
 version:sync
 ```
+
+### Formatting and lint
+
+Prettier (`printWidth` 120, `endOfLine: auto`) formats `src`, `test`, `scripts` and the root TypeScript/JS config files; `pnpm lint` runs `pnpm format:check` first and then ESLint (typescript-eslint `recommendedTypeChecked`, `no-floating-promises`, `complexity` 20, `max-lines` 300). Run `pnpm format` before finishing a change, and keep format-only changes separate from logic changes. The temporary exemption lists in `eslint.config.mjs` (owners: `restructure-code`, `standardize-tests`, `release-v2`) may only shrink; adding an entry needs a new recorded decision.
 
 Do not weaken, bypass, or silently skip these gates. Filesystem tests use isolated temporary repositories **and injected disposable user homes**; they must not mutate real global configuration or call real install/network operations.
 

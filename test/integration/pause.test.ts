@@ -124,7 +124,7 @@ function result(taskRecord: TaskRecordV2, dryRun: boolean, outcome: "would-pause
 }
 
 function output(calls: unknown[][]): string {
-  return calls.map((call) => String(call[0] ?? "")).join("");
+  return calls.map((call) => (typeof call[0] === "string" ? call[0] : "")).join("");
 }
 
 async function snapshotTree(root: string): Promise<Record<string, string>> {

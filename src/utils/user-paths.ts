@@ -56,6 +56,7 @@ export interface ResolveUserPlatformRootsOptions {
   environment?: Readonly<Record<string, string | undefined>> | undefined;
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await -- satisfies the async HomeResolver signature
 const defaultHomeResolver: HomeResolver = async () => homedir();
 
 /**

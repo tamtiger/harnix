@@ -239,6 +239,8 @@ pnpm scan:release
 git diff --check
 ```
 
+`pnpm lint` chạy `pnpm format:check` (Prettier) trước rồi ESLint; chạy `pnpm format` để tự định dạng lại `src`, `test` và `scripts` trước khi hoàn tất.
+
 `test:acceptance` đã chạy đủ sáu suite (`test:unit`, `test:integration`, `test:migration`, `test:platform`, `test:workflow`, `test:safety`) nên không cần chạy `pnpm test` lặp lại. Mọi filesystem test dùng repository tạm và fake user home injected, không đụng vào profile/config thật.
 
 ## Tài liệu đầy đủ

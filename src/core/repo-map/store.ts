@@ -124,8 +124,9 @@ function stringArray(value: unknown, count: number, length: number): string[] {
     !value.every((item) => typeof item === "string" && item.length > 0 && item.length <= length)
   )
     throw new Error("Invalid repo map outline.");
-  const sorted = [...value].sort(compareCodeUnits);
-  if (sorted.some((item, index) => item !== value[index]) || new Set(value).size !== value.length)
+  const items = value as string[];
+  const sorted = [...items].sort(compareCodeUnits);
+  if (sorted.some((item, index) => item !== items[index]) || new Set(items).size !== items.length)
     throw new Error("Repo map outline must be sorted and unique.");
-  return value;
+  return items;
 }

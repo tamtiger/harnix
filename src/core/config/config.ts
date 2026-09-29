@@ -297,7 +297,7 @@ function assertPackages(value: unknown, validateProfile: (item: Record<string, u
 function assertIds<T extends string>(value: unknown, allowed: Set<T>, field: string): asserts value is T[] {
   if (!Array.isArray(value) || !value.every((id) => typeof id === "string" && allowed.has(id as T)))
     throw new ConfigValidationError(`${field} contains an invalid ID.`);
-  assertSortedUnique(value, field);
+  assertSortedUnique(value as string[], field);
 }
 
 function assertPlatforms(value: unknown): asserts value is PlatformId[] {
@@ -306,7 +306,7 @@ function assertPlatforms(value: unknown): asserts value is PlatformId[] {
     !value.every((platform) => typeof platform === "string" && platformIds.has(platform as PlatformId))
   )
     throw new ConfigValidationError("platforms contains an invalid platform.");
-  assertSortedUnique(value, "platforms");
+  assertSortedUnique(value as string[], "platforms");
 }
 
 function assertContext(value: unknown): void {

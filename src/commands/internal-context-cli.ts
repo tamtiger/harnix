@@ -21,7 +21,7 @@ export async function runInternalContextCommand(options: RunInternalContextComma
   if (output) process.stdout.write(`${output}\n`);
 }
 
-export function parseOptionalHookInput(source: string | undefined): unknown | undefined {
+export function parseOptionalHookInput(source: string | undefined): unknown {
   if (source === undefined || source.trim().length === 0) return undefined;
   try {
     return JSON.parse(source) as unknown;

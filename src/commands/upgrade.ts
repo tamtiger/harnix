@@ -19,6 +19,7 @@ export interface UpgradeResult {
 
 /** The default path is deliberately offline; callers inject registry access when they explicitly want it. */
 export async function upgradeHarnix(options: UpgradeOptions): Promise<UpgradeResult> {
+  // eslint-disable-next-line @typescript-eslint/require-await -- satisfies the async injected registry-lookup signature
   const available = await (options.availableVersion ?? (async () => undefined))();
   const command = ["npm", "install", "--save-dev", "@tamtiger/harnix@latest"];
   if (options.apply) {

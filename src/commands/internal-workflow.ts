@@ -72,7 +72,7 @@ export interface WorkflowSaveEnvelope {
   task: unknown;
   artifacts?: WorkflowSaveArtifacts | undefined;
   contractRevision?: { reason: string } | undefined;
-  epic?: unknown | undefined;
+  epic?: unknown;
   epicMembers?: TaskRecord[] | undefined;
 }
 

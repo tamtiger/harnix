@@ -398,6 +398,7 @@ function defaultProcessIdentity(): FileLockProcessIdentity {
   return currentProcessIdentity;
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await -- satisfies the async process-identity inspector signature
 async function defaultProcessIdentityInspector(pid: number): Promise<FileLockProcessIdentity | undefined> {
   return pid === currentProcessIdentity.pid ? currentProcessIdentity : undefined;
 }

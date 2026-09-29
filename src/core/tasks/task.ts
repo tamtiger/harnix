@@ -39,7 +39,7 @@ export interface ValidationCheckV2 extends ValidationCheckBase {
 }
 /** v3 keeps the v2 shape; `@task-contract` is no longer a declared input because the contract is folded into every digest. */
 export type ValidationCheckV3 = ValidationCheckV2;
-export type ValidationCheck = ValidationCheckV1 | ValidationCheckV2 | ValidationCheckV3;
+export type ValidationCheck = ValidationCheckV1 | ValidationCheckV2;
 interface EvidenceBase {
   id: string;
   checkId?: string;
@@ -64,7 +64,7 @@ export interface EvidenceV2 extends EvidenceBase {
   findings?: EvidenceFindingV1[];
 }
 export type EvidenceV3 = EvidenceV2;
-export type Evidence = EvidenceV1 | EvidenceV2 | EvidenceV3;
+export type Evidence = EvidenceV1 | EvidenceV2;
 export interface TaskBlocker {
   kind: "decision" | "authority" | "credential" | "external" | "repository";
   summary: string;
@@ -301,7 +301,11 @@ export function validateTask(value: unknown, options: TaskValidationOptions = {}
     ].includes(String(value.checkpoint))
   )
     throw new TaskValidationError("Task identity, mode, status, or checkpoint is invalid.");
-  if (value.schemaVersion !== 1 && value.epicId !== undefined && !validId(String(value.epicId)))
+  if (
+    value.schemaVersion !== 1 &&
+    value.epicId !== undefined &&
+    (typeof value.epicId !== "string" || !validId(value.epicId))
+  )
     throw new TaskValidationError("Task epicId is invalid.");
   if (
     !Array.isArray(value.nonGoals) ||

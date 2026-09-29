@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205804-enforce-code-style",
   "title": "[06] Thiết lập chuẩn định dạng và lint cho toàn repo",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Hiện repo chưa có formatter (không có Prettier/Biome), ESLint chỉ bật bộ recommended cơ bản, và có nhiều dòng rất dài (task.ts 47 dòng > 160 ký tự, templates/harnix/workflow.ts 38, catalog.ts 31, doctor.ts 30). Thêm Prettier làm devDependency (printWidth 120) cùng eslint-config-prettier; format một lần toàn bộ src, test, scripts trong một thay đổi thuần định dạng; bật typescript-eslint recommendedTypeChecked, max-lines 300 cho mỗi file (có danh sách miễn trừ tạm thời ghi rõ task nào gỡ), complexity, no-floating-promises; thêm script format và format:check, đưa format:check vào lint gate.",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -18,52 +18,123 @@
     {
       "id": "ac-formatter",
       "text": "Prettier và eslint-config-prettier được cấu hình; pnpm format:check pass trên toàn repo sau một lần format.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-format"
+      ]
     },
     {
       "id": "ac-lint-rules",
       "text": "ESLint bật recommendedTypeChecked, max-lines 300, complexity, no-floating-promises; pnpm lint pass; mọi vi phạm còn lại nằm trong danh sách miễn trừ tạm thời có ghi task chịu trách nhiệm gỡ.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-lint-rules"
+      ]
     },
     {
       "id": "ac-format-only",
       "text": "Diff của bước format chỉ thay đổi định dạng: pnpm test pass không sửa assertion và output CLI giữ nguyên.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-build-parity",
+        "ev-check-suite"
+      ]
     },
     {
       "id": "ac-scripts",
       "text": "package.json có format và format:check; format:check nằm trong lint gate.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-format"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-sync",
+        "ev-check-suite"
+      ]
     }
   ],
   "relevantPaths": [
-    "package.json",
-    "eslint.config.mjs",
+    ".prettierignore",
     ".prettierrc.json",
+    "eslint.config.mjs",
+    "package.json",
+    "scripts/**",
     "src/**",
-    "test/**",
-    "scripts/**"
+    "test/**"
   ],
   "relevantSpecs": [
+    "AGENTS.md",
     "docs/HARNIX_PRD.md",
     "docs/HARNIX_WORKFLOW.md",
-    "docs/IMPLEMENTATION_PLAN.md"
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/OVERHAUL_DECISIONS.md"
   ],
   "validationPlan": [
     {
-      "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "id": "check-docs-sync",
+      "description": "Test parity docs, script và cấu hình định dạng pass",
       "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts test/unit/package-contract.test.ts",
+      "criterionIds": [
+        "ac-docs-sync"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "test/unit/package-contract.test.ts",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
+    },
+    {
+      "id": "check-format",
+      "description": "pnpm format:check pass trên toàn repo",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm format:check",
+      "criterionIds": [
+        "ac-formatter",
+        "ac-scripts"
+      ],
+      "inputs": [
+        ".prettierignore",
+        ".prettierrc.json",
+        "package.json",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-lint-rules",
+      "description": "ESLint với luật mới pass, vi phạm còn lại nằm trong danh sách miễn trừ",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec eslint .",
+      "criterionIds": [
+        "ac-lint-rules"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "package.json",
+        "scripts/**",
+        "src/**",
+        "test/**",
+        "tsconfig.json"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass",
+      "scope": "full",
       "required": true,
       "command": "pnpm lint && pnpm typecheck && pnpm test",
       "criterionIds": [
@@ -74,8 +145,13 @@
         "ac-scripts"
       ],
       "inputs": [
-        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
         "docs/**",
+        "eslint.config.mjs",
+        "package.json",
+        "scripts/**",
         "src/**",
         "test/**"
       ]
@@ -83,13 +159,90 @@
   ],
   "decisions": [
     {
-      "id": "d-draft-checks",
-      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
-      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+      "id": "d-install-approved",
+      "text": "prettier và eslint-config-prettier được cài bằng pnpm add -D sau khi người dùng cho phép rõ ràng ngày 2026-09-29.",
+      "rationale": "Task cấm tự cài package vì cần mạng; đã hỏi và được duyệt."
+    },
+    {
+      "id": "d-eol-auto",
+      "text": "Prettier dùng endOfLine auto.",
+      "rationale": "Working tree Windows có file CRLF lẫn LF do autocrlf; ép một kiểu sẽ đổi mọi dòng và phá diff chỉ định dạng."
+    },
+    {
+      "id": "d-exempt-list",
+      "text": "Vi phạm max-lines/complexity/type-checked chưa sửa cơ học được nằm trong danh sách miễn trừ tường minh trong eslint.config.mjs, mỗi nhóm ghi task chịu trách nhiệm gỡ.",
+      "rationale": "Sửa cấu trúc thuộc restructure-code và standardize-tests; task này không đổi hành vi hay tách module."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-09-29T11:01:59.790+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205804-enforce-code-style/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-29T11:02:00.522+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung check tập trung cho từng tiêu chí và ghi lại quyết định cài package sau khi được người dùng cho phép.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205804-enforce-code-style/task.json"
+      ]
+    },
+    {
+      "checkId": "check-docs-sync",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "recordedAt": "2026-09-29T11:10:02.228+07:00",
+      "summary": "Check check-docs-sync passed (exit 0):    Start at  11:08:57 |    Duration  1.05s (transform 283ms, setup 0ms, collect 680ms, tests 60ms, e",
+      "id": "ev-check-docs-sync",
+      "inputDigest": "48ca55ad053737162fd3537bfb064457e62d6eccd9c68c57e7e47c3f39d47de7",
+      "result": "pass"
+    },
+    {
+      "checkId": "check-format",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "recordedAt": "2026-09-29T11:10:03.102+07:00",
+      "summary": "Check check-format passed (exit 0): $ prettier --check \"src/**/*.ts\" \"test/**/*.ts\" \"scripts/**/*.mjs\" eslint.config.mjs tsup.config.ts ",
+      "id": "ev-check-format",
+      "inputDigest": "3639d210447487eae2156d3d92cbd7049eb93c9a1dc9448bb55d7e708d0ec597",
+      "result": "pass"
+    },
+    {
+      "checkId": "check-lint-rules",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "recordedAt": "2026-09-29T11:10:04.230+07:00",
+      "summary": "Check check-lint-rules passed (exit 0): ",
+      "id": "ev-check-lint-rules",
+      "inputDigest": "76250a150d737c354299a3468bd3758663ace1ce382b3c4331c6a6af9603c2b6",
+      "result": "pass"
+    },
+    {
+      "checkId": "check-suite",
+      "artifactPaths": [],
+      "exitCode": 0,
+      "recordedAt": "2026-09-29T11:10:05.449+07:00",
+      "summary": "Check check-suite passed (exit 0):    Start at  11:09:34 |    Duration  17.76s (transform 4.38s, setup 0ms, collect 35.76s, tests 100.0",
+      "id": "ev-check-suite",
+      "inputDigest": "853e343b6bf3f99de07b7ee154668ba0eefa9e7911ea4d0d1d970435113c58d6",
+      "result": "pass"
+    },
+    {
+      "id": "ev-build-parity",
+      "result": "pass",
+      "artifactPaths": [],
+      "recordedAt": "2026-09-29T11:10:06.770+07:00",
+      "summary": "Sau prettier --write, bản build tsup của toàn bộ dist khi minify bằng esbuild giống hệt bản trước khi format (527596 ký tự); typecheck sạch, 679 test pass không sửa assertion."
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
   "createdAt": "2026-09-28T20:58:04.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "updatedAt": "2026-09-29T11:10:24.683+07:00",
+  "completedAt": "2026-09-29T11:10:24.683+07:00"
 }

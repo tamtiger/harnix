@@ -42,7 +42,7 @@ describe("task state", () => {
       evidence: [],
       createdAt: timestamp,
       updatedAt: timestamp,
-    } as TaskRecord);
+    });
     expect(transitionTask(task, "ready", "ready").status).toBe("ready");
     const root = await temporaryRepository();
     await saveTask(root, task);

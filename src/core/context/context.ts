@@ -220,7 +220,7 @@ export function validateContextManifest(value: unknown): ContextManifest {
       (previous && compareEntries(previous, entry) > 0)
     )
       throw new Error("Invalid context entry.");
-    previous = entry as unknown as ContextEntry;
+    previous = entry;
   }
   for (const item of value.omitted)
     if (

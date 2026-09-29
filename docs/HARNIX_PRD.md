@@ -431,7 +431,7 @@ Tất cả filesystem tests dùng isolated temporary repositories **và injected
 
 Harnix không hoàn thành cho tới khi fresh output chứng minh:
 
-- `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm lint`, `pnpm typecheck` và `pnpm test:acceptance` pass; `test:acceptance` đã bao phủ toàn bộ test directories nên cổng release không chạy thêm duplicate `pnpm test`.
+- `pnpm install --frozen-lockfile`, `pnpm build`, `pnpm lint` (đã gồm `pnpm format:check`), `pnpm typecheck` và `pnpm test:acceptance` pass; `test:acceptance` đã bao phủ toàn bộ test directories nên cổng release không chạy thêm duplicate `pnpm test`.
 - `pnpm pack:check` tạo/kiểm đúng một `@tamtiger/harnix` tarball dưới project-local `.artifacts/`.
 - `pnpm smoke:tarball` uses two independent temporary roots: a fake user home for global Kiro/Antigravity/Codex setup and one-or-more temporary projects for init/context; it must never mutate real profile/config.
 - `test:acceptance` gồm clean/seeded unsafe Doctor JSON v2 fixtures and isolated-home global lifecycle fixtures.

@@ -651,7 +651,7 @@ Phase 1–5 task checkmarks below are historical delivery evidence. Their former
 
 - [x] Write packaging invariant test first: exactly one publishable `package.json`, no workspace file, one `harnix` bin.
 - [x] Scaffold package with Node >=18 and ESM.
-- [x] Lock package scripts: `build`, `lint`, `typecheck`, `test`, `test:unit`, `test:integration`, `test:migration`, `test:platform`, `test:workflow`, `test:safety`, `test:acceptance`, `pack:check`, `smoke:tarball`, `measure:init`, `measure:footprint`, `scan:release`.
+- [x] Lock package scripts: `build`, `format`, `format:check`, `lint`, `typecheck`, `test`, `test:unit`, `test:integration`, `test:migration`, `test:platform`, `test:workflow`, `test:safety`, `test:acceptance`, `pack:check`, `smoke:tarball`, `measure:init`, `measure:footprint`, `scan:release`.
 - [x] Phase 1: `test:acceptance` orchestrates the implemented unit/integration/migration/platform/workflow/safety suites; `pack:check` produces exactly one tarball under `.artifacts/` without global mutation.
 - [x] Phase 4 extension: add clean/seeded Doctor JSON fixtures to `test:acceptance`, then have smoke/release scripts consume the checked tarball and isolated fixtures.
 - [x] Build minimal CLI help and non-zero usage errors.
@@ -1047,6 +1047,7 @@ git diff --check
 
 Script contracts:
 
+- `format` / `format:check`: Prettier (`printWidth` 120, `endOfLine: auto`) ghi/kiểm `src/**/*.ts`, `test/**/*.ts`, `scripts/**/*.mjs` và các file cấu hình TS/JS ở gốc; `lint` chạy `pnpm format:check` trước rồi `eslint .` (typescript-eslint `recommendedTypeChecked`, `no-floating-promises`, `complexity` 20, `max-lines` 300). Vi phạm còn lại chỉ nằm trong danh sách miễn trừ tạm thời của `eslint.config.mjs`, mỗi nhóm ghi task chịu trách nhiệm gỡ (`restructure-code`, `standardize-tests`, `release-v2`); danh sách chỉ được thu hẹp.
 - `test:acceptance`: chạy toàn bộ unit/integration/migration/platform/workflow/safety test directories, gồm clean và seeded unsafe Doctor JSON fixtures; acceptance sequence không chạy duplicate `pnpm test`.
 - `pack:check`: xóa/recreate project-local `.artifacts/` safely, chạy `pnpm pack --pack-destination .artifacts`, assert đúng một `@tamtiger/harnix` tarball và kiểm contents/license/runtime/templates.
 - `smoke:tarball`: cài tarball đó vào two independent temporary roots: fake user home for global setup and one-or-more project fixtures for `init`/context; smoke từng Kiro/Antigravity/Codex và tổ hợp ba platform without a real profile.
