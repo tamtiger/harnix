@@ -183,7 +183,7 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("one current stage-owner skill");
     expect(workflowTemplate).toContain("separately through EOF");
     expect(workflowTemplate).not.toContain("harnix internal workflow");
-    expect(workflowTemplate).toContain('{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts>, "contractRevision"?: { "reason": <text> }, "epic"?: <EpicRecord>, "roadmapMembers"?: <TaskRecord[]> }');
+    expect(workflowTemplate).toContain('{ "task": <TaskRecord>, "artifacts"?: <TaskArtifacts>, "contractRevision"?: { "reason": <text> }, "epic"?: <EpicRecord>, "epicMembers"?: <TaskRecord[]> }');
     expect(workflowTemplate).toContain("acceptanceCriteria: [{ id, text, status, evidenceIds, waiverReason? }]");
     expect(workflowTemplate).toContain("validationPlan: [{ id, description, command?, scope, required, criterionIds, inputs }]");
     expect(workflowTemplate).toContain("evidence: [{ id, checkId?, recordedAt, result, exitCode?, summary, artifactPaths, inputDigest?, findings? }]");

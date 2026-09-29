@@ -55,7 +55,7 @@ Maintain a decision inventory with four groups:
 
 Ask at most one blocking question at a time. Include why it matters, your recommendation, and the trade-off. Do not manufacture a question when evidence and the request already decide the matter.
 
-For a broad request, split independently testable deliverables before refining implementation details. Keep one active task; record ordering and ownership rather than inventing hidden dependency state. When an initiative spans >=2 tasks or the user requests grouping into a larger initiative, an Epic Roadmap is mandatory: include `epicId` on the task, supply the top-level `epic` object (`EpicRecord` schema v1: `id`, `title`, `goal`, optional `nonGoals`) in the `--save` envelope, and upfront declare and scaffold all member tasks via `roadmapMembers`. Consistently follow the timestamp prefix convention `YYYYMMDD-HHMMSS-<name>` for both task and epic IDs. Inspect existing epics with `harnix roadmap` or `harnix roadmap --id <epic-id>`.
+For a broad request, split independently testable deliverables before refining implementation details. Keep one active task; record ordering and ownership rather than inventing hidden dependency state. When an initiative spans >=2 tasks or the user requests grouping into a larger initiative, an Epic is mandatory: include `epicId` on the task, supply the top-level `epic` object (`EpicRecord` schema v1: `id`, `title`, `goal`, optional `nonGoals`) in the `--save` envelope, and upfront declare and scaffold all member tasks via `epicMembers`. Consistently follow the timestamp prefix convention `YYYYMMDD-HHMMSS-<name>` for both task and epic IDs. Inspect existing epics with `harnix epic` or `harnix epic <epic-id>`.
 
 ## Context checkpoint before ready
 

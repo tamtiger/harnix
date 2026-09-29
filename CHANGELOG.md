@@ -23,6 +23,9 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 - **Breaking:** `workflow --save` chỉ nhận task mới ở schema v3. Task v1/v2 chưa hoàn tất chỉ được nâng lên v3 bằng một lần save migration (giữ status/checkpoint, tiêu chí, check bắt buộc và evidence); mọi thao tác khác trên task chưa migrate bị từ chối kèm hướng dẫn. Evidence pass cũ báo `legacy-schema` cho đến khi migrate và chạy lại check. Task đã kết thúc vẫn đọc được, không bị ghi lại.
 - Mã lý do stale của check còn: `digest-mismatch`, `evidence-expired`, `inputs-unavailable`, `latest-failed`, `latest-skipped`, `legacy-schema`, `no-evidence`; `changes` luôn rỗng vì không còn snapshot để so sánh.
 - Sửa lọc member của epic để task v3 hiện trong `harnix roadmap`.
+- **Breaking:** thống nhất tên gọi "epic". Lệnh `harnix roadmap [--limit] [--id]` bị xóa (không alias) và thay bằng `harnix epic [--limit]` (danh sách) cùng `harnix epic <epic-id>` (chi tiết kèm next task; id không tồn tại trả lỗi JSON exit 2). Thư mục `.harnix/roadmaps/` đổi thành `.harnix/epics/`; trường envelope `roadmapMembers` của `workflow --save` đổi thành `epicMembers`. `EpicRecord` và `epicId` của task không đổi.
+- `harnix update` và `harnix doctor --fix` chuyển `.harnix/roadmaps/*.json` sang `.harnix/epics/` không mất dữ liệu (chỉ xóa file cũ sau khi bản mới đã ghi đúng, idempotent, giữ nguyên cả hai nếu đích đã có nội dung khác); trước khi chuyển, các lệnh đọc vẫn tìm ở thư mục cũ.
+- Sửa trang epic `.md`: có dòng trống trước mọi heading, render `nonGoals`, và thêm mục `Next task` khớp với `nextTask` của `harnix epic <epic-id>`.
 - Suite `test:migration` chuyển thành suite tương thích dữ liệu cũ (đọc task v1/v2 và task có `context.json`) thay cho test của module migration đã gỡ.
 
 ## [1.1.22] - 2026-09-28

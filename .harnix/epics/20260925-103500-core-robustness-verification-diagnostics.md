@@ -1,6 +1,18 @@
 # Epic: Refactor Core Architecture & Verification Diagnostics Enhancement
 
 Cải thiện độ vững chắc của core parser ready-trace, tách nhỏ các module monolithic trong workflow, và nâng cấp hệ thống chẩn đoán lỗi verification failure với structured findings theo phong cách Superpowers.
+
+- **Cập nhật:** 2026-09-25 10:32:15 +07:00
+
+## Non-goals
+
+- Không thêm platform mới ngoài 4 platform hiện tại (Kiro, Antigravity, Codex, Claude Code).
+- Không làm gãy backward compatibility của TaskRecord v1/v2 schema.
+
+## Next task
+
+Không còn task nào chưa hoàn tất.
+
 ## Members (2 tasks)
 
 | # | Task ID | Title | Status |
@@ -21,4 +33,3 @@ Cải thiện độ vững chắc của core parser ready-trace, tách nhỏ cá
 - **Trạng thái:** `completed`
 - **Mục tiêu:** Nâng cấp hệ thống chẩn đoán lỗi verification failure với structured findings theo phong cách Superpowers.
 - **Tiêu chí nghiệm thu:** 3 tiêu chí
-

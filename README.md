@@ -151,7 +151,7 @@ Mọi output của public command đều là JSON. Dưới đây là các lệnh
 | `harnix resume <task-id> [--dry-run]` | Tiếp tục một task chưa hoàn thành theo đúng ID |
 | `harnix context-report --platform <id>` | Xem context nào thực sự được đưa vào agent |
 | `harnix status --explain [--limit <n>]` | Xem check nào đã stale (input đổi/thiếu) và readiness/completion blocker của task hiện tại |
-| `harnix roadmap [--id <epic-id>] [--limit <n>]` | Xem danh sách Epic Roadmaps hoặc chi tiết tiến độ member tasks trong epic |
+| `harnix epic [<epic-id>] [--limit <n>]` | Xem danh sách epic hoặc chi tiết tiến độ member tasks và next task của một epic |
 | `harnix repo-map --query <text>` / `--impact <path>` | Tìm file liên quan hoặc dependency impact từ cache |
 | `harnix doctor [--fix] [--global]` | Kiểm tra drift, hook, path safety, secret exposure; tự sửa issue an toàn |
 | `harnix update [--global] [--restore]` | Đồng bộ lại managed files theo config hiện tại |
@@ -187,7 +187,7 @@ Mở trực tiếp `.harnix/tasks/<id>/review.md` — không cần chạy comman
   config.yaml
   workflow.md
   .template-hashes.json
-  roadmaps/             # lưu trữ epic roadmap (*.json và derived *.md)
+  epics/                # lưu trữ epic (*.json và derived *.md)
   spec/                 # guide/rule đã được quản lý
   tasks/                # tạo lazy khi persist task đầu tiên
   workspace/<developer>/journal/ # tạo lazy khi ghi journal đầu tiên

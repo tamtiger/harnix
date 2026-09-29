@@ -67,7 +67,7 @@ Engineering guidance selected for this project lives in \`.harnix/spec/guides/\`
 
 Every persisted task has derived read-only \`.harnix/tasks/<id>/review.md\` (goal, criteria, checks, decisions, risks, evidence), regenerated automatically on save. Point the user there for plain-file review instead of running a command or reading \`task.json\`; never hand-edit it.
 
-Optional \`epicId\` links a task to an epic; mandatory Epic Roadmap when initiative has >=2 tasks. Upfront declare all member tasks at initialization. Top-level \`epic\` in \`--save\` creates/updates; public \`harnix roadmap\` inspects.
+Optional \`epicId\` links a task to an epic; mandatory Epic when initiative has >=2 tasks. Upfront declare all member tasks at initialization via \`epicMembers\`. Top-level \`epic\` in \`--save\` creates/updates; public \`harnix epic\` inspects (legacy \`.harnix/roadmaps/\` is migrated by \`harnix update\`).
 
 ## Operating rules
 

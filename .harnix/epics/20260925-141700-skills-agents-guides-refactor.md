@@ -1,6 +1,19 @@
 # Epic: Refactor toàn diện Skills, AGENTS, Guides Flatten và Mở rộng Stack
 
 Nâng cấp toàn bộ 7 canonical skills, AGENTS template, root AGENTS.md, flatten cấu trúc thư mục src/guides/ thành *.md, mở rộng độ phủ các ngôn ngữ/framework phổ biến và cập nhật auto-detection cùng context chuẩn của từng stack.
+
+- **Cập nhật:** 2026-09-25 14:20:16 +07:00
+
+## Non-goals
+
+- Không phá vỡ backward compatibility của schema task hay config.yaml.
+- Không vượt quá 8,192 bytes cho renderAgentsTemplate.
+- Không thêm network service hay telemetry.
+
+## Next task
+
+Không còn task nào chưa hoàn tất.
+
 ## Members (3 tasks)
 
 | # | Task ID | Title | Status |
@@ -28,4 +41,3 @@ Nâng cấp toàn bộ 7 canonical skills, AGENTS template, root AGENTS.md, flat
 - **Trạng thái:** `completed`
 - **Mục tiêu:** Nâng cấp và chuẩn hóa toàn diện nội dung 21 guide files cũ lên cùng đẳng cấp chiều sâu kỹ thuật (từ 3.200 - 4.800 ký tự với 4 đề mục H2 chuyên sâu), giàu tính chỉ dẫn thực chiến và bám sát các phiên bản mới nhất của từng hệ sinh thái.
 - **Tiêu chí nghiệm thu:** 4 tiêu chí
-

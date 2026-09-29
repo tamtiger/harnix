@@ -124,7 +124,7 @@ describe("configured time zone", () => {
     await saveWorkflow(root, { task: legacy, epic });
 
     const review = await readFile(join(root, ".harnix", "tasks", taskId, "review.md"), "utf8");
-    const page = await readFile(join(root, ".harnix", "roadmaps", "epic-one.md"), "utf8");
+    const page = await readFile(join(root, ".harnix", "epics", "epic-one.md"), "utf8");
     expect(review).toContain("**Created:** 2026-09-28 20:58:01 +07:00");
     expect(review).toContain("**Updated:** 2026-09-28 20:58:01 +07:00");
     expect(page).toContain("**Cập nhật:** 2026-09-28 20:58:01 +07:00");

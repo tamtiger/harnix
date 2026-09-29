@@ -3,12 +3,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { runCli } from "../../src/cli-program.js";
 import { initializeProject } from "../../src/commands/init.js";
 import { saveTask, setActiveTask, type TaskRecordV2 } from "../../src/core/tasks/task.js";
-import { upsertEpic, type EpicRecord } from "../../src/core/roadmaps/roadmap.js";
+import { upsertEpic, type EpicRecord } from "../../src/core/epics/epic.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const originalCwd = process.cwd();
 const originalExitCode = process.exitCode;
-const temporaryRepository = useTemporaryRepositories("harnix-roadmap-");
+const temporaryRepository = useTemporaryRepositories("harnix-epic-");
 
 afterEach(() => {
   process.chdir(originalCwd);
@@ -16,7 +16,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe.sequential("roadmap command", () => {
+describe.sequential("epic command", () => {
   it("lists epics with task counts by status", async () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });
@@ -33,7 +33,7 @@ describe.sequential("roadmap command", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "roadmap"])).resolves.toBe(0);
+    await expect(runCli(["node", "harnix", "epic"])).resolves.toBe(0);
 
     const output = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""));
     expect(output).toMatchObject({
@@ -60,7 +60,7 @@ describe.sequential("roadmap command", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "roadmap", "--id", "detail-epic"])).resolves.toBe(0);
+    await expect(runCli(["node", "harnix", "epic", "detail-epic"])).resolves.toBe(0);
 
     const output = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""));
     expect(output).toMatchObject({
@@ -79,7 +79,7 @@ describe.sequential("roadmap command", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "roadmap", "--id", "nonexistent-epic"])).resolves.toBe(2);
+    await expect(runCli(["node", "harnix", "epic", "nonexistent-epic"])).resolves.toBe(2);
 
     const output = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""));
     expect(output).toMatchObject({ ok: false, error: { exitCode: 2 } });
@@ -103,7 +103,7 @@ function taskV2(id: string, status: TaskRecordV2["status"], epicId: string): Tas
     generator: "harnix",
     schemaVersion: 2,
     id,
-    title: "roadmap member",
+    title: "epic member",
     mode: "lite",
     status,
     checkpoint: status === "ready" ? "ready" : status === "in_progress" ? "implementing" : "planning",

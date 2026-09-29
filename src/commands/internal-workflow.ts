@@ -27,7 +27,7 @@ import {
   type TaskRecord,
   type TaskRecordV3,
 } from "../core/tasks/task.js";
-import { validateEpic, upsertEpic, loadEpicRecord, renderRoadmapMarkdown, type EpicRecord } from "../core/roadmaps/roadmap.js";
+import { validateEpic, upsertEpic, loadEpicRecord, renderEpicMarkdown, type EpicRecord } from "../core/epics/epic.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import {
   contextSelectionResultHash,
@@ -61,7 +61,7 @@ export interface WorkflowSaveEnvelope {
   artifacts?: WorkflowSaveArtifacts | undefined;
   contractRevision?: { reason: string } | undefined;
   epic?: unknown | undefined;
-  roadmapMembers?: TaskRecord[] | undefined;
+  epicMembers?: TaskRecord[] | undefined;
 }
 
 /** Hidden transport for agents; it preserves TaskRecord state and is deliberately JSON-only. */
@@ -146,15 +146,15 @@ async function saveWorkflowLocked(
     await saveTask(harnixRoot, candidate);
     taskCommitted = true;
 
-    // Save any planned roadmap member tasks
-    if (envelope.roadmapMembers && envelope.roadmapMembers.length > 0) {
+    // Save any planned epic member tasks
+    if (envelope.epicMembers && envelope.epicMembers.length > 0) {
       const targetEpicId = validatedEpic ? validatedEpic.id : candidate.schemaVersion !== 1 ? candidate.epicId : undefined;
-      for (const member of envelope.roadmapMembers) {
+      for (const member of envelope.epicMembers) {
         if (member.schemaVersion !== 3 || member.status !== "planning") {
-          throw new Error(`Roadmap member task ${member.id} must be schemaVersion 3 and in planning status.`);
+          throw new Error(`Epic member task ${member.id} must be schemaVersion 3 and in planning status.`);
         }
         if (targetEpicId && member.epicId !== targetEpicId) {
-          throw new Error(`Roadmap member task ${member.id} epicId must match ${targetEpicId}.`);
+          throw new Error(`Epic member task ${member.id} epicId must match ${targetEpicId}.`);
         }
         await saveTask(harnixRoot, member);
       }
@@ -169,7 +169,7 @@ async function saveWorkflowLocked(
     if (candidate.schemaVersion !== 1 && candidate.epicId !== undefined && candidate.epicId !== validatedEpic?.id) {
       const epicId = candidate.epicId;
       const epic = await loadEpicRecord(root, epicId);
-      await renderRoadmapMarkdown(root, epicId, epic);
+      await renderEpicMarkdown(root, epicId, epic);
     }
   } catch (error: unknown) {
     if (!taskCommitted) {
@@ -251,8 +251,8 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
     envelope: {
       artifacts: "optional { prd?, plan?, design?, research?: { <safe>.md: text }, context? }",
       contractRevision: "optional { reason: 10-1000 characters }, accepted in the save that sets checkpoint replan on an unfinished task and revises unproven obligations",
-      epic: "optional EpicRecord schema v1; when present, upserts .harnix/roadmaps/<epic-id>.json and regenerates markdown",
-      roadmapMembers: "optional TaskRecord[] schema v3 in planning state; saved as non-active member tasks with matching epicId",
+      epic: "optional EpicRecord schema v1; when present, upserts .harnix/epics/<epic-id>.json and regenerates markdown",
+      epicMembers: "optional TaskRecord[] schema v3 in planning state; saved as non-active member tasks with matching epicId",
       task: "TaskRecord, required",
     },
     taskRecord: taskRecordFieldManifest(3),
@@ -285,12 +285,12 @@ function validateEvidenceEnvelope(value: unknown): Evidence {
  * `finishWorkflowTask`/`cancelWorkflowTask` persist the terminal record via
  * the low-level `saveTask`, not `saveWorkflowLocked`, so they never go
  * through the epic-refresh step that a normal `--save` triggers. Without
- * this, a task's roadmap entry would freeze at its last pre-terminal status.
+ * this, a task's epic entry would freeze at its last pre-terminal status.
  */
 async function refreshLinkedEpicMarkdown(root: string, task: TaskRecord): Promise<void> {
   if (task.schemaVersion === 1 || task.epicId === undefined) return;
   const epic = await loadEpicRecord(root, task.epicId);
-  await renderRoadmapMarkdown(root, task.epicId, epic);
+  await renderEpicMarkdown(root, task.epicId, epic);
 }
 
 export async function finishWorkflow(root: string, injectedNow?: string): Promise<TaskRecord> {
@@ -777,7 +777,7 @@ function preflightStage(
 
 function validateWorkflowSaveEnvelope(value: unknown): WorkflowSaveEnvelope {
   if (!isRecord(value)) throw new Error("Workflow save envelope is invalid.");
-  assertExactFields(value, new Set(["task", "artifacts", "contractRevision", "epic", "roadmapMembers"]), "Workflow save envelope");
+  assertExactFields(value, new Set(["task", "artifacts", "contractRevision", "epic", "epicMembers"]), "Workflow save envelope");
   if (!("task" in value)) throw new Error("Workflow save envelope requires task.");
   const envelope: WorkflowSaveEnvelope = { task: value.task };
   if (value.artifacts !== undefined) envelope.artifacts = validateWorkflowSaveArtifacts(value.artifacts);
@@ -790,9 +790,9 @@ function validateWorkflowSaveEnvelope(value: unknown): WorkflowSaveEnvelope {
   if (value.epic !== undefined) {
     envelope.epic = value.epic;
   }
-  if (value.roadmapMembers !== undefined) {
-    if (!Array.isArray(value.roadmapMembers)) throw new Error("Workflow save envelope roadmapMembers must be an array.");
-    envelope.roadmapMembers = value.roadmapMembers.map((m) => validateTask(m));
+  if (value.epicMembers !== undefined) {
+    if (!Array.isArray(value.epicMembers)) throw new Error("Workflow save envelope epicMembers must be an array.");
+    envelope.epicMembers = value.epicMembers.map((m) => validateTask(m));
   }
   return envelope;
 }

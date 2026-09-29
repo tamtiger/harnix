@@ -1,5 +1,6 @@
 import { access } from "node:fs/promises";
 
+import { migrateLegacyEpics } from "../core/epics/migrate.js";
 import { migrateConfig, readConfig, type HarnixConfigV2 } from "../core/config/config.js";
 import { guideOutputPath, selectGuideSources } from "../guides/catalog.js";
 import { workflowTemplate } from "../templates/harnix/workflow.js";
@@ -27,7 +28,13 @@ export async function updateProject(options: UpdateProjectOptions): Promise<Upda
     restoreDeleted: options.restoreDeleted,
   });
   await writeManifest(manifestPath, mergeManifestEntries(reconciled.manifest, legacyEntries));
-  return reconciled.result;
+  const epics = await migrateLegacyEpics(options.root);
+  return {
+    ...reconciled.result,
+    created: [...reconciled.result.created, ...epics.created],
+    deleted: [...reconciled.result.deleted, ...epics.deleted],
+    preserved: [...reconciled.result.preserved, ...epics.preserved],
+  };
 }
 
 /** Records files immediately after setup has written the exact packaged templates. */

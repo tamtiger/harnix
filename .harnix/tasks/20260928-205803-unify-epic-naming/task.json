@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205803-unify-epic-naming",
   "title": "[05] Thống nhất tên gọi epic và sửa renderer trang epic",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Dùng một tên epic ở mọi nơi: .harnix/roadmaps/ đổi thành .harnix/epics/; lệnh harnix roadmap [--limit] [--id] đổi thành harnix epic [--limit] (danh sách) và harnix epic <epic-id> (chi tiết, positional như harnix resume <task-id>); envelope roadmapMembers đổi thành epicMembers; src/core/roadmaps/roadmap.ts và src/commands/roadmap.ts đổi thành src/core/epics/epic.ts và src/commands/epic.ts. Giữ epicId, EpicRecord, field epic. harnix update và doctor --fix chuyển dữ liệu cũ từ .harnix/roadmaps/ sang .harnix/epics/; trước khi chuyển vẫn đọc được. Sửa 3 lỗi renderer: thiếu dòng trống trước heading Members, epic.nonGoals không được render, trang .md thiếu next task so với JSON. Bỏ hẳn tên roadmap trong 2.0.0 và ghi breaking change.",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -17,60 +17,126 @@
     {
       "id": "ac-rename",
       "text": "Không còn tên roadmap trong src, CLI, skill, template và docs hiện hành (trừ ghi chú migrate và CHANGELOG).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-naming-docs"
+      ]
     },
     {
       "id": "ac-cli-epic",
       "text": "harnix epic trả danh sách, harnix epic <epic-id> trả chi tiết kèm next task; id sai trả lỗi JSON exit 2; cli-contract.test được cập nhật.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-behavior"
+      ]
     },
     {
       "id": "ac-migrate-epics",
       "text": "update và doctor --fix chuyển .harnix/roadmaps/*.json sang .harnix/epics/ không mất dữ liệu, idempotent; trước khi chuyển vẫn đọc được.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-migration"
+      ]
     },
     {
       "id": "ac-epic-members",
       "text": "Envelope hidden --save nhận epicMembers; skill và workflow.md dùng tên mới.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-behavior",
+        "ev-check-naming-docs"
+      ]
     },
     {
       "id": "ac-epic-render",
       "text": "Trang epic .md có dòng trống trước heading, render nonGoals và next task; có test snapshot.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-behavior"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-naming-docs",
+        "ev-check-suite"
+      ]
     }
   ],
   "relevantPaths": [
-    "src/core/roadmaps/**",
-    "src/commands/roadmap.ts",
-    "src/commands/internal-workflow.ts",
     "src/cli-program.ts",
-    "src/commands/update.ts",
-    "src/commands/doctor.ts",
-    "src/skills/**",
-    "src/templates/**"
+    "src/commands/**",
+    "src/core/epics/**",
+    "src/core/roadmaps/**",
+    "src/templates/**",
+    "test/**"
   ],
   "relevantSpecs": [
+    "AGENTS.md",
     "docs/HARNIX_PRD.md",
     "docs/HARNIX_WORKFLOW.md",
-    "docs/IMPLEMENTATION_PLAN.md"
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/OVERHAUL_DECISIONS.md"
   ],
   "validationPlan": [
     {
-      "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "id": "check-epic-behavior",
+      "description": "Test lệnh epic, envelope epicMembers và renderer trang epic pass",
       "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/epic.test.ts test/integration/epic.test.ts test/workflow/internal-workflow-save.test.ts test/workflow/cli-contract.test.ts",
+      "criterionIds": [
+        "ac-cli-epic",
+        "ac-epic-members",
+        "ac-epic-render"
+      ],
+      "inputs": [
+        "src/**",
+        "test/integration/**",
+        "test/unit/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-epic-migration",
+      "description": "Test chuyển dữ liệu roadmaps sang epics pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/migration/epics-migration.test.ts",
+      "criterionIds": [
+        "ac-migrate-epics"
+      ],
+      "inputs": [
+        "src/**",
+        "test/migration/**"
+      ]
+    },
+    {
+      "id": "check-naming-docs",
+      "description": "Test tên gọi epic, docs, skill, template và self-host pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/epic-naming.test.ts test/workflow/docs-task-contract.test.ts test/workflow/templates.test.ts test/workflow/skill-sources.test.ts test/workflow/self-host.test.ts",
+      "criterionIds": [
+        "ac-docs-sync",
+        "ac-epic-members",
+        "ac-rename"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass",
+      "scope": "full",
       "required": true,
       "command": "pnpm lint && pnpm typecheck && pnpm test",
       "criterionIds": [
@@ -82,7 +148,6 @@
         "ac-rename"
       ],
       "inputs": [
-        "@task-contract",
         "docs/**",
         "src/**",
         "test/**"
@@ -91,13 +156,83 @@
   ],
   "decisions": [
     {
-      "id": "d-draft-checks",
-      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
-      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+      "id": "d-migrate-in-update",
+      "text": "Migration dữ liệu epic nằm trong updateProject; doctor --fix dùng lại vì nó gọi updateProject.",
+      "rationale": "Một đường duy nhất cho hai lệnh, tránh hai bản logic di chuyển file có thể lệch nhau."
+    },
+    {
+      "id": "d-keep-conflicts",
+      "text": "Nếu .harnix/epics/<id>.json đã tồn tại với nội dung khác thì giữ cả hai và không xóa file cũ.",
+      "rationale": "Không được mất dữ liệu người dùng; xung đột hiếm nên xử lý thủ công."
+    },
+    {
+      "id": "d-remove-roadmap-cmd",
+      "text": "Lệnh public roadmap bị xóa hẳn, không giữ alias.",
+      "rationale": "Quyết định D8 của epic đại tu: thống nhất một tên, ghi breaking change trong CHANGELOG."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-09-29T10:51:07.725+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205803-unify-epic-naming/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-29T10:51:08.455+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung check tập trung cho từng tiêu chí sau khi khảo sát code roadmap hiện có.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205803-unify-epic-naming/task.json"
+      ]
+    },
+    {
+      "recordedAt": "2026-09-29T10:58:37.963+07:00",
+      "summary": "Check check-epic-behavior passed (exit 0):    Start at  10:58:35 |    Duration  1.82s (transform 727ms, setup 0ms, collect 3.23s, tests 1.31s, environmen",
+      "inputDigest": "b9ad11a5d72411f116e90c7e669ba99bc588240fad528c64d247cb5b64c92fb6",
+      "artifactPaths": [],
+      "id": "ev-check-epic-behavior",
+      "exitCode": 0,
+      "result": "pass",
+      "checkId": "check-epic-behavior"
+    },
+    {
+      "recordedAt": "2026-09-29T10:58:38.856+07:00",
+      "summary": "Check check-epic-migration passed (exit 0):    Start at  10:57:30 |    Duration  1.54s (transform 347ms, setup 0ms, collect 756ms, tests 396ms, environmen",
+      "inputDigest": "5992f536117a73dbcaba75e5fb4dad68a5e44d26b8abf2f839a030306eb94c89",
+      "artifactPaths": [],
+      "id": "ev-check-epic-migration",
+      "exitCode": 0,
+      "result": "pass",
+      "checkId": "check-epic-migration"
+    },
+    {
+      "recordedAt": "2026-09-29T10:58:39.812+07:00",
+      "summary": "Check check-naming-docs passed (exit 0):    Start at  10:57:34 |    Duration  1.29s (transform 527ms, setup 0ms, collect 2.23s, tests 468ms, environmen",
+      "inputDigest": "428d2f55774cb4f12e5c682d535ee8e20f1f820574f00fd8920cac261708bde7",
+      "artifactPaths": [],
+      "id": "ev-check-naming-docs",
+      "exitCode": 0,
+      "result": "pass",
+      "checkId": "check-naming-docs"
+    },
+    {
+      "recordedAt": "2026-09-29T10:58:40.838+07:00",
+      "summary": "Check check-suite passed (exit 0):    Start at  10:58:05 |    Duration  17.89s (transform 4.89s, setup 0ms, collect 39.70s, tests 94.67s, environ",
+      "inputDigest": "1c442213beb9b60389938a68dc21b14c1cb1ffc97feeaf2882b0e8df97f65f84",
+      "artifactPaths": [],
+      "id": "ev-check-suite",
+      "exitCode": 0,
+      "result": "pass",
+      "checkId": "check-suite"
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
-  "createdAt": "2026-09-28T20:58:03.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "createdAt": "2026-09-28T20:58:03+07:00",
+  "updatedAt": "2026-09-29T10:58:44.450+07:00",
+  "completedAt": "2026-09-29T10:58:44.450+07:00"
 }

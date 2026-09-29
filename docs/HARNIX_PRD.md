@@ -131,7 +131,7 @@ harnix uninstall --legacy-project-surfaces [--yes]
 harnix mem [query]
 harnix status
 harnix tasks [--limit <1..100>] [--status <TaskStatus>]
-harnix roadmap [--limit <1..100>] [--id <epic-id>]
+harnix epic [<epic-id>] [--limit <1..100>]
 harnix resume <task-id> [--dry-run]
 harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]
 harnix status --explain [--limit <1..50>]

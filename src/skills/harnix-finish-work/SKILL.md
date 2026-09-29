@@ -97,7 +97,7 @@ When a user requests a commit, first show the proposed changes and commit messag
 
 Before finishing, record every accepted residual risk as a `residualRisks` item with `id`, `text` and `severity` so it survives the conversation. Residual risk is review data outside the task contract: it never waives a criterion, downgrades a failed check, or replaces a required pass. Point the user to the task-owned, always-regenerated `review.md` for a plain-file summary of the finished task instead of running a command.
 
-If the finished task belongs to an Epic (has `epicId`), inspect `.harnix/roadmaps/<epic-id>.json` or run `harnix roadmap --id <epic-id>` to report overall epic progress, completed member tasks, and explicitly recommend the next member task to the user.
+If the finished task belongs to an Epic (has `epicId`), inspect `.harnix/epics/<epic-id>.json` or run `harnix epic <epic-id>` to report overall epic progress, completed member tasks, and explicitly recommend the next member task to the user.
 
 ## Upstream basis
 

@@ -16,7 +16,7 @@ import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces
 import { searchMemory } from "./commands/mem.js";
 import { inspectProjectStatus, explainProjectStatus } from "./commands/status.js";
 import { listProjectTasks } from "./commands/tasks.js";
-import { listPublicRoadmaps, detailPublicRoadmap } from "./commands/roadmap.js";
+import { listPublicEpics, detailPublicEpic } from "./commands/epic.js";
 import { resumeProjectTask } from "./commands/resume.js";
 import { pauseProjectTask } from "./commands/pause.js";
 import { reportProjectContext } from "./commands/context-report.js";
@@ -165,19 +165,15 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       });
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
-  program.command("roadmap")
-    .description("List or detail epic roadmaps")
-    .option("--limit <count>", "Maximum roadmap records", "20")
-    .option("--id <epic-id>", "Show details for a specific epic")
-    .action(async (options: { limit: string; id?: string }) => {
-      if (options.id) {
-        const result = await detailPublicRoadmap(process.cwd(), options.id);
-        process.stdout.write(`${JSON.stringify(result)}\n`);
-      } else {
-        const limit = parseTaskLimit(options.limit);
-        const result = await listPublicRoadmaps(process.cwd(), limit);
-        process.stdout.write(`${JSON.stringify(result)}\n`);
-      }
+  program.command("epic")
+    .description("List epics, or show one epic with its member tasks and next task")
+    .argument("[epic-id]", "Exact epic ID for the detail view")
+    .option("--limit <count>", "Maximum epic records in the list view", "20")
+    .action(async (epicId: string | undefined, options: { limit: string }) => {
+      const result = epicId === undefined
+        ? await listPublicEpics(process.cwd(), parseTaskLimit(options.limit))
+        : await detailPublicEpic(process.cwd(), epicId);
+      process.stdout.write(`${JSON.stringify(result)}\n`);
     });
   program.command("resume")
     .description("Activate an exact unfinished Harnix task")

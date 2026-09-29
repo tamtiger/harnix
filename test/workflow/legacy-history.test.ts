@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { initializeProject } from "../../src/commands/init.js";
-import { detailPublicRoadmap, listPublicRoadmaps } from "../../src/commands/roadmap.js";
+import { detailPublicEpic, listPublicEpics } from "../../src/commands/epic.js";
 import { inspectProjectStatus } from "../../src/commands/status.js";
 import { listProjectTasks } from "../../src/commands/tasks.js";
 import { loadTask, type TaskRecord } from "../../src/core/tasks/task.js";
@@ -30,7 +30,10 @@ async function projectWithHistory(): Promise<History> {
     await mkdir(join(root, ".harnix", "tasks", id), { recursive: true });
     await cp(join(repositoryHarnix, "tasks", id, "task.json"), join(root, ".harnix", "tasks", id, "task.json"));
   }
-  await cp(join(repositoryHarnix, "roadmaps"), join(root, ".harnix", "roadmaps"), { recursive: true });
+  for (const directory of ["epics", "roadmaps"]) {
+    try { await cp(join(repositoryHarnix, directory), join(root, ".harnix", directory), { recursive: true }); }
+    catch { /* the repository may hold only one of the two directory names */ }
+  }
   const tasks: TaskRecord[] = [];
   const unreadable: string[] = [];
   for (const id of ids) {
@@ -73,11 +76,11 @@ describe("historical task data stays readable", () => {
     }
   });
 
-  it("reads epics and their historical members through the roadmap commands", async () => {
+  it("reads epics and their historical members through the epic commands", async () => {
     const { root } = await projectWithHistory();
 
-    const list = await listPublicRoadmaps(root, 100);
-    const detail = await detailPublicRoadmap(root, list.epics[0]!.id);
+    const list = await listPublicEpics(root, 100);
+    const detail = await detailPublicEpic(root, list.epics[0]!.id);
 
     expect(list.total).toBeGreaterThan(0);
     expect(detail.members.length).toBeGreaterThan(0);

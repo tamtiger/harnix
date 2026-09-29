@@ -29,10 +29,10 @@ describe("hidden workflow save epic envelope", () => {
 
     await saveWorkflow(root, { task: planning, epic });
 
-    const jsonContent = await readFile(join(root, ".harnix", "roadmaps", "my-epic.json"), "utf8");
+    const jsonContent = await readFile(join(root, ".harnix", "epics", "my-epic.json"), "utf8");
     expect(JSON.parse(jsonContent).id).toBe("my-epic");
 
-    const mdContent = await readFile(join(root, ".harnix", "roadmaps", "my-epic.md"), "utf8");
+    const mdContent = await readFile(join(root, ".harnix", "epics", "my-epic.md"), "utf8");
     expect(mdContent).toContain("Epic title");
     expect(mdContent).toContain("Epic goal");
   });
@@ -56,7 +56,7 @@ describe("hidden workflow save epic envelope", () => {
     const withEpicId = { ...planning, epicId: "my-epic", status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
     await saveWorkflow(root, { task: withEpicId });
 
-    const mdContent = await readFile(join(root, ".harnix", "roadmaps", "my-epic.md"), "utf8");
+    const mdContent = await readFile(join(root, ".harnix", "epics", "my-epic.md"), "utf8");
     expect(mdContent).toContain(planning.id);
     expect(mdContent).toContain("ready");
     // The refresh must reload the persisted epic record for title/goal
@@ -74,10 +74,10 @@ describe("hidden workflow save epic envelope", () => {
 
     expect(result.id).toBe(planning.id);
     expect(result.status).toBe("planning");
-    await expect(readFile(join(root, ".harnix", "roadmaps", "my-epic.json"), "utf8")).rejects.toThrow();
+    await expect(readFile(join(root, ".harnix", "epics", "my-epic.json"), "utf8")).rejects.toThrow();
   });
 
-  it("refreshes roadmap markdown with the final completed status when finishing a task with epicId", async () => {
+  it("refreshes epic markdown with the final completed status when finishing a task with epicId", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
     const epic = { generator: "harnix" as const, schemaVersion: 1 as const, id: "finish-epic", title: "Finish epic title", goal: "Finish epic goal", createdAt: timestamp, updatedAt: timestamp };
@@ -99,14 +99,14 @@ describe("hidden workflow save epic envelope", () => {
 
     await expect(finishWorkflow(root, completedAt)).resolves.toMatchObject({ status: "completed" });
 
-    const mdContent = await readFile(join(root, ".harnix", "roadmaps", "finish-epic.md"), "utf8");
+    const mdContent = await readFile(join(root, ".harnix", "epics", "finish-epic.md"), "utf8");
     expect(mdContent).toContain("Finish epic title");
     expect(mdContent).toContain("Finish epic goal");
     expect(mdContent).toContain(completedTask.id);
     expect(mdContent).toContain("completed");
   });
 
-  it("refreshes roadmap markdown with the final cancelled status when cancelling a task with epicId", async () => {
+  it("refreshes epic markdown with the final cancelled status when cancelling a task with epicId", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
     const epic = { generator: "harnix" as const, schemaVersion: 1 as const, id: "cancel-epic", title: "Cancel epic title", goal: "Cancel epic goal", createdAt: timestamp, updatedAt: timestamp };
@@ -114,7 +114,7 @@ describe("hidden workflow save epic envelope", () => {
 
     await expect(cancelWorkflow(root, { reason: "no longer needed", authorizedBy: "user" }, "2026-08-13T00:05:00.000Z")).resolves.toMatchObject({ status: "cancelled" });
 
-    const mdContent = await readFile(join(root, ".harnix", "roadmaps", "cancel-epic.md"), "utf8");
+    const mdContent = await readFile(join(root, ".harnix", "epics", "cancel-epic.md"), "utf8");
     expect(mdContent).toContain("Cancel epic title");
     expect(mdContent).toContain("Cancel epic goal");
     expect(mdContent).toContain("cancelled");
@@ -129,7 +129,7 @@ describe("hidden workflow save epic envelope", () => {
     await expect(cancelWorkflow(root, { reason: "no longer needed", authorizedBy: "user" }, "2026-08-13T00:01:00.000Z")).resolves.toMatchObject({ status: "cancelled" });
   });
 
-  it("scaffolds planned roadmap member tasks and regenerates markdown when roadmapMembers is present", async () => {
+  it("scaffolds planned epic member tasks and regenerates markdown when epicMembers is present", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
     const epic = { generator: "harnix" as const, schemaVersion: 1 as const, id: "batch-epic", title: "Batch epic title", goal: "Batch epic goal", createdAt: timestamp, updatedAt: timestamp };
@@ -139,10 +139,10 @@ describe("hidden workflow save epic envelope", () => {
     await saveWorkflow(root, {
       task: member1,
       epic,
-      roadmapMembers: [member2],
+      epicMembers: [member2],
     });
 
-    const mdContent = await readFile(join(root, ".harnix", "roadmaps", "batch-epic.md"), "utf8");
+    const mdContent = await readFile(join(root, ".harnix", "epics", "batch-epic.md"), "utf8");
     expect(mdContent).toContain("Batch epic title");
     expect(mdContent).toContain("Member 1");
     expect(mdContent).toContain("Member 2");

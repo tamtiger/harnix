@@ -6,7 +6,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe("CLI command contract", () => {
   it("exposes fifteen supported commands without exposing hidden/internal commands", () => {
-    expect(createProgram().commands.filter((command) => !(command as { _hidden?: boolean })._hidden).map((command) => command.name())).toEqual(["init", "setup", "update", "upgrade", "uninstall", "mem", "status", "tasks", "roadmap", "resume", "pause", "context-report", "skill", "doctor", "repo-map"]);
+    expect(createProgram().commands.filter((command) => !(command as { _hidden?: boolean })._hidden).map((command) => command.name())).toEqual(["init", "setup", "update", "upgrade", "uninstall", "mem", "status", "tasks", "epic", "resume", "pause", "context-report", "skill", "doctor", "repo-map"]);
   });
 
   it("registers single-command action flags without nested command trees", () => {
@@ -26,8 +26,8 @@ describe("CLI command contract", () => {
     expect(repoMap?.options.find((option) => option.long === "--refresh")?.hidden).toBe(true);
     expect(status?.options.map((option) => option.long)).toEqual(["--explain", "--limit"]);
     expect(tasks?.options.map((option) => option.long)).toEqual(["--limit", "--status"]);
-    const roadmap = program.commands.find((command) => command.name() === "roadmap");
-    expect(roadmap?.options.map((option) => option.long)).toEqual(["--limit", "--id"]);
+    const epic = program.commands.find((command) => command.name() === "epic");
+    expect(epic?.options.map((option) => option.long)).toEqual(["--limit"]);
     expect(resume?.options.map((option) => option.long)).toEqual(["--dry-run"]);
     expect(contextReport?.options.map((option) => option.long)).toEqual(["--platform", "--limit"]);
     expect(workflow?.options.map((option) => option.long)).toEqual(["--inspect", "--preflight", "--save", "--snapshot", "--finish", "--cancel", "--learn", "--transition", "--evidence", "--schema", "--check"]);
