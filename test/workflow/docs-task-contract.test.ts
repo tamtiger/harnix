@@ -56,6 +56,36 @@ describe("task contract documentation parity", () => {
     }
   });
 
+  it("points agents at the preflight clock block for timestamps and IDs", async () => {
+    const documents = [
+      { name: "AGENTS.md", text: await read("AGENTS.md") },
+      { name: "workflow template", text: workflowTemplate },
+      { name: "src/skills/harnix-brainstorm/SKILL.md", text: await read("src/skills/harnix-brainstorm/SKILL.md") },
+      { name: "src/skills/harnix-implement/SKILL.md", text: await read("src/skills/harnix-implement/SKILL.md") },
+    ];
+
+    for (const { name, text } of documents) {
+      expect(text, name).toMatch(/`clock`|clock\.now/u);
+      expect(text, name).toMatch(/preflight/iu);
+    }
+  });
+
+  it("never instructs a shell date command for timestamps", async () => {
+    const sources = [
+      { name: "AGENTS.md", text: await read("AGENTS.md") },
+      { name: "workflow template", text: workflowTemplate },
+      ...(await skillSources()),
+    ];
+    const shellDate = /date -u|run `date`|`date`|\$\(date/u;
+    const allowed = /\bnot\b|never|instead|legacy/iu;
+
+    for (const { name, text } of sources) {
+      for (const [index, line] of text.split("\n").entries()) {
+        if (shellDate.test(line)) expect(line, `${name}:${index + 1}`).toMatch(allowed);
+      }
+    }
+  });
+
   it("documents contractRevision as a replan save in the hidden --schema output", () => {
     const schema = workflowEnvelopeSchema();
 

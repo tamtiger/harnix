@@ -12,6 +12,7 @@ import { analyzeLearningStatement, type LearningRiskKind } from "./journal/learn
 import { archiveTask, cancelTask, loadTask, saveTask, selectLatestEvidence, transitionTask } from "./tasks/task.js";
 import { resolveActiveTask } from "./tasks/task.js";
 import { resolveSafeProjectPath } from "../utils/paths.js";
+import { nowInstant } from "../utils/clock.js";
 import { compareCodeUnits } from "../utils/order.js";
 import { assertInputDigestsFresh } from "./verification/input-digest.js";
 
@@ -125,7 +126,7 @@ export function implementationStrategy(kind: "behavior" | "docs" | "wiring" | "s
   return "documented-exception";
 }
 export function evidenceSupportsScope(evidence: Evidence, requiredScope: "focused" | "full", checkScope: "focused" | "full"): boolean { return evidence.result === "pass" && (requiredScope === "focused" || checkScope === "full"); }
-export async function finishWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, now = new Date().toISOString(), dependencies: WorkflowFinishDependencies = {}): Promise<TaskRecord> {
+export async function finishWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, now = nowInstant(), dependencies: WorkflowFinishDependencies = {}): Promise<TaskRecord> {
   const recoveringCompletedTask = task.status === "completed" && task.checkpoint === "finishing";
   if (!recoveringCompletedTask && (task.status !== "verifying" || task.checkpoint !== "finishing")) {
     throw new Error("Task requires the verifying/finishing checkpoint or a completed/finishing recovery state.");
@@ -148,7 +149,7 @@ export async function finishWorkflowTask(harnixRoot: string, journalPath: string
   await (dependencies.archiveTask ?? archiveTask)(harnixRoot, completed);
   return completed;
 }
-export async function recordWorkflowLearning(harnixRoot: string, journalRoot: string, journalPath: string, developer: string, task: TaskRecord, input: LearningCaptureInput, now = new Date().toISOString()): Promise<WorkflowLearningResult> {
+export async function recordWorkflowLearning(harnixRoot: string, journalRoot: string, journalPath: string, developer: string, task: TaskRecord, input: LearningCaptureInput, now = nowInstant()): Promise<WorkflowLearningResult> {
   await assertTaskReadyForFinishing(harnixRoot, task, now);
   const candidate = createCapturedLearningCandidate(input);
   const analysis = analyzeLearningStatement(candidate.statement);
@@ -183,7 +184,7 @@ export async function recordWorkflowLearning(harnixRoot: string, journalRoot: st
   const appended = await appendJournalIdempotent(journalRoot, journalPath, entry);
   return { ...appended, eligible: true, findings: analysis.findings };
 }
-export async function cancelWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, cancellation: TaskCancellation | undefined, now = new Date().toISOString(), dependencies: WorkflowFinishDependencies = {}): Promise<TaskRecord> {
+export async function cancelWorkflowTask(harnixRoot: string, journalPath: string, developer: string, task: TaskRecord, cancellation: TaskCancellation | undefined, now = nowInstant(), dependencies: WorkflowFinishDependencies = {}): Promise<TaskRecord> {
   const recoveringCancelledTask = task.status === "cancelled" && task.checkpoint === "cancelling";
   let cancelled = task;
   if (!recoveringCancelledTask) {

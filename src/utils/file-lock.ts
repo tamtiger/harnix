@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { lstat, mkdir, readFile, readdir, rm, rmdir, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, resolve, win32 } from "node:path";
 
+import { formatInstant } from "./clock.js";
 import { packageVersion } from "../version.js";
 
 export interface HarnixFileLockRecord {
@@ -110,7 +111,7 @@ const systemClock: FileLockClock = {
 // `unknown` unless the host injects a platform-specific inspector.
 const currentProcessIdentity: FileLockProcessIdentity = Object.freeze({
   pid: process.pid,
-  startedAt: new Date(Date.now() - process.uptime() * 1_000).toISOString(),
+  startedAt: formatInstant(Date.now() - process.uptime() * 1_000),
 });
 
 const defaultFilesystem: FileLockFileSystem = {
@@ -151,7 +152,7 @@ export async function acquireHarnixFileLock(lockPath: string, options: FileLockO
     throw new FileLockError("The current process identity is invalid.");
   }
   const record: HarnixFileLockRecord = {
-    acquiredAt: new Date(clock.now()).toISOString(),
+    acquiredAt: formatInstant(clock.now()),
     generator: "harnix",
     generatorVersion: packageVersion,
     operationId,

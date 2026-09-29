@@ -72,6 +72,8 @@ Run the focused test and relevant neighboring tests. Fix production code when th
 
 For a TaskRecord schema v3 required check, run `harnix workflow --snapshot --check <id>` immediately before the non-mutating verification command. After reading the complete result and exit code, run the same hidden snapshot again. Record a passing evidence item only when both `inputDigest` values are identical; set that exact lowercase digest and the command's exit code on the evidence and persist it immediately. If the digest changes, the pattern is empty, or an input is missing/unreadable, do not claim GREEN—resolve the drift and rerun the check.
 
+Take each evidence `recordedAt` from the `clock.now` value of `harnix workflow --preflight`, never from the shell `date` command.
+
 Write each evidence `summary` as command, then result, then any note, in that order — for example "pnpm vitest run test/x.test.ts — 5/5 pass — regression case for the empty-list branch" — instead of one undifferentiated sentence. A reader scanning `review.md` should find what ran and what happened without parsing prose for both.
 
 Before running a check, inspect preflight/check state once. Reuse a required check already reported `passed` when its current `inputDigest` still matches; this evidence reuse avoids executing the same check twice for the same digest in one user request. Persist a stable failed run with its `inputDigest` so Check can distinguish a changed input from a repeated identical failure.

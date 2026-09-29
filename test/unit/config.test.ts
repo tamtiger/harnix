@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   ConfigValidationError,
   createConfig,
+  effectiveTimezone,
   migrateConfig,
   readConfig,
   readConfigDocument,
@@ -17,7 +18,7 @@ const createFixture = useTemporaryRepositories("harnix-config-");
 
 describe("Harnix config v2", () => {
   it("creates a deterministic valid default config", () => {
-    expect(createConfig({ developer: "tam", languages: ["go", "go"], technologies: ["vue", "vue"], packages: [{ path: ".", languages: ["go"], technologies: ["vue"] }] })).toEqual({
+    expect(createConfig({ developer: "tam", languages: ["go", "go"], technologies: ["vue", "vue"], packages: [{ path: ".", languages: ["go"], technologies: ["vue"] }], timezone: "Asia/Ho_Chi_Minh" })).toEqual({
       context: { maxCharacters: 24000, tokenApproximation: 4 },
       developer: "tam",
       generator: "harnix",
@@ -27,7 +28,38 @@ describe("Harnix config v2", () => {
       platforms: [],
       runtime: { fullContext: false, research: "conditional" },
       schemaVersion: 2,
+      timezone: "Asia/Ho_Chi_Minh",
     });
+  });
+
+  it("defaults the timezone to the system zone at creation and validates IANA names", () => {
+    const created = createConfig({ developer: "tam" });
+
+    expect(typeof created.timezone).toBe("string");
+    expect(() => validateConfig(created)).not.toThrow();
+    expect(() => validateConfig({ ...created, timezone: "Not/AZone" })).toThrow(ConfigValidationError);
+    expect(() => validateConfig({ ...created, timezone: "" })).toThrow(ConfigValidationError);
+  });
+
+  it("still reads a config written before timezone existed and falls back to the system zone", async () => {
+    const root = await createFixture();
+    const path = join(root, "config.yaml");
+    await writeFile(path, ["generator: harnix", "schemaVersion: 2", "developer: tam", "languages: []", "technologies: []", "packages: []", "platforms: []", "context:", "  maxCharacters: 24000", "  tokenApproximation: 4", "runtime:", "  research: conditional", "  fullContext: false", ""].join("\n"));
+
+    const config = await readConfig(path);
+
+    expect(config.timezone).toBeUndefined();
+    expect(effectiveTimezone(config)).toBe(effectiveTimezone({}));
+    expect(await readFile(path, "utf8")).not.toContain("timezone");
+  });
+
+  it("persists a configured timezone in the written YAML", async () => {
+    const root = await createFixture();
+    const path = join(root, "config.yaml");
+    await writeConfig(path, createConfig({ developer: "tam", timezone: "Asia/Ho_Chi_Minh" }));
+
+    expect(await readFile(path, "utf8")).toContain("timezone: Asia/Ho_Chi_Minh");
+    expect((await readConfig(path)).timezone).toBe("Asia/Ho_Chi_Minh");
   });
 
   it("should_accept_claude_as_a_supported_platform_when_creating_config", () => {

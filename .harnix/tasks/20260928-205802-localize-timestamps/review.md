@@ -2,11 +2,11 @@
 
 - **ID:** 20260928-205802-localize-timestamps
 - **Mode:** full
-- **Status:** planning/planning
-- **Created:** 2026-09-28T20:58:02.000+07:00
-- **Updated:** 2026-09-28T20:58:28.000+07:00
+- **Status:** completed/finishing
+- **Created:** 2026-09-28 20:58:02 +07:00
+- **Updated:** 2026-09-29 10:45:56 +07:00
 
-**Verdict:** PENDING — 0/7 acceptance criteria met
+**Verdict:** PASS — all acceptance criteria met or waived
 
 ## Goal
 
@@ -19,25 +19,42 @@ Thêm timezone (tên IANA) vào .harnix/config.yaml, mặc định lấy từ h�
 - Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28).
 - Không ghi lại task/journal lịch sử (làm stale evidence và digest).
 
+## Artifacts
+
+- [`prd.md`](./prd.md) — outcome, scope, acceptance criteria narrative.
+- [`plan.md`](./plan.md) — implementation checklist and slices.
+
 ## Acceptance criteria
 
-- `ac-config-timezone` (pending): config.yaml có timezone IANA hợp lệ, mặc định lấy từ hệ thống lúc init, validator từ chối tên không hợp lệ; config cũ thiếu field vẫn đọc được.
-- `ac-single-clock` (pending): Không còn new Date().toISOString() rải rác trong src; mọi timestamp ghi ra có offset của múi giờ cấu hình; có test với clock và múi giờ cố định.
-- `ac-ids-journal` (pending): Tiền tố ID task/epic và ngày phân vùng journal theo múi giờ cấu hình; có test chuyển ngày quanh nửa đêm giờ Việt Nam.
-- `ac-display` (pending): review.md, trang epic và status hiển thị thời gian theo múi giờ cấu hình, kể cả dữ liệu cũ dạng Z.
-- `ac-agent-time-source` (pending): Harness cung cấp thời gian hiện tại và tiền tố ID theo múi giờ cấu hình (ví dụ trong output của workflow --preflight hoặc --schema), skill hướng dẫn agent dùng giá trị này thay vì lệnh date của shell (Git Bash trên Windows bỏ qua tên múi giờ và trả UTC — đã gặp trong phiên audit).
-- `ac-legacy-order` (pending): Dữ liệu trộn Z và +07:00 vẫn sắp xếp đúng theo thời điểm tuyệt đối; task lịch sử không bị ghi lại.
-- `ac-docs-sync` (pending): PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.
+- `ac-config-timezone` (met): config.yaml có timezone IANA hợp lệ, mặc định lấy từ hệ thống lúc init, validator từ chối tên không hợp lệ; config cũ thiếu field vẫn đọc được.
+- `ac-single-clock` (met): Không còn toISOString() rải rác trong src ngoài module thời gian; mọi timestamp ghi ra qua đường lệnh có offset của múi giờ cấu hình; có test với clock và múi giờ cố định.
+- `ac-ids-journal` (met): Tiền tố ID task/epic (do harness cung cấp) và ngày phân vùng journal theo múi giờ cấu hình; có test chuyển ngày quanh nửa đêm giờ Việt Nam.
+- `ac-display` (met): review.md và trang epic hiển thị thời gian theo múi giờ cấu hình, kể cả dữ liệu cũ dạng Z; status không phát sinh timestamp mới.
+- `ac-agent-time-source` (met): workflow --preflight trả clock (timezone, now, idPrefix) theo múi giờ cấu hình và skill hướng dẫn agent dùng giá trị này thay cho lệnh date của shell.
+- `ac-legacy-order` (met): Dữ liệu trộn Z và +07:00 vẫn sắp xếp đúng theo thời điểm tuyệt đối; task lịch sử không bị ghi lại.
+- `ac-docs-sync` (met): PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.
 
 ## Required checks
 
-- `check-suite` (focused): Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning) — chưa chạy / not yet run
+- `check-clock-config` (focused): Test đơn vị module thời gian và config timezone pass — pass (2026-09-29 10:45:50 +07:00)
+- `check-docs-sync` (focused): Test đồng bộ docs, skill, template và self-host pass — pass (2026-09-29 10:45:51 +07:00)
+- `check-time-flow` (focused): Test luồng thời gian: offset cấu hình, journal, preflight, hiển thị pass — pass (2026-09-29 10:45:52 +07:00)
+- `check-suite` (full): Toàn bộ lint, typecheck và mọi suite test pass — pass (2026-09-29 10:45:53 +07:00)
 
 ## Decisions
 
-- **d-draft-checks** — check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.
-  - _Why:_ Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái).
+- **d-core-default-utc** — Core giữ tham số now tùy chọn; mặc định đi qua clock.ts (UTC). Mọi đường lệnh truyền thời gian theo múi giờ cấu hình.
+  - _Why:_ Tránh đổi chữ ký hàng loạt (khoảng 30 chỗ gọi trong test) mà vẫn đảm bảo dữ liệu ghi ra qua CLI có offset cấu hình.
+- **d-status-no-time** — harnix status không phát sinh timestamp nên giữ nguyên hình dạng; AC hiển thị chỉ áp dụng cho review.md và trang epic.
+  - _Why:_ Thêm timestamp vào status là đổi contract công khai không có nhu cầu; AC gốc giả định status có timestamp.
+- **d-clock-in-preflight** — Nguồn thời gian cho agent là khối clock trong workflow --preflight.
+  - _Why:_ Preflight đã là bước bắt buộc trước công việc Lite/Full và no-write; tránh thêm lệnh mới.
 
 ## Evidence
 
-_None recorded yet._
+- pass (2026-09-29 10:36:48 +07:00): Migrated TaskRecord schema to v3 with explicit authorization.
+- skipped (2026-09-29 10:36:49 +07:00): Task contract revised at persisted replan: Bổ sung check tập trung cho từng tiêu chí, làm rõ tiêu chí hiển thị thời gian sau khi khảo sát code.
+- `check-clock-config` — pass (2026-09-29 10:45:50 +07:00): Check check-clock-config passed (exit 0):    Start at  10:45:09 |    Duration  607ms (transform 92ms, setup 0ms, collect 180ms, tests 88ms, environment 
+- `check-docs-sync` — pass (2026-09-29 10:45:51 +07:00): Check check-docs-sync passed (exit 0):    Start at  10:45:12 |    Duration  1.59s (transform 860ms, setup 0ms, collect 2.81s, tests 388ms, environmen
+- `check-time-flow` — pass (2026-09-29 10:45:52 +07:00): Check check-time-flow passed (exit 0):    Start at  10:45:15 |    Duration  1.78s (transform 317ms, setup 0ms, collect 726ms, tests 653ms, environmen
+- `check-suite` — pass (2026-09-29 10:45:53 +07:00): Check check-suite passed (exit 0):    Start at  10:45:26 |    Duration  15.42s (transform 3.95s, setup 0ms, collect 33.07s, tests 84.21s, environ

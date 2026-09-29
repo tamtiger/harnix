@@ -2,7 +2,8 @@ import { readFile, rm } from "node:fs/promises";
 import { Buffer } from "node:buffer";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { readConfig } from "../core/config/config.js";
+import { effectiveTimezone, readConfig, readProjectTimezone } from "../core/config/config.js";
+import { formatInstant, idPrefix, localDate, nowInstant } from "../utils/clock.js";
 import { canCompleteTask, cancelWorkflowTask, finishWorkflowTask, recordWorkflowLearning, taskContextDrift, verificationRetryDisposition, type WorkflowLearningResult } from "../core/workflow.js";
 import { validateContextManifest, type ContextDrift } from "../core/context/context.js";
 import {
@@ -204,7 +205,13 @@ async function prepareWorkflowArtifacts(
  * silently rewrite an obligation while changing state. Every guard, lock and
  * immutability rule of the full save path still applies.
  */
-export async function transitionWorkflow(root: string, status: string, checkpoint: string, now = new Date().toISOString()): Promise<TaskRecord> {
+/** Current time in the project's configured zone unless the caller injects one. */
+async function currentInstant(root: string, now: string | undefined): Promise<string> {
+  return now ?? nowInstant(await readProjectTimezone(await resolveSafeHarnixPath(root)));
+}
+
+export async function transitionWorkflow(root: string, status: string, checkpoint: string, injectedNow?: string): Promise<TaskRecord> {
+  const now = await currentInstant(root, injectedNow);
   if (status === "cancelled") throw new Error("Workflow cancellation must use workflow --cancel.");
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
@@ -216,7 +223,8 @@ export async function transitionWorkflow(root: string, status: string, checkpoin
  * Appends exactly one evidence item to the active task. Existing evidence is
  * never sent by the caller, so a malformed round-trip cannot erase history.
  */
-export async function appendEvidenceWorkflow(root: string, envelope: unknown, now = new Date().toISOString()): Promise<TaskRecord> {
+export async function appendEvidenceWorkflow(root: string, envelope: unknown, injectedNow?: string): Promise<TaskRecord> {
+  const now = await currentInstant(root, injectedNow);
   const evidence = validateEvidenceEnvelope(envelope);
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
@@ -285,19 +293,21 @@ async function refreshLinkedEpicMarkdown(root: string, task: TaskRecord): Promis
   await renderRoadmapMarkdown(root, task.epicId, epic);
 }
 
-export async function finishWorkflow(root: string, now = new Date().toISOString()): Promise<TaskRecord> {
+export async function finishWorkflow(root: string, injectedNow?: string): Promise<TaskRecord> {
+  const now = await currentInstant(root, injectedNow);
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
   if (!task) throw new Error("Workflow finish requires an active task.");
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
   const journalDate = task.status === "completed" ? task.completedAt! : now;
-  const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${journalDate.slice(0, 10)}.jsonl`);
+  const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${localDate(journalDate, effectiveTimezone(config))}.jsonl`);
   const finished = await finishWorkflowTask(harnixRoot, journalPath, config.developer, task, now);
   await refreshLinkedEpicMarkdown(root, finished);
   return finished;
 }
 
-export async function cancelWorkflow(root: string, envelope: unknown, now = new Date().toISOString()): Promise<TaskRecord> {
+export async function cancelWorkflow(root: string, envelope: unknown, injectedNow?: string): Promise<TaskRecord> {
+  const now = await currentInstant(root, injectedNow);
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
   if (!task) throw new Error("Workflow cancellation requires an active task.");
@@ -305,20 +315,21 @@ export async function cancelWorkflow(root: string, envelope: unknown, now = new 
   const cancellation = recovering ? undefined : validateCancellationEnvelope(envelope);
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
   const journalDate = recovering ? task.cancelledAt! : now;
-  const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${journalDate.slice(0, 10)}.jsonl`);
+  const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${localDate(journalDate, effectiveTimezone(config))}.jsonl`);
   const cancelled = await cancelWorkflowTask(harnixRoot, journalPath, config.developer, task, cancellation, now);
   await refreshLinkedEpicMarkdown(root, cancelled);
   return cancelled;
 }
 
-export async function recordLearningWorkflow(root: string, envelope: unknown, now = new Date().toISOString()): Promise<WorkflowLearningResult> {
+export async function recordLearningWorkflow(root: string, envelope: unknown, injectedNow?: string): Promise<WorkflowLearningResult> {
+  const now = await currentInstant(root, injectedNow);
   const input = validateLearningEnvelope(envelope);
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
   if (!task) throw new Error("Workflow learning capture requires an active task.");
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
   const journalRoot = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal`);
-  const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${now.slice(0, 10)}.jsonl`);
+  const journalPath = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal/${localDate(now, effectiveTimezone(config))}.jsonl`);
   return recordWorkflowLearning(harnixRoot, journalRoot, journalPath, config.developer, task, input, now);
 }
 
@@ -457,12 +468,16 @@ export interface WorkflowPreflightResultV1 {
   requiredChecks: Record<RequiredCheckState, string[]>;
   retryLimitReached: string[];
   nextStage: "await" | "brainstorm" | "check" | "continue" | "debug" | "finish" | "implement" | "stop";
+  /** Authoritative time source for agents: current instant and ID prefix in the configured zone. */
+  clock: { timezone: string; now: string; idPrefix: string };
 }
 
 export async function preflightWorkflow(root: string, now = Date.now()): Promise<WorkflowPreflightResultV1> {
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
+  const timezone = await readProjectTimezone(harnixRoot);
   const base = {
+    clock: { timezone, now: formatInstant(now, timezone), idPrefix: idPrefix(now, timezone) },
     generator: "harnix" as const,
     schemaVersion: 1 as const,
     contextDrift: "not-recorded" as const,

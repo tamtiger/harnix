@@ -6,6 +6,7 @@ languages:
 technologies: []
 packages: []
 platforms: []
+timezone: Asia/Ho_Chi_Minh
 context:
   maxCharacters: 24000
   tokenApproximation: 4

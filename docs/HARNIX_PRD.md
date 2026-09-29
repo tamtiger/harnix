@@ -231,6 +231,7 @@ Context:
 - Research findings lưu cùng task với source/date, không global injection.
 - Explicit hidden context persistence ghi `context.json` cùng task-owned `context-selection.json` v1, bind `taskId`, selector version, repo-map `inventoryFingerprint`, canonical selection-input hash và selection-result hash; sidecar không chứa source body, task prose, secret hoặc absolute path.
 - Hidden inspect/continue luôn trả `contextDrift` gồm path `changes` và selection-basis `selectionChanges`; content, inventory, selector version hoặc task/config/guide signal drift tạo `stale`, buộc persist cùng status/checkpoint `replan` trước context reselection. Manifest v1 chưa có sidecar vẫn đọc và disclose `not-recorded`; inspect/hook không scan, refresh hoặc write repo-map.
+- Mọi timestamp Harnix ghi ra dùng `timezone` IANA trong `.harnix/config.yaml` (ISO 8601 kèm offset; repo này `Asia/Ho_Chi_Minh`); hidden `workflow --preflight` cũng trả `clock` (`timezone`, `now`, `idPrefix`) làm nguồn thời gian cho agent thay cho lệnh `date` của shell.
 - Hidden `workflow --preflight` trả bounded no-write routing state; same `contextDrift` sau một replan/reselection trong cùng request phải dừng thay vì lặp.
 
 Task verification:

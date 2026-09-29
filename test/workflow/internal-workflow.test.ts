@@ -8,6 +8,7 @@ import { acceptanceCriterionKeys, blockerKeys, cancelTask, evidenceV2Keys, saveT
 import { assertInputDigestsFresh, computeInputDigest } from "../../src/core/verification/input-digest.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 import { initializeProject } from "../../src/commands/init.js";
+import { readConfig, writeConfig } from "../../src/core/config/config.js";
 import { sha256 } from "../../src/utils/hashing.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -16,7 +17,7 @@ const timestamp = "2026-08-13T00:00:00.000Z";
 describe("hidden workflow persistence operations", () => {
   it("should_transition_the_active_task_without_a_task_body_and_preserve_evidence", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
     const ready = { ...planning, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
@@ -43,7 +44,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("should_reject_an_illegal_transition_and_a_missing_active_task", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
 
     await expect(transitionWorkflow(root, "verifying", "verifying")).rejects.toThrow(/active task/u);
 
@@ -56,7 +57,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("should_append_exactly_one_evidence_item_without_removing_history", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
     const ready = { ...planning, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
@@ -74,7 +75,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("should_describe_the_save_envelope_schema_without_writing", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
 
     const schema = workflowEnvelopeSchema();
 
@@ -103,7 +104,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("returns bounded read-only preflight metadata without task prose", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = { ...taskV3("planning", "planning"), title: "PRIVATE_TITLE_CANARY", goal: "PRIVATE_GOAL_CANARY" };
     await saveWorkflow(root, { task: planning });
     const ready = { ...planning, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
@@ -117,6 +118,7 @@ describe("hidden workflow persistence operations", () => {
     const result = await preflightWorkflow(root);
 
     expect(result).toEqual({
+      clock: { timezone: "UTC", now: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T[\d:.]+\+00:00$/u), idPrefix: expect.stringMatching(/^\d{8}-\d{6}$/u) },
       generator: "harnix",
       schemaVersion: 1,
       activeTask: { id: active.id, mode: "lite", status: "in_progress", checkpoint: "implementing" },
@@ -130,7 +132,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("does not infer implementation authority from a persisted ready task", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
     await saveWorkflow(root, { task: { ...planning, status: "ready", checkpoint: "ready", updatedAt: "2026-08-13T00:01:00.000Z" } });
@@ -139,7 +141,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("recovers a missing active pointer when the task commit marker already exists", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
     await rm(join(root, ".harnix", "tasks", ".active"));
@@ -149,7 +151,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("treats JSON object-key and validation-check order as non-semantic while preserving evidence order", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = {
       ...taskV3("planning", "planning"),
       acceptanceCriteria: [
@@ -173,7 +175,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("does not mutate or activate an inactive task through a non-exact save", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
     const taskPath = join(root, ".harnix", "tasks", planning.id, "task.json");
@@ -189,7 +191,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("rejects evidence reordering instead of changing retry chronology", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const first = { id: "failure-1", checkId: "check", recordedAt: timestamp, result: "fail" as const, exitCode: 1, summary: "first", artifactPaths: [] };
     const second = { ...first, id: "failure-2", recordedAt: "2026-08-13T00:01:00.000Z", summary: "second" };
     const persisted = { ...taskV3("planning", "planning"), evidence: [first, second] };
@@ -200,7 +202,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("accepts semantically identical evidence objects with reordered properties", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const evidence = { id: "failure-1", checkId: "check", recordedAt: timestamp, result: "fail" as const, exitCode: 1, summary: "first", artifactPaths: [] };
     const persisted = { ...taskV3("planning", "planning"), evidence: [evidence] };
     await saveTask(join(root, ".harnix"), persisted);
@@ -213,7 +215,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("serializes concurrent workflow saves so one stale evidence append cannot overwrite another", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
     const candidate = (id: string, summary: string): TaskRecordV3 => ({
@@ -232,7 +234,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("routes stale active context to continuation before implementation", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     await writeFile(join(root, "tracked.md"), "new content");
     const active = taskV3("in_progress", "implementing");
     await saveTask(join(root, ".harnix"), active);
@@ -250,7 +252,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("short-circuits stale-context routing before verification snapshot inspection", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     await writeFile(join(root, "tracked.md"), "new content");
     const active: TaskRecordV3 = {
       ...taskV3("verifying", "verifying"),
@@ -275,7 +277,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("stops instead of routing back to debug after a second identical failed check", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const digest = "a".repeat(64);
     const active: TaskRecordV3 = {
       ...taskV3("verifying", "verifying"),
@@ -295,7 +297,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("does not let a future-dated pass reset the verification retry breaker", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const digest = "a".repeat(64);
     const active: TaskRecordV3 = {
       ...taskV3("verifying", "verifying"),
@@ -316,7 +318,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("does not route finishing to Finish until acceptance completion semantics are ready", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const now = Date.parse("2026-08-13T00:03:00.000Z");
     await writeProjectSource(root);
     const base = taskV3("verifying", "finishing");
@@ -337,7 +339,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("projects stale context drift from the persisted manifest without mutating it", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
     await writeFile(join(root, "tracked.md"), "new content");
@@ -359,7 +361,7 @@ describe("hidden workflow persistence operations", () => {
   it("persists selection freshness and reports task or inventory drift without refreshing the repo map", async () => {
     const root = await temporaryRepository();
     await writeFile(join(root, "tracked.md"), "tracked content");
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = { ...taskV3("planning", "planning"), relevantPaths: ["tracked.md"] };
     const context = {
       generator: "harnix" as const,
@@ -397,7 +399,7 @@ describe("hidden workflow persistence operations", () => {
   it("refuses missing-pointer replay when a persisted context selection pair is incomplete", async () => {
     const root = await temporaryRepository();
     await writeFile(join(root, "tracked.md"), "tracked content");
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = { ...taskV3("planning", "planning"), relevantPaths: ["tracked.md"] };
     const context = {
       generator: "harnix" as const,
@@ -417,7 +419,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("inspects, creates a planning task, and rejects evidence mutation or an illegal jump", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     expect(await inspectWorkflow(root)).toEqual({ activeTask: null, contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] } });
 
     await writeFile(join(root, "input.ts"), "export const value = 1;\n");
@@ -434,7 +436,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("re-enters ready only from replan and reruns the Full ready gate", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = { ...taskV3("planning", "planning"), mode: "full" as const, relevantPaths: ["src/a.ts"] };
     const prd = "# PRD\nDone.\n";
     const plan = "# Plan\n- [ ] `CAP-A` — implement\n";
@@ -472,7 +474,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("finishes only the active task after fresh verification and clears only its matching pointer", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     await mkdir(join(root, "src"), { recursive: true });
     await writeFile(join(root, "src", "a.ts"), "export const a = 1;\n");
     const verifying = taskV3("verifying", "verifying");
@@ -494,7 +496,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("recovers a completed task from its original journal date across a UTC day boundary", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const completedAt = "2026-08-13T23:59:59.000Z";
     const retryAt = "2026-08-14T00:00:01.000Z";
     const completionEvidence = { id: "e", checkId: "check", recordedAt: completedAt, result: "pass" as const, exitCode: 0, summary: "verified", artifactPaths: [] };
@@ -530,7 +532,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("cancels an active task through the hidden transport and writes its cancellation journal", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     planning.evidence = [{ id: "failed", recordedAt: timestamp, result: "fail", exitCode: 1, summary: "blocked", artifactPaths: [] }];
     await saveWorkflow(root, { task: planning });
@@ -548,7 +550,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("requires workflow --cancel instead of allowing save to forge a cancelled task", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
     await expect(saveWorkflow(root, { task: {
@@ -563,7 +565,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("recovers a cancelled task into its original journal date across a UTC day boundary", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const cancelledAt = "2026-08-13T23:59:59.000Z";
     const retryAt = "2026-08-14T00:00:01.000Z";
     const cancelled = cancelTask(task("planning", "planning"), { reason: "Stop safely", authorizedBy: "user" }, cancelledAt);
@@ -582,7 +584,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("records one eligible learning candidate from fresh finishing provenance and retries idempotently", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const now = "2026-08-20T23:59:00.000Z";
     const harnixRoot = join(root, ".harnix");
     await writeProjectSource(root);
@@ -621,7 +623,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("rejects learning capture below the threshold or with unknown provenance", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const now = new Date().toISOString();
     await writeProjectSource(root);
     const currentBase = taskV3("verifying", "finishing");
@@ -637,7 +639,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("rejects a new Full task unless its required artifacts are persisted with it", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const full = { ...taskV3("planning", "planning"), mode: "full" as const };
 
     await expect(saveWorkflow(root, { task: full })).rejects.toThrow("prd.md and plan.md");
@@ -646,7 +648,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("rejects unknown hidden-save envelope, artifact, and revision fields", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
 
     await expect(saveWorkflow(root, { task: planning, ignored: true })).rejects.toThrow(/unknown schema field/iu);
@@ -657,7 +659,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("rejects a new TaskRecord v1 while preserving direct legacy-state loading", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const legacy = task("planning", "planning");
 
     await expect(saveWorkflow(root, { task: legacy })).rejects.toThrow(/new task.*schema v3|schema v3.*new task/iu);
@@ -670,7 +672,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("prevents a Full task from downgrading to Lite before readiness", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const full = { ...taskV3("planning", "planning"), mode: "full" as const };
     await saveWorkflow(root, { task: full, artifacts: { prd: "# PRD\n", plan: "# Plan\n" } });
 
@@ -681,7 +683,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("rejects readiness when acceptance or required validation gates are empty", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const empty = { ...taskV3("planning", "planning"), acceptanceCriteria: [], validationPlan: [] };
     const harnixRoot = join(root, ".harnix");
     await saveTask(harnixRoot, empty);
@@ -702,7 +704,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("preserves persisted acceptance criteria and required validation obligations", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
     const ready = { ...planning, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
@@ -721,7 +723,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("allows TaskRecord v2 obligations to converge during planning before freezing at ready", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
 
@@ -740,7 +742,7 @@ describe("hidden workflow persistence operations", () => {
   });
   it("supersedes an unproven frozen check in one save at replan with audit evidence", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
     const ready = { ...planning, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
@@ -765,7 +767,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("locks criteria mapped by failed evidence and requires a new check ID when retiring the failed definition", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     await writeFile(join(root, "input.ts"), "export const value = 1;\n");
     const planning = taskV3("planning", "planning", ["input.ts"]);
     await saveWorkflow(root, { task: planning });
@@ -807,7 +809,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("rejects a save-time verification race", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     await writeFile(join(root, "input.ts"), "export const value = 1;\n");
     const planning = taskV3("planning", "planning", ["input.ts"]);
     await saveWorkflow(root, { task: planning });
@@ -826,7 +828,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("validates a failed-run input digest before trusting it as a retry fingerprint", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     await writeFile(join(root, "input.ts"), "export const value = 1;\n");
     const planning = taskV3("planning", "planning", ["input.ts"]);
     await saveWorkflow(root, { task: planning });
@@ -844,7 +846,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("leaves candidate artifacts and the task untouched when evidence validation fails before the task commit", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     await writeFile(join(root, "input.ts"), "export const value = 1;\n");
     const planning = { ...taskV3("planning", "planning", ["input.ts"]), mode: "full" as const };
     const initialArtifacts = { prd: "# PRD\nRequirement.\n", plan: "# Plan\nOriginal semantic plan.\n" };
@@ -867,7 +869,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("keeps saved pass evidence fresh when its required glob matches the active task record", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const planning = taskV3("planning", "planning", [".harnix/tasks/*/task.json"]);
     await saveWorkflow(root, { task: planning });
     const snapshot = await snapshotWorkflow(root, "check");
@@ -898,7 +900,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("fails finish with safe relative diagnostics when persisted verification inputs drift", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     await writeFile(join(root, "input.ts"), "export const value = 1;\n");
     const planning = taskV3("planning", "planning", ["input.ts"]);
     await saveWorkflow(root, { task: planning });
@@ -923,7 +925,7 @@ describe("hidden workflow persistence operations", () => {
 
   it("rechecks non-empty Full artifacts immediately before readiness", async () => {
     const root = await temporaryRepository();
-    await initializeProject({ root, developer: "tam", yes: true });
+    await initializeUtcProject(root);
     const full = { ...taskV3("planning", "planning"), mode: "full" as const };
     await saveWorkflow(root, { task: full, artifacts: { prd: "# PRD\n", plan: "# Plan\n" } });
     const ready = { ...full, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
@@ -935,6 +937,13 @@ describe("hidden workflow persistence operations", () => {
     await expect(saveWorkflow(root, { task: ready })).rejects.toThrow("Full tasks require non-empty prd.md and plan.md at ready");
   });
 });
+
+/** These tests assert calendar-day behavior, so they pin the zone instead of inheriting the machine's. */
+async function initializeUtcProject(root: string): Promise<void> {
+  await initializeProject({ root, developer: "tam", yes: true });
+  const configPath = join(root, ".harnix", "config.yaml");
+  await writeConfig(configPath, { ...(await readConfig(configPath)), timezone: "UTC" });
+}
 
 function task(status: TaskRecord["status"], checkpoint: TaskRecord["checkpoint"]): TaskRecordV1 {
   return { generator: "harnix", schemaVersion: 1, id: "20260813-120000-workflow", title: "workflow", mode: "lite", status, checkpoint, goal: "test", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [{ id: "check", description: "verify", command: "pnpm test", scope: "full", required: true }], evidence: [], createdAt: timestamp, updatedAt: timestamp };

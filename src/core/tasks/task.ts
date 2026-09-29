@@ -1,5 +1,7 @@
 import { access, mkdir, readFile } from "node:fs/promises";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
+import { formatDisplay, nowInstant } from "../../utils/clock.js";
+import { readProjectTimezone } from "../config/config.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "../../utils/paths.js";
 import { contextSelectionResultHash, saveContextSelectionSnapshot, validateContextSelectionSnapshot, type ContextSelectionSnapshotV1 } from "../context/selection-freshness.js";
 import { saveContextManifest, validateContextManifest, type ContextManifest } from "../context/context.js";
@@ -296,7 +298,7 @@ function validateV3Contracts(value: Record<string, unknown>, checks: Map<string,
   }
 }
 
-export function transitionTask(task: TaskRecord, status: TaskStatus, checkpoint: WorkflowCheckpoint, now = new Date().toISOString(), blocker?: TaskBlocker): TaskRecord {
+export function transitionTask(task: TaskRecord, status: TaskStatus, checkpoint: WorkflowCheckpoint, now = nowInstant(), blocker?: TaskBlocker): TaskRecord {
   if (!transitions[task.status].includes(status)) throw new TaskValidationError(`Illegal task transition ${task.status} -> ${status}.`);
   if (task.status === "blocked" && task.blocker?.resumeStatus !== status) throw new TaskValidationError("Blocked task must resume to its recorded status.");
   if (status === "blocked" && blocker === undefined) throw new TaskValidationError("Transitioning to blocked requires a blocker.");
@@ -305,7 +307,7 @@ export function transitionTask(task: TaskRecord, status: TaskStatus, checkpoint:
   return validateTask({ ...withoutBlocker, ...(status === "blocked" ? { blocker } : {}), status, checkpoint, updatedAt: now, ...(status === "completed" ? { completedAt: now } : {}) });
 }
 
-export function cancelTask(task: TaskRecord, cancellation: TaskCancellation, now = new Date().toISOString()): TaskRecord {
+export function cancelTask(task: TaskRecord, cancellation: TaskCancellation, now = nowInstant()): TaskRecord {
   if (!cancellableStatuses.has(task.status)) throw new TaskValidationError(`Cannot cancel terminal ${task.status} task.`);
   const reason = cancellation.reason.trim();
   if (!isCancellationReason(reason)) throw new TaskValidationError("Task cancellation reason is invalid.");
@@ -314,7 +316,7 @@ export function cancelTask(task: TaskRecord, cancellation: TaskCancellation, now
   return validateTask({ ...withoutBlocker, status: "cancelled", checkpoint: "cancelling", cancellation: { reason, authorizedBy: cancellation.authorizedBy }, updatedAt: now, cancelledAt: now });
 }
 
-export function updateTaskCheckpoint(task: TaskRecord, checkpoint: WorkflowCheckpoint, now = new Date().toISOString()): TaskRecord {
+export function updateTaskCheckpoint(task: TaskRecord, checkpoint: WorkflowCheckpoint, now = nowInstant()): TaskRecord {
   if (task.status === "blocked" || task.status === "completed" || task.status === "cancelled") throw new TaskValidationError("Cannot update the checkpoint for blocked or terminal tasks.");
   return validateTask({ ...task, checkpoint, updatedAt: now });
 }
@@ -337,7 +339,7 @@ export async function saveTask(root: string, task: TaskRecord): Promise<void> {
     plan: await exists(await resolveSafeProjectPath(directory, "plan.md")),
     design: await exists(await resolveSafeProjectPath(directory, "design.md")),
   };
-  await atomicWriteFile(await resolveSafeProjectPath(directory, "review.md"), renderTaskReview(valid, artifacts));
+  await atomicWriteFile(await resolveSafeProjectPath(directory, "review.md"), renderTaskReview(valid, artifacts, await readProjectTimezone(root)));
 }
 
 async function exists(path: string): Promise<boolean> {
@@ -353,15 +355,21 @@ function renderVerdict(task: TaskRecord): string {
   return `**Verdict:** PENDING — ${met}/${task.acceptanceCriteria.length} acceptance criteria met`;
 }
 
-function renderTaskReview(task: TaskRecord, artifacts: { prd: boolean; plan: boolean; design: boolean }): string {
+/** Legacy `Z` and offset timestamps both render in the configured zone; an unparsable value is shown as stored. */
+function displayTime(value: string, timezone: string): string {
+  try { return formatDisplay(value, timezone); }
+  catch { return value; }
+}
+
+function renderTaskReview(task: TaskRecord, artifacts: { prd: boolean; plan: boolean; design: boolean }, timezone: string): string {
   const lines: string[] = [
     `# ${task.title}`,
     "",
     `- **ID:** ${task.id}`,
     `- **Mode:** ${task.mode}`,
     `- **Status:** ${task.status}/${task.checkpoint}`,
-    `- **Created:** ${task.createdAt}`,
-    `- **Updated:** ${task.updatedAt}`,
+    `- **Created:** ${displayTime(task.createdAt, timezone)}`,
+    `- **Updated:** ${displayTime(task.updatedAt, timezone)}`,
     "",
     renderVerdict(task),
     "",
@@ -394,7 +402,7 @@ function renderTaskReview(task: TaskRecord, artifacts: { prd: boolean; plan: boo
   } else {
     for (const check of requiredChecks) {
       const latest = selectLatestEvidence(task.evidence, check.id);
-      const state = latest ? `${latest.result} (${latest.recordedAt})` : "chưa chạy / not yet run";
+      const state = latest ? `${latest.result} (${displayTime(latest.recordedAt, timezone)})` : "chưa chạy / not yet run";
       lines.push(`- \`${check.id}\` (${check.scope}): ${check.description} — ${state}`);
     }
   }
@@ -421,7 +429,7 @@ function renderTaskReview(task: TaskRecord, artifacts: { prd: boolean; plan: boo
     const renderedCheckIds = new Set<string>();
     for (const item of task.evidence) {
       if (item.checkId === undefined) {
-        lines.push(`- ${item.result} (${item.recordedAt}): ${item.summary}`);
+        lines.push(`- ${item.result} (${displayTime(item.recordedAt, timezone)}): ${item.summary}`);
         continue;
       }
       if (renderedCheckIds.has(item.checkId)) continue;
@@ -429,7 +437,7 @@ function renderTaskReview(task: TaskRecord, artifacts: { prd: boolean; plan: boo
       const rerunCount = task.evidence.filter((candidate) => candidate.checkId === item.checkId).length - 1;
       const latest = selectLatestEvidence(task.evidence, item.checkId) ?? item;
       const rerunNote = rerunCount > 0 ? ` _(${rerunCount} earlier rerun${rerunCount > 1 ? "s" : ""} not shown; see task.json for full history)_` : "";
-      lines.push(`- \`${item.checkId}\` — ${latest.result} (${latest.recordedAt}): ${latest.summary}${rerunNote}`);
+      lines.push(`- \`${item.checkId}\` — ${latest.result} (${displayTime(latest.recordedAt, timezone)}): ${latest.summary}${rerunNote}`);
     }
   }
   return `${lines.join("\n")}\n`;

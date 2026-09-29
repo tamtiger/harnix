@@ -150,6 +150,7 @@ describe.sequential("CLI", () => {
     output.mockClear();
     await createProgram({ interactive: false }).parseAsync(["node", "harnix", "workflow", "--preflight"], { from: "node" });
     expect(JSON.parse(output.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+      clock: { timezone: expect.any(String), now: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T[\d:.]+[+-]\d{2}:\d{2}$/u), idPrefix: expect.stringMatching(/^\d{8}-\d{6}$/u) },
       generator: "harnix",
       schemaVersion: 1,
       activeTask: null,

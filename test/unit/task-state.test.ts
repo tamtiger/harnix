@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { createLearningCandidate, isPromotionEligible } from "../../src/core/journal/learning.js";
 import { promotionProposal } from "../../src/core/journal/promotion.js";
 import { archiveTask, cancelTask, clearActiveTask, createTaskV2MigrationEvidence, loadTask, resolveActiveTask, saveTask, saveTaskWithArtifacts, setActiveTask, TaskValidationError, transitionTask, validateTask, type TaskRecord } from "../../src/core/tasks/task.js";
+import { formatDisplay, systemTimezone } from "../../src/utils/clock.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -365,8 +366,9 @@ describe("task state", () => {
     expect(review).toContain("met");
     expect(review).toContain("ac-b");
     expect(review).toContain("pending");
-    expect(review).toContain(timestamp);
-    expect(review).toContain("2026-09-16T23:50:00.000Z");
+    // No config under this bare root, so the review falls back to the system zone.
+    expect(review).toContain(formatDisplay(timestamp, systemTimezone()));
+    expect(review).toContain(formatDisplay("2026-09-16T23:50:00.000Z", systemTimezone()));
     expect(review).toContain("Required checks");
     expect(review).toContain("`check`");
     expect(review).toContain("`release-gate`");

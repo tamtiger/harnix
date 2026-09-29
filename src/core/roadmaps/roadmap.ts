@@ -2,6 +2,8 @@ import { mkdir, readFile, writeFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { isIsoTimestamp, isRecord } from "../tasks/task.js";
 import { loadTask } from "../tasks/task.js";
+import { formatDisplay } from "../../utils/clock.js";
+import { readProjectTimezone } from "../config/config.js";
 
 export class RoadmapValidationError extends Error {
   override name = "RoadmapValidationError";
@@ -95,6 +97,8 @@ export async function renderRoadmapMarkdown(root: string, epicId: string, epic?:
   const mdPath = join(root, ".harnix", "roadmaps", `${epicId}.md`);
   const title = epic?.title || epicId;
   const goal = epic?.goal ? `\n\n${epic.goal}` : "";
+  const timezone = await readProjectTimezone(join(root, ".harnix"));
+  const updated = epic === undefined ? "" : `\n\n- **Cập nhật:** ${formatDisplay(epic.updatedAt, timezone)}`;
 
   // Collect tasks that belong to this epic
   const harnixRoot = join(root, ".harnix");
@@ -157,6 +161,6 @@ export async function renderRoadmapMarkdown(root: string, epicId: string, epic?:
     });
   }
 
-  const content = `# Epic: ${title}${goal}${memberLines}`;
+  const content = `# Epic: ${title}${goal}${updated}${memberLines}`;
   await writeFile(mdPath, content, "utf8");
 }

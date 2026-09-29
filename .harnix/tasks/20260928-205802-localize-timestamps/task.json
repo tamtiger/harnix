@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205802-localize-timestamps",
   "title": "[04] Chuyển mọi thời gian sang múi giờ cấu hình (giờ Việt Nam)",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Thêm timezone (tên IANA) vào .harnix/config.yaml, mặc định lấy từ hệ thống lúc init qua Intl (không qua biến TZ của shell, vì Git Bash trên Windows không nhận tên múi giờ); repo này đặt Asia/Ho_Chi_Minh. Một hàm thời gian duy nhất (clock inject được) thay 13 chỗ new Date().toISOString() trong src, ghi ISO 8601 kèm offset (ví dụ 2026-09-28T20:30:01.000+07:00). Tiền tố ID YYYYMMDD-HHMMSS của task/epic, ngày phân vùng journal, và hiển thị trong review.md, trang epic, status dùng cùng múi giờ. So sánh vẫn theo thời điểm tuyệt đối nên dữ liệu cũ dạng Z đọc và sắp xếp đúng. Không ghi lại task lịch sử; chỉ hiển thị chúng theo múi giờ cấu hình.",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -17,65 +17,138 @@
     {
       "id": "ac-config-timezone",
       "text": "config.yaml có timezone IANA hợp lệ, mặc định lấy từ hệ thống lúc init, validator từ chối tên không hợp lệ; config cũ thiếu field vẫn đọc được.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-clock-config"
+      ]
     },
     {
       "id": "ac-single-clock",
-      "text": "Không còn new Date().toISOString() rải rác trong src; mọi timestamp ghi ra có offset của múi giờ cấu hình; có test với clock và múi giờ cố định.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Không còn toISOString() rải rác trong src ngoài module thời gian; mọi timestamp ghi ra qua đường lệnh có offset của múi giờ cấu hình; có test với clock và múi giờ cố định.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-clock-config",
+        "ev-check-time-flow"
+      ]
     },
     {
       "id": "ac-ids-journal",
-      "text": "Tiền tố ID task/epic và ngày phân vùng journal theo múi giờ cấu hình; có test chuyển ngày quanh nửa đêm giờ Việt Nam.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Tiền tố ID task/epic (do harness cung cấp) và ngày phân vùng journal theo múi giờ cấu hình; có test chuyển ngày quanh nửa đêm giờ Việt Nam.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-time-flow"
+      ]
     },
     {
       "id": "ac-display",
-      "text": "review.md, trang epic và status hiển thị thời gian theo múi giờ cấu hình, kể cả dữ liệu cũ dạng Z.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "review.md và trang epic hiển thị thời gian theo múi giờ cấu hình, kể cả dữ liệu cũ dạng Z; status không phát sinh timestamp mới.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-time-flow"
+      ]
     },
     {
       "id": "ac-agent-time-source",
-      "text": "Harness cung cấp thời gian hiện tại và tiền tố ID theo múi giờ cấu hình (ví dụ trong output của workflow --preflight hoặc --schema), skill hướng dẫn agent dùng giá trị này thay vì lệnh date của shell (Git Bash trên Windows bỏ qua tên múi giờ và trả UTC — đã gặp trong phiên audit).",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "workflow --preflight trả clock (timezone, now, idPrefix) theo múi giờ cấu hình và skill hướng dẫn agent dùng giá trị này thay cho lệnh date của shell.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-time-flow"
+      ]
     },
     {
       "id": "ac-legacy-order",
       "text": "Dữ liệu trộn Z và +07:00 vẫn sắp xếp đúng theo thời điểm tuyệt đối; task lịch sử không bị ghi lại.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-clock-config"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-sync",
+        "ev-check-suite"
+      ]
     }
   ],
   "relevantPaths": [
+    "src/commands/**",
     "src/core/config/**",
-    "src/core/tasks/**",
     "src/core/journal/**",
     "src/core/roadmaps/**",
+    "src/core/tasks/**",
     "src/core/workflow.ts",
-    "src/commands/**",
     "src/utils/**"
   ],
   "relevantSpecs": [
+    "AGENTS.md",
     "docs/HARNIX_PRD.md",
     "docs/HARNIX_WORKFLOW.md",
-    "docs/IMPLEMENTATION_PLAN.md"
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/OVERHAUL_DECISIONS.md"
   ],
   "validationPlan": [
     {
-      "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "id": "check-clock-config",
+      "description": "Test đơn vị module thời gian và config timezone pass",
       "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/clock.test.ts test/unit/config.test.ts",
+      "criterionIds": [
+        "ac-config-timezone",
+        "ac-ids-journal",
+        "ac-legacy-order",
+        "ac-single-clock"
+      ],
+      "inputs": [
+        "src/core/config/**",
+        "src/utils/**",
+        "test/unit/**"
+      ]
+    },
+    {
+      "id": "check-docs-sync",
+      "description": "Test đồng bộ docs, skill, template và self-host pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts test/workflow/templates.test.ts test/workflow/skill-sources.test.ts test/workflow/self-host.test.ts test/workflow/cli-contract.test.ts",
+      "criterionIds": [
+        "ac-agent-time-source",
+        "ac-docs-sync"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "docs/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-time-flow",
+      "description": "Test luồng thời gian: offset cấu hình, journal, preflight, hiển thị pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/localized-time.test.ts",
+      "criterionIds": [
+        "ac-agent-time-source",
+        "ac-display",
+        "ac-ids-journal",
+        "ac-legacy-order",
+        "ac-single-clock"
+      ],
+      "inputs": [
+        "src/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass",
+      "scope": "full",
       "required": true,
       "command": "pnpm lint && pnpm typecheck && pnpm test",
       "criterionIds": [
@@ -88,7 +161,6 @@
         "ac-single-clock"
       ],
       "inputs": [
-        "@task-contract",
         "docs/**",
         "src/**",
         "test/**"
@@ -97,13 +169,83 @@
   ],
   "decisions": [
     {
-      "id": "d-draft-checks",
-      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
-      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+      "id": "d-core-default-utc",
+      "text": "Core giữ tham số now tùy chọn; mặc định đi qua clock.ts (UTC). Mọi đường lệnh truyền thời gian theo múi giờ cấu hình.",
+      "rationale": "Tránh đổi chữ ký hàng loạt (khoảng 30 chỗ gọi trong test) mà vẫn đảm bảo dữ liệu ghi ra qua CLI có offset cấu hình."
+    },
+    {
+      "id": "d-status-no-time",
+      "text": "harnix status không phát sinh timestamp nên giữ nguyên hình dạng; AC hiển thị chỉ áp dụng cho review.md và trang epic.",
+      "rationale": "Thêm timestamp vào status là đổi contract công khai không có nhu cầu; AC gốc giả định status có timestamp."
+    },
+    {
+      "id": "d-clock-in-preflight",
+      "text": "Nguồn thời gian cho agent là khối clock trong workflow --preflight.",
+      "rationale": "Preflight đã là bước bắt buộc trước công việc Lite/Full và no-write; tránh thêm lệnh mới."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-09-29T10:36:48.757+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205802-localize-timestamps/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-29T10:36:49.177+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung check tập trung cho từng tiêu chí, làm rõ tiêu chí hiển thị thời gian sau khi khảo sát code.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205802-localize-timestamps/task.json"
+      ]
+    },
+    {
+      "result": "pass",
+      "id": "ev-check-clock-config",
+      "recordedAt": "2026-09-29T10:45:50.408+07:00",
+      "checkId": "check-clock-config",
+      "summary": "Check check-clock-config passed (exit 0):    Start at  10:45:09 |    Duration  607ms (transform 92ms, setup 0ms, collect 180ms, tests 88ms, environment ",
+      "inputDigest": "2dec4d9958871c644d6467d5d3a0febe27f4ac3ee527f50cf3cd1ff1b26bed73",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "result": "pass",
+      "id": "ev-check-docs-sync",
+      "recordedAt": "2026-09-29T10:45:51.153+07:00",
+      "checkId": "check-docs-sync",
+      "summary": "Check check-docs-sync passed (exit 0):    Start at  10:45:12 |    Duration  1.59s (transform 860ms, setup 0ms, collect 2.81s, tests 388ms, environmen",
+      "inputDigest": "e679dc00aa9efcf99e6e061d24d511102b9173a284222742a2f0e330323dd811",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "result": "pass",
+      "id": "ev-check-time-flow",
+      "recordedAt": "2026-09-29T10:45:52.188+07:00",
+      "checkId": "check-time-flow",
+      "summary": "Check check-time-flow passed (exit 0):    Start at  10:45:15 |    Duration  1.78s (transform 317ms, setup 0ms, collect 726ms, tests 653ms, environmen",
+      "inputDigest": "6e2b5185cf22c6e5dc555d7424a9788466fe1c837a0154772fffb9ba1411b6b9",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "result": "pass",
+      "id": "ev-check-suite",
+      "recordedAt": "2026-09-29T10:45:53.174+07:00",
+      "checkId": "check-suite",
+      "summary": "Check check-suite passed (exit 0):    Start at  10:45:26 |    Duration  15.42s (transform 3.95s, setup 0ms, collect 33.07s, tests 84.21s, environ",
+      "inputDigest": "5e81b5924c5f9d149a547e86d68e82aa2a0c5458d087a07ac6fda86e6e27c1d0",
+      "exitCode": 0,
+      "artifactPaths": []
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
-  "createdAt": "2026-09-28T20:58:02.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "createdAt": "2026-09-28T20:58:02+07:00",
+  "updatedAt": "2026-09-29T10:45:56.089+07:00",
+  "completedAt": "2026-09-29T10:45:56.089+07:00"
 }

@@ -130,6 +130,7 @@ interface HarnixConfigV2 {
   technologies: TechnologyId[];
   packages: PackageConfigV2[];
   platforms: PlatformId[];   // deprecated compatibility field; ignored by global setup
+  timezone?: string;         // IANA zone for every persisted timestamp; init defaults it to the system zone (Intl, never shell TZ); absent in older configs => system zone
   context: { maxCharacters: number; tokenApproximation: number; [compatibleUnknown: string]: unknown };
   runtime: { research: "conditional"; fullContext: boolean; [compatibleUnknown: string]: unknown };
   [compatibleUnknown: string]: unknown;
@@ -514,8 +515,11 @@ interface WorkflowPreflightResultV1 {
   requiredChecks: { passed: string[]; failed: string[]; stale: string[]; pending: string[] };
   retryLimitReached: string[];
   nextStage: "await" | "brainstorm" | "check" | "continue" | "debug" | "finish" | "implement" | "stop";
+  clock: { timezone: string; now: string; idPrefix: string }; // now = ISO 8601 with zone offset; idPrefix = YYYYMMDD-HHMMSS in the configured zone
 }
 ```
+
+`clock` is the authoritative time source for agents (never the shell `date`). Review pages (`review.md`, epic page) render times in the configured zone; comparisons use absolute time so legacy `Z` and offset values sort together.
 
 Every ID list is code-unit sorted. Output omits title/goal/criterion/check/blocker prose, commands, paths, hashes, prompts, secrets and file contents. No active task returns `brainstorm`. Terminal recovery returns `continue` before context/input hashing. Otherwise stage precedence is blocked/terminal → stale context `continue` → retry-limit `stop` → planning/replan `brainstorm` → ready `await` → in-progress `implement|debug` → verifying debug → completion-ready finishing `finish` → `check`. Finishing requires non-empty obligations, green fresh required checks, and acceptance completion/link semantics; green/empty check buckets alone never route Finish. `ready` never implies implementation authority; the latest request router may choose Implement only when the current user request authorizes project mutation. Required-input freshness is recomputed only in `verifying`; earlier stages expose required IDs as pending without eagerly hashing broad globs. Two consecutive chronological failures for one required check exhaust the single automatic remediation round regardless of digest/summary changes; skipped evidence and invalid/future passes do not reset it, while a current valid pass does. Preflight performs no write, process spawn or network call.
 

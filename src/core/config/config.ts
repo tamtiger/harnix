@@ -3,6 +3,7 @@ import { parse, stringify } from "yaml";
 
 import type { LanguageId, TechnologyId } from "../../catalog/catalog.js";
 import { atomicWriteFile } from "../../utils/atomic-write.js";
+import { isValidTimeZone, systemTimezone } from "../../utils/clock.js";
 import { compareCodeUnits } from "../../utils/order.js";
 import { normalizeRepositoryPath } from "../../utils/paths.js";
 import { legacyStackIds, normalizeLegacyStackIds, type LegacyStackId } from "../../utils/stack.js";
@@ -42,6 +43,8 @@ export interface HarnixConfigV2 {
   technologies: TechnologyId[];
   packages: PackageConfig[];
   platforms: PlatformId[];
+  /** IANA zone for every persisted timestamp; absent in older configs, which then use the system zone. */
+  timezone?: string;
   context: { maxCharacters: number; tokenApproximation: number; [key: string]: unknown };
   runtime: { research: "conditional"; fullContext: boolean; [key: string]: unknown };
   [key: string]: unknown;
@@ -60,6 +63,7 @@ export interface CreateConfigOptions {
   technologies?: TechnologyId[] | undefined;
   packages?: PackageConfig[] | undefined;
   platforms?: PlatformId[] | undefined;
+  timezone?: string | undefined;
 }
 
 const languageIds = new Set<LanguageId>(["csharp", "typescript", "javascript", "php", "python", "java", "go"]);
@@ -67,7 +71,7 @@ const technologyIds = new Set<TechnologyId>(["dotnet", "abp", "nestjs", "spring"
 const legacyIds = new Set<LegacyStackId>(legacyStackIds);
 const platformIds = new Set<PlatformId>(["kiro", "antigravity", "codex", "claude"]);
 const developerPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u;
-const topLevelKeys = new Set(["generator", "schemaVersion", "developer", "languages", "technologies", "packages", "platforms", "context", "runtime"]);
+const topLevelKeys = new Set(["generator", "schemaVersion", "developer", "languages", "technologies", "packages", "platforms", "timezone", "context", "runtime"]);
 const packageKeys = new Set(["path", "languages", "technologies"]);
 const contextKeys = new Set(["maxCharacters", "tokenApproximation"]);
 const runtimeKeys = new Set(["research", "fullContext"]);
@@ -92,7 +96,19 @@ export function createConfig(options: CreateConfigOptions): HarnixConfigV2 {
     platforms: sortUnique(options.platforms ?? []),
     runtime: { fullContext: false, research: "conditional" },
     schemaVersion: 2,
+    timezone: options.timezone ?? systemTimezone(),
   });
+}
+
+/** Configured zone, or the system zone for configs written before `timezone` existed. */
+export function effectiveTimezone(config: Pick<HarnixConfigV2, "timezone">): string {
+  return config.timezone ?? systemTimezone();
+}
+
+/** Best-effort zone for a project's `.harnix` root; an unreadable config never blocks writing task files. */
+export async function readProjectTimezone(harnixRoot: string): Promise<string> {
+  try { return effectiveTimezone(await readConfig(`${harnixRoot}/config.yaml`)); }
+  catch { return systemTimezone(); }
 }
 
 export function validateConfig(value: unknown): HarnixConfigV2 {
@@ -178,6 +194,7 @@ function orderedConfig(value: HarnixConfigV2): Record<string, unknown> {
     technologies: value.technologies,
     packages: value.packages.map((item) => ({ path: item.path, languages: item.languages, technologies: item.technologies, ...unknownEntries(item, packageKeys) })),
     platforms: value.platforms,
+    ...(value.timezone === undefined ? {} : { timezone: value.timezone }),
     context: { maxCharacters: value.context.maxCharacters, tokenApproximation: value.context.tokenApproximation, ...unknownEntries(value.context, contextKeys) },
     runtime: { research: value.runtime.research, fullContext: value.runtime.fullContext, ...unknownEntries(value.runtime, runtimeKeys) },
     ...unknownEntries(value, topLevelKeys),
@@ -188,6 +205,7 @@ function validateCommon(value: Record<string, unknown>): void {
   if (typeof value.developer !== "string") throw new ConfigValidationError("developer must be a safe journal ID.");
   validateDeveloperId(value.developer);
   assertPlatforms(value.platforms);
+  if (value.timezone !== undefined && !isValidTimeZone(value.timezone)) throw new ConfigValidationError("timezone must be a valid IANA time zone name.");
   assertContext(value.context);
   assertRuntime(value.runtime);
 }
