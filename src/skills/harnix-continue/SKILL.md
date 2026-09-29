@@ -59,7 +59,7 @@ For `completed/finishing` still active, rerun the hidden `workflow --finish` rec
 
 For an explicit user request to abandon an unfinished task, clarify cancellation when wording such as “complete” could mean successful completion, then route to `harnix-finish-work`; do not relabel failed evidence as pass. For `cancelled/cancelling` still active, rerun `harnix workflow --cancel` without replacing the persisted reason or authority. Recovery reuses the deterministic cancellation journal ID and original `cancelledAt` date, then clears only the matching active pointer.
 
-Do not interpret `ready` as proof that the ready gate passed when artifacts contradict it. Route to `replan` if a material decision, placeholder, or contract gap is visible. A `ready|in_progress|verifying` task may later re-enter `ready/ready` only through Brainstorm's audited guarded re-entry from its persisted `replan` checkpoint; Continue must not simulate a backward transition.
+Do not interpret `ready` as proof that the ready gate passed when artifacts contradict it. Route to `replan` if a material decision, placeholder, or contract gap is visible. A `ready|in_progress|verifying` task may later re-enter `ready/ready` only through Brainstorm's guarded re-entry from its persisted `replan` checkpoint; Continue must not simulate a backward transition.
 
 ## Recover partial persistence
 
@@ -73,7 +73,7 @@ When state and artifacts disagree:
 
 Never silently downgrade schema, discard evidence, clear a blocker, or advance a status to make the record convenient.
 
-Doctor finding `legacy-task-schema` is diagnostic only. Continue reads schema v1 exactly and does not rewrite it. An unfinished v1 to v2 migration is owned by planning at checkpoint `replan`, requires explicit authorization and exact migration evidence, and preserves prior criteria/evidence; terminal `completed|cancelled` v1 records remain byte-preserved.
+Doctor finding `legacy-task-schema` is diagnostic only. Continue reads legacy schema v1/v2 exactly and does not rewrite it. An unfinished legacy task accepts only one explicitly authorized migration save to schema v3 (status and checkpoint unchanged, exact `task-schema-to-v3` evidence, prior criteria/evidence preserved) owned by planning; any other save on it is refused and its earlier passes must be rerun. Terminal `completed|cancelled` legacy records remain byte-preserved.
 
 ## Persist
 

@@ -228,7 +228,7 @@
       "id": "deterministic-ready-trace",
       "capability": "Bounded deterministic trace from Full-task criteria to slices, checks, and paths",
       "decision": "adapt",
-      "lifecycle": "implemented",
+      "lifecycle": "deprecated",
       "sources": [
         {
           "repository": "github/spec-kit",
@@ -253,15 +253,15 @@
           ]
         }
       ],
-      "adaptation": "Replaces human-only consistency guidance with a bounded line parser and stable diagnostics; no LLM judge, Markdown execution, or Lite-task ceremony is introduced.",
+      "adaptation": "Retired by TaskRecord v3: the bounded trace parser, its grammar and workflow --audit-ready were removed. Full readiness now only needs non-empty free-form prd.md and plan.md with at least one checklist item.",
       "implementation": {
         "code": [
           "src/commands/internal-workflow.ts",
-          "src/core/tasks/ready-trace.ts"
+          "src/core/tasks/workflow-helpers.ts"
         ],
         "tests": [
-          "test/unit/ready-trace.test.ts",
-          "test/workflow/internal-workflow.test.ts"
+          "test/workflow/internal-workflow.test.ts",
+          "test/workflow/task-contract-v3.test.ts"
         ],
         "docs": [
           "docs/HARNESS_RESEARCH.md",
@@ -352,15 +352,15 @@
           ]
         }
       ],
-      "adaptation": "Adopts evidence-before-claims and extends it with Harnix TaskRecord v2 check ownership, pre/post snapshots, immutable digest sidecars, age bounds, and finish-time recomputation.",
+      "adaptation": "Adopts evidence-before-claims and extends it with Harnix TaskRecord v3 check ownership, pre/post digest comparison, inline input digests recomputed from current inputs, and finish-time recomputation; no sidecar file is written.",
       "implementation": {
         "code": [
-          "src/core/verification/input-freshness.ts",
+          "src/core/verification/input-digest.ts",
           "src/core/workflow.ts",
           "src/skills/harnix-finish-work/SKILL.md"
         ],
         "tests": [
-          "test/unit/verification-inputs.test.ts",
+          "test/unit/input-digest.test.ts",
           "test/workflow/internal-workflow.test.ts",
           "test/workflow/routing.test.ts"
         ],
@@ -568,7 +568,7 @@
           ]
         }
       ],
-      "adaptation": "Reuses Harnix's exact ready-trace, criterion-support, and input-freshness contracts to expose separate readiness and completion states with stable codes and sorted IDs; it deliberately omits heuristic recommendations and never runs checks, edits artifacts, advances workflow, or reveals private prose.",
+      "adaptation": "Reuses Harnix's Full-task ready gate, criterion-support, and input-digest contracts to expose separate readiness and completion states with stable codes and sorted IDs; it deliberately omits heuristic recommendations and never runs checks, edits artifacts, advances workflow, or reveals private prose.",
       "implementation": {
         "code": [
           "src/commands/audit.ts",
@@ -810,7 +810,7 @@
           ]
         }
       ],
-      "adaptation": "Clean-room Harnix projection reads existing local task, evidence, input-freshness, and context-drift contracts; it emits counts and static codes only, with no database, watcher, statusline, model state, task prose, or network.",
+      "adaptation": "Clean-room Harnix projection reads existing local task, evidence, input-digest, and context-drift contracts; it emits counts and static codes only, with no database, watcher, statusline, model state, task prose, or network.",
       "implementation": {
         "code": [
           "src/commands/status.ts",

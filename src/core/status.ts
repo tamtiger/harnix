@@ -99,9 +99,8 @@ export async function inspectRequiredCheckEvidence(
   harnixRoot: string,
   task: TaskRecord,
   now = Date.now(),
-  maxEvidenceAgeMs = 60 * 60 * 1_000,
 ): Promise<RequiredCheckState[]> {
-  return (await inspectRequiredChecks(projectRoot, harnixRoot, task, now, maxEvidenceAgeMs)).map((inspection) => inspection.state);
+  return (await inspectRequiredChecks(projectRoot, harnixRoot, task, now)).map((inspection) => inspection.state);
 }
 
 function result(activeTask: StatusActiveTask | null, code: StatusNextActionCode, attention: StatusAttention[]): HarnixStatusResultV1 {

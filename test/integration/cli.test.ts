@@ -178,9 +178,9 @@ describe.sequential("CLI", () => {
     await createProgram({ interactive: false }).parseAsync(["node", "harnix", "init", "--user", "tam"], { from: "node" });
     const timestamp = "2026-08-19T00:00:00.000Z";
     const planning = {
-      generator: "harnix", schemaVersion: 2, id: "20260819-000000-cancel-me", title: "Cancel me", mode: "lite", status: "planning", checkpoint: "planning",
+      generator: "harnix", schemaVersion: 3, id: "20260819-000000-cancel-me", title: "Cancel me", mode: "lite", status: "planning", checkpoint: "planning",
       goal: "Stop safely", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [],
-      validationPlan: [{ id: "check", description: "verify", scope: "focused", required: true, criterionIds: ["a"], inputs: ["@task-contract"] }], evidence: [], createdAt: timestamp, updatedAt: timestamp,
+      validationPlan: [{ id: "check", description: "verify", scope: "focused", required: true, criterionIds: ["a"], inputs: ["package.json"] }], evidence: [], createdAt: timestamp, updatedAt: timestamp,
     };
     const output = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     await createProgram({ interactive: false, workflowInput: async () => JSON.stringify({ task: planning }) }).parseAsync(["node", "harnix", "workflow", "--save"], { from: "node" });

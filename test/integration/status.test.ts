@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "../../src/cli-program.js";
 import { initializeProject } from "../../src/commands/init.js";
-import { saveTask, setActiveTask, type TaskRecordV1, type TaskRecordV2 } from "../../src/core/tasks/task.js";
-import { computeVerificationInputSnapshot, persistNewVerificationInputSnapshots } from "../../src/core/verification/input-freshness.js";
+import { saveTask, setActiveTask, type TaskRecordV1, type TaskRecordV2, type TaskRecordV3 } from "../../src/core/tasks/task.js";
+import { computeInputDigest } from "../../src/core/verification/input-digest.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const originalCwd = process.cwd();
@@ -131,17 +131,18 @@ describe.sequential("status command", () => {
       nextAction: { code: string };
       attention: unknown[];
     };
+    // A legacy v1 pass cannot be re-proven under the v3 contract, so it is stale until migration.
     expect(result.activeTask.progress.requiredChecks).toEqual({
-      passed: 1,
+      passed: 0,
       failed: 1,
-      stale: 1,
+      stale: 2,
       pending: 1,
       total: 4,
     });
     expect(result.nextAction.code).toBe("run-verification");
     expect(result.attention).toEqual([
       { code: "required-check-failed", count: 1 },
-      { code: "required-check-stale", count: 1 },
+      { code: "required-check-stale", count: 2 },
     ]);
   });
 
@@ -181,20 +182,21 @@ describe.sequential("status command", () => {
     ]);
   });
 
-  it("requires a matching v2 sidecar and current input digest for a passed check", async () => {
+  it("requires the inline v3 digest to match the current inputs for a passed check", async () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });
     await writeFile(join(root, "input.ts"), "export const value = 1;\n");
     const now = Date.parse("2026-08-26T01:00:00.000Z");
     const base = digestTask(now);
-    const snapshot = await computeVerificationInputSnapshot(root, base, "gate");
-    const task: TaskRecordV2 = {
+    const snapshot = await computeInputDigest(root, base, "gate");
+    const task: TaskRecordV3 = {
       ...base,
       evidence: [{
         id: "e-current",
         checkId: "gate",
         recordedAt: new Date(now - 1_000).toISOString(),
         result: "pass",
+        exitCode: 0,
         summary: "passed",
         artifactPaths: [],
         inputDigest: snapshot.inputDigest,
@@ -202,7 +204,6 @@ describe.sequential("status command", () => {
     };
     const harnixRoot = join(root, ".harnix");
     await saveTask(harnixRoot, task);
-    await persistNewVerificationInputSnapshots(root, harnixRoot, [], task);
     await setActiveTask(harnixRoot, task.id);
     process.chdir(root);
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
@@ -292,11 +293,11 @@ function verificationTask(now: number): TaskRecordV1 {
   };
 }
 
-function digestTask(now: number): TaskRecordV2 {
+function digestTask(now: number): TaskRecordV3 {
   const timestamp = new Date(now - 2_000).toISOString();
   return {
     generator: "harnix",
-    schemaVersion: 2,
+    schemaVersion: 3,
     id: "20260826-000002-status-digest",
     title: "Digest status",
     mode: "lite",
@@ -310,10 +311,11 @@ function digestTask(now: number): TaskRecordV2 {
     validationPlan: [{
       id: "gate",
       description: "verify input",
+      command: "pnpm test",
       scope: "focused",
       required: true,
       criterionIds: ["criterion"],
-      inputs: ["@task-contract", "input.ts"],
+      inputs: ["input.ts"],
     }],
     evidence: [],
     createdAt: timestamp,

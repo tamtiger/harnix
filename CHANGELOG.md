@@ -10,11 +10,17 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 ### Removed
 
+- Gỡ sidecar `verification-inputs.json` (cho task mới), ready-trace grammar, execution-notes grammar và `workflow --audit-ready` cùng module `ready-trace.ts`, `input-freshness.ts` và test đi kèm. `plan.md` cũ có vùng execution-notes vẫn đọc và lưu được như văn bản tự do.
 - Gỡ code không còn caller: `src/migration/**`, `src/rules/rules.ts`, `src/templates/harnix/managed-workflow.ts`, `src/core/research.ts` cùng test đi kèm. Nội dung rule đã nằm hoàn toàn trong `src/guides/`.
 
 ### Changed
 
 - **Breaking:** gộp hai lệnh public `harnix checks` và `harnix audit` vào `harnix status --explain [--limit <1..50>]`. Kết quả nằm dưới `explain.checks` và `explain.audit`; lớp redaction chống lộ nội dung task hỏng được giữ nguyên. Dùng `harnix status --explain` thay cho hai lệnh cũ.
+- **Breaking:** hợp đồng task chuyển sang TaskRecord schema v3. Check không còn khai báo `@task-contract` (hợp đồng luôn được gộp ngầm vào digest); evidence pass của check bắt buộc mang `inputDigest`, và với check có lệnh thì pass phải có `exitCode` 0, fail phải khác 0. Digest được tính lại từ input hiện hành thay vì lưu snapshot; task mới không còn tạo `verification-inputs.json`, churn `.harnix` của một vòng đời mẫu ≤ 200 dòng.
+- **Breaking:** `contractRevision` còn một bước: một lần `workflow --save` đặt checkpoint `replan` kèm `reason`, rồi một lần save `ready/ready`. Điều kiện ready của Full task chỉ đòi `prd.md` và `plan.md` không rỗng, `plan.md` có ít nhất một mục checklist.
+- **Breaking:** `workflow --save` chỉ nhận task mới ở schema v3. Task v1/v2 chưa hoàn tất chỉ được nâng lên v3 bằng một lần save migration (giữ status/checkpoint, tiêu chí, check bắt buộc và evidence); mọi thao tác khác trên task chưa migrate bị từ chối kèm hướng dẫn. Evidence pass cũ báo `legacy-schema` cho đến khi migrate và chạy lại check. Task đã kết thúc vẫn đọc được, không bị ghi lại.
+- Mã lý do stale của check còn: `digest-mismatch`, `evidence-expired`, `inputs-unavailable`, `latest-failed`, `latest-skipped`, `legacy-schema`, `no-evidence`; `changes` luôn rỗng vì không còn snapshot để so sánh.
+- Sửa lọc member của epic để task v3 hiện trong `harnix roadmap`.
 - Suite `test:migration` chuyển thành suite tương thích dữ liệu cũ (đọc task v1/v2 và task có `context.json`) thay cho test của module migration đã gỡ.
 
 ## [1.1.22] - 2026-09-28

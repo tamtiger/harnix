@@ -1,137 +1,77 @@
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { createCheckFailureFinding, inspectRequiredChecks } from "../../src/core/verification/check-report.js";
-import type { TaskRecordV1, TaskRecordV2 } from "../../src/core/tasks/task.js";
-import { computeVerificationInputSnapshot, persistNewVerificationInputSnapshots } from "../../src/core/verification/input-freshness.js";
+import { computeInputDigest } from "../../src/core/verification/input-digest.js";
+import type { TaskRecordV1, TaskRecordV2, TaskRecordV3 } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-check-report-");
+const now = Date.parse("2026-08-26T01:00:00.000Z");
 
 describe("required check report", () => {
-  it("classifies base evidence states and preserves append order for timestamp ties", async () => {
-    const task = v1Task();
-    const now = Date.parse("2026-08-26T01:00:00.000Z");
-
-    const reports = await inspectRequiredChecks("unused", "unused", task, now);
+  it("classifies base evidence states; legacy v1 passes cannot be re-proven and report legacy-schema", async () => {
+    const reports = await inspectRequiredChecks("unused", "unused", v1Task(), now);
 
     expect(reports.map(({ id, state, reasonCodes }) => ({ id, state, reasonCodes }))).toEqual([
       { id: "pending", state: "pending", reasonCodes: ["no-evidence"] },
       { id: "tie", state: "failed", reasonCodes: ["latest-failed"] },
       { id: "future", state: "stale", reasonCodes: ["evidence-expired"] },
-      { id: "expired", state: "stale", reasonCodes: ["evidence-expired"] },
-      { id: "passed", state: "passed", reasonCodes: [] },
+      { id: "expired", state: "stale", reasonCodes: ["legacy-schema"] },
+      { id: "passed", state: "stale", reasonCodes: ["legacy-schema"] },
       { id: "skipped", state: "pending", reasonCodes: ["latest-skipped"] },
     ]);
   });
 
-  it("explains v2 input, contract, missing-path, and invalid-sidecar freshness", async () => {
+  it("reports a legacy v2 pass as stale until the task migrates", async () => {
+    const task: TaskRecordV2 = {
+      ...(v3Task() as unknown as TaskRecordV2),
+      schemaVersion: 2,
+      validationPlan: [{ id: "gate", description: "private", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract", "src/*.ts"] }],
+      evidence: [{ id: "pass", checkId: "gate", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", exitCode: 0, summary: "private", artifactPaths: [], inputDigest: "a".repeat(64) }],
+    };
+
+    expect((await inspectRequiredChecks("unused", "unused", task, now))[0]).toMatchObject({ state: "stale", reasonCodes: ["legacy-schema"], changes: [] });
+  });
+
+  it("recomputes the inline v3 digest: current, changed input, missing input, mismatched digest, future evidence", async () => {
     const root = await temporaryRepository();
-    const harnixRoot = join(root, ".harnix");
-    const base = v2Task();
+    const base = v3Task();
     await mkdir(join(root, "src"), { recursive: true });
-    await mkdir(join(harnixRoot, "tasks", base.id), { recursive: true });
     await writeFile(join(root, "src", "a.ts"), "a1\n");
     await writeFile(join(root, "src", "b.ts"), "b1\n");
-    const snapshot = await computeVerificationInputSnapshot(root, base, "gate");
-    const task: TaskRecordV2 = { ...base, evidence: [{ id: "pass", checkId: "gate", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", exitCode: 0, summary: "private", artifactPaths: [], inputDigest: snapshot.inputDigest }] };
-    await persistNewVerificationInputSnapshots(root, harnixRoot, [], task);
-    const sidecarPath = join(harnixRoot, "tasks", task.id, "verification-inputs.json");
-    const validSidecar = await readFile(sidecarPath, "utf8");
-    const now = Date.parse("2026-08-26T01:00:00.000Z");
+    const digest = (await computeInputDigest(root, base, "gate")).inputDigest;
+    const task: TaskRecordV3 = { ...base, evidence: [{ id: "pass", checkId: "gate", recordedAt: "2026-08-20T00:00:00.000Z", result: "pass", exitCode: 0, summary: "private", artifactPaths: [], inputDigest: digest }] };
+    const inspect = async (candidate: TaskRecordV3) => (await inspectRequiredChecks(root, join(root, ".harnix"), candidate, now))[0]!;
 
-    const oldButCurrent: TaskRecordV2 = { ...task, evidence: [{ ...task.evidence[0]!, recordedAt: "2026-08-20T00:00:00.000Z" }] };
-    expect((await inspectRequiredChecks(root, harnixRoot, oldButCurrent, now))[0]).toMatchObject({ state: "passed", reasonCodes: [] });
-    const legacySnapshot = await computeVerificationInputSnapshot(root, base, "gate", { schemaVersion: 1 });
-    const legacyNestedOld: TaskRecordV2 = {
-      ...base,
-      evidence: [{ id: "legacy-pass", checkId: "gate", recordedAt: "2026-08-20T00:00:00.000Z", result: "pass", exitCode: 0, summary: "private", artifactPaths: [], inputDigest: legacySnapshot.inputDigest }],
-    };
-    await writeFile(sidecarPath, `${JSON.stringify({
-      generator: "harnix",
-      schemaVersion: 1,
-      taskId: base.id,
-      snapshots: [{ evidenceId: "legacy-pass", ...legacySnapshot }],
-    }, null, 2)}\n`);
-    expect((await inspectRequiredChecks(root, harnixRoot, legacyNestedOld, now))[0]).toMatchObject({ state: "passed", reasonCodes: [] });
-    await writeFile(sidecarPath, validSidecar);
-    const future: TaskRecordV2 = { ...task, evidence: [{ ...task.evidence[0]!, recordedAt: "2026-08-26T01:00:01.000Z" }] };
-    expect((await inspectRequiredChecks(root, harnixRoot, future, now))[0]).toMatchObject({ state: "stale", reasonCodes: ["evidence-expired"] });
+    expect(await inspect(task)).toMatchObject({ state: "passed", reasonCodes: [], changes: [] });
 
-    const futureThenValid: TaskRecordV2 = {
+    const future: TaskRecordV3 = { ...task, evidence: [{ ...task.evidence[0]!, recordedAt: "2026-08-26T01:00:01.000Z" }] };
+    expect(await inspect(future)).toMatchObject({ state: "stale", reasonCodes: ["evidence-expired"] });
+
+    const futureThenValid: TaskRecordV3 = {
       ...task,
       evidence: [
         { ...task.evidence[0]!, id: "gate-future", recordedAt: "2026-08-26T01:00:01.000Z" },
         { ...task.evidence[0]!, id: "gate-valid", recordedAt: "2026-08-26T00:59:00.000Z" },
       ],
     };
-    await persistNewVerificationInputSnapshots(root, harnixRoot, [], futureThenValid);
-    expect((await inspectRequiredChecks(root, harnixRoot, futureThenValid, now))[0]).toMatchObject({ state: "passed", reasonCodes: [] });
-    await writeFile(sidecarPath, validSidecar);
+    expect(await inspect(futureThenValid)).toMatchObject({ state: "passed", reasonCodes: [] });
+
+    const mismatch: TaskRecordV3 = { ...task, evidence: [{ ...task.evidence[0]!, inputDigest: "0".repeat(64) }] };
+    expect(await inspect(mismatch)).toMatchObject({ state: "stale", reasonCodes: ["digest-mismatch"] });
 
     await writeFile(join(root, "src", "a.ts"), "a2\n");
-    let report = (await inspectRequiredChecks(root, harnixRoot, task, now))[0]!;
-    expect(report).toMatchObject({ state: "stale", reasonCodes: ["inputs-changed"], changes: [{ path: "src/a.ts", kind: "changed" }] });
-
+    expect(await inspect(task)).toMatchObject({ state: "stale", reasonCodes: ["digest-mismatch"] });
     await writeFile(join(root, "src", "a.ts"), "a1\n");
-    const contractChanged: TaskRecordV2 = { ...task, acceptanceCriteria: [{ ...task.acceptanceCriteria[0]!, text: "changed contract" }] };
-    report = (await inspectRequiredChecks(root, harnixRoot, contractChanged, now))[0]!;
-    expect(report).toMatchObject({ state: "stale", reasonCodes: ["task-contract-changed"], changes: [] });
 
-    await rm(join(root, "src", "b.ts"));
-    report = (await inspectRequiredChecks(root, harnixRoot, task, now))[0]!;
-    expect(report).toMatchObject({ state: "stale", reasonCodes: ["inputs-missing"], changes: [{ path: "src/b.ts", kind: "missing" }] });
+    const contractChanged: TaskRecordV3 = { ...task, acceptanceCriteria: [{ ...task.acceptanceCriteria[0]!, text: "changed contract" }] };
+    expect(await inspect(contractChanged)).toMatchObject({ state: "stale", reasonCodes: ["digest-mismatch"] });
 
-    await rm(sidecarPath);
-    report = (await inspectRequiredChecks(root, harnixRoot, task, now))[0]!;
-    expect(report).toMatchObject({ state: "stale", reasonCodes: ["snapshot-missing"], changes: [] });
-
-    await writeFile(sidecarPath, validSidecar);
-    const mismatch: TaskRecordV2 = { ...task, evidence: [{ ...task.evidence[0]!, inputDigest: "0".repeat(64) }] };
-    report = (await inspectRequiredChecks(root, harnixRoot, mismatch, now))[0]!;
-    expect(report).toMatchObject({ state: "stale", reasonCodes: ["snapshot-mismatch"], changes: [] });
-
-    await rm(join(root, "src", "a.ts"));
-    report = (await inspectRequiredChecks(root, harnixRoot, task, now))[0]!;
-    expect(report).toMatchObject({ state: "stale", reasonCodes: ["inputs-unavailable"], changes: [] });
-
-    await writeFile(sidecarPath, "{\"private\":\"PRIVATE_SIDECAR_CANARY\"}\n");
-    report = (await inspectRequiredChecks(root, harnixRoot, task, now))[0]!;
-    expect(report).toMatchObject({ state: "stale", reasonCodes: ["snapshot-invalid"], changes: [] });
-    expect(JSON.stringify(report)).not.toContain("PRIVATE_SIDECAR_CANARY");
-  });
-
-  it("distinguishes malformed plan.md execution-notes grammar from a genuinely unavailable input", async () => {
-    const root = await temporaryRepository();
-    const harnixRoot = join(root, ".harnix");
-    const base: TaskRecordV2 = { ...v2Task(), mode: "full" };
-    await mkdir(join(root, "src"), { recursive: true });
-    await mkdir(join(harnixRoot, "tasks", base.id), { recursive: true });
-    await writeFile(join(root, "src", "a.ts"), "a1\n");
-    await writeFile(join(root, "src", "b.ts"), "b1\n");
-    await writeFile(join(harnixRoot, "tasks", base.id, "prd.md"), "# PRD\n");
-    const validPlan = [
-      "# Plan",
-      "- [ ] `S1` — do thing",
-      "",
-      "<!-- harnix:execution-notes:begin -->",
-      "slice:S1=passed",
-      "<!-- harnix:execution-notes:end -->",
-      "",
-    ].join("\n");
-    await writeFile(join(harnixRoot, "tasks", base.id, "plan.md"), validPlan);
-
-    const snapshot = await computeVerificationInputSnapshot(root, base, "gate");
-    const task: TaskRecordV2 = { ...base, evidence: [{ id: "pass", checkId: "gate", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", exitCode: 0, summary: "private", artifactPaths: [], inputDigest: snapshot.inputDigest }] };
-    await persistNewVerificationInputSnapshots(root, harnixRoot, [], task);
-    const now = Date.parse("2026-08-26T01:00:00.000Z");
-    expect((await inspectRequiredChecks(root, harnixRoot, task, now))[0]).toMatchObject({ state: "passed", reasonCodes: [] });
-
-    const badPlan = validPlan.replace("slice:S1=passed", "slice:S1=done");
-    await writeFile(join(harnixRoot, "tasks", base.id, "plan.md"), badPlan);
-    const report = (await inspectRequiredChecks(root, harnixRoot, task, now))[0]!;
-    expect(report).toMatchObject({ state: "stale", reasonCodes: ["plan-artifact-invalid"] });
+    await rm(join(root, "src"), { recursive: true });
+    expect(await inspect(task)).toMatchObject({ state: "stale", reasonCodes: ["inputs-unavailable"] });
+    expect(await inspect(base)).toMatchObject({ state: "pending", reasonCodes: ["no-evidence"] });
   });
 
   it("forwards structured findings from evidence to inspection results", async () => {
@@ -141,9 +81,8 @@ describe("required check report", () => {
     expect(finding1).toEqual({ id: "err-1", text: "Test suite failed with exit code 1", severity: "critical" });
     expect(finding2).toEqual({ id: "warn-1", text: "Deprecated API usage", severity: "low" });
 
-    const base = v2Task();
-    const taskWithFindings: TaskRecordV2 = {
-      ...base,
+    const taskWithFindings: TaskRecordV3 = {
+      ...v3Task(),
       evidence: [
         {
           id: "ev-failed",
@@ -159,7 +98,6 @@ describe("required check report", () => {
       ],
     };
 
-    const now = Date.parse("2026-08-26T01:00:00.000Z");
     const reports = await inspectRequiredChecks("unused", "unused", taskWithFindings, now);
 
     expect(reports[0]).toMatchObject({
@@ -200,12 +138,12 @@ function v1Task(): TaskRecordV1 {
   };
 }
 
-function v2Task(): TaskRecordV2 {
+function v3Task(): TaskRecordV3 {
   const timestamp = "2026-08-26T00:00:00.000Z";
   return {
     generator: "harnix",
-    schemaVersion: 2,
-    id: "20260826-162101-unit-checks-v2",
+    schemaVersion: 3,
+    id: "20260826-162102-unit-checks-v3",
     title: "private",
     mode: "lite",
     status: "verifying",
@@ -215,7 +153,7 @@ function v2Task(): TaskRecordV2 {
     acceptanceCriteria: [{ id: "criterion", text: "private", status: "pending", evidenceIds: [] }],
     relevantPaths: ["src/a.ts", "src/b.ts"],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "private", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract", "src/*.ts"] }],
+    validationPlan: [{ id: "gate", description: "private", scope: "focused", required: true, command: "pnpm test", criterionIds: ["criterion"], inputs: ["src/*.ts"] }],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,

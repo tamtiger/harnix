@@ -34,7 +34,7 @@ Accept only one of these inputs:
 - any unfinished state plus an explicit user instruction to cancel the task and a concise non-secret reason;
 - Accept `cancelled/cancelling` only for partial cancellation recovery.
 
-If completion prerequisites are missing, stop and return to the owning stage. Missing release preparation must persist the same `verifying` status at checkpoint `replan` and route to `harnix-brainstorm`; only its audited guarded re-entry to `ready/ready` may hand back to implementation. Missing or stale evidence returns to `harnix-check`. Never repair product files in Finish or reinterpret “complete” as cancellation without clarifying when the user's intent is ambiguous.
+If completion prerequisites are missing, stop and return to the owning stage. Missing release preparation must persist the same `verifying` status at checkpoint `replan` and route to `harnix-brainstorm`; only its guarded re-entry to `ready/ready` may hand back to implementation. Missing or stale evidence returns to `harnix-check`. Never repair product files in Finish or reinterpret “complete” as cancellation without clarifying when the user's intent is ambiguous.
 
 ## Final state review
 
@@ -47,7 +47,7 @@ Reread:
 - current diff/status and user-owned changes;
 - omitted checks, waivers, and residual risks.
 
-Confirm that evidence still describes the current files. For TaskRecord schema v2, treat the task-owned `verification-inputs.json` snapshot as immutable workflow state and use `harnix workflow --finish` so Harnix recomputes every latest required pass. If it reports changed/missing relative paths or a task-contract mismatch, verification is stale and must run again; timestamps alone are insufficient.
+Confirm that evidence still describes the current files. For TaskRecord schema v3, use `harnix workflow --finish` so Harnix recomputes the digest of every latest required pass from the current inputs; there is no snapshot file to trust. If it reports stale inputs for a check, verification is stale and must run again; timestamps alone are insufficient. A legacy v1/v2 task must migrate to v3 and rerun its checks before it can finish.
 
 `--finish` recomputes freshness against file content at the exact moment it runs, so any edit between recording the final passing evidence and calling `--finish`—including an editor autoSave or a format-on-save hook silently touching an already-verified file—will legitimately reopen that check as stale. The stale error names the specific evidence id and its `recordedAt` alongside the changed/missing paths, so read it to tell a real snapshot problem apart from a file that was simply edited again after evidence was recorded.
 

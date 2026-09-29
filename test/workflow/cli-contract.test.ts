@@ -30,7 +30,7 @@ describe("CLI command contract", () => {
     expect(roadmap?.options.map((option) => option.long)).toEqual(["--limit", "--id"]);
     expect(resume?.options.map((option) => option.long)).toEqual(["--dry-run"]);
     expect(contextReport?.options.map((option) => option.long)).toEqual(["--platform", "--limit"]);
-    expect(workflow?.options.map((option) => option.long)).toEqual(["--inspect", "--preflight", "--save", "--snapshot", "--audit-ready", "--finish", "--cancel", "--learn", "--transition", "--evidence", "--schema", "--check"]);
+    expect(workflow?.options.map((option) => option.long)).toEqual(["--inspect", "--preflight", "--save", "--snapshot", "--finish", "--cancel", "--learn", "--transition", "--evidence", "--schema", "--check"]);
   });
 
   it("keeps the workflow transport hidden and rejects ambiguous action flags", async () => {

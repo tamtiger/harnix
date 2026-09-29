@@ -9,9 +9,10 @@ import {
   loadTask,
   acceptanceCriterionKeys,
   blockerKeys,
-  createTaskV2MigrationEvidence,
+  createTaskV3MigrationEvidence,
   evidenceV2Keys,
   TASK_V2_MIGRATION_EVIDENCE_ID,
+  TASK_V3_MIGRATION_EVIDENCE_ID,
   resolveActiveTask,
   saveTask,
   saveTaskArtifacts,
@@ -23,7 +24,7 @@ import {
   type Evidence,
   type TaskArtifacts,
   type TaskRecord,
-  type TaskRecordV2,
+  type TaskRecordV3,
 } from "../core/tasks/task.js";
 import { validateEpic, upsertEpic, loadEpicRecord, renderRoadmapMarkdown, type EpicRecord } from "../core/roadmaps/roadmap.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
@@ -33,14 +34,8 @@ import {
   validateContextSelectionSnapshot,
 } from "../core/context/selection-freshness.js";
 import { contextSelectionInput } from "../core/workflow.js";
-import { auditReadyTrace, type ReadyTraceReportV1 } from "../core/tasks/ready-trace.js";
-import {
-  canonicalizePlanningArtifactV1,
-  computeVerificationInputSnapshot,
-  persistNewVerificationInputSnapshots,
-  type VerificationInputSnapshot,
-} from "../core/verification/input-freshness.js";
 import { inspectRequiredChecks, type RequiredCheckState } from "../core/verification/check-report.js";
+import { assertNewEvidenceDigests, computeInputDigest, type InputDigestSnapshot } from "../core/verification/input-digest.js";
 import { compareCodeUnits } from "../utils/order.js";
 import { atomicWriteFile } from "../utils/atomic-write.js";
 import { acquireHarnixFileLock } from "../utils/file-lock.js";
@@ -51,6 +46,7 @@ import {
   isMissing,
   isRecord,
   laterTimestamp,
+  planHasChecklistItem,
   sameBytes,
   semanticJsonEqual,
   semanticTaskEqual,
@@ -103,7 +99,7 @@ async function saveWorkflowLocked(
   if (active && active.id !== candidate.id) throw new Error("Workflow save may update only the active task.");
   if (existing && isAppliedContractRevisionReplay(existing, candidate, envelope.contractRevision)) {
     const artifacts = await prepareWorkflowArtifacts(root, harnixRoot, candidate, envelope.artifacts);
-    if (artifacts) { validateTaskArtifacts(candidate, artifacts); assertValidPlanArtifact(candidate, artifacts); }
+    if (artifacts) validateTaskArtifacts(candidate, artifacts);
     await assertReplayArtifactsMatch(harnixRoot, candidate, artifacts);
     if (active === undefined) await setActiveTask(harnixRoot, candidate.id);
     return existing;
@@ -113,7 +109,7 @@ async function saveWorkflowLocked(
       throw new Error("Workflow save with a missing active pointer requires an exact task replay; select an inactive task through harnix resume.");
     }
     const artifacts = await prepareWorkflowArtifacts(root, harnixRoot, candidate, envelope.artifacts);
-    if (artifacts) { validateTaskArtifacts(candidate, artifacts); assertValidPlanArtifact(candidate, artifacts); }
+    if (artifacts) validateTaskArtifacts(candidate, artifacts);
     await assertReplayArtifactsMatch(harnixRoot, candidate, artifacts);
     await setActiveTask(harnixRoot, candidate.id);
     return existing;
@@ -125,7 +121,7 @@ async function saveWorkflowLocked(
     candidate = preserveObligations(existing, candidate, envelope.contractRevision);
     assertLegalTransition(existing, candidate);
   } else {
-    if (candidate.schemaVersion !== 2) throw new Error("Workflow save requires TaskRecord schema v2 for every new task.");
+    if (candidate.schemaVersion !== 3) throw new Error("Workflow save requires TaskRecord schema v3 for every new task.");
     if (active || candidate.status !== "planning") throw new Error("Workflow save may create only a planning task when no task is active.");
     if (candidate.mode === "full" && !envelope.artifacts) throw new Error("Full tasks require prd.md and plan.md.");
   }
@@ -139,27 +135,22 @@ async function saveWorkflowLocked(
   }
 
   const artifacts = await prepareWorkflowArtifacts(root, harnixRoot, candidate, envelope.artifacts);
-  if (artifacts) { validateTaskArtifacts(candidate, artifacts); assertValidPlanArtifact(candidate, artifacts); }
+  if (artifacts) validateTaskArtifacts(candidate, artifacts);
   const rollbackSnapshot = await captureWorkflowSaveFiles(harnixRoot, candidate, artifacts);
   await assertWorkflowSaveFilesUnchanged(rollbackSnapshot);
   let taskCommitted = false;
   try {
+    if (candidate.schemaVersion === 3) await assertNewEvidenceDigests(root, existing?.evidence ?? [], candidate);
     if (artifacts) await saveTaskArtifacts(harnixRoot, candidate, artifacts);
-    if (candidate.schemaVersion === 2) {
-      await persistNewVerificationInputSnapshots(root, harnixRoot, existing?.evidence ?? [], candidate, {
-        artifacts: { plan: artifacts?.plan, prd: artifacts?.prd },
-      });
-      await recordForwardFileContent(rollbackSnapshot, `tasks/${candidate.id}/verification-inputs.json`);
-    }
     await saveTask(harnixRoot, candidate);
     taskCommitted = true;
 
     // Save any planned roadmap member tasks
     if (envelope.roadmapMembers && envelope.roadmapMembers.length > 0) {
-      const targetEpicId = validatedEpic ? validatedEpic.id : candidate.schemaVersion === 2 ? candidate.epicId : undefined;
+      const targetEpicId = validatedEpic ? validatedEpic.id : candidate.schemaVersion !== 1 ? candidate.epicId : undefined;
       for (const member of envelope.roadmapMembers) {
-        if (member.schemaVersion !== 2 || member.status !== "planning") {
-          throw new Error(`Roadmap member task ${member.id} must be schemaVersion 2 and in planning status.`);
+        if (member.schemaVersion !== 3 || member.status !== "planning") {
+          throw new Error(`Roadmap member task ${member.id} must be schemaVersion 3 and in planning status.`);
         }
         if (targetEpicId && member.epicId !== targetEpicId) {
           throw new Error(`Roadmap member task ${member.id} epicId must match ${targetEpicId}.`);
@@ -174,7 +165,7 @@ async function saveWorkflowLocked(
     }
     // Regenerate markdown if task has epicId matching an existing epic, unless
     // this same save already upserted (and rendered) that exact epic above.
-    if (candidate.schemaVersion === 2 && candidate.epicId !== undefined && candidate.epicId !== validatedEpic?.id) {
+    if (candidate.schemaVersion !== 1 && candidate.epicId !== undefined && candidate.epicId !== validatedEpic?.id) {
       const epicId = candidate.epicId;
       const epic = await loadEpicRecord(root, epicId);
       await renderRoadmapMarkdown(root, epicId, epic);
@@ -251,12 +242,12 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
     schemaVersion: 1,
     envelope: {
       artifacts: "optional { prd?, plan?, design?, research?: { <safe>.md: text }, context? }",
-      contractRevision: "optional { reason: 10-1000 characters }, accepted only at an unchanged replan checkpoint",
+      contractRevision: "optional { reason: 10-1000 characters }, accepted in the save that sets checkpoint replan on an unfinished task and revises unproven obligations",
       epic: "optional EpicRecord schema v1; when present, upserts .harnix/roadmaps/<epic-id>.json and regenerates markdown",
-      roadmapMembers: "optional TaskRecord[] schema v2 in planning state; saved as non-active member tasks with matching epicId",
+      roadmapMembers: "optional TaskRecord[] schema v3 in planning state; saved as non-active member tasks with matching epicId",
       task: "TaskRecord, required",
     },
-    taskRecord: taskRecordFieldManifest(2),
+    taskRecord: taskRecordFieldManifest(3),
     nested: {
       acceptanceCriteria: [...acceptanceCriterionKeys].sort(),
       validationPlan: [...validationCheckV2Keys].sort(),
@@ -289,7 +280,7 @@ function validateEvidenceEnvelope(value: unknown): Evidence {
  * this, a task's roadmap entry would freeze at its last pre-terminal status.
  */
 async function refreshLinkedEpicMarkdown(root: string, task: TaskRecord): Promise<void> {
-  if (task.schemaVersion !== 2 || task.epicId === undefined) return;
+  if (task.schemaVersion === 1 || task.epicId === undefined) return;
   const epic = await loadEpicRecord(root, task.epicId);
   await renderRoadmapMarkdown(root, task.epicId, epic);
 }
@@ -331,10 +322,6 @@ export async function recordLearningWorkflow(root: string, envelope: unknown, no
   return recordWorkflowLearning(harnixRoot, journalRoot, journalPath, config.developer, task, input, now);
 }
 
-function assertValidPlanArtifact(candidate: TaskRecord, artifacts: TaskArtifacts): void {
-  if (candidate.mode === "full" && artifacts.plan !== undefined) canonicalizePlanningArtifactV1(artifacts.plan, "plan");
-}
-
 async function loadExistingTask(harnixRoot: string, id: string): Promise<TaskRecord | undefined> {
   try { return await loadTask(await resolveSafeProjectPath(harnixRoot, `tasks/${id}/task.json`)); }
   catch (error: unknown) { if (isMissing(error)) return undefined; throw error; }
@@ -353,7 +340,6 @@ async function captureWorkflowSaveFiles(harnixRoot: string, task: TaskRecord, ar
   const taskDirectory = `tasks/${task.id}`;
   const relativePaths = new Set<string>([`${taskDirectory}/task.json`]);
   const forwardContent = new Map<string, Uint8Array>([[`${taskDirectory}/task.json`, Buffer.from(`${JSON.stringify(task, null, 2)}\n`)]]);
-  if (task.schemaVersion === 2) relativePaths.add(`${taskDirectory}/verification-inputs.json`);
   if (artifacts !== undefined) {
     if (task.mode === "full") {
       relativePaths.add(`${taskDirectory}/prd.md`);
@@ -423,13 +409,6 @@ async function assertWorkflowSaveFilesUnchanged(snapshots: readonly WorkflowFile
   }
 }
 
-async function recordForwardFileContent(snapshots: WorkflowFileSnapshot[], relativePath: string): Promise<void> {
-  const snapshot = snapshots.find((candidate) => candidate.relativePath === relativePath);
-  if (snapshot === undefined) return;
-  try { snapshot.forward = await readFile(snapshot.path); }
-  catch (error: unknown) { if (!isMissing(error)) throw error; }
-}
-
 function preserveObligations(previous: TaskRecord, next: TaskRecord, revision: WorkflowSaveEnvelope["contractRevision"]): TaskRecord {
   if (!obligationsChanged(previous, next) || previous.schemaVersion !== next.schemaVersion) {
     if (revision !== undefined) throw new Error("Workflow contractRevision is allowed only when obligations change at persisted replan.");
@@ -440,7 +419,7 @@ function preserveObligations(previous: TaskRecord, next: TaskRecord, revision: W
     if (revision !== undefined) throw new Error("Workflow planning obligations do not require contractRevision before first ready.");
     return next;
   }
-  if (previous.schemaVersion === 2 && next.schemaVersion === 2 && previous.checkpoint === "replan" && next.checkpoint === "replan" && previous.status === next.status) {
+  if (previous.schemaVersion === 3 && next.schemaVersion === 3 && next.checkpoint === "replan" && previous.status === next.status) {
     const reason = validateContractRevision(revision);
     preserveProvenObligations(previous, next);
     return appendContractRevisionEvidence(next, reason);
@@ -462,7 +441,7 @@ function preserveObligations(previous: TaskRecord, next: TaskRecord, revision: W
     if (candidate.description !== check.description || candidate.command !== check.command || candidate.scope !== check.scope) {
       throw new Error(`Workflow obligations freeze at ${freezePoint}; cannot mutate required validation check ${check.id}; use persisted replan with contractRevision for v2.`);
     }
-    if (previous.schemaVersion === 2 && next.schemaVersion === 2 && (!semanticJsonEqual(candidate.criterionIds, check.criterionIds) || !semanticJsonEqual(candidate.inputs, check.inputs))) {
+    if (previous.schemaVersion !== 1 && next.schemaVersion !== 1 && (!semanticJsonEqual(candidate.criterionIds, check.criterionIds) || !semanticJsonEqual(candidate.inputs, check.inputs))) {
       throw new Error(`Workflow obligations freeze at ${freezePoint}; cannot mutate required validation check ${check.id}; use persisted replan with contractRevision for v2.`);
     }
   }
@@ -560,12 +539,12 @@ function requiredChecksFromEvidence(task: TaskRecord, now: number): WorkflowPref
 }
 
 function isEditablePlanningDraft(task: TaskRecord): boolean {
-  return task.schemaVersion === 2
-    && !task.evidence.some((evidence) => evidence.id === TASK_V2_MIGRATION_EVIDENCE_ID)
+  return task.schemaVersion !== 1
+    && !task.evidence.some((evidence) => evidence.id === TASK_V2_MIGRATION_EVIDENCE_ID || evidence.id === TASK_V3_MIGRATION_EVIDENCE_ID)
     && (task.status === "planning" || (task.status === "blocked" && task.blocker?.resumeStatus === "planning"));
 }
 
-function preserveProvenObligations(previous: TaskRecordV2, next: TaskRecordV2): void {
+function preserveProvenObligations(previous: TaskRecordV3, next: TaskRecordV3): void {
   const evidencedCheckIds = new Set(previous.evidence.filter((evidence) => evidence.checkId !== undefined).map((evidence) => evidence.checkId!));
   const criteriaMappedByEvidencedChecks = new Set(previous.validationPlan
     .filter((check) => evidencedCheckIds.has(check.id))
@@ -612,8 +591,8 @@ function validateContractRevision(revision: WorkflowSaveEnvelope["contractRevisi
   return reason;
 }
 
-function isAppliedContractRevisionReplay(previous: TaskRecord, candidate: TaskRecord, revision: WorkflowSaveEnvelope["contractRevision"]): previous is TaskRecordV2 {
-  if (previous.schemaVersion !== 2 || candidate.schemaVersion !== 2 || revision === undefined) return false;
+function isAppliedContractRevisionReplay(previous: TaskRecord, candidate: TaskRecord, revision: WorkflowSaveEnvelope["contractRevision"]): previous is TaskRecordV3 {
+  if (previous.schemaVersion !== 3 || candidate.schemaVersion !== 3 || revision === undefined) return false;
   const reason = validateContractRevision(revision);
   if (previous.evidence.length !== candidate.evidence.length + 1) return false;
   if (!semanticJsonEqual(previous.evidence.slice(0, -1), candidate.evidence)) return false;
@@ -674,7 +653,7 @@ async function readOptionalText(path: string): Promise<string | undefined> {
   catch (error: unknown) { if (isMissing(error)) return undefined; throw error; }
 }
 
-function appendContractRevisionEvidence(task: TaskRecordV2, reason: string): TaskRecordV2 {
+function appendContractRevisionEvidence(task: TaskRecordV3, reason: string): TaskRecordV3 {
   let sequence = 1;
   const ids = new Set(task.evidence.map((evidence) => evidence.id));
   while (ids.has(`task-contract-revision-${String(sequence).padStart(2, "0")}`)) sequence += 1;
@@ -687,60 +666,59 @@ function appendContractRevisionEvidence(task: TaskRecordV2, reason: string): Tas
       summary: `Task contract revised at persisted replan: ${reason}`,
       artifactPaths: [`.harnix/tasks/${task.id}/task.json`],
     }],
-  }) as TaskRecordV2;
+  }) as TaskRecordV3;
 }
 
-export async function snapshotWorkflow(root: string, checkId: string): Promise<VerificationInputSnapshot> {
+export async function snapshotWorkflow(root: string, checkId: string): Promise<InputDigestSnapshot> {
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
   if (task === undefined) throw new Error("Workflow verification snapshot requires an active task.");
-  if (task.schemaVersion !== 2) throw new Error("Workflow verification snapshot requires TaskRecord schema v2.");
-  return computeVerificationInputSnapshot(root, task, checkId);
+  if (task.schemaVersion !== 3) throw new Error("Workflow verification snapshot requires TaskRecord schema v3; migrate the task first.");
+  return computeInputDigest(root, task, checkId);
 }
 
-export async function auditWorkflow(root: string): Promise<ReadyTraceReportV1> {
-  const harnixRoot = await resolveSafeHarnixPath(root);
-  const task = await resolveActiveTask(harnixRoot);
-  if (task === undefined || task.mode !== "full") throw new Error("Workflow ready audit requires an active Full task.");
-  const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
-  const [prd, plan] = await Promise.all([
-    readFile(await resolveSafeProjectPath(taskDirectory, "prd.md"), "utf8"),
-    readFile(await resolveSafeProjectPath(taskDirectory, "plan.md"), "utf8"),
-  ]);
-  return auditReadyTrace({ task, prd, plan });
-}
+const MIGRATE_HINT = "Save it once as TaskRecord schema v3 (workflow --save) preserving its criteria, required checks and evidence, then continue.";
 
+/** Legacy v1/v2 records are read-only except for the one-save migration to v3; finished tasks are never rewritten. */
 function assertSchemaEvolution(previous: TaskRecord, next: TaskRecord): void {
-  if (previous.schemaVersion === next.schemaVersion) return;
-  if (previous.schemaVersion === 2) throw new Error("Workflow save cannot downgrade TaskRecord schema.");
-  if (previous.status === "completed" || previous.checkpoint !== "replan" || next.checkpoint !== "replan" || previous.status !== next.status) {
-    throw new Error("TaskRecord v1 to v2 migration is allowed only for an unfinished task at the replan checkpoint.");
+  if (previous.schemaVersion === next.schemaVersion) {
+    if (previous.schemaVersion !== 3 && previous.status !== "completed" && previous.status !== "cancelled") {
+      throw new Error(`Unfinished TaskRecord v${previous.schemaVersion} tasks must migrate before any other change. ${MIGRATE_HINT}`);
+    }
+    return;
+  }
+  if (next.schemaVersion !== 3 || previous.schemaVersion === 3) throw new Error("Workflow save cannot downgrade TaskRecord schema.");
+  if (previous.status === "completed" || previous.status === "cancelled" || previous.status === "blocked" || previous.status !== next.status || previous.checkpoint !== next.checkpoint) {
+    throw new Error("TaskRecord migration to v3 is allowed only for an unfinished, unblocked task and keeps its status and checkpoint.");
   }
   if (!semanticJsonEqual(
     [...previous.acceptanceCriteria].sort((left, right) => compareCodeUnits(left.id, right.id)),
     [...next.acceptanceCriteria].sort((left, right) => compareCodeUnits(left.id, right.id)),
   )) {
-    throw new Error("TaskRecord v1 to v2 migration must preserve acceptance criteria exactly.");
+    throw new Error("TaskRecord migration to v3 must preserve acceptance criteria exactly.");
   }
   const nextChecks = new Map(next.validationPlan.map((check) => [check.id, check]));
   for (const check of previous.validationPlan.filter((candidate) => candidate.required)) {
     const candidate = nextChecks.get(check.id);
+    const sameCoverage = previous.schemaVersion === 1 || semanticJsonEqual(candidate?.criterionIds, (check as { criterionIds?: string[] }).criterionIds);
     if (candidate === undefined
       || candidate.description !== check.description
       || candidate.command !== check.command
       || candidate.scope !== check.scope
-      || candidate.required !== check.required) {
-      throw new Error(`TaskRecord v1 to v2 migration must preserve required validation check ${check.id} exactly.`);
+      || candidate.required !== check.required
+      || !sameCoverage) {
+      throw new Error(`TaskRecord migration to v3 must preserve required validation check ${check.id} exactly.`);
     }
   }
-  const expected = createTaskV2MigrationEvidence(previous.id, next.updatedAt);
+  const expected = createTaskV3MigrationEvidence(previous.id, next.updatedAt);
   if (next.evidence.length !== previous.evidence.length + 1
     || !semanticJsonEqual(next.evidence.slice(0, previous.evidence.length), previous.evidence)
     || !semanticJsonEqual(next.evidence.at(-1), expected)) {
-    throw new Error("TaskRecord v1 to v2 migration requires exact appended migration evidence.");
+    throw new Error("TaskRecord migration to v3 requires exact appended migration evidence.");
   }
 }
 
+/** Ready needs obligations and, for Full, free-form non-empty prd/plan with a checklist; there is no trace grammar. */
 async function assertReadyRequirements(harnixRoot: string, task: TaskRecord, artifacts?: TaskArtifacts): Promise<void> {
   if (task.acceptanceCriteria.length === 0) throw new Error("Workflow ready requires at least one acceptance criterion.");
   if (!task.validationPlan.some((check) => check.required)) throw new Error("Workflow ready requires at least one required validation check.");
@@ -755,7 +733,7 @@ async function assertReadyRequirements(harnixRoot: string, task: TaskRecord, art
       artifacts?.plan ?? readFile(planPath, "utf8"),
     ]);
     if (!prd.trim() || !plan.trim()) throw new Error("Full tasks require non-empty prd.md and plan.md at ready.");
-    if (auditReadyTrace({ task, prd, plan }).status !== "pass") throw new Error("Full task ready trace audit failed; run harnix workflow --audit-ready.");
+    if (!planHasChecklistItem(plan)) throw new Error("Full task plan.md needs at least one checklist item ('- [ ] ...') at ready.");
   } catch (error: unknown) {
     if (isMissing(error)) throw new Error("Full tasks require non-empty prd.md and plan.md at ready.");
     throw error;

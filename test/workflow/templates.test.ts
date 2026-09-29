@@ -166,7 +166,7 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("lowercase hyphen-separated slug");
     expect(workflowTemplate).toContain("implementation checklist");
     expect(workflowTemplate).toContain("at least one criterion and one required validation check");
-    expect(workflowTemplate).toContain("TaskRecord schema v2");
+    expect(workflowTemplate).toContain("TaskRecord schema v3");
     expect(workflowTemplate).toContain("criterionIds");
     expect(workflowTemplate).toContain("@task-contract");
     expect(workflowTemplate).toContain("contextDrift");
@@ -199,7 +199,7 @@ describe("workflow templates", () => {
     expect(workflowTemplate).toContain("Public harnix tasks provides a bounded resilient local task index");
     expect(workflowTemplate).toContain("harnix resume restores only an explicitly selected exact unfinished-task pointer");
     expect(workflowTemplate).toContain("Public harnix context-report explains effective hook-context metadata");
-    expect(workflowTemplate).toContain("harnix status --explain adds required-check freshness with changed inputs plus exact readiness/completion blocker codes and IDs");
+    expect(workflowTemplate).toContain("harnix status --explain adds required-check freshness (digest state and reason codes) plus exact readiness/completion blocker codes and IDs");
     expect(workflowTemplate).toContain("must not invoke repository-map queries, impact, or refreshes");
     expect(workflowTemplate).not.toContain("Increase the package patch version");
     expect(workflowTemplate).not.toContain("update `CHANGELOG.md`");

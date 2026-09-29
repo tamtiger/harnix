@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "../../src/cli-program.js";
 import { initializeProject } from "../../src/commands/init.js";
-import { saveTask, setActiveTask, type TaskRecordV1, type TaskRecordV2 } from "../../src/core/tasks/task.js";
-import { computeVerificationInputSnapshot, persistNewVerificationInputSnapshots } from "../../src/core/verification/input-freshness.js";
+import { saveTask, setActiveTask, type TaskRecordV1, type TaskRecordV3 } from "../../src/core/tasks/task.js";
+import { computeInputDigest } from "../../src/core/verification/input-digest.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const originalCwd = process.cwd();
@@ -38,12 +38,12 @@ describe.sequential("status --explain (checks projection)", () => {
     const raw = output(stdout.mock.calls);
     const result = (JSON.parse(raw) as { explain: { checks: { activeTask: { summary: unknown; checks: Array<{ id: string; state: string; reasonCodes: string[]; changes: unknown[] }> } } } }).explain.checks;
     expect(result).toMatchObject({ generator: "harnix", schemaVersion: 1, scope: "project", filter: { limit: 50 } });
-    expect(result.activeTask.summary).toEqual({ passed: 1, failed: 1, stale: 1, pending: 2, total: 5, returned: 5, resultTruncated: false, detailsTruncated: false });
+    expect(result.activeTask.summary).toEqual({ passed: 0, failed: 1, stale: 2, pending: 2, total: 5, returned: 5, resultTruncated: false, detailsTruncated: false });
     expect(result.activeTask.checks.map(({ id, state, reasonCodes }) => ({ id, state, reasonCodes }))).toEqual([
       { id: "a-failed", state: "failed", reasonCodes: ["latest-failed"] },
-      { id: "b-passed", state: "passed", reasonCodes: [] },
+      { id: "b-passed", state: "stale", reasonCodes: ["legacy-schema"] },
       { id: "c-skipped", state: "pending", reasonCodes: ["latest-skipped"] },
-      { id: "m-expired", state: "stale", reasonCodes: ["evidence-expired"] },
+      { id: "m-expired", state: "stale", reasonCodes: ["legacy-schema"] },
       { id: "z-pending", state: "pending", reasonCodes: ["no-evidence"] },
     ]);
     expect(result.activeTask.checks.every((check) => check.changes.length === 0)).toBe(true);
@@ -56,19 +56,18 @@ describe.sequential("status --explain (checks projection)", () => {
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
 
-  it("explains v2 changed inputs from immutable snapshots without running or writing", async () => {
+  it("reports a v3 digest mismatch after an input changes without running or writing", async () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });
     await writeFile(join(root, "input.ts"), "export const value = 1;\n");
     const harnixRoot = join(root, ".harnix");
-    const base = v2Task();
-    const snapshot = await computeVerificationInputSnapshot(root, base, "gate");
-    const task: TaskRecordV2 = {
+    const base = v3Task();
+    const snapshot = await computeInputDigest(root, base, "gate");
+    const task: TaskRecordV3 = {
       ...base,
       evidence: [{ id: "e-pass", checkId: "gate", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", exitCode: 0, summary: "PRIVATE_EVIDENCE_CANARY", artifactPaths: [], inputDigest: snapshot.inputDigest }],
     };
     await saveTask(harnixRoot, task);
-    await persistNewVerificationInputSnapshots(root, harnixRoot, [], task);
     await setActiveTask(harnixRoot, task.id);
     await writeFile(join(root, "input.ts"), "export const value = 2;\n");
     process.chdir(root);
@@ -85,9 +84,9 @@ describe.sequential("status --explain (checks projection)", () => {
         checks: [{
           id: "gate",
           state: "stale",
-          reasonCodes: ["inputs-changed"],
-          changeSummary: { changed: 1, missing: 0, returned: 1, truncated: false },
-          changes: [{ path: "input.ts", kind: "changed" }],
+          reasonCodes: ["digest-mismatch"],
+          changeSummary: { changed: 0, missing: 0, returned: 0, truncated: false },
+          changes: [],
         }],
       },
     });
@@ -166,12 +165,12 @@ function v1Task(): TaskRecordV1 {
   };
 }
 
-function v2Task(): TaskRecordV2 {
+function v3Task(): TaskRecordV3 {
   const timestamp = "2026-08-26T00:00:00.000Z";
   return {
     generator: "harnix",
-    schemaVersion: 2,
-    id: "20260826-162001-checks-v2",
+    schemaVersion: 3,
+    id: "20260826-162001-checks-v3",
     title: "PRIVATE_TITLE_CANARY",
     mode: "lite",
     status: "verifying",
@@ -181,7 +180,7 @@ function v2Task(): TaskRecordV2 {
     acceptanceCriteria: [{ id: "criterion", text: "private", status: "pending", evidenceIds: [] }],
     relevantPaths: ["input.ts"],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "PRIVATE_CHECK_CANARY", command: "PRIVATE_COMMAND_CANARY", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract", "input.ts"] }],
+    validationPlan: [{ id: "gate", description: "PRIVATE_CHECK_CANARY", command: "PRIVATE_COMMAND_CANARY", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["input.ts"] }],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,

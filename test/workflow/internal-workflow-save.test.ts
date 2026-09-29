@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { cancelWorkflow, finishWorkflow, saveWorkflow } from "../../src/commands/internal-workflow.js";
 import { initializeProject } from "../../src/commands/init.js";
 import { saveTask, setActiveTask } from "../../src/core/tasks/task.js";
-import type { TaskRecord, TaskRecordV1, TaskRecordV2 } from "../../src/core/tasks/task.js";
+import type { TaskRecord, TaskRecordV1, TaskRecordV3 } from "../../src/core/tasks/task.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -15,7 +15,7 @@ describe("hidden workflow save epic envelope", () => {
   it("upserts an epic record and generates markdown when the epic field is present", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const planning = taskV2("planning", "planning");
+    const planning = taskV3("planning", "planning");
 
     const epic = {
       generator: "harnix" as const,
@@ -40,7 +40,7 @@ describe("hidden workflow save epic envelope", () => {
   it("refreshes markdown when saving a task whose epicId matches an existing epic without resending epic", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const planning = taskV2("planning", "planning");
+    const planning = taskV3("planning", "planning");
 
     const epic = {
       generator: "harnix" as const,
@@ -68,7 +68,7 @@ describe("hidden workflow save epic envelope", () => {
   it("preserves prior save behavior exactly when no epic or epicId is present (regression)", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const planning = taskV2("planning", "planning");
+    const planning = taskV3("planning", "planning");
 
     const result = await saveWorkflow(root, { task: planning });
 
@@ -81,12 +81,12 @@ describe("hidden workflow save epic envelope", () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
     const epic = { generator: "harnix" as const, schemaVersion: 1 as const, id: "finish-epic", title: "Finish epic title", goal: "Finish epic goal", createdAt: timestamp, updatedAt: timestamp };
-    await saveWorkflow(root, { task: taskV2("planning", "planning"), epic });
+    await saveWorkflow(root, { task: taskV3("planning", "planning"), epic });
 
     const completedAt = "2026-08-13T00:05:00.000Z";
     const completionEvidence = { id: "e", checkId: "check", recordedAt: completedAt, result: "pass" as const, exitCode: 0, summary: "verified", artifactPaths: [], inputDigest: "a".repeat(64) };
-    const completedTask: TaskRecordV2 = {
-      ...taskV2("completed", "finishing"),
+    const completedTask: TaskRecordV3 = {
+      ...taskV3("completed", "finishing"),
       epicId: "finish-epic",
       acceptanceCriteria: [{ id: "a", text: "done", status: "met", evidenceIds: [completionEvidence.id] }],
       evidence: [completionEvidence],
@@ -110,7 +110,7 @@ describe("hidden workflow save epic envelope", () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
     const epic = { generator: "harnix" as const, schemaVersion: 1 as const, id: "cancel-epic", title: "Cancel epic title", goal: "Cancel epic goal", createdAt: timestamp, updatedAt: timestamp };
-    await saveWorkflow(root, { task: { ...taskV2("planning", "planning"), epicId: "cancel-epic" }, epic });
+    await saveWorkflow(root, { task: { ...taskV3("planning", "planning"), epicId: "cancel-epic" }, epic });
 
     await expect(cancelWorkflow(root, { reason: "no longer needed", authorizedBy: "user" }, "2026-08-13T00:05:00.000Z")).resolves.toMatchObject({ status: "cancelled" });
 
@@ -123,7 +123,7 @@ describe("hidden workflow save epic envelope", () => {
   it("leaves finish/cancel behavior unaffected when the task has no epicId (regression)", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const planning = taskV2("planning", "planning");
+    const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
 
     await expect(cancelWorkflow(root, { reason: "no longer needed", authorizedBy: "user" }, "2026-08-13T00:01:00.000Z")).resolves.toMatchObject({ status: "cancelled" });
@@ -133,8 +133,8 @@ describe("hidden workflow save epic envelope", () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
     const epic = { generator: "harnix" as const, schemaVersion: 1 as const, id: "batch-epic", title: "Batch epic title", goal: "Batch epic goal", createdAt: timestamp, updatedAt: timestamp };
-    const member1 = { ...taskV2("planning", "planning"), id: "20260813-120000-member-1", title: "Member 1", goal: "Goal 1", epicId: "batch-epic" };
-    const member2 = { ...taskV2("planning", "planning"), id: "20260813-120001-member-2", title: "Member 2", goal: "Goal 2", epicId: "batch-epic" };
+    const member1 = { ...taskV3("planning", "planning"), id: "20260813-120000-member-1", title: "Member 1", goal: "Goal 1", epicId: "batch-epic" };
+    const member2 = { ...taskV3("planning", "planning"), id: "20260813-120001-member-2", title: "Member 2", goal: "Goal 2", epicId: "batch-epic" };
 
     await saveWorkflow(root, {
       task: member1,
@@ -154,10 +154,10 @@ function task(status: TaskRecord["status"], checkpoint: TaskRecord["checkpoint"]
   return { generator: "harnix", schemaVersion: 1, id: "20260813-120000-workflow", title: "workflow", mode: "lite", status, checkpoint, goal: "test", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [{ id: "check", description: "verify", command: "pnpm test", scope: "full", required: true }], evidence: [], createdAt: timestamp, updatedAt: timestamp };
 }
 
-function taskV2(status: TaskRecord["status"], checkpoint: TaskRecord["checkpoint"], inputs = ["@task-contract", "src/**/*.ts"]): TaskRecordV2 {
+function taskV3(status: TaskRecord["status"], checkpoint: TaskRecord["checkpoint"], inputs = ["src/**/*.ts"]): TaskRecordV3 {
   return {
     ...task(status, checkpoint),
-    schemaVersion: 2 as const,
+    schemaVersion: 3 as const,
     validationPlan: [{ id: "check", description: "Run tests", command: "pnpm test", scope: "full" as const, required: true, criterionIds: ["a"], inputs }],
     evidence: [],
   };

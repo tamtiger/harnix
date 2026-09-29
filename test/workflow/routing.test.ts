@@ -1,15 +1,25 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { cancelWorkflowTask, canCompleteTask, continueWorkflowTask, evidenceSupportsScope, finishWorkflowTask, implementationStrategy, isWithinRequestedScope, nextWorkflowStatus, routeWorkflow, shouldReassessArchitecture, shouldResearch, validateFullReadyArtifact, verificationRetryDisposition, verificationStages } from "../../src/core/workflow.js";
 import { appendJournal } from "../../src/core/journal/journal.js";
 import { loadTask, resolveActiveTask, saveTask, setActiveTask, transitionTask } from "../../src/core/tasks/task.js";
-import type { TaskRecord, TaskRecordV2 } from "../../src/core/tasks/task.js";
+import type { TaskRecord, TaskRecordV2, TaskRecordV3 } from "../../src/core/tasks/task.js";
+import { computeInputDigest } from "../../src/core/verification/input-digest.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
 function task(evidenceAt: string, scope: "focused" | "full" = "full"): TaskRecord { return { generator: "harnix", schemaVersion: 1, id: "20260807-120000-task", title: "t", mode: "lite", status: "verifying", checkpoint: "finishing", goal: "t", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "met", evidenceIds: ["e"] }], relevantPaths: [], relevantSpecs: [], validationPlan: [{ id: "check", description: "verify", scope, required: true }], evidence: [{ id: "e", checkId: "check", recordedAt: evidenceAt, result: "pass", summary: "ok", artifactPaths: [] }], createdAt: "2026-08-07T00:00:00.000Z", updatedAt: "2026-08-07T00:00:00.000Z" }; }
+/** A v3 verifying/finishing task whose passing evidence carries the real digest of a file in `root`. */
+async function finishingTask(root: string, evidenceAt: string): Promise<TaskRecordV3> {
+  await mkdir(join(root, "src"), { recursive: true });
+  await writeFile(join(root, "src", "a.ts"), "export {};\n");
+  const base: TaskRecordV3 = { generator: "harnix", schemaVersion: 3, id: "20260807-120000-task", title: "t", mode: "lite", status: "verifying", checkpoint: "finishing", goal: "t", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "met", evidenceIds: ["e"] }], relevantPaths: [], relevantSpecs: [], validationPlan: [{ id: "check", description: "verify", command: "pnpm test", scope: "full", required: true, criterionIds: ["a"], inputs: ["src/**"] }], evidence: [], createdAt: "2026-08-07T00:00:00.000Z", updatedAt: "2026-08-07T00:00:00.000Z" };
+  const inputDigest = (await computeInputDigest(root, base, "check")).inputDigest;
+  return { ...base, evidence: [{ id: "e", checkId: "check", recordedAt: evidenceAt, result: "pass", exitCode: 0, summary: "ok", artifactPaths: [], inputDigest }] };
+}
+
 describe("workflow routing and completion evidence", () => {
   it("routes action, work kind, risk, and active state deterministically", () => {
     expect(routeWorkflow({ action: "review", workKind: "refactor", mutation: "none", riskSignals: [] })).toMatchObject({ entry: "bypass", owner: "harnix-check", reasonCodes: ["standalone-review"] });
@@ -169,7 +179,7 @@ describe("workflow routing and completion evidence", () => {
     expect(nextWorkflowStatus("plan", true)).toBe("ready"); expect(nextWorkflowStatus("implement", true)).toBe("in_progress"); expect(nextWorkflowStatus("fix", false)).toBe("planning"); expect(validateFullReadyArtifact({ acceptanceCriteria: ["a"], materialUnknownDecision: "not needed", plan: "step" })).toBe(true); expect(validateFullReadyArtifact({ acceptanceCriteria: [], materialUnknownDecision: "x", plan: "x" })).toBe(false);
   });
   it("finishes only verified tasks and journals evidence without Git work", async () => {
-    const root = await temporaryRepository(); const current = new Date().toISOString(); const ready = task(current);
+    const root = await temporaryRepository(); const current = new Date().toISOString(); const ready = await finishingTask(root, current);
     await saveTask(root, ready); await setActiveTask(root, ready.id); const finished = await finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", ready, current, {
       searchJournal: async () => { throw new Error("normal completion must not scan the journal"); },
     });
@@ -183,7 +193,7 @@ describe("workflow routing and completion evidence", () => {
     await expect(finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", verifying, current)).rejects.toThrow("finishing checkpoint");
   });
   it("should_persist_completion_and_retain_active_pointer_when_archiving_fails", async () => {
-    const root = await temporaryRepository(); const current = new Date().toISOString(); const verifying = task(current); const calls: string[] = [];
+    const root = await temporaryRepository(); const current = new Date().toISOString(); const verifying = await finishingTask(root, current); const calls: string[] = [];
     await saveTask(root, verifying); await setActiveTask(root, verifying.id);
 
     await expect(finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", verifying, current, {
@@ -245,7 +255,7 @@ describe("workflow routing and completion evidence", () => {
     expect(entries.filter((entry) => entry.id === `${active.id}-cancellation`)).toHaveLength(1);
   });
   it("should_retain_verifying_task_and_active_pointer_when_completion_persistence_fails", async () => {
-    const root = await temporaryRepository(); const current = new Date().toISOString(); const verifying = task(current); const calls: string[] = [];
+    const root = await temporaryRepository(); const current = new Date().toISOString(); const verifying = await finishingTask(root, current); const calls: string[] = [];
     await saveTask(root, verifying); await setActiveTask(root, verifying.id);
 
     await expect(finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", verifying, current, {
@@ -259,7 +269,7 @@ describe("workflow routing and completion evidence", () => {
     expect((await resolveActiveTask(root))?.id).toBe(verifying.id);
   });
   it("should_retain_active_pointer_when_completion_journal_write_fails", async () => {
-    const root = await temporaryRepository(); const current = new Date().toISOString(); const verifying = task(current); const calls: string[] = [];
+    const root = await temporaryRepository(); const current = new Date().toISOString(); const verifying = await finishingTask(root, current); const calls: string[] = [];
     await saveTask(root, verifying); await setActiveTask(root, verifying.id);
 
     await expect(finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", verifying, current, {
@@ -278,7 +288,7 @@ describe("workflow routing and completion evidence", () => {
     expect(canCompleteTask(current, Date.parse("2026-08-07T10:00:00Z"))).toBe(false);
   });
   it("journals only criterion-supporting and latest required passing evidence", async () => {
-    const root = await temporaryRepository(); const current = new Date().toISOString(); const ready = task(current);
+    const root = await temporaryRepository(); const current = new Date().toISOString(); const ready = await finishingTask(root, current);
     ready.evidence.push({ id: "old-failure", checkId: "check", recordedAt: new Date(Date.parse(current) - 60_000).toISOString(), result: "fail", exitCode: 1, summary: "old failure", artifactPaths: [] });
     await saveTask(root, ready); await setActiveTask(root, ready.id);
     await finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", ready, current);

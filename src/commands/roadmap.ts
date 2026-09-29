@@ -123,7 +123,7 @@ async function countEpicMembers(root: string, epicId: string): Promise<{ total: 
     for (const taskId of taskIds) {
       try {
         const task = await loadTask(join(tasksDir, taskId, "task.json"));
-        if (task.schemaVersion === 2 && task.epicId === epicId) {
+        if (task.schemaVersion !== 1 && task.epicId === epicId) {
           total++;
           if (task.status === "completed") completed++;
           else if (task.status === "cancelled") cancelled++;
@@ -154,7 +154,7 @@ async function loadEpicMembers(root: string, epicId: string): Promise<RoadmapTas
     for (const taskId of taskIds) {
       try {
         const task = await loadTask(join(tasksDir, taskId, "task.json"));
-        if (task.schemaVersion === 2 && task.epicId === epicId) {
+        if (task.schemaVersion !== 1 && task.epicId === epicId) {
           members.push({
             id: taskId,
             status: task.status,

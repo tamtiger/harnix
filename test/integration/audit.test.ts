@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "../../src/cli-program.js";
 import { initializeProject } from "../../src/commands/init.js";
-import { saveTask, saveTaskWithArtifacts, setActiveTask, type TaskRecordV2 } from "../../src/core/tasks/task.js";
-import { computeVerificationInputSnapshot, persistNewVerificationInputSnapshots } from "../../src/core/verification/input-freshness.js";
+import { saveTask, saveTaskWithArtifacts, setActiveTask, type TaskRecordV3 } from "../../src/core/tasks/task.js";
+import { computeInputDigest } from "../../src/core/verification/input-digest.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const originalCwd = process.cwd();
@@ -41,7 +41,7 @@ describe.sequential("status --explain (audit projection)", () => {
     const harnixRoot = join(root, ".harnix");
     await saveTaskWithArtifacts(harnixRoot, task, {
       prd: "# PRD\n### AC `criterion`\nDone.\n",
-      plan: "# Plan\n- [ ] `SLICE` — implement\n### Slice `SLICE`\nCriteria: `criterion`\nChecks: `gate`\nPaths: `src/a.ts`\n",
+      plan: "# Plan\n- [ ] Triển khai\n",
     });
     await setActiveTask(harnixRoot, task.id);
     const nested = join(root, "packages", "app");
@@ -76,14 +76,14 @@ describe.sequential("status --explain (audit projection)", () => {
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
 
-  it("uses current v2 input freshness without executing or mutating checks", async () => {
+  it("uses current v3 input freshness without executing or mutating checks", async () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });
     await writeFile(join(root, "input.ts"), "export const value = 1;\n");
     const current = Date.parse("2026-08-26T01:00:00.000Z");
     const base = digestTask();
-    const snapshot = await computeVerificationInputSnapshot(root, base, "gate");
-    const task: TaskRecordV2 = {
+    const snapshot = await computeInputDigest(root, base, "gate");
+    const task: TaskRecordV3 = {
       ...base,
       acceptanceCriteria: [{ ...base.acceptanceCriteria[0]!, status: "met", evidenceIds: ["e-pass"] }],
       evidence: [{
@@ -99,7 +99,6 @@ describe.sequential("status --explain (audit projection)", () => {
     };
     const harnixRoot = join(root, ".harnix");
     await saveTask(harnixRoot, task);
-    await persistNewVerificationInputSnapshots(root, harnixRoot, [], task);
     await setActiveTask(harnixRoot, task.id);
     process.chdir(root);
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
@@ -127,10 +126,10 @@ describe.sequential("status --explain (audit projection)", () => {
   });
 });
 
-function fullTask(): TaskRecordV2 {
+function fullTask(): TaskRecordV3 {
   return {
     generator: "harnix",
-    schemaVersion: 2,
+    schemaVersion: 3,
     id: "20260826-120000-full-audit",
     title: "PRIVATE_TITLE_CANARY",
     mode: "full",
@@ -141,14 +140,14 @@ function fullTask(): TaskRecordV2 {
     acceptanceCriteria: [{ id: "criterion", text: "PRIVATE_CRITERION_CANARY", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "PRIVATE_CHECK_CANARY", command: "PRIVATE_COMMAND_CANARY", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract", "src/**/*.ts"] }],
+    validationPlan: [{ id: "gate", description: "PRIVATE_CHECK_CANARY", command: "PRIVATE_COMMAND_CANARY", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["src/**/*.ts"] }],
     evidence: [],
     createdAt: "2026-08-26T00:00:00.000Z",
     updatedAt: "2026-08-26T00:30:00.000Z",
   };
 }
 
-function digestTask(): TaskRecordV2 {
+function digestTask(): TaskRecordV3 {
   return {
     ...fullTask(),
     id: "20260826-120001-digest-audit",
@@ -156,7 +155,7 @@ function digestTask(): TaskRecordV2 {
     status: "verifying",
     checkpoint: "verifying",
     relevantPaths: ["input.ts"],
-    validationPlan: [{ id: "gate", description: "verify input", command: "pnpm test", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract", "input.ts"] }],
+    validationPlan: [{ id: "gate", description: "verify input", command: "pnpm test", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["input.ts"] }],
   };
 }
 

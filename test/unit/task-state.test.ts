@@ -82,7 +82,7 @@ describe("task state", () => {
   });
 
   it("rejects future schema and malformed task records", () => {
-    expect(() => validateTask({ ...taskFixture(), schemaVersion: 3 })).toThrow("unsupported");
+    expect(() => validateTask({ ...taskFixture(), schemaVersion: 4 })).toThrow("unsupported");
     expect(() => validateTask({ ...taskFixture(), checkpoint: "unknown" })).toThrow("invalid");
   });
 

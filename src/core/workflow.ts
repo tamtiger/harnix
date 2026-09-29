@@ -13,7 +13,7 @@ import { archiveTask, cancelTask, loadTask, saveTask, selectLatestEvidence, tran
 import { resolveActiveTask } from "./tasks/task.js";
 import { resolveSafeProjectPath } from "../utils/paths.js";
 import { compareCodeUnits } from "../utils/order.js";
-import { assertVerificationInputsFresh } from "./verification/input-freshness.js";
+import { assertInputDigestsFresh } from "./verification/input-digest.js";
 
 export type WorkflowEntry = "bypass" | "create" | "resume" | "wait" | "fail-closed";
 export type WorkflowAction = "inspect" | "plan" | "change" | "review" | "research" | "verify";
@@ -245,10 +245,9 @@ function completionEvidenceIds(task: TaskRecord): string[] {
 }
 async function assertTaskReadyForFinishing(harnixRoot: string, task: TaskRecord, now: string): Promise<void> {
   if (task.status !== "verifying" || task.checkpoint !== "finishing") throw new Error("Workflow learning capture requires an active verifying/finishing task.");
-  if (task.schemaVersion === 2) {
-    const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
-    await assertVerificationInputsFresh(projectRoot, harnixRoot, task);
-  }
+  if (task.schemaVersion !== 3) throw new Error(`Unfinished TaskRecord v${task.schemaVersion} tasks must migrate to schema v3 before finishing.`);
+  const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
+  await assertInputDigestsFresh(projectRoot, task);
   if (!canCompleteTask(task, Date.parse(now))) throw new Error("Task requires fresh complete verification before finishing.");
 }
 

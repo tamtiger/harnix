@@ -126,7 +126,7 @@ Nghiên cứu task `20260814-081624-harness-capability-research` đã đối chi
 
 - **C1 — context drift:** hidden inspect/continue luôn project `contextDrift`; hash thay đổi, file thiếu, unreadable và manifest entry không có hash được phân loại xác định. `stale` chỉ route qua persisted `replan` và context reselection, không tự sửa source/manifest.
 - **C2 — TaskRecord v2:** required checks sở hữu `criterionIds`/`inputs`; completion đòi criterion-linked evidence giao đúng declared check. V1 vẫn đọc nguyên semantics; completed v1 byte-preserved, unfinished v1 chỉ explicit migrate tại `replan` với deterministic migration evidence. Doctor chỉ báo `legacy-task-schema`.
-- **C3 — input freshness:** `@task-contract`, Full PRD/plan và safe repository globs tạo canonical SHA-256 `inputDigest`. Hidden snapshot chạy trước/sau check; save recompute để phát hiện race và ghi immutable relative-path/hash sidecar; finish recompute để chặn changed/missing/unreadable/unsafe input. Không persist source body, secret, absolute path, prompt, environment hay command output.
+- **C3 — input freshness:** (v3, supersedes the v2 sidecar design) task contract và safe repository globs tạo canonical SHA-256 `inputDigest` lưu inline trong evidence, không còn sidecar. Hidden snapshot chạy trước/sau check; save recompute để phát hiện race; finish recompute để chặn changed/missing/unreadable/unsafe input. Không persist source body, secret, absolute path, prompt, environment hay command output.
 
 Thiết kế sidecar task-owned được chọn thay vì watcher/daemon vì giữ workflow local, deterministic, no-network và cho diagnostic path-level mà không nhét per-file hash vào evidence công khai. Timestamp-only freshness bị thay thế cho TaskRecord v2; pre-migration v1 evidence vẫn bảo toàn nhưng không chứng minh completion v2.
 
@@ -137,7 +137,7 @@ Research task `20260818-140304-harness-capability-landscape` compared current ag
 | Capability | Decision | Harnix adaptation | Rejected expansion |
 |---|---|---|---|
 | Context selection-basis freshness | `adapt` | Task-owned hash-only sidecar binds task/config/guide/selector/cache inputs and selected-result metadata; inspect reports deterministic `selectionChanges` | ContextManifest v2, watcher, auto-refresh, hook-time repo-map I/O |
-| Deterministic ready trace | `adapt` | Bounded line parser proves PRD criterion ↔ plan slice ↔ required check/safe path and gates Full readiness | LLM judge, arbitrary Markdown execution, Lite ceremony, historical rewrite |
+| Deterministic ready trace (retired in TaskRecord v3) | `adapt` | Formerly a bounded line parser for PRD criterion ↔ plan slice ↔ check/path; Full readiness is now non-empty prd/plan + a plan checklist item | LLM judge, arbitrary Markdown execution, Lite ceremony, historical rewrite |
 | Untrusted learning promotion guard | `adapt` | Exact hash + sorted provenance/risk categories; statement is JSON-string review data inside a fixed boundary; Doctor warning is redacted/no-fix | Semantic malware claim, auto-promotion, spec/journal rewrite, URL/command execution |
 | Dependency-aware repo-map ranking | `adapt` | Safe relative import resolver and bounded two-hop in-memory graph add capped bonuses; cache/public schema stay v1 and lexical ranker v1 remains rollback | AST server, embedding/vector DB, persisted graph, runtime scan/network |
 

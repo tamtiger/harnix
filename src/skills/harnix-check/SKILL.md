@@ -57,7 +57,7 @@ For non-command checks, record what was inspected, the exact scope, time, result
 
 Public `harnix status --explain` may be used as a bounded preflight view of required-check freshness plus readiness/completion blocker codes and IDs. Its result never substitutes for reading the governing artifacts, running a declared check, capturing pre/post input snapshots, or recording fresh evidence; audit does not execute or fix anything.
 
-For each TaskRecord schema v2 required check, capture `harnix workflow --snapshot --check <id>` immediately before the non-mutating check and again after its complete output is read. Persist a passing evidence item only when the two snapshots have the same `inputDigest`, and attach that digest to the evidence. A mismatch, empty glob, missing input, unreadable input, or unsafe path is failed freshness evidence, not a warning to ignore.
+For each TaskRecord schema v3 required check, capture `harnix workflow --snapshot --check <id>` immediately before the non-mutating check and again after its complete output is read. Persist a passing evidence item only when the two snapshots have the same `inputDigest`, and attach that digest to the evidence. A mismatch, empty glob, missing input, unreadable input, or unsafe path is failed freshness evidence, not a warning to ignore.
 
 ## Convergence rule
 
@@ -119,7 +119,7 @@ When fixes are authorized through an active task, batch confirmed blockers and r
 
 ## Persist
 
-For every newly executed check, record timestamp, command or inspection, scope, exit/result, and outcome. Required v2 passes carry the validated `inputDigest`; a stable failed run carries it when the snapshot was available, while an empty/missing/unreadable input failure remains persistable without inventing a digest. Append that evidence and every verification checkpoint through a bounded JSON envelope on stdin to `harnix workflow --save`; start from `harnix workflow --inspect` output and never edit `task.json` directly. Keep failed evidence; do not overwrite history with a passing rerun. Link acceptance criteria only to current passing evidence whose declared `criterionIds` contains that criterion. Remain `verifying` while any required item is failed, missing, stale, or unread.
+For every newly executed check, record timestamp, command or inspection, scope, exit/result, and outcome. Required v3 passes carry the validated `inputDigest` and the command's exit code; a stable failed run carries it when the snapshot was available, while an empty/missing/unreadable input failure remains persistable without inventing a digest. Append that evidence and every verification checkpoint through a bounded JSON envelope on stdin to `harnix workflow --save`; start from `harnix workflow --inspect` output and never edit `task.json` directly. Keep failed evidence; do not overwrite history with a passing rerun. Link acceptance criteria only to current passing evidence whose declared `criterionIds` contains that criterion. Remain `verifying` while any required item is failed, missing, stale, or unread.
 
 ## Exit
 

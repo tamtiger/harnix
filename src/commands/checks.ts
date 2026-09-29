@@ -7,8 +7,8 @@ import {
   type RequiredCheckInspection,
   type RequiredCheckReasonCode,
   type RequiredCheckState,
+  type VerificationInputChange,
 } from "../core/verification/check-report.js";
-import type { VerificationInputChange } from "../core/verification/input-freshness.js";
 import { resolveActiveTask, TaskValidationError } from "../core/tasks/task.js";
 import { compareCodeUnits } from "../utils/order.js";
 import { findInitializedProject } from "../utils/project-discovery.js";

@@ -27,7 +27,7 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "Do not mark the task `ready`",
     "stale context",
     "context reselection",
-    "TaskRecord schema v2",
+    "TaskRecord schema v3",
     "criterionIds",
     "@task-contract",
     "context checkpoint",
@@ -86,7 +86,7 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "Never commit",
     "residual risks",
     "product-read-only",
-    "verification-inputs.json",
+    "recomputes the digest of every latest required pass",
     "harnix workflow --finish",
     "cancelled/cancelling",
     "harnix workflow --cancel",
@@ -100,7 +100,7 @@ const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = 
     "checkpoint `replan`",
     "reselect context",
     "legacy-task-schema",
-    "v1 to v2 migration",
+    "migration save to schema v3",
     "harnix workflow --inspect",
     "harnix workflow --save",
     "cancelled/cancelling",
@@ -209,7 +209,7 @@ describe("canonical Harnix workflow skill sources", () => {
     expect(finish).toContain("does not meet the threshold");
     expect(finish).not.toContain("write the task `status` as `completed`");
     expect(continuation).toContain("Blocked state takes precedence over its checkpoint");
-    expect(continuation).toContain("audited guarded re-entry");
+    expect(continuation).toContain("guarded re-entry");
     expect(continuation).toContain("Read only that owner skill, separately through EOF");
   });
 
@@ -248,8 +248,8 @@ describe("canonical Harnix workflow skill sources", () => {
     expect(continuation).toContain("explicit Harnix-task status request");
     expect(continuation.indexOf("Classify the latest request")).toBeLessThan(continuation.indexOf("read `.harnix/workflow.md` after this classification"));
     expect(continuation).toContain("same drift");
-    expect(brainstorm).toContain("inert `check:<id>=pending|passed|failed|skipped[@<ISO-Z>]`");
-    expect(implement).toContain("inert `check:<id>=pending|passed|failed|skipped[@<ISO-Z>]`");
+    expect(brainstorm).not.toContain("execution-notes");
+    expect(implement).not.toContain("execution-note");
     expect(research).toContain("no new source or evidence");
   });
 });

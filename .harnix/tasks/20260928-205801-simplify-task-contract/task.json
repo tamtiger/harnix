@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205801-simplify-task-contract",
   "title": "[03] Đơn giản hóa hợp đồng task và evidence",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Thay TaskRecord v2 + sidecar verification-inputs + contractRevision 5 bước + ready-trace grammar + execution-notes grammar bằng record gọn: checks có criterionIds, evidence có exit code và digest tùy chọn nội tuyến, replan một bước có reason; v1/v2 chỉ đọc qua adapter; Lite không cần prd/plan. Harness không tự chạy lệnh (không thêm process runner). Không tách module code (thuộc restructure-code).",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -15,63 +15,164 @@
   ],
   "acceptanceCriteria": [
     {
-      "id": "ac-schema",
-      "text": "Schema mới được đóng băng trong docs và validator; hidden --save chấp nhận nó.",
-      "status": "pending",
-      "evidenceIds": []
-    },
-    {
-      "id": "ac-no-sidecar",
-      "text": "Task mới không tạo verification-inputs.json; churn .harnix của một task mẫu ≤ 200 dòng.",
-      "status": "pending",
-      "evidenceIds": []
+      "id": "ac-docs-sync",
+      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN, README, skill, template và AGENTS.md phản ánh đúng schema v3 trong cùng task; managed output được sinh lại bằng harnix update.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-sync",
+        "ev-check-suite"
+      ]
     },
     {
       "id": "ac-legacy-read",
-      "text": "69 task lịch sử (v1 và v2) vẫn đọc được bởi status/tasks/roadmap.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "69 task lịch sử (v1 và v2) vẫn được validateTask chấp nhận và được status, tasks, roadmap đọc bình thường.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-legacy-read"
+      ]
+    },
+    {
+      "id": "ac-migrate-unfinished",
+      "text": "Task v1/v2 chưa hoàn tất nâng lên v3 bằng một lần save bảo toàn tiêu chí, nghĩa vụ bắt buộc và evidence; mọi save khác lên task cũ bị từ chối kèm hướng dẫn migrate.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-save-flow"
+      ]
     },
     {
       "id": "ac-no-execution-notes",
-      "text": "Execution-notes grammar được gỡ khỏi validator, skill và docs; plan.md cũ có vùng execution-notes vẫn đọc được.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Execution-notes grammar, ready-trace grammar và --audit-ready được gỡ khỏi validator, skill và docs; plan.md cũ có vùng execution-notes vẫn lưu và đọc được như văn bản tự do.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-save-flow"
+      ]
     },
     {
-      "id": "ac-docs-sync",
-      "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "id": "ac-no-sidecar",
+      "text": "Task mới không tạo verification-inputs.json; một vòng đời mẫu (planning, ready, evidence, finish) ghi tổng cộng ≤ 200 dòng dưới .harnix/tasks/<id>/.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-contract-unit"
+      ]
+    },
+    {
+      "id": "ac-replan-one-step",
+      "text": "Một lần --save đặt checkpoint replan cùng contractRevision.reason sửa được nghĩa vụ chưa được chứng minh; nghĩa vụ đã có pass vẫn bất biến; sau đó chỉ cần một --save ready/ready, không có bước audit riêng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-save-flow"
+      ]
+    },
+    {
+      "id": "ac-schema",
+      "text": "Schema v3 được đóng băng trong docs và validator; workflow --save chấp nhận task v3 hợp lệ và từ chối task mới ở schema cũ; workflow --schema mô tả đúng v3.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-contract-unit"
+      ]
     }
   ],
   "relevantPaths": [
+    "src/cli-program.ts",
+    "src/commands/internal-workflow.ts",
     "src/core/tasks/**",
     "src/core/verification/**",
-    "src/commands/internal-workflow.ts",
-    "src/core/workflow.ts"
+    "src/core/workflow.ts",
+    "test/unit/**",
+    "test/workflow/**"
   ],
   "relevantSpecs": [
+    "AGENTS.md",
     "docs/HARNIX_PRD.md",
     "docs/HARNIX_WORKFLOW.md",
-    "docs/IMPLEMENTATION_PLAN.md"
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/OVERHAUL_DECISIONS.md"
   ],
   "validationPlan": [
     {
-      "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "id": "check-contract-unit",
+      "description": "Test đơn vị schema v3 và digest nội tuyến pass",
       "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/task-schema-v3.test.ts test/unit/input-digest.test.ts test/unit/check-report.test.ts",
+      "criterionIds": [
+        "ac-no-sidecar",
+        "ac-schema"
+      ],
+      "inputs": [
+        "src/core/**",
+        "test/unit/**"
+      ]
+    },
+    {
+      "id": "check-docs-sync",
+      "description": "Test đồng bộ docs, skill, template và self-host pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts test/workflow/templates.test.ts test/workflow/skill-sources.test.ts test/workflow/self-host.test.ts test/workflow/cli-contract.test.ts",
+      "criterionIds": [
+        "ac-docs-sync"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "README.md",
+        "docs/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-legacy-read",
+      "description": "Test đọc dữ liệu lịch sử v1/v2 và plan cũ pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/legacy-history.test.ts",
+      "criterionIds": [
+        "ac-legacy-read",
+        "ac-no-execution-notes"
+      ],
+      "inputs": [
+        "src/core/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-save-flow",
+      "description": "Test luồng save v3, migration, replan một bước và churn mẫu pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/task-contract-v3.test.ts",
+      "criterionIds": [
+        "ac-migrate-unfinished",
+        "ac-no-execution-notes",
+        "ac-no-sidecar",
+        "ac-replan-one-step",
+        "ac-schema"
+      ],
+      "inputs": [
+        "src/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass",
+      "scope": "full",
       "required": true,
       "command": "pnpm lint && pnpm typecheck && pnpm test",
       "criterionIds": [
         "ac-docs-sync",
         "ac-legacy-read",
+        "ac-migrate-unfinished",
         "ac-no-execution-notes",
         "ac-no-sidecar",
+        "ac-replan-one-step",
         "ac-schema"
       ],
       "inputs": [
-        "@task-contract",
+        "AGENTS.md",
+        "README.md",
         "docs/**",
         "src/**",
         "test/**"
@@ -80,13 +181,94 @@
   ],
   "decisions": [
     {
-      "id": "d-draft-checks",
-      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
-      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+      "id": "d-v3-schema",
+      "text": "Đóng băng TaskRecord schema v3: cùng bộ field với v2, check v3 bỏ token @task-contract, evidence pass của check bắt buộc mang inputDigest và exitCode khớp kết quả.",
+      "rationale": "Gọn hơn v2 mà vẫn giữ gate dựa trên evidence; hợp đồng task luôn được gộp ngầm vào digest nên không cần khai báo."
+    },
+    {
+      "id": "d-no-sidecar",
+      "text": "Digest được tính lại tại chỗ từ inputs hiện hành và so với evidence.inputDigest; không lưu snapshot ra file.",
+      "rationale": "Sidecar sinh ~69K dòng churn trong lịch sử dogfood; đổi lại mất danh sách file thay đổi cụ thể trong chẩn đoán stale, chấp nhận vì chi phí lớn hơn lợi ích."
+    },
+    {
+      "id": "d-one-step-revision",
+      "text": "contractRevision hợp lệ trong cùng lần save đặt checkpoint replan; sau đó một save ready/ready thông thường. Bỏ bước audit riêng và bỏ --audit-ready.",
+      "rationale": "Năm bước cũ là bộ máy tự bảo vệ; bất biến của nghĩa vụ đã có pass được giữ nguyên nên an toàn không giảm."
+    },
+    {
+      "id": "d-self-migrate",
+      "text": "Task này bắt đầu ở v2 và tự migrate sang v3 sau khi đường migration xanh; mã v2 chỉ bị gỡ ở lát PURGE.",
+      "rationale": "Kiểm chứng migration bằng dữ liệu thật và tránh tự phá đường lưu evidence của chính task."
+    },
+    {
+      "id": "d-migrate-scope",
+      "text": "Migration v1/v2→v3 cho phép ở mọi status chưa hoàn tất, giữ nguyên status/checkpoint; evidence pass cũ trở nên stale vì digest v3 khác payload cũ.",
+      "rationale": "Fail-closed: không tin bằng chứng tính theo hợp đồng khác; các task member v2 còn lại migrate khi được kích hoạt."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-09-29T09:29:19.967+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205801-simplify-task-contract/task.json"
+      ]
+    },
+    {
+      "artifactPaths": [],
+      "recordedAt": "2026-09-29T09:44:29.206+07:00",
+      "result": "pass",
+      "inputDigest": "8d1323cea0b8769dcbc1700b5a483a3a7c46b4276ce2cd8a04770ec0fb272ce9",
+      "summary": "Check check-contract-unit passed (exit 0):       Tests  23 passed (23) |    Start at  09:43:45 |    Duration  705ms (transform 170ms, setup 0ms, collect 493ms, tes",
+      "exitCode": 0,
+      "id": "ev-check-contract-unit",
+      "checkId": "check-contract-unit"
+    },
+    {
+      "artifactPaths": [],
+      "recordedAt": "2026-09-29T09:44:29.673+07:00",
+      "result": "pass",
+      "inputDigest": "6c2b2158108a80d509702955e7f8be86f15650e5c95b927dffca58e7e3b9ee29",
+      "summary": "Check check-docs-sync passed (exit 0):       Tests  21 passed (21) |    Start at  09:43:47 |    Duration  1.46s (transform 811ms, setup 0ms, collect 2.47s, tes",
+      "exitCode": 0,
+      "id": "ev-check-docs-sync",
+      "checkId": "check-docs-sync"
+    },
+    {
+      "artifactPaths": [],
+      "recordedAt": "2026-09-29T09:44:30.141+07:00",
+      "result": "pass",
+      "inputDigest": "c6921ae89cbd9b47486dabc6d6de8ecb0dc9b6d497c3cf4bee38289db2ac7898",
+      "summary": "Check check-legacy-read passed (exit 0):       Tests  4 passed (4) |    Start at  09:43:51 |    Duration  2.50s (transform 311ms, setup 0ms, collect 700ms, tests",
+      "exitCode": 0,
+      "id": "ev-check-legacy-read",
+      "checkId": "check-legacy-read"
+    },
+    {
+      "artifactPaths": [],
+      "recordedAt": "2026-09-29T09:44:30.557+07:00",
+      "result": "pass",
+      "inputDigest": "7dfc1788f28adfea21e3e2298c9f68a8e9748e890308d2507cafb5e2384dbc03",
+      "summary": "Check check-save-flow passed (exit 0):       Tests  14 passed (14) |    Start at  09:43:55 |    Duration  2.19s (transform 306ms, setup 0ms, collect 716ms, tes",
+      "exitCode": 0,
+      "id": "ev-check-save-flow",
+      "checkId": "check-save-flow"
+    },
+    {
+      "artifactPaths": [],
+      "recordedAt": "2026-09-29T09:44:31.047+07:00",
+      "result": "pass",
+      "inputDigest": "fcd37c78d4a8b4d5f7add27355b1a00e2afe1dd3c5a1af2a195cb033324beaa3",
+      "summary": "Check check-suite passed (exit 0):       Tests  648 passed | 1 skipped (649) |    Start at  09:44:06 |    Duration  13.81s (transform 4.44s, setup 0ms, col",
+      "exitCode": 0,
+      "id": "ev-check-suite",
+      "checkId": "check-suite"
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
-  "createdAt": "2026-09-28T20:58:01.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "createdAt": "2026-09-28T20:58:01+07:00",
+  "updatedAt": "2026-09-29T02:44:36.780Z",
+  "completedAt": "2026-09-29T02:44:36.780Z"
 }

@@ -61,28 +61,19 @@ describe("task audit", () => {
     expect(JSON.stringify(result)).not.toContain("PRIVATE_");
   });
 
-  it("reuses ready-trace diagnostics while stripping messages", async () => {
+  it("checks only that Full prd and plan are non-empty and the plan has a checklist item", async () => {
     const task = fullTask();
-    const validPrd = "# PRD\n### AC `criterion`\nDone.\n";
-    const validPlan = [
-      "# Plan",
-      "- [ ] `SLICE` — implement",
-      "### Slice `SLICE`",
-      "Criteria: `criterion`",
-      "Checks: `gate`",
-      "Paths: `src/a.ts`",
-      "",
-    ].join("\n");
+    const validPrd = "# PRD\nTự do.\n";
+    const validPlan = "# Plan\n- [ ] Bước một\n";
     const pass = await createTaskAudit("project", "harnix", task, now, dependencies(["pending"], { "prd.md": validPrd, "plan.md": validPlan }));
     expect(pass.activeTask?.readiness).toEqual({ status: "pass", diagnostics: [] });
 
-    const fail = await createTaskAudit("project", "harnix", task, now, dependencies(["pending"], { "prd.md": validPrd, "plan.md": `${validPlan}TODO\n` }));
-    expect(fail.activeTask?.readiness).toMatchObject({
-      status: "fail",
-      diagnostics: [expect.objectContaining({ code: "placeholder", artifact: "plan.md" })],
-    });
-    expect(JSON.stringify(fail)).not.toContain("message");
-    expect(JSON.stringify(fail)).not.toContain("unresolved placeholder");
+    const noChecklist = await createTaskAudit("project", "harnix", task, now, dependencies(["pending"], { "prd.md": validPrd, "plan.md": "# Plan\nKhông có checklist\n" }));
+    expect(noChecklist.activeTask?.readiness).toEqual({ status: "fail", diagnostics: [{ code: "plan-checklist-missing", artifact: "plan.md" }] });
+
+    const empty = await createTaskAudit("project", "harnix", task, now, dependencies(["pending"], { "prd.md": "  \n", "plan.md": validPlan }));
+    expect(empty.activeTask?.readiness).toEqual({ status: "fail", diagnostics: [{ code: "artifact-empty", artifact: "prd.md" }] });
+    expect(JSON.stringify(empty)).not.toContain("message");
   });
 
   it("returns artifact-unavailable without leaking read errors", async () => {

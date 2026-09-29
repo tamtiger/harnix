@@ -7,6 +7,13 @@ import {
 } from "./task.js";
 import type { LearningCaptureInput } from "../journal/learning.js";
 
+const PLAN_CHECKLIST_ITEM = /^\s*- \[[ xX]\]\s+\S/mu;
+
+/** The only structural expectation on a Full plan.md: at least one checklist item; everything else is free-form. */
+export function planHasChecklistItem(plan: string): boolean {
+  return PLAN_CHECKLIST_ITEM.test(plan);
+}
+
 export function laterTimestamp(previous: string, now: string): string {
   return Date.parse(now) > Date.parse(previous) ? now : previous;
 }

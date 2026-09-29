@@ -4,12 +4,12 @@ import { inspectRequiredCheckEvidence, type RequiredCheckState } from "../status
 import { canCompleteTask } from "../workflow.js";
 import { compareCodeUnits } from "../../utils/order.js";
 import { resolveSafeProjectPath } from "../../utils/paths.js";
-import { auditReadyTrace, type ReadyTraceDiagnosticCode } from "./ready-trace.js";
 import { selectLatestEvidence } from "./task.js";
 import type { AcceptanceCriterion, Evidence, TaskMode, TaskRecord, TaskStatus, WorkflowCheckpoint } from "./task.js";
+import { planHasChecklistItem } from "./workflow-helpers.js";
 
 type TaskAuditArtifact = "prd.md" | "plan.md" | "task.json";
-type TaskAuditDiagnosticCode = ReadyTraceDiagnosticCode | "artifact-unavailable";
+type TaskAuditDiagnosticCode = "artifact-unavailable" | "artifact-empty" | "plan-checklist-missing";
 
 export interface TaskAuditDiagnosticV1 {
   readonly code: TaskAuditDiagnosticCode;
@@ -116,16 +116,10 @@ async function inspectReadiness(
     catch { unavailable.push({ code: "artifact-unavailable", artifact }); }
   }
   if (unavailable.length > 0) return { status: "unavailable", diagnostics: unavailable };
-  const report = auditReadyTrace({ task, prd: contents.get("prd.md")!, plan: contents.get("plan.md")! });
-  return {
-    status: report.status,
-    diagnostics: report.diagnostics.map((diagnostic) => ({
-      code: diagnostic.code,
-      artifact: diagnostic.artifact,
-      ...(diagnostic.id === undefined ? {} : { id: diagnostic.id }),
-      ...(diagnostic.line === undefined ? {} : { line: diagnostic.line }),
-    })),
-  };
+  const diagnostics: TaskAuditDiagnosticV1[] = [];
+  for (const artifact of ["prd.md", "plan.md"] as const) if (!contents.get(artifact)!.trim()) diagnostics.push({ code: "artifact-empty", artifact });
+  if (!planHasChecklistItem(contents.get("plan.md")!)) diagnostics.push({ code: "plan-checklist-missing", artifact: "plan.md" });
+  return { status: diagnostics.length === 0 ? "pass" : "fail", diagnostics };
 }
 
 function completionCriteria(

@@ -117,7 +117,7 @@ export async function renderRoadmapMarkdown(root: string, epicId: string, epic?:
     for (const taskId of taskIds) {
       try {
         const task = await loadTask(join(tasksDir, taskId, "task.json"));
-        if (task.schemaVersion === 2 && task.epicId === epicId) {
+        if (task.schemaVersion !== 1 && task.epicId === epicId) {
           memberTasks.push({
             id: taskId,
             status: task.status,

@@ -22,7 +22,7 @@ import { pauseProjectTask } from "./commands/pause.js";
 import { reportProjectContext } from "./commands/context-report.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
-import { appendEvidenceWorkflow, auditWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, preflightWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow, transitionWorkflow, workflowEnvelopeSchema } from "./commands/internal-workflow.js";
+import { appendEvidenceWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, preflightWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow, transitionWorkflow, workflowEnvelopeSchema } from "./commands/internal-workflow.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
@@ -256,7 +256,6 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--preflight", "Inspect bounded workflow routing metadata")
     .option("--save", "Persist workflow state from stdin")
     .option("--snapshot", "Snapshot one required check")
-    .option("--audit-ready", "Audit Full-task ready trace")
     .option("--finish", "Finish the active workflow task")
     .option("--cancel", "Cancel the active workflow task")
     .option("--learn", "Record one eligible project-local learning candidate")
@@ -264,10 +263,10 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--evidence", "Append exactly one evidence item from stdin")
     .option("--schema", "Describe the save envelope schema")
     .option("--check <id>", "Required check ID for --snapshot")
-    .action(async (options: { inspect?: boolean; preflight?: boolean; save?: boolean; snapshot?: boolean; auditReady?: boolean; finish?: boolean; cancel?: boolean; learn?: boolean; check?: string; transition?: string; evidence?: boolean; schema?: boolean }) => {
-      const actionCount = [options.inspect, options.preflight, options.save, options.snapshot, options.auditReady, options.finish, options.cancel, options.learn, options.evidence, options.schema].filter((selected) => selected === true).length
+    .action(async (options: { inspect?: boolean; preflight?: boolean; save?: boolean; snapshot?: boolean; finish?: boolean; cancel?: boolean; learn?: boolean; check?: string; transition?: string; evidence?: boolean; schema?: boolean }) => {
+      const actionCount = [options.inspect, options.preflight, options.save, options.snapshot, options.finish, options.cancel, options.learn, options.evidence, options.schema].filter((selected) => selected === true).length
         + (options.transition === undefined ? 0 : 1);
-      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --preflight, --save, --transition, --evidence, --schema, --snapshot, --audit-ready, --finish, --cancel, or --learn.");
+      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --preflight, --save, --transition, --evidence, --schema, --snapshot, --finish, --cancel, or --learn.");
       if (options.snapshot !== true && options.check !== undefined) throw new Error("--check requires workflow --snapshot.");
       if (options.snapshot === true && options.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
       const root = await resolveProjectRoot(process.cwd());
@@ -307,10 +306,6 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       }
       if (options.snapshot) {
         process.stdout.write(`${JSON.stringify(await snapshotWorkflow(root, options.check!))}\n`);
-        return;
-      }
-      if (options.auditReady) {
-        process.stdout.write(`${JSON.stringify(await auditWorkflow(root))}\n`);
         return;
       }
       if (options.cancel) {

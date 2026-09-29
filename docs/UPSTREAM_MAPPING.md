@@ -57,7 +57,7 @@ The 2026-08-18 adopted capability boundaries remain in the same dependency direc
 | Harnix-owned module | Basis | Ownership/removal boundary |
 |---|---|---|
 | `core/context/selection-freshness.ts` | Trellis scoped-context resume semantics, reimplemented | Hash-only sidecar; no watcher, raw source cache or ContextManifest v2 |
-| `core/tasks/ready-trace.ts` | Superpowers decision-complete planning discipline, reimplemented | Deterministic bounded parser; no LLM judge or Markdown execution |
+| ~~`core/tasks/ready-trace.ts`~~ (removed in TaskRecord v3) | Superpowers decision-complete planning discipline, reimplemented | Retired: Full ready now only needs non-empty free-form prd/plan with a checklist item (`workflow-helpers.ts`) |
 | `core/journal/learning-safety.ts` + `promotion.ts` | Trellis/ECC evidence learning, security adaptation | JSON-string review boundary and category-only diagnostics; no auto-promotion/spec rewrite |
 | `core/repo-map/graph.ts` + `search.ts` | Repository dependency navigation pattern, Harnix-authored | Safe cached structural graph only; no AST service, embedding, persisted graph or network |
 | `core/status.ts` | Trellis/ECC/Spec Kit/BMAD status-resume patterns, clean-room reimplemented | Count-only persisted-state projection; no database, watcher, task prose, model/session state or network |
@@ -178,7 +178,7 @@ Stack/catalog architecture uses only researched patterns rather than vendored ru
 | Requirement exploration | `Planning` | Repo evidence first, ask only user-owned decisions, acceptance/non-goals/validation bắt buộc |
 | `prd.md`, `design.md`, `implement.md` | Lite `task.json`; Full `prd.md` + `plan.md`; conditional `design.md` | Artifact proportionality, không tạo empty ceremony files |
 | `implement.jsonl` + `check.jsonl` | `context.json` scoped by state + `context-selection.json` | Một ranked/budgeted manifest, dedupe/truncation disclosure và hash-only selection-basis freshness |
-| `task.py start` after second approval | `Ready` gate + ready trace v1 | Deterministic criterion/slice/check/path audit; proceed automatically nếu original request đã cho implementation; dừng khi plan-only/checkpoint/blocker |
+| `task.py start` after second approval | `Ready` gate (v3: non-empty prd/plan + plan checklist item) | Deterministic gate without trace grammar; proceed automatically nếu original request đã cho implementation; dừng khi plan-only/checkpoint/blocker |
 | Implement/check phase | `Implementing` → `Verifying` | Single-agent capable; compliance trước quality; delegation optional |
 | Rollback | `Debugging` / `Replan` | Explicit transitions dựa trên root cause hoặc requirement/architecture defect |
 | Spec update | Finishing learning candidate/promotion | Evidence + recurrence hoặc explicit approval; JSON-string untrusted boundary, redacted categories và reviewable diff |
@@ -206,7 +206,7 @@ Bảy adaptation được lưu dưới dạng source thật tại `src/skills/ha
 | Capability | Origin/evidence | Harnix location | Ownership decision |
 |---|---|---|---|
 | Target-root authority trước ambient context (`HX-TARGET-01`) | `harnix-self-audit`; task `20260826-165933-codex-harnix-runtime-audit`, finding `F-CUR-02`, mechanism `M04` | `src/templates/harnix/activation.ts`, project/global templates, bảy `src/skills/harnix-*/SKILL.md`, structured target scenario/ambient-canary tests | Harnix-owned instruction contract; explicit target được validate trước ancestor lookup, hook-injected context không cấp authority; không có external source, không thêm external provenance registry entry và không đổi `NOTICE` |
-| Active workflow snapshot self-exclusion | `harnix-self-audit`; cùng task, verification replan ngày 2026-08-27 | `src/core/verification/input-freshness.ts`, unit + hidden-workflow regression tests, TaskRecord v2 docs/templates | Harnix-owned correctness repair; omit exact active `task.json` và workflow-owned `verification-inputs.json` raw entries để evidence không tự đổi input digest, vẫn raw-hash matching records/sidecars của other tasks và giữ top-level sidecar v1; không thêm external provenance/attribution |
+| Active workflow snapshot self-exclusion | `harnix-self-audit`; cùng task, verification replan ngày 2026-08-27 | `src/core/verification/input-digest.ts` (TaskRecord v3; the former `input-freshness.ts` sidecar module was removed), unit + hidden-workflow regression tests | Harnix-owned correctness repair; omit exact active `task.json`, `review.md` và legacy `verification-inputs.json` raw entries để evidence không tự đổi input digest, vẫn raw-hash matching records của other tasks; không có sidecar; không thêm external provenance/attribution |
 | Standalone read-only research routing | `harnix-self-audit`; task `20260828-110352-standalone-research-route` | `src/core/workflow.ts`, canonical `harnix-research`, project/global templates và routing/parity regressions | Harnix-owned consistency repair; standalone research là Bypass không consult/mutate active task, task-scoped research giữ Planning/Replan/Debugging artifact contract; không thêm external provenance/attribution |
 
 Mapping này tách self-observed product correction khỏi external-derived capability. Nếu implementation tương lai lấy behavior, code hoặc content từ harness ngoài, mục 10 bắt buộc supersede ownership decision này bằng registry/source/ref/license/evidence đầy đủ trước completion.
