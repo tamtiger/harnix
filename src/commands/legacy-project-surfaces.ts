@@ -106,9 +106,11 @@ export async function cleanupLegacyProjectSurfaces(
 function isCanonicalLegacyProjectSurface(entry: ManagedEntry): boolean {
   switch (entry.scope) {
     case "kiro":
-      return isLegacySkill(entry, ".kiro/skills")
-        || (entry.path === ".kiro/steering/harnix.md" && entry.sourceId === "kiro-steering")
-        || (entry.path === ".kiro/hooks/harnix-context.kiro.hook" && entry.sourceId === "kiro-context-hook");
+      return (
+        isLegacySkill(entry, ".kiro/skills") ||
+        (entry.path === ".kiro/steering/harnix.md" && entry.sourceId === "kiro-steering") ||
+        (entry.path === ".kiro/hooks/harnix-context.kiro.hook" && entry.sourceId === "kiro-context-hook")
+      );
     case "antigravity":
       return isLegacySkill(entry, ".gemini/skills");
     case "codex":
@@ -119,8 +121,7 @@ function isCanonicalLegacyProjectSurface(entry: ManagedEntry): boolean {
 }
 
 function isLegacySkill(entry: ManagedEntry, root: ".kiro/skills" | ".gemini/skills" | ".agents/skills"): boolean {
-  return entry.sourceId.startsWith("harnix-")
-    && entry.path === `${root}/${entry.sourceId}/SKILL.md`;
+  return entry.sourceId.startsWith("harnix-") && entry.path === `${root}/${entry.sourceId}/SKILL.md`;
 }
 
 async function readOptionalManifest(path: string): Promise<ManagedManifest | undefined> {

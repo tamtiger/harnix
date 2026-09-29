@@ -13,30 +13,46 @@ describe("task resume", () => {
       activate,
     };
 
-    await expect(resumeTask("unused", candidate.id, false, dependencies)).resolves.toMatchObject({ outcome: "resumed", task: { id: candidate.id } });
+    await expect(resumeTask("unused", candidate.id, false, dependencies)).resolves.toMatchObject({
+      outcome: "resumed",
+      task: { id: candidate.id },
+    });
     expect(activate).toHaveBeenCalledWith("unused", candidate.id);
 
     dependencies.loadActive = async () => candidate;
     activate.mockClear();
-    await expect(resumeTask("unused", candidate.id, false, dependencies)).resolves.toMatchObject({ outcome: "already-active" });
+    await expect(resumeTask("unused", candidate.id, false, dependencies)).resolves.toMatchObject({
+      outcome: "already-active",
+    });
     expect(activate).not.toHaveBeenCalled();
   });
 
   it("previews without writing and rejects terminal candidates or active-task collisions", async () => {
     const candidate = task("20260826-160000-resume-target", "planning");
     const activate = vi.fn(async () => undefined);
-    const dependencies: TaskResumeDependencies = { loadCandidate: async () => candidate, loadActive: async () => null, activate };
+    const dependencies: TaskResumeDependencies = {
+      loadCandidate: async () => candidate,
+      loadActive: async () => null,
+      activate,
+    };
 
-    await expect(resumeTask("unused", candidate.id, true, dependencies)).resolves.toMatchObject({ dryRun: true, outcome: "would-resume" });
+    await expect(resumeTask("unused", candidate.id, true, dependencies)).resolves.toMatchObject({
+      dryRun: true,
+      outcome: "would-resume",
+    });
     expect(activate).not.toHaveBeenCalled();
 
     dependencies.loadActive = async () => task("20260826-160001-other-task", "ready");
-    await expect(resumeTask("unused", candidate.id, false, dependencies)).rejects.toThrow("Resume cannot replace another active task.");
+    await expect(resumeTask("unused", candidate.id, false, dependencies)).rejects.toThrow(
+      "Resume cannot replace another active task.",
+    );
     expect(activate).not.toHaveBeenCalled();
 
     dependencies.loadActive = async () => null;
     dependencies.loadCandidate = async () => terminalTask(candidate.id);
-    await expect(resumeTask("unused", candidate.id, false, dependencies)).rejects.toThrow("Resume requires an unfinished task.");
+    await expect(resumeTask("unused", candidate.id, false, dependencies)).rejects.toThrow(
+      "Resume requires an unfinished task.",
+    );
     expect(activate).not.toHaveBeenCalled();
   });
 });
@@ -56,7 +72,16 @@ function task(id: string, status: "planning" | "ready"): TaskRecordV2 {
     acceptanceCriteria: [{ id: "criterion", text: "private", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "private", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract"] }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "private",
+        scope: "focused",
+        required: true,
+        criterionIds: ["criterion"],
+        inputs: ["@task-contract"],
+      },
+    ],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,

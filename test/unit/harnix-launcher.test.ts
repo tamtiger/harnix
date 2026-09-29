@@ -19,10 +19,12 @@ describe("Harnix launcher lookup", () => {
     });
 
     expect(found).toBe(true);
-    expect(calls).toEqual([{
-      executable: "cmd.exe",
-      args: ["/d", "/s", "/c", "harnix --version"],
-    }]);
+    expect(calls).toEqual([
+      {
+        executable: "cmd.exe",
+        args: ["/d", "/s", "/c", "harnix --version"],
+      },
+    ]);
   });
 
   it("should_probe_the_direct_constant_binary_on_non_windows_platforms", async () => {
@@ -40,12 +42,14 @@ describe("Harnix launcher lookup", () => {
   });
 
   it("should_report_unavailable_when_the_fixed_launcher_probe_fails", async () => {
-    await expect(lookupHarnixLauncher({
-      platform: "win32",
-      runner: async () => {
-        throw new Error("missing shim");
-      },
-    })).resolves.toBe(false);
+    await expect(
+      lookupHarnixLauncher({
+        platform: "win32",
+        runner: async () => {
+          throw new Error("missing shim");
+        },
+      }),
+    ).resolves.toBe(false);
   });
 
   it.runIf(process.platform === "win32")("should_resolve_a_windows_cmd_shim_when_it_is_on_path", async () => {

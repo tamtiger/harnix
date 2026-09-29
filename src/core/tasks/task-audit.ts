@@ -55,7 +55,12 @@ export interface TaskAuditResultV1 {
 
 export interface TaskAuditDependencies {
   readArtifact(harnixRoot: string, taskId: string, artifact: "prd.md" | "plan.md"): Promise<string>;
-  inspectRequiredChecks(projectRoot: string, harnixRoot: string, task: TaskRecord, now: number): Promise<RequiredCheckState[]>;
+  inspectRequiredChecks(
+    projectRoot: string,
+    harnixRoot: string,
+    task: TaskRecord,
+    now: number,
+  ): Promise<RequiredCheckState[]>;
 }
 
 const defaultDependencies: TaskAuditDependencies = {
@@ -81,13 +86,17 @@ export async function createTaskAudit(
   const states = requiredChecks.map((_check, index): RequiredCheckState => inspectedStates[index] ?? "pending");
   const stateByCheck = new Map(requiredChecks.map((check, index) => [check.id, states[index]!]));
   const criteria = completionCriteria(task, stateByCheck, now);
-  const checks = completionChecks(requiredChecks.map((check) => check.id), states);
+  const checks = completionChecks(
+    requiredChecks.map((check) => check.id),
+    states,
+  );
   const readiness = await inspectReadiness(harnixRoot, task, dependencies);
-  const completionReady = task.acceptanceCriteria.length > 0
-    && requiredChecks.length > 0
-    && criteria.pending === 0
-    && checks.failed + checks.stale + checks.pending === 0
-    && canCompleteTask(task, now);
+  const completionReady =
+    task.acceptanceCriteria.length > 0 &&
+    requiredChecks.length > 0 &&
+    criteria.pending === 0 &&
+    checks.failed + checks.stale + checks.pending === 0 &&
+    canCompleteTask(task, now);
 
   return {
     generator: "harnix",
@@ -112,13 +121,18 @@ async function inspectReadiness(
   const contents = new Map<"prd.md" | "plan.md", string>();
   const unavailable: TaskAuditDiagnosticV1[] = [];
   for (const artifact of ["prd.md", "plan.md"] as const) {
-    try { contents.set(artifact, await dependencies.readArtifact(harnixRoot, task.id, artifact)); }
-    catch { unavailable.push({ code: "artifact-unavailable", artifact }); }
+    try {
+      contents.set(artifact, await dependencies.readArtifact(harnixRoot, task.id, artifact));
+    } catch {
+      unavailable.push({ code: "artifact-unavailable", artifact });
+    }
   }
   if (unavailable.length > 0) return { status: "unavailable", diagnostics: unavailable };
   const diagnostics: TaskAuditDiagnosticV1[] = [];
-  for (const artifact of ["prd.md", "plan.md"] as const) if (!contents.get(artifact)!.trim()) diagnostics.push({ code: "artifact-empty", artifact });
-  if (!planHasChecklistItem(contents.get("plan.md")!)) diagnostics.push({ code: "plan-checklist-missing", artifact: "plan.md" });
+  for (const artifact of ["prd.md", "plan.md"] as const)
+    if (!contents.get(artifact)!.trim()) diagnostics.push({ code: "artifact-empty", artifact });
+  if (!planHasChecklistItem(contents.get("plan.md")!))
+    diagnostics.push({ code: "plan-checklist-missing", artifact: "plan.md" });
   return { status: diagnostics.length === 0 ? "pass" : "fail", diagnostics };
 }
 
@@ -130,7 +144,8 @@ function completionCriteria(
   const counts = { met: 0, waived: 0, pending: 0, total: task.acceptanceCriteria.length, pendingIds: [] as string[] };
   for (const criterion of task.acceptanceCriteria) {
     if (criterion.status === "waived") counts.waived += 1;
-    else if (criterion.status === "met" && criterionHasFreshSupport(task, criterion, stateByCheck, now)) counts.met += 1;
+    else if (criterion.status === "met" && criterionHasFreshSupport(task, criterion, stateByCheck, now))
+      counts.met += 1;
     else {
       counts.pending += 1;
       counts.pendingIds.push(criterion.id);
@@ -175,14 +190,21 @@ function criterionHasFreshSupport(
 ): boolean {
   const evidenceById = new Map(task.evidence.map((evidence) => [evidence.id, evidence]));
   const latestByCheck = new Map<string, Evidence>();
-  for (const checkId of new Set(task.evidence.map((evidence) => evidence.checkId).filter((id): id is string => id !== undefined))) {
+  for (const checkId of new Set(
+    task.evidence.map((evidence) => evidence.checkId).filter((id): id is string => id !== undefined),
+  )) {
     const latest = selectLatestEvidence(task.evidence, checkId, now);
     if (latest) latestByCheck.set(checkId, latest);
   }
   const checks = new Map(task.validationPlan.map((check) => [check.id, check]));
   return criterion.evidenceIds.some((id) => {
     const evidence = evidenceById.get(id);
-    if (evidence === undefined || evidence.result !== "pass" || !isFreshEvidence(evidence, now, task.schemaVersion === 1)) return false;
+    if (
+      evidence === undefined ||
+      evidence.result !== "pass" ||
+      !isFreshEvidence(evidence, now, task.schemaVersion === 1)
+    )
+      return false;
     if (evidence.checkId !== undefined) {
       const latest = latestByCheck.get(evidence.checkId);
       if (task.schemaVersion === 1) {
@@ -191,7 +213,12 @@ function criterionHasFreshSupport(
         return false;
       }
     }
-    if (evidence.checkId !== undefined && stateByCheck.has(evidence.checkId) && stateByCheck.get(evidence.checkId) !== "passed") return false;
+    if (
+      evidence.checkId !== undefined &&
+      stateByCheck.has(evidence.checkId) &&
+      stateByCheck.get(evidence.checkId) !== "passed"
+    )
+      return false;
     if (task.schemaVersion === 1) return true;
     if (!/^[a-f0-9]{64}$/u.test(evidence.inputDigest ?? "") || evidence.checkId === undefined) return false;
     return checks.get(evidence.checkId)?.criterionIds?.includes(criterion.id) === true;

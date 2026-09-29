@@ -30,7 +30,10 @@ describe.sequential("status --explain (audit projection)", () => {
 
     await expect(runCli(["node", "harnix", "status", "--explain"])).resolves.toBe(0);
 
-    expect((JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { explain: { audit: unknown } }).explain.audit).toEqual({ generator: "harnix", schemaVersion: 1, activeTask: null });
+    expect(
+      (JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { explain: { audit: unknown } }).explain
+        .audit,
+    ).toEqual({ generator: "harnix", schemaVersion: 1, activeTask: null });
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
 
@@ -66,13 +69,30 @@ describe.sequential("status --explain (audit projection)", () => {
         completion: {
           status: "fail",
           criteria: { met: 0, waived: 0, pending: 1, total: 1, pendingIds: ["criterion"] },
-          requiredChecks: { passed: 0, failed: 0, stale: 0, pending: 1, total: 1, failedIds: [], staleIds: [], pendingIds: ["gate"] },
+          requiredChecks: {
+            passed: 0,
+            failed: 0,
+            stale: 0,
+            pending: 1,
+            total: 1,
+            failedIds: [],
+            staleIds: [],
+            pendingIds: ["gate"],
+          },
         },
       },
     });
-    for (const canary of ["PRIVATE_TITLE_CANARY", "PRIVATE_GOAL_CANARY", "PRIVATE_CHECK_CANARY", "PRIVATE_COMMAND_CANARY"]) expect(output).not.toContain(canary);
+    for (const canary of [
+      "PRIVATE_TITLE_CANARY",
+      "PRIVATE_GOAL_CANARY",
+      "PRIVATE_CHECK_CANARY",
+      "PRIVATE_COMMAND_CANARY",
+    ])
+      expect(output).not.toContain(canary);
     expect(output).not.toContain(root);
-    expect(Buffer.byteLength(JSON.stringify((JSON.parse(output) as { explain: { audit: unknown } }).explain.audit), "utf8")).toBeLessThan(4_096);
+    expect(
+      Buffer.byteLength(JSON.stringify((JSON.parse(output) as { explain: { audit: unknown } }).explain.audit), "utf8"),
+    ).toBeLessThan(4_096);
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
 
@@ -86,16 +106,18 @@ describe.sequential("status --explain (audit projection)", () => {
     const task: TaskRecordV3 = {
       ...base,
       acceptanceCriteria: [{ ...base.acceptanceCriteria[0]!, status: "met", evidenceIds: ["e-pass"] }],
-      evidence: [{
-        id: "e-pass",
-        checkId: "gate",
-        recordedAt: "2026-08-26T00:59:00.000Z",
-        result: "pass",
-        exitCode: 0,
-        summary: "PRIVATE_EVIDENCE_CANARY",
-        artifactPaths: [],
-        inputDigest: snapshot.inputDigest,
-      }],
+      evidence: [
+        {
+          id: "e-pass",
+          checkId: "gate",
+          recordedAt: "2026-08-26T00:59:00.000Z",
+          result: "pass",
+          exitCode: 0,
+          summary: "PRIVATE_EVIDENCE_CANARY",
+          artifactPaths: [],
+          inputDigest: snapshot.inputDigest,
+        },
+      ],
     };
     const harnixRoot = join(root, ".harnix");
     await saveTask(harnixRoot, task);
@@ -105,15 +127,23 @@ describe.sequential("status --explain (audit projection)", () => {
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     await expect(runCli(["node", "harnix", "status", "--explain"], { statusClock: () => current })).resolves.toBe(0);
-    expect((JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { explain: { audit: unknown } }).explain.audit).toMatchObject({
-      activeTask: { completion: { status: "pass", criteria: { met: 1, pending: 0 }, requiredChecks: { passed: 1, stale: 0 } } },
+    expect(
+      (JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { explain: { audit: unknown } }).explain
+        .audit,
+    ).toMatchObject({
+      activeTask: {
+        completion: { status: "pass", criteria: { met: 1, pending: 0 }, requiredChecks: { passed: 1, stale: 0 } },
+      },
     });
 
     await writeFile(join(root, "input.ts"), "export const value = 2;\n");
     const beforeStaleAudit = await snapshotTree(root);
     stdout.mockClear();
     await expect(runCli(["node", "harnix", "status", "--explain"], { statusClock: () => current })).resolves.toBe(0);
-    expect((JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { explain: { audit: unknown } }).explain.audit).toMatchObject({
+    expect(
+      (JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { explain: { audit: unknown } }).explain
+        .audit,
+    ).toMatchObject({
       activeTask: {
         completion: {
           status: "fail",
@@ -140,7 +170,17 @@ function fullTask(): TaskRecordV3 {
     acceptanceCriteria: [{ id: "criterion", text: "PRIVATE_CRITERION_CANARY", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "PRIVATE_CHECK_CANARY", command: "PRIVATE_COMMAND_CANARY", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["src/**/*.ts"] }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "PRIVATE_CHECK_CANARY",
+        command: "PRIVATE_COMMAND_CANARY",
+        scope: "focused",
+        required: true,
+        criterionIds: ["criterion"],
+        inputs: ["src/**/*.ts"],
+      },
+    ],
     evidence: [],
     createdAt: "2026-08-26T00:00:00.000Z",
     updatedAt: "2026-08-26T00:30:00.000Z",
@@ -155,23 +195,37 @@ function digestTask(): TaskRecordV3 {
     status: "verifying",
     checkpoint: "verifying",
     relevantPaths: ["input.ts"],
-    validationPlan: [{ id: "gate", description: "verify input", command: "pnpm test", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["input.ts"] }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "verify input",
+        command: "pnpm test",
+        scope: "focused",
+        required: true,
+        criterionIds: ["criterion"],
+        inputs: ["input.ts"],
+      },
+    ],
   };
 }
 
 async function snapshotTree(root: string): Promise<Array<{ path: string; sha256: string }>> {
   const files = await walk(root);
-  return Promise.all(files.map(async (path) => ({
-    path: relative(root, path).replaceAll("\\", "/"),
-    sha256: createHash("sha256").update(await readFile(path)).digest("hex"),
-  })));
+  return Promise.all(
+    files.map(async (path) => ({
+      path: relative(root, path).replaceAll("\\", "/"),
+      sha256: createHash("sha256")
+        .update(await readFile(path))
+        .digest("hex"),
+    })),
+  );
 }
 
 async function walk(root: string): Promise<string[]> {
   const paths: string[] = [];
   for (const entry of await readdir(root, { withFileTypes: true })) {
     const path = join(root, entry.name);
-    if (entry.isDirectory()) paths.push(...await walk(path));
+    if (entry.isDirectory()) paths.push(...(await walk(path)));
     else if (entry.isFile()) paths.push(path);
   }
   return paths.sort();

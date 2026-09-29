@@ -5,7 +5,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "../../src/cli-program.js";
 import { initializeProject } from "../../src/commands/init.js";
-import { saveTask, setActiveTask, type TaskRecordV1, type TaskRecordV2, type TaskRecordV3 } from "../../src/core/tasks/task.js";
+import {
+  saveTask,
+  setActiveTask,
+  type TaskRecordV1,
+  type TaskRecordV2,
+  type TaskRecordV3,
+} from "../../src/core/tasks/task.js";
 import { computeInputDigest } from "../../src/core/verification/input-digest.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
@@ -159,9 +165,30 @@ describe.sequential("status command", () => {
       required: true,
     }));
     task.evidence = [
-      { id: "e-z", checkId: "tie", recordedAt: new Date(now - 1_000).toISOString(), result: "pass", summary: "first", artifactPaths: [] },
-      { id: "e-a", checkId: "tie", recordedAt: new Date(now - 1_000).toISOString(), result: "fail", summary: "appended winner", artifactPaths: [] },
-      { id: "e-future", checkId: "future", recordedAt: new Date(now + 1_000).toISOString(), result: "pass", summary: "future", artifactPaths: [] },
+      {
+        id: "e-z",
+        checkId: "tie",
+        recordedAt: new Date(now - 1_000).toISOString(),
+        result: "pass",
+        summary: "first",
+        artifactPaths: [],
+      },
+      {
+        id: "e-a",
+        checkId: "tie",
+        recordedAt: new Date(now - 1_000).toISOString(),
+        result: "fail",
+        summary: "appended winner",
+        artifactPaths: [],
+      },
+      {
+        id: "e-future",
+        checkId: "future",
+        recordedAt: new Date(now + 1_000).toISOString(),
+        result: "pass",
+        summary: "future",
+        artifactPaths: [],
+      },
     ];
     await saveTask(join(root, ".harnix"), task);
     await setActiveTask(join(root, ".harnix"), task.id);
@@ -191,16 +218,18 @@ describe.sequential("status command", () => {
     const snapshot = await computeInputDigest(root, base, "gate");
     const task: TaskRecordV3 = {
       ...base,
-      evidence: [{
-        id: "e-current",
-        checkId: "gate",
-        recordedAt: new Date(now - 1_000).toISOString(),
-        result: "pass",
-        exitCode: 0,
-        summary: "passed",
-        artifactPaths: [],
-        inputDigest: snapshot.inputDigest,
-      }],
+      evidence: [
+        {
+          id: "e-current",
+          checkId: "gate",
+          recordedAt: new Date(now - 1_000).toISOString(),
+          result: "pass",
+          exitCode: 0,
+          summary: "passed",
+          artifactPaths: [],
+          inputDigest: snapshot.inputDigest,
+        },
+      ],
     };
     const harnixRoot = join(root, ".harnix");
     await saveTask(harnixRoot, task);
@@ -246,14 +275,16 @@ function planningTask(): TaskRecordV2 {
     acceptanceCriteria: [{ id: "criterion", text: "PRIVATE_CRITERION_CANARY", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{
-      id: "gate",
-      description: "PRIVATE_CHECK_CANARY",
-      scope: "focused",
-      required: true,
-      criterionIds: ["criterion"],
-      inputs: ["@task-contract"],
-    }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "PRIVATE_CHECK_CANARY",
+        scope: "focused",
+        required: true,
+        criterionIds: ["criterion"],
+        inputs: ["@task-contract"],
+      },
+    ],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -285,7 +316,14 @@ function verificationTask(now: number): TaskRecordV1 {
     evidence: [
       { id: "e-failed", checkId: "failed", recordedAt: current, result: "fail", summary: "failed", artifactPaths: [] },
       { id: "e-passed", checkId: "passed", recordedAt: current, result: "pass", summary: "passed", artifactPaths: [] },
-      { id: "e-pending", checkId: "pending", recordedAt: current, result: "skipped", summary: "skipped", artifactPaths: [] },
+      {
+        id: "e-pending",
+        checkId: "pending",
+        recordedAt: current,
+        result: "skipped",
+        summary: "skipped",
+        artifactPaths: [],
+      },
       { id: "e-stale", checkId: "stale", recordedAt: stale, result: "pass", summary: "old pass", artifactPaths: [] },
     ],
     createdAt: stale,
@@ -308,15 +346,17 @@ function digestTask(now: number): TaskRecordV3 {
     acceptanceCriteria: [{ id: "criterion", text: "done", status: "pending", evidenceIds: [] }],
     relevantPaths: ["input.ts"],
     relevantSpecs: [],
-    validationPlan: [{
-      id: "gate",
-      description: "verify input",
-      command: "pnpm test",
-      scope: "focused",
-      required: true,
-      criterionIds: ["criterion"],
-      inputs: ["input.ts"],
-    }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "verify input",
+        command: "pnpm test",
+        scope: "focused",
+        required: true,
+        criterionIds: ["criterion"],
+        inputs: ["input.ts"],
+      },
+    ],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -325,17 +365,21 @@ function digestTask(now: number): TaskRecordV3 {
 
 async function snapshotTree(root: string): Promise<Array<{ path: string; sha256: string }>> {
   const files = await walk(root);
-  return Promise.all(files.map(async (path) => ({
-    path: relative(root, path).replaceAll("\\", "/"),
-    sha256: createHash("sha256").update(await readFile(path)).digest("hex"),
-  })));
+  return Promise.all(
+    files.map(async (path) => ({
+      path: relative(root, path).replaceAll("\\", "/"),
+      sha256: createHash("sha256")
+        .update(await readFile(path))
+        .digest("hex"),
+    })),
+  );
 }
 
 async function walk(root: string): Promise<string[]> {
   const paths: string[] = [];
   for (const entry of await readdir(root, { withFileTypes: true })) {
     const path = join(root, entry.name);
-    if (entry.isDirectory()) paths.push(...await walk(path));
+    if (entry.isDirectory()) paths.push(...(await walk(path)));
     else if (entry.isFile()) paths.push(path);
   }
   return paths.sort();

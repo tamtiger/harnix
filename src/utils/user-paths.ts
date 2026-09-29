@@ -43,10 +43,12 @@ export interface SelectedUserPlatformRoots {
   readonly kiro?: UserPathRoot | undefined;
   readonly antigravityDesktop?: UserPathRoot | undefined;
   readonly antigravityCli?: UserPathRoot | undefined;
-  readonly codex?: {
-    readonly config: UserPathRoot;
-    readonly skills: UserPathRoot;
-  } | undefined;
+  readonly codex?:
+    | {
+        readonly config: UserPathRoot;
+        readonly skills: UserPathRoot;
+      }
+    | undefined;
 }
 
 export interface ResolveUserPlatformRootsOptions {
@@ -65,7 +67,13 @@ export async function resolveUserPlatformRoots(
   options: ResolveUserPlatformRootsOptions = {},
 ): Promise<UserPlatformRoots> {
   const roots = await resolveSelectedUserPlatformRoots(["kiro", "antigravity", "codex", "claude"], options);
-  if (roots.kiro === undefined || roots.antigravityDesktop === undefined || roots.antigravityCli === undefined || roots.codex === undefined || roots.claude === undefined) {
+  if (
+    roots.kiro === undefined ||
+    roots.antigravityDesktop === undefined ||
+    roots.antigravityCli === undefined ||
+    roots.codex === undefined ||
+    roots.claude === undefined
+  ) {
     throw new UnsafeUserPathError("All supported user platform roots could not be resolved.");
   }
   return {
@@ -114,17 +122,22 @@ export async function resolveSelectedUserPlatformRoots(
   if (selected.has("codex")) {
     const codexHome = (options.environment ?? process.env).CODEX_HOME;
     roots.codex = {
-      config: codexHome === undefined
-        ? await createDerivedUserRoot(home, ".codex", "~/.codex")
-        : await createVerifiedUserRoot(assertCodexHome(codexHome), "$CODEX_HOME"),
+      config:
+        codexHome === undefined
+          ? await createDerivedUserRoot(home, ".codex", "~/.codex")
+          : await createVerifiedUserRoot(assertCodexHome(codexHome), "$CODEX_HOME"),
       skills: await createDerivedUserRoot(home, ".agents", "~/.agents"),
     };
   }
   if (selected.has("claude")) {
     const claudeConfigDirectory = (options.environment ?? process.env).CLAUDE_CONFIG_DIR;
-    roots.claude = claudeConfigDirectory === undefined
-      ? await createDerivedUserRoot(home, ".claude", "~/.claude")
-      : await createVerifiedUserRoot(assertNamedHome(claudeConfigDirectory, "CLAUDE_CONFIG_DIR"), "$CLAUDE_CONFIG_DIR");
+    roots.claude =
+      claudeConfigDirectory === undefined
+        ? await createDerivedUserRoot(home, ".claude", "~/.claude")
+        : await createVerifiedUserRoot(
+            assertNamedHome(claudeConfigDirectory, "CLAUDE_CONFIG_DIR"),
+            "$CLAUDE_CONFIG_DIR",
+          );
   }
   return roots;
 }
@@ -197,7 +210,11 @@ export function normalizeUserRelativePath(value: string): string {
 
   const normalized = value.replaceAll("\\", "/").replace(/\/+/gu, "/");
   const segments = normalized.split("/");
-  if (segments.some((segment) => segment.length === 0 || segment === "." || segment === ".." || hasControlCharacter(segment))) {
+  if (
+    segments.some(
+      (segment) => segment.length === 0 || segment === "." || segment === ".." || hasControlCharacter(segment),
+    )
+  ) {
     throw new UnsafeUserPathError("User paths must not traverse outside their verified root.");
   }
   return segments.join("/");
@@ -224,7 +241,9 @@ function assertNamedHome(value: string, variable: string): string {
 
 function isSafeLogicalPath(value: string): boolean {
   const roots = ["$CODEX_HOME", "$CLAUDE_CONFIG_DIR"];
-  return value === "~" || value.startsWith("~/") || roots.some((root) => value === root || value.startsWith(`${root}/`));
+  return (
+    value === "~" || value.startsWith("~/") || roots.some((root) => value === root || value.startsWith(`${root}/`))
+  );
 }
 
 function isAbsolutePath(value: string): boolean {
@@ -241,7 +260,10 @@ function isFilesystemRoot(value: string): boolean {
 
 function isContainedPath(root: string, candidate: string): boolean {
   const pathToCandidate = relative(root, candidate);
-  return pathToCandidate === "" || (!pathToCandidate.startsWith(`..${sep}`) && pathToCandidate !== ".." && !isAbsolute(pathToCandidate));
+  return (
+    pathToCandidate === "" ||
+    (!pathToCandidate.startsWith(`..${sep}`) && pathToCandidate !== ".." && !isAbsolute(pathToCandidate))
+  );
 }
 
 async function findRealExistingAncestor(candidate: string): Promise<string> {

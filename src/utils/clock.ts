@@ -6,8 +6,12 @@
 
 export function isValidTimeZone(value: unknown): value is string {
   if (typeof value !== "string" || value.length === 0) return false;
-  try { new Intl.DateTimeFormat("en-US", { timeZone: value }); return true; }
-  catch { return false; }
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Resolved through Intl, never the shell `TZ` variable (Git Bash on Windows does not honor IANA names). */
@@ -16,14 +20,46 @@ export function systemTimezone(): string {
   return isValidTimeZone(resolved) ? resolved : "UTC";
 }
 
-interface ZonedParts { year: string; month: string; day: string; hour: string; minute: string; second: string; offsetMinutes: number }
+interface ZonedParts {
+  year: string;
+  month: string;
+  day: string;
+  hour: string;
+  minute: string;
+  second: string;
+  offsetMinutes: number;
+}
 
 function zonedParts(instantMs: number, timezone: string): ZonedParts {
-  const formatter = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
   const parts = Object.fromEntries(formatter.formatToParts(new Date(instantMs)).map((part) => [part.type, part.value]));
   const wholeSecond = Math.floor(instantMs / 1000) * 1000;
-  const asUtc = Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day), Number(parts.hour), Number(parts.minute), Number(parts.second));
-  return { year: parts.year!, month: parts.month!, day: parts.day!, hour: parts.hour!, minute: parts.minute!, second: parts.second!, offsetMinutes: Math.round((asUtc - wholeSecond) / 60_000) };
+  const asUtc = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second),
+  );
+  return {
+    year: parts.year!,
+    month: parts.month!,
+    day: parts.day!,
+    hour: parts.hour!,
+    minute: parts.minute!,
+    second: parts.second!,
+    offsetMinutes: Math.round((asUtc - wholeSecond) / 60_000),
+  };
 }
 
 function offsetText(offsetMinutes: number): string {

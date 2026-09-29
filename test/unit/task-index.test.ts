@@ -75,7 +75,7 @@ describe("task index", () => {
     const source: TaskIndexSource = {
       listTaskDirectoryIds: async () => ["../unsafe", badId, good.id, good.id],
       readActiveTaskId: async () => badId,
-      loadTaskRecord: async (_root, id) => id === good.id ? good : { private: "PRIVATE_RECORD_CANARY" },
+      loadTaskRecord: async (_root, id) => (id === good.id ? good : { private: "PRIVATE_RECORD_CANARY" }),
     };
 
     const result = await createTaskIndex("unused", { limit: 20 }, source);
@@ -105,7 +105,9 @@ describe("task index", () => {
   it("degrades to partial when the active pointer itself cannot be read", async () => {
     const good = task("20260826-120000-good-task", "2026-08-26T00:00:00.000Z", "planning");
     const source = memorySource([good], null);
-    source.readActiveTaskId = async () => { throw new Error("PRIVATE_PATH_CANARY"); };
+    source.readActiveTaskId = async () => {
+      throw new Error("PRIVATE_PATH_CANARY");
+    };
 
     const result = await createTaskIndex("unused", { limit: 20 }, source);
 
@@ -151,7 +153,15 @@ function task(id: string, updatedAt: string, status: Extract<TaskStatus, "planni
     acceptanceCriteria: [{ id: "criterion", text: "PRIVATE_CRITERION_CANARY", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "PRIVATE_COMMAND_CANARY", command: "PRIVATE_COMMAND_CANARY", scope: "focused", required: true }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "PRIVATE_COMMAND_CANARY",
+        command: "PRIVATE_COMMAND_CANARY",
+        scope: "focused",
+        required: true,
+      },
+    ],
     evidence: [],
     createdAt: "2026-08-25T00:00:00.000Z",
     updatedAt,

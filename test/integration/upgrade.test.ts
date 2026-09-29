@@ -15,13 +15,15 @@ describe("upgradeHarnix", () => {
   it("should_remain_offline_until_an_explicit_apply_runner_is_requested", async () => {
     let ran = false;
 
-    await expect(upgradeHarnix({
-      installedVersion: "0.1.0",
-      availableVersion: async () => "0.2.0",
-      runner: async () => {
-        ran = true;
-      },
-    })).resolves.toMatchObject({ available: "0.2.0", applied: false });
+    await expect(
+      upgradeHarnix({
+        installedVersion: "0.1.0",
+        availableVersion: async () => "0.2.0",
+        runner: async () => {
+          ran = true;
+        },
+      }),
+    ).resolves.toMatchObject({ available: "0.2.0", applied: false });
     expect(ran).toBe(false);
 
     await upgradeHarnix({

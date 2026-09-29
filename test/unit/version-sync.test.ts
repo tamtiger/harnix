@@ -5,23 +5,51 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 
-interface VersionSyncResult { changed: boolean; previousVersion: string; updated: readonly string[]; version: string; }
-type SyncVersion = (options: { date?: string; kind?: string; root: string; summaries: readonly string[]; version: string }) => Promise<VersionSyncResult>;
-const { syncVersion } = await import(new URL("../../scripts/version-sync.mjs", import.meta.url).href) as { syncVersion: SyncVersion };
+interface VersionSyncResult {
+  changed: boolean;
+  previousVersion: string;
+  updated: readonly string[];
+  version: string;
+}
+type SyncVersion = (options: {
+  date?: string;
+  kind?: string;
+  root: string;
+  summaries: readonly string[];
+  version: string;
+}) => Promise<VersionSyncResult>;
+const { syncVersion } = (await import(new URL("../../scripts/version-sync.mjs", import.meta.url).href)) as {
+  syncVersion: SyncVersion;
+};
 const execFileAsync = promisify(execFile);
 
 const roots: string[] = [];
-const skillNames = ["harnix-brainstorm", "harnix-check", "harnix-continue", "harnix-debug", "harnix-finish-work", "harnix-implement", "harnix-research"];
+const skillNames = [
+  "harnix-brainstorm",
+  "harnix-check",
+  "harnix-continue",
+  "harnix-debug",
+  "harnix-finish-work",
+  "harnix-implement",
+  "harnix-research",
+];
 
-afterEach(async () => { await Promise.all(roots.splice(0).map(async (root) => rm(root, { force: true, recursive: true }))); });
+afterEach(async () => {
+  await Promise.all(roots.splice(0).map(async (root) => rm(root, { force: true, recursive: true })));
+});
 
 describe("version sync", () => {
   it("synchronizes package, canonical skills, and one changelog entry idempotently", async () => {
     const root = await fixture();
 
-    await expect(syncVersion({ date: "2026-08-18", root, summaries: ["Đồng bộ release metadata qua script."], version: "1.0.5" })).resolves.toMatchObject({ changed: true, previousVersion: "1.0.4", version: "1.0.5" });
+    await expect(
+      syncVersion({ date: "2026-08-18", root, summaries: ["Đồng bộ release metadata qua script."], version: "1.0.5" }),
+    ).resolves.toMatchObject({ changed: true, previousVersion: "1.0.4", version: "1.0.5" });
     await expect(readFile(join(root, "package.json"), "utf8")).resolves.toContain('"version": "1.0.5"');
-    for (const name of skillNames) await expect(readFile(join(root, "src", "skills", name, "SKILL.md"), "utf8")).resolves.toContain('version: "1.0.5"');
+    for (const name of skillNames)
+      await expect(readFile(join(root, "src", "skills", name, "SKILL.md"), "utf8")).resolves.toContain(
+        'version: "1.0.5"',
+      );
     const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
     expect(changelog).toContain("## [1.0.5] - 2026-08-18");
     expect(changelog).toContain("- Đồng bộ release metadata qua script.");
@@ -32,17 +60,27 @@ describe("version sync", () => {
 
     await writeFile(join(root, "README.md"), "# Fixture\n\n**Version:** `1.0.4`\n");
     await writeSelfHostManifest(root, "1.0.4");
-    await expect(syncVersion({ date: "2026-08-19", root, summaries: ["Đồng bộ release metadata qua script."], version: "1.0.5" })).resolves.toMatchObject({ changed: true, updated: [".harnix/.template-hashes.json", "README.md"], version: "1.0.5" });
+    await expect(
+      syncVersion({ date: "2026-08-19", root, summaries: ["Đồng bộ release metadata qua script."], version: "1.0.5" }),
+    ).resolves.toMatchObject({
+      changed: true,
+      updated: [".harnix/.template-hashes.json", "README.md"],
+      version: "1.0.5",
+    });
     expect((await readFile(join(root, "CHANGELOG.md"), "utf8")).match(/^## \[1\.0\.5\]/gmu)).toHaveLength(1);
     await expect(readFile(join(root, "README.md"), "utf8")).resolves.toContain("**Version:** `1.0.5`");
     await expect(selfHostGeneratorVersions(root)).resolves.toEqual(["1.0.5", "1.0.5"]);
-    await expect(syncVersion({ date: "2026-08-19", root, summaries: ["Đồng bộ release metadata qua script."], version: "1.0.5" })).resolves.toMatchObject({ changed: false, version: "1.0.5" });
+    await expect(
+      syncVersion({ date: "2026-08-19", root, summaries: ["Đồng bộ release metadata qua script."], version: "1.0.5" }),
+    ).resolves.toMatchObject({ changed: false, version: "1.0.5" });
   });
 
   it("rejects a non-increasing version and a missing release summary", async () => {
     const root = await fixture();
 
-    await expect(syncVersion({ root, summaries: ["x"], version: "1.0.3" })).rejects.toThrow("greater than current version");
+    await expect(syncVersion({ root, summaries: ["x"], version: "1.0.3" })).rejects.toThrow(
+      "greater than current version",
+    );
     await expect(syncVersion({ root, summaries: [], version: "1.0.5" })).rejects.toThrow("summary");
   });
 
@@ -50,7 +88,11 @@ describe("version sync", () => {
     const root = await fixture();
     const script = join(process.cwd(), "scripts", "version-sync.mjs");
 
-    const { stdout } = await execFileAsync(process.execPath, [script, "--", "1.0.5", "--summary", "Đồng bộ release metadata qua pnpm."], { cwd: root });
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [script, "--", "1.0.5", "--summary", "Đồng bộ release metadata qua pnpm."],
+      { cwd: root },
+    );
 
     expect(JSON.parse(stdout)).toMatchObject({ changed: true, previousVersion: "1.0.4", version: "1.0.5" });
   });
@@ -60,7 +102,11 @@ describe("version sync", () => {
     const root = await fixture();
     const script = join(process.cwd(), "scripts", "version-sync.mjs");
 
-    const { stdout } = await execFileAsync(process.execPath, [script, "--", "1.0.5", "--summary", "Sửa lỗi X.", "--kind", "fixed"], { cwd: root });
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [script, "--", "1.0.5", "--summary", "Sửa lỗi X.", "--kind", "fixed"],
+      { cwd: root },
+    );
 
     expect(JSON.parse(stdout)).toMatchObject({ changed: true, version: "1.0.5" });
     const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
@@ -72,7 +118,9 @@ describe("version sync", () => {
   it("inserts ### Added section when kind: added is passed via API", async () => {
     const root = await fixture();
 
-    await expect(syncVersion({ date: "2026-08-18", root, summaries: ["Tính năng mới Y."], version: "1.0.5", kind: "added" })).resolves.toMatchObject({ changed: true });
+    await expect(
+      syncVersion({ date: "2026-08-18", root, summaries: ["Tính năng mới Y."], version: "1.0.5", kind: "added" }),
+    ).resolves.toMatchObject({ changed: true });
     const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
     expect(changelog).toContain("### Added");
     expect(changelog).not.toContain("### Changed");
@@ -81,7 +129,9 @@ describe("version sync", () => {
   it("defaults to ### Changed when kind is omitted", async () => {
     const root = await fixture();
 
-    await expect(syncVersion({ date: "2026-08-18", root, summaries: ["Cập nhật."], version: "1.0.5" })).resolves.toMatchObject({ changed: true });
+    await expect(
+      syncVersion({ date: "2026-08-18", root, summaries: ["Cập nhật."], version: "1.0.5" }),
+    ).resolves.toMatchObject({ changed: true });
     const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
     expect(changelog).toContain("### Changed");
   });
@@ -89,7 +139,9 @@ describe("version sync", () => {
   it("rejects an unknown kind value", async () => {
     const root = await fixture();
 
-    await expect(syncVersion({ date: "2026-08-18", root, summaries: ["x"], version: "1.0.5", kind: "refactor" })).rejects.toThrow(/kind/iu);
+    await expect(
+      syncVersion({ date: "2026-08-18", root, summaries: ["x"], version: "1.0.5", kind: "refactor" }),
+    ).rejects.toThrow(/kind/iu);
   });
 
   // Fix #2: re-sync auto-fixes stale skills
@@ -109,21 +161,28 @@ describe("version sync", () => {
   it("replaces only the frontmatter version and leaves matching body content untouched", async () => {
     const root = await fixture();
     const skillPath = join(root, "src", "skills", "harnix-brainstorm", "SKILL.md");
-    await writeFile(skillPath, `---\nname: harnix-brainstorm\nmetadata:\n  version: "1.0.4"\n---\n\nUse \`  version: "1.0.4"\` in your frontmatter.\n`);
+    await writeFile(
+      skillPath,
+      `---\nname: harnix-brainstorm\nmetadata:\n  version: "1.0.4"\n---\n\nUse \`  version: "1.0.4"\` in your frontmatter.\n`,
+    );
 
     await syncVersion({ date: "2026-08-18", root, summaries: ["Test."], version: "1.0.5" });
 
     const content = await readFile(skillPath, "utf8");
-    expect(content).toContain('version: "1.0.5"');         // frontmatter updated
-    expect(content).toContain('`  version: "1.0.4"`');     // body left untouched
+    expect(content).toContain('version: "1.0.5"'); // frontmatter updated
+    expect(content).toContain('`  version: "1.0.4"`'); // body left untouched
   });
 
   // Fix #4: invalid calendar date rejection
   it("rejects an invalid calendar date even when format matches YYYY-MM-DD", async () => {
     const root = await fixture();
 
-    await expect(syncVersion({ date: "2026-13-01", root, summaries: ["x"], version: "1.0.5" })).rejects.toThrow(/invalid.*date/iu);
-    await expect(syncVersion({ date: "2026-02-30", root, summaries: ["x"], version: "1.0.5" })).rejects.toThrow(/invalid.*date/iu);
+    await expect(syncVersion({ date: "2026-13-01", root, summaries: ["x"], version: "1.0.5" })).rejects.toThrow(
+      /invalid.*date/iu,
+    );
+    await expect(syncVersion({ date: "2026-02-30", root, summaries: ["x"], version: "1.0.5" })).rejects.toThrow(
+      /invalid.*date/iu,
+    );
   });
 });
 
@@ -155,9 +214,21 @@ async function writeSelfHostManifest(root: string, generatorVersion: string): Pr
     generator: "harnix",
     schemaVersion: 1,
     entries: [
-      { path: ".harnix/spec/guides/common.md", sourceId: "guide-common-engineering", scope: "project", generatedHash: "a".repeat(64), generatorVersion },
-      { path: ".harnix/workflow.md", sourceId: "workflow", scope: "project", generatedHash: "b".repeat(64), generatorVersion }
-    ]
+      {
+        path: ".harnix/spec/guides/common.md",
+        sourceId: "guide-common-engineering",
+        scope: "project",
+        generatedHash: "a".repeat(64),
+        generatorVersion,
+      },
+      {
+        path: ".harnix/workflow.md",
+        sourceId: "workflow",
+        scope: "project",
+        generatedHash: "b".repeat(64),
+        generatorVersion,
+      },
+    ],
   };
   await writeFile(join(root, ".harnix", ".template-hashes.json"), `${JSON.stringify(manifest, null, 2)}\n`);
 }

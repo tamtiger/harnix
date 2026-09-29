@@ -31,7 +31,12 @@ export async function queryRepoMapInternal(cwd: string, query: string, limit: nu
   return { results: result.results, scope: "project", status: result.status };
 }
 
-export async function impactRepoMapInternal(cwd: string, target: string, depth: number, limit: number): Promise<unknown> {
+export async function impactRepoMapInternal(
+  cwd: string,
+  target: string,
+  depth: number,
+  limit: number,
+): Promise<unknown> {
   const root = await initializedRoot(cwd);
   await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
   return impactRepoMap({ root, target, depth, limit });
@@ -44,5 +49,12 @@ async function initializedRoot(cwd: string): Promise<string> {
 }
 
 function terms(...values: string[]): string[] {
-  return [...new Set(values.join(" ").toLowerCase().match(/[\p{L}\p{N}_-]+/gu) ?? [])].sort(compareCodeUnits);
+  return [
+    ...new Set(
+      values
+        .join(" ")
+        .toLowerCase()
+        .match(/[\p{L}\p{N}_-]+/gu) ?? [],
+    ),
+  ].sort(compareCodeUnits);
 }

@@ -1,10 +1,5 @@
 import { compareCodeUnits } from "../../utils/order.js";
-import {
-  type TaskRecord,
-  type TaskCancellation,
-  transitionTask,
-  updateTaskCheckpoint,
-} from "./task.js";
+import { type TaskRecord, type TaskCancellation, transitionTask, updateTaskCheckpoint } from "./task.js";
 import type { LearningCaptureInput } from "../journal/learning.js";
 
 const PLAN_CHECKLIST_ITEM = /^\s*- \[[ xX]\]\s+\S/mu;
@@ -19,7 +14,9 @@ export function laterTimestamp(previous: string, now: string): string {
 }
 
 export function isMissing(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT";
+  return (
+    typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"
+  );
 }
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
@@ -32,7 +29,7 @@ export function canonicalJson(value: unknown): unknown {
   return Object.fromEntries(
     Object.keys(value)
       .sort(compareCodeUnits)
-      .map((key) => [key, canonicalJson(value[key])])
+      .map((key) => [key, canonicalJson(value[key])]),
   );
 }
 
@@ -66,10 +63,11 @@ export function assertLegalTransition(previous: TaskRecord, next: TaskRecord): v
     updateTaskCheckpoint(previous, next.checkpoint, next.updatedAt);
     return;
   }
-  const reenteringReadyFromReplan = next.status === "ready"
-    && next.checkpoint === "ready"
-    && previous.checkpoint === "replan"
-    && (previous.status === "in_progress" || previous.status === "verifying");
+  const reenteringReadyFromReplan =
+    next.status === "ready" &&
+    next.checkpoint === "ready" &&
+    previous.checkpoint === "replan" &&
+    (previous.status === "in_progress" || previous.status === "verifying");
   if (reenteringReadyFromReplan) return;
   transitionTask(previous, next.status, next.checkpoint, next.updatedAt, next.blocker);
 }

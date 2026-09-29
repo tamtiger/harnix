@@ -1,7 +1,8 @@
 import type { LanguageId, TechnologyId } from "../catalog/catalog.js";
 import { compareCodeUnits } from "./order.js";
 
-export type LegacyStackId = "csharp-dotnet-abp" | "typescript-nestjs" | "php" | "python" | "java-spring" | "go" | "react-web" | "vue";
+export type LegacyStackId =
+  "csharp-dotnet-abp" | "typescript-nestjs" | "php" | "python" | "java-spring" | "go" | "react-web" | "vue";
 
 export interface StackProfile {
   languages: LanguageId[];

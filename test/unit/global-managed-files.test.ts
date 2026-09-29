@@ -16,7 +16,11 @@ import { useTemporaryRepositories } from "../support/temporary-repository.js";
 const temporaryRoot = useTemporaryRepositories("harnix-global-managed-");
 
 const markerSelector = { type: "markers" as const, begin: "<!-- harnix:begin -->", end: "<!-- harnix:end -->" };
-const jsonSelector = { type: "json-array-member" as const, pointer: "/hooks/UserPromptSubmit", memberId: "harnix-context" };
+const jsonSelector = {
+  type: "json-array-member" as const,
+  pointer: "/hooks/UserPromptSubmit",
+  memberId: "harnix-context",
+};
 const legacyCodexContextCommand = "harnix internal context --platform codex";
 const codexContextCommand = "harnix context --platform codex";
 const lockRecordName = "owner-00000000-0000-4000-8000-000000000001.json";
@@ -32,52 +36,126 @@ describe("global managed files", () => {
       schemaVersion: 1 as const,
       platform: "codex" as const,
       entries: [
-        { path: "AGENTS.md", sourceId: "agents", kind: "managed-block" as const, selector: markerSelector, generatedHash: sha256("block"), generatorVersion: "0.5.0" },
-        { path: "hooks.json", sourceId: "hook", kind: "json-member" as const, selector: jsonSelector, generatedHash: sha256("member"), generatorVersion: "0.5.0" },
+        {
+          path: "AGENTS.md",
+          sourceId: "agents",
+          kind: "managed-block" as const,
+          selector: markerSelector,
+          generatedHash: sha256("block"),
+          generatorVersion: "0.5.0",
+        },
+        {
+          path: "hooks.json",
+          sourceId: "hook",
+          kind: "json-member" as const,
+          selector: jsonSelector,
+          generatedHash: sha256("member"),
+          generatorVersion: "0.5.0",
+        },
       ],
     };
 
     expect(validateGlobalManagedManifest(manifest)).toEqual(manifest);
-    expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], selector: undefined }] })).toThrow(GlobalManagedManifestError);
-    expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], kind: "file", selector: markerSelector }] })).toThrow("must not use a selector");
-    expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], selector: { type: "markers", begin: "<!-- harnix:begin -->", end: "harnix:begin" } }] })).toThrow("overlap");
-    expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], path: "../AGENTS.md" }] })).toThrow("safe");
-    expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], path: "skills/\0invalid" }] })).toThrow("safe");
-    expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], sourceId: "agents\0invalid" }] })).toThrow("safe canonical values");
-    expect(() => validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[1], selector: { ...jsonSelector, pointer: "hooks/UserPromptSubmit" } }] })).toThrow("canonical JSON pointer");
-    expect(() => validateGlobalManagedManifest({ ...manifest, entries: [manifest.entries[0], { ...manifest.entries[0], sourceId: "another-source" }] })).toThrow("overlap");
-    expect(() => validateGlobalManagedManifest({
-      ...manifest,
-      entries: [
-        { ...manifest.entries[0], sourceId: "agents-a", selector: { type: "markers", begin: "<!-- harnix:a -->", end: "<!-- harnix:shared -->" } },
-        { ...manifest.entries[0], sourceId: "agents-b", selector: { type: "markers", begin: "<!-- harnix:shared -->", end: "<!-- harnix:b -->" } },
-      ],
-    })).toThrow("overlap");
-    expect(() => validateGlobalManagedManifest({
-      ...manifest,
-      entries: [
-        { ...manifest.entries[0], sourceId: "agents-a", selector: { type: "markers", begin: "<!-- harnix:a -->", end: "<!-- harnix:shared boundary -->" } },
-        { ...manifest.entries[0], sourceId: "agents-b", selector: { type: "markers", begin: "harnix:shared", end: "<!-- harnix:b -->" } },
-      ],
-    })).toThrow("overlap");
+    expect(() =>
+      validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], selector: undefined }] }),
+    ).toThrow(GlobalManagedManifestError);
+    expect(() =>
+      validateGlobalManagedManifest({
+        ...manifest,
+        entries: [{ ...manifest.entries[0], kind: "file", selector: markerSelector }],
+      }),
+    ).toThrow("must not use a selector");
+    expect(() =>
+      validateGlobalManagedManifest({
+        ...manifest,
+        entries: [
+          {
+            ...manifest.entries[0],
+            selector: { type: "markers", begin: "<!-- harnix:begin -->", end: "harnix:begin" },
+          },
+        ],
+      }),
+    ).toThrow("overlap");
+    expect(() =>
+      validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], path: "../AGENTS.md" }] }),
+    ).toThrow("safe");
+    expect(() =>
+      validateGlobalManagedManifest({ ...manifest, entries: [{ ...manifest.entries[0], path: "skills/\0invalid" }] }),
+    ).toThrow("safe");
+    expect(() =>
+      validateGlobalManagedManifest({
+        ...manifest,
+        entries: [{ ...manifest.entries[0], sourceId: "agents\0invalid" }],
+      }),
+    ).toThrow("safe canonical values");
+    expect(() =>
+      validateGlobalManagedManifest({
+        ...manifest,
+        entries: [{ ...manifest.entries[1], selector: { ...jsonSelector, pointer: "hooks/UserPromptSubmit" } }],
+      }),
+    ).toThrow("canonical JSON pointer");
+    expect(() =>
+      validateGlobalManagedManifest({
+        ...manifest,
+        entries: [manifest.entries[0], { ...manifest.entries[0], sourceId: "another-source" }],
+      }),
+    ).toThrow("overlap");
+    expect(() =>
+      validateGlobalManagedManifest({
+        ...manifest,
+        entries: [
+          {
+            ...manifest.entries[0],
+            sourceId: "agents-a",
+            selector: { type: "markers", begin: "<!-- harnix:a -->", end: "<!-- harnix:shared -->" },
+          },
+          {
+            ...manifest.entries[0],
+            sourceId: "agents-b",
+            selector: { type: "markers", begin: "<!-- harnix:shared -->", end: "<!-- harnix:b -->" },
+          },
+        ],
+      }),
+    ).toThrow("overlap");
+    expect(() =>
+      validateGlobalManagedManifest({
+        ...manifest,
+        entries: [
+          {
+            ...manifest.entries[0],
+            sourceId: "agents-a",
+            selector: { type: "markers", begin: "<!-- harnix:a -->", end: "<!-- harnix:shared boundary -->" },
+          },
+          {
+            ...manifest.entries[0],
+            sourceId: "agents-b",
+            selector: { type: "markers", begin: "harnix:shared", end: "<!-- harnix:b -->" },
+          },
+        ],
+      }),
+    ).toThrow("overlap");
   });
 
   it("rejects desired marker content that would make the next reconciliation malformed", async () => {
     const root = await temporaryGlobalRoot();
 
-    await expect(reconcileGlobalManagedFiles({
-      root,
-      manifestPath: "harnix/managed.json",
-      platform: "codex",
-      generatorVersion: "0.6.0",
-      desired: [{
-        path: "AGENTS.md",
-        sourceId: "agents",
-        kind: "managed-block",
-        selector: markerSelector,
-        content: "Safe text followed by <!-- harnix:begin --> a nested marker.",
-      }],
-    })).rejects.toThrow(/marker content/i);
+    await expect(
+      reconcileGlobalManagedFiles({
+        root,
+        manifestPath: "harnix/managed.json",
+        platform: "codex",
+        generatorVersion: "0.6.0",
+        desired: [
+          {
+            path: "AGENTS.md",
+            sourceId: "agents",
+            kind: "managed-block",
+            selector: markerSelector,
+            content: "Safe text followed by <!-- harnix:begin --> a nested marker.",
+          },
+        ],
+      }),
+    ).rejects.toThrow(/marker content/i);
 
     await expect(access(join(root.path, "AGENTS.md"))).rejects.toMatchObject({ code: "ENOENT" });
   });
@@ -85,19 +163,23 @@ describe("global managed files", () => {
   it("rejects a desired JSON member that does not match its own stable selector", async () => {
     const root = await temporaryGlobalRoot();
 
-    await expect(reconcileGlobalManagedFiles({
-      root,
-      manifestPath: "harnix/managed.json",
-      platform: "codex",
-      generatorVersion: "0.6.0",
-      desired: [{
-        path: "hooks.json",
-        sourceId: "hook",
-        kind: "json-member",
-        selector: jsonSelector,
-        member: { id: "different-id", command: codexContextCommand },
-      }],
-    })).rejects.toThrow(/does not match/i);
+    await expect(
+      reconcileGlobalManagedFiles({
+        root,
+        manifestPath: "harnix/managed.json",
+        platform: "codex",
+        generatorVersion: "0.6.0",
+        desired: [
+          {
+            path: "hooks.json",
+            sourceId: "hook",
+            kind: "json-member",
+            selector: jsonSelector,
+            member: { id: "different-id", command: codexContextCommand },
+          },
+        ],
+      }),
+    ).rejects.toThrow(/does not match/i);
 
     await expect(access(join(root.path, "hooks.json"))).rejects.toMatchObject({ code: "ENOENT" });
   });
@@ -112,13 +194,15 @@ describe("global managed files", () => {
         manifestPath: "harnix/managed.json",
         platform: "codex",
         generatorVersion: "0.6.0",
-        desired: [{
-          path: "hooks.json",
-          sourceId: "hook",
-          kind: "json-member",
-          selector,
-          member: { id: "harnix-context", command: codexContextCommand },
-        }],
+        desired: [
+          {
+            path: "hooks.json",
+            sourceId: "hook",
+            kind: "json-member",
+            selector,
+            member: { id: "harnix-context", command: codexContextCommand },
+          },
+        ],
       });
 
       const document = JSON.parse(await readFile(join(root.path, "hooks.json"), "utf8")) as Record<string, unknown>;
@@ -168,7 +252,9 @@ describe("global managed files", () => {
     await expect(access(join(unit, "SKILL.md"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(root.path, "harnix", "managed.json"))).rejects.toMatchObject({ code: "ENOENT" });
     expect(result.manifest.entries).toEqual([]);
-    expect(result.warnings).toContainEqual(expect.objectContaining({ code: "untracked-collision", path: "skills/harnix-check/SKILL.md" }));
+    expect(result.warnings).toContainEqual(
+      expect.objectContaining({ code: "untracked-collision", path: "skills/harnix-check/SKILL.md" }),
+    );
   });
 
   it("permits only its own lock-created plugin root but preserves concurrent root content", async () => {
@@ -185,7 +271,7 @@ describe("global managed files", () => {
       ownedRootLockContent: "harnix-owned lock\n",
       ownedRootLockPath: ".managed.lock",
       ownedRootLockRecordName: lockRecordName,
-      desired: [{ path: "plugin.json", sourceId: "plugin", kind: "file", content: "{\"name\":\"harnix\"}\n" }],
+      desired: [{ path: "plugin.json", sourceId: "plugin", kind: "file", content: '{"name":"harnix"}\n' }],
     });
     await expect(access(join(lockOnlyRoot.path, "plugin.json"))).resolves.toBeUndefined();
     await expect(access(join(lockOnlyRoot.path, ".managed.json"))).resolves.toBeUndefined();
@@ -209,7 +295,9 @@ describe("global managed files", () => {
     await expect(readFile(join(concurrentRoot.path, "plugin.json"), "utf8")).resolves.toBe("user plugin\n");
     await expect(access(join(concurrentRoot.path, "hooks.json"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(concurrentRoot.path, ".managed.json"))).rejects.toMatchObject({ code: "ENOENT" });
-    expect(collision.warnings).toContainEqual(expect.objectContaining({ code: "untracked-collision", path: "hooks.json" }));
+    expect(collision.warnings).toContainEqual(
+      expect.objectContaining({ code: "untracked-collision", path: "hooks.json" }),
+    );
 
     const unprovenLockRoot = await temporaryGlobalRoot("~/unproven-plugin-lock");
     await mkdir(join(unprovenLockRoot.path, ".managed.lock"), { recursive: true });
@@ -224,7 +312,9 @@ describe("global managed files", () => {
     });
     await expect(access(join(unprovenLockRoot.path, "hooks.json"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(unprovenLockRoot.path, ".managed.json"))).rejects.toMatchObject({ code: "ENOENT" });
-    expect(unproven.warnings).toContainEqual(expect.objectContaining({ code: "untracked-collision", path: "hooks.json" }));
+    expect(unproven.warnings).toContainEqual(
+      expect.objectContaining({ code: "untracked-collision", path: "hooks.json" }),
+    );
   });
 
   it("fails closed on a corrupt sidecar before attempting a global target write", async () => {
@@ -234,14 +324,18 @@ describe("global managed files", () => {
     await writeFile(manifestPath, "not-json");
     let writes = 0;
 
-    await expect(reconcileGlobalManagedFiles({
-      root,
-      manifestPath: "harnix/managed.json",
-      platform: "kiro",
-      generatorVersion: "0.6.0",
-      desired: [{ path: "steering/harnix.md", sourceId: "steering", kind: "file", content: "generated\n" }],
-      writer: async () => { writes += 1; },
-    })).rejects.toBeInstanceOf(GlobalManagedManifestError);
+    await expect(
+      reconcileGlobalManagedFiles({
+        root,
+        manifestPath: "harnix/managed.json",
+        platform: "kiro",
+        generatorVersion: "0.6.0",
+        desired: [{ path: "steering/harnix.md", sourceId: "steering", kind: "file", content: "generated\n" }],
+        writer: async () => {
+          writes += 1;
+        },
+      }),
+    ).rejects.toBeInstanceOf(GlobalManagedManifestError);
 
     expect(writes).toBe(0);
     await expect(access(join(root.path, "steering", "harnix.md"))).rejects.toMatchObject({ code: "ENOENT" });
@@ -251,28 +345,42 @@ describe("global managed files", () => {
     const root = await temporaryGlobalRoot();
     const manifestPath = join(root.path, "harnix", "managed.json");
     await mkdir(join(root.path, "harnix"), { recursive: true });
-    await writeFile(manifestPath, `${JSON.stringify({
-      entries: [{
-        generatedHash: "0".repeat(64),
-        generatorVersion: "0.6.0",
-        kind: "file",
-        path: "harnix/managed.json",
-        sourceId: "invalid-self-owner",
-      }],
-      generator: "harnix",
-      platform: "kiro",
-      schemaVersion: 1,
-    }, null, 2)}\n`, "utf8");
+    await writeFile(
+      manifestPath,
+      `${JSON.stringify(
+        {
+          entries: [
+            {
+              generatedHash: "0".repeat(64),
+              generatorVersion: "0.6.0",
+              kind: "file",
+              path: "harnix/managed.json",
+              sourceId: "invalid-self-owner",
+            },
+          ],
+          generator: "harnix",
+          platform: "kiro",
+          schemaVersion: 1,
+        },
+        null,
+        2,
+      )}\n`,
+      "utf8",
+    );
     let writes = 0;
 
-    await expect(reconcileGlobalManagedFiles({
-      root,
-      manifestPath: "harnix/managed.json",
-      platform: "kiro",
-      generatorVersion: "0.6.0",
-      desired: [{ path: "steering/harnix.md", sourceId: "steering", kind: "file", content: "generated\n" }],
-      writer: async () => { writes += 1; },
-    })).rejects.toBeInstanceOf(GlobalManagedManifestError);
+    await expect(
+      reconcileGlobalManagedFiles({
+        root,
+        manifestPath: "harnix/managed.json",
+        platform: "kiro",
+        generatorVersion: "0.6.0",
+        desired: [{ path: "steering/harnix.md", sourceId: "steering", kind: "file", content: "generated\n" }],
+        writer: async () => {
+          writes += 1;
+        },
+      }),
+    ).rejects.toBeInstanceOf(GlobalManagedManifestError);
 
     expect(writes).toBe(0);
     await expect(access(join(root.path, "steering", "harnix.md"))).rejects.toMatchObject({ code: "ENOENT" });
@@ -289,17 +397,63 @@ describe("global managed files", () => {
       generatorVersion: "0.6.0",
     };
 
-    const installed = await reconcileGlobalManagedFiles({ ...base, desired: [{ path: "AGENTS.md", sourceId: "agents", kind: "managed-block", selector: markerSelector, content: "Read Harnix state when present." }] });
-    expect(await readFile(agentsPath, "utf8")).toContain("<!-- harnix:begin -->\nRead Harnix state when present.\n<!-- harnix:end -->");
+    const installed = await reconcileGlobalManagedFiles({
+      ...base,
+      desired: [
+        {
+          path: "AGENTS.md",
+          sourceId: "agents",
+          kind: "managed-block",
+          selector: markerSelector,
+          content: "Read Harnix state when present.",
+        },
+      ],
+    });
+    expect(await readFile(agentsPath, "utf8")).toContain(
+      "<!-- harnix:begin -->\nRead Harnix state when present.\n<!-- harnix:end -->",
+    );
 
-    await writeFile(agentsPath, `# User guide\n\nUser changed this line.\n\n${await readFile(agentsPath, "utf8").then((text) => text.slice(text.indexOf("<!-- harnix:begin -->")))}`);
-    const updated = await reconcileGlobalManagedFiles({ ...base, generatorVersion: "0.7.0", desired: [{ path: "AGENTS.md", sourceId: "agents", kind: "managed-block", selector: markerSelector, content: "Read current Harnix state when present." }] });
+    await writeFile(
+      agentsPath,
+      `# User guide\n\nUser changed this line.\n\n${await readFile(agentsPath, "utf8").then((text) => text.slice(text.indexOf("<!-- harnix:begin -->")))}`,
+    );
+    const updated = await reconcileGlobalManagedFiles({
+      ...base,
+      generatorVersion: "0.7.0",
+      desired: [
+        {
+          path: "AGENTS.md",
+          sourceId: "agents",
+          kind: "managed-block",
+          selector: markerSelector,
+          content: "Read current Harnix state when present.",
+        },
+      ],
+    });
     expect(await readFile(agentsPath, "utf8")).toContain("User changed this line.");
     expect(await readFile(agentsPath, "utf8")).toContain("Read current Harnix state when present.");
     expect(updated.updated).toEqual(["AGENTS.md#agents"]);
 
-    await writeFile(agentsPath, (await readFile(agentsPath, "utf8")).replace("Read current Harnix state when present.", "User changed the Harnix block."));
-    const preserved = await reconcileGlobalManagedFiles({ ...base, generatorVersion: "0.8.0", desired: [{ path: "AGENTS.md", sourceId: "agents", kind: "managed-block", selector: markerSelector, content: "A later generated block." }] });
+    await writeFile(
+      agentsPath,
+      (await readFile(agentsPath, "utf8")).replace(
+        "Read current Harnix state when present.",
+        "User changed the Harnix block.",
+      ),
+    );
+    const preserved = await reconcileGlobalManagedFiles({
+      ...base,
+      generatorVersion: "0.8.0",
+      desired: [
+        {
+          path: "AGENTS.md",
+          sourceId: "agents",
+          kind: "managed-block",
+          selector: markerSelector,
+          content: "A later generated block.",
+        },
+      ],
+    });
     expect(await readFile(agentsPath, "utf8")).toContain("User changed the Harnix block.");
     expect(preserved.preserved).toEqual(["AGENTS.md#agents"]);
     expect(preserved.warnings).toContainEqual(expect.objectContaining({ code: "modified", path: "AGENTS.md#agents" }));
@@ -309,7 +463,10 @@ describe("global managed files", () => {
   it("merges a JSON array member without overwriting unrelated handlers, but preserves an edited Harnix member", async () => {
     const root = await temporaryGlobalRoot();
     const hooksPath = join(root.path, "hooks.json");
-    await writeFile(hooksPath, JSON.stringify({ hooks: { UserPromptSubmit: [{ id: "user-handler", command: "user command" }] } }, null, 2));
+    await writeFile(
+      hooksPath,
+      JSON.stringify({ hooks: { UserPromptSubmit: [{ id: "user-handler", command: "user command" }] } }, null, 2),
+    );
     const base = {
       root,
       manifestPath: "harnix/managed.json",
@@ -318,20 +475,50 @@ describe("global managed files", () => {
     };
     const first = await reconcileGlobalManagedFiles({
       ...base,
-      desired: [{ path: "hooks.json", sourceId: "hook", kind: "json-member", selector: jsonSelector, member: { id: "harnix-context", command: legacyCodexContextCommand, timeout: 5 } }],
+      desired: [
+        {
+          path: "hooks.json",
+          sourceId: "hook",
+          kind: "json-member",
+          selector: jsonSelector,
+          member: { id: "harnix-context", command: legacyCodexContextCommand, timeout: 5 },
+        },
+      ],
     });
-    const afterInstall = JSON.parse(await readFile(hooksPath, "utf8")) as { hooks: { UserPromptSubmit: Array<Record<string, unknown>> } };
-    expect(afterInstall.hooks.UserPromptSubmit).toEqual(expect.arrayContaining([expect.objectContaining({ id: "user-handler" }), expect.objectContaining({ id: "harnix-context", timeout: 5 })]));
+    const afterInstall = JSON.parse(await readFile(hooksPath, "utf8")) as {
+      hooks: { UserPromptSubmit: Array<Record<string, unknown>> };
+    };
+    expect(afterInstall.hooks.UserPromptSubmit).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: "user-handler" }),
+        expect.objectContaining({ id: "harnix-context", timeout: 5 }),
+      ]),
+    );
 
     afterInstall.hooks.UserPromptSubmit[0]!.command = "user command changed";
     await writeFile(hooksPath, `${JSON.stringify(afterInstall, null, 2)}\n`);
     const updated = await reconcileGlobalManagedFiles({
       ...base,
       generatorVersion: "0.7.0",
-      desired: [{ path: "hooks.json", sourceId: "hook", kind: "json-member", selector: jsonSelector, member: { id: "harnix-context", command: codexContextCommand, timeout: 6 } }],
+      desired: [
+        {
+          path: "hooks.json",
+          sourceId: "hook",
+          kind: "json-member",
+          selector: jsonSelector,
+          member: { id: "harnix-context", command: codexContextCommand, timeout: 6 },
+        },
+      ],
     });
-    const afterUpdate = JSON.parse(await readFile(hooksPath, "utf8")) as { hooks: { UserPromptSubmit: Array<Record<string, unknown>> } };
-    expect(afterUpdate.hooks.UserPromptSubmit).toEqual(expect.arrayContaining([expect.objectContaining({ id: "user-handler", command: "user command changed" }), expect.objectContaining({ id: "harnix-context", command: codexContextCommand, timeout: 6 })]));
+    const afterUpdate = JSON.parse(await readFile(hooksPath, "utf8")) as {
+      hooks: { UserPromptSubmit: Array<Record<string, unknown>> };
+    };
+    expect(afterUpdate.hooks.UserPromptSubmit).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: "user-handler", command: "user command changed" }),
+        expect.objectContaining({ id: "harnix-context", command: codexContextCommand, timeout: 6 }),
+      ]),
+    );
     expect(updated.updated).toEqual(["hooks.json#hook"]);
 
     const harnixMember = afterUpdate.hooks.UserPromptSubmit.find((member) => member.id === "harnix-context");
@@ -340,9 +527,21 @@ describe("global managed files", () => {
     const preserved = await reconcileGlobalManagedFiles({
       ...base,
       generatorVersion: "0.8.0",
-      desired: [{ path: "hooks.json", sourceId: "hook", kind: "json-member", selector: jsonSelector, member: { id: "harnix-context", command: "new command", timeout: 7 } }],
+      desired: [
+        {
+          path: "hooks.json",
+          sourceId: "hook",
+          kind: "json-member",
+          selector: jsonSelector,
+          member: { id: "harnix-context", command: "new command", timeout: 7 },
+        },
+      ],
     });
-    expect(JSON.parse(await readFile(hooksPath, "utf8")).hooks.UserPromptSubmit.find((member: { id: string }) => member.id === "harnix-context").timeout).toBe(99);
+    expect(
+      JSON.parse(await readFile(hooksPath, "utf8")).hooks.UserPromptSubmit.find(
+        (member: { id: string }) => member.id === "harnix-context",
+      ).timeout,
+    ).toBe(99);
     expect(preserved.warnings).toContainEqual(expect.objectContaining({ code: "modified", path: "hooks.json#hook" }));
     expect(first.manifest.entries).toHaveLength(1);
   });
@@ -350,29 +549,47 @@ describe("global managed files", () => {
   it("preserves an untracked JSON member collision instead of claiming its identity", async () => {
     const root = await temporaryGlobalRoot();
     const hooksPath = join(root.path, "hooks.json");
-    await writeFile(hooksPath, `${JSON.stringify({ hooks: { UserPromptSubmit: [{ id: "harnix-context", command: "someone else" }] } }, null, 2)}\n`);
+    await writeFile(
+      hooksPath,
+      `${JSON.stringify({ hooks: { UserPromptSubmit: [{ id: "harnix-context", command: "someone else" }] } }, null, 2)}\n`,
+    );
 
     const result = await reconcileGlobalManagedFiles({
       root,
       manifestPath: "harnix/managed.json",
       platform: "codex",
       generatorVersion: "0.6.0",
-      desired: [{ path: "hooks.json", sourceId: "hook", kind: "json-member", selector: jsonSelector, member: { id: "harnix-context", command: codexContextCommand } }],
+      desired: [
+        {
+          path: "hooks.json",
+          sourceId: "hook",
+          kind: "json-member",
+          selector: jsonSelector,
+          member: { id: "harnix-context", command: codexContextCommand },
+        },
+      ],
     });
 
     expect(JSON.parse(await readFile(hooksPath, "utf8")).hooks.UserPromptSubmit[0].command).toBe("someone else");
     expect(result.manifest.entries).toEqual([]);
-    expect(result.warnings).toContainEqual(expect.objectContaining({ code: "untracked-collision", path: "hooks.json#hook" }));
+    expect(result.warnings).toContainEqual(
+      expect.objectContaining({ code: "untracked-collision", path: "hooks.json#hook" }),
+    );
   });
 
   it("removes only an unchanged obsolete global file and drops its ownership entry", async () => {
     const root = await temporaryGlobalRoot();
     const base = { root, manifestPath: "harnix/managed.json", platform: "kiro" as const, generatorVersion: "0.6.0" };
-    await reconcileGlobalManagedFiles({ ...base, desired: [{ path: "skills/harnix-check/SKILL.md", sourceId: "check", kind: "file", content: "generated\n" }] });
+    await reconcileGlobalManagedFiles({
+      ...base,
+      desired: [{ path: "skills/harnix-check/SKILL.md", sourceId: "check", kind: "file", content: "generated\n" }],
+    });
 
     const removed = await reconcileGlobalManagedFiles({ ...base, desired: [], removeObsolete: true });
 
-    await expect(access(join(root.path, "skills", "harnix-check", "SKILL.md"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(root.path, "skills", "harnix-check", "SKILL.md"))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
     expect(removed.deleted).toEqual(["skills/harnix-check/SKILL.md"]);
     expect(removed.manifest.entries).toEqual([]);
   });
@@ -388,7 +605,9 @@ describe("global managed files", () => {
       generatorVersion: "0.6.0",
       desired: [{ path: "steering/harnix.md", sourceId: "steering", kind: "file", content: "generated\n" }],
       dryRun: true,
-      writer: async () => { writes += 1; },
+      writer: async () => {
+        writes += 1;
+      },
     });
 
     expect(planned.created).toEqual(["steering/harnix.md"]);
@@ -422,7 +641,13 @@ describe("global managed files", () => {
       },
     };
 
-    await expect(reconcileGlobalManagedRoots({ reconciliations: [secondRequest, firstRequest] })).rejects.toMatchObject({ rollback: expect.objectContaining({ restored: expect.arrayContaining(["~/first-platform/steering/harnix.md"]) }) });
+    await expect(reconcileGlobalManagedRoots({ reconciliations: [secondRequest, firstRequest] })).rejects.toMatchObject(
+      {
+        rollback: expect.objectContaining({
+          restored: expect.arrayContaining(["~/first-platform/steering/harnix.md"]),
+        }),
+      },
+    );
     await expect(access(firstTarget)).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(first.path, "harnix", "managed.json"))).rejects.toMatchObject({ code: "ENOENT" });
   });
@@ -433,12 +658,26 @@ describe("global managed files", () => {
     await mkdir(join(second.path, "harnix"), { recursive: true });
     await writeFile(join(second.path, "harnix", "managed.json"), "invalid");
 
-    await expect(reconcileGlobalManagedRoots({
-      reconciliations: [
-        { root: first, manifestPath: "harnix/managed.json", platform: "kiro", generatorVersion: "0.6.0", desired: [{ path: "steering/harnix.md", sourceId: "steering", kind: "file", content: "first\n" }] },
-        { root: second, manifestPath: "harnix/managed.json", platform: "codex", generatorVersion: "0.6.0", desired: [{ path: "AGENTS.md", sourceId: "agents", kind: "file", content: "second\n" }] },
-      ],
-    })).rejects.toBeInstanceOf(GlobalManagedManifestError);
+    await expect(
+      reconcileGlobalManagedRoots({
+        reconciliations: [
+          {
+            root: first,
+            manifestPath: "harnix/managed.json",
+            platform: "kiro",
+            generatorVersion: "0.6.0",
+            desired: [{ path: "steering/harnix.md", sourceId: "steering", kind: "file", content: "first\n" }],
+          },
+          {
+            root: second,
+            manifestPath: "harnix/managed.json",
+            platform: "codex",
+            generatorVersion: "0.6.0",
+            desired: [{ path: "AGENTS.md", sourceId: "agents", kind: "file", content: "second\n" }],
+          },
+        ],
+      }),
+    ).rejects.toBeInstanceOf(GlobalManagedManifestError);
 
     await expect(access(join(first.path, "steering", "harnix.md"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(first.path, "harnix", "managed.json"))).rejects.toMatchObject({ code: "ENOENT" });
@@ -453,14 +692,16 @@ describe("global managed files", () => {
       await atomicWriteFile(path, content);
     };
 
-    await expect(reconcileGlobalManagedFiles({
-      root,
-      manifestPath: "harnix/managed.json",
-      platform: "kiro",
-      generatorVersion: "0.6.0",
-      desired: [{ path: "steering/harnix.md", sourceId: "steering", kind: "file", content: "generated\n" }],
-      writer,
-    })).rejects.toMatchObject({ rollback: { restored: ["steering/harnix.md"], partial: [] } });
+    await expect(
+      reconcileGlobalManagedFiles({
+        root,
+        manifestPath: "harnix/managed.json",
+        platform: "kiro",
+        generatorVersion: "0.6.0",
+        desired: [{ path: "steering/harnix.md", sourceId: "steering", kind: "file", content: "generated\n" }],
+        writer,
+      }),
+    ).rejects.toMatchObject({ rollback: { restored: ["steering/harnix.md"], partial: [] } });
 
     await expect(access(target)).rejects.toMatchObject({ code: "ENOENT" });
   });
@@ -512,17 +753,19 @@ describe("global managed files", () => {
       }
     };
 
-    await expect(reconcileGlobalManagedFiles({
-      root,
-      manifestPath: "harnix/managed.json",
-      platform: "kiro",
-      generatorVersion: "0.6.0",
-      desired: [
-        { path: "a-first.md", sourceId: "first", kind: "file", content: "first generated\n" },
-        { path: "b-concurrent.md", sourceId: "second", kind: "file", content: "second generated\n" },
-      ],
-      writer,
-    })).rejects.toMatchObject({
+    await expect(
+      reconcileGlobalManagedFiles({
+        root,
+        manifestPath: "harnix/managed.json",
+        platform: "kiro",
+        generatorVersion: "0.6.0",
+        desired: [
+          { path: "a-first.md", sourceId: "first", kind: "file", content: "first generated\n" },
+          { path: "b-concurrent.md", sourceId: "second", kind: "file", content: "second generated\n" },
+        ],
+        writer,
+      }),
+    ).rejects.toMatchObject({
       rollback: { restored: ["a-first.md"], partial: [] },
     });
 
@@ -557,13 +800,15 @@ describe("global managed files", () => {
       }
     };
 
-    await expect(reconcileGlobalManagedFiles({
-      ...base,
-      generatorVersion: "0.7.0",
-      desired: [{ path: "a-first.md", sourceId: "first", kind: "file", content: "new first\n" }],
-      removeObsolete: true,
-      writer,
-    })).rejects.toMatchObject({
+    await expect(
+      reconcileGlobalManagedFiles({
+        ...base,
+        generatorVersion: "0.7.0",
+        desired: [{ path: "a-first.md", sourceId: "first", kind: "file", content: "new first\n" }],
+        removeObsolete: true,
+        writer,
+      }),
+    ).rejects.toMatchObject({
       rollback: { restored: ["a-first.md"], partial: [] },
     });
 

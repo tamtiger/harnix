@@ -16,18 +16,28 @@ async function writeFixtureFile(root: string, path: string, content = ""): Promi
 describe("detectProject", () => {
   it("detects source languages and technologies as independent facets", async () => {
     const root = await createFixture();
-    await writeFixtureFile(root, "src/App/App.csproj", '<Project><ItemGroup><PackageReference Include="Volo.Abp.Core" /></ItemGroup></Project>');
+    await writeFixtureFile(
+      root,
+      "src/App/App.csproj",
+      '<Project><ItemGroup><PackageReference Include="Volo.Abp.Core" /></ItemGroup></Project>',
+    );
     await writeFixtureFile(root, "src/App/Program.cs", "namespace Sample;");
 
     const result = await detectProject(root);
 
     expect(result.languages).toEqual(["csharp"]);
     expect(result.technologies).toEqual(["abp", "dotnet"]);
-    expect(result.matches).toEqual(expect.arrayContaining([
-      expect.objectContaining({ confidence: "confirmed", facet: "language", id: "csharp", kind: "language" }),
-      expect.objectContaining({ confidence: "confirmed", facet: "technology", id: "abp", kind: "framework" }),
-    ]));
-    expect(result.matches.flatMap(({ evidence }) => evidence).every(({ path }) => !path.includes(root) && !path.includes("\\"))).toBe(true);
+    expect(result.matches).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ confidence: "confirmed", facet: "language", id: "csharp", kind: "language" }),
+        expect.objectContaining({ confidence: "confirmed", facet: "technology", id: "abp", kind: "framework" }),
+      ]),
+    );
+    expect(
+      result.matches
+        .flatMap(({ evidence }) => evidence)
+        .every(({ path }) => !path.includes(root) && !path.includes("\\")),
+    ).toBe(true);
   });
 
   it("does not overclaim ABP or C# from generic .NET markers", async () => {
@@ -58,7 +68,11 @@ describe("detectProject", () => {
     await writeFixtureFile(root, "composer.json", JSON.stringify({ require: { php: ">=8.2" } }));
     await expect(detectProject(root)).resolves.toMatchObject({ languages: ["php"], technologies: [] });
 
-    await writeFixtureFile(root, "composer.json", JSON.stringify({ require: { php: ">=8.2", "codeigniter4/framework": "^4" } }));
+    await writeFixtureFile(
+      root,
+      "composer.json",
+      JSON.stringify({ require: { php: ">=8.2", "codeigniter4/framework": "^4" } }),
+    );
     await expect(detectProject(root)).resolves.toMatchObject({ languages: ["php"], technologies: ["codeigniter"] });
   });
 
@@ -73,7 +87,11 @@ describe("detectProject", () => {
 
   it("distinguishes React web from React Native and detects source language separately", async () => {
     const native = await createFixture();
-    await writeFixtureFile(native, "package.json", JSON.stringify({ dependencies: { react: "1", "react-native": "1" } }));
+    await writeFixtureFile(
+      native,
+      "package.json",
+      JSON.stringify({ dependencies: { react: "1", "react-native": "1" } }),
+    );
     await writeFixtureFile(native, "src/App.tsx", "export const App = () => null;");
     await expect(detectProject(native)).resolves.toMatchObject({ languages: ["typescript"], technologies: [] });
 
@@ -97,24 +115,50 @@ describe("detectProject", () => {
     }
 
     const postgresDotnet = await createFixture();
-    await writeFixtureFile(postgresDotnet, "src/App/App.csproj", '<Project><ItemGroup><PackageReference Include="Npgsql" /></ItemGroup></Project>');
-    await expect(detectProject(postgresDotnet)).resolves.toMatchObject({ technologies: expect.arrayContaining(["postgresql"]) });
+    await writeFixtureFile(
+      postgresDotnet,
+      "src/App/App.csproj",
+      '<Project><ItemGroup><PackageReference Include="Npgsql" /></ItemGroup></Project>',
+    );
+    await expect(detectProject(postgresDotnet)).resolves.toMatchObject({
+      technologies: expect.arrayContaining(["postgresql"]),
+    });
 
     const sqlServerDotnet = await createFixture();
-    await writeFixtureFile(sqlServerDotnet, "src/App/App.csproj", '<Project><ItemGroup><PackageReference Include="Microsoft.Data.SqlClient" /></ItemGroup></Project>');
-    await expect(detectProject(sqlServerDotnet)).resolves.toMatchObject({ technologies: expect.arrayContaining(["sqlserver"]) });
+    await writeFixtureFile(
+      sqlServerDotnet,
+      "src/App/App.csproj",
+      '<Project><ItemGroup><PackageReference Include="Microsoft.Data.SqlClient" /></ItemGroup></Project>',
+    );
+    await expect(detectProject(sqlServerDotnet)).resolves.toMatchObject({
+      technologies: expect.arrayContaining(["sqlserver"]),
+    });
 
     const postgresJava = await createFixture();
-    await writeFixtureFile(postgresJava, "pom.xml", "<project><dependencies><dependency><artifactId>postgresql</artifactId></dependency></dependencies></project>");
-    await expect(detectProject(postgresJava)).resolves.toMatchObject({ technologies: expect.arrayContaining(["postgresql"]) });
+    await writeFixtureFile(
+      postgresJava,
+      "pom.xml",
+      "<project><dependencies><dependency><artifactId>postgresql</artifactId></dependency></dependencies></project>",
+    );
+    await expect(detectProject(postgresJava)).resolves.toMatchObject({
+      technologies: expect.arrayContaining(["postgresql"]),
+    });
   });
 
   it("detects a monorepo deterministically with package profiles and verification commands", async () => {
     const root = await createFixture();
     await writeFixtureFile(root, "pnpm-lock.yaml");
-    await writeFixtureFile(root, "apps/api/package.json", JSON.stringify({ dependencies: { "@nestjs/core": "1" }, scripts: { test: "vitest", build: "tsc" } }));
+    await writeFixtureFile(
+      root,
+      "apps/api/package.json",
+      JSON.stringify({ dependencies: { "@nestjs/core": "1" }, scripts: { test: "vitest", build: "tsc" } }),
+    );
     await writeFixtureFile(root, "apps/api/tsconfig.json", "{}");
-    await writeFixtureFile(root, "apps/web/package.json", JSON.stringify({ dependencies: { vue: "1" }, scripts: { lint: "eslint ." } }));
+    await writeFixtureFile(
+      root,
+      "apps/web/package.json",
+      JSON.stringify({ dependencies: { vue: "1" }, scripts: { lint: "eslint ." } }),
+    );
     await writeFixtureFile(root, "apps/web/src/main.js", "createApp({});");
 
     const result = await detectProject(root);
@@ -122,15 +166,32 @@ describe("detectProject", () => {
     expect(result.languages).toEqual(["javascript", "typescript"]);
     expect(result.technologies).toEqual(["nestjs", "vue"]);
     expect(result.packages).toEqual([
-      { languages: ["typescript"], packageManager: "pnpm", path: "apps/api", technologies: ["nestjs"], verificationCommands: ["pnpm run build", "pnpm run test"] },
-      { languages: ["javascript"], packageManager: "pnpm", path: "apps/web", technologies: ["vue"], verificationCommands: ["pnpm run lint"] },
+      {
+        languages: ["typescript"],
+        packageManager: "pnpm",
+        path: "apps/api",
+        technologies: ["nestjs"],
+        verificationCommands: ["pnpm run build", "pnpm run test"],
+      },
+      {
+        languages: ["javascript"],
+        packageManager: "pnpm",
+        path: "apps/web",
+        technologies: ["vue"],
+        verificationCommands: ["pnpm run lint"],
+      },
     ]);
   });
 
   it("ignores generated, dependency, cache and symlink trees", async () => {
-    const root = await createFixture(); const external = await createFixture();
+    const root = await createFixture();
+    const external = await createFixture();
     await writeFixtureFile(root, "node_modules/react/package.json", JSON.stringify({ dependencies: { react: "1" } }));
-    await writeFixtureFile(root, "vendor/composer.json", JSON.stringify({ require: { "codeigniter4/framework": "^4" } }));
+    await writeFixtureFile(
+      root,
+      "vendor/composer.json",
+      JSON.stringify({ require: { "codeigniter4/framework": "^4" } }),
+    );
     await writeFixtureFile(root, "dist/App.csproj", "<Project />");
     await writeFixtureFile(root, "docs/example.java", "class Example {}");
     await writeFixtureFile(external, "package.json", JSON.stringify({ dependencies: { vue: "1" } }));
@@ -149,19 +210,37 @@ describe("detectProject", () => {
     await writeFixtureFile(root, ".understand-anything/tmp/graph.mjs", "export default {};");
 
     await expect(detectProject(root)).resolves.toMatchObject({
-      languages: ["csharp"], technologies: [], packages: [{ languages: ["csharp"], technologies: [], packageManager: undefined, path: ".", verificationCommands: [] }],
+      languages: ["csharp"],
+      technologies: [],
+      packages: [
+        { languages: ["csharp"], technologies: [], packageManager: undefined, path: ".", verificationCommands: [] },
+      ],
     });
   });
 
   it("does not execute package scripts while discovering verification commands", async () => {
     const root = await createFixture();
     await writeFixtureFile(root, "package-lock.json");
-    await writeFixtureFile(root, "package.json", JSON.stringify({ dependencies: { vue: "1" }, scripts: { test: "node -e \"throw new Error('must not run')\"" } }));
+    await writeFixtureFile(
+      root,
+      "package.json",
+      JSON.stringify({ dependencies: { vue: "1" }, scripts: { test: "node -e \"throw new Error('must not run')\"" } }),
+    );
     await writeFixtureFile(root, "src/main.js", "createApp({});");
 
     await expect(detectProject(root)).resolves.toMatchObject({
-      languages: ["javascript"], technologies: ["vue"], packageManager: "npm",
-      packages: [{ languages: ["javascript"], technologies: ["vue"], packageManager: "npm", path: ".", verificationCommands: ["npm run test"] }],
+      languages: ["javascript"],
+      technologies: ["vue"],
+      packageManager: "npm",
+      packages: [
+        {
+          languages: ["javascript"],
+          technologies: ["vue"],
+          packageManager: "npm",
+          path: ".",
+          verificationCommands: ["npm run test"],
+        },
+      ],
     });
   });
 
@@ -189,7 +268,11 @@ describe("detectProject", () => {
 
   it("detects new frameworks and respects framework implications", async () => {
     const nextRoot = await createFixture();
-    await writeFixtureFile(nextRoot, "package.json", JSON.stringify({ dependencies: { next: "^14.0.0", react: "^18.0.0", "react-dom": "^18.0.0" } }));
+    await writeFixtureFile(
+      nextRoot,
+      "package.json",
+      JSON.stringify({ dependencies: { next: "^14.0.0", react: "^18.0.0", "react-dom": "^18.0.0" } }),
+    );
     await writeFixtureFile(nextRoot, "src/app/page.tsx", "export default function Page() { return null; }");
     const nextResult = await detectProject(nextRoot);
     expect(nextResult.technologies).toContain("nextjs");
@@ -205,7 +288,11 @@ describe("detectProject", () => {
     await expect(detectProject(expressRoot)).resolves.toMatchObject({ technologies: ["express"] });
 
     const angularRoot = await createFixture();
-    await writeFixtureFile(angularRoot, "package.json", JSON.stringify({ dependencies: { "@angular/core": "^18.0.0" } }));
+    await writeFixtureFile(
+      angularRoot,
+      "package.json",
+      JSON.stringify({ dependencies: { "@angular/core": "^18.0.0" } }),
+    );
     await expect(detectProject(angularRoot)).resolves.toMatchObject({ technologies: ["angular"] });
 
     const fastapiRoot = await createFixture();
@@ -225,4 +312,3 @@ describe("detectProject", () => {
     await expect(detectProject(axumRoot)).resolves.toMatchObject({ technologies: ["axum"] });
   });
 });
-

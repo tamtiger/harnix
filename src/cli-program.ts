@@ -22,7 +22,18 @@ import { pauseProjectTask } from "./commands/pause.js";
 import { reportProjectContext } from "./commands/context-report.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
-import { appendEvidenceWorkflow, cancelWorkflow, finishWorkflow, inspectWorkflow, preflightWorkflow, recordLearningWorkflow, saveWorkflow, snapshotWorkflow, transitionWorkflow, workflowEnvelopeSchema } from "./commands/internal-workflow.js";
+import {
+  appendEvidenceWorkflow,
+  cancelWorkflow,
+  finishWorkflow,
+  inspectWorkflow,
+  preflightWorkflow,
+  recordLearningWorkflow,
+  saveWorkflow,
+  snapshotWorkflow,
+  transitionWorkflow,
+  workflowEnvelopeSchema,
+} from "./commands/internal-workflow.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
@@ -57,56 +68,121 @@ export interface PublicCliErrorV1 {
 
 export function createProgram(programOptions: ProgramOptions = {}): Command {
   const program = new Command();
-  program.name("harnix").description("Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, Codex, and Claude Code integrations.").version(packageVersion).showSuggestionAfterError().exitOverride();
-  program.command("init")
+  program
+    .name("harnix")
+    .description(
+      "Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, Codex, and Claude Code integrations.",
+    )
+    .version(packageVersion)
+    .showSuggestionAfterError()
+    .exitOverride();
+  program
+    .command("init")
     .option("--user <name>", "Override the detected developer journal ID")
     .option("--languages <csv>", "Override auto-detected language IDs")
     .option("--technologies <csv>", "Override auto-detected technology IDs")
     .option("--dry-run", "Preview without writing")
     .addOption(new Option("--yes", "Deprecated compatibility option; init no longer prompts").hideHelp())
-    .action(async (options: { yes?: boolean; user?: string; languages?: string; technologies?: string; dryRun?: boolean }) => {
-      const environment = { ...process.env, ...(programOptions.environment ?? {}) };
-      const developer = options.user ?? defaultDeveloperId(environment);
-      const profile = parseInitProfile(options.languages, options.technologies);
-      const result = await initializeProject({ developer, dryRun: options.dryRun, languages: profile.languages, technologies: profile.technologies, warnings: profile.warnings, root: await resolveProjectRoot(process.cwd()), yes: options.yes });
+    .action(
+      async (options: {
+        yes?: boolean;
+        user?: string;
+        languages?: string;
+        technologies?: string;
+        dryRun?: boolean;
+      }) => {
+        const environment = { ...process.env, ...(programOptions.environment ?? {}) };
+        const developer = options.user ?? defaultDeveloperId(environment);
+        const profile = parseInitProfile(options.languages, options.technologies);
+        const result = await initializeProject({
+          developer,
+          dryRun: options.dryRun,
+          languages: profile.languages,
+          technologies: profile.technologies,
+          warnings: profile.warnings,
+          root: await resolveProjectRoot(process.cwd()),
+          yes: options.yes,
+        });
+        process.stdout.write(`${JSON.stringify(result)}\n`);
+      },
+    );
+  program
+    .command("setup")
+    .option("--kiro", "Install Kiro user-global integration")
+    .option("--antigravity", "Install Antigravity user-global integration")
+    .option("--codex", "Install Codex user-global integration")
+    .option("--claude", "Install Claude Code user-global integration")
+    .option("--dry-run", "Preview user-global changes without writing")
+    .action(
+      async (options: {
+        kiro?: boolean;
+        antigravity?: boolean;
+        codex?: boolean;
+        claude?: boolean;
+        dryRun?: boolean;
+      }) => {
+        const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
+        const result = await setupPlatforms({
+          ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
+          ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
+          ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
+          dryRun: options.dryRun,
+          platforms,
+        });
+        process.stdout.write(`${JSON.stringify(result)}\n`);
+        reportActionableSetupReadiness(result);
+      },
+    );
+  program
+    .command("update")
+    .option("--restore", "Restore explicitly deleted managed files")
+    .option("--global", "Reconcile user-global platform integrations")
+    .option("--kiro", "Select Kiro for --global")
+    .option("--antigravity", "Select Antigravity for --global")
+    .option("--codex", "Select Codex for --global")
+    .option("--claude", "Select Claude Code for --global")
+    .option("--dry-run", "Preview global changes without writing")
+    .action(
+      async (options: {
+        restore?: boolean;
+        global?: boolean;
+        kiro?: boolean;
+        antigravity?: boolean;
+        codex?: boolean;
+        claude?: boolean;
+        dryRun?: boolean;
+      }) => {
+        const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
+        if (!options.global && (platforms.length > 0 || options.dryRun))
+          throw new Error("--kiro, --antigravity, --codex, --claude, and --dry-run require update --global.");
+        const result = options.global
+          ? await updateGlobalPlatforms({
+              ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
+              ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
+              ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
+              dryRun: options.dryRun,
+              restoreDeleted: options.restore,
+              ...(platforms.length === 0 ? {} : { platforms }),
+            })
+          : await updateProject({ root: await resolveProjectRoot(process.cwd()), restoreDeleted: options.restore });
+        process.stdout.write(`${JSON.stringify(result)}\n`);
+      },
+    );
+  program
+    .command("upgrade")
+    .option("--apply", "Run the displayed npm upgrade command")
+    .action(async (options: { apply?: boolean }) => {
+      const result = await upgradeHarnix({
+        installedVersion: packageVersion,
+        ...(programOptions.availableVersionLookup === undefined
+          ? {}
+          : { availableVersion: programOptions.availableVersionLookup }),
+        apply: options.apply,
+      });
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
-  program.command("setup").option("--kiro", "Install Kiro user-global integration").option("--antigravity", "Install Antigravity user-global integration").option("--codex", "Install Codex user-global integration").option("--claude", "Install Claude Code user-global integration").option("--dry-run", "Preview user-global changes without writing").action(async (options: { kiro?: boolean; antigravity?: boolean; codex?: boolean; claude?: boolean; dryRun?: boolean }) => {
-    const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
-    const result = await setupPlatforms({
-      ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
-      ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
-      ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
-      dryRun: options.dryRun,
-      platforms,
-    });
-    process.stdout.write(`${JSON.stringify(result)}\n`);
-    reportActionableSetupReadiness(result);
-  });
-  program.command("update").option("--restore", "Restore explicitly deleted managed files").option("--global", "Reconcile user-global platform integrations").option("--kiro", "Select Kiro for --global").option("--antigravity", "Select Antigravity for --global").option("--codex", "Select Codex for --global").option("--claude", "Select Claude Code for --global").option("--dry-run", "Preview global changes without writing").action(async (options: { restore?: boolean; global?: boolean; kiro?: boolean; antigravity?: boolean; codex?: boolean; claude?: boolean; dryRun?: boolean }) => {
-    const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
-    if (!options.global && (platforms.length > 0 || options.dryRun)) throw new Error("--kiro, --antigravity, --codex, --claude, and --dry-run require update --global.");
-    const result = options.global
-      ? await updateGlobalPlatforms({
-        ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
-        ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
-        ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
-        dryRun: options.dryRun,
-        restoreDeleted: options.restore,
-        ...(platforms.length === 0 ? {} : { platforms }),
-      })
-      : await updateProject({ root: await resolveProjectRoot(process.cwd()), restoreDeleted: options.restore });
-    process.stdout.write(`${JSON.stringify(result)}\n`);
-  });
-  program.command("upgrade").option("--apply", "Run the displayed npm upgrade command").action(async (options: { apply?: boolean }) => {
-    const result = await upgradeHarnix({
-      installedVersion: packageVersion,
-      ...(programOptions.availableVersionLookup === undefined ? {} : { availableVersion: programOptions.availableVersionLookup }),
-      apply: options.apply,
-    });
-    process.stdout.write(`${JSON.stringify(result)}\n`);
-  });
-  program.command("uninstall")
+  program
+    .command("uninstall")
     .option("--purge", "Remove only this project's .harnix data")
     .option("--global", "Uninstall selected user-global platform integrations")
     .option("--legacy-project-surfaces", "Remove manifest-proven legacy project-local integration files")
@@ -115,45 +191,87 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--codex", "Select Codex for --global")
     .option("--claude", "Select Claude Code for --global")
     .option("--yes", "Confirm the selected destructive action")
-    .action(async (options: { purge?: boolean; global?: boolean; legacyProjectSurfaces?: boolean; kiro?: boolean; antigravity?: boolean; codex?: boolean; claude?: boolean; yes?: boolean }) => {
-      const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
-      const projectModeCount = Number(options.purge === true) + Number(options.legacyProjectSurfaces === true);
-      if (projectModeCount > 1 || (options.global === true && projectModeCount > 0)) throw new Error("--global, --purge, and --legacy-project-surfaces are mutually exclusive.");
-      if (!options.global && platforms.length > 0) throw new Error("--kiro, --antigravity, --codex, and --claude require uninstall --global.");
-      if (options.global && platforms.length === 0) throw new Error("uninstall --global requires at least one platform flag.");
-      if (!options.global && projectModeCount === 0) throw new Error("Specify one of --purge, --global, or --legacy-project-surfaces.");
+    .action(
+      async (options: {
+        purge?: boolean;
+        global?: boolean;
+        legacyProjectSurfaces?: boolean;
+        kiro?: boolean;
+        antigravity?: boolean;
+        codex?: boolean;
+        claude?: boolean;
+        yes?: boolean;
+      }) => {
+        const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
+        const projectModeCount = Number(options.purge === true) + Number(options.legacyProjectSurfaces === true);
+        if (projectModeCount > 1 || (options.global === true && projectModeCount > 0))
+          throw new Error("--global, --purge, and --legacy-project-surfaces are mutually exclusive.");
+        if (!options.global && platforms.length > 0)
+          throw new Error("--kiro, --antigravity, --codex, and --claude require uninstall --global.");
+        if (options.global && platforms.length === 0)
+          throw new Error("uninstall --global requires at least one platform flag.");
+        if (!options.global && projectModeCount === 0)
+          throw new Error("Specify one of --purge, --global, or --legacy-project-surfaces.");
 
-      const result = options.global
-        ? await uninstallGlobalIntegrations({
-          ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
-          ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
-          platforms,
-          yes: options.yes,
-        })
-        : options.legacyProjectSurfaces
-          ? await cleanupLegacyProjectSurfaces({ root: await resolveProjectRoot(process.cwd()), yes: options.yes })
-          : await uninstallProject({ root: await resolveProjectRoot(process.cwd()), purge: true, yes: options.yes });
-      process.stdout.write(`${JSON.stringify(result)}\n`);
-      const confirmationRequired = "confirmationRequired" in result
-        ? result.confirmationRequired
-        : result.platforms.some((platform) => platform.confirmationRequired);
-      if (confirmationRequired) process.exitCode = 2;
-    });
-  program.command("mem").argument("[query]").option("--query <query>").option("--user <id>").option("--limit <count>").option("--learning", "Return only learning candidates").action(async (query: string | undefined, options: { query?: string; user?: string; limit?: string; learning?: boolean }) => {
-    const limit = options.limit === undefined ? undefined : /^\d+$/u.test(options.limit) ? Number(options.limit) : Number.NaN; if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) throw new Error("--limit must be a positive integer."); const result = await searchMemory({ root: await resolveProjectRoot(process.cwd()), query: options.query ?? query, user: options.user, limit, learningOnly: options.learning }); process.stdout.write(`${JSON.stringify(result)}\n`);
-  });
-  program.command("status")
+        const result = options.global
+          ? await uninstallGlobalIntegrations({
+              ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
+              ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
+              platforms,
+              yes: options.yes,
+            })
+          : options.legacyProjectSurfaces
+            ? await cleanupLegacyProjectSurfaces({ root: await resolveProjectRoot(process.cwd()), yes: options.yes })
+            : await uninstallProject({ root: await resolveProjectRoot(process.cwd()), purge: true, yes: options.yes });
+        process.stdout.write(`${JSON.stringify(result)}\n`);
+        const confirmationRequired =
+          "confirmationRequired" in result
+            ? result.confirmationRequired
+            : result.platforms.some((platform) => platform.confirmationRequired);
+        if (confirmationRequired) process.exitCode = 2;
+      },
+    );
+  program
+    .command("mem")
+    .argument("[query]")
+    .option("--query <query>")
+    .option("--user <id>")
+    .option("--limit <count>")
+    .option("--learning", "Return only learning candidates")
+    .action(
+      async (
+        query: string | undefined,
+        options: { query?: string; user?: string; limit?: string; learning?: boolean },
+      ) => {
+        const limit =
+          options.limit === undefined ? undefined : /^\d+$/u.test(options.limit) ? Number(options.limit) : Number.NaN;
+        if (limit !== undefined && (!Number.isInteger(limit) || limit < 1))
+          throw new Error("--limit must be a positive integer.");
+        const result = await searchMemory({
+          root: await resolveProjectRoot(process.cwd()),
+          query: options.query ?? query,
+          user: options.user,
+          limit,
+          learningOnly: options.learning,
+        });
+        process.stdout.write(`${JSON.stringify(result)}\n`);
+      },
+    );
+  program
+    .command("status")
     .description("Summarize the active Harnix task and next action")
     .option("--explain", "Include required-check freshness and readiness/completion blockers")
     .option("--limit <count>", "Maximum required checks when --explain is set", "20")
     .action(async (options: { explain?: boolean; limit: string }) => {
       const now = programOptions.statusClock?.() ?? Date.now();
-      const result = options.explain === true
-        ? await explainProjectStatus(process.cwd(), parseReportLimit(options.limit, "status"), now)
-        : await inspectProjectStatus(process.cwd(), now);
+      const result =
+        options.explain === true
+          ? await explainProjectStatus(process.cwd(), parseReportLimit(options.limit, "status"), now)
+          : await inspectProjectStatus(process.cwd(), now);
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
-  program.command("tasks")
+  program
+    .command("tasks")
     .description("List bounded Harnix task metadata")
     .option("--limit <count>", "Maximum task records")
     .option("--status <status>", "Filter by exact task status")
@@ -165,89 +283,123 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       });
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
-  program.command("epic")
+  program
+    .command("epic")
     .description("List epics, or show one epic with its member tasks and next task")
     .argument("[epic-id]", "Exact epic ID for the detail view")
     .option("--limit <count>", "Maximum epic records in the list view", "20")
     .action(async (epicId: string | undefined, options: { limit: string }) => {
-      const result = epicId === undefined
-        ? await listPublicEpics(process.cwd(), parseTaskLimit(options.limit))
-        : await detailPublicEpic(process.cwd(), epicId);
+      const result =
+        epicId === undefined
+          ? await listPublicEpics(process.cwd(), parseTaskLimit(options.limit))
+          : await detailPublicEpic(process.cwd(), epicId);
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
-  program.command("resume")
+  program
+    .command("resume")
     .description("Activate an exact unfinished Harnix task")
     .argument("<task-id>", "Exact Harnix task ID")
     .option("--dry-run", "Preview without writing the active pointer")
     .action(async (taskId: string, options: { dryRun?: boolean }) => {
-      process.stdout.write(`${JSON.stringify(await resumeProjectTask(process.cwd(), taskId, options.dryRun === true))}\n`);
+      process.stdout.write(
+        `${JSON.stringify(await resumeProjectTask(process.cwd(), taskId, options.dryRun === true))}\n`,
+      );
     });
-  program.command("pause")
+  program
+    .command("pause")
     .description("Pause the active Harnix task by clearing the active pointer")
     .option("--dry-run", "Preview without writing the active pointer")
     .action(async (options: { dryRun?: boolean }) => {
       process.stdout.write(`${JSON.stringify(await pauseProjectTask(process.cwd(), options.dryRun === true))}\n`);
     });
-  program.command("context-report")
+  program
+    .command("context-report")
     .description("Explain bounded effective Harnix hook context metadata")
     .option("--platform <platform>", "Target Kiro, Antigravity, Codex, or Claude Code")
     .option("--limit <count>", "Maximum details per context category", "20")
     .action(async (options: { platform?: string; limit: string }) => {
       const platform = parseReportPlatform(options.platform);
-      process.stdout.write(`${JSON.stringify(await reportProjectContext(process.cwd(), platform, parseReportLimit(options.limit, "context-report")))}\n`);
+      process.stdout.write(
+        `${JSON.stringify(await reportProjectContext(process.cwd(), platform, parseReportLimit(options.limit, "context-report")))}\n`,
+      );
     });
-  program.command("skill")
+  program
+    .command("skill")
     .argument("[name]", "Canonical Harnix skill name, for example harnix-implement")
     .description("Print the canonical Harnix skill catalog or one skill's instructions")
     .action((name: string | undefined) => {
       process.stdout.write(`${JSON.stringify(name === undefined ? reportSkillCatalog() : reportSkill(name))}\n`);
     });
-  program.command("doctor").option("--fix", "Repair safe, unchanged managed files").option("--global", "Allow --fix to reconcile safe global integration drift").action(async (options: { fix?: boolean; global?: boolean }) => {
-    const result = await diagnoseProject({
-      ...(programOptions.capabilityLookup === undefined ? {} : { capabilityLookup: programOptions.capabilityLookup }),
-      ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
-      ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
-      ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
-      fix: options.fix,
-      global: options.global,
-      root: await resolveProjectRoot(process.cwd()),
+  program
+    .command("doctor")
+    .option("--fix", "Repair safe, unchanged managed files")
+    .option("--global", "Allow --fix to reconcile safe global integration drift")
+    .action(async (options: { fix?: boolean; global?: boolean }) => {
+      const result = await diagnoseProject({
+        ...(programOptions.capabilityLookup === undefined ? {} : { capabilityLookup: programOptions.capabilityLookup }),
+        ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
+        ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
+        ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
+        fix: options.fix,
+        global: options.global,
+        root: await resolveProjectRoot(process.cwd()),
+      });
+      process.stdout.write(`${JSON.stringify(result)}\n`);
+      if (
+        result.project.status === "invalid" ||
+        result.globalIntegrations.some((integration) => integration.status === "invalid")
+      )
+        process.exitCode = 2;
+      else if (!result.ok) process.exitCode = 1;
     });
-    process.stdout.write(`${JSON.stringify(result)}\n`);
-    if (result.project.status === "invalid" || result.globalIntegrations.some((integration) => integration.status === "invalid")) process.exitCode = 2;
-    else if (!result.ok) process.exitCode = 1;
-  });
-  program.command("repo-map")
+  program
+    .command("repo-map")
     .option("--query <text>", "Search the structural repository map")
     .option("--impact <path>", "Show cached dependency impact for an exact path")
     .option("--limit <count>", "Maximum results")
     .option("--depth <count>", "Reverse-dependent traversal depth for --impact")
     .addOption(new Option("--refresh", "Rebuild the structural repository map").hideHelp())
     .action(async (options: { query?: string; impact?: string; limit?: string; depth?: string; refresh?: boolean }) => {
-      const actionCount = Number(options.query !== undefined) + Number(options.impact !== undefined) + Number(options.refresh === true);
+      const actionCount =
+        Number(options.query !== undefined) + Number(options.impact !== undefined) + Number(options.refresh === true);
       if (actionCount !== 1) throw new Error("repo-map requires exactly one of --query, --impact, or --refresh.");
       if (options.refresh) {
-        if (options.limit !== undefined || options.depth !== undefined) throw new Error("--limit and --depth are not valid with repo-map --refresh.");
+        if (options.limit !== undefined || options.depth !== undefined)
+          throw new Error("--limit and --depth are not valid with repo-map --refresh.");
         process.stdout.write(`${JSON.stringify(await refreshRepoMapInternal(process.cwd()))}\n`);
         return;
       }
       if (options.impact !== undefined) {
-        process.stdout.write(`${JSON.stringify(await impactRepoMapInternal(process.cwd(), parseRepoMapImpactPath(options.impact), parseRepoMapDepth(options.depth ?? "2"), parseRepoMapLimit(options.limit ?? "20")))}\n`);
+        process.stdout.write(
+          `${JSON.stringify(await impactRepoMapInternal(process.cwd(), parseRepoMapImpactPath(options.impact), parseRepoMapDepth(options.depth ?? "2"), parseRepoMapLimit(options.limit ?? "20")))}\n`,
+        );
         return;
       }
       if (options.depth !== undefined) throw new Error("--depth requires repo-map --impact.");
-      process.stdout.write(`${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query!, parseRepoMapLimit(options.limit ?? "20")))}\n`);
+      process.stdout.write(
+        `${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query!, parseRepoMapLimit(options.limit ?? "20")))}\n`,
+      );
     });
   // A hook host that writes the event payload but never closes the child's
   // stdin must not hang this command forever; the caller's own hook timeout
   // cannot save us from that, since the process would still be blocked
   // reading rather than merely slow.
   const contextHookStdinIdleTimeoutMs = 2_000;
-  program.command("context", { hidden: true }).option("--platform <platform>").action(async (options: { platform: "kiro" | "antigravity" | "codex" | "claude" }) => {
-    if (!options.platform || !["kiro", "antigravity", "codex", "claude"].includes(options.platform)) throw new Error("--platform must be kiro, antigravity, codex, or claude.");
-    const hookInput = programOptions.hookEventInput ? await programOptions.hookEventInput() : process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
-    await runInternalContextCommand({ hookInput, platform: options.platform });
-  });
-  program.command("workflow", { hidden: true })
+  program
+    .command("context", { hidden: true })
+    .option("--platform <platform>")
+    .action(async (options: { platform: "kiro" | "antigravity" | "codex" | "claude" }) => {
+      if (!options.platform || !["kiro", "antigravity", "codex", "claude"].includes(options.platform))
+        throw new Error("--platform must be kiro, antigravity, codex, or claude.");
+      const hookInput = programOptions.hookEventInput
+        ? await programOptions.hookEventInput()
+        : process.stdin.isTTY === true
+          ? ""
+          : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
+      await runInternalContextCommand({ hookInput, platform: options.platform });
+    });
+  program
+    .command("workflow", { hidden: true })
     .option("--inspect", "Inspect active workflow state")
     .option("--preflight", "Inspect bounded workflow routing metadata")
     .option("--save", "Persist workflow state from stdin")
@@ -259,67 +411,123 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--evidence", "Append exactly one evidence item from stdin")
     .option("--schema", "Describe the save envelope schema")
     .option("--check <id>", "Required check ID for --snapshot")
-    .action(async (options: { inspect?: boolean; preflight?: boolean; save?: boolean; snapshot?: boolean; finish?: boolean; cancel?: boolean; learn?: boolean; check?: string; transition?: string; evidence?: boolean; schema?: boolean }) => {
-      const actionCount = [options.inspect, options.preflight, options.save, options.snapshot, options.finish, options.cancel, options.learn, options.evidence, options.schema].filter((selected) => selected === true).length
-        + (options.transition === undefined ? 0 : 1);
-      if (actionCount !== 1) throw new Error("workflow requires exactly one of --inspect, --preflight, --save, --transition, --evidence, --schema, --snapshot, --finish, --cancel, or --learn.");
-      if (options.snapshot !== true && options.check !== undefined) throw new Error("--check requires workflow --snapshot.");
-      if (options.snapshot === true && options.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
-      const root = await resolveProjectRoot(process.cwd());
-      if (options.inspect) {
-        process.stdout.write(`${JSON.stringify(await inspectWorkflow(root))}\n`);
-        return;
-      }
-      if (options.preflight) {
-        process.stdout.write(`${JSON.stringify(await preflightWorkflow(root))}\n`);
-        return;
-      }
-      if (options.save) {
-        const input = programOptions.workflowInput ? await programOptions.workflowInput() : await readBoundedInput(process.stdin);
-        if (!input) throw new Error("Workflow save requires a bounded JSON envelope on stdin.");
-        let envelope: unknown;
-        try { envelope = JSON.parse(input) as unknown; } catch { throw new Error("Workflow save requires valid JSON."); }
-        process.stdout.write(`${JSON.stringify(await saveWorkflow(root, envelope))}\n`);
-        return;
-      }
-      if (options.transition !== undefined) {
-        const [status, checkpoint, ...rest] = options.transition.split("/");
-        if (!status || !checkpoint || rest.length > 0) throw new Error("workflow --transition requires <status>/<checkpoint>.");
-        process.stdout.write(`${JSON.stringify(await transitionWorkflow(root, status, checkpoint))}\n`);
-        return;
-      }
-      if (options.evidence) {
-        const input = programOptions.workflowInput ? await programOptions.workflowInput() : await readBoundedInput(process.stdin);
-        if (!input) throw new Error("Workflow evidence requires a bounded JSON envelope on stdin.");
-        let envelope: unknown;
-        try { envelope = JSON.parse(input) as unknown; } catch { throw new Error("Workflow evidence requires valid JSON."); }
-        process.stdout.write(`${JSON.stringify(await appendEvidenceWorkflow(root, envelope))}\n`);
-        return;
-      }
-      if (options.schema) {
-        process.stdout.write(`${JSON.stringify(workflowEnvelopeSchema())}\n`);
-        return;
-      }
-      if (options.snapshot) {
-        process.stdout.write(`${JSON.stringify(await snapshotWorkflow(root, options.check!))}\n`);
-        return;
-      }
-      if (options.cancel) {
-        const input = programOptions.workflowInput ? await programOptions.workflowInput() : process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin);
-        let envelope: unknown;
-        try { envelope = input ? JSON.parse(input) as unknown : undefined; } catch { throw new Error("Workflow cancellation requires valid bounded JSON."); }
-        process.stdout.write(`${JSON.stringify(await cancelWorkflow(root, envelope))}\n`);
-        return;
-      }
-      if (options.learn) {
-        const input = programOptions.workflowInput ? await programOptions.workflowInput() : await readBoundedInput(process.stdin);
-        let envelope: unknown;
-        try { envelope = input ? JSON.parse(input) as unknown : undefined; } catch { throw new Error("Workflow learning capture requires valid bounded JSON."); }
-        process.stdout.write(`${JSON.stringify(await recordLearningWorkflow(root, envelope))}\n`);
-        return;
-      }
-      process.stdout.write(`${JSON.stringify(await finishWorkflow(root))}\n`);
-    });
+    .action(
+      async (options: {
+        inspect?: boolean;
+        preflight?: boolean;
+        save?: boolean;
+        snapshot?: boolean;
+        finish?: boolean;
+        cancel?: boolean;
+        learn?: boolean;
+        check?: string;
+        transition?: string;
+        evidence?: boolean;
+        schema?: boolean;
+      }) => {
+        const actionCount =
+          [
+            options.inspect,
+            options.preflight,
+            options.save,
+            options.snapshot,
+            options.finish,
+            options.cancel,
+            options.learn,
+            options.evidence,
+            options.schema,
+          ].filter((selected) => selected === true).length + (options.transition === undefined ? 0 : 1);
+        if (actionCount !== 1)
+          throw new Error(
+            "workflow requires exactly one of --inspect, --preflight, --save, --transition, --evidence, --schema, --snapshot, --finish, --cancel, or --learn.",
+          );
+        if (options.snapshot !== true && options.check !== undefined)
+          throw new Error("--check requires workflow --snapshot.");
+        if (options.snapshot === true && options.check === undefined)
+          throw new Error("workflow --snapshot requires --check <id>.");
+        const root = await resolveProjectRoot(process.cwd());
+        if (options.inspect) {
+          process.stdout.write(`${JSON.stringify(await inspectWorkflow(root))}\n`);
+          return;
+        }
+        if (options.preflight) {
+          process.stdout.write(`${JSON.stringify(await preflightWorkflow(root))}\n`);
+          return;
+        }
+        if (options.save) {
+          const input = programOptions.workflowInput
+            ? await programOptions.workflowInput()
+            : await readBoundedInput(process.stdin);
+          if (!input) throw new Error("Workflow save requires a bounded JSON envelope on stdin.");
+          let envelope: unknown;
+          try {
+            envelope = JSON.parse(input) as unknown;
+          } catch {
+            throw new Error("Workflow save requires valid JSON.");
+          }
+          process.stdout.write(`${JSON.stringify(await saveWorkflow(root, envelope))}\n`);
+          return;
+        }
+        if (options.transition !== undefined) {
+          const [status, checkpoint, ...rest] = options.transition.split("/");
+          if (!status || !checkpoint || rest.length > 0)
+            throw new Error("workflow --transition requires <status>/<checkpoint>.");
+          process.stdout.write(`${JSON.stringify(await transitionWorkflow(root, status, checkpoint))}\n`);
+          return;
+        }
+        if (options.evidence) {
+          const input = programOptions.workflowInput
+            ? await programOptions.workflowInput()
+            : await readBoundedInput(process.stdin);
+          if (!input) throw new Error("Workflow evidence requires a bounded JSON envelope on stdin.");
+          let envelope: unknown;
+          try {
+            envelope = JSON.parse(input) as unknown;
+          } catch {
+            throw new Error("Workflow evidence requires valid JSON.");
+          }
+          process.stdout.write(`${JSON.stringify(await appendEvidenceWorkflow(root, envelope))}\n`);
+          return;
+        }
+        if (options.schema) {
+          process.stdout.write(`${JSON.stringify(workflowEnvelopeSchema())}\n`);
+          return;
+        }
+        if (options.snapshot) {
+          process.stdout.write(`${JSON.stringify(await snapshotWorkflow(root, options.check!))}\n`);
+          return;
+        }
+        if (options.cancel) {
+          const input = programOptions.workflowInput
+            ? await programOptions.workflowInput()
+            : process.stdin.isTTY === true
+              ? ""
+              : await readBoundedInput(process.stdin);
+          let envelope: unknown;
+          try {
+            envelope = input ? (JSON.parse(input) as unknown) : undefined;
+          } catch {
+            throw new Error("Workflow cancellation requires valid bounded JSON.");
+          }
+          process.stdout.write(`${JSON.stringify(await cancelWorkflow(root, envelope))}\n`);
+          return;
+        }
+        if (options.learn) {
+          const input = programOptions.workflowInput
+            ? await programOptions.workflowInput()
+            : await readBoundedInput(process.stdin);
+          let envelope: unknown;
+          try {
+            envelope = input ? (JSON.parse(input) as unknown) : undefined;
+          } catch {
+            throw new Error("Workflow learning capture requires valid bounded JSON.");
+          }
+          process.stdout.write(`${JSON.stringify(await recordLearningWorkflow(root, envelope))}\n`);
+          return;
+        }
+        process.stdout.write(`${JSON.stringify(await finishWorkflow(root))}\n`);
+      },
+    );
   return program;
 }
 
@@ -348,7 +556,8 @@ export async function runCli(argv = process.argv, programOptions: ProgramOptions
     await program.parseAsync(argv);
     return typeof process.exitCode === "number" ? process.exitCode : 0;
   } catch (error: unknown) {
-    const commanderExit = typeof error === "object" && error !== null && "code" in error && String(error.code).startsWith("commander.");
+    const commanderExit =
+      typeof error === "object" && error !== null && "code" in error && String(error.code).startsWith("commander.");
     if (commanderExit && "exitCode" in error && error.exitCode === 0) return 0;
     const exitCode = 2;
     const message = redactPublicErrorMessage(error);
@@ -367,9 +576,13 @@ function parseRepoMapDepth(value: string): number {
 
 function parseRepoMapImpactPath(value: string): string {
   let normalized: string;
-  try { normalized = normalizeRepositoryPath(value); }
-  catch { throw new Error("--impact must be an exact normalized repository-relative POSIX path."); }
-  if (normalized !== value || value.includes("\\")) throw new Error("--impact must be an exact normalized repository-relative POSIX path.");
+  try {
+    normalized = normalizeRepositoryPath(value);
+  } catch {
+    throw new Error("--impact must be an exact normalized repository-relative POSIX path.");
+  }
+  if (normalized !== value || value.includes("\\"))
+    throw new Error("--impact must be an exact normalized repository-relative POSIX path.");
   return normalized;
 }
 
@@ -382,13 +595,23 @@ function parseTaskLimit(value: string): number {
 
 function parseTaskStatus(value: string | undefined): TaskStatus | undefined {
   if (value === undefined) return undefined;
-  const statuses: readonly TaskStatus[] = ["planning", "ready", "in_progress", "verifying", "blocked", "completed", "cancelled"];
-  if (!statuses.includes(value as TaskStatus)) throw new Error("--status must be planning, ready, in_progress, verifying, blocked, completed, or cancelled.");
+  const statuses: readonly TaskStatus[] = [
+    "planning",
+    "ready",
+    "in_progress",
+    "verifying",
+    "blocked",
+    "completed",
+    "cancelled",
+  ];
+  if (!statuses.includes(value as TaskStatus))
+    throw new Error("--status must be planning, ready, in_progress, verifying, blocked, completed, or cancelled.");
   return value as TaskStatus;
 }
 
 function parseReportPlatform(value: string | undefined): "kiro" | "antigravity" | "codex" | "claude" {
-  if (value !== "kiro" && value !== "antigravity" && value !== "codex" && value !== "claude") throw new Error("--platform must be kiro, antigravity, codex, or claude.");
+  if (value !== "kiro" && value !== "antigravity" && value !== "codex" && value !== "claude")
+    throw new Error("--platform must be kiro, antigravity, codex, or claude.");
   return value;
 }
 
@@ -405,17 +628,23 @@ export function publicCliError(message: string, exitCode: 1 | 2): PublicCliError
 
 export function redactPublicErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : "Harnix operation failed.";
-  const rollbackDetail = error instanceof GlobalManagedTransactionError && error.rollback.partial.length > 0
-    ? ` Partial rollback preserved concurrent edits at: ${error.rollback.partial.join(", ")}.`
-    : "";
-  return `${message}${rollbackDetail}`
-    .replaceAll(process.cwd(), "[PROJECT]")
-    .replace(/(['"])(?:[A-Za-z]:[\\/]|\/|\\\\)[^'"\r\n]+\1/gu, "'[PROJECT]'")
-    // File-lock and filesystem errors commonly include an unquoted absolute
-    // path. Redact the rest of that diagnostic segment rather than leaking a
-    // user profile merely because the path contains spaces.
-    .replace(/(?:\\\\(?:\?\\)?[^\\/\r\n]+[\\/]|[A-Za-z]:[\\/]|\/(?:home|Users|tmp|var\/folders)\/)[^\r\n]*/gu, "[PATH]")
-    .replace(/((?:token|secret|password|api[_-]?key)\s*[=:]\s*)[^\s,]+/giu, "$1[REDACTED]");
+  const rollbackDetail =
+    error instanceof GlobalManagedTransactionError && error.rollback.partial.length > 0
+      ? ` Partial rollback preserved concurrent edits at: ${error.rollback.partial.join(", ")}.`
+      : "";
+  return (
+    `${message}${rollbackDetail}`
+      .replaceAll(process.cwd(), "[PROJECT]")
+      .replace(/(['"])(?:[A-Za-z]:[\\/]|\/|\\\\)[^'"\r\n]+\1/gu, "'[PROJECT]'")
+      // File-lock and filesystem errors commonly include an unquoted absolute
+      // path. Redact the rest of that diagnostic segment rather than leaking a
+      // user profile merely because the path contains spaces.
+      .replace(
+        /(?:\\\\(?:\?\\)?[^\\/\r\n]+[\\/]|[A-Za-z]:[\\/]|\/(?:home|Users|tmp|var\/folders)\/)[^\r\n]*/gu,
+        "[PATH]",
+      )
+      .replace(/((?:token|secret|password|api[_-]?key)\s*[=:]\s*)[^\s,]+/giu, "$1[REDACTED]")
+  );
 }
 
 function isHiddenProtocolInvocation(argv: readonly string[]): boolean {
@@ -423,14 +652,17 @@ function isHiddenProtocolInvocation(argv: readonly string[]): boolean {
 }
 
 function reportActionableSetupReadiness(result: SetupPlatformsResult): void {
-  const actionable = result.platforms.filter((platform) => platform.readiness !== "installed" || platform.warnings.length > 0);
+  const actionable = result.platforms.filter(
+    (platform) => platform.readiness !== "installed" || platform.warnings.length > 0,
+  );
   if (actionable.length === 0) return;
   for (const platform of actionable) {
     if (platform.warnings.length === 0) {
       process.stderr.write(`${platform.platform}: setup readiness is ${platform.readiness}.\n`);
       continue;
     }
-    for (const warning of platform.warnings) process.stderr.write(`${platform.platform}: ${redactPublicErrorMessage(new Error(warning))}\n`);
+    for (const warning of platform.warnings)
+      process.stderr.write(`${platform.platform}: ${redactPublicErrorMessage(new Error(warning))}\n`);
   }
   process.exitCode = 1;
 }

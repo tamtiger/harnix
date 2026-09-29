@@ -15,10 +15,7 @@ export interface NormalizeRepositoryPathOptions {
   allowRoot?: boolean;
 }
 
-export function normalizeRepositoryPath(
-  value: string,
-  options: NormalizeRepositoryPathOptions = {},
-): string {
+export function normalizeRepositoryPath(value: string, options: NormalizeRepositoryPathOptions = {}): string {
   if (value.length === 0 || hasUnsafeRepositoryPathCharacter(value) || isAbsolute(value) || win32.isAbsolute(value)) {
     throw new UnsafeProjectPathError("A repository path must be non-empty and relative.");
   }
@@ -50,7 +47,9 @@ export function normalizeRepositoryPath(
 function hasUnsafeRepositoryPathCharacter(value: string): boolean {
   return [...value].some((character) => {
     const codePoint = character.codePointAt(0)!;
-    return codePoint <= 0x1f || codePoint >= 0x7f && codePoint <= 0x9f || codePoint === 0x2028 || codePoint === 0x2029;
+    return (
+      codePoint <= 0x1f || (codePoint >= 0x7f && codePoint <= 0x9f) || codePoint === 0x2028 || codePoint === 0x2029
+    );
   });
 }
 
@@ -64,10 +63,7 @@ export async function findGitRoot(cwd: string): Promise<string | undefined> {
   }
 }
 
-export async function resolveProjectRoot(
-  cwd: string,
-  gitRootLookup: GitRootLookup = findGitRoot,
-): Promise<string> {
+export async function resolveProjectRoot(cwd: string, gitRootLookup: GitRootLookup = findGitRoot): Promise<string> {
   const resolvedCwd = resolve(cwd);
   const gitRoot = await gitRootLookup(resolvedCwd);
   return gitRoot === undefined ? resolvedCwd : resolve(gitRoot);
@@ -99,7 +95,10 @@ export async function resolveSafeHarnixPath(projectRoot: string, harnixPath = ".
 
 function isContainedPath(root: string, candidate: string): boolean {
   const pathToCandidate = relative(root, candidate);
-  return pathToCandidate === "" || (!pathToCandidate.startsWith(`..${sep}`) && pathToCandidate !== ".." && !isAbsolute(pathToCandidate));
+  return (
+    pathToCandidate === "" ||
+    (!pathToCandidate.startsWith(`..${sep}`) && pathToCandidate !== ".." && !isAbsolute(pathToCandidate))
+  );
 }
 
 async function findRealExistingAncestor(candidate: string): Promise<string> {

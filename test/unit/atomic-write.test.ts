@@ -64,11 +64,13 @@ describe("atomicWriteFile", () => {
       rm: vi.fn(),
       writeFile: vi.fn(),
     };
-    await expect(atomicWriteFile(target, "new", {
-      filesystem: exhaustedFilesystem,
-      randomSuffix: () => "exhausted",
-      renameRetryDelaysMs: [0, 0],
-    })).rejects.toBe(transient);
+    await expect(
+      atomicWriteFile(target, "new", {
+        filesystem: exhaustedFilesystem,
+        randomSuffix: () => "exhausted",
+        renameRetryDelaysMs: [0, 0],
+      }),
+    ).rejects.toBe(transient);
     expect(exhaustedFilesystem.rename).toHaveBeenCalledTimes(3);
     expect(exhaustedFilesystem.rm).toHaveBeenCalledWith(`${target}.exhausted.tmp`, { force: true });
   });
@@ -91,14 +93,17 @@ describe("atomicWriteFile", () => {
     expect(filesystem.rename).toHaveBeenCalledWith(`${target}.fixed.tmp`, target);
   });
 
-  it.runIf(process.platform !== "win32")("preserves an existing file mode when atomically replacing its content", async () => {
-    const directory = await createTemporaryDirectory();
-    const target = join(directory, "private.json");
-    await writeFile(target, "old");
-    await chmod(target, 0o600);
+  it.runIf(process.platform !== "win32")(
+    "preserves an existing file mode when atomically replacing its content",
+    async () => {
+      const directory = await createTemporaryDirectory();
+      const target = join(directory, "private.json");
+      await writeFile(target, "old");
+      await chmod(target, 0o600);
 
-    await atomicWriteFile(target, "new");
+      await atomicWriteFile(target, "new");
 
-    expect((await stat(target)).mode & 0o777).toBe(0o600);
-  });
+      expect((await stat(target)).mode & 0o777).toBe(0o600);
+    },
+  );
 });

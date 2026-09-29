@@ -3,7 +3,21 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createLearningCandidate, isPromotionEligible } from "../../src/core/journal/learning.js";
 import { promotionProposal } from "../../src/core/journal/promotion.js";
-import { archiveTask, cancelTask, clearActiveTask, createTaskV2MigrationEvidence, loadTask, resolveActiveTask, saveTask, saveTaskWithArtifacts, setActiveTask, TaskValidationError, transitionTask, validateTask, type TaskRecord } from "../../src/core/tasks/task.js";
+import {
+  archiveTask,
+  cancelTask,
+  clearActiveTask,
+  createTaskV2MigrationEvidence,
+  loadTask,
+  resolveActiveTask,
+  saveTask,
+  saveTaskWithArtifacts,
+  setActiveTask,
+  TaskValidationError,
+  transitionTask,
+  validateTask,
+  type TaskRecord,
+} from "../../src/core/tasks/task.js";
 import { formatDisplay, systemTimezone } from "../../src/utils/clock.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
@@ -11,12 +25,40 @@ const temporaryRepository = useTemporaryRepositories();
 
 describe("task state", () => {
   it("applies task transitions and learning threshold", async () => {
-    const task = validateTask({ generator: "harnix", schemaVersion: 1, id: "20260807-120000-x", title: "x", mode: "lite", status: "planning", checkpoint: "planning", goal: "x", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp } as TaskRecord);
+    const task = validateTask({
+      generator: "harnix",
+      schemaVersion: 1,
+      id: "20260807-120000-x",
+      title: "x",
+      mode: "lite",
+      status: "planning",
+      checkpoint: "planning",
+      goal: "x",
+      nonGoals: [],
+      acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }],
+      relevantPaths: [],
+      relevantSpecs: [],
+      validationPlan: [],
+      evidence: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    } as TaskRecord);
     expect(transitionTask(task, "ready", "ready").status).toBe("ready");
-    const root = await temporaryRepository(); await saveTask(root, task); await setActiveTask(root, task.id);
-    expect((await resolveActiveTask(root))?.id).toBe(task.id); await clearActiveTask(root, task.id); expect(await resolveActiveTask(root)).toBeUndefined();
-    const candidate = createLearningCandidate({ id: "l", statement: "x", sourceTaskIds: ["b", "a", "a"], evidenceIds: ["e2", "e1"], status: "candidate" });
-    expect(candidate.occurrences).toBe(2); expect(isPromotionEligible(candidate)).toBe(true);
+    const root = await temporaryRepository();
+    await saveTask(root, task);
+    await setActiveTask(root, task.id);
+    expect((await resolveActiveTask(root))?.id).toBe(task.id);
+    await clearActiveTask(root, task.id);
+    expect(await resolveActiveTask(root)).toBeUndefined();
+    const candidate = createLearningCandidate({
+      id: "l",
+      statement: "x",
+      sourceTaskIds: ["b", "a", "a"],
+      evidenceIds: ["e2", "e1"],
+      status: "candidate",
+    });
+    expect(candidate.occurrences).toBe(2);
+    expect(isPromotionEligible(candidate)).toBe(true);
     expect(promotionProposal(candidate, "spec/guide.md").content).toContain("Evidence: e1, e2");
   });
 
@@ -28,17 +70,23 @@ describe("task state", () => {
   });
 
   it("should_reject_external_symlink_when_writing_task_artifacts", async () => {
-    const root = await temporaryRepository(); const external = await temporaryRepository();
+    const root = await temporaryRepository();
+    const external = await temporaryRepository();
     await symlink(external, join(root, "tasks"), process.platform === "win32" ? "junction" : "dir");
 
-    await expect(saveTaskWithArtifacts(root, { ...taskFixture(), mode: "full" }, { prd: "# PRD\n", plan: "# Plan\n" })).rejects.toThrow("symbolic link");
+    await expect(
+      saveTaskWithArtifacts(root, { ...taskFixture(), mode: "full" }, { prd: "# PRD\n", plan: "# Plan\n" }),
+    ).rejects.toThrow("symbolic link");
 
     await expect(access(join(external, "20260807-120000-x", "task.json"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   it("should_reject_external_symlink_when_resolving_active_task", async () => {
-    const root = await temporaryRepository(); const external = await temporaryRepository(); const task = taskFixture();
-    await saveTask(external, task); await setActiveTask(external, task.id);
+    const root = await temporaryRepository();
+    const external = await temporaryRepository();
+    const task = taskFixture();
+    await saveTask(external, task);
+    await setActiveTask(external, task.id);
     await symlink(external, join(root, "tasks"), process.platform === "win32" ? "junction" : "dir");
 
     await expect(resolveActiveTask(root)).rejects.toThrow("symbolic link");
@@ -48,8 +96,10 @@ describe("task state", () => {
   });
 
   it("wraps a corrupt task.json in a TaskValidationError naming the file instead of a raw JSON.parse SyntaxError", async () => {
-    const root = await temporaryRepository(); const task = taskFixture();
-    await saveTask(root, task); await setActiveTask(root, task.id);
+    const root = await temporaryRepository();
+    const task = taskFixture();
+    await saveTask(root, task);
+    await setActiveTask(root, task.id);
     const taskJsonPath = join(root, "tasks", task.id, "task.json");
     await writeFile(taskJsonPath, '{"generator":"harnix","schemaVersion":2,"id":"20260807-1200', "utf8"); // truncated mid-string
 
@@ -59,22 +109,47 @@ describe("task state", () => {
   });
 
   it("archives only terminal tasks and preserves task data", async () => {
-    const root = await temporaryRepository(); const task = taskFixture();
+    const root = await temporaryRepository();
+    const task = taskFixture();
     const evidence = { id: "e", recordedAt: timestamp, result: "pass" as const, summary: "ok", artifactPaths: [] };
-    const completed = transitionTask({ ...task, evidence: [evidence], acceptanceCriteria: [{ ...task.acceptanceCriteria[0]!, status: "met", evidenceIds: ["e"] }] }, "ready", "ready");
-    const inProgress = transitionTask(completed, "in_progress", "implementing"); const verifying = transitionTask(inProgress, "verifying", "verifying"); const done = transitionTask(verifying, "completed", "finishing");
-    await saveTask(root, done); await setActiveTask(root, done.id); await archiveTask(root, done); expect(await resolveActiveTask(root)).toBeUndefined(); expect((await readFile(join(root, "tasks", done.id, "task.json"), "utf8"))).toContain(done.id);
+    const completed = transitionTask(
+      {
+        ...task,
+        evidence: [evidence],
+        acceptanceCriteria: [{ ...task.acceptanceCriteria[0]!, status: "met", evidenceIds: ["e"] }],
+      },
+      "ready",
+      "ready",
+    );
+    const inProgress = transitionTask(completed, "in_progress", "implementing");
+    const verifying = transitionTask(inProgress, "verifying", "verifying");
+    const done = transitionTask(verifying, "completed", "finishing");
+    await saveTask(root, done);
+    await setActiveTask(root, done.id);
+    await archiveTask(root, done);
+    expect(await resolveActiveTask(root)).toBeUndefined();
+    expect(await readFile(join(root, "tasks", done.id, "task.json"), "utf8")).toContain(done.id);
   });
 
   it("requires blocked tasks to resume to the recorded status", () => {
-    const task = taskFixture(); const blocked = { ...task, status: "blocked" as const, blocker: { kind: "repository" as const, summary: "x", nextAction: "x", resumeStatus: "in_progress" as const } };
+    const task = taskFixture();
+    const blocked = {
+      ...task,
+      status: "blocked" as const,
+      blocker: { kind: "repository" as const, summary: "x", nextAction: "x", resumeStatus: "in_progress" as const },
+    };
     expect(() => transitionTask(blocked, "ready", "ready")).toThrow("recorded status");
     expect(transitionTask(blocked, "in_progress", "implementing").status).toBe("in_progress");
   });
 
   it("should_record_blocker_when_transitioning_from_an_active_state", () => {
     const task = taskFixture();
-    const blocker = { kind: "external" as const, summary: "Waiting for upstream", nextAction: "Retry after the upstream incident", resumeStatus: "planning" as const };
+    const blocker = {
+      kind: "external" as const,
+      summary: "Waiting for upstream",
+      nextAction: "Retry after the upstream incident",
+      resumeStatus: "planning" as const,
+    };
 
     const blocked = transitionTask(task, "blocked", "planning", undefined, blocker);
 
@@ -91,18 +166,40 @@ describe("task state", () => {
     const fixture = taskV2Fixture();
     const criterion = fixture.acceptanceCriteria[0]!;
     const check = fixture.validationPlan[0]!;
-    const failedEvidence = { id: "failed", checkId: check.id, recordedAt: timestamp, result: "fail" as const, exitCode: 1, summary: "failed", artifactPaths: [] };
+    const failedEvidence = {
+      id: "failed",
+      checkId: check.id,
+      recordedAt: timestamp,
+      result: "fail" as const,
+      exitCode: 1,
+      summary: "failed",
+      artifactPaths: [],
+    };
 
     expect(() => validateTask({ ...fixture, unexpected: true })).toThrow(/field|schema/iu);
-    expect(() => validateTask({ ...fixture, acceptanceCriteria: [{ ...criterion, unexpected: true }] })).toThrow(/field|schema/iu);
-    expect(() => validateTask({ ...fixture, validationPlan: [{ ...check, unexpected: true }] })).toThrow(/field|schema/iu);
-    expect(() => validateTask({ ...fixture, evidence: [{ ...failedEvidence, unexpected: true }] })).toThrow(/field|schema/iu);
-    expect(() => validateTask({
-      ...fixture,
-      status: "blocked",
-      checkpoint: "planning",
-      blocker: { kind: "repository", summary: "blocked", nextAction: "retry", resumeStatus: "planning", unexpected: true },
-    })).toThrow(/field|schema/iu);
+    expect(() => validateTask({ ...fixture, acceptanceCriteria: [{ ...criterion, unexpected: true }] })).toThrow(
+      /field|schema/iu,
+    );
+    expect(() => validateTask({ ...fixture, validationPlan: [{ ...check, unexpected: true }] })).toThrow(
+      /field|schema/iu,
+    );
+    expect(() => validateTask({ ...fixture, evidence: [{ ...failedEvidence, unexpected: true }] })).toThrow(
+      /field|schema/iu,
+    );
+    expect(() =>
+      validateTask({
+        ...fixture,
+        status: "blocked",
+        checkpoint: "planning",
+        blocker: {
+          kind: "repository",
+          summary: "blocked",
+          nextAction: "retry",
+          resumeStatus: "planning",
+          unexpected: true,
+        },
+      }),
+    ).toThrow(/field|schema/iu);
   });
 
   it("fails closed when the active pointer references a missing task record", async () => {
@@ -119,7 +216,14 @@ describe("task state", () => {
   it("cancels any unfinished task with explicit user authority and preserves its evidence", async () => {
     const root = await temporaryRepository();
     const planning = taskFixture();
-    planning.evidence.push({ id: "failed-check", recordedAt: timestamp, result: "fail", exitCode: 1, summary: "MongoDB permission denied", artifactPaths: [] });
+    planning.evidence.push({
+      id: "failed-check",
+      recordedAt: timestamp,
+      result: "fail",
+      exitCode: 1,
+      summary: "MongoDB permission denied",
+      artifactPaths: [],
+    });
     const blocked = transitionTask(planning, "blocked", "planning", timestamp, {
       kind: "credential",
       summary: "Missing test credential",
@@ -127,7 +231,11 @@ describe("task state", () => {
       resumeStatus: "planning",
     });
 
-    const cancelled = cancelTask(blocked, { reason: "Người dùng chọn dừng task để chuyển ưu tiên.", authorizedBy: "user" }, laterTimestamp);
+    const cancelled = cancelTask(
+      blocked,
+      { reason: "Người dùng chọn dừng task để chuyển ưu tiên.", authorizedBy: "user" },
+      laterTimestamp,
+    );
 
     expect(cancelled).toMatchObject({
       status: "cancelled",
@@ -137,7 +245,9 @@ describe("task state", () => {
       evidence: [{ id: "failed-check", result: "fail" }],
     });
     expect(cancelled.blocker).toBeUndefined();
-    expect(() => transitionTask(planning, "cancelled", "cancelling", laterTimestamp)).toThrow(/illegal task transition/iu);
+    expect(() => transitionTask(planning, "cancelled", "cancelling", laterTimestamp)).toThrow(
+      /illegal task transition/iu,
+    );
     expect(() => transitionTask(cancelled, "planning", "planning", laterTimestamp)).toThrow(/cancelled|transition/iu);
 
     await saveTask(root, cancelled);
@@ -153,11 +263,20 @@ describe("task state", () => {
     const ready = transitionTask(planning, "ready", "ready", timestamp);
     const inProgress = transitionTask(ready, "in_progress", "implementing", timestamp);
     const verifying = transitionTask(inProgress, "verifying", "verifying", timestamp);
-    const completed = transitionTask({
-      ...verifying,
-      acceptanceCriteria: [{ ...verifying.acceptanceCriteria[0]!, status: "waived", waiverReason: "Explicitly not applicable." }],
-    }, "completed", "finishing", timestamp);
-    expect(() => cancelTask(completed, { reason: "Too late", authorizedBy: "user" }, laterTimestamp)).toThrow(/completed|terminal/iu);
+    const completed = transitionTask(
+      {
+        ...verifying,
+        acceptanceCriteria: [
+          { ...verifying.acceptanceCriteria[0]!, status: "waived", waiverReason: "Explicitly not applicable." },
+        ],
+      },
+      "completed",
+      "finishing",
+      timestamp,
+    );
+    expect(() => cancelTask(completed, { reason: "Too late", authorizedBy: "user" }, laterTimestamp)).toThrow(
+      /completed|terminal/iu,
+    );
   });
 
   it("accepts TaskRecord v2 with explicit criterion coverage and verification inputs", () => {
@@ -178,86 +297,206 @@ describe("task state", () => {
       [{ ...check, inputs: ["src/**/*.ts"] }],
       [{ ...check, inputs: ["@task-contract", "../escape"] }],
       [{ ...check, inputs: ["src/**/*.ts", "@task-contract"] }],
-    ]) expect(() => validateTask({ ...fixture, validationPlan })).toThrow();
+    ])
+      expect(() => validateTask({ ...fixture, validationPlan })).toThrow();
 
-    expect(() => validateTask({
-      ...fixture,
-      acceptanceCriteria: [...fixture.acceptanceCriteria, { id: "b", text: "b", status: "pending", evidenceIds: [] }],
-      validationPlan: [{ ...check, criterionIds: ["b", "a"] }],
-    })).toThrow(/criterion/iu);
-    expect(() => validateTask({ ...fixture, validationPlan: [{ ...check, inputs: ["@task-contract", "!src/**/*.ts"] }] })).toThrow(/input/iu);
+    expect(() =>
+      validateTask({
+        ...fixture,
+        acceptanceCriteria: [...fixture.acceptanceCriteria, { id: "b", text: "b", status: "pending", evidenceIds: [] }],
+        validationPlan: [{ ...check, criterionIds: ["b", "a"] }],
+      }),
+    ).toThrow(/criterion/iu);
+    expect(() =>
+      validateTask({ ...fixture, validationPlan: [{ ...check, inputs: ["@task-contract", "!src/**/*.ts"] }] }),
+    ).toThrow(/input/iu);
 
-    expect(() => validateTask({
-      ...fixture,
-      acceptanceCriteria: [...fixture.acceptanceCriteria, { id: "orphan", text: "orphan", status: "pending", evidenceIds: [] }],
-    })).toThrow(/criterion|coverage/iu);
-    expect(() => validateTask({
-      ...fixture,
-      acceptanceCriteria: [...fixture.acceptanceCriteria, { id: "bad id", text: "waived", status: "waived", evidenceIds: [], waiverReason: "not applicable" }],
-    })).toThrow(/criterion/iu);
+    expect(() =>
+      validateTask({
+        ...fixture,
+        acceptanceCriteria: [
+          ...fixture.acceptanceCriteria,
+          { id: "orphan", text: "orphan", status: "pending", evidenceIds: [] },
+        ],
+      }),
+    ).toThrow(/criterion|coverage/iu);
+    expect(() =>
+      validateTask({
+        ...fixture,
+        acceptanceCriteria: [
+          ...fixture.acceptanceCriteria,
+          { id: "bad id", text: "waived", status: "waived", evidenceIds: [], waiverReason: "not applicable" },
+        ],
+      }),
+    ).toThrow(/criterion/iu);
   });
 
   it("requires repository inputs for behavioral TaskRecord v2 checks and digests for passing evidence", () => {
     const fixture = taskV2Fixture();
-    expect(() => validateTask({
-      ...fixture,
-      validationPlan: [{ ...fixture.validationPlan[0]!, inputs: ["@task-contract"] }],
-    })).toThrow(/input/iu);
-    expect(() => validateTask({
-      ...fixture,
-      evidence: [{ id: "e", checkId: "check", recordedAt: timestamp, result: "pass", exitCode: 0, summary: "ok", artifactPaths: [] }],
-    })).toThrow(/digest/iu);
-    expect(() => validateTask({
-      ...fixture,
-      evidence: [{ id: "e", checkId: "check", recordedAt: timestamp, result: "pass", exitCode: 0, summary: "ok", artifactPaths: [], inputDigest: "A".repeat(64) }],
-    })).toThrow(/digest/iu);
+    expect(() =>
+      validateTask({
+        ...fixture,
+        validationPlan: [{ ...fixture.validationPlan[0]!, inputs: ["@task-contract"] }],
+      }),
+    ).toThrow(/input/iu);
+    expect(() =>
+      validateTask({
+        ...fixture,
+        evidence: [
+          {
+            id: "e",
+            checkId: "check",
+            recordedAt: timestamp,
+            result: "pass",
+            exitCode: 0,
+            summary: "ok",
+            artifactPaths: [],
+          },
+        ],
+      }),
+    ).toThrow(/digest/iu);
+    expect(() =>
+      validateTask({
+        ...fixture,
+        evidence: [
+          {
+            id: "e",
+            checkId: "check",
+            recordedAt: timestamp,
+            result: "pass",
+            exitCode: 0,
+            summary: "ok",
+            artifactPaths: [],
+            inputDigest: "A".repeat(64),
+          },
+        ],
+      }),
+    ).toThrow(/digest/iu);
   });
 
   it("accepts optional findings on EvidenceRecordV2 but rejects them on EvidenceRecordV1", () => {
     const fixtureV2 = taskV2Fixture();
     const withFindings = {
       ...fixtureV2,
-      evidence: [{
-        id: "e", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "ok", artifactPaths: [], inputDigest: "a".repeat(64),
-        findings: [{ id: "f1", text: "Duplicate key in map iteration", severity: "medium" as const }],
-      }],
+      evidence: [
+        {
+          id: "e",
+          checkId: "check",
+          recordedAt: timestamp,
+          result: "pass" as const,
+          exitCode: 0,
+          summary: "ok",
+          artifactPaths: [],
+          inputDigest: "a".repeat(64),
+          findings: [{ id: "f1", text: "Duplicate key in map iteration", severity: "medium" as const }],
+        },
+      ],
       acceptanceCriteria: [{ id: "a", text: "x", status: "met" as const, evidenceIds: ["e"] }],
     };
     expect(() => validateTask(withFindings)).not.toThrow();
 
-    const withoutFindings = { ...fixtureV2, evidence: [{ id: "e", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "ok", artifactPaths: [], inputDigest: "a".repeat(64) }], acceptanceCriteria: [{ id: "a", text: "x", status: "met" as const, evidenceIds: ["e"] }] };
+    const withoutFindings = {
+      ...fixtureV2,
+      evidence: [
+        {
+          id: "e",
+          checkId: "check",
+          recordedAt: timestamp,
+          result: "pass" as const,
+          exitCode: 0,
+          summary: "ok",
+          artifactPaths: [],
+          inputDigest: "a".repeat(64),
+        },
+      ],
+      acceptanceCriteria: [{ id: "a", text: "x", status: "met" as const, evidenceIds: ["e"] }],
+    };
     expect(() => validateTask(withoutFindings)).not.toThrow();
 
     const v1WithFindings = {
       ...taskFixture(),
-      evidence: [{ id: "e", checkId: undefined, recordedAt: timestamp, result: "pass" as const, summary: "ok", artifactPaths: [], findings: [{ id: "f1", text: "x", severity: "low" as const }] }],
+      evidence: [
+        {
+          id: "e",
+          checkId: undefined,
+          recordedAt: timestamp,
+          result: "pass" as const,
+          summary: "ok",
+          artifactPaths: [],
+          findings: [{ id: "f1", text: "x", severity: "low" as const }],
+        },
+      ],
     };
     expect(() => validateTask(v1WithFindings)).toThrow(/unknown schema field/iu);
   });
 
   it("rejects a finding with an invalid id, empty text, or an out-of-enum severity", () => {
     const fixtureV2 = taskV2Fixture();
-    const baseEvidence = { id: "e", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "ok", artifactPaths: [], inputDigest: "a".repeat(64) };
-    const withCriterion = { ...fixtureV2, acceptanceCriteria: [{ id: "a", text: "x", status: "met" as const, evidenceIds: ["e"] }] };
+    const baseEvidence = {
+      id: "e",
+      checkId: "check",
+      recordedAt: timestamp,
+      result: "pass" as const,
+      exitCode: 0,
+      summary: "ok",
+      artifactPaths: [],
+      inputDigest: "a".repeat(64),
+    };
+    const withCriterion = {
+      ...fixtureV2,
+      acceptanceCriteria: [{ id: "a", text: "x", status: "met" as const, evidenceIds: ["e"] }],
+    };
 
-    expect(() => validateTask({ ...withCriterion, evidence: [{ ...baseEvidence, findings: [{ id: "bad id", text: "x", severity: "low" }] }] })).toThrow(/finding/iu);
-    expect(() => validateTask({ ...withCriterion, evidence: [{ ...baseEvidence, findings: [{ id: "f1", text: "", severity: "low" }] }] })).toThrow(/finding/iu);
-    expect(() => validateTask({ ...withCriterion, evidence: [{ ...baseEvidence, findings: [{ id: "f1", text: "x", severity: "catastrophic" }] }] })).toThrow(/finding/iu);
-    expect(() => validateTask({ ...withCriterion, evidence: [{ ...baseEvidence, findings: [{ id: "f1", text: "x", severity: "critical" }] }] })).not.toThrow();
+    expect(() =>
+      validateTask({
+        ...withCriterion,
+        evidence: [{ ...baseEvidence, findings: [{ id: "bad id", text: "x", severity: "low" }] }],
+      }),
+    ).toThrow(/finding/iu);
+    expect(() =>
+      validateTask({
+        ...withCriterion,
+        evidence: [{ ...baseEvidence, findings: [{ id: "f1", text: "", severity: "low" }] }],
+      }),
+    ).toThrow(/finding/iu);
+    expect(() =>
+      validateTask({
+        ...withCriterion,
+        evidence: [{ ...baseEvidence, findings: [{ id: "f1", text: "x", severity: "catastrophic" }] }],
+      }),
+    ).toThrow(/finding/iu);
+    expect(() =>
+      validateTask({
+        ...withCriterion,
+        evidence: [{ ...baseEvidence, findings: [{ id: "f1", text: "x", severity: "critical" }] }],
+      }),
+    ).not.toThrow();
   });
 
   it("preserves pre-migration v1 evidence without allowing new undigested v2 passes", () => {
     const fixture = taskV2Fixture();
-    const legacyPass = { id: "legacy", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "legacy", artifactPaths: [] };
-    expect(() => validateTask({
-      ...fixture,
-      acceptanceCriteria: [{ ...fixture.acceptanceCriteria[0]!, status: "met", evidenceIds: ["legacy"] }],
-      evidence: [legacyPass, createTaskV2MigrationEvidence(fixture.id, "2026-08-13T00:01:00.000Z")],
-    })).not.toThrow();
-    expect(() => validateTask({
-      ...fixture,
-      evidence: [createTaskV2MigrationEvidence(fixture.id, timestamp), { ...legacyPass, id: "new" }],
-    })).toThrow(/digest/iu);
+    const legacyPass = {
+      id: "legacy",
+      checkId: "check",
+      recordedAt: timestamp,
+      result: "pass" as const,
+      exitCode: 0,
+      summary: "legacy",
+      artifactPaths: [],
+    };
+    expect(() =>
+      validateTask({
+        ...fixture,
+        acceptanceCriteria: [{ ...fixture.acceptanceCriteria[0]!, status: "met", evidenceIds: ["legacy"] }],
+        evidence: [legacyPass, createTaskV2MigrationEvidence(fixture.id, "2026-08-13T00:01:00.000Z")],
+      }),
+    ).not.toThrow();
+    expect(() =>
+      validateTask({
+        ...fixture,
+        evidence: [createTaskV2MigrationEvidence(fixture.id, timestamp), { ...legacyPass, id: "new" }],
+      }),
+    ).toThrow(/digest/iu);
   });
 
   it("accepts readable kebab-case task slugs and rejects unsafe task IDs", async () => {
@@ -283,14 +522,32 @@ describe("task state", () => {
 
   it("rejects malformed evidence and acceptance criteria", () => {
     expect(() => validateTask({ ...taskFixture(), evidence: [{ id: "e" }] })).toThrow("Evidence");
-    expect(() => validateTask({ ...taskFixture(), acceptanceCriteria: [{ id: "a", text: "x", status: "bad", evidenceIds: [] }] })).toThrow("Acceptance");
+    expect(() =>
+      validateTask({ ...taskFixture(), acceptanceCriteria: [{ id: "a", text: "x", status: "bad", evidenceIds: [] }] }),
+    ).toThrow("Acceptance");
   });
 
   it("rejects unsafe references, invalid timestamps, duplicate IDs, and illegal status/checkpoint combinations", () => {
     expect(() => validateTask({ ...taskFixture(), createdAt: "not-a-time" })).toThrow("timestamp");
     expect(() => validateTask({ ...taskFixture(), relevantPaths: ["../escape"] })).toThrow("path");
-    expect(() => validateTask({ ...taskFixture(), validationPlan: [{ id: "check", description: "x", scope: "focused", required: true }], evidence: [{ id: "e", checkId: "missing", recordedAt: timestamp, result: "pass", summary: "x", artifactPaths: [] }] })).toThrow("check");
-    expect(() => validateTask({ ...taskFixture(), acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }, { id: "a", text: "y", status: "pending", evidenceIds: [] }] })).toThrow(/duplicate/iu);
+    expect(() =>
+      validateTask({
+        ...taskFixture(),
+        validationPlan: [{ id: "check", description: "x", scope: "focused", required: true }],
+        evidence: [
+          { id: "e", checkId: "missing", recordedAt: timestamp, result: "pass", summary: "x", artifactPaths: [] },
+        ],
+      }),
+    ).toThrow("check");
+    expect(() =>
+      validateTask({
+        ...taskFixture(),
+        acceptanceCriteria: [
+          { id: "a", text: "x", status: "pending", evidenceIds: [] },
+          { id: "a", text: "y", status: "pending", evidenceIds: [] },
+        ],
+      }),
+    ).toThrow(/duplicate/iu);
     expect(() => validateTask({ ...taskFixture(), status: "ready", checkpoint: "implementing" })).toThrow("checkpoint");
   });
   it("should_accept_optional_rationale_fields_on_schema_v2_and_reject_them_on_v1", () => {
@@ -312,7 +569,9 @@ describe("task state", () => {
       createdAt: "2026-09-16T00:00:00.000Z",
       updatedAt: "2026-09-16T00:00:00.000Z",
     };
-    const decisions = [{ id: "d1", text: "Skill phân phối bằng command", rationale: "Không tăng footprint và luôn khớp version." }];
+    const decisions = [
+      { id: "d1", text: "Skill phân phối bằng command", rationale: "Không tăng footprint và luôn khớp version." },
+    ];
     const residualRisks = [{ id: "r1", text: "internal-workflow.ts vẫn lớn", severity: "low" as const }];
 
     expect(validateTask({ ...base, decisions, residualRisks })).toMatchObject({ decisions, residualRisks });
@@ -320,9 +579,21 @@ describe("task state", () => {
     expect(() => validateTask({ ...base, schemaVersion: 1, decisions })).toThrow(/unknown schema field/u);
     expect(() => validateTask({ ...base, decisions: [{ id: "bad id", text: "x", rationale: "y" }] })).toThrow();
     expect(() => validateTask({ ...base, decisions: [{ id: "d1", text: "", rationale: "y" }] })).toThrow();
-    expect(() => validateTask({ ...base, decisions: [{ id: "d1", text: "x", rationale: "y", extra: 1 }] })).toThrow(/unknown schema field/u);
-    expect(() => validateTask({ ...base, residualRisks: [{ id: "r1", text: "x", severity: "catastrophic" }] })).toThrow();
-    expect(() => validateTask({ ...base, decisions: [{ id: "d1", text: "x", rationale: "y" }, { id: "d1", text: "z", rationale: "w" }] })).toThrow(/Duplicate/u);
+    expect(() => validateTask({ ...base, decisions: [{ id: "d1", text: "x", rationale: "y", extra: 1 }] })).toThrow(
+      /unknown schema field/u,
+    );
+    expect(() =>
+      validateTask({ ...base, residualRisks: [{ id: "r1", text: "x", severity: "catastrophic" }] }),
+    ).toThrow();
+    expect(() =>
+      validateTask({
+        ...base,
+        decisions: [
+          { id: "d1", text: "x", rationale: "y" },
+          { id: "d1", text: "z", rationale: "w" },
+        ],
+      }),
+    ).toThrow(/Duplicate/u);
   });
 
   it("should_generate_a_plain_review_markdown_file_alongside_task_json_for_direct_review", async () => {
@@ -346,10 +617,37 @@ describe("task state", () => {
       decisions: [{ id: "d1", text: "Dung in-memory counter.", rationale: "Chua co multi-instance deployment." }],
       residualRisks: [{ id: "r1", text: "Khong chia se giua nhieu instance.", severity: "medium" as const }],
       validationPlan: [
-        { id: "check", description: "Run tests", command: "pnpm test", scope: "full" as const, required: true, criterionIds: ["ac-a", "ac-b"], inputs: ["@task-contract", "src/**/*.ts"] },
-        { id: "release-gate", description: "Run release gate", command: "pnpm test:acceptance", scope: "full" as const, required: true, criterionIds: ["ac-a"], inputs: ["@task-contract", "src/**/*.ts"] },
+        {
+          id: "check",
+          description: "Run tests",
+          command: "pnpm test",
+          scope: "full" as const,
+          required: true,
+          criterionIds: ["ac-a", "ac-b"],
+          inputs: ["@task-contract", "src/**/*.ts"],
+        },
+        {
+          id: "release-gate",
+          description: "Run release gate",
+          command: "pnpm test:acceptance",
+          scope: "full" as const,
+          required: true,
+          criterionIds: ["ac-a"],
+          inputs: ["@task-contract", "src/**/*.ts"],
+        },
       ],
-      evidence: [{ id: "e1", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "GREEN", artifactPaths: [], inputDigest: "a".repeat(64) }],
+      evidence: [
+        {
+          id: "e1",
+          checkId: "check",
+          recordedAt: timestamp,
+          result: "pass" as const,
+          exitCode: 0,
+          summary: "GREEN",
+          artifactPaths: [],
+          inputDigest: "a".repeat(64),
+        },
+      ],
       createdAt: timestamp,
       updatedAt: "2026-09-16T23:50:00.000Z",
     };
@@ -410,7 +708,12 @@ describe("task state", () => {
     expect(fullReview).toContain("plan.md");
     expect(fullReview).not.toContain("design.md");
 
-    const liteTask = { ...fullTask, id: "20260916-234500-review-artifacts-lite", mode: "lite" as const, title: "Lite task" };
+    const liteTask = {
+      ...fullTask,
+      id: "20260916-234500-review-artifacts-lite",
+      mode: "lite" as const,
+      title: "Lite task",
+    };
     await saveTask(root, liteTask);
     const liteReview = await readFile(join(root, "tasks", liteTask.id, "review.md"), "utf8");
 
@@ -447,7 +750,12 @@ describe("task state", () => {
     expect(first).not.toContain("Decisions");
     expect(first).not.toContain("Residual");
 
-    const updated = { ...minimal, status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-09-16T22:02:00.000Z" };
+    const updated = {
+      ...minimal,
+      status: "ready" as const,
+      checkpoint: "ready" as const,
+      updatedAt: "2026-09-16T22:02:00.000Z",
+    };
     await saveTask(root, updated);
     const second = await readFile(reviewPath, "utf8");
 
@@ -473,8 +781,29 @@ describe("task state", () => {
       ],
       relevantPaths: [],
       relevantSpecs: [],
-      validationPlan: [{ id: "check", description: "d", command: "pnpm test", scope: "full" as const, required: true, criterionIds: ["a", "b"], inputs: ["@task-contract", "src/**/*.ts"] }],
-      evidence: [{ id: "e1", checkId: "check", recordedAt: timestamp, result: "pass" as const, exitCode: 0, summary: "s", artifactPaths: [], inputDigest: "a".repeat(64) }],
+      validationPlan: [
+        {
+          id: "check",
+          description: "d",
+          command: "pnpm test",
+          scope: "full" as const,
+          required: true,
+          criterionIds: ["a", "b"],
+          inputs: ["@task-contract", "src/**/*.ts"],
+        },
+      ],
+      evidence: [
+        {
+          id: "e1",
+          checkId: "check",
+          recordedAt: timestamp,
+          result: "pass" as const,
+          exitCode: 0,
+          summary: "s",
+          artifactPaths: [],
+          inputDigest: "a".repeat(64),
+        },
+      ],
       createdAt: timestamp,
       updatedAt: timestamp,
     };
@@ -505,7 +834,12 @@ describe("task state", () => {
       id: "20260924-150000-verdict-blocked",
       status: "blocked" as const,
       checkpoint: "implementing" as const,
-      blocker: { kind: "external" as const, summary: "waiting on vendor", nextAction: "poll vendor", resumeStatus: "in_progress" as const },
+      blocker: {
+        kind: "external" as const,
+        summary: "waiting on vendor",
+        nextAction: "poll vendor",
+        resumeStatus: "in_progress" as const,
+      },
     };
     await saveTask(root, blocked);
     const blockedReview = await readFile(join(root, "tasks", blocked.id, "review.md"), "utf8");
@@ -540,11 +874,46 @@ describe("task state", () => {
       acceptanceCriteria: [{ id: "a", text: "x", status: "pending" as const, evidenceIds: [] }],
       relevantPaths: [],
       relevantSpecs: [],
-      validationPlan: [{ id: "check", description: "d", command: "pnpm test", scope: "full" as const, required: true, criterionIds: ["a"], inputs: ["@task-contract", "src/**/*.ts"] }],
+      validationPlan: [
+        {
+          id: "check",
+          description: "d",
+          command: "pnpm test",
+          scope: "full" as const,
+          required: true,
+          criterionIds: ["a"],
+          inputs: ["@task-contract", "src/**/*.ts"],
+        },
+      ],
       evidence: [
-        { id: "e1", checkId: "check", recordedAt: "2026-09-24T00:00:00.000Z", result: "fail" as const, exitCode: 1, summary: "RED-1", artifactPaths: [] },
-        { id: "e2", checkId: "check", recordedAt: "2026-09-24T00:01:00.000Z", result: "fail" as const, exitCode: 1, summary: "RED-2", artifactPaths: [] },
-        { id: "e3", checkId: "check", recordedAt: "2026-09-24T00:02:00.000Z", result: "pass" as const, exitCode: 0, summary: "GREEN", artifactPaths: [], inputDigest: "a".repeat(64) },
+        {
+          id: "e1",
+          checkId: "check",
+          recordedAt: "2026-09-24T00:00:00.000Z",
+          result: "fail" as const,
+          exitCode: 1,
+          summary: "RED-1",
+          artifactPaths: [],
+        },
+        {
+          id: "e2",
+          checkId: "check",
+          recordedAt: "2026-09-24T00:01:00.000Z",
+          result: "fail" as const,
+          exitCode: 1,
+          summary: "RED-2",
+          artifactPaths: [],
+        },
+        {
+          id: "e3",
+          checkId: "check",
+          recordedAt: "2026-09-24T00:02:00.000Z",
+          result: "pass" as const,
+          exitCode: 0,
+          summary: "GREEN",
+          artifactPaths: [],
+          inputDigest: "a".repeat(64),
+        },
       ],
       createdAt: timestamp,
       updatedAt: timestamp,
@@ -559,17 +928,35 @@ describe("task state", () => {
     expect(evidenceSection).not.toContain("RED-2");
     expect(evidenceSection).toMatch(/2 (earlier|previous).*(rerun|attempt)/iu);
 
-    const persisted = JSON.parse(await readFile(join(root, "tasks", task.id, "task.json"), "utf8")) as { evidence: unknown[] };
+    const persisted = JSON.parse(await readFile(join(root, "tasks", task.id, "task.json"), "utf8")) as {
+      evidence: unknown[];
+    };
     expect(persisted.evidence).toHaveLength(3);
   });
-
 });
 
 const timestamp = "2026-08-13T00:00:00.000Z";
 const laterTimestamp = "2026-08-13T00:01:00.000Z";
 
 function taskFixture(): TaskRecord {
-  return { generator: "harnix", schemaVersion: 1, id: "20260807-120000-x", title: "x", mode: "lite", status: "planning", checkpoint: "planning", goal: "x", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [], evidence: [], createdAt: timestamp, updatedAt: timestamp };
+  return {
+    generator: "harnix",
+    schemaVersion: 1,
+    id: "20260807-120000-x",
+    title: "x",
+    mode: "lite",
+    status: "planning",
+    checkpoint: "planning",
+    goal: "x",
+    nonGoals: [],
+    acceptanceCriteria: [{ id: "a", text: "x", status: "pending", evidenceIds: [] }],
+    relevantPaths: [],
+    relevantSpecs: [],
+    validationPlan: [],
+    evidence: [],
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
 }
 
 function taskV2Fixture() {
@@ -577,15 +964,17 @@ function taskV2Fixture() {
     ...taskFixture(),
     schemaVersion: 2 as const,
     acceptanceCriteria: [{ id: "a", text: "x", status: "pending" as const, evidenceIds: [] }],
-    validationPlan: [{
-      id: "check",
-      description: "Run unit tests",
-      command: "pnpm test",
-      scope: "focused" as const,
-      required: true,
-      criterionIds: ["a"],
-      inputs: ["@task-contract", "src/**/*.ts"],
-    }],
+    validationPlan: [
+      {
+        id: "check",
+        description: "Run unit tests",
+        command: "pnpm test",
+        scope: "focused" as const,
+        required: true,
+        criterionIds: ["a"],
+        inputs: ["@task-contract", "src/**/*.ts"],
+      },
+    ],
   };
 }
 

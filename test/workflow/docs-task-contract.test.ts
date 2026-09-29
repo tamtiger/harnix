@@ -16,8 +16,16 @@ async function read(path: string): Promise<string> {
 }
 
 async function skillSources(): Promise<Array<{ name: string; text: string }>> {
-  const names = (await readdir(join(root, "src", "skills"), { withFileTypes: true })).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
-  return Promise.all(names.map(async (name) => ({ name: `src/skills/${name}/SKILL.md`, text: await read(`src/skills/${name}/SKILL.md`) })));
+  const names = (await readdir(join(root, "src", "skills"), { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  return Promise.all(
+    names.map(async (name) => ({
+      name: `src/skills/${name}/SKILL.md`,
+      text: await read(`src/skills/${name}/SKILL.md`),
+    })),
+  );
 }
 
 describe("task contract documentation parity", () => {

@@ -74,7 +74,8 @@ export function canonicalJson(value: JsonValue): string {
 export function normalizeJsonValue(value: unknown): JsonValue {
   if (value === null || typeof value === "string" || typeof value === "boolean") return value;
   if (typeof value === "number") {
-    if (!Number.isFinite(value)) throw new GlobalManagedManifestError("A JSON member must not contain a non-finite number.");
+    if (!Number.isFinite(value))
+      throw new GlobalManagedManifestError("A JSON member must not contain a non-finite number.");
     return value;
   }
   if (Array.isArray(value)) return value.map(normalizeJsonValue);
@@ -91,7 +92,8 @@ export function parseCanonicalJsonPointer(pointer: string): string[] {
   if (!pointer.startsWith("/")) throw new GlobalManagedManifestError("A JSON pointer must start with '/'.");
   const tokens = pointer.slice(1).split("/").map(unescapeJsonPointerToken);
   const canonical = `/${tokens.map(escapeJsonPointerToken).join("/")}`;
-  if (canonical !== pointer) throw new GlobalManagedManifestError("A JSON pointer must use canonical RFC 6901 escaping.");
+  if (canonical !== pointer)
+    throw new GlobalManagedManifestError("A JSON pointer must use canonical RFC 6901 escaping.");
   return tokens;
 }
 

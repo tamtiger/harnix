@@ -5,7 +5,10 @@ import type {
   JsonValue,
   MarkerSelector,
 } from "../utils/global-managed-files.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../templates/harnix/activation.js";
+import {
+  HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
+  HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
+} from "../templates/harnix/activation.js";
 import { globalSkillDesiredFiles } from "../templates/harnix/global-surface.js";
 
 const begin = "<!-- harnix:begin -->";
@@ -31,12 +34,14 @@ ${HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS.join("\n")}
 Only after a request is classified as project-scoped Lite/Full or explicitly asks to inspect/continue Harnix work, read \`.harnix/workflow.md\` and the minimum relevant \`.harnix\` context. Obvious Bypass does not load unrelated workflow/task state. Preserve user-owned project files and use fresh verification before completing work. Do not auto-commit, push, or create a pull request.`;
 
 export const codexGlobalContextHookGroup: JsonValue = {
-  hooks: [{
-    additionalContextLimit: 2500,
-    command: CODEX_GLOBAL_CONTEXT_COMMAND,
-    timeout: 5,
-    type: "command",
-  }],
+  hooks: [
+    {
+      additionalContextLimit: 2500,
+      command: CODEX_GLOBAL_CONTEXT_COMMAND,
+      timeout: 5,
+      type: "command",
+    },
+  ],
 };
 
 export const codexGlobalContextHookConfig = `[[hooks.UserPromptSubmit]]
@@ -87,12 +92,20 @@ export function createCodexGlobalSurfacePlan(): CodexGlobalSurfacePlan {
  * duplicate while ordinary command groups remain unrelated.
  */
 export const matchesCodexGlobalContextHookGroup: GlobalJsonMemberMatcher = (candidate, selector) => {
-  if (selector.memberId !== CODEX_GLOBAL_HOOK_SELECTOR.memberId || selector.pointer !== CODEX_GLOBAL_HOOK_SELECTOR.pointer || !isJsonRecord(candidate) || !Array.isArray(candidate.hooks)) {
+  if (
+    selector.memberId !== CODEX_GLOBAL_HOOK_SELECTOR.memberId ||
+    selector.pointer !== CODEX_GLOBAL_HOOK_SELECTOR.pointer ||
+    !isJsonRecord(candidate) ||
+    !Array.isArray(candidate.hooks)
+  ) {
     return false;
   }
-  return candidate.hooks.some((handler) => isJsonRecord(handler)
-    && typeof handler.command === "string"
-    && (handler.command === CODEX_GLOBAL_CONTEXT_COMMAND || handler.additionalContextLimit === 2500));
+  return candidate.hooks.some(
+    (handler) =>
+      isJsonRecord(handler) &&
+      typeof handler.command === "string" &&
+      (handler.command === CODEX_GLOBAL_CONTEXT_COMMAND || handler.additionalContextLimit === 2500),
+  );
 };
 
 function isJsonRecord(value: JsonValue): value is { [key: string]: JsonValue } {

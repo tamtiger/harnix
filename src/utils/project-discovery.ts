@@ -4,10 +4,7 @@ import { dirname, isAbsolute, resolve, win32 } from "node:path";
 import { UnsafeProjectPathError, resolveSafeHarnixPath } from "./paths.js";
 
 export type InitializedProjectResolution =
-  | { kind: "ready"; root: string }
-  | { kind: "none" }
-  | { kind: "ambiguous" }
-  | { kind: "invalid" };
+  { kind: "ready"; root: string } | { kind: "none" } | { kind: "ambiguous" } | { kind: "invalid" };
 
 export interface FindInitializedProjectOptions {
   cwd?: string | undefined;
@@ -19,7 +16,9 @@ export interface FindInitializedProjectOptions {
  * back to a single realpath-distinct workspace root. It deliberately does not
  * use Git discovery: hooks can run in ordinary folders as well as repositories.
  */
-export async function findInitializedProject(options: FindInitializedProjectOptions): Promise<InitializedProjectResolution> {
+export async function findInitializedProject(
+  options: FindInitializedProjectOptions,
+): Promise<InitializedProjectResolution> {
   let invalid = false;
   if (await isUsableAbsoluteDirectory(options.cwd)) {
     const fromCwd = await nearestInitializedRoot(options.cwd!);
@@ -28,7 +27,7 @@ export async function findInitializedProject(options: FindInitializedProjectOpti
 
   const roots = new Map<string, string>();
   for (const workspace of options.workspacePaths ?? []) {
-    if (!await isUsableAbsoluteDirectory(workspace)) continue;
+    if (!(await isUsableAbsoluteDirectory(workspace))) continue;
     const discovered = await nearestInitializedRoot(workspace);
     if (discovered.kind === "invalid") {
       invalid = true;
@@ -73,12 +72,16 @@ async function isUsableAbsoluteDirectory(value: string | undefined): Promise<boo
 }
 
 function isMissing(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT";
+  return (
+    typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT"
+  );
 }
 
 function isInaccessible(error: unknown): boolean {
-  return typeof error === "object"
-    && error !== null
-    && "code" in error
-    && ["EACCES", "EPERM"].includes(String((error as { code?: unknown }).code));
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    ["EACCES", "EPERM"].includes(String((error as { code?: unknown }).code))
+  );
 }

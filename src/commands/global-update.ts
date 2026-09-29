@@ -1,5 +1,15 @@
-import { setupPlatforms, type GlobalSetupPlatform, type HookCommandLookup, type SetupPlatformsResult } from "./setup.js";
-import { GlobalManagedManifestError, readGlobalManagedManifest, resolveSafeGlobalPath, type GlobalPlatform } from "../utils/global-managed-files.js";
+import {
+  setupPlatforms,
+  type GlobalSetupPlatform,
+  type HookCommandLookup,
+  type SetupPlatformsResult,
+} from "./setup.js";
+import {
+  GlobalManagedManifestError,
+  readGlobalManagedManifest,
+  resolveSafeGlobalPath,
+  type GlobalPlatform,
+} from "../utils/global-managed-files.js";
 import { resolveUserPlatformRoots, type HomeResolver } from "../utils/user-paths.js";
 
 export interface UpdateGlobalPlatformsOptions {
@@ -24,9 +34,10 @@ export async function updateGlobalPlatforms(options: UpdateGlobalPlatformsOption
   if (isTestProcess() && options.commandLookup === undefined) {
     throw new Error("Global update requires an injected commandLookup in test mode.");
   }
-  const selected = options.platforms === undefined || options.platforms.length === 0
-    ? await installedPlatforms(options)
-    : [...new Set(options.platforms)].sort();
+  const selected =
+    options.platforms === undefined || options.platforms.length === 0
+      ? await installedPlatforms(options)
+      : [...new Set(options.platforms)].sort();
   if (selected.length === 0) return { scope: "user", platforms: [] };
   return setupPlatforms({
     ...(options.commandLookup === undefined ? {} : { commandLookup: options.commandLookup }),

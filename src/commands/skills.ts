@@ -28,7 +28,11 @@ export function reportSkillCatalog(): SkillCatalogResultV1 {
   return {
     generator: "harnix",
     schemaVersion: 1,
-    skills: workflowSkills.map((skill) => ({ name: skill.name, description: skill.description, version: packageVersion })),
+    skills: workflowSkills.map((skill) => ({
+      name: skill.name,
+      description: skill.description,
+      version: packageVersion,
+    })),
   };
 }
 

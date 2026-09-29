@@ -1,0 +1,9 @@
+dist
+node_modules
+.artifacts
+.harnix
+.kilo
+.worktrees
+docs
+pnpm-lock.yaml
+

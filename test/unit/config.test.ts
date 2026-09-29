@@ -18,7 +18,15 @@ const createFixture = useTemporaryRepositories("harnix-config-");
 
 describe("Harnix config v2", () => {
   it("creates a deterministic valid default config", () => {
-    expect(createConfig({ developer: "tam", languages: ["go", "go"], technologies: ["vue", "vue"], packages: [{ path: ".", languages: ["go"], technologies: ["vue"] }], timezone: "Asia/Ho_Chi_Minh" })).toEqual({
+    expect(
+      createConfig({
+        developer: "tam",
+        languages: ["go", "go"],
+        technologies: ["vue", "vue"],
+        packages: [{ path: ".", languages: ["go"], technologies: ["vue"] }],
+        timezone: "Asia/Ho_Chi_Minh",
+      }),
+    ).toEqual({
       context: { maxCharacters: 24000, tokenApproximation: 4 },
       developer: "tam",
       generator: "harnix",
@@ -44,7 +52,25 @@ describe("Harnix config v2", () => {
   it("still reads a config written before timezone existed and falls back to the system zone", async () => {
     const root = await createFixture();
     const path = join(root, "config.yaml");
-    await writeFile(path, ["generator: harnix", "schemaVersion: 2", "developer: tam", "languages: []", "technologies: []", "packages: []", "platforms: []", "context:", "  maxCharacters: 24000", "  tokenApproximation: 4", "runtime:", "  research: conditional", "  fullContext: false", ""].join("\n"));
+    await writeFile(
+      path,
+      [
+        "generator: harnix",
+        "schemaVersion: 2",
+        "developer: tam",
+        "languages: []",
+        "technologies: []",
+        "packages: []",
+        "platforms: []",
+        "context:",
+        "  maxCharacters: 24000",
+        "  tokenApproximation: 4",
+        "runtime:",
+        "  research: conditional",
+        "  fullContext: false",
+        "",
+      ].join("\n"),
+    );
 
     const config = await readConfig(path);
 
@@ -96,23 +122,26 @@ describe("Harnix config v2", () => {
   it("round-trips compatible unknown keys without changing known schema values", async () => {
     const root = await createFixture();
     const path = join(root, "config.yaml");
-    await writeFile(path, [
-      "generator: harnix",
-      "schemaVersion: 2",
-      "developer: tam",
-      "languages: [go]",
-      "technologies: [vue]",
-      "packages:",
-      "  - path: .",
-      "    languages: [go]",
-      "    technologies: [vue]",
-      "    packageNote: keep package",
-      "platforms: []",
-      "context: { maxCharacters: 24000, tokenApproximation: 4, contextNote: keep context }",
-      "runtime: { research: conditional, fullContext: false, runtimeNote: keep runtime }",
-      "futureCompatibleNote: preserve me",
-      "",
-    ].join("\n"));
+    await writeFile(
+      path,
+      [
+        "generator: harnix",
+        "schemaVersion: 2",
+        "developer: tam",
+        "languages: [go]",
+        "technologies: [vue]",
+        "packages:",
+        "  - path: .",
+        "    languages: [go]",
+        "    technologies: [vue]",
+        "    packageNote: keep package",
+        "platforms: []",
+        "context: { maxCharacters: 24000, tokenApproximation: 4, contextNote: keep context }",
+        "runtime: { research: conditional, fullContext: false, runtimeNote: keep runtime }",
+        "futureCompatibleNote: preserve me",
+        "",
+      ].join("\n"),
+    );
 
     const config = await readConfig(path);
     await writeConfig(path, config);
@@ -128,11 +157,19 @@ describe("Harnix config v2", () => {
     const root = await createFixture();
     const path = join(root, "config.yaml");
     const original = [
-      "generator: harnix", "schemaVersion: 1", "developer: tam",
+      "generator: harnix",
+      "schemaVersion: 1",
+      "developer: tam",
       "languages: [csharp-dotnet-abp, go, java-spring, php, python, react-web, typescript-nestjs, vue]",
-      "packages:", "  - path: .", "    languages: [csharp-dotnet-abp, react-web]", "    packageNote: keep",
-      "platforms: []", "context: { maxCharacters: 24000, tokenApproximation: 4 }",
-      "runtime: { research: conditional, fullContext: false }", "futureCompatibleNote: keep", "",
+      "packages:",
+      "  - path: .",
+      "    languages: [csharp-dotnet-abp, react-web]",
+      "    packageNote: keep",
+      "platforms: []",
+      "context: { maxCharacters: 24000, tokenApproximation: 4 }",
+      "runtime: { research: conditional, fullContext: false }",
+      "futureCompatibleNote: keep",
+      "",
     ].join("\n");
     await writeFile(path, original);
 
@@ -141,18 +178,30 @@ describe("Harnix config v2", () => {
     expect(document.sourceSchemaVersion).toBe(1);
     expect(document.config.languages).toEqual(["csharp", "go", "java", "php", "python", "typescript"]);
     expect(document.config.technologies).toEqual(["abp", "dotnet", "nestjs", "react-web", "spring", "vue"]);
-    expect(document.config.packages).toEqual([{ languages: ["csharp"], packageNote: "keep", path: ".", technologies: ["abp", "dotnet", "react-web"] }]);
+    expect(document.config.packages).toEqual([
+      { languages: ["csharp"], packageNote: "keep", path: ".", technologies: ["abp", "dotnet", "react-web"] },
+    ]);
     await expect(readFile(path, "utf8")).resolves.toBe(original);
   });
 
   it("migrates v1 atomically and idempotently without rescanning", async () => {
     const root = await createFixture();
     const path = join(root, "config.yaml");
-    await writeFile(path, [
-      "generator: harnix", "schemaVersion: 1", "developer: tam", "languages: [typescript-nestjs]",
-      "packages: [{ path: ., languages: [typescript-nestjs] }]", "platforms: []",
-      "context: { maxCharacters: 24000, tokenApproximation: 4 }", "runtime: { research: conditional, fullContext: false }", "unknown: keep", "",
-    ].join("\n"));
+    await writeFile(
+      path,
+      [
+        "generator: harnix",
+        "schemaVersion: 1",
+        "developer: tam",
+        "languages: [typescript-nestjs]",
+        "packages: [{ path: ., languages: [typescript-nestjs] }]",
+        "platforms: []",
+        "context: { maxCharacters: 24000, tokenApproximation: 4 }",
+        "runtime: { research: conditional, fullContext: false }",
+        "unknown: keep",
+        "",
+      ].join("\n"),
+    );
 
     await expect(migrateConfig(path)).resolves.toMatchObject({ status: "migrated", config: { schemaVersion: 2 } });
     const migrated = await readFile(path, "utf8");
@@ -168,10 +217,10 @@ describe("Harnix config v2", () => {
     ["future", "generator: harnix\nschemaVersion: 3\n"],
     ["corrupt", "generator: [invalid"],
   ])("rejects %s state before write", async (_name, content) => {
-    const root = await createFixture(); const path = join(root, "config.yaml"); await writeFile(path, content);
+    const root = await createFixture();
+    const path = join(root, "config.yaml");
+    await writeFile(path, content);
     await expect(migrateConfig(path)).rejects.toThrow(ConfigValidationError);
     await expect(readFile(path, "utf8")).resolves.toBe(content);
   });
 });
-
-

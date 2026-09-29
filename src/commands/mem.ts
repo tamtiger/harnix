@@ -6,22 +6,44 @@ import { searchJournal, type JournalEntry } from "../core/journal/journal.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
 import { compareCodeUnits } from "../utils/order.js";
 
-export interface MemOptions { root: string; query?: string | undefined; user?: string | undefined; limit?: number | undefined; learningOnly?: boolean | undefined; }
-export interface MemResult { entries: JournalEntry[]; malformed: number; }
+export interface MemOptions {
+  root: string;
+  query?: string | undefined;
+  user?: string | undefined;
+  limit?: number | undefined;
+  learningOnly?: boolean | undefined;
+}
+export interface MemResult {
+  entries: JournalEntry[];
+  malformed: number;
+}
 
 export async function searchMemory(options: MemOptions): Promise<MemResult> {
   const config = await readConfig(await resolveSafeHarnixPath(options.root, "config.yaml"));
   const developer = validateDeveloperId(options.user ?? config.developer);
   const journalRoot = await resolveSafeProjectPath(options.root, `.harnix/workspace/${developer}/journal`);
   let names: string[];
-  try { names = (await readdir(journalRoot)).filter((name) => name.endsWith(".jsonl")).sort(); }
-  catch (error: unknown) { if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return { entries: [], malformed: 0 }; throw error; }
+  try {
+    names = (await readdir(journalRoot)).filter((name) => name.endsWith(".jsonl")).sort();
+  } catch (error: unknown) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT")
+      return { entries: [], malformed: 0 };
+    throw error;
+  }
   const limit = Math.max(1, options.limit ?? 20);
-  let entries: JournalEntry[] = [], malformed = 0;
+  let entries: JournalEntry[] = [],
+    malformed = 0;
   for (const name of names) {
-    const result = await searchJournal(join(journalRoot, name), { developer, limit, ...(options.learningOnly === true ? { kind: "learning" as const } : {}), ...(options.query === undefined ? {} : { query: options.query }) });
+    const result = await searchJournal(join(journalRoot, name), {
+      developer,
+      limit,
+      ...(options.learningOnly === true ? { kind: "learning" as const } : {}),
+      ...(options.query === undefined ? {} : { query: options.query }),
+    });
     malformed += result.malformed;
-    entries = [...entries, ...result.entries].sort((left, right) => compareCodeUnits(right.recordedAt, left.recordedAt) || compareCodeUnits(right.id, left.id)).slice(0, limit);
+    entries = [...entries, ...result.entries]
+      .sort((left, right) => compareCodeUnits(right.recordedAt, left.recordedAt) || compareCodeUnits(right.id, left.id))
+      .slice(0, limit);
   }
   return { entries, malformed };
 }

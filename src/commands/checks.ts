@@ -66,11 +66,20 @@ export async function reportProjectChecks(cwd: string, limit: number, now = Date
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
   const task = await resolveActiveTask(harnixRoot).catch(redactChecksParserError);
-  const base = { generator: "harnix" as const, schemaVersion: 1 as const, scope: "project" as const, filter: { limit } };
+  const base = {
+    generator: "harnix" as const,
+    schemaVersion: 1 as const,
+    scope: "project" as const,
+    filter: { limit },
+  };
   if (task === undefined) return { ...base, activeTask: null };
 
-  const inspections = (await inspectRequiredChecks(project.root, harnixRoot, task, now)).sort((left, right) => compareCodeUnits(left.id, right.id));
-  const visible: VisibleInspection[] = inspections.slice(0, limit).map((inspection) => ({ inspection, changes: inspection.changes.slice(0, MAX_CHANGES_PER_CHECK) }));
+  const inspections = (await inspectRequiredChecks(project.root, harnixRoot, task, now)).sort((left, right) =>
+    compareCodeUnits(left.id, right.id),
+  );
+  const visible: VisibleInspection[] = inspections
+    .slice(0, limit)
+    .map((inspection) => ({ inspection, changes: inspection.changes.slice(0, MAX_CHANGES_PER_CHECK) }));
   const counts = countStates(inspections);
   const createResult = (): ChecksReportResultV1 => {
     const checks = visible.map(({ inspection: item, changes }): PublicCheckItemV1 => {

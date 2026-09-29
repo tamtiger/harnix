@@ -11,8 +11,13 @@ import { useTemporaryRepositories } from "../support/temporary-repository.js";
 const temporaryRepository = useTemporaryRepositories("harnix-epic-migration-");
 
 const epic = {
-  generator: "harnix", schemaVersion: 1, id: "old-epic", title: "Old epic", goal: "Goal",
-  createdAt: "2026-09-24T04:00:00.000Z", updatedAt: "2026-09-24T04:00:00.000Z",
+  generator: "harnix",
+  schemaVersion: 1,
+  id: "old-epic",
+  title: "Old epic",
+  goal: "Goal",
+  createdAt: "2026-09-24T04:00:00.000Z",
+  updatedAt: "2026-09-24T04:00:00.000Z",
 };
 const legacyJson = `${JSON.stringify(epic, null, 2)}\n`;
 
@@ -26,8 +31,12 @@ async function legacyProject(): Promise<string> {
 }
 
 async function exists(path: string): Promise<boolean> {
-  try { await access(path); return true; }
-  catch { return false; }
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 describe("roadmaps to epics migration", () => {

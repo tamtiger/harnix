@@ -87,7 +87,16 @@ function task(id: string, status: "planning" | "ready" | "in_progress"): TaskRec
     acceptanceCriteria: [{ id: "criterion", text: "private", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "private", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract"] }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "private",
+        scope: "focused",
+        required: true,
+        criterionIds: ["criterion"],
+        inputs: ["@task-contract"],
+      },
+    ],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,

@@ -16,7 +16,9 @@ export function canonicalInternalContextPlatform(argv: readonly string[]): Inter
   const args = argv.slice(2);
   if (args.length !== 3 || args[0] !== "context" || args[1] !== "--platform") return undefined;
   const platform = args[2];
-  return platform === "kiro" || platform === "antigravity" || platform === "codex" || platform === "claude" ? platform : undefined;
+  return platform === "kiro" || platform === "antigravity" || platform === "codex" || platform === "claude"
+    ? platform
+    : undefined;
 }
 
 /**
@@ -31,7 +33,10 @@ export async function runEntrypoint(argv = process.argv): Promise<number> {
   const platform = canonicalInternalContextPlatform(argv);
   if (platform !== undefined) {
     try {
-      const hookInput = process.stdin.isTTY === true ? "" : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
+      const hookInput =
+        process.stdin.isTTY === true
+          ? ""
+          : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
       await runInternalContextCommand({ hookInput, platform });
     } catch {
       // The fixed command shape is emitted only by global hooks. A broken
@@ -49,6 +54,9 @@ if (isCliEntryPoint()) process.exitCode = await runEntrypoint();
 function isCliEntryPoint(): boolean {
   const entryPath = process.argv[1];
   if (entryPath === undefined) return false;
-  try { return realpathSync(entryPath) === realpathSync(fileURLToPath(import.meta.url)); }
-  catch { return false; }
+  try {
+    return realpathSync(entryPath) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
 }

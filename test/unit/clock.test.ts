@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDisplay, formatInstant, idPrefix, isValidTimeZone, localDate, systemTimezone } from "../../src/utils/clock.js";
+import {
+  formatDisplay,
+  formatInstant,
+  idPrefix,
+  isValidTimeZone,
+  localDate,
+  systemTimezone,
+} from "../../src/utils/clock.js";
 
 const VN = "Asia/Ho_Chi_Minh";
 
@@ -14,8 +21,12 @@ describe("clock", () => {
   });
 
   it("follows daylight saving offsets of a zone that has them", () => {
-    expect(formatInstant(Date.parse("2026-01-15T12:00:00.000Z"), "America/New_York")).toBe("2026-01-15T07:00:00.000-05:00");
-    expect(formatInstant(Date.parse("2026-07-15T12:00:00.000Z"), "America/New_York")).toBe("2026-07-15T08:00:00.000-04:00");
+    expect(formatInstant(Date.parse("2026-01-15T12:00:00.000Z"), "America/New_York")).toBe(
+      "2026-01-15T07:00:00.000-05:00",
+    );
+    expect(formatInstant(Date.parse("2026-07-15T12:00:00.000Z"), "America/New_York")).toBe(
+      "2026-07-15T08:00:00.000-04:00",
+    );
   });
 
   it("changes local date around midnight Vietnam time, not UTC midnight", () => {
@@ -52,7 +63,11 @@ describe("clock", () => {
     expect(isValidTimeZone(7)).toBe(false);
     const previous = process.env.TZ;
     process.env.TZ = "Definitely/Invalid";
-    try { expect(isValidTimeZone(systemTimezone())).toBe(true); }
-    finally { if (previous === undefined) delete process.env.TZ; else process.env.TZ = previous; }
+    try {
+      expect(isValidTimeZone(systemTimezone())).toBe(true);
+    } finally {
+      if (previous === undefined) delete process.env.TZ;
+      else process.env.TZ = previous;
+    }
   });
 });

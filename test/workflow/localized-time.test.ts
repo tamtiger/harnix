@@ -47,7 +47,17 @@ function taskV3(overrides: Partial<TaskRecordV3> = {}): TaskRecordV3 {
     acceptanceCriteria: [{ id: "ac-one", text: "One", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{ id: "check", description: "Unit tests", scope: "focused", required: true, command: "pnpm test", criterionIds: ["ac-one"], inputs: ["src/**"] }],
+    validationPlan: [
+      {
+        id: "check",
+        description: "Unit tests",
+        scope: "focused",
+        required: true,
+        command: "pnpm test",
+        criterionIds: ["ac-one"],
+        inputs: ["src/**"],
+      },
+    ],
     evidence: [],
     createdAt,
     updatedAt: createdAt,
@@ -59,12 +69,38 @@ function taskV3(overrides: Partial<TaskRecordV3> = {}): TaskRecordV3 {
 async function finishingProject(): Promise<string> {
   const root = await project();
   await saveWorkflow(root, { task: taskV3() });
-  for (const [status, checkpoint] of [["ready", "ready"], ["in_progress", "implementing"], ["verifying", "verifying"]] as const) await transitionWorkflow(root, status, checkpoint, "2026-09-29T09:05:00.000+07:00");
+  for (const [status, checkpoint] of [
+    ["ready", "ready"],
+    ["in_progress", "implementing"],
+    ["verifying", "verifying"],
+  ] as const)
+    await transitionWorkflow(root, status, checkpoint, "2026-09-29T09:05:00.000+07:00");
   const snapshot = await snapshotWorkflow(root, "check");
-  await appendEvidenceWorkflow(root, { evidence: { id: "ev", checkId: "check", recordedAt: "2026-09-29T09:10:00.000+07:00", result: "pass", exitCode: 0, summary: "ok", artifactPaths: [], inputDigest: snapshot.inputDigest } }, "2026-09-29T09:10:00.000+07:00");
+  await appendEvidenceWorkflow(
+    root,
+    {
+      evidence: {
+        id: "ev",
+        checkId: "check",
+        recordedAt: "2026-09-29T09:10:00.000+07:00",
+        result: "pass",
+        exitCode: 0,
+        summary: "ok",
+        artifactPaths: [],
+        inputDigest: snapshot.inputDigest,
+      },
+    },
+    "2026-09-29T09:10:00.000+07:00",
+  );
   await transitionWorkflow(root, "verifying", "finishing", "2026-09-29T09:11:00.000+07:00");
   const active = (await inspectWorkflow(root)).activeTask!;
-  await saveWorkflow(root, { task: { ...active, acceptanceCriteria: [{ id: "ac-one", text: "One", status: "met", evidenceIds: ["ev"] }], updatedAt: "2026-09-29T09:12:00.000+07:00" } });
+  await saveWorkflow(root, {
+    task: {
+      ...active,
+      acceptanceCriteria: [{ id: "ac-one", text: "One", status: "met", evidenceIds: ["ev"] }],
+      updatedAt: "2026-09-29T09:12:00.000+07:00",
+    },
+  });
   return root;
 }
 
@@ -74,7 +110,15 @@ async function journalFiles(root: string): Promise<string[]> {
 
 async function sourceFiles(directory: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true });
-  const nested = await Promise.all(entries.map(async (entry) => entry.isDirectory() ? sourceFiles(join(directory, entry.name)) : entry.name.endsWith(".ts") ? [join(directory, entry.name)] : []));
+  const nested = await Promise.all(
+    entries.map(async (entry) =>
+      entry.isDirectory()
+        ? sourceFiles(join(directory, entry.name))
+        : entry.name.endsWith(".ts")
+          ? [join(directory, entry.name)]
+          : [],
+    ),
+  );
   return nested.flat();
 }
 
@@ -113,13 +157,29 @@ describe("configured time zone", () => {
 
     const preflight = await preflightWorkflow(root, Date.parse("2026-09-28T17:00:00.000Z"));
 
-    expect(preflight.clock).toEqual({ timezone: VN, now: "2026-09-29T00:00:00.000+07:00", idPrefix: "20260929-000000" });
+    expect(preflight.clock).toEqual({
+      timezone: VN,
+      now: "2026-09-29T00:00:00.000+07:00",
+      idPrefix: "20260929-000000",
+    });
   });
 
   it("renders review.md and the epic page in the configured zone, including legacy Z data", async () => {
     const root = await project();
-    const legacy = taskV3({ createdAt: "2026-09-28T13:58:01.000Z", updatedAt: "2026-09-28T13:58:01.000Z", epicId: "epic-one" });
-    const epic = { generator: "harnix" as const, schemaVersion: 1 as const, id: "epic-one", title: "Epic", goal: "Goal", createdAt: "2026-09-28T13:58:01.000Z", updatedAt: "2026-09-28T13:58:01.000Z" };
+    const legacy = taskV3({
+      createdAt: "2026-09-28T13:58:01.000Z",
+      updatedAt: "2026-09-28T13:58:01.000Z",
+      epicId: "epic-one",
+    });
+    const epic = {
+      generator: "harnix" as const,
+      schemaVersion: 1 as const,
+      id: "epic-one",
+      title: "Epic",
+      goal: "Goal",
+      createdAt: "2026-09-28T13:58:01.000Z",
+      updatedAt: "2026-09-28T13:58:01.000Z",
+    };
 
     await saveWorkflow(root, { task: legacy, epic });
 
@@ -133,9 +193,23 @@ describe("configured time zone", () => {
   it("leaves historical task records byte-for-byte untouched while reading them", async () => {
     const root = await project();
     const legacy: TaskRecordV1 = {
-      generator: "harnix", schemaVersion: 1, id: "20260813-120000-old", title: "Old", mode: "lite", status: "completed", checkpoint: "finishing", goal: "g", nonGoals: [],
-      acceptanceCriteria: [{ id: "a", text: "t", status: "waived", evidenceIds: [], waiverReason: "old" }], relevantPaths: [], relevantSpecs: [], validationPlan: [], evidence: [],
-      createdAt: "2026-08-13T00:00:00.000Z", updatedAt: "2026-08-13T00:00:00.000Z", completedAt: "2026-08-13T00:00:00.000Z",
+      generator: "harnix",
+      schemaVersion: 1,
+      id: "20260813-120000-old",
+      title: "Old",
+      mode: "lite",
+      status: "completed",
+      checkpoint: "finishing",
+      goal: "g",
+      nonGoals: [],
+      acceptanceCriteria: [{ id: "a", text: "t", status: "waived", evidenceIds: [], waiverReason: "old" }],
+      relevantPaths: [],
+      relevantSpecs: [],
+      validationPlan: [],
+      evidence: [],
+      createdAt: "2026-08-13T00:00:00.000Z",
+      updatedAt: "2026-08-13T00:00:00.000Z",
+      completedAt: "2026-08-13T00:00:00.000Z",
     };
     await saveTask(join(root, ".harnix"), legacy);
     const path = join(root, ".harnix", "tasks", legacy.id, "task.json");

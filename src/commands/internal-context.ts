@@ -29,7 +29,8 @@ interface NormalizedHookEvent {
   readonly workspacePaths: string[];
 }
 
-const REDACTED_PROJECT_STATE_WARNING = "Harnix context unavailable: initialized project state cannot be read safely. Run harnix doctor for details.";
+const REDACTED_PROJECT_STATE_WARNING =
+  "Harnix context unavailable: initialized project state cannot be read safely. Run harnix doctor for details.";
 
 /**
  * Renders a platform-specific bounded context for a known initialized project.
@@ -43,14 +44,25 @@ export async function renderInternalContext(
   options: RenderInternalContextOptions = {},
 ): Promise<string> {
   const harnixRoot = await resolveSafeHarnixPath(root);
-  if (!await exists(await resolveSafeHarnixPath(root, "config.yaml"))) return emptyPayload(platform);
+  if (!(await exists(await resolveSafeHarnixPath(root, "config.yaml")))) return emptyPayload(platform);
 
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
   const active = await resolveActiveTask(harnixRoot);
   if (!active) return emptyInitializedProjectPayload(platform);
 
-  const output = await buildEffectiveContext({ projectRoot: root, harnixRoot, config, task: active, platform, forceBounded: options.forceBounded });
-  const text = boundedContext(output.text, output.manifest.omitted.map((item) => item.path), output.budget.maxCharacters);
+  const output = await buildEffectiveContext({
+    projectRoot: root,
+    harnixRoot,
+    config,
+    task: active,
+    platform,
+    forceBounded: options.forceBounded,
+  });
+  const text = boundedContext(
+    output.text,
+    output.manifest.omitted.map((item) => item.path),
+    output.budget.maxCharacters,
+  );
   return formatPlatformPayload(platform, text);
 }
 
@@ -80,9 +92,13 @@ export async function renderInternalContextForHook(options: RenderInternalContex
     // true no-op rather than exposing a filesystem detail to the host agent.
     return "";
   }
-  if (project.kind === "ambiguous") return options.platform === "antigravity" && event.invocationNum === 0
-    ? formatPlatformPayload(options.platform, "Harnix context unavailable: multiple initialized workspace roots; select the active root to continue.")
-    : "";
+  if (project.kind === "ambiguous")
+    return options.platform === "antigravity" && event.invocationNum === 0
+      ? formatPlatformPayload(
+          options.platform,
+          "Harnix context unavailable: multiple initialized workspace roots; select the active root to continue.",
+        )
+      : "";
   if (project.kind !== "ready") return "";
   // A known later Antigravity invocation belongs to an initialized project
   // but must not inject context. Preserve the platform's schema-valid empty
@@ -122,9 +138,10 @@ function emptyInitializedProjectPayload(platform: InternalContextPlatform): stri
 }
 
 function boundedContext(source: string, omittedPaths: string[], cap: number): string {
-  const sourceContent = source.startsWith(UNTRUSTED_CONTEXT_PREFIX) && source.endsWith(UNTRUSTED_CONTEXT_SUFFIX)
-    ? source.slice(UNTRUSTED_CONTEXT_PREFIX.length, -UNTRUSTED_CONTEXT_SUFFIX.length)
-    : source;
+  const sourceContent =
+    source.startsWith(UNTRUSTED_CONTEXT_PREFIX) && source.endsWith(UNTRUSTED_CONTEXT_SUFFIX)
+      ? source.slice(UNTRUSTED_CONTEXT_PREFIX.length, -UNTRUSTED_CONTEXT_SUFFIX.length)
+      : source;
   const frameBudget = cap - UNTRUSTED_CONTEXT_PREFIX.length - UNTRUSTED_CONTEXT_SUFFIX.length;
   if (frameBudget < 0) return "";
 
@@ -144,16 +161,19 @@ function boundedOmissionDisclosure(paths: string[], cap: number): string {
 }
 
 function serializeOmissionPath(path: string): string {
-  return [...JSON.stringify(path)].map((character) => {
-    const codePoint = character.codePointAt(0)!;
-    const mustEscape = codePoint === 0x26
-      || codePoint === 0x3c
-      || codePoint === 0x3e
-      || codePoint >= 0x7f && codePoint <= 0x9f
-      || codePoint === 0x2028
-      || codePoint === 0x2029;
-    return mustEscape ? `\\u${codePoint.toString(16).padStart(4, "0")}` : character;
-  }).join("");
+  return [...JSON.stringify(path)]
+    .map((character) => {
+      const codePoint = character.codePointAt(0)!;
+      const mustEscape =
+        codePoint === 0x26 ||
+        codePoint === 0x3c ||
+        codePoint === 0x3e ||
+        (codePoint >= 0x7f && codePoint <= 0x9f) ||
+        codePoint === 0x2028 ||
+        codePoint === 0x2029;
+      return mustEscape ? `\\u${codePoint.toString(16).padStart(4, "0")}` : character;
+    })
+    .join("");
 }
 
 function normalizeHookEvent(value: unknown): NormalizedHookEvent {
@@ -161,18 +181,24 @@ function normalizeHookEvent(value: unknown): NormalizedHookEvent {
   const cwd = safeAbsoluteDirectory(value.cwd);
   const workspacePaths = Array.isArray(value.workspacePaths)
     ? value.workspacePaths.slice(0, 32).flatMap((path) => {
-      const safePath = safeAbsoluteDirectory(path);
-      return safePath === undefined ? [] : [safePath];
-    })
+        const safePath = safeAbsoluteDirectory(path);
+        return safePath === undefined ? [] : [safePath];
+      })
     : [];
-  const invocationNum = typeof value.invocationNum === "number" && Number.isSafeInteger(value.invocationNum) && value.invocationNum >= 0
-    ? value.invocationNum
-    : undefined;
-  return { ...(cwd === undefined ? {} : { cwd }), ...(invocationNum === undefined ? {} : { invocationNum }), workspacePaths };
+  const invocationNum =
+    typeof value.invocationNum === "number" && Number.isSafeInteger(value.invocationNum) && value.invocationNum >= 0
+      ? value.invocationNum
+      : undefined;
+  return {
+    ...(cwd === undefined ? {} : { cwd }),
+    ...(invocationNum === undefined ? {} : { invocationNum }),
+    workspacePaths,
+  };
 }
 
 function safeAbsoluteDirectory(value: unknown): string | undefined {
-  if (typeof value !== "string" || value.length === 0 || value.length > 32_768 || value.includes("\0")) return undefined;
+  if (typeof value !== "string" || value.length === 0 || value.length > 32_768 || value.includes("\0"))
+    return undefined;
   return isAbsolute(value) || win32.isAbsolute(value) ? value : undefined;
 }
 

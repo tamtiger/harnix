@@ -49,13 +49,23 @@ export interface ContextReportResultV1 {
   } | null;
 }
 
-export async function reportProjectContext(cwd: string, platform: PlatformId, limit: number): Promise<ContextReportResultV1> {
+export async function reportProjectContext(
+  cwd: string,
+  platform: PlatformId,
+  limit: number,
+): Promise<ContextReportResultV1> {
   const project = await findInitializedProject({ cwd });
   if (project.kind !== "ready") throw new Error("Context report requires an initialized Harnix project.");
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   const config = await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
   const task = await resolveActiveTask(harnixRoot).catch(redactContextReportParserError);
-  const base = { generator: "harnix" as const, schemaVersion: 1 as const, scope: "project" as const, platform, filter: { limit } };
+  const base = {
+    generator: "harnix" as const,
+    schemaVersion: 1 as const,
+    scope: "project" as const,
+    platform,
+    filter: { limit },
+  };
   if (task === undefined) return { ...base, activeTask: null };
 
   const [effective, drift] = await Promise.all([

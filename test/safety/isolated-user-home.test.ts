@@ -2,14 +2,11 @@ import { delimiter, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 type IsolatedUserHomeModule = {
-  createIsolatedUserEnvironment(
-    home: string,
-    options?: { pathPrefix?: string },
-  ): NodeJS.ProcessEnv;
+  createIsolatedUserEnvironment(home: string, options?: { pathPrefix?: string }): NodeJS.ProcessEnv;
 };
 
 const { createIsolatedUserEnvironment } = (await import(
-  new URL("../../scripts/isolated-user-home.mjs", import.meta.url).href,
+  new URL("../../scripts/isolated-user-home.mjs", import.meta.url).href
 )) as IsolatedUserHomeModule;
 
 describe("isolated user-home release environment", () => {

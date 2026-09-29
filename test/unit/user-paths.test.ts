@@ -29,12 +29,19 @@ describe("user-global paths", () => {
     expect(roots.codex.config.logicalPath).toBe("$CODEX_HOME");
     expect(roots.codex.skills.path).toBe(join(home, ".agents"));
     expect(roots.codex.skills.logicalPath).toBe("~/.agents");
-    expect(Object.values({ ...roots, codex: undefined }).every((root) => root === undefined || !root.logicalPath.includes(home))).toBe(true);
+    expect(
+      Object.values({ ...roots, codex: undefined }).every(
+        (root) => root === undefined || !root.logicalPath.includes(home),
+      ),
+    ).toBe(true);
   });
 
   it("derives the Claude root from the injected home and honours CLAUDE_CONFIG_DIR", async () => {
     const home = await temporaryUserHome();
-    const derived = await resolveSelectedUserPlatformRoots(["claude"], { homeResolver: async () => home, environment: {} });
+    const derived = await resolveSelectedUserPlatformRoots(["claude"], {
+      homeResolver: async () => home,
+      environment: {},
+    });
     const relocated = await resolveSelectedUserPlatformRoots(["claude"], {
       homeResolver: async () => home,
       environment: { CLAUDE_CONFIG_DIR: join(home, "custom-claude") },
@@ -58,7 +65,7 @@ describe("user-global paths", () => {
     expect(roots.codex.config.display("config.toml")).toBe("~/.codex/config.toml");
   });
 
-  it.each(["", ".", "../outside", "skills/../../outside", "/outside", "C:\\outside"]) (
+  it.each(["", ".", "../outside", "skills/../../outside", "/outside", "C:\\outside"])(
     "rejects unsafe user-relative path %j",
     async (unsafePath) => {
       const home = await temporaryUserHome();
@@ -74,7 +81,9 @@ describe("user-global paths", () => {
     const roots = await resolveUserPlatformRoots({ homeResolver: async () => home, environment: {} });
     await symlink(external, roots.kiro.path, process.platform === "win32" ? "junction" : "dir");
 
-    await expect(resolveSafeUserPath(roots.kiro, "skills/harnix-implement/SKILL.md")).rejects.toBeInstanceOf(UnsafeUserPathError);
+    await expect(resolveSafeUserPath(roots.kiro, "skills/harnix-implement/SKILL.md")).rejects.toBeInstanceOf(
+      UnsafeUserPathError,
+    );
   });
 
   it("rejects a symbolic-link ancestor while deriving an Antigravity plugin root from home", async () => {
@@ -82,14 +91,18 @@ describe("user-global paths", () => {
     const external = await temporaryUserHome();
     await symlink(external, join(home, ".gemini"), process.platform === "win32" ? "junction" : "dir");
 
-    await expect(resolveUserPlatformRoots({ homeResolver: async () => home, environment: {} })).rejects.toBeInstanceOf(UnsafeUserPathError);
+    await expect(resolveUserPlatformRoots({ homeResolver: async () => home, environment: {} })).rejects.toBeInstanceOf(
+      UnsafeUserPathError,
+    );
   });
 
   it("rejects a filesystem root supplied through CODEX_HOME", async () => {
     const home = await temporaryUserHome();
     const filesystemRoot = process.platform === "win32" ? "C:\\" : "/";
 
-    await expect(resolveUserPlatformRoots({ homeResolver: async () => home, environment: { CODEX_HOME: filesystemRoot } })).rejects.toBeInstanceOf(UnsafeUserPathError);
+    await expect(
+      resolveUserPlatformRoots({ homeResolver: async () => home, environment: { CODEX_HOME: filesystemRoot } }),
+    ).rejects.toBeInstanceOf(UnsafeUserPathError);
   });
 
   it("should_reject_a_regular_file_when_CODEX_HOME_is_selected", async () => {
@@ -97,10 +110,12 @@ describe("user-global paths", () => {
     const codexHome = join(home, "not-a-directory");
     await writeFile(codexHome, "not a directory\n", "utf8");
 
-    await expect(resolveSelectedUserPlatformRoots(["codex"], {
-      homeResolver: async () => home,
-      environment: { CODEX_HOME: codexHome },
-    })).rejects.toBeInstanceOf(UnsafeUserPathError);
+    await expect(
+      resolveSelectedUserPlatformRoots(["codex"], {
+        homeResolver: async () => home,
+        environment: { CODEX_HOME: codexHome },
+      }),
+    ).rejects.toBeInstanceOf(UnsafeUserPathError);
   });
 
   it("accepts platform roots that do not exist yet but resolves writes below the verified home", async () => {

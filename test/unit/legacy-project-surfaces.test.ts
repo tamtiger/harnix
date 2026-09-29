@@ -17,7 +17,10 @@ interface ManifestEntry {
 
 async function writeProjectManifest(root: string, entries: ManifestEntry[]): Promise<void> {
   await mkdir(join(root, ".harnix"), { recursive: true });
-  await writeFile(join(root, ".harnix", ".template-hashes.json"), `${JSON.stringify({ generator: "harnix", schemaVersion: 1, entries }, null, 2)}\n`);
+  await writeFile(
+    join(root, ".harnix", ".template-hashes.json"),
+    `${JSON.stringify({ generator: "harnix", schemaVersion: 1, entries }, null, 2)}\n`,
+  );
 }
 
 describe("legacy project surface cleanup", () => {
@@ -29,10 +32,22 @@ describe("legacy project surface cleanup", () => {
     await writeFile(join(root, "AGENTS.md"), "root bootstrap remains\n");
     await writeFile(join(root, "GEMINI.md"), "untracked instruction remains\n");
     await mkdir(join(root, ".codex"), { recursive: true });
-    await writeFile(join(root, ".codex", "hooks.json"), "{\"user\":true}\n");
+    await writeFile(join(root, ".codex", "hooks.json"), '{"user":true}\n');
     await writeProjectManifest(root, [
-      { path: ".harnix/workflow.md", sourceId: "workflow", scope: "project", generatedHash: sha256("workflow\n"), generatorVersion: "0.5.0" },
-      { path: ".kiro/skills/harnix-check/SKILL.md", sourceId: "harnix-check", scope: "kiro", generatedHash: sha256("generated skill\n"), generatorVersion: "0.5.0" },
+      {
+        path: ".harnix/workflow.md",
+        sourceId: "workflow",
+        scope: "project",
+        generatedHash: sha256("workflow\n"),
+        generatorVersion: "0.5.0",
+      },
+      {
+        path: ".kiro/skills/harnix-check/SKILL.md",
+        sourceId: "harnix-check",
+        scope: "kiro",
+        generatedHash: sha256("generated skill\n"),
+        generatorVersion: "0.5.0",
+      },
     ]);
 
     const result = await cleanupLegacyProjectSurfaces({ root });
@@ -47,7 +62,7 @@ describe("legacy project surface cleanup", () => {
     await expect(readFile(skillPath, "utf8")).resolves.toBe("generated skill\n");
     await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toBe("root bootstrap remains\n");
     await expect(readFile(join(root, "GEMINI.md"), "utf8")).resolves.toBe("untracked instruction remains\n");
-    await expect(readFile(join(root, ".codex", "hooks.json"), "utf8")).resolves.toBe("{\"user\":true}\n");
+    await expect(readFile(join(root, ".codex", "hooks.json"), "utf8")).resolves.toBe('{"user":true}\n');
   });
 
   it("does not let non-project manifest scopes authorize arbitrary files or the root AGENTS bootstrap", async () => {
@@ -63,10 +78,34 @@ describe("legacy project surface cleanup", () => {
     await writeFile(agentsPath, "current init bootstrap\n");
     await writeFile(readmePath, "project documentation\n");
     await writeProjectManifest(root, [
-      { path: ".agents/skills/harnix-check/SKILL.md", sourceId: "harnix-check", scope: "codex", generatedHash: sha256("generated skill\n"), generatorVersion: "0.5.0" },
-      { path: ".kiro/skills/harnix-wrong-scope/SKILL.md", sourceId: "harnix-wrong-scope", scope: "codex", generatedHash: sha256("wrong scope skill\n"), generatorVersion: "0.5.0" },
-      { path: "AGENTS.md", sourceId: "agents-bootstrap", scope: "codex", generatedHash: sha256("current init bootstrap\n"), generatorVersion: "0.5.0" },
-      { path: "README.md", sourceId: "documentation", scope: "antigravity", generatedHash: sha256("project documentation\n"), generatorVersion: "0.5.0" },
+      {
+        path: ".agents/skills/harnix-check/SKILL.md",
+        sourceId: "harnix-check",
+        scope: "codex",
+        generatedHash: sha256("generated skill\n"),
+        generatorVersion: "0.5.0",
+      },
+      {
+        path: ".kiro/skills/harnix-wrong-scope/SKILL.md",
+        sourceId: "harnix-wrong-scope",
+        scope: "codex",
+        generatedHash: sha256("wrong scope skill\n"),
+        generatorVersion: "0.5.0",
+      },
+      {
+        path: "AGENTS.md",
+        sourceId: "agents-bootstrap",
+        scope: "codex",
+        generatedHash: sha256("current init bootstrap\n"),
+        generatorVersion: "0.5.0",
+      },
+      {
+        path: "README.md",
+        sourceId: "documentation",
+        scope: "antigravity",
+        generatedHash: sha256("project documentation\n"),
+        generatorVersion: "0.5.0",
+      },
     ]);
 
     expect(await cleanupLegacyProjectSurfaces({ root })).toEqual({
@@ -90,8 +129,14 @@ describe("legacy project surface cleanup", () => {
     await expect(readFile(wrongScopeSkillPath, "utf8")).resolves.toBe("wrong scope skill\n");
     await expect(readFile(agentsPath, "utf8")).resolves.toBe("current init bootstrap\n");
     await expect(readFile(readmePath, "utf8")).resolves.toBe("project documentation\n");
-    const manifest = JSON.parse(await readFile(join(root, ".harnix", ".template-hashes.json"), "utf8")) as { entries: ManifestEntry[] };
-    expect(manifest.entries.map((entry) => entry.path)).toEqual([".kiro/skills/harnix-wrong-scope/SKILL.md", "AGENTS.md", "README.md"]);
+    const manifest = JSON.parse(await readFile(join(root, ".harnix", ".template-hashes.json"), "utf8")) as {
+      entries: ManifestEntry[];
+    };
+    expect(manifest.entries.map((entry) => entry.path)).toEqual([
+      ".kiro/skills/harnix-wrong-scope/SKILL.md",
+      "AGENTS.md",
+      "README.md",
+    ]);
   });
 
   it("removes only unchanged regular manifest-proven files and retains ownership for modified or deleted entries", async () => {
@@ -103,24 +148,54 @@ describe("legacy project surface cleanup", () => {
     await writeFile(unchangedPath, "generated hook\n");
     await writeFile(modifiedPath, "user changed skill\n");
     await writeProjectManifest(root, [
-      { path: ".agents/skills/harnix-check/SKILL.md", sourceId: "harnix-check", scope: "codex", generatedHash: sha256("missing\n"), generatorVersion: "0.5.0" },
-      { path: ".gemini/skills/harnix-check/SKILL.md", sourceId: "harnix-check", scope: "antigravity", generatedHash: sha256("generated skill\n"), generatorVersion: "0.5.0" },
-      { path: ".harnix/workflow.md", sourceId: "workflow", scope: "project", generatedHash: sha256("workflow\n"), generatorVersion: "0.5.0" },
-      { path: ".kiro/hooks/harnix-context.kiro.hook", sourceId: "kiro-context-hook", scope: "kiro", generatedHash: sha256("generated hook\n"), generatorVersion: "0.5.0" },
+      {
+        path: ".agents/skills/harnix-check/SKILL.md",
+        sourceId: "harnix-check",
+        scope: "codex",
+        generatedHash: sha256("missing\n"),
+        generatorVersion: "0.5.0",
+      },
+      {
+        path: ".gemini/skills/harnix-check/SKILL.md",
+        sourceId: "harnix-check",
+        scope: "antigravity",
+        generatedHash: sha256("generated skill\n"),
+        generatorVersion: "0.5.0",
+      },
+      {
+        path: ".harnix/workflow.md",
+        sourceId: "workflow",
+        scope: "project",
+        generatedHash: sha256("workflow\n"),
+        generatorVersion: "0.5.0",
+      },
+      {
+        path: ".kiro/hooks/harnix-context.kiro.hook",
+        sourceId: "kiro-context-hook",
+        scope: "kiro",
+        generatedHash: sha256("generated hook\n"),
+        generatorVersion: "0.5.0",
+      },
     ]);
 
     const result = await cleanupLegacyProjectSurfaces({ root, yes: true });
 
     expect(result).toEqual({
       scope: "legacy-project-surfaces",
-      targets: [".agents/skills/harnix-check/SKILL.md", ".gemini/skills/harnix-check/SKILL.md", ".kiro/hooks/harnix-context.kiro.hook"],
+      targets: [
+        ".agents/skills/harnix-check/SKILL.md",
+        ".gemini/skills/harnix-check/SKILL.md",
+        ".kiro/hooks/harnix-context.kiro.hook",
+      ],
       removed: [".kiro/hooks/harnix-context.kiro.hook"],
       preserved: [".agents/skills/harnix-check/SKILL.md", ".gemini/skills/harnix-check/SKILL.md"],
       confirmationRequired: false,
     });
     await expect(access(unchangedPath)).rejects.toMatchObject({ code: "ENOENT" });
     await expect(readFile(modifiedPath, "utf8")).resolves.toBe("user changed skill\n");
-    const manifest = JSON.parse(await readFile(join(root, ".harnix", ".template-hashes.json"), "utf8")) as { entries: ManifestEntry[] };
+    const manifest = JSON.parse(await readFile(join(root, ".harnix", ".template-hashes.json"), "utf8")) as {
+      entries: ManifestEntry[];
+    };
     expect(manifest.entries.map((entry) => entry.path)).toEqual([
       ".agents/skills/harnix-check/SKILL.md",
       ".gemini/skills/harnix-check/SKILL.md",
@@ -138,15 +213,30 @@ describe("legacy project surface cleanup", () => {
     await symlink(external, join(root, ".kiro"), process.platform === "win32" ? "junction" : "dir");
     await mkdir(nonRegularSkillPath, { recursive: true });
     await writeProjectManifest(root, [
-      { path: ".gemini/skills/harnix-directory/SKILL.md", sourceId: "harnix-directory", scope: "antigravity", generatedHash: sha256("directory\n"), generatorVersion: "0.5.0" },
-      { path: ".kiro/skills/harnix-unsafe/SKILL.md", sourceId: "harnix-unsafe", scope: "kiro", generatedHash: sha256("external generated\n"), generatorVersion: "0.5.0" },
+      {
+        path: ".gemini/skills/harnix-directory/SKILL.md",
+        sourceId: "harnix-directory",
+        scope: "antigravity",
+        generatedHash: sha256("directory\n"),
+        generatorVersion: "0.5.0",
+      },
+      {
+        path: ".kiro/skills/harnix-unsafe/SKILL.md",
+        sourceId: "harnix-unsafe",
+        scope: "kiro",
+        generatedHash: sha256("external generated\n"),
+        generatorVersion: "0.5.0",
+      },
     ]);
 
     const result = await cleanupLegacyProjectSurfaces({ root, yes: true });
 
     expect(result.targets).toEqual([".gemini/skills/harnix-directory/SKILL.md", ".kiro/skills/harnix-unsafe/SKILL.md"]);
     expect(result.removed).toEqual([]);
-    expect(result.preserved).toEqual([".gemini/skills/harnix-directory/SKILL.md", ".kiro/skills/harnix-unsafe/SKILL.md"]);
+    expect(result.preserved).toEqual([
+      ".gemini/skills/harnix-directory/SKILL.md",
+      ".kiro/skills/harnix-unsafe/SKILL.md",
+    ]);
     await expect(readFile(unsafeSkillPath, "utf8")).resolves.toBe("external generated\n");
     await expect(access(nonRegularSkillPath)).resolves.toBeUndefined();
   });

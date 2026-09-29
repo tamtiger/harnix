@@ -9,7 +9,10 @@ import { useTemporaryRepositories } from "../../support/temporary-repository.js"
 
 const temporaryRepository = useTemporaryRepositories("harnix-repo-map-cli-");
 const originalCwd = process.cwd();
-afterEach(() => { process.chdir(originalCwd); vi.restoreAllMocks(); });
+afterEach(() => {
+  process.chdir(originalCwd);
+  vi.restoreAllMocks();
+});
 
 describe("repository-map operations", () => {
   it("initializes and supports query or refresh as exclusive repo-map actions", async () => {
@@ -21,10 +24,17 @@ describe("repository-map operations", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     await createProgram().parseAsync(["node", "harnix", "repo-map", "--refresh"], { from: "node" });
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({ scope: "project", status: "refreshed" });
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
+      scope: "project",
+      status: "refreshed",
+    });
     stdout.mockClear();
     await createProgram().parseAsync(["node", "harnix", "repo-map", "--query", "billing"], { from: "node" });
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({ scope: "project", status: "ready", results: [expect.objectContaining({ path: "src/billing.ts" })] });
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
+      scope: "project",
+      status: "ready",
+      results: [expect.objectContaining({ path: "src/billing.ts" })],
+    });
     expect(createProgram().helpInformation()).toContain("repo-map");
     await expect(runCli(["node", "harnix", "repo-map", "--query", "billing", "--refresh"])).resolves.toBe(2);
     await expect(runCli(["node", "harnix", "repo-map", "--refresh", "--limit", "3"])).resolves.toBe(2);
@@ -43,7 +53,9 @@ describe("repository-map operations", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "repo-map", "--impact", "src/billing.ts", "--depth", "2", "--limit", "20"])).resolves.toBe(0);
+    await expect(
+      runCli(["node", "harnix", "repo-map", "--impact", "src/billing.ts", "--depth", "2", "--limit", "20"]),
+    ).resolves.toBe(0);
 
     expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
       generator: "harnix",
@@ -73,7 +85,11 @@ describe("repository-map operations", () => {
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     await expect(runCli(["node", "harnix", "repo-map", "--impact", "src/missing.ts"])).resolves.toBe(0);
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({ status: "not-found", dependencies: [], dependents: [] });
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
+      status: "not-found",
+      dependencies: [],
+      dependents: [],
+    });
 
     for (const argv of [
       ["node", "harnix", "repo-map", "--impact", "./src/present.ts"],
@@ -90,28 +106,40 @@ describe("repository-map operations", () => {
     await rm(cachePath);
     stdout.mockClear();
     await expect(runCli(["node", "harnix", "repo-map", "--impact", "src/present.ts"])).resolves.toBe(0);
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({ status: "missing", dependencies: [], dependents: [] });
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
+      status: "missing",
+      dependencies: [],
+      dependents: [],
+    });
 
     await writeFile(cachePath, "{}\n");
     stdout.mockClear();
     await expect(runCli(["node", "harnix", "repo-map", "--impact", "src/present.ts"])).resolves.toBe(0);
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({ status: "invalid", dependencies: [], dependents: [] });
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
+      status: "invalid",
+      dependencies: [],
+      dependents: [],
+    });
   });
 });
 
 async function snapshotTree(root: string): Promise<Array<{ path: string; sha256: string }>> {
   const files = await walk(root);
-  return Promise.all(files.map(async (path) => ({
-    path: path.slice(root.length + 1).replaceAll("\\", "/"),
-    sha256: createHash("sha256").update(await readFile(path)).digest("hex"),
-  })));
+  return Promise.all(
+    files.map(async (path) => ({
+      path: path.slice(root.length + 1).replaceAll("\\", "/"),
+      sha256: createHash("sha256")
+        .update(await readFile(path))
+        .digest("hex"),
+    })),
+  );
 }
 
 async function walk(root: string): Promise<string[]> {
   const paths: string[] = [];
   for (const entry of await readdir(root, { withFileTypes: true })) {
     const path = join(root, entry.name);
-    if (entry.isDirectory()) paths.push(...await walk(path));
+    if (entry.isDirectory()) paths.push(...(await walk(path)));
     else if (entry.isFile()) paths.push(path);
   }
   return paths.sort();

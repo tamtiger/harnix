@@ -13,6 +13,8 @@ describe("user-global path safety", () => {
     const roots = await resolveUserPlatformRoots({ homeResolver: async () => home, environment: {} });
     await symlink(external, roots.kiro.path, process.platform === "win32" ? "junction" : "dir");
 
-    await expect(resolveSafeUserPath(roots.kiro, "hooks/harnix-context.json")).rejects.toBeInstanceOf(UnsafeUserPathError);
+    await expect(resolveSafeUserPath(roots.kiro, "hooks/harnix-context.json")).rejects.toBeInstanceOf(
+      UnsafeUserPathError,
+    );
   });
 });

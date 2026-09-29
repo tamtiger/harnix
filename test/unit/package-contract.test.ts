@@ -9,7 +9,18 @@ const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..")
 const temporaryRepository = useTemporaryRepositories("harnix-package-contract-");
 // docs/** may hold untracked, user-owned third-party material (e.g. vendored skill bundles)
 // that is not part of the Harnix package and is never counted toward the single-package contract.
-const nonProductDirectories = new Set([".artifacts", ".git", ".harnix", ".kilo", ".pnpm-store", "coverage", "dist", "docs", "node_modules", "test"]);
+const nonProductDirectories = new Set([
+  ".artifacts",
+  ".git",
+  ".harnix",
+  ".kilo",
+  ".pnpm-store",
+  "coverage",
+  "dist",
+  "docs",
+  "node_modules",
+  "test",
+]);
 
 function findPackageJsonFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -29,7 +40,11 @@ function findPackageJsonFiles(directory: string): string[] {
 function findFiles(directory: string, extension: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = join(directory, entry.name);
-    return entry.isDirectory() ? findFiles(path, extension) : entry.isFile() && entry.name.endsWith(extension) ? [path] : [];
+    return entry.isDirectory()
+      ? findFiles(path, extension)
+      : entry.isFile() && entry.name.endsWith(extension)
+        ? [path]
+        : [];
   });
 }
 
@@ -53,6 +68,8 @@ describe("package invariant", () => {
     expect(packageJson.bin).toEqual({ harnix: "./dist/cli.js" });
     expect(Object.keys(packageJson.scripts ?? {}).sort()).toEqual([
       "build",
+      "format",
+      "format:check",
       "lint",
       "measure:footprint",
       "measure:init",
@@ -70,22 +87,35 @@ describe("package invariant", () => {
       "typecheck",
       "version:sync",
     ]);
-    expect(packageJson.scripts?.["test:acceptance"]).toBe("pnpm run test:unit && pnpm run test:integration && pnpm run test:migration && pnpm run test:platform && pnpm run test:workflow && pnpm run test:safety");
+    expect(packageJson.scripts?.["test:acceptance"]).toBe(
+      "pnpm run test:unit && pnpm run test:integration && pnpm run test:migration && pnpm run test:platform && pnpm run test:workflow && pnpm run test:safety",
+    );
   });
 
   it("pins only the audited vulnerable transitive tool resolutions without creating a workspace", async () => {
     const pnpmfileUrl = pathToFileURL(resolve(repositoryRoot, ".pnpmfile.mjs")).href;
-    const { hooks } = await import(pnpmfileUrl) as {
+    const { hooks } = (await import(pnpmfileUrl)) as {
       hooks: {
-        readPackage: (pkg: { name: string; version: string; dependencies?: Record<string, string> }) => { dependencies?: Record<string, string> };
+        readPackage: (pkg: { name: string; version: string; dependencies?: Record<string, string> }) => {
+          dependencies?: Record<string, string>;
+        };
         updateConfig: (config: { allowBuilds?: Record<string, boolean> }) => { allowBuilds?: Record<string, boolean> };
       };
     };
 
-    expect(hooks.readPackage({ name: "tsup", version: "8.5.1", dependencies: { esbuild: "^0.27.0" } }).dependencies).toEqual({ esbuild: "0.28.1" });
-    expect(hooks.readPackage({ name: "postcss", version: "8.5.25", dependencies: { nanoid: "^3.3.16" } }).dependencies).toEqual({ nanoid: "3.3.18" });
-    expect(hooks.readPackage({ name: "unrelated", version: "1.0.0", dependencies: { esbuild: "^0.27.0" } }).dependencies).toEqual({ esbuild: "^0.27.0" });
-    expect(hooks.updateConfig({ allowBuilds: { "unrelated-package": false } }).allowBuilds).toEqual({ esbuild: true, "unrelated-package": false });
+    expect(
+      hooks.readPackage({ name: "tsup", version: "8.5.1", dependencies: { esbuild: "^0.27.0" } }).dependencies,
+    ).toEqual({ esbuild: "0.28.1" });
+    expect(
+      hooks.readPackage({ name: "postcss", version: "8.5.25", dependencies: { nanoid: "^3.3.16" } }).dependencies,
+    ).toEqual({ nanoid: "3.3.18" });
+    expect(
+      hooks.readPackage({ name: "unrelated", version: "1.0.0", dependencies: { esbuild: "^0.27.0" } }).dependencies,
+    ).toEqual({ esbuild: "^0.27.0" });
+    expect(hooks.updateConfig({ allowBuilds: { "unrelated-package": false } }).allowBuilds).toEqual({
+      esbuild: true,
+      "unrelated-package": false,
+    });
     expect(existsSync(resolve(repositoryRoot, "pnpm-workspace.yaml"))).toBe(false);
   });
 
@@ -99,18 +129,21 @@ describe("package invariant", () => {
       join(root, ".pnpm-store", "v11", ".tmp", "package.json"),
       join(root, "test", "fixtures", "package.json"),
     ];
-    await Promise.all(paths.map(async (path) => {
-      await mkdir(dirname(path), { recursive: true });
-      await writeFile(path, "{}\n");
-    }));
+    await Promise.all(
+      paths.map(async (path) => {
+        await mkdir(dirname(path), { recursive: true });
+        await writeFile(path, "{}\n");
+      }),
+    );
 
     expect(findPackageJsonFiles(root).sort()).toEqual([join(root, "package.json"), productPackage].sort());
   });
 
   it("should_avoid_locale_sensitive_primitives_in_deterministic_production_paths", () => {
-    const offenders = findFiles(join(repositoryRoot, "src"), ".ts").filter((path) => /\.localeCompare\(|\.toLocale(?:Lower|Upper)Case\(/u.test(readFileSync(path, "utf8")));
+    const offenders = findFiles(join(repositoryRoot, "src"), ".ts").filter((path) =>
+      /\.localeCompare\(|\.toLocale(?:Lower|Upper)Case\(/u.test(readFileSync(path, "utf8")),
+    );
 
     expect(offenders).toEqual([]);
   });
 });
-

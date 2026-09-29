@@ -96,7 +96,10 @@ export async function diagnoseProject(options: DoctorOptions): Promise<DoctorRep
           ...(options.homeResolver === undefined ? {} : { homeResolver: options.homeResolver }),
           restoreDeleted: true,
         });
-        fixed += reconciliation.platforms.reduce((total, platform) => total + platform.created.length + platform.updated.length, 0);
+        fixed += reconciliation.platforms.reduce(
+          (total, platform) => total + platform.created.length + platform.updated.length,
+          0,
+        );
       } catch (error: unknown) {
         if (error instanceof GlobalManagedTransactionError) {
           globalRollbackPartial = error.rollback.partial;
@@ -124,7 +127,15 @@ function addGlobalPartialRollbackFindings(
       ...integration,
       findings: sortFindings([
         ...integration.findings,
-        ...paths.map((path) => finding("global-partial-rollback", "warning", path, "A concurrent edit was preserved during rollback; inspect it before retrying the global operation.", false)),
+        ...paths.map((path) =>
+          finding(
+            "global-partial-rollback",
+            "warning",
+            path,
+            "A concurrent edit was preserved during rollback; inspect it before retrying the global operation.",
+            false,
+          ),
+        ),
       ]),
       status: integration.status === "invalid" ? "invalid" : "drifted",
     };
@@ -154,27 +165,63 @@ async function diagnoseProjectSection(root: string): Promise<DoctorProjectSectio
   try {
     const document = await readConfigDocument(await resolveSafeHarnixPath(root, "config.yaml"));
     config = document.config;
-    if (document.sourceSchemaVersion === 1) findings.push(finding("config-outdated", "warning", ".harnix/config.yaml", "Config schema v1 is valid but outdated; run doctor --fix or update to migrate it without rescanning.", true));
+    if (document.sourceSchemaVersion === 1)
+      findings.push(
+        finding(
+          "config-outdated",
+          "warning",
+          ".harnix/config.yaml",
+          "Config schema v1 is valid but outdated; run doctor --fix or update to migrate it without rescanning.",
+          true,
+        ),
+      );
   } catch (error: unknown) {
     if (isMissing(error)) {
-      return { status: "not-initialized", findings: [finding("project-not-initialized", "info", ".harnix/config.yaml", "No initialized Harnix project was found in this directory.", false)] };
+      return {
+        status: "not-initialized",
+        findings: [
+          finding(
+            "project-not-initialized",
+            "info",
+            ".harnix/config.yaml",
+            "No initialized Harnix project was found in this directory.",
+            false,
+          ),
+        ],
+      };
     }
-    return { status: "invalid", findings: [finding("config-invalid", "error", ".harnix/config.yaml", redact(error, root), false)] };
+    return {
+      status: "invalid",
+      findings: [finding("config-invalid", "error", ".harnix/config.yaml", redact(error, root), false)],
+    };
   }
 
   let manifest: ManagedManifest;
   try {
     manifest = await readManifest(await resolveSafeHarnixPath(root, ".template-hashes.json"));
   } catch (error: unknown) {
-    return { status: "invalid", findings: [finding("manifest-invalid", "error", ".harnix/.template-hashes.json", redact(error, root), false)] };
+    return {
+      status: "invalid",
+      findings: [finding("manifest-invalid", "error", ".harnix/.template-hashes.json", redact(error, root), false)],
+    };
   }
 
   const desired = new Map(desiredFiles(config).map((file) => [file.entry.path, file]));
-  const projectLanguages = new Set(config.languages), projectTechnologies = new Set(config.technologies);
+  const projectLanguages = new Set(config.languages),
+    projectTechnologies = new Set(config.technologies);
   for (const packageConfig of config.packages) {
     const missingLanguages = packageConfig.languages.filter((id) => !projectLanguages.has(id));
     const missingTechnologies = packageConfig.technologies.filter((id) => !projectTechnologies.has(id));
-    if (missingLanguages.length > 0 || missingTechnologies.length > 0) findings.push(finding("profile-conflict", "warning", ".harnix/config.yaml", `Package ${packageConfig.path} contains profile IDs absent from the project union.`, false));
+    if (missingLanguages.length > 0 || missingTechnologies.length > 0)
+      findings.push(
+        finding(
+          "profile-conflict",
+          "warning",
+          ".harnix/config.yaml",
+          `Package ${packageConfig.path} contains profile IDs absent from the project union.`,
+          false,
+        ),
+      );
   }
   for (const entry of manifest.entries) {
     if (entry.scope !== "project") {
@@ -183,14 +230,45 @@ async function diagnoseProjectSection(root: string): Promise<DoctorProjectSectio
     }
     try {
       const state = await ownershipState(root, entry, entry);
-      if (state === "deleted") findings.push(finding("managed-missing", "warning", entry.path, "Managed file was deleted by the user; run update --restore to recreate it.", false));
-      if (state === "modified") findings.push(finding("managed-modified", "warning", entry.path, "Managed file has user changes and will be preserved.", false));
-      if (!desired.has(entry.path)) findings.push(finding("managed-obsolete", "warning", entry.path, "Managed file is no longer in the desired template set.", state === "unchanged"));
+      if (state === "deleted")
+        findings.push(
+          finding(
+            "managed-missing",
+            "warning",
+            entry.path,
+            "Managed file was deleted by the user; run update --restore to recreate it.",
+            false,
+          ),
+        );
+      if (state === "modified")
+        findings.push(
+          finding(
+            "managed-modified",
+            "warning",
+            entry.path,
+            "Managed file has user changes and will be preserved.",
+            false,
+          ),
+        );
+      if (!desired.has(entry.path))
+        findings.push(
+          finding(
+            "managed-obsolete",
+            "warning",
+            entry.path,
+            "Managed file is no longer in the desired template set.",
+            state === "unchanged",
+          ),
+        );
     } catch (error) {
       findings.push(finding("unsafe-managed-path", "error", entry.path, redact(error, root), false));
     }
   }
-  for (const [path] of desired) if (!manifest.entries.some((entry) => entry.scope === "project" && entry.path === path)) findings.push(finding("managed-untracked", "warning", path, "Desired project file is not yet owned by Harnix.", true));
+  for (const [path] of desired)
+    if (!manifest.entries.some((entry) => entry.scope === "project" && entry.path === path))
+      findings.push(
+        finding("managed-untracked", "warning", path, "Desired project file is not yet owned by Harnix.", true),
+      );
 
   await inspectUntrackedLegacySurfaces(root, manifest, findings);
   await inspectTaskRecords(root, findings);
@@ -199,9 +277,20 @@ async function diagnoseProjectSection(root: string): Promise<DoctorProjectSectio
   const repoMap = await diagnoseRepoMap(root);
   if (repoMap !== "ready") {
     const severity = repoMap === "invalid" ? "error" : "warning";
-    findings.push(finding(`repo-map-${repoMap}`, severity, ".harnix/cache/repo-map-v1.json", `Repository map cache is ${repoMap}; run doctor --fix to rebuild it.`, true));
+    findings.push(
+      finding(
+        `repo-map-${repoMap}`,
+        severity,
+        ".harnix/cache/repo-map-v1.json",
+        `Repository map cache is ${repoMap}; run doctor --fix to rebuild it.`,
+        true,
+      ),
+    );
   }
-  return { status: findings.some((entry) => entry.severity === "error") ? "invalid" : "ready", findings: sortFindings(findings) };
+  return {
+    status: findings.some((entry) => entry.severity === "error") ? "invalid" : "ready",
+    findings: sortFindings(findings),
+  };
 }
 
 async function inspectTaskRecords(root: string, findings: DoctorFinding[]): Promise<void> {
@@ -211,12 +300,16 @@ async function inspectTaskRecords(root: string, findings: DoctorFinding[]): Prom
     const value = (await readFile(activePath, "utf8")).trim();
     if (value.length > 0) activeId = value;
   } catch (error: unknown) {
-    if (!isMissing(error)) findings.push(finding("active-pointer-unreadable", "error", "tasks/.active", redact(error, root), false));
+    if (!isMissing(error))
+      findings.push(finding("active-pointer-unreadable", "error", "tasks/.active", redact(error, root), false));
   }
 
   const tasks = new Map<string, ReturnType<typeof validateTask>>();
   try {
-    const entries = await readdir(await resolveSafeHarnixPath(root, "tasks"), { encoding: "utf8", withFileTypes: true });
+    const entries = await readdir(await resolveSafeHarnixPath(root, "tasks"), {
+      encoding: "utf8",
+      withFileTypes: true,
+    });
     let activeFound = activeId === undefined;
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
@@ -230,43 +323,121 @@ async function inspectTaskRecords(root: string, findings: DoctorFinding[]): Prom
         } catch (error: unknown) {
           if (entry.name === activeId) throw error;
           task = validateTask(source, { allowUnsafeCompletedEvidenceArtifacts: true });
-          if (task.status !== "completed" || !task.evidence.some((evidence) => evidence.artifactPaths.some((artifactPath) => !isSafeRepositoryPath(artifactPath)))) throw error;
-          findings.push(finding("task-evidence-artifact-unsafe", "warning", logicalPath, "A completed historical task references an unsafe or expired artifact path and was preserved without rewrite.", false));
+          if (
+            task.status !== "completed" ||
+            !task.evidence.some((evidence) =>
+              evidence.artifactPaths.some((artifactPath) => !isSafeRepositoryPath(artifactPath)),
+            )
+          )
+            throw error;
+          findings.push(
+            finding(
+              "task-evidence-artifact-unsafe",
+              "warning",
+              logicalPath,
+              "A completed historical task references an unsafe or expired artifact path and was preserved without rewrite.",
+              false,
+            ),
+          );
         }
         tasks.set(task.id, task);
         const terminal = task.status === "completed" || task.status === "cancelled";
         if (task.schemaVersion === 1) {
-          findings.push(finding("legacy-task-schema", terminal ? "info" : "warning", logicalPath, "TaskRecord schema v1 is preserved; migrate an unfinished task explicitly only from a replan checkpoint.", false));
+          findings.push(
+            finding(
+              "legacy-task-schema",
+              terminal ? "info" : "warning",
+              logicalPath,
+              "TaskRecord schema v1 is preserved; migrate an unfinished task explicitly only from a replan checkpoint.",
+              false,
+            ),
+          );
         }
         if (entry.name === activeId) {
           activeFound = true;
-          if (task.status === "completed") findings.push(finding("task-active-completed", "error", logicalPath, "The active pointer references a completed task and must be repaired before continuation.", false));
-          if (task.status === "cancelled") findings.push(finding("task-active-cancelled", "error", logicalPath, "The active pointer references a cancelled task with incomplete cancellation persistence; run cancellation recovery before continuation.", false));
+          if (task.status === "completed")
+            findings.push(
+              finding(
+                "task-active-completed",
+                "error",
+                logicalPath,
+                "The active pointer references a completed task and must be repaired before continuation.",
+                false,
+              ),
+            );
+          if (task.status === "cancelled")
+            findings.push(
+              finding(
+                "task-active-cancelled",
+                "error",
+                logicalPath,
+                "The active pointer references a cancelled task with incomplete cancellation persistence; run cancellation recovery before continuation.",
+                false,
+              ),
+            );
         }
         if (task.mode === "full") {
           for (const artifact of ["prd.md", "plan.md"]) {
-            try { await stat(await resolveSafeProjectPath(root, `.harnix/tasks/${task.id}/${artifact}`)); }
-            catch { findings.push(finding("task-full-artifact-missing", task.id === activeId ? "error" : "warning", `tasks/${task.id}/${artifact}`, "A Full task is missing a required planning artifact.", false)); }
+            try {
+              await stat(await resolveSafeProjectPath(root, `.harnix/tasks/${task.id}/${artifact}`));
+            } catch {
+              findings.push(
+                finding(
+                  "task-full-artifact-missing",
+                  task.id === activeId ? "error" : "warning",
+                  `tasks/${task.id}/${artifact}`,
+                  "A Full task is missing a required planning artifact.",
+                  false,
+                ),
+              );
+            }
           }
         }
       } catch {
         const active = entry.name === activeId;
-        findings.push(finding(active ? "task-invalid-active" : "task-invalid-historical", active ? "error" : "warning", logicalPath, active ? "The active task record is invalid and continuation must fail closed." : "A historical task record is invalid and was preserved without rewrite.", false));
+        findings.push(
+          finding(
+            active ? "task-invalid-active" : "task-invalid-historical",
+            active ? "error" : "warning",
+            logicalPath,
+            active
+              ? "The active task record is invalid and continuation must fail closed."
+              : "A historical task record is invalid and was preserved without rewrite.",
+            false,
+          ),
+        );
       }
     }
-    if (!activeFound) findings.push(finding("active-pointer-missing-task", "error", "tasks/.active", "The active pointer does not identify a readable task record.", false));
+    if (!activeFound)
+      findings.push(
+        finding(
+          "active-pointer-missing-task",
+          "error",
+          "tasks/.active",
+          "The active pointer does not identify a readable task record.",
+          false,
+        ),
+      );
   } catch (error: unknown) {
     if (!isMissing(error)) findings.push(finding("task-root-unreadable", "error", "tasks", redact(error, root), false));
   }
   await inspectJournalRecords(root, tasks, findings);
 }
 
-async function inspectJournalRecords(root: string, tasks: ReadonlyMap<string, ReturnType<typeof validateTask>>, findings: DoctorFinding[]): Promise<void> {
+async function inspectJournalRecords(
+  root: string,
+  tasks: ReadonlyMap<string, ReturnType<typeof validateTask>>,
+  findings: DoctorFinding[],
+): Promise<void> {
   let developers;
   try {
-    developers = await readdir(await resolveSafeHarnixPath(root, "workspace"), { encoding: "utf8", withFileTypes: true });
+    developers = await readdir(await resolveSafeHarnixPath(root, "workspace"), {
+      encoding: "utf8",
+      withFileTypes: true,
+    });
   } catch (error: unknown) {
-    if (!isMissing(error)) findings.push(finding("journal-root-unreadable", "warning", "workspace", redact(error, root), false));
+    if (!isMissing(error))
+      findings.push(finding("journal-root-unreadable", "warning", "workspace", redact(error, root), false));
     return;
   }
   for (const developer of developers) {
@@ -276,7 +447,8 @@ async function inspectJournalRecords(root: string, tasks: ReadonlyMap<string, Re
     try {
       files = await readdir(await resolveSafeHarnixPath(root, journalRoot), { encoding: "utf8", withFileTypes: true });
     } catch (error: unknown) {
-      if (!isMissing(error)) findings.push(finding("journal-root-unreadable", "warning", journalRoot, redact(error, root), false));
+      if (!isMissing(error))
+        findings.push(finding("journal-root-unreadable", "warning", journalRoot, redact(error, root), false));
       continue;
     }
     for (const file of files) {
@@ -284,7 +456,16 @@ async function inspectJournalRecords(root: string, tasks: ReadonlyMap<string, Re
       const logicalPath = `${journalRoot}/${file.name}`;
       try {
         const journal = await searchJournal(await resolveSafeHarnixPath(root, logicalPath));
-        if (journal.malformed > 0) findings.push(finding("journal-malformed", "warning", logicalPath, "A historical journal contains malformed records and was preserved without rewrite.", false));
+        if (journal.malformed > 0)
+          findings.push(
+            finding(
+              "journal-malformed",
+              "warning",
+              logicalPath,
+              "A historical journal contains malformed records and was preserved without rewrite.",
+              false,
+            ),
+          );
         for (const entry of journal.entries) inspectJournalLink(entry, tasks, logicalPath, findings);
         const learningRisks = new Set<LearningRiskKind>();
         for (const entry of journal.entries) {
@@ -293,7 +474,15 @@ async function inspectJournalRecords(root: string, tasks: ReadonlyMap<string, Re
         }
         if (learningRisks.size > 0) {
           const categories = [...learningRisks].sort(compareCodeUnits);
-          findings.push(finding("persistent-learning-suspicious", "warning", logicalPath, `Suspicious persistent learning data categories: ${categories.join(", ")}; review as untrusted data.`, false));
+          findings.push(
+            finding(
+              "persistent-learning-suspicious",
+              "warning",
+              logicalPath,
+              `Suspicious persistent learning data categories: ${categories.join(", ")}; review as untrusted data.`,
+              false,
+            ),
+          );
         }
       } catch (error: unknown) {
         findings.push(finding("journal-unreadable", "warning", logicalPath, redact(error, root), false));
@@ -302,34 +491,93 @@ async function inspectJournalRecords(root: string, tasks: ReadonlyMap<string, Re
   }
 }
 
-function inspectJournalLink(entry: JournalEntry, tasks: ReadonlyMap<string, ReturnType<typeof validateTask>>, path: string, findings: DoctorFinding[]): void {
+function inspectJournalLink(
+  entry: JournalEntry,
+  tasks: ReadonlyMap<string, ReturnType<typeof validateTask>>,
+  path: string,
+  findings: DoctorFinding[],
+): void {
   if (!entry.taskId) return;
   const task = tasks.get(entry.taskId);
   if (!task) {
-    findings.push(finding("journal-task-unlinked", "warning", path, "A historical journal references an unknown task and was preserved without rewrite.", false));
+    findings.push(
+      finding(
+        "journal-task-unlinked",
+        "warning",
+        path,
+        "A historical journal references an unknown task and was preserved without rewrite.",
+        false,
+      ),
+    );
     return;
   }
   const evidenceIds = new Set(task.evidence.map((evidence) => evidence.id));
-  if (entry.evidenceIds.some((id) => !evidenceIds.has(id))) findings.push(finding("journal-evidence-unlinked", "warning", path, "A historical journal references evidence absent from its task and was preserved without rewrite.", false));
+  if (entry.evidenceIds.some((id) => !evidenceIds.has(id)))
+    findings.push(
+      finding(
+        "journal-evidence-unlinked",
+        "warning",
+        path,
+        "A historical journal references evidence absent from its task and was preserved without rewrite.",
+        false,
+      ),
+    );
 }
 
 async function inspectLegacyEntry(root: string, entry: ManagedEntry, findings: DoctorFinding[]): Promise<void> {
   try {
     const state = await ownershipState(root, entry, entry);
     if (state === "unchanged") {
-      findings.push(finding("legacy-project-surface", "info", entry.path, "A manifest-proven project-local platform surface remains; use uninstall --legacy-project-surfaces to remove it explicitly.", false));
+      findings.push(
+        finding(
+          "legacy-project-surface",
+          "info",
+          entry.path,
+          "A manifest-proven project-local platform surface remains; use uninstall --legacy-project-surfaces to remove it explicitly.",
+          false,
+        ),
+      );
       if (isLegacyProjectHookPath(entry.path)) {
-        findings.push(finding("legacy-project-duplicate-hook", "warning", entry.path, "A manifest-proven project-local Harnix hook may run alongside the user-global integration; use uninstall --legacy-project-surfaces to remove it explicitly.", false));
+        findings.push(
+          finding(
+            "legacy-project-duplicate-hook",
+            "warning",
+            entry.path,
+            "A manifest-proven project-local Harnix hook may run alongside the user-global integration; use uninstall --legacy-project-surfaces to remove it explicitly.",
+            false,
+          ),
+        );
       }
-    }
-    else if (state === "modified") findings.push(finding("legacy-project-surface-modified", "warning", entry.path, "A legacy project-local platform surface was modified and will be preserved.", false));
-    else findings.push(finding("legacy-project-surface-missing", "warning", entry.path, "A manifest-proven legacy project-local platform surface is missing.", false));
+    } else if (state === "modified")
+      findings.push(
+        finding(
+          "legacy-project-surface-modified",
+          "warning",
+          entry.path,
+          "A legacy project-local platform surface was modified and will be preserved.",
+          false,
+        ),
+      );
+    else
+      findings.push(
+        finding(
+          "legacy-project-surface-missing",
+          "warning",
+          entry.path,
+          "A manifest-proven legacy project-local platform surface is missing.",
+          false,
+        ),
+      );
   } catch (error) {
     findings.push(finding("legacy-project-surface-unsafe", "error", entry.path, redact(error, root), false));
   }
 }
 
-async function inspectUntrackedLegacySurfaces(root: string, manifest: ManagedManifest, findings: DoctorFinding[]): Promise<void> {
+async function inspectUntrackedLegacySurfaces(
+  root: string,
+  manifest: ManagedManifest,
+  findings: DoctorFinding[],
+): Promise<void> {
   const candidates = new Set([
     ".kiro/hooks/harnix-context.kiro.hook",
     ".kiro/hooks/harnix-context.json",
@@ -354,14 +602,28 @@ async function inspectUntrackedLegacySurfaces(root: string, manifest: ManagedMan
         ? /<!-- harnix:(?:begin|end) -->/u.test(text)
         : path === "AGENTS.md"
           ? hasHistoricalProjectLocalAgentsBlock(text)
-        : path === ".codex/config.toml"
-          ? /^\s*\[harnix\]/imu.test(text)
-        : /harnix/iu.test(text);
+          : path === ".codex/config.toml"
+            ? /^\s*\[harnix\]/imu.test(text)
+            : /harnix/iu.test(text);
     if (looksHarnix) {
       const duplicateHook = isLegacyProjectHookPath(path) && /harnix\s+internal\s+context/iu.test(text);
-      findings.push(duplicateHook
-        ? finding("legacy-project-duplicate-hook", "warning", path, "An untracked project-local Harnix hook may run alongside the user-global integration; it will not be removed automatically.", false)
-        : finding("legacy-project-surface-untracked", "warning", path, "An untracked legacy Harnix platform surface may duplicate the user-global integration; it will not be removed automatically.", false));
+      findings.push(
+        duplicateHook
+          ? finding(
+              "legacy-project-duplicate-hook",
+              "warning",
+              path,
+              "An untracked project-local Harnix hook may run alongside the user-global integration; it will not be removed automatically.",
+              false,
+            )
+          : finding(
+              "legacy-project-surface-untracked",
+              "warning",
+              path,
+              "An untracked legacy Harnix platform surface may duplicate the user-global integration; it will not be removed automatically.",
+              false,
+            ),
+      );
     }
   }
 }
@@ -383,24 +645,35 @@ async function findLegacySkillCandidates(root: string, findings: DoctorFinding[]
         if (entry.name.startsWith("harnix-")) candidates.push(`${skillRoot}/${entry.name}/SKILL.md`);
       }
     } catch (error: unknown) {
-      if (!isMissing(error)) findings.push(finding("legacy-surface-inspection-failed", "warning", skillRoot, redact(error, root), false));
+      if (!isMissing(error))
+        findings.push(finding("legacy-surface-inspection-failed", "warning", skillRoot, redact(error, root), false));
     }
   }
   return candidates;
 }
 
 function isLegacyProjectHookPath(path: string): boolean {
-  return path === ".kiro/hooks/harnix-context.kiro.hook"
-    || path === ".kiro/hooks/harnix-context.json"
-    || path === ".codex/hooks.json"
-    || path === ".agents/hooks.json"
-    || path === ".agents/plugins/harnix/hooks.json";
+  return (
+    path === ".kiro/hooks/harnix-context.kiro.hook" ||
+    path === ".kiro/hooks/harnix-context.json" ||
+    path === ".codex/hooks.json" ||
+    path === ".agents/hooks.json" ||
+    path === ".agents/plugins/harnix/hooks.json"
+  );
 }
 
 async function inspectSensitiveFiles(root: string, findings: DoctorFinding[]): Promise<void> {
-  for (const path of [".harnix/config.yaml", ".harnix/.template-hashes.json", "AGENTS.md", "GEMINI.md", ".codex/hooks.json", ".kiro/hooks/harnix-context.kiro.hook"]) {
+  for (const path of [
+    ".harnix/config.yaml",
+    ".harnix/.template-hashes.json",
+    "AGENTS.md",
+    "GEMINI.md",
+    ".codex/hooks.json",
+    ".kiro/hooks/harnix-context.kiro.hook",
+  ]) {
     const text = await optionalSafe(root, path, findings);
-    if (containsSecret(text)) findings.push(finding("secret-exposure", "error", path, "Potential secret value detected: [REDACTED].", false));
+    if (containsSecret(text))
+      findings.push(finding("secret-exposure", "error", path, "Potential secret value detected: [REDACTED].", false));
   }
 }
 
@@ -409,9 +682,11 @@ async function inspectPermissions(root: string, manifest: ManagedManifest, findi
   for (const entry of manifest.entries.filter((item) => item.scope === "project")) {
     try {
       const metadata = await stat(await resolveSafeProjectPath(root, entry.path));
-      if ((metadata.mode & 0o002) !== 0) findings.push(finding("broad-permissions", "warning", entry.path, "Managed file is world-writable.", false));
+      if ((metadata.mode & 0o002) !== 0)
+        findings.push(finding("broad-permissions", "warning", entry.path, "Managed file is world-writable.", false));
     } catch (error: unknown) {
-      if (!isMissing(error)) findings.push(finding("permission-check-failed", "warning", entry.path, redact(error, root), false));
+      if (!isMissing(error))
+        findings.push(finding("permission-check-failed", "warning", entry.path, redact(error, root), false));
     }
   }
 }
@@ -426,19 +701,41 @@ async function optionalSafe(root: string, path: string, findings: DoctorFinding[
   }
 }
 
-function report(project: DoctorProjectSection, globalIntegrations: GlobalIntegrationDiagnosis[], fixed: number): DoctorReport {
+function report(
+  project: DoctorProjectSection,
+  globalIntegrations: GlobalIntegrationDiagnosis[],
+  fixed: number,
+): DoctorReport {
   const all = [...project.findings, ...globalIntegrations.flatMap((integration) => integration.findings)];
   const errors = all.filter((item) => item.severity === "error").length;
   const warnings = all.filter((item) => item.severity === "warning").length;
-  return { generator: "harnix", schemaVersion: 2, ok: errors === 0 && warnings === 0, project: { ...project, findings: sortFindings(project.findings) }, globalIntegrations, summary: { errors, warnings, fixed } };
+  return {
+    generator: "harnix",
+    schemaVersion: 2,
+    ok: errors === 0 && warnings === 0,
+    project: { ...project, findings: sortFindings(project.findings) },
+    globalIntegrations,
+    summary: { errors, warnings, fixed },
+  };
 }
 
 function sortFindings(findings: readonly DoctorFinding[]): DoctorFinding[] {
   const order = { error: 0, warning: 1, info: 2 } as const;
-  return [...findings].sort((left, right) => order[left.severity] - order[right.severity] || compareCodeUnits(left.code, right.code) || compareCodeUnits(left.path ?? "", right.path ?? ""));
+  return [...findings].sort(
+    (left, right) =>
+      order[left.severity] - order[right.severity] ||
+      compareCodeUnits(left.code, right.code) ||
+      compareCodeUnits(left.path ?? "", right.path ?? ""),
+  );
 }
 
-function finding(code: string, severity: DoctorFinding["severity"], path: string | undefined, message: string, fixable: boolean): DoctorFinding {
+function finding(
+  code: string,
+  severity: DoctorFinding["severity"],
+  path: string | undefined,
+  message: string,
+  fixable: boolean,
+): DoctorFinding {
   return { code, severity, ...(path === undefined ? {} : { path }), message, fixable };
 }
 
@@ -453,10 +750,15 @@ function containsSecret(value: string): boolean {
 }
 
 function isSafeRepositoryPath(value: string): boolean {
-  try { return normalizeRepositoryPath(value, { allowRoot: true }) === value; }
-  catch { return false; }
+  try {
+    return normalizeRepositoryPath(value, { allowRoot: true }) === value;
+  } catch {
+    return false;
+  }
 }
 
 function isMissing(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT";
+  return (
+    typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"
+  );
 }

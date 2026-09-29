@@ -113,7 +113,17 @@ function taskV2(id: string, status: TaskRecordV2["status"], epicId: string): Tas
     acceptanceCriteria: [{ id: "a", text: "done", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{ id: "check", description: "verify", command: "pnpm test", scope: "full", required: true, criterionIds: ["a"], inputs: ["@task-contract", "src/**/*.ts"] }],
+    validationPlan: [
+      {
+        id: "check",
+        description: "verify",
+        command: "pnpm test",
+        scope: "full",
+        required: true,
+        criterionIds: ["a"],
+        inputs: ["@task-contract", "src/**/*.ts"],
+      },
+    ],
     evidence: [],
     createdAt: "2026-08-26T00:00:00.000Z",
     updatedAt: "2026-08-26T00:00:00.000Z",

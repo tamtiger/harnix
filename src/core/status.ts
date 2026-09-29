@@ -103,7 +103,11 @@ export async function inspectRequiredCheckEvidence(
   return (await inspectRequiredChecks(projectRoot, harnixRoot, task, now)).map((inspection) => inspection.state);
 }
 
-function result(activeTask: StatusActiveTask | null, code: StatusNextActionCode, attention: StatusAttention[]): HarnixStatusResultV1 {
+function result(
+  activeTask: StatusActiveTask | null,
+  code: StatusNextActionCode,
+  attention: StatusAttention[],
+): HarnixStatusResultV1 {
   return {
     generator: "harnix",
     schemaVersion: 1,
@@ -125,7 +129,11 @@ function countChecks(states: readonly RequiredCheckState[]): StatusProgress["req
   return progress;
 }
 
-function nextAction(task: TaskRecord, contextDrift: ContextDrift, checks: StatusProgress["requiredChecks"]): StatusNextActionCode {
+function nextAction(
+  task: TaskRecord,
+  contextDrift: ContextDrift,
+  checks: StatusProgress["requiredChecks"],
+): StatusNextActionCode {
   if (task.status === "blocked") return "resolve-blocker";
   if (contextDrift.state === "stale") return "replan-context";
   if (task.status === "planning") return "complete-planning";

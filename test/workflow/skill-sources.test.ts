@@ -161,9 +161,12 @@ describe("canonical Harnix workflow skill sources", () => {
   });
 
   it("keeps skill prose out of the TypeScript workflow template", async () => {
-    const workflowSource = await readFile(fileURLToPath(new URL("../../src/templates/harnix/workflow.ts", import.meta.url)), "utf8");
+    const workflowSource = await readFile(
+      fileURLToPath(new URL("../../src/templates/harnix/workflow.ts", import.meta.url)),
+      "utf8",
+    );
 
-    expect(workflowSource).not.toContain("body: \"Incoming state:");
+    expect(workflowSource).not.toContain('body: "Incoming state:');
     expect(workflowSource).not.toContain("export const workflowSkills: SkillTemplate[] = [");
   });
 
@@ -246,7 +249,9 @@ describe("canonical Harnix workflow skill sources", () => {
     expect(continuation).toContain("unrelated active task");
     expect(continuation).toContain("generic status request");
     expect(continuation).toContain("explicit Harnix-task status request");
-    expect(continuation.indexOf("Classify the latest request")).toBeLessThan(continuation.indexOf("read `.harnix/workflow.md` after this classification"));
+    expect(continuation.indexOf("Classify the latest request")).toBeLessThan(
+      continuation.indexOf("read `.harnix/workflow.md` after this classification"),
+    );
     expect(continuation).toContain("same drift");
     expect(brainstorm).not.toContain("execution-notes");
     expect(implement).not.toContain("execution-note");
@@ -255,5 +260,7 @@ describe("canonical Harnix workflow skill sources", () => {
 });
 
 async function readSkill(name: (typeof skillNames)[number]): Promise<string> {
-  return (await readFile(fileURLToPath(new URL(`../../src/skills/${name}/SKILL.md`, import.meta.url)), "utf8")).replaceAll("\r\n", "\n");
+  return (
+    await readFile(fileURLToPath(new URL(`../../src/skills/${name}/SKILL.md`, import.meta.url)), "utf8")
+  ).replaceAll("\r\n", "\n");
 }

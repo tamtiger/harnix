@@ -69,7 +69,9 @@ describe("task pause", () => {
       deactivate,
     };
 
-    await expect(pauseTask("unused", false, dependencies)).rejects.toThrow("Active task state is unavailable; run harnix doctor.");
+    await expect(pauseTask("unused", false, dependencies)).rejects.toThrow(
+      "Active task state is unavailable; run harnix doctor.",
+    );
     expect(deactivate).not.toHaveBeenCalled();
   });
 });
@@ -89,7 +91,16 @@ function task(id: string, status: "planning" | "ready" | "in_progress"): TaskRec
     acceptanceCriteria: [{ id: "criterion", text: "private", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "private", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract"] }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "private",
+        scope: "focused",
+        required: true,
+        criterionIds: ["criterion"],
+        inputs: ["@task-contract"],
+      },
+    ],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,

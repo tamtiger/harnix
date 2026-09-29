@@ -34,7 +34,15 @@ describe.sequential("context-report command", () => {
       schemaVersion: 1,
       taskId: active.id,
       maxCharacters: 24_000,
-      entries: [{ path: "docs/visible.md", reason: "PRIVATE_RAW_REASON_CANARY", priority: 7, pinned: true, states: ["PRIVATE_STATE_CANARY"] }],
+      entries: [
+        {
+          path: "docs/visible.md",
+          reason: "PRIVATE_RAW_REASON_CANARY",
+          priority: 7,
+          pinned: true,
+          states: ["PRIVATE_STATE_CANARY"],
+        },
+      ],
       omitted: [],
     });
     await setActiveTask(harnixRoot, active.id);
@@ -57,7 +65,13 @@ describe.sequential("context-report command", () => {
         selected: Array<{ path: string; reasonCodes: string[]; priority: number; pinned: boolean }>;
       };
     };
-    expect(result).toMatchObject({ generator: "harnix", schemaVersion: 1, scope: "project", platform: "codex", filter: { limit: 20 } });
+    expect(result).toMatchObject({
+      generator: "harnix",
+      schemaVersion: 1,
+      scope: "project",
+      platform: "codex",
+      filter: { limit: 20 },
+    });
     expect(result.activeTask).toMatchObject({
       id: active.id,
       budget: { maxCharacters: 2_500, maxEntries: 64 },
@@ -72,7 +86,15 @@ describe.sequential("context-report command", () => {
       priority: 1_507,
       pinned: true,
     });
-    for (const canary of ["VISIBLE_CONTEXT_BODY_CANARY", "PRIVATE_RAW_REASON_CANARY", "PRIVATE_STATE_CANARY", "PRIVATE_TITLE_CANARY", "PRIVATE_GOAL_CANARY", root]) expect(raw).not.toContain(canary);
+    for (const canary of [
+      "VISIBLE_CONTEXT_BODY_CANARY",
+      "PRIVATE_RAW_REASON_CANARY",
+      "PRIVATE_STATE_CANARY",
+      "PRIVATE_TITLE_CANARY",
+      "PRIVATE_GOAL_CANARY",
+      root,
+    ])
+      expect(raw).not.toContain(canary);
     expect(Buffer.byteLength(raw, "utf8")).toBeLessThanOrEqual(262_144);
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
@@ -86,7 +108,14 @@ describe.sequential("context-report command", () => {
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     await expect(runCli(["node", "harnix", "context-report", "--platform", "kiro"])).resolves.toBe(0);
-    expect(JSON.parse(output(stdout.mock.calls))).toEqual({ generator: "harnix", schemaVersion: 1, scope: "project", platform: "kiro", filter: { limit: 20 }, activeTask: null });
+    expect(JSON.parse(output(stdout.mock.calls))).toEqual({
+      generator: "harnix",
+      schemaVersion: 1,
+      scope: "project",
+      platform: "kiro",
+      filter: { limit: 20 },
+      activeTask: null,
+    });
     await expect(snapshotTree(root)).resolves.toEqual(before);
 
     for (const argv of [
@@ -97,7 +126,12 @@ describe.sequential("context-report command", () => {
     ]) {
       stdout.mockClear();
       await expect(runCli(argv)).resolves.toBe(2);
-      expect(JSON.parse(output(stdout.mock.calls))).toMatchObject({ generator: "harnix", schemaVersion: 1, ok: false, error: { exitCode: 2 } });
+      expect(JSON.parse(output(stdout.mock.calls))).toMatchObject({
+        generator: "harnix",
+        schemaVersion: 1,
+        ok: false,
+        error: { exitCode: 2 },
+      });
     }
   });
 
@@ -116,8 +150,22 @@ describe.sequential("context-report command", () => {
       taskId: active.id,
       maxCharacters: 24_000,
       entries: [
-        { path: "docs/a.md", reason: "private-a", priority: 0, pinned: false, states: [], contentHash: sha256("before-a\n") },
-        { path: "docs/b.md", reason: "private-b", priority: 0, pinned: false, states: [], contentHash: sha256("before-b\n") },
+        {
+          path: "docs/a.md",
+          reason: "private-a",
+          priority: 0,
+          pinned: false,
+          states: [],
+          contentHash: sha256("before-a\n"),
+        },
+        {
+          path: "docs/b.md",
+          reason: "private-b",
+          priority: 0,
+          pinned: false,
+          states: [],
+          contentHash: sha256("before-b\n"),
+        },
       ],
       omitted: [],
     });
@@ -129,9 +177,24 @@ describe.sequential("context-report command", () => {
 
     await expect(runCli(["node", "harnix", "context-report", "--platform", "kiro", "--limit", "1"])).resolves.toBe(0);
 
-    const result = JSON.parse(output(stdout.mock.calls)) as { activeTask: { drift: { state: string; changeCount: number; returnedChanges: number; changesTruncated: boolean }; summary: { selected: number; returnedSelected: number; selectedTruncated: boolean; detailsTruncated: boolean }; selected: unknown[] } };
-    expect(result.activeTask.drift).toMatchObject({ state: "stale", changeCount: 2, returnedChanges: 1, changesTruncated: true });
-    expect(result.activeTask.summary).toMatchObject({ returnedSelected: 1, selectedTruncated: true, detailsTruncated: true });
+    const result = JSON.parse(output(stdout.mock.calls)) as {
+      activeTask: {
+        drift: { state: string; changeCount: number; returnedChanges: number; changesTruncated: boolean };
+        summary: { selected: number; returnedSelected: number; selectedTruncated: boolean; detailsTruncated: boolean };
+        selected: unknown[];
+      };
+    };
+    expect(result.activeTask.drift).toMatchObject({
+      state: "stale",
+      changeCount: 2,
+      returnedChanges: 1,
+      changesTruncated: true,
+    });
+    expect(result.activeTask.summary).toMatchObject({
+      returnedSelected: 1,
+      selectedTruncated: true,
+      detailsTruncated: true,
+    });
     expect(result.activeTask.summary.selected).toBeGreaterThan(1);
     expect(result.activeTask.selected).toHaveLength(1);
     await expect(snapshotTree(root)).resolves.toEqual(before);
@@ -178,7 +241,16 @@ function task(id: string, relevantPaths: string[]): TaskRecordV2 {
     acceptanceCriteria: [{ id: "criterion", text: "PRIVATE_CRITERION_CANARY", status: "pending", evidenceIds: [] }],
     relevantPaths,
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "PRIVATE_COMMAND_CANARY", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract"] }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "PRIVATE_COMMAND_CANARY",
+        scope: "focused",
+        required: true,
+        criterionIds: ["criterion"],
+        inputs: ["@task-contract"],
+      },
+    ],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -191,14 +263,21 @@ function output(calls: readonly (readonly unknown[])[]): string {
 
 async function snapshotTree(root: string): Promise<Array<{ path: string; sha256: string }>> {
   const files = await walk(root);
-  return Promise.all(files.map(async (path) => ({ path: relative(root, path).replaceAll("\\", "/"), sha256: createHash("sha256").update(await readFile(path)).digest("hex") })));
+  return Promise.all(
+    files.map(async (path) => ({
+      path: relative(root, path).replaceAll("\\", "/"),
+      sha256: createHash("sha256")
+        .update(await readFile(path))
+        .digest("hex"),
+    })),
+  );
 }
 
 async function walk(root: string): Promise<string[]> {
   const paths: string[] = [];
   for (const entry of await readdir(root, { withFileTypes: true })) {
     const path = join(root, entry.name);
-    if (entry.isDirectory()) paths.push(...await walk(path));
+    if (entry.isDirectory()) paths.push(...(await walk(path)));
     else if (entry.isFile()) paths.push(path);
   }
   return paths.sort();

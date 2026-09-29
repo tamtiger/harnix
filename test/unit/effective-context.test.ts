@@ -21,7 +21,14 @@ describe("effective context", () => {
     config.runtime.fullContext = true;
     const task = activeTask(["docs/a.md"]);
 
-    const result = await buildEffectiveContext({ projectRoot: root, harnixRoot, config, task, platform: "codex", forceBounded: true });
+    const result = await buildEffectiveContext({
+      projectRoot: root,
+      harnixRoot,
+      config,
+      task,
+      platform: "codex",
+      forceBounded: true,
+    });
 
     expect(result.budget).toEqual({ maxCharacters: 2_500, maxEntries: 64 });
     expect(result.candidates).toBe(2);
@@ -48,7 +55,16 @@ function activeTask(relevantPaths: string[]): TaskRecordV2 {
     acceptanceCriteria: [{ id: "criterion", text: "private", status: "pending", evidenceIds: [] }],
     relevantPaths,
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "private", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract"] }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "private",
+        scope: "focused",
+        required: true,
+        criterionIds: ["criterion"],
+        inputs: ["@task-contract"],
+      },
+    ],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,

@@ -41,7 +41,9 @@ describe.sequential("resume command", () => {
     await expect(runCli(["node", "harnix", "resume", candidate.id])).resolves.toBe(0);
     expect(JSON.parse(output(stdout.mock.calls))).toEqual(result(candidate, false, "resumed"));
     await expect(readFile(join(harnixRoot, "tasks", ".active"), "utf8")).resolves.toBe(`${candidate.id}\n`);
-    await expect(readFile(join(harnixRoot, "tasks", candidate.id, "task.json"), "utf8")).resolves.toContain("PRIVATE_TITLE_CANARY");
+    await expect(readFile(join(harnixRoot, "tasks", candidate.id, "task.json"), "utf8")).resolves.toContain(
+      "PRIVATE_TITLE_CANARY",
+    );
 
     const afterResume = await snapshotTree(root);
     stdout.mockClear();
@@ -67,8 +69,14 @@ describe.sequential("resume command", () => {
     await expect(runCli(["node", "harnix", "resume", candidate.id])).resolves.toBe(2);
 
     const raw = output(stdout.mock.calls);
-    expect(JSON.parse(raw)).toMatchObject({ generator: "harnix", schemaVersion: 1, ok: false, error: { exitCode: 2, message: "Resume cannot replace another active task." } });
-    for (const canary of ["PRIVATE_TITLE_CANARY", "PRIVATE_GOAL_CANARY", "PRIVATE_COMMAND_CANARY", root]) expect(raw).not.toContain(canary);
+    expect(JSON.parse(raw)).toMatchObject({
+      generator: "harnix",
+      schemaVersion: 1,
+      ok: false,
+      error: { exitCode: 2, message: "Resume cannot replace another active task." },
+    });
+    for (const canary of ["PRIVATE_TITLE_CANARY", "PRIVATE_GOAL_CANARY", "PRIVATE_COMMAND_CANARY", root])
+      expect(raw).not.toContain(canary);
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
 
@@ -81,7 +89,7 @@ describe.sequential("resume command", () => {
     const terminal = terminalTask("20260826-160005-terminal-task");
     await mkdir(join(harnixRoot, "tasks", malformedId), { recursive: true });
     await mkdir(join(harnixRoot, "tasks", oversizedId), { recursive: true });
-    await writeFile(join(harnixRoot, "tasks", malformedId, "task.json"), "{\"private\":\"PRIVATE_MALFORMED_CANARY\"}\n");
+    await writeFile(join(harnixRoot, "tasks", malformedId, "task.json"), '{"private":"PRIVATE_MALFORMED_CANARY"}\n');
     await writeFile(join(harnixRoot, "tasks", oversizedId, "task.json"), `{"padding":"${"x".repeat(1_048_576)}"}`);
     await saveTask(harnixRoot, terminal);
     process.chdir(root);
@@ -93,8 +101,14 @@ describe.sequential("resume command", () => {
       stdout.mockClear();
       await expect(runCli(["node", "harnix", "resume", id])).resolves.toBe(2);
       const raw = output(stdout.mock.calls);
-      expect(JSON.parse(raw)).toMatchObject({ generator: "harnix", schemaVersion: 1, ok: false, error: { exitCode: 2 } });
-      for (const canary of ["PRIVATE_MALFORMED_CANARY", "PRIVATE_TITLE_CANARY", root]) expect(raw).not.toContain(canary);
+      expect(JSON.parse(raw)).toMatchObject({
+        generator: "harnix",
+        schemaVersion: 1,
+        ok: false,
+        error: { exitCode: 2 },
+      });
+      for (const canary of ["PRIVATE_MALFORMED_CANARY", "PRIVATE_TITLE_CANARY", root])
+        expect(raw).not.toContain(canary);
       await expect(snapshotTree(root)).resolves.toEqual(before);
     }
 
@@ -105,7 +119,10 @@ describe.sequential("resume command", () => {
     stdout.mockClear();
     await expect(runCli(["node", "harnix", "resume", valid.id])).resolves.toBe(2);
     const raw = output(stdout.mock.calls);
-    expect(JSON.parse(raw)).toMatchObject({ ok: false, error: { message: "Active task state is unavailable; run harnix doctor." } });
+    expect(JSON.parse(raw)).toMatchObject({
+      ok: false,
+      error: { message: "Active task state is unavailable; run harnix doctor." },
+    });
     expect(raw).not.toContain("PRIVATE_POINTER_CANARY");
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
@@ -138,7 +155,16 @@ function task(id: string, status: "planning" | "ready" | "in_progress"): TaskRec
     acceptanceCriteria: [{ id: "criterion", text: "PRIVATE_CRITERION_CANARY", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "PRIVATE_COMMAND_CANARY", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract"] }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "PRIVATE_COMMAND_CANARY",
+        scope: "focused",
+        required: true,
+        criterionIds: ["criterion"],
+        inputs: ["@task-contract"],
+      },
+    ],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -162,17 +188,21 @@ function output(calls: readonly (readonly unknown[])[]): string {
 
 async function snapshotTree(root: string): Promise<Array<{ path: string; sha256: string }>> {
   const files = await walk(root);
-  return Promise.all(files.map(async (path) => ({
-    path: relative(root, path).replaceAll("\\", "/"),
-    sha256: createHash("sha256").update(await readFile(path)).digest("hex"),
-  })));
+  return Promise.all(
+    files.map(async (path) => ({
+      path: relative(root, path).replaceAll("\\", "/"),
+      sha256: createHash("sha256")
+        .update(await readFile(path))
+        .digest("hex"),
+    })),
+  );
 }
 
 async function walk(root: string): Promise<string[]> {
   const paths: string[] = [];
   for (const entry of await readdir(root, { withFileTypes: true })) {
     const path = join(root, entry.name);
-    if (entry.isDirectory()) paths.push(...await walk(path));
+    if (entry.isDirectory()) paths.push(...(await walk(path)));
     else if (entry.isFile()) paths.push(path);
   }
   return paths.sort();

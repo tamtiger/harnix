@@ -95,9 +95,7 @@ interface ObservedLockToken {
 }
 
 type ExistingLockInspection =
-  | { action: "wait" }
-  | { action: "invalid"; reason: string }
-  | { action: "reclaim"; tokens: ObservedLockToken[] };
+  { action: "wait" } | { action: "invalid"; reason: string } | { action: "reclaim"; tokens: ObservedLockToken[] };
 
 const lockRecordNamePattern = /^owner-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.json$/u;
 
@@ -142,10 +140,13 @@ export async function acquireHarnixFileLock(lockPath: string, options: FileLockO
   const retryDelayMs = options.retryDelayMs ?? 50;
   const staleAfterMs = options.staleAfterMs ?? 300_000;
   const processIdentity = options.processIdentity ?? defaultProcessIdentity;
-  const ownerInspector = options.ownerInspector
-    ?? ((existingRecord: HarnixFileLockRecord) => inspectOwner(existingRecord, options.processIdentityInspector ?? defaultProcessIdentityInspector));
+  const ownerInspector =
+    options.ownerInspector ??
+    ((existingRecord: HarnixFileLockRecord) =>
+      inspectOwner(existingRecord, options.processIdentityInspector ?? defaultProcessIdentityInspector));
   const operationId = options.operationId ?? randomUUID();
-  if (operationId.trim().length === 0 || operationId.includes("\0")) throw new FileLockError("operationId must be non-empty and safe.");
+  if (operationId.trim().length === 0 || operationId.includes("\0"))
+    throw new FileLockError("operationId must be non-empty and safe.");
 
   const identity = processIdentity();
   if (!isValidProcessIdentity(identity)) {
@@ -185,7 +186,9 @@ export async function acquireHarnixFileLock(lockPath: string, options: FileLockO
             path,
             recordPath,
             record,
-            release: async () => { await removeOwnedToken(filesystem, path, { name: recordName, path: recordPath, source: serialized }); },
+            release: async () => {
+              await removeOwnedToken(filesystem, path, { name: recordName, path: recordPath, source: serialized });
+            },
           };
         }
       } catch (error: unknown) {
@@ -209,14 +212,22 @@ export async function acquireHarnixFileLock(lockPath: string, options: FileLockO
 }
 
 export function parseHarnixFileLockRecord(value: unknown): HarnixFileLockRecord {
-  if (!isRecord(value)
-    || value.generator !== "harnix"
-    || value.schemaVersion !== 1
-    || typeof value.generatorVersion !== "string" || value.generatorVersion.length === 0
-    || typeof value.ownerPid !== "number" || !Number.isInteger(value.ownerPid) || value.ownerPid <= 0
-    || typeof value.processStartedAt !== "string" || !isIsoDate(value.processStartedAt)
-    || typeof value.acquiredAt !== "string" || !isIsoDate(value.acquiredAt)
-    || typeof value.operationId !== "string" || value.operationId.length === 0) {
+  if (
+    !isRecord(value) ||
+    value.generator !== "harnix" ||
+    value.schemaVersion !== 1 ||
+    typeof value.generatorVersion !== "string" ||
+    value.generatorVersion.length === 0 ||
+    typeof value.ownerPid !== "number" ||
+    !Number.isInteger(value.ownerPid) ||
+    value.ownerPid <= 0 ||
+    typeof value.processStartedAt !== "string" ||
+    !isIsoDate(value.processStartedAt) ||
+    typeof value.acquiredAt !== "string" ||
+    !isIsoDate(value.acquiredAt) ||
+    typeof value.operationId !== "string" ||
+    value.operationId.length === 0
+  ) {
     throw new InvalidHarnixFileLockError("Harnix lock record is invalid.");
   }
   return value as unknown as HarnixFileLockRecord;
@@ -262,7 +273,10 @@ async function inspectExistingLock(
     throw error;
   }
   if (!directoryMetadata.isDirectory() || directoryMetadata.isSymbolicLink()) {
-    return { action: "invalid", reason: "The existing Harnix lock uses an unsupported or unsafe non-directory format." };
+    return {
+      action: "invalid",
+      reason: "The existing Harnix lock uses an unsupported or unsafe non-directory format.",
+    };
   }
 
   let entries: string[];
@@ -305,7 +319,7 @@ async function inspectExistingLock(
       tokens.push({ name, path: tokenPath, source });
       continue;
     }
-    if (await ownerInspector(existingRecord) !== "dead") return { action: "wait" };
+    if ((await ownerInspector(existingRecord)) !== "dead") return { action: "wait" };
     tokens.push({ name, path: tokenPath, source });
   }
   return { action: "reclaim", tokens };
@@ -319,9 +333,11 @@ async function isSoleOwnedToken(
 ): Promise<boolean> {
   try {
     const entries = await filesystem.readdir(path);
-    return entries.length === 1
-      && entries[0] === recordName
-      && await filesystem.readFile(join(path, recordName), "utf8") === serializedRecord;
+    return (
+      entries.length === 1 &&
+      entries[0] === recordName &&
+      (await filesystem.readFile(join(path, recordName), "utf8")) === serializedRecord
+    );
   } catch (error: unknown) {
     if (isMissing(error) || isNotDirectory(error)) return false;
     throw error;
@@ -335,7 +351,7 @@ async function removeObservedLock(
 ): Promise<boolean> {
   for (const token of tokens) {
     try {
-      if (await filesystem.readFile(token.path, "utf8") !== token.source) return false;
+      if ((await filesystem.readFile(token.path, "utf8")) !== token.source) return false;
       await filesystem.rm(token.path, { force: true });
     } catch (error: unknown) {
       if (!isMissing(error) && !isNotDirectory(error)) throw error;
@@ -386,7 +402,10 @@ async function defaultProcessIdentityInspector(pid: number): Promise<FileLockPro
   return pid === currentProcessIdentity.pid ? currentProcessIdentity : undefined;
 }
 
-async function inspectOwner(record: HarnixFileLockRecord, processIdentityInspector: FileLockProcessIdentityInspector): Promise<FileLockOwnerState> {
+async function inspectOwner(
+  record: HarnixFileLockRecord,
+  processIdentityInspector: FileLockProcessIdentityInspector,
+): Promise<FileLockOwnerState> {
   try {
     process.kill(record.ownerPid, 0);
   } catch (error: unknown) {

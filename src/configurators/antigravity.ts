@@ -8,11 +8,13 @@ export const ANTIGRAVITY_GLOBAL_PLUGIN_MANIFEST = { name: "harnix" } as const;
 
 export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK = {
   "harnix-context": {
-    PreInvocation: [{
-      type: "command",
-      command: ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND,
-      timeout: 5,
-    }],
+    PreInvocation: [
+      {
+        type: "command",
+        command: ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND,
+        timeout: 5,
+      },
+    ],
   },
 } as const;
 

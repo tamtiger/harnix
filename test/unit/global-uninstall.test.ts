@@ -8,7 +8,9 @@ import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
 
 const temporaryUserHome = useTemporaryUserHomes("harnix-global-uninstall-");
 
-async function configuredRoots(platforms: readonly ("kiro" | "antigravity" | "codex")[]): Promise<{ home: string; roots: UserPlatformRoots }> {
+async function configuredRoots(
+  platforms: readonly ("kiro" | "antigravity" | "codex")[],
+): Promise<{ home: string; roots: UserPlatformRoots }> {
   const home = await temporaryUserHome();
   const roots = await resolveUserPlatformRoots({ homeResolver: async () => home, environment: {} });
   await setupPlatforms({
@@ -35,10 +37,24 @@ describe("global integration uninstall", () => {
 
     expect(result.scope).toBe("user");
     expect(result.platforms.map((platform) => platform.platform)).toEqual(["codex", "kiro"]);
-    expect(result.platforms.every((platform) => platform.confirmationRequired && platform.removed.length === 0 && platform.preserved.length === 0)).toBe(true);
-    expect(result.platforms.find((platform) => platform.platform === "kiro")?.targets).toContain("~/.kiro/skills/harnix-check/SKILL.md");
-    expect(result.platforms.find((platform) => platform.platform === "codex")?.targets).toEqual(expect.arrayContaining(["~/.agents/skills/harnix-check/SKILL.md", "~/.codex/AGENTS.md#codex-global-agents", "~/.codex/config.toml#codex-global-context-hook"]));
-    expect(result.platforms.flatMap((platform) => platform.targets).some((target) => target.includes(".gemini"))).toBe(false);
+    expect(
+      result.platforms.every(
+        (platform) => platform.confirmationRequired && platform.removed.length === 0 && platform.preserved.length === 0,
+      ),
+    ).toBe(true);
+    expect(result.platforms.find((platform) => platform.platform === "kiro")?.targets).toContain(
+      "~/.kiro/skills/harnix-check/SKILL.md",
+    );
+    expect(result.platforms.find((platform) => platform.platform === "codex")?.targets).toEqual(
+      expect.arrayContaining([
+        "~/.agents/skills/harnix-check/SKILL.md",
+        "~/.codex/AGENTS.md#codex-global-agents",
+        "~/.codex/config.toml#codex-global-context-hook",
+      ]),
+    );
+    expect(result.platforms.flatMap((platform) => platform.targets).some((target) => target.includes(".gemini"))).toBe(
+      false,
+    );
     await expect(access(kiroSkill)).resolves.toBeUndefined();
     await expect(access(antigravityPlugin)).resolves.toBeUndefined();
     await expect(access(codexAgents)).resolves.toBeUndefined();
@@ -55,11 +71,13 @@ describe("global integration uninstall", () => {
       platforms: ["kiro"],
     });
 
-    expect(result.platforms).toEqual([expect.objectContaining({
-      confirmationRequired: true,
-      platform: "kiro",
-      targets: expect.arrayContaining(["~/.kiro/hooks/harnix-context.json"]),
-    })]);
+    expect(result.platforms).toEqual([
+      expect.objectContaining({
+        confirmationRequired: true,
+        platform: "kiro",
+        targets: expect.arrayContaining(["~/.kiro/hooks/harnix-context.json"]),
+      }),
+    ]);
   });
 
   it("removes unchanged selected Kiro and both Antigravity roots without deleting platform roots or unrelated files", async () => {
@@ -75,7 +93,9 @@ describe("global integration uninstall", () => {
     const result = await uninstallGlobalIntegrations({ platforms: ["antigravity", "kiro"], roots, yes: true });
 
     expect(result.platforms.map((platform) => platform.platform)).toEqual(["antigravity", "kiro"]);
-    expect(result.platforms.every((platform) => platform.confirmationRequired === false && platform.removed.length > 0)).toBe(true);
+    expect(
+      result.platforms.every((platform) => platform.confirmationRequired === false && platform.removed.length > 0),
+    ).toBe(true);
     expect(result.platforms.flatMap((platform) => platform.preserved)).toEqual([]);
     await expect(readFile(kiroUnrelated, "utf8")).resolves.toBe("user setting\n");
     await expect(readFile(desktopUnrelated, "utf8")).resolves.toBe("desktop user note\n");
@@ -94,7 +114,9 @@ describe("global integration uninstall", () => {
     await expect(access(roots.antigravityCli.path)).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(roots.codex.config.path, "harnix"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(roots.codex.skills.path, "harnix"))).rejects.toMatchObject({ code: "ENOENT" });
-    await expect(access(join(roots.codex.skills.path, "skills", "harnix-check"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(roots.codex.skills.path, "skills", "harnix-check"))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
     await expect(access(roots.codex.config.path)).resolves.toBeUndefined();
     await expect(access(roots.codex.skills.path)).resolves.toBeUndefined();
   });
@@ -105,12 +127,20 @@ describe("global integration uninstall", () => {
     const configPath = join(roots.codex.config.path, "config.toml");
     await writeFile(agentsPath, (await readFile(agentsPath, "utf8")).replace("## Harnix", "## User-modified Harnix"));
     const config = await readFile(configPath, "utf8");
-    await writeFile(configPath, `${config.replace("# harnix:codex-hook:begin", "[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ntype = \"command\"\ncommand = \"user hook\"\ntimeout = 1\n\n# harnix:codex-hook:begin").replace("timeout = 5", "timeout = 99")}`);
+    await writeFile(
+      configPath,
+      `${config.replace("# harnix:codex-hook:begin", '[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ntype = "command"\ncommand = "user hook"\ntimeout = 1\n\n# harnix:codex-hook:begin').replace("timeout = 5", "timeout = 99")}`,
+    );
 
     const result = await uninstallGlobalIntegrations({ platforms: ["codex"], roots, yes: true });
     const codex = result.platforms[0]!;
 
-    expect(codex.preserved).toEqual(expect.arrayContaining(["~/.codex/AGENTS.md#codex-global-agents", "~/.codex/config.toml#codex-global-context-hook"]));
+    expect(codex.preserved).toEqual(
+      expect.arrayContaining([
+        "~/.codex/AGENTS.md#codex-global-agents",
+        "~/.codex/config.toml#codex-global-context-hook",
+      ]),
+    );
     expect(codex.removed).toEqual(expect.arrayContaining(["~/.agents/skills/harnix-check/SKILL.md"]));
     await expect(readFile(agentsPath, "utf8")).resolves.toContain("User-modified Harnix");
     await expect(access(join(roots.codex.config.path, "harnix", "managed.json"))).resolves.toBeUndefined();
@@ -161,7 +191,11 @@ describe("global integration uninstall", () => {
       yes: true,
       lockAcquirer: async (path) => {
         acquired.push(path);
-        return { release: async () => { released.push(path); } };
+        return {
+          release: async () => {
+            released.push(path);
+          },
+        };
       },
     });
 

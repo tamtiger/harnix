@@ -4,7 +4,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { initializeProject } from "../../src/commands/init.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
+import {
+  HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
+  HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
+} from "../../src/templates/harnix/activation.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const fixture = useTemporaryRepositories("harnix-init-");
@@ -20,10 +23,12 @@ describe("initializeProject database detection", () => {
     const config = await readFile(join(root, ".harnix", "config.yaml"), "utf8");
     expect(config).toContain("- mongodb");
     expect(config).toContain("- postgresql");
-    expect(result.detection.matches).toEqual(expect.arrayContaining([
-      expect.objectContaining({ facet: "technology", id: "postgresql", kind: "database" }),
-      expect.objectContaining({ facet: "technology", id: "mongodb", kind: "database" }),
-    ]));
+    expect(result.detection.matches).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ facet: "technology", id: "postgresql", kind: "database" }),
+        expect.objectContaining({ facet: "technology", id: "mongodb", kind: "database" }),
+      ]),
+    );
   });
 });
 
@@ -34,7 +39,8 @@ describe("initializeProject", () => {
     await writeFile(join(root, "keep.txt"), "user content");
     await initializeProject({ developer: "tam", root, yes: true });
     const config = await readFile(join(root, ".harnix", "config.yaml"), "utf8");
-    expect(config).toContain("developer: tam"); expect(config).toContain("- vue");
+    expect(config).toContain("developer: tam");
+    expect(config).toContain("- vue");
     await expect(access(join(root, ".harnix", "spec", "guides"))).resolves.toBeUndefined();
     await expect(access(join(root, ".harnix", "tasks"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(root, ".harnix", "workspace", "tam"))).rejects.toMatchObject({ code: "ENOENT" });
@@ -55,9 +61,13 @@ describe("initializeProject", () => {
     const lastTargetGuardIndex = agentInstructions.indexOf(HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.at(-1)!);
     expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("## Project profile"));
     expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("Read .harnix/workflow.md"));
-    expect(agentInstructions).toContain("Use this profile only when this AGENTS root is the selected Harnix root resolved by the target-authority guard");
+    expect(agentInstructions).toContain(
+      "Use this profile only when this AGENTS root is the selected Harnix root resolved by the target-authority guard",
+    );
     expect(agentInstructions).not.toContain("this AGENTS root is the selected target");
-    expect(agentInstructions).toContain("Read .harnix/workflow.md and .harnix/config.yaml from the selected Harnix root");
+    expect(agentInstructions).toContain(
+      "Read .harnix/workflow.md and .harnix/config.yaml from the selected Harnix root",
+    );
     expect(agentInstructions).toContain("## Project profile");
     expect(agentInstructions).toContain("- Languages: not specified.");
     expect(agentInstructions).toContain("- Technologies: Vue.");
@@ -71,7 +81,9 @@ describe("initializeProject", () => {
     expect(agentInstructions).toContain("harnix-check");
     expect(agentInstructions).toContain("harnix-finish-work");
     expect(agentInstructions).toContain("harnix-continue");
-    expect(agentInstructions).toContain("Canonical lifecycle, schema, transitions, and rules live in `.harnix/workflow.md`");
+    expect(agentInstructions).toContain(
+      "Canonical lifecycle, schema, transitions, and rules live in `.harnix/workflow.md`",
+    );
     expect(agentInstructions).toContain("never edit `task.json` or `.active` directly");
     await expect(readFile(join(root, "keep.txt"), "utf8")).resolves.toBe("user content");
     await writeFile(join(root, "added-after-init.ts"), "export const stale = true;\n");
@@ -80,7 +92,8 @@ describe("initializeProject", () => {
     await expect(readFile(repoMapPath, "utf8")).resolves.not.toContain("added-after-init.ts");
   });
   it("should_initialize_harnix_without_touching_existing_trellis_data", async () => {
-    const root = await fixture(); await writeFile(join(root, ".trellis"), "legacy");
+    const root = await fixture();
+    await writeFile(join(root, ".trellis"), "legacy");
     const result = await initializeProject({ developer: "tam", root, yes: true });
     expect(result).toEqual({
       scope: "project",
@@ -106,27 +119,44 @@ describe("initializeProject", () => {
     await expect(readFile(join(root, ".trellis"), "utf8")).resolves.toBe("legacy");
   });
   it("preserves existing config, supports dry-run, and initializes quickly", async () => {
-    const root = await fixture(); await initializeProject({ developer: "tam", root, yes: true });
-    const configPath = join(root, ".harnix", "config.yaml"); await writeFile(configPath, `${await readFile(configPath, "utf8")}futureCompatibleNote: keep\n`);
-    await initializeProject({ developer: "other", root, yes: true }); await expect(readFile(configPath, "utf8")).resolves.toContain("futureCompatibleNote: keep");
-    const dryRunRoot = await fixture(); await expect(initializeProject({ developer: "tam", dryRun: true, root: dryRunRoot, yes: true })).resolves.toMatchObject({
+    const root = await fixture();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const configPath = join(root, ".harnix", "config.yaml");
+    await writeFile(configPath, `${await readFile(configPath, "utf8")}futureCompatibleNote: keep\n`);
+    await initializeProject({ developer: "other", root, yes: true });
+    await expect(readFile(configPath, "utf8")).resolves.toContain("futureCompatibleNote: keep");
+    const dryRunRoot = await fixture();
+    await expect(
+      initializeProject({ developer: "tam", dryRun: true, root: dryRunRoot, yes: true }),
+    ).resolves.toMatchObject({
       scope: "project",
       status: "planned",
       developer: "tam",
-      created: expect.arrayContaining([".harnix/config.yaml", ".harnix/cache/repo-map-v1.json", ".harnix/workflow.md", "AGENTS.md"]),
+      created: expect.arrayContaining([
+        ".harnix/config.yaml",
+        ".harnix/cache/repo-map-v1.json",
+        ".harnix/workflow.md",
+        "AGENTS.md",
+      ]),
       unchanged: [],
       preserved: [],
     });
     await expect(access(join(dryRunRoot, ".harnix"))).rejects.toBeDefined();
-    const performanceRoot = await fixture(); const startedAt = performance.now(); await initializeProject({ developer: "tam", root: performanceRoot, yes: true }); expect(performance.now() - startedAt).toBeLessThan(5000);
+    const performanceRoot = await fixture();
+    const startedAt = performance.now();
+    await initializeProject({ developer: "tam", root: performanceRoot, yes: true });
+    expect(performance.now() - startedAt).toBeLessThan(5000);
   });
   it("should_seed_relevant_rules_when_initializing_detected_project", async () => {
-    const root = await fixture(); await writeFile(join(root, "package.json"), JSON.stringify({ dependencies: { vue: "latest" } }));
+    const root = await fixture();
+    await writeFile(join(root, "package.json"), JSON.stringify({ dependencies: { vue: "latest" } }));
     await initializeProject({ developer: "tam", root, yes: true });
     const common = await readFile(join(root, ".harnix", "spec", "guides", "common.md"), "utf8");
     expect(common).toContain("broader gates");
     expect(common).toContain("repository instructions");
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "vue.md"), "utf8")).resolves.toContain("Vue engineering");
+    await expect(
+      readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "vue.md"), "utf8"),
+    ).resolves.toContain("Vue engineering");
   });
   it("should_detect_php_composer_projects_and_seed_php_guidance", async () => {
     const root = await fixture();
@@ -135,11 +165,14 @@ describe("initializeProject", () => {
     await initializeProject({ developer: "tam", root, yes: true });
 
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("- php");
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "languages", "php.md"), "utf8")).resolves.toContain("PHP engineering");
+    await expect(readFile(join(root, ".harnix", "spec", "guides", "languages", "php.md"), "utf8")).resolves.toContain(
+      "PHP engineering",
+    );
     await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toContain("- Languages: PHP.");
   });
   it("should_seed_actionable_dotnet_abp_guidance_instead_of_a_placeholder", async () => {
-    const root = await fixture(); await writeFile(join(root, "sample.csproj"), '<Project><PackageReference Include="Volo.Abp.Core" /></Project>');
+    const root = await fixture();
+    await writeFile(join(root, "sample.csproj"), '<Project><PackageReference Include="Volo.Abp.Core" /></Project>');
 
     await initializeProject({ developer: "tam", root, yes: true });
 
@@ -149,7 +182,8 @@ describe("initializeProject", () => {
     expect(guide).toContain("tenant isolation");
   });
   it("should_preserve_existing_agent_instructions_when_initializing", async () => {
-    const root = await fixture(); await writeFile(join(root, "AGENTS.md"), "# User instructions\n");
+    const root = await fixture();
+    await writeFile(join(root, "AGENTS.md"), "# User instructions\n");
 
     await initializeProject({ developer: "tam", root, yes: true });
 

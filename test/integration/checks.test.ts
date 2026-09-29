@@ -33,12 +33,34 @@ describe.sequential("status --explain (checks projection)", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "status", "--explain", "--limit", "50"], { statusClock: () => now })).resolves.toBe(0);
+    await expect(
+      runCli(["node", "harnix", "status", "--explain", "--limit", "50"], { statusClock: () => now }),
+    ).resolves.toBe(0);
 
     const raw = output(stdout.mock.calls);
-    const result = (JSON.parse(raw) as { explain: { checks: { activeTask: { summary: unknown; checks: Array<{ id: string; state: string; reasonCodes: string[]; changes: unknown[] }> } } } }).explain.checks;
+    const result = (
+      JSON.parse(raw) as {
+        explain: {
+          checks: {
+            activeTask: {
+              summary: unknown;
+              checks: Array<{ id: string; state: string; reasonCodes: string[]; changes: unknown[] }>;
+            };
+          };
+        };
+      }
+    ).explain.checks;
     expect(result).toMatchObject({ generator: "harnix", schemaVersion: 1, scope: "project", filter: { limit: 50 } });
-    expect(result.activeTask.summary).toEqual({ passed: 0, failed: 1, stale: 2, pending: 2, total: 5, returned: 5, resultTruncated: false, detailsTruncated: false });
+    expect(result.activeTask.summary).toEqual({
+      passed: 0,
+      failed: 1,
+      stale: 2,
+      pending: 2,
+      total: 5,
+      returned: 5,
+      resultTruncated: false,
+      detailsTruncated: false,
+    });
     expect(result.activeTask.checks.map(({ id, state, reasonCodes }) => ({ id, state, reasonCodes }))).toEqual([
       { id: "a-failed", state: "failed", reasonCodes: ["latest-failed"] },
       { id: "b-passed", state: "stale", reasonCodes: ["legacy-schema"] },
@@ -47,12 +69,24 @@ describe.sequential("status --explain (checks projection)", () => {
       { id: "z-pending", state: "pending", reasonCodes: ["no-evidence"] },
     ]);
     expect(result.activeTask.checks.every((check) => check.changes.length === 0)).toBe(true);
-    for (const canary of ["PRIVATE_TITLE_CANARY", "PRIVATE_GOAL_CANARY", "PRIVATE_CHECK_CANARY", "PRIVATE_COMMAND_CANARY", "PRIVATE_EVIDENCE_CANARY", root]) expect(raw).not.toContain(canary);
+    for (const canary of [
+      "PRIVATE_TITLE_CANARY",
+      "PRIVATE_GOAL_CANARY",
+      "PRIVATE_CHECK_CANARY",
+      "PRIVATE_COMMAND_CANARY",
+      "PRIVATE_EVIDENCE_CANARY",
+      root,
+    ])
+      expect(raw).not.toContain(canary);
     await expect(snapshotTree(root)).resolves.toEqual(before);
 
     stdout.mockClear();
-    await expect(runCli(["node", "harnix", "status", "--explain", "--limit", "2"], { statusClock: () => now })).resolves.toBe(0);
-    expect((JSON.parse(output(stdout.mock.calls)) as { explain: { checks: unknown } }).explain.checks).toMatchObject({ activeTask: { summary: { total: 5, returned: 2, resultTruncated: true, detailsTruncated: true } } });
+    await expect(
+      runCli(["node", "harnix", "status", "--explain", "--limit", "2"], { statusClock: () => now }),
+    ).resolves.toBe(0);
+    expect((JSON.parse(output(stdout.mock.calls)) as { explain: { checks: unknown } }).explain.checks).toMatchObject({
+      activeTask: { summary: { total: 5, returned: 2, resultTruncated: true, detailsTruncated: true } },
+    });
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
 
@@ -65,7 +99,18 @@ describe.sequential("status --explain (checks projection)", () => {
     const snapshot = await computeInputDigest(root, base, "gate");
     const task: TaskRecordV3 = {
       ...base,
-      evidence: [{ id: "e-pass", checkId: "gate", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", exitCode: 0, summary: "PRIVATE_EVIDENCE_CANARY", artifactPaths: [], inputDigest: snapshot.inputDigest }],
+      evidence: [
+        {
+          id: "e-pass",
+          checkId: "gate",
+          recordedAt: "2026-08-26T00:59:00.000Z",
+          result: "pass",
+          exitCode: 0,
+          summary: "PRIVATE_EVIDENCE_CANARY",
+          artifactPaths: [],
+          inputDigest: snapshot.inputDigest,
+        },
+      ],
     };
     await saveTask(harnixRoot, task);
     await setActiveTask(harnixRoot, task.id);
@@ -75,22 +120,27 @@ describe.sequential("status --explain (checks projection)", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
-    await expect(runCli(["node", "harnix", "status", "--explain"], { statusClock: () => Date.parse("2026-08-26T01:00:00.000Z") })).resolves.toBe(0);
+    await expect(
+      runCli(["node", "harnix", "status", "--explain"], { statusClock: () => Date.parse("2026-08-26T01:00:00.000Z") }),
+    ).resolves.toBe(0);
 
     const raw = output(stdout.mock.calls);
     expect((JSON.parse(raw) as { explain: { checks: unknown } }).explain.checks).toMatchObject({
       activeTask: {
         summary: { passed: 0, failed: 0, stale: 1, pending: 0, total: 1, returned: 1 },
-        checks: [{
-          id: "gate",
-          state: "stale",
-          reasonCodes: ["digest-mismatch"],
-          changeSummary: { changed: 0, missing: 0, returned: 0, truncated: false },
-          changes: [],
-        }],
+        checks: [
+          {
+            id: "gate",
+            state: "stale",
+            reasonCodes: ["digest-mismatch"],
+            changeSummary: { changed: 0, missing: 0, returned: 0, truncated: false },
+            changes: [],
+          },
+        ],
       },
     });
-    for (const canary of ["PRIVATE_EVIDENCE_CANARY", "PRIVATE_COMMAND_CANARY", snapshot.inputDigest, root]) expect(raw).not.toContain(canary);
+    for (const canary of ["PRIVATE_EVIDENCE_CANARY", "PRIVATE_COMMAND_CANARY", snapshot.inputDigest, root])
+      expect(raw).not.toContain(canary);
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
 
@@ -102,7 +152,13 @@ describe.sequential("status --explain (checks projection)", () => {
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     await expect(runCli(["node", "harnix", "status", "--explain"])).resolves.toBe(0);
-    expect((JSON.parse(output(stdout.mock.calls)) as { explain: { checks: unknown } }).explain.checks).toEqual({ generator: "harnix", schemaVersion: 1, scope: "project", filter: { limit: 20 }, activeTask: null });
+    expect((JSON.parse(output(stdout.mock.calls)) as { explain: { checks: unknown } }).explain.checks).toEqual({
+      generator: "harnix",
+      schemaVersion: 1,
+      scope: "project",
+      filter: { limit: 20 },
+      activeTask: null,
+    });
 
     for (const limit of ["0", "51", "1.5", "private"]) {
       stdout.mockClear();
@@ -139,7 +195,13 @@ describe.sequential("status --explain (checks projection)", () => {
 
 function v1Task(): TaskRecordV1 {
   const timestamp = "2026-08-25T00:00:00.000Z";
-  const checks = ["z-pending", "m-expired", "a-failed", "c-skipped", "b-passed"].map((id) => ({ id, description: "PRIVATE_CHECK_CANARY", command: "PRIVATE_COMMAND_CANARY", scope: "focused" as const, required: true }));
+  const checks = ["z-pending", "m-expired", "a-failed", "c-skipped", "b-passed"].map((id) => ({
+    id,
+    description: "PRIVATE_CHECK_CANARY",
+    command: "PRIVATE_COMMAND_CANARY",
+    scope: "focused" as const,
+    required: true,
+  }));
   return {
     generator: "harnix",
     schemaVersion: 1,
@@ -155,10 +217,42 @@ function v1Task(): TaskRecordV1 {
     relevantSpecs: [],
     validationPlan: checks,
     evidence: [
-      { id: "e-expired", checkId: "m-expired", recordedAt: "2026-08-25T22:00:00.000Z", result: "pass", exitCode: 0, summary: "PRIVATE_EVIDENCE_CANARY", artifactPaths: [] },
-      { id: "e-failed", checkId: "a-failed", recordedAt: "2026-08-26T00:59:00.000Z", result: "fail", exitCode: 1, summary: "PRIVATE_EVIDENCE_CANARY", artifactPaths: [] },
-      { id: "e-skipped", checkId: "c-skipped", recordedAt: "2026-08-26T00:59:00.000Z", result: "skipped", exitCode: 0, summary: "PRIVATE_EVIDENCE_CANARY", artifactPaths: [] },
-      { id: "e-passed", checkId: "b-passed", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", exitCode: 0, summary: "PRIVATE_EVIDENCE_CANARY", artifactPaths: [] },
+      {
+        id: "e-expired",
+        checkId: "m-expired",
+        recordedAt: "2026-08-25T22:00:00.000Z",
+        result: "pass",
+        exitCode: 0,
+        summary: "PRIVATE_EVIDENCE_CANARY",
+        artifactPaths: [],
+      },
+      {
+        id: "e-failed",
+        checkId: "a-failed",
+        recordedAt: "2026-08-26T00:59:00.000Z",
+        result: "fail",
+        exitCode: 1,
+        summary: "PRIVATE_EVIDENCE_CANARY",
+        artifactPaths: [],
+      },
+      {
+        id: "e-skipped",
+        checkId: "c-skipped",
+        recordedAt: "2026-08-26T00:59:00.000Z",
+        result: "skipped",
+        exitCode: 0,
+        summary: "PRIVATE_EVIDENCE_CANARY",
+        artifactPaths: [],
+      },
+      {
+        id: "e-passed",
+        checkId: "b-passed",
+        recordedAt: "2026-08-26T00:59:00.000Z",
+        result: "pass",
+        exitCode: 0,
+        summary: "PRIVATE_EVIDENCE_CANARY",
+        artifactPaths: [],
+      },
     ],
     createdAt: timestamp,
     updatedAt: "2026-08-26T00:59:00.000Z",
@@ -180,25 +274,44 @@ function v3Task(): TaskRecordV3 {
     acceptanceCriteria: [{ id: "criterion", text: "private", status: "pending", evidenceIds: [] }],
     relevantPaths: ["input.ts"],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "PRIVATE_CHECK_CANARY", command: "PRIVATE_COMMAND_CANARY", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["input.ts"] }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "PRIVATE_CHECK_CANARY",
+        command: "PRIVATE_COMMAND_CANARY",
+        scope: "focused",
+        required: true,
+        criterionIds: ["criterion"],
+        inputs: ["input.ts"],
+      },
+    ],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,
   };
 }
 
-function output(calls: readonly (readonly unknown[])[]): string { return calls.map((call) => String(call[0])).join(""); }
+function output(calls: readonly (readonly unknown[])[]): string {
+  return calls.map((call) => String(call[0])).join("");
+}
 
 async function snapshotTree(root: string): Promise<Array<{ path: string; sha256: string }>> {
   const files = await walk(root);
-  return Promise.all(files.map(async (path) => ({ path: relative(root, path).replaceAll("\\", "/"), sha256: createHash("sha256").update(await readFile(path)).digest("hex") })));
+  return Promise.all(
+    files.map(async (path) => ({
+      path: relative(root, path).replaceAll("\\", "/"),
+      sha256: createHash("sha256")
+        .update(await readFile(path))
+        .digest("hex"),
+    })),
+  );
 }
 
 async function walk(root: string): Promise<string[]> {
   const paths: string[] = [];
   for (const entry of await readdir(root, { withFileTypes: true })) {
     const path = join(root, entry.name);
-    if (entry.isDirectory()) paths.push(...await walk(path));
+    if (entry.isDirectory()) paths.push(...(await walk(path)));
     else if (entry.isFile()) paths.push(path);
   }
   return paths.sort();

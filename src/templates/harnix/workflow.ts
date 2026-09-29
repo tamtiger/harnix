@@ -1,6 +1,8 @@
 import { HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "./activation.js";
 
-const targetAuthorityInstructions = HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.map((instruction) => `- ${instruction}`).join("\n");
+const targetAuthorityInstructions = HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.map((instruction) => `- ${instruction}`).join(
+  "\n",
+);
 
 export const WORKFLOW_SOURCE_ID = "workflow";
 

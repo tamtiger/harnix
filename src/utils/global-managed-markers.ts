@@ -2,7 +2,8 @@ import type { MarkerSelector } from "./global-managed-files.js";
 
 export function markersOverlap(left: MarkerSelector, right: MarkerSelector): boolean {
   return [left.begin, left.end].some((leftToken) =>
-    [right.begin, right.end].some((rightToken) => markerTokensOverlap(leftToken, rightToken)));
+    [right.begin, right.end].some((rightToken) => markerTokensOverlap(leftToken, rightToken)),
+  );
 }
 
 export function markerTokensOverlap(left: string, right: string): boolean {
@@ -25,9 +26,7 @@ export function appendManagedBlock(content: string, fragment: string): string {
 }
 
 export type LocatedManagedBlock =
-  | { kind: "missing" }
-  | { kind: "malformed" }
-  | { kind: "found"; start: number; end: number; value: string };
+  { kind: "missing" } | { kind: "malformed" } | { kind: "found"; start: number; end: number; value: string };
 
 export function locateManagedBlock(content: string, selector: MarkerSelector): LocatedManagedBlock {
   const begins = findAll(content, selector.begin);

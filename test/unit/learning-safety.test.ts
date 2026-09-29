@@ -45,17 +45,30 @@ describe("persistent learning safety", () => {
     });
     const statementLine = proposal.content.split("\n").find((line) => line.startsWith("Statement-JSON: "))!;
     expect(JSON.parse(statementLine.slice("Statement-JSON: ".length))).toBe(statement);
-    expect(proposal.content.split("\n").filter((line) => line === "<<< END HARNIX UNTRUSTED LEARNING CANDIDATE >>>")).toHaveLength(1);
+    expect(
+      proposal.content.split("\n").filter((line) => line === "<<< END HARNIX UNTRUSTED LEARNING CANDIDATE >>>"),
+    ).toHaveLength(1);
     expect(proposal.content).toContain("<<< HARNIX UNTRUSTED LEARNING CANDIDATE >>>");
   });
 
   it("round-trips benign Unicode and rejects oversized promotion input", () => {
     const statement = "Quy ước: giữ nguyên Unicode và xuống dòng.\nKhông tự động sửa tài liệu.";
-    const candidate = createLearningCandidate({ id: "unicode", statement, sourceTaskIds: [], evidenceIds: [], status: "candidate" });
+    const candidate = createLearningCandidate({
+      id: "unicode",
+      statement,
+      sourceTaskIds: [],
+      evidenceIds: [],
+      status: "candidate",
+    });
     const proposal = promotionProposal(candidate, "docs/product.md");
-    const encoded = proposal.content.split("\n").find((line) => line.startsWith("Statement-JSON: "))!.slice("Statement-JSON: ".length);
+    const encoded = proposal.content
+      .split("\n")
+      .find((line) => line.startsWith("Statement-JSON: "))!
+      .slice("Statement-JSON: ".length);
     expect(JSON.parse(encoded)).toBe(statement);
     expect(proposal.review.findings).toEqual([]);
-    expect(() => promotionProposal({ ...candidate, statement: "x".repeat(65_537) }, "docs/product.md")).toThrow("64 KiB");
+    expect(() => promotionProposal({ ...candidate, statement: "x".repeat(65_537) }, "docs/product.md")).toThrow(
+      "64 KiB",
+    );
   });
 });

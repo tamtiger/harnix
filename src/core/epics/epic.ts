@@ -20,7 +20,16 @@ export interface EpicRecord {
   updatedAt: string;
 }
 
-const EPIC_RECORD_FIELDS = new Set<string>(["generator", "schemaVersion", "id", "title", "goal", "nonGoals", "createdAt", "updatedAt"]);
+const EPIC_RECORD_FIELDS = new Set<string>([
+  "generator",
+  "schemaVersion",
+  "id",
+  "title",
+  "goal",
+  "nonGoals",
+  "createdAt",
+  "updatedAt",
+]);
 
 export function validateEpic(value: unknown): EpicRecord {
   if (!isRecord(value) || value.generator !== "harnix" || value.schemaVersion !== 1) {
@@ -88,8 +97,12 @@ export interface EpicMember {
 }
 
 async function pathExists(path: string): Promise<boolean> {
-  try { await access(path); return true; }
-  catch { return false; }
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Path of an epic file: the current directory first, then the legacy one, else where it would be created. */
@@ -120,13 +133,24 @@ export async function collectEpicMembers(harnixRoot: string, epicId: string): Pr
   const tasksDirectory = join(harnixRoot, "tasks");
   const members: EpicMember[] = [];
   let entries;
-  try { entries = await readdir(tasksDirectory, { withFileTypes: true }); }
-  catch { return members; }
-  for (const entry of entries.filter((candidate) => candidate.isDirectory()).sort((left, right) => (left.name < right.name ? -1 : left.name > right.name ? 1 : 0))) {
+  try {
+    entries = await readdir(tasksDirectory, { withFileTypes: true });
+  } catch {
+    return members;
+  }
+  for (const entry of entries
+    .filter((candidate) => candidate.isDirectory())
+    .sort((left, right) => (left.name < right.name ? -1 : left.name > right.name ? 1 : 0))) {
     try {
       const task = await loadTask(join(tasksDirectory, entry.name, "task.json"));
       if (task.schemaVersion !== 1 && task.epicId === epicId) {
-        members.push({ id: entry.name, status: task.status, title: task.title, goal: task.goal, acceptanceCriteriaCount: task.acceptanceCriteria.length });
+        members.push({
+          id: entry.name,
+          status: task.status,
+          title: task.title,
+          goal: task.goal,
+          acceptanceCriteriaCount: task.acceptanceCriteria.length,
+        });
       }
     } catch {
       // Skip tasks that cannot be loaded.
@@ -149,7 +173,9 @@ export async function upsertEpic(root: string, epic: EpicRecord): Promise<void> 
 /** Returns undefined when the epic record does not exist or fails to parse/validate. */
 export async function loadEpicRecord(root: string, epicId: string): Promise<EpicRecord | undefined> {
   try {
-    return validateEpic(JSON.parse(await readFile(await resolveEpicFile(join(root, ".harnix"), epicId, "json"), "utf8")));
+    return validateEpic(
+      JSON.parse(await readFile(await resolveEpicFile(join(root, ".harnix"), epicId, "json"), "utf8")),
+    );
   } catch {
     return undefined;
   }
@@ -165,24 +191,47 @@ export async function renderEpicMarkdown(root: string, epicId: string, epic?: Ep
   const sections: string[] = [`# Epic: ${epic?.title || epicId}`];
   if (epic?.goal) sections.push(epic.goal);
   if (epic !== undefined) sections.push(`- **Cập nhật:** ${formatDisplay(epic.updatedAt, timezone)}`);
-  if (epic?.nonGoals !== undefined && epic.nonGoals.length > 0) sections.push(["## Non-goals", "", ...epic.nonGoals.map((item) => `- ${item}`)].join("\n"));
+  if (epic?.nonGoals !== undefined && epic.nonGoals.length > 0)
+    sections.push(["## Non-goals", "", ...epic.nonGoals.map((item) => `- ${item}`)].join("\n"));
 
-  sections.push(["## Next task", "", next !== null
-    ? `- \`${next.id}\` — ${next.title} (\`${next.status}\`)`
-    : members.length === 0 ? "Chưa có task thành viên." : "Không còn task nào chưa hoàn tất."].join("\n"));
+  sections.push(
+    [
+      "## Next task",
+      "",
+      next !== null
+        ? `- \`${next.id}\` — ${next.title} (\`${next.status}\`)`
+        : members.length === 0
+          ? "Chưa có task thành viên."
+          : "Không còn task nào chưa hoàn tất.",
+    ].join("\n"),
+  );
 
   if (members.length === 0) {
     sections.push("## Members (0 tasks)\n\nNo task members yet.");
   } else {
-    const table = members.map((member, index) => `| ${index + 1} | \`${member.id}\` | ${member.title} | \`${member.status}\` |`);
-    sections.push([`## Members (${members.length} task${members.length === 1 ? "" : "s"})`, "", "| # | Task ID | Title | Status |", "|---|---------|-------|--------|", ...table].join("\n"));
-    const overview = members.map((member, index) => [
-      `### ${index + 1}. \`${member.id}\` — ${member.title}`,
-      "",
-      `- **Trạng thái:** \`${member.status}\``,
-      `- **Mục tiêu:** ${member.goal}`,
-      ...(member.acceptanceCriteriaCount > 0 ? [`- **Tiêu chí nghiệm thu:** ${member.acceptanceCriteriaCount} tiêu chí`] : []),
-    ].join("\n"));
+    const table = members.map(
+      (member, index) => `| ${index + 1} | \`${member.id}\` | ${member.title} | \`${member.status}\` |`,
+    );
+    sections.push(
+      [
+        `## Members (${members.length} task${members.length === 1 ? "" : "s"})`,
+        "",
+        "| # | Task ID | Title | Status |",
+        "|---|---------|-------|--------|",
+        ...table,
+      ].join("\n"),
+    );
+    const overview = members.map((member, index) =>
+      [
+        `### ${index + 1}. \`${member.id}\` — ${member.title}`,
+        "",
+        `- **Trạng thái:** \`${member.status}\``,
+        `- **Mục tiêu:** ${member.goal}`,
+        ...(member.acceptanceCriteriaCount > 0
+          ? [`- **Tiêu chí nghiệm thu:** ${member.acceptanceCriteriaCount} tiêu chí`]
+          : []),
+      ].join("\n"),
+    );
     sections.push(["## Task Overview & Scope", "", overview.join("\n\n")].join("\n"));
   }
 

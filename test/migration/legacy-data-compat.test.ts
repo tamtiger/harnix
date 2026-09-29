@@ -63,14 +63,26 @@ describe("legacy .harnix data compatibility", () => {
       acceptanceCriteria: [{ id: "c1", text: "done", status: "pending", evidenceIds: [] }],
       relevantPaths: [],
       relevantSpecs: [],
-      validationPlan: [{ id: "gate", description: "verify", scope: "focused", required: true, criterionIds: ["c1"], inputs: ["@task-contract"] }],
+      validationPlan: [
+        {
+          id: "gate",
+          description: "verify",
+          scope: "focused",
+          required: true,
+          criterionIds: ["c1"],
+          inputs: ["@task-contract"],
+        },
+      ],
       evidence: [],
       createdAt: "2026-09-01T12:00:00.000Z",
       updatedAt: "2026-09-01T12:00:00.000Z",
     };
     await writeFile(join(dir, "task.json"), `${JSON.stringify(v2, null, 2)}\n`);
     // A legacy context selection sidecar from the removed feature must not break loading.
-    await writeFile(join(dir, "context.json"), `${JSON.stringify({ generator: "harnix", schemaVersion: 1, selected: [] }, null, 2)}\n`);
+    await writeFile(
+      join(dir, "context.json"),
+      `${JSON.stringify({ generator: "harnix", schemaVersion: 1, selected: [] }, null, 2)}\n`,
+    );
 
     const loaded = await loadTask(join(dir, "task.json"));
     expect(loaded.schemaVersion).toBe(2);

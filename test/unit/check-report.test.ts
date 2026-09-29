@@ -28,11 +28,35 @@ describe("required check report", () => {
     const task: TaskRecordV2 = {
       ...(v3Task() as unknown as TaskRecordV2),
       schemaVersion: 2,
-      validationPlan: [{ id: "gate", description: "private", scope: "focused", required: true, criterionIds: ["criterion"], inputs: ["@task-contract", "src/*.ts"] }],
-      evidence: [{ id: "pass", checkId: "gate", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", exitCode: 0, summary: "private", artifactPaths: [], inputDigest: "a".repeat(64) }],
+      validationPlan: [
+        {
+          id: "gate",
+          description: "private",
+          scope: "focused",
+          required: true,
+          criterionIds: ["criterion"],
+          inputs: ["@task-contract", "src/*.ts"],
+        },
+      ],
+      evidence: [
+        {
+          id: "pass",
+          checkId: "gate",
+          recordedAt: "2026-08-26T00:59:00.000Z",
+          result: "pass",
+          exitCode: 0,
+          summary: "private",
+          artifactPaths: [],
+          inputDigest: "a".repeat(64),
+        },
+      ],
     };
 
-    expect((await inspectRequiredChecks("unused", "unused", task, now))[0]).toMatchObject({ state: "stale", reasonCodes: ["legacy-schema"], changes: [] });
+    expect((await inspectRequiredChecks("unused", "unused", task, now))[0]).toMatchObject({
+      state: "stale",
+      reasonCodes: ["legacy-schema"],
+      changes: [],
+    });
   });
 
   it("recomputes the inline v3 digest: current, changed input, missing input, mismatched digest, future evidence", async () => {
@@ -42,12 +66,30 @@ describe("required check report", () => {
     await writeFile(join(root, "src", "a.ts"), "a1\n");
     await writeFile(join(root, "src", "b.ts"), "b1\n");
     const digest = (await computeInputDigest(root, base, "gate")).inputDigest;
-    const task: TaskRecordV3 = { ...base, evidence: [{ id: "pass", checkId: "gate", recordedAt: "2026-08-20T00:00:00.000Z", result: "pass", exitCode: 0, summary: "private", artifactPaths: [], inputDigest: digest }] };
-    const inspect = async (candidate: TaskRecordV3) => (await inspectRequiredChecks(root, join(root, ".harnix"), candidate, now))[0]!;
+    const task: TaskRecordV3 = {
+      ...base,
+      evidence: [
+        {
+          id: "pass",
+          checkId: "gate",
+          recordedAt: "2026-08-20T00:00:00.000Z",
+          result: "pass",
+          exitCode: 0,
+          summary: "private",
+          artifactPaths: [],
+          inputDigest: digest,
+        },
+      ],
+    };
+    const inspect = async (candidate: TaskRecordV3) =>
+      (await inspectRequiredChecks(root, join(root, ".harnix"), candidate, now))[0]!;
 
     expect(await inspect(task)).toMatchObject({ state: "passed", reasonCodes: [], changes: [] });
 
-    const future: TaskRecordV3 = { ...task, evidence: [{ ...task.evidence[0]!, recordedAt: "2026-08-26T01:00:01.000Z" }] };
+    const future: TaskRecordV3 = {
+      ...task,
+      evidence: [{ ...task.evidence[0]!, recordedAt: "2026-08-26T01:00:01.000Z" }],
+    };
     expect(await inspect(future)).toMatchObject({ state: "stale", reasonCodes: ["evidence-expired"] });
 
     const futureThenValid: TaskRecordV3 = {
@@ -66,7 +108,10 @@ describe("required check report", () => {
     expect(await inspect(task)).toMatchObject({ state: "stale", reasonCodes: ["digest-mismatch"] });
     await writeFile(join(root, "src", "a.ts"), "a1\n");
 
-    const contractChanged: TaskRecordV3 = { ...task, acceptanceCriteria: [{ ...task.acceptanceCriteria[0]!, text: "changed contract" }] };
+    const contractChanged: TaskRecordV3 = {
+      ...task,
+      acceptanceCriteria: [{ ...task.acceptanceCriteria[0]!, text: "changed contract" }],
+    };
     expect(await inspect(contractChanged)).toMatchObject({ state: "stale", reasonCodes: ["digest-mismatch"] });
 
     await rm(join(root, "src"), { recursive: true });
@@ -110,7 +155,12 @@ describe("required check report", () => {
 });
 
 function v1Task(): TaskRecordV1 {
-  const checks = ["pending", "tie", "future", "expired", "passed", "skipped"].map((id) => ({ id, description: "private", scope: "focused" as const, required: true }));
+  const checks = ["pending", "tie", "future", "expired", "passed", "skipped"].map((id) => ({
+    id,
+    description: "private",
+    scope: "focused" as const,
+    required: true,
+  }));
   return {
     generator: "harnix",
     schemaVersion: 1,
@@ -126,12 +176,54 @@ function v1Task(): TaskRecordV1 {
     relevantSpecs: [],
     validationPlan: checks,
     evidence: [
-      { id: "tie-pass", checkId: "tie", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", summary: "private", artifactPaths: [] },
-      { id: "tie-fail", checkId: "tie", recordedAt: "2026-08-26T00:59:00.000Z", result: "fail", summary: "private", artifactPaths: [] },
-      { id: "future", checkId: "future", recordedAt: "2026-08-26T01:01:00.000Z", result: "pass", summary: "private", artifactPaths: [] },
-      { id: "expired", checkId: "expired", recordedAt: "2026-08-25T22:00:00.000Z", result: "pass", summary: "private", artifactPaths: [] },
-      { id: "passed", checkId: "passed", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", summary: "private", artifactPaths: [] },
-      { id: "skipped", checkId: "skipped", recordedAt: "2026-08-26T00:59:00.000Z", result: "skipped", summary: "private", artifactPaths: [] },
+      {
+        id: "tie-pass",
+        checkId: "tie",
+        recordedAt: "2026-08-26T00:59:00.000Z",
+        result: "pass",
+        summary: "private",
+        artifactPaths: [],
+      },
+      {
+        id: "tie-fail",
+        checkId: "tie",
+        recordedAt: "2026-08-26T00:59:00.000Z",
+        result: "fail",
+        summary: "private",
+        artifactPaths: [],
+      },
+      {
+        id: "future",
+        checkId: "future",
+        recordedAt: "2026-08-26T01:01:00.000Z",
+        result: "pass",
+        summary: "private",
+        artifactPaths: [],
+      },
+      {
+        id: "expired",
+        checkId: "expired",
+        recordedAt: "2026-08-25T22:00:00.000Z",
+        result: "pass",
+        summary: "private",
+        artifactPaths: [],
+      },
+      {
+        id: "passed",
+        checkId: "passed",
+        recordedAt: "2026-08-26T00:59:00.000Z",
+        result: "pass",
+        summary: "private",
+        artifactPaths: [],
+      },
+      {
+        id: "skipped",
+        checkId: "skipped",
+        recordedAt: "2026-08-26T00:59:00.000Z",
+        result: "skipped",
+        summary: "private",
+        artifactPaths: [],
+      },
     ],
     createdAt: "2026-08-25T00:00:00.000Z",
     updatedAt: "2026-08-26T00:59:00.000Z",
@@ -153,7 +245,17 @@ function v3Task(): TaskRecordV3 {
     acceptanceCriteria: [{ id: "criterion", text: "private", status: "pending", evidenceIds: [] }],
     relevantPaths: ["src/a.ts", "src/b.ts"],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "private", scope: "focused", required: true, command: "pnpm test", criterionIds: ["criterion"], inputs: ["src/*.ts"] }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "private",
+        scope: "focused",
+        required: true,
+        command: "pnpm test",
+        criterionIds: ["criterion"],
+        inputs: ["src/*.ts"],
+      },
+    ],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,

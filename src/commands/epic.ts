@@ -1,6 +1,13 @@
 import { readFile } from "node:fs/promises";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
-import { collectEpicMembers, listEpicIds, nextEpicMember, resolveEpicFile, validateEpic, type EpicRecord } from "../core/epics/epic.js";
+import {
+  collectEpicMembers,
+  listEpicIds,
+  nextEpicMember,
+  resolveEpicFile,
+  validateEpic,
+  type EpicRecord,
+} from "../core/epics/epic.js";
 
 export interface PublicEpicListResult {
   readonly generator: "harnix";
@@ -56,7 +63,12 @@ export async function listPublicEpics(root: string, limit: number): Promise<Publ
 export async function detailPublicEpic(root: string, epicId: string): Promise<PublicEpicDetailResult> {
   const harnixRoot = await resolveSafeHarnixPath(root);
   const epic = await loadEpic(harnixRoot, epicId);
-  const members = (await collectEpicMembers(harnixRoot, epicId)).map(({ id, status, title, goal }) => ({ id, status, title, goal }));
+  const members = (await collectEpicMembers(harnixRoot, epicId)).map(({ id, status, title, goal }) => ({
+    id,
+    status,
+    title,
+    goal,
+  }));
   return { generator: "harnix", schemaVersion: 1, epic, members, nextTask: nextEpicMember(members) };
 }
 

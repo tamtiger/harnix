@@ -7,7 +7,15 @@ const MAX_SCANNED_TASKS = 1_000;
 const MAX_TASK_RECORD_BYTES = 1_048_576;
 const MAX_ACTIVE_POINTER_BYTES = 1_024;
 const taskIdPattern = /^\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$/u;
-const taskStatuses = new Set<TaskStatus>(["planning", "ready", "in_progress", "verifying", "blocked", "completed", "cancelled"]);
+const taskStatuses = new Set<TaskStatus>([
+  "planning",
+  "ready",
+  "in_progress",
+  "verifying",
+  "blocked",
+  "completed",
+  "cancelled",
+]);
 
 export interface TaskIndexOptions {
   readonly limit: number;
@@ -99,8 +107,9 @@ export async function createTaskIndex(
     activeUnavailable = true;
   }
 
-  const directoryIds = [...new Set((await source.listTaskDirectoryIds(harnixRoot)).filter((id) => taskIdPattern.test(id)))]
-    .sort(compareCodeUnitsDescending);
+  const directoryIds = [
+    ...new Set((await source.listTaskDirectoryIds(harnixRoot)).filter((id) => taskIdPattern.test(id))),
+  ].sort(compareCodeUnitsDescending);
   const selectedIds = directoryIds.slice(0, MAX_SCANNED_TASKS);
   if (activePointer !== null && directoryIds.includes(activePointer) && !selectedIds.includes(activePointer)) {
     selectedIds[selectedIds.length - 1] = activePointer;
@@ -157,8 +166,10 @@ export async function createTaskIndex(
 }
 
 function assertOptions(options: TaskIndexOptions): void {
-  if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 100) throw new Error("Task index limit must be an integer between 1 and 100.");
-  if (options.status !== undefined && !taskStatuses.has(options.status)) throw new Error("Task index status filter is invalid.");
+  if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 100)
+    throw new Error("Task index limit must be an integer between 1 and 100.");
+  if (options.status !== undefined && !taskStatuses.has(options.status))
+    throw new Error("Task index status filter is invalid.");
 }
 
 function compareTaskItems(left: TaskIndexItemV1, right: TaskIndexItemV1): number {
@@ -172,5 +183,7 @@ function compareCodeUnitsDescending(left: string, right: string): number {
 }
 
 function isMissing(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT";
+  return (
+    typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT"
+  );
 }

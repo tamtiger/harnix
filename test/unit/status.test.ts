@@ -33,7 +33,12 @@ describe("status projection", () => {
 
   it("prioritizes blockers over stale context and keeps attention in fixed order", () => {
     const task = fixture("blocked");
-    task.blocker = { kind: "credential", summary: "PRIVATE_BLOCKER", nextAction: "PRIVATE_ACTION", resumeStatus: "in_progress" };
+    task.blocker = {
+      kind: "credential",
+      summary: "PRIVATE_BLOCKER",
+      nextAction: "PRIVATE_ACTION",
+      resumeStatus: "in_progress",
+    };
     const context: ContextDrift = {
       state: "stale",
       changes: [{ path: "src/a.ts", kind: "changed" }],
@@ -59,7 +64,7 @@ describe("status projection", () => {
     ["verifying", currentContext(), ["passed"], "finish-task"],
     ["completed", currentContext(), ["passed"], "finalize-task"],
     ["planning", { state: "stale", changes: [], selectionChanges: [] }, ["pending"], "replan-context"],
-  ] as Array<[TaskStatus, ContextDrift, RequiredCheckState[], string]>) (
+  ] as Array<[TaskStatus, ContextDrift, RequiredCheckState[], string]>)(
     "routes %s deterministically",
     (status, context, checks, expected) => {
       expect(createActiveStatus(fixture(status), context, checks).nextAction.code).toBe(expected);
@@ -76,10 +81,16 @@ function fixture(status: TaskStatus): TaskRecordV1 {
     title: "PRIVATE_TITLE",
     mode: "lite",
     status,
-    checkpoint: status === "planning" ? "planning"
-      : status === "ready" ? "ready"
-        : status === "in_progress" ? "implementing"
-          : status === "completed" ? "finishing" : "verifying",
+    checkpoint:
+      status === "planning"
+        ? "planning"
+        : status === "ready"
+          ? "ready"
+          : status === "in_progress"
+            ? "implementing"
+            : status === "completed"
+              ? "finishing"
+              : "verifying",
     goal: "PRIVATE_GOAL",
     nonGoals: [],
     acceptanceCriteria: [{ id: "criterion", text: "done", status: "pending", evidenceIds: [] }],

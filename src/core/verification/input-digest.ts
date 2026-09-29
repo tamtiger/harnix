@@ -27,7 +27,11 @@ export interface InputDigestSnapshot {
  * only the resulting digest; freshness is decided by recomputing it, so there
  * is no snapshot file to write, diff, or keep in sync.
  */
-export async function computeInputDigest(projectRoot: string, task: TaskRecordV3, checkId: string): Promise<InputDigestSnapshot> {
+export async function computeInputDigest(
+  projectRoot: string,
+  task: TaskRecordV3,
+  checkId: string,
+): Promise<InputDigestSnapshot> {
   const check = task.validationPlan.find((candidate) => candidate.id === checkId);
   if (check === undefined) throw new Error(`Verification input check ${checkId} is not declared.`);
   const workflowOwned = new Set([
@@ -37,7 +41,14 @@ export async function computeInputDigest(projectRoot: string, task: TaskRecordV3
   ]);
   const paths = new Set<string>();
   for (const input of check.inputs) {
-    const matches = await globby(input, { absolute: false, cwd: projectRoot, dot: true, followSymbolicLinks: false, gitignore: true, onlyFiles: true });
+    const matches = await globby(input, {
+      absolute: false,
+      cwd: projectRoot,
+      dot: true,
+      followSymbolicLinks: false,
+      gitignore: true,
+      onlyFiles: true,
+    });
     if (matches.length === 0) throw new Error(`Verification input pattern for check ${checkId} matched no files.`);
     for (const match of matches) {
       const normalized = normalizeRepositoryPath(match);
@@ -46,8 +57,11 @@ export async function computeInputDigest(projectRoot: string, task: TaskRecordV3
   }
   const entries: InputDigestEntry[] = [];
   for (const path of [...paths].sort(compareText)) {
-    try { entries.push({ path, sha256: hashBytes(await readFile(await resolveSafeProjectPath(projectRoot, path))) }); }
-    catch { throw new Error(`Verification input for check ${checkId} is missing or unreadable: ${path}`); }
+    try {
+      entries.push({ path, sha256: hashBytes(await readFile(await resolveSafeProjectPath(projectRoot, path))) });
+    } catch {
+      throw new Error(`Verification input for check ${checkId} is missing or unreadable: ${path}`);
+    }
   }
   const taskContractHash = hashText(canonicalTaskContract(task));
   return {
@@ -62,14 +76,20 @@ export async function computeInputDigest(projectRoot: string, task: TaskRecordV3
 }
 
 /** Save-time gate: a newly appended pass (or digest-carrying fail) must describe the inputs as they are right now. */
-export async function assertNewEvidenceDigests(projectRoot: string, previousEvidence: readonly { id: string }[], candidate: TaskRecordV3): Promise<void> {
+export async function assertNewEvidenceDigests(
+  projectRoot: string,
+  previousEvidence: readonly { id: string }[],
+  candidate: TaskRecordV3,
+): Promise<void> {
   const previousIds = new Set(previousEvidence.map((evidence) => evidence.id));
   const requiredChecks = new Set(candidate.validationPlan.filter((check) => check.required).map((check) => check.id));
   for (const evidence of candidate.evidence) {
-    if (previousIds.has(evidence.id) || evidence.checkId === undefined || !requiredChecks.has(evidence.checkId)) continue;
+    if (previousIds.has(evidence.id) || evidence.checkId === undefined || !requiredChecks.has(evidence.checkId))
+      continue;
     if (evidence.result !== "pass" && !(evidence.result === "fail" && evidence.inputDigest !== undefined)) continue;
     const snapshot = await computeInputDigest(projectRoot, candidate, evidence.checkId);
-    if (snapshot.inputDigest !== evidence.inputDigest) throw new Error(`Verification input digest does not match the current snapshot for check ${evidence.checkId}.`);
+    if (snapshot.inputDigest !== evidence.inputDigest)
+      throw new Error(`Verification input digest does not match the current snapshot for check ${evidence.checkId}.`);
   }
 }
 
@@ -80,7 +100,9 @@ export async function assertInputDigestsFresh(projectRoot: string, task: TaskRec
     if (latest?.result !== "pass") continue;
     const current = await computeInputDigest(projectRoot, task, check.id);
     if (current.inputDigest !== latest.inputDigest) {
-      throw new Error(`Verification inputs are stale for check ${check.id}: evidence ${latest.id} recorded at ${latest.recordedAt} no longer matches current content.`);
+      throw new Error(
+        `Verification inputs are stale for check ${check.id}: evidence ${latest.id} recorded at ${latest.recordedAt} no longer matches current content.`,
+      );
     }
   }
 }
@@ -91,7 +113,9 @@ function canonicalTaskContract(task: TaskRecordV3): string {
     schemaVersion: 3,
     taskId: task.id,
     mode: task.mode,
-    acceptanceCriteria: [...task.acceptanceCriteria].map((criterion) => ({ id: criterion.id, text: criterion.text })).sort((left, right) => compareText(left.id, right.id)),
+    acceptanceCriteria: [...task.acceptanceCriteria]
+      .map((criterion) => ({ id: criterion.id, text: criterion.text }))
+      .sort((left, right) => compareText(left.id, right.id)),
     validationPlan: [...task.validationPlan].map(canonicalCheck).sort((left, right) => compareText(left.id, right.id)),
   });
 }
@@ -108,6 +132,12 @@ function canonicalCheck(check: ValidationCheckV3) {
   };
 }
 
-function hashBytes(content: Uint8Array): string { return createHash("sha256").update(content).digest("hex"); }
-function hashText(content: string): string { return createHash("sha256").update(content, "utf8").digest("hex"); }
-function compareText(left: string, right: string): number { return left < right ? -1 : left > right ? 1 : 0; }
+function hashBytes(content: Uint8Array): string {
+  return createHash("sha256").update(content).digest("hex");
+}
+function hashText(content: string): string {
+  return createHash("sha256").update(content, "utf8").digest("hex");
+}
+function compareText(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}

@@ -18,7 +18,17 @@ function v3(overrides: Record<string, unknown> = {}): Record<string, unknown> {
     acceptanceCriteria: [{ id: "ac-one", text: "One", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{ id: "check-one", description: "Unit tests", scope: "focused", required: true, command: "pnpm test", criterionIds: ["ac-one"], inputs: ["src/**"] }],
+    validationPlan: [
+      {
+        id: "check-one",
+        description: "Unit tests",
+        scope: "focused",
+        required: true,
+        command: "pnpm test",
+        criterionIds: ["ac-one"],
+        inputs: ["src/**"],
+      },
+    ],
     evidence: [],
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -27,7 +37,17 @@ function v3(overrides: Record<string, unknown> = {}): Record<string, unknown> {
 }
 
 function evidence(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  return { id: "ev-one", checkId: "check-one", recordedAt: timestamp, result: "pass", exitCode: 0, summary: "ok", artifactPaths: [], inputDigest: digest, ...overrides };
+  return {
+    id: "ev-one",
+    checkId: "check-one",
+    recordedAt: timestamp,
+    result: "pass",
+    exitCode: 0,
+    summary: "ok",
+    artifactPaths: [],
+    inputDigest: digest,
+    ...overrides,
+  };
 }
 
 describe("TaskRecord schema v3", () => {
@@ -37,32 +57,100 @@ describe("TaskRecord schema v3", () => {
   });
 
   it("accepts the optional review fields and epicId", () => {
-    expect(() => validateTask(v3({ epicId: "20260929-090000-epic", decisions: [{ id: "d", text: "t", rationale: "r" }], residualRisks: [{ id: "r", text: "t", severity: "low" }] }))).not.toThrow();
+    expect(() =>
+      validateTask(
+        v3({
+          epicId: "20260929-090000-epic",
+          decisions: [{ id: "d", text: "t", rationale: "r" }],
+          residualRisks: [{ id: "r", text: "t", severity: "low" }],
+        }),
+      ),
+    ).not.toThrow();
   });
 
   it("rejects the v2 @task-contract input token because the contract is implicit", () => {
-    const plan = [{ id: "check-one", description: "Unit tests", scope: "focused", required: true, command: "pnpm test", criterionIds: ["ac-one"], inputs: ["@task-contract", "src/**"] }];
+    const plan = [
+      {
+        id: "check-one",
+        description: "Unit tests",
+        scope: "focused",
+        required: true,
+        command: "pnpm test",
+        criterionIds: ["ac-one"],
+        inputs: ["@task-contract", "src/**"],
+      },
+    ];
     expect(() => validateTask(v3({ validationPlan: plan }))).toThrow(TaskValidationError);
   });
 
   it("requires a required check to declare criteria and at least one input", () => {
-    const noInputs = [{ id: "check-one", description: "Unit tests", scope: "focused", required: true, command: "pnpm test", criterionIds: ["ac-one"], inputs: [] }];
-    const noCriteria = [{ id: "check-one", description: "Unit tests", scope: "focused", required: true, command: "pnpm test", criterionIds: [], inputs: ["src/**"] }];
+    const noInputs = [
+      {
+        id: "check-one",
+        description: "Unit tests",
+        scope: "focused",
+        required: true,
+        command: "pnpm test",
+        criterionIds: ["ac-one"],
+        inputs: [],
+      },
+    ];
+    const noCriteria = [
+      {
+        id: "check-one",
+        description: "Unit tests",
+        scope: "focused",
+        required: true,
+        command: "pnpm test",
+        criterionIds: [],
+        inputs: ["src/**"],
+      },
+    ];
     expect(() => validateTask(v3({ validationPlan: noInputs }))).toThrow(TaskValidationError);
     expect(() => validateTask(v3({ validationPlan: noCriteria }))).toThrow(TaskValidationError);
   });
 
   it("requires every non-waived criterion to be covered by a required check", () => {
-    const criteria = [{ id: "ac-one", text: "One", status: "pending", evidenceIds: [] }, { id: "ac-two", text: "Two", status: "pending", evidenceIds: [] }];
+    const criteria = [
+      { id: "ac-one", text: "One", status: "pending", evidenceIds: [] },
+      { id: "ac-two", text: "Two", status: "pending", evidenceIds: [] },
+    ];
     expect(() => validateTask(v3({ acceptanceCriteria: criteria }))).toThrow(TaskValidationError);
   });
 
   it("rejects unsorted or duplicate criterion IDs and inputs", () => {
-    const criteria = [{ id: "ac-a", text: "A", status: "pending", evidenceIds: [] }, { id: "ac-b", text: "B", status: "pending", evidenceIds: [] }];
-    const unsorted = [{ id: "check-one", description: "Unit tests", scope: "focused", required: true, command: "pnpm test", criterionIds: ["ac-b", "ac-a"], inputs: ["src/**"] }];
-    const duplicateInputs = [{ id: "check-one", description: "Unit tests", scope: "focused", required: true, command: "pnpm test", criterionIds: ["ac-a", "ac-b"], inputs: ["src/**", "src/**"] }];
-    expect(() => validateTask(v3({ acceptanceCriteria: criteria, validationPlan: unsorted }))).toThrow(TaskValidationError);
-    expect(() => validateTask(v3({ acceptanceCriteria: criteria, validationPlan: duplicateInputs }))).toThrow(TaskValidationError);
+    const criteria = [
+      { id: "ac-a", text: "A", status: "pending", evidenceIds: [] },
+      { id: "ac-b", text: "B", status: "pending", evidenceIds: [] },
+    ];
+    const unsorted = [
+      {
+        id: "check-one",
+        description: "Unit tests",
+        scope: "focused",
+        required: true,
+        command: "pnpm test",
+        criterionIds: ["ac-b", "ac-a"],
+        inputs: ["src/**"],
+      },
+    ];
+    const duplicateInputs = [
+      {
+        id: "check-one",
+        description: "Unit tests",
+        scope: "focused",
+        required: true,
+        command: "pnpm test",
+        criterionIds: ["ac-a", "ac-b"],
+        inputs: ["src/**", "src/**"],
+      },
+    ];
+    expect(() => validateTask(v3({ acceptanceCriteria: criteria, validationPlan: unsorted }))).toThrow(
+      TaskValidationError,
+    );
+    expect(() => validateTask(v3({ acceptanceCriteria: criteria, validationPlan: duplicateInputs }))).toThrow(
+      TaskValidationError,
+    );
   });
 
   it("requires a digest on a passing required-check evidence item", () => {
@@ -73,8 +161,12 @@ describe("TaskRecord schema v3", () => {
 
   it("requires exit code 0 for a command pass and a non-zero exit code for a command fail", () => {
     expect(() => validateTask(v3({ evidence: [evidence({ exitCode: 1 })] }))).toThrow(TaskValidationError);
-    expect(() => validateTask(v3({ evidence: [evidence({ result: "fail", exitCode: 0, inputDigest: undefined })] }))).toThrow(TaskValidationError);
-    expect(() => validateTask(v3({ evidence: [evidence({ result: "fail", exitCode: 2, inputDigest: undefined })] }))).not.toThrow();
+    expect(() =>
+      validateTask(v3({ evidence: [evidence({ result: "fail", exitCode: 0, inputDigest: undefined })] })),
+    ).toThrow(TaskValidationError);
+    expect(() =>
+      validateTask(v3({ evidence: [evidence({ result: "fail", exitCode: 2, inputDigest: undefined })] })),
+    ).not.toThrow();
   });
 
   it("requires an exit code on command-backed evidence", () => {
@@ -96,10 +188,26 @@ describe("TaskRecord schema v3", () => {
   it("still reads historical v1 and v2 records unchanged", () => {
     const legacyV2 = v3({
       schemaVersion: 2,
-      validationPlan: [{ id: "check-one", description: "Unit tests", scope: "focused", required: true, command: "pnpm test", criterionIds: ["ac-one"], inputs: ["@task-contract", "src/**"] }],
+      validationPlan: [
+        {
+          id: "check-one",
+          description: "Unit tests",
+          scope: "focused",
+          required: true,
+          command: "pnpm test",
+          criterionIds: ["ac-one"],
+          inputs: ["@task-contract", "src/**"],
+        },
+      ],
       evidence: [evidence()],
     });
-    const legacyV1 = v3({ schemaVersion: 1, validationPlan: [{ id: "check-one", description: "Unit tests", scope: "focused", required: true, command: "pnpm test" }], evidence: [] });
+    const legacyV1 = v3({
+      schemaVersion: 1,
+      validationPlan: [
+        { id: "check-one", description: "Unit tests", scope: "focused", required: true, command: "pnpm test" },
+      ],
+      evidence: [],
+    });
     delete legacyV1.decisions;
     expect(validateTask(legacyV2).schemaVersion).toBe(2);
     expect(validateTask(legacyV1).schemaVersion).toBe(1);

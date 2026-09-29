@@ -8,26 +8,51 @@ import { defaultRepoMapLimits, type RepoMapInventory, type RepoMapLimits } from 
 import { compareCodeUnits } from "../../utils/order.js";
 
 const ignoredDirectoryNameList = [
-  ".agents", ".cache", ".claude", ".codex", ".gemini", ".git", ".harnix", ".kilo", ".kiro", ".next", ".pytest_cache", ".trellis", ".turbo", ".understand-anything",
+  ".agents",
+  ".cache",
+  ".claude",
+  ".codex",
+  ".gemini",
+  ".git",
+  ".harnix",
+  ".kilo",
+  ".kiro",
+  ".next",
+  ".pytest_cache",
+  ".trellis",
+  ".turbo",
+  ".understand-anything",
   ".worktrees",
-  "__pycache__", "bin", "build", "coverage", "dist", "node_modules", "obj", "vendor",
+  "__pycache__",
+  "bin",
+  "build",
+  "coverage",
+  "dist",
+  "node_modules",
+  "obj",
+  "vendor",
 ] as const;
 const ignoredDirectoryNames = new Set<string>(ignoredDirectoryNameList);
 const secretPath = /(?:^|\/)(?:\.env[^/]*|[^/]*(?:credential|secret|token)[^/]*|id_rsa[^/]*|[^/]*\.(?:pem|key))$/iu;
 
-export async function inventoryRepository(root: string, limits: RepoMapLimits = defaultRepoMapLimits): Promise<RepoMapInventory> {
+export async function inventoryRepository(
+  root: string,
+  limits: RepoMapLimits = defaultRepoMapLimits,
+): Promise<RepoMapInventory> {
   assertRepoMapLimits(limits);
   const resolvedRoot = resolve(root);
   const realRoot = await realpath(resolvedRoot);
-  const candidates = (await globby("**/*", {
-    absolute: true,
-    cwd: resolvedRoot,
-    dot: true,
-    followSymbolicLinks: false,
-    gitignore: true,
-    ignore: ignoredDirectoryNameList.map((name) => `**/${name}/**`),
-    onlyFiles: true,
-  })).sort(compareCodeUnits);
+  const candidates = (
+    await globby("**/*", {
+      absolute: true,
+      cwd: resolvedRoot,
+      dot: true,
+      followSymbolicLinks: false,
+      gitignore: true,
+      ignore: ignoredDirectoryNameList.map((name) => `**/${name}/**`),
+      onlyFiles: true,
+    })
+  ).sort(compareCodeUnits);
   const files: RepoMapInventory["files"] = [];
   const skipped: string[] = [];
   let totalBytes = 0;

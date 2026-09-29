@@ -23,8 +23,11 @@ export async function migrateLegacyEpics(root: string): Promise<EpicMigrationRes
   const harnixRoot = await resolveSafeHarnixPath(root);
   const legacyDirectory = await resolveSafeProjectPath(harnixRoot, LEGACY_EPICS_DIRECTORY);
   let names: string[];
-  try { names = (await readdir(legacyDirectory)).filter((name) => name.endsWith(".json")).sort(compareCodeUnits); }
-  catch { return result; }
+  try {
+    names = (await readdir(legacyDirectory)).filter((name) => name.endsWith(".json")).sort(compareCodeUnits);
+  } catch {
+    return result;
+  }
 
   for (const name of names) {
     const epicId = name.slice(0, -".json".length);
@@ -42,15 +45,19 @@ export async function migrateLegacyEpics(root: string): Promise<EpicMigrationRes
     }
 
     let targetContent: string | undefined;
-    try { targetContent = await readFile(targetPath, "utf8"); }
-    catch { targetContent = undefined; }
+    try {
+      targetContent = await readFile(targetPath, "utf8");
+    } catch {
+      targetContent = undefined;
+    }
     if (targetContent !== undefined && targetContent !== content) {
       result.preserved.push(legacyRelative);
       continue;
     }
     if (targetContent === undefined) {
       await atomicWriteFile(targetPath, content);
-      if (await readFile(targetPath, "utf8") !== content) throw new Error(`Epic migration could not verify ${epicId}.`);
+      if ((await readFile(targetPath, "utf8")) !== content)
+        throw new Error(`Epic migration could not verify ${epicId}.`);
       result.created.push(`.harnix/${EPICS_DIRECTORY}/${name}`);
     }
     await renderEpicMarkdown(root, epicId, epic);
@@ -59,6 +66,10 @@ export async function migrateLegacyEpics(root: string): Promise<EpicMigrationRes
     const legacyPage = await resolveSafeProjectPath(harnixRoot, `${LEGACY_EPICS_DIRECTORY}/${epicId}.md`);
     await rm(legacyPage, { force: true });
   }
-  try { await rmdir(legacyDirectory); } catch { /* not empty or already gone: keep whatever remains */ }
+  try {
+    await rmdir(legacyDirectory);
+  } catch {
+    /* not empty or already gone: keep whatever remains */
+  }
   return result;
 }

@@ -5,16 +5,18 @@ export const KIRO_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix context --platform kiro"
 
 export const KIRO_GLOBAL_CONTEXT_HOOK = {
   version: "v1",
-  hooks: [{
-    name: "harnix-context",
-    trigger: "UserPromptSubmit",
-    action: {
-      type: "command",
-      command: KIRO_GLOBAL_CONTEXT_HOOK_COMMAND,
+  hooks: [
+    {
+      name: "harnix-context",
+      trigger: "UserPromptSubmit",
+      action: {
+        type: "command",
+        command: KIRO_GLOBAL_CONTEXT_HOOK_COMMAND,
+      },
+      timeout: 5,
+      enabled: true,
     },
-    timeout: 5,
-    enabled: true,
-  }],
+  ],
 } as const;
 
 export const KIRO_GLOBAL_STEERING = HARNIX_GLOBAL_ACTIVATION_DOCUMENT;

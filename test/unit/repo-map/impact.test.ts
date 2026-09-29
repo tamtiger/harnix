@@ -73,8 +73,10 @@ describe("repository map impact", () => {
     for (const target of ["./src/target.ts", "src\\target.ts", "src//target.ts", "../target.ts", "C:/target.ts", "."]) {
       expect(() => createRepoMapImpact(map, { target, depth: 2, limit: 20 }), target).toThrow(/exact normalized/iu);
     }
-    for (const depth of [0, 4, 1.5]) expect(() => createRepoMapImpact(map, { target: "src/target.ts", depth, limit: 20 })).toThrow(/depth/iu);
-    for (const limit of [0, 21, 1.5]) expect(() => createRepoMapImpact(map, { target: "src/target.ts", depth: 2, limit })).toThrow(/limit/iu);
+    for (const depth of [0, 4, 1.5])
+      expect(() => createRepoMapImpact(map, { target: "src/target.ts", depth, limit: 20 })).toThrow(/depth/iu);
+    for (const limit of [0, 21, 1.5])
+      expect(() => createRepoMapImpact(map, { target: "src/target.ts", depth: 2, limit })).toThrow(/limit/iu);
   });
 });
 

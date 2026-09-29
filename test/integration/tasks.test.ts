@@ -55,12 +55,14 @@ describe.sequential("tasks command", () => {
       },
       activeTaskId: active.id,
       attention: [],
-      tasks: [
-        projection(active, true),
-        projection(newest, false),
-      ],
+      tasks: [projection(active, true), projection(newest, false)],
     });
-    for (const canary of ["PRIVATE_TITLE_CANARY", "PRIVATE_GOAL_CANARY", "PRIVATE_CRITERION_CANARY", "PRIVATE_COMMAND_CANARY"]) {
+    for (const canary of [
+      "PRIVATE_TITLE_CANARY",
+      "PRIVATE_GOAL_CANARY",
+      "PRIVATE_CRITERION_CANARY",
+      "PRIVATE_COMMAND_CANARY",
+    ]) {
       expect(output).not.toContain(canary);
     }
     await expect(snapshotTree(root)).resolves.toEqual(before);
@@ -74,7 +76,7 @@ describe.sequential("tasks command", () => {
     const badId = "20260826-110000-bad-task";
     await saveTask(harnixRoot, good);
     await mkdir(join(harnixRoot, "tasks", badId), { recursive: true });
-    await writeFile(join(harnixRoot, "tasks", badId, "task.json"), "{\"private\":\"PRIVATE_MALFORMED_CANARY\"}\n");
+    await writeFile(join(harnixRoot, "tasks", badId, "task.json"), '{"private":"PRIVATE_MALFORMED_CANARY"}\n');
     await writeFile(join(harnixRoot, "tasks", ".active"), `${badId}\n`);
     process.chdir(root);
     const before = await snapshotTree(root);
@@ -110,7 +112,10 @@ describe.sequential("tasks command", () => {
     ]) {
       stdout.mockClear();
       await expect(runCli(argv)).resolves.toBe(2);
-      const result = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as { ok: boolean; error: { exitCode: number; message: string } };
+      const result = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as {
+        ok: boolean;
+        error: { exitCode: number; message: string };
+      };
       expect(result).toMatchObject({ ok: false, error: { exitCode: 2 } });
       expect(result.error.message).not.toContain(root);
     }
@@ -118,7 +123,14 @@ describe.sequential("tasks command", () => {
 });
 
 function projection(record: TaskRecordV1, active: boolean) {
-  return { id: record.id, mode: record.mode, status: record.status, checkpoint: record.checkpoint, active, updatedAt: record.updatedAt };
+  return {
+    id: record.id,
+    mode: record.mode,
+    status: record.status,
+    checkpoint: record.checkpoint,
+    active,
+    updatedAt: record.updatedAt,
+  };
 }
 
 function task(id: string, updatedAt: string, status: "planning" | "ready"): TaskRecordV1 {
@@ -135,7 +147,15 @@ function task(id: string, updatedAt: string, status: "planning" | "ready"): Task
     acceptanceCriteria: [{ id: "criterion", text: "PRIVATE_CRITERION_CANARY", status: "pending", evidenceIds: [] }],
     relevantPaths: [],
     relevantSpecs: [],
-    validationPlan: [{ id: "gate", description: "PRIVATE_COMMAND_CANARY", command: "PRIVATE_COMMAND_CANARY", scope: "focused", required: true }],
+    validationPlan: [
+      {
+        id: "gate",
+        description: "PRIVATE_COMMAND_CANARY",
+        command: "PRIVATE_COMMAND_CANARY",
+        scope: "focused",
+        required: true,
+      },
+    ],
     evidence: [],
     createdAt: "2026-08-25T00:00:00.000Z",
     updatedAt,
@@ -144,17 +164,21 @@ function task(id: string, updatedAt: string, status: "planning" | "ready"): Task
 
 async function snapshotTree(root: string): Promise<Array<{ path: string; sha256: string }>> {
   const files = await walk(root);
-  return Promise.all(files.map(async (path) => ({
-    path: relative(root, path).replaceAll("\\", "/"),
-    sha256: createHash("sha256").update(await readFile(path)).digest("hex"),
-  })));
+  return Promise.all(
+    files.map(async (path) => ({
+      path: relative(root, path).replaceAll("\\", "/"),
+      sha256: createHash("sha256")
+        .update(await readFile(path))
+        .digest("hex"),
+    })),
+  );
 }
 
 async function walk(root: string): Promise<string[]> {
   const paths: string[] = [];
   for (const entry of await readdir(root, { withFileTypes: true })) {
     const path = join(root, entry.name);
-    if (entry.isDirectory()) paths.push(...await walk(path));
+    if (entry.isDirectory()) paths.push(...(await walk(path)));
     else if (entry.isFile()) paths.push(path);
   }
   return paths.sort();

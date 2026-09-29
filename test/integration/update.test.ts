@@ -11,24 +11,59 @@ import { packageVersion } from "../../src/version.js";
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-update-");
-async function fixture(): Promise<string> { const root = await temporaryRepository(); await initializeProject({ developer: "tam", root, yes: true }); return root; }
+async function fixture(): Promise<string> {
+  const root = await temporaryRepository();
+  await initializeProject({ developer: "tam", root, yes: true });
+  return root;
+}
 
 describe("updateProject", () => {
   it("migrates config v1 and replaces only unchanged legacy guides", async () => {
-    const root = await fixture(); const configPath = join(root, ".harnix", "config.yaml");
-    await writeFile(configPath, [
-      "generator: harnix", "schemaVersion: 1", "developer: tam", "languages: [typescript-nestjs]",
-      "packages: [{ path: ., languages: [typescript-nestjs] }]", "platforms: []",
-      "context: { maxCharacters: 24000, tokenApproximation: 4 }", "runtime: { research: conditional, fullContext: false }", "unknown: keep", "",
-    ].join("\n"));
-    const legacyPath = ".harnix/spec/guides/typescript-nestjs.md"; const legacyContent = "legacy generated\n";
-    const modifiedLegacyPath = ".harnix/spec/guides/vue.md"; const modifiedLegacyOriginal = "legacy Vue generated\n";
-    await writeFile(join(root, legacyPath), legacyContent); await writeFile(join(root, modifiedLegacyPath), modifiedLegacyOriginal);
-    const manifestPath = join(root, ".harnix", ".template-hashes.json"); const manifest = await readManifest(manifestPath);
-    await writeManifest(manifestPath, { ...manifest, entries: [...manifest.entries,
-      { path: legacyPath, sourceId: "rules-typescript-nestjs", scope: "project" as const, generatedHash: sha256(legacyContent), generatorVersion: "0.6.0" },
-      { path: modifiedLegacyPath, sourceId: "rules-vue", scope: "project" as const, generatedHash: sha256(modifiedLegacyOriginal), generatorVersion: "0.6.0" },
-    ].sort((a, b) => a.path.localeCompare(b.path)) });
+    const root = await fixture();
+    const configPath = join(root, ".harnix", "config.yaml");
+    await writeFile(
+      configPath,
+      [
+        "generator: harnix",
+        "schemaVersion: 1",
+        "developer: tam",
+        "languages: [typescript-nestjs]",
+        "packages: [{ path: ., languages: [typescript-nestjs] }]",
+        "platforms: []",
+        "context: { maxCharacters: 24000, tokenApproximation: 4 }",
+        "runtime: { research: conditional, fullContext: false }",
+        "unknown: keep",
+        "",
+      ].join("\n"),
+    );
+    const legacyPath = ".harnix/spec/guides/typescript-nestjs.md";
+    const legacyContent = "legacy generated\n";
+    const modifiedLegacyPath = ".harnix/spec/guides/vue.md";
+    const modifiedLegacyOriginal = "legacy Vue generated\n";
+    await writeFile(join(root, legacyPath), legacyContent);
+    await writeFile(join(root, modifiedLegacyPath), modifiedLegacyOriginal);
+    const manifestPath = join(root, ".harnix", ".template-hashes.json");
+    const manifest = await readManifest(manifestPath);
+    await writeManifest(manifestPath, {
+      ...manifest,
+      entries: [
+        ...manifest.entries,
+        {
+          path: legacyPath,
+          sourceId: "rules-typescript-nestjs",
+          scope: "project" as const,
+          generatedHash: sha256(legacyContent),
+          generatorVersion: "0.6.0",
+        },
+        {
+          path: modifiedLegacyPath,
+          sourceId: "rules-vue",
+          scope: "project" as const,
+          generatedHash: sha256(modifiedLegacyOriginal),
+          generatorVersion: "0.6.0",
+        },
+      ].sort((a, b) => a.path.localeCompare(b.path)),
+    });
     await writeFile(join(root, modifiedLegacyPath), "user-modified legacy Vue guidance\n");
 
     const result = await updateProject({ root });
@@ -37,19 +72,29 @@ describe("updateProject", () => {
     expect(result.preserved).toContain(modifiedLegacyPath);
     await expect(access(join(root, legacyPath))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(readFile(join(root, modifiedLegacyPath), "utf8")).resolves.toBe("user-modified legacy Vue guidance\n");
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "languages", "typescript.md"), "utf8")).resolves.toContain("TypeScript");
-    await expect(readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "nestjs.md"), "utf8")).resolves.toContain("NestJS");
-    const config = await readFile(configPath, "utf8"); expect(config).toContain("schemaVersion: 2"); expect(config).toContain("unknown: keep");
+    await expect(
+      readFile(join(root, ".harnix", "spec", "guides", "languages", "typescript.md"), "utf8"),
+    ).resolves.toContain("TypeScript");
+    await expect(
+      readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "nestjs.md"), "utf8"),
+    ).resolves.toContain("NestJS");
+    const config = await readFile(configPath, "utf8");
+    expect(config).toContain("schemaVersion: 2");
+    expect(config).toContain("unknown: keep");
   });
 
   it("preserves user edits and requires --restore for user-deleted managed files", async () => {
-    const root = await fixture(); const workflow = join(root, ".harnix", "workflow.md");
+    const root = await fixture();
+    const workflow = join(root, ".harnix", "workflow.md");
     await unlink(workflow);
     const deleted = await updateProject({ root });
-    expect(deleted.deleted).toContain(".harnix/workflow.md"); await expect(access(workflow)).rejects.toMatchObject({ code: "ENOENT" });
-    await updateProject({ root, restoreDeleted: true }); await expect(readFile(workflow, "utf8")).resolves.toContain("Harnix workflow");
+    expect(deleted.deleted).toContain(".harnix/workflow.md");
+    await expect(access(workflow)).rejects.toMatchObject({ code: "ENOENT" });
+    await updateProject({ root, restoreDeleted: true });
+    await expect(readFile(workflow, "utf8")).resolves.toContain("Harnix workflow");
     await writeFile(join(root, ".harnix", "spec", "guides", "common.md"), "my rules\n");
-    await updateProject({ root }); await expect(readFile(join(root, ".harnix", "spec", "guides", "common.md"), "utf8")).resolves.toBe("my rules\n");
+    await updateProject({ root });
+    await expect(readFile(join(root, ".harnix", "spec", "guides", "common.md"), "utf8")).resolves.toBe("my rules\n");
   });
   it("does not touch tasks, journals, or unrelated files", async () => {
     const root = await fixture();
@@ -57,9 +102,13 @@ describe("updateProject", () => {
       mkdir(join(root, ".harnix", "tasks"), { recursive: true }),
       mkdir(join(root, ".harnix", "workspace", "tam"), { recursive: true }),
     ]);
-    await writeFile(join(root, ".harnix", "tasks", "keep.txt"), "task"); await writeFile(join(root, ".harnix", "workspace", "tam", "keep.jsonl"), "journal"); await writeFile(join(root, "keep.txt"), "user");
+    await writeFile(join(root, ".harnix", "tasks", "keep.txt"), "task");
+    await writeFile(join(root, ".harnix", "workspace", "tam", "keep.jsonl"), "journal");
+    await writeFile(join(root, "keep.txt"), "user");
     await updateProject({ root });
-    await expect(readFile(join(root, ".harnix", "tasks", "keep.txt"), "utf8")).resolves.toBe("task"); await expect(readFile(join(root, ".harnix", "workspace", "tam", "keep.jsonl"), "utf8")).resolves.toBe("journal"); await expect(readFile(join(root, "keep.txt"), "utf8")).resolves.toBe("user");
+    await expect(readFile(join(root, ".harnix", "tasks", "keep.txt"), "utf8")).resolves.toBe("task");
+    await expect(readFile(join(root, ".harnix", "workspace", "tam", "keep.jsonl"), "utf8")).resolves.toBe("journal");
+    await expect(readFile(join(root, "keep.txt"), "utf8")).resolves.toBe("user");
   });
   it("should_remove_unchanged_obsolete_file_when_template_is_no_longer_desired", async () => {
     const root = await fixture();
@@ -103,20 +152,25 @@ describe("updateProject", () => {
     const manifest = await readManifest(manifestPath);
     await writeManifest(manifestPath, {
       ...manifest,
-      entries: [...manifest.entries, {
-        path: legacyPath,
-        sourceId: "harnix-implement",
-        scope: "kiro" as const,
-        generatedHash: sha256(legacyContent),
-        generatorVersion: "0.5.0",
-      }].sort((left, right) => left.path.localeCompare(right.path)),
+      entries: [
+        ...manifest.entries,
+        {
+          path: legacyPath,
+          sourceId: "harnix-implement",
+          scope: "kiro" as const,
+          generatedHash: sha256(legacyContent),
+          generatorVersion: "0.5.0",
+        },
+      ].sort((left, right) => left.path.localeCompare(right.path)),
     });
 
     await updateProject({ root });
 
     await expect(readFile(join(root, legacyPath), "utf8")).resolves.toBe(legacyContent);
     await expect(access(join(root, ".kiro", "hooks", "harnix-context.json"))).rejects.toMatchObject({ code: "ENOENT" });
-    expect((await readManifest(manifestPath)).entries).toContainEqual(expect.objectContaining({ path: legacyPath, scope: "kiro" }));
+    expect((await readManifest(manifestPath)).entries).toContainEqual(
+      expect.objectContaining({ path: legacyPath, scope: "kiro" }),
+    );
   });
 
   it("reports metadata-only reconciliation without claiming a managed file update", async () => {
@@ -125,9 +179,11 @@ describe("updateProject", () => {
     const manifest = await readManifest(manifestPath);
     await writeManifest(manifestPath, {
       ...manifest,
-      entries: manifest.entries.map((entry) => entry.path === ".harnix/workflow.md"
-        ? { ...entry, sourceId: "harnix-workflow", generatorVersion: "0.0.0" }
-        : entry),
+      entries: manifest.entries.map((entry) =>
+        entry.path === ".harnix/workflow.md"
+          ? { ...entry, sourceId: "harnix-workflow", generatorVersion: "0.0.0" }
+          : entry,
+      ),
     });
 
     const result = await updateProject({ root });
@@ -135,7 +191,9 @@ describe("updateProject", () => {
 
     expect(result.updated).not.toContain(".harnix/workflow.md");
     expect(result.metadataUpdated).toEqual([".harnix/workflow.md"]);
-    expect(reconciled.entries.find(({ path }) => path === ".harnix/workflow.md")?.generatorVersion).toBe(packageVersion);
+    expect(reconciled.entries.find(({ path }) => path === ".harnix/workflow.md")?.generatorVersion).toBe(
+      packageVersion,
+    );
     expect(reconciled.entries.find(({ path }) => path === ".harnix/workflow.md")?.sourceId).toBe("workflow");
   });
 });

@@ -93,7 +93,15 @@ export interface DesiredGlobalJsonMember {
 export type DesiredGlobalManagedFile = DesiredGlobalFile | DesiredGlobalManagedBlock | DesiredGlobalJsonMember;
 
 export interface GlobalManagedWarning {
-  code: "untracked-collision" | "modified" | "malformed-markers" | "invalid-json" | "invalid-json-pointer" | "duplicate-json-member" | "manifest-conflict" | "deleted";
+  code:
+    | "untracked-collision"
+    | "modified"
+    | "malformed-markers"
+    | "invalid-json"
+    | "invalid-json-pointer"
+    | "duplicate-json-member"
+    | "manifest-conflict"
+    | "deleted";
   path: string;
   message: string;
 }
@@ -218,7 +226,13 @@ export class GlobalManagedTransactionError extends Error {
  * relationship to the project-local managed-files manifest.
  */
 export function validateGlobalManagedManifest(value: unknown): GlobalManagedManifestV1 {
-  if (!isRecord(value) || value.generator !== "harnix" || value.schemaVersion !== 1 || !isGlobalPlatform(value.platform) || !Array.isArray(value.entries)) {
+  if (
+    !isRecord(value) ||
+    value.generator !== "harnix" ||
+    value.schemaVersion !== 1 ||
+    !isGlobalPlatform(value.platform) ||
+    !Array.isArray(value.entries)
+  ) {
     throw new GlobalManagedManifestError("Invalid or unsupported global managed manifest.");
   }
 
@@ -227,7 +241,9 @@ export function validateGlobalManagedManifest(value: unknown): GlobalManagedMani
   for (const entry of entries) {
     const key = entryKey(entry);
     if (key <= previous) {
-      throw new GlobalManagedManifestError("Global managed manifest entries must be unique and sorted by path and sourceId.");
+      throw new GlobalManagedManifestError(
+        "Global managed manifest entries must be unique and sorted by path and sourceId.",
+      );
     }
     previous = key;
   }
@@ -255,7 +271,11 @@ export async function readGlobalManagedManifest(path: string): Promise<GlobalMan
   }
 }
 
-export async function writeGlobalManagedManifest(path: string, manifest: GlobalManagedManifestV1, writer: GlobalManagedWriter = atomicWriteFile): Promise<void> {
+export async function writeGlobalManagedManifest(
+  path: string,
+  manifest: GlobalManagedManifestV1,
+  writer: GlobalManagedWriter = atomicWriteFile,
+): Promise<void> {
   await writer(path, serializeManifest(validateGlobalManagedManifest(manifest)));
 }
 
@@ -272,7 +292,9 @@ export async function resolveSafeGlobalPath(root: UserPathRoot, globalPath: stri
  * target writes followed by its sidecar manifest. A failed apply restores only
  * paths whose bytes are still exactly the Harnix output written by this call.
  */
-export async function reconcileGlobalManagedFiles(options: ReconcileGlobalManagedFilesOptions): Promise<GlobalManagedReconcileResult> {
+export async function reconcileGlobalManagedFiles(
+  options: ReconcileGlobalManagedFilesOptions,
+): Promise<GlobalManagedReconcileResult> {
   const prepared = await preflightGlobalManagedFiles(options);
   if (!options.dryRun && prepared.plans.length > 0) {
     await applyPlans(prepared.plans, options.writer ?? atomicWriteFile, options.remover ?? removeManagedFile);
@@ -285,25 +307,40 @@ export async function reconcileGlobalManagedFiles(options: ReconcileGlobalManage
  * logical-root order. It is intentionally lock-agnostic so G7 can acquire the
  * platform locks in the same order before entering this transaction.
  */
-export async function reconcileGlobalManagedRoots(options: ReconcileGlobalManagedRootsOptions): Promise<GlobalManagedReconcileResult[]> {
-  const ordered = options.reconciliations.map((reconciliation, index) => ({ reconciliation, index })).sort((left, right) => compareCodeUnits(globalManagedReconciliationOrderKey(left.reconciliation), globalManagedReconciliationOrderKey(right.reconciliation)));
+export async function reconcileGlobalManagedRoots(
+  options: ReconcileGlobalManagedRootsOptions,
+): Promise<GlobalManagedReconcileResult[]> {
+  const ordered = options.reconciliations
+    .map((reconciliation, index) => ({ reconciliation, index }))
+    .sort((left, right) =>
+      compareCodeUnits(
+        globalManagedReconciliationOrderKey(left.reconciliation),
+        globalManagedReconciliationOrderKey(right.reconciliation),
+      ),
+    );
   assertUniqueReconciliationRoots(ordered.map(({ reconciliation }) => reconciliation));
   const prepared: Array<PlannedGlobalReconciliation & { index: number }> = [];
   for (const item of ordered) {
-    prepared.push({ ...await preflightGlobalManagedFiles(item.reconciliation), index: item.index });
+    prepared.push({ ...(await preflightGlobalManagedFiles(item.reconciliation)), index: item.index });
   }
-  const transactionPlans = prepared.flatMap(({ options: reconciliation, plans }) => reconciliation.dryRun ? [] : plans.map((plan) => ({
-    plan: { ...plan, label: reconciliation.root.display(plan.label) },
-    writer: reconciliation.writer ?? atomicWriteFile,
-    remover: reconciliation.remover ?? removeManagedFile,
-  })));
+  const transactionPlans = prepared.flatMap(({ options: reconciliation, plans }) =>
+    reconciliation.dryRun
+      ? []
+      : plans.map((plan) => ({
+          plan: { ...plan, label: reconciliation.root.display(plan.label) },
+          writer: reconciliation.writer ?? atomicWriteFile,
+          remover: reconciliation.remover ?? removeManagedFile,
+        })),
+  );
   if (transactionPlans.length > 0) {
     await applyTransaction(transactionPlans);
   }
   return prepared.sort((left, right) => left.index - right.index).map(({ result }) => result);
 }
 
-async function preflightGlobalManagedFiles(options: ReconcileGlobalManagedFilesOptions): Promise<PlannedGlobalReconciliation> {
+async function preflightGlobalManagedFiles(
+  options: ReconcileGlobalManagedFilesOptions,
+): Promise<PlannedGlobalReconciliation> {
   if (!isNonEmptyText(options.generatorVersion)) {
     throw new GlobalManagedManifestError("A global managed generatorVersion is required.");
   }
@@ -318,18 +355,37 @@ async function preflightGlobalManagedFiles(options: ReconcileGlobalManagedFilesO
   if (loadedManifest.manifest.entries.some((entry) => entry.path === manifestRelativePath)) {
     throw new GlobalManagedManifestError("A global managed manifest must not claim its own sidecar path.");
   }
-  if (options.preserveUnownedRoot
-    && loadedManifest.content === undefined
-    && await pathExists(options.root.path)
-    && !await rootContainsOnlyOwnedLock(options.root, options.ownedRootLockPath, options.ownedRootLockRecordName, options.ownedRootLockContent)) {
+  if (
+    options.preserveUnownedRoot &&
+    loadedManifest.content === undefined &&
+    (await pathExists(options.root.path)) &&
+    !(await rootContainsOnlyOwnedLock(
+      options.root,
+      options.ownedRootLockPath,
+      options.ownedRootLockRecordName,
+      options.ownedRootLockContent,
+    ))
+  ) {
     const result = emptyResult(loadedManifest.manifest);
     for (const item of prepared) {
-      preserve(result, entryLabel(item.entry), "untracked-collision", "The pre-existing namespaced integration root has no Harnix ownership sidecar.");
+      preserve(
+        result,
+        entryLabel(item.entry),
+        "untracked-collision",
+        "The pre-existing namespaced integration root has no Harnix ownership sidecar.",
+      );
     }
     return { options, result, plans: [] };
   }
-  const targetRelativePaths = [...new Set([...prepared.map((item) => item.entry.path), ...loadedManifest.manifest.entries.map((entry) => entry.path)])];
-  const targetPaths = await Promise.all(targetRelativePaths.map(async (path) => [path, await resolveSafeGlobalPath(options.root, path)] as const));
+  const targetRelativePaths = [
+    ...new Set([
+      ...prepared.map((item) => item.entry.path),
+      ...loadedManifest.manifest.entries.map((entry) => entry.path),
+    ]),
+  ];
+  const targetPaths = await Promise.all(
+    targetRelativePaths.map(async (path) => [path, await resolveSafeGlobalPath(options.root, path)] as const),
+  );
   const absoluteByRelativePath = new Map(targetPaths);
   const previousByKey = new Map(loadedManifest.manifest.entries.map((entry) => [entryKey(entry), entry]));
   const targetStates = await loadTargetStates(targetRelativePaths, absoluteByRelativePath);
@@ -359,7 +415,12 @@ async function preflightGlobalManagedFiles(options: ReconcileGlobalManagedFilesO
     }
     const target = getTargetState(targetStates, previous.path);
     if (options.removeObsolete) {
-      const removed = removeObsoleteEntry(target, previous, result, options.memberMatchers?.get(previous.sourceId) ?? defaultJsonMemberMatcher);
+      const removed = removeObsoleteEntry(
+        target,
+        previous,
+        result,
+        options.memberMatchers?.get(previous.sourceId) ?? defaultJsonMemberMatcher,
+      );
       if (!removed) {
         nextEntries.push(previous);
       }
@@ -377,16 +438,35 @@ async function preflightGlobalManagedFiles(options: ReconcileGlobalManagedFilesO
   result.manifest = manifest;
 
   const manifestOutput = manifest.entries.length === 0 ? undefined : serializeManifest(manifest);
-  const plans = await buildPlans(targetStates, manifestPath, manifestOutput, manifestRelativePath, loadedManifest.content);
+  const plans = await buildPlans(
+    targetStates,
+    manifestPath,
+    manifestOutput,
+    manifestRelativePath,
+    loadedManifest.content,
+  );
   return { options, result, plans };
 }
 
 function validateGlobalManagedEntry(value: unknown): GlobalManagedEntry {
-  if (!isRecord(value) || typeof value.path !== "string" || typeof value.sourceId !== "string" || typeof value.kind !== "string" || typeof value.generatedHash !== "string" || typeof value.generatorVersion !== "string") {
+  if (
+    !isRecord(value) ||
+    typeof value.path !== "string" ||
+    typeof value.sourceId !== "string" ||
+    typeof value.kind !== "string" ||
+    typeof value.generatedHash !== "string" ||
+    typeof value.generatorVersion !== "string"
+  ) {
     throw new GlobalManagedManifestError("Invalid global managed manifest entry.");
   }
   const path = normalizeGlobalPath(value.path);
-  if (path !== value.path || !isNonEmptyText(value.sourceId) || !isNonEmptyText(value.generatorVersion) || !/^[a-f0-9]{64}$/u.test(value.generatedHash) || !isGlobalManagedKind(value.kind)) {
+  if (
+    path !== value.path ||
+    !isNonEmptyText(value.sourceId) ||
+    !isNonEmptyText(value.generatorVersion) ||
+    !/^[a-f0-9]{64}$/u.test(value.generatedHash) ||
+    !isGlobalManagedKind(value.kind)
+  ) {
     throw new GlobalManagedManifestError("Global managed manifest entries must use safe canonical values.");
   }
 
@@ -412,12 +492,26 @@ function validateSelector(kind: GlobalManagedKind, value: unknown): GlobalManage
     throw new GlobalManagedManifestError("Fragment global entries require a selector.");
   }
   if (kind === "managed-block") {
-    if (value.type !== "markers" || typeof value.begin !== "string" || typeof value.end !== "string" || !isNonEmptyText(value.begin) || !isNonEmptyText(value.end) || markerTokensOverlap(value.begin, value.end)) {
-      throw new GlobalManagedManifestError("Managed-block entries require distinct non-empty markers that do not overlap.");
+    if (
+      value.type !== "markers" ||
+      typeof value.begin !== "string" ||
+      typeof value.end !== "string" ||
+      !isNonEmptyText(value.begin) ||
+      !isNonEmptyText(value.end) ||
+      markerTokensOverlap(value.begin, value.end)
+    ) {
+      throw new GlobalManagedManifestError(
+        "Managed-block entries require distinct non-empty markers that do not overlap.",
+      );
     }
     return { type: "markers", begin: value.begin, end: value.end };
   }
-  if (value.type !== "json-array-member" || typeof value.pointer !== "string" || typeof value.memberId !== "string" || !isNonEmptyText(value.memberId)) {
+  if (
+    value.type !== "json-array-member" ||
+    typeof value.pointer !== "string" ||
+    typeof value.memberId !== "string" ||
+    !isNonEmptyText(value.memberId)
+  ) {
     throw new GlobalManagedManifestError("JSON member entries require a JSON-array-member selector.");
   }
   try {
@@ -440,7 +534,9 @@ function validateEntryGroups(entries: readonly GlobalManagedEntry[]): void {
     const sourceIds = new Set<string>();
     for (const entry of group) {
       if (sourceIds.has(entry.sourceId)) {
-        throw new GlobalManagedManifestError("Global managed entries with the same path must have unique sourceId values.");
+        throw new GlobalManagedManifestError(
+          "Global managed entries with the same path must have unique sourceId values.",
+        );
       }
       sourceIds.add(entry.sourceId);
     }
@@ -478,12 +574,21 @@ function validateEntryGroups(entries: readonly GlobalManagedEntry[]): void {
   }
 }
 
-function prepareDesired(desired: readonly DesiredGlobalManagedFile[], platform: GlobalPlatform, generatorVersion: string): PreparedDesired[] {
+function prepareDesired(
+  desired: readonly DesiredGlobalManagedFile[],
+  platform: GlobalPlatform,
+  generatorVersion: string,
+): PreparedDesired[] {
   const prepared = desired.map((item) => {
     const entry = entryFromDesired(item, generatorVersion);
     return { desired: item, entry };
   });
-  validateGlobalManagedManifest({ generator: "harnix", schemaVersion: 1, platform, entries: prepared.map((item) => item.entry).sort(compareEntries) });
+  validateGlobalManagedManifest({
+    generator: "harnix",
+    schemaVersion: 1,
+    platform,
+    entries: prepared.map((item) => item.entry).sort(compareEntries),
+  });
   return prepared.sort((left, right) => compareEntries(left.entry, right.entry));
 }
 
@@ -495,7 +600,13 @@ function entryFromDesired(desired: DesiredGlobalManagedFile, generatorVersion: s
     if (typeof desired.content !== "string") {
       throw new GlobalManagedManifestError("Whole-file global content must be text.");
     }
-    return validateGlobalManagedEntry({ path: desired.path, sourceId: desired.sourceId, kind: desired.kind, generatedHash: sha256(desired.content), generatorVersion });
+    return validateGlobalManagedEntry({
+      path: desired.path,
+      sourceId: desired.sourceId,
+      kind: desired.kind,
+      generatedHash: sha256(desired.content),
+      generatorVersion,
+    });
   }
   if (desired.kind === "managed-block") {
     if (typeof desired.content !== "string") {
@@ -505,14 +616,28 @@ function entryFromDesired(desired: DesiredGlobalManagedFile, generatorVersion: s
       throw new GlobalManagedManifestError("Managed-block marker content must not contain its own boundary markers.");
     }
     const fragment = renderManagedBlock(desired.selector, desired.content);
-    return validateGlobalManagedEntry({ path: desired.path, sourceId: desired.sourceId, kind: desired.kind, selector: desired.selector, generatedHash: sha256(canonicalManagedBlock(fragment)), generatorVersion });
+    return validateGlobalManagedEntry({
+      path: desired.path,
+      sourceId: desired.sourceId,
+      kind: desired.kind,
+      selector: desired.selector,
+      generatedHash: sha256(canonicalManagedBlock(fragment)),
+      generatorVersion,
+    });
   }
   const member = normalizeJsonValue(desired.member);
   const matcher = desired.memberMatcher ?? defaultJsonMemberMatcher;
   if (!matcher(member, desired.selector)) {
     throw new GlobalManagedManifestError("A desired JSON member does not match its own stable selector.");
   }
-  return validateGlobalManagedEntry({ path: desired.path, sourceId: desired.sourceId, kind: desired.kind, selector: desired.selector, generatedHash: sha256(canonicalJson(member)), generatorVersion });
+  return validateGlobalManagedEntry({
+    path: desired.path,
+    sourceId: desired.sourceId,
+    kind: desired.kind,
+    selector: desired.selector,
+    generatedHash: sha256(canonicalJson(member)),
+    generatorVersion,
+  });
 }
 
 async function loadManifestOrEmpty(path: string, platform: GlobalPlatform): Promise<LoadedGlobalManifest> {
@@ -535,15 +660,20 @@ async function loadManifestOrEmpty(path: string, platform: GlobalPlatform): Prom
   return { manifest, content };
 }
 
-async function loadTargetStates(relativePaths: readonly string[], paths: ReadonlyMap<string, string>): Promise<Map<string, TargetState>> {
-  const states = await Promise.all(relativePaths.map(async (relativePath) => {
-    const absolutePath = paths.get(relativePath);
-    if (absolutePath === undefined) {
-      throw new GlobalManagedManifestError("Missing resolved global managed path.");
-    }
-    const content = await readOptionalText(absolutePath);
-    return [relativePath, { relativePath, absolutePath, original: content, current: content }] as const;
-  }));
+async function loadTargetStates(
+  relativePaths: readonly string[],
+  paths: ReadonlyMap<string, string>,
+): Promise<Map<string, TargetState>> {
+  const states = await Promise.all(
+    relativePaths.map(async (relativePath) => {
+      const absolutePath = paths.get(relativePath);
+      if (absolutePath === undefined) {
+        throw new GlobalManagedManifestError("Missing resolved global managed path.");
+      }
+      const content = await readOptionalText(absolutePath);
+      return [relativePath, { relativePath, absolutePath, original: content, current: content }] as const;
+    }),
+  );
   return new Map(states);
 }
 
@@ -573,7 +703,12 @@ async function markUnownedSkillUnitCollisions(
 
 function harnixSkillUnitPath(path: string): string | undefined {
   const segments = path.split("/");
-  if (segments.length !== 3 || segments[0] !== "skills" || !segments[1]?.startsWith("harnix-") || segments[2] !== "SKILL.md") {
+  if (
+    segments.length !== 3 ||
+    segments[0] !== "skills" ||
+    !segments[1]?.startsWith("harnix-") ||
+    segments[2] !== "SKILL.md"
+  ) {
     return undefined;
   }
   return `${segments[0]}/${segments[1]}`;
@@ -608,11 +743,22 @@ function reconcileDesired(
   return reconcileJsonMember(target, item, previous, restoreDeleted, result);
 }
 
-function reconcileWholeFile(target: TargetState, item: PreparedDesired, previous: GlobalManagedEntry | undefined, restoreDeleted: boolean, result: GlobalManagedReconcileResult): GlobalManagedEntry | undefined {
+function reconcileWholeFile(
+  target: TargetState,
+  item: PreparedDesired,
+  previous: GlobalManagedEntry | undefined,
+  restoreDeleted: boolean,
+  result: GlobalManagedReconcileResult,
+): GlobalManagedEntry | undefined {
   const label = entryLabel(item.entry);
   const desired = item.desired as DesiredGlobalFile;
   if (previous === undefined && target.unownedSkillUnit) {
-    preserve(result, label, "untracked-collision", "A pre-existing Harnix-namespaced skill unit is not owned by Harnix.");
+    preserve(
+      result,
+      label,
+      "untracked-collision",
+      "A pre-existing Harnix-namespaced skill unit is not owned by Harnix.",
+    );
     return undefined;
   }
   if (target.current === undefined) {
@@ -641,7 +787,13 @@ function reconcileWholeFile(target: TargetState, item: PreparedDesired, previous
   return item.entry;
 }
 
-function reconcileManagedBlock(target: TargetState, item: PreparedDesired, previous: GlobalManagedEntry | undefined, restoreDeleted: boolean, result: GlobalManagedReconcileResult): GlobalManagedEntry | undefined {
+function reconcileManagedBlock(
+  target: TargetState,
+  item: PreparedDesired,
+  previous: GlobalManagedEntry | undefined,
+  restoreDeleted: boolean,
+  result: GlobalManagedReconcileResult,
+): GlobalManagedEntry | undefined {
   const label = entryLabel(item.entry);
   const desired = item.desired as DesiredGlobalManagedBlock;
   const fragment = renderManagedBlock(desired.selector, desired.content);
@@ -685,7 +837,13 @@ function reconcileManagedBlock(target: TargetState, item: PreparedDesired, previ
   return item.entry;
 }
 
-function reconcileJsonMember(target: TargetState, item: PreparedDesired, previous: GlobalManagedEntry | undefined, restoreDeleted: boolean, result: GlobalManagedReconcileResult): GlobalManagedEntry | undefined {
+function reconcileJsonMember(
+  target: TargetState,
+  item: PreparedDesired,
+  previous: GlobalManagedEntry | undefined,
+  restoreDeleted: boolean,
+  result: GlobalManagedReconcileResult,
+): GlobalManagedEntry | undefined {
   const label = entryLabel(item.entry);
   const desired = item.desired as DesiredGlobalJsonMember;
   const matcher = desired.memberMatcher ?? defaultJsonMemberMatcher;
@@ -706,14 +864,21 @@ function reconcileJsonMember(target: TargetState, item: PreparedDesired, previou
     preserve(result, label, "invalid-json-pointer", "The configured JSON pointer does not safely resolve to an array.");
     return previous;
   }
-  const matches = array.map((candidate, index) => ({ candidate, index })).filter(({ candidate }) => matcher(candidate, desired.selector));
+  const matches = array
+    .map((candidate, index) => ({ candidate, index }))
+    .filter(({ candidate }) => matcher(candidate, desired.selector));
   if (matches.length > 1) {
     preserve(result, label, "duplicate-json-member", "Multiple JSON array members match the stable Harnix memberId.");
     return previous;
   }
   if (matches.length === 0) {
     if (previous !== undefined && desired.preserveIfUnmatched && array.length > 0) {
-      preserve(result, label, "modified", "The previously-owned JSON member cannot be distinguished safely from edited or unrelated handlers.");
+      preserve(
+        result,
+        label,
+        "modified",
+        "The previously-owned JSON member cannot be distinguished safely from edited or unrelated handlers.",
+      );
       return previous;
     }
     if (previous === undefined || restoreDeleted) {
@@ -727,7 +892,12 @@ function reconcileJsonMember(target: TargetState, item: PreparedDesired, previou
   }
   const match = matches[0]!;
   if (previous === undefined) {
-    preserve(result, label, "untracked-collision", "A pre-existing JSON array member matches the Harnix memberId but is not owned by Harnix.");
+    preserve(
+      result,
+      label,
+      "untracked-collision",
+      "A pre-existing JSON array member matches the Harnix memberId but is not owned by Harnix.",
+    );
     return undefined;
   }
   if (sha256(canonicalJson(match.candidate)) !== previous.generatedHash) {
@@ -744,7 +914,12 @@ function reconcileJsonMember(target: TargetState, item: PreparedDesired, previou
   return item.entry;
 }
 
-function removeObsoleteEntry(target: TargetState, entry: GlobalManagedEntry, result: GlobalManagedReconcileResult, jsonMemberMatcher: GlobalJsonMemberMatcher): boolean {
+function removeObsoleteEntry(
+  target: TargetState,
+  entry: GlobalManagedEntry,
+  result: GlobalManagedReconcileResult,
+  jsonMemberMatcher: GlobalJsonMemberMatcher,
+): boolean {
   const label = entryLabel(entry);
   if (entry.kind === "file") {
     if (target.current === undefined || sha256(target.current) === entry.generatedHash) {
@@ -763,7 +938,12 @@ function removeObsoleteEntry(target: TargetState, entry: GlobalManagedEntry, res
     }
     const located = locateManagedBlock(target.current, selector);
     if (located.kind !== "found") {
-      preserve(result, label, located.kind === "malformed" ? "malformed-markers" : "modified", "The obsolete Harnix marker block cannot be removed safely.");
+      preserve(
+        result,
+        label,
+        located.kind === "malformed" ? "malformed-markers" : "modified",
+        "The obsolete Harnix marker block cannot be removed safely.",
+      );
       return false;
     }
     if (sha256(canonicalManagedBlock(located.value)) !== entry.generatedHash) {
@@ -789,13 +969,25 @@ function removeObsoleteEntry(target: TargetState, entry: GlobalManagedEntry, res
   const selector = entry.selector as JsonArrayMemberSelector;
   const array = findExistingJsonArray(document, selector);
   if (array === undefined) {
-    preserve(result, label, "invalid-json-pointer", "The obsolete JSON array member pointer no longer resolves safely.");
+    preserve(
+      result,
+      label,
+      "invalid-json-pointer",
+      "The obsolete JSON array member pointer no longer resolves safely.",
+    );
     return false;
   }
-  const matches = array.map((candidate, index) => ({ candidate, index })).filter(({ candidate }) => jsonMemberMatcher(candidate, selector));
+  const matches = array
+    .map((candidate, index) => ({ candidate, index }))
+    .filter(({ candidate }) => jsonMemberMatcher(candidate, selector));
   const match = matches[0];
   if (matches.length !== 1 || match === undefined || sha256(canonicalJson(match.candidate)) !== entry.generatedHash) {
-    preserve(result, label, matches.length > 1 ? "duplicate-json-member" : "modified", "The obsolete Harnix JSON array member was modified or cannot be identified safely.");
+    preserve(
+      result,
+      label,
+      matches.length > 1 ? "duplicate-json-member" : "modified",
+      "The obsolete Harnix JSON array member was modified or cannot be identified safely.",
+    );
     return false;
   }
   array.splice(match.index, 1);
@@ -812,7 +1004,9 @@ async function buildPlans(
   manifestOriginal: string | undefined,
 ): Promise<PlannedWrite[]> {
   const plans: PlannedWrite[] = [];
-  for (const state of [...states.values()].sort((left, right) => compareCodeUnits(left.relativePath, right.relativePath))) {
+  for (const state of [...states.values()].sort((left, right) =>
+    compareCodeUnits(left.relativePath, right.relativePath),
+  )) {
     if (state.current === state.original) {
       continue;
     }
@@ -833,7 +1027,11 @@ async function buildPlans(
   return plans;
 }
 
-async function applyPlans(plans: readonly PlannedWrite[], writer: GlobalManagedWriter, remover: GlobalManagedRemover): Promise<void> {
+async function applyPlans(
+  plans: readonly PlannedWrite[],
+  writer: GlobalManagedWriter,
+  remover: GlobalManagedRemover,
+): Promise<void> {
   await applyTransaction(plans.map((plan) => ({ plan, writer, remover })));
 }
 
@@ -855,7 +1053,11 @@ async function applyTransaction(plans: readonly TransactionPlan[]): Promise<void
     }
   } catch (error: unknown) {
     const rollback = await rollbackPlans(attempted);
-    throw new GlobalManagedTransactionError("Global managed reconciliation failed; attempted writes were rolled back conservatively.", rollback, error);
+    throw new GlobalManagedTransactionError(
+      "Global managed reconciliation failed; attempted writes were rolled back conservatively.",
+      rollback,
+      error,
+    );
   }
 }
 
@@ -866,7 +1068,9 @@ async function assertSnapshotUnchangedImmediatelyBeforeApply(plan: PlannedWrite)
   }
 }
 
-async function rollbackPlans(attempted: readonly TransactionPlan[]): Promise<{ restored: string[]; partial: string[] }> {
+async function rollbackPlans(
+  attempted: readonly TransactionPlan[],
+): Promise<{ restored: string[]; partial: string[] }> {
   const restored: string[] = [];
   const partial: string[] = [];
   for (const { plan, writer, remover } of [...attempted].reverse()) {
@@ -917,7 +1121,12 @@ function emptyResult(manifest: GlobalManagedManifestV1): GlobalManagedReconcileR
   return { manifest, created: [], updated: [], unchanged: [], preserved: [], deleted: [], warnings: [] };
 }
 
-function preserve(result: GlobalManagedReconcileResult, path: string, code: GlobalManagedWarning["code"], message: string): void {
+function preserve(
+  result: GlobalManagedReconcileResult,
+  path: string,
+  code: GlobalManagedWarning["code"],
+  message: string,
+): void {
   pushUnique(result.preserved, path);
   result.warnings.push({ code, path, message });
 }
@@ -944,14 +1153,21 @@ function assertUniqueReconciliationRoots(reconciliations: readonly ReconcileGlob
   for (const reconciliation of reconciliations) {
     const target = `${reconciliation.root.path}\u0000${normalizeGlobalPath(reconciliation.manifestPath)}`;
     if (targets.has(target)) {
-      throw new GlobalManagedManifestError("A global managed multi-root transaction must not reconcile one sidecar twice.");
+      throw new GlobalManagedManifestError(
+        "A global managed multi-root transaction must not reconcile one sidecar twice.",
+      );
     }
     targets.add(target);
   }
 }
 
 function sameEntryShape(left: GlobalManagedEntry, right: GlobalManagedEntry): boolean {
-  return left.path === right.path && left.sourceId === right.sourceId && left.kind === right.kind && selectorKey(left.selector) === selectorKey(right.selector);
+  return (
+    left.path === right.path &&
+    left.sourceId === right.sourceId &&
+    left.kind === right.kind &&
+    selectorKey(left.selector) === selectorKey(right.selector)
+  );
 }
 
 function selectorKey(selector: GlobalManagedSelector | undefined): string {
@@ -997,7 +1213,13 @@ async function rootContainsOnlyOwnedLock(
   lockRecordName: string | undefined,
   lockContent: string | undefined,
 ): Promise<boolean> {
-  if (lockPath === undefined || lockRecordName === undefined || lockContent === undefined || lockPath.includes("/") || lockRecordName.includes("/")) {
+  if (
+    lockPath === undefined ||
+    lockRecordName === undefined ||
+    lockContent === undefined ||
+    lockPath.includes("/") ||
+    lockRecordName.includes("/")
+  ) {
     return false;
   }
   const normalizedLockPath = normalizeGlobalPath(lockPath);
@@ -1007,11 +1229,13 @@ async function rootContainsOnlyOwnedLock(
   try {
     const rootEntries = await readdir(root.path);
     const lockEntries = await readdir(absoluteLockPath);
-    return rootEntries.length === 1
-      && rootEntries[0] === normalizedLockPath
-      && lockEntries.length === 1
-      && lockEntries[0] === normalizedRecordName
-      && await readFile(absoluteRecordPath, "utf8") === lockContent;
+    return (
+      rootEntries.length === 1 &&
+      rootEntries[0] === normalizedLockPath &&
+      lockEntries.length === 1 &&
+      lockEntries[0] === normalizedRecordName &&
+      (await readFile(absoluteRecordPath, "utf8")) === lockContent
+    );
   } catch (error: unknown) {
     if (isMissingPathError(error)) {
       return false;
@@ -1029,8 +1253,7 @@ function matchesSnapshot(current: string | undefined, snapshot: FileSnapshot): b
 }
 
 function sameFileSnapshot(left: FileSnapshot, right: FileSnapshot): boolean {
-  return left.exists === right.exists
-    && (!left.exists || (left.content === right.content && left.mode === right.mode));
+  return left.exists === right.exists && (!left.exists || (left.content === right.content && left.mode === right.mode));
 }
 
 function normalizeGlobalPath(value: string): string {
@@ -1050,7 +1273,13 @@ function isMissingPathError(error: unknown): error is NodeJS.ErrnoException {
 }
 
 function isGlobalPlatform(value: unknown): value is GlobalPlatform {
-  return value === "kiro" || value === "antigravity-desktop" || value === "antigravity-cli" || value === "codex" || value === "claude";
+  return (
+    value === "kiro" ||
+    value === "antigravity-desktop" ||
+    value === "antigravity-cli" ||
+    value === "codex" ||
+    value === "claude"
+  );
 }
 
 function isGlobalManagedKind(value: string): value is GlobalManagedKind {

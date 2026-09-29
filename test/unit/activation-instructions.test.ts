@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import { ANTIGRAVITY_GLOBAL_RULE } from "../../src/configurators/antigravity.js";
 import { codexGlobalAgentsContent } from "../../src/configurators/codex.js";
 import { KIRO_GLOBAL_STEERING } from "../../src/configurators/kiro.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
+import {
+  HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
+  HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
+} from "../../src/templates/harnix/activation.js";
 import { renderAgentsTemplate } from "../../src/templates/harnix/agents.js";
 import { workflowSkills, workflowTemplate } from "../../src/templates/harnix/workflow.js";
 
@@ -22,7 +25,8 @@ const targetAuthorityContract = [
 type TargetValidation = "existing-safe" | "missing" | "symlink-escape" | "traversal" | "unsafe-root";
 type HarnixState = "invalid" | "uninitialized" | "valid";
 type RequestIntent = "mutating" | "read-only";
-type TargetAction = "activate" | "compare-isolated" | "report-invalid" | "report-uninitialized" | "request-exact-target" | "stop";
+type TargetAction =
+  "activate" | "compare-isolated" | "report-invalid" | "report-uninitialized" | "request-exact-target" | "stop";
 type TargetStopReason =
   | "explicit-target-invalid"
   | "explicit-target-missing"
@@ -148,32 +152,56 @@ const targetAuthorityScenarios: readonly TargetAuthorityScenario[] = [
   },
   {
     id: "explicit-missing",
-    input: { ambient: ambientTarget, explicitTargets: [{ ...explicitTarget, validation: "missing" }], intent: "mutating" },
+    input: {
+      ambient: ambientTarget,
+      explicitTargets: [{ ...explicitTarget, validation: "missing" }],
+      intent: "mutating",
+    },
     expected: decision("stop", [], "explicit-target-missing"),
   },
   {
     id: "explicit-traversal",
-    input: { ambient: ambientTarget, explicitTargets: [{ ...explicitTarget, validation: "traversal" }], intent: "mutating" },
+    input: {
+      ambient: ambientTarget,
+      explicitTargets: [{ ...explicitTarget, validation: "traversal" }],
+      intent: "mutating",
+    },
     expected: decision("stop", [], "explicit-target-traversal"),
   },
   {
     id: "explicit-unsafe-root",
-    input: { ambient: ambientTarget, explicitTargets: [{ ...explicitTarget, validation: "unsafe-root" }], intent: "mutating" },
+    input: {
+      ambient: ambientTarget,
+      explicitTargets: [{ ...explicitTarget, validation: "unsafe-root" }],
+      intent: "mutating",
+    },
     expected: decision("stop", [], "explicit-target-unsafe-root"),
   },
   {
     id: "explicit-symlink-escape",
-    input: { ambient: ambientTarget, explicitTargets: [{ ...explicitTarget, validation: "symlink-escape" }], intent: "mutating" },
+    input: {
+      ambient: ambientTarget,
+      explicitTargets: [{ ...explicitTarget, validation: "symlink-escape" }],
+      intent: "mutating",
+    },
     expected: decision("stop", [], "explicit-target-symlink-escape"),
   },
   {
     id: "explicit-uninitialized",
-    input: { ambient: ambientTarget, explicitTargets: [{ ...explicitTarget, harnixState: "uninitialized" }], intent: "mutating" },
+    input: {
+      ambient: ambientTarget,
+      explicitTargets: [{ ...explicitTarget, harnixState: "uninitialized" }],
+      intent: "mutating",
+    },
     expected: decision("report-uninitialized", ["explicit-root"], "explicit-target-uninitialized"),
   },
   {
     id: "explicit-invalid",
-    input: { ambient: ambientTarget, explicitTargets: [{ ...explicitTarget, harnixState: "invalid" }], intent: "mutating" },
+    input: {
+      ambient: ambientTarget,
+      explicitTargets: [{ ...explicitTarget, harnixState: "invalid" }],
+      intent: "mutating",
+    },
     expected: decision("report-invalid", ["explicit-root"], "explicit-target-invalid"),
   },
   {
@@ -289,8 +317,12 @@ describe("Harnix target authority instructions", () => {
       expect(actual, scenario.id).toEqual(scenario.expected);
 
       if (scenario.input.explicitTargets.length > 0) {
-        expect(actual.harnixReadRoots, `${scenario.id} read ambient Harnix state`).not.toContain(ambientTarget.canonicalRoot);
-        expect(actual.observedCanaries, `${scenario.id} observed the ambient canary`).not.toContain(AMBIENT_PRIVATE_CANARY);
+        expect(actual.harnixReadRoots, `${scenario.id} read ambient Harnix state`).not.toContain(
+          ambientTarget.canonicalRoot,
+        );
+        expect(actual.observedCanaries, `${scenario.id} observed the ambient canary`).not.toContain(
+          AMBIENT_PRIVATE_CANARY,
+        );
       }
       expect(actual.harnixWriteRoots, `${scenario.id} performed a guard-time write`).toEqual([]);
     }

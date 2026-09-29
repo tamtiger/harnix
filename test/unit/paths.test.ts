@@ -11,7 +11,10 @@ import {
 import { useTemporaryRepositories } from "../support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-path-");
-async function createTemporaryDirectory(prefix: string): Promise<string> { void prefix; return temporaryRepository(); }
+async function createTemporaryDirectory(prefix: string): Promise<string> {
+  void prefix;
+  return temporaryRepository();
+}
 
 describe("normalizeRepositoryPath", () => {
   it("normalizes repository-relative Windows paths to POSIX", () => {
@@ -19,7 +22,7 @@ describe("normalizeRepositoryPath", () => {
     expect(normalizeRepositoryPath(".", { allowRoot: true })).toBe(".");
   });
 
-  it.each(["", ".", "../secret", "src/../../secret", "/tmp/secret", "C:\\secret"]) (
+  it.each(["", ".", "../secret", "src/../../secret", "/tmp/secret", "C:\\secret"])(
     "rejects unsafe persisted path %j",
     (unsafePath) => {
       expect(() => normalizeRepositoryPath(unsafePath)).toThrow(UnsafeProjectPathError);
@@ -87,4 +90,3 @@ describe("resolveSafeProjectPath", () => {
     await expect(resolveSafeProjectPath(root, "linked/secret.txt")).rejects.toBeInstanceOf(UnsafeProjectPathError);
   });
 });
-

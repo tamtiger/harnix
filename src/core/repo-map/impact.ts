@@ -108,9 +108,15 @@ function emptyResult(
 
 function assertImpactOptions(options: RepoMapImpactOptions): void {
   let normalized: string;
-  try { normalized = normalizeRepositoryPath(options.target); }
-  catch { throw new Error("Impact target must be an exact normalized repository-relative POSIX path."); }
-  if (normalized !== options.target || options.target.includes("\\")) throw new Error("Impact target must be an exact normalized repository-relative POSIX path.");
-  if (!Number.isInteger(options.depth) || options.depth < 1 || options.depth > 3) throw new Error("Impact depth must be an integer between 1 and 3.");
-  if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 20) throw new Error("Impact limit must be an integer between 1 and 20.");
+  try {
+    normalized = normalizeRepositoryPath(options.target);
+  } catch {
+    throw new Error("Impact target must be an exact normalized repository-relative POSIX path.");
+  }
+  if (normalized !== options.target || options.target.includes("\\"))
+    throw new Error("Impact target must be an exact normalized repository-relative POSIX path.");
+  if (!Number.isInteger(options.depth) || options.depth < 1 || options.depth > 3)
+    throw new Error("Impact depth must be an integer between 1 and 3.");
+  if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 20)
+    throw new Error("Impact limit must be an integer between 1 and 20.");
 }

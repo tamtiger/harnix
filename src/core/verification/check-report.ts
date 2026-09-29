@@ -47,24 +47,30 @@ export async function inspectRequiredChecks(
   task: TaskRecord,
   now = Date.now(),
 ): Promise<RequiredCheckInspection[]> {
-  return Promise.all(task.validationPlan.filter((check) => check.required).map(async (check): Promise<RequiredCheckInspection> => {
-    const evidence = selectLatestEvidence(task.evidence, check.id, now);
-    if (evidence === undefined) return inspection(check.id, "pending", ["no-evidence"]);
-    const findings = task.schemaVersion === 1 ? undefined : (evidence as { findings?: EvidenceFindingV1[] }).findings;
-    if (evidence.result === "skipped") return inspection(check.id, "pending", ["latest-skipped"], findings);
-    if (evidence.result === "fail") return inspection(check.id, "failed", ["latest-failed"], findings);
-    const timestamp = Date.parse(evidence.recordedAt);
-    if (!Number.isFinite(timestamp) || timestamp > now) return inspection(check.id, "stale", ["evidence-expired"], findings);
-    if (task.schemaVersion !== 3) return inspection(check.id, "stale", ["legacy-schema"], findings);
-    try {
-      const current = await computeInputDigest(projectRoot, task, check.id);
-      return current.inputDigest === evidence.inputDigest
-        ? inspection(check.id, "passed", [], findings)
-        : inspection(check.id, "stale", ["digest-mismatch"], findings);
-    } catch {
-      return inspection(check.id, "stale", ["inputs-unavailable"], findings);
-    }
-  }));
+  return Promise.all(
+    task.validationPlan
+      .filter((check) => check.required)
+      .map(async (check): Promise<RequiredCheckInspection> => {
+        const evidence = selectLatestEvidence(task.evidence, check.id, now);
+        if (evidence === undefined) return inspection(check.id, "pending", ["no-evidence"]);
+        const findings =
+          task.schemaVersion === 1 ? undefined : (evidence as { findings?: EvidenceFindingV1[] }).findings;
+        if (evidence.result === "skipped") return inspection(check.id, "pending", ["latest-skipped"], findings);
+        if (evidence.result === "fail") return inspection(check.id, "failed", ["latest-failed"], findings);
+        const timestamp = Date.parse(evidence.recordedAt);
+        if (!Number.isFinite(timestamp) || timestamp > now)
+          return inspection(check.id, "stale", ["evidence-expired"], findings);
+        if (task.schemaVersion !== 3) return inspection(check.id, "stale", ["legacy-schema"], findings);
+        try {
+          const current = await computeInputDigest(projectRoot, task, check.id);
+          return current.inputDigest === evidence.inputDigest
+            ? inspection(check.id, "passed", [], findings)
+            : inspection(check.id, "stale", ["digest-mismatch"], findings);
+        } catch {
+          return inspection(check.id, "stale", ["inputs-unavailable"], findings);
+        }
+      }),
+  );
 }
 
 function inspection(

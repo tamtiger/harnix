@@ -19,26 +19,39 @@ const repositoryHarnix = join(process.cwd(), ".harnix");
  */
 const KNOWN_MALFORMED = ["20260813-104800-templateversion", "20260813-105600-changelogrelease"];
 
-interface History { root: string; tasks: TaskRecord[]; unreadable: string[] }
+interface History {
+  root: string;
+  tasks: TaskRecord[];
+  unreadable: string[];
+}
 
 /** A disposable project that holds a copy of this repository's task records and epic files, so the real data is never touched. */
 async function projectWithHistory(): Promise<History> {
   const root = await temporaryRepository();
   await initializeProject({ root, developer: "tam", yes: true });
-  const ids = (await readdir(join(repositoryHarnix, "tasks"), { withFileTypes: true })).filter((entry) => entry.isDirectory()).map((entry) => entry.name).sort();
+  const ids = (await readdir(join(repositoryHarnix, "tasks"), { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
   for (const id of ids) {
     await mkdir(join(root, ".harnix", "tasks", id), { recursive: true });
     await cp(join(repositoryHarnix, "tasks", id, "task.json"), join(root, ".harnix", "tasks", id, "task.json"));
   }
   for (const directory of ["epics", "roadmaps"]) {
-    try { await cp(join(repositoryHarnix, directory), join(root, ".harnix", directory), { recursive: true }); }
-    catch { /* the repository may hold only one of the two directory names */ }
+    try {
+      await cp(join(repositoryHarnix, directory), join(root, ".harnix", directory), { recursive: true });
+    } catch {
+      /* the repository may hold only one of the two directory names */
+    }
   }
   const tasks: TaskRecord[] = [];
   const unreadable: string[] = [];
   for (const id of ids) {
-    try { tasks.push(await loadTask(join(root, ".harnix", "tasks", id, "task.json"))); }
-    catch { unreadable.push(id); }
+    try {
+      tasks.push(await loadTask(join(root, ".harnix", "tasks", id, "task.json")));
+    } catch {
+      unreadable.push(id);
+    }
   }
   return { root, tasks, unreadable };
 }

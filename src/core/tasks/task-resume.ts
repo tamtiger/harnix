@@ -60,7 +60,8 @@ export async function resumeTask(
   } catch {
     throw new Error("Active task state is unavailable; run harnix doctor.");
   }
-  if (active !== null && terminalStatuses.has(active.status)) throw new Error("Active task state is unavailable; run harnix doctor.");
+  if (active !== null && terminalStatuses.has(active.status))
+    throw new Error("Active task state is unavailable; run harnix doctor.");
   if (active !== null && active.id !== candidate.id) throw new Error("Resume cannot replace another active task.");
 
   let outcome: TaskResumeOutcome;
@@ -92,9 +93,12 @@ export async function loadBoundedActiveTask(harnixRoot: string): Promise<TaskRec
   try {
     if ((await stat(pointerPath)).size > MAX_ACTIVE_POINTER_BYTES) throw new Error("Active task pointer is oversized.");
     source = await readFile(pointerPath, "utf8");
+  } catch (error: unknown) {
+    if (isMissing(error)) return null;
+    throw error;
   }
-  catch (error: unknown) { if (isMissing(error)) return null; throw error; }
-  if (Buffer.byteLength(source, "utf8") > MAX_ACTIVE_POINTER_BYTES) throw new Error("Active task pointer is oversized.");
+  if (Buffer.byteLength(source, "utf8") > MAX_ACTIVE_POINTER_BYTES)
+    throw new Error("Active task pointer is oversized.");
   const taskId = source.trim();
   if (taskId.length === 0) return null;
   if (!taskIdPattern.test(taskId)) throw new Error("Active task pointer is invalid.");
@@ -113,5 +117,7 @@ async function loadBoundedTask(harnixRoot: string, taskId: string): Promise<Task
 }
 
 function isMissing(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT";
+  return (
+    typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT"
+  );
 }

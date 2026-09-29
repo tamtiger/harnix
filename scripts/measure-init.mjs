@@ -21,17 +21,21 @@ for (let index = 0; index < 3; index += 1) {
       env: createIsolatedUserEnvironment(home),
       windowsHide: true,
     });
-    if (result.status !== 0) throw new Error(`init run failed: ${result.error?.message || result.stderr || result.stdout || "unknown command failure"}`);
+    if (result.status !== 0)
+      throw new Error(
+        `init run failed: ${result.error?.message || result.stderr || result.stdout || "unknown command failure"}`,
+      );
     runs.push(performance.now() - started);
   } finally {
-    await Promise.all([
-      rm(fixture, { force: true, recursive: true }),
-      rm(home, { force: true, recursive: true }),
-    ]);
+    await Promise.all([rm(fixture, { force: true, recursive: true }), rm(home, { force: true, recursive: true })]);
   }
 }
-const ordered = [...runs].sort((left, right) => left - right); const median = ordered[1]; const worst = ordered.at(-1);
-process.stdout.write(`${JSON.stringify({ command: "harnix init", fixture: "representative-vue-nest-monorepo-with-ignored-trees", repetitions: runs.length, runs, median, worst })}\n`);
+const ordered = [...runs].sort((left, right) => left - right);
+const median = ordered[1];
+const worst = ordered.at(-1);
+process.stdout.write(
+  `${JSON.stringify({ command: "harnix init", fixture: "representative-vue-nest-monorepo-with-ignored-trees", repetitions: runs.length, runs, median, worst })}\n`,
+);
 if (worst >= 5000) throw new Error(`init worst run ${worst.toFixed(1)}ms exceeds 5 seconds.`);
 
 async function createRepresentativeFixture(directory) {
@@ -39,8 +43,17 @@ async function createRepresentativeFixture(directory) {
   await mkdir(join(directory, "coverage", "nested", "reports"), { recursive: true });
   await mkdir(join(directory, ".cache", "bundler"), { recursive: true });
   await writeFile(join(directory, "package.json"), JSON.stringify({ private: true, dependencies: { vue: "latest" } }));
-  await writeFile(join(directory, "apps", "api", "package.json"), JSON.stringify({ dependencies: { "@nestjs/core": "latest" } }));
+  await writeFile(
+    join(directory, "apps", "api", "package.json"),
+    JSON.stringify({ dependencies: { "@nestjs/core": "latest" } }),
+  );
   await writeFile(join(directory, "apps", "api", "src", "main.ts"), "export const app = true;\n");
-  await writeFile(join(directory, "coverage", "nested", "reports", "package.json"), JSON.stringify({ dependencies: { react: "latest", "react-dom": "latest" } }));
-  await writeFile(join(directory, ".cache", "bundler", "pom.xml"), "<project><artifactId>ignored</artifactId></project>\n");
+  await writeFile(
+    join(directory, "coverage", "nested", "reports", "package.json"),
+    JSON.stringify({ dependencies: { react: "latest", "react-dom": "latest" } }),
+  );
+  await writeFile(
+    join(directory, ".cache", "bundler", "pom.xml"),
+    "<project><artifactId>ignored</artifactId></project>\n",
+  );
 }

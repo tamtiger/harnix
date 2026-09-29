@@ -52,7 +52,8 @@ export async function syncVersion({
   const heading = `## [${version}] - ${date}`;
   const versionEntry = new RegExp(`^## \\[${version.replaceAll(".", "\\.")}\\] - \\d{4}-\\d{2}-\\d{2}$`, "mu");
 
-  if (comparison < 0) throw new Error(`Requested version ${version} must be greater than current version ${packageDocument.version}.`);
+  if (comparison < 0)
+    throw new Error(`Requested version ${version} must be greater than current version ${packageDocument.version}.`);
   if (comparison === 0) {
     if (!versionEntry.test(changelog)) throw new Error(`CHANGELOG.md does not contain a release entry for ${version}.`);
     const updated = [];
@@ -74,7 +75,8 @@ export async function syncVersion({
     }
     return { changed: updated.length > 0, previousVersion: packageDocument.version, updated, version };
   }
-  if (normalizedSummaries.length === 0) throw new Error("At least one non-empty --summary is required for a new release version.");
+  if (normalizedSummaries.length === 0)
+    throw new Error("At least one non-empty --summary is required for a new release version.");
   if (versionEntry.test(changelog)) throw new Error(`CHANGELOG.md already contains version ${version}.`);
 
   const updated = [];
@@ -100,26 +102,37 @@ export async function syncVersion({
 }
 
 function parseVersion(value) {
-  if (typeof value !== "string" || !semverPattern.test(value)) throw new Error("Version must be strict semver in x.y.z form.");
+  if (typeof value !== "string" || !semverPattern.test(value))
+    throw new Error("Version must be strict semver in x.y.z form.");
   return value.split(".").map(Number);
 }
 
 function compareVersions(left, right) {
-  for (let index = 0; index < left.length; index += 1) if (left[index] !== right[index]) return left[index] > right[index] ? 1 : -1;
+  for (let index = 0; index < left.length; index += 1)
+    if (left[index] !== right[index]) return left[index] > right[index] ? 1 : -1;
   return 0;
 }
 
 function normalizeSummaries(summaries) {
   if (!Array.isArray(summaries)) return [];
-  return summaries.map((summary) => typeof summary === "string" ? summary.trim() : "").filter((summary) => summary.length > 0 && !/[\r\n]/u.test(summary));
+  return summaries
+    .map((summary) => (typeof summary === "string" ? summary.trim() : ""))
+    .filter((summary) => summary.length > 0 && !/[\r\n]/u.test(summary));
 }
 
 async function canonicalSkillPaths(root) {
   const directory = join(root, "src", "skills");
   const entries = await readdir(directory, { withFileTypes: true });
-  const skills = entries.filter((entry) => entry.isDirectory() && entry.name.startsWith("harnix-")).map((entry) => join(directory, entry.name, "SKILL.md")).sort();
+  const skills = entries
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith("harnix-"))
+    .map((entry) => join(directory, entry.name, "SKILL.md"))
+    .sort();
   if (skills.length === 0) throw new Error("No canonical Harnix skill sources were found.");
-  await Promise.all(skills.map(async (path) => { await stat(path); }));
+  await Promise.all(
+    skills.map(async (path) => {
+      await stat(path);
+    }),
+  );
   return skills;
 }
 
@@ -142,7 +155,9 @@ function insertChangelogEntry(changelog, heading, summaries, kind = "changed") {
   const sectionTitle = kindTitles[kind] ?? "Changed";
   const entry = `${heading}\n\n### ${sectionTitle}\n\n${summaries.map((summary) => `- ${summary}`).join("\n")}\n\n`;
   const firstRelease = changelog.search(/^## \[/mu);
-  return firstRelease < 0 ? `${changelog.trimEnd()}\n\n${entry}` : `${changelog.slice(0, firstRelease)}${entry}${changelog.slice(firstRelease)}`;
+  return firstRelease < 0
+    ? `${changelog.trimEnd()}\n\n${entry}`
+    : `${changelog.slice(0, firstRelease)}${entry}${changelog.slice(firstRelease)}`;
 }
 
 function replaceReadmeVersion(readme, version) {
@@ -159,7 +174,13 @@ function replaceSelfHostGeneratorVersion(source, version, path) {
   } catch {
     throw new Error(`Self-host manifest is not valid JSON: ${path}.`);
   }
-  if (!isRecord(document) || document.generator !== "harnix" || document.schemaVersion !== 1 || !Array.isArray(document.entries) || document.entries.length === 0) {
+  if (
+    !isRecord(document) ||
+    document.generator !== "harnix" ||
+    document.schemaVersion !== 1 ||
+    !Array.isArray(document.entries) ||
+    document.entries.length === 0
+  ) {
     throw new Error(`Self-host manifest has an invalid structure: ${path}.`);
   }
   if (!document.entries.every((entry) => isRecord(entry) && typeof entry.generatorVersion === "string")) {
@@ -169,7 +190,9 @@ function replaceSelfHostGeneratorVersion(source, version, path) {
   return `${JSON.stringify({ ...document, entries: document.entries.map((entry) => ({ ...entry, generatorVersion: version })) }, null, 2)}\n`;
 }
 
-function isRecord(value) { return typeof value === "object" && value !== null && !Array.isArray(value); }
+function isRecord(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 async function atomicWrite(path, contents) {
   const mode = (await stat(path)).mode;
@@ -183,7 +206,9 @@ async function atomicWrite(path, contents) {
   }
 }
 
-function relativePath(root, path) { return path.slice(root.length + 1).replaceAll("\\", "/"); }
+function relativePath(root, path) {
+  return path.slice(root.length + 1).replaceAll("\\", "/");
+}
 
 function parseArguments(argumentsList) {
   const normalizedArguments = argumentsList[0] === "--" ? argumentsList.slice(1) : argumentsList;

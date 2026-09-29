@@ -28,9 +28,16 @@ const MAX_HOOK_CONTEXT_ENTRIES = 64;
 
 export async function buildEffectiveContext(input: EffectiveContextInput): Promise<EffectiveContextResult> {
   const persisted = await loadPersistedEntries(input.harnixRoot, input.task.id);
-  const taskEntries = persisted === undefined
-    ? input.task.relevantPaths.map((path): ContextEntry => ({ path, reason: "task reference", priority: 0, pinned: false, states: ["implementing"] }))
-    : persisted;
+  const taskEntries =
+    persisted === undefined
+      ? input.task.relevantPaths.map((path): ContextEntry => ({
+          path,
+          reason: "task reference",
+          priority: 0,
+          pinned: false,
+          states: ["implementing"],
+        }))
+      : persisted;
   const selectedGuides = selectGuideSources({
     activePaths: input.task.relevantPaths,
     languages: input.config.languages,
@@ -40,7 +47,13 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
   const guidePaths = selectedGuides.map(guideOutputPath);
   const entries: ContextEntry[] = [
     ...taskEntries,
-    ...guidePaths.map((path) => ({ path, reason: "applicable guide", priority: 0, pinned: false, states: ["implementing", "verifying"] })),
+    ...guidePaths.map((path) => ({
+      path,
+      reason: "applicable guide",
+      priority: 0,
+      pinned: false,
+      states: ["implementing", "verifying"],
+    })),
   ];
   const renderCap = input.platform === "codex" ? 2_500 : Math.min(input.config.context.maxCharacters, 8_000);
   const bounded = input.forceBounded === true;
@@ -54,7 +67,9 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
       references: input.task.relevantPaths,
       guides: guidePaths,
       languages: selectedGuides.filter(({ descriptor }) => descriptor.appliesTo.languages?.length).map(guideOutputPath),
-      technologies: selectedGuides.filter(({ descriptor }) => descriptor.appliesTo.technologies?.length).map(guideOutputPath),
+      technologies: selectedGuides
+        .filter(({ descriptor }) => descriptor.appliesTo.technologies?.length)
+        .map(guideOutputPath),
     },
     bounded ? false : input.config.runtime.fullContext,
     bounded ? MAX_HOOK_CONTEXT_ENTRIES : undefined,
@@ -90,22 +105,36 @@ function reasonCodes(
   const result = new Map<string, Set<EffectiveContextReasonCode>>();
   const add = (path: string, code: EffectiveContextReasonCode): void => {
     let normalized: string;
-    try { normalized = normalizeRepositoryPath(path); } catch { return; }
+    try {
+      normalized = normalizeRepositoryPath(path);
+    } catch {
+      return;
+    }
     const codes = result.get(normalized) ?? new Set<EffectiveContextReasonCode>();
     codes.add(code);
     result.set(normalized, codes);
   };
   for (const path of taskPaths) add(path, "task-reference");
   for (const path of guidePaths) add(path, "applicable-guide");
-  if (persisted) for (const entry of entries.slice(0, entries.length - guidePaths.length)) add(entry.path, "persisted-selection");
+  if (persisted)
+    for (const entry of entries.slice(0, entries.length - guidePaths.length)) add(entry.path, "persisted-selection");
   for (const entry of entries) if (entry.pinned) add(entry.path, "pinned");
   return new Map([...result].map(([path, codes]) => [path, [...codes].sort(compareCodeUnits)]));
 }
 
 function taskTopics(...values: string[]): string[] {
-  return [...new Set(values.join(" ").toLowerCase().match(/[a-z0-9-]+/gu) ?? [])].sort(compareCodeUnits);
+  return [
+    ...new Set(
+      values
+        .join(" ")
+        .toLowerCase()
+        .match(/[a-z0-9-]+/gu) ?? [],
+    ),
+  ].sort(compareCodeUnits);
 }
 
 function isMissing(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT";
+  return (
+    typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT"
+  );
 }

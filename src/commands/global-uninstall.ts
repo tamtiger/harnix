@@ -14,7 +14,12 @@ import {
 } from "../utils/global-managed-files.js";
 import { matchesClaudeGlobalContextHookGroup } from "../configurators/claude.js";
 import { matchesCodexGlobalContextHookGroup } from "../configurators/codex.js";
-import { resolveSelectedUserPlatformRoots, type HomeResolver, type SelectedUserPlatformRoots, type UserPathRoot } from "../utils/user-paths.js";
+import {
+  resolveSelectedUserPlatformRoots,
+  type HomeResolver,
+  type SelectedUserPlatformRoots,
+  type UserPathRoot,
+} from "../utils/user-paths.js";
 import { packageVersion } from "../version.js";
 
 export type GlobalUninstallPlatform = "kiro" | "antigravity" | "codex" | "claude";
@@ -68,10 +73,12 @@ export async function uninstallGlobalIntegrations(options: GlobalUninstallOption
   if (isTestProcess() && options.roots === undefined && options.homeResolver === undefined) {
     throw new Error("Global uninstall requires an injected homeResolver in test mode.");
   }
-  const roots = options.roots ?? await resolveSelectedUserPlatformRoots(platforms, {
-    ...(options.environment === undefined ? {} : { environment: options.environment }),
-    ...(options.homeResolver === undefined ? {} : { homeResolver: options.homeResolver }),
-  });
+  const roots =
+    options.roots ??
+    (await resolveSelectedUserPlatformRoots(platforms, {
+      ...(options.environment === undefined ? {} : { environment: options.environment }),
+      ...(options.homeResolver === undefined ? {} : { homeResolver: options.homeResolver }),
+    }));
   const targets = await loadTargets(platforms, roots);
 
   if (!options.yes) {
@@ -89,7 +96,7 @@ export async function uninstallGlobalIntegrations(options: GlobalUninstallOption
       });
       locks = await acquireLocks(activeTargets, options.lockAcquirer ?? acquireHarnixFileLock);
       const outcomes = await reconcileGlobalManagedRoots({ reconciliations });
-      const outcomesByTarget = new Map(activeTargets.map((target, index) => [target, outcomes[index]! ]));
+      const outcomesByTarget = new Map(activeTargets.map((target, index) => [target, outcomes[index]!]));
       emptiedTargets = activeTargets.filter((target) => outcomesByTarget.get(target)?.manifest.entries.length === 0);
       return resultFromTargets(platforms, targets, outcomesByTarget, false);
     }
@@ -108,9 +115,10 @@ export async function uninstallGlobalIntegrations(options: GlobalUninstallOption
  */
 async function cleanupEmptyOwnedDirectories(targets: readonly GlobalUninstallTarget[]): Promise<void> {
   for (const target of targets) {
-    const directories = target.platform === "antigravity-desktop" || target.platform === "antigravity-cli"
-      ? ownedPluginDirectories(target.entries)
-      : ownedSkillUnitDirectories(target.entries);
+    const directories =
+      target.platform === "antigravity-desktop" || target.platform === "antigravity-cli"
+        ? ownedPluginDirectories(target.entries)
+        : ownedSkillUnitDirectories(target.entries);
     for (const relativePath of directories) {
       await removeEmptyOwnedDirectory(target.root, relativePath);
     }
@@ -150,7 +158,12 @@ function uniqueDeepestFirst(paths: readonly string[]): string[] {
 function ownedSkillUnitDirectory(entry: GlobalManagedEntry): string | undefined {
   if (entry.kind !== "file") return undefined;
   const segments = entry.path.split("/");
-  if (segments.length !== 3 || segments[0] !== "skills" || !segments[1]?.startsWith("harnix-") || segments[2] !== "SKILL.md") {
+  if (
+    segments.length !== 3 ||
+    segments[0] !== "skills" ||
+    !segments[1]?.startsWith("harnix-") ||
+    segments[2] !== "SKILL.md"
+  ) {
     return undefined;
   }
   return `${segments[0]}/${segments[1]}`;
@@ -181,38 +194,64 @@ async function removeEmptyDirectory(path: string): Promise<void> {
   }
 }
 
-async function loadTargets(platforms: readonly GlobalUninstallPlatform[], roots: SelectedUserPlatformRoots): Promise<GlobalUninstallTarget[]> {
+async function loadTargets(
+  platforms: readonly GlobalUninstallPlatform[],
+  roots: SelectedUserPlatformRoots,
+): Promise<GlobalUninstallTarget[]> {
   const descriptors = createTargetDescriptors(platforms, roots);
-  return Promise.all(descriptors.map(async (descriptor) => {
-    const manifestPath = await resolveSafeGlobalPath(descriptor.root, descriptor.manifestPath);
-    let entries: readonly GlobalManagedEntry[] = [];
-    try {
-      const manifest = await readGlobalManagedManifest(manifestPath);
-      if (manifest.platform !== descriptor.platform) {
-        throw new GlobalManagedManifestError("The global managed manifest belongs to a different platform root.");
+  return Promise.all(
+    descriptors.map(async (descriptor) => {
+      const manifestPath = await resolveSafeGlobalPath(descriptor.root, descriptor.manifestPath);
+      let entries: readonly GlobalManagedEntry[] = [];
+      try {
+        const manifest = await readGlobalManagedManifest(manifestPath);
+        if (manifest.platform !== descriptor.platform) {
+          throw new GlobalManagedManifestError("The global managed manifest belongs to a different platform root.");
+        }
+        if (manifest.entries.some((entry) => entry.path === descriptor.manifestPath)) {
+          throw new GlobalManagedManifestError("A global managed manifest must not claim its own sidecar path.");
+        }
+        entries = manifest.entries;
+      } catch (error: unknown) {
+        if (!isMissingPathError(error)) {
+          throw error;
+        }
       }
-      if (manifest.entries.some((entry) => entry.path === descriptor.manifestPath)) {
-        throw new GlobalManagedManifestError("A global managed manifest must not claim its own sidecar path.");
-      }
-      entries = manifest.entries;
-    } catch (error: unknown) {
-      if (!isMissingPathError(error)) {
-        throw error;
-      }
-    }
-    return { ...descriptor, entries };
-  }));
+      return { ...descriptor, entries };
+    }),
+  );
 }
 
-function createTargetDescriptors(platforms: readonly GlobalUninstallPlatform[], roots: SelectedUserPlatformRoots): Omit<GlobalUninstallTarget, "entries">[] {
+function createTargetDescriptors(
+  platforms: readonly GlobalUninstallPlatform[],
+  roots: SelectedUserPlatformRoots,
+): Omit<GlobalUninstallTarget, "entries">[] {
   const targets: Omit<GlobalUninstallTarget, "entries">[] = [];
   if (platforms.includes("kiro")) {
-    targets.push({ publicPlatform: "kiro", root: requireSelectedRoot(roots.kiro, "Kiro"), manifestPath: "harnix/managed.json", lockPath: "harnix/managed.lock", platform: "kiro" });
+    targets.push({
+      publicPlatform: "kiro",
+      root: requireSelectedRoot(roots.kiro, "Kiro"),
+      manifestPath: "harnix/managed.json",
+      lockPath: "harnix/managed.lock",
+      platform: "kiro",
+    });
   }
   if (platforms.includes("antigravity")) {
     targets.push(
-      { publicPlatform: "antigravity", root: requireSelectedRoot(roots.antigravityDesktop, "Antigravity Desktop"), manifestPath: ".managed.json", lockPath: ".managed.lock", platform: "antigravity-desktop" },
-      { publicPlatform: "antigravity", root: requireSelectedRoot(roots.antigravityCli, "Antigravity CLI"), manifestPath: ".managed.json", lockPath: ".managed.lock", platform: "antigravity-cli" },
+      {
+        publicPlatform: "antigravity",
+        root: requireSelectedRoot(roots.antigravityDesktop, "Antigravity Desktop"),
+        manifestPath: ".managed.json",
+        lockPath: ".managed.lock",
+        platform: "antigravity-desktop",
+      },
+      {
+        publicPlatform: "antigravity",
+        root: requireSelectedRoot(roots.antigravityCli, "Antigravity CLI"),
+        manifestPath: ".managed.json",
+        lockPath: ".managed.lock",
+        platform: "antigravity-cli",
+      },
     );
   }
   if (platforms.includes("claude")) {
@@ -236,7 +275,13 @@ function createTargetDescriptors(platforms: readonly GlobalUninstallPlatform[], 
         platform: "codex",
         memberMatchers: new Map([["codex-global-context-hook", matchesCodexGlobalContextHookGroup]]),
       },
-      { publicPlatform: "codex", root: codex.skills, manifestPath: "harnix/managed.json", lockPath: "harnix/managed.lock", platform: "codex" },
+      {
+        publicPlatform: "codex",
+        root: codex.skills,
+        manifestPath: "harnix/managed.json",
+        lockPath: "harnix/managed.lock",
+        platform: "codex",
+      },
     );
   }
   return targets;
@@ -262,8 +307,16 @@ function createReconciliation(target: GlobalUninstallTarget): ReconcileGlobalMan
   };
 }
 
-async function acquireLocks(targets: readonly GlobalUninstallTarget[], lockAcquirer: GlobalUninstallLockAcquirer): Promise<GlobalUninstallLock[]> {
-  const ordered = [...targets].sort((left, right) => compareCodeUnits(globalManagedReconciliationOrderKey(createReconciliation(left)), globalManagedReconciliationOrderKey(createReconciliation(right))));
+async function acquireLocks(
+  targets: readonly GlobalUninstallTarget[],
+  lockAcquirer: GlobalUninstallLockAcquirer,
+): Promise<GlobalUninstallLock[]> {
+  const ordered = [...targets].sort((left, right) =>
+    compareCodeUnits(
+      globalManagedReconciliationOrderKey(createReconciliation(left)),
+      globalManagedReconciliationOrderKey(createReconciliation(right)),
+    ),
+  );
   const locks: GlobalUninstallLock[] = [];
   try {
     for (const target of ordered) {
@@ -286,9 +339,15 @@ function resultFromTargets(
     scope: "user",
     platforms: platforms.map((platform) => {
       const platformTargets = targets.filter((target) => target.publicPlatform === platform);
-      const targetsForPlatform = platformTargets.flatMap((target) => target.entries.map((entry) => displayEntry(target.root, entry))).sort(compareCodeUnits);
-      const removed = platformTargets.flatMap((target) => (outcomes.get(target)?.deleted ?? []).map((label) => displayLabel(target.root, label)));
-      const preserved = platformTargets.flatMap((target) => (outcomes.get(target)?.preserved ?? []).map((label) => displayLabel(target.root, label)));
+      const targetsForPlatform = platformTargets
+        .flatMap((target) => target.entries.map((entry) => displayEntry(target.root, entry)))
+        .sort(compareCodeUnits);
+      const removed = platformTargets.flatMap((target) =>
+        (outcomes.get(target)?.deleted ?? []).map((label) => displayLabel(target.root, label)),
+      );
+      const preserved = platformTargets.flatMap((target) =>
+        (outcomes.get(target)?.preserved ?? []).map((label) => displayLabel(target.root, label)),
+      );
       return {
         platform,
         targets: uniqueSorted(targetsForPlatform),
@@ -316,7 +375,11 @@ function normalizePlatforms(platforms: readonly GlobalUninstallPlatform[]): Glob
   if (normalized.length === 0) {
     throw new Error("At least one platform must be selected for global uninstall.");
   }
-  if (normalized.some((platform) => platform !== "kiro" && platform !== "antigravity" && platform !== "codex" && platform !== "claude")) {
+  if (
+    normalized.some(
+      (platform) => platform !== "kiro" && platform !== "antigravity" && platform !== "codex" && platform !== "claude",
+    )
+  ) {
     throw new Error("Only Kiro, Antigravity, Codex, and Claude Code are supported for global uninstall.");
   }
   return normalized;
@@ -331,10 +394,12 @@ function isMissingPathError(error: unknown): boolean {
 }
 
 function isNonEmptyOrNotDirectory(error: unknown): boolean {
-  return typeof error === "object"
-    && error !== null
-    && "code" in error
-    && (error.code === "ENOTEMPTY" || error.code === "EEXIST" || error.code === "ENOTDIR");
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error.code === "ENOTEMPTY" || error.code === "EEXIST" || error.code === "ENOTDIR")
+  );
 }
 
 function isTestProcess(): boolean {

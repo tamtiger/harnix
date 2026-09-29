@@ -11,15 +11,34 @@ const LEGACY_WORDS = /legacy|migrat|renamed|removed|breaking/iu;
 
 async function sourceFiles(directory: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true });
-  const nested = await Promise.all(entries.map(async (entry) => entry.isDirectory() ? sourceFiles(join(directory, entry.name)) : /\.(ts|md)$/u.test(entry.name) ? [join(directory, entry.name)] : []));
+  const nested = await Promise.all(
+    entries.map(async (entry) =>
+      entry.isDirectory()
+        ? sourceFiles(join(directory, entry.name))
+        : /\.(ts|md)$/u.test(entry.name)
+          ? [join(directory, entry.name)]
+          : [],
+    ),
+  );
   return nested.flat();
 }
 
 async function scannedFiles(): Promise<string[]> {
-  const skills = (await readdir(join(root, "src", "skills"), { withFileTypes: true })).filter((entry) => entry.isDirectory()).map((entry) => join("src", "skills", entry.name, "SKILL.md"));
-  const sources = (await sourceFiles(join(root, "src"))).map((file) => file.slice(root.length + 1)).filter((file) => file.endsWith(".ts"));
-  return [...sources, ...skills, "AGENTS.md", "README.md", join("docs", "HARNIX_PRD.md"), join("docs", "HARNIX_WORKFLOW.md"), join("docs", "IMPLEMENTATION_PLAN.md")]
-    .filter((file) => !LEGACY_HOLDERS.includes(file));
+  const skills = (await readdir(join(root, "src", "skills"), { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => join("src", "skills", entry.name, "SKILL.md"));
+  const sources = (await sourceFiles(join(root, "src")))
+    .map((file) => file.slice(root.length + 1))
+    .filter((file) => file.endsWith(".ts"));
+  return [
+    ...sources,
+    ...skills,
+    "AGENTS.md",
+    "README.md",
+    join("docs", "HARNIX_PRD.md"),
+    join("docs", "HARNIX_WORKFLOW.md"),
+    join("docs", "IMPLEMENTATION_PLAN.md"),
+  ].filter((file) => !LEGACY_HOLDERS.includes(file));
 }
 
 describe("epic naming", () => {

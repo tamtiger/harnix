@@ -52,7 +52,10 @@ function abandon(input: AsyncIterable<unknown>, iterator: AsyncIterator<unknown>
   else void iterator.return?.()?.catch(() => undefined);
 }
 
-async function raceWithIdleTimeout<T>(pending: Promise<T>, idleTimeoutMs: number | undefined): Promise<T | typeof idleTimeout> {
+async function raceWithIdleTimeout<T>(
+  pending: Promise<T>,
+  idleTimeoutMs: number | undefined,
+): Promise<T | typeof idleTimeout> {
   if (idleTimeoutMs === undefined) return pending;
   let timer: NodeJS.Timeout;
   const timeoutPromise = new Promise<typeof idleTimeout>((resolve) => {

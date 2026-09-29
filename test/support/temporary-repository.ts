@@ -7,9 +7,11 @@ export function useTemporaryRepositories(prefix = "harnix-test-"): () => Promise
   const directories: string[] = [];
 
   afterEach(async () => {
-    await Promise.all(directories.splice(0).map(async (directory) => {
-      await rm(directory, { force: true, recursive: true });
-    }));
+    await Promise.all(
+      directories.splice(0).map(async (directory) => {
+        await rm(directory, { force: true, recursive: true });
+      }),
+    );
   });
 
   return async () => {

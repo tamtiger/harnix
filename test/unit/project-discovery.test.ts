@@ -31,7 +31,10 @@ describe("initialized project discovery", () => {
     await initialize(initialized);
     await mkdir(ordinary, { recursive: true });
 
-    await expect(findInitializedProject({ cwd: ordinary, workspacePaths: [initialized] })).resolves.toMatchObject({ kind: "ready", root: initialized });
+    await expect(findInitializedProject({ cwd: ordinary, workspacePaths: [initialized] })).resolves.toMatchObject({
+      kind: "ready",
+      root: initialized,
+    });
   });
 
   it("should_deduplicate_realpath_equivalent_workspace_roots", async () => {
@@ -41,7 +44,10 @@ describe("initialized project discovery", () => {
     await initialize(initialized);
     await symlink(initialized, alias, process.platform === "win32" ? "junction" : "dir");
 
-    await expect(findInitializedProject({ workspacePaths: [initialized, alias] })).resolves.toMatchObject({ kind: "ready", root: initialized });
+    await expect(findInitializedProject({ workspacePaths: [initialized, alias] })).resolves.toMatchObject({
+      kind: "ready",
+      root: initialized,
+    });
   });
 
   it("should_fail_closed_when_multiple_workspace_roots_are_initialized_without_an_active_cwd", async () => {

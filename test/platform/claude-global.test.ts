@@ -52,7 +52,11 @@ describe("claude user-global desired surface", () => {
 
     expect(memory.kind).toBe("managed-block");
     expect(memory.kind === "managed-block" ? memory.selector : undefined).toEqual(CLAUDE_GLOBAL_MEMORY_SELECTOR);
-    expect(CLAUDE_GLOBAL_MEMORY_SELECTOR).toEqual({ type: "markers", begin: "<!-- harnix:begin -->", end: "<!-- harnix:end -->" });
+    expect(CLAUDE_GLOBAL_MEMORY_SELECTOR).toEqual({
+      type: "markers",
+      begin: "<!-- harnix:begin -->",
+      end: "<!-- harnix:end -->",
+    });
     for (const clause of HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS) expect(claudeGlobalMemoryContent).toContain(clause);
     expect(claudeGlobalMemoryContent).toContain(".harnix/config.yaml");
     expect(claudeGlobalMemoryContent).toContain("Do not auto-commit");
@@ -64,7 +68,11 @@ describe("claude user-global desired surface", () => {
 
     expect(settings.kind).toBe("json-member");
     expect(settings.kind === "json-member" ? settings.selector : undefined).toEqual(CLAUDE_GLOBAL_HOOK_SELECTOR);
-    expect(CLAUDE_GLOBAL_HOOK_SELECTOR).toEqual({ type: "json-array-member", pointer: "/hooks/UserPromptSubmit", memberId: "harnix-context" });
+    expect(CLAUDE_GLOBAL_HOOK_SELECTOR).toEqual({
+      type: "json-array-member",
+      pointer: "/hooks/UserPromptSubmit",
+      memberId: "harnix-context",
+    });
     expect(CLAUDE_GLOBAL_CONTEXT_COMMAND).toBe("harnix context --platform claude");
     expect(claudeGlobalContextHookGroup).toEqual({
       hooks: [{ command: CLAUDE_GLOBAL_CONTEXT_COMMAND, timeout: 5, type: "command" }],
@@ -74,18 +82,25 @@ describe("claude user-global desired surface", () => {
 
   it("should_identify_only_the_harnix_hook_group_when_matching_existing_settings_members", () => {
     expect(matchesClaudeGlobalContextHookGroup(claudeGlobalContextHookGroup, CLAUDE_GLOBAL_HOOK_SELECTOR)).toBe(true);
-    expect(matchesClaudeGlobalContextHookGroup(
-      { hooks: [{ type: "command", command: CLAUDE_GLOBAL_CONTEXT_COMMAND, timeout: 30 }] },
-      CLAUDE_GLOBAL_HOOK_SELECTOR,
-    )).toBe(true);
-    expect(matchesClaudeGlobalContextHookGroup(
-      { hooks: [{ type: "command", command: "pnpm lint" }] },
-      CLAUDE_GLOBAL_HOOK_SELECTOR,
-    )).toBe(false);
+    expect(
+      matchesClaudeGlobalContextHookGroup(
+        { hooks: [{ type: "command", command: CLAUDE_GLOBAL_CONTEXT_COMMAND, timeout: 30 }] },
+        CLAUDE_GLOBAL_HOOK_SELECTOR,
+      ),
+    ).toBe(true);
+    expect(
+      matchesClaudeGlobalContextHookGroup(
+        { hooks: [{ type: "command", command: "pnpm lint" }] },
+        CLAUDE_GLOBAL_HOOK_SELECTOR,
+      ),
+    ).toBe(false);
     expect(matchesClaudeGlobalContextHookGroup({ hooks: "not-an-array" }, CLAUDE_GLOBAL_HOOK_SELECTOR)).toBe(false);
-    expect(matchesClaudeGlobalContextHookGroup(
-      claudeGlobalContextHookGroup,
-      { type: "json-array-member", pointer: "/hooks/PreToolUse", memberId: "harnix-context" },
-    )).toBe(false);
+    expect(
+      matchesClaudeGlobalContextHookGroup(claudeGlobalContextHookGroup, {
+        type: "json-array-member",
+        pointer: "/hooks/PreToolUse",
+        memberId: "harnix-context",
+      }),
+    ).toBe(false);
   });
 });

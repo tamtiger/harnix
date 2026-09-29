@@ -40,9 +40,13 @@ describe("Codex global surface plan", () => {
     const plan = createCodexGlobalSurfacePlan();
 
     expect(plan.skills).toHaveLength(7);
-    expect(plan.skills.every((file) => file.kind === "file" && /^skills\/harnix-[a-z-]+\/SKILL\.md$/u.test(file.path))).toBe(true);
+    expect(
+      plan.skills.every((file) => file.kind === "file" && /^skills\/harnix-[a-z-]+\/SKILL\.md$/u.test(file.path)),
+    ).toBe(true);
     expect(plan.skills.every((file) => file.path.startsWith(".") === false)).toBe(true);
-    expect(plan.skills.every((file) => file.kind !== "file" || file.content.includes(".harnix/config.yaml"))).toBe(true);
+    expect(plan.skills.every((file) => file.kind !== "file" || file.content.includes(".harnix/config.yaml"))).toBe(
+      true,
+    );
     expect(plan.config.map((file) => file.path)).toEqual(["AGENTS.md", "config.toml"]);
 
     const agents = plan.config.find((file) => file.path === "AGENTS.md");
@@ -88,13 +92,27 @@ describe("Codex global surface plan", () => {
       root: roots.codex.config,
     });
 
-    await expect(readFile(join(roots.codex.config.path, "AGENTS.md"), "utf8")).resolves.toContain("# User instructions\n\nPreserve this text.");
-    await expect(readFile(join(roots.codex.config.path, "AGENTS.md"), "utf8")).resolves.toContain(CODEX_GLOBAL_AGENTS_SELECTOR.begin);
+    await expect(readFile(join(roots.codex.config.path, "AGENTS.md"), "utf8")).resolves.toContain(
+      "# User instructions\n\nPreserve this text.",
+    );
+    await expect(readFile(join(roots.codex.config.path, "AGENTS.md"), "utf8")).resolves.toContain(
+      CODEX_GLOBAL_AGENTS_SELECTOR.begin,
+    );
     const config = await readFile(join(roots.codex.config.path, "config.toml"), "utf8");
     expect(config).toContain("[hooks.state]\nuser = true");
     expect(config).toContain("[[hooks.UserPromptSubmit]]");
 
-    expect(matchesCodexGlobalContextHookGroup({ hooks: [{ type: "command", command: "user-edited-command", timeout: 99, additionalContextLimit: 2500 }] }, CODEX_GLOBAL_HOOK_SELECTOR)).toBe(true);
-    expect(matchesCodexGlobalContextHookGroup({ hooks: [{ type: "command", command: "user-context" }] }, CODEX_GLOBAL_HOOK_SELECTOR)).toBe(false);
+    expect(
+      matchesCodexGlobalContextHookGroup(
+        { hooks: [{ type: "command", command: "user-edited-command", timeout: 99, additionalContextLimit: 2500 }] },
+        CODEX_GLOBAL_HOOK_SELECTOR,
+      ),
+    ).toBe(true);
+    expect(
+      matchesCodexGlobalContextHookGroup(
+        { hooks: [{ type: "command", command: "user-context" }] },
+        CODEX_GLOBAL_HOOK_SELECTOR,
+      ),
+    ).toBe(false);
   });
 });

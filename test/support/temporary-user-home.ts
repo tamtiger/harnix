@@ -8,9 +8,11 @@ export function useTemporaryUserHomes(prefix = "harnix-user-home-"): () => Promi
   const directories: string[] = [];
 
   afterEach(async () => {
-    await Promise.all(directories.splice(0).map(async (directory) => {
-      await rm(directory, { force: true, recursive: true });
-    }));
+    await Promise.all(
+      directories.splice(0).map(async (directory) => {
+        await rm(directory, { force: true, recursive: true });
+      }),
+    );
   });
 
   return async () => {

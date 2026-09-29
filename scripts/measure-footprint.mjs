@@ -12,20 +12,29 @@ const home = await mkdtemp(join(tmpdir(), "harnix-footprint-home-"));
 
 try {
   const environment = createIsolatedUserEnvironment(home);
-  run(process.execPath, [join(root, "dist", "cli.js"), "init", "--user", "measure", "--languages", "vue"], project, environment);
-  const setup = run(process.execPath, [join(root, "dist", "cli.js"), "setup", "--kiro", "--antigravity", "--codex"], project, environment, [0, 1]);
+  run(
+    process.execPath,
+    [join(root, "dist", "cli.js"), "init", "--user", "measure", "--languages", "vue"],
+    project,
+    environment,
+  );
+  const setup = run(
+    process.execPath,
+    [join(root, "dist", "cli.js"), "setup", "--kiro", "--antigravity", "--codex"],
+    project,
+    environment,
+    [0, 1],
+  );
   assertSetupExitContract(setup);
   await assertNoProjectLocalPlatformSurfaces(project);
   await assertExpectedGlobalSurfaces(home);
 
   const projectMeasurement = await measure([".harnix", "AGENTS.md"].map((name) => join(project, name)));
-  const globalMeasurement = await measure([
-    ".agents",
-    ".codex",
-    ".gemini/config/plugins/harnix",
-    ".gemini/antigravity-cli/plugins/harnix",
-    ".kiro",
-  ].map((name) => join(home, ...name.split("/"))));
+  const globalMeasurement = await measure(
+    [".agents", ".codex", ".gemini/config/plugins/harnix", ".gemini/antigravity-cli/plugins/harnix", ".kiro"].map(
+      (name) => join(home, ...name.split("/")),
+    ),
+  );
   const measurement = {
     bytes: projectMeasurement.bytes + globalMeasurement.bytes,
     files: projectMeasurement.files + globalMeasurement.files,
@@ -33,25 +42,26 @@ try {
   const baselineBytes = 1_343_579;
   const baselineFiles = 236;
   const reduction = 1 - measurement.bytes / baselineBytes;
-  process.stdout.write(`${JSON.stringify({
-    ...measurement,
-    baselineFiles,
-    baselineBytes,
-    global: globalMeasurement,
-    project: projectMeasurement,
-    reduction,
-  })}\n`);
-  if (reduction < 0.5) throw new Error("Harnix generated footprint is not at least 50% smaller than the frozen template baseline.");
+  process.stdout.write(
+    `${JSON.stringify({
+      ...measurement,
+      baselineFiles,
+      baselineBytes,
+      global: globalMeasurement,
+      project: projectMeasurement,
+      reduction,
+    })}\n`,
+  );
+  if (reduction < 0.5)
+    throw new Error("Harnix generated footprint is not at least 50% smaller than the frozen template baseline.");
 } finally {
-  await Promise.all([
-    rm(home, { force: true, recursive: true }),
-    rm(project, { force: true, recursive: true }),
-  ]);
+  await Promise.all([rm(home, { force: true, recursive: true }), rm(project, { force: true, recursive: true })]);
 }
 
 function run(executable, args, cwd, env, expectedStatuses = [0]) {
   const result = spawnSync(executable, args, { cwd, encoding: "utf8", env, windowsHide: true });
-  if (!expectedStatuses.includes(result.status)) throw new Error(result.error?.message || result.stderr || result.stdout || "unknown command failure");
+  if (!expectedStatuses.includes(result.status))
+    throw new Error(result.error?.message || result.stderr || result.stdout || "unknown command failure");
   return result;
 }
 
@@ -62,11 +72,17 @@ function assertSetupExitContract({ status, stderr, stdout }) {
   } catch {
     throw new Error(`setup did not return valid JSON: ${stdout}`);
   }
-  if (result?.scope !== "user" || !Array.isArray(result.platforms)) throw new Error(`setup returned an unexpected global result: ${stdout}`);
-  const actionable = result.platforms.some((platform) => platform?.readiness !== "installed" || !Array.isArray(platform?.warnings) || platform.warnings.length > 0);
+  if (result?.scope !== "user" || !Array.isArray(result.platforms))
+    throw new Error(`setup returned an unexpected global result: ${stdout}`);
+  const actionable = result.platforms.some(
+    (platform) =>
+      platform?.readiness !== "installed" || !Array.isArray(platform?.warnings) || platform.warnings.length > 0,
+  );
   const expectedStatus = actionable ? 1 : 0;
-  if (status !== expectedStatus) throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result.`);
-  if (actionable !== (stderr.trim().length > 0)) throw new Error("setup stderr did not match its actionable readiness result.");
+  if (status !== expectedStatus)
+    throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result.`);
+  if (actionable !== stderr.trim().length > 0)
+    throw new Error("setup stderr did not match its actionable readiness result.");
 }
 
 async function assertNoProjectLocalPlatformSurfaces(projectRoot) {

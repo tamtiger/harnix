@@ -67,11 +67,35 @@ export interface CreateConfigOptions {
 }
 
 const languageIds = new Set<LanguageId>(["csharp", "typescript", "javascript", "php", "python", "java", "go"]);
-const technologyIds = new Set<TechnologyId>(["dotnet", "abp", "nestjs", "spring", "react-web", "vue", "codeigniter", "postgresql", "mysql", "sqlserver", "mongodb", "redis"]);
+const technologyIds = new Set<TechnologyId>([
+  "dotnet",
+  "abp",
+  "nestjs",
+  "spring",
+  "react-web",
+  "vue",
+  "codeigniter",
+  "postgresql",
+  "mysql",
+  "sqlserver",
+  "mongodb",
+  "redis",
+]);
 const legacyIds = new Set<LegacyStackId>(legacyStackIds);
 const platformIds = new Set<PlatformId>(["kiro", "antigravity", "codex", "claude"]);
 const developerPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u;
-const topLevelKeys = new Set(["generator", "schemaVersion", "developer", "languages", "technologies", "packages", "platforms", "timezone", "context", "runtime"]);
+const topLevelKeys = new Set([
+  "generator",
+  "schemaVersion",
+  "developer",
+  "languages",
+  "technologies",
+  "packages",
+  "platforms",
+  "timezone",
+  "context",
+  "runtime",
+]);
 const packageKeys = new Set(["path", "languages", "technologies"]);
 const contextKeys = new Set(["maxCharacters", "tokenApproximation"]);
 const runtimeKeys = new Set(["research", "fullContext"]);
@@ -107,13 +131,17 @@ export function effectiveTimezone(config: Pick<HarnixConfigV2, "timezone">): str
 
 /** Best-effort zone for a project's `.harnix` root; an unreadable config never blocks writing task files. */
 export async function readProjectTimezone(harnixRoot: string): Promise<string> {
-  try { return effectiveTimezone(await readConfig(`${harnixRoot}/config.yaml`)); }
-  catch { return systemTimezone(); }
+  try {
+    return effectiveTimezone(await readConfig(`${harnixRoot}/config.yaml`));
+  } catch {
+    return systemTimezone();
+  }
 }
 
 export function validateConfig(value: unknown): HarnixConfigV2 {
   if (!isRecord(value)) throw new ConfigValidationError("Harnix config must be a YAML object.");
-  if (value.generator !== "harnix" || value.schemaVersion !== 2) throw new ConfigValidationError("Unsupported Harnix config generator or schema version.");
+  if (value.generator !== "harnix" || value.schemaVersion !== 2)
+    throw new ConfigValidationError("Unsupported Harnix config generator or schema version.");
   validateCommon(value);
   assertIds(value.languages, languageIds, "languages");
   assertIds(value.technologies, technologyIds, "technologies");
@@ -123,7 +151,8 @@ export function validateConfig(value: unknown): HarnixConfigV2 {
 
 export function validateConfigV1(value: unknown): HarnixConfigV1 {
   if (!isRecord(value)) throw new ConfigValidationError("Harnix config must be a YAML object.");
-  if (value.generator !== "harnix" || value.schemaVersion !== 1) throw new ConfigValidationError("Unsupported Harnix config generator or schema version.");
+  if (value.generator !== "harnix" || value.schemaVersion !== 1)
+    throw new ConfigValidationError("Unsupported Harnix config generator or schema version.");
   validateCommon(value);
   assertIds(value.languages, legacyIds, "languages");
   assertPackagesV1(value.packages);
@@ -138,7 +167,8 @@ export async function readConfigDocument(path: string): Promise<ConfigDocument> 
     if (isMissingFile(error)) throw error;
     throw new ConfigValidationError("Harnix config YAML is invalid.");
   }
-  if (!isRecord(value) || value.generator !== "harnix") throw new ConfigValidationError("Unsupported Harnix config generator or schema version.");
+  if (!isRecord(value) || value.generator !== "harnix")
+    throw new ConfigValidationError("Unsupported Harnix config generator or schema version.");
   if (value.schemaVersion === 2) return { config: validateConfig(value), sourceSchemaVersion: 2 };
   if (value.schemaVersion === 1) return { config: normalizeV1(validateConfigV1(value)), sourceSchemaVersion: 1 };
   throw new ConfigValidationError("Unsupported Harnix config generator or schema version.");
@@ -153,7 +183,9 @@ export async function writeConfig(path: string, config: HarnixConfigV2): Promise
   await atomicWriteFile(path, stringify(orderedConfig(valid)).replaceAll("\r\n", "\n"));
 }
 
-export async function migrateConfig(path: string): Promise<{ status: "migrated" | "unchanged"; config: HarnixConfigV2 }> {
+export async function migrateConfig(
+  path: string,
+): Promise<{ status: "migrated" | "unchanged"; config: HarnixConfigV2 }> {
   const document = await readConfigDocument(path);
   if (document.sourceSchemaVersion === 2) return { status: "unchanged", config: document.config };
   await writeConfig(path, document.config);
@@ -179,8 +211,16 @@ function normalizeV1(value: HarnixConfigV1): HarnixConfigV2 {
       };
     }),
     platforms: [...value.platforms],
-    context: { maxCharacters: value.context.maxCharacters, tokenApproximation: value.context.tokenApproximation, ...unknownEntries(value.context, contextKeys) },
-    runtime: { research: value.runtime.research, fullContext: value.runtime.fullContext, ...unknownEntries(value.runtime, runtimeKeys) },
+    context: {
+      maxCharacters: value.context.maxCharacters,
+      tokenApproximation: value.context.tokenApproximation,
+      ...unknownEntries(value.context, contextKeys),
+    },
+    runtime: {
+      research: value.runtime.research,
+      fullContext: value.runtime.fullContext,
+      ...unknownEntries(value.runtime, runtimeKeys),
+    },
     ...unknown,
   });
 }
@@ -192,11 +232,24 @@ function orderedConfig(value: HarnixConfigV2): Record<string, unknown> {
     developer: value.developer,
     languages: value.languages,
     technologies: value.technologies,
-    packages: value.packages.map((item) => ({ path: item.path, languages: item.languages, technologies: item.technologies, ...unknownEntries(item, packageKeys) })),
+    packages: value.packages.map((item) => ({
+      path: item.path,
+      languages: item.languages,
+      technologies: item.technologies,
+      ...unknownEntries(item, packageKeys),
+    })),
     platforms: value.platforms,
     ...(value.timezone === undefined ? {} : { timezone: value.timezone }),
-    context: { maxCharacters: value.context.maxCharacters, tokenApproximation: value.context.tokenApproximation, ...unknownEntries(value.context, contextKeys) },
-    runtime: { research: value.runtime.research, fullContext: value.runtime.fullContext, ...unknownEntries(value.runtime, runtimeKeys) },
+    context: {
+      maxCharacters: value.context.maxCharacters,
+      tokenApproximation: value.context.tokenApproximation,
+      ...unknownEntries(value.context, contextKeys),
+    },
+    runtime: {
+      research: value.runtime.research,
+      fullContext: value.runtime.fullContext,
+      ...unknownEntries(value.runtime, runtimeKeys),
+    },
     ...unknownEntries(value, topLevelKeys),
   };
 }
@@ -205,7 +258,8 @@ function validateCommon(value: Record<string, unknown>): void {
   if (typeof value.developer !== "string") throw new ConfigValidationError("developer must be a safe journal ID.");
   validateDeveloperId(value.developer);
   assertPlatforms(value.platforms);
-  if (value.timezone !== undefined && !isValidTimeZone(value.timezone)) throw new ConfigValidationError("timezone must be a valid IANA time zone name.");
+  if (value.timezone !== undefined && !isValidTimeZone(value.timezone))
+    throw new ConfigValidationError("timezone must be a valid IANA time zone name.");
   assertContext(value.context);
   assertRuntime(value.runtime);
 }
@@ -225,53 +279,77 @@ function assertPackages(value: unknown, validateProfile: (item: Record<string, u
   if (!Array.isArray(value)) throw new ConfigValidationError("packages must be an array.");
   let previousPath: string | undefined;
   for (const item of value) {
-    if (!isRecord(item) || typeof item.path !== "string") throw new ConfigValidationError("packages contains an invalid entry.");
+    if (!isRecord(item) || typeof item.path !== "string")
+      throw new ConfigValidationError("packages contains an invalid entry.");
     let normalizedPath: string;
-    try { normalizedPath = normalizeRepositoryPath(item.path, { allowRoot: true }); }
-    catch { throw new ConfigValidationError("packages must have unique sorted safe paths."); }
-    if (normalizedPath !== item.path || previousPath !== undefined && previousPath >= normalizedPath) throw new ConfigValidationError("packages must have unique sorted safe paths.");
+    try {
+      normalizedPath = normalizeRepositoryPath(item.path, { allowRoot: true });
+    } catch {
+      throw new ConfigValidationError("packages must have unique sorted safe paths.");
+    }
+    if (normalizedPath !== item.path || (previousPath !== undefined && previousPath >= normalizedPath))
+      throw new ConfigValidationError("packages must have unique sorted safe paths.");
     validateProfile(item);
     previousPath = normalizedPath;
   }
 }
 
 function assertIds<T extends string>(value: unknown, allowed: Set<T>, field: string): asserts value is T[] {
-  if (!Array.isArray(value) || !value.every((id) => typeof id === "string" && allowed.has(id as T))) throw new ConfigValidationError(`${field} contains an invalid ID.`);
+  if (!Array.isArray(value) || !value.every((id) => typeof id === "string" && allowed.has(id as T)))
+    throw new ConfigValidationError(`${field} contains an invalid ID.`);
   assertSortedUnique(value, field);
 }
 
 function assertPlatforms(value: unknown): asserts value is PlatformId[] {
-  if (!Array.isArray(value) || !value.every((platform) => typeof platform === "string" && platformIds.has(platform as PlatformId))) throw new ConfigValidationError("platforms contains an invalid platform.");
+  if (
+    !Array.isArray(value) ||
+    !value.every((platform) => typeof platform === "string" && platformIds.has(platform as PlatformId))
+  )
+    throw new ConfigValidationError("platforms contains an invalid platform.");
   assertSortedUnique(value, "platforms");
 }
 
 function assertContext(value: unknown): void {
-  if (!isRecord(value) || !isPositiveInteger(value.maxCharacters) || !isPositiveNumber(value.tokenApproximation)) throw new ConfigValidationError("context values must be positive.");
+  if (!isRecord(value) || !isPositiveInteger(value.maxCharacters) || !isPositiveNumber(value.tokenApproximation))
+    throw new ConfigValidationError("context values must be positive.");
 }
 
 function assertRuntime(value: unknown): void {
-  if (!isRecord(value) || value.research !== "conditional" || typeof value.fullContext !== "boolean") throw new ConfigValidationError("runtime is invalid.");
+  if (!isRecord(value) || value.research !== "conditional" || typeof value.fullContext !== "boolean")
+    throw new ConfigValidationError("runtime is invalid.");
 }
 
 function normalizePackages(values: PackageConfig[]): PackageConfig[] {
-  return values.map((item) => ({
-    path: normalizeRepositoryPath(item.path, { allowRoot: true }),
-    languages: sortUnique(item.languages),
-    technologies: sortUnique(item.technologies),
-    ...unknownEntries(item, packageKeys),
-  })).sort((left, right) => compareCodeUnits(left.path, right.path));
+  return values
+    .map((item) => ({
+      path: normalizeRepositoryPath(item.path, { allowRoot: true }),
+      languages: sortUnique(item.languages),
+      technologies: sortUnique(item.technologies),
+      ...unknownEntries(item, packageKeys),
+    }))
+    .sort((left, right) => compareCodeUnits(left.path, right.path));
 }
 
 function unknownEntries(value: Record<string, unknown>, known: Set<string>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(value).filter(([key]) => !known.has(key)));
 }
 
-function sortUnique<T extends string>(values: T[]): T[] { return [...new Set(values)].sort(compareCodeUnits); }
-function assertSortedUnique(values: string[], field: string): void {
-  if (new Set(values).size !== values.length || values.some((value, index) => index > 0 && values[index - 1]! >= value)) throw new ConfigValidationError(`${field} must be unique and sorted.`);
+function sortUnique<T extends string>(values: T[]): T[] {
+  return [...new Set(values)].sort(compareCodeUnits);
 }
-function isPositiveInteger(value: unknown): value is number { return typeof value === "number" && Number.isInteger(value) && value > 0; }
-function isPositiveNumber(value: unknown): value is number { return typeof value === "number" && Number.isFinite(value) && value > 0; }
-function isRecord(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value); }
-function isMissingFile(error: unknown): boolean { return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT"; }
-
+function assertSortedUnique(values: string[], field: string): void {
+  if (new Set(values).size !== values.length || values.some((value, index) => index > 0 && values[index - 1]! >= value))
+    throw new ConfigValidationError(`${field} must be unique and sorted.`);
+}
+function isPositiveInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isInteger(value) && value > 0;
+}
+function isPositiveNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function isMissingFile(error: unknown): boolean {
+  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
+}

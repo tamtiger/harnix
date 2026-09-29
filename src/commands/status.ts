@@ -1,5 +1,10 @@
 import { readConfig } from "../core/config/config.js";
-import { createActiveStatus, createNoActiveStatus, inspectRequiredCheckEvidence, type HarnixStatusResultV1 } from "../core/status.js";
+import {
+  createActiveStatus,
+  createNoActiveStatus,
+  inspectRequiredCheckEvidence,
+  type HarnixStatusResultV1,
+} from "../core/status.js";
 import { resolveActiveTask, TaskValidationError } from "../core/tasks/task.js";
 import { taskContextDrift } from "../core/workflow.js";
 import { findInitializedProject } from "../utils/project-discovery.js";
@@ -32,7 +37,11 @@ export interface StatusExplainResultV1 extends HarnixStatusResultV1 {
  * commands: it returns the ordinary status projection plus the required-check
  * freshness and readiness/completion-blocker detail under one bounded payload.
  */
-export async function explainProjectStatus(cwd: string, limit: number, now = Date.now()): Promise<StatusExplainResultV1> {
+export async function explainProjectStatus(
+  cwd: string,
+  limit: number,
+  now = Date.now(),
+): Promise<StatusExplainResultV1> {
   try {
     const status = await inspectProjectStatus(cwd, now);
     const checks = await reportProjectChecks(cwd, limit, now);

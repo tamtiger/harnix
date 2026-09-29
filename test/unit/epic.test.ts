@@ -87,29 +87,69 @@ describe("EpicRecord validation", () => {
   });
 });
 
-
 const renderRepository = useTemporaryRepositories("harnix-epic-render-");
 
 function memberTask(id: string, status: "planning" | "completed", title: string): TaskRecordV3 {
   const stamp = "2026-09-28T13:58:01.000Z";
   return {
-    generator: "harnix", schemaVersion: 3, id, title, mode: "lite", status, checkpoint: status === "completed" ? "finishing" : "planning", goal: `Goal of ${title}`, nonGoals: [],
-    acceptanceCriteria: [{ id: "ac-one", text: "One", status: status === "completed" ? "waived" : "pending", evidenceIds: [], ...(status === "completed" ? { waiverReason: "test" } : {}) }],
-    relevantPaths: [], relevantSpecs: [], validationPlan: [{ id: "check", description: "Unit", scope: "focused", required: true, command: "pnpm test", criterionIds: ["ac-one"], inputs: ["src/**"] }],
-    evidence: [], createdAt: stamp, updatedAt: stamp, epicId: "render-epic", ...(status === "completed" ? { completedAt: stamp } : {}),
+    generator: "harnix",
+    schemaVersion: 3,
+    id,
+    title,
+    mode: "lite",
+    status,
+    checkpoint: status === "completed" ? "finishing" : "planning",
+    goal: `Goal of ${title}`,
+    nonGoals: [],
+    acceptanceCriteria: [
+      {
+        id: "ac-one",
+        text: "One",
+        status: status === "completed" ? "waived" : "pending",
+        evidenceIds: [],
+        ...(status === "completed" ? { waiverReason: "test" } : {}),
+      },
+    ],
+    relevantPaths: [],
+    relevantSpecs: [],
+    validationPlan: [
+      {
+        id: "check",
+        description: "Unit",
+        scope: "focused",
+        required: true,
+        command: "pnpm test",
+        criterionIds: ["ac-one"],
+        inputs: ["src/**"],
+      },
+    ],
+    evidence: [],
+    createdAt: stamp,
+    updatedAt: stamp,
+    epicId: "render-epic",
+    ...(status === "completed" ? { completedAt: stamp } : {}),
   };
 }
 
 describe("epic page renderer", () => {
   const epic = {
-    generator: "harnix" as const, schemaVersion: 1 as const, id: "render-epic", title: "Render epic", goal: "Epic goal",
-    nonGoals: ["Không viết lại từ đầu.", "Không thêm telemetry."], createdAt: "2026-09-28T13:58:01.000Z", updatedAt: "2026-09-28T13:58:01.000Z",
+    generator: "harnix" as const,
+    schemaVersion: 1 as const,
+    id: "render-epic",
+    title: "Render epic",
+    goal: "Epic goal",
+    nonGoals: ["Không viết lại từ đầu.", "Không thêm telemetry."],
+    createdAt: "2026-09-28T13:58:01.000Z",
+    updatedAt: "2026-09-28T13:58:01.000Z",
   };
 
   async function project(): Promise<string> {
     const root = await renderRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    await writeConfig(join(root, ".harnix", "config.yaml"), { ...(await readConfig(join(root, ".harnix", "config.yaml"))), timezone: "Asia/Ho_Chi_Minh" });
+    await writeConfig(join(root, ".harnix", "config.yaml"), {
+      ...(await readConfig(join(root, ".harnix", "config.yaml"))),
+      timezone: "Asia/Ho_Chi_Minh",
+    });
     return root;
   }
 
@@ -121,50 +161,54 @@ describe("epic page renderer", () => {
     await upsertEpic(root, epic);
 
     const page = await readFile(join(root, ".harnix", "epics", "render-epic.md"), "utf8");
-    expect(page).toBe([
-      "# Epic: Render epic",
-      "",
-      "Epic goal",
-      "",
-      "- **Cập nhật:** 2026-09-28 20:58:01 +07:00",
-      "",
-      "## Non-goals",
-      "",
-      "- Không viết lại từ đầu.",
-      "- Không thêm telemetry.",
-      "",
-      "## Next task",
-      "",
-      "- `20260928-100001-open` — Open task (`planning`)",
-      "",
-      "## Members (2 tasks)",
-      "",
-      "| # | Task ID | Title | Status |",
-      "|---|---------|-------|--------|",
-      "| 1 | `20260928-100000-done` | Done task | `completed` |",
-      "| 2 | `20260928-100001-open` | Open task | `planning` |",
-      "",
-      "## Task Overview & Scope",
-      "",
-      "### 1. `20260928-100000-done` — Done task",
-      "",
-      "- **Trạng thái:** `completed`",
-      "- **Mục tiêu:** Goal of Done task",
-      "- **Tiêu chí nghiệm thu:** 1 tiêu chí",
-      "",
-      "### 2. `20260928-100001-open` — Open task",
-      "",
-      "- **Trạng thái:** `planning`",
-      "- **Mục tiêu:** Goal of Open task",
-      "- **Tiêu chí nghiệm thu:** 1 tiêu chí",
-      "",
-    ].join("\n"));
+    expect(page).toBe(
+      [
+        "# Epic: Render epic",
+        "",
+        "Epic goal",
+        "",
+        "- **Cập nhật:** 2026-09-28 20:58:01 +07:00",
+        "",
+        "## Non-goals",
+        "",
+        "- Không viết lại từ đầu.",
+        "- Không thêm telemetry.",
+        "",
+        "## Next task",
+        "",
+        "- `20260928-100001-open` — Open task (`planning`)",
+        "",
+        "## Members (2 tasks)",
+        "",
+        "| # | Task ID | Title | Status |",
+        "|---|---------|-------|--------|",
+        "| 1 | `20260928-100000-done` | Done task | `completed` |",
+        "| 2 | `20260928-100001-open` | Open task | `planning` |",
+        "",
+        "## Task Overview & Scope",
+        "",
+        "### 1. `20260928-100000-done` — Done task",
+        "",
+        "- **Trạng thái:** `completed`",
+        "- **Mục tiêu:** Goal of Done task",
+        "- **Tiêu chí nghiệm thu:** 1 tiêu chí",
+        "",
+        "### 2. `20260928-100001-open` — Open task",
+        "",
+        "- **Trạng thái:** `planning`",
+        "- **Mục tiêu:** Goal of Open task",
+        "- **Tiêu chí nghiệm thu:** 1 tiêu chí",
+        "",
+      ].join("\n"),
+    );
     expect(page).not.toMatch(/[^\n]\n#/u);
   });
 
   it("says so when there are no members or every member is finished, and omits empty non-goals", async () => {
     const root = await project();
-    const withoutNonGoals = Object.fromEntries(Object.entries(epic).filter(([key]) => key !== "nonGoals")) as unknown as typeof epic;
+    const withoutNonGoals = Object.fromEntries(
+      Object.entries(epic).filter(([key]) => key !== "nonGoals"),
+    ) as unknown as typeof epic;
 
     await upsertEpic(root, withoutNonGoals);
     const empty = await readFile(join(root, ".harnix", "epics", "render-epic.md"), "utf8");
@@ -187,6 +231,8 @@ describe("epic page renderer", () => {
     const detail = await detailPublicEpic(root, "render-epic");
 
     expect(detail.nextTask?.id).toBe("20260928-100001-open");
-    expect((await readFile(join(root, ".harnix", "epics", "render-epic.md"), "utf8"))).toContain(`\`${detail.nextTask!.id}\``);
+    expect(await readFile(join(root, ".harnix", "epics", "render-epic.md"), "utf8")).toContain(
+      `\`${detail.nextTask!.id}\``,
+    );
   });
 });

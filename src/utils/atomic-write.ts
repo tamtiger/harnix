@@ -36,8 +36,9 @@ export async function atomicWriteFile(
 ): Promise<void> {
   const filesystem = options.filesystem ?? defaultFilesystem;
   const randomSuffix = options.randomSuffix ?? (() => randomBytes(12).toString("hex"));
-  const renameRetryDelaysMs = validateRenameRetryDelays(options.renameRetryDelaysMs
-    ?? (process.platform === "win32" ? windowsRenameRetryDelaysMs : []));
+  const renameRetryDelaysMs = validateRenameRetryDelays(
+    options.renameRetryDelaysMs ?? (process.platform === "win32" ? windowsRenameRetryDelaysMs : []),
+  );
   const temporaryPath = `${destination}.${randomSuffix()}.tmp`;
   const preservedMode = await existingMode(filesystem, destination);
 
@@ -45,7 +46,8 @@ export async function atomicWriteFile(
 
   try {
     await filesystem.writeFile(temporaryPath, content);
-    if (preservedMode !== undefined && filesystem.chmod !== undefined) await filesystem.chmod(temporaryPath, preservedMode);
+    if (preservedMode !== undefined && filesystem.chmod !== undefined)
+      await filesystem.chmod(temporaryPath, preservedMode);
     await renameWithRetry(filesystem, temporaryPath, destination, renameRetryDelaysMs);
   } catch (error) {
     try {
@@ -84,10 +86,12 @@ function validateRenameRetryDelays(value: readonly number[]): readonly number[] 
 }
 
 function isTransientRenameError(error: unknown): boolean {
-  return typeof error === "object"
-    && error !== null
-    && "code" in error
-    && ["EACCES", "EBUSY", "EPERM"].includes(String((error as { code?: unknown }).code));
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    ["EACCES", "EBUSY", "EPERM"].includes(String((error as { code?: unknown }).code))
+  );
 }
 
 async function existingMode(filesystem: AtomicFileSystem, destination: string): Promise<number | undefined> {
@@ -99,4 +103,3 @@ async function existingMode(filesystem: AtomicFileSystem, destination: string): 
     throw error;
   }
 }
-

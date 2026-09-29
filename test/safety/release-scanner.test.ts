@@ -8,8 +8,18 @@ type ReleaseScanner = {
   assertAttribution(notice: string): void;
   assertExpectedGlobalSurfaces(home: string): Promise<void>;
   assertNonHarnixContextNoOutput(stdout: string, stderr?: string): void;
-  assertNonHarnixContextPerformance(samples: number[]): { max: number; median: number; p95: number; repetitions: number; samples: number[] };
-  assertNoDeadPackagedImports(packageRoot: string, packageJson: { dependencies?: Record<string, string> }, options?: { resolveBareSpecifier?(specifier: string): string }): Promise<void>;
+  assertNonHarnixContextPerformance(samples: number[]): {
+    max: number;
+    median: number;
+    p95: number;
+    repetitions: number;
+    samples: number[];
+  };
+  assertNoDeadPackagedImports(
+    packageRoot: string,
+    packageJson: { dependencies?: Record<string, string> },
+    options?: { resolveBareSpecifier?(specifier: string): string },
+  ): Promise<void>;
   assertNoProjectLocalPlatformSurfaces(project: string): Promise<void>;
   assertSingleHarnixExecutable(packageJson: { bin?: Record<string, string> }): void;
   assertSingleHooks(home: string): Promise<void>;
@@ -18,7 +28,9 @@ type ReleaseScanner = {
   scanTextFiles(files: string[], scope: string, generated: boolean): Promise<void>;
 };
 
-const releaseScanner = await import(new URL("../../scripts/scan-release.mjs", import.meta.url).href) as ReleaseScanner;
+const releaseScanner = (await import(
+  new URL("../../scripts/scan-release.mjs", import.meta.url).href
+)) as ReleaseScanner;
 const {
   assertAttribution,
   assertExpectedGlobalSurfaces,
@@ -64,7 +76,11 @@ describe("release scanner negative fixtures", () => {
   it.each([
     ["aws_access_key", "AKIA" + "IOSFODNN7EXAMPLE"],
     ["github_classic_token", "gh" + "p_16C7e42F292c6912E7710c838347Ae178B4a"],
-    ["github_fine_grained_token", "github_pat_" + "11AAAAAAA0aaaaaaaaaaaa_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+    [
+      "github_fine_grained_token",
+      "github_pat_" +
+        "11AAAAAAA0aaaaaaaaaaaa_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    ],
     ["stripe_live_key", "sk_live_" + "4eC39HqLyjWDarjtT1zdp7dc"],
     ["stripe_restricted_key", "rk_live_" + "4eC39HqLyjWDarjtT1zdp7dc"],
     ["slack_token", "xoxb-" + "1234567890-abcdefghijklmnop"],
@@ -82,7 +98,11 @@ describe("release scanner negative fixtures", () => {
 
   it("should_accept_ordinary_prose_and_identifiers_without_a_structured_secret_shape", async () => {
     const root = await fixture();
-    const file = await writeFixtureFile(root, "dist/index.js", "export const releaseNotes = \"See CHANGELOG for the AKIA-style example naming convention.\";\n");
+    const file = await writeFixtureFile(
+      root,
+      "dist/index.js",
+      'export const releaseNotes = "See CHANGELOG for the AKIA-style example naming convention.";\n',
+    );
 
     await expect(scanTextFiles([file], "negative control", false)).resolves.toBeUndefined();
   });
@@ -103,26 +123,34 @@ describe("release scanner negative fixtures", () => {
 
   it("should_accept_a_capitalized_TypeScript_type_annotation_without_treating_it_as_a_secret", async () => {
     const root = await fixture();
-    const file = await writeFixtureFile(root, "dist/index.js.map", JSON.stringify({
-      mappings: "",
-      names: [],
-      sources: ["../src/file-lock.ts"],
-      sourcesContent: ["type LockSnapshot = { token: ObservedLockToken; secret: Credential };\n"],
-      version: 3,
-    }));
+    const file = await writeFixtureFile(
+      root,
+      "dist/index.js.map",
+      JSON.stringify({
+        mappings: "",
+        names: [],
+        sources: ["../src/file-lock.ts"],
+        sourcesContent: ["type LockSnapshot = { token: ObservedLockToken; secret: Credential };\n"],
+        version: 3,
+      }),
+    );
 
     await expect(scanTextFiles([file], "negative control", false)).resolves.toBeUndefined();
   });
 
   it("should_reject_a_PascalCase_object_value_in_a_source_map_when_it_is_not_a_type_annotation", async () => {
     const root = await fixture();
-    const file = await writeFixtureFile(root, "dist/index.js.map", JSON.stringify({
-      mappings: "",
-      names: [],
-      sources: ["../src/config.ts"],
-      sourcesContent: ["const config = { token: MySecretToken };\n"],
-      version: 3,
-    }));
+    const file = await writeFixtureFile(
+      root,
+      "dist/index.js.map",
+      JSON.stringify({
+        mappings: "",
+        names: [],
+        sources: ["../src/config.ts"],
+        sourcesContent: ["const config = { token: MySecretToken };\n"],
+        version: 3,
+      }),
+    );
 
     await expect(scanTextFiles([file], "negative fixture", false)).rejects.toThrow(/Potential secret found/u);
   });
@@ -139,14 +167,20 @@ describe("release scanner negative fixtures", () => {
 
   it("should_allow_supported_claude_platform_surface_in_generated_output", async () => {
     const root = await fixture();
-    const file = await writeFixtureFile(root, ".harnix/generated.md", "harnix setup --claude installs ~/.claude skills.");
+    const file = await writeFixtureFile(
+      root,
+      ".harnix/generated.md",
+      "harnix setup --claude installs ~/.claude skills.",
+    );
 
     await expect(scanTextFiles([file], "generated fixture", true)).resolves.toBeUndefined();
   });
 
   it("should_reject_unsafe_or_workspace_tarball_entries_when_release_listing_is_invalid", async () => {
     await expect(assertTarballListing(["package/package.json", "../escape"])).rejects.toThrow(/unsafe path/u);
-    await expect(assertTarballListing(["package/package.json", "package/pnpm-workspace.yaml"])).rejects.toThrow(/workspace file/u);
+    await expect(assertTarballListing(["package/package.json", "package/pnpm-workspace.yaml"])).rejects.toThrow(
+      /workspace file/u,
+    );
     await expect(assertTarballListing(["package/README.md"])).rejects.toThrow(/exactly one package/u);
   });
 
@@ -155,7 +189,9 @@ describe("release scanner negative fixtures", () => {
   });
 
   it("should_reject_non_single_harnix_bin_when_package_metadata_is_invalid", () => {
-    expect(() => assertSingleHarnixExecutable({ bin: { harnix: "./dist/cli.js", extra: "./dist/extra.js" } })).toThrow(/exactly one harnix executable/u);
+    expect(() => assertSingleHarnixExecutable({ bin: { harnix: "./dist/cli.js", extra: "./dist/extra.js" } })).toThrow(
+      /exactly one harnix executable/u,
+    );
   });
 
   it("should_reject_missing_relative_import_when_packaged_module_is_unresolvable", async () => {
@@ -188,9 +224,17 @@ describe("release scanner negative fixtures", () => {
     const root = await fixture();
     await writeFixtureFile(root, "dist/index.js", 'import "declared/missing";\n');
 
-    await expect(assertNoDeadPackagedImports(root, { dependencies: { declared: "1.0.0" } }, {
-      resolveBareSpecifier: () => { throw new Error("module not found"); },
-    })).rejects.toThrow(/cannot be resolved/u);
+    await expect(
+      assertNoDeadPackagedImports(
+        root,
+        { dependencies: { declared: "1.0.0" } },
+        {
+          resolveBareSpecifier: () => {
+            throw new Error("module not found");
+          },
+        },
+      ),
+    ).rejects.toThrow(/cannot be resolved/u);
   });
 
   it("should_ignore_commented_import_text_when_scanning_packaged_modules", async () => {
@@ -210,24 +254,40 @@ describe("release scanner negative fixtures", () => {
 
   it("should_reject_duplicate_harnix_hook_when_global_fixture_contains_two_codex_entries", async () => {
     const home = await fixture();
-    await writeFixtureFile(home, ".codex/config.toml", "[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ncommand = \"harnix context --platform codex\"\n\n[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ncommand = \"harnix context --platform codex\"\n");
+    await writeFixtureFile(
+      home,
+      ".codex/config.toml",
+      '[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ncommand = "harnix context --platform codex"\n\n[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ncommand = "harnix context --platform codex"\n',
+    );
 
     await expect(assertSingleHooks(home)).rejects.toThrow(/one Codex Harnix hook, found 2/u);
   });
 
   it("should_accept_current_user_global_hook_locations_when_each_platform_has_one_handler", async () => {
     const home = await fixture();
-    await writeFixtureFile(home, ".codex/config.toml", "[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ncommand = \"harnix context --platform codex\"\n");
-    await writeFixtureFile(home, ".kiro/hooks/harnix-context.json", JSON.stringify({
-      hooks: [{ action: { command: "harnix context --platform kiro" } }],
-      version: "v1",
-    }));
+    await writeFixtureFile(
+      home,
+      ".codex/config.toml",
+      '[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ncommand = "harnix context --platform codex"\n',
+    );
+    await writeFixtureFile(
+      home,
+      ".kiro/hooks/harnix-context.json",
+      JSON.stringify({
+        hooks: [{ action: { command: "harnix context --platform kiro" } }],
+        version: "v1",
+      }),
+    );
     for (const root of [".gemini/config/plugins/harnix", ".gemini/antigravity-cli/plugins/harnix"]) {
-      await writeFixtureFile(home, `${root}/hooks.json`, JSON.stringify({
-        "harnix-context": {
-          PreInvocation: [{ command: "harnix context --platform antigravity", type: "command" }],
-        },
-      }));
+      await writeFixtureFile(
+        home,
+        `${root}/hooks.json`,
+        JSON.stringify({
+          "harnix-context": {
+            PreInvocation: [{ command: "harnix context --platform antigravity", type: "command" }],
+          },
+        }),
+      );
     }
 
     await expect(assertSingleHooks(home)).resolves.toBeUndefined();

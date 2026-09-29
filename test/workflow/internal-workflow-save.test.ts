@@ -53,7 +53,13 @@ describe("hidden workflow save epic envelope", () => {
     };
     await saveWorkflow(root, { task: planning, epic });
 
-    const withEpicId = { ...planning, epicId: "my-epic", status: "ready" as const, checkpoint: "ready" as const, updatedAt: "2026-08-13T00:01:00.000Z" };
+    const withEpicId = {
+      ...planning,
+      epicId: "my-epic",
+      status: "ready" as const,
+      checkpoint: "ready" as const,
+      updatedAt: "2026-08-13T00:01:00.000Z",
+    };
     await saveWorkflow(root, { task: withEpicId });
 
     const mdContent = await readFile(join(root, ".harnix", "epics", "my-epic.md"), "utf8");
@@ -80,11 +86,28 @@ describe("hidden workflow save epic envelope", () => {
   it("refreshes epic markdown with the final completed status when finishing a task with epicId", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const epic = { generator: "harnix" as const, schemaVersion: 1 as const, id: "finish-epic", title: "Finish epic title", goal: "Finish epic goal", createdAt: timestamp, updatedAt: timestamp };
+    const epic = {
+      generator: "harnix" as const,
+      schemaVersion: 1 as const,
+      id: "finish-epic",
+      title: "Finish epic title",
+      goal: "Finish epic goal",
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
     await saveWorkflow(root, { task: taskV3("planning", "planning"), epic });
 
     const completedAt = "2026-08-13T00:05:00.000Z";
-    const completionEvidence = { id: "e", checkId: "check", recordedAt: completedAt, result: "pass" as const, exitCode: 0, summary: "verified", artifactPaths: [], inputDigest: "a".repeat(64) };
+    const completionEvidence = {
+      id: "e",
+      checkId: "check",
+      recordedAt: completedAt,
+      result: "pass" as const,
+      exitCode: 0,
+      summary: "verified",
+      artifactPaths: [],
+      inputDigest: "a".repeat(64),
+    };
     const completedTask: TaskRecordV3 = {
       ...taskV3("completed", "finishing"),
       epicId: "finish-epic",
@@ -109,10 +132,20 @@ describe("hidden workflow save epic envelope", () => {
   it("refreshes epic markdown with the final cancelled status when cancelling a task with epicId", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const epic = { generator: "harnix" as const, schemaVersion: 1 as const, id: "cancel-epic", title: "Cancel epic title", goal: "Cancel epic goal", createdAt: timestamp, updatedAt: timestamp };
+    const epic = {
+      generator: "harnix" as const,
+      schemaVersion: 1 as const,
+      id: "cancel-epic",
+      title: "Cancel epic title",
+      goal: "Cancel epic goal",
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
     await saveWorkflow(root, { task: { ...taskV3("planning", "planning"), epicId: "cancel-epic" }, epic });
 
-    await expect(cancelWorkflow(root, { reason: "no longer needed", authorizedBy: "user" }, "2026-08-13T00:05:00.000Z")).resolves.toMatchObject({ status: "cancelled" });
+    await expect(
+      cancelWorkflow(root, { reason: "no longer needed", authorizedBy: "user" }, "2026-08-13T00:05:00.000Z"),
+    ).resolves.toMatchObject({ status: "cancelled" });
 
     const mdContent = await readFile(join(root, ".harnix", "epics", "cancel-epic.md"), "utf8");
     expect(mdContent).toContain("Cancel epic title");
@@ -126,15 +159,37 @@ describe("hidden workflow save epic envelope", () => {
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
 
-    await expect(cancelWorkflow(root, { reason: "no longer needed", authorizedBy: "user" }, "2026-08-13T00:01:00.000Z")).resolves.toMatchObject({ status: "cancelled" });
+    await expect(
+      cancelWorkflow(root, { reason: "no longer needed", authorizedBy: "user" }, "2026-08-13T00:01:00.000Z"),
+    ).resolves.toMatchObject({ status: "cancelled" });
   });
 
   it("scaffolds planned epic member tasks and regenerates markdown when epicMembers is present", async () => {
     const root = await temporaryRepository();
     await initializeProject({ root, developer: "tam", yes: true });
-    const epic = { generator: "harnix" as const, schemaVersion: 1 as const, id: "batch-epic", title: "Batch epic title", goal: "Batch epic goal", createdAt: timestamp, updatedAt: timestamp };
-    const member1 = { ...taskV3("planning", "planning"), id: "20260813-120000-member-1", title: "Member 1", goal: "Goal 1", epicId: "batch-epic" };
-    const member2 = { ...taskV3("planning", "planning"), id: "20260813-120001-member-2", title: "Member 2", goal: "Goal 2", epicId: "batch-epic" };
+    const epic = {
+      generator: "harnix" as const,
+      schemaVersion: 1 as const,
+      id: "batch-epic",
+      title: "Batch epic title",
+      goal: "Batch epic goal",
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+    const member1 = {
+      ...taskV3("planning", "planning"),
+      id: "20260813-120000-member-1",
+      title: "Member 1",
+      goal: "Goal 1",
+      epicId: "batch-epic",
+    };
+    const member2 = {
+      ...taskV3("planning", "planning"),
+      id: "20260813-120001-member-2",
+      title: "Member 2",
+      goal: "Goal 2",
+      epicId: "batch-epic",
+    };
 
     await saveWorkflow(root, {
       task: member1,
@@ -151,14 +206,45 @@ describe("hidden workflow save epic envelope", () => {
 });
 
 function task(status: TaskRecord["status"], checkpoint: TaskRecord["checkpoint"]): TaskRecordV1 {
-  return { generator: "harnix", schemaVersion: 1, id: "20260813-120000-workflow", title: "workflow", mode: "lite", status, checkpoint, goal: "test", nonGoals: [], acceptanceCriteria: [{ id: "a", text: "done", status: "pending", evidenceIds: [] }], relevantPaths: [], relevantSpecs: [], validationPlan: [{ id: "check", description: "verify", command: "pnpm test", scope: "full", required: true }], evidence: [], createdAt: timestamp, updatedAt: timestamp };
+  return {
+    generator: "harnix",
+    schemaVersion: 1,
+    id: "20260813-120000-workflow",
+    title: "workflow",
+    mode: "lite",
+    status,
+    checkpoint,
+    goal: "test",
+    nonGoals: [],
+    acceptanceCriteria: [{ id: "a", text: "done", status: "pending", evidenceIds: [] }],
+    relevantPaths: [],
+    relevantSpecs: [],
+    validationPlan: [{ id: "check", description: "verify", command: "pnpm test", scope: "full", required: true }],
+    evidence: [],
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
 }
 
-function taskV3(status: TaskRecord["status"], checkpoint: TaskRecord["checkpoint"], inputs = ["src/**/*.ts"]): TaskRecordV3 {
+function taskV3(
+  status: TaskRecord["status"],
+  checkpoint: TaskRecord["checkpoint"],
+  inputs = ["src/**/*.ts"],
+): TaskRecordV3 {
   return {
     ...task(status, checkpoint),
     schemaVersion: 3 as const,
-    validationPlan: [{ id: "check", description: "Run tests", command: "pnpm test", scope: "full" as const, required: true, criterionIds: ["a"], inputs }],
+    validationPlan: [
+      {
+        id: "check",
+        description: "Run tests",
+        command: "pnpm test",
+        scope: "full" as const,
+        required: true,
+        criterionIds: ["a"],
+        inputs,
+      },
+    ],
     evidence: [],
   };
 }

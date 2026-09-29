@@ -11,15 +11,29 @@ const artifacts = join(repository, ".artifacts");
 const tarball = (await readdir(artifacts)).find((name) => name.endsWith(".tgz"));
 if (!tarball) throw new Error("Run pnpm pack:check before smoke:tarball.");
 
-for (const platforms of [["--kiro"], ["--antigravity"], ["--codex"], ["--claude"], ["--kiro", "--antigravity", "--codex", "--claude"]]) {
+for (const platforms of [
+  ["--kiro"],
+  ["--antigravity"],
+  ["--codex"],
+  ["--claude"],
+  ["--kiro", "--antigravity", "--codex", "--claude"],
+]) {
   const home = await mkdtemp(join(tmpdir(), "harnix-smoke-home-"));
   const packageManagerHome = await mkdtemp(join(tmpdir(), "harnix-smoke-package-manager-home-"));
   const project = await mkdtemp(join(tmpdir(), "harnix-smoke-project-"));
   try {
     const npmEntrypoint = process.env.npm_execpath;
     if (!npmEntrypoint) throw new Error("smoke:tarball must run through pnpm or npm.");
-    const install = run(process.execPath, [npmEntrypoint, "add", "--ignore-scripts", "--no-lockfile", join(artifacts, tarball)], project, createIsolatedUserEnvironment(packageManagerHome));
-    if (install.status !== 0) throw new Error(`tarball install failed: ${install.error?.message ?? install.stderr ?? install.stdout ?? "unknown"}`);
+    const install = run(
+      process.execPath,
+      [npmEntrypoint, "add", "--ignore-scripts", "--no-lockfile", join(artifacts, tarball)],
+      project,
+      createIsolatedUserEnvironment(packageManagerHome),
+    );
+    if (install.status !== 0)
+      throw new Error(
+        `tarball install failed: ${install.error?.message ?? install.stderr ?? install.stdout ?? "unknown"}`,
+      );
 
     const cli = join(project, "node_modules", "@tamtiger", "harnix", "dist", "cli.js");
     const environment = createIsolatedUserEnvironment(home, {
@@ -43,7 +57,9 @@ for (const platforms of [["--kiro"], ["--antigravity"], ["--codex"], ["--claude"
 function run(executable, args, cwd, env, expectedStatuses = [0]) {
   const result = spawnSync(executable, args, { cwd, encoding: "utf8", env, windowsHide: true });
   if (!expectedStatuses.includes(result.status)) {
-    throw new Error(`${args.join(" ")} failed: ${result.error?.message ?? result.stderr ?? result.stdout ?? "unknown"}`);
+    throw new Error(
+      `${args.join(" ")} failed: ${result.error?.message ?? result.stderr ?? result.stdout ?? "unknown"}`,
+    );
   }
   return result;
 }
@@ -61,12 +77,19 @@ function assertGlobalSetupResult(processResult, platforms, home) {
   if (result.scope !== "user" || JSON.stringify(actual) !== JSON.stringify(selected)) {
     throw new Error(`setup returned an unexpected global result: ${output}`);
   }
-  const actionable = result.platforms.some((platform) => platform?.readiness !== "installed" || !Array.isArray(platform?.warnings) || platform.warnings.length > 0);
+  const actionable = result.platforms.some(
+    (platform) =>
+      platform?.readiness !== "installed" || !Array.isArray(platform?.warnings) || platform.warnings.length > 0,
+  );
   const expectedStatus = actionable ? 1 : 0;
-  if (status !== expectedStatus) throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result.`);
-  if (actionable && stderr.trim().length === 0) throw new Error("setup omitted stderr guidance for an actionable readiness result.");
-  if (!actionable && stderr.trim().length > 0) throw new Error(`setup emitted unexpected stderr for a clean install: ${stderr}`);
-  if (output.includes(home) || stderr.includes(home)) throw new Error("setup exposed the physical disposable home path.");
+  if (status !== expectedStatus)
+    throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result.`);
+  if (actionable && stderr.trim().length === 0)
+    throw new Error("setup omitted stderr guidance for an actionable readiness result.");
+  if (!actionable && stderr.trim().length > 0)
+    throw new Error(`setup emitted unexpected stderr for a clean install: ${stderr}`);
+  if (output.includes(home) || stderr.includes(home))
+    throw new Error("setup exposed the physical disposable home path.");
 }
 
 async function assertNoProjectLocalPlatformSurfaces(project) {
@@ -90,11 +113,22 @@ async function assertExpectedGlobalSurfaces(home, platforms) {
   }
   if (platforms.includes("--antigravity")) {
     for (const pluginRoot of [".gemini/config/plugins/harnix", ".gemini/antigravity-cli/plugins/harnix"]) {
-      expected.push(`${pluginRoot}/.managed.json`, `${pluginRoot}/hooks.json`, `${pluginRoot}/plugin.json`, `${pluginRoot}/rules/AGENTS.md`);
+      expected.push(
+        `${pluginRoot}/.managed.json`,
+        `${pluginRoot}/hooks.json`,
+        `${pluginRoot}/plugin.json`,
+        `${pluginRoot}/rules/AGENTS.md`,
+      );
     }
   }
   if (platforms.includes("--codex")) {
-    expected.push(".agents/harnix/managed.json", ".agents/skills", ".codex/AGENTS.md", ".codex/harnix/managed.json", ".codex/config.toml");
+    expected.push(
+      ".agents/harnix/managed.json",
+      ".agents/skills",
+      ".codex/AGENTS.md",
+      ".codex/harnix/managed.json",
+      ".codex/config.toml",
+    );
   }
   if (platforms.includes("--claude")) {
     expected.push(".claude/harnix/managed.json", ".claude/skills", ".claude/CLAUDE.md", ".claude/settings.json");

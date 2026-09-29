@@ -22,7 +22,9 @@ function clockAt(initial: number): FileLockClock & { nowValue: () => number } {
   return {
     now: () => now,
     nowValue: () => now,
-    sleep: async (milliseconds) => { now += milliseconds; },
+    sleep: async (milliseconds) => {
+      now += milliseconds;
+    },
   };
 }
 
@@ -51,7 +53,9 @@ async function writeLockDirectory(
   return { source, tokenPath };
 }
 
-async function readLockDirectory(path: string): Promise<{ record: HarnixFileLockRecord; source: string; tokenPath: string }> {
+async function readLockDirectory(
+  path: string,
+): Promise<{ record: HarnixFileLockRecord; source: string; tokenPath: string }> {
   const entries = await readdir(path);
   expect(entries).toHaveLength(1);
   const tokenPath = join(path, entries[0]!);
@@ -121,20 +125,22 @@ describe("Harnix file lock", () => {
     });
     await writeLockDirectory(path, stale);
 
-    await expect(acquireHarnixFileLock(path, {
-      clock: clockAt(10_000),
-      operationId: "contender-operation",
-      ownerInspector: async (existing) => {
-        if (existing.operationId === stale.operationId) {
-          await rm(path, { force: true, recursive: true });
-          await writeLockDirectory(path, replacement, secondTokenName);
-          return "dead";
-        }
-        return "alive";
-      },
-      processIdentity: () => ({ pid: 303, startedAt: new Date(9_500).toISOString() }),
-      timeoutMs: 0,
-    })).rejects.toBeInstanceOf(FileLockTimeoutError);
+    await expect(
+      acquireHarnixFileLock(path, {
+        clock: clockAt(10_000),
+        operationId: "contender-operation",
+        ownerInspector: async (existing) => {
+          if (existing.operationId === stale.operationId) {
+            await rm(path, { force: true, recursive: true });
+            await writeLockDirectory(path, replacement, secondTokenName);
+            return "dead";
+          }
+          return "alive";
+        },
+        processIdentity: () => ({ pid: 303, startedAt: new Date(9_500).toISOString() }),
+        timeoutMs: 0,
+      }),
+    ).rejects.toBeInstanceOf(FileLockTimeoutError);
 
     expect((await readLockDirectory(path)).record).toEqual(replacement);
   });
@@ -160,14 +166,16 @@ describe("Harnix file lock", () => {
       },
     });
 
-    await expect(acquireHarnixFileLock(path, {
-      clock: clockAt(10_000),
-      filesystem,
-      operationId: "contender-operation",
-      ownerInspector: async () => "dead",
-      processIdentity: () => ({ pid: 303, startedAt: new Date(9_500).toISOString() }),
-      timeoutMs: 0,
-    })).rejects.toBeInstanceOf(FileLockTimeoutError);
+    await expect(
+      acquireHarnixFileLock(path, {
+        clock: clockAt(10_000),
+        filesystem,
+        operationId: "contender-operation",
+        ownerInspector: async () => "dead",
+        processIdentity: () => ({ pid: 303, startedAt: new Date(9_500).toISOString() }),
+        timeoutMs: 0,
+      }),
+    ).rejects.toBeInstanceOf(FileLockTimeoutError);
 
     expect(replacementInstalled).toBe(true);
     expect((await readLockDirectory(path)).record).toEqual(replacement);
@@ -189,13 +197,15 @@ describe("Harnix file lock", () => {
       },
     });
 
-    await expect(acquireHarnixFileLock(path, {
-      clock: clockAt(10_000),
-      filesystem,
-      operationId: "candidate-operation",
-      processIdentity: () => ({ pid: 303, startedAt: new Date(9_500).toISOString() }),
-      timeoutMs: 0,
-    })).rejects.toBeInstanceOf(FileLockTimeoutError);
+    await expect(
+      acquireHarnixFileLock(path, {
+        clock: clockAt(10_000),
+        filesystem,
+        operationId: "candidate-operation",
+        processIdentity: () => ({ pid: 303, startedAt: new Date(9_500).toISOString() }),
+        timeoutMs: 0,
+      }),
+    ).rejects.toBeInstanceOf(FileLockTimeoutError);
 
     expect((await readLockDirectory(path)).record).toEqual(replacement);
   });
@@ -206,12 +216,14 @@ describe("Harnix file lock", () => {
     await writeLockDirectory(path, record());
     const clock = clockAt(10_000);
 
-    await expect(acquireHarnixFileLock(path, {
-      clock,
-      ownerInspector: async () => "alive",
-      retryDelayMs: 5,
-      timeoutMs: 10,
-    })).rejects.toBeInstanceOf(FileLockTimeoutError);
+    await expect(
+      acquireHarnixFileLock(path, {
+        clock,
+        ownerInspector: async () => "alive",
+        retryDelayMs: 5,
+        timeoutMs: 10,
+      }),
+    ).rejects.toBeInstanceOf(FileLockTimeoutError);
     expect(clock.nowValue()).toBe(10_010);
     expect((await readLockDirectory(path)).record).toMatchObject({ operationId: "stale-operation" });
   });
@@ -228,7 +240,10 @@ describe("Harnix file lock", () => {
       processIdentityInspector: async (pid) => ({ pid, startedAt: new Date(9_000).toISOString() }),
     });
 
-    expect((await readLockDirectory(path)).record).toMatchObject({ operationId: "pid-reuse-replacement", ownerPid: 77 });
+    expect((await readLockDirectory(path)).record).toMatchObject({
+      operationId: "pid-reuse-replacement",
+      ownerPid: 77,
+    });
     await replacement.release();
   });
 
@@ -239,14 +254,16 @@ describe("Harnix file lock", () => {
     await writeLockDirectory(path, original);
 
     let inspections = 0;
-    await expect(acquireHarnixFileLock(path, {
-      clock: clockAt(10_000),
-      processIdentityInspector: async () => {
-        inspections += 1;
-        return undefined;
-      },
-      timeoutMs: 0,
-    })).rejects.toBeInstanceOf(FileLockTimeoutError);
+    await expect(
+      acquireHarnixFileLock(path, {
+        clock: clockAt(10_000),
+        processIdentityInspector: async () => {
+          inspections += 1;
+          return undefined;
+        },
+        timeoutMs: 0,
+      }),
+    ).rejects.toBeInstanceOf(FileLockTimeoutError);
     expect(inspections).toBe(1);
     expect((await readLockDirectory(path)).record).toEqual(original);
   });
@@ -266,16 +283,20 @@ describe("Harnix file lock", () => {
 
     const freshPath = join(home, "fresh.lock");
     await writeLockDirectory(freshPath, "partial-json");
-    await expect(acquireHarnixFileLock(freshPath, { clock: clockAt(10_000), timeoutMs: 0 })).rejects.toBeInstanceOf(FileLockTimeoutError);
+    await expect(acquireHarnixFileLock(freshPath, { clock: clockAt(10_000), timeoutMs: 0 })).rejects.toBeInstanceOf(
+      FileLockTimeoutError,
+    );
 
     const legacyPath = join(home, "legacy.lock");
     const legacySource = `${JSON.stringify(record())}\n`;
     await writeFile(legacyPath, legacySource, "utf8");
-    await expect(acquireHarnixFileLock(legacyPath, {
-      clock: clockAt(10_000),
-      ownerInspector: async () => "dead",
-      timeoutMs: 0,
-    })).rejects.toBeInstanceOf(InvalidHarnixFileLockError);
+    await expect(
+      acquireHarnixFileLock(legacyPath, {
+        clock: clockAt(10_000),
+        ownerInspector: async () => "dead",
+        timeoutMs: 0,
+      }),
+    ).rejects.toBeInstanceOf(InvalidHarnixFileLockError);
     expect(await readFile(legacyPath, "utf8")).toBe(legacySource);
   });
 
@@ -295,10 +316,12 @@ describe("Harnix file lock", () => {
 
     const freshPath = join(home, "fresh-empty.lock");
     await mkdir(freshPath);
-    await expect(acquireHarnixFileLock(freshPath, {
-      clock: clockAt(Date.now()),
-      timeoutMs: 0,
-    })).rejects.toBeInstanceOf(FileLockTimeoutError);
+    await expect(
+      acquireHarnixFileLock(freshPath, {
+        clock: clockAt(Date.now()),
+        timeoutMs: 0,
+      }),
+    ).rejects.toBeInstanceOf(FileLockTimeoutError);
     expect(await readdir(freshPath)).toEqual([]);
   });
 

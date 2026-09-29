@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { createNoActiveTaskAudit, createTaskAudit, type TaskAuditDependencies } from "../../src/core/tasks/task-audit.js";
+import {
+  createNoActiveTaskAudit,
+  createTaskAudit,
+  type TaskAuditDependencies,
+} from "../../src/core/tasks/task-audit.js";
 import type { RequiredCheckState } from "../../src/core/status.js";
 import type { TaskRecordV1, TaskRecordV2 } from "../../src/core/tasks/task.js";
 
@@ -15,7 +19,13 @@ describe("task audit", () => {
     const task = liteTask();
     task.acceptanceCriteria = [
       { id: "met", text: "PRIVATE_MET_CANARY", status: "met", evidenceIds: ["e-pass"] },
-      { id: "waived", text: "PRIVATE_WAIVED_CANARY", status: "waived", evidenceIds: [], waiverReason: "PRIVATE_WAIVER_CANARY" },
+      {
+        id: "waived",
+        text: "PRIVATE_WAIVED_CANARY",
+        status: "waived",
+        evidenceIds: [],
+        waiverReason: "PRIVATE_WAIVER_CANARY",
+      },
       { id: "pending", text: "PRIVATE_PENDING_CANARY", status: "pending", evidenceIds: [] },
     ];
     task.validationPlan = ["stale", "passed", "pending", "failed"].map((id) => ({
@@ -25,17 +35,25 @@ describe("task audit", () => {
       scope: "focused" as const,
       required: true,
     }));
-    task.evidence = [{
-      id: "e-pass",
-      checkId: "passed",
-      recordedAt: "2026-08-26T00:59:00.000Z",
-      result: "pass",
-      exitCode: 0,
-      summary: "PRIVATE_EVIDENCE_CANARY",
-      artifactPaths: [],
-    }];
+    task.evidence = [
+      {
+        id: "e-pass",
+        checkId: "passed",
+        recordedAt: "2026-08-26T00:59:00.000Z",
+        result: "pass",
+        exitCode: 0,
+        summary: "PRIVATE_EVIDENCE_CANARY",
+        artifactPaths: [],
+      },
+    ];
 
-    const result = await createTaskAudit("project", "harnix", task, now, dependencies(["stale", "passed", "pending", "failed"]));
+    const result = await createTaskAudit(
+      "project",
+      "harnix",
+      task,
+      now,
+      dependencies(["stale", "passed", "pending", "failed"]),
+    );
 
     expect(result.activeTask).toEqual({
       id: task.id,
@@ -65,14 +83,38 @@ describe("task audit", () => {
     const task = fullTask();
     const validPrd = "# PRD\nTự do.\n";
     const validPlan = "# Plan\n- [ ] Bước một\n";
-    const pass = await createTaskAudit("project", "harnix", task, now, dependencies(["pending"], { "prd.md": validPrd, "plan.md": validPlan }));
+    const pass = await createTaskAudit(
+      "project",
+      "harnix",
+      task,
+      now,
+      dependencies(["pending"], { "prd.md": validPrd, "plan.md": validPlan }),
+    );
     expect(pass.activeTask?.readiness).toEqual({ status: "pass", diagnostics: [] });
 
-    const noChecklist = await createTaskAudit("project", "harnix", task, now, dependencies(["pending"], { "prd.md": validPrd, "plan.md": "# Plan\nKhông có checklist\n" }));
-    expect(noChecklist.activeTask?.readiness).toEqual({ status: "fail", diagnostics: [{ code: "plan-checklist-missing", artifact: "plan.md" }] });
+    const noChecklist = await createTaskAudit(
+      "project",
+      "harnix",
+      task,
+      now,
+      dependencies(["pending"], { "prd.md": validPrd, "plan.md": "# Plan\nKhông có checklist\n" }),
+    );
+    expect(noChecklist.activeTask?.readiness).toEqual({
+      status: "fail",
+      diagnostics: [{ code: "plan-checklist-missing", artifact: "plan.md" }],
+    });
 
-    const empty = await createTaskAudit("project", "harnix", task, now, dependencies(["pending"], { "prd.md": "  \n", "plan.md": validPlan }));
-    expect(empty.activeTask?.readiness).toEqual({ status: "fail", diagnostics: [{ code: "artifact-empty", artifact: "prd.md" }] });
+    const empty = await createTaskAudit(
+      "project",
+      "harnix",
+      task,
+      now,
+      dependencies(["pending"], { "prd.md": "  \n", "plan.md": validPlan }),
+    );
+    expect(empty.activeTask?.readiness).toEqual({
+      status: "fail",
+      diagnostics: [{ code: "artifact-empty", artifact: "prd.md" }],
+    });
     expect(JSON.stringify(empty)).not.toContain("message");
   });
 
@@ -97,14 +139,32 @@ describe("task audit", () => {
     const task = liteTask();
     task.acceptanceCriteria = [{ id: "criterion", text: "done", status: "met", evidenceIds: ["e-pass"] }];
     task.validationPlan = [{ id: "gate", description: "verify", scope: "focused", required: true }];
-    task.evidence = [{ id: "e-pass", checkId: "gate", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", summary: "ok", artifactPaths: [] }];
+    task.evidence = [
+      {
+        id: "e-pass",
+        checkId: "gate",
+        recordedAt: "2026-08-26T00:59:00.000Z",
+        result: "pass",
+        summary: "ok",
+        artifactPaths: [],
+      },
+    ];
 
     const result = await createTaskAudit("project", "harnix", task, now, dependencies(["passed"]));
 
     expect(result.activeTask?.completion).toEqual({
       status: "pass",
       criteria: { met: 1, waived: 0, pending: 0, total: 1, pendingIds: [] },
-      requiredChecks: { passed: 1, failed: 0, stale: 0, pending: 0, total: 1, failedIds: [], staleIds: [], pendingIds: [] },
+      requiredChecks: {
+        passed: 1,
+        failed: 0,
+        stale: 0,
+        pending: 0,
+        total: 1,
+        failedIds: [],
+        staleIds: [],
+        pendingIds: [],
+      },
     });
   });
 
@@ -125,17 +185,35 @@ describe("task audit", () => {
       ],
       relevantPaths: [],
       relevantSpecs: [],
-      validationPlan: [{
-        id: "shared-check",
-        description: "shared check",
-        scope: "focused",
-        required: true,
-        criterionIds: ["a", "b"],
-        inputs: ["@task-contract", "src/x.ts"],
-      }],
+      validationPlan: [
+        {
+          id: "shared-check",
+          description: "shared check",
+          scope: "focused",
+          required: true,
+          criterionIds: ["a", "b"],
+          inputs: ["@task-contract", "src/x.ts"],
+        },
+      ],
       evidence: [
-        { id: "ev-a", checkId: "shared-check", recordedAt: "2026-08-26T00:58:00.000Z", result: "pass", summary: "ok", artifactPaths: [], inputDigest: "f".repeat(64) },
-        { id: "ev-b", checkId: "shared-check", recordedAt: "2026-08-26T00:59:00.000Z", result: "pass", summary: "ok", artifactPaths: [], inputDigest: "f".repeat(64) },
+        {
+          id: "ev-a",
+          checkId: "shared-check",
+          recordedAt: "2026-08-26T00:58:00.000Z",
+          result: "pass",
+          summary: "ok",
+          artifactPaths: [],
+          inputDigest: "f".repeat(64),
+        },
+        {
+          id: "ev-b",
+          checkId: "shared-check",
+          recordedAt: "2026-08-26T00:59:00.000Z",
+          result: "pass",
+          summary: "ok",
+          artifactPaths: [],
+          inputDigest: "f".repeat(64),
+        },
       ],
       createdAt: "2026-08-26T00:00:00.000Z",
       updatedAt: "2026-08-26T00:59:00.000Z",
@@ -146,7 +224,16 @@ describe("task audit", () => {
     expect(result.activeTask?.completion).toEqual({
       status: "pass",
       criteria: { met: 2, waived: 0, pending: 0, total: 2, pendingIds: [] },
-      requiredChecks: { passed: 1, failed: 0, stale: 0, pending: 0, total: 1, failedIds: [], staleIds: [], pendingIds: [] },
+      requiredChecks: {
+        passed: 1,
+        failed: 0,
+        stale: 0,
+        pending: 0,
+        total: 1,
+        failedIds: [],
+        staleIds: [],
+        pendingIds: [],
+      },
     });
   });
 });

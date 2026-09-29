@@ -21,10 +21,7 @@ export interface ContextSelectionSnapshotV1 {
 }
 
 export type ContextSelectionChangeKind =
-  | "inventory-changed"
-  | "inventory-unavailable"
-  | "selection-signals-changed"
-  | "selector-version-changed";
+  "inventory-changed" | "inventory-unavailable" | "selection-signals-changed" | "selector-version-changed";
 
 export interface ContextSelectionInput {
   task: Pick<TaskRecord, "id" | "relevantPaths" | "relevantSpecs">;
@@ -55,7 +52,11 @@ export function inspectContextSelectionChanges(
 ): ContextSelectionChangeKind[] {
   const valid = validateContextSelectionSnapshot(snapshot);
   const manifest = validateContextManifest(input.manifest);
-  if (valid.taskId !== input.task.id || manifest.taskId !== input.task.id || valid.selectionResultHash !== contextSelectionResultHash(manifest)) {
+  if (
+    valid.taskId !== input.task.id ||
+    manifest.taskId !== input.task.id ||
+    valid.selectionResultHash !== contextSelectionResultHash(manifest)
+  ) {
     throw new Error("Context selection snapshot binding is invalid.");
   }
   const currentSelectorVersion = input.currentSelectorVersion ?? CONTEXT_SELECTOR_VERSION;
@@ -70,19 +71,25 @@ export function inspectContextSelectionChanges(
 
 export function contextSelectionResultHash(manifest: ContextManifest): string {
   const valid = validateContextManifest(manifest);
-  const entries = valid.entries.map(({ path, reason, priority, pinned, states }) => ({
-    path,
-    reason,
-    priority,
-    pinned,
-    states: sortedUnique(states),
-  })).sort((left, right) => compareCodeUnits(left.path, right.path));
-  const omitted = valid.omitted.map(({ path, reason }) => ({ path, reason }))
+  const entries = valid.entries
+    .map(({ path, reason, priority, pinned, states }) => ({
+      path,
+      reason,
+      priority,
+      pinned,
+      states: sortedUnique(states),
+    }))
+    .sort((left, right) => compareCodeUnits(left.path, right.path));
+  const omitted = valid.omitted
+    .map(({ path, reason }) => ({ path, reason }))
     .sort((left, right) => compareCodeUnits(left.path, right.path) || compareCodeUnits(left.reason, right.reason));
   return sha256(JSON.stringify({ entries, omitted }));
 }
 
-export async function saveContextSelectionSnapshot(taskDirectory: string, snapshot: ContextSelectionSnapshotV1): Promise<void> {
+export async function saveContextSelectionSnapshot(
+  taskDirectory: string,
+  snapshot: ContextSelectionSnapshotV1,
+): Promise<void> {
   const path = await resolveSafeProjectPath(taskDirectory, "context-selection.json");
   await atomicWriteFile(path, `${JSON.stringify(validateContextSelectionSnapshot(snapshot), null, 2)}\n`);
 }
@@ -92,48 +99,58 @@ export async function loadContextSelectionSnapshot(path: string): Promise<Contex
 }
 
 export function validateContextSelectionSnapshot(value: unknown): ContextSelectionSnapshotV1 {
-  if (!isRecord(value)
-    || value.generator !== "harnix"
-    || value.schemaVersion !== 1
-    || typeof value.taskId !== "string"
-    || value.taskId.length === 0
-    || value.selectorVersion !== CONTEXT_SELECTOR_VERSION
-    || !isHash(value.inventoryFingerprint)
-    || !isHash(value.selectionInputHash)
-    || !isHash(value.selectionResultHash)) {
+  if (
+    !isRecord(value) ||
+    value.generator !== "harnix" ||
+    value.schemaVersion !== 1 ||
+    typeof value.taskId !== "string" ||
+    value.taskId.length === 0 ||
+    value.selectorVersion !== CONTEXT_SELECTOR_VERSION ||
+    !isHash(value.inventoryFingerprint) ||
+    !isHash(value.selectionInputHash) ||
+    !isHash(value.selectionResultHash)
+  ) {
     throw new Error("Invalid or unsupported context selection snapshot.");
   }
   return value as unknown as ContextSelectionSnapshotV1;
 }
 
-function selectionInputHash(input: Omit<ContextSelectionInput, "manifest">, selectorVersion: number, inventoryFingerprint: string): string {
-  const packages = input.config.packages.map((item) => ({
-    path: normalizeRepositoryPath(item.path, { allowRoot: true }),
-    languages: sortedUnique(item.languages),
-    technologies: sortedUnique(item.technologies),
-  })).sort((left, right) => compareCodeUnits(left.path, right.path));
-  return sha256(JSON.stringify({
-    task: {
-      relevantPaths: sortedRepositoryPaths(input.task.relevantPaths),
-      relevantSpecs: sortedRepositoryPaths(input.task.relevantSpecs),
-    },
-    config: {
-      languages: sortedUnique(input.config.languages),
-      technologies: sortedUnique(input.config.technologies),
-      packages,
-      context: {
-        maxCharacters: input.config.context.maxCharacters,
-        tokenApproximation: input.config.context.tokenApproximation,
+function selectionInputHash(
+  input: Omit<ContextSelectionInput, "manifest">,
+  selectorVersion: number,
+  inventoryFingerprint: string,
+): string {
+  const packages = input.config.packages
+    .map((item) => ({
+      path: normalizeRepositoryPath(item.path, { allowRoot: true }),
+      languages: sortedUnique(item.languages),
+      technologies: sortedUnique(item.technologies),
+    }))
+    .sort((left, right) => compareCodeUnits(left.path, right.path));
+  return sha256(
+    JSON.stringify({
+      task: {
+        relevantPaths: sortedRepositoryPaths(input.task.relevantPaths),
+        relevantSpecs: sortedRepositoryPaths(input.task.relevantSpecs),
       },
-      runtime: {
-        fullContext: input.config.runtime.fullContext,
-        research: input.config.runtime.research,
+      config: {
+        languages: sortedUnique(input.config.languages),
+        technologies: sortedUnique(input.config.technologies),
+        packages,
+        context: {
+          maxCharacters: input.config.context.maxCharacters,
+          tokenApproximation: input.config.context.tokenApproximation,
+        },
+        runtime: {
+          fullContext: input.config.runtime.fullContext,
+          research: input.config.runtime.research,
+        },
       },
-    },
-    selectedGuidePaths: sortedRepositoryPaths(input.selectedGuidePaths),
-    selectorVersion,
-    inventoryFingerprint,
-  }));
+      selectedGuidePaths: sortedRepositoryPaths(input.selectedGuidePaths),
+      selectorVersion,
+      inventoryFingerprint,
+    }),
+  );
 }
 
 function sortedRepositoryPaths(values: readonly string[]): string[] {

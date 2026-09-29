@@ -42,13 +42,15 @@ describe("user-global platform desired-surface renderers", () => {
     expect(KIRO_GLOBAL_CONTEXT_HOOK_COMMAND).toBe("harnix context --platform kiro");
     expect(KIRO_GLOBAL_CONTEXT_HOOK).toEqual({
       version: "v1",
-      hooks: [{
-        name: "harnix-context",
-        trigger: "UserPromptSubmit",
-        action: { type: "command", command: KIRO_GLOBAL_CONTEXT_HOOK_COMMAND },
-        timeout: 5,
-        enabled: true,
-      }],
+      hooks: [
+        {
+          name: "harnix-context",
+          trigger: "UserPromptSubmit",
+          action: { type: "command", command: KIRO_GLOBAL_CONTEXT_HOOK_COMMAND },
+          timeout: 5,
+          enabled: true,
+        },
+      ],
     });
     expect(JSON.parse(fileContent(byPath.get("hooks/harnix-context.json")))).toEqual(KIRO_GLOBAL_CONTEXT_HOOK);
     expect(fileContent(byPath.get("steering/harnix.md"))).toBe(KIRO_GLOBAL_STEERING);
@@ -83,7 +85,9 @@ describe("user-global platform desired-surface renderers", () => {
   it("should_route_ordinary_requests_without_requiring_the_user_to_name_harnix", () => {
     for (const instructions of [KIRO_GLOBAL_STEERING, ANTIGRAVITY_GLOBAL_RULE, codexGlobalAgentsContent]) {
       for (const clause of HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS) expect(instructions).toContain(clause);
-      expect(instructions.indexOf("classify the latest request")).toBeLessThan(instructions.indexOf("consulting any active task"));
+      expect(instructions.indexOf("classify the latest request")).toBeLessThan(
+        instructions.indexOf("consulting any active task"),
+      );
       expect(instructions).toContain("leaves an unrelated active task unchanged");
       expect(instructions).toContain("workflow --preflight");
       expect(instructions).toContain("If no such root exists or its state is invalid");
@@ -141,15 +145,19 @@ describe("user-global platform desired-surface renderers", () => {
     expect(ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND).toBe("harnix context --platform antigravity");
     expect(ANTIGRAVITY_GLOBAL_CONTEXT_HOOK).toEqual({
       "harnix-context": {
-        PreInvocation: [{
-          type: "command",
-          command: ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND,
-          timeout: 5,
-        }],
+        PreInvocation: [
+          {
+            type: "command",
+            command: ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND,
+            timeout: 5,
+          },
+        ],
       },
     });
     expect(JSON.parse(fileContent(byPath.get("hooks.json")))).toEqual(ANTIGRAVITY_GLOBAL_CONTEXT_HOOK);
     expect(fileContent(byPath.get("rules/AGENTS.md"))).toBe(ANTIGRAVITY_GLOBAL_RULE);
-    expect(desktopPlan.map((file) => file.path).some((path) => path.startsWith("/") || path.includes(".."))).toBe(false);
+    expect(desktopPlan.map((file) => file.path).some((path) => path.startsWith("/") || path.includes(".."))).toBe(
+      false,
+    );
   });
 });

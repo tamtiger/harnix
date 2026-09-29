@@ -23,6 +23,9 @@ export async function runInternalContextCommand(options: RunInternalContextComma
 
 export function parseOptionalHookInput(source: string | undefined): unknown | undefined {
   if (source === undefined || source.trim().length === 0) return undefined;
-  try { return JSON.parse(source) as unknown; }
-  catch { return undefined; }
+  try {
+    return JSON.parse(source) as unknown;
+  } catch {
+    return undefined;
+  }
 }

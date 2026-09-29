@@ -40,7 +40,15 @@ describe("harnix skill", () => {
   it("should_name_every_skill_the_router_can_select", () => {
     const names = new Set(reportSkillCatalog().skills.map((skill) => skill.name));
 
-    for (const owner of ["harnix-brainstorm", "harnix-implement", "harnix-check", "harnix-debug", "harnix-research", "harnix-finish-work", "harnix-continue"]) {
+    for (const owner of [
+      "harnix-brainstorm",
+      "harnix-implement",
+      "harnix-check",
+      "harnix-debug",
+      "harnix-research",
+      "harnix-finish-work",
+      "harnix-continue",
+    ]) {
       expect(names.has(owner)).toBe(true);
     }
   });

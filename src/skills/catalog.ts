@@ -49,10 +49,12 @@ function parseSkillSource(rawSource: string): SkillTemplate {
   if (typeof frontmatter.description !== "string" || !frontmatter.description.startsWith("Use when ")) {
     throw new Error("Harnix skill description must start with 'Use when '.");
   }
-  if (!isRecord(frontmatter.metadata)
-    || Object.keys(frontmatter.metadata).join(",") !== "version"
-    || typeof frontmatter.metadata.version !== "string"
-    || !/^\d+\.\d+\.\d+$/u.test(frontmatter.metadata.version)) {
+  if (
+    !isRecord(frontmatter.metadata) ||
+    Object.keys(frontmatter.metadata).join(",") !== "version" ||
+    typeof frontmatter.metadata.version !== "string" ||
+    !/^\d+\.\d+\.\d+$/u.test(frontmatter.metadata.version)
+  ) {
     throw new Error("Harnix skill metadata.version must be a semantic version string.");
   }
 

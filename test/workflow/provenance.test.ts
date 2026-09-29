@@ -67,14 +67,24 @@ describe("external harness feature provenance", () => {
     expect(registry.features.map((feature) => feature.id)).toEqual(expectedFeatureIds);
 
     for (const feature of registry.features) {
-      expect(exactKeys(feature)).toEqual(["adaptation", "capability", "decision", "id", "implementation", "lifecycle", "sources"]);
+      expect(exactKeys(feature)).toEqual([
+        "adaptation",
+        "capability",
+        "decision",
+        "id",
+        "implementation",
+        "lifecycle",
+        "sources",
+      ]);
       expect(feature.id).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/u);
       expect(feature.capability.trim()).not.toBe("");
       expect(["adopt", "adapt"]).toContain(feature.decision);
       expect(["implemented", "deprecated"]).toContain(feature.lifecycle);
       expect(feature.adaptation.trim()).not.toBe("");
       expect(feature.sources.length).toBeGreaterThan(0);
-      expect(feature.sources.map((source) => source.repository)).toEqual(sortedUnique(feature.sources.map((source) => source.repository)));
+      expect(feature.sources.map((source) => source.repository)).toEqual(
+        sortedUnique(feature.sources.map((source) => source.repository)),
+      );
 
       for (const source of feature.sources) {
         expect(exactKeys(source)).toEqual(["evidenceUrls", "license", "ref", "repository", "sourceDate", "url"]);
@@ -102,7 +112,10 @@ describe("external harness feature provenance", () => {
         for (const path of paths) {
           expect(path).not.toMatch(/[?*[\]{}]/u);
           expect(normalizeRepositoryPath(path)).toBe(path);
-          await expect(access(await resolveSafeProjectPath(root, path)), `${feature.id}: ${path}`).resolves.toBeUndefined();
+          await expect(
+            access(await resolveSafeProjectPath(root, path)),
+            `${feature.id}: ${path}`,
+          ).resolves.toBeUndefined();
         }
       }
     }
@@ -131,5 +144,5 @@ function exactKeys(value: object): string[] {
 }
 
 function sortedUnique(values: readonly string[]): string[] {
-  return [...new Set(values)].sort((left, right) => left < right ? -1 : left > right ? 1 : 0);
+  return [...new Set(values)].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
 }

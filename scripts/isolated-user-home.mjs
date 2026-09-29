@@ -16,8 +16,7 @@ export function createIsolatedUserEnvironment(home, options = {}) {
 
   const pathKey = Object.keys(environment).find((key) => key.toUpperCase() === "PATH") ?? "PATH";
   const inheritedPath = environment[pathKey] ?? "";
-  environment[pathKey] = inheritedPath.length === 0
-    ? options.pathPrefix
-    : `${options.pathPrefix}${delimiter}${inheritedPath}`;
+  environment[pathKey] =
+    inheritedPath.length === 0 ? options.pathPrefix : `${options.pathPrefix}${delimiter}${inheritedPath}`;
   return environment;
 }

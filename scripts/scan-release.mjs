@@ -14,7 +14,8 @@ const runtimeDependencyFields = ["dependencies", "optionalDependencies", "peerDe
 const packageImportExtensions = ["", ".js", ".mjs", ".cjs", ".json"];
 const executableExtensions = new Set([".cjs", ".js", ".mjs"]);
 const builtinSpecifiers = new Set([...builtinModules, ...builtinModules.map((name) => `node:${name}`)]);
-const potentialSecretPattern = /(?:api[_-]?key|password|secret|token)\s*([=:])\s*(?:['"][^'"]{8,}|([A-Za-z0-9][A-Za-z0-9._~+/-]{7,}))/giu;
+const potentialSecretPattern =
+  /(?:api[_-]?key|password|secret|token)\s*([=:])\s*(?:['"][^'"]{8,}|([A-Za-z0-9][A-Za-z0-9._~+/-]{7,}))/giu;
 
 // High-confidence: a fixed vendor prefix plus a structured token body. These formats are
 // specific enough that a genuine TypeScript type name or identifier cannot collide with them,
@@ -30,7 +31,10 @@ const structuredSecretPatterns = [
   { name: "private key header", pattern: /-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----/u },
   { name: "JWT", pattern: /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/u },
   // Medium-confidence: a database connection string that embeds a credential before the host.
-  { name: "database connection string with credential", pattern: /(?:postgres|postgresql|mysql|mongodb(?:\+srv)?|redis|sqlserver|mssql):\/\/[^\s'"/@]+:[^\s'"/@]+@/u },
+  {
+    name: "database connection string with credential",
+    pattern: /(?:postgres|postgresql|mysql|mongodb(?:\+srv)?|redis|sqlserver|mssql):\/\/[^\s'"/@]+:[^\s'"/@]+@/u,
+  },
 ];
 
 export async function runReleaseScan(options = {}) {
@@ -38,7 +42,8 @@ export async function runReleaseScan(options = {}) {
   const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
   const artifacts = join(root, ".artifacts");
   const tarballs = (await readdir(artifacts)).filter((name) => name.endsWith(".tgz"));
-  if (tarballs.length !== 1) throw new Error(`Expected one checked tarball, found ${tarballs.length}. Run pack:check first.`);
+  if (tarballs.length !== 1)
+    throw new Error(`Expected one checked tarball, found ${tarballs.length}. Run pack:check first.`);
 
   const temporary = await mkdtemp(join(options.temporaryDirectory ?? tmpdir(), "harnix-release-scan-"));
   try {
@@ -67,7 +72,12 @@ export async function runReleaseScan(options = {}) {
     await writeFile(join(installRoot, "package.json"), '{"private":true}\n');
     const packageManagerEntrypoint = process.env.npm_execpath;
     if (!packageManagerEntrypoint) throw new Error("scan:release must run through pnpm or npm.");
-    run(process.execPath, [packageManagerEntrypoint, "add", "--ignore-scripts", "--no-lockfile", tarball], installRoot, createIsolatedUserEnvironment(packageManagerHome));
+    run(
+      process.execPath,
+      [packageManagerEntrypoint, "add", "--ignore-scripts", "--no-lockfile", tarball],
+      installRoot,
+      createIsolatedUserEnvironment(packageManagerHome),
+    );
     const installedCli = await realpath(join(installRoot, "node_modules", "@tamtiger", "harnix", "dist", "cli.js"));
     const installedPackage = resolve(installedCli, "..", "..");
     const installedRequire = createRequire(join(installedPackage, "package.json"));
@@ -81,22 +91,40 @@ export async function runReleaseScan(options = {}) {
 
     const fixture = join(temporary, "fixture");
     await mkdir(fixture);
-    run(process.execPath, [installedCli, "init", "--user", "scan", "--languages", "vue"], fixture, integrationEnvironment);
-    const setup = run(process.execPath, [installedCli, "setup", "--kiro", "--antigravity", "--codex"], fixture, integrationEnvironment, undefined, [0, 1]);
+    run(
+      process.execPath,
+      [installedCli, "init", "--user", "scan", "--languages", "vue"],
+      fixture,
+      integrationEnvironment,
+    );
+    const setup = run(
+      process.execPath,
+      [installedCli, "setup", "--kiro", "--antigravity", "--codex"],
+      fixture,
+      integrationEnvironment,
+      undefined,
+      [0, 1],
+    );
     assertSetupExitContract(setup);
-    const generatedFiles = [...await walk(fixture), ...await walk(userHome)];
+    const generatedFiles = [...(await walk(fixture)), ...(await walk(userHome))];
     await scanTextFiles(generatedFiles, "generated fixture", true);
     await assertExpectedGlobalSurfaces(userHome);
     await assertNoProjectLocalPlatformSurfaces(fixture);
     await assertSingleHooks(userHome);
     const ordinaryWorkspace = join(temporary, "ordinary-workspace");
     await mkdir(ordinaryWorkspace);
-    const nonHarnixContextPerformance = measureNonHarnixContextFastPath(installedCli, ordinaryWorkspace, integrationEnvironment);
+    const nonHarnixContextPerformance = measureNonHarnixContextFastPath(
+      installedCli,
+      ordinaryWorkspace,
+      integrationEnvironment,
+    );
     if ((await readdir(ordinaryWorkspace)).length !== 0) {
       throw new Error("Non-Harnix context hook must not write to the workspace.");
     }
 
-    process.stdout.write(`${JSON.stringify({ package: packageJson.name, tarball: tarballs[0], packagedFiles: packagedFiles.length, generatedFiles: generatedFiles.length, nonHarnixContextPerformance, scanned: ["secrets", "machine-paths", "required-todos", "forbidden-surfaces", "one-package", "one-bin", "dead-imports", "duplicate-hooks", "attribution", "non-harnix-context-performance"] })}\n`);
+    process.stdout.write(
+      `${JSON.stringify({ package: packageJson.name, tarball: tarballs[0], packagedFiles: packagedFiles.length, generatedFiles: generatedFiles.length, nonHarnixContextPerformance, scanned: ["secrets", "machine-paths", "required-todos", "forbidden-surfaces", "one-package", "one-bin", "dead-imports", "duplicate-hooks", "attribution", "non-harnix-context-performance"] })}\n`,
+    );
   } finally {
     await rm(temporary, { force: true, recursive: true });
   }
@@ -104,13 +132,16 @@ export async function runReleaseScan(options = {}) {
 
 export async function assertTarballListing(listing) {
   if (listing.some(isUnsafeTarballPath)) throw new Error("Tarball contains an unsafe path.");
-  if (listing.filter((path) => path === "package/package.json").length !== 1) throw new Error("Release must contain exactly one package.");
-  if (listing.some((path) => /(?:^|[/\\])pnpm-workspace\.yaml$/u.test(path))) throw new Error("Release must not contain a workspace file.");
+  if (listing.filter((path) => path === "package/package.json").length !== 1)
+    throw new Error("Release must contain exactly one package.");
+  if (listing.some((path) => /(?:^|[/\\])pnpm-workspace\.yaml$/u.test(path)))
+    throw new Error("Release must not contain a workspace file.");
 }
 
 export function assertSingleHarnixExecutable(packageJson) {
   const bin = packageJson.bin ?? {};
-  if (Object.keys(bin).length !== 1 || bin.harnix !== "./dist/cli.js") throw new Error("Release must expose exactly one harnix executable.");
+  if (Object.keys(bin).length !== 1 || bin.harnix !== "./dist/cli.js")
+    throw new Error("Release must expose exactly one harnix executable.");
 }
 
 export function assertAttribution(notice) {
@@ -124,11 +155,19 @@ export async function scanTextFiles(files, scope, generated) {
     const content = await readFile(file);
     if (content.includes(0)) continue;
     const text = content.toString("utf8");
-    if (/(?:[A-Za-z]:[\\/]Users[\\/]|\/(?:home|Users)\/[^/]+\/|\\\\(?:\?\\[A-Za-z]:\\|[A-Za-z0-9._-]+\\[A-Za-z0-9$._-]+\\))/u.test(text)) throw new Error(`Machine path found in ${scope}: ${file}.`);
+    if (
+      /(?:[A-Za-z]:[\\/]Users[\\/]|\/(?:home|Users)\/[^/]+\/|\\\\(?:\?\\[A-Za-z]:\\|[A-Za-z0-9._-]+\\[A-Za-z0-9$._-]+\\))/u.test(
+        text,
+      )
+    )
+      throw new Error(`Machine path found in ${scope}: ${file}.`);
     if (containsPotentialSecret(text, file)) throw new Error(`Potential secret found in ${scope}: ${file}.`);
-    if (/(?:REQUIRED\s+TODO|TODO\s*\(required\))/iu.test(text)) throw new Error(`Required TODO found in ${scope}: ${file}.`);
-    if (generated && /gemini-cli|cursor|windsurf/iu.test(text)) throw new Error(`Forbidden platform surface found in generated output: ${file}.`);
-    if (generated && /@mindfoldhq\/trellis|@tamtiger\/trellis/iu.test(text)) throw new Error(`Forbidden legacy product reference found in generated output: ${file}.`);
+    if (/(?:REQUIRED\s+TODO|TODO\s*\(required\))/iu.test(text))
+      throw new Error(`Required TODO found in ${scope}: ${file}.`);
+    if (generated && /gemini-cli|cursor|windsurf/iu.test(text))
+      throw new Error(`Forbidden platform surface found in generated output: ${file}.`);
+    if (generated && /@mindfoldhq\/trellis|@tamtiger\/trellis/iu.test(text))
+      throw new Error(`Forbidden legacy product reference found in generated output: ${file}.`);
   }
 }
 
@@ -151,12 +190,13 @@ function containsPotentialSecret(text, file) {
 function containsPotentialSecretText(text, ignoredTypeReferenceRanges) {
   for (const match of text.matchAll(potentialSecretPattern)) {
     const [, separator, unquotedValue] = match;
-    const valueStart = unquotedValue === undefined || match.index === undefined
-      ? -1
-      : match.index + match[0].lastIndexOf(unquotedValue);
-    const isTypeReference = valueStart >= 0 && ignoredTypeReferenceRanges.some(
-      ([start, end]) => valueStart >= start && valueStart + unquotedValue.length <= end,
-    );
+    const valueStart =
+      unquotedValue === undefined || match.index === undefined ? -1 : match.index + match[0].lastIndexOf(unquotedValue);
+    const isTypeReference =
+      valueStart >= 0 &&
+      ignoredTypeReferenceRanges.some(
+        ([start, end]) => valueStart >= start && valueStart + unquotedValue.length <= end,
+      );
     if (separator === ":" && unquotedValue !== undefined && isTypeReference) continue;
     return true;
   }
@@ -166,7 +206,13 @@ function containsPotentialSecretText(text, ignoredTypeReferenceRanges) {
 function parseSourceMap(text) {
   try {
     const value = JSON.parse(text);
-    if (typeof value !== "object" || value === null || !Array.isArray(value.sources) || !Array.isArray(value.sourcesContent)) return undefined;
+    if (
+      typeof value !== "object" ||
+      value === null ||
+      !Array.isArray(value.sources) ||
+      !Array.isArray(value.sourcesContent)
+    )
+      return undefined;
     return value;
   } catch {
     return undefined;
@@ -242,18 +288,17 @@ export async function assertSingleHooks(home) {
   if (codexCount !== 1) throw new Error(`Expected one Codex Harnix hook, found ${codexCount}.`);
 
   const kiro = JSON.parse(await readFile(join(home, ".kiro", "hooks", "harnix-context.json"), "utf8"));
-  const kiroCount = (Array.isArray(kiro.hooks) ? kiro.hooks.map((hook) => hook?.action?.command) : [])
-    .filter((command) => command === "harnix context --platform kiro").length;
+  const kiroCount = (Array.isArray(kiro.hooks) ? kiro.hooks.map((hook) => hook?.action?.command) : []).filter(
+    (command) => command === "harnix context --platform kiro",
+  ).length;
   if (kiroCount !== 1) throw new Error(`Expected one Kiro Harnix hook, found ${kiroCount}.`);
 
-  for (const pluginRoot of [
-    ".gemini/config/plugins/harnix",
-    ".gemini/antigravity-cli/plugins/harnix",
-  ]) {
+  for (const pluginRoot of [".gemini/config/plugins/harnix", ".gemini/antigravity-cli/plugins/harnix"]) {
     const pluginHooks = JSON.parse(await readFile(join(home, ...pluginRoot.split("/"), "hooks.json"), "utf8"));
     const entries = pluginHooks?.["harnix-context"]?.PreInvocation;
-    const count = (Array.isArray(entries) ? entries : [])
-      .filter((entry) => entry?.command === "harnix context --platform antigravity").length;
+    const count = (Array.isArray(entries) ? entries : []).filter(
+      (entry) => entry?.command === "harnix context --platform antigravity",
+    ).length;
     if (count !== 1) throw new Error(`Expected one Antigravity Harnix hook in ${pluginRoot}, found ${count}.`);
   }
 }
@@ -273,7 +318,13 @@ export function measureNonHarnixContextFastPath(cli, workspace, environment) {
   const samples = [];
   for (let index = 0; index < 15; index += 1) {
     const started = performance.now();
-    const result = run(process.execPath, [cli, ...contextFastPathArguments("antigravity")], workspace, environment, input);
+    const result = run(
+      process.execPath,
+      [cli, ...contextFastPathArguments("antigravity")],
+      workspace,
+      environment,
+      input,
+    );
     const duration = performance.now() - started;
     assertNonHarnixContextNoOutput(result.stdout, result.stderr);
     samples.push(duration);
@@ -297,7 +348,9 @@ export function assertNonHarnixContextPerformance(samples) {
   const p95 = percentile(sorted, 0.95);
   const max = sorted.at(-1);
   if (median >= 300 || p95 >= 750 || max === undefined || max >= 1000) {
-    throw new Error(`Non-Harnix context hook startup exceeds release thresholds: median=${median.toFixed(1)}ms p95=${p95.toFixed(1)}ms max=${max?.toFixed(1) ?? "unknown"}ms.`);
+    throw new Error(
+      `Non-Harnix context hook startup exceeds release thresholds: median=${median.toFixed(1)}ms p95=${p95.toFixed(1)}ms max=${max?.toFixed(1) ?? "unknown"}ms.`,
+    );
   }
   return { max, median, p95, repetitions: samples.length, samples };
 }
@@ -313,27 +366,38 @@ function isUnsafeTarballPath(path) {
 async function assertLivePackagedImport(specifier, importer, packageRoot, packageJson, resolveBareSpecifier) {
   if (builtinSpecifiers.has(specifier) || specifier.startsWith("data:")) return;
   if (specifier.startsWith(".") || specifier.startsWith("/")) {
-    const candidates = packageImportExtensions.map((extension) => resolve(dirname(importer), `${specifier}${extension}`));
-    if (specifier.startsWith("/") || !await anyPackagedFile(candidates, packageRoot)) {
-      throw new Error(`Dead packaged import ${JSON.stringify(specifier)} from ${relativePackagePath(packageRoot, importer)}.`);
+    const candidates = packageImportExtensions.map((extension) =>
+      resolve(dirname(importer), `${specifier}${extension}`),
+    );
+    if (specifier.startsWith("/") || !(await anyPackagedFile(candidates, packageRoot))) {
+      throw new Error(
+        `Dead packaged import ${JSON.stringify(specifier)} from ${relativePackagePath(packageRoot, importer)}.`,
+      );
     }
     return;
   }
   if (specifier.startsWith("#")) {
-    if (!hasPackageImport(packageJson.imports, specifier)) throw new Error(`Dead packaged import ${JSON.stringify(specifier)} from ${relativePackagePath(packageRoot, importer)}: package import is not declared.`);
+    if (!hasPackageImport(packageJson.imports, specifier))
+      throw new Error(
+        `Dead packaged import ${JSON.stringify(specifier)} from ${relativePackagePath(packageRoot, importer)}: package import is not declared.`,
+      );
     return;
   }
 
   const dependency = packageNameFromSpecifier(specifier);
   if (dependency === packageJson.name) return;
   if (!runtimeDependencyFields.some((field) => typeof packageJson[field]?.[dependency] === "string")) {
-    throw new Error(`Dead packaged import ${JSON.stringify(specifier)} from ${relativePackagePath(packageRoot, importer)}: ${JSON.stringify(dependency)} is not declared as a runtime dependency.`);
+    throw new Error(
+      `Dead packaged import ${JSON.stringify(specifier)} from ${relativePackagePath(packageRoot, importer)}: ${JSON.stringify(dependency)} is not declared as a runtime dependency.`,
+    );
   }
   if (resolveBareSpecifier !== undefined) {
     try {
       resolveBareSpecifier(specifier);
     } catch {
-      throw new Error(`Dead packaged import ${JSON.stringify(specifier)} from ${relativePackagePath(packageRoot, importer)}: runtime target cannot be resolved.`);
+      throw new Error(
+        `Dead packaged import ${JSON.stringify(specifier)} from ${relativePackagePath(packageRoot, importer)}: runtime target cannot be resolved.`,
+      );
     }
   }
 }
@@ -355,12 +419,18 @@ async function anyPackagedFile(candidates, packageRoot) {
 function isContainedPath(root, candidate) {
   const normalizedRoot = resolve(root);
   const normalizedCandidate = resolve(candidate);
-  return normalizedCandidate === normalizedRoot || normalizedCandidate.startsWith(`${normalizedRoot}\\`) || normalizedCandidate.startsWith(`${normalizedRoot}/`);
+  return (
+    normalizedCandidate === normalizedRoot ||
+    normalizedCandidate.startsWith(`${normalizedRoot}\\`) ||
+    normalizedCandidate.startsWith(`${normalizedRoot}/`)
+  );
 }
 
 function hasPackageImport(imports, specifier) {
   if (typeof imports !== "object" || imports === null) return false;
-  return Object.keys(imports).some((key) => key === specifier || key.includes("*") && matchesImportPattern(key, specifier));
+  return Object.keys(imports).some(
+    (key) => key === specifier || (key.includes("*") && matchesImportPattern(key, specifier)),
+  );
 }
 
 function matchesImportPattern(pattern, specifier) {
@@ -380,12 +450,19 @@ function relativePackagePath(packageRoot, file) {
 function importSpecifiers(source) {
   const specifiers = new Set();
   const file = ts.createSourceFile("packed-module.js", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
-  const add = (value) => { if (value !== undefined && ts.isStringLiteralLike(value)) specifiers.add(value.text); };
+  const add = (value) => {
+    if (value !== undefined && ts.isStringLiteralLike(value)) specifiers.add(value.text);
+  };
   const visit = (node) => {
     if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) add(node.moduleSpecifier);
     else if (ts.isCallExpression(node)) {
       const [argument] = node.arguments;
-      if ((node.expression.kind === ts.SyntaxKind.ImportKeyword || ts.isIdentifier(node.expression) && node.expression.text === "require") && argument) add(argument);
+      if (
+        (node.expression.kind === ts.SyntaxKind.ImportKeyword ||
+          (ts.isIdentifier(node.expression) && node.expression.text === "require")) &&
+        argument
+      )
+        add(argument);
     }
     ts.forEachChild(node, visit);
   };
@@ -409,7 +486,10 @@ function run(executable, args, cwd, env, input, expectedStatuses = [0]) {
     ...(input === undefined ? {} : { input }),
     windowsHide: true,
   });
-  if (!expectedStatuses.includes(result.status)) throw new Error(`${executable} ${args.join(" ")} failed: ${result.error?.message ?? result.stderr ?? result.stdout ?? "unknown"}`);
+  if (!expectedStatuses.includes(result.status))
+    throw new Error(
+      `${executable} ${args.join(" ")} failed: ${result.error?.message ?? result.stderr ?? result.stdout ?? "unknown"}`,
+    );
   return result;
 }
 
@@ -420,11 +500,17 @@ function assertSetupExitContract({ status, stderr, stdout }) {
   } catch {
     throw new Error(`setup did not return valid JSON: ${stdout}`);
   }
-  if (result?.scope !== "user" || !Array.isArray(result.platforms)) throw new Error(`setup returned an unexpected global result: ${stdout}`);
-  const actionable = result.platforms.some((platform) => platform?.readiness !== "installed" || !Array.isArray(platform?.warnings) || platform.warnings.length > 0);
+  if (result?.scope !== "user" || !Array.isArray(result.platforms))
+    throw new Error(`setup returned an unexpected global result: ${stdout}`);
+  const actionable = result.platforms.some(
+    (platform) =>
+      platform?.readiness !== "installed" || !Array.isArray(platform?.warnings) || platform.warnings.length > 0,
+  );
   const expectedStatus = actionable ? 1 : 0;
-  if (status !== expectedStatus) throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result.`);
-  if (actionable !== (stderr.trim().length > 0)) throw new Error("setup stderr did not match its actionable readiness result.");
+  if (status !== expectedStatus)
+    throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result.`);
+  if (actionable !== stderr.trim().length > 0)
+    throw new Error("setup stderr did not match its actionable readiness result.");
 }
 
 async function walk(directory) {
@@ -432,7 +518,7 @@ async function walk(directory) {
   const result = [];
   for (const entry of entries) {
     const path = join(directory, entry.name);
-    if (entry.isDirectory()) result.push(...await walk(path));
+    if (entry.isDirectory()) result.push(...(await walk(path)));
     else if (entry.isFile()) result.push(path);
   }
   return result;

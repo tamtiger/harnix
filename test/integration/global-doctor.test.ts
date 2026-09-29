@@ -42,7 +42,9 @@ describe("diagnoseGlobalIntegrations", () => {
     });
 
     expect(kiro).toMatchObject({ platform: "kiro", status: "invalid" });
-    expect(kiro?.findings).toContainEqual(expect.objectContaining({ code: "test-command-lookup-required", severity: "error" }));
+    expect(kiro?.findings).toContainEqual(
+      expect.objectContaining({ code: "test-command-lookup-required", severity: "error" }),
+    );
     await expect(access(join(home, ".kiro"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
@@ -65,7 +67,11 @@ describe("diagnoseGlobalIntegrations", () => {
       { platform: "codex", status: "not-installed" },
       { platform: "claude", status: "not-installed" },
     ]);
-    expect(integrations.flatMap((integration) => integration.findings).every((finding) => !(finding.path ?? "").includes(home))).toBe(true);
+    expect(
+      integrations
+        .flatMap((integration) => integration.findings)
+        .every((finding) => !(finding.path ?? "").includes(home)),
+    ).toBe(true);
     expect(commandLookups).toBe(0);
     await expect(access(join(home, ".kiro"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(home, ".gemini"))).rejects.toMatchObject({ code: "ENOENT" });
@@ -87,12 +93,14 @@ describe("diagnoseGlobalIntegrations", () => {
     });
 
     expect(kiro).toMatchObject({ platform: "kiro", status: "not-installed" });
-    expect(kiro?.findings).toContainEqual(expect.objectContaining({
-      code: "global-untracked-surface",
-      fixable: false,
-      path: "~/.kiro/skills/harnix-check/SKILL.md",
-      severity: "warning",
-    }));
+    expect(kiro?.findings).toContainEqual(
+      expect.objectContaining({
+        code: "global-untracked-surface",
+        fixable: false,
+        path: "~/.kiro/skills/harnix-check/SKILL.md",
+        severity: "warning",
+      }),
+    );
     await expect(readFile(userOwnedSkill, "utf8")).resolves.toBe("user-owned skill data\n");
   });
 
@@ -109,7 +117,7 @@ describe("diagnoseGlobalIntegrations", () => {
     const before = await Promise.all(paths.map(async (path) => readFile(path, "utf8")));
 
     const integrations = await diagnoseGlobalIntegrations({
-      capabilityLookup: async (platform) => platform === "codex" ? "active" : "supported",
+      capabilityLookup: async (platform) => (platform === "codex" ? "active" : "supported"),
       commandLookup: async () => true,
       environment: environment(home),
       homeResolver: async () => home,
@@ -122,9 +130,13 @@ describe("diagnoseGlobalIntegrations", () => {
       { platform: "claude", status: "not-installed" },
     ]);
     const codex = integrations.find((integration) => integration.platform === "codex");
-    expect(codex?.findings).toContainEqual(expect.objectContaining({ code: "codex-trust-pending", severity: "warning" }));
+    expect(codex?.findings).toContainEqual(
+      expect.objectContaining({ code: "codex-trust-pending", severity: "warning" }),
+    );
     expect(JSON.stringify(codex)).not.toContain('"active"');
-    expect(integrations.find((integration) => integration.platform === "antigravity")?.findings).toContainEqual(expect.objectContaining({ code: "antigravity-precedence-unknown" }));
+    expect(integrations.find((integration) => integration.platform === "antigravity")?.findings).toContainEqual(
+      expect.objectContaining({ code: "antigravity-precedence-unknown" }),
+    );
     expect(JSON.stringify(integrations)).not.toContain(home);
     await expect(Promise.all(paths.map(async (path) => readFile(path, "utf8")))).resolves.toEqual(before);
   });
@@ -134,12 +146,13 @@ describe("diagnoseGlobalIntegrations", () => {
     await install(home, ["kiro", "antigravity", "codex"]);
 
     const integrations = await diagnoseGlobalIntegrations({
-      capabilityLookup: async (platform) => ({
-        kiro: "unsupported-version" as const,
-        antigravity: "shadowed" as const,
-        codex: "active" as const,
-        claude: "active" as const,
-      })[platform],
+      capabilityLookup: async (platform) =>
+        ({
+          kiro: "unsupported-version" as const,
+          antigravity: "shadowed" as const,
+          codex: "active" as const,
+          claude: "active" as const,
+        })[platform],
       codexTrustLookup: async () => "trusted",
       commandLookup: async () => true,
       environment: environment(home),
@@ -152,9 +165,15 @@ describe("diagnoseGlobalIntegrations", () => {
       { platform: "codex", status: "active" },
       { platform: "claude", status: "not-installed" },
     ]);
-    expect(integrations[0]?.findings).toContainEqual(expect.objectContaining({ code: "global-unsupported-version", severity: "warning" }));
-    expect(integrations[1]?.findings).toContainEqual(expect.objectContaining({ code: "global-integration-shadowed", severity: "warning" }));
-    expect(integrations[2]?.findings).toContainEqual(expect.objectContaining({ code: "global-integration-active", severity: "info" }));
+    expect(integrations[0]?.findings).toContainEqual(
+      expect.objectContaining({ code: "global-unsupported-version", severity: "warning" }),
+    );
+    expect(integrations[1]?.findings).toContainEqual(
+      expect.objectContaining({ code: "global-integration-shadowed", severity: "warning" }),
+    );
+    expect(integrations[2]?.findings).toContainEqual(
+      expect.objectContaining({ code: "global-integration-active", severity: "info" }),
+    );
   });
 
   it("reports a missing launcher separately from correctly owned global files", async () => {
@@ -169,7 +188,9 @@ describe("diagnoseGlobalIntegrations", () => {
     });
 
     expect(kiro).toMatchObject({ platform: "kiro", status: "binary-unavailable" });
-    expect(kiro?.findings).toContainEqual(expect.objectContaining({ code: "global-binary-unavailable", severity: "warning" }));
+    expect(kiro?.findings).toContainEqual(
+      expect.objectContaining({ code: "global-binary-unavailable", severity: "warning" }),
+    );
   });
 
   it("reports_a_nonempty_codex_agents_override_as_shadowing_without_mutating_it", async () => {
@@ -186,7 +207,14 @@ describe("diagnoseGlobalIntegrations", () => {
     });
 
     expect(codex).toMatchObject({ platform: "codex", status: "shadowed" });
-    expect(codex?.findings).toContainEqual(expect.objectContaining({ code: "codex-agents-override-shadowed", path: "$CODEX_HOME/AGENTS.override.md", severity: "warning", fixable: false }));
+    expect(codex?.findings).toContainEqual(
+      expect.objectContaining({
+        code: "codex-agents-override-shadowed",
+        path: "$CODEX_HOME/AGENTS.override.md",
+        severity: "warning",
+        fixable: false,
+      }),
+    );
     await expect(readFile(override, "utf8")).resolves.toBe("# User override\n\nTake precedence.\n");
   });
 
@@ -203,7 +231,9 @@ describe("diagnoseGlobalIntegrations", () => {
     });
 
     expect(kiro).toMatchObject({ platform: "kiro", status: "installed" });
-    expect(kiro?.findings).toContainEqual(expect.objectContaining({ code: "kiro-home-ambiguity", severity: "warning", fixable: false }));
+    expect(kiro?.findings).toContainEqual(
+      expect.objectContaining({ code: "kiro-home-ambiguity", severity: "warning", fixable: false }),
+    );
     expect(JSON.stringify(kiro)).not.toContain(configuredHome);
     await expect(access(configuredHome)).rejects.toMatchObject({ code: "ENOENT" });
   });
@@ -222,7 +252,13 @@ describe("diagnoseGlobalIntegrations", () => {
     });
 
     expect(kiro).toMatchObject({ platform: "kiro", status: "drifted" });
-    expect(kiro?.findings).toContainEqual(expect.objectContaining({ code: "global-managed-modified", path: "~/.kiro/skills/harnix-check/SKILL.md", fixable: false }));
+    expect(kiro?.findings).toContainEqual(
+      expect.objectContaining({
+        code: "global-managed-modified",
+        path: "~/.kiro/skills/harnix-check/SKILL.md",
+        fixable: false,
+      }),
+    );
     await expect(readFile(skill, "utf8")).resolves.toBe("user modification\n");
   });
 
@@ -240,7 +276,13 @@ describe("diagnoseGlobalIntegrations", () => {
     });
 
     expect(codex).toMatchObject({ platform: "codex", status: "invalid" });
-    expect(codex?.findings).toContainEqual(expect.objectContaining({ code: "global-manifest-invalid", severity: "error", path: "$CODEX_HOME/harnix/managed.json" }));
+    expect(codex?.findings).toContainEqual(
+      expect.objectContaining({
+        code: "global-manifest-invalid",
+        severity: "error",
+        path: "$CODEX_HOME/harnix/managed.json",
+      }),
+    );
     await expect(readFile(manifest, "utf8")).resolves.toBe("not-json\n");
   });
 });
