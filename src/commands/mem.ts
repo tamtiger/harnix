@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { readConfig, validateDeveloperId } from "src/core/config/config.js";
 import { searchJournal, type JournalEntry } from "src/core/journal/journal.js";
+import { effectiveLearningStatus } from "src/core/journal/learning.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { compareCodeUnits } from "src/utils/order.js";
 
@@ -12,6 +13,8 @@ export interface MemOptions {
   user?: string | undefined;
   limit?: number | undefined;
   learningOnly?: boolean | undefined;
+  /** Wall clock for learning expiry; defaults to the current time. */
+  now?: number | undefined;
 }
 export interface MemResult {
   entries: JournalEntry[];
@@ -45,5 +48,15 @@ export async function searchMemory(options: MemOptions): Promise<MemResult> {
       .sort((left, right) => compareCodeUnits(right.recordedAt, left.recordedAt) || compareCodeUnits(right.id, left.id))
       .slice(0, limit);
   }
-  return { entries, malformed };
+  const now = options.now ?? Date.now();
+  return { entries: entries.map((entry) => withEffectiveStatus(entry, now)), malformed };
+}
+
+/** Shows a lapsed draft or candidate as `archived` without rewriting the journal. */
+function withEffectiveStatus(entry: JournalEntry, now: number): JournalEntry {
+  if (entry.learning === undefined) return entry;
+  return {
+    ...entry,
+    learning: { ...entry.learning, status: effectiveLearningStatus(entry.learning.status, entry.recordedAt, now) },
+  };
 }

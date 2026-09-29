@@ -105,6 +105,7 @@ describe.sequential("CLI doctor, context and hidden workflow", () => {
       from: "node",
     });
     expect(JSON.parse(output.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+      learning: [],
       clock: {
         timezone: expect.any(String),
         now: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T[\d:.]+[+-]\d{2}:\d{2}$/u),

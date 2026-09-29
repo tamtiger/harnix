@@ -1,5 +1,6 @@
 import { readConfig } from "src/core/config/config.js";
 import { appendJournal, searchJournal } from "src/core/journal/journal.js";
+import { captureLearningAtFinish } from "src/core/journal/learning-capture.js";
 import { archiveTask, resolveActiveTask, saveTask, transitionTask, type TaskRecord } from "src/core/tasks/task.js";
 import { nowInstant } from "src/utils/clock.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
@@ -23,7 +24,29 @@ export async function finishWorkflow(root: string, injectedNow?: string): Promis
   const journalPath = await journalFilePath(root, config, journalDate);
   const finished = await finishWorkflowTask(harnixRoot, journalPath, config.developer, task, now);
   await refreshLinkedEpicMarkdown(root, finished);
+  await captureLearning(root, config.developer, finished, journalPath, journalDate);
   return finished;
+}
+
+/** Best-effort by design: learning is a by-product, so a failure here must never undo or hide a completed task. */
+async function captureLearning(
+  root: string,
+  developer: string,
+  task: TaskRecord,
+  journalPath: string,
+  instant: string,
+): Promise<void> {
+  try {
+    await captureLearningAtFinish(
+      await resolveSafeHarnixPath(root, `workspace/${developer}/journal`),
+      journalPath,
+      developer,
+      task,
+      instant,
+    );
+  } catch {
+    // The completion journal entry and task state are already durable; capture is retried on the next finish.
+  }
 }
 
 export async function finishWorkflowTask(

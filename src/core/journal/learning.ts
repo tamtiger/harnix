@@ -1,4 +1,10 @@
+import { sha256 } from "src/utils/hashing.js";
 import { compareCodeUnits } from "src/utils/order.js";
+
+export type LearningStatus = "draft" | "candidate" | "approved" | "promoted" | "rejected" | "archived";
+
+/** A `draft` or `candidate` nobody promoted within this many days reads as `archived` (computed on read, never written). */
+export const LEARNING_TTL_DAYS = 28;
 
 export interface LearningCandidate {
   id: string;
@@ -7,7 +13,7 @@ export interface LearningCandidate {
   evidenceIds: string[];
   occurrences: number;
   confidence: number;
-  status: "candidate" | "approved" | "promoted" | "rejected";
+  status: LearningStatus;
 }
 export interface LearningCaptureInput {
   id: string;
@@ -74,11 +80,32 @@ export function validateLearningCandidate(value: unknown): LearningCandidate {
     !Number.isFinite(value.confidence) ||
     value.confidence < 0 ||
     value.confidence > 1 ||
-    !["candidate", "approved", "promoted", "rejected"].includes(String(value.status))
+    !["draft", "candidate", "approved", "promoted", "rejected", "archived"].includes(String(value.status))
   )
     throw new Error("Invalid learning candidate.");
   return value as unknown as LearningCandidate;
 }
+/** Status a reader should act on: only unpromoted `draft`/`candidate` entries can lapse. */
+export function effectiveLearningStatus(status: LearningStatus, recordedAt: string, now: number): LearningStatus {
+  if (status !== "draft" && status !== "candidate") return status;
+  const recorded = Date.parse(recordedAt);
+  return Number.isFinite(recorded) && now - recorded > LEARNING_TTL_DAYS * 86_400_000 ? "archived" : status;
+}
+
+/** Case, spacing and edge-punctuation insensitive form used to recognise the same observation across tasks. */
+export function normalizeObservation(text: string): string {
+  return text
+    .normalize("NFC")
+    .toLowerCase()
+    .replace(/\s+/gu, " ")
+    .replace(/^[\s.;:!,-]+|[\s.;:!,-]+$/gu, "");
+}
+
+/** Stable candidate ID for an observation, so a later task finds and extends the same candidate. */
+export function observationCandidateId(text: string): string {
+  return `obs-${sha256(normalizeObservation(text)).slice(0, 16)}`;
+}
+
 function stringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === "string");
 }

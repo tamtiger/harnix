@@ -209,7 +209,7 @@ describe("canonical Harnix workflow skill sources", () => {
     expect(finish).toContain("run `harnix workflow --cancel`");
     expect(finish).toContain("harnix mem --learning");
     expect(finish).toContain("harnix workflow --learn");
-    expect(finish).toContain("does not meet the threshold");
+    expect(finish).toContain("Capture is automatic");
     expect(finish).not.toContain("write the task `status` as `completed`");
     expect(continuation).toContain("Blocked state takes precedence over its checkpoint");
     expect(continuation).toContain("guarded re-entry");

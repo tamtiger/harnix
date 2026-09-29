@@ -39,6 +39,7 @@ describe("workflow preflight", () => {
     const result = await preflightWorkflow(root);
 
     expect(result).toEqual({
+      learning: [],
       clock: {
         timezone: "UTC",
         now: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T[\d:.]+\+00:00$/u),

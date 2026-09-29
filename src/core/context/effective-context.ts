@@ -3,7 +3,15 @@ import type { TaskRecord } from "src/core/tasks/task.js";
 import { guideOutputPath, selectGuideSources } from "src/guides/catalog.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
-import { buildContext, loadContextManifest, type ContextEntry, type ContextManifest } from "./context.js";
+import { renderLearningBlock, summarizeLearning } from "src/core/journal/learning-summary.js";
+import {
+  UNTRUSTED_CONTEXT_PREFIX,
+  UNTRUSTED_CONTEXT_SUFFIX,
+  buildContext,
+  loadContextManifest,
+  type ContextEntry,
+  type ContextManifest,
+} from "./context.js";
 
 export type EffectiveContextReasonCode = "applicable-guide" | "persisted-selection" | "pinned" | "task-reference";
 
@@ -14,6 +22,8 @@ export interface EffectiveContextInput {
   readonly task: TaskRecord;
   readonly platform: PlatformId;
   readonly forceBounded?: boolean | undefined;
+  /** Wall clock for learning expiry; defaults to the current time. */
+  readonly now?: number | undefined;
 }
 
 export interface EffectiveContextResult {
@@ -75,13 +85,30 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
     bounded ? MAX_HOOK_CONTEXT_ENTRIES : undefined,
   );
 
+  const learning = await learningBlock(input);
   return {
-    text: output.text,
+    text: withLearning(output.text, learning),
     manifest: output.manifest,
     budget: { maxCharacters: renderCap, maxEntries },
     candidates: entries.length,
     reasonCodesByPath: reasonCodes(entries, input.task.relevantPaths, guidePaths, persisted !== undefined),
   };
+}
+
+async function learningBlock(input: EffectiveContextInput): Promise<string> {
+  try {
+    const journalRoot = await resolveSafeProjectPath(input.harnixRoot, `workspace/${input.config.developer}/journal`);
+    return renderLearningBlock(await summarizeLearning(journalRoot, input.now ?? Date.now()));
+  } catch {
+    return "";
+  }
+}
+
+/** Learning goes first inside the untrusted frame so the size budget trims file excerpts before it. */
+function withLearning(text: string, learning: string): string {
+  if (learning.length === 0) return text;
+  if (text.length === 0) return `${UNTRUSTED_CONTEXT_PREFIX}${learning}${UNTRUSTED_CONTEXT_SUFFIX}`;
+  return `${UNTRUSTED_CONTEXT_PREFIX}${learning}\n\n${text.slice(UNTRUSTED_CONTEXT_PREFIX.length)}`;
 }
 
 async function loadPersistedEntries(harnixRoot: string, taskId: string): Promise<ContextEntry[] | undefined> {

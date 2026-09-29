@@ -535,8 +535,11 @@ interface WorkflowPreflightResultV1 {
   retryLimitReached: string[];
   nextStage: "await" | "brainstorm" | "check" | "continue" | "debug" | "finish" | "implement" | "stop";
   clock: { timezone: string; now: string; idPrefix: string }; // now = ISO 8601 with zone offset; idPrefix = YYYYMMDD-HHMMSS in the configured zone
+  learning: { id: string; status: "draft" | "candidate" | "approved"; sources: number; statement: string }[]; // <= 5 redacted notes, statement <= 160 chars
 }
 ```
+
+`learning` is the hookless surface for project learning. Entries come from journal `learning` records (newest per candidate id); `archived`, `rejected` and risk-flagged statements are omitted, candidates sort before drafts. `workflow --finish` captures them automatically from the finishing task's `decisions`, `residualRisks` and evidence `findings` (best-effort, max 5 per finish, risky statements never captured); status set is `draft | candidate | approved | promoted | rejected | archived`, and a `draft`/`candidate` older than 28 days reads as `archived` (computed on read). Promotion into a spec remains manual.
 
 `clock` is the authoritative time source for agents (never the shell `date`). Review pages (`review.md`, epic page) render times in the configured zone; comparisons use absolute time so legacy `Z` and offset values sort together.
 

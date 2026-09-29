@@ -95,7 +95,7 @@ Manifest corrupt, traversal, symlink escape hoặc partial write phải fail clo
 
 ### 3.4 Learning model
 
-Learning candidate gồm source tasks, statement, evidence IDs, occurrence count và deterministic confidence. Formula/threshold được khóa tại `IMPLEMENTATION_PLAN.md`: proposal eligibility cần ít nhất hai task độc lập, hai evidence và confidence >=0.8; write vào spec vẫn phải là explicit finish/review action. Không daemon, hidden skill generation hay global memory.
+Learning candidate gồm source tasks, statement, evidence IDs, occurrence count và deterministic confidence. Formula/threshold được khóa tại `IMPLEMENTATION_PLAN.md`: proposal eligibility cần ít nhất hai task độc lập, hai evidence và confidence >=0.8; write vào spec vẫn phải là explicit finish/review action. Capture và surface là tự động (finish tự rút quan sát từ `decisions`/`residualRisks`/`findings`, trạng thái `draft` lên `candidate` khi task thứ hai lặp lại, TTL 28 ngày, tóm tắt qua hook context hoặc `workflow --preflight`); chỉ promote mới thủ công. Không daemon, hidden skill generation hay global memory.
 
 ### 3.5 Verification model
 

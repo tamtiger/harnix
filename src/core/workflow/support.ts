@@ -1,5 +1,6 @@
-import { effectiveTimezone, readProjectTimezone, type HarnixConfigV2 } from "src/core/config/config.js";
+import { effectiveTimezone, readConfig, readProjectTimezone, type HarnixConfigV2 } from "src/core/config/config.js";
 import { loadEpicRecord, renderEpicMarkdown } from "src/core/epics/epic.js";
+import { summarizeLearning, type LearningSummaryItem } from "src/core/journal/learning-summary.js";
 import type { TaskRecord } from "src/core/tasks/task.js";
 import { localDate, nowInstant } from "src/utils/clock.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
@@ -19,6 +20,16 @@ export async function journalFilePath(
     root,
     `workspace/${config.developer}/journal/${localDate(instant, effectiveTimezone(config))}.jsonl`,
   );
+}
+
+/** Redacted, bounded learning summary for agents; any read problem yields an empty list so it never blocks work. */
+export async function projectLearningSummary(root: string, now: number): Promise<LearningSummaryItem[]> {
+  try {
+    const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
+    return await summarizeLearning(await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal`), now);
+  } catch {
+    return [];
+  }
 }
 
 /**

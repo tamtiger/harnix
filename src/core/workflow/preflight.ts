@@ -6,7 +6,9 @@ import { formatInstant, idPrefix } from "src/utils/clock.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { canCompleteTask, verificationRetryDisposition } from "./completion.js";
+import type { LearningSummaryItem } from "src/core/journal/learning-summary.js";
 import { taskContextDrift } from "./context.js";
+import { projectLearningSummary } from "./support.js";
 
 export interface WorkflowPreflightResultV1 {
   generator: "harnix";
@@ -18,6 +20,8 @@ export interface WorkflowPreflightResultV1 {
   nextStage: "await" | "brainstorm" | "check" | "continue" | "debug" | "finish" | "implement" | "stop";
   /** Authoritative time source for agents: current instant and ID prefix in the configured zone. */
   clock: { timezone: string; now: string; idPrefix: string };
+  /** Redacted, bounded notes from earlier tasks (at most 5); the source for platforms without hooks. */
+  learning: LearningSummaryItem[];
 }
 
 type RequiredChecks = WorkflowPreflightResultV1["requiredChecks"];
@@ -36,6 +40,7 @@ export async function preflightWorkflow(root: string, now = Date.now()): Promise
   const timezone = await readProjectTimezone(harnixRoot);
   const base = {
     clock: { timezone, now: formatInstant(now, timezone), idPrefix: idPrefix(now, timezone) },
+    learning: await projectLearningSummary(root, now),
     generator: "harnix" as const,
     schemaVersion: 1 as const,
     contextDrift: "not-recorded" as const,

@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205808-automate-learning",
   "title": "[10] Thiết kế lại learning để tự kích hoạt (không bỏ)",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Giữ cơ chế learning nhưng sửa điểm kích hoạt: (1) workflow --finish tự quét và tạo candidate đạt ngưỡng, không đòi agent tự nhớ gọi --learn; (2) đưa tóm tắt learning đã redact (giới hạn dòng) vào context đầu task Lite/Full qua effective-context; (3) trạng thái draft (1 task nguồn) tự nâng lên candidate khi task thứ hai xuất hiện; (4) decay/expiry cho candidate chưa promote; (5) giữ gate review thủ công khi ghi vào spec và giữ analyzeLearningStatement redaction/JSON-string boundary; (6) phạm vi project-local. Chạy trước slim-instructions nên sửa skill finish-work hiện có; slim-instructions sẽ chuyển nội dung sang harnix-verify.",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -17,68 +17,150 @@
     {
       "id": "ac-auto-capture",
       "text": "workflow --finish tự tạo candidate đạt ngưỡng mà không cần bước --learn riêng; có test.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-learning-flow"
+      ]
     },
     {
       "id": "ac-auto-surface",
       "text": "Context đầu task Lite/Full có tóm tắt learning liên quan (giới hạn dòng, đã redact) khi có entry.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-learning-flow"
+      ]
     },
     {
       "id": "ac-hookless-surface",
       "text": "Tóm tắt learning cũng đến được agent trên nền tảng không có hook (OpenCode, Cursor) qua output của workflow --preflight hoặc bước tường minh trong skill.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-learning-flow",
+        "ev-check-docs-sync"
+      ]
     },
     {
       "id": "ac-draft-upgrade",
       "text": "Candidate draft (1 nguồn) tự nâng lên candidate khi task thứ hai xuất hiện; có test.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-learning-core",
+        "ev-check-learning-flow"
+      ]
     },
     {
       "id": "ac-decay",
       "text": "Candidate chưa promote quá hạn được đánh dấu archived/hạ ưu tiên; có test.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-learning-core"
+      ]
     },
     {
       "id": "ac-promote-gate-unchanged",
       "text": "Ghi vào spec vẫn yêu cầu review thủ công; không có đường tự động ghi vào spec.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-learning-core",
+        "ev-check-learning-flow"
+      ]
     },
     {
       "id": "ac-safety-unchanged",
       "text": "Redaction và JSON-string injection boundary không bị nới lỏng; có test hồi quy.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-learning-core",
+        "ev-check-learning-flow"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-sync",
+        "ev-check-suite"
+      ]
     }
   ],
   "relevantPaths": [
-    "src/core/journal/**",
+    "src/commands/mem.ts",
     "src/core/context/effective-context.ts",
+    "src/core/journal/**",
     "src/core/workflow/**",
-    "src/skills/harnix-finish-work/SKILL.md"
+    "src/skills/harnix-finish-work/SKILL.md",
+    "test/**"
   ],
   "relevantSpecs": [
+    "AGENTS.md",
     "docs/HARNIX_PRD.md",
     "docs/HARNIX_WORKFLOW.md",
-    "docs/IMPLEMENTATION_PLAN.md"
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/OVERHAUL_DECISIONS.md"
   ],
   "validationPlan": [
     {
-      "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "id": "check-docs-sync",
+      "description": "Test parity docs, skill và template pass",
       "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts test/workflow/templates.test.ts test/workflow/skill-sources.test.ts test/workflow/self-host.test.ts",
+      "criterionIds": [
+        "ac-docs-sync",
+        "ac-hookless-surface"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-learning-core",
+      "description": "Test đơn vị learning: trạng thái, decay, gộp nguồn, an toàn pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/core/journal",
+      "criterionIds": [
+        "ac-decay",
+        "ac-draft-upgrade",
+        "ac-promote-gate-unchanged",
+        "ac-safety-unchanged"
+      ],
+      "inputs": [
+        "src/core/journal/**",
+        "test/unit/core/journal/**"
+      ]
+    },
+    {
+      "id": "check-learning-flow",
+      "description": "Test luồng finish, hook context, preflight và hồi quy an toàn pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/learning-automation.test.ts",
+      "criterionIds": [
+        "ac-auto-capture",
+        "ac-auto-surface",
+        "ac-draft-upgrade",
+        "ac-hookless-surface",
+        "ac-promote-gate-unchanged",
+        "ac-safety-unchanged"
+      ],
+      "inputs": [
+        "src/**",
+        "test/support/**",
+        "test/workflow/learning-automation.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass",
+      "scope": "full",
       "required": true,
       "command": "pnpm lint && pnpm typecheck && pnpm test",
       "criterionIds": [
@@ -92,22 +174,98 @@
         "ac-safety-unchanged"
       ],
       "inputs": [
-        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
         "docs/**",
+        "eslint.config.mjs",
+        "package.json",
+        "scripts/**",
         "src/**",
-        "test/**"
+        "test/**",
+        "vitest.config.ts"
       ]
     }
   ],
   "decisions": [
     {
-      "id": "d-draft-checks",
-      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
-      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+      "id": "d-observation-source",
+      "text": "Nguồn quan sát tự động là decisions, residualRisks và findings của evidence trong TaskRecord; không thêm trường vào schema v3.",
+      "rationale": "Đó là văn bản review agent đã ghi sẵn, nên capture không tốn thao tác; đổi lại chỉ khớp được nội dung trùng sau chuẩn hóa, không khớp theo ngữ nghĩa."
+    },
+    {
+      "id": "d-risky-not-captured",
+      "text": "Quan sát bị analyzeLearningStatement gắn credential-like, instruction-override hoặc command-like không được capture hay surface tự động.",
+      "rationale": "Tự động hóa trigger không được nới lỏng kiểm soát an toàn; chỉ đường thủ công có review mới xử lý nội dung rủi ro."
+    },
+    {
+      "id": "d-ttl",
+      "text": "TTL 28 ngày là hằng số; trạng thái archived được tính khi đọc, không ghi lại journal.",
+      "rationale": "Journal append-only; tính khi đọc tránh ghi thừa và giữ nguyên dữ liệu gốc."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-09-29T16:36:59.658+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205808-automate-learning/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-29T16:37:00.420+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung check tập trung cho từng tiêu chí và chốt nguồn quan sát tự động sau khi khảo sát code learning hiện có.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205808-automate-learning/task.json"
+      ]
+    },
+    {
+      "result": "pass",
+      "summary": "Check check-docs-sync passed (exit 0):    Start at  16:47:41 |    Duration  1.42s (transform 674ms, setup 0ms, collect 1.97s, tests 283ms, ",
+      "recordedAt": "2026-09-29T16:48:49.615+07:00",
+      "inputDigest": "8811b717ad9d5530c3259e814a2f68cd61d6e4aca8dd9bb68348e50b45af5048",
+      "exitCode": 0,
+      "artifactPaths": [],
+      "id": "ev-check-docs-sync",
+      "checkId": "check-docs-sync"
+    },
+    {
+      "result": "pass",
+      "summary": "Check check-learning-core passed (exit 0):    Start at  16:47:44 |    Duration  1.84s (transform 816ms, setup 0ms, collect 5.42s, tests 239ms, ",
+      "recordedAt": "2026-09-29T16:48:50.445+07:00",
+      "inputDigest": "9d5692b0e86eb0531953f759a64af2b7354b1aa6cd90c7f94925f6b52755898c",
+      "exitCode": 0,
+      "artifactPaths": [],
+      "id": "ev-check-learning-core",
+      "checkId": "check-learning-core"
+    },
+    {
+      "result": "pass",
+      "summary": "Check check-learning-flow passed (exit 0):    Start at  16:47:48 |    Duration  4.37s (transform 524ms, setup 0ms, collect 1.21s, tests 2.68s, ",
+      "recordedAt": "2026-09-29T16:48:51.273+07:00",
+      "inputDigest": "2a66e65e840dc055c5b715a404073d0729beec9f6bb9b26bccffe02dc28139c0",
+      "exitCode": 0,
+      "artifactPaths": [],
+      "id": "ev-check-learning-flow",
+      "checkId": "check-learning-flow"
+    },
+    {
+      "result": "pass",
+      "summary": "Check check-suite passed (exit 0): Functions    : 98.3% ( 810/824 ) | Lines        : 93.48% ( 12956/13859 ) | =========================",
+      "recordedAt": "2026-09-29T16:48:52.234+07:00",
+      "inputDigest": "28765d80f451b698c5d45fee9edaaaf03e352f6dc6d7233e84c8ff788b9716de",
+      "exitCode": 0,
+      "artifactPaths": [],
+      "id": "ev-check-suite",
+      "checkId": "check-suite"
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
   "createdAt": "2026-09-28T20:58:08.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "updatedAt": "2026-09-29T16:48:55.457+07:00",
+  "completedAt": "2026-09-29T16:48:55.457+07:00"
 }

@@ -137,4 +137,23 @@ describe("task contract documentation parity", () => {
     expect(packageJson.scripts.test).toContain("--coverage");
     expect(await read("vitest.config.ts")).toContain("thresholds");
   });
+
+  it("documents automatic learning capture, the preflight learning field and decision D14", async () => {
+    for (const file of ["docs/HARNIX_WORKFLOW.md", "src/templates/harnix/workflow.ts", "docs/IMPLEMENTATION_PLAN.md"]) {
+      const text = await read(file);
+      expect(text, file).toMatch(/learning/u);
+      expect(text, file).toMatch(/preflight/iu);
+    }
+    for (const file of ["src/skills/harnix-finish-work/SKILL.md", "src/skills/harnix-brainstorm/SKILL.md"]) {
+      expect(await read(file), file).toContain("learning");
+    }
+    expect(await read("docs/HARNIX_WORKFLOW.md")).toContain("capture tự động");
+    expect(await read("docs/HARNIX_PRD.md")).toContain("Capture tự động");
+    expect(await read("src/templates/harnix/workflow.ts")).toContain("automatically");
+    expect(await read("src/skills/harnix-brainstorm/SKILL.md")).toContain("`learning`");
+    const finishWork = await read("src/skills/harnix-finish-work/SKILL.md");
+    expect(finishWork).toContain("Capture is automatic");
+    expect(finishWork).not.toMatch(/Send bounded JSON[^\n]*to `harnix workflow --learn`/u);
+    expect(await read("docs/OVERHAUL_DECISIONS.md")).toContain("| D14 |");
+  });
 });

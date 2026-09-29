@@ -250,7 +250,9 @@ Journal/learning:
 - Candidate gồm source task, statement, evidence, occurrences, confidence.
 - Public `harnix mem --learning` filter learning entries trước query/limit, giữ newest-first và JSON shape hiện tại khi không có flag.
 - Hidden `workflow --learn` chỉ nhận bounded candidate-only JSON tại active `verifying/finishing`; runtime revalidate completion freshness, source task/evidence provenance, 64 KiB và eligibility, tự tính derived fields rồi append idempotent một `JournalEntryV1`. Retry identical không duplicate; conflict fail closed; action không đổi TaskRecord/spec/active pointer.
-- Promotion vào spec cần repeated independent evidence hoặc explicit finish approval.
+- Capture tự động tại `workflow --finish` (best-effort): quan sát lấy từ `decisions`, `residualRisks` và `findings` của evidence trong chính task, chuẩn hóa và loại trùng, tối đa 5 mỗi lần finish; quan sát `credential-like`/`instruction-override`/`command-like` không bao giờ được capture. Candidate id ổn định `obs-<sha256 chuẩn hóa>[0..16]`; một task nguồn là `draft`, tự nâng lên `candidate` khi task thứ hai lặp lại và đạt ngưỡng eligibility hiện hành. Status: `draft | candidate | approved | promoted | rejected | archived`; `draft`/`candidate` quá 28 ngày là `archived` khi đọc (không ghi lại journal).
+- Surface tự động: hook context của task active có khối "Project learning" tối đa 5 dòng (statement 160 ký tự, JSON-quoted, đã redact) và `workflow --preflight` trả cùng danh sách trong trường `learning` cho nền tảng không hook. Phạm vi project-local.
+- Promotion vào spec cần repeated independent evidence hoặc explicit finish approval; không có đường tự động ghi vào spec.
 - Promotion reviewable trong diff; statement chỉ được render dưới `Statement-JSON: <JSON.stringify(statement)>` trong fixed untrusted-learning boundary, kèm exact SHA-256, sorted provenance/evidence và redacted risk categories. Doctor gộp tối đa một `persistent-learning-suspicious` warning mỗi journal file, `fixable:false`, không echo matched value và không sửa journal/spec. Không daemon, hidden skill generation, global memory hoặc automatic promotion.
 
 ## 11. Managed-file lifecycle
