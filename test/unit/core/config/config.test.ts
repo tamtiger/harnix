@@ -223,4 +223,43 @@ describe("Harnix config v2", () => {
     await expect(migrateConfig(path)).rejects.toThrow(ConfigValidationError);
     await expect(readFile(path, "utf8")).resolves.toBe(content);
   });
+
+  it("persists and reads verify section in config.yaml", async () => {
+    const root = await createFixture();
+    const path = join(root, "config.yaml");
+    const configWithVerify = createConfig({
+      developer: "tam",
+      verify: {
+        test: "pnpm test",
+        lint: "pnpm lint",
+        typecheck: "pnpm typecheck",
+        format: "pnpm format:check",
+        packages: [
+          {
+            path: "packages/core",
+            test: "pnpm --filter core test",
+          },
+        ],
+      },
+    });
+
+    await writeConfig(path, configWithVerify);
+    const read = await readConfig(path);
+    expect(read.verify).toEqual({
+      test: "pnpm test",
+      lint: "pnpm lint",
+      typecheck: "pnpm typecheck",
+      format: "pnpm format:check",
+      packages: [
+        {
+          path: "packages/core",
+          test: "pnpm --filter core test",
+        },
+      ],
+    });
+    const rawYaml = await readFile(path, "utf8");
+    expect(rawYaml).toContain("verify:");
+    expect(rawYaml).toContain("test: pnpm test");
+    expect(rawYaml).toContain("path: packages/core");
+  });
 });

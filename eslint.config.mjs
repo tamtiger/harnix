@@ -17,9 +17,6 @@ const PLATFORM_MODULES = [
   "src/utils/global-managed-files.ts",
 ];
 
-// Removed by `add-verify-detection` (task 09), which reworks config and stack detection.
-const VERIFY_DETECTION_MODULES = ["src/core/config/config.ts", "src/core/stack/detection.ts"];
-
 // Removed by `rewrite-guides` (task 14), which rewrites the guide and stack catalogs.
 const CATALOG_MODULES = ["src/catalog/catalog.ts", "src/catalog/validation.ts", "src/guides/catalog.ts"];
 
@@ -31,7 +28,6 @@ const UNRESOLVED_SOURCE_FILES = ["src/cli-program.ts", "src/core/context/context
 
 const OVERSIZED_SOURCE_FILES = [
   ...PLATFORM_MODULES,
-  ...VERIFY_DETECTION_MODULES,
   ...CATALOG_MODULES,
   "src/cli-program.ts",
   "src/utils/file-lock.ts",

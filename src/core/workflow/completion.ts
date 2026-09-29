@@ -2,6 +2,7 @@ import { basename, dirname } from "node:path";
 import { compareCodeUnits } from "src/utils/order.js";
 import { selectLatestEvidence, type Evidence, type TaskRecord } from "src/core/tasks/task.js";
 import { assertInputDigestsFresh } from "src/core/verification/input-digest.js";
+import { assertSuiteGateFinishing } from "./suite-gate.js";
 
 export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceAgeMs = 60 * 60 * 1000): boolean {
   const required = task.validationPlan.filter((check) => check.required);
@@ -122,6 +123,7 @@ export async function assertTaskReadyForFinishing(harnixRoot: string, task: Task
     throw new Error(`Unfinished TaskRecord v${task.schemaVersion} tasks must migrate to schema v3 before finishing.`);
   const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
   await assertInputDigestsFresh(projectRoot, task);
+  await assertSuiteGateFinishing(projectRoot, task);
   if (!canCompleteTask(task, Date.parse(now)))
     throw new Error("Task requires fresh complete verification before finishing.");
 }

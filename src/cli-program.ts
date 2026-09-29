@@ -21,6 +21,7 @@ import { resumeProjectTask } from "./commands/resume.js";
 import { pauseProjectTask } from "./commands/pause.js";
 import { reportProjectContext } from "./commands/context-report.js";
 import { diagnoseProject } from "./commands/doctor.js";
+import { inspectVerifyPlan } from "./commands/verify-plan.js";
 import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
 import {
   appendEvidenceWorkflow,
@@ -379,6 +380,13 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       process.stdout.write(
         `${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query!, parseRepoMapLimit(options.limit ?? "20")))}\n`,
       );
+    });
+  program
+    .command("verify-plan")
+    .description("Inspect deterministic test, lint, typecheck, and format commands for this project and its packages")
+    .action(async () => {
+      const plan = await inspectVerifyPlan(process.cwd());
+      process.stdout.write(`${JSON.stringify(plan)}\n`);
     });
   // A hook host that writes the event payload but never closes the child's
   // stdin must not hang this command forever; the caller's own hook timeout

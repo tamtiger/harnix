@@ -3,6 +3,9 @@ import type { TaskArtifacts, TaskRecord } from "src/core/tasks/task.js";
 import { isMissing, planHasChecklistItem } from "src/core/tasks/workflow-helpers.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 
+import { dirname, basename } from "node:path";
+import { assertSuiteGateReady } from "./suite-gate.js";
+
 /** Ready needs obligations and, for Full, free-form non-empty prd/plan with a checklist; there is no trace grammar. */
 export async function assertReadyRequirements(
   harnixRoot: string,
@@ -13,6 +16,8 @@ export async function assertReadyRequirements(
     throw new Error("Workflow ready requires at least one acceptance criterion.");
   if (!task.validationPlan.some((check) => check.required))
     throw new Error("Workflow ready requires at least one required validation check.");
+  const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
+  await assertSuiteGateReady(projectRoot, task);
   if (task.mode !== "full") return;
 
   try {

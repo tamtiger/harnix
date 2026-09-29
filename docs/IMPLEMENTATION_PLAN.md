@@ -135,13 +135,28 @@ interface HarnixConfigV2 {
   packages: PackageConfigV2[];
   platforms: PlatformId[];   // deprecated compatibility field; ignored by global setup
   timezone?: string;         // IANA zone for every persisted timestamp; init defaults it to the system zone (Intl, never shell TZ); absent in older configs => system zone
+  verify?: {
+    test?: string;
+    lint?: string;
+    typecheck?: string;
+    format?: string;
+    suite?: string;
+    packages?: Array<{
+      path: string;
+      test?: string;
+      lint?: string;
+      typecheck?: string;
+      format?: string;
+      suite?: string;
+    }>;
+  };
   context: { maxCharacters: number; tokenApproximation: number; [compatibleUnknown: string]: unknown };
   runtime: { research: "conditional"; fullContext: boolean; [compatibleUnknown: string]: unknown };
   [compatibleUnknown: string]: unknown;
 }
 ```
 
-New init and every config write use v2 only. Reads classify input as valid v1, valid v2, corrupt or future without writing. Explicit `update` and `doctor --fix` migrate v1 atomically and permission-preservingly; read-only commands and `init` on an existing project never migrate. Migration maps `csharp-dotnet-abp -> csharp + dotnet,abp`, `typescript-nestjs -> typescript + nestjs`, `java-spring -> java + spring`, plain `php|python|go` to the matching language, and historical `react-web|vue` to technology only. It never rescans the repository.
+New init and every config write use v2 only. Reads classify input as valid v1, valid v2, corrupt or future without writing. Public `harnix verify-plan` outputs deterministic verify commands across ≥ 8 ecosystems (npm/pnpm/yarn/bun, uv/poetry/pip, cargo, go, gradle/maven, dotnet, composer, swift, flutter) and monorepo workspaces (pnpm, Cargo, go.work, Maven) following nearest-manifest-wins; allows user override via `verify:` in `config.yaml`. Suite Gate requires a project-level suite check covering full source and test inputs at `ready` and rejects `finish` without a current passing digest. Explicit `update` and `doctor --fix` migrate v1 atomically and permission-preservingly; read-only commands and `init` on an existing project never migrate. Migration maps `csharp-dotnet-abp -> csharp + dotnet,abp`, `typescript-nestjs -> typescript + nestjs`, `java-spring -> java + spring`, plain `php|python|go` to the matching language, and historical `react-web|vue` to technology only. It never rescans the repository.
 
 YAML serialization is deterministic with LF golden fixtures. Compatible unknown user keys round-trip at top level and inside package/context/runtime objects; core logic ignores them and known keys cannot be shadowed. Duplicate/unsorted arrays, absolute/package-escape paths, unsafe developer IDs, invalid enums, corrupt YAML and future schema fail before write.
 

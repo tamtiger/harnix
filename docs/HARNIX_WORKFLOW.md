@@ -128,7 +128,8 @@ Task chỉ sang `ready` khi:
 - Full `prd.md`/`plan.md` là Markdown tự do, không rỗng; `plan.md` có ít nhất một checklist item (`- [ ] ...`). Không còn trace grammar; plan cũ chứa vùng execution-notes đã retired vẫn được lưu và đọc như văn bản thường;
 - material research đã được lưu cùng source/date hoặc đã ghi rõ “not needed”;
 - không còn product decision hoặc authority blocker;
-- implementation nằm trong quyền mà user đã cấp.
+- implementation nằm trong quyền mà user đã cấp;
+- **Suite Gate:** nếu repo có test (`verify-plan` có `hasTests: true`), task bắt buộc phải có ít nhất một required check mức project lấy từ `verify-plan` với `inputs` phủ toàn bộ source và test (ví dụ `src/**` và `test/**`); từ chối ready nếu check này thiếu.
 
 Trước khi persist `ready`, agent bắt buộc self-review: decision inventory không còn material decision ẩn trong implementation step; mỗi requirement map tới slice triển khai/verification; field/interface/migration/ownership contract đủ chính xác; không còn placeholder hoặc câu mơ hồ có thể đổi code; PRD/plan/research/task record nhất quán; dirty user-owned work có preservation rule; scope có thể triển khai và kiểm chứng độc lập. Full planning artifacts phải được persist trước `ready`; cùng ready gate chạy lại trên mọi transition/re-transition vào `ready` (không còn bước audit riêng). Một plan bắt đầu bằng “freeze contract” không được xem là ready nếu contract sản phẩm vẫn chưa được quyết định.
 
@@ -187,7 +188,8 @@ Trước `completed`, agent:
 
 1. Reread acceptance criteria và kiểm tra diff/current state.
 2. Reuse current required passes; không chạy lại redundant final gate. Hidden finish recompute digest của mọi latest required pass v3 từ current inputs, không chỉ dựa timestamp.
-3. Ghi evidence, outcome, residual risks và omitted checks.
+3. **Suite Gate:** finish từ chối hoàn thành khi project-level suite check thiếu pass evidence với input digest hiện hành.
+4. Ghi evidence, outcome, residual risks và omitted checks.
 4. Trước completion, review bounded `harnix mem` output; chỉ gửi một candidate-only envelope qua hidden `workflow --learn` khi một non-obvious statement có ít nhất hai source task/evidence độc lập, current finishing task là source và provenance kiểm chứng được. Command revalidate completion freshness, append idempotent entry và không đổi TaskRecord/spec/active pointer; không đủ ngưỡng thì finish bình thường.
 5. Promote learning vào spec chỉ khi có explicit approval hoặc recurrence/evidence gate, dưới dạng diff reviewable; statement chỉ là JSON-string data trong fixed untrusted-learning boundary và Doctor warning không echo matched values hoặc auto-fix journal.
 6. Xác nhận required release preparation đã nằm trong verified inputs; nếu thiếu, persist `verifying/replan`, route Brainstorm qua guarded re-entry `ready/ready`, rồi Implementing tiếp tục mà Finish không sửa product files.

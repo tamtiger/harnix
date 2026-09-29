@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205807-add-verify-detection",
   "title": "[09] Phát hiện lệnh verify đa ngôn ngữ, workspace và suite gate",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Phát hiện deterministic lệnh test/lint/typecheck/format theo manifest + lockfile + task runner cho npm/pnpm/yarn/bun, uv/poetry/pip, cargo, go, gradle/maven, dotnet, composer, swift, flutter; nearest-manifest-wins cho monorepo; ghi vào config.yaml verify:; lệnh public verify-plan. Suite gate: ready yêu cầu ít nhất một check mức project lấy từ verify-plan với inputs phủ toàn bộ source và test; finish từ chối khi check đó không có pass với digest hiện hành. Harness chỉ phát hiện và kiểm tra evidence, không tự chạy lệnh.",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -17,32 +17,47 @@
     {
       "id": "ac-detect",
       "text": "Fixture cho ≥ 8 hệ sinh thái sinh đúng lệnh verify.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-detect-ecosystems-2",
+        "ev-check-suite"
+      ]
     },
     {
       "id": "ac-workspace",
       "text": "Monorepo pnpm/Cargo/go.work/Maven modules sinh lệnh theo package.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-monorepo-workspaces-2",
+        "ev-check-suite"
+      ]
     },
     {
       "id": "ac-no-tests",
       "text": "Repo không có test được báo rõ và phải khai báo check thay thế; không tính là pass.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-no-tests-warning-2",
+        "ev-check-suite"
+      ]
     },
     {
       "id": "ac-suite-gate",
       "text": "Ready từ chối task thiếu check mức project phủ toàn bộ source+test; finish từ chối khi check đó không có pass với digest hiện hành; regression test tái hiện kịch bản task pause (check chỉ unit+integration) bị từ chối.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-gate-3",
+        "ev-check-suite"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-sync",
+        "ev-check-suite"
+      ]
     }
   ],
   "relevantPaths": [
@@ -60,7 +75,7 @@
   "validationPlan": [
     {
       "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass (project suite gate)",
       "scope": "focused",
       "required": true,
       "command": "pnpm lint && pnpm typecheck && pnpm test",
@@ -72,10 +87,79 @@
         "ac-workspace"
       ],
       "inputs": [
-        "@task-contract",
         "docs/**",
         "src/**",
         "test/**"
+      ]
+    },
+    {
+      "id": "check-detect-ecosystems",
+      "description": "Phát hiện lệnh verify cho >= 8 hệ sinh thái",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/stack/verify-detection.test.ts",
+      "criterionIds": [
+        "ac-detect"
+      ],
+      "inputs": [
+        "src/core/stack/**",
+        "test/unit/core/stack/verify-detection.test.ts"
+      ]
+    },
+    {
+      "id": "check-monorepo-workspaces",
+      "description": "Phát hiện lệnh verify theo monorepo workspaces nearest-manifest-wins",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/stack/workspace-detection.test.ts",
+      "criterionIds": [
+        "ac-workspace"
+      ],
+      "inputs": [
+        "src/core/stack/**",
+        "test/unit/core/stack/workspace-detection.test.ts"
+      ]
+    },
+    {
+      "id": "check-no-tests-warning",
+      "description": "Cảnh báo repo không có test và xử lý verify-plan",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/stack/verify-plan.test.ts",
+      "criterionIds": [
+        "ac-no-tests"
+      ],
+      "inputs": [
+        "src/core/stack/**",
+        "test/unit/core/stack/verify-plan.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite-gate",
+      "description": "Suite gate từ chối ready thiếu project-level suite check và finish thiếu pass digest",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/workflow/suite-gate.test.ts",
+      "criterionIds": [
+        "ac-suite-gate"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/suite-gate.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs-sync",
+      "description": "Đồng bộ tài liệu hợp đồng và README/skill",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/stack/verify-docs-sync.test.ts",
+      "criterionIds": [
+        "ac-docs-sync"
+      ],
+      "inputs": [
+        "docs/**",
+        "test/unit/core/stack/verify-docs-sync.test.ts"
       ]
     }
   ],
@@ -86,8 +170,147 @@
       "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-09-29T14:15:00.000+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205807-add-verify-detection/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-29T14:16:00.793+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung các check kiểm thử tập trung cho từng tiêu chí chấp nhận theo quyết định planning d-draft-checks.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205807-add-verify-detection/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-09-29T14:40:55.926+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Cập nhật đường dẫn file test trong inputs và command khớp với cấu trúc test/unit/core/... theo test-structure.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205807-add-verify-detection/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-detect-ecosystems",
+      "recordedAt": "2026-09-29T14:43:46.378+07:00",
+      "result": "pass",
+      "summary": "Unit tests pass for verify detection across >= 8 ecosystems.",
+      "checkId": "check-detect-ecosystems",
+      "inputDigest": "2a5e7e6ade6c19854134c45a2d93f111ee83f7a84ffc6239ae58902300cca6e9",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "id": "ev-check-monorepo-workspaces",
+      "recordedAt": "2026-09-29T14:43:49.562+07:00",
+      "result": "pass",
+      "summary": "Unit tests pass for workspace nearest-manifest-wins detection.",
+      "checkId": "check-monorepo-workspaces",
+      "inputDigest": "f60c80c8fe5a7c017847ab134b4901b9bd891072f0f0b9d3c752a102d95be29d",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "id": "ev-check-no-tests-warning",
+      "recordedAt": "2026-09-29T14:43:52.847+07:00",
+      "result": "pass",
+      "summary": "Unit tests pass for no-tests warning and verify-plan command.",
+      "checkId": "check-no-tests-warning",
+      "inputDigest": "9ab595bd79baf0837e45c3f7a0b462a260f46d6dd82adea9f3d6abfee3d4bb7d",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "id": "ev-check-suite-gate",
+      "recordedAt": "2026-09-29T14:43:56.800+07:00",
+      "result": "pass",
+      "summary": "Unit tests pass for suite gate enforcement at ready and finish.",
+      "checkId": "check-suite-gate",
+      "inputDigest": "97e2929d18ad576db5efa61cfeec1908518a492ab991412039633ac066326745",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "id": "ev-check-docs-sync",
+      "recordedAt": "2026-09-29T14:44:00.648+07:00",
+      "result": "pass",
+      "summary": "Unit tests pass for contract documentation synchronization.",
+      "checkId": "check-docs-sync",
+      "inputDigest": "b30aae1fb1b5ab59651de1ff5de14b98a8358cdfef49bc0007e605a2ad8b26ef",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "id": "ev-check-suite-gate-2",
+      "recordedAt": "2026-09-29T14:45:30.783+07:00",
+      "result": "pass",
+      "summary": "Unit tests pass for suite gate enforcement at ready and finish after complexity refactor.",
+      "checkId": "check-suite-gate",
+      "inputDigest": "816f760c719744987fd92a105fed1a7f182c23f581bbd44af331aadf3d249f83",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "id": "ev-check-suite-gate-3",
+      "recordedAt": "2026-09-29T14:50:00.487+07:00",
+      "result": "pass",
+      "summary": "Unit tests pass for suite gate enforcement at ready and finish after complexity refactor.",
+      "checkId": "check-suite-gate",
+      "inputDigest": "bb73a855ee38fd09c8d5b2351856def07334c876bb84d16e7472a84879662227",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "id": "ev-check-no-tests-warning-2",
+      "recordedAt": "2026-09-29T14:52:47.339+07:00",
+      "result": "pass",
+      "summary": "Unit tests pass for no-tests warning and verify-plan command after coverage tests added.",
+      "checkId": "check-no-tests-warning",
+      "inputDigest": "86ef35b2389482fc9bccd2051c5ff8ff3e39046500a491f30939d2b3da819769",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "id": "ev-check-detect-ecosystems-2",
+      "recordedAt": "2026-09-29T14:59:05.672+07:00",
+      "result": "pass",
+      "summary": "Unit tests pass for verify detection across >= 8 ecosystems after branch coverage addition.",
+      "checkId": "check-detect-ecosystems",
+      "inputDigest": "bae9863613a8291afdaed25802195cea3b9856f78d4ad429a59e0ab42ff5847a",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "id": "ev-check-suite",
+      "recordedAt": "2026-09-29T14:59:54.584+07:00",
+      "result": "pass",
+      "summary": "Full suite pass: lint, typecheck, and all test suites pass.",
+      "checkId": "check-suite",
+      "inputDigest": "d19b1303eb1cf7be15f1adc184e98b6c6ad82d64f3fad08b642e756167a114f7",
+      "exitCode": 0,
+      "artifactPaths": []
+    },
+    {
+      "id": "ev-check-monorepo-workspaces-2",
+      "recordedAt": "2026-09-29T15:00:16.884+07:00",
+      "result": "pass",
+      "summary": "Unit tests pass for monorepo workspace detection after test additions.",
+      "checkId": "check-monorepo-workspaces",
+      "inputDigest": "800fb6472e72e78aa77fd8489ec32b0e5bf380478baf8a2e7aa5dd32168f8012",
+      "exitCode": 0,
+      "artifactPaths": []
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
   "createdAt": "2026-09-28T20:58:07.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "updatedAt": "2026-09-29T15:00:56.826+07:00",
+  "completedAt": "2026-09-29T15:00:56.826+07:00"
 }
