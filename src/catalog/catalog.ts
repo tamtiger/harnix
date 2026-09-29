@@ -401,7 +401,7 @@ const definition: StackCatalog = {
       guideIds: [],
       provenance,
     },
-    // Database detectors use `dependency` (npm/composer) and `content` glob only. `src/utils/detection.ts`
+    // Database detectors use `dependency` (npm/composer) and `content` glob only. `src/core/stack/detection.ts`
     // never collects nuget/maven/gradle dependency facts, so a .NET or Java driver is detected by
     // matching its package name inside `*.csproj`/`pom.xml`/`build.gradle*` content instead.
     {

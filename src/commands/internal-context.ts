@@ -1,4 +1,4 @@
-import { access } from "node:fs/promises";
+import { access } from "../utils/fs-access.js";
 import { isAbsolute, win32 } from "node:path";
 
 import { readConfig } from "../core/config/config.js";

@@ -33,7 +33,9 @@ harnix/
 ├── src/
 │   ├── core/
 │   │   ├── config/          # schema, explicit migrations
-│   │   ├── tasks/           # task PRD/state/context references
+│   │   ├── tasks/           # task PRD/state/context references; task.ts is a barrel over task-schema/-validate/-migration/-state/-store/-review
+│   │   ├── workflow/        # hidden workflow logic split by action (save, transition, evidence, schema, snapshot, preflight, finish, cancel, learn) + routing/completion; commands/internal-workflow.ts is a re-export adapter
+│   │   ├── stack/           # language/technology detection (moved from utils by restructure-code)
 │   │   ├── context/         # rank, dedupe, budget, disclosure
 │   │   ├── journal/         # entries, search, learning candidates
 │   │   └── project.ts       # project-level service boundary
@@ -72,6 +74,8 @@ commands -> terminal UI
 configurators -> templates/rules/skills
 core -X-> Commander/Inquirer/platform templates
 ```
+
+`test/unit/architecture.test.ts` enforces this direction (core imports no commands/templates/skills/Commander/Inquirer; `src/utils` imports none of core/commands/catalog/guides/templates/configurators), the `node:fs`-free command list (exempt until `add-platform-registry`: doctor, global-doctor, setup, global-uninstall, global-update), the 300-code-line cap for `src/core/workflow/` and `src/core/tasks/`, and the adapter shape of `src/commands/internal-workflow.ts`. `test/workflow/behavior-snapshot.golden.json` is the pure-refactor oracle and is never regenerated to make a refactor pass.
 
 Filesystem, clock, process runner, version lookup, prompt dependencies and user-home/root resolvers must be injectable so integration tests never call network/install, interactive terminals or a real user profile.
 
@@ -670,7 +674,7 @@ Phase 1–5 task checkmarks below are historical delivery evidence. Their former
 
 ### Task 1.3: Detection
 
-**Create:** `src/utils/detection.ts`; fixture repositories.
+**Create:** `src/core/stack/detection.ts` (moved from `src/utils/detection.ts` by `restructure-code`); fixture repositories.
 
 - [x] RED tests for C#/.NET/ABP, NestJS, Python, Java/Spring, Go, React, Vue and monorepo.
 - [x] Test ignored `node_modules/vendor/bin/obj/dist/build` trees and agent/tooling namespaces (`.agents`, `.kiro`, `.gemini`, `.trellis`, `.understand-anything`).

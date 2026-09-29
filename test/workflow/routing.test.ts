@@ -16,7 +16,7 @@ import {
   validateFullReadyArtifact,
   verificationRetryDisposition,
   verificationStages,
-} from "../../src/core/workflow.js";
+} from "../../src/core/workflow/index.js";
 import { appendJournal } from "../../src/core/journal/journal.js";
 import { loadTask, resolveActiveTask, saveTask, setActiveTask, transitionTask } from "../../src/core/tasks/task.js";
 import type { TaskRecord, TaskRecordV2, TaskRecordV3 } from "../../src/core/tasks/task.js";

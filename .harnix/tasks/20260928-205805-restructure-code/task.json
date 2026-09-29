@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205805-restructure-code",
   "title": "[07] Tái cấu trúc code theo đúng tầng và tách module lớn",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Đưa code về đúng hướng phụ thuộc trong AGENTS.md (commands -> core -> utils): logic workflow đang nằm ở src/commands/internal-workflow.ts (827 dòng, 24 hàm) chuyển vào src/core/workflow/ và tách theo action (save, transition, evidence, schema, snapshot, audit, preflight, finish, cancel, learn), command chỉ còn là adapter mỏng; 11 file trong src/commands import node:fs trực tiếp chuyển truy cập file xuống core/utils; detection (src/utils/detection.ts) chuyển về src/core/stack/ vì là logic nghiệp vụ; tách src/core/tasks/task.ts thành schema/validate/migration; đổi tên một trong hai hàm canonicalJson trùng tên khác nghĩa (workflow-helpers.ts trả object, global-managed-json.ts trả string); gỡ khỏi danh sách miễn trừ max-lines các file đã tách. Refactor thuần: CLI output và file ghi ra giống hệt trước/sau.",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -18,44 +18,60 @@
     {
       "id": "ac-layering",
       "text": "Không file nào trong src/commands import node:fs hay chứa logic nghiệp vụ, trừ doctor.ts, global-doctor.ts, setup.ts, global-update.ts, global-uninstall.ts (thuộc add-platform-registry, ghi vào danh sách miễn trừ); có test kiến trúc kiểm tra hướng import commands -> core -> utils và core không import commander/inquirer/templates.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-architecture"
+      ]
     },
     {
       "id": "ac-split-workflow",
       "text": "Logic workflow nằm trong src/core/workflow/ tách theo action, mỗi file ≤ 300 dòng.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-architecture"
+      ]
     },
     {
       "id": "ac-split-task",
       "text": "task.ts được tách thành schema/validate/migration, không còn trong danh sách miễn trừ.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-architecture"
+      ]
     },
     {
       "id": "ac-move-domain-utils",
       "text": "detection chuyển sang src/core/stack/; src/utils chỉ còn helper dùng chung (fs, path, hash, lock, input), trừ global-managed-files.ts và global-managed-json.ts (thuộc add-platform-registry, ghi vào danh sách miễn trừ).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-architecture"
+      ]
     },
     {
       "id": "ac-rename-duplicate",
       "text": "Không còn hai hàm cùng tên canonicalJson khác nghĩa trong src.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-architecture"
+      ]
     },
     {
       "id": "ac-no-behavior-change",
       "text": "Test snapshot trước/sau xác nhận output CLI và file ghi ra giống hệt; toàn bộ suite pass.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-behavior",
+        "ev-check-suite"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-sync",
+        "ev-check-suite"
+      ]
     }
   ],
   "relevantPaths": [
@@ -65,15 +81,70 @@
     "test/**"
   ],
   "relevantSpecs": [
+    "AGENTS.md",
     "docs/HARNIX_PRD.md",
     "docs/HARNIX_WORKFLOW.md",
-    "docs/IMPLEMENTATION_PLAN.md"
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/OVERHAUL_DECISIONS.md"
   ],
   "validationPlan": [
     {
-      "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "id": "check-architecture",
+      "description": "Test kiến trúc: hướng import, giới hạn dòng, vị trí module, tên hàm pass",
       "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/architecture.test.ts",
+      "criterionIds": [
+        "ac-layering",
+        "ac-move-domain-utils",
+        "ac-rename-duplicate",
+        "ac-split-task",
+        "ac-split-workflow"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "src/**",
+        "test/unit/architecture.test.ts"
+      ]
+    },
+    {
+      "id": "check-behavior",
+      "description": "Snapshot hành vi khớp golden ghi trước refactor",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/behavior-snapshot.test.ts",
+      "criterionIds": [
+        "ac-no-behavior-change"
+      ],
+      "inputs": [
+        "src/**",
+        "test/workflow/behavior-snapshot.golden.json",
+        "test/workflow/behavior-snapshot.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs-sync",
+      "description": "Test parity docs pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts test/workflow/templates.test.ts test/workflow/skill-sources.test.ts test/workflow/self-host.test.ts",
+      "criterionIds": [
+        "ac-docs-sync"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass",
+      "scope": "full",
       "required": true,
       "command": "pnpm lint && pnpm typecheck && pnpm test",
       "criterionIds": [
@@ -86,8 +157,13 @@
         "ac-split-workflow"
       ],
       "inputs": [
-        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
         "docs/**",
+        "eslint.config.mjs",
+        "package.json",
+        "scripts/**",
         "src/**",
         "test/**"
       ]
@@ -95,13 +171,83 @@
   ],
   "decisions": [
     {
-      "id": "d-draft-checks",
-      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
-      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+      "id": "d-barrels",
+      "text": "task.ts và commands/internal-workflow.ts giữ nguyên tên export dưới dạng barrel/adapter.",
+      "rationale": "Hàng trăm import và test hiện có không phải đổi, diff tập trung vào di chuyển code."
+    },
+    {
+      "id": "d-golden-first",
+      "text": "Golden hành vi được sinh từ code trước refactor và không được sửa để test pass.",
+      "rationale": "Đây là bằng chứng duy nhất cho tiêu chí không đổi hành vi."
+    },
+    {
+      "id": "d-remaining-exempt",
+      "text": "File lớn ngoài tiêu chí vẫn nằm trong danh sách miễn trừ với owner mới; ghi vào docs/OVERHAUL_DECISIONS.md.",
+      "rationale": "Task giới hạn ở tiêu chí đã duyệt; tách thêm sẽ chạm add-platform-registry và làm diff khó kiểm chứng."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-09-29T11:13:42.243+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205805-restructure-code/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-29T11:13:43.049+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung check tập trung cho từng tiêu chí và ghi lại quyết định tái cấu trúc sau khi khảo sát đồ thị import.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205805-restructure-code/task.json"
+      ]
+    },
+    {
+      "summary": "Check check-architecture passed (exit 0):    Start at  11:29:47 |    Duration  665ms (transform 38ms, setup 0ms, collect 71ms, tests 48ms, env",
+      "result": "pass",
+      "exitCode": 0,
+      "recordedAt": "2026-09-29T11:30:38.388+07:00",
+      "id": "ev-check-architecture",
+      "artifactPaths": [],
+      "inputDigest": "271d6682ec737b53d5fca8ef7f422494586f0a2991880176c9047506b6179fd7",
+      "checkId": "check-architecture"
+    },
+    {
+      "summary": "Check check-behavior passed (exit 0):    Start at  11:29:50 |    Duration  1.71s (transform 415ms, setup 0ms, collect 898ms, tests 424ms, ",
+      "result": "pass",
+      "exitCode": 0,
+      "recordedAt": "2026-09-29T11:30:39.373+07:00",
+      "id": "ev-check-behavior",
+      "artifactPaths": [],
+      "inputDigest": "7e74f41d40664d01bcbda8df90f8ce70acd99aff04ba3d7938f84e8ffdded758",
+      "checkId": "check-behavior"
+    },
+    {
+      "summary": "Check check-docs-sync passed (exit 0):    Start at  11:29:54 |    Duration  1.35s (transform 698ms, setup 0ms, collect 1.98s, tests 256ms, ",
+      "result": "pass",
+      "exitCode": 0,
+      "recordedAt": "2026-09-29T11:30:40.322+07:00",
+      "id": "ev-check-docs-sync",
+      "artifactPaths": [],
+      "inputDigest": "b6f4ef3582fe7390f3fa079691144200a592cd8bbed99eb9572e06561b8836de",
+      "checkId": "check-docs-sync"
+    },
+    {
+      "summary": "Check check-suite passed (exit 0):    Start at  11:30:13 |    Duration  17.03s (transform 4.28s, setup 0ms, collect 40.53s, tests 90.70",
+      "result": "pass",
+      "exitCode": 0,
+      "recordedAt": "2026-09-29T11:30:41.318+07:00",
+      "id": "ev-check-suite",
+      "artifactPaths": [],
+      "inputDigest": "fa8a22d124911e7e14e33f40cd131c1f66aa97a8969ef19a1afd18582de81247",
+      "checkId": "check-suite"
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
   "createdAt": "2026-09-28T20:58:05.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "updatedAt": "2026-09-29T11:30:44.360+07:00",
+  "completedAt": "2026-09-29T11:30:44.360+07:00"
 }

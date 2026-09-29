@@ -1,4 +1,4 @@
-import { rm } from "node:fs/promises";
+import { rm } from "../utils/fs-access.js";
 
 import { resolveSafeHarnixPath } from "../utils/paths.js";
 

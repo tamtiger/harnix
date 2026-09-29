@@ -8,36 +8,41 @@ import tseslint from "typescript-eslint";
  * decision recorded in docs/OVERHAUL_DECISIONS.md.
  */
 
-// Removed by `restructure-code` (task 07), which splits these modules by responsibility.
-const OVERSIZED_SOURCE_FILES = [
-  "src/catalog/catalog.ts",
-  "src/catalog/validation.ts",
-  "src/cli-program.ts",
+// Removed by `add-platform-registry` (task 12), which merges and splits the platform/doctor/global modules.
+const PLATFORM_MODULES = [
   "src/commands/doctor.ts",
   "src/commands/global-doctor.ts",
   "src/commands/global-uninstall.ts",
-  "src/commands/internal-workflow.ts",
   "src/commands/setup.ts",
-  "src/core/config/config.ts",
-  "src/core/tasks/task.ts",
-  "src/core/workflow.ts",
-  "src/guides/catalog.ts",
-  "src/utils/detection.ts",
-  "src/utils/file-lock.ts",
   "src/utils/global-managed-files.ts",
 ];
 
-// Removed by `restructure-code` (task 07) together with the oversized modules above.
+// Removed by `add-verify-detection` (task 09), which reworks config and stack detection.
+const VERIFY_DETECTION_MODULES = ["src/core/config/config.ts", "src/core/stack/detection.ts"];
+
+// Removed by `rewrite-guides` (task 14), which rewrites the guide and stack catalogs.
+const CATALOG_MODULES = ["src/catalog/catalog.ts", "src/catalog/validation.ts", "src/guides/catalog.ts"];
+
+// Removed by `add-test-impact-map` (task 16), which reworks the repo-map search.
+const REPO_MAP_MODULES = ["src/core/repo-map/search.ts"];
+
+// Unresolved after `restructure-code` (task 07); `release-v2` (task 17) must split each one or record a new decision.
+const UNRESOLVED_SOURCE_FILES = ["src/cli-program.ts", "src/core/context/context.ts", "src/utils/file-lock.ts"];
+
+const OVERSIZED_SOURCE_FILES = [
+  ...PLATFORM_MODULES,
+  ...VERIFY_DETECTION_MODULES,
+  ...CATALOG_MODULES,
+  "src/cli-program.ts",
+  "src/utils/file-lock.ts",
+];
+
 const COMPLEX_SOURCE_FILES = [
   "src/catalog/validation.ts",
-  "src/cli-program.ts",
   "src/commands/doctor.ts",
-  "src/commands/internal-workflow.ts",
-  "src/core/context/context.ts",
-  "src/core/repo-map/search.ts",
-  "src/core/tasks/task.ts",
-  "src/utils/file-lock.ts",
   "src/utils/global-managed-files.ts",
+  ...REPO_MAP_MODULES,
+  ...UNRESOLVED_SOURCE_FILES,
 ];
 
 // Removed by `release-v2` (task 17), which reviews the release scripts.

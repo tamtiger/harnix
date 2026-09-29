@@ -1,4 +1,4 @@
-import { readdir } from "node:fs/promises";
+import { readdir } from "../utils/fs-access.js";
 import { join } from "node:path";
 
 import { readConfig, validateDeveloperId } from "../core/config/config.js";

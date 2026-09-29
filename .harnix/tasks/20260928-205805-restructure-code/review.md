@@ -2,11 +2,11 @@
 
 - **ID:** 20260928-205805-restructure-code
 - **Mode:** full
-- **Status:** planning/planning
-- **Created:** 2026-09-28T20:58:05.000+07:00
-- **Updated:** 2026-09-28T20:58:28.000+07:00
+- **Status:** completed/finishing
+- **Created:** 2026-09-28 20:58:05 +07:00
+- **Updated:** 2026-09-29 11:30:44 +07:00
 
-**Verdict:** PENDING — 0/7 acceptance criteria met
+**Verdict:** PASS — all acceptance criteria met or waived
 
 ## Goal
 
@@ -20,25 +20,42 @@
 - Không đổi hành vi quan sát được.
 - Không tách global-managed-files.ts, doctor.ts, global-doctor.ts (thuộc add-platform-registry) và không viết lại templates (thuộc slim-instructions).
 
+## Artifacts
+
+- [`prd.md`](./prd.md) — outcome, scope, acceptance criteria narrative.
+- [`plan.md`](./plan.md) — implementation checklist and slices.
+
 ## Acceptance criteria
 
-- `ac-layering` (pending): Không file nào trong src/commands import node:fs hay chứa logic nghiệp vụ, trừ doctor.ts, global-doctor.ts, setup.ts, global-update.ts, global-uninstall.ts (thuộc add-platform-registry, ghi vào danh sách miễn trừ); có test kiến trúc kiểm tra hướng import commands -> core -> utils và core không import commander/inquirer/templates.
-- `ac-split-workflow` (pending): Logic workflow nằm trong src/core/workflow/ tách theo action, mỗi file ≤ 300 dòng.
-- `ac-split-task` (pending): task.ts được tách thành schema/validate/migration, không còn trong danh sách miễn trừ.
-- `ac-move-domain-utils` (pending): detection chuyển sang src/core/stack/; src/utils chỉ còn helper dùng chung (fs, path, hash, lock, input), trừ global-managed-files.ts và global-managed-json.ts (thuộc add-platform-registry, ghi vào danh sách miễn trừ).
-- `ac-rename-duplicate` (pending): Không còn hai hàm cùng tên canonicalJson khác nghĩa trong src.
-- `ac-no-behavior-change` (pending): Test snapshot trước/sau xác nhận output CLI và file ghi ra giống hệt; toàn bộ suite pass.
-- `ac-docs-sync` (pending): PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.
+- `ac-layering` (met): Không file nào trong src/commands import node:fs hay chứa logic nghiệp vụ, trừ doctor.ts, global-doctor.ts, setup.ts, global-update.ts, global-uninstall.ts (thuộc add-platform-registry, ghi vào danh sách miễn trừ); có test kiến trúc kiểm tra hướng import commands -> core -> utils và core không import commander/inquirer/templates.
+- `ac-split-workflow` (met): Logic workflow nằm trong src/core/workflow/ tách theo action, mỗi file ≤ 300 dòng.
+- `ac-split-task` (met): task.ts được tách thành schema/validate/migration, không còn trong danh sách miễn trừ.
+- `ac-move-domain-utils` (met): detection chuyển sang src/core/stack/; src/utils chỉ còn helper dùng chung (fs, path, hash, lock, input), trừ global-managed-files.ts và global-managed-json.ts (thuộc add-platform-registry, ghi vào danh sách miễn trừ).
+- `ac-rename-duplicate` (met): Không còn hai hàm cùng tên canonicalJson khác nghĩa trong src.
+- `ac-no-behavior-change` (met): Test snapshot trước/sau xác nhận output CLI và file ghi ra giống hệt; toàn bộ suite pass.
+- `ac-docs-sync` (met): PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.
 
 ## Required checks
 
-- `check-suite` (focused): Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning) — chưa chạy / not yet run
+- `check-architecture` (focused): Test kiến trúc: hướng import, giới hạn dòng, vị trí module, tên hàm pass — pass (2026-09-29 11:30:38 +07:00)
+- `check-behavior` (focused): Snapshot hành vi khớp golden ghi trước refactor — pass (2026-09-29 11:30:39 +07:00)
+- `check-docs-sync` (focused): Test parity docs pass — pass (2026-09-29 11:30:40 +07:00)
+- `check-suite` (full): Toàn bộ lint, typecheck và mọi suite test pass — pass (2026-09-29 11:30:41 +07:00)
 
 ## Decisions
 
-- **d-draft-checks** — check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.
-  - _Why:_ Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái).
+- **d-barrels** — task.ts và commands/internal-workflow.ts giữ nguyên tên export dưới dạng barrel/adapter.
+  - _Why:_ Hàng trăm import và test hiện có không phải đổi, diff tập trung vào di chuyển code.
+- **d-golden-first** — Golden hành vi được sinh từ code trước refactor và không được sửa để test pass.
+  - _Why:_ Đây là bằng chứng duy nhất cho tiêu chí không đổi hành vi.
+- **d-remaining-exempt** — File lớn ngoài tiêu chí vẫn nằm trong danh sách miễn trừ với owner mới; ghi vào docs/OVERHAUL_DECISIONS.md.
+  - _Why:_ Task giới hạn ở tiêu chí đã duyệt; tách thêm sẽ chạm add-platform-registry và làm diff khó kiểm chứng.
 
 ## Evidence
 
-_None recorded yet._
+- pass (2026-09-29 11:13:42 +07:00): Migrated TaskRecord schema to v3 with explicit authorization.
+- skipped (2026-09-29 11:13:43 +07:00): Task contract revised at persisted replan: Bổ sung check tập trung cho từng tiêu chí và ghi lại quyết định tái cấu trúc sau khi khảo sát đồ thị import.
+- `check-architecture` — pass (2026-09-29 11:30:38 +07:00): Check check-architecture passed (exit 0):    Start at  11:29:47 |    Duration  665ms (transform 38ms, setup 0ms, collect 71ms, tests 48ms, env
+- `check-behavior` — pass (2026-09-29 11:30:39 +07:00): Check check-behavior passed (exit 0):    Start at  11:29:50 |    Duration  1.71s (transform 415ms, setup 0ms, collect 898ms, tests 424ms, 
+- `check-docs-sync` — pass (2026-09-29 11:30:40 +07:00): Check check-docs-sync passed (exit 0):    Start at  11:29:54 |    Duration  1.35s (transform 698ms, setup 0ms, collect 1.98s, tests 256ms, 
+- `check-suite` — pass (2026-09-29 11:30:41 +07:00): Check check-suite passed (exit 0):    Start at  11:30:13 |    Duration  17.03s (transform 4.28s, setup 0ms, collect 40.53s, tests 90.70

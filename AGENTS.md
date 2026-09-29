@@ -50,6 +50,8 @@ configurators -> templates/rules/skills
 core -X-> Commander/Inquirer/platform templates
 ```
 
+- Directory layout: hidden workflow logic lives in `src/core/workflow/` split by action (`save`, `transition`, `evidence`, `schema`, `snapshot`, `preflight`, `finish`, `cancel`, `learn`, plus shared `obligations`, `migration`, `ready`, `save-files`); `src/commands/internal-workflow.ts` is a re-export-only adapter. `src/core/tasks/task.ts` is a barrel over `task-schema`, `task-validate*`, `task-migration`, `task-state`, `task-store` and `task-review`. Stack detection lives in `src/core/stack/`, and `src/utils` holds only shared helpers.
+- `test/unit/architecture.test.ts` enforces the import direction, the `node:fs`-free command list, the 300-code-line cap for `src/core/workflow` and `src/core/tasks`, and the adapter shape. Its exemptions and the lists in `eslint.config.mjs` may only shrink. `test/workflow/behavior-snapshot.golden.json` is the pure-refactor oracle: never regenerate it to make a refactor pass.
 - Inject filesystem, clock, process runner, version lookup, network, and prompt dependencies where deterministic tests need control.
 - Use Node path/realpath APIs and executable-plus-argument arrays. Never concatenate untrusted shell input.
 - Normalize project paths to repository-relative POSIX form and global paths to a verified platform root; reject traversal, unsafe roots, and symlink/junction escape.

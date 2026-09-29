@@ -176,7 +176,7 @@
       "implementation": {
         "code": [
           "src/core/context/selection-freshness.ts",
-          "src/core/workflow.ts"
+          "src/core/workflow/context.ts"
         ],
         "tests": [
           "test/workflow/internal-context.test.ts",
@@ -356,7 +356,7 @@
       "implementation": {
         "code": [
           "src/core/verification/input-digest.ts",
-          "src/core/workflow.ts",
+          "src/core/workflow/completion.ts",
           "src/skills/harnix-finish-work/SKILL.md"
         ],
         "tests": [
@@ -394,7 +394,7 @@
       "implementation": {
         "code": [
           "src/core/journal/journal.ts",
-          "src/core/workflow.ts",
+          "src/core/workflow/routing.ts",
           "src/skills/harnix-continue/SKILL.md"
         ],
         "tests": [
@@ -665,7 +665,7 @@
         "code": [
           "src/commands/internal-workflow.ts",
           "src/core/tasks/task.ts",
-          "src/core/workflow.ts"
+          "src/core/workflow/index.ts"
         ],
         "tests": [
           "test/unit/task-state.test.ts",

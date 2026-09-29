@@ -6,7 +6,7 @@ import { atomicWriteFile } from "../../utils/atomic-write.js";
 import { isValidTimeZone, systemTimezone } from "../../utils/clock.js";
 import { compareCodeUnits } from "../../utils/order.js";
 import { normalizeRepositoryPath } from "../../utils/paths.js";
-import { legacyStackIds, normalizeLegacyStackIds, type LegacyStackId } from "../../utils/stack.js";
+import { legacyStackIds, normalizeLegacyStackIds, type LegacyStackId } from "../stack/stack.js";
 
 export type PlatformId = "kiro" | "antigravity" | "codex" | "claude";
 

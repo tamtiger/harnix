@@ -31,6 +31,7 @@ Ngày duyệt: 2026-09-28. Múi giờ mọi mốc thời gian: `Asia/Ho_Chi_Minh
 | D9 | Chuẩn hoá code và test: Prettier + ESLint type-checked + max-lines 300; code đúng tầng `commands → core → utils`; test phản chiếu `src`, builder dùng chung, coverage floor | 3 task: `enforce-code-style`, `restructure-code`, `standardize-tests` |
 | D10 | Refactor cấu trúc là thuần tuý, không đổi hành vi quan sát được | Có test snapshot trước/sau |
 | D11 | Mỗi task phá contract tự cập nhật docs (PRD/WORKFLOW/IMPLEMENTATION_PLAN) trong cùng task | `release-v2` chỉ rà nhất quán lần cuối |
+| D12 | `restructure-code` chỉ tách phần thuộc tiêu chí đã duyệt (workflow, `task.ts`, detection/stack, `node:fs` khỏi command) và để các file còn lại trong danh sách miễn trừ của `eslint.config.mjs` với owner ghi rõ: `add-platform-registry` (doctor, global-doctor, global-uninstall, setup, global-managed-files), `add-verify-detection` (config.ts, core/stack/detection.ts), `rewrite-guides` (catalog.ts, validation.ts, guides/catalog.ts), `add-test-impact-map` (repo-map/search.ts). `cli-program.ts`, `core/context/context.ts` và `utils/file-lock.ts` chưa có owner tách nên `release-v2` phải tách hoặc ghi quyết định mới | Danh sách chỉ được thu hẹp; golden `test/workflow/behavior-snapshot.golden.json` sinh trước refactor là bằng chứng không đổi hành vi và không bao giờ được sinh lại để test pass |
 
 ## Phương án đã loại
 

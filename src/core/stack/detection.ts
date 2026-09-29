@@ -1,6 +1,6 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { basename, dirname, relative, resolve } from "node:path";
-import { compareCodeUnits } from "./order.js";
+import { compareCodeUnits } from "../../utils/order.js";
 
 import {
   stackCatalog,
@@ -13,10 +13,10 @@ import {
   type LanguageId,
   type TechnologyDescriptor,
   type TechnologyId,
-} from "../catalog/catalog.js";
-import { matchesSafeGlob } from "./safe-glob.js";
+} from "../../catalog/catalog.js";
+import { matchesSafeGlob } from "../../utils/safe-glob.js";
 
-export type { DetectionMatch, LanguageId, TechnologyId } from "../catalog/catalog.js";
+export type { DetectionMatch, LanguageId, TechnologyId } from "../../catalog/catalog.js";
 export type PackageManager = "pnpm" | "yarn" | "npm" | "bun";
 
 export interface DetectedPackage {

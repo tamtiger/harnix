@@ -3,10 +3,10 @@ import { stackCatalog } from "../catalog/catalog.js";
 import { createConfig, readConfig, writeConfig } from "../core/config/config.js";
 import { refreshRepoMap } from "../core/repo-map/service.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
-import { detectProject } from "../utils/detection.js";
+import { detectProject } from "../core/stack/detection.js";
 import { writeManifest } from "../utils/managed-files.js";
 import { pathExists } from "../utils/filesystem.js";
-import { normalizeLegacyStackIds, legacyStackIds, type LegacyStackId } from "../utils/stack.js";
+import { normalizeLegacyStackIds, legacyStackIds, type LegacyStackId } from "../core/stack/stack.js";
 import { compareCodeUnits } from "../utils/order.js";
 import { desiredFiles, updateProject } from "./update.js";
 

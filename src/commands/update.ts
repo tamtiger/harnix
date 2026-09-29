@@ -1,4 +1,4 @@
-import { access } from "node:fs/promises";
+import { access } from "../utils/fs-access.js";
 
 import { migrateLegacyEpics } from "../core/epics/migrate.js";
 import { migrateConfig, readConfig, type HarnixConfigV2 } from "../core/config/config.js";

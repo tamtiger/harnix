@@ -1,0 +1,1179 @@
+{
+  "log": [
+    {
+      "step": "preflight-empty",
+      "result": {
+        "clock": {
+          "timezone": "Asia/Ho_Chi_Minh",
+          "now": "2026-09-29T09:30:00.000+07:00",
+          "idPrefix": "20260929-093000"
+        },
+        "generator": "harnix",
+        "schemaVersion": 1,
+        "contextDrift": "not-recorded",
+        "requiredChecks": {
+          "passed": [],
+          "failed": [],
+          "stale": [],
+          "pending": []
+        },
+        "retryLimitReached": [],
+        "activeTask": null,
+        "nextStage": "brainstorm"
+      }
+    },
+    {
+      "step": "save-first",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090000-golden-one",
+        "title": "Task 20260929-090000-golden-one",
+        "mode": "lite",
+        "status": "planning",
+        "checkpoint": "planning",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:00:00.000+07:00",
+        "epicId": "golden-epic"
+      }
+    },
+    {
+      "step": "inspect",
+      "result": {
+        "activeTask": {
+          "generator": "harnix",
+          "schemaVersion": 3,
+          "id": "20260929-090000-golden-one",
+          "title": "Task 20260929-090000-golden-one",
+          "mode": "lite",
+          "status": "planning",
+          "checkpoint": "planning",
+          "goal": "Golden goal",
+          "nonGoals": [
+            "No extras"
+          ],
+          "acceptanceCriteria": [
+            {
+              "id": "ac-one",
+              "text": "One",
+              "status": "pending",
+              "evidenceIds": []
+            }
+          ],
+          "relevantPaths": [
+            "src/a.ts"
+          ],
+          "relevantSpecs": [],
+          "validationPlan": [
+            {
+              "id": "check",
+              "description": "Unit tests",
+              "scope": "focused",
+              "required": true,
+              "command": "pnpm test",
+              "criterionIds": [
+                "ac-one"
+              ],
+              "inputs": [
+                "src/**"
+              ]
+            }
+          ],
+          "evidence": [],
+          "createdAt": "2026-09-29T09:00:00.000+07:00",
+          "updatedAt": "2026-09-29T09:00:00.000+07:00",
+          "epicId": "golden-epic"
+        },
+        "contextDrift": {
+          "state": "not-recorded",
+          "changes": [],
+          "selectionChanges": []
+        }
+      }
+    },
+    {
+      "step": "illegal-jump",
+      "error": "Illegal task transition planning -> verifying."
+    },
+    {
+      "step": "ready",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090000-golden-one",
+        "title": "Task 20260929-090000-golden-one",
+        "mode": "lite",
+        "status": "ready",
+        "checkpoint": "ready",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:02:00.000+07:00",
+        "epicId": "golden-epic"
+      }
+    },
+    {
+      "step": "preflight-ready",
+      "result": {
+        "clock": {
+          "timezone": "Asia/Ho_Chi_Minh",
+          "now": "2026-09-29T09:30:00.000+07:00",
+          "idPrefix": "20260929-093000"
+        },
+        "generator": "harnix",
+        "schemaVersion": 1,
+        "contextDrift": "not-recorded",
+        "requiredChecks": {
+          "passed": [],
+          "failed": [],
+          "stale": [],
+          "pending": [
+            "check"
+          ]
+        },
+        "retryLimitReached": [],
+        "activeTask": {
+          "id": "20260929-090000-golden-one",
+          "mode": "lite",
+          "status": "ready",
+          "checkpoint": "ready"
+        },
+        "nextStage": "await"
+      }
+    },
+    {
+      "step": "in-progress",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090000-golden-one",
+        "title": "Task 20260929-090000-golden-one",
+        "mode": "lite",
+        "status": "in_progress",
+        "checkpoint": "implementing",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:03:00.000+07:00",
+        "epicId": "golden-epic"
+      }
+    },
+    {
+      "step": "verifying",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090000-golden-one",
+        "title": "Task 20260929-090000-golden-one",
+        "mode": "lite",
+        "status": "verifying",
+        "checkpoint": "verifying",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:04:00.000+07:00",
+        "epicId": "golden-epic"
+      }
+    },
+    {
+      "step": "snapshot",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "taskId": "20260929-090000-golden-one",
+        "checkId": "check",
+        "taskContractHash": "8f4981ddd8794a41c85cecd286cd030912aacb5e7521e0caabaac704b056683c",
+        "entries": [
+          {
+            "path": "src/a.ts",
+            "sha256": "037ecd1db38c230c248787e60fd7bfc0cb0101b187b59535b6e7483be762d350"
+          }
+        ],
+        "inputDigest": "9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb"
+      }
+    },
+    {
+      "step": "bad-evidence",
+      "error": "Verification input digest does not match the current snapshot for check check."
+    },
+    {
+      "step": "evidence",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090000-golden-one",
+        "title": "Task 20260929-090000-golden-one",
+        "mode": "lite",
+        "status": "verifying",
+        "checkpoint": "verifying",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [
+          {
+            "id": "ev-check",
+            "checkId": "check",
+            "recordedAt": "2026-09-29T09:06:00.000+07:00",
+            "result": "pass",
+            "exitCode": 0,
+            "summary": "pnpm test passed",
+            "artifactPaths": [],
+            "inputDigest": "9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb"
+          }
+        ],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:06:00.000+07:00",
+        "epicId": "golden-epic"
+      }
+    },
+    {
+      "step": "finishing",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090000-golden-one",
+        "title": "Task 20260929-090000-golden-one",
+        "mode": "lite",
+        "status": "verifying",
+        "checkpoint": "finishing",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [
+          {
+            "id": "ev-check",
+            "checkId": "check",
+            "recordedAt": "2026-09-29T09:06:00.000+07:00",
+            "result": "pass",
+            "exitCode": 0,
+            "summary": "pnpm test passed",
+            "artifactPaths": [],
+            "inputDigest": "9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb"
+          }
+        ],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:07:00.000+07:00",
+        "epicId": "golden-epic"
+      }
+    },
+    {
+      "step": "criteria-met",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090000-golden-one",
+        "title": "Task 20260929-090000-golden-one",
+        "mode": "lite",
+        "status": "verifying",
+        "checkpoint": "finishing",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "met",
+            "evidenceIds": [
+              "ev-check"
+            ]
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [
+          {
+            "id": "ev-check",
+            "checkId": "check",
+            "recordedAt": "2026-09-29T09:06:00.000+07:00",
+            "result": "pass",
+            "exitCode": 0,
+            "summary": "pnpm test passed",
+            "artifactPaths": [],
+            "inputDigest": "9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb"
+          }
+        ],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:08:00.000+07:00",
+        "epicId": "golden-epic"
+      }
+    },
+    {
+      "step": "preflight-finishing",
+      "result": {
+        "clock": {
+          "timezone": "Asia/Ho_Chi_Minh",
+          "now": "2026-09-29T09:30:00.000+07:00",
+          "idPrefix": "20260929-093000"
+        },
+        "generator": "harnix",
+        "schemaVersion": 1,
+        "contextDrift": "not-recorded",
+        "requiredChecks": {
+          "passed": [
+            "check"
+          ],
+          "failed": [],
+          "stale": [],
+          "pending": []
+        },
+        "retryLimitReached": [],
+        "activeTask": {
+          "id": "20260929-090000-golden-one",
+          "mode": "lite",
+          "status": "verifying",
+          "checkpoint": "finishing"
+        },
+        "nextStage": "finish"
+      }
+    },
+    {
+      "step": "finish",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090000-golden-one",
+        "title": "Task 20260929-090000-golden-one",
+        "mode": "lite",
+        "status": "completed",
+        "checkpoint": "finishing",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "met",
+            "evidenceIds": [
+              "ev-check"
+            ]
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [
+          {
+            "id": "ev-check",
+            "checkId": "check",
+            "recordedAt": "2026-09-29T09:06:00.000+07:00",
+            "result": "pass",
+            "exitCode": 0,
+            "summary": "pnpm test passed",
+            "artifactPaths": [],
+            "inputDigest": "9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb"
+          }
+        ],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:09:00.000+07:00",
+        "epicId": "golden-epic",
+        "completedAt": "2026-09-29T09:09:00.000+07:00"
+      }
+    },
+    {
+      "step": "save-second-active",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090100-golden-two",
+        "title": "Task 20260929-090100-golden-two",
+        "mode": "lite",
+        "status": "planning",
+        "checkpoint": "planning",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:00:00.000+07:00",
+        "epicId": "golden-epic"
+      }
+    },
+    {
+      "step": "cancel",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090100-golden-two",
+        "title": "Task 20260929-090100-golden-two",
+        "mode": "lite",
+        "status": "cancelled",
+        "checkpoint": "cancelling",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:10:00.000+07:00",
+        "epicId": "golden-epic",
+        "cancellation": {
+          "reason": "Golden cancellation",
+          "authorizedBy": "user"
+        },
+        "cancelledAt": "2026-09-29T09:10:00.000+07:00"
+      }
+    },
+    {
+      "step": "save-full",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090200-golden-full",
+        "title": "Task 20260929-090200-golden-full",
+        "mode": "full",
+        "status": "planning",
+        "checkpoint": "planning",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:00:00.000+07:00"
+      }
+    },
+    {
+      "step": "full-ready",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090200-golden-full",
+        "title": "Task 20260929-090200-golden-full",
+        "mode": "full",
+        "status": "ready",
+        "checkpoint": "ready",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:11:00.000+07:00"
+      }
+    },
+    {
+      "step": "full-in-progress",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090200-golden-full",
+        "title": "Task 20260929-090200-golden-full",
+        "mode": "full",
+        "status": "in_progress",
+        "checkpoint": "implementing",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:12:00.000+07:00"
+      }
+    },
+    {
+      "step": "revision-one-step",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090200-golden-full",
+        "title": "Task 20260929-090200-golden-full",
+        "mode": "full",
+        "status": "in_progress",
+        "checkpoint": "replan",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One, revised",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [
+          {
+            "id": "task-contract-revision-01",
+            "recordedAt": "2026-09-29T09:13:00.000+07:00",
+            "result": "skipped",
+            "summary": "Task contract revised at persisted replan: Golden revision reason for the snapshot.",
+            "artifactPaths": [
+              ".harnix/tasks/20260929-090200-golden-full/task.json"
+            ]
+          }
+        ],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:13:00.000+07:00"
+      }
+    },
+    {
+      "step": "revision-reenter-ready",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 3,
+        "id": "20260929-090200-golden-full",
+        "title": "Task 20260929-090200-golden-full",
+        "mode": "full",
+        "status": "ready",
+        "checkpoint": "ready",
+        "goal": "Golden goal",
+        "nonGoals": [
+          "No extras"
+        ],
+        "acceptanceCriteria": [
+          {
+            "id": "ac-one",
+            "text": "One, revised",
+            "status": "pending",
+            "evidenceIds": []
+          }
+        ],
+        "relevantPaths": [
+          "src/a.ts"
+        ],
+        "relevantSpecs": [],
+        "validationPlan": [
+          {
+            "id": "check",
+            "description": "Unit tests",
+            "scope": "focused",
+            "required": true,
+            "command": "pnpm test",
+            "criterionIds": [
+              "ac-one"
+            ],
+            "inputs": [
+              "src/**"
+            ]
+          }
+        ],
+        "evidence": [
+          {
+            "id": "task-contract-revision-01",
+            "recordedAt": "2026-09-29T09:13:00.000+07:00",
+            "result": "skipped",
+            "summary": "Task contract revised at persisted replan: Golden revision reason for the snapshot.",
+            "artifactPaths": [
+              ".harnix/tasks/20260929-090200-golden-full/task.json"
+            ]
+          }
+        ],
+        "createdAt": "2026-09-29T09:00:00.000+07:00",
+        "updatedAt": "2026-09-29T09:14:00.000+07:00"
+      }
+    },
+    {
+      "step": "schema",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 1,
+        "envelope": {
+          "artifacts": "optional { prd?, plan?, design?, research?: { <safe>.md: text }, context? }",
+          "contractRevision": "optional { reason: 10-1000 characters }, accepted in the save that sets checkpoint replan on an unfinished task and revises unproven obligations",
+          "epic": "optional EpicRecord schema v1; when present, upserts .harnix/epics/<epic-id>.json and regenerates markdown",
+          "epicMembers": "optional TaskRecord[] schema v3 in planning state; saved as non-active member tasks with matching epicId",
+          "task": "TaskRecord, required"
+        },
+        "taskRecord": {
+          "required": [
+            "acceptanceCriteria",
+            "checkpoint",
+            "createdAt",
+            "evidence",
+            "generator",
+            "goal",
+            "id",
+            "mode",
+            "nonGoals",
+            "relevantPaths",
+            "relevantSpecs",
+            "schemaVersion",
+            "status",
+            "title",
+            "updatedAt",
+            "validationPlan"
+          ],
+          "optional": [
+            "blocker",
+            "cancellation",
+            "cancelledAt",
+            "completedAt",
+            "decisions",
+            "epicId",
+            "residualRisks"
+          ]
+        },
+        "nested": {
+          "acceptanceCriteria": [
+            "evidenceIds",
+            "id",
+            "status",
+            "text",
+            "waiverReason"
+          ],
+          "validationPlan": [
+            "command",
+            "criterionIds",
+            "description",
+            "id",
+            "inputs",
+            "required",
+            "scope"
+          ],
+          "evidence": [
+            "artifactPaths",
+            "checkId",
+            "exitCode",
+            "findings",
+            "id",
+            "inputDigest",
+            "recordedAt",
+            "result",
+            "summary"
+          ],
+          "blocker": [
+            "kind",
+            "nextAction",
+            "resumeStatus",
+            "summary"
+          ]
+        },
+        "transports": {
+          "--save": "Full record plus artifacts. Required for obligations, artifacts and contract revisions.",
+          "--transition": "Status and checkpoint only, read from the persisted record.",
+          "--evidence": "Append exactly one evidence item.",
+          "--finish": "Terminal completion; accepts no body.",
+          "--cancel": "Terminal cancellation; the only cancellation transport."
+        }
+      }
+    },
+    {
+      "step": "status",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 1,
+        "activeTask": {
+          "id": "20260929-090200-golden-full",
+          "mode": "full",
+          "status": "ready",
+          "checkpoint": "ready",
+          "progress": {
+            "acceptance": {
+              "met": 0,
+              "waived": 0,
+              "pending": 1,
+              "total": 1
+            },
+            "requiredChecks": {
+              "passed": 0,
+              "failed": 0,
+              "stale": 0,
+              "pending": 1,
+              "total": 1
+            }
+          },
+          "context": {
+            "state": "not-recorded",
+            "changeCount": 0,
+            "selectionChangeCount": 0
+          }
+        },
+        "nextAction": {
+          "code": "begin-implementation",
+          "message": "Begin the approved implementation."
+        },
+        "attention": []
+      }
+    },
+    {
+      "step": "tasks",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 1,
+        "scope": "project",
+        "status": "ready",
+        "filter": {
+          "status": null,
+          "limit": 20
+        },
+        "summary": {
+          "scanned": 3,
+          "valid": 3,
+          "invalid": 0,
+          "matched": 3,
+          "returned": 3,
+          "scanTruncated": false,
+          "resultTruncated": false
+        },
+        "activeTaskId": "20260929-090200-golden-full",
+        "attention": [],
+        "tasks": [
+          {
+            "id": "20260929-090200-golden-full",
+            "mode": "full",
+            "status": "ready",
+            "checkpoint": "ready",
+            "active": true,
+            "updatedAt": "2026-09-29T09:14:00.000+07:00"
+          },
+          {
+            "id": "20260929-090100-golden-two",
+            "mode": "lite",
+            "status": "cancelled",
+            "checkpoint": "cancelling",
+            "active": false,
+            "updatedAt": "2026-09-29T09:10:00.000+07:00"
+          },
+          {
+            "id": "20260929-090000-golden-one",
+            "mode": "lite",
+            "status": "completed",
+            "checkpoint": "finishing",
+            "active": false,
+            "updatedAt": "2026-09-29T09:09:00.000+07:00"
+          }
+        ]
+      }
+    },
+    {
+      "step": "epics",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 1,
+        "epics": [
+          {
+            "id": "golden-epic",
+            "title": "Golden epic",
+            "totalTasks": 2,
+            "completedTasks": 1,
+            "cancelledTasks": 1
+          }
+        ],
+        "total": 1
+      }
+    },
+    {
+      "step": "epic-detail",
+      "result": {
+        "generator": "harnix",
+        "schemaVersion": 1,
+        "epic": {
+          "generator": "harnix",
+          "schemaVersion": 1,
+          "id": "golden-epic",
+          "title": "Golden epic",
+          "goal": "Epic goal",
+          "nonGoals": [
+            "Nothing else"
+          ],
+          "createdAt": "2026-09-29T09:00:00.000+07:00",
+          "updatedAt": "2026-09-29T09:00:00.000+07:00"
+        },
+        "members": [
+          {
+            "id": "20260929-090000-golden-one",
+            "status": "completed",
+            "title": "Task 20260929-090000-golden-one",
+            "goal": "Golden goal"
+          },
+          {
+            "id": "20260929-090100-golden-two",
+            "status": "cancelled",
+            "title": "Task 20260929-090100-golden-two",
+            "goal": "Golden goal"
+          }
+        ],
+        "nextTask": null
+      }
+    },
+    {
+      "step": "epic-missing",
+      "error": "No epic found with ID 'missing-epic'."
+    }
+  ],
+  "files": {
+    "tasks/.active": "20260929-090200-golden-full\n",
+    "tasks/20260929-090000-golden-one/review.md": "# Task 20260929-090000-golden-one\n\n- **ID:** 20260929-090000-golden-one\n- **Mode:** lite\n- **Status:** completed/finishing\n- **Created:** 2026-09-29 09:00:00 +07:00\n- **Updated:** 2026-09-29 09:09:00 +07:00\n\n**Verdict:** PASS — all acceptance criteria met or waived\n\n## Goal\n\nGolden goal\n\n## Non-goals\n\n- No extras\n\n## Acceptance criteria\n\n- `ac-one` (met): One\n\n## Required checks\n\n- `check` (focused): Unit tests — pass (2026-09-29 09:06:00 +07:00)\n\n## Evidence\n\n- `check` — pass (2026-09-29 09:06:00 +07:00): pnpm test passed\n",
+    "tasks/20260929-090000-golden-one/task.json": "{\n  \"generator\": \"harnix\",\n  \"schemaVersion\": 3,\n  \"id\": \"20260929-090000-golden-one\",\n  \"title\": \"Task 20260929-090000-golden-one\",\n  \"mode\": \"lite\",\n  \"status\": \"completed\",\n  \"checkpoint\": \"finishing\",\n  \"goal\": \"Golden goal\",\n  \"nonGoals\": [\n    \"No extras\"\n  ],\n  \"acceptanceCriteria\": [\n    {\n      \"id\": \"ac-one\",\n      \"text\": \"One\",\n      \"status\": \"met\",\n      \"evidenceIds\": [\n        \"ev-check\"\n      ]\n    }\n  ],\n  \"relevantPaths\": [\n    \"src/a.ts\"\n  ],\n  \"relevantSpecs\": [],\n  \"validationPlan\": [\n    {\n      \"id\": \"check\",\n      \"description\": \"Unit tests\",\n      \"scope\": \"focused\",\n      \"required\": true,\n      \"command\": \"pnpm test\",\n      \"criterionIds\": [\n        \"ac-one\"\n      ],\n      \"inputs\": [\n        \"src/**\"\n      ]\n    }\n  ],\n  \"evidence\": [\n    {\n      \"id\": \"ev-check\",\n      \"checkId\": \"check\",\n      \"recordedAt\": \"2026-09-29T09:06:00.000+07:00\",\n      \"result\": \"pass\",\n      \"exitCode\": 0,\n      \"summary\": \"pnpm test passed\",\n      \"artifactPaths\": [],\n      \"inputDigest\": \"9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb\"\n    }\n  ],\n  \"createdAt\": \"2026-09-29T09:00:00.000+07:00\",\n  \"updatedAt\": \"2026-09-29T09:09:00.000+07:00\",\n  \"epicId\": \"golden-epic\",\n  \"completedAt\": \"2026-09-29T09:09:00.000+07:00\"\n}\n",
+    "tasks/20260929-090100-golden-two/review.md": "# Task 20260929-090100-golden-two\n\n- **ID:** 20260929-090100-golden-two\n- **Mode:** lite\n- **Status:** cancelled/cancelling\n- **Created:** 2026-09-29 09:00:00 +07:00\n- **Updated:** 2026-09-29 09:10:00 +07:00\n\n**Verdict:** CANCELLED — Golden cancellation\n\n## Goal\n\nGolden goal\n\n## Non-goals\n\n- No extras\n\n## Acceptance criteria\n\n- `ac-one` (pending): One\n\n## Required checks\n\n- `check` (focused): Unit tests — chưa chạy / not yet run\n\n## Cancellation\n\n- **Reason:** Golden cancellation\n\n## Evidence\n\n_None recorded yet._\n",
+    "tasks/20260929-090100-golden-two/task.json": "{\n  \"generator\": \"harnix\",\n  \"schemaVersion\": 3,\n  \"id\": \"20260929-090100-golden-two\",\n  \"title\": \"Task 20260929-090100-golden-two\",\n  \"mode\": \"lite\",\n  \"status\": \"cancelled\",\n  \"checkpoint\": \"cancelling\",\n  \"goal\": \"Golden goal\",\n  \"nonGoals\": [\n    \"No extras\"\n  ],\n  \"acceptanceCriteria\": [\n    {\n      \"id\": \"ac-one\",\n      \"text\": \"One\",\n      \"status\": \"pending\",\n      \"evidenceIds\": []\n    }\n  ],\n  \"relevantPaths\": [\n    \"src/a.ts\"\n  ],\n  \"relevantSpecs\": [],\n  \"validationPlan\": [\n    {\n      \"id\": \"check\",\n      \"description\": \"Unit tests\",\n      \"scope\": \"focused\",\n      \"required\": true,\n      \"command\": \"pnpm test\",\n      \"criterionIds\": [\n        \"ac-one\"\n      ],\n      \"inputs\": [\n        \"src/**\"\n      ]\n    }\n  ],\n  \"evidence\": [],\n  \"createdAt\": \"2026-09-29T09:00:00.000+07:00\",\n  \"updatedAt\": \"2026-09-29T09:10:00.000+07:00\",\n  \"epicId\": \"golden-epic\",\n  \"cancellation\": {\n    \"reason\": \"Golden cancellation\",\n    \"authorizedBy\": \"user\"\n  },\n  \"cancelledAt\": \"2026-09-29T09:10:00.000+07:00\"\n}\n",
+    "tasks/20260929-090200-golden-full/plan.md": "- [ ] Step one\n",
+    "tasks/20260929-090200-golden-full/prd.md": "# PRD\n",
+    "tasks/20260929-090200-golden-full/review.md": "# Task 20260929-090200-golden-full\n\n- **ID:** 20260929-090200-golden-full\n- **Mode:** full\n- **Status:** ready/ready\n- **Created:** 2026-09-29 09:00:00 +07:00\n- **Updated:** 2026-09-29 09:14:00 +07:00\n\n**Verdict:** PENDING — 0/1 acceptance criteria met\n\n## Goal\n\nGolden goal\n\n## Non-goals\n\n- No extras\n\n## Artifacts\n\n- [`prd.md`](./prd.md) — outcome, scope, acceptance criteria narrative.\n- [`plan.md`](./plan.md) — implementation checklist and slices.\n\n## Acceptance criteria\n\n- `ac-one` (pending): One, revised\n\n## Required checks\n\n- `check` (focused): Unit tests — chưa chạy / not yet run\n\n## Evidence\n\n- skipped (2026-09-29 09:13:00 +07:00): Task contract revised at persisted replan: Golden revision reason for the snapshot.\n",
+    "tasks/20260929-090200-golden-full/task.json": "{\n  \"generator\": \"harnix\",\n  \"schemaVersion\": 3,\n  \"id\": \"20260929-090200-golden-full\",\n  \"title\": \"Task 20260929-090200-golden-full\",\n  \"mode\": \"full\",\n  \"status\": \"ready\",\n  \"checkpoint\": \"ready\",\n  \"goal\": \"Golden goal\",\n  \"nonGoals\": [\n    \"No extras\"\n  ],\n  \"acceptanceCriteria\": [\n    {\n      \"id\": \"ac-one\",\n      \"text\": \"One, revised\",\n      \"status\": \"pending\",\n      \"evidenceIds\": []\n    }\n  ],\n  \"relevantPaths\": [\n    \"src/a.ts\"\n  ],\n  \"relevantSpecs\": [],\n  \"validationPlan\": [\n    {\n      \"id\": \"check\",\n      \"description\": \"Unit tests\",\n      \"scope\": \"focused\",\n      \"required\": true,\n      \"command\": \"pnpm test\",\n      \"criterionIds\": [\n        \"ac-one\"\n      ],\n      \"inputs\": [\n        \"src/**\"\n      ]\n    }\n  ],\n  \"evidence\": [\n    {\n      \"id\": \"task-contract-revision-01\",\n      \"recordedAt\": \"2026-09-29T09:13:00.000+07:00\",\n      \"result\": \"skipped\",\n      \"summary\": \"Task contract revised at persisted replan: Golden revision reason for the snapshot.\",\n      \"artifactPaths\": [\n        \".harnix/tasks/20260929-090200-golden-full/task.json\"\n      ]\n    }\n  ],\n  \"createdAt\": \"2026-09-29T09:00:00.000+07:00\",\n  \"updatedAt\": \"2026-09-29T09:14:00.000+07:00\"\n}\n",
+    "epics/golden-epic.json": "{\n  \"generator\": \"harnix\",\n  \"schemaVersion\": 1,\n  \"id\": \"golden-epic\",\n  \"title\": \"Golden epic\",\n  \"goal\": \"Epic goal\",\n  \"nonGoals\": [\n    \"Nothing else\"\n  ],\n  \"createdAt\": \"2026-09-29T09:00:00.000+07:00\",\n  \"updatedAt\": \"2026-09-29T09:00:00.000+07:00\"\n}",
+    "epics/golden-epic.md": "# Epic: Golden epic\n\nEpic goal\n\n- **Cập nhật:** 2026-09-29 09:00:00 +07:00\n\n## Non-goals\n\n- Nothing else\n\n## Next task\n\nKhông còn task nào chưa hoàn tất.\n\n## Members (2 tasks)\n\n| # | Task ID | Title | Status |\n|---|---------|-------|--------|\n| 1 | `20260929-090000-golden-one` | Task 20260929-090000-golden-one | `completed` |\n| 2 | `20260929-090100-golden-two` | Task 20260929-090100-golden-two | `cancelled` |\n\n## Task Overview & Scope\n\n### 1. `20260929-090000-golden-one` — Task 20260929-090000-golden-one\n\n- **Trạng thái:** `completed`\n- **Mục tiêu:** Golden goal\n- **Tiêu chí nghiệm thu:** 1 tiêu chí\n\n### 2. `20260929-090100-golden-two` — Task 20260929-090100-golden-two\n\n- **Trạng thái:** `cancelled`\n- **Mục tiêu:** Golden goal\n- **Tiêu chí nghiệm thu:** 1 tiêu chí\n",
+    "workspace/tam/journal/2026-09-29.jsonl": "{\"generator\":\"harnix\",\"schemaVersion\":1,\"id\":\"20260929-090000-golden-one-completion\",\"recordedAt\":\"2026-09-29T09:09:00.000+07:00\",\"developer\":\"tam\",\"taskId\":\"20260929-090000-golden-one\",\"kind\":\"completion\",\"summary\":\"Completed: Task 20260929-090000-golden-one\",\"evidenceIds\":[\"ev-check\"]}\n{\"generator\":\"harnix\",\"schemaVersion\":1,\"id\":\"20260929-090100-golden-two-cancellation\",\"recordedAt\":\"2026-09-29T09:10:00.000+07:00\",\"developer\":\"tam\",\"taskId\":\"20260929-090100-golden-two\",\"kind\":\"cancellation\",\"summary\":\"Cancelled: Task 20260929-090100-golden-two — Golden cancellation\",\"evidenceIds\":[]}\n"
+  }
+}

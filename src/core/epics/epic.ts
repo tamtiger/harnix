@@ -170,6 +170,17 @@ export async function upsertEpic(root: string, epic: EpicRecord): Promise<void> 
   await renderEpicMarkdown(root, epic.id, epic);
 }
 
+/** Loads an epic by ID for the public views; an unreadable or missing record is reported as not found. */
+export async function loadEpicOrThrow(harnixRoot: string, epicId: string): Promise<EpicRecord> {
+  let content: string;
+  try {
+    content = await readFile(await resolveEpicFile(harnixRoot, epicId, "json"), "utf8");
+  } catch {
+    throw new Error(`No epic found with ID '${epicId}'.`);
+  }
+  return validateEpic(JSON.parse(content));
+}
+
 /** Returns undefined when the epic record does not exist or fails to parse/validate. */
 export async function loadEpicRecord(root: string, epicId: string): Promise<EpicRecord | undefined> {
   try {

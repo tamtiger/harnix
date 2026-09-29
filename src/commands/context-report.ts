@@ -4,7 +4,7 @@ import { readConfig, type PlatformId } from "../core/config/config.js";
 import { buildEffectiveContext, type EffectiveContextReasonCode } from "../core/context/effective-context.js";
 import type { ContextChange, ContextDrift, ContextManifest } from "../core/context/context.js";
 import { resolveActiveTask, TaskValidationError } from "../core/tasks/task.js";
-import { taskContextDrift } from "../core/workflow.js";
+import { taskContextDrift } from "../core/workflow/index.js";
 import { findInitializedProject } from "../utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
 

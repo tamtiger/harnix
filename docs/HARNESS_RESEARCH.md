@@ -292,7 +292,7 @@ Các quyết định này là guardrail chống scope creep. Thay đổi cần c
 |---|---|---|
 | Root/path safety | `src/utils/paths.ts` | nested Git/worktree, Unicode/spaces, traversal, symlink |
 | Config/schema | `src/core/config/**` | exact frozen types, valid/corrupt, migrations, future version, unknown-key round trip |
-| Detection | `src/catalog/**`, `src/utils/detection.ts` | independent language/technology evidence, packages, exclusions and package managers |
+| Detection | `src/catalog/**`, `src/core/stack/detection.ts` | independent language/technology evidence, packages, exclusions and package managers |
 | Managed files | `src/utils/{hashing,managed-files,atomic-write}.ts` plus Phase 6 global ownership/lock boundary | modified/deleted/obsolete/corrupt/rollback, fragment collision, permission mode and concurrent-edit preservation |
 | Context budget | `src/core/context/**` | rank, dedupe, pins, truncation disclosure, full override |
 | Journal/learning | `src/core/journal/**`, `learning.ts` | malformed/Unicode/newest-first/confidence/promotion |

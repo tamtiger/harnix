@@ -1,11 +1,9 @@
-import { readFile } from "node:fs/promises";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
 import {
   collectEpicMembers,
   listEpicIds,
   nextEpicMember,
-  resolveEpicFile,
-  validateEpic,
+  loadEpicOrThrow,
   type EpicRecord,
 } from "../core/epics/epic.js";
 
@@ -44,7 +42,7 @@ export async function listPublicEpics(root: string, limit: number): Promise<Publ
   const epics: EpicSummary[] = [];
   for (const epicId of (await listEpicIds(harnixRoot)).slice(0, limit)) {
     try {
-      const epic = await loadEpic(harnixRoot, epicId);
+      const epic = await loadEpicOrThrow(harnixRoot, epicId);
       const members = await collectEpicMembers(harnixRoot, epicId);
       epics.push({
         id: epicId,
@@ -62,7 +60,7 @@ export async function listPublicEpics(root: string, limit: number): Promise<Publ
 
 export async function detailPublicEpic(root: string, epicId: string): Promise<PublicEpicDetailResult> {
   const harnixRoot = await resolveSafeHarnixPath(root);
-  const epic = await loadEpic(harnixRoot, epicId);
+  const epic = await loadEpicOrThrow(harnixRoot, epicId);
   const members = (await collectEpicMembers(harnixRoot, epicId)).map(({ id, status, title, goal }) => ({
     id,
     status,
@@ -70,14 +68,4 @@ export async function detailPublicEpic(root: string, epicId: string): Promise<Pu
     goal,
   }));
   return { generator: "harnix", schemaVersion: 1, epic, members, nextTask: nextEpicMember(members) };
-}
-
-async function loadEpic(harnixRoot: string, epicId: string): Promise<EpicRecord> {
-  let content: string;
-  try {
-    content = await readFile(await resolveEpicFile(harnixRoot, epicId, "json"), "utf8");
-  } catch {
-    throw new Error(`No epic found with ID '${epicId}'.`);
-  }
-  return validateEpic(JSON.parse(content));
 }

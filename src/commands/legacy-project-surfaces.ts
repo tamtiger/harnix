@@ -1,4 +1,4 @@
-import { lstat, readFile, rm } from "node:fs/promises";
+import { lstat, readFile, rm } from "../utils/fs-access.js";
 
 import { sha256 } from "../utils/hashing.js";
 import { readManifest, writeManifest, type ManagedEntry, type ManagedManifest } from "../utils/managed-files.js";

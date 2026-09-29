@@ -113,4 +113,13 @@ describe("task contract documentation parity", () => {
     for (const owner of ["restructure-code", "standardize-tests", "release-v2"]) expect(eslintConfig).toContain(owner);
     expect(await read("AGENTS.md")).toContain("format:check");
   });
+
+  it("documents the restructured layout, its architecture test and decision D12", async () => {
+    for (const file of ["AGENTS.md", "docs/IMPLEMENTATION_PLAN.md"]) {
+      const text = await read(file);
+      expect(text, file).toContain("src/core/workflow/");
+      expect(text, file).toContain("architecture.test.ts");
+    }
+    expect(await read("docs/OVERHAUL_DECISIONS.md")).toContain("| D12 |");
+  });
 });

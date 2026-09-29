@@ -6,7 +6,7 @@ import {
   type HarnixStatusResultV1,
 } from "../core/status.js";
 import { resolveActiveTask, TaskValidationError } from "../core/tasks/task.js";
-import { taskContextDrift } from "../core/workflow.js";
+import { taskContextDrift } from "../core/workflow/index.js";
 import { findInitializedProject } from "../utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "../utils/paths.js";
 import { reportProjectChecks, type ChecksReportResultV1 } from "./checks.js";
