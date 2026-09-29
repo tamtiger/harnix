@@ -13,10 +13,10 @@ export {
   snapshotWorkflow,
   transitionWorkflow,
   workflowEnvelopeSchema,
-} from "../core/workflow/index.js";
+} from "src/core/workflow/index.js";
 export type {
   WorkflowEnvelopeSchemaV1,
   WorkflowPreflightResultV1,
   WorkflowSaveArtifacts,
   WorkflowSaveEnvelope,
-} from "../core/workflow/index.js";
+} from "src/core/workflow/index.js";

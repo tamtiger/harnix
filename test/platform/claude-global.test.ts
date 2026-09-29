@@ -8,10 +8,10 @@ import {
   claudeGlobalDesiredFiles,
   claudeGlobalMemoryContent,
   matchesClaudeGlobalContextHookGroup,
-} from "../../src/configurators/claude.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
-import { renderSkill, workflowSkills } from "../../src/templates/harnix/workflow.js";
-import type { DesiredGlobalManagedFile } from "../../src/utils/global-managed-files.js";
+} from "src/configurators/claude.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "src/templates/harnix/activation.js";
+import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
+import type { DesiredGlobalManagedFile } from "src/utils/global-managed-files.js";
 
 function entry(files: readonly DesiredGlobalManagedFile[], path: string): DesiredGlobalManagedFile {
   const found = files.find((file) => file.path === path);

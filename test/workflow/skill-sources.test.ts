@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { workflowSkills } from "../../src/skills/catalog.js";
+import { workflowSkills } from "src/skills/catalog.js";
 
 const skillNames = [
   "harnix-brainstorm",

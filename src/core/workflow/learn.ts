@@ -1,11 +1,11 @@
-import { readConfig } from "../config/config.js";
-import { appendJournalIdempotent, type JournalEntry } from "../journal/journal.js";
-import { createCapturedLearningCandidate, type LearningCaptureInput } from "../journal/learning.js";
-import { analyzeLearningStatement, type LearningRiskKind } from "../journal/learning-safety.js";
-import { loadTask, resolveActiveTask, type TaskRecord } from "../tasks/task.js";
-import { isMissing, validateLearningEnvelope } from "../tasks/workflow-helpers.js";
-import { nowInstant } from "../../utils/clock.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../../utils/paths.js";
+import { readConfig } from "src/core/config/config.js";
+import { appendJournalIdempotent, type JournalEntry } from "src/core/journal/journal.js";
+import { createCapturedLearningCandidate, type LearningCaptureInput } from "src/core/journal/learning.js";
+import { analyzeLearningStatement, type LearningRiskKind } from "src/core/journal/learning-safety.js";
+import { loadTask, resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
+import { isMissing, validateLearningEnvelope } from "src/core/tasks/workflow-helpers.js";
+import { nowInstant } from "src/utils/clock.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { assertTaskReadyForFinishing } from "./completion.js";
 import { currentInstant, journalFilePath } from "./support.js";
 

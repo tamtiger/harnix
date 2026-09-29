@@ -1,7 +1,7 @@
 import { basename, dirname } from "node:path";
-import { compareCodeUnits } from "../../utils/order.js";
-import { selectLatestEvidence, type Evidence, type TaskRecord } from "../tasks/task.js";
-import { assertInputDigestsFresh } from "../verification/input-digest.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { selectLatestEvidence, type Evidence, type TaskRecord } from "src/core/tasks/task.js";
+import { assertInputDigestsFresh } from "src/core/verification/input-digest.js";
 
 export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceAgeMs = 60 * 60 * 1000): boolean {
   const required = task.validationPlan.filter((check) => check.required);

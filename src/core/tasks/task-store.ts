@@ -1,14 +1,14 @@
 import { access, mkdir, readFile } from "node:fs/promises";
-import { atomicWriteFile } from "../../utils/atomic-write.js";
-import { resolveSafeProjectPath } from "../../utils/paths.js";
-import { readProjectTimezone } from "../config/config.js";
-import { saveContextManifest, validateContextManifest, type ContextManifest } from "../context/context.js";
+import { atomicWriteFile } from "src/utils/atomic-write.js";
+import { resolveSafeProjectPath } from "src/utils/paths.js";
+import { readProjectTimezone } from "src/core/config/config.js";
+import { saveContextManifest, validateContextManifest, type ContextManifest } from "src/core/context/context.js";
 import {
   contextSelectionResultHash,
   saveContextSelectionSnapshot,
   validateContextSelectionSnapshot,
   type ContextSelectionSnapshotV1,
-} from "../context/selection-freshness.js";
+} from "src/core/context/selection-freshness.js";
 import { renderTaskReview } from "./task-review.js";
 import type { TaskRecord } from "./task-schema.js";
 import { validateTask } from "./task-validate.js";

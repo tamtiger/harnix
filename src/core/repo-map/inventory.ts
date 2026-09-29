@@ -3,9 +3,9 @@ import { isAbsolute, relative, resolve, sep } from "node:path";
 
 import { globby } from "globby";
 
-import { normalizeRepositoryPath } from "../../utils/paths.js";
+import { normalizeRepositoryPath } from "src/utils/paths.js";
 import { defaultRepoMapLimits, type RepoMapInventory, type RepoMapLimits } from "./types.js";
-import { compareCodeUnits } from "../../utils/order.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 const ignoredDirectoryNameList = [
   ".agents",

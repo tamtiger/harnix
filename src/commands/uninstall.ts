@@ -1,6 +1,6 @@
-import { rm } from "../utils/fs-access.js";
+import { rm } from "src/utils/fs-access.js";
 
-import { resolveSafeHarnixPath } from "../utils/paths.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 export interface UninstallOptions {
   root: string;

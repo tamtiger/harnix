@@ -2,23 +2,22 @@ import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { detailPublicEpic, listPublicEpics } from "../../src/commands/epic.js";
-import { diagnoseProject } from "../../src/commands/doctor.js";
-import { initializeProject } from "../../src/commands/init.js";
-import { updateProject } from "../../src/commands/update.js";
-import { useTemporaryRepositories } from "../support/temporary-repository.js";
+import { detailPublicEpic, listPublicEpics } from "src/commands/epic.js";
+import { diagnoseProject } from "src/commands/doctor.js";
+import { initializeProject } from "src/commands/init.js";
+import { updateProject } from "src/commands/update.js";
+import { buildEpic } from "test/support/builders.js";
+import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-epic-migration-");
 
-const epic = {
-  generator: "harnix",
-  schemaVersion: 1,
+const epic = buildEpic({
   id: "old-epic",
   title: "Old epic",
   goal: "Goal",
   createdAt: "2026-09-24T04:00:00.000Z",
   updatedAt: "2026-09-24T04:00:00.000Z",
-};
+});
 const legacyJson = `${JSON.stringify(epic, null, 2)}\n`;
 
 async function legacyProject(): Promise<string> {

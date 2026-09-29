@@ -1,4 +1,4 @@
-import type { DesiredGlobalManagedFile } from "../../utils/global-managed-files.js";
+import type { DesiredGlobalManagedFile } from "src/utils/global-managed-files.js";
 import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "./activation.js";
 import { renderSkill, workflowSkills } from "./workflow.js";
 

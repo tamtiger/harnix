@@ -9,8 +9,8 @@ import {
   readGlobalManagedManifest,
   resolveSafeGlobalPath,
   type GlobalPlatform,
-} from "../utils/global-managed-files.js";
-import { resolveUserPlatformRoots, type HomeResolver } from "../utils/user-paths.js";
+} from "src/utils/global-managed-files.js";
+import { resolveUserPlatformRoots, type HomeResolver } from "src/utils/user-paths.js";
 
 export interface UpdateGlobalPlatformsOptions {
   readonly platforms?: readonly GlobalSetupPlatform[] | undefined;

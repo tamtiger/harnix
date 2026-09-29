@@ -1,9 +1,9 @@
-import { readConfig } from "../core/config/config.js";
-import { resolveActiveTask } from "../core/tasks/task.js";
-import { impactRepoMap, queryRepoMap, refreshRepoMap } from "../core/repo-map/service.js";
-import { findInitializedProject } from "../utils/project-discovery.js";
-import { resolveSafeHarnixPath } from "../utils/paths.js";
-import { compareCodeUnits } from "../utils/order.js";
+import { readConfig } from "src/core/config/config.js";
+import { resolveActiveTask } from "src/core/tasks/task.js";
+import { impactRepoMap, queryRepoMap, refreshRepoMap } from "src/core/repo-map/service.js";
+import { findInitializedProject } from "src/utils/project-discovery.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 export async function refreshRepoMapInternal(cwd: string): Promise<unknown> {
   const root = await initializedRoot(cwd);

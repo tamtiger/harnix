@@ -1,10 +1,10 @@
-import { readdir } from "../utils/fs-access.js";
+import { readdir } from "src/utils/fs-access.js";
 import { join } from "node:path";
 
-import { readConfig, validateDeveloperId } from "../core/config/config.js";
-import { searchJournal, type JournalEntry } from "../core/journal/journal.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
-import { compareCodeUnits } from "../utils/order.js";
+import { readConfig, validateDeveloperId } from "src/core/config/config.js";
+import { searchJournal, type JournalEntry } from "src/core/journal/journal.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 export interface MemOptions {
   root: string;

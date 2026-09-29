@@ -1,4 +1,4 @@
-import type { TaskMode, TaskRecord } from "../tasks/task.js";
+import type { TaskMode, TaskRecord } from "src/core/tasks/task.js";
 
 export type WorkflowEntry = "bypass" | "create" | "resume" | "wait" | "fail-closed";
 export type WorkflowAction = "inspect" | "plan" | "change" | "review" | "research" | "verify";

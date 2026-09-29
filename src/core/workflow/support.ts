@@ -1,8 +1,8 @@
-import { effectiveTimezone, readProjectTimezone, type HarnixConfigV2 } from "../config/config.js";
-import { loadEpicRecord, renderEpicMarkdown } from "../epics/epic.js";
-import type { TaskRecord } from "../tasks/task.js";
-import { localDate, nowInstant } from "../../utils/clock.js";
-import { resolveSafeHarnixPath } from "../../utils/paths.js";
+import { effectiveTimezone, readProjectTimezone, type HarnixConfigV2 } from "src/core/config/config.js";
+import { loadEpicRecord, renderEpicMarkdown } from "src/core/epics/epic.js";
+import type { TaskRecord } from "src/core/tasks/task.js";
+import { localDate, nowInstant } from "src/utils/clock.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 /** Current time in the project's configured zone unless the caller injects one. */
 export async function currentInstant(root: string, now: string | undefined): Promise<string> {

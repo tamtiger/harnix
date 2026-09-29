@@ -75,7 +75,7 @@ configurators -> templates/rules/skills
 core -X-> Commander/Inquirer/platform templates
 ```
 
-`test/unit/architecture.test.ts` enforces this direction (core imports no commands/templates/skills/Commander/Inquirer; `src/utils` imports none of core/commands/catalog/guides/templates/configurators), the `node:fs`-free command list (exempt until `add-platform-registry`: doctor, global-doctor, setup, global-uninstall, global-update), the 300-code-line cap for `src/core/workflow/` and `src/core/tasks/`, and the adapter shape of `src/commands/internal-workflow.ts`. `test/workflow/behavior-snapshot.golden.json` is the pure-refactor oracle and is never regenerated to make a refactor pass.
+`test/workflow/architecture.test.ts` enforces this direction (core imports no commands/templates/skills/Commander/Inquirer; `src/utils` imports none of core/commands/catalog/guides/templates/configurators), the `node:fs`-free command list (exempt until `add-platform-registry`: doctor, global-doctor, setup, global-uninstall, global-update), the 300-code-line cap for `src/core/workflow/` and `src/core/tasks/`, and the adapter shape of `src/commands/internal-workflow.ts`. `test/workflow/behavior-snapshot.golden.json` is the pure-refactor oracle and is never regenerated to make a refactor pass.
 
 Filesystem, clock, process runner, version lookup, prompt dependencies and user-home/root resolvers must be injectable so integration tests never call network/install, interactive terminals or a real user profile.
 
@@ -665,7 +665,7 @@ Phase 1–5 task checkmarks below are historical delivery evidence. Their former
 
 **Create:** `src/utils/{paths,atomic-write}.ts`
 
-**Tests:** `test/unit/{paths,atomic-write}.test.ts`
+**Tests:** `test/unit/utils/{paths,atomic-write}.test.ts`
 
 - [x] RED tests for nested Git root, worktree root, Unicode/spaces, non-Git fallback, traversal and symlink/junction escape.
 - [x] Implement Node path APIs + argument-safe Git lookup; never shell-concatenate paths.
@@ -1052,6 +1052,7 @@ git diff --check
 Script contracts:
 
 - `format` / `format:check`: Prettier (`printWidth` 120, `endOfLine: auto`) ghi/kiểm `src/**/*.ts`, `test/**/*.ts`, `scripts/**/*.mjs` và các file cấu hình TS/JS ở gốc; `lint` chạy `pnpm format:check` trước rồi `eslint .` (typescript-eslint `recommendedTypeChecked`, `no-floating-promises`, `complexity` 20, `max-lines` 300). Vi phạm còn lại chỉ nằm trong danh sách miễn trừ tạm thời của `eslint.config.mjs`, mỗi nhóm ghi task chịu trách nhiệm gỡ (`restructure-code`, `standardize-tests`, `release-v2`); danh sách chỉ được thu hẹp.
+- `test`: `vitest run --coverage` (provider v8, `@vitest/coverage-v8`) trên toàn bộ `test/**/*.test.ts`; sàn coverage `lines`/`statements` 93.1, `functions` 98.1, `branches` 86.8 (đo được 93.19/93.19/98.18/86.82) nằm trong `vitest.config.ts` và chỉ được nâng lên, không hạ để một thay đổi pass; `testTimeout` 20 giây. Bố cục test được mô tả trong `test/README.md` và bị `test/unit/test-structure.test.ts` ép buộc (unit phản chiếu `src`, `integration/commands` phản chiếu `src/commands`, mọi file ≤ 400 dòng, dùng builder dùng chung, mọi module có test hoặc lý do, số test/assertion không giảm). Import dùng alias `src/...` và `test/...` (tsconfig `paths` + alias vitest) trong cả `src` và `test`; ESLint cấm import cha `../`.
 - `test:acceptance`: chạy toàn bộ unit/integration/migration/platform/workflow/safety test directories, gồm clean và seeded unsafe Doctor JSON fixtures; acceptance sequence không chạy duplicate `pnpm test`.
 - `pack:check`: xóa/recreate project-local `.artifacts/` safely, chạy `pnpm pack --pack-destination .artifacts`, assert đúng một `@tamtiger/harnix` tarball và kiểm contents/license/runtime/templates.
 - `smoke:tarball`: cài tarball đó vào two independent temporary roots: fake user home for global setup and one-or-more project fixtures for `init`/context; smoke từng Kiro/Antigravity/Codex và tổ hợp ba platform without a real profile.

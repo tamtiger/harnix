@@ -1,7 +1,7 @@
-import { readConfig } from "../core/config/config.js";
-import { createTaskIndex, type TaskIndexOptions, type TaskIndexResultV1 } from "../core/tasks/task-index.js";
-import { findInitializedProject } from "../utils/project-discovery.js";
-import { resolveSafeHarnixPath } from "../utils/paths.js";
+import { readConfig } from "src/core/config/config.js";
+import { createTaskIndex, type TaskIndexOptions, type TaskIndexResultV1 } from "src/core/tasks/task-index.js";
+import { findInitializedProject } from "src/utils/project-discovery.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 export async function listProjectTasks(cwd: string, options: TaskIndexOptions): Promise<TaskIndexResultV1> {
   const project = await findInitializedProject({ cwd });

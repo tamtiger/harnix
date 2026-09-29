@@ -1,4 +1,4 @@
-import { selectLatestEvidence, type EvidenceFindingV1, type TaskRecord } from "../tasks/task.js";
+import { selectLatestEvidence, type EvidenceFindingV1, type TaskRecord } from "src/core/tasks/task.js";
 import { computeInputDigest } from "./input-digest.js";
 
 export type RequiredCheckState = "passed" | "failed" | "stale" | "pending";

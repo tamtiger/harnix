@@ -1,21 +1,21 @@
-import { access } from "../utils/fs-access.js";
+import { access } from "src/utils/fs-access.js";
 
-import { migrateLegacyEpics } from "../core/epics/migrate.js";
-import { migrateConfig, readConfig, type HarnixConfigV2 } from "../core/config/config.js";
-import { guideOutputPath, selectGuideSources } from "../guides/catalog.js";
-import { workflowTemplate } from "../templates/harnix/workflow.js";
+import { migrateLegacyEpics } from "src/core/epics/migrate.js";
+import { migrateConfig, readConfig, type HarnixConfigV2 } from "src/core/config/config.js";
+import { guideOutputPath, selectGuideSources } from "src/guides/catalog.js";
+import { workflowTemplate } from "src/templates/harnix/workflow.js";
 import {
   reconcileManagedFiles,
   readManifest,
   writeManifest,
   type DesiredManagedFile,
   type ManagedManifest,
-} from "../utils/managed-files.js";
-import { sha256 } from "../utils/hashing.js";
-import { packageVersion } from "../version.js";
-import { renderAgentsTemplate } from "../templates/harnix/agents.js";
-import { resolveSafeHarnixPath } from "../utils/paths.js";
-import { compareCodeUnits } from "../utils/order.js";
+} from "src/utils/managed-files.js";
+import { sha256 } from "src/utils/hashing.js";
+import { packageVersion } from "src/version.js";
+import { renderAgentsTemplate } from "src/templates/harnix/agents.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 export interface UpdateProjectOptions {
   root: string;

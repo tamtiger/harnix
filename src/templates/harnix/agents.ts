@@ -1,6 +1,6 @@
-import type { LanguageId, TechnologyId } from "../../catalog/catalog.js";
-import type { PackageConfig } from "../../core/config/config.js";
-import { packageVersion } from "../../version.js";
+import type { LanguageId, TechnologyId } from "src/catalog/catalog.js";
+import type { PackageConfig } from "src/core/config/config.js";
+import { packageVersion } from "src/version.js";
 import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "./activation.js";
 
 export interface AgentsProjectProfile {

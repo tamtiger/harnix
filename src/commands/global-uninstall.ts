@@ -1,5 +1,5 @@
-import { acquireHarnixFileLock } from "../utils/file-lock.js";
-import { compareCodeUnits } from "../utils/order.js";
+import { acquireHarnixFileLock } from "src/utils/file-lock.js";
+import { compareCodeUnits } from "src/utils/order.js";
 import { rmdir } from "node:fs/promises";
 import {
   GlobalManagedManifestError,
@@ -11,16 +11,16 @@ import {
   type GlobalManagedEntry,
   type GlobalPlatform,
   type ReconcileGlobalManagedFilesOptions,
-} from "../utils/global-managed-files.js";
-import { matchesClaudeGlobalContextHookGroup } from "../configurators/claude.js";
-import { matchesCodexGlobalContextHookGroup } from "../configurators/codex.js";
+} from "src/utils/global-managed-files.js";
+import { matchesClaudeGlobalContextHookGroup } from "src/configurators/claude.js";
+import { matchesCodexGlobalContextHookGroup } from "src/configurators/codex.js";
 import {
   resolveSelectedUserPlatformRoots,
   type HomeResolver,
   type SelectedUserPlatformRoots,
   type UserPathRoot,
-} from "../utils/user-paths.js";
-import { packageVersion } from "../version.js";
+} from "src/utils/user-paths.js";
+import { packageVersion } from "src/version.js";
 
 export type GlobalUninstallPlatform = "kiro" | "antigravity" | "codex" | "claude";
 

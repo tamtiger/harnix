@@ -1,11 +1,11 @@
-import { resolveSafeHarnixPath } from "../utils/paths.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import {
   collectEpicMembers,
   listEpicIds,
   nextEpicMember,
   loadEpicOrThrow,
   type EpicRecord,
-} from "../core/epics/epic.js";
+} from "src/core/epics/epic.js";
 
 export interface PublicEpicListResult {
   readonly generator: "harnix";

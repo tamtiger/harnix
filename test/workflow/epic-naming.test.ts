@@ -2,7 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { workflowEnvelopeSchema } from "../../src/commands/internal-workflow.js";
+import { workflowEnvelopeSchema } from "src/commands/internal-workflow.js";
 
 const root = process.cwd();
 // The legacy directory constant and its migration necessarily spell the old name.

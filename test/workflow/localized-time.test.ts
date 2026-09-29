@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -10,59 +10,22 @@ import {
   saveWorkflow,
   snapshotWorkflow,
   transitionWorkflow,
-} from "../../src/commands/internal-workflow.js";
-import { initializeProject } from "../../src/commands/init.js";
-import { inspectProjectStatus } from "../../src/commands/status.js";
-import { readConfig, writeConfig } from "../../src/core/config/config.js";
-import { saveTask } from "../../src/core/tasks/task.js";
-import type { TaskRecordV1, TaskRecordV3 } from "../../src/core/tasks/task.js";
-import { useTemporaryRepositories } from "../support/temporary-repository.js";
+} from "src/commands/internal-workflow.js";
+import { inspectProjectStatus } from "src/commands/status.js";
+import { saveTask } from "src/core/tasks/task.js";
+import type { TaskRecordV1, TaskRecordV3 } from "src/core/tasks/task.js";
+import { buildCriterion, buildEpic, buildTaskV1, buildTaskV3, createTestProject } from "test/support/builders.js";
+import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-time-");
 const VN = "Asia/Ho_Chi_Minh";
 const taskId = "20260929-090000-clock";
 const createdAt = "2026-09-29T09:00:00.000+07:00";
 
-async function project(timezone = VN): Promise<string> {
-  const root = await temporaryRepository();
-  await initializeProject({ root, developer: "tam", yes: true });
-  const configPath = join(root, ".harnix", "config.yaml");
-  await writeConfig(configPath, { ...(await readConfig(configPath)), timezone });
-  await mkdir(join(root, "src"), { recursive: true });
-  await writeFile(join(root, "src", "a.ts"), "export const a = 1;\n");
-  return root;
-}
+const project = async (timezone = VN): Promise<string> => createTestProject(await temporaryRepository(), timezone);
 
 function taskV3(overrides: Partial<TaskRecordV3> = {}): TaskRecordV3 {
-  return {
-    generator: "harnix",
-    schemaVersion: 3,
-    id: taskId,
-    title: "Clock",
-    mode: "lite",
-    status: "planning",
-    checkpoint: "planning",
-    goal: "Goal",
-    nonGoals: [],
-    acceptanceCriteria: [{ id: "ac-one", text: "One", status: "pending", evidenceIds: [] }],
-    relevantPaths: [],
-    relevantSpecs: [],
-    validationPlan: [
-      {
-        id: "check",
-        description: "Unit tests",
-        scope: "focused",
-        required: true,
-        command: "pnpm test",
-        criterionIds: ["ac-one"],
-        inputs: ["src/**"],
-      },
-    ],
-    evidence: [],
-    createdAt,
-    updatedAt: createdAt,
-    ...overrides,
-  };
+  return buildTaskV3({ id: taskId, title: "Clock", createdAt, updatedAt: createdAt, ...overrides });
 }
 
 /** Drives a task to verifying/finishing so `finishWorkflow` can journal it. */
@@ -171,15 +134,13 @@ describe("configured time zone", () => {
       updatedAt: "2026-09-28T13:58:01.000Z",
       epicId: "epic-one",
     });
-    const epic = {
-      generator: "harnix" as const,
-      schemaVersion: 1 as const,
+    const epic = buildEpic({
       id: "epic-one",
       title: "Epic",
       goal: "Goal",
       createdAt: "2026-09-28T13:58:01.000Z",
       updatedAt: "2026-09-28T13:58:01.000Z",
-    };
+    });
 
     await saveWorkflow(root, { task: legacy, epic });
 
@@ -192,25 +153,18 @@ describe("configured time zone", () => {
 
   it("leaves historical task records byte-for-byte untouched while reading them", async () => {
     const root = await project();
-    const legacy: TaskRecordV1 = {
-      generator: "harnix",
-      schemaVersion: 1,
+    const legacy: TaskRecordV1 = buildTaskV1({
       id: "20260813-120000-old",
       title: "Old",
-      mode: "lite",
       status: "completed",
       checkpoint: "finishing",
       goal: "g",
-      nonGoals: [],
-      acceptanceCriteria: [{ id: "a", text: "t", status: "waived", evidenceIds: [], waiverReason: "old" }],
-      relevantPaths: [],
-      relevantSpecs: [],
+      acceptanceCriteria: [buildCriterion({ id: "a", text: "t", status: "waived", waiverReason: "old" })],
       validationPlan: [],
-      evidence: [],
       createdAt: "2026-08-13T00:00:00.000Z",
       updatedAt: "2026-08-13T00:00:00.000Z",
       completedAt: "2026-08-13T00:00:00.000Z",
-    };
+    });
     await saveTask(join(root, ".harnix"), legacy);
     const path = join(root, ".harnix", "tasks", legacy.id, "task.json");
     const before = await readFile(path, "utf8");

@@ -3,8 +3,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { loadTask } from "../../src/core/tasks/task.js";
-import { useTemporaryRepositories } from "../support/temporary-repository.js";
+import { loadTask } from "src/core/tasks/task.js";
+import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 /**
  * The former `src/migration/**` code was removed in the overhaul. Its suite slot is

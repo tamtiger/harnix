@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 import { readFile, stat } from "node:fs/promises";
 
-import { resolveSafeProjectPath } from "../../utils/paths.js";
+import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { setActiveTask, validateTask, type TaskRecord } from "./task.js";
 
 const MAX_TASK_RECORD_BYTES = 1_048_576;

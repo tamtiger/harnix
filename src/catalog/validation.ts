@@ -7,7 +7,7 @@ import type {
   StackCatalog,
   TechnologyDescriptor,
 } from "./types.js";
-import { compareCodeUnits } from "../utils/order.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 const languageIds = new Set([
   "csharp",

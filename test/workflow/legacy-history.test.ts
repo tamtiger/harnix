@@ -2,12 +2,12 @@ import { cp, mkdir, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { initializeProject } from "../../src/commands/init.js";
-import { detailPublicEpic, listPublicEpics } from "../../src/commands/epic.js";
-import { inspectProjectStatus } from "../../src/commands/status.js";
-import { listProjectTasks } from "../../src/commands/tasks.js";
-import { loadTask, type TaskRecord } from "../../src/core/tasks/task.js";
-import { useTemporaryRepositories } from "../support/temporary-repository.js";
+import { initializeProject } from "src/commands/init.js";
+import { detailPublicEpic, listPublicEpics } from "src/commands/epic.js";
+import { inspectProjectStatus } from "src/commands/status.js";
+import { listProjectTasks } from "src/commands/tasks.js";
+import { loadTask, type TaskRecord } from "src/core/tasks/task.js";
+import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-legacy-");
 const repositoryHarnix = join(process.cwd(), ".harnix");

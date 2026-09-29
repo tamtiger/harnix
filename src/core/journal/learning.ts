@@ -1,4 +1,4 @@
-import { compareCodeUnits } from "../../utils/order.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 export interface LearningCandidate {
   id: string;

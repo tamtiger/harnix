@@ -1,13 +1,13 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 
-import { readConfigDocument, type HarnixConfigV2 } from "../core/config/config.js";
-import { diagnoseRepoMap, refreshRepoMap } from "../core/repo-map/service.js";
-import { ownershipState, readManifest, type ManagedEntry, type ManagedManifest } from "../utils/managed-files.js";
-import { normalizeRepositoryPath, resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
-import { compareCodeUnits } from "../utils/order.js";
-import { validateTask } from "../core/tasks/task.js";
-import { searchJournal, type JournalEntry } from "../core/journal/journal.js";
-import { analyzeLearningStatement, type LearningRiskKind } from "../core/journal/learning-safety.js";
+import { readConfigDocument, type HarnixConfigV2 } from "src/core/config/config.js";
+import { diagnoseRepoMap, refreshRepoMap } from "src/core/repo-map/service.js";
+import { ownershipState, readManifest, type ManagedEntry, type ManagedManifest } from "src/utils/managed-files.js";
+import { normalizeRepositoryPath, resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { validateTask } from "src/core/tasks/task.js";
+import { searchJournal, type JournalEntry } from "src/core/journal/journal.js";
+import { analyzeLearningStatement, type LearningRiskKind } from "src/core/journal/learning-safety.js";
 import { desiredFiles, updateProject } from "./update.js";
 import {
   diagnoseGlobalIntegrations,
@@ -17,8 +17,8 @@ import {
   type GlobalIntegrationDiagnosis,
 } from "./global-doctor.js";
 import { updateGlobalPlatforms } from "./global-update.js";
-import { GlobalManagedTransactionError } from "../utils/global-managed-files.js";
-import type { HomeResolver, UserPlatformRoots } from "../utils/user-paths.js";
+import { GlobalManagedTransactionError } from "src/utils/global-managed-files.js";
+import type { HomeResolver, UserPlatformRoots } from "src/utils/user-paths.js";
 
 export interface DoctorFinding {
   code: string;

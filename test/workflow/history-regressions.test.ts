@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { implementationStrategy, routeWorkflow, verificationStages } from "../../src/core/workflow/index.js";
+import { implementationStrategy, routeWorkflow, verificationStages } from "src/core/workflow/index.js";
 
 describe("history-derived workflow regressions", () => {
   it("does not force localized work to Full because of a generic implementation verb", () => {

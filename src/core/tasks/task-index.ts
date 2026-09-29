@@ -1,6 +1,6 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 
-import { resolveSafeProjectPath } from "../../utils/paths.js";
+import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { validateTask, type TaskMode, type TaskRecord, type TaskStatus, type WorkflowCheckpoint } from "./task.js";
 
 const MAX_SCANNED_TASKS = 1_000;

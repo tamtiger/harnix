@@ -4,10 +4,10 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 
-import { workflowTemplate } from "../../src/templates/harnix/workflow.js";
-import { readRepoMap } from "../../src/core/repo-map/store.js";
-import { sha256 } from "../../src/utils/hashing.js";
-import { packageVersion } from "../../src/version.js";
+import { workflowTemplate } from "src/templates/harnix/workflow.js";
+import { readRepoMap } from "src/core/repo-map/store.js";
+import { sha256 } from "src/utils/hashing.js";
+import { packageVersion } from "src/version.js";
 
 describe("repository self-host state", () => {
   it("tracks the current canonical workflow and initialized project surfaces", async () => {

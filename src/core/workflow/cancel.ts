@@ -1,5 +1,5 @@
-import { readConfig } from "../config/config.js";
-import { appendJournal, searchJournal } from "../journal/journal.js";
+import { readConfig } from "src/core/config/config.js";
+import { appendJournal, searchJournal } from "src/core/journal/journal.js";
 import {
   archiveTask,
   cancelTask,
@@ -7,10 +7,10 @@ import {
   saveTask,
   type TaskCancellation,
   type TaskRecord,
-} from "../tasks/task.js";
-import { validateCancellationEnvelope } from "../tasks/workflow-helpers.js";
-import { nowInstant } from "../../utils/clock.js";
-import { resolveSafeHarnixPath } from "../../utils/paths.js";
+} from "src/core/tasks/task.js";
+import { validateCancellationEnvelope } from "src/core/tasks/workflow-helpers.js";
+import { nowInstant } from "src/utils/clock.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import type { WorkflowFinishDependencies } from "./finish.js";
 import { currentInstant, journalFilePath, refreshLinkedEpicMarkdown } from "./support.js";
 

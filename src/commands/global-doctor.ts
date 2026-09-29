@@ -1,11 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { compareCodeUnits } from "../utils/order.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
-import { antigravityGlobalPluginDesiredFiles } from "../configurators/antigravity.js";
-import { createCodexGlobalSurfacePlan, matchesCodexGlobalContextHookGroup } from "../configurators/codex.js";
-import { claudeGlobalDesiredFiles, matchesClaudeGlobalContextHookGroup } from "../configurators/claude.js";
-import { kiroGlobalDesiredFiles } from "../configurators/kiro.js";
+import { antigravityGlobalPluginDesiredFiles } from "src/configurators/antigravity.js";
+import { createCodexGlobalSurfacePlan, matchesCodexGlobalContextHookGroup } from "src/configurators/codex.js";
+import { claudeGlobalDesiredFiles, matchesClaudeGlobalContextHookGroup } from "src/configurators/claude.js";
+import { kiroGlobalDesiredFiles } from "src/configurators/kiro.js";
 import {
   readGlobalManagedManifest,
   reconcileGlobalManagedFiles,
@@ -16,15 +16,15 @@ import {
   type GlobalManagedReconcileResult,
   type GlobalManagedWarning,
   type GlobalPlatform,
-} from "../utils/global-managed-files.js";
+} from "src/utils/global-managed-files.js";
 import {
   resolveUserPlatformRoots,
   type HomeResolver,
   type UserPathRoot,
   type UserPlatformRoots,
-} from "../utils/user-paths.js";
-import { packageVersion } from "../version.js";
-import { lookupHarnixLauncher } from "../utils/harnix-launcher.js";
+} from "src/utils/user-paths.js";
+import { packageVersion } from "src/version.js";
+import { lookupHarnixLauncher } from "src/utils/harnix-launcher.js";
 
 const publicPlatforms = ["kiro", "antigravity", "codex", "claude"] as const;
 export type GlobalDoctorPlatform = (typeof publicPlatforms)[number];

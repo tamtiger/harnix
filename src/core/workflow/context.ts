@@ -4,19 +4,19 @@ import {
   loadContextManifest,
   type ContextDrift,
   type ContextManifest,
-} from "../context/context.js";
+} from "src/core/context/context.js";
 import {
   inspectContextSelectionChanges,
   loadContextSelectionSnapshot,
   type ContextSelectionInput,
-} from "../context/selection-freshness.js";
-import { readConfig } from "../config/config.js";
-import { readRepoMap } from "../repo-map/store.js";
-import { guideOutputPath, selectGuideSources } from "../../guides/catalog.js";
-import { resolveActiveTask, type TaskRecord } from "../tasks/task.js";
-import { isMissing } from "../tasks/workflow-helpers.js";
-import { resolveSafeProjectPath } from "../../utils/paths.js";
-import { compareCodeUnits } from "../../utils/order.js";
+} from "src/core/context/selection-freshness.js";
+import { readConfig } from "src/core/config/config.js";
+import { readRepoMap } from "src/core/repo-map/store.js";
+import { guideOutputPath, selectGuideSources } from "src/guides/catalog.js";
+import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
+import { isMissing } from "src/core/tasks/workflow-helpers.js";
+import { resolveSafeProjectPath } from "src/utils/paths.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 export async function continueWorkflowTask(
   harnixRoot: string,

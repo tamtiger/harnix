@@ -1,12 +1,12 @@
 import { Buffer } from "node:buffer";
 
-import { readConfig, type PlatformId } from "../core/config/config.js";
-import { buildEffectiveContext, type EffectiveContextReasonCode } from "../core/context/effective-context.js";
-import type { ContextChange, ContextDrift, ContextManifest } from "../core/context/context.js";
-import { resolveActiveTask, TaskValidationError } from "../core/tasks/task.js";
-import { taskContextDrift } from "../core/workflow/index.js";
-import { findInitializedProject } from "../utils/project-discovery.js";
-import { resolveSafeHarnixPath } from "../utils/paths.js";
+import { readConfig, type PlatformId } from "src/core/config/config.js";
+import { buildEffectiveContext, type EffectiveContextReasonCode } from "src/core/context/effective-context.js";
+import type { ContextChange, ContextDrift, ContextManifest } from "src/core/context/context.js";
+import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
+import { taskContextDrift } from "src/core/workflow/index.js";
+import { findInitializedProject } from "src/utils/project-discovery.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 const MAX_PUBLIC_RESULT_BYTES = 262_144;
 

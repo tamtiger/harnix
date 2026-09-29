@@ -1,10 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { atomicWriteFile } from "../../utils/atomic-write.js";
-import { sha256 } from "../../utils/hashing.js";
-import { compareCodeUnits } from "../../utils/order.js";
-import { normalizeRepositoryPath, resolveSafeHarnixPath } from "../../utils/paths.js";
+import { atomicWriteFile } from "src/utils/atomic-write.js";
+import { sha256 } from "src/utils/hashing.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { normalizeRepositoryPath, resolveSafeHarnixPath } from "src/utils/paths.js";
 import type { RepoMapRecordV1, RepoMapV1 } from "./types.js";
 
 export const repoMapRelativePath = "cache/repo-map-v1.json";

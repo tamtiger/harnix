@@ -1,4 +1,4 @@
-import { formatDisplay } from "../../utils/clock.js";
+import { formatDisplay } from "src/utils/clock.js";
 import type { TaskRecord } from "./task-schema.js";
 import { selectLatestEvidence } from "./task-state.js";
 

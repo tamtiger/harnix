@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createProgram, runCli } from "../../src/cli-program.js";
+import { createProgram, runCli } from "src/cli-program.js";
 
 afterEach(() => vi.restoreAllMocks());
 

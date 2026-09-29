@@ -1,8 +1,8 @@
-import type { HarnixConfigV2, PlatformId } from "../config/config.js";
-import type { TaskRecord } from "../tasks/task.js";
-import { guideOutputPath, selectGuideSources } from "../../guides/catalog.js";
-import { compareCodeUnits } from "../../utils/order.js";
-import { normalizeRepositoryPath, resolveSafeProjectPath } from "../../utils/paths.js";
+import type { HarnixConfigV2, PlatformId } from "src/core/config/config.js";
+import type { TaskRecord } from "src/core/tasks/task.js";
+import { guideOutputPath, selectGuideSources } from "src/guides/catalog.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { buildContext, loadContextManifest, type ContextEntry, type ContextManifest } from "./context.js";
 
 export type EffectiveContextReasonCode = "applicable-guide" | "persisted-selection" | "pinned" | "task-reference";

@@ -1,6 +1,6 @@
-import { compareCodeUnits } from "../../utils/order.js";
+import { compareCodeUnits } from "src/utils/order.js";
 import { type TaskRecord, type TaskCancellation, transitionTask, updateTaskCheckpoint } from "./task.js";
-import type { LearningCaptureInput } from "../journal/learning.js";
+import type { LearningCaptureInput } from "src/core/journal/learning.js";
 
 const PLAN_CHECKLIST_ITEM = /^\s*- \[[ xX]\]\s+\S/mu;
 

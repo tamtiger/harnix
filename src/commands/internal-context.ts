@@ -1,12 +1,12 @@
-import { access } from "../utils/fs-access.js";
+import { access } from "src/utils/fs-access.js";
 import { isAbsolute, win32 } from "node:path";
 
-import { readConfig } from "../core/config/config.js";
-import { UNTRUSTED_CONTEXT_PREFIX, UNTRUSTED_CONTEXT_SUFFIX } from "../core/context/context.js";
-import { buildEffectiveContext } from "../core/context/effective-context.js";
-import { resolveActiveTask } from "../core/tasks/task.js";
-import { findInitializedProject } from "../utils/project-discovery.js";
-import { resolveSafeHarnixPath } from "../utils/paths.js";
+import { readConfig } from "src/core/config/config.js";
+import { UNTRUSTED_CONTEXT_PREFIX, UNTRUSTED_CONTEXT_SUFFIX } from "src/core/context/context.js";
+import { buildEffectiveContext } from "src/core/context/effective-context.js";
+import { resolveActiveTask } from "src/core/tasks/task.js";
+import { findInitializedProject } from "src/utils/project-discovery.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 export type InternalContextPlatform = "kiro" | "antigravity" | "codex" | "claude";
 

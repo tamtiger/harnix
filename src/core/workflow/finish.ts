@@ -1,8 +1,8 @@
-import { readConfig } from "../config/config.js";
-import { appendJournal, searchJournal } from "../journal/journal.js";
-import { archiveTask, resolveActiveTask, saveTask, transitionTask, type TaskRecord } from "../tasks/task.js";
-import { nowInstant } from "../../utils/clock.js";
-import { resolveSafeHarnixPath } from "../../utils/paths.js";
+import { readConfig } from "src/core/config/config.js";
+import { appendJournal, searchJournal } from "src/core/journal/journal.js";
+import { archiveTask, resolveActiveTask, saveTask, transitionTask, type TaskRecord } from "src/core/tasks/task.js";
+import { nowInstant } from "src/utils/clock.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertTaskReadyForFinishing, completionEvidenceIds } from "./completion.js";
 import { currentInstant, journalFilePath, refreshLinkedEpicMarkdown } from "./support.js";
 

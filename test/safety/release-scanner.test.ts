@@ -44,7 +44,7 @@ const {
   contextFastPathArguments,
   scanTextFiles,
 } = releaseScanner;
-import { useTemporaryRepositories } from "../support/temporary-repository.js";
+import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const fixture = useTemporaryRepositories("harnix-release-scanner-");
 

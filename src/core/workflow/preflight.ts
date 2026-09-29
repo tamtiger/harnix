@@ -1,10 +1,10 @@
-import type { ContextDrift } from "../context/context.js";
-import { readProjectTimezone } from "../config/config.js";
-import { resolveActiveTask, type Evidence, type TaskRecord } from "../tasks/task.js";
-import { inspectRequiredChecks, type RequiredCheckState } from "../verification/check-report.js";
-import { formatInstant, idPrefix } from "../../utils/clock.js";
-import { compareCodeUnits } from "../../utils/order.js";
-import { resolveSafeHarnixPath } from "../../utils/paths.js";
+import type { ContextDrift } from "src/core/context/context.js";
+import { readProjectTimezone } from "src/core/config/config.js";
+import { resolveActiveTask, type Evidence, type TaskRecord } from "src/core/tasks/task.js";
+import { inspectRequiredChecks, type RequiredCheckState } from "src/core/verification/check-report.js";
+import { formatInstant, idPrefix } from "src/utils/clock.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { canCompleteTask, verificationRetryDisposition } from "./completion.js";
 import { taskContextDrift } from "./context.js";
 

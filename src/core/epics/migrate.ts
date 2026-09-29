@@ -1,8 +1,8 @@
 import { readFile, readdir, rm, rmdir } from "node:fs/promises";
 
-import { atomicWriteFile } from "../../utils/atomic-write.js";
-import { compareCodeUnits } from "../../utils/order.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../../utils/paths.js";
+import { atomicWriteFile } from "src/utils/atomic-write.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { EPICS_DIRECTORY, LEGACY_EPICS_DIRECTORY, renderEpicMarkdown, validateEpic } from "./epic.js";
 
 export interface EpicMigrationResult {

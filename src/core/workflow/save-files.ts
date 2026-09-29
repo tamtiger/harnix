@@ -1,12 +1,12 @@
 import { readFile, rm } from "node:fs/promises";
 import { Buffer } from "node:buffer";
-import { validateContextManifest } from "../context/context.js";
-import { contextSelectionResultHash, validateContextSelectionSnapshot } from "../context/selection-freshness.js";
-import type { TaskArtifacts, TaskRecord } from "../tasks/task.js";
-import { isMissing, sameBytes } from "../tasks/workflow-helpers.js";
-import { atomicWriteFile } from "../../utils/atomic-write.js";
-import { compareCodeUnits } from "../../utils/order.js";
-import { resolveSafeProjectPath } from "../../utils/paths.js";
+import { validateContextManifest } from "src/core/context/context.js";
+import { contextSelectionResultHash, validateContextSelectionSnapshot } from "src/core/context/selection-freshness.js";
+import type { TaskArtifacts, TaskRecord } from "src/core/tasks/task.js";
+import { isMissing, sameBytes } from "src/core/tasks/workflow-helpers.js";
+import { atomicWriteFile } from "src/utils/atomic-write.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { resolveSafeProjectPath } from "src/utils/paths.js";
 
 const RESEARCH_ARTIFACT_NAME = /^[a-z0-9][a-z0-9._-]*\.md$/u;
 

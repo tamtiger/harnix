@@ -1,12 +1,12 @@
 import { readFile } from "node:fs/promises";
 import { parse, stringify } from "yaml";
 
-import type { LanguageId, TechnologyId } from "../../catalog/catalog.js";
-import { atomicWriteFile } from "../../utils/atomic-write.js";
-import { isValidTimeZone, systemTimezone } from "../../utils/clock.js";
-import { compareCodeUnits } from "../../utils/order.js";
-import { normalizeRepositoryPath } from "../../utils/paths.js";
-import { legacyStackIds, normalizeLegacyStackIds, type LegacyStackId } from "../stack/stack.js";
+import type { LanguageId, TechnologyId } from "src/catalog/catalog.js";
+import { atomicWriteFile } from "src/utils/atomic-write.js";
+import { isValidTimeZone, systemTimezone } from "src/utils/clock.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { normalizeRepositoryPath } from "src/utils/paths.js";
+import { legacyStackIds, normalizeLegacyStackIds, type LegacyStackId } from "src/core/stack/stack.js";
 
 export type PlatformId = "kiro" | "antigravity" | "codex" | "claude";
 

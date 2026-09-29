@@ -2,7 +2,7 @@ import { access, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { normalizeRepositoryPath, resolveSafeProjectPath } from "../../src/utils/paths.js";
+import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 
 const root = resolve(".");
 const registryPath = "docs/HARNESS_FEATURE_PROVENANCE.json";

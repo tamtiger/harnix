@@ -5,9 +5,9 @@ import {
   type Evidence,
   type TaskRecord,
   type TaskRecordV3,
-} from "../tasks/task.js";
-import { semanticJsonEqual, semanticTaskEqual } from "../tasks/workflow-helpers.js";
-import { compareCodeUnits } from "../../utils/order.js";
+} from "src/core/tasks/task.js";
+import { semanticJsonEqual, semanticTaskEqual } from "src/core/tasks/workflow-helpers.js";
+import { compareCodeUnits } from "src/utils/order.js";
 import type { WorkflowSaveEnvelope } from "./envelope.js";
 
 type ContractRevision = WorkflowSaveEnvelope["contractRevision"];

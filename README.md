@@ -241,6 +241,8 @@ git diff --check
 
 `pnpm lint` chạy `pnpm format:check` (Prettier) trước rồi ESLint; chạy `pnpm format` để tự định dạng lại `src`, `test` và `scripts` trước khi hoàn tất.
 
+`pnpm test` chạy toàn bộ test kèm coverage (`vitest run --coverage`) với sàn ghi trong `vitest.config.ts`; bố cục test và builder dùng chung được mô tả trong `test/README.md`. Import trong `src` và `test` dùng alias `src/...` và `test/...` thay cho đường dẫn cha `../`.
+
 `test:acceptance` đã chạy đủ sáu suite (`test:unit`, `test:integration`, `test:migration`, `test:platform`, `test:workflow`, `test:safety`) nên không cần chạy `pnpm test` lặp lại. Mọi filesystem test dùng repository tạm và fake user home injected, không đụng vào profile/config thật.
 
 ## Tài liệu đầy đủ

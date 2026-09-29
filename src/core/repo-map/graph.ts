@@ -1,7 +1,7 @@
 import { posix } from "node:path";
 
-import { compareCodeUnits } from "../../utils/order.js";
-import { normalizeRepositoryPath } from "../../utils/paths.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { normalizeRepositoryPath } from "src/utils/paths.js";
 import type { RepoMapRecordV1 } from "./types.js";
 
 export interface RepoMapGraphLimits {

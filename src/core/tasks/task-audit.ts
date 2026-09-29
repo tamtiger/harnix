@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises";
 
-import { inspectRequiredCheckEvidence, type RequiredCheckState } from "../status.js";
-import { canCompleteTask } from "../workflow/index.js";
-import { compareCodeUnits } from "../../utils/order.js";
-import { resolveSafeProjectPath } from "../../utils/paths.js";
+import { inspectRequiredCheckEvidence, type RequiredCheckState } from "src/core/status.js";
+import { canCompleteTask } from "src/core/workflow/index.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { selectLatestEvidence } from "./task.js";
 import type { AcceptanceCriterion, Evidence, TaskMode, TaskRecord, TaskStatus, WorkflowCheckpoint } from "./task.js";
 import { planHasChecklistItem } from "./workflow-helpers.js";

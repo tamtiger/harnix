@@ -1,6 +1,6 @@
-import { resolveActiveTask, type TaskRecord } from "../tasks/task.js";
-import { laterTimestamp } from "../tasks/workflow-helpers.js";
-import { resolveSafeHarnixPath } from "../../utils/paths.js";
+import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
+import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
 

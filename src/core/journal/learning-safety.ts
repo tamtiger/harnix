@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 
-import { sha256 } from "../../utils/hashing.js";
-import { compareCodeUnits } from "../../utils/order.js";
+import { sha256 } from "src/utils/hashing.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 export type LearningRiskKind = "command-like" | "credential-like" | "instruction-override" | "url-like";
 

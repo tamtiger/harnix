@@ -1,5 +1,5 @@
-import { renderSkill, workflowSkills } from "../templates/harnix/workflow.js";
-import { packageVersion } from "../version.js";
+import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
+import { packageVersion } from "src/version.js";
 
 export interface SkillCatalogItemV1 {
   name: string;

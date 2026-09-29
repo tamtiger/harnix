@@ -51,7 +51,7 @@ core -X-> Commander/Inquirer/platform templates
 ```
 
 - Directory layout: hidden workflow logic lives in `src/core/workflow/` split by action (`save`, `transition`, `evidence`, `schema`, `snapshot`, `preflight`, `finish`, `cancel`, `learn`, plus shared `obligations`, `migration`, `ready`, `save-files`); `src/commands/internal-workflow.ts` is a re-export-only adapter. `src/core/tasks/task.ts` is a barrel over `task-schema`, `task-validate*`, `task-migration`, `task-state`, `task-store` and `task-review`. Stack detection lives in `src/core/stack/`, and `src/utils` holds only shared helpers.
-- `test/unit/architecture.test.ts` enforces the import direction, the `node:fs`-free command list, the 300-code-line cap for `src/core/workflow` and `src/core/tasks`, and the adapter shape. Its exemptions and the lists in `eslint.config.mjs` may only shrink. `test/workflow/behavior-snapshot.golden.json` is the pure-refactor oracle: never regenerate it to make a refactor pass.
+- `test/workflow/architecture.test.ts` enforces the import direction, the `node:fs`-free command list, the 300-code-line cap for `src/core/workflow` and `src/core/tasks`, and the adapter shape. Its exemptions and the lists in `eslint.config.mjs` may only shrink. `test/workflow/behavior-snapshot.golden.json` is the pure-refactor oracle: never regenerate it to make a refactor pass.
 - Inject filesystem, clock, process runner, version lookup, network, and prompt dependencies where deterministic tests need control.
 - Use Node path/realpath APIs and executable-plus-argument arrays. Never concatenate untrusted shell input.
 - Normalize project paths to repository-relative POSIX form and global paths to a verified platform root; reject traversal, unsafe roots, and symlink/junction escape.
@@ -145,6 +145,10 @@ version:sync
 ### Formatting and lint
 
 Prettier (`printWidth` 120, `endOfLine: auto`) formats `src`, `test`, `scripts` and the root TypeScript/JS config files; `pnpm lint` runs `pnpm format:check` first and then ESLint (typescript-eslint `recommendedTypeChecked`, `no-floating-promises`, `complexity` 20, `max-lines` 300). Run `pnpm format` before finishing a change, and keep format-only changes separate from logic changes. The temporary exemption lists in `eslint.config.mjs` (owners: `restructure-code`, `standardize-tests`, `release-v2`) may only shrink; adding an entry needs a new recorded decision.
+
+### Tests, builders and coverage
+
+Test layout follows `test/README.md`: `test/unit` mirrors `src`, `test/integration/commands` mirrors `src/commands`, and `workflow`, `platform`, `safety`, `migration` are named after the contract or data they cover. Every test file stays at 400 lines or fewer, builds task and epic records through `test/support/builders.ts` (plus the area fixtures next to it) and has a spec for every source module; `test/unit/test-structure.test.ts` enforces this and a floor under the number of tests and assertions. `pnpm test` runs `vitest run --coverage`; the coverage floors in `vitest.config.ts` only ever rise, so raise them when coverage improves and never lower one to make a change pass. Imports use the `src/...` and `test/...` aliases (tsconfig `paths` and the vitest alias) in both `src` and `test`, and ESLint forbids parent-relative `../` imports. The remaining exemption lists in `eslint.config.mjs` (including the test override block) may only shrink.
 
 Do not weaken, bypass, or silently skip these gates. Filesystem tests use isolated temporary repositories **and injected disposable user homes**; they must not mutate real global configuration or call real install/network operations.
 

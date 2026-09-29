@@ -1,4 +1,4 @@
-import { normalizeRepositoryPath } from "../../utils/paths.js";
+import { normalizeRepositoryPath } from "src/utils/paths.js";
 
 export class TaskValidationError extends Error {
   override name = "TaskValidationError";

@@ -1,6 +1,6 @@
-import { resolveActiveTask } from "../tasks/task.js";
-import { computeInputDigest, type InputDigestSnapshot } from "../verification/input-digest.js";
-import { resolveSafeHarnixPath } from "../../utils/paths.js";
+import { resolveActiveTask } from "src/core/tasks/task.js";
+import { computeInputDigest, type InputDigestSnapshot } from "src/core/verification/input-digest.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 export async function snapshotWorkflow(root: string, checkId: string): Promise<InputDigestSnapshot> {
   const harnixRoot = await resolveSafeHarnixPath(root);

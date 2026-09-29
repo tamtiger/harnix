@@ -4,12 +4,12 @@ import type {
   JsonArrayMemberSelector,
   JsonValue,
   MarkerSelector,
-} from "../utils/global-managed-files.js";
+} from "src/utils/global-managed-files.js";
 import {
   HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
   HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
-} from "../templates/harnix/activation.js";
-import { globalSkillDesiredFiles } from "../templates/harnix/global-surface.js";
+} from "src/templates/harnix/activation.js";
+import { globalSkillDesiredFiles } from "src/templates/harnix/global-surface.js";
 
 const begin = "<!-- harnix:begin -->";
 const end = "<!-- harnix:end -->";

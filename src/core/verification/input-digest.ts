@@ -3,8 +3,8 @@ import { readFile } from "node:fs/promises";
 
 import { globby } from "globby";
 
-import { selectLatestEvidence, type TaskRecordV3, type ValidationCheckV3 } from "../tasks/task.js";
-import { normalizeRepositoryPath, resolveSafeProjectPath } from "../../utils/paths.js";
+import { selectLatestEvidence, type TaskRecordV3, type ValidationCheckV3 } from "src/core/tasks/task.js";
+import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 
 export interface InputDigestEntry {
   path: string;

@@ -48,24 +48,6 @@ const COMPLEX_SOURCE_FILES = [
 // Removed by `release-v2` (task 17), which reviews the release scripts.
 const RELEASE_SCRIPT_EXEMPTIONS = ["scripts/scan-release.mjs", "scripts/version-sync.mjs"];
 
-// Removed by `standardize-tests` (task 08), which splits large test files by module.
-const OVERSIZED_TEST_FILES = [
-  "test/integration/cli.test.ts",
-  "test/integration/doctor.test.ts",
-  "test/integration/global-lifecycle.test.ts",
-  "test/integration/status.test.ts",
-  "test/platform/setup.test.ts",
-  "test/unit/activation-instructions.test.ts",
-  "test/unit/context.test.ts",
-  "test/unit/file-lock.test.ts",
-  "test/unit/global-managed-files.test.ts",
-  "test/unit/task-state.test.ts",
-  "test/workflow/internal-context.test.ts",
-  "test/workflow/internal-workflow.test.ts",
-  "test/workflow/routing.test.ts",
-  "test/workflow/task-contract-v3.test.ts",
-];
-
 export default tseslint.config(
   {
     // docs/** may contain untracked, user-owned third-party material (e.g. vendored skill
@@ -90,6 +72,15 @@ export default tseslint.config(
       "@typescript-eslint/no-floating-promises": "error",
       complexity: ["error", 20],
       "max-lines": ["error", { max: 300, skipBlankLines: true, skipComments: true }],
+      // Imports that leave the current directory use the `src/...` and `test/...` aliases (tsconfig paths).
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            { group: ["../*"], message: "Use the src/... or test/... alias instead of a parent-relative path." },
+          ],
+        },
+      ],
     },
   },
   {
@@ -98,10 +89,12 @@ export default tseslint.config(
     extends: [tseslint.configs.disableTypeChecked],
   },
   {
-    // Tests inject async fakes, spy on unbound methods and read untyped JSON on purpose.
-    // `standardize-tests` (task 08) replaces these with typed builders and removes this block.
+    // Tests inject async fakes, spy on unbound methods and read untyped JSON on purpose. Unresolved after
+    // `standardize-tests` (task 08); `release-v2` (task 17) must remove this block or record a new decision.
+    // Test files are capped at 400 lines (enforced by test/unit/test-structure.test.ts), not 300.
     files: ["test/**/*.ts"],
     rules: {
+      "max-lines": ["error", { max: 400, skipBlankLines: true, skipComments: true }],
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
@@ -112,6 +105,5 @@ export default tseslint.config(
   { files: OVERSIZED_SOURCE_FILES, rules: { "max-lines": "off" } },
   { files: COMPLEX_SOURCE_FILES, rules: { complexity: "off" } },
   { files: RELEASE_SCRIPT_EXEMPTIONS, rules: { complexity: "off", "max-lines": "off" } },
-  { files: OVERSIZED_TEST_FILES, rules: { "max-lines": "off" } },
   prettier,
 );

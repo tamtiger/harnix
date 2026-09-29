@@ -1,11 +1,11 @@
 import { readFile } from "node:fs/promises";
 
-import type { HarnixConfigV2 } from "../config/config.js";
-import type { TaskRecord } from "../tasks/task.js";
-import { atomicWriteFile } from "../../utils/atomic-write.js";
-import { sha256 } from "../../utils/hashing.js";
-import { compareCodeUnits } from "../../utils/order.js";
-import { normalizeRepositoryPath, resolveSafeProjectPath } from "../../utils/paths.js";
+import type { HarnixConfigV2 } from "src/core/config/config.js";
+import type { TaskRecord } from "src/core/tasks/task.js";
+import { atomicWriteFile } from "src/utils/atomic-write.js";
+import { sha256 } from "src/utils/hashing.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { validateContextManifest, type ContextManifest } from "./context.js";
 
 export const CONTEXT_SELECTOR_VERSION = 1 as const;

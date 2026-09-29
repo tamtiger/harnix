@@ -1,6 +1,6 @@
-import { validateContextManifest } from "../context/context.js";
-import { validateTask, type Evidence, type TaskArtifacts, type TaskRecord } from "../tasks/task.js";
-import { assertExactFields, isRecord } from "../tasks/workflow-helpers.js";
+import { validateContextManifest } from "src/core/context/context.js";
+import { validateTask, type Evidence, type TaskArtifacts, type TaskRecord } from "src/core/tasks/task.js";
+import { assertExactFields, isRecord } from "src/core/tasks/workflow-helpers.js";
 
 export type WorkflowSaveArtifacts = Omit<TaskArtifacts, "contextSelection">;
 export interface WorkflowSaveEnvelope {

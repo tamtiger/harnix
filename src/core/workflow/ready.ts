@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
-import type { TaskArtifacts, TaskRecord } from "../tasks/task.js";
-import { isMissing, planHasChecklistItem } from "../tasks/workflow-helpers.js";
-import { resolveSafeProjectPath } from "../../utils/paths.js";
+import type { TaskArtifacts, TaskRecord } from "src/core/tasks/task.js";
+import { isMissing, planHasChecklistItem } from "src/core/tasks/workflow-helpers.js";
+import { resolveSafeProjectPath } from "src/utils/paths.js";
 
 /** Ready needs obligations and, for Full, free-form non-empty prd/plan with a checklist; there is no trace grammar. */
 export async function assertReadyRequirements(

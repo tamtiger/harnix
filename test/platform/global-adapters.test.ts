@@ -6,17 +6,17 @@ import {
   ANTIGRAVITY_GLOBAL_PLUGIN_MANIFEST,
   ANTIGRAVITY_GLOBAL_RULE,
   antigravityGlobalPluginDesiredFiles,
-} from "../../src/configurators/antigravity.js";
+} from "src/configurators/antigravity.js";
 import {
   KIRO_GLOBAL_CONTEXT_HOOK,
   KIRO_GLOBAL_CONTEXT_HOOK_COMMAND,
   KIRO_GLOBAL_STEERING,
   kiroGlobalDesiredFiles,
-} from "../../src/configurators/kiro.js";
-import { renderSkill, workflowSkills } from "../../src/templates/harnix/workflow.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "../../src/templates/harnix/activation.js";
-import { codexGlobalAgentsContent, createCodexGlobalSurfacePlan } from "../../src/configurators/codex.js";
-import type { DesiredGlobalManagedFile } from "../../src/utils/global-managed-files.js";
+} from "src/configurators/kiro.js";
+import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
+import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "src/templates/harnix/activation.js";
+import { codexGlobalAgentsContent, createCodexGlobalSurfacePlan } from "src/configurators/codex.js";
+import type { DesiredGlobalManagedFile } from "src/utils/global-managed-files.js";
 
 function fileContent(file: DesiredGlobalManagedFile | undefined): string {
   if (file?.kind !== "file") {

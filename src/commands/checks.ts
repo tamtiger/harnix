@@ -1,18 +1,18 @@
 import { Buffer } from "node:buffer";
 
-import { readConfig } from "../core/config/config.js";
-import type { EvidenceFindingV1, TaskMode, TaskStatus, WorkflowCheckpoint } from "../core/tasks/task.js";
+import { readConfig } from "src/core/config/config.js";
+import type { EvidenceFindingV1, TaskMode, TaskStatus, WorkflowCheckpoint } from "src/core/tasks/task.js";
 import {
   inspectRequiredChecks,
   type RequiredCheckInspection,
   type RequiredCheckReasonCode,
   type RequiredCheckState,
   type VerificationInputChange,
-} from "../core/verification/check-report.js";
-import { resolveActiveTask, TaskValidationError } from "../core/tasks/task.js";
-import { compareCodeUnits } from "../utils/order.js";
-import { findInitializedProject } from "../utils/project-discovery.js";
-import { resolveSafeHarnixPath } from "../utils/paths.js";
+} from "src/core/verification/check-report.js";
+import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { findInitializedProject } from "src/utils/project-discovery.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 const MAX_PUBLIC_RESULT_BYTES = 262_144;
 const MAX_CHANGES_PER_CHECK = 20;

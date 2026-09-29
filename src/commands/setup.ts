@@ -1,12 +1,12 @@
-import type { PlatformId } from "../core/config/config.js";
+import type { PlatformId } from "src/core/config/config.js";
 import { readdir } from "node:fs/promises";
 import { basename } from "node:path";
-import { antigravityGlobalPluginDesiredFiles } from "../configurators/antigravity.js";
-import { claudeGlobalDesiredFiles, matchesClaudeGlobalContextHookGroup } from "../configurators/claude.js";
-import { createCodexGlobalSurfacePlan, matchesCodexGlobalContextHookGroup } from "../configurators/codex.js";
-import { kiroGlobalDesiredFiles } from "../configurators/kiro.js";
-import { acquireHarnixFileLock, readHarnixFileLockSnapshot, type HarnixFileLockRecord } from "../utils/file-lock.js";
-import { compareCodeUnits } from "../utils/order.js";
+import { antigravityGlobalPluginDesiredFiles } from "src/configurators/antigravity.js";
+import { claudeGlobalDesiredFiles, matchesClaudeGlobalContextHookGroup } from "src/configurators/claude.js";
+import { createCodexGlobalSurfacePlan, matchesCodexGlobalContextHookGroup } from "src/configurators/codex.js";
+import { kiroGlobalDesiredFiles } from "src/configurators/kiro.js";
+import { acquireHarnixFileLock, readHarnixFileLockSnapshot, type HarnixFileLockRecord } from "src/utils/file-lock.js";
+import { compareCodeUnits } from "src/utils/order.js";
 import {
   globalManagedReconciliationOrderKey,
   reconcileGlobalManagedRoots,
@@ -15,15 +15,15 @@ import {
   type GlobalManagedReconcileResult,
   type GlobalPlatform,
   type ReconcileGlobalManagedFilesOptions,
-} from "../utils/global-managed-files.js";
+} from "src/utils/global-managed-files.js";
 import {
   resolveSelectedUserPlatformRoots,
   type HomeResolver,
   type SelectedUserPlatformRoots,
   type UserPathRoot,
-} from "../utils/user-paths.js";
-import { lookupHarnixLauncher } from "../utils/harnix-launcher.js";
-import { packageVersion } from "../version.js";
+} from "src/utils/user-paths.js";
+import { lookupHarnixLauncher } from "src/utils/harnix-launcher.js";
+import { packageVersion } from "src/version.js";
 
 export type GlobalSetupPlatform = PlatformId;
 export type GlobalIntegrationReadiness =

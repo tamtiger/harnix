@@ -1,9 +1,9 @@
-import { lstat, readFile, rm } from "../utils/fs-access.js";
+import { lstat, readFile, rm } from "src/utils/fs-access.js";
 
-import { sha256 } from "../utils/hashing.js";
-import { readManifest, writeManifest, type ManagedEntry, type ManagedManifest } from "../utils/managed-files.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../utils/paths.js";
-import { compareCodeUnits } from "../utils/order.js";
+import { sha256 } from "src/utils/hashing.js";
+import { readManifest, writeManifest, type ManagedEntry, type ManagedManifest } from "src/utils/managed-files.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 export interface CleanupLegacyProjectSurfacesOptions {
   root: string;

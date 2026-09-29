@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises";
 import { basename, dirname, extname } from "node:path";
 
-import { sha256 } from "../../utils/hashing.js";
+import { sha256 } from "src/utils/hashing.js";
 import type { RepoMapFileKind, RepoMapInventoryFile, RepoMapRecordV1 } from "./types.js";
-import { compareCodeUnits } from "../../utils/order.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 const languageByExtension: Readonly<Record<string, string>> = {
   cs: "csharp",

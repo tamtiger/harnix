@@ -1,6 +1,6 @@
-import { createTaskV3MigrationEvidence, type TaskRecord } from "../tasks/task.js";
-import { semanticJsonEqual } from "../tasks/workflow-helpers.js";
-import { compareCodeUnits } from "../../utils/order.js";
+import { createTaskV3MigrationEvidence, type TaskRecord } from "src/core/tasks/task.js";
+import { semanticJsonEqual } from "src/core/tasks/workflow-helpers.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 const MIGRATE_HINT =
   "Save it once as TaskRecord schema v3 (workflow --save) preserving its criteria, required checks and evidence, then continue.";

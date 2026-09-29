@@ -1,8 +1,8 @@
 import type { LearningCandidate } from "./learning.js";
 import { isPromotionEligible } from "./learning.js";
 import { analyzeLearningStatement, type LearningRiskKind } from "./learning-safety.js";
-import { compareCodeUnits } from "../../utils/order.js";
-import { normalizeRepositoryPath } from "../../utils/paths.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { normalizeRepositoryPath } from "src/utils/paths.js";
 
 export interface LearningReviewMetadataV1 {
   statementHash: string;

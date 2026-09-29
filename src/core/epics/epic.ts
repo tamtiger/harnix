@@ -1,9 +1,9 @@
 import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { isIsoTimestamp, isRecord } from "../tasks/task.js";
-import { loadTask } from "../tasks/task.js";
-import { formatDisplay } from "../../utils/clock.js";
-import { readProjectTimezone } from "../config/config.js";
+import { isIsoTimestamp, isRecord } from "src/core/tasks/task.js";
+import { loadTask } from "src/core/tasks/task.js";
+import { formatDisplay } from "src/utils/clock.js";
+import { readProjectTimezone } from "src/core/config/config.js";
 
 export class EpicValidationError extends Error {
   override name = "EpicValidationError";

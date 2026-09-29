@@ -4,7 +4,7 @@ import {
   evidenceV2Keys,
   taskRecordFieldManifest,
   validationCheckV2Keys,
-} from "../tasks/task.js";
+} from "src/core/tasks/task.js";
 
 export interface WorkflowEnvelopeSchemaV1 {
   generator: "harnix";

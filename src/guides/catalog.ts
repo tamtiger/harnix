@@ -1,7 +1,7 @@
-import type { GuideDescriptor, LanguageId, TechnologyId } from "../catalog/catalog.js";
-import { validateStackCatalog, stackCatalog } from "../catalog/catalog.js";
-import { matchesSafeGlob } from "../utils/safe-glob.js";
-import { compareCodeUnits } from "../utils/order.js";
+import type { GuideDescriptor, LanguageId, TechnologyId } from "src/catalog/catalog.js";
+import { validateStackCatalog, stackCatalog } from "src/catalog/catalog.js";
+import { matchesSafeGlob } from "src/utils/safe-glob.js";
+import { compareCodeUnits } from "src/utils/order.js";
 import commonEngineering from "./common.md";
 import csharpEngineering from "./languages/csharp.md";
 import goEngineering from "./languages/go.md";

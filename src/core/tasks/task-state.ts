@@ -1,4 +1,4 @@
-import { nowInstant } from "../../utils/clock.js";
+import { nowInstant } from "src/utils/clock.js";
 import { cancellableStatuses, transitions } from "./task-schema.js";
 import type {
   Evidence,

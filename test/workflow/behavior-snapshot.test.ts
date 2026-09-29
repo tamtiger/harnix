@@ -2,8 +2,8 @@ import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { detailPublicEpic, listPublicEpics } from "../../src/commands/epic.js";
-import { initializeProject } from "../../src/commands/init.js";
+import { detailPublicEpic, listPublicEpics } from "src/commands/epic.js";
+import { initializeProject } from "src/commands/init.js";
 import {
   appendEvidenceWorkflow,
   cancelWorkflow,
@@ -14,12 +14,12 @@ import {
   snapshotWorkflow,
   transitionWorkflow,
   workflowEnvelopeSchema,
-} from "../../src/commands/internal-workflow.js";
-import { inspectProjectStatus } from "../../src/commands/status.js";
-import { listProjectTasks } from "../../src/commands/tasks.js";
-import { readConfig, writeConfig } from "../../src/core/config/config.js";
-import type { TaskRecord, TaskRecordV3 } from "../../src/core/tasks/task.js";
-import { useTemporaryRepositories } from "../support/temporary-repository.js";
+} from "src/commands/internal-workflow.js";
+import { inspectProjectStatus } from "src/commands/status.js";
+import { listProjectTasks } from "src/commands/tasks.js";
+import { readConfig, writeConfig } from "src/core/config/config.js";
+import type { TaskRecord, TaskRecordV3 } from "src/core/tasks/task.js";
+import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 /**
  * Pure-refactor guard. The golden file was generated from the code as it stood before the

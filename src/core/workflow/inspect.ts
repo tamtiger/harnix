@@ -1,6 +1,6 @@
-import type { ContextDrift } from "../context/context.js";
-import { resolveActiveTask, type TaskRecord } from "../tasks/task.js";
-import { resolveSafeHarnixPath } from "../../utils/paths.js";
+import type { ContextDrift } from "src/core/context/context.js";
+import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { taskContextDrift } from "./context.js";
 
 /** Hidden transport for agents; it preserves TaskRecord state and is deliberately JSON-only. */

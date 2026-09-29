@@ -3,7 +3,7 @@ import { lstat, mkdir, readFile, readdir, rm, rmdir, writeFile } from "node:fs/p
 import { dirname, isAbsolute, join, resolve, win32 } from "node:path";
 
 import { formatInstant } from "./clock.js";
-import { packageVersion } from "../version.js";
+import { packageVersion } from "src/version.js";
 
 export interface HarnixFileLockRecord {
   generator: "harnix";

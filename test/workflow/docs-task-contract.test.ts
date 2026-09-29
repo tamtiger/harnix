@@ -2,8 +2,8 @@ import { readdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { workflowEnvelopeSchema } from "../../src/commands/internal-workflow.js";
-import { workflowTemplate } from "../../src/templates/harnix/workflow.js";
+import { workflowEnvelopeSchema } from "src/commands/internal-workflow.js";
+import { workflowTemplate } from "src/templates/harnix/workflow.js";
 
 const root = resolve(".");
 const v3Marker = /schema v3|schemaVersion:? 3|TaskRecordV3/iu;
@@ -121,5 +121,20 @@ describe("task contract documentation parity", () => {
       expect(text, file).toContain("architecture.test.ts");
     }
     expect(await read("docs/OVERHAUL_DECISIONS.md")).toContain("| D12 |");
+  });
+
+  it("documents the test layout, aliases, coverage floor and decision D13", async () => {
+    const agents = await read("AGENTS.md");
+    const testReadme = await read("test/README.md");
+    const packageJson = JSON.parse(await read("package.json")) as { scripts: Record<string, string> };
+
+    expect(agents).toContain("coverage");
+    expect(agents).toContain("test/README.md");
+    expect(testReadme).toContain("`src/...`");
+    expect(testReadme).toContain("`test/...`");
+    expect(testReadme).toContain("coverage");
+    expect(await read("docs/OVERHAUL_DECISIONS.md")).toContain("| D13 |");
+    expect(packageJson.scripts.test).toContain("--coverage");
+    expect(await read("vitest.config.ts")).toContain("thresholds");
   });
 });

@@ -7,10 +7,10 @@ import {
   CODEX_GLOBAL_HOOK_SELECTOR,
   createCodexGlobalSurfacePlan,
   matchesCodexGlobalContextHookGroup,
-} from "../../src/configurators/codex.js";
-import { reconcileGlobalManagedFiles } from "../../src/utils/global-managed-files.js";
-import { resolveUserPlatformRoots } from "../../src/utils/user-paths.js";
-import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
+} from "src/configurators/codex.js";
+import { reconcileGlobalManagedFiles } from "src/utils/global-managed-files.js";
+import { resolveUserPlatformRoots } from "src/utils/user-paths.js";
+import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 
 const temporaryUserHome = useTemporaryUserHomes("harnix-codex-global-");
 

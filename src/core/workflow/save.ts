@@ -1,7 +1,7 @@
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { createContextSelectionSnapshot } from "../context/selection-freshness.js";
-import { loadEpicRecord, renderEpicMarkdown, upsertEpic, validateEpic, type EpicRecord } from "../epics/epic.js";
+import { createContextSelectionSnapshot } from "src/core/context/selection-freshness.js";
+import { loadEpicRecord, renderEpicMarkdown, upsertEpic, validateEpic, type EpicRecord } from "src/core/epics/epic.js";
 import {
   loadTask,
   resolveActiveTask,
@@ -13,18 +13,18 @@ import {
   type Evidence,
   type TaskArtifacts,
   type TaskRecord,
-} from "../tasks/task.js";
+} from "src/core/tasks/task.js";
 import {
   assertLegalTransition,
   isMissing,
   isRecord,
   semanticJsonEqual,
   semanticTaskEqual,
-} from "../tasks/workflow-helpers.js";
-import { assertNewEvidenceDigests } from "../verification/input-digest.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "../../utils/paths.js";
-import { acquireHarnixFileLock } from "../../utils/file-lock.js";
-import { sha256 } from "../../utils/hashing.js";
+} from "src/core/tasks/workflow-helpers.js";
+import { assertNewEvidenceDigests } from "src/core/verification/input-digest.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { acquireHarnixFileLock } from "src/utils/file-lock.js";
+import { sha256 } from "src/utils/hashing.js";
 import { contextSelectionInput } from "./context.js";
 import { validateWorkflowSaveEnvelope, type WorkflowSaveArtifacts, type WorkflowSaveEnvelope } from "./envelope.js";
 import { assertSchemaEvolution } from "./migration.js";

@@ -2,16 +2,16 @@ import { access, readFile, writeFile } from "node:fs/promises";
 import { Buffer } from "node:buffer";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { initializeProject } from "../../src/commands/init.js";
-import { updateProject } from "../../src/commands/update.js";
+import { initializeProject } from "src/commands/init.js";
+import { updateProject } from "src/commands/update.js";
 import {
   HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
   HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
-} from "../../src/templates/harnix/activation.js";
-import { renderAgentsTemplate } from "../../src/templates/harnix/agents.js";
-import { workflowSkills, workflowTemplate } from "../../src/templates/harnix/workflow.js";
-import { packageVersion } from "../../src/version.js";
-import { useTemporaryRepositories } from "../support/temporary-repository.js";
+} from "src/templates/harnix/activation.js";
+import { renderAgentsTemplate } from "src/templates/harnix/agents.js";
+import { workflowSkills, workflowTemplate } from "src/templates/harnix/workflow.js";
+import { packageVersion } from "src/version.js";
+import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
 const vietnameseTaskPolicy =

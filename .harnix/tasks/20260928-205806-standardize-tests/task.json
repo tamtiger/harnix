@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205806-standardize-tests",
   "title": "[08] Chuẩn hóa cấu trúc và chất lượng test",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Hiện có 82 file test chia 7 suite (unit 38, integration 22, workflow 11, safety 5, platform 4, migration 2, support 2); file lớn nhất test/workflow/internal-workflow.test.ts 1.148 dòng; 6 module không có test trực tiếp (internal-context-cli.ts, repo-map-internal.ts, workflow-helpers.ts, global-surface.ts, global-managed-error.ts, global-managed-markers.ts); chưa đo coverage. Chuẩn hóa: cấu trúc thư mục test phản chiếu src; tên file <module>.test.ts; định nghĩa rõ mục đích từng suite (unit, integration, workflow, platform, safety); giữ suite migration làm suite tương thích dữ liệu cũ (task v1/v2, context.json, .harnix/roadmaps chuyển sang .harnix/epics) thay vì xoá, để script bắt buộc test:migration vẫn có nghĩa; tách test lớn theo module mới của restructure-code; builder dùng chung trong test/support cho TaskRecord, EpicRecord, repo tạm, home tạm, clock và múi giờ cố định; bổ sung test cho module chưa có; bật coverage bằng @vitest/coverage-v8 với ngưỡng bằng mức đo được hiện tại để chặn giảm.",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -18,61 +18,133 @@
     {
       "id": "ac-test-layout",
       "text": "Thư mục test phản chiếu src và mọi file theo quy ước <module>.test.ts; có tài liệu ngắn mô tả mục đích từng suite.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-test-structure"
+      ]
     },
     {
       "id": "ac-split-large-tests",
       "text": "Không file test nào > 400 dòng.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-test-structure"
+      ]
     },
     {
       "id": "ac-shared-builders",
       "text": "Builder dùng chung cho TaskRecord, EpicRecord, repo tạm, home tạm, clock và múi giờ; không còn fixture dựng tay lặp lại giữa các file.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-test-structure"
+      ]
     },
     {
       "id": "ac-untested-modules",
       "text": "Mọi module trong src có ít nhất một test trực tiếp hoặc được ghi rõ lý do.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-test-structure"
+      ]
     },
     {
       "id": "ac-coverage-floor",
       "text": "pnpm test chạy coverage với ngưỡng bằng mức đo hiện tại; ngưỡng được ghi vào vitest.config.ts.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-coverage"
+      ]
     },
     {
       "id": "ac-no-weakening",
       "text": "Số assertion và hành vi được kiểm không giảm; toàn bộ suite pass.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-test-structure",
+        "ev-check-suite"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-sync",
+        "ev-check-suite"
+      ]
     }
   ],
   "relevantPaths": [
+    "package.json",
     "test/**",
-    "vitest.config.ts",
-    "package.json"
+    "vitest.config.ts"
   ],
   "relevantSpecs": [
+    "AGENTS.md",
     "docs/HARNIX_PRD.md",
     "docs/HARNIX_WORKFLOW.md",
-    "docs/IMPLEMENTATION_PLAN.md"
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/OVERHAUL_DECISIONS.md"
   ],
   "validationPlan": [
     {
-      "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "id": "check-coverage",
+      "description": "Toàn bộ test chạy với coverage và đạt ngưỡng trong vitest.config.ts",
       "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run --coverage",
+      "criterionIds": [
+        "ac-coverage-floor"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "check-docs-sync",
+      "description": "Test parity docs pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts test/workflow/templates.test.ts test/workflow/skill-sources.test.ts test/workflow/self-host.test.ts",
+      "criterionIds": [
+        "ac-docs-sync"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/README.md",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-test-structure",
+      "description": "Test cấu trúc: bố cục, cỡ file, builder, module có test, baseline không giảm",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/test-structure.test.ts",
+      "criterionIds": [
+        "ac-no-weakening",
+        "ac-shared-builders",
+        "ac-split-large-tests",
+        "ac-test-layout",
+        "ac-untested-modules"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass",
+      "scope": "full",
       "required": true,
       "command": "pnpm lint && pnpm typecheck && pnpm test",
       "criterionIds": [
@@ -85,22 +157,98 @@
         "ac-untested-modules"
       ],
       "inputs": [
-        "@task-contract",
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "README.md",
         "docs/**",
+        "eslint.config.mjs",
+        "package.json",
+        "scripts/**",
         "src/**",
-        "test/**"
+        "test/**",
+        "vitest.config.ts"
       ]
     }
   ],
   "decisions": [
     {
-      "id": "d-draft-checks",
-      "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
-      "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+      "id": "d-install-approved",
+      "text": "@vitest/coverage-v8 3.2.7 được cài bằng pnpm add -D sau khi người dùng cho phép rõ ràng ngày 2026-09-29.",
+      "rationale": "Task cấm tự cài package vì cần mạng; đã hỏi và được duyệt."
+    },
+    {
+      "id": "d-layout",
+      "text": "test/unit phản chiếu src; test/integration/commands phản chiếu src/commands; các suite còn lại đặt tên theo tính năng và được mô tả trong test/README.md.",
+      "rationale": "Phản chiếu tuyệt đối mọi suite làm test kịch bản (workflow, platform, safety) mất ý nghĩa, trong khi unit và command test vốn gắn với đúng một module."
+    },
+    {
+      "id": "d-baseline",
+      "text": "Baseline không được giảm: 689 test chạy (thêm 1 skipped) và 2.338 lệnh expect đo trước task.",
+      "rationale": "Chặn việc tách hay gộp test âm thầm làm yếu kiểm chứng; số này được kiểm bằng test cấu trúc."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-09-29T13:12:25.354+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205806-standardize-tests/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-29T13:12:26.717+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung check tập trung cho từng tiêu chí sau khi đo baseline test và coverage.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205806-standardize-tests/task.json"
+      ]
+    },
+    {
+      "inputDigest": "7b5682b4370f715563163c66344657099e5a8d447216fd6feda60bdf08cbd0a3",
+      "recordedAt": "2026-09-29T13:41:34.612+07:00",
+      "artifactPaths": [],
+      "summary": "Check check-coverage passed (exit 0): Functions    : 98.18% ( 758/772 ) | Lines        : 93.19% ( 12141/13027 ) | ========================",
+      "id": "ev-check-coverage",
+      "checkId": "check-coverage",
+      "result": "pass",
+      "exitCode": 0
+    },
+    {
+      "inputDigest": "69da56783ff063e01917c4929a375f787c3ede0a2016921e4be0f960d91b4ecd",
+      "recordedAt": "2026-09-29T13:41:35.516+07:00",
+      "artifactPaths": [],
+      "summary": "Check check-docs-sync passed (exit 0):    Start at  13:40:37 |    Duration  1.31s (transform 586ms, setup 0ms, collect 1.73s, tests 257ms, ",
+      "id": "ev-check-docs-sync",
+      "checkId": "check-docs-sync",
+      "result": "pass",
+      "exitCode": 0
+    },
+    {
+      "inputDigest": "dc6067b891534e90fa539c807e52b019a225cc062d887d47c5fd964175e164c5",
+      "recordedAt": "2026-09-29T13:41:36.532+07:00",
+      "artifactPaths": [],
+      "summary": "Check check-test-structure passed (exit 0):    Start at  13:40:40 |    Duration  612ms (transform 59ms, setup 0ms, collect 62ms, tests 141ms, en",
+      "id": "ev-check-test-structure",
+      "checkId": "check-test-structure",
+      "result": "pass",
+      "exitCode": 0
+    },
+    {
+      "inputDigest": "1c3e86f1127898e92840b0c1c91a94ddb4b3d4eb903b91c8027619b0360d20af",
+      "recordedAt": "2026-09-29T13:41:37.701+07:00",
+      "artifactPaths": [],
+      "summary": "Check check-suite passed (exit 0): Functions    : 98.18% ( 758/772 ) | Lines        : 93.19% ( 12141/13027 ) | ========================",
+      "id": "ev-check-suite",
+      "checkId": "check-suite",
+      "result": "pass",
+      "exitCode": 0
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
   "createdAt": "2026-09-28T20:58:06.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "updatedAt": "2026-09-29T13:41:40.996+07:00",
+  "completedAt": "2026-09-29T13:41:40.996+07:00"
 }

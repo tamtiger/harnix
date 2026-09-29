@@ -1,8 +1,8 @@
 import { symlink } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
-import { UnsafeUserPathError, resolveSafeUserPath, resolveUserPlatformRoots } from "../../src/utils/user-paths.js";
-import { useTemporaryUserHomes } from "../support/temporary-user-home.js";
+import { UnsafeUserPathError, resolveSafeUserPath, resolveUserPlatformRoots } from "src/utils/user-paths.js";
+import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 
 const temporaryUserHome = useTemporaryUserHomes("harnix-user-path-safety-");
 

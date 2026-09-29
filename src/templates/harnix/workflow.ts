@@ -94,4 +94,4 @@ Release preparation—required version, changelog, generated-source, or release 
 When the user explicitly abandons an unfinished task, use cancellation instead of weakening gates or claiming completion. Ambiguous wording such as “complete” must be clarified before cancellation. \`workflow --cancel\` does not run verification, mutate criteria/evidence, or create a completion journal; it persists the reason/authority, terminal state, cancellation journal, and matching-pointer cleanup in recoverable order. Before any commit, show the proposed changes and commit message, then wait for explicit user approval. Do not commit, branch, push, merge, publish, or create a PR automatically.
 `;
 
-export { renderSkill, workflowSkills, type SkillTemplate } from "../../skills/catalog.js";
+export { renderSkill, workflowSkills, type SkillTemplate } from "src/skills/catalog.js";

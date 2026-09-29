@@ -1,17 +1,17 @@
-import { readConfig } from "../core/config/config.js";
+import { readConfig } from "src/core/config/config.js";
 import {
   createActiveStatus,
   createNoActiveStatus,
   inspectRequiredCheckEvidence,
   type HarnixStatusResultV1,
-} from "../core/status.js";
-import { resolveActiveTask, TaskValidationError } from "../core/tasks/task.js";
-import { taskContextDrift } from "../core/workflow/index.js";
-import { findInitializedProject } from "../utils/project-discovery.js";
-import { resolveSafeHarnixPath } from "../utils/paths.js";
+} from "src/core/status.js";
+import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
+import { taskContextDrift } from "src/core/workflow/index.js";
+import { findInitializedProject } from "src/utils/project-discovery.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { reportProjectChecks, type ChecksReportResultV1 } from "./checks.js";
 import { auditProjectTask } from "./audit.js";
-import type { TaskAuditResultV1 } from "../core/tasks/task-audit.js";
+import type { TaskAuditResultV1 } from "src/core/tasks/task-audit.js";
 
 export async function inspectProjectStatus(cwd: string, now = Date.now()): Promise<HarnixStatusResultV1> {
   const project = await findInitializedProject({ cwd });
