@@ -83,6 +83,23 @@ describe("TaskRecord schema v3", () => {
     expect(() => validateTask(v3({ validationPlan: plan }))).toThrow(TaskValidationError);
   });
 
+  it("rejects invalid scope with an actionable error message naming allowed values", () => {
+    const plan = [
+      {
+        id: "check-one",
+        description: "Suite tests",
+        scope: "suite",
+        required: true,
+        command: "dotnet test",
+        criterionIds: ["ac-one"],
+        inputs: ["src/**"],
+      },
+    ];
+    expect(() => validateTask(v3({ validationPlan: plan }))).toThrow(
+      /Validation plan check 'check-one' has invalid scope 'suite'; expected 'focused' or 'full'/u,
+    );
+  });
+
   it("requires a required check to declare criteria and at least one input", () => {
     const noInputs = [
       {

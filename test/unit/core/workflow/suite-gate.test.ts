@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { assertSuiteGateFinishing, assertSuiteGateReady } from "src/core/workflow/suite-gate.js";
+import { assertSuiteGateFinishing, assertSuiteGateReady, coversSourceAndTest } from "src/core/workflow/suite-gate.js";
 import { buildTaskV3 } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
@@ -15,6 +15,28 @@ async function writeFixture(root: string, path: string, content = ""): Promise<v
 }
 
 describe("Suite Gate (ac-suite-gate)", () => {
+  it("coversSourceAndTest recognizes root, nested, monorepo, and normalized paths", () => {
+    // Root level
+    expect(coversSourceAndTest(["src/**", "test/**"])).toBe(true);
+    expect(coversSourceAndTest(["lib/**", "spec/**"])).toBe(true);
+    expect(coversSourceAndTest(["app/**", "tests/**"])).toBe(true);
+    expect(coversSourceAndTest(["**"])).toBe(true);
+
+    // Monorepo / subproject nested paths
+    expect(coversSourceAndTest(["frt-paymenthub/src/**", "frt-paymenthub/test/**"])).toBe(true);
+    expect(coversSourceAndTest(["packages/core/src/index.ts", "packages/core/test/index.test.ts"])).toBe(true);
+    expect(coversSourceAndTest(["frt-paymenthub\\src\\**", "frt-paymenthub\\test\\**"])).toBe(true);
+    expect(coversSourceAndTest(["./src/**", "./test/**"])).toBe(true);
+
+    // Incomplete inputs
+    expect(coversSourceAndTest(["frt-paymenthub/src/**"])).toBe(false);
+    expect(coversSourceAndTest(["frt-paymenthub/test/**"])).toBe(false);
+    expect(coversSourceAndTest(["src/**"])).toBe(false);
+    expect(coversSourceAndTest(["test/**"])).toBe(false);
+    expect(coversSourceAndTest(undefined)).toBe(false);
+    expect(coversSourceAndTest([])).toBe(false);
+  });
+
   it("ready accepts task with project-level suite check covering full source and test inputs", async () => {
     const root = await createFixture();
     await writeFixture(
@@ -38,6 +60,35 @@ describe("Suite Gate (ac-suite-gate)", () => {
           command: "pnpm test",
           criterionIds: ["ac-1"],
           inputs: ["src/**", "test/**"],
+        },
+      ],
+    });
+
+    await expect(assertSuiteGateReady(root, task)).resolves.not.toThrow();
+  });
+
+  it("ready accepts task with monorepo nested source and test paths", async () => {
+    const root = await createFixture();
+    await writeFixture(
+      root,
+      "package.json",
+      JSON.stringify({
+        scripts: { test: "dotnet test" },
+      }),
+    );
+    await writeFixture(root, "frt-paymenthub/src/Adapter.cs", "");
+    await writeFixture(root, "frt-paymenthub/test/AdapterTests.cs", "");
+
+    const task = buildTaskV3({
+      validationPlan: [
+        {
+          id: "check-monorepo-suite",
+          description: "Monorepo suite check",
+          scope: "full",
+          required: true,
+          command: "dotnet test frt-paymenthub/test/FRT.PaymentHub.Tests",
+          criterionIds: ["ac-1"],
+          inputs: ["frt-paymenthub/src/**", "frt-paymenthub/test/**"],
         },
       ],
     });

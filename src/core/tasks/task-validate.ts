@@ -99,20 +99,20 @@ function assertArraysAndTimestamps(value: TaskObject): void {
     throw new TaskValidationError("Task path and goal arrays are invalid.");
 }
 
-function isValidationCheckShape(item: unknown): boolean {
-  return (
-    isRecord(item) &&
-    validId(item.id) &&
-    typeof item.description === "string" &&
-    ["focused", "full"].includes(String(item.scope)) &&
-    typeof item.required === "boolean" &&
-    (item.command === undefined || typeof item.command === "string")
-  );
-}
-
 function assertValidationPlan(value: TaskObject): void {
-  if (!(value.validationPlan as unknown[]).every(isValidationCheckShape))
-    throw new TaskValidationError("Validation plan is invalid.");
+  for (const item of value.validationPlan as unknown[]) {
+    if (!isRecord(item) || !validId(item.id) || typeof item.description !== "string") {
+      throw new TaskValidationError("Validation plan is invalid.");
+    }
+    if (!["focused", "full"].includes(String(item.scope))) {
+      throw new TaskValidationError(
+        `Validation plan check '${String(item.id)}' has invalid scope '${String(item.scope)}'; expected 'focused' or 'full'.`,
+      );
+    }
+    if (typeof item.required !== "boolean" || (item.command !== undefined && typeof item.command !== "string")) {
+      throw new TaskValidationError("Validation plan is invalid.");
+    }
+  }
   for (const item of value.validationPlan as Record<string, unknown>[])
     assertExactKeys(
       item,

@@ -3,12 +3,17 @@ import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { buildVerifyPlan } from "src/core/stack/verify-plan.js";
 
 const SOURCE_PREFIXES = ["src/", "src/**", "lib/", "app/", "pkg/", "cmd/", "internal/"] as const;
-const TEST_PREFIXES = ["test/", "test/**", "tests/", "tests/**", "spec/", "spec/**"] as const;
+const TEST_PREFIXES = ["test/", "test/**", "tests/", "tests/**", "spec/", "spec/**", "specs/", "specs/**"] as const;
 const WILDCARD_INPUTS = new Set([".", "**", "**/*", "*"]);
 
 function matchesAnyPrefix(input: string, prefixes: readonly string[]): boolean {
-  const lower = input.toLowerCase();
-  return prefixes.some((prefix) => lower.startsWith(prefix));
+  const normalized = input.toLowerCase().replace(/\\/g, "/").replace(/^\.\//, "");
+  return prefixes.some(
+    (prefix) =>
+      normalized.startsWith(prefix) ||
+      normalized.includes("/" + prefix) ||
+      (prefix.endsWith("/") && (normalized === prefix.slice(0, -1) || normalized.endsWith("/" + prefix.slice(0, -1)))),
+  );
 }
 
 export function coversSourceAndTest(inputs: readonly string[] | string[] | undefined): boolean {
@@ -36,7 +41,9 @@ export async function assertSuiteGateReady(projectRoot: string, task: TaskRecord
   }
   const suiteCheck = findProjectSuiteCheck(task);
   if (!suiteCheck) {
-    throw new Error("Workflow ready requires a project-level suite check covering full source and test inputs.");
+    throw new Error(
+      "Workflow ready requires a project-level suite check covering full source and test inputs (with scope: 'full' or 'focused').",
+    );
   }
 }
 
