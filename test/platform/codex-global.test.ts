@@ -39,12 +39,20 @@ describe("Codex global surface plan", () => {
   it("renders only root-relative global skills plus conditional AGENTS and the current nested hook shape", () => {
     const plan = createCodexGlobalSurfacePlan();
 
-    expect(plan.skills).toHaveLength(6);
+    expect(plan.skills).toHaveLength(13);
     expect(
-      plan.skills.every((file) => file.kind === "file" && /^skills\/harnix-[a-z-]+\/SKILL\.md$/u.test(file.path)),
+      plan.skills.every(
+        (file) =>
+          file.kind === "file" &&
+          /^skills\/harnix-[a-z-]+(?:\/SKILL\.md|\/references\/[a-z0-9-]+\.md)$/u.test(file.path),
+      ),
     ).toBe(true);
     expect(plan.skills.every((file) => file.path.startsWith(".") === false)).toBe(true);
-    expect(plan.skills.every((file) => file.kind !== "file" || file.content.includes("name: harnix-"))).toBe(true);
+    expect(
+      plan.skills
+        .filter((file) => file.path.endsWith("SKILL.md"))
+        .every((file) => file.kind !== "file" || file.content.includes("name: harnix-")),
+    ).toBe(true);
     expect(plan.config.map((file) => file.path)).toEqual(["AGENTS.md", "config.toml"]);
 
     const agents = plan.config.find((file) => file.path === "AGENTS.md");

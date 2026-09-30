@@ -1,0 +1,183 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20260930-200015-install-skill-references",
+  "title": "Cài đặt reference files trực tiếp vào global skill setup và cập nhật đường dẫn tương đối",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cài đặt các file reference cùng thư mục kỹ năng tại skills/<name>/references/<topic>.md qua setup global, cập nhật SKILL.md trỏ đường dẫn tương đối, và bổ sung 1 dòng bảo vệ contract criterion bất biến vào workflow.md",
+  "nonGoals": [
+    "Không đưa nội dung reference trực tiếp vào SKILL.md chính (giữ ngân sách token)",
+    "Không bỏ CLI command harnix skill --reference (giữ tương thích ngược)"
+  ],
+  "relevantPaths": [
+    "src/templates/harnix/global-surface.ts",
+    "src/templates/harnix/workflow.md",
+    "src/skills/harnix-plan/SKILL.md",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-verify/SKILL.md",
+    "test/unit/templates/harnix/global-surface.test.ts",
+    "test/workflow/instruction-budget.test.ts"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-install-references",
+      "text": "globalSkillDesiredFiles xuất ra cả 6 SKILL.md và 7 reference files tại skills/<name>/references/<topic>.md với sourceId phân biệt",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-global-surface-1"
+      ]
+    },
+    {
+      "id": "ac-skill-relative-paths",
+      "text": "Các file SKILL.md (plan, implement, verify) trỏ reference bằng đường dẫn tương đối ./references/<topic>.md",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-instruction-budget-2"
+      ]
+    },
+    {
+      "id": "ac-workflow-contract-immutability",
+      "text": "workflow.md template chứa quy tắc bất biến của contract criterion mapped by evidence",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-instruction-budget-2"
+      ]
+    },
+    {
+      "id": "ac-suite-pass",
+      "text": "Toàn bộ test suite unit, workflow, platform và instruction-budget pass 100%",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-gate-3"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-global-surface",
+      "command": "pnpm vitest run test/unit/templates/harnix/global-surface.test.ts",
+      "criterionIds": [
+        "ac-install-references"
+      ],
+      "description": "Kiểm tra globalSkillDesiredFiles xuất đủ skill và reference files",
+      "inputs": [
+        "src/templates/harnix/global-surface.ts",
+        "test/unit/templates/harnix/global-surface.test.ts"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "check-instruction-budget",
+      "command": "pnpm vitest run test/workflow/instruction-budget.test.ts test/workflow/skill-sources.test.ts",
+      "criterionIds": [
+        "ac-skill-relative-paths",
+        "ac-workflow-contract-immutability"
+      ],
+      "description": "Kiểm tra ngân sách token và source integrity của skills",
+      "inputs": [
+        "src/skills/**",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/**"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "check-suite-gate",
+      "command": "pnpm vitest run test/unit test/workflow test/platform",
+      "criterionIds": [
+        "ac-suite-pass"
+      ],
+      "description": "Suite gate kiểm tra toàn bộ unit, workflow và platform tests",
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "required": true,
+      "scope": "full"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-global-surface-1",
+      "checkId": "check-global-surface",
+      "recordedAt": "2026-09-30T20:07:05.892+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4cf9112b12e77acd3dfa004407456c8461ad8b90bc42b36d7d9d33604b3bbed8"
+    },
+    {
+      "id": "ev-check-instruction-budget-1",
+      "checkId": "check-instruction-budget",
+      "recordedAt": "2026-09-30T20:07:26.532+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "563ab8fd71f827a69d163fcc642c5d9ebbb06ee7fe5c4b21de43a823f13f693e"
+    },
+    {
+      "id": "ev-check-suite-gate-1",
+      "checkId": "check-suite-gate",
+      "recordedAt": "2026-09-30T20:08:04.062+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "e2563b061b890926daa0049eb700fdf29425f9d42ec4ed923581261048b741ad"
+    },
+    {
+      "id": "ev-check-suite-gate-2",
+      "checkId": "check-suite-gate",
+      "recordedAt": "2026-09-30T20:09:29.630+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "d4fcc925f427ec19b7e8372f77c5e969b4577466571f7e0dace3d4b37b0fc47d"
+    },
+    {
+      "id": "ev-check-suite-gate-3",
+      "checkId": "check-suite-gate",
+      "recordedAt": "2026-09-30T20:11:00.185+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d492603467c8942166f3764bc259071a2ac7481f523aab8ce817fe3640eed2d4"
+    },
+    {
+      "id": "ev-check-instruction-budget-2",
+      "checkId": "check-instruction-budget",
+      "recordedAt": "2026-09-30T20:11:32.857+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f6bf084f83418a19fc60fcf47ac830dc83b9f08a2251486826498c3b52350faa"
+    }
+  ],
+  "createdAt": "2026-09-30T20:00:15.529+07:00",
+  "updatedAt": "2026-09-30T20:11:43.461+07:00",
+  "decisions": [
+    {
+      "id": "dec-install-references",
+      "text": "Install reference files directly at skills/<name>/references/<topic>.md alongside SKILL.md so agents can read them locally via relative paths without CLI overhead",
+      "rationale": "Reduces reference adoption risk where coding agents skip CLI discovery"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-uninstall-empty-dirs",
+      "text": "Deepest-first cleanup is required when uninstalling hierarchical skill directories to avoid leaving parent folders non-empty",
+      "severity": "medium"
+    }
+  ],
+  "completedAt": "2026-09-30T20:11:43.461+07:00"
+}

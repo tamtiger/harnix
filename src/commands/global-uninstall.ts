@@ -134,7 +134,17 @@ async function cleanupEmptyOwnedDirectories(targets: readonly GlobalUninstallTar
 }
 
 function ownedSkillUnitDirectories(entries: readonly GlobalManagedEntry[]): string[] {
-  return uniqueDeepestFirst(entries.map(ownedSkillUnitDirectory).filter((path): path is string => path !== undefined));
+  const directories: string[] = [];
+  for (const entry of entries) {
+    if (entry.kind !== "file") continue;
+    const segments = entry.path.split("/");
+    if (segments[0] === "skills" && segments[1]?.startsWith("harnix-") && segments.length >= 3) {
+      for (let length = 2; length < segments.length; length += 1) {
+        directories.push(segments.slice(0, length).join("/"));
+      }
+    }
+  }
+  return uniqueDeepestFirst(directories);
 }
 
 function ownedPluginDirectories(entries: readonly GlobalManagedEntry[]): string[] {
@@ -153,20 +163,6 @@ function uniqueDeepestFirst(paths: readonly string[]): string[] {
     const depth = right.split("/").length - left.split("/").length;
     return depth === 0 ? compareCodeUnits(right, left) : depth;
   });
-}
-
-function ownedSkillUnitDirectory(entry: GlobalManagedEntry): string | undefined {
-  if (entry.kind !== "file") return undefined;
-  const segments = entry.path.split("/");
-  if (
-    segments.length !== 3 ||
-    segments[0] !== "skills" ||
-    !segments[1]?.startsWith("harnix-") ||
-    segments[2] !== "SKILL.md"
-  ) {
-    return undefined;
-  }
-  return `${segments[0]}/${segments[1]}`;
 }
 
 function parentRelativePath(path: string): string | undefined {

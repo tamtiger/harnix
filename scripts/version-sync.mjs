@@ -3,7 +3,7 @@ import { chmod, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/p
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const semverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u;
+const semverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z.-]+))?$/u;
 const allowedKinds = new Set(["added", "changed", "fixed"]);
 const kindTitles = {
   added: "Added",
@@ -104,12 +104,46 @@ export async function syncVersion({
 function parseVersion(value) {
   if (typeof value !== "string" || !semverPattern.test(value))
     throw new Error("Version must be strict semver in x.y.z form.");
-  return value.split(".").map(Number);
+  const [core, prerelease] = value.split("-");
+  return {
+    numbers: core.split(".").map(Number),
+    prerelease: prerelease ?? null,
+  };
 }
 
 function compareVersions(left, right) {
-  for (let index = 0; index < left.length; index += 1)
-    if (left[index] !== right[index]) return left[index] > right[index] ? 1 : -1;
+  for (let index = 0; index < left.numbers.length; index += 1) {
+    if (left.numbers[index] !== right.numbers[index]) {
+      return left.numbers[index] > right.numbers[index] ? 1 : -1;
+    }
+  }
+  return comparePrereleases(left.prerelease, right.prerelease);
+}
+
+function comparePrereleases(left, right) {
+  if (left === right) return 0;
+  if (left === null) return 1;
+  if (right === null) return -1;
+  const leftParts = left.split(".");
+  const rightParts = right.split(".");
+  const length = Math.max(leftParts.length, rightParts.length);
+  for (let index = 0; index < length; index += 1) {
+    const l = leftParts[index];
+    const r = rightParts[index];
+    if (l === undefined) return -1;
+    if (r === undefined) return 1;
+    if (l === r) continue;
+    const lNum = Number(l);
+    const rNum = Number(r);
+    const lIsNum = /^\d+$/u.test(l) && !Number.isNaN(lNum);
+    const rIsNum = /^\d+$/u.test(r) && !Number.isNaN(rNum);
+    if (lIsNum && rIsNum) {
+      return lNum > rNum ? 1 : -1;
+    }
+    if (lIsNum && !rIsNum) return -1;
+    if (!lIsNum && rIsNum) return 1;
+    return l.localeCompare(r);
+  }
   return 0;
 }
 

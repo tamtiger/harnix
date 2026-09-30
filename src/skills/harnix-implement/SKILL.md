@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "1.1.28"
+  version: "2.0.0-dev.7"
 ---
 
 # Implement with evidence
@@ -23,7 +23,7 @@ Read the task artifacts, the matching `.harnix/spec/guides/`, the affected code 
 
 1. **RED:** one focused test of real behavior. Run it and see it fail for the intended reason (not a setup crash, not a rename of a passing test). A test that passes at once proves nothing.
 2. **GREEN:** the minimal implementation of the frozen contract. Run the focused and neighboring tests. Fix production code when the contract is right; never bend the test.
-3. **Evidence:** for a schema v3 required check run `harnix workflow --run-check <id> -- <exe> [args...]` (snapshots the inputs before and after, records the outcome). Detail: `harnix skill harnix-verify --reference evidence`.
+3. **Evidence:** for a schema v3 required check run `harnix workflow --run-check <id> -- <exe> [args...]` (snapshots the inputs before and after, records the outcome). Detail: `../harnix-verify/references/evidence.md` (or `harnix skill harnix-verify --reference evidence`).
 4. **REFACTOR** only while green, then rerun the focused checks.
 
 Prose-only wording, generated snapshots and trivial wiring may skip RED: record why and use the strongest alternative (schema validation, parity, typecheck, build, focused integration test).
@@ -38,7 +38,7 @@ Release-visible changes bump the package version at most once (`pnpm version:syn
 
 ## Feedback and stop conditions
 
-Reviewer or user feedback is a hypothesis: read all of it, verify it against the code and contract, apply one item at a time, push back with evidence (`harnix skill harnix-implement --reference feedback`). Stop and route on a new product or compatibility decision, a plan that contradicts evidence, a missing dependency or authority, a repeated unexplained failure, or a change that would overwrite user-owned content.
+Reviewer or user feedback is a hypothesis: read all of it, verify it against the code and contract, apply one item at a time, push back with evidence (`./references/feedback.md` or `harnix skill harnix-implement --reference feedback`). Stop and route on a new product or compatibility decision, a plan that contradicts evidence, a missing dependency or authority, a repeated unexplained failure, or a change that would overwrite user-owned content.
 
 ## Exit
 

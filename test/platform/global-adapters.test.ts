@@ -25,6 +25,11 @@ function fileContent(file: DesiredGlobalManagedFile | undefined): string {
   return file.content;
 }
 
+const skillPaths = workflowSkills.flatMap((skill) => [
+  `skills/${skill.name}/SKILL.md`,
+  ...Object.keys(skill.references).map((topic) => `skills/${skill.name}/references/${topic}.md`),
+]);
+
 describe("user-global platform desired-surface renderers", () => {
   it("should_render_language_independent_kiro_global_surfaces_when_setup_has_no_project_context", () => {
     const first = kiroGlobalDesiredFiles();
@@ -32,13 +37,9 @@ describe("user-global platform desired-surface renderers", () => {
     const byPath = new Map(first.map((file) => [file.path, file]));
 
     expect(second).toEqual(first);
-    expect(first).toHaveLength(workflowSkills.length + 2);
+    expect(first).toHaveLength(skillPaths.length + 2);
     expect(first.every((file) => file.kind === "file")).toBe(true);
-    expect(first.map((file) => file.path)).toEqual([
-      ...workflowSkills.map((skill) => `skills/${skill.name}/SKILL.md`),
-      "steering/harnix.md",
-      "hooks/harnix-context.json",
-    ]);
+    expect(first.map((file) => file.path)).toEqual([...skillPaths, "steering/harnix.md", "hooks/harnix-context.json"]);
     expect(KIRO_GLOBAL_CONTEXT_HOOK_COMMAND).toBe("harnix context --platform kiro");
     expect(KIRO_GLOBAL_CONTEXT_HOOK).toEqual({
       version: "v1",
@@ -64,9 +65,11 @@ describe("user-global platform desired-surface renderers", () => {
     const antigravity = antigravityGlobalPluginDesiredFiles();
     const antigravitySkills = antigravity.filter((file) => file.path.startsWith("skills/"));
 
-    expect(kiroSkills).toHaveLength(workflowSkills.length);
+    expect(kiroSkills).toHaveLength(skillPaths.length);
     for (const skill of [...kiroSkills, ...antigravitySkills]) {
-      expect(fileContent(skill)).toContain("name: harnix-");
+      if (skill.path.endsWith("SKILL.md")) {
+        expect(fileContent(skill)).toContain("name: harnix-");
+      }
       expect(fileContent(skill)).not.toContain("## Harnix rules");
       expect(fileContent(skill)).not.toContain("C:\\");
     }
@@ -117,8 +120,12 @@ describe("user-global platform desired-surface renderers", () => {
     for (const [prefix, files] of platforms) {
       const skills = files.filter((file) => file.path.startsWith("skills/"));
 
-      expect(skills.map((file) => file.sourceId)).toEqual(workflowSkills.map((skill) => `${prefix}-${skill.name}`));
-      expect(skills.map((file) => file.path)).toEqual(workflowSkills.map((skill) => `skills/${skill.name}/SKILL.md`));
+      const expectedSourceIds = workflowSkills.flatMap((skill) => [
+        `${prefix}-${skill.name}`,
+        ...Object.keys(skill.references).map((topic) => `${prefix}-${skill.name}-ref-${topic}`),
+      ]);
+      expect(skills.map((file) => file.sourceId)).toEqual(expectedSourceIds);
+      expect(skills.map((file) => file.path)).toEqual(skillPaths);
     }
   });
 
@@ -128,11 +135,11 @@ describe("user-global platform desired-surface renderers", () => {
     const byPath = new Map(desktopPlan.map((file) => [file.path, file]));
 
     expect(cliPlan).toEqual(desktopPlan);
-    expect(desktopPlan).toHaveLength(workflowSkills.length + 3);
+    expect(desktopPlan).toHaveLength(skillPaths.length + 3);
     expect(desktopPlan.every((file) => file.kind === "file")).toBe(true);
     expect(desktopPlan.map((file) => file.path)).toEqual([
       "plugin.json",
-      ...workflowSkills.map((skill) => `skills/${skill.name}/SKILL.md`),
+      ...skillPaths,
       "rules/AGENTS.md",
       "hooks.json",
     ]);

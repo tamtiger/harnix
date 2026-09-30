@@ -24,17 +24,26 @@ describe("global surface templates", () => {
   });
 
   describe("globalSkillDesiredFiles", () => {
-    it("emits one canonical SKILL.md file per workflow skill with the rendered skill bytes", () => {
+    it("emits canonical SKILL.md and reference files for workflow skills with the rendered bytes", () => {
       const files = globalSkillDesiredFiles("kiro");
+      const totalExpected = workflowSkills.reduce((sum, skill) => sum + 1 + Object.keys(skill.references).length, 0);
 
-      expect(files).toHaveLength(workflowSkills.length);
-      for (const [index, skill] of workflowSkills.entries()) {
-        expect(files[index]).toEqual({
+      expect(files).toHaveLength(totalExpected);
+      for (const skill of workflowSkills) {
+        expect(files).toContainEqual({
           path: `skills/${skill.name}/SKILL.md`,
           sourceId: `kiro-${skill.name}`,
           kind: "file",
           content: renderSkill(skill),
         });
+        for (const [topic, text] of Object.entries(skill.references)) {
+          expect(files).toContainEqual({
+            path: `skills/${skill.name}/references/${topic}.md`,
+            sourceId: `kiro-${skill.name}-ref-${topic}`,
+            kind: "file",
+            content: text,
+          });
+        }
       }
     });
 

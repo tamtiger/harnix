@@ -25,12 +25,12 @@ describe("claude user-global desired surface", () => {
     const second = claudeGlobalDesiredFiles();
 
     expect(second).toEqual(first);
-    expect(first).toHaveLength(workflowSkills.length + 2);
-    expect(first.map((file) => file.path)).toEqual([
-      ...workflowSkills.map((skill) => `skills/${skill.name}/SKILL.md`),
-      "CLAUDE.md",
-      "settings.json",
+    const skillPaths = workflowSkills.flatMap((skill) => [
+      `skills/${skill.name}/SKILL.md`,
+      ...Object.keys(skill.references).map((topic) => `skills/${skill.name}/references/${topic}.md`),
     ]);
+    expect(first).toHaveLength(skillPaths.length + 2);
+    expect(first.map((file) => file.path)).toEqual([...skillPaths, "CLAUDE.md", "settings.json"]);
     expect(first.map((file) => file.path).some((path) => path.startsWith("/") || path.includes(".."))).toBe(false);
     expect(first.map((file) => file.path)).not.toContain(".claude.json");
   });

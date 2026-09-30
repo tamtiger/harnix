@@ -4,47 +4,54 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
-## [1.1.28] - 2026-09-30
+## [2.0.0-dev.7] - 2026-09-30
 
 ### Added
 
-- workflow --add-decision/--add-risk ghi note review bằng flag và --finish --brief báo learning đã capture (kèm lý do khi bằng 0); cookbook và skill finish-work hướng dẫn ghi bài học tái dùng
+- Cài đặt reference files trực tiếp vào global skill setup (`skills/<name>/references/<topic>.md`) và cập nhật đường dẫn tương đối trong các file SKILL.md; dọn dẹp thư mục rỗng deepest-first khi uninstall.
+- Bổ sung quy tắc contract immutability vào `workflow.md` template.
 
-## [1.1.27] - 2026-09-30
+## [2.0.0-dev.6] - 2026-09-30
 
 ### Added
 
-- workflow --set-check/--add-criterion/--set-paths chỉnh kế hoạch bằng flag, bỏ BOM ở stdin và từ chối văn bản hỏng mã hóa (mojibake) trước khi lưu; cookbook và skill hướng dẫn không đưa chữ có dấu qua pipe của Windows PowerShell 5.1
+- `workflow --add-decision`/`--add-risk` ghi note review bằng flag và `--finish --brief` báo learning đã capture (kèm lý do khi bằng 0); cookbook và skill finish-work hướng dẫn ghi bài học tái dùng.
 
-## [1.1.26] - 2026-09-30
+## [2.0.0-dev.5] - 2026-09-30
+
+### Added
+
+- `workflow --set-check`/`--add-criterion`/`--set-paths` chỉnh kế hoạch bằng flag, bỏ BOM ở stdin và từ chối văn bản hỏng mã hóa (mojibake) trước khi lưu; cookbook và skill hướng dẫn không đưa chữ có dấu qua pipe của Windows PowerShell 5.1.
+
+## [2.0.0-dev.4] - 2026-09-30
 
 ### Fixed
 
-- Cookbook và quy tắc persistence nhắc đặt $OutputEncoding UTF-8 trong Windows PowerShell 5.1 trước khi pipe JSON có dấu
-- `workflow --run-check` giữ nguyên mọi đối số sau operand đầu tiên kể cả khi shim `harnix.ps1` của pnpm làm mất dấu `--` (trước đây `--filter X` bị hiểu là option của harnix), và `--criterion` tách danh sách theo dấu phẩy lẫn khoảng trắng (PowerShell nối `a,b,c` không nháy thành `a b c`)
-- `workflow --migrate` và `--cancel` không còn chờ EOF khi không có body: stdin của shell agent thường là pipe mở mãi nên lệnh bị treo tới timeout dù đã ghi xong; nay dừng đọc sau 2 giây không có dữ liệu
+- Cookbook và quy tắc persistence nhắc đặt $OutputEncoding UTF-8 trong Windows PowerShell 5.1 trước khi pipe JSON có dấu.
+- `workflow --run-check` giữ nguyên mọi đối số sau operand đầu tiên kể cả khi shim `harnix.ps1` của pnpm làm mất dấu `--` (trước đây `--filter X` bị hiểu là option của harnix), và `--criterion` tách danh sách theo dấu phẩy lẫn khoảng trắng (PowerShell nối `a,b,c` không nháy thành `a b c`).
+- `workflow --migrate` và `--cancel` không còn chờ EOF khi không có body: stdin của shell agent thường là pipe mở mãi nên lệnh bị treo tới timeout dù đã ghi xong; nay dừng đọc sau 2 giây không có dữ liệu.
 
-## [1.1.25] - 2026-09-30
+## [2.0.0-dev.3] - 2026-09-30
 
 ### Changed
 
-- Skill, workflow.md và steering nền tảng cấm script tạm, có Command cookbook PowerShell/bash, quy tắc clock, giải thích inputDigest và phục hồi sau replan; test đối chiếu flag tài liệu với CLI
+- Skill, workflow.md và steering nền tảng cấm script tạm, có Command cookbook PowerShell/bash, quy tắc clock, giải thích inputDigest và phục hồi sau replan; test đối chiếu flag tài liệu với CLI.
 
-## [1.1.24] - 2026-09-30
+## [2.0.0-dev.2] - 2026-09-30
 
 ### Added
 
-- Hidden workflow thêm transport dạng flag: --evidence tự điền id/recordedAt/digest, --criterion --met, --migrate lên v3, --run-check và --brief; tách wiring sang src/commands/workflow-command.ts
+- Hidden workflow thêm transport dạng flag: `--evidence` tự điền id/recordedAt/digest, `--criterion --met`, `--migrate` lên v3, `--run-check` và `--brief`; tách wiring sang `src/commands/workflow-command.ts`.
 
-## [1.1.23] - 2026-09-30
+## [2.0.0-dev.1] - 2026-09-30
 
 ### Fixed
 
-- Suite gate nhận diện layout monorepo/.NET theo segment, finish gate xét pass mới nhất; input digest bỏ thư mục build tạm theo tín hiệu (marker), khớp không phân biệt hoa thường và băm song song
+- Suite gate nhận diện layout monorepo/.NET theo segment, finish gate xét pass mới nhất; input digest bỏ thư mục build tạm theo tín hiệu (marker), khớp không phân biệt hoa thường và băm song song.
 
-## [Unreleased] - 2026-09-28
+## [2.0.0-dev.0] - 2026-09-28
 
-Đợt đại tu toàn diện (epic `20260928-180123-harnix-overhaul`). Mục này tích luỹ breaking change qua từng task; khi hoàn tất toàn bộ epic, `release-v2` sẽ đổi tiêu đề này thành `## [2.0.0] - <ngày phát hành>`.
+Đợt đại tu toàn diện (epic `20260928-180123-harnix-overhaul`). Phiên bản khởi đầu chu kỳ v2 đang phát triển. Khi hoàn tất toàn bộ epic, `release-v2` sẽ đổi thành `## [2.0.0] - <ngày phát hành>`.
 
 ### Added
 

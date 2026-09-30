@@ -20,7 +20,7 @@ export interface SkillTemplate {
   version: string;
   body: string;
   content: string;
-  /** On-demand detail, loaded with `harnix skill <name> --reference <topic>`; never installed as separate files. */
+  /** Reference detail installed under skills/<name>/references/<topic>.md and loaded with `harnix skill <name> --reference <topic>`. */
   references: Readonly<Record<string, string>>;
 }
 
@@ -86,7 +86,7 @@ function parseSkillSource(rawSource: string, references: Record<string, string>)
     !isRecord(frontmatter.metadata) ||
     Object.keys(frontmatter.metadata).join(",") !== "version" ||
     typeof frontmatter.metadata.version !== "string" ||
-    !/^\d+\.\d+\.\d+$/u.test(frontmatter.metadata.version)
+    !/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u.test(frontmatter.metadata.version)
   ) {
     throw new Error("Harnix skill metadata.version must be a semantic version string.");
   }
