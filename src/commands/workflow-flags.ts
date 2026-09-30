@@ -18,6 +18,8 @@ export interface WorkflowFlags {
   runCheck?: string;
   setCheck?: string;
   addCriterion?: string;
+  addDecision?: string;
+  addRisk?: string;
   check?: string;
   result?: string;
   exitCode?: string;
@@ -30,6 +32,8 @@ export interface WorkflowFlags {
   criteria?: string;
   reason?: string;
   text?: string;
+  rationale?: string;
+  severity?: string;
   artifact?: string[];
   input?: string[];
   relevantPath?: string[];
@@ -49,7 +53,15 @@ const BOOLEAN_ACTIONS = [
   "migrate",
   "setPaths",
 ] as const;
-const VALUE_ACTIONS = ["transition", "criterion", "runCheck", "setCheck", "addCriterion"] as const;
+const VALUE_ACTIONS = [
+  "transition",
+  "criterion",
+  "runCheck",
+  "setCheck",
+  "addCriterion",
+  "addDecision",
+  "addRisk",
+] as const;
 const BRIEF_ACTIONS = new Set([
   "save",
   "transition",
@@ -60,6 +72,8 @@ const BRIEF_ACTIONS = new Set([
   "runCheck",
   "setCheck",
   "addCriterion",
+  "addDecision",
+  "addRisk",
   "setPaths",
 ]);
 
@@ -113,7 +127,19 @@ const FLAG_OWNERS: readonly FlagOwner[] = [
     actions: ["setCheck", "addCriterion"],
     hint: "workflow --set-check or --add-criterion",
   },
-  { name: "--text", isSet: (f) => f.text !== undefined, actions: ["addCriterion"], hint: "workflow --add-criterion" },
+  {
+    name: "--text",
+    isSet: (f) => f.text !== undefined,
+    actions: ["addCriterion", "addDecision", "addRisk"],
+    hint: "workflow --add-criterion, --add-decision or --add-risk",
+  },
+  {
+    name: "--rationale",
+    isSet: (f) => f.rationale !== undefined,
+    actions: ["addDecision"],
+    hint: "workflow --add-decision",
+  },
+  { name: "--severity", isSet: (f) => f.severity !== undefined, actions: ["addRisk"], hint: "workflow --add-risk" },
   {
     name: "--relevant-path",
     isSet: (f) => listed(f.relevantPath),
@@ -134,7 +160,7 @@ export function selectAction(flags: WorkflowFlags): string {
   const [only] = selected;
   if (selected.length !== 1 || only === undefined)
     throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --save, --transition, --evidence, --criterion, --migrate, --run-check, --set-check, --add-criterion, --set-paths, --schema, --snapshot, --finish, --cancel, or --learn.",
+      "workflow requires exactly one of --inspect, --preflight, --save, --transition, --evidence, --criterion, --migrate, --run-check, --set-check, --add-criterion, --add-decision, --add-risk, --set-paths, --schema, --snapshot, --finish, --cancel, or --learn.",
     );
   return only;
 }
@@ -165,8 +191,17 @@ export function assertFlagGroups(action: string, flags: WorkflowFlags): void {
   if (action === "criterion" && flags.met !== true) throw new Error("workflow --criterion requires --met.");
   if (action === "addCriterion" && flags.text === undefined)
     throw new Error("workflow --add-criterion requires --text.");
+  assertNoteFlags(action, flags);
   if (action === "setPaths" && !listed(flags.relevantPath) && !listed(flags.relevantSpec))
     throw new Error("workflow --set-paths requires --relevant-path and/or --relevant-spec.");
   if (isEvidenceFlagsMode(action, flags) && (!flags.check || !flags.result || flags.summary === undefined))
     throw new Error("workflow --evidence with flags requires --check, --result and --summary.");
+}
+
+function assertNoteFlags(action: string, flags: WorkflowFlags): void {
+  if (action === "addDecision" && (flags.text === undefined || flags.rationale === undefined))
+    throw new Error("workflow --add-decision requires --text and --rationale.");
+  if (action === "addRisk" && flags.text === undefined) throw new Error("workflow --add-risk requires --text.");
+  if (flags.severity !== undefined && !["low", "medium", "high"].includes(flags.severity))
+    throw new Error("--severity must be low, medium or high.");
 }

@@ -2,11 +2,13 @@ import type { Command } from "commander";
 
 import {
   addCriterionWorkflow,
+  addDecisionWorkflow,
+  addRiskWorkflow,
   appendEvidenceFlagsWorkflow,
   appendEvidenceWorkflow,
   briefTask,
   cancelWorkflow,
-  finishWorkflow,
+  finishWorkflowReport,
   inspectWorkflow,
   markCriteriaMetWorkflow,
   migrateToV3Workflow,
@@ -158,6 +160,24 @@ const HANDLERS: Record<string, Handler> = {
     );
     return presentTask(context, task);
   },
+  addDecision: async (context) => {
+    const { flags, root } = context;
+    const task = await addDecisionWorkflow(root, {
+      id: flags.addDecision as string,
+      text: flags.text as string,
+      rationale: flags.rationale as string,
+    });
+    return presentTask(context, task);
+  },
+  addRisk: async (context) => {
+    const { flags, root } = context;
+    const task = await addRiskWorkflow(root, {
+      id: flags.addRisk as string,
+      text: flags.text as string,
+      severity: flags.severity,
+    });
+    return presentTask(context, task);
+  },
   setPaths: async (context) => {
     const { flags, root } = context;
     const task = await setPathsWorkflow(root, {
@@ -194,7 +214,10 @@ const HANDLERS: Record<string, Handler> = {
       parseJson(input, "Workflow learning capture requires valid bounded JSON.", true),
     );
   },
-  finish: async (context) => presentTask(context, await finishWorkflow(context.root)),
+  finish: async (context) => {
+    const report = await finishWorkflowReport(context.root);
+    return context.flags.brief === true ? { ...briefTask(report.task), learning: report.learning } : report.task;
+  },
 };
 
 const collect = (value: string, previous: string[]): string[] => [...previous, value];
@@ -223,6 +246,8 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--run-check <id>", "Run the command after -- against a check and record the outcome")
     .option("--set-check <id>", "Add or update one validation check of the active task")
     .option("--add-criterion <id>", "Add one acceptance criterion (requires --text)")
+    .option("--add-decision <id>", "Record one decision (requires --text and --rationale)")
+    .option("--add-risk <id>", "Record one residual risk (requires --text)")
     .option("--set-paths", "Replace the relevant paths and/or specs of the active task")
     .option("--schema", "Describe the save envelope schema")
     .option(
@@ -242,7 +267,9 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--criteria <ids>", "Comma-separated criterion IDs a --set-check check covers")
     .option("--input <glob>", "Repository input glob of a --set-check check (repeatable)", collect, [])
     .option("--reason <text>", "Why obligations change after planning (10-1000 characters)")
-    .option("--text <text>", "Criterion text for --add-criterion")
+    .option("--text <text>", "Text for --add-criterion, --add-decision or --add-risk")
+    .option("--rationale <text>", "Rationale for --add-decision")
+    .option("--severity <level>", "Severity for --add-risk: low, medium or high")
     .option("--relevant-path <path>", "Relevant path for --set-paths (repeatable)", collect, [])
     .option("--relevant-spec <path>", "Relevant spec path for --set-paths (repeatable)", collect, [])
     .option("--brief", "Print only id, status, checkpoint and updatedAt")

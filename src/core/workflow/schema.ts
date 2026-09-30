@@ -51,11 +51,15 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
         "Add or update one validation check of the active v3 task from flags; after planning it needs --reason and makes the guarded replan save.",
       "--add-criterion":
         "Add one acceptance criterion from --text and cover it with the --check IDs; same --reason rule as --set-check.",
+      "--add-decision": "Record one decision (--text, --rationale) on the active v3 task; review data, so no --reason.",
+      "--add-risk":
+        "Record one residual risk (--text, optional --severity) on the active v3 task; review data, so no --reason.",
       "--set-paths":
         "Replace the relevant paths and/or specs from repeatable --relevant-path and --relevant-spec flags; needs no reason.",
       "--brief":
         "Print only id, status, checkpoint and updatedAt for --save, --transition, --evidence, --criterion, --migrate and --finish.",
-      "--finish": "Terminal completion; accepts no body.",
+      "--finish":
+        "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? }.",
       "--cancel": "Terminal cancellation; the only cancellation transport.",
     },
   };

@@ -2,45 +2,22 @@ import { appendJournalIdempotent, type JournalEntry } from "src/core/journal/jou
 import {
   createLearningCandidate,
   effectiveLearningStatus,
-  normalizeObservation,
   observationCandidateId,
   type LearningStatus,
 } from "src/core/journal/learning.js";
-import { analyzeLearningStatement } from "src/core/journal/learning-safety.js";
+import { extractObservations } from "src/core/journal/learning-notes.js";
 import { readLearningStates } from "src/core/journal/learning-store.js";
 import type { TaskRecord } from "src/core/tasks/task.js";
 import { compareCodeUnits } from "src/utils/order.js";
 
-export const MAX_OBSERVATIONS_PER_TASK = 5;
-export const MAX_OBSERVATION_CHARACTERS = 500;
 const MAX_EVIDENCE_PER_TASK = 4;
 
-/**
- * Review notes the agent already wrote into the task (decisions, residual risks, evidence findings), trimmed and
- * de-duplicated by normalized text. Statements that trip a risk check are dropped here: automatic capture never
- * stores content that only a manual, reviewed path may handle.
- */
-export function extractObservations(task: TaskRecord): string[] {
-  if (task.schemaVersion === 1) return [];
-  const texts = [
-    ...(task.decisions ?? []).map((decision) => decision.text),
-    ...(task.residualRisks ?? []).map((risk) => risk.text),
-    ...task.evidence.flatMap((evidence) => (evidence.findings ?? []).map((finding) => finding.text)),
-  ];
-  const seen = new Set<string>();
-  const observations: string[] = [];
-  for (const raw of texts) {
-    const text = raw.trim();
-    const key = normalizeObservation(text);
-    if (text.length === 0 || text.length > MAX_OBSERVATION_CHARACTERS || seen.has(key)) continue;
-    const analysis = analyzeLearningStatement(text);
-    if (analysis.oversized || analysis.findings.some((kind) => kind !== "url-like")) continue;
-    seen.add(key);
-    observations.push(text);
-    if (observations.length >= MAX_OBSERVATIONS_PER_TASK) break;
-  }
-  return observations;
-}
+export {
+  extractObservations,
+  MAX_OBSERVATION_CHARACTERS,
+  MAX_OBSERVATIONS_PER_TASK,
+  reviewNotes,
+} from "src/core/journal/learning-notes.js";
 
 /**
  * Called after a task completes. A new observation becomes a `draft` (one source task); the same observation from a

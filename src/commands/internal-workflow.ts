@@ -4,11 +4,14 @@
  */
 export {
   addCriterionWorkflow,
+  addDecisionWorkflow,
+  addRiskWorkflow,
   appendEvidenceFlagsWorkflow,
   appendEvidenceWorkflow,
   briefTask,
   cancelWorkflow,
   finishWorkflow,
+  finishWorkflowReport,
   inspectWorkflow,
   markCriteriaMetWorkflow,
   migrateToV3Workflow,

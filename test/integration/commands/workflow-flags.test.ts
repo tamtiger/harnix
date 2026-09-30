@@ -32,7 +32,9 @@ describe("workflow flag validation", () => {
     expect(selectAction({ addCriterion: "c", text: "t" })).toBe("addCriterion");
     expect(selectAction({ setPaths: true })).toBe("setPaths");
     expect(() => selectAction({})).toThrow(/exactly one of/u);
-    expect(() => selectAction({ setPaths: true, inspect: true })).toThrow(/--set-check, --add-criterion, --set-paths/u);
+    expect(() => selectAction({ setPaths: true, inspect: true })).toThrow(
+      /--set-check, --add-criterion, --add-decision, --add-risk, --set-paths/u,
+    );
   });
 
   it("keeps plan-edit flags with their action", () => {
@@ -151,5 +153,66 @@ describe.sequential("hidden workflow plan-edit transports", () => {
 
     expect(result.code).toBe(2);
     expect(result.err).toMatch(/wrong text encoding/u);
+  });
+});
+
+describe("workflow note flags", () => {
+  it("selects and validates the note actions", () => {
+    expect(selectAction({ addDecision: "d1" })).toBe("addDecision");
+    expect(selectAction({ addRisk: "r1" })).toBe("addRisk");
+    expect(() => selectAction({ addRisk: "r1", inspect: true })).toThrow(/--add-decision, --add-risk/u);
+    expect(() => assertFlagGroups("addDecision", { text: "t" })).toThrow(/--rationale/u);
+    expect(() => assertFlagGroups("addDecision", { rationale: "r" })).toThrow(/--text/u);
+    expect(() => assertFlagGroups("addDecision", { text: "t", rationale: "r" })).not.toThrow();
+    expect(() => assertFlagGroups("addRisk", {})).toThrow(/--text/u);
+    expect(() => assertFlagGroups("addRisk", { text: "t", severity: "high" })).not.toThrow();
+    expect(() => assertFlagGroups("addRisk", { text: "t", severity: "urgent" })).toThrow(/--severity/u);
+    expect(() => assertFlagGroups("inspect", { rationale: "r" })).toThrow(
+      /--rationale requires workflow --add-decision/u,
+    );
+    expect(() => assertFlagGroups("addDecision", { text: "t", rationale: "r", severity: "low" })).toThrow(
+      /--severity requires workflow --add-risk/u,
+    );
+    expect(() => assertCommandShape("addRisk", { brief: true }, [])).not.toThrow();
+  });
+});
+
+describe.sequential("hidden workflow note transports", () => {
+  it("records notes from flags and reports the learning captured at finish", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+
+    const decision = await run([
+      "--add-decision",
+      "d1",
+      "--text",
+      "Ghi decision bằng flag để learning không rỗng",
+      "--rationale",
+      "Agent không phải dựng JSON",
+      "--brief",
+    ]);
+    const risk = await run([
+      "--add-risk",
+      "r1",
+      "--text",
+      "Bản cài ở home chỉ đổi sau update global",
+      "--severity",
+      "medium",
+      "--brief",
+    ]);
+    expect(decision.code, decision.err).toBe(0);
+    expect(risk.code, risk.err).toBe(0);
+
+    await run(["--transition", "verifying/verifying"]);
+    await run(["--evidence", "--check", "check", "--result", "pass", "--exit-code", "0", "--summary", "ok"]);
+    await run(["--criterion", "a", "--met"]);
+    await run(["--transition", "verifying/finishing"]);
+    const finish = await run(["--finish", "--brief"]);
+
+    expect(finish.code, finish.err).toBe(0);
+    const brief = JSON.parse(finish.out) as { status: string; learning: { notes: number; captured: number } };
+    expect(brief.status).toBe("completed");
+    expect(brief.learning).toEqual({ notes: 2, captured: 2 });
   });
 });

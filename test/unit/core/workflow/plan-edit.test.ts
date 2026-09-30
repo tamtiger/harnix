@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { resolveActiveTask } from "src/core/tasks/task.js";
-import { addCriterionWorkflow, setCheckWorkflow, setPathsWorkflow } from "src/core/workflow/plan-edit.js";
+import {
+  addCriterionWorkflow,
+  addDecisionWorkflow,
+  addRiskWorkflow,
+  setCheckWorkflow,
+  setPathsWorkflow,
+} from "src/core/workflow/plan-edit.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import {
@@ -193,5 +199,52 @@ describe("workflow plan-edit transports", () => {
     await initializeUtcProject(root);
 
     await expect(setCheckWorkflow(root, { id: "x" }, {}, NOW)).rejects.toThrow(/active task/u);
+  });
+
+  it("records decisions and residual risks at any unfinished stage without a reason or a replan", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    const rationale = "Giữ nguyên contract hash nên không cần replan";
+
+    const withDecision = await addDecisionWorkflow(root, { id: "d1", text: "Ghi decision bằng flag", rationale }, NOW);
+    expect(withDecision.decisions).toEqual([{ id: "d1", text: "Ghi decision bằng flag", rationale }]);
+    expect(withDecision.checkpoint).toBe("implementing");
+
+    const withRisk = await addRiskWorkflow(
+      root,
+      { id: "r1", text: "Rủi ro còn lại về mã hóa" },
+      "2026-08-13T00:31:00.000Z",
+    );
+    expect(withRisk.residualRisks).toEqual([{ id: "r1", text: "Rủi ro còn lại về mã hóa", severity: "low" }]);
+    const high = await addRiskWorkflow(
+      root,
+      { id: "r2", text: "Rủi ro cao", severity: "high" },
+      "2026-08-13T00:32:00.000Z",
+    );
+    expect(high.residualRisks?.map((risk) => risk.severity)).toEqual(["low", "high"]);
+  });
+
+  it("rejects duplicate ids, empty text or rationale, unknown severity and corrupted text for notes", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    await addDecisionWorkflow(root, { id: "d1", text: "Một", rationale: "Lý do" }, NOW);
+    await addRiskWorkflow(root, { id: "r1", text: "Rủi ro" }, NOW);
+
+    await expect(addDecisionWorkflow(root, { id: "d1", text: "Hai", rationale: "Lý do" }, NOW)).rejects.toThrow(
+      /already/u,
+    );
+    await expect(addDecisionWorkflow(root, { id: "d2", text: " ", rationale: "Lý do" }, NOW)).rejects.toThrow(
+      /--text/u,
+    );
+    await expect(addDecisionWorkflow(root, { id: "d2", text: "Hai", rationale: "" }, NOW)).rejects.toThrow(
+      /--rationale/u,
+    );
+    await expect(addRiskWorkflow(root, { id: "r1", text: "Trùng" }, NOW)).rejects.toThrow(/already/u);
+    await expect(addRiskWorkflow(root, { id: "r2", text: "" }, NOW)).rejects.toThrow(/--text/u);
+    await expect(addRiskWorkflow(root, { id: "r2", text: "x", severity: "critical" }, NOW)).rejects.toThrow(
+      /--severity/u,
+    );
+    const garbled = new TextDecoder("windows-1252").decode(Buffer.from("Điều phối", "utf8"));
+    await expect(addRiskWorkflow(root, { id: "r3", text: garbled }, NOW)).rejects.toThrow(/wrong text encoding/u);
   });
 });

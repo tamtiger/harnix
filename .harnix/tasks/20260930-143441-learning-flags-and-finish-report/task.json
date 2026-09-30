@@ -1,0 +1,166 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20260930-143441-learning-flags-and-finish-report",
+  "title": "Ghi learning bằng flag và báo kết quả capture khi finish",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-09-30T14:34:41.150+07:00",
+  "updatedAt": "2026-09-30T14:47:01.380+07:00",
+  "goal": "Agent ghi decisions và residualRisks bằng lệnh dạng flag không cần JSON, và `--finish --brief` cho biết learning đã capture bao nhiêu note cùng lý do khi bằng 0.",
+  "nonGoals": [
+    "Không suy ra learning tự động từ hội thoại",
+    "Không đổi bộ lọc an toàn của learning",
+    "Không capture lại cho task đã hoàn tất",
+    "Không đổi output của --finish khi không có --brief"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-add-decision-risk",
+      "text": "`--add-decision <id> --text <t> --rationale <t>` và `--add-risk <id> --text <t> [--severity low|medium|high]` thêm một decisions/residualRisks item vào task v3 active ở mọi stage chưa terminal mà không cần `--reason`, không đổi checkpoint, giữ nguyên tiếng Việt; id trùng, text hoặc rationale rỗng và văn bản hỏng mã hóa bị từ chối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-1",
+        "ev-chk-learning-flags-focused-1"
+      ]
+    },
+    {
+      "id": "ac-finish-learning-report",
+      "text": "`--finish --brief` trả thêm `learning: { notes, captured, hint? }` với `captured` là số observation đã ghi vào journal, `hint` nêu lý do khi bằng 0 (không có note, hoặc note bị lọc); `--finish` không `--brief` vẫn trả đúng TaskRecord như cũ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-1",
+        "ev-chk-learning-flags-focused-1"
+      ]
+    },
+    {
+      "id": "ac-guidance-learning",
+      "text": "Cookbook, skill `harnix-finish-work` và `harnix-brainstorm` hướng dẫn ghi note bằng `--add-risk`/`--add-decision` (câu tự đứng được, tái dùng) và đọc `learning.captured` sau khi finish; test đối chiếu flag tài liệu với CLI vẫn pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-1",
+        "ev-chk-learning-flags-focused-1"
+      ]
+    },
+    {
+      "id": "ac-docs-schema-learning",
+      "text": "`workflow --schema`, PRD, WORKFLOW, IMPLEMENTATION_PLAN §4 và AGENTS.md mô tả hai transport mới và báo cáo capture; output các lệnh hiện có không đổi ngoài danh sách transport của `--schema`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-1",
+        "ev-chk-learning-flags-focused-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-command.ts",
+    "src/commands/workflow-flags.ts",
+    "src/core/workflow/finish.ts",
+    "src/core/workflow/plan-edit.ts",
+    "src/core/workflow/schema.ts",
+    "src/skills/harnix-finish-work/SKILL.md",
+    "src/templates/harnix/workflow.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/common.md",
+    ".harnix/spec/guides/languages/typescript.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-learning-flags-focused",
+      "description": "Test tập trung cho transport ghi note, báo cáo finish và hướng dẫn.",
+      "command": "pnpm vitest run test/unit/core/workflow test/integration/commands test/workflow",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-add-decision-risk",
+        "ac-docs-schema-learning",
+        "ac-finish-learning-report",
+        "ac-guidance-learning"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/journal/**",
+        "src/core/workflow/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/integration/commands/**",
+        "test/unit/core/workflow/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-full-suite",
+      "description": "Typecheck, lint và toàn bộ test kèm coverage floor.",
+      "command": "pnpm typecheck && pnpm lint && pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-add-decision-risk",
+        "ac-docs-schema-learning",
+        "ac-finish-learning-report",
+        "ac-guidance-learning"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "vitest.config.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-learning-flags-focused-1",
+      "checkId": "chk-learning-flags-focused",
+      "recordedAt": "2026-09-30T14:45:06.672+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow test/integration/commands test/workflow — focused learning flags",
+      "artifactPaths": [],
+      "inputDigest": "fea3dfa75179d72e26984a09d085a869e33168ddb06b428f4116dd4d1b860f7d"
+    },
+    {
+      "id": "ev-chk-full-suite-1",
+      "checkId": "chk-full-suite",
+      "recordedAt": "2026-09-30T14:46:25.877+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck && pnpm lint && pnpm test — suite đầy đủ kèm coverage",
+      "artifactPaths": [],
+      "inputDigest": "892b737126ec5f5a23b516a50355a3fc9f4f7a6ef680364e11896dedd18a9776"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-review-data-no-replan",
+      "text": "Decisions và residualRisks là dữ liệu review nên transport ghi chúng không cần --reason hay replan.",
+      "rationale": "Chúng nằm ngoài contract hash; buộc replan sẽ khiến agent lại quay về dựng JSON."
+    },
+    {
+      "id": "d-report-only-in-brief",
+      "text": "Báo cáo capture chỉ có trong --finish --brief.",
+      "rationale": "Giữ nguyên output đầy đủ của --finish và snapshot hành vi; cookbook dùng --brief cho mọi lệnh ghi."
+    },
+    {
+      "id": "d-dogfood-notes",
+      "text": "Task này tự ghi risk bằng --add-risk trước --finish để kiểm chứng learning.captured khác 0.",
+      "rationale": "Chứng minh đường ghi note không cần JSON hoạt động đầu-cuối"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-stale-installs",
+      "text": "Agent Kiro, Antigravity, Claude và Codex chỉ có --add-decision, --add-risk và báo cáo learning sau khi chạy harnix update --global; trước đó learning tiếp tục rỗng.",
+      "severity": "medium"
+    },
+    {
+      "id": "r-filtered-notes",
+      "text": "Learning chỉ ghi các note đã nằm trong task; note dài hơn 500 ký tự, giống lệnh, chứa credential hoặc chỉ thị bị lọc và chỉ được báo qua learning.hint khi finish.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-09-30T14:47:01.380+07:00"
+}

@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.28] - 2026-09-30
+
+### Added
+
+- workflow --add-decision/--add-risk ghi note review bằng flag và --finish --brief báo learning đã capture (kèm lý do khi bằng 0); cookbook và skill finish-work hướng dẫn ghi bài học tái dùng
+
 ## [1.1.27] - 2026-09-30
 
 ### Added

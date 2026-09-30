@@ -6,6 +6,8 @@ describe("workflow index", () => {
   it("exposes exactly the public workflow surface used by commands and hooks", () => {
     expect(Object.keys(workflow).sort()).toEqual([
       "addCriterionWorkflow",
+      "addDecisionWorkflow",
+      "addRiskWorkflow",
       "appendEvidenceFlagsWorkflow",
       "appendEvidenceWorkflow",
       "briefTask",
@@ -16,6 +18,7 @@ describe("workflow index", () => {
       "continueWorkflowTask",
       "evidenceSupportsScope",
       "finishWorkflow",
+      "finishWorkflowReport",
       "finishWorkflowTask",
       "implementationStrategy",
       "inspectWorkflow",

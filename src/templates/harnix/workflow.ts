@@ -86,6 +86,8 @@ harnix workflow --finish --brief
 harnix workflow --set-check <check-id> --description "<text>" --scope focused --command "<command>" --criteria <criterion-id>,<criterion-id> --input "src/**" --input "test/**" --reason "<why, 10-1000 characters, required after planning>"
 harnix workflow --add-criterion <criterion-id> --text "<criterion text>" --check <check-id> --reason "<why>"
 harnix workflow --set-paths --relevant-path <path> --relevant-path <path> --relevant-spec <path>
+harnix workflow --add-decision <id> --text "<self-contained lesson>" --rationale "<why>" --brief
+harnix workflow --add-risk <id> --text "<reusable risk or trap>" --severity medium --brief
 $json | harnix workflow --save --brief                 # only when artifacts or obligations change; start from harnix workflow --inspect
 \`\`\`
 
@@ -104,6 +106,8 @@ printf '%s' '{"reason":"<why>","authorizedBy":"user"}' | harnix workflow --cance
 harnix workflow --set-check <check-id> --description '<text>' --scope focused --command '<command>' --criteria <criterion-id>,<criterion-id> --input 'src/**' --input 'test/**' --reason '<why, 10-1000 characters, required after planning>'
 harnix workflow --add-criterion <criterion-id> --text '<criterion text>' --check <check-id> --reason '<why>'
 harnix workflow --set-paths --relevant-path <path> --relevant-path <path> --relevant-spec <path>
+harnix workflow --add-decision <id> --text '<self-contained lesson>' --rationale '<why>' --brief
+harnix workflow --add-risk <id> --text '<reusable risk or trap>' --severity medium --brief
 printf '%s' "$json" | harnix workflow --save --brief   # only when artifacts or obligations change; start from harnix workflow --inspect
 \`\`\`
 
@@ -112,6 +116,7 @@ printf '%s' "$json" | harnix workflow --save --brief   # only when artifacts or 
 - \`harnix workflow --run-check <id> -- <exe> [args...]\` starts one process from an executable and an argument array (no shell), records pass for exit 0 and fail otherwise, and records nothing when the inputs changed while it ran. For a compound command such as \`a && b\`, declare one check per command or start a shell explicitly, for example \`harnix workflow --run-check <id> -- bash -c "pnpm typecheck && pnpm lint && pnpm test"\` (use the full path of \`bash\` on Windows).
 - \`harnix workflow --migrate\` upgrades the active unfinished legacy v1/v2 task to schema v3 in one call. Send no body when every required check already has \`criterionIds\` and a repository input; otherwise pipe \`{ "checks": { "<check-id>": { "criterionIds": [...], "inputs": [...] } } }\`. Earlier passes are stale afterwards and must be rerun.
 - \`harnix workflow --set-check <id>\` adds or updates one check (\`--description\`, \`--command\`, \`--scope\`, \`--required\`/\`--no-required\`, \`--criteria\`, repeatable \`--input\`); a new check needs description, scope, and for a required check criteria and inputs. \`harnix workflow --add-criterion <id> --text <text> --check <check-id>\` adds a criterion and covers it with the named check(s). After planning, and for any migrated task, both need \`--reason\` (10-1000 characters): they make the single guarded replan save, and you then run \`--transition ready/ready\`. \`harnix workflow --set-paths\` replaces the relevant paths and/or specs and needs no reason.
+- \`harnix workflow --add-decision <id> --text <text> --rationale <text>\` and \`harnix workflow --add-risk <id> --text <text> [--severity low|medium|high]\` record review notes at any unfinished stage with no reason and no replan. Write each as a self-contained, reusable lesson: \`--finish\` turns decisions, residual risks and evidence findings into project learning, and \`harnix workflow --finish --brief\` prints \`learning: { notes, captured, hint? }\` so a zero is explained instead of silent.
 - \`harnix workflow --brief\` (on \`--save\`, \`--transition\`, \`--evidence\`, \`--criterion\`, \`--migrate\`, \`--finish\`) prints only \`id\`, \`status\`, \`checkpoint\` and \`updatedAt\`, plus \`evidenceId\` when one was recorded; use it instead of filtering the full task output.
 
 ## Ready gate

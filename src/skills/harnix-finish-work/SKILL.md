@@ -2,7 +2,7 @@
 name: harnix-finish-work
 description: Use when a Harnix task needs safe completion or explicit cancellation persistence, journaling, active-pointer cleanup, and an evidence-based handoff.
 metadata:
-  version: "1.1.27"
+  version: "1.1.28"
 ---
 
 # Finish or cancel Harnix work
@@ -95,7 +95,7 @@ Never commit, branch, merge, push, publish, create a pull request, delete a work
 
 When a user requests a commit, first show the proposed changes and commit message, then wait for explicit approval before staging or committing.
 
-Before finishing, record every accepted residual risk as a `residualRisks` item with `id`, `text` and `severity` so it survives the conversation. Residual risk is review data outside the task contract: it never waives a criterion, downgrades a failed check, or replaces a required pass. Point the user to the task-owned, always-regenerated `review.md` for a plain-file summary of the finished task instead of running a command.
+Before finishing, record every accepted residual risk as a `residualRisks` item with `id`, `text` and `severity` so it survives the conversation: use `harnix workflow --add-risk <id> --text <text> [--severity low|medium|high]` and `harnix workflow --add-decision <id> --text <text> --rationale <text>` (no JSON), and write each as a self-contained, reusable lesson. After `harnix workflow --finish --brief`, read `learning.captured` and act on `learning.hint` when it is 0. Residual risk is review data outside the task contract: it never waives a criterion, downgrades a failed check, or replaces a required pass. Point the user to the task-owned, always-regenerated `review.md` for a plain-file summary of the finished task instead of running a command.
 
 If the finished task belongs to an Epic (has `epicId`), inspect `.harnix/epics/<epic-id>.json` or run `harnix epic <epic-id>` to report overall epic progress, completed member tasks, and explicitly recommend the next member task to the user.
 

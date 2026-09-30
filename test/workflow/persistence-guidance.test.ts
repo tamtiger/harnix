@@ -97,6 +97,9 @@ describe("agent persistence guidance", () => {
       "--set-check",
       "--add-criterion",
       "--set-paths",
+      "--add-risk",
+      "--add-decision",
+      "learning: { notes, captured, hint? }",
       "must never go through a Windows PowerShell 5.1 pipe",
       "edit `prd.md`",
     ])
@@ -133,5 +136,14 @@ describe("agent persistence guidance", () => {
         expect(registered.has(flag), `${source} documents unknown flag ${flag}`).toBe(true);
       }
     }
+  });
+
+  it("teaches recording learning notes with flags and reading the finish report", () => {
+    const finish = skillText("harnix-finish-work");
+
+    expect(finish).toMatch(/harnix workflow --add-risk <id> --text <text>/u);
+    expect(finish).toMatch(/harnix workflow --add-decision <id> --text <text> --rationale <text>/u);
+    expect(finish).toMatch(/learning.captured/u);
+    expect(skillText("harnix-brainstorm")).toMatch(/harnix workflow --add-decision <id>/u);
   });
 });

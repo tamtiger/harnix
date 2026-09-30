@@ -1,6 +1,7 @@
 import { readConfig } from "src/core/config/config.js";
 import { appendJournal, searchJournal } from "src/core/journal/journal.js";
 import { captureLearningAtFinish } from "src/core/journal/learning-capture.js";
+import { extractObservations, reviewNotes } from "src/core/journal/learning-notes.js";
 import { archiveTask, resolveActiveTask, saveTask, transitionTask, type TaskRecord } from "src/core/tasks/task.js";
 import { nowInstant } from "src/utils/clock.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
@@ -14,7 +15,32 @@ export interface WorkflowFinishDependencies {
   archiveTask?: typeof archiveTask;
 }
 
+export interface FinishLearningReport {
+  notes: number;
+  captured: number;
+  hint?: string;
+}
+
+export interface FinishReport {
+  task: TaskRecord;
+  learning: FinishLearningReport;
+}
+
 export async function finishWorkflow(root: string, injectedNow?: string): Promise<TaskRecord> {
+  return (await finishWorkflowReport(root, injectedNow)).task;
+}
+
+function learningHint(task: TaskRecord, captured: number): string | undefined {
+  if (captured > 0) return undefined;
+  if (reviewNotes(task).length === 0)
+    return "No decisions, residual risks or evidence findings were recorded, so no learning was captured; record reusable lessons with --add-risk or --add-decision before --finish.";
+  if (extractObservations(task).length === 0)
+    return "Every note was filtered (longer than 500 characters, command-like, credential-like or an instruction override), so no learning was captured.";
+  return "Learning for this task was already captured or a reviewed decision on it already exists.";
+}
+
+/** Finishes the active task and reports how much project learning that produced, so a zero is never silent. */
+export async function finishWorkflowReport(root: string, injectedNow?: string): Promise<FinishReport> {
   const now = await currentInstant(root, injectedNow);
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
@@ -24,8 +50,12 @@ export async function finishWorkflow(root: string, injectedNow?: string): Promis
   const journalPath = await journalFilePath(root, config, journalDate);
   const finished = await finishWorkflowTask(harnixRoot, journalPath, config.developer, task, now);
   await refreshLinkedEpicMarkdown(root, finished);
-  await captureLearning(root, config.developer, finished, journalPath, journalDate);
-  return finished;
+  const captured = await captureLearning(root, config.developer, finished, journalPath, journalDate);
+  const hint = learningHint(finished, captured);
+  return {
+    task: finished,
+    learning: { notes: reviewNotes(finished).length, captured, ...(hint === undefined ? {} : { hint }) },
+  };
 }
 
 /** Best-effort by design: learning is a by-product, so a failure here must never undo or hide a completed task. */
@@ -35,9 +65,9 @@ async function captureLearning(
   task: TaskRecord,
   journalPath: string,
   instant: string,
-): Promise<void> {
+): Promise<number> {
   try {
-    await captureLearningAtFinish(
+    return await captureLearningAtFinish(
       await resolveSafeHarnixPath(root, `workspace/${developer}/journal`),
       journalPath,
       developer,
@@ -46,6 +76,7 @@ async function captureLearning(
     );
   } catch {
     // The completion journal entry and task state are already durable; capture is retried on the next finish.
+    return 0;
   }
 }
 

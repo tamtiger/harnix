@@ -178,3 +178,54 @@ export async function setPathsWorkflow(
   };
   return (await saveWorkflow(root, { task: edited })) as TaskRecordV3;
 }
+
+const SEVERITIES = ["low", "medium", "high"] as const;
+
+function requireText(value: string, flag: string): string {
+  const text = value.trim();
+  if (text === "") throw new Error(`${flag} must not be empty.`);
+  return text;
+}
+
+/** Review data (outside the contract hash), so no reason and no replan at any unfinished stage. */
+export async function addDecisionWorkflow(
+  root: string,
+  input: { id: string; text: string; rationale: string },
+  injectedNow?: string,
+): Promise<TaskRecordV3> {
+  const now = await currentInstant(root, injectedNow);
+  const task = await activeV3(root);
+  const text = requireText(input.text, "--text");
+  const rationale = requireText(input.rationale, "--rationale");
+  const decisions = task.decisions ?? [];
+  if (decisions.some((decision) => decision.id === input.id)) throw new Error(`Decision ${input.id} already exists.`);
+  return (await saveWorkflow(root, {
+    task: {
+      ...task,
+      decisions: [...decisions, { id: input.id, text, rationale }],
+      updatedAt: laterTimestamp(task.updatedAt, now),
+    },
+  })) as TaskRecordV3;
+}
+
+export async function addRiskWorkflow(
+  root: string,
+  input: { id: string; text: string; severity?: string | undefined },
+  injectedNow?: string,
+): Promise<TaskRecordV3> {
+  const now = await currentInstant(root, injectedNow);
+  const task = await activeV3(root);
+  const text = requireText(input.text, "--text");
+  const severity = input.severity ?? "low";
+  if (!SEVERITIES.includes(severity as (typeof SEVERITIES)[number]))
+    throw new Error("--severity must be low, medium or high.");
+  const risks = task.residualRisks ?? [];
+  if (risks.some((risk) => risk.id === input.id)) throw new Error(`Residual risk ${input.id} already exists.`);
+  return (await saveWorkflow(root, {
+    task: {
+      ...task,
+      residualRisks: [...risks, { id: input.id, text, severity: severity as (typeof SEVERITIES)[number] }],
+      updatedAt: laterTimestamp(task.updatedAt, now),
+    },
+  })) as TaskRecordV3;
+}
