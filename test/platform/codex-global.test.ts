@@ -39,14 +39,12 @@ describe("Codex global surface plan", () => {
   it("renders only root-relative global skills plus conditional AGENTS and the current nested hook shape", () => {
     const plan = createCodexGlobalSurfacePlan();
 
-    expect(plan.skills).toHaveLength(7);
+    expect(plan.skills).toHaveLength(6);
     expect(
       plan.skills.every((file) => file.kind === "file" && /^skills\/harnix-[a-z-]+\/SKILL\.md$/u.test(file.path)),
     ).toBe(true);
     expect(plan.skills.every((file) => file.path.startsWith(".") === false)).toBe(true);
-    expect(plan.skills.every((file) => file.kind !== "file" || file.content.includes(".harnix/config.yaml"))).toBe(
-      true,
-    );
+    expect(plan.skills.every((file) => file.kind !== "file" || file.content.includes("name: harnix-"))).toBe(true);
     expect(plan.config.map((file) => file.path)).toEqual(["AGENTS.md", "config.toml"]);
 
     const agents = plan.config.find((file) => file.path === "AGENTS.md");
@@ -56,8 +54,8 @@ describe("Codex global surface plan", () => {
       sourceId: "codex-global-agents",
     });
     if (agents?.kind !== "managed-block") throw new Error("Expected AGENTS.md to be a managed block.");
-    expect(agents.content).toContain("nearest ancestor or workspace root containing `.harnix/config.yaml`");
-    expect(agents.content).toContain("no such root exists or its state is invalid");
+    expect(agents.content).toContain("nearest ancestor with a valid `.harnix/config.yaml`");
+    expect(agents.content).toContain("if none exists or its state is invalid");
     expect(agents.content).not.toContain("<!-- harnix:begin -->");
 
     const hook = plan.config.find((file) => file.path === "config.toml");

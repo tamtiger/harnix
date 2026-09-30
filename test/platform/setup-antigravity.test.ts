@@ -164,7 +164,7 @@ describe("setupPlatforms user-global lifecycle: Antigravity roots and skills", (
 
   it("should_preserve_an_unowned_harnix_skill_unit_without_claiming_or_overwriting_it", async () => {
     const home = await temporaryUserHome();
-    const skillUnit = join(home, ".kiro", "skills", "harnix-check");
+    const skillUnit = join(home, ".kiro", "skills", "harnix-verify");
     await mkdir(skillUnit, { recursive: true });
     await writeFile(join(skillUnit, "USER-NOTES.md"), "do not replace this skill\n");
 
@@ -176,12 +176,12 @@ describe("setupPlatforms user-global lifecycle: Antigravity roots and skills", (
     });
 
     expect(result.platforms[0]).toMatchObject({ platform: "kiro", readiness: "drifted" });
-    expect(result.platforms[0]?.preserved).toContain("~/.kiro/skills/harnix-check/SKILL.md");
+    expect(result.platforms[0]?.preserved).toContain("~/.kiro/skills/harnix-verify/SKILL.md");
     await expect(readFile(join(skillUnit, "USER-NOTES.md"), "utf8")).resolves.toBe("do not replace this skill\n");
     await expect(access(join(skillUnit, "SKILL.md"))).rejects.toMatchObject({ code: "ENOENT" });
     const manifest = JSON.parse(await readFile(join(home, ".kiro", "harnix", "managed.json"), "utf8")) as {
       entries: Array<{ path: string }>;
     };
-    expect(manifest.entries.some((entry) => entry.path === "skills/harnix-check/SKILL.md")).toBe(false);
+    expect(manifest.entries.some((entry) => entry.path === "skills/harnix-verify/SKILL.md")).toBe(false);
   });
 });

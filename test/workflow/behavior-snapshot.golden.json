@@ -20,7 +20,7 @@
         },
         "retryLimitReached": [],
         "activeTask": null,
-        "nextStage": "brainstorm"
+        "nextStage": "plan"
       }
     },
     {
@@ -523,7 +523,7 @@
           "status": "verifying",
           "checkpoint": "finishing"
         },
-        "nextStage": "finish"
+        "nextStage": "verify"
       }
     },
     {

@@ -14,7 +14,7 @@ import {
   kiroGlobalDesiredFiles,
 } from "src/configurators/kiro.js";
 import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "src/templates/harnix/activation.js";
+import { renderHarnixRules } from "src/templates/harnix/activation.js";
 import { codexGlobalAgentsContent, createCodexGlobalSurfacePlan } from "src/configurators/codex.js";
 import type { DesiredGlobalManagedFile } from "src/utils/global-managed-files.js";
 
@@ -54,46 +54,42 @@ describe("user-global platform desired-surface renderers", () => {
     });
     expect(JSON.parse(fileContent(byPath.get("hooks/harnix-context.json")))).toEqual(KIRO_GLOBAL_CONTEXT_HOOK);
     expect(fileContent(byPath.get("steering/harnix.md"))).toBe(KIRO_GLOBAL_STEERING);
-    expect(KIRO_GLOBAL_STEERING).toContain("only when");
+    expect(KIRO_GLOBAL_STEERING).toContain("nearest ancestor with a valid");
     expect(KIRO_GLOBAL_STEERING).toContain(".harnix/config.yaml");
     expect(KIRO_GLOBAL_STEERING).not.toContain("Detected languages:");
   });
 
-  it("should_include_activation_guard_when_rendering_global_skills_and_rules", () => {
+  it("should_render_the_same_harnix_rules_on_every_always_loaded_surface_and_keep_skills_free_of_them", () => {
     const kiroSkills = kiroGlobalDesiredFiles().filter((file) => file.path.startsWith("skills/"));
     const antigravity = antigravityGlobalPluginDesiredFiles();
     const antigravitySkills = antigravity.filter((file) => file.path.startsWith("skills/"));
 
     expect(kiroSkills).toHaveLength(workflowSkills.length);
     for (const skill of [...kiroSkills, ...antigravitySkills]) {
-      expect(fileContent(skill)).toContain("## Harnix activation guard");
-      expect(fileContent(skill)).toContain(".harnix/config.yaml");
-      expect(fileContent(skill)).toContain("nearest ancestor or workspace root");
-      expect(fileContent(skill)).toContain("no such root exists or its state is invalid");
+      expect(fileContent(skill)).toContain("name: harnix-");
+      expect(fileContent(skill)).not.toContain("## Harnix rules");
       expect(fileContent(skill)).not.toContain("C:\\");
     }
-    expect(ANTIGRAVITY_GLOBAL_RULE).toContain("## Harnix activation guard");
     expect(ANTIGRAVITY_GLOBAL_RULE).toMatch(/^# Harnix\n/u);
     expect(ANTIGRAVITY_GLOBAL_RULE).not.toMatch(/^---\n/u);
-    expect(ANTIGRAVITY_GLOBAL_RULE).toContain(".harnix/config.yaml");
-    expect(ANTIGRAVITY_GLOBAL_RULE).toContain("nearest ancestor or workspace root");
-    expect(ANTIGRAVITY_GLOBAL_RULE).toContain("no such root exists or its state is invalid");
-    expect(KIRO_GLOBAL_STEERING).toContain("nearest ancestor or workspace root");
-    expect(KIRO_GLOBAL_STEERING).toContain("no such root exists or its state is invalid");
+    for (const surface of [ANTIGRAVITY_GLOBAL_RULE, KIRO_GLOBAL_STEERING]) {
+      expect(surface).toContain("## Harnix rules");
+      expect(surface).toContain(renderHarnixRules());
+      expect(surface).toContain(".harnix/config.yaml");
+      expect(surface).toContain("nearest ancestor with a valid `.harnix/config.yaml`");
+    }
   });
 
   it("should_route_ordinary_requests_without_requiring_the_user_to_name_harnix", () => {
     for (const instructions of [KIRO_GLOBAL_STEERING, ANTIGRAVITY_GLOBAL_RULE, codexGlobalAgentsContent]) {
-      for (const clause of HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS) expect(instructions).toContain(clause);
+      expect(instructions).toContain(renderHarnixRules());
       expect(instructions.indexOf("classify the latest request")).toBeLessThan(
-        instructions.indexOf("consulting any active task"),
+        instructions.indexOf("before reading any active task") + 1,
       );
       expect(instructions).toContain("leaves an unrelated active task unchanged");
       expect(instructions).toContain("workflow --preflight");
-      expect(instructions).toContain("If no such root exists or its state is invalid");
+      expect(instructions).toContain("if none exists or its state is invalid");
     }
-    expect(codexGlobalAgentsContent).toContain("Obvious Bypass does not load unrelated workflow/task state");
-    expect(codexGlobalAgentsContent).not.toContain("For an initialized Harnix project, read `.harnix/workflow.md`");
   });
 
   it("should_render_byte-identical_canonical_skill_sources_for_every_platform", () => {

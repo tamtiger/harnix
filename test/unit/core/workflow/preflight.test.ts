@@ -101,7 +101,7 @@ describe("workflow preflight", () => {
       )}\n`,
     );
 
-    await expect(preflightWorkflow(root)).resolves.toMatchObject({ contextDrift: "stale", nextStage: "continue" });
+    await expect(preflightWorkflow(root)).resolves.toMatchObject({ contextDrift: "stale", nextStage: "plan" });
   });
 
   it("short-circuits stale-context routing before verification snapshot inspection", async () => {
@@ -153,7 +153,7 @@ describe("workflow preflight", () => {
     await expect(preflightWorkflow(root, Date.parse("2026-08-13T00:03:00.000Z"))).resolves.toMatchObject({
       contextDrift: "stale",
       requiredChecks: { pending: ["check"], stale: [] },
-      nextStage: "continue",
+      nextStage: "plan",
     });
   });
 
@@ -245,7 +245,7 @@ describe("workflow preflight", () => {
     });
   });
 
-  it("does not route finishing to Finish until acceptance completion semantics are ready", async () => {
+  it("routes finishing to verify whether or not acceptance completion is ready", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
     const now = Date.parse("2026-08-13T00:03:00.000Z");
@@ -267,7 +267,7 @@ describe("workflow preflight", () => {
 
     await expect(preflightWorkflow(root, now)).resolves.toMatchObject({
       requiredChecks: { passed: ["check"] },
-      nextStage: "check",
+      nextStage: "verify",
     });
     await expect(finishWorkflow(root, new Date(now).toISOString())).rejects.toThrow(
       /fresh complete verification|completion|fresh required evidence/iu,
@@ -283,7 +283,7 @@ describe("workflow preflight", () => {
     await saveTask(join(root, ".harnix"), noRequired);
     await expect(preflightWorkflow(root, now)).resolves.toMatchObject({
       requiredChecks: { passed: [] },
-      nextStage: "check",
+      nextStage: "verify",
     });
   });
 });

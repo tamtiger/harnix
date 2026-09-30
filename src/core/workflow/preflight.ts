@@ -5,7 +5,8 @@ import { inspectRequiredChecks, type RequiredCheckState } from "src/core/verific
 import { formatInstant, idPrefix } from "src/utils/clock.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
-import { canCompleteTask, verificationRetryDisposition } from "./completion.js";
+import { verificationRetryDisposition } from "./completion.js";
+import { stageOwnerFor } from "./routing.js";
 import type { LearningSummaryItem } from "src/core/journal/learning-summary.js";
 import { taskContextDrift } from "./context.js";
 import { projectLearningSummary } from "./support.js";
@@ -17,7 +18,7 @@ export interface WorkflowPreflightResultV1 {
   contextDrift: ContextDrift["state"];
   requiredChecks: Record<RequiredCheckState, string[]>;
   retryLimitReached: string[];
-  nextStage: "await" | "brainstorm" | "check" | "continue" | "debug" | "finish" | "implement" | "stop";
+  nextStage: "await" | "debug" | "implement" | "plan" | "stop" | "verify";
   /** Authoritative time source for agents: current instant and ID prefix in the configured zone. */
   clock: { timezone: string; now: string; idPrefix: string };
   /** Redacted, bounded notes from earlier tasks (at most 5); the source for platforms without hooks. */
@@ -47,12 +48,10 @@ export async function preflightWorkflow(root: string, now = Date.now()): Promise
     requiredChecks: emptyRequiredChecks(),
     retryLimitReached: [] as string[],
   };
-  if (task === undefined) return { ...base, activeTask: null, nextStage: "brainstorm" };
+  if (task === undefined) return { ...base, activeTask: null, nextStage: "plan" };
   const activeTask = { id: task.id, mode: task.mode, status: task.status, checkpoint: task.checkpoint };
-  if (task.status === "completed" || task.status === "cancelled") {
-    return { ...base, activeTask, nextStage: "continue" };
-  }
-  if (task.status === "blocked") return { ...base, activeTask, nextStage: "continue" };
+  if (task.status === "completed" || task.status === "cancelled" || task.status === "blocked")
+    return { ...base, activeTask, nextStage: stageOf(task) };
   const contextDrift = (await taskContextDrift(root, harnixRoot, task)).state;
   const retryLimitReached = task.validationPlan
     .filter((check) => check.required && verificationRetryDisposition(task, check.id, now) === "stop")
@@ -65,7 +64,7 @@ export async function preflightWorkflow(root: string, now = Date.now()): Promise
       contextDrift,
       requiredChecks: requiredChecksFromEvidence(task, now),
       retryLimitReached,
-      nextStage: contextDrift === "stale" ? "continue" : "stop",
+      nextStage: contextDrift === "stale" ? "plan" : "stop",
     };
   }
   const inspections =
@@ -83,7 +82,7 @@ export async function preflightWorkflow(root: string, now = Date.now()): Promise
     contextDrift,
     requiredChecks,
     retryLimitReached,
-    nextStage: preflightStage(task, contextDrift, requiredChecks, retryLimitReached, now),
+    nextStage: stageOf(task),
   };
 }
 
@@ -114,25 +113,9 @@ function isStalePass(task: TaskRecord, latest: Evidence, now: number): boolean {
   );
 }
 
-function preflightStage(
-  task: TaskRecord,
-  contextDrift: ContextDrift["state"],
-  checks: RequiredChecks,
-  retryLimitReached: readonly string[],
-  now: number,
-): WorkflowPreflightResultV1["nextStage"] {
-  if (task.status === "blocked" || task.status === "completed" || task.status === "cancelled") return "continue";
-  if (contextDrift === "stale") return "continue";
-  if (retryLimitReached.length > 0) return "stop";
-  if (task.status === "planning" || task.checkpoint === "replan") return "brainstorm";
-  if (task.status === "ready") return "await";
-  if (task.status === "in_progress") return task.checkpoint === "debugging" ? "debug" : "implement";
-  if (task.checkpoint === "debugging") return "debug";
-  if (
-    task.checkpoint === "finishing" &&
-    checks.failed.length + checks.stale.length + checks.pending.length === 0 &&
-    canCompleteTask(task, now)
-  )
-    return "finish";
-  return "check";
+/** The skill that owns the persisted state; `ready` waits until the latest request authorizes implementation. */
+function stageOf(task: TaskRecord): WorkflowPreflightResultV1["nextStage"] {
+  if (task.status === "ready" && task.checkpoint === "ready") return "await";
+  const owner = stageOwnerFor(task);
+  return owner === undefined ? "stop" : (owner.slice("harnix-".length) as "plan" | "implement" | "verify" | "debug");
 }

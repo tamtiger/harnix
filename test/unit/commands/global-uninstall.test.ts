@@ -29,7 +29,7 @@ describe("global integration uninstall", () => {
 
   it("returns a confirmation-only preview for exactly the selected public platforms", async () => {
     const { roots } = await configuredRoots(["kiro", "antigravity", "codex"]);
-    const kiroSkill = join(roots.kiro.path, "skills", "harnix-check", "SKILL.md");
+    const kiroSkill = join(roots.kiro.path, "skills", "harnix-verify", "SKILL.md");
     const antigravityPlugin = join(roots.antigravityDesktop.path, "plugin.json");
     const codexAgents = join(roots.codex.config.path, "AGENTS.md");
 
@@ -43,11 +43,11 @@ describe("global integration uninstall", () => {
       ),
     ).toBe(true);
     expect(result.platforms.find((platform) => platform.platform === "kiro")?.targets).toContain(
-      "~/.kiro/skills/harnix-check/SKILL.md",
+      "~/.kiro/skills/harnix-verify/SKILL.md",
     );
     expect(result.platforms.find((platform) => platform.platform === "codex")?.targets).toEqual(
       expect.arrayContaining([
-        "~/.agents/skills/harnix-check/SKILL.md",
+        "~/.agents/skills/harnix-verify/SKILL.md",
         "~/.codex/AGENTS.md#codex-global-agents",
         "~/.codex/config.toml#codex-global-context-hook",
       ]),
@@ -114,7 +114,7 @@ describe("global integration uninstall", () => {
     await expect(access(roots.antigravityCli.path)).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(roots.codex.config.path, "harnix"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(roots.codex.skills.path, "harnix"))).rejects.toMatchObject({ code: "ENOENT" });
-    await expect(access(join(roots.codex.skills.path, "skills", "harnix-check"))).rejects.toMatchObject({
+    await expect(access(join(roots.codex.skills.path, "skills", "harnix-verify"))).rejects.toMatchObject({
       code: "ENOENT",
     });
     await expect(access(roots.codex.config.path)).resolves.toBeUndefined();
@@ -141,7 +141,7 @@ describe("global integration uninstall", () => {
         "~/.codex/config.toml#codex-global-context-hook",
       ]),
     );
-    expect(codex.removed).toEqual(expect.arrayContaining(["~/.agents/skills/harnix-check/SKILL.md"]));
+    expect(codex.removed).toEqual(expect.arrayContaining(["~/.agents/skills/harnix-verify/SKILL.md"]));
     await expect(readFile(agentsPath, "utf8")).resolves.toContain("User-modified Harnix");
     await expect(access(join(roots.codex.config.path, "harnix", "managed.json"))).resolves.toBeUndefined();
     const after = await readFile(configPath, "utf8");

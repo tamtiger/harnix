@@ -137,6 +137,21 @@ Chi tiết đầy đủ (transition, gate, artifact contract) nằm ở [Workflo
 
 **Seed specs và `.harnix/workflow.md` được Harnix quản lý cho đến khi người dùng sửa** — sau lần chỉnh sửa đầu tiên, `harnix update` sẽ luôn giữ nguyên phần bạn đã đổi. Ngược lại: **Task, research và journal luôn là dữ liệu người dùng** — Harnix không bao giờ tự sửa hay xoá nội dung bên trong `.harnix/tasks/`, research hay journal của bạn.
 
+### Sáu skill Harnix
+
+Agent chỉ nạp đúng một skill mỗi lần, theo `nextStage` mà `harnix workflow --preflight` trả về:
+
+| Skill | Khi nào agent dùng |
+|---|---|
+| `harnix-plan` | Chưa có task, đang `planning`, replan, ready gate, migrate task cũ lên v3, tạo epic |
+| `harnix-implement` | Task `ready` đã được yêu cầu triển khai, hoặc đang `in_progress/implementing` |
+| `harnix-verify` | `verifying`: kiểm chứng compliance rồi quality/security, sau đó finish hoặc cancel |
+| `harnix-debug` | Checkpoint `debugging` cho một lỗi tái hiện được trong phạm vi task |
+| `harnix-review` | Review code chỉ đọc (Bypass, không đụng task) |
+| `harnix-research` | Research chỉ đọc, hoặc research cho một ẩn số trong planning/replan/debugging |
+
+Phần chi tiết ít dùng (replan, migration, epic, evidence, finish/cancel…) nằm trong các *reference* nạp theo yêu cầu: `harnix skill <tên> --reference <chủ đề>`; chạy `harnix skill` để xem danh sách. Tên skill cũ (`harnix-brainstorm`, `harnix-check`, `harnix-finish-work`, `harnix-continue`) vẫn resolve về skill mới.
+
 ## Các lệnh CLI thường dùng
 
 Mọi output của public command đều là JSON. Dưới đây là các lệnh bạn sẽ dùng thường xuyên nhất; danh sách đầy đủ options và output shape nằm ở [Yêu cầu sản phẩm](docs/HARNIX_PRD.md#12-lifecycle-commands).
@@ -157,7 +172,7 @@ Mọi output của public command đều là JSON. Dưới đây là các lệnh
 | `harnix update [--global] [--restore]` | Đồng bộ lại managed files theo config hiện tại |
 | `harnix uninstall --purge` / `--global --kiro --yes` | Gỡ dữ liệu project hoặc một tích hợp global |
 | `harnix mem "<query>"` | Tìm journal memory theo từ khóa |
-| `harnix skill [name]` | Xem catalog skill hoặc nội dung một skill cụ thể |
+| `harnix skill [name] [--reference <topic>]` | Xem catalog sáu skill, nội dung một skill (tên cũ vẫn resolve) hoặc một reference nạp theo yêu cầu |
 
 Một vài quy ước chung đáng nhớ:
 
@@ -179,6 +194,8 @@ Mở trực tiếp `.harnix/tasks/<id>/review.md` — không cần chạy comman
 | Claude Code | `claude` / `--claude` | `~/.claude/skills/harnix-*`, marker block trong `~/.claude/CLAUDE.md`, group `harnix-context` trong `hooks.UserPromptSubmit` của `~/.claude/settings.json` |
 
 `harnix setup` chạy được ở bất kỳ thư mục nào, chỉ cần chọn platform flag, không cần đứng trong project. Với Codex, sau khi setup bạn cần mở `/hooks` và tự trust hook. Harnix không bao giờ ghi vào `~/.claude.json`, credentials, MCP server, hay các file không thuộc phạm vi quản lý của nó. Chi tiết đầy đủ về hook protocol nằm ở [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) và [Yêu cầu sản phẩm](docs/HARNIX_PRD.md#9-user-global-setup-and-platform-requirements).
+
+**Nâng cấp từ bản dùng 7 skill cũ:** chạy `harnix update --global` (và `harnix update` trong từng project) để cài 6 skill mới, gỡ 4 skill cũ do Harnix quản lý và làm mới khối chỉ dẫn always-loaded. Nội dung bạn đã sửa tay vẫn được giữ nguyên; `AGENTS.md` project đã tồn tại không bị ghi đè nên cần đối chiếu tay nếu bạn đã chỉnh.
 
 ## Dữ liệu dự án (.harnix/)
 

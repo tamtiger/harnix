@@ -1,26 +1,14 @@
 import type { DesiredGlobalManagedFile } from "src/utils/global-managed-files.js";
-import {
-  HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
-  HARNIX_PERSISTENCE_INSTRUCTIONS,
-  HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
-} from "./activation.js";
+import { renderHarnixRules } from "./activation.js";
 import { renderSkill, workflowSkills } from "./workflow.js";
 
 /**
- * Canonical standalone activation-guard document. Every platform whose global
- * surface owns a whole rule/steering file renders exactly these bytes, so the
- * guard cannot drift between platforms.
+ * Canonical standalone rules document. Every platform whose global surface owns a whole rule/steering file
+ * renders exactly these bytes, so the rules cannot drift between platforms.
  */
-export const HARNIX_GLOBAL_ACTIVATION_DOCUMENT = [
-  "# Harnix",
-  "",
-  "## Harnix activation guard",
-  "",
-  ...HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
-  ...HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
-  ...HARNIX_PERSISTENCE_INSTRUCTIONS,
-  "",
-].join("\n");
+export const HARNIX_GLOBAL_ACTIVATION_DOCUMENT = ["# Harnix", "", "## Harnix rules", "", renderHarnixRules(), ""].join(
+  "\n",
+);
 
 /**
  * Root-relative canonical skill files for one platform. Paths stay identical

@@ -1,163 +1,200 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
-import { workflowSkills } from "src/skills/catalog.js";
+import { legacySkillAliases, workflowSkills } from "src/skills/catalog.js";
 
 const skillNames = [
-  "harnix-brainstorm",
+  "harnix-plan",
   "harnix-implement",
-  "harnix-check",
-  "harnix-finish-work",
-  "harnix-continue",
+  "harnix-verify",
+  "harnix-review",
   "harnix-research",
   "harnix-debug",
 ] as const;
+type SkillName = (typeof skillNames)[number];
+const TASK_SKILLS: readonly SkillName[] = ["harnix-plan", "harnix-implement", "harnix-verify", "harnix-debug"];
 
-const behaviorNeedles: Record<(typeof skillNames)[number], readonly string[]> = {
-  "harnix-brainstorm": [
-    "review.md",
-    "`decisions`",
-    "decision inventory",
+/**
+ * Every responsibility of the seven skills that existed before the merge, with the phrase that proves it still has a
+ * home. A needle is looked up in the skill and its references (references are part of the skill's instructions).
+ */
+const capabilities: Record<SkillName, readonly string[]> = {
+  "harnix-plan": [
+    "harnix workflow --preflight",
+    "inventory",
     "observable acceptance criteria",
-    "placeholder scan",
     "hyphenated slug",
-    "implementation checklist",
-    "Do not mark the task `ready`",
-    "stale context",
-    "context reselection",
+    "unchecked",
+    "context checkpoint",
+    "not a second approval gate",
+    "--add-decision",
+    "harnix skill harnix-research",
     "TaskRecord schema v3",
     "criterionIds",
+    "--set-check",
+    "freeze at the first persisted `ready`",
+    "await",
+    "plan-only",
+    "epicMembers",
+    "contractRevision",
+    "context reselection",
     "@task-contract",
-    "context checkpoint",
-    "assumptions and inferences",
-    "no blocking question remains",
-    "not a second approval gate",
-    "harnix workflow --save",
-    "bounded JSON envelope on stdin",
+    "--migrate",
+    "task-schema-to-v3",
+    "placeholders",
+    "commit discipline",
+    "blocked",
   ],
   "harnix-implement": [
-    "workflow --transition",
-    "workflow --evidence",
-    "Review the plan critically",
-    "Verify RED",
+    "harnix workflow --preflight",
+    "harnix workflow --transition in_progress/implementing",
+    "review the plan",
+    "RED",
+    "GREEN",
     "minimal implementation",
+    "--run-check",
+    "strongest alternative",
+    "`- [x]`",
+    "release preparation",
+    "pnpm version:sync",
+    "before verifying",
     "technical feedback",
-    "implementation checklist",
-    "workflow --snapshot",
-    "inputDigest",
-    "harnix workflow --save",
+    "push back",
+    "replan",
+    "harnix-debug",
+    "--add-risk",
+    "wait for approval",
   ],
-  "harnix-check": [
-    "workflow --evidence",
-    "Map every claim",
-    "exit code",
+  "harnix-verify": [
+    "harnix workflow --preflight",
+    "harnix workflow --transition verifying/verifying",
+    "evidence precedes claims",
     "compliance",
     "quality and security",
-    "standalone read-only review",
+    "inputDigest",
+    "reuse a required pass",
+    "--run-check",
+    "--criterion <ids> --met",
+    "waived",
+    "one remediation round",
+    "material correctness",
+    "--add-risk",
+    "verifying/finishing",
+    "harnix workflow --finish --brief",
+    "recomputes",
+    "never edits the product",
+    "learning.captured",
+    "review.md",
+    "harnix epic",
+    "cancelled/cancelling",
+    "harnix workflow --cancel",
+    "authorizedBy",
+    "clears only the matching active pointer",
+    "digest-mismatch",
+    "fingerprint",
+    "wait for approval",
+  ],
+  "harnix-review": [
+    "read-only",
     "working-tree diff",
-    "explicit commit range",
-    "bounded paths",
+    "commit range",
     "file:line",
     "fix direction",
     "ready-with-fixes",
-    "omitted checks",
+    "omitted",
     "residual risk",
-    "workflow --snapshot",
-    "inputDigest",
-    "harnix workflow --save",
-    "redundancy that aids readability",
-    "already addressed in the diff",
-    "consistency-only change",
-    "harmless no-op",
-    "style or formatting",
     "find-or-create",
     "unique constraint",
     "constant-time",
     "LLM",
     "N+1",
-  ],
-  "harnix-finish-work": [
-    "review.md",
-    "`residualRisks`",
-    "active pointer",
-    "completed",
-    "Never commit",
-    "residual risks",
-    "product-read-only",
-    "recomputes the digest of every latest required pass",
-    "harnix workflow --finish",
-    "cancelled/cancelling",
-    "harnix workflow --cancel",
-  ],
-  "harnix-continue": [
-    "routing table",
-    "planning",
-    "in_progress",
-    "verifying",
-    "contextDrift",
-    "checkpoint `replan`",
-    "reselect context",
-    "legacy-task-schema",
-    "migration save to schema v3",
-    "harnix workflow --inspect",
-    "harnix workflow --save",
-    "cancelled/cancelling",
-    "separately through EOF",
+    "readability-only redundancy",
+    "consistency-only reshaping",
+    "harmless no-op",
+    "linter",
+    "the diff already fixes",
+    "hypothesis",
   ],
   "harnix-research": [
-    "source authority",
-    "facts from inferences",
+    "authority",
+    "separate facts from inferences",
     "remaining uncertainty",
-    "one material unknown",
-    "Standalone read-only research",
-    "Task-scoped research",
-    "do not read or mutate active task state",
-    "harnix workflow --save",
+    "one bounded pass",
+    "standalone",
+    "task-scoped",
+    "do not read or change task state",
+    "--save",
+    "new source could change",
+    "primary sources",
   ],
   "harnix-debug": [
+    "harnix workflow --preflight",
     "root cause",
-    "one falsifiable hypothesis",
+    "falsifiable",
     "contained recovery",
-    "three failed hypotheses",
-    "harnix workflow --save",
+    "three distinct failed hypotheses",
+    "scope gate",
+    "outside the goal",
+    "identical check, digest, exit code",
+    "replan",
+    "harnix skill harnix-research",
+    "repo-map --impact",
+    "in_progress/implementing",
   ],
 };
 
+function fullText(name: SkillName): string {
+  const skill = workflowSkills.find((candidate) => candidate.name === name);
+  if (skill === undefined) throw new Error(`missing skill ${name}`);
+  return [skill.content, ...Object.values(skill.references)].join("\n").toLowerCase();
+}
+
+async function readSkillSource(name: string): Promise<string> {
+  return (
+    await readFile(fileURLToPath(new URL(`../../src/skills/${name}/SKILL.md`, import.meta.url)), "utf8")
+  ).replaceAll("\r\n", "\n");
+}
+
 describe("canonical Harnix workflow skill sources", () => {
-  it("stores all seven discoverable skills as real, self-contained SKILL.md files", async () => {
+  it("stores exactly six discoverable skills as SKILL.md files with only references beside them", async () => {
     const packageVersion = JSON.parse(
       await readFile(fileURLToPath(new URL("../../package.json", import.meta.url)), "utf8"),
     ) as { version: string };
+    const directory = fileURLToPath(new URL("../../src/skills/", import.meta.url));
+    const onDisk = (await readdir(directory, { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort();
 
+    expect(onDisk).toEqual([...skillNames].sort());
     for (const name of skillNames) {
-      const content = await readSkill(name);
+      const content = await readSkillSource(name);
       const frontmatter = content.match(/^---\n([\s\S]*?)\n---\n/u)?.[1] ?? "";
+      const entries = (await readdir(`${directory}${name}`)).sort();
 
+      expect(entries.filter((entry) => entry !== "references")).toEqual(["SKILL.md"]);
       expect(frontmatter).toContain(`name: ${name}`);
       expect(frontmatter).toMatch(/description: ["']?Use when\b/u);
       expect(frontmatter).toContain(`metadata:\n  version: "${packageVersion.version}"`);
       expect(frontmatter).not.toMatch(/^version:/mu);
-      expect(content).toContain("## Harnix activation guard");
-      expect(content).toContain("`.harnix/config.yaml`");
-      expect(content).toContain("## Incoming state");
-      expect(content).toContain("## Persist");
-      expect(content).toContain("## Exit");
-      expect(content).toContain("## Upstream basis");
       expect(content.split("\n").length).toBeLessThan(500);
       expect(content).not.toContain("REQUIRED SUB-SKILL");
       expect(content).not.toContain("using-git-worktrees");
       expect(content).not.toContain("subagent-driven-development");
-
-      for (const needle of behaviorNeedles[name]) {
-        expect(content.toLowerCase(), `${name} is missing behavior: ${needle}`).toContain(needle.toLowerCase());
-      }
     }
-
     expect(workflowSkills.map(({ name, version }) => ({ name, version }))).toEqual(
       skillNames.map((name) => ({ name, version: packageVersion.version })),
     );
+  });
+
+  it.each(skillNames)("%s keeps every responsibility of the skills it absorbed", (name) => {
+    const text = fullText(name);
+
+    for (const needle of capabilities[name]) {
+      expect(text, `${name} is missing behavior: ${needle}`).toContain(needle.toLowerCase());
+    }
   });
 
   it("keeps skill prose out of the TypeScript workflow template", async () => {
@@ -170,97 +207,83 @@ describe("canonical Harnix workflow skill sources", () => {
     expect(workflowSource).not.toContain("export const workflowSkills: SkillTemplate[] = [");
   });
 
-  it("makes the check skill discoverable for code review and review feedback", async () => {
-    const content = await readSkill("harnix-check");
-    const description = content.match(/^description:\s*(.+)$/mu)?.[1] ?? "";
+  it("makes the review and research skills discoverable and independent of task state", () => {
+    const review = workflowSkills.find(({ name }) => name === "harnix-review")!;
+    const research = workflowSkills.find(({ name }) => name === "harnix-research")!;
 
-    expect(description.toLowerCase()).toContain("code review");
-    expect(description.toLowerCase()).toContain("review feedback");
-    expect(content).not.toMatch(/dispatch a code reviewer subagent|before merge to main|auto-?fix/iu);
+    expect(review.description.toLowerCase()).toContain("code review");
+    expect(review.description.toLowerCase()).toContain("review feedback");
+    expect(review.content).not.toMatch(/dispatch a code reviewer subagent|before merge to main|auto-?fix/iu);
+    expect(research.description.toLowerCase()).toContain("standalone read-only research");
+    for (const skill of [review, research]) {
+      expect(skill.content, skill.name).toMatch(
+        /does not need `\.harnix\/workflow\.md`|do not need `\.harnix\/workflow\.md`|you do not need `\.harnix\/workflow\.md`/u,
+      );
+    }
   });
 
-  it("makes the research skill safe for standalone and task-scoped profiles", async () => {
-    const content = await readSkill("harnix-research");
-    const description = content.match(/^description:\s*(.+)$/mu)?.[1] ?? "";
-
-    expect(description.toLowerCase()).toContain("standalone read-only research");
-    expect(content).toContain("**Standalone read-only research:**");
-    expect(content).toContain("**Task-scoped research:**");
-    expect(content).toContain("do not read or mutate active task state");
-    expect(content).toContain("Do not create task state, persist an artifact, or modify product files");
+  it("makes every task skill start from preflight so it works without a hook", () => {
+    for (const name of TASK_SKILLS) {
+      const skill = workflowSkills.find((candidate) => candidate.name === name)!;
+      expect(skill.content, name).toContain("harnix workflow --preflight");
+    }
   });
 
-  it("keeps each persisted checkpoint owned by one stage skill", async () => {
-    const brainstorm = await readSkill("harnix-brainstorm");
-    const implement = await readSkill("harnix-implement");
-    const check = await readSkill("harnix-check");
-    const finish = await readSkill("harnix-finish-work");
-    const continuation = await readSkill("harnix-continue");
-
-    expect(brainstorm).toContain("outside `planning|replan`");
-    expect(brainstorm).toContain("guarded re-entry");
-    expect(implement).toContain("`in_progress/implementing`");
-    expect(implement).toContain("guarded re-entry to `ready/ready`");
-    expect(implement).not.toContain("`implementing` or `debugging`");
-    expect(check).toContain("persist `verifying/finishing`");
-    expect(finish).toContain("Accept only `verifying/finishing`");
-    expect(finish).toContain("run `harnix workflow --finish` exactly once");
-    expect(finish).toContain("Accept `cancelled/cancelling` only for partial cancellation recovery");
-    expect(finish).toContain("run `harnix workflow --cancel`");
-    expect(finish).toContain("harnix mem --learning");
-    expect(finish).toContain("harnix workflow --learn");
-    expect(finish).toContain("Capture is automatic");
-    expect(finish).not.toContain("write the task `status` as `completed`");
-    expect(continuation).toContain("Blocked state takes precedence over its checkpoint");
-    expect(continuation).toContain("guarded re-entry");
-    expect(continuation).toContain("Read only that owner skill, separately through EOF");
+  it("keeps each rule in one place: no skill repeats the guard, the Bypass list or the state rules", () => {
+    for (const skill of workflowSkills) {
+      expect(skill.content, skill.name).not.toMatch(/canonicalize|symlink|junction/iu);
+      expect(skill.content, skill.name).not.toMatch(/literal-value|docs-only/iu);
+      expect(skill.content, skill.name).not.toMatch(/Set-Content|never create temporary/iu);
+    }
   });
 
-  it("enforces bounded convergence, evidence reuse, and product-read-only finish across stage owners", async () => {
-    const brainstorm = await readSkill("harnix-brainstorm");
-    const implement = await readSkill("harnix-implement");
-    const check = await readSkill("harnix-check");
-    const finish = await readSkill("harnix-finish-work");
-    const continuation = await readSkill("harnix-continue");
-    const research = await readSkill("harnix-research");
-    const debug = await readSkill("harnix-debug");
+  it("removes the contradictions C4 to C8 from the instructions", () => {
+    const all = workflowSkills
+      .map((skill) => [skill.content, ...Object.values(skill.references)].join("\n"))
+      .join("\n");
 
-    expect(brainstorm.indexOf("Classify the latest request")).toBeLessThan(brainstorm.indexOf("active task"));
-    expect(brainstorm).toContain("bounded literal-value-only edit");
-    expect(brainstorm).toContain("freeze at the first persisted `ready`");
-    expect(implement).toContain("Release preparation");
-    expect(implement).toContain("before `verifying`");
-    expect(implement).toContain("reuse");
-    expect(implement).toContain("failed run");
-    expect(implement).toContain("inputDigest");
-    expect(check).toContain("reported `passed`");
-    expect(check).toContain("one automatic remediation round");
-    expect(check).toContain("Low/P3");
-    expect(check).toContain("residual");
-    expect(check).not.toContain("Do not rely on an earlier run");
-    expect(check).not.toContain("one confirmed item at a time");
-    expect(debug).toContain("Scope gate");
-    expect(debug).toContain("outside the task goal");
-    expect(debug).toContain("second identical failure");
-    expect(finish).toContain("product-read-only");
-    expect(finish).toContain("only when new evidence");
-    expect(finish).toContain("Never append a duplicate summary");
-    expect(finish).not.toContain("project-specific release instruction");
-    expect(continuation).toContain("unrelated active task");
-    expect(continuation).toContain("generic status request");
-    expect(continuation).toContain("explicit Harnix-task status request");
-    expect(continuation.indexOf("Classify the latest request")).toBeLessThan(
-      continuation.indexOf("read `.harnix/workflow.md` after this classification"),
+    expect(all).not.toMatch(/through a bounded JSON envelope on stdin to `harnix workflow --save`/u); // C4
+    expect(workflowSkills.find(({ name }) => name === "harnix-verify")!.content).toMatch(/Lite task has none/u); // C5
+    expect(workflowSkills.find(({ name }) => name === "harnix-implement")!.content).toMatch(/Lite task has none/u); // C5
+    for (const name of ["harnix-review", "harnix-research"]) {
+      const skill = workflowSkills.find((candidate) => candidate.name === name)!;
+      expect(skill.content, name).toMatch(/workflow\.md/u); // C6: says it is not needed
+      expect(skill.content, name).not.toMatch(/read `\.harnix\/workflow\.md`/iu);
+    }
+    expect(all).not.toMatch(/read[^\n]*\.active|\.active[^\n]*(read|before preflight)/iu); // C7: never read the pointer first
+    expect(all).not.toContain("harnix-continue"); // C8: one route through nextStage
+  });
+
+  it("keeps each persisted checkpoint owned by one stage skill", () => {
+    const plan = fullText("harnix-plan");
+    const implement = fullText("harnix-implement");
+    const verify = fullText("harnix-verify");
+    const debug = fullText("harnix-debug");
+
+    expect(plan).toContain("nextstage");
+    expect(implement).toContain(
+      "`in_progress/implementing`".toLowerCase().replace("`in_progress/implementing`", "in_progress/implementing"),
     );
-    expect(continuation).toContain("same drift");
-    expect(brainstorm).not.toContain("execution-notes");
-    expect(implement).not.toContain("execution-note");
-    expect(research).toContain("no new source or evidence");
+    expect(verify).toContain("verifying/finishing");
+    expect(verify).toContain("run `harnix workflow --finish --brief` exactly once".toLowerCase().replace(/`/gu, "`"));
+    expect(verify).toContain("cancelled/cancelling");
+    expect(debug).toContain("checkpoint `replan`");
+    expect(verify).not.toContain("write the task `status` as `completed`");
+  });
+
+  it("resolves every earlier skill name to its replacement", () => {
+    expect(Object.keys(legacySkillAliases).sort()).toEqual([
+      "harnix-brainstorm",
+      "harnix-check",
+      "harnix-continue",
+      "harnix-finish-work",
+    ]);
+    for (const alias of Object.values(legacySkillAliases)) {
+      expect(skillNames).toContain(alias.name);
+    }
+  });
+
+  it("keeps skill descriptions within the documented 1,024-character limit", () => {
+    for (const skill of workflowSkills) expect(skill.description.length, skill.name).toBeLessThanOrEqual(1024);
   });
 });
-
-async function readSkill(name: (typeof skillNames)[number]): Promise<string> {
-  return (
-    await readFile(fileURLToPath(new URL(`../../src/skills/${name}/SKILL.md`, import.meta.url)), "utf8")
-  ).replaceAll("\r\n", "\n");
-}

@@ -189,17 +189,17 @@ Stack/catalog architecture uses only researched patterns rather than vendored ru
 
 | Source skill | Harnix location | Adaptation |
 |---|---|---|
-| `brainstorming` | `Triage`/`Planning`/`Ready`, `harnix-brainstorm` | Context-first convergence; approval chỉ khi user requested checkpoint hoặc decision chưa resolved, không universal hard gate |
+| `brainstorming` | `Triage`/`Planning`/`Ready`, `harnix-plan` | Context-first convergence; approval chỉ khi user requested checkpoint hoặc decision chưa resolved, không universal hard gate |
 | `systematic-debugging` | `harnix-debug` | Concise evidence/hypothesis loop, three-failure architecture reset |
-| `verification-before-completion` | `harnix-check`, `harnix-finish-work` | Fresh command/exit evidence + TaskRecord v2 criterion/check intersection + canonical input snapshot recomputed ở save/finish |
+| `verification-before-completion` | `harnix-verify` | Fresh command/exit evidence + TaskRecord v2 criterion/check intersection + canonical input snapshot recomputed ở save/finish |
 | `test-driven-development` | `harnix-implement` | Adaptive meaningful RED–GREEN–REFACTOR, documented exceptions |
-| `writing-plans` | Full `harnix-brainstorm`, `plan.md` | File/interface-level decision-complete plan; no placeholder, mandatory commits or execution-mode handoff |
+| `writing-plans` | Full `harnix-plan`, `plan.md` | File/interface-level decision-complete plan; no placeholder, mandatory commits or execution-mode handoff |
 | `executing-plans` | `harnix-implement` | Small verifiable checkpoints and stop/replan rules; no required worktree/subagent |
-| Request/receive review | `harnix-check` | Compliance then quality; verify feedback technically, no blind application or mandatory reviewer subagent |
-| `finishing-a-development-branch` | `harnix-finish-work` only for verification concept | Branch/merge/push/PR menu rejected; integration remains explicit user-owned action |
+| Request/receive review | `harnix-verify`, `harnix-review` | Compliance then quality; verify feedback technically, no blind application or mandatory reviewer subagent |
+| `finishing-a-development-branch` | `harnix-verify` only for verification concept | Branch/merge/push/PR menu rejected; integration remains explicit user-owned action |
 | Universal skill invocation/worktree/subagent chain | — | Rejected; one canonical workflow routes focused skills only when state requires them |
 
-Bảy adaptation được lưu dưới dạng source thật tại `src/skills/harnix-*/SKILL.md`, mỗi source có semantic `metadata.version` đồng bộ package release. `workflow.ts` không giữ một bản prose thứ hai; build nhúng source Markdown và cả ba platform cài cùng byte content. `harnix-brainstorm` bổ sung decision inventory, contract/placeholder/consistency self-review; `harnix-implement` bổ sung critical plan review và observed RED; `harnix-check` map claim sang fresh output/exit; debug/research/continue/finish giữ các stop/persistence rule tương ứng nhưng tiếp tục loại universal approval, worktree, subagent, commit, branch và PR behavior.
+Các adaptation được lưu dưới dạng source thật tại `src/skills/harnix-*/SKILL.md`, mỗi source có semantic `metadata.version` đồng bộ package release. `workflow.ts` không giữ một bản prose thứ hai; build nhúng source Markdown và cả ba platform cài cùng byte content. `harnix-plan` bổ sung decision inventory, contract/placeholder/consistency self-review; `harnix-implement` bổ sung critical plan review và observed RED; `harnix-verify` map claim sang fresh output/exit và gộp finish/cancellation; debug/review/research giữ các stop/persistence rule tương ứng nhưng tiếp tục loại universal approval, worktree, subagent, commit, branch và PR behavior.
 
 ### 8.3 Harnix self-audit ownership mapping
 

@@ -9,7 +9,7 @@ import {
   claudeGlobalMemoryContent,
   matchesClaudeGlobalContextHookGroup,
 } from "src/configurators/claude.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS } from "src/templates/harnix/activation.js";
+import { renderHarnixRules } from "src/templates/harnix/activation.js";
 import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
 import type { DesiredGlobalManagedFile } from "src/utils/global-managed-files.js";
 
@@ -57,9 +57,9 @@ describe("claude user-global desired surface", () => {
       begin: "<!-- harnix:begin -->",
       end: "<!-- harnix:end -->",
     });
-    for (const clause of HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS) expect(claudeGlobalMemoryContent).toContain(clause);
+    expect(claudeGlobalMemoryContent).toContain(renderHarnixRules());
     expect(claudeGlobalMemoryContent).toContain(".harnix/config.yaml");
-    expect(claudeGlobalMemoryContent).toContain("Do not auto-commit");
+    expect(claudeGlobalMemoryContent).toContain("Never commit, branch, push");
     expect(claudeGlobalMemoryContent).not.toContain("C:\\");
   });
 

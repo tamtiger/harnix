@@ -51,11 +51,14 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 - Lệnh public `harnix verify-plan`: phát hiện deterministic lệnh test/lint/typecheck/format theo manifest, lockfile và task runner cho ≥ 8 hệ sinh thái (Node.js npm/pnpm/yarn/bun, Python uv/poetry/pip, Rust cargo, Go, JVM Gradle/Maven, .NET dotnet, PHP Composer, Swift, Flutter/Dart) cùng monorepo workspaces (pnpm, Cargo, go.work, Maven) theo nguyên tắc nearest-manifest-wins.
 - Hỗ trợ cấu hình `verify:` trong `.harnix/config.yaml` (mức project và package).
 - Cơ chế **Suite Gate**: `ready` yêu cầu ít nhất một check mức project lấy từ `verify-plan` với `inputs` phủ toàn bộ source và test; `finish` từ chối hoàn thành khi check đó thiếu pass evidence với input digest hiện hành. Cảnh báo rõ repo không có test (`hasTests: false`) và yêu cầu khai báo check thay thế.
+- `harnix skill <tên> --reference <chủ đề>`: nạp theo yêu cầu phần chi tiết ít dùng của một skill (plan: `replan|migration|epic|ready-review`; implement: `feedback`; verify: `evidence|finish-cancel`). Reference nằm trong package, không cài thêm file; lỗi liệt kê chủ đề hợp lệ.
+- Bộ test ngân sách chỉ dẫn (`instruction-budget`): khối always-loaded ≤ 1.500 token, mỗi skill ≤ 2.000, đường trực tiếp ≤ 4.000, đường Full ≤ 15.000 (ước lượng ký tự/4), cùng test giữ nguyên năng lực của các skill cũ trong skill mới.
 
 ### Removed
 
 - Gỡ sidecar `verification-inputs.json` (cho task mới), ready-trace grammar, execution-notes grammar và `workflow --audit-ready` cùng module `ready-trace.ts`, `input-freshness.ts` và test đi kèm. `plan.md` cũ có vùng execution-notes vẫn đọc và lưu được như văn bản tự do.
 - Gỡ code không còn caller: `src/migration/**`, `src/rules/rules.ts`, `src/templates/harnix/managed-workflow.ts`, `src/core/research.ts` cùng test đi kèm. Nội dung rule đã nằm hoàn toàn trong `src/guides/`.
+- Gỡ bốn skill `harnix-brainstorm`, `harnix-check`, `harnix-finish-work`, `harnix-continue` (thay bằng `harnix-plan` và `harnix-verify`); `update --global` gỡ bản cài cũ do Harnix quản lý. `harnix skill` vẫn resolve tên cũ về skill mới (`resolvedFrom`, riêng `harnix-continue` kèm ghi chú chạy `harnix workflow --preflight`).
 
 ### Changed
 
@@ -76,6 +79,9 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 - `harnix update` và `harnix doctor --fix` chuyển `.harnix/roadmaps/*.json` sang `.harnix/epics/` không mất dữ liệu (chỉ xóa file cũ sau khi bản mới đã ghi đúng, idempotent, giữ nguyên cả hai nếu đích đã có nội dung khác); trước khi chuyển, các lệnh đọc vẫn tìm ở thư mục cũ.
 - Sửa trang epic `.md`: có dòng trống trước mọi heading, render `nonGoals`, và thêm mục `Next task` khớp với `nextTask` của `harnix epic <epic-id>`.
 - Suite `test:migration` chuyển thành suite tương thích dữ liệu cũ (đọc task v1/v2 và task có `context.json`) thay cho test của module migration đã gỡ.
+- **Breaking:** bảy skill thành sáu: `harnix-plan`, `harnix-implement`, `harnix-verify`, `harnix-debug`, `harnix-review`, `harnix-research` (review và research tách riêng). `harnix workflow --preflight` trả `nextStage` ∈ `plan|implement|verify|debug|await|stop` (trước đây `brainstorm|check|finish|continue|…`); `stageOwnerFor(state)` là nguồn duy nhất map trạng thái sang skill và `blocked` route tới owner của `resumeStatus`.
+- Một khối quy tắc always-loaded (`HARNIX_RULES`, 9 quy tắc) được render giống hệt trên steering Kiro/Antigravity, khối Claude/Codex và `AGENTS.md` bootstrap; guard, danh sách Bypass và quy tắc state chỉ nằm ở đó, skill không lặp lại. Skill chạy được khi không có hook (bắt đầu bằng `harnix workflow --preflight`); review/research không cần `.harnix/workflow.md`; không đọc `.active` trước preflight; task Lite không có `plan.md`.
+- `.harnix/workflow.md` được viết lại gọn từ `src/templates/harnix/workflow.md` (route, lệnh public, task state, gate, transport, cookbook); README và tài liệu PRD/workflow/implementation plan/upstream mapping cập nhật theo sáu skill. Nâng cấp: chạy `harnix update --global` và `harnix update`.
 
 ## [1.1.22] - 2026-09-28
 

@@ -9,7 +9,7 @@ import { runInternalContextCommand } from "./commands/internal-context-cli.js";
 import { updateProject } from "./commands/update.js";
 import { updateGlobalPlatforms } from "./commands/global-update.js";
 import { upgradeHarnix, type AvailableVersionLookup } from "./commands/upgrade.js";
-import { reportSkill, reportSkillCatalog } from "./commands/skills.js";
+import { reportSkill, reportSkillCatalog, reportSkillReference } from "./commands/skills.js";
 import { uninstallProject } from "./commands/uninstall.js";
 import { uninstallGlobalIntegrations } from "./commands/global-uninstall.js";
 import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces.js";
@@ -319,9 +319,17 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   program
     .command("skill")
     .argument("[name]", "Canonical Harnix skill name, for example harnix-implement")
-    .description("Print the canonical Harnix skill catalog or one skill's instructions")
-    .action((name: string | undefined) => {
-      process.stdout.write(`${JSON.stringify(name === undefined ? reportSkillCatalog() : reportSkill(name))}\n`);
+    .option("--reference <topic>", "Print one on-demand reference of the skill instead of its instructions")
+    .description("Print the canonical Harnix skill catalog, one skill's instructions, or one of its references")
+    .action((name: string | undefined, options: { reference?: string }) => {
+      if (options.reference !== undefined && name === undefined) throw new Error("--reference requires a skill name.");
+      const result =
+        name === undefined
+          ? reportSkillCatalog()
+          : options.reference === undefined
+            ? reportSkill(name)
+            : reportSkillReference(name, options.reference);
+      process.stdout.write(`${JSON.stringify(result)}\n`);
     });
   program
     .command("doctor")

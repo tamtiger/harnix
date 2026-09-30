@@ -59,7 +59,7 @@ describe("setupPlatforms user-global lifecycle", () => {
       `metadata:\n  version: "${packageVersion}"`,
     );
     await expect(readFile(join(home, ".agents", "skills", "harnix-implement", "SKILL.md"), "utf8")).resolves.toContain(
-      "nearest ancestor or workspace root containing `.harnix/config.yaml`",
+      "harnix workflow --preflight",
     );
     await expect(readFile(join(home, "codex-home", "config.toml"), "utf8")).resolves.toContain(
       "[[hooks.UserPromptSubmit]]",

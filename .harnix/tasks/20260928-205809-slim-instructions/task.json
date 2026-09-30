@@ -1,12 +1,12 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205809-slim-instructions",
   "title": "[11] Tinh gọn lớp chỉ dẫn, gộp skill và sửa C4–C8",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
-  "goal": "Gộp 7 skill thành 5 (harnix-plan, harnix-implement, harnix-verify, harnix-review, harnix-debug) theo bảng trách nhiệm ở design.md §1; viết lại AGENTS.md root, .harnix/workflow.md, marker block các nền tảng theo bộ 8 rule trong design.md; guard một chỗ; chế độ không hook; test ngân sách token; sửa C4–C8; bảo đảm mọi status/checkpoint hợp lệ có đúng một skill chủ sở hữu.",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Gộp 7 skill thành 6 (harnix-plan, harnix-implement, harnix-verify, harnix-review, harnix-research, harnix-debug) và đưa nội dung dài vào reference nạp theo yêu cầu; viết lại AGENTS.md root, .harnix/workflow.md, marker block các nền tảng theo bộ 8 rule trong design.md; guard một chỗ; chế độ không hook; test ngân sách token; sửa C4–C8; bảo đảm mọi status/checkpoint hợp lệ có đúng một skill chủ sở hữu.",
   "nonGoals": [
     "Không commit/push/PR tự động.",
     "Không đụng cấu hình user-global thật trong test.",
@@ -15,45 +15,75 @@
   "acceptanceCriteria": [
     {
       "id": "ac-skills",
-      "text": "Catalog có đúng 5 skill mới, mỗi skill ≤ 2K tok; tên cũ được alias hoặc migrate khi update --global.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Catalog có đúng 6 skill (harnix-plan, harnix-implement, harnix-verify, harnix-review, harnix-research, harnix-debug), mỗi skill ≤ 2K tok; phần nội dung dài đưa vào reference nạp theo yêu cầu qua `harnix skill <tên> --reference <chủ đề>`; tên cũ được alias hoặc migrate khi update --global.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-instructions-focused-1"
+      ]
     },
     {
       "id": "ac-budget",
       "text": "Test đo: chỉ dẫn luôn nạp ≤ 1.5K tok, đường direct ≤ 4K, Full ≤ 15K.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-instructions-focused-1"
+      ]
     },
     {
       "id": "ac-hookless",
       "text": "Skill hoạt động đúng khi không có hook bằng cách tự gọi preflight.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-instructions-focused-1"
+      ]
     },
     {
       "id": "ac-coverage-matrix",
       "text": "Test liệt kê toàn bộ status/checkpoint hợp lệ (planning, replan, ready, in_progress/implementing, verifying/verifying, verifying/finishing, mọi blocked/*, cancelled, completed) và xác nhận mỗi trạng thái có đúng một skill chủ sở hữu.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-instructions-focused-1"
+      ]
     },
     {
       "id": "ac-contradictions-c4-c8",
       "text": "C4–C8 trong research/inventory.md của task audit không còn trong chỉ dẫn mới.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-instructions-focused-1"
+      ]
     },
     {
       "id": "ac-template-exemptions",
       "text": "src/templates/** được gỡ khỏi danh sách miễn trừ max-lines sau khi viết lại.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-instructions-focused-1"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-instructions-focused-1"
+      ]
+    },
+    {
+      "id": "ac-references",
+      "text": "Mỗi reference (replan, migration, epic, ready-review cho plan; evidence, finish-cancel cho verify; feedback cho implement) là nội dung Markdown ≤ 2K tok nạp bằng `harnix skill <tên> --reference <chủ đề>`; chủ đề không tồn tại trả lỗi kèm danh sách chủ đề hợp lệ; `harnix skill` không tham số liệt kê reference của từng skill.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-instructions-focused-1"
+      ]
     }
   ],
   "relevantPaths": [
@@ -72,23 +102,52 @@
     {
       "id": "check-suite",
       "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
       "scope": "focused",
       "required": true,
-      "command": "pnpm lint && pnpm typecheck && pnpm test",
       "criterionIds": [
         "ac-budget",
         "ac-contradictions-c4-c8",
         "ac-coverage-matrix",
         "ac-docs-sync",
         "ac-hookless",
+        "ac-references",
         "ac-skills",
         "ac-template-exemptions"
       ],
       "inputs": [
-        "@task-contract",
         "docs/**",
+        "eslint.config.mjs",
         "src/**",
         "test/**"
+      ]
+    },
+    {
+      "id": "chk-instructions-focused",
+      "description": "Test tập trung cho skill, template, định tuyến nextStage, ngân sách token và bề mặt nền tảng",
+      "command": "pnpm vitest run test/workflow test/platform test/unit test/integration/commands",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-budget",
+        "ac-contradictions-c4-c8",
+        "ac-coverage-matrix",
+        "ac-docs-sync",
+        "ac-hookless",
+        "ac-references",
+        "ac-skills",
+        "ac-template-exemptions"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "src/configurators/**",
+        "src/core/workflow/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/integration/commands/**",
+        "test/platform/**",
+        "test/unit/**",
+        "test/workflow/**"
       ]
     }
   ],
@@ -97,10 +156,128 @@
       "id": "d-draft-checks",
       "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
       "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    },
+    {
+      "id": "d-budget-definitions",
+      "text": "Ngân sách đo bằng ký tự/4: bề mặt luôn nạp ≤ 1.500, skill ≤ 2.000, đường Bypass = luôn nạp + harnix-implement ≤ 4.000, task Full = luôn nạp + workflow.md + plan + implement + verify ≤ 15.000.",
+      "rationale": "Design chỉ nêu số; định nghĩa đường đo phải cụ thể để test tự động được và khớp context.tokenApproximation trong config"
+    },
+    {
+      "id": "d-nextstage-owner",
+      "text": "nextStage của preflight trả thẳng owner plan|implement|verify|debug|await|stop; continue và finish biến mất; blocked trả owner của resumeStatus.",
+      "rationale": "Design §1 bỏ tầng continue: preflight đã biết trạng thái nên trả đúng owner, giảm một skill và một lần đọc"
+    },
+    {
+      "id": "d-legacy-skill-aliases",
+      "text": "Tên skill cũ được alias sang skill mới trong harnix skill (resolvedFrom) và update --global xoá bản cài cũ do Harnix sở hữu.",
+      "rationale": "Agent đã cài bản cũ không được vỡ đột ngột; nội dung người dùng đã sửa vẫn được giữ theo luật managed"
+    },
+    {
+      "id": "d-research-own-skill",
+      "text": "Research độc lập chỉ đọc là skill riêng `harnix-research`, tách khỏi `harnix-review`; tổng là 6 skill thay vì 5.",
+      "rationale": "Review đánh giá diff/code đã có và trả findings kèm verdict, research điều tra một unknown và trả kết luận có nguồn; hai giao thức khác nhau. Design §1 không có dòng cho research độc lập nên đây là quyết định của người dùng ngày 2026-09-30, sửa câu gộp 7 thành 5."
+    },
+    {
+      "id": "d-skill-references",
+      "text": "Nội dung dài (replan, migration, epic, ready self-review, finish/cancel, convergence) chuyển vào reference nạp theo yêu cầu bằng `harnix skill <tên> --reference <chủ đề>`, không cài thành file riêng.",
+      "rationale": "Giữ mỗi skill ≤ 2K token mà không mất quy tắc; agent chỉ nạp reference khi checkpoint hoặc tình huống cần, và không phải đổi manifest cài đặt của 4 nền tảng."
+    },
+    {
+      "id": "d-references-cli-only",
+      "text": "Reference của skill chỉ được phục vụ bằng lệnh harnix skill <tên> --reference <chủ đề>, không cài thành file cạnh SKILL.md.",
+      "rationale": "Research 2026-09-30: Kiro (issue 6955) và Antigravity không đưa đường dẫn thư mục skill cho model nên link tương đối tới references/ hỏng với skill global; lệnh chạy giống nhau trên cả bốn nền tảng và luôn khớp catalog"
+    },
+    {
+      "id": "skills-six-with-cli-references",
+      "text": "Sáu skill (plan, implement, verify, review, research, debug); chi tiết ít dùng nằm ở reference nạp qua harnix skill <name> --reference <topic>, không cài thêm file vì Kiro và Antigravity không lộ đường dẫn thư mục skill.",
+      "rationale": "Giữ đủ năng lực workflow mà mỗi skill vẫn dưới 2000 token; CLI luôn có sẵn trên mọi nền tảng."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-09-30T15:47:02.253+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205809-slim-instructions/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-09-30T15:48:59.438+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung check tập trung cho từng tiêu chí trước khi ready theo quy tắc áp cho member task",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205809-slim-instructions/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-09-30T15:49:12.414+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Thêm eslint.config.mjs vào inputs vì ac-template-exemptions đọc file này",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205809-slim-instructions/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-09-30T15:56:05.947+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Tách harnix-research thành skill riêng (6 skill) và thêm reference nạp theo yêu cầu theo quyết định người dùng 2026-09-30",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205809-slim-instructions/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-04",
+      "recordedAt": "2026-09-30T15:56:07.745+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Thêm tiêu chí cho reference nạp theo yêu cầu của thiết kế 6 skill",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205809-slim-instructions/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-05",
+      "recordedAt": "2026-09-30T15:56:41.491+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa lại văn bản tiêu chí ac-references bị shell thay mất đoạn lệnh khi thêm bằng flag",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205809-slim-instructions/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-instructions-focused-1",
+      "checkId": "chk-instructions-focused",
+      "recordedAt": "2026-09-30T16:39:26.637+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "C:\\Program Files\\Git\\usr\\bin\\bash.exe — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0022fbe5da38f3be2262642fb8f7f989fafe7cb888a4d33d9a1ab321e03f1f7f"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-09-30T16:40:40.661+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "C:\\Program Files\\Git\\usr\\bin\\bash.exe — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c41219d4bb5439161049c3cdec52675b1c00f8664b6560a92773a0a1e54ef0da"
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
   "createdAt": "2026-09-28T20:58:09.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "updatedAt": "2026-09-30T16:41:12.482+07:00",
+  "residualRisks": [
+    {
+      "id": "old-skill-names",
+      "text": "Agent đã cache tên skill cũ (brainstorm, check, continue, finish-work) chỉ chạy được nhờ alias legacySkillAliases; người dùng cần chạy harnix update --global để gỡ bốn skill cũ.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-09-30T16:41:12.482+07:00"
 }

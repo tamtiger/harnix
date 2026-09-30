@@ -114,7 +114,7 @@ describe("diagnoseProject Doctor v2 global integrations", () => {
     const report = await diagnoseProject({ root, fix: true, global: true, ...globalOptions(home) });
 
     expect(report.summary.fixed).toBeGreaterThan(0);
-    await expect(readFile(steering, "utf8")).resolves.toContain("Harnix activation guard");
+    await expect(readFile(steering, "utf8")).resolves.toContain("Harnix rules");
     await expect(access(repoMap)).rejects.toMatchObject({ code: "ENOENT" });
     expect(report.project.findings).toContainEqual(
       expect.objectContaining({ code: "repo-map-missing", fixable: true }),

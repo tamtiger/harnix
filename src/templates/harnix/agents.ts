@@ -1,7 +1,6 @@
 import type { LanguageId, TechnologyId } from "src/catalog/catalog.js";
 import type { PackageConfig } from "src/core/config/config.js";
-import { packageVersion } from "src/version.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "./activation.js";
+import { renderHarnixRules } from "./activation.js";
 
 export interface AgentsProjectProfile {
   languages: readonly LanguageId[];
@@ -45,11 +44,8 @@ const technologyLabels: Record<TechnologyId, string> = {
   gin: "Gin",
   axum: "Axum",
 };
-const targetAuthorityInstructions = HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.map((instruction) => `- ${instruction}`).join(
-  "\n",
-);
-const implicitActivationInstructions = HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS.join("\n\n");
 
+/** Project bootstrap: the same always-loaded rules as every platform surface, plus the discovered profile. */
 export function renderAgentsTemplate(profile: AgentsProjectProfile): string {
   const languages = profile.languages.map((id) => languageLabels[id]).join(", ") || "not specified";
   const technologies = profile.technologies.map((id) => technologyLabels[id]).join(", ") || "not specified";
@@ -59,13 +55,7 @@ export function renderAgentsTemplate(profile: AgentsProjectProfile): string {
 
 ## Harnix
 
-- Version: ${packageVersion}.
-- Role: project-local coding-agent harness for task state, evidence, and concise engineering guidance.
-- Scope: this bootstrap applies only when its repository is the selected Harnix root. Platform integrations are an explicit user-global integration and are never init output.
-
-Target authority and activation guard:
-
-${targetAuthorityInstructions}
+${renderHarnixRules()}
 
 ## Project profile
 
@@ -73,50 +63,6 @@ ${targetAuthorityInstructions}
 - Technologies: ${technologies}.
 - Package paths: ${packagePaths}.
 
-Use this profile only when this AGENTS root is the selected Harnix root resolved by the target-authority guard. It is an initialization-time discovery seed, not complete repository truth. Verify current manifests, source, tests, and instructions; do not bulk-load the repository.
-
-## Route before restoring
-
-${implicitActivationInstructions}
-
-Apply the matching ceremony profile:
-
-- **Bypass:** use the read-only route above without inspecting or mutating task state.
-- **Lite:** localized low-risk change with a clear contract and focused validation, beyond the Bypass docs-only/bounded literal-value/scoped-user-override carve-outs in \`.harnix/workflow.md\`.
-- **Full:** cross-layer, migration-heavy, security-sensitive, or materially uncertain work.
-
-Read .harnix/workflow.md and .harnix/config.yaml from the selected Harnix root (canonical workflow: [\`.harnix/workflow.md\`](.harnix/workflow.md)) only after the route above requires project state. The preflight is bounded routing metadata, not proof of completion, and \`nextStage: await\` at \`ready\` requires the latest request rather than stale conversation memory to authorize implementation.
-
-Use the exact \`nextStage\` returned by preflight for project-scoped work, and otherwise use the standalone owner named by the route above:
-
-- \`harnix-brainstorm\` for triage, planning, replan, and the ready gate.
-- \`harnix-implement\` for authorized ready or in-progress work.
-- \`harnix-check\` for standalone review or active compliance/quality verification.
-- \`harnix-debug\` only for a reproducible in-scope failure.
-- \`harnix-research\` for standalone read-only research or one task-scoped material unknown.
-- \`harnix-finish-work\` only for verified completion or explicit cancellation.
-- \`harnix-continue\` only for interrupted or partial persisted state when selected by \`nextStage\`.
-
-Skills are not repository files. Run \`harnix skill <name>\` to get the selected owner and read its \`content\` through EOF; run \`harnix skill\` for the catalog. Do not preload later skills. Canonical lifecycle, schema, transitions, and rules live in \`.harnix/workflow.md\`; do not duplicate or invent them here.
-
-Engineering guidance selected for this project lives in \`.harnix/spec/guides/\`. Read only the guide files relevant to the files you are changing.
-
-Every persisted task has derived read-only \`.harnix/tasks/<id>/review.md\` (goal, criteria, checks, decisions, risks, evidence), regenerated automatically on save. Point the user there for plain-file review instead of running a command or reading \`task.json\`; never hand-edit it.
-
-Optional \`epicId\` links a task to an epic; mandatory Epic when initiative has >=2 tasks. Upfront declare all member tasks at initialization via \`epicMembers\`. Top-level \`epic\` in \`--save\` creates/updates; public \`harnix epic\` inspects (legacy \`.harnix/roadmaps/\` is migrated by \`harnix update\`).
-
-## Operating rules
-
-- \`harnix init\` is project-local. \`harnix setup --kiro|--antigravity|--codex|--claude\` is user-global. Do not run setup or harnix init automatically.
-- When \`harnix\` is not installed or not on PATH, or state/skill is invalid, say so and stop: do not invent task state, skip the workflow, or edit \`.harnix\` by hand.
-- Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (\`task.json\`, \`prd.md\`, \`plan.md\`, \`design.md\`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.
-- Preserve user-owned files, tasks, evidence, specs, research, journals, credentials, and unrelated configuration.
-- Use hidden workflow transport for state changes; never edit \`task.json\` or \`.active\` directly. When the user requests pausing the active task to switch or start another task, use \`harnix pause\`.
-- Use \`harnix repo-map --query <text>\` or \`harnix repo-map --impact <path>\` only as bounded implementation-stage navigation hints. Platform hooks must not invoke repository-map query, impact, or refresh.
-- Mark \`[x]\` on \`plan.md\` checklist as each slice completes; checklist must reach 100% \`[x]\` before \`verifying\`.
-- Release preparation belongs to implementation and must finish before \`verifying\`. Finish is product-read-only.
-- Require explicit authority for destructive, networked, installation, upgrade, purge, or externally visible actions.
-- Never commit, branch, create a worktree, merge, push, publish, or create a pull request automatically.
-- Before any commit, show the proposed changes and commit message, then wait for explicit user approval.
+This is a discovery seed, not complete repository truth: verify current manifests, source and tests, and do not bulk-load the repository. Engineering guidance for this project lives in \`.harnix/spec/guides/\`; read only the files relevant to your change. Each task has a derived read-only \`.harnix/tasks/<id>/review.md\` for the user to review.
 `;
 }

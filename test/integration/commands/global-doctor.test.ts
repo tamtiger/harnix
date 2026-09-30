@@ -81,7 +81,7 @@ describe("diagnoseGlobalIntegrations", () => {
 
   it("should_report_an_unowned_harnix_skill_unit_when_no_global_sidecar_exists", async () => {
     const home = await temporaryUserHome();
-    const userOwnedSkill = join(home, ".kiro", "skills", "harnix-check", "USER-NOTES.md");
+    const userOwnedSkill = join(home, ".kiro", "skills", "harnix-verify", "USER-NOTES.md");
     await mkdir(join(userOwnedSkill, ".."), { recursive: true });
     await writeFile(userOwnedSkill, "user-owned skill data\n", "utf8");
 
@@ -97,7 +97,7 @@ describe("diagnoseGlobalIntegrations", () => {
       expect.objectContaining({
         code: "global-untracked-surface",
         fixable: false,
-        path: "~/.kiro/skills/harnix-check/SKILL.md",
+        path: "~/.kiro/skills/harnix-verify/SKILL.md",
         severity: "warning",
       }),
     );
@@ -241,7 +241,7 @@ describe("diagnoseGlobalIntegrations", () => {
   it("reports owned global drift without reconciling or overwriting the modified file", async () => {
     const home = await temporaryUserHome();
     await install(home, ["kiro"]);
-    const skill = join(home, ".kiro", "skills", "harnix-check", "SKILL.md");
+    const skill = join(home, ".kiro", "skills", "harnix-verify", "SKILL.md");
     await writeFile(skill, "user modification\n");
 
     const [kiro] = await diagnoseGlobalIntegrations({
@@ -255,7 +255,7 @@ describe("diagnoseGlobalIntegrations", () => {
     expect(kiro?.findings).toContainEqual(
       expect.objectContaining({
         code: "global-managed-modified",
-        path: "~/.kiro/skills/harnix-check/SKILL.md",
+        path: "~/.kiro/skills/harnix-verify/SKILL.md",
         fixable: false,
       }),
     );

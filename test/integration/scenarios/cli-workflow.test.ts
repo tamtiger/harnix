@@ -117,7 +117,7 @@ describe.sequential("CLI doctor, context and hidden workflow", () => {
       contextDrift: "not-recorded",
       requiredChecks: { passed: [], failed: [], stale: [], pending: [] },
       retryLimitReached: [],
-      nextStage: "brainstorm",
+      nextStage: "plan",
     });
   });
   it("should_recognize_the_hidden_learning_action_and_require_an_active_finishing_task", async () => {

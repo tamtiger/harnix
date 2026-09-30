@@ -20,10 +20,10 @@ describe("history-derived workflow regressions", () => {
   it("keeps review-only read-only while review-and-fix becomes a task", () => {
     expect(routeWorkflow({ action: "review", workKind: "bugfix", mutation: "none", riskSignals: [] })).toMatchObject({
       entry: "bypass",
-      owner: "harnix-check",
+      owner: "harnix-review",
     });
     expect(routeWorkflow({ action: "change", workKind: "bugfix", mutation: "project", riskSignals: [] })).toMatchObject(
-      { entry: "create", owner: "harnix-brainstorm" },
+      { entry: "create", owner: "harnix-plan" },
     );
   });
 
@@ -43,7 +43,7 @@ describe("history-derived workflow regressions", () => {
         mutation: "project",
         riskSignals: ["material-unknown"],
       }),
-    ).toMatchObject({ entry: "create", mode: "full", owner: "harnix-brainstorm" });
+    ).toMatchObject({ entry: "create", mode: "full", owner: "harnix-plan" });
   });
 
   it("keeps hotfix gates and test work distinctions", () => {

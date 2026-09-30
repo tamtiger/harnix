@@ -8,13 +8,16 @@ import {
   shouldResearch,
   validateFullReadyArtifact,
   verificationStages,
+  stageOwnerFor,
 } from "src/core/workflow/routing.js";
+import { legalCheckpoints } from "src/core/tasks/task-schema.js";
+import type { TaskRecord } from "src/core/tasks/task.js";
 
 describe("workflow routing", () => {
   it("routes action, work kind, risk, and active state deterministically", () => {
     expect(routeWorkflow({ action: "review", workKind: "refactor", mutation: "none", riskSignals: [] })).toMatchObject({
       entry: "bypass",
-      owner: "harnix-check",
+      owner: "harnix-review",
       reasonCodes: ["standalone-review"],
     });
     expect(
@@ -27,7 +30,7 @@ describe("workflow routing", () => {
     ).toMatchObject({ entry: "bypass", owner: "harnix-research", reasonCodes: ["standalone-research"] });
     expect(
       routeWorkflow({ action: "change", workKind: "feature", mutation: "project", riskSignals: [] }),
-    ).toMatchObject({ entry: "create", mode: "lite", owner: "harnix-brainstorm", reasonCodes: ["low-risk-lite"] });
+    ).toMatchObject({ entry: "create", mode: "lite", owner: "harnix-plan", reasonCodes: ["low-risk-lite"] });
     expect(
       routeWorkflow({ action: "change", workKind: "hotfix", mutation: "project", riskSignals: ["security-sensitive"] }),
     ).toMatchObject({ entry: "create", mode: "full", reasonCodes: ["risk-full"] });
@@ -48,7 +51,7 @@ describe("workflow routing", () => {
         riskSignals: [],
         activeTask: { mode: "full", status: "ready", checkpoint: "ready" },
       }),
-    ).toMatchObject({ entry: "resume", owner: "harnix-brainstorm", reasonCodes: ["active-replan"] });
+    ).toMatchObject({ entry: "resume", owner: "harnix-plan", reasonCodes: ["active-replan"] });
     expect(
       routeWorkflow({
         action: "change",
@@ -57,7 +60,7 @@ describe("workflow routing", () => {
         riskSignals: [],
         activeTask: { mode: "full", status: "completed", checkpoint: "finishing" },
       }),
-    ).toMatchObject({ entry: "resume", owner: "harnix-continue", reasonCodes: ["completed-active"] });
+    ).toMatchObject({ entry: "resume", owner: "harnix-verify", reasonCodes: ["completed-active"] });
     expect(
       routeWorkflow({
         action: "change",
@@ -66,7 +69,7 @@ describe("workflow routing", () => {
         riskSignals: [],
         activeTask: { mode: "full", status: "cancelled", checkpoint: "cancelling" },
       }),
-    ).toMatchObject({ entry: "resume", owner: "harnix-continue", reasonCodes: ["cancelled-active"] });
+    ).toMatchObject({ entry: "resume", owner: "harnix-verify", reasonCodes: ["cancelled-active"] });
     expect(
       routeWorkflow({
         action: "change",
@@ -94,7 +97,7 @@ describe("workflow routing", () => {
           blocker: { kind: "decision", summary: "need decision", nextAction: "decide", resumeStatus: "verifying" },
         },
       }),
-    ).toMatchObject({ entry: "resume", owner: "harnix-continue", reasonCodes: ["active-stage"] });
+    ).toMatchObject({ entry: "resume", owner: "harnix-plan", reasonCodes: ["active-stage"] });
   });
 
   it("bypasses a docs-only or literal-value-only edit unless it forces tracked risk, and leaves an active task unchanged", () => {
@@ -173,7 +176,7 @@ describe("workflow routing", () => {
       routeWorkflow({ action: "review", workKind: "refactor", mutation: "none", riskSignals: [], activeTask }),
     ).toEqual({
       entry: "bypass",
-      owner: "harnix-check",
+      owner: "harnix-review",
       reasonCodes: ["standalone-review"],
     });
     expect(
@@ -225,5 +228,67 @@ describe("workflow routing", () => {
     expect(verificationStages()).toEqual(["compliance", "quality-security"]);
     expect(isWithinRequestedScope(["workflow"], ["workflow"])).toBe(true);
     expect(isWithinRequestedScope(["workflow"], ["workflow", "new-framework"])).toBe(false);
+  });
+
+  describe("stage owner coverage matrix", () => {
+    type State = Pick<TaskRecord, "status" | "checkpoint" | "blocker">;
+    const resumable = ["planning", "ready", "in_progress", "verifying"] as const;
+    const states: State[] = [
+      ...resumable.flatMap((status) => legalCheckpoints[status].map((checkpoint) => ({ status, checkpoint }))),
+      ...resumable.flatMap((resumeStatus) =>
+        legalCheckpoints[resumeStatus].map((checkpoint) => ({
+          status: "blocked" as const,
+          checkpoint,
+          blocker: { kind: "decision" as const, summary: "wait", nextAction: "decide", resumeStatus },
+        })),
+      ),
+      { status: "completed", checkpoint: "finishing" },
+      { status: "cancelled", checkpoint: "cancelling" },
+    ];
+
+    it("gives every legal status and checkpoint exactly one task-stage skill (review and research own no task state)", () => {
+      const owners = new Set(["harnix-plan", "harnix-implement", "harnix-verify", "harnix-debug"]);
+
+      expect(states.length).toBeGreaterThan(20);
+      for (const state of states) {
+        const owner = stageOwnerFor(state);
+        expect(owner, JSON.stringify(state)).toBeDefined();
+        expect(owners.has(owner as string), JSON.stringify(state)).toBe(true);
+      }
+    });
+
+    it("maps the documented stages to their owner", () => {
+      const owner = (
+        status: TaskRecord["status"],
+        checkpoint: TaskRecord["checkpoint"],
+        resume?: "planning" | "ready" | "in_progress" | "verifying",
+      ) =>
+        stageOwnerFor({
+          status,
+          checkpoint,
+          ...(resume === undefined
+            ? {}
+            : { blocker: { kind: "decision", summary: "s", nextAction: "n", resumeStatus: resume } }),
+        });
+
+      expect(owner("planning", "planning")).toBe("harnix-plan");
+      expect(owner("in_progress", "replan")).toBe("harnix-plan");
+      expect(owner("verifying", "replan")).toBe("harnix-plan");
+      expect(owner("ready", "ready")).toBe("harnix-implement");
+      expect(owner("in_progress", "implementing")).toBe("harnix-implement");
+      expect(owner("in_progress", "debugging")).toBe("harnix-debug");
+      expect(owner("verifying", "debugging")).toBe("harnix-debug");
+      expect(owner("verifying", "verifying")).toBe("harnix-verify");
+      expect(owner("verifying", "finishing")).toBe("harnix-verify");
+      expect(owner("completed", "finishing")).toBe("harnix-verify");
+      expect(owner("cancelled", "cancelling")).toBe("harnix-verify");
+      expect(owner("blocked", "implementing", "in_progress")).toBe("harnix-implement");
+      expect(owner("blocked", "planning", "planning")).toBe("harnix-plan");
+    });
+
+    it("returns nothing for a state that is not legal", () => {
+      expect(stageOwnerFor({ status: "planning", checkpoint: "finishing" })).toBeUndefined();
+      expect(stageOwnerFor({ status: "blocked", checkpoint: "planning" })).toBeUndefined();
+    });
   });
 });

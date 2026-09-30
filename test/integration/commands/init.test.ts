@@ -4,10 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { initializeProject } from "src/commands/init.js";
-import {
-  HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
-  HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
-} from "src/templates/harnix/activation.js";
+import { renderHarnixRules } from "src/templates/harnix/activation.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const fixture = useTemporaryRepositories("harnix-init-");
@@ -48,25 +45,9 @@ describe("initializeProject", () => {
     const repoMapPath = join(root, ".harnix", "cache", "repo-map-v1.json");
     await expect(access(repoMapPath)).resolves.toBeUndefined();
     const agentInstructions = await readFile(join(root, "AGENTS.md"), "utf8");
-    expect(agentInstructions).toContain("## Route before restoring");
-    for (const instruction of HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS) {
-      expect(agentInstructions).toContain(instruction);
-    }
-    expect(agentInstructions).toContain("harnix setup --kiro|--antigravity|--codex");
-    expect(agentInstructions).toContain("explicit user-global integration");
-    expect(agentInstructions).toContain("Do not run setup or harnix init automatically");
-    for (const instruction of HARNIX_TARGET_AUTHORITY_INSTRUCTIONS) {
-      expect(agentInstructions).toContain(instruction);
-    }
-    const lastTargetGuardIndex = agentInstructions.indexOf(HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.at(-1)!);
-    expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("## Project profile"));
-    expect(lastTargetGuardIndex).toBeLessThan(agentInstructions.indexOf("Read .harnix/workflow.md"));
-    expect(agentInstructions).toContain(
-      "Use this profile only when this AGENTS root is the selected Harnix root resolved by the target-authority guard",
-    );
-    expect(agentInstructions).not.toContain("this AGENTS root is the selected target");
-    expect(agentInstructions).toContain(
-      "Read .harnix/workflow.md and .harnix/config.yaml from the selected Harnix root",
+    expect(agentInstructions).toContain(renderHarnixRules());
+    expect(agentInstructions.indexOf(renderHarnixRules())).toBeLessThan(
+      agentInstructions.indexOf("## Project profile"),
     );
     expect(agentInstructions).toContain("## Project profile");
     expect(agentInstructions).toContain("- Languages: not specified.");
@@ -75,16 +56,11 @@ describe("initializeProject", () => {
     expect(agentInstructions).not.toContain("Detected repository");
     expect(agentInstructions).not.toContain("Project-local skills are generated");
     expect(agentInstructions).toContain("harnix workflow --preflight");
-    expect(agentInstructions).toContain("nextStage: await");
-    expect(agentInstructions).toContain("harnix-brainstorm");
-    expect(agentInstructions).toContain("harnix-implement");
-    expect(agentInstructions).toContain("harnix-check");
-    expect(agentInstructions).toContain("harnix-finish-work");
-    expect(agentInstructions).toContain("harnix-continue");
-    expect(agentInstructions).toContain(
-      "Canonical lifecycle, schema, transitions, and rules live in `.harnix/workflow.md`",
-    );
-    expect(agentInstructions).toContain("never edit `task.json` or `.active` directly");
+    expect(agentInstructions).toContain("nextStage");
+    expect(agentInstructions).toContain("`await` and `stop` are mandatory stops");
+    expect(agentInstructions).toContain("harnix skill harnix-<stage>");
+    expect(agentInstructions).toContain(".harnix/workflow.md");
+    expect(agentInstructions).toContain("never patch `task.json`");
     await expect(readFile(join(root, "keep.txt"), "utf8")).resolves.toBe("user content");
     await writeFile(join(root, "added-after-init.ts"), "export const stale = true;\n");
     await initializeProject({ developer: "tam", root, yes: true });

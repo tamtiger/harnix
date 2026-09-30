@@ -1,12 +1,18 @@
 import { parse } from "yaml";
 
-import brainstormSource from "./harnix-brainstorm/SKILL.md";
-import checkSource from "./harnix-check/SKILL.md";
-import continueSource from "./harnix-continue/SKILL.md";
 import debugSource from "./harnix-debug/SKILL.md";
-import finishWorkSource from "./harnix-finish-work/SKILL.md";
 import implementSource from "./harnix-implement/SKILL.md";
+import feedbackReference from "./harnix-implement/references/feedback.md";
+import epicReference from "./harnix-plan/references/epic.md";
+import migrationReference from "./harnix-plan/references/migration.md";
+import readyReviewReference from "./harnix-plan/references/ready-review.md";
+import replanReference from "./harnix-plan/references/replan.md";
+import planSource from "./harnix-plan/SKILL.md";
 import researchSource from "./harnix-research/SKILL.md";
+import reviewSource from "./harnix-review/SKILL.md";
+import evidenceReference from "./harnix-verify/references/evidence.md";
+import finishCancelReference from "./harnix-verify/references/finish-cancel.md";
+import verifySource from "./harnix-verify/SKILL.md";
 
 export interface SkillTemplate {
   name: string;
@@ -14,25 +20,52 @@ export interface SkillTemplate {
   version: string;
   body: string;
   content: string;
+  /** On-demand detail, loaded with `harnix skill <name> --reference <topic>`; never installed as separate files. */
+  references: Readonly<Record<string, string>>;
 }
 
-const canonicalSources = [
-  brainstormSource,
-  implementSource,
-  checkSource,
-  finishWorkSource,
-  continueSource,
-  researchSource,
-  debugSource,
-] as const;
+const canonicalSources: readonly [string, Record<string, string>][] = [
+  [
+    planSource,
+    {
+      replan: replanReference,
+      migration: migrationReference,
+      epic: epicReference,
+      "ready-review": readyReviewReference,
+    },
+  ],
+  [implementSource, { feedback: feedbackReference }],
+  [verifySource, { evidence: evidenceReference, "finish-cancel": finishCancelReference }],
+  [reviewSource, {}],
+  [researchSource, {}],
+  [debugSource, {}],
+];
 
-export const workflowSkills: readonly SkillTemplate[] = validateSkillSet(canonicalSources.map(parseSkillSource));
+/**
+ * Names of skills that existed before the instruction slimming, with the skill
+ * that replaced each one. `harnix skill <old>` resolves through this table.
+ */
+export const legacySkillAliases: Readonly<Record<string, { name: string; note?: string }>> = {
+  "harnix-brainstorm": { name: "harnix-plan" },
+  "harnix-check": { name: "harnix-verify" },
+  "harnix-finish-work": { name: "harnix-verify" },
+  "harnix-continue": {
+    name: "harnix-plan",
+    note: "harnix-continue was removed: run `harnix workflow --preflight` and load the skill named by nextStage.",
+  },
+};
+
+const REFERENCE_TOPIC = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+
+export const workflowSkills: readonly SkillTemplate[] = validateSkillSet(
+  canonicalSources.map(([source, references]) => parseSkillSource(source, references)),
+);
 
 export function renderSkill(skill: SkillTemplate): string {
   return skill.content;
 }
 
-function parseSkillSource(rawSource: string): SkillTemplate {
+function parseSkillSource(rawSource: string, references: Record<string, string>): SkillTemplate {
   const content = rawSource.replaceAll("\r\n", "\n").trimEnd() + "\n";
   const match = /^---\n([\s\S]*?)\n---\n\n([\s\S]+)\n$/u.exec(content);
   if (match === null) {
@@ -63,8 +96,20 @@ function parseSkillSource(rawSource: string): SkillTemplate {
     content,
     description: frontmatter.description,
     name: frontmatter.name,
+    references: normalizeReferences(references),
     version: frontmatter.metadata.version,
   };
+}
+
+function normalizeReferences(references: Record<string, string>): Readonly<Record<string, string>> {
+  const normalized: Record<string, string> = {};
+  for (const [topic, text] of Object.entries(references)) {
+    if (!REFERENCE_TOPIC.test(topic)) throw new Error(`Harnix skill reference topic is invalid: ${topic}`);
+    const content = text.replaceAll("\r\n", "\n").trimEnd() + "\n";
+    if (content.trim() === "") throw new Error(`Harnix skill reference ${topic} is empty.`);
+    normalized[topic] = content;
+  }
+  return normalized;
 }
 
 function validateSkillSet(skills: SkillTemplate[]): readonly SkillTemplate[] {
@@ -75,8 +120,8 @@ function validateSkillSet(skills: SkillTemplate[]): readonly SkillTemplate[] {
     }
     names.add(skill.name);
   }
-  if (skills.length !== 7) {
-    throw new Error(`Expected seven Harnix workflow skills, received ${skills.length}.`);
+  if (skills.length !== 6) {
+    throw new Error(`Expected six Harnix workflow skills, received ${skills.length}.`);
   }
   return skills;
 }

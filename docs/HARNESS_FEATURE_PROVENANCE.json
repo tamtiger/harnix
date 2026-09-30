@@ -358,7 +358,7 @@
         "code": [
           "src/core/verification/input-digest.ts",
           "src/core/workflow/completion.ts",
-          "src/skills/harnix-finish-work/SKILL.md"
+          "src/skills/harnix-verify/SKILL.md"
         ],
         "tests": [
           "test/unit/core/verification/input-digest.test.ts",
@@ -396,7 +396,7 @@
         "code": [
           "src/core/journal/journal.ts",
           "src/core/workflow/routing.ts",
-          "src/skills/harnix-continue/SKILL.md"
+          "src/skills/harnix-plan/SKILL.md"
         ],
         "tests": [
           "test/unit/core/journal/journal.test.ts",
@@ -574,7 +574,7 @@
         "code": [
           "src/commands/audit.ts",
           "src/core/tasks/task-audit.ts",
-          "src/skills/harnix-check/SKILL.md",
+          "src/skills/harnix-verify/SKILL.md",
           "src/templates/harnix/agents.ts",
           "src/templates/harnix/workflow.ts"
         ],
@@ -621,7 +621,7 @@
         "code": [
           "src/commands/tasks.ts",
           "src/core/tasks/task-index.ts",
-          "src/skills/harnix-continue/SKILL.md",
+          "src/skills/harnix-plan/SKILL.md",
           "src/templates/harnix/agents.ts",
           "src/templates/harnix/workflow.ts"
         ],
@@ -858,7 +858,7 @@
       "adaptation": "Separates contract compliance from correctness, security, maintainability, and complexity review while keeping the process single-agent compatible and evidence-based.",
       "implementation": {
         "code": [
-          "src/skills/harnix-check/SKILL.md"
+          "src/skills/harnix-verify/SKILL.md"
         ],
         "tests": [
           "test/workflow/skill-sources.test.ts"

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { workflowEnvelopeSchema } from "src/commands/internal-workflow.js";
 import { workflowTemplate } from "src/templates/harnix/workflow.js";
+import { renderHarnixRules } from "src/templates/harnix/activation.js";
 
 const root = resolve(".");
 const v3Marker = /schema v3|schemaVersion:? 3|TaskRecordV3/iu;
@@ -43,9 +44,9 @@ describe("task contract documentation parity", () => {
 
   it("makes the skills that touch the task record speak schema v3", async () => {
     const skills = await skillSources();
-    const touching = skills.filter(({ name }) => /brainstorm|implement|check|finish-work/u.test(name));
+    const touching = skills.filter(({ name }) => /harnix-(plan|implement|verify)/u.test(name));
 
-    expect(touching).toHaveLength(4);
+    expect(touching).toHaveLength(3);
     for (const { name, text } of touching) expect(text, name).toMatch(v3Marker);
   });
 
@@ -68,8 +69,8 @@ describe("task contract documentation parity", () => {
     const documents = [
       { name: "AGENTS.md", text: await read("AGENTS.md") },
       { name: "workflow template", text: workflowTemplate },
-      { name: "src/skills/harnix-brainstorm/SKILL.md", text: await read("src/skills/harnix-brainstorm/SKILL.md") },
-      { name: "src/skills/harnix-implement/SKILL.md", text: await read("src/skills/harnix-implement/SKILL.md") },
+      { name: "always-loaded rules", text: renderHarnixRules() },
+      { name: "src/skills/harnix-plan/SKILL.md", text: await read("src/skills/harnix-plan/SKILL.md") },
     ];
 
     for (const { name, text } of documents) {
@@ -139,20 +140,20 @@ describe("task contract documentation parity", () => {
   });
 
   it("documents automatic learning capture, the preflight learning field and decision D14", async () => {
-    for (const file of ["docs/HARNIX_WORKFLOW.md", "src/templates/harnix/workflow.ts", "docs/IMPLEMENTATION_PLAN.md"]) {
+    for (const file of ["docs/HARNIX_WORKFLOW.md", "src/templates/harnix/workflow.md", "docs/IMPLEMENTATION_PLAN.md"]) {
       const text = await read(file);
       expect(text, file).toMatch(/learning/u);
       expect(text, file).toMatch(/preflight/iu);
     }
-    for (const file of ["src/skills/harnix-finish-work/SKILL.md", "src/skills/harnix-brainstorm/SKILL.md"]) {
+    for (const file of ["src/skills/harnix-verify/SKILL.md", "src/skills/harnix-plan/SKILL.md"]) {
       expect(await read(file), file).toContain("learning");
     }
     expect(await read("docs/HARNIX_WORKFLOW.md")).toContain("capture tự động");
     expect(await read("docs/HARNIX_PRD.md")).toContain("Capture tự động");
-    expect(await read("src/templates/harnix/workflow.ts")).toContain("automatically");
-    expect(await read("src/skills/harnix-brainstorm/SKILL.md")).toContain("`learning`");
-    const finishWork = await read("src/skills/harnix-finish-work/SKILL.md");
-    expect(finishWork).toContain("Capture is automatic");
+    expect(await read("src/templates/harnix/workflow.md")).toContain("into project learning");
+    expect(await read("src/skills/harnix-plan/SKILL.md")).toContain("`learning`");
+    const finishWork = await read("src/skills/harnix-verify/SKILL.md");
+    expect(finishWork).toContain("captures learning");
     expect(finishWork).not.toMatch(/Send bounded JSON[^\n]*to `harnix workflow --learn`/u);
     expect(await read("docs/OVERHAUL_DECISIONS.md")).toContain("| D14 |");
   });

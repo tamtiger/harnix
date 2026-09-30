@@ -787,7 +787,7 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 
 ### Task 3.1: Core skills
 
-**Create:** generated workflow template từ canonical doc; source thật `src/skills/harnix-*/SKILL.md` cho `harnix-brainstorm`, `harnix-implement`, `harnix-check`, `harnix-finish-work`, `harnix-continue`.
+**Create:** generated workflow template từ canonical doc; source thật `src/skills/harnix-*/SKILL.md` cho `harnix-plan`, `harnix-implement`, `harnix-verify`, `harnix-debug`, `harnix-review`, `harnix-research` (overhaul D4: sáu skill; tên cũ là alias trong `legacySkillAliases`).
 
 - [x] Generated `.harnix/workflow.md` giữ đúng state/transition/gate semantics và được managed-until-edited.
 - [x] Eval Bypass không tạo task; Lite/Full tạo đúng artifact contract.

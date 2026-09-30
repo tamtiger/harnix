@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
-  HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
-} from "src/templates/harnix/activation.js";
+import { HARNIX_RULES, renderHarnixRules } from "src/templates/harnix/activation.js";
 import { HARNIX_GLOBAL_ACTIVATION_DOCUMENT, globalSkillDesiredFiles } from "src/templates/harnix/global-surface.js";
 import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
 
@@ -13,23 +10,16 @@ const contentOf = (file: { kind: string; content?: string }): string | undefined
 
 describe("global surface templates", () => {
   describe("HARNIX_GLOBAL_ACTIVATION_DOCUMENT", () => {
-    it("is a standalone document headed by the activation guard section and ends with a newline", () => {
-      expect(HARNIX_GLOBAL_ACTIVATION_DOCUMENT.startsWith("# Harnix\n\n## Harnix activation guard\n\n")).toBe(true);
+    it("is a standalone document headed by the rules section and ends with a newline", () => {
+      expect(HARNIX_GLOBAL_ACTIVATION_DOCUMENT.startsWith("# Harnix\n\n## Harnix rules\n\n")).toBe(true);
       expect(HARNIX_GLOBAL_ACTIVATION_DOCUMENT.endsWith("\n")).toBe(true);
     });
 
-    it("carries every target-authority and implicit-activation instruction verbatim", () => {
-      for (const line of [...HARNIX_TARGET_AUTHORITY_INSTRUCTIONS, ...HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS]) {
-        expect(HARNIX_GLOBAL_ACTIVATION_DOCUMENT).toContain(line);
-      }
-    });
-
-    it("places the target-authority instructions before the implicit-activation ones", () => {
-      const authority = HARNIX_GLOBAL_ACTIVATION_DOCUMENT.indexOf(HARNIX_TARGET_AUTHORITY_INSTRUCTIONS[0]);
-      const implicit = HARNIX_GLOBAL_ACTIVATION_DOCUMENT.indexOf(HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS[0]);
-
-      expect(authority).toBeGreaterThan(-1);
-      expect(implicit).toBeGreaterThan(authority);
+    it("carries every rule verbatim and in order", () => {
+      expect(HARNIX_GLOBAL_ACTIVATION_DOCUMENT).toContain(renderHarnixRules());
+      const positions = HARNIX_RULES.map((rule) => HARNIX_GLOBAL_ACTIVATION_DOCUMENT.indexOf(rule));
+      expect(positions.every((position) => position > -1)).toBe(true);
+      expect([...positions].sort((left, right) => left - right)).toEqual(positions);
     });
   });
 

@@ -90,9 +90,7 @@ describe.sequential("CLI lifecycle commands", () => {
       from: "node",
     });
 
-    await expect(readFile(join(home, ".kiro", "steering", "harnix.md"), "utf8")).resolves.toContain(
-      "Harnix activation guard",
-    );
+    await expect(readFile(join(home, ".kiro", "steering", "harnix.md"), "utf8")).resolves.toContain("Harnix rules");
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).rejects.toMatchObject({ code: "ENOENT" });
   });
   it("should_preview_then_uninstall_only_explicit_user_global_platforms", async () => {
@@ -113,9 +111,7 @@ describe.sequential("CLI lifecycle commands", () => {
       platforms: Array<{ platform: string; confirmationRequired: boolean }>;
     };
     expect(preview).toMatchObject({ scope: "user", platforms: [{ platform: "kiro", confirmationRequired: true }] });
-    await expect(readFile(join(home, ".kiro", "steering", "harnix.md"), "utf8")).resolves.toContain(
-      "Harnix activation guard",
-    );
+    await expect(readFile(join(home, ".kiro", "steering", "harnix.md"), "utf8")).resolves.toContain("Harnix rules");
 
     stdout.mockClear();
     await expect(runCli(["node", "harnix", "uninstall", "--global", "--kiro", "--yes"], programOptions)).resolves.toBe(
