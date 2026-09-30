@@ -47,6 +47,12 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
         "Migrate the active unfinished legacy v1/v2 task to schema v3; optional stdin { checks } supplies criterionIds and inputs.",
       "--run-check":
         "Run the command after -- between two input snapshots of one check and record the outcome; output is returned, never stored.",
+      "--set-check":
+        "Add or update one validation check of the active v3 task from flags; after planning it needs --reason and makes the guarded replan save.",
+      "--add-criterion":
+        "Add one acceptance criterion from --text and cover it with the --check IDs; same --reason rule as --set-check.",
+      "--set-paths":
+        "Replace the relevant paths and/or specs from repeatable --relevant-path and --relevant-spec flags; needs no reason.",
       "--brief":
         "Print only id, status, checkpoint and updatedAt for --save, --transition, --evidence, --criterion, --migrate and --finish.",
       "--finish": "Terminal completion; accepts no body.",

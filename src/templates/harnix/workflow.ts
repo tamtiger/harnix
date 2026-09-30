@@ -69,7 +69,7 @@ A TaskRecord v3 contains only: \`generator\`, \`schemaVersion\` (3), \`id\`, \`t
 
 ### Command cookbook
 
-Copy-paste forms for the hidden \`harnix workflow\` transports, run from the repository root. Never create temporary script or JSON files; pipe any JSON on stdin and keep it under 64 KiB. \`<\` redirection does not work in PowerShell, so always pipe. Prefer the flag forms, which need no JSON and fill \`id\`, \`recordedAt\` and the input digest for you.
+Copy-paste forms for the hidden \`harnix workflow\` transports, run from the repository root. Never create temporary script or JSON files; pipe any JSON on stdin and keep it under 64 KiB. \`<\` redirection does not work in PowerShell, so always pipe. Accented text (for example Vietnamese) must never go through a Windows PowerShell 5.1 pipe or a \`powershell -File\` script: it reads UTF-8 files as ANSI and prepends a BOM, which corrupts the task; harnix rejects such text. Change checks, criteria and paths with the flag forms below (arguments arrive intact), edit \`prd.md\`, \`plan.md\` and \`design.md\` directly with the editor tool, and use bash or \`pwsh\` 7.4+ when JSON is unavoidable. Prefer the flag forms, which need no JSON and fill \`id\`, \`recordedAt\` and the input digest for you.
 
 PowerShell:
 
@@ -83,6 +83,9 @@ harnix workflow --run-check <check-id> -- pnpm test    # snapshot, run, snapshot
 '{"checks":{"<check-id>":{"criterionIds":["<criterion-id>"],"inputs":["src/**"]}}}' | harnix workflow --migrate --brief
 harnix workflow --finish --brief
 '{"reason":"<why>","authorizedBy":"user"}' | harnix workflow --cancel
+harnix workflow --set-check <check-id> --description "<text>" --scope focused --command "<command>" --criteria <criterion-id>,<criterion-id> --input "src/**" --input "test/**" --reason "<why, 10-1000 characters, required after planning>"
+harnix workflow --add-criterion <criterion-id> --text "<criterion text>" --check <check-id> --reason "<why>"
+harnix workflow --set-paths --relevant-path <path> --relevant-path <path> --relevant-spec <path>
 $json | harnix workflow --save --brief                 # only when artifacts or obligations change; start from harnix workflow --inspect
 \`\`\`
 
@@ -98,6 +101,9 @@ harnix workflow --run-check <check-id> -- pnpm test    # snapshot, run, snapshot
 printf '%s' '{"checks":{"<check-id>":{"criterionIds":["<criterion-id>"],"inputs":["src/**"]}}}' | harnix workflow --migrate --brief
 harnix workflow --finish --brief
 printf '%s' '{"reason":"<why>","authorizedBy":"user"}' | harnix workflow --cancel
+harnix workflow --set-check <check-id> --description '<text>' --scope focused --command '<command>' --criteria <criterion-id>,<criterion-id> --input 'src/**' --input 'test/**' --reason '<why, 10-1000 characters, required after planning>'
+harnix workflow --add-criterion <criterion-id> --text '<criterion text>' --check <check-id> --reason '<why>'
+harnix workflow --set-paths --relevant-path <path> --relevant-path <path> --relevant-spec <path>
 printf '%s' "$json" | harnix workflow --save --brief   # only when artifacts or obligations change; start from harnix workflow --inspect
 \`\`\`
 
@@ -105,6 +111,7 @@ printf '%s' "$json" | harnix workflow --save --brief   # only when artifacts or 
 - \`harnix workflow --criterion <ids> --met\` marks criteria \`met\` from the newest fresh pass of every required check that covers them, or from \`--evidence-ids <ids>\`; it refuses when a covering check has no fresh pass.
 - \`harnix workflow --run-check <id> -- <exe> [args...]\` starts one process from an executable and an argument array (no shell), records pass for exit 0 and fail otherwise, and records nothing when the inputs changed while it ran. For a compound command such as \`a && b\`, declare one check per command or start a shell explicitly, for example \`harnix workflow --run-check <id> -- bash -c "pnpm typecheck && pnpm lint && pnpm test"\` (use the full path of \`bash\` on Windows).
 - \`harnix workflow --migrate\` upgrades the active unfinished legacy v1/v2 task to schema v3 in one call. Send no body when every required check already has \`criterionIds\` and a repository input; otherwise pipe \`{ "checks": { "<check-id>": { "criterionIds": [...], "inputs": [...] } } }\`. Earlier passes are stale afterwards and must be rerun.
+- \`harnix workflow --set-check <id>\` adds or updates one check (\`--description\`, \`--command\`, \`--scope\`, \`--required\`/\`--no-required\`, \`--criteria\`, repeatable \`--input\`); a new check needs description, scope, and for a required check criteria and inputs. \`harnix workflow --add-criterion <id> --text <text> --check <check-id>\` adds a criterion and covers it with the named check(s). After planning, and for any migrated task, both need \`--reason\` (10-1000 characters): they make the single guarded replan save, and you then run \`--transition ready/ready\`. \`harnix workflow --set-paths\` replaces the relevant paths and/or specs and needs no reason.
 - \`harnix workflow --brief\` (on \`--save\`, \`--transition\`, \`--evidence\`, \`--criterion\`, \`--migrate\`, \`--finish\`) prints only \`id\`, \`status\`, \`checkpoint\` and \`updatedAt\`, plus \`evidenceId\` when one was recorded; use it instead of filtering the full task output.
 
 ## Ready gate

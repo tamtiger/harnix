@@ -49,6 +49,8 @@ describe("agent persistence guidance", () => {
     expect(rules).toMatch(/stop and report the exact command and error/u);
     expect(rules).toMatch(/pipe/u);
     expect(rules).toMatch(/64 KiB/u);
+    expect(rules).toMatch(/Never pass accented .* text through a Windows PowerShell 5\.1 pipe/u);
+    expect(rules).toMatch(/--set-check/u);
     expect(rules).toMatch(/`clock` block of `harnix workflow --preflight`/u);
     for (const surface of [HARNIX_GLOBAL_ACTIVATION_DOCUMENT, claudeGlobalMemoryContent, codexGlobalAgentsContent])
       for (const line of HARNIX_PERSISTENCE_INSTRUCTIONS) expect(surface).toContain(line);
@@ -64,6 +66,9 @@ describe("agent persistence guidance", () => {
     expect(section).toMatch(/`clock` block of `harnix workflow --preflight`/u);
     expect(section).toMatch(/never `<` in PowerShell/u);
     expect(section).toMatch(/64 KiB/u);
+    expect(section).toMatch(/never pipe accented text through Windows PowerShell 5\.1/u);
+    expect(section).toMatch(/--set-check`, `--add-criterion` and `--set-paths`/u);
+    expect(section).not.toMatch(/OutputEncoding/u);
     expect(section).toMatch(/Command cookbook/u);
     const canonical = skillText("harnix-brainstorm").match(/## Persistence rules\r?\n[\s\S]*?(?=\r?\n## |$)/u)?.[0];
     expect(section).toBe(canonical);
@@ -89,6 +94,11 @@ describe("agent persistence guidance", () => {
       "| harnix workflow --save",
       "does not work in PowerShell",
       "bash -c",
+      "--set-check",
+      "--add-criterion",
+      "--set-paths",
+      "must never go through a Windows PowerShell 5.1 pipe",
+      "edit `prd.md`",
     ])
       expect(cookbook, needle).toContain(needle);
   });

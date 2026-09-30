@@ -6,6 +6,8 @@ export type { BriefTask } from "./brief.js";
 export { markCriteriaMetWorkflow } from "./criterion.js";
 export type { MarkCriteriaInput } from "./criterion.js";
 export { migrateToV3Workflow } from "./migrate-v3.js";
+export { addCriterionWorkflow, setCheckWorkflow, setPathsWorkflow } from "./plan-edit.js";
+export type { CheckEdit, PlanEditOptions } from "./plan-edit.js";
 export { runCheckWorkflow } from "./run-check.js";
 export type { CheckRunner, RunCheckDependencies, RunCheckResult } from "./run-check.js";
 export { cancelWorkflow, cancelWorkflowTask } from "./cancel.js";

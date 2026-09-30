@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 
 import {
+  addCriterionWorkflow,
   appendEvidenceFlagsWorkflow,
   appendEvidenceWorkflow,
   briefTask,
@@ -13,10 +14,19 @@ import {
   recordLearningWorkflow,
   runCheckWorkflow,
   saveWorkflow,
+  setCheckWorkflow,
+  setPathsWorkflow,
   snapshotWorkflow,
   transitionWorkflow,
   workflowEnvelopeSchema,
 } from "src/commands/internal-workflow.js";
+import {
+  assertCommandShape,
+  assertFlagGroups,
+  isEvidenceFlagsMode,
+  selectAction,
+  type WorkflowFlags,
+} from "src/commands/workflow-flags.js";
 import type { CheckRunner } from "src/utils/check-runner.js";
 import { readBoundedInput } from "src/utils/bounded-input.js";
 import { resolveProjectRoot } from "src/utils/paths.js";
@@ -26,31 +36,6 @@ export interface WorkflowCommandOptions {
   checkRunner?: CheckRunner | undefined;
 }
 
-export interface WorkflowFlags {
-  inspect?: boolean;
-  preflight?: boolean;
-  save?: boolean;
-  snapshot?: boolean;
-  finish?: boolean;
-  cancel?: boolean;
-  learn?: boolean;
-  evidence?: boolean;
-  schema?: boolean;
-  migrate?: boolean;
-  met?: boolean;
-  brief?: boolean;
-  transition?: string;
-  criterion?: string;
-  runCheck?: string;
-  check?: string;
-  result?: string;
-  exitCode?: string;
-  summary?: string;
-  digest?: string;
-  evidenceIds?: string;
-  artifact?: string[];
-}
-
 interface WorkflowContext {
   root: string;
   flags: WorkflowFlags;
@@ -58,76 +43,19 @@ interface WorkflowContext {
   options: WorkflowCommandOptions;
 }
 
-const BOOLEAN_ACTIONS = [
-  "inspect",
-  "preflight",
-  "save",
-  "snapshot",
-  "finish",
-  "cancel",
-  "learn",
-  "evidence",
-  "schema",
-  "migrate",
-] as const;
-const BRIEF_ACTIONS = new Set(["save", "transition", "evidence", "criterion", "migrate", "finish", "runCheck"]);
+const OPTIONAL_STDIN_IDLE_MS = 2_000;
+const BYTE_ORDER_MARK = String.fromCharCode(0xfeff);
 
-function selectAction(flags: WorkflowFlags): string {
-  const selected: string[] = BOOLEAN_ACTIONS.filter((name) => flags[name] === true);
-  if (flags.transition !== undefined) selected.push("transition");
-  if (flags.criterion !== undefined) selected.push("criterion");
-  if (flags.runCheck !== undefined) selected.push("runCheck");
-  const [only] = selected;
-  if (selected.length !== 1 || only === undefined)
-    throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --save, --transition, --evidence, --criterion, --migrate, --run-check, --schema, --snapshot, --finish, --cancel, or --learn.",
-    );
-  return only;
-}
-
-function isEvidenceFlagsMode(action: string, flags: WorkflowFlags): boolean {
-  return (
-    (action === "evidence" &&
-      [flags.check, flags.result, flags.exitCode, flags.summary, flags.digest].some((value) => value !== undefined)) ||
-    (action === "evidence" && (flags.artifact?.length ?? 0) > 0)
-  );
-}
-
-function assertCommandShape(action: string, flags: WorkflowFlags, operands: string[]): void {
-  if (action === "runCheck" && operands.length === 0)
-    throw new Error("workflow --run-check requires an executable after --.");
-  if (action !== "runCheck" && operands.length > 0)
-    throw new Error(`workflow does not accept operands: ${operands.join(" ")}`);
-  if (flags.brief === true && !BRIEF_ACTIONS.has(action))
-    throw new Error(`--brief is not supported for workflow --${action}.`);
-  if (action === "snapshot" && flags.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
-  if (flags.check !== undefined && action !== "snapshot" && action !== "evidence")
-    throw new Error("--check requires workflow --snapshot or --evidence.");
-}
-
-function assertFlagGroups(action: string, flags: WorkflowFlags): void {
-  const evidenceOnly: [string, unknown][] = [
-    ["--result", flags.result],
-    ["--exit-code", flags.exitCode],
-    ["--digest", flags.digest],
-    ["--artifact", (flags.artifact?.length ?? 0) > 0 ? flags.artifact : undefined],
-  ];
-  for (const [name, value] of evidenceOnly)
-    if (value !== undefined && action !== "evidence") throw new Error(`${name} requires workflow --evidence.`);
-  if (flags.summary !== undefined && action !== "evidence" && action !== "runCheck")
-    throw new Error("--summary requires workflow --evidence or --run-check.");
-  if (flags.met === true && action !== "criterion") throw new Error("--met requires workflow --criterion.");
-  if (flags.evidenceIds !== undefined && action !== "criterion")
-    throw new Error("--evidence-ids requires workflow --criterion.");
-  if (action === "criterion" && flags.met !== true) throw new Error("workflow --criterion requires --met.");
-  if (isEvidenceFlagsMode(action, flags) && (!flags.check || !flags.result || flags.summary === undefined))
-    throw new Error("workflow --evidence with flags requires --check, --result and --summary.");
-}
+/** Windows PowerShell 5.1 prefixes piped text with a BOM even for UTF-8 without BOM, which is not valid JSON. */
+const withoutBom = (input: string | undefined): string | undefined =>
+  input?.startsWith(BYTE_ORDER_MARK) ? input.slice(1) : input;
 
 async function readInput(context: WorkflowContext, optional = false): Promise<string | undefined> {
-  if (context.options.workflowInput) return context.options.workflowInput();
-  if (optional && process.stdin.isTTY === true) return "";
-  return readBoundedInput(process.stdin);
+  if (context.options.workflowInput) return withoutBom(await context.options.workflowInput());
+  if (!optional) return withoutBom(await readBoundedInput(process.stdin));
+  if (process.stdin.isTTY === true) return "";
+  // An agent shell often leaves stdin as an open pipe that never closes, so an optional body must not wait for EOF.
+  return withoutBom(await readBoundedInput(process.stdin, undefined, OPTIONAL_STDIN_IDLE_MS));
 }
 
 function parseJson(input: string | undefined, message: string, optional = false): unknown {
@@ -150,7 +78,7 @@ async function readRequired(context: WorkflowContext, subject: string, invalid: 
 
 const splitList = (value: string): string[] =>
   value
-    .split(",")
+    .split(/[\s,]+/u)
     .map((item) => item.trim())
     .filter((item) => item !== "");
 
@@ -200,6 +128,44 @@ const HANDLERS: Record<string, Handler> = {
     });
     return presentTask(context, task);
   },
+  setCheck: async (context) => {
+    const { flags, root } = context;
+    const task = await setCheckWorkflow(
+      root,
+      {
+        id: flags.setCheck as string,
+        description: flags.description,
+        command: flags.command,
+        scope: flags.scope,
+        required: flags.required,
+        criteria: flags.criteria === undefined ? undefined : splitList(flags.criteria),
+        inputs: (flags.input?.length ?? 0) > 0 ? flags.input : undefined,
+      },
+      { reason: flags.reason },
+    );
+    return presentTask(context, task);
+  },
+  addCriterion: async (context) => {
+    const { flags, root } = context;
+    const task = await addCriterionWorkflow(
+      root,
+      {
+        id: flags.addCriterion as string,
+        text: flags.text as string,
+        checks: flags.check === undefined ? [] : splitList(flags.check),
+      },
+      { reason: flags.reason },
+    );
+    return presentTask(context, task);
+  },
+  setPaths: async (context) => {
+    const { flags, root } = context;
+    const task = await setPathsWorkflow(root, {
+      paths: (flags.relevantPath?.length ?? 0) > 0 ? flags.relevantPath : undefined,
+      specs: (flags.relevantSpec?.length ?? 0) > 0 ? flags.relevantSpec : undefined,
+    });
+    return presentTask(context, task);
+  },
   migrate: async (context) => {
     const input = await readInput(context, true);
     const envelope = parseJson(input, "Workflow migration requires valid bounded JSON.", true);
@@ -231,11 +197,15 @@ const HANDLERS: Record<string, Handler> = {
   finish: async (context) => presentTask(context, await finishWorkflow(context.root)),
 };
 
-const collectArtifact = (value: string, previous: string[]): string[] => [...previous, value];
+const collect = (value: string, previous: string[]): string[] => [...previous, value];
 
 export function registerWorkflowCommand(program: Command, options: WorkflowCommandOptions): void {
+  // The pnpm PowerShell shim forwards `$args` and drops the `--` separator, so everything after the first operand
+  // (the command of `--run-check`) is passed through untouched instead of being parsed as harnix options.
+  program.enablePositionalOptions();
   program
     .command("workflow", { hidden: true })
+    .passThroughOptions()
     .argument("[operands...]")
     .option("--inspect", "Inspect active workflow state")
     .option("--preflight", "Inspect bounded workflow routing metadata")
@@ -251,13 +221,30 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--evidence-ids <ids>", "Explicit passing evidence IDs for --criterion")
     .option("--migrate", "Migrate the active legacy task to schema v3")
     .option("--run-check <id>", "Run the command after -- against a check and record the outcome")
+    .option("--set-check <id>", "Add or update one validation check of the active task")
+    .option("--add-criterion <id>", "Add one acceptance criterion (requires --text)")
+    .option("--set-paths", "Replace the relevant paths and/or specs of the active task")
     .option("--schema", "Describe the save envelope schema")
-    .option("--check <id>", "Check ID for --snapshot or --evidence")
+    .option(
+      "--check <id>",
+      "Check ID for --snapshot or --evidence; check IDs covering the criterion for --add-criterion",
+    )
     .option("--result <result>", "Evidence result: pass, fail, or skipped")
     .option("--exit-code <n>", "Evidence exit code")
     .option("--summary <text>", "Evidence summary")
-    .option("--artifact <path>", "Evidence artifact path (repeatable)", collectArtifact, [])
+    .option("--artifact <path>", "Evidence artifact path (repeatable)", collect, [])
     .option("--digest <hex>", "Input digest captured before the check ran")
+    .option("--description <text>", "Check description for --set-check")
+    .option("--command <text>", "Check command for --set-check")
+    .option("--scope <scope>", "Check scope for --set-check: focused or full")
+    .option("--required", "Mark the --set-check check required")
+    .option("--no-required", "Mark the --set-check check not required")
+    .option("--criteria <ids>", "Comma-separated criterion IDs a --set-check check covers")
+    .option("--input <glob>", "Repository input glob of a --set-check check (repeatable)", collect, [])
+    .option("--reason <text>", "Why obligations change after planning (10-1000 characters)")
+    .option("--text <text>", "Criterion text for --add-criterion")
+    .option("--relevant-path <path>", "Relevant path for --set-paths (repeatable)", collect, [])
+    .option("--relevant-spec <path>", "Relevant spec path for --set-paths (repeatable)", collect, [])
     .option("--brief", "Print only id, status, checkpoint and updatedAt")
     .action(async (operands: string[], flags: WorkflowFlags) => {
       const action = selectAction(flags);

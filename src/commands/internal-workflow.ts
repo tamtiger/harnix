@@ -3,6 +3,7 @@
  * keeps the historical import path stable for the CLI wiring.
  */
 export {
+  addCriterionWorkflow,
   appendEvidenceFlagsWorkflow,
   appendEvidenceWorkflow,
   briefTask,
@@ -15,6 +16,8 @@ export {
   recordLearningWorkflow,
   runCheckWorkflow,
   saveWorkflow,
+  setCheckWorkflow,
+  setPathsWorkflow,
   snapshotWorkflow,
   transitionWorkflow,
   workflowEnvelopeSchema,

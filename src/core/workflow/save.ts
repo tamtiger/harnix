@@ -30,6 +30,7 @@ import { validateWorkflowSaveEnvelope, type WorkflowSaveArtifacts, type Workflow
 import { assertSchemaEvolution } from "./migration.js";
 import { isAppliedContractRevisionReplay, preserveObligations } from "./obligations.js";
 import { assertReadyRequirements } from "./ready.js";
+import { assertTextIntegrity } from "./text-integrity.js";
 import {
   assertReplayArtifactsMatch,
   assertWorkflowSaveFilesUnchanged,
@@ -47,6 +48,7 @@ interface SaveContext {
 
 export async function saveWorkflow(root: string, input: unknown): Promise<TaskRecord> {
   const envelope = validateWorkflowSaveEnvelope(input);
+  assertTextIntegrity(envelope);
   if (isRecord(envelope.task) && envelope.task.status === "cancelled")
     throw new Error("Workflow cancellation must use workflow --cancel.");
   const candidate = validateTask(envelope.task);

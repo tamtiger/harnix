@@ -1,0 +1,231 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20260930-135720-workflow-text-safety-and-plan-transports",
+  "title": "An toàn văn bản và transport chỉnh kế hoạch cho hidden workflow",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-09-30T13:57:19.679+07:00",
+  "updatedAt": "2026-09-30T14:15:16.835+07:00",
+  "goal": "Agent chỉnh check, criterion và relevantPaths bằng flag (không JSON, không script), stdin có BOM vẫn được đọc, và văn bản bị hỏng mã hóa (mojibake) bị từ chối thay vì được ghi vào task.",
+  "nonGoals": [
+    "Không thêm --file",
+    "Không đổi TaskRecord schema v3",
+    "Không tự sửa dữ liệu task đã hỏng ở repository khác"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-add-criterion",
+      "text": "`--add-criterion <id> --text <text>` thêm criterion `pending` với id chưa tồn tại, giữ nguyên tiếng Việt trong text, và theo cùng quy tắc `replan`/`--reason` như `--set-check`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-text-safety-focused-2"
+      ]
+    },
+    {
+      "id": "ac-bom-stripped",
+      "text": "Body stdin bắt đầu bằng BOM UTF-8 vẫn được `--save`, `--evidence`, `--migrate`, `--cancel` và `--learn` parse thành công.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-text-safety-focused-2"
+      ]
+    },
+    {
+      "id": "ac-docs-schema",
+      "text": "`workflow --schema`, PRD, `docs/HARNIX_WORKFLOW.md`, `docs/IMPLEMENTATION_PLAN.md` §4 và `AGENTS.md` mô tả các transport mới và kiểm tra hỏng mã hóa; output các lệnh hiện có không đổi ngoài danh sách transport của `--schema`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-text-safety-focused-2"
+      ]
+    },
+    {
+      "id": "ac-guidance-text-safety",
+      "text": "Cookbook, `Persistence rules` của 6 skill và khối activation hướng dẫn chỉnh kế hoạch bằng flag, sửa prd/plan/design trực tiếp bằng công cụ sửa file, không đưa văn bản có dấu qua pipe hay script `-File` của powershell.exe 5.1, và không còn khẳng định `$OutputEncoding` một mình là đủ; test đối chiếu flag tài liệu với CLI vẫn pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-text-safety-focused-2"
+      ]
+    },
+    {
+      "id": "ac-mojibake-rejected",
+      "text": "`saveWorkflow` từ chối envelope chứa chuỗi có U+FFFD hoặc chuỗi là mojibake windows-1252/windows-1258 của UTF-8 hợp lệ (task, artifacts, epic, epicMembers), kể cả qua đường replan; tiếng Việt, Latin có dấu và emoji hợp lệ vẫn được chấp nhận.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-text-safety-focused-2"
+      ]
+    },
+    {
+      "id": "ac-set-check",
+      "text": "`--set-check <id>` thêm hoặc cập nhật một validation check (description, command, scope, required, criteria, input) của task v3 active và giữ field không nêu; check mới thiếu field bắt buộc bị từ chối; task đã qua planning cần `--reason` và tạo đúng một save `replan` kèm `contractRevision`, task đã ở `replan` thì save thường.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-text-safety-focused-2"
+      ]
+    },
+    {
+      "id": "ac-set-paths",
+      "text": "`--set-paths` với `--relevant-path`/`--relevant-spec` lặp lại thay toàn bộ danh sách tương ứng, không cần `--reason`, và từ chối đường dẫn không an toàn.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-text-safety-focused-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-command.ts",
+    "src/core/workflow/envelope.ts",
+    "src/core/workflow/save.ts",
+    "src/core/workflow/schema.ts",
+    "src/templates/harnix/activation.ts",
+    "src/templates/harnix/workflow.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/common.md",
+    ".harnix/spec/guides/languages/typescript.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-text-safety-focused",
+      "description": "Test tập trung cho transport workflow, kiểm tra hỏng mã hóa và hướng dẫn.",
+      "command": "pnpm vitest run test/unit/core/workflow test/integration/commands test/workflow",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-add-criterion",
+        "ac-bom-stripped",
+        "ac-docs-schema",
+        "ac-guidance-text-safety",
+        "ac-mojibake-rejected",
+        "ac-set-check",
+        "ac-set-paths"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/workflow/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/integration/commands/**",
+        "test/unit/core/workflow/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-full-suite",
+      "description": "Typecheck, lint và toàn bộ test kèm coverage floor.",
+      "command": "pnpm typecheck && pnpm lint && pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-add-criterion",
+        "ac-bom-stripped",
+        "ac-docs-schema",
+        "ac-guidance-text-safety",
+        "ac-mojibake-rejected",
+        "ac-set-check",
+        "ac-set-paths"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "vitest.config.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-text-safety-focused-1",
+      "checkId": "chk-text-safety-focused",
+      "recordedAt": "2026-09-30T14:08:45.870+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow test/integration/commands test/workflow — focused text safety và plan transports",
+      "artifactPaths": [],
+      "inputDigest": "da650942136116cf8df815974985a19b9409751694c37da4a14a8276adb0a881"
+    },
+    {
+      "id": "ev-chk-full-suite-1",
+      "checkId": "chk-full-suite",
+      "recordedAt": "2026-09-30T14:09:11.582+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm typecheck && pnpm lint && pnpm test — suite đầy đủ kèm coverage",
+      "artifactPaths": [],
+      "inputDigest": "18b7f5dff62da0e5408ae3d7a5f6bfceae596898798345b65bcca0396cc82477"
+    },
+    {
+      "id": "ev-chk-text-safety-focused-2",
+      "checkId": "chk-text-safety-focused",
+      "recordedAt": "2026-09-30T14:13:16.634+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow test/integration/commands test/workflow — chạy lại sau khi sửa lint",
+      "artifactPaths": [],
+      "inputDigest": "93310ae47cb0624ab442727f16b5b6e053418a7436736db9a80989bc00be004e"
+    },
+    {
+      "id": "ev-chk-full-suite-2",
+      "checkId": "chk-full-suite",
+      "recordedAt": "2026-09-30T14:14:35.366+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck && pnpm lint && pnpm test — chạy lại sau khi sửa 4 lỗi lint",
+      "artifactPaths": [],
+      "inputDigest": "220c373c31a1a7d6552dad13821e927683709dfa5f6b43336e7eea0ec1f922d9"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-flags-carry-text",
+      "text": "Chỉnh nghĩa vụ bằng flag thay vì JSON; văn bản có dấu đi qua đối số dòng lệnh.",
+      "rationale": "Đối số dòng lệnh Windows là UTF-16 nên node nhận UTF-8 đúng; stdin qua powershell.exe 5.1 bị đổi mã hóa và thêm BOM."
+    },
+    {
+      "id": "d-guard-not-repair",
+      "text": "Phát hiện mojibake thì từ chối, không tự sửa.",
+      "rationale": "Tự sửa có thể đoán sai; từ chối kèm chỉ dẫn giữ dữ liệu người dùng nguyên vẹn."
+    },
+    {
+      "id": "d-reason-wraps-replan",
+      "text": "Transport chỉnh nghĩa vụ sau planning bắt buộc --reason và tự gói save replan + contractRevision.",
+      "rationale": "Giữ đúng hợp đồng replan hiện có mà agent không phải dựng envelope."
+    },
+    {
+      "id": "d-artifacts-edited-directly",
+      "text": "prd.md, plan.md, design.md được sửa trực tiếp bằng công cụ sửa file, không qua --save.",
+      "rationale": "Ready gate đọc file hiện có; tick checklist plan.md đã làm trực tiếp từ trước và không lỗi."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-mojibake-heuristic",
+      "text": "Kiểm tra mojibake chỉ bắt được UTF-8 bị đọc bằng windows-1252 hoặc windows-1258; một code page khác (ví dụ OEM 850) không bị phát hiện, và chuỗi Latin hiếm gặp có đúng dạng mojibake sẽ bị chặn nhầm.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-json-still-needed",
+      "text": "Tạo task mới và sửa tiêu chí đã có vẫn cần JSON qua --save; chỉ check, criterion mới và relevantPaths có transport dạng flag.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-agent-installs-stale",
+      "text": "Agent Kiro, Antigravity, Claude và Codex chỉ nhận hướng dẫn mới sau harnix update --global; trước đó vẫn thấy bản cũ và có thể vẫn dựng JSON hoặc script.",
+      "severity": "medium"
+    },
+    {
+      "id": "risk-damaged-data-elsewhere",
+      "text": "Dữ liệu task đã bị hỏng mã hóa ở repository khác (ví dụ payment-hub) không được sửa tự động; guard chỉ ngăn hỏng thêm, cần khôi phục từ git hoặc replan có contractRevision.",
+      "severity": "medium"
+    }
+  ],
+  "completedAt": "2026-09-30T14:15:16.835+07:00"
+}

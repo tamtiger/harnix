@@ -1,3 +1,4 @@
+import { PassThrough } from "node:stream";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "src/cli-program.js";
@@ -138,6 +139,61 @@ describe.sequential("hidden workflow flag transports", () => {
     expect(cancelled.code).toBe(0);
     expect(JSON.parse(cancelled.out)).toMatchObject({ status: "cancelled" });
   });
+
+  it("passes the command of --run-check through even when the -- separator was dropped by a shell shim", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+    const calls: string[][] = [];
+    const checkRunner: CheckRunner = async (executable, args) => {
+      calls.push([executable, ...args]);
+      return { exitCode: 0, output: "" };
+    };
+
+    const withoutSeparator = await run(["--run-check", "check", "dotnet", "test", "--filter", "X", "--nologo"], {
+      checkRunner,
+    });
+    const withSeparator = await run(["--run-check", "check", "--", "dotnet", "test", "--filter", "X"], { checkRunner });
+
+    expect(withoutSeparator.code).toBe(0);
+    expect(withSeparator.code).toBe(0);
+    expect(calls).toEqual([
+      ["dotnet", "test", "--filter", "X", "--nologo"],
+      ["dotnet", "test", "--filter", "X"],
+    ]);
+  });
+
+  it("splits criterion lists on commas and on the spaces PowerShell joins array arguments with", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+    await run(["--evidence", "--check", "check", "--result", "pass", "--exit-code", "0", "--summary", "ok"]);
+
+    for (const list of ["a,a", "a a", "a, a"]) {
+      const result = await run(["--criterion", list, "--met", "--brief"]);
+      expect(result.code, list).toBe(0);
+    }
+  });
+
+  it("does not wait for a stdin that never closes when the body is optional", async () => {
+    const root = await fixture();
+    await initializeUtcProject(root);
+    process.chdir(root);
+    const original = Object.getOwnPropertyDescriptor(process, "stdin");
+    Object.defineProperty(process, "stdin", { configurable: true, value: new PassThrough() });
+    try {
+      const started = Date.now();
+      const migrate = await run(["--migrate"]);
+      const cancel = await run(["--cancel"]);
+
+      expect(migrate.code).toBe(2);
+      expect(migrate.err).toMatch(/active task/u);
+      expect(cancel.code).toBe(2);
+      expect(Date.now() - started).toBeLessThan(15_000);
+    } finally {
+      if (original) Object.defineProperty(process, "stdin", original);
+    }
+  }, 20_000);
 
   it("rejects flag combinations that do not belong together", async () => {
     const root = await fixture();

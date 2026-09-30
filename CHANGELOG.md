@@ -4,6 +4,20 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.27] - 2026-09-30
+
+### Added
+
+- workflow --set-check/--add-criterion/--set-paths chỉnh kế hoạch bằng flag, bỏ BOM ở stdin và từ chối văn bản hỏng mã hóa (mojibake) trước khi lưu; cookbook và skill hướng dẫn không đưa chữ có dấu qua pipe của Windows PowerShell 5.1
+
+## [1.1.26] - 2026-09-30
+
+### Fixed
+
+- Cookbook và quy tắc persistence nhắc đặt $OutputEncoding UTF-8 trong Windows PowerShell 5.1 trước khi pipe JSON có dấu
+- `workflow --run-check` giữ nguyên mọi đối số sau operand đầu tiên kể cả khi shim `harnix.ps1` của pnpm làm mất dấu `--` (trước đây `--filter X` bị hiểu là option của harnix), và `--criterion` tách danh sách theo dấu phẩy lẫn khoảng trắng (PowerShell nối `a,b,c` không nháy thành `a b c`)
+- `workflow --migrate` và `--cancel` không còn chờ EOF khi không có body: stdin của shell agent thường là pipe mở mãi nên lệnh bị treo tới timeout dù đã ghi xong; nay dừng đọc sau 2 giây không có dữ liệu
+
 ## [1.1.25] - 2026-09-30
 
 ### Changed

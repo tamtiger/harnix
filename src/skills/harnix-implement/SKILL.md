@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or already in progress and needs plan review, test-first implementation, refactoring, or technical feedback handling.
 metadata:
-  version: "1.1.25"
+  version: "1.1.27"
 ---
 
 # Implement a ready Harnix task
@@ -121,7 +121,7 @@ Never create a branch, worktree, commit, push, merge, publish, or pull request a
 
 ## Persistence rules
 
-Change task state only through `harnix workflow` (`--save`, `--transition`, `--evidence`, `--criterion`, `--migrate`, `--run-check`, `--finish`, `--cancel`); `.harnix/workflow.md` has a Command cookbook with copy-paste PowerShell and bash examples. Never create temporary `.ps1`, `.sh`, `.js` or `.json` files to build or patch state, never edit `task.json`, `review.md` or `.harnix/tasks/.active` with regex, `sed`, `Set-Content` or an editor tool, and when a needed command is missing or keeps failing, stop and report the exact command and error instead of scripting around it. Take `recordedAt`, `createdAt`, `updatedAt` and ID prefixes from the `clock` block of `harnix workflow --preflight`, never from `date` or `Get-Date`. Pipe JSON to stdin (never `<` in PowerShell), keep it under 64 KiB, and prefer the flag transports that need no JSON.
+Change task state only through `harnix workflow` (`--save`, `--transition`, `--evidence`, `--criterion`, `--migrate`, `--run-check`, `--finish`, `--cancel`); `.harnix/workflow.md` has a Command cookbook with copy-paste PowerShell and bash examples. Never create temporary `.ps1`, `.sh`, `.js` or `.json` files to build or patch state, never edit `task.json`, `review.md` or `.harnix/tasks/.active` with regex, `sed`, `Set-Content` or an editor tool, and when a needed command is missing or keeps failing, stop and report the exact command and error instead of scripting around it. Take `recordedAt`, `createdAt`, `updatedAt` and ID prefixes from the `clock` block of `harnix workflow --preflight`, never from `date` or `Get-Date`. Pipe JSON to stdin (never `<` in PowerShell, and never pipe accented text through Windows PowerShell 5.1: change checks, criteria and paths with `--set-check`, `--add-criterion` and `--set-paths`, edit `prd.md`, `plan.md` and `design.md` directly, and use bash or `pwsh` 7.4+ for unavoidable JSON), keep it under 64 KiB, and prefer the flag transports that need no JSON.
 
 ## Upstream basis
 

@@ -5,6 +5,7 @@ import * as workflow from "src/core/workflow/index.js";
 describe("workflow index", () => {
   it("exposes exactly the public workflow surface used by commands and hooks", () => {
     expect(Object.keys(workflow).sort()).toEqual([
+      "addCriterionWorkflow",
       "appendEvidenceFlagsWorkflow",
       "appendEvidenceWorkflow",
       "briefTask",
@@ -28,6 +29,8 @@ describe("workflow index", () => {
       "routeWorkflow",
       "runCheckWorkflow",
       "saveWorkflow",
+      "setCheckWorkflow",
+      "setPathsWorkflow",
       "shouldReassessArchitecture",
       "shouldResearch",
       "snapshotWorkflow",
