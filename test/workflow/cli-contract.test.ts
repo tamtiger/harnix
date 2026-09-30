@@ -67,8 +67,19 @@ describe("CLI command contract", () => {
       "--learn",
       "--transition",
       "--evidence",
+      "--criterion",
+      "--met",
+      "--evidence-ids",
+      "--migrate",
+      "--run-check",
       "--schema",
       "--check",
+      "--result",
+      "--exit-code",
+      "--summary",
+      "--artifact",
+      "--digest",
+      "--brief",
     ]);
   });
 

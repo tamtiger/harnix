@@ -3,12 +3,17 @@
  * keeps the historical import path stable for the CLI wiring.
  */
 export {
+  appendEvidenceFlagsWorkflow,
   appendEvidenceWorkflow,
+  briefTask,
   cancelWorkflow,
   finishWorkflow,
   inspectWorkflow,
+  markCriteriaMetWorkflow,
+  migrateToV3Workflow,
   preflightWorkflow,
   recordLearningWorkflow,
+  runCheckWorkflow,
   saveWorkflow,
   snapshotWorkflow,
   transitionWorkflow,

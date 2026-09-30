@@ -2,7 +2,7 @@
 name: harnix-continue
 description: Use when an initialized Harnix project may have an unfinished, interrupted, blocked, or partially persisted task that must resume safely.
 metadata:
-  version: "1.1.22"
+  version: "1.1.25"
 ---
 
 # Continue persisted Harnix work
@@ -40,18 +40,18 @@ Public `harnix tasks [--limit] [--status]` may be used as bounded discovery when
 
 ## Routing table
 
-| Persisted state | Route |
-|---|---|
-| `planning` or checkpoint `replan` | `harnix-brainstorm` |
-| `ready/ready` with implementation already authorized | `harnix-implement` |
-| `ready/ready` for plan-only work | report ready; wait for an implementation request |
-| `in_progress/implementing` | `harnix-implement` from the last recorded slice |
-| `in_progress/debugging` | `harnix-debug` from the recorded symptom/hypothesis |
-| `verifying/verifying` | `harnix-check`, preserving prior failed/passing evidence |
-| `verifying/finishing` with green prerequisites | `harnix-finish-work` |
-| `blocked` with unchanged blocker | report blocker and resume status; do not pretend progress |
-| `completed` still active | validate completion persistence, then repair pointer/archive only within the documented workflow |
-| `cancelled/cancelling` still active | route to `harnix-finish-work` for cancellation journal/pointer recovery only |
+| Persisted state                                      | Route                                                                                            |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `planning` or checkpoint `replan`                    | `harnix-brainstorm`                                                                              |
+| `ready/ready` with implementation already authorized | `harnix-implement`                                                                               |
+| `ready/ready` for plan-only work                     | report ready; wait for an implementation request                                                 |
+| `in_progress/implementing`                           | `harnix-implement` from the last recorded slice                                                  |
+| `in_progress/debugging`                              | `harnix-debug` from the recorded symptom/hypothesis                                              |
+| `verifying/verifying`                                | `harnix-check`, preserving prior failed/passing evidence                                         |
+| `verifying/finishing` with green prerequisites       | `harnix-finish-work`                                                                             |
+| `blocked` with unchanged blocker                     | report blocker and resume status; do not pretend progress                                        |
+| `completed` still active                             | validate completion persistence, then repair pointer/archive only within the documented workflow |
+| `cancelled/cancelling` still active                  | route to `harnix-finish-work` for cancellation journal/pointer recovery only                     |
 
 Blocked state takes precedence over its checkpoint. Never route a blocked `replan`, `debugging`, or `finishing` checkpoint directly to another stage owner until Continue validates that the blocker has changed and resumes the task to its recorded status.
 
@@ -82,6 +82,14 @@ Ordinary continuation is read-only until the owning skill performs its documente
 ## Exit
 
 Hand off to exactly one stage owner with the active task path, validated status/checkpoint, last durable evidence, and next action. For invalid state, stop with repair guidance. For no active task, return to triage.
+
+## Persistence rules
+
+Change task state only through `harnix workflow` (`--save`, `--transition`, `--evidence`, `--criterion`, `--migrate`, `--run-check`, `--finish`, `--cancel`); `.harnix/workflow.md` has a Command cookbook with copy-paste PowerShell and bash examples. Never create temporary `.ps1`, `.sh`, `.js` or `.json` files to build or patch state, never edit `task.json`, `review.md` or `.harnix/tasks/.active` with regex, `sed`, `Set-Content` or an editor tool, and when a needed command is missing or keeps failing, stop and report the exact command and error instead of scripting around it. Take `recordedAt`, `createdAt`, `updatedAt` and ID prefixes from the `clock` block of `harnix workflow --preflight`, never from `date` or `Get-Date`. Pipe JSON to stdin (never `<` in PowerShell), keep it under 64 KiB, and prefer the flag transports that need no JSON.
+
+## Input digest freshness
+
+`inputDigest` changes when a file matched by a check's `inputs` changes, or when the task contract changes: criterion ids/text, mode, or the definition of any check, so a replan that edits one check stales every earlier pass. It does not change when evidence is recorded, criterion `status`/`evidenceIds` change, the `plan.md` checklist is ticked, or decisions/residual risks change. After a replan, run `harnix status --explain` to see which checks are stale and rerun each with `harnix workflow --run-check <id> -- <exe> [args...]` (or snapshot before and after, run, and record with `--evidence --check <id> --digest <before>`); batch every contract edit into one replan so the reruns happen once.
 
 ## Upstream basis
 

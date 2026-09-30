@@ -1,0 +1,198 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20260930-103813-agent-guidance-cookbook",
+  "title": "Viết lại hướng dẫn skill và template cho agent",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20260930-103810-agent-workflow-transport",
+  "createdAt": "2026-09-30T10:38:10.580+07:00",
+  "updatedAt": "2026-09-30T11:20:37.503+07:00",
+  "goal": "Skill, `.harnix/workflow.md` và steering (Kiro/Antigravity/Claude/Codex) chỉ rõ cách dùng đúng CLI cuối cùng trên PowerShell và bash, cấm script tạm, bắt dùng clock, giải thích digest.",
+  "nonGoals": [
+    "Không đổi hành vi CLI",
+    "Không thêm skill hay nền tảng mới",
+    "Không sửa lịch sử task đã hoàn tất"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-forbid-temp-scripts",
+      "text": "Các skill implement, check, continue, finish-work, debug, brainstorm và tài liệu activation dùng chung đều có quy tắc: chỉ đổi trạng thái task qua `harnix workflow`, cấm file tạm .ps1/.sh/.json và regex/Set-Content lên `task.json`/`review.md`/`.active`, và lệnh còn thiếu thì dừng báo cáo.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-guidance-focused-1"
+      ]
+    },
+    {
+      "id": "ac-cookbook-both-shells",
+      "text": "`workflow.md` có `### Command cookbook` với ví dụ PowerShell và bash cho evidence (flag và envelope), criterion met, transition, snapshot trước/sau, run-check, migrate, finish, cancel; dùng pipe (không dùng `<`), nêu giới hạn stdin 64 KiB và cách chạy lệnh ghép qua shell tường minh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-guidance-focused-1"
+      ]
+    },
+    {
+      "id": "ac-clock-rule",
+      "text": "Quy tắc lấy `now`/`idPrefix` từ `clock` của preflight có trong `harnix-check`, `harnix-debug`, `harnix-continue`, `harnix-finish-work` và tài liệu activation.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-guidance-focused-1"
+      ]
+    },
+    {
+      "id": "ac-digest-explained",
+      "text": "Skill mô tả cái gì làm đổi và không làm đổi `inputDigest`, cách phục hồi sau replan (`--snapshot`, chạy lại, ghi lại) và khuyến nghị gộp mọi sửa contract vào một lần replan.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-guidance-focused-1"
+      ]
+    },
+    {
+      "id": "ac-docs-match-cli",
+      "text": "Không còn mâu thuẫn evidence-transport trong `harnix-check`; một test trích mọi `--flag` trên dòng chứa `harnix workflow` trong cookbook và 6 skill và xác nhận flag đó là option đã đăng ký của command `workflow`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-guidance-focused-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/skills/catalog.ts",
+    "src/skills/harnix-brainstorm/SKILL.md",
+    "src/skills/harnix-check/SKILL.md",
+    "src/skills/harnix-continue/SKILL.md",
+    "src/skills/harnix-debug/SKILL.md",
+    "src/skills/harnix-finish-work/SKILL.md",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/templates/harnix/activation.ts",
+    "src/templates/harnix/global-surface.ts",
+    "src/templates/harnix/workflow.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/common.md",
+    ".harnix/spec/guides/languages/typescript.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-guidance-focused",
+      "description": "Test tập trung cho skill, template và cấu hình nền tảng.",
+      "command": "pnpm vitest run test/unit/templates test/integration/commands/skills.test.ts test/platform",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-clock-rule",
+        "ac-cookbook-both-shells",
+        "ac-digest-explained",
+        "ac-docs-match-cli",
+        "ac-forbid-temp-scripts"
+      ],
+      "inputs": [
+        "src/configurators/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/integration/commands/skills.test.ts",
+        "test/platform/**",
+        "test/unit/templates/**"
+      ]
+    },
+    {
+      "id": "chk-full-suite",
+      "description": "Typecheck, lint và toàn bộ test kèm coverage floor.",
+      "command": "pnpm typecheck && pnpm lint && pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-clock-rule",
+        "ac-cookbook-both-shells",
+        "ac-digest-explained",
+        "ac-docs-match-cli",
+        "ac-forbid-temp-scripts"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "vitest.config.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-guidance-focused-1",
+      "checkId": "chk-guidance-focused",
+      "recordedAt": "2026-09-30T11:17:15.291+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/templates test/integration/commands/skills.test.ts test/platform — guidance focused",
+      "artifactPaths": [],
+      "inputDigest": "ff18a79fbbf160075424ba37e1fb81b5fa9fff1ac2d39dd0effc4e3cd48bc999"
+    },
+    {
+      "id": "ev-chk-full-suite-1",
+      "checkId": "chk-full-suite",
+      "recordedAt": "2026-09-30T11:18:11.561+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm typecheck && pnpm lint && pnpm test — suite đầy đủ kèm coverage",
+      "artifactPaths": [],
+      "inputDigest": "32f03af99e8d706510e7ac6d12b6615471cd026ba504abd4abe39cbc4c9f34a5"
+    },
+    {
+      "id": "ev-chk-full-suite-2",
+      "checkId": "chk-full-suite",
+      "recordedAt": "2026-09-30T11:20:03.093+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck && pnpm lint && pnpm test — chạy lại sau harnix update đồng bộ .harnix/workflow.md với template phiên bản 1.1.25",
+      "artifactPaths": [],
+      "inputDigest": "32f03af99e8d706510e7ac6d12b6615471cd026ba504abd4abe39cbc4c9f34a5"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-shared-activation-array",
+      "text": "Thêm ba mệnh đề vào cuối `HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS` thay vì tạo mảng mới.",
+      "rationale": "Mọi consumer (steering Kiro/Antigravity, khối Claude/Codex, AGENTS.md) đã nối mảng này nên nội dung không thể lệch giữa nền tảng; test hiện có chỉ đòi các mệnh đề cũ vẫn có mặt."
+    },
+    {
+      "id": "d-identical-skill-section",
+      "text": "Mục `## Persistence rules` giống hệt nhau (byte) trong 6 skill; đoạn về digest chỉ ở brainstorm, continue, check.",
+      "rationale": "Một nguồn diễn đạt, dễ test bằng so khớp chuỗi; digest chỉ liên quan tới stage lập kế hoạch, nối lại và verify."
+    },
+    {
+      "id": "d-cookbook-in-workflow-md",
+      "text": "Cookbook nằm trong `.harnix/workflow.md` (template workflow.ts), skill chỉ trỏ tới.",
+      "rationale": "workflow.md được đọc ở mọi Lite/Full nên ví dụ không phải lặp trong từng skill và không làm phình ngân sách kích thước skill."
+    },
+    {
+      "id": "d-no-home-mutation",
+      "text": "Không chạy `harnix update --global` trên home thật; chỉ cập nhật project này bằng `harnix update`.",
+      "rationale": "AGENTS.md cấm đụng home thật khi chưa được ủy quyền; người dùng tự chạy lệnh global."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-global-installs-stale",
+      "text": "Bản skill và steering đã cài ở home người dùng (Kiro, Antigravity, Claude, Codex) chỉ cập nhật sau khi chạy harnix update --global; cho tới lúc đó agent vẫn thấy hướng dẫn cũ.",
+      "severity": "medium"
+    },
+    {
+      "id": "risk-agents-md-not-updated",
+      "text": "AGENTS.md của dự án là file do người dùng sở hữu nên harnix update giữ nguyên; bootstrap gọn 8 KiB không mang quy tắc persistence, chúng nằm trong steering nền tảng, skill và workflow.md.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-persistence-test-outside-inputs",
+      "text": "test/workflow/persistence-guidance.test.ts nằm ngoài inputs của check focused nên chỉ được chứng minh bởi check full-suite.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-09-30T11:20:37.503+07:00"
+}

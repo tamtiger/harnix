@@ -4,6 +4,11 @@ import { readFile } from "node:fs/promises";
 import { globby } from "globby";
 
 import { selectLatestEvidence, type TaskRecordV3, type ValidationCheckV3 } from "src/core/tasks/task.js";
+import {
+  buildGlobIgnores,
+  createGuardedDirectoryFilter,
+  targetedSegments,
+} from "src/core/verification/transient-directories.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 
 export interface InputDigestEntry {
@@ -21,6 +26,8 @@ export interface InputDigestSnapshot {
   entries: InputDigestEntry[];
   inputDigest: string;
 }
+
+const HASH_CONCURRENCY = 16;
 
 /**
  * Digest of the contract and declared inputs for one v3 check. Evidence stores
@@ -40,29 +47,29 @@ export async function computeInputDigest(
     `.harnix/tasks/${task.id}/verification-inputs.json`,
   ]);
   const paths = new Set<string>();
+  const isKept = createGuardedDirectoryFilter(projectRoot);
   for (const input of check.inputs) {
+    const targeted = targetedSegments(input);
     const matches = await globby(input, {
       absolute: false,
       cwd: projectRoot,
       dot: true,
       followSymbolicLinks: false,
       gitignore: true,
+      ignore: buildGlobIgnores(targeted),
       onlyFiles: true,
     });
     if (matches.length === 0) throw new Error(`Verification input pattern for check ${checkId} matched no files.`);
+    let kept = 0;
     for (const match of matches) {
       const normalized = normalizeRepositoryPath(match);
+      if (!(await isKept(normalized, targeted))) continue;
+      kept += 1;
       if (!workflowOwned.has(normalized)) paths.add(normalized);
     }
+    if (kept === 0) throw new Error(`Verification input pattern for check ${checkId} matched no files.`);
   }
-  const entries: InputDigestEntry[] = [];
-  for (const path of [...paths].sort(compareText)) {
-    try {
-      entries.push({ path, sha256: hashBytes(await readFile(await resolveSafeProjectPath(projectRoot, path))) });
-    } catch {
-      throw new Error(`Verification input for check ${checkId} is missing or unreadable: ${path}`);
-    }
-  }
+  const entries = await hashEntries(projectRoot, [...paths].sort(compareText), checkId);
   const taskContractHash = hashText(canonicalTaskContract(task));
   return {
     generator: "harnix",
@@ -130,6 +137,30 @@ function canonicalCheck(check: ValidationCheckV3) {
     criterionIds: [...check.criterionIds].sort(compareText),
     inputs: [...check.inputs],
   };
+}
+
+async function hashEntries(
+  projectRoot: string,
+  paths: readonly string[],
+  checkId: string,
+): Promise<InputDigestEntry[]> {
+  const entries: (InputDigestEntry | undefined)[] = paths.map(() => undefined);
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    for (let index = next++; index < paths.length; index = next++) {
+      const path = paths[index] as string;
+      try {
+        entries[index] = { path, sha256: hashBytes(await readFile(await resolveSafeProjectPath(projectRoot, path))) };
+      } catch {
+        /* reported below in path order so the failing file is deterministic */
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(HASH_CONCURRENCY, paths.length) }, worker));
+  const missing = entries.findIndex((entry) => entry === undefined);
+  if (missing >= 0)
+    throw new Error(`Verification input for check ${checkId} is missing or unreadable: ${paths[missing]}`);
+  return entries as InputDigestEntry[];
 }
 
 function hashBytes(content: Uint8Array): string {

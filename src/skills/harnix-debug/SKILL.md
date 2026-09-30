@@ -2,7 +2,7 @@
 name: harnix-debug
 description: Use when a Harnix implementation or verification has a reproducible bug, failing test, unexpected behavior, loop, or repeated unsuccessful fix.
 metadata:
-  version: "1.1.22"
+  version: "1.1.25"
 ---
 
 # Debug with evidence
@@ -80,6 +80,10 @@ For each hypothesis record symptom, evidence, hypothesis, discriminating check, 
 - Confirmed fix with only verification reruns left: return to `verifying/verifying`.
 - Requirement or architecture defect, or three failed hypotheses: checkpoint `replan` and return to `harnix-brainstorm`.
 - External blocker: retain resumable state and report the exact dependency or authority needed.
+
+## Persistence rules
+
+Change task state only through `harnix workflow` (`--save`, `--transition`, `--evidence`, `--criterion`, `--migrate`, `--run-check`, `--finish`, `--cancel`); `.harnix/workflow.md` has a Command cookbook with copy-paste PowerShell and bash examples. Never create temporary `.ps1`, `.sh`, `.js` or `.json` files to build or patch state, never edit `task.json`, `review.md` or `.harnix/tasks/.active` with regex, `sed`, `Set-Content` or an editor tool, and when a needed command is missing or keeps failing, stop and report the exact command and error instead of scripting around it. Take `recordedAt`, `createdAt`, `updatedAt` and ID prefixes from the `clock` block of `harnix workflow --preflight`, never from `date` or `Get-Date`. Pipe JSON to stdin (never `<` in PowerShell), keep it under 64 KiB, and prefer the flag transports that need no JSON.
 
 ## Upstream basis
 

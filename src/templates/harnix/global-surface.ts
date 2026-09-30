@@ -1,5 +1,9 @@
 import type { DesiredGlobalManagedFile } from "src/utils/global-managed-files.js";
-import { HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS, HARNIX_TARGET_AUTHORITY_INSTRUCTIONS } from "./activation.js";
+import {
+  HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
+  HARNIX_PERSISTENCE_INSTRUCTIONS,
+  HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
+} from "./activation.js";
 import { renderSkill, workflowSkills } from "./workflow.js";
 
 /**
@@ -14,6 +18,7 @@ export const HARNIX_GLOBAL_ACTIVATION_DOCUMENT = [
   "",
   ...HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
   ...HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
+  ...HARNIX_PERSISTENCE_INSTRUCTIONS,
   "",
 ].join("\n");
 

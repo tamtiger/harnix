@@ -23,29 +23,21 @@ import { reportProjectContext } from "./commands/context-report.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { inspectVerifyPlan } from "./commands/verify-plan.js";
 import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
-import {
-  appendEvidenceWorkflow,
-  cancelWorkflow,
-  finishWorkflow,
-  inspectWorkflow,
-  preflightWorkflow,
-  recordLearningWorkflow,
-  saveWorkflow,
-  snapshotWorkflow,
-  transitionWorkflow,
-  workflowEnvelopeSchema,
-} from "./commands/internal-workflow.js";
+import { registerWorkflowCommand } from "./commands/workflow-command.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./utils/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
 import { GlobalManagedTransactionError } from "./utils/global-managed-files.js";
 import { readBoundedInput } from "./utils/bounded-input.js";
 import type { TaskStatus } from "./core/tasks/task.js";
+import type { CheckRunner } from "./utils/check-runner.js";
 
 export interface ProgramOptions {
   interactive?: boolean | undefined;
   hookEventInput?: (() => Promise<string>) | undefined;
   workflowInput?: (() => Promise<string>) | undefined;
+  /** Test/integration injection for the process that `workflow --run-check` starts. */
+  checkRunner?: CheckRunner | undefined;
   homeResolver?: HomeResolver | undefined;
   environment?: Readonly<Record<string, string | undefined>> | undefined;
   commandLookup?: HookCommandLookup | undefined;
@@ -406,136 +398,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
           : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
       await runInternalContextCommand({ hookInput, platform: options.platform });
     });
-  program
-    .command("workflow", { hidden: true })
-    .option("--inspect", "Inspect active workflow state")
-    .option("--preflight", "Inspect bounded workflow routing metadata")
-    .option("--save", "Persist workflow state from stdin")
-    .option("--snapshot", "Snapshot one required check")
-    .option("--finish", "Finish the active workflow task")
-    .option("--cancel", "Cancel the active workflow task")
-    .option("--learn", "Record one eligible project-local learning candidate")
-    .option("--transition <status/checkpoint>", "Move the active task to one legal status/checkpoint")
-    .option("--evidence", "Append exactly one evidence item from stdin")
-    .option("--schema", "Describe the save envelope schema")
-    .option("--check <id>", "Required check ID for --snapshot")
-    .action(
-      async (options: {
-        inspect?: boolean;
-        preflight?: boolean;
-        save?: boolean;
-        snapshot?: boolean;
-        finish?: boolean;
-        cancel?: boolean;
-        learn?: boolean;
-        check?: string;
-        transition?: string;
-        evidence?: boolean;
-        schema?: boolean;
-      }) => {
-        const actionCount =
-          [
-            options.inspect,
-            options.preflight,
-            options.save,
-            options.snapshot,
-            options.finish,
-            options.cancel,
-            options.learn,
-            options.evidence,
-            options.schema,
-          ].filter((selected) => selected === true).length + (options.transition === undefined ? 0 : 1);
-        if (actionCount !== 1)
-          throw new Error(
-            "workflow requires exactly one of --inspect, --preflight, --save, --transition, --evidence, --schema, --snapshot, --finish, --cancel, or --learn.",
-          );
-        if (options.snapshot !== true && options.check !== undefined)
-          throw new Error("--check requires workflow --snapshot.");
-        if (options.snapshot === true && options.check === undefined)
-          throw new Error("workflow --snapshot requires --check <id>.");
-        const root = await resolveProjectRoot(process.cwd());
-        if (options.inspect) {
-          process.stdout.write(`${JSON.stringify(await inspectWorkflow(root))}\n`);
-          return;
-        }
-        if (options.preflight) {
-          process.stdout.write(`${JSON.stringify(await preflightWorkflow(root))}\n`);
-          return;
-        }
-        if (options.save) {
-          const input = programOptions.workflowInput
-            ? await programOptions.workflowInput()
-            : await readBoundedInput(process.stdin);
-          if (!input) throw new Error("Workflow save requires a bounded JSON envelope on stdin.");
-          let envelope: unknown;
-          try {
-            envelope = JSON.parse(input) as unknown;
-          } catch {
-            throw new Error("Workflow save requires valid JSON.");
-          }
-          process.stdout.write(`${JSON.stringify(await saveWorkflow(root, envelope))}\n`);
-          return;
-        }
-        if (options.transition !== undefined) {
-          const [status, checkpoint, ...rest] = options.transition.split("/");
-          if (!status || !checkpoint || rest.length > 0)
-            throw new Error("workflow --transition requires <status>/<checkpoint>.");
-          process.stdout.write(`${JSON.stringify(await transitionWorkflow(root, status, checkpoint))}\n`);
-          return;
-        }
-        if (options.evidence) {
-          const input = programOptions.workflowInput
-            ? await programOptions.workflowInput()
-            : await readBoundedInput(process.stdin);
-          if (!input) throw new Error("Workflow evidence requires a bounded JSON envelope on stdin.");
-          let envelope: unknown;
-          try {
-            envelope = JSON.parse(input) as unknown;
-          } catch {
-            throw new Error("Workflow evidence requires valid JSON.");
-          }
-          process.stdout.write(`${JSON.stringify(await appendEvidenceWorkflow(root, envelope))}\n`);
-          return;
-        }
-        if (options.schema) {
-          process.stdout.write(`${JSON.stringify(workflowEnvelopeSchema())}\n`);
-          return;
-        }
-        if (options.snapshot) {
-          process.stdout.write(`${JSON.stringify(await snapshotWorkflow(root, options.check!))}\n`);
-          return;
-        }
-        if (options.cancel) {
-          const input = programOptions.workflowInput
-            ? await programOptions.workflowInput()
-            : process.stdin.isTTY === true
-              ? ""
-              : await readBoundedInput(process.stdin);
-          let envelope: unknown;
-          try {
-            envelope = input ? (JSON.parse(input) as unknown) : undefined;
-          } catch {
-            throw new Error("Workflow cancellation requires valid bounded JSON.");
-          }
-          process.stdout.write(`${JSON.stringify(await cancelWorkflow(root, envelope))}\n`);
-          return;
-        }
-        if (options.learn) {
-          const input = programOptions.workflowInput
-            ? await programOptions.workflowInput()
-            : await readBoundedInput(process.stdin);
-          let envelope: unknown;
-          try {
-            envelope = input ? (JSON.parse(input) as unknown) : undefined;
-          } catch {
-            throw new Error("Workflow learning capture requires valid bounded JSON.");
-          }
-          process.stdout.write(`${JSON.stringify(await recordLearningWorkflow(root, envelope))}\n`);
-          return;
-        }
-        process.stdout.write(`${JSON.stringify(await finishWorkflow(root))}\n`);
-      },
-    );
+  registerWorkflowCommand(program, programOptions);
   return program;
 }
 

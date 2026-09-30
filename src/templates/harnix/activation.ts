@@ -18,3 +18,10 @@ export const HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS = [
   "Only for project-scoped Lite or Full work, or an explicit request to inspect or continue the active task, run the hidden `harnix workflow --preflight`, then read `.harnix/workflow.md` and one current stage-owner skill; a ready-task preflight returns `await` until the current request supplies implementation authority.",
   "Use the exact `nextStage` returned by preflight; use `harnix-continue` only when `nextStage` selects it for interrupted or partial persisted state, and treat `await` or `stop` as mandatory stop points.",
 ] as const;
+
+/** Persistence and clock rules for platforms that own a whole global rule; kept out of the lean project bootstrap. */
+export const HARNIX_PERSISTENCE_INSTRUCTIONS = [
+  "Change Harnix task state only through `harnix workflow --save`, `--transition`, `--evidence`, `--criterion`, `--migrate`, `--run-check`, `--finish` or `--cancel`: never create temporary script or JSON files (`.ps1`, `.sh`, `.js`, `.json`) to build or patch task state, never edit `task.json`, `review.md` or `.harnix/tasks/.active` with regex, `sed`, `Set-Content` or an editor tool, and when a needed command is missing or keeps failing, stop and report the exact command and error instead of scripting around it.",
+  "Pass JSON to `harnix workflow` on stdin through a pipe (PowerShell `$json | harnix workflow --save`, bash `printf '%s' \"$json\" | harnix workflow --save`) because `<` redirection does not work in PowerShell, keep it under 64 KiB, and prefer the flag transports that need no JSON: `harnix workflow --evidence --check <id> --result <pass|fail|skipped> --summary <text> --exit-code <n>`, `--criterion <ids> --met`, `--run-check <id> -- <exe> [args...]` and `--brief`.",
+  "Take every `recordedAt`, `createdAt`, `updatedAt` and new task or epic ID prefix from the `clock` block of `harnix workflow --preflight`, never from `date`, `Get-Date` or your own estimate; the `--evidence` and `--run-check` flag transports fill `recordedAt` for you.",
+] as const;

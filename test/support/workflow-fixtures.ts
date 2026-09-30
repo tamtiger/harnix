@@ -5,6 +5,7 @@ import { initializeProject } from "src/commands/init.js";
 import { readConfig, writeConfig } from "src/core/config/config.js";
 import type { TaskRecord, TaskRecordV1, TaskRecordV3 } from "src/core/tasks/task.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
+import { saveWorkflow } from "src/core/workflow/save.js";
 import { buildCheck, buildCriterion, buildEvidence, buildTaskV1, buildTaskV3 } from "./builders.js";
 
 /** Fixed stamp of the historical fixtures used by the workflow-persistence specs. */
@@ -118,4 +119,27 @@ export async function finishingTask(root: string, evidenceAt: string): Promise<T
     ...base,
     evidence: [buildEvidence({ id: "e", checkId: "check", recordedAt: evidenceAt, summary: "ok", inputDigest })],
   };
+}
+
+/** Initialized UTC project whose one v3 task is persisted at `in_progress/implementing` (check `check` covers criterion `a`). */
+export async function implementingTaskV3(root: string): Promise<TaskRecordV3> {
+  await initializeUtcProject(root);
+  await writeProjectSource(root);
+  const planning = taskV3("planning", "planning");
+  await saveWorkflow(root, { task: planning });
+  const ready = {
+    ...planning,
+    status: "ready" as const,
+    checkpoint: "ready" as const,
+    updatedAt: "2026-08-13T00:01:00.000Z",
+  };
+  await saveWorkflow(root, { task: ready });
+  const running = {
+    ...ready,
+    status: "in_progress" as const,
+    checkpoint: "implementing" as const,
+    updatedAt: "2026-08-13T00:02:00.000Z",
+  };
+  await saveWorkflow(root, { task: running });
+  return running;
 }

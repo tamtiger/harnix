@@ -2,7 +2,7 @@
 name: harnix-brainstorm
 description: Use when a Harnix project needs request triage, requirements, design, planning, or a trustworthy ready gate before implementation.
 metadata:
-  version: "1.1.22"
+  version: "1.1.25"
 ---
 
 # Plan a Harnix task
@@ -124,6 +124,14 @@ An unfinished legacy schema v1/v2 task is read-only except for one migration sav
 - Unresolved user decision or authority: persist the valid resumable state and report one blocker.
 - Plan-only: return the ready summary and paths.
 - Authorized implementation with a passed gate: hand off to `harnix-implement` without another approval prompt.
+
+## Persistence rules
+
+Change task state only through `harnix workflow` (`--save`, `--transition`, `--evidence`, `--criterion`, `--migrate`, `--run-check`, `--finish`, `--cancel`); `.harnix/workflow.md` has a Command cookbook with copy-paste PowerShell and bash examples. Never create temporary `.ps1`, `.sh`, `.js` or `.json` files to build or patch state, never edit `task.json`, `review.md` or `.harnix/tasks/.active` with regex, `sed`, `Set-Content` or an editor tool, and when a needed command is missing or keeps failing, stop and report the exact command and error instead of scripting around it. Take `recordedAt`, `createdAt`, `updatedAt` and ID prefixes from the `clock` block of `harnix workflow --preflight`, never from `date` or `Get-Date`. Pipe JSON to stdin (never `<` in PowerShell), keep it under 64 KiB, and prefer the flag transports that need no JSON.
+
+## Input digest freshness
+
+`inputDigest` changes when a file matched by a check's `inputs` changes, or when the task contract changes: criterion ids/text, mode, or the definition of any check, so a replan that edits one check stales every earlier pass. It does not change when evidence is recorded, criterion `status`/`evidenceIds` change, the `plan.md` checklist is ticked, or decisions/residual risks change. After a replan, run `harnix status --explain` to see which checks are stale and rerun each with `harnix workflow --run-check <id> -- <exe> [args...]` (or snapshot before and after, run, and record with `--evidence --check <id> --digest <before>`); batch every contract edit into one replan so the reruns happen once.
 
 ## Upstream basis
 

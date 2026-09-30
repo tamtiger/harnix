@@ -4,6 +4,24 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [1.1.25] - 2026-09-30
+
+### Changed
+
+- Skill, workflow.md và steering nền tảng cấm script tạm, có Command cookbook PowerShell/bash, quy tắc clock, giải thích inputDigest và phục hồi sau replan; test đối chiếu flag tài liệu với CLI
+
+## [1.1.24] - 2026-09-30
+
+### Added
+
+- Hidden workflow thêm transport dạng flag: --evidence tự điền id/recordedAt/digest, --criterion --met, --migrate lên v3, --run-check và --brief; tách wiring sang src/commands/workflow-command.ts
+
+## [1.1.23] - 2026-09-30
+
+### Fixed
+
+- Suite gate nhận diện layout monorepo/.NET theo segment, finish gate xét pass mới nhất; input digest bỏ thư mục build tạm theo tín hiệu (marker), khớp không phân biệt hoa thường và băm song song
+
 ## [Unreleased] - 2026-09-28
 
 Đợt đại tu toàn diện (epic `20260928-180123-harnix-overhaul`). Mục này tích luỹ breaking change qua từng task; khi hoàn tất toàn bộ epic, `release-v2` sẽ đổi tiêu đề này thành `## [2.0.0] - <ngày phát hành>`.

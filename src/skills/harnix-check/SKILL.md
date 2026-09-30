@@ -2,7 +2,7 @@
 name: harnix-check
 description: Use when Harnix needs a standalone read-only code review, review feedback evaluation, or fresh active-task compliance, correctness, security, and maintainability verification before completion.
 metadata:
-  version: "1.1.22"
+  version: "1.1.25"
 ---
 
 # Review and verify Harnix work
@@ -119,7 +119,7 @@ When fixes are authorized through an active task, batch confirmed blockers and r
 
 ## Persist
 
-For every newly executed check, record timestamp, command or inspection, scope, exit/result, and outcome. Required v3 passes carry the validated `inputDigest` and the command's exit code; a stable failed run carries it when the snapshot was available, while an empty/missing/unreadable input failure remains persistable without inventing a digest. Append that evidence and every verification checkpoint through a bounded JSON envelope on stdin to `harnix workflow --save`; start from `harnix workflow --inspect` output and never edit `task.json` directly. Keep failed evidence; do not overwrite history with a passing rerun. Link acceptance criteria only to current passing evidence whose declared `criterionIds` contains that criterion. Remain `verifying` while any required item is failed, missing, stale, or unread.
+For every newly executed check, record timestamp, command or inspection, scope, exit/result, and outcome. Required v3 passes carry the validated `inputDigest` and the command's exit code; a stable failed run carries it when the snapshot was available, while an empty/missing/unreadable input failure remains persistable without inventing a digest. Record each verification result with `harnix workflow --run-check` or `harnix workflow --evidence` (flags, or a `{ "evidence": <Evidence> }` envelope on stdin), mark criteria with `--criterion <ids> --met`, and move stage with `--transition`; use `--save` only when artifacts or obligations change (start from `harnix workflow --inspect` output) and never edit `task.json` directly. Keep failed evidence; do not overwrite history with a passing rerun. Link acceptance criteria only to current passing evidence whose declared `criterionIds` contains that criterion. Remain `verifying` while any required item is failed, missing, stale, or unread.
 
 ## Exit
 
@@ -130,6 +130,14 @@ For every newly executed check, record timestamp, command or inspection, scope, 
 Do not fix unrelated findings, weaken gates, or declare success from absence of visible errors.
 
 Append each verification result with `harnix workflow --evidence`, which takes a bounded `{ "evidence": <Evidence> }` envelope on stdin and preserves every earlier item; reserve `harnix workflow --save` for a step that also changes artifacts or obligations.
+
+## Persistence rules
+
+Change task state only through `harnix workflow` (`--save`, `--transition`, `--evidence`, `--criterion`, `--migrate`, `--run-check`, `--finish`, `--cancel`); `.harnix/workflow.md` has a Command cookbook with copy-paste PowerShell and bash examples. Never create temporary `.ps1`, `.sh`, `.js` or `.json` files to build or patch state, never edit `task.json`, `review.md` or `.harnix/tasks/.active` with regex, `sed`, `Set-Content` or an editor tool, and when a needed command is missing or keeps failing, stop and report the exact command and error instead of scripting around it. Take `recordedAt`, `createdAt`, `updatedAt` and ID prefixes from the `clock` block of `harnix workflow --preflight`, never from `date` or `Get-Date`. Pipe JSON to stdin (never `<` in PowerShell), keep it under 64 KiB, and prefer the flag transports that need no JSON.
+
+## Input digest freshness
+
+`inputDigest` changes when a file matched by a check's `inputs` changes, or when the task contract changes: criterion ids/text, mode, or the definition of any check, so a replan that edits one check stales every earlier pass. It does not change when evidence is recorded, criterion `status`/`evidenceIds` change, the `plan.md` checklist is ticked, or decisions/residual risks change. After a replan, run `harnix status --explain` to see which checks are stale and rerun each with `harnix workflow --run-check <id> -- <exe> [args...]` (or snapshot before and after, run, and record with `--evidence --check <id> --digest <before>`); batch every contract edit into one replan so the reruns happen once.
 
 ## Upstream basis
 

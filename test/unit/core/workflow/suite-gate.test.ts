@@ -2,6 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { assertSuiteGateFinishing, assertSuiteGateReady, coversSourceAndTest } from "src/core/workflow/suite-gate.js";
 import { buildTaskV3 } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -160,6 +161,75 @@ describe("Suite Gate (ac-suite-gate)", () => {
 
     await expect(assertSuiteGateFinishing(root, taskWithoutPass)).rejects.toThrow(
       /Workflow finish requires a passing project-level suite check with current input digest/u,
+    );
+  });
+
+  it("coversSourceAndTest recognizes layouts whose test directories are named by suffix", () => {
+    expect(coversSourceAndTest(["Foo.Api/**", "Foo.Api.Tests/**"])).toBe(true);
+    expect(coversSourceAndTest(["Foo.Api/**/", "Foo.Api.UnitTests/"])).toBe(true);
+    expect(coversSourceAndTest(["service-a/**", "service-a-tests/**"])).toBe(true);
+    expect(coversSourceAndTest(["lib/core/**", "lib/core/__tests__/**"])).toBe(true);
+    expect(coversSourceAndTest(["Foo.Api/**"])).toBe(false);
+    expect(coversSourceAndTest(["Foo.Api.Tests/**"])).toBe(false);
+  });
+
+  it("coversSourceAndTest rejects documentation trees, file-only globs and negations as source", () => {
+    expect(coversSourceAndTest(["docs/app/**", "test/**"])).toBe(false);
+    expect(coversSourceAndTest(["scripts/**", "test/**"])).toBe(false);
+    expect(coversSourceAndTest(["**/*.cs", "**/*.Tests.cs"])).toBe(false);
+    expect(coversSourceAndTest(["!src/**", "test/**"])).toBe(false);
+    expect(coversSourceAndTest(["x/lib/**", "test/**"])).toBe(true);
+    expect(coversSourceAndTest(["xlib/**", "test/**"])).toBe(true);
+  });
+
+  it("ready error message describes the required coverage without a scope clause", async () => {
+    const root = await createFixture();
+    await writeFixture(root, "package.json", JSON.stringify({ scripts: { test: "pnpm test" } }));
+    await writeFixture(root, "src/index.ts", "");
+    const task = buildTaskV3({ validationPlan: [] });
+
+    const message = await assertSuiteGateReady(root, task).then(
+      () => "",
+      (error: Error) => error.message,
+    );
+    expect(message).toMatch(/covering full source and test inputs/u);
+    expect(message).not.toMatch(/scope/u);
+  });
+
+  it("finish judges the newest suite pass, not the first recorded one", async () => {
+    const root = await createFixture();
+    await writeFixture(root, "package.json", JSON.stringify({ scripts: { test: "pnpm test" } }));
+    await writeFixture(root, "src/index.ts", "export const a = 1;");
+    await writeFixture(root, "test/index.test.ts", "");
+    const suiteCheck = {
+      id: "check-suite",
+      description: "Project suite check",
+      scope: "full" as const,
+      required: true,
+      command: "pnpm test",
+      criterionIds: ["ac-1"],
+      inputs: ["src/**", "test/**"],
+    };
+    const base = buildTaskV3({ status: "verifying", checkpoint: "finishing", validationPlan: [suiteCheck] });
+    const { inputDigest } = await computeInputDigest(root, base, "check-suite");
+    const pass = (id: string, recordedAt: string, digest: string) => ({
+      id,
+      checkId: "check-suite",
+      recordedAt,
+      result: "pass" as const,
+      exitCode: 0,
+      summary: "pnpm test — pass",
+      artifactPaths: [],
+      inputDigest: digest,
+    });
+    const stale = pass("ev-old", "2026-09-28T09:00:00.000+07:00", "0".repeat(64));
+    const fresh = pass("ev-new", "2026-09-29T09:00:00.000+07:00", inputDigest);
+
+    await expect(assertSuiteGateFinishing(root, { ...base, evidence: [stale, fresh] })).resolves.not.toThrow();
+    await expect(assertSuiteGateFinishing(root, { ...base, evidence: [fresh, stale] })).resolves.not.toThrow();
+    const newerStale = pass("ev-newer-stale", "2026-09-29T10:00:00.000+07:00", "1".repeat(64));
+    await expect(assertSuiteGateFinishing(root, { ...base, evidence: [fresh, newerStale] })).rejects.toThrow(
+      /current input digest/u,
     );
   });
 

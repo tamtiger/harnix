@@ -1,4 +1,13 @@
 export { appendEvidenceWorkflow } from "./evidence.js";
+export { appendEvidenceFlagsWorkflow } from "./evidence-flags.js";
+export type { AppendedEvidence, EvidenceFlags } from "./evidence-flags.js";
+export { briefTask } from "./brief.js";
+export type { BriefTask } from "./brief.js";
+export { markCriteriaMetWorkflow } from "./criterion.js";
+export type { MarkCriteriaInput } from "./criterion.js";
+export { migrateToV3Workflow } from "./migrate-v3.js";
+export { runCheckWorkflow } from "./run-check.js";
+export type { CheckRunner, RunCheckDependencies, RunCheckResult } from "./run-check.js";
 export { cancelWorkflow, cancelWorkflowTask } from "./cancel.js";
 export { canCompleteTask, evidenceSupportsScope, verificationRetryDisposition } from "./completion.js";
 export type { VerificationRetryDisposition } from "./completion.js";

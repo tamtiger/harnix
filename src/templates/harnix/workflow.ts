@@ -67,6 +67,46 @@ Hidden workflow commands are the only persistence/freshness transport for stage 
 
 A TaskRecord v3 contains only: \`generator\`, \`schemaVersion\` (3), \`id\`, \`title\`, \`mode\`, \`status\`, \`checkpoint\`, \`goal\`, \`nonGoals\`, \`acceptanceCriteria\`, \`relevantPaths\`, \`relevantSpecs\`, \`validationPlan\`, \`evidence\`, \`createdAt\`, \`updatedAt\`, optional \`blocker\`, optional \`cancellation\`, optional \`completedAt\`, optional \`cancelledAt\`, optional \`epicId\`, optional \`decisions\`, and optional \`residualRisks\`. The nested contracts are \`acceptanceCriteria: [{ id, text, status, evidenceIds, waiverReason? }]\`, \`validationPlan: [{ id, description, command?, scope, required, criterionIds, inputs }]\` (sorted unique \`criterionIds\` and \`inputs\`; a required check needs at least one of each), \`evidence: [{ id, checkId?, recordedAt, result, exitCode?, summary, artifactPaths, inputDigest?, findings? }]\`, \`blocker: { kind, summary, nextAction, resumeStatus }\`, \`cancellation?: { reason, authorizedBy: "user" }\`, \`decisions?: [{ id, text, rationale }]\`, \`residualRisks?: [{ id, severity, text }]\`, and \`cancelledAt?: ISO timestamp\`. Use ISO timestamps, preserve existing evidence and frozen obligations, send only legal status/checkpoint transitions, and never edit task.json directly. Legacy v1/v2 records keep their earlier shapes and remain readable through the validator adapter. This schema change is a breaking change decided in D1/D11 (\`docs/OVERHAUL_DECISIONS.md\`); the \`release-v2\` task consolidates the changelog.
 
+### Command cookbook
+
+Copy-paste forms for the hidden \`harnix workflow\` transports, run from the repository root. Never create temporary script or JSON files; pipe any JSON on stdin and keep it under 64 KiB. \`<\` redirection does not work in PowerShell, so always pipe. Prefer the flag forms, which need no JSON and fill \`id\`, \`recordedAt\` and the input digest for you.
+
+PowerShell:
+
+\`\`\`powershell
+$pf = harnix workflow --preflight | ConvertFrom-Json   # $pf.clock.now and $pf.clock.idPrefix are the only time source
+harnix workflow --evidence --check <check-id> --result pass --exit-code 0 --summary "<command> - <result>" --brief
+harnix workflow --criterion <criterion-id>,<criterion-id> --met --brief
+harnix workflow --transition verifying/finishing --brief
+$before = (harnix workflow --snapshot --check <check-id> | ConvertFrom-Json).inputDigest
+harnix workflow --run-check <check-id> -- pnpm test    # snapshot, run, snapshot and record in one call
+'{"checks":{"<check-id>":{"criterionIds":["<criterion-id>"],"inputs":["src/**"]}}}' | harnix workflow --migrate --brief
+harnix workflow --finish --brief
+'{"reason":"<why>","authorizedBy":"user"}' | harnix workflow --cancel
+$json | harnix workflow --save --brief                 # only when artifacts or obligations change; start from harnix workflow --inspect
+\`\`\`
+
+bash:
+
+\`\`\`bash
+now=$(harnix workflow --preflight | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).clock.now")
+harnix workflow --evidence --check <check-id> --result pass --exit-code 0 --summary '<command> - <result>' --brief
+harnix workflow --criterion <criterion-id>,<criterion-id> --met --brief
+harnix workflow --transition verifying/finishing --brief
+before=$(harnix workflow --snapshot --check <check-id> | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).inputDigest")
+harnix workflow --run-check <check-id> -- pnpm test    # snapshot, run, snapshot and record in one call
+printf '%s' '{"checks":{"<check-id>":{"criterionIds":["<criterion-id>"],"inputs":["src/**"]}}}' | harnix workflow --migrate --brief
+harnix workflow --finish --brief
+printf '%s' '{"reason":"<why>","authorizedBy":"user"}' | harnix workflow --cancel
+printf '%s' "$json" | harnix workflow --save --brief   # only when artifacts or obligations change; start from harnix workflow --inspect
+\`\`\`
+
+- \`harnix workflow --evidence --check <id> --result <pass|fail|skipped> --summary <text>\` needs \`--exit-code <n>\` for every pass or fail and for any command-backed check; add \`--artifact <path>\` (repeatable) or \`--digest <before>\` when you snapshotted before the run. Without \`--result\` it still reads the \`{ "evidence": <Evidence> }\` envelope from stdin.
+- \`harnix workflow --criterion <ids> --met\` marks criteria \`met\` from the newest fresh pass of every required check that covers them, or from \`--evidence-ids <ids>\`; it refuses when a covering check has no fresh pass.
+- \`harnix workflow --run-check <id> -- <exe> [args...]\` starts one process from an executable and an argument array (no shell), records pass for exit 0 and fail otherwise, and records nothing when the inputs changed while it ran. For a compound command such as \`a && b\`, declare one check per command or start a shell explicitly, for example \`harnix workflow --run-check <id> -- bash -c "pnpm typecheck && pnpm lint && pnpm test"\` (use the full path of \`bash\` on Windows).
+- \`harnix workflow --migrate\` upgrades the active unfinished legacy v1/v2 task to schema v3 in one call. Send no body when every required check already has \`criterionIds\` and a repository input; otherwise pipe \`{ "checks": { "<check-id>": { "criterionIds": [...], "inputs": [...] } } }\`. Earlier passes are stale afterwards and must be rerun.
+- \`harnix workflow --brief\` (on \`--save\`, \`--transition\`, \`--evidence\`, \`--criterion\`, \`--migrate\`, \`--finish\`) prints only \`id\`, \`status\`, \`checkpoint\` and \`updatedAt\`, plus \`evidenceId\` when one was recorded; use it instead of filtering the full task output.
+
 ## Ready gate
 
 Before implementation, record the goal, non-goals, observable acceptance criteria, relevant paths/specs, exact affected contracts, and a validation plan. Ready requires at least one criterion and one required validation check; every non-waived criterion maps to a required check, and v3 checks declare sorted unique \`criterionIds\` plus sorted unique repository-glob \`inputs\` (at least one for a required check). Full also requires non-empty task-owned \`prd.md\` and \`plan.md\` in free-form Markdown, and \`plan.md\` must contain at least one checklist item (\`- [ ] ...\`); there is no trace grammar, and plans containing the retired execution-notes markers are stored and read as ordinary text. Lite and historical records gain no retroactive ceremony. Draft obligations may converge during planning and freeze at first persisted \`ready\`. Resolve material product, compatibility, risk, scope, and authority decisions first.

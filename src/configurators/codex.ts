@@ -7,6 +7,7 @@ import type {
 } from "src/utils/global-managed-files.js";
 import {
   HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS,
+  HARNIX_PERSISTENCE_INSTRUCTIONS,
   HARNIX_TARGET_AUTHORITY_INSTRUCTIONS,
 } from "src/templates/harnix/activation.js";
 import { globalSkillDesiredFiles } from "src/templates/harnix/global-surface.js";
@@ -30,6 +31,7 @@ export const codexGlobalAgentsContent = `## Harnix
 ${HARNIX_TARGET_AUTHORITY_INSTRUCTIONS.join("\n")}
 
 ${HARNIX_IMPLICIT_ACTIVATION_INSTRUCTIONS.join("\n")}
+${HARNIX_PERSISTENCE_INSTRUCTIONS.join("\n")}
 
 Only after a request is classified as project-scoped Lite/Full or explicitly asks to inspect/continue Harnix work, read \`.harnix/workflow.md\` and the minimum relevant \`.harnix\` context. Obvious Bypass does not load unrelated workflow/task state. Preserve user-owned project files and use fresh verification before completing work. Do not auto-commit, push, or create a pull request.`;
 

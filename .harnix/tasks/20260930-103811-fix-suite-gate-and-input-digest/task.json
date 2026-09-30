@@ -1,0 +1,199 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20260930-103811-fix-suite-gate-and-input-digest",
+  "title": "Sửa suite gate và input digest cho monorepo",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20260930-103810-agent-workflow-transport",
+  "createdAt": "2026-09-30T10:38:10.580+07:00",
+  "updatedAt": "2026-09-30T10:51:34.654+07:00",
+  "goal": "Suite gate chấp nhận check bao phủ source+test theo layout monorepo/.NET mà không ép inputs `**`; finish gate dùng pass mới nhất; input digest bỏ qua thư mục build tạm theo tín hiệu, không loại source thật, ổn định và nhanh.",
+  "nonGoals": [
+    "Không thêm transport CLI mới (task 2 của epic)",
+    "Không sửa skill/template (task 3 của epic)",
+    "Không đổi công thức digest ngoài phạm vi loại file tạm",
+    "Không commit hay hoàn tất diff input-digest.ts đang có bằng cách bỏ đi phần đã làm"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-gate-monorepo-layout",
+      "text": "`coversSourceAndTest` chấp nhận inputs `Foo.Api/**` + `Foo.Api.Tests/**` và `src/**` + `test/**` mà không cần `**`; từ chối `docs/app/**` + `test/**`, `src/**` đứng một mình, và `**/*.cs`; thông báo lỗi không còn nhắc `scope`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-gate-digest-focused-1",
+        "ev-full-suite-1"
+      ]
+    },
+    {
+      "id": "ac-finish-gate-latest-pass",
+      "text": "Finish gate của suite check dùng evidence pass mới nhất: sau khi có pass mới với digest hiện tại thì finish thành công dù pass cũ có digest lệch; nếu pass mới nhất lệch thì bị từ chối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-gate-digest-focused-1",
+        "ev-full-suite-1"
+      ]
+    },
+    {
+      "id": "ac-digest-signal-based-ignore",
+      "text": "Input digest luôn bỏ qua `node_modules`, `TestResults`, `.vs`, `.idea`, `.git`, `.harnix`; chỉ bỏ `bin`/`obj` khi thư mục cha có `*.csproj|*.fsproj|*.vbproj` và `build`/`dist`/`coverage`/`out` khi thư mục cha có `package.json|pom.xml|build.gradle*`; `build/Build.cs` trong repo không có marker vẫn được băm.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-gate-digest-focused-1",
+        "ev-full-suite-1"
+      ]
+    },
+    {
+      "id": "ac-digest-targeted-by-segment",
+      "text": "Một input chỉ tắt ignore của thư mục tạm khi có segment đường dẫn trùng tên (không phân biệt hoa thường, bỏ tiền tố `!`): `src/Binary/**` không tắt ignore `bin`, còn `bin/**` và `**/obj/**` thì có; input khai báo `.harnix/tasks/<id>/plan.md` được băm.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-gate-digest-focused-1",
+        "ev-full-suite-1"
+      ]
+    },
+    {
+      "id": "ac-digest-case-insensitive",
+      "text": "Ignore thư mục tạm không phân biệt hoa thường: `TestResults`, `Bin`, `Obj`, `.VS` đều bị bỏ qua khi thoả điều kiện ở trên.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-gate-digest-focused-1",
+        "ev-full-suite-1"
+      ]
+    },
+    {
+      "id": "ac-digest-deterministic-parallel",
+      "text": "Băm file song song có giới hạn (tối đa 16) cho digest giống hệt băm tuần tự; hai lần snapshot liên tiếp khi không có thay đổi cho cùng digest, kể cả khi thêm file vào thư mục bị ignore.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-gate-digest-focused-1",
+        "ev-full-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/stack/verify-plan.ts",
+    "src/core/verification/input-digest.ts",
+    "src/core/workflow/ready.ts",
+    "src/core/workflow/suite-gate.ts",
+    "test/unit/core/verification/input-digest.test.ts",
+    "test/unit/core/workflow/suite-gate.test.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/common.md",
+    ".harnix/spec/guides/languages/typescript.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-gate-digest-focused",
+      "description": "Test tập trung cho suite gate, ready và input digest.",
+      "command": "pnpm vitest run test/unit/core/workflow test/unit/core/verification",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-digest-case-insensitive",
+        "ac-digest-deterministic-parallel",
+        "ac-digest-signal-based-ignore",
+        "ac-digest-targeted-by-segment",
+        "ac-finish-gate-latest-pass",
+        "ac-gate-monorepo-layout"
+      ],
+      "inputs": [
+        "src/core/verification/**",
+        "src/core/workflow/**",
+        "test/unit/core/verification/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-full-suite",
+      "description": "Typecheck, lint và toàn bộ test kèm coverage floor.",
+      "command": "pnpm typecheck && pnpm lint && pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-digest-case-insensitive",
+        "ac-digest-deterministic-parallel",
+        "ac-digest-signal-based-ignore",
+        "ac-digest-targeted-by-segment",
+        "ac-finish-gate-latest-pass",
+        "ac-gate-monorepo-layout"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "vitest.config.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-gate-digest-focused-1",
+      "checkId": "chk-gate-digest-focused",
+      "recordedAt": "2026-09-30T10:49:47.576+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow test/unit/core/verification — 23 file, 115 test pass — suite gate theo segment, finish dùng pass mới nhất, digest theo marker/hoa thường/song song",
+      "artifactPaths": [],
+      "inputDigest": "c5696ba39d60a991d4ee47a2484174c031f2af4473f495d355a527b837bb1a64"
+    },
+    {
+      "id": "ev-full-suite-1",
+      "checkId": "chk-full-suite",
+      "recordedAt": "2026-09-30T10:51:18.656+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck && pnpm lint && pnpm test — exit 0 — 154 file, 914 test pass (1 skipped), coverage lines 93.54% — không hồi quy; evidence focused trước đó ghi 23 file/115 test là số cũ, chạy thật là 24 file/118 test",
+      "artifactPaths": [],
+      "inputDigest": "aae2ad5cfee79e1026c0b9b6a200b16fabed396448dec66948622526e04593c4"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-epic-order",
+      "text": "Thứ tự epic: (1) sửa gate/digest, (2) transport CLI, (3) viết lại skill/template sau cùng.",
+      "rationale": "Skill/template mô tả CLI cuối cùng nên viết một lượt sau khi CLI xong, tránh sửa hai lần và vượt ngân sách kích thước skill; digest đang có rủi ro sai (fresh giả) nên phải sửa trước khi commit."
+    },
+    {
+      "id": "d-ignore-by-marker",
+      "text": "Thư mục build mơ hồ (`bin`, `obj`, `build`, `dist`, `coverage`, `out`) chỉ bị ignore khi thư mục cha có file marker của hệ build; nhóm không mơ hồ (`node_modules`, `TestResults`, `.vs`, `.idea`, `.git`, `.harnix`) luôn bị ignore.",
+      "rationale": "Ignore theo tên ở mọi độ sâu làm mất source thật như `build/Build.cs` hoặc `bin/cli.js` và gây fresh giả."
+    },
+    {
+      "id": "d-gate-recognition",
+      "text": "Không phụ thuộc `plan.packages`. Test = segment (không phân biệt hoa thường) bằng `test|tests|spec|specs|__tests__` hoặc kết thúc bằng `.test(s)|.spec(s)|-test(s)|_test(s)`. Source = input dạng cây thư mục không có segment test, segment đầu không thuộc `docs|doc|.github|.harnix|.vscode|scripts`, hoặc có segment `src|lib|app|pkg|cmd|internal`. Wildcard `.`, `**`, `**/*`, `*` vẫn đủ.",
+      "rationale": "Giữ hàm đồng bộ, không cần I/O; bao được layout .NET/Java/Go mà không đoán cấu trúc workspace."
+    },
+    {
+      "id": "d-preserve-wip",
+      "text": "Tiếp tục trên diff chưa commit của `input-digest.ts` và test đi kèm, không revert và không commit.",
+      "rationale": "Đó là công việc đang dở của người dùng; phần cần sửa nằm chính trong phạm vi task này."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-digest-git-exclude",
+      "text": "Digest dùng globby gitignore nên .git/info/exclude và global gitignore vẫn không được tôn trọng; file nằm trong đó có thể lọt vào digest của input rộng như **.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-gate-test-heuristic",
+      "text": "Suite gate nhận diện thư mục test bằng tên (test|tests|spec|specs|__tests__, hậu tố .tests/-spec, hậu tố camel-case UnitTests); layout đặt tên khác vẫn phải dùng inputs ** hoặc thêm cây test có tên chuẩn.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-hash-io-unmeasured",
+      "text": "Băm song song giới hạn 16 file chưa được đo trên solution hàng chục nghìn file thật; mới kiểm chứng tính đúng và tính xác định.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-negated-input",
+      "text": "Input dạng phủ định (!…) đứng riêng vẫn bị globby coi là không khớp file nào và làm snapshot lỗi; gate chỉ bỏ qua chúng khi xét coverage.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-09-30T10:51:34.654+07:00"
+}

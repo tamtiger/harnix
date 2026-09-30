@@ -1,0 +1,227 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20260930-103812-workflow-cli-transports",
+  "title": "Bổ sung transport CLI cho evidence, criterion và chạy check",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20260930-103810-agent-workflow-transport",
+  "createdAt": "2026-09-30T10:38:10.580+07:00",
+  "updatedAt": "2026-09-30T11:10:39.464+07:00",
+  "goal": "Agent hoàn tất evidence, đánh dấu criterion `met`, migrate task legacy lên v3, chạy và ghi check chỉ bằng lệnh `harnix workflow`, với id/recordedAt/digest do CLI tự điền và output gọn tuỳ chọn.",
+  "nonGoals": [
+    "Không thêm --file (khuyến khích file tạm trong repo, làm bẩn digest, thêm bề mặt path-safety)",
+    "Không chạy command của check qua shell; --run-check chỉ nhận executable + mảng đối số",
+    "Không đổi stdin envelope hiện có",
+    "Không thêm cờ --json"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-evidence-flags",
+      "text": "`--evidence --check <id> --result pass|fail|skipped --summary <text> [--exit-code <n>] [--artifact <path>]... [--digest <hex>]` ghi đúng một evidence; CLI tự điền `id` dạng `ev-<checkId>-<n>`, `recordedAt` từ clock đã cấu hình và `inputDigest` (check v3 required, result pass/fail); pass/fail thiếu `--exit-code` bị từ chối; stdin envelope cũ vẫn hoạt động y hệt.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-transport-focused-2"
+      ]
+    },
+    {
+      "id": "ac-criterion-met",
+      "text": "`--criterion <id>[,<id>] --met [--evidence-ids <ids>]` đặt criterion `met` với evidenceIds mặc định là pass mới nhất còn tươi của các required check bao phủ criterion; bị từ chối khi thiếu pass tươi, criterion không tồn tại, task không phải v3, hoặc evidence không thuộc check bao phủ criterion.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-transport-focused-2"
+      ]
+    },
+    {
+      "id": "ac-brief-output",
+      "text": "`--brief` cho `--save|--transition|--evidence|--criterion|--migrate|--finish` trả `{id,status,checkpoint,updatedAt}` (kèm `evidenceId` khi có); không có `--brief` output giữ nguyên như hiện tại.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-transport-focused-2"
+      ]
+    },
+    {
+      "id": "ac-run-check",
+      "text": "`--run-check <id> -- <exe> [args...]` chụp digest, chạy tiến trình bằng process runner inject được (không shell), chụp lại digest; digest bằng nhau thì ghi evidence (exit 0 = pass, khác 0 = fail), lệch thì không ghi và báo lỗi; đuôi output (tối đa 2000 ký tự) trả về trong `outputTail` nhưng không lưu vào task.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-transport-focused-2"
+      ]
+    },
+    {
+      "id": "ac-migrate-to-v3",
+      "text": "`--migrate [stdin { checks }]` migrate task active legacy v1/v2 chưa kết thúc, không blocked lên v3 trong một lệnh: giữ status, checkpoint, criteria, field nền của required check và evidence cũ, bỏ `@task-contract`, append đúng evidence `task-schema-to-v3` với thời gian từ clock; `criterionIds`/`inputs` không suy ra được phải lấy từ `checks` và thiếu thì bị từ chối kèm danh sách; task v3, completed, cancelled, blocked bị từ chối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-transport-focused-2"
+      ]
+    },
+    {
+      "id": "ac-contract-docs-schema",
+      "text": "`workflow --schema` liệt kê các transport mới; PRD, `docs/HARNIX_WORKFLOW.md` và `docs/IMPLEMENTATION_PLAN.md` §4 mô tả chúng; output các lệnh hiện có và dữ liệu `.harnix` cũ không đổi (golden snapshot giữ nguyên).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-full-suite-2",
+        "ev-chk-transport-focused-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/cli-program.ts",
+    "src/commands/internal-workflow.ts",
+    "src/core/workflow/envelope.ts",
+    "src/core/workflow/evidence.ts",
+    "src/core/workflow/migration.ts",
+    "src/core/workflow/schema.ts",
+    "src/core/workflow/transition.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/common.md",
+    ".harnix/spec/guides/languages/typescript.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-transport-focused",
+      "description": "Test tập trung cho các transport workflow.",
+      "command": "pnpm vitest run test/unit/core/workflow test/integration/commands test/workflow",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-brief-output",
+        "ac-contract-docs-schema",
+        "ac-criterion-met",
+        "ac-evidence-flags",
+        "ac-migrate-to-v3",
+        "ac-run-check"
+      ],
+      "inputs": [
+        "src/cli-program.ts",
+        "src/commands/**",
+        "src/core/workflow/**",
+        "test/integration/commands/**",
+        "test/unit/core/workflow/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-full-suite",
+      "description": "Typecheck, lint và toàn bộ test kèm coverage floor.",
+      "command": "pnpm typecheck && pnpm lint && pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-brief-output",
+        "ac-contract-docs-schema",
+        "ac-criterion-met",
+        "ac-evidence-flags",
+        "ac-migrate-to-v3",
+        "ac-run-check"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "src/**",
+        "test/**",
+        "tsconfig.json",
+        "vitest.config.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-transport-focused-1",
+      "checkId": "chk-transport-focused",
+      "recordedAt": "2026-09-30T11:06:56.306+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow test/integration/commands test/workflow — focused transports",
+      "artifactPaths": [],
+      "inputDigest": "befc68689188bffc756300ca06ab749a3a08f68a24e321321d5b0a297e8d5737"
+    },
+    {
+      "id": "ev-chk-full-suite-1",
+      "checkId": "chk-full-suite",
+      "recordedAt": "2026-09-30T11:07:55.272+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm typecheck && pnpm lint && pnpm test — suite đầy đủ kèm coverage",
+      "artifactPaths": [],
+      "inputDigest": "1e6b5d6c1619ca0b8bd617a46df428fbd5b71fe57a788534d560a74a61732b5c"
+    },
+    {
+      "id": "ev-chk-full-suite-2",
+      "checkId": "chk-full-suite",
+      "recordedAt": "2026-09-30T11:09:38.565+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck && pnpm lint && pnpm test — chạy lại sau khi bổ sung test dispatcher để coverage functions đạt ngưỡng 98.1%",
+      "artifactPaths": [],
+      "inputDigest": "312b23bbeca2fc8ffd7f12fa621fb6861f4518a78a8e8b2f241e61797d2611e9"
+    },
+    {
+      "id": "ev-chk-transport-focused-2",
+      "checkId": "chk-transport-focused",
+      "recordedAt": "2026-09-30T11:10:26.192+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow test/integration/commands test/workflow — chạy lại sau khi thêm test dispatcher",
+      "artifactPaths": [],
+      "inputDigest": "6c3bdb88894d1e8528f41d675e5c706147b80b29e8f968b30602f06aea3b9950"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-no-file-flag",
+      "text": "Không thêm `--file` cho `--save`/`--evidence`; thay bằng transport dạng flag và pipe.",
+      "rationale": "`--file` khuyến khích file tạm trong repo (làm bẩn digest nếu khớp inputs) và thêm bề mặt path-safety; flag cho phép bỏ hẳn file tạm."
+    },
+    {
+      "id": "d-run-check-no-shell",
+      "text": "`--run-check` nhận executable + mảng đối số sau `--`, chạy bằng process runner inject được, không qua shell; đuôi output chỉ trả về, không lưu.",
+      "rationale": "AGENTS.md cấm nối chuỗi shell; command dạng `a && b` trong task chỉ để tài liệu, agent chạy từng phần hoặc dùng flag evidence. Output có thể chứa bí mật nên không persist."
+    },
+    {
+      "id": "d-migrate-no-guessing",
+      "text": "`--migrate` không suy đoán `criterionIds` (v1) và `inputs` rỗng: lấy từ stdin `checks`, thiếu thì lỗi liệt kê. Chỉ áp dụng cho task active.",
+      "rationale": "Suy đoán coverage/inputs làm yếu bằng chứng; mọi pass cũ vốn đã stale sau migrate nên chi phí khai báo là một lần. Người dùng yêu cầu hỗ trợ migrate lên v3 cùng đợt này."
+    },
+    {
+      "id": "d-flags-share-save-guards",
+      "text": "Mọi transport mới build candidate rồi gọi `saveWorkflow`; không đường ghi riêng.",
+      "rationale": "Giữ nguyên khóa, digest recompute, bất biến obligation và rollback."
+    },
+    {
+      "id": "d-extract-command",
+      "text": "Tách wiring `workflow` sang `src/commands/workflow-command.ts` trước khi thêm flag.",
+      "rationale": "`cli-program.ts` sát ngưỡng complexity/max-lines; tách không đổi hành vi và cho phép test tích hợp riêng."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-run-check-compound",
+      "text": "--run-check chỉ chạy một tiến trình; lệnh ghép a && b của check phải gọi qua shell tường minh (ví dụ bash -c với đường dẫn đầy đủ) hoặc tách thành nhiều check.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-cmd-metachar",
+      "text": "Trên Windows, tên lệnh trần đi qua cmd.exe /d /s /c và từ chối đối số chứa & | < > ^ % dấu nháy kép hay xuống dòng, nên một số đối số hợp lệ phải dùng đường dẫn đầy đủ tới file thực thi.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-migrate-v1-overrides",
+      "text": "--migrate không suy đoán criterionIds/inputs: task v1 luôn cần stdin checks cho mọi required check; task v2 hợp lệ thường migrate được không cần stdin.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-golden-additive-edit",
+      "text": "Snapshot golden của workflow --schema được sửa tay theo hướng chỉ thêm transport mới (không regenerate); nếu schema đổi thêm cần cập nhật cùng lúc.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-09-30T11:10:39.464+07:00"
+}

@@ -1,0 +1,15 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20260930-103810-agent-workflow-transport",
+  "title": "Agent chạy trọn workflow bằng CLI, không cần script tạm",
+  "goal": "Loại bỏ nhu cầu agent (đặc biệt trên Kiro/Windows PowerShell) tự viết script .ps1/.json để cập nhật task: sửa suite gate và input digest cho monorepo, bổ sung transport CLI cho evidence/criterion/output gọn/chạy check, và viết lại hướng dẫn skill/template cho đúng với CLI cuối cùng.",
+  "nonGoals": [
+    "Không thêm flag --json hay chế độ human-summary",
+    "Không thêm --file cho --save/--evidence (khuyến khích file tạm)",
+    "Không đổi TaskRecord schema v3 hay dữ liệu .harnix hiện có",
+    "Không thêm nền tảng hay package thứ hai"
+  ],
+  "createdAt": "2026-09-30T10:38:10.580+07:00",
+  "updatedAt": "2026-09-30T10:38:10.580+07:00"
+}
