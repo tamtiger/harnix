@@ -85,7 +85,7 @@ export function desiredFiles(
   config: Pick<HarnixConfigV2, "languages" | "technologies" | "packages">,
 ): DesiredManagedFile[] {
   return [
-    managed("AGENTS.md", "agents-bootstrap", "project", renderAgentsTemplate(config)),
+    managed("AGENTS.md", "agents-bootstrap", "project", renderAgentsTemplate({ ...config, version: packageVersion })),
     managed(".harnix/workflow.md", "workflow", "project", workflowTemplate),
     ...selectGuideSources(config).map((source) =>
       managed(guideOutputPath(source), `guide-${source.descriptor.id}`, "project", source.content),

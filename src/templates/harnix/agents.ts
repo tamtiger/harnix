@@ -6,6 +6,8 @@ export interface AgentsProjectProfile {
   languages: readonly LanguageId[];
   technologies: readonly TechnologyId[];
   packages: readonly Pick<PackageConfig, "path">[];
+  /** Harnix version stamped into the bootstrap; callers pass `packageVersion`. */
+  version?: string;
 }
 
 const languageLabels: Record<LanguageId, string> = {
@@ -45,17 +47,16 @@ const technologyLabels: Record<TechnologyId, string> = {
   axum: "Axum",
 };
 
-/** Project bootstrap: the same always-loaded rules as every platform surface, plus the discovered profile. */
+/** Project bootstrap: the discovered profile first, then the same always-loaded rules as every platform surface. */
 export function renderAgentsTemplate(profile: AgentsProjectProfile): string {
   const languages = profile.languages.map((id) => languageLabels[id]).join(", ") || "not specified";
   const technologies = profile.technologies.map((id) => technologyLabels[id]).join(", ") || "not specified";
   const packagePaths = profile.packages.map(({ path }) => `\`${path}\``).join(", ") || "not specified";
+  const version = profile.version ?? "unknown";
 
   return `# Project agent instructions
 
-## Harnix
-
-${renderHarnixRules()}
+Harnix version: ${version}.
 
 ## Project profile
 
@@ -64,5 +65,9 @@ ${renderHarnixRules()}
 - Package paths: ${packagePaths}.
 
 This is a discovery seed, not complete repository truth: verify current manifests, source and tests, and do not bulk-load the repository. Engineering guidance for this project lives in \`.harnix/spec/guides/\`; read only the files relevant to your change. Each task has a derived read-only \`.harnix/tasks/<id>/review.md\` for the user to review.
+
+## Harnix
+
+${renderHarnixRules()}
 `;
 }

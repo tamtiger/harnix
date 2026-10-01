@@ -46,10 +46,12 @@ describe("initializeProject", () => {
     await expect(access(repoMapPath)).resolves.toBeUndefined();
     const agentInstructions = await readFile(join(root, "AGENTS.md"), "utf8");
     expect(agentInstructions).toContain(renderHarnixRules());
-    expect(agentInstructions.indexOf(renderHarnixRules())).toBeLessThan(
-      agentInstructions.indexOf("## Project profile"),
+    // Project profile comes first, before the Harnix rules block.
+    expect(agentInstructions.indexOf("## Project profile")).toBeLessThan(
+      agentInstructions.indexOf(renderHarnixRules()),
     );
     expect(agentInstructions).toContain("## Project profile");
+    expect(agentInstructions).toContain("Harnix version:");
     expect(agentInstructions).toContain("- Languages: not specified.");
     expect(agentInstructions).toContain("- Technologies: Vue.");
     expect(agentInstructions).toContain("- Package paths: `.`.");

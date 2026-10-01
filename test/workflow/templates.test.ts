@@ -7,13 +7,15 @@ import { updateProject } from "src/commands/update.js";
 import { HARNIX_RULES, renderHarnixRules } from "src/templates/harnix/activation.js";
 import { renderAgentsTemplate } from "src/templates/harnix/agents.js";
 import { workflowSkills, workflowTemplate } from "src/templates/harnix/workflow.js";
+import { packageVersion } from "src/version.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
 const vietnameseTaskPolicy =
   "Giao tiếp trực tiếp với người dùng và mọi nội dung hướng người dùng trong task Harnix (`task.json`, `prd.md`, `plan.md`, `design.md`, research, journal) đều dùng tiếng Việt. Giữ nguyên code identifier, command, đường dẫn, tên field/schema và trích dẫn nguồn khi cần để bảo đảm chính xác kỹ thuật.";
 
-const bootstrap = () => renderAgentsTemplate({ languages: [], technologies: [], packages: [] });
+const bootstrap = () =>
+  renderAgentsTemplate({ languages: [], technologies: [], packages: [], version: packageVersion });
 
 describe("workflow templates", () => {
   it("keeps the bootstrap lean and routes the latest Bypass intent before any active task", () => {
@@ -24,7 +26,9 @@ describe("workflow templates", () => {
     expect(Buffer.byteLength(agentInstructions, "utf8")).toBeLessThan(8_192);
     expect(target).toBeGreaterThan(-1);
     expect(target).toBeLessThan(route);
-    expect(route).toBeLessThan(agentInstructions.indexOf("## Project profile"));
+    // Project profile now comes first, before the Harnix rules block.
+    expect(agentInstructions.indexOf("## Project profile")).toBeLessThan(target);
+    expect(agentInstructions).toContain("Harnix version:");
     expect(agentInstructions).toContain("workflow --preflight");
     expect(agentInstructions).toContain("leaves an unrelated active task unchanged");
     expect(agentInstructions).toContain("a standalone review (`harnix-review`) or research (`harnix-research`)");

@@ -1,0 +1,92 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261001-145709-agents-template-version-profile-order",
+  "title": "Them version va dua Project profile len dau trong agents bootstrap template",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-01T14:57:09.436+07:00",
+  "updatedAt": "2026-10-01T15:04:08.546+07:00",
+  "goal": "renderAgentsTemplate (src/templates/harnix/agents.ts) phai nhung version Harnix vao project AGENTS.md bootstrap, va dua phan Project profile len dau (truoc phan Harnix rules). Version lay tu caller (update.ts truyen packageVersion); them field version? vao AgentsProjectProfile de giu structural callers hien co. Cap nhat cac test dang assert thu tu rules-truoc-profile.",
+  "nonGoals": [
+    "Khong doi noi dung Harnix rules",
+    "Khong doi cach version-sync hoat dong",
+    "Khong doi template nen tang khac (chi project bootstrap AGENTS.md)"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-version-profile",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-agents-1",
+        "ev-chk-suite-1"
+      ],
+      "text": "renderAgentsTemplate xuat version Harnix (vd 2.0.0-dev.9) va dat block Project profile TRUOC block Harnix rules; update.ts truyen packageVersion; cac test templates/init/activation/budget pass voi thu tu moi."
+    }
+  ],
+  "relevantPaths": [
+    "src/templates/harnix/agents.ts",
+    "src/commands/update.ts",
+    "test/workflow/templates.test.ts",
+    "test/integration/commands/init.test.ts"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-chk-agents-1",
+      "checkId": "chk-agents",
+      "recordedAt": "2026-10-01T15:02:19.793+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "47d4e51f69cab0b498b8ba5174348369c2a845dea96c9c270f78abdad4e9e14f"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-01T15:03:54.130+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bae6b85f77f8edff70a5f8b2cd01c6efeb2a007abfa6db1e0c4574626fd25e5a"
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-agents",
+      "description": "Test agents template + init bootstrap + activation + budget",
+      "command": "pnpm vitest run test/workflow/templates.test.ts test/integration/commands/init.test.ts test/workflow/activation-instructions.test.ts test/workflow/instruction-budget.test.ts",
+      "criterionIds": [
+        "ac-version-profile"
+      ],
+      "inputs": [
+        "src/commands/update.ts",
+        "src/templates/harnix/agents.ts",
+        "test/integration/commands/init.test.ts",
+        "test/workflow/activation-instructions.test.ts",
+        "test/workflow/instruction-budget.test.ts",
+        "test/workflow/templates.test.ts"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "chk-suite",
+      "description": "Project suite gate lint typecheck test",
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-version-profile"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "required": true,
+      "scope": "full"
+    }
+  ],
+  "completedAt": "2026-10-01T15:04:08.546+07:00"
+}
