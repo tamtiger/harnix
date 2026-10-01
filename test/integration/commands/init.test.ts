@@ -85,6 +85,7 @@ describe("initializeProject", () => {
         ".harnix/cache/repo-map-v1.json",
         ".harnix/config.yaml",
         ".harnix/spec/guides/common.md",
+        ".harnix/spec/project-facts.md",
         ".harnix/workflow.md",
         "AGENTS.md",
       ],
@@ -130,11 +131,11 @@ describe("initializeProject", () => {
     await writeFile(join(root, "package.json"), JSON.stringify({ dependencies: { vue: "latest" } }));
     await initializeProject({ developer: "tam", root, yes: true });
     const common = await readFile(join(root, ".harnix", "spec", "guides", "common.md"), "utf8");
-    expect(common).toContain("broader gates");
+    expect(common).toContain("harnix verify-plan");
     expect(common).toContain("repository instructions");
     await expect(
       readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "vue.md"), "utf8"),
-    ).resolves.toContain("Vue engineering");
+    ).resolves.toContain("# Vue guide");
   });
   it("should_detect_php_composer_projects_and_seed_php_guidance", async () => {
     const root = await fixture();
@@ -144,7 +145,7 @@ describe("initializeProject", () => {
 
     await expect(readFile(join(root, ".harnix", "config.yaml"), "utf8")).resolves.toContain("- php");
     await expect(readFile(join(root, ".harnix", "spec", "guides", "languages", "php.md"), "utf8")).resolves.toContain(
-      "PHP engineering",
+      "composer validate --strict",
     );
     await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toContain("- Languages: PHP.");
   });
@@ -155,9 +156,9 @@ describe("initializeProject", () => {
     await initializeProject({ developer: "tam", root, yes: true });
 
     const guide = `${await readFile(join(root, ".harnix", "spec", "guides", "technologies", "framework", "abp.md"), "utf8")}\n${await readFile(join(root, ".harnix", "spec", "guides", "technologies", "runtime", "dotnet.md"), "utf8")}`;
-    expect(guide).toContain("Domain-Driven Design (DDD)");
+    expect(guide).toContain("Keep DDD layers");
     expect(guide).toContain("Unit of Work");
-    expect(guide).toContain("tenant isolation");
+    expect(guide).toContain("IMultiTenant");
   });
   it("should_preserve_existing_agent_instructions_when_initializing", async () => {
     const root = await fixture();
@@ -166,5 +167,17 @@ describe("initializeProject", () => {
     await initializeProject({ developer: "tam", root, yes: true });
 
     await expect(readFile(join(root, "AGENTS.md"), "utf8")).resolves.toBe("# User instructions\n");
+  });
+
+  it("writes the derived project facts with the confirmed stack and verify commands", async () => {
+    const root = await fixture();
+    await writeFile(join(root, "composer.json"), JSON.stringify({ require: { php: ">=8.1" } }));
+
+    await initializeProject({ developer: "tam", root, yes: true });
+
+    const facts = await readFile(join(root, ".harnix", "spec", "project-facts.md"), "utf8");
+    expect(facts).toContain("# Project facts");
+    expect(facts).toContain("- Languages: php");
+    expect(facts).toContain("## Verify commands");
   });
 });

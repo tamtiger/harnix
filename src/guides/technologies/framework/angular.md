@@ -1,33 +1,30 @@
-# Angular engineering guide
+# Angular guide
 
-## Architecture and standalone component design
+## Verify
 
-- Adopt modern Standalone Components, Directives, and Pipes (`standalone: true`) as the default architecture for modern Angular applications. Avoid declaring unnecessary `NgModule` containers unless maintaining legacy codebases.
-- Maintain a strict directory hierarchy: separate core singleton services (`core/`), shared reusable presentation UI components (`shared/`), and domain-specific feature modules (`features/`).
-- Adopt Angular Signals (`signal()`, `computed()`, `effect()`) for fine-grained, reactive state management and modern zone-less or reduced-zone change detection. Use signals for synchronous component-local state and derived data representations.
-- Structure smart (container) and dumb (presentational) components intentionally. Dumb components should communicate purely via signal inputs (`input()`), output events (`output()`), and maintain zero knowledge of external HTTP services or routing dependencies.
-- Configure `ChangeDetectionStrategy.OnPush` across all components to eliminate redundant change detection passes and improve application rendering performance.
+```text
+tsc --noEmit -p tsconfig.app.json
+ng lint
+ng test --watch=false
+ng build
+```
 
-## Routing, HTTP, and data handling
+## Constraints
 
-- Implement lazy loading for feature routes using `loadComponent: () => import('./feature.component')` or `loadChildren: () => import('./feature.routes')`. Keep the initial bundle slim to guarantee fast First Contentful Paint (FCP).
-- Protect routes and control navigation flows using functional route guards (`canActivate: [authGuard]`, `canDeactivate: [unsavedChangesGuard]`) instead of deprecated class-based guard implementations.
-- Handle HTTP communication with Angular's `HttpClient` configured via `provideHttpClient()`. Use functional HTTP interceptors (`withInterceptors([authInterceptor, loggingInterceptor])`) for token injection, error handling, and header normalization.
-- Manage asynchronous streams using RxJS deliberately. Unsubscribe from manual subscriptions using `takeUntilDestroyed()`, `take(1)`, or prefer binding directly in templates using the `async` pipe or converting to signals via `toSignal()`.
-- Avoid memory leaks: never create unbounded subscriptions in component lifecycles or service instances without explicit teardown logic.
+- Use standalone components, directives and pipes; do not add new NgModules.
+- Set `changeDetection: ChangeDetectionStrategy.OnPush` on components.
+- Use signals (`signal`, `computed`, `input()`, `output()`) for local state and `inject()` for dependencies.
+- Use built-in control flow (`@if`, `@for` with `track`, `@switch`) instead of `*ngIf`/`*ngFor` in new templates.
+- Unsubscribe with `takeUntilDestroyed()` or the `async` pipe; never leave manual subscriptions open.
+- Keep `strict: true` in tsconfig and `strictTemplates: true` in `angularCompilerOptions`.
+- Lazy-load routes with `loadComponent` or `loadChildren`.
+- Use typed reactive forms (`FormControl<T>`) and functional guards/interceptors (`CanActivateFn`, `HttpInterceptorFn`).
+- Never call `bypassSecurityTrust*` on untrusted input.
 
-## Forms, validation, and security
+## Common mistakes
 
-- Prefer Reactive Forms (`ReactiveFormsModule`) over template-driven forms for complex enterprise workflows. Define type-safe form groups (`FormGroup`, `FormControl`, `FormBuilder`) to guarantee compile-time type safety across form controls.
-- Enforce validation rules on form controls (`Validators.required`, `Validators.email`, custom validator functions). Show contextual, accessible error feedback only when a control is touched or dirty (`control.touched && control.invalid`).
-- Protect against Cross-Site Scripting (XSS) by relying on Angular's built-in DOM sanitization. Avoid bypassing security via `DomSanitizer.bypassSecurityTrustHtml` unless input has been processed by a rigorous backend or client-side sanitizer like DOMPurify.
-- Mitigate Cross-Site Request Forgery (CSRF) by enabling `withXsrfConfiguration` in HTTP client providers. Ensure cookie-based sessions send and validate matching anti-CSRF request headers.
-- Never store sensitive user tokens, secrets, or encryption keys in unencrypted browser `localStorage` or `sessionStorage` where they are vulnerable to XSS extraction; use secure `HttpOnly` cookies where possible.
-
-## Performance, testing, and maintenance
-
-- Optimize list rendering in templates using the modern control flow `@for` syntax with an explicit `@for (item of items; track item.id)` track expression. Never omit the `track` expression.
-- Use the `@defer` block for deferred template loading of heavy components, images, or third-party widgets until specific conditions are met (e.g., `@defer (on viewport)`).
-- Write focused unit tests for components, services, and pipes using Vitest or Jest with the Angular testing utilities (`TestBed.configureTestingModule`). Test user interactions and observable outputs rather than internal private component state.
-- Mock HTTP backend requests in integration tests using `HttpTestingController` from `@angular/common/http/testing` to assert exact URL calls, query parameters, and error status simulations.
-- Enforce strict TypeScript compilation (`"strict": true`, `"noImplicitAny": true`, `"strictNullChecks": true`) and configure ESLint with `@angular-eslint` to enforce architectural conventions and template accessibility (a11y) rules.
+- Calling methods in templates instead of using `computed` or pure pipes.
+- Nested `subscribe` calls instead of `switchMap`/`combineLatest`.
+- Mutating `@Input` objects under OnPush so the view does not update.
+- Missing `track` expression in `@for`.
+- Providing a service in a component when it should be `providedIn: 'root'`.

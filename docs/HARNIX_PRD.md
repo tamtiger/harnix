@@ -162,6 +162,7 @@ Init chỉ tạo:
 ```text
 .harnix/
   spec/guides/
+  spec/project-facts.md      # derived: confirmed stack and verify commands per package
   config.yaml
   cache/repo-map-v1.json
   workflow.md
@@ -402,7 +403,7 @@ repository conventions
 > packaged fallback
 ```
 
-Harnix ships a typed guide registry and focused Markdown under `src/guides/common`, `src/guides/languages/<language>` and `src/guides/technologies/<kind>/<technology>`. Metadata selects common, source-language and increasingly specific technology/domain content by profile, path and task topic. Short rules may be always active; path guides and task skills load only when applicable. Only selected content is materialized and loaded. Descriptor/content mapping, priority, composition, supersedence and provenance are validated; user-modified or unowned content is preserved.
+Harnix ships a typed guide registry and focused Markdown under `src/guides/common`, `src/guides/languages/<language>` and `src/guides/technologies/<kind>/<technology>`. Metadata selects common, source-language and increasingly specific technology/domain content by profile, path and task topic. Short rules may be always active; path guides and task skills load only when applicable. Only selected content is materialized and loaded. Descriptor/content mapping, priority, composition, supersedence and provenance are validated; user-modified or unowned content is preserved. Every guide has the same three sections after its title: `## Verify` (commands of the official tools), `## Constraints` (at most 10 rules that catch real defects) and `## Common mistakes` (at most 6), and stays within 600 tokens (ceil(characters / 4)); `test/workflow/guide-format.test.ts` enforces this. `.harnix/spec/project-facts.md` is derived, not user-owned: `init` and `update` rewrite it deterministically from `.harnix/config.yaml` (confirmed languages, technologies and packages) and the detected verify plan, it is not listed in `.template-hashes.json`, and the hook context never embeds it.
 
 Initial IDs cover source languages C#, TypeScript, JavaScript, PHP, Python, Java and Go plus .NET, ABP, NestJS, Spring, React web, Vue and CodeIgniter technologies, plus PostgreSQL, MySQL, SQL Server, MongoDB and Redis as first-class `database`-kind technologies. Detection is evidence-based and independent across facets: generic Composer/Maven/Gradle/solution metadata cannot assert a specific framework or source language. A database's own detector never asserts a nuget/maven/gradle dependency fact, since collectors only gather npm/composer dependencies; a .NET or Java driver is matched through its package name inside `*.csproj`/`pom.xml`/`build.gradle*` content instead. PostgreSQL, MySQL and SQL Server share one relational-database guide through the packaged `extends` mechanism; MongoDB and Redis each ship a standalone guide. Packaged content starts by decomposing guidance Harnix already owns; external text requires a frozen upstream revision, license review, mapping and release-scan evidence before adaptation.
 

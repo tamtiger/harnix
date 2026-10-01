@@ -5,6 +5,7 @@ import { refreshRepoMap } from "src/core/repo-map/service.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { detectProject } from "src/core/stack/detection.js";
 import { writeManifest } from "src/core/managed/project-files.js";
+import { PROJECT_FACTS_PATH } from "src/core/spec/project-facts.js";
 import { pathExists } from "src/utils/filesystem.js";
 import { normalizeLegacyStackIds, legacyStackIds, type LegacyStackId } from "src/core/stack/stack.js";
 import { compareCodeUnits } from "src/utils/order.js";
@@ -101,6 +102,9 @@ export async function initializeProject(options: InitializeProjectOptions): Prom
       options.root,
       desired.map(({ entry }) => entry.path),
     );
+    // Derived file: planned as created when absent; an existing one is rewritten only if its content differs.
+    if (!(await pathExists(await resolveSafeProjectPath(options.root, PROJECT_FACTS_PATH))))
+      planned.created.push(PROJECT_FACTS_PATH);
     return result(
       "planned",
       config,

@@ -196,4 +196,22 @@ describe("updateProject", () => {
     );
     expect(reconciled.entries.find(({ path }) => path === ".harnix/workflow.md")?.sourceId).toBe("workflow");
   });
+
+  it("rewrites a hand-edited project-facts.md as a derived file and reports it as updated", async () => {
+    const root = await fixture();
+    const path = join(root, ".harnix", "spec", "project-facts.md");
+    const generated = await readFile(path, "utf8");
+    await writeFile(path, "edited by hand\n");
+
+    const result = await updateProject({ root });
+
+    expect(result.updated).toContain(".harnix/spec/project-facts.md");
+    expect(await readFile(path, "utf8")).toBe(generated);
+    const manifest = await readManifest(join(root, ".harnix", ".template-hashes.json"));
+    expect(manifest.entries.some(({ path: entry }) => entry.endsWith("project-facts.md"))).toBe(false);
+
+    const again = await updateProject({ root });
+    expect(again.updated).not.toContain(".harnix/spec/project-facts.md");
+    expect(again.created).not.toContain(".harnix/spec/project-facts.md");
+  });
 });

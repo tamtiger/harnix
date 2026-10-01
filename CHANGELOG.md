@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.0.0-dev.13] - 2026-10-01
+
+### Changed
+
+- Viết lại 34 guide theo dạng lệnh + ràng buộc: mỗi guide có đúng ba mục Verify, Constraints, Common mistakes và không quá 600 token (tổng 41.676 → 11.607 token, đọc common + typescript 2.891 → 666); sửa nội dung lỗi thời đã kiểm chứng bằng nguồn chính thức (Next.js 16 proxy.ts và INP, bleach ngừng bảo trì nên dùng nh3, staticcheck thay gosimple và layout Go internal/cmd); thêm .harnix/spec/project-facts.md (derived, init và update ghi lại: stack đã xác nhận và lệnh verify theo package; bootstrap AGENTS.md nhắc tới file); measure:tokens in khối guides.
+
 ## [2.0.0-dev.12] - 2026-10-01
 
 ### Changed

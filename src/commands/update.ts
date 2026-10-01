@@ -11,6 +11,7 @@ import {
   type DesiredManagedFile,
   type ManagedManifest,
 } from "src/core/managed/project-files.js";
+import { PROJECT_FACTS_PATH, writeProjectFacts } from "src/core/spec/project-facts.js";
 import { sha256 } from "src/utils/hashing.js";
 import { packageVersion } from "src/version.js";
 import { renderAgentsTemplate } from "src/templates/harnix/agents.js";
@@ -50,9 +51,12 @@ export async function updateProject(options: UpdateProjectOptions): Promise<Upda
   );
   await writeManifest(manifestPath, mergeManifestEntries(reconciled.manifest, legacyEntries));
   const epics = await migrateLegacyEpics(options.root);
+  // Derived, never user-owned: always rewritten when the confirmed stack or the detected commands changed.
+  const facts = await writeProjectFacts(options.root);
   return {
     ...reconciled.result,
-    created: [...reconciled.result.created, ...epics.created],
+    created: [...reconciled.result.created, ...epics.created, ...(facts === "created" ? [PROJECT_FACTS_PATH] : [])],
+    updated: [...reconciled.result.updated, ...(facts === "updated" ? [PROJECT_FACTS_PATH] : [])],
     deleted: [...reconciled.result.deleted, ...epics.deleted],
     preserved: [...reconciled.result.preserved, ...epics.preserved],
   };

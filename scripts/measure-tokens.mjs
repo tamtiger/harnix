@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -170,7 +170,35 @@ export async function measureLifecycle({ cli, brief }) {
   }
 }
 
-export function buildReport(brief, full) {
+/** Token cost of the packaged guides an agent reads on demand: every markdown file under `directory`. */
+export async function measureGuides(directory) {
+  const files = [];
+  const walk = async (current) => {
+    for (const entry of await readdir(current, { withFileTypes: true })) {
+      const path = join(current, entry.name);
+      if (entry.isDirectory()) await walk(path);
+      else if (entry.name.endsWith(".md")) files.push(path);
+    }
+  };
+  await walk(directory);
+  const tokens = new Map();
+  for (const path of files) tokens.set(path, estimateTokens(await readFile(path, "utf8")));
+  const of = (...segments) => {
+    const value = tokens.get(join(directory, ...segments));
+    if (value === undefined) throw new Error(`guide ${segments.join("/")} is missing.`);
+    return value;
+  };
+  const sizes = [...tokens.values()];
+  return {
+    files: sizes.length,
+    totalTokens: sizes.reduce((sum, size) => sum + size, 0),
+    maxTokens: Math.max(0, ...sizes),
+    // The typical read: the common guide plus one language guide (TypeScript is the reference).
+    commonPlusLanguage: of("common.md") + of("languages", "typescript.md"),
+  };
+}
+
+export function buildReport(brief, full, guides) {
   const tokensOf = (label) => {
     const step = brief.steps.find((candidate) => candidate.label === label);
     if (step === undefined) throw new Error(`missing measured step "${label}".`);
@@ -185,6 +213,7 @@ export function buildReport(brief, full) {
     tokenApproximation: TOKEN_APPROXIMATION,
     fixture: "disposable-lite-lifecycle",
     ...brief.statics,
+    guides,
     preflight: {
       noTask: tokensOf("preflight (no task)"),
       planning: tokensOf("preflight (planning)"),
@@ -211,7 +240,8 @@ async function main() {
   if (!existsSync(cli)) throw new Error("dist/cli.js is missing; run `pnpm build` before `pnpm measure:tokens`.");
   const brief = await measureLifecycle({ cli, brief: true });
   const full = await measureLifecycle({ cli, brief: false });
-  process.stdout.write(`${JSON.stringify(buildReport(brief, full))}\n`);
+  const guides = await measureGuides(join(root, "src", "guides"));
+  process.stdout.write(`${JSON.stringify(buildReport(brief, full, guides))}\n`);
 }
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) await main();

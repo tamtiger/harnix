@@ -1,48 +1,79 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205812-rewrite-guides",
   "title": "[14] Viết lại guides theo dạng lệnh + ràng buộc, bổ sung spec/project-facts",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Viết lại common và các guide ngôn ngữ/công nghệ còn giữ theo format ngắn (≤ 600 tok): lệnh verify chuẩn, ràng buộc bắt lỗi thật, lỗi thường gặp; sửa nội dung lỗi thời (Next.js, Django, Go); gỡ guide không đem lại khác biệt. KHÔNG chuyển guide thành SKILL.md — guides là bản dịch đúng của ECC rules/ (docs/UPSTREAM_MAPPING.md §7). Bổ sung .harnix/spec/project-facts.md (derived, sinh lại khi init/update) chứa stack đã xác nhận và lệnh verify theo package từ add-verify-detection.",
   "nonGoals": [
-    "Không commit/push/PR tự động.",
+    "Không commit, push hay tạo PR tự động.",
     "Không đụng cấu hình user-global thật trong test.",
-    "Không bump version trong task này; version 2.0.0 chỉ bump một lần ở release-v2 (quyết định người dùng 2026-09-28)."
+    "Không chuyển guide thành SKILL.md: guide là bản dịch của ECC rules/ (docs/UPSTREAM_MAPPING.md mục 7).",
+    "Không đổi cơ chế chọn guide (catalog, extends, activation) và không đổi schema TaskRecord v3.",
+    "Mỗi task thành viên epic tăng phiên bản 2.0.0-dev.x một lần bằng pnpm version:sync (quyết định người dùng 2026-10-01 thay cho quy tắc cũ; 2.0.0 chỉ bump ở release-v2)."
   ],
   "acceptanceCriteria": [
     {
       "id": "ac-format",
       "text": "Mọi guide ≤ 600 tok và có mục lệnh verify.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-guide-format-1"
+      ]
     },
     {
       "id": "ac-stale",
       "text": "Các nội dung lỗi thời đã nêu (Next.js, Django, Go) được sửa.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-guide-format-1"
+      ]
     },
     {
       "id": "ac-project-facts",
       "text": ".harnix/spec/project-facts.md được sinh tại init/update, chứa stack đã xác nhận và lệnh verify theo package; là derived, không phải user-owned.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-project-facts-2"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-guide-format-1"
+      ]
+    },
+    {
+      "id": "ac-token-measured",
+      "text": "pnpm run measure:tokens in thêm khối guides { files, totalTokens, maxTokens, commonPlusLanguage } tính ceil(ký tự/4) trên src/guides; sau khi viết lại totalTokens không quá 20.400 (giảm ít nhất 50% so với baseline 41.676 token của 34 file) và maxTokens không quá 600; số trước và sau được ghi bằng decision.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-guide-tokens-1",
+        "ev-chk-measure-1"
+      ]
     }
   ],
   "relevantPaths": [
-    "src/guides/**",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "scripts/measure-tokens.mjs",
     "src/commands/init.ts",
     "src/commands/update.ts",
-    "src/core/config/**"
+    "src/core/spec",
+    "src/guides",
+    "src/templates/harnix/agents.ts"
   ],
   "relevantSpecs": [
     "docs/HARNIX_PRD.md",
@@ -53,20 +84,87 @@
     {
       "id": "check-suite",
       "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
       "scope": "focused",
       "required": true,
-      "command": "pnpm lint && pnpm typecheck && pnpm test",
       "criterionIds": [
         "ac-docs-sync",
         "ac-format",
         "ac-project-facts",
-        "ac-stale"
+        "ac-stale",
+        "ac-token-measured"
       ],
       "inputs": [
-        "@task-contract",
         "docs/**",
         "src/**",
         "test/**"
+      ]
+    },
+    {
+      "id": "chk-guide-format",
+      "description": "Test định dạng guide (<=600 token, mục Verify/Constraints/Common mistakes), nội dung lỗi thời đã sửa và tài liệu đồng bộ",
+      "command": "pnpm vitest run test/workflow/guide-format.test.ts test/unit/guides/catalog.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-sync",
+        "ac-format",
+        "ac-stale"
+      ],
+      "inputs": [
+        "docs/HARNIX_PRD.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/guides/**",
+        "test/unit/guides/catalog.test.ts",
+        "test/workflow/guide-format.test.ts"
+      ]
+    },
+    {
+      "id": "chk-project-facts",
+      "description": "Test project-facts.md: render, ghi derived lúc init/update, idempotent, bootstrap nhắc tới file",
+      "command": "pnpm vitest run test/unit/core/spec test/integration/commands/init.test.ts test/integration/commands/update.test.ts test/unit/templates/harnix",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-project-facts"
+      ],
+      "inputs": [
+        "src/commands/init.ts",
+        "src/commands/update.ts",
+        "src/core/spec/**",
+        "src/templates/harnix/agents.ts",
+        "test/integration/commands/init.test.ts",
+        "test/integration/commands/update.test.ts",
+        "test/unit/core/spec/**",
+        "test/unit/templates/harnix/**"
+      ]
+    },
+    {
+      "id": "chk-guide-tokens",
+      "description": "Test hàm đo guide của measure:tokens",
+      "command": "pnpm vitest run test/workflow/measure-tokens.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-token-measured"
+      ],
+      "inputs": [
+        "scripts/measure-tokens.mjs",
+        "test/workflow/measure-tokens.test.ts"
+      ]
+    },
+    {
+      "id": "chk-measure",
+      "description": "Đo lại token của guide trên bản build (chạy pnpm build trước)",
+      "command": "pnpm run measure:tokens",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-token-measured"
+      ],
+      "inputs": [
+        "scripts/measure-tokens.mjs",
+        "src/guides/**"
       ]
     }
   ],
@@ -75,10 +173,173 @@
       "id": "d-draft-checks",
       "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
       "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    },
+    {
+      "id": "d-stale-verified",
+      "text": "Đã kiểm chứng giả thuyết lỗi thời bằng nguồn chính thức (2026-10-01): Next.js đổi file convention middleware thành proxy từ v16.0.0, hàm export tên proxy, chạy mặc định Node.js (nextjs.org/docs proxy, v16.3.8); INP là metric kế nhiệm FID (web.dev/articles/inp); bleach ngừng bảo trì từ 2026-06-05, không còn bản phát hành kể cả bản vá bảo mật (pypi.org/project/bleach), nh3 là binding Ammonia còn phát hành (0.3.7, 2026-08-23); gosimple và stylecheck đã gộp vào staticcheck từ golangci-lint v2 (golangci-lint.run migration guide); hướng dẫn layout module Go chính thức dùng internal/ và cmd/ và không nhắc pkg/ (go.dev/doc/modules/layout).",
+      "rationale": "Audit chỉ ghi các mục này là giả thuyết; sửa guide dựa trên nguồn chính thức thay vì trí nhớ."
+    },
+    {
+      "id": "d-guide-format",
+      "text": "Mọi guide có đúng ba mục sau tiêu đề H1: \"## Verify\" (lệnh chuẩn trong khối ```text, chỉ lệnh của công cụ chính thức), \"## Constraints\" (tối đa 10 gạch đầu dòng, mỗi dòng một ràng buộc kiểm chứng được và bắt lỗi thật) và \"## Common mistakes\" (tối đa 6 dòng); tổng không quá 600 token theo ceil(ký tự/4); không có đoạn giới thiệu hay giải thích dài.",
+      "rationale": "Audit: guide hiện toàn bullet 4 mục x 5 nhưng gần như không có lệnh chạy cụ thể (0-4 dòng); định dạng lệnh + ràng buộc vừa giảm token đọc vừa hữu dụng hơn."
+    },
+    {
+      "id": "d-no-guide-removed",
+      "text": "Không gỡ guide nào: database/relational.md là guide cơ sở mà postgresql, mysql, sqlserver mở rộng (extends) nên gỡ sẽ mất nội dung chung; mọi guide còn lại gắn với một ngôn ngữ hoặc công nghệ được catalog phát hiện, và chỉ guide khớp stack mới được cài. Tiết kiệm đến từ việc co từng file về 600 token.",
+      "rationale": "Mục tiêu gốc cho phép gỡ guide không đem lại khác biệt, nhưng kiểm tra descriptor cho thấy không guide nào dư."
+    },
+    {
+      "id": "d-project-facts-derived",
+      "text": "project-facts.md do updateProject ghi (init gọi updateProject nên cùng đường): nội dung tất định từ config (ngôn ngữ, công nghệ, package đã xác nhận) cộng buildVerifyPlan (lệnh verify theo package), không có timestamp hay version để không churn; luôn ghi đè nếu khác, bỏ qua khi giống, không nằm trong manifest .template-hashes.json (derived, không phải user-owned); tối đa 20 package rồi ghi \"và N package khác\"; bootstrap AGENTS.md nhắc tới file nhưng hook context không nhúng nó.",
+      "rationale": "Hook chạy mỗi prompt nên không nhúng thêm nội dung; agent đọc file khi cần stack và lệnh verify mà không chạy lại detection."
+    },
+    {
+      "id": "d-measured-after",
+      "text": "Đo lại bằng pnpm run measure:tokens sau thay đổi (trước → sau, ceil(ký tự/4)): 34 guide tổng 41.676 → 11.607 token (-72%), lớn nhất 1.631 → 539, cả 34 file đạt <=600 (trước đó 34/34 vượt); một lần đọc common + typescript 2.891 → 666 (-77%), thêm nextjs 4.062 → 1.066. Chi phí tăng: bootstrap AGENTS.md 1.242 → 1.273 (+31, câu nhắc project-facts.md); phần còn lại không đổi (hook fixture 130, preflight, lệnh ghi --brief 337). Trên repo này hook context mỗi prompt còn 625 token (11 con trỏ + ghi chú learning).",
+      "rationale": "Mức giảm nằm ở token mỗi lần agent đọc guide; chi phí tăng là một câu trong bootstrap."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-10-01T20:32:20.728+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205812-rewrite-guides/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-01T20:33:27.132+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Task migrate từ schema v2 cũ, chưa có evidence nào: thay check nháp bằng các check tập trung cho từng tiêu chí và thêm tiêu chí đo token để hợp đồng đủ trước khi ready.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205812-rewrite-guides/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-01T20:33:27.686+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Task migrate từ schema v2 cũ, chưa có evidence nào: thay check nháp bằng các check tập trung cho từng tiêu chí và thêm tiêu chí đo token để hợp đồng đủ trước khi ready.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205812-rewrite-guides/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-10-01T20:33:37.163+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Task migrate từ schema v2 cũ, chưa có evidence nào: thay check nháp bằng các check tập trung cho từng tiêu chí và thêm tiêu chí đo token để hợp đồng đủ trước khi ready.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205812-rewrite-guides/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-04",
+      "recordedAt": "2026-10-01T20:33:37.685+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Task migrate từ schema v2 cũ, chưa có evidence nào: thay check nháp bằng các check tập trung cho từng tiêu chí và thêm tiêu chí đo token để hợp đồng đủ trước khi ready.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205812-rewrite-guides/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-05",
+      "recordedAt": "2026-10-01T20:33:38.203+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Task migrate từ schema v2 cũ, chưa có evidence nào: thay check nháp bằng các check tập trung cho từng tiêu chí và thêm tiêu chí đo token để hợp đồng đủ trước khi ready.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205812-rewrite-guides/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-guide-format-1",
+      "checkId": "chk-guide-format",
+      "recordedAt": "2026-10-01T20:43:27.999+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f0028edc80b461b9c007bb70bb5335b7448cdd0a290d099ed7bcc7c3d2a920b1"
+    },
+    {
+      "id": "ev-chk-project-facts-1",
+      "checkId": "chk-project-facts",
+      "recordedAt": "2026-10-01T20:43:32.736+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5b941b1f1cc0139f5f197cf71165daaddcb59657440fe93bef6ee38f51567b91"
+    },
+    {
+      "id": "ev-chk-guide-tokens-1",
+      "checkId": "chk-guide-tokens",
+      "recordedAt": "2026-10-01T20:43:36.679+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c560f5cece774ebe83d331c5c13995f7e60643573b1c750b034b436c5d8252f8"
+    },
+    {
+      "id": "ev-chk-measure-1",
+      "checkId": "chk-measure",
+      "recordedAt": "2026-10-01T20:43:51.212+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d4654af2dafa35604a0a1032a4db7550315d9da40d88a7d284e8b12e66e37b29"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-01T20:44:13.066+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pwsh.exe — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "baff5d30b47bae135de4f77de8389148cbd40167f806f2af72a401177b0f8a9f"
+    },
+    {
+      "id": "ev-chk-project-facts-2",
+      "checkId": "chk-project-facts",
+      "recordedAt": "2026-10-01T20:44:38.954+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "41f84471caeaddd5a2f23045ed992a9eb51589ef588bf496e1d0167d0f52087f"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-01T20:45:45.458+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh.exe — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e3516cea35e44f7f8c9443e184f94aa01d89c56f3abdf7653df8ba882a9170bf"
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
   "createdAt": "2026-09-28T20:58:12.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "updatedAt": "2026-10-01T20:46:05.237+07:00",
+  "residualRisks": [
+    {
+      "id": "r-managed-hash-mismatch",
+      "text": "update coi .harnix/spec/guides/languages/typescript.md của chính repo là bị sửa tay (hash thô trong manifest không khớp bản template cũ lẫn bản CRLF của checkout autocrlf) nên giữ bản cũ; chưa tìm ra nguyên nhân gốc. Đã đặt đúng nội dung template mới rồi update; cần điều tra riêng nếu người dùng Windows thấy guide không được làm mới.",
+      "severity": "low"
+    },
+    {
+      "id": "r-relevantpaths-pointers",
+      "text": "Mỗi mục relevantPaths dài tạo một con trỏ ~25 token lặp ở mọi prompt (11 mục = ~275 token trên repo này), và hook cũng chạy ở mỗi thông báo hệ thống của agent nền (6 lần trong lượt chạy song song = ~4k token); nên giữ relevantPaths ngắn và bỏ tài liệu lớn khỏi danh sách khi không cần.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-01T20:46:05.237+07:00"
 }

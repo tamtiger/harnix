@@ -1,28 +1,30 @@
-# Swift engineering guide
+# Swift guide
 
-## Value semantics and type safety
+## Verify
 
-- Favor value types (structs and enums) over reference types (classes) by default. Value semantics eliminate unexpected mutation side effects, simplify concurrency analysis, and improve compiler optimization.
-- Reserve classes strictly for scenarios requiring reference identity, shared mutable state across independent subsystems, or integration with Objective-C / Apple platform frameworks requiring class inheritance.
-- Model domain states and events using enums with associated values. Leverage Swift's pattern matching to handle complex, state-machine-driven workflows safely and exhaustively.
-- Restrict force unwrapping (`!`) and force casting (`as!`) completely from production code. Safely unwrap optionals using `guard let`, `if let`, or optional chaining, failing early and explicitly with domain-specific errors.
+```text
+swift build
+swift test
+swiftlint
+```
 
-## Protocol-oriented programming and generics
+## Constraints
 
-- Design components around small, highly cohesive protocols rather than monolithic interfaces. Compose rich functionality by extending protocols with default implementations and constrained extensions.
-- Use Swift generics with type constraints to create expressive, reusable components without sacrificing static type safety or runtime efficiency.
-- Follow the principle of protocol abstraction for external dependencies (network services, persistence stores, hardware sensors), enabling straightforward mock injection during automated testing.
-- Mark classes that are not intended for subclassing with `final` to enable direct method dispatch and improve compilation and runtime execution efficiency.
+- Do not use `!` or `as!` in production code; use `guard let`, `if let` or `as?`.
+- Prefer `struct` and `enum` with associated values; use `class` only for reference identity.
+- Mark classes not meant for subclassing `final`.
+- Protect shared mutable state with an `actor`.
+- Annotate UI types and view models with `@MainActor`.
+- Use `async`/`await` and structured tasks; do not add completion-handler or manual GCD code in new APIs.
+- Call `try Task.checkCancellation()` in long async loops.
+- Hide external dependencies behind small protocols so tests can inject fakes.
+- Write tests with Swift Testing (`@Test`, `#expect`) or `XCTest`.
+- Keep `Package.swift` declarative with separate library and test targets.
 
-## Modern concurrency (Swift Concurrency)
+## Common mistakes
 
-- Adopt Swift's modern `async/await` concurrency model, actors, and structured concurrency tasks. Avoid legacy completion-handler-based asynchronous APIs and manual GCD dispatch queue juggling in new codebases.
-- Isolate shared mutable state within `actor` boundaries to guarantee thread safety and eliminate data races at compile time.
-- Use `@MainActor` explicitly on UI components, view models, and state holders that interact directly with main-thread rendering frameworks.
-- Respect task cancellation: inspect `Task.isCancelled` and call `Task.checkCancellation()` periodically within intensive asynchronous loops to terminate stale computations cleanly.
-
-## Testing, package management and style
-
-- Manage dependencies and modularize project boundaries using Swift Package Manager (SPM). Keep package manifests (`Package.swift`) declarative, minimal, and cleanly divided into library targets and test targets.
-- Structure automated test suites using the modern Swift Testing framework (`@Test`, `#expect`) or `XCTest`. Ensure critical business logic is decoupled from platform frameworks for rapid headless test execution.
-- Enforce formatting and style consistency using `swift-format` or `SwiftLint`. Treat compiler warnings as errors in release configurations to prevent creeping code degradation.
+- Capturing `self` strongly in an escaping closure without `[weak self]`.
+- Using `Task.detached` where a child task would inherit cancellation.
+- Updating UI state off the main actor.
+- Passing non-`Sendable` types across actor boundaries.
+- Using `try!` to silence an error.
