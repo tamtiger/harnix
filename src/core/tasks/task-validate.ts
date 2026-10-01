@@ -236,13 +236,19 @@ function assertCriterionSupport(value: TaskObject): void {
 
 export function validateTask(value: unknown, options: TaskValidationOptions = {}): TaskRecord {
   const task = asTaskObject(value);
+  // Structural core: later phases cast these shapes, so a failure here must stop immediately.
   assertTopLevelKeysAndStrings(task);
   assertIdentity(task);
   assertArraysAndTimestamps(task);
-  assertValidationPlan(task);
-  assertEvidence(task, options);
-  assertCriteria(task);
-  assertUniquenessAndPaths(task);
+  // Independent shape/content phases: collect every problem so one --save round surfaces them all,
+  // instead of forcing a resend of the whole envelope per hidden error.
+  const problems = collectValidationErrors([
+    () => assertValidationPlan(task),
+    () => assertEvidence(task, options),
+    () => assertCriteria(task),
+    () => assertUniquenessAndPaths(task),
+  ]);
+  if (problems.length > 0) throw new TaskValidationError(problems.join("; "));
   const checks = new Map((task.validationPlan as ValidationCheck[]).map((check) => [check.id, check]));
   assertEvidenceCheckReferences(task, checks);
   if (task.schemaVersion === 2) validateV2Contracts(task, checks);
@@ -252,4 +258,18 @@ export function validateTask(value: unknown, options: TaskValidationOptions = {}
   assertCancellation(task);
   assertStatusCheckpointAndCompletion(task);
   return task as unknown as TaskRecord;
+}
+
+/** Runs each independent assert, collecting TaskValidationError messages; re-throws any other error. */
+function collectValidationErrors(asserts: readonly (() => void)[]): string[] {
+  const messages: string[] = [];
+  for (const assertOne of asserts) {
+    try {
+      assertOne();
+    } catch (error: unknown) {
+      if (error instanceof TaskValidationError) messages.push(error.message);
+      else throw error;
+    }
+  }
+  return messages;
 }

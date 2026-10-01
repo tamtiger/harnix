@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { access } from "node:fs/promises";
+import { join } from "node:path";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { initializeUtcProject, taskV3 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -6,15 +8,15 @@ import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 const temporaryRepository = useTemporaryRepositories();
 
 describe("workflow envelope", () => {
-  it("rejects a new Full task unless its required artifacts are persisted with it", async () => {
+  it("creates a Full planning task without artifacts and lets the ready gate enforce prd/plan", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
     const full = { ...taskV3("planning", "planning"), mode: "full" as const };
 
-    await expect(saveWorkflow(root, { task: full })).rejects.toThrow("prd.md and plan.md");
-    await expect(
-      saveWorkflow(root, { task: full, artifacts: { prd: "# PRD\n", plan: "# Plan\n" } }),
-    ).resolves.toMatchObject({ id: full.id });
+    // A Full task may be created light (task.json only); prd.md/plan.md are written later and enforced at ready.
+    await expect(saveWorkflow(root, { task: full })).resolves.toMatchObject({ id: full.id });
+    await expect(access(join(root, ".harnix", "tasks", full.id, "task.json"))).resolves.toBeUndefined();
+    await expect(access(join(root, ".harnix", "tasks", full.id, "prd.md"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   it("rejects unknown hidden-save envelope, artifact, and revision fields", async () => {

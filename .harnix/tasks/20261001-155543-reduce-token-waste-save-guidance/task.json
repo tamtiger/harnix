@@ -1,0 +1,143 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261001-155543-reduce-token-waste-save-guidance",
+  "title": "Giam token lang phi: gop loi validate --save, bo sung chi dan save va cookbook",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-01T15:55:43.300+07:00",
+  "updatedAt": "2026-10-01T16:18:12.206+07:00",
+  "goal": "Giam token lang phi khi chay Harnix tren moi repo/tool bang 3 cai tien: (1) validateTask gop nhieu loi doc lap thanh mot thong bao thay vi throw loi dau tien; (2) skill harnix-plan liet ke day du rang buoc --save va dan doc --schema truoc; (3) Command cookbook workflow.md them mau --save, compound --run-check, guarded replan.",
+  "nonGoals": [
+    "Khong doi rang buoc schema - chi doi CACH bao loi",
+    "Khong doi noi dung tung thong bao loi hien co",
+    "Khong dong 9 rule always-loaded"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-aggregate-errors",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-suite-1",
+        "ev-chk-validate-1"
+      ],
+      "text": "validateTask tren envelope v3 co nhieu loi doc lap throw mot TaskValidationError chua tat ca thong bao; moi thong bao con lai la substring nen test toThrow substring van pass; envelope hop le van pass."
+    },
+    {
+      "id": "ac-plan-save-constraints",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-guidance-1",
+        "ev-chk-suite-1"
+      ],
+      "text": "Skill harnix-plan liet ke day du rang buoc --save va dan doc harnix workflow --schema mot lan truoc khi dung envelope."
+    },
+    {
+      "id": "ac-cookbook-save",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-guidance-1",
+        "ev-chk-suite-1"
+      ],
+      "text": "Command cookbook workflow.md co mau --save toi thieu, compound --run-check qua shell, va guarded replan."
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task-validate.ts",
+    "src/skills/harnix-plan/SKILL.md",
+    "src/templates/harnix/workflow.ts",
+    "test/unit/core/tasks/task-validate.test.ts",
+    "test/workflow/persistence-guidance.test.ts"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-chk-validate-1",
+      "checkId": "chk-validate",
+      "recordedAt": "2026-10-01T16:16:09.329+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5181ba389cb898375d2a127ef732843f91c5c4fa5080163154c1c648598155ba"
+    },
+    {
+      "id": "ev-chk-guidance-1",
+      "checkId": "chk-guidance",
+      "recordedAt": "2026-10-01T16:16:24.154+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "02e65a032c44eaf906f46d1073327ce40f033ff9f77dd028c1065bd58b5171ef"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-01T16:17:39.895+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "803c7a1bb6b9d6832139b611b74c38216297fdc75a18436c96f0fbe9a1aff2fa"
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-validate",
+      "description": "Test validator gop loi",
+      "command": "pnpm vitest run test/unit/core/tasks/task-validate.test.ts",
+      "criterionIds": [
+        "ac-aggregate-errors"
+      ],
+      "inputs": [
+        "src/core/tasks/task-validate.ts",
+        "test/unit/core/tasks/task-validate.test.ts"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "chk-guidance",
+      "description": "Test skill plan + cookbook",
+      "command": "pnpm vitest run test/workflow/persistence-guidance.test.ts test/workflow/skill-sources.test.ts",
+      "criterionIds": [
+        "ac-cookbook-save",
+        "ac-plan-save-constraints"
+      ],
+      "inputs": [
+        "src/skills/harnix-plan/SKILL.md",
+        "src/templates/harnix/workflow.ts",
+        "test/workflow/persistence-guidance.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "chk-suite",
+      "description": "Project suite gate",
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-aggregate-errors",
+        "ac-cookbook-save",
+        "ac-plan-save-constraints"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "required": true,
+      "scope": "full"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-validate-aggregate",
+      "text": "validateTask gom loi theo nhom doc lap: structural core (asTaskObject/topLevelKeys/identity/arrays) van throw ngay vi downstream cast phu thuoc; nhom shape doc lap (validationPlan/evidence/criteria/uniqueness-paths) chay trong collectValidationErrors (try/catch, thu TaskValidationError, re-throw loi khac) roi throw mot lan noi bang '; '. Giu nguyen van tung message nen moi test .toThrow(substring) hien co van pass. Giam so lan resend envelope --save.",
+      "rationale": "Nguon ton token lon nhat la --save fail-fast tung loi mot; gop loi de sua 1 lan."
+    }
+  ],
+  "completedAt": "2026-10-01T16:18:12.206+07:00"
+}

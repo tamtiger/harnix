@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.0.0-dev.10] - 2026-10-01
+
+### Changed
+
+- Giam friction/token khi dung --save: validateTask gop moi loi shape doc lap thanh mot thong bao (sua 1 lan thay vi resend envelope nhieu lan); bo guard tao-task thua bat Full task phai inline prd/plan JSON luc tao - gio tao Full task nhe (chi task.json) roi viet prd.md/plan.md bang editor tool, ready gate van chan; skill harnix-plan va cookbook workflow.md ghi ro rang buoc --save, doc --schema mot lan, va luong Full-create nhe.
+
 ## [2.0.0-dev.9] - 2026-10-01
 
 ### Fixed

@@ -229,4 +229,29 @@ describe("TaskRecord schema v3", () => {
     expect(validateTask(legacyV2).schemaVersion).toBe(2);
     expect(validateTask(legacyV1).schemaVersion).toBe(1);
   });
+
+  it("aggregates independent validation errors into one message instead of throwing the first", () => {
+    const broken = v3({
+      validationPlan: [
+        {
+          id: "check-one",
+          description: "Suite tests",
+          scope: "suite",
+          required: true,
+          command: "dotnet test",
+          criterionIds: ["ac-one"],
+          inputs: ["src/**"],
+        },
+      ],
+      relevantPaths: ["../escape"],
+    });
+    const run = () => validateTask(broken);
+    // Both independent problems appear in a single thrown message, each as its original substring.
+    expect(run).toThrow(/invalid scope 'suite'; expected 'focused' or 'full'/u);
+    expect(run).toThrow(/Task path is unsafe/u);
+  });
+
+  it("still accepts a fully valid v3 record", () => {
+    expect(validateTask(v3()).schemaVersion).toBe(3);
+  });
 });

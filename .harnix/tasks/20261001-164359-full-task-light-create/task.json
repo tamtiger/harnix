@@ -1,0 +1,132 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261001-164359-full-task-light-create",
+  "title": "Cho phep tao Full task o planning khong can artifacts, ready gate van chan",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-01T16:43:59.894+07:00",
+  "updatedAt": "2026-10-01T16:53:09.819+07:00",
+  "goal": "Bo guard tao-task thua o src/core/workflow/save.ts (dong 147) bat buoc envelope --save phai co artifacts khi tao Full task. Guard nay ep agent nhoi prd/plan dang JSON lon ngay luc tao (friction lap lai moi Full task, de hong khi pipe JSON qua pwsh). Ready gate (ready.ts) DA bat buoc prd.md/plan.md khong rong doc tu disk, dung voi hop dong tai lieu (WORKFLOW/PRD/IMPLEMENTATION_PLAN deu noi 'tai ready'). Sau khi bo guard: tao Full task = JSON nho (chi task.json), roi viet prd.md/plan.md bang editor tool; ready gate chan neu thieu. Cap nhat skill harnix-plan + cookbook mo ta luong nhe nay.",
+  "nonGoals": [
+    "Khong doi ready gate (van bat buoc prd/plan khong rong + 1 checklist item tai ready)",
+    "Khong doi hop dong tai lieu (chi align code voi tai lieu da noi 'tai ready')",
+    "Khong doi cach ghi file artifacts hay digest"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-light-create",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-create-1",
+        "ev-chk-suite-1"
+      ],
+      "text": "saveWorkflow tao mot Full task planning MA KHONG co artifacts thanh cong (chi ghi task.json); sau do transition ready that bai neu prd.md/plan.md thieu/rong; thanh cong khi da co prd/plan khong rong + checklist item."
+    },
+    {
+      "id": "ac-guidance-light",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-guidance-1",
+        "ev-chk-suite-1"
+      ],
+      "text": "Skill harnix-plan va Command cookbook mo ta luong tao Full task nhe: --save JSON nho roi viet prd.md/plan.md bang editor tool, ready gate la cho chan."
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/save.ts",
+    "src/skills/harnix-plan/SKILL.md",
+    "src/templates/harnix/workflow.md",
+    "test/unit/core/workflow/envelope.test.ts"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-chk-create-1",
+      "checkId": "chk-create",
+      "recordedAt": "2026-10-01T16:51:22.507+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "18bf6a369f853a33b805df58fb8ada93674f024a6d6ec7b4f67518a10a8be1c1"
+    },
+    {
+      "id": "ev-chk-guidance-1",
+      "checkId": "chk-guidance",
+      "recordedAt": "2026-10-01T16:51:26.495+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b676fc75d629767efe6e1c0033bed1b482d787527fb4ef5d23c8f252326206c2"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-01T16:52:37.065+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bc027b5a841dde61634685f9b0e52751dd291e4f909b79d13dea050043aacfdf"
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-create",
+      "description": "Test tao Full task khong artifacts + ready gate chan",
+      "command": "pnpm vitest run test/unit/core/workflow/envelope.test.ts test/unit/core/workflow/ready.test.ts",
+      "criterionIds": [
+        "ac-light-create"
+      ],
+      "inputs": [
+        "src/core/workflow/save.ts",
+        "test/unit/core/workflow/envelope.test.ts",
+        "test/unit/core/workflow/ready.test.ts"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "chk-guidance",
+      "description": "Test skill + cookbook guidance",
+      "command": "pnpm vitest run test/workflow/persistence-guidance.test.ts test/workflow/skill-sources.test.ts",
+      "criterionIds": [
+        "ac-guidance-light"
+      ],
+      "inputs": [
+        "src/skills/harnix-plan/SKILL.md",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/persistence-guidance.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "chk-suite",
+      "description": "Project suite gate",
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-guidance-light",
+        "ac-light-create"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "required": true,
+      "scope": "full"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-light-full-create",
+      "text": "Guard tao-task save.ts (full && !artifacts -> throw) la thua: ready gate (ready.ts) va cac doc (WORKFLOW/PRD/IMPLEMENTATION_PLAN) deu dinh nghia yeu cau prd/plan 'tai ready', khong phai luc create. Khi envelope khong co artifacts, plannedSaveFiles chi ghi task.json va validateTaskArtifacts chi chay neu co artifacts, nen bo guard la an toan. Giup tao Full task nhe (JSON nho) roi viet prd.md/plan.md bang editor tool, tranh nhoi prose JSON lon.",
+      "rationale": "Giam friction lap lai moi Full task; align code voi hop dong tai lieu."
+    }
+  ],
+  "completedAt": "2026-10-01T16:53:09.819+07:00"
+}

@@ -2,7 +2,7 @@
 name: harnix-plan
 description: Use when a Harnix request needs triage, requirements, planning, a trustworthy ready gate, a replan, a legacy-task migration or an epic before implementation.
 metadata:
-  version: "2.0.0-dev.9"
+  version: "2.0.0-dev.10"
 ---
 
 # Plan a Harnix task
@@ -29,9 +29,9 @@ Anything that is not Bypass is tracked. **Lite**: localized, low-risk, obvious c
 
 ## Build the task
 
-- Create new tasks as TaskRecord schema v3 with one `harnix workflow --save` envelope (`--schema` shows the shape). ID = `clock.idPrefix` + lowercase hyphenated slug; all timestamps from `clock`.
+- Create new tasks as TaskRecord schema v3 with one `harnix workflow --save` envelope. Read `harnix workflow --schema` once and build the envelope correctly the first time instead of discovering the shape by failing: no unknown fields; every criterion carries `id`, `text`, `status` and `evidenceIds: []`; each check `scope` is `focused` or `full` (never `project`); a required check needs non-empty `criterionIds` and `inputs`, and both arrays are sorted and unique; every non-waived criterion is covered by a required check; include one project-level suite check (`scope: full`, source-and-test inputs) from `harnix verify-plan`. A `--save` now reports every independent problem at once, so fix them together. ID = `clock.idPrefix` + lowercase hyphenated slug; all timestamps from `clock`.
+- A Full task does not need `prd.md`/`plan.md` in the create envelope: save the record light (no `artifacts`), then write `prd.md` and `plan.md` directly with the editor tool. The ready gate enforces non-empty `prd.md`/`plan.md` with a checklist item, so there is no reason to inline large prose as JSON.
 - Persist `planning` before any product edit. Record outcome, non-goals, observable acceptance criteria, relevant paths/specs, affected contracts, risks and rollback, and validation.
-- Checks: sorted `criterionIds`, sorted repository-glob `inputs`; every non-waived criterion is covered by a required check; include a project-level check from `harnix verify-plan`.
 - Edit obligations with flags, not JSON: `--set-check`, `--add-criterion`, `--set-paths`.
 - Full `plan.md`: an unchecked `- [ ]` item per ordered slice near the top, concrete files/interfaces, RED then GREEN order, what each check proves. Under each criterion in `prd.md` add a **Verifies:** line. Write these two files with the editor tool.
 - Obligations freeze at the first persisted `ready`.

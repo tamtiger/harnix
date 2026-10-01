@@ -73,6 +73,9 @@ describe("agent persistence guidance", () => {
       "must never go through a Windows PowerShell 5.1 pipe",
       "edit `prd.md`",
       "single-quote text that contains backticks",
+      "A `--save` envelope is",
+      "harnix workflow --schema",
+      "reports every independent problem at once",
     ])
       expect(cookbook, needle).toContain(needle);
     expect(cookbook).not.toContain("$OutputEncoding");

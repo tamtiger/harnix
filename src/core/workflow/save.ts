@@ -76,7 +76,7 @@ async function saveWorkflowLocked(
   if (replayed !== undefined) return replayed;
   const candidate = existing
     ? validateAgainstExisting(existing, initialCandidate, envelope)
-    : validateNewTask(active, initialCandidate, envelope);
+    : validateNewTask(active, initialCandidate);
 
   if (candidate.status === "completed") throw new Error("Workflow completion must use workflow --finish.");
   if (candidate.status === "ready") await assertReadyRequirements(harnixRoot, candidate, envelope.artifacts);
@@ -136,15 +136,10 @@ function validateAgainstExisting(
   return preserved;
 }
 
-function validateNewTask(
-  active: TaskRecord | undefined,
-  candidate: TaskRecord,
-  envelope: WorkflowSaveEnvelope,
-): TaskRecord {
+function validateNewTask(active: TaskRecord | undefined, candidate: TaskRecord): TaskRecord {
   if (candidate.schemaVersion !== 3) throw new Error("Workflow save requires TaskRecord schema v3 for every new task.");
   if (active || candidate.status !== "planning")
     throw new Error("Workflow save may create only a planning task when no task is active.");
-  if (candidate.mode === "full" && !envelope.artifacts) throw new Error("Full tasks require prd.md and plan.md.");
   return candidate;
 }
 
