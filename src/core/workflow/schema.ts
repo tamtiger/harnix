@@ -1,10 +1,19 @@
+import { epicIdPattern } from "src/core/epics/epic.js";
 import {
   acceptanceCriterionKeys,
   blockerKeys,
+  checkScopes,
+  criterionStatuses,
+  evidenceResults,
   evidenceV2Keys,
+  taskIdPattern,
+  taskModes,
   taskRecordFieldManifest,
+  taskStatuses,
   validationCheckV2Keys,
+  workflowCheckpoints,
 } from "src/core/tasks/task.js";
+import { briefFlagNames } from "./brief.js";
 
 export interface WorkflowEnvelopeSchemaV1 {
   generator: "harnix";
@@ -13,6 +22,22 @@ export interface WorkflowEnvelopeSchemaV1 {
   taskRecord: { required: string[]; optional: string[] };
   nested: { acceptanceCriteria: string[]; validationPlan: string[]; evidence: string[]; blocker: string[] };
   transports: Record<string, string>;
+  /** Values and rules the validator enforces, so an envelope can be built right the first time. */
+  constraints: {
+    mode: string[];
+    status: string[];
+    checkpoint: string[];
+    scope: string[];
+    result: string[];
+    criterionStatus: string[];
+    taskId: string;
+    epicId: string;
+    sortedUniqueArrays: string[];
+    newCriterion: string;
+    requiredCheck: string;
+    envelope: string;
+    brief: string[];
+  };
 }
 
 /** Read-only self-description so an agent can build a valid envelope before its first save fails. */
@@ -36,6 +61,23 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       evidence: [...evidenceV2Keys].sort(),
       blocker: [...blockerKeys].sort(),
     },
+    constraints: {
+      mode: [...taskModes],
+      status: [...taskStatuses],
+      checkpoint: [...workflowCheckpoints],
+      scope: [...checkScopes],
+      result: [...evidenceResults],
+      criterionStatus: [...criterionStatuses],
+      taskId: taskIdPattern.source,
+      epicId: epicIdPattern.source,
+      sortedUniqueArrays: ["validationPlan[].criterionIds", "validationPlan[].inputs"],
+      newCriterion: 'status "pending" with evidenceIds: [] on every criterion; criteria text is free-form',
+      requiredCheck:
+        "a required check needs non-empty criterionIds and inputs; every non-waived criterion is covered by one",
+      envelope:
+        "{ task, artifacts?, contractRevision?, epic?, epicMembers? }; the TaskRecord goes under task, never bare",
+      brief: briefFlagNames(),
+    },
     transports: {
       "--save": "Full record plus artifacts. Required for obligations, artifacts and contract revisions.",
       "--transition": "Status and checkpoint only, read from the persisted record.",
@@ -57,7 +99,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--set-paths":
         "Replace the relevant paths and/or specs from repeatable --relevant-path and --relevant-spec flags; needs no reason.",
       "--brief":
-        "Print only id, status, checkpoint and updatedAt for --save, --transition, --evidence, --criterion, --migrate and --finish.",
+        "Print only id, status, checkpoint and updatedAt (preflight: without learning); the commands that accept it are listed in constraints.brief.",
       "--finish":
         "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? }.",
       "--cancel": "Terminal cancellation; the only cancellation transport.",

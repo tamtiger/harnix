@@ -3,10 +3,13 @@ import { describe, expect, it } from "vitest";
 import { createProgram } from "src/cli-program.js";
 import { claudeGlobalMemoryContent } from "src/configurators/claude.js";
 import { codexGlobalAgentsContent } from "src/configurators/codex.js";
+import { briefFlagNames } from "src/core/workflow/brief.js";
 import { HARNIX_RULES, renderHarnixRules } from "src/templates/harnix/activation.js";
 import { HARNIX_GLOBAL_ACTIVATION_DOCUMENT } from "src/templates/harnix/global-surface.js";
 import { workflowSkills, workflowTemplate } from "src/templates/harnix/workflow.js";
 
+const ROUTE_RULE = HARNIX_RULES.find((rule) => /^Route:/u.test(rule))!;
+const ECONOMY_RULE = HARNIX_RULES.find((rule) => /^Token economy:/u.test(rule))!;
 const STATE_RULE = HARNIX_RULES.find((rule) => /change task state only with `harnix workflow`/u.test(rule))!;
 
 function skillAndReferences(name: string): string {
@@ -72,7 +75,7 @@ describe("agent persistence guidance", () => {
       "bash -c",
       "must never go through a Windows PowerShell 5.1 pipe",
       "edit `prd.md`",
-      "single-quote text that contains backticks",
+      "single-quote it in bash when it contains backticks",
       "A `--save` envelope is",
       "harnix workflow --schema",
       "reports every independent problem at once",
@@ -116,5 +119,48 @@ describe("agent persistence guidance", () => {
         expect(registered.has(flag), `${source} documents unknown flag ${flag}`).toBe(true);
       }
     }
+  });
+
+  it("keeps one cookbook command block instead of repeating every command per shell", () => {
+    const cookbook = workflowTemplate.slice(workflowTemplate.indexOf("## Command cookbook"));
+
+    expect(cookbook.match(/^```/gmu)).toHaveLength(2);
+    expect(cookbook).toContain("In PowerShell:");
+    expect(cookbook).toContain("In bash:");
+    expect(cookbook).toContain("pwsh.exe -NoProfile -Command");
+    expect(cookbook).toContain("refuses");
+  });
+
+  it("shows --brief on every cookbook command that accepts it and on none that refuses it", () => {
+    const cookbook = workflowTemplate.slice(workflowTemplate.indexOf("## Command cookbook"));
+    const block = cookbook.split(/^```.*$/gmu)[1] ?? "";
+    const accepted = new Set(briefFlagNames());
+    const optional = new Set(["--preflight"]);
+    const lines = block.split(/\r?\n/u).filter((line) => line.startsWith("harnix workflow "));
+
+    expect(lines.length).toBeGreaterThan(8);
+    for (const line of lines) {
+      const flag = /^harnix workflow (--[a-z-]+)/u.exec(line)?.[1] ?? "";
+      if (accepted.has(flag) && !optional.has(flag)) expect(line, flag).toContain("--brief");
+      if (!accepted.has(flag)) expect(line, flag).not.toContain("--brief");
+    }
+  });
+
+  it("tells the reader to read the workflow page and the schema once per session and where --brief is listed", () => {
+    expect(ROUTE_RULE).toMatch(/read `\.harnix\/workflow\.md` once per session/u);
+    expect(ECONOMY_RULE).toContain("constraints.brief");
+    expect(ECONOMY_RULE).toContain("once per session");
+    for (const flag of ["--set-check", "--add-criterion", "--set-paths"]) expect(ECONOMY_RULE, flag).toContain(flag);
+    expect(workflowTemplate).toContain("once per session");
+  });
+
+  it("documents the required --platform flag, the epic ID order and how to edit a member that is not active", () => {
+    const plan = skillAndReferences("harnix-plan");
+
+    expect(workflowTemplate).toContain("harnix context --platform <p>");
+    expect(workflowTemplate).toContain("harnix context-report --platform <p>");
+    expect(plan).toContain("later idPrefix");
+    expect(plan).toContain("harnix pause");
+    expect(plan).toContain("harnix resume <task-id>");
   });
 });

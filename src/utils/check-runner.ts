@@ -32,7 +32,10 @@ export function resolveInvocation(
   const bareName = !/[\\/]/u.test(executable) && !executable.includes(".");
   if (platform !== "win32" || !bareName) return { executable, args: [...args] };
   const unsafe = args.find((argument) => CMD_METACHARACTERS.test(argument));
-  if (unsafe !== undefined) throw new Error("A command argument contains characters that are unsafe for cmd.exe.");
+  if (unsafe !== undefined)
+    throw new Error(
+      "A command argument contains characters that are unsafe for cmd.exe; run the program by a name with its extension (for example pwsh.exe) or by its full path.",
+    );
   return { executable: "cmd.exe", args: ["/d", "/s", "/c", executable, ...args] };
 }
 

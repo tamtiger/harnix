@@ -131,7 +131,7 @@ harnix uninstall --legacy-project-surfaces [--yes]
 harnix mem [query]
 harnix status
 harnix tasks [--limit <1..100>] [--status <TaskStatus>]
-harnix epic [<epic-id>] [--limit <1..100>]
+harnix epic [<epic-id>] [--limit <1..100>] [--brief]
 harnix resume <task-id> [--dry-run]
 harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]
 harnix status --explain [--limit <1..50>]
@@ -235,7 +235,7 @@ Context:
 - Explicit hidden context persistence ghi `context.json` cùng task-owned `context-selection.json` v1, bind `taskId`, selector version, repo-map `inventoryFingerprint`, canonical selection-input hash và selection-result hash; sidecar không chứa source body, task prose, secret hoặc absolute path.
 - Hidden inspect/continue luôn trả `contextDrift` gồm path `changes` và selection-basis `selectionChanges`; content, inventory, selector version hoặc task/config/guide signal drift tạo `stale`, buộc persist cùng status/checkpoint `replan` trước context reselection. Manifest v1 chưa có sidecar vẫn đọc và disclose `not-recorded`; inspect/hook không scan, refresh hoặc write repo-map.
 - Mọi timestamp Harnix ghi ra dùng `timezone` IANA trong `.harnix/config.yaml` (ISO 8601 kèm offset; repo này `Asia/Ho_Chi_Minh`); hidden `workflow --preflight` cũng trả `clock` (`timezone`, `now`, `idPrefix`) làm nguồn thời gian cho agent thay cho lệnh `date` của shell.
-- Hidden `workflow --preflight` trả bounded no-write routing state; same `contextDrift` sau một replan/reselection trong cùng request phải dừng thay vì lặp.
+- Hidden `workflow --preflight` trả bounded no-write routing state; same `contextDrift` sau một replan/reselection trong cùng request phải dừng thay vì lặp. `learning` chỉ có nội dung khi `nextStage` là `plan` (stage khác trả mảng rỗng) và `workflow --preflight --brief` bỏ `learning`. `workflow --schema` có khối `constraints` (enum mode/status/checkpoint/scope/result, regex id task và epic, mảng sorted-unique, dạng envelope `{ task, ... }` và danh sách lệnh nhận `--brief`) lấy từ cùng hằng mà validator dùng. Một `epic <epic-id> --brief` chỉ in id/title, đếm theo trạng thái, `nextTask` và id+status từng member.
 
 Task verification:
 
@@ -318,7 +318,7 @@ Hidden save chỉ có crash-recovery exception hẹp: khi task commit đã tồn
 
 `harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]` emit `ContextReportResultV1` read-only; default limit 20, no active task là success với `activeTask:null`. Active report dùng cùng effective builder với hidden context ở bounded hook mode: Codex cap 2.500 characters; Kiro/Antigravity/Claude Code cap `min(config.context.maxCharacters, 8000)`; tối đa 64 inspected entries. Chưa có `context.json` thì candidate là task `relevantPaths` cộng applicable guides; đã có manifest thì dùng persisted entries cộng applicable guides.
 
-Output active chỉ gồm task ID, platform budget, aggregate candidate/selected/omitted counts, selected relative paths với trusted sorted reason codes `applicable-guide|persisted-selection|pinned|task-reference`, omitted relative paths với `budget|duplicate|missing|unsafe`, và bounded context/selection drift metadata. `--limit` áp riêng cho selected, omitted và drift changes. Toàn JSON tối đa 262.144 UTF-8 bytes bằng deterministic whole-item tail omission; report không trả content, raw persisted reason/state, hash, task prose, hook event, secret hoặc absolute path, không ghi file/network và không làm đổi hidden hook payload.
+Output active chỉ gồm task ID, platform budget, aggregate candidate/selected/omitted counts, selected relative paths với trusted sorted reason codes `applicable-guide|persisted-selection|pinned|task-reference`, omitted relative paths với `budget|duplicate|missing|unsafe`, và bounded context/selection drift metadata. `--limit` áp riêng cho selected, omitted và drift changes. Toàn JSON tối đa 262.144 UTF-8 bytes bằng deterministic whole-item tail omission; report không trả content, raw persisted reason/state, hash, task prose, hook event, secret hoặc absolute path, không ghi file/network và không làm đổi hidden hook payload. Hook context bounded liệt kê mọi guide dưới `.harnix/spec/guides/` và mọi file từ 1.500 ký tự dạng con trỏ (đường dẫn + số ký tự, kèm lời nhắc đọc khi khớp file đang sửa) thay vì nhúng nội dung, vẫn hash để drift hoạt động; mỗi entry luôn nguyên vẹn hoặc nằm trong `Omitted`, không bao giờ bị cắt giữa chừng.
 
 ### Checks
 

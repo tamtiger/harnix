@@ -1,6 +1,8 @@
 import { validateContextManifest } from "src/core/context/context.js";
 import { validateTask, type Evidence, type TaskArtifacts, type TaskRecord } from "src/core/tasks/task.js";
+import { unknownFieldsMessage } from "src/core/tasks/task.js";
 import { assertExactFields, isRecord } from "src/core/tasks/workflow-helpers.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 export type WorkflowSaveArtifacts = Omit<TaskArtifacts, "contextSelection">;
 export interface WorkflowSaveEnvelope {
@@ -11,14 +13,38 @@ export interface WorkflowSaveEnvelope {
   epicMembers?: TaskRecord[] | undefined;
 }
 
+const ENVELOPE_KEYS: ReadonlySet<string> = new Set(["task", "artifacts", "contractRevision", "epic", "epicMembers"]);
+const ENVELOPE_SHAPE = "{ task, artifacts?, contractRevision?, epic?, epicMembers? }";
+
+/** Epic members are listed by ID, so the declared order only survives when each ID sorts after the one before it. */
+function assertEpicMemberOrder(ids: readonly string[]): void {
+  for (let index = 1; index < ids.length; index += 1) {
+    const previous = ids[index - 1] as string;
+    const next = ids[index] as string;
+    if (compareCodeUnits(previous, next) >= 0)
+      throw new Error(
+        `Epic members must be ordered by execution: "${previous}" is declared before "${next}" but does not sort before it. Give each member a later idPrefix (YYYYMMDD-HHMMSS) than the one before it.`,
+      );
+  }
+}
+
 export function validateWorkflowSaveEnvelope(value: unknown): WorkflowSaveEnvelope {
   if (!isRecord(value)) throw new Error("Workflow save envelope is invalid.");
-  assertExactFields(
-    value,
-    new Set(["task", "artifacts", "contractRevision", "epic", "epicMembers"]),
-    "Workflow save envelope",
-  );
-  if (!("task" in value)) throw new Error("Workflow save envelope requires task.");
+  const unknown = Object.keys(value).filter((key) => !ENVELOPE_KEYS.has(key));
+  if (!("task" in value)) {
+    const found =
+      unknown.length > 0
+        ? `; found top-level ${unknown
+            .slice(0, 5)
+            .map((key) => JSON.stringify(key))
+            .join(", ")} instead`
+        : "";
+    throw new Error(
+      `Workflow save envelope requires task: expected ${ENVELOPE_SHAPE} with the TaskRecord under task${found}.`,
+    );
+  }
+  if (unknown.length > 0)
+    throw new Error(`${unknownFieldsMessage("Workflow save envelope", unknown)} Expected ${ENVELOPE_SHAPE}.`);
   const envelope: WorkflowSaveEnvelope = { task: value.task };
   if (value.artifacts !== undefined) envelope.artifacts = validateWorkflowSaveArtifacts(value.artifacts);
   if (value.contractRevision !== undefined) {
@@ -34,6 +60,8 @@ export function validateWorkflowSaveEnvelope(value: unknown): WorkflowSaveEnvelo
   if (value.epicMembers !== undefined) {
     if (!Array.isArray(value.epicMembers)) throw new Error("Workflow save envelope epicMembers must be an array.");
     envelope.epicMembers = value.epicMembers.map((m) => validateTask(m));
+    if (isRecord(value.task) && typeof value.task.id === "string")
+      assertEpicMemberOrder([value.task.id, ...envelope.epicMembers.map((member) => member.id)]);
   }
   return envelope;
 }

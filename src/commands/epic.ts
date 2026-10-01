@@ -1,3 +1,4 @@
+import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import {
   collectEpicMembers,
@@ -58,7 +59,21 @@ export async function listPublicEpics(root: string, limit: number): Promise<Publ
   return { generator: "harnix", schemaVersion: 1, epics, total: epics.length };
 }
 
-export async function detailPublicEpic(root: string, epicId: string): Promise<PublicEpicDetailResult> {
+/** Identity and progress only: no prose, so an agent can follow an epic without paying for every member's goal. */
+export interface PublicEpicBriefResult {
+  readonly generator: "harnix";
+  readonly schemaVersion: 1;
+  readonly epic: Pick<EpicRecord, "id" | "title">;
+  readonly counts: Readonly<Record<string, number>>;
+  readonly members: readonly { readonly id: string; readonly status: string }[];
+  readonly nextTask: { readonly id: string; readonly status: string; readonly title?: string } | null;
+}
+
+export async function detailPublicEpic(
+  root: string,
+  epicId: string,
+  brief = false,
+): Promise<PublicEpicDetailResult | PublicEpicBriefResult> {
   const harnixRoot = await resolveSafeHarnixPath(root);
   const epic = await loadEpicOrThrow(harnixRoot, epicId);
   const members = (await collectEpicMembers(harnixRoot, epicId)).map(({ id, status, title, goal }) => ({
@@ -67,5 +82,23 @@ export async function detailPublicEpic(root: string, epicId: string): Promise<Pu
     title,
     goal,
   }));
-  return { generator: "harnix", schemaVersion: 1, epic, members, nextTask: nextEpicMember(members) };
+  const nextTask = nextEpicMember(members);
+  if (!brief) return { generator: "harnix", schemaVersion: 1, epic, members, nextTask };
+  const counts: Record<string, number> = {};
+  for (const { status } of members) counts[status] = (counts[status] ?? 0) + 1;
+  return {
+    generator: "harnix",
+    schemaVersion: 1,
+    epic: { id: epic.id, title: epic.title },
+    counts: Object.fromEntries(Object.entries(counts).sort(([left], [right]) => compareCodeUnits(left, right))),
+    members: members.map(({ id, status }) => ({ id, status })),
+    nextTask:
+      nextTask === null
+        ? null
+        : {
+            id: nextTask.id,
+            status: nextTask.status,
+            ...(nextTask.title === undefined ? {} : { title: nextTask.title }),
+          },
+  };
 }

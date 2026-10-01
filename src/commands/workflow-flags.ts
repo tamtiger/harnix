@@ -1,3 +1,5 @@
+import { BRIEF_ACTIONS, actionFlagName, briefFlagNames } from "src/core/workflow/brief.js";
+
 export interface WorkflowFlags {
   inspect?: boolean;
   preflight?: boolean;
@@ -62,20 +64,6 @@ const VALUE_ACTIONS = [
   "addDecision",
   "addRisk",
 ] as const;
-const BRIEF_ACTIONS = new Set([
-  "save",
-  "transition",
-  "evidence",
-  "criterion",
-  "migrate",
-  "finish",
-  "runCheck",
-  "setCheck",
-  "addCriterion",
-  "addDecision",
-  "addRisk",
-  "setPaths",
-]);
 
 interface FlagOwner {
   name: string;
@@ -179,7 +167,9 @@ export function assertCommandShape(action: string, flags: WorkflowFlags, operand
   if (action !== "runCheck" && operands.length > 0)
     throw new Error(`workflow does not accept operands: ${operands.join(" ")}`);
   if (flags.brief === true && !BRIEF_ACTIONS.has(action))
-    throw new Error(`--brief is not supported for workflow --${action}.`);
+    throw new Error(
+      `--brief is not supported for workflow ${actionFlagName(action)}; it works with ${briefFlagNames().join(", ")}.`,
+    );
   if (action === "snapshot" && flags.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
   if (flags.check !== undefined && !["snapshot", "evidence", "addCriterion"].includes(action))
     throw new Error("--check requires workflow --snapshot, --evidence or --add-criterion.");

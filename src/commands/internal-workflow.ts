@@ -8,6 +8,7 @@ export {
   addRiskWorkflow,
   appendEvidenceFlagsWorkflow,
   appendEvidenceWorkflow,
+  briefPreflight,
   briefTask,
   cancelWorkflow,
   finishWorkflow,

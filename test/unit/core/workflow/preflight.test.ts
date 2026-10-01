@@ -7,12 +7,49 @@ import { saveWorkflow } from "src/core/workflow/save.js";
 import { saveTask, setActiveTask, type TaskRecordV3 } from "src/core/tasks/task.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { sha256 } from "src/utils/hashing.js";
+import { at } from "test/support/builders.js";
+import { buildLearningEntry, writeJournalFile } from "test/support/learning-fixtures.js";
 import { initializeUtcProject, writeProjectSource, taskV3 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
 describe("workflow preflight", () => {
+  it("returns learning notes only when the next stage is plan", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const journal = join(root, ".harnix", "workspace", "tam", "journal");
+    await writeJournalFile(journal, "2026-09-29.jsonl", [
+      buildLearningEntry({ id: "obs-note", status: "candidate", statement: "Prefer builders over hand-built records" }),
+    ]);
+    const now = Date.parse(at(60));
+
+    expect((await preflightWorkflow(root, now)).learning.map((item) => item.id)).toEqual(["obs-note"]);
+
+    const planning = taskV3("planning", "planning");
+    await saveWorkflow(root, { task: planning });
+    expect((await preflightWorkflow(root, now)).learning.map((item) => item.id)).toEqual(["obs-note"]);
+
+    const ready = {
+      ...planning,
+      status: "ready" as const,
+      checkpoint: "ready" as const,
+      updatedAt: "2026-08-13T00:01:00.000Z",
+    };
+    await saveWorkflow(root, { task: ready });
+    const active = {
+      ...ready,
+      status: "in_progress" as const,
+      checkpoint: "implementing" as const,
+      updatedAt: "2026-08-13T00:02:00.000Z",
+    };
+    await saveWorkflow(root, { task: active });
+
+    const implementing = await preflightWorkflow(root, now);
+    expect(implementing.nextStage).toBe("implement");
+    expect(implementing.learning).toEqual([]);
+  });
+
   it("returns bounded read-only preflight metadata without task prose", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);

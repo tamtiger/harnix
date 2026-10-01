@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.0.0-dev.12] - 2026-10-01
+
+### Changed
+
+- Giảm token và ma sát của agent theo số đo thật: hook context liệt kê guide và file từ 1.500 ký tự dạng con trỏ (vẫn hash cho drift) và không cắt giữa entry; preflight chỉ trả learning ở stage plan và nhận --brief; BRIEF_ACTIONS là một tập duy nhất, lỗi --brief liệt kê các lệnh hỗ trợ; workflow --schema có khối constraints; lỗi envelope nêu tên field lạ, dạng { task } và buộc epicMembers có ID tăng dần; harnix epic <id> --brief; thông báo lỗi run-check trên Windows nêu cách xử lý; rule đọc workflow.md và schema một lần mỗi phiên, cookbook gộp một khối, ghi rõ --platform và cách sửa member không active.
+
 ## [2.0.0-dev.11] - 2026-10-01
 
 ### Added

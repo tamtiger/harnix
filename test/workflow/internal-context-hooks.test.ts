@@ -1,14 +1,23 @@
 import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createConfig, writeConfig } from "src/core/config/config.js";
 import { renderInternalContext, renderInternalContextForHook } from "src/commands/internal-context.js";
+import { buildContext, type ContextEntry } from "src/core/context/context.js";
+import { sha256 } from "src/utils/hashing.js";
 import { saveTask, setActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { buildTaskV1 } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
 const timestamp = "2026-08-13T00:00:00.000Z";
+const pointers = { prefixes: [".harnix/spec/guides/"], minCharacters: 1500 };
+const entry = (path: string): ContextEntry => ({ path, reason: "", priority: 0, pinned: false, states: [] });
+
+async function write(root: string, path: string, content: string): Promise<void> {
+  await mkdir(dirname(join(root, path)), { recursive: true });
+  await writeFile(join(root, path), content);
+}
 
 describe("internal context hooks", () => {
   it("returns empty output for an uninitialized project and JSON for Codex", async () => {
@@ -239,5 +248,97 @@ describe("internal context hooks", () => {
     expect(later).toBe(JSON.stringify({ injectSteps: [] }));
     expect(missingInvocation).toBe("");
     expect(malformedInvocation).toBe("");
+  });
+
+  it("embeds short task files and points to long ones instead of pasting them", async () => {
+    const root = await temporaryRepository();
+    await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" }));
+    await mkdir(join(root, "docs"), { recursive: true });
+    await writeFile(join(root, "docs", "short.md"), "SHORT BODY MARKER");
+    await writeFile(join(root, "docs", "long.md"), "LONG BODY MARKER ".repeat(200));
+    const task = buildTaskV1({
+      id: "20260813-120000-hook-pointers",
+      title: "t",
+      status: "in_progress",
+      checkpoint: "implementing",
+      goal: "t",
+      acceptanceCriteria: [],
+      relevantPaths: ["docs/short.md", "docs/long.md"],
+      validationPlan: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+    await saveTask(join(root, ".harnix"), task);
+    await setActiveTask(join(root, ".harnix"), task.id);
+
+    const payload = await renderInternalContext(root, "kiro", { forceBounded: true });
+
+    expect(payload).toContain("SHORT BODY MARKER");
+    expect(payload).toContain("--- docs/long.md ---");
+    expect(payload).toContain("(pointer, 3400 characters; read it when it matches the files you change)");
+    expect(payload).not.toContain("LONG BODY MARKER");
+  });
+});
+
+describe("buildContext pointers", () => {
+  it("emits a pointer for guides and long files, embeds short files and still hashes every entry", async () => {
+    const root = await temporaryRepository();
+    const guide = "G".repeat(300);
+    const long = "L".repeat(2000);
+    await write(root, ".harnix/spec/guides/common.md", guide);
+    await write(root, "docs/long.md", long);
+    await write(root, "docs/short.md", "short body");
+
+    const result = await buildContext(
+      root,
+      [".harnix/spec/guides/common.md", "docs/long.md", "docs/short.md"].map(entry),
+      10_000,
+      {},
+      false,
+      undefined,
+      pointers,
+    );
+
+    expect(result.text).toContain("--- .harnix/spec/guides/common.md ---");
+    expect(result.text).toContain("(pointer, 300 characters; read it when it matches the files you change)");
+    expect(result.text).toContain("(pointer, 2000 characters; read it when it matches the files you change)");
+    expect(result.text).not.toContain("GGGG");
+    expect(result.text).not.toContain("LLLL");
+    expect(result.text).toContain("short body");
+    expect(Object.fromEntries(result.manifest.entries.map((item) => [item.path, item.contentHash]))).toEqual({
+      ".harnix/spec/guides/common.md": sha256(guide),
+      "docs/long.md": sha256(long),
+      "docs/short.md": sha256("short body"),
+    });
+    expect(result.manifest.omitted).toEqual([]);
+  });
+
+  it("counts only the pointer line against the budget so a large guide no longer crowds out other files", async () => {
+    const root = await temporaryRepository();
+    await write(root, ".harnix/spec/guides/common.md", "G".repeat(5000));
+    await write(root, "docs/short.md", "short body");
+
+    const result = await buildContext(
+      root,
+      [".harnix/spec/guides/common.md", "docs/short.md"].map(entry),
+      600,
+      {},
+      false,
+      undefined,
+      pointers,
+    );
+
+    expect(result.manifest.omitted).toEqual([]);
+    expect(result.text).toContain("short body");
+  });
+
+  it("keeps embedding everything when no pointer options are given", async () => {
+    const root = await temporaryRepository();
+    await write(root, ".harnix/spec/guides/common.md", "G".repeat(300));
+
+    const result = await buildContext(root, [entry(".harnix/spec/guides/common.md")], 10_000);
+
+    expect(result.text).toContain("G".repeat(300));
+    expect(result.text).not.toContain("pointer");
   });
 });

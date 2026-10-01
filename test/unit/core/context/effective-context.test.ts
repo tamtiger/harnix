@@ -38,7 +38,9 @@ describe("effective context", () => {
     expect(result.reasonCodesByPath.get("docs/a.md")).toEqual(["task-reference"]);
     expect(result.reasonCodesByPath.get(".harnix/spec/guides/common.md")).toEqual(["applicable-guide"]);
     expect(result.text).toContain("task context");
-    expect(result.text).toContain("guide context");
+    expect(result.text).toContain("--- .harnix/spec/guides/common.md ---");
+    expect(result.text).toContain("(pointer, 14 characters; read it when it matches the files you change)");
+    expect(result.text).not.toContain("guide context");
   });
 });
 

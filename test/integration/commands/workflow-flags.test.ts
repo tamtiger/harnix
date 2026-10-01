@@ -215,4 +215,24 @@ describe.sequential("hidden workflow note transports", () => {
     expect(brief.status).toBe("completed");
     expect(brief.learning).toEqual({ notes: 2, captured: 2 });
   });
+
+  it("accepts --brief for a preflight and drops learning from it", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+
+    const brief = JSON.parse((await run(["--preflight", "--brief"])).out) as Record<string, unknown>;
+    const full = JSON.parse((await run(["--preflight"])).out) as Record<string, unknown>;
+
+    expect("learning" in brief).toBe(false);
+    expect(brief.nextStage).toBe(full.nextStage);
+    expect(Array.isArray(full.learning)).toBe(true);
+  });
+
+  it("names every command that supports --brief when it is refused", () => {
+    expect(() => assertCommandShape("preflight", { brief: true }, [])).not.toThrow();
+    expect(() => assertCommandShape("inspect", { brief: true }, [])).toThrow(
+      /not supported for workflow --inspect.*--preflight.*--run-check.*--set-check/su,
+    );
+  });
 });

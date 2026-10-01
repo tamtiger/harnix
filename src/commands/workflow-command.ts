@@ -6,6 +6,7 @@ import {
   addRiskWorkflow,
   appendEvidenceFlagsWorkflow,
   appendEvidenceWorkflow,
+  briefPreflight,
   briefTask,
   cancelWorkflow,
   finishWorkflowReport,
@@ -92,7 +93,10 @@ type Handler = (context: WorkflowContext) => Promise<unknown>;
 
 const HANDLERS: Record<string, Handler> = {
   inspect: ({ root }) => inspectWorkflow(root),
-  preflight: ({ root }) => preflightWorkflow(root),
+  preflight: async ({ root, flags }) => {
+    const result = await preflightWorkflow(root);
+    return flags.brief === true ? briefPreflight(result) : result;
+  },
   schema: () => Promise.resolve(workflowEnvelopeSchema()),
   snapshot: ({ root, flags }) => snapshotWorkflow(root, flags.check as string),
   save: async (context) => {

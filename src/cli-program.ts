@@ -255,11 +255,12 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .description("List epics, or show one epic with its member tasks and next task")
     .argument("[epic-id]", "Exact epic ID for the detail view")
     .option("--limit <count>", "Maximum epic records in the list view", "20")
-    .action(async (epicId: string | undefined, options: { limit: string }) => {
+    .option("--brief", "In the detail view, print only ids, titles, status counts and the next task (no goals)")
+    .action(async (epicId: string | undefined, options: { limit: string; brief?: boolean }) => {
       const result =
         epicId === undefined
           ? await listPublicEpics(process.cwd(), parseTaskLimit(options.limit))
-          : await detailPublicEpic(process.cwd(), epicId);
+          : await detailPublicEpic(process.cwd(), epicId, options.brief === true);
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
   program

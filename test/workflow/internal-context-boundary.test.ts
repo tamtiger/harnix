@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createConfig, writeConfig } from "src/core/config/config.js";
-import { renderInternalContext, renderInternalContextForHook } from "src/commands/internal-context.js";
+import { boundedContext, renderInternalContext, renderInternalContextForHook } from "src/commands/internal-context.js";
 import { UNTRUSTED_CONTEXT_PREFIX, UNTRUSTED_CONTEXT_SUFFIX } from "src/core/context/context.js";
 import { saveTask, setActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { buildTaskV1 } from "test/support/builders.js";
@@ -196,5 +196,45 @@ describe("internal context untrusted boundary", () => {
     expect(output.injectSteps[0]?.ephemeralMessage).toContain("multiple initialized workspace roots");
     expect(JSON.stringify(output)).not.toContain("private-");
     expect(laterInvocation).toBe("");
+  });
+});
+
+describe("bounded context entries", () => {
+  const frame = (body: string): string => `${UNTRUSTED_CONTEXT_PREFIX}${body}${UNTRUSTED_CONTEXT_SUFFIX}`;
+  const entry = (path: string, body: string): string => `\n--- ${path} ---\n${body}`;
+  const frameLength = UNTRUSTED_CONTEXT_PREFIX.length + UNTRUSTED_CONTEXT_SUFFIX.length;
+
+  it("drops whole trailing entries instead of cutting one in the middle, and discloses them", () => {
+    const first = entry("a.md", "a".repeat(200));
+    const source = frame(`LEARN\n${first}${entry("b.md", "b".repeat(200))}`);
+    const cap = frameLength + "LEARN\n".length + first.length + "\n\n".length + 'Omitted: "b.md"'.length;
+
+    const output = boundedContext(source, [], cap);
+
+    expect(output).toContain("a".repeat(200));
+    expect(output).not.toContain("bbbb");
+    expect(output).toContain('Omitted: "b.md"');
+    expect(output.length).toBeLessThanOrEqual(cap);
+  });
+
+  it("keeps every entry when the budget allows it", () => {
+    const body = `LEARN\n${entry("a.md", "a".repeat(50))}${entry("b.md", "b".repeat(50))}`;
+
+    const output = boundedContext(frame(body), [], 10_000);
+
+    expect(output).toContain("a".repeat(50));
+    expect(output).toContain("b".repeat(50));
+    expect(output).toContain("Omitted: none");
+  });
+
+  it("keeps the learning block and drops every entry when none fits", () => {
+    const source = frame(`LEARN\n${entry("a.md", "a".repeat(400))}`);
+    const cap = frameLength + "LEARN\n".length + "\n\n".length + 'Omitted: "a.md"'.length;
+
+    const output = boundedContext(source, [], cap);
+
+    expect(output).toContain("LEARN");
+    expect(output).not.toContain("aaaa");
+    expect(output).toContain('Omitted: "a.md"');
   });
 });

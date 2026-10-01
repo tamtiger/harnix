@@ -35,13 +35,19 @@ function sortRequiredChecks(requiredChecks: RequiredChecks): void {
   for (const values of Object.values(requiredChecks)) values.sort(compareCodeUnits);
 }
 
+/** Learning notes help planning only, so every other stage skips them and the extra tokens. */
 export async function preflightWorkflow(root: string, now = Date.now()): Promise<WorkflowPreflightResultV1> {
+  const result = await routePreflight(root, now);
+  return result.nextStage === "plan" ? { ...result, learning: await projectLearningSummary(root, now) } : result;
+}
+
+async function routePreflight(root: string, now: number): Promise<WorkflowPreflightResultV1> {
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
   const timezone = await readProjectTimezone(harnixRoot);
   const base = {
     clock: { timezone, now: formatInstant(now, timezone), idPrefix: idPrefix(now, timezone) },
-    learning: await projectLearningSummary(root, now),
+    learning: [] as LearningSummaryItem[],
     generator: "harnix" as const,
     schemaVersion: 1 as const,
     contextDrift: "not-recorded" as const,

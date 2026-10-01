@@ -2,7 +2,7 @@
 name: harnix-plan
 description: Use when a Harnix request needs triage, requirements, planning, a trustworthy ready gate, a replan, a legacy-task migration or an epic before implementation.
 metadata:
-  version: "2.0.0-dev.11"
+  version: "2.0.0-dev.12"
 ---
 
 # Plan a Harnix task

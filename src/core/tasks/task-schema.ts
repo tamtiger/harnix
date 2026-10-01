@@ -2,6 +2,31 @@ export type TaskMode = "lite" | "full";
 export type TaskStatus = "planning" | "ready" | "in_progress" | "verifying" | "blocked" | "completed" | "cancelled";
 export type WorkflowCheckpoint =
   "triage" | "planning" | "ready" | "implementing" | "debugging" | "replan" | "verifying" | "finishing" | "cancelling";
+/** The enum values the validator accepts; `workflow --schema` lists these same arrays. */
+export const taskModes = ["lite", "full"] as const satisfies readonly TaskMode[];
+export const taskStatuses = [
+  "planning",
+  "ready",
+  "in_progress",
+  "verifying",
+  "blocked",
+  "completed",
+  "cancelled",
+] as const satisfies readonly TaskStatus[];
+export const workflowCheckpoints = [
+  "triage",
+  "planning",
+  "ready",
+  "implementing",
+  "debugging",
+  "replan",
+  "verifying",
+  "finishing",
+  "cancelling",
+] as const satisfies readonly WorkflowCheckpoint[];
+export const checkScopes = ["focused", "full"] as const;
+export const evidenceResults = ["pass", "fail", "skipped"] as const;
+export const criterionStatuses = ["pending", "met", "waived"] as const;
 export interface AcceptanceCriterion {
   id: string;
   text: string;

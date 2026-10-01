@@ -172,7 +172,7 @@ describe("workflow templates", () => {
       "`harnix status` (bounded read-only projection",
       "`harnix tasks` (bounded local index)",
       "`harnix resume <task-id> [--dry-run]` restores only an explicitly selected unfinished task's pointer",
-      "`harnix context-report` (effective hook-context metadata)",
+      "`harnix context-report --platform <p>` (effective hook-context metadata;",
       "`harnix status --explain`",
       "platform hooks must not invoke repository-map queries, impact or refreshes",
       "never commit, branch, push, publish or open a pull request without showing the changes and message",

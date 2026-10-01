@@ -1012,6 +1012,70 @@
             "summary"
           ]
         },
+        "constraints": {
+          "mode": [
+            "lite",
+            "full"
+          ],
+          "status": [
+            "planning",
+            "ready",
+            "in_progress",
+            "verifying",
+            "blocked",
+            "completed",
+            "cancelled"
+          ],
+          "checkpoint": [
+            "triage",
+            "planning",
+            "ready",
+            "implementing",
+            "debugging",
+            "replan",
+            "verifying",
+            "finishing",
+            "cancelling"
+          ],
+          "scope": [
+            "focused",
+            "full"
+          ],
+          "result": [
+            "pass",
+            "fail",
+            "skipped"
+          ],
+          "criterionStatus": [
+            "pending",
+            "met",
+            "waived"
+          ],
+          "taskId": "^\\d{8}-\\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "epicId": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+          "sortedUniqueArrays": [
+            "validationPlan[].criterionIds",
+            "validationPlan[].inputs"
+          ],
+          "newCriterion": "status \"pending\" with evidenceIds: [] on every criterion; criteria text is free-form",
+          "requiredCheck": "a required check needs non-empty criterionIds and inputs; every non-waived criterion is covered by one",
+          "envelope": "{ task, artifacts?, contractRevision?, epic?, epicMembers? }; the TaskRecord goes under task, never bare",
+          "brief": [
+            "--add-criterion",
+            "--add-decision",
+            "--add-risk",
+            "--criterion",
+            "--evidence",
+            "--finish",
+            "--migrate",
+            "--preflight",
+            "--run-check",
+            "--save",
+            "--set-check",
+            "--set-paths",
+            "--transition"
+          ]
+        },
         "transports": {
           "--save": "Full record plus artifacts. Required for obligations, artifacts and contract revisions.",
           "--transition": "Status and checkpoint only, read from the persisted record.",
@@ -1024,7 +1088,7 @@
           "--add-decision": "Record one decision (--text, --rationale) on the active v3 task; review data, so no --reason.",
           "--add-risk": "Record one residual risk (--text, optional --severity) on the active v3 task; review data, so no --reason.",
           "--set-paths": "Replace the relevant paths and/or specs from repeatable --relevant-path and --relevant-spec flags; needs no reason.",
-          "--brief": "Print only id, status, checkpoint and updatedAt for --save, --transition, --evidence, --criterion, --migrate and --finish.",
+          "--brief": "Print only id, status, checkpoint and updatedAt (preflight: without learning); the commands that accept it are listed in constraints.brief.",
           "--finish": "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? }.",
           "--cancel": "Terminal cancellation; the only cancellation transport."
         }

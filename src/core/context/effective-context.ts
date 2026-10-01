@@ -6,6 +6,8 @@ import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { renderLearningBlock, summarizeLearning } from "src/core/journal/learning-summary.js";
 import {
+  GUIDE_POINTER_PREFIX,
+  POINTER_MIN_CHARACTERS,
   UNTRUSTED_CONTEXT_PREFIX,
   UNTRUSTED_CONTEXT_SUFFIX,
   buildContext,
@@ -84,6 +86,7 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
     },
     bounded ? false : input.config.runtime.fullContext,
     bounded ? MAX_HOOK_CONTEXT_ENTRIES : undefined,
+    bounded ? { prefixes: [GUIDE_POINTER_PREFIX], minCharacters: POINTER_MIN_CHARACTERS } : undefined,
   );
 
   const learning = await learningBlock(input);

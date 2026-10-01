@@ -1,5 +1,6 @@
 import { compareCodeUnits } from "src/utils/order.js";
 import { type TaskRecord, type TaskCancellation, transitionTask, updateTaskCheckpoint } from "./task.js";
+import { unknownFieldsMessage } from "./task-validate-common.js";
 import type { LearningCaptureInput } from "src/core/journal/learning.js";
 
 const PLAN_CHECKLIST_ITEM = /^\s*- \[[ xX]\]\s+\S/mu;
@@ -47,9 +48,8 @@ export function semanticTaskEqual(left: TaskRecord, right: TaskRecord): boolean 
 }
 
 export function assertExactFields(value: Record<string, unknown>, allowed: ReadonlySet<string>, label: string): void {
-  if (Object.keys(value).some((key) => !allowed.has(key))) {
-    throw new Error(`${label} contains an unknown schema field.`);
-  }
+  const unknown = Object.keys(value).filter((key) => !allowed.has(key));
+  if (unknown.length > 0) throw new Error(unknownFieldsMessage(label, unknown));
 }
 
 export function sameBytes(left: Uint8Array | undefined, right: Uint8Array | undefined): boolean {

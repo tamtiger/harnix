@@ -1,7 +1,7 @@
 export { appendEvidenceWorkflow } from "./evidence.js";
 export { appendEvidenceFlagsWorkflow } from "./evidence-flags.js";
 export type { AppendedEvidence, EvidenceFlags } from "./evidence-flags.js";
-export { briefTask } from "./brief.js";
+export { briefPreflight, briefTask } from "./brief.js";
 export type { BriefTask } from "./brief.js";
 export { markCriteriaMetWorkflow } from "./criterion.js";
 export type { MarkCriteriaInput } from "./criterion.js";

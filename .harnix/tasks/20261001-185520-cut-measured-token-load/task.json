@@ -1,0 +1,567 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261001-185520-cut-measured-token-load",
+  "epicId": "20261001-185520-agent-token-diet",
+  "title": "Cắt các nguồn token lớn nhất theo số đo",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-01T18:55:20.755+07:00",
+  "updatedAt": "2026-10-01T19:45:53.445+07:00",
+  "goal": "Dùng đường cơ sở của measure:tokens để giảm token theo thứ tự đo được: (1) hook context mỗi prompt chỉ liệt kê guide (đường dẫn + kích thước) thay vì nhúng nội dung, vẫn nhúng file nguồn/task; (2) preflight chỉ trả learning khi nextStage là plan; (3) rule 2 và workflow.md: đọc workflow.md và --schema một lần mỗi phiên, cookbook gộp thành một khối; (4) harnix epic <id> --brief; (5) thông báo lỗi envelope nêu tên field lạ và dạng { task }. Chạy lại measure:tokens để ghi số sau. Bump 2.0.0-dev.12 và CHANGELOG.md.",
+  "nonGoals": [
+    "Không thêm cờ patch/--set-field và không đổi hình dạng tạo task (chờ dữ liệu tần suất sửa task)",
+    "Không gộp các lệnh transition/criterion vì chạm bảng transition đã frozen",
+    "Không sửa AGENTS.md gốc (quyết định riêng của chủ repo)",
+    "Không đổi schema v3 hay giá trị mặc định context.maxCharacters của config hiện có"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-hook-pointer",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-hook-2",
+        "ev-chk-suite-2"
+      ],
+      "text": "harnix context --platform <p> khi có active task không nhúng nội dung guide mà liệt kê đường dẫn và kích thước từng guide; file nguồn/task vẫn được nhúng, mục Omitted vẫn được liệt kê; trên fixture của measure:tokens tổng hook context giảm ít nhất 60% so với đường cơ sở 1.307 token."
+    },
+    {
+      "id": "ac-preflight-learning",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-preflight-2",
+        "ev-chk-suite-2"
+      ],
+      "text": "workflow --preflight trả learning khi nextStage là plan và trả mảng rỗng ở implement, verify, debug; nền tảng không hook vẫn nhận learning ở stage plan."
+    },
+    {
+      "id": "ac-rules-docs",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-rules-3",
+        "ev-chk-suite-2"
+      ],
+      "text": "Rule block ghi rõ đọc .harnix/workflow.md và --schema một lần mỗi phiên, cookbook của workflow.md là một khối thay vì hai khối shell; test instruction-budget (1.500/2.000/4.000/15.000) và test guidance vẫn đạt."
+    },
+    {
+      "id": "ac-epic-brief",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-epic-save-2",
+        "ev-chk-suite-2"
+      ],
+      "text": "harnix epic <epic-id> --brief trả id/title epic, đếm theo trạng thái, next task và id+status từng member, nhỏ hơn 25% output đầy đủ của epic cùng kích thước; không --brief thì output không đổi."
+    },
+    {
+      "id": "ac-save-error",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-epic-save-2",
+        "ev-chk-suite-2"
+      ],
+      "text": "Khi envelope --save chứa field lạ hoặc thiếu bọc { task }, thông báo lỗi nêu đúng tên field lạ và dạng envelope mong đợi { task, artifacts?, ... } thay vì chỉ nói unknown schema field."
+    },
+    {
+      "id": "ac-measured",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-measure-2",
+        "ev-chk-suite-2"
+      ],
+      "text": "pnpm run measure:tokens sau thay đổi cho thấy hook context giảm ít nhất 60% và preflight ở nextStage khác plan giảm so với đường cơ sở; số trước/sau được ghi vào task bằng add-decision."
+    },
+    {
+      "id": "ac-preflight-brief",
+      "text": "workflow --preflight --brief được chấp nhận và bỏ learning (vẫn giữ clock, activeTask, requiredChecks, nextStage); lệnh không hỗ trợ --brief báo lỗi nêu danh sách lệnh hỗ trợ --brief thay vì chỉ nói không hỗ trợ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-preflight-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-hook-whole-entries",
+      "text": "Hook context không bao giờ cắt giữa một entry: mỗi file được chèn nguyên vẹn hoặc là con trỏ; file dài từ 1.500 ký tự trở lên (kể cả relevantPaths như package.json) là con trỏ; tổng độ dài không vượt context.maxCharacters và mục Omitted vẫn đúng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-hook-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-docs-gaps",
+      "text": "workflow.md ghi rõ harnix context --platform <p> và harnix context-report --platform <p> (cờ bắt buộc), và reference epic nêu cách sửa member không active bằng harnix pause rồi harnix resume <id>; test guidance kiểm các câu này.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-rules-3",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-schema-constraints",
+      "text": "workflow --schema liệt kê ràng buộc mà validator thực thi: enum mode, status, checkpoint, scope (focused|full), result, định dạng id, mảng criterionIds/inputs sorted và unique, evidenceIds: [] bắt buộc trên criterion, và dạng envelope { task, ... }; test đối chiếu danh sách với validator để schema không lệch khỏi mã.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-schema-3",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-brief-coverage",
+      "text": "Rule 10, cookbook của workflow.md và --schema nêu --brief cho mọi lệnh ghi mà tập BRIEF_ACTIONS hỗ trợ (gồm --set-check, --add-criterion, --set-paths, --run-check) lấy từ một tập duy nhất đặt trong src/core/workflow/brief.ts; thông báo lỗi --brief liệt kê tập này; test đối chiếu văn bản hướng dẫn với tập đó để lệnh ghi không còn in lại cả task vì thiếu --brief.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-rules-3",
+        "ev-chk-schema-3",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-run-check-hint",
+      "text": "Khi --run-check trên Windows từ chối đối số vì ký tự không an toàn với cmd.exe, thông báo nêu cách xử lý (dùng tên có đuôi như pwsh.exe hoặc đường dẫn đầy đủ) và cookbook của workflow.md ghi điều này cho lệnh ghép như lint && typecheck && test; test check-runner kiểm thông báo.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-rules-3",
+        "ev-chk-runner-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-epic-order",
+      "text": "Thứ tự member của epic khớp thứ tự thực thi: reference epic và workflow.md dặn gán idPrefix tăng dần theo thứ tự thực thi cho từng member; --save với epicMembers báo lỗi nêu cách sửa khi ID các member (task đầu rồi epicMembers theo thứ tự khai báo) không tăng dần chặt; nextTask của harnix epic là member chưa hoàn tất đầu tiên theo thứ tự đó.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-epic-save-2",
+        "ev-chk-rules-3",
+        "ev-chk-suite-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/cli-program.ts",
+    "src/commands/epic.ts",
+    "src/commands/internal-context.ts",
+    "src/commands/workflow-flags.ts",
+    "src/core/context/context.ts",
+    "src/core/context/effective-context.ts",
+    "src/core/epics/epic.ts",
+    "src/core/tasks/workflow-helpers.ts",
+    "src/core/workflow/brief.ts",
+    "src/core/workflow/preflight.ts",
+    "src/core/workflow/save.ts",
+    "src/core/workflow/schema.ts",
+    "src/skills",
+    "src/templates/harnix/activation.ts",
+    "src/templates/harnix/workflow.md",
+    "src/utils/check-runner.ts"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-chk-hook-1",
+      "checkId": "chk-hook",
+      "recordedAt": "2026-10-01T19:26:42.921+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8db7aa6f1b853ba1d38b0db96b963a5435a3b05539a70f9050a234fa4aa6c78c"
+    },
+    {
+      "id": "ev-chk-preflight-1",
+      "checkId": "chk-preflight",
+      "recordedAt": "2026-10-01T19:29:41.729+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f518930c203dc3a0c616e67f72c375e122a14b5cf107b64bc1276fa4759151d3"
+    },
+    {
+      "id": "ev-chk-schema-1",
+      "checkId": "chk-schema",
+      "recordedAt": "2026-10-01T19:31:16.797+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "247eb5768de29cec59ee32aee18e581cb999c26366200ca8dbcda0e26e61764e"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-01T19:31:51.294+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Thông báo lỗi envelope và kiểm tra thứ tự epicMembers được cài trong src/core/workflow/envelope.ts nên file này phải nằm trong inputs của check để digest phản ánh đúng thay đổi.",
+      "artifactPaths": [
+        ".harnix/tasks/20261001-185520-cut-measured-token-load/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-runner-1",
+      "checkId": "chk-runner",
+      "recordedAt": "2026-10-01T19:34:31.224+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c8ecaeb212638ce52f25a5a12d2a44a00f47e019c8eed8c541e9fde48e656c09"
+    },
+    {
+      "id": "ev-chk-rules-1",
+      "checkId": "chk-rules",
+      "recordedAt": "2026-10-01T19:38:02.108+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9a6042ad1d26bfff27cdfc7b99c7ddc1ae974483b522e4e17adb9802420171af"
+    },
+    {
+      "id": "ev-chk-epic-save-1",
+      "checkId": "chk-epic-save",
+      "recordedAt": "2026-10-01T19:40:20.483+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0997935dc75b22b4b7bc83124b78ee6aaa251777f35135022c9dccb875bbac67"
+    },
+    {
+      "id": "ev-chk-hook-2",
+      "checkId": "chk-hook",
+      "recordedAt": "2026-10-01T19:41:57.073+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "73b3fda07e098d9bb973c3c77b3c420342fd3f78a988bf9d433cbcc252f45a62"
+    },
+    {
+      "id": "ev-chk-preflight-2",
+      "checkId": "chk-preflight",
+      "recordedAt": "2026-10-01T19:42:02.725+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "62c12f2de391b6dfce00dd0d8bdfd3d605e53aab2c29f1b7d96304e2ab55d207"
+    },
+    {
+      "id": "ev-chk-schema-2",
+      "checkId": "chk-schema",
+      "recordedAt": "2026-10-01T19:42:07.022+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ebceccd524e5eefd4b7aa6d6256ce0f9da30e2d4349fa1f7d6eb31908ebaba94"
+    },
+    {
+      "id": "ev-chk-rules-2",
+      "checkId": "chk-rules",
+      "recordedAt": "2026-10-01T19:42:12.174+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "54a30028992de23107e146bd112e883c75cebe5781188e4391be829480b21883"
+    },
+    {
+      "id": "ev-chk-epic-save-2",
+      "checkId": "chk-epic-save",
+      "recordedAt": "2026-10-01T19:42:17.535+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0997935dc75b22b4b7bc83124b78ee6aaa251777f35135022c9dccb875bbac67"
+    },
+    {
+      "id": "ev-chk-runner-2",
+      "checkId": "chk-runner",
+      "recordedAt": "2026-10-01T19:42:21.004+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c8ecaeb212638ce52f25a5a12d2a44a00f47e019c8eed8c541e9fde48e656c09"
+    },
+    {
+      "id": "ev-chk-measure-1",
+      "checkId": "chk-measure",
+      "recordedAt": "2026-10-01T19:42:35.633+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "71558707fc796bf11abf4797be4a7479181d9c4dc687f86aca07e73295c431e6"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-01T19:42:58.484+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pwsh.exe — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "a5426de9ae103888e7edf95449ef9e033e9f3afd76cc756ac8e8bb6b37589d6e"
+    },
+    {
+      "id": "ev-chk-schema-3",
+      "checkId": "chk-schema",
+      "recordedAt": "2026-10-01T19:43:49.114+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "01ed0aeb39d22fccbe1e6ab45e6636a2c44eb8082b03d814dfa0f9f857260d51"
+    },
+    {
+      "id": "ev-chk-rules-3",
+      "checkId": "chk-rules",
+      "recordedAt": "2026-10-01T19:43:54.156+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "39b8427b9af5298110af3b799f4fe1cca7f479d1be3778efac50098e9bef6098"
+    },
+    {
+      "id": "ev-chk-measure-2",
+      "checkId": "chk-measure",
+      "recordedAt": "2026-10-01T19:44:09.298+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f89f4fc9ebc0be48a2d0e271c24975331956d7fccc9f02a70faafae193368937"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-01T19:45:16.412+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh.exe — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4f0eccd7e5a02e1da4ce04915c0d12901f5c457f29481bc6280a2939a903ad55"
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-hook",
+      "description": "Test hook context: guide là con trỏ, không cắt giữa entry, file dài là con trỏ",
+      "command": "pnpm vitest run test/unit/core/context test/unit/commands/internal-context-cli.test.ts test/workflow/internal-context-boundary.test.ts test/workflow/internal-context-hooks.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-hook-pointer",
+        "ac-hook-whole-entries"
+      ],
+      "inputs": [
+        "src/commands/internal-context.ts",
+        "src/core/context/**",
+        "test/unit/commands/internal-context-cli.test.ts",
+        "test/unit/core/context/**",
+        "test/workflow/internal-context-boundary.test.ts",
+        "test/workflow/internal-context-hooks.test.ts"
+      ]
+    },
+    {
+      "id": "chk-preflight",
+      "description": "Test preflight chỉ trả learning ở stage plan và chấp nhận --brief",
+      "command": "pnpm vitest run test/unit/core/workflow/preflight.test.ts test/integration/commands/workflow-flags.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-preflight-brief",
+        "ac-preflight-learning"
+      ],
+      "inputs": [
+        "src/commands/workflow-flags.ts",
+        "src/core/workflow/preflight.ts",
+        "test/integration/commands/workflow-flags.test.ts",
+        "test/unit/core/workflow/preflight.test.ts"
+      ]
+    },
+    {
+      "id": "chk-rules",
+      "description": "Test ngân sách instruction, guidance rule/workflow.md và độ phủ --brief",
+      "command": "pnpm vitest run test/workflow/instruction-budget.test.ts test/workflow/persistence-guidance.test.ts test/workflow/skill-sources.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-brief-coverage",
+        "ac-docs-gaps",
+        "ac-epic-order",
+        "ac-rules-docs",
+        "ac-run-check-hint"
+      ],
+      "inputs": [
+        "src/commands/workflow-flags.ts",
+        "src/core/workflow/brief.ts",
+        "src/skills/**",
+        "src/templates/harnix/**",
+        "test/workflow/instruction-budget.test.ts",
+        "test/workflow/persistence-guidance.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "chk-epic-save",
+      "description": "Test epic --brief, thông báo lỗi envelope và thứ tự member epic",
+      "command": "pnpm vitest run test/integration/commands/epic.test.ts test/unit/core/workflow/envelope.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-epic-brief",
+        "ac-epic-order",
+        "ac-save-error"
+      ],
+      "inputs": [
+        "src/cli-program.ts",
+        "src/commands/epic.ts",
+        "src/core/epics/**",
+        "src/core/tasks/workflow-helpers.ts",
+        "src/core/workflow/envelope.ts",
+        "src/core/workflow/save.ts",
+        "test/integration/commands/epic.test.ts",
+        "test/unit/core/workflow/envelope.test.ts"
+      ]
+    },
+    {
+      "id": "chk-measure",
+      "description": "Đo lại token trên bản build sau thay đổi (chạy pnpm build trước)",
+      "command": "pnpm run measure:tokens",
+      "criterionIds": [
+        "ac-measured"
+      ],
+      "inputs": [
+        "scripts/measure-tokens.mjs",
+        "src/**"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "chk-suite",
+      "description": "Project suite gate",
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-brief-coverage",
+        "ac-docs-gaps",
+        "ac-epic-brief",
+        "ac-epic-order",
+        "ac-hook-pointer",
+        "ac-hook-whole-entries",
+        "ac-measured",
+        "ac-preflight-brief",
+        "ac-preflight-learning",
+        "ac-rules-docs",
+        "ac-run-check-hint",
+        "ac-save-error",
+        "ac-schema-constraints"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ],
+      "required": true,
+      "scope": "full"
+    },
+    {
+      "id": "chk-schema",
+      "description": "Test --schema mô tả đủ ràng buộc, khớp validator và khớp BRIEF_ACTIONS",
+      "command": "pnpm vitest run test/unit/core/workflow/schema.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-brief-coverage",
+        "ac-schema-constraints"
+      ],
+      "inputs": [
+        "src/commands/workflow-flags.ts",
+        "src/core/tasks/**",
+        "src/core/workflow/brief.ts",
+        "src/core/workflow/schema.ts",
+        "test/unit/core/workflow/schema.test.ts"
+      ]
+    },
+    {
+      "id": "chk-runner",
+      "description": "Test thông báo --run-check nêu cách xử lý ký tự cmd.exe",
+      "command": "pnpm vitest run test/unit/utils/check-runner.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-run-check-hint"
+      ],
+      "inputs": [
+        "src/utils/check-runner.ts",
+        "test/unit/utils/check-runner.test.ts"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-hook-pointer",
+      "text": "Hook context liệt kê guide dạng con trỏ (đường dẫn + kích thước) thay vì nhúng nội dung; file nguồn/task vẫn nhúng.",
+      "rationale": "Hook không được ghi (no-write) nên không thể khử trùng lặp theo phiên; guide nhúng lại ở mọi prompt (~1,3-2,9k token) và tích lũy trong context. AGENTS.md đã yêu cầu agent chỉ đọc guide liên quan, nên con trỏ giữ được việc phát hiện mà bỏ chi phí lặp. Cần chủ repo xác nhận vì đổi hành vi hook đã tài liệu hóa."
+    },
+    {
+      "id": "d-observed-friction",
+      "text": "Lỗi gặp khi chạy workflow thật (đã xác minh bằng mã): (1) --preflight --brief bị từ chối \"not supported\" mà không nêu lệnh nào hỗ trợ; (2) --save với task trần báo \"unknown schema field\" không nêu tên field hay dạng { task }; (3) --set-check, --add-criterion, --set-paths hỗ trợ --brief nhưng rule 10, cookbook và --schema không nêu nên in lại cả task (~1,3k token mỗi lần, 3 lần liên tiếp); (4) --schema không có enum scope/status/mode, sorted/unique hay regex id nên agent phải đọc văn xuôi trong workflow.md; (5) harnix context và context-report bắt buộc --platform nhưng workflow.md không ghi; (6) hook boundedContext cắt cứng giữa file (internal-context.ts:156) nên guide bị cụt giữa câu và hook nhúng cả package.json từ relevantPaths; (7) reference epic không nói cách sửa member không active (cần harnix pause rồi harnix resume).",
+      "rationale": "Mỗi lỗi buộc agent chạy lại hoặc đọc thêm tài liệu; sửa tại nguồn (mã, schema, guide) rẻ hơn lặp lại ở mọi phiên và là cùng mục tiêu giảm token của epic."
+    },
+    {
+      "id": "d-hook-pointer-approved",
+      "text": "Chủ repo chọn phương án A (2026-10-01): guide trong hook context là con trỏ (đường dẫn + kích thước), không nhúng nội dung; ngưỡng con trỏ cho file khác guide là 1.500 ký tự.",
+      "rationale": "Hook no-write không khử trùng lặp theo phiên; phương án A giảm token mỗi prompt và dòng con trỏ nhắc đọc guide khi khớp file đang sửa."
+    },
+    {
+      "id": "d-run-check-cmd-exe",
+      "text": "Quan sát thêm khi triển khai task 1: --run-check với executable tên trần trên Windows đi qua cmd.exe và từ chối & | < > ^ % với thông báo \"unsafe for cmd.exe\" không nêu cách xử lý (src/utils/check-runner.ts:35); lệnh ghép chạy được bằng tên có đuôi như pwsh.exe. Agent phải chạy lại và đọc mã runner.",
+      "rationale": "Cùng nhóm lỗi thông báo thiếu hành động; sửa ở thông báo và cookbook rẻ hơn mỗi phiên tự dò."
+    },
+    {
+      "id": "d-epic-order-lesson",
+      "text": "Khi tạo epic với mọi member dùng cùng idPrefix, harnix epic sắp member theo tên thư mục (epic.ts:143) nên thứ tự thực thi bị đảo: trang epic ghi task phụ thuộc là #1 và nextTask khuyến nghị nó trước task nền. Hướng dẫn epic chỉ nói dùng clock.idPrefix cho epic và mọi task, không nói phải tăng dần.",
+      "rationale": "Lỗi do hướng dẫn thiếu dẫn tới khuyến nghị sai thứ tự; sửa ở reference và chặn ở --save rẻ hơn để người dùng tự phát hiện."
+    },
+    {
+      "id": "d-golden-schema-update",
+      "text": "Cập nhật test/workflow/behavior-snapshot.golden.json một lần có chủ đích: chỉ output của workflow --schema đổi (thêm khối constraints, câu mô tả --brief); mọi output khác của golden giữ nguyên.",
+      "rationale": "Đây là thay đổi hành vi được duyệt (schema có ràng buộc), không phải refactor thuần; diff đã được đọc và chỉ gồm +65/-1 dòng của schema."
+    },
+    {
+      "id": "d-measured-after",
+      "text": "Đo lại bằng pnpm run measure:tokens sau thay đổi (trước → sau, token ceil(ký tự/4)): hook context 1.307 → 130 mỗi prompt (-90%) ở fixture; ở repo Harnix với task active ~2,9k ước → 942 đo thật. preflight ở stage implement 375 → 135 (learning chỉ ở stage plan). Chi phí tăng: khối luôn nạp 1.173 → 1.242 (+69), workflow.md 3.551 → 3.593 (+42), --schema 744 → 1.012 (+268, đọc một lần mỗi phiên). Lệnh ghi có --brief không đổi (337 token cả vòng đời Lite).",
+      "rationale": "Mức giảm lớn nhất nằm ở chi phí lặp mỗi prompt; phần tăng nhỏ và chỉ trả một lần, nên tổng chi phí mỗi phiên giảm rõ rệt."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-pointer-ignored",
+      "text": "Hook liệt kê guide dạng con trỏ nên agent có thể không mở guide và bỏ qua quy tắc kỹ thuật; chủ repo đã chọn phương án này (d-hook-pointer-approved), giảm nhẹ bằng dòng nhắc đọc guide khi khớp file đang sửa.",
+      "severity": "medium"
+    },
+    {
+      "id": "r-measure-fixture-no-learning",
+      "text": "measure:tokens dùng fixture không có learning nên không thể hiện mức giảm của preflight ở stage khác plan; số đó chỉ đo trực tiếp trên repo có learning (375 → 135 token).",
+      "severity": "low"
+    },
+    {
+      "id": "r-epic-order-strict",
+      "text": "--save với epicMembers nay từ chối ID không tăng dần chặt; luồng tạo epic cũ dùng chung idPrefix cho mọi member theo thứ tự slug không tăng dần sẽ bị từ chối cho tới khi tăng idPrefix từng member.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-01T19:45:53.445+07:00"
+}

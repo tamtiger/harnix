@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { inspectWorkflow } from "src/core/workflow/inspect.js";
 import { workflowEnvelopeSchema } from "src/core/workflow/schema.js";
+import { briefFlagNames } from "src/core/workflow/brief.js";
 import {
   acceptanceCriterionKeys,
+  checkScopes,
+  criterionStatuses,
+  evidenceResults,
+  taskModes,
+  taskStatuses,
+  workflowCheckpoints,
   blockerKeys,
   evidenceV2Keys,
   taskRecordFieldManifest,
@@ -47,5 +54,35 @@ describe("workflow schema", () => {
     expect(schema.nested.validationPlan.sort()).toEqual([...validationCheckV2Keys].sort());
     expect(schema.nested.evidence.sort()).toEqual([...evidenceV2Keys].sort());
     expect(schema.nested.blocker.sort()).toEqual([...blockerKeys].sort());
+  });
+
+  it("lists the constraints validateTask enforces so an agent need not read prose to build an envelope", () => {
+    const { constraints } = workflowEnvelopeSchema();
+
+    expect(constraints.mode).toEqual(["lite", "full"]);
+    expect(constraints.scope).toEqual(["focused", "full"]);
+    expect(constraints.result).toEqual(["pass", "fail", "skipped"]);
+    expect(constraints.criterionStatus).toEqual(["pending", "met", "waived"]);
+    expect(constraints.status).toContain("in_progress");
+    expect(constraints.checkpoint).toContain("replan");
+    expect(new RegExp(constraints.taskId, "u").test("20261001-185520-measure-baseline")).toBe(true);
+    expect(new RegExp(constraints.taskId, "u").test("measure-baseline")).toBe(false);
+    expect(new RegExp(constraints.epicId, "u").test("20261001-185520-agent-token-diet")).toBe(true);
+    expect(constraints.sortedUniqueArrays).toEqual(["validationPlan[].criterionIds", "validationPlan[].inputs"]);
+    expect(constraints.newCriterion).toContain("evidenceIds");
+    expect(constraints.requiredCheck).toContain("criterionIds");
+    expect(constraints.envelope).toContain("{ task");
+    expect(constraints.brief).toEqual(briefFlagNames());
+  });
+
+  it("builds the listed enums from the constants the validator checks against", () => {
+    const { constraints } = workflowEnvelopeSchema();
+
+    expect(constraints.mode).toEqual([...taskModes]);
+    expect(constraints.status).toEqual([...taskStatuses]);
+    expect(constraints.checkpoint).toEqual([...workflowCheckpoints]);
+    expect(constraints.scope).toEqual([...checkScopes]);
+    expect(constraints.result).toEqual([...evidenceResults]);
+    expect(constraints.criterionStatus).toEqual([...criterionStatuses]);
   });
 });

@@ -142,7 +142,21 @@ function emptyInitializedProjectPayload(platform: InternalContextPlatform): stri
   return emptyPayload(platform);
 }
 
-function boundedContext(source: string, omittedPaths: string[], cap: number): string {
+const ENTRY_HEADER = /\n--- ([^\n]+) ---\n/gu;
+
+/** Splits rendered context into the leading block (learning) and one chunk per `--- path ---` entry. */
+function splitEntries(content: string): { lead: string; entries: { path: string; text: string }[] } {
+  const headers = [...content.matchAll(ENTRY_HEADER)];
+  const first = headers[0]?.index ?? content.length;
+  const entries = headers.map((match, index) => ({
+    path: match[1] ?? "",
+    text: content.slice(match.index, headers[index + 1]?.index ?? content.length),
+  }));
+  return { lead: content.slice(0, first), entries };
+}
+
+/** Fits the context into `cap` by dropping whole trailing entries (disclosed as omitted), never cutting one in half. */
+export function boundedContext(source: string, omittedPaths: string[], cap: number): string {
   const sourceContent =
     source.startsWith(UNTRUSTED_CONTEXT_PREFIX) && source.endsWith(UNTRUSTED_CONTEXT_SUFFIX)
       ? source.slice(UNTRUSTED_CONTEXT_PREFIX.length, -UNTRUSTED_CONTEXT_SUFFIX.length)
@@ -151,11 +165,23 @@ function boundedContext(source: string, omittedPaths: string[], cap: number): st
   if (frameBudget < 0) return "";
 
   const separator = "\n\n";
-  const disclosure = boundedOmissionDisclosure(omittedPaths, frameBudget);
-  const contentBudget = Math.max(0, frameBudget - disclosure.length - separator.length);
-  const content = sourceContent.slice(0, contentBudget);
-  const actualSeparator = content.length > 0 && disclosure.length > 0 ? separator : "";
-  return `${UNTRUSTED_CONTEXT_PREFIX}${content}${actualSeparator}${disclosure}${UNTRUSTED_CONTEXT_SUFFIX}`;
+  const { lead, entries } = splitEntries(sourceContent);
+  for (let kept = entries.length; kept >= 0; kept -= 1) {
+    const dropped = entries.slice(kept).map((entry) => entry.path);
+    const disclosure = boundedOmissionDisclosure([...omittedPaths, ...dropped], frameBudget);
+    const contentBudget = Math.max(0, frameBudget - disclosure.length - separator.length);
+    const body =
+      lead +
+      entries
+        .slice(0, kept)
+        .map((entry) => entry.text)
+        .join("");
+    if (body.length > contentBudget && kept > 0) continue;
+    const content = body.slice(0, contentBudget);
+    const actualSeparator = content.length > 0 && disclosure.length > 0 ? separator : "";
+    return `${UNTRUSTED_CONTEXT_PREFIX}${content}${actualSeparator}${disclosure}${UNTRUSTED_CONTEXT_SUFFIX}`;
+  }
+  return "";
 }
 
 function boundedOmissionDisclosure(paths: string[], cap: number): string {

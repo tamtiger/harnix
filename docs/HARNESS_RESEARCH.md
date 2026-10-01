@@ -76,7 +76,7 @@ Context candidates được rank theo thứ tự ưu tiên:
 4. Language/framework.
 5. Cross-project guide.
 
-Deduplicate theo normalized repo-relative path và content identity. Frozen scorer tại `IMPLEMENTATION_PLAN.md` dùng pin 1000, task/acceptance 500, active package/path 250, một bounded language-or-technology bonus 100, guide 25; signals cộng dồn và tie-break bằng normalized path. Enforce `maxCharacters` cùng `tokenApproximation`; khi thiếu budget, inject phần điểm cao nhất và luôn liệt kê file bị bỏ. Full-context là explicit override, không phải default.
+Deduplicate theo normalized repo-relative path và content identity. Frozen scorer tại `IMPLEMENTATION_PLAN.md` dùng pin 1000, task/acceptance 500, active package/path 250, một bounded language-or-technology bonus 100, guide 25; signals cộng dồn và tie-break bằng normalized path. Enforce `maxCharacters` cùng `tokenApproximation`; khi thiếu budget, inject phần điểm cao nhất và luôn liệt kê file bị bỏ. Full-context là explicit override, không phải default. Cập nhật 2026-10-01 (epic agent-token-diet): số đo thật cho thấy hook nhúng lại guide ở mỗi prompt (1.307 token ở fixture nhỏ, ước ~2,9k ở repo này) và cộng dồn trong context, trong khi hook no-write không thể khử trùng lặp theo phiên. Vì vậy ở đường hook bounded, guide và file từ 1.500 ký tự là con trỏ (vẫn hash cho drift) và `boundedContext` bỏ nguyên entry cuối thay vì cắt giữa file.
 
 ### 3.3 Managed ownership model
 

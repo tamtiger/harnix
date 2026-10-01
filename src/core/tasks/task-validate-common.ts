@@ -50,10 +50,17 @@ export function isSafeRepositoryPath(value: unknown): value is string {
 export function ensureUnique(ids: readonly string[], label: string): void {
   if (new Set(ids).size !== ids.length) throw new TaskValidationError(`Duplicate ${label} ID.`);
 }
+/** Names the offending fields (bounded, JSON-quoted) so one resend fixes them. */
+export function unknownFieldsMessage(label: string, unknown: readonly string[]): string {
+  const shown = unknown.slice(0, 5).map((key) => JSON.stringify(key.slice(0, 40)));
+  return `${label} contains an unknown schema field. Unknown: ${shown.join(", ")}${unknown.length > 5 ? ", ..." : ""}.`;
+}
 export function assertExactKeys(value: Record<string, unknown>, allowed: ReadonlySet<string>, label: string): void {
   const unknown = Object.keys(value).filter((key) => !allowed.has(key));
-  if (unknown.length > 0) throw new TaskValidationError(`${label} contains an unknown schema field.`);
+  if (unknown.length > 0) throw new TaskValidationError(unknownFieldsMessage(label, unknown));
 }
+export const isOneOf = (allowed: readonly string[], value: unknown): boolean => allowed.includes(String(value));
+
 export function isSortedUnique(values: readonly string[]): boolean {
   return (
     new Set(values).size === values.length && values.every((value, index) => index === 0 || values[index - 1]! < value)

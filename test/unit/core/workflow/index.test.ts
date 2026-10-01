@@ -10,6 +10,7 @@ describe("workflow index", () => {
       "addRiskWorkflow",
       "appendEvidenceFlagsWorkflow",
       "appendEvidenceWorkflow",
+      "briefPreflight",
       "briefTask",
       "canCompleteTask",
       "cancelWorkflow",

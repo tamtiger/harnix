@@ -1,9 +1,11 @@
 import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { isIsoTimestamp, isRecord } from "src/core/tasks/task.js";
+import { isIsoTimestamp, isRecord, unknownFieldsMessage } from "src/core/tasks/task.js";
 import { loadTask } from "src/core/tasks/task.js";
 import { formatDisplay } from "src/utils/clock.js";
 import { readProjectTimezone } from "src/core/config/config.js";
+
+export const epicIdPattern = /^[A-Za-z0-9][A-Za-z0-9._-]*$/u;
 
 export class EpicValidationError extends Error {
   override name = "EpicValidationError";
@@ -76,12 +78,12 @@ export function validateEpic(value: unknown): EpicRecord {
 
 // Helpers (mirrored from task.ts pattern).
 function validId(value: unknown): value is string {
-  return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._-]*$/u.test(value);
+  return typeof value === "string" && epicIdPattern.test(value);
 }
 
 function assertExactKeys(value: Record<string, unknown>, allowed: ReadonlySet<string>, label: string): void {
   const unknown = Object.keys(value).filter((key) => !allowed.has(key));
-  if (unknown.length > 0) throw new EpicValidationError(`${label} contains an unknown schema field.`);
+  if (unknown.length > 0) throw new EpicValidationError(unknownFieldsMessage(label, unknown));
 }
 
 export const EPICS_DIRECTORY = "epics";

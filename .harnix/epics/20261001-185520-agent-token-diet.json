@@ -1,0 +1,15 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261001-185520-agent-token-diet",
+  "title": "Giảm token mà coding agent tiêu tốn, dựa trên số đo thật",
+  "goal": "Đo lượng token thực tế mà agent phải nạp và phát sinh khi dùng Harnix (instruction luôn nạp, workflow.md, preflight, hook context mỗi prompt, output từng lệnh workflow), rồi cắt các nguồn lớn nhất theo đúng thứ tự đo được. Số đo trước/sau được ghi lại bằng một lệnh lặp lại được để chứng minh mức giảm.",
+  "nonGoals": [
+    "Không đổi TaskRecord schema v3 và không làm hỏng dữ liệu .harnix hiện có",
+    "Không cắt guard bắt buộc: explicit-target guard, quy tắc secrets, phê duyệt trước commit, quy tắc state",
+    "Không thêm cờ --json hay chế độ human-summary, không thêm tokenizer, telemetry hay network",
+    "Không thêm nền tảng hay package thứ hai"
+  ],
+  "createdAt": "2026-10-01T18:55:20.755+07:00",
+  "updatedAt": "2026-10-01T18:55:20.755+07:00"
+}

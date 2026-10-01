@@ -29,6 +29,20 @@ export interface ContextSignals {
   technologies?: string[];
   guides?: string[];
 }
+/** Entries under `prefixes`, and any file of at least `minCharacters`, are listed as a pointer instead of pasted. */
+export interface ContextPointerOptions {
+  prefixes: readonly string[];
+  minCharacters: number;
+}
+/** Guides stay pointers because a hook repeats its payload on every prompt; the agent reads the matching one on demand. */
+export const GUIDE_POINTER_PREFIX = ".harnix/spec/guides/";
+export const POINTER_MIN_CHARACTERS = 1500;
+/** A pointer still needs the content hash for drift detection, so the file is read; an enormous one is omitted instead. */
+const MAX_POINTER_READ_BYTES = 1_048_576;
+
+const pointerLine = (characters: number): string =>
+  `(pointer, ${characters} characters; read it when it matches the files you change)`;
+
 export type ContextState = "not-recorded" | "current" | "stale";
 export type ContextChangeKind = "changed" | "missing" | "unreadable" | "unverified";
 export interface ContextChange {
@@ -111,6 +125,7 @@ export async function buildContext(
   signals: ContextSignals = {},
   fullContext = false,
   maxEntries = Number.POSITIVE_INFINITY,
+  pointers?: ContextPointerOptions,
 ): Promise<{ text: string; manifest: ContextManifest }> {
   const normalizedSeen = new Set<string>(),
     safeEntries: ContextEntry[] = [],
@@ -145,7 +160,14 @@ export async function buildContext(
       // A bounded caller must not read a giant file merely to discover that it
       // cannot fit. UTF-8 byte size is a conservative upper bound for the JS
       // string length used by this context budget.
-      if (!fullContext && size + header.length + (await stat(path)).size > maxCharacters) {
+      const fileSize = (await stat(path)).size;
+      const pointerByPath = pointers?.prefixes.some((prefix) => entry.path.startsWith(prefix)) === true;
+      const mayPoint = pointerByPath || (pointers !== undefined && fileSize >= pointers.minCharacters);
+      if (mayPoint && fileSize > MAX_POINTER_READ_BYTES) {
+        omitted.push({ path: entry.path, reason: "budget" });
+        continue;
+      }
+      if (!mayPoint && !fullContext && size + header.length + fileSize > maxCharacters) {
         omitted.push({ path: entry.path, reason: "budget" });
         continue;
       }
@@ -155,7 +177,8 @@ export async function buildContext(
         omitted.push({ path: entry.path, reason: "duplicate" });
         continue;
       }
-      const chunk = `${header}${content}`;
+      const asPointer = pointers !== undefined && (pointerByPath || content.length >= pointers.minCharacters);
+      const chunk = `${header}${asPointer ? pointerLine(content.length) : content}`;
       if (!fullContext && size + chunk.length > maxCharacters) {
         omitted.push({ path: entry.path, reason: "budget" });
         continue;

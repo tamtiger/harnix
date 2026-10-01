@@ -85,7 +85,81 @@ describe.sequential("epic command", () => {
     const output = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""));
     expect(output).toMatchObject({ ok: false, error: { exitCode: 2 } });
   });
+
+  it("prints a brief epic detail without goals, non-goals or timestamps and with counts by status", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const harnixRoot = `${root}/.harnix`;
+    const longGoal =
+      "A long goal sentence that every full epic detail repeats for the epic and for each member. ".repeat(20);
+    await upsertEpic(root, buildEpic({ id: "brief-epic", title: "Brief epic", goal: longGoal, nonGoals: [longGoal] }));
+    const statuses: TaskRecordV3["status"][] = ["ready", "planning", "planning", "planning"];
+    for (const [index, status] of statuses.entries()) {
+      const checkpoint = status === "ready" ? "ready" : "planning";
+      await saveTask(
+        harnixRoot,
+        buildTaskV3({
+          id: `20260826-10000${index}-member-${index}`,
+          title: `Member ${index}`,
+          status,
+          checkpoint,
+          goal: longGoal,
+          epicId: "brief-epic",
+        }),
+      );
+    }
+    process.chdir(root);
+
+    const full = await runEpic(["epic", "brief-epic"]);
+    const brief = await runEpic(["epic", "brief-epic", "--brief"]);
+
+    expect(JSON.stringify(brief).length).toBeLessThan(JSON.stringify(full).length * 0.25);
+    expect(JSON.stringify(brief)).not.toContain("A long goal sentence");
+    expect(brief).toEqual({
+      generator: "harnix",
+      schemaVersion: 1,
+      epic: { id: "brief-epic", title: "Brief epic" },
+      counts: { planning: 3, ready: 1 },
+      members: [
+        { id: "20260826-100000-member-0", status: "ready" },
+        { id: "20260826-100001-member-1", status: "planning" },
+        { id: "20260826-100002-member-2", status: "planning" },
+        { id: "20260826-100003-member-3", status: "planning" },
+      ],
+      nextTask: { id: "20260826-100000-member-0", status: "ready", title: "Member 0" },
+    });
+    const detail = full as { epic: { goal: string }; members: { goal: string }[] };
+    expect(detail.epic.goal).toBe(longGoal);
+    expect(detail.members.every((member) => member.goal === longGoal)).toBe(true);
+  });
+
+  it("recommends the first unfinished member in ID order as the next task", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const harnixRoot = `${root}/.harnix`;
+    await upsertEpic(root, epicRecord("order-epic", "Order epic", "Order goal"));
+    await saveTask(harnixRoot, taskV2("20260826-100000-foundation", "ready", "order-epic"));
+    await saveTask(harnixRoot, taskV2("20260826-100001-dependent", "planning", "order-epic"));
+    process.chdir(root);
+
+    const detail = (await runEpic(["epic", "order-epic"])) as { members: { id: string }[]; nextTask: { id: string } };
+
+    expect(detail.members.map((member) => member.id)).toEqual([
+      "20260826-100000-foundation",
+      "20260826-100001-dependent",
+    ]);
+    expect(detail.nextTask.id).toBe("20260826-100000-foundation");
+  });
 });
+
+async function runEpic(argv: string[]): Promise<unknown> {
+  const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+  vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+  await expect(runCli(["node", "harnix", ...argv])).resolves.toBe(0);
+  const output = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as unknown;
+  stdout.mockRestore();
+  return output;
+}
 
 function epicRecord(id: string, title: string, goal: string): EpicRecord {
   return buildEpic({ id, title, goal });

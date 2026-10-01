@@ -51,4 +51,10 @@ describe("check runner", () => {
       expect(() => resolveInvocation("pnpm", [bad], "win32")).toThrow(/unsafe/u);
     }
   });
+
+  it("tells the caller how to run a compound command when a Windows shim argument is unsafe", () => {
+    expect(() => resolveInvocation("pwsh", ["-Command", "a && b"], "win32")).toThrow(
+      /unsafe for cmd.exe.*name with its extension.*pwsh.exe.*full path/su,
+    );
+  });
 });

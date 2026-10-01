@@ -1,8 +1,12 @@
 import {
   acceptanceCriterionKeys,
+  checkScopes,
+  criterionStatuses,
   evidenceFindingKeys,
+  evidenceResults,
   evidenceV1Keys,
   evidenceV2Keys,
+  taskModes,
   taskRecordKeys,
   taskRecordV2Keys,
   transitions,
@@ -22,6 +26,7 @@ import {
   ensureUnique,
   isBoundedText,
   isIsoTimestamp,
+  isOneOf,
   isRecord,
   isSafeRepositoryPath,
   taskIdPattern,
@@ -62,7 +67,7 @@ function assertTopLevelKeysAndStrings(value: TaskObject): void {
 function assertIdentity(value: TaskObject): void {
   if (
     !taskIdPattern.test(String(value.id)) ||
-    !["lite", "full"].includes(String(value.mode)) ||
+    !isOneOf(taskModes, value.mode) ||
     !Object.keys(transitions).includes(String(value.status)) ||
     !checkpointNames.includes(String(value.checkpoint))
   )
@@ -104,7 +109,7 @@ function assertValidationPlan(value: TaskObject): void {
     if (!isRecord(item) || !validId(item.id) || typeof item.description !== "string") {
       throw new TaskValidationError("Validation plan is invalid.");
     }
-    if (!["focused", "full"].includes(String(item.scope))) {
+    if (!isOneOf(checkScopes, item.scope)) {
       throw new TaskValidationError(
         `Validation plan check '${String(item.id)}' has invalid scope '${String(item.scope)}'; expected 'focused' or 'full'.`,
       );
@@ -135,7 +140,7 @@ function isEvidenceShape(item: unknown, allowUnsafeArtifacts: boolean): boolean 
     (item.checkId === undefined || validId(item.checkId)) &&
     typeof item.recordedAt === "string" &&
     isIsoTimestamp(item.recordedAt) &&
-    ["pass", "fail", "skipped"].includes(String(item.result)) &&
+    isOneOf(evidenceResults, item.result) &&
     (item.exitCode === undefined || Number.isInteger(item.exitCode)) &&
     typeof item.summary === "string" &&
     Array.isArray(item.artifactPaths) &&
@@ -183,7 +188,7 @@ function assertCriteria(value: TaskObject): void {
         isRecord(item) &&
         typeof item.id === "string" &&
         typeof item.text === "string" &&
-        ["pending", "met", "waived"].includes(String(item.status)) &&
+        isOneOf(criterionStatuses, item.status) &&
         Array.isArray(item.evidenceIds) &&
         (item.evidenceIds as unknown[]).every((id) => typeof id === "string"),
     )

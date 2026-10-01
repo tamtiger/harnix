@@ -33,11 +33,17 @@ export {
   TASK_RECORD_FIELDS,
   acceptanceCriterionKeys,
   blockerKeys,
+  checkScopes,
+  criterionStatuses,
   decisionKeys,
+  evidenceResults,
   evidenceV2Keys,
   residualRiskKeys,
+  taskModes,
   taskRecordFieldManifest,
+  taskStatuses,
   validationCheckV2Keys,
+  workflowCheckpoints,
 } from "./task-schema.js";
 export {
   TASK_V2_MIGRATION_EVIDENCE_ID,
@@ -48,7 +54,13 @@ export {
   createTaskV3MigrationEvidence,
 } from "./task-migration.js";
 export { validateTask } from "./task-validate.js";
-export { TaskValidationError, isIsoTimestamp, isRecord } from "./task-validate-common.js";
+export {
+  TaskValidationError,
+  isIsoTimestamp,
+  isRecord,
+  taskIdPattern,
+  unknownFieldsMessage,
+} from "./task-validate-common.js";
 export { cancelTask, selectLatestEvidence, transitionTask, updateTaskCheckpoint } from "./task-state.js";
 export type { TaskArtifacts } from "./task-store.js";
 export {
