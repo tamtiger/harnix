@@ -1078,6 +1078,7 @@ Script contracts:
 - `smoke:tarball`: cài tarball đó vào two independent temporary roots: fake user home for global setup and one-or-more project fixtures for `init`/context; smoke từng Kiro/Antigravity/Codex và tổ hợp ba platform without a real profile.
 - `measure:init`: chạy documented non-migration fixture nhiều lần, report median/worst wall-clock và fail nếu worst >=5 giây.
 - `measure:footprint`: đo files/bytes theo `UPSTREAM_BASELINE.md`, report numerator/denominator và fail nếu reduction <50%.
+- `measure:tokens`: chạy một vòng đời Lite thật trong repo tạm với home cô lập (cần `pnpm build` trước), in một JSON số token `ceil(ký tự/4)` theo `alwaysLoaded`, `workflowDoc`, `skills`, `preflight`, `reads`, `hookContext` (planning và in_progress) và `steps` (mỗi lệnh workflow có và không `--brief`); thoát khác 0 khi một lệnh đo lỗi. Số đo thông tin, không phải gate acceptance.
 - `scan:release`: scan tarball + generated fixtures cho forbidden branding/surfaces, stale project-local setup output, secrets, absolute machine paths, required TODO, second package/workspace, dead packaged imports và duplicate hooks.
 
 Failure dừng gate và kích hoạt tối đa một systematic remediation round; sau fix chỉ rerun affected focused evidence rồi required gate. Failed rerun tiếp theo dừng automatic work. Previous/partial output không phải completion evidence.

@@ -143,6 +143,7 @@ pack:check
 smoke:tarball
 measure:init
 measure:footprint
+measure:tokens
 scan:release
 version:sync
 ```

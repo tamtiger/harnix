@@ -1,0 +1,140 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261001-185520-measure-token-baseline",
+  "epicId": "20261001-185520-agent-token-diet",
+  "title": "Thêm lệnh đo token thực tế của một vòng đời task",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-01T18:55:20.755+07:00",
+  "updatedAt": "2026-10-01T19:14:53.358+07:00",
+  "goal": "Thêm script pnpm measure:tokens (scripts/measure-tokens.mjs) chạy một vòng đời Lite thật trong repo tạm với home cô lập rồi in một JSON số token (ceil(ký tự/4), cùng tokenApproximation của dự án) theo từng bước: khối instruction luôn nạp, workflow.md, các skill, preflight, schema, từng lệnh workflow có và không có --brief, hook context lúc planning và in_progress, status/inspect. Đây là đường cơ sở để task cắt token chứng minh mức giảm. Bump gói lên 2.0.0-dev.11 bằng pnpm version:sync và ghi CHANGELOG.md.",
+  "nonGoals": [
+    "Không đổi hành vi của bất kỳ lệnh harnix nào",
+    "Không dùng tokenizer thật hay gọi network",
+    "Không ghi vào home thật hay vào repo Harnix"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-measure-guard",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-measure-unit-1",
+        "ev-chk-suite-1"
+      ],
+      "text": "Hàm báo cáo của script ước token bằng ceil(ký tự/4), tổng hợp theo bước, và script thoát khác 0 khi một lệnh đo trả exit khác 0 (không nuốt lỗi); package.json và test hợp đồng package liệt kê script measure:tokens."
+    },
+    {
+      "id": "ac-measure-run",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-measure-run-1",
+        "ev-chk-suite-1"
+      ],
+      "text": "pnpm run measure:tokens thoát 0 trên repo tạm cô lập và in một JSON có các khóa alwaysLoaded, workflowDoc, skills, preflight, steps (mỗi lệnh workflow có giá trị brief và không brief) và hookContext (planning và in_progress); không chạm home thật hay repo Harnix."
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "package.json",
+    "scripts/measure-tokens.mjs",
+    "test/workflow/measure-tokens.test.ts",
+    "test/workflow/package-contract.test.ts"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-chk-measure-unit-1",
+      "checkId": "chk-measure-unit",
+      "recordedAt": "2026-10-01T19:12:52.576+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "645d9ab84fda921e6681a6647eb9bbcf09e221cd459ee01f080fd85d8ad2f099"
+    },
+    {
+      "id": "ev-chk-measure-run-1",
+      "checkId": "chk-measure-run",
+      "recordedAt": "2026-10-01T19:13:11.186+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1563a8ab87194b39db32a46819f7ede7652b8ac7fb1251d3ddd9cd50de3697cb"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-01T19:14:40.079+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh.exe — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3733fb27379629dc52383f40859da48104949ab55e65f3d5bffbd58b988ed3c3"
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-measure-unit",
+      "description": "Test hàm báo cáo, exit khác 0 khi lệnh đo lỗi và hợp đồng package",
+      "command": "pnpm vitest run test/workflow/measure-tokens.test.ts test/workflow/package-contract.test.ts",
+      "criterionIds": [
+        "ac-measure-guard"
+      ],
+      "inputs": [
+        "package.json",
+        "scripts/measure-tokens.mjs",
+        "test/workflow/measure-tokens.test.ts",
+        "test/workflow/package-contract.test.ts"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "chk-measure-run",
+      "description": "Chạy measure:tokens trên bản build hiện tại (chạy pnpm build trước)",
+      "command": "pnpm run measure:tokens",
+      "criterionIds": [
+        "ac-measure-run"
+      ],
+      "inputs": [
+        "package.json",
+        "scripts/measure-tokens.mjs"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "chk-suite",
+      "description": "Project suite gate",
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-measure-guard",
+        "ac-measure-run"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ],
+      "required": true,
+      "scope": "full"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-baseline",
+      "text": "Số đo thật (repo tạm, ceil(ký tự/4)): hook context khi có active task = 1.307 token mỗi prompt ở fixture JavaScript (nhúng nguyên guide, không khử trùng lặp theo phiên); repo Harnix có guides typescript.md + common.md = 11.565 ký tự, ước ~2,9k token mỗi prompt. Lệnh workflow không --brief: transition 195-198, criterion 259, finish 270, save 196 token; có --brief còn 30-33, 33, 85, 31. Cả vòng đời Lite có --brief ~0,3k token output. preflight 79-104 token ở repo trống nhưng ~375 ở repo này vì learning. schema 744, status 121, status --explain 360, inspect 221.",
+      "rationale": "Chi phí lặp lại mỗi prompt của hook lớn hơn toàn bộ lệnh vòng đời; task cắt token phải ưu tiên nó và dùng script này làm đường cơ sở."
+    },
+    {
+      "id": "d-run-check-cmd-exe",
+      "text": "Trên Windows, harnix workflow --run-check với executable tên trần (pnpm, pwsh) đi qua cmd.exe nên từ chối đối số chứa & | < > ^ % với thông báo \"unsafe for cmd.exe\" mà không nói cách xử lý; check ghép như lint && typecheck && test chạy được bằng tên có đuôi, ví dụ pwsh.exe -NoProfile -Command \"...\" (hoặc đường dẫn đầy đủ).",
+      "rationale": "Agent mất một lần chạy lại và phải đọc check-runner.ts để biết cách; nên nêu trong thông báo lỗi và cookbook."
+    }
+  ],
+  "completedAt": "2026-10-01T19:14:53.358+07:00"
+}

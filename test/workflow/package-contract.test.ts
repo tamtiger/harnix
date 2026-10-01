@@ -73,6 +73,7 @@ describe("package invariant", () => {
       "lint",
       "measure:footprint",
       "measure:init",
+      "measure:tokens",
       "pack:check",
       "scan:release",
       "smoke:tarball",
