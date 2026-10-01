@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205810-add-platform-registry",
   "title": "[12] Registry nền tảng khai báo cho 4 nền tảng hiện có (nền tảng cho OpenCode/Cursor)",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Thay nhánh platform rải rác (tên nền tảng xuất hiện trong ~15 file src) bằng registry khai báo cho đúng 4 nền tảng Kiro, Antigravity, Codex, Claude Code; skill sink chung có kiểm tra trùng; gộp hai hệ reconcile (managed-files.ts / global-managed-files.ts) và hai doctor (doctor.ts / global-doctor.ts); tách src/utils/global-managed-files.ts theo mối quan tâm (discovery, reconcile, manifest, rollback); cập nhật contract Claude Code đọc AGENTS.md native (v2.1.277+); xác minh các điểm research chưa chắc của nền tảng hiện có (tên event hook Antigravity) trước khi đóng băng contract; migrate bản cài cũ khi skill đổi tên. Registry phải đủ để task kế tiếp add-opencode-cursor thêm OpenCode và Cursor chỉ bằng bản ghi dữ liệu, kể cả các khác biệt: nền tảng không có file instruction global (Cursor), nền tảng không có hook shell (OpenCode), và nhiều thư mục skill mà một tool đọc cùng lúc.",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -17,43 +17,57 @@
     {
       "id": "ac-registry",
       "text": "Mọi nhánh theo nền tảng đi qua một registry; thêm một nền tảng về sau chỉ cần một bản ghi dữ liệu và fixture test (chứng minh bằng fixture giả, không phát hành nền tảng mới).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-registry-2",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-reconcile",
       "text": "Global integration đã cài được reconcile không mất nội dung người dùng, kể cả skill đổi tên (fake home).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-reconcile-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-split-global-managed",
       "text": "global-managed-files.ts được tách theo mối quan tâm; một hệ reconcile và một doctor dùng chung cho project/global; các file này được gỡ khỏi danh sách miễn trừ max-lines và miễn trừ layering; logic global integration chuyển khỏi src/utils và src/commands vào src/core.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-layering-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-unverified-facts",
       "text": "Tên event hook Antigravity và các điểm chưa xác minh khác của 4 nền tảng được xác minh bằng nguồn chính thức hoặc ghi rõ giới hạn trước khi đóng băng.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-facts-2",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "relevantPaths": [
+    "eslint.config.mjs",
+    "src/commands/**",
     "src/configurators/**",
-    "src/utils/global-managed-files.ts",
-    "src/utils/managed-files.ts",
-    "src/commands/setup.ts",
-    "src/commands/doctor.ts",
-    "src/commands/global-doctor.ts",
-    "src/commands/global-update.ts",
-    "src/commands/global-uninstall.ts"
+    "src/core/global/**",
+    "src/core/platform/**",
+    "src/utils/**",
+    "test/**"
   ],
   "relevantSpecs": [
     "docs/HARNIX_PRD.md",
@@ -63,10 +77,10 @@
   "validationPlan": [
     {
       "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
-      "scope": "focused",
-      "required": true,
+      "description": "Lint, typecheck và toàn bộ test pass",
       "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "scope": "full",
+      "required": true,
       "criterionIds": [
         "ac-docs-sync",
         "ac-reconcile",
@@ -75,7 +89,79 @@
         "ac-unverified-facts"
       ],
       "inputs": [
-        "@task-contract",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-registry",
+      "description": "Registry nền tảng: bản ghi dữ liệu và fixture giả chứng minh thêm nền tảng không cần nhánh mới",
+      "command": "pnpm vitest run test/unit/core/platform",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-registry"
+      ],
+      "inputs": [
+        "src/core/platform/**",
+        "test/unit/core/platform/**"
+      ]
+    },
+    {
+      "id": "check-reconcile",
+      "description": "Reconcile global không mất nội dung người dùng, kể cả skill đổi tên (fake home)",
+      "command": "pnpm vitest run test/platform test/integration/scenarios/global-lifecycle.test.ts test/integration/scenarios/global-skill-migration.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-reconcile"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-layering",
+      "description": "Tách module, gỡ miễn trừ max-lines và layering, kiến trúc đúng tầng",
+      "command": "pnpm lint && pnpm vitest run test/workflow/architecture.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-split-global-managed"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-facts",
+      "description": "Mỗi bản ghi nền tảng có nguồn và ngày xác minh; hook event Antigravity nằm trong registry",
+      "command": "pnpm vitest run test/unit/core/platform/facts.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-unverified-facts"
+      ],
+      "inputs": [
+        "src/core/platform/**",
+        "test/unit/core/platform/**"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Docs, README và skill khớp contract đã đổi",
+      "command": "pnpm vitest run test/workflow",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-sync"
+      ],
+      "inputs": [
+        "README.md",
         "docs/**",
         "src/**",
         "test/**"
@@ -87,10 +173,182 @@
       "id": "d-draft-checks",
       "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
       "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    },
+    {
+      "id": "d-registry-di",
+      "text": "Nền tảng là bản ghi dữ liệu trong registry; desired files và member matchers của configurator được inject qua GlobalPlanProvider; project và global dùng chung bảng quyết định ownership nhưng giữ hai adapter I/O.",
+      "rationale": "Core không được import configurators/templates; output công khai bị đóng băng nên không gộp thành một engine duy nhất (D15)."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-10-01T08:08:06.661+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205810-add-platform-registry/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-01T08:08:26.656+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Migrated v2 draft; bổ sung check tập trung cho từng AC trước ready",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205810-add-platform-registry/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-01T08:08:33.842+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Migrated v2 draft; bổ sung check tập trung cho từng AC trước ready",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205810-add-platform-registry/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-10-01T08:08:34.347+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Migrated v2 draft; bổ sung check tập trung cho từng AC trước ready",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205810-add-platform-registry/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-04",
+      "recordedAt": "2026-10-01T08:08:34.830+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Migrated v2 draft; bổ sung check tập trung cho từng AC trước ready",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205810-add-platform-registry/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-05",
+      "recordedAt": "2026-10-01T08:08:35.371+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Migrated v2 draft; bổ sung check tập trung cho từng AC trước ready",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205810-add-platform-registry/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-06",
+      "recordedAt": "2026-10-01T08:08:35.858+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Migrated v2 draft; bổ sung check tập trung cho từng AC trước ready",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205810-add-platform-registry/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-registry-1",
+      "checkId": "check-registry",
+      "recordedAt": "2026-10-01T08:11:11.431+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3dc8df2fc306f1d0a9972b332703f39ee646e1ca8db6c5f34181d9c72a516d08"
+    },
+    {
+      "id": "ev-check-facts-1",
+      "checkId": "check-facts",
+      "recordedAt": "2026-10-01T08:11:13.881+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6dd0c73ed48b623a9bcffda861b01e44e257dadf1e3ee08b5c28870974186b6b"
+    },
+    {
+      "id": "ev-check-registry-2",
+      "checkId": "check-registry",
+      "recordedAt": "2026-10-01T09:01:24.392+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1ee574ec8a80fdf601b3370b9a24cefb8a4647cce1d1c54131afc99701acfc44"
+    },
+    {
+      "id": "ev-check-facts-2",
+      "checkId": "check-facts",
+      "recordedAt": "2026-10-01T09:01:26.578+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1a23a33496b201cdf14facba208e5d5194e02f27108ec541fc8b33ecb0ac63d9"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-01T09:01:35.113+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3d2815eee177d3375b209b9248ec7c36b6e4b10050c3003a4dcd758482bd8e1c"
+    },
+    {
+      "id": "ev-check-reconcile-1",
+      "checkId": "check-reconcile",
+      "recordedAt": "2026-10-01T09:02:02.313+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "97835ee2fd9a1781b6879080b7b189d02eff97039dbb9348a58fade42f7b0b90"
+    },
+    {
+      "id": "ev-check-layering-1",
+      "checkId": "check-layering",
+      "recordedAt": "2026-10-01T09:02:42.038+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d441707d77c59b8550c6a0ea80030cf1cdefa6cdb62833f4f182d1e0628a0ac6"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-01T09:03:20.104+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3775baaa5fc0f0e0e7499bf8cc2279d4e443101cbc0ae895bf893a35ef517772"
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
   "createdAt": "2026-09-28T20:58:10.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "updatedAt": "2026-10-01T09:04:05.468+07:00",
+  "residualRisks": [
+    {
+      "id": "r-kiro-trigger",
+      "text": "Tên trigger JSON UserPromptSubmit của Kiro không được trích nguyên văn trên trang công khai; contract giữ nguyên và ghi là giới hạn đã biết.",
+      "severity": "low"
+    },
+    {
+      "id": "r-legacy-scope-enum",
+      "text": "Enum scope legacy kiro|antigravity|codex của manifest project là dữ liệu lưu trữ đóng băng nên chưa nằm trong registry; thêm OpenCode/Cursor không ghi vào manifest project.",
+      "severity": "low"
+    },
+    {
+      "id": "r-reconcile-obsolete-cycle",
+      "text": "src/core/global/reconcile.ts và obsolete.ts import vòng nhau (reconcileJsonMember, preserve, pushUnique); hiện an toàn vì chỉ gọi lúc runtime, nên tách preserve/pushUnique ra module riêng khi có dịp.",
+      "severity": "low"
+    },
+    {
+      "id": "r-doctor-rollback-scope",
+      "text": "Partial-rollback finding của doctor giờ gán theo root đã đăng ký trong registry: codex gồm ~/.codex, antigravity thu hẹp vào hai thư mục plugin Harnix (trước là toàn bộ ~/.gemini); thay đổi có chủ đích, không đổi finding code.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-01T09:04:05.468+07:00"
 }

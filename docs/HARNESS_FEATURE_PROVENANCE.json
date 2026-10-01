@@ -56,12 +56,14 @@
       "adaptation": "Reimplements atomic replacement and hash-owned reconciliation with permission preservation, safe relative paths, and conservative collision handling for one Harnix package.",
       "implementation": {
         "code": [
-          "src/utils/atomic-write.ts",
-          "src/utils/managed-files.ts"
+          "src/core/managed/decision.ts",
+          "src/core/managed/project-files.ts",
+          "src/utils/atomic-write.ts"
         ],
         "tests": [
-          "test/unit/utils/atomic-write.test.ts",
-          "test/unit/utils/managed-files.test.ts"
+          "test/unit/core/managed/decision.test.ts",
+          "test/unit/core/managed/project-files.test.ts",
+          "test/unit/utils/atomic-write.test.ts"
         ],
         "docs": [
           "docs/HARNIX_PRD.md",

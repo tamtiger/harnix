@@ -25,9 +25,10 @@ import { inspectVerifyPlan } from "./commands/verify-plan.js";
 import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
 import { registerWorkflowCommand } from "./commands/workflow-command.js";
 import { packageVersion } from "./version.js";
-import type { HomeResolver } from "./utils/user-paths.js";
+import type { HomeResolver } from "./core/platform/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
-import { GlobalManagedTransactionError } from "./utils/global-managed-files.js";
+import { GlobalManagedTransactionError } from "./core/global/managed-files.js";
+import { parsePlatformId, platformRecords, type PlatformId } from "./core/platform/registry.js";
 import { readBoundedInput } from "./utils/bounded-input.js";
 import type { TaskStatus } from "./core/tasks/task.js";
 import type { CheckRunner } from "./utils/check-runner.js";
@@ -99,68 +100,44 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
         process.stdout.write(`${JSON.stringify(result)}\n`);
       },
     );
-  program
-    .command("setup")
-    .option("--kiro", "Install Kiro user-global integration")
-    .option("--antigravity", "Install Antigravity user-global integration")
-    .option("--codex", "Install Codex user-global integration")
-    .option("--claude", "Install Claude Code user-global integration")
+  addPlatformFlags(program.command("setup"), (label) => `Install ${label} user-global integration`)
     .option("--dry-run", "Preview user-global changes without writing")
-    .action(
-      async (options: {
-        kiro?: boolean;
-        antigravity?: boolean;
-        codex?: boolean;
-        claude?: boolean;
-        dryRun?: boolean;
-      }) => {
-        const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
-        const result = await setupPlatforms({
-          ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
-          ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
-          ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
-          dryRun: options.dryRun,
-          platforms,
-        });
-        process.stdout.write(`${JSON.stringify(result)}\n`);
-        reportActionableSetupReadiness(result);
-      },
-    );
-  program
-    .command("update")
-    .option("--restore", "Restore explicitly deleted managed files")
-    .option("--global", "Reconcile user-global platform integrations")
-    .option("--kiro", "Select Kiro for --global")
-    .option("--antigravity", "Select Antigravity for --global")
-    .option("--codex", "Select Codex for --global")
-    .option("--claude", "Select Claude Code for --global")
+    .action(async (options: PlatformFlagOptions & { dryRun?: boolean }) => {
+      const platforms = selectedPlatforms(options);
+      const result = await setupPlatforms({
+        ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
+        ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
+        ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
+        dryRun: options.dryRun,
+        platforms,
+      });
+      process.stdout.write(`${JSON.stringify(result)}\n`);
+      reportActionableSetupReadiness(result);
+    });
+  addPlatformFlags(
+    program
+      .command("update")
+      .option("--restore", "Restore explicitly deleted managed files")
+      .option("--global", "Reconcile user-global platform integrations"),
+    (label) => `Select ${label} for --global`,
+  )
     .option("--dry-run", "Preview global changes without writing")
-    .action(
-      async (options: {
-        restore?: boolean;
-        global?: boolean;
-        kiro?: boolean;
-        antigravity?: boolean;
-        codex?: boolean;
-        claude?: boolean;
-        dryRun?: boolean;
-      }) => {
-        const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
-        if (!options.global && (platforms.length > 0 || options.dryRun))
-          throw new Error("--kiro, --antigravity, --codex, --claude, and --dry-run require update --global.");
-        const result = options.global
-          ? await updateGlobalPlatforms({
-              ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
-              ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
-              ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
-              dryRun: options.dryRun,
-              restoreDeleted: options.restore,
-              ...(platforms.length === 0 ? {} : { platforms }),
-            })
-          : await updateProject({ root: await resolveProjectRoot(process.cwd()), restoreDeleted: options.restore });
-        process.stdout.write(`${JSON.stringify(result)}\n`);
-      },
-    );
+    .action(async (options: PlatformFlagOptions & { restore?: boolean; global?: boolean; dryRun?: boolean }) => {
+      const platforms = selectedPlatforms(options);
+      if (!options.global && (platforms.length > 0 || options.dryRun))
+        throw new Error(`${platformFlagList(["--dry-run"])} require update --global.`);
+      const result = options.global
+        ? await updateGlobalPlatforms({
+            ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
+            ...(programOptions.environment === undefined ? {} : { environment: programOptions.environment }),
+            ...(programOptions.homeResolver === undefined ? {} : { homeResolver: programOptions.homeResolver }),
+            dryRun: options.dryRun,
+            restoreDeleted: options.restore,
+            ...(platforms.length === 0 ? {} : { platforms }),
+          })
+        : await updateProject({ root: await resolveProjectRoot(process.cwd()), restoreDeleted: options.restore });
+      process.stdout.write(`${JSON.stringify(result)}\n`);
+    });
   program
     .command("upgrade")
     .option("--apply", "Run the displayed npm upgrade command")
@@ -174,33 +151,30 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
       });
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
-  program
-    .command("uninstall")
-    .option("--purge", "Remove only this project's .harnix data")
-    .option("--global", "Uninstall selected user-global platform integrations")
-    .option("--legacy-project-surfaces", "Remove manifest-proven legacy project-local integration files")
-    .option("--kiro", "Select Kiro for --global")
-    .option("--antigravity", "Select Antigravity for --global")
-    .option("--codex", "Select Codex for --global")
-    .option("--claude", "Select Claude Code for --global")
+  addPlatformFlags(
+    program
+      .command("uninstall")
+      .option("--purge", "Remove only this project's .harnix data")
+      .option("--global", "Uninstall selected user-global platform integrations")
+      .option("--legacy-project-surfaces", "Remove manifest-proven legacy project-local integration files"),
+    (label) => `Select ${label} for --global`,
+  )
     .option("--yes", "Confirm the selected destructive action")
     .action(
-      async (options: {
-        purge?: boolean;
-        global?: boolean;
-        legacyProjectSurfaces?: boolean;
-        kiro?: boolean;
-        antigravity?: boolean;
-        codex?: boolean;
-        claude?: boolean;
-        yes?: boolean;
-      }) => {
-        const platforms = (["kiro", "antigravity", "codex", "claude"] as const).filter((platform) => options[platform]);
+      async (
+        options: PlatformFlagOptions & {
+          purge?: boolean;
+          global?: boolean;
+          legacyProjectSurfaces?: boolean;
+          yes?: boolean;
+        },
+      ) => {
+        const platforms = selectedPlatforms(options);
         const projectModeCount = Number(options.purge === true) + Number(options.legacyProjectSurfaces === true);
         if (projectModeCount > 1 || (options.global === true && projectModeCount > 0))
           throw new Error("--global, --purge, and --legacy-project-surfaces are mutually exclusive.");
         if (!options.global && platforms.length > 0)
-          throw new Error("--kiro, --antigravity, --codex, and --claude require uninstall --global.");
+          throw new Error(`${platformFlagList()} require uninstall --global.`);
         if (options.global && platforms.length === 0)
           throw new Error("uninstall --global requires at least one platform flag.");
         if (!options.global && projectModeCount === 0)
@@ -311,7 +285,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .option("--platform <platform>", "Target Kiro, Antigravity, Codex, or Claude Code")
     .option("--limit <count>", "Maximum details per context category", "20")
     .action(async (options: { platform?: string; limit: string }) => {
-      const platform = parseReportPlatform(options.platform);
+      const platform = parsePlatformId(options.platform);
       process.stdout.write(
         `${JSON.stringify(await reportProjectContext(process.cwd(), platform, parseReportLimit(options.limit, "context-report")))}\n`,
       );
@@ -396,15 +370,14 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   program
     .command("context", { hidden: true })
     .option("--platform <platform>")
-    .action(async (options: { platform: "kiro" | "antigravity" | "codex" | "claude" }) => {
-      if (!options.platform || !["kiro", "antigravity", "codex", "claude"].includes(options.platform))
-        throw new Error("--platform must be kiro, antigravity, codex, or claude.");
+    .action(async (options: { platform?: string }) => {
+      const platform = parsePlatformId(options.platform);
       const hookInput = programOptions.hookEventInput
         ? await programOptions.hookEventInput()
         : process.stdin.isTTY === true
           ? ""
           : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
-      await runInternalContextCommand({ hookInput, platform: options.platform });
+      await runInternalContextCommand({ hookInput, platform });
     });
   registerWorkflowCommand(program, programOptions);
   return program;
@@ -488,12 +461,6 @@ function parseTaskStatus(value: string | undefined): TaskStatus | undefined {
   return value as TaskStatus;
 }
 
-function parseReportPlatform(value: string | undefined): "kiro" | "antigravity" | "codex" | "claude" {
-  if (value !== "kiro" && value !== "antigravity" && value !== "codex" && value !== "claude")
-    throw new Error("--platform must be kiro, antigravity, codex, or claude.");
-  return value;
-}
-
 function parseReportLimit(value: string, command: "context-report" | "status"): number {
   if (!/^\d+$/u.test(value)) throw new Error(`--limit must be an integer between 1 and 50 for ${command}.`);
   const limit = Number(value);
@@ -544,4 +511,24 @@ function reportActionableSetupReadiness(result: SetupPlatformsResult): void {
       process.stderr.write(`${platform.platform}: ${redactPublicErrorMessage(new Error(warning))}\n`);
   }
   process.exitCode = 1;
+}
+
+type PlatformFlagOptions = Partial<Record<PlatformId, boolean>>;
+
+/** One `--<flag>` option per registered platform; the description is built from the platform label. */
+function addPlatformFlags(command: Command, describe: (label: string) => string): Command {
+  for (const record of platformRecords()) command.option(`--${record.flag}`, describe(record.label));
+  return command;
+}
+
+function selectedPlatforms(options: PlatformFlagOptions): PlatformId[] {
+  return platformRecords()
+    .map((record) => record.id as PlatformId)
+    .filter((id) => options[id] === true);
+}
+
+/** "--kiro, --antigravity, --codex, and --claude" built from the registry, plus any extra flags. */
+function platformFlagList(extra: readonly string[] = []): string {
+  const flags = [...platformRecords().map((record) => `--${record.flag}`), ...extra];
+  return `${flags.slice(0, -1).join(", ")}, and ${flags[flags.length - 1] ?? ""}`;
 }

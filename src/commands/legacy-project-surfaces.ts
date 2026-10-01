@@ -1,7 +1,12 @@
 import { lstat, readFile, rm } from "src/utils/fs-access.js";
 
 import { sha256 } from "src/utils/hashing.js";
-import { readManifest, writeManifest, type ManagedEntry, type ManagedManifest } from "src/utils/managed-files.js";
+import {
+  readManifest,
+  writeManifest,
+  type ManagedEntry,
+  type ManagedManifest,
+} from "src/core/managed/project-files.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { compareCodeUnits } from "src/utils/order.js";
 

@@ -10,7 +10,7 @@ import {
   writeManifest,
   type DesiredManagedFile,
   type ManagedManifest,
-} from "src/utils/managed-files.js";
+} from "src/core/managed/project-files.js";
 import { sha256 } from "src/utils/hashing.js";
 import { packageVersion } from "src/version.js";
 import { renderAgentsTemplate } from "src/templates/harnix/agents.js";

@@ -7,7 +7,7 @@ import {
   resolveSelectedUserPlatformRoots,
   resolveSafeUserPath,
   resolveUserPlatformRoots,
-} from "src/utils/user-paths.js";
+} from "src/core/platform/user-paths.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 
 const temporaryUserHome = useTemporaryUserHomes();

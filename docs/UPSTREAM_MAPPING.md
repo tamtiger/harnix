@@ -25,8 +25,8 @@ Mọi public symbol, package, executable, template và generated branding dùng 
 | — | `src/commands/setup.ts` | `build new` | Multi-flag platform setup tách khỏi init |
 | — | `src/commands/doctor.ts` | `build new` | Local deterministic diagnostics/fix |
 | `utils/atomic-write.ts` | `src/utils/atomic-write.ts` | `reuse/adapt` | Temp sibling + atomic replace + cleanup/rollback tests |
-| `utils/template-hash.ts` | `src/utils/hashing.ts`, `managed-files.ts` | `reuse/adapt` | Versioned entry metadata, normalized relative paths, ownership states |
-| `utils/file-writer.ts`, `manifest-prune.ts` | `src/utils/managed-files.ts` | `reuse/adapt` | Preserve unknown/user files; explicit deleted/obsolete states |
+| `utils/template-hash.ts` | `src/utils/hashing.ts`, `src/core/managed/project-files.ts` | `reuse/adapt` | Versioned entry metadata, normalized relative paths, ownership states |
+| `utils/file-writer.ts`, `manifest-prune.ts` | `src/core/managed/project-files.ts`, `src/core/managed/decision.ts` | `reuse/adapt` | Preserve unknown/user files; explicit deleted/obsolete states |
 | `utils/project-detector.ts` | `src/core/stack/detection.ts` | `reuse/adapt` | .NET/ABP, NestJS, Python, Java/Spring, Go, React, Vue + ignored dirs |
 | `utils/cwd-guard.ts`, task paths | `src/utils/paths.ts` | `reuse/adapt` | Git root/worktree, Unicode/spaces, symlink and traversal safety |
 | `.trellis/scripts/**` | Package runtime modules | `remove` | Không sinh Python/runtime scripts vào consumer |

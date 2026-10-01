@@ -8,8 +8,8 @@ import {
   createCodexGlobalSurfacePlan,
   matchesCodexGlobalContextHookGroup,
 } from "src/configurators/codex.js";
-import { reconcileGlobalManagedFiles } from "src/utils/global-managed-files.js";
-import { resolveUserPlatformRoots } from "src/utils/user-paths.js";
+import { reconcileGlobalManagedFiles } from "src/core/global/managed-files.js";
+import { resolveUserPlatformRoots } from "src/core/platform/user-paths.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 
 const temporaryUserHome = useTemporaryUserHomes("harnix-codex-global-");

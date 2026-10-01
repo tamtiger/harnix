@@ -11,7 +11,7 @@ import {
 } from "src/configurators/claude.js";
 import { renderHarnixRules } from "src/templates/harnix/activation.js";
 import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
-import type { DesiredGlobalManagedFile } from "src/utils/global-managed-files.js";
+import type { DesiredGlobalManagedFile } from "src/core/global/managed-files.js";
 
 function entry(files: readonly DesiredGlobalManagedFile[], path: string): DesiredGlobalManagedFile {
   const found = files.find((file) => file.path === path);

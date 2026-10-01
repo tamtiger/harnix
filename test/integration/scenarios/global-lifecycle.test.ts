@@ -7,9 +7,10 @@ import { uninstallGlobalIntegrations } from "src/commands/global-uninstall.js";
 import { updateGlobalPlatforms } from "src/commands/global-update.js";
 import { CODEX_GLOBAL_HOOK_SELECTOR, codexGlobalContextHookGroup } from "src/configurators/codex.js";
 import { KIRO_GLOBAL_CONTEXT_HOOK } from "src/configurators/kiro.js";
-import { canonicalJson } from "src/utils/global-managed-json.js";
+import { canonicalJson } from "src/core/global/managed-json.js";
 import { sha256 } from "src/utils/hashing.js";
-import { resolveUserPlatformRoots } from "src/utils/user-paths.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import { resolveUserPlatformRoots } from "src/core/platform/user-paths.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 
 const temporaryUserHome = useTemporaryUserHomes("harnix-global-lifecycle-");
@@ -174,7 +175,7 @@ describe("global integration lifecycle", () => {
       generatorVersion: "0.4.0",
     });
     manifest.entries.sort((left, right) =>
-      `${left.path}\u0000${left.sourceId}`.localeCompare(`${right.path}\u0000${right.sourceId}`),
+      compareCodeUnits(`${left.path}\u0000${left.sourceId}`, `${right.path}\u0000${right.sourceId}`),
     );
     await mkdir(join(obsoletePath, ".."), { recursive: true });
     await writeFile(obsoletePath, obsoleteContent);
@@ -281,7 +282,7 @@ describe("global integration lifecycle", () => {
         generatorVersion: "1.0.6",
       });
       manifest.entries.sort((left, right) =>
-        `${left.path}\u0000${left.sourceId}`.localeCompare(`${right.path}\u0000${right.sourceId}`),
+        compareCodeUnits(`${left.path}\u0000${left.sourceId}`, `${right.path}\u0000${right.sourceId}`),
       );
       await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
@@ -334,7 +335,7 @@ describe("global integration lifecycle", () => {
       await writeFile(join(pluginRoot, "rules", "harnix.md"), legacyAntigravityRule);
       Object.assign(ruleEntry!, { path: "rules/harnix.md", generatedHash: sha256(legacyAntigravityRule) });
       manifest.entries.sort((left, right) =>
-        `${left.path}\u0000${left.sourceId}`.localeCompare(`${right.path}\u0000${right.sourceId}`),
+        compareCodeUnits(`${left.path}\u0000${left.sourceId}`, `${right.path}\u0000${right.sourceId}`),
       );
       await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
     }

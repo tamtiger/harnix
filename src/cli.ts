@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import { runInternalContextCommand } from "./commands/internal-context-cli.js";
 import type { InternalContextPlatform } from "./commands/internal-context.js";
+import { isPlatformId } from "./core/platform/registry.js";
 import { readBoundedInput } from "./utils/bounded-input.js";
 
 /**
@@ -16,9 +17,7 @@ export function canonicalInternalContextPlatform(argv: readonly string[]): Inter
   const args = argv.slice(2);
   if (args.length !== 3 || args[0] !== "context" || args[1] !== "--platform") return undefined;
   const platform = args[2];
-  return platform === "kiro" || platform === "antigravity" || platform === "codex" || platform === "claude"
-    ? platform
-    : undefined;
+  return isPlatformId(platform) ? platform : undefined;
 }
 
 /**

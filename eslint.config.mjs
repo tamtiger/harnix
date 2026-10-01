@@ -8,15 +8,6 @@ import tseslint from "typescript-eslint";
  * decision recorded in docs/OVERHAUL_DECISIONS.md.
  */
 
-// Removed by `add-platform-registry` (task 12), which merges and splits the platform/doctor/global modules.
-const PLATFORM_MODULES = [
-  "src/commands/doctor.ts",
-  "src/commands/global-doctor.ts",
-  "src/commands/global-uninstall.ts",
-  "src/commands/setup.ts",
-  "src/utils/global-managed-files.ts",
-];
-
 // Removed by `rewrite-guides` (task 14), which rewrites the guide and stack catalogs.
 const CATALOG_MODULES = ["src/catalog/catalog.ts", "src/catalog/validation.ts", "src/guides/catalog.ts"];
 
@@ -26,20 +17,9 @@ const REPO_MAP_MODULES = ["src/core/repo-map/search.ts"];
 // Unresolved after `restructure-code` (task 07); `release-v2` (task 17) must split each one or record a new decision.
 const UNRESOLVED_SOURCE_FILES = ["src/cli-program.ts", "src/core/context/context.ts", "src/utils/file-lock.ts"];
 
-const OVERSIZED_SOURCE_FILES = [
-  ...PLATFORM_MODULES,
-  ...CATALOG_MODULES,
-  "src/cli-program.ts",
-  "src/utils/file-lock.ts",
-];
+const OVERSIZED_SOURCE_FILES = [...CATALOG_MODULES, "src/cli-program.ts", "src/utils/file-lock.ts"];
 
-const COMPLEX_SOURCE_FILES = [
-  "src/catalog/validation.ts",
-  "src/commands/doctor.ts",
-  "src/utils/global-managed-files.ts",
-  ...REPO_MAP_MODULES,
-  ...UNRESOLVED_SOURCE_FILES,
-];
+const COMPLEX_SOURCE_FILES = ["src/catalog/validation.ts", ...REPO_MAP_MODULES, ...UNRESOLVED_SOURCE_FILES];
 
 // Removed by `release-v2` (task 17), which reviews the release scripts.
 const RELEASE_SCRIPT_EXEMPTIONS = ["scripts/scan-release.mjs", "scripts/version-sync.mjs"];

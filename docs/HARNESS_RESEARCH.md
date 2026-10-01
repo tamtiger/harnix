@@ -228,7 +228,7 @@ Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapte
 ### Claude Code
 
 - Global user surface is `~/.claude/skills/harnix-*`, a marker block in `~/.claude/CLAUDE.md`, and one owned `harnix-context` group inside `hooks.UserPromptSubmit` in `~/.claude/settings.json`.
-- Claude Code reads `CLAUDE.md`, not `AGENTS.md`. `UserPromptSubmit` has no matcher field.
+- Claude Code reads `CLAUDE.md`. From v2.1.277 it also reads a project `AGENTS.md` natively, but only when no `CLAUDE.md` or `CLAUDE.local.md` exists in or above the working directory; `~/.claude/CLAUDE.md` and `.claude/rules/` do not count, and `AGENTS.override.md` and `.agents/` are never read (verified 2026-10-01, https://code.claude.com/docs/en/memory). Before v2.1.277 a `CLAUDE.md` that imports `@AGENTS.md` is required. `UserPromptSubmit` has no matcher field.
 - Respects `CLAUDE_CONFIG_DIR` to relocate that root.
 - Never touches `~/.claude.json`, credentials, MCP servers, `projects/`, `history` or `todos/`.
 
@@ -299,7 +299,7 @@ Các quyết định này là guardrail chống scope creep. Thay đổi cần c
 | Workflow | `src/skills/**` | lite/full/ambiguous/forced, debug, TDD exceptions, reviews, verification |
 | Platforms/hooks | `src/configurators/{kiro,antigravity,codex}.ts`, Home/Platform root resolvers, hidden internal context handler | user-global snapshots, stdin/stdout protocol, activation guard, bounds, idempotence, fake home and no machine paths |
 | Lifecycle/migration | `src/commands/**`, `src/migration/**` | project/global scope, legacy conflicts, rollback, purge/global-uninstall safety |
-| Doctor | `src/commands/doctor.ts` | stable ordered/redacted Doctor JSON v2 + unsafe/duplicate/legacy/global/secret fixtures |
+| Doctor | `src/core/doctor/doctor.ts` (wired by `src/commands/doctor.ts`) | stable ordered/redacted Doctor JSON v2 + unsafe/duplicate/legacy/global/secret fixtures |
 | Task status/next action | `src/core/status.ts`, `src/commands/status.ts` | no-active/active, precedence, v1 age/v2 digest freshness, privacy, bounded payload và no-write nested-root integration |
 | Exact task recovery | `src/core/tasks/task-resume.ts`, `src/commands/resume.ts` | absent/same/different/invalid pointer, missing/malformed/oversized/terminal candidate, dry-run/no-write và pointer-only mutation |
 | Effective context explanation | `src/core/context/effective-context.ts`, `src/commands/context-report.ts` | hidden-hook parity, dynamic/persisted selection, platform caps, trusted reasons, drift, privacy, truncation và no-write |

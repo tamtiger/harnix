@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { initializeProject } from "src/commands/init.js";
 import { updateProject } from "src/commands/update.js";
 import { readConfig, writeConfig } from "src/core/config/config.js";
-import { readManifest, writeManifest } from "src/utils/managed-files.js";
+import { readManifest, writeManifest } from "src/core/managed/project-files.js";
 import { sha256 } from "src/utils/hashing.js";
 import { packageVersion } from "src/version.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";

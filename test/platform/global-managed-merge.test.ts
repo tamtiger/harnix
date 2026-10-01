@@ -1,8 +1,8 @@
 import { access, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { reconcileGlobalManagedFiles } from "src/utils/global-managed-files.js";
-import { createVerifiedUserRoot, type UserPathRoot } from "src/utils/user-paths.js";
+import { reconcileGlobalManagedFiles } from "src/core/global/managed-files.js";
+import { createVerifiedUserRoot, type UserPathRoot } from "src/core/platform/user-paths.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRoot = useTemporaryRepositories("harnix-global-managed-");

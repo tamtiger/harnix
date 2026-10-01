@@ -1,7 +1,9 @@
 import type { LanguageId, TechnologyId } from "src/catalog/catalog.js";
 import { legacyStackIds, type LegacyStackId } from "src/core/stack/stack.js";
 
-export type PlatformId = "kiro" | "antigravity" | "codex" | "claude";
+import { PLATFORM_IDS, type PlatformId } from "src/core/platform/registry.js";
+
+export type { PlatformId };
 
 export interface LegacyPackageConfig {
   path: string;
@@ -96,7 +98,7 @@ export const technologyIds = new Set<TechnologyId>([
 ]);
 
 export const legacyIds = new Set<LegacyStackId>(legacyStackIds);
-export const platformIds = new Set<PlatformId>(["kiro", "antigravity", "codex", "claude"]);
+export const platformIds = new Set<PlatformId>(PLATFORM_IDS);
 export const developerPattern = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u;
 
 export const topLevelKeys = new Set([

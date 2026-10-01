@@ -4,7 +4,7 @@ import { createConfig, readConfig, writeConfig } from "src/core/config/config.js
 import { refreshRepoMap } from "src/core/repo-map/service.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { detectProject } from "src/core/stack/detection.js";
-import { writeManifest } from "src/utils/managed-files.js";
+import { writeManifest } from "src/core/managed/project-files.js";
 import { pathExists } from "src/utils/filesystem.js";
 import { normalizeLegacyStackIds, legacyStackIds, type LegacyStackId } from "src/core/stack/stack.js";
 import { compareCodeUnits } from "src/utils/order.js";

@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { diagnoseProject } from "src/commands/doctor.js";
 import { initializeProject } from "src/commands/init.js";
 import { setupPlatforms } from "src/commands/setup.js";
-import { GlobalManagedTransactionError } from "src/utils/global-managed-files.js";
+import { GlobalManagedTransactionError } from "src/core/global/managed-files.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 import { globalDoctorOptions as globalOptions } from "test/support/integration-fixtures.js";

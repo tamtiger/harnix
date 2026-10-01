@@ -9,7 +9,7 @@ import {
   reconcileManagedFiles,
   validateManifest,
   writeManifest,
-} from "src/utils/managed-files.js";
+} from "src/core/managed/project-files.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();

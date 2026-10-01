@@ -1,4 +1,4 @@
-import type { MarkerSelector } from "./global-managed-files.js";
+import type { MarkerSelector } from "src/core/global/managed-files.js";
 
 export function markersOverlap(left: MarkerSelector, right: MarkerSelector): boolean {
   return [left.begin, left.end].some((leftToken) =>

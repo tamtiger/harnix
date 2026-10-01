@@ -7,7 +7,7 @@ import {
   markerTokensOverlap,
   markersOverlap,
   renderManagedBlock,
-} from "src/utils/global-managed-markers.js";
+} from "src/core/global/managed-markers.js";
 
 const selector = { type: "markers" as const, begin: "<!-- harnix:begin -->", end: "<!-- harnix:end -->" };
 

@@ -1,6 +1,7 @@
 import { realpath, stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, parse, relative, resolve, sep, win32 } from "node:path";
+import { getPlatform, PLATFORM_IDS, type PlatformId, type PlatformRoot } from "src/core/platform/registry.js";
 
 export class UnsafeUserPathError extends Error {
   override name = "UnsafeUserPathError";
@@ -31,7 +32,7 @@ export interface UserPlatformRoots {
 }
 
 /** Public integration identities used to resolve only authorized platform roots. */
-export type UserGlobalPlatform = "kiro" | "antigravity" | "codex" | "claude";
+export type UserGlobalPlatform = PlatformId;
 
 /**
  * A deliberately partial root set. Global lifecycle commands receive only the
@@ -67,7 +68,7 @@ const defaultHomeResolver: HomeResolver = async () => homedir();
 export async function resolveUserPlatformRoots(
   options: ResolveUserPlatformRootsOptions = {},
 ): Promise<UserPlatformRoots> {
-  const roots = await resolveSelectedUserPlatformRoots(["kiro", "antigravity", "codex", "claude"], options);
+  const roots = await resolveSelectedUserPlatformRoots(PLATFORM_IDS, options);
   if (
     roots.kiro === undefined ||
     roots.antigravityDesktop === undefined ||
@@ -97,50 +98,76 @@ export async function resolveSelectedUserPlatformRoots(
 ): Promise<SelectedUserPlatformRoots> {
   const selected = new Set(platforms);
   const home = await createVerifiedUserRoot(await (options.homeResolver ?? defaultHomeResolver)(), "~");
-  const roots: {
-    claude?: UserPathRoot;
-    kiro?: UserPathRoot;
-    antigravityDesktop?: UserPathRoot;
-    antigravityCli?: UserPathRoot;
-    codex?: { config: UserPathRoot; skills: UserPathRoot };
-  } = {};
+  const environment = options.environment ?? process.env;
+  const resolved = new Map<string, UserPathRoot>();
+  for (const platform of PLATFORM_IDS) {
+    if (!selected.has(platform)) continue;
+    for (const root of getPlatform(platform).roots) {
+      resolved.set(`${platform}:${root.key}`, await overridableRoot(home, platform, root.key, environment));
+    }
+  }
+  return shapeRoots(resolved);
+}
 
-  if (selected.has("kiro")) {
-    roots.kiro = await createDerivedUserRoot(home, ".kiro", "~/.kiro");
-  }
-  if (selected.has("antigravity")) {
-    roots.antigravityCli = await createDerivedUserRoot(
-      home,
-      ".gemini/antigravity-cli/plugins/harnix",
-      "~/.gemini/antigravity-cli/plugins/harnix",
-    );
-    roots.antigravityDesktop = await createDerivedUserRoot(
-      home,
-      ".gemini/config/plugins/harnix",
-      "~/.gemini/config/plugins/harnix",
-    );
-  }
-  if (selected.has("codex")) {
-    const codexHome = (options.environment ?? process.env).CODEX_HOME;
-    roots.codex = {
-      config:
-        codexHome === undefined
-          ? await createDerivedUserRoot(home, ".codex", "~/.codex")
-          : await createVerifiedUserRoot(assertCodexHome(codexHome), "$CODEX_HOME"),
-      skills: await createDerivedUserRoot(home, ".agents", "~/.agents"),
-    };
-  }
-  if (selected.has("claude")) {
-    const claudeConfigDirectory = (options.environment ?? process.env).CLAUDE_CONFIG_DIR;
-    roots.claude =
-      claudeConfigDirectory === undefined
-        ? await createDerivedUserRoot(home, ".claude", "~/.claude")
-        : await createVerifiedUserRoot(
-            assertNamedHome(claudeConfigDirectory, "CLAUDE_CONFIG_DIR"),
-            "$CLAUDE_CONFIG_DIR",
-          );
-  }
-  return roots;
+/** Places each resolved `<platform>:<root key>` into the named fields the lifecycle code reads. */
+function shapeRoots(resolved: ReadonlyMap<string, UserPathRoot>): SelectedUserPlatformRoots {
+  const kiro = resolved.get("kiro:config");
+  const antigravityDesktop = resolved.get("antigravity:desktop");
+  const antigravityCli = resolved.get("antigravity:cli");
+  const codexConfig = resolved.get("codex:config");
+  const codexSkills = resolved.get("codex:skills");
+  const claude = resolved.get("claude:config");
+  return {
+    ...(kiro === undefined ? {} : { kiro }),
+    ...(antigravityDesktop === undefined ? {} : { antigravityDesktop }),
+    ...(antigravityCli === undefined ? {} : { antigravityCli }),
+    ...(codexConfig === undefined || codexSkills === undefined
+      ? {}
+      : { codex: { config: codexConfig, skills: codexSkills } }),
+    ...(claude === undefined ? {} : { claude }),
+  };
+}
+
+const ROOT_ACCESSORS: Readonly<Record<string, (roots: SelectedUserPlatformRoots) => UserPathRoot | undefined>> = {
+  "kiro:config": (roots) => roots.kiro,
+  "antigravity:desktop": (roots) => roots.antigravityDesktop,
+  "antigravity:cli": (roots) => roots.antigravityCli,
+  "codex:config": (roots) => roots.codex?.config,
+  "codex:skills": (roots) => roots.codex?.skills,
+  "claude:config": (roots) => roots.claude,
+};
+
+/** The resolved root a registry `<platform>:<root key>` names, or undefined when it was not selected. */
+export function selectedUserRoot(
+  roots: SelectedUserPlatformRoots,
+  platform: PlatformId,
+  rootKey: string,
+): UserPathRoot | undefined {
+  return ROOT_ACCESSORS[`${platform}:${rootKey}`]?.(roots);
+}
+
+function registryRoot(platform: PlatformId, key: string): PlatformRoot {
+  const root = getPlatform(platform).roots.find((candidate) => candidate.key === key);
+  if (root === undefined) throw new UnsafeUserPathError("A user root is not declared in the platform registry.");
+  return root;
+}
+
+function derivedRoot(home: UserPathRoot, platform: PlatformId, key: string): Promise<UserPathRoot> {
+  const root = registryRoot(platform, key);
+  return createDerivedUserRoot(home, root.relativePath, root.logicalPath);
+}
+
+/** A registry root that its `envOverride` variable may relocate to a verified absolute directory. */
+async function overridableRoot(
+  home: UserPathRoot,
+  platform: PlatformId,
+  key: string,
+  environment: Readonly<Record<string, string | undefined>>,
+): Promise<UserPathRoot> {
+  const root = registryRoot(platform, key);
+  const override = root.envOverride === null ? undefined : environment[root.envOverride];
+  if (root.envOverride === null || override === undefined) return derivedRoot(home, platform, key);
+  return createVerifiedUserRoot(assertNamedHome(override, root.envOverride), `$${root.envOverride}`);
 }
 
 /** Creates a root that can later be used only with resolveSafeUserPath. */
@@ -227,10 +254,6 @@ function hasControlCharacter(value: string): boolean {
     if (codePoint <= 0x1f || codePoint === 0x7f) return true;
   }
   return false;
-}
-
-function assertCodexHome(value: string): string {
-  return assertNamedHome(value, "CODEX_HOME");
 }
 
 function assertNamedHome(value: string, variable: string): string {

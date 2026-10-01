@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { GlobalManagedManifestError } from "src/utils/global-managed-error.js";
-import { GlobalManagedManifestError as ReExported } from "src/utils/global-managed-files.js";
+import { GlobalManagedManifestError } from "src/core/global/managed-error.js";
+import { GlobalManagedManifestError as ReExported } from "src/core/global/managed-files.js";
 
 describe("GlobalManagedManifestError", () => {
   it("is a named Error subclass that keeps its message", () => {

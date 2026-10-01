@@ -4,7 +4,7 @@ import type {
   JsonArrayMemberSelector,
   JsonValue,
   MarkerSelector,
-} from "src/utils/global-managed-files.js";
+} from "src/core/global/managed-files.js";
 import { renderHarnixRules } from "src/templates/harnix/activation.js";
 import { globalSkillDesiredFiles } from "src/templates/harnix/global-surface.js";
 

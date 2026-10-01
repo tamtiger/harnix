@@ -1,6 +1,7 @@
 import type { HarnixConfigV2, PlatformId } from "src/core/config/config.js";
 import type { TaskRecord } from "src/core/tasks/task.js";
 import { guideOutputPath, selectGuideSources } from "src/guides/catalog.js";
+import { getPlatform } from "src/core/platform/registry.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { renderLearningBlock, summarizeLearning } from "src/core/journal/learning-summary.js";
@@ -65,7 +66,7 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
       states: ["implementing", "verifying"],
     })),
   ];
-  const renderCap = input.platform === "codex" ? 2_500 : Math.min(input.config.context.maxCharacters, 8_000);
+  const renderCap = getPlatform(input.platform).contextRenderCap ?? Math.min(input.config.context.maxCharacters, 8_000);
   const bounded = input.forceBounded === true;
   const maxEntries = bounded ? MAX_HOOK_CONTEXT_ENTRIES : Number.POSITIVE_INFINITY;
   const output = await buildContext(

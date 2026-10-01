@@ -1,9 +1,10 @@
-import { readFile } from "node:fs/promises";
-import { atomicWriteFile } from "./atomic-write.js";
-import type { AtomicFileSystem } from "./atomic-write.js";
-import { normalizeRepositoryPath, resolveSafeProjectPath } from "./paths.js";
-import { sha256 } from "./hashing.js";
-import { compareCodeUnits } from "./order.js";
+import { readFile, rm } from "node:fs/promises";
+import { decideObsoleteFile, decideWholeFile } from "src/core/managed/decision.js";
+import { atomicWriteFile } from "src/utils/atomic-write.js";
+import type { AtomicFileSystem } from "src/utils/atomic-write.js";
+import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { sha256 } from "src/utils/hashing.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 export type ManagedScope = "project" | "kiro" | "antigravity" | "codex";
 export interface ManagedEntry {
@@ -119,56 +120,63 @@ export async function reconcileManagedFiles(
   for (const file of desired.sort((a, b) => compareCodeUnits(a.entry.path, b.entry.path))) {
     const entry = { ...file.entry, generatorVersion: options.generatorVersion };
     const previous = oldByPath.get(entry.path);
-    const state = await ownershipState(projectRoot, entry, previous);
-    if (state === "new") {
-      await atomicWriteFile(await resolveSafeProjectPath(projectRoot, entry.path), file.content);
-      result.created.push(entry.path);
-    } else if (state === "deleted") {
-      if (options.restoreDeleted) {
-        await atomicWriteFile(await resolveSafeProjectPath(projectRoot, entry.path), file.content);
+    const target = await resolveSafeProjectPath(projectRoot, entry.path);
+    const generatedHash = sha256(file.content);
+    oldByPath.delete(entry.path);
+    switch (
+      decideWholeFile({
+        current: await readOptionalText(target),
+        previousHash: previous?.generatedHash,
+        desiredHash: generatedHash,
+        restoreDeleted: options.restoreDeleted === true,
+      })
+    ) {
+      case "create":
+        await atomicWriteFile(target, file.content);
         result.created.push(entry.path);
-        nextEntries.push({ ...entry, generatedHash: sha256(file.content) });
-      } else {
+        nextEntries.push({ ...entry, generatedHash });
+        break;
+      case "keep-deleted":
         result.deleted.push(entry.path);
         nextEntries.push(previous!);
-      }
-      oldByPath.delete(entry.path);
-      continue;
-    } else if (state === "unchanged") {
-      const generatedHash = sha256(file.content);
-      if (previous?.generatedHash !== generatedHash) {
-        await atomicWriteFile(await resolveSafeProjectPath(projectRoot, entry.path), file.content);
+        break;
+      case "collision":
+        result.preserved.push(entry.path);
+        break;
+      case "keep-modified":
+        result.preserved.push(entry.path);
+        nextEntries.push(previous!);
+        break;
+      case "update":
+        await atomicWriteFile(target, file.content);
         result.updated.push(entry.path);
-      } else {
+        nextEntries.push({ ...entry, generatedHash });
+        break;
+      case "unchanged":
         result.preserved.push(entry.path);
         if (
-          previous.generatorVersion !== entry.generatorVersion ||
-          previous.sourceId !== entry.sourceId ||
-          previous.scope !== entry.scope
+          previous!.generatorVersion !== entry.generatorVersion ||
+          previous!.sourceId !== entry.sourceId ||
+          previous!.scope !== entry.scope
         ) {
           result.metadataUpdated.push(entry.path);
         }
-      }
-    } else if (state === "modified") {
-      if (previous) {
-        result.preserved.push(entry.path);
-        nextEntries.push(previous);
-      } else result.preserved.push(entry.path);
-      oldByPath.delete(entry.path);
-      continue;
+        nextEntries.push({ ...entry, generatedHash });
+        break;
     }
-    nextEntries.push({ ...entry, generatedHash: sha256(file.content) });
-    oldByPath.delete(entry.path);
   }
   for (const obsolete of oldByPath.values()) {
-    const state = await obsoleteState(projectRoot, obsolete);
-    if (state === "obsolete-unchanged" && options.removeObsolete) {
-      const target = await resolveSafeProjectPath(projectRoot, obsolete.path);
-      const { rm } = await import("node:fs/promises");
+    const target = await resolveSafeProjectPath(projectRoot, obsolete.path);
+    const removable =
+      decideObsoleteFile(await readOptionalText(target), obsolete.generatedHash) === "remove" &&
+      options.removeObsolete === true;
+    if (removable) {
       await rm(target, { force: true });
       result.deleted.push(obsolete.path);
     } else {
-      result[state === "obsolete-unchanged" ? "obsolete" : "preserved"].push(obsolete.path);
+      result[(await obsoleteState(projectRoot, obsolete)) === "obsolete-unchanged" ? "obsolete" : "preserved"].push(
+        obsolete.path,
+      );
       nextEntries.push(obsolete);
     }
   }
@@ -189,4 +197,13 @@ function isMissing(error: unknown): boolean {
   return (
     typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"
   );
+}
+
+async function readOptionalText(path: string): Promise<string | undefined> {
+  try {
+    return await readFile(path, "utf8");
+  } catch (error: unknown) {
+    if (isMissing(error)) return undefined;
+    throw error;
+  }
 }

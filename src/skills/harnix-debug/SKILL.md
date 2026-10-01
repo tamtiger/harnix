@@ -2,7 +2,7 @@
 name: harnix-debug
 description: Use when a Harnix implementation or verification has a reproducible bug, failing test, unexpected behavior, loop or repeated unsuccessful fix.
 metadata:
-  version: "2.0.0-dev.7"
+  version: "2.0.0-dev.8"
 ---
 
 # Debug with evidence

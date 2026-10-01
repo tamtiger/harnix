@@ -16,7 +16,7 @@ import {
 import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
 import { renderHarnixRules } from "src/templates/harnix/activation.js";
 import { codexGlobalAgentsContent, createCodexGlobalSurfacePlan } from "src/configurators/codex.js";
-import type { DesiredGlobalManagedFile } from "src/utils/global-managed-files.js";
+import type { DesiredGlobalManagedFile } from "src/core/global/managed-files.js";
 
 function fileContent(file: DesiredGlobalManagedFile | undefined): string {
   if (file?.kind !== "file") {

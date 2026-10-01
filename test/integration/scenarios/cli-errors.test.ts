@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createProgram, redactPublicErrorMessage, runCli } from "src/cli-program.js";
-import { GlobalManagedTransactionError } from "src/utils/global-managed-files.js";
+import { GlobalManagedTransactionError } from "src/core/global/managed-files.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 

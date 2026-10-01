@@ -4,14 +4,14 @@ import type {
   JsonArrayMemberSelector,
   JsonValue,
   MarkerSelector,
-} from "src/utils/global-managed-files.js";
+} from "src/core/global/managed-files.js";
 import { renderHarnixRules } from "src/templates/harnix/activation.js";
 import { globalSkillDesiredFiles } from "src/templates/harnix/global-surface.js";
 
 const begin = "<!-- harnix:begin -->";
 const end = "<!-- harnix:end -->";
 
-/** Claude Code reads `CLAUDE.md`, not `AGENTS.md`, so the guard lives there. */
+/** The user-level `~/.claude/CLAUDE.md` never counts as a project `CLAUDE.md`, so the guard lives there even though project `AGENTS.md` is read natively (v2.1.277+). */
 export const CLAUDE_GLOBAL_MEMORY_SELECTOR: MarkerSelector = { type: "markers", begin, end };
 
 /**

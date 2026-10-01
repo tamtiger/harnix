@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.0.0-dev.8] - 2026-10-01
+
+### Changed
+
+- Registry nền tảng khai báo cho Kiro, Antigravity, Codex và Claude Code (src/core/platform/registry.ts, kèm facts có nguồn và ngày xác minh); tách engine reconcile global theo mối quan tâm vào src/core/global và chuyển setup/update/uninstall/doctor vào core, command chỉ còn wiring; project và global dùng chung bảng quyết định ownership; cập nhật contract Claude Code đọc AGENTS.md native (v2.1.277+). Sửa redact() in literal $1 thay vì tên khóa và partial rollback của Claude không gán đúng nền tảng.
+
 ## [2.0.0-dev.7] - 2026-09-30
 
 ### Added

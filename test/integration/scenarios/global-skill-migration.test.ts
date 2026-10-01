@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { setupPlatforms } from "src/commands/setup.js";
 import { updateGlobalPlatforms } from "src/commands/global-update.js";
 import { sha256 } from "src/utils/hashing.js";
+import { compareCodeUnits } from "src/utils/order.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 
 const temporaryUserHome = useTemporaryUserHomes("harnix-global-skill-migration-");
@@ -33,7 +34,7 @@ describe("global skill migration", () => {
       });
     }
     manifest.entries.sort((left, right) =>
-      `${left.path}\u0000${left.sourceId}`.localeCompare(`${right.path}\u0000${right.sourceId}`),
+      compareCodeUnits(`${left.path}\u0000${left.sourceId}`, `${right.path}\u0000${right.sourceId}`),
     );
     await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 

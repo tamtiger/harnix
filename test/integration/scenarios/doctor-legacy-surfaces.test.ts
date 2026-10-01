@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { diagnoseProject } from "src/commands/doctor.js";
 import { initializeProject } from "src/commands/init.js";
-import { readManifest, writeManifest } from "src/utils/managed-files.js";
+import { readManifest, writeManifest } from "src/core/managed/project-files.js";
 import { sha256 } from "src/utils/hashing.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";

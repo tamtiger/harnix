@@ -4,11 +4,12 @@ import { isAbsolute, win32 } from "node:path";
 import { readConfig } from "src/core/config/config.js";
 import { UNTRUSTED_CONTEXT_PREFIX, UNTRUSTED_CONTEXT_SUFFIX } from "src/core/context/context.js";
 import { buildEffectiveContext } from "src/core/context/effective-context.js";
+import { getPlatform, type PlatformId } from "src/core/platform/registry.js";
 import { resolveActiveTask } from "src/core/tasks/task.js";
 import { findInitializedProject } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
-export type InternalContextPlatform = "kiro" | "antigravity" | "codex" | "claude";
+export type InternalContextPlatform = PlatformId;
 
 export interface RenderInternalContextForHookOptions {
   readonly platform: InternalContextPlatform;
@@ -77,7 +78,7 @@ export async function renderInternalContextForHook(options: RenderInternalContex
   // Antigravity permits injection only on invocation 0. A malformed or absent
   // event must be a true global no-op: no project lookup and no protocol output
   // that could be interpreted as a context injection in an unrelated workspace.
-  if (options.platform === "antigravity" && event.invocationNum === undefined) {
+  if (getPlatform(options.platform).contextFirstInvocationOnly && event.invocationNum === undefined) {
     return "";
   }
 
@@ -93,7 +94,7 @@ export async function renderInternalContextForHook(options: RenderInternalContex
     return "";
   }
   if (project.kind === "ambiguous")
-    return options.platform === "antigravity" && event.invocationNum === 0
+    return getPlatform(options.platform).contextFirstInvocationOnly && event.invocationNum === 0
       ? formatPlatformPayload(
           options.platform,
           "Harnix context unavailable: multiple initialized workspace roots; select the active root to continue.",
@@ -103,7 +104,7 @@ export async function renderInternalContextForHook(options: RenderInternalContex
   // A known later Antigravity invocation belongs to an initialized project
   // but must not inject context. Preserve the platform's schema-valid empty
   // response only after the activation guard has proved that scope.
-  if (options.platform === "antigravity" && event.invocationNum !== 0) {
+  if (getPlatform(options.platform).contextFirstInvocationOnly && event.invocationNum !== 0) {
     return emptyPayload(options.platform);
   }
   try {
@@ -117,22 +118,26 @@ export async function renderInternalContextForHook(options: RenderInternalContex
 
 function formatPlatformPayload(platform: InternalContextPlatform, text: string): string {
   if (text.length === 0) return emptyPayload(platform);
-  if (platform === "codex") {
-    return JSON.stringify({ hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: text } });
+  const record = getPlatform(platform);
+  if (record.contextOutput === "codex-additional-context") {
+    return JSON.stringify({
+      hookSpecificOutput: { hookEventName: record.contextHook?.event, additionalContext: text },
+    });
   }
-  if (platform === "antigravity") {
+  if (record.contextOutput === "antigravity-inject-steps") {
     return JSON.stringify({ injectSteps: [{ ephemeralMessage: text }] });
   }
   return text;
 }
 
 function emptyPayload(platform: InternalContextPlatform): string {
-  return platform === "antigravity" ? JSON.stringify({ injectSteps: [] }) : "";
+  return getPlatform(platform).contextOutput === "antigravity-inject-steps" ? JSON.stringify({ injectSteps: [] }) : "";
 }
 
 function emptyInitializedProjectPayload(platform: InternalContextPlatform): string {
-  if (platform === "codex") {
-    return JSON.stringify({ hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: "" } });
+  const record = getPlatform(platform);
+  if (record.contextOutput === "codex-additional-context") {
+    return JSON.stringify({ hookSpecificOutput: { hookEventName: record.contextHook?.event, additionalContext: "" } });
   }
   return emptyPayload(platform);
 }

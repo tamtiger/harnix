@@ -66,15 +66,6 @@ function codeLines(file: string): number {
   return count;
 }
 
-// These commands are owned by the later task `add-platform-registry`, which removes their direct file access.
-const COMMANDS_WITH_DIRECT_FS = [
-  "commands/doctor.ts",
-  "commands/global-doctor.ts",
-  "commands/global-update.ts",
-  "commands/global-uninstall.ts",
-  "commands/setup.ts",
-];
-
 describe("architecture", () => {
   it("keeps core free of commands, templates, skills and terminal UI packages", () => {
     const forbidden = new Set(["commands", "templates", "skills", "commander", "inquirer"]);
@@ -92,14 +83,12 @@ describe("architecture", () => {
     expect(offenders.map((edge) => `${edge.from} -> ${edge.specifier}`)).toEqual([]);
   });
 
-  it("keeps direct filesystem access out of commands, except the platform-registry owned ones", () => {
+  it("keeps direct filesystem access out of commands", () => {
     const offenders = edges
       .filter((edge) => layer(edge.from) === "commands" && /^node:fs(?:\/promises)?$/u.test(edge.specifier))
-      .map((edge) => edge.from)
-      .filter((from) => !COMMANDS_WITH_DIRECT_FS.includes(from));
+      .map((edge) => edge.from);
 
     expect([...new Set(offenders)]).toEqual([]);
-    for (const exempt of COMMANDS_WITH_DIRECT_FS) expect(existsSync(join(srcRoot, exempt))).toBe(true);
   });
 
   it("defines each canonical JSON helper exactly once", () => {
@@ -108,7 +97,7 @@ describe("architecture", () => {
         .filter((file) => new RegExp(`export function ${name}\\(`, "u").test(readFileSync(file, "utf8")))
         .map(rel);
 
-    expect(definitions("canonicalJson")).toEqual(["utils/global-managed-json.ts"]);
+    expect(definitions("canonicalJson")).toEqual(["core/global/managed-json.ts"]);
     expect(definitions("canonicalizeJson")).toEqual(["core/tasks/workflow-helpers.ts"]);
   });
 

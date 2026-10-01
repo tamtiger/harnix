@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { setupPlatforms } from "src/commands/setup.js";
 import { uninstallGlobalIntegrations } from "src/commands/global-uninstall.js";
-import { resolveUserPlatformRoots, type UserPlatformRoots } from "src/utils/user-paths.js";
+import { resolveUserPlatformRoots, type UserPlatformRoots } from "src/core/platform/user-paths.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 
 const temporaryUserHome = useTemporaryUserHomes("harnix-global-uninstall-");

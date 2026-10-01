@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { diagnoseGlobalIntegrations } from "src/commands/global-doctor.js";
 import { setupPlatforms } from "src/commands/setup.js";
-import { resolveUserPlatformRoots } from "src/utils/user-paths.js";
+import { resolveUserPlatformRoots } from "src/core/platform/user-paths.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 
 const temporaryUserHome = useTemporaryUserHomes("harnix-global-doctor-");

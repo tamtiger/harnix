@@ -1,5 +1,5 @@
-import { GlobalManagedManifestError } from "./global-managed-error.js";
-import type { JsonArrayMemberSelector, JsonValue } from "./global-managed-files.js";
+import { GlobalManagedManifestError } from "src/core/global/managed-error.js";
+import type { JsonArrayMemberSelector, JsonValue } from "src/core/global/managed-files.js";
 
 export function defaultJsonMemberMatcher(candidate: JsonValue, selector: JsonArrayMemberSelector): boolean {
   return isJsonObject(candidate) && candidate.id === selector.memberId;

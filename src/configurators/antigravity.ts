@@ -1,4 +1,4 @@
-import type { DesiredGlobalManagedFile } from "src/utils/global-managed-files.js";
+import type { DesiredGlobalManagedFile } from "src/core/global/managed-files.js";
 import { globalSkillDesiredFiles, HARNIX_GLOBAL_ACTIVATION_DOCUMENT } from "src/templates/harnix/global-surface.js";
 
 export const ANTIGRAVITY_GLOBAL_CONTEXT_HOOK_COMMAND = "harnix context --platform antigravity";
