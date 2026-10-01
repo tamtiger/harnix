@@ -95,4 +95,42 @@ describe("harnix skill", () => {
 
     expect([...names].sort()).toEqual([...owners].sort());
   });
+
+  it("should_report_technique_skills_and_include_them_when_all_is_requested", () => {
+    const defaultCatalog = reportSkillCatalog();
+    expect(defaultCatalog.skills.some((s) => s.name === "harnix-verification-gap")).toBe(false);
+
+    const allCatalog = reportSkillCatalog({ all: true });
+    expect(allCatalog.skills.some((s) => s.name === "harnix-verification-gap")).toBe(true);
+
+    const verificationGap = reportSkill("harnix-verification-gap");
+    expect(verificationGap.name).toBe("harnix-verification-gap");
+    expect(verificationGap.content).toContain("# Verification gap analysis");
+  });
+
+  it("should_include_and_report_project_skills_when_provided", () => {
+    const customSkill = {
+      name: "domain-compliance",
+      description: "Use when verifying domain compliance requirements.",
+      version: "1.0.0",
+      content: "# Domain compliance skill\n",
+      body: "Instructions for domain compliance.",
+      references: { faq: "# FAQ content\n" },
+    };
+
+    const catalog = reportSkillCatalog({ all: true, projectSkills: [customSkill] });
+    const found = catalog.skills.find((s) => s.name === "domain-compliance");
+    expect(found).toBeDefined();
+    expect(found!.kind).toBe("project");
+    expect(found!.references).toEqual(["faq"]);
+
+    const reported = reportSkill("domain-compliance", [customSkill]);
+    expect(reported.name).toBe("domain-compliance");
+    expect(reported.content).toBe(customSkill.content);
+    expect(reported.references).toEqual(["faq"]);
+
+    const refReport = reportSkillReference("domain-compliance", "faq", [customSkill]);
+    expect(refReport.reference).toBe("faq");
+    expect(refReport.content).toBe("# FAQ content\n");
+  });
 });

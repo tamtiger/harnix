@@ -849,6 +849,15 @@ Product decision supersession: Harnix no longer exposes legacy detection or migr
 - [x] Add negative scans for forbidden branding/surfaces.
 - [x] Preserve allowed research/migration/license occurrences only.
 
+### Task 3.7: Technique skills and project extension point (Overhaul D5, task add-technique-skills)
+
+**Create:** `src/skills/harnix-verification-gap/SKILL.md`, `src/skills/harnix-bugfix-preserve/SKILL.md`, `src/skills/harnix-flaky-test/SKILL.md`, `src/skills/harnix-migration-safety/SKILL.md`, `src/skills/harnix-security-lens/SKILL.md`, `src/core/spec/project-skills.ts`.
+
+- [x] Đúng 5 technique-skill được ship (5–10 theo D5), mỗi skill trích dẫn bằng chứng cụ thể từ `external-research.md`.
+- [x] Frontmatter và format chuẩn Agent Skills, cài vào global skill sink của 6 platform qua `globalSkillDesiredFiles`, không đi qua `preflight.nextStage`.
+- [x] Ranh giới rõ ràng: không trùng lặp với guides hay 6 workflow stage-owners.
+- [x] Mở `.harnix/spec/skills/` làm extension point cho dự án tự thêm skill riêng; `harnix skill` hỗ trợ discover và đọc custom skills; có fixture test kiểm chứng.
+
 **Phase 3 gate:** [x] workflow evals and platform snapshots green; setup parity/idempotence green; public/output branding clean. Verified with fresh acceptance, typecheck, lint, and diff check.
 
 ### Phase 3 hardening: canonical skill sources (2026-08-13)

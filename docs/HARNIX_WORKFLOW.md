@@ -278,6 +278,8 @@ Platform adapters cho Kiro, Antigravity và Codex phải giữ cùng state/gate 
 
 Source canonical của sáu skill (cùng `references/*.md` nạp theo yêu cầu bằng `harnix skill <name> --reference <topic>`) nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi source có portable `metadata.version`; contract test buộc version semantic này đồng bộ với package release. Build nhúng raw Markdown vào package; runtime không đọc source tree hoặc network. Cả ba adapter phải cài byte-identical canonical `SKILL.md`, gồm version và provenance, thay vì prepend các bản guard/prose riêng có thể drift.
 
+Ngoài 6 workflow skills sở hữu state machine, Harnix ship 5 technique skills cross-language có bằng chứng thực nghiệm (`harnix-verification-gap`, `harnix-bugfix-preserve`, `harnix-flaky-test`, `harnix-migration-safety`, `harnix-security-lens`). Các technique skills này được cài đặt vào global skill sink của 6 nền tảng và để agent tự chọn theo mô tả (native discovery), không nằm trong stage routing của `preflight.nextStage`. Dự án có thể mở rộng bằng cách thêm skill riêng tại `.harnix/spec/skills/<skill-name>/SKILL.md`; lệnh `harnix skill` hỗ trợ khám phá và đọc nội dung của project skills.
+
 Router chỉ load một stage owner tại một thời điểm. Mỗi selected `SKILL.md` phải được đọc riêng đến EOF; không batch-read toàn bộ skill catalog hoặc preload stage tương lai. Đây là progressive disclosure và cũng tránh tool output truncation khi tổng nhiều file vượt output budget; truncation không cho phép suy diễn phần instruction bị thiếu.
 
 ## 8. Required behavior evals

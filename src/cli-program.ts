@@ -10,6 +10,7 @@ import { updateProject } from "./commands/update.js";
 import { updateGlobalPlatforms } from "./commands/global-update.js";
 import { upgradeHarnix, type AvailableVersionLookup } from "./commands/upgrade.js";
 import { reportSkill, reportSkillCatalog, reportSkillReference } from "./commands/skills.js";
+import type { SkillTemplate } from "./core/spec/project-skills.js";
 import { uninstallProject } from "./commands/uninstall.js";
 import { uninstallGlobalIntegrations } from "./commands/global-uninstall.js";
 import { cleanupLegacyProjectSurfaces } from "./commands/legacy-project-surfaces.js";
@@ -21,6 +22,7 @@ import { resumeProjectTask } from "./commands/resume.js";
 import { pauseProjectTask } from "./commands/pause.js";
 import { reportProjectContext } from "./commands/context-report.js";
 import { diagnoseProject } from "./commands/doctor.js";
+import { discoverProjectSkills } from "./core/spec/project-skills.js";
 import { inspectVerifyPlan } from "./commands/verify-plan.js";
 import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
 import { registerWorkflowCommand } from "./commands/workflow-command.js";
@@ -295,15 +297,23 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .command("skill")
     .argument("[name]", "Canonical Harnix skill name, for example harnix-implement")
     .option("--reference <topic>", "Print one on-demand reference of the skill instead of its instructions")
+    .option("--all", "Include technique skills and custom project skills in the catalog listing")
     .description("Print the canonical Harnix skill catalog, one skill's instructions, or one of its references")
-    .action((name: string | undefined, options: { reference?: string }) => {
+    .action(async (name: string | undefined, options: { reference?: string; all?: boolean }) => {
       if (options.reference !== undefined && name === undefined) throw new Error("--reference requires a skill name.");
+      let projectSkills: readonly SkillTemplate[] = [];
+      try {
+        const root = await resolveProjectRoot(process.cwd());
+        projectSkills = await discoverProjectSkills(root);
+      } catch {
+        // Missing project root is expected outside initialized projects.
+      }
       const result =
         name === undefined
-          ? reportSkillCatalog()
+          ? reportSkillCatalog({ all: options.all, projectSkills })
           : options.reference === undefined
-            ? reportSkill(name)
-            : reportSkillReference(name, options.reference);
+            ? reportSkill(name, projectSkills)
+            : reportSkillReference(name, options.reference, projectSkills);
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
   program

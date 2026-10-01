@@ -13,7 +13,7 @@ import {
   KIRO_GLOBAL_STEERING,
   kiroGlobalDesiredFiles,
 } from "src/configurators/kiro.js";
-import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
+import { canonicalSkills, renderSkill } from "src/templates/harnix/workflow.js";
 import { renderHarnixRules } from "src/templates/harnix/activation.js";
 import { codexGlobalAgentsContent, createCodexGlobalSurfacePlan } from "src/configurators/codex.js";
 import type { DesiredGlobalManagedFile } from "src/core/global/managed-files.js";
@@ -25,7 +25,7 @@ function fileContent(file: DesiredGlobalManagedFile | undefined): string {
   return file.content;
 }
 
-const skillPaths = workflowSkills.flatMap((skill) => [
+const skillPaths = canonicalSkills.flatMap((skill) => [
   `skills/${skill.name}/SKILL.md`,
   ...Object.keys(skill.references).map((topic) => `skills/${skill.name}/references/${topic}.md`),
 ]);
@@ -96,7 +96,7 @@ describe("user-global platform desired-surface renderers", () => {
   });
 
   it("should_render_byte-identical_canonical_skill_sources_for_every_platform", () => {
-    const expected = new Map(workflowSkills.map((skill) => [`skills/${skill.name}/SKILL.md`, renderSkill(skill)]));
+    const expected = new Map(canonicalSkills.map((skill) => [`skills/${skill.name}/SKILL.md`, renderSkill(skill)]));
     const platforms = [
       kiroGlobalDesiredFiles(),
       antigravityGlobalPluginDesiredFiles(),
@@ -120,7 +120,7 @@ describe("user-global platform desired-surface renderers", () => {
     for (const [prefix, files] of platforms) {
       const skills = files.filter((file) => file.path.startsWith("skills/"));
 
-      const expectedSourceIds = workflowSkills.flatMap((skill) => [
+      const expectedSourceIds = canonicalSkills.flatMap((skill) => [
         `${prefix}-${skill.name}`,
         ...Object.keys(skill.references).map((topic) => `${prefix}-${skill.name}-ref-${topic}`),
       ]);

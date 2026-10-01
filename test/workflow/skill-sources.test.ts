@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { legacySkillAliases, workflowSkills } from "src/skills/catalog.js";
 
-const skillNames = [
+const workflowSkillNames = [
   "harnix-plan",
   "harnix-implement",
   "harnix-verify",
@@ -13,7 +13,15 @@ const skillNames = [
   "harnix-research",
   "harnix-debug",
 ] as const;
-type SkillName = (typeof skillNames)[number];
+type SkillName = (typeof workflowSkillNames)[number];
+const techniqueSkillNames = [
+  "harnix-verification-gap",
+  "harnix-bugfix-preserve",
+  "harnix-flaky-test",
+  "harnix-migration-safety",
+  "harnix-security-lens",
+] as const;
+const allSkillNames = [...workflowSkillNames, ...techniqueSkillNames];
 const TASK_SKILLS: readonly SkillName[] = ["harnix-plan", "harnix-implement", "harnix-verify", "harnix-debug"];
 
 /**
@@ -158,7 +166,7 @@ async function readSkillSource(name: string): Promise<string> {
 }
 
 describe("canonical Harnix workflow skill sources", () => {
-  it("stores exactly six discoverable skills as SKILL.md files with only references beside them", async () => {
+  it("stores canonical workflow and technique skills as SKILL.md files with only references beside them", async () => {
     const packageVersion = JSON.parse(
       await readFile(fileURLToPath(new URL("../../package.json", import.meta.url)), "utf8"),
     ) as { version: string };
@@ -168,8 +176,8 @@ describe("canonical Harnix workflow skill sources", () => {
       .map((entry) => entry.name)
       .sort();
 
-    expect(onDisk).toEqual([...skillNames].sort());
-    for (const name of skillNames) {
+    expect(onDisk).toEqual([...allSkillNames].sort());
+    for (const name of allSkillNames) {
       const content = await readSkillSource(name);
       const frontmatter = content.match(/^---\n([\s\S]*?)\n---\n/u)?.[1] ?? "";
       const entries = (await readdir(`${directory}${name}`)).sort();
@@ -185,11 +193,11 @@ describe("canonical Harnix workflow skill sources", () => {
       expect(content).not.toContain("subagent-driven-development");
     }
     expect(workflowSkills.map(({ name, version }) => ({ name, version }))).toEqual(
-      skillNames.map((name) => ({ name, version: packageVersion.version })),
+      workflowSkillNames.map((name) => ({ name, version: packageVersion.version })),
     );
   });
 
-  it.each(skillNames)("%s keeps every responsibility of the skills it absorbed", (name) => {
+  it.each(workflowSkillNames)("%s keeps every responsibility of the skills it absorbed", (name) => {
     const text = fullText(name);
 
     for (const needle of capabilities[name]) {
@@ -279,7 +287,7 @@ describe("canonical Harnix workflow skill sources", () => {
       "harnix-finish-work",
     ]);
     for (const alias of Object.values(legacySkillAliases)) {
-      expect(skillNames).toContain(alias.name);
+      expect(workflowSkillNames).toContain(alias.name);
     }
   });
 

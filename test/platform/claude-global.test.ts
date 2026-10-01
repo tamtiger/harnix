@@ -10,7 +10,7 @@ import {
   matchesClaudeGlobalContextHookGroup,
 } from "src/configurators/claude.js";
 import { renderHarnixRules } from "src/templates/harnix/activation.js";
-import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
+import { canonicalSkills, renderSkill } from "src/templates/harnix/workflow.js";
 import type { DesiredGlobalManagedFile } from "src/core/global/managed-files.js";
 
 function entry(files: readonly DesiredGlobalManagedFile[], path: string): DesiredGlobalManagedFile {
@@ -25,7 +25,7 @@ describe("claude user-global desired surface", () => {
     const second = claudeGlobalDesiredFiles();
 
     expect(second).toEqual(first);
-    const skillPaths = workflowSkills.flatMap((skill) => [
+    const skillPaths = canonicalSkills.flatMap((skill) => [
       `skills/${skill.name}/SKILL.md`,
       ...Object.keys(skill.references).map((topic) => `skills/${skill.name}/references/${topic}.md`),
     ]);
@@ -38,7 +38,7 @@ describe("claude user-global desired surface", () => {
   it("should_render_byte_identical_canonical_skills_for_claude", () => {
     const files = claudeGlobalDesiredFiles();
 
-    for (const skill of workflowSkills) {
+    for (const skill of canonicalSkills) {
       const file = entry(files, `skills/${skill.name}/SKILL.md`);
 
       expect(file.kind).toBe("file");

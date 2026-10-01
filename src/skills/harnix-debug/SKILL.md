@@ -2,7 +2,7 @@
 name: harnix-debug
 description: Use when a Harnix implementation or verification has a reproducible bug, failing test, unexpected behavior, loop or repeated unsuccessful fix.
 metadata:
-  version: "2.0.0-dev.13"
+  version: "2.0.0-dev.14"
 ---
 
 # Debug with evidence
@@ -32,6 +32,12 @@ State one hypothesis: **X is the root cause** because **Y evidence**, and **Z mi
 Write the smallest failing regression test (or strongest reproducer), see it fail, make one fix at the root cause, rerun the reproducer and neighbors, remove temporary instrumentation and keep the regression test. Use the smallest reversible action and claim only recovery you actually performed.
 
 One automatic remediation round per verification failure. A failed rerun after it stops automatic work; an identical check, digest, exit code and summary is the strongest signal; skipped or future-dated evidence never resets it. After three distinct failed hypotheses for one symptom stop, reassess assumptions and architecture with the user or replan.
+
+## Technique skills
+
+Use native agent skills on demand (load via `harnix skill <name>`):
+- Intermittent or flaky failures: `harnix skill harnix-flaky-test` diagnoses timing, race conditions and test isolation.
+- Bugfix regressions: `harnix skill harnix-bugfix-preserve` builds test specifications to protect existing working behaviors.
 
 ## Persist and exit
 

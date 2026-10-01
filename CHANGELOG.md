@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.0.0-dev.14] - 2026-10-01
+
+### Added
+
+- Thêm 5 technique skills độc lập (harnix-verification-gap, harnix-bugfix-preserve, harnix-flaky-test, harnix-migration-safety, harnix-security-lens) phân phối qua global skill sink của 6 nền tảng; mở extension point .harnix/spec/skills/ cho custom project skills; bổ sung con trỏ hướng dẫn kích hoạt vào các workflow skills chính.
+
 ## [2.0.0-dev.13] - 2026-10-01
 
 ### Changed

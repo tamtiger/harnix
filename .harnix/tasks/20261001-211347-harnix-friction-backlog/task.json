@@ -1,0 +1,54 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261001-211347-harnix-friction-backlog",
+  "title": "Sửa các lỗi và thiếu sót hướng dẫn của Harnix gặp khi vận hành thật",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "createdAt": "2026-10-01T21:13:47.380+07:00",
+  "updatedAt": "2026-10-01T21:13:47.380+07:00",
+  "goal": "Gom và xử lý các lỗi do chính Harnix gây ra cho agent khi chạy workflow thật (mã, thông báo lỗi, hướng dẫn, thiết kế): danh sách nằm ở bảng backlog trong prd.md và được bổ sung sau mỗi task đã chạy. Task giữ ở planning cho tới khi người dùng chốt mục nào sửa, mục nào từ chối.",
+  "nonGoals": [
+    "Không sửa lỗi môi trường ngoài Harnix (heredoc của Bash tool, WebFetch trả cả trang).",
+    "Không đổi schema TaskRecord v3.",
+    "Không commit hay push tự động."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-triage",
+      "status": "pending",
+      "evidenceIds": [],
+      "text": "Mỗi mục trong bảng backlog của prd.md được sửa (có test hoặc kiểm chứng lặp lại được) hoặc bị từ chối kèm lý do ghi trong prd.md."
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNIX_WORKFLOW.md",
+    "src/cli-program.ts",
+    "src/commands/internal-context.ts",
+    "src/core/managed/project-files.ts",
+    "src/core/tasks/task-validate-contracts.ts",
+    "src/core/workflow/obligations.ts",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/templates/harnix/workflow.md"
+  ],
+  "relevantSpecs": [],
+  "evidence": [],
+  "validationPlan": [
+    {
+      "id": "chk-suite",
+      "description": "Project suite gate",
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-triage"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ],
+      "required": true,
+      "scope": "full"
+    }
+  ]
+}

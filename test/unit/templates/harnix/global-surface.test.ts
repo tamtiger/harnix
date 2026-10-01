@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { HARNIX_RULES, renderHarnixRules } from "src/templates/harnix/activation.js";
 import { HARNIX_GLOBAL_ACTIVATION_DOCUMENT, globalSkillDesiredFiles } from "src/templates/harnix/global-surface.js";
-import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
+import { canonicalSkills, renderSkill } from "src/templates/harnix/workflow.js";
 
 /** Skill files are whole-file entries, so only they carry `content`. */
 const contentOf = (file: { kind: string; content?: string }): string | undefined =>
@@ -26,10 +26,10 @@ describe("global surface templates", () => {
   describe("globalSkillDesiredFiles", () => {
     it("emits canonical SKILL.md and reference files for workflow skills with the rendered bytes", () => {
       const files = globalSkillDesiredFiles("kiro");
-      const totalExpected = workflowSkills.reduce((sum, skill) => sum + 1 + Object.keys(skill.references).length, 0);
+      const totalExpected = canonicalSkills.reduce((sum, skill) => sum + 1 + Object.keys(skill.references).length, 0);
 
       expect(files).toHaveLength(totalExpected);
-      for (const skill of workflowSkills) {
+      for (const skill of canonicalSkills) {
         expect(files).toContainEqual({
           path: `skills/${skill.name}/SKILL.md`,
           sourceId: `kiro-${skill.name}`,

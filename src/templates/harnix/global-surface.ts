@@ -1,6 +1,6 @@
 import type { DesiredGlobalManagedFile } from "src/core/global/managed-files.js";
 import { renderHarnixRules } from "./activation.js";
-import { renderSkill, workflowSkills } from "./workflow.js";
+import { canonicalSkills, renderSkill } from "./workflow.js";
 
 /**
  * Canonical standalone rules document. Every platform whose global surface owns a whole rule/steering file
@@ -17,7 +17,7 @@ export const HARNIX_GLOBAL_ACTIVATION_DOCUMENT = ["# Harnix", "", "## Harnix rul
  */
 export function globalSkillDesiredFiles(sourceIdPrefix: string): DesiredGlobalManagedFile[] {
   const files: DesiredGlobalManagedFile[] = [];
-  for (const skill of workflowSkills) {
+  for (const skill of canonicalSkills) {
     files.push({
       path: `skills/${skill.name}/SKILL.md`,
       sourceId: `${sourceIdPrefix}-${skill.name}`,

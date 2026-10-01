@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.0.0-dev.13"
+  version: "2.0.0-dev.14"
 ---
 
 # Implement with evidence
@@ -17,7 +17,7 @@ A blocked task: read its blocker, resolve it or report the exact condition, then
 
 ## Review the plan
 
-Read the task artifacts, the matching `.harnix/spec/guides/`, the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. `harnix repo-map --query` / `--impact` are navigation hints; verify the source yourself.
+Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands in `.harnix/spec/project-facts.md`, custom project skills in `.harnix/spec/skills/` (or `harnix skill --all`), the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. `harnix repo-map --query` / `--impact` are navigation hints; verify the source yourself.
 
 ## RED, GREEN, REFACTOR per behavior
 
@@ -39,6 +39,12 @@ Release-visible changes bump the package version at most once (`pnpm version:syn
 ## Feedback and stop conditions
 
 Reviewer or user feedback is a hypothesis: read all of it, verify it against the code and contract, apply one item at a time, push back with evidence (`./references/feedback.md` or `harnix skill harnix-implement --reference feedback`). Stop and route on a new product or compatibility decision, a plan that contradicts evidence, a missing dependency or authority, a repeated unexplained failure, or a change that would overwrite user-owned content.
+
+## Technique skills
+
+Use native agent skills on demand (load via `harnix skill <name>`):
+- Complex bugfix preserving behavior: `harnix skill harnix-bugfix-preserve` builds test specifications to protect working contracts.
+- Schema/contract evolution: `harnix skill harnix-migration-safety` guards data and compatibility.
 
 ## Exit
 

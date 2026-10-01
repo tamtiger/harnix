@@ -64,7 +64,7 @@ Harnix version: ${version}.
 - Technologies: ${technologies}.
 - Package paths: ${packagePaths}.
 
-This is a discovery seed, not complete repository truth: verify current manifests, source and tests, and do not bulk-load the repository. Engineering guidance for this project lives in \`.harnix/spec/guides/\`; read only the files relevant to your change. The confirmed stack and the verify commands per package are in the derived \`.harnix/spec/project-facts.md\`; do not edit it. Each task has a derived read-only \`.harnix/tasks/<id>/review.md\` for the user to review.
+This is a discovery seed, not complete repository truth: verify current manifests, source and tests, and do not bulk-load the repository. Engineering guidance for this project lives in \`.harnix/spec/guides/\`; read only the files relevant to your change. The confirmed stack and the verify commands per package are in the derived \`.harnix/spec/project-facts.md\`; do not edit it. Custom project skills live in \`.harnix/spec/skills/<name>/SKILL.md\` (or discoverable via \`harnix skill --all\`); use them when relevant to project domain requirements. Each task has a derived read-only \`.harnix/tasks/<id>/review.md\` for the user to review.
 
 ## Harnix
 

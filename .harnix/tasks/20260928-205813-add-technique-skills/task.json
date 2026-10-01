@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205813-add-technique-skills",
   "title": "[15] Thư viện technique-skill hẹp (5–10, có bằng chứng) + extension point",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Không cố khớp số lượng 292 skill của ECC. Chỉ ship 5–10 technique-skill cross-language có bằng chứng từ research/external-research.md (verification-gap lens, bugfix 'must remain working', flaky-test diagnosis, migration-safety review, security-review lens) dạng SKILL.md chuẩn Agent Skills, cài qua skill sink của add-platform-registry, agent tự chọn theo mô tả, không qua stage routing. Mở .harnix/spec/skills/ làm extension point cho dự án tự thêm skill riêng; Harnix chỉ cung cấp cơ chế discover/cài đặt.",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -17,32 +17,48 @@
     {
       "id": "ac-bounded-count",
       "text": "Đúng 5–10 technique-skill được ship, mỗi skill trích dẫn bằng chứng cụ thể từ external-research.md.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-3",
+        "ev-check-technique-skills-3"
+      ]
     },
     {
       "id": "ac-native-discovery",
       "text": "Technique-skill có frontmatter name/description chuẩn, được cài vào skill sink, không đi qua preflight.nextStage; test xác nhận không lẫn với 5 skill stage-owner.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-global-surface-1",
+        "ev-check-suite-3",
+        "ev-check-technique-skills-3"
+      ]
     },
     {
       "id": "ac-project-skill-ext",
       "text": ".harnix/spec/skills/ cho phép dự án tự thêm skill riêng; có fixture test.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-project-skills-ext-2",
+        "ev-check-suite-3"
+      ]
     },
     {
       "id": "ac-no-scope-creep",
       "text": "Không technique-skill nào trùng phạm vi guides hoặc 5 skill stage-owner.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-3",
+        "ev-check-technique-skills-3"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-sync-2",
+        "ev-check-suite-3"
+      ]
     }
   ],
   "relevantPaths": [
@@ -58,10 +74,10 @@
   "validationPlan": [
     {
       "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
-      "scope": "focused",
-      "required": true,
+      "description": "Toan bo lint, typecheck va moi suite test pass",
       "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "scope": "full",
+      "required": true,
       "criterionIds": [
         "ac-bounded-count",
         "ac-docs-sync",
@@ -70,10 +86,71 @@
         "ac-project-skill-ext"
       ],
       "inputs": [
-        "@task-contract",
         "docs/**",
         "src/**",
         "test/**"
+      ]
+    },
+    {
+      "id": "check-technique-skills",
+      "description": "Kiem tra 5 technique-skill ve so luong, frontmatter, bang chung va khong lan stage-owner",
+      "command": "pnpm vitest run test/unit/skills/technique-skills.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-bounded-count",
+        "ac-native-discovery",
+        "ac-no-scope-creep"
+      ],
+      "inputs": [
+        "src/skills/**",
+        "test/unit/skills/technique-skills.test.ts"
+      ]
+    },
+    {
+      "id": "check-project-skills-ext",
+      "description": "Kiem tra extension point .harnix/spec/skills/ va discovery cua harnix skill",
+      "command": "pnpm vitest run test/integration/commands/skills-extension.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-project-skill-ext"
+      ],
+      "inputs": [
+        "src/commands/skills.ts",
+        "src/core/spec/**",
+        "test/integration/commands/skills-extension.test.ts"
+      ]
+    },
+    {
+      "id": "check-global-surface",
+      "description": "Kiem tra globalSkillDesiredFiles va cac adapter cai dat du ca workflow va technique skills",
+      "command": "pnpm vitest run test/unit/templates/harnix/global-surface.test.ts test/platform/global-adapters.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-native-discovery"
+      ],
+      "inputs": [
+        "src/templates/harnix/global-surface.ts",
+        "test/platform/global-adapters.test.ts",
+        "test/unit/templates/harnix/global-surface.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs-sync",
+      "description": "Kiem tra tai lieu va hop dong skills dong bo",
+      "command": "pnpm vitest run test/workflow/skill-sources.test.ts test/workflow/instruction-budget.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-sync"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/skills/**",
+        "test/workflow/instruction-budget.test.ts",
+        "test/workflow/skill-sources.test.ts"
       ]
     }
   ],
@@ -82,10 +159,233 @@
       "id": "d-draft-checks",
       "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
       "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    },
+    {
+      "id": "d-technique-skills",
+      "text": "Trien khai 5 technique-skills doc lap va mo extension point project skills",
+      "rationale": "Tuan thu nghiem ngat nghien cuu empirical va bao dam test-structure khong bi orphan"
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-10-01T21:25:36.685+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205813-add-technique-skills/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-01T21:28:09.151+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bo sung check tap trung cho cac tieu chi nghiem thu theo quyet dinh d-draft-checks",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205813-add-technique-skills/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-01T21:28:15.730+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bo sung check cho extension point .harnix/spec/skills/",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205813-add-technique-skills/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-10-01T21:28:23.198+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bo sung check cho viec cai dat global skills tren 6 platform",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205813-add-technique-skills/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-04",
+      "recordedAt": "2026-10-01T21:28:30.084+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bo sung check kiem tra dong bo tai lieu va ngan sach token skills",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205813-add-technique-skills/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-05",
+      "recordedAt": "2026-10-01T21:28:35.541+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Cap nhat scope thanh full va input phu hop cho suite gate",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205813-add-technique-skills/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-06",
+      "recordedAt": "2026-10-01T21:29:01.846+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Truyen repeatable --input cho suite gate",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205813-add-technique-skills/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-07",
+      "recordedAt": "2026-10-01T21:29:08.884+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Chuan hoa input thanh repeatable flags",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205813-add-technique-skills/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-08",
+      "recordedAt": "2026-10-01T21:29:15.796+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Chuan hoa input thanh repeatable flags",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205813-add-technique-skills/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-09",
+      "recordedAt": "2026-10-01T21:29:21.715+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Chuan hoa input thanh repeatable flags",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205813-add-technique-skills/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-10",
+      "recordedAt": "2026-10-01T21:29:26.583+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Chuan hoa input thanh repeatable flags",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205813-add-technique-skills/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-technique-skills-1",
+      "checkId": "check-technique-skills",
+      "recordedAt": "2026-10-01T21:43:31.334+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0ab3dade9a4e956eb4ce12e9242a806177501d9d1cb994df01efb17a7f2b99b2"
+    },
+    {
+      "id": "ev-check-project-skills-ext-1",
+      "checkId": "check-project-skills-ext",
+      "recordedAt": "2026-10-01T21:43:39.716+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9e43c94ef486aa66e0aa011318f070504a3b9f65a86b36acf0786d25a9d4d10d"
+    },
+    {
+      "id": "ev-check-global-surface-1",
+      "checkId": "check-global-surface",
+      "recordedAt": "2026-10-01T21:43:48.028+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ce97152fea1e4bf27be0d094e712099d93cdd3c91544188eee3a97d3f0712ecd"
+    },
+    {
+      "id": "ev-check-docs-sync-1",
+      "checkId": "check-docs-sync",
+      "recordedAt": "2026-10-01T21:44:03.777+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "13803bd9495237d4d8c04154b9a0394d420c00cccae53a7ee73e8f00a1e12d1f"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-01T21:45:18.343+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pwsh.exe — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "6c56755b4d44dab03c34f6c5b0c856e164f0811f2309f53dd9419b4acf391df5"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-01T21:49:16.165+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh.exe — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c8292ad292ea91bb25f7f76c7f3b3f409a0244df0363cac689ee9bca42e78323"
+    },
+    {
+      "id": "ev-check-technique-skills-2",
+      "checkId": "check-technique-skills",
+      "recordedAt": "2026-10-01T21:52:43.511+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "eafff6d023fb5fcc804ab84cbd23a2af379af66f9c83d085078e2bfe66263584"
+    },
+    {
+      "id": "ev-check-technique-skills-3",
+      "checkId": "check-technique-skills",
+      "recordedAt": "2026-10-01T21:53:31.704+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e03e012a34bf7e2b00a4b39857c83776ba9b559cf695954d47769676b0b2b89d"
+    },
+    {
+      "id": "ev-check-project-skills-ext-2",
+      "checkId": "check-project-skills-ext",
+      "recordedAt": "2026-10-01T21:53:39.518+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6779297b8e9a14d1a4bf8b6d99de2dd59363b760e64437451b82bf3789631f71"
+    },
+    {
+      "id": "ev-check-docs-sync-2",
+      "checkId": "check-docs-sync",
+      "recordedAt": "2026-10-01T21:53:54.675+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1ed729848c752448ff7ec6b7855de398fbdb94a61a845966c7a89c35fd85f19b"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-01T21:55:05.559+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh.exe — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "374847d96947d846a16302ec4484cfb271b85e9341f9f877ef34ad68ec88a90e"
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
   "createdAt": "2026-09-28T20:58:13.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "updatedAt": "2026-10-01T21:55:44.646+07:00",
+  "residualRisks": [
+    {
+      "id": "r-project-skills",
+      "text": "Cac custom skill can tuan thu dinh dang agent-skills frontmatter de duoc phat hien chinh xac",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-01T21:55:44.646+07:00"
 }
