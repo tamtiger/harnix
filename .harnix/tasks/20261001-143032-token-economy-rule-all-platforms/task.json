@@ -1,0 +1,95 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261001-143032-token-economy-rule-all-platforms",
+  "title": "Them Rule 10 token economy vao HARNIX_RULES cho moi nen tang",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-01T14:30:32.087+07:00",
+  "updatedAt": "2026-10-01T14:35:08.935+07:00",
+  "goal": "Them Rule 10 (token economy) vao HARNIX_RULES trong src/templates/harnix/activation.ts de moi nen tang (Kiro, Antigravity, Codex, Claude, OpenCode, Cursor) deu nhan huong dan tiet kiem token qua block instruction sinh tu nguon duy nhat. Noi dung: luon --brief; dung status --explain thay --inspect; --run-check thay vi chay tay + --evidence; chay lenh hep khi lap, suite day du 1 lan o verify; tail output va jmespath cho MCP; nap skill reference theo yeu cau. Giu block trong ngan sach 1500 token.",
+  "nonGoals": [
+    "Khong doi 9 rule hien co ve noi dung",
+    "Khong tu chay harnix update --global (de nguoi dung tu chay)",
+    "Khong doi logic workflow/state machine"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-rule10",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-activation-1",
+        "ev-chk-suite-1"
+      ],
+      "text": "HARNIX_RULES co Rule 10 token economy (brief, status --explain, run-check, narrow-then-suite, tail+jmespath, lazy skill); renderHarnixRules in ra 10 rule; block always-loaded van trong ngan sach 1500 token (instruction-budget test pass)."
+    }
+  ],
+  "relevantPaths": [
+    "src/templates/harnix/activation.ts",
+    "test/workflow/instruction-budget.test.ts",
+    "test/workflow/activation-instructions.test.ts"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-chk-activation-1",
+      "checkId": "chk-activation",
+      "recordedAt": "2026-10-01T14:33:32.706+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8625d2d9d98053b3e4a6cd318aa8a2c3c2131e26fd45d1314408ff6fcac6c531"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-01T14:34:45.444+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bf79eb0174bcd55f21cea5bfac904929ece5c71bff2c5cad922a8ad536cbaa86"
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-activation",
+      "description": "Test activation rules + instruction budget",
+      "command": "pnpm vitest run test/workflow/activation-instructions.test.ts test/workflow/instruction-budget.test.ts",
+      "criterionIds": [
+        "ac-rule10"
+      ],
+      "inputs": [
+        "src/templates/harnix/activation.ts",
+        "test/workflow/activation-instructions.test.ts",
+        "test/workflow/instruction-budget.test.ts"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "chk-suite",
+      "description": "Project suite gate lint typecheck test",
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-rule10"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "required": true,
+      "scope": "full"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-rule-single-source",
+      "text": "HARNIX_RULES trong src/templates/harnix/activation.ts la nguon duy nhat sinh instruction block cho moi nen tang (Kiro steering, Codex AGENTS.md, Claude CLAUDE.md, Antigravity rules, OpenCode AGENTS.md). Them 1 rule o day ap cho tat ca tool sau khi chay harnix setup/update --global. File Kiro viet tay ~/.kiro/steering/harnix.md la BAN RIENG cua user, khong dong bo tu dong voi package.",
+      "rationale": "Giai thich vi sao sua activation.ts moi ap cho moi tool, con sua file Kiro steering chi anh huong Kiro."
+    }
+  ],
+  "completedAt": "2026-10-01T14:35:08.935+07:00"
+}

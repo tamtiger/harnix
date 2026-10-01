@@ -7,7 +7,7 @@ import { HARNIX_RULES, renderHarnixRules } from "src/templates/harnix/activation
 import { HARNIX_GLOBAL_ACTIVATION_DOCUMENT } from "src/templates/harnix/global-surface.js";
 import { workflowSkills, workflowTemplate } from "src/templates/harnix/workflow.js";
 
-const STATE_RULE = HARNIX_RULES[HARNIX_RULES.length - 1]!;
+const STATE_RULE = HARNIX_RULES.find((rule) => /change task state only with `harnix workflow`/u.test(rule))!;
 
 function skillAndReferences(name: string): string {
   const skill = workflowSkills.find((candidate) => candidate.name === name);
