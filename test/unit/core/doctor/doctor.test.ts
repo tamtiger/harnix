@@ -47,7 +47,7 @@ describe("doctor run", () => {
     const report = await runDoctor({ root, homeResolver, commandLookup, environment: {} }, deps(calls));
 
     expect(report).toMatchObject({ schemaVersion: 2, generator: "harnix" });
-    expect(report.globalIntegrations).toHaveLength(4);
+    expect(report.globalIntegrations).toHaveLength(6);
     expect(report.summary.fixed).toBe(0);
     expect(calls).toEqual({ project: 0, global: 0 });
   });

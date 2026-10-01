@@ -2,7 +2,7 @@
 
 ## Mission
 
-Build Harnix as a lean coding-agent harness for exactly Kiro, Antigravity, Codex, and Claude Code. Project workflow data remains local in `.harnix/`; Phase 6 platform integrations are explicit, Harnix-owned **user-global** customizations. The product is one npm package (`@tamtiger/harnix`) and one executable (`harnix`).
+Build Harnix as a lean coding-agent harness for exactly Kiro, Antigravity, Codex, Claude Code, OpenCode, and Cursor. Project workflow data remains local in `.harnix/`; Phase 6 platform integrations are explicit, Harnix-owned **user-global** customizations. The product is one npm package (`@tamtiger/harnix`) and one executable (`harnix`).
 
 ## Sources of truth
 
@@ -30,11 +30,12 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 
 - TypeScript ESM, Node.js `>=18`, pnpm, Commander.js, Inquirer, tsup, and Vitest.
 - Exactly one publishable `package.json` and one `harnix` bin.
-- Supported platforms are Kiro, Antigravity, Codex, and Claude Code only.
+- Supported platforms are Kiro, Antigravity, Codex, Claude Code, OpenCode, and Cursor only.
 - Antigravity public identity/flag is `antigravity`/`--antigravity`; its executable is `agy`. The physical `.gemini` namespace does not make Gemini CLI a supported platform.
+- OpenCode and Cursor were added purely as platform-registry records plus configurators (epic decision D3, 2026-10-01): OpenCode owns a marked block in `~/.config/opencode/AGENTS.md` (which takes precedence over the `~/.claude/CLAUDE.md` fallback) plus skills under `~/.config/opencode/skills/` and is hookless with no root relocate variable; Cursor has no global instruction file (User Rules are UI-only) so it ships only skills under `~/.cursor/skills/` and is hookless because its `sessionStart` injection is unverified. Both use `preserveUnownedRoot: false` because their roots are shared with the tool, and neither uses `beforeSubmitPrompt`.
 - Runtime code stays in the installed package. Never copy runtime scripts into consumer repositories.
 - No telemetry, daemon, hosted service, marketplace, default MCP, global memory, or silent runtime network.
-- User-global setup is limited to the documented Kiro, Antigravity, Codex, and Claude Code files. Never create `~/.harnix`, mutate real user homes in tests, or infer global ownership from a project manifest.
+- User-global setup is limited to the documented Kiro, Antigravity, Codex, Claude Code, OpenCode, and Cursor files. Never create `~/.harnix`, mutate real user homes in tests, or infer global ownership from a project manifest.
 - No channel/forum/worker network, workflow-template switching, mandatory subagents, or automatic Git integration.
 - Never auto-commit, branch, create a worktree, merge, push, publish, or create a PR.
 - Before any commit, show the proposed changes and commit message, then wait for explicit user approval. A request to commit does not authorize skipping this review.

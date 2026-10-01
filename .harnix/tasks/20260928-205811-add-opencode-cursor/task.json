@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205811-add-opencode-cursor",
   "title": "[13] Thêm OpenCode và Cursor qua platform registry",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Thêm đúng hai nền tảng OpenCode và Cursor chỉ bằng bản ghi registry + fixture (chứng minh registry). OpenCode: marker block trong ~/.config/opencode/AGENTS.md giữ nội dung ngoài block; xử lý rõ rủi ro tạo file làm OpenCode ngừng dùng dự phòng ~/.claude/CLAUDE.md; skill qua skill sink chung; không có hook shell nên chạy chế độ không hook, không cài plugin JS mặc định. Cursor: không có file instruction global (User Rules chỉ qua UI) nên dựa vào skill + chế độ không hook; hook sessionStart trong ~/.cursor/hooks.json chỉ là tăng cường tùy chọn, bật khi đã xác minh schema additional_context; không dùng beforeSubmitPrompt. Chống trùng skill vì cả hai tool đọc nhiều thư mục (~/.agents/skills, ~/.claude/skills, ~/.cursor/skills, ~/.codex/skills, ~/.config/opencode/skills). Flag --opencode, --cursor cho setup/update/uninstall/doctor --global. Xác minh lại mọi đường dẫn, biến môi trường relocate root và schema hook bằng tài liệu chính thức lúc làm task (design.md §10).",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -18,38 +18,56 @@
     {
       "id": "ac-opencode-setup",
       "text": "setup/update/doctor/uninstall --global --opencode chạy đúng qua fake home: marker block trong ~/.config/opencode/AGENTS.md, giữ nội dung ngoài block; hành vi với dự phòng ~/.claude/CLAUDE.md được chọn, test và ghi rõ.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-platform-2",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-cursor-setup",
       "text": "setup/update/doctor/uninstall --global --cursor chạy đúng qua fake home; skill được Cursor đọc thấy; hook sessionStart chỉ được cài khi schema đã xác minh, nếu không doctor báo rõ trạng thái hookless.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-platform-2",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-no-duplicate-skills",
       "text": "Khi cài nhiều nền tảng cùng lúc, mỗi tool chỉ thấy một bản mỗi skill harnix-* theo ma trận thư mục mà tool đó đọc; doctor cảnh báo khi có trùng.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-platform-2",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-registry-only",
       "text": "Hai nền tảng được thêm chỉ bằng bản ghi registry và fixture; không thêm nhánh theo tên nền tảng ngoài registry.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-registry-2",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-verified-facts",
       "text": "Đường dẫn, biến môi trường relocate root và schema hook của OpenCode/Cursor được xác minh bằng nguồn chính thức kèm ngày truy cập và ghi vào docs; điểm chưa xác minh được ghi rõ giới hạn.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-registry-2",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD, ranh giới Supported platforms trong AGENTS.md, README và docs global setup được cập nhật trong cùng task.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "relevantPaths": [
@@ -73,10 +91,10 @@
   "validationPlan": [
     {
       "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
-      "scope": "focused",
-      "required": true,
+      "description": "Project suite gate: lint + typecheck + toan bo test pass (chan hoi quy)",
       "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "scope": "full",
+      "required": true,
       "criterionIds": [
         "ac-cursor-setup",
         "ac-docs-sync",
@@ -86,10 +104,63 @@
         "ac-verified-facts"
       ],
       "inputs": [
-        "@task-contract",
         "docs/**",
         "src/**",
         "test/**"
+      ]
+    },
+    {
+      "id": "check-registry",
+      "description": "Registry + facts: 6 nen tang la du lieu, facts co nguon + verifiedOn",
+      "command": "pnpm vitest run test/unit/core/platform/registry.test.ts test/unit/core/platform/facts.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-registry-only",
+        "ac-verified-facts"
+      ],
+      "inputs": [
+        "src/core/platform/facts.ts",
+        "src/core/platform/registry.ts",
+        "test/unit/core/platform/facts.test.ts",
+        "test/unit/core/platform/registry.test.ts"
+      ]
+    },
+    {
+      "id": "check-platform",
+      "description": "Lifecycle OpenCode/Cursor qua fake home + dedup skill",
+      "command": "pnpm vitest run test/platform/opencode-global.test.ts test/platform/cursor-global.test.ts test/platform/skill-dedup.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-cursor-setup",
+        "ac-no-duplicate-skills",
+        "ac-opencode-setup"
+      ],
+      "inputs": [
+        "src/commands/setup.ts",
+        "src/configurators/cursor.ts",
+        "src/configurators/opencode.ts",
+        "src/core/platform/registry.ts",
+        "src/core/platform/user-paths.ts",
+        "test/platform/**"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Docs sync: PRD/AGENTS/README/global-setup nhac OpenCode+Cursor",
+      "command": "pnpm vitest run test/unit/docs/supported-platforms.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-sync"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "README.md",
+        "docs/GLOBAL_SETUP_REFACTOR_PLAN.md",
+        "docs/HARNIX_PRD.md",
+        "test/unit/docs/supported-platforms.test.ts"
       ]
     }
   ],
@@ -98,10 +169,144 @@
       "id": "d-draft-checks",
       "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
       "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    },
+    {
+      "id": "d-opencode-facts",
+      "text": "OpenCode (opencode.ai/docs/rules + /docs/config, truy cap 2026-10-01): instruction global = ~/.config/opencode/AGENTS.md; skills native doc = ~/.config/opencode/skills/ (ten plural); KHONG co env var relocate rieng cho root ~/.config/opencode (OPENCODE_CONFIG tro 1 file, OPENCODE_CONFIG_DIR them thu muc custom chu khong doi root; XDG_CONFIG_HOME la quy uoc XDG, khong wiring) nen envOverride=null va ghi gioi han; tao ~/.config/opencode/AGENTS.md khien OpenCode ngung dung fallback prompt ~/.claude/CLAUDE.md (precedence), chap nhan vi ta so huu marker block, skills co disable var rieng OPENCODE_DISABLE_CLAUDE_CODE_SKILLS; khong co shell hook -> hookless, contextOutput plain.",
+      "rationale": "AC ac-verified-facts yeu cau xac minh duong dan/env/hook bang nguon chinh thuc kem ngay truy cap."
+    },
+    {
+      "id": "d-cursor-facts",
+      "text": "Cursor (cursor.com/docs/hooks, truy cap 2026-10-01): KHONG co file instruction global (User Rules chi qua UI, project rules la .cursor/rules/*.md) nen instructionFile=null; user hooks = ~/.cursor/hooks.json schema version=1 (so nguyen duong); sessionStart output additional_context (string) + env (object) nhung la fire-and-forget, agent loop khong doi/khong ep; co 2 bao cao chinh thuc tren forum.cursor.com rang additional_context KHONG duoc inject on dinh vao system context ban dau -> injection chua xac minh. Skills doc tai ~/.cursor/skills/. Khong co env relocate root ~/.cursor duoc tai lieu. Quyet dinh: Cursor hookless mac dinh (contextHook=null, contextOutput plain, dua vao skill); sessionStart chi la tang cuong tuy chon, chua bat vi injection chua xac minh; KHONG dung beforeSubmitPrompt (chi chan/validate, khong inject).",
+      "rationale": "AC ac-cursor-setup + ac-verified-facts: chi cai hook khi schema xac minh; schema version=1 xac minh nhung do tin cay inject chua -> giu hookless."
+    },
+    {
+      "id": "d-preserve-unowned-root",
+      "text": "Nen tang single-root dung chung voi tool (OpenCode ~/.config/opencode, Cursor ~/.cursor) phai dat preserveUnownedRoot=false giong Kiro/Claude, KHONG phai true nhu Antigravity plugin dir. preserveUnownedRoot=true khien setup tu choi khi root da ton tai (user that thuong co san ~/.cursor), coi ca root la unowned. Khi false, trung skill duoc bat o muc tung unit qua markUnownedSkillUnitCollisions (reason 'A pre-existing Harnix-namespaced skill unit is not owned by Harnix.').",
+      "rationale": "Test platform lo ra: readiness drifted + ca root bi preserve khi preserveUnownedRoot=true tren shared root."
+    },
+    {
+      "id": "d-records-extraction",
+      "text": "Khi them record vao PLATFORM_RECORDS lam registry.ts > 300 dong (max-lines), tach mang record ra src/core/platform/records.ts; registry.ts giu type + ham + re-export PLATFORM_RECORDS. records.ts import type PlatformRecord tu registry (type-only, khong cycle runtime). Them import truc tiep records.ts trong registry.test.ts de thoa test-structure 'tests every source module'.",
+      "rationale": "Giai phap thay vi them vao danh sach mien tru max-lines (chi duoc thu nho); giu dung huong tang va 300-dong cap."
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-10-01T09:33:15.374+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205811-add-opencode-cursor/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-01T09:39:11.796+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Planning convergence: thay check-suite nhap bang cac check tap trung cho tung AC theo quyet dinh d-draft-checks truoc khi ready; obligations chua tung dat ready.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205811-add-opencode-cursor/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-01T09:39:27.250+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Planning convergence per d-draft-checks: check tap trung cho AC lifecycle + dedup truoc ready.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205811-add-opencode-cursor/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-10-01T09:39:35.864+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Planning convergence per d-draft-checks: check tap trung cho AC docs-sync truoc ready.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205811-add-opencode-cursor/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-04",
+      "recordedAt": "2026-10-01T09:40:15.834+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Planning convergence per d-draft-checks: check-suite tro thanh suite gate scope full phu source+test+docs.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205811-add-opencode-cursor/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-registry-1",
+      "checkId": "check-registry",
+      "recordedAt": "2026-10-01T10:13:58.945+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "15fc3d97775836d075a8e79970e3d9dd8c7addf334101efcabc427bdb68cb0a8"
+    },
+    {
+      "id": "ev-check-platform-1",
+      "checkId": "check-platform",
+      "recordedAt": "2026-10-01T10:14:23.879+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2bccce55a142894e7604b5a6b88bce8840ea5447fff8b9e1dead043c023e518e"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-01T10:14:38.556+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f05097d445e7f4396e7027a40cafc43cb52b8638414746252a36f528438bf26c"
+    },
+    {
+      "id": "ev-check-registry-2",
+      "checkId": "check-registry",
+      "recordedAt": "2026-10-01T10:43:24.316+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3d8b79e167b3f122c200a41755aa98413cdba1250f9734a750e0a083f9cf1108"
+    },
+    {
+      "id": "ev-check-platform-2",
+      "checkId": "check-platform",
+      "recordedAt": "2026-10-01T10:43:42.367+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8c632ebdc846cce486a5fad6410bc13430013b7a94bc8f915c27957d8f0db440"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-01T10:45:10.905+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fcd57dcaa40fd8271fc4518bf8d7e11d349a0ea9ca7c7fdc7db42c7e209b764d"
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
   "createdAt": "2026-09-28T20:58:11.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "updatedAt": "2026-10-01T10:48:51.653+07:00",
+  "residualRisks": [
+    {
+      "id": "r-cursor-sessionstart",
+      "text": "Cursor sessionStart hook (hooks.json v1) co output additional_context nhung fire-and-forget va injection vao system context ban dau chua tin cay (2 bao cao chinh thuc 2026). Khi bat hook Cursor sau nay phai xac minh lai injection truoc, dung giả định no hoat dong.",
+      "severity": "medium"
+    }
+  ],
+  "completedAt": "2026-10-01T10:48:51.653+07:00"
 }

@@ -29,6 +29,8 @@ export interface UserPlatformRoots {
     readonly config: UserPathRoot;
     readonly skills: UserPathRoot;
   };
+  readonly opencode: UserPathRoot;
+  readonly cursor: UserPathRoot;
 }
 
 /** Public integration identities used to resolve only authorized platform roots. */
@@ -50,6 +52,8 @@ export interface SelectedUserPlatformRoots {
         readonly skills: UserPathRoot;
       }
     | undefined;
+  readonly opencode?: UserPathRoot | undefined;
+  readonly cursor?: UserPathRoot | undefined;
 }
 
 export interface ResolveUserPlatformRootsOptions {
@@ -74,7 +78,9 @@ export async function resolveUserPlatformRoots(
     roots.antigravityDesktop === undefined ||
     roots.antigravityCli === undefined ||
     roots.codex === undefined ||
-    roots.claude === undefined
+    roots.claude === undefined ||
+    roots.opencode === undefined ||
+    roots.cursor === undefined
   ) {
     throw new UnsafeUserPathError("All supported user platform roots could not be resolved.");
   }
@@ -83,7 +89,9 @@ export async function resolveUserPlatformRoots(
     antigravityDesktop: roots.antigravityDesktop,
     claude: roots.claude,
     codex: roots.codex,
+    cursor: roots.cursor,
     kiro: roots.kiro,
+    opencode: roots.opencode,
   };
 }
 
@@ -117,6 +125,8 @@ function shapeRoots(resolved: ReadonlyMap<string, UserPathRoot>): SelectedUserPl
   const codexConfig = resolved.get("codex:config");
   const codexSkills = resolved.get("codex:skills");
   const claude = resolved.get("claude:config");
+  const opencode = resolved.get("opencode:config");
+  const cursor = resolved.get("cursor:config");
   return {
     ...(kiro === undefined ? {} : { kiro }),
     ...(antigravityDesktop === undefined ? {} : { antigravityDesktop }),
@@ -125,6 +135,8 @@ function shapeRoots(resolved: ReadonlyMap<string, UserPathRoot>): SelectedUserPl
       ? {}
       : { codex: { config: codexConfig, skills: codexSkills } }),
     ...(claude === undefined ? {} : { claude }),
+    ...(opencode === undefined ? {} : { opencode }),
+    ...(cursor === undefined ? {} : { cursor }),
   };
 }
 
@@ -135,6 +147,8 @@ const ROOT_ACCESSORS: Readonly<Record<string, (roots: SelectedUserPlatformRoots)
   "codex:config": (roots) => roots.codex?.config,
   "codex:skills": (roots) => roots.codex?.skills,
   "claude:config": (roots) => roots.claude,
+  "opencode:config": (roots) => roots.opencode,
+  "cursor:config": (roots) => roots.cursor,
 };
 
 /** The resolved root a registry `<platform>:<root key>` names, or undefined when it was not selected. */

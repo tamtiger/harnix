@@ -42,3 +42,33 @@ export const CLAUDE_FACTS: readonly PlatformFact[] = [
     verifiedOn: "2026-10-01",
   },
 ];
+
+export const OPENCODE_FACTS: readonly PlatformFact[] = [
+  {
+    claim:
+      "OpenCode reads global rules from ~/.config/opencode/AGENTS.md and that file takes precedence over the ~/.claude/CLAUDE.md fallback, so creating it stops the Claude Code prompt fallback (Harnix only owns a marker block inside it)",
+    source: "https://opencode.ai/docs/rules",
+    verifiedOn: "2026-10-01",
+  },
+  {
+    claim:
+      "OpenCode reads skills from the ~/.config/opencode/skills/ directory (plural subdirectory name); no documented environment variable relocates the ~/.config/opencode root (OPENCODE_CONFIG names a single config file, OPENCODE_CONFIG_DIR adds an extra custom directory), so the root is hookless with no envOverride (documented limit)",
+    source: "https://opencode.ai/docs/config",
+    verifiedOn: "2026-10-01",
+  },
+];
+
+export const CURSOR_FACTS: readonly PlatformFact[] = [
+  {
+    claim:
+      "Cursor has no global instruction file (User Rules are UI-only; project rules live in .cursor/rules/*.md), so Harnix relies on skills under ~/.cursor/skills/ with no owned instruction file",
+    source: "https://cursor.com/docs/hooks",
+    verifiedOn: "2026-10-01",
+  },
+  {
+    claim:
+      "Cursor user hooks live in ~/.cursor/hooks.json (schema version 1); the sessionStart additional_context output is fire-and-forget and two official forum reports show it is not reliably injected into initial system context, so Harnix stays hookless (sessionStart injection unverified, documented limit) and never uses beforeSubmitPrompt",
+    source: "https://cursor.com/docs/hooks",
+    verifiedOn: "2026-10-01",
+  },
+];

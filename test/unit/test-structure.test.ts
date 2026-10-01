@@ -51,7 +51,11 @@ describe("test suite structure", () => {
   });
 
   it("mirrors src in test/unit and src/commands in test/integration/commands", () => {
-    const unitExceptions = new Set(["test/unit/test-structure.test.ts"]);
+    const unitExceptions = new Set([
+      "test/unit/test-structure.test.ts",
+      // Repository-contract test with no src module to mirror (documentation/platform-boundary consistency).
+      "test/unit/docs/supported-platforms.test.ts",
+    ]);
     const unitOrphans = specFiles
       .filter((path) => path.startsWith("test/unit/") && !unitExceptions.has(path))
       .filter((path) => !sourceFiles.includes(`src/${path.slice("test/unit/".length).replace(/\.test\.ts$/u, ".ts")}`));

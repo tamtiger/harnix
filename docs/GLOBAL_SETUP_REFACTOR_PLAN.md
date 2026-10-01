@@ -24,12 +24,16 @@ Quyết định đích:
 | Antigravity Desktop/IDE | `~/.gemini/config/plugins/harnix/skills/harnix-*/SKILL.md` | `~/.gemini/config/plugins/harnix/rules/AGENTS.md` | `~/.gemini/config/plugins/harnix/hooks.json` | Plugin global được auto-discover cho mọi workspace; `plugin.json` là bắt buộc; standalone AGENTS rule always-on không có frontmatter. |
 | Antigravity CLI (`agy`) | `~/.gemini/antigravity-cli/plugins/harnix/skills/harnix-*/SKILL.md` | `~/.gemini/antigravity-cli/plugins/harnix/rules/AGENTS.md` | `~/.gemini/antigravity-cli/plugins/harnix/hooks.json` | CLI dùng vùng staging riêng; không giả định plugin Desktop tự được CLI load; standalone AGENTS rule always-on không có frontmatter. |
 | Codex CLI/IDE | `$HOME/.agents/skills/harnix-*/SKILL.md` | `$CODEX_HOME/AGENTS.md`, mặc định `~/.codex/AGENTS.md` | `$CODEX_HOME/config.toml`, mặc định `~/.codex/config.toml` | Skill user-global **không nằm trong `.codex/skills`**. Hook nằm inline cùng config source để tránh Codex mixed-source warning; legacy Harnix JSON được migrate conservatively. |
+| OpenCode (thêm sau Phase 6, epic D3) | `~/.config/opencode/skills/harnix-*/SKILL.md` | marked block trong `~/.config/opencode/AGENTS.md` | — (hookless) | AGENTS.md global thắng fallback `~/.claude/CLAUDE.md`; Harnix chỉ sở hữu marked block, giữ nội dung ngoài block. Không có env var relocate root `~/.config/opencode` (OPENCODE_CONFIG=file, OPENCODE_CONFIG_DIR=thư mục custom — giới hạn đã biết). Không có shell hook user-global. |
+| Cursor (thêm sau Phase 6, epic D3) | `~/.cursor/skills/harnix-*/SKILL.md` | — (User Rules chỉ qua UI; project rules `.cursor/rules/*.md`) | — (hookless) | Không có file instruction global. `~/.cursor/hooks.json` schema version 1 có `sessionStart` (output `additional_context`) nhưng fire-and-forget và injection chưa xác minh (2 báo cáo chính thức) nên chạy hookless; không dùng `beforeSubmitPrompt`. Không có env relocate root `~/.cursor`. |
 
 Nguồn xác minh:
 
 - Codex: [skill locations](https://learn.chatgpt.com/docs/build-skills), [hooks](https://learn.chatgpt.com/docs/hooks), [global AGENTS.md](https://learn.chatgpt.com/docs/agent-configuration/agents-md).
 - Kiro: [configuration scopes](https://kiro.dev/docs/configuration/), [skills](https://kiro.dev/docs/skills/), [steering](https://kiro.dev/docs/steering/), [hooks](https://kiro.dev/docs/hooks/), [hook actions](https://kiro.dev/docs/hooks/actions/).
 - Antigravity: [skills](https://antigravity.google/docs/skills), [IDE plugins](https://antigravity.google/docs/ide/plugins), [hooks](https://antigravity.google/docs/hooks), [CLI plugins](https://antigravity.google/docs/cli/features), [CLI migration](https://antigravity.google/docs/gcli-migration).
+- OpenCode (truy cập 2026-10-01): [rules/global AGENTS.md](https://opencode.ai/docs/rules), [config directory](https://opencode.ai/docs/config).
+- Cursor (truy cập 2026-10-01): [hooks (hooks.json schema version 1, sessionStart)](https://cursor.com/docs/hooks).
 
 Version snapshot tại thời điểm research:
 

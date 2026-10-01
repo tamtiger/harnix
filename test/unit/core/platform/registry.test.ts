@@ -9,6 +9,7 @@ import {
   validatePlatformRecords,
   type PlatformRecord,
 } from "src/core/platform/registry.js";
+import { PLATFORM_RECORDS } from "src/core/platform/records.js";
 
 const fakeRecord: PlatformRecord = {
   id: "fakeide",
@@ -37,16 +38,37 @@ const fakeRecord: PlatformRecord = {
 };
 
 describe("platform registry", () => {
-  it("declares exactly the four supported platforms in stable order", () => {
-    expect(PLATFORM_IDS).toEqual(["kiro", "antigravity", "codex", "claude"]);
+  it("declares exactly the six supported platforms in stable order", () => {
+    expect(PLATFORM_IDS).toEqual(["kiro", "antigravity", "codex", "claude", "opencode", "cursor"]);
     expect(platformRecords().map((record) => record.id)).toEqual([...PLATFORM_IDS]);
+    expect(platformRecords()).toBe(PLATFORM_RECORDS);
   });
 
   it("parses and guards platform ids", () => {
     expect(isPlatformId("codex")).toBe(true);
+    expect(isPlatformId("opencode")).toBe(true);
+    expect(isPlatformId("cursor")).toBe(true);
     expect(isPlatformId("gemini")).toBe(false);
     expect(parsePlatformId("claude")).toBe("claude");
-    expect(() => parsePlatformId("gemini")).toThrow("--platform must be kiro, antigravity, codex, or claude.");
+    expect(parsePlatformId("opencode")).toBe("opencode");
+    expect(() => parsePlatformId("gemini")).toThrow(
+      "--platform must be kiro, antigravity, codex, claude, opencode, or cursor.",
+    );
+  });
+
+  it("declares OpenCode and Cursor as hookless registry data", () => {
+    expect(getPlatform("opencode").instructionFile).toBe("AGENTS.md");
+    expect(getPlatform("opencode").contextHook).toBeNull();
+    expect(getPlatform("opencode").contextOutput).toBe("plain");
+    expect(getPlatform("opencode").roots[0]?.logicalPath).toBe("~/.config/opencode");
+    expect(getPlatform("opencode").targets.map((target) => target.planKey)).toEqual(["opencode"]);
+    expect(getPlatform("opencode").targets.every((target) => target.preserveUnownedRoot)).toBe(false);
+    expect(getPlatform("cursor").instructionFile).toBeNull();
+    expect(getPlatform("cursor").contextHook).toBeNull();
+    expect(getPlatform("cursor").contextOutput).toBe("plain");
+    expect(getPlatform("cursor").roots[0]?.logicalPath).toBe("~/.cursor");
+    expect(getPlatform("cursor").targets.map((target) => target.planKey)).toEqual(["cursor"]);
+    expect(getPlatform("cursor").setupNotice).toContain("hookless");
   });
 
   it("keeps the public per-platform behavior as data", () => {

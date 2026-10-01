@@ -33,6 +33,8 @@ describe("diagnoseProject Doctor v2 global integrations", () => {
       { platform: "antigravity", status: "not-installed" },
       { platform: "codex", status: "not-installed" },
       { platform: "claude", status: "not-installed" },
+      { platform: "opencode", status: "not-installed" },
+      { platform: "cursor", status: "not-installed" },
     ]);
   });
 
@@ -68,6 +70,8 @@ describe("diagnoseProject Doctor v2 global integrations", () => {
           antigravity: "shadowed" as const,
           codex: "active" as const,
           claude: "active" as const,
+          opencode: "active" as const,
+          cursor: "active" as const,
         })[platform],
       codexTrustLookup: async () => "trusted",
       root,
@@ -80,6 +84,8 @@ describe("diagnoseProject Doctor v2 global integrations", () => {
       { platform: "antigravity", status: "shadowed" },
       { platform: "codex", status: "active" },
       { platform: "claude", status: "not-installed" },
+      { platform: "opencode", status: "not-installed" },
+      { platform: "cursor", status: "not-installed" },
     ]);
   });
 

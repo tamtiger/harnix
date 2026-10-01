@@ -66,6 +66,8 @@ describe("diagnoseGlobalIntegrations", () => {
       { platform: "antigravity", status: "not-installed" },
       { platform: "codex", status: "not-installed" },
       { platform: "claude", status: "not-installed" },
+      { platform: "opencode", status: "not-installed" },
+      { platform: "cursor", status: "not-installed" },
     ]);
     expect(
       integrations
@@ -77,6 +79,8 @@ describe("diagnoseGlobalIntegrations", () => {
     await expect(access(join(home, ".gemini"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(home, ".agents"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(home, "codex-home"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(home, ".config", "opencode"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(home, ".cursor"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   it("should_report_an_unowned_harnix_skill_unit_when_no_global_sidecar_exists", async () => {
@@ -128,6 +132,8 @@ describe("diagnoseGlobalIntegrations", () => {
       { platform: "antigravity", status: "precedence-unknown" },
       { platform: "codex", status: "installed-pending-trust" },
       { platform: "claude", status: "not-installed" },
+      { platform: "opencode", status: "not-installed" },
+      { platform: "cursor", status: "not-installed" },
     ]);
     const codex = integrations.find((integration) => integration.platform === "codex");
     expect(codex?.findings).toContainEqual(
@@ -152,6 +158,8 @@ describe("diagnoseGlobalIntegrations", () => {
           antigravity: "shadowed" as const,
           codex: "active" as const,
           claude: "active" as const,
+          opencode: "active" as const,
+          cursor: "active" as const,
         })[platform],
       codexTrustLookup: async () => "trusted",
       commandLookup: async () => true,
@@ -164,6 +172,8 @@ describe("diagnoseGlobalIntegrations", () => {
       { platform: "antigravity", status: "shadowed" },
       { platform: "codex", status: "active" },
       { platform: "claude", status: "not-installed" },
+      { platform: "opencode", status: "not-installed" },
+      { platform: "cursor", status: "not-installed" },
     ]);
     expect(integrations[0]?.findings).toContainEqual(
       expect.objectContaining({ code: "global-unsupported-version", severity: "warning" }),

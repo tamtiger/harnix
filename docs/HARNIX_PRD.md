@@ -31,7 +31,7 @@ Harnix được phát triển từ baseline kỹ thuật [mindfold-ai/Trellis](h
 | 5 | Re-init/update overwrite customizations | Versioned hash manifest và conservative ownership |
 | 6 | Scripts/hooks duplicate | Runtime từ package đã cài; mỗi platform một mechanism |
 | 7 | Thiếu stack-specific standards | Detect stack và seed concise relevant rules |
-| 8 | Quá nhiều platform/surface | Chỉ Kiro, Antigravity, Codex và Claude Code |
+| 8 | Quá nhiều platform/surface | Chỉ Kiro, Antigravity, Codex, Claude Code, OpenCode và Cursor |
 | 9 | Workflow/channel quá phức tạp | Một workflow; không forum/worker network |
 | 10 | Completion claim thiếu evidence | Fresh verification gate và two-stage review |
 | 11 | Legacy install bị merge âm thầm | Preview, explicit migration, verify, rollback, preserve source |
@@ -55,7 +55,7 @@ Harnix được phát triển từ baseline kỹ thuật [mindfold-ai/Trellis](h
 - Task/spec/context/journal/learning project-local.
 - Dual-mode brainstorm, adaptive TDD, systematic debugging, two-stage review.
 - Stack/package-manager/verification detection.
-- Kiro, Antigravity, Codex và Claude Code native user-global integrations with project-activation guards.
+- Kiro, Antigravity, Codex, Claude Code, OpenCode và Cursor native user-global integrations with project-activation guards. OpenCode (`~/.config/opencode/AGENTS.md` + `~/.config/opencode/skills/`, hookless; marked block thay fallback `~/.claude/CLAUDE.md`) và Cursor (`~/.cursor/skills/`, không file instruction global vì User Rules chỉ qua UI, hookless vì `sessionStart` injection chưa xác minh) được thêm chỉ bằng bản ghi registry + facts (nguồn chính thức, truy cập 2026-10-01).
 - Managed lifecycle, migration, doctor, update, upgrade, uninstall, memory query.
 - Bounded task observability, exact unfinished-task pointer recovery, effective-context explanation và required-check freshness explanation.
 - Concise common và stack-specific engineering rules.

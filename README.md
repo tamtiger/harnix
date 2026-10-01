@@ -2,7 +2,7 @@
 
 **Version:** `2.0.0-dev.8`
 
-Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex hoặc Claude Code), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
+Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
 Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 
@@ -28,7 +28,7 @@ Repository: [github.com/tamtiger/harnix](https://github.com/tamtiger/harnix.git)
 Khi làm việc với một coding agent, hai vấn đề hay gặp là: agent quên mất mình đang làm gì giữa chừng, và không ai biết agent đã thực sự kiểm chứng thay đổi hay chưa. Harnix gắn một quy trình làm việc (workflow) cố định vào agent để giải quyết việc đó:
 
 - **Một npm package** (`@tamtiger/harnix`) và **một executable** (`harnix`).
-- Hỗ trợ đúng 4 nền tảng agent: **Kiro, Antigravity, Codex và Claude Code**.
+- Hỗ trợ đúng 6 nền tảng agent: **Kiro, Antigravity, Codex, Claude Code, OpenCode và Cursor**.
 - Dữ liệu task nằm gọn trong `.harnix/` của từng project; tích hợp platform là cấu hình user-global, cài một lần, dùng cho mọi project.
 - Chạy hoàn toàn local, mặc định không cần network, không telemetry, không daemon, không hosted service.
 - **Không bao giờ tự động commit, branch, merge, push, publish hay tạo pull request** — trước mọi commit, Harnix luôn trình bày thay đổi và commit message đề xuất, rồi chờ bạn duyệt.
@@ -128,7 +128,7 @@ Chi tiết đầy đủ (transition, gate, artifact contract) nằm ở [Workflo
 
 ## Từ yêu cầu người dùng đến workflow agent
 
-**Gửi yêu cầu tự nhiên** cho agent (Kiro, Antigravity, Codex, Claude Code) ngay trong project đã `harnix init` — không cần gõ lệnh `harnix` nào trước. Agent tự phân loại yêu cầu đó trước khi chạm vào task đang active:
+**Gửi yêu cầu tự nhiên** cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode, Cursor) ngay trong project đã `harnix init` — không cần gõ lệnh `harnix` nào trước. Agent tự phân loại yêu cầu đó trước khi chạm vào task đang active:
 
 - Một câu hỏi chỉ đọc, một review độc lập, hoặc một **standalone read-only research** không tạo hay đụng vào task nào — agent trả lời/thực hiện ngay rồi dừng lại (Bypass).
 - Ngược lại, bất kỳ yêu cầu nào **thay đổi file repository hoặc task artifact phải đi vào lifecycle Lite/Full** — tạo hoặc tiếp tục một task record, đi qua đúng các stage `planning -> ready -> implementing -> verifying -> finishing -> completed`.

@@ -1,7 +1,9 @@
 import { antigravityGlobalPluginDesiredFiles } from "src/configurators/antigravity.js";
 import { claudeGlobalDesiredFiles, matchesClaudeGlobalContextHookGroup } from "src/configurators/claude.js";
 import { createCodexGlobalSurfacePlan, matchesCodexGlobalContextHookGroup } from "src/configurators/codex.js";
+import { cursorGlobalDesiredFiles } from "src/configurators/cursor.js";
 import { kiroGlobalDesiredFiles } from "src/configurators/kiro.js";
+import { opencodeGlobalDesiredFiles } from "src/configurators/opencode.js";
 import type { GlobalLock, GlobalLockAcquirer } from "src/core/global/locking.js";
 import {
   setupGlobal,
@@ -46,6 +48,8 @@ export function configuratorPlans(): GlobalPlanProvider {
     claude: claudeGlobalDesiredFiles(),
     "codex-config": codex.config,
     "codex-skills": codex.skills,
+    opencode: opencodeGlobalDesiredFiles(),
+    cursor: cursorGlobalDesiredFiles(),
   } as const;
   const matchers = {
     claude: new Map([["claude-global-context-hook", matchesClaudeGlobalContextHookGroup]]),

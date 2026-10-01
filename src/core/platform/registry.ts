@@ -4,16 +4,12 @@
  * on the platform name. Adding a platform later means adding one record and a test fixture.
  */
 
-import {
-  ANTIGRAVITY_FACTS,
-  CLAUDE_FACTS,
-  CODEX_FACTS,
-  KIRO_FACTS,
-  type PlatformFact,
-} from "src/core/platform/facts.js";
+import type { PlatformFact } from "src/core/platform/facts.js";
+import { PLATFORM_RECORDS } from "src/core/platform/records.js";
 
 export type { PlatformFact };
-export type PlatformId = "kiro" | "antigravity" | "codex" | "claude";
+export { PLATFORM_RECORDS };
+export type PlatformId = "kiro" | "antigravity" | "codex" | "claude" | "opencode" | "cursor";
 
 /** How a platform's context hook must print its payload. */
 export type ContextOutputKind = "plain" | "codex-additional-context" | "antigravity-inject-steps";
@@ -30,7 +26,8 @@ export interface PlatformRoot {
 }
 
 /** Physical ownership namespaces a platform writes to (a sidecar lives in each). */
-export type GlobalPlatformId = "kiro" | "antigravity-desktop" | "antigravity-cli" | "codex" | "claude";
+export type GlobalPlatformId =
+  "kiro" | "antigravity-desktop" | "antigravity-cli" | "codex" | "claude" | "opencode" | "cursor";
 
 /** What a healthy install reports when no external evidence says more. */
 export type HealthyReadiness = "installed" | "installed-pending-trust" | "precedence-unknown";
@@ -93,159 +90,9 @@ export interface PlatformRecord {
   readonly facts: readonly PlatformFact[];
 }
 
-export const PLATFORM_RECORDS = [
-  {
-    id: "kiro",
-    label: "Kiro",
-    flag: "kiro",
-    executable: "kiro-cli",
-    roots: [{ key: "config", relativePath: ".kiro", logicalPath: "~/.kiro", envOverride: null }],
-    skillDirectories: ["config:skills"],
-    instructionFile: "steering/harnix.md",
-    contextHook: { event: "UserPromptSubmit", command: "harnix context --platform kiro" },
-    contextOutput: "plain",
-    contextFirstInvocationOnly: false,
-    contextRenderCap: null,
-    targets: [
-      {
-        rootKey: "config",
-        globalPlatform: "kiro",
-        manifestPath: "harnix/managed.json",
-        lockPath: "harnix/managed.lock",
-        preserveUnownedRoot: false,
-        planKey: "kiro",
-      },
-    ],
-    healthyReadiness: "installed",
-    setupNotice: null,
-    ambiguousRootEnv: "KIRO_HOME",
-    shadowingFiles: [],
-    facts: KIRO_FACTS,
-  },
-  {
-    id: "antigravity",
-    label: "Antigravity",
-    flag: "antigravity",
-    executable: "agy",
-    roots: [
-      {
-        key: "desktop",
-        relativePath: ".gemini/config/plugins/harnix",
-        logicalPath: "~/.gemini/config/plugins/harnix",
-        envOverride: null,
-      },
-      {
-        key: "cli",
-        relativePath: ".gemini/antigravity-cli/plugins/harnix",
-        logicalPath: "~/.gemini/antigravity-cli/plugins/harnix",
-        envOverride: null,
-      },
-    ],
-    skillDirectories: ["desktop:skills", "cli:skills"],
-    instructionFile: "rules/AGENTS.md",
-    contextHook: { event: "PreInvocation", command: "harnix context --platform antigravity" },
-    contextOutput: "antigravity-inject-steps",
-    contextFirstInvocationOnly: true,
-    contextRenderCap: null,
-    targets: [
-      {
-        rootKey: "desktop",
-        globalPlatform: "antigravity-desktop",
-        manifestPath: ".managed.json",
-        lockPath: ".managed.lock",
-        preserveUnownedRoot: true,
-        planKey: "antigravity-plugin",
-      },
-      {
-        rootKey: "cli",
-        globalPlatform: "antigravity-cli",
-        manifestPath: ".managed.json",
-        lockPath: ".managed.lock",
-        preserveUnownedRoot: true,
-        planKey: "antigravity-plugin",
-      },
-    ],
-    healthyReadiness: "precedence-unknown",
-    setupNotice:
-      "Antigravity plugin-versus-workspace hook precedence is not verified; inspect the active tool session before relying on injection.",
-    ambiguousRootEnv: null,
-    shadowingFiles: [],
-    facts: ANTIGRAVITY_FACTS,
-  },
-  {
-    id: "codex",
-    label: "Codex",
-    flag: "codex",
-    executable: "codex",
-    roots: [
-      { key: "config", relativePath: ".codex", logicalPath: "~/.codex", envOverride: "CODEX_HOME" },
-      { key: "skills", relativePath: ".agents", logicalPath: "~/.agents", envOverride: null },
-    ],
-    skillDirectories: ["skills:skills"],
-    instructionFile: "AGENTS.md",
-    contextHook: { event: "UserPromptSubmit", command: "harnix context --platform codex" },
-    contextOutput: "codex-additional-context",
-    contextFirstInvocationOnly: false,
-    contextRenderCap: 2_500,
-    targets: [
-      {
-        rootKey: "config",
-        globalPlatform: "codex",
-        manifestPath: "harnix/managed.json",
-        lockPath: "harnix/managed.lock",
-        preserveUnownedRoot: false,
-        planKey: "codex-config",
-      },
-      {
-        rootKey: "skills",
-        globalPlatform: "codex",
-        manifestPath: "harnix/managed.json",
-        lockPath: "harnix/managed.lock",
-        preserveUnownedRoot: false,
-        planKey: "codex-skills",
-      },
-    ],
-    healthyReadiness: "installed-pending-trust",
-    setupNotice: "Review and trust the exact Harnix hook from Codex /hooks before it can run.",
-    ambiguousRootEnv: null,
-    shadowingFiles: [
-      { rootKey: "config", path: "AGENTS.override.md", code: "codex-agents-override", subject: "AGENTS override" },
-    ],
-    facts: CODEX_FACTS,
-  },
-  {
-    id: "claude",
-    label: "Claude Code",
-    flag: "claude",
-    executable: "claude",
-    roots: [{ key: "config", relativePath: ".claude", logicalPath: "~/.claude", envOverride: "CLAUDE_CONFIG_DIR" }],
-    skillDirectories: ["config:skills"],
-    instructionFile: "CLAUDE.md",
-    contextHook: { event: "UserPromptSubmit", command: "harnix context --platform claude" },
-    contextOutput: "plain",
-    contextFirstInvocationOnly: false,
-    contextRenderCap: null,
-    targets: [
-      {
-        rootKey: "config",
-        globalPlatform: "claude",
-        manifestPath: "harnix/managed.json",
-        lockPath: "harnix/managed.lock",
-        preserveUnownedRoot: false,
-        planKey: "claude",
-      },
-    ],
-    healthyReadiness: "installed",
-    setupNotice: null,
-    ambiguousRootEnv: null,
-    shadowingFiles: [],
-    facts: CLAUDE_FACTS,
-  },
-] as const satisfies readonly PlatformRecord[];
-
 export const PLATFORM_IDS: readonly PlatformId[] = PLATFORM_RECORDS.map((record) => record.id);
 
-const PLATFORM_MESSAGE = "--platform must be kiro, antigravity, codex, or claude.";
+const PLATFORM_MESSAGE = "--platform must be kiro, antigravity, codex, claude, opencode, or cursor.";
 
 export function platformRecords(): readonly PlatformRecord[] {
   return PLATFORM_RECORDS;
