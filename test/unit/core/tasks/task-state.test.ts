@@ -99,6 +99,10 @@ describe("task state transitions", () => {
     expect(() => transitionTask(planning, "cancelled", "cancelling", laterTimestamp)).toThrow(
       /illegal task transition/iu,
     );
+    // Actionable: an illegal transition names the legal next statuses from the current status.
+    expect(() => transitionTask(planning, "verifying", "verifying", laterTimestamp)).toThrow(
+      /legal next statuses from planning: ready, blocked/u,
+    );
     expect(() => transitionTask(cancelled, "planning", "planning", laterTimestamp)).toThrow(/cancelled|transition/iu);
 
     await saveTask(root, cancelled);

@@ -71,7 +71,9 @@ export async function assertSuiteGateReady(projectRoot: string, task: TaskRecord
   }
   const suiteCheck = findProjectSuiteCheck(task);
   if (!suiteCheck) {
-    throw new Error("Workflow ready requires a project-level suite check covering full source and test inputs.");
+    throw new Error(
+      'Workflow ready requires a required check whose inputs cover both source and test (for example inputs ["**"], or a source tree plus a test tree such as ["src/**","test/**"]). Scope must be "focused" or "full" (there is no "project" scope).',
+    );
   }
 }
 
@@ -82,16 +84,22 @@ export async function assertSuiteGateFinishing(projectRoot: string, task: TaskRe
   }
   const suiteCheck = findProjectSuiteCheck(task);
   if (!suiteCheck) {
-    throw new Error("Workflow finish requires a passing project-level suite check with current input digest.");
+    throw new Error(
+      'Workflow finish requires a passing required check whose inputs cover both source and test (for example ["**"] or ["src/**","test/**"]) with a current input digest. Scope must be "focused" or "full".',
+    );
   }
 
   const passEvidence = selectLatestEvidence(task.evidence, suiteCheck.id);
   if (task.schemaVersion !== 3 || passEvidence?.result !== "pass" || typeof passEvidence.inputDigest !== "string") {
-    throw new Error("Workflow finish requires a passing project-level suite check with current input digest.");
+    throw new Error(
+      `Workflow finish requires a passing source-and-test check with a current input digest. Re-run it with: harnix workflow --run-check ${suiteCheck.id} -- <command>.`,
+    );
   }
 
   const currentSnapshot = await computeInputDigest(projectRoot, task, suiteCheck.id);
   if (passEvidence.inputDigest !== currentSnapshot.inputDigest) {
-    throw new Error("Workflow finish requires a passing project-level suite check with current input digest.");
+    throw new Error(
+      `Workflow finish: the source-and-test check ${suiteCheck.id} is stale (inputs changed since it last passed). Re-run it last, with no input-touching command after it, via: harnix workflow --run-check ${suiteCheck.id} -- <command>.`,
+    );
   }
 }

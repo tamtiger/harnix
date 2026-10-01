@@ -126,8 +126,11 @@ describe("Suite Gate (ac-suite-gate)", () => {
     });
 
     await expect(assertSuiteGateReady(root, pauseLikeTask)).rejects.toThrow(
-      /Workflow ready requires a project-level suite check covering full source and test inputs/u,
+      /Workflow ready requires a required check whose inputs cover both source and test/u,
     );
+    // Actionable: the error must steer away from a "project" scope and toward focused/full with wildcard inputs.
+    await expect(assertSuiteGateReady(root, pauseLikeTask)).rejects.toThrow(/"focused" or "full"/u);
+    await expect(assertSuiteGateReady(root, pauseLikeTask)).rejects.toThrow(/no "project" scope/u);
   });
 
   it("finish rejects completion when suite check lacks a passing evidence with current digest", async () => {
@@ -160,7 +163,7 @@ describe("Suite Gate (ac-suite-gate)", () => {
     });
 
     await expect(assertSuiteGateFinishing(root, taskWithoutPass)).rejects.toThrow(
-      /Workflow finish requires a passing project-level suite check with current input digest/u,
+      /Workflow finish requires a passing source-and-test check with a current input digest/u,
     );
   });
 
@@ -182,7 +185,7 @@ describe("Suite Gate (ac-suite-gate)", () => {
     expect(coversSourceAndTest(["xlib/**", "test/**"])).toBe(true);
   });
 
-  it("ready error message describes the required coverage without a scope clause", async () => {
+  it("ready error message describes the required coverage and the valid scope values", async () => {
     const root = await createFixture();
     await writeFixture(root, "package.json", JSON.stringify({ scripts: { test: "pnpm test" } }));
     await writeFixture(root, "src/index.ts", "");
@@ -192,8 +195,9 @@ describe("Suite Gate (ac-suite-gate)", () => {
       () => "",
       (error: Error) => error.message,
     );
-    expect(message).toMatch(/covering full source and test inputs/u);
-    expect(message).not.toMatch(/scope/u);
+    expect(message).toMatch(/inputs cover both source and test/u);
+    expect(message).toMatch(/"focused" or "full"/u);
+    expect(message).toMatch(/no "project" scope/u);
   });
 
   it("finish judges the newest suite pass, not the first recorded one", async () => {
@@ -229,7 +233,7 @@ describe("Suite Gate (ac-suite-gate)", () => {
     await expect(assertSuiteGateFinishing(root, { ...base, evidence: [fresh, stale] })).resolves.not.toThrow();
     const newerStale = pass("ev-newer-stale", "2026-09-29T10:00:00.000+07:00", "1".repeat(64));
     await expect(assertSuiteGateFinishing(root, { ...base, evidence: [fresh, newerStale] })).rejects.toThrow(
-      /current input digest/u,
+      /is stale/u,
     );
   });
 

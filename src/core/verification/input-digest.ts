@@ -108,7 +108,9 @@ export async function assertInputDigestsFresh(projectRoot: string, task: TaskRec
     const current = await computeInputDigest(projectRoot, task, check.id);
     if (current.inputDigest !== latest.inputDigest) {
       throw new Error(
-        `Verification inputs are stale for check ${check.id}: evidence ${latest.id} recorded at ${latest.recordedAt} no longer matches current content.`,
+        `Verification inputs are stale for check ${check.id}: evidence ${latest.id} recorded at ${latest.recordedAt} no longer matches current content. ` +
+          `Its inputs changed after the evidence was recorded — usually because a build or other command ran between recording and finish. ` +
+          `Re-run it last with: harnix workflow --run-check ${check.id} -- <command>, and run no input-touching command after it before --finish.`,
       );
     }
   }

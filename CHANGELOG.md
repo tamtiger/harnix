@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.0.0-dev.9] - 2026-10-01
+
+### Fixed
+
+- Thong bao loi workflow actionable hon de agent khong lap lai: loi transition liet ke status/checkpoint hop le; suite-gate ready/finish noi ro can check co inputs phu source+test va scope focused|full (bo cach noi 'project-level' gay hieu nham scope=project); loi stale input-digest neu nguyen nhan (inputs doi sau khi ghi evidence) va cach sua (chay lai bang --run-check, khong chay lenh cham inputs truoc --finish); skill harnix-verify huong dan uu tien --run-check va chay check rong truoc check hep.
+
 ## [2.0.0-dev.8] - 2026-10-01
 
 ### Changed

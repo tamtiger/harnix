@@ -126,7 +126,7 @@
     },
     {
       "step": "illegal-jump",
-      "error": "Illegal task transition planning -> verifying."
+      "error": "Illegal task transition planning -> verifying. legal next statuses from planning: ready, blocked."
     },
     {
       "step": "ready",

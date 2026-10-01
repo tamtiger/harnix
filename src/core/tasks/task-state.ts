@@ -44,8 +44,14 @@ export function transitionTask(
   now = nowInstant(),
   blocker?: TaskBlocker,
 ): TaskRecord {
-  if (!transitions[task.status].includes(status))
-    throw new TaskValidationError(`Illegal task transition ${task.status} -> ${status}.`);
+  if (!transitions[task.status].includes(status)) {
+    const legal = transitions[task.status];
+    const hint =
+      legal.length === 0
+        ? `${task.status} is terminal and has no further transitions`
+        : `legal next statuses from ${task.status}: ${legal.join(", ")}`;
+    throw new TaskValidationError(`Illegal task transition ${task.status} -> ${status}. ${hint}.`);
+  }
   if (task.status === "blocked" && task.blocker?.resumeStatus !== status)
     throw new TaskValidationError("Blocked task must resume to its recorded status.");
   if (status === "blocked" && blocker === undefined)

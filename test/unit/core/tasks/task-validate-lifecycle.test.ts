@@ -123,6 +123,10 @@ describe("lifecycle assertions", () => {
     expect(() => assertStatusCheckpointAndCompletion({ status: "ready", checkpoint: "implementing" })).toThrow(
       "Task status/checkpoint combination is invalid.",
     );
+    // Actionable: the error names the legal checkpoints for the status.
+    expect(() => assertStatusCheckpointAndCompletion({ status: "ready", checkpoint: "implementing" })).toThrow(
+      /Legal checkpoints for status ready: ready, replan/u,
+    );
     expect(() => assertStatusCheckpointAndCompletion({ ...blockedFields })).not.toThrow();
     const completed = {
       status: "completed",

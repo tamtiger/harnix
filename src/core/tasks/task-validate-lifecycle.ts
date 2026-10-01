@@ -81,7 +81,9 @@ export function assertStatusCheckpointAndCompletion(value: Record<string, unknow
       ? (value.blocker as TaskBlocker).resumeStatus
       : (value.status as Exclude<TaskStatus, "blocked">);
   if (!legalCheckpoints[checkpointOwner].includes(value.checkpoint as WorkflowCheckpoint))
-    throw new TaskValidationError("Task status/checkpoint combination is invalid.");
+    throw new TaskValidationError(
+      `Task status/checkpoint combination is invalid. Legal checkpoints for status ${checkpointOwner}: ${legalCheckpoints[checkpointOwner].join(", ")}.`,
+    );
   if (
     value.status === "completed" &&
     (!value.completedAt ||

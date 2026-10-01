@@ -1,0 +1,128 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261001-111513-actionable-workflow-errors",
+  "title": "Thong bao loi workflow actionable de agent repo khac khong lap lai",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-01T11:15:13.864+07:00",
+  "updatedAt": "2026-10-01T11:33:30.476+07:00",
+  "goal": "Lam cho thong bao loi va chi dan cua harnix workflow du actionable de coding agent o repo khac khong lap lai cac loi da gap: (1) transition sai state khong biet dich hop le; (2) hieu nham project-level suite check thanh scope=project; (3) ghi evidence thu cong roi chay lenh cham inputs sau do dan den stale digest luc finish. Khong doi hanh vi state machine, chi doi noi dung message va skill guidance.",
+  "nonGoals": [
+    "Khong doi state machine transitions hay legalCheckpoints",
+    "Khong doi cach tinh inputDigest hay dieu kien freshness",
+    "Khong doi schema TaskRecord"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-transition-msg",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ],
+      "text": "Loi transition sai liet ke cac dich hop le tu trang thai hien tai (status ke tiep va checkpoint hop le)."
+    },
+    {
+      "id": "ac-suite-msg",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ],
+      "text": "Message suite-gate ready va finish khong con khien hieu nham scope=project: noi ro can mot required check co inputs phu source va test (vd wildcard **) va scope la focused hoac full."
+    },
+    {
+      "id": "ac-stale-msg",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-suite-1"
+      ],
+      "text": "Message stale input digest neu ro nguyen nhan va cach sua: chay lai bang --run-check va khong chay lenh cham inputs giua luc ghi evidence va --finish."
+    },
+    {
+      "id": "ac-skill-guidance",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-suite-1"
+      ],
+      "text": "Skill harnix-verify evidence reference ghi ro: dung --run-check cho required check; khong mutate inputs giua ghi evidence va finish; chay check rong truoc check hep."
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task-state.ts",
+    "src/core/tasks/task-validate-lifecycle.ts",
+    "src/core/workflow/suite-gate.ts",
+    "src/core/verification/input-digest.ts",
+    "src/skills/harnix-verify/references/evidence.md"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-10-01T11:30:53.244+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7fcc958f39def68126e56d7e0fba1b41ca9b98aefa0ea7f434054e1d55898825"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-01T11:32:29.812+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "932e41a08e11238f1375d6cdddb04071901def8aba7186b865e7c799cebbdd21"
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test don vi cho message transition suite-gate stale va validate",
+      "command": "pnpm vitest run test/unit/core/tasks/task-state.test.ts test/unit/core/tasks/task-validate.test.ts test/unit/core/workflow/suite-gate.test.ts",
+      "criterionIds": [
+        "ac-suite-msg",
+        "ac-transition-msg"
+      ],
+      "inputs": [
+        "src/core/tasks/**",
+        "src/core/verification/input-digest.ts",
+        "src/core/workflow/suite-gate.ts",
+        "test/unit/core/tasks/**",
+        "test/unit/core/workflow/suite-gate.test.ts"
+      ],
+      "required": true,
+      "scope": "focused"
+    },
+    {
+      "id": "chk-suite",
+      "description": "Project suite gate lint typecheck test",
+      "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "criterionIds": [
+        "ac-skill-guidance",
+        "ac-stale-msg",
+        "ac-suite-msg",
+        "ac-transition-msg"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "required": true,
+      "scope": "full"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-stale-ordering",
+      "text": "Loi stale digest luc finish gan nhu luon do: ghi evidence thu cong (--evidence) cho check roi chay them lenh cham inputs (build sinh bin/obj, formatter, sua code) truoc --finish. Finish tinh lai digest -> mismatch. Phong tranh: dung --run-check cho required check (ghi digest nguyen tu), va chay check rong (build full) TRUOC check hep de khong lam cu evidence truoc do; khong chay lenh cham inputs giua ghi evidence va finish.",
+      "rationale": "Phan tich log agent payment-hub: build full chay sau khi da ghi evidence test -> stale. Da nho hoa message + skill de agent repo khac khong lap lai."
+    }
+  ],
+  "completedAt": "2026-10-01T11:33:30.476+07:00"
+}

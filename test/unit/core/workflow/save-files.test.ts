@@ -154,4 +154,41 @@ describe("workflow save-files", () => {
     expect(current.inputDigest).toBe(snapshot.inputDigest);
     expect(current.entries.map((entry) => entry.path)).not.toContain(`.harnix/tasks/${planning.id}/task.json`);
   });
+
+  it("reports an actionable stale message naming --run-check when inputs changed after recording", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeFile(join(root, "input.ts"), "export const value = 1;\n");
+    const planning = taskV3("planning", "planning", ["input.ts"]);
+    await saveWorkflow(root, { task: planning });
+    const snapshot = await snapshotWorkflow(root, "check");
+    const withEvidence: TaskRecordV3 = {
+      ...planning,
+      acceptanceCriteria: [{ ...planning.acceptanceCriteria[0]!, status: "met", evidenceIds: ["e-stale"] }],
+      evidence: [
+        {
+          id: "e-stale",
+          checkId: "check",
+          recordedAt: "2026-08-14T00:01:00.000Z",
+          result: "pass",
+          exitCode: 0,
+          summary: "pass",
+          artifactPaths: [],
+          inputDigest: snapshot.inputDigest,
+        },
+      ],
+      updatedAt: "2026-08-14T00:01:00.000Z",
+    };
+    await saveWorkflow(root, { task: withEvidence });
+    const persisted = (await inspectWorkflow(root)).activeTask;
+    if (persisted?.schemaVersion !== 3) throw new Error("Expected an active TaskRecord v3 fixture.");
+    // An input touched after the evidence was recorded makes the digest stale.
+    await writeFile(join(root, "input.ts"), "export const value = 2;\n");
+
+    await expect(assertInputDigestsFresh(root, persisted)).rejects.toThrow(/are stale for check check/u);
+    await expect(assertInputDigestsFresh(root, persisted)).rejects.toThrow(
+      /harnix workflow --run-check check -- <command>/u,
+    );
+    await expect(assertInputDigestsFresh(root, persisted)).rejects.toThrow(/no input-touching command after it/u);
+  });
 });
