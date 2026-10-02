@@ -4,6 +4,18 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.0.1] - 2026-10-02
+
+Bản vá khắc phục các điểm ma sát (friction items HX-01 đến HX-19) được phát hiện trong quá trình vận hành thực tế của Harnix v2.0.0.
+
+### Fixed
+
+- **Chẩn đoán lỗi Task & Obligations:** Nêu rõ ID criterion bị thiếu kèm danh sách criterion hợp lệ khi xác thực task (`HX-01`); làm rõ hướng dẫn dùng `--reason` và loại bỏ tiền tố `"for v2"` khi freeze obligations (`HX-02`, `HX-09`); chi tiết hóa trường vi phạm và ràng buộc trong repo-map store validation (`HX-16`).
+- **Tiện ích CLI & Chống Token Bloat:** Cờ `--run-check --brief` loại bỏ `outputTail` giúp context gọn gàng (`HX-08`); tham số `--set-check --input` tự động phân tách chuỗi comma-separated (`HX-10`); giới hạn tối đa 5 unpersisted task references trong effective context (`HX-05`).
+- **Tính đúng đắn Reconcile & CLI Update:** Chuẩn hóa so sánh CRLF/LF trong `decision.ts` chống nhận nhầm modified file trên Windows (`HX-03`); bổ sung cờ `--dry-run` cho lệnh `harnix update` ở phạm vi project (`HX-04`).
+- **Dev Tooling & Repo Map:** Hỗ trợ bóc tách cú pháp `using`, `using static`, `global using` của C# vào `importTargets` (`HX-17`); bổ sung executable stub `bin/harnix.js` chuyển tiếp (`HX-19`); tự động format Prettier các file sau khi chạy sync version (`HX-15`).
+- **Tài liệu & Kỹ năng:** Bổ sung hướng dẫn chạy lint và format trước khi verify trong `harnix-implement` (`HX-06`, `HX-11`); khuyến nghị `pwsh` 7.4+ cho Windows khi xử lý chuỗi JSON có dấu tiếng Việt (`HX-07`); bổ sung quy ước mirror test layout ngay từ khâu lập kế hoạch trong `harnix-plan` (`HX-14`).
+
 ## [2.0.0] - 2026-10-02
 
 Bản phát hành lớn đánh dấu đợt đại tu toàn diện Harnix v2.0.0 (Epic `20260928-180123-harnix-overhaul`). Tinh giản bộ máy workflow, giảm token chỉ dẫn, tự động hoá learning, mở rộng hỗ trợ 6 coding tools, tích hợp repo-map test impact, bổ sung 5 technique-skills, và chuẩn hoá toàn diện code & test.

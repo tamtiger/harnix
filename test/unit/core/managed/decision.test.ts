@@ -40,12 +40,33 @@ describe("whole-file ownership decision", () => {
       "update",
     );
   });
+
+  it("treats CRLF file content on disk as matching LF previousHash (Windows autocrlf resilience)", () => {
+    const textLf = "line1\nline2\n";
+    const textCrlf = "line1\r\nline2\r\n";
+    const hashLf = sha256(textLf);
+    const newDesired = sha256("new line\n");
+
+    expect(
+      decideWholeFile({ current: textCrlf, previousHash: hashLf, desiredHash: hashLf, restoreDeleted: true }),
+    ).toBe("unchanged");
+    expect(
+      decideWholeFile({ current: textCrlf, previousHash: hashLf, desiredHash: newDesired, restoreDeleted: true }),
+    ).toBe("update");
+  });
 });
 
 describe("obsolete-file ownership decision", () => {
   it("removes only content that still matches the owned hash", () => {
     expect(decideObsoleteFile("owned", owned)).toBe("remove");
     expect(decideObsoleteFile("user edit", owned)).toBe("keep-modified");
+  });
+
+  it("recognizes CRLF content as matching LF previousHash when obsolete", () => {
+    const textLf = "line1\nline2\n";
+    const textCrlf = "line1\r\nline2\r\n";
+    const hashLf = sha256(textLf);
+    expect(decideObsoleteFile(textCrlf, hashLf)).toBe("remove");
   });
 
   it("reports a file that is already gone separately", () => {

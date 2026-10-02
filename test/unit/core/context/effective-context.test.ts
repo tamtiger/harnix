@@ -42,6 +42,29 @@ describe("effective context", () => {
     expect(result.text).toContain("(pointer, 14 characters; read it when it matches the files you change)");
     expect(result.text).not.toContain("guide context");
   });
+
+  it("limits unpersisted task references to at most 5 entries to prevent token bloat", async () => {
+    const root = await temporaryRepository();
+    const harnixRoot = join(root, ".harnix");
+    await mkdir(join(harnixRoot, "spec", "guides"), { recursive: true });
+    await mkdir(join(root, "docs"), { recursive: true });
+    const paths = Array.from({ length: 10 }, (_, i) => `docs/file-${i}.md`);
+    for (const p of paths) await writeFile(join(root, p), `content ${p}\n`);
+    const config = createConfig({ developer: "tam" });
+    const task = activeTask(paths);
+
+    const result = await buildEffectiveContext({
+      projectRoot: root,
+      harnixRoot,
+      config,
+      task,
+      platform: "codex",
+      forceBounded: true,
+    });
+
+    const taskRefEntries = result.manifest.entries.filter((e) => e.path.startsWith("docs/file-"));
+    expect(taskRefEntries.length).toBe(5);
+  });
 });
 
 function activeTask(relevantPaths: string[]): TaskRecordV2 {

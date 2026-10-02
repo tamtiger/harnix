@@ -232,4 +232,37 @@ describe("workflow obligations", () => {
       ],
     });
   });
+
+  it("provides actionable error message without referencing v2 when mutating frozen obligations", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const planning = taskV3("planning", "planning");
+    await saveWorkflow(root, { task: planning });
+    const ready = {
+      ...planning,
+      status: "ready" as const,
+      checkpoint: "ready" as const,
+      updatedAt: "2026-08-13T00:01:00.000Z",
+    };
+    await saveWorkflow(root, { task: ready });
+
+    await expect(
+      saveWorkflow(root, {
+        task: {
+          ...ready,
+          validationPlan: [{ ...ready.validationPlan[0]!, command: "echo mutated" }],
+          updatedAt: "2026-08-13T00:02:00.000Z",
+        },
+      }),
+    ).rejects.toThrow(/--reason.*replan/iu);
+    await expect(
+      saveWorkflow(root, {
+        task: {
+          ...ready,
+          validationPlan: [{ ...ready.validationPlan[0]!, command: "echo mutated" }],
+          updatedAt: "2026-08-13T00:02:00.000Z",
+        },
+      }),
+    ).rejects.not.toThrow(/for v2/iu);
+  });
 });

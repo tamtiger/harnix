@@ -74,11 +74,10 @@ export function registerProjectCommands(program: Command, programOptions: Progra
       .option("--global", "Reconcile user-global platform integrations"),
     (label) => `Select ${label} for --global`,
   )
-    .option("--dry-run", "Preview global changes without writing")
+    .option("--dry-run", "Preview changes without writing")
     .action(async (options: PlatformFlagOptions & { restore?: boolean; global?: boolean; dryRun?: boolean }) => {
       const platforms = selectedPlatforms(options);
-      if (!options.global && (platforms.length > 0 || options.dryRun))
-        throw new Error(`${platformFlagList(["--dry-run"])} require update --global.`);
+      if (!options.global && platforms.length > 0) throw new Error(`${platformFlagList()} require update --global.`);
       const result = options.global
         ? await updateGlobalPlatforms({
             ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
@@ -88,7 +87,11 @@ export function registerProjectCommands(program: Command, programOptions: Progra
             restoreDeleted: options.restore,
             ...(platforms.length === 0 ? {} : { platforms }),
           })
-        : await updateProject({ root: await resolveProjectRoot(process.cwd()), restoreDeleted: options.restore });
+        : await updateProject({
+            root: await resolveProjectRoot(process.cwd()),
+            restoreDeleted: options.restore,
+            dryRun: options.dryRun,
+          });
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
 

@@ -21,6 +21,7 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 
 - Documentation readiness has passed.
 - Phase 1–6, workflow freshness hardening C1–C3, và Epic đại tu overhaul 2.0.0 (`20260928-180123-harnix-overhaul`, xem `docs/OVERHAUL_DECISIONS.md`) đã hoàn thành 100%. Phiên bản chính thức hiện tại là `2.0.0`.
+- Only when the user requests implementation, proceed to implement authorized tasks.
 - Do not invent a second package, workspace, service, or compatibility surface.
 
 ## Non-negotiable product boundaries

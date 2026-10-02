@@ -61,23 +61,26 @@ export function validateRepoMap(value: unknown): RepoMapV1 {
 }
 
 function validateRecord(value: unknown): RepoMapRecordV1 {
+  if (!isRecord(value)) throw new Error("Invalid repo map record: expected object.");
+  if (typeof value.path !== "string" || normalizeRepositoryPath(value.path) !== value.path)
+    throw new Error("Invalid repo map record: path must be a normalized repository path.");
+  if (!hash(value.contentHash))
+    throw new Error("Invalid repo map record: contentHash must be a 64-character hex string.");
+  if (!integer(value.byteLength))
+    throw new Error("Invalid repo map record: byteLength must be a non-negative integer.");
+  if (typeof value.extension !== "string") throw new Error("Invalid repo map record: extension must be a string.");
   if (
-    !isRecord(value) ||
-    typeof value.path !== "string" ||
-    normalizeRepositoryPath(value.path) !== value.path ||
-    !hash(value.contentHash) ||
-    !integer(value.byteLength) ||
-    typeof value.extension !== "string" ||
     typeof value.packagePath !== "string" ||
-    (value.packagePath !== "" && normalizeRepositoryPath(value.packagePath) !== value.packagePath) ||
-    typeof value.kind !== "string" ||
-    !fileKinds.has(value.kind as RepoMapRecordV1["kind"]) ||
-    (value.language !== undefined && typeof value.language !== "string")
+    (value.packagePath !== "" && normalizeRepositoryPath(value.packagePath) !== value.packagePath)
   )
-    throw new Error("Invalid repo map record.");
-  const headings = stringArray(value.headings, 16, 120),
-    identifiers = stringArray(value.identifiers, 32, 96),
-    importTargets = stringArray(value.importTargets, 32, 160);
+    throw new Error("Invalid repo map record: packagePath must be a normalized repository path or empty string.");
+  if (typeof value.kind !== "string" || !fileKinds.has(value.kind as RepoMapRecordV1["kind"]))
+    throw new Error("Invalid repo map record: kind is invalid.");
+  if (value.language !== undefined && typeof value.language !== "string")
+    throw new Error("Invalid repo map record: language must be a string.");
+  const headings = stringArray(value.headings, 16, 120, "headings"),
+    identifiers = stringArray(value.identifiers, 32, 96, "identifiers"),
+    importTargets = stringArray(value.importTargets, 32, 160, "importTargets");
   if ([value.path, ...headings, ...identifiers, ...importTargets].some(isSensitive))
     throw new Error("Repo map record contains sensitive content.");
   return {
@@ -117,16 +120,18 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 const compareRepositoryPaths = compareCodeUnits;
-function stringArray(value: unknown, count: number, length: number): string[] {
+function stringArray(value: unknown, count: number, length: number, fieldName = "outline"): string[] {
   if (
     !Array.isArray(value) ||
     value.length > count ||
     !value.every((item) => typeof item === "string" && item.length > 0 && item.length <= length)
   )
-    throw new Error("Invalid repo map outline.");
+    throw new Error(
+      `Invalid repo map ${fieldName}: must be an array of at most ${count} strings (max ${length} chars each).`,
+    );
   const items = value as string[];
   const sorted = [...items].sort(compareCodeUnits);
   if (sorted.some((item, index) => item !== items[index]) || new Set(items).size !== items.length)
-    throw new Error("Repo map outline must be sorted and unique.");
+    throw new Error(`Repo map ${fieldName} must be sorted and unique.`);
   return items;
 }

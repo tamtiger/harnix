@@ -99,7 +99,12 @@ export async function reconcileManagedFiles(
   projectRoot: string,
   manifest: ManagedManifest,
   desired: DesiredManagedFile[],
-  options: { generatorVersion: string; removeObsolete?: boolean | undefined; restoreDeleted?: boolean | undefined } = {
+  options: {
+    generatorVersion: string;
+    removeObsolete?: boolean | undefined;
+    restoreDeleted?: boolean | undefined;
+    dryRun?: boolean | undefined;
+  } = {
     generatorVersion: "unknown",
   },
 ): Promise<{ manifest: ManagedManifest; result: ReconcileResult }> {
@@ -132,7 +137,7 @@ export async function reconcileManagedFiles(
       })
     ) {
       case "create":
-        await atomicWriteFile(target, file.content);
+        if (options.dryRun !== true) await atomicWriteFile(target, file.content);
         result.created.push(entry.path);
         nextEntries.push({ ...entry, generatedHash });
         break;
@@ -148,7 +153,7 @@ export async function reconcileManagedFiles(
         nextEntries.push(previous!);
         break;
       case "update":
-        await atomicWriteFile(target, file.content);
+        if (options.dryRun !== true) await atomicWriteFile(target, file.content);
         result.updated.push(entry.path);
         nextEntries.push({ ...entry, generatedHash });
         break;
@@ -171,7 +176,7 @@ export async function reconcileManagedFiles(
       decideObsoleteFile(await readOptionalText(target), obsolete.generatedHash) === "remove" &&
       options.removeObsolete === true;
     if (removable) {
-      await rm(target, { force: true });
+      if (options.dryRun !== true) await rm(target, { force: true });
       result.deleted.push(obsolete.path);
     } else {
       result[(await obsoleteState(projectRoot, obsolete)) === "obsolete-unchanged" ? "obsolete" : "preserved"].push(

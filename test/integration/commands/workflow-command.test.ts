@@ -217,4 +217,49 @@ describe.sequential("hidden workflow flag transports", () => {
       expect(result.err, argv.join(" ")).toMatch(message);
     }
   });
+
+  it("omits outputTail from --run-check when --brief is passed", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+    const checkRunner: CheckRunner = async () => ({
+      exitCode: 0,
+      output: "long command output that should be omitted",
+    });
+
+    const result = await run(["--run-check", "check", "--brief", "--", "pnpm", "test"], { checkRunner });
+    expect(result.code).toBe(0);
+    const payload = JSON.parse(result.out) as Record<string, unknown>;
+    expect(payload).toMatchObject({ evidenceId: "ev-check-1", result: "pass", exitCode: 0 });
+    expect(payload).not.toHaveProperty("outputTail");
+  });
+
+  it("splits comma-separated input strings passed to --set-check --input", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+
+    const result = await run([
+      "--set-check",
+      "check-split",
+      "--criteria",
+      "a",
+      "--input",
+      "src/**,test/**",
+      "--description",
+      "check description",
+      "--command",
+      "pnpm test",
+      "--scope",
+      "focused",
+      "--reason",
+      "Test input splitting on comma-separated values",
+    ]);
+
+    expect(result.err).toBe("");
+    expect(result.code).toBe(0);
+    const task = JSON.parse(result.out) as { validationPlan: { id: string; inputs: string[] }[] };
+    const check = task.validationPlan.find((c) => c.id === "check-split");
+    expect(check?.inputs).toEqual(["src/**", "test/**"]);
+  });
 });

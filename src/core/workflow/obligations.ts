@@ -58,7 +58,7 @@ function assertFrozenCriteria(previous: TaskRecord, next: TaskRecord, freezePoin
       );
     if (candidate.text !== criterion.text)
       throw new Error(
-        `Workflow obligations freeze at ${freezePoint}; cannot mutate acceptance criterion text ${criterion.id}; use persisted replan with contractRevision for v2.`,
+        `Workflow obligations freeze at ${freezePoint}; cannot mutate acceptance criterion text ${criterion.id}; pass --reason <10-1000 chars> with --add-criterion (or persist replan with contractRevision) to supersede unproven obligations.`,
       );
   }
 }
@@ -77,7 +77,7 @@ function assertFrozenRequiredChecks(previous: TaskRecord, next: TaskRecord, free
       candidate.scope !== check.scope;
     if (mutated || hasChangedCoverage(previous, next, check, candidate)) {
       throw new Error(
-        `Workflow obligations freeze at ${freezePoint}; cannot mutate required validation check ${check.id}; use persisted replan with contractRevision for v2.`,
+        `Workflow obligations freeze at ${freezePoint}; cannot mutate required validation check ${check.id}; pass --reason <10-1000 chars> with --set-check (or persist replan with contractRevision) to supersede unproven obligations.`,
       );
     }
   }

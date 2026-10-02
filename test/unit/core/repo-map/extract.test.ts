@@ -87,4 +87,25 @@ describe("repo-map record extraction", () => {
 
     expect(record?.headings).toEqual(["Overview"]);
   });
+
+  it("extracts C# using namespaces into importTargets", async () => {
+    const root = await temporaryRepository();
+    const csharpCode = [
+      "using System;",
+      "using System.Collections.Generic;",
+      "using static System.Math;",
+      "global using Microsoft.Extensions.Logging;",
+      "namespace MyApp;",
+      "public class Service {}",
+    ].join("\n");
+    const record = await extractRepoMapRecord(await inventoryFile(root, "src/Service.cs", csharpCode), [""]);
+
+    expect(record).toMatchObject({
+      extension: "cs",
+      language: "csharp",
+      kind: "source",
+      importTargets: ["Microsoft.Extensions.Logging", "System", "System.Collections.Generic", "System.Math"],
+      identifiers: ["MyApp", "Service"],
+    });
+  });
 });

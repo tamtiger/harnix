@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { chmod, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -102,6 +103,7 @@ export async function syncVersion({
   updated.push("CHANGELOG.md");
   await atomicWrite(readmePath, replaceReadmeVersion(readme, version));
   updated.push("README.md");
+  formatUpdatedFiles(targetRoot, updated);
   return { changed: true, previousVersion: packageDocument.version, updated, version };
 }
 
@@ -269,6 +271,19 @@ function parseArguments(argumentsList) {
     }
   }
   return { kind, summaries, version };
+}
+
+function formatUpdatedFiles(targetRoot, updated) {
+  const pnpm = process.env.npm_execpath;
+  if (!pnpm || updated.length === 0) return;
+  try {
+    spawnSync(process.execPath, [pnpm, "exec", "prettier", "--write", ...updated], {
+      cwd: targetRoot,
+      stdio: "ignore",
+    });
+  } catch (error) {
+    void error;
+  }
 }
 
 const isDirectExecution = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);

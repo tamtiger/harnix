@@ -145,7 +145,7 @@ const HANDLERS: Record<string, Handler> = {
         scope: flags.scope,
         required: flags.required,
         criteria: flags.criteria === undefined ? undefined : splitList(flags.criteria),
-        inputs: (flags.input?.length ?? 0) > 0 ? flags.input : undefined,
+        inputs: flags.input && flags.input.length > 0 ? flags.input.flatMap((item) => splitList(item)) : undefined,
       },
       { reason: flags.reason },
     );
@@ -204,7 +204,7 @@ const HANDLERS: Record<string, Handler> = {
       ...briefTask(run.task, run.evidenceId),
       result: run.result,
       exitCode: run.exitCode,
-      outputTail: run.outputTail,
+      ...(flags.brief === true ? {} : { outputTail: run.outputTail }),
     };
   },
   cancel: async (context) => {

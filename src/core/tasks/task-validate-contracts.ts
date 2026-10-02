@@ -55,8 +55,13 @@ function assertCheckCriteria(check: ValidationCheckV2, criterionIds: ReadonlySet
   ) {
     throw new TaskValidationError(`TaskRecord ${label} validation criterion coverage is invalid.`);
   }
-  if (check.criterionIds.some((id) => !criterionIds.has(id)))
-    throw new TaskValidationError(`TaskRecord ${label} validation criterion reference is invalid.`);
+  const missing = check.criterionIds.filter((id) => !criterionIds.has(id));
+  if (missing.length > 0) {
+    const valid = Array.from(criterionIds).sort().join(", ");
+    throw new TaskValidationError(
+      `TaskRecord ${label} validation criterion reference is invalid: unknown criterion ${missing.join(", ")} (valid: ${valid || "none"}).`,
+    );
+  }
 }
 
 function assertCriterionCoverage(

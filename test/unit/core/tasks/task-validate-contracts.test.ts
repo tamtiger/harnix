@@ -95,6 +95,18 @@ describe("task validation contracts", () => {
     ).toThrow(/criterion/iu);
   });
 
+  it("provides actionable error message naming missing and valid criteria when reference is invalid", () => {
+    const fixture = taskV2Fixture();
+    const check = fixture.validationPlan[0]!;
+    expect(() =>
+      validateTask({
+        ...fixture,
+        acceptanceCriteria: [{ id: "ac-valid", text: "valid", status: "pending", evidenceIds: [] }],
+        validationPlan: [{ ...check, criterionIds: ["ac-missing"] }],
+      }),
+    ).toThrow(/unknown criterion ac-missing.*valid: ac-valid/iu);
+  });
+
   it("requires repository inputs for behavioral TaskRecord v2 checks and digests for passing evidence", () => {
     const fixture = taskV2Fixture();
     expect(() =>

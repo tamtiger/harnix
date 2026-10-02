@@ -38,12 +38,13 @@ export interface EffectiveContextResult {
 }
 
 const MAX_HOOK_CONTEXT_ENTRIES = 64;
+const MAX_UNPERSISTED_TASK_REFERENCES = 5;
 
 export async function buildEffectiveContext(input: EffectiveContextInput): Promise<EffectiveContextResult> {
   const persisted = await loadPersistedEntries(input.harnixRoot, input.task.id);
   const taskEntries =
     persisted === undefined
-      ? input.task.relevantPaths.map((path): ContextEntry => ({
+      ? input.task.relevantPaths.slice(0, MAX_UNPERSISTED_TASK_REFERENCES).map((path): ContextEntry => ({
           path,
           reason: "task reference",
           priority: 0,

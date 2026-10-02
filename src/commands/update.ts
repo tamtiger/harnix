@@ -21,6 +21,7 @@ import { compareCodeUnits } from "src/utils/order.js";
 export interface UpdateProjectOptions {
   root: string;
   restoreDeleted?: boolean | undefined;
+  dryRun?: boolean | undefined;
 }
 export interface UpdateProjectResult {
   created: string[];
@@ -47,12 +48,18 @@ export async function updateProject(options: UpdateProjectOptions): Promise<Upda
       generatorVersion: packageVersion,
       removeObsolete: true,
       restoreDeleted: options.restoreDeleted,
+      dryRun: options.dryRun,
     },
   );
-  await writeManifest(manifestPath, mergeManifestEntries(reconciled.manifest, legacyEntries));
-  const epics = await migrateLegacyEpics(options.root);
+  if (options.dryRun !== true) {
+    await writeManifest(manifestPath, mergeManifestEntries(reconciled.manifest, legacyEntries));
+  }
+  const epics =
+    options.dryRun === true
+      ? { created: [], updated: [], deleted: [], preserved: [] }
+      : await migrateLegacyEpics(options.root);
   // Derived, never user-owned: always rewritten when the confirmed stack or the detected commands changed.
-  const facts = await writeProjectFacts(options.root);
+  const facts = options.dryRun === true ? "unchanged" : await writeProjectFacts(options.root);
   return {
     ...reconciled.result,
     created: [...reconciled.result.created, ...epics.created, ...(facts === "created" ? [PROJECT_FACTS_PATH] : [])],

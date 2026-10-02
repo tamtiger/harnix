@@ -79,7 +79,10 @@ function imports(content: string): string[] {
   );
   const pythonFrom = [...content.matchAll(/\bfrom\s+([A-Za-z0-9_.-]+)\s+import\b/gu)].map((match) => match[1] ?? "");
   const pythonImport = [...content.matchAll(/^\s*import\s+([A-Za-z0-9_.-]+)/gmu)].map((match) => match[1] ?? "");
-  return bounded([...quoted, ...goBlocks, ...pythonFrom, ...pythonImport], 32, 160);
+  const csharpUsing = [...content.matchAll(/^\s*(?:global\s+)?using\s+(?:static\s+)?([A-Za-z0-9_.]+)\s*;/gmu)].map(
+    (match) => match[1] ?? "",
+  );
+  return bounded([...quoted, ...goBlocks, ...pythonFrom, ...pythonImport, ...csharpUsing], 32, 160);
 }
 
 function bounded(values: readonly string[], count: number, length: number): string[] {

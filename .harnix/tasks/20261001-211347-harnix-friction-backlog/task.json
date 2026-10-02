@@ -4,10 +4,10 @@
   "id": "20261001-211347-harnix-friction-backlog",
   "title": "Sửa các lỗi và thiếu sót hướng dẫn của Harnix gặp khi vận hành thật",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "createdAt": "2026-10-01T21:13:47.380+07:00",
-  "updatedAt": "2026-10-01T21:13:47.380+07:00",
+  "updatedAt": "2026-10-02T14:29:10.231+07:00",
   "goal": "Gom và xử lý các lỗi do chính Harnix gây ra cho agent khi chạy workflow thật (mã, thông báo lỗi, hướng dẫn, thiết kế): danh sách nằm ở bảng backlog trong prd.md và được bổ sung sau mỗi task đã chạy. Task giữ ở planning cho tới khi người dùng chốt mục nào sửa, mục nào từ chối.",
   "nonGoals": [
     "Không sửa lỗi môi trường ngoài Harnix (heredoc của Bash tool, WebFetch trả cả trang).",
@@ -17,23 +17,146 @@
   "acceptanceCriteria": [
     {
       "id": "ac-triage",
-      "status": "pending",
-      "evidenceIds": [],
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-cli-workflow-2",
+        "ev-chk-diagnostics-3",
+        "ev-chk-extract-2",
+        "ev-chk-reconcile-update-2",
+        "ev-chk-suite-2"
+      ],
       "text": "Mỗi mục trong bảng backlog của prd.md được sửa (có test hoặc kiểm chứng lặp lại được) hoặc bị từ chối kèm lý do ghi trong prd.md."
     }
   ],
   "relevantPaths": [
     "docs/HARNIX_WORKFLOW.md",
-    "src/cli-program.ts",
-    "src/commands/internal-context.ts",
+    "src/cli-project-commands.ts",
+    "src/commands/update.ts",
+    "src/commands/workflow-command.ts",
+    "src/core/context/effective-context.ts",
+    "src/core/managed/decision.ts",
     "src/core/managed/project-files.ts",
+    "src/core/repo-map/extract.ts",
+    "src/core/repo-map/store.ts",
     "src/core/tasks/task-validate-contracts.ts",
     "src/core/workflow/obligations.ts",
     "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-plan/SKILL.md",
     "src/templates/harnix/workflow.md"
   ],
   "relevantSpecs": [],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "ev-chk-diagnostics-1",
+      "checkId": "chk-diagnostics",
+      "recordedAt": "2026-10-02T13:57:02.320+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "9d43ba522ea14f66384a1465f9cd3d5f5d8630795e17206a756e17a072c82888"
+    },
+    {
+      "id": "ev-chk-diagnostics-2",
+      "checkId": "chk-diagnostics",
+      "recordedAt": "2026-10-02T13:57:14.498+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9d43ba522ea14f66384a1465f9cd3d5f5d8630795e17206a756e17a072c82888"
+    },
+    {
+      "id": "ev-chk-cli-workflow-1",
+      "checkId": "chk-cli-workflow",
+      "recordedAt": "2026-10-02T14:01:44.306+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "063e71332af0985ab0c7cacab78869aa36469397211155fbabd560ff7eba435b"
+    },
+    {
+      "id": "ev-chk-reconcile-update-1",
+      "checkId": "chk-reconcile-update",
+      "recordedAt": "2026-10-02T14:05:09.129+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "87f8fc9bbb07db8ab0d48d3ee94dbb2bca127cf118d8eca5a677a42c9caaa24e"
+    },
+    {
+      "id": "ev-chk-extract-1",
+      "checkId": "chk-extract",
+      "recordedAt": "2026-10-02T14:06:15.215+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8b3388ea1241aa2b0509c15b54e038bcb907be368924cbfded2836793c6cc03a"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-02T14:18:29.564+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pwsh.exe — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "84b86243ec6b1a1aca7b3b928d38751b8ce71a0dc33c8fe89ab13d94bfe10752"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-02T14:27:42.099+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pwsh.exe — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8f8d2d929bb793df9dfef1bdce96377dd1035f461b8878f76de4995f0ebebf97"
+    },
+    {
+      "id": "ev-chk-diagnostics-3",
+      "checkId": "chk-diagnostics",
+      "recordedAt": "2026-10-02T14:28:18.304+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cb5e411096b4a90028aac64492afc69a0d93cf8735282ec0a85df9f1118a8b0e"
+    },
+    {
+      "id": "ev-chk-cli-workflow-2",
+      "checkId": "chk-cli-workflow",
+      "recordedAt": "2026-10-02T14:28:27.512+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f1738411ddaf4ec1cd8fafb8200dae6b253f6e3daeb535d44b1c1bee4e423bd0"
+    },
+    {
+      "id": "ev-chk-reconcile-update-2",
+      "checkId": "chk-reconcile-update",
+      "recordedAt": "2026-10-02T14:28:36.772+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b44de00166ada2eb9b6122fc89e26310055123726ee01039ea277e715936c1b9"
+    },
+    {
+      "id": "ev-chk-extract-2",
+      "checkId": "chk-extract",
+      "recordedAt": "2026-10-02T14:28:44.392+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c266bf0a14355fb99bcbe5ba51c4a660c29540017cc1145d8e26fff8b2eb5022"
+    }
+  ],
   "validationPlan": [
     {
       "id": "chk-suite",
@@ -49,6 +172,74 @@
       ],
       "required": true,
       "scope": "full"
+    },
+    {
+      "id": "chk-diagnostics",
+      "description": "Unit tests for error message improvements",
+      "command": "pnpm exec vitest run test/unit/core/tasks/task-validate-contracts.test.ts test/unit/core/workflow/obligations.test.ts test/unit/core/repo-map/store.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-triage"
+      ],
+      "inputs": [
+        "src/core/repo-map/**",
+        "src/core/tasks/**",
+        "src/core/workflow/**",
+        "test/unit/core/repo-map/**",
+        "test/unit/core/tasks/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-cli-workflow",
+      "description": "Unit tests for CLI workflow improvements",
+      "command": "pnpm exec vitest run test/unit/commands/workflow-command.test.ts test/unit/core/workflow/run-check.test.ts test/unit/core/context/effective-context.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-triage"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/context/**",
+        "src/core/workflow/**",
+        "test/unit/commands/**",
+        "test/unit/core/context/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-reconcile-update",
+      "description": "Unit tests for reconcile and update dry-run",
+      "command": "pnpm exec vitest run test/unit/core/managed/decision.test.ts test/unit/commands/update.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-triage"
+      ],
+      "inputs": [
+        "src/cli-project-commands.ts",
+        "src/commands/**",
+        "src/core/managed/**",
+        "test/unit/commands/**",
+        "test/unit/core/managed/**"
+      ]
+    },
+    {
+      "id": "chk-extract",
+      "description": "Unit tests for C# using extraction in repo map",
+      "command": "pnpm exec vitest run test/unit/core/repo-map/extract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-triage"
+      ],
+      "inputs": [
+        "src/core/repo-map/**",
+        "test/unit/core/repo-map/**"
+      ]
     }
-  ]
+  ],
+  "completedAt": "2026-10-02T14:29:10.231+07:00"
 }
