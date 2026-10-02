@@ -11,15 +11,12 @@ import tseslint from "typescript-eslint";
 // Removed by `rewrite-guides` (task 14), which rewrites the guide and stack catalogs.
 const CATALOG_MODULES = ["src/catalog/catalog.ts", "src/catalog/validation.ts", "src/guides/catalog.ts"];
 
-// Removed by `add-test-impact-map` (task 16), which reworks the repo-map search.
-const REPO_MAP_MODULES = ["src/core/repo-map/search.ts"];
-
 // Unresolved after `restructure-code` (task 07); `release-v2` (task 17) must split each one or record a new decision.
 const UNRESOLVED_SOURCE_FILES = ["src/cli-program.ts", "src/core/context/context.ts", "src/utils/file-lock.ts"];
 
 const OVERSIZED_SOURCE_FILES = [...CATALOG_MODULES, "src/cli-program.ts", "src/utils/file-lock.ts"];
 
-const COMPLEX_SOURCE_FILES = ["src/catalog/validation.ts", ...REPO_MAP_MODULES, ...UNRESOLVED_SOURCE_FILES];
+const COMPLEX_SOURCE_FILES = ["src/catalog/validation.ts", ...UNRESOLVED_SOURCE_FILES];
 
 // Removed by `release-v2` (task 17), which reviews the release scripts.
 const RELEASE_SCRIPT_EXEMPTIONS = ["scripts/scan-release.mjs", "scripts/version-sync.mjs"];

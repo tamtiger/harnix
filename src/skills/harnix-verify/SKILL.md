@@ -2,7 +2,7 @@
 name: harnix-verify
 description: Use when a Harnix task needs fresh compliance, correctness and security verification, evidence, and a safe finish or explicit cancellation with an evidence-based handoff.
 metadata:
-  version: "2.0.0-dev.14"
+  version: "2.0.0-dev.15"
 ---
 
 # Verify and finish Harnix work
@@ -19,7 +19,7 @@ Read the request, goal and non-goals, PRD/plan, guides and the diff. A Full `pla
 
 ## Stage 2: quality and security
 
-Inspect check state once. Reuse a required pass whose `inputDigest` still matches; run only pending, failed, stale or affected checks, never the same check twice for one digest in one request. Run a check with `harnix workflow --run-check <id> -- <exe> [args...]` (manual and compound forms: `./references/evidence.md` or `harnix skill harnix-verify --reference evidence`). Read the full output and exit code. Review correctness and regression coverage, meaningful tests, type/lint/build output, dependency direction, input/path/command/credential boundaries, atomicity and permissions, and cross-layer error flow. A focused pass never replaces a required full gate.
+Inspect check state once. Reuse a required pass whose `inputDigest` still matches; run affected tests first (discover via `harnix repo-map --tests <path>`), then pending, failed, stale or affected checks, and the package suite; never run the same check twice for one digest in one request. Run a check with `harnix workflow --run-check <id> -- <exe> [args...]` (manual and compound forms: `./references/evidence.md` or `harnix skill harnix-verify --reference evidence`). Read the full output and exit code. Review correctness and regression coverage, meaningful tests, type/lint/build output, dependency direction, input/path/command/credential boundaries, atomicity and permissions, and cross-layer error flow. A focused pass never replaces a required full gate.
 
 Only acceptance violations, required-gate failures and material correctness, security, data-loss or compatibility defects block completion; batch them, allow one remediation round, rerun only affected evidence. A second failure with the same check, digest and exit code stops automatic work. Low findings become `harnix workflow --add-risk`.
 

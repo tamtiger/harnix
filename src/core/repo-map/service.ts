@@ -9,11 +9,16 @@ import {
   type RepoMapImpactResultV1,
 } from "./impact.js";
 import {
+  createUnavailableRepoMapTests,
+  findAffectedTests,
+  type RepoMapTestsOptions,
+  type RepoMapTestsResultV1,
+} from "./tests.js";
+import {
   defaultRepoMapLimits,
   type RepoMapLimits,
   type RepoMapQueryResult,
   type RepoMapQuerySignals,
-  type RepoMapRankerVersion,
   type RepoMapV1,
 } from "./types.js";
 
@@ -27,7 +32,6 @@ export interface QueryRepoMapOptions {
   query: string;
   limit?: number | undefined;
   signals?: RepoMapQuerySignals | undefined;
-  rankerVersion?: RepoMapRankerVersion | undefined;
 }
 
 export type QueryRepoMapResult =
@@ -66,9 +70,7 @@ export async function queryRepoMap(options: QueryRepoMapOptions): Promise<QueryR
   }
   return {
     map,
-    results: searchRepoMap(map, options.query, options.limit ?? 20, options.signals, {
-      rankerVersion: options.rankerVersion,
-    }),
+    results: searchRepoMap(map, options.query, options.limit ?? 20, options.signals),
     status: "ready",
   };
 }
@@ -83,6 +85,18 @@ export async function impactRepoMap(
     return createUnavailableRepoMapImpact(isMissing(error) ? "missing" : "invalid", options);
   }
   return createRepoMapImpact(map, options);
+}
+
+export async function impactRepoMapTests(
+  options: RepoMapTestsOptions & { readonly root: string },
+): Promise<RepoMapTestsResultV1> {
+  let map: RepoMapV1;
+  try {
+    map = await readRepoMap(options.root);
+  } catch (error: unknown) {
+    return createUnavailableRepoMapTests(isMissing(error) ? "missing" : "invalid", options);
+  }
+  return findAffectedTests(map, options);
 }
 
 /** Explicit doctor inventory: scans safely but never writes or refreshes the cache. */

@@ -40,11 +40,10 @@ describe("repository map dependency graph ranking", () => {
       record("src/payment-service.ts", [], ["ChargeEngine"]),
     ]);
 
-    const v1 = searchRepoMap(map, "controller", 20, {}, { rankerVersion: 1 });
-    const v2 = searchRepoMap(map, "controller", 20, {}, { rankerVersion: 2 });
+    const v2 = searchRepoMap(map, "controller", 20);
     const defaultRanking = searchRepoMap(map, "controller");
 
-    expect(v1.map(({ path }) => path)).not.toContain("src/payment-service.ts");
+    expect(v2.map(({ path }) => path)).toContain("src/payment-controller.ts");
     expect(v2.map(({ path }) => path)).toContain("src/payment-service.ts");
     expect(v2.find(({ path }) => path === "src/payment-service.ts")).toMatchObject({
       reasons: expect.arrayContaining(["dependency-centrality", "dependency-neighbor"]),
@@ -61,18 +60,17 @@ describe("repository map dependency graph ranking", () => {
     expect(Object.keys(v2[0]!).sort()).toEqual(["outline", "path", "reasons", "score"]);
   });
 
-  it("keeps ranker v1 lexical behavior and applies depth-two expansion once", () => {
+  it("applies depth-two expansion once in graph-aware search", () => {
     const map = createRepoMap([
       record("src/alpha-entry.ts", ["./middle"], ["AlphaEntry"]),
       record("src/far.ts", [], ["FarDependency"]),
       record("src/middle.ts", ["./far"], ["MiddleNode"]),
     ]);
-    const legacy = searchRepoMap(map, "alpha", 20, {}, { rankerVersion: 1 });
-    const legacyAgain = searchRepoMap(map, "alpha", 20, {}, { rankerVersion: 1 });
-    const graph = searchRepoMap(map, "alpha", 20, {}, { rankerVersion: 2 });
+    const graph = searchRepoMap(map, "alpha", 20);
+    const graphAgain = searchRepoMap(map, "alpha", 20);
 
-    expect(legacyAgain).toEqual(legacy);
-    expect(legacy.map(({ path }) => path)).toEqual(["src/alpha-entry.ts"]);
+    expect(graphAgain).toEqual(graph);
+    expect(graph.map(({ path }) => path)).toContain("src/alpha-entry.ts");
     expect(graph.find(({ path }) => path === "src/far.ts")).toMatchObject({
       reasons: expect.arrayContaining(["dependency-neighbor"]),
       score: expect.any(Number),

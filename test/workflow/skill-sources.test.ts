@@ -74,6 +74,7 @@ const capabilities: Record<SkillName, readonly string[]> = {
     "harnix-debug",
     "--add-risk",
     "wait for approval",
+    "repo-map --tests",
   ],
   "harnix-verify": [
     "harnix workflow --preflight",
@@ -83,6 +84,7 @@ const capabilities: Record<SkillName, readonly string[]> = {
     "quality and security",
     "inputDigest",
     "reuse a required pass",
+    "repo-map --tests",
     "--run-check",
     "--criterion <ids> --met",
     "waived",

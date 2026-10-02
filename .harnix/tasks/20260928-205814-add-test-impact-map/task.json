@@ -1,11 +1,11 @@
 {
   "generator": "harnix",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "id": "20260928-205814-add-test-impact-map",
   "title": "[16] Repo-map hướng test-impact",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Đổi hướng repo-map: thêm cạnh code→test theo import và quy ước đặt tên; lệnh repo-map --tests <path>; skill implement/verify dùng nó để chạy test bị ảnh hưởng trước rồi mới chạy suite; bỏ ranker không dùng.",
   "nonGoals": [
     "Không commit/push/PR tự động.",
@@ -17,20 +17,29 @@
     {
       "id": "ac-tests-edge",
       "text": "repo-map --tests trả đúng test bị ảnh hưởng trên fixture TS, Python, Go.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-check-tests-edge-1"
+      ]
     },
     {
       "id": "ac-skill-use",
       "text": "Skill implement/verify hướng dẫn chạy test bị ảnh hưởng rồi suite package.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-skill-use-1",
+        "ev-check-suite-2"
+      ]
     },
     {
       "id": "ac-docs-sync",
       "text": "PRD/WORKFLOW/IMPLEMENTATION_PLAN (và README/skill liên quan) được cập nhật trong cùng task cho mọi contract mà task này đổi; không dồn sang release-v2.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-sync-2",
+        "ev-check-suite-2"
+      ]
     }
   ],
   "relevantPaths": [
@@ -46,18 +55,63 @@
   "validationPlan": [
     {
       "id": "check-suite",
-      "description": "Toàn bộ lint, typecheck và mọi suite test pass (bản nháp, bổ sung check tập trung khi planning)",
-      "scope": "focused",
-      "required": true,
+      "description": "Toàn bộ lint, typecheck và mọi suite test pass",
       "command": "pnpm lint && pnpm typecheck && pnpm test",
+      "scope": "full",
+      "required": true,
       "criterionIds": [
         "ac-docs-sync",
         "ac-skill-use",
         "ac-tests-edge"
       ],
       "inputs": [
-        "@task-contract",
         "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-tests-edge",
+      "description": "repo-map --tests trả đúng test bị ảnh hưởng trên fixture TS, Python, Go",
+      "command": "pnpm vitest run test/unit/core/repo-map/ test/integration/commands/repo-map-internal.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-tests-edge"
+      ],
+      "inputs": [
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/**",
+        "test/integration/commands/repo-map-internal.test.ts",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "check-skill-use",
+      "description": "Skill implement/verify hướng dẫn chạy test bị ảnh hưởng rồi suite package",
+      "command": "pnpm vitest run test/workflow/skill-sources.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-skill-use"
+      ],
+      "inputs": [
+        "src/skills/**",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs-sync",
+      "description": "Kiểm tra structure, architecture và các docs PRD/WORKFLOW/IMPLEMENTATION_PLAN đồng bộ",
+      "command": "pnpm vitest run test/unit/test-structure.test.ts test/workflow/architecture.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-docs-sync"
+      ],
+      "inputs": [
+        "docs/**",
+        "eslint.config.mjs",
         "src/**",
         "test/**"
       ]
@@ -68,10 +122,122 @@
       "id": "d-draft-checks",
       "text": "check-suite là bản nháp; trong planning của chính task phải bổ sung check tập trung cho từng AC (lệnh, inputs, criterionIds) trước khi ready.",
       "rationale": "Review trước implement: một check chung pnpm lint/typecheck/test không chứng minh được các AC định lượng (token, churn, số hệ sinh thái)."
+    },
+    {
+      "id": "d-version-rule",
+      "text": "Mỗi member task hoàn thành sẽ bump package lên 2.0.0-dev.x kế tiếp (2.0.0-dev.15) theo quyết định người dùng 2026-10-01",
+      "rationale": "Ghi đè quyết định 2026-09-28 cho toàn bộ epic overhaul theo hướng dẫn mới trong AGENTS.md"
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-schema-to-v3",
+      "recordedAt": "2026-10-02T08:09:57.579+07:00",
+      "result": "pass",
+      "summary": "Migrated TaskRecord schema to v3 with explicit authorization.",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205814-add-test-impact-map/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-02T08:12:34.863+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung checks tập trung cho từng AC và hoàn thiện suite gate trước khi ready theo decision d-draft-checks",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205814-add-test-impact-map/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-02T08:12:41.129+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung check tập trung cho ac-tests-edge theo decision d-draft-checks",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205814-add-test-impact-map/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-10-02T08:12:45.579+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung check tập trung cho ac-skill-use theo decision d-draft-checks",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205814-add-test-impact-map/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-04",
+      "recordedAt": "2026-10-02T08:12:51.132+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung check tập trung cho ac-docs-sync theo decision d-draft-checks",
+      "artifactPaths": [
+        ".harnix/tasks/20260928-205814-add-test-impact-map/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-tests-edge-1",
+      "checkId": "check-tests-edge",
+      "recordedAt": "2026-10-02T08:24:44.116+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a0832ebcbcb1828641ce891d980c4bae611371b3fe5dc6a85de8416fdd1fcb6b"
+    },
+    {
+      "id": "ev-check-skill-use-1",
+      "checkId": "check-skill-use",
+      "recordedAt": "2026-10-02T08:24:50.301+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ee8acc1e655857e91c350cd940ffc1fcadbc68fb7ae80cf733584e0795653481"
+    },
+    {
+      "id": "ev-check-docs-sync-1",
+      "checkId": "check-docs-sync",
+      "recordedAt": "2026-10-02T08:25:07.358+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6b06f4ad1bfb24262a895ceeef964897c2c4c66c0a8f6f0179b0e509209c42ef"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-02T08:25:51.921+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "8d70e148e05c2a182cb9d0e620750531273345c7b62157055c7ba6410479f6e0"
+    },
+    {
+      "id": "ev-check-docs-sync-2",
+      "checkId": "check-docs-sync",
+      "recordedAt": "2026-10-02T08:26:26.764+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fba6338f7c658f3d885d465ac32c0e3c42126414d57301e42545983435bec514"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-02T08:27:39.661+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "385867e2968e85dc5e5f6ab34a84ee63099319f47e0daeb609857f0d0461e7c5"
+    }
+  ],
   "epicId": "20260928-180123-harnix-overhaul",
   "createdAt": "2026-09-28T20:58:14.000+07:00",
-  "updatedAt": "2026-09-28T20:58:28.000+07:00"
+  "updatedAt": "2026-10-02T08:28:08.938+07:00",
+  "completedAt": "2026-10-02T08:28:08.938+07:00"
 }

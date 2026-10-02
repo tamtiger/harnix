@@ -65,7 +65,24 @@ function resolveImportTarget(
   paths: readonly string[],
   indexed: ReadonlySet<string>,
 ): string[] {
-  if (!/^(?:\.\/|\.\.\/)/u.test(importTarget) || importTarget.includes("\0") || importTarget.includes("\\")) return [];
+  if (
+    importTarget.includes("\0") ||
+    importTarget.includes("\\") ||
+    importTarget.startsWith("/") ||
+    importTarget.includes("://")
+  )
+    return [];
+  return /^(?:\.\/|\.\.\/)/u.test(importTarget)
+    ? resolveRelativeImport(sourcePath, importTarget, paths, indexed)
+    : resolvePackageImport(importTarget, paths, indexed);
+}
+
+function resolveRelativeImport(
+  sourcePath: string,
+  importTarget: string,
+  paths: readonly string[],
+  indexed: ReadonlySet<string>,
+): string[] {
   const joined = posix.normalize(posix.join(posix.dirname(sourcePath), importTarget));
   if (joined === "." || joined === ".." || joined.startsWith("../") || posix.isAbsolute(joined)) return [];
   let target: string;
@@ -79,6 +96,20 @@ function resolveImportTarget(
   for (const path of paths) if (stripLastExtension(path) === target) candidates.add(path);
   for (const path of paths)
     if (posix.dirname(path) === target && /^index(?:\.|$)/u.test(posix.basename(path))) candidates.add(path);
+  return [...candidates].sort(compareCodeUnits);
+}
+
+function resolvePackageImport(importTarget: string, paths: readonly string[], indexed: ReadonlySet<string>): string[] {
+  const normalizedTarget = importTarget.replace(/^\.\//u, "").replaceAll(".", "/");
+  const candidates = new Set<string>();
+  if (indexed.has(importTarget)) candidates.add(importTarget);
+  for (const path of paths) {
+    if (stripLastExtension(path) === importTarget) candidates.add(path);
+    if (stripLastExtension(path) === stripLastExtension(importTarget)) candidates.add(path);
+    if (stripLastExtension(path) === normalizedTarget || stripLastExtension(path).endsWith(`/${normalizedTarget}`))
+      candidates.add(path);
+    if (posix.dirname(path) === importTarget || posix.dirname(path).endsWith(`/${importTarget}`)) candidates.add(path);
+  }
   return [...candidates].sort(compareCodeUnits);
 }
 

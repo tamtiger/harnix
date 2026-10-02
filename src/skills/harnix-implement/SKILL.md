@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.0.0-dev.14"
+  version: "2.0.0-dev.15"
 ---
 
 # Implement with evidence
@@ -17,12 +17,12 @@ A blocked task: read its blocker, resolve it or report the exact condition, then
 
 ## Review the plan
 
-Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands in `.harnix/spec/project-facts.md`, custom project skills in `.harnix/spec/skills/` (or `harnix skill --all`), the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. `harnix repo-map --query` / `--impact` are navigation hints; verify the source yourself.
+Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands in `.harnix/spec/project-facts.md`, custom project skills in `.harnix/spec/skills/` (or `harnix skill --all`), the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. `harnix repo-map --query` / `--impact` / `--tests` are navigation hints; verify the source yourself.
 
 ## RED, GREEN, REFACTOR per behavior
 
 1. **RED:** one focused test of real behavior. Run it and see it fail for the intended reason (not a setup crash, not a rename of a passing test). A test that passes at once proves nothing.
-2. **GREEN:** the minimal implementation of the frozen contract. Run the focused and neighboring tests. Fix production code when the contract is right; never bend the test.
+2. **GREEN:** the minimal implementation of the frozen contract. Run the affected tests (use `harnix repo-map --tests <path>` to identify them), then neighboring tests and the package suite. Fix production code when the contract is right; never bend the test.
 3. **Evidence:** for a schema v3 required check run `harnix workflow --run-check <id> -- <exe> [args...]` (snapshots the inputs before and after, records the outcome). Detail: `../harnix-verify/references/evidence.md` (or `harnix skill harnix-verify --reference evidence`).
 4. **REFACTOR** only while green, then rerun the focused checks.
 

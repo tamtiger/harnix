@@ -121,6 +121,87 @@ describe("repository-map operations", () => {
       dependents: [],
     });
   });
+
+  it("reports affected tests for TS, Python, and Go via repo-map --tests", async () => {
+    const root = await temporaryRepository();
+    // TS files
+    await mkdir(join(root, "src", "math"), { recursive: true });
+    await mkdir(join(root, "test", "unit", "math"), { recursive: true });
+    await writeFile(join(root, "src", "math", "calc.ts"), "export const add = (a: number, b: number) => a + b;\n");
+    await writeFile(
+      join(root, "test", "unit", "math", "calc.test.ts"),
+      "import { add } from 'src/math/calc.js';\nexport const testCalc = true;\n",
+    );
+
+    // Python files
+    await mkdir(join(root, "pkg", "billing"), { recursive: true });
+    await writeFile(join(root, "pkg", "billing", "service.py"), "def bill(order):\n    return order\n");
+    await writeFile(
+      join(root, "pkg", "billing", "test_service.py"),
+      "from pkg.billing.service import bill\ndef test_bill():\n    assert True\n",
+    );
+
+    // Go files
+    await mkdir(join(root, "pkg", "storage"), { recursive: true });
+    await writeFile(join(root, "pkg", "storage", "store.go"), "package storage\ntype Store struct{}\n");
+    await writeFile(join(root, "pkg", "storage", "store_test.go"), "package storage\nfunc TestStore() {}\n");
+
+    await initializeProject({ developer: "tam", root, yes: true });
+    process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    // TS test impact
+    await expect(runCli(["node", "harnix", "repo-map", "--tests", "src/math/calc.ts"])).resolves.toBe(0);
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+      generator: "harnix",
+      schemaVersion: 1,
+      scope: "project",
+      status: "ready",
+      target: "src/math/calc.ts",
+      limit: 20,
+      tests: ["test/unit/math/calc.test.ts"],
+      truncated: false,
+    });
+
+    // Python test impact
+    stdout.mockClear();
+    await expect(runCli(["node", "harnix", "repo-map", "--tests", "pkg/billing/service.py"])).resolves.toBe(0);
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+      generator: "harnix",
+      schemaVersion: 1,
+      scope: "project",
+      status: "ready",
+      target: "pkg/billing/service.py",
+      limit: 20,
+      tests: ["pkg/billing/test_service.py"],
+      truncated: false,
+    });
+
+    // Go test impact
+    stdout.mockClear();
+    await expect(runCli(["node", "harnix", "repo-map", "--tests", "pkg/storage/store.go"])).resolves.toBe(0);
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+      generator: "harnix",
+      schemaVersion: 1,
+      scope: "project",
+      status: "ready",
+      target: "pkg/storage/store.go",
+      limit: 20,
+      tests: ["pkg/storage/store_test.go"],
+      truncated: false,
+    });
+
+    // Flag validation
+    stdout.mockClear();
+    await expect(runCli(["node", "harnix", "repo-map", "--tests", "src/math/calc.ts", "--depth", "2"])).resolves.toBe(
+      2,
+    );
+    stdout.mockClear();
+    await expect(
+      runCli(["node", "harnix", "repo-map", "--tests", "src/math/calc.ts", "--impact", "src/math/calc.ts"]),
+    ).resolves.toBe(2);
+  });
 });
 
 async function snapshotTree(root: string): Promise<Array<{ path: string; sha256: string }>> {

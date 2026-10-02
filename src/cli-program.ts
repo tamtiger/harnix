@@ -24,7 +24,12 @@ import { reportProjectContext } from "./commands/context-report.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { discoverProjectSkills } from "./core/spec/project-skills.js";
 import { inspectVerifyPlan } from "./commands/verify-plan.js";
-import { impactRepoMapInternal, queryRepoMapInternal, refreshRepoMapInternal } from "./commands/repo-map-internal.js";
+import {
+  impactRepoMapInternal,
+  queryRepoMapInternal,
+  refreshRepoMapInternal,
+  testsRepoMapInternal,
+} from "./commands/repo-map-internal.js";
 import { registerWorkflowCommand } from "./commands/workflow-command.js";
 import { packageVersion } from "./version.js";
 import type { HomeResolver } from "./core/platform/user-paths.js";
@@ -342,30 +347,51 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
     .command("repo-map")
     .option("--query <text>", "Search the structural repository map")
     .option("--impact <path>", "Show cached dependency impact for an exact path")
+    .option("--tests <path>", "Show affected test files for an exact path")
     .option("--limit <count>", "Maximum results")
     .option("--depth <count>", "Reverse-dependent traversal depth for --impact")
     .addOption(new Option("--refresh", "Rebuild the structural repository map").hideHelp())
-    .action(async (options: { query?: string; impact?: string; limit?: string; depth?: string; refresh?: boolean }) => {
-      const actionCount =
-        Number(options.query !== undefined) + Number(options.impact !== undefined) + Number(options.refresh === true);
-      if (actionCount !== 1) throw new Error("repo-map requires exactly one of --query, --impact, or --refresh.");
-      if (options.refresh) {
-        if (options.limit !== undefined || options.depth !== undefined)
-          throw new Error("--limit and --depth are not valid with repo-map --refresh.");
-        process.stdout.write(`${JSON.stringify(await refreshRepoMapInternal(process.cwd()))}\n`);
-        return;
-      }
-      if (options.impact !== undefined) {
+    .action(
+      async (options: {
+        query?: string;
+        impact?: string;
+        tests?: string;
+        limit?: string;
+        depth?: string;
+        refresh?: boolean;
+      }) => {
+        const actionCount =
+          Number(options.query !== undefined) +
+          Number(options.impact !== undefined) +
+          Number(options.tests !== undefined) +
+          Number(options.refresh === true);
+        if (actionCount !== 1)
+          throw new Error("repo-map requires exactly one of --query, --impact, --tests, or --refresh.");
+        if (options.refresh) {
+          if (options.limit !== undefined || options.depth !== undefined)
+            throw new Error("--limit and --depth are not valid with repo-map --refresh.");
+          process.stdout.write(`${JSON.stringify(await refreshRepoMapInternal(process.cwd()))}\n`);
+          return;
+        }
+        if (options.tests !== undefined) {
+          if (options.depth !== undefined) throw new Error("--depth requires repo-map --impact.");
+          process.stdout.write(
+            `${JSON.stringify(await testsRepoMapInternal(process.cwd(), parseRepoMapPath(options.tests, "--tests"), parseRepoMapLimit(options.limit ?? "20")))}\n`,
+          );
+          return;
+        }
+        if (options.impact !== undefined) {
+          process.stdout.write(
+            `${JSON.stringify(await impactRepoMapInternal(process.cwd(), parseRepoMapPath(options.impact, "--impact"), parseRepoMapDepth(options.depth ?? "2"), parseRepoMapLimit(options.limit ?? "20")))}\n`,
+          );
+          return;
+        }
+        if (options.depth !== undefined) throw new Error("--depth requires repo-map --impact.");
         process.stdout.write(
-          `${JSON.stringify(await impactRepoMapInternal(process.cwd(), parseRepoMapImpactPath(options.impact), parseRepoMapDepth(options.depth ?? "2"), parseRepoMapLimit(options.limit ?? "20")))}\n`,
+          `${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query!, parseRepoMapLimit(options.limit ?? "20")))}\n`,
         );
-        return;
-      }
-      if (options.depth !== undefined) throw new Error("--depth requires repo-map --impact.");
-      process.stdout.write(
-        `${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query!, parseRepoMapLimit(options.limit ?? "20")))}\n`,
-      );
-    });
+      },
+    );
   program
     .command("verify-plan")
     .description("Inspect deterministic test, lint, typecheck, and format commands for this project and its packages")
@@ -437,15 +463,15 @@ function parseRepoMapDepth(value: string): number {
   return depth;
 }
 
-function parseRepoMapImpactPath(value: string): string {
+function parseRepoMapPath(value: string, flag: "--impact" | "--tests" = "--impact"): string {
   let normalized: string;
   try {
     normalized = normalizeRepositoryPath(value);
   } catch {
-    throw new Error("--impact must be an exact normalized repository-relative POSIX path.");
+    throw new Error(`${flag} must be an exact normalized repository-relative POSIX path.`);
   }
   if (normalized !== value || value.includes("\\"))
-    throw new Error("--impact must be an exact normalized repository-relative POSIX path.");
+    throw new Error(`${flag} must be an exact normalized repository-relative POSIX path.`);
   return normalized;
 }
 

@@ -139,6 +139,7 @@ harnix skill [name]
 harnix doctor [--fix] [--global]
 harnix repo-map --query <text> [--limit <count>]
 harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]
+harnix repo-map --tests <path> [--limit <1..20>]
 harnix verify-plan
 ```
 
@@ -457,9 +458,11 @@ Delivery evidence status through 2026-08-26: Phase 6 implementation and automate
 
 ## Repository map v1
 
-Repo-map is disposable project cache at `.harnix/cache/repo-map-v1.json`, containing only deterministic repository-relative structural metadata and SHA-256 fingerprints—never source bodies, literals, secrets, absolute paths, a daemon, embeddings, or network data. Fresh `harnix init`, hidden `harnix repo-map --refresh`, and project `doctor --fix` may safely rebuild it. Public `harnix repo-map --query <text> [--limit <count>]` is cache-only and always emits the v1 JSON shape. Default ranker v2 resolves only safe relative cached `importTargets`, builds a bounded in-memory graph (10k nodes, 100k edges, two hops, 200 candidates), then applies capped dependency-neighbor, referenced-by and inbound-centrality bonuses with stable tie-breaking. Internal ranker v1 preserves lexical rollback behavior; neither ranker persists graph state.
+Repo-map is disposable project cache at `.harnix/cache/repo-map-v1.json`, containing only deterministic repository-relative structural metadata and SHA-256 fingerprints—never source bodies, literals, secrets, absolute paths, a daemon, embeddings, or network data. Fresh `harnix init`, hidden `harnix repo-map --refresh`, and project `doctor --fix` may safely rebuild it. Public `harnix repo-map --query <text> [--limit <count>]` is cache-only and always emits the v1 JSON shape. The ranker uses graph-aware lexical and structural signals resolving relative and project/package imports, builds a bounded in-memory graph (10k nodes, 100k edges, two hops, 200 candidates), then applies capped dependency-neighbor, referenced-by and inbound-centrality bonuses with stable tie-breaking. Unused ranker v1 was removed in task [16].
 
-Public `harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]` is mutually exclusive with query/hidden refresh and accepts only an exact normalized non-root repository-relative POSIX path. It reads cache v1 only, returns direct outgoing dependencies and unique reverse dependents with BFS distance up to depth (default 2), sorts by distance then code-unit path, and applies limit independently to both directions (default 20). Stable result status is `ready|missing|invalid|not-found`; every non-ready result keeps the same JSON fields with empty lists and false truncation flags. Impact never scans source, refreshes/writes cache, infers dynamic dependencies, or changes the cache schema. Global hooks never scan, refresh, write, query, or request impact from repo-map.
+Public `harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]` is mutually exclusive with query/tests/hidden refresh and accepts only an exact normalized non-root repository-relative POSIX path. It reads cache v1 only, returns direct outgoing dependencies and unique reverse dependents with BFS distance up to depth (default 2), sorts by distance then code-unit path, and applies limit independently to both directions (default 20). Stable result status is `ready|missing|invalid|not-found`; every non-ready result keeps the same JSON fields with empty lists and false truncation flags.
+
+Public `harnix repo-map --tests <path> [--limit <1..20>]` is mutually exclusive with query/impact/hidden refresh and accepts only an exact normalized non-root repository-relative POSIX path. It reads cache v1 only, identifies directly and transitively affected test files based on both import edges and test naming conventions (for TypeScript/JavaScript, Python, Go, etc.), prioritizing direct matches before reverse-dependent tests, sorted code-unit. When target is already a test file, it returns target itself. Stable result status is `ready|missing|invalid|not-found`. Impact and tests never scan source, refresh/write cache, infer dynamic dependencies, or change cache schema. Global hooks never scan, refresh, write, query, or request impact/tests from repo-map.
 
 ## 19. Provenance and requirement history
 

@@ -63,8 +63,3 @@ export interface RepoMapQueryResult {
     "extension" | "packagePath" | "language" | "kind" | "identifiers" | "headings" | "importTargets"
   >;
 }
-
-export type RepoMapRankerVersion = 1 | 2;
-export interface RepoMapRankingOptions {
-  rankerVersion?: RepoMapRankerVersion | undefined;
-}

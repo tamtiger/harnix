@@ -46,6 +46,7 @@ describe("CLI command contract", () => {
     expect(repoMap?.options.map((option) => option.long)).toEqual([
       "--query",
       "--impact",
+      "--tests",
       "--limit",
       "--depth",
       "--refresh",

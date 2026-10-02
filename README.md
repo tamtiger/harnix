@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.0.0-dev.14`
+**Version:** `2.0.0-dev.15`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -167,7 +167,7 @@ Mọi output của public command đều là JSON. Dưới đây là các lệnh
 | `harnix context-report --platform <id>` | Xem context nào thực sự được đưa vào agent |
 | `harnix status --explain [--limit <n>]` | Xem check nào đã stale (input đổi/thiếu) và readiness/completion blocker của task hiện tại |
 | `harnix epic [<epic-id>] [--limit <n>]` | Xem danh sách epic hoặc chi tiết tiến độ member tasks và next task của một epic |
-| `harnix repo-map --query <text>` / `--impact <path>` | Tìm file liên quan hoặc dependency impact từ cache |
+| `harnix repo-map --query <text>` / `--impact <path>` / `--tests <path>` | Tìm file liên quan, dependency impact hoặc test bị ảnh hưởng từ cache |
 | `harnix doctor [--fix] [--global]` | Kiểm tra drift, hook, path safety, secret exposure; tự sửa issue an toàn |
 | `harnix update [--global] [--restore]` | Đồng bộ lại managed files theo config hiện tại |
 | `harnix uninstall --purge` / `--global --kiro --yes` | Gỡ dữ liệu project hoặc một tích hợp global |

@@ -3,13 +3,7 @@ import MiniSearch from "minisearch";
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath } from "src/utils/paths.js";
 import { buildRepoMapGraph } from "./graph.js";
-import type {
-  RepoMapQueryResult,
-  RepoMapQuerySignals,
-  RepoMapRankingOptions,
-  RepoMapRecordV1,
-  RepoMapV1,
-} from "./types.js";
+import type { RepoMapQueryResult, RepoMapQuerySignals, RepoMapRecordV1, RepoMapV1 } from "./types.js";
 
 interface SearchDocument {
   id: string;
@@ -31,15 +25,12 @@ export function searchRepoMap(
   query: string,
   limit = 20,
   signals: RepoMapQuerySignals = {},
-  options: RepoMapRankingOptions = {},
 ): RepoMapQueryResult[] {
   const normalizedQuery = query.trim();
   if (normalizedQuery.length === 0 || normalizedQuery.length > 256)
     throw new Error("Repo map query must contain 1 to 256 characters.");
   if (!Number.isInteger(limit) || limit < 1 || limit > 20)
     throw new Error("Repo map query limit must be between 1 and 20.");
-  const rankerVersion = options.rankerVersion ?? 2;
-  if (rankerVersion !== 1 && rankerVersion !== 2) throw new Error("Repo map ranker version is invalid.");
   const index = new MiniSearch<SearchDocument>({ fields: ["path", "terms"], storeFields: ["path"] });
   index.addAll(map.records.map((record) => ({ id: record.path, path: record.path, terms: terms(record) })));
   const records = new Map(map.records.map((record) => [record.path, record]));
@@ -57,27 +48,6 @@ export function searchRepoMap(
     [...(signals.languages ?? []), ...(signals.technologies ?? [])].map(normalizeTerm).filter(Boolean),
   );
   const lexical = index.search(normalizedQuery, { fuzzy: 0.2, prefix: true }).slice(0, MAX_LEXICAL_SEEDS);
-  if (rankerVersion === 1) {
-    return lexical
-      .flatMap((candidate) => {
-        const record = records.get(String(candidate.id));
-        return record === undefined
-          ? []
-          : [
-              rank(
-                record,
-                Math.round(candidate.score * 10),
-                true,
-                taskTerms,
-                relevant,
-                signals.packagePath,
-                languageTerms,
-              ),
-            ];
-      })
-      .sort(compareResults)
-      .slice(0, limit);
-  }
 
   const lexicalBase = new Map(lexical.map((candidate) => [String(candidate.id), Math.round(candidate.score * 10)]));
   const graph = buildRepoMapGraph(map.records);
@@ -85,6 +55,43 @@ export function searchRepoMap(
     0,
     MAX_EXPANDED_CANDIDATES,
   );
+  const { directDependencies, directImporters, depthTwoDirections } = computeGraphSignals(seedPaths, graph);
+  const candidates = collectCandidates(seedPaths, directDependencies, directImporters, depthTwoDirections, records);
+
+  return candidates
+    .flatMap((path) => {
+      const record = records.get(path);
+      if (record === undefined) return [];
+      const result = rank(
+        record,
+        lexicalBase.get(path) ?? 0,
+        lexicalBase.has(path),
+        taskTerms,
+        relevant,
+        signals.packagePath,
+        languageTerms,
+      );
+      return [
+        applyGraphSignals(result, path, {
+          depthTwoDirections,
+          directDependencies,
+          directImporters,
+          inboundCount: graph.reverseAdjacency.get(path)?.length ?? 0,
+        }),
+      ];
+    })
+    .sort(compareResults)
+    .slice(0, limit);
+}
+
+function computeGraphSignals(
+  seedPaths: readonly string[],
+  graph: ReturnType<typeof buildRepoMapGraph>,
+): {
+  directDependencies: Set<string>;
+  directImporters: Set<string>;
+  depthTwoDirections: Map<string, "dependency-neighbor" | "referenced-by">;
+} {
   const directDependencies = new Set<string>();
   const directImporters = new Set<string>();
   for (const seed of seedPaths) {
@@ -112,7 +119,16 @@ export function searchRepoMap(
       depthTwoDirections.set(path, direction);
     }
   }
+  return { depthTwoDirections, directDependencies, directImporters };
+}
 
+function collectCandidates(
+  seedPaths: readonly string[],
+  directDependencies: Set<string>,
+  directImporters: Set<string>,
+  depthTwoDirections: Map<string, unknown>,
+  records: Map<string, RepoMapRecordV1>,
+): string[] {
   const candidates: string[] = [];
   const addCandidates = (values: Iterable<string>): void => {
     for (const path of [...values].sort(compareCodeUnits)) {
@@ -124,31 +140,7 @@ export function searchRepoMap(
   addCandidates(directDependencies);
   addCandidates(directImporters);
   addCandidates(depthTwoDirections.keys());
-
-  return candidates
-    .flatMap((path) => {
-      const record = records.get(path);
-      if (record === undefined) return [];
-      const result = rank(
-        record,
-        lexicalBase.get(path) ?? 0,
-        lexicalBase.has(path),
-        taskTerms,
-        relevant,
-        signals.packagePath,
-        languageTerms,
-      );
-      return [
-        applyGraphSignals(result, path, {
-          directDependencies,
-          directImporters,
-          depthTwoDirections,
-          inboundCount: graph.reverseAdjacency.get(path)?.length ?? 0,
-        }),
-      ];
-    })
-    .sort(compareResults)
-    .slice(0, limit);
+  return candidates;
 }
 
 function rank(

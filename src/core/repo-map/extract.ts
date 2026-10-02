@@ -71,11 +71,15 @@ function identifiers(content: string): string[] {
 }
 
 function imports(content: string): string[] {
-  return bounded(
-    [...content.matchAll(/\b(?:from|import|require)\s*\(?\s*["']([^"']+)["']/gu)].map((match) => match[1] ?? ""),
-    32,
-    160,
+  const quoted = [...content.matchAll(/\b(?:from|import|require)\s*\(?\s*["']([^"']+)["']/gu)].map(
+    (match) => match[1] ?? "",
   );
+  const goBlocks = [...content.matchAll(/\bimport\s*\(([\s\S]*?)\)/gu)].flatMap((block) =>
+    [...(block[1] ?? "").matchAll(/["']([^"']+)["']/gu)].map((match) => match[1] ?? ""),
+  );
+  const pythonFrom = [...content.matchAll(/\bfrom\s+([A-Za-z0-9_.-]+)\s+import\b/gu)].map((match) => match[1] ?? "");
+  const pythonImport = [...content.matchAll(/^\s*import\s+([A-Za-z0-9_.-]+)/gmu)].map((match) => match[1] ?? "");
+  return bounded([...quoted, ...goBlocks, ...pythonFrom, ...pythonImport], 32, 160);
 }
 
 function bounded(values: readonly string[], count: number, length: number): string[] {
@@ -100,8 +104,15 @@ function nearestPackage(path: string, roots: readonly string[]): string {
 }
 
 function fileKind(path: string, extension: string): RepoMapFileKind {
-  const name = basename(path).toLowerCase();
-  if (/(?:^|\.)test\.[^.]+$|(?:^|\.)spec\.[^.]+$|__tests__\//u.test(path)) return "test";
+  const normalized = path.replaceAll("\\", "/");
+  const name = basename(normalized).toLowerCase();
+  if (
+    /(?:^|\.)test\.[^.]+$|(?:^|\.)spec\.[^.]+$|__tests__\//u.test(normalized) ||
+    /^(?:test_.*|.*_test)\.[^.]+$/u.test(name) ||
+    /(?:^|\/)(?:tests?|specs?)\/.*test.*\.[^.]+$/u.test(normalized) ||
+    /(?:^|\/)(?:tests?|specs?)\/.*(?:test|spec)/iu.test(normalized)
+  )
+    return "test";
   if (
     ["package.json", "pnpm-lock.yaml", "composer.json", "go.mod", "pom.xml", "*.csproj", "*.sln"].includes(name) ||
     name.endsWith(".csproj") ||

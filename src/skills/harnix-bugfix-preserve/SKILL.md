@@ -2,7 +2,7 @@
 name: harnix-bugfix-preserve
 description: Use when fixing a bug to explicitly define invariants that must remain working, prevent regressions and isolate the fix.
 metadata:
-  version: "2.0.0-dev.14"
+  version: "2.0.0-dev.15"
 ---
 
 # Bugfix preservation
