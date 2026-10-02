@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { stackCatalog, validateStackCatalog, type StackCatalog } from "src/catalog/catalog.js";
+import { catalogLanguages } from "src/catalog/languages.js";
+import { catalogTechnologies } from "src/catalog/technologies.js";
 
 const provenance = { adaptedAt: "2026-08-13", license: "AGPL-3.0-or-later", source: "Harnix" } as const;
 
@@ -10,6 +12,8 @@ function candidate(): StackCatalog {
 
 describe("stack catalog", () => {
   it("exposes the frozen language and technology taxonomy in deterministic order", () => {
+    expect(catalogLanguages.length).toBeGreaterThan(0);
+    expect(catalogTechnologies.length).toBeGreaterThan(0);
     const catalog = validateStackCatalog(candidate());
 
     expect(catalog.languages.map(({ id }) => id)).toEqual([

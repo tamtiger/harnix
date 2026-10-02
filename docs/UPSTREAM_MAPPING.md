@@ -75,18 +75,20 @@ Public exports chỉ gồm supported programmatic boundaries được ghi trong 
 | Public command | Upstream basis | Harnix delta |
 |---|---|---|
 | `harnix init [--migrate] [--dry-run]` | Trellis init/project detector | `.harnix`, no scripts, interactive/CI language choice, legacy preview default, <5s |
-| `harnix setup --kiro|--antigravity|--codex|--claude [--dry-run]` | Upstream configurators/templates | Explicit user-global integration, multi-platform invocation, fixed hook command/readiness, no project config/root dependency; all public output is JSON by default |
+| `harnix setup --kiro\|--antigravity\|--codex\|--claude\|--opencode\|--cursor [--dry-run]` | Upstream configurators/templates | Explicit user-global integration, multi-platform invocation, fixed hook command/readiness, no project config/root dependency; all public output is JSON by default |
 | `harnix update [--global]` | Template hash/fetch/prune | Offline project template reconcile by default; global reconcile uses per-root ownership manifests |
 | `harnix upgrade` | Upgrade command | `@tamtiger/harnix`, installed/available versions, injected network/process deps |
-| `harnix uninstall [--purge|--global|--legacy-project-surfaces]` | Uninstall scrubbers | Project purge remains separate; global/legacy cleanup preview and confirmation preserve modified/untracked content |
+| `harnix uninstall [--purge\|--global\|--legacy-project-surfaces]` | Uninstall scrubbers | Project purge remains separate; global/legacy cleanup preview and confirmation preserve modified/untracked content |
 | `harnix mem [query]` | Mem search concepts | Project JSONL/structured journals, Unicode/malformed handling, learning metadata; statements remain untrusted review data |
-| `harnix status` | Trellis/ECC/Spec Kit/BMAD status-resume-next-step patterns | Nearest initialized project, bounded read-only JSON v1, deterministic progress/freshness/attention/next action; no task prose, writes or network |
+| `harnix status [--explain]` | Trellis/ECC/Spec Kit/BMAD status-resume-next-step patterns | Nearest initialized project, bounded read-only JSON v1, deterministic progress/freshness/attention/next action; `--explain` gộp `checks` và `audit` cũ để chiếu readiness và digest freshness; no task prose, writes or network |
 | `harnix tasks [--limit] [--status]` | Cline local task history/search plus real malformed-history failures | Bounded exact-state index, per-record validation, active pin and partial-state disclosure; no prompt/history body, fuzzy search or restore |
+| `harnix pause [--dry-run]` | New in Harnix (v1.1.22) | Tạm dừng task đang active, gỡ `.active` an toàn để chuyển sang task khác |
 | `harnix resume <task-id> [--dry-run]` | BMAD existing-story resume, Spec Kit exact run state and Codex exact-ID resume | Activates only an exact validated unfinished local TaskRecord when pointer state permits; preview, collision fail-close and pointer-only atomic write; no transcript/model/Git restore |
+| `harnix epic [<epic-id>] [--limit]` | New in Harnix v2.0.0 (D8) | Quản lý epic (*.json và derived *.md), thay thế hoàn toàn `harnix roadmap` cũ đã gỡ bỏ |
+| `harnix verify-plan` | New in Harnix v2.0.0 (D6) | Tự động phát hiện deterministic lệnh verify cho ≥ 8 hệ sinh thái và monorepo |
 | `harnix context-report --platform <id> [--limit]` | VS Code context composition/transparency | Reuses Harnix's actual bounded hook selector and exposes only relative selected/omitted/drift metadata with trusted reason codes; no file content/raw reason/hash/write/network |
-| `harnix checks [--limit]` | Spec Kit/BMAD persisted workflow/status semantics | Reuses Harnix immutable verification snapshots to explain fresh/stale/failed/pending and bounded changed/missing inputs; no validation execution or state mutation |
-| `harnix audit` | Spec Kit analyze and BMAD implementation-readiness checks | Separate deterministic readiness/completion projection using Harnix's exact gates; visibility only, no check execution, mutation or heuristic blocking |
-| `harnix repo-map --query|--impact` | Aider repository-map and on-demand dependency navigation | Cache-only lexical candidate search or exact directional dependency impact; no source scan/snippet, embeddings or dynamic-call claim |
+| ~~`harnix checks`~~ / ~~`harnix audit`~~ | Spec Kit/BMAD persisted workflow/status semantics | Retired/removed in v2.0.0: gộp vào `harnix status --explain` để giảm overhead |
+| `harnix repo-map --query\|--impact\|--tests` | Aider repository-map and on-demand dependency navigation | Cache-only lexical candidate search, exact directional dependency impact, và test-impact navigation (`--tests`); no source scan/snippet, embeddings or dynamic-call claim |
 | `harnix doctor [--fix] [--global]` | New + ECC doctor ideas | Doctor JSON v2 projects + global integrations, redacted suspicious-learning categories, meaningful exit codes, conservative scoped fix, no network/journal rewrite |
 | Trellis `workflow` | — | Removed; exactly one Harnix workflow |
 | Trellis `channel` | — | Removed completely |
@@ -151,6 +153,20 @@ Mapping rules:
 | ECC / Trellis Claude Code | User-global `~/.claude` skills + marker block in `CLAUDE.md` + one owned `harnix-context` hook inside `UserPromptSubmit` in `settings.json` |
 | Native `projects/`, `todos/`, `history` | Ignored. Harnix uses `.harnix/` independent state. |
 | Trellis MCP | No default MCP server required. |
+
+### OpenCode
+
+| Upstream | Harnix |
+|---|---|
+| OpenCode community / CLI | User-global `~/.config/opencode/skills/harnix-*` + marker block trong `~/.config/opencode/AGENTS.md` (chế độ không hook shell) |
+| Shared root with tool | `preserveUnownedRoot: false`, bảo tồn mọi cấu hình và nội dung người dùng ngoài marker block |
+
+### Cursor
+
+| Upstream | Harnix |
+|---|---|
+| Cursor IDE / User Rules | User-global `~/.cursor/skills/harnix-*` (chế độ không hook shell, không tạo global instruction file vì User Rules quản lý qua UI) |
+| Shared root with tool | `preserveUnownedRoot: false`, chỉ quản lý các skill `harnix-*` được cài đặt |
 
 ## 7. ECC content mapping
 

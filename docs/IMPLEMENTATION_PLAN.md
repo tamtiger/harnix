@@ -2,7 +2,7 @@
 
 ## 1. Mục tiêu
 
-Xây dựng Harnix end-to-end dưới dạng **một public npm package** `@tamtiger/harnix`, một executable `harnix`, project data `.harnix/`, hỗ trợ đúng Kiro, Antigravity, Codex và Claude Code. Harnix phải biến yêu cầu thành spec/task có cấu trúc, nạp context có ngân sách, kiểm chứng bằng fresh evidence và duy trì project knowledge mà không làm phình consumer repository.
+Xây dựng Harnix end-to-end dưới dạng **một public npm package** `@tamtiger/harnix`, một executable `harnix`, project data `.harnix/`, hỗ trợ đúng Kiro, Antigravity, Codex, Claude Code, OpenCode và Cursor. Harnix phải biến yêu cầu thành spec/task có cấu trúc, nạp context có ngân sách, kiểm chứng bằng fresh evidence và duy trì project knowledge mà không làm phình consumer repository.
 
 Plan này là checkpoint bắt buộc trước code. Checkpoint đã pass tại Phase 0 sau khi:
 
@@ -18,7 +18,7 @@ Plan này là checkpoint bắt buộc trước code. Checkpoint đã pass tại 
 - Project data/generator/skills: `.harnix/` / `harnix` / `harnix-*`.
 - TypeScript ESM, Node.js `>=18`, pnpm, Commander.js, Inquirer, tsup, Vitest.
 - Một publishable `package.json`; không workspace/core package phụ.
-- Chỉ Kiro, Antigravity, Codex, Claude Code.
+- Chỉ Kiro, Antigravity, Codex, Claude Code, OpenCode và Cursor.
 - Runtime nằm trong package; không sinh runtime scripts vào consumer.
 - User-modified project files and user-global Harnix fragments thắng packaged defaults.
 - Không telemetry, daemon, hosted service, silent network, default MCP, global runtime/memory, credential, permission or trust mutation. Phase 6 permits only explicit Harnix-owned user-global platform customization described in `GLOBAL_SETUP_REFACTOR_PLAN.md`.
@@ -1082,7 +1082,7 @@ git diff --check
 
 Script contracts:
 
-- `format` / `format:check`: Prettier (`printWidth` 120, `endOfLine: auto`) ghi/kiểm `src/**/*.ts`, `test/**/*.ts`, `scripts/**/*.mjs` và các file cấu hình TS/JS ở gốc; `lint` chạy `pnpm format:check` trước rồi `eslint .` (typescript-eslint `recommendedTypeChecked`, `no-floating-promises`, `complexity` 20, `max-lines` 300). Vi phạm còn lại chỉ nằm trong danh sách miễn trừ tạm thời của `eslint.config.mjs`, mỗi nhóm ghi task chịu trách nhiệm gỡ (`restructure-code`, `standardize-tests`, `release-v2`); danh sách chỉ được thu hẹp.
+- `format` / `format:check`: Prettier (`printWidth` 120, `endOfLine: auto`) ghi/kiểm `src/**/*.ts`, `test/**/*.ts`, `scripts/**/*.mjs` và các file cấu hình TS/JS ở gốc; `lint` chạy `pnpm format:check` trước rồi `eslint .` (typescript-eslint `recommendedTypeChecked`, `no-floating-promises`, `complexity` 20, `max-lines` 300). Tại bản phát hành 2.0.0, toàn bộ danh sách miễn trừ trong `eslint.config.mjs` (`OVERSIZED_SOURCE_FILES`, `COMPLEX_SOURCE_FILES`, `RELEASE_SCRIPT_EXEMPTIONS`) đã được dọn sạch hoàn toàn về rỗng `[]`; mọi file trong `src/` đều ≤ 300 dòng code và complexity ≤ 20.
 - `test`: `vitest run --coverage` (provider v8, `@vitest/coverage-v8`) trên toàn bộ `test/**/*.test.ts`; sàn coverage `lines`/`statements` 93.1, `functions` 98.1, `branches` 86.8 (đo được 93.19/93.19/98.18/86.82) nằm trong `vitest.config.ts` và chỉ được nâng lên, không hạ để một thay đổi pass; `testTimeout` 20 giây. Bố cục test được mô tả trong `test/README.md` và bị `test/unit/test-structure.test.ts` ép buộc (unit phản chiếu `src`, `integration/commands` phản chiếu `src/commands`, mọi file ≤ 400 dòng, dùng builder dùng chung, mọi module có test hoặc lý do, số test/assertion không giảm). Import dùng alias `src/...` và `test/...` (tsconfig `paths` + alias vitest) trong cả `src` và `test`; ESLint cấm import cha `../`.
 - `test:acceptance`: chạy toàn bộ unit/integration/migration/platform/workflow/safety test directories, gồm clean và seeded unsafe Doctor JSON fixtures; acceptance sequence không chạy duplicate `pnpm test`.
 - `pack:check`: xóa/recreate project-local `.artifacts/` safely, chạy `pnpm pack --pack-destination .artifacts`, assert đúng một `@tamtiger/harnix` tarball và kiểm contents/license/runtime/templates.

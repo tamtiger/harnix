@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.0.0-dev.15`
+**Version:** `2.0.0`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -71,9 +71,9 @@ Set-Location C:\path\to\your-project
 harnix init
 
 # 2. Cài tích hợp cho platform agent bạn đang dùng (chỉ cần làm 1 lần, dùng chung cho mọi project)
-harnix setup --claude        # hoặc --kiro / --antigravity / --codex, có thể chọn nhiều cờ cùng lúc
+harnix setup --claude        # hoặc --kiro / --antigravity / --codex / --opencode / --cursor, có thể chọn nhiều cờ cùng lúc
 
-# 3. Mở Kiro / Antigravity / Codex / Claude Code ngay tại project này và gửi yêu cầu bình thường,
+# 3. Mở Kiro / Antigravity / Codex / Claude Code / OpenCode / Cursor ngay tại project này và gửi yêu cầu bình thường,
 #    ví dụ: "thêm retry có backoff cho payment webhook và cập nhật test"
 #    -> Harnix tự phân loại yêu cầu và dẫn dắt agent qua đúng quy trình, không cần bạn gõ lệnh nào thêm.
 
@@ -137,18 +137,27 @@ Chi tiết đầy đủ (transition, gate, artifact contract) nằm ở [Workflo
 
 **Seed specs và `.harnix/workflow.md` được Harnix quản lý cho đến khi người dùng sửa** — sau lần chỉnh sửa đầu tiên, `harnix update` sẽ luôn giữ nguyên phần bạn đã đổi. Ngược lại: **Task, research và journal luôn là dữ liệu người dùng** — Harnix không bao giờ tự sửa hay xoá nội dung bên trong `.harnix/tasks/`, research hay journal của bạn.
 
-### Sáu skill Harnix
+### Sáu skill Harnix và Thư viện Technique-Skills
 
-Agent chỉ nạp đúng một skill mỗi lần, theo `nextStage` mà `harnix workflow --preflight` trả về:
+Agent chỉ nạp đúng một skill quy trình mỗi lần, theo `nextStage` mà `harnix workflow --preflight` trả về:
 
 | Skill | Khi nào agent dùng |
 |---|---|
 | `harnix-plan` | Chưa có task, đang `planning`, replan, ready gate, migrate task cũ lên v3, tạo epic |
-| `harnix-implement` | Task `ready` đã được yêu cầu triển khai, hoặc đang `in_progress/implementing` |
+| `harnix-implement` | Task `ready` đã được yêu cầu triển khai, hoặc đang `in_progress/implementing` (dùng `repo-map --tests` chạy test bị ảnh hưởng trước) |
 | `harnix-verify` | `verifying`: kiểm chứng compliance rồi quality/security, sau đó finish hoặc cancel |
 | `harnix-debug` | Checkpoint `debugging` cho một lỗi tái hiện được trong phạm vi task |
 | `harnix-review` | Review code chỉ đọc (Bypass, không đụng task) |
 | `harnix-research` | Research chỉ đọc, hoặc research cho một ẩn số trong planning/replan/debugging |
+
+Ngoài 6 skill quy trình trên, Harnix đóng gói sẵn **5 technique-skills độc lập** (không qua stage routing, agent tự kích hoạt theo mô tả ngữ cảnh):
+- `harnix-verification-gap`: Đánh giá khoảng trống kiểm chứng, phát hiện điểm mù false-success.
+- `harnix-bugfix-preserve`: Định hình bất biến ("must remain working") khi sửa bug để chống regression.
+- `harnix-flaky-test`: Chẩn đoán và cô lập test chập chờn, bất định hoặc phụ thuộc thời gian.
+- `harnix-migration-safety`: Rà soát an toàn di chuyển dữ liệu, schema và breaking changes.
+- `harnix-security-lens`: Ống kính bảo mật rà soát ranh giới dữ liệu không tin cậy, injection, traversal.
+
+**Extension Point cho dự án:** Bạn có thể tự thêm skill riêng tại `.harnix/spec/skills/<skill-name>/SKILL.md`. Harnix tự động phát hiện qua `harnix skill --all` và đồng bộ vào platform agent.
 
 Phần chi tiết ít dùng (replan, migration, epic, evidence, finish/cancel…) nằm trong các *reference* nạp theo yêu cầu: `harnix skill <tên> --reference <chủ đề>`; chạy `harnix skill` để xem danh sách. Tên skill cũ (`harnix-brainstorm`, `harnix-check`, `harnix-finish-work`, `harnix-continue`) vẫn resolve về skill mới.
 
@@ -192,6 +201,8 @@ Mở trực tiếp `.harnix/tasks/<id>/review.md` — không cần chạy comman
 | Antigravity | `antigravity` / `--antigravity` (executable: `agy`) | `~/.gemini/config/plugins/harnix` (Desktop) và `~/.gemini/antigravity-cli/plugins/harnix` (CLI) |
 | Codex | `codex` / `--codex` | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/config.toml` |
 | Claude Code | `claude` / `--claude` | `~/.claude/skills/harnix-*`, marker block trong `~/.claude/CLAUDE.md`, group `harnix-context` trong `hooks.UserPromptSubmit` của `~/.claude/settings.json` |
+| OpenCode | `opencode` / `--opencode` | `~/.config/opencode/skills/harnix-*`, marker block trong `~/.config/opencode/AGENTS.md` (chế độ không hook) |
+| Cursor | `cursor` / `--cursor` | `~/.cursor/skills/harnix-*` (chế độ không hook) |
 
 `harnix setup` chạy được ở bất kỳ thư mục nào, chỉ cần chọn platform flag, không cần đứng trong project. Với Codex, sau khi setup bạn cần mở `/hooks` và tự trust hook. Harnix không bao giờ ghi vào `~/.claude.json`, credentials, MCP server, hay các file không thuộc phạm vi quản lý của nó. Chi tiết đầy đủ về hook protocol nằm ở [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) và [Yêu cầu sản phẩm](docs/HARNIX_PRD.md#9-user-global-setup-and-platform-requirements).
 
@@ -231,10 +242,10 @@ Không sửa tay version trong `package.json` hay `metadata.version` của skill
 
 ```powershell
 # Bump version mới kèm tóm tắt và phân loại (kind: added | changed | fixed, mặc định changed):
-pnpm version:sync 1.1.22 --summary "Mô tả thay đổi release" --kind fixed
+pnpm version:sync 2.0.0 --summary "Mô tả thay đổi release" --kind fixed
 
 # Hoặc đồng bộ lại metadata khi có drift cùng version:
-pnpm version:sync 1.1.22
+pnpm version:sync 2.0.0
 
 pnpm build
 node dist\cli.js update

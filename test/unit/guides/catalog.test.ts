@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import type { GuideDescriptor } from "src/catalog/types.js";
-import { guideOutputPath, guideSources, selectGuideSources, type GuideSource } from "src/guides/catalog.js";
+import { guideOutputPath, selectGuideSources, type GuideSource } from "src/guides/catalog.js";
+import { guideSources } from "src/guides/sources.js";
 
 const provenance = { adaptedAt: "2026-08-13", license: "MIT", source: "Harnix" } as const;
 

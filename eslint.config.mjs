@@ -8,18 +8,13 @@ import tseslint from "typescript-eslint";
  * decision recorded in docs/OVERHAUL_DECISIONS.md.
  */
 
-// Removed by `rewrite-guides` (task 14), which rewrites the guide and stack catalogs.
-const CATALOG_MODULES = ["src/catalog/catalog.ts", "src/catalog/validation.ts", "src/guides/catalog.ts"];
+// Resolved by `restructure-code` (task 07) and `release-v2` (task 17); no oversized source files remain.
+const OVERSIZED_SOURCE_FILES = [];
 
-// Unresolved after `restructure-code` (task 07); `release-v2` (task 17) must split each one or record a new decision.
-const UNRESOLVED_SOURCE_FILES = ["src/cli-program.ts", "src/core/context/context.ts", "src/utils/file-lock.ts"];
-
-const OVERSIZED_SOURCE_FILES = [...CATALOG_MODULES, "src/cli-program.ts", "src/utils/file-lock.ts"];
-
-const COMPLEX_SOURCE_FILES = ["src/catalog/validation.ts", ...UNRESOLVED_SOURCE_FILES];
+const COMPLEX_SOURCE_FILES = [];
 
 // Removed by `release-v2` (task 17), which reviews the release scripts.
-const RELEASE_SCRIPT_EXEMPTIONS = ["scripts/scan-release.mjs", "scripts/version-sync.mjs"];
+const RELEASE_SCRIPT_EXEMPTIONS = [];
 
 export default tseslint.config(
   {
@@ -75,8 +70,10 @@ export default tseslint.config(
       "@typescript-eslint/unbound-method": "off",
     },
   },
-  { files: OVERSIZED_SOURCE_FILES, rules: { "max-lines": "off" } },
-  { files: COMPLEX_SOURCE_FILES, rules: { complexity: "off" } },
-  { files: RELEASE_SCRIPT_EXEMPTIONS, rules: { complexity: "off", "max-lines": "off" } },
+  ...(OVERSIZED_SOURCE_FILES.length > 0 ? [{ files: OVERSIZED_SOURCE_FILES, rules: { "max-lines": "off" } }] : []),
+  ...(COMPLEX_SOURCE_FILES.length > 0 ? [{ files: COMPLEX_SOURCE_FILES, rules: { complexity: "off" } }] : []),
+  ...(RELEASE_SCRIPT_EXEMPTIONS.length > 0
+    ? [{ files: RELEASE_SCRIPT_EXEMPTIONS, rules: { complexity: "off", "max-lines": "off" } }]
+    : []),
   prettier,
 );

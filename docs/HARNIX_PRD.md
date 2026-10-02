@@ -221,6 +221,21 @@ Phase 6 supersedes every former project-local platform setup path. `init` contin
 - The hook emits plain-text stdout, which Claude Code adds as prompt context. A non-Harnix directory exits 0 with empty stdout.
 - Setup never writes `~/.claude.json`, credentials, MCP servers, `projects/`, `history` or `todos/`, and never changes permissions, sandbox or model settings. Claude Code reloads settings hooks from disk, so Harnix reports readiness `installed` or `binary-unavailable` and never claims `active` without authoritative external evidence.
 
+### 9.5 OpenCode
+
+- Public identity/flag: `opencode` / `--opencode`.
+- Nơi cài đặt: `~/.config/opencode/skills/harnix-*/SKILL.md` qua global skill sink chung, và một marker block trong `~/.config/opencode/AGENTS.md`. Khối này bảo toàn toàn bộ nội dung người dùng nằm ngoài markers, và có độ ưu tiên cao hơn fallback `~/.claude/CLAUDE.md`.
+- Chế độ hoạt động: Hookless (không hook shell, không cài plugin JS mặc định, không có biến môi trường relocate root riêng).
+- Manifest và Reconcile: `preserveUnownedRoot: false` vì thư mục gốc chia sẻ với công cụ; bảo toàn các file và skill không do Harnix quản lý.
+
+### 9.6 Cursor
+
+- Public identity/flag: `cursor` / `--cursor`.
+- Nơi cài đặt: `~/.cursor/skills/harnix-*/SKILL.md` qua global skill sink chung.
+- Không có file instruction global: Cursor User Rules chỉ cấu hình qua giao diện UI, không có file instruction cấp hệ thống.
+- Chế độ hoạt động: Hookless (injection `sessionStart` chưa được xác minh schema và không dùng `beforeSubmitPrompt`).
+- Manifest và Reconcile: `preserveUnownedRoot: false` vì thư mục gốc chia sẻ với công cụ; bảo toàn các skill của bên thứ ba.
+
 The root `AGENTS.md` bootstrap that `init` creates when absent is retained for project onboarding. It is not a setup-owned Codex platform surface.
 ## 10. Config, context, journal and learning
 
@@ -479,5 +494,6 @@ Lịch sử này giải thích provenance/migration, không tạo public alias h
 - **Phase 4:** lifecycle commands, full migration, packaging, performance, footprint và polish.
 - **Phase 5:** review remediation, lifecycle/state safety and harness hardening.
 - **Phase 6:** explicit user-global Kiro, Antigravity, Codex, and Claude Code integrations; global ownership, Doctor v2, legacy project-surface cleanup and disposable-profile acceptance.
+- **Phase 7 (Overhaul v2.0.0):** Đại tu toàn diện 17 tasks: TaskRecord schema v3, suite gate kiểm chứng thực, chuẩn hóa múi giờ VN offset, thống nhất tên epic, bổ sung OpenCode & Cursor qua platform registry khai báo, viết lại guides dạng lệnh + ràng buộc, thư viện technique-skills & extension point, repo-map test-impact, tinh gọn acceptance gates và phát hành chính thức 2.0.0.
 
 Chi tiết file/task/test/exit criteria nằm trong `IMPLEMENTATION_PLAN.md`.

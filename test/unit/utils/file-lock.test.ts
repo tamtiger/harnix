@@ -10,6 +10,7 @@ import {
   type FileLockFileSystem,
   type HarnixFileLockRecord,
 } from "src/utils/file-lock.js";
+import { lockRecordNamePattern, isLockRecordName } from "src/utils/file-lock-inspect.js";
 import { packageVersion } from "src/version.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 
@@ -335,5 +336,11 @@ describe("Harnix file lock", () => {
 
     await lock.release();
     expect((await readLockDirectory(path)).record).toEqual(replacement);
+  });
+
+  it("validates lock record names against the UUID pattern", () => {
+    expect(lockRecordNamePattern.test("owner-00000000-0000-4000-8000-000000000001.json")).toBe(true);
+    expect(isLockRecordName("owner-00000000-0000-4000-8000-000000000001.json")).toBe(true);
+    expect(isLockRecordName("invalid.json")).toBe(false);
   });
 });

@@ -11,16 +11,7 @@ const kindTitles = {
   fixed: "Fixed",
 };
 
-export async function syncVersion({
-  root = process.cwd(),
-  version,
-  summaries,
-  date = new Date().toISOString().slice(0, 10),
-  kind = "changed",
-}) {
-  const targetRoot = resolve(root);
-  const requested = parseVersion(version);
-  const normalizedSummaries = normalizeSummaries(summaries);
+function assertReleaseMetadata(date, kind) {
   if (!/^\d{4}-\d{2}-\d{2}$/u.test(date)) throw new Error("Release date must use YYYY-MM-DD.");
   const [year, month, day] = date.split("-").map(Number);
   const parsedDate = new Date(Date.UTC(year, month - 1, day));
@@ -34,6 +25,19 @@ export async function syncVersion({
   if (!allowedKinds.has(kind)) {
     throw new Error(`Release kind must be one of: ${[...allowedKinds].join(", ")}.`);
   }
+}
+
+export async function syncVersion({
+  root = process.cwd(),
+  version,
+  summaries,
+  date = new Date().toISOString().slice(0, 10),
+  kind = "changed",
+}) {
+  const targetRoot = resolve(root);
+  const requested = parseVersion(version);
+  const normalizedSummaries = normalizeSummaries(summaries);
+  assertReleaseMetadata(date, kind);
 
   const packagePath = join(targetRoot, "package.json");
   const changelogPath = join(targetRoot, "CHANGELOG.md");

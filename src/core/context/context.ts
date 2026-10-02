@@ -3,61 +3,29 @@ import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { sha256 } from "src/utils/hashing.js";
 import { compareCodeUnits } from "src/utils/order.js";
-import type { ContextSelectionChangeKind } from "./selection-freshness.js";
-
-export interface ContextEntry {
-  path: string;
-  reason: string;
-  priority: number;
-  pinned: boolean;
-  states: string[];
-  contentHash?: string;
-}
-export interface ContextManifest {
-  generator: "harnix";
-  schemaVersion: 1;
-  taskId: string;
-  maxCharacters: number;
-  entries: ContextEntry[];
-  omitted: Array<{ path: string; reason: "budget" | "duplicate" | "missing" | "unsafe" }>;
-}
-export interface ContextSignals {
-  taskId?: string;
-  references?: string[];
-  activePaths?: string[];
-  languages?: string[];
-  technologies?: string[];
-  guides?: string[];
-}
-/** Entries under `prefixes`, and any file of at least `minCharacters`, are listed as a pointer instead of pasted. */
-export interface ContextPointerOptions {
-  prefixes: readonly string[];
-  minCharacters: number;
-}
-/** Guides stay pointers because a hook repeats its payload on every prompt; the agent reads the matching one on demand. */
-export const GUIDE_POINTER_PREFIX = ".harnix/spec/guides/";
-export const POINTER_MIN_CHARACTERS = 1500;
-/** A pointer still needs the content hash for drift detection, so the file is read; an enormous one is omitted instead. */
-const MAX_POINTER_READ_BYTES = 1_048_576;
-
-const pointerLine = (characters: number): string =>
-  `(pointer, ${characters} characters; read it when it matches the files you change)`;
-
-export type ContextState = "not-recorded" | "current" | "stale";
-export type ContextChangeKind = "changed" | "missing" | "unreadable" | "unverified";
-export interface ContextChange {
-  path: string;
-  kind: ContextChangeKind;
-}
-export interface ContextDrift {
-  state: ContextState;
-  changes: ContextChange[];
-  selectionChanges: ContextSelectionChangeKind[];
-}
-export interface ContextDriftDependencies {
-  readFile?: (path: string) => Promise<string>;
-  resolvePath?: (projectRoot: string, repositoryPath: string) => Promise<string>;
-}
+export type {
+  ContextChange,
+  ContextChangeKind,
+  ContextDrift,
+  ContextDriftDependencies,
+  ContextEntry,
+  ContextManifest,
+  ContextPointerOptions,
+  ContextSignals,
+  ContextState,
+} from "./context-types.js";
+export { GUIDE_POINTER_PREFIX, POINTER_MIN_CHARACTERS } from "./context-types.js";
+import {
+  MAX_POINTER_READ_BYTES,
+  pointerLine,
+  type ContextChange,
+  type ContextDrift,
+  type ContextDriftDependencies,
+  type ContextEntry,
+  type ContextManifest,
+  type ContextPointerOptions,
+  type ContextSignals,
+} from "./context-types.js";
 
 export const UNTRUSTED_CONTEXT_PREFIX = [
   "<<< HARNIX UNTRUSTED REPOSITORY CONTEXT >>>",
@@ -118,6 +86,70 @@ export async function inspectContextDrift(
   return { state: changes.length === 0 ? "current" : "stale", changes, selectionChanges: [] };
 }
 
+function filterInitialEntries(entries: ContextEntry[]): {
+  safeEntries: ContextEntry[];
+  omitted: ContextManifest["omitted"];
+} {
+  const normalizedSeen = new Set<string>();
+  const safeEntries: ContextEntry[] = [];
+  const omitted: ContextManifest["omitted"] = [];
+  for (const entry of entries) {
+    try {
+      const path = normalizeRepositoryPath(entry.path);
+      if (normalizedSeen.has(path)) {
+        omitted.push({ path, reason: "duplicate" });
+      } else {
+        normalizedSeen.add(path);
+        safeEntries.push({ ...entry, path });
+      }
+    } catch {
+      omitted.push({ path: entry.path, reason: "unsafe" });
+    }
+  }
+  return { safeEntries, omitted };
+}
+
+type ProcessContextResult =
+  | { kind: "include"; data: { chunk: string; contentHash: string; sizeDelta: number } }
+  | { kind: "omit"; reason: "budget" | "duplicate" | "missing" | "unsafe" };
+
+async function inspectAndReadContextEntry(
+  projectRoot: string,
+  entry: ContextEntry,
+  currentSize: number,
+  maxCharacters: number,
+  fullContext: boolean,
+  pointers: ContextPointerOptions | undefined,
+  contentHashes: Set<string>,
+): Promise<ProcessContextResult> {
+  try {
+    const path = await resolveSafeProjectPath(projectRoot, entry.path);
+    const header = `\n--- ${entry.path} ---\n`;
+    const fileSize = (await stat(path)).size;
+    const pointerByPath = pointers?.prefixes.some((prefix) => entry.path.startsWith(prefix)) === true;
+    const mayPoint = pointerByPath || (pointers !== undefined && fileSize >= pointers.minCharacters);
+    if (mayPoint && fileSize > MAX_POINTER_READ_BYTES) {
+      return { kind: "omit", reason: "budget" };
+    }
+    if (!mayPoint && !fullContext && currentSize + header.length + fileSize > maxCharacters) {
+      return { kind: "omit", reason: "budget" };
+    }
+    const content = await readFile(path, "utf8");
+    const contentHash = sha256(content);
+    if (contentHashes.has(contentHash)) {
+      return { kind: "omit", reason: "duplicate" };
+    }
+    const asPointer = pointers !== undefined && (pointerByPath || content.length >= pointers.minCharacters);
+    const chunk = `${header}${asPointer ? pointerLine(content.length) : content}`;
+    if (!fullContext && currentSize + chunk.length > maxCharacters) {
+      return { kind: "omit", reason: "budget" };
+    }
+    return { kind: "include", data: { chunk, contentHash, sizeDelta: chunk.length } };
+  } catch (error: unknown) {
+    return { kind: "omit", reason: isUnsafe(error) ? "unsafe" : "missing" };
+  }
+}
+
 export async function buildContext(
   projectRoot: string,
   entries: ContextEntry[],
@@ -127,70 +159,39 @@ export async function buildContext(
   maxEntries = Number.POSITIVE_INFINITY,
   pointers?: ContextPointerOptions,
 ): Promise<{ text: string; manifest: ContextManifest }> {
-  const normalizedSeen = new Set<string>(),
-    safeEntries: ContextEntry[] = [],
-    omitted: ContextManifest["omitted"] = [];
-  for (const entry of entries) {
-    try {
-      const path = normalizeRepositoryPath(entry.path);
-      if (normalizedSeen.has(path)) omitted.push({ path, reason: "duplicate" });
-      else {
-        normalizedSeen.add(path);
-        safeEntries.push({ ...entry, path });
-      }
-    } catch {
-      omitted.push({ path: entry.path, reason: "unsafe" });
-    }
-  }
-  const ranked = rankContext(safeEntries, signals),
-    included: ContextEntry[] = [],
-    chunks: string[] = [],
-    contentHashes = new Set<string>();
+  const { safeEntries, omitted } = filterInitialEntries(entries);
+  const ranked = rankContext(safeEntries, signals);
+  const included: ContextEntry[] = [];
+  const chunks: string[] = [];
+  const contentHashes = new Set<string>();
   let size = fullContext ? 0 : UNTRUSTED_CONTEXT_PREFIX.length + UNTRUSTED_CONTEXT_SUFFIX.length;
   let inspectedEntries = 0;
+
   for (const entry of ranked) {
     if (inspectedEntries >= maxEntries) {
       omitted.push({ path: entry.path, reason: "budget" });
       continue;
     }
     inspectedEntries += 1;
-    try {
-      const path = await resolveSafeProjectPath(projectRoot, entry.path);
-      const header = `\n--- ${entry.path} ---\n`;
-      // A bounded caller must not read a giant file merely to discover that it
-      // cannot fit. UTF-8 byte size is a conservative upper bound for the JS
-      // string length used by this context budget.
-      const fileSize = (await stat(path)).size;
-      const pointerByPath = pointers?.prefixes.some((prefix) => entry.path.startsWith(prefix)) === true;
-      const mayPoint = pointerByPath || (pointers !== undefined && fileSize >= pointers.minCharacters);
-      if (mayPoint && fileSize > MAX_POINTER_READ_BYTES) {
-        omitted.push({ path: entry.path, reason: "budget" });
-        continue;
-      }
-      if (!mayPoint && !fullContext && size + header.length + fileSize > maxCharacters) {
-        omitted.push({ path: entry.path, reason: "budget" });
-        continue;
-      }
-      const content = await readFile(path, "utf8");
-      const contentHash = sha256(content);
-      if (contentHashes.has(contentHash)) {
-        omitted.push({ path: entry.path, reason: "duplicate" });
-        continue;
-      }
-      const asPointer = pointers !== undefined && (pointerByPath || content.length >= pointers.minCharacters);
-      const chunk = `${header}${asPointer ? pointerLine(content.length) : content}`;
-      if (!fullContext && size + chunk.length > maxCharacters) {
-        omitted.push({ path: entry.path, reason: "budget" });
-        continue;
-      }
-      contentHashes.add(contentHash);
-      included.push({ ...entry, contentHash });
-      chunks.push(chunk);
-      size += chunk.length;
-    } catch (error: unknown) {
-      omitted.push({ path: entry.path, reason: isUnsafe(error) ? "unsafe" : "missing" });
+    const result = await inspectAndReadContextEntry(
+      projectRoot,
+      entry,
+      size,
+      maxCharacters,
+      fullContext,
+      pointers,
+      contentHashes,
+    );
+    if (result.kind === "omit") {
+      omitted.push({ path: entry.path, reason: result.reason });
+    } else {
+      contentHashes.add(result.data.contentHash);
+      included.push({ ...entry, contentHash: result.data.contentHash });
+      chunks.push(result.data.chunk);
+      size += result.data.sizeDelta;
     }
   }
+
   const text = chunks.length === 0 ? "" : `${UNTRUSTED_CONTEXT_PREFIX}${chunks.join("")}${UNTRUSTED_CONTEXT_SUFFIX}`;
   return {
     text,
@@ -204,15 +205,47 @@ export async function buildContext(
     },
   };
 }
+
 export async function saveContextManifest(taskDirectory: string, manifest: ContextManifest): Promise<void> {
   await atomicWriteFile(
     await resolveSafeProjectPath(taskDirectory, "context.json"),
     `${JSON.stringify(validateContextManifest(manifest), null, 2)}\n`,
   );
 }
+
 export async function loadContextManifest(path: string): Promise<ContextManifest> {
   return validateContextManifest(JSON.parse(await readFile(path, "utf8")) as unknown);
 }
+
+function validateContextEntry(entry: unknown, previous: ContextEntry | undefined): ContextEntry {
+  if (
+    !isRecord(entry) ||
+    typeof entry.path !== "string" ||
+    normalizeRepositoryPath(entry.path) !== entry.path ||
+    typeof entry.reason !== "string" ||
+    !Number.isInteger(entry.priority) ||
+    typeof entry.pinned !== "boolean" ||
+    !Array.isArray(entry.states) ||
+    !entry.states.every((state) => typeof state === "string") ||
+    (entry.contentHash !== undefined &&
+      (typeof entry.contentHash !== "string" || !/^[a-f0-9]{64}$/u.test(entry.contentHash))) ||
+    (previous && compareEntries(previous, entry as unknown as ContextEntry) > 0)
+  ) {
+    throw new Error("Invalid context entry.");
+  }
+  return entry as unknown as ContextEntry;
+}
+
+function validateOmittedEntry(item: unknown): void {
+  if (
+    !isRecord(item) ||
+    typeof item.path !== "string" ||
+    !["budget", "duplicate", "missing", "unsafe"].includes(String(item.reason))
+  ) {
+    throw new Error("Invalid omitted context entry.");
+  }
+}
+
 export function validateContextManifest(value: unknown): ContextManifest {
   if (
     !isRecord(value) ||
@@ -224,34 +257,16 @@ export function validateContextManifest(value: unknown): ContextManifest {
     value.maxCharacters <= 0 ||
     !Array.isArray(value.entries) ||
     !Array.isArray(value.omitted)
-  )
+  ) {
     throw new Error("Invalid or unsupported context manifest.");
-  const entries = value.entries as ContextEntry[];
-  let previous: ContextEntry | undefined;
-  for (const entry of entries) {
-    if (
-      !isRecord(entry) ||
-      typeof entry.path !== "string" ||
-      normalizeRepositoryPath(entry.path) !== entry.path ||
-      typeof entry.reason !== "string" ||
-      !Number.isInteger(entry.priority) ||
-      typeof entry.pinned !== "boolean" ||
-      !Array.isArray(entry.states) ||
-      !entry.states.every((state) => typeof state === "string") ||
-      (entry.contentHash !== undefined &&
-        (typeof entry.contentHash !== "string" || !/^[a-f0-9]{64}$/u.test(entry.contentHash))) ||
-      (previous && compareEntries(previous, entry) > 0)
-    )
-      throw new Error("Invalid context entry.");
-    previous = entry;
   }
-  for (const item of value.omitted)
-    if (
-      !isRecord(item) ||
-      typeof item.path !== "string" ||
-      !["budget", "duplicate", "missing", "unsafe"].includes(String(item.reason))
-    )
-      throw new Error("Invalid omitted context entry.");
+  let previous: ContextEntry | undefined;
+  for (const rawEntry of value.entries) {
+    previous = validateContextEntry(rawEntry, previous);
+  }
+  for (const item of value.omitted) {
+    validateOmittedEntry(item);
+  }
   return value as unknown as ContextManifest;
 }
 function compareEntries(left: ContextEntry, right: ContextEntry): number {

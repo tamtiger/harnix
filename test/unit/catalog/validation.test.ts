@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { stackCatalog } from "src/catalog/catalog.js";
 import type { StackCatalog } from "src/catalog/types.js";
 import { CatalogValidationError, validateStackCatalog } from "src/catalog/validation.js";
+import { CatalogValidationError as HelperError } from "src/catalog/validation-helpers.js";
 import { guideSources } from "src/guides/catalog.js";
 
 /** The packaged languages/technologies wired to the packaged guides, exactly as src/guides/catalog.ts validates them. */
@@ -15,6 +16,7 @@ const candidate = (): StackCatalog =>
 
 describe("validateStackCatalog", () => {
   it("throws CatalogValidationError, a named Error subclass, for a malformed catalog", () => {
+    expect(HelperError).toBe(CatalogValidationError);
     const error = (() => {
       try {
         validateStackCatalog(null as never);

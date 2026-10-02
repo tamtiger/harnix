@@ -4,139 +4,51 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
-## [2.0.0-dev.15] - 2026-10-02
+## [2.0.0] - 2026-10-02
+
+Bản phát hành lớn đánh dấu đợt đại tu toàn diện Harnix v2.0.0 (Epic `20260928-180123-harnix-overhaul`). Tinh giản bộ máy workflow, giảm token chỉ dẫn, tự động hoá learning, mở rộng hỗ trợ 6 coding tools, tích hợp repo-map test impact, bổ sung 5 technique-skills, và chuẩn hoá toàn diện code & test.
+
+### Added
+
+- **Hỗ trợ 6 nền tảng coding tools:** Bổ sung OpenCode (`~/.config/opencode/`) và Cursor (`~/.cursor/skills/`) cùng Kiro, Antigravity, Codex, và Claude Code thông qua registry nền tảng khai báo (`src/core/platform/registry.ts`).
+- **5 Technique Skills độc lập:** Thêm `harnix-verification-gap`, `harnix-bugfix-preserve`, `harnix-flaky-test`, `harnix-migration-safety`, `harnix-security-lens` được cài đặt qua global skill sink của cả 6 nền tảng.
+- **Extension Point cho custom skills:** Hỗ trợ dự án tự định nghĩa skill riêng tại `.harnix/spec/skills/<skill>/SKILL.md`, tự động discover qua `harnix skill --all`.
+- **Repo-map Test Impact:** Bổ sung cờ `--tests <path>` cho lệnh `harnix repo-map` hỗ trợ truy vết ngược các test bị ảnh hưởng trực tiếp và bắc cầu trên TypeScript, Python, Go.
+- **Lệnh public `harnix verify-plan`:** Tự động phát hiện deterministic lệnh test/lint/typecheck/format cho ≥ 8 hệ sinh thái và monorepo workspaces.
+- **Cơ chế Suite Gate:** Đảm bảo trước khi `ready` và `finish` phải có kiểm chứng suite bao quát source và test với digest hợp lệ.
+- **Tự động capture & surface Learning:** `workflow --finish` tự động ghi nhận bài học từ `decisions`, `residualRisks`, `findings` thành draft/candidate, tự động surface qua hook context / preflight.
+- **Múi giờ địa phương (ISO 8601 kèm offset):** Hỗ trợ cấu hình `timezone` (mặc định `Asia/Ho_Chi_Minh` UTC+7), timestamp có offset chính xác thay thế lệnh `date` shell.
+- **Đo lường token:** Thêm công cụ `pnpm measure:tokens` đo lường mức độ tiêu hao token thực tế của từng thành phần workflow.
+- **Reference nạp theo yêu cầu:** `harnix skill <name> --reference <topic>` giúp agent đọc chi tiết chuyên sâu chỉ khi cần.
 
 ### Changed
 
-- Repo-map test impact, support --tests for TS, Python, Go and remove unused ranker
-
-## [2.0.0-dev.14] - 2026-10-01
-
-### Added
-
-- Thêm 5 technique skills độc lập (harnix-verification-gap, harnix-bugfix-preserve, harnix-flaky-test, harnix-migration-safety, harnix-security-lens) phân phối qua global skill sink của 6 nền tảng; mở extension point .harnix/spec/skills/ cho custom project skills; bổ sung con trỏ hướng dẫn kích hoạt vào các workflow skills chính.
-
-## [2.0.0-dev.13] - 2026-10-01
-
-### Changed
-
-- Viết lại 34 guide theo dạng lệnh + ràng buộc: mỗi guide có đúng ba mục Verify, Constraints, Common mistakes và không quá 600 token (tổng 41.676 → 11.607 token, đọc common + typescript 2.891 → 666); sửa nội dung lỗi thời đã kiểm chứng bằng nguồn chính thức (Next.js 16 proxy.ts và INP, bleach ngừng bảo trì nên dùng nh3, staticcheck thay gosimple và layout Go internal/cmd); thêm .harnix/spec/project-facts.md (derived, init và update ghi lại: stack đã xác nhận và lệnh verify theo package; bootstrap AGENTS.md nhắc tới file); measure:tokens in khối guides.
-
-## [2.0.0-dev.12] - 2026-10-01
-
-### Changed
-
-- Giảm token và ma sát của agent theo số đo thật: hook context liệt kê guide và file từ 1.500 ký tự dạng con trỏ (vẫn hash cho drift) và không cắt giữa entry; preflight chỉ trả learning ở stage plan và nhận --brief; BRIEF_ACTIONS là một tập duy nhất, lỗi --brief liệt kê các lệnh hỗ trợ; workflow --schema có khối constraints; lỗi envelope nêu tên field lạ, dạng { task } và buộc epicMembers có ID tăng dần; harnix epic <id> --brief; thông báo lỗi run-check trên Windows nêu cách xử lý; rule đọc workflow.md và schema một lần mỗi phiên, cookbook gộp một khối, ghi rõ --platform và cách sửa member không active.
-
-## [2.0.0-dev.11] - 2026-10-01
-
-### Added
-
-- Thêm pnpm measure:tokens (scripts/measure-tokens.mjs): chạy một vòng đời Lite thật trong repo tạm với home cô lập và in JSON số token (ceil(ký tự/4)) theo khối instruction luôn nạp, workflow.md, từng skill, preflight, schema, status, hook context (planning và in_progress) và từng lệnh workflow có/không --brief; thoát khác 0 khi một lệnh đo lỗi. Đây là đường cơ sở của epic agent-token-diet.
-
-## [2.0.0-dev.10] - 2026-10-01
-
-### Changed
-
-- Giam friction/token khi dung --save: validateTask gop moi loi shape doc lap thanh mot thong bao (sua 1 lan thay vi resend envelope nhieu lan); bo guard tao-task thua bat Full task phai inline prd/plan JSON luc tao - gio tao Full task nhe (chi task.json) roi viet prd.md/plan.md bang editor tool, ready gate van chan; skill harnix-plan va cookbook workflow.md ghi ro rang buoc --save, doc --schema mot lan, va luong Full-create nhe.
-
-## [2.0.0-dev.9] - 2026-10-01
-
-### Fixed
-
-- Thong bao loi workflow actionable hon de agent khong lap lai: loi transition liet ke status/checkpoint hop le; suite-gate ready/finish noi ro can check co inputs phu source+test va scope focused|full (bo cach noi 'project-level' gay hieu nham scope=project); loi stale input-digest neu nguyen nhan (inputs doi sau khi ghi evidence) va cach sua (chay lai bang --run-check, khong chay lenh cham inputs truoc --finish); skill harnix-verify huong dan uu tien --run-check va chay check rong truoc check hep.
-
-## [2.0.0-dev.8] - 2026-10-01
-
-### Changed
-
-- Registry nền tảng khai báo cho Kiro, Antigravity, Codex và Claude Code (src/core/platform/registry.ts, kèm facts có nguồn và ngày xác minh); tách engine reconcile global theo mối quan tâm vào src/core/global và chuyển setup/update/uninstall/doctor vào core, command chỉ còn wiring; project và global dùng chung bảng quyết định ownership; cập nhật contract Claude Code đọc AGENTS.md native (v2.1.277+). Sửa redact() in literal $1 thay vì tên khóa và partial rollback của Claude không gán đúng nền tảng.
-
-## [2.0.0-dev.7] - 2026-09-30
-
-### Added
-
-- Cài đặt reference files trực tiếp vào global skill setup (`skills/<name>/references/<topic>.md`) và cập nhật đường dẫn tương đối trong các file SKILL.md; dọn dẹp thư mục rỗng deepest-first khi uninstall.
-- Bổ sung quy tắc contract immutability vào `workflow.md` template.
-
-## [2.0.0-dev.6] - 2026-09-30
-
-### Added
-
-- `workflow --add-decision`/`--add-risk` ghi note review bằng flag và `--finish --brief` báo learning đã capture (kèm lý do khi bằng 0); cookbook và skill finish-work hướng dẫn ghi bài học tái dùng.
-
-## [2.0.0-dev.5] - 2026-09-30
-
-### Added
-
-- `workflow --set-check`/`--add-criterion`/`--set-paths` chỉnh kế hoạch bằng flag, bỏ BOM ở stdin và từ chối văn bản hỏng mã hóa (mojibake) trước khi lưu; cookbook và skill hướng dẫn không đưa chữ có dấu qua pipe của Windows PowerShell 5.1.
-
-## [2.0.0-dev.4] - 2026-09-30
-
-### Fixed
-
-- Cookbook và quy tắc persistence nhắc đặt $OutputEncoding UTF-8 trong Windows PowerShell 5.1 trước khi pipe JSON có dấu.
-- `workflow --run-check` giữ nguyên mọi đối số sau operand đầu tiên kể cả khi shim `harnix.ps1` của pnpm làm mất dấu `--` (trước đây `--filter X` bị hiểu là option của harnix), và `--criterion` tách danh sách theo dấu phẩy lẫn khoảng trắng (PowerShell nối `a,b,c` không nháy thành `a b c`).
-- `workflow --migrate` và `--cancel` không còn chờ EOF khi không có body: stdin của shell agent thường là pipe mở mãi nên lệnh bị treo tới timeout dù đã ghi xong; nay dừng đọc sau 2 giây không có dữ liệu.
-
-## [2.0.0-dev.3] - 2026-09-30
-
-### Changed
-
-- Skill, workflow.md và steering nền tảng cấm script tạm, có Command cookbook PowerShell/bash, quy tắc clock, giải thích inputDigest và phục hồi sau replan; test đối chiếu flag tài liệu với CLI.
-
-## [2.0.0-dev.2] - 2026-09-30
-
-### Added
-
-- Hidden workflow thêm transport dạng flag: `--evidence` tự điền id/recordedAt/digest, `--criterion --met`, `--migrate` lên v3, `--run-check` và `--brief`; tách wiring sang `src/commands/workflow-command.ts`.
-
-## [2.0.0-dev.1] - 2026-09-30
-
-### Fixed
-
-- Suite gate nhận diện layout monorepo/.NET theo segment, finish gate xét pass mới nhất; input digest bỏ thư mục build tạm theo tín hiệu (marker), khớp không phân biệt hoa thường và băm song song.
-
-## [2.0.0-dev.0] - 2026-09-28
-
-Đợt đại tu toàn diện (epic `20260928-180123-harnix-overhaul`). Phiên bản khởi đầu chu kỳ v2 đang phát triển. Khi hoàn tất toàn bộ epic, `release-v2` sẽ đổi thành `## [2.0.0] - <ngày phát hành>`.
-
-### Added
-
-- Lệnh public `harnix verify-plan`: phát hiện deterministic lệnh test/lint/typecheck/format theo manifest, lockfile và task runner cho ≥ 8 hệ sinh thái (Node.js npm/pnpm/yarn/bun, Python uv/poetry/pip, Rust cargo, Go, JVM Gradle/Maven, .NET dotnet, PHP Composer, Swift, Flutter/Dart) cùng monorepo workspaces (pnpm, Cargo, go.work, Maven) theo nguyên tắc nearest-manifest-wins.
-- Hỗ trợ cấu hình `verify:` trong `.harnix/config.yaml` (mức project và package).
-- Cơ chế **Suite Gate**: `ready` yêu cầu ít nhất một check mức project lấy từ `verify-plan` với `inputs` phủ toàn bộ source và test; `finish` từ chối hoàn thành khi check đó thiếu pass evidence với input digest hiện hành. Cảnh báo rõ repo không có test (`hasTests: false`) và yêu cầu khai báo check thay thế.
-- `harnix skill <tên> --reference <chủ đề>`: nạp theo yêu cầu phần chi tiết ít dùng của một skill (plan: `replan|migration|epic|ready-review`; implement: `feedback`; verify: `evidence|finish-cancel`). Reference nằm trong package, không cài thêm file; lỗi liệt kê chủ đề hợp lệ.
-- Bộ test ngân sách chỉ dẫn (`instruction-budget`): khối always-loaded ≤ 1.500 token, mỗi skill ≤ 2.000, đường trực tiếp ≤ 4.000, đường Full ≤ 15.000 (ước lượng ký tự/4), cùng test giữ nguyên năng lực của các skill cũ trong skill mới.
+- **Tinh gọn Task Contract (Schema v3):** Bỏ sidecar `verification-inputs.json`, digest được tính động từ file input hiện hành, giảm churn `.harnix` xuống ≤ 200 dòng mỗi task.
+- **Tái cấu trúc 6 workflow skills:** Gộp 7 skill cũ thành 6 skill rõ ràng: `harnix-plan`, `harnix-implement`, `harnix-verify`, `harnix-debug`, `harnix-review`, `harnix-research`.
+- **Viết lại 34 Guides:** Chuyển đổi định dạng guides theo dạng lệnh + ràng buộc (Verify, Constraints, Common mistakes), giảm ~72% lượng token (từ ~41k xuống ~11k).
+- **Thêm `.harnix/spec/project-facts.md`:** Khởi tạo và ghi lại stack đã nhận diện cùng lệnh verify chuẩn của dự án.
+- **Chuẩn hoá Codebase & Test Suite:** Áp dụng Prettier + ESLint type-checked, trần độ dài file ≤ 300 dòng và complexity ≤ 20 trên 100% mã nguồn `src/` (xóa sạch toàn bộ danh sách miễn trừ); test layout phản chiếu cấu trúc mã nguồn, test coverage đạt sàn `lines`/`statements` 93.1%, `functions` 98.1%, `branches` 86.8%.
+- **Thống nhất định danh Epic:** Chuyển đổi toàn diện roadmap sang epic (`.harnix/epics/`, `harnix epic`, `epicMembers`), tự động migrate dữ liệu cũ idempotent.
+- **Rút gọn các lệnh phụ:** Gộp `harnix checks` và `harnix audit` vào `harnix status --explain`.
 
 ### Removed
 
-- Gỡ sidecar `verification-inputs.json` (cho task mới), ready-trace grammar, execution-notes grammar và `workflow --audit-ready` cùng module `ready-trace.ts`, `input-freshness.ts` và test đi kèm. `plan.md` cũ có vùng execution-notes vẫn đọc và lưu được như văn bản tự do.
-- Gỡ code không còn caller: `src/migration/**`, `src/rules/rules.ts`, `src/templates/harnix/managed-workflow.ts`, `src/core/research.ts` cùng test đi kèm. Nội dung rule đã nằm hoàn toàn trong `src/guides/`.
-- Gỡ bốn skill `harnix-brainstorm`, `harnix-check`, `harnix-finish-work`, `harnix-continue` (thay bằng `harnix-plan` và `harnix-verify`); `update --global` gỡ bản cài cũ do Harnix quản lý. `harnix skill` vẫn resolve tên cũ về skill mới (`resolvedFrom`, riêng `harnix-continue` kèm ghi chú chạy `harnix workflow --preflight`).
+- Xóa bỏ sidecar `verification-inputs.json`, ready-trace grammar, execution-notes grammar và lệnh `workflow --audit-ready`.
+- Xóa bỏ mã nguồn chết và không còn caller (`src/migration/**`, `src/rules/rules.ts`, `src/templates/harnix/managed-workflow.ts`, `src/core/research.ts`).
+- Xóa bỏ 4 skills cũ (`harnix-brainstorm`, `harnix-check`, `harnix-finish-work`, `harnix-continue`) và lệnh `harnix roadmap` (thay bằng `harnix epic`).
 
-### Changed
+### Breaking Changes
 
-- Learning tự kích hoạt (không breaking): `workflow --finish` tự capture quan sát lặp lại từ `decisions`, `residualRisks` và `findings` của chính task thành journal entry `draft`, nâng lên `candidate` khi task thứ hai lặp lại; quan sát rủi ro (credential/override/command) không bao giờ được capture. `draft`/`candidate` quá 28 ngày đọc là `archived`. Hook context có khối "Project learning" tối đa 5 dòng và `workflow --preflight` có trường `learning` mới cho nền tảng không hook. Promotion vào spec vẫn thủ công.
-- Tái cấu trúc nội bộ, không đổi hành vi quan sát được: logic workflow chuyển từ `src/commands/internal-workflow.ts` và `src/core/workflow.ts` vào `src/core/workflow/` (tách theo action, command chỉ còn adapter re-export); `src/core/tasks/task.ts` tách thành schema/validate/migration/state/store/review sau một barrel; `detection` và `stack` chuyển sang `src/core/stack/`; sáu command không còn import `node:fs`; hàm `canonicalJson` trả object trong `workflow-helpers.ts` đổi tên thành `canonicalizeJson`. Bảo vệ bởi `test/unit/architecture.test.ts` và golden `test/workflow/behavior-snapshot.golden.json`.
-- Danh sách miễn trừ `max-lines`/`complexity` trong `eslint.config.mjs` được gỡ `VERIFY_DETECTION_MODULES` (`config.ts`, `detection.ts`) sau khi tách các module này về ≤ 300 dòng; các owner còn lại: `add-platform-registry`, `rewrite-guides`, `add-test-impact-map`, `release-v2`.
-- Công cụ phát triển (không ảnh hưởng người dùng cuối): thêm devDependency `prettier` và `eslint-config-prettier`, cấu hình `.prettierrc.json` (`printWidth` 120, `endOfLine: auto`), script `format` và `format:check`; `pnpm lint` giờ chạy `pnpm format:check` trước rồi ESLint. Toàn bộ `src`, `test`, `scripts` được định dạng một lần (chỉ đổi định dạng; test, typecheck và bản build sau minify giữ nguyên). ESLint bật `recommendedTypeChecked`, `no-floating-promises`, `complexity` 20 và `max-lines` 300; vi phạm còn lại nằm trong danh sách miễn trừ tạm thời của `eslint.config.mjs`, chỉ được thu hẹp, do `restructure-code`, `standardize-tests` và `release-v2` chịu trách nhiệm gỡ.
-- Chuẩn hóa test (công cụ phát triển, không ảnh hưởng người dùng cuối): `test/unit` phản chiếu `src`, `test/integration/commands` phản chiếu `src/commands`, mọi file test ≤ 400 dòng, builder dùng chung trong `test/support/builders.ts`, mọi module `src` có test trực tiếp hoặc lý do ghi rõ, `test/README.md` mô tả từng suite và `test/unit/test-structure.test.ts` ép buộc các quy tắc này cùng sàn số test/assertion. `pnpm test` giờ chạy coverage (`@vitest/coverage-v8`) với sàn `lines`/`statements` 93.1, `functions` 98.1, `branches` 86.8 trong `vitest.config.ts`, `testTimeout` 20 giây. Import trong `src` và `test` dùng alias `src/...` và `test/...` (tsconfig `paths` + alias vitest), ESLint cấm import cha `../`.
-- Mọi timestamp ghi ra dùng múi giờ cấu hình: `.harnix/config.yaml` có `timezone` (tên IANA, tùy chọn; mặc định lấy múi giờ hệ thống qua `Intl` lúc `init`, không dùng biến `TZ` của shell; repo này đặt `Asia/Ho_Chi_Minh`). Thời gian được định dạng ISO 8601 kèm offset (ví dụ `2026-09-28T20:30:01.123+07:00`) qua module duy nhất `src/utils/clock.ts`; ngày phân vùng journal theo ngày cục bộ. Dữ liệu cũ dạng `Z` chỉ được hiển thị và so sánh theo thời điểm tuyệt đối, không bị ghi lại. Từ nay task/evidence mới của repo này mang `+07:00` thay vì `Z`.
-- `harnix workflow --preflight` trả thêm khối `clock` (`timezone`, `now`, `idPrefix`) làm nguồn thời gian và tiền tố ID cho agent thay cho lệnh `date` của shell; `review.md` và trang epic hiển thị thời gian theo múi giờ cấu hình.
-- **Breaking:** gộp hai lệnh public `harnix checks` và `harnix audit` vào `harnix status --explain [--limit <1..50>]`. Kết quả nằm dưới `explain.checks` và `explain.audit`; lớp redaction chống lộ nội dung task hỏng được giữ nguyên. Dùng `harnix status --explain` thay cho hai lệnh cũ.
-- **Breaking:** hợp đồng task chuyển sang TaskRecord schema v3. Check không còn khai báo `@task-contract` (hợp đồng luôn được gộp ngầm vào digest); evidence pass của check bắt buộc mang `inputDigest`, và với check có lệnh thì pass phải có `exitCode` 0, fail phải khác 0. Digest được tính lại từ input hiện hành thay vì lưu snapshot; task mới không còn tạo `verification-inputs.json`, churn `.harnix` của một vòng đời mẫu ≤ 200 dòng.
-- **Breaking:** `contractRevision` còn một bước: một lần `workflow --save` đặt checkpoint `replan` kèm `reason`, rồi một lần save `ready/ready`. Điều kiện ready của Full task chỉ đòi `prd.md` và `plan.md` không rỗng, `plan.md` có ít nhất một mục checklist.
-- **Breaking:** `workflow --save` chỉ nhận task mới ở schema v3. Task v1/v2 chưa hoàn tất chỉ được nâng lên v3 bằng một lần save migration (giữ status/checkpoint, tiêu chí, check bắt buộc và evidence); mọi thao tác khác trên task chưa migrate bị từ chối kèm hướng dẫn. Evidence pass cũ báo `legacy-schema` cho đến khi migrate và chạy lại check. Task đã kết thúc vẫn đọc được, không bị ghi lại.
-- Mã lý do stale của check còn: `digest-mismatch`, `evidence-expired`, `inputs-unavailable`, `latest-failed`, `latest-skipped`, `legacy-schema`, `no-evidence`; `changes` luôn rỗng vì không còn snapshot để so sánh.
-- Sửa lọc member của epic để task v3 hiện trong `harnix roadmap`.
-- **Breaking:** thống nhất tên gọi "epic". Lệnh `harnix roadmap [--limit] [--id]` bị xóa (không alias) và thay bằng `harnix epic [--limit]` (danh sách) cùng `harnix epic <epic-id>` (chi tiết kèm next task; id không tồn tại trả lỗi JSON exit 2). Thư mục `.harnix/roadmaps/` đổi thành `.harnix/epics/`; trường envelope `roadmapMembers` của `workflow --save` đổi thành `epicMembers`. `EpicRecord` và `epicId` của task không đổi.
-- `harnix update` và `harnix doctor --fix` chuyển `.harnix/roadmaps/*.json` sang `.harnix/epics/` không mất dữ liệu (chỉ xóa file cũ sau khi bản mới đã ghi đúng, idempotent, giữ nguyên cả hai nếu đích đã có nội dung khác); trước khi chuyển, các lệnh đọc vẫn tìm ở thư mục cũ.
-- Sửa trang epic `.md`: có dòng trống trước mọi heading, render `nonGoals`, và thêm mục `Next task` khớp với `nextTask` của `harnix epic <epic-id>`.
-- Suite `test:migration` chuyển thành suite tương thích dữ liệu cũ (đọc task v1/v2 và task có `context.json`) thay cho test của module migration đã gỡ.
-- **Breaking:** bảy skill thành sáu: `harnix-plan`, `harnix-implement`, `harnix-verify`, `harnix-debug`, `harnix-review`, `harnix-research` (review và research tách riêng). `harnix workflow --preflight` trả `nextStage` ∈ `plan|implement|verify|debug|await|stop` (trước đây `brainstorm|check|finish|continue|…`); `stageOwnerFor(state)` là nguồn duy nhất map trạng thái sang skill và `blocked` route tới owner của `resumeStatus`.
-- Một khối quy tắc always-loaded (`HARNIX_RULES`, 9 quy tắc) được render giống hệt trên steering Kiro/Antigravity, khối Claude/Codex và `AGENTS.md` bootstrap; guard, danh sách Bypass và quy tắc state chỉ nằm ở đó, skill không lặp lại. Skill chạy được khi không có hook (bắt đầu bằng `harnix workflow --preflight`); review/research không cần `.harnix/workflow.md`; không đọc `.active` trước preflight; task Lite không có `plan.md`.
-- `.harnix/workflow.md` được viết lại gọn từ `src/templates/harnix/workflow.md` (route, lệnh public, task state, gate, transport, cookbook); README và tài liệu PRD/workflow/implementation plan/upstream mapping cập nhật theo sáu skill. Nâng cấp: chạy `harnix update --global` và `harnix update`.
+1. **TaskRecord Schema v3:** Mọi task mới bắt buộc dùng schema v3. Check không còn dùng token `@task-contract`. Task v1/v2 cũ vẫn đọc được nhưng nếu chưa hoàn tất thì cần migrate lên v3 bằng một lần save duy nhất.
+2. **Lệnh `harnix roadmap`:** Bị gỡ bỏ và thay thế bằng `harnix epic [--limit]` và `harnix epic <epic-id>`.
+3. **Lệnh `harnix checks` và `harnix audit`:** Bị gỡ bỏ và gộp vào `harnix status --explain`.
+4. **Hệ thống 6 Skills mới:** Các platforms cần chạy `harnix update --global` để cập nhật bộ skill và gỡ các skill cũ do Harnix quản lý.
+
+### Migration Guide
+
+- **Đối với dự án hiện hữu:** Chạy `harnix update` trong thư mục dự án để làm mới `.harnix/workflow.md`, di chuyển các file roadmap cũ sang `.harnix/epics/`, và cập nhật `.template-hashes.json`.
+- **Đối với platform agent:** Chạy `harnix update --global` để cập nhật bộ 6 workflow skills và 5 technique-skills mới vào user home của các công cụ đang sử dụng (Kiro, Antigravity, Codex, Claude Code, OpenCode, Cursor).
+- **Đối với task đang dang dở (v1/v2):** Khi tiếp tục task bằng `harnix resume <id>`, agent sẽ tự động migrate task record lên schema v3 trong lần lưu đầu tiên mà không làm mất tiêu chí hay bằng chứng đã có.
 
 ## [1.1.22] - 2026-09-28
 
