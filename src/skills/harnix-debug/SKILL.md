@@ -2,7 +2,7 @@
 name: harnix-debug
 description: Use when a Harnix implementation or verification has a reproducible bug, failing test, unexpected behavior, loop or repeated unsuccessful fix.
 metadata:
-  version: "2.0.1"
+  version: "2.0.2"
 ---
 
 # Debug with evidence
@@ -36,6 +36,7 @@ One automatic remediation round per verification failure. A failed rerun after i
 ## Technique skills
 
 Use native agent skills on demand (load via `harnix skill <name>`):
+
 - Intermittent or flaky failures: `harnix skill harnix-flaky-test` diagnoses timing, race conditions and test isolation.
 - Bugfix regressions: `harnix skill harnix-bugfix-preserve` builds test specifications to protect existing working behaviors.
 

@@ -2,7 +2,7 @@
 name: harnix-review
 description: Use when Harnix needs a standalone read-only code review of a diff, commit range or paths, or an evaluation of review feedback, without touching any task.
 metadata:
-  version: "2.0.1"
+  version: "2.0.2"
 ---
 
 # Review code (read-only)
@@ -32,6 +32,7 @@ Treat reviewer feedback as a hypothesis: read all of it, verify each item agains
 ## Technique skills
 
 Use native agent skills on demand (load via `harnix skill <name>`):
+
 - Verification and test blind spots: `harnix skill harnix-verification-gap`.
 - Security patterns and threat vectors: `harnix skill harnix-security-lens`.
 - Schema and migration safety: `harnix skill harnix-migration-safety`.

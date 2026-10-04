@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.0.2] - 2026-10-03
+
+### Added
+
+- **Quy trình User Review Gate cho Full Task & Epic:** Bắt buộc dừng lại tại checkpoint `ready` (`nextStage: await`) để người dùng review kế hoạch (PRD, checklist slices, danh sách member tasks) đối với mọi task Full và Epic trước khi viết code; cập nhật Invariant 4 và mục 5.3 Ready gate trong `HARNIX_WORKFLOW.md`, workflow template, kỹ năng `harnix-plan` và `AGENTS.md`.
+
 ## [2.0.1] - 2026-10-02
 
 Bản vá khắc phục các điểm ma sát (friction items HX-01 đến HX-19) được phát hiện trong quá trình vận hành thực tế của Harnix v2.0.0.

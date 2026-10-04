@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.0.1"
+  version: "2.0.2"
 ---
 
 # Implement with evidence
@@ -43,6 +43,7 @@ Reviewer or user feedback is a hypothesis: read all of it, verify it against the
 ## Technique skills
 
 Use native agent skills on demand (load via `harnix skill <name>`):
+
 - Complex bugfix preserving behavior: `harnix skill harnix-bugfix-preserve` builds test specifications to protect working contracts.
 - Schema/contract evolution: `harnix skill harnix-migration-safety` guards data and compatibility.
 

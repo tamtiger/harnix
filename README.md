@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.0.1`
+**Version:** `2.0.2`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -108,11 +108,11 @@ harnix init -> harnix setup + trust hook -> yêu cầu tự nhiên với agent
 
 Bạn không cần gọi lệnh để tự tạo, chuyển stage hay hoàn tất task — agent làm việc đó thông qua các skill Harnix. Mỗi yêu cầu mới được agent phân loại trước:
 
-| Loại | Khi nào | Điều gì xảy ra |
-|---|---|---|
+| Loại       | Khi nào                                                                                       | Điều gì xảy ra                                          |
+| ---------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
 | **Bypass** | Câu hỏi chỉ đọc, review/research độc lập, sửa docs/prose, hoặc sửa một giá trị literal đơn lẻ | Trả lời/thực hiện ngay, không tạo hay đụng vào task nào |
-| **Lite** | Thay đổi nhỏ, phạm vi rõ ràng | Tạo một task record gọn, kiểm chứng tối thiểu |
-| **Full** | Thay đổi cross-layer, nhạy cảm về bảo mật, hoặc còn nhiều điểm chưa rõ | Có thêm PRD/plan, research khi cần, kiểm chứng đầy đủ |
+| **Lite**   | Thay đổi nhỏ, phạm vi rõ ràng                                                                 | Tạo một task record gọn, kiểm chứng tối thiểu           |
+| **Full**   | Thay đổi cross-layer, nhạy cảm về bảo mật, hoặc còn nhiều điểm chưa rõ                        | Có thêm PRD/plan, research khi cần, kiểm chứng đầy đủ   |
 
 Toàn bộ state machine của workflow:
 
@@ -141,16 +141,17 @@ Chi tiết đầy đủ (transition, gate, artifact contract) nằm ở [Workflo
 
 Agent chỉ nạp đúng một skill quy trình mỗi lần, theo `nextStage` mà `harnix workflow --preflight` trả về:
 
-| Skill | Khi nào agent dùng |
-|---|---|
-| `harnix-plan` | Chưa có task, đang `planning`, replan, ready gate, migrate task cũ lên v3, tạo epic |
+| Skill              | Khi nào agent dùng                                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `harnix-plan`      | Chưa có task, đang `planning`, replan, ready gate, migrate task cũ lên v3, tạo epic                                                  |
 | `harnix-implement` | Task `ready` đã được yêu cầu triển khai, hoặc đang `in_progress/implementing` (dùng `repo-map --tests` chạy test bị ảnh hưởng trước) |
-| `harnix-verify` | `verifying`: kiểm chứng compliance rồi quality/security, sau đó finish hoặc cancel |
-| `harnix-debug` | Checkpoint `debugging` cho một lỗi tái hiện được trong phạm vi task |
-| `harnix-review` | Review code chỉ đọc (Bypass, không đụng task) |
-| `harnix-research` | Research chỉ đọc, hoặc research cho một ẩn số trong planning/replan/debugging |
+| `harnix-verify`    | `verifying`: kiểm chứng compliance rồi quality/security, sau đó finish hoặc cancel                                                   |
+| `harnix-debug`     | Checkpoint `debugging` cho một lỗi tái hiện được trong phạm vi task                                                                  |
+| `harnix-review`    | Review code chỉ đọc (Bypass, không đụng task)                                                                                        |
+| `harnix-research`  | Research chỉ đọc, hoặc research cho một ẩn số trong planning/replan/debugging                                                        |
 
 Ngoài 6 skill quy trình trên, Harnix đóng gói sẵn **5 technique-skills độc lập** (không qua stage routing, agent tự kích hoạt theo mô tả ngữ cảnh):
+
 - `harnix-verification-gap`: Đánh giá khoảng trống kiểm chứng, phát hiện điểm mù false-success.
 - `harnix-bugfix-preserve`: Định hình bất biến ("must remain working") khi sửa bug để chống regression.
 - `harnix-flaky-test`: Chẩn đoán và cô lập test chập chờn, bất định hoặc phụ thuộc thời gian.
@@ -159,29 +160,29 @@ Ngoài 6 skill quy trình trên, Harnix đóng gói sẵn **5 technique-skills �
 
 **Extension Point cho dự án:** Bạn có thể tự thêm skill riêng tại `.harnix/spec/skills/<skill-name>/SKILL.md`. Harnix tự động phát hiện qua `harnix skill --all` và đồng bộ vào platform agent.
 
-Phần chi tiết ít dùng (replan, migration, epic, evidence, finish/cancel…) nằm trong các *reference* nạp theo yêu cầu: `harnix skill <tên> --reference <chủ đề>`; chạy `harnix skill` để xem danh sách. Tên skill cũ (`harnix-brainstorm`, `harnix-check`, `harnix-finish-work`, `harnix-continue`) vẫn resolve về skill mới.
+Phần chi tiết ít dùng (replan, migration, epic, evidence, finish/cancel…) nằm trong các _reference_ nạp theo yêu cầu: `harnix skill <tên> --reference <chủ đề>`; chạy `harnix skill` để xem danh sách. Tên skill cũ (`harnix-brainstorm`, `harnix-check`, `harnix-finish-work`, `harnix-continue`) vẫn resolve về skill mới.
 
 ## Các lệnh CLI thường dùng
 
 Mọi output của public command đều là JSON. Dưới đây là các lệnh bạn sẽ dùng thường xuyên nhất; danh sách đầy đủ options và output shape nằm ở [Yêu cầu sản phẩm](docs/HARNIX_PRD.md#12-lifecycle-commands).
 
-| Lệnh | Dùng để làm gì |
-|---|---|
-| `harnix init [--languages <csv>] [--technologies <csv>] [--dry-run]` | Khởi tạo `.harnix/` trong project, tự phát hiện ngôn ngữ/công nghệ |
-| `harnix setup --kiro\|--antigravity\|--codex\|--claude [--dry-run]` | Cài tích hợp user-global cho platform agent (chạy 1 lần, dùng cho mọi project) |
-| `harnix status` | Xem task đang active, tiến độ và bước tiếp theo |
-| `harnix tasks [--limit <n>] [--status <status>]` | Liệt kê lịch sử task local |
-| `harnix pause [--dry-run]` | Tạm dừng task đang active, gỡ `.active` an toàn để chuyển hoặc tạo task mới |
-| `harnix resume <task-id> [--dry-run]` | Tiếp tục một task chưa hoàn thành theo đúng ID |
-| `harnix context-report --platform <id>` | Xem context nào thực sự được đưa vào agent |
-| `harnix status --explain [--limit <n>]` | Xem check nào đã stale (input đổi/thiếu) và readiness/completion blocker của task hiện tại |
-| `harnix epic [<epic-id>] [--limit <n>]` | Xem danh sách epic hoặc chi tiết tiến độ member tasks và next task của một epic |
-| `harnix repo-map --query <text>` / `--impact <path>` / `--tests <path>` | Tìm file liên quan, dependency impact hoặc test bị ảnh hưởng từ cache |
-| `harnix doctor [--fix] [--global]` | Kiểm tra drift, hook, path safety, secret exposure; tự sửa issue an toàn |
-| `harnix update [--global] [--restore]` | Đồng bộ lại managed files theo config hiện tại |
-| `harnix uninstall --purge` / `--global --kiro --yes` | Gỡ dữ liệu project hoặc một tích hợp global |
-| `harnix mem "<query>"` | Tìm journal memory theo từ khóa |
-| `harnix skill [name] [--reference <topic>]` | Xem catalog sáu skill, nội dung một skill (tên cũ vẫn resolve) hoặc một reference nạp theo yêu cầu |
+| Lệnh                                                                    | Dùng để làm gì                                                                                     |
+| ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `harnix init [--languages <csv>] [--technologies <csv>] [--dry-run]`    | Khởi tạo `.harnix/` trong project, tự phát hiện ngôn ngữ/công nghệ                                 |
+| `harnix setup --kiro\|--antigravity\|--codex\|--claude [--dry-run]`     | Cài tích hợp user-global cho platform agent (chạy 1 lần, dùng cho mọi project)                     |
+| `harnix status`                                                         | Xem task đang active, tiến độ và bước tiếp theo                                                    |
+| `harnix tasks [--limit <n>] [--status <status>]`                        | Liệt kê lịch sử task local                                                                         |
+| `harnix pause [--dry-run]`                                              | Tạm dừng task đang active, gỡ `.active` an toàn để chuyển hoặc tạo task mới                        |
+| `harnix resume <task-id> [--dry-run]`                                   | Tiếp tục một task chưa hoàn thành theo đúng ID                                                     |
+| `harnix context-report --platform <id>`                                 | Xem context nào thực sự được đưa vào agent                                                         |
+| `harnix status --explain [--limit <n>]`                                 | Xem check nào đã stale (input đổi/thiếu) và readiness/completion blocker của task hiện tại         |
+| `harnix epic [<epic-id>] [--limit <n>]`                                 | Xem danh sách epic hoặc chi tiết tiến độ member tasks và next task của một epic                    |
+| `harnix repo-map --query <text>` / `--impact <path>` / `--tests <path>` | Tìm file liên quan, dependency impact hoặc test bị ảnh hưởng từ cache                              |
+| `harnix doctor [--fix] [--global]`                                      | Kiểm tra drift, hook, path safety, secret exposure; tự sửa issue an toàn                           |
+| `harnix update [--global] [--restore]`                                  | Đồng bộ lại managed files theo config hiện tại                                                     |
+| `harnix uninstall --purge` / `--global --kiro --yes`                    | Gỡ dữ liệu project hoặc một tích hợp global                                                        |
+| `harnix mem "<query>"`                                                  | Tìm journal memory theo từ khóa                                                                    |
+| `harnix skill [name] [--reference <topic>]`                             | Xem catalog sáu skill, nội dung một skill (tên cũ vẫn resolve) hoặc một reference nạp theo yêu cầu |
 
 Một vài quy ước chung đáng nhớ:
 
@@ -195,14 +196,14 @@ Mở trực tiếp `.harnix/tasks/<id>/review.md` — không cần chạy comman
 
 ## Tích hợp platform
 
-| Platform | Identity / flag | Nơi Harnix tạo file (user-global) |
-|---|---|---|
-| Kiro | `kiro` / `--kiro` | `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, `~/.kiro/hooks/harnix-context.json` |
-| Antigravity | `antigravity` / `--antigravity` (executable: `agy`) | `~/.gemini/config/plugins/harnix` (Desktop) và `~/.gemini/antigravity-cli/plugins/harnix` (CLI) |
-| Codex | `codex` / `--codex` | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/config.toml` |
-| Claude Code | `claude` / `--claude` | `~/.claude/skills/harnix-*`, marker block trong `~/.claude/CLAUDE.md`, group `harnix-context` trong `hooks.UserPromptSubmit` của `~/.claude/settings.json` |
-| OpenCode | `opencode` / `--opencode` | `~/.config/opencode/skills/harnix-*`, marker block trong `~/.config/opencode/AGENTS.md` (chế độ không hook) |
-| Cursor | `cursor` / `--cursor` | `~/.cursor/skills/harnix-*` (chế độ không hook) |
+| Platform    | Identity / flag                                     | Nơi Harnix tạo file (user-global)                                                                                                                          |
+| ----------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kiro        | `kiro` / `--kiro`                                   | `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, `~/.kiro/hooks/harnix-context.json`                                                               |
+| Antigravity | `antigravity` / `--antigravity` (executable: `agy`) | `~/.gemini/config/plugins/harnix` (Desktop) và `~/.gemini/antigravity-cli/plugins/harnix` (CLI)                                                            |
+| Codex       | `codex` / `--codex`                                 | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/config.toml`                                                                        |
+| Claude Code | `claude` / `--claude`                               | `~/.claude/skills/harnix-*`, marker block trong `~/.claude/CLAUDE.md`, group `harnix-context` trong `hooks.UserPromptSubmit` của `~/.claude/settings.json` |
+| OpenCode    | `opencode` / `--opencode`                           | `~/.config/opencode/skills/harnix-*`, marker block trong `~/.config/opencode/AGENTS.md` (chế độ không hook)                                                |
+| Cursor      | `cursor` / `--cursor`                               | `~/.cursor/skills/harnix-*` (chế độ không hook)                                                                                                            |
 
 `harnix setup` chạy được ở bất kỳ thư mục nào, chỉ cần chọn platform flag, không cần đứng trong project. Với Codex, sau khi setup bạn cần mở `/hooks` và tự trust hook. Harnix không bao giờ ghi vào `~/.claude.json`, credentials, MCP server, hay các file không thuộc phạm vi quản lý của nó. Chi tiết đầy đủ về hook protocol nằm ở [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) và [Yêu cầu sản phẩm](docs/HARNIX_PRD.md#9-user-global-setup-and-platform-requirements).
 

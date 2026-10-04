@@ -1,0 +1,193 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261003-230709-user-review-gate-full-epic",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "title": "Bat buoc user review truoc khi chay task Full hoac Epic",
+  "goal": "Bao dam moi task Full hoac Epic deu dung o ready (checkpoint await) de nguoi dung review ke hoach truoc khi chuyen sang in_progress.",
+  "nonGoals": [
+    "Khong thay doi hanh vi tu dong chuyen sang implementing cua task Lite khi yeu cau da ro",
+    "Khong them tuong tac blocking hay popup ngoai giao dien chat chuan"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-workflow-invariants",
+      "text": "HARNIX_WORKFLOW.md Invariant 4 va muc 5.3 Ready gate phan tach ro Lite vs Full/Epic; Full va Epic bat buoc dung o ready/await de user review ke hoach truoc khi code.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-workflow-docs-2"
+      ]
+    },
+    {
+      "id": "ac-workflow-template",
+      "text": "src/templates/harnix/workflow.md va .harnix/workflow.md phan anh quy dinh Full tasks va Epics dung o ready cho user review.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-workflow-docs-2"
+      ]
+    },
+    {
+      "id": "ac-skills-guidance",
+      "text": "harnix-plan/SKILL.md va epic.md quy dinh ro diem dung await tai ready cho Full task va Epic, yeu cau xuat trinh tom tat ke hoach/lo trinh va cho approval truoc khi implement.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-skills-budget-1"
+      ]
+    },
+    {
+      "id": "ac-agent-rules",
+      "text": "AGENTS.md nhat quan voi quy tac mandatory review stop cho Full tasks va Epics.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-skills-budget-1"
+      ]
+    },
+    {
+      "id": "ac-test-suite",
+      "text": "Toan bo test suite va instruction token budget vuot qua 100%.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/workflow.md",
+    "AGENTS.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "src/skills/harnix-plan/SKILL.md",
+    "src/skills/harnix-plan/references/epic.md",
+    "src/templates/harnix/workflow.md",
+    "test/unit/version.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "check-workflow-docs",
+      "description": "Kiem tra tinh nhat quan cua tai lieu workflow va hop dong task",
+      "command": "pnpm vitest run test/workflow/docs-task-contract.test.ts test/workflow/templates.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-workflow-invariants",
+        "ac-workflow-template"
+      ],
+      "inputs": [
+        "docs/HARNIX_WORKFLOW.md",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts",
+        "test/workflow/templates.test.ts"
+      ]
+    },
+    {
+      "id": "check-skills-budget",
+      "description": "Kiem tra instruction token budgets va ky nang harnix-plan",
+      "command": "pnpm vitest run test/workflow/instruction-budget.test.ts test/workflow/skill-sources.test.ts test/unit/skills/catalog.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-agent-rules",
+        "ac-skills-guidance"
+      ],
+      "inputs": [
+        "src/skills/catalog.ts",
+        "src/skills/harnix-plan/SKILL.md",
+        "src/skills/harnix-plan/references/epic.md",
+        "test/workflow/instruction-budget.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Chay test suite toan du an",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-test-suite"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-workflow-docs-1",
+      "checkId": "check-workflow-docs",
+      "recordedAt": "2026-10-03T23:11:03.532+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "122238e9319af1257fcf086efbd0a4c3c574edc5d4fbbd7ef3737fb78ce48bd5"
+    },
+    {
+      "id": "ev-check-workflow-docs-2",
+      "checkId": "check-workflow-docs",
+      "recordedAt": "2026-10-03T23:11:22.133+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3bf2e76b6ee7f999e7a8f733b47f776d131f17f1386e238136e5b562f162fffa"
+    },
+    {
+      "id": "ev-check-skills-budget-1",
+      "checkId": "check-skills-budget",
+      "recordedAt": "2026-10-03T23:11:30.455+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "733215ce3e498fc2b072fa034fcc025ee0ca0771e30382f540a7ee1a29176699"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-03T23:12:33.350+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "e36acffb54b1c49db2163dbeeec5029ceee88e4d455bcbab9615c315b3c5a6df"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-03T23:13:58.648+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e36acffb54b1c49db2163dbeeec5029ceee88e4d455bcbab9615c315b3c5a6df"
+    }
+  ],
+  "createdAt": "2026-10-03T23:07:09.006+07:00",
+  "updatedAt": "2026-10-03T23:15:02.503+07:00",
+  "decisions": [
+    {
+      "id": "dec-full-epic-review-gate",
+      "text": "Bat buoc dung o ready/await de user review ke hoach cho Full task va Epic",
+      "rationale": "Tranh viec Agent tu dong sua code dien rong khi nguoi dung chua kip xem PRD va Plan"
+    },
+    {
+      "id": "dec-lite-frictionless",
+      "text": "Giu nguyen co che tu dong implementing cho Lite task khi prompt da ro",
+      "rationale": "Toi uu toc do va khong tao ma sat thua cho cac thay doi nho"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "rsk-user-turn-delay",
+      "text": "User can xac nhan sau plan lam tang 1 turn tuong tac nhung dam bao an toan tuyet doi",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-03T23:15:02.503+07:00"
+}

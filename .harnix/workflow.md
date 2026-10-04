@@ -23,7 +23,7 @@ Use one active task and the success sequence `planning → ready → in_progress
 - **Lite:** localized, low-risk, obvious contract, one focused check; a compact `task.json` only.
 - **Full:** cross-layer, security-sensitive, migration-heavy, externally researched or materially uncertain; also non-empty `prd.md` and `plan.md`, and `design.md` or research only when they clarify a boundary.
 
-Plan-only requests stop at `ready`. `nextStage: await` exists because persisted state alone cannot prove the latest request authorized implementation; when it did, hand the ready task to implementation and transition to `in_progress` without another approval prompt.
+Plan-only requests stop at `ready`. Full tasks and Epics also stop at `ready` (`nextStage: await`) for user review before any code is written; only a Lite task whose latest request already authorized implementation transitions directly to `in_progress` without another approval prompt.
 
 ## Public commands
 
