@@ -989,6 +989,7 @@
             "baseline",
             "command",
             "criterionIds",
+            "cwd",
             "description",
             "id",
             "inputs",
@@ -1065,6 +1066,7 @@
             "--add-criterion",
             "--add-decision",
             "--add-risk",
+            "--batch",
             "--criterion",
             "--evidence",
             "--finish",
@@ -1092,6 +1094,7 @@
           "--add-decision": "Record one decision (--text, --rationale) on the active v3 task; review data, so no --reason.",
           "--add-risk": "Record one residual risk (--text, optional --severity) on the active v3 task; review data, so no --reason.",
           "--set-paths": "Replace the relevant paths and/or specs from repeatable --relevant-path and --relevant-spec flags; needs no reason.",
+          "--batch": "Apply criteria, checks, decisions, risks and paths atomically from stdin envelope under a single file lock; schema v3 only.",
           "--brief": "Print only id, status, checkpoint and updatedAt (preflight: without learning); the commands that accept it are listed in constraints.brief.",
           "--finish": "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? }.",
           "--cancel": "Terminal cancellation; the only cancellation transport."

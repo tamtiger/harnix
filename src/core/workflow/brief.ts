@@ -12,6 +12,7 @@ export interface BriefTask {
 /** Workflow actions that accept `--brief`: the one list behind flag validation, `--schema` and the guidance. */
 export const BRIEF_ACTIONS: ReadonlySet<string> = new Set([
   "init",
+  "batch",
   "save",
   "transition",
   "evidence",

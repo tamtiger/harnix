@@ -19,6 +19,18 @@ describe("check runner", () => {
     expect(failing.exitCode).toBe(7);
   });
 
+  it("runs an executable in the specified cwd subdirectory", async () => {
+    const root = await temporaryRepository();
+    const { mkdir } = await import("node:fs/promises");
+    const subDir = join(root, "packages", "sub-repo");
+    await mkdir(subDir, { recursive: true });
+
+    const result = await runCheckProcess(process.execPath, ["-e", "console.log(process.cwd())"], subDir);
+    expect(result.exitCode).toBe(0);
+    // Normalize path separators for Windows comparison
+    expect(result.output.trim().replace(/\\/g, "/")).toContain("packages/sub-repo");
+  });
+
   it("does not interpret shell metacharacters in arguments", async () => {
     const root = await temporaryRepository();
 
@@ -59,6 +71,18 @@ describe("check runner", () => {
     expect(resolveInvocation("npm.cmd", ["test"], "linux")).toEqual({
       executable: "npm.cmd",
       args: ["test"],
+    });
+    expect(resolveInvocation("cmd", ["/d", "/c", "echo a && echo b"], "win32")).toEqual({
+      executable: "cmd.exe",
+      args: ["/d", "/c", "echo a && echo b"],
+    });
+    expect(resolveInvocation("cmd.exe", ["/d", "/c", "echo a && echo b"], "win32")).toEqual({
+      executable: "cmd.exe",
+      args: ["/d", "/c", "echo a && echo b"],
+    });
+    expect(resolveInvocation("npm", ["run", "test"], "win32")).toEqual({
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "npm", "run", "test"],
     });
   });
 

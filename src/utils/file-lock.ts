@@ -135,14 +135,14 @@ interface LockContext {
 
 function buildLockContext(lockPath: string, options: FileLockOptions): LockContext {
   if (!isAbsolutePath(lockPath)) throw new FileLockError("A lock path must be absolute.");
-  assertDuration("timeoutMs", options.timeoutMs ?? 5_000, 0);
+  assertDuration("timeoutMs", options.timeoutMs ?? 30_000, 0);
   assertDuration("retryDelayMs", options.retryDelayMs ?? 50, 1);
   assertDuration("staleAfterMs", options.staleAfterMs ?? 300_000, 1);
 
   const path = resolve(lockPath);
   const clock = options.clock ?? systemClock;
   const filesystem = options.filesystem ?? defaultFilesystem;
-  const timeoutMs = options.timeoutMs ?? 5_000;
+  const timeoutMs = options.timeoutMs ?? 30_000;
   const retryDelayMs = options.retryDelayMs ?? 50;
   const staleAfterMs = options.staleAfterMs ?? 300_000;
   const processIdentity = options.processIdentity ?? defaultProcessIdentity;
@@ -197,7 +197,8 @@ export async function acquireHarnixFileLock(lockPath: string, options: FileLockO
 
     const remaining = ctx.deadline - ctx.clock.now();
     if (remaining <= 0) throw new FileLockTimeoutError(`Timed out waiting for Harnix lock: ${ctx.path}`);
-    await ctx.clock.sleep(Math.min(ctx.retryDelayMs, remaining));
+    const jitter = Math.floor(Math.random() * 20);
+    await ctx.clock.sleep(Math.min(ctx.retryDelayMs + jitter, remaining));
   }
 }
 

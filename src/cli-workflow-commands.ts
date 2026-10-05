@@ -5,7 +5,7 @@ import { runInternalContextCommand } from "./commands/internal-context-cli.js";
 import { reportSkill, reportSkillCatalog, reportSkillReference } from "./commands/skills.js";
 import type { SkillTemplate } from "./core/spec/project-skills.js";
 import { searchMemory } from "./commands/mem.js";
-import { inspectProjectStatus, explainProjectStatus } from "./commands/status.js";
+import { inspectProjectStatus, explainProjectStatus, summarizeProjectStatus } from "./commands/status.js";
 import { listProjectTasks } from "./commands/tasks.js";
 import { listPublicEpics, detailPublicEpic } from "./commands/epic.js";
 import { resumeProjectTask } from "./commands/resume.js";
@@ -64,9 +64,15 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .command("status")
     .description("Summarize the active Harnix task and next action")
     .option("--explain", "Include required-check freshness and readiness/completion blockers")
+    .option("--summary", "Print a concise micro-summary under 100 tokens")
     .option("--limit <count>", "Maximum required checks when --explain is set", "20")
-    .action(async (options: { explain?: boolean; limit: string }) => {
+    .action(async (options: { explain?: boolean; summary?: boolean; limit: string }) => {
       const now = programOptions.statusClock?.() ?? Date.now();
+      if (options.summary === true) {
+        const result = await summarizeProjectStatus(process.cwd(), now);
+        process.stdout.write(`${JSON.stringify(result)}\n`);
+        return;
+      }
       const result =
         options.explain === true
           ? await explainProjectStatus(process.cwd(), parseReportLimit(options.limit, "status"), now)

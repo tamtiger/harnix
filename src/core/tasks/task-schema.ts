@@ -38,6 +38,7 @@ interface ValidationCheckBase {
   id: string;
   description: string;
   command?: string;
+  cwd?: string;
   scope: "focused" | "full";
   required: boolean;
 }
@@ -196,7 +197,7 @@ export const decisionKeys = new Set(["id", "rationale", "text"]);
 export const residualRiskKeys = new Set(["id", "severity", "text"]);
 export const acceptanceCriterionKeys = new Set(["evidenceIds", "id", "status", "text", "waiverReason"]);
 export const validationCheckV1Keys = new Set(["command", "description", "id", "required", "scope"]);
-export const validationCheckV2Keys = new Set([...validationCheckV1Keys, "criterionIds", "inputs", "baseline"]);
+export const validationCheckV2Keys = new Set([...validationCheckV1Keys, "criterionIds", "inputs", "baseline", "cwd"]);
 export const evidenceV1Keys = new Set([
   "artifactPaths",
   "checkId",

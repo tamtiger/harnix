@@ -52,7 +52,7 @@ describe("CLI command contract", () => {
       "--refresh",
     ]);
     expect(repoMap?.options.find((option) => option.long === "--refresh")?.hidden).toBe(true);
-    expect(status?.options.map((option) => option.long)).toEqual(["--explain", "--limit"]);
+    expect(status?.options.map((option) => option.long)).toEqual(["--explain", "--summary", "--limit"]);
     expect(tasks?.options.map((option) => option.long)).toEqual(["--limit", "--status"]);
     const epic = program.commands.find((command) => command.name() === "epic");
     expect(epic?.options.map((option) => option.long)).toEqual(["--limit", "--brief"]);
@@ -83,6 +83,7 @@ describe("CLI command contract", () => {
       "--add-decision",
       "--add-risk",
       "--set-paths",
+      "--batch",
       "--schema",
       "--check",
       "--result",
@@ -103,6 +104,8 @@ describe("CLI command contract", () => {
       "--severity",
       "--relevant-path",
       "--relevant-spec",
+      "--cwd",
+      "--follow-up",
       "--brief",
       "--dry-run",
     ]);

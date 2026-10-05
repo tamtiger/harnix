@@ -4,6 +4,7 @@ export interface WorkflowFlags {
   inspect?: boolean;
   preflight?: boolean;
   init?: boolean;
+  batch?: boolean;
   save?: boolean;
   snapshot?: boolean;
   finish?: boolean;
@@ -46,12 +47,15 @@ export interface WorkflowFlags {
   input?: string[];
   relevantPath?: string[];
   relevantSpec?: string[];
+  cwd?: string;
+  followUp?: string;
 }
 
 const BOOLEAN_ACTIONS = [
   "inspect",
   "preflight",
   "init",
+  "batch",
   "save",
   "snapshot",
   "finish",
@@ -192,6 +196,18 @@ const FLAG_OWNERS: readonly FlagOwner[] = [
     actions: ["transition"],
     hint: "workflow --transition",
   },
+  {
+    name: "--cwd",
+    isSet: (f) => f.cwd !== undefined,
+    actions: ["setCheck", "replaceCheck", "runCheck"],
+    hint: "workflow --set-check, --replace-check or --run-check",
+  },
+  {
+    name: "--follow-up",
+    isSet: (f) => f.followUp !== undefined,
+    actions: ["init"],
+    hint: "workflow --init",
+  },
 ];
 
 export function selectAction(flags: WorkflowFlags): string {
@@ -200,7 +216,7 @@ export function selectAction(flags: WorkflowFlags): string {
   const [only] = selected;
   if (selected.length !== 1 || only === undefined)
     throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --init, --save, --transition, --evidence, --criterion, --migrate, --run-check, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths, --schema, --snapshot, --finish, --cancel, or --learn.",
+      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths, --schema, --snapshot, --finish, --cancel, or --learn.",
     );
   return only;
 }

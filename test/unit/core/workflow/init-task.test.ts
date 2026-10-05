@@ -56,4 +56,46 @@ describe("initTaskWorkflow", () => {
     await expect(initTaskWorkflow(root, { title: "" })).rejects.toThrow(/--title/u);
     await expect(initTaskWorkflow(root, { title: "   " })).rejects.toThrow(/--title/u);
   });
+
+  it("should inherit relevantPaths, relevantSpecs and epicId from followUp task", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const { saveWorkflow } = await import("src/core/workflow/save.js");
+    const { clearActiveTask } = await import("src/core/tasks/task-store.js");
+
+    const parent = await initTaskWorkflow(root, {
+      title: "Base Payment Service",
+    });
+    // Add paths and epicId to parent task
+    await saveWorkflow(root, {
+      task: {
+        ...parent,
+        relevantPaths: ["src/payments/**"],
+        relevantSpecs: ["spec/payment.md"],
+        epicId: "20261005-153000-concurrency-and-token-optimization",
+      },
+    });
+    await clearActiveTask(`${root}/.harnix`, parent.id);
+
+    const followUp = await initTaskWorkflow(root, {
+      title: "Refund Service Extension",
+      followUp: parent.id,
+    });
+
+    expect(followUp.relevantPaths).toEqual(["src/payments/**"]);
+    expect(followUp.relevantSpecs).toEqual(["spec/payment.md"]);
+    expect(followUp.epicId).toBe("20261005-153000-concurrency-and-token-optimization");
+  });
+
+  it("should reject followUp if specified task does not exist", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+
+    await expect(
+      initTaskWorkflow(root, {
+        title: "Refund Service Extension",
+        followUp: "20261005-000000-non-existent-task",
+      }),
+    ).rejects.toThrow(/follow-up task.*not found/iu);
+  });
 });

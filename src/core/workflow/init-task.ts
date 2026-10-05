@@ -1,4 +1,6 @@
+import { readFile } from "node:fs/promises";
 import type { TaskMode, TaskRecordV3 } from "src/core/tasks/task.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
 
@@ -9,6 +11,7 @@ export interface InitTaskOptions {
   criterion?: string;
   command?: string;
   input?: string[];
+  followUp?: string;
   injectedNow?: string;
 }
 
@@ -45,6 +48,25 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
   const command = options.command?.trim() || "pnpm test";
   const inputs = Array.isArray(options.input) && options.input.length > 0 ? [...new Set(options.input)].sort() : ["src/**"];
 
+  let relevantPaths: string[] = [];
+  let relevantSpecs: string[] = [];
+  let epicId: string | undefined;
+
+  if (options.followUp) {
+    const parentId = options.followUp.trim();
+    try {
+      const harnixDir = await resolveSafeHarnixPath(root);
+      const parentTaskFile = await resolveSafeProjectPath(harnixDir, `tasks/${parentId}/task.json`);
+      const raw = await readFile(parentTaskFile, "utf8");
+      const parent = JSON.parse(raw) as Partial<TaskRecordV3>;
+      relevantPaths = Array.isArray(parent.relevantPaths) ? [...parent.relevantPaths] : [];
+      relevantSpecs = Array.isArray(parent.relevantSpecs) ? [...parent.relevantSpecs] : [];
+      epicId = parent.epicId;
+    } catch {
+      throw new Error(`Follow-up task '${parentId}' not found.`);
+    }
+  }
+
   const candidate: TaskRecordV3 = {
     generator: "harnix",
     schemaVersion: 3,
@@ -55,6 +77,7 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
     checkpoint: "planning",
     goal,
     nonGoals: [],
+    ...(epicId !== undefined ? { epicId } : {}),
     acceptanceCriteria: [
       {
         id: "ac-1",
@@ -75,8 +98,8 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
       },
     ],
     evidence: [],
-    relevantPaths: [],
-    relevantSpecs: [],
+    relevantPaths,
+    relevantSpecs,
     createdAt: now,
     updatedAt: now,
   };

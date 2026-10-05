@@ -1,0 +1,130 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-155236-batch-state-mutation-envelope-cho-workfl",
+  "title": "Batch state mutation envelope cho workflow",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cung cap kha nang batch state mutation giup agent cap nhat criteria checks decisions va risks trong mot lan goi duy nhat",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Ho tro workflow --batch nhan JSON envelope gop tren stdin thuc thi nguyen tu trong mot transaction",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Batch mutation envelope thuc thi nguyen tu duoi mot lock duy nhat va cap nhat task.json an toan",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Kiem tra tinh toan ven text integrity va validation envelope batch tu choi du lieu hop dong khong hop le",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Suite gate va kiem thu tich hop CLI --batch va schema --schema bao phu day du",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Unit tests cho batch state mutation envelope",
+      "command": "pnpm vitest run test/unit/core/workflow/batch.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Suite gate batch state mutation",
+      "command": "pnpm vitest run test/unit/core/workflow/batch.test.ts",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-05T16:01:27.926+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b6c968cb50b7101a6efcda813a279209f90631650d5484b22a3a2f93501fec69"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T16:01:42.721+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "05e34694c1947ead4f7adb55abfa56045b9449dc3d10354d86a4134258dd63c5"
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-command.ts",
+    "src/commands/workflow-flags.ts",
+    "src/core/workflow/batch.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-05T15:52:36.340+07:00",
+  "updatedAt": "2026-10-05T16:03:22.924+07:00",
+  "decisions": [
+    {
+      "id": "dec-batch-envelope",
+      "text": "Ho tro workflow --batch mutation envelope duoi mot file lock duy nhat",
+      "rationale": "Giam thieu lock timeout, tranh chap file lock khi nhieu mutation xay ra dong thoi va toi uu hoa manh me token context"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-batch-contract-freeze",
+      "text": "Batch mutation tuan thu chat che contract freeze; cac tieu chi da map voi check da pass khong duoc phep thay doi qua batch tru khi di kem replan reason",
+      "severity": "medium"
+    }
+  ],
+  "completedAt": "2026-10-05T16:03:22.924+07:00",
+  "epicId": "20261005-153000-concurrency-and-token-optimization"
+}

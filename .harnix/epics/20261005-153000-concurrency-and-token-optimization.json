@@ -1,0 +1,13 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261005-153000-concurrency-and-token-optimization",
+  "title": "Toi uu hoa kha nang chay dong thoi, multi-repo va tiet kiem token Harnix",
+  "goal": "Khac phuc triet de van de timeout file lock khi chay dong thoi run-check, tu dong hoa normalization command Windows (npm/pnpm/npx), toi uu hoa manh me token economy cho CLI va ho tro multi-repo workspace, follow-up tasks va baseline checks.",
+  "nonGoals": [
+    "Khong thay doi kien truc luu tru local cua .harnix",
+    "Khong bo sung network telemetry hoac daemon nen"
+  ],
+  "createdAt": "2026-10-05T15:30:00.000+07:00",
+  "updatedAt": "2026-10-05T15:30:00.000+07:00"
+}

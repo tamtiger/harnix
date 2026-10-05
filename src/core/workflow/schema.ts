@@ -100,6 +100,8 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
         "Record one residual risk (--text, optional --severity) on the active v3 task; review data, so no --reason.",
       "--set-paths":
         "Replace the relevant paths and/or specs from repeatable --relevant-path and --relevant-spec flags; needs no reason.",
+      "--batch":
+        "Apply criteria, checks, decisions, risks and paths atomically from stdin envelope under a single file lock; schema v3 only.",
       "--brief":
         "Print only id, status, checkpoint and updatedAt (preflight: without learning); the commands that accept it are listed in constraints.brief.",
       "--finish":

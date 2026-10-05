@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildCriterion, buildTaskV1 } from "test/support/builders.js";
 
-import { createActiveStatus, createNoActiveStatus, type RequiredCheckState } from "src/core/status.js";
+import { createActiveStatus, createNoActiveStatus, summarizeStatus, type RequiredCheckState } from "src/core/status.js";
 import type { ContextDrift } from "src/core/context/context.js";
 import type { TaskRecordV1, TaskStatus } from "src/core/tasks/task.js";
 
@@ -71,6 +71,30 @@ describe("status projection", () => {
       expect(createActiveStatus(fixture(status), context, checks).nextAction.code).toBe(expected);
     },
   );
+
+  it("creates a concise micro-summary under 100 tokens", () => {
+    expect(summarizeStatus(createNoActiveStatus())).toEqual({
+      generator: "harnix",
+      schemaVersion: 1,
+      summary: "No active task.",
+      activeTask: null,
+      nextAction: "no-active-task",
+    });
+
+    const active = createActiveStatus(fixture("in_progress"), currentContext(), ["passed"]);
+    expect(summarizeStatus(active)).toMatchObject({
+      generator: "harnix",
+      schemaVersion: 1,
+      summary: expect.stringContaining("Task 20260826-000003-unit-status: in_progress/implementing"),
+      activeTask: {
+        id: "20260826-000003-unit-status",
+        stage: "in_progress/implementing",
+        criteria: "0/1 met",
+        checks: "1/1 passed",
+      },
+      nextAction: "continue-implementation",
+    });
+  });
 });
 
 function fixture(status: TaskStatus): TaskRecordV1 {

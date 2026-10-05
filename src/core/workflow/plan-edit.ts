@@ -12,6 +12,7 @@ export interface CheckEdit {
   id: string;
   description?: string | undefined;
   command?: string | undefined;
+  cwd?: string | undefined;
   scope?: string | undefined;
   required?: boolean | undefined;
   criteria?: readonly string[] | undefined;
@@ -104,10 +105,12 @@ function mergeCheck(existing: ValidationCheckV3 | undefined, edit: CheckEdit): V
   if (required && (criterionIds.length === 0 || inputs.length === 0))
     throw new Error(`Check ${edit.id} is required: --criteria and at least one --input are needed.`);
   const command = edit.command ?? existing?.command;
+  const cwd = edit.cwd ?? existing?.cwd;
   return {
     id: edit.id,
     description,
     ...(command === undefined ? {} : { command }),
+    ...(cwd === undefined ? {} : { cwd }),
     scope,
     required,
     criterionIds,
@@ -235,6 +238,7 @@ export interface ReplaceCheckInput {
   newId: string;
   description?: string | undefined;
   command?: string | undefined;
+  cwd?: string | undefined;
   scope?: string | undefined;
   inputs?: readonly string[] | undefined;
   criteria?: readonly string[] | undefined;
@@ -268,6 +272,7 @@ export async function replaceCheckWorkflow(
         ? resolveDescription(existingNew, { id: input.newId, description: input.description })
         : existingNew.description;
     const command = input.command !== undefined ? input.command : existingNew.command;
+    const cwd = input.cwd !== undefined ? input.cwd : existingNew.cwd;
     const inputs = input.inputs !== undefined ? sortedUnique(input.inputs) : existingNew.inputs;
     const criteria = sortedUnique([...(input.criteria ?? existingNew.criterionIds), ...oldCheck.criterionIds]);
     newCheck = {
@@ -278,6 +283,7 @@ export async function replaceCheckWorkflow(
       inputs,
       criterionIds: criteria,
       ...(command === undefined ? {} : { command }),
+      ...(cwd === undefined ? {} : { cwd }),
     };
   } else {
     const scope = resolveScope(undefined, { id: input.newId, scope: input.scope ?? oldCheck.scope });
@@ -287,6 +293,7 @@ export async function replaceCheckWorkflow(
     });
     const inputs = sortedUnique(input.inputs ?? oldCheck.inputs);
     const criteria = sortedUnique(input.criteria ?? oldCheck.criterionIds);
+    const cwd = input.cwd !== undefined ? input.cwd : oldCheck.cwd;
     if (inputs.length === 0) throw new Error(`Replacement check ${input.newId} requires at least one --input.`);
     newCheck = {
       id: input.newId,
@@ -296,6 +303,7 @@ export async function replaceCheckWorkflow(
       criterionIds: criteria,
       inputs,
       ...(input.command === undefined ? {} : { command: input.command }),
+      ...(cwd === undefined ? {} : { cwd }),
     };
   }
 

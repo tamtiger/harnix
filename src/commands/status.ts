@@ -3,8 +3,11 @@ import {
   createActiveStatus,
   createNoActiveStatus,
   inspectRequiredCheckEvidence,
+  summarizeStatus,
   type HarnixStatusResultV1,
+  type StatusSummaryResultV1,
 } from "src/core/status.js";
+export type { StatusSummaryResultV1 } from "src/core/status.js";
 import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
 import { taskContextDrift } from "src/core/workflow/index.js";
 import { findInitializedProject } from "src/utils/project-discovery.js";
@@ -55,4 +58,12 @@ export async function explainProjectStatus(
     }
     throw error;
   }
+}
+
+export async function summarizeProjectStatus(
+  cwd: string,
+  now = Date.now(),
+): Promise<StatusSummaryResultV1> {
+  const status = await inspectProjectStatus(cwd, now);
+  return summarizeStatus(status);
 }

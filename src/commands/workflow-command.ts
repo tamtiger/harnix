@@ -7,6 +7,7 @@ import {
   addRiskWorkflow,
   appendEvidenceFlagsWorkflow,
   appendEvidenceWorkflow,
+  batchWorkflow,
   briefPreflight,
   briefTask,
   cancelWorkflow,
@@ -110,6 +111,7 @@ const HANDLERS: Record<string, Handler> = {
       criterion: context.flags.text,
       command: context.flags.command,
       input: context.flags.input,
+      followUp: context.flags.followUp,
     });
     return presentTask(context, task);
   },
@@ -164,6 +166,7 @@ const HANDLERS: Record<string, Handler> = {
         id: flags.setCheck as string,
         description: flags.description,
         command: flags.command,
+        cwd: flags.cwd,
         scope: flags.scope,
         required: flags.required,
         criteria: flags.criteria === undefined ? undefined : splitList(flags.criteria),
@@ -188,6 +191,7 @@ const HANDLERS: Record<string, Handler> = {
         newId,
         description: flags.description,
         command: flags.command,
+        cwd: flags.cwd,
         scope: flags.scope,
         criteria: flags.criteria === undefined ? undefined : splitList(flags.criteria),
         inputs: flags.input && flags.input.length > 0 ? flags.input.flatMap((item) => splitList(item)) : undefined,
@@ -235,6 +239,11 @@ const HANDLERS: Record<string, Handler> = {
     });
     return presentTask(context, task);
   },
+  batch: async (context) => {
+    const envelope = await readRequired(context, "Workflow batch", "Workflow batch requires valid JSON.");
+    const task = await batchWorkflow(context.root, envelope);
+    return presentTask(context, task);
+  },
   migrate: async (context) => {
     const input = await readInput(context, true);
     const envelope = parseJson(input, "Workflow migration requires valid bounded JSON.", true);
@@ -244,6 +253,7 @@ const HANDLERS: Record<string, Handler> = {
     const run = await runCheckWorkflow(root, flags.runCheck as string, operands, {
       runner: options.checkRunner,
       summary: flags.summary,
+      cwd: flags.cwd,
     });
     return {
       ...briefTask(run.task, run.evidenceId),
@@ -303,6 +313,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--add-decision <id>", "Record one decision (requires --text and --rationale)")
     .option("--add-risk <id>", "Record one residual risk (requires --text)")
     .option("--set-paths", "Replace the relevant paths and/or specs of the active task")
+    .option("--batch", "Batch apply criteria, checks, decisions, risks and paths from stdin")
     .option("--schema", "Describe the save envelope schema")
     .option(
       "--check <id>",
@@ -326,6 +337,8 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--severity <level>", "Severity for --add-risk: low, medium or high")
     .option("--relevant-path <path>", "Relevant path for --set-paths (repeatable)", collect, [])
     .option("--relevant-spec <path>", "Relevant spec path for --set-paths (repeatable)", collect, [])
+    .option("--cwd <path>", "Working directory relative to project root for check execution")
+    .option("--follow-up <task-id>", "Task ID to follow up on, inheriting context from a completed task")
     .option("--brief", "Print only id, status, checkpoint and updatedAt")
     .option("--dry-run", "Validate transition conditions without persisting state")
     .action(async (operands: string[], flags: WorkflowFlags) => {

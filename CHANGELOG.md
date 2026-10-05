@@ -4,6 +4,21 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.0.4] - 2026-10-05
+
+### Added
+
+- **Multi-repository `cwd` Scoping cho Checks:** Bổ sung thuộc tính `cwd?: string` vào schema `ValidationCheck` (TaskRecord schema v3) và cờ `--cwd <path>` trong `workflow --set-check`, `workflow --replace-check`, `workflow --run-check`. Cho phép các lệnh build/test của các repository con trong multi-repo workspace (`frt-payment-core`, `frt-payment-gateway`, `frt-payment-portal-web`) được thực thi trực tiếp và chuẩn xác trong thư mục con tương ứng mà không cần workaround chuỗi lệnh phức tạp qua `cd`.
+- **Khởi tạo Follow-up Task (`workflow --init --follow-up <task-id>`):** Bổ sung cờ `--follow-up <task-id>` cho `workflow --init` tự động kế thừa `relevantPaths`, `relevantSpecs` và `epicId` từ task cha, giúp tiếp nối các yêu cầu bổ sung hoặc công việc liền kề mà không làm mất ngữ cảnh đã xác lập.
+- **Baseline Check Execution trong Planning:** Cho phép chạy `workflow --run-check` ngay trong giai đoạn `planning` để thu thập bằng chứng kiểm thử baseline, phát hiện sớm các lỗi pre-existing trước khi freeze contract tại `ready`.
+- **Batch State Mutation Envelope (`workflow --batch`):** Bổ sung flag `--batch` cho lệnh nội bộ `harnix workflow` nhận JSON envelope `{ criteria?, checks?, decisions?, risks?, paths?, specs? }` từ stdin. Cho phép áp dụng đồng thời nhiều thay đổi vào `task.json` chỉ dưới 1 file lock duy nhất, loại bỏ hiện tượng tranh chấp lock khi cập nhật liên tiếp các criteria/checks/decisions và giảm thiểu đáng kể chi phí round-trip/token context.
+- **Micro-summary cho CLI (`harnix status --summary`):** Bổ sung tùy chọn `--summary` cho lệnh `status` in ra một dòng JSON siêu ngắn gọn (dưới 80 tokens) gồm ID task, stage, tiến độ criteria/checks và nextAction, giúp tiết kiệm context window tối đa khi polling trạng thái.
+
+### Fixed
+
+- **Tăng timeout file lock và backoff jitter:** Nâng thời gian timeout mặc định của `acquireHarnixFileLock` từ 5 giây lên 30 giây kèm cơ chế sleep retry jitter ngẫu nhiên, khắc phục triệt để lỗi `Timed out waiting for Harnix lock` khi agent chạy song song nhiều lệnh `workflow --run-check` hoặc các thao tác cập nhật workflow.
+- **Tự động normalize lệnh Windows:** Chuẩn hóa trực tiếp lệnh `cmd`/`cmd.exe` trên Windows để thực thi script mà không bị bọc lặp hay chặn metacharacters không cần thiết, đồng thời duy trì bọc an toàn qua `cmd.exe /d /s /c` cho các batch shims (`.cmd`, `.bat`, `npm`, `pnpm`, `npx`).
+
 ## [2.0.3] - 2026-10-05
 
 ### Added

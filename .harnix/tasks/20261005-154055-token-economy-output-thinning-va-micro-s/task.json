@@ -1,0 +1,93 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-154055-token-economy-output-thinning-va-micro-s",
+  "title": "Token economy output thinning va micro summary cho CLI",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Toi uu token output: preflight brief bo qua learning, run check compact tail khi pass va status summary sieu gon",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Preflight brief khong serialize learning notes; run-check pass tra concise tail; status --summary in micro summary duoi 100 tokens",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Verify Token economy output thinning va micro summary cho CLI",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/workflow/preflight.test.ts test/unit/core/status.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Suite gate token economy",
+      "command": "pnpm vitest run test/unit/core/workflow/preflight.test.ts test/unit/core/status.test.ts",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-05T15:44:55.864+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d44d166994e34ac9968a7a0bc6aec2ccf83be524cd26c6f1e3c294a483915a4c"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T15:45:03.875+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a92ab76356e9034ca16177bb60959192303e219262557442edd72e24373a72b0"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-05T15:40:55.732+07:00",
+  "updatedAt": "2026-10-05T15:45:46.075+07:00",
+  "decisions": [
+    {
+      "id": "dec-token-summary",
+      "text": "Micro summary qua status --summary giup polling trang thai voi chi 50 token",
+      "rationale": "Tiet kiem context window dang ke cho agent khi lap lai status check"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-preflight-brief",
+      "text": "Preflight brief khong co learning nen chi dung cho routing nhanh",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-05T15:45:46.075+07:00",
+  "epicId": "20261005-153000-concurrency-and-token-optimization"
+}

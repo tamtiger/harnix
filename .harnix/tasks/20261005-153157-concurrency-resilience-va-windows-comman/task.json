@@ -1,0 +1,113 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-153157-concurrency-resilience-va-windows-comman",
+  "title": "Concurrency resilience va Windows command auto normalization",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khac phuc timeout file lock va tu dong normalize command Windows tren run-check",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "File lock tang timeout 30s co backoff va check runner tu dong wrap npm/pnpm/npx thanh .cmd tren Windows",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Verify Concurrency resilience va Windows command auto normalization",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/utils/check-runner.test.ts test/unit/utils/file-lock.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Suite gate test runner va file lock",
+      "command": "pnpm vitest run test/unit/utils/check-runner.test.ts test/unit/utils/file-lock.test.ts",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-05T15:35:47.123+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "58a0e62394f5a39e7c0a913c0e3f88607774d942892d50f6998b1a2eebf99b2b"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T15:35:54.149+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5f75fe280546bb1ef3f72d09fa5e95e8e7697feaf82f9c4ea711789407a4196c"
+    },
+    {
+      "id": "ev-check-1-2",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-05T15:36:59.051+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1f95af0f53c6f703450a64c6124da74d6ce9982af06ed372d821d106c93171d2"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T15:37:05.272+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f118dda01b167d93d7691ea8191a1d3c690af375c67365698d055fb1a2efa238"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-05T15:31:57.956+07:00",
+  "updatedAt": "2026-10-05T15:37:17.485+07:00",
+  "decisions": [
+    {
+      "id": "dec-lock-timeout",
+      "text": "Tang lock timeout len 30s va sleep jitter giup triet tieu tranh chap concurrency",
+      "rationale": "Tranh FileLockTimeoutError khi cac lenh run-check dong thoi hoan tat"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-windows-shell",
+      "text": "Goi shell cmd.exe tren Windows can dam bao khong double-wrap",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-05T15:37:17.485+07:00",
+  "epicId": "20261005-153000-concurrency-and-token-optimization"
+}

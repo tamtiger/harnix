@@ -27,7 +27,7 @@ Plan-only requests stop at `ready`. Full tasks and Epics also stop at `ready` (`
 
 ## Public commands
 
-`harnix status` (bounded read-only projection of the active task, progress, context freshness and next action) and `harnix status --explain` (required-check digest freshness with reason codes and exact readiness/completion blocker codes, without running anything); `harnix tasks` (bounded local index); `harnix resume <task-id> [--dry-run]` restores only an explicitly selected unfinished task's pointer and refuses collisions; `harnix pause [--dry-run]` clears only the pointer; `harnix epic [--limit N]` / `harnix epic <epic-id>`; `harnix verify-plan [--recursive]` (deterministic test/lint/typecheck/format commands per package and nested repositories); `harnix context-report --platform <p>` (effective hook-context metadata; `<p>` is `kiro`, `antigravity`, `codex`, `claude`, `opencode` or `cursor`, and the flag is required, as it is for the hook command `harnix context --platform <p>`); `harnix repo-map --query|--impact` (bounded navigation hints only; platform hooks must not invoke repository-map queries, impact or refreshes); `harnix skill [name] [--reference topic]`; `harnix doctor`, `harnix update`. Private task prose, commands, prompts, hashes, secrets and absolute paths are omitted from their output.
+`harnix status` (bounded read-only projection of the active task, progress, context freshness and next action), `harnix status --summary` (micro status projection under 80 tokens: stage, criteria, check counts and next action) and `harnix status --explain` (required-check digest freshness with reason codes and exact readiness/completion blocker codes, without running anything); `harnix tasks` (bounded local index); `harnix resume <task-id> [--dry-run]` restores only an explicitly selected unfinished task's pointer and refuses collisions; `harnix pause [--dry-run]` clears only the pointer; `harnix epic [--limit N]` / `harnix epic <epic-id>`; `harnix verify-plan [--recursive]` (deterministic test/lint/typecheck/format commands per package and nested repositories); `harnix context-report --platform <p>` (effective hook-context metadata; `<p>` is `kiro`, `antigravity`, `codex`, `claude`, `opencode` or `cursor`, and the flag is required, as it is for the hook command `harnix context --platform <p>`); `harnix repo-map --query|--impact` (bounded navigation hints only; platform hooks must not invoke repository-map queries, impact or refreshes); `harnix skill [name] [--reference topic]`; `harnix doctor`, `harnix update`. Private task prose, commands, prompts, hashes, secrets and absolute paths are omitted from their output.
 
 ## Task state
 
@@ -56,7 +56,7 @@ Hidden `harnix workflow` is the only persistence transport; it is not a supporte
 - `--save`: one bounded JSON envelope on stdin `{ task, artifacts?, contractRevision?, epic?, epicMembers? }`. `artifacts` holds only `prd`, `plan`, `design`, a `research` map keyed by safe `.md` names and a validated `context`. Saves are serialized by a project lock, compare captured bytes, validate the digest of any new required pass and commit `task.json` last. Needed only for new tasks, task text and research; use the flags below for everything else.
 - `--transition <status>/<checkpoint>`: no body; moves the persisted record through one legal transition.
 - `--evidence --check <id> --result <r> --summary <t> [--exit-code --artifact --digest]` (or a `{ "evidence": ... }` envelope): appends one item; id, `recordedAt` and digest are filled in. `--run-check <id> -- <exe> [args]`: snapshot, run without a shell, snapshot, record. `--snapshot --check <id>`: read-only digest. `--criterion <ids> --met [--evidence-ids]`.
-- `--set-check`, `--add-criterion --text --check`, `--set-paths` edit obligations and paths; after planning they need `--reason` and make one guarded replan save. `--add-decision`, `--add-risk` record review notes at any unfinished stage. `--migrate` upgrades a legacy task. `--brief` trims output (the commands that accept it are listed in `harnix workflow --schema` under `constraints.brief`); `--finish --brief` also reports `learning { notes, captured, hint? }`.
+- `--set-check`, `--add-criterion --text --check`, `--set-paths` edit obligations and paths; after planning they need `--reason` and make one guarded replan save. `--add-decision`, `--add-risk` record review notes at any unfinished stage. `--batch` applies criteria, checks, decisions, risks and paths atomically in one call from stdin. `--migrate` upgrades a legacy task. `--brief` trims output (the commands that accept it are listed in `harnix workflow --schema` under `constraints.brief`); `--finish --brief` also reports `learning { notes, captured, hint? }`.
 - `--finish` and `--cancel` are the only terminal transports. `--learn` records a hand-authored candidate.
 
 ## Command cookbook
@@ -68,17 +68,19 @@ A `--save` envelope is `{ "task": <TaskRecord v3>, "artifacts"?: { "prd": "...",
 The commands are the same in both shells; double-quote text in PowerShell and single-quote it in bash when it contains backticks or `$`:
 
 ```text
+harnix status --summary                      # micro status projection under 80 tokens (stage, criteria, checks, next action)
 harnix workflow --preflight                  # clock.now and clock.idPrefix are the only time source
-harnix workflow --init --title "<task title>" [--mode lite|full] [--goal "<goal>"] [--text "<criterion>"] [--command "<cmd>"] [--input "src/**"] --brief
+harnix workflow --init --title "<task title>" [--mode lite|full] [--goal "<goal>"] [--text "<criterion>"] [--command "<cmd>"] [--input "src/**"] [--follow-up <task-id>] --brief
 harnix workflow --transition ready/ready --dry-run --brief
-harnix workflow --run-check <check-id> --brief -- pnpm test    # snapshot, run, snapshot and record in one call
+harnix workflow --run-check <check-id> [--cwd <path>] --brief -- pnpm test    # snapshot, run, snapshot and record in one call
 harnix workflow --evidence --check <check-id> --result pass --exit-code 0 --summary "<command> - <result>" --brief
 harnix workflow --criterion <criterion-id>,<criterion-id> --met --brief
-harnix workflow --replace-check <old-check-id> <new-check-id> --reason "<why, required>" [--description "<text>" --command "<cmd>" --scope focused --input "src/**" --criteria <criterion-id>] --brief
+harnix workflow --replace-check <old-check-id> <new-check-id> --reason "<why, required>" [--description "<text>" --command "<cmd>" --scope focused --input "src/**" --criteria <criterion-id> --cwd <path>] --brief
 harnix workflow --transition verifying/finishing --brief
-harnix workflow --set-check <check-id> --description "<text>" --scope focused --command "<command>" --criteria <criterion-id> --input "src/**" --reason "<why, 10-1000 characters, required after planning>" --brief
+harnix workflow --set-check <check-id> --description "<text>" --scope focused --command "<command>" [--cwd <path>] --criteria <criterion-id> --input "src/**" --reason "<why, 10-1000 characters, required after planning>" --brief
 harnix workflow --add-criterion <criterion-id> --text "<criterion text>" --check <check-id> --reason "<why>" --brief
 harnix workflow --set-paths --relevant-path <path> --relevant-spec <path> --brief
+harnix workflow --batch --brief              # atomic batch apply criteria, checks, decisions, risks, paths from stdin
 harnix workflow --add-decision <id> --text "<self-contained lesson>" --rationale "<why>" --brief
 harnix workflow --add-risk <id> --text "<reusable risk or trap>" --severity medium --brief
 harnix workflow --finish --brief

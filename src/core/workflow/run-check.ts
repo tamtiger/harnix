@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { runCheckProcess, type CheckRunner } from "src/utils/check-runner.js";
@@ -12,6 +13,7 @@ export interface RunCheckDependencies {
   runner?: CheckRunner | undefined;
   summary?: string | undefined;
   now?: string | undefined;
+  cwd?: string | undefined;
 }
 
 export interface RunCheckResult {
@@ -38,10 +40,16 @@ export async function runCheckWorkflow(
   const task = await resolveActiveTask(await resolveSafeHarnixPath(root));
   if (!task) throw new Error("Workflow run-check requires an active task.");
   if (task.schemaVersion !== 3) throw new Error("Workflow --run-check requires a TaskRecord schema v3 task.");
-  if (!task.validationPlan.some((check) => check.id === checkId))
+  const declared = task.validationPlan.find((check) => check.id === checkId);
+  if (!declared)
     throw new Error(`Workflow run-check check ${checkId} is not declared.`);
   const before = (await computeInputDigest(root, task, checkId)).inputDigest;
-  const run = await (dependencies.runner ?? runCheckProcess)(executable, args, root);
+  const runCwd = dependencies.cwd
+    ? resolve(root, dependencies.cwd)
+    : declared.cwd
+      ? resolve(root, declared.cwd)
+      : root;
+  const run = await (dependencies.runner ?? runCheckProcess)(executable, args, runCwd);
   const after = (await computeInputDigest(root, task, checkId)).inputDigest;
   if (before !== after)
     throw new Error(`Verification inputs for check ${checkId} changed while it ran; nothing was recorded.`);

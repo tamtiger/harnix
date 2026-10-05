@@ -1,0 +1,195 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-160344-multi-repo-workspace-roots-follow-up-tas",
+  "title": "Multi-repo workspace roots follow-up task lifecycle va baseline check workflow",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Ho tro khai bao cwd roots cho cac check trong multi-repo workspace bo sung workflow init follow-up ke thua context tu task completed va tinh nang baseline verification",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Ho tro khai bao cwd roots cho tung validation check va scoping multi-repo",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1",
+        "ev-check-cwd-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Ho tro workflow --init --follow-up <task-id> ke thua relevantPaths, relevantSpecs va epicId tu task completed",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-followup-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Cho phep workflow --run-check chay kiem thu baseline trong planning de phat hien va xu ly loi pre-existing truoc freeze contract",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-baseline-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Bo unit tests va suite gate bao phu check-runner cwd, follow-up init va baseline execution pass 100%",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Verify Multi-repo workspace roots follow-up task lifecycle va baseline check workflow",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/workflow/batch.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**"
+      ]
+    },
+    {
+      "id": "check-cwd",
+      "description": "Kiem tra check-runner va set-check ho tro cwd cho multi-repo",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/utils/check-runner.ts",
+        "test/unit/utils/check-runner.test.ts"
+      ],
+      "command": "pnpm vitest run test/unit/utils/check-runner.test.ts"
+    },
+    {
+      "id": "check-followup",
+      "description": "Kiem tra workflow --init --follow-up ke thua context tu task completed",
+      "command": "pnpm vitest run test/unit/commands/workflow-command.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/init-task.ts",
+        "test/unit/commands/workflow-command.test.ts"
+      ]
+    },
+    {
+      "id": "check-baseline",
+      "description": "Kiem tra workflow --run-check trong planning cho baseline checks",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/workflow/run-check.ts",
+        "test/unit/core/workflow/run-check.test.ts"
+      ],
+      "command": "pnpm vitest run test/unit/core/workflow/run-check.test.ts"
+    },
+    {
+      "id": "check-suite",
+      "description": "Suite gate toan bo unit tests multi-repo follow-up va baseline",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm vitest run test/unit/utils/check-runner.test.ts test/unit/core/workflow/batch.test.ts"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-cwd-1",
+      "checkId": "check-cwd",
+      "recordedAt": "2026-10-05T16:24:59.832+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bcb400a29074da83c0d2edc5ec2824545d910607c027761dc630de7555f8035d"
+    },
+    {
+      "id": "ev-check-followup-1",
+      "checkId": "check-followup",
+      "recordedAt": "2026-10-05T16:25:09.787+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2e13125ec92b0dbeffa925fb936a9667fa078274356af6c15e0118527fb0aa54"
+    },
+    {
+      "id": "ev-check-baseline-1",
+      "checkId": "check-baseline",
+      "recordedAt": "2026-10-05T16:25:19.595+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "496ad0c5caf0054e7e5bb4526582403ecf3802ffe8a59e6a551d357b4c5a0637"
+    },
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-05T16:25:29.435+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fba6234e9c6a560201330697e6d9ffa158e50148c18542ac6519b4ee676baa5d"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T16:25:42.321+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a36f666378f22eeb179bc9e7409f2248d460a6ce45691c5083d67facc79105fc"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-05T16:03:44.346+07:00",
+  "updatedAt": "2026-10-05T16:26:46.459+07:00",
+  "epicId": "20261005-153000-concurrency-and-token-optimization",
+  "decisions": [
+    {
+      "id": "dec-cwd-multirepo",
+      "text": "Ho tro cwd trong ValidationCheck schema va run-check",
+      "rationale": "Cho phep cac validation checks cua multi-repo workspace chay thang vao repo con ma khong can workaround chuoi lenh shell phuc tap"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-multirepo-path-resolution",
+      "text": "Can dam bao cac input globs cua check co cwd duoc pham vi hoa dung vao thu muc tuong ung hoac relative tu project root",
+      "severity": "medium"
+    }
+  ],
+  "completedAt": "2026-10-05T16:26:46.459+07:00"
+}

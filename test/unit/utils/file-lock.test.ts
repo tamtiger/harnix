@@ -6,6 +6,8 @@ import {
   FileLockTimeoutError,
   InvalidHarnixFileLockError,
   acquireHarnixFileLock,
+  parseHarnixFileLockRecord,
+  readHarnixFileLockSnapshot,
   type FileLockClock,
   type FileLockFileSystem,
   type HarnixFileLockRecord,
@@ -342,5 +344,37 @@ describe("Harnix file lock", () => {
     expect(lockRecordNamePattern.test("owner-00000000-0000-4000-8000-000000000001.json")).toBe(true);
     expect(isLockRecordName("owner-00000000-0000-4000-8000-000000000001.json")).toBe(true);
     expect(isLockRecordName("invalid.json")).toBe(false);
+  });
+
+  it("defaults to a 30-second timeout when timeoutMs is omitted", async () => {
+    const home = await temporaryUserHome();
+    const path = join(home, "default-timeout.lock");
+    await writeLockDirectory(path, record({ ownerPid: process.pid, processStartedAt: new Date(1).toISOString() }));
+    const clock = clockAt(0);
+
+    await expect(
+      acquireHarnixFileLock(path, {
+        clock,
+        ownerInspector: async () => "alive",
+      }),
+    ).rejects.toBeInstanceOf(FileLockTimeoutError);
+
+    expect(clock.nowValue()).toBeGreaterThanOrEqual(30_000);
+  });
+
+  it("reads lock snapshot and validates lock records", async () => {
+    const home = await temporaryUserHome();
+    const path = join(home, "snapshot.lock");
+    const rec = record({ ownerPid: 1234, operationId: "snapshot-test" });
+    await writeLockDirectory(path, rec);
+
+    const snapshot = await readHarnixFileLockSnapshot(path);
+    expect(snapshot.record.operationId).toBe("snapshot-test");
+    expect(snapshot.recordName).toBe(firstTokenName);
+
+    expect(() => parseHarnixFileLockRecord(null)).toThrow(InvalidHarnixFileLockError);
+    expect(() => parseHarnixFileLockRecord({ generator: "invalid" })).toThrow(InvalidHarnixFileLockError);
+    expect(() => parseHarnixFileLockRecord({ ...rec, ownerPid: -1 })).toThrow(InvalidHarnixFileLockError);
+    expect(() => parseHarnixFileLockRecord({ ...rec, acquiredAt: "invalid-date" })).toThrow(InvalidHarnixFileLockError);
   });
 });

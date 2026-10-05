@@ -145,3 +145,46 @@ function nextAction(
   }
   return "finalize-task";
 }
+
+export interface StatusSummaryResultV1 {
+  readonly generator: "harnix";
+  readonly schemaVersion: 1;
+  readonly summary: string;
+  readonly activeTask: {
+    readonly id: string;
+    readonly stage: string;
+    readonly criteria: string;
+    readonly checks: string;
+  } | null;
+  readonly nextAction: StatusNextActionCode;
+}
+
+export function summarizeStatus(status: HarnixStatusResultV1): StatusSummaryResultV1 {
+  if (!status.activeTask) {
+    return {
+      generator: "harnix",
+      schemaVersion: 1,
+      summary: "No active task.",
+      activeTask: null,
+      nextAction: status.nextAction.code,
+    };
+  }
+  const task = status.activeTask;
+  const stage = `${task.status}/${task.checkpoint}`;
+  const criteria = `${task.progress.acceptance.met}/${task.progress.acceptance.total} met`;
+  const checks = `${task.progress.requiredChecks.passed}/${task.progress.requiredChecks.total} passed`;
+  const summary = `Task ${task.id}: ${stage}. Criteria: ${criteria}. Checks: ${checks}. Next: ${status.nextAction.code}`;
+
+  return {
+    generator: "harnix",
+    schemaVersion: 1,
+    summary,
+    activeTask: {
+      id: task.id,
+      stage,
+      criteria,
+      checks,
+    },
+    nextAction: status.nextAction.code,
+  };
+}

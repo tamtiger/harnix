@@ -29,6 +29,9 @@ export function resolveInvocation(
   args: readonly string[],
   platform: NodeJS.Platform = process.platform,
 ): Invocation {
+  if (platform === "win32" && (executable.toLowerCase() === "cmd" || executable.toLowerCase() === "cmd.exe")) {
+    return { executable: "cmd.exe", args: [...args] };
+  }
   const isBatchShim = /\.(?:cmd|bat)$/iu.test(executable);
   const bareName = !/[\\/]/u.test(executable) && !executable.includes(".");
   const needsCmd = isBatchShim || bareName;

@@ -342,5 +342,41 @@ describe("workflow plan-edit transports", () => {
       ),
     ).rejects.toThrow(/not declared/u);
   });
+
+  it("supports cwd scoping for multi-repo checks in setCheck and replaceCheck", async () => {
+    const root = await temporaryRepository();
+    await planningProject(root);
+
+    const added = await setCheckWorkflow(
+      root,
+      {
+        id: "core-test",
+        description: "Core test in sub repo",
+        scope: "focused",
+        criteria: ["a"],
+        inputs: ["sub-core/**"],
+        command: "pnpm test",
+        cwd: "sub-core",
+      },
+      {},
+      NOW,
+    );
+    const check = added.validationPlan.find((c) => c.id === "core-test");
+    expect(check?.cwd).toBe("sub-core");
+
+    const replaced = await replaceCheckWorkflow(
+      root,
+      {
+        oldId: "core-test",
+        newId: "core-test-v2",
+        description: "Core test v2",
+        cwd: "sub-core-v2",
+      },
+      { reason: "Update root repo directory" },
+      NOW,
+    );
+    const newCheck = replaced.validationPlan.find((c) => c.id === "core-test-v2");
+    expect(newCheck?.cwd).toBe("sub-core-v2");
+  });
 });
 

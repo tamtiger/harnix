@@ -88,4 +88,54 @@ describe("workflow --run-check", () => {
     await expect(runCheckWorkflow(root, "check", [], { runner, now: NOW })).rejects.toThrow(/executable/u);
     expect(calls).toEqual([]);
   });
+
+  it("honours check cwd or explicit dependency cwd when running command", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+    const { saveWorkflow } = await import("src/core/workflow/save.js");
+    // Update check with cwd via contractRevision
+    await saveWorkflow(root, {
+      task: {
+        ...task,
+        checkpoint: "replan",
+        validationPlan: [
+          {
+            ...task.validationPlan[0]!,
+            cwd: "packages/portal",
+          },
+        ],
+      },
+      contractRevision: { reason: "Configure cwd for multi-repo check execution" },
+    });
+
+    const { runner, calls } = fakeRunner(0);
+    await runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: NOW });
+    expect(calls[0]?.cwd.replace(/\\/g, "/")).toContain("packages/portal");
+
+    // Overriding via dependencies.cwd
+    await runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: NOW, cwd: "packages/override" });
+    expect(calls[1]?.cwd.replace(/\\/g, "/")).toContain("packages/override");
+  });
+
+  it("allows running checks during planning stage for baseline verification", async () => {
+    const root = await temporaryRepository();
+    const { initializeUtcProject } = await import("test/support/workflow-fixtures.js");
+    await initializeUtcProject(root);
+    const { mkdir } = await import("node:fs/promises");
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(join(root, "src", "index.ts"), "export const ok = 1;\n");
+
+    const { initTaskWorkflow } = await import("src/core/workflow/init-task.js");
+    await initTaskWorkflow(root, {
+      title: "Baseline Planning Task",
+    });
+
+    const { runner } = fakeRunner(0, "baseline passed");
+    const result = await runCheckWorkflow(root, "check-1", ["pnpm", "test"], { runner, now: NOW });
+
+    expect(result.result).toBe("pass");
+    expect(result.task.status).toBe("planning");
+    expect(result.task.evidence).toHaveLength(1);
+    expect(result.task.evidence[0]?.checkId).toBe("check-1");
+  });
 });
