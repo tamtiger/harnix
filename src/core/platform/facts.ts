@@ -52,9 +52,9 @@ export const OPENCODE_FACTS: readonly PlatformFact[] = [
   },
   {
     claim:
-      "OpenCode reads skills from the ~/.config/opencode/skills/ directory (plural subdirectory name); no documented environment variable relocates the ~/.config/opencode root (OPENCODE_CONFIG names a single config file, OPENCODE_CONFIG_DIR adds an extra custom directory), so the root is hookless with no envOverride (documented limit)",
+      "OpenCode reads skills from the ~/.config/opencode/skills/ directory (plural subdirectory name); OpenCode also resolves the root from XDG_CONFIG_HOME (an absolute value gives $XDG_CONFIG_HOME/opencode; the official page does not name it, a public OpenCode issue, anomalyco/opencode #6669, records the behavior), while OPENCODE_CONFIG names a single config file and OPENCODE_CONFIG_DIR adds an extra custom directory without moving the root (documented limit: XDG support is undocumented upstream)",
     source: "https://opencode.ai/docs/config",
-    verifiedOn: "2026-10-01",
+    verifiedOn: "2026-10-05",
   },
 ];
 

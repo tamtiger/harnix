@@ -3,7 +3,12 @@ import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { computeInputDigest } from "src/core/verification/input-digest.js";
-import { assertSuiteGateFinishing, assertSuiteGateReady, coversSourceAndTest } from "src/core/workflow/suite-gate.js";
+import {
+  assertSuiteGateFinishing,
+  assertSuiteGateReady,
+  coversSourceAndTest,
+  knownTestCommands,
+} from "src/core/workflow/suite-gate.js";
 import { buildTaskV3 } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
@@ -74,7 +79,7 @@ describe("Suite Gate (ac-suite-gate)", () => {
       root,
       "package.json",
       JSON.stringify({
-        scripts: { test: "dotnet test" },
+        scripts: { test: "dotnet test frt-paymenthub/test/FRT.PaymentHub.Tests" },
       }),
     );
     await writeFixture(root, "frt-paymenthub/src/Adapter.cs", "");
@@ -87,7 +92,7 @@ describe("Suite Gate (ac-suite-gate)", () => {
           description: "Monorepo suite check",
           scope: "full",
           required: true,
-          command: "dotnet test frt-paymenthub/test/FRT.PaymentHub.Tests",
+          command: "npm test",
           criterionIds: ["ac-1"],
           inputs: ["frt-paymenthub/src/**", "frt-paymenthub/test/**"],
         },
@@ -250,5 +255,104 @@ describe("Suite Gate (ac-suite-gate)", () => {
 
     await expect(assertSuiteGateReady(root, task)).resolves.not.toThrow();
     await expect(assertSuiteGateFinishing(root, task)).resolves.not.toThrow();
+  });
+
+  describe("suite command", () => {
+    const suiteTask = (command: string | undefined, extra: Record<string, unknown> = {}) =>
+      buildTaskV3({
+        status: "verifying",
+        checkpoint: "finishing",
+        validationPlan: [
+          {
+            id: "check-suite",
+            description: "Project suite check",
+            scope: "full",
+            required: true,
+            ...(command === undefined ? {} : { command }),
+            criterionIds: ["ac-1"],
+            inputs: ["src/**", "test/**"],
+          },
+        ],
+        ...extra,
+      });
+
+    async function jsProject(): Promise<string> {
+      const root = await createFixture();
+      await writeFixture(root, "package.json", JSON.stringify({ scripts: { test: "vitest run" } }));
+      await writeFixture(root, "pnpm-lock.yaml", "");
+      await writeFixture(root, "src/index.ts", "export const a = 1;");
+      await writeFixture(root, "test/index.test.ts", "");
+      return root;
+    }
+
+    it("ready rejects a suite check that runs only part of the tests", async () => {
+      const root = await jsProject();
+
+      for (const command of ["pnpm vitest run test/index.test.ts", "pnpm run test:unit", "node -e 0", undefined]) {
+        await expect(assertSuiteGateReady(root, suiteTask(command))).rejects.toThrow(
+          /command must be the project test command \(pnpm run test\)/u,
+        );
+      }
+    });
+
+    it("ready accepts the project test command in every equivalent spelling", async () => {
+      const root = await jsProject();
+
+      for (const command of ["pnpm run test", "pnpm test", "npm test", "yarn run test", "PNPM test"]) {
+        await expect(assertSuiteGateReady(root, suiteTask(command))).resolves.toBeUndefined();
+      }
+    });
+
+    it("finish rejects a fresh passing suite check whose command is not the project test command", async () => {
+      const root = await jsProject();
+      const base = suiteTask("pnpm vitest run test/index.test.ts");
+      const { inputDigest } = await computeInputDigest(root, base, "check-suite");
+      const task = {
+        ...base,
+        evidence: [
+          {
+            id: "ev-1",
+            checkId: "check-suite",
+            recordedAt: "2026-09-29T09:00:00.000+07:00",
+            result: "pass" as const,
+            exitCode: 0,
+            summary: "focused only",
+            artifactPaths: [],
+            inputDigest,
+          },
+        ],
+      };
+
+      await expect(assertSuiteGateFinishing(root, task)).rejects.toThrow(/command must be the project test command/u);
+    });
+
+    it("keeps the inputs-only rule when the repository declares tests but no test command", async () => {
+      const root = await createFixture();
+      await writeFixture(root, "composer.json", "{}");
+      await writeFixture(root, "src/index.php", "");
+      await writeFixture(root, "tests/IndexTest.php", "");
+
+      await expect(
+        assertSuiteGateReady(root, suiteTask("vendor/bin/phpunit tests/IndexTest.php")),
+      ).resolves.toBeUndefined();
+    });
+
+    it("collects the root and package test commands without duplicates", () => {
+      const plan = {
+        generator: "harnix" as const,
+        schemaVersion: 1 as const,
+        projectRoot: ".",
+        hasTests: true,
+        commands: { test: "pnpm run test" },
+        packages: [
+          { path: "a", hasTests: true, commands: { test: "dotnet test" } },
+          { path: "b", hasTests: true, commands: { test: "pnpm run test" } },
+          { path: "c", hasTests: false, commands: {} },
+        ],
+        warnings: [],
+      };
+
+      expect(knownTestCommands(plan)).toEqual(["pnpm run test", "dotnet test"]);
+    });
   });
 });

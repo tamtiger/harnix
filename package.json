@@ -35,7 +35,7 @@
     "test:platform": "vitest run test/platform",
     "test:workflow": "vitest run test/workflow",
     "test:safety": "vitest run test/safety",
-    "test:acceptance": "pnpm run test:unit && pnpm run test:integration && pnpm run test:migration && pnpm run test:platform && pnpm run test:workflow && pnpm run test:safety",
+    "test:acceptance": "pnpm run test",
     "pack:check": "node scripts/pack-check.mjs",
     "smoke:tarball": "node scripts/smoke-tarball.mjs",
     "measure:init": "node scripts/measure-init.mjs",

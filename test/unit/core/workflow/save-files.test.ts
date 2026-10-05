@@ -1,7 +1,13 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { inspectWorkflow } from "src/core/workflow/inspect.js";
+import {
+  assertReplayArtifactsMatch,
+  assertWorkflowSaveFilesUnchanged,
+  captureWorkflowSaveFiles,
+  restoreWorkflowSaveFiles,
+} from "src/core/workflow/save-files.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { snapshotWorkflow } from "src/core/workflow/snapshot.js";
 import { type TaskRecordV3 } from "src/core/tasks/task.js";
@@ -190,5 +196,123 @@ describe("workflow save-files", () => {
       /harnix workflow --run-check check -- <command>/u,
     );
     await expect(assertInputDigestsFresh(root, persisted)).rejects.toThrow(/no input-touching command after it/u);
+  });
+});
+
+describe("workflow save-files helpers", () => {
+  async function taskDirectory(root: string, task: TaskRecordV3): Promise<string> {
+    const directory = join(root, ".harnix", "tasks", task.id);
+    await mkdir(directory, { recursive: true });
+    return directory;
+  }
+
+  it("plans task.json, Full-only prd and plan, design, research and context files in stable order", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const lite = taskV3("planning", "planning");
+    const full = { ...lite, mode: "full" as const };
+    const artifacts = { prd: "P", plan: "Q", design: "D", research: { "a.md": "R" }, context: {} as never };
+
+    const fullFiles = await captureWorkflowSaveFiles(join(root, ".harnix"), full, artifacts);
+    const liteFiles = await captureWorkflowSaveFiles(join(root, ".harnix"), lite, artifacts);
+
+    const prefix = `tasks/${lite.id}`;
+    expect(fullFiles.map((file) => file.relativePath)).toEqual(
+      ["context.json", "design.md", "plan.md", "prd.md", "research/a.md", "task.json"].map(
+        (name) => `${prefix}/${name}`,
+      ),
+    );
+    expect(liteFiles.map((file) => file.relativePath)).not.toContain(`${prefix}/prd.md`);
+    expect(fullFiles.every((file) => file.original === undefined && file.forward !== undefined)).toBe(true);
+  });
+
+  it("rejects research artifacts with an invalid name or empty content", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const task = taskV3("planning", "planning");
+
+    for (const research of [{ "Bad Name.md": "x" }, { "ok.md": "  " }]) {
+      await expect(captureWorkflowSaveFiles(join(root, ".harnix"), task, { research })).rejects.toThrow(
+        "Research artifact name or content is invalid.",
+      );
+    }
+  });
+
+  it("restores overwritten bytes, removes created files and preserves concurrent changes", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const directory = await taskDirectory(root, taskV3("planning", "planning"));
+    const file = (name: string, original: string | undefined, forward: string, current: string) => {
+      const path = join(directory, name);
+      return writeFile(path, current).then(() => ({
+        relativePath: name,
+        path,
+        original: original === undefined ? undefined : Buffer.from(original),
+        forward: Buffer.from(forward),
+      }));
+    };
+    const overwritten = await file("a.md", "old", "new", "new");
+    const created = await file("b.md", undefined, "x", "x");
+    const untouched = await file("c.md", "same", "other", "same");
+
+    await restoreWorkflowSaveFiles([overwritten, created, untouched]);
+
+    await expect(readFile(overwritten.path, "utf8")).resolves.toBe("old");
+    await expect(readFile(created.path, "utf8")).rejects.toThrow();
+    const changed = await file("d.md", "orig", "forward", "someone else");
+    await expect(restoreWorkflowSaveFiles([changed])).rejects.toThrow("Concurrent changes were preserved at: d.md.");
+    await expect(readFile(changed.path, "utf8")).resolves.toBe("someone else");
+  });
+
+  it("detects task files that changed since the snapshot", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const directory = await taskDirectory(root, taskV3("planning", "planning"));
+    const path = join(directory, "task.json");
+    await writeFile(path, "a");
+    const snapshot = { relativePath: "task.json", path, original: Buffer.from("a"), forward: Buffer.from("b") };
+
+    await expect(assertWorkflowSaveFilesUnchanged([snapshot])).resolves.toBeUndefined();
+    await writeFile(path, "changed");
+    await expect(assertWorkflowSaveFilesUnchanged([snapshot])).rejects.toThrow(
+      "task files changed concurrently: task.json.",
+    );
+  });
+
+  it("requires committed artifacts to match on a contractRevision replay", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const task = taskV3("planning", "planning");
+    const directory = await taskDirectory(root, task);
+    await writeFile(join(directory, "prd.md"), "P");
+    const harnixRoot = join(root, ".harnix");
+
+    await expect(assertReplayArtifactsMatch(harnixRoot, task, { prd: "P" })).resolves.toBeUndefined();
+    await expect(assertReplayArtifactsMatch(harnixRoot, task, { prd: "Z" })).rejects.toThrow(
+      "cannot replace already committed artifact prd.md.",
+    );
+    await expect(assertReplayArtifactsMatch(harnixRoot, task, { plan: "x" })).rejects.toThrow(
+      "missing or unreadable: plan.md",
+    );
+    await expect(assertReplayArtifactsMatch(harnixRoot, task, { research: { "bad name.md": "x" } })).rejects.toThrow(
+      "Research artifact name or content is invalid.",
+    );
+  });
+
+  it("requires a complete, valid and task-bound context pair on replay", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const task = taskV3("planning", "planning");
+    const directory = await taskDirectory(root, task);
+    const harnixRoot = join(root, ".harnix");
+
+    await writeFile(join(directory, "context.json"), "{}");
+    await expect(assertReplayArtifactsMatch(harnixRoot, task, undefined)).rejects.toThrow(
+      "complete context.json and context-selection.json pair",
+    );
+    await writeFile(join(directory, "context-selection.json"), "{}");
+    await expect(assertReplayArtifactsMatch(harnixRoot, task, undefined)).rejects.toThrow(
+      "unreadable, invalid, or unbound",
+    );
   });
 });

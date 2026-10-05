@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import { createIsolatedUserEnvironment } from "./isolated-user-home.mjs";
+import { healthyReadiness } from "./scan-release-assertions.mjs";
 
 const repository = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const artifacts = join(repository, ".artifacts");
@@ -16,7 +17,9 @@ for (const platforms of [
   ["--antigravity"],
   ["--codex"],
   ["--claude"],
-  ["--kiro", "--antigravity", "--codex", "--claude"],
+  ["--opencode"],
+  ["--cursor"],
+  ["--kiro", "--antigravity", "--codex", "--claude", "--opencode", "--cursor"],
 ]) {
   const home = await mkdtemp(join(tmpdir(), "harnix-smoke-home-"));
   const packageManagerHome = await mkdtemp(join(tmpdir(), "harnix-smoke-package-manager-home-"));
@@ -77,23 +80,20 @@ function assertGlobalSetupResult(processResult, platforms, home) {
   if (result.scope !== "user" || JSON.stringify(actual) !== JSON.stringify(selected)) {
     throw new Error(`setup returned an unexpected global result: ${output}`);
   }
-  const actionable = result.platforms.some(
-    (platform) =>
-      platform?.readiness !== "installed" || !Array.isArray(platform?.warnings) || platform.warnings.length > 0,
-  );
-  const expectedStatus = actionable ? 1 : 0;
+  // Each platform is healthy at its own readiness (Codex waits for hook trust); an informational notice on stderr is
+  // not a finding. A clean disposable install must therefore exit 0.
+  const unhealthy = result.platforms.filter((platform) => platform?.readiness !== healthyReadiness(platform?.platform));
+  const expectedStatus = unhealthy.length > 0 ? 1 : 0;
   if (status !== expectedStatus)
-    throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result.`);
-  if (actionable && stderr.trim().length === 0)
+    throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result: ${output}`);
+  if (unhealthy.length > 0 && stderr.trim().length === 0)
     throw new Error("setup omitted stderr guidance for an actionable readiness result.");
-  if (!actionable && stderr.trim().length > 0)
-    throw new Error(`setup emitted unexpected stderr for a clean install: ${stderr}`);
   if (output.includes(home) || stderr.includes(home))
     throw new Error("setup exposed the physical disposable home path.");
 }
 
 async function assertNoProjectLocalPlatformSurfaces(project) {
-  const forbidden = [".agents", ".claude", ".codex", ".gemini", ".kiro", "GEMINI.md"];
+  const forbidden = [".agents", ".claude", ".codex", ".cursor", ".gemini", ".kiro", ".opencode", "GEMINI.md"];
   const present = [];
   for (const name of forbidden) {
     try {
@@ -132,6 +132,12 @@ async function assertExpectedGlobalSurfaces(home, platforms) {
   }
   if (platforms.includes("--claude")) {
     expected.push(".claude/harnix/managed.json", ".claude/skills", ".claude/CLAUDE.md", ".claude/settings.json");
+  }
+  if (platforms.includes("--opencode")) {
+    expected.push(".config/opencode/harnix/managed.json", ".config/opencode/AGENTS.md", ".config/opencode/skills");
+  }
+  if (platforms.includes("--cursor")) {
+    expected.push(".cursor/harnix/managed.json", ".cursor/skills");
   }
   for (const relativePath of expected) {
     try {

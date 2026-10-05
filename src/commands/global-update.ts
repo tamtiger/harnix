@@ -1,7 +1,6 @@
 import {
   configuratorPlans,
   defaultCommandLookup,
-  isTestProcess,
   type GlobalSetupPlatform,
   type HookCommandLookup,
   type SetupPlatformsResult,
@@ -9,6 +8,7 @@ import {
 import { updateGlobal } from "src/core/global/update.js";
 import type { HomeResolver } from "src/core/platform/user-paths.js";
 import { acquireHarnixFileLock } from "src/utils/file-lock.js";
+import { isTestProcess } from "src/utils/test-process.js";
 import { packageVersion } from "src/version.js";
 
 export interface UpdateGlobalPlatformsOptions {

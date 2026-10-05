@@ -23,10 +23,7 @@ export interface VerifyPlan {
   warnings: string[];
 }
 
-export async function buildVerifyPlan(
-  projectRoot: string,
-  options?: { recursive?: boolean },
-): Promise<VerifyPlan> {
+export async function buildVerifyPlan(projectRoot: string, options?: { recursive?: boolean }): Promise<VerifyPlan> {
   const root = resolve(projectRoot);
   let config: HarnixConfigV2 | undefined;
   try {

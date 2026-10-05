@@ -104,7 +104,21 @@ function obligationsChanged(previous: TaskRecord, next: TaskRecord): boolean {
       .sort((left, right) => compareCodeUnits(left.id, right.id));
   const checks = (task: TaskRecord) =>
     [...task.validationPlan].sort((left, right) => compareCodeUnits(left.id, right.id));
-  return !semanticJsonEqual(criteria(previous), criteria(next)) || !semanticJsonEqual(checks(previous), checks(next));
+  return (
+    !semanticJsonEqual(criteria(previous), criteria(next)) ||
+    !semanticJsonEqual(checks(previous), checks(next)) ||
+    waiversChanged(previous, next)
+  );
+}
+
+/** Waiving a criterion removes the need for its evidence, so it is a contract change like editing its text. */
+function waiversChanged(previous: TaskRecord, next: TaskRecord): boolean {
+  const waivers = (task: TaskRecord) =>
+    task.acceptanceCriteria
+      .filter((criterion) => criterion.status === "waived")
+      .map(({ id, waiverReason }) => ({ id, waiverReason: waiverReason ?? null }))
+      .sort((left, right) => compareCodeUnits(left.id, right.id));
+  return !semanticJsonEqual(waivers(previous), waivers(next));
 }
 
 function isEditablePlanningDraft(task: TaskRecord): boolean {
@@ -133,7 +147,7 @@ function preserveProvenObligations(previous: TaskRecordV3, next: TaskRecordV3): 
     )
       continue;
     const candidate = nextCriteria.get(criterion.id);
-    if (candidate === undefined || candidate.text !== criterion.text)
+    if (candidate === undefined || candidate.text !== criterion.text || candidate.status !== criterion.status)
       throw new Error(`Workflow contractRevision cannot mutate proven acceptance criterion ${criterion.id}.`);
   }
   assertEvidencedChecksRetained(previous, next);
@@ -165,8 +179,7 @@ function assertEvidencedChecksRetained(previous: TaskRecordV3, next: TaskRecordV
     const hasReplacement = next.validationPlan.some(
       (replacement) =>
         (!priorCheckIds.has(replacement.id) ||
-          (replacement.id !== check.id &&
-            !evidenceByCheck.get(replacement.id)?.some((e) => e.result === "pass"))) &&
+          (replacement.id !== check.id && !evidenceByCheck.get(replacement.id)?.some((e) => e.result === "pass"))) &&
         replacement.required &&
         check.criterionIds.every((criterionId) => replacement.criterionIds.includes(criterionId)),
     );

@@ -86,4 +86,35 @@ describe("OpenCode user-global lifecycle", () => {
     const integrations = await diagnoseGlobalIntegrations(options(home));
     expect(integrations.map((integration) => integration.platform)).toContain("opencode");
   });
+
+  it("installs, updates and removes below $XDG_CONFIG_HOME/opencode when OpenCode would read it there", async () => {
+    const home = await temporaryUserHome();
+    const xdg = await temporaryUserHome();
+    const xdgOptions = { ...options(home), environment: { XDG_CONFIG_HOME: xdg } };
+
+    await setupPlatforms({ ...xdgOptions, platforms: ["opencode"] });
+
+    await expect(readFile(join(xdg, "opencode", "AGENTS.md"), "utf8")).resolves.toContain("<!-- harnix:begin -->");
+    await expect(access(join(xdg, "opencode", "skills", "harnix-implement", "SKILL.md"))).resolves.toBeUndefined();
+    await expect(access(join(home, ".config"))).rejects.toMatchObject({ code: "ENOENT" });
+    const updated = await updateGlobalPlatforms(xdgOptions);
+    expect(updated.platforms.map((platform) => platform.platform)).toEqual(["opencode"]);
+    const integrations = await diagnoseGlobalIntegrations(xdgOptions);
+    expect(integrations.map((integration) => integration.platform)).toContain("opencode");
+
+    await uninstallGlobalIntegrations({ ...xdgOptions, platforms: ["opencode"], yes: true });
+    await expect(access(join(xdg, "opencode", "skills", "harnix-implement"))).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
+  it("falls back to ~/.config/opencode when XDG_CONFIG_HOME is empty or relative", async () => {
+    const home = await temporaryUserHome();
+
+    await setupPlatforms({
+      ...options(home),
+      environment: { XDG_CONFIG_HOME: "relative/dir" },
+      platforms: ["opencode"],
+    });
+
+    await expect(access(agentsPath(home))).resolves.toBeUndefined();
+  });
 });

@@ -142,6 +142,7 @@ function canonicalCheck(check: ValidationCheckV3) {
     required: check.required,
     criterionIds: [...check.criterionIds].sort(compareText),
     inputs: [...check.inputs],
+    ...(check.cwd === undefined ? {} : { cwd: check.cwd }),
   };
 }
 

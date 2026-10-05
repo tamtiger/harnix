@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  explainProjectStatus,
-  inspectProjectStatus,
-  summarizeProjectStatus,
-} from "src/commands/status.js";
+import { explainProjectStatus, inspectProjectStatus, summarizeProjectStatus } from "src/commands/status.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { initializeUtcProject, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";

@@ -169,7 +169,14 @@ async function preflightGlobalManagedFiles(
   }
 
   nextEntries.push(
-    ...reconcileObsoleteEntries(loadedManifest.manifest.entries, seenPrevious, targetStates, result, options),
+    ...reconcileObsoleteEntries(
+      loadedManifest.manifest.entries,
+      seenPrevious,
+      new Set(prepared.map((item) => item.entry.sourceId)),
+      targetStates,
+      result,
+      options,
+    ),
   );
 
   const manifest = validateGlobalManagedManifest({
@@ -244,6 +251,7 @@ async function preserveUnownedRoot(
 function reconcileObsoleteEntries(
   previousEntries: readonly GlobalManagedEntry[],
   seenPrevious: ReadonlySet<string>,
+  desiredSourceIds: ReadonlySet<string>,
   targetStates: ReadonlyMap<string, TargetState>,
   result: GlobalManagedReconcileResult,
   options: ReconcileGlobalManagedFilesOptions,
@@ -253,7 +261,11 @@ function reconcileObsoleteEntries(
     if (seenPrevious.has(entryKey(previous))) continue;
     const target = getTargetState(targetStates, previous.path);
     const matcher = options.memberMatchers?.get(previous.sourceId) ?? defaultJsonMemberMatcher;
-    if (!options.removeObsolete || !removeObsoleteEntry(target, previous, result, matcher)) kept.push(previous);
+    // A fragment whose replacement is being installed now (same sourceId, new shape) must not keep running beside it.
+    const superseded = desiredSourceIds.has(previous.sourceId);
+    if (!(options.removeObsolete || superseded) || !removeObsoleteEntry(target, previous, result, matcher)) {
+      kept.push(previous);
+    }
   }
   return kept;
 }

@@ -33,6 +33,8 @@ export interface WorkflowEnvelopeSchemaV1 {
     taskId: string;
     epicId: string;
     sortedUniqueArrays: string[];
+    checkCwd: string;
+    checkBaseline: string;
     newCriterion: string;
     requiredCheck: string;
     envelope: string;
@@ -71,6 +73,9 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       taskId: taskIdPattern.source,
       epicId: epicIdPattern.source,
       sortedUniqueArrays: ["validationPlan[].criterionIds", "validationPlan[].inputs"],
+      checkCwd:
+        'optional repository-relative POSIX path ("." is the root); traversal, absolute and drive-relative forms are rejected',
+      checkBaseline: "optional { result?, classification?, authorizedBy?, scope? }; no other key",
       newCriterion: 'status "pending" with evidenceIds: [] on every criterion; criteria text is free-form',
       requiredCheck:
         "a required check needs non-empty criterionIds and inputs; every non-waived criterion is covered by one",
@@ -88,11 +93,11 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--migrate":
         "Migrate the active unfinished legacy v1/v2 task to schema v3; optional stdin { checks } supplies criterionIds and inputs.",
       "--run-check":
-        "Run the command after -- between two input snapshots of one check and record the outcome; output is returned, never stored.",
+        "Run the command after -- between two input snapshots of one check and record the outcome; the argv must equal the declared command and runs in the declared cwd, and a check that failed twice in a row is refused; output is returned, never stored.",
       "--set-check":
         "Add or update one validation check of the active v3 task from flags; after planning it needs --reason and makes the guarded replan save.",
       "--replace-check":
-        "Retire a failed or unpassed required check and activate or declare a replacement check covering its criteria: --replace-check <old> <new> --reason <why> [--description --command --scope --input --criteria]; schema v3 only.",
+        "Retire a failed or unpassed required check and activate or declare a replacement check covering its criteria: --replace-check <old> <new> --reason <why> [--description --command --scope --input --criteria --cwd]; the replacement must differ from the retired check in command, inputs or cwd; schema v3 only.",
       "--add-criterion":
         "Add one acceptance criterion from --text and cover it with the --check IDs; same --reason rule as --set-check.",
       "--add-decision": "Record one decision (--text, --rationale) on the active v3 task; review data, so no --reason.",
@@ -101,7 +106,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--set-paths":
         "Replace the relevant paths and/or specs from repeatable --relevant-path and --relevant-spec flags; needs no reason.",
       "--batch":
-        "Apply criteria, checks, decisions, risks and paths atomically from stdin envelope under a single file lock; schema v3 only.",
+        "Apply criteria, checks, decisions, risks and paths atomically from the stdin envelope { criteria?: [{ id, text?, status?, waiverReason?, checks? }], checks?: [{ id, description?, command?, scope?, required?, criteria?, inputs? }], decisions?: [{ id, text, rationale }], risks?: [{ id, text, severity? }], paths?: { paths?, specs? }, reason? } in one save under the workflow lock; decision and risk ids must be new (severity defaults to low); changing criteria or checks follows --set-check, so after planning it needs reason (10-1000 characters); schema v3 only.",
       "--brief":
         "Print only id, status, checkpoint and updatedAt (preflight: without learning); the commands that accept it are listed in constraints.brief.",
       "--finish":

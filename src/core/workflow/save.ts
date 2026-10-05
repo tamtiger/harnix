@@ -1,5 +1,3 @@
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { createContextSelectionSnapshot } from "src/core/context/selection-freshness.js";
 import { loadEpicRecord, renderEpicMarkdown, upsertEpic, validateEpic, type EpicRecord } from "src/core/epics/epic.js";
 import {
@@ -23,14 +21,16 @@ import {
 } from "src/core/tasks/workflow-helpers.js";
 import { assertNewEvidenceDigests } from "src/core/verification/input-digest.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
-import { acquireHarnixFileLock } from "src/utils/file-lock.js";
-import { sha256 } from "src/utils/hashing.js";
 import { contextSelectionInput } from "./context.js";
 import { validateWorkflowSaveEnvelope, type WorkflowSaveArtifacts, type WorkflowSaveEnvelope } from "./envelope.js";
+import { prepareEpicMembers, removeEpicMembers, writeEpicMembers } from "./epic-members.js";
+import { assertNewEvidenceNotFuture } from "./evidence-time.js";
 import { assertSchemaEvolution } from "./migration.js";
 import { isAppliedContractRevisionReplay, preserveObligations } from "./obligations.js";
 import { assertReadyRequirements } from "./ready.js";
+import { assertNewEvidenceRetryAllowed } from "./retry-guard.js";
 import { assertTextIntegrity } from "./text-integrity.js";
+import { withWorkflowLock } from "./workflow-lock.js";
 import {
   assertReplayArtifactsMatch,
   assertWorkflowSaveFilesUnchanged,
@@ -53,12 +53,7 @@ export async function saveWorkflow(root: string, input: unknown): Promise<TaskRe
     throw new Error("Workflow cancellation must use workflow --cancel.");
   const candidate = validateTask(envelope.task);
   const harnixRoot = await resolveSafeHarnixPath(root);
-  const lock = await acquireHarnixFileLock(join(tmpdir(), "harnix-workflow-locks", `${sha256(harnixRoot)}.lock`));
-  try {
-    return await saveWorkflowLocked(root, harnixRoot, envelope, candidate);
-  } finally {
-    await lock.release();
-  }
+  return withWorkflowLock(harnixRoot, () => saveWorkflowLocked(root, harnixRoot, envelope, candidate));
 }
 
 async function saveWorkflowLocked(
@@ -78,6 +73,8 @@ async function saveWorkflowLocked(
     ? validateAgainstExisting(existing, initialCandidate, envelope)
     : validateNewTask(active, initialCandidate);
 
+  assertNewEvidenceNotFuture(existing?.evidence ?? [], candidate.evidence);
+  assertNewEvidenceRetryAllowed(existing, candidate);
   if (candidate.status === "completed") throw new Error("Workflow completion must use workflow --finish.");
   if (candidate.status === "ready") await assertReadyRequirements(harnixRoot, candidate, envelope.artifacts);
 
@@ -153,13 +150,19 @@ async function persistCandidate(
   const { root, harnixRoot, envelope, existing } = context;
   const rollbackSnapshot = await captureWorkflowSaveFiles(harnixRoot, candidate, artifacts);
   await assertWorkflowSaveFilesUnchanged(rollbackSnapshot);
+  const newMembers = await prepareEpicMembers(
+    harnixRoot,
+    envelope.epicMembers ?? [],
+    validatedEpic ? validatedEpic.id : candidate.schemaVersion !== 1 ? candidate.epicId : undefined,
+  );
   let taskCommitted = false;
+  let createdMembers: string[] = [];
   try {
     if (candidate.schemaVersion === 3) await assertNewEvidenceDigests(root, existing?.evidence ?? [], candidate);
+    createdMembers = await writeEpicMembers(harnixRoot, newMembers);
     if (artifacts) await saveTaskArtifacts(harnixRoot, candidate, artifacts);
     await saveTask(harnixRoot, candidate);
     taskCommitted = true;
-    await saveEpicMembers(harnixRoot, candidate, envelope, validatedEpic);
     if (validatedEpic) await upsertEpic(root, validatedEpic);
     // Regenerate markdown if task has epicId matching an existing epic, unless
     // this same save already upserted (and rendered) that exact epic above.
@@ -171,6 +174,7 @@ async function persistCandidate(
   } catch (error: unknown) {
     if (!taskCommitted) {
       try {
+        await removeEpicMembers(harnixRoot, createdMembers);
         await restoreWorkflowSaveFiles(rollbackSnapshot);
       } catch (rollbackError: unknown) {
         const detail = rollbackError instanceof Error ? ` ${rollbackError.message}` : "";
@@ -180,26 +184,6 @@ async function persistCandidate(
       }
     }
     throw error;
-  }
-}
-
-/** Saves any planned epic member tasks (schema v3, planning) under the same epic. */
-async function saveEpicMembers(
-  harnixRoot: string,
-  candidate: TaskRecord,
-  envelope: WorkflowSaveEnvelope,
-  validatedEpic: EpicRecord | undefined,
-): Promise<void> {
-  if (!envelope.epicMembers || envelope.epicMembers.length === 0) return;
-  const targetEpicId = validatedEpic ? validatedEpic.id : candidate.schemaVersion !== 1 ? candidate.epicId : undefined;
-  for (const member of envelope.epicMembers) {
-    if (member.schemaVersion !== 3 || member.status !== "planning") {
-      throw new Error(`Epic member task ${member.id} must be schemaVersion 3 and in planning status.`);
-    }
-    if (targetEpicId && member.epicId !== targetEpicId) {
-      throw new Error(`Epic member task ${member.id} epicId must match ${targetEpicId}.`);
-    }
-    await saveTask(harnixRoot, member);
   }
 }
 

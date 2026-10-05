@@ -77,12 +77,12 @@ describe("global integration lifecycle", () => {
       yes: true,
     });
     const memory = await readFile(join(home, ".claude", "CLAUDE.md"), "utf8");
-    const settings = JSON.parse(await readFile(join(home, ".claude", "settings.json"), "utf8"));
 
     expect(uninstalled.platforms.map((platform) => platform.platform)).toEqual(["claude"]);
     expect(memory).toContain("Prefer pnpm.");
     expect(memory).not.toContain("<!-- harnix:begin -->");
-    expect(settings.hooks?.UserPromptSubmit ?? []).toEqual([]);
+    // Harnix created settings.json and was its only content, so uninstall leaves no file behind.
+    await expect(access(join(home, ".claude", "settings.json"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(access(join(home, ".claude", "skills", "harnix-implement"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 

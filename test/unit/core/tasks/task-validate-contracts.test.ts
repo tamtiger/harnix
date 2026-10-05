@@ -275,3 +275,29 @@ describe("task validation contracts", () => {
     ).toThrow(/digest/iu);
   });
 });
+
+describe("validation check cwd and baseline contracts", () => {
+  const withCheck = (patch: Record<string, unknown>) => {
+    const fixture = taskV2Fixture();
+    return { ...fixture, validationPlan: [{ ...fixture.validationPlan[0]!, ...patch }] };
+  };
+
+  it("accepts a safe repository-relative cwd and the project root", () => {
+    expect(() => validateTask(withCheck({ cwd: "packages/portal" }))).not.toThrow();
+    expect(() => validateTask(withCheck({ cwd: "." }))).not.toThrow();
+  });
+
+  it.each(["../other", "/abs", "C:/x", "D:foo", "a/../../b", "", "a b"])("rejects the unsafe cwd %j", (cwd) => {
+    expect(() => validateTask(withCheck({ cwd }))).toThrow(/cwd/u);
+  });
+
+  it("accepts only the documented baseline keys with valid enums", () => {
+    const baseline = { result: "fail", classification: "pre-existing", authorizedBy: "user", scope: "legacy suite" };
+
+    expect(() => validateTask(withCheck({ baseline }))).not.toThrow();
+    expect(() => validateTask(withCheck({ baseline: { ...baseline, extra: true } }))).toThrow(/baseline/u);
+    expect(() => validateTask(withCheck({ baseline: { classification: "nonsense" } }))).toThrow(/baseline/u);
+    expect(() => validateTask(withCheck({ baseline: { authorizedBy: 3 } }))).toThrow(/baseline/u);
+    expect(() => validateTask(withCheck({ baseline: { scope: 7 } }))).toThrow(/baseline/u);
+  });
+});

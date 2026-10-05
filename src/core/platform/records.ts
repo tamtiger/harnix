@@ -167,7 +167,15 @@ export const PLATFORM_RECORDS = [
     label: "OpenCode",
     flag: "opencode",
     executable: "opencode",
-    roots: [{ key: "config", relativePath: ".config/opencode", logicalPath: "~/.config/opencode", envOverride: null }],
+    roots: [
+      {
+        key: "config",
+        relativePath: ".config/opencode",
+        logicalPath: "~/.config/opencode",
+        envOverride: "XDG_CONFIG_HOME",
+        envOverrideSubpath: "opencode",
+      },
+    ],
     skillDirectories: ["config:skills"],
     instructionFile: "AGENTS.md",
     contextHook: null,

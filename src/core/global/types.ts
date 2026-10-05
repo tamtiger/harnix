@@ -52,6 +52,8 @@ export interface DesiredGlobalManagedBlock {
   kind: "managed-block";
   selector: MarkerSelector;
   content: string;
+  /** Returns a reason when appending the block to this existing file would corrupt it; the file is then left alone. */
+  conflictCheck?: (current: string) => string | undefined;
 }
 
 export interface DesiredGlobalJsonMember {

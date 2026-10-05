@@ -3,7 +3,7 @@ import { normalizeRepositoryPath } from "./utils/paths.js";
 import type { HomeResolver } from "./core/platform/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
 import { GlobalManagedTransactionError } from "./core/global/managed-files.js";
-import { platformRecords, type PlatformId } from "./core/platform/registry.js";
+import { getPlatform, platformRecords, type PlatformId } from "./core/platform/registry.js";
 import type { TaskStatus } from "./core/tasks/task.js";
 import type { CheckRunner } from "./utils/check-runner.js";
 import type { HookCommandLookup, SetupPlatformsResult } from "./commands/setup.js";
@@ -122,20 +122,24 @@ export function isHiddenProtocolInvocation(argv: readonly string[]): boolean {
   return argv[2] === "context" || argv[2] === "workflow";
 }
 
+/**
+ * Writes every note and warning of a setup or update to stderr and sets exit 1 only for something to act on: a
+ * readiness other than the platform's healthy one, or a warning that is not the platform's fixed informational notice.
+ */
 export function reportActionableSetupReadiness(result: SetupPlatformsResult): void {
-  const actionable = result.platforms.filter(
-    (platform) => platform.readiness !== "installed" || platform.warnings.length > 0,
-  );
-  if (actionable.length === 0) return;
-  for (const platform of actionable) {
-    if (platform.warnings.length === 0) {
+  let actionable = false;
+  for (const platform of result.platforms) {
+    const record = getPlatform(platform.platform);
+    const findings = platform.warnings.filter((warning) => warning !== record.setupNotice);
+    const needsAction = platform.readiness !== record.healthyReadiness || findings.length > 0;
+    actionable ||= needsAction;
+    if (platform.warnings.length === 0 && platform.readiness !== "installed") {
       process.stderr.write(`${platform.platform}: setup readiness is ${platform.readiness}.\n`);
-      continue;
     }
     for (const warning of platform.warnings)
       process.stderr.write(`${platform.platform}: ${redactPublicErrorMessage(new Error(warning))}\n`);
   }
-  process.exitCode = 1;
+  if (actionable) process.exitCode = 1;
 }
 
 export type PlatformFlagOptions = Partial<Record<PlatformId, boolean>>;

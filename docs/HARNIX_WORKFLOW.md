@@ -61,27 +61,41 @@ Agent tự chọn mức nhẹ nhất vẫn kiểm soát được rủi ro. Chỉ
 stateDiagram-v2
     [*] --> Triage
     Triage --> Bypass: read-only / review / research
-    Triage --> Planning: change requested
+    Triage --> planning: change requested
     Bypass --> [*]
-    Planning --> Ready: ready gate passes
-    Planning --> Blocked: user-owned decision / authority missing
-    Ready --> Implementing
-    Implementing --> Verifying
-    Implementing --> Debugging: failure or unexpected behavior
-    Verifying --> Finishing: all gates green
-    Verifying --> Debugging: check fails
-    Debugging --> Implementing: root cause confirmed
-    Debugging --> Replan: requirement or architecture defect
-    Replan --> Planning
-    Finishing --> Completed
-    Planning --> Cancelled: explicit user cancellation
-    Ready --> Cancelled: explicit user cancellation
-    Implementing --> Cancelled: explicit user cancellation
-    Verifying --> Cancelled: explicit user cancellation
-    Blocked --> Cancelled: explicit user cancellation
-    Blocked --> Planning: decision or authority supplied
-    Blocked --> Implementing: execution dependency supplied
+    planning --> ready: ready gate passes
+    planning --> blocked: user-owned decision / authority missing
+    ready --> in_progress: implementation authorized
+    ready --> blocked
+    in_progress --> verifying: implementation and focused checks done
+    in_progress --> blocked
+    verifying --> completed: all gates green (checkpoint finishing)
+    verifying --> blocked
+    blocked --> planning: decision or authority supplied
+    blocked --> ready
+    blocked --> in_progress: execution dependency supplied
+    blocked --> verifying
+    planning --> cancelled: explicit user cancellation
+    ready --> cancelled
+    in_progress --> cancelled
+    verifying --> cancelled
+    blocked --> cancelled
+    completed --> [*]
+    cancelled --> [*]
 ```
+
+Mỗi trạng thái trong sơ đồ là một persisted `status`; `blocked` chỉ resume về `blocker.resumeStatus`, chính là trạng thái ngay trước khi bị chặn. Các checkpoint (`triage`, `debugging`, `replan`, `finishing`, `cancelling`) nằm **bên trong** một status và không phải trạng thái riêng:
+
+| Status | Checkpoint hợp lệ |
+|---|---|
+| `planning` | `triage`, `planning`, `replan` |
+| `ready` | `ready`, `replan` |
+| `in_progress` | `implementing`, `debugging`, `replan` |
+| `verifying` | `verifying`, `debugging`, `replan`, `finishing` |
+| `completed` | `finishing` |
+| `cancelled` | `cancelling` |
+
+`debugging` là sửa một lỗi tái hiện được rồi quay lại checkpoint thực thi của cùng status. `replan` đánh dấu obligation đang được sửa; từ `replan` chỉ thoát được về `ready/ready` (chạy lại ready gate và dừng ở `await` cho Full task và Epic), hoặc `planning/planning` khi task chưa rời `planning`, hoặc sang `blocked`.
 
 Persisted task statuses là `planning`, `ready`, `in_progress`, `verifying`, `blocked`, `completed`, `cancelled`. `triage`, `debugging`, `replan`, `finishing` và `cancelling` là workflow checkpoint. `completed` chỉ thuộc success path; `cancelled/cancelling` là terminal incomplete path có explicit user authority.
 
@@ -180,7 +194,7 @@ Mỗi evidence record gồm command/check, thời điểm, exit/result và conci
 
 Mỗi claim phải map tới command/inspection thực sự chứng minh claim đó. Agent đọc output liên quan và exit/result đầy đủ; passing rerun không được xóa failed evidence trước đó. Review feedback là technical hypothesis cần kiểm tra với code/contract, không phải requirement tự động.
 
-Persist `verifying` trước check đầu tiên. Tại verification entry, inspect hidden preflight/check state một lần; required check đã report `passed` được reuse khi current `inputDigest` khớp, chỉ pending/failed/stale/affected check mới chạy và cùng check/digest không chạy hai lần trong một user request. Với mỗi required check v3 cần chạy, dùng hidden `harnix workflow --snapshot --check <id>` ngay trước và sau non-mutating check; chỉ persist pass khi hai digest bằng nhau. Các transport hẹp không cần script tạm: `workflow --run-check <id> -- <exe> [args...]` chụp trước/sau, chạy và ghi evidence trong một lệnh; `workflow --evidence --check <id> --result <r> --summary <text> [--exit-code <n>]` tự điền `id`, `recordedAt` và digest; `workflow --criterion <ids> --met` đặt criterion `met` từ pass còn tươi; `workflow --migrate` chuyển task legacy chưa kết thúc lên v3; `workflow --add-decision` và `--add-risk` ghi note review (nguồn của learning) không cần JSON và `workflow --finish --brief` báo `learning: { notes, captured, hint? }`; `workflow --set-check`, `--add-criterion` và `--set-paths` chỉnh check, criterion và relevant paths bằng flag (văn bản có dấu đi qua đối số, không qua stdin của powershell.exe 5.1); `--brief` thu gọn output. Chi tiết và ràng buộc nằm ở `IMPLEMENTATION_PLAN.md` mục 4. Digest gộp task id, check id, task contract (không gồm decisions/residualRisks/evidence) và sha256 thô của mọi file khớp `inputs` (băm song song tối đa 16 file, entries vẫn sắp xếp ổn định). Task contract trong digest gồm định nghĩa của **mọi** check, nên sửa bất kỳ check nào (kể cả qua replan) làm stale mọi pass đã ghi; ghi evidence, đổi `status`/`evidenceIds` của criterion, tick `plan.md`, decisions/residualRisks thì không. Glob luôn bỏ `.git`, `node_modules`, `TestResults`, `.vs`, `.idea`, `__pycache__` và `.harnix` (trừ khi một input gọi tên đúng segment đó), còn `bin`/`obj` chỉ bị bỏ khi thư mục cha có `*.csproj|*.fsproj|*.vbproj` và `build`/`dist`/`coverage`/`out` khi thư mục cha có `package.json|pom.xml|build.gradle*`, so khớp không phân biệt hoa thường; một input chỉ tắt ignore khi có segment đường dẫn literal trùng tên (`src/Binary/**` không tắt ignore `bin`). Snapshot bỏ đúng ba file workflow-owned của active task (`task.json`, `review.md` và legacy `verification-inputs.json`), còn `prd.md`/`plan.md` chỉ là input khi được khai báo. Không có sidecar: save recompute digest của required pass mới append và từ chối nếu không khớp current inputs. Ghi từng evidence ngay sau khi check kết thúc; failed evidence giữ task recoverable ở `verifying` hoặc route rõ sang Debugging, không bị thay thế im lặng bởi summary mới hơn.
+Persist `verifying` trước check đầu tiên. Tại verification entry, inspect hidden preflight/check state một lần; required check đã report `passed` được reuse khi current `inputDigest` khớp, chỉ pending/failed/stale/affected check mới chạy và cùng check/digest không chạy hai lần trong một user request. Với mỗi required check v3 cần chạy, dùng hidden `harnix workflow --snapshot --check <id>` ngay trước và sau non-mutating check; chỉ persist pass khi hai digest bằng nhau. Các transport hẹp không cần script tạm: `workflow --run-check <id> -- <exe> [args...]` chụp trước/sau, chạy và ghi evidence trong một lệnh (argv phải khớp `command` đã khai báo của check, chạy trong `cwd` đã khai báo, và bị từ chối khi check đã fail hai lần liên tiếp); `workflow --evidence --check <id> --result <r> --summary <text> [--exit-code <n>]` tự điền `id`, `recordedAt` và digest; `workflow --criterion <ids> --met` đặt criterion `met` từ pass còn tươi; `workflow --migrate` chuyển task legacy chưa kết thúc lên v3; `workflow --add-decision` và `--add-risk` ghi note review (nguồn của learning) không cần JSON và `workflow --finish --brief` báo `learning: { notes, captured, hint? }`; `workflow --set-check`, `--add-criterion` và `--set-paths` chỉnh check, criterion và relevant paths bằng flag (văn bản có dấu đi qua đối số, không qua stdin của powershell.exe 5.1); `--brief` thu gọn output. Chi tiết và ràng buộc nằm ở `IMPLEMENTATION_PLAN.md` mục 4. Digest gộp task id, check id, task contract (không gồm decisions/residualRisks/evidence) và sha256 thô của mọi file khớp `inputs` (băm song song tối đa 16 file, entries vẫn sắp xếp ổn định). Task contract trong digest gồm định nghĩa của **mọi** check, nên sửa bất kỳ check nào (kể cả qua replan) làm stale mọi pass đã ghi; ghi evidence, đổi `status`/`evidenceIds` của criterion, tick `plan.md`, decisions/residualRisks thì không. Glob luôn bỏ `.git`, `node_modules`, `TestResults`, `.vs`, `.idea`, `__pycache__` và `.harnix` (trừ khi một input gọi tên đúng segment đó), còn `bin`/`obj` chỉ bị bỏ khi thư mục cha có `*.csproj|*.fsproj|*.vbproj` và `build`/`dist`/`coverage`/`out` khi thư mục cha có `package.json|pom.xml|build.gradle*`, so khớp không phân biệt hoa thường; một input chỉ tắt ignore khi có segment đường dẫn literal trùng tên (`src/Binary/**` không tắt ignore `bin`). Snapshot bỏ đúng ba file workflow-owned của active task (`task.json`, `review.md` và legacy `verification-inputs.json`), còn `prd.md`/`plan.md` chỉ là input khi được khai báo. Không có sidecar: save recompute digest của required pass mới append và từ chối nếu không khớp current inputs. Ghi từng evidence ngay sau khi check kết thúc; failed evidence giữ task recoverable ở `verifying` hoặc route rõ sang Debugging, không bị thay thế im lặng bởi summary mới hơn.
 
 ### 5.7 Finishing
 
@@ -188,7 +202,7 @@ Trước `completed`, agent:
 
 1. Reread acceptance criteria và kiểm tra diff/current state.
 2. Reuse current required passes; không chạy lại redundant final gate. Hidden finish recompute digest của mọi latest required pass v3 từ current inputs, không chỉ dựa timestamp.
-3. **Suite Gate:** finish từ chối hoàn thành khi project-level suite check thiếu pass evidence với input digest hiện hành; gate xét pass **mới nhất** của check đó. Một required check là suite check khi `inputs` là wildcard (`.`, `**`, `**/*`, `*`) hoặc gồm cả một cây source và một cây test: test là thư mục tên `test|tests|spec|specs|__tests__`, có hậu tố `.tests`/`-spec`… hoặc camel-case `UnitTests` (`Foo.Api.Tests/**`); source là cây thư mục không phải test, không mở đầu bằng `docs|doc|.github|.harnix|.vscode|scripts`, hoặc có segment `src|lib|app|pkg|cmd|internal`. Input phủ định (`!…`) không được tính.
+3. **Suite Gate:** finish từ chối hoàn thành khi project-level suite check thiếu pass evidence với input digest hiện hành; gate xét pass **mới nhất** của check đó. Suite check còn phải chạy đúng lệnh test của dự án: `command` của nó (so sánh sau chuẩn hóa: bỏ nháy, gộp khoảng trắng, `npm|pnpm|yarn|bun [run] test` tương đương) phải khớp một lệnh test do `harnix verify-plan` trả về (gốc hoặc package); lệnh chỉ chạy một phần test, chẳng hạn một file test, bị từ chối ở cả ready lẫn finish. Khi `verify-plan` không xác định được lệnh test thì chỉ xét `inputs`. Một required check là suite check khi `inputs` là wildcard (`.`, `**`, `**/*`, `*`) hoặc gồm cả một cây source và một cây test: test là thư mục tên `test|tests|spec|specs|__tests__`, có hậu tố `.tests`/`-spec`… hoặc camel-case `UnitTests` (`Foo.Api.Tests/**`); source là cây thư mục không phải test, không mở đầu bằng `docs|doc|.github|.harnix|.vscode|scripts`, hoặc có segment `src|lib|app|pkg|cmd|internal`. Input phủ định (`!…`) không được tính.
 4. Ghi evidence, outcome, residual risks và omitted checks.
 4. Learning được capture tự động: sau khi task `completed`, hidden `workflow --finish` lấy `decisions`, `residualRisks` và `findings` của evidence trong chính task, chuẩn hóa (lowercase, gộp khoảng trắng, bỏ dấu câu đầu/cuối), loại trùng, tối đa 5 quan sát mỗi lần finish, và append idempotent một `learning` entry cho mỗi quan sát. Quan sát mang tín hiệu `credential-like`, `instruction-override`, `command-like` hoặc quá dài không bao giờ được capture. Task đầu tiên tạo `draft` (một source); task sau lặp lại cùng quan sát thì gộp source/evidence và nâng lên `candidate` khi đạt ngưỡng hiện hành (≥ 2 task, ≥ 2 evidence, confidence ≥ 0,8). Journal append-only, entry mới nhất của một candidate là trạng thái hiện hành; `approved`/`promoted`/`rejected` không bị đụng tới. Capture là best-effort, không đổi output của `--finish` và không bao giờ làm hỏng finish. `workflow --learn` vẫn dùng được cho candidate do agent tự soạn.
    - **Decay:** `draft`/`candidate` chưa promote mà entry mới nhất quá 28 ngày được đọc là `archived` (tính khi đọc, không ghi lại); `harnix mem --learning` hiển thị trạng thái hiệu lực.

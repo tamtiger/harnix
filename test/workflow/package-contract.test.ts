@@ -88,9 +88,20 @@ describe("package invariant", () => {
       "typecheck",
       "version:sync",
     ]);
-    expect(packageJson.scripts?.["test:acceptance"]).toBe(
-      "pnpm run test:unit && pnpm run test:integration && pnpm run test:migration && pnpm run test:platform && pnpm run test:workflow && pnpm run test:safety",
+    expect(packageJson.scripts?.test).toContain("--coverage");
+    expect(packageJson.scripts?.["test:acceptance"]).toBe("pnpm run test");
+  });
+
+  it("keeps the documented acceptance sequence on the coverage-enforcing test script", () => {
+    const plan = readFileSync(resolve(repositoryRoot, "docs/IMPLEMENTATION_PLAN.md"), "utf8");
+    const section = plan.slice(
+      plan.indexOf("## 11. Acceptance command sequence"),
+      plan.indexOf("## 12. Risk register"),
     );
+    const sequence = /```text\r?\n([\s\S]*?)```/u.exec(section)?.[1]?.split(/\r?\n/u) ?? [];
+
+    expect(sequence).toContain("pnpm test");
+    expect(sequence).not.toContain("pnpm test:acceptance");
   });
 
   it("pins only the audited vulnerable transitive tool resolutions without creating a workspace", async () => {

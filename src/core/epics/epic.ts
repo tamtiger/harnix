@@ -1,7 +1,8 @@
-import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { isIsoTimestamp, isRecord, unknownFieldsMessage } from "src/core/tasks/task.js";
 import { loadTask } from "src/core/tasks/task.js";
+import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { formatDisplay } from "src/utils/clock.js";
 import { readProjectTimezone } from "src/core/config/config.js";
 
@@ -168,7 +169,7 @@ export function nextEpicMember<T extends { status: string }>(members: readonly T
 export async function upsertEpic(root: string, epic: EpicRecord): Promise<void> {
   const directory = join(root, ".harnix", EPICS_DIRECTORY);
   await mkdir(directory, { recursive: true });
-  await writeFile(join(directory, `${epic.id}.json`), JSON.stringify(epic, null, 2), "utf8");
+  await atomicWriteFile(join(directory, `${epic.id}.json`), `${JSON.stringify(epic, null, 2)}\n`);
   await renderEpicMarkdown(root, epic.id, epic);
 }
 
@@ -249,5 +250,5 @@ export async function renderEpicMarkdown(root: string, epicId: string, epic?: Ep
   }
 
   await mkdir(join(harnixRoot, EPICS_DIRECTORY), { recursive: true });
-  await writeFile(join(harnixRoot, EPICS_DIRECTORY, `${epicId}.md`), `${sections.join("\n\n")}\n`, "utf8");
+  await atomicWriteFile(join(harnixRoot, EPICS_DIRECTORY, `${epicId}.md`), `${sections.join("\n\n")}\n`);
 }

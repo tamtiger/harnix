@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -25,16 +25,16 @@ describe("workflow --run-check", () => {
     await implementingTaskV3(root);
     const { runner, calls } = fakeRunner(0, "all good");
 
-    const result = await runCheckWorkflow(root, "check", ["pnpm", "test", "--filter", "a b"], { runner, now: NOW });
+    const result = await runCheckWorkflow(root, "check", ["pnpm", "run", "test"], { runner, now: NOW });
 
-    expect(calls).toEqual([{ executable: "pnpm", args: ["test", "--filter", "a b"], cwd: root }]);
+    expect(calls).toEqual([{ executable: "pnpm", args: ["run", "test"], cwd: root }]);
     expect(result).toMatchObject({ evidenceId: "ev-check-1", result: "pass", exitCode: 0, outputTail: "all good" });
     expect(result.task.evidence.at(-1)).toMatchObject({
       checkId: "check",
       result: "pass",
       exitCode: 0,
       recordedAt: NOW,
-      summary: "pnpm — exit 0",
+      summary: "pnpm test — exit 0",
     });
     expect(JSON.stringify(result.task)).not.toContain("all good");
   });
@@ -44,7 +44,7 @@ describe("workflow --run-check", () => {
     await implementingTaskV3(root);
     const { runner } = fakeRunner(3, "boom");
 
-    const result = await runCheckWorkflow(root, "check", ["node", "x.js"], {
+    const result = await runCheckWorkflow(root, "check", ["pnpm", "test"], {
       runner,
       now: NOW,
       summary: "RED as intended",
@@ -53,6 +53,46 @@ describe("workflow --run-check", () => {
     expect(result).toMatchObject({ result: "fail", exitCode: 3 });
     expect(result.task.evidence.at(-1)).toMatchObject({ result: "fail", exitCode: 3, summary: "RED as intended" });
     expect(result.task.evidence.at(-1)?.inputDigest).toMatch(/^[a-f0-9]{64}$/u);
+  });
+
+  it("rejects a command that differs from the declared one without running or recording anything", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+    const { runner, calls } = fakeRunner(0);
+
+    for (const argv of [
+      ["node", "-e", "0"],
+      ["pnpm", "test", "--filter", "a"],
+      ["pnpm", "lint"],
+    ]) {
+      await expect(runCheckWorkflow(root, "check", argv, { runner, now: NOW })).rejects.toThrow(
+        /differs from the command declared by check check/u,
+      );
+    }
+    expect(calls).toEqual([]);
+    const { resolveActiveTask } = await import("src/core/tasks/task.js");
+    expect((await resolveActiveTask(join(root, ".harnix")))?.evidence).toEqual(task.evidence);
+  });
+
+  it("runs a check that declares no command and records the command that really ran", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+    const { saveWorkflow } = await import("src/core/workflow/save.js");
+    const { id, description, scope, required, criterionIds, inputs } = task.validationPlan[0]!;
+    await saveWorkflow(root, {
+      task: {
+        ...task,
+        checkpoint: "replan",
+        validationPlan: [{ id, description, scope, required, criterionIds, inputs }],
+      },
+      contractRevision: { reason: "Declare the check without a command" },
+    });
+    const { runner, calls } = fakeRunner(0);
+
+    const result = await runCheckWorkflow(root, "check", ["node", "tool.js", "--name", "a b"], { runner, now: NOW });
+
+    expect(calls).toHaveLength(1);
+    expect(result.task.evidence.at(-1)?.summary).toBe("node tool.js --name a b — exit 0");
   });
 
   it("records nothing when the inputs change while the command runs", async () => {
@@ -89,32 +129,63 @@ describe("workflow --run-check", () => {
     expect(calls).toEqual([]);
   });
 
-  it("honours check cwd or explicit dependency cwd when running command", async () => {
-    const root = await temporaryRepository();
+  async function declareCwd(root: string, cwd: string): Promise<void> {
     const task = await implementingTaskV3(root);
     const { saveWorkflow } = await import("src/core/workflow/save.js");
-    // Update check with cwd via contractRevision
     await saveWorkflow(root, {
-      task: {
-        ...task,
-        checkpoint: "replan",
-        validationPlan: [
-          {
-            ...task.validationPlan[0]!,
-            cwd: "packages/portal",
-          },
-        ],
-      },
+      task: { ...task, checkpoint: "replan", validationPlan: [{ ...task.validationPlan[0]!, cwd }] },
       contractRevision: { reason: "Configure cwd for multi-repo check execution" },
     });
+  }
 
+  it("runs a check in its declared cwd and accepts an identical explicit cwd", async () => {
+    const root = await temporaryRepository();
+    await declareCwd(root, "packages/portal");
     const { runner, calls } = fakeRunner(0);
-    await runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: NOW });
-    expect(calls[0]?.cwd.replace(/\\/g, "/")).toContain("packages/portal");
 
-    // Overriding via dependencies.cwd
-    await runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: NOW, cwd: "packages/override" });
-    expect(calls[1]?.cwd.replace(/\\/g, "/")).toContain("packages/override");
+    await runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: NOW });
+    await runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: NOW, cwd: "./packages//portal/" });
+
+    const directories = calls.map((call) => call.cwd.replaceAll("\\", "/"));
+    expect(directories).toHaveLength(2);
+    for (const directory of directories) expect(directory.endsWith("/packages/portal")).toBe(true);
+  });
+
+  it("rejects a run-time cwd that differs from the declared one, without running or recording anything", async () => {
+    const root = await temporaryRepository();
+    await declareCwd(root, "packages/portal");
+    const { runner, calls } = fakeRunner(0);
+
+    for (const cwd of ["packages/override", "..", "../other", "C:/x"]) {
+      await expect(runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: NOW, cwd })).rejects.toThrow(
+        /cwd/u,
+      );
+    }
+    expect(calls).toEqual([]);
+  });
+
+  it("rejects an explicit cwd for a check that declares none", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    const { runner, calls } = fakeRunner(0);
+
+    await expect(
+      runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: NOW, cwd: "packages/x" }),
+    ).rejects.toThrow(/declares no cwd/u);
+    expect(calls).toEqual([]);
+  });
+
+  it("refuses a declared cwd that escapes the project through a directory link", async () => {
+    const root = await temporaryRepository();
+    const outside = await temporaryRepository();
+    await declareCwd(root, "linked/work");
+    await symlink(outside, join(root, "linked"), "junction");
+    const { runner, calls } = fakeRunner(0);
+
+    await expect(runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: NOW })).rejects.toThrow(
+      /escapes the project/u,
+    );
+    expect(calls).toEqual([]);
   });
 
   it("allows running checks during planning stage for baseline verification", async () => {

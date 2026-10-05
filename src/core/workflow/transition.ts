@@ -13,6 +13,8 @@ export interface DryRunTransitionResult {
   target: { status: string; checkpoint: string };
   task: { id: string; status: string; checkpoint: string };
   issues: string[];
+  /** Not enforced by the transition; worth fixing before the contract freezes. */
+  advisories: string[];
   unbaselinedChecks?: string[];
 }
 
@@ -22,6 +24,27 @@ export interface DryRunTransitionResult {
  * silently rewrite an obligation while changing state. Every guard, lock and
  * immutability rule of the full save path still applies.
  */
+export function transitionWorkflow(
+  root: string,
+  status: string,
+  checkpoint: string,
+  injectedNow: string | undefined,
+  dryRun: true,
+): Promise<DryRunTransitionResult>;
+export function transitionWorkflow(
+  root: string,
+  status: string,
+  checkpoint: string,
+  injectedNow?: string,
+  dryRun?: false,
+): Promise<TaskRecord>;
+export function transitionWorkflow(
+  root: string,
+  status: string,
+  checkpoint: string,
+  injectedNow?: string,
+  dryRun?: boolean,
+): Promise<TaskRecord | DryRunTransitionResult>;
 export async function transitionWorkflow(
   root: string,
   status: string,
@@ -37,6 +60,7 @@ export async function transitionWorkflow(
 
   if (dryRun === true) {
     const issues: string[] = [];
+    let advisories: string[] = [];
     let unbaselinedChecks: string[] | undefined;
     try {
       assertLegalTransition(task, {
@@ -50,6 +74,7 @@ export async function transitionWorkflow(
     if (status === "ready") {
       const readyInspection = await inspectReadyConditions(harnixRoot, task);
       issues.push(...readyInspection.issues);
+      advisories = readyInspection.advisories;
       if (readyInspection.unbaselined.length > 0) {
         unbaselinedChecks = readyInspection.unbaselined;
       }
@@ -62,9 +87,13 @@ export async function transitionWorkflow(
       target: { status, checkpoint },
       task: { id: task.id, status: task.status, checkpoint: task.checkpoint },
       issues,
+      advisories,
       ...(unbaselinedChecks ? { unbaselinedChecks } : {}),
     };
   }
 
-  return saveWorkflow(root, { task: { ...task, status, checkpoint, updatedAt: laterTimestamp(task.updatedAt, now) } });
+  // A blocked task keeps its blocker only while blocked; resuming drops it and must land on the recorded status.
+  const base: TaskRecord = { ...task };
+  if (base.status === "blocked") delete base.blocker;
+  return saveWorkflow(root, { task: { ...base, status, checkpoint, updatedAt: laterTimestamp(task.updatedAt, now) } });
 }

@@ -17,6 +17,7 @@ import type { PlatformId } from "src/core/platform/registry.js";
 import type { HomeResolver } from "src/core/platform/user-paths.js";
 import { acquireHarnixFileLock } from "src/utils/file-lock.js";
 import { lookupHarnixLauncher } from "src/utils/harnix-launcher.js";
+import { isTestProcess } from "src/utils/test-process.js";
 import { packageVersion } from "src/version.js";
 
 export type GlobalSetupPlatform = PlatformId;
@@ -59,10 +60,6 @@ export function configuratorPlans(): GlobalPlanProvider {
     desired: (planKey) => desired[planKey as keyof typeof desired] ?? [],
     memberMatchers: (planKey) => matchers[planKey as keyof typeof matchers],
   };
-}
-
-export function isTestProcess(): boolean {
-  return process.env.VITEST !== undefined || process.env.NODE_ENV === "test";
 }
 
 export async function defaultCommandLookup(command: string): Promise<boolean> {

@@ -68,4 +68,38 @@ describe("workflow evidence", () => {
     ).rejects.toThrow();
     await expect(appendEvidenceWorkflow(root, { task: {}, evidence: {} })).rejects.toThrow();
   });
+
+  it("rejects evidence dated in the future so it can never hide a later real failure", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await saveWorkflow(root, { task: taskV3("planning", "planning") });
+    const future = new Date(Date.now() + 60_000).toISOString();
+
+    await expect(
+      appendEvidenceWorkflow(root, {
+        evidence: {
+          id: "future-fail",
+          checkId: "check",
+          recordedAt: future,
+          result: "fail",
+          exitCode: 1,
+          summary: "claimed",
+          artifactPaths: [],
+        },
+      }),
+    ).rejects.toThrow("Evidence future-fail is recorded in the future");
+    await expect(
+      appendEvidenceWorkflow(root, {
+        evidence: {
+          id: "future-again",
+          checkId: "check",
+          recordedAt: new Date(Date.now() + 3_600_000).toISOString(),
+          result: "fail",
+          exitCode: 2,
+          summary: "claimed",
+          artifactPaths: [],
+        },
+      }),
+    ).rejects.toThrow("recorded in the future");
+  });
 });

@@ -7,12 +7,12 @@ import { currentInstant } from "./support.js";
 export interface InitTaskOptions {
   title: string;
   mode?: TaskMode;
-  goal?: string;
-  criterion?: string;
-  command?: string;
-  input?: string[];
-  followUp?: string;
-  injectedNow?: string;
+  goal?: string | undefined;
+  criterion?: string | undefined;
+  command?: string | undefined;
+  input?: string[] | undefined;
+  followUp?: string | undefined;
+  injectedNow?: string | undefined;
 }
 
 function toSlug(title: string): string {
@@ -46,7 +46,8 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
   const goal = options.goal?.trim() || title;
   const criterionText = options.criterion?.trim() || title;
   const command = options.command?.trim() || "pnpm test";
-  const inputs = Array.isArray(options.input) && options.input.length > 0 ? [...new Set(options.input)].sort() : ["src/**"];
+  const inputs =
+    Array.isArray(options.input) && options.input.length > 0 ? [...new Set(options.input)].sort() : ["src/**"];
 
   let relevantPaths: string[] = [];
   let relevantSpecs: string[] = [];

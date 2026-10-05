@@ -85,4 +85,14 @@ describe("workflow schema", () => {
     expect(constraints.result).toEqual([...evidenceResults]);
     expect(constraints.criterionStatus).toEqual([...criterionStatuses]);
   });
+
+  it("describes the full --batch envelope and its rules", () => {
+    const text = workflowEnvelopeSchema().transports["--batch"] ?? "";
+
+    for (const part of ["criteria?", "checks?", "decisions?", "risks?", "paths?: { paths?, specs? }", "reason?"]) {
+      expect(text).toContain(part);
+    }
+    expect(text).toContain("severity defaults to low");
+    expect(text).toContain("10-1000 characters");
+  });
 });

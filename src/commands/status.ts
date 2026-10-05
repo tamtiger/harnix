@@ -60,10 +60,7 @@ export async function explainProjectStatus(
   }
 }
 
-export async function summarizeProjectStatus(
-  cwd: string,
-  now = Date.now(),
-): Promise<StatusSummaryResultV1> {
+export async function summarizeProjectStatus(cwd: string, now = Date.now()): Promise<StatusSummaryResultV1> {
   const status = await inspectProjectStatus(cwd, now);
   return summarizeStatus(status);
 }

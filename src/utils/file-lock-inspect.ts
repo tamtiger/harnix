@@ -94,7 +94,7 @@ export async function inspectExistingLock(
   try {
     entries = await filesystem.readdir(path);
   } catch (error: unknown) {
-    if (isMissing(error) || isNotDirectory(error)) return { action: "wait" };
+    if (isLockChanging(error)) return { action: "wait" };
     throw error;
   }
   if (entries.length === 0) {
@@ -118,7 +118,7 @@ export async function inspectExistingLock(
       }
       source = await filesystem.readFile(tokenPath, "utf8");
     } catch (error: unknown) {
-      if (isMissing(error) || isNotDirectory(error)) return { action: "wait" };
+      if (isLockChanging(error)) return { action: "wait" };
       throw error;
     }
 
@@ -207,6 +207,20 @@ export function isCandidateLost(error: unknown): boolean {
 
 export function isMissing(error: unknown): boolean {
   return hasErrorCode(error, "ENOENT");
+}
+
+/**
+ * Windows reports EPERM or EBUSY, not ENOENT, for a file whose deletion is pending or that another process is
+ * releasing right now. The holder is mid-release, so the lock is changing: wait and look again (the acquire timeout
+ * still bounds the wait, so a genuine permission problem ends as a lock timeout rather than being retried forever).
+ */
+export function isReleasePending(error: unknown): boolean {
+  return hasErrorCode(error, "EPERM") || hasErrorCode(error, "EBUSY");
+}
+
+/** The lock vanished or its holder is releasing it right now, so the caller should wait and look again. */
+function isLockChanging(error: unknown): boolean {
+  return isMissing(error) || isNotDirectory(error) || isReleasePending(error);
 }
 
 export function isNotDirectory(error: unknown): boolean {

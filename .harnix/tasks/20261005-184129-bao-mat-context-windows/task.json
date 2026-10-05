@@ -1,0 +1,164 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-184129-bao-mat-context-windows",
+  "title": "Bảo mật hook context, learning và thực thi trên Windows",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Chặn prompt injection qua nội dung file, lách redaction, lộ đường dẫn tuyệt đối và các lỗi thực thi process trên Windows (R-012, R-014 đến R-017 và các mục P3 liên quan).",
+  "nonGoals": [
+    "Không thêm network hay shell",
+    "Không đổi giao thức hook"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`harnix verify-plan` không in đường dẫn tuyệt đối (bỏ `projectRoot` hoặc trả `.`), có test chặn tái diễn.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Hook context vô hiệu hóa mọi marker trong nội dung file (`<<< ... >>>` và dòng `--- x ---`); nội dung repo không thể đóng khung untrusted sớm hay làm `splitEntries` cắt sai.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Redaction learning chuẩn hóa NFKC, bỏ ký tự `\\p{Cf}` và gộp whitespace trước khi phân tích, bắt câu tiếng Việt, lệnh nằm giữa câu, credential (`*_TOKEN=`, `ghp_`, `AKIA`, `xox*-`, khối `-----BEGIN`) và đường dẫn tuyệt đối; table test phủ đúng các chuỗi đã tái hiện.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "`harnix upgrade --apply` chạy được trên Windows qua cùng cơ chế `resolveInvocation` của check-runner; test inject `win32`.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-5",
+      "text": "Check-runner: executable cũng bị kiểm metacharacter, đường dẫn `.cmd` có dấu cách chạy đúng, timeout kill cả cây tiến trình trên Windows (test với spawner giả).",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-6",
+      "text": "Redact lỗi bao phủ mọi đường dẫn POSIX tuyệt đối (vd. `/root/...`); `--cancel` và `--learn` stdin đi qua `assertTextIntegrity`.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-7",
+      "text": "Cổng chất lượng xanh: `pnpm run typecheck`, `pnpm run lint` và `pnpm run test` (có coverage, không hạ ngưỡng) đều exit 0 trên cây mã cuối cùng của task.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-security",
+      "description": "Test context, learning, utils, lệnh",
+      "command": "pnpm run test:safety",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/cli-helpers.ts",
+        "src/commands/**",
+        "src/core/context/**",
+        "src/core/journal/**",
+        "src/core/stack/**",
+        "src/core/workflow/cancel.ts",
+        "src/core/workflow/learn.ts",
+        "test/safety/**",
+        "test/unit/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-windows",
+      "description": "Test check-runner và upgrade",
+      "command": "pnpm vitest run test/unit/utils/check-runner.test.ts test/unit/commands/upgrade.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/commands/upgrade.ts",
+        "src/utils/check-runner.ts",
+        "test/unit/commands/upgrade.test.ts",
+        "test/unit/utils/check-runner.test.ts"
+      ]
+    },
+    {
+      "id": "check-typecheck",
+      "description": "pnpm run typecheck exit 0",
+      "command": "pnpm run typecheck",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-7"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "tsconfig.json"
+      ]
+    },
+    {
+      "id": "check-lint",
+      "description": "pnpm run lint (format:check + ESLint) exit 0",
+      "command": "pnpm run lint",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-7"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "pnpm run test (vitest + coverage) exit 0",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-7"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [
+    "src/core/stack/verify-plan.ts",
+    "src/core/context/context.ts",
+    "src/core/journal/learning-safety.ts",
+    "src/core/journal/learning-summary.ts",
+    "src/commands/upgrade.ts",
+    "src/utils/check-runner.ts",
+    "src/cli-helpers.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "epicId": "20261005-184125-harnix-hardening-2-0-5",
+  "createdAt": "2026-10-05T18:41:25.132+07:00",
+  "updatedAt": "2026-10-05T18:41:25.132+07:00"
+}

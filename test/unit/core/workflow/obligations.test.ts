@@ -2,9 +2,11 @@ import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { finishWorkflow } from "src/core/workflow/finish.js";
+import { preserveObligations } from "src/core/workflow/obligations.js";
 import { inspectWorkflow } from "src/core/workflow/inspect.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { snapshotWorkflow } from "src/core/workflow/snapshot.js";
+import { buildCheck, buildCriterion, buildEvidence, buildTaskV3 } from "test/support/builders.js";
 import { initializeUtcProject, taskV3 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
@@ -82,6 +84,30 @@ describe("workflow obligations", () => {
         validationPlan: [{ id: "check", command: "pnpm test", scope: "full", required: true }],
       },
     });
+  });
+
+  it("treats the working directory of a frozen required check as part of its definition", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const planning = taskV3("planning", "planning");
+    await saveWorkflow(root, { task: planning });
+    const ready = {
+      ...planning,
+      status: "ready" as const,
+      checkpoint: "ready" as const,
+      updatedAt: "2026-08-13T00:01:00.000Z",
+    };
+    await saveWorkflow(root, { task: ready });
+
+    await expect(
+      saveWorkflow(root, {
+        task: {
+          ...ready,
+          validationPlan: [{ ...ready.validationPlan[0]!, cwd: "packages/other" }],
+          updatedAt: "2026-08-13T00:02:00.000Z",
+        },
+      }),
+    ).rejects.toThrow("Workflow obligations freeze at");
   });
 
   it("allows TaskRecord v2 obligations to converge during planning before freezing at ready", async () => {
@@ -264,5 +290,108 @@ describe("workflow obligations", () => {
         },
       }),
     ).rejects.not.toThrow(/for v2/iu);
+  });
+});
+
+describe("waiving a frozen criterion", () => {
+  const WAIVER = { status: "waived" as const, waiverReason: "Không còn áp dụng cho phạm vi này." };
+
+  async function planningProject() {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const planning = taskV3("planning", "planning");
+    await saveWorkflow(root, { task: planning });
+    return { root, planning };
+  }
+
+  async function readyProject() {
+    const { root, planning } = await planningProject();
+    const ready = {
+      ...planning,
+      status: "ready" as const,
+      checkpoint: "ready" as const,
+      updatedAt: "2026-08-13T00:01:00.000Z",
+    };
+    await saveWorkflow(root, { task: ready });
+    return { root, ready };
+  }
+
+  it("is an ordinary edit while the task is still a planning draft", async () => {
+    const { root, planning } = await planningProject();
+
+    await expect(
+      saveWorkflow(root, {
+        task: {
+          ...planning,
+          acceptanceCriteria: [{ ...planning.acceptanceCriteria[0]!, ...WAIVER }],
+          updatedAt: "2026-08-13T00:00:30.000Z",
+        },
+      }),
+    ).resolves.toMatchObject({ status: "planning" });
+  });
+
+  it("needs a persisted replan with a contractRevision once the task is ready", async () => {
+    const { root, ready } = await readyProject();
+    const waived = { ...ready.acceptanceCriteria[0]!, ...WAIVER };
+
+    await expect(
+      saveWorkflow(root, { task: { ...ready, acceptanceCriteria: [waived], updatedAt: "2026-08-13T00:02:00.000Z" } }),
+    ).rejects.toThrow(/freeze at first ready.*contractRevision/su);
+    await expect(
+      saveWorkflow(root, {
+        task: {
+          ...ready,
+          checkpoint: "replan",
+          acceptanceCriteria: [waived],
+          updatedAt: "2026-08-13T00:02:00.000Z",
+        },
+        contractRevision: { reason: "Người dùng xác nhận tiêu chí này không còn áp dụng." },
+      }),
+    ).resolves.toMatchObject({ checkpoint: "replan", acceptanceCriteria: [{ status: "waived" }] });
+  });
+
+  it("treats a changed waiver reason of an already waived criterion as a contract change too", async () => {
+    const { root, planning: base } = await planningProject();
+    const waivedPlanning = {
+      ...base,
+      acceptanceCriteria: [
+        { ...base.acceptanceCriteria[0]!, ...WAIVER },
+        { id: "b", text: "covered", status: "pending" as const, evidenceIds: [] },
+      ],
+      validationPlan: [{ ...base.validationPlan[0]!, criterionIds: ["b"] }],
+    };
+    await saveWorkflow(root, { task: waivedPlanning });
+    const ready = { ...waivedPlanning, status: "ready" as const, checkpoint: "ready" as const };
+    await saveWorkflow(root, { task: { ...ready, updatedAt: "2026-08-13T00:01:00.000Z" } });
+    const [first, second] = ready.acceptanceCriteria as [
+      (typeof ready.acceptanceCriteria)[0],
+      (typeof ready.acceptanceCriteria)[0],
+    ];
+
+    await expect(
+      saveWorkflow(root, {
+        task: {
+          ...ready,
+          acceptanceCriteria: [{ ...first, waiverReason: "Một lý do khác hẳn." }, second],
+          updatedAt: "2026-08-13T00:02:00.000Z",
+        },
+      }),
+    ).rejects.toThrow(/freeze at first ready/u);
+  });
+
+  it("is refused for a criterion that already has evidence, even during a replan", () => {
+    const met = buildCriterion({ status: "met", evidenceIds: ["ev-check-1"] });
+    const previous = buildTaskV3({
+      status: "ready",
+      checkpoint: "replan",
+      acceptanceCriteria: [met],
+      validationPlan: [buildCheck()],
+      evidence: [buildEvidence({ id: "ev-check-1", checkId: "check" })],
+    });
+    const next = buildTaskV3({ ...previous, acceptanceCriteria: [{ ...met, ...WAIVER }] });
+
+    expect(() => preserveObligations(previous, next, { reason: "Một lý do đủ dài để thử." })).toThrow(
+      /cannot mutate proven acceptance criterion/u,
+    );
   });
 });

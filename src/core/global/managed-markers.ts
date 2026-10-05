@@ -1,4 +1,5 @@
 import type { MarkerSelector } from "src/core/global/managed-files.js";
+import { detectEol, withEol } from "src/core/global/toml-guard.js";
 
 export function markersOverlap(left: MarkerSelector, right: MarkerSelector): boolean {
   return [left.begin, left.end].some((leftToken) =>
@@ -19,10 +20,12 @@ export function canonicalManagedBlock(content: string): string {
   return content.replaceAll("\r\n", "\n");
 }
 
+/** Appends a block using the line ending that dominates the existing file, so a CRLF file stays CRLF. */
 export function appendManagedBlock(content: string, fragment: string): string {
   if (content.length === 0) return `${fragment}\n`;
-  const suffix = content.endsWith("\n") ? content : `${content}\n`;
-  return `${suffix}\n${fragment}\n`;
+  const eol = detectEol(content);
+  const suffix = content.endsWith("\n") ? content : `${content}${eol}`;
+  return `${suffix}${eol}${withEol(fragment, eol)}${eol}`;
 }
 
 export type LocatedManagedBlock =

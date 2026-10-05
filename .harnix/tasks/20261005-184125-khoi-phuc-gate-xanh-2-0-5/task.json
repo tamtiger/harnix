@@ -1,0 +1,222 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-184125-khoi-phuc-gate-xanh-2-0-5",
+  "title": "Khôi phục gate xanh cho HEAD 2.0.4",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Đưa typecheck, lint, format và coverage về xanh, và bảo đảm chuỗi acceptance thật sự chạy coverage (R-001, R-013).",
+  "nonGoals": [
+    "Không thay đổi hành vi runtime ngoài việc sửa kiểu và tách module",
+    "Không hạ ngưỡng coverage hay thêm miễn trừ ESLint"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`pnpm run typecheck` exit 0: `src/commands/workflow-command.ts` có import type `TaskRecord`, `InitTaskOptions` tương thích `exactOptionalPropertyTypes`, và các lỗi kiểu trong `test/unit/core/workflow/transition.test.ts`, `batch.test.ts`, `test/workflow/localized-time.test.ts` được sửa bằng thu hẹp kiểu đúng nghĩa, không dùng `any`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-focused-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "`src/core/workflow/batch.ts` (và các file khác) tuân thủ `max-lines` 300 và complexity 20 bằng cách tách module theo trách nhiệm; không thêm miễn trừ vào `eslint.config.mjs`; `pnpm run format:check` sạch.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-focused-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Coverage về lại trên ngưỡng trong `vitest.config.ts` (lines/statements 94.7, branches 88.4) nhờ test thật cho `src/core/workflow/ready.ts` và `src/core/workflow/save-files.ts` cùng các nhánh mới tách ra.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-focused-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "`docs/IMPLEMENTATION_PLAN.md` §11 và `test:acceptance` chạy `pnpm run test` có coverage; một test cấu trúc bảo vệ điều này.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Cổng chất lượng xanh: `pnpm run typecheck`, `pnpm run lint` và `pnpm run test` (có coverage, không hạ ngưỡng) đều exit 0 trên cây mã cuối cùng của task.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-lint-1",
+        "ev-check-suite-1",
+        "ev-check-typecheck-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-focused",
+      "description": "Test workflow và command liên quan",
+      "command": "pnpm vitest run test/unit/core/workflow test/unit/commands",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/workflow/**",
+        "test/unit/commands/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Test hợp đồng tài liệu và cấu trúc",
+      "command": "pnpm vitest run test/workflow/docs-task-contract.test.ts test/unit/test-structure.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "package.json",
+        "test/unit/test-structure.test.ts",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
+    },
+    {
+      "id": "check-typecheck",
+      "description": "pnpm run typecheck exit 0",
+      "command": "pnpm run typecheck",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "tsconfig.json"
+      ]
+    },
+    {
+      "id": "check-lint",
+      "description": "pnpm run lint (format:check + ESLint) exit 0",
+      "command": "pnpm run lint",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "pnpm run test (vitest + coverage) exit 0",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-focused-1",
+      "checkId": "check-focused",
+      "recordedAt": "2026-10-05T19:19:48.259+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "01718efa2db0e743eb8733e9173363e17217f728609ddcada3b9f5a66329384b"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-05T19:19:52.497+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ed12bcb5b49305b66c94700f9ffba5e0302003b1085c064c9980518cbf3d444b"
+    },
+    {
+      "id": "ev-check-typecheck-1",
+      "checkId": "check-typecheck",
+      "recordedAt": "2026-10-05T19:19:58.351+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ae9dab5cb05cd2d60842a32a1cd42da69d6511c3b4e2f3f0ffa927690bf96d2f"
+    },
+    {
+      "id": "ev-check-lint-1",
+      "checkId": "check-lint",
+      "recordedAt": "2026-10-05T19:20:19.060+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ded425f3f6a3d096f501b07ff8fc071b182ec132cb63ea40ce59adb2e6f5cab1"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T19:21:09.385+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ff5d0b4ef7023cbe5b211ac35390eaea7e9bd51ecf8893f640d213eb5ab2a453"
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-command.ts",
+    "src/core/workflow/batch.ts",
+    "src/core/workflow/ready.ts",
+    "src/core/workflow/save-files.ts",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "package.json",
+    "vitest.config.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "epicId": "20261005-184125-harnix-hardening-2-0-5",
+  "createdAt": "2026-10-05T18:41:25.132+07:00",
+  "updatedAt": "2026-10-05T19:21:26.063+07:00",
+  "decisions": [
+    {
+      "id": "d-acceptance-alias",
+      "text": "test:acceptance trở thành alias của pnpm run test (có coverage) và chuỗi acceptance §11 chạy đúng một lần pnpm test; các suite con vẫn chạy riêng được qua test:unit..test:safety.",
+      "rationale": "Sàn coverage trong vitest.config.ts chỉ được ép khi chạy vitest --coverage; chuỗi cũ chỉ chạy sáu suite con nên coverage dưới sàn lọt qua gate ở 2.0.4."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-format-only-churn",
+      "text": "Các file status.ts, verify-plan.ts, task-validate.ts, obligations.ts, run-check.ts và vài test chỉ đổi định dạng Prettier trong task này; khi review diff hãy tách phần format khỏi phần logic.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-05T19:21:26.063+07:00"
+}

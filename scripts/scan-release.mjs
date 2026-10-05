@@ -111,7 +111,7 @@ export async function runReleaseScan(options = {}) {
     );
     const setup = run(
       process.execPath,
-      [installedCli, "setup", "--kiro", "--antigravity", "--codex"],
+      [installedCli, "setup", "--kiro", "--antigravity", "--codex", "--claude", "--opencode", "--cursor"],
       fixture,
       integrationEnvironment,
       undefined,

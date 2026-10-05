@@ -76,8 +76,10 @@ describe("workflow --batch envelope", () => {
     expect(task.relevantPaths).toContain("src/core/workflow/batch.ts");
 
     const reloaded = await resolveActiveTask(`${root}/.harnix`);
-    expect(reloaded?.decisions?.some((d) => d.id === "dec-1")).toBe(true);
-    expect(reloaded?.residualRisks?.some((r) => r.id === "risk-1")).toBe(true);
+    expect(reloaded?.schemaVersion).toBe(3);
+    if (reloaded?.schemaVersion !== 3) throw new Error("expected a schema v3 task after batch");
+    expect(reloaded.decisions?.some((d) => d.id === "dec-1")).toBe(true);
+    expect(reloaded.residualRisks?.some((r) => r.id === "risk-1")).toBe(true);
   });
 
   it("rejects mojibake in text values", () => {
@@ -106,6 +108,40 @@ describe("workflow --batch envelope", () => {
       reason: "Bổ sung criterion thứ ba phục vụ verify",
     });
     expect(updated.acceptanceCriteria.some((c) => c.id === "c3")).toBe(true);
+  });
+
+  it("bounds the reason like --set-check: 10 to 1000 characters once obligations are frozen", async () => {
+    const root = await temporaryRepository();
+    const planning = await setupPlanningProject(root);
+    await saveWorkflow(root, { task: { ...planning, status: "ready", checkpoint: "ready" } });
+    const criteria = [{ id: "c3", text: "Third criterion", checks: ["check"] }];
+
+    await expect(batchWorkflow(root, { criteria, reason: "too short" })).rejects.toThrow(/10-1000 characters/u);
+    await expect(batchWorkflow(root, { criteria, reason: "x".repeat(1_001) })).rejects.toThrow(/10-1000 characters/u);
+    await expect(batchWorkflow(root, { criteria, reason: "  Lý do đủ dài để hợp lệ  " })).resolves.toMatchObject({
+      checkpoint: "replan",
+    });
+  });
+
+  it("decides whether obligations are frozen by status, so a planning task at replan stays editable", async () => {
+    const root = await temporaryRepository();
+    const planning = await setupPlanningProject(root);
+    await saveWorkflow(root, { task: { ...planning, checkpoint: "replan", updatedAt: "2026-08-13T00:00:30.000Z" } });
+
+    const updated = await batchWorkflow(root, { criteria: [{ id: "c9", text: "Late criterion", checks: ["check"] }] });
+
+    expect(updated.acceptanceCriteria.some((criterion) => criterion.id === "c9")).toBe(true);
+    expect(updated.status).toBe("planning");
+  });
+
+  it("rejects a repeated decision id like --add-decision and keeps the task unchanged", async () => {
+    const root = await temporaryRepository();
+    await setupPlanningProject(root);
+    await batchWorkflow(root, { decisions: [{ id: "d1", text: "first", rationale: "why" }] });
+
+    await expect(batchWorkflow(root, { decisions: [{ id: "d1", text: "again", rationale: "why" }] })).rejects.toThrow(
+      "Decision d1 already exists.",
+    );
   });
 
   it("updates existing checks and criteria with status and waiverReason", async () => {

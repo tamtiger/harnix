@@ -6,7 +6,8 @@ export function defaultJsonMemberMatcher(candidate: JsonValue, selector: JsonArr
 }
 
 export function parseJsonDocument(content: string): JsonValue {
-  return normalizeJsonValue(JSON.parse(content) as unknown);
+  const withoutBom = content.startsWith(String.fromCharCode(0xfeff)) ? content.slice(1) : content;
+  return normalizeJsonValue(JSON.parse(withoutBom) as unknown);
 }
 
 export function createJsonDocument(selector: JsonArrayMemberSelector): JsonValue {

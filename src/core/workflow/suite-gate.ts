@@ -1,6 +1,7 @@
 import { selectLatestEvidence, type TaskRecord, type ValidationCheck } from "src/core/tasks/task.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
-import { buildVerifyPlan } from "src/core/stack/verify-plan.js";
+import { buildVerifyPlan, type VerifyPlan } from "src/core/stack/verify-plan.js";
+import { equivalentCommand } from "./command-match.js";
 
 const SOURCE_SEGMENTS = new Set(["src", "lib", "app", "pkg", "cmd", "internal"]);
 const NON_SOURCE_ROOTS = new Set(["docs", "doc", ".github", ".harnix", ".vscode", "scripts"]);
@@ -60,8 +61,40 @@ export function coversSourceAndTest(inputs: readonly string[] | string[] | undef
   return hasSource && hasTest;
 }
 
-export function findProjectSuiteCheck(task: TaskRecord): ValidationCheck | undefined {
-  return task.validationPlan.find((check) => check.required && coversSourceAndTest(check.inputs));
+/** Distinct test commands of the repository and its packages, in detection order. */
+export function knownTestCommands(plan: VerifyPlan): string[] {
+  const commands = [plan.commands.test, ...plan.packages.map((item) => item.commands.test)];
+  return [...new Set(commands.filter((command): command is string => typeof command === "string" && command !== ""))];
+}
+
+function runsProjectTests(check: ValidationCheck, known: readonly string[]): boolean {
+  const command = check.command;
+  return (
+    known.length === 0 || (command !== undefined && known.some((candidate) => equivalentCommand(candidate, command)))
+  );
+}
+
+/**
+ * The required check that proves the whole suite: its inputs cover source and tests and its command is the project
+ * test command, so a check that runs one test file cannot stand in for the suite. Without a detected test command
+ * only the inputs are judged.
+ */
+async function selectSuiteCheck(
+  projectRoot: string,
+  task: TaskRecord,
+  plan: VerifyPlan,
+  action: "ready" | "finish",
+): Promise<ValidationCheck | undefined> {
+  const covering = task.validationPlan.filter((check) => check.required && coversSourceAndTest(check.inputs));
+  if (covering.length === 0) return undefined;
+  const direct = covering.find((check) => runsProjectTests(check, knownTestCommands(plan)));
+  if (direct) return direct;
+  const known = knownTestCommands(await buildVerifyPlan(projectRoot, { recursive: true }));
+  const nested = covering.find((check) => runsProjectTests(check, known));
+  if (nested) return nested;
+  throw new Error(
+    `Workflow ${action}: the suite check command must be the project test command (${known.join(" or ")}); a command that runs only part of the tests, such as a single test file, does not prove the suite.`,
+  );
 }
 
 export async function assertSuiteGateReady(projectRoot: string, task: TaskRecord): Promise<void> {
@@ -69,7 +102,7 @@ export async function assertSuiteGateReady(projectRoot: string, task: TaskRecord
   if (!plan.hasTests) {
     return;
   }
-  const suiteCheck = findProjectSuiteCheck(task);
+  const suiteCheck = await selectSuiteCheck(projectRoot, task, plan, "ready");
   if (!suiteCheck) {
     throw new Error(
       'Workflow ready requires a required check whose inputs cover both source and test (for example inputs ["**"], or a source tree plus a test tree such as ["src/**","test/**"]). Scope must be "focused" or "full" (there is no "project" scope).',
@@ -82,7 +115,7 @@ export async function assertSuiteGateFinishing(projectRoot: string, task: TaskRe
   if (!plan.hasTests) {
     return;
   }
-  const suiteCheck = findProjectSuiteCheck(task);
+  const suiteCheck = await selectSuiteCheck(projectRoot, task, plan, "finish");
   if (!suiteCheck) {
     throw new Error(
       'Workflow finish requires a passing required check whose inputs cover both source and test (for example ["**"] or ["src/**","test/**"]) with a current input digest. Scope must be "focused" or "full".',

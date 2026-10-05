@@ -122,3 +122,75 @@ describe("Codex global surface plan", () => {
     ).toBe(false);
   });
 });
+
+describe("Codex config.toml safety", () => {
+  async function codexRoot() {
+    const home = await temporaryUserHome();
+    const roots = await resolveUserPlatformRoots({ homeResolver: async () => home, environment: {} });
+    await mkdir(roots.codex.config.path, { recursive: true });
+    return roots.codex.config;
+  }
+  const reconcile = (root: Awaited<ReturnType<typeof codexRoot>>) =>
+    reconcileGlobalManagedFiles({
+      desired: createCodexGlobalSurfacePlan().config.filter((file) => file.path === "config.toml"),
+      generatorVersion: "0.6.0",
+      manifestPath: "harnix/managed.json",
+      platform: "codex",
+      root,
+    });
+
+  it.each([
+    ["a [hooks] key", "[features]\nhooks = true\n\n[hooks]\nUserPromptSubmit = []\n"],
+    ["a dotted key", "hooks.UserPromptSubmit = []\n"],
+    ["a single table", "[hooks.UserPromptSubmit]\ncommand = 'x'\n"],
+  ])(
+    "leaves a config that defines hooks.UserPromptSubmit as %s byte-for-byte unchanged and reports it",
+    async (_n, original) => {
+      const root = await codexRoot();
+      const path = join(root.path, "config.toml");
+      await writeFile(path, original);
+
+      const result = await reconcile(root);
+
+      await expect(readFile(path, "utf8")).resolves.toBe(original);
+      expect(result.created).toEqual([]);
+      expect(result.preserved).toHaveLength(1);
+      expect(result.warnings.map((warning) => warning.code)).toEqual(["untracked-collision"]);
+      expect(result.warnings[0]?.message).toContain("hooks.UserPromptSubmit");
+      expect(result.manifest.entries).toEqual([]);
+      const again = await reconcile(root);
+      await expect(readFile(path, "utf8")).resolves.toBe(original);
+      expect(again.warnings).toHaveLength(1);
+    },
+  );
+
+  it("appends the hook block with the line endings of a CRLF config and keeps updates in that style", async () => {
+    const root = await codexRoot();
+    const path = join(root.path, "config.toml");
+    await writeFile(path, '[features]\r\nhooks = true\r\n\r\nmodel = "x"\r\n');
+
+    await reconcile(root);
+    const config = await readFile(path, "utf8");
+
+    expect(config).toContain("[[hooks.UserPromptSubmit]]");
+    expect(config).not.toMatch(/(?<!\r)\n/u);
+    expect(config.startsWith('[features]\r\nhooks = true\r\n\r\nmodel = "x"\r\n')).toBe(true);
+    const again = await reconcile(root);
+    expect(again.unchanged).toHaveLength(1);
+    await expect(readFile(path, "utf8")).resolves.toBe(config);
+  });
+
+  it("still appends to a config that already uses [[hooks.UserPromptSubmit]] entries", async () => {
+    const root = await codexRoot();
+    const path = join(root.path, "config.toml");
+    const original = "[[hooks.UserPromptSubmit]]\n[[hooks.UserPromptSubmit.hooks]]\ncommand = 'mine'\n";
+    await writeFile(path, original);
+
+    const result = await reconcile(root);
+
+    expect(result.created).toHaveLength(1);
+    const config = await readFile(path, "utf8");
+    expect(config.startsWith(original)).toBe(true);
+    expect(config).toContain("# harnix:codex-hook:begin");
+  });
+});

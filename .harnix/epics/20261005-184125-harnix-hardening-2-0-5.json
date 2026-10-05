@@ -1,0 +1,14 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261005-184125-harnix-hardening-2-0-5",
+  "title": "Hardening 2.0.5: khắc phục toàn bộ phát hiện từ review toàn diện 2.0.4",
+  "goal": "Đưa Harnix về trạng thái phát hành được: gate xanh, đóng mọi đường ghi pass giả, bảo toàn cấu hình global của người dùng, siết state machine, bảo mật hook/learning/Windows, và đồng bộ tài liệu rồi phát hành 2.0.5. Quyết định mặc định chờ người dùng duyệt: chính thức hóa cwd/baseline vào §4; suite gate ép command khớp verify-plan; waive sau ready cần replan; bỏ tên repo khách hàng khỏi CHANGELOG.",
+  "nonGoals": [
+    "Không thêm tính năng sản phẩm mới",
+    "Không thêm platform hay bề mặt tương thích mới",
+    "Không commit, push hay publish khi chưa được người dùng duyệt"
+  ],
+  "createdAt": "2026-10-05T18:41:25.132+07:00",
+  "updatedAt": "2026-10-05T18:41:25.132+07:00"
+}

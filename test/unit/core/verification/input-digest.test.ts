@@ -2,7 +2,7 @@ import { access, mkdir, readdir, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildTaskV3 } from "test/support/builders.js";
+import { buildCheck, buildTaskV3 } from "test/support/builders.js";
 
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import type { TaskRecordV3 } from "src/core/tasks/task.js";
@@ -77,6 +77,27 @@ describe("v3 input digest", () => {
     expect(annotated.inputDigest).toBe(base.inputDigest);
     expect(revised.taskContractHash).not.toBe(base.taskContractHash);
     expect(revised.inputDigest).not.toBe(base.inputDigest);
+  });
+
+  it("folds a check cwd into the task contract while leaving cwd-less checks unchanged", async () => {
+    const root = await fixtureRepository();
+    const plain = await computeInputDigest(root, taskFixture({ validationPlan: [buildCheck()] }), "check");
+    const portal = await computeInputDigest(
+      root,
+      taskFixture({ validationPlan: [buildCheck({ cwd: "packages/portal" })] }),
+      "check",
+    );
+    const api = await computeInputDigest(
+      root,
+      taskFixture({ validationPlan: [buildCheck({ cwd: "packages/api" })] }),
+      "check",
+    );
+
+    expect(portal.taskContractHash).not.toBe(plain.taskContractHash);
+    expect(api.taskContractHash).not.toBe(portal.taskContractHash);
+    expect(plain.taskContractHash).toBe(
+      (await computeInputDigest(root, taskFixture({ validationPlan: [buildCheck()] }), "check")).taskContractHash,
+    );
   });
 
   it("ignores the workflow-owned files of the active task even when a glob matches them", async () => {

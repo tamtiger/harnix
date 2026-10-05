@@ -72,9 +72,9 @@ describe("workflow command unit", () => {
   it("handles validation errors on transition and replace-check format", async () => {
     const program = new Command();
     registerWorkflowCommand(program, {});
-    await expect(
-      program.parseAsync(["node", "harnix", "workflow", "--transition", "invalid-format"]),
-    ).rejects.toThrow(/transition requires <status>\/<checkpoint>/u);
+    await expect(program.parseAsync(["node", "harnix", "workflow", "--transition", "invalid-format"])).rejects.toThrow(
+      /transition requires <status>\/<checkpoint>/u,
+    );
 
     const program2 = new Command();
     registerWorkflowCommand(program2, {});
@@ -131,15 +131,7 @@ describe("workflow command unit", () => {
       expect(written).toContain("updatedAt");
 
       written = "";
-      await program.parseAsync([
-        "node",
-        "harnix",
-        "workflow",
-        "--set-paths",
-        "--relevant-path",
-        "src/**",
-        "--brief",
-      ]);
+      await program.parseAsync(["node", "harnix", "workflow", "--set-paths", "--relevant-path", "src/**", "--brief"]);
       expect(written).toContain("updatedAt");
 
       written = "";

@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -55,6 +55,21 @@ describe("EpicRecord validation", () => {
     const mdContent = await readFile(join(root, ".harnix", "epics", "my-epic.md"), "utf8");
     expect(mdContent).toContain("Tính năng lớn");
     expect(mdContent).toContain("Thêm roadmap");
+  });
+
+  it("writes both epic files atomically: whole files, a final newline and no temporary leftovers", async () => {
+    const root = await temporaryRepository();
+    const epic = validateEpic(buildEpic({ id: "atomic-epic", title: "Epic", goal: "Goal", ...stamp }));
+
+    await upsertEpic(root, epic);
+    await upsertEpic(root, validateEpic({ ...epic, goal: "A different goal" }));
+
+    const directory = join(root, ".harnix", "epics");
+    const json = await readFile(join(directory, "atomic-epic.json"), "utf8");
+    expect(json.endsWith("}\n")).toBe(true);
+    expect(JSON.parse(json).goal).toBe("A different goal");
+    expect((await readFile(join(directory, "atomic-epic.md"), "utf8")).endsWith("\n")).toBe(true);
+    expect((await readdir(directory)).sort()).toEqual(["atomic-epic.json", "atomic-epic.md"]);
   });
 });
 

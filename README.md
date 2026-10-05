@@ -260,7 +260,7 @@ pnpm install --frozen-lockfile
 pnpm build
 pnpm lint
 pnpm typecheck
-pnpm test:acceptance
+pnpm test
 pnpm pack:check
 pnpm smoke:tarball
 pnpm measure:init
@@ -273,7 +273,7 @@ git diff --check
 
 `pnpm test` chạy toàn bộ test kèm coverage (`vitest run --coverage`) với sàn ghi trong `vitest.config.ts`; bố cục test và builder dùng chung được mô tả trong `test/README.md`. Import trong `src` và `test` dùng alias `src/...` và `test/...` thay cho đường dẫn cha `../`.
 
-`test:acceptance` đã chạy đủ sáu suite (`test:unit`, `test:integration`, `test:migration`, `test:platform`, `test:workflow`, `test:safety`) nên không cần chạy `pnpm test` lặp lại. Mọi filesystem test dùng repository tạm và fake user home injected, không đụng vào profile/config thật.
+`pnpm test` đã chạy đủ sáu suite (`test:unit`, `test:integration`, `test:migration`, `test:platform`, `test:workflow`, `test:safety`) kèm coverage, và `test:acceptance` là alias của nó; gate không cần chạy thêm từng suite con. Mọi filesystem test dùng repository tạm và fake user home injected, không đụng vào profile/config thật.
 
 ## Tài liệu đầy đủ
 

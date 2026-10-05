@@ -5,6 +5,7 @@ import type {
   JsonValue,
   MarkerSelector,
 } from "src/core/global/managed-files.js";
+import { findHookConflict } from "src/core/global/toml-guard.js";
 import { renderHarnixRules } from "src/templates/harnix/activation.js";
 import { globalSkillDesiredFiles } from "src/templates/harnix/global-surface.js";
 
@@ -67,6 +68,7 @@ export function createCodexGlobalSurfacePlan(): CodexGlobalSurfacePlan {
         sourceId: "codex-global-agents",
       },
       {
+        conflictCheck: findHookConflict,
         content: codexGlobalContextHookConfig,
         kind: "managed-block",
         path: "config.toml",

@@ -1,10 +1,11 @@
-import { rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { assertReadyRequirements, collectReadyIssues, inspectReadyConditions } from "src/core/workflow/ready.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { saveTask, setActiveTask } from "src/core/tasks/task.js";
 import { initializeProject } from "src/commands/init.js";
-import { initializeUtcProject, taskV3 } from "test/support/workflow-fixtures.js";
+import { initializeUtcProject, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -154,5 +155,88 @@ describe("workflow ready", () => {
     await expect(saveWorkflow(root, { task: ready })).rejects.toThrow(
       "Full tasks require non-empty prd.md and plan.md at ready",
     );
+  });
+});
+
+describe("collectReadyIssues", () => {
+  it("lists exactly what the ready transition rejects, in order, and is empty for an acceptable task", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const harnixRoot = join(root, ".harnix");
+    const ok = taskV3("planning", "planning");
+
+    await expect(collectReadyIssues(harnixRoot, ok)).resolves.toEqual([]);
+    await expect(assertReadyRequirements(harnixRoot, ok)).resolves.toBeUndefined();
+    const empty = { ...ok, acceptanceCriteria: [], validationPlan: [] };
+    const issues = await collectReadyIssues(harnixRoot, empty);
+    expect(issues[0]).toBe("Workflow ready requires at least one acceptance criterion.");
+    await expect(assertReadyRequirements(harnixRoot, empty)).rejects.toThrow(issues[0]);
+  });
+});
+
+describe("workflow ready inspection", () => {
+  const baselineEvidence = (result: "pass" | "fail") => ({
+    id: `ev-${result}`,
+    checkId: "check",
+    recordedAt: "2026-08-13T00:00:30.000Z",
+    result,
+    exitCode: result === "pass" ? 0 : 1,
+    summary: "baseline",
+    artifactPaths: [],
+  });
+
+  it("reports no issue for a baselined Full task with artifacts and matching inputs", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+    const task = { ...taskV3("planning", "planning"), mode: "full" as const, evidence: [baselineEvidence("pass")] };
+    await mkdir(join(root, ".harnix", "tasks", task.id), { recursive: true });
+
+    const result = await inspectReadyConditions(join(root, ".harnix"), task, { prd: "# PRD\n", plan: "- [ ] slice\n" });
+
+    expect(result).toEqual({ issues: [], advisories: [], unbaselined: [] });
+  });
+
+  it("collects every independent issue in one pass", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const empty = {
+      ...taskV3("planning", "planning"),
+      mode: "full" as const,
+      acceptanceCriteria: [],
+      validationPlan: [],
+    };
+
+    const emptyResult = await inspectReadyConditions(join(root, ".harnix"), empty, { prd: " ", plan: "" });
+    expect(emptyResult.issues).toEqual([
+      "Workflow ready requires at least one acceptance criterion.",
+      "Workflow ready requires at least one required validation check.",
+      "Full tasks require non-empty prd.md and plan.md at ready.",
+    ]);
+
+    const missingInput = taskV3("planning", "planning", ["missing/**/*.ts"]);
+    const checked = await inspectReadyConditions(join(root, ".harnix"), missingInput);
+    expect(checked.issues).toEqual([]);
+    expect(checked.advisories).toContain("Required check 'check' input 'missing/**/*.ts' matches no files.");
+    expect(checked.advisories).toContain("Required check 'check' has not been baselined before contract freeze.");
+    expect(checked.unbaselined).toEqual(["check"]);
+  });
+
+  it("flags a missing checklist, a failed baseline and unreadable artifacts", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+    const task = { ...taskV3("planning", "planning"), mode: "full" as const, evidence: [baselineEvidence("fail")] };
+    await mkdir(join(root, ".harnix", "tasks", task.id), { recursive: true });
+
+    const noChecklist = await inspectReadyConditions(join(root, ".harnix"), task, {
+      prd: "# PRD\n",
+      plan: "# Plan\n",
+    });
+    expect(noChecklist.issues).toEqual(["Full task plan.md needs at least one checklist item ('- [ ] ...') at ready."]);
+    expect(noChecklist.advisories).toEqual(["Required check 'check' failed in baseline run without a waiver."]);
+
+    const noFiles = await inspectReadyConditions(join(root, ".harnix"), task);
+    expect(noFiles.issues).toContain("Full tasks require non-empty prd.md and plan.md at ready.");
   });
 });

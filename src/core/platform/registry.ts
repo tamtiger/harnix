@@ -23,6 +23,11 @@ export interface PlatformRoot {
   readonly logicalPath: string;
   /** Environment variable that relocates the root, or null. */
   readonly envOverride: string | null;
+  /**
+   * Set when the variable names a parent directory (an XDG base directory) rather than the root itself: the root is
+   * then `<variable>/<subpath>`, and a variable that is empty or not an absolute path is ignored as the XDG spec says.
+   */
+  readonly envOverrideSubpath?: string;
 }
 
 /** Physical ownership namespaces a platform writes to (a sidecar lives in each). */

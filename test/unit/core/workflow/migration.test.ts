@@ -97,6 +97,27 @@ describe("workflow migration", () => {
       );
     });
 
+    it("keeps the inputs of a required check exactly, apart from the retired @task-contract token", async () => {
+      const root = await legacyProject();
+      const previous = (await inspectWorkflow(root)).activeTask as TaskRecordV2;
+      const good = migrated(previous);
+      const withInputs = (inputs: string[]) => ({
+        ...good,
+        validationPlan: [{ ...good.validationPlan[0]!, inputs }],
+      });
+
+      await expect(saveWorkflow(root, { task: withInputs(["src/core/**"]) })).rejects.toThrow(
+        /preserve required validation check/iu,
+      );
+      await expect(saveWorkflow(root, { task: withInputs(["docs/**", "src/**"]) })).rejects.toThrow(
+        /preserve required validation check/iu,
+      );
+      await expect(saveWorkflow(root, { task: withInputs(["src/**"]) })).resolves.toMatchObject({
+        schemaVersion: 3,
+        validationPlan: [{ inputs: ["src/**"] }],
+      });
+    });
+
     it("does not migrate a finished task", async () => {
       const root = await createTestProject(await temporaryRepository());
       const finished: TaskRecordV2 = taskV2("completed", "finishing", {

@@ -1,0 +1,300 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-184127-bao-toan-config-global",
+  "title": "Bảo toàn cấu hình global của người dùng",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Setup/update/uninstall không được làm hỏng hay thay đổi nội dung không thuộc Harnix; exit code và smoke phủ đủ 6 platform (R-010, R-011, R-018 đến R-021, R-031, R-032).",
+  "nonGoals": [
+    "Không thêm platform hay file global mới",
+    "Không chạm home thật trong test"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Codex `config.toml`: phát hiện `hooks.UserPromptSubmit` đã được định nghĩa không phải dạng array-of-tables (kể cả dotted/inline) thì giữ nguyên, báo `drifted`/collision thay vì nối block; giữ kiểu xuống dòng của file gốc (CRLF).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-platform-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Claude `settings.json`: vòng setup rồi uninstall trả lại file đúng từng byte ban đầu, giữ thứ tự key, số nguyên lớn (vd. 12345678901234567890) và indent; chỉ dạng chuẩn hóa dùng để tính hash.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-platform-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Uninstall không để lại khung rỗng do Harnix tạo: mảng `hooks.UserPromptSubmit` rỗng, các object cha rỗng và file `settings.json` chỉ còn `{}` bị gỡ; các thư mục cha rỗng sau khi xóa file sở hữu (skills, steering, hooks, plugins) bị dọn đến nhưng không gồm root đã xác minh; thư mục hoặc file có nội dung của người dùng giữ nguyên; vòng setup rồi uninstall trên home rỗng không để lại gì.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-platform-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "`setup --codex` gỡ hook `hooks.json` legacy chưa sửa đã được thay thế, không để Codex chạy hook hai lần; có test dùng `setupPlatforms` với fixture legacy.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-platform-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Exit code nhất quán: `setup --cursor|--opencode` (kể cả `--dry-run`) trả 0 khi cài sạch; `update --global` dùng cùng báo cáo readiness và trả khác 0 khi `drifted`; ma trận exit code theo platform có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-platform-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "OpenCode: xác minh bằng `harnix-research` (chỉ đọc) việc OpenCode có đọc `XDG_CONFIG_HOME` hay không và ghi kết luận thành decision; nếu có thì root theo `$XDG_CONFIG_HOME/opencode` với kiểm tra an toàn như `CODEX_HOME`, nếu không xác nhận được thì `doctor` chỉ cảnh báo khi biến được đặt; `facts.ts` và `docs/GLOBAL_SETUP_REFACTOR_PLAN.md` ghi đúng kết luận; có test cho cả hai nhánh biến được đặt và không đặt.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-platform-1"
+      ]
+    },
+    {
+      "id": "ac-7",
+      "text": "Script release dùng home giả đầy đủ: `createIsolatedUserEnvironment` ghi đè `CLAUDE_CONFIG_DIR` và gỡ các biến relocate khác; `smoke:tarball` và `scan:release` phủ cả `--opencode` và `--cursor`; `isTestProcess` chỉ còn một định nghĩa và không phụ thuộc `NODE_ENV` của người dùng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-release-scripts-1",
+        "ev-check-smoke-1"
+      ]
+    },
+    {
+      "id": "ac-8",
+      "text": "Cổng chất lượng xanh: `pnpm run typecheck`, `pnpm run lint` và `pnpm run test` (có coverage, không hạ ngưỡng) đều exit 0 trên cây mã cuối cùng của task.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-lint-1",
+        "ev-check-suite-1",
+        "ev-check-typecheck-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-platform",
+      "description": "Test platform và vòng đời global",
+      "command": "pnpm vitest run test/platform test/safety test/integration test/unit/core test/unit/commands test/unit/cli-helpers.test.ts test/unit/cli-project-commands.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-release-scripts",
+      "description": "Test an toàn home giả của script release",
+      "command": "pnpm vitest run test/safety test/unit/utils/test-process.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-7"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/safety/**",
+        "test/unit/utils/test-process.test.ts"
+      ]
+    },
+    {
+      "id": "check-smoke",
+      "description": "Smoke tarball với home giả (chạy pack:check trước)",
+      "command": "pnpm run smoke:tarball",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-7"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**"
+      ]
+    },
+    {
+      "id": "check-typecheck",
+      "description": "pnpm run typecheck exit 0",
+      "command": "pnpm run typecheck",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-8"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "tsconfig.json"
+      ]
+    },
+    {
+      "id": "check-lint",
+      "description": "pnpm run lint (format:check + ESLint) exit 0",
+      "command": "pnpm run lint",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-8"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "pnpm run test (vitest + coverage) exit 0",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-8"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-platform-1",
+      "checkId": "check-platform",
+      "recordedAt": "2026-10-05T20:40:22.832+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/platform test/safety test/integration test/unit/core test/unit/commands test/unit/cli-helpers.test.ts test/unit/cli-project-commands.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "314665397c3c0dea90f81b5c8e403582e7c3b88118149c63a54e6484157ba0b5"
+    },
+    {
+      "id": "ev-check-release-scripts-1",
+      "checkId": "check-release-scripts",
+      "recordedAt": "2026-10-05T20:40:26.853+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/safety test/unit/utils/test-process.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3df48d5851c4194a99c798d26c697c3276baf392cef678ec0d353cf22f76dbae"
+    },
+    {
+      "id": "ev-check-smoke-1",
+      "checkId": "check-smoke",
+      "recordedAt": "2026-10-05T20:41:23.383+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm smoke:tarball — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "654ba801b347a0593cad7bb42a899bdc5b006ef7a90ba2674d3f9cffe4b18611"
+    },
+    {
+      "id": "ev-check-typecheck-1",
+      "checkId": "check-typecheck",
+      "recordedAt": "2026-10-05T20:41:34.343+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "548edb40628341096029e255bb1cb5d1ed9332843795ce05ae6268ca63772577"
+    },
+    {
+      "id": "ev-check-lint-1",
+      "checkId": "check-lint",
+      "recordedAt": "2026-10-05T20:41:52.933+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2afe1ba480f33de2c338932f89af0c9138ca8390d9d7f6b5014de00748e272fa"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T20:42:46.909+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "37a224ef5013d6282dacc87b9ef72ef06c440decbd7ebd369bc77d9e936ee7e2"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/global/reconcile.ts",
+    "src/core/global/managed-json.ts",
+    "src/core/global/obsolete.ts",
+    "src/core/global/setup.ts",
+    "src/cli-helpers.ts",
+    "src/core/platform/records.ts",
+    "scripts/isolated-user-home.mjs",
+    "scripts/smoke-tarball.mjs",
+    "scripts/scan-release.mjs"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "epicId": "20261005-184125-harnix-hardening-2-0-5",
+  "createdAt": "2026-10-05T18:41:25.132+07:00",
+  "updatedAt": "2026-10-05T20:43:05.771+07:00",
+  "decisions": [
+    {
+      "id": "d-opencode-xdg-root",
+      "text": "Root OpenCode theo XDG_CONFIG_HOME/opencode khi biến là đường dẫn tuyệt đối, ngược lại giữ ~/.config/opencode; biến rỗng hoặc tương đối bị bỏ qua.",
+      "rationale": "Tài liệu chính thức chỉ nêu ~/.config/opencode nhưng issue anomalyco/opencode 6669 ghi nhận OpenCode đọc XDG_CONFIG_HOME; ghi nhầm chỗ thì skill và khối AGENTS.md không được OpenCode thấy. Bằng chứng là quan sát của người dùng, chưa phải tài liệu chính thức."
+    },
+    {
+      "id": "d-exit-code-readiness",
+      "text": "setup và update --global thoát 1 chỉ khi readiness khác trạng thái khỏe của platform (installed, installed-pending-trust cho Codex, precedence-unknown cho Antigravity) hoặc có cảnh báo không phải setupNotice; cài sạch, dry-run và chạy lặp thoát 0.",
+      "rationale": "Ghi chú thông tin cố định làm setup cursor và opencode luôn thoát 1, và update --global thoát 0 dù drifted; tài liệu §4.25 quy định thoát 0 cho success và dry-run sạch."
+    },
+    {
+      "id": "d-json-in-place-edit",
+      "text": "settings.json và các file JSON dùng chung được sửa theo offset trên văn bản (chèn, thay, xóa đúng một phần tử mảng), không parse rồi ghi lại cả file; uninstall gỡ luôn mảng và object cha rỗng rồi xóa file chỉ còn khung rỗng.",
+      "rationale": "Ghi lại cả file làm đổi thứ tự key, indent và làm sai số nguyên lớn trong cấu hình của người dùng; sửa theo offset giữ nguyên từng byte ngoài vùng chỉnh."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-empty-container-pruned",
+      "text": "Nếu người dùng đã có sẵn mảng hooks.UserPromptSubmit rỗng hoặc object hooks rỗng thì sau uninstall các khung rỗng đó cũng bị gỡ, vì không phân biệt được với khung Harnix tạo; ý nghĩa cấu hình không đổi.",
+      "severity": "low"
+    },
+    {
+      "id": "r-toml-scan-conservative",
+      "text": "Bộ quét TOML không phải parser đầy đủ; có thể báo xung đột hooks.UserPromptSubmit cho file hợp lệ, khi đó Harnix giữ nguyên file và báo drifted kèm cách xử lý thủ công.",
+      "severity": "low"
+    },
+    {
+      "id": "r-opencode-xdg-undocumented",
+      "text": "Việc OpenCode đọc XDG_CONFIG_HOME dựa trên issue công khai anomalyco/opencode 6669, chưa có trong tài liệu chính thức; nếu upstream đổi hành vi thì root OpenCode lệch và doctor sẽ không thấy.",
+      "severity": "medium"
+    },
+    {
+      "id": "r-codex-exit-zero",
+      "text": "Codex ở trạng thái chờ tin cậy hook (installed-pending-trust) nay thoát 0 thay vì 1; script nào dựa vào exit 1 để nhắc người dùng mở /hooks phải đọc stderr hoặc trường readiness.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-05T20:43:05.771+07:00"
+}

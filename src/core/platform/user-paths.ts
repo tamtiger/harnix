@@ -1,6 +1,6 @@
 import { realpath, stat } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, isAbsolute, parse, relative, resolve, sep, win32 } from "node:path";
+import { dirname, isAbsolute, join, parse, relative, resolve, sep, win32 } from "node:path";
 import { getPlatform, PLATFORM_IDS, type PlatformId, type PlatformRoot } from "src/core/platform/registry.js";
 
 export class UnsafeUserPathError extends Error {
@@ -181,6 +181,16 @@ async function overridableRoot(
   const root = registryRoot(platform, key);
   const override = root.envOverride === null ? undefined : environment[root.envOverride];
   if (root.envOverride === null || override === undefined) return derivedRoot(home, platform, key);
+  if (root.envOverrideSubpath !== undefined) {
+    // An XDG base directory: empty or relative values are invalid by the spec and are ignored, never an error.
+    if (override.trim().length === 0 || !isAbsolutePath(override) || override.includes("\0")) {
+      return derivedRoot(home, platform, key);
+    }
+    return createVerifiedUserRoot(
+      join(override, root.envOverrideSubpath),
+      `$${root.envOverride}/${root.envOverrideSubpath}`,
+    );
+  }
   return createVerifiedUserRoot(assertNamedHome(override, root.envOverride), `$${root.envOverride}`);
 }
 
@@ -278,7 +288,7 @@ function assertNamedHome(value: string, variable: string): string {
 }
 
 function isSafeLogicalPath(value: string): boolean {
-  const roots = ["$CODEX_HOME", "$CLAUDE_CONFIG_DIR"];
+  const roots = ["$CODEX_HOME", "$CLAUDE_CONFIG_DIR", "$XDG_CONFIG_HOME"];
   return (
     value === "~" || value.startsWith("~/") || roots.some((root) => value === root || value.startsWith(`${root}/`))
   );

@@ -43,7 +43,3 @@ export function redact(value: unknown, root: string): string {
 export function containsSecret(value: string): boolean {
   return /(?:token|secret|password|api[_-]?key)\s*[=:]\s*['"]?[^\s,'"]{8,}/iu.test(value);
 }
-
-export function isTestProcess(): boolean {
-  return process.env.VITEST !== undefined || process.env.NODE_ENV === "test";
-}

@@ -56,6 +56,8 @@ export function transitionTask(
     throw new TaskValidationError("Blocked task must resume to its recorded status.");
   if (status === "blocked" && blocker === undefined)
     throw new TaskValidationError("Transitioning to blocked requires a blocker.");
+  if (status === "blocked" && blocker?.resumeStatus !== task.status)
+    throw new TaskValidationError("A blocker must resume to the status the task was in when it was blocked.");
   const withoutBlocker = { ...task };
   delete withoutBlocker.blocker;
   return validateTask({

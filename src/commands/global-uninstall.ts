@@ -1,4 +1,5 @@
-import { configuratorPlans, isTestProcess } from "src/commands/setup.js";
+import { configuratorPlans } from "src/commands/setup.js";
+import { isTestProcess } from "src/utils/test-process.js";
 import type { GlobalLock, GlobalLockAcquirer } from "src/core/global/locking.js";
 import {
   uninstallGlobal,

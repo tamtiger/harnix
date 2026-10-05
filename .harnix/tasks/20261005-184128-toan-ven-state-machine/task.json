@@ -1,0 +1,271 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-184128-toan-ven-state-machine",
+  "title": "Toàn vẹn state machine và dữ liệu task",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khóa các đường vượt freeze và mất dữ liệu: epicMembers ghi đè, blocked/resumeStatus, waive sau ready, thoát replan, dry-run lệch, migration, replace-check, batch, ghi epic không atomic (R-004, R-007, R-008, R-023 đến R-028, R-036).",
+  "nonGoals": [
+    "Không đổi tên trạng thái hay checkpoint",
+    "Không đọc lại hay ghi lại dữ liệu legacy"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`epicMembers` chỉ tạo member chưa tồn tại; member đã tồn tại chỉ chấp nhận replay giống hệt, khác thì bị từ chối trước khi ghi bất kỳ file nào; member mới được ghi trước task chính và bị gỡ nếu lần save thất bại trước khi task commit; task có evidence không bao giờ bị ghi đè.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-state-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Vào `blocked` bắt buộc `blocker.resumeStatus` bằng status ngay trước; `--transition` resume được task `blocked` về đúng `resumeStatus` (bỏ `blocker`) mà không cần `--save` thô, và resume sai đích bị từ chối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-state-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Sau first ready, chuyển criterion sang hoặc khỏi `waived`, hoặc đổi `waiverReason`, bắt buộc qua `replan` + `contractRevision.reason`; `--criterion --met` (pending sang met) không bị ảnh hưởng; trong replan, criterion đã được chứng minh không đổi `status`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-state-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Từ checkpoint `replan` chỉ thoát được về `ready/ready` (hoặc `planning/planning` khi status là `planning`); `--transition ... --dry-run` dùng cùng hàm `collectReadyIssues` với transition thật nên `valid` đúng khi transition thật được chấp nhận, còn input glob không khớp file và baseline chỉ là `advisories` không làm `valid` thành false.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-state-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Migration v2 sang v3 giữ nguyên `inputs` của required check (trừ `@task-contract`) và từ chối khi bị thu hẹp hoặc mở rộng; `--replace-check` kế thừa `command` của check bị thay (đã làm ở task trước) có test hồi quy.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-migration-1",
+        "ev-check-state-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "`--batch` dùng lại logic `plan-edit`: severity mặc định `low`, id decision/risk trùng và text rỗng bị từ chối như các cờ, obligation sau planning đi qua `saveObligationEdit` với `reason` 10-1000 ký tự, phát hiện đã qua planning theo `status`; envelope đầy đủ được mô tả trong `workflow --schema`.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-state-1"
+      ]
+    },
+    {
+      "id": "ac-7",
+      "text": "Ghi file epic `.json`/`.md` dùng `atomicWriteFile` và có newline cuối; sơ đồ trong `docs/HARNIX_WORKFLOW.md` khớp bảng `transitions` thực tế theo cặp status/checkpoint.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-state-1"
+      ]
+    },
+    {
+      "id": "ac-8",
+      "text": "Cổng chất lượng xanh: `pnpm run typecheck`, `pnpm run lint` và `pnpm run test` (có coverage, không hạ ngưỡng) đều exit 0 trên cây mã cuối cùng của task.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-lint-1",
+        "ev-check-suite-1",
+        "ev-check-typecheck-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-state",
+      "description": "Test workflow, task và epic",
+      "command": "pnpm vitest run test/unit/core test/unit/commands test/workflow test/migration",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-migration",
+      "description": "Test migration và tài liệu state machine",
+      "command": "pnpm run test:migration",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "src/core/tasks/**",
+        "src/core/workflow/migration.ts",
+        "test/migration/**"
+      ]
+    },
+    {
+      "id": "check-typecheck",
+      "description": "pnpm run typecheck exit 0",
+      "command": "pnpm run typecheck",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-8"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "tsconfig.json"
+      ]
+    },
+    {
+      "id": "check-lint",
+      "description": "pnpm run lint (format:check + ESLint) exit 0",
+      "command": "pnpm run lint",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-8"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "pnpm run test (vitest + coverage) exit 0",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-8"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-state-1",
+      "checkId": "check-state",
+      "recordedAt": "2026-10-05T22:58:34.421+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core test/unit/commands test/workflow test/migration — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "01a32cfe1507f67c739db3858cfccccb4fba003522fadd073432413caf45d6de"
+    },
+    {
+      "id": "ev-check-migration-1",
+      "checkId": "check-migration",
+      "recordedAt": "2026-10-05T22:58:38.705+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:migration — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d6c4f7c00d71872a3b8b2a5009f21c29dac637bd856d580b81fa583bb76f262e"
+    },
+    {
+      "id": "ev-check-typecheck-1",
+      "checkId": "check-typecheck",
+      "recordedAt": "2026-10-05T22:58:44.568+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "85edc7d0b832ecd5c761058ad12b96a4a0abbc9e17b942e76d609db3087807c9"
+    },
+    {
+      "id": "ev-check-lint-1",
+      "checkId": "check-lint",
+      "recordedAt": "2026-10-05T22:59:09.196+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "82ac1f888dc240f60f90f03500fc332ebef705c9bea4f348b9d6c6ea72345955"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T23:00:03.543+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "30e1699d4b38b991b37e8fa0771980f025fe497cab0582ec68397b59b4db96d0"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/save.ts",
+    "src/core/tasks/task-state.ts",
+    "src/core/tasks/task-validate-lifecycle.ts",
+    "src/core/workflow/obligations.ts",
+    "src/core/workflow/ready.ts",
+    "src/core/workflow/plan-edit.ts",
+    "src/core/workflow/batch.ts",
+    "src/core/epics/epic.ts",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "epicId": "20261005-184125-harnix-hardening-2-0-5",
+  "createdAt": "2026-10-05T18:41:25.132+07:00",
+  "updatedAt": "2026-10-05T23:00:26.493+07:00",
+  "decisions": [
+    {
+      "id": "d-dry-run-advisories",
+      "text": "Dry-run của --transition trả thêm trường advisories; valid chỉ phản ánh điều kiện transition thật kiểm tra (collectReadyIssues), còn input glob không khớp file và check chưa baseline là advisories.",
+      "rationale": "Trước đây dry-run báo lỗi baseline mà transition thật bỏ qua, và làm theo gợi ý đó (chạy check trong planning) đóng băng obligation sớm."
+    },
+    {
+      "id": "d-golden-regenerated-twice",
+      "text": "Golden snapshot được sinh lại thêm một lần trong task này; diff chỉ gồm chữ mô tả --batch trong workflow --schema và dấu xuống dòng cuối của file epic json.",
+      "rationale": "Cả hai là thay đổi có chủ ý của task, đã xem diff trước khi giữ."
+    },
+    {
+      "id": "d-lock-release-race",
+      "text": "Bộ kiểm tra khóa file coi EPERM và EBUSY khi đọc token đang được giải phóng là khóa đang đổi và chờ thử lại, như ENOENT.",
+      "rationale": "Trên Windows file đang chờ xóa trả EPERM; hai tiến trình tranh khóa workflow bị lỗi EPERM thay vì chờ, lộ ra khi finish và cancel được đưa vào cùng khóa với save."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-waive-needs-replan",
+      "text": "Task Lite cũ dùng --save thường để waive criterion sau ready nay phải đi qua replan kèm reason; script hoặc thói quen cũ sẽ bị từ chối với gợi ý contractRevision.",
+      "severity": "low"
+    },
+    {
+      "id": "r-dry-run-shape",
+      "text": "Dry-run của --transition thêm trường advisories; skill và cookbook nhắc valid cần được cập nhật ở task đồng bộ tài liệu.",
+      "severity": "low"
+    },
+    {
+      "id": "r-release-pending-masks-eperm",
+      "text": "Coi EPERM khi đọc token khóa là chờ có thể che một lỗi quyền thật; khi đó người dùng thấy lỗi hết thời gian chờ khóa thay vì EPERM, vẫn bị giới hạn bởi timeout 30 giây.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-05T23:00:26.493+07:00"
+}

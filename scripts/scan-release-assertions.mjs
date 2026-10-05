@@ -46,6 +46,15 @@ export async function assertExpectedGlobalSurfaces(home) {
     ".kiro/harnix/managed.json",
     ".kiro/hooks/harnix-context.json",
     ".kiro/steering/harnix.md",
+    ".claude/harnix/managed.json",
+    ".claude/CLAUDE.md",
+    ".claude/settings.json",
+    ".claude/skills",
+    ".config/opencode/harnix/managed.json",
+    ".config/opencode/AGENTS.md",
+    ".config/opencode/skills",
+    ".cursor/harnix/managed.json",
+    ".cursor/skills",
   ];
   for (const relativePath of required) {
     try {
@@ -58,7 +67,7 @@ export async function assertExpectedGlobalSurfaces(home) {
 }
 
 export async function assertNoProjectLocalPlatformSurfaces(project) {
-  const forbidden = [".agents", ".codex", ".gemini", ".kiro", "GEMINI.md"];
+  const forbidden = [".agents", ".claude", ".codex", ".cursor", ".gemini", ".kiro", ".opencode", "GEMINI.md"];
   const present = [];
   for (const relativePath of forbidden) {
     try {
@@ -292,15 +301,20 @@ export function assertSetupExitContract({ status, stderr, stdout }) {
   }
   if (result?.scope !== "user" || !Array.isArray(result.platforms))
     throw new Error(`setup returned an unexpected global result: ${stdout}`);
-  const actionable = result.platforms.some(
-    (platform) =>
-      platform?.readiness !== "installed" || !Array.isArray(platform?.warnings) || platform.warnings.length > 0,
-  );
+  // A platform is healthy at its own readiness (Codex waits for hook trust); a fixed informational notice is not a
+  // finding, so only an unhealthy readiness (drift, missing launcher...) makes setup exit 1.
+  const actionable = result.platforms.some((platform) => platform?.readiness !== healthyReadiness(platform?.platform));
   const expectedStatus = actionable ? 1 : 0;
   if (status !== expectedStatus)
     throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result.`);
-  if (actionable !== stderr.trim().length > 0)
-    throw new Error("setup stderr did not match its actionable readiness result.");
+  if (actionable && stderr.trim().length === 0)
+    throw new Error("setup stderr did not explain its actionable readiness result.");
+}
+
+/** The readiness each platform reports once installed correctly (mirrors `healthyReadiness` in the platform registry). */
+export function healthyReadiness(platform) {
+  if (platform === "codex") return "installed-pending-trust";
+  return platform === "antigravity" ? "precedence-unknown" : "installed";
 }
 
 export async function walk(directory) {

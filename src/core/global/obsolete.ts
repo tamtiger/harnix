@@ -8,6 +8,13 @@ import {
   parseJsonDocument,
   serializeJsonDocument,
 } from "src/core/global/managed-json.js";
+import {
+  JsonTextError,
+  insertArrayMember,
+  isEmptyJsonRoot,
+  removeArrayMember,
+  replaceArrayMember,
+} from "src/core/global/json-text.js";
 import { canonicalManagedBlock, locateManagedBlock } from "src/core/global/managed-markers.js";
 import { decideObsoleteFile } from "src/core/managed/decision.js";
 import { sha256 } from "src/utils/hashing.js";
@@ -24,6 +31,16 @@ import {
   type PreparedDesired,
   type TargetState,
 } from "src/core/global/types.js";
+
+/** Runs an in-place text edit; a document that cannot be edited safely yields undefined so the caller preserves it. */
+function editJsonText(edit: () => string): string | undefined {
+  try {
+    return edit();
+  } catch (error: unknown) {
+    if (error instanceof JsonTextError) return undefined;
+    throw error;
+  }
+}
 
 export function reconcileJsonMember(
   target: TargetState,
@@ -71,7 +88,15 @@ export function reconcileJsonMember(
     }
     if (previous === undefined || restoreDeleted) {
       array.push(member);
-      target.current = serializeJsonDocument(document);
+      const text =
+        target.current === undefined
+          ? serializeJsonDocument(document)
+          : editJsonText(() => insertArrayMember(target.current!, desired.selector.pointer, member));
+      if (text === undefined) {
+        preserve(result, label, "invalid-json-pointer", "The shared JSON file cannot be edited in place safely.");
+        return previous;
+      }
+      target.current = text;
       pushUnique(result.created, label);
       return item.entry;
     }
@@ -96,8 +121,14 @@ export function reconcileJsonMember(
     pushUnique(result.unchanged, label);
     return item.entry;
   }
-  array[match.index] = member;
-  target.current = serializeJsonDocument(document);
+  const replaced = editJsonText(() =>
+    replaceArrayMember(target.current!, desired.selector.pointer, match.index, member),
+  );
+  if (replaced === undefined) {
+    preserve(result, label, "invalid-json-pointer", "The shared JSON file cannot be edited in place safely.");
+    return previous;
+  }
+  target.current = replaced;
   pushUnique(result.updated, label);
   return item.entry;
 }
@@ -178,8 +209,17 @@ export function removeObsoleteEntry(
     );
     return false;
   }
-  array.splice(match.index, 1);
-  target.current = serializeJsonDocument(document);
+  const text = editJsonText(() => removeArrayMember(target.current!, selector.pointer, match.index));
+  if (text === undefined) {
+    preserve(
+      result,
+      label,
+      "invalid-json-pointer",
+      "The obsolete JSON array member cannot be removed in place safely.",
+    );
+    return false;
+  }
+  target.current = isEmptyJsonRoot(text) ? undefined : text;
   pushUnique(result.deleted, label);
   return true;
 }

@@ -24,7 +24,7 @@ Quyết định đích:
 | Antigravity Desktop/IDE | `~/.gemini/config/plugins/harnix/skills/harnix-*/SKILL.md` | `~/.gemini/config/plugins/harnix/rules/AGENTS.md` | `~/.gemini/config/plugins/harnix/hooks.json` | Plugin global được auto-discover cho mọi workspace; `plugin.json` là bắt buộc; standalone AGENTS rule always-on không có frontmatter. |
 | Antigravity CLI (`agy`) | `~/.gemini/antigravity-cli/plugins/harnix/skills/harnix-*/SKILL.md` | `~/.gemini/antigravity-cli/plugins/harnix/rules/AGENTS.md` | `~/.gemini/antigravity-cli/plugins/harnix/hooks.json` | CLI dùng vùng staging riêng; không giả định plugin Desktop tự được CLI load; standalone AGENTS rule always-on không có frontmatter. |
 | Codex CLI/IDE | `$HOME/.agents/skills/harnix-*/SKILL.md` | `$CODEX_HOME/AGENTS.md`, mặc định `~/.codex/AGENTS.md` | `$CODEX_HOME/config.toml`, mặc định `~/.codex/config.toml` | Skill user-global **không nằm trong `.codex/skills`**. Hook nằm inline cùng config source để tránh Codex mixed-source warning; legacy Harnix JSON được migrate conservatively. |
-| OpenCode (thêm sau Phase 6, epic D3) | `~/.config/opencode/skills/harnix-*/SKILL.md` | marked block trong `~/.config/opencode/AGENTS.md` | — (hookless) | AGENTS.md global thắng fallback `~/.claude/CLAUDE.md`; Harnix chỉ sở hữu marked block, giữ nội dung ngoài block. Không có env var relocate root `~/.config/opencode` (OPENCODE_CONFIG=file, OPENCODE_CONFIG_DIR=thư mục custom — giới hạn đã biết). Không có shell hook user-global. |
+| OpenCode (thêm sau Phase 6, epic D3) | `~/.config/opencode/skills/harnix-*/SKILL.md` | marked block trong `~/.config/opencode/AGENTS.md` | — (hookless) | AGENTS.md global thắng fallback `~/.claude/CLAUDE.md`; Harnix chỉ sở hữu marked block, giữ nội dung ngoài block. Root theo `$XDG_CONFIG_HOME/opencode` khi biến này là đường dẫn tuyệt đối (OpenCode đọc `XDG_CONFIG_HOME` dù tài liệu chính thức chưa nêu; biến rỗng hoặc tương đối bị bỏ qua theo XDG spec), ngược lại `~/.config/opencode`; `OPENCODE_CONFIG`=file và `OPENCODE_CONFIG_DIR`=thư mục custom bổ sung không dời root. Không có shell hook user-global. |
 | Cursor (thêm sau Phase 6, epic D3) | `~/.cursor/skills/harnix-*/SKILL.md` | — (User Rules chỉ qua UI; project rules `.cursor/rules/*.md`) | — (hookless) | Không có file instruction global. `~/.cursor/hooks.json` schema version 1 có `sessionStart` (output `additional_context`) nhưng fire-and-forget và injection chưa xác minh (2 báo cáo chính thức) nên chạy hookless; không dùng `beforeSubmitPrompt`. Không có env relocate root `~/.cursor`. |
 
 Nguồn xác minh:
@@ -383,7 +383,7 @@ Trạng thái delivery: G0–G10 đã hoàn tất trong scope được người 
 pnpm build
 pnpm lint
 pnpm typecheck
-pnpm test:acceptance
+pnpm test
 pnpm pack:check
 pnpm smoke:tarball
 pnpm measure:init
@@ -392,7 +392,7 @@ pnpm scan:release
 git diff --check
 ```
 
-`test:acceptance` bao phủ toàn bộ unit, integration, migration, platform, workflow và safety; không chạy thêm `pnpm test` trùng lặp trong release sequence.
+`pnpm test` bao phủ toàn bộ unit, integration, migration, platform, workflow và safety kèm coverage (`test:acceptance` là alias); release sequence không chạy thêm các suite con.
 
 `smoke:tarball` phải dùng **hai root tạm độc lập**: fake user home cho global setup và one-or-more temp repositories cho project init/context. Test không được mutate home/config thật hoặc gọi network/install ngoài boundary explicit.
 

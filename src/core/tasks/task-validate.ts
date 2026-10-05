@@ -13,6 +13,7 @@ import {
   validationCheckV1Keys,
   validationCheckV2Keys,
 } from "./task-schema.js";
+import { assertValidationCheckExtras } from "./task-validate-check.js";
 import type {
   AcceptanceCriterion,
   Evidence,
@@ -117,15 +118,7 @@ function assertValidationPlan(value: TaskObject): void {
     if (typeof item.required !== "boolean" || (item.command !== undefined && typeof item.command !== "string")) {
       throw new TaskValidationError("Validation plan is invalid.");
     }
-    if (item.cwd !== undefined && (typeof item.cwd !== "string" || item.cwd.includes("\0"))) {
-      throw new TaskValidationError(`Validation plan check '${String(item.id)}' has invalid cwd.`);
-    }
-    if (item.baseline !== undefined) {
-      if (!isRecord(item.baseline)) throw new TaskValidationError(`Validation plan check '${String(item.id)}' baseline is invalid.`);
-      if (item.baseline.result !== undefined && !isOneOf(evidenceResults, item.baseline.result)) {
-        throw new TaskValidationError(`Validation plan check '${String(item.id)}' baseline has invalid result.`);
-      }
-    }
+    assertValidationCheckExtras(item);
   }
   for (const item of value.validationPlan as Record<string, unknown>[])
     assertExactKeys(

@@ -4,11 +4,72 @@ import { describe, expect, it } from "vitest";
 import { inspectWorkflow } from "src/core/workflow/inspect.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { transitionWorkflow } from "src/core/workflow/transition.js";
-import { transitionTask } from "src/core/tasks/task.js";
-import { initializeUtcProject, taskV3, routingTask } from "test/support/workflow-fixtures.js";
+import { saveTask, setActiveTask, transitionTask } from "src/core/tasks/task.js";
+import { implementingTaskV3, initializeUtcProject, taskV3, routingTask } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
+
+describe("workflow transition out of blocked", () => {
+  async function blockedProject() {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const planning = taskV3("planning", "planning");
+    await saveWorkflow(root, { task: planning });
+    await saveWorkflow(root, {
+      task: {
+        ...planning,
+        status: "blocked",
+        checkpoint: "planning",
+        blocker: { kind: "decision", summary: "Waiting", nextAction: "Ask", resumeStatus: "planning" },
+        updatedAt: "2026-08-13T00:01:00.000Z",
+      },
+    });
+    return root;
+  }
+
+  it("resumes a blocked task to its recorded status without a hand-built save and drops the blocker", async () => {
+    const root = await blockedProject();
+
+    const resumed = await transitionWorkflow(root, "planning", "planning");
+
+    expect(resumed).toMatchObject({ status: "planning", checkpoint: "planning" });
+    expect("blocker" in resumed).toBe(false);
+    expect((await inspectWorkflow(root)).activeTask).toMatchObject({ status: "planning" });
+  });
+
+  it("refuses to resume anywhere but the recorded status and keeps the task blocked", async () => {
+    const root = await blockedProject();
+
+    await expect(transitionWorkflow(root, "ready", "ready")).rejects.toThrow("recorded status");
+    await expect(transitionWorkflow(root, "in_progress", "implementing")).rejects.toThrow("recorded status");
+    expect((await inspectWorkflow(root)).activeTask).toMatchObject({ status: "blocked" });
+  });
+
+  it("refuses a blocker from verifying that would resume at planning, the way around the freeze", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const verifying = taskV3("verifying", "verifying");
+    await saveWorkflow(root, { task: taskV3("planning", "planning") });
+    await saveWorkflow(root, { task: { ...taskV3("ready", "ready"), updatedAt: "2026-08-13T00:01:00.000Z" } });
+    await saveWorkflow(root, {
+      task: { ...taskV3("in_progress", "implementing"), updatedAt: "2026-08-13T00:02:00.000Z" },
+    });
+    await saveWorkflow(root, { task: { ...verifying, updatedAt: "2026-08-13T00:03:00.000Z" } });
+
+    await expect(
+      saveWorkflow(root, {
+        task: {
+          ...verifying,
+          status: "blocked",
+          checkpoint: "planning",
+          blocker: { kind: "decision", summary: "x", nextAction: "y", resumeStatus: "planning" },
+          updatedAt: "2026-08-13T00:04:00.000Z",
+        },
+      }),
+    ).rejects.toThrow("status the task was in");
+  });
+});
 
 describe("workflow transition", () => {
   it("should_transition_the_active_task_without_a_task_body_and_preserve_evidence", async () => {
@@ -84,7 +145,7 @@ describe("workflow transition", () => {
     expect(transitionTask(current, "verifying", "verifying").blocker).toBeUndefined();
   });
 
-  it("should validate ready transition and detect unbaselined checks in dry-run without persisting", async () => {
+  it("should validate ready transition and advise about unbaselined checks in dry-run without persisting", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
@@ -94,12 +155,11 @@ describe("workflow transition", () => {
 
     expect(dryRunResult).toMatchObject({
       dryRun: true,
-      valid: false,
+      valid: true,
+      issues: [],
       target: { status: "ready", checkpoint: "ready" },
     });
-    if ("issues" in dryRunResult) {
-      expect(dryRunResult.issues.some((issue) => issue.includes("has not been baselined"))).toBe(true);
-    }
+    expect(dryRunResult.advisories.some((issue) => issue.includes("has not been baselined"))).toBe(true);
     // Verify state was not persisted to disk
     await expect(inspectWorkflow(root)).resolves.toMatchObject({
       activeTask: { status: "planning", checkpoint: "planning" },
@@ -142,7 +202,7 @@ describe("workflow transition", () => {
     });
   });
 
-  it("should report non-matching input globs during dry-run ready transition", async () => {
+  it("should report non-matching input globs as an advisory during dry-run ready transition", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
     const planning = {
@@ -167,12 +227,82 @@ describe("workflow transition", () => {
 
     const dryRunResult = await transitionWorkflow(root, "ready", "ready", undefined, true);
 
-    expect(dryRunResult).toMatchObject({
-      dryRun: true,
+    expect(dryRunResult).toMatchObject({ dryRun: true, valid: true, issues: [] });
+    expect(dryRunResult.advisories.some((issue) => issue.includes("matches no files"))).toBe(true);
+  });
+});
+
+describe("leaving the replan checkpoint", () => {
+  async function replanned(status: "planning" | "in_progress") {
+    const root = await temporaryRepository();
+    if (status === "in_progress") {
+      const running = await implementingTaskV3(root);
+      await saveWorkflow(root, { task: { ...running, checkpoint: "replan", updatedAt: "2026-08-13T00:03:00.000Z" } });
+    } else {
+      await initializeUtcProject(root);
+      const planning = taskV3("planning", "planning");
+      await saveWorkflow(root, { task: planning });
+      await saveWorkflow(root, { task: { ...planning, checkpoint: "replan", updatedAt: "2026-08-13T00:01:00.000Z" } });
+    }
+    return root;
+  }
+
+  it("refuses to go from in_progress/replan straight back to implementing, for real and in a dry-run", async () => {
+    const root = await replanned("in_progress");
+
+    await expect(transitionWorkflow(root, "in_progress", "implementing")).rejects.toThrow(
+      /may only re-enter ready\/ready/u,
+    );
+    await expect(transitionWorkflow(root, "in_progress", "implementing", undefined, true)).resolves.toMatchObject({
       valid: false,
     });
-    if ("issues" in dryRunResult) {
-      expect(dryRunResult.issues.some((issue) => issue.includes("matches no files"))).toBe(true);
-    }
+    await expect(transitionWorkflow(root, "verifying", "verifying")).rejects.toThrow(/replan/u);
+    expect((await inspectWorkflow(root)).activeTask).toMatchObject({ status: "in_progress", checkpoint: "replan" });
+  });
+
+  it("re-enters ready/ready through the ready gate and from there continues normally", async () => {
+    const root = await replanned("in_progress");
+
+    await expect(transitionWorkflow(root, "ready", "ready", undefined, true)).resolves.toMatchObject({ valid: true });
+    await expect(transitionWorkflow(root, "ready", "ready")).resolves.toMatchObject({ status: "ready" });
+    await expect(transitionWorkflow(root, "in_progress", "implementing")).resolves.toMatchObject({
+      status: "in_progress",
+      checkpoint: "implementing",
+    });
+  });
+
+  it("lets a task that is still planning return to planning/planning", async () => {
+    const root = await replanned("planning");
+
+    await expect(transitionWorkflow(root, "planning", "planning")).resolves.toMatchObject({ checkpoint: "planning" });
+  });
+});
+
+describe("a dry-run agrees with the real ready transition", () => {
+  const cases: [string, (task: ReturnType<typeof taskV3>) => ReturnType<typeof taskV3>, boolean][] = [
+    ["a complete Lite task", (task) => task, true],
+    ["a task with no acceptance criterion", (task) => ({ ...task, acceptanceCriteria: [], validationPlan: [] }), false],
+    ["a Full task without prd.md and plan.md", (task) => ({ ...task, mode: "full" as const }), false],
+    [
+      "a task whose input glob matches nothing (advisory only)",
+      (task) => ({ ...task, validationPlan: [{ ...task.validationPlan[0]!, inputs: ["nowhere/**"] }] }),
+      true,
+    ],
+  ];
+
+  it.each(cases)("%s", async (_name, shape, accepted) => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const planning = shape(taskV3("planning", "planning"));
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, planning);
+    await setActiveTask(harnixRoot, planning.id);
+
+    const dryRun = await transitionWorkflow(root, "ready", "ready", undefined, true);
+    const real = transitionWorkflow(root, "ready", "ready");
+
+    expect(dryRun.valid).toBe(accepted);
+    if (accepted) await expect(real).resolves.toMatchObject({ status: "ready" });
+    else await expect(real).rejects.toThrow();
   });
 });

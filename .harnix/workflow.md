@@ -40,7 +40,7 @@ Plan-only requests stop at `ready`. Full tasks and Epics also stop at `ready` (`
 
 ## Gates
 
-- **Ready:** at least one criterion and one required check; every non-waived criterion is covered by a required check; a project-level suite check covering source and tests is required when the repository has tests (wildcard inputs, or a source tree plus a test tree such as `src/**` + `test/**` or `Foo.Api/**` + `Foo.Api.Tests/**`). A Full task has non-empty `prd.md` and `plan.md` with at least one `- [ ]` item. Details: `./references/ready-review.md` (or `harnix skill harnix-plan --reference ready-review`).
+- **Ready:** at least one criterion and one required check; every non-waived criterion is covered by a required check; a project-level suite check covering source and tests is required when the repository has tests (wildcard inputs, or a source tree plus a test tree such as `src/**` + `test/**` or `Foo.Api/**` + `Foo.Api.Tests/**`) whose `command` is the project test command from `harnix verify-plan` (a command that runs only part of the tests, such as one test file, is rejected). A Full task has non-empty `prd.md` and `plan.md` with at least one `- [ ]` item. Details: `./references/ready-review.md` (or `harnix skill harnix-plan --reference ready-review`).
 - **Contract immutability:** never change a criterion mapped by recorded check evidence; checks with a pass remain immutable and check failures are retired unchanged with a replacement required check ID.
 - **Execute:** persist `in_progress/implementing` before the first product edit; tick the Full checklist per slice, 100% before verifying; release preparation (version, changelog, generated output) belongs here.
 - **Verify:** persist `verifying/verifying` before the first check. Two stages: compliance, then quality and security. A required pass is fresh only when its `inputDigest` equals the digest recomputed from the current inputs. The digest covers the task id, check id, the task contract (criteria id and text, mode, every check definition) and the raw sha256 of each matched file; it omits the active task's own `task.json` and `review.md`, and `prd.md`/`plan.md` count only when declared. It skips `.git`, `node_modules`, `TestResults`, `.vs`, `.idea`, `.harnix` and build output next to its build marker.
@@ -72,7 +72,7 @@ harnix status --summary                      # micro status projection under 80 
 harnix workflow --preflight                  # clock.now and clock.idPrefix are the only time source
 harnix workflow --init --title "<task title>" [--mode lite|full] [--goal "<goal>"] [--text "<criterion>"] [--command "<cmd>"] [--input "src/**"] [--follow-up <task-id>] --brief
 harnix workflow --transition ready/ready --dry-run --brief
-harnix workflow --run-check <check-id> [--cwd <path>] --brief -- pnpm test    # snapshot, run, snapshot and record in one call
+harnix workflow --run-check <check-id> --brief -- pnpm test    # snapshot, run, snapshot and record; argv must equal the declared command and runs in the declared cwd
 harnix workflow --evidence --check <check-id> --result pass --exit-code 0 --summary "<command> - <result>" --brief
 harnix workflow --criterion <criterion-id>,<criterion-id> --met --brief
 harnix workflow --replace-check <old-check-id> <new-check-id> --reason "<why, required>" [--description "<text>" --command "<cmd>" --scope focused --input "src/**" --criteria <criterion-id> --cwd <path>] --brief

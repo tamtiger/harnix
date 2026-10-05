@@ -6,7 +6,12 @@ import { saveTask, setActiveTask } from "src/core/tasks/task.js";
 import type { CheckRunner } from "src/core/workflow/run-check.js";
 import { output } from "test/support/integration-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
-import { implementingTaskV3, initializeUtcProject, legacyTask } from "test/support/workflow-fixtures.js";
+import {
+  commandlessImplementingTaskV3,
+  implementingTaskV3,
+  initializeUtcProject,
+  legacyTask,
+} from "test/support/workflow-fixtures.js";
 
 const originalCwd = process.cwd();
 const originalExitCode = process.exitCode;
@@ -106,10 +111,10 @@ describe.sequential("hidden workflow flag transports", () => {
       return { exitCode: 0, output: "fine" };
     };
 
-    const result = await run(["--run-check", "check", "--", "pnpm", "test", "--filter", "x y"], { checkRunner });
+    const result = await run(["--run-check", "check", "--", "pnpm", "run", "test"], { checkRunner });
 
     expect(result.code).toBe(0);
-    expect(calls).toEqual([["pnpm", "test", "--filter", "x y"]]);
+    expect(calls).toEqual([["pnpm", "run", "test"]]);
     expect(JSON.parse(result.out)).toMatchObject({
       evidenceId: "ev-check-1",
       result: "pass",
@@ -142,7 +147,7 @@ describe.sequential("hidden workflow flag transports", () => {
 
   it("passes the command of --run-check through even when the -- separator was dropped by a shell shim", async () => {
     const root = await fixture();
-    await implementingTaskV3(root);
+    await commandlessImplementingTaskV3(root);
     process.chdir(root);
     const calls: string[][] = [];
     const checkRunner: CheckRunner = async (executable, args) => {

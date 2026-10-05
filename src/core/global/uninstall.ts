@@ -1,4 +1,5 @@
 import { rmdir } from "node:fs/promises";
+import { dirname } from "node:path";
 
 import {
   acquireGlobalLocks,
@@ -137,32 +138,21 @@ async function loadTargets(
 async function cleanupEmptyOwnedDirectories(targets: readonly UninstallTarget[]): Promise<void> {
   for (const target of targets) {
     const ownsWholeRoot = target.preserveUnownedRoot;
-    const directories = ownsWholeRoot
-      ? ownedPluginDirectories(target.entries)
-      : ownedSkillUnitDirectories(target.entries);
-    for (const relativePath of directories) await removeEmptyOwnedDirectory(target.root, relativePath);
+    for (const relativePath of ownedAncestorDirectories(target.entries)) {
+      await removeEmptyOwnedDirectory(target.root, relativePath);
+    }
 
     const sidecarDirectory = parentRelativePath(target.manifestPath);
     if (sidecarDirectory !== undefined) await removeEmptyOwnedDirectory(target.root, sidecarDirectory);
-    if (ownsWholeRoot) await removeEmptyOwnedRoot(target.root, target.manifestPath);
-  }
-}
-
-function ownedSkillUnitDirectories(entries: readonly GlobalManagedEntry[]): string[] {
-  const directories: string[] = [];
-  for (const entry of entries) {
-    if (entry.kind !== "file") continue;
-    const segments = entry.path.split("/");
-    if (segments[0] === "skills" && segments[1]?.startsWith("harnix-") && segments.length >= 3) {
-      for (let length = 2; length < segments.length; length += 1) {
-        directories.push(segments.slice(0, length).join("/"));
-      }
+    if (ownsWholeRoot) {
+      await removeEmptyOwnedRoot(target.root, target.manifestPath);
+      await removeEmptyAncestorsAboveRoot(target.root);
     }
   }
-  return uniqueDeepestFirst(directories);
 }
 
-function ownedPluginDirectories(entries: readonly GlobalManagedEntry[]): string[] {
+/** Every directory above an owned entry, deepest first; a non-recursive rmdir keeps any that still hold content. */
+function ownedAncestorDirectories(entries: readonly GlobalManagedEntry[]): string[] {
   const directories: string[] = [];
   for (const entry of entries) {
     const segments = entry.path.split("/");
@@ -187,6 +177,21 @@ function parentRelativePath(path: string): string | undefined {
 
 async function removeEmptyOwnedDirectory(root: UserPathRoot, relativePath: string): Promise<void> {
   await removeEmptyDirectory(await resolveSafeGlobalPath(root, relativePath));
+}
+
+/** A plugin root Harnix created leaves its parents (for example ~/.gemini/config/plugins) empty; clear them up to the home. */
+async function removeEmptyAncestorsAboveRoot(root: UserPathRoot): Promise<void> {
+  const aboveRoot = root.logicalPath.split("/").length - 2;
+  let directory = root.path;
+  for (let level = 0; level < aboveRoot; level += 1) {
+    directory = dirname(directory);
+    try {
+      await rmdir(directory);
+    } catch (error: unknown) {
+      if (isMissingPathError(error) || isNonEmptyOrNotDirectory(error)) return;
+      throw error;
+    }
+  }
 }
 
 async function removeEmptyOwnedRoot(root: UserPathRoot, probePath: string): Promise<void> {

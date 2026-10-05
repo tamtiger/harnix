@@ -7,6 +7,7 @@ import { nowInstant } from "src/utils/clock.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertTaskReadyForFinishing, completionEvidenceIds } from "./completion.js";
 import { currentInstant, journalFilePath, refreshLinkedEpicMarkdown } from "./support.js";
+import { withWorkflowLock } from "./workflow-lock.js";
 
 export interface WorkflowFinishDependencies {
   saveTask?: typeof saveTask;
@@ -41,8 +42,12 @@ function learningHint(task: TaskRecord, captured: number): string | undefined {
 
 /** Finishes the active task and reports how much project learning that produced, so a zero is never silent. */
 export async function finishWorkflowReport(root: string, injectedNow?: string): Promise<FinishReport> {
-  const now = await currentInstant(root, injectedNow);
   const harnixRoot = await resolveSafeHarnixPath(root);
+  return withWorkflowLock(harnixRoot, () => finishLocked(root, harnixRoot, injectedNow));
+}
+
+async function finishLocked(root: string, harnixRoot: string, injectedNow: string | undefined): Promise<FinishReport> {
+  const now = await currentInstant(root, injectedNow);
   const task = await resolveActiveTask(harnixRoot);
   if (!task) throw new Error("Workflow finish requires an active task.");
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));

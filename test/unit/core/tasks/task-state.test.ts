@@ -64,6 +64,23 @@ describe("task state transitions", () => {
     expect(transitionTask(blocked, "planning", "planning").blocker).toBeUndefined();
   });
 
+  it("rejects a blocker that would resume somewhere other than the status the task was in", () => {
+    const planning = taskFixture();
+    const blocker = (resumeStatus: "planning" | "ready" | "in_progress" | "verifying") => ({
+      kind: "decision" as const,
+      summary: "Needs a decision",
+      nextAction: "Ask the user",
+      resumeStatus,
+    });
+
+    for (const resumeStatus of ["ready", "in_progress", "verifying"] as const) {
+      expect(() => transitionTask(planning, "blocked", "planning", undefined, blocker(resumeStatus))).toThrow(
+        "status the task was in",
+      );
+    }
+    expect(transitionTask(planning, "blocked", "planning", undefined, blocker("planning")).status).toBe("blocked");
+  });
+
   it("cancels any unfinished task with explicit user authority and preserves its evidence", async () => {
     const root = await temporaryRepository();
     const planning = taskFixture();

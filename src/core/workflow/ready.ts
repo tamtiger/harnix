@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import type { TaskArtifacts, TaskRecord } from "src/core/tasks/task.js";
-import { isMissing, planHasChecklistItem } from "src/core/tasks/workflow-helpers.js";
+import { planHasChecklistItem } from "src/core/tasks/workflow-helpers.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 
 import { dirname, basename } from "node:path";
@@ -9,119 +9,141 @@ import { assertSuiteGateReady } from "./suite-gate.js";
 import { globby } from "globby";
 import { buildGlobIgnores, targetedSegments } from "src/core/verification/transient-directories.js";
 
+const FULL_ARTIFACTS_MESSAGE = "Full tasks require non-empty prd.md and plan.md at ready.";
+const CHECKLIST_MESSAGE = "Full task plan.md needs at least one checklist item ('- [ ] ...') at ready.";
+
+function projectRootOf(harnixRoot: string): string {
+  return basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
+}
+
+function describe(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function obligationIssues(task: TaskRecord): string[] {
+  const issues: string[] = [];
+  if (task.acceptanceCriteria.length === 0) issues.push("Workflow ready requires at least one acceptance criterion.");
+  if (!task.validationPlan.some((check) => check.required)) {
+    issues.push("Workflow ready requires at least one required validation check.");
+  }
+  return issues;
+}
+
+async function suiteGateIssues(projectRoot: string, task: TaskRecord): Promise<string[]> {
+  try {
+    await assertSuiteGateReady(projectRoot, task);
+    return [];
+  } catch (error: unknown) {
+    return [describe(error)];
+  }
+}
+
+async function fullArtifactIssues(
+  harnixRoot: string,
+  task: TaskRecord,
+  artifacts: TaskArtifacts | undefined,
+): Promise<string[]> {
+  if (task.mode !== "full") return [];
+  try {
+    const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
+    const prdPath = await resolveSafeProjectPath(taskDirectory, "prd.md");
+    const planPath = await resolveSafeProjectPath(taskDirectory, "plan.md");
+    const [prd, plan] = await Promise.all([
+      artifacts?.prd ?? readFile(prdPath, "utf8").catch(() => ""),
+      artifacts?.plan ?? readFile(planPath, "utf8").catch(() => ""),
+    ]);
+    if (!prd.trim() || !plan.trim()) return [FULL_ARTIFACTS_MESSAGE];
+    return planHasChecklistItem(plan) ? [] : [CHECKLIST_MESSAGE];
+  } catch {
+    return [FULL_ARTIFACTS_MESSAGE];
+  }
+}
+
+async function inputGlobIssue(projectRoot: string, checkId: string, input: string): Promise<string | undefined> {
+  try {
+    const matches = await globby(input, {
+      cwd: projectRoot,
+      dot: true,
+      followSymbolicLinks: false,
+      gitignore: true,
+      ignore: buildGlobIgnores(targetedSegments(input)),
+      onlyFiles: true,
+    });
+    return matches.length === 0 ? `Required check '${checkId}' input '${input}' matches no files.` : undefined;
+  } catch {
+    return `Required check '${checkId}' input '${input}' is invalid or cannot be evaluated.`;
+  }
+}
+
+async function inputIssues(projectRoot: string, task: TaskRecord): Promise<string[]> {
+  const issues: string[] = [];
+  for (const check of task.validationPlan) {
+    if (!check.required || !("inputs" in check) || !Array.isArray(check.inputs)) continue;
+    for (const input of check.inputs) {
+      if (input === "@task-contract") continue;
+      const issue = await inputGlobIssue(projectRoot, check.id, input);
+      if (issue) issues.push(issue);
+    }
+  }
+  return issues;
+}
+
+function baselineIssues(task: TaskRecord): { issues: string[]; unbaselined: string[] } {
+  const issues: string[] = [];
+  const unbaselined: string[] = [];
+  for (const check of task.validationPlan) {
+    if (!check.required) continue;
+    const baseline = (check as { baseline?: { authorizedBy?: string } }).baseline;
+    if (baseline?.authorizedBy !== undefined) continue;
+    const latest = task.evidence.filter((e) => e.checkId === check.id).at(-1);
+    if (latest === undefined) {
+      unbaselined.push(check.id);
+      issues.push(`Required check '${check.id}' has not been baselined before contract freeze.`);
+    } else if (latest.result === "fail") {
+      issues.push(`Required check '${check.id}' failed in baseline run without a waiver.`);
+    }
+  }
+  return { issues, unbaselined };
+}
+
+/**
+ * Every condition the ready transition enforces, in the order it reports them. The real transition and the dry-run
+ * both use this list, so a dry-run is valid exactly when the transition would be accepted.
+ */
+export async function collectReadyIssues(
+  harnixRoot: string,
+  task: TaskRecord,
+  artifacts?: TaskArtifacts,
+): Promise<string[]> {
+  return [
+    ...obligationIssues(task),
+    ...(await suiteGateIssues(projectRootOf(harnixRoot), task)),
+    ...(await fullArtifactIssues(harnixRoot, task, artifacts)),
+  ];
+}
+
 /** Ready needs obligations and, for Full, free-form non-empty prd/plan with a checklist; there is no trace grammar. */
 export async function assertReadyRequirements(
   harnixRoot: string,
   task: TaskRecord,
   artifacts?: TaskArtifacts,
 ): Promise<void> {
-  if (task.acceptanceCriteria.length === 0)
-    throw new Error("Workflow ready requires at least one acceptance criterion.");
-  if (!task.validationPlan.some((check) => check.required))
-    throw new Error("Workflow ready requires at least one required validation check.");
-  const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
-  await assertSuiteGateReady(projectRoot, task);
-  if (task.mode !== "full") return;
-
-  try {
-    const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
-    const prdPath = await resolveSafeProjectPath(taskDirectory, "prd.md");
-    const planPath = await resolveSafeProjectPath(taskDirectory, "plan.md");
-    const [prd, plan] = await Promise.all([
-      artifacts?.prd ?? readFile(prdPath, "utf8"),
-      artifacts?.plan ?? readFile(planPath, "utf8"),
-    ]);
-    if (!prd.trim() || !plan.trim()) throw new Error("Full tasks require non-empty prd.md and plan.md at ready.");
-    if (!planHasChecklistItem(plan))
-      throw new Error("Full task plan.md needs at least one checklist item ('- [ ] ...') at ready.");
-  } catch (error: unknown) {
-    if (isMissing(error)) throw new Error("Full tasks require non-empty prd.md and plan.md at ready.");
-    throw error;
-  }
+  const [first] = await collectReadyIssues(harnixRoot, task, artifacts);
+  if (first !== undefined) throw new Error(first);
 }
 
-/** Comprehensive diagnosis of ready conditions for dry-run inspection. */
+/**
+ * Dry-run diagnosis: `issues` are what the ready transition would reject; `advisories` are things worth fixing
+ * before the contract freezes (an input glob that matches nothing, a check never run against the baseline) that the
+ * transition itself does not enforce.
+ */
 export async function inspectReadyConditions(
   harnixRoot: string,
   task: TaskRecord,
   artifacts?: TaskArtifacts,
-): Promise<{ issues: string[]; unbaselined: string[] }> {
-  const issues: string[] = [];
-  const unbaselined: string[] = [];
-
-  if (task.acceptanceCriteria.length === 0) {
-    issues.push("Workflow ready requires at least one acceptance criterion.");
-  }
-  if (!task.validationPlan.some((check) => check.required)) {
-    issues.push("Workflow ready requires at least one required validation check.");
-  }
-
-  const projectRoot = basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
-  try {
-    await assertSuiteGateReady(projectRoot, task);
-  } catch (error: unknown) {
-    issues.push(error instanceof Error ? error.message : String(error));
-  }
-
-  if (task.mode === "full") {
-    try {
-      const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
-      const prdPath = await resolveSafeProjectPath(taskDirectory, "prd.md");
-      const planPath = await resolveSafeProjectPath(taskDirectory, "plan.md");
-      const [prd, plan] = await Promise.all([
-        artifacts?.prd ?? readFile(prdPath, "utf8").catch(() => ""),
-        artifacts?.plan ?? readFile(planPath, "utf8").catch(() => ""),
-      ]);
-      if (!prd.trim() || !plan.trim()) {
-        issues.push("Full tasks require non-empty prd.md and plan.md at ready.");
-      } else if (!planHasChecklistItem(plan)) {
-        issues.push("Full task plan.md needs at least one checklist item ('- [ ] ...') at ready.");
-      }
-    } catch {
-      issues.push("Full tasks require non-empty prd.md and plan.md at ready.");
-    }
-  }
-
-  // Check input globs match at least one file
-  for (const check of task.validationPlan) {
-    if (!check.required || !("inputs" in check) || !Array.isArray(check.inputs)) continue;
-    for (const input of check.inputs) {
-      if (input === "@task-contract") continue;
-      const targeted = targetedSegments(input);
-      try {
-        const matches = await globby(input, {
-          cwd: projectRoot,
-          dot: true,
-          followSymbolicLinks: false,
-          gitignore: true,
-          ignore: buildGlobIgnores(targeted),
-          onlyFiles: true,
-        });
-        if (matches.length === 0) {
-          issues.push(`Required check '${check.id}' input '${input}' matches no files.`);
-        }
-      } catch {
-        issues.push(`Required check '${check.id}' input '${input}' is invalid or cannot be evaluated.`);
-      }
-    }
-  }
-
-  // Check baseline status
-  for (const check of task.validationPlan) {
-    if (!check.required) continue;
-    const checkRecord = check as { baseline?: { result?: string; classification?: string; authorizedBy?: string; scope?: string } };
-    const hasWaiver = checkRecord.baseline?.authorizedBy !== undefined;
-    const evidences = task.evidence.filter((e) => e.checkId === check.id);
-    if (evidences.length === 0 && !hasWaiver) {
-      unbaselined.push(check.id);
-      issues.push(`Required check '${check.id}' has not been baselined before contract freeze.`);
-    } else if (evidences.length > 0 && !hasWaiver) {
-      const latest = evidences[evidences.length - 1];
-      if (latest && latest.result === "fail") {
-        issues.push(`Required check '${check.id}' failed in baseline run without a waiver.`);
-      }
-    }
-  }
-
-  return { issues, unbaselined };
+): Promise<{ issues: string[]; advisories: string[]; unbaselined: string[] }> {
+  const baseline = baselineIssues(task);
+  const issues = await collectReadyIssues(harnixRoot, task, artifacts).catch((error: unknown) => [describe(error)]);
+  const advisories = [...(await inputIssues(projectRootOf(harnixRoot), task)), ...baseline.issues];
+  return { issues, advisories, unbaselined: baseline.unbaselined };
 }

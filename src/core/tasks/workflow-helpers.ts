@@ -58,7 +58,23 @@ export function sameBytes(left: Uint8Array | undefined, right: Uint8Array | unde
   return left.every((byte, index) => byte === right[index]);
 }
 
+/**
+ * A task at checkpoint replan is waiting for its changed contract to pass the ready gate again, so the only ways out
+ * are ready/ready, planning/planning while the task never left planning, or being blocked.
+ */
+function assertReplanExit(previous: TaskRecord, next: TaskRecord): void {
+  if (previous.checkpoint !== "replan" || next.checkpoint === "replan") return;
+  if (next.status === "blocked") return;
+  const readyAgain = next.status === "ready" && next.checkpoint === "ready";
+  const stillPlanning = next.status === "planning" && next.checkpoint === "planning";
+  if (readyAgain || stillPlanning) return;
+  throw new Error(
+    `A task at checkpoint replan may only re-enter ready/ready (or planning/planning while planning), not ${next.status}/${next.checkpoint}.`,
+  );
+}
+
 export function assertLegalTransition(previous: TaskRecord, next: TaskRecord): void {
+  assertReplanExit(previous, next);
   if (previous.status === next.status) {
     updateTaskCheckpoint(previous, next.checkpoint, next.updatedAt);
     return;

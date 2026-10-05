@@ -4,6 +4,7 @@ import {
   locateManagedBlock,
   renderManagedBlock,
 } from "src/core/global/managed-markers.js";
+import { detectEol, withEol } from "src/core/global/toml-guard.js";
 import { decideWholeFile } from "src/core/managed/decision.js";
 import { sha256 } from "src/utils/hashing.js";
 import { entryLabel, sameEntryShape } from "src/core/global/manifest.js";
@@ -115,6 +116,11 @@ function reconcileManagedBlock(
   }
   if (located.kind === "missing") {
     if (previous === undefined || restoreDeleted) {
+      const reason = desired.conflictCheck?.(target.current);
+      if (reason !== undefined) {
+        preserve(result, label, "untracked-collision", reason);
+        return previous;
+      }
       target.current = appendManagedBlock(target.current, fragment);
       pushUnique(result.created, label);
       return item.entry;
@@ -134,7 +140,7 @@ function reconcileManagedBlock(
     pushUnique(result.unchanged, label);
     return item.entry;
   }
-  target.current = `${target.current.slice(0, located.start)}${fragment}${target.current.slice(located.end)}`;
+  target.current = `${target.current.slice(0, located.start)}${withEol(fragment, detectEol(target.current))}${target.current.slice(located.end)}`;
   pushUnique(result.updated, label);
   return item.entry;
 }

@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 
-import { finding, isTestProcess, sortFindings, type DoctorFinding } from "src/core/doctor/findings.js";
+import { finding, sortFindings, type DoctorFinding } from "src/core/doctor/findings.js";
+import { isTestProcess } from "src/utils/test-process.js";
 import { inspectPlatform, type DoctorTarget } from "src/core/doctor/global-inspect.js";
 import { finalizeInspection, safeCommandLookup } from "src/core/doctor/global-status.js";
 import type {

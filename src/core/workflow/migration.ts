@@ -58,11 +58,24 @@ function assertMigrationPreservesRequiredChecks(previous: TaskRecord, next: Task
       candidate.command !== check.command ||
       candidate.scope !== check.scope ||
       candidate.required !== check.required ||
-      !sameCoverage
+      !sameCoverage ||
+      !sameInputs(previous, check, candidate)
     ) {
       throw new Error(`TaskRecord migration to v3 must preserve required validation check ${check.id} exactly.`);
     }
   }
+}
+
+/** A v2 check declared its inputs, so they carry over unchanged minus the retired @task-contract token. */
+function sameInputs(
+  previous: TaskRecord,
+  check: TaskRecord["validationPlan"][number],
+  candidate: TaskRecord["validationPlan"][number],
+): boolean {
+  if (previous.schemaVersion !== 2) return true;
+  const unique = (values: readonly string[] | undefined) => [...new Set(values ?? [])].sort(compareCodeUnits);
+  const carried = unique(check.inputs?.filter((input) => input !== "@task-contract"));
+  return carried.length === 0 || semanticJsonEqual(unique(candidate.inputs), carried);
 }
 
 function assertMigrationEvidence(previous: TaskRecord, next: TaskRecord): void {

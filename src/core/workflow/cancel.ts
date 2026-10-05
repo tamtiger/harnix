@@ -13,10 +13,20 @@ import { nowInstant } from "src/utils/clock.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import type { WorkflowFinishDependencies } from "./finish.js";
 import { currentInstant, journalFilePath, refreshLinkedEpicMarkdown } from "./support.js";
+import { withWorkflowLock } from "./workflow-lock.js";
 
 export async function cancelWorkflow(root: string, envelope: unknown, injectedNow?: string): Promise<TaskRecord> {
-  const now = await currentInstant(root, injectedNow);
   const harnixRoot = await resolveSafeHarnixPath(root);
+  return withWorkflowLock(harnixRoot, () => cancelLocked(root, harnixRoot, envelope, injectedNow));
+}
+
+async function cancelLocked(
+  root: string,
+  harnixRoot: string,
+  envelope: unknown,
+  injectedNow: string | undefined,
+): Promise<TaskRecord> {
+  const now = await currentInstant(root, injectedNow);
   const task = await resolveActiveTask(harnixRoot);
   if (!task) throw new Error("Workflow cancellation requires an active task.");
   const recovering = task.status === "cancelled" && task.checkpoint === "cancelling";

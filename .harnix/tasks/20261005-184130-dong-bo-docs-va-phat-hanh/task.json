@@ -1,0 +1,190 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-184130-dong-bo-docs-va-phat-hanh",
+  "title": "Đồng bộ tài liệu, skill, test cấu trúc và phát hành 2.0.5",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Làm test cấu trúc đủ chặt, sửa mặc định --init, dọn skill/tài liệu lỗi thời, rồi phát hành 2.0.5 với toàn bộ chuỗi acceptance xanh (R-022, R-029, R-030, R-033, R-035 và các mục P3).",
+  "nonGoals": [
+    "Không thêm tính năng mới",
+    "Không commit hay publish khi chưa được duyệt"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`test/workflow/architecture.test.ts` bắt dynamic `import()`, side-effect import và `fs` không có tiền tố `node:`, cấm `core` import `configurators`; có fixture vi phạm chứng minh bộ quét hoạt động.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "`workflow --init`: lệnh và input mặc định lấy từ `verify-plan`, `--mode` không hợp lệ báo lỗi, slug không kết thúc bằng `-`, thời gian chỉ qua `src/utils/clock.ts`, `--input` tách theo dấu phẩy như `--set-check`.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Skill và reference không chứa quy ước riêng của repo Harnix: bỏ `pnpm format`/`pnpm lint` cứng, `pnpm version:sync` và yêu cầu mirror `test/unit` khỏi `harnix-implement` và `harnix-plan` (thay bằng lệnh từ `verify-plan`/`project-facts`); `harnix-plan` bỏ yêu cầu dòng `**Verifies:**` còn sót từ ready-trace grammar; `references/replan.md` nhắc `--replace-check` và quy tắc bản thay phải khác `command`, `inputs` hoặc `cwd`; `references/ready-review.md` nêu suite check phải chạy lệnh test của dự án.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Số platform là 6 ở mọi bề mặt người dùng thấy: help `--platform` (`src/cli-workflow-commands.ts`), mô tả chương trình (`src/cli-program.ts`), thông báo uninstall (`src/core/global/uninstall.ts`), hàng `setup`/`uninstall` trong `README.md`, bảng platform trong `test/README.md`, danh sách cờ trong `docs/HARNIX_PRD.md` và `docs/GLOBAL_SETUP_REFACTOR_PLAN.md`, và ghi chú registry trong `docs/UPSTREAM_MAPPING.md`; `test/unit/docs/supported-platforms.test.ts` được mở rộng để giữ danh sách này không lệch lại.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-5",
+      "text": "Quy tắc và số liệu thống nhất giữa docs, help và code: PRD:402, WORKFLOW:12 và :290 khớp WORKFLOW:136 về việc Full task và Epic luôn dừng ở `ready`/`await`; help `status --summary` ghi dưới 80 token như tài liệu; `references/evidence.md` ghi `evidence-expired` chỉ cho legacy, danh sách thư mục bỏ qua có `__pycache__` và quy tắc `.git` khớp code; `workflow --schema` transports liệt kê đủ `--init`, `--preflight`, `--snapshot`, `--inspect`; `test/README.md` ghi sàn coverage hiện hành (95, 98.6, 89); thông tin cũ trong `docs/prompts/*` (bốn platform, chín điều luật, đường dẫn máy cụ thể) được cập nhật hoặc đánh dấu lịch sử.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-6",
+      "text": "`CHANGELOG.md` không còn tên repo khách hàng; `pnpm version:sync 2.0.5 --summary ...` được chạy đúng một lần với một entry gộp toàn bộ epic hardening (gate xanh, đóng đường xanh giả, bảo toàn cấu hình global, state machine, bảo mật, tài liệu); `package.json`, CHANGELOG và template khớp nhau; `harnix doctor` không tăng cảnh báo so với trước task.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-7",
+      "text": "Cổng chất lượng xanh: `pnpm run typecheck`, `pnpm run lint` và `pnpm run test` (có coverage, không hạ ngưỡng) đều exit 0 trên cây mã cuối cùng của task.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-8",
+      "text": "Hướng dẫn multi-repo và quy tắc check mới có trong skill: reference mới `multi-repo` của `harnix-plan` (khi nào cần `cwd`, `verify-plan --recursive`, khai báo bằng `--set-check --cwd` và cần `--reason` sau planning, chạy chỉ bằng `--run-check` không truyền `--cwd`, ví dụ hai repo, các lỗi thường gặp); `references/evidence.md` mô tả `--run-check` chỉ chạy đúng `command` trong đúng `cwd`, evidence không được đề ngày tương lai và circuit breaker `stop` với lối đi `--replace-check`; skill `harnix-debug` trỏ tới breaker; cookbook trong template nhắc reference; test catalog và ngân sách instruction vẫn xanh.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-9",
+      "text": "Vệ sinh test và cấu hình: `HARNIX_UPDATE_GOLDEN` làm test thất bại khi chạy trong CI thay vì pass im lặng; sàn đếm test/assertion trong `test/unit/test-structure.test.ts` được nâng lên mức hiện tại; lý do miễn trừ sai của `src/index.ts` và comment ESLint lỗi thời (`release-v2 must remove this block`) được sửa; không thêm miễn trừ mới.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-structure",
+      "description": "Test cấu trúc, tài liệu, skill, template",
+      "command": "pnpm vitest run test/workflow test/unit",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-8",
+        "ac-9"
+      ],
+      "inputs": [
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-version",
+      "description": "Test đồng bộ phiên bản",
+      "command": "pnpm vitest run test/workflow/version-sync.test.ts test/workflow/package-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-6"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/**",
+        "test/workflow/package-contract.test.ts",
+        "test/workflow/version-sync.test.ts"
+      ]
+    },
+    {
+      "id": "check-scan",
+      "description": "scan:release sau pack:check",
+      "command": "pnpm run scan:release",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-6"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/**",
+        "src/**"
+      ]
+    },
+    {
+      "id": "check-typecheck",
+      "description": "pnpm run typecheck exit 0",
+      "command": "pnpm run typecheck",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-7"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "tsconfig.json"
+      ]
+    },
+    {
+      "id": "check-lint",
+      "description": "pnpm run lint (format:check + ESLint) exit 0",
+      "command": "pnpm run lint",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-7"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "pnpm run test (vitest + coverage) exit 0",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-7"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [
+    "test/workflow/architecture.test.ts",
+    "src/core/workflow/init-task.ts",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-plan/SKILL.md",
+    "docs/HARNIX_PRD.md",
+    "README.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "epicId": "20261005-184125-harnix-hardening-2-0-5",
+  "createdAt": "2026-10-05T18:41:25.132+07:00",
+  "updatedAt": "2026-10-05T20:08:35.529+07:00"
+}

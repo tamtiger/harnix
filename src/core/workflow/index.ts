@@ -12,11 +12,12 @@ export {
   addCriterionWorkflow,
   addDecisionWorkflow,
   addRiskWorkflow,
-  replaceCheckWorkflow,
   setCheckWorkflow,
   setPathsWorkflow,
 } from "./plan-edit.js";
-export type { CheckEdit, PlanEditOptions, ReplaceCheckInput } from "./plan-edit.js";
+export type { CheckEdit, PlanEditOptions } from "./plan-edit.js";
+export { replaceCheckWorkflow } from "./replace-check.js";
+export type { ReplaceCheckInput } from "./replace-check.js";
 export { runCheckWorkflow } from "./run-check.js";
 export type { CheckRunner, RunCheckDependencies, RunCheckResult } from "./run-check.js";
 export { cancelWorkflow, cancelWorkflowTask } from "./cancel.js";

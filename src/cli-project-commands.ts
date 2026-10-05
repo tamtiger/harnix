@@ -1,7 +1,7 @@
 import { Option, type Command } from "commander";
 
 import { initializeProject, parseInitProfile } from "./commands/init.js";
-import { setupPlatforms } from "./commands/setup.js";
+import { setupPlatforms, type SetupPlatformsResult } from "./commands/setup.js";
 import { resolveProjectRoot } from "./utils/paths.js";
 import { updateProject } from "./commands/update.js";
 import { updateGlobalPlatforms } from "./commands/global-update.js";
@@ -93,6 +93,7 @@ export function registerProjectCommands(program: Command, programOptions: Progra
             dryRun: options.dryRun,
           });
       process.stdout.write(`${JSON.stringify(result)}\n`);
+      if (options.global) reportActionableSetupReadiness(result as SetupPlatformsResult);
     });
 
   program

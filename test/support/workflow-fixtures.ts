@@ -143,3 +143,17 @@ export async function implementingTaskV3(root: string): Promise<TaskRecordV3> {
   await saveWorkflow(root, { task: running });
   return running;
 }
+
+/** An implementing v3 task whose only required check declares no command, so any argv may run it. */
+export async function commandlessImplementingTaskV3(root: string): Promise<TaskRecordV3> {
+  const running = await implementingTaskV3(root);
+  const { id, description, scope, required, criterionIds, inputs } = running.validationPlan[0]!;
+  const revised = {
+    ...running,
+    checkpoint: "replan" as const,
+    validationPlan: [{ id, description, scope, required, criterionIds, inputs }],
+    updatedAt: "2026-08-13T00:03:00.000Z",
+  };
+  await saveWorkflow(root, { task: revised, contractRevision: { reason: "Declare the check without a command" } });
+  return revised;
+}
