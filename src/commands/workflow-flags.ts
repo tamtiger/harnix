@@ -3,6 +3,7 @@ import { BRIEF_ACTIONS, actionFlagName, briefFlagNames } from "src/core/workflow
 export interface WorkflowFlags {
   inspect?: boolean;
   preflight?: boolean;
+  init?: boolean;
   save?: boolean;
   snapshot?: boolean;
   finish?: boolean;
@@ -14,14 +15,19 @@ export interface WorkflowFlags {
   setPaths?: boolean;
   met?: boolean;
   brief?: boolean;
+  dryRun?: boolean;
   required?: boolean;
   transition?: string;
   criterion?: string;
   runCheck?: string;
   setCheck?: string;
+  replaceCheck?: string | string[];
   addCriterion?: string;
   addDecision?: string;
   addRisk?: string;
+  title?: string;
+  mode?: string;
+  goal?: string;
   check?: string;
   result?: string;
   exitCode?: string;
@@ -45,6 +51,7 @@ export interface WorkflowFlags {
 const BOOLEAN_ACTIONS = [
   "inspect",
   "preflight",
+  "init",
   "save",
   "snapshot",
   "finish",
@@ -60,6 +67,7 @@ const VALUE_ACTIONS = [
   "criterion",
   "runCheck",
   "setCheck",
+  "replaceCheck",
   "addCriterion",
   "addDecision",
   "addRisk",
@@ -96,30 +104,50 @@ const FLAG_OWNERS: readonly FlagOwner[] = [
   {
     name: "--description",
     isSet: (f) => f.description !== undefined,
-    actions: ["setCheck"],
-    hint: "workflow --set-check",
+    actions: ["setCheck", "replaceCheck"],
+    hint: "workflow --set-check or --replace-check",
   },
-  { name: "--command", isSet: (f) => f.command !== undefined, actions: ["setCheck"], hint: "workflow --set-check" },
-  { name: "--scope", isSet: (f) => f.scope !== undefined, actions: ["setCheck"], hint: "workflow --set-check" },
+  {
+    name: "--command",
+    isSet: (f) => f.command !== undefined,
+    actions: ["setCheck", "replaceCheck", "init"],
+    hint: "workflow --set-check, --replace-check or --init",
+  },
+  {
+    name: "--scope",
+    isSet: (f) => f.scope !== undefined,
+    actions: ["setCheck", "replaceCheck"],
+    hint: "workflow --set-check or --replace-check",
+  },
   {
     name: "--required/--no-required",
     isSet: (f) => f.required !== undefined,
     actions: ["setCheck"],
     hint: "workflow --set-check",
   },
-  { name: "--criteria", isSet: (f) => f.criteria !== undefined, actions: ["setCheck"], hint: "workflow --set-check" },
-  { name: "--input", isSet: (f) => listed(f.input), actions: ["setCheck"], hint: "workflow --set-check" },
+  {
+    name: "--criteria",
+    isSet: (f) => f.criteria !== undefined,
+    actions: ["setCheck", "replaceCheck"],
+    hint: "workflow --set-check or --replace-check",
+  },
+  {
+    name: "--input",
+    isSet: (f) => listed(f.input),
+    actions: ["setCheck", "replaceCheck", "init"],
+    hint: "workflow --set-check, --replace-check or --init",
+  },
   {
     name: "--reason",
     isSet: (f) => f.reason !== undefined,
-    actions: ["setCheck", "addCriterion"],
-    hint: "workflow --set-check or --add-criterion",
+    actions: ["setCheck", "addCriterion", "replaceCheck"],
+    hint: "workflow --set-check, --add-criterion or --replace-check",
   },
   {
     name: "--text",
     isSet: (f) => f.text !== undefined,
-    actions: ["addCriterion", "addDecision", "addRisk"],
-    hint: "workflow --add-criterion, --add-decision or --add-risk",
+    actions: ["addCriterion", "addDecision", "addRisk", "init"],
+    hint: "workflow --add-criterion, --add-decision, --add-risk or --init",
   },
   {
     name: "--rationale",
@@ -128,6 +156,24 @@ const FLAG_OWNERS: readonly FlagOwner[] = [
     hint: "workflow --add-decision",
   },
   { name: "--severity", isSet: (f) => f.severity !== undefined, actions: ["addRisk"], hint: "workflow --add-risk" },
+  {
+    name: "--title",
+    isSet: (f) => f.title !== undefined,
+    actions: ["init"],
+    hint: "workflow --init",
+  },
+  {
+    name: "--mode",
+    isSet: (f) => f.mode !== undefined,
+    actions: ["init"],
+    hint: "workflow --init",
+  },
+  {
+    name: "--goal",
+    isSet: (f) => f.goal !== undefined,
+    actions: ["init"],
+    hint: "workflow --init",
+  },
   {
     name: "--relevant-path",
     isSet: (f) => listed(f.relevantPath),
@@ -140,6 +186,12 @@ const FLAG_OWNERS: readonly FlagOwner[] = [
     actions: ["setPaths"],
     hint: "workflow --set-paths",
   },
+  {
+    name: "--dry-run",
+    isSet: (f) => f.dryRun === true,
+    actions: ["transition"],
+    hint: "workflow --transition",
+  },
 ];
 
 export function selectAction(flags: WorkflowFlags): string {
@@ -148,7 +200,7 @@ export function selectAction(flags: WorkflowFlags): string {
   const [only] = selected;
   if (selected.length !== 1 || only === undefined)
     throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --save, --transition, --evidence, --criterion, --migrate, --run-check, --set-check, --add-criterion, --add-decision, --add-risk, --set-paths, --schema, --snapshot, --finish, --cancel, or --learn.",
+      "workflow requires exactly one of --inspect, --preflight, --init, --save, --transition, --evidence, --criterion, --migrate, --run-check, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths, --schema, --snapshot, --finish, --cancel, or --learn.",
     );
   return only;
 }
@@ -181,6 +233,8 @@ export function assertFlagGroups(action: string, flags: WorkflowFlags): void {
   if (action === "criterion" && flags.met !== true) throw new Error("workflow --criterion requires --met.");
   if (action === "addCriterion" && flags.text === undefined)
     throw new Error("workflow --add-criterion requires --text.");
+  if (action === "replaceCheck" && flags.reason === undefined)
+    throw new Error("workflow --replace-check requires --reason.");
   assertNoteFlags(action, flags);
   if (action === "setPaths" && !listed(flags.relevantPath) && !listed(flags.relevantSpec))
     throw new Error("workflow --set-paths requires --relevant-path and/or --relevant-spec.");

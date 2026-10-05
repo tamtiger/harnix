@@ -135,7 +135,9 @@ describe("v3 input digest", () => {
     });
 
     await expect(computeInputDigest(root, taskFixture(), "nope")).rejects.toThrow("not declared");
-    await expect(computeInputDigest(root, empty, "check")).rejects.toThrow("matched no files");
+    await expect(computeInputDigest(root, empty, "check")).rejects.toThrow(
+      'Verification input pattern "missing/**" for check check matched no files.',
+    );
   });
 
   it("writes no sidecar or snapshot file", async () => {

@@ -29,8 +29,10 @@ export function resolveInvocation(
   args: readonly string[],
   platform: NodeJS.Platform = process.platform,
 ): Invocation {
+  const isBatchShim = /\.(?:cmd|bat)$/iu.test(executable);
   const bareName = !/[\\/]/u.test(executable) && !executable.includes(".");
-  if (platform !== "win32" || !bareName) return { executable, args: [...args] };
+  const needsCmd = isBatchShim || bareName;
+  if (platform !== "win32" || !needsCmd) return { executable, args: [...args] };
   const unsafe = args.find((argument) => CMD_METACHARACTERS.test(argument));
   if (unsafe !== undefined)
     throw new Error(

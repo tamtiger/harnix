@@ -45,9 +45,16 @@ export interface ValidationCheckV1 extends ValidationCheckBase {
   criterionIds?: never;
   inputs?: never;
 }
+export interface CheckBaselineWaiver {
+  result?: "pass" | "fail" | "skipped";
+  classification?: "pre-existing" | "introduced" | "environment" | "unknown";
+  authorizedBy?: string;
+  scope?: string;
+}
 export interface ValidationCheckV2 extends ValidationCheckBase {
   criterionIds: string[];
   inputs: string[];
+  baseline?: CheckBaselineWaiver;
 }
 /** v3 keeps the v2 shape; `@task-contract` is no longer a declared input because the contract is folded into every digest. */
 export type ValidationCheckV3 = ValidationCheckV2;
@@ -189,7 +196,7 @@ export const decisionKeys = new Set(["id", "rationale", "text"]);
 export const residualRiskKeys = new Set(["id", "severity", "text"]);
 export const acceptanceCriterionKeys = new Set(["evidenceIds", "id", "status", "text", "waiverReason"]);
 export const validationCheckV1Keys = new Set(["command", "description", "id", "required", "scope"]);
-export const validationCheckV2Keys = new Set([...validationCheckV1Keys, "criterionIds", "inputs"]);
+export const validationCheckV2Keys = new Set([...validationCheckV1Keys, "criterionIds", "inputs", "baseline"]);
 export const evidenceV1Keys = new Set([
   "artifactPaths",
   "checkId",

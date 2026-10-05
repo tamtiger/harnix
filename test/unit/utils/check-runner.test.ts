@@ -44,6 +44,22 @@ describe("check runner", () => {
       args: ["test"],
     });
     expect(resolveInvocation("dotnet.exe", ["test"], "win32")).toEqual({ executable: "dotnet.exe", args: ["test"] });
+    expect(resolveInvocation("npm.cmd", ["test"], "win32")).toEqual({
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "npm.cmd", "test"],
+    });
+    expect(resolveInvocation("C:\\nodejs\\npm.cmd", ["test"], "win32")).toEqual({
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "C:\\nodejs\\npm.cmd", "test"],
+    });
+    expect(resolveInvocation("build.bat", ["arg"], "win32")).toEqual({
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "build.bat", "arg"],
+    });
+    expect(resolveInvocation("npm.cmd", ["test"], "linux")).toEqual({
+      executable: "npm.cmd",
+      args: ["test"],
+    });
   });
 
   it("rejects cmd metacharacters in arguments for the Windows shim route", () => {

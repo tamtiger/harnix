@@ -1,0 +1,141 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-134655-windows-runner-glob-validation",
+  "title": "Khac phuc Windows spawn runner cho .cmd/.bat va tang cuong chan doan input globs",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sua loi spawn EINVAL khi chay cac lenh .cmd/.bat tren Windows qua check-runner va cai thien do ro rang cua thong bao loi khi input globs khong match file nao.",
+  "nonGoals": [
+    "Khong thuc thi shell arbitrary khong an toan",
+    "Khong bo qua kiem tra an toan ky tu cmd"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "check-runner nhan dien cac tep .cmd, .bat tren Windows va route an toan qua cmd.exe /d /s /c ma khong bi spawn EINVAL",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-windows-runner-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Validation input globs va computeInputDigest thong bao chinh xac glob nao khong match file nao thay vi loi chung chung",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-input-globs-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toan bo test suite unit, workflow va acceptance cua Harnix vuot qua 100% exit code 0",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-input-globs",
+      "description": "Unit test chan doan loi chi tiet khi input glob khong khop",
+      "command": "pnpm vitest run test/unit/core/tasks/task-validate-contracts.test.ts test/unit/core/verification/input-digest.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/tasks/task-validate-contracts.ts",
+        "src/core/verification/input-digest.ts",
+        "test/unit/core/tasks/task-validate-contracts.test.ts",
+        "test/unit/core/verification/input-digest.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Kiem thu hoi quy toan bo he thong",
+      "command": "pnpm run test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-windows-runner",
+      "description": "Unit test cho check-runner voi cac launcher .cmd/.bat tren Windows",
+      "command": "pnpm vitest run test/unit/utils/check-runner.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/utils/check-runner.ts",
+        "test/unit/utils/check-runner.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-windows-runner-1",
+      "checkId": "check-windows-runner",
+      "recordedAt": "2026-10-05T13:54:14.701+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "831fe917d0ccfeabf8d2f5285f5b14b17d8555ef2baac3a8e0e5ed936304ac7c"
+    },
+    {
+      "id": "ev-check-input-globs-1",
+      "checkId": "check-input-globs",
+      "recordedAt": "2026-10-05T13:54:23.618+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e3b9b621a7bb95c461b179902411709905c306e6840f29692495568ac440f2dc"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T13:54:52.976+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "14e8b2dee8872cec579491bf81f504568c152b5ab4f8a32a9379026be83cf0ef"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T13:57:02.843+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ff47ab31d97772dfb4ae4dc19dab0639bfac0a5248f3db99ba2bf025b662d8ea"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task-validate-contracts.ts",
+    "src/core/verification/input-digest.ts",
+    "src/utils/check-runner.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-05T13:46:54.585+07:00",
+  "updatedAt": "2026-10-05T13:57:29.144+07:00",
+  "epicId": "20261005-134654-reliability-ergonomics-hardening",
+  "completedAt": "2026-10-05T13:57:29.144+07:00"
+}

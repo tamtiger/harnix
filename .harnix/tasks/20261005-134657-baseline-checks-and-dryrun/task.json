@@ -1,0 +1,105 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-134657-baseline-checks-and-dryrun",
+  "title": "Co che baseline check truoc freeze contract va dry-run transition",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Them kiem tra baseline cho cac required checks truoc khi dong bang contract tai ready va ho tro transition dry-run de phat hien som loi cau hinh.",
+  "nonGoals": [
+    "Khong tu dong bo qua check loi neu khong co waiver",
+    "Khong vi pham quy tac ready gate"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Ho tro flag --transition ready/ready --dry-run de kiem tra truoc cac dieu kien freeze ma khong luu state",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-baseline-dryrun-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Canh bao hoac chan chuyen ready khi required checks chua duoc chay baseline lan nao",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-baseline-dryrun-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toan bo test suite unit, workflow va acceptance cua Harnix vuot qua 100% exit code 0",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-baseline-dryrun",
+      "description": "Unit test cho dry-run transition va baseline checking",
+      "command": "pnpm vitest run test/unit/core/workflow/transition.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/ready.ts",
+        "src/core/workflow/transition.ts",
+        "test/unit/core/workflow/transition.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Kiem thu hoi quy toan bo he thong",
+      "command": "pnpm run test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-baseline-dryrun-1",
+      "checkId": "check-baseline-dryrun",
+      "recordedAt": "2026-10-05T14:32:20.308+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "32354d9ade765d5181cf6df53c96543d0368ba8b33f127ea335cfb1cd5132751"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T14:33:22.703+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2266d8519703d244a8bf33d12a596b4ea9757d1e8743024f4958657d85ff19f1"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/ready.ts",
+    "src/core/workflow/transition.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-05T13:46:54.585+07:00",
+  "updatedAt": "2026-10-05T14:33:38.121+07:00",
+  "epicId": "20261005-134654-reliability-ergonomics-hardening",
+  "completedAt": "2026-10-05T14:33:38.121+07:00"
+}

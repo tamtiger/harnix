@@ -164,7 +164,9 @@ function assertEvidencedChecksRetained(previous: TaskRecordV3, next: TaskRecordV
       semanticJsonEqual({ ...candidate, required: true }, check);
     const hasReplacement = next.validationPlan.some(
       (replacement) =>
-        !priorCheckIds.has(replacement.id) &&
+        (!priorCheckIds.has(replacement.id) ||
+          (replacement.id !== check.id &&
+            !evidenceByCheck.get(replacement.id)?.some((e) => e.result === "pass"))) &&
         replacement.required &&
         check.criterionIds.every((criterionId) => replacement.criterionIds.includes(criterionId)),
     );

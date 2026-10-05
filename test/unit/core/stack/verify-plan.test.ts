@@ -122,4 +122,32 @@ describe("buildVerifyPlan (ac-no-tests & verify-plan)", () => {
     expect(pkgB?.commands.test).toBe("vitest run");
     expect(plan.hasTests).toBe(true);
   });
+
+  it("discovers nested .NET solutions and sub-repositories when recursive option is true", async () => {
+    const root = await createFixture();
+    await writeFixture(
+      root,
+      "package.json",
+      JSON.stringify({
+        scripts: { test: "vitest run" },
+      }),
+    );
+    await writeFixture(root, "test/sample.test.ts", "");
+
+    // Nested .NET sub-repositories
+    await writeFixture(root, "services/payment-core/PaymentCore.sln", "");
+    await writeFixture(root, "services/payment-core/PaymentCore.csproj", "");
+    await writeFixture(root, "services/payment-gateway/Gateway.csproj", "");
+
+    const plan = await buildVerifyPlan(root, { recursive: true });
+    const corePkg = plan.packages.find((p) => p.path === "services/payment-core");
+    const gatewayPkg = plan.packages.find((p) => p.path === "services/payment-gateway");
+
+    expect(corePkg).toBeDefined();
+    expect(corePkg?.ecosystem).toBe("dotnet");
+    expect(corePkg?.commands.test).toBe("dotnet test");
+
+    expect(gatewayPkg).toBeDefined();
+    expect(gatewayPkg?.ecosystem).toBe("dotnet");
+  });
 });

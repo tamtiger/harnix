@@ -27,7 +27,7 @@ Plan-only requests stop at `ready`. Full tasks and Epics also stop at `ready` (`
 
 ## Public commands
 
-`harnix status` (bounded read-only projection of the active task, progress, context freshness and next action) and `harnix status --explain` (required-check digest freshness with reason codes and exact readiness/completion blocker codes, without running anything); `harnix tasks` (bounded local index); `harnix resume <task-id> [--dry-run]` restores only an explicitly selected unfinished task's pointer and refuses collisions; `harnix pause [--dry-run]` clears only the pointer; `harnix epic [--limit N]` / `harnix epic <epic-id>`; `harnix verify-plan` (deterministic test/lint/typecheck/format commands per package); `harnix context-report --platform <p>` (effective hook-context metadata; `<p>` is `kiro`, `antigravity`, `codex`, `claude`, `opencode` or `cursor`, and the flag is required, as it is for the hook command `harnix context --platform <p>`); `harnix repo-map --query|--impact` (bounded navigation hints only; platform hooks must not invoke repository-map queries, impact or refreshes); `harnix skill [name] [--reference topic]`; `harnix doctor`, `harnix update`. Private task prose, commands, prompts, hashes, secrets and absolute paths are omitted from their output.
+`harnix status` (bounded read-only projection of the active task, progress, context freshness and next action) and `harnix status --explain` (required-check digest freshness with reason codes and exact readiness/completion blocker codes, without running anything); `harnix tasks` (bounded local index); `harnix resume <task-id> [--dry-run]` restores only an explicitly selected unfinished task's pointer and refuses collisions; `harnix pause [--dry-run]` clears only the pointer; `harnix epic [--limit N]` / `harnix epic <epic-id>`; `harnix verify-plan [--recursive]` (deterministic test/lint/typecheck/format commands per package and nested repositories); `harnix context-report --platform <p>` (effective hook-context metadata; `<p>` is `kiro`, `antigravity`, `codex`, `claude`, `opencode` or `cursor`, and the flag is required, as it is for the hook command `harnix context --platform <p>`); `harnix repo-map --query|--impact` (bounded navigation hints only; platform hooks must not invoke repository-map queries, impact or refreshes); `harnix skill [name] [--reference topic]`; `harnix doctor`, `harnix update`. Private task prose, commands, prompts, hashes, secrets and absolute paths are omitted from their output.
 
 ## Task state
 
@@ -69,9 +69,12 @@ The commands are the same in both shells; double-quote text in PowerShell and si
 
 ```text
 harnix workflow --preflight                  # clock.now and clock.idPrefix are the only time source
+harnix workflow --init --title "<task title>" [--mode lite|full] [--goal "<goal>"] [--text "<criterion>"] [--command "<cmd>"] [--input "src/**"] --brief
+harnix workflow --transition ready/ready --dry-run --brief
 harnix workflow --run-check <check-id> --brief -- pnpm test    # snapshot, run, snapshot and record in one call
 harnix workflow --evidence --check <check-id> --result pass --exit-code 0 --summary "<command> - <result>" --brief
 harnix workflow --criterion <criterion-id>,<criterion-id> --met --brief
+harnix workflow --replace-check <old-check-id> <new-check-id> --reason "<why, required>" [--description "<text>" --command "<cmd>" --scope focused --input "src/**" --criteria <criterion-id>] --brief
 harnix workflow --transition verifying/finishing --brief
 harnix workflow --set-check <check-id> --description "<text>" --scope focused --command "<command>" --criteria <criterion-id> --input "src/**" --reason "<why, 10-1000 characters, required after planning>" --brief
 harnix workflow --add-criterion <criterion-id> --text "<criterion text>" --check <check-id> --reason "<why>" --brief

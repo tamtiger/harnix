@@ -59,7 +59,8 @@ export async function computeInputDigest(
       ignore: buildGlobIgnores(targeted),
       onlyFiles: true,
     });
-    if (matches.length === 0) throw new Error(`Verification input pattern for check ${checkId} matched no files.`);
+    if (matches.length === 0)
+      throw new Error(`Verification input pattern "${input}" for check ${checkId} matched no files.`);
     let kept = 0;
     for (const match of matches) {
       const normalized = normalizeRepositoryPath(match);
@@ -67,7 +68,10 @@ export async function computeInputDigest(
       kept += 1;
       if (!workflowOwned.has(normalized)) paths.add(normalized);
     }
-    if (kept === 0) throw new Error(`Verification input pattern for check ${checkId} matched no files.`);
+    if (kept === 0)
+      throw new Error(
+        `Verification input pattern "${input}" for check ${checkId} matched no files after filtering transient directories.`,
+      );
   }
   const entries = await hashEntries(projectRoot, [...paths].sort(compareText), checkId);
   const taskContractHash = hashText(canonicalTaskContract(task));

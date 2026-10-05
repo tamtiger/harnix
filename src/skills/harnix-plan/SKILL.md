@@ -2,7 +2,7 @@
 name: harnix-plan
 description: Use when a Harnix request needs triage, requirements, planning, a trustworthy ready gate, a replan, a legacy-task migration or an epic before implementation.
 metadata:
-  version: "2.0.2"
+  version: "2.0.3"
 ---
 
 # Plan a Harnix task
@@ -29,7 +29,7 @@ Anything that is not Bypass is tracked. **Lite**: localized, low-risk, obvious c
 
 ## Build the task
 
-- Create new tasks as TaskRecord schema v3 with one `harnix workflow --save` envelope. Read `harnix workflow --schema` once and build the envelope correctly the first time instead of discovering the shape by failing: no unknown fields; every criterion carries `id`, `text`, `status` and `evidenceIds: []`; each check `scope` is `focused` or `full` (never `project`); a required check needs non-empty `criterionIds` and `inputs`, and both arrays are sorted and unique; unit tests must mirror their `src/` modules in `test/unit/` per test-structure rules; every non-waived criterion is covered by a required check; include one project-level suite check (`scope: full`, source-and-test inputs) from `harnix verify-plan`. A `--save` now reports every independent problem at once, so fix them together. ID = `clock.idPrefix` + lowercase hyphenated slug; all timestamps from `clock`.
+- Create new tasks as TaskRecord schema v3 with one `harnix workflow --save` envelope, or use `harnix workflow --init --title <title> [--mode lite|full] [--goal <goal>] [--text <criterion>] [--command <cmd>] [--input <glob>]` for safe flag-based creation without manual JSON serialization. If using `--save`: read `harnix workflow --schema` once; no unknown fields; every criterion carries `id`, `text`, `status` and `evidenceIds: []`; each check `scope` is `focused` or `full` (never `project`); a required check needs non-empty `criterionIds` and `inputs`, and both arrays are sorted and unique; unit tests must mirror their `src/` modules in `test/unit/` per test-structure rules; every non-waived criterion is covered by a required check; include one project-level suite check (`scope: full`, source-and-test inputs) from `harnix verify-plan` (use `harnix verify-plan --recursive` for multi-repo workspaces or nested projects). A `--save` reports every independent problem at once, so fix them together. ID = `clock.idPrefix` + lowercase hyphenated slug; all timestamps from `clock`.
 - A Full task does not need `prd.md`/`plan.md` in the create envelope: save the record light (no `artifacts`), then write `prd.md` and `plan.md` directly with the editor tool. The ready gate enforces non-empty `prd.md`/`plan.md` with a checklist item, so there is no reason to inline large prose as JSON.
 - Persist `planning` before any product edit. Record outcome, non-goals, observable acceptance criteria, relevant paths/specs, affected contracts, risks and rollback, and validation.
 - Edit obligations with flags, not JSON: `--set-check`, `--add-criterion`, `--set-paths`.
@@ -38,7 +38,7 @@ Anything that is not Bypass is tracked. **Lite**: localized, low-risk, obvious c
 
 ## Ready
 
-Run the ready self-review (`./references/ready-review.md` or `harnix skill harnix-plan --reference ready-review`) and fix every gap first. Then `harnix workflow --transition ready/ready`. A plan-only request, a Full task, or an Epic stops here (`nextStage: await`): present the plan/epic summary, key decisions and checklist to the user, and wait for explicit approval before implementation. For an authorized Lite task only, continue with `harnix-implement` without another approval.
+Run the ready self-review (`./references/ready-review.md` or `harnix skill harnix-plan --reference ready-review`) and fix every gap first. Test ready conditions in advance with `harnix workflow --transition ready/ready --dry-run` to detect empty input globs or missing checks without altering task state. Then `harnix workflow --transition ready/ready`. A plan-only request, a Full task, or an Epic stops here (`nextStage: await`): present the plan/epic summary, key decisions and checklist to the user, and wait for explicit approval before implementation. For an authorized Lite task only, continue with `harnix-implement` without another approval.
 
 ## Technique skills
 

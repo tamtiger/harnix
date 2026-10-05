@@ -150,13 +150,26 @@ export function validateV2Contracts(value: Record<string, unknown>, checks: Map<
 }
 
 function assertV3CheckInputs(check: ValidationCheckV3): void {
-  if (
-    !Array.isArray(check.inputs) ||
-    !check.inputs.every(isSafeInputGlob) ||
-    !isSortedUnique(check.inputs) ||
-    (check.required && check.inputs.length === 0)
-  ) {
-    throw new TaskValidationError("TaskRecord v3 validation inputs are invalid.");
+  if (!Array.isArray(check.inputs)) {
+    throw new TaskValidationError(
+      `TaskRecord v3 validation inputs are invalid for check "${check.id}": inputs must be an array.`,
+    );
+  }
+  if (check.required && check.inputs.length === 0) {
+    throw new TaskValidationError(
+      `TaskRecord v3 validation inputs are invalid for check "${check.id}": required check must declare at least one input glob.`,
+    );
+  }
+  const unsafe = check.inputs.find((input) => !isSafeInputGlob(input));
+  if (unsafe !== undefined) {
+    throw new TaskValidationError(
+      `TaskRecord v3 validation inputs are invalid for check "${check.id}": unsafe or invalid glob pattern ${JSON.stringify(unsafe)}.`,
+    );
+  }
+  if (!isSortedUnique(check.inputs)) {
+    throw new TaskValidationError(
+      `TaskRecord v3 validation inputs are invalid for check "${check.id}": inputs must be sorted and unique without duplicates.`,
+    );
   }
 }
 

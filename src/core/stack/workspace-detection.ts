@@ -10,7 +10,10 @@ export interface WorkspacePackage extends EcosystemVerifyResult {
   path: string;
 }
 
-export async function detectWorkspaces(projectRoot: string): Promise<WorkspacePackage[]> {
+export async function detectWorkspaces(
+  projectRoot: string,
+  options?: { recursive?: boolean },
+): Promise<WorkspacePackage[]> {
   const root = resolve(projectRoot);
   const packagePaths = new Set<string>();
 
@@ -29,8 +32,8 @@ export async function detectWorkspaces(projectRoot: string): Promise<WorkspacePa
   // 5. Maven multi-module
   await collectMavenWorkspaces(root, packagePaths);
 
-  // If no explicit workspace config found, discover all nested manifests
-  if (packagePaths.size === 0) {
+  // If no explicit workspace config found or recursive requested, discover all nested manifests
+  if (packagePaths.size === 0 || options?.recursive === true) {
     await discoverNestedManifests(root, root, 0, packagePaths);
   }
 
@@ -164,13 +167,17 @@ async function discoverNestedManifests(
     const entries = await readdir(current, { withFileTypes: true });
     const fileNames = new Set(entries.filter((e) => e.isFile()).map((e) => e.name));
     const rel = relative(root, current).replaceAll("\\", "/");
-    if (
-      rel !== "" &&
-      (fileNames.has("package.json") ||
-        fileNames.has("Cargo.toml") ||
-        fileNames.has("go.mod") ||
-        fileNames.has("pom.xml"))
-    ) {
+    const hasProjectFile =
+      fileNames.has("package.json") ||
+      fileNames.has("Cargo.toml") ||
+      fileNames.has("go.mod") ||
+      fileNames.has("pom.xml") ||
+      fileNames.has("pyproject.toml") ||
+      fileNames.has("requirements.txt") ||
+      entries.some(
+        (e) => e.isFile() && (e.name.endsWith(".sln") || e.name.endsWith(".csproj") || e.name.endsWith(".fsproj")),
+      );
+    if (rel !== "" && hasProjectFile) {
       packagePaths.add(normalizeRepositoryPath(rel, { allowRoot: false }));
     }
     for (const entry of entries) {

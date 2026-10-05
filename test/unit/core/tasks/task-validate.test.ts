@@ -127,6 +127,23 @@ describe("TaskRecord schema v3", () => {
     expect(() => validateTask(v3({ validationPlan: noCriteria }))).toThrow(TaskValidationError);
   });
 
+  it("provides actionable error message naming check ID when v3 check inputs are invalid", () => {
+    const noInputs = [
+      {
+        id: "check-fe",
+        description: "FE tests",
+        scope: "focused",
+        required: true,
+        command: "npm test",
+        criterionIds: ["ac-one"],
+        inputs: [],
+      },
+    ];
+    expect(() => validateTask(v3({ validationPlan: noInputs }))).toThrow(
+      /validation inputs are invalid for check "check-fe": required check must declare at least one input glob/iu,
+    );
+  });
+
   it("requires every non-waived criterion to be covered by a required check", () => {
     const criteria = [
       { id: "ac-one", text: "One", status: "pending", evidenceIds: [] },

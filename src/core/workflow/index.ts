@@ -10,10 +10,11 @@ export {
   addCriterionWorkflow,
   addDecisionWorkflow,
   addRiskWorkflow,
+  replaceCheckWorkflow,
   setCheckWorkflow,
   setPathsWorkflow,
 } from "./plan-edit.js";
-export type { CheckEdit, PlanEditOptions } from "./plan-edit.js";
+export type { CheckEdit, PlanEditOptions, ReplaceCheckInput } from "./plan-edit.js";
 export { runCheckWorkflow } from "./run-check.js";
 export type { CheckRunner, RunCheckDependencies, RunCheckResult } from "./run-check.js";
 export { cancelWorkflow, cancelWorkflowTask } from "./cancel.js";
@@ -24,6 +25,8 @@ export type { WorkflowSaveArtifacts, WorkflowSaveEnvelope } from "./envelope.js"
 export { finishWorkflow, finishWorkflowReport, finishWorkflowTask } from "./finish.js";
 export type { FinishLearningReport, FinishReport, WorkflowFinishDependencies } from "./finish.js";
 export { inspectWorkflow } from "./inspect.js";
+export { initTaskWorkflow } from "./init-task.js";
+export type { InitTaskOptions } from "./init-task.js";
 export { recordLearningWorkflow, recordWorkflowLearning } from "./learn.js";
 export type { WorkflowLearningResult } from "./learn.js";
 export { preflightWorkflow } from "./preflight.js";

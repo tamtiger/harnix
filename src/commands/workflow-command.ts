@@ -1,5 +1,6 @@
 import type { Command } from "commander";
 
+import type { TaskMode } from "src/core/tasks/task.js";
 import {
   addCriterionWorkflow,
   addDecisionWorkflow,
@@ -10,11 +11,13 @@ import {
   briefTask,
   cancelWorkflow,
   finishWorkflowReport,
+  initTaskWorkflow,
   inspectWorkflow,
   markCriteriaMetWorkflow,
   migrateToV3Workflow,
   preflightWorkflow,
   recordLearningWorkflow,
+  replaceCheckWorkflow,
   runCheckWorkflow,
   saveWorkflow,
   setCheckWorkflow,
@@ -99,6 +102,17 @@ const HANDLERS: Record<string, Handler> = {
   },
   schema: () => Promise.resolve(workflowEnvelopeSchema()),
   snapshot: ({ root, flags }) => snapshotWorkflow(root, flags.check as string),
+  init: async (context) => {
+    const task = await initTaskWorkflow(context.root, {
+      title: context.flags.title as string,
+      mode: context.flags.mode as TaskMode,
+      goal: context.flags.goal,
+      criterion: context.flags.text,
+      command: context.flags.command,
+      input: context.flags.input,
+    });
+    return presentTask(context, task);
+  },
   save: async (context) => {
     const envelope = await readRequired(context, "Workflow save", "Workflow save requires valid JSON.");
     return presentTask(context, await saveWorkflow(context.root, envelope));
@@ -107,7 +121,15 @@ const HANDLERS: Record<string, Handler> = {
     const [status, checkpoint, ...rest] = (context.flags.transition as string).split("/");
     if (!status || !checkpoint || rest.length > 0)
       throw new Error("workflow --transition requires <status>/<checkpoint>.");
-    return presentTask(context, await transitionWorkflow(context.root, status, checkpoint));
+    const result = await transitionWorkflow(
+      context.root,
+      status,
+      checkpoint,
+      undefined,
+      context.flags.dryRun === true,
+    );
+    if (context.flags.dryRun === true) return result;
+    return presentTask(context, result as TaskRecord);
   },
   evidence: async (context) => {
     const { flags, root } = context;
@@ -144,6 +166,29 @@ const HANDLERS: Record<string, Handler> = {
         command: flags.command,
         scope: flags.scope,
         required: flags.required,
+        criteria: flags.criteria === undefined ? undefined : splitList(flags.criteria),
+        inputs: flags.input && flags.input.length > 0 ? flags.input.flatMap((item) => splitList(item)) : undefined,
+      },
+      { reason: flags.reason },
+    );
+    return presentTask(context, task);
+  },
+  replaceCheck: async (context) => {
+    const { flags, root } = context;
+    const raw = Array.isArray(flags.replaceCheck) ? flags.replaceCheck.join(" ") : String(flags.replaceCheck);
+    const ids = splitList(raw);
+    if (ids.length !== 2) {
+      throw new Error("workflow --replace-check requires exactly two check IDs: <old-check-id> <new-check-id>.");
+    }
+    const [oldId, newId] = ids as [string, string];
+    const task = await replaceCheckWorkflow(
+      root,
+      {
+        oldId,
+        newId,
+        description: flags.description,
+        command: flags.command,
+        scope: flags.scope,
         criteria: flags.criteria === undefined ? undefined : splitList(flags.criteria),
         inputs: flags.input && flags.input.length > 0 ? flags.input.flatMap((item) => splitList(item)) : undefined,
       },
@@ -236,6 +281,10 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .argument("[operands...]")
     .option("--inspect", "Inspect active workflow state")
     .option("--preflight", "Inspect bounded workflow routing metadata")
+    .option("--init", "Initialize a new task record with boilerplate obligations")
+    .option("--title <title>", "Task title for --init")
+    .option("--mode <mode>", "Task mode for --init: lite or full")
+    .option("--goal <goal>", "Task goal for --init")
     .option("--save", "Persist workflow state from stdin")
     .option("--snapshot", "Snapshot one required check")
     .option("--finish", "Finish the active workflow task")
@@ -249,6 +298,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--migrate", "Migrate the active legacy task to schema v3")
     .option("--run-check <id>", "Run the command after -- against a check and record the outcome")
     .option("--set-check <id>", "Add or update one validation check of the active task")
+    .option("--replace-check <ids...>", "Replace a failed check with a new check atomically")
     .option("--add-criterion <id>", "Add one acceptance criterion (requires --text)")
     .option("--add-decision <id>", "Record one decision (requires --text and --rationale)")
     .option("--add-risk <id>", "Record one residual risk (requires --text)")
@@ -277,6 +327,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--relevant-path <path>", "Relevant path for --set-paths (repeatable)", collect, [])
     .option("--relevant-spec <path>", "Relevant spec path for --set-paths (repeatable)", collect, [])
     .option("--brief", "Print only id, status, checkpoint and updatedAt")
+    .option("--dry-run", "Validate transition conditions without persisting state")
     .action(async (operands: string[], flags: WorkflowFlags) => {
       const action = selectAction(flags);
       assertCommandShape(action, flags, operands);

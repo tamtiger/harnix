@@ -23,7 +23,10 @@ export interface VerifyPlan {
   warnings: string[];
 }
 
-export async function buildVerifyPlan(projectRoot: string): Promise<VerifyPlan> {
+export async function buildVerifyPlan(
+  projectRoot: string,
+  options?: { recursive?: boolean },
+): Promise<VerifyPlan> {
   const root = resolve(projectRoot);
   let config: HarnixConfigV2 | undefined;
   try {
@@ -33,7 +36,7 @@ export async function buildVerifyPlan(projectRoot: string): Promise<VerifyPlan> 
   }
 
   const rootDetected = await detectEcosystemVerify(root, ".");
-  const workspacePackages = await detectWorkspaces(root);
+  const workspacePackages = await detectWorkspaces(root, options);
 
   const commands: VerifyCommandConfig = {
     ...(rootDetected?.commands ?? {}),

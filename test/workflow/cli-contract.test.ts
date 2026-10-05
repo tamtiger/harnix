@@ -61,6 +61,10 @@ describe("CLI command contract", () => {
     expect(workflow?.options.map((option) => option.long)).toEqual([
       "--inspect",
       "--preflight",
+      "--init",
+      "--title",
+      "--mode",
+      "--goal",
       "--save",
       "--snapshot",
       "--finish",
@@ -74,6 +78,7 @@ describe("CLI command contract", () => {
       "--migrate",
       "--run-check",
       "--set-check",
+      "--replace-check",
       "--add-criterion",
       "--add-decision",
       "--add-risk",
@@ -99,6 +104,7 @@ describe("CLI command contract", () => {
       "--relevant-path",
       "--relevant-spec",
       "--brief",
+      "--dry-run",
     ]);
   });
 

@@ -233,8 +233,9 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
   program
     .command("verify-plan")
     .description("Inspect deterministic test, lint, typecheck, and format commands for this project and its packages")
-    .action(async () => {
-      const plan = await inspectVerifyPlan(process.cwd());
+    .option("--recursive", "Discover nested repositories, solutions and packages recursively")
+    .action(async (options: { recursive?: boolean }) => {
+      const plan = await inspectVerifyPlan(process.cwd(), options);
       process.stdout.write(`${JSON.stringify(plan)}\n`);
     });
 

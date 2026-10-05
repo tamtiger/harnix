@@ -1,0 +1,13 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261005-134654-reliability-ergonomics-hardening",
+  "title": "Hardening do tin cay thuc thi check va cong thai hoc workflow Harnix",
+  "goal": "Giai quyet triet de 6 van de lon gap phai trong thuc te: loi Windows spawn EINVAL khi chay .cmd, thieu validate input globs, thieu baseline check truoc khi freeze contract, thieu atomic replacement cho failed check, thieu multi-repo discovery trong verify-plan, va rao can thao tac PowerShell CLI.",
+  "nonGoals": [
+    "Khong thay doi kien truc luu tru local cua .harnix",
+    "Khong bo sung network telemetry hoac daemon nen"
+  ],
+  "createdAt": "2026-10-05T13:46:54.585+07:00",
+  "updatedAt": "2026-10-05T13:46:54.585+07:00"
+}

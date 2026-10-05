@@ -1,0 +1,108 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-134658-multirepo-discovery-and-task-cli",
+  "title": "Ho tro multi-repository discovery trong verify-plan va CLI tao task tien dung",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bo sung kha nang phat hien da repository/solution long nhau trong verify-plan va CLI tien dung de khoi tao task ma khong can dung hash literal phuc tap trong shell.",
+  "nonGoals": [
+    "Khong bien Harnix thanh monorepo build tool chuyen dung",
+    "Khong thay doi cau truc TaskRecord schema v3"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "verify-plan ho tro quet sau cac package/repository con long nhau qua --recursive",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-discovery-and-cli-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Bo sung lenh hoac flag CLI (nhu harnix workflow --init hoac tuong duong) ho tro tao task an toan",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-discovery-and-cli-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toan bo test suite unit, workflow va acceptance cua Harnix vuot qua 100% exit code 0",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-discovery-and-cli",
+      "description": "Unit test cho multi-repo discovery va task init CLI",
+      "command": "pnpm vitest run test/unit/core/stack/verify-plan.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/workflow-command.ts",
+        "src/core/stack/verify-plan.ts",
+        "src/core/stack/workspace-detection.ts",
+        "test/unit/core/stack/verify-plan.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Kiem thu hoi quy toan bo he thong",
+      "command": "pnpm run test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-discovery-and-cli-1",
+      "checkId": "check-discovery-and-cli",
+      "recordedAt": "2026-10-05T14:45:33.179+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7966b379d2584078ded92fe9378d1e7c940b98425817f77c0d0a2f98e6c11304"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T14:46:49.529+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2279ea205ac19c9269dfc306e312251378b2acce2685e9c28cd9c7232118c009"
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-command.ts",
+    "src/core/stack/verify-plan.ts",
+    "src/core/stack/workspace-detection.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-05T13:46:54.585+07:00",
+  "updatedAt": "2026-10-05T14:47:08.313+07:00",
+  "epicId": "20261005-134654-reliability-ergonomics-hardening",
+  "completedAt": "2026-10-05T14:47:08.313+07:00"
+}

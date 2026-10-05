@@ -29,11 +29,12 @@ describe("workflow flag validation", () => {
   it("selects exactly one action", () => {
     expect(selectAction({ inspect: true })).toBe("inspect");
     expect(selectAction({ setCheck: "c" })).toBe("setCheck");
+    expect(selectAction({ replaceCheck: ["c", "n"] })).toBe("replaceCheck");
     expect(selectAction({ addCriterion: "c", text: "t" })).toBe("addCriterion");
     expect(selectAction({ setPaths: true })).toBe("setPaths");
     expect(() => selectAction({})).toThrow(/exactly one of/u);
     expect(() => selectAction({ setPaths: true, inspect: true })).toThrow(
-      /--set-check, --add-criterion, --add-decision, --add-risk, --set-paths/u,
+      /--set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths/u,
     );
   });
 

@@ -4,6 +4,19 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.0.3] - 2026-10-05
+
+### Added
+
+- **Multi-repository Discovery cho verify-plan:** Bổ sung flag `--recursive` cho `harnix verify-plan` tự động quét sâu các solution .NET (`.sln`, `.csproj`), package Python (`pyproject.toml`, `requirements.txt`), Node, Go, Rust nằm trong các thư mục và repository con lồng nhau.
+- **Khởi tạo Task nhanh qua CLI:** Bổ sung action `workflow --init --title <title> [--mode lite|full] [--goal <goal>] [--text <criterion>] [--command <cmd>] [--input <glob>]` khởi tạo tự động TaskRecord v3 chuẩn chỉnh và kích hoạt active task mà không cần soạn JSON phức tạp qua shell.
+- **Chẩn đoán Dry-run & Baseline Checks:** Bổ sung cờ `--dry-run` cho `workflow --transition <status>/<checkpoint>` kiểm tra trước toàn diện các điều kiện ready (criteria, suite gate, artifacts, input globs, baseline status) mà không lưu state; bổ sung schema `baseline` waiver vào `ValidationCheck` cho phép ghi nhận miễn trừ các lỗi pre-existing ngoài phạm vi task.
+- **Thay thế nguyên tử validation check:** Bổ sung flag `--replace-check <old> <new> --reason "..."` cho `harnix workflow` thực hiện retirement check cũ đã fail và kích hoạt check thay thế mới trong một transaction duy nhất, bảo toàn tiêu chí nghiệm thu mà không vi phạm hợp đồng bất biến.
+
+### Fixed
+
+- **Windows Runner & Input Globs:** Khắc phục lỗi `spawn EINVAL` trên Windows khi chạy lệnh `.cmd`/`.bat` qua `workflow --run-check` bằng cách chuyển qua `cmd.exe /d /s /c`; cải thiện thông báo lỗi chỉ đích danh pattern input glob không khớp và ID check vi phạm.
+
 ## [2.0.2] - 2026-10-03
 
 ### Added

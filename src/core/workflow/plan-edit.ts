@@ -229,3 +229,87 @@ export async function addRiskWorkflow(
     },
   })) as TaskRecordV3;
 }
+
+export interface ReplaceCheckInput {
+  oldId: string;
+  newId: string;
+  description?: string | undefined;
+  command?: string | undefined;
+  scope?: string | undefined;
+  inputs?: readonly string[] | undefined;
+  criteria?: readonly string[] | undefined;
+}
+
+export async function replaceCheckWorkflow(
+  root: string,
+  input: ReplaceCheckInput,
+  options: PlanEditOptions = {},
+  injectedNow?: string,
+): Promise<TaskRecordV3> {
+  const now = await currentInstant(root, injectedNow);
+  const task = await activeV3(root);
+  const oldCheck = task.validationPlan.find((check) => check.id === input.oldId);
+  if (oldCheck === undefined) throw new Error(`Workflow check to replace ${input.oldId} is not declared.`);
+  if (input.oldId === input.newId)
+    throw new Error("Replacement check ID must differ from the check being replaced.");
+  if (!oldCheck.required) throw new Error(`Workflow check ${input.oldId} is not a required check.`);
+  if (task.evidence.some((evidence) => evidence.checkId === input.oldId && evidence.result === "pass"))
+    throw new Error(`Workflow cannot replace check ${input.oldId} after passing evidence.`);
+
+  const retiredOld: ValidationCheckV3 = { ...oldCheck, required: false };
+  const existingNew = task.validationPlan.find((check) => check.id === input.newId);
+
+  let newCheck: ValidationCheckV3;
+  if (existingNew !== undefined) {
+    const scope =
+      input.scope !== undefined ? resolveScope(existingNew, { id: input.newId, scope: input.scope }) : existingNew.scope;
+    const description =
+      input.description !== undefined
+        ? resolveDescription(existingNew, { id: input.newId, description: input.description })
+        : existingNew.description;
+    const command = input.command !== undefined ? input.command : existingNew.command;
+    const inputs = input.inputs !== undefined ? sortedUnique(input.inputs) : existingNew.inputs;
+    const criteria = sortedUnique([...(input.criteria ?? existingNew.criterionIds), ...oldCheck.criterionIds]);
+    newCheck = {
+      ...existingNew,
+      description,
+      scope,
+      required: true,
+      inputs,
+      criterionIds: criteria,
+      ...(command === undefined ? {} : { command }),
+    };
+  } else {
+    const scope = resolveScope(undefined, { id: input.newId, scope: input.scope ?? oldCheck.scope });
+    const description = resolveDescription(undefined, {
+      id: input.newId,
+      description: input.description ?? `Replacement for ${input.oldId}`,
+    });
+    const inputs = sortedUnique(input.inputs ?? oldCheck.inputs);
+    const criteria = sortedUnique(input.criteria ?? oldCheck.criterionIds);
+    if (inputs.length === 0) throw new Error(`Replacement check ${input.newId} requires at least one --input.`);
+    newCheck = {
+      id: input.newId,
+      description,
+      scope,
+      required: true,
+      criterionIds: criteria,
+      inputs,
+      ...(input.command === undefined ? {} : { command: input.command }),
+    };
+  }
+
+  const missing = oldCheck.criterionIds.filter((cid) => !newCheck.criterionIds.includes(cid));
+  if (missing.length > 0) {
+    throw new Error(
+      `Replacement check ${input.newId} must cover all criteria of ${input.oldId} (missing: ${missing.join(", ")}).`,
+    );
+  }
+
+  const otherChecks = task.validationPlan.filter((check) => check.id !== input.oldId && check.id !== input.newId);
+  const validationPlan = [...otherChecks, retiredOld, newCheck].sort((left, right) =>
+    compareCodeUnits(left.id, right.id),
+  );
+
+  return saveObligationEdit(root, task, { ...task, validationPlan }, options, now);
+}

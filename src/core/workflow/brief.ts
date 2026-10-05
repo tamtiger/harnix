@@ -11,6 +11,7 @@ export interface BriefTask {
 
 /** Workflow actions that accept `--brief`: the one list behind flag validation, `--schema` and the guidance. */
 export const BRIEF_ACTIONS: ReadonlySet<string> = new Set([
+  "init",
   "save",
   "transition",
   "evidence",
@@ -24,6 +25,7 @@ export const BRIEF_ACTIONS: ReadonlySet<string> = new Set([
   "addDecision",
   "addRisk",
   "setPaths",
+  "replaceCheck",
 ]);
 
 /** The command-line flag of a workflow action: `runCheck` is `--run-check`. */

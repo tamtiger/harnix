@@ -91,6 +91,8 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
         "Run the command after -- between two input snapshots of one check and record the outcome; output is returned, never stored.",
       "--set-check":
         "Add or update one validation check of the active v3 task from flags; after planning it needs --reason and makes the guarded replan save.",
+      "--replace-check":
+        "Retire a failed or unpassed required check and activate or declare a replacement check covering its criteria: --replace-check <old> <new> --reason <why> [--description --command --scope --input --criteria]; schema v3 only.",
       "--add-criterion":
         "Add one acceptance criterion from --text and cover it with the --check IDs; same --reason rule as --set-check.",
       "--add-decision": "Record one decision (--text, --rationale) on the active v3 task; review data, so no --reason.",

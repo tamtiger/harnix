@@ -1,3 +1,5 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { inspectWorkflow } from "src/core/workflow/inspect.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
@@ -80,5 +82,97 @@ describe("workflow transition", () => {
       },
     };
     expect(transitionTask(current, "verifying", "verifying").blocker).toBeUndefined();
+  });
+
+  it("should validate ready transition and detect unbaselined checks in dry-run without persisting", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const planning = taskV3("planning", "planning");
+    await saveWorkflow(root, { task: planning });
+
+    const dryRunResult = await transitionWorkflow(root, "ready", "ready", undefined, true);
+
+    expect(dryRunResult).toMatchObject({
+      dryRun: true,
+      valid: false,
+      target: { status: "ready", checkpoint: "ready" },
+    });
+    if ("issues" in dryRunResult) {
+      expect(dryRunResult.issues.some((issue) => issue.includes("has not been baselined"))).toBe(true);
+    }
+    // Verify state was not persisted to disk
+    await expect(inspectWorkflow(root)).resolves.toMatchObject({
+      activeTask: { status: "planning", checkpoint: "planning" },
+    });
+  });
+
+  it("should accept dry-run ready transition when check has baseline waiver", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(join(root, "src", "index.ts"), "export const a = 1;\n");
+    const planning = {
+      ...taskV3("planning", "planning"),
+      validationPlan: [
+        {
+          id: "check",
+          description: "Unit tests",
+          scope: "focused" as const,
+          required: true,
+          command: "pnpm test",
+          criterionIds: ["a"],
+          inputs: ["src/**"],
+          baseline: {
+            result: "fail" as const,
+            classification: "pre-existing" as const,
+            authorizedBy: "user",
+          },
+        },
+      ],
+    };
+    await saveWorkflow(root, { task: planning });
+
+    const dryRunResult = await transitionWorkflow(root, "ready", "ready", undefined, true);
+
+    expect(dryRunResult).toMatchObject({
+      dryRun: true,
+      valid: true,
+      target: { status: "ready", checkpoint: "ready" },
+      issues: [],
+    });
+  });
+
+  it("should report non-matching input globs during dry-run ready transition", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const planning = {
+      ...taskV3("planning", "planning"),
+      validationPlan: [
+        {
+          id: "check",
+          description: "Unit tests",
+          scope: "focused" as const,
+          required: true,
+          command: "pnpm test",
+          criterionIds: ["a"],
+          inputs: ["nonexistent-folder/**"],
+          baseline: {
+            result: "pass" as const,
+            authorizedBy: "user",
+          },
+        },
+      ],
+    };
+    await saveWorkflow(root, { task: planning });
+
+    const dryRunResult = await transitionWorkflow(root, "ready", "ready", undefined, true);
+
+    expect(dryRunResult).toMatchObject({
+      dryRun: true,
+      valid: false,
+    });
+    if ("issues" in dryRunResult) {
+      expect(dryRunResult.issues.some((issue) => issue.includes("matches no files"))).toBe(true);
+    }
   });
 });

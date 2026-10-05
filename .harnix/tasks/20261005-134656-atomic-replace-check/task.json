@@ -1,0 +1,127 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261005-134656-atomic-replace-check",
+  "title": "Bo sung transport thay the atomic cho required check da fail",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bo sung co lenh workflow --replace-check de thay the nguyen tu mot check da fail bang mot check moi ma van dam bao tinh bat bien cua hop dong va tieu chuan kiem thu.",
+  "nonGoals": [
+    "Khong cho phep thay the check da pass",
+    "Khong giam do bao phu tieu chi nghiem thu"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Ho tro flag --replace-check <old> <new> --reason va kiem tra new check cover du criterionIds cua old check",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-replace-command-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Thao tac thay the la atomic, ghi nhan contractRevision hop le va giu nguyen dinh nghia cua old check",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-replace-command-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toan bo test suite unit, workflow va acceptance cua Harnix vuot qua 100% exit code 0",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-3"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-replace-command",
+      "description": "Unit test cho workflow replace-check command va plan-edit",
+      "command": "pnpm vitest run test/unit/core/workflow/plan-edit.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/workflow-command.ts",
+        "src/commands/workflow-flags.ts",
+        "src/core/workflow/plan-edit.ts",
+        "test/unit/core/workflow/plan-edit.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Kiem thu hoi quy toan bo he thong",
+      "command": "pnpm run test:acceptance",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-replace-command-1",
+      "checkId": "check-replace-command",
+      "recordedAt": "2026-10-05T14:16:16.777+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b266e209c7b672e14e4fd1180108642324b245dc6354714f4234642a1a0f1252"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T14:16:42.990+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "9d181942db18f54d5b020a8bc96ef7f1a258d41780c330a317408ccd02625936"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T14:18:22.041+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "e30e28c95d42f0208eedf31e040c12d76fe8c221bdf6b49a5dad1155a80b8174"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-05T14:21:20.943+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bf33ff2da93635b71978fdb6d7ce7975a8cb724b5afd2a69909920b138a24c0a"
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-command.ts",
+    "src/commands/workflow-flags.ts",
+    "src/core/workflow/plan-edit.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-05T13:46:54.585+07:00",
+  "updatedAt": "2026-10-05T14:21:44.910+07:00",
+  "epicId": "20261005-134654-reliability-ergonomics-hardening",
+  "completedAt": "2026-10-05T14:21:44.910+07:00"
+}

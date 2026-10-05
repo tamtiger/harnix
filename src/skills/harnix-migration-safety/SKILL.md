@@ -2,7 +2,7 @@
 name: harnix-migration-safety
 description: Use when designing or reviewing schema migrations, contract breaking changes, data transitions or structural refactorings to guarantee data preservation and backward compatibility.
 metadata:
-  version: "2.0.2"
+  version: "2.0.3"
 ---
 
 # Migration safety and data preservation
