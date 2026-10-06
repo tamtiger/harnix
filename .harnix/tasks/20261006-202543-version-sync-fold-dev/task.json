@@ -1,0 +1,58 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-202543-version-sync-fold-dev",
+  "title": "version:sync gom các bản dev thành một entry phát hành",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Khi đóng epic, pnpm version:sync X.Y.0 gom các entry X.Y.0-dev.N trong CHANGELOG thành một entry X.Y.0 thay vì để người làm gom tay, và không định dạng lại các file markdown không liên quan.",
+  "nonGoals": [
+    "Không nới ngưỡng hay bỏ test cấu trúc",
+    "Không đổi hành vi hiện có ngoài phạm vi tiêu chí"
+  ],
+  "epicId": "20261006-202542-harnix-self-improvement",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "pnpm version:sync X.Y.0 --fold-dev gộp mọi entry X.Y.0-dev.N thành một entry X.Y.0 giữ nguyên thứ tự và nội dung các mục Added/Changed/Fixed, không mất dòng nào, và chạy lại không đổi gì.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "version:sync chỉ định dạng lại các file nó thực sự ghi và không đụng các file markdown khác; có test chứng minh.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Tài liệu chính sách phiên bản nêu --fold-dev cho task đóng epic.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T20:25:42.786+07:00",
+  "updatedAt": "2026-10-06T20:25:42.786+07:00"
+}

@@ -1,0 +1,14 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261006-202542-harnix-self-improvement",
+  "title": "Harnix tự cải tiến: tối ưu token và giảm ma sát phát hiện khi phát triển",
+  "goal": "Gom các cải tiến phát hiện trong lúc phát triển Harnix: gom bản dev thành bản phát hành, chạy mọi check bằng một lệnh, tóm tắt lỗi check gọn, giảm output lặp và giảm token của hook context. Mỗi member dùng bản dev của dòng phát hành kế tiếp; member cuối theo ID đóng epic bằng một bản minor.",
+  "nonGoals": [
+    "Không thêm dịch vụ, telemetry hay mạng",
+    "Không nới ngưỡng hay bỏ test cấu trúc",
+    "Không đổi hành vi hiện có ngoài phạm vi tiêu chí"
+  ],
+  "createdAt": "2026-10-06T20:25:42.786+07:00",
+  "updatedAt": "2026-10-06T20:25:42.786+07:00"
+}

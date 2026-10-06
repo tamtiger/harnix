@@ -1,0 +1,58 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-202547-hook-context-diet",
+  "title": "Hook context chỉ mang learning khi agent sắp lập kế hoạch",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Hook UserPromptSubmit gắn 5 note learning vào mọi prompt dù task đang implement hay verify; chỉ gắn khi chưa có task active hoặc task đang planning, để giảm token mỗi lượt mà không mất thông tin lúc cần.",
+  "nonGoals": [
+    "Không nới ngưỡng hay bỏ test cấu trúc",
+    "Không đổi hành vi hiện có ngoài phạm vi tiêu chí"
+  ],
+  "epicId": "20261006-202542-harnix-self-improvement",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Hook context bỏ khối learning khi task active ở trạng thái ready, in_progress hoặc verifying và vẫn gắn khi không có task hoặc task đang planning.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "pnpm measure:tokens báo mức giảm số token hook context cho trạng thái implement và có test khóa ngưỡng.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Tài liệu hook và harnix context-report phản ánh quy tắc mới.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T20:25:42.786+07:00",
+  "updatedAt": "2026-10-06T20:25:42.786+07:00"
+}

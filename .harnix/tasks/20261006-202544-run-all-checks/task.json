@@ -1,0 +1,65 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-202544-run-all-checks",
+  "title": "Một lệnh chạy mọi check bắt buộc và tóm tắt kết quả",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Agent không phải gọi --run-check lần lượt cho từng check: một lệnh chạy các check bắt buộc còn pending hoặc stale theo thứ tự (focused trước, suite cuối), ghi evidence như --run-check, dừng ở lần fail đầu và in tóm tắt rất ngắn.",
+  "nonGoals": [
+    "Không nới ngưỡng hay bỏ test cấu trúc",
+    "Không đổi hành vi hiện có ngoài phạm vi tiêu chí"
+  ],
+  "epicId": "20261006-202542-harnix-self-improvement",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix workflow --run-checks chạy tuần tự mọi required check còn pending hoặc stale bằng đúng command và cwd đã khai báo, focused trước và check suite sau cùng, ghi evidence như --run-check và dừng ở check đầu tiên fail.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Output là một đối tượng ngắn chỉ gồm id, result, exitCode của từng check đã chạy và check còn lại; không in output của lệnh khi pass.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Check đang ở circuit breaker stop hoặc không có command khiến lệnh dừng với lý do nêu rõ, không chạy gì.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Cookbook và skill harnix-verify ghi lệnh này như đường chính ở giai đoạn verify.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T20:25:42.786+07:00",
+  "updatedAt": "2026-10-06T20:25:42.786+07:00"
+}

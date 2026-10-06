@@ -1,0 +1,58 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-202546-quiet-advisories",
+  "title": "Giảm output dài của ready dry-run, finish và các gợi ý lặp",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Các thông báo dài lặp lại ở mỗi lần gọi (advisory chưa baseline từng check trong ready dry-run, hint learning ở --finish) tốn token mà không đổi quyết định; gộp chúng thành một dòng ngắn có số lượng.",
+  "nonGoals": [
+    "Không nới ngưỡng hay bỏ test cấu trúc",
+    "Không đổi hành vi hiện có ngoài phạm vi tiêu chí"
+  ],
+  "epicId": "20261006-202542-harnix-self-improvement",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "transition --dry-run gộp mọi advisory chưa baseline thành một mục duy nhất nêu số check, vẫn giữ unbaselinedChecks; advisory glob không khớp file giữ nguyên.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "learning.hint của --finish --brief rút còn một câu ngắn và chỉ xuất hiện khi captured bằng 0.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Có test đo độ dài output trước và sau cho một task mẫu để chặn hồi quy phình to.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T20:25:42.786+07:00",
+  "updatedAt": "2026-10-06T20:25:42.786+07:00"
+}

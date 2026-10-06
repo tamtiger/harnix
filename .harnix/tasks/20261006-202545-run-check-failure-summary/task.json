@@ -1,0 +1,58 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-202545-run-check-failure-summary",
+  "title": "Output --run-check chỉ nêu test lỗi thay vì đuôi log dài",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Khi một check fail, outputTail của --run-check hiện tối đa 2000 ký tự log thô; thay bằng tóm tắt các test lỗi (tên và dòng đầu thông điệp) khi nhận diện được định dạng vitest, và giữ đuôi ngắn cho lệnh khác, để giảm token đọc lỗi.",
+  "nonGoals": [
+    "Không nới ngưỡng hay bỏ test cấu trúc",
+    "Không đổi hành vi hiện có ngoài phạm vi tiêu chí"
+  ],
+  "epicId": "20261006-202542-harnix-self-improvement",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Khi check fail và output có báo cáo lỗi vitest nhận diện được, outputTail liệt kê tên test lỗi cùng dòng đầu thông điệp, tối đa 10 mục và 800 ký tự.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Với lệnh khác hoặc output không nhận diện được, outputTail rút còn tối đa 600 ký tự cuối; khi pass không có outputTail.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "outputTail vẫn không được lưu vào task và không lộ đường dẫn tuyệt đối của máy.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T20:25:42.786+07:00",
+  "updatedAt": "2026-10-06T20:25:42.786+07:00"
+}
