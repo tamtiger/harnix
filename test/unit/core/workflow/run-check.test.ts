@@ -199,6 +199,7 @@ describe("workflow --run-check", () => {
     const { initTaskWorkflow } = await import("src/core/workflow/init-task.js");
     await initTaskWorkflow(root, {
       title: "Baseline Planning Task",
+      command: "pnpm test",
     });
 
     const { runner } = fakeRunner(0, "baseline passed");

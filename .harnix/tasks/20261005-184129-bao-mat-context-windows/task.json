@@ -4,8 +4,8 @@
   "id": "20261005-184129-bao-mat-context-windows",
   "title": "Bảo mật hook context, learning và thực thi trên Windows",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Chặn prompt injection qua nội dung file, lách redaction, lộ đường dẫn tuyệt đối và các lỗi thực thi process trên Windows (R-012, R-014 đến R-017 và các mục P3 liên quan).",
   "nonGoals": [
     "Không thêm network hay shell",
@@ -15,51 +15,67 @@
     {
       "id": "ac-1",
       "text": "`harnix verify-plan` không in đường dẫn tuyệt đối (bỏ `projectRoot` hoặc trả `.`), có test chặn tái diễn.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-security-4"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Hook context vô hiệu hóa mọi marker trong nội dung file (`<<< ... >>>` và dòng `--- x ---`); nội dung repo không thể đóng khung untrusted sớm hay làm `splitEntries` cắt sai.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-security-4"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Redaction learning chuẩn hóa NFKC, bỏ ký tự `\\p{Cf}` và gộp whitespace trước khi phân tích, bắt câu tiếng Việt, lệnh nằm giữa câu, credential (`*_TOKEN=`, `ghp_`, `AKIA`, `xox*-`, khối `-----BEGIN`) và đường dẫn tuyệt đối; table test phủ đúng các chuỗi đã tái hiện.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-security-4"
+      ]
     },
     {
       "id": "ac-4",
       "text": "`harnix upgrade --apply` chạy được trên Windows qua cùng cơ chế `resolveInvocation` của check-runner; test inject `win32`.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-windows-3"
+      ]
     },
     {
       "id": "ac-5",
       "text": "Check-runner: executable cũng bị kiểm metacharacter, đường dẫn `.cmd` có dấu cách chạy đúng, timeout kill cả cây tiến trình trên Windows (test với spawner giả).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-windows-3"
+      ]
     },
     {
       "id": "ac-6",
       "text": "Redact lỗi bao phủ mọi đường dẫn POSIX tuyệt đối (vd. `/root/...`); `--cancel` và `--learn` stdin đi qua `assertTextIntegrity`.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-security-4"
+      ]
     },
     {
       "id": "ac-7",
       "text": "Cổng chất lượng xanh: `pnpm run typecheck`, `pnpm run lint` và `pnpm run test` (có coverage, không hạ ngưỡng) đều exit 0 trên cây mã cuối cùng của task.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-lint-4",
+        "ev-check-suite-3",
+        "ev-check-typecheck-4"
+      ]
     }
   ],
   "validationPlan": [
     {
       "id": "check-security",
       "description": "Test context, learning, utils, lệnh",
-      "command": "pnpm run test:safety",
+      "command": "pnpm vitest run test/safety test/unit/core/context test/unit/core/journal test/unit/core/stack/verify-plan.test.ts test/unit/commands/verify-plan.test.ts test/unit/commands/internal-context-cli.test.ts test/unit/cli-helpers.test.ts test/unit/core/tasks/workflow-helpers.test.ts test/unit/core/workflow/cancel.test.ts test/unit/core/workflow/learn.test.ts test/workflow/internal-context-boundary.test.ts",
       "scope": "focused",
       "required": true,
       "criterionIds": [
@@ -74,6 +90,7 @@
         "src/core/context/**",
         "src/core/journal/**",
         "src/core/stack/**",
+        "src/core/tasks/workflow-helpers.ts",
         "src/core/workflow/cancel.ts",
         "src/core/workflow/learn.ts",
         "test/safety/**",
@@ -84,7 +101,7 @@
     {
       "id": "check-windows",
       "description": "Test check-runner và upgrade",
-      "command": "pnpm vitest run test/unit/utils/check-runner.test.ts test/unit/commands/upgrade.test.ts",
+      "command": "pnpm vitest run test/unit/utils/check-runner.test.ts test/integration/commands/upgrade.test.ts",
       "scope": "focused",
       "required": true,
       "criterionIds": [
@@ -94,7 +111,7 @@
       "inputs": [
         "src/commands/upgrade.ts",
         "src/utils/check-runner.ts",
-        "test/unit/commands/upgrade.test.ts",
+        "test/integration/commands/upgrade.test.ts",
         "test/unit/utils/check-runner.test.ts"
       ]
     },
@@ -144,7 +161,188 @@
       ]
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "ev-check-windows-1",
+      "checkId": "check-windows",
+      "recordedAt": "2026-10-06T08:11:55.911+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d607872f3ff7482ec98840f618c2ad0b1dcea13c2ecb39fa23f0a8406c8f4e1d"
+    },
+    {
+      "id": "ev-check-security-1",
+      "checkId": "check-security",
+      "recordedAt": "2026-10-06T08:12:05.960+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "96e7f9e8b13f4848779def5f4689108f083c33c2f2daaafd097f781517a71dba"
+    },
+    {
+      "id": "ev-check-typecheck-1",
+      "checkId": "check-typecheck",
+      "recordedAt": "2026-10-06T08:12:10.895+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0d4e2104a5bda8a08453935f50b9a770ffd66d4ce7e514ab0eefc67d958c0d8d"
+    },
+    {
+      "id": "ev-check-lint-1",
+      "checkId": "check-lint",
+      "recordedAt": "2026-10-06T08:12:27.191+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "80c36ad5cbb580b0593804cfb10ad8f64d8dc2773c87192d09561a06891564ad"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T08:13:23.336+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "57923c6cac5a488b4ab3b3427166dda23eb38c4688a1dd445160ae6aa117acf9"
+    },
+    {
+      "id": "ev-check-windows-2",
+      "checkId": "check-windows",
+      "recordedAt": "2026-10-06T08:22:49.955+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "eb1ced5201c3ec746678f54d43fd72c35dc3629585a54c1b597e5f812da18756"
+    },
+    {
+      "id": "ev-check-security-2",
+      "checkId": "check-security",
+      "recordedAt": "2026-10-06T08:22:57.879+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "24ecb3696bd4fb3cb0b580d6292e6e2200cb979ed691e1e2fd1312899c072b30"
+    },
+    {
+      "id": "ev-check-typecheck-2",
+      "checkId": "check-typecheck",
+      "recordedAt": "2026-10-06T08:23:07.183+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "06d121256915ebcc2e6f37d2190929afdba97def615399f7ca6202e07a08db5b"
+    },
+    {
+      "id": "ev-check-lint-2",
+      "checkId": "check-lint",
+      "recordedAt": "2026-10-06T08:23:23.553+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "c4650ebd659b930d4717dc5114feff67d076699a109785989ce398831599c97a"
+    },
+    {
+      "id": "ev-check-lint-3",
+      "checkId": "check-lint",
+      "recordedAt": "2026-10-06T08:24:33.739+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "41900203cce5c645338a82a4faa99bb69d746481fb4de9b3e463fa3b1450b3af"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T08:25:51.745+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7b1ef01f231cafb17f5a72a2039772a43c70c928396d9cd684379a0f88f8657f"
+    },
+    {
+      "id": "ev-check-typecheck-3",
+      "checkId": "check-typecheck",
+      "recordedAt": "2026-10-06T08:25:56.676+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bf5af7c223660b50b6831c2b5fe876908ea6bfaa82d316248b3b8a0e3278397b"
+    },
+    {
+      "id": "ev-check-windows-3",
+      "checkId": "check-windows",
+      "recordedAt": "2026-10-06T08:26:28.997+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c8f920365e618360dbc115c4b5b068e69bd7d3bd9a96e130a8bf2c76944c7ca1"
+    },
+    {
+      "id": "ev-check-security-3",
+      "checkId": "check-security",
+      "recordedAt": "2026-10-06T08:26:36.355+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9b2f5d104a9741d09b13881d7579680675af90ec929de96eca5759d70ab07070"
+    },
+    {
+      "id": "ev-check-security-4",
+      "checkId": "check-security",
+      "recordedAt": "2026-10-06T08:28:18.722+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "847b158df629d956e2fa1c6164d2264975837a99c917b193839bae48bf4e772b"
+    },
+    {
+      "id": "ev-check-typecheck-4",
+      "checkId": "check-typecheck",
+      "recordedAt": "2026-10-06T08:28:23.529+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e11ad580d0967c52b7a70a8b0bd9d6622be2efc0f55e227c95304f097b9dea20"
+    },
+    {
+      "id": "ev-check-lint-4",
+      "checkId": "check-lint",
+      "recordedAt": "2026-10-06T08:28:38.704+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e1b99c5479bb8f14ed22bf5b6e6ac467ead2cd4bbc9f9a65f5abed0e071d124b"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T08:29:26.881+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4587740ea507f64ef93d142883b548034a055ba116e490580b2efe65199da6db"
+    }
+  ],
   "relevantPaths": [
     "src/core/stack/verify-plan.ts",
     "src/core/context/context.ts",
@@ -160,5 +358,13 @@
   ],
   "epicId": "20261005-184125-harnix-hardening-2-0-5",
   "createdAt": "2026-10-05T18:41:25.132+07:00",
-  "updatedAt": "2026-10-05T18:41:25.132+07:00"
+  "updatedAt": "2026-10-06T08:30:01.727+07:00",
+  "decisions": [
+    {
+      "id": "d-redos-bounded",
+      "text": "Regex của learning-safety phải có cận trên hoặc neo cùng dòng; thêm test thời gian cho input gần giới hạn 64 KiB.",
+      "rationale": "Security review phát hiện backtracking bậc hai ở CREDENTIAL và COMMAND_AT_STATEMENT_START."
+    }
+  ],
+  "completedAt": "2026-10-06T08:30:01.727+07:00"
 }

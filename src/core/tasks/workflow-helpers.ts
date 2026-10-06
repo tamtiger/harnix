@@ -1,3 +1,4 @@
+import { assertTextIntegrity } from "src/core/workflow/text-integrity.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { type TaskRecord, type TaskCancellation, transitionTask, updateTaskCheckpoint } from "./task.js";
 import { unknownFieldsMessage } from "./task-validate-common.js";
@@ -92,6 +93,7 @@ export function validateCancellationEnvelope(value: unknown): TaskCancellation {
   if (!isRecord(value) || typeof value.reason !== "string" || value.authorizedBy !== "user") {
     throw new Error("Workflow cancellation requires bounded JSON with reason and authorizedBy=user.");
   }
+  assertTextIntegrity(value);
   return { reason: value.reason, authorizedBy: "user" };
 }
 
@@ -99,5 +101,6 @@ export function validateLearningEnvelope(value: unknown): LearningCaptureInput {
   if (!isRecord(value) || Object.keys(value).length !== 1 || !isRecord(value.candidate)) {
     throw new Error("Workflow learning capture requires bounded JSON with a candidate object.");
   }
+  assertTextIntegrity(value);
   return value.candidate as unknown as LearningCaptureInput;
 }

@@ -99,7 +99,7 @@ type LegacyStackId =
 type LanguageId = "csharp" | "typescript" | "javascript" | "php" | "python" | "java" | "go";
 type TechnologyId = "dotnet" | "abp" | "nestjs" | "spring" | "react-web" | "vue" | "codeigniter" | "postgresql" | "mysql" | "sqlserver" | "mongodb" | "redis";
 
-type PlatformId = "kiro" | "antigravity" | "codex" | "claude";
+type PlatformId = "kiro" | "antigravity" | "codex" | "claude" | "opencode" | "cursor";
 
 interface PackageConfigV2 {
   path: string;              // normalized repo-relative POSIX path; "." for root
@@ -500,7 +500,7 @@ Behavioral research alone does not claim copied code. `NOTICE` changes only when
 
 ### 4.18 Public effective-context explanation v1
 
-`harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]` is the twelfth public command and defaults to 20 details per category. It shares one effective-context builder with hidden `harnix context`: persisted context entries plus applicable guides when a manifest exists, otherwise task `relevantPaths` plus applicable guides. Bounded mode is identical to hook selection: Codex 2,500 characters; Kiro/Antigravity/Claude Code `min(config.context.maxCharacters, 8000)`; maximum 64 inspected entries.
+`harnix context-report --platform <kiro|antigravity|codex|claude|opencode|cursor> [--limit <1..50>]` is the twelfth public command and defaults to 20 details per category. It shares one effective-context builder with hidden `harnix context`: persisted context entries plus applicable guides when a manifest exists, otherwise task `relevantPaths` plus applicable guides. Bounded mode is identical to hook selection: Codex 2,500 characters; Kiro/Antigravity/Claude Code `min(config.context.maxCharacters, 8000)`; maximum 64 inspected entries.
 
 `ContextReportResultV1` has exact top-level fields `generator`, `schemaVersion`, `scope`, `platform`, `filter`, `activeTask`; no active task is clean success with `activeTask:null`. Active output contains only task `id`, `budget`, bounded `drift`, `summary`, `selected`, `omitted`. Selected items contain `path`, sorted derived `reasonCodes`, `priority`, `pinned`; allowed reason codes are `applicable-guide|persisted-selection|pinned|task-reference`. Omitted items retain only relative path and `budget|duplicate|missing|unsafe`. Raw reason/states, content, hash, task prose, hook event, secret and absolute path are forbidden. Limit applies independently to selected, omitted and drift changes; the entire serialized result is capped at 262,144 UTF-8 bytes by dropping deterministic whole tail items and setting count/truncation fields. The command never writes or calls network, and hidden hook payload/activation behavior remains regression-locked.
 
@@ -598,7 +598,7 @@ Consumer expecting v1 receives an explicit schema mismatch, never a misleading f
 
 ### 4.24 Internal platform-hook protocol
 
-`harnix context --platform <kiro|antigravity|codex|claude>` is the only packaged fast-path hook command, not public API and does not increase the sixteen-command public contract. Legacy `harnix internal context ...` is not an alias and must fall through to regular CLI rejection. Release performance measurement invokes the exact canonical installed command. The hidden command:
+`harnix context --platform <kiro|antigravity|codex|claude|opencode|cursor>` is the only packaged fast-path hook command, not public API and does not increase the sixteen-command public contract. Legacy `harnix internal context ...` is not an alias and must fall through to regular CLI rejection. Release performance measurement invokes the exact canonical installed command. The hidden command:
 
 1. accepts bounded optional hook-event JSON from stdin, validates `cwd` and bounded `workspacePaths[]`, and falls back safely to process cwd; this event discovery does not parse an explicit target from natural-language prompt text and does not grant target authority;
 2. resolves the **nearest** initialized project ancestor/root from cwd or workspace roots using safe realpath containment, including non-Git workspaces, deduplicated symlink-equivalent roots; it must not require the current workspace directory itself to contain `.harnix`. Any injected repository context remains untrusted target evidence, and generated instructions apply §4.21 after the prompt is available before reading Harnix state or acting;

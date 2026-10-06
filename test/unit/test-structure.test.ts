@@ -39,7 +39,8 @@ const RAW_RECORD_FILES: Record<string, string> = {
 
 /** Source modules with no test importing them directly or through a re-export barrel, and why that is acceptable. */
 const UNTESTED_MODULES: Record<string, string> = {
-  "src/index.ts": "package entry that only re-exports the CLI; exercised by the built-package smoke test",
+  "src/index.ts":
+    "package entry that only exports packageName and packageVersion; the built entry is checked by pack:check and scan:release",
   "src/types/markdown.d.ts": "ambient module declaration for raw markdown imports; no runtime code",
 };
 
@@ -167,7 +168,7 @@ describe("test suite structure", () => {
   });
 
   it("never lowers the amount of verification recorded before the restructuring", () => {
-    const BASELINE = { assertions: 2338, tests: 628 };
+    const BASELINE = { assertions: 4285, tests: 1372 };
     const assertionPattern = /\bexpect(?:\.[a-zA-Z]+)?\(/gu;
     const testPattern = /\b(?:it|test)(?:\.each\([^)]*\))?\(/gu;
     const totals = testFiles.reduce(

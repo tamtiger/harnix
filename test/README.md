@@ -8,7 +8,7 @@ Every spec is a `*.test.ts` file; shared helpers live only in `test/support/`. T
 | unit | `test/unit/` | One source module in isolation. | Mirrors `src`: `src/core/tasks/task-store.ts` is tested by `test/unit/core/tasks/task-store.test.ts`. |
 | integration | `test/integration/` | Real commands against a disposable project. | `commands/<command>.test.ts` mirrors `src/commands/<command>.ts`; multi-command flows go in `scenarios/`. |
 | workflow | `test/workflow/` | Workflow scenarios and repository contracts (architecture, docs, templates, CLI contract, behavior golden). | Named after the contract or scenario. |
-| platform | `test/platform/` | Kiro, Antigravity, Codex and Claude Code global setup against an injected home. | Named after the platform surface. |
+| platform | `test/platform/` | Kiro, Antigravity, Codex, Claude Code, OpenCode and Cursor global setup against an injected home. | Named after the platform surface. |
 | safety | `test/safety/` | Path boundaries, isolated user home and release scanning. | Named after the boundary. |
 | migration | `test/migration/` | Compatibility with older data (task v1/v2, `context.json`, `.harnix/roadmaps` to `.harnix/epics`). | Named after the data being migrated. |
 
@@ -29,8 +29,8 @@ Import source and support modules through the `src/...` and `test/...` aliases (
 `vitest.config.ts`), for example `import { at } from "test/support/builders.js"`. Only same-directory `./x.js`
 imports stay relative; ESLint forbids parent-relative `../` imports.
 
-`pnpm test` runs `vitest run --coverage` (v8 provider). The floors in `vitest.config.ts` (lines and statements 93.1,
-functions 98.1, branches 86.8) only ever rise: raise them when coverage improves, never lower one to make a change
+`pnpm test` runs `vitest run --coverage` (v8 provider). The floors in `vitest.config.ts` (lines and statements 95,
+functions 98.6, branches 89) only ever rise: raise them when coverage improves, never lower one to make a change
 pass. The per-test timeout is 20 seconds because filesystem-heavy workflow tests run in parallel.
 
 Do not regenerate `test/workflow/behavior-snapshot.golden.json` to make a refactor pass.

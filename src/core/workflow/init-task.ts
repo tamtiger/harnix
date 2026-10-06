@@ -1,5 +1,8 @@
 import { readFile } from "node:fs/promises";
+import { readProjectTimezone } from "src/core/config/config.js";
+import { buildVerifyPlan } from "src/core/stack/verify-plan.js";
 import type { TaskMode, TaskRecordV3 } from "src/core/tasks/task.js";
+import { idPrefix } from "src/utils/clock.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
@@ -22,14 +25,13 @@ function toSlug(title: string): string {
     .replace(/[\u0300-\u036f]/gu, "")
     .replace(/[^a-z0-9]+/gu, "-")
     .replace(/^-+|-+$/gu, "");
-  return normalized.slice(0, 40) || "task";
+  return normalized.slice(0, 40).replace(/-+$/u, "") || "task";
 }
 
-function makeIdPrefix(isoTimestamp: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/u.exec(isoTimestamp);
-  if (!match) return "20261005-000000";
-  const [, y, m, d, hh, mm, ss] = match;
-  return `${y}${m}${d}-${hh}${mm}${ss}`;
+async function detectedTestCommand(root: string): Promise<string> {
+  const command = (await buildVerifyPlan(root)).commands.test?.trim();
+  if (!command) throw new Error("workflow --init found no project test command; pass --command <cmd> explicitly.");
+  return command;
 }
 
 export async function initTaskWorkflow(root: string, options: InitTaskOptions): Promise<TaskRecordV3> {
@@ -37,17 +39,18 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
   if (!title) {
     throw new Error("workflow --init requires a non-empty --title.");
   }
-  const mode: TaskMode = options.mode === "full" ? "full" : "lite";
+  if (options.mode !== undefined && options.mode !== "lite" && options.mode !== "full")
+    throw new Error("workflow --init --mode must be lite or full.");
+  const mode: TaskMode = options.mode ?? "lite";
   const now = await currentInstant(root, options.injectedNow);
-  const prefix = makeIdPrefix(now);
+  const prefix = idPrefix(Date.parse(now), await readProjectTimezone(await resolveSafeHarnixPath(root)));
   const slug = toSlug(title);
   const id = `${prefix}-${slug}`;
 
   const goal = options.goal?.trim() || title;
   const criterionText = options.criterion?.trim() || title;
-  const command = options.command?.trim() || "pnpm test";
-  const inputs =
-    Array.isArray(options.input) && options.input.length > 0 ? [...new Set(options.input)].sort() : ["src/**"];
+  const command = options.command?.trim() || (await detectedTestCommand(root));
+  const inputs = Array.isArray(options.input) && options.input.length > 0 ? [...new Set(options.input)].sort() : ["**"];
 
   let relevantPaths: string[] = [];
   let relevantSpecs: string[] = [];

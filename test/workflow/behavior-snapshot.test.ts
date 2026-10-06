@@ -223,10 +223,26 @@ async function scenario(): Promise<unknown> {
   return { log, files: await tree(join(root, ".harnix")) };
 }
 
+/** Regenerating the golden in CI would turn a failing comparison into a silent pass, so it is refused there. */
+function goldenUpdateRequested(env: Readonly<Record<string, string | undefined>>): boolean {
+  if (env.HARNIX_UPDATE_GOLDEN !== "1") return false;
+  if (env.CI !== undefined && env.CI !== "" && env.CI !== "false")
+    throw new Error("HARNIX_UPDATE_GOLDEN=1 is not allowed in CI; regenerate the golden locally and review the diff.");
+  return true;
+}
+
 describe("behavior snapshot", () => {
+  it("refuses to regenerate the golden in CI", () => {
+    expect(goldenUpdateRequested({})).toBe(false);
+    expect(goldenUpdateRequested({ HARNIX_UPDATE_GOLDEN: "1" })).toBe(true);
+    expect(goldenUpdateRequested({ HARNIX_UPDATE_GOLDEN: "1", CI: "false" })).toBe(true);
+    expect(() => goldenUpdateRequested({ HARNIX_UPDATE_GOLDEN: "1", CI: "true" })).toThrow(/not allowed in CI/u);
+    expect(goldenUpdateRequested({ CI: "true" })).toBe(false);
+  });
+
   it("keeps workflow, status, task and epic outputs and written files identical to the golden", async () => {
     const actual = JSON.parse(JSON.stringify(await scenario())) as unknown;
-    if (process.env.HARNIX_UPDATE_GOLDEN === "1") {
+    if (goldenUpdateRequested(process.env)) {
       await writeFile(goldenPath, `${JSON.stringify(actual, null, 2)}\n`);
       return;
     }

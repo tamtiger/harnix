@@ -100,4 +100,9 @@ describe("workflow helpers", () => {
     expect(() => validateLearningEnvelope({ candidate: {}, extra: 1 })).toThrow(/candidate/u);
     expect(() => validateLearningEnvelope({ candidate: "text" })).toThrow(/candidate/u);
   });
+
+  it("refuses damaged text in the cancellation and learning envelopes", () => {
+    expect(() => validateCancellationEnvelope({ reason: "l�i", authorizedBy: "user" })).toThrow(/text encoding/u);
+    expect(() => validateLearningEnvelope({ candidate: { id: "l", statement: "Ã¡" } })).toThrow(/text encoding/u);
+  });
 });

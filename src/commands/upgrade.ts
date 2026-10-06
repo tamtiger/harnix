@@ -1,7 +1,5 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import { runCheckProcess, type CheckRunner } from "src/utils/check-runner.js";
 
-const execFileAsync = promisify(execFile);
 export type AvailableVersionLookup = () => Promise<string | undefined>;
 export type UpgradeRunner = (executable: string, args: string[]) => Promise<void>;
 export interface UpgradeOptions {
@@ -9,6 +7,8 @@ export interface UpgradeOptions {
   availableVersion?: AvailableVersionLookup | undefined;
   apply?: boolean | undefined;
   runner?: UpgradeRunner | undefined;
+  /** Process runner behind the default apply path; it routes `npm` through cmd.exe on Windows. */
+  checkRunner?: CheckRunner | undefined;
 }
 export interface UpgradeResult {
   installed: string;
@@ -23,7 +23,8 @@ export async function upgradeHarnix(options: UpgradeOptions): Promise<UpgradeRes
   const available = await (options.availableVersion ?? (async () => undefined))();
   const command = ["npm", "install", "--save-dev", "@tamtiger/harnix@latest"];
   if (options.apply) {
-    const runner = options.runner ?? defaultRunner;
+    const runner =
+      options.runner ?? ((executable, args) => runNpm(options.checkRunner ?? runCheckProcess, executable, args));
     await runner(command[0]!, command.slice(1));
   }
   return {
@@ -34,6 +35,7 @@ export async function upgradeHarnix(options: UpgradeOptions): Promise<UpgradeRes
   };
 }
 
-async function defaultRunner(executable: string, args: string[]): Promise<void> {
-  await execFileAsync(executable, args, { windowsHide: true });
+async function runNpm(run: CheckRunner, executable: string, args: string[]): Promise<void> {
+  const result = await run(executable, args, process.cwd());
+  if (result.exitCode !== 0) throw new Error(`The upgrade command exited with code ${result.exitCode}.`);
 }

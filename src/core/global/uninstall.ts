@@ -252,7 +252,9 @@ function normalizePlatforms(platforms: readonly PlatformId[]): PlatformId[] {
   const normalized = [...new Set(platforms)].sort();
   if (normalized.length === 0) throw new Error("At least one platform must be selected for global uninstall.");
   if (!normalized.every((platform) => isPlatformId(platform))) {
-    throw new Error("Only Kiro, Antigravity, Codex, and Claude Code are supported for global uninstall.");
+    throw new Error(
+      "Only Kiro, Antigravity, Codex, Claude Code, OpenCode, and Cursor are supported for global uninstall.",
+    );
   }
   return normalized;
 }

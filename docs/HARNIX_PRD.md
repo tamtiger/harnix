@@ -121,19 +121,19 @@ CLI có help rõ, actionable errors và non-zero exit khi thất bại:
 
 ```text
 harnix init [--user <name>] [--languages <csv>] [--dry-run]
-harnix setup --kiro|--antigravity|--codex|--claude [--dry-run]
+harnix setup --kiro|--antigravity|--codex|--claude|--opencode|--cursor [--dry-run]
 harnix update [--restore]
-harnix update --global [--kiro|--antigravity|--codex|--claude] [--restore] [--dry-run]
+harnix update --global [--kiro|--antigravity|--codex|--claude|--opencode|--cursor] [--restore] [--dry-run]
 harnix upgrade
 harnix uninstall --purge [--yes]
-harnix uninstall --global --kiro|--antigravity|--codex|--claude [--yes]
+harnix uninstall --global --kiro|--antigravity|--codex|--claude|--opencode|--cursor [--yes]
 harnix uninstall --legacy-project-surfaces [--yes]
 harnix mem [query]
 harnix status
 harnix tasks [--limit <1..100>] [--status <TaskStatus>]
 harnix epic [<epic-id>] [--limit <1..100>] [--brief]
 harnix resume <task-id> [--dry-run]
-harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]
+harnix context-report --platform <kiro|antigravity|codex|claude|opencode|cursor> [--limit <1..50>]
 harnix status --explain [--limit <1..50>]
 harnix skill [name]
 harnix doctor [--fix] [--global]
@@ -301,7 +301,7 @@ Báo installed/available version và npm upgrade path cho `@tamtiger/harnix`. Re
 
 ### Uninstall
 
-`uninstall --purge --yes` only removes project `.harnix` data after preview/confirmation and safe-root checks. `uninstall --global --kiro|--antigravity|--codex [--yes]` previews then removes only unchanged selected global entries; without `--yes` it makes no write. `uninstall --legacy-project-surfaces [--yes]` is a separate manifest-backed cleanup that may delete only unchanged **standalone** historical paths whose v1 manifest proves the exact Harnix source/path. Root/shared files such as `AGENTS.md`, `GEMINI.md`, `.codex` config/hooks and arbitrary user files are inventory-only, never deletion targets; the flag is mutually exclusive with global/purge and always preserves modified/untracked content.
+`uninstall --purge --yes` only removes project `.harnix` data after preview/confirmation and safe-root checks. `uninstall --global --kiro|--antigravity|--codex|--claude|--opencode|--cursor [--yes]` previews then removes only unchanged selected global entries; without `--yes` it makes no write. `uninstall --legacy-project-surfaces [--yes]` is a separate manifest-backed cleanup that may delete only unchanged **standalone** historical paths whose v1 manifest proves the exact Harnix source/path. Root/shared files such as `AGENTS.md`, `GEMINI.md`, `.codex` config/hooks and arbitrary user files are inventory-only, never deletion targets; the flag is mutually exclusive with global/purge and always preserves modified/untracked content.
 
 ### Mem
 
@@ -333,7 +333,7 @@ Hidden save chỉ có crash-recovery exception hẹp: khi task commit đã tồn
 
 ### Context report
 
-`harnix context-report --platform <kiro|antigravity|codex|claude> [--limit <1..50>]` emit `ContextReportResultV1` read-only; default limit 20, no active task là success với `activeTask:null`. Active report dùng cùng effective builder với hidden context ở bounded hook mode: Codex cap 2.500 characters; Kiro/Antigravity/Claude Code cap `min(config.context.maxCharacters, 8000)`; tối đa 64 inspected entries. Chưa có `context.json` thì candidate là task `relevantPaths` cộng applicable guides; đã có manifest thì dùng persisted entries cộng applicable guides.
+`harnix context-report --platform <kiro|antigravity|codex|claude|opencode|cursor> [--limit <1..50>]` emit `ContextReportResultV1` read-only; default limit 20, no active task là success với `activeTask:null`. Active report dùng cùng effective builder với hidden context ở bounded hook mode: Codex cap 2.500 characters; Kiro/Antigravity/Claude Code cap `min(config.context.maxCharacters, 8000)`; tối đa 64 inspected entries. Chưa có `context.json` thì candidate là task `relevantPaths` cộng applicable guides; đã có manifest thì dùng persisted entries cộng applicable guides.
 
 Output active chỉ gồm task ID, platform budget, aggregate candidate/selected/omitted counts, selected relative paths với trusted sorted reason codes `applicable-guide|persisted-selection|pinned|task-reference`, omitted relative paths với `budget|duplicate|missing|unsafe`, và bounded context/selection drift metadata. `--limit` áp riêng cho selected, omitted và drift changes. Toàn JSON tối đa 262.144 UTF-8 bytes bằng deterministic whole-item tail omission; report không trả content, raw persisted reason/state, hash, task prose, hook event, secret hoặc absolute path, không ghi file/network và không làm đổi hidden hook payload. Hook context bounded liệt kê mọi guide dưới `.harnix/spec/guides/` và mọi file từ 1.500 ký tự dạng con trỏ (đường dẫn + số ký tự, kèm lời nhắc đọc khi khớp file đang sửa) thay vì nhúng nội dung, vẫn hash để drift hoạt động; mỗi entry luôn nguyên vẹn hoặc nằm trong `Omitted`, không bao giờ bị cắt giữa chừng.
 
@@ -399,7 +399,7 @@ Thư viện technique-skill hẹp (5–10 skill, task `add-technique-skills` shi
 - **Ambiguous:** tự chọn mức nhẹ nhất kiểm soát được rủi ro; chỉ hỏi full brainstorm hay quick implementation khi outcome/cost khác đáng kể.
 - Explicit `--lite`/`--full` override heuristic. Forced Lite với risk signal vốn chọn Full phải giữ Lite nhưng emit `explicit-lite-risk-conflict`; cả hai mode vẫn giữ common compliance và quality/security gates.
 
-Yêu cầu rõ kiểu build/fix/implement/change cho phép chuyển từ ready sang implementing trong phạm vi đã yêu cầu; không xin approval lần hai. Plan-only request hoặc explicit review checkpoint dừng ở `ready`. Product decision chưa giải quyết, scope expansion, destructive/external action hoặc thiếu authority mới cần hỏi.
+Yêu cầu rõ kiểu build/fix/implement/change cho phép chuyển từ ready sang implementing trong phạm vi đã yêu cầu; không xin approval lần hai. Plan-only request hoặc explicit review checkpoint dừng ở `ready`. Task Full và Epic luôn dừng ở `ready` (`nextStage: await`) để người dùng duyệt kế hoạch trước khi viết code; chỉ task Lite đã được yêu cầu triển khai mới chuyển thẳng sang `implementing`. Product decision chưa giải quyết, scope expansion, destructive/external action hoặc thiếu authority mới cần hỏi.
 
 Workflow phải operational từ generated project artifacts: classify latest request trước khi đọc `.active`; obvious Bypass giữ unrelated task unchanged. Standalone review route tới `harnix-review` và standalone research route tới `harnix-research` mà không consult active task state. Project-scoped Lite/Full hoặc explicit inspect/continue mới chạy bounded hidden preflight. `ready` trả `nextStage:await` vì persisted state không tự chứng minh latest request đã authorize implementation. Sau routing, persist task `planning` trước product edits; persist `ready`, `in_progress/implementing`, và `verifying` trước hành động của stage kế tiếp; ghi evidence ngay sau check; persist `completed` trước completion journal/archive. Hidden `workflow --cancel` nhận bounded JSON reason/authority cho explicit cancellation, persist `cancelled/cancelling` trước cancellation journal rồi clear only matching pointer; partial failure retry idempotent và không chạy completion gate. Task ID phải dùng lowercase kebab slug dễ đọc và vẫn fail closed với unsafe path. Ready persistence bắt buộc ít nhất một acceptance criterion và một required validation check; ở v3 mọi non-waived criterion phải được required check bao phủ. V3 draft hội tụ trong planning và freeze tại first persisted `ready`. Post-ready revision dùng một save `replan` kèm `contractRevision`, không reinterpret evidence dưới criterion/check definition mới. Full artifacts phải tồn tại, an toàn, không rỗng tại mỗi ready transition; `plan.md` có implementation checklist (≥ 1 item) ánh xạ các slice, chỉ check sau focused evidence và không thay thế TaskRecord evidence. Mỗi generated skill phải nêu incoming state, persisted action, và exit/handoff; không dựa vào conversation memory để giả định transition.
 

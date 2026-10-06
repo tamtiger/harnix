@@ -64,7 +64,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .command("status")
     .description("Summarize the active Harnix task and next action")
     .option("--explain", "Include required-check freshness and readiness/completion blockers")
-    .option("--summary", "Print a concise micro-summary under 100 tokens")
+    .option("--summary", "Print a concise micro-summary under 80 tokens")
     .option("--limit <count>", "Maximum required checks when --explain is set", "20")
     .action(async (options: { explain?: boolean; summary?: boolean; limit: string }) => {
       const now = programOptions.statusClock?.() ?? Date.now();
@@ -130,7 +130,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
   program
     .command("context-report")
     .description("Explain bounded effective Harnix hook context metadata")
-    .option("--platform <platform>", "Target Kiro, Antigravity, Codex, or Claude Code")
+    .option("--platform <platform>", "Target Kiro, Antigravity, Codex, Claude Code, OpenCode, or Cursor")
     .option("--limit <count>", "Maximum details per context category", "20")
     .action(async (options: { platform?: string; limit: string }) => {
       const platform = parsePlatformId(options.platform);

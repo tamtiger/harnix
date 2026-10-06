@@ -102,7 +102,7 @@ describe("task contract documentation parity", () => {
     expect(schema.transports["--save"]).toBeDefined();
   });
 
-  it("keeps the format and lint gate wired: scripts, Prettier config, exemption owners, AGENTS mention", async () => {
+  it("keeps the format and lint gate wired: scripts, Prettier config, empty exemption lists, AGENTS mention", async () => {
     const scripts = (JSON.parse(await read("package.json")) as { scripts: Record<string, string> }).scripts;
     const prettierConfig = JSON.parse(await read(".prettierrc.json")) as { printWidth: number };
     const eslintConfig = await read("eslint.config.mjs");
@@ -111,7 +111,8 @@ describe("task contract documentation parity", () => {
     expect(scripts["format:check"]).toContain("prettier --check");
     expect(scripts.lint?.startsWith("pnpm format:check")).toBe(true);
     expect(prettierConfig.printWidth).toBe(120);
-    for (const owner of ["restructure-code", "standardize-tests", "release-v2"]) expect(eslintConfig).toContain(owner);
+    for (const list of ["OVERSIZED_SOURCE_FILES", "COMPLEX_SOURCE_FILES", "RELEASE_SCRIPT_EXEMPTIONS"])
+      expect(eslintConfig).toMatch(new RegExp(`const ${list} = \\[\\];`, "u"));
     expect(await read("AGENTS.md")).toContain("format:check");
   });
 

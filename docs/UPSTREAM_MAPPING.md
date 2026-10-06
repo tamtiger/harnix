@@ -20,7 +20,7 @@ Mọi public symbol, package, executable, template và generated branding dùng 
 | `packages/core/src/channel/**` | — | `remove` | Không forum, worker, spawn, supervisor hoặc channel store |
 | `packages/cli/src/cli/**` | `src/cli.ts` | `reuse/adapt` | Commander CLI, một executable `harnix` |
 | `packages/cli/src/commands/init.ts` | `src/commands/init.ts` | `reuse/adapt` | Init tạo `.harnix` project data plus root `AGENTS.md` bootstrap only when absent; setup tách riêng |
-| Configurator registry 24 platform | `src/configurators/{kiro,antigravity,codex}.ts` | `reuse/adapt` | Registry đóng chỉ Kiro, Antigravity và Codex |
+| Configurator registry 24 platform | `src/core/platform/registry.ts` + `src/configurators/` | `reuse/adapt` | Registry đóng chỉ Kiro, Antigravity, Codex, Claude Code, OpenCode và Cursor |
 | `commands/{update,upgrade,uninstall,mem}.ts` | Cùng command names dưới `src/commands` | `reuse/adapt` | Semantics ownership, injection và safety mới |
 | — | `src/commands/setup.ts` | `build new` | Multi-flag platform setup tách khỏi init |
 | — | `src/commands/doctor.ts` | `build new` | Local deterministic diagnostics/fix |

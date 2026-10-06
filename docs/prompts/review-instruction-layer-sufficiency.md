@@ -1,5 +1,8 @@
 # Review: Instruction Layer Sufficiency sau Task 11 (slim-instructions)
 
+> **Tài liệu lịch sử:** prompt này được viết trước bản 2.1.0. Số liệu (số platform, số điều luật, số lệnh) và đường dẫn trong đó phản ánh thời điểm viết; hiện Harnix hỗ trợ 6 platform (Kiro, Antigravity, Codex, Claude Code, OpenCode, Cursor). Xem `AGENTS.md` và `docs/HARNIX_PRD.md` để biết trạng thái hiện hành.
+
+
 ## Bối cảnh
 
 Task 11 (`20260928-205809-slim-instructions`) đã tinh gọn triệt để lớp chỉ dẫn của Harnix:

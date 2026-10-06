@@ -39,7 +39,7 @@ describe("Codex global surface plan", () => {
   it("renders only root-relative global skills plus conditional AGENTS and the current nested hook shape", () => {
     const plan = createCodexGlobalSurfacePlan();
 
-    expect(plan.skills).toHaveLength(18);
+    expect(plan.skills).toHaveLength(19);
     expect(
       plan.skills.every(
         (file) =>

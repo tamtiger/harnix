@@ -36,4 +36,24 @@ describe("upgradeHarnix", () => {
 
     expect(ran).toBe(true);
   });
+
+  it("should_run_the_default_apply_path_through_the_shared_check_runner", async () => {
+    const calls: [string, readonly string[]][] = [];
+    const result = await upgradeHarnix({
+      installedVersion: "0.1.0",
+      apply: true,
+      checkRunner: async (executable, args) => {
+        calls.push([executable, args]);
+        return { exitCode: 0, output: "" };
+      },
+    });
+    expect(calls).toEqual([["npm", ["install", "--save-dev", "@tamtiger/harnix@latest"]]]);
+    expect(result.applied).toBe(true);
+  });
+
+  it("should_fail_when_the_upgrade_process_exits_non_zero", async () => {
+    await expect(
+      upgradeHarnix({ installedVersion: "0.1.0", apply: true, checkRunner: async () => ({ exitCode: 3, output: "" }) }),
+    ).rejects.toThrow(/code 3/u);
+  });
 });

@@ -1,5 +1,8 @@
 # Prompt — Đại tu toàn diện Harnix: đánh giá hiệu quả từng tính năng, skill, workflow, rule và quyết định Giữ / Sửa / Gộp / Bỏ / Thêm
 
+> **Tài liệu lịch sử:** prompt này được viết trước bản 2.1.0. Số liệu (số platform, số điều luật, số lệnh) và đường dẫn trong đó phản ánh thời điểm viết; hiện Harnix hỗ trợ 6 platform (Kiro, Antigravity, Codex, Claude Code, OpenCode, Cursor). Xem `AGENTS.md` và `docs/HARNIX_PRD.md` để biết trạng thái hiện hành.
+
+
 Bạn đang làm việc tại repository Harnix (thư mục gốc của repo này). Đây là một đợt **đại tu dựa trên bằng chứng**: kiểm kê mọi thứ Harnix đang có, đo xem từng thứ có thực sự giúp software engineer code **nhanh hơn, bài bản hơn, chính xác hơn, chuẩn hơn** hay không, đối chiếu với thực tế bên ngoài, rồi đưa ra quyết định rõ ràng cho từng hạng mục.
 
 Mục tiêu sản phẩm cuối cùng: **một harness gọn, dùng được trên nhiều coding tool, hỗ trợ nhiều repo và nhiều ngôn ngữ/stack**, mà chi phí nghi thức (ceremony) luôn thấp hơn giá trị nó mang lại.

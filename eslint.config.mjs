@@ -8,12 +8,12 @@ import tseslint from "typescript-eslint";
  * decision recorded in docs/OVERHAUL_DECISIONS.md.
  */
 
-// Resolved by `restructure-code` (task 07) and `release-v2` (task 17); no oversized source files remain.
+// No oversized source files remain; keep this list empty.
 const OVERSIZED_SOURCE_FILES = [];
 
 const COMPLEX_SOURCE_FILES = [];
 
-// Removed by `release-v2` (task 17), which reviews the release scripts.
+// No release-script exemptions remain; keep this list empty.
 const RELEASE_SCRIPT_EXEMPTIONS = [];
 
 export default tseslint.config(
@@ -57,8 +57,8 @@ export default tseslint.config(
     extends: [tseslint.configs.disableTypeChecked],
   },
   {
-    // Tests inject async fakes, spy on unbound methods and read untyped JSON on purpose. Unresolved after
-    // `standardize-tests` (task 08); `release-v2` (task 17) must remove this block or record a new decision.
+    // Tests inject async fakes, spy on unbound methods and read untyped JSON on purpose; these relaxations are a
+    // standing decision, so a new test-only relaxation needs the same justification.
     // Test files are capped at 400 lines (enforced by test/unit/test-structure.test.ts), not 300.
     files: ["test/**/*.ts"],
     rules: {

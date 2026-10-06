@@ -66,7 +66,7 @@ const capabilities: Record<SkillName, readonly string[]> = {
     "strongest alternative",
     "`- [x]`",
     "release preparation",
-    "pnpm version:sync",
+    "project's own version command",
     "before verifying",
     "technical feedback",
     "push back",

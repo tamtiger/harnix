@@ -4,8 +4,8 @@
   "id": "20261005-184130-dong-bo-docs-va-phat-hanh",
   "title": "Đồng bộ tài liệu, skill, test cấu trúc và phát hành 2.0.5",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Làm test cấu trúc đủ chặt, sửa mặc định --init, dọn skill/tài liệu lỗi thời, rồi phát hành 2.0.5 với toàn bộ chuỗi acceptance xanh (R-022, R-029, R-030, R-033, R-035 và các mục P3).",
   "nonGoals": [
     "Không thêm tính năng mới",
@@ -15,59 +15,128 @@
     {
       "id": "ac-1",
       "text": "`test/workflow/architecture.test.ts` bắt dynamic `import()`, side-effect import và `fs` không có tiền tố `node:`, cấm `core` import `configurators`; có fixture vi phạm chứng minh bộ quét hoạt động.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-structure-4"
+      ]
     },
     {
       "id": "ac-2",
       "text": "`workflow --init`: lệnh và input mặc định lấy từ `verify-plan`, `--mode` không hợp lệ báo lỗi, slug không kết thúc bằng `-`, thời gian chỉ qua `src/utils/clock.ts`, `--input` tách theo dấu phẩy như `--set-check`.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-structure-4"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Skill và reference không chứa quy ước riêng của repo Harnix: bỏ `pnpm format`/`pnpm lint` cứng, `pnpm version:sync` và yêu cầu mirror `test/unit` khỏi `harnix-implement` và `harnix-plan` (thay bằng lệnh từ `verify-plan`/`project-facts`); `harnix-plan` bỏ yêu cầu dòng `**Verifies:**` còn sót từ ready-trace grammar; `references/replan.md` nhắc `--replace-check` và quy tắc bản thay phải khác `command`, `inputs` hoặc `cwd`; `references/ready-review.md` nêu suite check phải chạy lệnh test của dự án.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-structure-4"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Số platform là 6 ở mọi bề mặt người dùng thấy: help `--platform` (`src/cli-workflow-commands.ts`), mô tả chương trình (`src/cli-program.ts`), thông báo uninstall (`src/core/global/uninstall.ts`), hàng `setup`/`uninstall` trong `README.md`, bảng platform trong `test/README.md`, danh sách cờ trong `docs/HARNIX_PRD.md` và `docs/GLOBAL_SETUP_REFACTOR_PLAN.md`, và ghi chú registry trong `docs/UPSTREAM_MAPPING.md`; `test/unit/docs/supported-platforms.test.ts` được mở rộng để giữ danh sách này không lệch lại.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-structure-4"
+      ]
     },
     {
       "id": "ac-5",
       "text": "Quy tắc và số liệu thống nhất giữa docs, help và code: PRD:402, WORKFLOW:12 và :290 khớp WORKFLOW:136 về việc Full task và Epic luôn dừng ở `ready`/`await`; help `status --summary` ghi dưới 80 token như tài liệu; `references/evidence.md` ghi `evidence-expired` chỉ cho legacy, danh sách thư mục bỏ qua có `__pycache__` và quy tắc `.git` khớp code; `workflow --schema` transports liệt kê đủ `--init`, `--preflight`, `--snapshot`, `--inspect`; `test/README.md` ghi sàn coverage hiện hành (95, 98.6, 89); thông tin cũ trong `docs/prompts/*` (bốn platform, chín điều luật, đường dẫn máy cụ thể) được cập nhật hoặc đánh dấu lịch sử.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-structure-4"
+      ]
     },
     {
       "id": "ac-6",
-      "text": "`CHANGELOG.md` không còn tên repo khách hàng; `pnpm version:sync 2.0.5 --summary ...` được chạy đúng một lần với một entry gộp toàn bộ epic hardening (gate xanh, đóng đường xanh giả, bảo toàn cấu hình global, state machine, bảo mật, tài liệu); `package.json`, CHANGELOG và template khớp nhau; `harnix doctor` không tăng cảnh báo so với trước task.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "`CHANGELOG.md` không còn tên repo khách hàng; `pnpm version:sync 2.1.0 --summary ...` được chạy đúng một lần với một entry gộp toàn bộ epic hardening (gate xanh, đóng đường xanh giả, bảo toàn cấu hình global, state machine, bảo mật, tài liệu); `package.json`, CHANGELOG và template khớp nhau; `harnix doctor` không tăng cảnh báo so với trước task.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-scan-2-2",
+        "ev-check-version-2"
+      ]
     },
     {
       "id": "ac-7",
       "text": "Cổng chất lượng xanh: `pnpm run typecheck`, `pnpm run lint` và `pnpm run test` (có coverage, không hạ ngưỡng) đều exit 0 trên cây mã cuối cùng của task.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-lint-4",
+        "ev-check-suite-4",
+        "ev-check-typecheck-4"
+      ]
     },
     {
       "id": "ac-8",
       "text": "Hướng dẫn multi-repo và quy tắc check mới có trong skill: reference mới `multi-repo` của `harnix-plan` (khi nào cần `cwd`, `verify-plan --recursive`, khai báo bằng `--set-check --cwd` và cần `--reason` sau planning, chạy chỉ bằng `--run-check` không truyền `--cwd`, ví dụ hai repo, các lỗi thường gặp); `references/evidence.md` mô tả `--run-check` chỉ chạy đúng `command` trong đúng `cwd`, evidence không được đề ngày tương lai và circuit breaker `stop` với lối đi `--replace-check`; skill `harnix-debug` trỏ tới breaker; cookbook trong template nhắc reference; test catalog và ngân sách instruction vẫn xanh.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-structure-4"
+      ]
     },
     {
       "id": "ac-9",
       "text": "Vệ sinh test và cấu hình: `HARNIX_UPDATE_GOLDEN` làm test thất bại khi chạy trong CI thay vì pass im lặng; sàn đếm test/assertion trong `test/unit/test-structure.test.ts` được nâng lên mức hiện tại; lý do miễn trừ sai của `src/index.ts` và comment ESLint lỗi thời (`release-v2 must remove this block`) được sửa; không thêm miễn trừ mới.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-structure-4"
+      ]
     }
   ],
   "validationPlan": [
+    {
+      "id": "check-lint",
+      "description": "pnpm run lint (format:check + ESLint) exit 0",
+      "command": "pnpm run lint",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-7"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-scan",
+      "description": "scan:release sau pack:check",
+      "command": "pnpm run scan:release",
+      "scope": "focused",
+      "required": false,
+      "criterionIds": [
+        "ac-6"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/**",
+        "src/**"
+      ]
+    },
+    {
+      "id": "check-scan-2",
+      "description": "Replacement for check-scan",
+      "command": "pnpm run scan:release",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-6"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "package.json",
+        "scripts/**",
+        "src/**"
+      ]
+    },
     {
       "id": "check-structure",
       "description": "Test cấu trúc, tài liệu, skill, template",
@@ -91,36 +160,17 @@
       ]
     },
     {
-      "id": "check-version",
-      "description": "Test đồng bộ phiên bản",
-      "command": "pnpm vitest run test/workflow/version-sync.test.ts test/workflow/package-contract.test.ts",
-      "scope": "focused",
+      "id": "check-suite",
+      "description": "pnpm run test (vitest + coverage) exit 0",
+      "command": "pnpm run test",
+      "scope": "full",
       "required": true,
       "criterionIds": [
-        "ac-6"
+        "ac-7"
       ],
       "inputs": [
-        "CHANGELOG.md",
-        "package.json",
-        "scripts/**",
-        "test/workflow/package-contract.test.ts",
-        "test/workflow/version-sync.test.ts"
-      ]
-    },
-    {
-      "id": "check-scan",
-      "description": "scan:release sau pack:check",
-      "command": "pnpm run scan:release",
-      "scope": "focused",
-      "required": true,
-      "criterionIds": [
-        "ac-6"
-      ],
-      "inputs": [
-        "CHANGELOG.md",
-        "package.json",
-        "scripts/**",
-        "src/**"
+        "src/**",
+        "test/**"
       ]
     },
     {
@@ -139,37 +189,263 @@
       ]
     },
     {
-      "id": "check-lint",
-      "description": "pnpm run lint (format:check + ESLint) exit 0",
-      "command": "pnpm run lint",
-      "scope": "full",
+      "id": "check-version",
+      "description": "Test đồng bộ phiên bản",
+      "command": "pnpm vitest run test/workflow/version-sync.test.ts test/workflow/package-contract.test.ts",
+      "scope": "focused",
       "required": true,
       "criterionIds": [
-        "ac-7"
+        "ac-6"
       ],
       "inputs": [
-        "eslint.config.mjs",
+        "CHANGELOG.md",
+        "package.json",
         "scripts/**",
-        "src/**",
-        "test/**"
-      ]
-    },
-    {
-      "id": "check-suite",
-      "description": "pnpm run test (vitest + coverage) exit 0",
-      "command": "pnpm run test",
-      "scope": "full",
-      "required": true,
-      "criterionIds": [
-        "ac-7"
-      ],
-      "inputs": [
-        "src/**",
-        "test/**"
+        "test/workflow/package-contract.test.ts",
+        "test/workflow/version-sync.test.ts"
       ]
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "ev-check-structure-1",
+      "checkId": "check-structure",
+      "recordedAt": "2026-10-06T08:36:54.690+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "12f947d49d5c2371bcbe4f5a5325c9ccdc4e839f351cbb5f9f5cedee044d78cd"
+    },
+    {
+      "id": "ev-check-version-1",
+      "checkId": "check-version",
+      "recordedAt": "2026-10-06T08:36:57.466+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "abc29829d44b035ab12c497899c21d342c797ae11aabb9ab4c6feac99d1a4ee7"
+    },
+    {
+      "id": "ev-check-typecheck-1",
+      "checkId": "check-typecheck",
+      "recordedAt": "2026-10-06T08:37:01.986+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b05134056d0ab5fbf152a324be72fef220951f1a0e6f4e2f409fe6e46c4d9e22"
+    },
+    {
+      "id": "ev-check-lint-1",
+      "checkId": "check-lint",
+      "recordedAt": "2026-10-06T08:37:16.981+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "981ddb531c9db0c3f1effc6651a534fbda0414f5845cb1f413ac4296479cfa2c"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T08:38:32.496+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fe6cc6a298600768c481f8407f7d7bc2bd876f9ce2a5de77c349104a70b8b084"
+    },
+    {
+      "id": "ev-check-scan-1",
+      "checkId": "check-scan",
+      "recordedAt": "2026-10-06T08:38:34.067+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "1078b90f1b46fa3d5d717c1b25e6a18c5b9f32d3ab97f0150263b47e1bbfe9b5"
+    },
+    {
+      "id": "ev-check-scan-2",
+      "checkId": "check-scan",
+      "recordedAt": "2026-10-06T08:39:13.615+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "1078b90f1b46fa3d5d717c1b25e6a18c5b9f32d3ab97f0150263b47e1bbfe9b5"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-06T08:46:15.475+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Hai lần fail do môi trường (thiếu .artifacts, dist cũ), không do code; thêm dist/** vào inputs để build cũ làm check stale.",
+      "artifactPaths": [
+        ".harnix/tasks/20261005-184130-dong-bo-docs-va-phat-hanh/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-06T09:00:20.239+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: dist/** khớp 0 file vì thư mục build bị bỏ qua nên check không chạy được; bỏ khỏi inputs, dist được build lại trước khi chạy.",
+      "artifactPaths": [
+        ".harnix/tasks/20261005-184130-dong-bo-docs-va-phat-hanh/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-scan-2-1",
+      "checkId": "check-scan-2",
+      "recordedAt": "2026-10-06T09:00:44.668+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm scan:release — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d79e544f3b91d7da73e0ba31798f686262904da40ea5c542a4f8e4fed499e51d"
+    },
+    {
+      "id": "ev-check-typecheck-2",
+      "checkId": "check-typecheck",
+      "recordedAt": "2026-10-06T09:00:53.991+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "49f7e8c40de5e224102ee8fb06b7b1a95a4d600c4fcf177684490bccfd730d9e"
+    },
+    {
+      "id": "ev-check-lint-2",
+      "checkId": "check-lint",
+      "recordedAt": "2026-10-06T09:01:09.079+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "19c3113f41384aa32e900295047e8a39d96df8a2c90846423e28af5b9764576a"
+    },
+    {
+      "id": "ev-check-structure-2",
+      "checkId": "check-structure",
+      "recordedAt": "2026-10-06T09:01:36.813+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow test/unit — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0139b95871da46702336d53533f7be778271d5eb54a37222d51e799af73de8e1"
+    },
+    {
+      "id": "ev-check-version-2",
+      "checkId": "check-version",
+      "recordedAt": "2026-10-06T09:01:39.708+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/version-sync.test.ts test/workflow/package-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "76a76963bcfcf54b19b15c4cddb506574f3e3af5159bce3b4a674c348ce74863"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T09:02:32.259+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "a3e7b1680b43fef4890be1a3f6155c99ebca2dc916d2459e2c985f13212a7f10"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T09:06:24.965+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "04cfe1ffbc68010285436d2a4132bb54b51843dc2dedf28a82070142b49638a7"
+    },
+    {
+      "id": "ev-check-typecheck-3",
+      "checkId": "check-typecheck",
+      "recordedAt": "2026-10-06T09:06:29.681+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c83572c6991e3010aa3c674d4ea61447aff851df53e8dd56ac928239c52b051c"
+    },
+    {
+      "id": "ev-check-lint-3",
+      "checkId": "check-lint",
+      "recordedAt": "2026-10-06T09:06:44.737+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9bb66da0dc069f80d898051b79af35746b24029a2b4a7915fcd04ff4fd3fdc1d"
+    },
+    {
+      "id": "ev-check-structure-3",
+      "checkId": "check-structure",
+      "recordedAt": "2026-10-06T09:07:13.382+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow test/unit — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a8cd4b791f751bc65d09978657e0af5f48c87d3e8257f57d3260ee8fc9dcb819"
+    },
+    {
+      "id": "ev-check-scan-2-2",
+      "checkId": "check-scan-2",
+      "recordedAt": "2026-10-06T09:09:23.744+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm scan:release — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f2d163e8c35889519e9320da1961b98154ba4f265df0898eef88baaa3e9d05bb"
+    },
+    {
+      "id": "ev-check-typecheck-4",
+      "checkId": "check-typecheck",
+      "recordedAt": "2026-10-06T09:09:28.308+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d0abc13b03ddb254f059e1729adf64b2bb4c1df01de6a03c319c84100ab50248"
+    },
+    {
+      "id": "ev-check-lint-4",
+      "checkId": "check-lint",
+      "recordedAt": "2026-10-06T09:09:43.619+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8beadd800ecea8023804e61e0a1d2a0576e375802b0b2ab1bb183ca4be048e64"
+    },
+    {
+      "id": "ev-check-structure-4",
+      "checkId": "check-structure",
+      "recordedAt": "2026-10-06T09:10:10.355+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow test/unit — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "af78f29d11c915ec4dedf906bf0665fac5c7c691556d91939073ab080a65e552"
+    },
+    {
+      "id": "ev-check-suite-4",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T09:10:55.507+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b1f10d8b4ad6be5d04ce7895f64678fb4a7ea3b8f6c550ca06ccd2e60e5fdc1a"
+    }
+  ],
   "relevantPaths": [
     "test/workflow/architecture.test.ts",
     "src/core/workflow/init-task.ts",
@@ -186,5 +462,20 @@
   ],
   "epicId": "20261005-184125-harnix-hardening-2-0-5",
   "createdAt": "2026-10-05T18:41:25.132+07:00",
-  "updatedAt": "2026-10-05T20:08:35.529+07:00"
+  "updatedAt": "2026-10-06T09:11:40.353+07:00",
+  "decisions": [
+    {
+      "id": "d-doctor-delta",
+      "text": "Số cảnh báo harnix doctor đổi từ 44 lên 106 không so sánh được: 90 cảnh báo thuộc tích hợp global trong home thật (bản 2.0.x thành outdated khi lên 2.1.0), 16 thuộc project, gồm journal cũ bị redaction chặt hơn của task 5 gắn cờ; baseline 44 đo bằng dist cũ.",
+      "rationale": "Người dùng chọn đánh dấu ac-6 đạt kèm ghi chú này, không chạy update --global trên home thật và không sửa journal."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-global-outdated",
+      "text": "Tích hợp global trong home thật vẫn ở bản 2.0.x; chạy harnix update --global khi người dùng cho phép.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-06T09:11:40.353+07:00"
 }

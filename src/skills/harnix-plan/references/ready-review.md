@@ -4,7 +4,7 @@ Run every item before `ready`; if one fails keep the current planning status, us
 
 - **Decisions:** no unresolved material decision is disguised as an implementation step.
 - **Criteria:** every criterion describes behavior or evidence that can be checked.
-- **Coverage:** every requirement maps to an implementation slice and a validation check.
+- **Coverage:** every requirement maps to an implementation slice and a validation check; the project-level suite check runs the project's test command from `harnix verify-plan` (a command that runs only part of the tests is rejected).
 - **Contracts:** field names, enums, inputs, outputs, errors, precedence, migration and ownership are exact where they affect implementation.
 - **Placeholders:** no `TBD`, `TODO`, "handle appropriately", "similar to above", unnamed type or deferred choice that could change the implementation.
 - **Consistency:** PRD, plan, research, task record and repository instructions do not contradict each other.

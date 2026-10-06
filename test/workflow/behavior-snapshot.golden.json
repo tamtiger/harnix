@@ -1084,6 +1084,10 @@
           ]
         },
         "transports": {
+          "--init": "Create a valid v3 task and set it active: --init --title <t> [--mode lite|full --goal <g> --text <criterion> --command <cmd> --input <glob,glob> --follow-up <task-id>]; the command and inputs default from verify-plan.",
+          "--preflight": "Read-only routing metadata: clock, learning notes, check counts, active task and nextStage.",
+          "--snapshot": "Read-only input digest of one check (--snapshot --check <id>).",
+          "--inspect": "Read-only view of the active workflow state.",
           "--save": "Full record plus artifacts. Required for obligations, artifacts and contract revisions.",
           "--transition": "Status and checkpoint only, read from the persisted record.",
           "--evidence": "Append exactly one evidence item from a stdin envelope, or from --check, --result, --summary and optional --exit-code, --artifact, --digest flags.",

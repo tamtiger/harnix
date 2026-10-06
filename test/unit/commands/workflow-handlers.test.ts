@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { WORKFLOW_HANDLERS, type WorkflowContext } from "src/commands/workflow-handlers.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
-import { initializeUtcProject, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
+import { initializeUtcProject, loadPersistedTask, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
 
 const temporaryRepository = useTemporaryRepositories();
 const BYTE_ORDER_MARK = String.fromCharCode(0xfeff);
@@ -66,11 +66,19 @@ describe("workflow handlers", () => {
     await writeProjectSource(root);
 
     const result = (await WORKFLOW_HANDLERS.init!(
-      context(root, undefined, { title: "Init handler task", mode: "lite", brief: true, input: ["src/**"] }),
+      context(root, undefined, {
+        title: "Init handler task",
+        mode: "lite",
+        brief: true,
+        command: "pnpm test",
+        input: ["src/**/*.{ts,tsx}, My Dir/**", "test/**"],
+      }),
     )) as { id: string; status: string; checkpoint: string };
 
     expect(result).toMatchObject({ status: "planning", checkpoint: "planning" });
     expect(result.id).toMatch(/^\d{8}-\d{6}-init-handler-task$/u);
+    const persisted = (await loadPersistedTask(root, result.id)) as { validationPlan: { inputs: string[] }[] };
+    expect(persisted.validationPlan[0]?.inputs).toEqual(["My Dir/**", "src/**/*.{ts,tsx}", "test/**"]);
     const inspected = (await WORKFLOW_HANDLERS.inspect!(context(root, undefined))) as { activeTask: { id: string } };
     expect(inspected.activeTask.id).toBe(result.id);
   });

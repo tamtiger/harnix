@@ -288,7 +288,7 @@ Tasks, research và journal là user-owned. Packaged `workflow.md` và seed spec
 
 `stageOwnerFor(state)` là nguồn duy nhất map trạng thái persisted → skill; preflight `nextStage` ∈ `plan|implement|verify|debug|await|stop`. `blocked` route tới owner của `resumeStatus`. Không còn skill `continue`: khôi phục là chạy `harnix workflow --preflight` rồi nạp skill mà `nextStage` chỉ định.
 
-Platform adapters cho Kiro, Antigravity và Codex phải giữ cùng state/gate semantics. Hook, steering hoặc skill syntax có thể khác nhưng không được tạo platform-specific workflow.
+Platform adapters cho Kiro, Antigravity, Codex, Claude Code, OpenCode và Cursor phải giữ cùng state/gate semantics. Hook, steering hoặc skill syntax có thể khác nhưng không được tạo platform-specific workflow.
 
 Source canonical của sáu skill (cùng `references/*.md` nạp theo yêu cầu bằng `harnix skill <name> --reference <topic>`) nằm tại `src/skills/harnix-*/SKILL.md`. Mỗi source có portable `metadata.version`; contract test buộc version semantic này đồng bộ với package release. Build nhúng raw Markdown vào package; runtime không đọc source tree hoặc network. Cả ba adapter phải cài byte-identical canonical `SKILL.md`, gồm version và provenance, thay vì prepend các bản guard/prose riêng có thể drift.
 

@@ -2,6 +2,8 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { isFilesystemSpecifier, moduleSpecifiers } from "test/support/import-scan.js";
+
 const srcRoot = resolve(process.cwd(), "src");
 
 function walk(directory: string): string[] {
@@ -26,8 +28,7 @@ function importEdges(): ImportEdge[] {
   const edges: ImportEdge[] = [];
   for (const file of sourceFiles) {
     const source = readFileSync(file, "utf8");
-    for (const match of source.matchAll(/(?:import|export)\s[^;]*?from\s+"([^"]+)"/gu)) {
-      const specifier = match[1]!;
+    for (const specifier of moduleSpecifiers(source)) {
       const target = specifier.startsWith("src/")
         ? (specifier.split("/")[1] ?? "").replace(/\.js$/u, "")
         : specifier.startsWith(".")
@@ -68,7 +69,7 @@ function codeLines(file: string): number {
 
 describe("architecture", () => {
   it("keeps core free of commands, templates, skills and terminal UI packages", () => {
-    const forbidden = new Set(["commands", "templates", "skills", "commander", "inquirer"]);
+    const forbidden = new Set(["commands", "templates", "skills", "configurators", "commander", "inquirer"]);
     const offenders = edges.filter(
       (edge) => layer(edge.from) === "core" && (forbidden.has(edge.target) || edge.target.startsWith("@inquirer")),
     );
@@ -85,7 +86,7 @@ describe("architecture", () => {
 
   it("keeps direct filesystem access out of commands", () => {
     const offenders = edges
-      .filter((edge) => layer(edge.from) === "commands" && /^node:fs(?:\/promises)?$/u.test(edge.specifier))
+      .filter((edge) => layer(edge.from) === "commands" && isFilesystemSpecifier(edge.specifier))
       .map((edge) => edge.from);
 
     expect([...new Set(offenders)]).toEqual([]);
@@ -116,6 +117,31 @@ describe("architecture", () => {
     expect(oversized).toEqual([]);
     expect(existsSync(join(srcRoot, "core", "workflow"))).toBe(true);
     expect(existsSync(join(srcRoot, "core", "workflow.ts"))).toBe(false);
+  });
+
+  it("detects every import form in violating fixtures", () => {
+    const fixture = [
+      'import { a } from "src/core/a.js";',
+      "import type { B } from 'src/commands/b.js';",
+      'import "./side-effect.js";',
+      'export * from "./reexport.js";',
+      'const lazy = await import("src/configurators/lazy.js");',
+      'const legacy = require("fs");',
+      'import { readFile } from "fs/promises";',
+      '// import "./commented-out.js";',
+      '/* import("./block-commented.js") */',
+    ].join("\n");
+    expect(moduleSpecifiers(fixture)).toEqual([
+      "src/core/a.js",
+      "src/commands/b.js",
+      "./reexport.js",
+      "fs/promises",
+      "./side-effect.js",
+      "src/configurators/lazy.js",
+      "fs",
+    ]);
+    expect(["fs", "fs/promises", "node:fs", "node:fs/promises"].every(isFilesystemSpecifier)).toBe(true);
+    expect(["node:path", "fsevents", "src/utils/fs-access.js"].some(isFilesystemSpecifier)).toBe(false);
   });
 
   it("leaves the workflow command as a thin adapter that only re-exports core", () => {

@@ -1,6 +1,9 @@
 # Prompt — Review và Refactor toàn diện Harnix v2: Orchestrator Landscape, Docs Consistency & Architecture Audit
 
-Bạn đang làm việc tại repository Harnix (`C:\FPT\MyProject\harnix`). Hãy thực hiện một đợt review toàn diện, đối chiếu với ecosystem AI coding harness hiện hành — đặc biệt là các orchestrator/meta-harness cùng loại — phát hiện mọi inconsistency/drift/gap, rồi refactor docs và code để đưa Harnix về trạng thái nhất quán, chính xác và cập nhật.
+> **Tài liệu lịch sử:** prompt này được viết trước bản 2.1.0. Số liệu (số platform, số điều luật, số lệnh) và đường dẫn trong đó phản ánh thời điểm viết; hiện Harnix hỗ trợ 6 platform (Kiro, Antigravity, Codex, Claude Code, OpenCode, Cursor). Xem `AGENTS.md` và `docs/HARNIX_PRD.md` để biết trạng thái hiện hành.
+
+
+Bạn đang làm việc tại repository Harnix (thư mục gốc của repository). Hãy thực hiện một đợt review toàn diện, đối chiếu với ecosystem AI coding harness hiện hành — đặc biệt là các orchestrator/meta-harness cùng loại — phát hiện mọi inconsistency/drift/gap, rồi refactor docs và code để đưa Harnix về trạng thái nhất quán, chính xác và cập nhật.
 
 Đây là **review-then-refactor** task. Research trước, plan sau, implement có chứng cứ.
 

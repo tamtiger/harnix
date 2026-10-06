@@ -21,7 +21,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
   program
     .name("harnix")
     .description(
-      "Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, Codex, and Claude Code integrations.",
+      "Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, Codex, Claude Code, OpenCode, and Cursor integrations.",
     )
     .version(packageVersion)
     .showSuggestionAfterError()

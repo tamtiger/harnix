@@ -20,7 +20,7 @@ describe("harnix skill", () => {
   it("should_list_the_on_demand_references_of_each_skill", () => {
     const skills = new Map(reportSkillCatalog().skills.map((skill) => [skill.name, skill.references]));
 
-    expect(skills.get("harnix-plan")).toEqual(["replan", "migration", "epic", "ready-review"]);
+    expect(skills.get("harnix-plan")).toEqual(["replan", "migration", "epic", "multi-repo", "ready-review"]);
     expect(skills.get("harnix-implement")).toEqual(["feedback"]);
     expect(skills.get("harnix-verify")).toEqual(["evidence", "finish-cancel"]);
     expect(skills.get("harnix-review")).toEqual([]);
@@ -75,7 +75,7 @@ describe("harnix skill", () => {
     });
     expect(reportSkillReference("harnix-check", "evidence")).toMatchObject({ name: "harnix-verify" });
     expect(() => reportSkillReference("harnix-plan", "nope")).toThrow(
-      /Available: replan, migration, epic, ready-review/u,
+      /Available: replan, migration, epic, multi-repo, ready-review/u,
     );
     expect(() => reportSkillReference("harnix-review", "anything")).toThrow(/has no references/u);
     expect(() => reportSkillReference("harnix-plan", "__proto__")).toThrow(/Unknown reference/u);

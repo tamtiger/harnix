@@ -2,6 +2,7 @@ import { readFile, stat } from "node:fs/promises";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { sha256 } from "src/utils/hashing.js";
+import { neutralizeContextMarkers } from "./sanitize.js";
 import { compareCodeUnits } from "src/utils/order.js";
 export type {
   ContextChange,
@@ -140,7 +141,7 @@ async function inspectAndReadContextEntry(
       return { kind: "omit", reason: "duplicate" };
     }
     const asPointer = pointers !== undefined && (pointerByPath || content.length >= pointers.minCharacters);
-    const chunk = `${header}${asPointer ? pointerLine(content.length) : content}`;
+    const chunk = `${header}${asPointer ? pointerLine(content.length) : neutralizeContextMarkers(content)}`;
     if (!fullContext && currentSize + chunk.length > maxCharacters) {
       return { kind: "omit", reason: "budget" };
     }

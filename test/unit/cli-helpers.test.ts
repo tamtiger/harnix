@@ -59,6 +59,16 @@ describe("CLI helpers", () => {
     expect(redacted).toContain("[REDACTED]");
   });
 
+  it("redacts every absolute POSIX path and leaves relative paths and prose alone", () => {
+    for (const path of ["/root/.config/x.json", "/opt/app/data", "/etc/harnix/conf", "/srv/a/b/c"]) {
+      const redacted = redactPublicErrorMessage(new Error(`Cannot read ${path} now`));
+      expect(redacted).not.toContain(path);
+      expect(redacted).toContain("[PATH]");
+    }
+    const plain = "Use src/core/a.ts and/or --set-check/--set-paths; see /health";
+    expect(redactPublicErrorMessage(new Error(plain))).toBe(plain);
+  });
+
   it("formats platform flag lists", () => {
     const flags = platformFlagList();
     expect(flags).toContain("--kiro");

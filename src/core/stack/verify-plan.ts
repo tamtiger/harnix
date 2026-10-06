@@ -16,7 +16,6 @@ export interface PackageVerifyPlan {
 export interface VerifyPlan {
   generator: "harnix";
   schemaVersion: 1;
-  projectRoot: string;
   hasTests: boolean;
   commands: VerifyCommandConfig;
   packages: PackageVerifyPlan[];
@@ -54,7 +53,6 @@ export async function buildVerifyPlan(projectRoot: string, options?: { recursive
   return {
     generator: "harnix",
     schemaVersion: 1,
-    projectRoot: root,
     hasTests,
     commands,
     packages,

@@ -1,5 +1,8 @@
 # Prompt 1 — Mô phỏng workflow Harnix, tìm điểm yếu và research cách khắc phục
 
+> **Tài liệu lịch sử:** prompt này được viết trước bản 2.1.0. Số liệu (số platform, số điều luật, số lệnh) và đường dẫn trong đó phản ánh thời điểm viết; hiện Harnix hỗ trợ 6 platform (Kiro, Antigravity, Codex, Claude Code, OpenCode, Cursor). Xem `AGENTS.md` và `docs/HARNIX_PRD.md` để biết trạng thái hiện hành.
+
+
 Bạn đang làm việc tại repository Harnix. Hãy thực hiện một cuộc audit độc lập bằng cách mô phỏng các kịch bản workflow trong môi trường cô lập, tìm điểm yếu có bằng chứng và research các cơ chế có thể khắc phục chúng.
 
 Đây là một standalone review. Không triển khai fix trong lần chạy này.

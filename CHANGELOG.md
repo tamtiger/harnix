@@ -4,11 +4,22 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.1.0] - 2026-10-06
+
+### Changed
+
+- Hardening toàn diện sau review 2.0.4: khôi phục gate xanh (typecheck, lint, format, coverage) và bảo đảm chuỗi acceptance chạy coverage.
+- Đóng các đường ghi pass giả của check và evidence: argv phải khớp command đã khai báo, suite gate ép lệnh test của dự án, từ chối timestamp tương lai và cwd thoát repo, breaker bắt buộc dừng sau hai lần fail, chống race finish/cancel.
+- Bảo toàn cấu hình global của người dùng khi setup, update, uninstall; exit code và smoke phủ đủ 6 platform.
+- Siết state machine và dữ liệu task: epicMembers không ghi đè, blocked/resumeStatus, waive sau ready cần replan, dry-run khớp transition thật, migration, replace-check, batch, ghi epic atomic.
+- Bảo mật: vô hiệu hóa marker khung untrusted trong nội dung file của hook context, redaction learning chuẩn hóa Unicode và bắt tiếng Việt, lệnh giữa câu, credential, đường dẫn tuyệt đối; verify-plan không lộ đường dẫn tuyệt đối; thực thi process trên Windows (upgrade --apply, .cmd có dấu cách, kill cả cây tiến trình).
+- Tài liệu và skill: số platform là 6 ở mọi bề mặt, test cấu trúc bắt dynamic import và side-effect import, workflow --init lấy mặc định từ verify-plan, reference multi-repo mới, skill không còn quy ước riêng của repo Harnix.
+
 ## [2.0.4] - 2026-10-05
 
 ### Added
 
-- **Multi-repository `cwd` Scoping cho Checks:** Bổ sung thuộc tính `cwd?: string` vào schema `ValidationCheck` (TaskRecord schema v3) và cờ `--cwd <path>` trong `workflow --set-check`, `workflow --replace-check`, `workflow --run-check`. Cho phép các lệnh build/test của các repository con trong multi-repo workspace (`frt-payment-core`, `frt-payment-gateway`, `frt-payment-portal-web`) được thực thi trực tiếp và chuẩn xác trong thư mục con tương ứng mà không cần workaround chuỗi lệnh phức tạp qua `cd`.
+- **Multi-repository `cwd` Scoping cho Checks:** Bổ sung thuộc tính `cwd?: string` vào schema `ValidationCheck` (TaskRecord schema v3) và cờ `--cwd <path>` trong `workflow --set-check`, `workflow --replace-check`, `workflow --run-check`. Cho phép các lệnh build/test của các repository con trong multi-repo workspace (ví dụ hai repository `services/api` và `apps/web`) được thực thi trực tiếp và chuẩn xác trong thư mục con tương ứng mà không cần workaround chuỗi lệnh phức tạp qua `cd`.
 - **Khởi tạo Follow-up Task (`workflow --init --follow-up <task-id>`):** Bổ sung cờ `--follow-up <task-id>` cho `workflow --init` tự động kế thừa `relevantPaths`, `relevantSpecs` và `epicId` từ task cha, giúp tiếp nối các yêu cầu bổ sung hoặc công việc liền kề mà không làm mất ngữ cảnh đã xác lập.
 - **Baseline Check Execution trong Planning:** Cho phép chạy `workflow --run-check` ngay trong giai đoạn `planning` để thu thập bằng chứng kiểm thử baseline, phát hiện sớm các lỗi pre-existing trước khi freeze contract tại `ready`.
 - **Batch State Mutation Envelope (`workflow --batch`):** Bổ sung flag `--batch` cho lệnh nội bộ `harnix workflow` nhận JSON envelope `{ criteria?, checks?, decisions?, risks?, paths?, specs? }` từ stdin. Cho phép áp dụng đồng thời nhiều thay đổi vào `task.json` chỉ dưới 1 file lock duy nhất, loại bỏ hiện tượng tranh chấp lock khi cập nhật liên tiếp các criteria/checks/decisions và giảm thiểu đáng kể chi phí round-trip/token context.

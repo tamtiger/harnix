@@ -1,5 +1,8 @@
 # Prompt 2 — Research coding-agent harness và chọn capability phù hợp cho Harnix
 
+> **Tài liệu lịch sử:** prompt này được viết trước bản 2.1.0. Số liệu (số platform, số điều luật, số lệnh) và đường dẫn trong đó phản ánh thời điểm viết; hiện Harnix hỗ trợ 6 platform (Kiro, Antigravity, Codex, Claude Code, OpenCode, Cursor). Xem `AGENTS.md` và `docs/HARNIX_PRD.md` để biết trạng thái hiện hành.
+
+
 Bạn đang làm việc tại repository Harnix. Hãy research các coding-agent harness, workflow framework và agent-development tool hiện hành trên Internet; so sánh chúng với Harnix; sau đó chọn một tập capability nhỏ, có bằng chứng và phù hợp để đưa vào backlog Harnix.
 
 Đây là plan-only research. Không triển khai capability trong lần chạy này.

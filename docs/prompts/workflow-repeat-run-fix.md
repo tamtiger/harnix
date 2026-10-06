@@ -1,5 +1,8 @@
 # Prompt 4 — Chạy workflow lặp lại theo kịch bản thực tế, tìm bug rồi fix và cải tiến
 
+> **Tài liệu lịch sử:** prompt này được viết trước bản 2.1.0. Số liệu (số platform, số điều luật, số lệnh) và đường dẫn trong đó phản ánh thời điểm viết; hiện Harnix hỗ trợ 6 platform (Kiro, Antigravity, Codex, Claude Code, OpenCode, Cursor). Xem `AGENTS.md` và `docs/HARNIX_PRD.md` để biết trạng thái hiện hành.
+
+
 Bạn đang làm việc tại repository Harnix (`@tamtiger/harnix`). Nhiệm vụ gồm hai pha bắt buộc, theo đúng thứ tự:
 
 1. **Pha A — Chạy và quan sát.** Chạy workflow Harnix **lặp nhiều vòng** trên một tập kịch bản mô phỏng người dùng thật, trong môi trường cô lập, và ghi lại quá trình chạy đủ chi tiết để chứng minh từng kết luận.

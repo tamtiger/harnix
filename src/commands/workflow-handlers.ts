@@ -74,6 +74,23 @@ async function readRequired(context: WorkflowContext, subject: string, invalid: 
   return parseJson(input, invalid);
 }
 
+/** Splits a glob list on commas outside braces, so `*.{ts,tsx}` and `My Dir/**` survive intact. */
+const splitGlobList = (value: string): string[] => {
+  const items: string[] = [];
+  let depth = 0;
+  let current = "";
+  for (const character of value) {
+    if (character === "{") depth += 1;
+    if (character === "}") depth = Math.max(0, depth - 1);
+    if (character === "," && depth === 0) {
+      items.push(current);
+      current = "";
+    } else current += character;
+  }
+  items.push(current);
+  return items.map((item) => item.trim()).filter((item) => item !== "");
+};
+
 const splitList = (value: string): string[] =>
   value
     .split(/[\s,]+/u)
@@ -101,7 +118,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
       goal: context.flags.goal,
       criterion: context.flags.text,
       command: context.flags.command,
-      input: context.flags.input,
+      input: context.flags.input?.flatMap(splitGlobList),
       followUp: context.flags.followUp,
     });
     return presentTask(context, task);

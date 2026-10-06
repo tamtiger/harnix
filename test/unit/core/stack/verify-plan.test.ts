@@ -150,4 +150,14 @@ describe("buildVerifyPlan (ac-no-tests & verify-plan)", () => {
     expect(gatewayPkg).toBeDefined();
     expect(gatewayPkg?.ecosystem).toBe("dotnet");
   });
+
+  it("never exposes an absolute project path", async () => {
+    const root = await createFixture();
+    await writeFixture(root, "package.json", JSON.stringify({ scripts: { test: "vitest run" } }));
+    await writeFixture(root, "test/sample.test.ts", "");
+
+    const plan = await buildVerifyPlan(root);
+    expect(plan).not.toHaveProperty("projectRoot");
+    expect(JSON.stringify(plan)).not.toContain(root.replaceAll("\\", "\\\\"));
+  });
 });

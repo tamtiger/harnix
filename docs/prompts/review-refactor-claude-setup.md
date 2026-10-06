@@ -1,5 +1,8 @@
 # Prompt 3 — Review + refactor toàn repo (code, skills, AGENTS, AGENTS template) và bổ sung setup cho Claude
 
+> **Tài liệu lịch sử:** prompt này được viết trước bản 2.1.0. Số liệu (số platform, số điều luật, số lệnh) và đường dẫn trong đó phản ánh thời điểm viết; hiện Harnix hỗ trợ 6 platform (Kiro, Antigravity, Codex, Claude Code, OpenCode, Cursor). Xem `AGENTS.md` và `docs/HARNIX_PRD.md` để biết trạng thái hiện hành.
+
+
 Bạn đang làm việc tại repository Harnix (`@tamtiger/harnix`). Nhiệm vụ gồm hai phần bắt buộc, thực hiện theo đúng thứ tự:
 
 1. **Review** toàn repo bằng bằng chứng, rồi **refactor** những gì review chứng minh là nợ kỹ thuật — bao gồm code, skill templates, `AGENTS.md` của repo và AGENTS template sinh ra cho consumer.

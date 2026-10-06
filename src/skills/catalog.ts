@@ -3,6 +3,7 @@ import implementSource from "./harnix-implement/SKILL.md";
 import feedbackReference from "./harnix-implement/references/feedback.md";
 import epicReference from "./harnix-plan/references/epic.md";
 import migrationReference from "./harnix-plan/references/migration.md";
+import multiRepoReference from "./harnix-plan/references/multi-repo.md";
 import readyReviewReference from "./harnix-plan/references/ready-review.md";
 import replanReference from "./harnix-plan/references/replan.md";
 import planSource from "./harnix-plan/SKILL.md";
@@ -25,6 +26,7 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       replan: replanReference,
       migration: migrationReference,
       epic: epicReference,
+      "multi-repo": multiRepoReference,
       "ready-review": readyReviewReference,
     },
   ],

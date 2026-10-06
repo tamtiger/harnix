@@ -1,5 +1,8 @@
 # Prompt — Review toàn diện Harnix 2.0.x (read-only)
 
+> **Tài liệu lịch sử:** prompt này được viết trước bản 2.1.0. Số liệu (số platform, số điều luật, số lệnh) và đường dẫn trong đó phản ánh thời điểm viết; hiện Harnix hỗ trợ 6 platform (Kiro, Antigravity, Codex, Claude Code, OpenCode, Cursor). Xem `AGENTS.md` và `docs/HARNIX_PRD.md` để biết trạng thái hiện hành.
+
+
 Bạn đang làm việc tại repository Harnix (thư mục gốc của repo này, package `@tamtiger/harnix`, bin `harnix`). Hãy thực hiện một đợt **review toàn diện, chỉ đọc**: kiểm tra tính đúng đắn, an toàn, kiến trúc, tính nhất quán giữa docs ↔ code ↔ test, chất lượng test, trải nghiệm agent/người dùng và mức sẵn sàng phát hành của phiên bản hiện tại. Kết quả là một **báo cáo phát hiện (findings report) có bằng chứng**, không phải bản sửa code.
 
 ---

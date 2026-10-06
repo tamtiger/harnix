@@ -2,7 +2,7 @@
 name: harnix-debug
 description: Use when a Harnix implementation or verification has a reproducible bug, failing test, unexpected behavior, loop or repeated unsuccessful fix.
 metadata:
-  version: "2.0.4"
+  version: "2.1.0"
 ---
 
 # Debug with evidence
@@ -19,7 +19,7 @@ Before reproducing anything compare the failure with the latest request, goal an
 
 ## Capture
 
-Before retrying record: expected and actual behavior, the exact command and result and the smallest reproducer, the last good and first bad boundary, environment assumptions and changed files, earlier attempts, and whether it is deterministic, intermittent, environmental or policy-related. Failed check evidence may carry structured `findings`; `harnix status --explain` gives stable reason codes. Reproduce with the narrowest command; if that is unsafe or external, inspect read-only and say so.
+A check that failed twice in a row is a circuit breaker, not a retry prompt: `--run-check` refuses further evidence and prints `stop`. Stop and report; the only way forward is a user-authorized `--replace-check` (`harnix skill harnix-verify --reference evidence`). Before retrying record: expected and actual behavior, the exact command and result and the smallest reproducer, the last good and first bad boundary, environment assumptions and changed files, earlier attempts, and whether it is deterministic, intermittent, environmental or policy-related. Failed check evidence may carry structured `findings`; `harnix status --explain` gives stable reason codes. Reproduce with the narrowest command; if that is unsafe or external, inspect read-only and say so.
 
 ## Find the root cause
 
