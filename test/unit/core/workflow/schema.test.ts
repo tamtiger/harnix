@@ -86,6 +86,29 @@ describe("workflow schema", () => {
     expect(constraints.criterionStatus).toEqual([...criterionStatuses]);
   });
 
+  it("describes the ready content gate and --reviewed on --transition", () => {
+    const text = workflowEnvelopeSchema().transports["--transition"] ?? "";
+
+    for (const part of [
+      "--reviewed",
+      "--dry-run",
+      "placeholders",
+      "plan.md",
+      "focused required check",
+      "reviewChecklist",
+    ]) {
+      expect(text).toContain(part);
+    }
+  });
+
+  it("lists --learn with its stdin candidate shape and preconditions", () => {
+    const text = workflowEnvelopeSchema().transports["--learn"] ?? "";
+
+    for (const part of ["candidate", "id", "statement", "sourceTaskIds", "evidenceIds", "verifying/finishing"]) {
+      expect(text).toContain(part);
+    }
+  });
+
   it("describes the full --batch envelope and its rules", () => {
     const text = workflowEnvelopeSchema().transports["--batch"] ?? "";
 

@@ -1,0 +1,65 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-165801-fast-contract-gates",
+  "title": "Cổng hợp đồng chạy nhanh và bảo vệ golden khỏi cập nhật nhầm",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Phát hiện sớm các test hợp đồng (cấu trúc test, cli-contract, architecture, tài liệu, golden) mà check tập trung hay bỏ sót, và chặn việc regenerate golden ghi nhầm lỗi.",
+  "nonGoals": [
+    "Không nới ngưỡng hay bỏ test cấu trúc",
+    "Không đổi nội dung golden hiện có"
+  ],
+  "epicId": "20261006-141317-workflow-field-feedback",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Có script pnpm test:gates chạy trong vài giây các test hợp đồng: test-structure, cli-contract, architecture, docs-task-contract, skill-sources, instruction-budget và behavior-snapshot.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "harnix verify-plan hoặc hướng dẫn lập kế hoạch nêu test:gates như check tập trung gợi ý cho mọi task đổi CLI, tài liệu hoặc cấu trúc test.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "HARNIX_UPDATE_GOLDEN từ chối ghi khi kịch bản golden sinh thêm trường error mới so với golden hiện tại và in danh sách đường dẫn thay đổi để người duyệt thấy.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Có script pnpm test:failures chạy toàn bộ suite bằng reporter JSON và chỉ in tên test lỗi cùng thông điệp ngắn.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T16:58:00.000+07:00",
+  "updatedAt": "2026-10-06T16:58:00.000+07:00"
+}

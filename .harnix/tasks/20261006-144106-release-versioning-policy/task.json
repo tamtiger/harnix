@@ -1,0 +1,58 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-144106-release-versioning-policy",
+  "title": "Chính sách phiên bản: bản dev cho từng member, một bản minor khi đóng epic, patch cho task lẻ",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Đặt quy tắc phiên bản rõ ràng và kiểm tra được: task lẻ tăng patch một lần; task thuộc epic dùng bản tiền phát hành X.Y.0-dev.N; khi đóng epic phát hành một bản minor X.(Y+1).0 (major chỉ khi phá vỡ frozen contract).",
+  "nonGoals": [
+    "Không đổi lịch sử phiên bản đã phát hành",
+    "Không tự động commit, tag hay publish"
+  ],
+  "epicId": "20261006-141317-workflow-field-feedback",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "AGENTS.md, workflow.md và skill harnix-implement mô tả chính sách phiên bản: task lẻ patch, member của epic X.Y.0-dev.N, đóng epic minor, major chỉ cho thay đổi phá vỡ frozen contract; ghi rõ ai bump và bump lúc nào.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "scripts/version-sync.mjs chấp nhận X.Y.0-dev.N, từ chối bản dev thấp hơn bản hiện tại hoặc lùi về bản dev của bản đã phát hành, và cho phép bản phát hành X.Y.0 sau chuỗi dev.N; có test cho từng trường hợp.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Epic 20261006-141317-workflow-field-feedback có quyết định ghi lại: Task 1 đã phát hành 2.1.2, các member còn lại dùng 2.2.0-dev.N và Task 13 (cli-version-skew-warning, member cuối theo ID) đóng epic bằng bản 2.2.0.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T14:41:30.000+07:00",
+  "updatedAt": "2026-10-06T16:57:53.012+07:00"
+}

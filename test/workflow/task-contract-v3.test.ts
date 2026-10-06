@@ -302,7 +302,10 @@ describe("free-form planning artifacts", () => {
     };
 
     await expect(saveWorkflow(root, { task: ready })).rejects.toThrow(/checklist/u);
-    const saved = await saveWorkflow(root, { task: ready, artifacts: { prd: "# PRD\n", plan: "- [ ] Bước một\n" } });
+    const saved = await saveWorkflow(root, {
+      task: ready,
+      artifacts: { prd: "# PRD\n", plan: "- [ ] Bước một cho ac-one\n" },
+    });
     expect(saved.status).toBe("ready");
     await expect(access(join(root, ".harnix", "tasks", taskId, "verification-inputs.json"))).rejects.toMatchObject({
       code: "ENOENT",

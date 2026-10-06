@@ -192,10 +192,10 @@ async function scenario(): Promise<unknown> {
   await step("save-full", () =>
     saveWorkflow(root, {
       task: task(full, { mode: "full" }),
-      artifacts: { prd: "# PRD\n", plan: "- [ ] Step one\n" },
+      artifacts: { prd: "# PRD\n", plan: "- [ ] Step one covers ac-one\n" },
     }),
   );
-  await step("full-ready", () => transitionWorkflow(root, "ready", "ready", at(11)));
+  await step("full-ready", () => transitionWorkflow(root, "ready", "ready", at(11), false, { reviewed: true }));
   await step("full-in-progress", () => transitionWorkflow(root, "in_progress", "implementing", at(12)));
   const fullActive = (await inspectWorkflow(root)).activeTask as TaskRecordV3;
   await step("revision-one-step", () =>

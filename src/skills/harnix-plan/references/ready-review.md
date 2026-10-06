@@ -16,3 +16,7 @@ Run every item before `ready`; if one fails keep the current planning status, us
 - **Commit discipline:** before any commit, show the changes and message and wait for approval.
 
 A plan may begin with a contract-freeze slice only when it resolves implementation detail, not an undecided product contract.
+
+## What the CLI checks for you
+
+When a task enters `ready/ready`, `harnix workflow --transition` and `--save` reject: hard placeholder tokens (`TBD`, `TODO`, `FIXME`, `???`, `<placeholder>`) in a Full `prd.md` or `plan.md` outside code spans and fences (the issue names `file:line`); a criterion id that `plan.md` never names; a criterion with no required `focused` check (the full-scope suite check does not count; a Lite task only gets an advisory). Soft deferral phrases are advisories. A Full task must also pass `--reviewed` after you run this review; without it the command prints this checklist and what it found, and `--dry-run` returns it as `reviewChecklist`. The rest of this review stays yours: the CLI cannot judge decisions, contracts or scope.

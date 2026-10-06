@@ -17,7 +17,15 @@ describe("workflow snapshot", () => {
 
     const snapshot = await snapshotWorkflow(root, "check");
 
-    expect(snapshot).toEqual(await computeInputDigest(root, task as ReturnType<typeof buildTaskV3>, "check"));
+    const { legacyInputDigest, ...visible } = await computeInputDigest(
+      root,
+      task as ReturnType<typeof buildTaskV3>,
+      "check",
+    );
+    expect(legacyInputDigest).toMatch(/^[a-f0-9]{64}$/u);
+    expect(snapshot).toEqual(visible);
+    expect("legacyInputDigest" in snapshot).toBe(false);
+    expect(snapshot.taskContractHash).toMatch(/^[a-f0-9]{64}$/u);
     expect(snapshot.schemaVersion).toBe(3);
     expect(snapshot.inputDigest).toMatch(/^[a-f0-9]{64}$/u);
   });

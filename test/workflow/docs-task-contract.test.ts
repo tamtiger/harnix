@@ -30,6 +30,72 @@ async function skillSources(): Promise<Array<{ name: string; text: string }>> {
 }
 
 describe("task contract documentation parity", () => {
+  it("describes the input digest as bound to the check's own contract, with the former formula still recognised", async () => {
+    const surfaces = {
+      "workflow template": workflowTemplate,
+      "AGENTS.md": await read("AGENTS.md"),
+      "docs/HARNIX_PRD.md": await read("docs/HARNIX_PRD.md"),
+      "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
+      "docs/IMPLEMENTATION_PLAN.md": await read("docs/IMPLEMENTATION_PLAN.md"),
+      "evidence reference": await read("src/skills/harnix-verify/references/evidence.md"),
+    };
+
+    for (const [name, text] of Object.entries(surfaces)) {
+      expect(text, name).not.toMatch(/folded into every digest|luôn được gộp ngầm vào digest/u);
+    }
+    for (const name of ["workflow template", "evidence reference"] as const)
+      expect(surfaces[name], name).toMatch(/former formula/u);
+    for (const name of ["docs/HARNIX_PRD.md", "docs/HARNIX_WORKFLOW.md", "docs/IMPLEMENTATION_PLAN.md"] as const)
+      expect(surfaces[name], name).toMatch(/công thức cũ/u);
+    expect(surfaces["AGENTS.md"]).toMatch(/check's own definition/u);
+    expect(surfaces["docs/IMPLEMENTATION_PLAN.md"]).toMatch(
+      /\{digest:4, taskId, checkId, taskContractHash, entries\}/u,
+    );
+  });
+
+  it("documents --init --epic and followUpOf, and says an epic is never attached retroactively", async () => {
+    const surfaces = {
+      "workflow template": workflowTemplate,
+      "AGENTS.md": await read("AGENTS.md"),
+      "docs/HARNIX_PRD.md": await read("docs/HARNIX_PRD.md"),
+      "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
+      "docs/IMPLEMENTATION_PLAN.md": await read("docs/IMPLEMENTATION_PLAN.md"),
+      "epic reference": await read("src/skills/harnix-plan/references/epic.md"),
+    };
+
+    for (const [name, text] of Object.entries(surfaces)) {
+      expect(text, name).toMatch(/followUpOf/u);
+      expect(text, name).toMatch(/--epic/u);
+    }
+    expect(surfaces["epic reference"]).toMatch(/retroactive/iu);
+    const initSchema = workflowEnvelopeSchema().transports["--init"] ?? "";
+    expect(initSchema).toMatch(/--epic <epic-id>/u);
+    expect(initSchema).toMatch(/followUpOf/u);
+  });
+
+  it("documents the ready content gate and --reviewed in every surface that describes the ready gate", async () => {
+    const surfaces = {
+      "workflow template": workflowTemplate,
+      "AGENTS.md": await read("AGENTS.md"),
+      "docs/HARNIX_PRD.md": await read("docs/HARNIX_PRD.md"),
+      "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
+      "docs/IMPLEMENTATION_PLAN.md": await read("docs/IMPLEMENTATION_PLAN.md"),
+      "harnix-plan skill": await read("src/skills/harnix-plan/SKILL.md"),
+      "ready-review reference": await read("src/skills/harnix-plan/references/ready-review.md"),
+    };
+
+    for (const [name, text] of Object.entries(surfaces)) expect(text, name).toMatch(/--reviewed/u);
+    expect(workflowTemplate).toMatch(/placeholder/iu);
+    expect(workflowTemplate).toMatch(/focused required check/u);
+    expect(surfaces["ready-review reference"]).toMatch(/reviewChecklist/u);
+  });
+
+  it("teaches a Windows-safe way to read workflow JSON in the cookbook", () => {
+    expect(workflowTemplate).toMatch(/Out-String/u);
+    expect(workflowTemplate).toMatch(/ConvertFrom-Json/u);
+    expect(workflowTemplate).toMatch(/nested `?pwsh/u);
+  });
+
   it("describes the task record as schema v3 in the workflow doc, implementation plan, PRD, AGENTS.md and template", async () => {
     const documents = {
       "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),

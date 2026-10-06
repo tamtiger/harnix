@@ -9,6 +9,30 @@ import { laterTimestamp, timestamp } from "test/support/tasks-fixtures.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
+describe("task review lineage", () => {
+  it("shows the epic and the task it follows up only when the task has them", async () => {
+    const root = await temporaryRepository();
+    const linked = buildTaskV3({
+      id: "20260916-220100-review-lineage",
+      mode: "full",
+      epicId: "20260916-210000-the-epic",
+      followUpOf: "20260916-220000-review-md",
+    });
+    const plain = buildTaskV3({ id: "20260916-220200-review-plain", mode: "full" });
+    await saveTaskWithArtifacts(root, linked, { prd: "# prd", plan: "# plan" });
+    await saveTaskWithArtifacts(root, plain, { prd: "# prd", plan: "# plan" });
+
+    const read = async (id: string) => readFile(join(root, "tasks", id, "review.md"), "utf8");
+
+    const withLinks = await read(linked.id);
+    expect(withLinks).toContain("- **Epic:** 20260916-210000-the-epic");
+    expect(withLinks).toContain("- **Follow-up of:** 20260916-220000-review-md");
+    const without = await read(plain.id);
+    expect(without).not.toContain("**Epic:**");
+    expect(without).not.toContain("**Follow-up of:**");
+  });
+});
+
 describe("task review page", () => {
   it("should_generate_a_plain_review_markdown_file_alongside_task_json_for_direct_review", async () => {
     const root = await temporaryRepository();

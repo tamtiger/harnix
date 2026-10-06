@@ -4,8 +4,9 @@ import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildCheck, buildTaskV3 } from "test/support/builders.js";
 
-import { computeInputDigest } from "src/core/verification/input-digest.js";
-import type { TaskRecordV3 } from "src/core/tasks/task.js";
+import { computeInputDigest, digestMatches } from "src/core/verification/input-digest.js";
+import type { TaskRecordV3, ValidationCheckV3 } from "src/core/tasks/task.js";
+import { legacyDigest } from "test/support/legacy-digest.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-digest-");
@@ -327,5 +328,71 @@ describe("v3 input digest", () => {
       expect(snapshot.entries.find((entry) => entry.path === "many/f07.txt")?.sha256).toBe(expected);
       expect((await computeInputDigest(root, task, "check-many")).inputDigest).toBe(snapshot.inputDigest);
     });
+  });
+});
+
+describe("per-check digest isolation", () => {
+  const criteria = (two = "Two", one = "One") => [
+    { id: "ac-one", text: one, status: "pending" as const, evidenceIds: [] },
+    { id: "ac-two", text: two, status: "pending" as const, evidenceIds: [] },
+  ];
+  const checks = (alpha: Partial<ValidationCheckV3> = {}, beta: Partial<ValidationCheckV3> = {}) => [
+    buildCheck({ id: "alpha", criterionIds: ["ac-one"], ...alpha }),
+    buildCheck({ id: "beta", criterionIds: ["ac-two"], command: "pnpm lint", ...beta }),
+  ];
+  const twoChecks = (overrides: Partial<TaskRecordV3> = {}) =>
+    taskFixture({ acceptanceCriteria: criteria(), validationPlan: checks(), ...overrides });
+  const digestOf = async (root: string, task: TaskRecordV3) =>
+    (await computeInputDigest(root, task, "alpha")).inputDigest;
+
+  it("changes when any part of the check's own definition, a covered criterion or the mode changes", async () => {
+    const root = await fixtureRepository();
+    const base = await digestOf(root, twoChecks());
+    const variants: Record<string, Partial<TaskRecordV3>> = {
+      command: { validationPlan: checks({ command: "pnpm other" }) },
+      inputs: { validationPlan: checks({ inputs: ["src/a.ts"] }) },
+      scope: { validationPlan: checks({ scope: "full" }) },
+      required: { validationPlan: checks({ required: false }) },
+      description: { validationPlan: checks({ description: "renamed" }) },
+      criterionIds: { validationPlan: checks({ criterionIds: ["ac-one", "ac-two"] }) },
+      coveredCriterionText: { acceptanceCriteria: criteria("Two", "One, revised") },
+      mode: { mode: "lite" },
+    };
+
+    for (const [name, variant] of Object.entries(variants))
+      expect(await digestOf(root, twoChecks(variant)), name).not.toBe(base);
+  });
+
+  it("stays the same when only other checks or criteria the check does not cover change", async () => {
+    const root = await fixtureRepository();
+    const base = await computeInputDigest(root, twoChecks(), "alpha");
+    const unrelated: Record<string, Partial<TaskRecordV3>> = {
+      otherCommand: { validationPlan: checks({}, { command: "pnpm other" }) },
+      otherRetiredAndAdded: {
+        validationPlan: [...checks({}, { required: false }), buildCheck({ id: "gamma", criterionIds: ["ac-two"] })],
+      },
+      uncoveredCriterionText: { acceptanceCriteria: criteria("Two, revised") },
+    };
+
+    for (const [name, variant] of Object.entries(unrelated)) {
+      const after = await computeInputDigest(root, twoChecks(variant), "alpha");
+      expect([after.inputDigest, after.taskContractHash], name).toEqual([base.inputDigest, base.taskContractHash]);
+    }
+  });
+  it("still recognises a digest recorded with the former whole-contract formula, but only while that contract is unchanged", async () => {
+    const root = await fixtureRepository();
+    const task = twoChecks();
+    const snapshot = await computeInputDigest(root, task, "alpha");
+    const recorded = legacyDigest(task, "alpha", snapshot.entries);
+
+    expect([snapshot.legacyInputDigest, recorded === snapshot.inputDigest]).toEqual([recorded, false]);
+    expect([digestMatches(snapshot, snapshot.inputDigest), digestMatches(snapshot, recorded)]).toEqual([true, true]);
+    expect([digestMatches(snapshot, "0".repeat(64)), digestMatches(snapshot, undefined)]).toEqual([false, false]);
+
+    const otherCheckEdited = twoChecks({ validationPlan: checks({}, { command: "pnpm other" }) });
+
+    const after = await computeInputDigest(root, otherCheckEdited, "alpha");
+    expect(digestMatches(after, after.inputDigest)).toBe(true);
+    expect(digestMatches(after, recorded)).toBe(false);
   });
 });

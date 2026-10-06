@@ -1,9 +1,9 @@
-import { readFile } from "node:fs/promises";
 import { readProjectTimezone } from "src/core/config/config.js";
 import { buildVerifyPlan } from "src/core/stack/verify-plan.js";
 import type { TaskMode, TaskRecordV3 } from "src/core/tasks/task.js";
 import { idPrefix } from "src/utils/clock.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { resolveLineage } from "./init-lineage.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
 
@@ -15,6 +15,7 @@ export interface InitTaskOptions {
   command?: string | undefined;
   input?: string[] | undefined;
   followUp?: string | undefined;
+  epic?: string | undefined;
   injectedNow?: string | undefined;
 }
 
@@ -52,24 +53,7 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
   const command = options.command?.trim() || (await detectedTestCommand(root));
   const inputs = Array.isArray(options.input) && options.input.length > 0 ? [...new Set(options.input)].sort() : ["**"];
 
-  let relevantPaths: string[] = [];
-  let relevantSpecs: string[] = [];
-  let epicId: string | undefined;
-
-  if (options.followUp) {
-    const parentId = options.followUp.trim();
-    try {
-      const harnixDir = await resolveSafeHarnixPath(root);
-      const parentTaskFile = await resolveSafeProjectPath(harnixDir, `tasks/${parentId}/task.json`);
-      const raw = await readFile(parentTaskFile, "utf8");
-      const parent = JSON.parse(raw) as Partial<TaskRecordV3>;
-      relevantPaths = Array.isArray(parent.relevantPaths) ? [...parent.relevantPaths] : [];
-      relevantSpecs = Array.isArray(parent.relevantSpecs) ? [...parent.relevantSpecs] : [];
-      epicId = parent.epicId;
-    } catch {
-      throw new Error(`Follow-up task '${parentId}' not found.`);
-    }
-  }
+  const { epicId, followUpOf, relevantPaths, relevantSpecs } = await resolveLineage(root, options);
 
   const candidate: TaskRecordV3 = {
     generator: "harnix",
@@ -82,6 +66,7 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
     goal,
     nonGoals: [],
     ...(epicId !== undefined ? { epicId } : {}),
+    ...(followUpOf !== undefined ? { followUpOf } : {}),
     acceptanceCriteria: [
       {
         id: "ac-1",

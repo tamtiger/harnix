@@ -162,6 +162,25 @@ describe("workflow finish", () => {
     expect(failure?.message).not.toContain(root);
   });
 
+  it("finishes a task whose pass was recorded under the former digest formula, and still blocks once an input changes", async () => {
+    const root = await temporaryRepository();
+    const current = new Date().toISOString();
+    const base = await finishingTask(root, current);
+    const legacyDigest = (await computeInputDigest(root, base, "check")).legacyInputDigest;
+    const legacy = { ...base, evidence: base.evidence.map((item) => ({ ...item, inputDigest: legacyDigest })) };
+    await saveTask(root, legacy);
+    await setActiveTask(root, legacy.id);
+    const options = { searchJournal: async () => ({ entries: [], malformed: 0 }) };
+    await writeFile(join(root, "src", "a.ts"), "export const changed = true;\n");
+    await expect(
+      finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", legacy, current, options),
+    ).rejects.toThrow(/stale/u);
+
+    await writeFile(join(root, "src", "a.ts"), "export {};\n");
+    await expect(
+      finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", legacy, current, options),
+    ).resolves.toMatchObject({ status: "completed" });
+  });
   it("finishes only verified tasks and journals evidence without Git work", async () => {
     const root = await temporaryRepository();
     const current = new Date().toISOString();

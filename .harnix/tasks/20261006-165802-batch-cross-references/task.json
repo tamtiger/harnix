@@ -1,0 +1,65 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-165802-batch-cross-references",
+  "title": "--batch và --set-check chấp nhận tham chiếu chéo trong cùng một lần gọi",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Tiêu chí và check được khai báo trong cùng một lệnh có thể tham chiếu nhau mà không phụ thuộc thứ tự, vì hiện tại --batch báo coverage incomplete hoặc unknown criterion khi tiêu chí trỏ tới check chưa tồn tại.",
+  "nonGoals": [
+    "Không nới luật mỗi tiêu chí phải được một check bắt buộc phủ",
+    "Không đổi luật bất biến sau ready"
+  ],
+  "epicId": "20261006-141317-workflow-field-feedback",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "--batch áp dụng toàn bộ criteria và checks rồi mới validate coverage, nên criteria[].checks trỏ tới check định nghĩa trong cùng batch và checks[].criteria trỏ tới tiêu chí định nghĩa trong cùng batch đều hợp lệ.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Lỗi khi tham chiếu thực sự không tồn tại nêu rõ id thiếu và mọi vấn đề độc lập trong một lần báo.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "--set-check nhận --criteria chứa tiêu chí vừa thêm trong cùng một --batch mà không cần hai lệnh theo thứ tự cố định; có test hồi quy cho đúng kịch bản Task digest đã gặp.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu cookbook ghi rõ batch không phụ thuộc thứ tự.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T16:58:00.000+07:00",
+  "updatedAt": "2026-10-06T16:58:00.000+07:00"
+}

@@ -14,9 +14,15 @@ describe("workflow ready", () => {
   it("re-enters ready only from replan and reruns the Full ready gate", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
-    const planning = { ...taskV3("planning", "planning"), mode: "full" as const, relevantPaths: ["src/a.ts"] };
+    const base = taskV3("planning", "planning");
+    const planning = {
+      ...base,
+      mode: "full" as const,
+      relevantPaths: ["src/a.ts"],
+      validationPlan: [{ ...base.validationPlan[0]!, scope: "focused" as const }],
+    };
     const prd = "# PRD\nDone.\n";
-    const plan = "# Plan\n- [ ] `CAP-A` — implement\n";
+    const plan = "# Plan\n- [ ] `CAP-A` — implement criterion a\n";
     await saveWorkflow(root, { task: planning, artifacts: { prd, plan } });
 
     const ready = {
@@ -189,10 +195,19 @@ describe("workflow ready inspection", () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
     await writeProjectSource(root);
-    const task = { ...taskV3("planning", "planning"), mode: "full" as const, evidence: [baselineEvidence("pass")] };
+    const base = taskV3("planning", "planning");
+    const task = {
+      ...base,
+      mode: "full" as const,
+      validationPlan: [{ ...base.validationPlan[0]!, scope: "focused" as const }],
+      evidence: [baselineEvidence("pass")],
+    };
     await mkdir(join(root, ".harnix", "tasks", task.id), { recursive: true });
 
-    const result = await inspectReadyConditions(join(root, ".harnix"), task, { prd: "# PRD\n", plan: "- [ ] slice\n" });
+    const result = await inspectReadyConditions(join(root, ".harnix"), task, {
+      prd: "# PRD\n",
+      plan: "- [ ] slice for a\n",
+    });
 
     expect(result).toEqual({ issues: [], advisories: [], unbaselined: [] });
   });

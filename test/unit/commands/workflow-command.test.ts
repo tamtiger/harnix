@@ -21,6 +21,17 @@ describe("workflow command unit", () => {
     expect(workflowCmd?.options.some((opt) => opt.long === "--brief")).toBe(true);
   });
 
+  it("merges repeated list flags into one comma-separated value", () => {
+    const program = new Command();
+    registerWorkflowCommand(program, {});
+    const workflowCmd = program.commands.find((c) => c.name() === "workflow");
+    for (const flag of ["--criteria", "--criterion", "--evidence-ids", "--check"]) {
+      const option = workflowCmd?.options.find((opt) => opt.long === flag);
+      expect(option?.parseArg?.("ac-2", "ac-1"), flag).toBe("ac-1,ac-2");
+      expect(option?.parseArg?.("ac-1", undefined), flag).toBe("ac-1");
+    }
+  });
+
   it("executes workflow --schema via commander action", async () => {
     const program = new Command();
     registerWorkflowCommand(program, {});

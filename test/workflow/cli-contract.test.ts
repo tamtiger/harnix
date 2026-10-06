@@ -105,6 +105,8 @@ describe("CLI command contract", () => {
       "--relevant-path",
       "--relevant-spec",
       "--cwd",
+      "--reviewed",
+      "--epic",
       "--follow-up",
       "--brief",
       "--dry-run",

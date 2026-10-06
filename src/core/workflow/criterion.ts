@@ -6,7 +6,7 @@ import {
   type TaskRecordV3,
 } from "src/core/tasks/task.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
-import { computeInputDigest } from "src/core/verification/input-digest.js";
+import { computeInputDigest, digestMatches } from "src/core/verification/input-digest.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { saveWorkflow } from "./save.js";
@@ -36,8 +36,9 @@ async function freshEvidence(root: string, task: TaskRecordV3, criterionId: stri
   const notFresh: string[] = [];
   for (const check of covering) {
     const latest = selectLatestEvidence(task.evidence, check.id);
-    const current = latest?.result === "pass" ? (await computeInputDigest(root, task, check.id)).inputDigest : "";
-    if (latest?.result === "pass" && latest.inputDigest === current) ids.push(latest.id);
+    const current = latest?.result === "pass" ? await computeInputDigest(root, task, check.id) : undefined;
+    if (latest?.result === "pass" && current !== undefined && digestMatches(current, latest.inputDigest))
+      ids.push(latest.id);
     else notFresh.push(check.id);
   }
   if (ids.length === 0 || notFresh.length > 0) {

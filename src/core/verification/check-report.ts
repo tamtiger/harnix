@@ -1,5 +1,5 @@
 import { selectLatestEvidence, type EvidenceFindingV1, type TaskRecord } from "src/core/tasks/task.js";
-import { computeInputDigest } from "./input-digest.js";
+import { computeInputDigest, digestMatches } from "./input-digest.js";
 
 export type RequiredCheckState = "passed" | "failed" | "stale" | "pending";
 export type RequiredCheckReasonCode =
@@ -63,7 +63,7 @@ export async function inspectRequiredChecks(
         if (task.schemaVersion !== 3) return inspection(check.id, "stale", ["legacy-schema"], findings);
         try {
           const current = await computeInputDigest(projectRoot, task, check.id);
-          return current.inputDigest === evidence.inputDigest
+          return digestMatches(current, evidence.inputDigest)
             ? inspection(check.id, "passed", [], findings)
             : inspection(check.id, "stale", ["digest-mismatch"], findings);
         } catch {

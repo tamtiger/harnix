@@ -56,6 +56,17 @@ describe("TaskRecord schema v3", () => {
     expect(task.schemaVersion).toBe(3);
   });
 
+  it("accepts followUpOf as another task id and rejects it when malformed, self-referencing or on v2", () => {
+    const other = "20260929-090500-parent-task";
+
+    expect(() => validateTask(v3({ followUpOf: other }))).not.toThrow();
+    expect(() => validateTask(v3({ followUpOf: "Not An Id" }))).toThrow(/followUpOf/u);
+    expect(() => validateTask(v3({ followUpOf: 7 }))).toThrow(/followUpOf/u);
+    const own = v3({});
+    expect(() => validateTask({ ...own, followUpOf: own.id })).toThrow(/followUpOf/u);
+    expect(() => validateTask(v3({ schemaVersion: 2, followUpOf: other }))).toThrow();
+  });
+
   it("accepts the optional review fields and epicId", () => {
     expect(() =>
       validateTask(
@@ -216,7 +227,8 @@ describe("TaskRecord schema v3", () => {
   it("describes the v3 field manifest without dropping the v2 review fields", () => {
     const manifest = taskRecordFieldManifest(3);
     expect(manifest.required).toContain("validationPlan");
-    expect(manifest.optional).toEqual(expect.arrayContaining(["decisions", "epicId", "residualRisks"]));
+    expect(manifest.optional).toEqual(expect.arrayContaining(["decisions", "epicId", "followUpOf", "residualRisks"]));
+    expect(taskRecordFieldManifest(2).optional).not.toContain("followUpOf");
   });
 
   it("still reads historical v1 and v2 records unchanged", () => {

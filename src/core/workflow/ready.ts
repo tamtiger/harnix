@@ -1,16 +1,11 @@
-import { readFile } from "node:fs/promises";
 import type { TaskArtifacts, TaskRecord } from "src/core/tasks/task.js";
-import { planHasChecklistItem } from "src/core/tasks/workflow-helpers.js";
-import { resolveSafeProjectPath } from "src/utils/paths.js";
 
 import { dirname, basename } from "node:path";
+import { artifactFindings } from "./ready-artifacts.js";
 import { assertSuiteGateReady } from "./suite-gate.js";
 
 import { globby } from "globby";
 import { buildGlobIgnores, targetedSegments } from "src/core/verification/transient-directories.js";
-
-const FULL_ARTIFACTS_MESSAGE = "Full tasks require non-empty prd.md and plan.md at ready.";
-const CHECKLIST_MESSAGE = "Full task plan.md needs at least one checklist item ('- [ ] ...') at ready.";
 
 function projectRootOf(harnixRoot: string): string {
   return basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
@@ -35,27 +30,6 @@ async function suiteGateIssues(projectRoot: string, task: TaskRecord): Promise<s
     return [];
   } catch (error: unknown) {
     return [describe(error)];
-  }
-}
-
-async function fullArtifactIssues(
-  harnixRoot: string,
-  task: TaskRecord,
-  artifacts: TaskArtifacts | undefined,
-): Promise<string[]> {
-  if (task.mode !== "full") return [];
-  try {
-    const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
-    const prdPath = await resolveSafeProjectPath(taskDirectory, "prd.md");
-    const planPath = await resolveSafeProjectPath(taskDirectory, "plan.md");
-    const [prd, plan] = await Promise.all([
-      artifacts?.prd ?? readFile(prdPath, "utf8").catch(() => ""),
-      artifacts?.plan ?? readFile(planPath, "utf8").catch(() => ""),
-    ]);
-    if (!prd.trim() || !plan.trim()) return [FULL_ARTIFACTS_MESSAGE];
-    return planHasChecklistItem(plan) ? [] : [CHECKLIST_MESSAGE];
-  } catch {
-    return [FULL_ARTIFACTS_MESSAGE];
   }
 }
 
@@ -108,18 +82,33 @@ function baselineIssues(task: TaskRecord): { issues: string[]; unbaselined: stri
 
 /**
  * Every condition the ready transition enforces, in the order it reports them. The real transition and the dry-run
- * both use this list, so a dry-run is valid exactly when the transition would be accepted.
+ * both use this list, so a dry-run is valid exactly when the transition would be accepted. `entering` is true when
+ * the task is moving into ready/ready (the default); only then do the artifact content rules apply.
  */
+async function readyFindings(
+  harnixRoot: string,
+  task: TaskRecord,
+  artifacts: TaskArtifacts | undefined,
+  entering: boolean,
+): Promise<{ issues: string[]; advisories: string[] }> {
+  const artifact = await artifactFindings(harnixRoot, task, artifacts, entering);
+  return {
+    issues: [
+      ...obligationIssues(task),
+      ...(await suiteGateIssues(projectRootOf(harnixRoot), task)),
+      ...artifact.issues,
+    ],
+    advisories: artifact.advisories,
+  };
+}
+
 export async function collectReadyIssues(
   harnixRoot: string,
   task: TaskRecord,
   artifacts?: TaskArtifacts,
+  entering = true,
 ): Promise<string[]> {
-  return [
-    ...obligationIssues(task),
-    ...(await suiteGateIssues(projectRootOf(harnixRoot), task)),
-    ...(await fullArtifactIssues(harnixRoot, task, artifacts)),
-  ];
+  return (await readyFindings(harnixRoot, task, artifacts, entering)).issues;
 }
 
 /** Ready needs obligations and, for Full, free-form non-empty prd/plan with a checklist; there is no trace grammar. */
@@ -127,23 +116,28 @@ export async function assertReadyRequirements(
   harnixRoot: string,
   task: TaskRecord,
   artifacts?: TaskArtifacts,
+  entering = true,
 ): Promise<void> {
-  const [first] = await collectReadyIssues(harnixRoot, task, artifacts);
+  const [first] = await collectReadyIssues(harnixRoot, task, artifacts, entering);
   if (first !== undefined) throw new Error(first);
 }
 
 /**
  * Dry-run diagnosis: `issues` are what the ready transition would reject; `advisories` are things worth fixing
- * before the contract freezes (an input glob that matches nothing, a check never run against the baseline) that the
- * transition itself does not enforce.
+ * before the contract freezes (an input glob that matches nothing, a check never run against the baseline, a deferred
+ * decision in the plan) that the transition itself does not enforce.
  */
 export async function inspectReadyConditions(
   harnixRoot: string,
   task: TaskRecord,
   artifacts?: TaskArtifacts,
+  entering = true,
 ): Promise<{ issues: string[]; advisories: string[]; unbaselined: string[] }> {
   const baseline = baselineIssues(task);
-  const issues = await collectReadyIssues(harnixRoot, task, artifacts).catch((error: unknown) => [describe(error)]);
-  const advisories = [...(await inputIssues(projectRootOf(harnixRoot), task)), ...baseline.issues];
-  return { issues, advisories, unbaselined: baseline.unbaselined };
+  const found = await readyFindings(harnixRoot, task, artifacts, entering).catch((error: unknown) => ({
+    issues: [describe(error)],
+    advisories: [] as string[],
+  }));
+  const advisories = [...(await inputIssues(projectRootOf(harnixRoot), task)), ...baseline.issues, ...found.advisories];
+  return { issues: found.issues, advisories, unbaselined: baseline.unbaselined };
 }

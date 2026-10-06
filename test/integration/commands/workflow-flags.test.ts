@@ -1,10 +1,18 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "src/cli-program.js";
+import { upsertEpic } from "src/core/epics/epic.js";
 import { assertCommandShape, assertFlagGroups, selectAction } from "src/commands/workflow-flags.js";
 import { output } from "test/support/integration-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
-import { implementingTaskV3, taskV3 } from "test/support/workflow-fixtures.js";
+import { saveWorkflow } from "src/core/workflow/save.js";
+import { buildCheck, buildEpic } from "test/support/builders.js";
+import {
+  implementingTaskV3,
+  initializeUtcProject,
+  taskV3,
+  writeProjectSource,
+} from "test/support/workflow-fixtures.js";
 
 const originalCwd = process.cwd();
 const originalExitCode = process.exitCode;
@@ -53,6 +61,36 @@ describe("workflow flag validation", () => {
     );
     expect(() => assertFlagGroups("setPaths", { relevantSpec: ["a"] })).not.toThrow();
     expect(() => assertCommandShape("setCheck", { brief: true }, [])).not.toThrow();
+  });
+
+  it("explains that --learn reads a candidate from stdin when a note flag is passed to it", () => {
+    expect(() => assertFlagGroups("learn", { text: "t" })).toThrow(/--learn reads .*candidate.* from stdin/u);
+    expect(() => assertFlagGroups("learn", { rationale: "r" })).toThrow(/--learn reads .*candidate.* from stdin/u);
+    expect(() => assertFlagGroups("learn", {})).not.toThrow();
+  });
+
+  it("keeps --epic with the init action", () => {
+    expect(() => assertFlagGroups("init", { epic: "20261006-100000-e" })).not.toThrow();
+    expect(() => assertFlagGroups("inspect", { epic: "20261006-100000-e" })).toThrow(
+      /--epic requires workflow --init/u,
+    );
+    expect(() => assertFlagGroups("setCheck", { epic: "20261006-100000-e" })).toThrow(
+      /--epic requires workflow --init/u,
+    );
+  });
+
+  it("keeps --reviewed with the transition action", () => {
+    expect(() => assertFlagGroups("transition", { reviewed: true })).not.toThrow();
+    expect(() => assertFlagGroups("inspect", { reviewed: true })).toThrow(/--reviewed requires workflow --transition/u);
+    expect(() => assertFlagGroups("setCheck", { reviewed: true })).toThrow(
+      /--reviewed requires workflow --transition/u,
+    );
+  });
+
+  it("names the actions a misplaced --follow-up could belong to", () => {
+    expect(() => assertFlagGroups("setCheck", { followUp: "20260101-000000-x" })).toThrow(
+      /--follow-up requires workflow --init/u,
+    );
   });
 });
 
@@ -125,6 +163,112 @@ describe.sequential("hidden workflow plan-edit transports", () => {
       "--brief",
     ]);
     expect(paths.code, paths.err).toBe(0);
+  });
+
+  it("treats repeated --criteria like one comma-separated list", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+    const reason = "Bổ sung kiểm tra theo yêu cầu mới";
+    await run([
+      "--add-criterion",
+      "b",
+      "--text",
+      "Tiêu chí thứ hai",
+      "--check",
+      "check",
+      "--reason",
+      reason,
+      "--brief",
+    ]);
+
+    const repeated = await run(
+      ["--set-check", "gateway", "--reason", reason, "--criteria", "a", "--criteria", "b", "--input", "src/**"].concat([
+        "--description",
+        "Kiểm tra lặp cờ",
+        "--scope",
+        "focused",
+        "--command",
+        "pnpm test",
+      ]),
+    );
+
+    expect(repeated.code, repeated.err).toBe(0);
+    const task = JSON.parse(repeated.out) as { validationPlan: { id: string; criterionIds: string[] }[] };
+    expect(task.validationPlan.find((check) => check.id === "gateway")?.criterionIds).toEqual(["a", "b"]);
+  });
+
+  it("makes a Full task repeat the ready transition with --reviewed", async () => {
+    const root = await fixture();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+    const base = taskV3("planning", "planning");
+    const focus = buildCheck({ id: "focus", scope: "focused", criterionIds: ["a"], inputs: ["src/**/*.ts"] });
+    const full = { ...base, mode: "full" as const, validationPlan: [...base.validationPlan, focus] };
+    await saveWorkflow(root, { task: full, artifacts: { prd: "# PRD\n", plan: "- [ ] S1 covers criterion a\n" } });
+    process.chdir(root);
+
+    const refused = await run(["--transition", "ready/ready", "--brief"]);
+    expect(refused.code).not.toBe(0);
+    expect(refused.err).toMatch(/--reviewed/u);
+    expect(refused.err).toMatch(/Ready-review checklist/u);
+
+    const dry = await run(["--transition", "ready/ready", "--dry-run"]);
+    expect(dry.code, dry.err).toBe(0);
+    expect(JSON.parse(dry.out)).toMatchObject({ valid: true, reviewChecklist: expect.any(Array) as unknown });
+
+    const accepted = await run(["--transition", "ready/ready", "--reviewed", "--brief"]);
+    expect(accepted.code, accepted.err).toBe(0);
+    expect(JSON.parse(accepted.out)).toMatchObject({ status: "ready", checkpoint: "ready" });
+  });
+
+  it("creates a task in an existing epic with --init --epic and notes a follow-up that has no epic", async () => {
+    const root = await fixture();
+    await initializeUtcProject(root);
+    await upsertEpic(root, buildEpic({ id: "20261006-100000-flag-epic" }));
+    process.chdir(root);
+
+    const member = await run([
+      "--init",
+      "--title",
+      "Member",
+      "--epic",
+      "20261006-100000-flag-epic",
+      "--command",
+      "pnpm test",
+    ]);
+    expect(member.code, member.err).toBe(0);
+    expect(JSON.parse(member.out)).toMatchObject({ epicId: "20261006-100000-flag-epic" });
+    const memberId = (JSON.parse(member.out) as { id: string }).id;
+
+    const unknown = await run([
+      "--init",
+      "--title",
+      "Lost",
+      "--epic",
+      "20261006-100000-nope",
+      "--command",
+      "pnpm test",
+    ]);
+    expect(unknown.code).not.toBe(0);
+    expect(unknown.err).toMatch(/not found/u);
+
+    expect(memberId).toMatch(/^\d{8}-\d{6}-member$/u);
+  });
+
+  it("prints a notice on stderr when a follow-up parent has no epic, and keeps stdout JSON", async () => {
+    const root = await fixture();
+    await initializeUtcProject(root);
+    process.chdir(root);
+    const parent = await run(["--init", "--title", "Parent", "--command", "pnpm test"]);
+    const parentId = (JSON.parse(parent.out) as { id: string }).id;
+    await run(["--cancel"], { workflowInput: async () => '{"reason":"fixture cleanup reason","authorizedBy":"user"}' });
+
+    const child = await run(["--init", "--title", "Child", "--follow-up", parentId, "--command", "pnpm test"]);
+
+    expect(child.code, child.err).toBe(0);
+    expect(child.err).toMatch(/^notice: /mu);
+    expect(JSON.parse(child.out)).toMatchObject({ followUpOf: parentId });
   });
 
   it("accepts a stdin body that starts with a BOM", async () => {

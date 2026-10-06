@@ -35,6 +35,8 @@ function renderHeader(task: TaskRecord, timezone: string): string[] {
     "",
     `- **ID:** ${task.id}`,
     `- **Mode:** ${task.mode}`,
+    ...(task.schemaVersion !== 1 && task.epicId !== undefined ? [`- **Epic:** ${task.epicId}`] : []),
+    ...(task.schemaVersion === 3 && task.followUpOf !== undefined ? [`- **Follow-up of:** ${task.followUpOf}`] : []),
     `- **Status:** ${task.status}/${task.checkpoint}`,
     `- **Created:** ${displayTime(task.createdAt, timezone)}`,
     `- **Updated:** ${displayTime(task.updatedAt, timezone)}`,

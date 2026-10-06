@@ -9,6 +9,7 @@ import {
   taskModes,
   taskRecordKeys,
   taskRecordV2Keys,
+  taskRecordV3Keys,
   transitions,
   validationCheckV1Keys,
   validationCheckV2Keys,
@@ -60,7 +61,9 @@ function asTaskObject(value: unknown): TaskObject {
 }
 
 function assertTopLevelKeysAndStrings(value: TaskObject): void {
-  assertExactKeys(value, value.schemaVersion === 1 ? taskRecordKeys : taskRecordV2Keys, "TaskRecord");
+  const allowed =
+    value.schemaVersion === 1 ? taskRecordKeys : value.schemaVersion === 2 ? taskRecordV2Keys : taskRecordV3Keys;
+  assertExactKeys(value, allowed, "TaskRecord");
   for (const key of ["id", "title", "goal", "createdAt", "updatedAt"])
     if (typeof value[key] !== "string") throw new TaskValidationError(`Task ${key} is required.`);
 }
@@ -79,6 +82,11 @@ function assertIdentity(value: TaskObject): void {
     (typeof value.epicId !== "string" || !validId(value.epicId))
   )
     throw new TaskValidationError("Task epicId is invalid.");
+  if (
+    value.followUpOf !== undefined &&
+    (typeof value.followUpOf !== "string" || !taskIdPattern.test(value.followUpOf) || value.followUpOf === value.id)
+  )
+    throw new TaskValidationError("Task followUpOf must be the id of another task.");
 }
 
 function assertArraysAndTimestamps(value: TaskObject): void {

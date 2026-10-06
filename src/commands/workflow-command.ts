@@ -7,6 +7,9 @@ import { resolveProjectRoot } from "src/utils/paths.js";
 export type { WorkflowCommandOptions } from "src/commands/workflow-handlers.js";
 
 const collect = (value: string, previous: string[]): string[] => [...previous, value];
+/** A list flag accepts `--f a,b` and `--f a --f b` alike; the handler splits the merged string. */
+const joinList = (value: string, previous: string | undefined): string =>
+  previous === undefined ? value : `${previous},${value}`;
 
 export function registerWorkflowCommand(program: Command, options: WorkflowCommandOptions): void {
   // The pnpm PowerShell shim forwards `$args` and drops the `--` separator, so everything after the first operand
@@ -29,9 +32,13 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--learn", "Record one eligible project-local learning candidate")
     .option("--transition <status/checkpoint>", "Move the active task to one legal status/checkpoint")
     .option("--evidence", "Append exactly one evidence item from stdin or from flags")
-    .option("--criterion <ids>", "Comma-separated criterion IDs to mark met (requires --met)")
+    .option("--criterion <ids>", "Criterion IDs to mark met, comma-separated or repeated (requires --met)", joinList)
     .option("--met", "Mark the --criterion IDs met from fresh passing evidence")
-    .option("--evidence-ids <ids>", "Explicit passing evidence IDs for --criterion")
+    .option(
+      "--evidence-ids <ids>",
+      "Explicit passing evidence IDs for --criterion (comma-separated or repeated)",
+      joinList,
+    )
     .option("--migrate", "Migrate the active legacy task to schema v3")
     .option("--run-check <id>", "Run the command after -- against a check and record the outcome")
     .option("--set-check <id>", "Add or update one validation check of the active task")
@@ -44,7 +51,8 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--schema", "Describe the save envelope schema")
     .option(
       "--check <id>",
-      "Check ID for --snapshot or --evidence; check IDs covering the criterion for --add-criterion",
+      "Check ID for --snapshot or --evidence; check IDs covering the criterion for --add-criterion (comma-separated or repeated)",
+      joinList,
     )
     .option("--result <result>", "Evidence result: pass, fail, or skipped")
     .option("--exit-code <n>", "Evidence exit code")
@@ -56,7 +64,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--scope <scope>", "Check scope for --set-check: focused or full")
     .option("--required", "Mark the --set-check check required")
     .option("--no-required", "Mark the --set-check check not required")
-    .option("--criteria <ids>", "Comma-separated criterion IDs a --set-check check covers")
+    .option("--criteria <ids>", "Criterion IDs a check covers, comma-separated or repeated", joinList)
     .option("--input <glob>", "Repository input glob of a --set-check check (repeatable)", collect, [])
     .option("--reason <text>", "Why obligations change after planning (10-1000 characters)")
     .option("--text <text>", "Text for --add-criterion, --add-decision or --add-risk")
@@ -65,6 +73,8 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--relevant-path <path>", "Relevant path for --set-paths (repeatable)", collect, [])
     .option("--relevant-spec <path>", "Relevant spec path for --set-paths (repeatable)", collect, [])
     .option("--cwd <path>", "Working directory relative to project root for check execution")
+    .option("--reviewed", "Attest that the ready-review was run (required for a Full task at --transition ready/ready)")
+    .option("--epic <epic-id>", "Existing epic to attach the new task to (--init only)")
     .option("--follow-up <task-id>", "Task ID to follow up on, inheriting context from a completed task")
     .option("--brief", "Print only id, status, checkpoint and updatedAt")
     .option("--dry-run", "Validate transition conditions without persisting state")

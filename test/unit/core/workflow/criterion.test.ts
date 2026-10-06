@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { appendEvidenceFlagsWorkflow } from "src/core/workflow/evidence-flags.js";
 import { markCriteriaMetWorkflow } from "src/core/workflow/criterion.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
+import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { buildCheck, buildCriterion } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { implementingTaskV3, taskV3, initializeUtcProject } from "test/support/workflow-fixtures.js";
@@ -24,6 +25,21 @@ describe("workflow criterion transport", () => {
 
     expect(saved.acceptanceCriteria[0]).toMatchObject({ id: "a", status: "met", evidenceIds: ["ev-check-1"] });
     expect(saved.updatedAt).toBe(NOW);
+  });
+
+  it("treats a pass recorded under the former digest formula as fresh while the contract is unchanged", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+    const legacy = (await computeInputDigest(root, task, "check")).legacyInputDigest;
+    await appendEvidenceFlagsWorkflow(
+      root,
+      { check: "check", result: "pass", exitCode: "0", summary: "ok", digest: legacy },
+      "2026-08-13T00:10:00.000Z",
+    );
+
+    const saved = await markCriteriaMetWorkflow(root, { criterionIds: ["a"] }, NOW);
+
+    expect(saved.acceptanceCriteria[0]).toMatchObject({ id: "a", status: "met", evidenceIds: ["ev-check-1"] });
   });
 
   it("accepts explicit evidence ids that belong to a covering check", async () => {

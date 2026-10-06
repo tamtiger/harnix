@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildCriterion, buildTaskV1 } from "test/support/builders.js";
+import { buildCriterion, buildTaskV1, buildTaskV3 } from "test/support/builders.js";
 
 import { createTaskIndex, type TaskIndexSource } from "src/core/tasks/task-index.js";
 import type { TaskRecordV1, TaskStatus, WorkflowCheckpoint } from "src/core/tasks/task.js";
@@ -42,6 +42,25 @@ describe("task index", () => {
     expect(filtered.summary).toMatchObject({ valid: 4, matched: 2, returned: 1, resultTruncated: true });
     expect(filtered.activeTaskId).toBe(active.id);
     expect(filtered.tasks).toEqual([projection(newest, false)]);
+  });
+
+  it("shows epicId and followUpOf only on tasks that carry them", async () => {
+    const parentId = "20260826-100000-parent-task";
+    const linked = buildTaskV3({
+      id: "20260826-130000-linked-task",
+      epicId: "20260826-090000-the-epic",
+      followUpOf: parentId,
+    });
+    const plain = buildTaskV3({ id: "20260826-140000-plain-task" });
+    const source = memorySource([linked, plain] as never, null);
+
+    const { tasks } = await createTaskIndex("unused", { limit: 5 }, source);
+
+    const byId = new Map(tasks.map((item) => [item.id, item]));
+    expect(byId.get(linked.id)).toMatchObject({ epicId: "20260826-090000-the-epic", followUpOf: parentId });
+    expect(Object.keys(byId.get(plain.id) ?? {}).sort()).toEqual(
+      ["active", "checkpoint", "id", "mode", "status", "updatedAt"].sort(),
+    );
   });
 
   it("keeps the valid active task inside the 1000-record scan budget", async () => {

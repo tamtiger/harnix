@@ -120,7 +120,12 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
       command: context.flags.command,
       input: context.flags.input?.flatMap(splitGlobList),
       followUp: context.flags.followUp,
+      epic: context.flags.epic,
     });
+    if (context.flags.followUp !== undefined && task.epicId === undefined)
+      process.stderr.write(
+        `notice: follow-up of ${task.followUpOf ?? context.flags.followUp} has no epic, so ${task.id} belongs to none; pass --epic <epic-id> to attach it.\n`,
+      );
     return presentTask(context, task);
   },
   save: async (context) => {
@@ -131,7 +136,16 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
     const [status, checkpoint, ...rest] = (context.flags.transition as string).split("/");
     if (!status || !checkpoint || rest.length > 0)
       throw new Error("workflow --transition requires <status>/<checkpoint>.");
-    const result = await transitionWorkflow(context.root, status, checkpoint, undefined, context.flags.dryRun === true);
+    const result = await transitionWorkflow(
+      context.root,
+      status,
+      checkpoint,
+      undefined,
+      context.flags.dryRun === true,
+      {
+        reviewed: context.flags.reviewed === true,
+      },
+    );
     if (context.flags.dryRun === true) return result;
     return presentTask(context, result as TaskRecord);
   },

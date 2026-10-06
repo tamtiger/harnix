@@ -1,0 +1,65 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-144105-id-language-and-epic-mode-column",
+  "title": "Chuẩn hóa ngôn ngữ ID/title và thêm cột mode vào danh sách member của epic",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Task ID và Epic ID luôn là slug tiếng Anh, còn title, goal và nội dung hướng người dùng là tiếng Việt có dấu; --init không còn sinh slug tiếng Việt từ title, và epic hiển thị mode (lite/full) của từng member.",
+  "nonGoals": [
+    "Không đổi tên hay sửa task, epic đã tạo",
+    "Không cố đoán ngôn ngữ của slug bằng từ điển"
+  ],
+  "epicId": "20261006-141317-workflow-field-feedback",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix workflow --init với title có ký tự tiếng Việt (có dấu) mà thiếu --slug báo lỗi nêu rõ phải truyền --slug <english-kebab-case>; --slug hợp lệ tạo ID đúng regex của task, còn title ASCII vẫn tự sinh slug như cũ.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "harnix epic <epic-id> trả về mode của từng member, và file epic .md có cột Mode trong bảng Members; epic hiện có vẫn hiển thị bình thường.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "AGENTS.md, workflow.md và skill harnix-plan (kể cả reference epic) ghi quy ước: ID của task và epic là tiếng Anh, title, goal, tiêu chí là tiếng Việt có dấu.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Epic hiện tại 20261006-141317-workflow-field-feedback được xem xét lại và bản ghi epic cập nhật những gì còn thiếu (mục tiêu, non-goals) qua đường lệnh hợp lệ.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T14:41:30.000+07:00",
+  "updatedAt": "2026-10-06T14:41:30.000+07:00"
+}

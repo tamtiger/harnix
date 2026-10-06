@@ -1,0 +1,65 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-165803-member-edit-without-switch",
+  "title": "Sửa kế hoạch của task thành viên epic mà không phải pause và resume",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Cho phép các lệnh sửa obligation, đường dẫn và ghi chú nhắm tới một task thành viên đang planning của epic bằng --task <id>, thay vì chuỗi pause, resume, sửa, pause, resume dễ làm mất con trỏ.",
+  "nonGoals": [
+    "Không cho sửa task terminal hoặc task đã qua planning ngoài luật guarded replan hiện có",
+    "Không cho --task ở hành động chuyển trạng thái hay finish"
+  ],
+  "epicId": "20261006-141317-workflow-field-feedback",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Các lệnh --set-check, --add-criterion, --set-paths, --add-decision, --add-risk và --batch nhận --task <task-id> nhắm tới task chưa terminal của cùng project mà không đổi con trỏ active.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "--task bị từ chối với --transition, --finish, --cancel, --run-check và --evidence, và với task đã completed hoặc cancelled, kèm lỗi nêu lý do.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Mọi luật hiện có (reason sau planning, bất bất biến, lock workflow) áp dụng y hệt cho task đích; có test chứng minh không đổi .active và không ghi nhầm vào task đang active.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu epic reference bỏ hướng dẫn pause và resume để sửa member, thay bằng --task.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T16:58:00.000+07:00",
+  "updatedAt": "2026-10-06T16:58:00.000+07:00"
+}

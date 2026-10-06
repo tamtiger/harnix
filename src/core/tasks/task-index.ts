@@ -35,6 +35,10 @@ export interface TaskIndexItemV1 {
   readonly checkpoint: WorkflowCheckpoint;
   readonly active: boolean;
   readonly updatedAt: string;
+  /** Present only when the task belongs to an epic. */
+  readonly epicId?: string;
+  /** Present only when the task was created as a follow-up of another task. */
+  readonly followUpOf?: string;
 }
 
 export interface TaskIndexResultV1 {
@@ -139,6 +143,8 @@ export async function createTaskIndex(
       checkpoint: task.checkpoint,
       active: task.id === activeTaskId,
       updatedAt: task.updatedAt,
+      ...(task.schemaVersion !== 1 && task.epicId !== undefined ? { epicId: task.epicId } : {}),
+      ...(task.schemaVersion === 3 && task.followUpOf !== undefined ? { followUpOf: task.followUpOf } : {}),
     }))
     .sort(compareTaskItems);
   const tasks = matched.slice(0, options.limit);

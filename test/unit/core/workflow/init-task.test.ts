@@ -1,8 +1,11 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { upsertEpic } from "src/core/epics/epic.js";
 import { resolveActiveTask } from "src/core/tasks/task.js";
+import { clearActiveTask } from "src/core/tasks/task-store.js";
 import { initTaskWorkflow } from "src/core/workflow/init-task.js";
+import { buildEpic } from "test/support/builders.js";
 import { initializeUtcProject } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
@@ -96,6 +99,70 @@ describe("initTaskWorkflow", () => {
     expect(followUp.relevantPaths).toEqual(["src/payments/**"]);
     expect(followUp.relevantSpecs).toEqual(["spec/payment.md"]);
     expect(followUp.epicId).toBe("20261005-153000-concurrency-and-token-optimization");
+    expect(followUp.followUpOf).toBe(parent.id);
+  });
+
+  describe("epic and follow-up lineage", () => {
+    const epic = (id: string) => buildEpic({ id });
+
+    async function project() {
+      const root = await temporaryRepository();
+      await initializeUtcProject(root);
+      await writeTestProject(root);
+      return root;
+    }
+
+    it("attaches the new task to an existing epic and regenerates the epic page", async () => {
+      const root = await project();
+      await upsertEpic(root, epic("20261006-100000-lineage-epic"));
+
+      const task = await initTaskWorkflow(root, { title: "Member Task", epic: "20261006-100000-lineage-epic" });
+
+      expect(task.epicId).toBe("20261006-100000-lineage-epic");
+      const page = await readFile(join(root, ".harnix", "epics", "20261006-100000-lineage-epic.md"), "utf8");
+      expect(page).toContain(task.id);
+    });
+
+    it("refuses an unknown or unsafe epic before creating anything", async () => {
+      const root = await project();
+
+      await expect(initTaskWorkflow(root, { title: "Member Task", epic: "20261006-100000-missing" })).rejects.toThrow(
+        /epic .*not found/iu,
+      );
+      await expect(initTaskWorkflow(root, { title: "Member Task", epic: "../escape" })).rejects.toThrow(/epic id/iu);
+      expect(await resolveActiveTask(`${root}/.harnix`)).toBeUndefined();
+    });
+
+    it("records followUpOf and inherits the parent epic only when it has one", async () => {
+      const root = await project();
+      const parent = await initTaskWorkflow(root, { title: "Parent Task" });
+      await clearActiveTask(`${root}/.harnix`, parent.id);
+
+      const child = await initTaskWorkflow(root, { title: "Child Task", followUp: parent.id });
+
+      expect(child.followUpOf).toBe(parent.id);
+      expect(child.epicId).toBeUndefined();
+    });
+
+    it("accepts --epic together with a follow-up of the same epic and refuses a different one", async () => {
+      const root = await project();
+      await upsertEpic(root, epic("20261006-100000-lineage-epic"));
+      await upsertEpic(root, epic("20261006-100001-other-epic"));
+      const parent = await initTaskWorkflow(root, { title: "Parent Task", epic: "20261006-100000-lineage-epic" });
+      await clearActiveTask(`${root}/.harnix`, parent.id);
+
+      const same = await initTaskWorkflow(root, {
+        title: "Same Epic Child",
+        followUp: parent.id,
+        epic: "20261006-100000-lineage-epic",
+      });
+      await clearActiveTask(`${root}/.harnix`, same.id);
+
+      expect(same).toMatchObject({ followUpOf: parent.id, epicId: "20261006-100000-lineage-epic" });
+      await expect(
+        initTaskWorkflow(root, { title: "Other Epic Child", followUp: parent.id, epic: "20261006-100001-other-epic" }),
+      ).rejects.toThrow(/conflicts/iu);
+    });
   });
 
   it("should reject followUp if specified task does not exist", async () => {

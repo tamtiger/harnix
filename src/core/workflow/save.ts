@@ -76,7 +76,8 @@ async function saveWorkflowLocked(
   assertNewEvidenceNotFuture(existing?.evidence ?? [], candidate.evidence);
   assertNewEvidenceRetryAllowed(existing, candidate);
   if (candidate.status === "completed") throw new Error("Workflow completion must use workflow --finish.");
-  if (candidate.status === "ready") await assertReadyRequirements(harnixRoot, candidate, envelope.artifacts);
+  if (candidate.status === "ready")
+    await assertReadyRequirements(harnixRoot, candidate, envelope.artifacts, existing?.checkpoint !== "ready");
 
   const validatedEpic = envelope.epic !== undefined ? validateEpic(envelope.epic) : undefined;
   const artifacts = await prepareWorkflowArtifacts(root, harnixRoot, candidate, envelope.artifacts);

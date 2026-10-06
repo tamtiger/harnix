@@ -1,0 +1,193 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-141320-per-check-digest-isolation",
+  "title": "Cô lập digest của từng check khỏi định nghĩa các check khác",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "inputDigest của một check chỉ phụ thuộc vào input files, định nghĩa của chính check đó và tiêu chí nó phủ, để --replace-check hoặc --set-check trên check khác không làm stale bằng chứng pass hợp lệ.",
+  "nonGoals": [
+    "Không làm yếu việc phát hiện thay đổi input hay định nghĩa của chính check",
+    "Không viết lại hoặc xóa evidence cũ"
+  ],
+  "epicId": "20261006-141317-workflow-field-feedback",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Digest của check X không đổi khi chỉ định nghĩa của check khác hoặc tiêu chí mà X không phủ thay đổi (--replace-check, --set-check, --add-criterion trên phần không liên quan); bằng chứng pass của X vẫn fresh qua status, --criterion, suite gate và finish.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-digest-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Digest của check X đổi khi đổi command, inputs, cwd, scope, required, description hoặc criterionIds của chính X, text của một tiêu chí X phủ, mode của task, hoặc nội dung file input.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-digest-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Evidence pass ghi bằng công thức digest cũ (toàn bộ hợp đồng task) của task chưa finish vẫn được nhận fresh khi hợp đồng task chưa đổi kể từ lúc ghi, không giả pass và không buộc chạy lại; evidence mới ghi bằng công thức mới; có test cho cả hai.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-digest-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Mọi nơi so một digest đã ghi với digest hiện tại (check-report, assertNewEvidenceDigests, assertInputDigestsFresh, criterion, suite-gate) dùng chung một hàm so khớp; --snapshot không lộ digest công thức cũ và vẫn giữ khóa taskContractHash, nay là hash hợp đồng của riêng check đó.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-digest-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "workflow.md, AGENTS.md, các docs hợp đồng đóng băng và skill harnix-verify mô tả đúng thành phần của digest (chỉ định nghĩa của chính check, tiêu chí nó phủ, mode, file input) và việc vẫn nhận digest công thức cũ; test parity tài liệu và golden được cập nhật có chủ đích.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-digest",
+      "description": "Test digest theo từng check, nhận digest cũ, và mọi chỗ so khớp digest",
+      "command": "pnpm exec vitest run test/unit/core/verification test/unit/core/workflow test/unit/core/tasks test/integration/commands/checks.test.ts test/integration/commands/status.test.ts test/workflow/task-contract-v3.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/core/tasks/**",
+        "src/core/verification/**",
+        "src/core/workflow/**",
+        "test/integration/commands/checks.test.ts",
+        "test/integration/commands/status.test.ts",
+        "test/unit/core/tasks/**",
+        "test/unit/core/verification/**",
+        "test/unit/core/workflow/**",
+        "test/workflow/task-contract-v3.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Tài liệu mô tả đúng thành phần của digest",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "src/skills/harnix-verify/**",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts",
+        "test/workflow/instruction-budget.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ],
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts test/workflow/skill-sources.test.ts test/workflow/instruction-budget.test.ts"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-digest-1",
+      "checkId": "check-digest",
+      "recordedAt": "2026-10-06T16:48:08.879+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/verification test/unit/core/workflow test/unit/core/tasks test/integration/commands/checks.test.ts test/integration/commands/status.test.ts test/workflow/task-co... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2befd785272ed2656b7cafc577767b9ae8b79412574d05dce38623c9db39a717"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T16:48:12.199+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts test/workflow/skill-sources.test.ts test/workflow/instruction-budget.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7e9d808040f9ae4b1580a54bf97aaeeac5c2858721edd15cb551c91f4fb4371a"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T16:49:26.744+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "7d8d38eacc404afa4a019682894543b26a3f9cf10da383a9218c6841b021cbf1"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T16:54:43.023+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4cb41a59360cd0cd1455921939a9fe2c06706e0cb59aa041cde4c7682f88a0e9"
+    },
+    {
+      "id": "ev-check-digest-2",
+      "checkId": "check-digest",
+      "recordedAt": "2026-10-06T16:55:29.384+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/verification test/unit/core/workflow test/unit/core/tasks test/integration/commands/checks.test.ts test/integration/commands/status.test.ts test/workflow/task-co... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6c58500d0449b98ada2789cfc6fa1bd659771daf6a1315c61d4aaf74050e4e55"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T14:13:30.000+07:00",
+  "updatedAt": "2026-10-06T16:55:31.628+07:00",
+  "decisions": [
+    {
+      "id": "per-check-contract",
+      "text": "Hợp đồng của một check gồm id task, mode, định nghĩa của chính check và id cùng text các tiêu chí nó phủ; digest công thức cũ vẫn được nhận qua một hàm so khớp duy nhất.",
+      "rationale": "Tránh stale bằng chứng hợp lệ khi thao tác obligation trên check khác, mà không bắt task đang chạy phải chạy lại."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "digest-formula-change-retry-guard",
+      "text": "Công thức digest đổi nên lần chạy thất bại đầu tiên sau nâng cấp không bị coi là giống hệt lần thất bại trước theo digest; breaker chỉ so các lần chạy sau nâng cấp.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-06T16:55:31.628+07:00"
+}

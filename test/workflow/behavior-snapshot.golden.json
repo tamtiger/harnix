@@ -306,14 +306,14 @@
         "schemaVersion": 3,
         "taskId": "20260929-090000-golden-one",
         "checkId": "check",
-        "taskContractHash": "8f4981ddd8794a41c85cecd286cd030912aacb5e7521e0caabaac704b056683c",
+        "taskContractHash": "b696303c25c4da9db3279305e716ce7e8edc1698513d029d688fb9591fbd4fef",
         "entries": [
           {
             "path": "src/a.ts",
             "sha256": "037ecd1db38c230c248787e60fd7bfc0cb0101b187b59535b6e7483be762d350"
           }
         ],
-        "inputDigest": "9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb"
+        "inputDigest": "750ffba894f46352fe4a6d8cf8d4c9dde680c12d5d1c1e8fc65bdbf097815c65"
       }
     },
     {
@@ -370,7 +370,7 @@
             "exitCode": 0,
             "summary": "pnpm test passed",
             "artifactPaths": [],
-            "inputDigest": "9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb"
+            "inputDigest": "750ffba894f46352fe4a6d8cf8d4c9dde680c12d5d1c1e8fc65bdbf097815c65"
           }
         ],
         "createdAt": "2026-09-29T09:00:00.000+07:00",
@@ -428,7 +428,7 @@
             "exitCode": 0,
             "summary": "pnpm test passed",
             "artifactPaths": [],
-            "inputDigest": "9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb"
+            "inputDigest": "750ffba894f46352fe4a6d8cf8d4c9dde680c12d5d1c1e8fc65bdbf097815c65"
           }
         ],
         "createdAt": "2026-09-29T09:00:00.000+07:00",
@@ -488,7 +488,7 @@
             "exitCode": 0,
             "summary": "pnpm test passed",
             "artifactPaths": [],
-            "inputDigest": "9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb"
+            "inputDigest": "750ffba894f46352fe4a6d8cf8d4c9dde680c12d5d1c1e8fc65bdbf097815c65"
           }
         ],
         "createdAt": "2026-09-29T09:00:00.000+07:00",
@@ -578,7 +578,7 @@
             "exitCode": 0,
             "summary": "pnpm test passed",
             "artifactPaths": [],
-            "inputDigest": "9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb"
+            "inputDigest": "750ffba894f46352fe4a6d8cf8d4c9dde680c12d5d1c1e8fc65bdbf097815c65"
           }
         ],
         "createdAt": "2026-09-29T09:00:00.000+07:00",
@@ -974,6 +974,7 @@
             "completedAt",
             "decisions",
             "epicId",
+            "followUpOf",
             "residualRisks"
           ]
         },
@@ -1084,12 +1085,12 @@
           ]
         },
         "transports": {
-          "--init": "Create a valid v3 task and set it active: --init --title <t> [--mode lite|full --goal <g> --text <criterion> --command <cmd> --input <glob,glob> --follow-up <task-id>]; the command and inputs default from verify-plan.",
+          "--init": "Create a valid v3 task and set it active: --init --title <t> [--mode lite|full --goal <g> --text <criterion> --command <cmd> --input <glob,glob> --epic <epic-id> --follow-up <task-id>]; the command and inputs default from verify-plan; --epic attaches an existing epic and --follow-up records followUpOf and inherits the parent's epic and paths.",
           "--preflight": "Read-only routing metadata: clock, learning notes, check counts, active task and nextStage.",
           "--snapshot": "Read-only input digest of one check (--snapshot --check <id>).",
           "--inspect": "Read-only view of the active workflow state.",
           "--save": "Full record plus artifacts. Required for obligations, artifacts and contract revisions.",
-          "--transition": "Status and checkpoint only, read from the persisted record.",
+          "--transition": "Status and checkpoint only, read from the persisted record: --transition <status>/<checkpoint> [--dry-run] [--reviewed]. Entering ready/ready checks the plan content (placeholders, every criterion named in plan.md, a focused required check per criterion); a Full task also needs --reviewed after the ready-review, and --dry-run returns reviewChecklist.",
           "--evidence": "Append exactly one evidence item from a stdin envelope, or from --check, --result, --summary and optional --exit-code, --artifact, --digest flags.",
           "--criterion": "Mark criteria met from fresh passing evidence: --criterion <ids> --met [--evidence-ids <ids>]; schema v3 only.",
           "--migrate": "Migrate the active unfinished legacy v1/v2 task to schema v3; optional stdin { checks } supplies criterionIds and inputs.",
@@ -1103,7 +1104,8 @@
           "--batch": "Apply criteria, checks, decisions, risks and paths atomically from the stdin envelope { criteria?: [{ id, text?, status?, waiverReason?, checks? }], checks?: [{ id, description?, command?, scope?, required?, criteria?, inputs? }], decisions?: [{ id, text, rationale }], risks?: [{ id, text, severity? }], paths?: { paths?, specs? }, reason? } in one save under the workflow lock; decision and risk ids must be new (severity defaults to low); changing criteria or checks follows --set-check, so after planning it needs reason (10-1000 characters); schema v3 only.",
           "--brief": "Print only id, status, checkpoint and updatedAt (preflight: without learning); the commands that accept it are listed in constraints.brief.",
           "--finish": "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? }.",
-          "--cancel": "Terminal cancellation; the only cancellation transport."
+          "--cancel": "Terminal cancellation; the only cancellation transport.",
+          "--learn": "Record one hand-authored learning candidate from stdin { \"candidate\": { id, statement, sourceTaskIds, evidenceIds } } (no --text or --rationale flags); needs an active verifying/finishing task whose required checks are fresh, and the candidate must cite its evidence. Without a stdin body, --add-decision or --add-risk on the active task is captured at --finish."
         }
       }
     },
@@ -1182,7 +1184,8 @@
             "status": "cancelled",
             "checkpoint": "cancelling",
             "active": false,
-            "updatedAt": "2026-09-29T09:10:00.000+07:00"
+            "updatedAt": "2026-09-29T09:10:00.000+07:00",
+            "epicId": "golden-epic"
           },
           {
             "id": "20260929-090000-golden-one",
@@ -1190,7 +1193,8 @@
             "status": "completed",
             "checkpoint": "finishing",
             "active": false,
-            "updatedAt": "2026-09-29T09:09:00.000+07:00"
+            "updatedAt": "2026-09-29T09:09:00.000+07:00",
+            "epicId": "golden-epic"
           }
         ]
       }
@@ -1253,11 +1257,11 @@
   ],
   "files": {
     "tasks/.active": "20260929-090200-golden-full\n",
-    "tasks/20260929-090000-golden-one/review.md": "# Task 20260929-090000-golden-one\n\n- **ID:** 20260929-090000-golden-one\n- **Mode:** lite\n- **Status:** completed/finishing\n- **Created:** 2026-09-29 09:00:00 +07:00\n- **Updated:** 2026-09-29 09:09:00 +07:00\n\n**Verdict:** PASS — all acceptance criteria met or waived\n\n## Goal\n\nGolden goal\n\n## Non-goals\n\n- No extras\n\n## Acceptance criteria\n\n- `ac-one` (met): One\n\n## Required checks\n\n- `check` (focused): Unit tests — pass (2026-09-29 09:06:00 +07:00)\n\n## Evidence\n\n- `check` — pass (2026-09-29 09:06:00 +07:00): pnpm test passed\n",
-    "tasks/20260929-090000-golden-one/task.json": "{\n  \"generator\": \"harnix\",\n  \"schemaVersion\": 3,\n  \"id\": \"20260929-090000-golden-one\",\n  \"title\": \"Task 20260929-090000-golden-one\",\n  \"mode\": \"lite\",\n  \"status\": \"completed\",\n  \"checkpoint\": \"finishing\",\n  \"goal\": \"Golden goal\",\n  \"nonGoals\": [\n    \"No extras\"\n  ],\n  \"acceptanceCriteria\": [\n    {\n      \"id\": \"ac-one\",\n      \"text\": \"One\",\n      \"status\": \"met\",\n      \"evidenceIds\": [\n        \"ev-check\"\n      ]\n    }\n  ],\n  \"relevantPaths\": [\n    \"src/a.ts\"\n  ],\n  \"relevantSpecs\": [],\n  \"validationPlan\": [\n    {\n      \"id\": \"check\",\n      \"description\": \"Unit tests\",\n      \"scope\": \"focused\",\n      \"required\": true,\n      \"command\": \"pnpm test\",\n      \"criterionIds\": [\n        \"ac-one\"\n      ],\n      \"inputs\": [\n        \"src/**\"\n      ]\n    }\n  ],\n  \"evidence\": [\n    {\n      \"id\": \"ev-check\",\n      \"checkId\": \"check\",\n      \"recordedAt\": \"2026-09-29T09:06:00.000+07:00\",\n      \"result\": \"pass\",\n      \"exitCode\": 0,\n      \"summary\": \"pnpm test passed\",\n      \"artifactPaths\": [],\n      \"inputDigest\": \"9381b1838506d7156b2ad7a51c3228f69788d5a959913b769657f630a5f20aeb\"\n    }\n  ],\n  \"createdAt\": \"2026-09-29T09:00:00.000+07:00\",\n  \"updatedAt\": \"2026-09-29T09:09:00.000+07:00\",\n  \"epicId\": \"golden-epic\",\n  \"completedAt\": \"2026-09-29T09:09:00.000+07:00\"\n}\n",
-    "tasks/20260929-090100-golden-two/review.md": "# Task 20260929-090100-golden-two\n\n- **ID:** 20260929-090100-golden-two\n- **Mode:** lite\n- **Status:** cancelled/cancelling\n- **Created:** 2026-09-29 09:00:00 +07:00\n- **Updated:** 2026-09-29 09:10:00 +07:00\n\n**Verdict:** CANCELLED — Golden cancellation\n\n## Goal\n\nGolden goal\n\n## Non-goals\n\n- No extras\n\n## Acceptance criteria\n\n- `ac-one` (pending): One\n\n## Required checks\n\n- `check` (focused): Unit tests — chưa chạy / not yet run\n\n## Cancellation\n\n- **Reason:** Golden cancellation\n\n## Evidence\n\n_None recorded yet._\n",
+    "tasks/20260929-090000-golden-one/review.md": "# Task 20260929-090000-golden-one\n\n- **ID:** 20260929-090000-golden-one\n- **Mode:** lite\n- **Epic:** golden-epic\n- **Status:** completed/finishing\n- **Created:** 2026-09-29 09:00:00 +07:00\n- **Updated:** 2026-09-29 09:09:00 +07:00\n\n**Verdict:** PASS — all acceptance criteria met or waived\n\n## Goal\n\nGolden goal\n\n## Non-goals\n\n- No extras\n\n## Acceptance criteria\n\n- `ac-one` (met): One\n\n## Required checks\n\n- `check` (focused): Unit tests — pass (2026-09-29 09:06:00 +07:00)\n\n## Evidence\n\n- `check` — pass (2026-09-29 09:06:00 +07:00): pnpm test passed\n",
+    "tasks/20260929-090000-golden-one/task.json": "{\n  \"generator\": \"harnix\",\n  \"schemaVersion\": 3,\n  \"id\": \"20260929-090000-golden-one\",\n  \"title\": \"Task 20260929-090000-golden-one\",\n  \"mode\": \"lite\",\n  \"status\": \"completed\",\n  \"checkpoint\": \"finishing\",\n  \"goal\": \"Golden goal\",\n  \"nonGoals\": [\n    \"No extras\"\n  ],\n  \"acceptanceCriteria\": [\n    {\n      \"id\": \"ac-one\",\n      \"text\": \"One\",\n      \"status\": \"met\",\n      \"evidenceIds\": [\n        \"ev-check\"\n      ]\n    }\n  ],\n  \"relevantPaths\": [\n    \"src/a.ts\"\n  ],\n  \"relevantSpecs\": [],\n  \"validationPlan\": [\n    {\n      \"id\": \"check\",\n      \"description\": \"Unit tests\",\n      \"scope\": \"focused\",\n      \"required\": true,\n      \"command\": \"pnpm test\",\n      \"criterionIds\": [\n        \"ac-one\"\n      ],\n      \"inputs\": [\n        \"src/**\"\n      ]\n    }\n  ],\n  \"evidence\": [\n    {\n      \"id\": \"ev-check\",\n      \"checkId\": \"check\",\n      \"recordedAt\": \"2026-09-29T09:06:00.000+07:00\",\n      \"result\": \"pass\",\n      \"exitCode\": 0,\n      \"summary\": \"pnpm test passed\",\n      \"artifactPaths\": [],\n      \"inputDigest\": \"750ffba894f46352fe4a6d8cf8d4c9dde680c12d5d1c1e8fc65bdbf097815c65\"\n    }\n  ],\n  \"createdAt\": \"2026-09-29T09:00:00.000+07:00\",\n  \"updatedAt\": \"2026-09-29T09:09:00.000+07:00\",\n  \"epicId\": \"golden-epic\",\n  \"completedAt\": \"2026-09-29T09:09:00.000+07:00\"\n}\n",
+    "tasks/20260929-090100-golden-two/review.md": "# Task 20260929-090100-golden-two\n\n- **ID:** 20260929-090100-golden-two\n- **Mode:** lite\n- **Epic:** golden-epic\n- **Status:** cancelled/cancelling\n- **Created:** 2026-09-29 09:00:00 +07:00\n- **Updated:** 2026-09-29 09:10:00 +07:00\n\n**Verdict:** CANCELLED — Golden cancellation\n\n## Goal\n\nGolden goal\n\n## Non-goals\n\n- No extras\n\n## Acceptance criteria\n\n- `ac-one` (pending): One\n\n## Required checks\n\n- `check` (focused): Unit tests — chưa chạy / not yet run\n\n## Cancellation\n\n- **Reason:** Golden cancellation\n\n## Evidence\n\n_None recorded yet._\n",
     "tasks/20260929-090100-golden-two/task.json": "{\n  \"generator\": \"harnix\",\n  \"schemaVersion\": 3,\n  \"id\": \"20260929-090100-golden-two\",\n  \"title\": \"Task 20260929-090100-golden-two\",\n  \"mode\": \"lite\",\n  \"status\": \"cancelled\",\n  \"checkpoint\": \"cancelling\",\n  \"goal\": \"Golden goal\",\n  \"nonGoals\": [\n    \"No extras\"\n  ],\n  \"acceptanceCriteria\": [\n    {\n      \"id\": \"ac-one\",\n      \"text\": \"One\",\n      \"status\": \"pending\",\n      \"evidenceIds\": []\n    }\n  ],\n  \"relevantPaths\": [\n    \"src/a.ts\"\n  ],\n  \"relevantSpecs\": [],\n  \"validationPlan\": [\n    {\n      \"id\": \"check\",\n      \"description\": \"Unit tests\",\n      \"scope\": \"focused\",\n      \"required\": true,\n      \"command\": \"pnpm test\",\n      \"criterionIds\": [\n        \"ac-one\"\n      ],\n      \"inputs\": [\n        \"src/**\"\n      ]\n    }\n  ],\n  \"evidence\": [],\n  \"createdAt\": \"2026-09-29T09:00:00.000+07:00\",\n  \"updatedAt\": \"2026-09-29T09:10:00.000+07:00\",\n  \"epicId\": \"golden-epic\",\n  \"cancellation\": {\n    \"reason\": \"Golden cancellation\",\n    \"authorizedBy\": \"user\"\n  },\n  \"cancelledAt\": \"2026-09-29T09:10:00.000+07:00\"\n}\n",
-    "tasks/20260929-090200-golden-full/plan.md": "- [ ] Step one\n",
+    "tasks/20260929-090200-golden-full/plan.md": "- [ ] Step one covers ac-one\n",
     "tasks/20260929-090200-golden-full/prd.md": "# PRD\n",
     "tasks/20260929-090200-golden-full/review.md": "# Task 20260929-090200-golden-full\n\n- **ID:** 20260929-090200-golden-full\n- **Mode:** full\n- **Status:** ready/ready\n- **Created:** 2026-09-29 09:00:00 +07:00\n- **Updated:** 2026-09-29 09:14:00 +07:00\n\n**Verdict:** PENDING — 0/1 acceptance criteria met\n\n## Goal\n\nGolden goal\n\n## Non-goals\n\n- No extras\n\n## Artifacts\n\n- [`prd.md`](./prd.md) — outcome, scope, acceptance criteria narrative.\n- [`plan.md`](./plan.md) — implementation checklist and slices.\n\n## Acceptance criteria\n\n- `ac-one` (pending): One, revised\n\n## Required checks\n\n- `check` (focused): Unit tests — chưa chạy / not yet run\n\n## Evidence\n\n- skipped (2026-09-29 09:13:00 +07:00): Task contract revised at persisted replan: Golden revision reason for the snapshot.\n",
     "tasks/20260929-090200-golden-full/task.json": "{\n  \"generator\": \"harnix\",\n  \"schemaVersion\": 3,\n  \"id\": \"20260929-090200-golden-full\",\n  \"title\": \"Task 20260929-090200-golden-full\",\n  \"mode\": \"full\",\n  \"status\": \"ready\",\n  \"checkpoint\": \"ready\",\n  \"goal\": \"Golden goal\",\n  \"nonGoals\": [\n    \"No extras\"\n  ],\n  \"acceptanceCriteria\": [\n    {\n      \"id\": \"ac-one\",\n      \"text\": \"One, revised\",\n      \"status\": \"pending\",\n      \"evidenceIds\": []\n    }\n  ],\n  \"relevantPaths\": [\n    \"src/a.ts\"\n  ],\n  \"relevantSpecs\": [],\n  \"validationPlan\": [\n    {\n      \"id\": \"check\",\n      \"description\": \"Unit tests\",\n      \"scope\": \"focused\",\n      \"required\": true,\n      \"command\": \"pnpm test\",\n      \"criterionIds\": [\n        \"ac-one\"\n      ],\n      \"inputs\": [\n        \"src/**\"\n      ]\n    }\n  ],\n  \"evidence\": [\n    {\n      \"id\": \"task-contract-revision-01\",\n      \"recordedAt\": \"2026-09-29T09:13:00.000+07:00\",\n      \"result\": \"skipped\",\n      \"summary\": \"Task contract revised at persisted replan: Golden revision reason for the snapshot.\",\n      \"artifactPaths\": [\n        \".harnix/tasks/20260929-090200-golden-full/task.json\"\n      ]\n    }\n  ],\n  \"createdAt\": \"2026-09-29T09:00:00.000+07:00\",\n  \"updatedAt\": \"2026-09-29T09:14:00.000+07:00\"\n}\n",

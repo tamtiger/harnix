@@ -25,6 +25,31 @@ describe("required check report", () => {
     ]);
   });
 
+  it("reports a pass recorded under the former digest formula as passed while the contract is unchanged", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(join(root, "src", "a.ts"), "export const a = 1;\n");
+    const base = buildTaskV3({
+      validationPlan: [buildCheck({ id: "gate", criterionIds: ["ac-one"], inputs: ["src/**"] })],
+    });
+    const snapshot = await computeInputDigest(root, base, "gate");
+    const evidence = {
+      id: "pass",
+      checkId: "gate",
+      recordedAt: "2026-08-26T00:59:00.000Z",
+      result: "pass" as const,
+      exitCode: 0,
+      summary: "ok",
+      artifactPaths: [],
+      inputDigest: snapshot.legacyInputDigest,
+    };
+
+    const reports = await inspectRequiredChecks(root, "unused", { ...base, evidence: [evidence] }, now);
+
+    expect(reports.map(({ id, state, reasonCodes }) => ({ id, state, reasonCodes }))).toEqual([
+      { id: "gate", state: "passed", reasonCodes: [] },
+    ]);
+  });
   it("reports a legacy v2 pass as stale until the task migrates", async () => {
     const task: TaskRecordV2 = {
       ...(v3Task() as unknown as TaskRecordV2),

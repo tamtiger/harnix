@@ -49,6 +49,8 @@ export interface WorkflowFlags {
   relevantSpec?: string[];
   cwd?: string;
   followUp?: string;
+  reviewed?: boolean;
+  epic?: string;
 }
 
 const BOOLEAN_ACTIONS = [
@@ -203,6 +205,18 @@ const FLAG_OWNERS: readonly FlagOwner[] = [
     hint: "workflow --set-check, --replace-check or --run-check",
   },
   {
+    name: "--epic",
+    isSet: (f) => f.epic !== undefined,
+    actions: ["init"],
+    hint: "workflow --init",
+  },
+  {
+    name: "--reviewed",
+    isSet: (f) => f.reviewed === true,
+    actions: ["transition"],
+    hint: "workflow --transition",
+  },
+  {
     name: "--follow-up",
     isSet: (f) => f.followUp !== undefined,
     actions: ["init"],
@@ -244,6 +258,11 @@ export function assertCommandShape(action: string, flags: WorkflowFlags, operand
 }
 
 export function assertFlagGroups(action: string, flags: WorkflowFlags): void {
+  if (action === "learn" && (flags.text !== undefined || flags.rationale !== undefined))
+    throw new Error(
+      "--learn reads a JSON { candidate: { id, statement, sourceTaskIds, evidenceIds } } from stdin and takes no --text or --rationale; " +
+        "for a lesson without a stdin body use --add-decision or --add-risk on the active task (finish captures them).",
+    );
   for (const owner of FLAG_OWNERS)
     if (owner.isSet(flags) && !owner.actions.includes(action)) throw new Error(`${owner.name} requires ${owner.hint}.`);
   if (action === "criterion" && flags.met !== true) throw new Error("workflow --criterion requires --met.");

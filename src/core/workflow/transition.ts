@@ -2,6 +2,7 @@ import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { assertLegalTransition, laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { inspectReadyConditions } from "./ready.js";
+import { READY_REVIEW_CHECKLIST, reviewRequiredMessage } from "./ready-review.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
 
@@ -16,6 +17,13 @@ export interface DryRunTransitionResult {
   /** Not enforced by the transition; worth fixing before the contract freezes. */
   advisories: string[];
   unbaselinedChecks?: string[];
+  /** Present when a Full task is checked for ready: the ready-review to run before repeating with --reviewed. */
+  reviewChecklist?: string[];
+}
+
+export interface TransitionOptions {
+  /** The caller attests that the ready-review was run; a Full task cannot enter ready/ready without it. */
+  reviewed?: boolean;
 }
 
 /**
@@ -30,6 +38,7 @@ export function transitionWorkflow(
   checkpoint: string,
   injectedNow: string | undefined,
   dryRun: true,
+  options?: TransitionOptions,
 ): Promise<DryRunTransitionResult>;
 export function transitionWorkflow(
   root: string,
@@ -37,6 +46,7 @@ export function transitionWorkflow(
   checkpoint: string,
   injectedNow?: string,
   dryRun?: false,
+  options?: TransitionOptions,
 ): Promise<TaskRecord>;
 export function transitionWorkflow(
   root: string,
@@ -44,6 +54,7 @@ export function transitionWorkflow(
   checkpoint: string,
   injectedNow?: string,
   dryRun?: boolean,
+  options?: TransitionOptions,
 ): Promise<TaskRecord | DryRunTransitionResult>;
 export async function transitionWorkflow(
   root: string,
@@ -51,12 +62,14 @@ export async function transitionWorkflow(
   checkpoint: string,
   injectedNow?: string,
   dryRun?: boolean,
+  options: TransitionOptions = {},
 ): Promise<TaskRecord | DryRunTransitionResult> {
   const now = await currentInstant(root, injectedNow);
   if (status === "cancelled") throw new Error("Workflow cancellation must use workflow --cancel.");
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
   if (!task) throw new Error("Workflow transition requires an active task.");
+  const entersReady = status === "ready" && checkpoint === "ready";
 
   if (dryRun === true) {
     const issues: string[] = [];
@@ -72,7 +85,7 @@ export async function transitionWorkflow(
       issues.push(error instanceof Error ? error.message : String(error));
     }
     if (status === "ready") {
-      const readyInspection = await inspectReadyConditions(harnixRoot, task);
+      const readyInspection = await inspectReadyConditions(harnixRoot, task, undefined, task.checkpoint !== "ready");
       issues.push(...readyInspection.issues);
       advisories = readyInspection.advisories;
       if (readyInspection.unbaselined.length > 0) {
@@ -89,7 +102,13 @@ export async function transitionWorkflow(
       issues,
       advisories,
       ...(unbaselinedChecks ? { unbaselinedChecks } : {}),
+      ...(entersReady && task.mode === "full" ? { reviewChecklist: [...READY_REVIEW_CHECKLIST] } : {}),
     };
+  }
+
+  if (entersReady && task.mode === "full" && task.checkpoint !== "ready" && options.reviewed !== true) {
+    const found = await inspectReadyConditions(harnixRoot, task);
+    throw new Error(reviewRequiredMessage(found.issues, found.advisories));
   }
 
   // A blocked task keeps its blocker only while blocked; resuming drops it and must land on the recorded status.

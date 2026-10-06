@@ -10,6 +10,7 @@ import {
   taskRecordFieldManifest,
   taskRecordKeys,
   taskRecordV2Keys,
+  taskRecordV3Keys,
   transitions,
   validationCheckV2Keys,
 } from "src/core/tasks/task-schema.js";
@@ -22,13 +23,18 @@ describe("task schema definitions", () => {
     expect(v1.required).toContain("validationPlan");
     expect(v1.optional).not.toContain("decisions");
     expect(v3.optional).toEqual(expect.arrayContaining(["decisions", "epicId", "residualRisks"]));
-    expect(taskRecordFieldManifest(2)).toEqual(v3);
+    expect(v3.optional).toContain("followUpOf");
+    expect(taskRecordFieldManifest(2)).toEqual({
+      required: v3.required,
+      optional: v3.optional.filter((name) => name !== "followUpOf"),
+    });
     expect([...v3.required, ...v3.optional].sort()).toEqual(TASK_RECORD_FIELDS.map((field) => field.name).sort());
     expect(v3.required).toEqual([...v3.required].sort());
   });
 
   it("keeps the v1 key set a strict subset of the v2/v3 key set", () => {
     for (const key of taskRecordKeys) expect(taskRecordV2Keys.has(key)).toBe(true);
+    expect([...taskRecordV3Keys].filter((key) => !taskRecordV2Keys.has(key))).toEqual(["followUpOf"]);
     expect([...taskRecordV2Keys].filter((key) => !taskRecordKeys.has(key)).sort()).toEqual([
       "decisions",
       "epicId",

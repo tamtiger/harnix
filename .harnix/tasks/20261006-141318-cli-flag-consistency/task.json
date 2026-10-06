@@ -1,0 +1,148 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-141318-cli-flag-consistency",
+  "title": "Thống nhất cờ lặp/comma và lỗi cờ không hợp lệ của harnix workflow",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Mọi cờ nhận danh sách của harnix workflow chấp nhận cả dạng lặp cờ lẫn dạng phân tách bằng dấu phẩy, và cờ không áp dụng cho hành động đang chạy phải báo lỗi rõ thay vì bị bỏ qua; cookbook ghi cách đọc JSON an toàn trên Windows.",
+  "nonGoals": [
+    "Không dùng cờ danh sách nào làm mất giá trị âm thầm"
+  ],
+  "epicId": "20261006-141317-workflow-field-feedback",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "--criteria (và các cờ danh sách tương tự như --evidence-ids) nhận cả --criteria ac-1 --criteria ac-2 lẫn --criteria ac-1,ac-2 và cho cùng kết quả.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-flags-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cờ không áp dụng cho hành động đang chạy (ví dụ --follow-up cùng --set-check) báo lỗi nêu rõ cờ và hành động hợp lệ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-flags-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Cookbook trong workflow.md ghi mẫu đọc JSON an toàn trên Windows (gán bằng Out-String rồi ConvertFrom-Json, tránh pwsh -Command lồng nhau chờ stdin).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Đường ghi learning thủ công (--learn) có thể khám phá được: schema transports liệt kê nó cùng hình dạng stdin, và dùng sai cờ như --text trả lỗi chỉ rõ cách dùng đúng (hoặc có cờ --lesson --rationale không cần JSON), kèm điều kiện cần (task active ở verifying/finishing, có evidence).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-flags-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-flags",
+      "description": "Test cờ danh sách lặp/comma và lỗi cờ sai hành động",
+      "command": "pnpm exec vitest run test/integration/commands/workflow-flags.test.ts test/unit/core/workflow/schema.test.ts test/unit/commands/workflow-command.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/workflow/schema.ts",
+        "test/integration/commands/workflow-flags.test.ts",
+        "test/unit/commands/workflow-command.test.ts",
+        "test/unit/core/workflow/schema.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Cookbook workflow.md ghi mẫu đọc JSON an toàn trên Windows",
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-flags-1",
+      "checkId": "check-flags",
+      "recordedAt": "2026-10-06T14:35:34.360+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/workflow-flags.test.ts test/unit/core/workflow/schema.test.ts test/unit/commands/workflow-command.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b94eceaeec26e2e4d8be9e2fbdc86bc77b71e298154629609cac2fd98b774ad3"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T14:35:37.567+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8952f3e38bcae3ac8e7307f3b4fd0dbf188880b73447e7a105f21e981e52a83f"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T14:36:47.578+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e9fe975f85030580c8a4ba797c328ac62d2a11bdd75f86f318b75a4f9cf9fac6"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T14:13:30.000+07:00",
+  "updatedAt": "2026-10-06T14:37:14.796+07:00",
+  "decisions": [
+    {
+      "id": "lesson-epic-at-init",
+      "text": "Task tinh chỉnh thuộc cùng một mạch việc phải gắn epicId của epic có sẵn ngay lúc tạo (--init --epic <id> hoặc envelope epic); gắn hồi tố vào task đã completed không làm được an toàn, nên quên lúc tạo là mất liên kết.",
+      "rationale": "Phiên VNPAY POS: 3 task liên tiếp rời rạc vì --follow-up không ghi quan hệ và epic 20260925-113000-vnpay-spos-integration có sẵn không được dùng."
+    }
+  ],
+  "completedAt": "2026-10-06T14:37:14.796+07:00"
+}

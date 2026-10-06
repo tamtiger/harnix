@@ -146,6 +146,7 @@ export interface TaskRecordV3 extends TaskRecordBase {
   decisions?: TaskDecision[];
   residualRisks?: TaskResidualRisk[];
   epicId?: string;
+  followUpOf?: string;
 }
 export type TaskRecord = TaskRecordV1 | TaskRecordV2 | TaskRecordV3;
 export type TaskRecordWithReviewFields = TaskRecordV2 | TaskRecordV3;
@@ -175,6 +176,7 @@ export const TASK_RECORD_FIELDS: readonly {
   { name: "decisions", required: false, sinceSchemaVersion: 2 },
   { name: "epicId", required: false, sinceSchemaVersion: 2 },
   { name: "evidence", required: true, sinceSchemaVersion: 1 },
+  { name: "followUpOf", required: false, sinceSchemaVersion: 3 },
   { name: "generator", required: true, sinceSchemaVersion: 1 },
   { name: "goal", required: true, sinceSchemaVersion: 1 },
   { name: "id", required: true, sinceSchemaVersion: 1 },
@@ -192,7 +194,10 @@ export const TASK_RECORD_FIELDS: readonly {
 export const taskRecordKeys = new Set(
   TASK_RECORD_FIELDS.filter((field) => field.sinceSchemaVersion === 1).map((field) => field.name),
 );
-export const taskRecordV2Keys = new Set(TASK_RECORD_FIELDS.map((field) => field.name));
+export const taskRecordV2Keys = new Set(
+  TASK_RECORD_FIELDS.filter((field) => field.sinceSchemaVersion <= 2).map((field) => field.name),
+);
+export const taskRecordV3Keys = new Set(TASK_RECORD_FIELDS.map((field) => field.name));
 export const decisionKeys = new Set(["id", "rationale", "text"]);
 export const residualRiskKeys = new Set(["id", "severity", "text"]);
 export const acceptanceCriterionKeys = new Set(["evidenceIds", "id", "status", "text", "waiverReason"]);

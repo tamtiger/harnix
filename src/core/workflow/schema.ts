@@ -85,12 +85,13 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
     },
     transports: {
       "--init":
-        "Create a valid v3 task and set it active: --init --title <t> [--mode lite|full --goal <g> --text <criterion> --command <cmd> --input <glob,glob> --follow-up <task-id>]; the command and inputs default from verify-plan.",
+        "Create a valid v3 task and set it active: --init --title <t> [--mode lite|full --goal <g> --text <criterion> --command <cmd> --input <glob,glob> --epic <epic-id> --follow-up <task-id>]; the command and inputs default from verify-plan; --epic attaches an existing epic and --follow-up records followUpOf and inherits the parent's epic and paths.",
       "--preflight": "Read-only routing metadata: clock, learning notes, check counts, active task and nextStage.",
       "--snapshot": "Read-only input digest of one check (--snapshot --check <id>).",
       "--inspect": "Read-only view of the active workflow state.",
       "--save": "Full record plus artifacts. Required for obligations, artifacts and contract revisions.",
-      "--transition": "Status and checkpoint only, read from the persisted record.",
+      "--transition":
+        "Status and checkpoint only, read from the persisted record: --transition <status>/<checkpoint> [--dry-run] [--reviewed]. Entering ready/ready checks the plan content (placeholders, every criterion named in plan.md, a focused required check per criterion); a Full task also needs --reviewed after the ready-review, and --dry-run returns reviewChecklist.",
       "--evidence":
         "Append exactly one evidence item from a stdin envelope, or from --check, --result, --summary and optional --exit-code, --artifact, --digest flags.",
       "--criterion":
@@ -117,6 +118,8 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--finish":
         "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? }.",
       "--cancel": "Terminal cancellation; the only cancellation transport.",
+      "--learn":
+        'Record one hand-authored learning candidate from stdin { "candidate": { id, statement, sourceTaskIds, evidenceIds } } (no --text or --rationale flags); needs an active verifying/finishing task whose required checks are fresh, and the candidate must cite its evidence. Without a stdin body, --add-decision or --add-risk on the active task is captured at --finish.',
     },
   };
 }

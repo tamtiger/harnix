@@ -1,5 +1,5 @@
 import { selectLatestEvidence, type TaskRecord, type ValidationCheck } from "src/core/tasks/task.js";
-import { computeInputDigest } from "src/core/verification/input-digest.js";
+import { computeInputDigest, digestMatches } from "src/core/verification/input-digest.js";
 import { buildVerifyPlan, type VerifyPlan } from "src/core/stack/verify-plan.js";
 import { equivalentCommand } from "./command-match.js";
 
@@ -130,7 +130,7 @@ export async function assertSuiteGateFinishing(projectRoot: string, task: TaskRe
   }
 
   const currentSnapshot = await computeInputDigest(projectRoot, task, suiteCheck.id);
-  if (passEvidence.inputDigest !== currentSnapshot.inputDigest) {
+  if (!digestMatches(currentSnapshot, passEvidence.inputDigest)) {
     throw new Error(
       `Workflow finish: the source-and-test check ${suiteCheck.id} is stale (inputs changed since it last passed). Re-run it last, with no input-touching command after it, via: harnix workflow --run-check ${suiteCheck.id} -- <command>.`,
     );
