@@ -16,11 +16,11 @@ dotnet list package --vulnerable
 - Register services through DI with correct lifetimes; never resolve scoped services from singletons.
 - Use `IHttpClientFactory` or typed clients; never `new HttpClient()` per request.
 - Bind config with `IOptions<T>` and `ValidateOnStart()`; keep secrets in User Secrets or environment.
-- Go async end-to-end with `CancellationToken`; never `.Result` or `.Wait()`.
+- Go async end-to-end with `CancellationToken`; never `.Result` or `.Wait()`; no `async void` except event handlers.
 - Use `ILogger<T>` with structured message templates, not string interpolation.
-- EF Core: use `AsNoTracking()` for reads, `Include` or projection to avoid N+1, and committed migrations.
-- Use `IExceptionHandler` and `ProblemDetails` for API errors; add health check endpoints.
-- Avoid `async void` except event handlers.
+- EF Core: use `AsNoTracking()` for reads, `Include` or projection to avoid N+1, and committed migrations; parameterize all SQL (`FromSql` interpolation, Dapper parameters) and never concatenate into `FromSqlRaw`.
+- Use `IExceptionHandler` and `ProblemDetails` for API errors (no stack traces, SQL text or paths); add health check endpoints.
+- Enforce authorization with policies (`[Authorize]`/`RequireAuthorization`) at endpoint boundaries; use framework auth handlers, not custom token parsing.
 
 ## Common mistakes
 

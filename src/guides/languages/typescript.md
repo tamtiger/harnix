@@ -29,3 +29,4 @@ Use `jest` instead of `vitest run` when the repository uses Jest.
 - Passing an `async` callback to `forEach` and expecting it to be awaited.
 - Using `Object.keys` results as typed keys without a guard.
 - Mocking modules so heavily the test no longer exercises real behavior.
+- Leaving `console.log` in production code instead of a logger (enable `no-console`).

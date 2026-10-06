@@ -1,0 +1,69 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261006-100252-bo-sung-guides-theo-oi-chieu-ecc-rules",
+  "title": "Bổ sung guides theo đối chiếu ECC rules",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cập nhật src/guides (common, ngôn ngữ, framework) bằng các quy tắc kiểm tra được còn thiếu so với ECC, giữ nguyên ngân sách 600 token và giới hạn bullet, kèm test hồi quy cho nội dung sửa sai.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Các guide trong src/guides chứa các bổ sung đã kiểm chứng từ ECC, sửa bullet Rust expect và bullet Vue destructure lỗi thời, và vẫn qua test định dạng guide (600 token, tối đa 10 constraint, 6 mistake).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Verify Bổ sung guides theo đối chiếu ECC rules",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-06T10:06:26.115+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d3149bda14f0fbe7d5c9bad03a3ca8fd586bd42b1b22a70054058c30329aaaad"
+    }
+  ],
+  "relevantPaths": [
+    "src/guides",
+    "test/workflow/guide-format.test.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-06T10:02:52.340+07:00",
+  "updatedAt": "2026-10-06T10:07:21.648+07:00",
+  "decisions": [
+    {
+      "id": "d1-no-new-guides",
+      "text": "Không thêm guide mới (nuxt, react-native, ruby...) trong task này; cần catalog và stack detection nên thuộc task riêng.",
+      "rationale": "Giữ phạm vi nội dung, tránh bề mặt mới."
+    },
+    {
+      "id": "d2-ecc-mostly-subset",
+      "text": "ECC rules phần lớn là tập con của guides Harnix; chỉ các quy tắc kiểm tra được còn thiếu mới đáng thêm, và mỗi bổ sung phải nằm trong giới hạn 600 token, 10 constraint, 6 mistake.",
+      "rationale": "Tránh sao chép sở thích phong cách hoặc quy tắc gắn với agent ECC."
+    }
+  ],
+  "completedAt": "2026-10-06T10:07:21.648+07:00"
+}

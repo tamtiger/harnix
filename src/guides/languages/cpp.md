@@ -18,7 +18,7 @@ clang-tidy -p build <files>
 - Mark single-argument constructors `explicit` and use `enum class`.
 - Mark non-mutating members `const` and pass large inputs as `const T&`.
 - Never keep a `std::string_view` or `std::span` beyond its owner's lifetime.
-- Initialize every scalar at declaration and use `.at()` for untrusted indexes.
+- Initialize every scalar at declaration and use `.at()` for untrusted indexes; replace `strcpy`, `sprintf`, `malloc`/`free` and C arrays with `std::string`, `std::vector` and `std::array`.
 - Guard shared mutable state with `std::mutex` or `std::atomic`.
 - Use target-based CMake (`target_link_libraries`, `target_compile_features`); no global `include_directories`.
 
@@ -29,3 +29,4 @@ clang-tidy -p build <files>
 - Throwing from a destructor.
 - Skipping `-fsanitize=address,undefined` in debug test builds.
 - Slicing a derived object by passing it to a base by value.
+- Relying on signed integer overflow or a null dereference (undefined behavior).

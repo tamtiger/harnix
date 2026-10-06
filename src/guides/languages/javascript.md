@@ -28,3 +28,4 @@ Use the repository's runner (`vitest run` or `jest`) instead of `node --test` wh
 - Comparing with `==` or relying on truthiness for `0` or empty string.
 - Leaving timers, listeners or servers open so the process never exits.
 - Reading `process.env` values as numbers or booleans without parsing.
+- Leaving `console.log` in production code instead of a logger (enable `no-console`).

@@ -30,3 +30,4 @@ Use the repository's runner and package manager when they differ (`vitest run`, 
 - Using `cors()` with no options in production.
 - Trusting `req.ip` or `X-Forwarded-For` without `trust proxy`.
 - Serving static files from a directory that contains secrets.
+- Cookie-session auth without CSRF defense (`SameSite` cookies or a token; `csurf` is deprecated).

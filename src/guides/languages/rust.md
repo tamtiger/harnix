@@ -8,18 +8,20 @@ cargo clippy --all-targets -- -D warnings
 cargo test
 ```
 
+Also run `cargo audit` and `cargo deny check` when the repository configures them.
+
 ## Constraints
 
-- Put a `// SAFETY:` comment stating the invariant on every `unsafe` block.
+- Put a `// SAFETY:` comment stating the invariant on every `unsafe` block; never use `unsafe` to bypass the borrow checker.
 - Return `Result<T, E>`; use `panic!` only for broken invariants.
-- Do not use `unwrap()` in production code; use `?` or `expect("context")`.
+- Do not use `unwrap()` in production code; use `?`, and keep `expect("invariant")` only for proven invariants.
 - Use `thiserror` enums for library errors and `anyhow` only in binaries.
 - Wrap ids in newtypes (`UserId(u64)`) so arguments cannot be swapped.
 - Never hold a `Mutex` or `RwLock` guard across `.await`.
 - Run blocking I/O in async code through `tokio::task::spawn_blocking`.
-- Borrow (`&T`) instead of `.clone()` in hot paths.
+- Borrow (`&T`, `&str`, `&[T]`) by default; never clone just to satisfy the borrow checker.
 - Enable only the Cargo features a dependency needs (`default-features = false`).
-- Keep unit tests in `#[cfg(test)] mod tests` and public API tests under `tests/`.
+- Default items to private; use `pub(crate)` for internal sharing and `pub` only for the public API.
 
 ## Common mistakes
 

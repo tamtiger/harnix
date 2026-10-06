@@ -84,6 +84,30 @@ describe("stale guide content", () => {
   });
 });
 
+describe("guide gaps found against the ECC rules", () => {
+  it.each([
+    ["language-rust", /expect\("invariant"\)/u],
+    ["language-rust", /cargo audit/u],
+    ["language-kotlin", /runCatching/u],
+    ["language-php", /composer audit/u],
+    ["language-swift", /Keychain/u],
+    ["language-dart", /flutter_secure_storage/u],
+    ["language-javascript", /no-console/u],
+    ["common-engineering", /fail fast at startup/iu],
+    ["technology-vue", /Vue 3\.5/u],
+    ["technology-nextjs", /nonces?/u],
+    ["technology-react-web", /setX\(x => x \+ 1\)/u],
+    ["technology-angular", /canMatch/u],
+    ["technology-dotnet", /RequireAuthorization/u],
+  ])("%s mentions %s", (id, pattern) => {
+    expect(content(id)).toMatch(pattern);
+  });
+
+  it("does not keep the Rust expect-with-context advice", () => {
+    expect(content("language-rust")).not.toContain('expect("context")');
+  });
+});
+
 describe("project facts documentation", () => {
   it.each(["docs/HARNIX_PRD.md", "docs/IMPLEMENTATION_PLAN.md"])("%s describes project-facts.md", (path) => {
     expect(readFileSync(path, "utf8")).toContain("project-facts.md");

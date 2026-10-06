@@ -18,8 +18,8 @@ swiftlint
 - Use `async`/`await` and structured tasks; do not add completion-handler or manual GCD code in new APIs.
 - Call `try Task.checkCancellation()` in long async loops.
 - Hide external dependencies behind small protocols so tests can inject fakes.
-- Write tests with Swift Testing (`@Test`, `#expect`) or `XCTest`.
-- Keep `Package.swift` declarative with separate library and test targets.
+- Enable strict concurrency checking (Swift 6 language mode).
+- Store tokens and keys in the Keychain, never `UserDefaults` or source; do not disable App Transport Security.
 
 ## Common mistakes
 
@@ -28,3 +28,4 @@ swiftlint
 - Updating UI state off the main actor.
 - Passing non-`Sendable` types across actor boundaries.
 - Using `try!` to silence an error.
+- Logging with `print()` instead of `os.Logger`.

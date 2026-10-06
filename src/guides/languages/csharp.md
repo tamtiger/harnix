@@ -16,7 +16,7 @@ dotnet test
 - Dispose with `using var` or `await using var`; implement `IAsyncDisposable` for async cleanup.
 - Never call `serviceProvider.GetService<T>()` in business code; inject through constructors.
 - Bind options with `IOptions<T>` and `.ValidateOnStart()`.
-- Parameterize SQL (EF Core or Dapper); never interpolate user input into command text.
+- Parameterize SQL (EF Core or Dapper) and allowlist sort fields and filter operators in dynamic queries; never interpolate user input into command text.
 - Start processes with `UseShellExecute = false` and `ArgumentList`, never a concatenated string.
 - Expose `IReadOnlyList<T>` or `ImmutableArray<T>` in public signatures, not mutable collections.
 - Never log tokens, credentials or PII.
@@ -28,3 +28,4 @@ dotnet test
 - Using `async void` outside event handlers.
 - Passing raw `Guid` or `long` ids instead of typed ids.
 - Building `ProcessStartInfo.Arguments` from user input.
+- Returning stack traces, SQL text or file paths in API responses.

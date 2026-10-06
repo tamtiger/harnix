@@ -17,8 +17,9 @@ next build
 - Server Functions are POST endpoints: authenticate and authorize inside each one, never rely on `proxy.ts` alone.
 - Validate Server Function and Route Handler input with a schema parse before use.
 - Set caching explicitly: `fetch` `next: { revalidate, tags }`, then `revalidateTag` or `revalidatePath` after mutations.
-- Use `next/image` with width/height or `fill` and `next/font`; track Core Web Vitals LCP, CLS and INP.
+- Use `next/image` with width/height or `fill` and `next/font`; keep LCP under 2.5s, INP under 200ms and CLS under 0.1.
 - Add `error.tsx`, `loading.tsx` and `not-found.tsx` for route segments with async data.
+- Set a production CSP without `unsafe-inline` or `unsafe-eval` in `script-src`; use per-request nonces from `proxy.ts` (they force dynamic rendering).
 
 ## Common mistakes
 
@@ -27,3 +28,4 @@ next build
 - Calling your own Route Handler from a Server Component instead of the shared service.
 - Reading `cookies()` or `headers()` without `await`; they are async in current versions.
 - Leaking secrets through `NEXT_PUBLIC_` variables.
+- Importing a Server Component into a Client Component (it becomes client code); pass it as `children` instead.

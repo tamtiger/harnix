@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.1.1] - 2026-10-06
+
+### Changed
+
+- Bổ sung guides theo đối chiếu ECC: sửa bullet Rust expect và Vue destructure, thêm quy tắc bảo mật và kiểm tra cho 17 guide
+
 ## [2.1.0] - 2026-10-06
 
 ### Changed
