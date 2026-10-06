@@ -51,7 +51,7 @@ export interface DoctorDeps extends DiagnoseGlobalDeps {
  */
 export async function runDoctor(options: DoctorRunOptions, deps: DoctorDeps): Promise<DoctorReport> {
   const diagnoseGlobals = () => diagnoseGlobal(globalOptions(options), deps);
-  let project = await diagnoseProjectSection(options.root, deps.desiredPaths);
+  let project = await diagnoseProjectSection(options.root, deps.desiredPaths, deps.generatorVersion);
   let globalIntegrations = await diagnoseGlobals();
   if (!options.fix) return report(project, globalIntegrations, 0);
 
@@ -75,7 +75,7 @@ export async function runDoctor(options: DoctorRunOptions, deps: DoctorDeps): Pr
       // Global diagnostics below preserve corrupt or modified user content.
     }
   }
-  project = await diagnoseProjectSection(options.root, deps.desiredPaths);
+  project = await diagnoseProjectSection(options.root, deps.desiredPaths, deps.generatorVersion);
   globalIntegrations = await diagnoseGlobals();
   if (globalRollbackPartial.length > 0) {
     globalIntegrations = addPartialRollbackFindings(globalIntegrations, globalRollbackPartial);

@@ -7,6 +7,9 @@ export { briefPreflight, briefTask } from "./brief.js";
 export type { BriefTask } from "./brief.js";
 export { markCriteriaMetWorkflow } from "./criterion.js";
 export type { MarkCriteriaInput } from "./criterion.js";
+export { setEpicOrderWorkflow } from "./epic-order.js";
+export { setBaselineWorkflow } from "./baseline.js";
+export type { BaselineInput } from "./baseline.js";
 export { migrateToV3Workflow } from "./migrate-v3.js";
 export {
   addCriterionWorkflow,
@@ -58,4 +61,5 @@ export { saveWorkflow } from "./save.js";
 export { workflowEnvelopeSchema } from "./schema.js";
 export type { WorkflowEnvelopeSchemaV1 } from "./schema.js";
 export { snapshotWorkflow } from "./snapshot.js";
+export { withTargetTask } from "./target-task.js";
 export { transitionWorkflow } from "./transition.js";

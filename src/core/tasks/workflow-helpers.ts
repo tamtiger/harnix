@@ -68,9 +68,12 @@ function assertReplanExit(previous: TaskRecord, next: TaskRecord): void {
   if (next.status === "blocked") return;
   const readyAgain = next.status === "ready" && next.checkpoint === "ready";
   const stillPlanning = next.status === "planning" && next.checkpoint === "planning";
-  if (readyAgain || stillPlanning) return;
+  // A check edit at verifying keeps every pass immutable, so verification resumes instead of replaying the lifecycle.
+  const stillVerifying =
+    previous.status === "verifying" && next.status === "verifying" && next.checkpoint === "verifying";
+  if (readyAgain || stillPlanning || stillVerifying) return;
   throw new Error(
-    `A task at checkpoint replan may only re-enter ready/ready (or planning/planning while planning), not ${next.status}/${next.checkpoint}.`,
+    `A task at checkpoint replan may only re-enter ready/ready (or planning/planning while planning, or verifying/verifying while verifying), not ${next.status}/${next.checkpoint}.`,
   );
 }
 

@@ -4,8 +4,8 @@
   "id": "20261006-165803-member-edit-without-switch",
   "title": "Sửa kế hoạch của task thành viên epic mà không phải pause và resume",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Cho phép các lệnh sửa obligation, đường dẫn và ghi chú nhắm tới một task thành viên đang planning của epic bằng --task <id>, thay vì chuỗi pause, resume, sửa, pause, resume dễ làm mất con trỏ.",
   "nonGoals": [
     "Không cho sửa task terminal hoặc task đã qua planning ngoài luật guarded replan hiện có",
@@ -16,35 +16,62 @@
     {
       "id": "ac-1",
       "text": "Các lệnh --set-check, --add-criterion, --set-paths, --add-decision, --add-risk và --batch nhận --task <task-id> nhắm tới task chưa terminal của cùng project mà không đổi con trỏ active.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2-1",
+        "ev-check-target-2"
+      ]
     },
     {
       "id": "ac-2",
       "text": "--task bị từ chối với --transition, --finish, --cancel, --run-check và --evidence, và với task đã completed hoặc cancelled, kèm lỗi nêu lý do.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2-1",
+        "ev-check-target-2"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Mọi luật hiện có (reason sau planning, bất bất biến, lock workflow) áp dụng y hệt cho task đích; có test chứng minh không đổi .active và không ghi nhầm vào task đang active.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2-1",
+        "ev-check-target-2"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Tài liệu epic reference bỏ hướng dẫn pause và resume để sửa member, thay bằng --task.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-2",
+        "ev-check-suite-2-1"
+      ]
     }
   ],
   "validationPlan": [
+    {
+      "id": "check-docs",
+      "description": "Tài liệu bỏ chuỗi pause/resume để sửa member",
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/skills/harnix-plan/references/epic.md",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
+    },
     {
       "id": "check-suite",
       "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
       "command": "pnpm run test",
       "scope": "full",
-      "required": true,
+      "required": false,
       "criterionIds": [
         "ac-1",
         "ac-2",
@@ -55,11 +82,138 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-suite-2",
+      "description": "Toàn bộ test của dự án (thay check-suite)",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test"
+    },
+    {
+      "id": "check-target",
+      "description": "--task nhắm task đích cho các lệnh sửa",
+      "command": "pnpm exec vitest run test/unit/core/workflow/target-task.test.ts test/integration/commands/workflow-flags.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/workflow-*.ts",
+        "src/core/workflow/**",
+        "test/integration/commands/workflow-flags.test.ts",
+        "test/unit/core/workflow/target-task.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T19:51:17.543+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "941e9dea837f3f94c44a991b3480e43239552272263c0e5aa568764575735d13"
+    },
+    {
+      "id": "ev-check-target-1",
+      "checkId": "check-target",
+      "recordedAt": "2026-10-06T19:51:24.238+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/target-task.test.ts test/integration/commands/workflow-flags.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e640f618e705791e195d406db1528944728bf88a5f2c18e82bce3e52fc0a752b"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T19:52:27.099+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "19c22c444392b085f3dd15c968365b0291379fb8db2e4cb7ef229b94ed1ed68b"
+    },
+    {
+      "id": "ev-check-docs-2",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T19:53:56.827+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "941e9dea837f3f94c44a991b3480e43239552272263c0e5aa568764575735d13"
+    },
+    {
+      "id": "ev-check-target-2",
+      "checkId": "check-target",
+      "recordedAt": "2026-10-06T19:54:08.124+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/target-task.test.ts test/integration/commands/workflow-flags.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e640f618e705791e195d406db1528944728bf88a5f2c18e82bce3e52fc0a752b"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T19:55:40.688+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "c39e11158243fb5f748cbc9bcf50e1a115d21b056dece56d1a83bd78720886fa"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-06T19:56:05.184+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Suite đỏ hai lần do test danh sách export đã lỗi thời, đã sửa test; thay check với inputs có package.json để chạy lại",
+      "artifactPaths": [
+        ".harnix/tasks/20261006-165803-member-edit-without-switch/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-suite-2-1",
+      "checkId": "check-suite-2",
+      "recordedAt": "2026-10-06T19:57:37.872+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "23cc269b577fb0477d8b688348e73f6694b54c0349752a730f27023e31a7a65e"
+    }
+  ],
+  "relevantPaths": [
+    "src/commands",
+    "src/core/workflow"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T16:58:00.000+07:00",
-  "updatedAt": "2026-10-06T16:58:00.000+07:00"
+  "updatedAt": "2026-10-06T19:57:47.429+07:00",
+  "residualRisks": [
+    {
+      "id": "run-check-breaker-after-stale-test",
+      "text": "Chạy lại check-suite sau một lần đỏ do test lỗi thời làm kích hoạt circuit breaker; phải sửa test trước khi chạy lại, nếu không cần --replace-check.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-06T19:57:47.429+07:00"
 }

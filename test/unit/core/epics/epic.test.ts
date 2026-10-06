@@ -2,7 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { detailPublicEpic } from "src/commands/epic.js";
+import { detailPublicEpic, type PublicEpicDetailResult } from "src/commands/epic.js";
 import { initializeProject } from "src/commands/init.js";
 import { readConfig, writeConfig } from "src/core/config/config.js";
 import { upsertEpic, validateEpic } from "src/core/epics/epic.js";
@@ -141,10 +141,10 @@ describe("epic page renderer", () => {
         "",
         "## Members (2 tasks)",
         "",
-        "| # | Task ID | Title | Status |",
-        "|---|---------|-------|--------|",
-        "| 1 | `20260928-100000-done` | Done task | `completed` |",
-        "| 2 | `20260928-100001-open` | Open task | `planning` |",
+        "| # | Task ID | Title | Mode | Status |",
+        "|---|---------|-------|------|--------|",
+        "| 1 | `20260928-100000-done` | Done task | `lite` | `completed` |",
+        "| 2 | `20260928-100001-open` | Open task | `lite` | `planning` |",
         "",
         "## Task Overview & Scope",
         "",
@@ -192,8 +192,45 @@ describe("epic page renderer", () => {
     const detail = await detailPublicEpic(root, "render-epic");
 
     expect(detail.nextTask?.id).toBe("20260928-100001-open");
+    expect((detail as PublicEpicDetailResult).members.map((member) => member.mode)).toEqual(["lite", "lite"]);
     expect(await readFile(join(root, ".harnix", "epics", "render-epic.md"), "utf8")).toContain(
       `\`${detail.nextTask!.id}\``,
     );
+  });
+});
+
+describe("epic order", () => {
+  const A = "20260928-100000-first";
+  const B = "20260928-100001-second";
+  const ordered = buildEpic({
+    id: "ordered-epic",
+    title: "Ordered",
+    goal: "Goal",
+    order: [B, A],
+    createdAt: "2026-09-28T13:58:01.000Z",
+    updatedAt: "2026-09-28T13:58:01.000Z",
+  });
+
+  it("validates the order field and still reads an epic without one", () => {
+    expect(validateEpic(ordered).order).toEqual([B, A]);
+    expect(() => validateEpic({ ...ordered, order: [A, A] })).toThrow(/duplicate/iu);
+    expect(() => validateEpic({ ...ordered, order: "x" })).toThrow(/order/u);
+    expect(validateEpic(buildEpic({ id: "plain", title: "t", goal: "g" })).order).toBeUndefined();
+  });
+
+  it("picks the next task and renders the members in the declared order", async () => {
+    const root = await renderRepository();
+    await initializeProject({ root, developer: "tam", yes: true });
+    const member = (id: string, title: string) => ({ ...memberTask(id, "planning", title), epicId: "ordered-epic" });
+    await saveTask(join(root, ".harnix"), member(A, "First task"));
+    await saveTask(join(root, ".harnix"), member(B, "Second task"));
+    await upsertEpic(root, ordered);
+
+    const detail = (await detailPublicEpic(root, "ordered-epic")) as PublicEpicDetailResult;
+    const page = await readFile(join(root, ".harnix", "epics", "ordered-epic.md"), "utf8");
+
+    expect(detail.nextTask?.id).toBe(B);
+    expect(detail.members.map((item) => item.id)).toEqual([B, A]);
+    expect(page.indexOf(`\`${B}\` | Second task`)).toBeLessThan(page.indexOf(`\`${A}\` | First task`));
   });
 });

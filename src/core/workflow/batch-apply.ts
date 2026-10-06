@@ -110,3 +110,21 @@ export function applyBatchCriteria(task: TaskRecordV3, criteria: WorkflowBatchEn
     mapCriterionToChecks(task, item);
   }
 }
+
+/**
+ * Cross references are resolved after every item is applied, so their order in the envelope never matters; a
+ * reference that still points nowhere is reported with every other one at once.
+ */
+export function assertBatchReferences(task: TaskRecordV3, envelope: WorkflowBatchEnvelope): void {
+  const checkIds = new Set(task.validationPlan.map((check) => check.id));
+  const criterionIds = new Set(task.acceptanceCriteria.map((criterion) => criterion.id));
+  const problems: string[] = [];
+  for (const item of envelope.criteria ?? [])
+    for (const checkId of item.checks ?? [])
+      if (!checkIds.has(checkId)) problems.push(`criterion ${item.id} names unknown check ${checkId}`);
+  for (const item of envelope.checks ?? [])
+    for (const criterionId of item.criteria ?? [])
+      if (!criterionIds.has(criterionId)) problems.push(`check ${item.id} names unknown criterion ${criterionId}`);
+  if (problems.length > 0)
+    throw new Error(`Batch references do not resolve (order does not matter): ${problems.join("; ")}.`);
+}

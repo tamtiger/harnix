@@ -4,8 +4,8 @@
   "id": "20261006-165801-fast-contract-gates",
   "title": "Cổng hợp đồng chạy nhanh và bảo vệ golden khỏi cập nhật nhầm",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Phát hiện sớm các test hợp đồng (cấu trúc test, cli-contract, architecture, tài liệu, golden) mà check tập trung hay bỏ sót, và chặn việc regenerate golden ghi nhầm lỗi.",
   "nonGoals": [
     "Không nới ngưỡng hay bỏ test cấu trúc",
@@ -16,26 +16,38 @@
     {
       "id": "ac-1",
       "text": "Có script pnpm test:gates chạy trong vài giây các test hợp đồng: test-structure, cli-contract, architecture, docs-task-contract, skill-sources, instruction-budget và behavior-snapshot.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "harnix verify-plan hoặc hướng dẫn lập kế hoạch nêu test:gates như check tập trung gợi ý cho mọi task đổi CLI, tài liệu hoặc cấu trúc test.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "HARNIX_UPDATE_GOLDEN từ chối ghi khi kịch bản golden sinh thêm trường error mới so với golden hiện tại và in danh sách đường dẫn thay đổi để người duyệt thấy.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Có script pnpm test:failures chạy toàn bộ suite bằng reporter JSON và chỉ in tên test lỗi cùng thông điệp ngắn.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-failures-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -55,11 +67,102 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Guard golden và script test:gates",
+      "command": "pnpm exec vitest run test/workflow/behavior-snapshot.test.ts test/workflow/package-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "package.json",
+        "test/workflow/behavior-snapshot.test.ts",
+        "test/workflow/package-contract.test.ts"
+      ]
+    },
+    {
+      "id": "check-failures",
+      "description": "Script test:failures",
+      "command": "pnpm exec vitest run test/workflow/test-failures.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "scripts/test-failures.mjs",
+        "test/workflow/test-failures.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "test:gates trong hướng dẫn kế hoạch",
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "src/skills/harnix-plan/SKILL.md",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-06T19:41:57.796+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/behavior-snapshot.test.ts test/workflow/package-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4abc042385eb47792e52e1a143a5e23841bdb2ca3e6141aeeb76887a3e2b013d"
+    },
+    {
+      "id": "ev-check-failures-1",
+      "checkId": "check-failures",
+      "recordedAt": "2026-10-06T19:42:00.994+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/test-failures.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c0bc6e8b7128352952a50925d82fec953829a4b18059a669894a02a2ce2d93b8"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T19:42:05.412+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5ba9f5f8554516d03c702321cc09745c8fc394936ec56abad40d3b2f40a5c47e"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T19:43:12.407+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "576f61f0d305a57894eea1fcc92822afeb0694f3f47e40bccfd8d79d8005bc13"
+    }
+  ],
+  "relevantPaths": [
+    "scripts",
+    "test/workflow"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T16:58:00.000+07:00",
-  "updatedAt": "2026-10-06T16:58:00.000+07:00"
+  "updatedAt": "2026-10-06T19:43:14.989+07:00",
+  "completedAt": "2026-10-06T19:43:14.989+07:00"
 }

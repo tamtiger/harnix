@@ -4,8 +4,8 @@
   "id": "20261006-165804-epic-member-order",
   "title": "Thứ tự thực thi member của epic không phụ thuộc ID",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Epic có thể khai báo thứ tự chạy rõ ràng để harnix epic gợi ý đúng task kế tiếp khi người dùng đổi ưu tiên, thay vì luôn theo ID tăng dần.",
   "nonGoals": [
     "Không đổi ID của task đã tạo",
@@ -16,26 +16,38 @@
     {
       "id": "ac-1",
       "text": "EpicRecord có field tùy chọn order (danh sách task ID) được validate: chỉ chứa id thuộc epic, không trùng; epic cũ không có field vẫn đọc bình thường.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-order-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "harnix epic <id> chọn nextTask theo order trước, phần còn lại theo ID tăng dần, và file epic .md hiển thị đúng thứ tự đó.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-order-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Một lệnh hợp lệ (ví dụ harnix workflow --epic-order <epic-id> <task-ids>) cập nhật order mà không sửa task.json của task nào; có test.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-order-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Tài liệu hợp đồng đóng băng và epic reference mô tả order và quy tắc chọn task kế tiếp.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -55,11 +67,80 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-epic-order",
+      "description": "order của epic, thứ tự hiển thị và lệnh --epic-order",
+      "command": "pnpm exec vitest run test/unit/core/epics test/unit/core/workflow/epic-order.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/epic.ts",
+        "src/core/epics/**",
+        "src/core/workflow/epic-order.ts",
+        "test/unit/core/epics/**",
+        "test/unit/core/workflow/epic-order.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Tài liệu mô tả order của epic",
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/skills/harnix-plan/references/epic.md",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-epic-order-1",
+      "checkId": "check-epic-order",
+      "recordedAt": "2026-10-06T20:08:47.214+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/epics test/unit/core/workflow/epic-order.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "536a3c4dece294c33853c5ac79ff3ebb309adff322eca7e7c7463967b186d43d"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T20:08:51.524+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "08dbd9e77b70ba37eaf558c8a621a9a21584552d24aa69ca60dcb2637d6f022a"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T20:09:54.167+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c4d6ce8bde4cd5a7b6b23262843f09a7f0e97ac84ef046fffc5006df9b1d9278"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/epics",
+    "src/core/workflow"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T16:58:00.000+07:00",
-  "updatedAt": "2026-10-06T16:58:00.000+07:00"
+  "updatedAt": "2026-10-06T20:09:56.479+07:00",
+  "completedAt": "2026-10-06T20:09:56.479+07:00"
 }

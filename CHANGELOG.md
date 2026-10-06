@@ -4,23 +4,25 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
-## [2.2.0-dev.3] - 2026-10-06
-
-### Changed
-
-- workflow: digest của từng check chỉ gồm định nghĩa của chính check, tiêu chí nó phủ và mode, nên thao tác trên check khác không còn làm stale bằng chứng hợp lệ; evidence ghi bằng công thức cũ vẫn được nhận
-
-## [2.2.0-dev.2] - 2026-10-06
-
-### Added
-
-- workflow: --init --epic gắn task vào epic có sẵn ngay lúc tạo, --follow-up ghi followUpOf (field tùy chọn của TaskRecord v3), review.md và harnix tasks hiển thị epicId và followUpOf
-
-## [2.2.0-dev.1] - 2026-10-06
+## [2.2.0] - 2026-10-06
 
 ### Added
 
 - workflow: cổng ready kiểm tra nội dung kế hoạch (placeholder, id tiêu chí trong plan.md, check focused cho từng tiêu chí) và buộc --reviewed cho task Full
+- workflow: --init --epic gắn task vào epic có sẵn ngay lúc tạo, --follow-up ghi followUpOf (field tùy chọn của TaskRecord v3), review.md và harnix tasks hiển thị epicId và followUpOf
+- Baseline đỏ có ủy quyền (workflow --set-baseline) kèm check focused; sửa check ở verifying quay lại verifying/verifying
+- --init --slug: ID task và epic là tiếng Anh; epic hiển thị mode của member
+- Script pnpm selfhost:sync đồng bộ .harnix/workflow.md và hash manifest; test self-host nêu lệnh sửa
+- pnpm test:gates và test:failures; guard golden từ chối trường error mới và in đường dẫn thay đổi
+- workflow --task <task-id>: sửa task chưa terminal khác bằng các lệnh sửa và --batch mà không đổi con trỏ active
+- Epic có order tùy chọn: harnix workflow --epic-order, harnix epic và trang .md theo thứ tự đó
+- Đóng epic giảm ma sát workflow: cảnh báo lệch phiên bản CLI (versionSkew trong --preflight, cli-version-skew trong doctor)
+
+### Changed
+
+- workflow: digest của từng check chỉ gồm định nghĩa của chính check, tiêu chí nó phủ và mode, nên thao tác trên check khác không còn làm stale bằng chứng hợp lệ; evidence ghi bằng công thức cũ vẫn được nhận
+- Chính sách phiên bản: patch cho task lẻ, X.Y.0-dev.N cho member epic, minor khi đóng epic; version-sync từ chối pre-release sai dạng
+- workflow --batch: tham chiếu chéo giữa criteria và checks không phụ thuộc thứ tự, lỗi tham chiếu thiếu gộp một lần
 
 ## [2.1.2] - 2026-10-06
 

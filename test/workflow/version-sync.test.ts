@@ -232,3 +232,33 @@ async function writeSelfHostManifest(root: string, generatorVersion: string): Pr
   };
   await writeFile(join(root, ".harnix", ".template-hashes.json"), `${JSON.stringify(manifest, null, 2)}\n`);
 }
+
+describe("version sync release policy", () => {
+  const release = (root: string, version: string) => syncVersion({ root, summaries: ["Policy."], version });
+
+  it("accepts a dev chain on the next minor and then the release that closes it", async () => {
+    const root = await fixture();
+
+    await expect(release(root, "1.1.0-dev.1")).resolves.toMatchObject({ version: "1.1.0-dev.1" });
+    await expect(release(root, "1.1.0-dev.2")).resolves.toMatchObject({ previousVersion: "1.1.0-dev.1" });
+    await expect(release(root, "1.1.0-dev.10")).resolves.toMatchObject({ previousVersion: "1.1.0-dev.2" });
+    await expect(release(root, "1.1.0")).resolves.toMatchObject({ previousVersion: "1.1.0-dev.10" });
+  });
+
+  it("rejects a dev version that is not newer, including a dev of an already released version", async () => {
+    const root = await fixture();
+    await release(root, "1.1.0-dev.2");
+    await expect(release(root, "1.1.0-dev.1")).rejects.toThrow("greater than current version");
+    await release(root, "1.1.0");
+    await expect(release(root, "1.1.0-dev.9")).rejects.toThrow("greater than current version");
+  });
+
+  it.each(["1.1.1-dev.1", "1.1.0-beta.1", "1.1.0-dev", "1.1.0-dev.01"])(
+    "rejects the pre-release %s",
+    async (version) => {
+      const root = await fixture();
+
+      await expect(release(root, version)).rejects.toThrow("X.Y.0-dev.N");
+    },
+  );
+});

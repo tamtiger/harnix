@@ -2,7 +2,7 @@ import { basename, dirname } from "node:path";
 import { compareCodeUnits } from "src/utils/order.js";
 import { selectLatestEvidence, type Evidence, type TaskRecord } from "src/core/tasks/task.js";
 import { assertInputDigestsFresh } from "src/core/verification/input-digest.js";
-import { assertSuiteGateFinishing } from "./suite-gate.js";
+import { assertSuiteGateFinishing, authorizedRedBaseline } from "./suite-gate.js";
 
 export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceAgeMs = 60 * 60 * 1000): boolean {
   const required = task.validationPlan.filter((check) => check.required);
@@ -26,7 +26,9 @@ export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceA
     }
     return task.schemaVersion === 1 || isInputDigest(evidence.inputDigest);
   });
-  if (required.some((check) => !freshPasses.some((evidence) => evidence.checkId === check.id))) return false;
+  const proved = (check: (typeof required)[number]) =>
+    freshPasses.some((evidence) => evidence.checkId === check.id) || authorizedRedBaseline(task, check);
+  if (!required.every(proved)) return false;
   if (task.schemaVersion === 1) {
     return task.acceptanceCriteria.every(
       (criterion) =>

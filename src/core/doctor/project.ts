@@ -16,6 +16,7 @@ import {
 } from "src/core/doctor/project-legacy.js";
 import { inspectTaskRecords } from "src/core/doctor/project-tasks.js";
 import { ownershipState, readManifest, type ManagedManifest } from "src/core/managed/project-files.js";
+import { detectVersionSkew, skewMessage } from "src/core/versions/skew.js";
 import { diagnoseRepoMap } from "src/core/repo-map/service.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 
@@ -31,6 +32,7 @@ export type DesiredProjectPaths = (config: HarnixConfigV2) => readonly string[];
 export async function diagnoseProjectSection(
   root: string,
   desiredPaths: DesiredProjectPaths,
+  runningVersion?: string,
 ): Promise<DoctorProjectSection> {
   const findings: DoctorFinding[] = [];
   let config: HarnixConfigV2;
@@ -78,6 +80,9 @@ export async function diagnoseProjectSection(
     };
   }
 
+  const skew = runningVersion === undefined ? undefined : detectVersionSkew(manifest, runningVersion);
+  if (skew !== undefined)
+    findings.push(finding("cli-version-skew", "warning", ".harnix/.template-hashes.json", skewMessage(skew), false));
   const desired = new Set(desiredPaths(config));
   inspectProfiles(config, findings);
   await inspectManagedEntries(root, manifest, desired, findings);

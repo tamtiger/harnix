@@ -1,8 +1,9 @@
-import { resolveActiveTask, type TaskRecordV3, type ValidationCheckV3 } from "src/core/tasks/task.js";
+import { type TaskRecordV3, type ValidationCheckV3 } from "src/core/tasks/task.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { saveWorkflow } from "./save.js";
+import { resolveEditableTask } from "./target-task.js";
 import { currentInstant } from "./support.js";
 
 const REASON_MIN = 10;
@@ -26,7 +27,7 @@ export interface PlanEditOptions {
 export const sortedUnique = (values: readonly string[]): string[] => [...new Set(values)].sort(compareCodeUnits);
 
 export async function activeV3(root: string): Promise<TaskRecordV3> {
-  const task = await resolveActiveTask(await resolveSafeHarnixPath(root));
+  const task = await resolveEditableTask(await resolveSafeHarnixPath(root));
   if (!task) throw new Error("Workflow plan edit requires an active task.");
   if (task.schemaVersion !== 3)
     throw new Error("Workflow plan edit requires a TaskRecord schema v3 task; run --migrate first.");
@@ -58,11 +59,16 @@ export async function saveObligationEdit(
 ): Promise<TaskRecordV3> {
   const updatedAt = laterTimestamp(task.updatedAt, now);
   const reason = revisionReason(options);
-  const revise = async (contractReason: string): Promise<TaskRecordV3> =>
-    (await saveWorkflow(root, {
+  const revise = async (contractReason: string): Promise<TaskRecordV3> => {
+    const revised = (await saveWorkflow(root, {
       task: { ...edited, checkpoint: "replan", updatedAt },
       contractRevision: { reason: contractReason },
     })) as TaskRecordV3;
+    // Every recorded pass is immutable through a revision, so verification resumes rather than replaying ready.
+    if (task.status !== "verifying") return revised;
+    const resumed = { ...revised, checkpoint: "verifying" as const, updatedAt: laterTimestamp(updatedAt, now) };
+    return (await saveWorkflow(root, { task: resumed })) as TaskRecordV3;
+  };
   if (task.status !== "planning") {
     if (reason === undefined)
       throw new Error(

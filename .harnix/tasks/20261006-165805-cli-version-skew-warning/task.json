@@ -4,8 +4,8 @@
   "id": "20261006-165805-cli-version-skew-warning",
   "title": "Cảnh báo khi CLI harnix cũ hơn dự án và đóng epic bằng bản 2.2.0",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Báo rõ khi harnix chạy trên PATH cũ hơn phiên bản đã ghi trong dự án, vì khi đó các cổng mới không có tác dụng mà không có dấu hiệu nào; đồng thời task cuối này phát hành bản 2.2.0 đóng epic.",
   "nonGoals": [
     "Không chặn lệnh khi lệch phiên bản",
@@ -16,26 +16,38 @@
     {
       "id": "ac-1",
       "text": "harnix workflow --preflight và harnix doctor có trường hoặc cảnh báo skew khi generatorVersion trong .harnix/.template-hashes.json lớn hơn phiên bản CLI đang chạy, nêu cả hai phiên bản và cách cập nhật; không có cảnh báo khi bằng nhau hoặc CLI mới hơn.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-skew-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Cảnh báo ngắn, không làm preflight dài thêm khi không lệch, và có test cho ba trường hợp (CLI cũ hơn, bằng nhau, mới hơn kể cả tiền phát hành).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-skew-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Tài liệu nêu cách xử lý khi CLI trên PATH cũ hơn repo (build và cài lại bản repo, chỉ khi người dùng cho phép).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Task đóng epic: pnpm version:sync 2.2.0 với CHANGELOG gom các bản dev, đồng bộ file tự-host, và toàn bộ gate pass.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -55,11 +67,84 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-skew",
+      "description": "Phát hiện skew phiên bản trong preflight và doctor",
+      "command": "pnpm exec vitest run test/unit/core/versions/skew.test.ts test/unit/core/workflow/preflight.test.ts test/unit/core/doctor/project.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/doctor/project.ts",
+        "src/core/versions/**",
+        "src/core/workflow/preflight.ts",
+        "test/unit/core/doctor/project.test.ts",
+        "test/unit/core/versions/skew.test.ts",
+        "test/unit/core/workflow/preflight.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Tài liệu skew và CHANGELOG 2.2.0",
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "package.json",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-skew-1",
+      "checkId": "check-skew",
+      "recordedAt": "2026-10-06T20:31:08.518+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/versions/skew.test.ts test/unit/core/workflow/preflight.test.ts test/unit/core/doctor/project.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b9edc7e75f4306bcf80ac4bc23c85b49681acb4af2a7a605bb88cd00fc2c42c3"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T20:31:12.720+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "82785f2e328c4c8c1e87c02e31628c11b5268c8f743874f4590c20f4ce50bc18"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T20:32:19.270+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "55bca8923c369e5dad8029d57d8cddee283586adb631b8c7cb74300b163611e8"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/doctor",
+    "src/core/versions",
+    "src/core/workflow"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T16:58:00.000+07:00",
-  "updatedAt": "2026-10-06T16:58:00.000+07:00"
+  "updatedAt": "2026-10-06T20:32:21.855+07:00",
+  "completedAt": "2026-10-06T20:32:21.855+07:00"
 }

@@ -324,3 +324,48 @@ describe("workflow preflight", () => {
     });
   });
 });
+
+describe("workflow preflight version skew", () => {
+  async function projectWithRecordedVersion(version: string): Promise<string> {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const entry = {
+      path: "AGENTS.md",
+      sourceId: "agents-bootstrap",
+      scope: "project",
+      generatedHash: "0".repeat(64),
+      generatorVersion: version,
+    };
+    await writeFile(
+      join(root, ".harnix", ".template-hashes.json"),
+      JSON.stringify({ generator: "harnix", schemaVersion: 1, entries: [entry] }),
+    );
+    return root;
+  }
+
+  it("names both versions and the fix when the running CLI is older than the project", async () => {
+    const root = await projectWithRecordedVersion("2.2.0-dev.11");
+
+    const result = await preflightWorkflow(root, Date.now(), "2.0.4");
+
+    expect(result.versionSkew).toMatch(/2\.0\.4[\s\S]*2\.2\.0-dev\.11[\s\S]*reinstall/u);
+  });
+
+  it.each([
+    ["equal", "2.2.0", "2.2.0"],
+    ["newer", "2.1.0", "2.2.0"],
+    ["a release over its pre-release", "2.2.0-dev.11", "2.2.0"],
+  ])("adds nothing when the CLI is %s", async (_name, recorded, running) => {
+    const root = await projectWithRecordedVersion(recorded);
+
+    expect("versionSkew" in (await preflightWorkflow(root, Date.now(), running))).toBe(false);
+  });
+
+  it("adds nothing for a newer CLI, or without a running version", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+
+    expect("versionSkew" in (await preflightWorkflow(root, Date.now(), "99.0.0"))).toBe(false);
+    expect("versionSkew" in (await preflightWorkflow(await projectWithRecordedVersion("9.9.9")))).toBe(false);
+  });
+});

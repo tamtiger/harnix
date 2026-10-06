@@ -10,6 +10,7 @@ import { computeInputDigest, digestMatches } from "src/core/verification/input-d
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { saveWorkflow } from "./save.js";
+import { authorizedRedBaseline } from "./suite-gate.js";
 import { currentInstant } from "./support.js";
 
 export interface MarkCriteriaInput {
@@ -35,6 +36,7 @@ async function freshEvidence(root: string, task: TaskRecordV3, criterionId: stri
   const ids: string[] = [];
   const notFresh: string[] = [];
   for (const check of covering) {
+    if (authorizedRedBaseline(task, check)) continue;
     const latest = selectLatestEvidence(task.evidence, check.id);
     const current = latest?.result === "pass" ? await computeInputDigest(root, task, check.id) : undefined;
     if (latest?.result === "pass" && current !== undefined && digestMatches(current, latest.inputDigest))

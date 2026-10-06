@@ -2,7 +2,7 @@
 name: harnix-plan
 description: Use when a Harnix request needs triage, requirements, planning, a trustworthy ready gate, a replan, a legacy-task migration or an epic before implementation.
 metadata:
-  version: "2.2.0-dev.3"
+  version: "2.2.0"
 ---
 
 # Plan a Harnix task
@@ -29,9 +29,10 @@ Anything that is not Bypass is tracked. **Lite**: localized, low-risk, obvious c
 
 ## Build the task
 
-- Create new tasks as TaskRecord schema v3 with one `harnix workflow --save` envelope, or use `harnix workflow --init --title <title> [--mode lite|full] [--goal <goal>] [--text <criterion>] [--command <cmd>] [--input <glob,glob>]` for safe flag-based creation without manual JSON serialization (the command and inputs default from `harnix verify-plan`; with no detected test command it asks for `--command`). If using `--save`: read `harnix workflow --schema` once; no unknown fields; every criterion carries `id`, `text`, `status` and `evidenceIds: []`; each check `scope` is `focused` or `full` (never `project`); a required check needs non-empty `criterionIds` and `inputs`, and both arrays are sorted and unique; every non-waived criterion is covered by a required check; include one project-level suite check (`scope: full`, source-and-test inputs) from `harnix verify-plan` (use `harnix verify-plan --recursive` for multi-repo workspaces or nested projects). A `--save` reports every independent problem at once, so fix them together. ID = `clock.idPrefix` + lowercase hyphenated slug; all timestamps from `clock`.
+- Create new tasks as TaskRecord schema v3 with one `harnix workflow --save` envelope, or use `harnix workflow --init --title <title> [--mode lite|full] [--goal <goal>] [--text <criterion>] [--command <cmd>] [--input <glob,glob>] [--slug <english-kebab-case>]` for safe flag-based creation without manual JSON serialization (the command and inputs default from `harnix verify-plan`; with no detected test command it asks for `--command`). If using `--save`: read `harnix workflow --schema` once; no unknown fields; every criterion carries `id`, `text`, `status` and `evidenceIds: []`; each check `scope` is `focused` or `full` (never `project`); a required check needs non-empty `criterionIds` and `inputs`, and both arrays are sorted and unique; every non-waived criterion is covered by a required check; include one project-level suite check (`scope: full`, source-and-test inputs) from `harnix verify-plan` (use `harnix verify-plan --recursive` for multi-repo workspaces or nested projects). A `--save` reports every independent problem at once, so fix them together. ID = `clock.idPrefix` + lowercase hyphenated English slug (IDs of tasks and epics are English; title, goal and criteria are Vietnamese with accents; `--init` needs `--slug <english-kebab-case>` when the title has accents); all timestamps from `clock`.
 - A Full task does not need `prd.md`/`plan.md` in the create envelope: save the record light (no `artifacts`), then write `prd.md` and `plan.md` directly with the editor tool. The ready gate enforces non-empty `prd.md`/`plan.md` with a checklist item, so there is no reason to inline large prose as JSON.
 - Persist `planning` before any product edit. Record outcome, non-goals, observable acceptance criteria, relevant paths/specs, affected contracts, risks and rollback, and validation.
+- A task that changes the CLI, documentation or test structure gets a focused required check `pnpm run test:gates` (the contract tests in a few seconds: test-structure, cli-contract, architecture, docs, skill sources, instruction budget, golden) beside its own tests, so the suite does not find those gaps last.
 - Edit obligations with flags, not JSON: `--set-check`, `--add-criterion`, `--set-paths`.
 - Full `plan.md`: an unchecked `- [ ]` item per ordered slice near the top, concrete files/interfaces, RED then GREEN order, what each check proves. Write these two files with the editor tool.
 - Obligations freeze at the first persisted `ready`.

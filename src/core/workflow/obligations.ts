@@ -97,13 +97,22 @@ function hasChangedCoverage(
   );
 }
 
+/** The baseline waiver is review data like decisions and risks, so it never counts as an obligation change. */
+function withoutBaseline(check: TaskRecord["validationPlan"][number]): { id: string } & Record<string, unknown> {
+  const { baseline, ...contract } = check as unknown as { id: string; baseline?: unknown } & Record<string, unknown>;
+  void baseline;
+  return contract;
+}
+
 function obligationsChanged(previous: TaskRecord, next: TaskRecord): boolean {
   const criteria = (task: TaskRecord) =>
     task.acceptanceCriteria
       .map(({ id, text }) => ({ id, text }))
       .sort((left, right) => compareCodeUnits(left.id, right.id));
   const checks = (task: TaskRecord) =>
-    [...task.validationPlan].sort((left, right) => compareCodeUnits(left.id, right.id));
+    task.validationPlan
+      .map((check) => withoutBaseline(check))
+      .sort((left, right) => compareCodeUnits(left.id, right.id));
   return (
     !semanticJsonEqual(criteria(previous), criteria(next)) ||
     !semanticJsonEqual(checks(previous), checks(next)) ||

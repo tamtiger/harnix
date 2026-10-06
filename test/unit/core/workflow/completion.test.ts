@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { canCompleteTask, evidenceSupportsScope, verificationRetryDisposition } from "src/core/workflow/completion.js";
 import { type TaskRecordV2 } from "src/core/tasks/task.js";
+import { buildCheck, buildCriterion, buildEvidence, buildTaskV3 } from "test/support/builders.js";
 import { routingTask } from "test/support/workflow-fixtures.js";
 
 describe("workflow completion", () => {
@@ -248,5 +249,38 @@ describe("workflow completion", () => {
       artifactPaths: [],
     });
     expect(canCompleteTask(current, Date.parse("2026-08-07T10:00:00Z"))).toBe(false);
+  });
+});
+
+describe("workflow completion with an authorized red baseline", () => {
+  const baseline = {
+    result: "fail" as const,
+    classification: "pre-existing" as const,
+    authorizedBy: "user",
+    scope: "s",
+  };
+  const suite = buildCheck({ id: "suite", scope: "full", inputs: ["src/**", "test/**"], baseline });
+  const focused = buildCheck({ id: "focused" });
+  const taskOf = (validationPlan = [suite, focused]) =>
+    buildTaskV3({
+      status: "verifying",
+      checkpoint: "finishing",
+      acceptanceCriteria: [buildCriterion({ status: "met", evidenceIds: ["ev-focused"] })],
+      validationPlan,
+      evidence: [
+        buildEvidence({ id: "ev-suite", checkId: "suite", result: "fail", exitCode: 1 }),
+        buildEvidence({ id: "ev-focused", checkId: "focused" }),
+      ],
+    });
+
+  it("completes on the focused proof while the suite stays red, and not without the authorization", () => {
+    const now = Date.parse("2026-09-29T10:00:00Z");
+    expect(canCompleteTask(taskOf(), now)).toBe(true);
+    expect(
+      canCompleteTask(
+        taskOf([buildCheck({ id: "suite", scope: "full", inputs: ["src/**", "test/**"] }), focused]),
+        now,
+      ),
+    ).toBe(false);
   });
 });

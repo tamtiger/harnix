@@ -1,4 +1,4 @@
-import type { TaskMode, TaskRecord } from "src/core/tasks/task.js";
+import type { TaskRecord } from "src/core/tasks/task.js";
 import {
   addCriterionWorkflow,
   addDecisionWorkflow,
@@ -10,7 +10,6 @@ import {
   briefTask,
   cancelWorkflow,
   finishWorkflowReport,
-  initTaskWorkflow,
   inspectWorkflow,
   markCriteriaMetWorkflow,
   migrateToV3Workflow,
@@ -25,6 +24,9 @@ import {
   transitionWorkflow,
   workflowEnvelopeSchema,
 } from "src/commands/internal-workflow.js";
+import { presentTask, splitList } from "src/commands/workflow-handler-utils.js";
+import { LIFECYCLE_HANDLERS } from "src/commands/workflow-lifecycle-handlers.js";
+import { packageVersion } from "src/version.js";
 import { isEvidenceFlagsMode, type WorkflowFlags } from "src/commands/workflow-flags.js";
 import type { CheckRunner } from "src/utils/check-runner.js";
 import { readBoundedInput } from "src/utils/bounded-input.js";
@@ -74,60 +76,17 @@ async function readRequired(context: WorkflowContext, subject: string, invalid: 
   return parseJson(input, invalid);
 }
 
-/** Splits a glob list on commas outside braces, so `*.{ts,tsx}` and `My Dir/**` survive intact. */
-const splitGlobList = (value: string): string[] => {
-  const items: string[] = [];
-  let depth = 0;
-  let current = "";
-  for (const character of value) {
-    if (character === "{") depth += 1;
-    if (character === "}") depth = Math.max(0, depth - 1);
-    if (character === "," && depth === 0) {
-      items.push(current);
-      current = "";
-    } else current += character;
-  }
-  items.push(current);
-  return items.map((item) => item.trim()).filter((item) => item !== "");
-};
-
-const splitList = (value: string): string[] =>
-  value
-    .split(/[\s,]+/u)
-    .map((item) => item.trim())
-    .filter((item) => item !== "");
-
-function presentTask(context: WorkflowContext, task: Parameters<typeof briefTask>[0], evidenceId?: string): unknown {
-  return context.flags.brief === true ? briefTask(task, evidenceId) : task;
-}
-
 export type Handler = (context: WorkflowContext) => Promise<unknown>;
 
 export const WORKFLOW_HANDLERS: Record<string, Handler> = {
+  ...LIFECYCLE_HANDLERS,
   inspect: ({ root }) => inspectWorkflow(root),
   preflight: async ({ root, flags }) => {
-    const result = await preflightWorkflow(root);
+    const result = await preflightWorkflow(root, undefined, packageVersion);
     return flags.brief === true ? briefPreflight(result) : result;
   },
   schema: () => Promise.resolve(workflowEnvelopeSchema()),
   snapshot: ({ root, flags }) => snapshotWorkflow(root, flags.check as string),
-  init: async (context) => {
-    const task = await initTaskWorkflow(context.root, {
-      title: context.flags.title as string,
-      mode: context.flags.mode as TaskMode,
-      goal: context.flags.goal,
-      criterion: context.flags.text,
-      command: context.flags.command,
-      input: context.flags.input?.flatMap(splitGlobList),
-      followUp: context.flags.followUp,
-      epic: context.flags.epic,
-    });
-    if (context.flags.followUp !== undefined && task.epicId === undefined)
-      process.stderr.write(
-        `notice: follow-up of ${task.followUpOf ?? context.flags.followUp} has no epic, so ${task.id} belongs to none; pass --epic <epic-id> to attach it.\n`,
-      );
-    return presentTask(context, task);
-  },
   save: async (context) => {
     const envelope = await readRequired(context, "Workflow save", "Workflow save requires valid JSON.");
     return presentTask(context, await saveWorkflow(context.root, envelope));
@@ -291,6 +250,12 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
   },
   finish: async (context) => {
     const report = await finishWorkflowReport(context.root);
-    return context.flags.brief === true ? { ...briefTask(report.task), learning: report.learning } : report.task;
+    return context.flags.brief === true
+      ? {
+          ...briefTask(report.task),
+          learning: report.learning,
+          ...(report.baselineAuthorized.length > 0 ? { baselineAuthorized: report.baselineAuthorized } : {}),
+        }
+      : report.task;
   },
 };

@@ -1,6 +1,6 @@
 {
   "name": "@tamtiger/harnix",
-  "version": "2.2.0-dev.3",
+  "version": "2.2.0",
   "description": "Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, Codex, Claude Code, OpenCode, and Cursor integrations.",
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -34,6 +34,8 @@
     "test:migration": "vitest run test/migration",
     "test:platform": "vitest run test/platform",
     "test:workflow": "vitest run test/workflow",
+    "test:gates": "vitest run test/unit/test-structure.test.ts test/workflow/cli-contract.test.ts test/workflow/architecture.test.ts test/workflow/docs-task-contract.test.ts test/workflow/skill-sources.test.ts test/workflow/instruction-budget.test.ts test/workflow/behavior-snapshot.test.ts",
+    "test:failures": "node scripts/test-failures.mjs",
     "test:safety": "vitest run test/safety",
     "test:acceptance": "pnpm run test",
     "pack:check": "node scripts/pack-check.mjs",
@@ -42,7 +44,8 @@
     "measure:footprint": "node scripts/measure-footprint.mjs",
     "measure:tokens": "node scripts/measure-tokens.mjs",
     "scan:release": "node scripts/scan-release.mjs",
-    "version:sync": "node scripts/version-sync.mjs"
+    "version:sync": "node scripts/version-sync.mjs",
+    "selfhost:sync": "node scripts/selfhost-sync.mjs"
   },
   "dependencies": {
     "commander": "^13.1.0",

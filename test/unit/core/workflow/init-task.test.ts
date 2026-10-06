@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { assertFlagGroups } from "src/commands/workflow-flags.js";
 import { upsertEpic } from "src/core/epics/epic.js";
 import { resolveActiveTask } from "src/core/tasks/task.js";
 import { clearActiveTask } from "src/core/tasks/task-store.js";
@@ -222,5 +223,48 @@ describe("initTaskWorkflow", () => {
     const task = await initTaskWorkflow(root, { title: "Clocked", injectedNow: "2026-10-06T01:02:03.000Z" });
 
     expect(task.id).toBe("20261006-010203-clocked");
+  });
+});
+
+describe("initTaskWorkflow slug", () => {
+  async function project(): Promise<string> {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeTestProject(root);
+    return root;
+  }
+
+  it("requires an English --slug when the title is not plain ASCII", async () => {
+    const root = await project();
+
+    await expect(initTaskWorkflow(root, { title: "Chuẩn hóa ID" })).rejects.toThrow(/--slug <english-kebab-case>/u);
+  });
+
+  it("uses a valid --slug for the task id and keeps the Vietnamese title", async () => {
+    const root = await project();
+
+    const task = await initTaskWorkflow(root, { title: "Chuẩn hóa ID", slug: "normalize-id" });
+
+    expect(task.id).toMatch(/^\d{8}-\d{6}-normalize-id$/u);
+    expect(task.title).toBe("Chuẩn hóa ID");
+  });
+
+  it.each(["Bad Slug", "-x", "a--b", "x-", "a".repeat(61)])("rejects the malformed slug %s", async (slug) => {
+    const root = await project();
+
+    await expect(initTaskWorkflow(root, { title: "Plain title", slug })).rejects.toThrow(/--slug/u);
+  });
+
+  it("still derives the slug from an ASCII title", async () => {
+    const root = await project();
+
+    expect((await initTaskWorkflow(root, { title: "Plain Title" })).id).toMatch(/-plain-title$/u);
+  });
+});
+
+describe("--slug flag ownership", () => {
+  it("belongs to --init only", () => {
+    expect(() => assertFlagGroups("init", { slug: "x" })).not.toThrow();
+    expect(() => assertFlagGroups("inspect", { slug: "x" })).toThrow(/--slug requires workflow --init/u);
   });
 });

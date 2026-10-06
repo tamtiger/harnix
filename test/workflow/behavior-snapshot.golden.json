@@ -1079,6 +1079,7 @@
             "--replace-check",
             "--run-check",
             "--save",
+            "--set-baseline",
             "--set-check",
             "--set-paths",
             "--transition"
@@ -1237,12 +1238,14 @@
           {
             "id": "20260929-090000-golden-one",
             "status": "completed",
+            "mode": "lite",
             "title": "Task 20260929-090000-golden-one",
             "goal": "Golden goal"
           },
           {
             "id": "20260929-090100-golden-two",
             "status": "cancelled",
+            "mode": "lite",
             "title": "Task 20260929-090100-golden-two",
             "goal": "Golden goal"
           }
@@ -1266,7 +1269,7 @@
     "tasks/20260929-090200-golden-full/review.md": "# Task 20260929-090200-golden-full\n\n- **ID:** 20260929-090200-golden-full\n- **Mode:** full\n- **Status:** ready/ready\n- **Created:** 2026-09-29 09:00:00 +07:00\n- **Updated:** 2026-09-29 09:14:00 +07:00\n\n**Verdict:** PENDING — 0/1 acceptance criteria met\n\n## Goal\n\nGolden goal\n\n## Non-goals\n\n- No extras\n\n## Artifacts\n\n- [`prd.md`](./prd.md) — outcome, scope, acceptance criteria narrative.\n- [`plan.md`](./plan.md) — implementation checklist and slices.\n\n## Acceptance criteria\n\n- `ac-one` (pending): One, revised\n\n## Required checks\n\n- `check` (focused): Unit tests — chưa chạy / not yet run\n\n## Evidence\n\n- skipped (2026-09-29 09:13:00 +07:00): Task contract revised at persisted replan: Golden revision reason for the snapshot.\n",
     "tasks/20260929-090200-golden-full/task.json": "{\n  \"generator\": \"harnix\",\n  \"schemaVersion\": 3,\n  \"id\": \"20260929-090200-golden-full\",\n  \"title\": \"Task 20260929-090200-golden-full\",\n  \"mode\": \"full\",\n  \"status\": \"ready\",\n  \"checkpoint\": \"ready\",\n  \"goal\": \"Golden goal\",\n  \"nonGoals\": [\n    \"No extras\"\n  ],\n  \"acceptanceCriteria\": [\n    {\n      \"id\": \"ac-one\",\n      \"text\": \"One, revised\",\n      \"status\": \"pending\",\n      \"evidenceIds\": []\n    }\n  ],\n  \"relevantPaths\": [\n    \"src/a.ts\"\n  ],\n  \"relevantSpecs\": [],\n  \"validationPlan\": [\n    {\n      \"id\": \"check\",\n      \"description\": \"Unit tests\",\n      \"scope\": \"focused\",\n      \"required\": true,\n      \"command\": \"pnpm test\",\n      \"criterionIds\": [\n        \"ac-one\"\n      ],\n      \"inputs\": [\n        \"src/**\"\n      ]\n    }\n  ],\n  \"evidence\": [\n    {\n      \"id\": \"task-contract-revision-01\",\n      \"recordedAt\": \"2026-09-29T09:13:00.000+07:00\",\n      \"result\": \"skipped\",\n      \"summary\": \"Task contract revised at persisted replan: Golden revision reason for the snapshot.\",\n      \"artifactPaths\": [\n        \".harnix/tasks/20260929-090200-golden-full/task.json\"\n      ]\n    }\n  ],\n  \"createdAt\": \"2026-09-29T09:00:00.000+07:00\",\n  \"updatedAt\": \"2026-09-29T09:14:00.000+07:00\"\n}\n",
     "epics/golden-epic.json": "{\n  \"generator\": \"harnix\",\n  \"schemaVersion\": 1,\n  \"id\": \"golden-epic\",\n  \"title\": \"Golden epic\",\n  \"goal\": \"Epic goal\",\n  \"nonGoals\": [\n    \"Nothing else\"\n  ],\n  \"createdAt\": \"2026-09-29T09:00:00.000+07:00\",\n  \"updatedAt\": \"2026-09-29T09:00:00.000+07:00\"\n}\n",
-    "epics/golden-epic.md": "# Epic: Golden epic\n\nEpic goal\n\n- **Cập nhật:** 2026-09-29 09:00:00 +07:00\n\n## Non-goals\n\n- Nothing else\n\n## Next task\n\nKhông còn task nào chưa hoàn tất.\n\n## Members (2 tasks)\n\n| # | Task ID | Title | Status |\n|---|---------|-------|--------|\n| 1 | `20260929-090000-golden-one` | Task 20260929-090000-golden-one | `completed` |\n| 2 | `20260929-090100-golden-two` | Task 20260929-090100-golden-two | `cancelled` |\n\n## Task Overview & Scope\n\n### 1. `20260929-090000-golden-one` — Task 20260929-090000-golden-one\n\n- **Trạng thái:** `completed`\n- **Mục tiêu:** Golden goal\n- **Tiêu chí nghiệm thu:** 1 tiêu chí\n\n### 2. `20260929-090100-golden-two` — Task 20260929-090100-golden-two\n\n- **Trạng thái:** `cancelled`\n- **Mục tiêu:** Golden goal\n- **Tiêu chí nghiệm thu:** 1 tiêu chí\n",
+    "epics/golden-epic.md": "# Epic: Golden epic\n\nEpic goal\n\n- **Cập nhật:** 2026-09-29 09:00:00 +07:00\n\n## Non-goals\n\n- Nothing else\n\n## Next task\n\nKhông còn task nào chưa hoàn tất.\n\n## Members (2 tasks)\n\n| # | Task ID | Title | Mode | Status |\n|---|---------|-------|------|--------|\n| 1 | `20260929-090000-golden-one` | Task 20260929-090000-golden-one | `lite` | `completed` |\n| 2 | `20260929-090100-golden-two` | Task 20260929-090100-golden-two | `lite` | `cancelled` |\n\n## Task Overview & Scope\n\n### 1. `20260929-090000-golden-one` — Task 20260929-090000-golden-one\n\n- **Trạng thái:** `completed`\n- **Mục tiêu:** Golden goal\n- **Tiêu chí nghiệm thu:** 1 tiêu chí\n\n### 2. `20260929-090100-golden-two` — Task 20260929-090100-golden-two\n\n- **Trạng thái:** `cancelled`\n- **Mục tiêu:** Golden goal\n- **Tiêu chí nghiệm thu:** 1 tiêu chí\n",
     "workspace/tam/journal/2026-09-29.jsonl": "{\"generator\":\"harnix\",\"schemaVersion\":1,\"id\":\"20260929-090000-golden-one-completion\",\"recordedAt\":\"2026-09-29T09:09:00.000+07:00\",\"developer\":\"tam\",\"taskId\":\"20260929-090000-golden-one\",\"kind\":\"completion\",\"summary\":\"Completed: Task 20260929-090000-golden-one\",\"evidenceIds\":[\"ev-check\"]}\n{\"generator\":\"harnix\",\"schemaVersion\":1,\"id\":\"20260929-090100-golden-two-cancellation\",\"recordedAt\":\"2026-09-29T09:10:00.000+07:00\",\"developer\":\"tam\",\"taskId\":\"20260929-090100-golden-two\",\"kind\":\"cancellation\",\"summary\":\"Cancelled: Task 20260929-090100-golden-two — Golden cancellation\",\"evidenceIds\":[]}\n"
   }
 }

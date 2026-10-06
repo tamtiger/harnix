@@ -132,6 +132,7 @@ harnix mem [query]
 harnix status
 harnix tasks [--limit <1..100>] [--status <TaskStatus>]
 harnix epic [<epic-id>] [--limit <1..100>] [--brief]
+# hidden: harnix workflow --epic-order <epic-id> <task-id>...   # optional explicit run order of an epic (members in order first, the rest by ID)
 harnix resume <task-id> [--dry-run]
 harnix context-report --platform <kiro|antigravity|codex|claude|opencode|cursor> [--limit <1..50>]
 harnix status --explain [--limit <1..50>]

@@ -231,7 +231,40 @@ function goldenUpdateRequested(env: Readonly<Record<string, string | undefined>>
   return true;
 }
 
+type Leaves = Map<string, string>;
+
+/** Every leaf of a JSON value as `path -> serialized value`, so two snapshots compare path by path. */
+function leaves(value: unknown, path = "", into: Leaves = new Map()): Leaves {
+  if (typeof value === "object" && value !== null) {
+    for (const [key, child] of Object.entries(value)) leaves(child, `${path}/${key}`, into);
+    if (Object.keys(value).length === 0) into.set(path, JSON.stringify(value));
+  } else into.set(path, JSON.stringify(value));
+  return into;
+}
+
+/** Paths whose value differs between the golden and a new snapshot (added, removed or changed). */
+export function changedPaths(golden: unknown, actual: unknown): string[] {
+  const before = leaves(golden);
+  const after = leaves(actual);
+  return [...new Set([...before.keys(), ...after.keys()])].filter((key) => before.get(key) !== after.get(key)).sort();
+}
+
+/** `error` fields the new snapshot has and the golden lacks: a scenario that started failing, not a reviewed change. */
+export function addedErrorPaths(golden: unknown, actual: unknown): string[] {
+  const before = leaves(golden);
+  return [...leaves(actual).keys()].filter((key) => key.endsWith("/error") && !before.has(key)).sort();
+}
+
 describe("behavior snapshot", () => {
+  it("lists changed paths and the error fields a regenerated golden would add", () => {
+    const golden = { a: { ok: 1 }, b: { error: "known" } };
+    const actual = { a: { ok: 2, error: "new failure" }, b: { error: "known" }, c: 1 };
+
+    expect(changedPaths(golden, actual)).toEqual(["/a/error", "/a/ok", "/c"]);
+    expect(addedErrorPaths(golden, actual)).toEqual(["/a/error"]);
+    expect(addedErrorPaths(golden, golden)).toEqual([]);
+  });
+
   it("refuses to regenerate the golden in CI", () => {
     expect(goldenUpdateRequested({})).toBe(false);
     expect(goldenUpdateRequested({ HARNIX_UPDATE_GOLDEN: "1" })).toBe(true);

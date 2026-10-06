@@ -6,6 +6,7 @@ import { archiveTask, resolveActiveTask, saveTask, transitionTask, type TaskReco
 import { nowInstant } from "src/utils/clock.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertTaskReadyForFinishing, completionEvidenceIds } from "./completion.js";
+import { authorizedRedBaseline } from "./suite-gate.js";
 import { currentInstant, journalFilePath, refreshLinkedEpicMarkdown } from "./support.js";
 import { withWorkflowLock } from "./workflow-lock.js";
 
@@ -25,6 +26,8 @@ export interface FinishLearningReport {
 export interface FinishReport {
   task: TaskRecord;
   learning: FinishLearningReport;
+  /** Required checks that finished red from before the task under an authorized baseline. */
+  baselineAuthorized: string[];
 }
 
 export async function finishWorkflow(root: string, injectedNow?: string): Promise<TaskRecord> {
@@ -59,6 +62,9 @@ async function finishLocked(root: string, harnixRoot: string, injectedNow: strin
   const hint = learningHint(finished, captured);
   return {
     task: finished,
+    baselineAuthorized: finished.validationPlan
+      .filter((check) => authorizedRedBaseline(finished, check))
+      .map((check) => check.id),
     learning: { notes: reviewNotes(finished).length, captured, ...(hint === undefined ? {} : { hint }) },
   };
 }

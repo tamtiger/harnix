@@ -7,6 +7,7 @@ import {
   loadEpicOrThrow,
   type EpicRecord,
 } from "src/core/epics/epic.js";
+import { orderEpicMembers } from "src/core/epics/order.js";
 
 export interface PublicEpicListResult {
   readonly generator: "harnix";
@@ -34,6 +35,7 @@ export interface EpicSummary {
 export interface EpicTaskMember {
   readonly id: string;
   readonly status: string;
+  readonly mode?: string;
   readonly title?: string;
   readonly goal?: string;
 }
@@ -76,12 +78,15 @@ export async function detailPublicEpic(
 ): Promise<PublicEpicDetailResult | PublicEpicBriefResult> {
   const harnixRoot = await resolveSafeHarnixPath(root);
   const epic = await loadEpicOrThrow(harnixRoot, epicId);
-  const members = (await collectEpicMembers(harnixRoot, epicId)).map(({ id, status, title, goal }) => ({
-    id,
-    status,
-    title,
-    goal,
-  }));
+  const members = orderEpicMembers(await collectEpicMembers(harnixRoot, epicId), epic.order).map(
+    ({ id, status, mode, title, goal }) => ({
+      id,
+      status,
+      mode,
+      title,
+      goal,
+    }),
+  );
   const nextTask = nextEpicMember(members);
   if (!brief) return { generator: "harnix", schemaVersion: 1, epic, members, nextTask };
   const counts: Record<string, number> = {};

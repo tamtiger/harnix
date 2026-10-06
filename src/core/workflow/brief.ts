@@ -27,6 +27,7 @@ export const BRIEF_ACTIONS: ReadonlySet<string> = new Set([
   "addRisk",
   "setPaths",
   "replaceCheck",
+  "setBaseline",
 ]);
 
 /** The command-line flag of a workflow action: `runCheck` is `--run-check`. */

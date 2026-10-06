@@ -8,6 +8,8 @@ import {
   setCheckWorkflow,
   setPathsWorkflow,
 } from "src/core/workflow/plan-edit.js";
+import { appendEvidenceFlagsWorkflow } from "src/core/workflow/evidence-flags.js";
+import { transitionWorkflow } from "src/core/workflow/transition.js";
 import { replaceCheckWorkflow } from "src/core/workflow/replace-check.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -283,5 +285,55 @@ describe("workflow plan-edit transports", () => {
     );
     const newCheck = replaced.validationPlan.find((c) => c.id === "core-test-v2");
     expect(newCheck?.cwd).toBe("sub-core-v2");
+  });
+});
+
+describe("workflow obligation edits while verifying", () => {
+  async function verifyingWithPass(root: string) {
+    await implementingTaskV3(root);
+    await appendEvidenceFlagsWorkflow(
+      root,
+      { check: "check", result: "pass", exitCode: "0", summary: "ok" },
+      "2026-08-13T00:10:00.000Z",
+    );
+    await transitionWorkflow(root, "verifying", "verifying", "2026-08-13T00:20:00.000Z");
+  }
+
+  it("returns to verifying/verifying after a new check, keeping the passed evidence", async () => {
+    const root = await temporaryRepository();
+    await verifyingWithPass(root);
+
+    const saved = await setCheckWorkflow(
+      root,
+      { id: "extra", description: "d", scope: "focused", criteria: ["a"], inputs: ["src/**"] },
+      { reason: REASON },
+      "2026-08-13T00:30:00.000Z",
+    );
+
+    expect([saved.status, saved.checkpoint]).toEqual(["verifying", "verifying"]);
+    expect(saved.validationPlan.some((check) => check.id === "extra")).toBe(true);
+    expect(saved.evidence.filter((item) => item.checkId === "check" && item.result === "pass")).toHaveLength(1);
+  });
+
+  it("returns to verifying/verifying after a new criterion and refuses to touch the passed check", async () => {
+    const root = await temporaryRepository();
+    await verifyingWithPass(root);
+
+    await setCheckWorkflow(
+      root,
+      { id: "extra", description: "d", scope: "focused", criteria: ["a"], inputs: ["src/**"] },
+      { reason: REASON },
+      "2026-08-13T00:30:00.000Z",
+    );
+    const added = await addCriterionWorkflow(
+      root,
+      { id: "b", text: "Tiêu chí bổ sung", checks: ["extra"] },
+      { reason: REASON },
+      "2026-08-13T00:31:00.000Z",
+    );
+    expect([added.status, added.checkpoint]).toEqual(["verifying", "verifying"]);
+    await expect(
+      setCheckWorkflow(root, { id: "check", command: "pnpm other" }, { reason: REASON }, "2026-08-13T00:32:00.000Z"),
+    ).rejects.toThrow(/after passing evidence/u);
   });
 });

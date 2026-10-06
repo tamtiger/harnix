@@ -2,6 +2,7 @@ import { access, mkdir, readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { isIsoTimestamp, isRecord, unknownFieldsMessage } from "src/core/tasks/task.js";
 import { loadTask } from "src/core/tasks/task.js";
+import { orderEpicMembers, validateEpicOrder } from "./order.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { formatDisplay } from "src/utils/clock.js";
 import { readProjectTimezone } from "src/core/config/config.js";
@@ -19,6 +20,8 @@ export interface EpicRecord {
   title: string;
   goal: string;
   nonGoals?: string[];
+  /** Optional explicit run order (task ids); members not listed follow by ascending id. */
+  order?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -30,6 +33,7 @@ const EPIC_RECORD_FIELDS = new Set<string>([
   "title",
   "goal",
   "nonGoals",
+  "order",
   "createdAt",
   "updatedAt",
 ]);
@@ -66,6 +70,8 @@ export function validateEpic(value: unknown): EpicRecord {
     throw new EpicValidationError("Epic nonGoals must be a string array.");
   }
 
+  assertEpicOrder(value.order);
+
   if (!isIsoTimestamp(String(value.createdAt)) || !isIsoTimestamp(String(value.updatedAt))) {
     throw new EpicValidationError("Epic timestamp is invalid.");
   }
@@ -75,6 +81,15 @@ export function validateEpic(value: unknown): EpicRecord {
   }
 
   return value as unknown as EpicRecord;
+}
+
+function assertEpicOrder(order: unknown): void {
+  if (order === undefined) return;
+  try {
+    validateEpicOrder(order);
+  } catch (error: unknown) {
+    throw new EpicValidationError(error instanceof Error ? error.message : "Epic order is invalid.");
+  }
 }
 
 // Helpers (mirrored from task.ts pattern).
@@ -94,6 +109,7 @@ export const LEGACY_EPICS_DIRECTORY = "roadmaps";
 export interface EpicMember {
   id: string;
   status: string;
+  mode: string;
   title: string;
   goal: string;
   acceptanceCriteriaCount: number;
@@ -150,6 +166,7 @@ export async function collectEpicMembers(harnixRoot: string, epicId: string): Pr
         members.push({
           id: entry.name,
           status: task.status,
+          mode: task.mode,
           title: task.title,
           goal: task.goal,
           acceptanceCriteriaCount: task.acceptanceCriteria.length,
@@ -199,7 +216,7 @@ export async function loadEpicRecord(root: string, epicId: string): Promise<Epic
 export async function renderEpicMarkdown(root: string, epicId: string, epic?: EpicRecord): Promise<void> {
   const harnixRoot = join(root, ".harnix");
   const timezone = await readProjectTimezone(harnixRoot);
-  const members = await collectEpicMembers(harnixRoot, epicId);
+  const members = orderEpicMembers(await collectEpicMembers(harnixRoot, epicId), epic?.order);
   const next = nextEpicMember(members);
 
   const sections: string[] = [`# Epic: ${epic?.title || epicId}`];
@@ -224,14 +241,15 @@ export async function renderEpicMarkdown(root: string, epicId: string, epic?: Ep
     sections.push("## Members (0 tasks)\n\nNo task members yet.");
   } else {
     const table = members.map(
-      (member, index) => `| ${index + 1} | \`${member.id}\` | ${member.title} | \`${member.status}\` |`,
+      (member, index) =>
+        `| ${index + 1} | \`${member.id}\` | ${member.title} | \`${member.mode}\` | \`${member.status}\` |`,
     );
     sections.push(
       [
         `## Members (${members.length} task${members.length === 1 ? "" : "s"})`,
         "",
-        "| # | Task ID | Title | Status |",
-        "|---|---------|-------|--------|",
+        "| # | Task ID | Title | Mode | Status |",
+        "|---|---------|-------|------|--------|",
         ...table,
       ].join("\n"),
     );

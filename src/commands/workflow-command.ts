@@ -1,5 +1,6 @@
 import type { Command } from "commander";
 
+import { withTargetTask } from "src/commands/internal-workflow.js";
 import { WORKFLOW_HANDLERS, type Handler, type WorkflowCommandOptions } from "src/commands/workflow-handlers.js";
 import { assertCommandShape, assertFlagGroups, selectAction, type WorkflowFlags } from "src/commands/workflow-flags.js";
 import { resolveProjectRoot } from "src/utils/paths.js";
@@ -23,6 +24,11 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--preflight", "Inspect bounded workflow routing metadata")
     .option("--init", "Initialize a new task record with boilerplate obligations")
     .option("--title <title>", "Task title for --init")
+    .option(
+      "--task <task-id>",
+      "Edit this unfinished task instead of the active one (edit commands only; the active pointer stays)",
+    )
+    .option("--slug <slug>", "English kebab-case slug of the task ID for --init (required for a non-ASCII title)")
     .option("--mode <mode>", "Task mode for --init: lite or full")
     .option("--goal <goal>", "Task goal for --init")
     .option("--save", "Persist workflow state from stdin")
@@ -42,6 +48,13 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--migrate", "Migrate the active legacy task to schema v3")
     .option("--run-check <id>", "Run the command after -- against a check and record the outcome")
     .option("--set-check <id>", "Add or update one validation check of the active task")
+    .option(
+      "--set-baseline <id>",
+      "Record the authorized baseline of one check (requires --result, --classification, --authorized-by, --scope)",
+    )
+    .option("--classification <kind>", "Baseline classification: pre-existing, introduced, environment or unknown")
+    .option("--authorized-by <who>", "Who authorized the baseline for --set-baseline")
+    .option("--epic-order <ids...>", "Set an epic run order: <epic-id> then the task ids (none clears it)")
     .option("--replace-check <ids...>", "Replace a failed check with a new check atomically")
     .option("--add-criterion <id>", "Add one acceptance criterion (requires --text)")
     .option("--add-decision <id>", "Record one decision (requires --text and --rationale)")
@@ -83,7 +96,9 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
       assertCommandShape(action, flags, operands);
       assertFlagGroups(action, flags);
       const root = await resolveProjectRoot(process.cwd());
-      const result = await (WORKFLOW_HANDLERS[action] as Handler)({ root, flags, operands, options });
+      const result = await withTargetTask(flags.task, () =>
+        (WORKFLOW_HANDLERS[action] as Handler)({ root, flags, operands, options }),
+      );
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
 }

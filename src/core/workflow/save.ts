@@ -29,6 +29,7 @@ import { assertSchemaEvolution } from "./migration.js";
 import { isAppliedContractRevisionReplay, preserveObligations } from "./obligations.js";
 import { assertReadyRequirements } from "./ready.js";
 import { assertNewEvidenceRetryAllowed } from "./retry-guard.js";
+import { resolveEditableTask, targetTaskId } from "./target-task.js";
 import { assertTextIntegrity } from "./text-integrity.js";
 import { withWorkflowLock } from "./workflow-lock.js";
 import {
@@ -62,8 +63,10 @@ async function saveWorkflowLocked(
   envelope: WorkflowSaveEnvelope,
   initialCandidate: TaskRecord,
 ): Promise<TaskRecord> {
-  const active = await resolveActiveTask(harnixRoot);
   const existing = await loadExistingTask(harnixRoot, initialCandidate.id);
+  // With --task the targeted task stands in for the active one, so the pointer is neither read nor written.
+  const active =
+    targetTaskId() === undefined ? await resolveActiveTask(harnixRoot) : await resolveEditableTask(harnixRoot);
   const context: SaveContext = { root, harnixRoot, envelope, active, existing };
 
   if (active && active.id !== initialCandidate.id) throw new Error("Workflow save may update only the active task.");

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { appendEvidenceFlagsWorkflow } from "src/core/workflow/evidence-flags.js";
 import { markCriteriaMetWorkflow } from "src/core/workflow/criterion.js";
+import { setBaselineWorkflow } from "src/core/workflow/baseline.js";
+import { setCheckWorkflow } from "src/core/workflow/plan-edit.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { buildCheck, buildCriterion } from "test/support/builders.js";
@@ -109,5 +111,32 @@ describe("workflow criterion transport", () => {
     const saved = await markCriteriaMetWorkflow(root, { criterionIds: ["a", "b"] }, NOW);
     expect(saved.acceptanceCriteria.map((criterion) => criterion.status)).toEqual(["met", "met"]);
     expect(saved.acceptanceCriteria[1]?.evidenceIds).toEqual(["ev-check-1", "ev-second-1"]);
+  });
+});
+
+describe("workflow criterion transport with an authorized red baseline", () => {
+  it("marks a criterion met from the focused pass and skips the red baselined check", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    await setCheckWorkflow(
+      root,
+      { id: "focused", description: "d", scope: "focused", criteria: ["a"], inputs: ["src/**/*.ts"] },
+      { reason: "Thêm check tập trung làm bằng chứng" },
+      "2026-08-13T00:05:00.000Z",
+    );
+    const run = (check: string, result: string, exitCode: string, at: string) =>
+      appendEvidenceFlagsWorkflow(root, { check, result, exitCode, summary: "run" }, at);
+    await run("check", "fail", "1", "2026-08-13T00:10:00.000Z");
+    await run("focused", "pass", "0", "2026-08-13T00:11:00.000Z");
+    await expect(markCriteriaMetWorkflow(root, { criterionIds: ["a"] }, NOW)).rejects.toThrow(/fresh passing/u);
+
+    await setBaselineWorkflow(
+      root,
+      { checkId: "check", result: "fail", classification: "pre-existing", authorizedBy: "user", scope: "suite" },
+      "2026-08-13T00:12:00.000Z",
+    );
+    const saved = await markCriteriaMetWorkflow(root, { criterionIds: ["a"] }, NOW);
+
+    expect(saved.acceptanceCriteria[0]).toMatchObject({ status: "met", evidenceIds: ["ev-focused-1"] });
   });
 });

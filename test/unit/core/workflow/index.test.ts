@@ -36,7 +36,9 @@ describe("workflow index", () => {
       "routeWorkflow",
       "runCheckWorkflow",
       "saveWorkflow",
+      "setBaselineWorkflow",
       "setCheckWorkflow",
+      "setEpicOrderWorkflow",
       "setPathsWorkflow",
       "shouldReassessArchitecture",
       "shouldResearch",
@@ -47,6 +49,7 @@ describe("workflow index", () => {
       "validateWorkflowBatchEnvelope",
       "verificationRetryDisposition",
       "verificationStages",
+      "withTargetTask",
       "workflowEnvelopeSchema",
     ]);
   });

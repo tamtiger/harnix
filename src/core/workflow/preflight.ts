@@ -5,6 +5,8 @@ import { inspectRequiredChecks, type RequiredCheckState } from "src/core/verific
 import { formatInstant, idPrefix } from "src/utils/clock.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { readManifest } from "src/core/managed/project-files.js";
+import { detectVersionSkew, skewMessage, type VersionSkew } from "src/core/versions/skew.js";
 import { verificationRetryDisposition } from "./completion.js";
 import { stageOwnerFor } from "./routing.js";
 import type { LearningSummaryItem } from "src/core/journal/learning-summary.js";
@@ -23,6 +25,8 @@ export interface WorkflowPreflightResultV1 {
   clock: { timezone: string; now: string; idPrefix: string };
   /** Redacted, bounded notes from earlier tasks (at most 5); the source for platforms without hooks. */
   learning: LearningSummaryItem[];
+  /** Present only when the running CLI is older than the version recorded in the project manifest. */
+  versionSkew?: string;
 }
 
 type RequiredChecks = WorkflowPreflightResultV1["requiredChecks"];
@@ -36,9 +40,28 @@ function sortRequiredChecks(requiredChecks: RequiredChecks): void {
 }
 
 /** Learning notes help planning only, so every other stage skips them and the extra tokens. */
-export async function preflightWorkflow(root: string, now = Date.now()): Promise<WorkflowPreflightResultV1> {
-  const result = await routePreflight(root, now);
-  return result.nextStage === "plan" ? { ...result, learning: await projectLearningSummary(root, now) } : result;
+export async function preflightWorkflow(
+  root: string,
+  now = Date.now(),
+  cliVersion?: string,
+): Promise<WorkflowPreflightResultV1> {
+  const routed = await routePreflight(root, now);
+  const result =
+    routed.nextStage === "plan" ? { ...routed, learning: await projectLearningSummary(root, now) } : routed;
+  const skew = cliVersion === undefined ? undefined : await recordedSkew(root, cliVersion);
+  return skew === undefined ? result : { ...result, versionSkew: skewMessage(skew) };
+}
+
+/** The manifest is read only to compare versions; an unreadable one just means no warning. */
+async function recordedSkew(root: string, cliVersion: string): Promise<VersionSkew | undefined> {
+  try {
+    return detectVersionSkew(
+      await readManifest(await resolveSafeHarnixPath(root, ".template-hashes.json")),
+      cliVersion,
+    );
+  } catch {
+    return undefined;
+  }
 }
 
 async function routePreflight(root: string, now: number): Promise<WorkflowPreflightResultV1> {

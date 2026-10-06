@@ -160,7 +160,7 @@ describe("agent persistence guidance", () => {
     expect(workflowTemplate).toContain("harnix context --platform <p>");
     expect(workflowTemplate).toContain("harnix context-report --platform <p>");
     expect(plan).toContain("later idPrefix");
-    expect(plan).toContain("harnix pause");
-    expect(plan).toContain("harnix resume <task-id>");
+    expect(plan).toContain("--task <task-id>");
+    expect(plan).not.toContain("harnix pause");
   });
 });

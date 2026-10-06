@@ -22,11 +22,17 @@ export interface WorkflowFlags {
   criterion?: string;
   runCheck?: string;
   setCheck?: string;
+  setBaseline?: string;
+  classification?: string;
+  authorizedBy?: string;
   replaceCheck?: string | string[];
+  epicOrder?: string | string[];
   addCriterion?: string;
   addDecision?: string;
   addRisk?: string;
   title?: string;
+  task?: string;
+  slug?: string;
   mode?: string;
   goal?: string;
   check?: string;
@@ -73,7 +79,9 @@ const VALUE_ACTIONS = [
   "criterion",
   "runCheck",
   "setCheck",
+  "setBaseline",
   "replaceCheck",
+  "epicOrder",
   "addCriterion",
   "addDecision",
   "addRisk",
@@ -88,12 +96,38 @@ interface FlagOwner {
 
 const listed = (value: readonly string[] | undefined): boolean => (value?.length ?? 0) > 0;
 
+const baselineOwner = (name: string, pick: (flags: WorkflowFlags) => string | undefined): FlagOwner => ({
+  name,
+  isSet: (f) => pick(f) !== undefined,
+  actions: ["setBaseline"],
+  hint: "workflow --set-baseline",
+});
+
+const initOwner = (name: string, pick: (flags: WorkflowFlags) => string | undefined): FlagOwner => ({
+  name,
+  isSet: (f) => pick(f) !== undefined,
+  actions: ["init"],
+  hint: "workflow --init",
+});
+
+const EDIT_ACTIONS = ["setCheck", "addCriterion", "setPaths", "addDecision", "addRisk", "batch"];
+const taskOwner: FlagOwner = {
+  name: "--task",
+  isSet: (f) => f.task !== undefined,
+  actions: EDIT_ACTIONS,
+  hint: "workflow --set-check, --add-criterion, --set-paths, --add-decision, --add-risk or --batch (state changes, evidence and finish act only on the active task)",
+};
+
 /** Flags that only make sense with specific actions; anything else is rejected before any state is read. */
 const FLAG_OWNERS: readonly FlagOwner[] = [
-  { name: "--result", isSet: (f) => f.result !== undefined, actions: ["evidence"], hint: "workflow --evidence" },
-  { name: "--exit-code", isSet: (f) => f.exitCode !== undefined, actions: ["evidence"], hint: "workflow --evidence" },
-  { name: "--digest", isSet: (f) => f.digest !== undefined, actions: ["evidence"], hint: "workflow --evidence" },
-  { name: "--artifact", isSet: (f) => listed(f.artifact), actions: ["evidence"], hint: "workflow --evidence" },
+  {
+    name: "--result",
+    isSet: (f) => f.result !== undefined,
+    actions: ["evidence", "setBaseline"],
+    hint: "workflow --evidence or --set-baseline",
+  },
+  baselineOwner("--classification", (f) => f.classification),
+  baselineOwner("--authorized-by", (f) => f.authorizedBy),
   {
     name: "--summary",
     isSet: (f) => f.summary !== undefined,
@@ -122,8 +156,8 @@ const FLAG_OWNERS: readonly FlagOwner[] = [
   {
     name: "--scope",
     isSet: (f) => f.scope !== undefined,
-    actions: ["setCheck", "replaceCheck"],
-    hint: "workflow --set-check or --replace-check",
+    actions: ["setCheck", "replaceCheck", "setBaseline"],
+    hint: "workflow --set-check, --replace-check or --set-baseline",
   },
   {
     name: "--required/--no-required",
@@ -162,24 +196,11 @@ const FLAG_OWNERS: readonly FlagOwner[] = [
     hint: "workflow --add-decision",
   },
   { name: "--severity", isSet: (f) => f.severity !== undefined, actions: ["addRisk"], hint: "workflow --add-risk" },
-  {
-    name: "--title",
-    isSet: (f) => f.title !== undefined,
-    actions: ["init"],
-    hint: "workflow --init",
-  },
-  {
-    name: "--mode",
-    isSet: (f) => f.mode !== undefined,
-    actions: ["init"],
-    hint: "workflow --init",
-  },
-  {
-    name: "--goal",
-    isSet: (f) => f.goal !== undefined,
-    actions: ["init"],
-    hint: "workflow --init",
-  },
+  taskOwner,
+  initOwner("--title", (f) => f.title),
+  initOwner("--slug", (f) => f.slug),
+  initOwner("--mode", (f) => f.mode),
+  initOwner("--goal", (f) => f.goal),
   {
     name: "--relevant-path",
     isSet: (f) => listed(f.relevantPath),
@@ -204,24 +225,14 @@ const FLAG_OWNERS: readonly FlagOwner[] = [
     actions: ["setCheck", "replaceCheck", "runCheck"],
     hint: "workflow --set-check, --replace-check or --run-check",
   },
-  {
-    name: "--epic",
-    isSet: (f) => f.epic !== undefined,
-    actions: ["init"],
-    hint: "workflow --init",
-  },
+  initOwner("--epic", (f) => f.epic),
   {
     name: "--reviewed",
     isSet: (f) => f.reviewed === true,
     actions: ["transition"],
     hint: "workflow --transition",
   },
-  {
-    name: "--follow-up",
-    isSet: (f) => f.followUp !== undefined,
-    actions: ["init"],
-    hint: "workflow --init",
-  },
+  initOwner("--follow-up", (f) => f.followUp),
 ];
 
 export function selectAction(flags: WorkflowFlags): string {
@@ -230,7 +241,7 @@ export function selectAction(flags: WorkflowFlags): string {
   const [only] = selected;
   if (selected.length !== 1 || only === undefined)
     throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths, --schema, --snapshot, --finish, --cancel, or --learn.",
+      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, or --learn.",
     );
   return only;
 }
@@ -278,6 +289,13 @@ export function assertFlagGroups(action: string, flags: WorkflowFlags): void {
 }
 
 function assertNoteFlags(action: string, flags: WorkflowFlags): void {
+  if (action === "epicOrder" && [flags.epicOrder].flat().length === 0)
+    throw new Error("workflow --epic-order requires <epic-id> followed by the task ids in run order.");
+  if (
+    action === "setBaseline" &&
+    [flags.result, flags.classification, flags.authorizedBy, flags.scope].includes(undefined)
+  )
+    throw new Error("workflow --set-baseline requires --result, --classification, --authorized-by and --scope.");
   if (action === "addDecision" && (flags.text === undefined || flags.rationale === undefined))
     throw new Error("workflow --add-decision requires --text and --rationale.");
   if (action === "addRisk" && flags.text === undefined) throw new Error("workflow --add-risk requires --text.");

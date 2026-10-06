@@ -175,3 +175,51 @@ describe("workflow --batch envelope", () => {
     await expect(batchWorkflow(root, {})).rejects.toThrow(/active task/u);
   });
 });
+
+describe("workflow --batch cross references", () => {
+  const check = { description: "c", command: "pnpm test", scope: "focused", inputs: ["src/**"] } as const;
+
+  it("accepts a criterion that names a check defined later in the same batch", async () => {
+    const root = await temporaryRepository();
+    await setupPlanningProject(root);
+
+    const task = await batchWorkflow(
+      root,
+      { criteria: [{ id: "c2", text: "Second", checks: ["late"] }], checks: [{ id: "late", ...check }] },
+      NOW,
+    );
+
+    expect(task.validationPlan.find((item) => item.id === "late")?.criterionIds).toEqual(["c2"]);
+  });
+
+  it("accepts a check that names a criterion defined later in the same batch", async () => {
+    const root = await temporaryRepository();
+    await setupPlanningProject(root);
+
+    const task = await batchWorkflow(
+      root,
+      { checks: [{ id: "early", criteria: ["c3"], ...check }], criteria: [{ id: "c3", text: "Third" }] },
+      NOW,
+    );
+
+    expect(task.acceptanceCriteria.some((item) => item.id === "c3")).toBe(true);
+    expect(task.validationPlan.find((item) => item.id === "early")?.criterionIds).toEqual(["c3"]);
+  });
+
+  it("reports every missing reference in one error", async () => {
+    const root = await temporaryRepository();
+    await setupPlanningProject(root);
+
+    await expect(
+      batchWorkflow(
+        root,
+        {
+          criteria: [{ id: "c4", text: "Fourth", checks: ["ghost-check"] }],
+          checks: [{ id: "real", criteria: ["ghost-criterion", "c4"], ...check }],
+        },
+        NOW,
+      ),
+    ).rejects.toThrow(/ghost-check.*ghost-criterion/u);
+    expect(await resolveActiveTask(`${root}/.harnix`)).toMatchObject({ validationPlan: [{ id: "check" }] });
+  });
+});

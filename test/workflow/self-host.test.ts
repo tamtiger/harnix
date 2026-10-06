@@ -19,8 +19,14 @@ describe("repository self-host state", () => {
     const config = parse(await readFile(join(root, ".harnix", "config.yaml"), "utf8")) as { schemaVersion?: number };
     const workflowEntry = manifest.entries.find((entry) => entry.path === ".harnix/workflow.md");
 
-    expect(sha256(workflow)).toBe(sha256(workflowTemplate));
-    expect(workflowEntry).toMatchObject({ generatedHash: sha256(workflowTemplate), generatorVersion: packageVersion });
+    const fix = "run `pnpm selfhost:sync` to regenerate .harnix/workflow.md and its manifest hash";
+    expect(sha256(workflow), `.harnix/workflow.md differs from the template: ${fix}`).toBe(sha256(workflowTemplate));
+    expect(workflowEntry?.generatedHash, `manifest hash differs from the template: ${fix}`).toBe(
+      sha256(workflowTemplate),
+    );
+    expect(workflowEntry?.generatorVersion, `manifest generatorVersion differs from package.json: ${fix}`).toBe(
+      packageVersion,
+    );
     expect(config.schemaVersion).toBe(2);
     await expect(access(join(root, ".harnix", "spec", "guides", "common.md"))).resolves.toBeUndefined();
     await expect(access(join(root, ".harnix", "cache", "repo-map-v1.json"))).resolves.toBeUndefined();

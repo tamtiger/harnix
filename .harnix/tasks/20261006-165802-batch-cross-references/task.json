@@ -4,8 +4,8 @@
   "id": "20261006-165802-batch-cross-references",
   "title": "--batch và --set-check chấp nhận tham chiếu chéo trong cùng một lần gọi",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Tiêu chí và check được khai báo trong cùng một lệnh có thể tham chiếu nhau mà không phụ thuộc thứ tự, vì hiện tại --batch báo coverage incomplete hoặc unknown criterion khi tiêu chí trỏ tới check chưa tồn tại.",
   "nonGoals": [
     "Không nới luật mỗi tiêu chí phải được một check bắt buộc phủ",
@@ -16,26 +16,38 @@
     {
       "id": "ac-1",
       "text": "--batch áp dụng toàn bộ criteria và checks rồi mới validate coverage, nên criteria[].checks trỏ tới check định nghĩa trong cùng batch và checks[].criteria trỏ tới tiêu chí định nghĩa trong cùng batch đều hợp lệ.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-batch-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Lỗi khi tham chiếu thực sự không tồn tại nêu rõ id thiếu và mọi vấn đề độc lập trong một lần báo.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-batch-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "--set-check nhận --criteria chứa tiêu chí vừa thêm trong cùng một --batch mà không cần hai lệnh theo thứ tự cố định; có test hồi quy cho đúng kịch bản Task digest đã gặp.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-batch-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Tài liệu cookbook ghi rõ batch không phụ thuộc thứ tự.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -55,11 +67,77 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-batch",
+      "description": "Batch áp hết rồi validate, lỗi tham chiếu gộp",
+      "command": "pnpm exec vitest run test/unit/core/workflow/batch.test.ts test/unit/core/workflow/batch-apply.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/workflow/batch-apply.ts",
+        "src/core/workflow/batch.ts",
+        "test/unit/core/workflow/batch-apply.test.ts",
+        "test/unit/core/workflow/batch.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Cookbook ghi batch không phụ thuộc thứ tự",
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-batch-1",
+      "checkId": "check-batch",
+      "recordedAt": "2026-10-06T19:45:51.686+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/batch.test.ts test/unit/core/workflow/batch-apply.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f966cd8d24741dd87ad44e9d8de57319cccb13c5f21ee4279aafc4d9f6242809"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T19:45:55.823+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9b878e9f61a62b8b3cbc81039b40308e579f238ed556abc5648f1fc794744613"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T19:46:58.096+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0f31dfe27623506f544f58ef5bee8f5a4d40e204260373348f00f4ca26f4f78e"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T16:58:00.000+07:00",
-  "updatedAt": "2026-10-06T16:58:00.000+07:00"
+  "updatedAt": "2026-10-06T19:47:00.541+07:00",
+  "completedAt": "2026-10-06T19:47:00.541+07:00"
 }

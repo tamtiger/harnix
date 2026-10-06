@@ -4,8 +4,8 @@
   "id": "20261006-144105-id-language-and-epic-mode-column",
   "title": "Chuẩn hóa ngôn ngữ ID/title và thêm cột mode vào danh sách member của epic",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Task ID và Epic ID luôn là slug tiếng Anh, còn title, goal và nội dung hướng người dùng là tiếng Việt có dấu; --init không còn sinh slug tiếng Việt từ title, và epic hiển thị mode (lite/full) của từng member.",
   "nonGoals": [
     "Không đổi tên hay sửa task, epic đã tạo",
@@ -16,26 +16,38 @@
     {
       "id": "ac-1",
       "text": "harnix workflow --init với title có ký tự tiếng Việt (có dấu) mà thiếu --slug báo lỗi nêu rõ phải truyền --slug <english-kebab-case>; --slug hợp lệ tạo ID đúng regex của task, còn title ASCII vẫn tự sinh slug như cũ.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-init-slug-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "harnix epic <epic-id> trả về mode của từng member, và file epic .md có cột Mode trong bảng Members; epic hiện có vẫn hiển thị bình thường.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-mode-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "AGENTS.md, workflow.md và skill harnix-plan (kể cả reference epic) ghi quy ước: ID của task và epic là tiếng Anh, title, goal, tiêu chí là tiếng Việt có dấu.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Epic hiện tại 20261006-141317-workflow-field-feedback được xem xét lại và bản ghi epic cập nhật những gì còn thiếu (mục tiêu, non-goals) qua đường lệnh hợp lệ.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -55,11 +67,114 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-init-slug",
+      "description": "--init --slug và lỗi khi title có dấu thiếu slug",
+      "command": "pnpm exec vitest run test/unit/core/workflow/init-task.test.ts test/integration/commands/workflow-flags.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/commands/workflow-*.ts",
+        "src/core/workflow/init-task.ts",
+        "test/integration/commands/workflow-flags.test.ts",
+        "test/unit/core/workflow/init-task.test.ts"
+      ]
+    },
+    {
+      "id": "check-epic-mode",
+      "description": "Epic detail và file md hiển thị mode của member",
+      "command": "pnpm exec vitest run test/unit/core/epics/epic.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/epic.ts",
+        "src/core/epics/epic.ts",
+        "test/unit/core/epics/epic.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Quy ước ngôn ngữ ID/title trong tài liệu và bản ghi epic",
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        ".harnix/epics/20261006-141317-workflow-field-feedback.json",
+        "AGENTS.md",
+        "src/skills/harnix-plan/SKILL.md",
+        "src/skills/harnix-plan/references/epic.md",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-init-slug-1",
+      "checkId": "check-init-slug",
+      "recordedAt": "2026-10-06T19:29:17.619+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/init-task.test.ts test/integration/commands/workflow-flags.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fae07fb6290267612b64dbc6edbe5c14db2415e40e32b148c297aaddae2c5e71"
+    },
+    {
+      "id": "ev-check-epic-mode-1",
+      "checkId": "check-epic-mode",
+      "recordedAt": "2026-10-06T19:29:21.856+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/epics/epic.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "25dc66be7d38488387cec33c53133757ba61e01f57a670d8ab3b45d260b62cc8"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T19:29:26.144+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4e205e5d2eb3dc7a3206b463363cfb766c847c7100ac2d643208a2bf24a1a61d"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T19:30:31.624+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cc69e748467e55d21ff50fac08aca80b9d4be7a2b693054b75b785460aa17845"
+    }
+  ],
+  "relevantPaths": [
+    "src/commands",
+    "src/core/epics",
+    "src/core/workflow"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T14:41:30.000+07:00",
-  "updatedAt": "2026-10-06T14:41:30.000+07:00"
+  "updatedAt": "2026-10-06T19:30:38.189+07:00",
+  "decisions": [
+    {
+      "id": "slug-required-for-accents",
+      "text": "Title có ký tự ngoài ASCII bắt buộc --slug; không đoán ngôn ngữ slug bằng từ điển, chỉ kiểm định dạng.",
+      "rationale": "Bỏ dấu tự động sinh ID tiếng Việt không dấu trái quy ước ID tiếng Anh."
+    }
+  ],
+  "completedAt": "2026-10-06T19:30:38.189+07:00"
 }

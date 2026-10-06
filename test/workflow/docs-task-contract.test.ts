@@ -225,3 +225,155 @@ describe("task contract documentation parity", () => {
     expect(await read("docs/OVERHAUL_DECISIONS.md")).toContain("| D14 |");
   });
 });
+
+describe("baseline and verifying-edit documentation parity", () => {
+  it("documents --set-baseline, the focused proof, the delta decision and the verifying resume", async () => {
+    const surfaces = {
+      "workflow template": workflowTemplate,
+      "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
+      "docs/IMPLEMENTATION_PLAN.md": await read("docs/IMPLEMENTATION_PLAN.md"),
+      "harnix-verify skill": await read("src/skills/harnix-verify/SKILL.md"),
+    };
+    for (const [name, text] of Object.entries(surfaces)) {
+      expect(text, name).toContain("--set-baseline");
+      expect(text, name).toMatch(/pre-existing/u);
+    }
+    for (const name of ["docs/HARNIX_WORKFLOW.md", "docs/IMPLEMENTATION_PLAN.md"] as const) {
+      expect(surfaces[name], name).toMatch(/so sánh delta/u);
+      expect(surfaces[name], name).toContain("verifying/verifying");
+    }
+    expect(surfaces["workflow template"]).toMatch(/does not compare a test delta/u);
+    expect(surfaces["workflow template"]).toContain("verifying/verifying");
+  });
+});
+
+describe("ID language convention documentation parity", () => {
+  it("states that IDs are English with --slug while titles and goals stay Vietnamese", async () => {
+    const english = {
+      "workflow template": workflowTemplate,
+      "harnix-plan skill": await read("src/skills/harnix-plan/SKILL.md"),
+      "harnix-plan epic reference": await read("src/skills/harnix-plan/references/epic.md"),
+    };
+    const vietnamese = {
+      "AGENTS.md": await read("AGENTS.md"),
+      "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
+      "docs/IMPLEMENTATION_PLAN.md": await read("docs/IMPLEMENTATION_PLAN.md"),
+    };
+    for (const [name, text] of Object.entries(english)) expect(text, name).toMatch(/English/u);
+    for (const [name, text] of Object.entries(vietnamese)) expect(text, name).toMatch(/ID[^\n]{0,80}tiếng Anh/u);
+    for (const [name, text] of Object.entries({ ...english, ...vietnamese })) expect(text, name).toContain("--slug");
+  });
+
+  it("records the slug rule in the workflow-field-feedback epic through its goal and non-goals", async () => {
+    const epic = JSON.parse(await read(".harnix/epics/20261006-141317-workflow-field-feedback.json")) as {
+      nonGoals?: string[];
+    };
+
+    expect(epic.nonGoals?.join("\n")).toMatch(/slug tiếng Việt/u);
+  });
+});
+
+describe("release versioning policy documentation parity", () => {
+  it("states the patch, X.Y.0-dev.N and minor rules with the bump owner and timing", async () => {
+    const surfaces = {
+      "workflow template": workflowTemplate,
+      "harnix-implement skill": await read("src/skills/harnix-implement/SKILL.md"),
+      "AGENTS.md": await read("AGENTS.md"),
+    };
+    for (const [name, text] of Object.entries(surfaces)) {
+      expect(text, name).toContain("X.Y.0-dev.N");
+      expect(text, name).toMatch(/minor/u);
+      expect(text, name).toMatch(/major/u);
+    }
+  });
+
+  it("records the version plan of the workflow-field-feedback epic", async () => {
+    const epic = JSON.parse(await read(".harnix/epics/20261006-141317-workflow-field-feedback.json")) as {
+      goal: string;
+    };
+
+    expect(epic.goal).toMatch(/2\.1\.2/u);
+    expect(epic.goal).toMatch(/2\.2\.0-dev\.N/u);
+    expect(epic.goal).toContain("20261006-165805-cli-version-skew-warning");
+  });
+});
+
+describe("self-host sync documentation parity", () => {
+  it("points release preparation at pnpm selfhost:sync and explains the update report", async () => {
+    const surfaces = {
+      "AGENTS.md": await read("AGENTS.md"),
+      "harnix-implement skill": await read("src/skills/harnix-implement/SKILL.md"),
+      "workflow template": workflowTemplate,
+    };
+    for (const [name, text] of Object.entries(surfaces)) expect(text, name).toContain("pnpm selfhost:sync");
+    expect(surfaces["AGENTS.md"]).toMatch(/preserved[^\n]{0,200}unchanged|unchanged[^\n]{0,200}preserved/u);
+  });
+});
+
+describe("fast contract gates documentation parity", () => {
+  it("suggests test:gates as a focused check and documents test:failures", async () => {
+    for (const [name, text] of Object.entries({
+      "workflow template": workflowTemplate,
+      "harnix-plan skill": await read("src/skills/harnix-plan/SKILL.md"),
+    }))
+      expect(text, name).toContain("pnpm run test:gates");
+    const agents = await read("AGENTS.md");
+    expect(agents).toContain("test:gates");
+    expect(agents).toContain("test:failures");
+  });
+});
+
+describe("batch cookbook documentation parity", () => {
+  it("states that --batch items resolve cross references regardless of order", () => {
+    expect(workflowTemplate).toMatch(/--batch[^\n]*order does not matter/u);
+  });
+});
+
+describe("--task targeting documentation parity", () => {
+  it("documents --task for member edits instead of the pause and resume dance", async () => {
+    const epic = await read("src/skills/harnix-plan/references/epic.md");
+    expect(epic).toContain("--task <task-id>");
+    expect(epic).not.toMatch(/run `harnix pause`, then `harnix resume/u);
+    for (const [name, text] of Object.entries({
+      "workflow template": workflowTemplate,
+      "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
+      "docs/IMPLEMENTATION_PLAN.md": await read("docs/IMPLEMENTATION_PLAN.md"),
+    }))
+      expect(text, name).toContain("--task");
+  });
+});
+
+describe("epic order documentation parity", () => {
+  it("documents the order field, --epic-order and the next task rule", async () => {
+    for (const [name, text] of Object.entries({
+      "workflow template": workflowTemplate,
+      "harnix-plan epic reference": await read("src/skills/harnix-plan/references/epic.md"),
+      "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
+      "docs/IMPLEMENTATION_PLAN.md": await read("docs/IMPLEMENTATION_PLAN.md"),
+      "docs/HARNIX_PRD.md": await read("docs/HARNIX_PRD.md"),
+    }))
+      expect(text, name).toContain("--epic-order");
+  });
+});
+
+describe("version skew and release documentation parity", () => {
+  it("tells agents what to do when the harnix on PATH is older than the project", async () => {
+    for (const [name, text] of Object.entries({
+      "workflow template": workflowTemplate,
+      "AGENTS.md": await read("AGENTS.md"),
+      "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
+    }))
+      expect(text, name).toMatch(/versionSkew|cli-version-skew/u);
+  });
+
+  it("folds the dev entries of a stable release into one changelog entry", async () => {
+    const version = (JSON.parse(await read("package.json")) as { version: string }).version;
+    if (version.includes("-")) return; // a pre-release keeps its own dev entries until the epic closes
+    const [major, minor] = version.split(".");
+    const changelog = await read("CHANGELOG.md");
+
+    const heading = (text: string) => new RegExp(`^## \\[${text}`, "gmu");
+    expect(changelog.match(heading(`${version.replaceAll(".", "\\.")}\\]`))).toHaveLength(1);
+    expect(changelog).not.toMatch(heading(`${major}\\.${minor}\\.0-dev\\.`));
+  });
+});

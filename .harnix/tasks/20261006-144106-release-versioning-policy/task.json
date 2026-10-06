@@ -4,8 +4,8 @@
   "id": "20261006-144106-release-versioning-policy",
   "title": "Chính sách phiên bản: bản dev cho từng member, một bản minor khi đóng epic, patch cho task lẻ",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Đặt quy tắc phiên bản rõ ràng và kiểm tra được: task lẻ tăng patch một lần; task thuộc epic dùng bản tiền phát hành X.Y.0-dev.N; khi đóng epic phát hành một bản minor X.(Y+1).0 (major chỉ khi phá vỡ frozen contract).",
   "nonGoals": [
     "Không đổi lịch sử phiên bản đã phát hành",
@@ -16,20 +16,29 @@
     {
       "id": "ac-1",
       "text": "AGENTS.md, workflow.md và skill harnix-implement mô tả chính sách phiên bản: task lẻ patch, member của epic X.Y.0-dev.N, đóng epic minor, major chỉ cho thay đổi phá vỡ frozen contract; ghi rõ ai bump và bump lúc nào.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "scripts/version-sync.mjs chấp nhận X.Y.0-dev.N, từ chối bản dev thấp hơn bản hiện tại hoặc lùi về bản dev của bản đã phát hành, và cho phép bản phát hành X.Y.0 sau chuỗi dev.N; có test cho từng trường hợp.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-check-version-rules-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Epic 20261006-141317-workflow-field-feedback có quyết định ghi lại: Task 1 đã phát hành 2.1.2, các member còn lại dùng 2.2.0-dev.N và Task 13 (cli-version-skew-warning, member cuối theo ID) đóng epic bằng bản 2.2.0.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -48,11 +57,77 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-version-rules",
+      "description": "version-sync áp quy tắc dev.N",
+      "command": "pnpm exec vitest run test/workflow/version-sync.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "scripts/version-sync.mjs",
+        "test/workflow/version-sync.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Chính sách phiên bản trong tài liệu và bản ghi epic",
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        ".harnix/epics/20261006-141317-workflow-field-feedback.json",
+        "AGENTS.md",
+        "src/skills/harnix-implement/SKILL.md",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-version-rules-1",
+      "checkId": "check-version-rules",
+      "recordedAt": "2026-10-06T19:33:43.788+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/version-sync.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "07efbfcf8609cca49f03263e13404045b78e7c2d865ffb252bdb9d02bc6ba427"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T19:33:48.300+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "52506f495825c3a219559e2558b080b08efb15c1cc3696062957e16e396b7046"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T19:34:59.732+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5a91f68c30cd708002d28902858c9451357da6213fd93f23bee0eea263eca9a4"
+    }
+  ],
+  "relevantPaths": [
+    "scripts/version-sync.mjs"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T14:41:30.000+07:00",
-  "updatedAt": "2026-10-06T16:57:53.012+07:00"
+  "updatedAt": "2026-10-06T19:35:02.196+07:00",
+  "completedAt": "2026-10-06T19:35:02.196+07:00"
 }

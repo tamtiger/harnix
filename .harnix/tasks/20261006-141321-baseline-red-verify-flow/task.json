@@ -4,8 +4,8 @@
   "id": "20261006-141321-baseline-red-verify-flow",
   "title": "Cho phép chứng minh bằng check tập trung khi baseline đỏ và đổi check ở verify không ép replan đầy đủ",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Khi suite đã đỏ từ trước ngoài phạm vi task, người dùng có đường ghi nhận baseline đỏ có ủy quyền cùng check chứng minh tập trung, và thay check ở giai đoạn verifying quay lại verifying thay vì đi lại ready, in_progress, verifying, finishing.",
   "nonGoals": [
     "Không tự động bỏ qua test đỏ mới do chính task gây ra",
@@ -16,26 +16,38 @@
     {
       "id": "ac-1",
       "text": "Có flag ghi baseline của check (result, classification, authorizedBy, scope) mà không cần JSON, và finish/verify báo rõ suite đỏ sẵn đã được ủy quyền.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-baseline-flag-1",
+        "ev-check-suite-2"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Một check suite đỏ sẵn đã có baseline ủy quyền có thể đi kèm check tập trung bắt buộc làm bằng chứng chứng minh deliverable; ready và finish chấp nhận tổ hợp này và vẫn chặn khi không có ủy quyền.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-baseline-gate-1",
+        "ev-check-suite-2"
+      ]
     },
     {
       "id": "ac-3",
       "text": "--replace-check hoặc --set-check khi task ở verifying đưa task về verifying/verifying nếu các check đã pass còn nguyên, thay vì replan; có test cho đường này.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-check-verify-edit-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Quyết định về so sánh delta (chỉ fail test mới) được ghi lại, kèm lý do chọn hoặc không chọn.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-2"
+      ]
     }
   ],
   "validationPlan": [
@@ -55,18 +67,159 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-baseline-flag",
+      "description": "Flag ghi baseline, hiển thị ở status/finish, không cần replan",
+      "command": "pnpm exec vitest run test/unit/core/workflow/baseline.test.ts test/integration/commands/workflow-flags.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/commands/workflow-*.ts",
+        "src/core/workflow/**",
+        "test/integration/commands/workflow-flags.test.ts",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "check-baseline-gate",
+      "description": "Finish chấp nhận suite đỏ sẵn có ủy quyền cùng check focused; vẫn chặn khi thiếu",
+      "command": "pnpm exec vitest run test/unit/core/workflow/suite-gate.test.ts test/unit/core/workflow/completion.test.ts test/unit/core/workflow/finish.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/completion.ts",
+        "src/core/workflow/suite-gate.ts",
+        "test/unit/core/workflow/completion.test.ts",
+        "test/unit/core/workflow/finish.test.ts",
+        "test/unit/core/workflow/suite-gate.test.ts"
+      ]
+    },
+    {
+      "id": "check-verify-edit",
+      "description": "Đổi check ở verifying quay về verifying/verifying khi pass còn nguyên",
+      "command": "pnpm exec vitest run test/unit/core/workflow/plan-edit.test.ts test/unit/core/workflow/replace-check.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/tasks/workflow-helpers.ts",
+        "src/core/workflow/plan-edit.ts",
+        "src/core/workflow/replace-check.ts",
+        "test/unit/core/workflow/plan-edit.test.ts",
+        "test/unit/core/workflow/replace-check.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Tài liệu và template ghi quyết định delta, baseline và đường verify",
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
-  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-check-baseline-flag-1",
+      "checkId": "check-baseline-flag",
+      "recordedAt": "2026-10-06T18:16:27.836+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/baseline.test.ts test/integration/commands/workflow-flags.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2fa258ea64311094fb9f9594c3976e03cd048a7ecfee737f6eef6816134d98e3"
+    },
+    {
+      "id": "ev-check-baseline-gate-1",
+      "checkId": "check-baseline-gate",
+      "recordedAt": "2026-10-06T18:16:33.204+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/suite-gate.test.ts test/unit/core/workflow/completion.test.ts test/unit/core/workflow/finish.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a4ca024143879a1582cbc3718670fcc7d0ba98af5560c928974fe99ceb87a7fe"
+    },
+    {
+      "id": "ev-check-verify-edit-1",
+      "checkId": "check-verify-edit",
+      "recordedAt": "2026-10-06T18:16:38.535+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/plan-edit.test.ts test/unit/core/workflow/replace-check.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "814b3b470ac95a47dbb541eb43633f3f9d894b6769e7690a9bbf6004b322fed5"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T18:16:42.625+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "370403cbd1906f1a6a0cbf09100fa480ecebb73cf69ccef6c5268a3847bf369f"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T18:18:05.707+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "b025f0ccd2d7fb6241499e194521a9cddf9b55a8520f40138b28597f122c3f92"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T18:20:21.222+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "70589c8269a3314d0b7aec8d73df771788e2e70fb14fbb440df9e8119e09feb4"
+    }
+  ],
+  "relevantPaths": [
+    "src/commands",
+    "src/core/tasks",
+    "src/core/workflow"
+  ],
+  "relevantSpecs": [
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
   "createdAt": "2026-10-06T14:13:30.000+07:00",
-  "updatedAt": "2026-10-06T17:00:36.454+07:00",
+  "updatedAt": "2026-10-06T18:20:32.972+07:00",
   "decisions": [
     {
       "id": "baseline-red-authorized-focused-proof",
       "text": "Khi suite đỏ sẵn ngoài phạm vi task, dùng baseline có ủy quyền của check suite (mở rộng check.baseline hiện có: result, classification, authorizedBy, scope) cùng một check focused bắt buộc làm bằng chứng cho deliverable; không so sánh delta test.",
       "rationale": "Mở rộng cơ chế đã có, giữ cổng suite mặc định khi baseline xanh và cần ủy quyền rõ ràng của người dùng; so sánh delta phải định danh từng test, phức tạp và dễ báo sai."
     }
-  ]
+  ],
+  "residualRisks": [
+    {
+      "id": "baseline-needs-focused-proof",
+      "text": "Check suite đỏ sẵn chỉ được finish chấp nhận khi có check required khác (không baseline) pass tươi phủ cùng criterion; thiếu check focused thì cổng suite mặc định vẫn chặn.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-06T18:20:32.972+07:00"
 }

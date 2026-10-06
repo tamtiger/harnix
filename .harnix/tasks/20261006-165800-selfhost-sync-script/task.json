@@ -4,8 +4,8 @@
   "id": "20261006-165800-selfhost-sync-script",
   "title": "Script đồng bộ file tự-host và hash manifest thay cho thao tác tay",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Một lệnh duy nhất đồng bộ .harnix/workflow.md với template và cập nhật hash trong .harnix/.template-hashes.json (chuẩn hóa LF), và làm rõ vì sao harnix update bỏ qua workflow.md của chính repo này và kéo theo thay đổi guide không liên quan.",
   "nonGoals": [
     "Không đổi hành vi harnix update cho repo của người dùng",
@@ -16,26 +16,39 @@
     {
       "id": "ac-1",
       "text": "Có script pnpm (ví dụ pnpm selfhost:sync) sinh lại .harnix/workflow.md từ template và ghi hash chuẩn hóa LF cùng generatorVersion vào manifest; chạy lại không đổi gì (idempotent) và có test.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-selfhost-sync-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Test self-host báo lỗi kèm đúng lệnh sửa (pnpm selfhost:sync) khi file hoặc hash lệch, thay vì chỉ báo hai chuỗi hash khác nhau.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-selfhost-sync-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Nguyên nhân harnix update bỏ qua .harnix/workflow.md và cập nhật guide common.md ngoài ý muốn được điều tra, ghi vào tài liệu hoặc sửa nếu là lỗi, kèm test hồi quy.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-selfhost-sync-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "AGENTS.md và skill harnix-implement chỉ dẫn dùng script này ở bước release preparation.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -55,11 +68,80 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-selfhost-sync",
+      "description": "Script selfhost:sync, test self-host và hồi quy update",
+      "command": "pnpm exec vitest run test/workflow/selfhost-sync.test.ts test/workflow/self-host.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "scripts/selfhost-sync.mjs",
+        "test/workflow/self-host.test.ts",
+        "test/workflow/selfhost-sync.test.ts"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Chỉ dẫn selfhost:sync và điều tra update trong tài liệu",
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "src/skills/harnix-implement/SKILL.md",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-selfhost-sync-1",
+      "checkId": "check-selfhost-sync",
+      "recordedAt": "2026-10-06T19:38:14.426+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/selfhost-sync.test.ts test/workflow/self-host.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8536844d60209bc210cf1f7774eed6bb42a986153b50624932ed6f2bdfbae961"
+    },
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-06T19:38:18.801+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "df6422d6577fa87a44ae50570949ee273479eb190b2ca42ed2b20f351164db6d"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-06T19:39:26.464+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "760e0f475e0faf01c67a498e8280dae35c35cfbe73dbe2d66e197025d8acabf1"
+    }
+  ],
+  "relevantPaths": [
+    "scripts",
+    "test/workflow"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T16:58:00.000+07:00",
-  "updatedAt": "2026-10-06T16:58:00.000+07:00"
+  "updatedAt": "2026-10-06T19:39:29.161+07:00",
+  "completedAt": "2026-10-06T19:39:29.161+07:00"
 }

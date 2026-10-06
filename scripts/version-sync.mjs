@@ -37,6 +37,7 @@ export async function syncVersion({
 }) {
   const targetRoot = resolve(root);
   const requested = parseVersion(version);
+  assertReleasePolicy(requested);
   const normalizedSummaries = normalizeSummaries(summaries);
   assertReleaseMetadata(date, kind);
 
@@ -115,6 +116,15 @@ function parseVersion(value) {
     numbers: core.split(".").map(Number),
     prerelease: prerelease ?? null,
   };
+}
+
+/** A pre-release is only the dev chain of a minor: `X.Y.0-dev.N`; a release (task or epic close) has none. */
+function assertReleasePolicy(requested) {
+  if (requested.prerelease === null) return;
+  if (requested.numbers[2] !== 0 || !/^dev\.(0|[1-9]\d*)$/u.test(requested.prerelease))
+    throw new Error(
+      "A pre-release version must be X.Y.0-dev.N (N without leading zeros); a task releases a patch and an epic closes with a minor.",
+    );
 }
 
 function compareVersions(left, right) {

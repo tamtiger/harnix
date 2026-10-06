@@ -440,7 +440,449 @@ Public `harnix mem --learning` adds only a kind filter before the existing query
 
 ### 4.11 Ready gate and hidden transports (v3)
 
-Full `prd.md`/`plan.md` là Markdown tự do; ready chỉ đòi cả hai không rỗng và `plan.md` có ít nhất một checklist item (không còn ready-trace grammar). Hidden `workflow --transition <status>/<checkpoint>` không nhận task body: nó đọc active record đã persist, áp đúng một legal transition và đi qua cùng validation/lock/immutability của save path, nên đổi stage không thể làm rơi evidence hay ghi đè obligation; nó từ chối `cancelled` vì cancellation chỉ thuộc `--cancel`. Vào `blocked` bắt buộc `blocker.resumeStatus` bằng status ngay trước; từ `blocked`, `--transition` chỉ resume về `resumeStatus` và bỏ `blocker`. Từ checkpoint `replan` chỉ thoát được về `ready/ready` (hoặc `planning/planning` khi status `planning`, hoặc sang `blocked`). `--transition <status>/<checkpoint> --dry-run` trả `{ dryRun, valid, target, task, issues, advisories, unbaselinedChecks? }`: `valid` đúng khi transition thật được chấp nhận (cùng `collectReadyIssues` với cổng ready), còn input glob không khớp file và check chưa baseline chỉ nằm trong `advisories`. Hidden `workflow --evidence` đọc bounded envelope `{ "evidence": <Evidence> }` trên stdin và append đúng một item. Các transport hẹp bổ sung, tất cả build candidate rồi đi qua cùng `saveWorkflow` (khóa, digest recompute, bất biến obligation, rollback): (1) `workflow --evidence --check <id> --result pass|fail|skipped --summary <text> [--exit-code <n>] [--artifact <path>]... [--digest <hex>]` tự điền `id` dạng `ev-<checkId>-<n>`, `recordedAt` theo clock đã cấu hình và `inputDigest` (check v3 required, result pass/fail); `--exit-code` bắt buộc với pass/fail và với check có `command`; có bất kỳ flag evidence nào thì không đọc stdin. Evidence mới ở mọi transport có `recordedAt` lớn hơn giờ hiện tại quá 5 giây bị từ chối, và pass hoặc fail mới cho check đang ở circuit breaker `stop` (hai fail liên tiếp) cũng bị từ chối; lối đi là `--replace-check` với bản thay khác `command`, `inputs` hoặc `cwd`. (2) `workflow --criterion <id>[,<id>] --met [--evidence-ids <ids>]` (chỉ v3) đặt criterion `met` với evidenceIds mặc định là pass mới nhất còn tươi của mọi required check bao phủ criterion; từ chối khi thiếu pass tươi, criterion `waived`, hoặc evidence không thuộc check bao phủ. (3) `workflow --migrate` (stdin tuỳ chọn `{ "checks": { "<id>": { "criterionIds", "inputs" } } }`) migrate task active legacy v1/v2 chưa kết thúc và không blocked trong một lệnh: giữ status/checkpoint/criteria/field nền của required check/evidence cũ, bỏ `@task-contract`, append đúng evidence `task-schema-to-v3` với thời gian clock; `criterionIds` (v1) và `inputs` rỗng không được suy đoán, thiếu thì lỗi liệt kê check. (4) `workflow --run-check <id> -- <exe> [args...] [--summary <text>]` kiểm argv (chuẩn hóa: bỏ nháy, gộp khoảng trắng, bỏ `run` của package manager) bằng `command` đã khai báo của check (check không có `command` chạy argv bất kỳ và evidence ghi lệnh thật, tối đa 200 ký tự), chạy trong `cwd` đã khai báo (`--cwd` chỉ được lặp lại đúng giá trị đó; check chưa khai báo `cwd` từ chối `--cwd`; `cwd` được chuẩn hóa và kiểm realpath), từ chối khi check đang ở circuit breaker `stop`, chụp digest, chạy tiến trình bằng process runner (executable + mảng đối số; trên Windows tên lệnh trần đi qua `cmd.exe /d /s /c` cố định và từ chối đối số chứa metacharacter cmd), chụp lại digest và chỉ ghi evidence khi digest bằng nhau (exit 0 = pass, khác 0 = fail); trả `{id,status,checkpoint,updatedAt,evidenceId,result,exitCode,outputTail}` với `outputTail` tối đa 2000 ký tự và không lưu vào task. (5) `--brief` cho `--save|--transition|--evidence|--criterion|--migrate|--finish` trả `{id,status,checkpoint,updatedAt}` (kèm `evidenceId` khi có); không có `--brief` output giữ nguyên. (6) `workflow --set-check <id> [--description --command --scope focused|full --required|--no-required --criteria <ids> --input <glob>...] [--reason <text>]` thêm hoặc cập nhật một validation check của task v3 active (field không nêu giữ nguyên; check mới cần description và scope, check required cần criteria và ít nhất một input); `workflow --add-criterion <id> --text <text> --check <check-id>[,<check-id>] [--reason <text>]` thêm criterion `pending` và gắn nó vào các check nêu tên; `workflow --set-paths [--relevant-path <p>]... [--relevant-spec <p>]...` thay danh sách tương ứng và không cần lý do. Hai transport đầu là chỉnh nghĩa vụ: task `planning` chưa bị khóa thì save thường; task đã qua planning hoặc đã migrate (nghĩa vụ đã khóa) bắt buộc `--reason` 10–1000 ký tự và CLI tự làm đúng một save `replan` kèm `contractRevision`, sau đó chuyển `ready/ready`. Đổi `status` của criterion sang hoặc khỏi `waived`, hay đổi `waiverReason`, sau first ready cũng là chỉnh nghĩa vụ (cần replan và `contractRevision`); criterion đã có evidence không đổi `status`. `workflow --batch` đi cùng đường đó cho criteria và checks (sau planning cần `reason` 10–1000 ký tự); decision và risk của batch append-only như `--add-decision`/`--add-risk`: id trùng và text rỗng bị từ chối, severity mặc định `low`. (7) Mọi body stdin được bỏ BOM đứng đầu, và `saveWorkflow` từ chối envelope có chuỗi chứa U+FFFD hoặc là mojibake windows-1252/windows-1258 của UTF-8 hợp lệ (nguyên nhân: Windows PowerShell 5.1 đọc UTF-8 thành ANSI và thêm BOM khi pipe); văn bản có dấu đi qua flag hoặc file sửa trực tiếp, không qua pipe của powershell.exe 5.1. (8) `workflow --add-decision <id> --text <t> --rationale <t>` và `workflow --add-risk <id> --text <t> [--severity low|medium|high]` (mặc định `low`) thêm một `decisions` hoặc `residualRisks` item vào task v3 active ở mọi stage chưa terminal; đây là dữ liệu review nằm ngoài contract hash nên không cần `--reason` hay replan, id trùng hoặc text rỗng bị từ chối. `workflow --finish --brief` trả thêm `learning: { notes, captured, hint? }` (số note gồm decisions, residualRisks và findings; số observation đã ghi vào journal lần finish này; lý do khi bằng 0), còn `--finish` không `--brief` giữ nguyên output TaskRecord. Không có `--file`: file tạm trong repo làm bẩn digest và thêm bề mặt path-safety. Hidden `workflow --schema` là read-only và trả contract của envelope, TaskRecord cùng transport mà không lộ project data. Hidden `workflow --audit-ready` đã bị removed; Lite và historical records không bị rewrite. `workflow --preflight` trả `learning` chỉ khi `nextStage` là `plan`; `--preflight --brief` bỏ `learning`; `BRIEF_ACTIONS` (src/core/workflow/brief.ts) là tập lệnh duy nhất nhận `--brief` và `workflow --schema` liệt kê nó trong `constraints.brief`; `harnix epic <epic-id> --brief` là dạng gọn của chi tiết epic; `--save` với `epicMembers` từ chối ID không tăng dần chặt theo thứ tự khai báo, chỉ tạo member chưa tồn tại (member đã tồn tại chỉ nhận replay giống hệt, khác thì bị từ chối trước khi ghi bất kỳ file nào), ghi member trước task chính và gỡ chúng nếu save thất bại trước khi task commit; file epic `.json`/`.md` ghi bằng atomic replacement.
+Full `prd.md`/`plan.md` là Markdown tự do; ready chỉ đòi cả hai không rỗng và `plan.md` có ít nhất một checklist item (không còn ready-trace grammar). Hidden `workflow --transition <status>/<checkpoint>` không nhận task body: nó đọc active record đã persist, áp đúng một legal transition và đi qua cùng validation/lock/immutability của save path, nên đổi stage không thể làm rơi evidence hay ghi đè obligation; nó từ chối `cancelled` vì cancellation chỉ thuộc `--cancel`. Vào `blocked` bắt buộc `blocker.resumeStatus` bằng status ngay trước; từ `blocked`, `--transition` chỉ resume về `resumeStatus` và bỏ `blocker`. Từ checkpoint `replan` chỉ thoát được về `ready/ready` (hoặc `planning/planning` khi status `planning`, hoặc `verifying/verifying` khi status `verifying`, hoặc sang `blocked`). `--transition <status>/<checkpoint> --dry-run` trả `{ dryRun, valid, target, task, issues, advisories, unbaselinedChecks? }`: `valid` đúng khi transition thật được chấp nhận (cùng `collectReadyIssues` với cổng ready), còn input glob không khớp file và check chưa baseline chỉ nằm trong `advisories`. Hidden `workflow --evidence` đọc bounded envelope `{ "evidence": <Evidence> }` trên stdin và append đúng một item. Các transport hẹp bổ sung, tất cả build candidate rồi đi qua cùng `saveWorkflow` (khóa, digest recompute, bất biến obligation, rollback): (1) `workflow --evidence --check <id> --result pass|fail|skipped --summary <text> [--exit-code <n>] [--artifact <path>]... [--digest <hex>]` tự điền `id` dạng `ev-<checkId>-<n>`, `recordedAt` theo clock đã cấu hình và `inputDigest` (check v3 required, result pass/fail); `--exit-code` bắt buộc với pass/fail và với check có `command`; có bất kỳ flag evidence nào thì không đọc stdin. Evidence mới ở mọi transport có `recordedAt` lớn hơn giờ hiện tại quá 5 giây bị từ chối, và pass hoặc fail mới cho check đang ở circuit breaker `stop` (hai fail liên tiếp) cũng bị từ chối; lối đi là `--replace-check` với bản thay khác `command`, `inputs` hoặc `cwd`. (2) `workflow --criterion <id>[,<id>] --met [--evidence-ids <ids>]` (chỉ v3) đặt criterion `met` với evidenceIds mặc định là pass mới nhất còn tươi của mọi required check bao phủ criterion; từ chối khi thiếu pass tươi, criterion `waived`, hoặc evidence không thuộc check bao phủ. (3) `workflow --migrate` (stdin tuỳ chọn `{ "checks": { "<id>": { "criterionIds", "inputs" } } }`) migrate task active legacy v1/v2 chưa kết thúc và không blocked trong một lệnh: giữ status/checkpoint/criteria/field nền của required check/evidence cũ, bỏ `@task-contract`, append đúng evidence `task-schema-to-v3` với thời gian clock; `criterionIds` (v1) và `inputs` rỗng không được suy đoán, thiếu thì lỗi liệt kê check. (4) `workflow --run-check <id> -- <exe> [args...] [--summary <text>]` kiểm argv (chuẩn hóa: bỏ nháy, gộp khoảng trắng, bỏ `run` của package manager) bằng `command` đã khai báo của check (check không có `command` chạy argv bất kỳ và evidence ghi lệnh thật, tối đa 200 ký tự), chạy trong `cwd` đã khai báo (`--cwd` chỉ được lặp lại đúng giá trị đó; check chưa khai báo `cwd` từ chối `--cwd`; `cwd` được chuẩn hóa và kiểm realpath), từ chối khi check đang ở circuit breaker `stop`, chụp digest, chạy tiến trình bằng process runner (executable + mảng đối số; trên Windows tên lệnh trần đi qua `cmd.exe /d /s /c` cố định và từ chối đối số chứa metacharacter cmd), chụp lại digest và chỉ ghi evidence khi digest bằng nhau (exit 0 = pass, khác 0 = fail); trả `{id,status,checkpoint,updatedAt,evidenceId,result,exitCode,outputTail}` với `outputTail` tối đa 2000 ký tự và không lưu vào task. (5) `--brief` cho `--save|--transition|--evidence|--criterion|--migrate|--finish` trả `{id,status,checkpoint,updatedAt}` (kèm `evidenceId` khi có); không có `--brief` output giữ nguyên. (6) `workflow --set-check <id> [--description --command --scope focused|full --required|--no-required --criteria <ids> --input <glob>...] [--reason <text>]` thêm hoặc cập nhật một validation check của task v3 active (field không nêu giữ nguyên; check mới cần description và scope, check required cần criteria và ít nhất một input); `workflow --add-criterion <id> --text <text> --check <check-id>[,<check-id>] [--reason <text>]` thêm criterion `pending` và gắn nó vào các check nêu tên; `workflow --set-paths [--relevant-path <p>]... [--relevant-spec <p>]...` thay danh sách tương ứng và không cần lý do. Hai transport đầu là chỉnh nghĩa vụ: task `planning` chưa bị khóa thì save thường; task đã qua planning hoặc đã migrate (nghĩa vụ đã khóa) bắt buộc `--reason` 10–1000 ký tự và CLI tự làm đúng một save `replan` kèm `contractRevision`, sau đó chuyển `ready/ready`. Đổi `status` của criterion sang hoặc khỏi `waived`, hay đổi `waiverReason`, sau first ready cũng là chỉnh nghĩa vụ (cần replan và `contractRevision`); criterion đã có evidence không đổi `status`. `workflow --batch` đi cùng đường đó cho criteria và checks (sau planning cần `reason` 10–1000 ký tự); decision và risk của batch append-only như `--add-decision`/`--add-risk`: id trùng và text rỗng bị từ chối, severity mặc định `low`. (7) Mọi body stdin được bỏ BOM đứng đầu, và `saveWorkflow` từ chối envelope có chuỗi chứa U+FFFD hoặc là mojibake windows-1252/windows-1258 của UTF-8 hợp lệ (nguyên nhân: Windows PowerShell 5.1 đọc UTF-8 thành ANSI và thêm BOM khi pipe); văn bản có dấu đi qua flag hoặc file sửa trực tiếp, không qua pipe của powershell.exe 5.1. (12) `workflow --epic-order <epic-id> [<task-id>...]` ghi field tùy chọn `order` của `EpicRecord` (mảng task ID đúng regex task, không trùng, mọi id phải là member; mảng rỗng xóa field) cùng `updatedAt`, sinh lại `.md`, không đọc hay ghi `task.json`; `harnix epic <epic-id>` sắp member trong `order` trước theo thứ tự đó rồi theo ID tăng dần và `nextTask` theo thứ tự này. (11) `--task <task-id>` chọn task đích (id đúng regex task, tồn tại, chưa `completed|cancelled`) cho `--set-check|--add-criterion|--set-paths|--add-decision|--add-risk|--batch`: task đích đóng vai task active trong cùng đường code (`AsyncLocalStorage` trong `src/core/workflow/target-task.ts`), con trỏ `.active` không bao giờ bị đọc hay ghi; hành động khác (`--transition`, `--finish`, `--cancel`, `--run-check`, `--evidence`, ...) từ chối `--task`. (10) `workflow --init ... [--slug <english-kebab-case>]`: ID của task và epic là tiếng Anh nên slug lấy từ `--slug` (`^[a-z0-9]+(?:-[a-z0-9]+)*# Harnix Implementation Plan
+
+## 1. Mục tiêu
+
+Xây dựng Harnix end-to-end dưới dạng **một public npm package** `@tamtiger/harnix`, một executable `harnix`, project data `.harnix/`, hỗ trợ đúng Kiro, Antigravity, Codex, Claude Code, OpenCode và Cursor. Harnix phải biến yêu cầu thành spec/task có cấu trúc, nạp context có ngân sách, kiểm chứng bằng fresh evidence và duy trì project knowledge mà không làm phình consumer repository.
+
+Plan này là checkpoint bắt buộc trước code. Checkpoint đã pass tại Phase 0 sau khi:
+
+1. `docs/HARNIX_PRD.md` và `docs/HARNIX_WORKFLOW.md` được chuẩn hóa hoàn toàn sang Harnix.
+2. Toàn bộ PRD/workflow/plan/research/mapping/baseline được review và schema contracts được khóa.
+3. Active Git repository được xác minh là Harnix sạch, provenance upstream được giữ bằng frozen records và mọi tài liệu người dùng được bảo toàn.
+
+## 2. Global constraints
+
+- Product: **Harnix**.
+- Repository: `https://github.com/tamtiger/harnix.git`; active repo chỉ có `origin`. Trellis/ECC/Superpowers tồn tại dưới dạng frozen external research checkouts/records, không phải active remotes.
+- Package/executable: `@tamtiger/harnix` / `harnix`.
+- Project data/generator/skills: `.harnix/` / `harnix` / `harnix-*`.
+- TypeScript ESM, Node.js `>=18`, pnpm, Commander.js, Inquirer, tsup, Vitest.
+- Một publishable `package.json`; không workspace/core package phụ.
+- Chỉ Kiro, Antigravity, Codex, Claude Code, OpenCode và Cursor.
+- Runtime nằm trong package; không sinh runtime scripts vào consumer.
+- User-modified project files and user-global Harnix fragments thắng packaged defaults.
+- Không telemetry, daemon, hosted service, silent network, default MCP, global runtime/memory, credential, permission or trust mutation. Phase 6 permits only explicit Harnix-owned user-global platform customization described in `GLOBAL_SETUP_REFACTOR_PLAN.md`.
+- Không tự commit, branch, worktree, merge, push hoặc PR; subagent không phải dependency.
+- Default uninstall giữ data; purge cần preview, confirmation và safe-root verification.
+- AGPL-3.0/notices cho derived Trellis code; MIT attribution cho ECC/Superpowers adaptations.
+
+## 3. Kiến trúc đích
+
+```text
+harnix/
+├── src/
+│   ├── core/
+│   │   ├── config/          # schema, explicit migrations
+│   │   ├── tasks/           # task PRD/state/context references; task.ts is a barrel over task-schema/-validate/-migration/-state/-store/-review
+│   │   ├── workflow/        # hidden workflow logic split by action (save, transition, evidence, schema, snapshot, preflight, finish, cancel, learn) + routing/completion; commands/internal-workflow.ts is a re-export adapter
+│   │   ├── stack/           # language/technology detection (moved from utils by restructure-code)
+│   │   ├── context/         # rank, dedupe, budget, disclosure
+│   │   ├── journal/         # entries, search, learning candidates
+│   │   └── project.ts       # project-level service boundary
+│   ├── commands/            # init, setup, update, upgrade, uninstall, mem, status, tasks, resume, context-report, checks, audit, doctor, repo-map
+│   ├── configurators/       # kiro.ts, antigravity.ts, codex.ts only
+│   ├── templates/           # harnix + platform content
+│   ├── catalog/             # pure language/technology/guide metadata + validation
+│   ├── guides/              # common/language/technology Markdown sources
+│   ├── skills/              # five core + research/debug optional
+│   ├── agents/              # optional roles only
+│   ├── migration/           # discover, preview, plan, apply, verify, cleanup
+│   ├── utils/               # paths, detection, hashing, atomic/managed files, process
+│   ├── cli.ts
+│   └── index.ts
+├── test/
+│   ├── unit/
+│   ├── integration/
+│   ├── workflow/
+│   ├── migration/
+│   ├── platform/
+│   ├── safety/
+│   └── support/
+├── docs/
+├── package.json
+├── tsconfig.json
+├── tsup.config.ts
+├── vitest.config.ts
+└── pnpm-lock.yaml
+```
+
+Dependency direction:
+
+```text
+commands/configurators/migration -> core -> utils/pure types
+commands -> terminal UI
+configurators -> templates/rules/skills
+core -X-> Commander/Inquirer/platform templates
+```
+
+`test/workflow/architecture.test.ts` enforces this direction (core imports no commands/templates/skills/Commander/Inquirer; `src/utils` imports none of core/commands/catalog/guides/templates/configurators), the `node:fs`-free command list (exempt until `add-platform-registry`: doctor, global-doctor, setup, global-uninstall, global-update), the 300-code-line cap for `src/core/workflow/` and `src/core/tasks/`, and the adapter shape of `src/commands/internal-workflow.ts`. `test/workflow/behavior-snapshot.golden.json` is the pure-refactor oracle and is never regenerated to make a refactor pass.
+
+Filesystem, clock, process runner, version lookup, prompt dependencies and user-home/root resolvers must be injectable so integration tests never call network/install, interactive terminals or a real user profile.
+
+## 4. Frozen state and schema contracts
+
+Các contract project-data trong mục này là normative cho implementation hiện tại. Phase 6 supersedes former platform setup paths and the Doctor v1 shape with the global contracts in `GLOBAL_SETUP_REFACTOR_PLAN.md`; TaskRecord v3 ở mục 4.5 supersedes schema v1/v2 cho task mới (breaking change D1/D11 trong `OVERHAUL_DECISIONS.md`) nhưng giữ exact legacy reader; `release-v2` gộp changelog. Any field, enum, path or transition change still requires matching PRD/workflow, migration and test updates in the same change.
+
+### 4.1 `.harnix/config.yaml` v1 compatibility and v2 write schema
+
+```ts
+type LegacyStackId =
+  | "csharp-dotnet-abp"
+  | "typescript-nestjs"
+  | "php"
+  | "python"
+  | "java-spring"
+  | "go"
+  | "react-web"
+  | "vue";
+
+type LanguageId = "csharp" | "typescript" | "javascript" | "php" | "python" | "java" | "go";
+type TechnologyId = "dotnet" | "abp" | "nestjs" | "spring" | "react-web" | "vue" | "codeigniter" | "postgresql" | "mysql" | "sqlserver" | "mongodb" | "redis";
+
+type PlatformId = "kiro" | "antigravity" | "codex" | "claude" | "opencode" | "cursor";
+
+interface PackageConfigV2 {
+  path: string;              // normalized repo-relative POSIX path; "." for root
+  languages: LanguageId[];   // unique, lexicographically sorted
+  technologies: TechnologyId[]; // unique, lexicographically sorted
+  [compatibleUnknown: string]: unknown;
+}
+
+interface HarnixConfigV1 {
+  generator: "harnix";
+  schemaVersion: 1;
+  developer: string;         // journal namespace ID matching ^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$
+  languages: LegacyStackId[];
+  packages: Array<{ path: string; languages: LegacyStackId[]; [compatibleUnknown: string]: unknown }>;
+  platforms: PlatformId[];   // v1 parse compatibility only; deprecated and ignored for desired global setup
+  context: {
+    maxCharacters: number;   // positive integer, default 24000
+    tokenApproximation: number; // positive number, default 4 chars/token
+  };
+  runtime: {
+    research: "conditional";
+    fullContext: boolean;
+  };
+  [compatibleUnknown: string]: unknown;
+}
+
+interface HarnixConfigV2 {
+  generator: "harnix";
+  schemaVersion: 2;
+  developer: string;
+  languages: LanguageId[];
+  technologies: TechnologyId[];
+  packages: PackageConfigV2[];
+  platforms: PlatformId[];   // deprecated compatibility field; ignored by global setup
+  timezone?: string;         // IANA zone for every persisted timestamp; init defaults it to the system zone (Intl, never shell TZ); absent in older configs => system zone
+  verify?: {
+    test?: string;
+    lint?: string;
+    typecheck?: string;
+    format?: string;
+    suite?: string;
+    packages?: Array<{
+      path: string;
+      test?: string;
+      lint?: string;
+      typecheck?: string;
+      format?: string;
+      suite?: string;
+    }>;
+  };
+  context: { maxCharacters: number; tokenApproximation: number; [compatibleUnknown: string]: unknown };
+  runtime: { research: "conditional"; fullContext: boolean; [compatibleUnknown: string]: unknown };
+  [compatibleUnknown: string]: unknown;
+}
+```
+
+New init and every config write use v2 only. Reads classify input as valid v1, valid v2, corrupt or future without writing. Public `harnix verify-plan` outputs deterministic verify commands across ≥ 8 ecosystems (npm/pnpm/yarn/bun, uv/poetry/pip, cargo, go, gradle/maven, dotnet, composer, swift, flutter) and monorepo workspaces (pnpm, Cargo, go.work, Maven) following nearest-manifest-wins; allows user override via `verify:` in `config.yaml`. Suite Gate requires a project-level suite check covering full source and test inputs at `ready` and rejects `finish` without a current passing digest. Explicit `update` and `doctor --fix` migrate v1 atomically and permission-preservingly; read-only commands and `init` on an existing project never migrate. Migration maps `csharp-dotnet-abp -> csharp + dotnet,abp`, `typescript-nestjs -> typescript + nestjs`, `java-spring -> java + spring`, plain `php|python|go` to the matching language, and historical `react-web|vue` to technology only. It never rescans the repository.
+
+YAML serialization is deterministic with LF golden fixtures. Compatible unknown user keys round-trip at top level and inside package/context/runtime objects; core logic ignores them and known keys cannot be shadowed. Duplicate/unsorted arrays, absolute/package-escape paths, unsafe developer IDs, invalid enums, corrupt YAML and future schema fail before write.
+
+### 4.2 Stack, detector and guide catalogs
+
+The packaged pure catalog owns stable language/technology IDs, labels, technology kind (`framework|runtime|platform|library|database|tool|infrastructure|domain`), declarative detector expressions, guide references and provenance. Initial technology kinds are: `dotnet:runtime`, `abp|nestjs|spring|vue|codeigniter:framework`, `react-web:library`, `postgresql|mysql|sqlserver|mongodb|redis:database`. Database detectors use only `dependency(npm|composer)` and `content` predicates, never `dependency(nuget|maven|gradle)`, because collectors never gather nuget/maven/gradle dependency facts; a .NET or Java database driver is matched through its package name inside `*.csproj`/`pom.xml`/`build.gradle*` content instead. Catalog code must not import filesystem collectors, commands, terminal UI or platform adapters.
+
+Detector predicates are the discriminated union `file(glob)`, `dependency(ecosystem,name)` and `content(glob,contains)`. Expressions require a positive `allOf` or `anyOf`; both combine conjunctively and `noneOf` excludes. Globs are safe repository-relative POSIX patterns supporting literals, `*` and `**` only; content matching is bounded literal matching, never regex or code execution. Validation rejects duplicate IDs/predicates, invalid enum/confidence/provenance, unsafe paths, missing/self/cyclic `implies`, `guideIds`, `extends` or `supersedes` references, conflicting supersedence and duplicate guide content paths.
+
+Detection returns deterministic bounded matches with facet, technology kind or `language`, confidence `confirmed|probable|weak`, repository-relative evidence `{kind,path,detail}` and source `catalog`. Language is established independently from framework/runtime: NestJS does not imply TypeScript, Spring/build metadata does not imply Java, `.sln`/`global.json` does not imply C#, and React/Vue do not imply JavaScript or TypeScript. Config auto-selection uses confirmed/probable technology matches; weak evidence remains reviewable.
+
+Guide descriptors declare ID/title/description/category, language/technology/path/topic applicability, activation `always|path|task`, priority, `contentPath`, composition/supersedence and provenance. Packaged Markdown is imported at build time; source tests prove a one-to-one descriptor/content mapping. Selection order is common, language, then increasingly specific technology/domain, with priority and ID as deterministic tie-breakers. Only selected content is materialized below `.harnix/spec/guides/`. Beside the guides, `.harnix/spec/project-facts.md` is a derived file that is not a managed manifest entry: `updateProject` (which `init` also calls) writes it from the confirmed config plus `buildVerifyPlan` as deterministic text (at most 20 packages per list, no timestamp or version) and rewrites it only when the content changes. Every guide is `# title`, `## Verify`, `## Constraints` (at most 10 bullets), `## Common mistakes` (at most 6 bullets) and at most 600 tokens.
+
+### 4.3 Project managed manifest
+
+File: `.harnix/.template-hashes.json`.
+
+```ts
+interface ManagedEntryV1 {
+  path: string;             // POSIX-normalized repo-relative, unique
+  sourceId: string;         // stable packaged template/rule/skill identifier
+  scope: "project";
+  generatedHash: string;    // lowercase SHA-256 of normalized content
+  generatorVersion: string;
+}
+
+interface ManagedManifestV1 {
+  generator: "harnix";
+  schemaVersion: 1;
+  entries: ManagedEntryV1[]; // sorted by path
+}
+```
+
+Manifest replacement là atomic. This project manifest owns only `.harnix/**` templates and never global integration output; former platform entries are legacy inventory only. Canonical `.harnix/workflow.md` entry uses `sourceId: "workflow"`. Legacy `sourceId: "harnix-workflow"` is a metadata alias only: normalize it when the stored `generatedHash` still matches exact disk bytes; preserve and warn on user-modified content. Ownership state được suy ra từ desired template, stored entry và disk hash; không persist transient state. Project update result có `metadataUpdated: string[]` cho entry chỉ đổi manifest metadata; path đó vẫn thuộc `preserved` và không được đưa vào content `updated`. Không track tasks/journals. Reject duplicate/absolute/traversal keys, external symlinks, invalid hash và corrupt/future manifest. Legacy hash namespace không được tin; migration re-baseline từ disk/template evidence.
+
+### 4.4 Global managed manifest
+
+Phase 6 adds `GlobalManagedManifestV1` exactly as specified in `GLOBAL_SETUP_REFACTOR_PLAN.md` §5. It is a separate sidecar per verified Kiro, Antigravity Desktop, Antigravity CLI, Codex or Claude Code root, with only root-relative POSIX paths. Each entry has a stable `sourceId`, kind `file|managed-block|json-member`, generated hash/version and a required non-overlapping selector for fragments. Shared JSON array members are identified by stable `memberId` plus exact structural signature, never an array index. Corrupt/future data fails before write; a multi-platform transaction preflights all targets, locks in stable order, writes its manifest last and rolls back only when the disk still equals the output Harnix wrote. Mỗi canonical `managed.lock` path là directory chứa một unique UUID owner-token file với record schema v1. `mkdir(..., { recursive: false })` tạo candidate; candidate chỉ được trả ownership sau khi token là sole entry và exact bytes vẫn khớp. Stale/release cleanup đọc lại rồi unlink đúng observed token, sau đó gọi non-recursive `rmdir`; token identity đã đổi hoặc replacement directory có token khác thì preserve và retry/bounded timeout. Empty hoặc malformed Harnix token chỉ được reclaim sau stale threshold; live/identity-unknown owner và legacy single-file lock luôn fail closed.
+
+### 4.5 Task record and workflow state
+
+File: `.harnix/tasks/<task-id>/task.json`; `<task-id>` là lowercase `YYYYMMDD-HHMMSS-<kebab-slug>`, trong đó slug có một hoặc nhiều token alphanumeric không rỗng, phân tách bằng đúng một dấu `-`; collision chỉ append deterministic numeric suffix. Uppercase, empty segment, leading/trailing hyphen, traversal và path separator đều không hợp lệ. Active task được lưu bằng repo-relative task ID trong `.harnix/tasks/.active`, atomic replace; terminal `completed|cancelled` task xóa pointer chỉ khi pointer vẫn trỏ đúng task. Pointer rỗng là idle; pointer non-empty trỏ tới task file bị thiếu hoặc invalid phải throw typed invalid-state error và giữ nguyên pointer, không được project thành idle.
+
+Mọi transition vào `ready` yêu cầu acceptance criteria không rỗng, có ít nhất một validation check `required: true`, và với Full thì `prd.md`/`plan.md` phải được safe-resolve rồi đọc lại là không rỗng và `plan.md` có ít nhất một checklist item. Khi vào `ready/ready` (từ `planning` hoặc `replan`), CLI còn kiểm tra nội dung kế hoạch: không có token placeholder cứng (`TBD`, `TODO`, `FIXME`, `???`, `<placeholder>`) ngoài code, mọi id tiêu chí xuất hiện trong `plan.md`, và mỗi tiêu chí có check bắt buộc `focused` (check suite không tính); task Full phải lặp lại transition với `--reviewed` sau ready-review và `--dry-run` trả `reviewChecklist`. Task đã ở `ready/ready` không bị kiểm lại. Historical TaskRecord v1 freezes existing criterion/check identity and definition from first persistence but allows monotonic additions (legacy, read-only). TaskRecord v3 may freely converge criterion/check definitions while `planning` and before check evidence exists; obligations freeze at first persisted `ready`. Post-freeze changes take one `--save` that sets the same unfinished status at checkpoint `replan` with hidden-save envelope field `contractRevision: { reason }` (trimmed 10–1,000 characters; transport metadata, never a TaskRecord field), followed by a plain `ready/ready` save; there is no separate audit step. A criterion mapped by any check with recorded evidence and a check with passing evidence are immutable. A check with only failed/skipped evidence may be retired only by retaining its ID and every definition field, changing only `required` to false, and adding a new required replacement ID covering the same criteria. Exact replay returns the committed record without another audit entry.
+
+```ts
+type TaskMode = "lite" | "full";
+type TaskStatus = "planning" | "ready" | "in_progress" | "verifying" | "blocked" | "completed" | "cancelled";
+type WorkflowCheckpoint =
+  | "triage" | "planning" | "ready" | "implementing"
+  | "debugging" | "replan" | "verifying" | "finishing" | "cancelling";
+type CriterionStatus = "pending" | "met" | "waived";
+type EvidenceResult = "pass" | "fail" | "skipped";
+
+interface AcceptanceCriterionV1 {
+  id: string;
+  text: string;
+  status: CriterionStatus;
+  evidenceIds: string[];
+  waiverReason?: string;
+}
+
+interface ValidationCheckV1 {
+  id: string;
+  description: string;
+  command?: string;         // omitted for a deterministic non-command inspection
+  scope: "focused" | "full";
+  required: boolean;
+}
+
+interface EvidenceRecordV1 {
+  id: string;
+  checkId?: string;
+  recordedAt: string;       // ISO-8601
+  result: EvidenceResult;
+  exitCode?: number;        // required when command exists
+  summary: string;
+  artifactPaths: string[];  // normalized repo-relative, no machine paths
+}
+
+interface TaskRecordV1 {
+  generator: "harnix";
+  schemaVersion: 1;
+  id: string;
+  title: string;
+  mode: TaskMode;
+  status: TaskStatus;
+  checkpoint: WorkflowCheckpoint;
+  goal: string;
+  nonGoals: string[];
+  acceptanceCriteria: AcceptanceCriterionV1[];
+  relevantPaths: string[];
+  relevantSpecs: string[];
+  validationPlan: ValidationCheckV1[];
+  evidence: EvidenceRecordV1[];
+  blocker?: { kind: "decision" | "authority" | "credential" | "external" | "repository"; summary: string; nextAction: string; resumeStatus: "planning" | "ready" | "in_progress" | "verifying" };
+  cancellation?: { reason: string; authorizedBy: "user" };
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+  cancelledAt?: string;
+}
+
+interface ValidationCheckV2 {
+  id: string;
+  description: string;
+  command?: string;
+  scope: "focused" | "full";
+  required: boolean;
+  criterionIds: string[];
+  inputs: string[];
+}
+
+interface EvidenceFindingV1 { id: string; text: string; severity: "low" | "medium" | "high" | "critical" }
+
+interface EvidenceRecordV2 extends EvidenceRecordV1 {
+  inputDigest?: string;
+  findings?: EvidenceFindingV1[];
+}
+
+interface TaskRecordV2 extends Omit<TaskRecordV1, "schemaVersion" | "validationPlan" | "evidence"> {
+  schemaVersion: 2;
+  validationPlan: ValidationCheckV2[];
+  evidence: EvidenceRecordV2[];
+  decisions?: TaskDecision[];
+  residualRisks?: TaskResidualRisk[];
+}
+
+// Legacy v1/v2 above are read-only adapters. Schema v3 is the only shape a new task may have.
+interface ValidationCheckV3 {
+  id: string;
+  description: string;
+  command?: string;
+  scope: "focused" | "full";
+  required: boolean;
+  criterionIds: string[];   // sorted unique; required check needs >= 1
+  inputs: string[];         // sorted unique safe repository globs; required check needs >= 1; "@task-contract" is rejected
+  cwd?: string;             // repository-relative POSIX working directory ("." is the root); traversal, absolute and drive-relative forms are rejected; part of the check contract hash
+  baseline?: CheckBaselineWaiver; // closed key set below
+}
+
+interface CheckBaselineWaiver {
+  result?: "pass" | "fail" | "skipped";
+  classification?: "pre-existing" | "introduced" | "environment" | "unknown";
+  authorizedBy?: string;    // who accepted the baseline; a free-form record, not an authentication
+  scope?: string;
+}
+
+interface TaskRecordV3 extends Omit<TaskRecordV2, "schemaVersion" | "validationPlan"> {
+  schemaVersion: 3;
+  validationPlan: ValidationCheckV3[];
+  // evidence keeps the EvidenceRecordV2 shape: inputDigest? and findings? stay optional in the type,
+  // but a passing required-check evidence must carry a 64-hex inputDigest and a command-backed pass exitCode 0.
+}
+
+interface TaskDecision { id: string; text: string; rationale: string }
+interface TaskResidualRisk { id: string; text: string; severity: "low" | "medium" | "high" }
+```
+
+`decisions` và `residualRisks` là review data chỉ có ở v2 và v3: chúng ghi lại vì sao task có hình dạng hiện tại và rủi ro nào được chấp nhận, để người review và agent kế nhiệm không phải dựng lại từ transcript. Mỗi item có `id` an toàn unique và `text` non-empty tối đa 2.000 ký tự. Hai trường này nằm **ngoài** canonical task contract, nên thêm hoặc sửa chúng không đổi `taskContractHash` và không làm stale evidence đang pass; chúng không bao giờ waive một criterion, hạ cấp một failed check hay thay thế một required pass. Schema v1 reject chúng như unknown field.
+
+`findings` là optional trên `EvidenceRecordV2`: mỗi finding có `id` an toàn unique trong evidence đó, `text` non-empty tối đa 2.000 ký tự, và `severity` đúng một trong `low|medium|high|critical`. Đây là cách máy đọc được để Stage-2 review lọc/ưu tiên phát hiện theo mức độ nghiêm trọng thay vì chỉ dựa vào `summary` văn xuôi tự do; hoàn toàn optional, không bắt buộc, và không đổi cách tính `taskContractHash`, hay bất kỳ luật completion nào khác. Schema v1 reject `findings` như unknown field, giống `inputDigest`.
+
+Task mới chỉ được tạo bằng schema v3 (breaking change đã duyệt ở D1/D11); workflow transport reject new v1/v2 nhưng direct reader vẫn hỗ trợ exact historical v1/v2 (legacy, read-only). Mọi version dùng exact recursive allowlist cho TaskRecord, acceptance criterion, validation check, evidence, blocker và cancellation; unknown top-level hoặc nested key bị reject. `criterionIds` phải unique/valid/sorted; required check phải map ít nhất một criterion và mọi non-waived criterion phải được ít nhất một required check bao phủ. `inputs` là danh sách sorted unique các safe project-relative POSIX file/glob, không rỗng với required check; token `@task-contract` bị reject vì digest luôn gồm định nghĩa của chính check, tiêu chí nó phủ và mode của task. Absolute path, backslash, empty segment, `.`/`..`, traversal và symlink/junction escape bị reject; mỗi pattern phải match ít nhất một file khi tính digest. Mode là monotonic: Lite có thể promote sang Full với required artifacts/gates, nhưng persisted Full không được downgrade về Lite ở bất kỳ unfinished transition nào.
+
+`inputDigest` = SHA-256 của `{digest:4, taskId, checkId, taskContractHash, entries}` với `entries` là sorted `{path, sha256}` (sha256 thô của từng file khớp `inputs`, gitignore-aware, không follow symlink). `taskContractHash` là SHA-256 của hợp đồng riêng của check (task ID, mode, định nghĩa chính check, ID/text của tiêu chí nó phủ; không gồm check khác); evidence ghi bằng công thức cũ `{digest:3, ...}` (hợp đồng toàn task) vẫn được nhận khi hợp đồng toàn task chưa đổi; `decisions`, `residualRisks`, evidence và `review.md` nằm ngoài contract. Snapshot bỏ đúng ba file workflow-owned của active task (`task.json`, `review.md`, legacy `verification-inputs.json`); `prd.md`/`plan.md` chỉ là input khi được khai báo, nên tick checklist không stale evidence. Không có sidecar: digest chỉ lưu inline trong `evidence.inputDigest` và freshness được quyết định bằng cách tính lại. Không được mở rộng ngoại lệ thành `.harnix/tasks/**`.
+
+Hidden `harnix workflow --snapshot --check <id>` chỉ đọc state/input và trả `{generator, schemaVersion:3, taskId, checkId, taskContractHash, entries, inputDigest}`. Required passing evidence phải có digest 64-hex; command-backed pass cần `exitCode` 0 và command-backed fail cần `exitCode` khác 0. Failed run mang digest khi tính được; snapshot-unavailable failure vẫn hợp lệ mà không bịa digest. Save recompute digest của mọi required pass/fail-có-digest mới append theo inputs hiện tại và từ chối khi lệch. Mọi v3 pass đều dựa trên content freshness và không expire theo wall clock, còn timestamp invalid/future fail closed. Digest không chứa source body, secret, absolute path, prompt, environment hay command output.
+
+Hidden save accepts the exact envelope `{task, artifacts?, contractRevision?, epic?, epicMembers?}` only. Artifact allowlist is `prd|plan|design|research|context`; the workflow computes `contextSelection`, and unknown envelope/artifact/revision fields fail closed. A project-scoped cross-process lock serializes saves; captured bytes are compared immediately before forward writes. Save validates artifacts and writes candidate artifacts → `task.json` commit marker. Before a task commit, any failure conservatively restores only exact files whose current bytes still equal bytes written by that attempt; concurrent/user changes are preserved and reported. Evidence history is append-only and order-preserving with property-order-insensitive object comparison. A committed new/existing task with a missing `.active` pointer is recoverable only by semantic-exact persisted task/artifact replay; validation-check array order is non-semantic, while evidence order remains chronological. Context replay requires a valid bound `context.json`/`context-selection.json` pair. A modified inactive candidate is rejected and must first be selected through public `resume`; a committed `contractRevision` replay is idempotent. `epicMembers` must be v3 planning tasks (renamed from the removed `roadmapMembers`; breaking, no alias).
+
+Completion (v3) yêu cầu latest fresh pass của từng required check, criterion-linked evidence nằm trong giao của `criterion.evidenceIds` và check có `criterionIds` chứa criterion đó, đồng thời finish recompute digest từ current inputs và so với `evidence.inputDigest`. Drift fail closed với check ID; unreadable/unsafe/empty match cũng fail. Diagnostic không liệt kê file đổi (reason code `digest-mismatch`). Timestamp freshness không thay thế input freshness. Unscoped evidence và evidence tiền-migration không digest không chứng minh completion v3.
+
+**Ready gate và revision (v3).** Mọi transition vào `ready` yêu cầu ≥ 1 criterion và ≥ 1 required check; Full thêm `prd.md`/`plan.md` không rỗng (Markdown tự do) và `plan.md` có ít nhất một checklist item `- [ ] ...`. Khi vào `ready/ready` (từ `planning` hoặc `replan`), CLI còn kiểm tra nội dung kế hoạch: không có token placeholder cứng (`TBD`, `TODO`, `FIXME`, `???`, `<placeholder>`) ngoài code, mọi id tiêu chí xuất hiện trong `plan.md`, và mỗi tiêu chí có check bắt buộc `focused` (check suite không tính); task Full phải lặp lại transition với `--reviewed` sau ready-review và `--dry-run` trả `reviewChecklist`. Task đã ở `ready/ready` không bị kiểm lại. Obligations hội tụ tự do trong `planning` trước khi có check evidence và freeze tại first persisted `ready`. Post-freeze, một `--save` duy nhất đặt checkpoint `replan` (status unchanged, task ngoài editable planning draft) cùng envelope field `contractRevision: { reason }` (trimmed 10–1.000 ký tự, transport metadata, không phải field của TaskRecord) và obligations đã sửa; Harnix append skipped evidence `task-contract-revision-NN`. Criterion được map bởi check đã có evidence và check đã có pass là immutable; check chỉ có `fail|skipped` evidence được retire bằng cách giữ nguyên ID và mọi definition field, chỉ đổi `required` sang false, và thêm required replacement ID cùng criterion coverage. Sau đó một save/transition `ready/ready` thông thường (guarded re-entry chỉ khi checkpoint ngay trước là `replan`). Không có bước audit riêng; ready-trace grammar, execution-notes grammar và `workflow --audit-ready` đã bị removed, và plan cũ có vùng execution-notes được lưu/đọc như văn bản thường. Exact replay trả committed record mà không append audit lần hai.
+
+**Legacy v1/v2 (read-only) và migration.** Schema v1/v2 vẫn được đọc đúng semantics cũ và terminal `completed|cancelled` được byte-preserve. Unfinished v1/v2 không blocked chỉ migrate sang v3 bằng đúng một `--save` giữ nguyên status và checkpoint, acceptance criteria giữ nguyên, prior evidence giữ nguyên, và từng prior required check giữ exact `id|description|command|scope|required` (cùng `criterionIds` với v2) trong khi `inputs` bỏ `@task-contract` (v1 thêm `criterionIds|inputs`); candidate append exact `{ id:"task-schema-to-v3", recordedAt:<candidate.updatedAt>, result:"pass", summary:"Migrated TaskRecord schema to v3 with explicit authorization.", artifactPaths:[".harnix/tasks/<task-id>/task.json"] }`; downgrade bị reject. Mọi save/transition/evidence/finish/learn khác trên task chưa migrate bị từ chối kèm migrate hint. Pass tiền-migration được bảo toàn nhưng không chứng minh completion v3 (`legacy-schema`) và phải chạy lại. Migration evidence loại record khỏi native editable-draft path, nên thay obligation kế tiếp cần `contractRevision`. `update` và Doctor không rewrite; Doctor chỉ emit `legacy-task-schema` (`warning` cho unfinished, `info` cho terminal `completed|cancelled`).
+
+Legal success transitions: `planning -> ready -> in_progress -> verifying -> completed`; any unfinished state may enter `blocked` and resume only to its recorded prior status, hoặc chuyển terminal `cancelled/cancelling` qua hidden `workflow --cancel` khi có explicit user authority. `debugging`, `replan`, `finishing` và `cancelling` là checkpoints. `cancelled` cần non-empty concise `cancellation.reason`, `authorizedBy: "user"`, valid `cancelledAt`, không blocker/completedAt; nó giữ criteria/evidence nguyên trạng, không resume và không thỏa completion. `workflow --cancel` persist terminal task → append journal kind `cancellation` với deterministic ID → clear matching active pointer; retry từ `cancelled/cancelling` dùng original `cancelledAt` journal date và không duplicate. Illegal jump, malformed/future record hoặc acceptance/evidence reference lỗi fail closed. Full task bắt buộc `prd.md` + `plan.md`; `design.md`, `research/`, và `context.json` conditional (legacy v2 tasks may still carry a read-only `verification-inputs.json`). Lite giữ toàn bộ minimum trace trong `task.json`. Every `saveTask` call — the single write path shared by `--save`, `--transition`, `--evidence`, `--finish`, and `--cancel` — also regenerates `.harnix/tasks/<id>/review.md`, a derived, always-overwritten human-reading page (title, status/checkpoint, goal, non-goals, acceptance criteria, `decisions`/`residualRisks` when present, blocker/cancellation when present, evidence). It is not part of `TaskArtifacts`, carries no obligation, is never included in a required check's `inputs`, and never affects `taskContractHash`; a decision or residual risk recorded after a check has passed must not invalidate that evidence. Validation invariants chung: `met` criterion cần ít nhất một existing evidence ID; `waived` cần non-empty `waiverReason`; command evidence cần integer `exitCode`; `blocked` cần blocker + matching `resumeStatus`; `completed` cần `completedAt`, không blocker và mọi required criterion `met|waived`.
+
+### 4.6 Context manifest
+
+Conditional file: `.harnix/tasks/<task-id>/context.json`. Lite có thể chỉ dùng `relevantPaths`/`relevantSpecs` trong task record.
+
+```ts
+interface ContextEntryV1 {
+  path: string;             // normalized repo-relative
+  reason: string;
+  priority: number;         // integer; higher loads first
+  pinned: boolean;
+  states: Array<"planning" | "implementing" | "debugging" | "verifying" | "finishing">;
+  contentHash?: string;     // optional change-detection hint, never trust boundary
+}
+
+interface ContextManifestV1 {
+  generator: "harnix";
+  schemaVersion: 1;
+  taskId: string;
+  maxCharacters: number;
+  entries: ContextEntryV1[]; // dedupe by normalized path, sort pinned/priority/path
+  omitted: Array<{ path: string; reason: "budget" | "duplicate" | "missing" | "unsafe" }>;
+}
+```
+
+Deterministic base score là pin `1000`, explicit task/acceptance reference `500`, active package/path `250`, applicable language-or-technology profile `100` (một bounded stack bonus dù cả hai facet match), cross-project guide `25`; applicable signals cộng dồn, sau đó sort pinned → score/priority descending → normalized path ascending. Context loader không execute included text, không follow external symlink và luôn disclose omitted entries. Repository paths reject C0/C1 control characters cùng U+2028/U+2029. Platform payload serializes omitted paths with `JSON.stringify`; opening marker, excerpts, disclosure and closing marker share one hard character budget, and disclosure remains entirely inside the fixed untrusted repository boundary even when no excerpt fits. Explicit full-context bypasses budget only, không bypass path safety/dedupe/source listing. Đường hook bounded thêm `ContextPointerOptions` (`prefixes: [".harnix/spec/guides/"]`, `minCharacters: 1500`): entry khớp được liệt kê dạng con trỏ nhưng vẫn có `contentHash`; budget chỉ tính dòng con trỏ.
+
+Hidden inspect/continue luôn project `contextDrift: {state,changes,selectionChanges}` với state `not-recorded|current|stale`, sorted relative path changes `changed|missing|unreadable|unverified` và sorted selection-basis changes theo §4.4A. Không có manifest/hash là `not-recorded`; mixed hashed/unhashed là `stale` với entry thiếu hash `unverified`. Chỉ đọc path đã liệt kê và safe-resolve dưới root. Continue gặp `stale` phải persist cùng status với checkpoint `replan` trước khi dùng lại context và route Brainstorm để reselect; không tự sửa source hay manifest. `not-recorded` trên legacy state chỉ được disclose, không tự ép migration/replan.
+
+### 4.7 Context selection freshness sidecar v1
+
+Explicit hidden context persistence atomically writes a task-owned `.harnix/tasks/<task-id>/context-selection.json` beside `context.json`:
+
+### 4.8 Epic tracking
+
+File: `.harnix/epics/<epic-id>.json` và `.harnix/epics/<epic-id>.md` (derived, always-overwritten, similar role to review.md). Legacy `.harnix/roadmaps/` is still read as a fallback and is migrated by `harnix update` / `harnix doctor --fix`.
+
+```ts
+interface EpicRecord {
+  generator: "harnix";
+  schemaVersion: 1;
+  id: string;                // lowercase kebab-slug matching ^[A-Za-z0-9][A-Za-z0-9._-]*$
+  title: string;             // 1–500 characters
+  goal: string;              // 1–2000 characters
+  nonGoals?: string[];       // optional array of strings
+  createdAt: string;         // ISO-8601
+  updatedAt: string;         // ISO-8601, must be >= createdAt
+}
+```
+
+TaskRecordV2 gains optional field `epicId: string | undefined` (required: false, sinceSchemaVersion: 2) for grouping multiple tasks under one epic. Validation accepts v2 task with/without epicId and rejects epicId on v1 tasks. TaskRecordV3 gains optional `followUpOf` (task id of the task it follows up; sinceSchemaVersion 3, additive, no migration): rejected on v1/v2, when malformed, and when equal to the task's own id; `harnix workflow --init --epic <epic-id>` attaches an existing epic and `--follow-up` records `followUpOf` and inherits the parent's epic. Hidden `--save` envelope accepts optional field `epic?: EpicRecord`; when present, validates and upserts `.harnix/epics/<epic-id>.json` atomically. After save, if `task.epicId` matches an existing epic, regenerates `.harnix/epics/<epic-id>.md` with heading, goal, non-goals, next non-terminal task and members. Markdown is derived, never hand-edited, and regenerated on epic upsert or task-member update. Public command `harnix epic [--limit <1..100>]` lists epics and `harnix epic <epic-id>` details one (the former `harnix roadmap [--id]` is removed, breaking, no alias); a missing or invalid ID returns PublicCliErrorV1 exit 2. List results include task counts (total, completed, cancelled); detail results include member list and next task. EpicRecord schema freeze = [1.1.12]; future evolution requires new schema version.
+
+```ts
+interface ContextSelectionSnapshotV1 {
+  generator: "harnix";
+  schemaVersion: 1;
+  taskId: string;
+  selectorVersion: 1;
+  inventoryFingerprint: string;
+  selectionInputHash: string;
+  selectionResultHash: string;
+}
+```
+
+`selectionInputHash` canonicalizes task relevant paths/specs, known config profile/package/context/runtime facets, selected guide paths, selector version and validated repo-map inventory fingerprint. `selectionResultHash` canonicalizes sorted included/omitted selection metadata and deliberately excludes `contentHash`. Inspect returns `contextDrift.selectionChanges` sorted from `inventory-changed|inventory-unavailable|selection-signals-changed|selector-version-changed`; any content or selection change is `stale`. Manifest v1 without sidecar remains readable and is `not-recorded` when content is clean. Corrupt/future/task/result binding fails closed; missing/invalid current cache produces `inventory-unavailable` without scan, refresh, query or write.
+
+### 4.9 Journal and learning
+
+Journal path: `.harnix/workspace/<developer>/journal/YYYY-MM-DD.jsonl`; namespace directory được tạo lazy khi ghi entry đầu tiên. Mỗi UTF-8 JSON object nằm trên một line, append bằng locked/atomic strategy phù hợp platform. Malformed lines được report và skip, không làm mất valid entries.
+
+```ts
+interface LearningCandidateV1 {
+  id: string;
+  statement: string;
+  sourceTaskIds: string[];
+  evidenceIds: string[];
+  occurrences: number;
+  confidence: number;       // 0..1
+  status: "candidate" | "approved" | "promoted" | "rejected";
+}
+
+interface JournalEntryV1 {
+  generator: "harnix";
+  schemaVersion: 1;
+  id: string;
+  recordedAt: string;
+  developer: string;
+  taskId?: string;
+  kind: "checkpoint" | "completion" | "cancellation" | "learning" | "note";
+  summary: string;
+  evidenceIds: string[];
+  learning?: LearningCandidateV1;
+}
+```
+
+Candidate normalization dedupe `sourceTaskIds`/`evidenceIds`; `occurrences` bằng số source task độc lập. Deterministic confidence là `min(1, 0.4 + 0.2*min(distinctTasks,2) + 0.1*min(distinctEvidence,2))`. Không có explicit approval thì chỉ eligible để đề xuất khi distinct tasks >=2, distinct evidence >=2 và confidence >=0.8; write vào spec vẫn cần finish/review action rõ và luôn reviewable. Không hidden/global promotion.
+
+Public `harnix mem --learning` adds only a kind filter before the existing query/limit merge and preserves the default `{entries,malformed}` JSON contract. Hidden `workflow --learn` reads exact bounded stdin `{ "candidate": { "id", "statement", "sourceTaskIds", "evidenceIds" } }` only from active `verifying/finishing`; caller cannot set developer/path/time/status/occurrences/confidence. It reuses completion input freshness, requires the current task plus completed source tasks and at least one referenced evidence per source, enforces the frozen eligibility formula and 64 KiB limit, then appends deterministic ID `<current-task>-<candidate>-learning`. Identical retry across journal dates returns `created:false`; conflicting reuse fails. Output is `{entry,eligible:true,created,findings}` with sorted redacted finding categories. TaskRecord, active pointer, historical journal lines and specs remain unchanged.
+
+### 4.10 Untrusted learning review boundary
+
+`LearningCandidateV1` persisted shape và eligibility formula không đổi. `promotionProposal()` trả `PromotionProposalV2` với `review: {statementHash,sourceTaskIds,evidenceIds,findings}`; findings thuộc `command-like|credential-like|instruction-override|url-like`, sorted và không giữ matched values. Statement tối đa 64 KiB cho proposal, được render duy nhất dưới `Statement-JSON: <JSON.stringify(statement)>` trong fixed Harnix untrusted-learning boundary. Doctor union categories trên mỗi journal file thành một `persistent-learning-suspicious` warning, logical path only, `fixable:false`; `doctor --fix` không sửa journal hoặc spec.
+
+### 4.11 Ready gate and hidden transports (v3)
+
+Full `prd.md`/`plan.md` là Markdown tự do; ready chỉ đòi cả hai không rỗng và `plan.md` có ít nhất một checklist item (không còn ready-trace grammar). Hidden `workflow --transition <status>/<checkpoint>` không nhận task body: nó đọc active record đã persist, áp đúng một legal transition và đi qua cùng validation/lock/immutability của save path, nên đổi stage không thể làm rơi evidence hay ghi đè obligation; nó từ chối `cancelled` vì cancellation chỉ thuộc `--cancel`. Vào `blocked` bắt buộc `blocker.resumeStatus` bằng status ngay trước; từ `blocked`, `--transition` chỉ resume về `resumeStatus` và bỏ `blocker`. Từ checkpoint `replan` chỉ thoát được về `ready/ready` (hoặc `planning/planning` khi status `planning`, hoặc `verifying/verifying` khi status `verifying`, hoặc sang `blocked`). `--transition <status>/<checkpoint> --dry-run` trả `{ dryRun, valid, target, task, issues, advisories, unbaselinedChecks? }`: `valid` đúng khi transition thật được chấp nhận (cùng `collectReadyIssues` với cổng ready), còn input glob không khớp file và check chưa baseline chỉ nằm trong `advisories`. Hidden `workflow --evidence` đọc bounded envelope `{ "evidence": <Evidence> }` trên stdin và append đúng một item. Các transport hẹp bổ sung, tất cả build candidate rồi đi qua cùng `saveWorkflow` (khóa, digest recompute, bất biến obligation, rollback): (1) `workflow --evidence --check <id> --result pass|fail|skipped --summary <text> [--exit-code <n>] [--artifact <path>]... [--digest <hex>]` tự điền `id` dạng `ev-<checkId>-<n>`, `recordedAt` theo clock đã cấu hình và `inputDigest` (check v3 required, result pass/fail); `--exit-code` bắt buộc với pass/fail và với check có `command`; có bất kỳ flag evidence nào thì không đọc stdin. Evidence mới ở mọi transport có `recordedAt` lớn hơn giờ hiện tại quá 5 giây bị từ chối, và pass hoặc fail mới cho check đang ở circuit breaker `stop` (hai fail liên tiếp) cũng bị từ chối; lối đi là `--replace-check` với bản thay khác `command`, `inputs` hoặc `cwd`. (2) `workflow --criterion <id>[,<id>] --met [--evidence-ids <ids>]` (chỉ v3) đặt criterion `met` với evidenceIds mặc định là pass mới nhất còn tươi của mọi required check bao phủ criterion; từ chối khi thiếu pass tươi, criterion `waived`, hoặc evidence không thuộc check bao phủ. (3) `workflow --migrate` (stdin tuỳ chọn `{ "checks": { "<id>": { "criterionIds", "inputs" } } }`) migrate task active legacy v1/v2 chưa kết thúc và không blocked trong một lệnh: giữ status/checkpoint/criteria/field nền của required check/evidence cũ, bỏ `@task-contract`, append đúng evidence `task-schema-to-v3` với thời gian clock; `criterionIds` (v1) và `inputs` rỗng không được suy đoán, thiếu thì lỗi liệt kê check. (4) `workflow --run-check <id> -- <exe> [args...] [--summary <text>]` kiểm argv (chuẩn hóa: bỏ nháy, gộp khoảng trắng, bỏ `run` của package manager) bằng `command` đã khai báo của check (check không có `command` chạy argv bất kỳ và evidence ghi lệnh thật, tối đa 200 ký tự), chạy trong `cwd` đã khai báo (`--cwd` chỉ được lặp lại đúng giá trị đó; check chưa khai báo `cwd` từ chối `--cwd`; `cwd` được chuẩn hóa và kiểm realpath), từ chối khi check đang ở circuit breaker `stop`, chụp digest, chạy tiến trình bằng process runner (executable + mảng đối số; trên Windows tên lệnh trần đi qua `cmd.exe /d /s /c` cố định và từ chối đối số chứa metacharacter cmd), chụp lại digest và chỉ ghi evidence khi digest bằng nhau (exit 0 = pass, khác 0 = fail); trả `{id,status,checkpoint,updatedAt,evidenceId,result,exitCode,outputTail}` với `outputTail` tối đa 2000 ký tự và không lưu vào task. (5) `--brief` cho `--save|--transition|--evidence|--criterion|--migrate|--finish` trả `{id,status,checkpoint,updatedAt}` (kèm `evidenceId` khi có); không có `--brief` output giữ nguyên. (6) `workflow --set-check <id> [--description --command --scope focused|full --required|--no-required --criteria <ids> --input <glob>...] [--reason <text>]` thêm hoặc cập nhật một validation check của task v3 active (field không nêu giữ nguyên; check mới cần description và scope, check required cần criteria và ít nhất một input); `workflow --add-criterion <id> --text <text> --check <check-id>[,<check-id>] [--reason <text>]` thêm criterion `pending` và gắn nó vào các check nêu tên; `workflow --set-paths [--relevant-path <p>]... [--relevant-spec <p>]...` thay danh sách tương ứng và không cần lý do. Hai transport đầu là chỉnh nghĩa vụ: task `planning` chưa bị khóa thì save thường; task đã qua planning hoặc đã migrate (nghĩa vụ đã khóa) bắt buộc `--reason` 10–1000 ký tự và CLI tự làm đúng một save `replan` kèm `contractRevision`, sau đó chuyển `ready/ready`. Đổi `status` của criterion sang hoặc khỏi `waived`, hay đổi `waiverReason`, sau first ready cũng là chỉnh nghĩa vụ (cần replan và `contractRevision`); criterion đã có evidence không đổi `status`. `workflow --batch` đi cùng đường đó cho criteria và checks (sau planning cần `reason` 10–1000 ký tự); decision và risk của batch append-only như `--add-decision`/`--add-risk`: id trùng và text rỗng bị từ chối, severity mặc định `low`. (7) Mọi body stdin được bỏ BOM đứng đầu, và `saveWorkflow` từ chối envelope có chuỗi chứa U+FFFD hoặc là mojibake windows-1252/windows-1258 của UTF-8 hợp lệ (nguyên nhân: Windows PowerShell 5.1 đọc UTF-8 thành ANSI và thêm BOM khi pipe); văn bản có dấu đi qua flag hoặc file sửa trực tiếp, không qua pipe của powershell.exe 5.1. , tối đa 60 ký tự); title có ký tự ngoài ASCII mà thiếu `--slug` bị từ chối, title ASCII vẫn tự sinh slug; `harnix epic <epic-id>` trả thêm `mode` cho mỗi member và bảng Members của epic `.md` có cột Mode. (9) `workflow --set-baseline <check-id> --result pass|fail --classification pre-existing|introduced|environment|unknown --authorized-by <who> --scope <text>` ghi `baseline` (tập khóa đóng `result|classification|authorizedBy|scope`) lên một check required của task v3 active ở mọi stage chưa terminal; đây là dữ liệu review nằm ngoài contract hash, obligation freeze và digest nên không cần `--reason` hay replan. Check required có baseline `fail` với `classification` là `pre-existing|environment`, `authorizedBy` không rỗng và lần chạy mới nhất là `fail` được finish và `--criterion` chấp nhận khi một check required khác không có baseline pass mới nhất và phủ mọi `criterionIds` của nó; `--finish --brief` thêm `baselineAuthorized: [<check-id>]`. Không so sánh delta (chỉ fail test mới): cần định danh từng test, phức tạp và dễ báo sai. Khi task ở `verifying`, `--set-check|--replace-check|--add-criterion` sau save `replan` tự lưu tiếp `verifying/verifying` trong cùng lệnh (mọi check đã pass bất biến); status khác giữ `replan`. (8) `workflow --add-decision <id> --text <t> --rationale <t>` và `workflow --add-risk <id> --text <t> [--severity low|medium|high]` (mặc định `low`) thêm một `decisions` hoặc `residualRisks` item vào task v3 active ở mọi stage chưa terminal; đây là dữ liệu review nằm ngoài contract hash nên không cần `--reason` hay replan, id trùng hoặc text rỗng bị từ chối. `workflow --finish --brief` trả thêm `learning: { notes, captured, hint? }` (số note gồm decisions, residualRisks và findings; số observation đã ghi vào journal lần finish này; lý do khi bằng 0), còn `--finish` không `--brief` giữ nguyên output TaskRecord. Không có `--file`: file tạm trong repo làm bẩn digest và thêm bề mặt path-safety. Hidden `workflow --schema` là read-only và trả contract của envelope, TaskRecord cùng transport mà không lộ project data. Hidden `workflow --audit-ready` đã bị removed; Lite và historical records không bị rewrite. `workflow --preflight` trả `learning` chỉ khi `nextStage` là `plan`; `--preflight --brief` bỏ `learning`; `BRIEF_ACTIONS` (src/core/workflow/brief.ts) là tập lệnh duy nhất nhận `--brief` và `workflow --schema` liệt kê nó trong `constraints.brief`; `harnix epic <epic-id> --brief` là dạng gọn của chi tiết epic; `--save` với `epicMembers` từ chối ID không tăng dần chặt theo thứ tự khai báo, chỉ tạo member chưa tồn tại (member đã tồn tại chỉ nhận replay giống hệt, khác thì bị từ chối trước khi ghi bất kỳ file nào), ghi member trước task chính và gỡ chúng nếu save thất bại trước khi task commit; file epic `.json`/`.md` ghi bằng atomic replacement.
 
 ### 4.12 Dependency-aware repo-map ranker
 

@@ -61,6 +61,27 @@ export function coversSourceAndTest(inputs: readonly string[] | string[] | undef
   return hasSource && hasTest;
 }
 
+/**
+ * A required check that was already red before the task, with the user's authorization (`pre-existing` or
+ * `environment`), whose deliverable is proved by another passing required check covering the same criteria. The red
+ * run must be the latest one, so a check that later passed or never ran is judged by the ordinary rules.
+ */
+export function authorizedRedBaseline(task: TaskRecord, check: ValidationCheck): boolean {
+  const baseline = (check as { baseline?: { result?: string; classification?: string; authorizedBy?: string } })
+    .baseline;
+  if (!check.required || baseline?.result !== "fail" || (baseline.authorizedBy ?? "").trim() === "") return false;
+  if (baseline.classification !== "pre-existing" && baseline.classification !== "environment") return false;
+  if (selectLatestEvidence(task.evidence, check.id)?.result !== "fail") return false;
+  return task.validationPlan.some(
+    (proof) =>
+      proof.id !== check.id &&
+      proof.required &&
+      (proof as { baseline?: unknown }).baseline === undefined &&
+      selectLatestEvidence(task.evidence, proof.id)?.result === "pass" &&
+      check.criterionIds?.every((id) => proof.criterionIds?.includes(id)) === true,
+  );
+}
+
 /** Distinct test commands of the repository and its packages, in detection order. */
 export function knownTestCommands(plan: VerifyPlan): string[] {
   const commands = [plan.commands.test, ...plan.packages.map((item) => item.commands.test)];
@@ -121,6 +142,8 @@ export async function assertSuiteGateFinishing(projectRoot: string, task: TaskRe
       'Workflow finish requires a passing required check whose inputs cover both source and test (for example ["**"] or ["src/**","test/**"]) with a current input digest. Scope must be "focused" or "full".',
     );
   }
+
+  if (authorizedRedBaseline(task, suiteCheck)) return;
 
   const passEvidence = selectLatestEvidence(task.evidence, suiteCheck.id);
   if (task.schemaVersion !== 3 || passEvidence?.result !== "pass" || typeof passEvidence.inputDigest !== "string") {

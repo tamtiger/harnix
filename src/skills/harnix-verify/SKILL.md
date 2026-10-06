@@ -2,7 +2,7 @@
 name: harnix-verify
 description: Use when a Harnix task needs fresh compliance, correctness and security verification, evidence, and a safe finish or explicit cancellation with an evidence-based handoff.
 metadata:
-  version: "2.2.0-dev.3"
+  version: "2.2.0"
 ---
 
 # Verify and finish Harnix work
@@ -26,6 +26,8 @@ Only acceptance violations, required-gate failures and material correctness, sec
 ## Record
 
 Append each result with `--run-check` or `--evidence --check <id> --result <r> --summary <t> --exit-code <n>`; mark criteria with `--criterion <ids> --met`; keep failed evidence. Stay `verifying` while anything required is failed, missing, stale or unread.
+
+A suite that was already red before the task and outside its scope: ask the user to authorize it once with `harnix workflow --set-baseline <check-id> --result fail --classification pre-existing|environment --authorized-by user --scope "<why>"`, run the suite so its latest result is the red one, and prove the deliverable with a focused required check covering the same criteria; finish and `--criterion` then accept the pair. Never baseline a failure the task introduced. Editing a check while `verifying` (`--set-check`, `--replace-check`, `--add-criterion` with `--reason`) resumes at `verifying/verifying` without replaying ready.
 
 ## Technique skills
 
