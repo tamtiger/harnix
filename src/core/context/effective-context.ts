@@ -90,7 +90,8 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
     bounded ? { prefixes: [GUIDE_POINTER_PREFIX], minCharacters: POINTER_MIN_CHARACTERS } : undefined,
   );
 
-  const learning = await learningBlock(input);
+  // Learning only helps while the agent plans; every later turn would pay its tokens for nothing.
+  const learning = input.task.status === "planning" ? await learningBlock(input) : "";
   return {
     text: withLearning(output.text, learning),
     manifest: output.manifest,
@@ -112,8 +113,8 @@ async function learningBlock(input: EffectiveContextInput): Promise<string> {
 /** Learning goes first inside the untrusted frame so the size budget trims file excerpts before it. */
 function withLearning(text: string, learning: string): string {
   if (learning.length === 0) return text;
-  if (text.length === 0) return `${UNTRUSTED_CONTEXT_PREFIX}${learning}${UNTRUSTED_CONTEXT_SUFFIX}`;
-  return `${UNTRUSTED_CONTEXT_PREFIX}${learning}\n\n${text.slice(UNTRUSTED_CONTEXT_PREFIX.length)}`;
+  if (text.length === 0) return `${UNTRUSTED_CONTEXT_PREFIX}\n${learning}${UNTRUSTED_CONTEXT_SUFFIX}`;
+  return `${UNTRUSTED_CONTEXT_PREFIX}\n${learning}\n\n${text.slice(UNTRUSTED_CONTEXT_PREFIX.length)}`;
 }
 
 async function loadPersistedEntries(harnixRoot: string, taskId: string): Promise<ContextEntry[] | undefined> {

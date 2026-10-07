@@ -83,3 +83,28 @@ export function criteriaWithoutFocusedCheck(task: TaskRecord): string[] {
   }
   return openCriteria(task).filter((id) => !covered.has(id));
 }
+
+const CHECK_ID = "check-[a-z0-9]+(?:-[a-z0-9]+)*";
+const CHECK_IN_CODE = new RegExp(`\`(${CHECK_ID})\``, "gu");
+const CHECK_STARTING_ITEM = new RegExp(`^\\s*[-*]\\s+\\[[ xX]\\]\\s+(${CHECK_ID})(?![A-Za-z0-9-])`, "u");
+
+/**
+ * Check ids (the `check-` naming of Harnix) that `plan.md` names in inline code or at the start of a checklist item
+ * but `validationPlan` does not declare: a renamed or newly added check the plan and the task disagree about.
+ */
+export function unknownCheckReferences(task: TaskRecord, plan: string): string[] {
+  const declared = new Set(task.validationPlan.map((check) => check.id));
+  const found = new Set<string>();
+  let inFence = false;
+  for (const line of plan.split(/\r?\n/u)) {
+    if (FENCE.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
+    for (const match of line.matchAll(CHECK_IN_CODE)) found.add(match[1] as string);
+    const first = CHECK_STARTING_ITEM.exec(line)?.[1];
+    if (first !== undefined) found.add(first);
+  }
+  return [...found].filter((id) => !declared.has(id)).sort();
+}

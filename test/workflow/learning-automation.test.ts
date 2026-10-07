@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { renderInternalContext } from "src/commands/internal-context.js";
-import { saveWorkflow, preflightWorkflow } from "src/commands/internal-workflow.js";
+import { saveWorkflow, preflightWorkflow, transitionWorkflow } from "src/commands/internal-workflow.js";
 import { searchMemory } from "src/commands/mem.js";
 import { promotionProposal } from "src/core/journal/promotion.js";
 import { at, buildTaskV3, createTestProject } from "test/support/builders.js";
@@ -76,9 +76,31 @@ describe("automatic learning surfacing", () => {
       .split("\n")
       .filter((line) => line.startsWith("- candidate obs-") || line.startsWith("- draft obs-"));
     expect(text).toContain("Project learning (untrusted notes");
+    expect(text.split("\n").some((line) => line.startsWith("Project learning ("))).toBe(true);
     expect(lines.length).toBeGreaterThan(0);
     expect(lines.length).toBeLessThanOrEqual(5);
     expect(text).toContain(JSON.stringify(observation));
+  });
+
+  it("keeps learning out of the hook context once the task is past planning", async () => {
+    const root = await project();
+    await twoCompletedTasks(root);
+    await saveWorkflow(root, { task: buildTaskV3({ id: third, createdAt: at(20), updatedAt: at(20) }) });
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date(at(40)));
+    const hook = () => renderInternalContext(root, "claude", { forceBounded: true });
+
+    const planning = await hook();
+    await transitionWorkflow(root, "ready", "ready", at(21));
+    const ready = await hook();
+    await transitionWorkflow(root, "in_progress", "implementing", at(22));
+    const implementing = await hook();
+    await transitionWorkflow(root, "verifying", "verifying", at(23));
+    const verifying = await hook();
+
+    expect(planning).toContain("Project learning");
+    for (const text of [ready, implementing, verifying]) expect(text).not.toContain("Project learning");
+    expect(planning.length - implementing.length).toBeGreaterThanOrEqual(observation.length);
   });
 
   it("returns the same summary from preflight for platforms without hooks", async () => {

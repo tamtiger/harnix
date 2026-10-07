@@ -2,7 +2,7 @@
 name: harnix-verify
 description: Use when a Harnix task needs fresh compliance, correctness and security verification, evidence, and a safe finish or explicit cancellation with an evidence-based handoff.
 metadata:
-  version: "2.2.0"
+  version: "2.3.0"
 ---
 
 # Verify and finish Harnix work
@@ -19,13 +19,13 @@ Read the request, goal and non-goals, PRD/plan, guides and the diff. A Full `pla
 
 ## Stage 2: quality and security
 
-Inspect check state once. Reuse a required pass whose `inputDigest` still matches; run affected tests first (discover via `harnix repo-map --tests <path>`), then pending, failed, stale or affected checks, and the package suite; never run the same check twice for one digest in one request. Run a check with `harnix workflow --run-check <id> -- <exe> [args...]` (manual and compound forms: `./references/evidence.md` or `harnix skill harnix-verify --reference evidence`). Read the full output and exit code. Review correctness and regression coverage, meaningful tests, type/lint/build output, dependency direction, input/path/command/credential boundaries, atomicity and permissions, and cross-layer error flow. A focused pass never replaces a required full gate.
+Inspect check state once. Reuse a required pass whose `inputDigest` still matches; run affected tests first (discover via `harnix repo-map --tests <path>`), then pending, failed, stale or affected checks, and the package suite; never run the same check twice for one digest in one request. Run every check that still needs it with `harnix workflow --run-checks --brief` (focused first, suite last, stops at the first failure; main path), or one check with `harnix workflow --run-check <id> -- <exe> [args...]` (manual and compound forms: `./references/evidence.md` or `harnix skill harnix-verify --reference evidence`). Read the full output and exit code. Review correctness and regression coverage, meaningful tests, type/lint/build output, dependency direction, input/path/command/credential boundaries, atomicity and permissions, and cross-layer error flow. A focused pass never replaces a required full gate.
 
 Only acceptance violations, required-gate failures and material correctness, security, data-loss or compatibility defects block completion; batch them, allow one remediation round, rerun only affected evidence. A second failure with the same check, digest and exit code stops automatic work. Low findings become `harnix workflow --add-risk`. If a failed check must be replaced with a focused or corrected check, use `harnix workflow --replace-check <old> <new> --reason "..."` to atomically retire the old failed check and activate the replacement with full criterion coverage.
 
 ## Record
 
-Append each result with `--run-check` or `--evidence --check <id> --result <r> --summary <t> --exit-code <n>`; mark criteria with `--criterion <ids> --met`; keep failed evidence. Stay `verifying` while anything required is failed, missing, stale or unread.
+Append each result with `--run-check` or `--evidence --check <id> --result <r> --summary <t> --exit-code <n>`; mark criteria with `--criterion <ids> --met`; keep failed evidence. Stay `verifying` while anything required is failed, missing, stale or unread. If `--finish --brief` returns `secretAdvisory`, tell the user which files and rules (never a value) before anything is committed.
 
 A suite that was already red before the task and outside its scope: ask the user to authorize it once with `harnix workflow --set-baseline <check-id> --result fail --classification pre-existing|environment --authorized-by user --scope "<why>"`, run the suite so its latest result is the red one, and prove the deliverable with a focused required check covering the same criteria; finish and `--criterion` then accept the pair. Never baseline a failure the task introduced. Editing a check while `verifying` (`--set-check`, `--replace-check`, `--add-criterion` with `--reason`) resumes at `verifying/verifying` without replaying ready.
 

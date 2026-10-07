@@ -28,7 +28,7 @@ describe("workflow --run-check", () => {
     const result = await runCheckWorkflow(root, "check", ["pnpm", "run", "test"], { runner, now: NOW });
 
     expect(calls).toEqual([{ executable: "pnpm", args: ["run", "test"], cwd: root }]);
-    expect(result).toMatchObject({ evidenceId: "ev-check-1", result: "pass", exitCode: 0, outputTail: "all good" });
+    expect(result).toMatchObject({ evidenceId: "ev-check-1", result: "pass", exitCode: 0, outputTail: "" });
     expect(result.task.evidence.at(-1)).toMatchObject({
       checkId: "check",
       result: "pass",
@@ -108,15 +108,29 @@ describe("workflow --run-check", () => {
     expect(persisted?.evidence).toEqual(task.evidence);
   });
 
-  it("keeps only the last 2000 characters of output", async () => {
+  it("returns the short summary of a failing run and no tail for a pass", async () => {
     const root = await temporaryRepository();
     await implementingTaskV3(root);
-    const { runner } = fakeRunner(0, `${"x".repeat(5000)}END`);
+    const { runner } = fakeRunner(1, `${"x".repeat(5000)}END`);
 
     const result = await runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: NOW });
 
-    expect(result.outputTail).toHaveLength(2000);
+    expect(result).toMatchObject({ result: "fail", exitCode: 1 });
+    expect(result.outputTail).toHaveLength(600);
     expect(result.outputTail.endsWith("END")).toBe(true);
+  });
+
+  it("reports a launcher error as could not start and records nothing, so the breaker never counts it", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+    const { runner } = fakeRunner(1, "ERR_PNPM_NO_PKG_MANIFEST  No package.json found");
+
+    for (const now of [NOW, "2026-08-13T00:11:00.000Z", "2026-08-13T00:12:00.000Z"])
+      await expect(runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now })).rejects.toThrow(
+        /Check check could not start: no package\.json found in the working directory; nothing was recorded/u,
+      );
+    const { resolveActiveTask } = await import("src/core/tasks/task.js");
+    expect((await resolveActiveTask(join(root, ".harnix")))?.evidence).toEqual(task.evidence);
   });
 
   it("rejects an undeclared check, an empty command and a run without an active task", async () => {

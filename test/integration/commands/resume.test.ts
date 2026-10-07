@@ -6,7 +6,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { runCli } from "src/cli-program.js";
 import { initializeProject } from "src/commands/init.js";
 import { saveTask, setActiveTask, type TaskRecordV3 } from "src/core/tasks/task.js";
-import { at } from "test/support/builders.js";
+import { upsertEpic } from "src/core/epics/epic.js";
+import { at, buildEpic } from "test/support/builders.js";
 import { buildGatedTask } from "test/support/integration-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
@@ -130,6 +131,66 @@ describe.sequential("resume command", () => {
   });
 });
 
+describe.sequential("resume --epic", () => {
+  const EPIC = "20260826-150000-resume-epic";
+
+  async function epicProject(statuses: Array<"done" | "planning" | "ready" | "in_progress">): Promise<string[]> {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    await upsertEpic(root, buildEpic({ id: EPIC }));
+    const ids = statuses.map((_status, index) => `20260826-16000${index}-epic-member-${index}`);
+    for (const [index, status] of statuses.entries()) {
+      const base = status === "done" ? terminalTask(ids[index] as string) : task(ids[index] as string, status);
+      await saveTask(join(root, ".harnix"), { ...base, epicId: EPIC });
+    }
+    process.chdir(root);
+    return ids;
+  }
+
+  async function resume(...args: string[]): Promise<{ code: number; out: string; err: string }> {
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    const code = await runCli(["node", "harnix", "resume", ...args]);
+    const captured = { code, out: output(stdout.mock.calls), err: output(stderr.mock.calls) };
+    stdout.mockRestore();
+    stderr.mockRestore();
+    return captured;
+  }
+
+  it("previews and then activates the next unfinished member of the epic in order", async () => {
+    const ids = await epicProject(["done", "planning", "ready"]);
+
+    const preview = await resume("--epic", EPIC, "--dry-run");
+    const real = await resume("--epic", EPIC);
+
+    expect(JSON.parse(preview.out)).toMatchObject({ dryRun: true, outcome: "would-resume", task: { id: ids[1] } });
+    expect(JSON.parse(real.out)).toMatchObject({ dryRun: false, outcome: "resumed", task: { id: ids[1] } });
+    await expect(readFile(join(process.cwd(), ".harnix", "tasks", ".active"), "utf8")).resolves.toBe(`${ids[1]}\n`);
+  });
+
+  it("refuses an epic with nothing left, a task id together with --epic, and no argument at all", async () => {
+    await epicProject(["done"]);
+
+    expect((await resume("--epic", EPIC)).err).toMatch(/no unfinished task/u);
+    expect((await resume("--epic", "20260826-150000-unknown-epic")).code).not.toBe(0);
+    expect((await resume("20260826-160000-epic-member-0", "--epic", EPIC)).err).toMatch(/either a task id or --epic/u);
+    expect((await resume()).err).toMatch(/task id or --epic/u);
+  });
+
+  it("fails closed when another task is already active", async () => {
+    const ids = await epicProject(["planning", "ready"]);
+    const harnixRoot = join(process.cwd(), ".harnix");
+    const other = task("20260826-160009-other-active", "in_progress");
+    await saveTask(harnixRoot, other);
+    await setActiveTask(harnixRoot, other.id);
+
+    const result = await resume("--epic", EPIC);
+
+    expect(result.code).not.toBe(0);
+    await expect(readFile(join(harnixRoot, "tasks", ".active"), "utf8")).resolves.toBe(`${other.id}\n`);
+    expect(ids).toHaveLength(2);
+  });
+});
 function result(taskRecord: TaskRecordV3, dryRun: boolean, outcome: "would-resume" | "resumed" | "already-active") {
   return {
     generator: "harnix",

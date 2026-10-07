@@ -4,8 +4,8 @@
   "id": "20261006-202547-hook-context-diet",
   "title": "Hook context chỉ mang learning khi agent sắp lập kế hoạch",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Hook UserPromptSubmit gắn 5 note learning vào mọi prompt dù task đang implement hay verify; chỉ gắn khi chưa có task active hoặc task đang planning, để giảm token mỗi lượt mà không mất thông tin lúc cần.",
   "nonGoals": [
     "Không nới ngưỡng hay bỏ test cấu trúc",
@@ -16,20 +16,26 @@
     {
       "id": "ac-1",
       "text": "Hook context bỏ khối learning khi task active ở trạng thái ready, in_progress hoặc verifying và vẫn gắn khi không có task hoặc task đang planning.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-hook-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "pnpm measure:tokens báo mức giảm số token hook context cho trạng thái implement và có test khóa ngưỡng.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-hook-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Tài liệu hook và harnix context-report phản ánh quy tắc mới.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -48,11 +54,91 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-hook",
+      "description": "Test hook context chỉ gắn learning khi task planning và measure-tokens báo mức giảm",
+      "command": "pnpm exec vitest run test/workflow/learning-automation.test.ts test/workflow/measure-tokens.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "scripts/measure-tokens.mjs",
+        "src/commands/internal-context.ts",
+        "src/core/context/**",
+        "test/workflow/learning-automation.test.ts",
+        "test/workflow/measure-tokens.test.ts"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Contract tests (docs, instruction budget, golden) xanh sau khi cập nhật tài liệu hook",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "src/templates/**",
+        "test/**"
+      ]
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "ev-check-hook-1",
+      "checkId": "check-hook",
+      "recordedAt": "2026-10-07T11:51:46.170+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/learning-automation.test.ts test/workflow/measure-tokens.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5f0fb7713f7d125e42eaff4b273fe4542197afba2e10f4b017a059629fd71457"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-07T11:51:50.350+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e001f3e9fcc35e191b8b2c482ddbb6dcdd296755a0852d6487c7beb7dac7e728"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-07T11:52:42.507+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d05a93bfefadc7d55f5f0a14a6eaf5a55568db0c4b05c1895437468f2ecabc31"
+    }
+  ],
   "relevantPaths": [],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T20:25:42.786+07:00",
-  "updatedAt": "2026-10-06T20:25:42.786+07:00"
+  "updatedAt": "2026-10-07T11:53:11.386+07:00",
+  "decisions": [
+    {
+      "id": "d-no-task-learning",
+      "text": "Khi chưa có task active, hook vẫn không gắn learning (như hiện tại): learning cho giai đoạn lập kế hoạch đã có sẵn trong trường learning của workflow --preflight (nextStage plan), nên không thêm khối mới cho mọi prompt không task.",
+      "rationale": "Tiêu chí ac-1 viết 'vẫn gắn khi không có task' nhưng hook hiện không phát context khi không có task; thêm vào sẽ tăng token cho mọi prompt Bypass, trái mục tiêu của task."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-measure-spaces",
+      "text": "scripts/measure-tokens.mjs từng truyền process.execPath cho --run-check; sameCommand so command theo từ nên đường dẫn node có khoảng trắng (Windows) bị từ chối. Dùng tên node trần; cùng lỗi tách theo khoảng trắng có thể gặp ở bất kỳ command khai báo nào chứa đường dẫn có khoảng trắng.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-07T11:53:11.386+07:00"
 }

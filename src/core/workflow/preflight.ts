@@ -7,6 +7,7 @@ import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { readManifest } from "src/core/managed/project-files.js";
 import { detectVersionSkew, skewMessage, type VersionSkew } from "src/core/versions/skew.js";
+import { baselineHint } from "./baseline-hint.js";
 import { verificationRetryDisposition } from "./completion.js";
 import { stageOwnerFor } from "./routing.js";
 import type { LearningSummaryItem } from "src/core/journal/learning-summary.js";
@@ -27,6 +28,8 @@ export interface WorkflowPreflightResultV1 {
   learning: LearningSummaryItem[];
   /** Present only when the running CLI is older than the version recorded in the project manifest. */
   versionSkew?: string;
+  /** One line asking for an authorized baseline when the suite was already red in the last two finished tasks. */
+  baselineHint?: string;
 }
 
 type RequiredChecks = WorkflowPreflightResultV1["requiredChecks"];
@@ -49,7 +52,22 @@ export async function preflightWorkflow(
   const result =
     routed.nextStage === "plan" ? { ...routed, learning: await projectLearningSummary(root, now) } : routed;
   const skew = cliVersion === undefined ? undefined : await recordedSkew(root, cliVersion);
-  return skew === undefined ? result : { ...result, versionSkew: skewMessage(skew) };
+  const hint = await recordedBaselineHint(root);
+  return {
+    ...result,
+    ...(skew === undefined ? {} : { versionSkew: skewMessage(skew) }),
+    ...(hint === undefined ? {} : { baselineHint: hint }),
+  };
+}
+
+/** Read-only and best effort: any problem just means no hint. */
+async function recordedBaselineHint(root: string): Promise<string | undefined> {
+  try {
+    const task = await resolveActiveTask(await resolveSafeHarnixPath(root));
+    return task === undefined ? undefined : await baselineHint(root, task);
+  } catch {
+    return undefined;
+  }
 }
 
 /** The manifest is read only to compare versions; an unreadable one just means no warning. */

@@ -6,6 +6,7 @@ import { saveWorkflow } from "src/core/workflow/save.js";
 import { saveTask, setActiveTask } from "src/core/tasks/task.js";
 import { initializeProject } from "src/commands/init.js";
 import { initializeUtcProject, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
+import { buildCheck } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -212,6 +213,35 @@ describe("workflow ready inspection", () => {
     expect(result).toEqual({ issues: [], advisories: [], unbaselined: [] });
   });
 
+  it("folds unknown check ids named in plan.md into one advisory that never blocks ready", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+    const base = taskV3("planning", "planning");
+    const task = {
+      ...base,
+      mode: "full" as const,
+      validationPlan: [{ ...base.validationPlan[0]!, scope: "focused" as const }],
+      evidence: [baselineEvidence("pass")],
+    };
+    await mkdir(join(root, ".harnix", "tasks", task.id), { recursive: true });
+    const inspect = (plan: string) => inspectReadyConditions(join(root, ".harnix"), task, { prd: "# PRD\n", plan });
+
+    const one = await inspect("- [ ] slice for a `check-2b`\n");
+    const many = await inspect(
+      `- [ ] slice for a ${Array.from({ length: 7 }, (_u, i) => `\`check-x${i}\``).join(" ")}\n`,
+    );
+    const none = await inspect("- [ ] slice for a `check`\n");
+
+    expect(one.issues).toEqual([]);
+    expect(one.advisories).toEqual(["plan.md names 1 unknown check id(s): check-2b (not in validationPlan)."]);
+    expect(many.issues).toEqual([]);
+    expect(many.advisories).toEqual([
+      "plan.md names 7 unknown check id(s): check-x0, check-x1, check-x2, check-x3, check-x4, +2 more (not in validationPlan).",
+    ]);
+    expect(none.advisories).toEqual([]);
+  });
+
   it("collects every independent issue in one pass", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
@@ -233,8 +263,35 @@ describe("workflow ready inspection", () => {
     const checked = await inspectReadyConditions(join(root, ".harnix"), missingInput);
     expect(checked.issues).toEqual([]);
     expect(checked.advisories).toContain("Required check 'check' input 'missing/**/*.ts' matches no files.");
-    expect(checked.advisories).toContain("Required check 'check' has not been baselined before contract freeze.");
+    expect(checked.advisories).toContain(
+      "1 required check not baselined before contract freeze (ids in unbaselinedChecks).",
+    );
     expect(checked.unbaselined).toEqual(["check"]);
+  });
+
+  it("folds every unbaselined check into one short advisory with the count", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const task = {
+      ...taskV3("planning", "planning"),
+      validationPlan: ["a", "b", "c"].map((id) =>
+        buildCheck({
+          id,
+          description: id,
+          command: "pnpm test",
+          scope: "full",
+          criterionIds: ["a"],
+          inputs: ["src/**/*.ts"],
+        }),
+      ),
+    };
+
+    const result = await inspectReadyConditions(join(root, ".harnix"), task);
+
+    const folded = result.advisories.filter((advisory) => advisory.includes("baselined"));
+    expect(folded).toEqual(["3 required checks not baselined before contract freeze (ids in unbaselinedChecks)."]);
+    expect(JSON.stringify(folded).length).toBeLessThanOrEqual(100);
+    expect(result.unbaselined).toEqual(["a", "b", "c"]);
   });
 
   it("flags a missing checklist, a failed baseline and unreadable artifacts", async () => {

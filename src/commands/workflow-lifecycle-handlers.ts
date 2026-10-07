@@ -2,6 +2,7 @@ import { initTaskWorkflow, setBaselineWorkflow, setEpicOrderWorkflow } from "src
 import { presentTask, splitGlobList, splitList } from "src/commands/workflow-handler-utils.js";
 import type { Handler } from "src/commands/workflow-handlers.js";
 import type { TaskMode } from "src/core/tasks/task.js";
+import { parseCheckSpec } from "src/core/workflow/init-spec.js";
 
 /** Handlers that create a task, record a baseline or order an epic; split out to keep each handler file small. */
 export const LIFECYCLE_HANDLERS: Record<string, Handler> = {
@@ -11,7 +12,8 @@ export const LIFECYCLE_HANDLERS: Record<string, Handler> = {
       slug: context.flags.slug,
       mode: context.flags.mode as TaskMode,
       goal: context.flags.goal,
-      criterion: context.flags.text,
+      criteria: context.flags.text === undefined ? undefined : [context.flags.text].flat(),
+      checks: context.flags.withCheck?.map(parseCheckSpec),
       command: context.flags.command,
       input: context.flags.input?.flatMap(splitGlobList),
       followUp: context.flags.followUp,

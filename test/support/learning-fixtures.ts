@@ -3,13 +3,14 @@ import { join } from "node:path";
 
 import {
   appendEvidenceWorkflow,
-  finishWorkflow,
+  finishWorkflowReport,
   inspectWorkflow,
   saveWorkflow,
   snapshotWorkflow,
   transitionWorkflow,
 } from "src/commands/internal-workflow.js";
 import type { JournalEntry } from "src/core/journal/journal.js";
+import type { FinishReport } from "src/core/workflow/finish.js";
 import type { LearningCandidate } from "src/core/journal/learning.js";
 import { at, buildTaskV3 } from "test/support/builders.js";
 
@@ -57,15 +58,23 @@ export async function writeJournalFile(directory: string, name: string, lines: r
 /** Drives a Lite task through the whole workflow to `completed`, so `finishWorkflow` captures its learning. */
 export async function completeTaskWithDecisions(
   root: string,
-  input: { id: string; minute: number; decisions?: readonly string[]; evidenceId?: string },
-): Promise<void> {
+  input: { id: string; minute: number; decisions?: readonly string[]; evidenceId?: string; relevantPaths?: string[] },
+): Promise<FinishReport> {
   const decisions = (input.decisions ?? []).map((text, index) => ({
     id: `d${index + 1}`,
     text,
     rationale: "Recorded during the task.",
   }));
   const at2 = (offset: number): string => at(input.minute + offset);
-  await saveWorkflow(root, { task: buildTaskV3({ id: input.id, createdAt: at2(0), updatedAt: at2(0), decisions }) });
+  await saveWorkflow(root, {
+    task: buildTaskV3({
+      id: input.id,
+      createdAt: at2(0),
+      updatedAt: at2(0),
+      decisions,
+      relevantPaths: input.relevantPaths ?? [],
+    }),
+  });
   await transitionWorkflow(root, "ready", "ready", at2(1));
   await transitionWorkflow(root, "in_progress", "implementing", at2(2));
   await transitionWorkflow(root, "verifying", "verifying", at2(3));
@@ -96,5 +105,5 @@ export async function completeTaskWithDecisions(
       updatedAt: at2(6),
     },
   });
-  await finishWorkflow(root, at2(7));
+  return finishWorkflowReport(root, at2(7));
 }

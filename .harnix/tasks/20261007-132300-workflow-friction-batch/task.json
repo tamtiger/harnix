@@ -1,0 +1,262 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261007-132300-workflow-friction-batch",
+  "title": "Gom các ma sát vặt của workflow: đường dẫn có khoảng trắng, định dạng learning, inspect --task, sửa criterion, resume epic",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sửa một lượt các ma sát nhỏ gặp trong lúc phát triển epic tự cải tiến mà chưa có chỗ xử lý: command có đường dẫn khoảng trắng, định dạng khối learning, đọc task khác bằng --inspect --task, sửa nội dung criterion khi còn planning, resume task kế tiếp của epic và danh sách nơi phải sửa khi thêm action.",
+  "nonGoals": [],
+  "epicId": "20261006-202542-harnix-self-improvement",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Việc so khớp command khai báo với argv của --run-check và --run-checks so executable theo tên (bỏ thư mục và đuôi .exe/.cmd) khi command khai báo là tên trần, và so các đối số theo từng phần tử đúng chuỗi, nên đường dẫn tuyệt đối tới node (kể cả thư mục có khoảng trắng) khớp command khai báo bằng tên; command khai báo có thư mục vẫn phải khớp đúng đường dẫn; có test cho sameCommand và --run-check, và measure-tokens dùng process.execPath được.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-command-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Khối Project learning trong hook context bắt đầu ở dòng mới, không dính vào câu cuối của frame untrusted; có test khóa định dạng và không đổi nội dung hay giới hạn 5 note.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-text-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "workflow --inspect --task <task-id> đọc (chỉ đọc) được một task chưa terminal khác mà không đổi con trỏ active, nên không cần đọc thẳng task.json.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-text-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Có cách sửa nội dung một criterion bằng cờ (--set-criterion <id> --text <text>) khi task còn planning; sau planning cần --reason và đi qua replan có kiểm soát; criterion đã có evidence ghi nhận vẫn bất biến; có test và cookbook.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-text-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "harnix resume --epic <epic-id> khôi phục task kế tiếp (nextTask) của epic, từ chối khi đang có task active khác hoặc epic không còn task chưa kết thúc; có test cli-contract và docs.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-resume-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Có một danh sách ngắn trong docs hoặc test/README nêu mọi nơi phải cập nhật khi thêm cờ hoặc action workflow (flags, brief, schema, cli-contract, index.test, handlers test, golden), và danh sách này được kiểm bằng một test để không lỗi thời.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-checklist-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-command",
+      "description": "Test sameCommand theo từ, executable theo tên và --run-check với đường dẫn tuyệt đối",
+      "command": "pnpm exec vitest run test/unit/core/workflow/command-match.test.ts test/unit/core/workflow/run-check.test.ts test/workflow/measure-tokens.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "scripts/measure-tokens.mjs",
+        "src/core/workflow/**",
+        "test/unit/core/workflow/**",
+        "test/workflow/measure-tokens.test.ts"
+      ]
+    },
+    {
+      "id": "check-text",
+      "description": "Test xuống dòng của learning, inspect --task và --set-criterion",
+      "command": "pnpm exec vitest run test/workflow/learning-automation.test.ts test/unit/core/workflow/set-criterion.test.ts test/integration/commands/workflow-handlers.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/**",
+        "test/integration/commands/workflow-handlers.test.ts",
+        "test/unit/core/workflow/**",
+        "test/workflow/learning-automation.test.ts"
+      ]
+    },
+    {
+      "id": "check-resume",
+      "description": "Test resume --epic: task kế tiếp, từ chối khi có task active khác hoặc epic hết việc",
+      "command": "pnpm exec vitest run test/integration/commands/resume.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "src/cli-workflow-commands.ts",
+        "src/commands/**",
+        "src/core/epics/**",
+        "src/core/tasks/**",
+        "test/integration/commands/resume.test.ts"
+      ]
+    },
+    {
+      "id": "check-checklist",
+      "description": "Test danh sách nơi phải sửa khi thêm cờ hoặc action không lỗi thời",
+      "command": "pnpm exec vitest run test/workflow/action-checklist.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-6"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "test/workflow/action-checklist.test.ts"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Contract tests (cli-contract, schema, golden, docs, instruction budget) xanh sau khi thêm --set-criterion, resume --epic và sửa tài liệu",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "docs/HARNIX_WORKFLOW.md",
+        "src/core/workflow/schema.ts",
+        "src/templates/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-command-1",
+      "checkId": "check-command",
+      "recordedAt": "2026-10-07T15:26:03.135+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/command-match.test.ts test/unit/core/workflow/run-check.test.ts test/workflow/measure-tokens.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8b25a6cde44c5488b021f247964b92d0d441469de5f72978fea0fbf9062a6395"
+    },
+    {
+      "id": "ev-check-text-1",
+      "checkId": "check-text",
+      "recordedAt": "2026-10-07T15:26:09.863+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/learning-automation.test.ts test/unit/core/workflow/set-criterion.test.ts test/integration/commands/workflow-handlers.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5e29145a89c13f2a8f52e4284143eedd5f558060f3b321128073e4723d12b543"
+    },
+    {
+      "id": "ev-check-resume-1",
+      "checkId": "check-resume",
+      "recordedAt": "2026-10-07T15:26:14.275+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/resume.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "13cbdd7a62b965a8328de7b61ed0b7f6f2a0891c7c2be49b5049dfd47503d1a0"
+    },
+    {
+      "id": "ev-check-checklist-1",
+      "checkId": "check-checklist",
+      "recordedAt": "2026-10-07T15:26:16.315+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/action-checklist.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c44334a506314f28a26b0341703d3bac70ecded8e1f8b36956eafa5d80bc0538"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-07T15:26:20.716+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6fd8ab01fdc533dbed54de0aea0bf400f4e05a71b78333f26dc1c9f57a2e77c2"
+    },
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-07T15:27:40.835+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6db1d80916b77f4cb400da1e35fd32666a1313a894d3ceb2ec9d7f1d22ce94da"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-07T13:23:00.048+07:00",
+  "updatedAt": "2026-10-07T15:28:09.207+07:00",
+  "decisions": [
+    {
+      "id": "d-excluded",
+      "text": "Không đưa vào task này: sửa check sau ready không phải đi vòng replan (hệ quả của việc đóng băng obligations) và cài lại CLI trên PATH (cần người dùng cho phép).",
+      "rationale": "Hai mục này đổi hợp đồng đóng băng hoặc cần quyền người dùng, không thuộc nhóm ma sát vặt."
+    },
+    {
+      "id": "d-basename-match",
+      "text": "sameCommand chỉ so executable theo tên khi command khai báo là tên trần (không có thư mục); command khai báo có thư mục phải khớp đúng đường dẫn đã chuẩn hóa.",
+      "rationale": "Nguyên nhân thật của lỗi measure-tokens là đường dẫn tuyệt đối khác tên trần (không phụ thuộc khoảng trắng), nên ac-1 đã viết lại; so theo tên làm lỏng nhẹ ràng buộc argv bằng command khai báo nên giữ nghiêm với command có thư mục."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-duplicate-secret-patterns",
+      "text": "Bộ mẫu secret nằm ở ba nơi (secret-scan.ts, learning-safety.ts, scripts/scan-secrets.mjs); sửa một nơi dễ quên hai nơi còn lại. Cần gom về một module chung khi có cách đóng gói cho scripts.",
+      "severity": "low"
+    },
+    {
+      "id": "r-test-line-caps",
+      "text": "Một số file test sát trần 400 dòng (finish.test.ts 399, workflow-flags.test.ts 384): thêm test mới vào đó sẽ vi phạm test-structure, nên đặt test mới vào file mới đúng mirror.",
+      "severity": "low"
+    },
+    {
+      "id": "r-no-planning-edit-guard",
+      "text": "Harnix không chặn sửa file sản phẩm khi task còn planning; quy tắc chỉ dựa vào kỷ luật của agent. Một cảnh báo cần so sánh digest hoặc dùng Git nên ngoài phạm vi task này.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-07T15:28:09.207+07:00"
+}

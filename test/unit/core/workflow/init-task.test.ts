@@ -51,7 +51,7 @@ describe("initTaskWorkflow", () => {
       title: "Add Microservice Gateway",
       mode: "full",
       goal: "Implement API Gateway",
-      criterion: "Gateway routes payment requests correctly",
+      criteria: ["Gateway routes payment requests correctly"],
       command: "dotnet test services/gateway",
       input: ["services/gateway/**"],
     });
@@ -61,6 +61,72 @@ describe("initTaskWorkflow", () => {
     expect(task.acceptanceCriteria[0]?.text).toBe("Gateway routes payment requests correctly");
     expect(task.validationPlan[0]?.command).toBe("dotnet test services/gateway");
     expect(task.validationPlan[0]?.inputs).toEqual(["services/gateway/**"]);
+    expect(task.validationPlan[0]).toMatchObject({ id: "check-1", scope: "focused" });
+  });
+
+  it("turns the project test command into a Vietnamese full-scope check-suite", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeTestProject(root);
+
+    const implicit = await initTaskWorkflow(root, { title: "Default suite" });
+    await clearActiveTask(`${root}/.harnix`, implicit.id);
+    const explicit = await initTaskWorkflow(root, { title: "Same suite", command: "pnpm run test" });
+
+    for (const task of [implicit, explicit])
+      expect(task.validationPlan[0]).toMatchObject({
+        id: "check-suite",
+        scope: "full",
+        description: "Toàn bộ test, lint và typecheck của dự án phải xanh",
+        criterionIds: ["ac-1"],
+      });
+  });
+
+  it("creates one criterion per text in order and lets the default check cover all of them", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeTestProject(root);
+
+    const task = await initTaskWorkflow(root, { title: "Many", criteria: ["First", "Second", "Third"] });
+
+    expect(task.acceptanceCriteria.map(({ id, text }) => [id, text])).toEqual([
+      ["ac-1", "First"],
+      ["ac-2", "Second"],
+      ["ac-3", "Third"],
+    ]);
+    expect(task.validationPlan).toHaveLength(1);
+    expect(task.validationPlan[0]?.criterionIds).toEqual(["ac-1", "ac-2", "ac-3"]);
+  });
+
+  it("adds the declared checks as required checks and keeps the validation of a save", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeTestProject(root);
+    const focused = {
+      id: "check-focus",
+      command: "pnpm exec vitest run a.test.ts",
+      criterionIds: ["ac-1"],
+      inputs: ["test/**"],
+      scope: "focused" as const,
+      description: "Kiểm tra A",
+    };
+
+    const task = await initTaskWorkflow(root, { title: "With checks", criteria: ["A", "B"], checks: [focused] });
+
+    expect(task.validationPlan.map((check) => check.id)).toEqual(["check-suite", "check-focus"]);
+    expect(task.validationPlan[1]).toMatchObject({
+      required: true,
+      scope: "focused",
+      description: "Kiểm tra A",
+      criterionIds: ["ac-1"],
+    });
+    await clearActiveTask(`${root}/.harnix`, task.id);
+    await expect(
+      initTaskWorkflow(root, { title: "Unknown criterion", checks: [{ ...focused, criterionIds: ["ac-9"] }] }),
+    ).rejects.toThrow(/ac-9/u);
+    await expect(
+      initTaskWorkflow(root, { title: "Duplicate id", checks: [{ ...focused, id: "check-suite" }] }),
+    ).rejects.toThrow(/check-suite|duplicate/iu);
   });
 
   it("should reject an empty title", async () => {

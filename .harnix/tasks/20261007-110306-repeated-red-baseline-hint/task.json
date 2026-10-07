@@ -1,0 +1,133 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261007-110306-repeated-red-baseline-hint",
+  "title": "Nhắc đặt baseline khi suite đỏ lặp qua nhiều task",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khi cùng một suite đỏ sẵn qua nhiều task liên tiếp, preflight nhắc người dùng ủy quyền --set-baseline thay vì để agent tự đặt required false cho suite ở từng task.",
+  "nonGoals": [],
+  "epicId": "20261006-202542-harnix-self-improvement",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "preflight ở giai đoạn implement và verify trả một gợi ý ngắn khi check suite cùng command có evidence fail ở ít nhất 2 task gần nhất (completed hoặc cancelled), chỉ đọc .harnix/tasks cục bộ, không mạng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-hint-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Gợi ý nêu đúng lệnh --set-baseline kèm --authorized-by user và nói rõ cần người dùng ủy quyền; Harnix không tự đặt baseline và không đổi cổng suite.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-hint-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Không gợi ý khi baseline đã đặt cho check hiện tại; không tạo dữ liệu toàn cục ngoài .harnix/tasks; --brief giữ đúng một dòng; có test cho các nhánh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-hint-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-hint",
+      "description": "Test baselineHint: điều kiện xuất hiện, nội dung một dòng, không đặt baseline và tích hợp preflight",
+      "command": "pnpm exec vitest run test/unit/core/workflow/baseline-hint.test.ts test/unit/core/workflow/preflight.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Contract tests (schema, golden, docs, instruction budget) xanh sau khi thêm baselineHint vào preflight",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "docs/HARNIX_WORKFLOW.md",
+        "src/core/workflow/schema.ts",
+        "src/templates/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-hint-1",
+      "checkId": "check-hint",
+      "recordedAt": "2026-10-07T14:35:13.323+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/baseline-hint.test.ts test/unit/core/workflow/preflight.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "26f345131b7bb574c640ddba32fbdfb54886cc8dd8ef55af3e2120aa77c10a62"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-07T14:35:18.807+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "39c1d6aa3c57d079d2ad0853af7b3adcf4de74345b9c56cbca55edff00f64186"
+    },
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-07T14:36:21.736+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "56e3ef944c7af7ee2854dc082aedf0cc03fdb835ac2fcda3a3ed54b69ea6c14f"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-07T11:03:06.725+07:00",
+  "updatedAt": "2026-10-07T14:36:47.443+07:00",
+  "decisions": [
+    {
+      "id": "d-per-task-baseline",
+      "text": "Baseline vẫn là dữ liệu của từng task; baselineHint chỉ nhắc xin ủy quyền, không tạo baseline cấp repo.",
+      "rationale": "Baseline cấp repo cần lưu dữ liệu mới ngoài .harnix/tasks và đổi hợp đồng cổng suite; phạm vi task này là giảm việc lách thủ công."
+    }
+  ],
+  "completedAt": "2026-10-07T14:36:47.443+07:00"
+}

@@ -4,8 +4,8 @@
   "id": "20261006-202543-version-sync-fold-dev",
   "title": "version:sync gom các bản dev thành một entry phát hành",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Khi đóng epic, pnpm version:sync X.Y.0 gom các entry X.Y.0-dev.N trong CHANGELOG thành một entry X.Y.0 thay vì để người làm gom tay, và không định dạng lại các file markdown không liên quan.",
   "nonGoals": [
     "Không nới ngưỡng hay bỏ test cấu trúc",
@@ -16,20 +16,26 @@
     {
       "id": "ac-1",
       "text": "pnpm version:sync X.Y.0 --fold-dev gộp mọi entry X.Y.0-dev.N thành một entry X.Y.0 giữ nguyên thứ tự và nội dung các mục Added/Changed/Fixed, không mất dòng nào, và chạy lại không đổi gì.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-fold-2"
+      ]
     },
     {
       "id": "ac-2",
       "text": "version:sync chỉ định dạng lại các file nó thực sự ghi và không đụng các file markdown khác; có test chứng minh.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-fold-2"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Tài liệu chính sách phiên bản nêu --fold-dev cho task đóng epic.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2"
+      ]
     }
   ],
   "validationPlan": [
@@ -48,11 +54,103 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-fold",
+      "description": "Test version-sync gộp dev (fold) và chỉ ghi file của chính nó",
+      "command": "pnpm exec vitest run test/workflow/version-sync.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "scripts/**",
+        "test/workflow/version-sync.test.ts"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Contract tests (docs, instruction budget, golden) xanh sau khi sửa tài liệu chính sách",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "src/templates/harnix/workflow.md",
+        "test/**"
+      ]
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "ev-check-fold-1",
+      "checkId": "check-fold",
+      "recordedAt": "2026-10-07T10:20:56.299+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/version-sync.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "128b57a6ca67055959775324832c99180d5092e7990dc6ed72e97abe3d420b99"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-07T10:21:00.610+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "62ee7cdefd43d7b3cd0aad704d27970e9026c4d5b1b95e288eca97b9fdd26761"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-07T10:22:44.859+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4a84ce6d2cb7764fa67246d381c0215989b5a72fffea531a96be9a181ca77bd0"
+    },
+    {
+      "id": "ev-check-fold-2",
+      "checkId": "check-fold",
+      "recordedAt": "2026-10-07T10:27:53.153+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/version-sync.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "45b6df4fd7a527f0652eedac787de3ad777442577a0c0d8c19c8204d55167d38"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-07T10:27:57.649+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ebe4acb68110b6bd586b931f8159f6ae93c77b8ecb12af21619e595b81c1c7e5"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-07T10:29:08.465+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8253dfef9610cecd1785b95e2d69404865e8d97fec041c858b0bde4c5bd1427c"
+    }
+  ],
   "relevantPaths": [],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T20:25:42.786+07:00",
-  "updatedAt": "2026-10-06T20:25:42.786+07:00"
+  "updatedAt": "2026-10-07T10:29:36.014+07:00",
+  "completedAt": "2026-10-07T10:29:36.014+07:00"
 }

@@ -4,8 +4,8 @@
   "id": "20261006-202545-run-check-failure-summary",
   "title": "Output --run-check chỉ nêu test lỗi thay vì đuôi log dài",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Khi một check fail, outputTail của --run-check hiện tối đa 2000 ký tự log thô; thay bằng tóm tắt các test lỗi (tên và dòng đầu thông điệp) khi nhận diện được định dạng vitest, và giữ đuôi ngắn cho lệnh khác, để giảm token đọc lỗi.",
   "nonGoals": [
     "Không nới ngưỡng hay bỏ test cấu trúc",
@@ -16,20 +16,42 @@
     {
       "id": "ac-1",
       "text": "Khi check fail và output có báo cáo lỗi vitest nhận diện được, outputTail liệt kê tên test lỗi cùng dòng đầu thông điệp, tối đa 10 mục và 800 ký tự.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-summary-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Với lệnh khác hoặc output không nhận diện được, outputTail rút còn tối đa 600 ký tự cuối; khi pass không có outputTail.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-summary-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "outputTail vẫn không được lưu vào task và không lộ đường dẫn tuyệt đối của máy.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-summary-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Khi check fail, --run-check --brief và --run-checks --brief vẫn in đuôi ngắn (vài dòng cuối hoặc tóm tắt test lỗi) để biết lý do đỏ; khi pass không in output nào.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-cli-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Lỗi môi trường của launcher (pnpm/npm báo không có package.json, lệnh không tồn tại, cwd sai) được báo là lỗi khởi chạy kèm lý do ngắn và không ghi evidence fail, nên không tính vào circuit breaker; test đỏ thật vẫn ghi evidence fail; có test cho cả hai nhánh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-summary-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -42,17 +64,124 @@
       "criterionIds": [
         "ac-1",
         "ac-2",
-        "ac-3"
+        "ac-3",
+        "ac-4",
+        "ac-5"
       ],
       "inputs": [
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-summary",
+      "description": "Test tóm tắt output check, nhận diện lỗi launcher và --run-check/--run-checks trả đuôi gọn khi fail",
+      "command": "pnpm exec vitest run test/unit/core/workflow/check-output.test.ts test/unit/core/workflow/run-check.test.ts test/unit/core/workflow/run-checks.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "src/utils/check-runner.ts",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "check-cli",
+      "description": "Test CLI: --brief vẫn in đuôi ngắn khi fail, không in gì khi pass",
+      "command": "pnpm exec vitest run test/integration/commands/workflow-command.test.ts test/integration/commands/workflow-handlers.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/workflow/**",
+        "test/integration/commands/**"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Contract tests (cli-contract, docs, golden, instruction budget) xanh sau khi đổi schema và tài liệu",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/HARNIX_WORKFLOW.md",
+        "src/core/workflow/schema.ts",
+        "src/templates/**",
+        "test/**"
+      ]
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "ev-check-summary-1",
+      "checkId": "check-summary",
+      "recordedAt": "2026-10-07T11:17:50.499+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/check-output.test.ts test/unit/core/workflow/run-check.test.ts test/unit/core/workflow/run-checks.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "54f65c20861afa39e6909e3f2cd40581d56aa43e3a2cd42322cf5afa48251255"
+    },
+    {
+      "id": "ev-check-cli-1",
+      "checkId": "check-cli",
+      "recordedAt": "2026-10-07T11:17:58.689+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/workflow-command.test.ts test/integration/commands/workflow-handlers.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7059407aeeccf9a687e7ac1a9e4ea90e3115a0f652de74d192bb9ecf41ff30c8"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-07T11:18:02.770+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "66dd1ff63111dada3d91c58a5e2ed1e45c35f78d6bd77dd936ee85fd50fdc683"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-07T11:18:55.989+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f0fe804917ef3ae07d20f88dbd2ddd10d79efc7f2850012067cdcbc91e962336"
+    }
+  ],
   "relevantPaths": [],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T20:25:42.786+07:00",
-  "updatedAt": "2026-10-06T20:25:42.786+07:00"
+  "updatedAt": "2026-10-07T11:19:24.824+07:00",
+  "decisions": [
+    {
+      "id": "d-brief-tail",
+      "text": "Hiện --run-checks --brief bỏ outputTail của check fail; góp ý thực tế cho thấy fail không kèm lý do khiến phải chạy lại để đoán nguyên nhân, nên brief phải giữ đuôi ngắn khi fail.",
+      "rationale": "Ba lần --run-check --brief fail exit 1 sau khoảng 2 giây không cho biết là test đỏ hay lệnh không khởi chạy được; chạy lại cùng lệnh thì pass."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-launcher-heuristic",
+      "text": "Nhận diện lỗi launcher bằng mẫu output có thể báo sai; chỉ coi là lỗi khởi chạy khi khớp mẫu hẹp (ERR_PNPM_NO_PKG_MANIFEST, ENOENT, not recognized) và ngoài ra giữ hành vi ghi fail như cũ.",
+      "severity": "medium"
+    }
+  ],
+  "completedAt": "2026-10-07T11:19:24.824+07:00"
 }

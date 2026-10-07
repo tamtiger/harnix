@@ -372,7 +372,7 @@ describe("finish learning report", () => {
 
     expect(report.learning.captured).toBe(0);
     expect(report.learning.notes).toBe(0);
-    expect(report.learning.hint).toMatch(/--add-risk|--add-decision/u);
+    expect(report.learning.hint).toMatch(/^(?=.*(--add-risk|--add-decision)).{1,90}$/u);
   });
 
   it("explains a zero capture when every note was filtered as unsafe", async () => {
@@ -384,7 +384,7 @@ describe("finish learning report", () => {
     const report = await finishWorkflowReport(root, FINISH_AT);
 
     expect(report.learning).toMatchObject({ notes: 1, captured: 0 });
-    expect(report.learning.hint).toMatch(/filtered/u);
+    expect(report.learning.hint).toMatch(/^(?=.*filtered).{1,90}$/u);
   });
 
   it("keeps finishWorkflow returning the bare task record", async () => {

@@ -1,0 +1,188 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261007-150255-epic-close-release",
+  "title": "Đóng epic tự cải tiến: tài liệu gốc, kiểm chứng tiến trình thật và phát hành 2.3.0",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Hoàn tất epic harnix-self-improvement: đưa tài liệu gốc về khớp với các thay đổi của epic, kiểm chứng các lệnh mới bằng tiến trình thật và phát hành 2.3.0 bằng --fold-dev; đây là task cuối theo ID nên đóng epic.",
+  "nonGoals": [],
+  "epicId": "20261006-202542-harnix-self-improvement",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Tài liệu gốc khớp với các thay đổi của epic: docs/HARNIX_PRD.md và docs/IMPLEMENTATION_PLAN.md (mục transport của hidden workflow) nêu --run-checks, --init với --text lặp và --with-check, outputTail mới của --run-check, baselineHint của --preflight, secretAdvisory của --finish --brief và advisory ready gộp; các test docs xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Có test scenario chạy --run-checks và --init --with-check bằng tiến trình thật (không runner giả) trong project dùng một lần, nên đường chạy thật của các lệnh mới được kiểm chứng ngoài unit test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-scenario-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Đóng epic: bản phát hành 2.3.0 tạo bằng pnpm version:sync 2.3.0 --fold-dev (CHANGELOG chỉ còn một entry 2.3.0 gồm mọi dev.1 đến dev.N, không mất dòng nào), AGENTS.md mục Current state ghi epic và phiên bản mới, mô tả epic phản ánh đủ 10 member.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-release-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-docs",
+      "description": "Test docs: PRD, IMPLEMENTATION_PLAN và HARNIX_WORKFLOW nhất quán, ngân sách instruction và golden xanh",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "docs/IMPLEMENTATION_PLAN.md",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-scenario",
+      "description": "Scenario chạy --run-checks và --init --with-check bằng tiến trình thật",
+      "command": "pnpm exec vitest run test/integration/scenarios/cli-real-process.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/integration/scenarios/cli-real-process.test.ts"
+      ]
+    },
+    {
+      "id": "check-release",
+      "description": "Test hợp đồng release: CHANGELOG không còn entry dev của bản đã phát hành, bản mới nhất khớp package.json",
+      "command": "pnpm exec vitest run test/workflow/changelog-contract.test.ts test/workflow/package-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "CHANGELOG.md",
+        "package.json",
+        "test/workflow/changelog-contract.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-docs-1",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-07T15:37:15.404+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f0e704447808b9e74525a1c723a2c1a38d8f9c81368fe6fa9ac738aec41586eb"
+    },
+    {
+      "id": "ev-check-scenario-1",
+      "checkId": "check-scenario",
+      "recordedAt": "2026-10-07T15:37:20.500+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/scenarios/cli-real-process.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f28ec261abf671aa6408a6037ba308774f5fc957ccba0ad9dd76771585199597"
+    },
+    {
+      "id": "ev-check-docs-2",
+      "checkId": "check-docs",
+      "recordedAt": "2026-10-07T15:39:07.240+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f0e704447808b9e74525a1c723a2c1a38d8f9c81368fe6fa9ac738aec41586eb"
+    },
+    {
+      "id": "ev-check-scenario-2",
+      "checkId": "check-scenario",
+      "recordedAt": "2026-10-07T15:39:11.996+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/scenarios/cli-real-process.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "37c8ddbf5c5ebcfb84a3904b2fbf2b06e1bb592a131cb3726e8fb46fd1fe4c79"
+    },
+    {
+      "id": "ev-check-release-1",
+      "checkId": "check-release",
+      "recordedAt": "2026-10-07T15:39:14.129+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/changelog-contract.test.ts test/workflow/package-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d0cff0a5a84e9e79ca17db1389a36717a1ab35b83bcd2e05b666732daffeb771"
+    },
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-07T15:40:21.270+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ec024ec88b84d50823b0831ae8e86aa30fd4117d264d23613aaeed97e4abb224"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-07T15:02:55.530+07:00",
+  "updatedAt": "2026-10-07T15:40:50.244+07:00",
+  "residualRisks": [
+    {
+      "id": "r-cli-skew",
+      "text": "harnix trên PATH có thể cũ hơn repo nên các lệnh và hành vi mới (run-checks, with-check, baselineHint, secretAdvisory, advisory gộp) không hiện ra khi dùng thật; build và cài lại CLI cần người dùng cho phép, đặt ở bước đóng epic và phải hỏi trước.",
+      "severity": "medium"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "d-split-from-batch",
+      "text": "Task này tách ra từ workflow-friction-batch để phần đóng epic (tài liệu gốc, kiểm chứng tiến trình thật, phát hành 2.3.0 --fold-dev) chạy sau cùng và là member cuối theo ID.",
+      "rationale": "Phần ma sát vặt và phần đóng epic có rủi ro và bề mặt khác nhau; gộp một task làm task quá lớn (9 tiêu chí)."
+    },
+    {
+      "id": "d-release-last",
+      "text": "Bước phát hành 2.3.0 --fold-dev chạy sau cùng, sau khi docs và scenario đã xong và đã chạy các check, rồi mới verify lại; không dùng git và không cài lại CLI nếu chưa được người dùng cho phép.",
+      "rationale": "Gộp entry dev đổi CHANGELOG, package.json, README, skills và manifest self-host nên phải là thay đổi cuối cùng trước verify."
+    }
+  ],
+  "completedAt": "2026-10-07T15:40:50.244+07:00"
+}

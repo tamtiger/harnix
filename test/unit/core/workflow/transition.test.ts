@@ -159,7 +159,7 @@ describe("workflow transition", () => {
       issues: [],
       target: { status: "ready", checkpoint: "ready" },
     });
-    expect(dryRunResult.advisories.some((issue) => issue.includes("has not been baselined"))).toBe(true);
+    expect(dryRunResult.advisories.some((issue) => issue.includes("not baselined"))).toBe(true);
     // Verify state was not persisted to disk
     await expect(inspectWorkflow(root)).resolves.toMatchObject({
       activeTask: { status: "planning", checkpoint: "planning" },

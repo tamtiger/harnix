@@ -19,10 +19,13 @@ export {
   setPathsWorkflow,
 } from "./plan-edit.js";
 export type { CheckEdit, PlanEditOptions } from "./plan-edit.js";
+export { setCriterionWorkflow } from "./set-criterion.js";
 export { replaceCheckWorkflow } from "./replace-check.js";
 export type { ReplaceCheckInput } from "./replace-check.js";
 export { runCheckWorkflow } from "./run-check.js";
 export type { CheckRunner, RunCheckDependencies, RunCheckResult } from "./run-check.js";
+export { runChecksWorkflow } from "./run-checks.js";
+export type { RanCheck, RunChecksDependencies, RunChecksResult } from "./run-checks.js";
 export { cancelWorkflow, cancelWorkflowTask } from "./cancel.js";
 export { canCompleteTask, evidenceSupportsScope, verificationRetryDisposition } from "./completion.js";
 export type { VerificationRetryDisposition } from "./completion.js";

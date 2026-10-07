@@ -17,8 +17,10 @@ import {
   recordLearningWorkflow,
   replaceCheckWorkflow,
   runCheckWorkflow,
+  runChecksWorkflow,
   saveWorkflow,
   setCheckWorkflow,
+  setCriterionWorkflow,
   setPathsWorkflow,
   snapshotWorkflow,
   transitionWorkflow,
@@ -175,6 +177,15 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
     );
     return presentTask(context, task);
   },
+  setCriterion: async (context) => {
+    const { flags, root } = context;
+    const task = await setCriterionWorkflow(
+      root,
+      { id: flags.setCriterion as string, text: flags.text as string },
+      { reason: flags.reason },
+    );
+    return presentTask(context, task);
+  },
   addCriterion: async (context) => {
     const { flags, root } = context;
     const task = await addCriterionWorkflow(
@@ -234,8 +245,11 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
       ...briefTask(run.task, run.evidenceId),
       result: run.result,
       exitCode: run.exitCode,
-      ...(flags.brief === true ? {} : { outputTail: run.outputTail }),
+      ...(run.result === "fail" ? { outputTail: run.outputTail } : {}),
     };
+  },
+  runChecks: ({ root, options }) => {
+    return runChecksWorkflow(root, { runner: options.checkRunner });
   },
   cancel: async (context) => {
     const input = await readInput(context, true);
@@ -255,6 +269,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
           ...briefTask(report.task),
           learning: report.learning,
           ...(report.baselineAuthorized.length > 0 ? { baselineAuthorized: report.baselineAuthorized } : {}),
+          ...(report.secretAdvisory === undefined ? {} : { secretAdvisory: report.secretAdvisory }),
         }
       : report.task;
   },

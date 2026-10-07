@@ -72,11 +72,14 @@ function baselineIssues(task: TaskRecord): { issues: string[]; unbaselined: stri
     const latest = task.evidence.filter((e) => e.checkId === check.id).at(-1);
     if (latest === undefined) {
       unbaselined.push(check.id);
-      issues.push(`Required check '${check.id}' has not been baselined before contract freeze.`);
     } else if (latest.result === "fail") {
       issues.push(`Required check '${check.id}' failed in baseline run without a waiver.`);
     }
   }
+  if (unbaselined.length > 0)
+    issues.unshift(
+      `${unbaselined.length} required check${unbaselined.length === 1 ? "" : "s"} not baselined before contract freeze (ids in unbaselinedChecks).`,
+    );
   return { issues, unbaselined };
 }
 

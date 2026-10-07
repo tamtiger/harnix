@@ -119,8 +119,8 @@ describe.sequential("hidden workflow flag transports", () => {
       evidenceId: "ev-check-1",
       result: "pass",
       exitCode: 0,
-      outputTail: "fine",
     });
+    expect(JSON.parse(result.out)).not.toHaveProperty("outputTail");
   });
 
   it("keeps the read-only and terminal transports working through the shared dispatcher", async () => {

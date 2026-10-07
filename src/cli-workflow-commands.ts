@@ -110,12 +110,13 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
 
   program
     .command("resume")
-    .description("Activate an exact unfinished Harnix task")
-    .argument("<task-id>", "Exact Harnix task ID")
+    .description("Activate an exact unfinished Harnix task, or the next unfinished task of an epic")
+    .argument("[task-id]", "Exact Harnix task ID (omit with --epic)")
+    .option("--epic <epic-id>", "Resume the next unfinished task of this epic instead of a task id")
     .option("--dry-run", "Preview without writing the active pointer")
-    .action(async (taskId: string, options: { dryRun?: boolean }) => {
+    .action(async (taskId: string | undefined, options: { dryRun?: boolean; epic?: string }) => {
       process.stdout.write(
-        `${JSON.stringify(await resumeProjectTask(process.cwd(), taskId, options.dryRun === true))}\n`,
+        `${JSON.stringify(await resumeProjectTask(process.cwd(), taskId, options.dryRun === true, options.epic))}\n`,
       );
     });
 

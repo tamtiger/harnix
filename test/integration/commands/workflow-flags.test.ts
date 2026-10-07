@@ -40,6 +40,7 @@ describe("workflow flag validation", () => {
     expect(selectAction({ replaceCheck: ["c", "n"] })).toBe("replaceCheck");
     expect(selectAction({ addCriterion: "c", text: "t" })).toBe("addCriterion");
     expect(selectAction({ setPaths: true })).toBe("setPaths");
+    expect(selectAction({ runChecks: true })).toBe("runChecks");
     expect(() => selectAction({})).toThrow(/exactly one of/u);
     expect(() => selectAction({ setPaths: true, inspect: true })).toThrow(
       /--set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths/u,

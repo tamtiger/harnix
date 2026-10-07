@@ -4,6 +4,7 @@ import {
   criteriaWithoutFocusedCheck,
   missingCriteriaInPlan,
   scanPlaceholders,
+  unknownCheckReferences,
 } from "src/core/workflow/ready-content.js";
 import { buildCheck, buildCriterion, buildTaskV3 } from "test/support/builders.js";
 
@@ -125,5 +126,40 @@ describe("criteriaWithoutFocusedCheck", () => {
     });
 
     expect(criteriaWithoutFocusedCheck(covered)).toEqual([]);
+  });
+});
+
+describe("unknownCheckReferences", () => {
+  const declared = task({
+    validationPlan: [
+      buildCheck({ id: "check-a", scope: "focused", criterionIds: ["ac-1"] }),
+      buildCheck({ id: "check-opt", scope: "focused", required: false, criterionIds: ["ac-1"] }),
+    ],
+  });
+
+  it("reports check ids in backticks and at the start of a checklist item that are not declared", () => {
+    const plan = [
+      "- [ ] check-2b: run it",
+      "Run `check-a` then `check-gone` and `check-2b`.",
+      "- [x] `check-new` ok",
+    ].join("\n");
+
+    expect(unknownCheckReferences(declared, plan)).toEqual(["check-2b", "check-gone", "check-new"]);
+  });
+
+  it("accepts declared ids, including an optional check", () => {
+    expect(unknownCheckReferences(declared, "`check-a` and `check-opt`\n- [ ] check-a first")).toEqual([]);
+  });
+
+  it("ignores code fences, plain prose, other prefixes and ids that are only part of a longer word", () => {
+    const plan = [
+      "```",
+      "`check-fenced`",
+      "```",
+      "We call it check-prose in text and `chk-1` or `mycheck-x` in code.",
+      "- [ ] run the check-inline later",
+    ].join("\n");
+
+    expect(unknownCheckReferences(declared, plan)).toEqual([]);
   });
 });

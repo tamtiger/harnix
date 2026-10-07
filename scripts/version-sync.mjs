@@ -3,6 +3,7 @@ import { chmod, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/p
 import { spawnSync } from "node:child_process";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { foldDevEntries } from "./changelog-fold.mjs";
 
 const semverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z.-]+))?$/u;
 const allowedKinds = new Set(["added", "changed", "fixed"]);
@@ -34,10 +35,12 @@ export async function syncVersion({
   summaries,
   date = new Date().toISOString().slice(0, 10),
   kind = "changed",
+  foldDev = false,
+  format = formatUpdatedFiles,
 }) {
   const targetRoot = resolve(root);
   const requested = parseVersion(version);
-  assertReleasePolicy(requested);
+  assertReleasePolicy(requested, foldDev);
   const normalizedSummaries = normalizeSummaries(summaries);
   assertReleaseMetadata(date, kind);
 
@@ -81,7 +84,7 @@ export async function syncVersion({
     }
     return { changed: updated.length > 0, previousVersion: packageDocument.version, updated, version };
   }
-  if (normalizedSummaries.length === 0)
+  if (normalizedSummaries.length === 0 && !foldDev)
     throw new Error("At least one non-empty --summary is required for a new release version.");
   if (versionEntry.test(changelog)) throw new Error(`CHANGELOG.md already contains version ${version}.`);
 
@@ -100,11 +103,12 @@ export async function syncVersion({
   await atomicWrite(selfHostManifestPath, nextSelfHostManifest);
   updated.push(".harnix/.template-hashes.json");
 
-  await atomicWrite(changelogPath, insertChangelogEntry(changelog, heading, normalizedSummaries, kind));
+  const entry = { date, foldDev, heading, kind, summaries: normalizedSummaries, version };
+  await atomicWrite(changelogPath, nextChangelogText(changelog, entry));
   updated.push("CHANGELOG.md");
   await atomicWrite(readmePath, replaceReadmeVersion(readme, version));
   updated.push("README.md");
-  formatUpdatedFiles(targetRoot, updated);
+  format(targetRoot, updated);
   return { changed: true, previousVersion: packageDocument.version, updated, version };
 }
 
@@ -119,7 +123,9 @@ function parseVersion(value) {
 }
 
 /** A pre-release is only the dev chain of a minor: `X.Y.0-dev.N`; a release (task or epic close) has none. */
-function assertReleasePolicy(requested) {
+function assertReleasePolicy(requested, foldDev = false) {
+  if (foldDev && requested.prerelease !== null)
+    throw new Error("--fold-dev requires a release version without a pre-release (X.Y.0).");
   if (requested.prerelease === null) return;
   if (requested.numbers[2] !== 0 || !/^dev\.(0|[1-9]\d*)$/u.test(requested.prerelease))
     throw new Error(
@@ -201,6 +207,12 @@ function skillVersion(source, path) {
   return versions[0][1];
 }
 
+function nextChangelogText(changelog, { foldDev, heading, kind, summaries, version, date }) {
+  return foldDev
+    ? foldDevEntries(changelog, version, date, summaries, kind)
+    : insertChangelogEntry(changelog, heading, summaries, kind);
+}
+
 function insertChangelogEntry(changelog, heading, summaries, kind = "changed") {
   const sectionTitle = kindTitles[kind] ?? "Changed";
   const entry = `${heading}\n\n### ${sectionTitle}\n\n${summaries.map((summary) => `- ${summary}`).join("\n")}\n\n`;
@@ -265,8 +277,11 @@ function parseArguments(argumentsList) {
   const [version, ...rest] = normalizedArguments;
   const summaries = [];
   let kind;
+  let foldDev = false;
   for (let index = 0; index < rest.length; index += 1) {
-    if (rest[index] === "--summary") {
+    if (rest[index] === "--fold-dev") {
+      foldDev = true;
+    } else if (rest[index] === "--summary") {
       const summary = rest[index + 1];
       if (!summary) throw new Error("--summary requires a value.");
       summaries.push(summary);
@@ -280,7 +295,7 @@ function parseArguments(argumentsList) {
       throw new Error(`Unknown argument: ${rest[index]}`);
     }
   }
-  return { kind, summaries, version };
+  return { foldDev, kind, summaries, version };
 }
 
 function formatUpdatedFiles(targetRoot, updated) {

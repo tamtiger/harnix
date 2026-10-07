@@ -3,13 +3,12 @@ import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { runCheckProcess, type CheckRunner } from "src/utils/check-runner.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { launcherFailure, summarizeCheckOutput } from "./check-output.js";
 import { describeCommand, sameCommand } from "./command-match.js";
 import { appendEvidenceFlagsWorkflow } from "./evidence-flags.js";
 import { assertRetryAllowed } from "./retry-guard.js";
 
 export type { CheckRunner } from "src/utils/check-runner.js";
-
-const OUTPUT_TAIL_LENGTH = 2000;
 
 export interface RunCheckDependencies {
   runner?: CheckRunner | undefined;
@@ -55,7 +54,8 @@ async function resolveRunCwd(
 /**
  * Snapshot, run, snapshot, record: the evidence is written only when the
  * check ran against unchanged inputs. The output tail is returned to the
- * caller and never persisted because command output can carry secrets.
+ * caller (a short failure summary, nothing for a pass) and never persisted because command output can carry
+ * secrets. A launcher error means the check never ran, so it throws and records no evidence.
  */
 export async function runCheckWorkflow(
   root: string,
@@ -77,6 +77,8 @@ export async function runCheckWorkflow(
   const runCwd = await resolveRunCwd(root, checkId, declared.cwd, dependencies.cwd);
   const before = (await computeInputDigest(root, task, checkId)).inputDigest;
   const run = await (dependencies.runner ?? runCheckProcess)(executable, args, runCwd);
+  const launcher = launcherFailure(run.output, run.exitCode);
+  if (launcher !== undefined) throw new Error(`Check ${checkId} could not start: ${launcher}; nothing was recorded.`);
   const after = (await computeInputDigest(root, task, checkId)).inputDigest;
   if (before !== after)
     throw new Error(`Verification inputs for check ${checkId} changed while it ran; nothing was recorded.`);
@@ -97,6 +99,6 @@ export async function runCheckWorkflow(
     evidenceId: appended.evidenceId,
     result,
     exitCode: run.exitCode,
-    outputTail: run.output.slice(-OUTPUT_TAIL_LENGTH),
+    outputTail: result === "fail" ? summarizeCheckOutput(run.output) : "",
   };
 }

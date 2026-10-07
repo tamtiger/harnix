@@ -4,8 +4,8 @@
   "id": "20261006-202544-run-all-checks",
   "title": "Một lệnh chạy mọi check bắt buộc và tóm tắt kết quả",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Agent không phải gọi --run-check lần lượt cho từng check: một lệnh chạy các check bắt buộc còn pending hoặc stale theo thứ tự (focused trước, suite cuối), ghi evidence như --run-check, dừng ở lần fail đầu và in tóm tắt rất ngắn.",
   "nonGoals": [
     "Không nới ngưỡng hay bỏ test cấu trúc",
@@ -16,26 +16,34 @@
     {
       "id": "ac-1",
       "text": "harnix workflow --run-checks chạy tuần tự mọi required check còn pending hoặc stale bằng đúng command và cwd đã khai báo, focused trước và check suite sau cùng, ghi evidence như --run-check và dừng ở check đầu tiên fail.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-runchecks-2"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Output là một đối tượng ngắn chỉ gồm id, result, exitCode của từng check đã chạy và check còn lại; không in output của lệnh khi pass.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-runchecks-2"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Check đang ở circuit breaker stop hoặc không có command khiến lệnh dừng với lý do nêu rõ, không chạy gì.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-runchecks-2"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Cookbook và skill harnix-verify ghi lệnh này như đường chính ở giai đoạn verify.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2"
+      ]
     }
   ],
   "validationPlan": [
@@ -55,11 +63,124 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "check-runchecks",
+      "description": "Test lõi và cờ --run-checks: thứ tự, dừng ở fail, output ngắn, từ chối khi breaker hoặc thiếu command",
+      "command": "pnpm exec vitest run test/unit/core/workflow/run-checks.test.ts test/unit/core/workflow/command-match.test.ts test/integration/commands/workflow-flags.test.ts test/integration/commands/workflow-handlers.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/workflow/**",
+        "test/integration/commands/workflow-flags.test.ts",
+        "test/integration/commands/workflow-handlers.test.ts",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Contract tests (cli-contract, docs, skill sources, instruction budget, golden) xanh sau khi thêm lệnh và sửa tài liệu",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/HARNIX_WORKFLOW.md",
+        "src/skills/**",
+        "src/templates/**",
+        "test/**"
+      ]
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-07T10:52:50.863+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Test tích hợp CLI của --run-checks phải nằm ở test/integration/commands/workflow-handlers.test.ts để khớp cấu trúc mirror src/commands",
+      "artifactPaths": [
+        ".harnix/tasks/20261006-202544-run-all-checks/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-runchecks-1",
+      "checkId": "check-runchecks",
+      "recordedAt": "2026-10-07T10:54:29.836+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/run-checks.test.ts test/unit/core/workflow/command-match.test.ts test/integration/commands/workflow-flags.test.ts test/integration/commands/workflow-han... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f464e81f0bf4248e3a7cd8e587271aede8209cfc0b9b34cfed219e6f9f6770d4"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-07T10:54:34.208+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "057aef7224f7d521143137ca3bc16604de830c53679e18002cef61038b76ed80"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-07T10:55:30.200+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "f7a0795c7d2b1a3886fc4d1887d19ab8122e286a7060241910c41bdc4fe253fd"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-07T10:58:25.209+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b5f62fd39018b48d1cc00a48cf16ebe5db16947c4151019417f5d48ed7e49576"
+    },
+    {
+      "id": "ev-check-runchecks-2",
+      "checkId": "check-runchecks",
+      "recordedAt": "2026-10-07T10:58:58.699+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/run-checks.test.ts test/unit/core/workflow/command-match.test.ts test/integration/commands/workflow-flags.test.ts test/integration/commands/workflow-han... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "44f0fbb2997f9366262ea54d9dc72f1d610e50d3fa57eb9e4ed12040612295c4"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-07T10:59:02.799+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bbbd8ea3ef5ddd9a119f1fd9b4c2c7c3b47b51a966ba059188df1239b3c3d204"
+    }
+  ],
   "relevantPaths": [],
   "relevantSpecs": [],
   "createdAt": "2026-10-06T20:25:42.786+07:00",
-  "updatedAt": "2026-10-06T20:25:42.786+07:00"
+  "updatedAt": "2026-10-07T10:59:20.154+07:00",
+  "decisions": [
+    {
+      "id": "d-failed-reruns",
+      "text": "--run-checks chạy cả check có bằng chứng mới nhất là fail (ngoài pending và stale) vì sau khi sửa lỗi thì đó là đường lặp chính; circuit breaker vẫn chặn lần chạy thứ ba.",
+      "rationale": "Nếu chỉ chạy pending/stale thì sau một lần đỏ agent phải quay lại --run-check từng check, làm mất mục đích của lệnh."
+    }
+  ],
+  "completedAt": "2026-10-07T10:59:20.154+07:00"
 }

@@ -7,10 +7,14 @@ import { resolveProjectRoot } from "src/utils/paths.js";
 
 export type { WorkflowCommandOptions } from "src/commands/workflow-handlers.js";
 
-const collect = (value: string, previous: string[]): string[] => [...previous, value];
+const collect = (value: string, previous: string[] = []): string[] => [...previous, value];
 /** A list flag accepts `--f a,b` and `--f a --f b` alike; the handler splits the merged string. */
 const joinList = (value: string, previous: string | undefined): string =>
   previous === undefined ? value : `${previous},${value}`;
+
+/** `--text` repeats only with `--init`; the value stays a string until a second one arrives. */
+const accumulate = (value: string, previous: string | string[] | undefined): string | string[] =>
+  previous === undefined ? value : [...[previous].flat(), value];
 
 export function registerWorkflowCommand(program: Command, options: WorkflowCommandOptions): void {
   // The pnpm PowerShell shim forwards `$args` and drops the `--` separator, so everything after the first operand
@@ -47,6 +51,10 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     )
     .option("--migrate", "Migrate the active legacy task to schema v3")
     .option("--run-check <id>", "Run the command after -- against a check and record the outcome")
+    .option(
+      "--run-checks",
+      "Run every required check that is not passing, focused first, and stop at the first failure",
+    )
     .option("--set-check <id>", "Add or update one validation check of the active task")
     .option(
       "--set-baseline <id>",
@@ -57,6 +65,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--epic-order <ids...>", "Set an epic run order: <epic-id> then the task ids (none clears it)")
     .option("--replace-check <ids...>", "Replace a failed check with a new check atomically")
     .option("--add-criterion <id>", "Add one acceptance criterion (requires --text)")
+    .option("--set-criterion <id>", "Rewrite the text of one acceptance criterion (requires --text)")
     .option("--add-decision <id>", "Record one decision (requires --text and --rationale)")
     .option("--add-risk <id>", "Record one residual risk (requires --text)")
     .option("--set-paths", "Replace the relevant paths and/or specs of the active task")
@@ -80,7 +89,16 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--criteria <ids>", "Criterion IDs a check covers, comma-separated or repeated", joinList)
     .option("--input <glob>", "Repository input glob of a --set-check check (repeatable)", collect, [])
     .option("--reason <text>", "Why obligations change after planning (10-1000 characters)")
-    .option("--text <text>", "Text for --add-criterion, --add-decision or --add-risk")
+    .option(
+      "--text <text>",
+      "Text for --add-criterion, --add-decision or --add-risk; repeatable with --init, one criterion each",
+      accumulate,
+    )
+    .option(
+      "--with-check <spec>",
+      "Required check for --init as id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>[;scope=..][;description=..] (repeatable)",
+      collect,
+    )
     .option("--rationale <text>", "Rationale for --add-decision")
     .option("--severity <level>", "Severity for --add-risk: low, medium or high")
     .option("--relevant-path <path>", "Relevant path for --set-paths (repeatable)", collect, [])

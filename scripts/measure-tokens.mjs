@@ -24,6 +24,47 @@ const BRIEF_LABELS = new Set([
   "finish",
 ]);
 
+/** Tokens of the "Project learning" block a hook prints (its header and note lines); 0 when the hook carries none. */
+export function learningTokens(text) {
+  // The header may follow the untrusted-frame prefix on the same line, so it is found by position.
+  const at = text.indexOf("Project learning (");
+  if (at < 0) return 0;
+  const lines = text.slice(at).split("\n");
+  const start = 0;
+  const notes = [];
+  for (const line of lines.slice(start + 1)) {
+    if (!/^- (?:candidate|draft) obs-/u.test(line)) break;
+    notes.push(line);
+  }
+  return estimateTokens([lines[start], ...notes].join("\n"));
+}
+
+/** Five learning candidates in the journal entry shape, so the measured hook has real notes to carry or to drop. */
+export function seedLearningLines(developer, recordedAt) {
+  return Array.from({ length: 5 }, (_unused, index) => {
+    const id = `obs-000000000000000${index + 1}`;
+    return JSON.stringify({
+      generator: "harnix",
+      schemaVersion: 1,
+      id: `${id}-entry`,
+      recordedAt,
+      developer,
+      kind: "learning",
+      summary: `Learning candidate: ${id}`,
+      evidenceIds: ["ev-measure-1", "ev-measure-2"],
+      learning: {
+        id,
+        statement: `Measured project note ${index + 1}: keep the clock injectable and the fixtures disposable in tests.`,
+        sourceTaskIds: ["20260929-090000-measure-a", "20260929-090100-measure-b"],
+        evidenceIds: ["ev-measure-1", "ev-measure-2"],
+        occurrences: 2,
+        confidence: 0.8,
+        status: "candidate",
+      },
+    });
+  });
+}
+
 /** Wraps a runner so every step records its input and output tokens and a failing command aborts the measurement. */
 export function createMeter(run) {
   const steps = [];
@@ -119,6 +160,12 @@ export async function measureLifecycle({ cli, brief }) {
     await writeFile(join(project, "src", "a.js"), "export const a = 1;\n");
 
     meter.step("init", ["init", "--user", "measure"]);
+    const journal = join(project, ".harnix", "workspace", "measure", "journal");
+    await mkdir(journal, { recursive: true });
+    await writeFile(
+      join(journal, "seed.jsonl"),
+      `${seedLearningLines("measure", new Date().toISOString()).join("\n")}\n`,
+    );
     const skillList = JSON.parse(meter.step("skill list", ["skill"]));
     const skills = {};
     for (const { name } of skillList.skills)
@@ -135,7 +182,7 @@ export async function measureLifecycle({ cli, brief }) {
     const hook = JSON.stringify({ hook_event_name: "UserPromptSubmit", cwd: project, prompt: "measure" });
 
     meter.step("save create", ["workflow", "--save", ...flag], JSON.stringify({ task }));
-    meter.step("hook context (planning)", ["context", "--platform", "claude"], hook);
+    const hookPlanning = meter.step("hook context (planning)", ["context", "--platform", "claude"], hook);
     meter.step("preflight (planning)", ["workflow", "--preflight"]);
     meter.step("transition ready/ready", ["workflow", "--transition", "ready/ready", ...flag]);
     meter.step("transition in_progress/implementing", [
@@ -144,7 +191,7 @@ export async function measureLifecycle({ cli, brief }) {
       "in_progress/implementing",
       ...flag,
     ]);
-    meter.step("hook context (in_progress)", ["context", "--platform", "claude"], hook);
+    const hookInProgress = meter.step("hook context (in_progress)", ["context", "--platform", "claude"], hook);
     meter.step("inspect", ["workflow", "--inspect"]);
     meter.step("status", ["status"]);
     meter.step("status --explain", ["status", "--explain"]);
@@ -164,7 +211,11 @@ export async function measureLifecycle({ cli, brief }) {
     meter.step("transition verifying/finishing", ["workflow", "--transition", "verifying/finishing", ...flag]);
     meter.step("preflight (finishing)", ["workflow", "--preflight"]);
     meter.step("finish", ["workflow", "--finish", ...flag]);
-    return { steps: meter.steps, statics };
+    return {
+      steps: meter.steps,
+      statics,
+      hookLearning: { planning: learningTokens(hookPlanning), inProgress: learningTokens(hookInProgress) },
+    };
   } finally {
     await Promise.all([rm(project, { force: true, recursive: true }), rm(home, { force: true, recursive: true })]);
   }
@@ -225,7 +276,11 @@ export function buildReport(brief, full, guides) {
       status: tokensOf("status"),
       statusExplain: tokensOf("status --explain"),
     },
-    hookContext: { planning: tokensOf("hook context (planning)"), inProgress: tokensOf("hook context (in_progress)") },
+    hookContext: {
+      planning: tokensOf("hook context (planning)"),
+      inProgress: tokensOf("hook context (in_progress)"),
+      learningTokens: { ...brief.hookLearning, saved: brief.hookLearning.planning - brief.hookLearning.inProgress },
+    },
     steps,
     totals: {
       briefOutputTokens: steps.reduce((sum, step) => sum + step.brief.outputTokens, 0),
@@ -240,6 +295,11 @@ async function main() {
   if (!existsSync(cli)) throw new Error("dist/cli.js is missing; run `pnpm build` before `pnpm measure:tokens`.");
   const brief = await measureLifecycle({ cli, brief: true });
   const full = await measureLifecycle({ cli, brief: false });
+  const { planning, inProgress } = brief.hookLearning;
+  if (planning === 0 || inProgress !== 0)
+    throw new Error(
+      `hook learning must appear while planning and not while implementing (planning ${planning}, in_progress ${inProgress}).`,
+    );
   const guides = await measureGuides(join(root, "src", "guides"));
   process.stdout.write(`${JSON.stringify(buildReport(brief, full, guides))}\n`);
 }

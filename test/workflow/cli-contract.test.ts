@@ -56,7 +56,7 @@ describe("CLI command contract", () => {
     expect(tasks?.options.map((option) => option.long)).toEqual(["--limit", "--status"]);
     const epic = program.commands.find((command) => command.name() === "epic");
     expect(epic?.options.map((option) => option.long)).toEqual(["--limit", "--brief"]);
-    expect(resume?.options.map((option) => option.long)).toEqual(["--dry-run"]);
+    expect(resume?.options.map((option) => option.long)).toEqual(["--epic", "--dry-run"]);
     expect(contextReport?.options.map((option) => option.long)).toEqual(["--platform", "--limit"]);
     expect(workflow?.options.map((option) => option.long)).toEqual([
       "--inspect",
@@ -79,6 +79,7 @@ describe("CLI command contract", () => {
       "--evidence-ids",
       "--migrate",
       "--run-check",
+      "--run-checks",
       "--set-check",
       "--set-baseline",
       "--classification",
@@ -86,6 +87,7 @@ describe("CLI command contract", () => {
       "--epic-order",
       "--replace-check",
       "--add-criterion",
+      "--set-criterion",
       "--add-decision",
       "--add-risk",
       "--set-paths",
@@ -106,6 +108,7 @@ describe("CLI command contract", () => {
       "--input",
       "--reason",
       "--text",
+      "--with-check",
       "--rationale",
       "--severity",
       "--relevant-path",

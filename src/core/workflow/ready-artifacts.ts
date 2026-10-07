@@ -8,6 +8,7 @@ import {
   criteriaWithoutFocusedCheck,
   missingCriteriaInPlan,
   scanPlaceholders,
+  unknownCheckReferences,
   type ContentFindings,
 } from "./ready-content.js";
 
@@ -31,6 +32,14 @@ async function loadFullArtifacts(
   } catch {
     return undefined;
   }
+}
+
+/** One short line however many ids: the plan and the task disagree about which checks exist. */
+function unknownCheckAdvisory(task: TaskRecord, plan: string): string[] {
+  const unknown = unknownCheckReferences(task, plan);
+  if (unknown.length === 0) return [];
+  const shown = [...unknown.slice(0, 5), ...(unknown.length > 5 ? [`+${unknown.length - 5} more`] : [])];
+  return [`plan.md names ${unknown.length} unknown check id(s): ${shown.join(", ")} (not in validationPlan).`];
 }
 
 function focusedCheckFindings(task: TaskRecord): ContentFindings {
@@ -65,6 +74,6 @@ export async function artifactFindings(
       ...missingCriteriaInPlan(task, loaded.plan).map((id) => `plan.md never mentions criterion '${id}'`),
       ...focused.issues,
     ],
-    advisories: [...prd.advisories, ...plan.advisories],
+    advisories: [...prd.advisories, ...plan.advisories, ...unknownCheckAdvisory(task, loaded.plan)],
   };
 }

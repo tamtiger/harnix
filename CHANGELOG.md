@@ -4,6 +4,24 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.3.0] - 2026-10-07
+
+### Added
+
+- version:sync --fold-dev gộp các entry X.Y.0-dev.N thành một entry phát hành khi đóng epic; formatter chỉ nhận file script đã ghi
+- workflow --run-checks chạy mọi required check chưa passing (focused trước, suite sau), dừng ở lần fail đầu và in tóm tắt { ran, remaining }
+- workflow --init nhận --text lặp để tạo nhiều criterion và --with-check lặp để khai báo thêm check bắt buộc không cần JSON; check chạy lệnh test của dự án là check-suite scope full với mô tả tiếng Việt
+- Dry-run của cổng ready cảnh báo (một advisory gộp, không chặn) khi plan.md nhắc id check check-... không có trong validationPlan
+- workflow --preflight trả baselineHint (một dòng) khi suite cùng command đã đỏ ở 2 task kết thúc gần nhất, nhắc xin người dùng ủy quyền --set-baseline thay vì lách từng task
+- workflow --finish --brief trả secretAdvisory (đường dẫn và tên luật, không bao giờ có giá trị) khi file thuộc relevantPaths hoặc input của check có dấu hiệu secret; chỉ là cảnh báo, không dùng Git
+
+### Changed
+
+- workflow --run-check/--run-checks: check fail trả tóm tắt test lỗi ngắn (cả với --brief), pass không trả output; lỗi launcher (thiếu package.json, lệnh không tồn tại) báo could not start và không ghi evidence fail
+- Advisory chưa baseline của ready dry-run gộp thành một dòng có số lượng và learning.hint của --finish rút còn một câu ngắn
+- Hook context chỉ gắn khối learning khi task đang planning; pnpm measure:tokens báo số token learning của hook ở planning và in_progress và thất bại nếu in_progress còn learning
+- so khớp command theo từng từ và executable theo tên (đường dẫn tuyệt đối tới node khớp node), khối learning bắt đầu ở dòng mới, --inspect --task, --set-criterion, resume --epic và danh sách nơi phải sửa khi thêm cờ hoặc action trong AGENTS.md
+
 ## [2.2.0] - 2026-10-06
 
 ### Added

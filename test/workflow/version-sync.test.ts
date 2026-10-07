@@ -262,3 +262,76 @@ describe("version sync release policy", () => {
     },
   );
 });
+
+describe("version sync --fold-dev", () => {
+  const bump = (root: string, version: string, summary: string, kind: string, extra: object = {}) =>
+    syncVersion({
+      date: "2026-10-01",
+      kind,
+      root,
+      summaries: [summary],
+      version,
+      ...extra,
+    });
+  async function devChain(): Promise<string> {
+    const root = await fixture();
+    await bump(root, "1.1.0-dev.1", "A1", "added");
+    await bump(root, "1.1.0-dev.2", "C2", "changed");
+    await bump(root, "1.1.0-dev.3", "A3", "added");
+    return root;
+  }
+
+  it("folds every X.Y.0-dev.N entry into one release entry and is idempotent", async () => {
+    const root = await devChain();
+
+    await expect(bump(root, "1.1.0", "Final", "fixed", { foldDev: true })).resolves.toMatchObject({
+      changed: true,
+      version: "1.1.0",
+    });
+    const changelog = await readFile(join(root, "CHANGELOG.md"), "utf8");
+    expect(changelog).not.toContain("-dev.");
+    expect(changelog.match(/^## \[/gmu)).toHaveLength(2);
+    const entry = changelog.slice(changelog.indexOf("## [1.1.0]"), changelog.indexOf("## [1.0.4]"));
+    expect(entry).toBe(
+      "## [1.1.0] - 2026-10-01\n\n### Added\n\n- A1\n- A3\n\n### Changed\n\n- C2\n\n### Fixed\n\n- Final\n\n",
+    );
+    await expect(bump(root, "1.1.0", "Final", "fixed", { foldDev: true })).resolves.toMatchObject({
+      changed: false,
+    });
+    await expect(readFile(join(root, "CHANGELOG.md"), "utf8")).resolves.toBe(changelog);
+  });
+
+  it("rejects --fold-dev for a pre-release or when no dev entry exists", async () => {
+    const root = await fixture();
+
+    await expect(bump(root, "1.1.0", "x", "added", { foldDev: true })).rejects.toThrow("dev");
+    await expect(bump(root, "1.1.0-dev.1", "x", "added", { foldDev: true })).rejects.toThrow("--fold-dev");
+  });
+
+  it("formats only the files it wrote and leaves unrelated markdown untouched", async () => {
+    const root = await devChain();
+    const unrelated = join(root, "docs.md");
+    await writeFile(unrelated, "#   Unformatted\n*  item\n");
+    const formatted: string[][] = [];
+
+    await bump(root, "1.1.0", "Final", "fixed", {
+      foldDev: true,
+      format: (_root: string, files: string[]) => formatted.push(files),
+    });
+
+    expect(formatted).toHaveLength(1);
+    expect(formatted[0]).toContain("CHANGELOG.md");
+    expect(formatted[0]).not.toContain("docs.md");
+    await expect(readFile(unrelated, "utf8")).resolves.toBe("#   Unformatted\n*  item\n");
+  });
+
+  it("accepts the --fold-dev flag on the command line", async () => {
+    const root = await devChain();
+    const script = join(process.cwd(), "scripts", "version-sync.mjs");
+
+    const { stdout } = await execFileAsync(process.execPath, [script, "1.1.0", "--fold-dev"], { cwd: root });
+
+    expect(JSON.parse(stdout)).toMatchObject({ changed: true, version: "1.1.0" });
+    await expect(readFile(join(root, "CHANGELOG.md"), "utf8")).resolves.not.toContain("-dev.");
+  });
+});

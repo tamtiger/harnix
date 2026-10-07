@@ -6,6 +6,7 @@ import { archiveTask, resolveActiveTask, saveTask, transitionTask, type TaskReco
 import { nowInstant } from "src/utils/clock.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertTaskReadyForFinishing, completionEvidenceIds } from "./completion.js";
+import { scanTaskSecrets, type SecretAdvisory } from "./secret-scan.js";
 import { authorizedRedBaseline } from "./suite-gate.js";
 import { currentInstant, journalFilePath, refreshLinkedEpicMarkdown } from "./support.js";
 import { withWorkflowLock } from "./workflow-lock.js";
@@ -28,6 +29,8 @@ export interface FinishReport {
   learning: FinishLearningReport;
   /** Required checks that finished red from before the task under an authorized baseline. */
   baselineAuthorized: string[];
+  /** Present only when a file of the task shows a sign of a secret; advice, never a reason to refuse a finish. */
+  secretAdvisory?: SecretAdvisory;
 }
 
 export async function finishWorkflow(root: string, injectedNow?: string): Promise<TaskRecord> {
@@ -37,10 +40,9 @@ export async function finishWorkflow(root: string, injectedNow?: string): Promis
 function learningHint(task: TaskRecord, captured: number): string | undefined {
   if (captured > 0) return undefined;
   if (reviewNotes(task).length === 0)
-    return "No decisions, residual risks or evidence findings were recorded, so no learning was captured; record reusable lessons with --add-risk or --add-decision before --finish.";
-  if (extractObservations(task).length === 0)
-    return "Every note was filtered (longer than 500 characters, command-like, credential-like or an instruction override), so no learning was captured.";
-  return "Learning for this task was already captured or a reviewed decision on it already exists.";
+    return "No learning captured: record lessons with --add-risk or --add-decision before --finish.";
+  if (extractObservations(task).length === 0) return "No learning captured: every note was filtered as unsafe.";
+  return "No learning captured: it already exists.";
 }
 
 /** Finishes the active task and reports how much project learning that produced, so a zero is never silent. */
@@ -60,8 +62,10 @@ async function finishLocked(root: string, harnixRoot: string, injectedNow: strin
   await refreshLinkedEpicMarkdown(root, finished);
   const captured = await captureLearning(root, config.developer, finished, journalPath, journalDate);
   const hint = learningHint(finished, captured);
+  const secretAdvisory = await scanTaskSecrets(root, finished);
   return {
     task: finished,
+    ...(secretAdvisory === undefined ? {} : { secretAdvisory }),
     baselineAuthorized: finished.validationPlan
       .filter((check) => authorizedRedBaseline(finished, check))
       .map((check) => check.id),
