@@ -92,6 +92,15 @@ describe("task review page", () => {
     expect(review).toContain("`release-gate`");
     expect(review).toContain("GREEN");
     expect(review).toMatch(/release-gate[^\n]*chưa chạy|release-gate[^\n]*not yet run/u);
+    expect(review).toContain("- [x] `ac-a` (met): Lan thu thu 6 bi chan.");
+    expect(review).toContain("- [ ] `ac-b` (pending): Reset counter khi thanh cong.");
+    expect(review).toMatch(/- \[x\] `check`[^\n]*pass/u);
+    expect(review).toMatch(/- \[ \] `release-gate`[^\n]*(?:chưa chạy|not yet run)/u);
+    expect(review).toContain("## Relevant paths");
+    expect(review).toContain("- `src/auth/rate-limit.ts`");
+    expect(review).toContain("## Summary");
+    // Verify human-friendly readability without emojis or icons.
+    expect(review).not.toMatch(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u);
     expect(review).toContain("Dung in-memory counter.");
     expect(review).toContain("Chua co multi-instance deployment.");
     expect(review).toContain("Khong chia se giua nhieu instance.");

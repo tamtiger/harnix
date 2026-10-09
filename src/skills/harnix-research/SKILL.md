@@ -2,7 +2,7 @@
 name: harnix-research
 description: Use when Harnix needs standalone read-only research, or one material product, dependency, security, compatibility or architecture unknown could change a planning or debugging decision.
 metadata:
-  version: "2.3.0"
+  version: "2.3.1"
 ---
 
 # Research one decision

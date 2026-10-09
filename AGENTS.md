@@ -20,7 +20,7 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 ## Current state
 
 - Documentation readiness has passed.
-- Phase 1–6, workflow freshness hardening C1–C3, Epic đại tu overhaul 2.0.0 (`20260928-180123-harnix-overhaul`, xem `docs/OVERHAUL_DECISIONS.md`) và Epic hardening (`20261005-184125-harnix-hardening-2-0-5`, phát hành thành 2.1.0), Epic giảm ma sát workflow (phát hành thành 2.2.0) và Epic tự cải tiến (`20261006-202542-harnix-self-improvement`, 11 member, phát hành thành 2.3.0 bằng `pnpm version:sync 2.3.0 --fold-dev`) đã hoàn thành 100%. Phiên bản chính thức hiện tại là `2.3.0`.
+- Phase 1–6, workflow freshness hardening C1–C3, Epic đại tu overhaul 2.0.0 (`20260928-180123-harnix-overhaul`, xem `docs/OVERHAUL_DECISIONS.md`) và Epic hardening (`20261005-184125-harnix-hardening-2-0-5`, phát hành thành 2.1.0), Epic giảm ma sát workflow (phát hành thành 2.2.0) và Epic tự cải tiến (`20261006-202542-harnix-self-improvement`, 11 member, phát hành thành 2.3.0 bằng `pnpm version:sync 2.3.0 --fold-dev`) đã hoàn thành 100%. Phiên bản chính thức hiện tại là `2.3.1`.
 - Only when the user requests implementation, proceed to implement authorized tasks.
 - Do not invent a second package, workspace, service, or compatibility surface.
 

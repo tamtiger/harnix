@@ -14,6 +14,38 @@ function renderVerdict(task: TaskRecord): string {
   return `**Verdict:** PENDING — ${met}/${task.acceptanceCriteria.length} acceptance criteria met`;
 }
 
+function renderSummary(task: TaskRecord): string[] {
+  const met = task.acceptanceCriteria.filter(
+    (criterion) => criterion.status === "met" || criterion.status === "waived",
+  ).length;
+  const totalCrit = task.acceptanceCriteria.length;
+  const critRate = totalCrit > 0 ? `${Math.round((met / totalCrit) * 100)}%` : "N/A";
+
+  const requiredChecks = task.validationPlan.filter((check) => check.required);
+  const passedChecks = requiredChecks.filter((check) => {
+    const latest = selectLatestEvidence(task.evidence, check.id);
+    return latest?.result === "pass";
+  }).length;
+  const totalChecks = requiredChecks.length;
+  const checkRate = totalChecks > 0 ? `${Math.round((passedChecks / totalChecks) * 100)}%` : "N/A";
+
+  const residualRisks = "residualRisks" in task ? (task.residualRisks ?? []) : [];
+
+  const lines = [
+    "## Summary",
+    "",
+    "| Item | Progress | Details |",
+    "| --- | --- | --- |",
+    `| Acceptance criteria | ${critRate} | ${met}/${totalCrit} met or waived |`,
+    `| Required checks | ${checkRate} | ${passedChecks}/${totalChecks} passed |`,
+  ];
+  if (residualRisks.length > 0) {
+    const details = residualRisks.map((risk) => `${risk.id}: ${risk.severity}`).join(", ");
+    lines.push(`| Residual risks | ${residualRisks.length} | ${details} |`);
+  }
+  return lines;
+}
+
 /** Legacy `Z` and offset timestamps both render in the configured zone; an unparsable value is shown as stored. */
 function displayTime(value: string, timezone: string): string {
   try {
@@ -43,12 +75,31 @@ function renderHeader(task: TaskRecord, timezone: string): string[] {
     "",
     renderVerdict(task),
     "",
+    ...renderSummary(task),
+    "",
     "## Goal",
     "",
     task.goal,
   ];
   if (task.nonGoals.length > 0) {
     lines.push("", "## Non-goals", "", ...task.nonGoals.map((item) => `- ${item}`));
+  }
+  return lines;
+}
+
+function renderScope(task: TaskRecord): string[] {
+  const lines: string[] = [];
+  if (task.relevantPaths && task.relevantPaths.length > 0) {
+    lines.push("", "## Relevant paths", "");
+    for (const path of task.relevantPaths) {
+      lines.push(`- \`${path}\``);
+    }
+  }
+  if (task.relevantSpecs && task.relevantSpecs.length > 0) {
+    lines.push("", "## Relevant specs", "");
+    for (const spec of task.relevantSpecs) {
+      lines.push(`- \`${spec}\``);
+    }
   }
   return lines;
 }
@@ -68,8 +119,9 @@ function renderCriteriaAndChecks(task: TaskRecord, timezone: string): string[] {
     lines.push("_None recorded yet._");
   } else {
     for (const criterion of task.acceptanceCriteria) {
+      const box = criterion.status === "met" ? "[x]" : "[ ]";
       const waiver = criterion.status === "waived" && criterion.waiverReason ? ` — ${criterion.waiverReason}` : "";
-      lines.push(`- \`${criterion.id}\` (${criterion.status}): ${criterion.text}${waiver}`);
+      lines.push(`- ${box} \`${criterion.id}\` (${criterion.status}): ${criterion.text}${waiver}`);
     }
   }
   lines.push("", "## Required checks", "");
@@ -79,10 +131,12 @@ function renderCriteriaAndChecks(task: TaskRecord, timezone: string): string[] {
   } else {
     for (const check of requiredChecks) {
       const latest = selectLatestEvidence(task.evidence, check.id);
+      const isPassed = latest?.result === "pass";
+      const box = isPassed ? "[x]" : "[ ]";
       const state = latest
         ? `${latest.result} (${displayTime(latest.recordedAt, timezone)})`
         : "chưa chạy / not yet run";
-      lines.push(`- \`${check.id}\` (${check.scope}): ${check.description} — ${state}`);
+      lines.push(`- ${box} \`${check.id}\` (${check.scope}): ${check.description} — ${state}`);
     }
   }
   return lines;
@@ -148,6 +202,7 @@ function renderEvidence(task: TaskRecord, timezone: string): string[] {
 export function renderTaskReview(task: TaskRecord, artifacts: ReviewArtifacts, timezone: string): string {
   const lines = [
     ...renderHeader(task, timezone),
+    ...renderScope(task),
     ...renderArtifacts(artifacts),
     ...renderCriteriaAndChecks(task, timezone),
     ...renderReviewData(task),

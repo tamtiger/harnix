@@ -1,0 +1,115 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261008-114929-refactor-task-review-checklist",
+  "title": "Refactor trang review task: hiển thị tổng thể tiến độ và checklist trực quan",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cải tiến trang review.md để thể hiện rõ nét tổng thể task: bổ sung bảng tổng quan tiến độ (Scorecard), hiển thị phạm vi tác động (relevantPaths/specs), định dạng checklist rõ ràng cho criteria và checks mà không dùng icon.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "task-review.ts hiển thị bảng tổng quan tiến độ (Scorecard) phản ánh tỷ lệ hoàn thành tiêu chí, kiểm thử, rủi ro tồn đọng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-review-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "task-review.ts hiển thị phạm vi tác động (Scope & Relevant paths/specs) khi task có relevantPaths hoặc relevantSpecs.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-review-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "task-review.ts định dạng Acceptance criteria và Required checks theo dạng markdown checklist (- [x] / - [ ]) không dùng icon/emoji, giữ nguyên 100% khả năng tương thích với các test case hiện tại.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-review-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "check-review",
+      "description": "Unit test cho trang review.md",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/core/tasks/task-review.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/tasks/task-review.ts",
+        "test/unit/core/tasks/task-review.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-review-1",
+      "checkId": "check-review",
+      "recordedAt": "2026-10-08T12:02:59.136+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/tasks/task-review.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "090c993c2fcbcbb0b8febd4c01d34adcf43939922cc9344cb864265be4f7988d"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-08T12:04:02.323+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "177ccfeed59c1e2fa6c7e7cfc35abfd28e09adce1c1af4f83cf1c6b7bdef77de"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task-review.ts",
+    "test/unit/core/tasks/task-review.test.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-08T11:49:29.505+07:00",
+  "updatedAt": "2026-10-08T12:04:21.883+07:00",
+  "decisions": [
+    {
+      "id": "d-human-review",
+      "text": "Trang review.md dùng định dạng checklist markdown và bảng Summary tổng thể, không dùng icon hay emoji",
+      "rationale": "Tối ưu khả năng đọc của con người, tương thích tốt với mọi trình render markdown và đáp ứng đúng yêu cầu của người dùng"
+    },
+    {
+      "id": "d-check",
+      "text": "Kiem tra render moi",
+      "rationale": "Xac nhan file review.md duoc sinh tu ban build moi"
+    }
+  ],
+  "completedAt": "2026-10-08T12:04:21.883+07:00"
+}
