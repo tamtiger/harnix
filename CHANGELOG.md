@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.4.0-dev.1] - 2026-10-13
+
+### Added
+
+- Thêm harnix learning để xem, loại (--reject), promote (--promote --apply) và gỡ (--retire) learning vào .harnix/spec/learned.md; hook context nạp tối đa 5 khối theo vùng đường dẫn của task và xếp learning chưa duyệt theo độ liên quan
+
 ## [2.3.1] - 2026-10-08
 
 ### Changed

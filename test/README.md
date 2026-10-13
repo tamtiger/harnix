@@ -3,14 +3,14 @@
 Every spec is a `*.test.ts` file; shared helpers live only in `test/support/`. The suites map to the
 `pnpm test:*` scripts, and `pnpm test` runs all of them with coverage (the floor is in `vitest.config.ts`).
 
-| Suite | Directory | Purpose | Naming |
-| --- | --- | --- | --- |
-| unit | `test/unit/` | One source module in isolation. | Mirrors `src`: `src/core/tasks/task-store.ts` is tested by `test/unit/core/tasks/task-store.test.ts`. |
-| integration | `test/integration/` | Real commands against a disposable project. | `commands/<command>.test.ts` mirrors `src/commands/<command>.ts`; multi-command flows go in `scenarios/`. |
-| workflow | `test/workflow/` | Workflow scenarios and repository contracts (architecture, docs, templates, CLI contract, behavior golden). | Named after the contract or scenario. |
-| platform | `test/platform/` | Kiro, Antigravity, Codex, Claude Code, OpenCode and Cursor global setup against an injected home. | Named after the platform surface. |
-| safety | `test/safety/` | Path boundaries, isolated user home and release scanning. | Named after the boundary. |
-| migration | `test/migration/` | Compatibility with older data (task v1/v2, `context.json`, `.harnix/roadmaps` to `.harnix/epics`). | Named after the data being migrated. |
+| Suite       | Directory           | Purpose                                                                                                     | Naming                                                                                                    |
+| ----------- | ------------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| unit        | `test/unit/`        | One source module in isolation.                                                                             | Mirrors `src`: `src/core/tasks/task-store.ts` is tested by `test/unit/core/tasks/task-store.test.ts`.     |
+| integration | `test/integration/` | Real commands against a disposable project.                                                                 | `commands/<command>.test.ts` mirrors `src/commands/<command>.ts`; multi-command flows go in `scenarios/`. |
+| workflow    | `test/workflow/`    | Workflow scenarios and repository contracts (architecture, docs, templates, CLI contract, behavior golden). | Named after the contract or scenario.                                                                     |
+| platform    | `test/platform/`    | Kiro, Antigravity, Codex, Claude Code, OpenCode and Cursor global setup against an injected home.           | Named after the platform surface.                                                                         |
+| safety      | `test/safety/`      | Path boundaries, isolated user home and release scanning.                                                   | Named after the boundary.                                                                                 |
+| migration   | `test/migration/`   | Compatibility with older data (task v1/v2, `context.json`, `.harnix/roadmaps` to `.harnix/epics`).          | Named after the data being migrated.                                                                      |
 
 `test/unit/test-structure.test.ts` is the only unit-level repository contract: it enforces this layout, the
 400-line cap, use of the shared builders, direct coverage of every source module and a floor under the number

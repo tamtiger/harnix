@@ -2,7 +2,7 @@
 name: harnix-verify
 description: Use when a Harnix task needs fresh compliance, correctness and security verification, evidence, and a safe finish or explicit cancellation with an evidence-based handoff.
 metadata:
-  version: "2.3.1"
+  version: "2.4.0-dev.1"
 ---
 
 # Verify and finish Harnix work
@@ -38,6 +38,6 @@ Use native agent skills on demand (load via `harnix skill <name>`):
 
 ## Finish
 
-When every criterion is met or waived and every required check is fresh: `--transition verifying/finishing`, record reusable lessons with `--add-risk` / `--add-decision`, then run `harnix workflow --finish --brief` exactly once. It recomputes every digest and captures learning; read `learning.captured` and act on `learning.hint` when it is 0. Finish never edits the product. Details, recovery and cancellation: `./references/finish-cancel.md` (or `harnix skill harnix-verify --reference finish-cancel`).
+When every criterion is met or waived and every required check is fresh: `--transition verifying/finishing`, record reusable lessons with `--add-risk` / `--add-decision`, then run `harnix workflow --finish --brief` exactly once. It recomputes every digest and captures learning; read `learning.captured` and act on `learning.hint` when it is 0; when it is above 0 tell the user they can review the notes with `harnix learning` (never promote, reject or retire one yourself). Finish never edits the product. Details, recovery and cancellation: `./references/finish-cancel.md` (or `harnix skill harnix-verify --reference finish-cancel`).
 
 Report the outcome first, then the evidence, omitted checks and residual risks. For an epic member also report progress (`harnix epic <id>`) and recommend the next task; point to `review.md` for a plain summary. Never branch, commit, push or open a PR; before a commit show the diff and message and wait for approval.

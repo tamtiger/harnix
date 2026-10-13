@@ -6,6 +6,7 @@ import {
   renderLearningBlock,
   summarizeLearning,
   type LearningSummaryItem,
+  type SummarizeOptions,
 } from "src/core/journal/learning-summary.js";
 import { at } from "test/support/builders.js";
 import { buildLearningEntry, writeJournalFile } from "test/support/learning-fixtures.js";
@@ -14,14 +15,18 @@ import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 const temporaryRepository = useTemporaryRepositories("harnix-learning-summary-");
 const now = Date.parse(at(60));
 
-async function summarize(entries: ReturnType<typeof buildLearningEntry>[], at2 = now): Promise<LearningSummaryItem[]> {
+async function summarize(
+  entries: ReturnType<typeof buildLearningEntry>[],
+  at2 = now,
+  options?: SummarizeOptions,
+): Promise<LearningSummaryItem[]> {
   const root = await temporaryRepository();
   await writeJournalFile(root, "2026-09-29.jsonl", entries);
-  return summarizeLearning(root, at2);
+  return summarizeLearning(root, at2, options);
 }
 
 describe("learning summary", () => {
-  it("leaves out archived, lapsed and rejected entries but keeps live ones", async () => {
+  it("leaves out archived, lapsed, rejected and promoted entries but keeps live ones", async () => {
     const items = await summarize([
       buildLearningEntry({ id: "obs-live", status: "candidate" }),
       buildLearningEntry({ id: "obs-archived", status: "archived" }),
@@ -29,7 +34,7 @@ describe("learning summary", () => {
       buildLearningEntry({ id: "obs-promoted", status: "promoted" }),
     ]);
 
-    expect(items.map((item) => item.id).sort()).toEqual(["obs-live", "obs-promoted"]);
+    expect(items.map((item) => item.id).sort()).toEqual(["obs-live"]);
 
     const lapsed = await summarize([buildLearningEntry({ id: "obs-old", status: "draft" })], now + 29 * 86_400_000);
     expect(lapsed).toEqual([]);
@@ -105,6 +110,42 @@ describe("learning summary", () => {
     expect(Array.from(item!.statement)).toHaveLength(MAX_SUMMARY_STATEMENT_CHARACTERS);
     expect(JSON.parse(JSON.stringify(item!.statement))).toBe(item!.statement);
     expect(item!.statement).not.toMatch(/[\ud800-\udbff](?![\udc00-\udfff])/u);
+  });
+});
+
+describe("learning summary relevance", () => {
+  const sources: Record<string, string[]> = { "task-core": ["src/core/a.ts"], "task-docs": ["docs/a.md"] };
+  const options = (activePaths: string[]): SummarizeOptions => ({
+    activePaths,
+    sourcePaths: (taskIds) => Promise.resolve(taskIds.flatMap((id) => sources[id] ?? [])),
+  });
+  const entries = [
+    buildLearningEntry({ id: "obs-docs", status: "candidate", sourceTaskIds: ["task-docs"] }, { recordedAt: at(5) }),
+    buildLearningEntry({ id: "obs-core", status: "draft", sourceTaskIds: ["task-core"] }, { recordedAt: at(1) }),
+    buildLearningEntry({ id: "obs-none", status: "draft", sourceTaskIds: ["task-x"] }, { recordedAt: at(9) }),
+  ];
+
+  it("puts a lesson whose source paths overlap the task before a newer or stronger unrelated one", async () => {
+    const items = await summarize(entries, now, options(["src/core/workflow/save.ts"]));
+
+    expect(items.map((item) => item.id)).toEqual(["obs-core", "obs-docs", "obs-none"]);
+  });
+
+  it("keeps the old order when no active paths or source paths are given", async () => {
+    const plain = await summarize(entries);
+    const noActive = await summarize(entries, now, options([]));
+
+    expect(plain.map((item) => item.id)).toEqual(["obs-docs", "obs-none", "obs-core"]);
+    expect(noActive.map((item) => item.id)).toEqual(plain.map((item) => item.id));
+  });
+
+  it("falls back to the old order when the source lookup fails", async () => {
+    const items = await summarize(entries, now, {
+      activePaths: ["src/core"],
+      sourcePaths: () => Promise.reject(new Error("unreadable")),
+    });
+
+    expect(items.map((item) => item.id)).toEqual(["obs-docs", "obs-none", "obs-core"]);
   });
 });
 

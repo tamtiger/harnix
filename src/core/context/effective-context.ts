@@ -4,6 +4,8 @@ import { guideOutputPath, selectGuideSources } from "src/guides/catalog.js";
 import { getPlatform } from "src/core/platform/registry.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { loadLearnedSpecBlock } from "src/core/journal/learned-spec.js";
+import { createSourcePathsLoader } from "src/core/journal/learning-sources.js";
 import { renderLearningBlock, summarizeLearning } from "src/core/journal/learning-summary.js";
 import {
   GUIDE_POINTER_PREFIX,
@@ -90,8 +92,7 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
     bounded ? { prefixes: [GUIDE_POINTER_PREFIX], minCharacters: POINTER_MIN_CHARACTERS } : undefined,
   );
 
-  // Learning only helps while the agent plans; every later turn would pay its tokens for nothing.
-  const learning = input.task.status === "planning" ? await learningBlock(input) : "";
+  const learning = await learningBlock(input);
   return {
     text: withLearning(output.text, learning),
     manifest: output.manifest,
@@ -101,10 +102,24 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
   };
 }
 
+/**
+ * Promoted rules (bounded, picked by the task's paths) go to every stage; unreviewed learning only while planning.
+ */
 async function learningBlock(input: EffectiveContextInput): Promise<string> {
+  const promoted = await loadLearnedSpecBlock(input.projectRoot, input.task.relevantPaths);
+  const notes = input.task.status === "planning" ? await unreviewedLearningBlock(input) : "";
+  return [promoted, notes].filter((part) => part.length > 0).join("\n\n");
+}
+
+async function unreviewedLearningBlock(input: EffectiveContextInput): Promise<string> {
   try {
     const journalRoot = await resolveSafeProjectPath(input.harnixRoot, `workspace/${input.config.developer}/journal`);
-    return renderLearningBlock(await summarizeLearning(journalRoot, input.now ?? Date.now()));
+    return renderLearningBlock(
+      await summarizeLearning(journalRoot, input.now ?? Date.now(), {
+        activePaths: input.task.relevantPaths,
+        sourcePaths: createSourcePathsLoader(input.harnixRoot),
+      }),
+    );
   } catch {
     return "";
   }

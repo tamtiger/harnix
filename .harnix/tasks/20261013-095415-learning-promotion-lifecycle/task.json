@@ -1,0 +1,350 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261013-095415-learning-promotion-lifecycle",
+  "title": "Hoàn thiện vòng đời learning: review, approve, reject, promote vào spec",
+  "goal": "Thêm lệnh công khai (JSON mặc định) để xem hàng đợi, approve, reject và promote; promote dùng promotionProposal để sinh diff reviewable vào .harnix/spec/guides chỉ khi có approval tường minh; ghi status approved, promoted, rejected vào journal append-only; mở rộng kênh áp dụng theo kết quả research.",
+  "nonGoals": [
+    "Không tự ghi spec khi chưa approval",
+    "Không network, không global memory"
+  ],
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-13T09:54:11.405+07:00",
+  "updatedAt": "2026-10-13T11:12:02.211+07:00",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Có đường end-to-end được test: learning từ draft hoặc candidate tới .harnix/spec/learned.md qua harnix learning --promote <id> --apply tường minh, và learned.md được nạp vào ngữ cảnh agent",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-lifecycle-3",
+        "ev-check-suite-2-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "reject và promote ghi entry journal mới; trạng thái hiệu lực đúng trong mem --learning, harnix learning và preflight",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-lifecycle-3",
+        "ev-check-suite-2-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Cờ và action mới được cập nhật đủ cli-contract, golden, docs và template",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-suite-2-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Hướng dẫn skill harnix-plan, workflow.md và docs mô tả đúng vòng đời mới (review, approve, reject, promote); doctor không thay đổi",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-lifecycle-3",
+        "ev-check-suite-2-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "learned.md không làm tăng token vô hạn: nạp theo giao nhau relevantPaths trong trần 5 khối và 2000 ký tự, promote bị từ chối ở 40 khối, và lệnh retire gỡ khối kèm entry archived",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-lifecycle-3",
+        "ev-check-suite-2-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-gates",
+      "description": "Contract tests",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-lifecycle",
+      "description": "Test vòng đời learning",
+      "command": "pnpm exec vitest run test/unit test/integration",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": false,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite-2",
+      "description": "Toàn bộ bộ test của dự án (bản thay thế)",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-13T10:11:52.325+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Người dùng chọn chỉ cần --apply, bỏ bước approve; bổ sung nạp learned.md vì không có đường nạp thì promote vô nghĩa",
+      "artifactPaths": [
+        ".harnix/tasks/20261013-095415-learning-promotion-lifecycle/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-13T10:11:52.978+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bỏ approve theo yêu cầu người dùng, chỉ còn reject và promote --apply",
+      "artifactPaths": [
+        ".harnix/tasks/20261013-095415-learning-promotion-lifecycle/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-10-13T10:16:24.662+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Người dùng chỉ ra learned.md sẽ phình khi chạy nhiều task; cần chặn tăng token và có đường dọn",
+      "artifactPaths": [
+        ".harnix/tasks/20261013-095415-learning-promotion-lifecycle/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-04",
+      "recordedAt": "2026-10-13T10:16:26.029+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Thêm ac-5 vào check gates",
+      "artifactPaths": [
+        ".harnix/tasks/20261013-095415-learning-promotion-lifecycle/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-05",
+      "recordedAt": "2026-10-13T10:16:33.279+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Suite phải phủ cả ac-5 vừa thêm",
+      "artifactPaths": [
+        ".harnix/tasks/20261013-095415-learning-promotion-lifecycle/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-06",
+      "recordedAt": "2026-10-13T10:20:10.859+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa cú pháp lệnh theo kiểu cờ, không dùng subcommand",
+      "artifactPaths": [
+        ".harnix/tasks/20261013-095415-learning-promotion-lifecycle/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-lifecycle-1",
+      "checkId": "check-lifecycle",
+      "recordedAt": "2026-10-13T10:39:02.727+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit test/integration — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b5a50316f3aad4095b6bb448d0475152370c4c0d2dd16a600edffa067e5b559c"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-13T10:39:06.659+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "921b5a20e3f165c153a4f17cbdc2f594e1a7859733137629700c1be611bd7d64"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-13T10:40:23.159+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "2a5865a98e4f354a522d7e5f351a783e9ff7a9c355e9414c0d6e0b62b4fb1e0e"
+    },
+    {
+      "id": "ev-check-lifecycle-2",
+      "checkId": "check-lifecycle",
+      "recordedAt": "2026-10-13T10:45:54.688+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit test/integration — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ce85c1c3a191936478eefdee8856e029693eeca30ae4b3aba56139378b4bec40"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-13T10:45:58.940+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "650c3417645aeddef4849f3998de0d775b94b4f4bfd08d4bd8027ee7dc128809"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-13T10:47:05.197+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "749f865aff656dcde831c58df802cb627ab70a1a00137f01e9b6892d18e0815a"
+    },
+    {
+      "id": "task-contract-revision-07",
+      "recordedAt": "2026-10-13T11:02:44.900+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Người dùng cho phép thay check: lần fail thứ hai của check-suite không tái hiện được (270 file pass khi chạy tay và qua cmd.exe), thêm package.json vào inputs",
+      "artifactPaths": [
+        ".harnix/tasks/20261013-095415-learning-promotion-lifecycle/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-suite-2-1",
+      "checkId": "check-suite-2",
+      "recordedAt": "2026-10-13T11:04:16.329+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9b85d94c664ee058cd8222b351a8354e4407b0fab2484832f77a68440156bc5e"
+    },
+    {
+      "id": "ev-check-gates-3",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-13T11:09:42.901+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ec3b8157486a542b61c8912a09255d3f99636a3b977b28cc0d2dae0419eae74e"
+    },
+    {
+      "id": "ev-check-lifecycle-3",
+      "checkId": "check-lifecycle",
+      "recordedAt": "2026-10-13T11:10:23.527+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit test/integration — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "71620bb7b6d30c77081450364ce5f4d89ae0eaf6efb03a748e07474e7f7b2c37"
+    },
+    {
+      "id": "ev-check-suite-2-2",
+      "checkId": "check-suite-2",
+      "recordedAt": "2026-10-13T11:11:33.213+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "56deecd65ffff4610b4a38a9ba8f69556b9876c568cf30a27d628d9adf133228"
+    }
+  ],
+  "relevantPaths": [
+    "docs",
+    "src/cli-workflow-commands.ts",
+    "src/commands",
+    "src/core/context",
+    "src/core/journal",
+    "src/core/workflow",
+    "src/templates/harnix",
+    "test/unit/core/journal"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "epicId": "20261013-095411-harnix-learning-overhaul",
+  "decisions": [
+    {
+      "id": "d-scope-a",
+      "text": "Member A ưu tiên cao nhất: vòng đời promote vào guides cộng xếp hạng nạp theo giao nhau với relevantPaths (97/130 learning có task nguồn có relevantPaths).",
+      "rationale": "Chỉ có đường áp dụng mới làm learning có hiệu lực; nạp theo độ liên quan không tăng token."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-suite-intermittent",
+      "text": "Một lần chạy check-suite bằng workflow --run-checks fail ở test workflow-flags 'records notes from flags' (finish báo thiếu checkpoint verifying/finishing) dù chạy tay cùng lệnh và qua cmd.exe đều pass 270 file; chưa tái hiện được, nghi test phụ thuộc thời gian hoặc I/O Windows",
+      "severity": "medium"
+    },
+    {
+      "id": "r-store-cap",
+      "text": "readLearningStates chỉ đọc 500 entry mới nhất; sau đó một id promoted cũ có thể không tìm thấy nên --retire báo không tồn tại và capture có thể tạo lại draft",
+      "severity": "low"
+    },
+    {
+      "id": "r-learned-concurrency",
+      "text": "Ghi learned.md là đọc-sửa-ghi không có khóa; hai lệnh --promote --apply chạy đồng thời có thể mất một khối",
+      "severity": "low"
+    },
+    {
+      "id": "r-hook-cost",
+      "text": "Xếp hạng theo độ liên quan đọc task.json tuần tự cho mọi learning khi planning và learned.md chưa có giới hạn kích thước đọc",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-13T11:12:02.211+07:00"
+}

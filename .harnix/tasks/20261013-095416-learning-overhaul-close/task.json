@@ -1,0 +1,80 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261013-095416-learning-overhaul-close",
+  "title": "Đóng epic learning: tài liệu gốc, kiểm chứng end-to-end và phát hành",
+  "goal": "Cập nhật docs/HARNIX_WORKFLOW.md, PRD, workflow template (pnpm selfhost:sync), kiểm chứng end-to-end trên journal thật và phát hành X.(Y+1).0 bằng pnpm version:sync --fold-dev.",
+  "nonGoals": [
+    "Không thêm tính năng mới"
+  ],
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "createdAt": "2026-10-13T09:54:11.405+07:00",
+  "updatedAt": "2026-10-13T09:54:11.405+07:00",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Tài liệu và template mô tả đúng vòng đời learning mới, selfhost:sync đồng bộ",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Phát hành minor bằng version:sync --fold-dev, CHANGELOG gộp một mục",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Mọi gate (test, lint, typecheck, test:gates) có exit code 0 mới",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-gates",
+      "description": "Contract tests",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/HARNIX_PRD.md",
+    "CHANGELOG.md",
+    "src/templates/harnix/workflow.md"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "epicId": "20261013-095411-harnix-learning-overhaul"
+}

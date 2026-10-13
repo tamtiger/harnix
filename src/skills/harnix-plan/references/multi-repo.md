@@ -9,7 +9,7 @@ Use when one task spans a workspace of several repositories or nested projects t
 5. **Example, two repositories:**
    - `check-api`: `--command "dotnet test" --cwd services/api --input "services/api/**" --criteria ac-1`
    - `check-web`: `--command "pnpm run test" --cwd apps/web --input "apps/web/**" --criteria ac-2`
-   Run `--run-check check-api -- dotnet test`, then `--run-check check-web -- pnpm run test`.
+     Run `--run-check check-api -- dotnet test`, then `--run-check check-web -- pnpm run test`.
 6. **Common mistakes:**
    - `inputs` that do not cover the repository under `cwd` (the pass would never go stale).
    - A compound command (`cd x && y`); declare one check per command and use `cwd`.

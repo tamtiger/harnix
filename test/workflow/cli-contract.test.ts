@@ -5,7 +5,7 @@ import { createProgram, runCli } from "src/cli-program.js";
 afterEach(() => vi.restoreAllMocks());
 
 describe("CLI command contract", () => {
-  it("exposes sixteen supported commands without exposing hidden/internal commands", () => {
+  it("exposes seventeen supported commands without exposing hidden/internal commands", () => {
     expect(
       createProgram()
         .commands.filter((command) => !(command as { _hidden?: boolean })._hidden)
@@ -17,6 +17,7 @@ describe("CLI command contract", () => {
       "upgrade",
       "uninstall",
       "mem",
+      "learning",
       "status",
       "tasks",
       "epic",

@@ -1,0 +1,139 @@
+import { mkdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { runCli } from "src/cli-program.js";
+import { initializeProject } from "src/commands/init.js";
+import { saveTask } from "src/core/tasks/task.js";
+import { at, buildTaskV3 } from "test/support/builders.js";
+import { buildLearningEntry, writeJournalFile } from "test/support/learning-fixtures.js";
+import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+
+const originalCwd = process.cwd();
+const originalExitCode = process.exitCode;
+const temporaryRepository = useTemporaryRepositories("harnix-learning-command-");
+const SOURCE_TASK = "20260929-090000-source";
+
+afterEach(() => {
+  process.chdir(originalCwd);
+  process.exitCode = originalExitCode;
+  vi.restoreAllMocks();
+});
+
+async function project(): Promise<string> {
+  const root = await temporaryRepository();
+  await initializeProject({ developer: "tam", root, yes: true });
+  await saveTask(join(root, ".harnix"), buildTaskV3({ id: SOURCE_TASK, relevantPaths: ["src/core/workflow/save.ts"] }));
+  const journal = join(root, ".harnix", "workspace", "tam", "journal");
+  await mkdir(journal, { recursive: true });
+  await writeJournalFile(journal, "2099-01-01.jsonl", [
+    buildLearningEntry(
+      { id: "obs-a", status: "candidate", statement: "Inject the clock", sourceTaskIds: [SOURCE_TASK] },
+      { id: "a-1", recordedAt: at(0) },
+    ),
+    buildLearningEntry(
+      { id: "obs-b", status: "draft", statement: "Prefer builders", sourceTaskIds: [SOURCE_TASK] },
+      { id: "b-1", recordedAt: at(1) },
+    ),
+  ]);
+  process.chdir(root);
+  return root;
+}
+
+async function learning(...args: string[]): Promise<{ code: number; json: Record<string, unknown>; err: string }> {
+  const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+  const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+  const code = await runCli(["node", "harnix", "learning", ...args]);
+  const out = stdout.mock.calls.map((call) => String(call[0])).join("");
+  const err = stderr.mock.calls.map((call) => String(call[0])).join("");
+  stdout.mockRestore();
+  stderr.mockRestore();
+  return { code, json: out.trim() ? (JSON.parse(out) as Record<string, unknown>) : {}, err };
+}
+
+type Item = { id: string; status: string };
+
+describe.sequential("learning command", () => {
+  it("lists learning with the effective status, the spec size and honours --status and --limit", async () => {
+    await project();
+
+    const all = await learning();
+    const drafts = await learning("--status", "draft");
+    const one = await learning("--limit", "1");
+
+    expect(all.code).toBe(0);
+    expect((all.json.items as Item[]).map((item) => [item.id, item.status]).sort()).toEqual([
+      ["obs-a", "candidate"],
+      ["obs-b", "draft"],
+    ]);
+    expect(all.json.spec).toEqual({ path: ".harnix/spec/learned.md", blocks: 0, characters: 0, maxBlocks: 40 });
+    expect((drafts.json.items as Item[]).map((item) => item.id)).toEqual(["obs-b"]);
+    expect(one.json.items as Item[]).toHaveLength(1);
+  });
+
+  it("previews a promotion without writing anything", async () => {
+    const root = await project();
+
+    const result = await learning("--promote", "obs-a");
+
+    expect(result.code).toBe(0);
+    expect(result.json).toMatchObject({ action: "promote", id: "obs-a", applied: false, blocks: 1 });
+    expect(String(result.json.proposal)).toContain("Candidate: obs-a");
+    await expect(readFile(join(root, ".harnix", "spec", "learned.md"), "utf8")).rejects.toThrow();
+    expect(((await learning("--status", "candidate")).json.items as Item[]).map((item) => item.id)).toEqual(["obs-a"]);
+  });
+
+  it("promotes with --apply, scoping the block to the source task's paths, then retires it", async () => {
+    const root = await project();
+
+    const promoted = await learning("--promote", "obs-a", "--apply");
+    const text = await readFile(join(root, ".harnix", "spec", "learned.md"), "utf8");
+    const listed = await learning("--status", "promoted");
+
+    expect(promoted.json).toMatchObject({ action: "promote", applied: true, status: "promoted" });
+    expect(text).toContain("<!-- harnix-learning:obs-a paths=src/core/workflow -->");
+    expect(listed.json.spec).toMatchObject({ blocks: 1 });
+    expect((listed.json.items as Item[]).map((item) => item.id)).toEqual(["obs-a"]);
+
+    const retired = await learning("--retire", "obs-a");
+
+    expect(retired.json).toMatchObject({ action: "retire", removed: true, status: "archived", blocks: 0 });
+    expect(await readFile(join(root, ".harnix", "spec", "learned.md"), "utf8")).not.toContain("obs-a");
+  });
+
+  it("rejects a learning with a reason and then refuses to promote it", async () => {
+    await project();
+
+    const rejected = await learning("--reject", "obs-b", "--reason", "too specific");
+    const again = await learning("--promote", "obs-b", "--apply");
+
+    expect(rejected.json).toMatchObject({ action: "reject", id: "obs-b", status: "rejected" });
+    expect(again.code).toBe(2);
+    expect(again.err).toMatch(/cannot/iu);
+  });
+
+  it.each([
+    [["--promote", "obs-a", "--reject", "obs-b"], /only one/iu],
+    [["--apply"], /--apply.*--promote/iu],
+    [["--reject", "obs-a", "--apply"], /--apply.*--promote/iu],
+    [["--promote", "obs-a", "--reason", "x"], /--reason.*--reject/iu],
+    [["--promote", "obs-a", "--status", "draft"], /listing/iu],
+    [["--promote", "../evil"], /invalid/iu],
+    [["--promote", "obs-missing"], /does not exist/iu],
+    [["--status", "weird"], /--status/iu],
+    [["--limit", "0"], /--limit/iu],
+  ])("rejects %j", async (args, message) => {
+    await project();
+
+    const result = await learning(...args);
+
+    expect(result.code).toBe(2);
+    expect(result.err).toMatch(message);
+  });
+
+  it("fails closed outside an initialized project", async () => {
+    process.chdir(await temporaryRepository());
+
+    expect((await learning()).code).toBe(2);
+  });
+});

@@ -1,0 +1,104 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261013-095414-learning-near-duplicate-merge",
+  "title": "Gộp gần trùng learning để draft hội tụ thành candidate",
+  "goal": "Thay băm exact của observationCandidateId bằng so khớp gần trùng deterministic, offline (chuẩn hoá dấu tiếng Việt, token/shingle), giữ ID ổn định và tương thích ngược với entry cũ; đánh giá lại ngưỡng candidate theo dữ liệu nghiên cứu.",
+  "nonGoals": [
+    "Không thêm dependency",
+    "Không đổi schema entry journal v1"
+  ],
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "createdAt": "2026-10-13T09:54:11.405+07:00",
+  "updatedAt": "2026-10-13T10:00:07.619+07:00",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Hai ghi chú cùng ý khác câu chữ (kể cả khác dấu) được gộp vào một candidate, có test precision/recall trên fixture tiếng Việt",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Entry cũ vẫn đọc được và candidate hiện có không bị đổi id",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Báo cáo số liệu trước và sau trên bản sao journal thật: số candidate hội tụ tăng",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-merge",
+      "description": "Test gộp gần trùng",
+      "command": "pnpm exec vitest run test/unit/core/journal",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Contract tests",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [
+    "src/core/journal/learning.ts",
+    "src/core/journal/learning-capture.ts",
+    "src/core/journal/learning-store.ts",
+    "test/unit/core/journal"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "epicId": "20261013-095411-harnix-learning-overhaul",
+  "decisions": [
+    {
+      "id": "d-scope-c",
+      "text": "Member C thu hẹp: gấp dấu vào khoá chuẩn hoá và gợi ý trùng khi review; bỏ mục tiêu tăng số candidate vì dữ liệu thật không có nhiều cặp gần trùng.",
+      "rationale": "Jaccard 0,5 chỉ tìm 1 cặp trong 130 mục."
+    }
+  ]
+}

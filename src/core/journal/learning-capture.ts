@@ -48,6 +48,8 @@ export async function captureLearningAtFinish(
         ? undefined
         : effectiveLearningStatus(state.candidate.status, state.entry.recordedAt, Date.parse(now));
     if (status === "approved" || status === "promoted" || status === "rejected") continue;
+    // A stored `archived` was set by `retire`; a lapse only shows as archived through effectiveLearningStatus.
+    if (state?.candidate.status === "archived") continue;
     const previous = state !== undefined && status !== "archived" ? state.candidate : undefined;
     const sourceTaskIds = [...(previous?.sourceTaskIds ?? []), task.id];
     if (previous?.sourceTaskIds.includes(task.id) === true) continue;

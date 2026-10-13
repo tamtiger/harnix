@@ -93,7 +93,7 @@ describe("task contract documentation parity", () => {
   it("teaches a Windows-safe way to read workflow JSON in the cookbook", () => {
     expect(workflowTemplate).toMatch(/Out-String/u);
     expect(workflowTemplate).toMatch(/ConvertFrom-Json/u);
-    expect(workflowTemplate).toMatch(/nested `?pwsh/u);
+    expect(workflowTemplate).toMatch(/nested\s+`?pwsh/u);
   });
 
   it("describes the task record as schema v3 in the workflow doc, implementation plan, PRD, AGENTS.md and template", async () => {

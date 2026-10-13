@@ -1,0 +1,107 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261013-095412-learning-research",
+  "title": "Nghiên cứu lại tính năng learning: dữ liệu thật, kỹ thuật gộp gần trùng, mô hình áp dụng",
+  "goal": "Trả lời R1–R5 bằng bằng chứng: phân loại 130 learning hiện có, so sánh các harness khác, kỹ thuật gộp gần trùng offline, tiêu chí bài học tái sử dụng được và đường áp dụng an toàn; ghi research note làm đầu vào cho các member sau.",
+  "nonGoals": [
+    "Không sửa mã nguồn",
+    "Không thêm dependency hay gọi mạng ngoài việc tham khảo tài liệu"
+  ],
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-13T09:54:11.405+07:00",
+  "updatedAt": "2026-10-13T10:01:54.440+07:00",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Có research note tiếng Việt trong research/ của task trả lời đủ R1–R5 kèm số liệu từ journal thật và khuyến nghị chọn phương án",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Mỗi member sau (B, C, A) ghi lại quyết định rút ra từ research bằng add-decision",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-gates",
+      "description": "Hợp đồng không bị phá khi task chỉ thêm tài liệu nghiên cứu",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-13T10:00:14.038+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "df15646b5960af9ae6c18927e56c3e65db8511f314e53f018c3b120471d2e996"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-13T10:01:27.383+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9be9e2dcbf6a852e32967df57bfd57011be2d5db98ebe7532138dca4de4fe62d"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/journal",
+    "src/core/context",
+    "src/commands/mem.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "epicId": "20261013-095411-harnix-learning-overhaul",
+  "decisions": [
+    {
+      "id": "d-research-findings",
+      "text": "Dữ liệu thật cho thấy learning ít rác (khoảng 1–2%) và rất ít trùng gần (1 cặp ở Jaccard 0,5), nên vấn đề chính là thiếu bước duyệt/áp dụng và chọn theo độ mới thay vì theo độ liên quan.",
+      "rationale": "Phân loại 130 mục journal và thử gộp theo token trong research note."
+    }
+  ],
+  "completedAt": "2026-10-13T10:01:54.440+07:00"
+}

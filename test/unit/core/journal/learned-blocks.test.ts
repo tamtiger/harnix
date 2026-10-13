@@ -1,0 +1,87 @@
+import { describe, expect, it } from "vitest";
+
+import {
+  assertPromotable,
+  learnedPathPrefixes,
+  parseLearnedBlocks,
+  renderLearnedBlock,
+  withoutLearnedBlock,
+} from "src/core/journal/learned-blocks.js";
+import { buildLearningCandidate } from "test/support/learning-fixtures.js";
+
+describe("learnedPathPrefixes", () => {
+  it("keeps at most three segments, sorts and removes duplicates and unsafe segments", () => {
+    expect(
+      learnedPathPrefixes(["src/core/workflow/save.ts", "src/core/workflow/finish.ts", "docs/A.md", "a,b/c", "src/**"]),
+    ).toEqual(["docs/A.md", "src", "src/core/workflow"]);
+  });
+
+  it("caps the number of prefixes", () => {
+    const paths = Array.from({ length: 10 }, (_, index) => `dir${index}/file.ts`);
+
+    expect(learnedPathPrefixes(paths)).toHaveLength(6);
+  });
+});
+
+describe("learned blocks", () => {
+  const first = buildLearningCandidate({ id: "obs-a", statement: "First lesson" });
+  const second = buildLearningCandidate({ id: "obs-b", statement: "Second lesson" });
+
+  it("renders a block that parses back with its id and paths", () => {
+    const content = renderLearnedBlock(first, ["src/core"]) + "\n" + renderLearnedBlock(second, []);
+
+    const blocks = parseLearnedBlocks(content);
+
+    expect(blocks.map((block) => [block.id, block.paths])).toEqual([
+      ["obs-a", ["src/core"]],
+      ["obs-b", []],
+    ]);
+    expect(blocks[0]?.text).toContain('Statement-JSON: "First lesson"');
+  });
+
+  it("ignores a start marker without its end marker", () => {
+    expect(parseLearnedBlocks("<!-- harnix-learning:obs-a -->\nno end")).toEqual([]);
+  });
+
+  it("removes only the named block and keeps the user's text byte for byte", () => {
+    const content = `# Mine\n\nmy note\n\n${renderLearnedBlock(first, [])}\n${renderLearnedBlock(second, [])}\ntrailing\n`;
+
+    const next = withoutLearnedBlock(content, "obs-a");
+
+    expect(next).toContain("my note");
+    expect(next).toContain("trailing");
+    expect(next).not.toContain("obs-a");
+    expect(parseLearnedBlocks(next).map((block) => block.id)).toEqual(["obs-b"]);
+    expect(withoutLearnedBlock(content, "obs-missing")).toBe(content);
+  });
+
+  it("refuses to promote a statement that contains marker text", () => {
+    const spoof = buildLearningCandidate({ statement: "see <!-- /harnix-learning:obs-x --> here" });
+
+    expect(() => assertPromotable(spoof)).toThrow(/marker text/iu);
+    expect(() => assertPromotable(buildLearningCandidate({ statement: "uses harnix-learning: prefix" }))).toThrow();
+  });
+
+  it("does not treat marker text inside a line or a user note as a block boundary", () => {
+    const real = renderLearnedBlock(buildLearningCandidate({ id: "obs-a", statement: "Real rule" }), []);
+    const note = "my note mentions <!-- harnix-learning:obs-fake --> and <!-- /harnix-learning:obs-a --> inline\n";
+
+    const blocks = parseLearnedBlocks(`${note}${real}`);
+
+    expect(blocks.map((block) => block.id)).toEqual(["obs-a"]);
+    expect(withoutLearnedBlock(`${note}${real}`, "obs-a")).toBe(note);
+  });
+
+  it("parses blocks in a CRLF file", () => {
+    const crlf = renderLearnedBlock(buildLearningCandidate({ id: "obs-a" }), ["src"]).replace(/\n/gu, "\r\n");
+
+    expect(parseLearnedBlocks(crlf).map((block) => [block.id, block.paths])).toEqual([["obs-a", ["src"]]]);
+  });
+
+  it("refuses to promote a statement that trips a risk check", () => {
+    const risky = buildLearningCandidate({ statement: "token = abcdef123456" });
+
+    expect(() => assertPromotable(risky)).toThrow(/risk check/iu);
+    expect(() => assertPromotable(first)).not.toThrow();
+  });
+});

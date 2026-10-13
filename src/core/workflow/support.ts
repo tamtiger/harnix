@@ -1,7 +1,8 @@
 import { effectiveTimezone, readConfig, readProjectTimezone, type HarnixConfigV2 } from "src/core/config/config.js";
 import { loadEpicRecord, renderEpicMarkdown } from "src/core/epics/epic.js";
 import { summarizeLearning, type LearningSummaryItem } from "src/core/journal/learning-summary.js";
-import type { TaskRecord } from "src/core/tasks/task.js";
+import { createSourcePathsLoader } from "src/core/journal/learning-sources.js";
+import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { localDate, nowInstant } from "src/utils/clock.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
@@ -26,7 +27,12 @@ export async function journalFilePath(
 export async function projectLearningSummary(root: string, now: number): Promise<LearningSummaryItem[]> {
   try {
     const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
-    return await summarizeLearning(await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal`), now);
+    const harnixRoot = await resolveSafeHarnixPath(root);
+    const active = await resolveActiveTask(harnixRoot).catch(() => undefined);
+    return await summarizeLearning(await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal`), now, {
+      activePaths: active?.relevantPaths ?? [],
+      sourcePaths: createSourcePathsLoader(harnixRoot),
+    });
   } catch {
     return [];
   }

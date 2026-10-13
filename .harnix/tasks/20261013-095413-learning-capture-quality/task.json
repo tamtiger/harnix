@@ -1,0 +1,103 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261013-095413-learning-capture-quality",
+  "title": "Giảm nhiễu khi capture learning bằng bộ lọc chất lượng",
+  "goal": "Chỉ capture ghi chú tái sử dụng được: lọc độ dài tối thiểu, chuỗi không dấu hoặc chuỗi test, ghi chú gắn chặt id hoặc đường dẫn task; ưu tiên residualRisks và decision tường minh; có cách dọn draft rác hiện có mà vẫn giữ journal append-only.",
+  "nonGoals": [
+    "Không sửa hay xoá dòng journal cũ",
+    "Không nới learning-safety"
+  ],
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "createdAt": "2026-10-13T09:54:11.405+07:00",
+  "updatedAt": "2026-10-13T10:00:07.046+07:00",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Ghi chú rác (quá ngắn, không dấu, chuỗi test, gắn id task) không còn được capture, có test với fixture nhiễu",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Có đường dọn draft rác hiện có bằng entry mới đánh dấu rejected, journal cũ không bị sửa",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "learning-safety và nhãn untrusted giữ nguyên hành vi",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-capture",
+      "description": "Test bộ lọc capture và dọn draft",
+      "command": "pnpm exec vitest run test/unit/core/journal",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Contract tests",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [
+    "src/core/journal/learning-notes.ts",
+    "src/core/journal/learning-capture.ts",
+    "test/unit/core/journal"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "epicId": "20261013-095411-harnix-learning-overhaul",
+  "decisions": [
+    {
+      "id": "d-scope-b",
+      "text": "Member B chỉ chặn mục dưới 40 ký tự và chuỗi kiểm thử, không chặn theo không dấu, giảm ưu tiên mục gắn task cụ thể.",
+      "rationale": "24 mục không dấu vẫn có giá trị; chặn cứng sẽ mất bài học thật."
+    }
+  ]
+}

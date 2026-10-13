@@ -35,6 +35,11 @@ function documentedWorkflowFlags(text: string): string[] {
   return flags;
 }
 
+/** Paragraphs in the template are wrapped, so phrase checks compare with line breaks read as spaces. */
+function flatten(text: string): string {
+  return text.replace(/\s+/gu, " ");
+}
+
 describe("agent persistence guidance", () => {
   it("states the persistence, clock and encoding rules once, in the rules every surface renders", () => {
     expect(STATE_RULE).toMatch(/change task state only with `harnix workflow`/iu);
@@ -80,7 +85,7 @@ describe("agent persistence guidance", () => {
       "harnix workflow --schema",
       "reports every independent problem at once",
     ])
-      expect(cookbook, needle).toContain(needle);
+      expect(flatten(cookbook), needle).toContain(needle);
     expect(cookbook).not.toContain("$OutputEncoding");
   });
 
@@ -125,8 +130,8 @@ describe("agent persistence guidance", () => {
     const cookbook = workflowTemplate.slice(workflowTemplate.indexOf("## Command cookbook"));
 
     expect(cookbook.match(/^```/gmu)).toHaveLength(2);
-    expect(cookbook).toContain("In PowerShell:");
-    expect(cookbook).toContain("In bash:");
+    expect(flatten(cookbook)).toContain("In PowerShell:");
+    expect(flatten(cookbook)).toContain("In bash:");
     expect(cookbook).toContain("pwsh.exe -NoProfile -Command");
     expect(cookbook).toContain("refuses");
   });

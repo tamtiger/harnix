@@ -4,6 +4,7 @@ import { resolveProjectRoot } from "./utils/paths.js";
 import { runInternalContextCommand } from "./commands/internal-context-cli.js";
 import { reportSkill, reportSkillCatalog, reportSkillReference } from "./commands/skills.js";
 import type { SkillTemplate } from "./core/spec/project-skills.js";
+import { runLearning, type LearningCommandOptions } from "./commands/learning.js";
 import { searchMemory } from "./commands/mem.js";
 import { inspectProjectStatus, explainProjectStatus, summarizeProjectStatus } from "./commands/status.js";
 import { listProjectTasks } from "./commands/tasks.js";
@@ -59,6 +60,24 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
         process.stdout.write(`${JSON.stringify(result)}\n`);
       },
     );
+
+  program
+    .command("learning")
+    .description("List project learning, or reject, promote (--apply) or retire one by id")
+    .option("--status <status>", "Listing: only this effective status (draft, candidate, promoted, rejected, archived)")
+    .option("--limit <count>", "Listing: maximum entries (1-100)")
+    .option("--reject <id>", "Mark a draft or candidate as rejected")
+    .option(
+      "--promote <id>",
+      "Show the rule for a draft or candidate; with --apply write it to .harnix/spec/learned.md",
+    )
+    .option("--retire <id>", "Remove a promoted rule from .harnix/spec/learned.md and archive it")
+    .option("--apply", "With --promote: write the rule instead of only previewing it")
+    .option("--reason <text>", "With --reject: why, kept in the journal summary")
+    .action(async (options: LearningCommandOptions) => {
+      process.stdout.write(`${JSON.stringify(await runLearning(process.cwd(), options))}
+`);
+    });
 
   program
     .command("status")

@@ -34,9 +34,7 @@
         "status": "planning",
         "checkpoint": "planning",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -45,9 +43,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -56,12 +52,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [],
@@ -82,9 +74,7 @@
           "status": "planning",
           "checkpoint": "planning",
           "goal": "Golden goal",
-          "nonGoals": [
-            "No extras"
-          ],
+          "nonGoals": ["No extras"],
           "acceptanceCriteria": [
             {
               "id": "ac-one",
@@ -93,9 +83,7 @@
               "evidenceIds": []
             }
           ],
-          "relevantPaths": [
-            "src/a.ts"
-          ],
+          "relevantPaths": ["src/a.ts"],
           "relevantSpecs": [],
           "validationPlan": [
             {
@@ -104,12 +92,8 @@
               "scope": "focused",
               "required": true,
               "command": "pnpm test",
-              "criterionIds": [
-                "ac-one"
-              ],
-              "inputs": [
-                "src/**"
-              ]
+              "criterionIds": ["ac-one"],
+              "inputs": ["src/**"]
             }
           ],
           "evidence": [],
@@ -139,9 +123,7 @@
         "status": "ready",
         "checkpoint": "ready",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -150,9 +132,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -161,12 +141,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [],
@@ -191,9 +167,7 @@
           "passed": [],
           "failed": [],
           "stale": [],
-          "pending": [
-            "check"
-          ]
+          "pending": ["check"]
         },
         "retryLimitReached": [],
         "activeTask": {
@@ -216,9 +190,7 @@
         "status": "in_progress",
         "checkpoint": "implementing",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -227,9 +199,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -238,12 +208,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [],
@@ -263,9 +229,7 @@
         "status": "verifying",
         "checkpoint": "verifying",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -274,9 +238,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -285,12 +247,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [],
@@ -331,9 +289,7 @@
         "status": "verifying",
         "checkpoint": "verifying",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -342,9 +298,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -353,12 +307,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [
@@ -389,9 +339,7 @@
         "status": "verifying",
         "checkpoint": "finishing",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -400,9 +348,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -411,12 +357,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [
@@ -447,22 +389,16 @@
         "status": "verifying",
         "checkpoint": "finishing",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
             "text": "One",
             "status": "met",
-            "evidenceIds": [
-              "ev-check"
-            ]
+            "evidenceIds": ["ev-check"]
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -471,12 +407,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [
@@ -509,9 +441,7 @@
         "schemaVersion": 1,
         "contextDrift": "not-recorded",
         "requiredChecks": {
-          "passed": [
-            "check"
-          ],
+          "passed": ["check"],
           "failed": [],
           "stale": [],
           "pending": []
@@ -537,22 +467,16 @@
         "status": "completed",
         "checkpoint": "finishing",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
             "text": "One",
             "status": "met",
-            "evidenceIds": [
-              "ev-check"
-            ]
+            "evidenceIds": ["ev-check"]
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -561,12 +485,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [
@@ -598,9 +518,7 @@
         "status": "planning",
         "checkpoint": "planning",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -609,9 +527,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -620,12 +536,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [],
@@ -645,9 +557,7 @@
         "status": "cancelled",
         "checkpoint": "cancelling",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -656,9 +566,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -667,12 +575,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [],
@@ -697,9 +601,7 @@
         "status": "planning",
         "checkpoint": "planning",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -708,9 +610,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -719,12 +619,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [],
@@ -743,9 +639,7 @@
         "status": "ready",
         "checkpoint": "ready",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -754,9 +648,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -765,12 +657,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [],
@@ -789,9 +677,7 @@
         "status": "in_progress",
         "checkpoint": "implementing",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -800,9 +686,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -811,12 +695,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [],
@@ -835,9 +715,7 @@
         "status": "in_progress",
         "checkpoint": "replan",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -846,9 +724,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -857,12 +733,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [
@@ -871,9 +743,7 @@
             "recordedAt": "2026-09-29T09:13:00.000+07:00",
             "result": "skipped",
             "summary": "Task contract revised at persisted replan: Golden revision reason for the snapshot.",
-            "artifactPaths": [
-              ".harnix/tasks/20260929-090200-golden-full/task.json"
-            ]
+            "artifactPaths": [".harnix/tasks/20260929-090200-golden-full/task.json"]
           }
         ],
         "createdAt": "2026-09-29T09:00:00.000+07:00",
@@ -891,9 +761,7 @@
         "status": "ready",
         "checkpoint": "ready",
         "goal": "Golden goal",
-        "nonGoals": [
-          "No extras"
-        ],
+        "nonGoals": ["No extras"],
         "acceptanceCriteria": [
           {
             "id": "ac-one",
@@ -902,9 +770,7 @@
             "evidenceIds": []
           }
         ],
-        "relevantPaths": [
-          "src/a.ts"
-        ],
+        "relevantPaths": ["src/a.ts"],
         "relevantSpecs": [],
         "validationPlan": [
           {
@@ -913,12 +779,8 @@
             "scope": "focused",
             "required": true,
             "command": "pnpm test",
-            "criterionIds": [
-              "ac-one"
-            ],
-            "inputs": [
-              "src/**"
-            ]
+            "criterionIds": ["ac-one"],
+            "inputs": ["src/**"]
           }
         ],
         "evidence": [
@@ -927,9 +789,7 @@
             "recordedAt": "2026-09-29T09:13:00.000+07:00",
             "result": "skipped",
             "summary": "Task contract revised at persisted replan: Golden revision reason for the snapshot.",
-            "artifactPaths": [
-              ".harnix/tasks/20260929-090200-golden-full/task.json"
-            ]
+            "artifactPaths": [".harnix/tasks/20260929-090200-golden-full/task.json"]
           }
         ],
         "createdAt": "2026-09-29T09:00:00.000+07:00",
@@ -979,13 +839,7 @@
           ]
         },
         "nested": {
-          "acceptanceCriteria": [
-            "evidenceIds",
-            "id",
-            "status",
-            "text",
-            "waiverReason"
-          ],
+          "acceptanceCriteria": ["evidenceIds", "id", "status", "text", "waiverReason"],
           "validationPlan": [
             "baseline",
             "command",
@@ -1008,27 +862,11 @@
             "result",
             "summary"
           ],
-          "blocker": [
-            "kind",
-            "nextAction",
-            "resumeStatus",
-            "summary"
-          ]
+          "blocker": ["kind", "nextAction", "resumeStatus", "summary"]
         },
         "constraints": {
-          "mode": [
-            "lite",
-            "full"
-          ],
-          "status": [
-            "planning",
-            "ready",
-            "in_progress",
-            "verifying",
-            "blocked",
-            "completed",
-            "cancelled"
-          ],
+          "mode": ["lite", "full"],
+          "status": ["planning", "ready", "in_progress", "verifying", "blocked", "completed", "cancelled"],
           "checkpoint": [
             "triage",
             "planning",
@@ -1040,26 +878,12 @@
             "finishing",
             "cancelling"
           ],
-          "scope": [
-            "focused",
-            "full"
-          ],
-          "result": [
-            "pass",
-            "fail",
-            "skipped"
-          ],
-          "criterionStatus": [
-            "pending",
-            "met",
-            "waived"
-          ],
+          "scope": ["focused", "full"],
+          "result": ["pass", "fail", "skipped"],
+          "criterionStatus": ["pending", "met", "waived"],
           "taskId": "^\\d{8}-\\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$",
           "epicId": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
-          "sortedUniqueArrays": [
-            "validationPlan[].criterionIds",
-            "validationPlan[].inputs"
-          ],
+          "sortedUniqueArrays": ["validationPlan[].criterionIds", "validationPlan[].inputs"],
           "checkCwd": "optional repository-relative POSIX path (\".\" is the root); traversal, absolute and drive-relative forms are rejected",
           "checkBaseline": "optional { result?, classification?, authorizedBy?, scope? }; no other key",
           "newCriterion": "status \"pending\" with evidenceIds: [] on every criterion; criteria text is free-form",
@@ -1232,9 +1056,7 @@
           "id": "golden-epic",
           "title": "Golden epic",
           "goal": "Epic goal",
-          "nonGoals": [
-            "Nothing else"
-          ],
+          "nonGoals": ["Nothing else"],
           "createdAt": "2026-09-29T09:00:00.000+07:00",
           "updatedAt": "2026-09-29T09:00:00.000+07:00"
         },

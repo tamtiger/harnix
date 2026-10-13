@@ -1,0 +1,21 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261013-095411-harnix-learning-overhaul",
+  "title": "Đại tu tính năng learning để bài học thực sự được áp dụng",
+  "goal": "Nghiên cứu lại rồi refactor learning: giảm nhiễu khi capture, gộp gần trùng để draft hội tụ, hoàn thiện vòng đời review/approve/promote vào spec và mở rộng kênh áp dụng; đóng epic bằng tài liệu và bản phát hành minor.",
+  "nonGoals": [
+    "Không thêm dịch vụ, telemetry hay mạng",
+    "Không tự ghi vào .harnix/spec khi chưa có approval",
+    "Không nới learning-safety"
+  ],
+  "createdAt": "2026-10-13T09:54:11.405+07:00",
+  "updatedAt": "2026-10-13T10:03:55.957+07:00",
+  "order": [
+    "20261013-095412-learning-research",
+    "20261013-095415-learning-promotion-lifecycle",
+    "20261013-095413-learning-capture-quality",
+    "20261013-095414-learning-near-duplicate-merge",
+    "20261013-095416-learning-overhaul-close"
+  ]
+}
