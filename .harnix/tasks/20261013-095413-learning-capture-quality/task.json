@@ -9,35 +9,47 @@
     "Không nới learning-safety"
   ],
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "createdAt": "2026-10-13T09:54:11.405+07:00",
-  "updatedAt": "2026-10-13T10:00:07.046+07:00",
+  "updatedAt": "2026-10-13T13:55:21.880+07:00",
   "acceptanceCriteria": [
     {
       "id": "ac-1",
-      "text": "Ghi chú rác (quá ngắn, không dấu, chuỗi test, gắn id task) không còn được capture, có test với fixture nhiễu",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Mục quá ngắn (dưới 40 ký tự) hoặc chỉ gồm chuỗi test không còn được capture, mục gắn id task xếp sau khi nạp vào prompt, có test với fixture nhiễu",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-capture-2",
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
     },
     {
       "id": "ac-2",
-      "text": "Có đường dọn draft rác hiện có bằng entry mới đánh dấu rejected, journal cũ không bị sửa",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Lệnh harnix learning --prune [--apply] liệt kê rồi từ chối draft rác hiện có bằng entry rejected mới, journal cũ không bị sửa",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-capture-2",
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
     },
     {
       "id": "ac-3",
       "text": "learning-safety và nhãn untrusted giữ nguyên hành vi",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-capture-2",
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
     }
   ],
   "validationPlan": [
     {
       "id": "check-capture",
       "description": "Test bộ lọc capture và dọn draft",
-      "command": "pnpm exec vitest run test/unit/core/journal",
+      "command": "pnpm exec vitest run test/unit/core/journal test/integration/commands/learning.test.ts",
       "scope": "focused",
       "required": true,
       "criterionIds": [
@@ -83,10 +95,73 @@
       ]
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "ev-check-capture-1",
+      "checkId": "check-capture",
+      "recordedAt": "2026-10-13T13:49:37.646+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/journal test/integration/commands/learning.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9b8f14daa0441034ddec6a1e74da1521bac7ea8b01a8d535a3b0c332b2f36e9c"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-13T13:49:42.071+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "78548742918f6ffdfc73e5620ec17ef17884a5c0ad755bf8e8adfe0416f009f9"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-13T13:51:30.541+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "8a2b824a182b81f75f6513f177b50c1beca690e00c7954fa7a69e1d36242d9f2"
+    },
+    {
+      "id": "ev-check-capture-2",
+      "checkId": "check-capture",
+      "recordedAt": "2026-10-13T13:53:52.398+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/journal test/integration/commands/learning.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a4229643c700506cf833a53c90a273553827deddcf458fa22c1b550e157566fb"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-13T13:53:57.821+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cfdb525f2fbcdcbe719b4f6fdc7ca8725cfa6181e88195bfff5ab66a217f509a"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-13T13:55:13.850+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b96682e760f9f0e61ffa640899732bd28209be25f6d94454d79cddb50f6a23e6"
+    }
+  ],
   "relevantPaths": [
-    "src/core/journal/learning-notes.ts",
+    "src/commands/learning.ts",
     "src/core/journal/learning-capture.ts",
+    "src/core/journal/learning-notes.ts",
+    "src/core/journal/learning-summary.ts",
     "test/unit/core/journal"
   ],
   "relevantSpecs": [
@@ -98,6 +173,19 @@
       "id": "d-scope-b",
       "text": "Member B chỉ chặn mục dưới 40 ký tự và chuỗi kiểm thử, không chặn theo không dấu, giảm ưu tiên mục gắn task cụ thể.",
       "rationale": "24 mục không dấu vẫn có giá trị; chặn cứng sẽ mất bài học thật."
+    },
+    {
+      "id": "d-prune",
+      "text": "Dọn draft rác bằng harnix learning --prune [--apply] (xem trước khi không có --apply), dùng lại reviewLearning reject; không thêm lệnh mới.",
+      "rationale": "Journal append-only; từ chối bằng entry mới, cùng mô hình với --promote --apply."
     }
-  ]
+  ],
+  "residualRisks": [
+    {
+      "id": "r-min-length",
+      "text": "Ngưỡng 40 ký tự có thể chặn ghi chú ngắn nhưng có giá trị; chỉnh MIN_LEARNING_CHARACTERS nếu thấy mất bài học thật",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-13T13:55:21.880+07:00"
 }

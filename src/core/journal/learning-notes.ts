@@ -1,4 +1,5 @@
 import { normalizeObservation } from "src/core/journal/learning.js";
+import { lowValueReason } from "src/core/journal/learning-quality.js";
 import { analyzeLearningStatement } from "src/core/journal/learning-safety.js";
 import type { TaskRecord } from "src/core/tasks/task.js";
 
@@ -26,7 +27,13 @@ export function extractObservations(task: TaskRecord): string[] {
   for (const raw of texts) {
     const text = raw.trim();
     const key = normalizeObservation(text);
-    if (text.length === 0 || text.length > MAX_OBSERVATION_CHARACTERS || seen.has(key)) continue;
+    if (
+      text.length === 0 ||
+      text.length > MAX_OBSERVATION_CHARACTERS ||
+      seen.has(key) ||
+      lowValueReason(text) !== undefined
+    )
+      continue;
     const analysis = analyzeLearningStatement(text);
     if (analysis.oversized || analysis.findings.some((kind) => kind !== "url-like")) continue;
     seen.add(key);

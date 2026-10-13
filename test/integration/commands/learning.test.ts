@@ -28,11 +28,21 @@ async function project(): Promise<string> {
   await mkdir(journal, { recursive: true });
   await writeJournalFile(journal, "2099-01-01.jsonl", [
     buildLearningEntry(
-      { id: "obs-a", status: "candidate", statement: "Inject the clock", sourceTaskIds: [SOURCE_TASK] },
+      {
+        id: "obs-a",
+        status: "candidate",
+        statement: "Inject the clock into every unit test for determinism",
+        sourceTaskIds: [SOURCE_TASK],
+      },
       { id: "a-1", recordedAt: at(0) },
     ),
     buildLearningEntry(
-      { id: "obs-b", status: "draft", statement: "Prefer builders", sourceTaskIds: [SOURCE_TASK] },
+      {
+        id: "obs-b",
+        status: "draft",
+        statement: "Prefer test builders over hand-built task records",
+        sourceTaskIds: [SOURCE_TASK],
+      },
       { id: "b-1", recordedAt: at(1) },
     ),
   ]);
@@ -121,6 +131,9 @@ describe.sequential("learning command", () => {
     [["--promote", "../evil"], /invalid/iu],
     [["--promote", "obs-missing"], /does not exist/iu],
     [["--status", "weird"], /--status/iu],
+    [["--prune", "--promote", "obs-a"], /only one/iu],
+    [["--prune", "--reason", "x"], /--reason.*--reject/iu],
+    [["--prune", "--status", "draft"], /listing/iu],
     [["--limit", "0"], /--limit/iu],
   ])("rejects %j", async (args, message) => {
     await project();
@@ -129,6 +142,32 @@ describe.sequential("learning command", () => {
 
     expect(result.code).toBe(2);
     expect(result.err).toMatch(message);
+  });
+
+  it("previews low-value drafts with --prune and rejects them only with --apply", async () => {
+    const root = await project();
+    const journal = join(root, ".harnix", "workspace", "tam", "journal");
+    await writeJournalFile(journal, "2099-01-02.jsonl", [
+      buildLearningEntry({ id: "obs-noise", status: "draft", statement: "ngắn quá" }, { id: "n-1", recordedAt: at(2) }),
+    ]);
+
+    const preview = await learning("--prune");
+    const listedBefore = await learning("--status", "draft");
+
+    expect(preview.code).toBe(0);
+    expect(preview.json).toMatchObject({ action: "prune", applied: false, rejected: [] });
+    expect((preview.json.matches as { id: string; reason: string }[]).map((m) => [m.id, m.reason])).toEqual([
+      ["obs-noise", "too-short"],
+    ]);
+    expect((listedBefore.json.items as Item[]).map((item) => item.id)).toContain("obs-noise");
+
+    const applied = await learning("--prune", "--apply");
+    const rejected = await learning("--status", "rejected");
+
+    expect(applied.json).toMatchObject({ action: "prune", applied: true, rejected: ["obs-noise"] });
+    expect((rejected.json.items as Item[]).map((item) => item.id)).toEqual(["obs-noise"]);
+    expect(await readFile(join(journal, "2099-01-02.jsonl"), "utf8")).toContain('"status":"draft"');
+    expect(((await learning("--prune")).json as { matches: unknown[] }).matches).toEqual([]);
   });
 
   it("fails closed outside an initialized project", async () => {

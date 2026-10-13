@@ -11,7 +11,7 @@ import { completeTaskWithDecisions } from "test/support/learning-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-learning-flow-");
-const observation = "Always inject the clock in tests";
+const observation = "Always inject the clock in tests so runs stay deterministic";
 const first = "20260929-090000-learn-a";
 const second = "20260929-091000-learn-b";
 const third = "20260929-092000-learn-c";

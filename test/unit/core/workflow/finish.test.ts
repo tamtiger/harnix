@@ -352,7 +352,7 @@ describe("finish learning report", () => {
     await finishable(root, async (repo) => {
       await addDecisionWorkflow(
         repo,
-        { id: "d1", text: "Băm song song giữ digest ổn định", rationale: "Thứ tự sắp xếp" },
+        { id: "d1", text: "Băm song song giữ digest ổn định giữa các lần chạy", rationale: "Thứ tự sắp xếp" },
         EVIDENCE_AT,
       );
       await addRiskWorkflow(repo, { id: "r1", text: "Bản cài ở home chỉ đổi sau khi update global" }, EVIDENCE_AT);

@@ -1,5 +1,6 @@
 import { effectiveLearningStatus, type LearningStatus } from "src/core/journal/learning.js";
 import { relevanceScore } from "src/core/journal/learning-relevance.js";
+import { isTaskSpecific } from "src/core/journal/learning-quality.js";
 import { analyzeLearningStatement } from "src/core/journal/learning-safety.js";
 import { readLearningStates } from "src/core/journal/learning-store.js";
 import { compareCodeUnits } from "src/utils/order.js";
@@ -22,7 +23,12 @@ export interface SummarizeOptions {
   sourcePaths?: ((taskIds: readonly string[]) => Promise<string[]>) | undefined;
 }
 
-type Collected = LearningSummaryItem & { recordedAt: string; sourceTaskIds: string[]; relevance: number };
+type Collected = LearningSummaryItem & {
+  recordedAt: string;
+  sourceTaskIds: string[];
+  relevance: number;
+  specific: boolean;
+};
 
 /**
  * Bounded, redacted view of what earlier tasks learned. Lapsed, rejected and promoted entries are left out (a promoted
@@ -49,6 +55,7 @@ export async function summarizeLearning(
       recordedAt: entry.recordedAt,
       sourceTaskIds: candidate.sourceTaskIds,
       relevance: 0,
+      specific: isTaskSpecific(candidate.statement),
     });
   }
   await scoreRelevance(items, options);
@@ -56,6 +63,7 @@ export async function summarizeLearning(
     .sort(
       (left, right) =>
         right.relevance - left.relevance ||
+        Number(left.specific) - Number(right.specific) ||
         rank(left.status) - rank(right.status) ||
         compareCodeUnits(right.recordedAt, left.recordedAt) ||
         compareCodeUnits(left.id, right.id),

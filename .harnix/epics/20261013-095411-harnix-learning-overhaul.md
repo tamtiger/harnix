@@ -12,7 +12,7 @@ Nghiên cứu lại rồi refactor learning: giảm nhiễu khi capture, gộp g
 
 ## Next task
 
-- `20261013-095413-learning-capture-quality` — Giảm nhiễu khi capture learning bằng bộ lọc chất lượng (`planning`)
+- `20261013-095414-learning-near-duplicate-merge` — Gộp gần trùng learning để draft hội tụ thành candidate (`planning`)
 
 ## Members (5 tasks)
 
@@ -20,7 +20,7 @@ Nghiên cứu lại rồi refactor learning: giảm nhiễu khi capture, gộp g
 |---|---------|-------|------|--------|
 | 1 | `20261013-095412-learning-research` | Nghiên cứu lại tính năng learning: dữ liệu thật, kỹ thuật gộp gần trùng, mô hình áp dụng | `lite` | `completed` |
 | 2 | `20261013-095415-learning-promotion-lifecycle` | Hoàn thiện vòng đời learning: review, approve, reject, promote vào spec | `full` | `completed` |
-| 3 | `20261013-095413-learning-capture-quality` | Giảm nhiễu khi capture learning bằng bộ lọc chất lượng | `lite` | `planning` |
+| 3 | `20261013-095413-learning-capture-quality` | Giảm nhiễu khi capture learning bằng bộ lọc chất lượng | `lite` | `completed` |
 | 4 | `20261013-095414-learning-near-duplicate-merge` | Gộp gần trùng learning để draft hội tụ thành candidate | `full` | `planning` |
 | 5 | `20261013-095416-learning-overhaul-close` | Đóng epic learning: tài liệu gốc, kiểm chứng end-to-end và phát hành | `lite` | `planning` |
 
@@ -40,7 +40,7 @@ Nghiên cứu lại rồi refactor learning: giảm nhiễu khi capture, gộp g
 
 ### 3. `20261013-095413-learning-capture-quality` — Giảm nhiễu khi capture learning bằng bộ lọc chất lượng
 
-- **Trạng thái:** `planning`
+- **Trạng thái:** `completed`
 - **Mục tiêu:** Chỉ capture ghi chú tái sử dụng được: lọc độ dài tối thiểu, chuỗi không dấu hoặc chuỗi test, ghi chú gắn chặt id hoặc đường dẫn task; ưu tiên residualRisks và decision tường minh; có cách dọn draft rác hiện có mà vẫn giữ journal append-only.
 - **Tiêu chí nghiệm thu:** 3 tiêu chí
 

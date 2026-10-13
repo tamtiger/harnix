@@ -83,6 +83,21 @@ describe("learning summary", () => {
     expect(items.every((item) => item.status === "candidate")).toBe(true);
   });
 
+  it("ranks a note that names a task id after general notes of the same relevance", async () => {
+    const items = await summarize([
+      buildLearningEntry(
+        { id: "obs-specific", status: "candidate", statement: "Task 20260929-090000-a bi chan boi khoa tep hom do" },
+        { recordedAt: at(50) },
+      ),
+      buildLearningEntry(
+        { id: "obs-general", status: "candidate", statement: "Luon chay test:gates truoc khi vao verifying" },
+        { recordedAt: at(1) },
+      ),
+    ]);
+
+    expect(items.map((item) => item.id)).toEqual(["obs-general", "obs-specific"]);
+  });
+
   it("counts source tasks and orders drafts after candidates when there is room", async () => {
     const items = await summarize([
       buildLearningEntry({ id: "obs-draft", status: "draft", sourceTaskIds: ["a"] }),

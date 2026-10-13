@@ -3,6 +3,7 @@ import { learnedPathPrefixes } from "src/core/journal/learned-blocks.js";
 import { learnedSpecStats, type LearnedSpecStats } from "src/core/journal/learned-spec.js";
 import { effectiveLearningStatus, type LearningStatus } from "src/core/journal/learning.js";
 import { promoteLearning, retireLearning } from "src/core/journal/learned-promote.js";
+import { findLowValueLearning, pruneLearning, type PruneMatch } from "src/core/journal/learning-prune.js";
 import { reviewLearning } from "src/core/journal/learning-review.js";
 import { analyzeLearningStatement } from "src/core/journal/learning-safety.js";
 import { createSourcePathsLoader } from "src/core/journal/learning-sources.js";
@@ -24,6 +25,7 @@ export interface LearningCommandOptions {
   reject?: string | undefined;
   promote?: string | undefined;
   retire?: string | undefined;
+  prune?: boolean | undefined;
   apply?: boolean | undefined;
   reason?: string | undefined;
 }
@@ -41,6 +43,15 @@ export interface LearningListItem {
 
 export type LearningCommandResult =
   | { generator: "harnix"; schemaVersion: 1; action: "list"; items: LearningListItem[]; spec: LearnedSpecStats }
+  | {
+      generator: "harnix";
+      schemaVersion: 1;
+      action: "prune";
+      applied: boolean;
+      matches: PruneMatch[];
+      rejected: string[];
+      hint?: string;
+    }
   | ({ generator: "harnix"; schemaVersion: 1; action: "reject" | "promote" | "retire"; id: string } & Record<
       string,
       unknown
@@ -53,7 +64,8 @@ function chosenAction(options: LearningCommandOptions): { action: Action; id: st
     const id = options[action];
     return id === undefined ? [] : [{ action, id }];
   });
-  if (chosen.length > 1) throw new Error("Use only one of --reject, --promote and --retire.");
+  if (chosen.length + (options.prune === true ? 1 : 0) > 1)
+    throw new Error("Use only one of --reject, --promote, --retire and --prune.");
   const [one] = chosen;
   if (one !== undefined && !ID_PATTERN.test(one.id))
     throw new Error(`Learning id ${JSON.stringify(one.id)} is invalid.`);
@@ -62,9 +74,11 @@ function chosenAction(options: LearningCommandOptions): { action: Action; id: st
 
 function validate(options: LearningCommandOptions): { action: Action; id: string } | undefined {
   const picked = chosenAction(options);
-  if (options.apply === true && picked?.action !== "promote") throw new Error("--apply only goes with --promote.");
+  const pruning = options.prune === true;
+  if (options.apply === true && picked?.action !== "promote" && !pruning)
+    throw new Error("--apply only goes with --promote or --prune.");
   if (options.reason !== undefined && picked?.action !== "reject") throw new Error("--reason only goes with --reject.");
-  if (picked !== undefined && (options.status !== undefined || options.limit !== undefined))
+  if ((picked !== undefined || pruning) && (options.status !== undefined || options.limit !== undefined))
     throw new Error("--status and --limit belong to the listing; they cannot be combined with an action.");
   if (options.status !== undefined && !(LEARNING_STATUSES as readonly string[]).includes(options.status))
     throw new Error(`--status must be one of ${LEARNING_STATUSES.join(", ")}.`);
@@ -104,6 +118,7 @@ export async function runLearning(cwd: string, options: LearningCommandOptions):
     now,
   };
   const head = { generator: "harnix", schemaVersion: 1 } as const;
+  if (options.prune === true) return { ...head, ...(await prune(journalRoot, base, options.apply === true)) };
   if (picked === undefined) return { ...head, ...(await list(root, journalRoot, now, options.status, limit)) };
   const input = { ...base, id: picked.id };
   if (picked.action === "reject") {
@@ -153,4 +168,23 @@ async function list(
     (left, right) => compareCodeUnits(right.recordedAt, left.recordedAt) || compareCodeUnits(left.id, right.id),
   );
   return { action: "list", items: items.slice(0, limit), spec: await learnedSpecStats(root) };
+}
+
+async function prune(
+  journalRoot: string,
+  base: { journalPath: string; developer: string; now: string },
+  apply: boolean,
+): Promise<{ action: "prune"; applied: boolean; matches: PruneMatch[]; rejected: string[]; hint?: string }> {
+  const found = await findLowValueLearning(journalRoot, base.now);
+  const matches = found.map((match) => ({ ...match, statement: cut(match.statement) }));
+  if (!apply) {
+    return {
+      action: "prune",
+      applied: false,
+      matches,
+      rejected: [],
+      ...(matches.length === 0 ? {} : { hint: "Run again with --apply to reject these." }),
+    };
+  }
+  return { action: "prune", applied: true, matches, rejected: await pruneLearning({ journalRoot, ...base }, found) };
 }
