@@ -112,6 +112,49 @@ describe("captureLearningAtFinish", () => {
     expect(state.entry).toMatchObject({ kind: "learning", taskId: "20260929-090000-a", developer: "tam" });
   });
 
+  it("joins a variant that differs only by accents, case or punctuation and keeps the existing id", async () => {
+    const root = await temporaryRepository();
+    const accented = "Luôn chạy test:gates trước khi vào verifying để bắt lỗi hợp đồng sớm";
+    const plain = "LUON CHAY test:gates truoc khi vao verifying de bat loi hop dong som.";
+    await capture(root, taskWith("20260929-090000-a", [accented]), 0);
+
+    await capture(root, taskWith("20260929-090100-b", [plain]), 5);
+
+    const states = [...(await readLearningStates(root)).values()];
+    expect(states).toHaveLength(1);
+    const { candidate } = states[0]!;
+    expect(candidate.id).toBe(observationCandidateId(accented));
+    expect(candidate.statement).toBe(accented);
+    expect(candidate.status).toBe("candidate");
+    expect(candidate.sourceTaskIds).toEqual(["20260929-090000-a", "20260929-090100-b"]);
+  });
+
+  it("keeps the old hash id for a new statement and for an unchanged repeat", async () => {
+    const root = await temporaryRepository();
+    const statement = "Ghi learned.md là đọc sửa ghi không có khoá nên hai lệnh đồng thời có thể mất khối";
+
+    await capture(root, taskWith("20260929-090000-a", [statement]), 0);
+    await capture(root, taskWith("20260929-090000-a", [statement]), 1);
+
+    expect([...(await readLearningStates(root)).keys()]).toEqual([observationCandidateId(statement)]);
+  });
+
+  it("does not reopen a rejected candidate through an accent variant", async () => {
+    const root = await temporaryRepository();
+    const accented = "Luôn chạy test:gates trước khi vào verifying để bắt lỗi hợp đồng sớm";
+    await writeJournalFile(root, "2026-09-28.jsonl", [
+      buildLearningEntry({ id: observationCandidateId(accented), statement: accented, status: "rejected" }),
+    ]);
+
+    const created = await capture(
+      root,
+      taskWith("20260929-090000-a", ["Luon chay test:gates truoc khi vao verifying de bat loi hop dong som"]),
+    );
+
+    expect(created).toBe(0);
+    expect([...(await readLearningStates(root)).values()]).toHaveLength(1);
+  });
+
   it("merges a second task's identical observation and promotes it to candidate at the threshold", async () => {
     const root = await temporaryRepository();
     await capture(root, taskWith("20260929-090000-a", [observation]), 0);

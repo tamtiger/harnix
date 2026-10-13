@@ -1,5 +1,5 @@
-import { normalizeObservation } from "src/core/journal/learning.js";
 import { lowValueReason } from "src/core/journal/learning-quality.js";
+import { foldObservation } from "src/core/journal/learning-similarity.js";
 import { analyzeLearningStatement } from "src/core/journal/learning-safety.js";
 import type { TaskRecord } from "src/core/tasks/task.js";
 
@@ -26,7 +26,7 @@ export function extractObservations(task: TaskRecord): string[] {
   const observations: string[] = [];
   for (const raw of texts) {
     const text = raw.trim();
-    const key = normalizeObservation(text);
+    const key = foldObservation(text);
     if (
       text.length === 0 ||
       text.length > MAX_OBSERVATION_CHARACTERS ||

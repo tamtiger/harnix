@@ -2,7 +2,7 @@
 name: harnix-verify
 description: Use when a Harnix task needs fresh compliance, correctness and security verification, evidence, and a safe finish or explicit cancellation with an evidence-based handoff.
 metadata:
-  version: "2.4.0-dev.2"
+  version: "2.4.0-dev.3"
 ---
 
 # Verify and finish Harnix work

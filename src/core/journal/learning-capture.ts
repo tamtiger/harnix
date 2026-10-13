@@ -3,10 +3,12 @@ import {
   createLearningCandidate,
   effectiveLearningStatus,
   observationCandidateId,
+  type LearningCandidate,
   type LearningStatus,
 } from "src/core/journal/learning.js";
 import { extractObservations } from "src/core/journal/learning-notes.js";
-import { readLearningStates } from "src/core/journal/learning-store.js";
+import { findFoldedMatch } from "src/core/journal/learning-similarity.js";
+import { readLearningStates, type LearningState } from "src/core/journal/learning-store.js";
 import type { TaskRecord } from "src/core/tasks/task.js";
 import { compareCodeUnits } from "src/utils/order.js";
 
@@ -41,18 +43,10 @@ export async function captureLearningAtFinish(
     .slice(0, MAX_EVIDENCE_PER_TASK);
   let created = 0;
   for (const statement of observations) {
-    const id = observationCandidateId(statement);
-    const state = states.get(id);
-    const status =
-      state === undefined
-        ? undefined
-        : effectiveLearningStatus(state.candidate.status, state.entry.recordedAt, Date.parse(now));
-    if (status === "approved" || status === "promoted" || status === "rejected") continue;
-    // A stored `archived` was set by `retire`; a lapse only shows as archived through effectiveLearningStatus.
-    if (state?.candidate.status === "archived") continue;
-    const previous = state !== undefined && status !== "archived" ? state.candidate : undefined;
+    const target = captureTarget(states, statement, task.id, Date.parse(now));
+    if (target === undefined) continue;
+    const { id, previous } = target;
     const sourceTaskIds = [...(previous?.sourceTaskIds ?? []), task.id];
-    if (previous?.sourceTaskIds.includes(task.id) === true) continue;
     const mergedEvidence = [...(previous?.evidenceIds ?? []), ...evidenceIds];
     const next = grade({ id, statement: previous?.statement ?? statement, sourceTaskIds, evidenceIds: mergedEvidence });
     const entry: JournalEntry = {
@@ -71,6 +65,28 @@ export async function captureLearningAtFinish(
     if (result.created) created += 1;
   }
   return created;
+}
+
+/**
+ * Which candidate an observation extends, or undefined when it must not be captured (already decided, retired, or this
+ * task is already a source). A variant that differs only by accents joins the stored candidate; ids of stored entries
+ * are never recomputed.
+ */
+function captureTarget(
+  states: ReadonlyMap<string, LearningState>,
+  statement: string,
+  taskId: string,
+  now: number,
+): { id: string; previous: LearningCandidate | undefined } | undefined {
+  const state = findFoldedMatch(states, statement);
+  const id = state?.candidate.id ?? observationCandidateId(statement);
+  if (state === undefined) return { id, previous: undefined };
+  const status = effectiveLearningStatus(state.candidate.status, state.entry.recordedAt, now);
+  if (status === "approved" || status === "promoted" || status === "rejected") return undefined;
+  // A stored `archived` was set by `retire`; a lapse only shows as archived through effectiveLearningStatus.
+  if (state.candidate.status === "archived") return undefined;
+  const previous = status === "archived" ? undefined : state.candidate;
+  return previous?.sourceTaskIds.includes(taskId) === true ? undefined : { id, previous };
 }
 
 function grade(input: { id: string; statement: string; sourceTaskIds: string[]; evidenceIds: string[] }) {

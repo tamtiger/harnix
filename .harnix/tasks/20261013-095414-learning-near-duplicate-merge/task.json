@@ -9,41 +9,64 @@
     "Không đổi schema entry journal v1"
   ],
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "createdAt": "2026-10-13T09:54:11.405+07:00",
-  "updatedAt": "2026-10-13T10:00:07.619+07:00",
+  "updatedAt": "2026-10-13T14:08:09.169+07:00",
   "acceptanceCriteria": [
     {
       "id": "ac-1",
-      "text": "Hai ghi chú cùng ý khác câu chữ (kể cả khác dấu) được gộp vào một candidate, có test precision/recall trên fixture tiếng Việt",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Hai ghi chú cùng ý chỉ khác dấu tiếng Việt, hoa thường hoặc dấu câu được capture vào cùng một candidate (giữ id đã có), có test trên fixture tiếng Việt",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-merge-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-2",
-      "text": "Entry cũ vẫn đọc được và candidate hiện có không bị đổi id",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Entry cũ vẫn đọc được và id của candidate hiện có không đổi; id mới vẫn tính bằng cùng công thức băm",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-merge-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-3",
-      "text": "Báo cáo số liệu trước và sau trên bản sao journal thật: số candidate hội tụ tăng",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "harnix learning và harnix learning --promote trả danh sách similar (id gần trùng, Jaccard từ 0,5 trên token đã bỏ dấu), có test precision/recall trên fixture tiếng Việt",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-merge-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Báo cáo số liệu trước và sau trên journal thật của repo này: số cặp gộp được nhờ gấp dấu và số cặp gợi ý trùng; kết quả ghi vào evidence",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-merge-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
     {
       "id": "check-merge",
       "description": "Test gộp gần trùng",
-      "command": "pnpm exec vitest run test/unit/core/journal",
+      "command": "pnpm exec vitest run test/unit/core/journal test/integration/commands/learning.test.ts",
       "scope": "focused",
       "required": true,
       "criterionIds": [
         "ac-1",
         "ac-2",
-        "ac-3"
+        "ac-3",
+        "ac-4"
       ],
       "inputs": [
         "src/**",
@@ -59,7 +82,8 @@
       "criterionIds": [
         "ac-1",
         "ac-2",
-        "ac-3"
+        "ac-3",
+        "ac-4"
       ],
       "inputs": [
         "src/**",
@@ -75,7 +99,8 @@
       "criterionIds": [
         "ac-1",
         "ac-2",
-        "ac-3"
+        "ac-3",
+        "ac-4"
       ],
       "inputs": [
         "src/**",
@@ -83,11 +108,43 @@
       ]
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "ev-check-merge-1",
+      "checkId": "check-merge",
+      "recordedAt": "2026-10-13T14:06:07.761+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/journal test/integration/commands/learning.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5bc99fadd988706f07d4c3bdd728eb73a27effb0a9a822838b648c25b4940cd8"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-13T14:06:12.084+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bf4e6c0c0b87b17276d791fac66ca612f90dd3cdfcdc5d46048f0105ad5b4e4a"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-13T14:07:40.575+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e6b1b24f070a730c7a56ce9b3d759c6f7d34d5bb651def2b2201a497d2070948"
+    }
+  ],
   "relevantPaths": [
-    "src/core/journal/learning.ts",
+    "src/commands/learning.ts",
     "src/core/journal/learning-capture.ts",
-    "src/core/journal/learning-store.ts",
+    "src/core/journal/learning-similarity.ts",
+    "src/core/journal/learning.ts",
     "test/unit/core/journal"
   ],
   "relevantSpecs": [
@@ -99,6 +156,29 @@
       "id": "d-scope-c",
       "text": "Member C thu hẹp: gấp dấu vào khoá chuẩn hoá và gợi ý trùng khi review; bỏ mục tiêu tăng số candidate vì dữ liệu thật không có nhiều cặp gần trùng.",
       "rationale": "Jaccard 0,5 chỉ tìm 1 cặp trong 130 mục."
+    },
+    {
+      "id": "d-id-stable",
+      "text": "Giữ nguyên công thức id (băm chuỗi chuẩn hoá hiện tại); gộp biến thể khác dấu bằng khoá gấp dấu tra cứu qua statement của candidate đã có, không đổi id.",
+      "rationale": "Đổi công thức băm sẽ đổi id của mọi candidate đã có và phá tương thích."
+    },
+    {
+      "id": "d-threshold",
+      "text": "Giữ ngưỡng candidate hiện tại (2 task nguồn, 2 evidence, confidence từ 0,8).",
+      "rationale": "Nghiên cứu cho thấy vấn đề là thiếu đường duyệt, không phải ngưỡng; chỉ có 1 cặp gần trùng trong 130 mục."
+    },
+    {
+      "id": "d-measure",
+      "text": "Đo trên journal thật (139 entry): gấp dấu gộp thêm 0 candidate, 1 cặp live gần trùng (Jaccard từ 0,5), khớp kết quả nghiên cứu: dữ liệu hiện tại gần như không có biến thể khác dấu nên lợi ích là phòng ngừa cho các lần capture sau.",
+      "rationale": "Số liệu trước và sau cho ac-4; không có cặp nào bị đổi id."
     }
-  ]
+  ],
+  "residualRisks": [
+    {
+      "id": "r-fold-collision",
+      "text": "Khoá bỏ dấu có thể gộp hai câu khác nghĩa chỉ khác dấu; candidate giữ statement đầu tiên nên không mất nội dung nhưng người duyệt nên xem similar",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-13T14:08:09.169+07:00"
 }

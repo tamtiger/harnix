@@ -170,6 +170,32 @@ describe.sequential("learning command", () => {
     expect(((await learning("--prune")).json as { matches: unknown[] }).matches).toEqual([]);
   });
 
+  it("reports near-duplicate ids as similar in the listing and in a promotion preview", async () => {
+    const root = await project();
+    const journal = join(root, ".harnix", "workspace", "tam", "journal");
+    await writeJournalFile(journal, "2099-01-03.jsonl", [
+      buildLearningEntry(
+        { id: "obs-twin", status: "draft", statement: "Tiêm đồng hồ vào mọi unit test để kết quả ổn định" },
+        { id: "t-1", recordedAt: at(3) },
+      ),
+      buildLearningEntry(
+        { id: "obs-twin2", status: "draft", statement: "Tiem dong ho vao moi unit test de ket qua on dinh hon" },
+        { id: "t-2", recordedAt: at(4) },
+      ),
+    ]);
+
+    const listed = await learning();
+    const similar = (id: string) =>
+      (listed.json.items as { id: string; similar: { id: string; score: number }[] }[]).find((item) => item.id === id)
+        ?.similar;
+    const preview = await learning("--promote", "obs-twin");
+
+    expect(similar("obs-twin")?.map((match) => match.id)).toEqual(["obs-twin2"]);
+    expect(similar("obs-twin2")?.map((match) => match.id)).toEqual(["obs-twin"]);
+    expect(similar("obs-a")).toEqual([]);
+    expect((preview.json.similar as { id: string }[]).map((match) => match.id)).toEqual(["obs-twin2"]);
+  });
+
   it("fails closed outside an initialized project", async () => {
     process.chdir(await temporaryRepository());
 

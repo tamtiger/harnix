@@ -6,6 +6,7 @@ import { promoteLearning, retireLearning } from "src/core/journal/learned-promot
 import { findLowValueLearning, pruneLearning, type PruneMatch } from "src/core/journal/learning-prune.js";
 import { reviewLearning } from "src/core/journal/learning-review.js";
 import { analyzeLearningStatement } from "src/core/journal/learning-safety.js";
+import { similarLearning, type SimilarLearning } from "src/core/journal/learning-similarity.js";
 import { createSourcePathsLoader } from "src/core/journal/learning-sources.js";
 import { readLearningStates } from "src/core/journal/learning-store.js";
 import { currentInstant, journalFilePath } from "src/core/workflow/support.js";
@@ -37,6 +38,8 @@ export interface LearningListItem {
   recordedAt: string;
   /** Risk kinds found in the statement; a statement with one cannot be promoted. */
   findings: string[];
+  /** Other live or promoted notes that read alike (id and token similarity); only a hint, nothing merges them. */
+  similar: SimilarLearning[];
   /** Untrusted project text, cut to a fixed length; render it only as a JSON string. */
   statement: string;
 }
@@ -129,7 +132,8 @@ export async function runLearning(cwd: string, options: LearningCommandOptions):
     const retired = await retireLearning(input);
     return { ...head, action: "retire", id: picked.id, status: "archived", ...retired };
   }
-  const sources = (await readLearningStates(journalRoot)).get(picked.id)?.candidate.sourceTaskIds ?? [];
+  const states = await readLearningStates(journalRoot);
+  const sources = states.get(picked.id)?.candidate.sourceTaskIds ?? [];
   const paths = learnedPathPrefixes(await createSourcePathsLoader(harnixRoot)(sources));
   const promoted = await promoteLearning({ ...input, paths, apply: options.apply === true });
   const { content, ...summary } = promoted;
@@ -140,6 +144,7 @@ export async function runLearning(cwd: string, options: LearningCommandOptions):
     ...summary,
     status: promoted.applied ? "promoted" : "unchanged",
     proposal: content,
+    similar: similarLearning(states, picked.id),
     ...(promoted.applied ? {} : { hint: "Run again with --apply to write the rule." }),
   };
 }
@@ -152,7 +157,8 @@ async function list(
   limit: number,
 ): Promise<{ action: "list"; items: LearningListItem[]; spec: LearnedSpecStats }> {
   const items: LearningListItem[] = [];
-  for (const { entry, candidate } of (await readLearningStates(journalRoot)).values()) {
+  const states = await readLearningStates(journalRoot);
+  for (const { entry, candidate } of states.values()) {
     const effective = effectiveLearningStatus(candidate.status, entry.recordedAt, Date.parse(now));
     if (status !== undefined && effective !== status) continue;
     items.push({
@@ -161,13 +167,16 @@ async function list(
       sources: candidate.sourceTaskIds.length,
       recordedAt: entry.recordedAt,
       findings: analyzeLearningStatement(candidate.statement).findings.filter((kind) => kind !== "url-like"),
+      similar: [],
       statement: cut(candidate.statement),
     });
   }
   items.sort(
     (left, right) => compareCodeUnits(right.recordedAt, left.recordedAt) || compareCodeUnits(left.id, right.id),
   );
-  return { action: "list", items: items.slice(0, limit), spec: await learnedSpecStats(root) };
+  // Similarity is the costly part, so it is computed only for the entries that are returned.
+  const shown = items.slice(0, limit).map((item) => ({ ...item, similar: similarLearning(states, item.id) }));
+  return { action: "list", items: shown, spec: await learnedSpecStats(root) };
 }
 
 async function prune(
