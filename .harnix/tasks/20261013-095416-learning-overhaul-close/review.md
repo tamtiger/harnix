@@ -3,18 +3,18 @@
 - **ID:** 20261013-095416-learning-overhaul-close
 - **Mode:** lite
 - **Epic:** 20261013-095411-harnix-learning-overhaul
-- **Status:** planning/planning
+- **Status:** completed/finishing
 - **Created:** 2026-10-13 09:54:11 +07:00
-- **Updated:** 2026-10-13 09:54:11 +07:00
+- **Updated:** 2026-10-13 14:14:58 +07:00
 
-**Verdict:** PENDING — 0/3 acceptance criteria met
+**Verdict:** PASS — all acceptance criteria met or waived
 
 ## Summary
 
 | Item | Progress | Details |
 | --- | --- | --- |
-| Acceptance criteria | 0% | 0/3 met or waived |
-| Required checks | 0% | 0/2 passed |
+| Acceptance criteria | 100% | 3/3 met or waived |
+| Required checks | 100% | 2/2 passed |
 
 ## Goal
 
@@ -37,15 +37,16 @@ Cập nhật docs/HARNIX_WORKFLOW.md, PRD, workflow template (pnpm selfhost:sync
 
 ## Acceptance criteria
 
-- [ ] `ac-1` (pending): Tài liệu và template mô tả đúng vòng đời learning mới, selfhost:sync đồng bộ
-- [ ] `ac-2` (pending): Phát hành minor bằng version:sync --fold-dev, CHANGELOG gộp một mục
-- [ ] `ac-3` (pending): Mọi gate (test, lint, typecheck, test:gates) có exit code 0 mới
+- [x] `ac-1` (met): Tài liệu và template mô tả đúng vòng đời learning mới, selfhost:sync đồng bộ
+- [x] `ac-2` (met): Phát hành minor bằng version:sync --fold-dev, CHANGELOG gộp một mục
+- [x] `ac-3` (met): Mọi gate (test, lint, typecheck, test:gates) có exit code 0 mới
 
 ## Required checks
 
-- [ ] `check-gates` (focused): Contract tests — chưa chạy / not yet run
-- [ ] `check-suite` (full): Toàn bộ bộ test của dự án — chưa chạy / not yet run
+- [x] `check-gates` (focused): Contract tests — pass (2026-10-13 14:12:58 +07:00)
+- [x] `check-suite` (full): Toàn bộ bộ test của dự án — pass (2026-10-13 14:14:26 +07:00)
 
 ## Evidence
 
-_None recorded yet._
+- `check-gates` — pass (2026-10-13 14:12:58 +07:00): pnpm test:gates — exit 0
+- `check-suite` — pass (2026-10-13 14:14:26 +07:00): pnpm test — exit 0

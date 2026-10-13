@@ -8,28 +8,37 @@
     "Không thêm tính năng mới"
   ],
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "createdAt": "2026-10-13T09:54:11.405+07:00",
-  "updatedAt": "2026-10-13T09:54:11.405+07:00",
+  "updatedAt": "2026-10-13T14:14:58.804+07:00",
   "acceptanceCriteria": [
     {
       "id": "ac-1",
       "text": "Tài liệu và template mô tả đúng vòng đời learning mới, selfhost:sync đồng bộ",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Phát hành minor bằng version:sync --fold-dev, CHANGELOG gộp một mục",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Mọi gate (test, lint, typecheck, test:gates) có exit code 0 mới",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -66,7 +75,28 @@
       ]
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-13T14:12:58.041+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f98ba61741d3cb22f3979178b9b0c623e5cca13d78ae903c486b1573261adf36"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-13T14:14:26.467+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "63668483a5aebd6e3904d2a6b3d96bbf1b3b399df5b011c6f4a796eb058b25b0"
+    }
+  ],
   "relevantPaths": [
     "docs/HARNIX_WORKFLOW.md",
     "docs/HARNIX_PRD.md",
@@ -76,5 +106,6 @@
   "relevantSpecs": [
     "docs/HARNIX_WORKFLOW.md"
   ],
-  "epicId": "20261013-095411-harnix-learning-overhaul"
+  "epicId": "20261013-095411-harnix-learning-overhaul",
+  "completedAt": "2026-10-13T14:14:58.804+07:00"
 }

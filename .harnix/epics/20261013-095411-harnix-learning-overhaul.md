@@ -12,7 +12,7 @@ Nghiên cứu lại rồi refactor learning: giảm nhiễu khi capture, gộp g
 
 ## Next task
 
-- `20261013-095416-learning-overhaul-close` — Đóng epic learning: tài liệu gốc, kiểm chứng end-to-end và phát hành (`planning`)
+Không còn task nào chưa hoàn tất.
 
 ## Members (5 tasks)
 
@@ -22,7 +22,7 @@ Nghiên cứu lại rồi refactor learning: giảm nhiễu khi capture, gộp g
 | 2 | `20261013-095415-learning-promotion-lifecycle` | Hoàn thiện vòng đời learning: review, approve, reject, promote vào spec | `full` | `completed` |
 | 3 | `20261013-095413-learning-capture-quality` | Giảm nhiễu khi capture learning bằng bộ lọc chất lượng | `lite` | `completed` |
 | 4 | `20261013-095414-learning-near-duplicate-merge` | Gộp gần trùng learning để draft hội tụ thành candidate | `full` | `completed` |
-| 5 | `20261013-095416-learning-overhaul-close` | Đóng epic learning: tài liệu gốc, kiểm chứng end-to-end và phát hành | `lite` | `planning` |
+| 5 | `20261013-095416-learning-overhaul-close` | Đóng epic learning: tài liệu gốc, kiểm chứng end-to-end và phát hành | `lite` | `completed` |
 
 ## Task Overview & Scope
 
@@ -52,6 +52,6 @@ Nghiên cứu lại rồi refactor learning: giảm nhiễu khi capture, gộp g
 
 ### 5. `20261013-095416-learning-overhaul-close` — Đóng epic learning: tài liệu gốc, kiểm chứng end-to-end và phát hành
 
-- **Trạng thái:** `planning`
+- **Trạng thái:** `completed`
 - **Mục tiêu:** Cập nhật docs/HARNIX_WORKFLOW.md, PRD, workflow template (pnpm selfhost:sync), kiểm chứng end-to-end trên journal thật và phát hành X.(Y+1).0 bằng pnpm version:sync --fold-dev.
 - **Tiêu chí nghiệm thu:** 3 tiêu chí
