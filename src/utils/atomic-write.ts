@@ -18,7 +18,7 @@ export interface AtomicWriteOptions {
   renameRetryDelaysMs?: readonly number[];
 }
 
-const windowsRenameRetryDelaysMs = [10, 25, 50, 100] as const;
+const windowsRenameRetryDelaysMs = [10, 25, 50, 100, 200, 400] as const;
 
 const defaultFilesystem: AtomicFileSystem = {
   chmod,

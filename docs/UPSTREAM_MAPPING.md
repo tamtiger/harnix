@@ -227,6 +227,56 @@ Các adaptation được lưu dưới dạng source thật tại `src/skills/har
 
 Mapping này tách self-observed product correction khỏi external-derived capability. Nếu implementation tương lai lấy behavior, code hoặc content từ harness ngoài, mục 10 bắt buộc supersede ownership decision này bằng registry/source/ref/license/evidence đầy đủ trước completion.
 
+### 8.4 Upstream skill libraries mapping (addyosmani/agent-skills & mattpocock/skills)
+
+Khảo sát ngày 2026-10-14 trên hai kho kỹ năng `addyosmani/agent-skills` (25 skills) và `mattpocock/skills` (39 skills). Phân tích chi tiết các mẫu hình được tái sử dụng / thích nghi (Reuse/Adapt) và các mẫu hình bị loại bỏ dứt khoát (Explicitly Rejected):
+
+#### 8.4.1 Các pattern Reuse / Adapt
+
+| Pattern nguồn | Xuất xứ upstream | Harnix target skill | Phân loại | Nội dung thích nghi vào Harnix |
+|---|---|---|---|---|
+| `grilling` | addyosmani/agent-skills (`grilling`) | `harnix-plan` | `reuse/adapt` | Kỹ thuật chất vấn sâu về yêu cầu và giả định ngầm trong giai đoạn planning; bóc tách edge case và ép làm rõ acceptance criteria trước khi chuyển `ready`. |
+| `rationalizations` | addyosmani/agent-skills (`verification-rationalizations`) | `harnix-verify` | `reuse/adapt` | Danh mục nhận diện các lý do biện minh né tránh kiểm thử (ví dụ: "chỉ là đổi nhỏ", "test chạy trên máy tôi rồi", "code trông hiển nhiên đúng"); bắt buộc bằng chứng exit code 0 thực tế và digest khớp. |
+| `feedback-loop` | addyosmani/agent-skills (`debugging-feedback-loop`) | `harnix-debug` | `reuse/adapt` | Vòng lặp phản hồi chặt chẽ trong debug: tái lập lỗi -> một giả thuyết -> sửa tối thiểu -> regression test -> xác nhận lại; không phỏng đoán hay thử nghiệm lan man. |
+| `standards vs spec` | addyosmani/agent-skills (`code-review-standards`) | `harnix-review` | `reuse/adapt` | Phân định rạch ròi giữa vi phạm chuẩn mực chung của dự án (standards - style, lint, kiến trúc) và vi phạm đặc tả chức năng của task (spec - logic, hợp đồng API, edge cases) khi review. |
+| `adversarial` | mattpocock/skills (`adversarial-testing`) | `harnix-verification-gap` | `reuse/adapt` | Tư duy kiểm thử đối nghịch: chủ động đóng vai kẻ tấn công hoặc tìm các đầu vào biên ác ý để phá vỡ giải pháp trước khi công nhận pass. |
+| `moving goalposts` | mattpocock/skills (`testing-antipatterns`) | `harnix-verification-gap` | `reuse/adapt` | Ngăn chặn hiện tượng dịch chuyển tiêu chí kiểm thử hoặc nới lỏng/xóa assertion trong test suite khi gặp thất bại; bảo đảm tiêu chí nghiệm thu được giữ vững. |
+| `Chesterton's Fence` | mattpocock/skills (`code-simplification`) | `harnix-review` | `reuse/adapt` | Nguyên tắc bảo toàn: không đơn giản hóa, tái cấu trúc hoặc xóa một đoạn code / ràng buộc có vẻ rườm rà nếu chưa hiểu rõ và chứng minh được lý do nó được đặt ra ban đầu. |
+| `Forced Mutation` | mattpocock/skills (`diagnosing-bugs`) | `harnix-debug` | `reuse/adapt` | Chủ động tạo đột biến mã (làm hỏng logic có chủ đích) để chứng minh rằng test suite hoặc câu lệnh kiểm chứng thực sự phát hiện được lỗi và không rơi vào tình trạng false-pass. |
+| `Smell Baseline` | addyosmani/agent-skills (`code-review`) | `harnix-review` | `reuse/adapt` | Thiết lập baseline code smell hiện hữu của dự án trước khi review diff, tránh việc bắt lỗi oan hoặc sa đà vào các tồn dư kỹ thuật có sẵn ngoài phạm vi thay đổi. |
+
+#### 8.4.2 Bảy pattern Explicitly Rejected kèm lý do kiến trúc
+
+Harnix kiên định giữ vững các nguyên tắc cốt lõi (lean, deterministic, single-agent first, user-in-control, zero runtime network, clean consumer workspace). 7 mẫu hình sau đây từ các upstream bị từ chối đưa vào Harnix:
+
+1. **Mandatory Subagents Network** (Mạng lưới subagent bắt buộc):
+   - *Upstream*: Yêu cầu điều phối qua mạng lưới nhiều subagent độc lập (planner agent, reviewer agent, tester agent, researcher agent) với giao thức trao đổi phức tạp.
+   - *Lý do loại bỏ*: Vi phạm ranh giới kiến trúc Harnix. Harnix thiết kế theo mô hình single-agent first với state machine xác định, các skill tập trung theo stage, không bắt buộc đa tác nhân cồng kềnh, giảm thiểu chi phí token và tránh mất đồng bộ trạng thái.
+
+2. **Autonomous Git/PR** (Tự động thao tác Git / tạo Pull Request):
+   - *Upstream*: Tự động git add, git commit, tạo branch, push lên remote và mở Pull Request sau khi hoàn thành task.
+   - *Lý do loại bỏ*: Vi phạm trực tiếp Harnix Rule 6 (Commit discipline). Mọi hành động làm thay đổi lịch sử Git, nhánh hoặc remote bắt buộc phải hiển thị diff rõ ràng và chờ người dùng phê duyệt tường minh; tuyệt đối không tự ý commit hay tạo PR.
+
+3. **External Issue Trackers** (Tích hợp hệ thống quản lý issue ngoại vi):
+   - *Upstream*: Tự động sync hoặc tạo ticket trên GitHub Issues, Jira, Linear.
+   - *Lý do loại bỏ*: Harnix cam kết nguyên tắc bảo mật và hoạt động offline (zero runtime network, không phụ thuộc SaaS bên ngoài). Toàn bộ dữ liệu công việc được lưu trữ cục bộ, minh bạch và an toàn trong `.harnix/` của chính repository.
+
+4. **Root Directory Artifacts (GLOSSARY/ADR)** (Rải rác artifacts ở thư mục gốc):
+   - *Upstream*: Tự động tạo các file như `GLOSSARY.md`, `ADR-001.md`, `ARCHITECTURE.md` trực tiếp tại thư mục gốc repository.
+   - *Lý do loại bỏ*: Tránh làm ô nhiễm không gian làm việc của người dùng. Mọi tài liệu kỹ thuật, hướng dẫn và quyết định kiến trúc trong Harnix được tổ chức chuẩn hóa và tập trung trong `.harnix/spec/` và `.harnix/tasks/<task-id>/`.
+
+5. **Consumer Shell Scripts** (Sao chép shell scripts vào repository người dùng):
+   - *Upstream*: Sao chép các script shell (.sh, .bat, .ps1, .py) vào thư mục dự án để hỗ trợ chạy tác vụ.
+   - *Lý do loại bỏ*: Vi phạm ranh giới đóng gói của Harnix. Mã runtime của Harnix chỉ tồn tại duy nhất trong npm package cài đặt (`@tamtiger/harnix`), không xả rác các file thực thi không quản lý vào repository người dùng.
+
+6. **OS Temp Handoff (/tmp)** (Truyền nhận dữ liệu qua thư mục tạm hệ điều hành):
+   - *Upstream*: Ghi file tạm, context snapshot hoặc IPC qua `/tmp` hoặc thư mục Temp của hệ điều hành.
+   - *Lý do loại bỏ*: Tiềm ẩn rủi ro bảo mật (symlink attack, xung đột quyền truy cập giữa các user) và phá vỡ tính tương thích đa nền tảng (đặc biệt là Windows). Harnix yêu cầu mọi thao tác atomic write, staging và snapshot phải thực hiện ngay trong ranh giới workspace được bảo vệ.
+
+7. **Parallel Multi-Hypotheses** (Điều tra song song nhiều giả thuyết):
+   - *Upstream*: Sinh đồng thời nhiều giả thuyết song song và áp dụng đồng loạt các bản sửa thử nghiệm.
+   - *Lý do loại bỏ*: Vi phạm kỷ luật debug của Harnix. Harnix áp dụng điều tra tuần tự: kiểm tra một giả thuyết tại một thời điểm, có bằng chứng thực tế chứng minh, tối đa một vòng khắc phục tự động và sau ba giả thuyết phân kỳ phải dừng lại để tái đánh giá (replan). Điều này giúp kiểm soát context lean và tránh phân rã mã nguồn.
+
 ## 9. Removal verification
 
 Release scan must prove absence outside allowed research/migration/license contexts:

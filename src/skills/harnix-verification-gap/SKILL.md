@@ -2,7 +2,7 @@
 name: harnix-verification-gap
 description: Use when evaluating whether a test suite, verification plan or review scope has hidden gaps, false-success blind spots or unverified critical requirements.
 metadata:
-  version: "2.4.0"
+  version: "2.5.0"
 ---
 
 # Verification gap analysis
@@ -38,6 +38,16 @@ Automated tests and agent self-evaluations frequently exhibit false success when
 4. **Integration boundary**:
    - Check whether unit passes leave cross-component wiring untested.
    - Ensure suite gates cover real artifacts without relying on in-memory mock short-circuits.
+
+5. **Adversarial challenge**:
+   - Actively challenge solutions and assertions from an adversarial perspective (no mandatory subagents required).
+   - Attack assumptions: attempt to find malicious payloads, unhandled edge conditions, extreme boundaries or concurrent mutations that break the invariant.
+   - Formulate edge-case counterexamples before accepting a passing status.
+
+6. **Floor guard and anti-moving goalposts**:
+   - Verify that test assertions, criteria, or constraints are never weakened, relaxed, or skipped to make a failing suite pass.
+   - Check git diff for removed assertions, widened regexes, softened error checks, or deleted test files.
+   - Guard the baseline floor: any change that lowers the verification bar must be flagged and rejected immediately.
 
 ## Analysis steps
 

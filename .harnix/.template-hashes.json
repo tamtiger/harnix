@@ -7,21 +7,21 @@
       "sourceId": "guide-common-engineering",
       "scope": "project",
       "generatedHash": "2ad67aa562e0998542da9dda3c3aa230c10940152622b1366858889dfc2eab83",
-      "generatorVersion": "2.4.0"
+      "generatorVersion": "2.5.0"
     },
     {
       "path": ".harnix/spec/guides/languages/typescript.md",
       "sourceId": "guide-language-typescript",
       "scope": "project",
       "generatedHash": "4337166b036e79887d3c34b9cca5f70c661d47bcb0ceab383638a883301f4348",
-      "generatorVersion": "2.4.0"
+      "generatorVersion": "2.5.0"
     },
     {
       "path": ".harnix/workflow.md",
       "sourceId": "workflow",
       "scope": "project",
       "generatedHash": "18dcf9b8e21481e6d58f9b91f983e12dec77ab0d914d37b04d0dcc045628c876",
-      "generatorVersion": "2.4.0"
+      "generatorVersion": "2.5.0"
     }
   ]
 }

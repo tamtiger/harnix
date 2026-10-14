@@ -1,7 +1,9 @@
 import debugSource from "./harnix-debug/SKILL.md";
+import feedbackLoopReference from "./harnix-debug/references/feedback-loop.md";
 import implementSource from "./harnix-implement/SKILL.md";
 import feedbackReference from "./harnix-implement/references/feedback.md";
 import epicReference from "./harnix-plan/references/epic.md";
+import grillingReference from "./harnix-plan/references/grilling.md";
 import migrationReference from "./harnix-plan/references/migration.md";
 import multiRepoReference from "./harnix-plan/references/multi-repo.md";
 import readyReviewReference from "./harnix-plan/references/ready-review.md";
@@ -11,6 +13,7 @@ import researchSource from "./harnix-research/SKILL.md";
 import reviewSource from "./harnix-review/SKILL.md";
 import evidenceReference from "./harnix-verify/references/evidence.md";
 import finishCancelReference from "./harnix-verify/references/finish-cancel.md";
+import rationalizationsReference from "./harnix-verify/references/rationalizations.md";
 import verifySource from "./harnix-verify/SKILL.md";
 import { parseSkill, techniqueSkills } from "./technique-skills.js";
 
@@ -28,13 +31,21 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       epic: epicReference,
       "multi-repo": multiRepoReference,
       "ready-review": readyReviewReference,
+      grilling: grillingReference,
     },
   ],
   [implementSource, { feedback: feedbackReference }],
-  [verifySource, { evidence: evidenceReference, "finish-cancel": finishCancelReference }],
+  [
+    verifySource,
+    {
+      evidence: evidenceReference,
+      "finish-cancel": finishCancelReference,
+      rationalizations: rationalizationsReference,
+    },
+  ],
   [reviewSource, {}],
   [researchSource, {}],
-  [debugSource, {}],
+  [debugSource, { "feedback-loop": feedbackLoopReference }],
 ];
 
 /**

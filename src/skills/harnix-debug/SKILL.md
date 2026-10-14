@@ -2,7 +2,7 @@
 name: harnix-debug
 description: Use when a Harnix implementation or verification has a reproducible bug, failing test, unexpected behavior, loop or repeated unsuccessful fix.
 metadata:
-  version: "2.4.0"
+  version: "2.5.0"
 ---
 
 # Debug with evidence
@@ -29,7 +29,7 @@ State one hypothesis: **X is the root cause** because **Y evidence**, and **Z mi
 
 ## Contained recovery
 
-Write the smallest failing regression test (or strongest reproducer), see it fail, make one fix at the root cause, rerun the reproducer and neighbors, remove temporary instrumentation and keep the regression test. Use the smallest reversible action and claim only recovery you actually performed.
+Write the smallest failing regression test (or strongest reproducer), see it fail, make one fix at the root cause, rerun the reproducer and neighbors, remove temporary instrumentation and keep the regression test. For feedback loop discipline and Forced Mutation: read `./references/feedback-loop.md` (or `harnix skill harnix-debug --reference feedback-loop`). Use the smallest reversible action and claim only recovery you actually performed.
 
 One automatic remediation round per verification failure. A failed rerun after it stops automatic work; an identical check, digest, exit code and summary is the strongest signal; skipped or future-dated evidence never resets it. After three distinct failed hypotheses for one symptom stop, reassess assumptions and architecture with the user or replan.
 

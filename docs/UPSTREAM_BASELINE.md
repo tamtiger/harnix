@@ -30,6 +30,15 @@ Frozen refs ở mục 2 tiếp tục là ownership/reproducibility baseline. Rea
 
 Nguồn, method, diff evidence và remaining uncertainty đầy đủ nằm tại `.harnix/tasks/20260826-132459-harness-ux-research-improvements/research/upstream-revalidation.md`. Mapping machine-checkable của từng maintained external-derived feature nằm trong `docs/HARNESS_FEATURE_PROVENANCE.json`; current research ref và frozen implementation ref có thể cùng tồn tại khi vai trò của chúng khác nhau.
 
+### 2.2 Upstream skill libraries baseline 2026-10-14
+
+Khóa hai upstream skill libraries bổ sung cho hệ thống kỹ năng Harnix vào ngày **2026-10-14** (Asia/Bangkok):
+
+| Nguồn | Branch | Commit SHA | Ngày commit | Ngày truy cập | License | Quy mô & Vai trò |
+|---|---|---|---|---|---|---|
+| [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `main` | `aeac41d4d005999432bb7312f7ff06383a91d59d` | 2026-10-13T20:21:06Z | 2026-10-14 | MIT, Copyright (c) 2025 Addy Osmani | 25 skills; nguồn workflow patterns: grilling, rationalizations, feedback-loop, standards vs spec, smell baseline |
+| [mattpocock/skills](https://github.com/mattpocock/skills) | `main` | `49dd158d1076134a641b33efb035946536778336` | 2026-10-09T10:56:49Z | 2026-10-14 | MIT, Copyright (c) 2026 Matt Pocock | 39 skills; nguồn verification & debugging patterns: adversarial, moving goalposts, Chesterton's Fence, forced mutation |
+
 ## 3. Kiểm chứng bảo toàn PRD
 
 Trước khi gắn lịch sử upstream, PRD gốc (khi đó là `docs/PRD.md`, nay được chuẩn hóa thành `docs/HARNIX_PRD.md`) được sao lưu tạm và so sánh SHA-256 theo byte:
@@ -79,6 +88,23 @@ Hash bản làm việc và bản sao khớp tuyệt đối trước khi chỉnh 
 ### Superpowers
 
 Đã xem các skill `using-superpowers`, `brainstorming`, `systematic-debugging`, `verification-before-completion`, `test-driven-development`, `writing-plans`, `executing-plans`, `requesting-code-review`, `receiving-code-review` và `finishing-a-development-branch`. Harnix lấy process discipline, không lấy universal skill gate hoặc mandatory commit/worktree/subagent/branch-integration behavior.
+
+### addyosmani/agent-skills
+
+Đã xem toàn bộ 25 kỹ năng tại commit `aeac41d4d005999432bb7312f7ff06383a91d59d` (ngày commit 2026-10-13T20:21:06Z, ngày truy cập 2026-10-14, License MIT, Copyright (c) 2025 Addy Osmani). Các kỹ năng khảo sát cung cấp các mẫu quy trình tư duy phản biện và rà soát chất lượng:
+- `grilling`: kỹ thuật chất vấn sâu về yêu cầu trong planning, bóc tách giả định ngầm.
+- `rationalizations`: nhận diện các lời biện minh né tránh kỷ luật kiểm thử khi nghiệm thu.
+- `feedback-loop`: vòng lặp phản hồi chặt chẽ giữa hypothesis, reproduce, fix và verify trong debugging.
+- `standards vs spec`: phân định rõ giữa chuẩn mực chung của dự án và đặc tả cụ thể của từng task khi review.
+- `code-review` / `smell-baseline`: xác lập baseline cho code smell trước khi review để tránh false positives.
+
+### mattpocock/skills
+
+Đã xem toàn bộ 39 kỹ năng tại commit `49dd158d1076134a641b33efb035946536778336` (ngày commit 2026-10-09T10:56:49Z, ngày truy cập 2026-10-14, License MIT, Copyright (c) 2026 Matt Pocock). Các kỹ năng khảo sát cung cấp kỹ thuật kiểm thử đối nghịch và chẩn đoán lỗi:
+- `adversarial`: kiểm thử đối nghịch, chủ động tìm cách phá vỡ giải pháp trước khi chấp nhận hoàn thành.
+- `moving-goalposts`: ngăn chặn việc thay đổi tiêu chí kiểm thử hoặc làm suy yếu test case giữa chừng để pass.
+- `code-simplification` / `Chesterton's Fence`: không đơn giản hóa hoặc xóa code nếu chưa hiểu rõ lý do nó tồn tại lúc ban đầu.
+- `diagnosing-bugs` / `Forced Mutation`: chủ động làm đột biến mã để chứng minh test case thực sự bắt được lỗi và không phải false-pass.
 
 ## 6. Tài liệu Codex chính thức đã dùng
 
@@ -135,8 +161,8 @@ No global runtime, `~/.harnix`, credentials, MCP, permission/trust bypass, absol
 The stack/guide refactor additionally records architecture references to GitHub Linguist, Vercel framework registry, Netlify framework-info, GitHub Awesome Copilot, Awesome Cursor Rules and Fallow in the active task research. These are design references only, not vendored code/content and not new runtime dependencies. Any later content adaptation must add an immutable revision, license and item-level mapping before release.
 
 - Giữ `LICENSE` AGPL-3.0 và copyright/notices của Trellis cho derived code.
-- Thêm `NOTICE` ghi URL, SHA và copyright của cả ba nguồn.
-- Nội dung ECC/Superpowers sao chép hoặc chuyển thể phải giữ MIT attribution. Ưu tiên viết lại concise bằng ngôn ngữ Harnix thay vì vendor nguyên khối.
+- Thêm `NOTICE` ghi URL, SHA và copyright của các nguồn.
+- Nội dung ECC/Superpowers/addyosmani/mattpocock sao chép hoặc chuyển thể phải giữ MIT attribution. Ưu tiên viết lại concise bằng ngôn ngữ Harnix thay vì vendor nguyên khối.
 - Tên Trellis chỉ được tồn tại trong source research, migration compatibility, license/attribution và Git history; không xuất hiện trong public API, help hoặc output dự án mới.
 - Mỗi file vendored đáng kể phải có header/source note khi license hoặc provenance yêu cầu; các ý tưởng triển khai lại được trace trong `HARNESS_RESEARCH.md`.
 - Mỗi maintained external-derived capability phải có một entry trong `HARNESS_FEATURE_PROVENANCE.json` với immutable ref/date/license/evidence, adaptation delta và concrete existing code/test/docs paths. Clean-room behavioral research không tự tạo claim copied code hoặc nghĩa vụ `NOTICE`.
@@ -147,6 +173,8 @@ The stack/guide refactor additionally records architecture references to GitHub 
 git -C <trellis> show -s --format='%H|%cI|%s' HEAD
 git -C <ecc> show -s --format='%H|%cI|%s' HEAD
 git -C <superpowers> show -s --format='%H|%cI|%s' HEAD
+git -C <addyosmani-agent-skills> show -s --format='%H|%cI|%s' HEAD
+git -C <mattpocock-skills> show -s --format='%H|%cI|%s' HEAD
 Get-ChildItem <trellis>\packages\cli\src\templates -File -Recurse | Measure-Object Length -Sum
 Get-ChildItem <trellis>\.trellis -File -Recurse | Measure-Object Length -Sum
 ```

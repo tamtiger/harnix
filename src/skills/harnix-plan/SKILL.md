@@ -2,7 +2,7 @@
 name: harnix-plan
 description: Use when a Harnix request needs triage, requirements, planning, a trustworthy ready gate, a replan, a legacy-task migration or an epic before implementation.
 metadata:
-  version: "2.4.0"
+  version: "2.5.0"
 ---
 
 # Plan a Harnix task
@@ -16,6 +16,8 @@ The guard, the Bypass list and the state rules are in the always-loaded Harnix b
 A blocked task: read its blocker, resolve it or report the exact condition, then continue at its resume status. A task at checkpoint `replan`: read `./references/replan.md` (or `harnix skill harnix-plan --reference replan`). A legacy v1/v2 unfinished task: read `./references/migration.md` (or `harnix skill harnix-plan --reference migration`). Two or more related tasks (or the user asks to group them): read `./references/epic.md` (or `harnix skill harnix-plan --reference epic`); create the epic and every member up front. Several repositories in one workspace: read `./references/multi-repo.md` (or `harnix skill harnix-plan --reference multi-repo`).
 
 ## Explore before asking
+
+- Probe assumptions interactively (never in Bypass or automation, no intent files outside prd.md/plan.md): read `./references/grilling.md` (or `harnix skill harnix-plan --reference grilling`).
 
 Inspect instructions, code, tests, config, docs, the diff and task history; `harnix repo-map --query <text>` / `--impact <path>` are navigation hints only. Never ask the user for a fact the repository answers. Keep an inventory: repository facts, user-owned decisions, unknowns, non-goals. Split a broad request into independently testable deliverables.
 

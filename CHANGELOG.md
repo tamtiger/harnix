@@ -4,6 +4,13 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.5.0] - 2026-10-14
+
+### Added
+
+- Ghi nhận nguồn addyosmani/agent-skills và mattpocock/skills
+- Áp dụng có chọn lọc agent-skills và mattpocock/skills vào Harnix
+
 ## [2.4.0] - 2026-10-13
 
 ### Added

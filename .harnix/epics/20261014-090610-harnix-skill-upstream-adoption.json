@@ -1,0 +1,14 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261014-090610-harnix-skill-upstream-adoption",
+  "title": "Áp dụng có chọn lọc agent-skills và mattpocock/skills vào Harnix",
+  "goal": "Đưa các mẫu đã kiểm chứng (grilling, chống bào chữa, phản biện, phát hiện nới ngưỡng, vòng phản hồi debug) vào skill Harnix dưới dạng reference nạp theo yêu cầu. Gồm 2 member: (1) ghi nhận nguồn MIT, (2) thêm toàn bộ reference và đóng epic bằng bản phát hành minor 2.5.0.",
+  "nonGoals": [
+    "Không thêm skill, lệnh, persona hay subagent bắt buộc",
+    "Không tích hợp issue tracker, marketplace hay Git tự động",
+    "Không vượt ngân sách token"
+  ],
+  "createdAt": "2026-10-14T09:06:10.772+07:00",
+  "updatedAt": "2026-10-14T10:30:51.003+07:00"
+}

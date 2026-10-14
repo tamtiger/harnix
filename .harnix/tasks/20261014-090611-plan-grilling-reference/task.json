@@ -1,0 +1,231 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261014-090611-plan-grilling-reference",
+  "title": "Thêm các reference từ nguồn ngoài vào skill Harnix và phát hành 2.5.0",
+  "goal": "Thêm reference grilling (harnix-plan), rationalizations (harnix-verify), phản biện và phát hiện nới ngưỡng (harnix-verification-gap), hai trục Standards/Spec (harnix-review), feedback-loop (harnix-debug); đóng epic bằng bản phát hành minor 2.5.0 (--fold-dev).",
+  "nonGoals": [
+    "Không thêm skill, lệnh, nền tảng, persona agent hay subagent bắt buộc",
+    "Không chép nguyên văn nội dung nguồn; viết lại bằng ngôn ngữ Harnix",
+    "Không vượt ngân sách token của skill (test instruction-budget)"
+  ],
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-14T09:06:10.772+07:00",
+  "updatedAt": "2026-10-14T13:32:10.197+07:00",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Reference grilling của harnix-plan nạp được, trigger ở đầu dòng con trỏ, nêu rõ không dùng khi Bypass hoặc chạy tự động và không tạo tệp ý định mới",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-4",
+        "ev-check-suite-v2-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "harnix-verify có reference rationalizations; harnix-verification-gap có mục phản biện (không bắt buộc subagent) và checklist nới ngưỡng; harnix-review giữ hai trục Standards/Spec tách riêng",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-4",
+        "ev-check-suite-v2-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "harnix-debug có reference feedback-loop khớp quy tắc một giả thuyết và regression test; mọi skill vẫn trong ngân sách 2.000 token",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-4",
+        "ev-check-suite-v2-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Phát hành 2.5.0 bằng version:sync --fold-dev (CHANGELOG gộp một mục), selfhost:sync nếu template đổi, và mọi gate (test, lint, typecheck, test:gates) có exit code 0 mới",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-4",
+        "ev-check-suite-v2-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "harnix-review bổ sung nguyên lý Chesterton's Fence và smell baseline; reference feedback-loop của harnix-debug có kỹ thuật Forced Mutation",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-4",
+        "ev-check-suite-v2-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-gates",
+      "description": "Contract tests (cấu trúc skill, ngân sách token, guide)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": false,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite-v2",
+      "description": "Replacement for check-suite",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-14T13:17:22.855+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f2e20eca466b752899801624ef63ea4139923e4e166022e3407f81cba5fdd5d6"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-14T13:18:32.281+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "fbb090550458175568584c6f9217226fdc35367a83c6a8b3f28435f2206be773"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-14T13:19:18.409+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7602189f492cc37d1e2a6e25b722603b60b0f4f0c9cfe8f1201e2be59a5e284e"
+    },
+    {
+      "id": "ev-check-gates-3",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-14T13:25:19.608+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e7397d5b475f47c5637e3bf7c171dcdfafc1f986b9cb3b889759ff151f123650"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-14T13:26:26.966+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "74ed0ab392dc5698d1d5fd9d0ad6792c41e4596918e3403904628634f37add8d"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-14T13:30:00.995+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Khac phuc EPERM transient rename tren Windows trong learned-promote test bang viec tang retry delays, chay lai toan bo test suite",
+      "artifactPaths": [
+        ".harnix/tasks/20261014-090611-plan-grilling-reference/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-gates-4",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-14T13:30:16.924+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bbdb65276a34f6823c5e4f334498137dddea3b151e7e8c8d03c803c03e538e99"
+    },
+    {
+      "id": "ev-check-suite-v2-1",
+      "checkId": "check-suite-v2",
+      "recordedAt": "2026-10-14T13:31:19.766+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "73a5817d8ad0ecc0e35715bde8df6c7c156062b0cf4a1371dc85e6cf97e96e92"
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "package.json",
+    "src/skills/**",
+    "src/skills/catalog.ts",
+    "src/templates/harnix/workflow.md",
+    "test/**"
+  ],
+  "relevantSpecs": [
+    "docs/UPSTREAM_MAPPING.md"
+  ],
+  "epicId": "20261014-090610-harnix-skill-upstream-adoption",
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Bổ sung Chesterton's Fence, Forced Mutation và Smell Baseline vào references",
+      "rationale": "Chọn lọc từ addyosmani/agent-skills và mattpocock/skills để nâng cao chất lượng review, debug và bảo toàn test nhạy"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "rsk-1",
+      "text": "Cập nhật integration test test/integration/commands/skills.test.ts và unit test catalog.test.ts để khớp mảng references và regex lỗi",
+      "severity": "medium"
+    }
+  ],
+  "completedAt": "2026-10-14T13:32:10.197+07:00"
+}

@@ -2,7 +2,7 @@
 name: harnix-review
 description: Use when Harnix needs a standalone read-only code review of a diff, commit range or paths, or an evaluation of review feedback, without touching any task.
 metadata:
-  version: "2.4.0"
+  version: "2.5.0"
 ---
 
 # Review code (read-only)
@@ -15,9 +15,19 @@ Honor an explicit commit range or path list. Otherwise review the current workin
 
 ## Review
 
-Requirements and behavioral compliance first, then correctness, security, maintainability, tests, compatibility and operational risk. Read the code; do not infer behavior from names, summaries or test titles. Run a focused check only when it supports or falsifies a finding, and say which checks you omitted.
+Evaluate changes along two distinct axes: **Spec axis** (task behavioral requirements) and **Standards axis** (codebase health, design patterns and baseline quality). Read the code; do not infer behavior from names, summaries or test titles. Run a focused check only when it supports or falsifies a finding, and say which checks you omitted.
 
-Worth flagging: a find-or-create without a unique constraint; a status transition without an atomic `WHERE old-status` guard; a token compared with `==` instead of a constant-time comparison; untrusted or LLM output stored or queried without validation; an N+1 query from loading an association in a loop; missing tests for new behavior; an unhandled error path.
+### 1. Spec axis (Requirements and behavior)
+
+- Verify direct compliance with acceptance criteria, task goals, API contracts and intended behavior.
+- Probe edge cases, data flow, missing tests for new behavior, and unhandled error paths.
+- Requirements and behavioral compliance first, then correctness, security, maintainability, tests, compatibility and operational risk.
+
+### 2. Standards axis (Patterns and baseline health)
+
+- **Chesterton's Fence**: never simplify, refactor, or delete existing constraints or code without understanding and proving why they were established.
+- **Smell baseline**: establish the pre-existing code smell baseline; do not flag existing repository debt outside the diff scope.
+- Worth flagging: a find-or-create without a unique constraint; a status transition without an atomic `WHERE old-status` guard; a token compared with `==` instead of a constant-time comparison; untrusted or LLM output stored or queried without validation; an N+1 query from loading an association in a loop; missing tests for new behavior; an unhandled error path.
 
 Do not report: readability-only redundancy, a request to comment a threshold, consistency-only reshaping, a harmless no-op, style a linter enforces, or anything the diff already fixes. Read the complete diff before flagging a gap.
 

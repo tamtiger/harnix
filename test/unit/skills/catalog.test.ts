@@ -6,12 +6,12 @@ const TOKEN_BUDGET = 2_000;
 const tokens = (text: string): number => Math.ceil(text.length / 4);
 
 const expectedReferences: Record<string, string[]> = {
-  "harnix-plan": ["epic", "migration", "multi-repo", "ready-review", "replan"],
+  "harnix-plan": ["epic", "grilling", "migration", "multi-repo", "ready-review", "replan"],
   "harnix-implement": ["feedback"],
-  "harnix-verify": ["evidence", "finish-cancel"],
+  "harnix-verify": ["evidence", "finish-cancel", "rationalizations"],
   "harnix-review": [],
   "harnix-research": [],
-  "harnix-debug": [],
+  "harnix-debug": ["feedback-loop"],
 };
 
 describe("skill catalog references", () => {
