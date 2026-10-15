@@ -27,10 +27,18 @@ describe("harnix skill", () => {
       "multi-repo",
       "ready-review",
       "grilling",
+      "decision-discipline",
     ]);
-    expect(skills.get("harnix-implement")).toEqual(["feedback"]);
-    expect(skills.get("harnix-verify")).toEqual(["evidence", "finish-cancel", "rationalizations"]);
+    expect(skills.get("harnix-implement")).toEqual(["feedback", "brownfield", "commit-hygiene"]);
+    expect(skills.get("harnix-verify")).toEqual([
+      "evidence",
+      "finish-cancel",
+      "rationalizations",
+      "so-what",
+      "technical-recap",
+    ]);
     expect(skills.get("harnix-review")).toEqual([]);
+    expect(skills.get("harnix-research")).toEqual(["scouting-isolation"]);
     expect(skills.get("harnix-debug")).toEqual(["feedback-loop"]);
   });
 

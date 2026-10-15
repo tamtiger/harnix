@@ -4,6 +4,7 @@ import bugfixPreserveSource from "./harnix-bugfix-preserve/SKILL.md";
 import flakyTestSource from "./harnix-flaky-test/SKILL.md";
 import migrationSafetySource from "./harnix-migration-safety/SKILL.md";
 import securityLensSource from "./harnix-security-lens/SKILL.md";
+import sequentialThinkingSource from "./harnix-sequential-thinking/SKILL.md";
 import verificationGapSource from "./harnix-verification-gap/SKILL.md";
 
 import type { SkillTemplate } from "src/core/spec/project-skills.js";
@@ -67,6 +68,7 @@ const canonicalTechniqueSources: readonly [string, Record<string, string>][] = [
   [flakyTestSource, {}],
   [migrationSafetySource, {}],
   [securityLensSource, {}],
+  [sequentialThinkingSource, {}],
 ];
 
 function validateTechniqueSkillSet(

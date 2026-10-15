@@ -2,7 +2,7 @@
 name: harnix-research
 description: Use when Harnix needs standalone read-only research, or one material product, dependency, security, compatibility or architecture unknown could change a planning or debugging decision.
 metadata:
-  version: "2.5.0"
+  version: "2.6.0"
 ---
 
 # Research one decision
@@ -12,7 +12,7 @@ Resolve one decision-relevant unknown with bounded, cited evidence. Never modify
 ## Profiles
 
 - **Standalone (Bypass):** a research question with no project mutation. Do not read or change task state, even when an unrelated task exists, and you do not need `.harnix/workflow.md`. Answer directly.
-- **Task-scoped:** called from `harnix-plan` (plan/replan) or `harnix-debug` with one material unknown stated as a decision question. Read only the calling task context, run `harnix workflow --preflight` for the clock, and return the decision to the caller.
+- **Task-scoped:** called from `harnix-plan` (plan/replan) or `harnix-debug` with one material unknown stated as a decision question. Read only the calling task context, run `harnix workflow --preflight` for the clock, and return the decision to the caller. When delegating research or scouting foreign subsystems, isolate context and report with status protocol: read `./references/scouting-isolation.md` (or `harnix skill harnix-research --reference scouting-isolation`).
 
 If the request is broad, pick the highest-impact unknown. Do not research to decorate a plan that is already decided. One bounded pass per unknown per user request: reuse a current conclusion unless a new source could change it, and report the remaining uncertainty instead of repeating searches.
 

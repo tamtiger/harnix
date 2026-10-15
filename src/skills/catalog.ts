@@ -1,7 +1,10 @@
 import debugSource from "./harnix-debug/SKILL.md";
 import feedbackLoopReference from "./harnix-debug/references/feedback-loop.md";
 import implementSource from "./harnix-implement/SKILL.md";
+import brownfieldReference from "./harnix-implement/references/brownfield.md";
+import commitHygieneReference from "./harnix-implement/references/commit-hygiene.md";
 import feedbackReference from "./harnix-implement/references/feedback.md";
+import decisionDisciplineReference from "./harnix-plan/references/decision-discipline.md";
 import epicReference from "./harnix-plan/references/epic.md";
 import grillingReference from "./harnix-plan/references/grilling.md";
 import migrationReference from "./harnix-plan/references/migration.md";
@@ -10,10 +13,13 @@ import readyReviewReference from "./harnix-plan/references/ready-review.md";
 import replanReference from "./harnix-plan/references/replan.md";
 import planSource from "./harnix-plan/SKILL.md";
 import researchSource from "./harnix-research/SKILL.md";
+import scoutingIsolationReference from "./harnix-research/references/scouting-isolation.md";
 import reviewSource from "./harnix-review/SKILL.md";
 import evidenceReference from "./harnix-verify/references/evidence.md";
 import finishCancelReference from "./harnix-verify/references/finish-cancel.md";
 import rationalizationsReference from "./harnix-verify/references/rationalizations.md";
+import soWhatReference from "./harnix-verify/references/so-what.md";
+import technicalRecapReference from "./harnix-verify/references/technical-recap.md";
 import verifySource from "./harnix-verify/SKILL.md";
 import { parseSkill, techniqueSkills } from "./technique-skills.js";
 
@@ -32,19 +38,29 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       "multi-repo": multiRepoReference,
       "ready-review": readyReviewReference,
       grilling: grillingReference,
+      "decision-discipline": decisionDisciplineReference,
     },
   ],
-  [implementSource, { feedback: feedbackReference }],
+  [
+    implementSource,
+    {
+      feedback: feedbackReference,
+      brownfield: brownfieldReference,
+      "commit-hygiene": commitHygieneReference,
+    },
+  ],
   [
     verifySource,
     {
       evidence: evidenceReference,
       "finish-cancel": finishCancelReference,
       rationalizations: rationalizationsReference,
+      "so-what": soWhatReference,
+      "technical-recap": technicalRecapReference,
     },
   ],
   [reviewSource, {}],
-  [researchSource, {}],
+  [researchSource, { "scouting-isolation": scoutingIsolationReference }],
   [debugSource, { "feedback-loop": feedbackLoopReference }],
 ];
 

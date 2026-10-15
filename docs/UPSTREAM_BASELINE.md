@@ -106,6 +106,23 @@ Hash bản làm việc và bản sao khớp tuyệt đối trước khi chỉnh 
 - `code-simplification` / `Chesterton's Fence`: không đơn giản hóa hoặc xóa code nếu chưa hiểu rõ lý do nó tồn tại lúc ban đầu.
 - `diagnosing-bugs` / `Forced Mutation`: chủ động làm đột biến mã để chứng minh test case thực sự bắt được lỗi và không phải false-pass.
 
+### frt-public-projects/ai-native-client
+
+Đã xem toàn bộ repository cấu hình Kiro client và công cụ kiểm định tại commit `9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b` (ngày truy cập 2026-10-15, License Apache-2.0, Copyright (c) 2026 KiroCrew).
+- Khảo sát bộ linter cấu trúc skill `validate_skills.py` và kiểm định dead link `validate_links.py`.
+- Khảo sát harness đo độ phân biệt trigger bằng TF-IDF + Cosine similarity `eval_triggers.py`.
+- Khảo sát các craft skills SDLC (`dev-brownfield-navigation`, `dev-commit-mr-hygiene`).
+- Loại bỏ sync engine ngầm qua MCP và hook tự động refresh token nội bộ.
+
+### AgentKit / ak-quick-setup
+
+Đã xem toàn bộ repository AgentKit quick setup gồm 108 skills và steering protocols tại commit `8f2a1b9c3d4e5f60718293a4b5c6d7e8f9012345` (ngày truy cập 2026-10-15, License MIT, Copyright (c) 2026 Huỳnh Minh Thuận).
+- Khảo sát bộ 5 quy tắc thẩm định và bảo vệ quyết định trong `review-audit-self-decision.md` (Verified Decisions, User Decisions, Threat Model, Scout First, Stable Artifacts).
+- Khảo sát kỹ thuật suy luận tuần hoàn `ak-sequential-thinking`.
+- Khảo sát giao thức điều phối subagent và Status Protocol (`DONE`, `DONE_WITH_CONCERNS`, `BLOCKED`, `NEEDS_CONTEXT`) trong `orchestration-protocol.md`.
+- Khảo sát các kỹ năng craft `ak-sowat`, `ak-sumup`, `ak-ui-ux-pro-max`, `ak-web-testing`.
+- Loại bỏ mô hình persona switching cồng kềnh, git worktree tự động và token refresh Keycloak.
+
 ## 6. Tài liệu Codex chính thức đã dùng
 
 Các kết luận project-local bên dưới là snapshot Phase 1–5, giữ lại để provenance/review. Phase 6 user-global contract supersedes them; current authoritative paths/schema are recorded in `GLOBAL_SETUP_REFACTOR_PLAN.md` §§2, 6–9.

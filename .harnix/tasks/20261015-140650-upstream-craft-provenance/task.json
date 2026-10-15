@@ -1,0 +1,122 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261015-140650-upstream-craft-provenance",
+  "title": "Ghi nhận nguồn provenance, giấy phép và đăng ký feature registry cho ai-native-client và ak-quick-setup",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261015-140650-harnix-craft-and-quality-adoption",
+  "goal": "Cập nhật NOTICE, UPSTREAM_BASELINE.md, UPSTREAM_MAPPING.md, đăng ký feature provenance craft-and-decision-discipline và cập nhật test kiểm chứng provenance.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "File NOTICE chứa đầy đủ thông tin bản quyền và attribution cho tác giả của AgentKit và KiroCrew.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "docs/UPSTREAM_BASELINE.md và docs/UPSTREAM_MAPPING.md ghi nhận đầy đủ nguồn gốc, commit SHA, giấy phép và bảng mapping các thành phần Adopt/Adapt/Reject.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "docs/HARNESS_FEATURE_PROVENANCE.json và test/workflow/provenance.test.ts đăng ký hợp lệ feature craft-and-decision-discipline, pnpm vitest run test/workflow/provenance.test.ts pass 100%.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Phiên bản package được bump thành 2.6.0-dev.1 qua pnpm version:sync.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Kiểm tra kiểm chứng provenance, bản quyền và version 2.6.0-dev.1",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/workflow/provenance.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "NOTICE",
+        "docs/HARNESS_FEATURE_PROVENANCE.json",
+        "docs/UPSTREAM_BASELINE.md",
+        "docs/UPSTREAM_MAPPING.md",
+        "package.json",
+        "test/workflow/provenance.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-15T14:16:00.918+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/provenance.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c58cb6a25fc1aa61641fc3b24d70fcdefce97918d3527900d6ff7d946daba300"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T14:17:35.065+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1a3b222343d707a73d1be02135f4671e549f317763ba5d4bba5dee274b55708a"
+    }
+  ],
+  "relevantPaths": [
+    "NOTICE",
+    "docs/HARNESS_FEATURE_PROVENANCE.json",
+    "docs/UPSTREAM_BASELINE.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "package.json",
+    "test/workflow/provenance.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-15T14:06:50.485+07:00",
+  "updatedAt": "2026-10-15T14:18:15.080+07:00",
+  "completedAt": "2026-10-15T14:18:15.080+07:00"
+}

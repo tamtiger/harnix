@@ -1,0 +1,138 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261015-140651-workflow-craft-references",
+  "title": "Bổ sung các craft references từ hai repo nguồn vào workflow skills của Harnix",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261015-140650-harnix-craft-and-quality-adoption",
+  "goal": "Bổ sung các references: decision-discipline (5 quy tắc thẩm định), brownfield, commit-hygiene, so-what, technical-recap, scouting-isolation (Status Protocol) vào workflow skills.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Tạo và wire thành công các references: decision-discipline (harnix-plan), brownfield và commit-hygiene (harnix-implement), so-what và technical-recap (harnix-verify), scouting-isolation (harnix-research).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "test/unit/skills/catalog.test.ts và test/integration/commands/skills.test.ts pass 100% với các references mới.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Phiên bản package được bump thành 2.6.0-dev.2 qua pnpm version:sync.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Kiểm tra danh mục skill references và integration command",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/skills/catalog.test.ts test/integration/commands/skills.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "package.json",
+        "src/skills/**",
+        "test/integration/commands/skills.test.ts",
+        "test/unit/skills/catalog.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-15T14:24:41.925+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/skills/catalog.test.ts test/integration/commands/skills.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a5e3203c77b3476ab4cc5246c04b82cbfefa2a62e371b9998be1e56382220fba"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T14:26:29.991+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "ea8e71875eba1bb4bdd7594c30fb954ee9a0167c18126f0fbdaecef4b56cfabb"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T14:28:43.082+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8c23e627ccd4c79b78080ed31c0e397eaa1042c200cb8c282bff5dab8b6c1243"
+    },
+    {
+      "id": "ev-check-1-2",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-15T14:29:04.285+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/skills/catalog.test.ts test/integration/commands/skills.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9d71a1ac00307d4d17ce2e8c5f449f344da1a85e946aa7322c510cb20feff24b"
+    }
+  ],
+  "relevantPaths": [
+    "package.json",
+    "src/skills/catalog.ts",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-implement/references/brownfield.md",
+    "src/skills/harnix-implement/references/commit-hygiene.md",
+    "src/skills/harnix-plan/SKILL.md",
+    "src/skills/harnix-plan/references/decision-discipline.md",
+    "src/skills/harnix-research/SKILL.md",
+    "src/skills/harnix-research/references/scouting-isolation.md",
+    "src/skills/harnix-verify/SKILL.md",
+    "src/skills/harnix-verify/references/so-what.md",
+    "src/skills/harnix-verify/references/technical-recap.md",
+    "test/integration/commands/skills.test.ts",
+    "test/unit/skills/catalog.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-15T14:06:50.485+07:00",
+  "updatedAt": "2026-10-15T14:29:39.614+07:00",
+  "completedAt": "2026-10-15T14:29:39.614+07:00"
+}

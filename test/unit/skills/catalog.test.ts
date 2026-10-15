@@ -6,11 +6,11 @@ const TOKEN_BUDGET = 2_000;
 const tokens = (text: string): number => Math.ceil(text.length / 4);
 
 const expectedReferences: Record<string, string[]> = {
-  "harnix-plan": ["epic", "grilling", "migration", "multi-repo", "ready-review", "replan"],
-  "harnix-implement": ["feedback"],
-  "harnix-verify": ["evidence", "finish-cancel", "rationalizations"],
+  "harnix-plan": ["decision-discipline", "epic", "grilling", "migration", "multi-repo", "ready-review", "replan"],
+  "harnix-implement": ["brownfield", "commit-hygiene", "feedback"],
+  "harnix-verify": ["evidence", "finish-cancel", "rationalizations", "so-what", "technical-recap"],
   "harnix-review": [],
-  "harnix-research": [],
+  "harnix-research": ["scouting-isolation"],
   "harnix-debug": ["feedback-loop"],
 };
 
@@ -61,5 +61,11 @@ describe("skill catalog references", () => {
     const names = new Set(workflowSkills.map((skill) => skill.name));
     for (const alias of Object.values(legacySkillAliases)) expect(names.has(alias.name)).toBe(true);
     for (const skill of workflowSkills) expect(renderSkill(skill)).toBe(skill.content);
+  });
+
+  it("bumps package version to 2.6.0 series", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const pkg = JSON.parse(await readFile("package.json", "utf8"));
+    expect(pkg.version).toMatch(/^2\.6\.0/u);
   });
 });

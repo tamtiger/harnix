@@ -1,0 +1,113 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261015-140652-skill-sequential-thinking",
+  "title": "Xây dựng technique skill thứ 6: harnix-sequential-thinking",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261015-140650-harnix-craft-and-quality-adoption",
+  "goal": "Xây dựng technique skill harnix-sequential-thinking thuần markdown, frontmatter chuẩn Harnix, cập nhật catalog, PRD, workflow và tests.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Tạo skill src/skills/harnix-sequential-thinking/SKILL.md tuân thủ frontmatter chuẩn, ngân sách token <= 1200 và heading Evidence and Rationale.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Đăng ký technique skill thứ 6 trong src/skills/technique-skills.ts và test/unit/skills/technique-skills.test.ts, test/workflow/skill-sources.test.ts pass 100%.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Phiên bản package được bump thành 2.6.0-dev.3 qua pnpm version:sync.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Kiểm tra technique skills catalog và skill sources",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/skills/technique-skills.test.ts test/workflow/skill-sources.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/HARNIX_PRD.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "package.json",
+        "src/skills/**",
+        "test/unit/skills/technique-skills.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-15T14:33:59.142+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/skills/technique-skills.test.ts test/workflow/skill-sources.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1ee0547bc56b2ac26c6d5aacda487b06247b8f402a0f6c24984fb05efee2786b"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T14:35:23.405+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7cedce8308ab7507a94e508aa40e541c7851acc5452a07223d4fedb124a4ec8d"
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "package.json",
+    "src/skills/harnix-sequential-thinking/SKILL.md",
+    "src/skills/technique-skills.ts",
+    "test/unit/skills/technique-skills.test.ts",
+    "test/workflow/skill-sources.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-15T14:06:50.485+07:00",
+  "updatedAt": "2026-10-15T14:35:36.172+07:00",
+  "completedAt": "2026-10-15T14:35:36.172+07:00"
+}

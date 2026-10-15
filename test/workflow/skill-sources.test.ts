@@ -20,6 +20,7 @@ const techniqueSkillNames = [
   "harnix-flaky-test",
   "harnix-migration-safety",
   "harnix-security-lens",
+  "harnix-sequential-thinking",
 ] as const;
 const allSkillNames = [...workflowSkillNames, ...techniqueSkillNames];
 const TASK_SKILLS: readonly SkillName[] = ["harnix-plan", "harnix-implement", "harnix-verify", "harnix-debug"];
@@ -295,5 +296,35 @@ describe("canonical Harnix workflow skill sources", () => {
 
   it("keeps skill descriptions within the documented 1,024-character limit", () => {
     for (const skill of workflowSkills) expect(skill.description.length, skill.name).toBeLessThanOrEqual(1024);
+  });
+
+  it("enforces strict body line limits (<= 200 lines) and rejects prompt cruft across skills", async () => {
+    const FORBIDDEN_CRUFT = [
+      "as an ai language model",
+      "remember that you are",
+      "i am an assistant",
+      "let me know if you need anything else",
+      "feel free to ask",
+    ];
+
+    for (const name of allSkillNames) {
+      const content = await readSkillSource(name);
+      const match = /^---\n[\s\S]*?\n---\n\n([\s\S]+)$/u.exec(content);
+      expect(match, `${name} missing body`).not.toBeNull();
+      const body = match![1]!;
+      const lines = body.split("\n");
+      expect(lines.length, `${name} exceeds 200 lines: got ${lines.length}`).toBeLessThanOrEqual(200);
+
+      const lower = content.toLowerCase();
+      for (const phrase of FORBIDDEN_CRUFT) {
+        expect(lower, `${name} contains prompt cruft: '${phrase}'`).not.toContain(phrase);
+      }
+    }
+  });
+
+  it("bumps package version to 2.6.0 series", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const pkg = JSON.parse(await readFile("package.json", "utf8"));
+    expect(pkg.version).toMatch(/^2\.6\.0/u);
   });
 });

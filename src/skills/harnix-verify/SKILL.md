@@ -2,7 +2,7 @@
 name: harnix-verify
 description: Use when a Harnix task needs fresh compliance, correctness and security verification, evidence, and a safe finish or explicit cancellation with an evidence-based handoff.
 metadata:
-  version: "2.5.0"
+  version: "2.6.0"
 ---
 
 # Verify and finish Harnix work
@@ -15,7 +15,7 @@ The guard and state rules are in the always-loaded Harnix block. Run `harnix wor
 
 ## Stage 1: compliance
 
-Read the request, goal and non-goals, PRD/plan, guides and the diff. A Full `plan.md` checklist must be 100% `[x]` (a Lite task has none). For every criterion identify the changed files, the observable behavior, the fresh evidence and the actual outcome; `met` only with evidence, `waived` only with a reason and authority. Check scope, migration and compatibility, user-owned content, public output and docs. A compliance defect stops here: code defects go to `harnix-debug`, requirement defects to a replan via `harnix-plan`.
+Read the request, goal and non-goals, PRD/plan, guides and the diff. A Full `plan.md` checklist must be 100% `[x]` (a Lite task has none). Evaluate real-world product impact and eliminate busywork: read `./references/so-what.md` (or `harnix skill harnix-verify --reference so-what`). For every criterion identify the changed files, the observable behavior, the fresh evidence and the actual outcome; `met` only with evidence, `waived` only with a reason and authority. Check scope, migration and compatibility, user-owned content, public output and docs. A compliance defect stops here: code defects go to `harnix-debug`, requirement defects to a replan via `harnix-plan`.
 
 ## Stage 2: quality and security
 
@@ -40,4 +40,4 @@ Use native agent skills on demand (load via `harnix skill <name>`):
 
 When every criterion is met or waived and every required check is fresh: `--transition verifying/finishing`, record reusable lessons with `--add-risk` / `--add-decision`, then run `harnix workflow --finish --brief` exactly once. It recomputes every digest and captures learning; read `learning.captured` and act on `learning.hint` when it is 0; when it is above 0 tell the user they can review the notes with `harnix learning` (never promote, reject or retire one yourself). Finish never edits the product. Details, recovery and cancellation: `./references/finish-cancel.md` (or `harnix skill harnix-verify --reference finish-cancel`).
 
-Report the outcome first, then the evidence, omitted checks and residual risks. For an epic member also report progress (`harnix epic <id>`) and recommend the next task; point to `review.md` for a plain summary. Never branch, commit, push or open a PR; before a commit show the diff and message and wait for approval.
+Report the outcome first, then the evidence, omitted checks and residual risks. Summarize technical decisions, workarounds, and verification results concisely: read `./references/technical-recap.md` (or `harnix skill harnix-verify --reference technical-recap`). For an epic member also report progress (`harnix epic <id>`) and recommend the next task; point to `review.md` for a plain summary. Never branch, commit, push or open a PR; before a commit show the diff and message and wait for approval.

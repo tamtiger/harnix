@@ -245,6 +245,29 @@ Khảo sát ngày 2026-10-14 trên hai kho kỹ năng `addyosmani/agent-skills` 
 | `Forced Mutation` | mattpocock/skills (`diagnosing-bugs`) | `harnix-debug` | `reuse/adapt` | Chủ động tạo đột biến mã (làm hỏng logic có chủ đích) để chứng minh rằng test suite hoặc câu lệnh kiểm chứng thực sự phát hiện được lỗi và không rơi vào tình trạng false-pass. |
 | `Smell Baseline` | addyosmani/agent-skills (`code-review`) | `harnix-review` | `reuse/adapt` | Thiết lập baseline code smell hiện hữu của dự án trước khi review diff, tránh việc bắt lỗi oan hoặc sa đà vào các tồn dư kỹ thuật có sẵn ngoài phạm vi thay đổi. |
 
+### 8.5 Upstream craft & client libraries mapping (ai-native-client & ak-quick-setup)
+
+Khảo sát ngày 2026-10-15 trên hai kho tài nguyên `frt-public-projects/ai-native-client` (Apache-2.0) và `ak-quick-setup` (AgentKit, MIT):
+
+#### 8.5.1 Các pattern Reuse / Adapt
+| Pattern nguồn | Xuất xứ upstream | Harnix target | Phân loại | Nội dung thích nghi vào Harnix |
+|---|---|---|---|---|
+| `decision-discipline` (5 quy tắc thẩm định) | ak-quick-setup (`review-audit-self-decision.md`) | `harnix-plan`, `harnix-review`, `harnix-security-lens` | `reuse/adapt` | Bổ sung reference `decision-discipline.md`: bảo vệ quyết định đã kiểm chứng, bảo vệ quyết định người dùng, đánh giá rủi ro thực tế (Threat Model), thám hiểm trước khi hỏi (Scout First) và giữ sạch codebase. |
+| `sequential-thinking` | ak-quick-setup (`ak-sequential-thinking`) | `src/skills/harnix-sequential-thinking` | `adapt` | Xây dựng technique skill thứ 6 thuần markdown, frontmatter chuẩn Harnix, loại bỏ script ngoài, hỗ trợ suy luận nhiều bước với REVISION, BRANCH và HYPOTHESIS. |
+| `scouting-isolation` & Status Protocol | ak-quick-setup (`orchestration-protocol.md`) | `harnix-research` | `adapt` | Chuẩn hóa giao thức điều phối subagent và cô lập ngữ cảnh khi thám hiểm code: truyền context tối thiểu và bắt buộc báo cáo 4 trạng thái chuẩn (`DONE`, `DONE_WITH_CONCERNS`, `BLOCKED`, `NEEDS_CONTEXT`). |
+| `brownfield` navigation | ai-native-client (`dev-brownfield-navigation`) | `harnix-implement` | `adapt` | Kỷ luật chỉnh sửa code cũ: tôn trọng convention tại chỗ, cô lập thay đổi tối thiểu, không tiện tay đổi kiến trúc dự án khi chưa yêu cầu. |
+| `commit-hygiene` | ai-native-client (`dev-commit-mr-hygiene`) | `harnix-implement` | `adapt` | Kỷ luật chuẩn bị commit/MR: giải thích lý do, gắn kết diff thực tế với mục tiêu task, review scope cẩn thận trước khi xin phê duyệt. |
+| `so-what` impact review | ak-quick-setup (`ak-sowat`) | `harnix-verify`, `harnix-plan` | `adapt` | Đánh giá tác động thực chất theo góc nhìn sản phẩm, loại bỏ việc râu ria, bảo đảm giá trị mang lại rõ ràng. |
+| `technical-recap` | ak-quick-setup (`ak-sumup`) | `harnix-verify` | `adapt` | Mẫu báo cáo hoàn thành cô đọng: kết quả đạt được, sự cố & cách khắc phục, quyết định kiến trúc và sơ đồ flow. |
+| `link-validation` & `trigger-eval` | ai-native-client (`scripts/`) | Test suite & scripts | `adapt` | Tích hợp kiểm định markdown link tự động và harness đo độ phân biệt trigger TF-IDF + Cosine similarity stdlib. |
+| `ui-ux` & `web-testing` | ak-quick-setup | `src/guides/topics/` | `adapt` | 2 Topic Guides mới tuân thủ đúng 3 đề mục (Verify, Constraints, Common mistakes) và trần <= 600 tokens. |
+
+#### 8.5.2 Các pattern Explicitly Rejected
+1. **Silent Network Sync & MCP Auto-pull**: `tools/rai-client-sync-mcp/` và session hook tự động fetch/pull remote vi phạm nguyên tắc Lean & Offline-first của Harnix. Harnix dùng lệnh CLI tường minh `harnix update`.
+2. **Proprietary Token Handling**: `auto-refresh-token.kiro.hook` và token Keycloak/GitLab là hạ tầng riêng của doanh nghiệp, không thuộc phạm vi harness mã nguồn mở.
+3. **Mandatory Subagent Personas**: Cấm mandatory subagents và persona switching cồng kềnh; giữ nguyên mô hình single-agent kiêm nhiệm, chỉ kích hoạt protocol khi nền tảng hỗ trợ.
+4. **Autonomous Git Worktree**: Tự động tạo worktree vi phạm Rule 6 của Harnix.
+
 #### 8.4.2 Bảy pattern Explicitly Rejected kèm lý do kiến trúc
 
 Harnix kiên định giữ vững các nguyên tắc cốt lõi (lean, deterministic, single-agent first, user-in-control, zero runtime network, clean consumer workspace). 7 mẫu hình sau đây từ các upstream bị từ chối đưa vào Harnix:

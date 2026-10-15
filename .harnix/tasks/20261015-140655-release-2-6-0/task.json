@@ -1,0 +1,63 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261015-140655-release-2-6-0",
+  "title": "Xác minh toàn diện, self-host sync, bump phiên bản minor 2.6.0 và đóng Epic",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261015-140650-harnix-craft-and-quality-adoption",
+  "goal": "Chạy toàn bộ 273+ test suites, sync template workflow, bump phiên bản minor 2.6.0 --fold-dev và hoàn tất Epic.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Xác minh toàn diện, self-host sync, bump phiên bản minor 2.6.0 và đóng Epic",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T14:53:59.418+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "aaac3aff7a96348fba12e1a81b52534f265016dd63d85afb70ad24fa68f1f276"
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/epics/20261015-140650-harnix-craft-and-quality-adoption.json",
+    ".harnix/manifest.json",
+    ".harnix/workflow.md",
+    "CHANGELOG.md",
+    "package.json"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-15T14:06:50.485+07:00",
+  "updatedAt": "2026-10-15T14:54:32.567+07:00",
+  "completedAt": "2026-10-15T14:54:32.567+07:00"
+}

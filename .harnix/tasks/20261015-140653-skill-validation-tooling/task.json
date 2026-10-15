@@ -1,0 +1,139 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261015-140653-skill-validation-tooling",
+  "title": "Tích hợp bộ công cụ kiểm định chất lượng: link validation, skill contract lint và trigger evaluation harness",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261015-140650-harnix-craft-and-quality-adoption",
+  "goal": "Tích hợp test markdown links, lint ranh giới skill không quá 200 dòng, không chứa cruft và script đo trigger TF-IDF stdlib.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Xây dựng test test/unit/spec/markdown-links.test.ts kiểm tra toàn bộ markdown links trong dự án không bị hỏng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Bổ sung kiểm tra cấu trúc ranh giới body <= 200 dòng và cấm prompt cruft vào test/workflow/skill-sources.test.ts.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Tạo script scripts/eval-skill-triggers.py đo độ phân biệt trigger bằng TF-IDF + Cosine stdlib và thêm script test:links, eval:triggers vào package.json.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Phiên bản package được bump thành 2.6.0-dev.4 qua pnpm version:sync.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Kiểm tra markdown links, skill contract lint và trigger evaluation",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/spec/markdown-links.test.ts test/workflow/skill-sources.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "package.json",
+        "scripts/eval-skill-triggers.py",
+        "src/**",
+        "test/unit/spec/markdown-links.test.ts",
+        "test/workflow/skill-sources.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-15T14:39:15.989+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/spec/markdown-links.test.ts test/workflow/skill-sources.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cbe52f1a55f63abb000a63222cde43f63f1c7c0047384dd1533c15aa80abd860"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T14:40:40.473+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "10da728073db43d8f150c53bc32ecd5d3424294ffc90d6235b7851903ada0552"
+    },
+    {
+      "id": "ev-check-1-2",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-15T14:43:19.766+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/spec/markdown-links.test.ts test/workflow/skill-sources.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5c8790a18ab6b9c759798a1557c4c00907b93642ffd27f112eaa0fec1aa51b89"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T14:44:36.414+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c5fe0e02078ed3df0d2996c133dea0e33a79742750dc639430062674c8437fa4"
+    }
+  ],
+  "relevantPaths": [
+    "package.json",
+    "scripts/eval-skill-triggers.py",
+    "test/unit/spec/markdown-links.test.ts",
+    "test/workflow/skill-sources.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-15T14:06:50.485+07:00",
+  "updatedAt": "2026-10-15T14:44:59.708+07:00",
+  "completedAt": "2026-10-15T14:44:59.708+07:00"
+}

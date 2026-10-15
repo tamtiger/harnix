@@ -56,6 +56,8 @@ describe("test suite structure", () => {
       "test/unit/test-structure.test.ts",
       // Repository-contract test with no src module to mirror (documentation/platform-boundary consistency).
       "test/unit/docs/supported-platforms.test.ts",
+      // Repository documentation link verification test.
+      "test/unit/spec/markdown-links.test.ts",
     ]);
     const unitOrphans = specFiles
       .filter((path) => path.startsWith("test/unit/") && !unitExceptions.has(path))

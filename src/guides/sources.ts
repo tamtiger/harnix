@@ -34,6 +34,8 @@ import mysqlEngineering from "./technologies/database/mysql.md";
 import sqlserverEngineering from "./technologies/database/sqlserver.md";
 import mongodbEngineering from "./technologies/database/mongodb.md";
 import redisEngineering from "./technologies/database/redis.md";
+import uiUxEngineering from "./topics/ui-ux.md";
+import webTestingEngineering from "./topics/web-testing.md";
 
 export interface GuideSource {
   descriptor: GuideDescriptor;
@@ -246,5 +248,35 @@ export const guideSources: GuideSource[] = [
     redisEngineering,
     { technologies: ["redis"] },
     20,
+  ),
+  guide(
+    "topic-ui-ux",
+    "UI/UX",
+    "topics/ui-ux.md",
+    uiUxEngineering,
+    { paths: ["**/*.tsx", "**/*.jsx", "**/*.vue", "**/*.svelte", "**/*.html", "**/*.css", "**/*.scss"] },
+    25,
+    "path",
+  ),
+  guide(
+    "topic-web-testing",
+    "Web testing",
+    "topics/web-testing.md",
+    webTestingEngineering,
+    {
+      paths: [
+        "**/*.spec.ts",
+        "**/*.test.ts",
+        "**/*.spec.js",
+        "**/*.test.js",
+        "**/*.spec.tsx",
+        "**/*.test.tsx",
+        "**/cypress/**",
+        "**/playwright/**",
+        "**/e2e/**",
+      ],
+    },
+    25,
+    "path",
   ),
 ];

@@ -4,6 +4,17 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.6.0] - 2026-10-15
+
+### Added
+
+- Ghi nhận nguồn provenance và feature registry cho ai-native-client và ak-quick-setup
+- Bổ sung các craft references chuyên sâu vào workflow skills
+- Thêm technique skill thứ 6: harnix-sequential-thinking
+- Tích hợp link validation, skill contract lint và trigger eval harness
+- Thêm topic guides ui-ux và web-testing chuẩn 3 phần
+- Áp dụng có chọn lọc công cụ kiểm định skill, tri thức craft và quy tắc thẩm định từ ai-native-client và ak-quick-setup
+
 ## [2.5.0] - 2026-10-14
 
 ### Added

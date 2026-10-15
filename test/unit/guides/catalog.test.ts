@@ -54,6 +54,16 @@ describe("packaged guide sources", () => {
     expect(guideOutputPath(common)).toBe(`.harnix/spec/guides/${common.descriptor.contentPath}`);
     expect(guideOutputPath(common).startsWith(".harnix/spec/guides/")).toBe(true);
   });
+
+  it("selects path-activated topic guides when relevant files are active", () => {
+    const ui = selectGuideSources({ languages: [], technologies: [], activePaths: ["src/components/button.tsx"] });
+    expect(ids(ui)).toContain("topic-ui-ux");
+    expect(ids(ui)).not.toContain("topic-web-testing");
+
+    const web = selectGuideSources({ languages: [], technologies: [], activePaths: ["test/unit/foo.test.ts"] });
+    expect(ids(web)).toContain("topic-web-testing");
+    expect(ids(web)).not.toContain("topic-ui-ux");
+  });
 });
 
 describe("selectGuideSources composition", () => {

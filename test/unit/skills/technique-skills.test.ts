@@ -13,6 +13,7 @@ const expectedTechniqueSkillNames = [
   "harnix-flaky-test",
   "harnix-migration-safety",
   "harnix-security-lens",
+  "harnix-sequential-thinking",
 ] as const;
 
 describe("technique skills catalog", () => {
@@ -67,5 +68,11 @@ describe("technique skills catalog", () => {
         expect(skill.name).not.toBe(`harnix-${guide}`);
       }
     }
+  });
+
+  it("bumps package version to 2.6.0 series", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const pkg = JSON.parse(await readFile("package.json", "utf8"));
+    expect(pkg.version).toMatch(/^2\.6\.0/u);
   });
 });

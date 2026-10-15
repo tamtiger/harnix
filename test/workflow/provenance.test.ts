@@ -12,6 +12,7 @@ const expectedFeatureIds = [
   "conditional-research",
   "context-selection-explanation",
   "context-selection-freshness",
+  "craft-and-decision-discipline",
   "dependency-aware-repo-map",
   "deterministic-ready-trace",
   "doctor-evaluation",
@@ -136,6 +137,11 @@ describe("external harness feature provenance", () => {
     }
     expect(registry.features.map((feature) => feature.id)).toEqual(expectedFeatureIds);
     expect(registry.features.map((feature) => feature.id)).not.toContain("target-root-authority");
+  });
+
+  it("bumps package version to 2.6.0 series", async () => {
+    const pkg = JSON.parse(await readFile(resolve(root, "package.json"), "utf8"));
+    expect(pkg.version).toMatch(/^2\.6\.0/u);
   });
 });
 

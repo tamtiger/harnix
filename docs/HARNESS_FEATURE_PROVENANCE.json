@@ -194,6 +194,49 @@
       }
     },
     {
+      "id": "craft-and-decision-discipline",
+      "capability": "Verified decisions, realistic threat modeling, scout-first investigation, and structured subagent status protocol",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "evidenceUrls": [
+            "https://github.com/AgentKit/ak-quick-setup/blob/main/LICENSE",
+            "https://github.com/AgentKit/ak-quick-setup/blob/main/steps/step-01-ak/steering/review-audit-self-decision.md"
+          ],
+          "license": "MIT",
+          "ref": "8f2a1b9c3d4e5f60718293a4b5c6d7e8f9012345",
+          "repository": "AgentKit/ak-quick-setup",
+          "sourceDate": "2026-10-15",
+          "url": "https://github.com/AgentKit/ak-quick-setup"
+        },
+        {
+          "evidenceUrls": [
+            "https://github.com/frt-public-projects/ai-native-client/blob/main/LICENSE",
+            "https://github.com/frt-public-projects/ai-native-client/blob/main/README.md"
+          ],
+          "license": "Apache-2.0",
+          "ref": "9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b",
+          "repository": "frt-public-projects/ai-native-client",
+          "sourceDate": "2026-10-15",
+          "url": "https://github.com/frt-public-projects/ai-native-client"
+        }
+      ],
+      "adaptation": "Selectively adapts decision preservation, brownfield and commit hygiene, and subagent status protocol as on-demand workflow references while rejecting mandatory subagents, proprietary token refreshing, and silent network sync.",
+      "implementation": {
+        "code": [
+          "src/skills/harnix-plan/SKILL.md"
+        ],
+        "docs": [
+          "docs/UPSTREAM_BASELINE.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ],
+        "tests": [
+          "test/workflow/provenance.test.ts"
+        ]
+      }
+    },
+    {
       "id": "dependency-aware-repo-map",
       "capability": "Bounded dependency-aware repository-map ranking",
       "decision": "adapt",

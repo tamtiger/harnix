@@ -1,0 +1,16 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261015-140650-harnix-craft-and-quality-adoption",
+  "title": "Áp dụng có chọn lọc công cụ kiểm định skill, tri thức craft và quy tắc thẩm định từ ai-native-client và ak-quick-setup vào Harnix",
+  "goal": "Nâng cấp độ trưởng thành công nghệ của Harnix lên v2.6.0 thông qua việc: (1) ghi nhận provenance và feature registry, (2) bổ sung craft references chuyên sâu gồm quy tắc thẩm định và giao thức subagent, (3) thêm technique skill harnix-sequential-thinking, (4) tích hợp link validation, skill contract/cruft lint và trigger eval harness, (5) bổ sung 2 Topic Guides ui-ux và web-testing, (6) xác minh toàn diện và phát hành minor 2.6.0.",
+  "nonGoals": [
+    "Không thêm daemon, background sync hay silent network",
+    "Không đưa vào endpoint, PAT hay token Keycloak nội bộ",
+    "Không tự động hóa Git branch, worktree hay commit ngầm",
+    "Không làm thay đổi schema của TaskRecord v3",
+    "Không biến subagent thành dependency bắt buộc của core workflow"
+  ],
+  "createdAt": "2026-10-15T14:06:50.485+07:00",
+  "updatedAt": "2026-10-15T14:06:50.485+07:00"
+}

@@ -2,7 +2,7 @@
 name: harnix-plan
 description: Use when a Harnix request needs triage, requirements, planning, a trustworthy ready gate, a replan, a legacy-task migration or an epic before implementation.
 metadata:
-  version: "2.5.0"
+  version: "2.6.0"
 ---
 
 # Plan a Harnix task
@@ -18,6 +18,7 @@ A blocked task: read its blocker, resolve it or report the exact condition, then
 ## Explore before asking
 
 - Probe assumptions interactively (never in Bypass or automation, no intent files outside prd.md/plan.md): read `./references/grilling.md` (or `harnix skill harnix-plan --reference grilling`).
+- Preserve verified and user decisions, model real threats, scout first, and keep code clean: read `./references/decision-discipline.md` (or `harnix skill harnix-plan --reference decision-discipline`).
 
 Inspect instructions, code, tests, config, docs, the diff and task history; `harnix repo-map --query <text>` / `--impact <path>` are navigation hints only. Never ask the user for a fact the repository answers. Keep an inventory: repository facts, user-owned decisions, unknowns, non-goals. Split a broad request into independently testable deliverables.
 
