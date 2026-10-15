@@ -4,6 +4,15 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.7.0] - 2026-10-15
+
+### Changed
+
+- Nhận diện tương đương lệnh kiểm thử Python và gợi ý runner khi không tìm thấy executable
+- Mở rộng nhận diện glob source trong ready gate, báo lỗi batch và chuẩn hoá tài liệu
+- Cải tiến CLI khởi tạo Epic, nạp file UTF-8, chuyển đổi task và DX
+- Tinh chỉnh trải nghiệm phát triển và giảm ma sát workflow Harnix
+
 ## [2.6.0] - 2026-10-15
 
 ### Added

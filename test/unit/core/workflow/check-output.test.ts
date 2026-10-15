@@ -77,4 +77,11 @@ describe("launcherFailure", () => {
     expect(launcherFailure(`${vitestReport}\nERR_PNPM_NO_SCRIPT`, 1)).toBeUndefined();
     expect(launcherFailure("tests failed", 1)).toBeUndefined();
   });
+
+  it("provides a helpful suggestion when pytest is not found in PATH", () => {
+    expect(
+      launcherFailure("'pytest' is not recognized as an internal or external command", 1, "pytest"),
+    ).toContain("try 'python -m pytest'");
+    expect(launcherFailure("bash: pytest: command not found", 1)).toContain("try 'python -m pytest'");
+  });
 });

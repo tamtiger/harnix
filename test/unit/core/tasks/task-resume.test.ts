@@ -57,6 +57,51 @@ describe("task resume", () => {
     );
     expect(activate).not.toHaveBeenCalled();
   });
+
+  it("allows replacing another active task when force is true", async () => {
+    const candidate = task("20260826-160000-resume-target", "planning");
+    const otherActive = task("20260826-160001-other-task", "ready");
+    const activate = vi.fn(async () => undefined);
+    const dependencies: TaskResumeDependencies = {
+      loadCandidate: async () => candidate,
+      loadActive: async () => otherActive,
+      activate,
+    };
+
+    await expect(resumeTask("unused", candidate.id, false, dependencies, true)).resolves.toMatchObject({
+      outcome: "resumed",
+      task: { id: candidate.id },
+    });
+    expect(activate).toHaveBeenCalledWith("unused", candidate.id);
+  });
+
+  it("warns when a validation check references a test file that does not exist", async () => {
+    const candidate = {
+      ...task("20260826-160000-resume-target", "planning"),
+      validationPlan: [
+        {
+          id: "check-obsolete",
+          description: "Runs missing test",
+          command: "pnpm vitest run test/unit/deleted.test.ts",
+          scope: "focused" as const,
+          required: true,
+          criterionIds: ["criterion"],
+          inputs: ["@task-contract", "test/unit/deleted.test.ts"],
+        },
+      ],
+    };
+    const dependencies: TaskResumeDependencies = {
+      loadCandidate: async () => candidate,
+      loadActive: async () => null,
+      activate: async () => undefined,
+      fileExists: async () => false,
+    };
+
+    const result = await resumeTask("unused", candidate.id, false, dependencies);
+    expect(result.outcome).toBe("resumed");
+    expect(result.warnings).toBeDefined();
+    expect(result.warnings?.some((w) => w.includes("test/unit/deleted.test.ts"))).toBe(true);
+  });
 });
 
 function task(id: string, status: "planning" | "ready"): TaskRecordV2 {

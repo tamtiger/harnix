@@ -40,3 +40,20 @@ export function lowValueReason(statement: string): LowValueReason | undefined {
 export function isTaskSpecific(statement: string): boolean {
   return TASK_ID.test(statement);
 }
+
+const CONDITIONAL_OR_RULE_PATTERN =
+  /\b(?:khi|nếu|neu|tránh|tranh|luôn|luon|phải|phai|nên|nen|bảo\s+đảm|bao\s+dam|không|khong|đừng|dung|quy\s+tắc|quy\s+tac|vì|vi|do|nguyên\s+nhân|nguyen\s+nhan|when|if|always|never|ensure|prefer|avoid|rule|because|do\s+not|dont|don't)\b/iu;
+
+export function hasApplicableCondition(statement: string): boolean {
+  return CONDITIONAL_OR_RULE_PATTERN.test(statement);
+}
+
+/**
+ * Checks whether a decision is purely a local implementation action (referencing paths/files without an applicable rule)
+ * rather than a reusable lesson for future tasks.
+ */
+export function isLocalDecisionOnly(statement: string): boolean {
+  const text = statement.trim();
+  if (hasApplicableCondition(text)) return false;
+  return /(?:\b(?:src|test|lib|docs)\/|\.(?:ts|js|py|json|md|yaml|yml)\b)/u.test(text);
+}

@@ -18,6 +18,7 @@ export interface TaskResumeResultV1 {
   readonly dryRun: boolean;
   readonly outcome: TaskResumeOutcome;
   readonly task: Pick<TaskRecord, "id" | "mode" | "status" | "checkpoint">;
+  readonly warnings?: string[];
   readonly nextAction: {
     readonly code: "inspect-active-task";
     readonly message: "Run harnix status to inspect the selected task.";
@@ -28,6 +29,45 @@ export interface TaskResumeDependencies {
   loadCandidate(harnixRoot: string, taskId: string): Promise<TaskRecord>;
   loadActive(harnixRoot: string): Promise<TaskRecord | null>;
   activate(harnixRoot: string, taskId: string): Promise<void>;
+  fileExists?(path: string): Promise<boolean>;
+}
+
+const TEST_FILE_PATTERN =
+  /(?:^|[\s"'])([\w./\\-]+\.(?:test|spec)\.[a-z0-9]+|[\w./\\-]*test_[\w-]+\.py|[\w./\\-]*[\w-]+_test\.py)(?:[\s"']|$)/giu;
+
+async function sanityCheckTestFiles(
+  candidate: TaskRecord,
+  fileExists: (path: string) => Promise<boolean>,
+): Promise<string[]> {
+  const warnings: string[] = [];
+  for (const check of candidate.validationPlan) {
+    const candidates = new Set<string>();
+    if (check.command) {
+      for (const match of check.command.matchAll(TEST_FILE_PATTERN)) {
+        if (match[1]) candidates.add(match[1].trim());
+      }
+    }
+    if ("inputs" in check && Array.isArray(check.inputs)) {
+      for (const input of check.inputs) {
+        if (!input.includes("*") && input !== "@task-contract" && TEST_FILE_PATTERN.test(input)) {
+          candidates.add(input.trim());
+        }
+      }
+    }
+    for (const testPath of candidates) {
+      try {
+        const exists = await fileExists(testPath);
+        if (!exists) {
+          warnings.push(
+            `Check '${check.id}' references missing test file '${testPath}'. It may have been deleted or renamed by a prior task; review before ready.`,
+          );
+        }
+      } catch {
+        // file existence check failed
+      }
+    }
+  }
+  return warnings;
 }
 
 const defaultDependencies: TaskResumeDependencies = {
@@ -41,6 +81,7 @@ export async function resumeTask(
   taskId: string,
   dryRun: boolean,
   dependencies: TaskResumeDependencies = defaultDependencies,
+  force = false,
 ): Promise<TaskResumeResultV1> {
   if (!taskIdPattern.test(taskId)) throw new Error("Resume task ID is invalid.");
 
@@ -62,10 +103,10 @@ export async function resumeTask(
   }
   if (active !== null && terminalStatuses.has(active.status))
     throw new Error("Active task state is unavailable; run harnix doctor.");
-  if (active !== null && active.id !== candidate.id) throw new Error("Resume cannot replace another active task.");
+  if (active !== null && active.id !== candidate.id && !force) throw new Error("Resume cannot replace another active task.");
 
   let outcome: TaskResumeOutcome;
-  if (active !== null) outcome = "already-active";
+  if (active !== null && active.id === candidate.id) outcome = "already-active";
   else if (dryRun) outcome = "would-resume";
   else {
     try {
@@ -76,6 +117,22 @@ export async function resumeTask(
     outcome = "resumed";
   }
 
+  const fileExists =
+    dependencies.fileExists ??
+    (async (relPath: string) => {
+      try {
+        const { resolve } = await import("node:path");
+        const projectRoot = resolve(harnixRoot, "..");
+        const full = await resolveSafeProjectPath(projectRoot, relPath);
+        const s = await stat(full);
+        return s.isFile();
+      } catch {
+        return false;
+      }
+    });
+
+  const warnings = await sanityCheckTestFiles(candidate, fileExists);
+
   return {
     generator: "harnix",
     schemaVersion: 1,
@@ -83,6 +140,7 @@ export async function resumeTask(
     dryRun,
     outcome,
     task: { id: candidate.id, mode: candidate.mode, status: candidate.status, checkpoint: candidate.checkpoint },
+    ...(warnings.length > 0 ? { warnings } : {}),
     nextAction: { code: "inspect-active-task", message: "Run harnix status to inspect the selected task." },
   };
 }

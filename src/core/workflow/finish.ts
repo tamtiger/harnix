@@ -39,8 +39,7 @@ export async function finishWorkflow(root: string, injectedNow?: string): Promis
 
 function learningHint(task: TaskRecord, captured: number): string | undefined {
   if (captured > 0) return undefined;
-  if (reviewNotes(task).length === 0)
-    return "No learning captured: record lessons with --add-risk or --add-decision before --finish.";
+  if (reviewNotes(task).length === 0) return undefined;
   if (extractObservations(task).length === 0) return "No learning captured: every note was filtered as unsafe.";
   return "No learning captured: it already exists.";
 }

@@ -24,16 +24,32 @@ const initOwner = (name: string, pick: (flags: WorkflowFlags) => string | undefi
   hint: "workflow --init",
 });
 
-const EDIT_ACTIONS = ["inspect", "setCheck", "addCriterion", "setPaths", "addDecision", "addRisk", "batch"];
+const EDIT_ACTIONS = [
+  "inspect",
+  "setCheck",
+  "addCriterion",
+  "setPaths",
+  "addDecision",
+  "addRisk",
+  "setTitle",
+  "setGoal",
+  "batch",
+];
 const taskOwner: FlagOwner = {
   name: "--task",
   isSet: (f) => f.task !== undefined,
   actions: EDIT_ACTIONS,
-  hint: "workflow --inspect, --set-check, --add-criterion, --set-paths, --add-decision, --add-risk or --batch (state changes, evidence and finish act only on the active task)",
+  hint: "workflow --inspect, --set-check, --add-criterion, --set-paths, --set-title, --set-goal, --add-decision, --add-risk or --batch (state changes, evidence and finish act only on the active task)",
 };
 
 /** Flags that only make sense with specific actions; anything else is rejected before any state is read. */
 export const FLAG_OWNERS: readonly FlagOwner[] = [
+  {
+    name: "--file",
+    isSet: (f) => f.file !== undefined,
+    actions: ["save", "batch", "migrate", "evidence", "cancel", "learn"],
+    hint: "workflow --save, --batch, --migrate, --evidence, --cancel or --learn",
+  },
   {
     name: "--result",
     isSet: (f) => f.result !== undefined,

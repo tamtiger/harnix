@@ -21,6 +21,12 @@ describe("text integrity guard", () => {
     expect(findCorruptedText(["fine", { nested: "broken � text" }])).toMatchObject({ reason: "replacement-character" });
   });
 
+  it("flags repeated question marks indicating lossy encoding conversion", () => {
+    expect(findCorruptedText(["fine", { nested: "Lỗi font ??? rồi nè" }])).toMatchObject({
+      reason: "lossy-question-marks",
+    });
+  });
+
   it("accepts genuine Vietnamese, accented Latin, emoji, punctuation and plain ASCII", () => {
     for (const text of [
       VIETNAMESE,

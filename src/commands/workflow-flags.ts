@@ -33,6 +33,9 @@ export interface WorkflowFlags {
   setCriterion?: string;
   addDecision?: string;
   addRisk?: string;
+  setTitle?: string;
+  setGoal?: string;
+  file?: string;
   title?: string;
   task?: string;
   slug?: string;
@@ -91,6 +94,8 @@ const VALUE_ACTIONS = [
   "setCriterion",
   "addDecision",
   "addRisk",
+  "setTitle",
+  "setGoal",
 ] as const;
 
 export function selectAction(flags: WorkflowFlags): string {
@@ -99,7 +104,7 @@ export function selectAction(flags: WorkflowFlags): string {
   const [only] = selected;
   if (selected.length !== 1 || only === undefined)
     throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, or --learn.",
+      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, or --learn.",
     );
   return only;
 }

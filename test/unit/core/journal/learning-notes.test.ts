@@ -34,6 +34,20 @@ describe("learning review notes", () => {
     ]);
   });
 
+  it("filters out local implementation decisions that lack an applicable condition", () => {
+    const task = buildTaskV3({
+      decisions: [
+        { id: "d1", text: "Refactor function in src/utils/paths.ts to separate module", rationale: "Why" },
+        { id: "d2", text: "Luôn dùng try-catch khi đọc file từ đường dẫn không an toàn", rationale: "Why" },
+      ],
+    });
+
+    expect(reviewNotes(task).length).toBe(2);
+    // d1 has specific path without condition -> filtered out
+    // d2 has general rule ("Luôn dùng ... khi ...") -> kept
+    expect(extractObservations(task)).toEqual(["Luôn dùng try-catch khi đọc file từ đường dẫn không an toàn"]);
+  });
+
   it("yields nothing for a legacy v1 task or a task without notes", () => {
     expect(reviewNotes(buildTaskV1())).toEqual([]);
     expect(reviewNotes(buildTaskV3())).toEqual([]);

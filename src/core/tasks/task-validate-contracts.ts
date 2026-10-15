@@ -162,6 +162,11 @@ function assertV3CheckInputs(check: ValidationCheckV3): void {
   }
   const unsafe = check.inputs.find((input) => !isSafeInputGlob(input));
   if (unsafe !== undefined) {
+    if (unsafe === "@task-contract") {
+      throw new TaskValidationError(
+        `TaskRecord v3 validation inputs for check "${check.id}" contains "@task-contract": token is retired and forbidden in v3 because each digest binds the check's own contract. Omit "@task-contract" and declare only repository glob patterns.`,
+      );
+    }
     throw new TaskValidationError(
       `TaskRecord v3 validation inputs are invalid for check "${check.id}": unsafe or invalid glob pattern ${JSON.stringify(unsafe)}.`,
     );

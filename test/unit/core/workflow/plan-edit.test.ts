@@ -6,7 +6,9 @@ import {
   addDecisionWorkflow,
   addRiskWorkflow,
   setCheckWorkflow,
+  setGoalWorkflow,
   setPathsWorkflow,
+  setTitleWorkflow,
 } from "src/core/workflow/plan-edit.js";
 import { appendEvidenceFlagsWorkflow } from "src/core/workflow/evidence-flags.js";
 import { transitionWorkflow } from "src/core/workflow/transition.js";
@@ -195,6 +197,21 @@ describe("workflow plan-edit transports", () => {
     expect(onlyPaths.relevantSpecs).toEqual([".harnix/spec/guides/common.md"]);
     await expect(setPathsWorkflow(root, { paths: ["../escape"] }, NOW)).rejects.toThrow();
     await expect(setPathsWorkflow(root, {}, NOW)).rejects.toThrow(/--relevant-path/u);
+  });
+
+  it("updates title and goal directly with setTitleWorkflow and setGoalWorkflow", async () => {
+    const root = await temporaryRepository();
+    await planningProject(root);
+
+    const withTitle = await setTitleWorkflow(root, "Tiêu đề mới cho task", NOW);
+    expect(withTitle.title).toBe("Tiêu đề mới cho task");
+
+    const withGoal = await setGoalWorkflow(root, "Mục tiêu mới cho task", NOW);
+    expect(withGoal.goal).toBe("Mục tiêu mới cho task");
+    expect(withGoal.title).toBe("Tiêu đề mới cho task");
+
+    await expect(setTitleWorkflow(root, "   ", NOW)).rejects.toThrow(/--title must not be empty/u);
+    await expect(setGoalWorkflow(root, "   ", NOW)).rejects.toThrow(/--goal must not be empty/u);
   });
 
   it("requires a schema v3 active task", async () => {

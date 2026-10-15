@@ -49,7 +49,15 @@ export function summarizeCheckOutput(output: string): string {
  * A narrow match of launcher errors (pnpm or npm cannot find the project or script, the command does not exist):
  * the check never ran, so the run is not a red test. A report with failing tests is never a launcher error.
  */
-export function launcherFailure(output: string, exitCode: number): string | undefined {
+export function launcherFailure(output: string, exitCode: number, executable?: string): string | undefined {
   if (exitCode === 0 || /^\s*FAIL\s/mu.test(output)) return undefined;
-  return LAUNCHER_ERRORS.find(({ pattern }) => pattern.test(output))?.reason;
+  for (const { pattern, reason } of LAUNCHER_ERRORS) {
+    if (pattern.test(output)) {
+      if (reason === "command not found" && (executable?.toLowerCase() === "pytest" || /\bpytest\b/iu.test(output))) {
+        return "command not found (try 'python -m pytest' or ensure Python Scripts is in PATH)";
+      }
+      return reason;
+    }
+  }
+  return undefined;
 }

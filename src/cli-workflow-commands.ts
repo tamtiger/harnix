@@ -134,11 +134,27 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .argument("[task-id]", "Exact Harnix task ID (omit with --epic)")
     .option("--epic <epic-id>", "Resume the next unfinished task of this epic instead of a task id")
     .option("--dry-run", "Preview without writing the active pointer")
-    .action(async (taskId: string | undefined, options: { dryRun?: boolean; epic?: string }) => {
-      process.stdout.write(
-        `${JSON.stringify(await resumeProjectTask(process.cwd(), taskId, options.dryRun === true, options.epic))}\n`,
-      );
-    });
+    .option("--force", "Activate even if another task is currently active")
+    .option("--next", "Resume the next unfinished task of the active or first unfinished epic")
+    .action(
+      async (
+        taskId: string | undefined,
+        options: { dryRun?: boolean; epic?: string; force?: boolean; next?: boolean },
+      ) => {
+        process.stdout.write(
+          `${JSON.stringify(
+            await resumeProjectTask(
+              process.cwd(),
+              taskId,
+              options.dryRun === true,
+              options.epic,
+              options.force === true,
+              options.next === true,
+            ),
+          )}\n`,
+        );
+      },
+    );
 
   program
     .command("pause")
@@ -165,9 +181,11 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .argument("[name]", "Canonical Harnix skill name, for example harnix-implement")
     .option("--reference <topic>", "Print one on-demand reference of the skill instead of its instructions")
     .option("--all", "Include technique skills and custom project skills in the catalog listing")
+    .option("--raw", "Print the skill markdown directly instead of JSON-wrapped output")
     .description("Print the canonical Harnix skill catalog, one skill's instructions, or one of its references")
-    .action(async (name: string | undefined, options: { reference?: string; all?: boolean }) => {
+    .action(async (name: string | undefined, options: { reference?: string; all?: boolean; raw?: boolean }) => {
       if (options.reference !== undefined && name === undefined) throw new Error("--reference requires a skill name.");
+      if (options.raw === true && name === undefined) throw new Error("--raw requires a skill name.");
       let projectSkills: readonly SkillTemplate[] = [];
       try {
         const root = await resolveProjectRoot(process.cwd());
@@ -181,7 +199,11 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
           : options.reference === undefined
             ? reportSkill(name, projectSkills)
             : reportSkillReference(name, options.reference, projectSkills);
-      process.stdout.write(`${JSON.stringify(result)}\n`);
+      if (options.raw === true && "content" in result) {
+        process.stdout.write(`${result.content}\n`);
+      } else {
+        process.stdout.write(`${JSON.stringify(result)}\n`);
+      }
     });
 
   program

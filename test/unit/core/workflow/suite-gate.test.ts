@@ -41,6 +41,13 @@ describe("Suite Gate (ac-suite-gate)", () => {
     expect(coversSourceAndTest(["test/**"])).toBe(false);
     expect(coversSourceAndTest(undefined)).toBe(false);
     expect(coversSourceAndTest([])).toBe(false);
+
+    // Common source segment names with file globs
+    expect(coversSourceAndTest(["core/**/*.py", "test/**"])).toBe(true);
+    expect(coversSourceAndTest(["models/**/*.py", "tests/**"])).toBe(true);
+    expect(coversSourceAndTest(["services/**/*.ts", "test/**"])).toBe(true);
+    expect(coversSourceAndTest(["modules/**/*.go", "tests/**"])).toBe(true);
+    expect(coversSourceAndTest(["domain/**/*.java", "test/**"])).toBe(true);
   });
 
   it("ready accepts task with project-level suite check covering full source and test inputs", async () => {

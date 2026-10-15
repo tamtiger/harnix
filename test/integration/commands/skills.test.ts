@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import { runCli } from "src/cli-program.js";
 import { reportSkill, reportSkillCatalog, reportSkillReference } from "src/commands/skills.js";
 import type { WorkflowStageOwner } from "src/core/workflow/routing.js";
 import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
@@ -148,5 +149,18 @@ describe("harnix skill", () => {
     const refReport = reportSkillReference("domain-compliance", "faq", [customSkill]);
     expect(refReport.reference).toBe("faq");
     expect(refReport.content).toBe("# FAQ content\n");
+  });
+
+  it("prints raw markdown content directly with --raw flag", async () => {
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    const code = await runCli(["node", "harnix", "skill", "harnix-plan", "--raw"]);
+    expect(code).toBe(0);
+
+    const out = stdout.mock.calls.map((c) => String(c[0])).join("");
+    expect(out).toContain("# Plan a Harnix task");
+    expect(out).not.toContain('{"generator":"harnix"');
+    stdout.mockRestore();
   });
 });

@@ -364,7 +364,7 @@ describe("finish learning report", () => {
     expect(report.learning).toEqual({ notes: 2, captured: 2 });
   });
 
-  it("explains a zero capture when the task carries no notes", async () => {
+  it("omits the hint when the task carries no notes", async () => {
     const root = await temporaryRepository();
     await finishable(root);
 
@@ -372,7 +372,7 @@ describe("finish learning report", () => {
 
     expect(report.learning.captured).toBe(0);
     expect(report.learning.notes).toBe(0);
-    expect(report.learning.hint).toMatch(/^(?=.*(--add-risk|--add-decision)).{1,90}$/u);
+    expect(report.learning.hint).toBeUndefined();
   });
 
   it("explains a zero capture when every note was filtered as unsafe", async () => {

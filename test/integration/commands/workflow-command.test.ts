@@ -11,6 +11,7 @@ import {
   implementingTaskV3,
   initializeUtcProject,
   legacyTask,
+  taskV3,
 } from "test/support/workflow-fixtures.js";
 
 const originalCwd = process.cwd();
@@ -266,5 +267,51 @@ describe.sequential("hidden workflow flag transports", () => {
     const task = JSON.parse(result.out) as { validationPlan: { id: string; inputs: string[] }[] };
     const check = task.validationPlan.find((c) => c.id === "check-split");
     expect(check?.inputs).toEqual(["src/**", "test/**"]);
+  });
+
+  it("updates task title and goal using --set-title and --set-goal", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+
+    const titleResult = await run(["--set-title", "Tiêu đề mới từ CLI"]);
+    expect(titleResult.code).toBe(0);
+    const updatedTask = JSON.parse(titleResult.out) as { title: string };
+    expect(updatedTask.title).toBe("Tiêu đề mới từ CLI");
+
+    const goalResult = await run(["--set-goal", "Mục tiêu mới từ CLI"]);
+    expect(goalResult.code).toBe(0);
+    const withGoal = JSON.parse(goalResult.out) as { goal: string };
+    expect(withGoal.goal).toBe("Mục tiêu mới từ CLI");
+  });
+
+  it("loads save payload from a UTF-8 file via --file", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+
+    const { writeFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+
+    const taskData = {
+      task: {
+        ...taskV3("planning", "planning"),
+        id: "20261015-160000-file-payload",
+        title: "Task từ file UTF-8",
+        goal: "Kiểm tra tính toàn vẹn ký tự tiếng Việt",
+      },
+    };
+
+    const filePath = join(root, "payload.json");
+    await writeFile(filePath, JSON.stringify(taskData, null, 2), "utf8");
+
+    // Pause first so save can create a new planning task
+    await runCli(["node", "harnix", "pause"]);
+
+    const saveResult = await run(["--save", "--file", "payload.json"]);
+    expect(saveResult.code).toBe(0);
+    const saved = JSON.parse(saveResult.out) as { id: string; title: string };
+    expect(saved.id).toBe("20261015-160000-file-payload");
+    expect(saved.title).toBe("Task từ file UTF-8");
   });
 });

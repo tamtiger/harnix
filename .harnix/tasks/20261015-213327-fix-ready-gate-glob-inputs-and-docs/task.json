@@ -1,0 +1,127 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261015-213327-fix-ready-gate-glob-inputs-and-docs",
+  "epicId": "20261015-213325-harnix-dx-workflow-friction-reduction",
+  "title": "Mở rộng nhận diện glob source trong ready gate, báo lỗi batch và chuẩn hoá tài liệu",
+  "goal": "Mở rộng coversSource cho các thư mục source phổ biến, gom toàn bộ lỗi của ready gate để báo một lần (batch reporting), làm rõ quy tắc checklist plan.md và dọn sạch vết tích schema v2.",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-15T21:33:25.718+07:00",
+  "updatedAt": "2026-10-15T23:25:29.013+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/core/workflow/ready.ts",
+    "src/core/workflow/suite-gate.ts",
+    "src/templates/harnix/workflow.md"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "coversSource nhận diện các thư mục source phổ biến (như core, models, services, modules) ngay cả khi dùng glob file như core/**/*.py.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "assertSuiteGateReady và ready gate gom và báo toàn bộ các lỗi cùng lúc (batch error reporting) thay vì báo từng vòng đơn lẻ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Cải thiện thông báo lỗi và hướng dẫn rõ ràng cho điều kiện checklist - [ ] chưa tick trong plan.md.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu và template workflow.md được rà soát và loại bỏ sạch sẽ mọi hướng dẫn sót về schema v2 và token @task-contract.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Chạy toàn bộ test suite của Harnix",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Kiem tra hop dong gates",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-15T23:23:00.432+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "cbdbd88c9d2b297f03dd06a23bc42136247f40f00a158b1413b5854a1b3c459d"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-15T23:23:54.421+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3ffebff60e43662b7babfa1bd37e87fb414c86b811a25b175f1324af64f9fbca"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T23:25:05.803+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "05db6e37a4ede89cff38aa26ea6164b071f3dceadf9541abcf80d361d41e3fda"
+    }
+  ],
+  "completedAt": "2026-10-15T23:25:29.013+07:00"
+}

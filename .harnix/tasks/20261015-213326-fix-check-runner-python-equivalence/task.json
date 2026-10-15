@@ -1,0 +1,137 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261015-213326-fix-check-runner-python-equivalence",
+  "epicId": "20261015-213325-harnix-dx-workflow-friction-reduction",
+  "title": "Nhận diện tương đương lệnh kiểm thử Python và gợi ý runner trong check runner",
+  "goal": "Mở rộng equivalentCommand để nhận diện pytest và python -m pytest (kể cả runner prefixes) là tương đương, hỗ trợ fallback và gợi ý runner khi gặp ENOENT.",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-15T21:33:25.718+07:00",
+  "updatedAt": "2026-10-15T23:18:05.174+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/core/stack/verify-detection.ts",
+    "src/core/workflow/command-match.ts",
+    "src/utils/check-runner.ts",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "equivalentCommand và sameCommand nhận diện pytest tương đương với python -m pytest, python3 -m pytest, py -m pytest và các runner uv/poetry.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "detectPythonVerify và check runner đưa ra gợi ý rõ ràng hoặc giải quyết được khi pytest không nằm trong PATH.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-gates",
+      "description": "Chạy kiểm thử gates nhanh cho thay đổi",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/stack/verify-detection.ts",
+        "src/core/workflow/command-match.ts",
+        "src/utils/check-runner.ts",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Chạy toàn bộ test suite của Harnix",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-15T21:33:25.718+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Cập nhật lại văn bản tiếng Việt có dấu chuẩn mã hóa UTF-8 cho tiêu chí và mô tả của task.",
+      "artifactPaths": [
+        ".harnix/tasks/20261015-213326-fix-check-runner-python-equivalence/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-15T23:13:29.670+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "de070c99a888581a099b38d8fcb7f0973d01ab51e33e8ce11da2aa2fff594743"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-15T23:14:12.144+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "15a1d668e158d811a6c882fa9c6c78464d056ad26879ba60870ed6a8eb1a5d72"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T23:15:33.908+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "f945d14fab1eecbc7cc3d2b82eb4228165149222ac3a4e013e5851cd47d9c312"
+    },
+    {
+      "id": "ev-check-gates-3",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-15T23:16:23.985+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "60dea3f869e8e52efcdb444d03f5b1f9fb779954548d234e141f4970d79530ac"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T23:17:42.729+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f65330976f3a4cf2f0b9af79c18fea11c4533110bd43eefba37f13a162081205"
+    }
+  ],
+  "completedAt": "2026-10-15T23:18:05.174+07:00"
+}

@@ -11,6 +11,8 @@ import { baselineHint } from "./baseline-hint.js";
 import { verificationRetryDisposition } from "./completion.js";
 import { stageOwnerFor } from "./routing.js";
 import type { LearningSummaryItem } from "src/core/journal/learning-summary.js";
+import { collectEpicMembers, listEpicIds, loadEpicRecord, nextEpicMember } from "src/core/epics/epic.js";
+import { orderEpicMembers } from "src/core/epics/order.js";
 import { taskContextDrift } from "./context.js";
 import { projectLearningSummary } from "./support.js";
 
@@ -30,6 +32,17 @@ export interface WorkflowPreflightResultV1 {
   versionSkew?: string;
   /** One line asking for an authorized baseline when the suite was already red in the last two finished tasks. */
   baselineHint?: string;
+  /** Present when no task is active but an epic with unfinished tasks exists. */
+  epicContext?: {
+    id: string;
+    title: string;
+    nextTask: {
+      id: string;
+      status: string;
+      title?: string;
+    } | null;
+    resumeCommand: string;
+  };
 }
 
 type RequiredChecks = WorkflowPreflightResultV1["requiredChecks"];
@@ -95,7 +108,38 @@ async function routePreflight(root: string, now: number): Promise<WorkflowPrefli
     requiredChecks: emptyRequiredChecks(),
     retryLimitReached: [] as string[],
   };
-  if (task === undefined) return { ...base, activeTask: null, nextStage: "plan" };
+  if (task === undefined) {
+    let epicContext;
+    try {
+      const epics = await listEpicIds(harnixRoot);
+      for (const epicId of epics) {
+        const epic = await loadEpicRecord(root, epicId);
+        const members = orderEpicMembers(await collectEpicMembers(harnixRoot, epicId), epic.order);
+        const next = nextEpicMember(members);
+        if (next !== null) {
+          epicContext = {
+            id: epicId,
+            title: epic.title,
+            nextTask: {
+              id: next.id,
+              status: next.status,
+              title: next.title,
+            },
+            resumeCommand: `harnix resume ${next.id}`,
+          };
+          break;
+        }
+      }
+    } catch {
+      // Best effort
+    }
+    return {
+      ...base,
+      activeTask: null,
+      nextStage: "plan",
+      ...(epicContext === undefined ? {} : { epicContext }),
+    };
+  }
   const activeTask = { id: task.id, mode: task.mode, status: task.status, checkpoint: task.checkpoint };
   if (task.status === "completed" || task.status === "cancelled" || task.status === "blocked")
     return { ...base, activeTask, nextStage: stageOf(task) };

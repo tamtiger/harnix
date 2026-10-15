@@ -1,0 +1,10 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261015-213325-harnix-dx-workflow-friction-reduction",
+  "title": "Tinh chỉnh trải nghiệm phát triển và giảm ma sát workflow Harnix",
+  "goal": "Khắc phục các rào cản về runner Python, nhận diện source glob của ready gate, tiện ích khởi tạo Epic, cảnh báo secret scan và cải thiện khả năng quan sát của workflow CLI.",
+  "nonGoals": [],
+  "createdAt": "2026-10-15T21:33:25.718+07:00",
+  "updatedAt": "2026-10-15T21:33:25.718+07:00"
+}

@@ -21,7 +21,9 @@ import {
   saveWorkflow,
   setCheckWorkflow,
   setCriterionWorkflow,
+  setGoalWorkflow,
   setPathsWorkflow,
+  setTitleWorkflow,
   snapshotWorkflow,
   transitionWorkflow,
   workflowEnvelopeSchema,
@@ -32,6 +34,8 @@ import { packageVersion } from "src/version.js";
 import { isEvidenceFlagsMode, type WorkflowFlags } from "src/commands/workflow-flags.js";
 import type { CheckRunner } from "src/utils/check-runner.js";
 import { readBoundedInput } from "src/utils/bounded-input.js";
+import { readFile } from "src/utils/fs-access.js";
+import { resolveSafeFilePath } from "src/utils/paths.js";
 
 export interface WorkflowCommandOptions {
   workflowInput?: (() => Promise<string>) | undefined;
@@ -53,6 +57,10 @@ const withoutBom = (input: string | undefined): string | undefined =>
   input?.startsWith(BYTE_ORDER_MARK) ? input.slice(1) : input;
 
 async function readInput(context: WorkflowContext, optional = false): Promise<string | undefined> {
+  if (context.flags.file !== undefined) {
+    const target = await resolveSafeFilePath(context.root, context.flags.file);
+    return withoutBom(await readFile(target, "utf8"));
+  }
   if (context.options.workflowInput) return withoutBom(await context.options.workflowInput());
   if (!optional) return withoutBom(await readBoundedInput(process.stdin));
   if (process.stdin.isTTY === true) return "";
@@ -223,6 +231,14 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
       paths: (flags.relevantPath?.length ?? 0) > 0 ? flags.relevantPath : undefined,
       specs: (flags.relevantSpec?.length ?? 0) > 0 ? flags.relevantSpec : undefined,
     });
+    return presentTask(context, task);
+  },
+  setTitle: async (context) => {
+    const task = await setTitleWorkflow(context.root, context.flags.setTitle as string);
+    return presentTask(context, task);
+  },
+  setGoal: async (context) => {
+    const task = await setGoalWorkflow(context.root, context.flags.setGoal as string);
     return presentTask(context, task);
   },
   batch: async (context) => {

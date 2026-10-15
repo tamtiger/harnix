@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.6.0`
+**Version:** `2.7.0`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -150,13 +150,14 @@ Agent chỉ nạp đúng một skill quy trình mỗi lần, theo `nextStage` m�
 | `harnix-review`    | Review code chỉ đọc (Bypass, không đụng task)                                                                                        |
 | `harnix-research`  | Research chỉ đọc, hoặc research cho một ẩn số trong planning/replan/debugging                                                        |
 
-Ngoài 6 skill quy trình trên, Harnix đóng gói sẵn **5 technique-skills độc lập** (không qua stage routing, agent tự kích hoạt theo mô tả ngữ cảnh):
+Ngoài 6 skill quy trình trên, Harnix đóng gói sẵn **6 technique-skills độc lập** (không qua stage routing, agent tự kích hoạt theo mô tả ngữ cảnh):
 
 - `harnix-verification-gap`: Đánh giá khoảng trống kiểm chứng, phát hiện điểm mù false-success.
 - `harnix-bugfix-preserve`: Định hình bất biến ("must remain working") khi sửa bug để chống regression.
 - `harnix-flaky-test`: Chẩn đoán và cô lập test chập chờn, bất định hoặc phụ thuộc thời gian.
 - `harnix-migration-safety`: Rà soát an toàn di chuyển dữ liệu, schema và breaking changes.
 - `harnix-security-lens`: Ống kính bảo mật rà soát ranh giới dữ liệu không tin cậy, injection, traversal.
+- `harnix-sequential-thinking`: Phân tích tuần tự kiến trúc phức tạp, so sánh tradeoffs và kiểm chứng đa bước.
 
 **Extension Point cho dự án:** Bạn có thể tự thêm skill riêng tại `.harnix/spec/skills/<skill-name>/SKILL.md`. Harnix tự động phát hiện qua `harnix skill --all` và đồng bộ vào platform agent.
 
@@ -173,7 +174,7 @@ Mọi output của public command đều là JSON. Dưới đây là các lệnh
 | `harnix status [--summary]`                                                               | Xem task đang active, tiến độ và bước tiếp theo (dùng `--summary` để lấy micro-summary siêu gọn)     |
 | `harnix tasks [--limit <n>] [--status <status>]`                                          | Liệt kê lịch sử task local                                                                           |
 | `harnix pause [--dry-run]`                                                                | Tạm dừng task đang active, gỡ `.active` an toàn để chuyển hoặc tạo task mới                          |
-| `harnix resume <task-id> [--dry-run]` / `--epic <epic-id>`                                | Tiếp tục một task chưa hoàn thành theo đúng ID, hoặc task chưa xong kế tiếp của một epic             |
+| `harnix resume [<task-id>] [--force] [--next] [--dry-run]`                                | Tiếp tục task theo ID, hoặc kích hoạt task kế tiếp (`--next`), tự chuyển đổi an toàn (`--force`)      |
 | `harnix context-report --platform <id>`                                                   | Xem context nào thực sự được đưa vào agent                                                           |
 | `harnix status --explain [--limit <n>]`                                                   | Xem check nào đã stale (input đổi/thiếu) và readiness/completion blocker của task hiện tại           |
 | `harnix verify-plan [--recursive]`                                                        | Khám phá kiểm thử/build của project hoặc quét đệ quy các sub-repo/sub-packages                       |
@@ -188,7 +189,7 @@ Mọi output của public command đều là JSON. Dưới đây là các lệnh
 | `harnix learning --reject <id>` / `--retire <id>`                                         | Loại một learning, hoặc gỡ quy tắc đã promote khỏi `learned.md` (ghi journal mới, không sửa dòng cũ) |
 | `harnix learning --promote <id> [--apply]`                                                | Xem bản đề xuất; chỉ khi có `--apply` mới ghi quy tắc vào `.harnix/spec/learned.md` (tối đa 40 khối) |
 | `harnix upgrade [--apply]`                                                                | Hiển thị lệnh npm nâng cấp Harnix; `--apply` mới chạy lệnh đó                                        |
-| `harnix skill [name] [--reference <topic>]`                                               | Xem catalog sáu skill, nội dung một skill (tên cũ vẫn resolve) hoặc một reference nạp theo yêu cầu   |
+| `harnix skill [name] [--raw] [--reference <topic>]`                                       | Xem catalog skill, in Markdown trực tiếp (`--raw`) hoặc xem reference nạp theo yêu cầu               |
 
 Một vài quy ước chung đáng nhớ:
 

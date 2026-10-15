@@ -7,7 +7,8 @@ import {
   type HarnixStatusResultV1,
   type StatusSummaryResultV1,
 } from "src/core/status.js";
-export type { StatusSummaryResultV1 } from "src/core/status.js";
+import { detailPublicEpic, type PublicEpicBriefResult } from "src/commands/epic.js";
+import { listEpicIds } from "src/core/epics/epic.js";
 import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
 import { taskContextDrift } from "src/core/workflow/index.js";
 import { findInitializedProject } from "src/utils/project-discovery.js";
@@ -22,7 +23,27 @@ export async function inspectProjectStatus(cwd: string, now = Date.now()): Promi
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
   const task = await resolveActiveTask(harnixRoot);
-  if (task === undefined) return createNoActiveStatus();
+  if (task === undefined) {
+    let epicContext;
+    try {
+      const epics = await listEpicIds(harnixRoot);
+      for (const epicId of epics) {
+        const detail = (await detailPublicEpic(project.root, epicId, true)) as PublicEpicBriefResult;
+        if (detail.nextTask !== null) {
+          epicContext = {
+            id: epicId,
+            title: detail.epic.title,
+            nextTask: detail.nextTask,
+            resumeCommand: `harnix resume ${detail.nextTask.id}`,
+          };
+          break;
+        }
+      }
+    } catch {
+      // Best effort
+    }
+    return createNoActiveStatus(epicContext);
+  }
   const contextDrift = await taskContextDrift(project.root, harnixRoot, task);
   const requiredCheckStates = await inspectRequiredCheckEvidence(project.root, harnixRoot, task, now);
   return createActiveStatus(task, contextDrift, requiredCheckStates);

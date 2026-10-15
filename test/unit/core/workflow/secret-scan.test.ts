@@ -59,6 +59,10 @@ describe("scanTaskSecrets", () => {
     '{ "ApiKey": "your-api-key-here" }',
     "const token = getToken();",
     "Server=db;Integrated Security=true",
+    '{ "Password": "test_password_for_mock_api" }',
+    '{ "ApiKey": "mock_api_key_value_12345" }',
+    'const api_key = "Hunter2xyz"; // harnix-ignore-secret',
+    '# harnix-secret-waiver: Mock credentials for auth testing\nconst api_key = "Hunter2xyz";',
   ])("ignores a placeholder or a clean line: %s", async (content) => {
     const root = await project({ "src/app.json": content });
 

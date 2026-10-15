@@ -13,7 +13,8 @@ import {
 } from "./ready-content.js";
 
 const FULL_ARTIFACTS_MESSAGE = "Full tasks require non-empty prd.md and plan.md at ready.";
-const CHECKLIST_MESSAGE = "Full task plan.md needs at least one checklist item ('- [ ] ...') at ready.";
+const CHECKLIST_MESSAGE =
+  "Full task plan.md needs at least one checklist item ('- [ ] ...') at ready (checked items '- [x]' represent completed work during implementation).";
 
 async function loadFullArtifacts(
   harnixRoot: string,

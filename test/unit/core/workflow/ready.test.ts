@@ -305,7 +305,9 @@ describe("workflow ready inspection", () => {
       prd: "# PRD\n",
       plan: "# Plan\n",
     });
-    expect(noChecklist.issues).toEqual(["Full task plan.md needs at least one checklist item ('- [ ] ...') at ready."]);
+    expect(noChecklist.issues).toEqual([
+      "Full task plan.md needs at least one checklist item ('- [ ] ...') at ready (checked items '- [x]' represent completed work during implementation).",
+    ]);
     expect(noChecklist.advisories).toEqual(["Required check 'check' failed in baseline run without a waiver."]);
 
     const noFiles = await inspectReadyConditions(join(root, ".harnix"), task);

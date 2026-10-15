@@ -87,6 +87,32 @@ export async function resolveSafeProjectPath(projectRoot: string, repositoryPath
   return candidate;
 }
 
+/**
+ * Resolves a safe file path within project root. Accepts relative path or an absolute
+ * path that resolves within projectRoot and does not escape through symlinks.
+ */
+export async function resolveSafeFilePath(projectRoot: string, filePath: string): Promise<string> {
+  if (filePath.length === 0 || hasUnsafeRepositoryPathCharacter(filePath)) {
+    throw new UnsafeProjectPathError("A file path must be non-empty and valid.");
+  }
+  const resolvedRoot = resolve(projectRoot);
+  const candidate = isAbsolute(filePath) || win32.isAbsolute(filePath)
+    ? resolve(filePath)
+    : resolve(resolvedRoot, filePath);
+
+  if (!isContainedPath(resolvedRoot, candidate)) {
+    throw new UnsafeProjectPathError("The requested path escapes the project root.");
+  }
+
+  const realRoot = await realpath(resolvedRoot);
+  const realExistingAncestor = await findRealExistingAncestor(candidate);
+  if (!isContainedPath(realRoot, realExistingAncestor)) {
+    throw new UnsafeProjectPathError("The requested path escapes the project root through a symbolic link.");
+  }
+
+  return candidate;
+}
+
 /** Resolves Harnix state below a project root without trusting `.harnix` as a filesystem root. */
 export async function resolveSafeHarnixPath(projectRoot: string, harnixPath = "."): Promise<string> {
   const relativePath = harnixPath === "." || harnixPath.length === 0 ? ".harnix" : `.harnix/${harnixPath}`;

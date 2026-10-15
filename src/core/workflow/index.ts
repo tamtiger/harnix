@@ -16,7 +16,9 @@ export {
   addDecisionWorkflow,
   addRiskWorkflow,
   setCheckWorkflow,
+  setGoalWorkflow,
   setPathsWorkflow,
+  setTitleWorkflow,
 } from "./plan-edit.js";
 export type { CheckEdit, PlanEditOptions } from "./plan-edit.js";
 export { setCriterionWorkflow } from "./set-criterion.js";

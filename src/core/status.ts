@@ -43,12 +43,24 @@ export interface StatusActiveTask {
   };
 }
 
+export interface StatusEpicContext {
+  id: string;
+  title: string;
+  nextTask: {
+    id: string;
+    status: string;
+    title?: string;
+  } | null;
+  resumeCommand: string;
+}
+
 export interface HarnixStatusResultV1 {
   generator: "harnix";
   schemaVersion: 1;
   activeTask: StatusActiveTask | null;
   nextAction: StatusNextAction;
   attention: StatusAttention[];
+  epicContext?: StatusEpicContext;
 }
 
 const nextActionMessages: Record<StatusNextActionCode, string> = {
@@ -63,8 +75,9 @@ const nextActionMessages: Record<StatusNextActionCode, string> = {
   "no-active-task": "No active task; classify the next request.",
 };
 
-export function createNoActiveStatus(): HarnixStatusResultV1 {
-  return result(null, "no-active-task", []);
+export function createNoActiveStatus(epicContext?: StatusEpicContext): HarnixStatusResultV1 {
+  const base = result(null, "no-active-task", []);
+  return epicContext === undefined ? base : { ...base, epicContext };
 }
 
 export function createActiveStatus(

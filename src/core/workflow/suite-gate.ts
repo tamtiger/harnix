@@ -3,7 +3,29 @@ import { computeInputDigest, digestMatches } from "src/core/verification/input-d
 import { buildVerifyPlan, type VerifyPlan } from "src/core/stack/verify-plan.js";
 import { equivalentCommand } from "./command-match.js";
 
-const SOURCE_SEGMENTS = new Set(["src", "lib", "app", "pkg", "cmd", "internal"]);
+const SOURCE_SEGMENTS = new Set([
+  "src",
+  "lib",
+  "app",
+  "pkg",
+  "cmd",
+  "internal",
+  "core",
+  "model",
+  "models",
+  "service",
+  "services",
+  "domain",
+  "infra",
+  "infrastructure",
+  "module",
+  "modules",
+  "backend",
+  "frontend",
+  "api",
+  "server",
+  "client",
+]);
 const NON_SOURCE_ROOTS = new Set(["docs", "doc", ".github", ".harnix", ".vscode", "scripts"]);
 const WILDCARD_INPUTS = new Set([".", "**", "**/*", "*"]);
 const GLOB_CHARACTERS = /[*?[\]{}()!]/u;

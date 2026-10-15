@@ -69,6 +69,9 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--add-decision <id>", "Record one decision (requires --text and --rationale)")
     .option("--add-risk <id>", "Record one residual risk (requires --text)")
     .option("--set-paths", "Replace the relevant paths and/or specs of the active task")
+    .option("--set-title <title>", "Update the title of the active task")
+    .option("--set-goal <goal>", "Update the goal of the active task")
+    .option("--file <path>", "Read payload from a UTF-8 file instead of stdin")
     .option("--batch", "Batch apply criteria, checks, decisions, risks and paths from stdin")
     .option("--schema", "Describe the save envelope schema")
     .option(

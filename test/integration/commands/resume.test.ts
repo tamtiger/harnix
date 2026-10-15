@@ -81,6 +81,43 @@ describe.sequential("resume command", () => {
     for (const canary of ["PRIVATE_TITLE_CANARY", "PRIVATE_GOAL_CANARY", "PRIVATE_COMMAND_CANARY", root])
       expect(raw).not.toContain(canary);
     await expect(snapshotTree(root)).resolves.toEqual(before);
+
+    // With --force, replacing another active task is allowed
+    stdout.mockClear();
+    await expect(runCli(["node", "harnix", "resume", candidate.id, "--force"])).resolves.toBe(0);
+    expect(JSON.parse(output(stdout.mock.calls))).toEqual(result(candidate, false, "resumed"));
+    await expect(readFile(join(harnixRoot, "tasks", ".active"), "utf8")).resolves.toBe(`${candidate.id}\n`);
+  });
+
+  it("resumes next unfinished task of an epic with --next", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const harnixRoot = join(root, ".harnix");
+
+    const epic = {
+      generator: "harnix" as const,
+      schemaVersion: 1 as const,
+      id: "20261015-150000-sample-epic",
+      title: "Sample Epic",
+      goal: "Epic goal",
+      createdAt: "2026-10-15T15:00:00.000Z",
+      updatedAt: "2026-10-15T15:00:00.000Z",
+    };
+    await mkdir(join(harnixRoot, "epics"), { recursive: true });
+    await writeFile(join(harnixRoot, "epics", `${epic.id}.json`), JSON.stringify(epic));
+
+    const task1 = { ...task("20261015-150001-task-one", "planning"), epicId: epic.id };
+    const task2 = { ...task("20261015-150002-task-two", "planning"), epicId: epic.id };
+    await saveTask(harnixRoot, task1);
+    await saveTask(harnixRoot, task2);
+
+    process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    await expect(runCli(["node", "harnix", "resume", "--next"])).resolves.toBe(0);
+    expect(JSON.parse(output(stdout.mock.calls))).toEqual(result(task1, false, "resumed"));
+    await expect(readFile(join(harnixRoot, "tasks", ".active"), "utf8")).resolves.toBe(`${task1.id}\n`);
   });
 
   it("rejects malformed, oversized, and terminal task state without changing the pointer", async () => {

@@ -1,0 +1,184 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261015-213328-improve-epic-cli-preflight-and-skill-output",
+  "epicId": "20261015-213325-harnix-dx-workflow-friction-reduction",
+  "title": "Cải tiến CLI khởi tạo Epic, nạp file UTF-8, chuyển đổi task và DX",
+  "goal": "Hỗ trợ nạp cấu hình từ file (--file) cho save/batch/epic, phát hiện lỗi mất dấu text integrity, hỗ trợ resume --force và resume --next, bổ sung set-title/set-goal, hiển thị nextTask trong status/preflight và cờ raw cho skill.",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-15T21:33:25.718+07:00",
+  "updatedAt": "2026-10-16T00:00:09.570+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/commands/epic.ts",
+    "src/commands/resume.ts",
+    "src/commands/skills.ts",
+    "src/commands/status.ts",
+    "src/commands/workflow-flags.ts",
+    "src/core/workflow/preflight.ts",
+    "src/core/workflow/text-integrity.ts"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Hỗ trợ nạp cấu hình Epic và Task từ file (--file) cho workflow --save, --batch, --migrate và khởi tạo Epic, loại bỏ rủi ro hỏng encoding từ stdin pipe.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Bổ sung cơ chế phát hiện lỗi mất dấu tiếng Việt (lossy conversion ???) trong text-integrity.ts để chặn lưu dữ liệu hỏng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Hỗ trợ cờ --force và cờ --next cho harnix resume để kích hoạt task tiếp theo của epic một cách thuận tiện.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Bổ sung cờ --set-title và --set-goal cho harnix workflow để cập nhật tiêu đề và mục tiêu nhanh chóng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "harnix status và workflow --preflight gợi ý rõ ràng epicContext, nextTask và lệnh resume khi không có activeTask.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "harnix skill hỗ trợ cờ --raw để in trực tiếp nội dung Markdown ra terminal.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-7",
+      "text": ".harnix/cache/ được đưa vào .gitignore mặc định và hiển thị log rõ ràng khi file quản lý thay đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Chạy toàn bộ test suite của Harnix",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Kiem tra tap trung",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-15T23:52:53.443+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "6c1d9f66ca3386a6f52c9d75b64c2b84d36b080903847b3dd213c47c38278bb7"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-15T23:55:01.897+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c4f1e8c833d019ce413779d921cba8d0167f7463c1b0689a9cf83dd43b696cef"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T23:56:20.863+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "f2eb636e68b359a475c74e2f96cfe87b7bacc4ecf5aca27cbe8f8490abd32b23"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-15T23:59:01.599+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "54e825429f9b379d20ee5db87a62dae5dbb7688af0398b8d29f02d64515dd3c2"
+    },
+    {
+      "id": "ev-check-gates-3",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-15T23:59:33.533+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f1c73b58594e51ee751931fa16e25065b85ac41694d65a6943492bef4da8a0a7"
+    }
+  ],
+  "completedAt": "2026-10-16T00:00:09.570+07:00"
+}

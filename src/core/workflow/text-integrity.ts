@@ -4,7 +4,7 @@ const REPLACEMENT_CHARACTER = "�";
 const hasNonAscii = (text: string): boolean => [...text].some((character) => (character.codePointAt(0) ?? 0) > 0x7f);
 
 export interface CorruptedText {
-  reason: "mojibake" | "replacement-character";
+  reason: "mojibake" | "replacement-character" | "lossy-question-marks";
   excerpt: string;
 }
 
@@ -43,9 +43,19 @@ function isMojibake(text: string, table: Map<string, number>): boolean {
   }
 }
 
+/**
+ * Shells like Windows cmd or PowerShell 5.1 convert unmapped non-ASCII characters
+ * to literal question marks when piping through an encoding like cp1252. Three or
+ * more question marks together (or ??? embedded in words) indicate lossy encoding damage.
+ */
+function isLossyQuestionMarks(text: string): boolean {
+  return /\?{3,}/u.test(text);
+}
+
 function inspect(text: string): CorruptedText | undefined {
   const excerpt = text.length > EXCERPT_LENGTH ? `${text.slice(0, EXCERPT_LENGTH)}…` : text;
   if (text.includes(REPLACEMENT_CHARACTER)) return { reason: "replacement-character", excerpt };
+  if (isLossyQuestionMarks(text)) return { reason: "lossy-question-marks", excerpt };
   return TABLES.some((table) => isMojibake(text, table)) ? { reason: "mojibake", excerpt } : undefined;
 }
 
@@ -78,7 +88,9 @@ export function assertTextIntegrity(value: unknown): void {
   const cause =
     corrupted.reason === "replacement-character"
       ? "contains the replacement character U+FFFD"
-      : "looks like UTF-8 text read with a legacy code page";
+      : corrupted.reason === "lossy-question-marks"
+        ? "contains repeated question marks (???), indicating lossy encoding conversion"
+        : "looks like UTF-8 text read with a legacy code page";
   throw new Error(
     `Workflow text has the wrong text encoding: "${corrupted.excerpt}" ${cause}. Nothing was saved. Edit prd.md/plan.md/design.md directly with the editor tool and use the flag transports (--set-check, --add-criterion, --set-paths) instead of piping accented text through Windows PowerShell 5.1; use bash or pwsh 7.4+ when JSON is unavoidable.`,
   );

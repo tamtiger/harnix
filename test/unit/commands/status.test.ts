@@ -58,4 +58,47 @@ describe("commands/status", () => {
 
     await expect(explainProjectStatus(root, 10)).rejects.toThrow(/doctor/u);
   });
+
+  it("includes epicContext when no task is active but an unfinished epic exists", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+
+    const epic = {
+      generator: "harnix" as const,
+      schemaVersion: 1 as const,
+      id: "20261015-130000-sample-epic",
+      title: "Sample Epic",
+      goal: "Epic goal",
+      createdAt: "2026-10-15T13:00:00.000Z",
+      updatedAt: "2026-10-15T13:00:00.000Z",
+    };
+    const taskRecord = {
+      ...taskV3("planning", "planning"),
+      id: "20261015-130001-member-task",
+      title: "Member Task",
+      epicId: epic.id,
+    };
+    await saveWorkflow(root, {
+      task: taskRecord,
+      epic,
+    });
+
+    const { writeFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    await writeFile(join(root, ".harnix", "tasks", ".active"), "");
+
+    const status = await inspectProjectStatus(root);
+    expect(status.activeTask).toBeNull();
+    expect(status.epicContext).toMatchObject({
+      id: epic.id,
+      title: epic.title,
+      nextTask: {
+        id: taskRecord.id,
+        status: "planning",
+        title: "Member Task",
+      },
+      resumeCommand: `harnix resume ${taskRecord.id}`,
+    });
+  });
 });

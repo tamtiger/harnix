@@ -53,12 +53,24 @@ const RULES: readonly Rule[] = [
 ];
 
 const PLACEHOLDER =
-  /^(?:<.*>|\$\{.*\}|\{\{.*\}\}|%.*%|change[-_ ]?me|x{3,}|\*{3,}|your[-_ ].*|example.*|password|secret|token|test|dummy)$/iu;
+  /^(?:<.*>|\$\{.*\}|\{\{.*\}\}|%.*%|change[-_ ]?me|x{3,}|\*{3,}|your[-_ ].*|example.*|password|secret|token|test.*|dummy.*|mock.*|fake.*|sample.*)$/iu;
+const WAIVER_COMMENT = /(?:harnix-ignore-secret|harnix-secret-ignore|allow-secret|pragma:\s*allow-secret)/iu;
+const FILE_WAIVER = /harnix-secret-waiver:/iu;
 
 function matchesRule(text: string, rule: Rule): boolean {
+  if (FILE_WAIVER.test(text)) return false;
   for (const match of text.matchAll(rule.pattern)) {
     const value = rule.valueGroup === undefined ? undefined : match[rule.valueGroup];
-    if (value === undefined || !PLACEHOLDER.test(value)) return true;
+    if (value !== undefined && PLACEHOLDER.test(value)) continue;
+
+    // Check if the matched line contains an inline waiver comment
+    const index = match.index ?? 0;
+    const lineStart = text.lastIndexOf("\n", index) + 1;
+    const lineEnd = text.indexOf("\n", index);
+    const line = text.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
+    if (WAIVER_COMMENT.test(line)) continue;
+
+    return true;
   }
   return false;
 }

@@ -2,7 +2,7 @@
 name: harnix-plan
 description: Use when a Harnix request needs triage, requirements, planning, a trustworthy ready gate, a replan, a legacy-task migration or an epic before implementation.
 metadata:
-  version: "2.6.0"
+  version: "2.7.0"
 ---
 
 # Plan a Harnix task
@@ -38,6 +38,7 @@ Anything that is not Bypass is tracked. **Lite**: localized, low-risk, obvious c
 - A task that changes the CLI, documentation or test structure gets a focused required check `pnpm run test:gates` (the contract tests in a few seconds: test-structure, cli-contract, architecture, docs, skill sources, instruction budget, golden) beside its own tests, so the suite does not find those gaps last.
 - Edit obligations with flags, not JSON: `--set-check`, `--add-criterion`, `--set-paths`.
 - Full `plan.md`: an unchecked `- [ ]` item per ordered slice near the top, concrete files/interfaces, RED then GREEN order, what each check proves. Write these two files with the editor tool.
+- Reconcile findings with real code before freezing criteria: When creating epic members up front, initial criteria and checks are draft. Before `ready`, inspect the exact codebase files: verify the behavior is not already implemented, check that the finding does not contradict a frozen contract or test, ensure check test files exist on disk, and update obsolete obligations with `--set-criterion` or `--replace-check`.
 - Obligations freeze at the first persisted `ready`.
 
 ## Ready

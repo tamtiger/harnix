@@ -368,4 +368,30 @@ describe("workflow preflight version skew", () => {
     expect("versionSkew" in (await preflightWorkflow(root, Date.now(), "99.0.0"))).toBe(false);
     expect("versionSkew" in (await preflightWorkflow(await projectWithRecordedVersion("9.9.9")))).toBe(false);
   });
+
+  it("suggests nextTask and resume command via epicContext when no task is active", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const epic = {
+      id: "20261015-120000-sample-epic",
+      title: "Sample Epic",
+      goal: "Epic goal",
+      generator: "harnix" as const,
+      schemaVersion: 1 as const,
+      createdAt: at(10),
+      updatedAt: at(10),
+    };
+    const taskRecord = { ...taskV3("planning", "planning"), id: "20261015-120001-member-task", title: "Member Task", epicId: epic.id };
+    await saveWorkflow(root, { task: taskRecord, epic });
+    await writeFile(join(root, ".harnix", "tasks", ".active"), "");
+
+    const preflight = await preflightWorkflow(root, Date.now());
+    expect(preflight.activeTask).toBeNull();
+    expect(preflight.epicContext).toMatchObject({
+      id: epic.id,
+      title: epic.title,
+      nextTask: { id: taskRecord.id, status: "planning", title: "Member Task" },
+      resumeCommand: `harnix resume ${taskRecord.id}`,
+    });
+  });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { describeCommand, normalizeCommand, sameCommand, splitCommand } from "src/core/workflow/command-match.js";
+import { describeCommand, equivalentCommand, normalizeCommand, sameCommand, splitCommand } from "src/core/workflow/command-match.js";
 
 describe("normalizeCommand", () => {
   it.each([
@@ -87,5 +87,35 @@ describe("splitCommand", () => {
     const declared = 'pwsh.exe -NoProfile -Command "pnpm lint && pnpm test"';
 
     expect(sameCommand(declared, splitCommand(declared))).toBe(true);
+  });
+});
+
+describe("equivalentCommand", () => {
+  it("matches package manager commands running the same script", () => {
+    expect(equivalentCommand("npm test", "pnpm test")).toBe(true);
+    expect(equivalentCommand("pnpm run test", "yarn test")).toBe(true);
+    expect(equivalentCommand("pnpm test", "bun run test")).toBe(true);
+  });
+
+  it("matches pytest with python module runners and virtualenv tools", () => {
+    expect(equivalentCommand("pytest", "python -m pytest")).toBe(true);
+    expect(equivalentCommand("pytest", "python3 -m pytest")).toBe(true);
+    expect(equivalentCommand("pytest", "py -m pytest")).toBe(true);
+    expect(equivalentCommand("pytest", "uv run pytest")).toBe(true);
+    expect(equivalentCommand("pytest", "poetry run pytest")).toBe(true);
+    expect(equivalentCommand("python -m pytest", "pytest")).toBe(true);
+    expect(equivalentCommand("pytest -v test/a.py", "python -m pytest -v test/a.py")).toBe(true);
+    expect(equivalentCommand("pytest", "pytest -v")).toBe(false);
+    expect(equivalentCommand("pytest", "python -m unittest")).toBe(false);
+  });
+});
+
+describe("sameCommand with Python runners", () => {
+  it("matches declared pytest against python -m pytest or virtualenv runner argv", () => {
+    expect(sameCommand("pytest", ["python", "-m", "pytest"])).toBe(true);
+    expect(sameCommand("python -m pytest", ["pytest"])).toBe(true);
+    expect(sameCommand("pytest -v", ["python", "-m", "pytest", "-v"])).toBe(true);
+    expect(sameCommand("pytest", ["uv", "run", "pytest"])).toBe(true);
+    expect(sameCommand("pytest", ["poetry", "run", "pytest"])).toBe(true);
   });
 });

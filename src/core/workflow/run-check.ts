@@ -77,7 +77,7 @@ export async function runCheckWorkflow(
   const runCwd = await resolveRunCwd(root, checkId, declared.cwd, dependencies.cwd);
   const before = (await computeInputDigest(root, task, checkId)).inputDigest;
   const run = await (dependencies.runner ?? runCheckProcess)(executable, args, runCwd);
-  const launcher = launcherFailure(run.output, run.exitCode);
+  const launcher = launcherFailure(run.output, run.exitCode, executable);
   if (launcher !== undefined) throw new Error(`Check ${checkId} could not start: ${launcher}; nothing was recorded.`);
   const after = (await computeInputDigest(root, task, checkId)).inputDigest;
   if (before !== after)

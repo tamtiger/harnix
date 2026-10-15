@@ -1,4 +1,4 @@
-import { lowValueReason } from "src/core/journal/learning-quality.js";
+import { isLocalDecisionOnly, lowValueReason } from "src/core/journal/learning-quality.js";
 import { foldObservation } from "src/core/journal/learning-similarity.js";
 import { analyzeLearningStatement } from "src/core/journal/learning-safety.js";
 import type { TaskRecord } from "src/core/tasks/task.js";
@@ -31,7 +31,8 @@ export function extractObservations(task: TaskRecord): string[] {
       text.length === 0 ||
       text.length > MAX_OBSERVATION_CHARACTERS ||
       seen.has(key) ||
-      lowValueReason(text) !== undefined
+      lowValueReason(text) !== undefined ||
+      isLocalDecisionOnly(text)
     )
       continue;
     const analysis = analyzeLearningStatement(text);

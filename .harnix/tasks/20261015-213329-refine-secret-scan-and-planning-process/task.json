@@ -1,0 +1,137 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261015-213329-refine-secret-scan-and-planning-process",
+  "epicId": "20261015-213325-harnix-dx-workflow-friction-reduction",
+  "title": "Thu hẹp phạm vi secret scan, nâng cao chất lượng learning note và quy trình planning",
+  "goal": "Giới hạn secret scan vào các file thay đổi thực tế của task, hỗ trợ allowlist/waiver cho false-positive, bỏ hint gây nhiễu No learning captured, kiểm tra sanity check test files khi resume và hoàn thiện tài liệu skill harnix-plan.",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-15T21:33:25.718+07:00",
+  "updatedAt": "2026-10-16T00:14:05.220+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/core/workflow/secret-scan.ts",
+    "src/core/workflow/finish.ts",
+    "src/skills/harnix-plan/SKILL.md"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "scanTaskSecrets chỉ quét các file thực sự thay đổi hoặc được khai báo trong task, hỗ trợ allowlist/waiver có lý do cho các file test mock.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cơ chế trích xuất learning phân biệt được quyết định cục bộ và bài học kinh nghiệm có điều kiện áp dụng; loại bỏ hint gây nhiễu No learning captured khi không có gì cần ghi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Quy trình Epic cho phép member tasks giữ tiêu chí/check ở dạng draft; tự động sanity-check các test file được trỏ tới khi resume để cảnh báo file đã bị task trước xóa.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu skill harnix-plan hướng dẫn đối chiếu finding với code thực tế trước khi đóng băng tiêu chí.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-gates",
+      "description": "Chạy verification gates",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Chạy toàn bộ test suite của Harnix",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-16T00:09:51.487+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "06e0e8bfc1e19453da354ec7da123497fb6ddf9cd00de82a3a0322827cffc14e"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T00:11:13.257+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "d3b6f78deb29467855ada010cd8c3aad8b9385c8f564e9680dc69e8cfbee776b"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-16T00:12:08.926+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "56b0f878a31c395994ddb4334c9079d3628580a754c64484cecd44b0c3d8655d"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T00:13:29.406+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9a90d9284d476f56a94b36bf82821c5f9e3dbbd913c638a223c98cba52f9cccc"
+    }
+  ],
+  "completedAt": "2026-10-16T00:14:05.220+07:00"
+}

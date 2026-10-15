@@ -36,16 +36,16 @@ implementation transitions directly to `in_progress` without another approval pr
 
 `harnix status` (bounded read-only projection of the active task, progress, context freshness and next action), `harnix status --summary` (micro status projection under 80 tokens: stage, criteria,
 check counts and next action) and `harnix status --explain` (required-check digest freshness with reason codes and exact readiness/completion blocker codes, without running anything); `harnix tasks`
-(bounded local index); `harnix resume <task-id> [--dry-run]` restores only an explicitly selected unfinished task's pointer and refuses collisions (`harnix resume --epic <epic-id>` selects the epic's
-next unfinished task); `harnix pause [--dry-run]` clears only the pointer; `harnix epic [--limit N]` / `harnix epic <epic-id>` (members in the epic's optional `order` first, set with the hidden
+(bounded local index); `harnix resume <task-id> [--force] [--next] [--dry-run]` restores only an explicitly selected unfinished task's pointer and refuses collisions (`harnix resume --next` selects the epic's
+next unfinished task, and `--force` pauses any current active task); `harnix pause [--dry-run]` clears only the pointer; `harnix epic [--limit N]` / `harnix epic <epic-id>` (members in the epic's optional `order` first, set with the hidden
 `harnix workflow --epic-order <epic-id> <task-id>...`, then by ID; `nextTask` follows that sequence); `harnix verify-plan [--recursive]` (deterministic test/lint/typecheck/format commands per package
 and nested repositories); `harnix context-report --platform <p>` (effective hook-context metadata; `<p>` is `kiro`, `antigravity`, `codex`, `claude`, `opencode` or `cursor`, and the flag is required,
 as it is for the hook command `harnix context --platform <p>`); `harnix repo-map --query|--impact` (bounded navigation hints only; platform hooks must not invoke repository-map queries, impact or
-refreshes); `harnix skill [name] [--reference topic]`; `harnix doctor`, `harnix update`. Private task prose, commands, prompts, hashes, secrets and absolute paths are omitted from their output.
+refreshes); `harnix skill [name] [--raw] [--reference topic]`; `harnix doctor`, `harnix update`. Private task prose, commands, prompts, hashes, secrets and absolute paths are omitted from their output.
 
 ## Task state
 
-- **Record:** TaskRecord schema v3: goal, non-goals, acceptance criteria, relevant paths/specs, validation plan (checks with sorted `criterionIds` and repository-glob `inputs`), evidence, optional
+- **Record:** TaskRecord schema v3 (the legacy `@task-contract` input token is retired and forbidden in v3 because each digest binds the check's own contract): goal, non-goals, acceptance criteria, relevant paths/specs, validation plan (checks with sorted `criterionIds` and repository-glob `inputs`), evidence, optional
   decisions, residual risks and `epicId`. Shape: `acceptanceCriteria: [{ id, text, status, evidenceIds, waiverReason? }]`,
   `validationPlan: [{ id, description, command?, scope, required, criterionIds, inputs }]`,
   `evidence: [{ id, checkId?, recordedAt, result, exitCode?, summary, artifactPaths, inputDigest?, findings? }]`, `blocker?`, `cancellation?: { reason, authorizedBy: "user" }`, `cancelledAt?`;
@@ -146,19 +146,25 @@ harnix workflow --transition verifying/finishing --brief
 harnix workflow --set-check <check-id> --description "<text>" --scope focused --command "<command>" [--cwd <path>] --criteria <criterion-id> --input "src/**" --reason "<why, 10-1000 characters, required after planning>" --brief
 harnix workflow --add-criterion <criterion-id> --text "<criterion text>" --check <check-id> --reason "<why>" --brief
 harnix workflow --set-criterion <criterion-id> --text "<new text>" [--reason "<why, required after planning>"] --brief   # rewrite one criterion (a criterion mapped by recorded evidence stays immutable)
+harnix workflow --set-title "<new title>" --brief
+harnix workflow --set-goal "<new goal>" --brief
 harnix workflow --set-paths --relevant-path <path> --relevant-spec <path> --brief
-harnix workflow --batch --brief              # atomic batch of criteria, checks, decisions, risks, paths from stdin; references between items resolve after all are applied, so order does not matter
+harnix workflow --save --file <path> --brief   # safe UTF-8 file load without stdin piping issues
+harnix workflow --batch [--file <path>] --brief              # atomic batch of criteria, checks, decisions, risks, paths from stdin or file; references between items resolve after all are applied, so order does not matter
 harnix workflow --add-decision <id> --text "<self-contained lesson>" --rationale "<why>" --brief
 harnix workflow --add-risk <id> --text "<reusable risk or trap>" --severity medium --brief
+harnix resume --next                         # select and activate the next unfinished task in the active epic
+harnix resume <id> --force                   # switch task, pausing any currently active task automatically
+harnix skill <name> --raw                    # print raw Markdown skill text directly without JSON envelope
 harnix workflow --finish --brief
 ```
 
-Only JSON on stdin and the clock differ. In PowerShell: `$pf = harnix workflow --preflight | ConvertFrom-Json`, `$json | harnix workflow --save --brief` and
-`'{"reason":"<why>","authorizedBy":"user"}' | harnix workflow --cancel`. In bash: `now=$(harnix workflow --preflight | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).clock.now")`,
+Only JSON on stdin and the clock differ. To avoid stdin piping issues (e.g. Windows PowerShell ANSI encoding corruption or Bash heredoc unexpected EOF), use `--file <path>` with `--save`, `--batch` or `--migrate` to load raw UTF-8 JSON/YAML files directly. In PowerShell: `$pf = harnix workflow --preflight | ConvertFrom-Json`, `$json | harnix workflow --save --brief` and
+'{"reason":"<why>","authorizedBy":"user"}' | harnix workflow --cancel. In bash: `now=$(harnix workflow --preflight | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).clock.now")`,
 `printf '%s' "$json" | harnix workflow --save --brief` and `printf '%s' '{"reason":"<why>","authorizedBy":"user"}' | harnix workflow --cancel`. To read JSON from a command in PowerShell, assign the
 output first and parse it: `$out = harnix workflow --inspect | Out-String; $j = $out | ConvertFrom-Json`. Never pipe `harnix` into a nested `pwsh -Command` (it waits for stdin until the timeout). List
 flags such as `--criteria`, `--criterion`, `--evidence-ids` and `--check` accept `a,b` or a repeated flag; `--input` and `--relevant-path` repeat. On Windows, prefer PowerShell 7.4+ (`pwsh`) over
-Windows PowerShell 5.1 or Bash heredocs (which can fail with unexpected EOF on CRLF/pipes). `--save` is only for new tasks, task text or research; start from `harnix workflow --inspect`.
+Windows PowerShell 5.1 or Bash heredocs (which can fail with unexpected EOF on CRLF/pipes), or use `--file <path>`. `--save` is only for new tasks, task text or research; start from `harnix workflow --inspect`.
 
 Notes: `--run-check` runs one executable with an argument array; for a compound command such as `a && b` declare one check per command or start a shell explicitly (`-- bash -c "a && b"`). On Windows a
 bare executable name goes through `cmd.exe`, which refuses `&`, `|`, `<`, `>`, `^`, `%` and `"` in arguments, so give the shell its extension or a full path, for example
