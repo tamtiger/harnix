@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { describeCommand, equivalentCommand, normalizeCommand, sameCommand, splitCommand } from "src/core/workflow/command-match.js";
+import {
+  describeCommand,
+  equivalentCommand,
+  normalizeCommand,
+  sameCommand,
+  splitCommand,
+} from "src/core/workflow/command-match.js";
 
 describe("normalizeCommand", () => {
   it.each([

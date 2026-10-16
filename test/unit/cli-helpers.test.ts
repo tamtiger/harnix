@@ -5,7 +5,9 @@ import {
   parseReportLimit,
   parseRepoMapDepth,
   parseRepoMapLimit,
+  parseRepoMapOutlineLimit,
   parseRepoMapPath,
+  parseRepoMapSymbol,
   parseTaskLimit,
   parseTaskStatus,
   platformFlagList,
@@ -35,14 +37,20 @@ describe("CLI helpers", () => {
 
     expect(parseRepoMapLimit("15")).toBe(15);
     expect(() => parseRepoMapLimit("25")).toThrow("--limit must be an integer between 1 and 20");
+    expect(parseRepoMapOutlineLimit("40")).toBe(40);
+    expect(() => parseRepoMapOutlineLimit("55")).toThrow("--limit must be an integer between 1 and 50");
 
     expect(parseRepoMapDepth("2")).toBe(2);
     expect(() => parseRepoMapDepth("5")).toThrow("--depth must be an integer between 1 and 3");
 
     expect(parseRepoMapPath("src/index.ts")).toBe("src/index.ts");
+    expect(parseRepoMapPath("src/index.ts", "--outline")).toBe("src/index.ts");
+    expect(parseRepoMapPath("src/index.ts", "--path")).toBe("src/index.ts");
     expect(() => parseRepoMapPath("src\\index.ts")).toThrow(
       "must be an exact normalized repository-relative POSIX path",
     );
+    expect(parseRepoMapSymbol("OrderService")).toBe("OrderService");
+    expect(() => parseRepoMapSymbol("   ")).toThrow("--symbol must contain 1 to 128 characters");
   });
 
   it("formats and redacts public CLI error messages", () => {

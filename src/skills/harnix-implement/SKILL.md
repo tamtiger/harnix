@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.7.0"
+  version: "2.7.2"
 ---
 
 # Implement with evidence
@@ -17,7 +17,7 @@ A blocked task: read its blocker, resolve it or report the exact condition, then
 
 ## Review the plan
 
-Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands in `.harnix/spec/project-facts.md`, custom project skills in `.harnix/spec/skills/` (or `harnix skill --all`), the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. `harnix repo-map --query` / `--impact` / `--tests` are navigation hints; verify the source yourself. When modifying existing codebases, maintain local conventions and isolate changes: read `./references/brownfield.md` (or `harnix skill harnix-implement --reference brownfield`).
+Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands in `.harnix/spec/project-facts.md`, custom project skills in `.harnix/spec/skills/` (or `harnix skill --all`), the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. `harnix repo-map --query` / `--impact` / `--tests` / `--outline <path> [--symbol <name>]` (symbol spans before slicing large files) / `--refs <symbol> [--path <path>]` (call sites before signature edits) are navigation hints; verify the source yourself. When modifying existing codebases, maintain local conventions and isolate changes: read `./references/brownfield.md` (or `harnix skill harnix-implement --reference brownfield`).
 
 ## RED, GREEN, REFACTOR per behavior
 

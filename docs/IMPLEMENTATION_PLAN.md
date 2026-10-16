@@ -38,6 +38,7 @@ harnix/
 │   │   ├── stack/           # language/technology detection (moved from utils by restructure-code)
 │   │   ├── context/         # rank, dedupe, budget, disclosure
 │   │   ├── journal/         # entries, search, learning candidates
+│   │   ├── repo-map/        # structural inventory, lexical search, impact, tests, outline, refs
 │   │   └── project.ts       # project-level service boundary
 │   ├── commands/            # init, setup, update, upgrade, uninstall, mem, status, tasks, resume, context-report, checks, audit, doctor, repo-map
 │   ├── configurators/       # kiro.ts, antigravity.ts, codex.ts only

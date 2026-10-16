@@ -345,9 +345,7 @@ describe("workflow preflight version skew", () => {
 
   it("names both versions and the fix when the running CLI is older than the project", async () => {
     const root = await projectWithRecordedVersion("2.2.0-dev.11");
-
     const result = await preflightWorkflow(root, Date.now(), "2.0.4");
-
     expect(result.versionSkew).toMatch(/2\.0\.4[\s\S]*2\.2\.0-dev\.11[\s\S]*reinstall/u);
   });
 
@@ -357,14 +355,12 @@ describe("workflow preflight version skew", () => {
     ["a release over its pre-release", "2.2.0-dev.11", "2.2.0"],
   ])("adds nothing when the CLI is %s", async (_name, recorded, running) => {
     const root = await projectWithRecordedVersion(recorded);
-
     expect("versionSkew" in (await preflightWorkflow(root, Date.now(), running))).toBe(false);
   });
 
   it("adds nothing for a newer CLI, or without a running version", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
-
     expect("versionSkew" in (await preflightWorkflow(root, Date.now(), "99.0.0"))).toBe(false);
     expect("versionSkew" in (await preflightWorkflow(await projectWithRecordedVersion("9.9.9")))).toBe(false);
   });
@@ -372,8 +368,10 @@ describe("workflow preflight version skew", () => {
   it("suggests nextTask and resume command via epicContext when no task is active", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
+    const epicId = "20261015-120000-sample-epic";
+    const taskId = "20261015-120001-member-task";
     const epic = {
-      id: "20261015-120000-sample-epic",
+      id: epicId,
       title: "Sample Epic",
       goal: "Epic goal",
       generator: "harnix" as const,
@@ -381,17 +379,16 @@ describe("workflow preflight version skew", () => {
       createdAt: at(10),
       updatedAt: at(10),
     };
-    const taskRecord = { ...taskV3("planning", "planning"), id: "20261015-120001-member-task", title: "Member Task", epicId: epic.id };
+    const taskRecord = { ...taskV3("planning", "planning"), id: taskId, title: "Member Task", epicId };
     await saveWorkflow(root, { task: taskRecord, epic });
     await writeFile(join(root, ".harnix", "tasks", ".active"), "");
-
     const preflight = await preflightWorkflow(root, Date.now());
     expect(preflight.activeTask).toBeNull();
     expect(preflight.epicContext).toMatchObject({
-      id: epic.id,
+      id: epicId,
       title: epic.title,
-      nextTask: { id: taskRecord.id, status: "planning", title: "Member Task" },
-      resumeCommand: `harnix resume ${taskRecord.id}`,
+      nextTask: { id: taskId, status: "planning", title: "Member Task" },
+      resumeCommand: `harnix resume ${taskId}`,
     });
   });
 });

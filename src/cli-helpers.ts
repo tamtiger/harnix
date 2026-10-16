@@ -52,6 +52,13 @@ export function parseRepoMapLimit(value: string): number {
   return limit;
 }
 
+export function parseRepoMapOutlineLimit(value: string): number {
+  if (!/^\d+$/u.test(value)) throw new Error("--limit must be an integer between 1 and 50.");
+  const limit = Number(value);
+  if (limit < 1 || limit > 50) throw new Error("--limit must be an integer between 1 and 50.");
+  return limit;
+}
+
 export function parseRepoMapDepth(value: string): number {
   if (!/^\d+$/u.test(value)) throw new Error("--depth must be an integer between 1 and 3.");
   const depth = Number(value);
@@ -59,7 +66,10 @@ export function parseRepoMapDepth(value: string): number {
   return depth;
 }
 
-export function parseRepoMapPath(value: string, flag: "--impact" | "--tests" = "--impact"): string {
+export function parseRepoMapPath(
+  value: string,
+  flag: "--impact" | "--tests" | "--outline" | "--path" = "--impact",
+): string {
   let normalized: string;
   try {
     normalized = normalizeRepositoryPath(value);
@@ -69,6 +79,12 @@ export function parseRepoMapPath(value: string, flag: "--impact" | "--tests" = "
   if (normalized !== value || value.includes("\\"))
     throw new Error(`${flag} must be an exact normalized repository-relative POSIX path.`);
   return normalized;
+}
+
+export function parseRepoMapSymbol(value: string, flag: "--symbol" | "--refs" = "--symbol"): string {
+  const trimmed = value.trim();
+  if (trimmed.length === 0 || trimmed.length > 128) throw new Error(`${flag} must contain 1 to 128 characters.`);
+  return trimmed;
 }
 
 export function parseTaskLimit(value: string): number {

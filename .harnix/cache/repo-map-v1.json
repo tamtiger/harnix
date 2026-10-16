@@ -1,11 +1,11 @@
 {
   "extractorVersion": 1,
   "generator": "harnix",
-  "inventoryFingerprint": "4c29f1ccf44ece0812518b454c94002c8ab0b9c13fff09b986899e106c53c423",
+  "inventoryFingerprint": "a3e40feee9e307e022cb23d13abf9099bcb27e2e7c62afbe2fa117383b4c4896",
   "records": [
     {
-      "byteLength": 75,
-      "contentHash": "bd4adf5368aa1506b708b3d3cec10810a75ec81e9bf804eab1069b2c7d61a3bd",
+      "byteLength": 91,
+      "contentHash": "c3d09111919822d50a3fd856f01b0f9402d22b00b4ac0171c31d01ef7a3277c3",
       "extension": "",
       "headings": [],
       "identifiers": [],
@@ -55,8 +55,8 @@
       "path": ".prettierrc.json"
     },
     {
-      "byteLength": 33086,
-      "contentHash": "667bf7cb74bd017eab0dcf205e1c3f3856d8083542344626cfc95f947b4883b4",
+      "byteLength": 34663,
+      "contentHash": "7c20926e616eb41371cc2e7c6e1c2c578197c46f6d073ff14d3eb3d56be537a6",
       "extension": "md",
       "headings": [
         "Architecture rules",
@@ -87,8 +87,8 @@
       "path": "AGENTS.md"
     },
     {
-      "byteLength": 69045,
-      "contentHash": "3baab6f1a2bd25e928cf750c08754767208634a63c5af1d3822a936b1bb1a80e",
+      "byteLength": 71309,
+      "contentHash": "522b107d2e9fc3847fa51432bf1e3bb2d8eb3c93c163f90be87a1204bb1809d9",
       "extension": "md",
       "headings": [
         "Added",
@@ -141,8 +141,8 @@
       "path": "LICENSE"
     },
     {
-      "byteLength": 417,
-      "contentHash": "26845457adeaf84ad057c1890fee4d7c0a034e659b2686034dd93de9dd27ebb5",
+      "byteLength": 679,
+      "contentHash": "a6bf25ad7ab1f72fe8636e42d161a679b0c00b564675739f70f9e17b13f7afb5",
       "extension": "",
       "headings": [],
       "identifiers": [],
@@ -152,8 +152,8 @@
       "path": "NOTICE"
     },
     {
-      "byteLength": 24173,
-      "contentHash": "804dd5e155d6862e744739675d4231232cf897f748ae1a7f7a8cb9e1cf41e0cf",
+      "byteLength": 25686,
+      "contentHash": "5732758f789e5f2ff441286eaefbe64aa84da6e9f6e219a7988b0890d1d54ddb",
       "extension": "md",
       "headings": [
         "-> Harnix tự phân loại yêu cầu và dẫn dắt agent qua đúng quy trình, không cần bạn gõ lệnh nào thêm.",
@@ -216,8 +216,8 @@
       "path": "docs/GLOBAL_SETUP_REFACTOR_PLAN.md"
     },
     {
-      "byteLength": 40297,
-      "contentHash": "9f902c924a60a430510bdd7b277f8560b1126c1eb9dcd6a016b2b039726b43da",
+      "byteLength": 44672,
+      "contentHash": "9ef7cc0565024fb42d711ae38195ae7dc7ff952541ffed30fcf1049dc5bed59c",
       "extension": "json",
       "headings": [],
       "identifiers": [],
@@ -227,8 +227,8 @@
       "path": "docs/HARNESS_FEATURE_PROVENANCE.json"
     },
     {
-      "byteLength": 37644,
-      "contentHash": "23c6fd85fd6804f8537efc327db368a809a9f3aa2a8bc5fab0f8e0c4289a6faf",
+      "byteLength": 39421,
+      "contentHash": "97dd4a2e9ebf460cc0b62f06a318c49eee45a307bdea9d28e90031c44ce82c73",
       "extension": "md",
       "headings": [
         "1. Khung quyết định",
@@ -238,6 +238,7 @@
         "3.10 Revalidation 2026-08-26: recovery và explainability thực tế",
         "3.11 Runtime self-audit 2026-08-26/27: target authority và active-task verification self-reference",
         "3.12 Runtime self-audit 2026-08-28: standalone read-only research routing",
+        "3.13 Symbolic code navigation 2026-10-16: clean-room adaptation từ Serena",
         "3.2 Context model",
         "3.3 Managed ownership model",
         "3.4 Learning model",
@@ -245,8 +246,7 @@
         "3.6 Workflow synthesis",
         "3.7 Revalidation 2026-08-14: context drift và freshness theo input",
         "3.8 Adoption 2026-08-18: four bounded harness capabilities",
-        "3.9 Revalidation 2026-08-26: task observability, navigation, audit và provenance",
-        "4. Platform research decisions"
+        "3.9 Revalidation 2026-08-26: task observability, navigation, audit và provenance"
       ],
       "identifiers": [
         "does",
@@ -259,8 +259,8 @@
       "path": "docs/HARNESS_RESEARCH.md"
     },
     {
-      "byteLength": 77438,
-      "contentHash": "6886a32a3b933f56798a69918152cc41020db7a4db606ebe20f2378479cee80a",
+      "byteLength": 79989,
+      "contentHash": "597248d8e63f8ea4de0a376f3736cafd7177b1e580485d83ca90d3faf2789a8d",
       "extension": "md",
       "headings": [
         "1. Document status",
@@ -300,8 +300,8 @@
       "path": "docs/HARNIX_PRD.md"
     },
     {
-      "byteLength": 65159,
-      "contentHash": "4828f6b6438e7262580210892ae3f3ecae65736c88e2d6b0837fa993a7309ecc",
+      "byteLength": 67370,
+      "contentHash": "ec47228dbc4154efb0f5379b5df683b760c61103531509d356faffd3cff036dd",
       "extension": "md",
       "headings": [
         "1. Purpose and authority",
@@ -340,8 +340,8 @@
       "path": "docs/HARNIX_WORKFLOW.md"
     },
     {
-      "byteLength": 178697,
-      "contentHash": "fea68b80067c375867639b2fcec6ffde8ce928850e1dbc82abd130f604981712",
+      "byteLength": 178808,
+      "contentHash": "8c421bc1097a73e4cf8a4f087d8f5661a8a9fdf673fd42351e4c9f96e142c0b0",
       "extension": "md",
       "headings": [
         "1. Mục tiêu",
@@ -448,13 +448,15 @@
       "path": "docs/REVIEW_REFACTOR_PLAN.md"
     },
     {
-      "byteLength": 14012,
-      "contentHash": "ce52ddcf5e0037e1ee11883e14277a31b9e7106c3cd1779f63a3b25722a4c912",
+      "byteLength": 20374,
+      "contentHash": "3853c15da1ebc6faf8e3366226b9423fed81c2e54b02b29553a8a37541455cf2",
       "extension": "md",
       "headings": [
         "1. Mục đích và thời điểm chốt",
         "2. Baseline đã khóa",
         "2.1 Current upstream revalidation 2026-08-26",
+        "2.2 Upstream skill libraries baseline 2026-10-14",
+        "2.3 Symbolic code navigation baseline 2026-10-16",
         "3. Kiểm chứng bảo toàn PRD",
         "4. Baseline kỹ thuật Trellis",
         "5. Nội dung nguồn được xem xét",
@@ -463,10 +465,9 @@
         "7.1 Phase 6 user-global integration snapshot",
         "8. License và provenance policy",
         "9. Lệnh tái lập baseline",
+        "AgentKit / ak-quick-setup",
         "ECC",
-        "Superpowers",
-        "Trellis",
-        "Upstream Baseline"
+        "Superpowers"
       ],
       "identifiers": [
         "a"
@@ -477,8 +478,8 @@
       "path": "docs/UPSTREAM_BASELINE.md"
     },
     {
-      "byteLength": 25436,
-      "contentHash": "e1bb44ee0d8162b84394d693aa88bb3ff1889c66baea73bfe8d0862bb8f22cb9",
+      "byteLength": 38982,
+      "contentHash": "c6d24707833257e7d3b97d68e2d28014c873ddf3f143bda628cce85b9a7a2bfd",
       "extension": "md",
       "headings": [
         "1. Nguyên tắc mapping",
@@ -493,10 +494,10 @@
         "8.1 Trellis workflow mapping",
         "8.2 Superpowers behavior mapping",
         "8.3 Harnix self-audit ownership mapping",
-        "9. Removal verification",
-        "Antigravity",
-        "Claude Code",
-        "Codex"
+        "8.4 Upstream skill libraries mapping (addyosmani/agent-skills & mattpocock/skills)",
+        "8.4.1 Các pattern Reuse / Adapt",
+        "8.4.2 Bảy pattern Explicitly Rejected kèm lý do kiến trúc",
+        "8.5 Upstream craft & client libraries mapping (ai-native-client & ak-quick-setup)"
       ],
       "identifiers": [
         "validation"
@@ -754,7 +755,7 @@
     },
     {
       "byteLength": 2680,
-      "contentHash": "3cb4a9c282bdf1a406e77f819915541533be44031e4471bdc6f589de9857afa2",
+      "contentHash": "a67934d83195ecacf3877bafae96c82ac942e8c953fdb7d22e9c4da80efed318",
       "extension": "json",
       "headings": [],
       "identifiers": [],
@@ -810,6 +811,26 @@
       "packagePath": "",
       "path": "scripts/changelog-fold.mjs",
       "language": "javascript"
+    },
+    {
+      "byteLength": 4394,
+      "contentHash": "fab21a151ea86170fae433ef30fee952ede3e4a60238935e1762d4c04141fe3f",
+      "extension": "py",
+      "headings": [],
+      "identifiers": [],
+      "importTargets": [
+        ",",
+        "collections",
+        "glob",
+        "math",
+        "os",
+        "re",
+        "sys"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "scripts/eval-skill-triggers.py",
+      "language": "python"
     },
     {
       "byteLength": 1414,
@@ -1293,8 +1314,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6456,
-      "contentHash": "1997ba6212d37f5ec00f562c91db9bd5bbbaeb91c9985213081ebb246ca88bf1",
+      "byteLength": 6485,
+      "contentHash": "c6708cd2a121c5581d75e335d2792fde2a27bb0796cb716bbc8106665a5b48d4",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -1383,8 +1404,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7589,
-      "contentHash": "96ed09e151460f54d69c084f9cb16e382465cd49b2c54d7a84cec23ae6b6897b",
+      "byteLength": 8376,
+      "contentHash": "b6540d10b948d14d4d5c585bdc0e9e244a13a66cb87e1a83d89cf56b69fcbdca",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -1406,7 +1427,9 @@
         "normalized",
         "parseRepoMapDepth",
         "parseRepoMapLimit",
+        "parseRepoMapOutlineLimit",
         "parseRepoMapPath",
+        "parseRepoMapSymbol",
         "parseReportLimit",
         "parseTaskLimit",
         "parseTaskStatus",
@@ -1417,9 +1440,7 @@
         "redactPublicErrorMessage",
         "reportActionableSetupReadiness",
         "rollbackDetail",
-        "selectedPlatforms",
-        "statuses",
-        "warning"
+        "selectedPlatforms"
       ],
       "importTargets": [
         "./commands/global-doctor.js",
@@ -1506,14 +1527,17 @@
       "language": "typescript"
     },
     {
-      "byteLength": 12287,
-      "contentHash": "744bdd74f09c846ece5e9aea958defcd950ddf246ad9daf50fd2c3e3e5bd3c53",
+      "byteLength": 15212,
+      "contentHash": "70f5d94c8df7fd4cbf6414622ddfb17b2576bb3cf05656e17fd8fd6eea3bdbd2",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "Command",
+        "LearningCommandOptions",
         "ProgramOptions",
-        "actionCount",
+        "RepoMapCliOptions",
+        "SkillTemplate",
+        "actions",
         "contextHookStdinIdleTimeoutMs",
         "hookInput",
         "limit",
@@ -1522,9 +1546,12 @@
         "platform",
         "projectSkills",
         "registerWorkflowCliCommands",
+        "res",
         "result",
-        "root",
-        "status"
+        "runRepoMapCommand",
+        "status",
+        "symbol",
+        "target"
       ],
       "importTargets": [
         "./cli-helpers.js",
@@ -1532,6 +1559,7 @@
         "./commands/doctor.js",
         "./commands/epic.js",
         "./commands/internal-context-cli.js",
+        "./commands/learning.js",
         "./commands/mem.js",
         "./commands/pause.js",
         "./commands/repo-map-internal.js",
@@ -1544,8 +1572,7 @@
         "./core/spec/project-skills.js",
         "./utils/bounded-input.js",
         "./utils/paths.js",
-        "commander",
-        "type"
+        "commander"
       ],
       "kind": "source",
       "packagePath": "",
@@ -1986,6 +2013,67 @@
       "language": "typescript"
     },
     {
+      "byteLength": 9119,
+      "contentHash": "281879c8779a534a53e662965cad099615466f4653514b8c95378d97b8cc0922",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "Action",
+        "DEFAULT_LIMIT",
+        "ID_PATTERN",
+        "LEARNING_STATUSES",
+        "LearnedSpecStats",
+        "LearningCommandOptions",
+        "LearningCommandResult",
+        "LearningListItem",
+        "LearningStatus",
+        "MAX_LIMIT",
+        "MAX_LISTED_STATEMENT_CHARACTERS",
+        "PruneMatch",
+        "SimilarLearning",
+        "base",
+        "characters",
+        "chosen",
+        "chosenAction",
+        "config",
+        "cut",
+        "effective",
+        "found",
+        "harnixRoot",
+        "head",
+        "id",
+        "input",
+        "items",
+        "journalRoot",
+        "limit",
+        "list",
+        "matches",
+        "now",
+        "parseLimit"
+      ],
+      "importTargets": [
+        "src/core/config/config.js",
+        "src/core/journal/learned-blocks.js",
+        "src/core/journal/learned-promote.js",
+        "src/core/journal/learned-spec.js",
+        "src/core/journal/learning-prune.js",
+        "src/core/journal/learning-review.js",
+        "src/core/journal/learning-safety.js",
+        "src/core/journal/learning-similarity.js",
+        "src/core/journal/learning-sources.js",
+        "src/core/journal/learning-store.js",
+        "src/core/journal/learning.js",
+        "src/core/workflow/support.js",
+        "src/utils/order.js",
+        "src/utils/paths.js",
+        "src/utils/project-discovery.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/commands/learning.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 5774,
       "contentHash": "3b2f4ac24974f79d114b4c49dab03b71cc753fe3c110c395263e45fa8054a6f0",
       "extension": "ts",
@@ -2088,16 +2176,18 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2514,
-      "contentHash": "1020182ede425708210fc06a91d7bd00f604e8f04e27b711cac163b20739ac6b",
+      "byteLength": 3275,
+      "contentHash": "b48075f0345194248b2d54ca13dbf2f0cf1f10e4576cf5911bf76ea853fdbddc",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "impactRepoMapInternal",
         "initializedRoot",
+        "outlineRepoMapInternal",
         "project",
         "queryRepoMapInternal",
         "refreshRepoMapInternal",
+        "refsRepoMapInternal",
         "result",
         "root",
         "terms",
@@ -2117,20 +2207,26 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1510,
-      "contentHash": "4a7725a16e868f9d129b1d0996e25cf2dd90161e21e3e4c14403f12e287397d2",
+      "byteLength": 2626,
+      "contentHash": "ebe73a1cd36f2bb83e8071ed0c51e0c8ab0ba4b9aafeeb625e78870745b3c191",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "PublicEpicBriefResult",
+        "ResumeProjectTaskOptions",
         "TaskResumeResultV1",
+        "detail",
+        "epics",
         "harnixRoot",
+        "id",
         "project",
-        "resumeProjectTask"
+        "resumeProjectTask",
+        "targetEpic"
       ],
       "importTargets": [
         "src/commands/epic.js",
         "src/core/config/config.js",
+        "src/core/epics/epic.js",
         "src/core/tasks/task-resume.js",
         "src/utils/paths.js",
         "src/utils/project-discovery.js"
@@ -2243,18 +2339,23 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3054,
-      "contentHash": "0720b67a2723ad583a73e559970b8db204cd7cb9e8aae00a23ea2bb154e6edab",
+      "byteLength": 3712,
+      "contentHash": "dd82d7681a1be894a2c341f8fa9c07e4b164fff7df2ebc08cc486b409f3074f6",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "ChecksReportResultV1",
         "HarnixStatusResultV1",
+        "PublicEpicBriefResult",
         "StatusExplainResultV1",
         "StatusSummaryResultV1",
         "audit",
         "checks",
         "contextDrift",
+        "detail",
+        "epicContext",
+        "epicId",
+        "epics",
         "explainProjectStatus",
         "harnixRoot",
         "inspectProjectStatus",
@@ -2268,7 +2369,9 @@
       "importTargets": [
         "./audit.js",
         "./checks.js",
+        "src/commands/epic.js",
         "src/core/config/config.js",
+        "src/core/epics/epic.js",
         "src/core/status.js",
         "src/core/tasks/task-audit.js",
         "src/core/tasks/task.js",
@@ -2421,8 +2524,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7695,
-      "contentHash": "cd140c8f60d3101bd62ae5673374cd0664bf9e981e76c0cd79e1d1ff7feab6db",
+      "byteLength": 7923,
+      "contentHash": "ac7205ac2d533bc3683349f3773dcd2d706c54fdb3a85945f2c6b1957964270d",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2453,8 +2556,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5145,
-      "contentHash": "e2877a97f5d84085be9b1b45ae8e53bc6c042235614945b96aadbf854c52781f",
+      "byteLength": 5455,
+      "contentHash": "ed64bd4b36a742ed75d9de6d17e36939498be3cf9bffb0394a485c47f6387b88",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2476,8 +2579,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6682,
-      "contentHash": "9b0b363f66bb96004d62128d2f8d285174cd22ba110ef65a770d8f7df8e21434",
+      "byteLength": 6797,
+      "contentHash": "1e639c44770b88cf4a68885e01b7b14f6c0025936c272358c6da1b20474efd73",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2528,8 +2631,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 10592,
-      "contentHash": "2d77ffa714a00f90794f64c3a857b97210a96a48a489543565cac90a964b3026",
+      "byteLength": 11266,
+      "contentHash": "5ef65dcb70d01b48d32b2472b1a85bde139cdcfbfb24a2fb7da41c0756e429c2",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2551,6 +2654,7 @@
         "report",
         "result",
         "run",
+        "target",
         "task",
         "withoutBom"
       ],
@@ -2562,6 +2666,8 @@
         "src/core/tasks/task.js",
         "src/utils/bounded-input.js",
         "src/utils/check-runner.js",
+        "src/utils/fs-access.js",
+        "src/utils/paths.js",
         "src/version.js",
         "type"
       ],
@@ -2964,8 +3070,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6964,
-      "contentHash": "40dd2fa2c25f6e35ab793b87503e53dad3e5b9fd29f651b07f51d7ea44397fc2",
+      "byteLength": 7604,
+      "contentHash": "22db19e77a1845414f19adf7e92ef624272e0d4c7a9e3ef27825cd735ccdb396",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2991,20 +3097,22 @@
         "manifest",
         "maxEntries",
         "normalized",
+        "notes",
         "output",
         "path",
         "persisted",
+        "promoted",
         "reasonCodes",
         "renderCap",
         "result",
         "selectedGuides",
-        "taskEntries",
-        "taskTopics",
-        "withLearning"
+        "taskEntries"
       ],
       "importTargets": [
         "./context.js",
         "src/core/config/config.js",
+        "src/core/journal/learned-spec.js",
+        "src/core/journal/learning-sources.js",
         "src/core/journal/learning-summary.js",
         "src/core/platform/registry.js",
         "src/core/tasks/task.js",
@@ -4396,16 +4504,150 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3280,
-      "contentHash": "a3d6c938de27fae774fb32cf41212d5508ac876cc5c30bb9ea0ef330ca34784d",
+      "byteLength": 3844,
+      "contentHash": "3f119ca9a66811cf7cbde1eb2e2c3a0ae8fb8ba34976888d10b84968e6b193fd",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "LEARNED_SPEC_PATH",
+        "LearnedBlock",
+        "MAX_BLOCK_PATHS",
+        "MAX_LEARNED_BLOCKS",
+        "MAX_PREFIX_SEGMENTS",
+        "START",
+        "analysis",
+        "assertPromotable",
+        "block",
+        "blocks",
+        "bodyStart",
+        "endAt",
+        "endMarker",
+        "escapeRegExp",
+        "id",
+        "learnedPathPrefixes",
+        "match",
+        "parseLearnedBlocks",
+        "path",
+        "paths",
+        "prefix",
+        "prefixes",
+        "proposal",
+        "renderLearnedBlock",
+        "segments",
+        "suffix",
+        "unsafeAt",
+        "withoutLearnedBlock"
+      ],
+      "importTargets": [
+        "src/core/journal/learning-safety.js",
+        "src/core/journal/learning.js",
+        "src/core/journal/promotion.js",
+        "src/utils/order.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/journal/learned-blocks.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 3729,
+      "contentHash": "a9c0aaaf201ac11cceafb328386610a2a8be3c20c831cc462a1cd7606c23be26",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "FILE_HEADER",
+        "PromoteLearningInput",
+        "PromoteLearningResult",
+        "ReviewBase",
+        "ReviewLearningInput",
+        "all",
+        "alreadyPresent",
+        "blocks",
+        "content",
+        "existing",
+        "header",
+        "next",
+        "promoteLearning",
+        "readSpec",
+        "removed",
+        "result",
+        "retireLearning",
+        "separatorFor",
+        "specPath"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "src/core/journal/learned-blocks.js",
+        "src/core/journal/learning-review.js",
+        "src/utils/atomic-write.js",
+        "src/utils/paths.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/journal/learned-promote.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 4226,
+      "contentHash": "4c1d400746a932d78da2280a8ffbfb6a88790a7c1fdae0f8bb6bd3ce92c7bcc4",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "HEADER",
+        "LearnedBlock",
+        "LearnedSpecStats",
+        "MAX_LOADED_BLOCKS",
+        "MAX_LOADED_CHARACTERS",
+        "MAX_LOADED_STATEMENT_CHARACTERS",
+        "Ranked",
+        "analysis",
+        "characters",
+        "content",
+        "cut",
+        "empty",
+        "general",
+        "item",
+        "learnedSpecStats",
+        "length",
+        "line",
+        "lines",
+        "loadLearnedSpecBlock",
+        "passesSafetyScreen",
+        "path",
+        "ranked",
+        "renderLearnedSpec",
+        "score",
+        "statement",
+        "statementOf",
+        "value"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "src/core/journal/learned-blocks.js",
+        "src/core/journal/learning-relevance.js",
+        "src/core/journal/learning-safety.js",
+        "src/utils/paths.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/journal/learned-spec.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 4236,
+      "contentHash": "bf97b26b85c1cf2339cdd89dfc89561a32bda9ff1c5800c9cc47460fa69ec1d3",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "JournalEntry",
+        "LearningCandidate",
+        "LearningState",
         "LearningStatus",
         "MAX_EVIDENCE_PER_TASK",
         "candidate",
         "captureLearningAtFinish",
+        "captureTarget",
         "created",
         "eligible",
         "entry",
@@ -4421,11 +4663,13 @@
         "state",
         "statement",
         "states",
-        "status"
+        "status",
+        "target"
       ],
       "importTargets": [
         "src/core/journal/journal.js",
         "src/core/journal/learning-notes.js",
+        "src/core/journal/learning-similarity.js",
         "src/core/journal/learning-store.js",
         "src/core/journal/learning.js",
         "src/core/tasks/task.js",
@@ -4438,8 +4682,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1607,
-      "contentHash": "8cf7b4c3e24e8dc201b80a7b828c11087ca3023c7eed7fa0c3f0d61025b7543b",
+      "byteLength": 1854,
+      "contentHash": "8195dccf563bf112bbc2b8310753fe694fa439139aa4a7e2f6158151a57d357c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -4456,14 +4700,126 @@
         "texts"
       ],
       "importTargets": [
+        "src/core/journal/learning-quality.js",
         "src/core/journal/learning-safety.js",
-        "src/core/journal/learning.js",
+        "src/core/journal/learning-similarity.js",
         "src/core/tasks/task.js",
         "type"
       ],
       "kind": "source",
       "packagePath": "",
       "path": "src/core/journal/learning-notes.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1932,
+      "contentHash": "d8cc1a77e782e695cda27ac8638b1daaa1d9e361d35a2d65681f71af21187e7f",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "LowValueReason",
+        "MAX_PRUNE_BATCH",
+        "PruneMatch",
+        "ReviewLearningInput",
+        "findLowValueLearning",
+        "match",
+        "matches",
+        "pruneLearning",
+        "reason",
+        "rejected"
+      ],
+      "importTargets": [
+        "src/core/journal/learning-quality.js",
+        "src/core/journal/learning-review.js",
+        "src/core/journal/learning-store.js",
+        "src/core/journal/learning.js",
+        "src/utils/order.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/journal/learning-prune.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 2310,
+      "contentHash": "3fe5d1c978d452edb29aa9858d3b0c4a0079ee28971a4eedd7f348f9f4f92a1a",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "CONDITIONAL_OR_RULE_PATTERN",
+        "FILLER_WORDS",
+        "LowValueReason",
+        "MIN_LEARNING_CHARACTERS",
+        "TASK_ID",
+        "hasApplicableCondition",
+        "isLocalDecisionOnly",
+        "isTaskSpecific",
+        "lowValueReason",
+        "text",
+        "words"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/journal/learning-quality.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1440,
+      "contentHash": "2848c84a174bb01a97dbaa99a09c4c9b6213b5880e7aadc3109804ccacf1d982",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "MAX_AREA_DIRECTORIES",
+        "a",
+        "areaOf",
+        "b",
+        "directories",
+        "glob",
+        "last",
+        "length",
+        "literal",
+        "pathsOverlap",
+        "relevanceScore",
+        "segments"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/journal/learning-relevance.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 3158,
+      "contentHash": "dfaa7ad5ca353189c968f26567aa7fd44275b9d10d660f6a707681ee93a9ec77",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "JournalEntry",
+        "LearningAction",
+        "LearningCandidate",
+        "LearningState",
+        "LearningStatus",
+        "MAX_REVIEW_REASON_CHARACTERS",
+        "ReviewLearningInput",
+        "ReviewLearningResult",
+        "TRANSITIONS",
+        "effective",
+        "entry",
+        "planLearningReview",
+        "reason",
+        "reviewLearning",
+        "state",
+        "transition"
+      ],
+      "importTargets": [
+        "src/core/journal/journal.js",
+        "src/core/journal/learning-store.js",
+        "src/core/journal/learning.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/journal/learning-review.ts",
       "language": "typescript"
     },
     {
@@ -4501,6 +4857,68 @@
       "language": "typescript"
     },
     {
+      "byteLength": 3064,
+      "contentHash": "108ec2318537b81ef19cffd318caecef8828b087bcd24f430f7e5f9c223c7a2e",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "MAX_SIMILAR",
+        "MIN_TOKEN_CHARACTERS",
+        "SIMILARITY_THRESHOLD",
+        "SIMILAR_STATUSES",
+        "SimilarLearning",
+        "delta",
+        "findFoldedMatch",
+        "foldObservation",
+        "found",
+        "jaccard",
+        "key",
+        "matches",
+        "newer",
+        "observationTokens",
+        "score",
+        "shared",
+        "similarLearning",
+        "state",
+        "target",
+        "token",
+        "tokens",
+        "withoutDiacritics"
+      ],
+      "importTargets": [
+        "src/core/journal/learning-store.js",
+        "src/core/journal/learning.js",
+        "src/utils/order.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/journal/learning-similarity.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 969,
+      "contentHash": "8b0d34474ef1a3462820de7b12ffbca1f0fdd0843ef5287037c9a6dd8b559684",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "cache",
+        "cached",
+        "createSourcePathsLoader",
+        "paths",
+        "pathsOf",
+        "task"
+      ],
+      "importTargets": [
+        "src/core/tasks/task.js",
+        "src/utils/paths.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/journal/learning-sources.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 1742,
       "contentHash": "976fe9e14b94d68db2e34f5c7a27829eb3a0a3b601bd28a0380db31f37373178",
       "extension": "ts",
@@ -4533,25 +4951,32 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2932,
-      "contentHash": "a43e4dd61ae9a28ae842c14834cf127fafb0038b953dd5e3909505f73db035e7",
+      "byteLength": 4494,
+      "contentHash": "f0d6b6271f6b7cedbdb2d6cd45e4e0880e8fe95d6bd0f5392791b43b3d03620a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "Collected",
         "LearningStatus",
         "LearningSummaryItem",
         "MAX_SUMMARY_ITEMS",
         "MAX_SUMMARY_STATEMENT_CHARACTERS",
+        "SummarizeOptions",
+        "active",
         "analysis",
         "characters",
         "cut",
+        "item",
         "items",
         "rank",
         "renderLearningBlock",
+        "scoreRelevance",
         "status",
         "summarizeLearning"
       ],
       "importTargets": [
+        "src/core/journal/learning-quality.js",
+        "src/core/journal/learning-relevance.js",
         "src/core/journal/learning-safety.js",
         "src/core/journal/learning-store.js",
         "src/core/journal/learning.js",
@@ -4877,8 +5302,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5080,
-      "contentHash": "f30e71e39b546e2a89cb147a35644bfbfc57468df2126f858b57d465712ba6f8",
+      "byteLength": 5178,
+      "contentHash": "025ec66027c930cb50679c60035e137bee8777a138b04879c37eddd5f87365b3",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -4907,7 +5332,8 @@
         "selected",
         "sortedMap",
         "stripLastExtension",
-        "target"
+        "target",
+        "targetStem"
       ],
       "importTargets": [
         "./types.js",
@@ -5002,6 +5428,112 @@
       "language": "typescript"
     },
     {
+      "byteLength": 14405,
+      "contentHash": "685c47993e5fa97566548d1d3a159a4bbed2436af29a856cdbc193eabcd247ef",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "ContainerKind",
+        "RepoMapOutlineOptions",
+        "RepoMapOutlineResultV1",
+        "RepoMapSymbolKind",
+        "RepoMapSymbolOutlineV1",
+        "SymArgs",
+        "activeClass",
+        "activeContainer",
+        "all",
+        "assertOutlineOptions",
+        "balance",
+        "cMatch",
+        "candidate",
+        "ch",
+        "classMatch",
+        "createRepoMapOutline",
+        "defMatch",
+        "depth",
+        "end",
+        "endLine",
+        "exp",
+        "ext",
+        "extractBraceLanguageSymbols",
+        "extractFileSymbols",
+        "extractGoSymbols",
+        "extractMarkdownSymbols",
+        "extractPythonSymbols",
+        "filterSymbols",
+        "findBraceBlockEnd",
+        "findPyEnd",
+        "findStmtEnd",
+        "fnMatch"
+      ],
+      "importTargets": [
+        "./types.js",
+        "node:fs/promises",
+        "node:path",
+        "src/utils/order.js",
+        "src/utils/paths.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/repo-map/outline.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 8180,
+      "contentHash": "f0331151f48b4f4bd3d1c9cad467fc95a30f17fd2c84ece21bfcc214141dc79c",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "RepoMapRecordV1",
+        "RepoMapRefKind",
+        "RepoMapRefsOptions",
+        "RepoMapRefsResultV1",
+        "RepoMapSymbolReferenceV1",
+        "RepoMapV1",
+        "affectedTests",
+        "assertRefsOptions",
+        "candidate",
+        "candidatePaths",
+        "classifyReferenceLine",
+        "codeRecords",
+        "collectReverseDependents",
+        "collected",
+        "content",
+        "createUnavailableRepoMapRefs",
+        "current",
+        "declPattern",
+        "dependent",
+        "dependents",
+        "depth",
+        "emptyRefsResult",
+        "escapeRegExp",
+        "findRepoMapReferences",
+        "frontier",
+        "graph",
+        "index",
+        "isCommentLine",
+        "isContained",
+        "lines",
+        "match",
+        "matches"
+      ],
+      "importTargets": [
+        "./graph.js",
+        "./tests.js",
+        "./types.js",
+        ";\n  }\n  if (declPattern.test(trimmed)) return",
+        "node:fs/promises",
+        "node:path",
+        "src/utils/order.js",
+        "src/utils/paths.js",
+        "|"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/repo-map/refs.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 8691,
       "contentHash": "23be8dede23035bb46f72b10266cedf05ded335630a54e950ad400cd11be3f99",
       "extension": "ts",
@@ -5055,8 +5587,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5472,
-      "contentHash": "8f1b2a5caede0ecdc713db12ebf190916f9540bf243bd18b2b0dd27ae6d93706",
+      "byteLength": 6303,
+      "contentHash": "b89569f020aa62979a85c82289a850442c7b261caa26af779bc5e5bbc10c8e80",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5067,8 +5599,12 @@
         "RepoMapImpactOptions",
         "RepoMapImpactResultV1",
         "RepoMapLimits",
+        "RepoMapOutlineOptions",
+        "RepoMapOutlineResultV1",
         "RepoMapQueryResult",
         "RepoMapQuerySignals",
+        "RepoMapRefsOptions",
+        "RepoMapRefsResultV1",
         "RepoMapTestsOptions",
         "RepoMapTestsResultV1",
         "RepoMapV1",
@@ -5082,21 +5618,19 @@
         "map",
         "mapConcurrent",
         "next",
+        "outlineRepoMap",
         "packageRoots",
         "previous",
         "previousRecords",
         "queryRepoMap",
-        "readPreviousRecords",
-        "record",
-        "records",
-        "refreshRepoMap",
-        "results",
-        "value"
+        "readPreviousRecords"
       ],
       "importTargets": [
         "./extract.js",
         "./impact.js",
         "./inventory.js",
+        "./outline.js",
+        "./refs.js",
         "./search.js",
         "./store.js",
         "./tests.js",
@@ -5602,8 +6136,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6397,
-      "contentHash": "871af134accda72d4c137caed6388ba70686059011b67074be19b9d2a2605cc3",
+      "byteLength": 6920,
+      "contentHash": "d2978b4a1c78053616841642bf3b09c344b5557b2995270f330cc9081060f49e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5611,6 +6145,7 @@
         "RequiredCheckState",
         "StatusActiveTask",
         "StatusAttention",
+        "StatusEpicContext",
         "StatusNextAction",
         "StatusNextActionCode",
         "StatusProgress",
@@ -5618,6 +6153,7 @@
         "acceptance",
         "activeTask",
         "attention",
+        "base",
         "checks",
         "contextChangeCount",
         "countAcceptance",
@@ -5816,40 +6352,49 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4843,
-      "contentHash": "a6c832092a01b7935dd15b60bcc28fd4ad6919e6b196f47884989bb6fe6f56f7",
+      "byteLength": 6934,
+      "contentHash": "2c6fc0ccfe6d0729c9b41713baca732ad0166198310076b3563ce6016c24b5f9",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "IDs",
         "MAX_ACTIVE_POINTER_BYTES",
         "MAX_TASK_RECORD_BYTES",
+        "TEST_FILE_PATTERN",
         "TaskRecord",
         "TaskResumeDependencies",
         "TaskResumeOutcome",
         "TaskResumeResultV1",
         "active",
         "candidate",
+        "candidates",
+        "check",
         "defaultDependencies",
+        "exists",
+        "fileExists",
+        "full",
+        "input",
         "is",
         "isMissing",
         "loadBoundedActiveTask",
         "loadBoundedTask",
         "loaded",
+        "match",
         "outcome",
         "path",
         "pointerPath",
+        "projectRoot",
         "resumeTask",
+        "s",
+        "sanityCheckTestFiles",
         "source",
-        "task",
-        "taskId",
-        "taskIdPattern",
-        "terminalStatuses"
+        "task"
       ],
       "importTargets": [
         "./task.js",
         "node:buffer",
         "node:fs/promises",
+        "node:path",
         "src/utils/paths.js"
       ],
       "kind": "source",
@@ -5858,26 +6403,35 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6230,
-      "contentHash": "3878913da03e5f56796930c063e41165d0397bf57206ea806728e4d0ff340236",
+      "byteLength": 8271,
+      "contentHash": "1d79fbc6b2a4c527270186813ab3bf91b368226e735d8e6bf42f920dc58570ac",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "ReviewArtifacts",
+        "box",
         "check",
+        "checkRate",
+        "critRate",
         "criterion",
         "decision",
         "decisions",
+        "details",
         "displayTime",
+        "isPassed",
         "item",
         "latest",
         "lines",
         "met",
+        "passedChecks",
+        "path",
         "renderArtifacts",
         "renderCriteriaAndChecks",
         "renderEvidence",
         "renderHeader",
         "renderReviewData",
+        "renderScope",
+        "renderSummary",
         "renderTaskReview",
         "renderVerdict",
         "renderedCheckIds",
@@ -5885,9 +6439,7 @@
         "rerunCount",
         "rerunNote",
         "residualRisks",
-        "risk",
-        "state",
-        "waiver"
+        "risk"
       ],
       "importTargets": [
         "./task-schema.js",
@@ -6089,8 +6641,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8840,
-      "contentHash": "b9803d7cd6ea6bbe60d8b7656440bb200e342c21085b2df894670c610a33f5f6",
+      "byteLength": 9398,
+      "contentHash": "e867b00ad9092d1ef173e08304922a5d068b8dff086cf84b3e8f082b677504a0",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -6595,8 +7147,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1820,
-      "contentHash": "5ec76082b6aa0a776de0dc39081f58a49ff0c3f072d36f59b4d992d2892b8974",
+      "byteLength": 1849,
+      "contentHash": "d9b20fe2c69c4f82fecd477f9efeba3a5db59549e8ce262790cdf3f76de47fab",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -6660,8 +7212,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2577,
-      "contentHash": "56df405f4e43689ca412a854c2cf287ef398d6648ce89d661910230426bed0d4",
+      "byteLength": 2890,
+      "contentHash": "9c62539e116570ef8f984d9d3d42a51dc2908f915cc0c68c04a2cefd303ad7fe",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -6690,18 +7242,22 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4512,
-      "contentHash": "cb48a88bf28ca80a761ac406e66623fcc117edd8ab9abd54ad42aa226bfe7621",
+      "byteLength": 5396,
+      "contentHash": "4b030737c2378853be87446c5f0365d6467cfa66812caf0fd972334e2b0a6057",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "DESCRIPTION_LIMIT",
         "EXECUTABLE_SUFFIX",
         "PACKAGE_MANAGERS",
+        "PYTHON_RUNNERS",
+        "VENV_RUNNERS",
         "actual",
         "args",
         "argv",
         "baseName",
+        "canonicalName",
+        "canonicalizePythonTest",
         "char",
         "current",
         "describeCommand",
@@ -6710,6 +7266,7 @@
         "executablePath",
         "generic",
         "hasDirectory",
+        "list",
         "name",
         "normalizeCommand",
         "quote",
@@ -7048,8 +7605,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6146,
-      "contentHash": "9f182c244685e1e37cccad8073b85a471a9441484f1f6cf26696df670d5b4776",
+      "byteLength": 6061,
+      "contentHash": "a1d06c98cb5c03d8fbb3281ac35b49fc17e5a4450378c47b53a6b9e3ad06b39e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7074,7 +7631,6 @@
         "journalDate",
         "journalPath",
         "learningHint",
-        "lessons",
         "now",
         "recoveringCompletedTask",
         "secretAdvisory",
@@ -7100,8 +7656,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3249,
-      "contentHash": "ac7a6555180a162483050c8d865b0a27d1a1c1b45039eb87fcfffb16d9a55ee9",
+      "byteLength": 3290,
+      "contentHash": "3032045222d3dfa3d75d8edbdf6f0f550c5c8b02ed868fb4b0a0c9fff3ee9589",
       "extension": "ts",
       "headings": [],
       "identifiers": [],
@@ -7393,8 +7949,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 10161,
-      "contentHash": "31f3fe19dcf980b4db99c54ffa8a20c1416e02b4778ed226c4e18fd7aba673a4",
+      "byteLength": 11028,
+      "contentHash": "2e20ca29a4b210dd03203a3a0c9c3ed5218def06a13ad4a17b102c4faa73b8f4",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7446,8 +8002,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7668,
-      "contentHash": "2d787ae7885d41713c27417907325a2f3a66e3d08fd196020426953aaeaedf9f",
+      "byteLength": 8983,
+      "contentHash": "be0f95a569155e76766acfb4efa6add06007ca2284951891e5dde90b44151641",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7462,6 +8018,10 @@
         "check",
         "contextDrift",
         "emptyRequiredChecks",
+        "epic",
+        "epicContext",
+        "epicId",
+        "epics",
         "evidence",
         "harnixRoot",
         "hint",
@@ -7469,6 +8029,8 @@
         "inspections",
         "isStalePass",
         "latest",
+        "members",
+        "next",
         "owner",
         "preflightWorkflow",
         "recordedBaselineHint",
@@ -7476,13 +8038,7 @@
         "requiredChecks",
         "requiredChecksFromEvidence",
         "result",
-        "retryLimitReached",
-        "routePreflight",
-        "routed",
-        "skew",
-        "sortRequiredChecks",
-        "stageOf",
-        "task"
+        "retryLimitReached"
       ],
       "importTargets": [
         "./baseline-hint.js",
@@ -7492,6 +8048,8 @@
         "./support.js",
         "src/core/config/config.js",
         "src/core/context/context.js",
+        "src/core/epics/epic.js",
+        "src/core/epics/order.js",
         "src/core/journal/learning-summary.js",
         "src/core/managed/project-files.js",
         "src/core/tasks/task.js",
@@ -7508,8 +8066,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3535,
-      "contentHash": "53f0ac696da9ae9746878714cb5344bb568d5a7ff54465736c43da69dffff9f0",
+      "byteLength": 3688,
+      "contentHash": "a3be753180d985bc60c3110fcbe69801baedad72e07768b48d79a2dc0156e957",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7609,8 +8167,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5745,
-      "contentHash": "c2d7751e4d8211830e03715809103ff6553e000e35ea919cbac6e71666dc0c75",
+      "byteLength": 5946,
+      "contentHash": "2b3fbeb04d8cafff08e78ca1e43f5448a1fe3abc7d54a1d4c1bfe498c62f1091",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7630,6 +8188,7 @@
         "issue",
         "issues",
         "latest",
+        "list",
         "matches",
         "obligationIssues",
         "projectRootOf",
@@ -7759,8 +8318,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4735,
-      "contentHash": "3d9ca6dce51a477a258e84f8959d0773ec64bc7e03e14e1483dd815f5239d674",
+      "byteLength": 4747,
+      "contentHash": "8d08fd7473f82d509c1215f96f7cb7562ded4ea0da9f3d3469d016ed7a65f8bf",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8013,8 +8572,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7705,
-      "contentHash": "67cac0a99c2f720bfc7445410a4a0bd2ef5a7a31e27570b53f3698220c843e06",
+      "byteLength": 7930,
+      "contentHash": "cacbfb25312936d4bd08600090f1927000a87e40aab1ba6d402dd1f8513640d1",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8063,16 +8622,19 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2199,
-      "contentHash": "1f72c0d34f0902cfa259af192878a9bdf8042873441c7620518066ebea9b596b",
+      "byteLength": 2548,
+      "contentHash": "51cfdb956dbf1ef003cf85dfe38045eba084a12f5f768197b04ebdfac1ee9a40",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "HarnixConfigV2",
         "LearningSummaryItem",
+        "TaskRecord",
+        "active",
         "config",
         "currentInstant",
         "epic",
+        "harnixRoot",
         "journalFilePath",
         "projectLearningSummary",
         "refreshLinkedEpicMarkdown",
@@ -8081,11 +8643,11 @@
       "importTargets": [
         "src/core/config/config.js",
         "src/core/epics/epic.js",
+        "src/core/journal/learning-sources.js",
         "src/core/journal/learning-summary.js",
         "src/core/tasks/task.js",
         "src/utils/clock.js",
-        "src/utils/paths.js",
-        "type"
+        "src/utils/paths.js"
       ],
       "kind": "source",
       "packagePath": "",
@@ -8119,8 +8681,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3477,
-      "contentHash": "abee8278fbe4fc200ba3bbeca24f30bd8f56cd8fc11926bc53ae6d831a401c89",
+      "byteLength": 4182,
+      "contentHash": "0d5a2d718556ec9436d7d4e5a1fd17679ad7311454d031c40f87d917ececc5e4",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8142,6 +8704,7 @@
         "found",
         "hasNonAscii",
         "inspect",
+        "isLossyQuestionMarks",
         "isMojibake",
         "item",
         "table"
@@ -8470,8 +9033,8 @@
       "path": "src/guides/languages/typescript.md"
     },
     {
-      "byteLength": 7947,
-      "contentHash": "6bd9c4ca4cd20256406301702e89dc43fa7261710f300e28d1605e6200cc362d",
+      "byteLength": 8664,
+      "contentHash": "ed3332cb0d1e6f7098a370c6e629b4009519c3b476fb920bf6516fafbb813e2c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8868,6 +9431,40 @@
       "path": "src/guides/technologies/runtime/dotnet.md"
     },
     {
+      "byteLength": 1885,
+      "contentHash": "c75465be227c7540efce614f1b773f3139c26d8d4d13df5c87966078e6efbab0",
+      "extension": "md",
+      "headings": [
+        "Common mistakes",
+        "Constraints",
+        "UI/UX engineering guide",
+        "Verify"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/guides/topics/ui-ux.md"
+    },
+    {
+      "byteLength": 1868,
+      "contentHash": "485d397e56dbe3aac094e56ac9c789c855f91da5eb7191add1098563cae7ef37",
+      "extension": "md",
+      "headings": [
+        "Common mistakes",
+        "Constraints",
+        "Verify",
+        "Web testing guide"
+      ],
+      "identifiers": [
+        "names"
+      ],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/guides/topics/web-testing.md"
+    },
+    {
       "byteLength": 96,
       "contentHash": "22925db5271d1065a84c5e3d30b33868cde246210d586310fe03aa146d2ec686",
       "extension": "ts",
@@ -8884,8 +9481,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3052,
-      "contentHash": "490430fa2c92d90cc9db5c9086b163ad1328196e1a9d651adc84a269c2684638",
+      "byteLength": 4279,
+      "contentHash": "9071c1a5e085fb4b4b7194f1f290ed2f18f696acbde32e88b2ec7fd345e3f6e7",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8900,36 +9497,37 @@
       ],
       "importTargets": [
         "./harnix-debug/SKILL.md",
+        "./harnix-debug/references/feedback-loop.md",
         "./harnix-implement/SKILL.md",
+        "./harnix-implement/references/brownfield.md",
+        "./harnix-implement/references/commit-hygiene.md",
         "./harnix-implement/references/feedback.md",
         "./harnix-plan/SKILL.md",
+        "./harnix-plan/references/decision-discipline.md",
         "./harnix-plan/references/epic.md",
+        "./harnix-plan/references/grilling.md",
         "./harnix-plan/references/migration.md",
         "./harnix-plan/references/multi-repo.md",
         "./harnix-plan/references/ready-review.md",
         "./harnix-plan/references/replan.md",
         "./harnix-research/SKILL.md",
+        "./harnix-research/references/scouting-isolation.md",
         "./harnix-review/SKILL.md",
         "./harnix-verify/SKILL.md",
         "./harnix-verify/references/evidence.md",
         "./harnix-verify/references/finish-cancel.md",
+        "./harnix-verify/references/rationalizations.md",
+        "./harnix-verify/references/so-what.md",
+        "./harnix-verify/references/technical-recap.md",
         "./technique-skills.js",
+        "brownfieldReference",
+        "commitHygieneReference",
         "debugSource",
+        "decisionDisciplineReference",
         "epicReference",
         "evidenceReference",
-        "feedbackReference",
-        "finishCancelReference",
-        "implementSource",
-        "migrationReference",
-        "multiRepoReference",
-        "planSource",
-        "readyReviewReference",
-        "replanReference",
-        "researchSource",
-        "reviewSource",
-        "src/core/spec/project-skills.js",
-        "type",
-        "verifySource"
+        "feedbackLoopReference",
+        "feedbackReference"
       ],
       "kind": "source",
       "packagePath": "",
@@ -8938,7 +9536,7 @@
     },
     {
       "byteLength": 2210,
-      "contentHash": "ba7429af2b24ec3506032d4ebe5e29877a493c6b236230fa0834da0929bbaf95",
+      "contentHash": "3c40ca3842b1b6829946743f1cebbf92dc556d7b2d73c89d87897274bb92cf48",
       "extension": "md",
       "headings": [
         "Bugfix preservation",
@@ -8954,8 +9552,8 @@
       "path": "src/skills/harnix-bugfix-preserve/SKILL.md"
     },
     {
-      "byteLength": 4365,
-      "contentHash": "8c98114a7ed0bcf435973565162b88a145b5b516c5eb35d260859b6fee43be85",
+      "byteLength": 4512,
+      "contentHash": "d0d8fb7eec7502d8524a5c732678cc85f879f2095edadc2706edc6728cd59121",
       "extension": "md",
       "headings": [
         "Capture",
@@ -8977,8 +9575,23 @@
       "path": "src/skills/harnix-debug/SKILL.md"
     },
     {
+      "byteLength": 2360,
+      "contentHash": "98903543c639d49b9433314c1a5977b1a0c58ae2776a4ce6bf01be5af5f919c5",
+      "extension": "md",
+      "headings": [
+        "4-Step controlled loop",
+        "Debugging feedback loop and forced mutation",
+        "Forced mutation technique"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-debug/references/feedback-loop.md"
+    },
+    {
       "byteLength": 2764,
-      "contentHash": "d71da499f94ceed97f4ddbbbbb2475cb0b979a95df87179586bb76f6b9756380",
+      "contentHash": "63cf60602385ea07992f4d6ddc40e34019df03732bf2ecbda3b315734e15fcec",
       "extension": "md",
       "headings": [
         "Common flakiness root causes",
@@ -8996,8 +9609,8 @@
       "path": "src/skills/harnix-flaky-test/SKILL.md"
     },
     {
-      "byteLength": 5136,
-      "contentHash": "f017a8304f16286cb8d2184b94c75f5f0d645f44044dfb51d81023dd68ab13b6",
+      "byteLength": 5640,
+      "contentHash": "347bd990439ca56cb7f44e8b1ab51a74680aa887c867d80ec6cf2f7d07cc6e76",
       "extension": "md",
       "headings": [
         "Exit",
@@ -9020,6 +9633,39 @@
       "path": "src/skills/harnix-implement/SKILL.md"
     },
     {
+      "byteLength": 1245,
+      "contentHash": "ad1a61e8c3408ab676e89a6037856d0cd1f33368cca87114db5b761c3e26be8b",
+      "extension": "md",
+      "headings": [
+        "1. Respect local conventions",
+        "2. Minimal surgical change",
+        "3. Understand existing invariants",
+        "4. Protect existing test coverage",
+        "Brownfield navigation"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-implement/references/brownfield.md"
+    },
+    {
+      "byteLength": 1102,
+      "contentHash": "9eaf5b49097fe5d0c9523cae5860db8736f47c66a570dc51fdedf7a3501089d0",
+      "extension": "md",
+      "headings": [
+        "1. Inspect actual diffs",
+        "2. Conventional commit structure",
+        "3. Strict user approval gate",
+        "Commit and diff hygiene"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-implement/references/commit-hygiene.md"
+    },
+    {
       "byteLength": 779,
       "contentHash": "ac7fc6e44bb0a5d127e0782bc8675f78ca93549d620d519af835f6cb3783f794",
       "extension": "md",
@@ -9034,7 +9680,7 @@
     },
     {
       "byteLength": 2678,
-      "contentHash": "f6cc3b28b7fd0093ce702255838f02cac2ae075cb198a1418e20039baff94913",
+      "contentHash": "d18bdffcb963fa347b1f0c1e202874bf055228311962a21ab60123782d51afb1",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -9050,8 +9696,8 @@
       "path": "src/skills/harnix-migration-safety/SKILL.md"
     },
     {
-      "byteLength": 6967,
-      "contentHash": "d2911e4ddf8b3d017eb65ea126015f08bf471fc3fcde284663dd1579987cbec1",
+      "byteLength": 8001,
+      "contentHash": "7f4656623a6c58e8ea9149fca7fb689011dc73ac0af34c49e8331f352a4053bb",
       "extension": "md",
       "headings": [
         "Build the task",
@@ -9073,8 +9719,26 @@
       "path": "src/skills/harnix-plan/SKILL.md"
     },
     {
-      "byteLength": 3189,
-      "contentHash": "bb66baf469c8295bd7475a247b9c6529fd0a01c9610614c6fa25aaf0c2230c2e",
+      "byteLength": 1587,
+      "contentHash": "d3a012338dbbe79b156e36ed5bca138939df1fbff2362093f66786c800d83de8",
+      "extension": "md",
+      "headings": [
+        "1. Verified decisions",
+        "2. User decisions",
+        "3. Realistic threat model",
+        "4. Scout first",
+        "5. Stable code artifacts",
+        "Decision discipline"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-plan/references/decision-discipline.md"
+    },
+    {
+      "byteLength": 3590,
+      "contentHash": "c2ff1727d707b69c70a281b1db7da36fe4c73d74228c350eeafbd354df46c05e",
       "extension": "md",
       "headings": [
         "Epics",
@@ -9087,6 +9751,22 @@
       "kind": "documentation",
       "packagePath": "",
       "path": "src/skills/harnix-plan/references/epic.md"
+    },
+    {
+      "byteLength": 2734,
+      "contentHash": "b28487b5578c4ae0660e9b0c9cebf2d6aa20ece5b0f136f3cc9a8d9f2fb6f376",
+      "extension": "md",
+      "headings": [
+        "Assumption grilling and requirement probing",
+        "Questioning structure: Design Tree and Frontier",
+        "Settling decisions",
+        "When to use and strict boundaries"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-plan/references/grilling.md"
     },
     {
       "byteLength": 1147,
@@ -9102,8 +9782,8 @@
       "path": "src/skills/harnix-plan/references/migration.md"
     },
     {
-      "byteLength": 1934,
-      "contentHash": "5ea9bdbbc21fcc91a0dcce2893c9f014b44c749e601f67e96cd6837ea680c17f",
+      "byteLength": 1936,
+      "contentHash": "a1357be05bf5f8d4a6f4a7cacc59c078db572f3570515fea25f7be9043fdc745",
       "extension": "md",
       "headings": [
         "Multi-repository tasks"
@@ -9145,8 +9825,8 @@
       "path": "src/skills/harnix-plan/references/replan.md"
     },
     {
-      "byteLength": 3419,
-      "contentHash": "5c249fe36236f3c282668267974209e36ee55d8cf2fd90eb9e11771922d2d417",
+      "byteLength": 3682,
+      "contentHash": "c112c33b20c69786de289fe2ced3ac16645184404e562acde248d48b2bf1b40a",
       "extension": "md",
       "headings": [
         "Decide",
@@ -9164,10 +9844,28 @@
       "path": "src/skills/harnix-research/SKILL.md"
     },
     {
-      "byteLength": 3008,
-      "contentHash": "5803e4ff61da16cc82ad945363f2d07c6f94bae5d265bb1c5e81ac9f2e5fe406",
+      "byteLength": 1617,
+      "contentHash": "b9565cf207f17b4bcdb8b758d556c7b2d755b3716636878310ec545bd241842d",
       "extension": "md",
       "headings": [
+        "1. Context isolation",
+        "2. Standardized status protocol",
+        "Handling status outcomes:",
+        "Scouting isolation and subagent protocol"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-research/references/scouting-isolation.md"
+    },
+    {
+      "byteLength": 3765,
+      "contentHash": "e356dc90ee792aa1254ceb6e6a5ac134175b407fdd3288eb8ac19d543048f609",
+      "extension": "md",
+      "headings": [
+        "1. Spec axis (Requirements and behavior)",
+        "2. Standards axis (Patterns and baseline health)",
         "Exit",
         "Feedback on a review",
         "Report",
@@ -9184,7 +9882,7 @@
     },
     {
       "byteLength": 2807,
-      "contentHash": "9fb2577432d04531003b52273c98eb63384ef7676bc556ad292f85bbb0d76737",
+      "contentHash": "6323a9ed727d3b80f2f194a94e0ef3e42b3f1d87e79d9097e1c609cc1a12bfb7",
       "extension": "md",
       "headings": [
         "Critical vulnerability checks",
@@ -9200,8 +9898,25 @@
       "path": "src/skills/harnix-security-lens/SKILL.md"
     },
     {
-      "byteLength": 2755,
-      "contentHash": "b0c89b81f8d0e330adb3dddf63a83db1dda0b9f2b1d72a9618f3ec7ed9a6377c",
+      "byteLength": 2770,
+      "contentHash": "643f7a67e0a8d6b13a24a40e1482aa7526c37bb140fbc3911252af1d1cdf0ebd",
+      "extension": "md",
+      "headings": [
+        "Evidence and Rationale",
+        "Key principles",
+        "Sequential thinking and dynamic hypothesis revision",
+        "Thought protocol",
+        "When to use"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-sequential-thinking/SKILL.md"
+    },
+    {
+      "byteLength": 3545,
+      "contentHash": "0d3725472463e01da04dcd572bc71fa4f193f1abfb1e9a993cb6a25e63814af3",
       "extension": "md",
       "headings": [
         "Analysis steps",
@@ -9217,8 +9932,8 @@
       "path": "src/skills/harnix-verification-gap/SKILL.md"
     },
     {
-      "byteLength": 5283,
-      "contentHash": "5829cf9a5eaac8be232f7e7cbb116d79966c943e6814cdfed4744432de188ae8",
+      "byteLength": 5895,
+      "contentHash": "783e9cc0564e16c89ac088892c8ac69fddc13a77e0e3f82458155325d6c9fdcf",
       "extension": "md",
       "headings": [
         "Finish",
@@ -9254,8 +9969,8 @@
       "path": "src/skills/harnix-verify/references/evidence.md"
     },
     {
-      "byteLength": 2078,
-      "contentHash": "91e4a557e162f1b9e72528008afdcf300b164c9f8033a5692ffb6367a011e62e",
+      "byteLength": 2080,
+      "contentHash": "c6876a649ba4a4b0d1bab2a6cc7c80ef858211c9527891f3743ee9b825821da0",
       "extension": "md",
       "headings": [
         "Finish, recovery and cancellation"
@@ -9267,8 +9982,59 @@
       "path": "src/skills/harnix-verify/references/finish-cancel.md"
     },
     {
-      "byteLength": 4008,
-      "contentHash": "76d992103cc27fccc28ef8fd12afdbc20de72b4ef8cf71c5ba0f280913f1bcc4",
+      "byteLength": 2537,
+      "contentHash": "baa4bee57c081fc1d6847599629dea99b97c7e916ca40f8922152a55900f9912",
+      "extension": "md",
+      "headings": [
+        "8 Rationalization pairs: Excuse vs Harnix reality",
+        "Anti-rationalizations table",
+        "Core principle",
+        "Mandatory response when rationalizations arise"
+      ],
+      "identifiers": [
+        "edge"
+      ],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-verify/references/rationalizations.md"
+    },
+    {
+      "byteLength": 1055,
+      "contentHash": "34858d54f3a9aa7ed2710fad2c1389cf8afc65b0646b77633f88a971b868fc02",
+      "extension": "md",
+      "headings": [
+        "1. The so-what test",
+        "2. Eliminate busywork and micro-optimizations",
+        "3. Verify observable outcomes",
+        "Product impact and so-what analysis"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-verify/references/so-what.md"
+    },
+    {
+      "byteLength": 938,
+      "contentHash": "61207c7cc7919ba5605e651e056091e2eaf557b2c026bd4af00c960961a20c92",
+      "extension": "md",
+      "headings": [
+        "1. Core outcome",
+        "2. Failures encountered and workarounds",
+        "3. Key technical decisions",
+        "4. Verification summary",
+        "Technical recap"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-verify/references/technical-recap.md"
+    },
+    {
+      "byteLength": 4122,
+      "contentHash": "7f42b5a76dd78bead41f038dc525872737df42e0e3f9393e578cdb9a2da9dd1b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -9292,11 +10058,13 @@
         "./harnix-flaky-test/SKILL.md",
         "./harnix-migration-safety/SKILL.md",
         "./harnix-security-lens/SKILL.md",
+        "./harnix-sequential-thinking/SKILL.md",
         "./harnix-verification-gap/SKILL.md",
         "bugfixPreserveSource",
         "flakyTestSource",
         "migrationSafetySource",
         "securityLensSource",
+        "sequentialThinkingSource",
         "src/core/spec/project-skills.js",
         "type",
         "verificationGapSource",
@@ -9308,8 +10076,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5261,
-      "contentHash": "97b2bfe405ff8614d5b477e6ef8d51be58518331be1e0fcc254277ef6639b799",
+      "byteLength": 5604,
+      "contentHash": "3925279cf92d4be14574ecc19be789727a0be59be05b5f5707429f07ca433c35",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -9375,8 +10143,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 21341,
-      "contentHash": "24e1af078902d77b087c4460e3b8e266b4e1038046733e31e7f82a4d08e497e9",
+      "byteLength": 22565,
+      "contentHash": "7b867e4b9261486bbda8edb5d59981e65d67ac5938b8a37f541a09add4cc4215",
       "extension": "md",
       "headings": [
         "Agent transport",
@@ -9434,8 +10202,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3868,
-      "contentHash": "ce9e1b010bb3ac8c9de77e9c8c84aceef980b143b3406b5f8610fe06441c0f8e",
+      "byteLength": 3878,
+      "contentHash": "a9ae47269ce31aa7d4c54da3d8388f8dc50ab3884500812e96c5a048a5950091",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -9756,8 +10524,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4445,
-      "contentHash": "1add8181bb52270a50c558d35e35a022db326cc5fca5fcdbdbc858a612573370",
+      "byteLength": 5670,
+      "contentHash": "638308530064dc98bab912afd9b5d61663897d7589c14c7015f8e1206326de26",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -9784,6 +10552,7 @@
         "realRoot",
         "relativePath",
         "resolveProjectRoot",
+        "resolveSafeFilePath",
         "resolveSafeHarnixPath",
         "resolveSafeProjectPath",
         "resolved",
@@ -9885,8 +10654,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2805,
-      "contentHash": "163ead755b648a0ea6ac8e42c8bc2ab42ab179747af220b259c3e40a18c0fb97",
+      "byteLength": 3792,
+      "contentHash": "3ee924ac2ac04ec8994a3cb9c6b5ff90297736e582ca53ef09b29bf9d3f172e6",
       "extension": "md",
       "headings": [
         "Imports and coverage",
@@ -10200,6 +10969,57 @@
       "language": "typescript"
     },
     {
+      "byteLength": 8992,
+      "contentHash": "ccd0a6a53f4d530a9746764a465d80f71b4ad4d9f3d8dd974dbf5c2608a0ff4a",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "Item",
+        "SOURCE_TASK",
+        "again",
+        "all",
+        "applied",
+        "code",
+        "drafts",
+        "err",
+        "journal",
+        "learning",
+        "listed",
+        "listedBefore",
+        "one",
+        "originalCwd",
+        "originalExitCode",
+        "out",
+        "preview",
+        "project",
+        "promoted",
+        "rejected",
+        "result",
+        "retired",
+        "root",
+        "similar",
+        "stderr",
+        "stdout",
+        "temporaryRepository",
+        "text"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/cli-program.js",
+        "src/commands/init.js",
+        "src/core/tasks/task.js",
+        "test/support/builders.js",
+        "test/support/learning-fixtures.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/integration/commands/learning.test.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 4028,
       "contentHash": "bb3b0e34886906f5d618ccbe815bdea31bc5dcb97835068e725f998889aa2859",
       "extension": "ts",
@@ -10270,11 +11090,12 @@
       "language": "typescript"
     },
     {
-      "byteLength": 9681,
-      "contentHash": "7fe8c06968b3f393b19ef6f293578a589cea1c301dfe4cb61049ff7c4fde397f",
+      "byteLength": 13000,
+      "contentHash": "27f0f36c581deac9fce12c8ee02eea69fbc5046985ea288011c6af6c72320d65",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "OrderService",
         "add",
         "api",
         "app",
@@ -10286,6 +11107,7 @@
         "dependency",
         "entry",
         "files",
+        "handle",
         "originalCwd",
         "path",
         "paths",
@@ -10295,12 +11117,15 @@
         "stdout",
         "temporaryRepository",
         "testCalc",
+        "validateOrder",
         "walk"
       ],
       "importTargets": [
+        ",\n          line: 1,\n          path:",
         "./api",
         "./billing",
         "./dep",
+        "./service.js",
         "node:crypto",
         "node:fs/promises",
         "node:path",
@@ -10317,8 +11142,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 11552,
-      "contentHash": "d25a4de3ee29fd9210ce04d6e63c5351524e66763001ace2db9ae3e10a3f0b40",
+      "byteLength": 13629,
+      "contentHash": "cb8d3a212f60a8f4c39d8e0a2914a6111536a20e3777ad3e77da7943e8c946cb",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -10334,6 +11159,7 @@
         "checkpoint",
         "code",
         "entry",
+        "epic",
         "epicProject",
         "files",
         "harnixRoot",
@@ -10352,8 +11178,7 @@
         "raw",
         "real",
         "result",
-        "resume",
-        "root"
+        "resume"
       ],
       "importTargets": [
         "node:crypto",
@@ -10407,27 +11232,31 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5933,
-      "contentHash": "41819f4e27fc8b993179d5c497b2b0b9632657d6c7755b04633fa51aa5788a55",
+      "byteLength": 7054,
+      "contentHash": "fd5a4f2f1f68dec37c2ee01fb34f91ec77dca8be4b3f7846693171de938dff5b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "allCatalog",
         "catalog",
+        "code",
         "customSkill",
         "defaultCatalog",
         "found",
         "name",
         "names",
+        "out",
         "owners",
         "refReport",
         "reported",
         "result",
         "skill",
         "skills",
+        "stdout",
         "verificationGap"
       ],
       "importTargets": [
+        "src/cli-program.js",
         "src/commands/skills.js",
         "src/core/workflow/routing.js",
         "src/templates/harnix/workflow.js",
@@ -10652,8 +11481,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 10719,
-      "contentHash": "dcebcebf46929909dd028f70210d10a653dadf7b684b356aa45e51fdbe4e663b",
+      "byteLength": 12534,
+      "contentHash": "94e0cb069226ad0b0cf07000d498a3fb0c8cac4d0d21eb8df99b194bfcf4e476",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -10665,7 +11494,9 @@
         "check",
         "checkRunner",
         "code",
+        "filePath",
         "fixture",
+        "goalResult",
         "learn",
         "legacy",
         "list",
@@ -10680,15 +11511,17 @@
         "result",
         "root",
         "run",
+        "saveResult",
+        "saved",
         "schema",
         "started",
         "stderr",
         "stdout",
-        "task",
-        "withSeparator",
-        "withoutSeparator"
+        "task"
       ],
       "importTargets": [
+        "node:fs/promises",
+        "node:path",
         "node:stream",
         "src/cli-program.js",
         "src/core/tasks/task.js",
@@ -11396,7 +12229,7 @@
     },
     {
       "byteLength": 8693,
-      "contentHash": "d93ef921f0f7115401272b635863c2dd659e97c5ba8064b6f941f70f70b95562",
+      "contentHash": "dc686b2c6e575e03f9dd538fe602e736a232b16df3e3b18bb87ee9acd9cd9d9e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -12332,8 +13165,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3023,
-      "contentHash": "fe079862752504750e0dfa40a73043f0b2d869abc1fde95ceb3084ec9e70c793",
+      "byteLength": 3555,
+      "contentHash": "1cf44c7741a8f08b4f5f0a40807e760cddcaab2fb1258f8fe6c17f57eeed3135",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -12514,18 +13347,21 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2564,
-      "contentHash": "17ae18996f2ff706a42141a29672387a4851bc7cbe6011522adb420841525369",
+      "byteLength": 3889,
+      "contentHash": "c2cc154012b3dc724c5440312774e00ff5ca745f92cf6ecaa67afe7a488b9ede",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "active",
+        "epic",
         "explain",
         "noActive",
         "root",
+        "status",
         "summaryActive",
         "summaryNoActive",
         "task",
+        "taskRecord",
         "temporaryRepository"
       ],
       "importTargets": [
@@ -12661,8 +13497,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3765,
-      "contentHash": "7a5f9c3cf172a2e02b3ab3d204b2e62aff3f11c09fb347242d68534a121068a5",
+      "byteLength": 3806,
+      "contentHash": "51c1b92a8d41710e903b96945c581e1be0d42e5fdbce4af57c3a2271850448f8",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -12841,18 +13677,23 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3808,
-      "contentHash": "62b92c3fbe7693be49313dc8e64441c3f364ef3e0ccc2f7a5bc97dc96c972dc1",
+      "byteLength": 6855,
+      "contentHash": "e6ebe862d1f444ecfd46329db11c4076cbfde9406d0312efd662f18b50fe80ca",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "activeTask",
+        "build",
         "config",
         "harnixRoot",
+        "implementing",
+        "journal",
         "p",
         "paths",
+        "planning",
         "result",
         "root",
+        "seed",
         "task",
         "taskRefEntries",
         "temporaryRepository"
@@ -12862,8 +13703,10 @@
         "node:path",
         "src/core/config/config.js",
         "src/core/context/effective-context.js",
+        "src/core/journal/learned-blocks.js",
         "src/core/tasks/task.js",
         "test/support/builders.js",
+        "test/support/learning-fixtures.js",
         "test/support/tasks-fixtures.js",
         "test/support/temporary-repository.js",
         "type",
@@ -13704,21 +14547,115 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7348,
-      "contentHash": "b59a2b44a0b9c995c24b4d982854f04beca8f20303a827e04536e9deef43a0e8",
+      "byteLength": 3597,
+      "contentHash": "748df2a65e96681f804a4ffa6bf65a32e89a2c2a986cb5cabf0b5c86896f4033",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "blocks",
+        "content",
+        "crlf",
+        "first",
+        "next",
+        "note",
+        "paths",
+        "real",
+        "risky",
+        "second",
+        "spoof"
+      ],
+      "importTargets": [
+        "src/core/journal/learned-blocks.js",
+        "test/support/learning-fixtures.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/journal/learned-blocks.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 5741,
+      "contentHash": "aab8489260edc4b5bc472258adde074481802a143c88ed7aca0da095c8e0f747",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "base",
+        "before",
+        "crashed",
+        "id",
+        "ids",
+        "journalRoot",
+        "result",
+        "root",
+        "setup",
+        "temporaryRepository",
+        "text"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/journal/learned-blocks.js",
+        "src/core/journal/learned-promote.js",
+        "src/core/journal/learning-store.js",
+        "test/support/builders.js",
+        "test/support/learning-fixtures.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/journal/learned-promote.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 4571,
+      "contentHash": "a7fd5143f80198ff952b9008bea92bd98d4afbcfe2532284a4f364e38b485558",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "content",
+        "file",
+        "many",
+        "root",
+        "temporaryRepository",
+        "text"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/journal/learned-blocks.js",
+        "src/core/journal/learned-spec.js",
+        "test/support/learning-fixtures.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/journal/learned-spec.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 10708,
+      "contentHash": "04a81b85ed7a345ce9d2ad2bc69a3ef7c23eb7b0c40b97d7c3a2e357124d28ce",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "accented",
         "again",
         "capture",
         "created",
         "dropped",
+        "in",
         "lines",
         "many",
         "now",
         "observation",
+        "plain",
         "root",
         "state",
+        "statement",
+        "states",
         "task",
         "taskWith",
         "temporaryRepository"
@@ -13742,11 +14679,12 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1223,
-      "contentHash": "f4d6ad2e8d3e907d0f27c70ac0456f4ad88444bf3cd5a75017c445694143296c",
+      "byteLength": 2329,
+      "contentHash": "b7aa3e5b93266fd82228c93db731cff559211c2e542cb222207d0e8a477ff92c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "in",
         "task"
       ],
       "importTargets": [
@@ -13757,6 +14695,103 @@
       "kind": "test",
       "packagePath": "",
       "path": "test/unit/core/journal/learning-notes.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 3263,
+      "contentHash": "76c86d0b4788b5fa5b685d0e48a0ba3b1eee61b1df9562e3dfe8fe7cd7d2e5ba",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "GOOD",
+        "before",
+        "file",
+        "journal",
+        "matches",
+        "now",
+        "rejected",
+        "root",
+        "states",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/journal/learning-prune.js",
+        "src/core/journal/learning-store.js",
+        "test/support/builders.js",
+        "test/support/learning-fixtures.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/journal/learning-prune.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1876,
+      "contentHash": "391553d88bee713873edd0985dd7e1baaa276f93046b57bbf442eebb19a05efc",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "filler"
+      ],
+      "importTargets": [
+        "src/core/journal/learning-quality.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/journal/learning-quality.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 650,
+      "contentHash": "ffccbe4b6a97011c14b9ba9f61bc45a98f26c5b6b890a14760871ba3da3fa22e",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [],
+      "importTargets": [
+        "src/core/journal/learning-relevance.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/journal/learning-relevance.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 4174,
+      "contentHash": "ba6ba5a8ee20f77aee352444a93753e555ed799c9cc9cc24de4f32f594d641a6",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "created",
+        "id",
+        "result",
+        "review",
+        "root",
+        "seed",
+        "state",
+        "statement",
+        "task",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:path",
+        "src/core/journal/learning-capture.js",
+        "src/core/journal/learning-review.js",
+        "src/core/journal/learning-store.js",
+        "src/core/journal/learning.js",
+        "test/support/builders.js",
+        "test/support/learning-fixtures.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/journal/learning-review.test.ts",
       "language": "typescript"
     },
     {
@@ -13794,6 +14829,66 @@
       "language": "typescript"
     },
     {
+      "byteLength": 4995,
+      "contentHash": "4d47e3dd49ec65a071f68733f0f57773045f4ad42474d9d398ecc37f611c60dc",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "FIXTURE",
+        "accented",
+        "all",
+        "both",
+        "crowd",
+        "entry",
+        "expected",
+        "found",
+        "index",
+        "match",
+        "matches",
+        "newer",
+        "older",
+        "state",
+        "states"
+      ],
+      "importTargets": [
+        "src/core/journal/learning-similarity.js",
+        "src/core/journal/learning-store.js",
+        "test/support/learning-fixtures.js",
+        "type",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/journal/learning-similarity.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 2027,
+      "contentHash": "be84dc20f4db23a832f6bbbcc26b475d42f547ac6e5d225e23aead87b552c99c",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "directory",
+        "harnixRoot",
+        "load",
+        "paths",
+        "temporaryRepository",
+        "writeTask"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/journal/learning-sources.js",
+        "test/support/builders.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/journal/learning-sources.test.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 3635,
       "contentHash": "5e7c7fb4c8d6d02ff4d22e2db8d02ef01d76e4c222bf7850e0666dd1978814d8",
       "extension": "ts",
@@ -13820,12 +14915,13 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5706,
-      "contentHash": "e219ec1f8365ef94424f6f40650879a5969e8d43f8e12fbbf511c8d1867be836",
+      "byteLength": 8081,
+      "contentHash": "0784006e644dff44dff8b44009d84825222f1855a269241dea6ffd8e834339f5",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "LearningSummaryItem",
+        "SummarizeOptions",
         "block",
         "entries",
         "hostile",
@@ -13833,8 +14929,12 @@
         "items",
         "lapsed",
         "lines",
+        "noActive",
         "now",
+        "options",
+        "plain",
         "root",
+        "sources",
         "summarize",
         "temporaryRepository"
       ],
@@ -14126,8 +15226,85 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5903,
-      "contentHash": "f55a5e89ff59b82ee6707bcde72ae326f91ce0837c0ce7c6ad1e55d3cc299956",
+      "byteLength": 8860,
+      "contentHash": "b2caba2c5696b11f9015545ff343aba1710a004873b3d7ae3886f469a402fd61",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "BillingConfig",
+        "BillingService",
+        "DEFAULT_CURRENCY",
+        "InvoiceId",
+        "OrderProcessor",
+        "PaymentState",
+        "Store",
+        "VERSION",
+        "alpha",
+        "beta",
+        "binary",
+        "excluded",
+        "filtered",
+        "goSource",
+        "helper",
+        "hidden",
+        "leaked",
+        "markdown",
+        "missing",
+        "root",
+        "source",
+        "symbols",
+        "temporaryRepository",
+        "truncated",
+        "x"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/repo-map/outline.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/repo-map/outline.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 5124,
+      "contentHash": "6ca285ac142622df9c1b66897d8c9814759817357ed80f5dbe781cfde4d8425f",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "app",
+        "chargeInvoice",
+        "notFound",
+        "result",
+        "root",
+        "runCheckout",
+        "scoped",
+        "secret",
+        "temporaryRepository",
+        "unscoped"
+      ],
+      "importTargets": [
+        ",\n          line: 1,\n          path:",
+        "./charge.js",
+        "node:fs/promises",
+        "node:path",
+        "src/billing/charge.js",
+        "src/core/repo-map/refs.js",
+        "src/core/repo-map/service.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/repo-map/refs.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 6811,
+      "contentHash": "4fd8449ab9dc3f48f0e402908d8ff16e11158986d7ad049bf45229b13b00a29f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -14138,9 +15315,11 @@
         "legitimateSource",
         "limits",
         "map",
+        "outline",
         "query",
         "record",
         "refreshed",
+        "refs",
         "root",
         "temporaryRepository",
         "value"
@@ -14643,8 +15822,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3338,
-      "contentHash": "2e87465584f1bcd4af772931bb5889661c591ca73c637a632a2ab1b0e1127c49",
+      "byteLength": 5189,
+      "contentHash": "1d36af53169d59c1c51657677fed27708ff35f12da8efc7cc10fe3cf169ebf5b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -14653,6 +15832,8 @@
         "base",
         "candidate",
         "dependencies",
+        "otherActive",
+        "result",
         "task",
         "terminalTask"
       ],
@@ -14670,8 +15851,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 11532,
-      "contentHash": "28284b4c1f47aa6d42184374789399a00d7a152c464ea9877df5e9722689a0c9",
+      "byteLength": 12138,
+      "contentHash": "8978b310f05523252b44f35ef627675d76ee3c56f29dafa3b531748ac7530f04",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -15286,8 +16467,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2895,
-      "contentHash": "1b4dbd0babedd5e4a25dc1a3f24969748c790f957e6679f6b78cb5364c54fb7c",
+      "byteLength": 3247,
+      "contentHash": "c2ab42c7635ea8ad0f966472263f013d971c5a922fe6d9e7072c5cbd643ffacc",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -15305,8 +16486,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4429,
-      "contentHash": "fb0226ee52f0e75ffe46fab2b040baeb8d2c4622abadb2193550835306659f15",
+      "byteLength": 6104,
+      "contentHash": "1b897bde050ebc439e3998dcc46fb230b67a7dc58de35d2bad97cac65ecd261c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -15608,8 +16789,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 16999,
-      "contentHash": "f7d69ac9da8a8f39a9584921fbd4589fa78cdfcc15adaf167826c842e0190ed6",
+      "byteLength": 17375,
+      "contentHash": "99a15fd1d5d66596709031262d1f722ae60eb24efd182b56bb679537d69bc137",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -15670,8 +16851,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1725,
-      "contentHash": "e065673e4ac74983d49e9a5e13b9895d1e0cd4bf16dd44ac51172c7ced2d1b36",
+      "byteLength": 1778,
+      "contentHash": "28558a09a41108d9da92bc46d737d7498e1d9e296d4450b3c4372c29bb15cff7",
       "extension": "ts",
       "headings": [],
       "identifiers": [],
@@ -15941,8 +17122,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 13088,
-      "contentHash": "2477a81df724ddea1be4f37f80dbcb4c27618b8b9b9e38b3786bf480dccecc34",
+      "byteLength": 13888,
+      "contentHash": "1ba82dcdc4a609c4e09bc6c1e0a55952fb23c5b6c970f4156e33a1740a39f001",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -15968,7 +17149,9 @@
         "updated",
         "verifyingWithPass",
         "withDecision",
-        "withRisk"
+        "withGoal",
+        "withRisk",
+        "withTitle"
       ],
       "importTargets": [
         "src/core/tasks/task.js",
@@ -15988,8 +17171,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 13515,
-      "contentHash": "7f5e02689f3babdee22309165eaf587d8a5f6370aceaf8ebf4260c17b289261f",
+      "byteLength": 14602,
+      "contentHash": "50af1e9b8fd8cb2dffb8f525b4dc5b693340fbdfd5c5a77054c813da8634dfbb",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16000,6 +17183,8 @@
         "before",
         "digest",
         "entry",
+        "epic",
+        "epicId",
         "implementing",
         "journal",
         "noRequired",
@@ -16008,11 +17193,14 @@
         "pendingCriterion",
         "planning",
         "pointerPath",
+        "preflight",
         "projectWithRecordedVersion",
         "ready",
         "result",
         "root",
+        "taskId",
         "taskPath",
+        "taskRecord",
         "temporaryRepository"
       ],
       "importTargets": [
@@ -16135,8 +17323,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 13334,
-      "contentHash": "3fc74a1ba778760c0c135d0f64c8f6502dc237e757f310bd91b4f48e85afa2e3",
+      "byteLength": 13420,
+      "contentHash": "71687927cf012e3dc9773e74c686b1c6f44558362fb72278b1c121967d4f5ce0",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16549,8 +17737,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 14441,
-      "contentHash": "57541d5be12b549d95ce31b340f19380b6567ccb55514ac43a565ac7bb1c0c2a",
+      "byteLength": 14880,
+      "contentHash": "d9e52020d7b5c0704d97649e0abbdb416f00dfc5686f3f2814d624dc2c283fa9",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16656,8 +17844,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2566,
-      "contentHash": "4c1c1cd91a27e7b37365ccd1b966efbd991c45229dd9fdf108287ebc7e0ea43e",
+      "byteLength": 2872,
+      "contentHash": "a545d717a507772e730b022cd5a2a3ba4c9f4dc014cd48c23bd6bd38e1ae4427",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16787,8 +17975,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4522,
-      "contentHash": "a06ecc5f871463931477d5eccc91350afd3c99f8a18cc4620d6f0f72929c2e9c",
+      "byteLength": 5048,
+      "contentHash": "71d2d957486d0e2978e550d300573f03c618d36b2979f603eb328bbdf4445624",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16800,7 +17988,9 @@
         "selected",
         "selection",
         "sources",
-        "synthetic"
+        "synthetic",
+        "ui",
+        "web"
       ],
       "importTargets": [
         "src/catalog/types.js",
@@ -16815,8 +18005,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2847,
-      "contentHash": "3f88eb4c24d02d46d04cc08bdd49300c8d972ee953e21eb851df9a50f6b6a64b",
+      "byteLength": 3312,
+      "contentHash": "b9a8537a5fcb46080b6a8748a24695354f483df524ff9a86b669b318f939d57c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16827,6 +18017,7 @@
         "full",
         "label",
         "names",
+        "pkg",
         "skill",
         "target",
         "texts",
@@ -16834,6 +18025,7 @@
         "topic"
       ],
       "importTargets": [
+        "node:fs/promises",
         "src/skills/catalog.js",
         "vitest"
       ],
@@ -16843,8 +18035,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2808,
-      "contentHash": "63517700b800695d2bdb640d1f40976010542f4c043466b4a070f711a92435e1",
+      "byteLength": 3089,
+      "contentHash": "3f3f0939e0d8c756d8fcbaffd4150332d2ef82c25bdd78cd282d64ee50e1f936",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16852,12 +18044,14 @@
         "expectedTechniqueSkillNames",
         "guide",
         "guideLikeNames",
+        "pkg",
         "skill",
         "stageOwners",
         "tokens",
         "workflowNames"
       ],
       "importTargets": [
+        "node:fs/promises",
         "src/core/workflow/routing.js",
         "src/skills/catalog.js",
         "src/skills/technique-skills.js",
@@ -16867,6 +18061,39 @@
       "kind": "test",
       "packagePath": "",
       "path": "test/unit/skills/technique-skills.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 2256,
+      "contentHash": "fc12f88a156b647a51a68023f50929d928d7ba13c728ef0298526f4ff5e6ef66",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "IGNORED_DIRS",
+        "LINK_PATTERN",
+        "brokenLinks",
+        "collectMarkdownFiles",
+        "content",
+        "entries",
+        "entry",
+        "file",
+        "files",
+        "match",
+        "matches",
+        "mdFiles",
+        "pathWithoutAnchor",
+        "rawTarget",
+        "resolvedPath",
+        "root"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/spec/markdown-links.test.ts",
       "language": "typescript"
     },
     {
@@ -16913,8 +18140,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8537,
-      "contentHash": "88ebf65b52a30bb29fea66a6388420fa2010330535375307fe16a2ed2f3a9974",
+      "byteLength": 8642,
+      "contentHash": "8cf3c2f6afbda1a51261c05b63653415b102e89e5c59f7eac4800d14c93056c6",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -17460,8 +18687,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 47540,
-      "contentHash": "fd6537d6f6d4408eadcf218ed018e75ac3a0ed769305d2b9355a4c500ef2d1e7",
+      "byteLength": 48203,
+      "contentHash": "a077a3515ea795ca9bbba5c04dc94a2d5d51b06a4a9e554541a69fd50aac7873",
       "extension": "json",
       "headings": [],
       "identifiers": [
@@ -17557,8 +18784,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5582,
-      "contentHash": "eadaaeebdfbc2a94d0d831ca202a5c7db052ef045dbdf977828a2241915b7b09",
+      "byteLength": 5757,
+      "contentHash": "1a4e27b55330afba9ab3d09f1829abe93dc7646fcefc8d47c6803d500686ce46",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -17583,8 +18810,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 18194,
-      "contentHash": "c8dbbbeec70661171e2288a380edcae125a0634d5f144953f823e8e0f083fcb3",
+      "byteLength": 17817,
+      "contentHash": "deeb91aecd8e3dbc5d1739d823282834a378100e649141503fffeee534ca5a8e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -17886,8 +19113,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8695,
-      "contentHash": "43e251f67d5127799a472986c9f76adf0eceebdfcf0aefcfc9411264dad1a539",
+      "byteLength": 9325,
+      "contentHash": "842447118adbcfd15748dbe142f84764cbf1daacb344d0af5f2241f72744131c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18096,8 +19323,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7820,
-      "contentHash": "d7427608891c54e4f2cc931eafdfd695cb44440340a1981b7d5773d2251874b3",
+      "byteLength": 8038,
+      "contentHash": "a19b9ab192b8bca4af69714c7e4fe8ed957997600c834ebeadac38bc0b401f3c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18111,6 +19338,7 @@
         "evidence",
         "flag",
         "flags",
+        "flatten",
         "line",
         "lines",
         "match",
@@ -18144,8 +19372,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5679,
-      "contentHash": "e5933a91307dcdc97346cadad9d63f17d1adf2f47a68c4fdaf05339b0d17b248",
+      "byteLength": 6097,
+      "contentHash": "ecca62b5cd952c90632c883b2a129b64bf8d0ccec71ab3d447889a687f844bbd",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18159,6 +19387,7 @@
         "feature",
         "path",
         "paths",
+        "pkg",
         "registry",
         "registryPath",
         "root",
@@ -18237,16 +19466,18 @@
       "language": "typescript"
     },
     {
-      "byteLength": 10982,
-      "contentHash": "e41e2a450e4f0ec48832e6db5079477659f0db7db4448c3f3605e883a9e620b7",
+      "byteLength": 12494,
+      "contentHash": "455198d119110ba5517e790c4d300d1207906424a6ff65a3987c847b90c3c8b6",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "FORBIDDEN_CRUFT",
         "SkillName",
         "TASK_SKILLS",
         "alias",
         "all",
         "allSkillNames",
+        "body",
         "capabilities",
         "content",
         "debug",
@@ -18255,21 +19486,23 @@
         "frontmatter",
         "fullText",
         "implement",
+        "lines",
+        "lower",
+        "match",
+        "me",
         "name",
         "needle",
         "onDisk",
         "packageVersion",
+        "phrase",
+        "pkg",
         "plan",
         "readSkillSource",
         "research",
         "review",
         "skill",
         "techniqueSkillNames",
-        "text",
-        "verify",
-        "workflowSkillNames",
-        "workflowSkills",
-        "workflowSource"
+        "text"
       ],
       "importTargets": [
         "node:fs/promises",
@@ -18360,8 +19593,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 11354,
-      "contentHash": "2dce9913ed86bd40dc541ab143e1c31829f435f3cdcc7bb260788e511e643882",
+      "byteLength": 11417,
+      "contentHash": "282d9aa7bbefe718f3f77ec011828c41f7052b5b9e725c6ad9d1aee9553322c1",
       "extension": "ts",
       "headings": [],
       "identifiers": [

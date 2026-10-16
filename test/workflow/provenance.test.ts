@@ -22,6 +22,7 @@ const expectedFeatureIds = [
   "repository-impact-navigation",
   "rules-guides",
   "scoped-context",
+  "symbolic-code-navigation",
   "task-audit-readiness",
   "task-history-index",
   "task-lifecycle",
@@ -139,9 +140,14 @@ describe("external harness feature provenance", () => {
     expect(registry.features.map((feature) => feature.id)).not.toContain("target-root-authority");
   });
 
-  it("bumps package version to 2.7.0 series", async () => {
-    const pkg = JSON.parse(await readFile(resolve(root, "package.json"), "utf8"));
-    expect(pkg.version).toMatch(/^2\.7\.0/u);
+  it("bumps package version to 2.7.x series and records oraios/serena in NOTICE", async () => {
+    const [pkgText, notice] = await Promise.all([
+      readFile(resolve(root, "package.json"), "utf8"),
+      readFile(resolve(root, "NOTICE"), "utf8"),
+    ]);
+    const pkg = JSON.parse(pkgText) as { version: string };
+    expect(pkg.version).toMatch(/^2\.7\.\d+/u);
+    expect(notice).toContain("oraios/serena");
   });
 });
 

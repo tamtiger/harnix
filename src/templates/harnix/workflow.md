@@ -40,7 +40,7 @@ check counts and next action) and `harnix status --explain` (required-check dige
 next unfinished task, and `--force` pauses any current active task); `harnix pause [--dry-run]` clears only the pointer; `harnix epic [--limit N]` / `harnix epic <epic-id>` (members in the epic's optional `order` first, set with the hidden
 `harnix workflow --epic-order <epic-id> <task-id>...`, then by ID; `nextTask` follows that sequence); `harnix verify-plan [--recursive]` (deterministic test/lint/typecheck/format commands per package
 and nested repositories); `harnix context-report --platform <p>` (effective hook-context metadata; `<p>` is `kiro`, `antigravity`, `codex`, `claude`, `opencode` or `cursor`, and the flag is required,
-as it is for the hook command `harnix context --platform <p>`); `harnix repo-map --query|--impact` (bounded navigation hints only; platform hooks must not invoke repository-map queries, impact or
+as it is for the hook command `harnix context --platform <p>`); `harnix repo-map --query|--impact|--tests|--outline|--refs` (bounded navigation hints only; platform hooks must not invoke repository-map queries, impact or
 refreshes); `harnix skill [name] [--raw] [--reference topic]`; `harnix doctor`, `harnix update`. Private task prose, commands, prompts, hashes, secrets and absolute paths are omitted from their output.
 
 ## Task state

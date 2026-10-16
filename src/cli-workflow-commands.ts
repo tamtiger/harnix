@@ -3,7 +3,7 @@ import { Option, type Command } from "commander";
 import { resolveProjectRoot } from "./utils/paths.js";
 import { runInternalContextCommand } from "./commands/internal-context-cli.js";
 import { reportSkill, reportSkillCatalog, reportSkillReference } from "./commands/skills.js";
-import type { SkillTemplate } from "./core/spec/project-skills.js";
+import { discoverProjectSkills, type SkillTemplate } from "./core/spec/project-skills.js";
 import { runLearning, type LearningCommandOptions } from "./commands/learning.js";
 import { searchMemory } from "./commands/mem.js";
 import { inspectProjectStatus, explainProjectStatus, summarizeProjectStatus } from "./commands/status.js";
@@ -13,12 +13,13 @@ import { resumeProjectTask } from "./commands/resume.js";
 import { pauseProjectTask } from "./commands/pause.js";
 import { reportProjectContext } from "./commands/context-report.js";
 import { diagnoseProject } from "./commands/doctor.js";
-import { discoverProjectSkills } from "./core/spec/project-skills.js";
 import { inspectVerifyPlan } from "./commands/verify-plan.js";
 import {
   impactRepoMapInternal,
+  outlineRepoMapInternal,
   queryRepoMapInternal,
   refreshRepoMapInternal,
+  refsRepoMapInternal,
   testsRepoMapInternal,
 } from "./commands/repo-map-internal.js";
 import { parsePlatformId } from "./core/platform/registry.js";
@@ -27,7 +28,9 @@ import {
   parseReportLimit,
   parseRepoMapDepth,
   parseRepoMapLimit,
+  parseRepoMapOutlineLimit,
   parseRepoMapPath,
+  parseRepoMapSymbol,
   parseTaskLimit,
   parseTaskStatus,
   type ProgramOptions,
@@ -76,8 +79,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--apply", "With --promote or --prune: write the change instead of only previewing it")
     .option("--reason <text>", "With --reject: why, kept in the journal summary")
     .action(async (options: LearningCommandOptions) => {
-      process.stdout.write(`${JSON.stringify(await runLearning(process.cwd(), options))}
-`);
+      process.stdout.write(`${JSON.stringify(await runLearning(process.cwd(), options))}\n`);
     });
 
   program
@@ -88,15 +90,12 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--limit <count>", "Maximum required checks when --explain is set", "20")
     .action(async (options: { explain?: boolean; summary?: boolean; limit: string }) => {
       const now = programOptions.statusClock?.() ?? Date.now();
-      if (options.summary === true) {
-        const result = await summarizeProjectStatus(process.cwd(), now);
-        process.stdout.write(`${JSON.stringify(result)}\n`);
-        return;
-      }
       const result =
-        options.explain === true
-          ? await explainProjectStatus(process.cwd(), parseReportLimit(options.limit, "status"), now)
-          : await inspectProjectStatus(process.cwd(), now);
+        options.summary === true
+          ? await summarizeProjectStatus(process.cwd(), now)
+          : options.explain === true
+            ? await explainProjectStatus(process.cwd(), parseReportLimit(options.limit, "status"), now)
+            : await inspectProjectStatus(process.cwd(), now);
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
 
@@ -139,20 +138,17 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .action(
       async (
         taskId: string | undefined,
-        options: { dryRun?: boolean; epic?: string; force?: boolean; next?: boolean },
+        opts: { dryRun?: boolean; epic?: string; force?: boolean; next?: boolean },
       ) => {
-        process.stdout.write(
-          `${JSON.stringify(
-            await resumeProjectTask(
-              process.cwd(),
-              taskId,
-              options.dryRun === true,
-              options.epic,
-              options.force === true,
-              options.next === true,
-            ),
-          )}\n`,
+        const res = await resumeProjectTask(
+          process.cwd(),
+          taskId,
+          opts.dryRun === true,
+          opts.epic,
+          opts.force === true,
+          opts.next === true,
         );
+        process.stdout.write(`${JSON.stringify(res)}\n`);
       },
     );
 
@@ -188,8 +184,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
       if (options.raw === true && name === undefined) throw new Error("--raw requires a skill name.");
       let projectSkills: readonly SkillTemplate[] = [];
       try {
-        const root = await resolveProjectRoot(process.cwd());
-        projectSkills = await discoverProjectSkills(root);
+        projectSkills = await discoverProjectSkills(await resolveProjectRoot(process.cwd()));
       } catch {
         // Missing project root is expected outside initialized projects.
       }
@@ -199,11 +194,9 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
           : options.reference === undefined
             ? reportSkill(name, projectSkills)
             : reportSkillReference(name, options.reference, projectSkills);
-      if (options.raw === true && "content" in result) {
-        process.stdout.write(`${result.content}\n`);
-      } else {
-        process.stdout.write(`${JSON.stringify(result)}\n`);
-      }
+      process.stdout.write(
+        options.raw === true && "content" in result ? `${result.content}\n` : `${JSON.stringify(result)}\n`,
+      );
     });
 
   program
@@ -234,50 +227,16 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--query <text>", "Search the structural repository map")
     .option("--impact <path>", "Show cached dependency impact for an exact path")
     .option("--tests <path>", "Show affected test files for an exact path")
+    .option("--outline <path>", "Show structural symbol outline and line spans for an exact path")
+    .option("--refs <symbol>", "Find bounded symbol references across the repository map")
+    .option("--symbol <name>", "Filter symbols by name when using --outline")
+    .option("--path <path>", "Scope symbol reference lookup to a file and its dependents when using --refs")
     .option("--limit <count>", "Maximum results")
     .option("--depth <count>", "Reverse-dependent traversal depth for --impact")
     .addOption(new Option("--refresh", "Rebuild the structural repository map").hideHelp())
-    .action(
-      async (options: {
-        query?: string;
-        impact?: string;
-        tests?: string;
-        limit?: string;
-        depth?: string;
-        refresh?: boolean;
-      }) => {
-        const actionCount =
-          Number(options.query !== undefined) +
-          Number(options.impact !== undefined) +
-          Number(options.tests !== undefined) +
-          Number(options.refresh === true);
-        if (actionCount !== 1)
-          throw new Error("repo-map requires exactly one of --query, --impact, --tests, or --refresh.");
-        if (options.refresh) {
-          if (options.limit !== undefined || options.depth !== undefined)
-            throw new Error("--limit and --depth are not valid with repo-map --refresh.");
-          process.stdout.write(`${JSON.stringify(await refreshRepoMapInternal(process.cwd()))}\n`);
-          return;
-        }
-        if (options.tests !== undefined) {
-          if (options.depth !== undefined) throw new Error("--depth requires repo-map --impact.");
-          process.stdout.write(
-            `${JSON.stringify(await testsRepoMapInternal(process.cwd(), parseRepoMapPath(options.tests, "--tests"), parseRepoMapLimit(options.limit ?? "20")))}\n`,
-          );
-          return;
-        }
-        if (options.impact !== undefined) {
-          process.stdout.write(
-            `${JSON.stringify(await impactRepoMapInternal(process.cwd(), parseRepoMapPath(options.impact, "--impact"), parseRepoMapDepth(options.depth ?? "2"), parseRepoMapLimit(options.limit ?? "20")))}\n`,
-          );
-          return;
-        }
-        if (options.depth !== undefined) throw new Error("--depth requires repo-map --impact.");
-        process.stdout.write(
-          `${JSON.stringify(await queryRepoMapInternal(process.cwd(), options.query!, parseRepoMapLimit(options.limit ?? "20")))}\n`,
-        );
-      },
-    );
+    .action(async (options: RepoMapCliOptions) => {
+      process.stdout.write(`${JSON.stringify(await runRepoMapCommand(process.cwd(), options))}\n`);
+    });
 
   program
     .command("verify-plan")
@@ -301,4 +260,53 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
           : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
       await runInternalContextCommand({ hookInput, platform });
     });
+}
+
+type RepoMapCliOptions = Partial<
+  Record<"query" | "impact" | "tests" | "outline" | "refs" | "symbol" | "path" | "limit" | "depth", string>
+> & { refresh?: boolean };
+
+async function runRepoMapCommand(cwd: string, options: RepoMapCliOptions): Promise<unknown> {
+  const actions = [
+    options.query,
+    options.impact,
+    options.tests,
+    options.outline,
+    options.refs,
+    options.refresh === true ? "refresh" : undefined,
+  ].filter((v) => v !== undefined);
+  if (actions.length !== 1)
+    throw new Error("repo-map requires exactly one of --query, --impact, --tests, --outline, --refs, or --refresh.");
+  if (options.symbol !== undefined && options.outline === undefined)
+    throw new Error("--symbol requires repo-map --outline.");
+  if (options.path !== undefined && options.refs === undefined) throw new Error("--path requires repo-map --refs.");
+  if (options.depth !== undefined && options.impact === undefined)
+    throw new Error("--depth requires repo-map --impact.");
+  if (options.refresh) {
+    if (options.limit !== undefined) throw new Error("--limit is not valid with repo-map --refresh.");
+    return refreshRepoMapInternal(cwd);
+  }
+  if (options.outline !== undefined) {
+    const symbol = options.symbol === undefined ? undefined : parseRepoMapSymbol(options.symbol, "--symbol");
+    return outlineRepoMapInternal(
+      cwd,
+      parseRepoMapPath(options.outline, "--outline"),
+      parseRepoMapOutlineLimit(options.limit ?? "20"),
+      symbol,
+    );
+  }
+  const limit = parseRepoMapLimit(options.limit ?? "20");
+  if (options.refs !== undefined) {
+    const target = options.path === undefined ? undefined : parseRepoMapPath(options.path, "--path");
+    return refsRepoMapInternal(cwd, parseRepoMapSymbol(options.refs, "--refs"), limit, target);
+  }
+  if (options.tests !== undefined) return testsRepoMapInternal(cwd, parseRepoMapPath(options.tests, "--tests"), limit);
+  if (options.impact !== undefined)
+    return impactRepoMapInternal(
+      cwd,
+      parseRepoMapPath(options.impact, "--impact"),
+      parseRepoMapDepth(options.depth ?? "2"),
+      limit,
+    );
+  return queryRepoMapInternal(cwd, options.query!, limit);
 }

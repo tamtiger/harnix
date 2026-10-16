@@ -67,6 +67,7 @@ The 2026-08-18 adopted capability boundaries remain in the same dependency direc
 | `core/tasks/task-resume.ts` | BMAD/Spec Kit/Codex exact persisted-state recovery, clean-room reimplemented | Exact validated unfinished TaskRecord pointer only; no transcript/session store, fuzzy selection, Git restore or workflow transition |
 | `core/context/effective-context.ts` | VS Code context transparency concept over Harnix selector, clean-room reimplemented | Shared hidden-hook/report selection with trusted metadata only; no content/raw reason/hash, token accounting, compaction or model context ownership |
 | `core/verification/check-report.ts` | Spec Kit/BMAD persisted status/freshness visibility over Harnix snapshots, clean-room reimplemented | Structured categorical causes and safe changed/missing paths; no command execution, evidence rewrite or heuristic remediation |
+| `core/repo-map/outline.ts` + `refs.ts` | Serena (`oraios/serena`) symbol-first navigation concepts (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`), clean-room reimplemented | On-demand file symbol outline with `startLine`/`endLine` and bounded dependency-scoped symbol reference lookup; no LSP daemon, MCP server, Python runtime or cache schema change |
 
 Public exports chỉ gồm supported programmatic boundaries được ghi trong `src/index.ts`; consumer không được dựa vào deep imports. Commander/Inquirer nằm ở CLI layer. Filesystem/process/network dependencies được inject ở nơi cần test deterministic.
 
@@ -88,7 +89,7 @@ Public exports chỉ gồm supported programmatic boundaries được ghi trong 
 | `harnix verify-plan` | New in Harnix v2.0.0 (D6) | Tự động phát hiện deterministic lệnh verify cho ≥ 8 hệ sinh thái và monorepo |
 | `harnix context-report --platform <id> [--limit]` | VS Code context composition/transparency | Reuses Harnix's actual bounded hook selector and exposes only relative selected/omitted/drift metadata with trusted reason codes; no file content/raw reason/hash/write/network |
 | ~~`harnix checks`~~ / ~~`harnix audit`~~ | Spec Kit/BMAD persisted workflow/status semantics | Retired/removed in v2.0.0: gộp vào `harnix status --explain` để giảm overhead |
-| `harnix repo-map --query\|--impact\|--tests` | Aider repository-map and on-demand dependency navigation | Cache-only lexical candidate search, exact directional dependency impact, và test-impact navigation (`--tests`); no source scan/snippet, embeddings or dynamic-call claim |
+| `harnix repo-map --query\|--impact\|--tests\|--outline\|--refs` | Aider repository-map + Serena symbolic navigation | Cache-only lexical candidate search, exact directional dependency impact, test-impact navigation (`--tests`), on-demand file symbol outline (`--outline <path> [--symbol <name>]`) và bounded reference lookup (`--refs <symbol> [--path <path>]`); no LSP daemon, embeddings or cache schema mutation |
 | `harnix doctor [--fix] [--global]` | New + ECC doctor ideas | Doctor JSON v2 projects + global integrations, redacted suspicious-learning categories, meaningful exit codes, conservative scoped fix, no network/journal rewrite |
 | Trellis `workflow` | — | Removed; exactly one Harnix workflow |
 | Trellis `channel` | — | Removed completely |
@@ -267,6 +268,17 @@ Khảo sát ngày 2026-10-15 trên hai kho tài nguyên `frt-public-projects/ai-
 2. **Proprietary Token Handling**: `auto-refresh-token.kiro.hook` và token Keycloak/GitLab là hạ tầng riêng của doanh nghiệp, không thuộc phạm vi harness mã nguồn mở.
 3. **Mandatory Subagent Personas**: Cấm mandatory subagents và persona switching cồng kềnh; giữ nguyên mô hình single-agent kiêm nhiệm, chỉ kích hoạt protocol khi nền tảng hỗ trợ.
 4. **Autonomous Git Worktree**: Tự động tạo worktree vi phạm Rule 6 của Harnix.
+
+### 8.6 Symbolic code navigation mapping (oraios/serena)
+
+Khảo sát ngày 2026-10-16 trên `oraios/serena` (`d9e4c796fae0207ba6848d1df4b331122a5567b5`, GPL-3.0-or-later):
+
+| Khái niệm nguồn | Xuất xứ upstream | Harnix target | Phân loại | Nội dung thích nghi clean-room & ranh giới loại bỏ |
+|---|---|---|---|---|
+| `get_symbols_overview` + `find_symbol` | `oraios/serena` | `src/core/repo-map/outline.ts`, `harnix repo-map --outline <path> [--symbol <name>]` | `adapt` | Trích xuất on-demand danh sách symbol trong 1 file (`name`, `kind`, `exported`, `startLine`, `endLine`, `signature`, `container`) kèm bộ lọc `--symbol` và lọc secret; viết mới 100% bằng TypeScript thuần, không đổi schema `RepoMapV1`. |
+| `find_referencing_symbols` | `oraios/serena` | `src/core/repo-map/refs.ts`, `harnix repo-map --refs <symbol> [--path <path>]` | `adapt` | Tra cứu tham chiếu symbol (`declaration`, `import`, `reference`) ưu tiên theo `identifiers` trong `RepoMapV1` và thu hẹp theo đồ thị phụ thuộc (`buildRepoMapGraph` + `findAffectedTests`) khi có `--path`. |
+| MCP server / background daemon / `solidlsp` | `oraios/serena` | — | `remove` | Từ chối hoàn toàn daemon chạy nền, MCP server, Python runtime (`uvx`) và language server processes. |
+| `.serena/` memories & symbol-body edit tools | `oraios/serena` | — | `remove` | Từ chối `.serena/memories/` (Harnix đã có `.harnix/` + `harnix learning`) và `replace_symbol_body` / `insert_after_symbol` (nhường cho native edit tools của IDE/agent). |
 
 #### 8.4.2 Bảy pattern Explicitly Rejected kèm lý do kiến trúc
 

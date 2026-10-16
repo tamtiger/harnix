@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { queryRepoMap, refreshRepoMap } from "src/core/repo-map/service.js";
+import { outlineRepoMap, queryRepoMap, refreshRepoMap, refsRepoMap } from "src/core/repo-map/service.js";
 import { createRepoMap, repoMapCachePath } from "src/core/repo-map/store.js";
 import type { RepoMapRecordV1 } from "src/core/repo-map/types.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -103,6 +103,27 @@ describe("repository map service", () => {
     expect(query.status).toBe("ready");
     expect(query.results.map(({ path }) => path)).toContain("src/payment-service.ts");
     expect(query.results).toHaveLength(2);
+
+    const outline = await outlineRepoMap({ limit: 20, root, symbol: "charge", target: "src/payment-service.ts" });
+    expect(outline.status).toBe("ready");
+    expect(outline.symbols.map(({ name }) => name)).toEqual(["charge"]);
+
+    const refs = await refsRepoMap({ limit: 20, root, symbol: "PaymentService" });
+    expect(refs.status).toBe("ready");
+    expect(refs.references).toEqual([
+      {
+        kind: "declaration",
+        line: 1,
+        path: "src/payment-service.ts",
+        preview: "export class PaymentService {",
+      },
+    ]);
+  });
+  it("reports missing cache when refsRepoMap runs before refreshRepoMap", async () => {
+    const root = await temporaryRepository();
+    const refs = await refsRepoMap({ limit: 20, root, symbol: "PaymentService" });
+    expect(refs.status).toBe("missing");
+    expect(refs.references).toEqual([]);
   });
 });
 

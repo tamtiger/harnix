@@ -93,7 +93,9 @@ function resolveRelativeImport(
   }
   const candidates = new Set<string>();
   if (indexed.has(target)) candidates.add(target);
-  for (const path of paths) if (stripLastExtension(path) === target) candidates.add(path);
+  const targetStem = stripLastExtension(target);
+  for (const path of paths)
+    if (stripLastExtension(path) === target || stripLastExtension(path) === targetStem) candidates.add(path);
   for (const path of paths)
     if (posix.dirname(path) === target && /^index(?:\.|$)/u.test(posix.basename(path))) candidates.add(path);
   return [...candidates].sort(compareCodeUnits);

@@ -39,6 +39,14 @@ Khóa hai upstream skill libraries bổ sung cho hệ thống kỹ năng Harnix 
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | `main` | `aeac41d4d005999432bb7312f7ff06383a91d59d` | 2026-10-13T20:21:06Z | 2026-10-14 | MIT, Copyright (c) 2025 Addy Osmani | 25 skills; nguồn workflow patterns: grilling, rationalizations, feedback-loop, standards vs spec, smell baseline |
 | [mattpocock/skills](https://github.com/mattpocock/skills) | `main` | `49dd158d1076134a641b33efb035946536778336` | 2026-10-09T10:56:49Z | 2026-10-14 | MIT, Copyright (c) 2026 Matt Pocock | 39 skills; nguồn verification & debugging patterns: adversarial, moving goalposts, Chesterton's Fence, forced mutation |
 
+### 2.3 Symbolic code navigation baseline 2026-10-16
+
+Khóa nguồn tham chiếu hành vi điều hướng mã nguồn cấp symbol vào ngày **2026-10-16** (Asia/Ho_Chi_Minh):
+
+| Nguồn | Branch | Commit SHA | Ngày commit | Ngày truy cập | License | Quy mô & Vai trò |
+|---|---|---|---|---|---|---|
+| [oraios/serena](https://github.com/oraios/serena) | `main` | `d9e4c796fae0207ba6848d1df4b331122a5567b5` | 2026-10-15 | 2026-10-16 | GPL-3.0-or-later | Nguồn ý tưởng hành vi điều hướng symbol-first (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`); được tái hiện clean-room 100% bằng TypeScript cho `harnix repo-map --outline` và `--refs`, không sao chép bất kỳ mã nguồn Python/GPL nào |
+
 ## 3. Kiểm chứng bảo toàn PRD
 
 Trước khi gắn lịch sử upstream, PRD gốc (khi đó là `docs/PRD.md`, nay được chuẩn hóa thành `docs/HARNIX_PRD.md`) được sao lưu tạm và so sánh SHA-256 theo byte:
@@ -122,6 +130,12 @@ Hash bản làm việc và bản sao khớp tuyệt đối trước khi chỉnh 
 - Khảo sát giao thức điều phối subagent và Status Protocol (`DONE`, `DONE_WITH_CONCERNS`, `BLOCKED`, `NEEDS_CONTEXT`) trong `orchestration-protocol.md`.
 - Khảo sát các kỹ năng craft `ak-sowat`, `ak-sumup`, `ak-ui-ux-pro-max`, `ak-web-testing`.
 - Loại bỏ mô hình persona switching cồng kềnh, git worktree tự động và token refresh Keycloak.
+
+### oraios/serena
+
+Đã khảo sát kiến trúc và danh mục công cụ điều hướng mã nguồn của `oraios/serena` tại commit `d9e4c796fae0207ba6848d1df4b331122a5567b5` (ngày commit 2026-10-15, ngày truy cập 2026-10-16, License GPL-3.0-or-later):
+- Thích nghi clean-room các khái niệm điều hướng symbol-first (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`) thành hai chế độ on-demand của `harnix repo-map`: `--outline <path> [--symbol <name>]` (trích xuất danh sách symbol kèm `startLine`–`endLine`, `kind`, `signature`, `container`) và `--refs <symbol> [--path <path>]` (tra cứu tham chiếu kết hợp đồ thị phụ thuộc tĩnh `repo-map`).
+- Loại bỏ hoàn toàn kiến trúc MCP server / background daemon, Python runtime (`uvx`) & `solidlsp` language server processes, thư mục cấu hình `.serena/` kèm free-form markdown memories, và các công cụ ghi đè mã nguồn (`replace_symbol_body`, `insert_after_symbol`). Không sao chép bất kỳ mã nguồn GPL-3.0-or-later nào.
 
 ## 6. Tài liệu Codex chính thức đã dùng
 

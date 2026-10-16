@@ -114,6 +114,7 @@ async function routePreflight(root: string, now: number): Promise<WorkflowPrefli
       const epics = await listEpicIds(harnixRoot);
       for (const epicId of epics) {
         const epic = await loadEpicRecord(root, epicId);
+        if (epic === undefined) continue;
         const members = orderEpicMembers(await collectEpicMembers(harnixRoot, epicId), epic.order);
         const next = nextEpicMember(members);
         if (next !== null) {

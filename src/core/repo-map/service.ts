@@ -14,6 +14,13 @@ import {
   type RepoMapTestsOptions,
   type RepoMapTestsResultV1,
 } from "./tests.js";
+import { createRepoMapOutline, type RepoMapOutlineOptions, type RepoMapOutlineResultV1 } from "./outline.js";
+import {
+  createUnavailableRepoMapRefs,
+  findRepoMapReferences,
+  type RepoMapRefsOptions,
+  type RepoMapRefsResultV1,
+} from "./refs.js";
 import {
   defaultRepoMapLimits,
   type RepoMapLimits,
@@ -97,6 +104,24 @@ export async function impactRepoMapTests(
     return createUnavailableRepoMapTests(isMissing(error) ? "missing" : "invalid", options);
   }
   return findAffectedTests(map, options);
+}
+
+export async function outlineRepoMap(
+  options: RepoMapOutlineOptions & { readonly root: string },
+): Promise<RepoMapOutlineResultV1> {
+  return createRepoMapOutline(options);
+}
+
+export async function refsRepoMap(
+  options: RepoMapRefsOptions & { readonly root: string },
+): Promise<RepoMapRefsResultV1> {
+  let map: RepoMapV1;
+  try {
+    map = await readRepoMap(options.root);
+  } catch (error: unknown) {
+    return createUnavailableRepoMapRefs(isMissing(error) ? "missing" : "invalid", options);
+  }
+  return findRepoMapReferences(map, options);
 }
 
 /** Explicit doctor inventory: scans safely but never writes or refreshes the cache. */

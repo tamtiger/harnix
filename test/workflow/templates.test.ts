@@ -171,7 +171,7 @@ describe("workflow templates", () => {
       "harnix repo-map --query|--impact",
       "`harnix status` (bounded read-only projection",
       "`harnix tasks` (bounded local index)",
-      "`harnix resume <task-id> [--dry-run]` restores only an explicitly selected unfinished task's pointer",
+      "`harnix resume <task-id> [--force] [--next] [--dry-run]` restores only an explicitly selected unfinished task's pointer",
       "`harnix context-report --platform <p>` (effective hook-context metadata;",
       "`harnix status --explain`",
       "platform hooks must not invoke repository-map queries, impact or refreshes",

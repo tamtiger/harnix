@@ -63,3 +63,35 @@ export interface RepoMapQueryResult {
     "extension" | "packagePath" | "language" | "kind" | "identifiers" | "headings" | "importTargets"
   >;
 }
+
+export type ContainerKind = "class" | "interface" | "enum" | "struct" | "record" | "namespace";
+export type RepoMapSymbolKind = ContainerKind | "function" | "method" | "type" | "const" | "variable" | "heading";
+
+export interface RepoMapSymbolOutlineV1 {
+  readonly name: string;
+  readonly kind: RepoMapSymbolKind;
+  readonly exported: boolean;
+  readonly startLine: number;
+  readonly endLine: number;
+  readonly signature: string;
+  readonly container?: string;
+}
+
+export interface RepoMapOutlineOptions {
+  readonly target: string;
+  readonly symbol?: string;
+  readonly limit: number;
+}
+
+export interface RepoMapOutlineResultV1 {
+  readonly generator: "harnix";
+  readonly schemaVersion: 1;
+  readonly scope: "project";
+  readonly status: "ready" | "not-found" | "skipped";
+  readonly target: string;
+  readonly language?: string;
+  readonly symbolFilter?: string;
+  readonly limit: number;
+  readonly symbols: readonly RepoMapSymbolOutlineV1[];
+  readonly truncated: boolean;
+}

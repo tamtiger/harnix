@@ -2,15 +2,7 @@ import { access, readdir, readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const IGNORED_DIRS = new Set([
-  ".git",
-  "node_modules",
-  "dist",
-  "coverage",
-  ".vs",
-  ".idea",
-  "tasks",
-]);
+const IGNORED_DIRS = new Set([".git", "node_modules", "dist", "coverage", ".vs", ".idea", "tasks"]);
 
 async function collectMarkdownFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });

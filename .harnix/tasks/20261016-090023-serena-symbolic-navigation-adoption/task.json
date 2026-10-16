@@ -1,0 +1,338 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-090023-serena-symbolic-navigation-adoption",
+  "title": "Áp dụng điều hướng mã nguồn cấp symbol và tra cứu tham chiếu từ Serena vào Harnix",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Thích nghi clean-room các tính năng tương thích từ oraios/serena vào Harnix: bổ sung harnix repo-map --outline <path> (kèm lọc --symbol và giới hạn dòng startLine-endLine), harnix repo-map --refs <symbol> (tra cứu nơi tham chiếu symbol có giới hạn từ cache), cập nhật hướng dẫn điều hướng symbol-first trong skills/workflow template, và ghi nhận đầy đủ provenance/tài liệu theo chuẩn Harnix.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Bổ sung mô-đun trích xuất cấu trúc symbol cấp file src/core/repo-map/outline.ts và hành động harnix repo-map --outline <path> [--symbol <query>] [--limit <count>], trả về danh sách có thứ tự các symbol kèm name, kind, exported, startLine, endLine, signature đã lọc secret mà không cần daemon/LSP hay đổi schema cache RepoMapV1.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-cli-repo-map-2",
+        "ev-check-outline-3",
+        "ev-check-suite-v2-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Bổ sung mô-đun tra cứu tham chiếu symbol src/core/repo-map/refs.ts và hành động harnix repo-map --refs <symbol> [--path <target>] [--limit <count>], tận dụng cache RepoMapV1 và đồ thị phụ thuộc để trả về các vị trí tham chiếu (path, line, kind, preview đã lọc secret) an toàn và xác định.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-cli-repo-map-2",
+        "ev-check-refs-2",
+        "ev-check-suite-v2-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Tích hợp CLI flags (--outline, --refs, --symbol, --path) vào src/cli-workflow-commands.ts, src/commands/repo-map-internal.ts và cập nhật hướng dẫn điều hướng symbol-first trong src/templates/harnix/workflow.md, src/skills/harnix-implement/SKILL.md, src/skills/harnix-plan/SKILL.md, src/skills/harnix-research/SKILL.md trong trần token budget.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-cli-repo-map-2",
+        "ev-check-gates-3",
+        "ev-check-suite-v2-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Ghi nhận đầy đủ provenance của oraios/serena (commit d9e4c796fae0207ba6848d1df4b331122a5567b5, GPL-3.0-or-later clean-room adaptation và các hạng mục rejected) vào docs/HARNESS_FEATURE_PROVENANCE.json, docs/UPSTREAM_BASELINE.md, docs/UPSTREAM_MAPPING.md, docs/HARNESS_RESEARCH.md, docs/HARNIX_PRD.md, docs/HARNIX_WORKFLOW.md, docs/IMPLEMENTATION_PLAN.md, AGENTS.md, README.md và vượt qua toàn bộ test:gates.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-3",
+        "ev-check-suite-v2-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-cli-repo-map",
+      "description": "Integration test cho các cờ CLI repo-map --outline và --refs",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/integration/commands/repo-map-internal.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/cli-helpers.ts",
+        "src/cli-workflow-commands.ts",
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/**",
+        "test/integration/commands/repo-map-internal.test.ts"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Contract, CLI, architecture, provenance, docs và token budget gates",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test:gates",
+      "criterionIds": [
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/unit/test-structure.test.ts",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-outline",
+      "description": "Unit test cho trích xuất symbol outline và line span",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/repo-map/outline.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/repo-map/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "check-refs",
+      "description": "Unit test cho tra cứu tham chiếu symbol trên đồ thị repo-map",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/repo-map/refs.test.ts",
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/repo-map/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": false,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "check-suite-v2",
+      "description": "Kiểm thử toàn bộ test suite dự án (v2)",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "package.json",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-outline-1",
+      "checkId": "check-outline",
+      "recordedAt": "2026-10-16T09:07:06.420+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm vitest run test/unit/core/repo-map/outline.test.ts — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "cdb03b24072c241d76fbecaa70576430c7a7880e8d94c0af53ac465d7ebe9c91"
+    },
+    {
+      "id": "ev-check-outline-2",
+      "checkId": "check-outline",
+      "recordedAt": "2026-10-16T09:07:57.259+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/outline.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e96251e11cce6a0145f19739cdb43ccbfcad11fb353a8d70be8a440c63b17798"
+    },
+    {
+      "id": "ev-check-refs-1",
+      "checkId": "check-refs",
+      "recordedAt": "2026-10-16T09:10:47.733+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/refs.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2dd427c1e0046af859534e789f28ba538af2dcc587f8de19edee30d9287b7afc"
+    },
+    {
+      "id": "ev-check-cli-repo-map-1",
+      "checkId": "check-cli-repo-map",
+      "recordedAt": "2026-10-16T09:17:02.703+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/integration/commands/repo-map-internal.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4c7c570602f4429701e4454e33f9c58ada99712ad200ea315ce39abed9a1fa5d"
+    },
+    {
+      "id": "ev-check-outline-3",
+      "checkId": "check-outline",
+      "recordedAt": "2026-10-16T09:36:25.655+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/outline.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5db89476bd5f6db9ce3f4ba7ec1f5b3d2c8b07d0feca2faee071dd683de07a3c"
+    },
+    {
+      "id": "ev-check-refs-2",
+      "checkId": "check-refs",
+      "recordedAt": "2026-10-16T09:36:30.231+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/refs.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "469e2370262c0a7ce4ca0a2996b50298fa5db2bc922cd768d0621d5a078f206e"
+    },
+    {
+      "id": "ev-check-cli-repo-map-2",
+      "checkId": "check-cli-repo-map",
+      "recordedAt": "2026-10-16T09:36:36.369+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/integration/commands/repo-map-internal.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "40f2dfada280cb7527c2a1ded413c683fc74ce1ff953ed9d3730d31cda5d6b9d"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-16T09:36:58.302+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b6aa73ebb1ee85fb41294dd27a578cc8201e2ceb9d4f452ea0554bcde0ea6133"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T09:38:15.083+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "8851bd9d8973f00be49754039b5d3fc25537841862323df7aff3afb30790ea61"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T09:43:22.911+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "0af25b223fbcc16d625be4953b3da09216f1a7f7d4f7b98ea1c73becde39cfe9"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-16T09:45:37.650+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "aeafdeb823e9c77b727d3f58a3e6399b1ade9dfaa04afc54179048adbc8142da"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-16T09:54:54.697+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Thay thế check-suite sau khi bổ sung setTitle/setGoal vào BRIEF_ACTIONS và cập nhật behavior-snapshot.golden.json theo yêu cầu người dùng",
+      "artifactPaths": [
+        ".harnix/tasks/20261016-090023-serena-symbolic-navigation-adoption/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-gates-3",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-16T09:55:38.509+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8d00c001a443bd0eb2275f8acae7e2bdaa883fc581cc019fae628cf684cec854"
+    },
+    {
+      "id": "ev-check-suite-v2-1",
+      "checkId": "check-suite-v2",
+      "recordedAt": "2026-10-16T09:56:49.856+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "dbd0395c9575adf8942f2cb1e8badbfbf16da145c7d18001c87c749dac52a3f5"
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNESS_FEATURE_PROVENANCE.json",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/UPSTREAM_BASELINE.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "src/cli-helpers.ts",
+    "src/cli-workflow-commands.ts",
+    "src/commands/repo-map-internal.ts",
+    "src/core/repo-map/outline.ts",
+    "src/core/repo-map/refs.ts",
+    "src/core/repo-map/service.ts",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-plan/SKILL.md",
+    "src/skills/harnix-research/SKILL.md",
+    "src/templates/harnix/workflow.md"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/common.md",
+    ".harnix/spec/guides/languages/typescript.md"
+  ],
+  "createdAt": "2026-10-16T09:00:23.741+07:00",
+  "updatedAt": "2026-10-16T09:57:11.381+07:00",
+  "decisions": [
+    {
+      "id": "dec-serena-clean-room",
+      "text": "Thích nghi clean-room điều hướng symbol (repo-map --outline) và tra cứu tham chiếu (repo-map --refs) từ oraios/serena mà không chạy LSP daemon, không thêm MCP server và không đổi schema cache RepoMapV1",
+      "rationale": "Serena dùng GPL-3.0-or-later và kiến trúc Python LSP/MCP server; Harnix giữ ranh giới một gói npm độc lập, deterministic, zero-daemon và tương thích ngược hoàn toàn với RepoMapV1"
+    },
+    {
+      "id": "dec-brief-actions-golden",
+      "text": "Khi thêm action ghi mới vào harnix workflow, luôn thêm action vào BRIEF_ACTIONS trong src/core/workflow/brief.ts đồng thời cập nhật constraints.brief trong test/workflow/behavior-snapshot.golden.json.",
+      "rationale": "Giữ nhất quán giữa assertCommandShape, workflow.md cookbook, Rule 10 và snapshot schema"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-lexical-span-limits",
+      "text": "Trích xuất giới hạn dòng symbol (startLine-endLine) và tham chiếu bằng bộ phân tích lexical/ngoặc/thụt lề không giải quyết dynamic dispatch hoặc macro phức tạp như LSP đầy đủ",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-16T09:57:11.381+07:00"
+}

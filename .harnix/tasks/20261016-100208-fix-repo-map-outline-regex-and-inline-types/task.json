@@ -1,0 +1,102 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-100208-fix-repo-map-outline-regex-and-inline-types",
+  "title": "Khắc phục lỗi đếm ngoặc nhọn với regex literal và kiểu inline trong repo-map --outline",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Đảm bảo extractFileSymbols và findBraceBlockEnd trong src/core/repo-map/outline.ts bỏ qua dấu ngoặc nhọn trong regex literal và kiểu tham số/trả về inline của TypeScript",
+  "nonGoals": [],
+  "followUpOf": "20261016-090023-serena-symbolic-navigation-adoption",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Bỏ qua dấu ngoặc nhọn và ký tự escape bên trong regex literal khi tính độ sâu ngoặc nhọn và tìm dòng kết thúc khối",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-outline-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Tính chính xác endLine cho hàm và phương thức có kiểu đối tượng inline trong danh sách tham số hoặc kiểu trả về Promise<{...}>",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-outline-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "check-outline",
+      "description": "Unit test cho outline.ts",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/repo-map/outline.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/repo-map/outline.ts",
+        "test/unit/core/repo-map/outline.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-outline-1",
+      "checkId": "check-outline",
+      "recordedAt": "2026-10-16T10:06:44.135+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/outline.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7e4d228c1b8c2cbef0eadce77c17f7cd8aa39ef8568ae680e75b2dd77c7c5560"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T10:07:47.508+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0b5ee0e75c8a5a2dc7d863160024d575fc6991eed8b478445d6425d80d5215a5"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/repo-map/outline.ts",
+    "test/unit/core/repo-map/outline.test.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/typescript.md"
+  ],
+  "createdAt": "2026-10-16T10:02:08.067+07:00",
+  "updatedAt": "2026-10-16T10:08:10.119+07:00",
+  "decisions": [
+    {
+      "id": "dec-outline-regex-and-paren-braces",
+      "text": "Trong bộ phân tích từ vựng outline.ts, loại bỏ chuỗi trước rồi đến regex literal rồi mới đến comment dòng //, đồng thời bỏ qua cặp ngoặc nhọn { } bên trong danh sách tham số ( ) và chỉ kiểm tra kết thúc khối sau khi quét hết dòng.",
+      "rationale": "Tránh đếm nhầm dấu { trong regex literal hoặc trong kiểu tham số/trả về inline của TypeScript"
+    }
+  ],
+  "completedAt": "2026-10-16T10:08:10.119+07:00"
+}

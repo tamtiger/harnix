@@ -202,6 +202,109 @@ describe("repository-map operations", () => {
       runCli(["node", "harnix", "repo-map", "--tests", "src/math/calc.ts", "--impact", "src/math/calc.ts"]),
     ).resolves.toBe(2);
   });
+
+  it("extracts file symbol outlines and looks up symbol references via repo-map --outline and --refs", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(
+      join(root, "src", "service.ts"),
+      [
+        "export class OrderService {",
+        "  createOrder(id: string): string {",
+        "    return id;",
+        "  }",
+        "}",
+        "export function validateOrder(id: string): boolean {",
+        "  return id.length > 0;",
+        "}",
+        "",
+      ].join("\n"),
+    );
+    await writeFile(
+      join(root, "src", "handler.ts"),
+      [
+        "import { validateOrder } from './service.js';",
+        "export function handle(id: string): boolean {",
+        "  return validateOrder(id);",
+        "}",
+        "",
+      ].join("\n"),
+    );
+    await initializeProject({ developer: "tam", root, yes: true });
+    process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    await expect(
+      runCli(["node", "harnix", "repo-map", "--outline", "src/service.ts", "--symbol", "validateOrder"]),
+    ).resolves.toBe(0);
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+      generator: "harnix",
+      language: "typescript",
+      limit: 20,
+      schemaVersion: 1,
+      scope: "project",
+      status: "ready",
+      symbolFilter: "validateOrder",
+      symbols: [
+        {
+          exported: true,
+          kind: "function",
+          name: "validateOrder",
+          signature: "export function validateOrder(id: string): boolean {",
+          startLine: 6,
+          endLine: 8,
+        },
+      ],
+      target: "src/service.ts",
+      truncated: false,
+    });
+
+    stdout.mockClear();
+    await expect(
+      runCli(["node", "harnix", "repo-map", "--refs", "validateOrder", "--path", "src/service.ts"]),
+    ).resolves.toBe(0);
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+      generator: "harnix",
+      limit: 20,
+      references: [
+        {
+          kind: "declaration",
+          line: 6,
+          path: "src/service.ts",
+          preview: "export function validateOrder(id: string): boolean {",
+        },
+        {
+          kind: "import",
+          line: 1,
+          path: "src/handler.ts",
+          preview: "import { validateOrder } from './service.js';",
+        },
+        {
+          kind: "reference",
+          line: 3,
+          path: "src/handler.ts",
+          preview: "return validateOrder(id);",
+        },
+      ],
+      schemaVersion: 1,
+      scope: "project",
+      status: "ready",
+      symbol: "validateOrder",
+      target: "src/service.ts",
+      truncated: false,
+    });
+
+    for (const argv of [
+      ["node", "harnix", "repo-map", "--query", "service", "--symbol", "validateOrder"],
+      ["node", "harnix", "repo-map", "--outline", "src/service.ts", "--path", "src/service.ts"],
+      ["node", "harnix", "repo-map", "--refs", "validateOrder", "--depth", "2"],
+      ["node", "harnix", "repo-map", "--outline", "src/service.ts", "--depth", "2"],
+    ]) {
+      stdout.mockClear();
+      await expect(runCli(argv)).resolves.toBe(2);
+    }
+  });
 });
 
 async function snapshotTree(root: string): Promise<Array<{ path: string; sha256: string }>> {

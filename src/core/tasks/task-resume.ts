@@ -1,5 +1,6 @@
 import { Buffer } from "node:buffer";
 import { readFile, stat } from "node:fs/promises";
+import { resolve } from "node:path";
 
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { setActiveTask, validateTask, type TaskRecord } from "./task.js";
@@ -29,7 +30,7 @@ export interface TaskResumeDependencies {
   loadCandidate(harnixRoot: string, taskId: string): Promise<TaskRecord>;
   loadActive(harnixRoot: string): Promise<TaskRecord | null>;
   activate(harnixRoot: string, taskId: string): Promise<void>;
-  fileExists?(path: string): Promise<boolean>;
+  fileExists?: (path: string) => Promise<boolean>;
 }
 
 const TEST_FILE_PATTERN =
@@ -103,7 +104,8 @@ export async function resumeTask(
   }
   if (active !== null && terminalStatuses.has(active.status))
     throw new Error("Active task state is unavailable; run harnix doctor.");
-  if (active !== null && active.id !== candidate.id && !force) throw new Error("Resume cannot replace another active task.");
+  if (active !== null && active.id !== candidate.id && !force)
+    throw new Error("Resume cannot replace another active task.");
 
   let outcome: TaskResumeOutcome;
   if (active !== null && active.id === candidate.id) outcome = "already-active";
@@ -121,7 +123,6 @@ export async function resumeTask(
     dependencies.fileExists ??
     (async (relPath: string) => {
       try {
-        const { resolve } = await import("node:path");
         const projectRoot = resolve(harnixRoot, "..");
         const full = await resolveSafeProjectPath(projectRoot, relPath);
         const s = await stat(full);

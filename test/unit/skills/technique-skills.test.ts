@@ -73,6 +73,6 @@ describe("technique skills catalog", () => {
   it("bumps package version to 2.7.0 series", async () => {
     const { readFile } = await import("node:fs/promises");
     const pkg = JSON.parse(await readFile("package.json", "utf8"));
-    expect(pkg.version).toMatch(/^2\.7\.0/u);
+    expect(pkg.version).toMatch(/^2\.7\.\d+/u);
   });
 });

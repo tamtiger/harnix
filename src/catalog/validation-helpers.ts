@@ -85,7 +85,10 @@ export function validateContentPath(value: string): void {
   }
   if (
     !value.endsWith(".md") ||
-    !(value === "common.md" || ["common/", "languages/", "technologies/", "topics/"].some((prefix) => value.startsWith(prefix)))
+    !(
+      value === "common.md" ||
+      ["common/", "languages/", "technologies/", "topics/"].some((prefix) => value.startsWith(prefix))
+    )
   ) {
     throw new CatalogValidationError("Guide contentPath is unsafe.");
   }

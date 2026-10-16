@@ -1,0 +1,109 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-101116-add-serena-notice-and-multilang-outline-fixes",
+  "title": "Bổ sung oraios/serena vào NOTICE và xử lý các edge case đa ngôn ngữ trong repo-map --outline",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Thêm ghi nhận oraios/serena vào NOTICE và cải thiện bộ phân tích outline.ts cho C#/PHP block namespace, Python multi-line def/docstring và Go type alias",
+  "nonGoals": [],
+  "followUpOf": "20261016-100208-fix-repo-map-outline-regex-and-inline-types",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Ghi nhận oraios/serena trong NOTICE và kiểm tra tự động trong test/workflow/provenance.test.ts",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-outline-1",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Xử lý chính xác C#/PHP block-scoped namespace, Python multi-line def signature/docstring và Go type alias trong src/core/repo-map/outline.ts",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-outline-1",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "check-outline",
+      "description": "Kiểm thử outline đa ngôn ngữ và provenance NOTICE",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/repo-map/outline.test.ts test/workflow/provenance.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "NOTICE",
+        "src/core/repo-map/outline.ts",
+        "test/unit/core/repo-map/outline.test.ts",
+        "test/workflow/provenance.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-outline-1",
+      "checkId": "check-outline",
+      "recordedAt": "2026-10-16T10:25:07.922+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/outline.test.ts test/workflow/provenance.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fe9f7967c3e87607fafa058339c12c619b55bda3510dd4847961140f8a45b7f0"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T10:26:11.619+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "53b81ede1826c2df803e9aa18bf973bf8e4d89ee9c68f5f001d7cf3440a88da4"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T10:28:21.986+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a00c6851bbbdc496166c3685b5004a5b7b6a32ba534cb1114b70e148b6f99ebb"
+    }
+  ],
+  "relevantPaths": [
+    "NOTICE",
+    "src/core/repo-map/outline.ts",
+    "test/unit/core/repo-map/outline.test.ts",
+    "test/workflow/provenance.test.ts"
+  ],
+  "relevantSpecs": [
+    ".harnix/spec/guides/typescript.md"
+  ],
+  "createdAt": "2026-10-16T10:11:16.289+07:00",
+  "updatedAt": "2026-10-16T10:28:51.344+07:00",
+  "completedAt": "2026-10-16T10:28:51.344+07:00"
+}

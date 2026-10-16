@@ -239,11 +239,7 @@ export async function addRiskWorkflow(
   })) as TaskRecordV3;
 }
 
-export async function setTitleWorkflow(
-  root: string,
-  title: string,
-  injectedNow?: string,
-): Promise<TaskRecordV3> {
+export async function setTitleWorkflow(root: string, title: string, injectedNow?: string): Promise<TaskRecordV3> {
   const text = requireText(title, "--title");
   const now = await currentInstant(root, injectedNow);
   const task = await activeV3(root);
@@ -256,11 +252,7 @@ export async function setTitleWorkflow(
   })) as TaskRecordV3;
 }
 
-export async function setGoalWorkflow(
-  root: string,
-  goal: string,
-  injectedNow?: string,
-): Promise<TaskRecordV3> {
+export async function setGoalWorkflow(root: string, goal: string, injectedNow?: string): Promise<TaskRecordV3> {
   const text = requireText(goal, "--goal");
   const now = await currentInstant(root, injectedNow);
   const task = await activeV3(root);
@@ -272,4 +264,3 @@ export async function setGoalWorkflow(
     },
   })) as TaskRecordV3;
 }
-

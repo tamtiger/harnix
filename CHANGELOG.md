@@ -4,6 +4,18 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.7.2] - 2026-10-16
+
+### Fixed
+
+- Bổ sung oraios/serena vào NOTICE và fix edge cases outline cho Python, Go, C# và PHP
+
+## [2.7.1] - 2026-10-16
+
+### Added
+
+- Bổ sung điều hướng symbol cấp file (repo-map --outline) và tra cứu tham chiếu symbol (repo-map --refs) thích nghi clean-room từ Serena
+
 ## [2.7.0] - 2026-10-15
 
 ### Changed

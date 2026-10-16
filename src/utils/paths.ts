@@ -96,9 +96,8 @@ export async function resolveSafeFilePath(projectRoot: string, filePath: string)
     throw new UnsafeProjectPathError("A file path must be non-empty and valid.");
   }
   const resolvedRoot = resolve(projectRoot);
-  const candidate = isAbsolute(filePath) || win32.isAbsolute(filePath)
-    ? resolve(filePath)
-    : resolve(resolvedRoot, filePath);
+  const candidate =
+    isAbsolute(filePath) || win32.isAbsolute(filePath) ? resolve(filePath) : resolve(resolvedRoot, filePath);
 
   if (!isContainedPath(resolvedRoot, candidate)) {
     throw new UnsafeProjectPathError("The requested path escapes the project root.");

@@ -198,6 +198,16 @@ Correction nhỏ nhất thêm action `research` vào internal router và hai pro
 
 Behavior này được suy ra từ self-audit consistency của Harnix, không lấy từ external harness. Vì vậy `docs/HARNESS_FEATURE_PROVENANCE.json` và `NOTICE` không đổi; parity, routing và inactive-task regression tests là evidence sở hữu của Harnix.
 
+### 3.13 Symbolic code navigation 2026-10-16: clean-room adaptation từ Serena
+
+Khảo sát `oraios/serena` tại commit `d9e4c796fae0207ba6848d1df4b331122a5567b5` (ngày 2026-10-15, `GPL-3.0-or-later`) cho thấy giá trị cốt lõi của điều hướng cấp symbol đối với token economy: agent đọc khung cấu trúc symbol kèm dải dòng (`startLine`–`endLine`) và tra cứu các vị trí tham chiếu (`declaration`, `import`, `reference`) trước khi đọc lát cắt file hoặc sửa đổi chữ ký hàm, thay vì nạp toàn bộ file dài hoặc grep tràn lan.
+
+Harnix chọn phương án thích nghi clean-room (`symbolic-code-navigation`):
+
+- `harnix repo-map --outline <path> [--symbol <name>] [--limit <1..50>]` (`src/core/repo-map/outline.ts`): phân tích cấu trúc on-demand trên 1 file đích đã xác thực an toàn, trả về danh sách symbol theo thứ tự xuất hiện (`name`, `kind`, `exported`, `startLine`, `endLine`, `signature`, `container?`) cho TypeScript/JavaScript, Python, Go, C#/Java/PHP và Markdown, lọc dòng chứa secret và không thay đổi schema `RepoMapV1`.
+- `harnix repo-map --refs <symbol> [--path <path>] [--limit <1..20>]` (`src/core/repo-map/refs.ts`): tận dụng chỉ mục `identifiers` và đồ thị phụ thuộc (`buildRepoMapGraph` + `findAffectedTests`) của `RepoMapV1` để tìm và phân loại tham chiếu (`declaration | import | reference`) có giới hạn.
+- Các thành phần bị từ chối (`reject`): kiến trúc MCP server / background daemon, Python runtime (`uvx`) và `solidlsp` language server processes, thư mục `.serena/` + free-form markdown memories, và công cụ sửa đổi body symbol (`replace_symbol_body`, `insert_after_symbol`).
+
 ## 4. Platform research decisions
 
 Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapters described by earlier Phase 1–5 research are retained only as legacy/provenance evidence; the current adopted contract is `GLOBAL_SETUP_REFACTOR_PLAN.md` §§2, 6–9.

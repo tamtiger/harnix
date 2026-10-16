@@ -1,7 +1,7 @@
 {
   "generator": "harnix",
   "schemaVersion": 1,
-  "reviewedAt": "2026-08-26",
+  "reviewedAt": "2026-10-16",
   "features": [
     {
       "id": "adaptive-tdd",
@@ -578,6 +578,61 @@
           "docs/HARNESS_RESEARCH.md",
           "docs/HARNIX_PRD.md",
           "docs/HARNIX_WORKFLOW.md",
+          "docs/UPSTREAM_MAPPING.md"
+        ]
+      }
+    },
+    {
+      "id": "symbolic-code-navigation",
+      "capability": "On-demand file symbol outlines with line spans and bounded dependency-scoped symbol reference lookup",
+      "decision": "adapt",
+      "lifecycle": "implemented",
+      "sources": [
+        {
+          "repository": "oraios/serena",
+          "url": "https://github.com/oraios/serena",
+          "ref": "d9e4c796fae0207ba6848d1df4b331122a5567b5",
+          "sourceDate": "2026-10-15",
+          "license": "GPL-3.0-or-later",
+          "evidenceUrls": [
+            "https://github.com/oraios/serena/blob/d9e4c796fae0207ba6848d1df4b331122a5567b5/LICENSE",
+            "https://github.com/oraios/serena/blob/d9e4c796fae0207ba6848d1df4b331122a5567b5/README.md",
+            "https://github.com/oraios/serena/commit/d9e4c796fae0207ba6848d1df4b331122a5567b5"
+          ]
+        }
+      ],
+      "adaptation": "Re-implements file-level symbol outline extraction (name, kind, exported, startLine, endLine, signature, container) and bounded dependency-scoped reference lookup (--outline and --refs on harnix repo-map) from scratch in TypeScript without copying GPL-3.0-or-later code, spawning LSP daemons, registering MCP servers, or altering the RepoMapV1 cache schema.",
+      "implementation": {
+        "code": [
+          "src/cli-helpers.ts",
+          "src/cli-workflow-commands.ts",
+          "src/commands/repo-map-internal.ts",
+          "src/core/repo-map/outline.ts",
+          "src/core/repo-map/refs.ts",
+          "src/core/repo-map/service.ts",
+          "src/skills/harnix-implement/SKILL.md",
+          "src/skills/harnix-plan/SKILL.md",
+          "src/skills/harnix-research/SKILL.md",
+          "src/templates/harnix/workflow.md"
+        ],
+        "tests": [
+          "test/integration/commands/repo-map-internal.test.ts",
+          "test/unit/cli-helpers.test.ts",
+          "test/unit/core/repo-map/outline.test.ts",
+          "test/unit/core/repo-map/refs.test.ts",
+          "test/unit/core/repo-map/service.test.ts",
+          "test/workflow/cli-contract.test.ts",
+          "test/workflow/provenance.test.ts"
+        ],
+        "docs": [
+          "AGENTS.md",
+          "README.md",
+          "docs/HARNESS_FEATURE_PROVENANCE.json",
+          "docs/HARNESS_RESEARCH.md",
+          "docs/HARNIX_PRD.md",
+          "docs/HARNIX_WORKFLOW.md",
+          "docs/IMPLEMENTATION_PLAN.md",
+          "docs/UPSTREAM_BASELINE.md",
           "docs/UPSTREAM_MAPPING.md"
         ]
       }

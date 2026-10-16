@@ -28,6 +28,8 @@ export const BRIEF_ACTIONS: ReadonlySet<string> = new Set([
   "addDecision",
   "addRisk",
   "setPaths",
+  "setTitle",
+  "setGoal",
   "replaceCheck",
   "setBaseline",
 ]);

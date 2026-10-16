@@ -147,6 +147,8 @@ harnix doctor [--fix] [--global]
 harnix repo-map --query <text> [--limit <count>]
 harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]
 harnix repo-map --tests <path> [--limit <1..20>]
+harnix repo-map --outline <path> [--symbol <name>] [--limit <1..50>]
+harnix repo-map --refs <symbol> [--path <path>] [--limit <1..20>]
 harnix verify-plan
 ```
 

@@ -122,7 +122,7 @@ export async function assertReadyRequirements(
   entering = true,
 ): Promise<void> {
   const issues = await collectReadyIssues(harnixRoot, task, artifacts, entering);
-  if (issues.length === 1) throw new Error(issues[0]!);
+  if (issues.length === 1) throw new Error(issues[0]);
   if (issues.length > 1) {
     const list = issues.map((issue) => `- ${issue}`).join("\n");
     throw new Error(`Workflow ready requirements failed with ${issues.length} issues:\n${list}`);
