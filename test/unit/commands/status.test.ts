@@ -101,4 +101,54 @@ describe("commands/status", () => {
       resumeCommand: `harnix resume ${taskRecord.id}`,
     });
   });
+
+  it("includes epicContext with task position and total in status when task belongs to an epic", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+
+    const epic = {
+      generator: "harnix" as const,
+      schemaVersion: 1 as const,
+      id: "20261015-130000-sample-epic",
+      title: "Sample Epic",
+      goal: "Epic goal",
+      createdAt: "2026-10-15T13:00:00.000Z",
+      updatedAt: "2026-10-15T13:00:00.000Z",
+    };
+    const taskRecord = {
+      ...taskV3("planning", "planning"),
+      id: "20261015-130001-member-task",
+      title: "Member Task",
+      epicId: epic.id,
+    };
+    await saveWorkflow(root, {
+      task: taskRecord,
+      epic,
+    });
+
+    const status = await inspectProjectStatus(root);
+    expect(status.activeTask).not.toBeNull();
+    expect(status.epicContext).toMatchObject({
+      id: epic.id,
+      title: epic.title,
+      taskIndex: 1,
+      totalTasks: 1,
+    });
+
+    const summary = await summarizeProjectStatus(root);
+    expect(summary.summary).toContain(`(Epic ${epic.id} [1/1])`);
+    expect(summary.epicContext).toMatchObject({
+      id: epic.id,
+      taskIndex: 1,
+      totalTasks: 1,
+    });
+
+    const explain = await explainProjectStatus(root, 10);
+    expect(explain.epicContext).toMatchObject({
+      id: epic.id,
+      taskIndex: 1,
+      totalTasks: 1,
+    });
+  });
 });

@@ -30,4 +30,22 @@ describe("inspectVerifyPlan command", () => {
     expect(plan.hasTests).toBe(true);
     expect(plan.commands.test).toBe("npm run test");
   });
+
+  it("passes impact option to buildVerifyPlan", async () => {
+    const root = await createFixture();
+    await writeFixture(
+      root,
+      "package.json",
+      JSON.stringify({
+        scripts: { test: "vitest run" },
+      }),
+    );
+    await writeFixture(root, "src/service.ts", "export const foo = 1;");
+    await writeFixture(root, "test/service.test.ts", "export const testRan = true;");
+
+    const plan = await inspectVerifyPlan(root, { impact: "src/service.ts" });
+    expect(plan.impact).toBeDefined();
+    expect(plan.impact?.files).toEqual(["src/service.ts"]);
+    expect(plan.impact?.tests).toEqual(["test/service.test.ts"]);
+  });
 });

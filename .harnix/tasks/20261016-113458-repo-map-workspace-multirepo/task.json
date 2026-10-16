@@ -1,0 +1,114 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-113458-repo-map-workspace-multirepo",
+  "epicId": "20261016-113456-harnix-dx-and-microservices-enhancement",
+  "title": "Hỗ trợ Workspace đa repository cho harnix repo-map",
+  "goal": "Hỗ trợ cờ --workspace lập chỉ mục và truy vấn liên repo cho các cụm microservices (như payment-hub và payment-lc).",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-16T11:34:56.719+07:00",
+  "updatedAt": "2026-10-16T14:04:14.128+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/core/repo-map/**",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "repo-map hỗ trợ --workspace đọc cấu hình workspace và tìm kiếm biểu tượng xuyên các repository con.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-3",
+        "ev-check-workspace-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án phải xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-workspace",
+      "description": "Kiểm tra unit test cho repo-map multi-repo workspace",
+      "command": "pnpm vitest run test/unit/core/repo-map/workspace.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/repo-map/**",
+        "test/unit/core/repo-map/workspace.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-workspace-1",
+      "checkId": "check-workspace",
+      "recordedAt": "2026-10-16T13:55:47.030+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/workspace.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5760e3fe011ebb9dafe886251c3d6339c354a673767e5d6d6bbad404756d1a68"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T13:56:50.129+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "e48c6a5ecf95b0d34495eee1496115ad4b25658d40b0c19cd5e2f1d401d0c74f"
+    },
+    {
+      "id": "ev-check-workspace-2",
+      "checkId": "check-workspace",
+      "recordedAt": "2026-10-16T13:59:24.597+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/workspace.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "dbf2a209fdc899f698858e9f18b433b771a4bf1cc05a9d8d2fe1779bef37d7a7"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T14:00:34.908+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e5cb4f7624071b6926a137c49a9899036f75914019a2f4481427dfc7a9c047ad"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T14:04:00.362+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d5b45682b56b163168407f5d22c57bf8364ecb2f639116c9171cfca35cb4e983"
+    }
+  ],
+  "completedAt": "2026-10-16T14:04:14.128+07:00"
+}

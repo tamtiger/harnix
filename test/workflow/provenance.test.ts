@@ -140,13 +140,13 @@ describe("external harness feature provenance", () => {
     expect(registry.features.map((feature) => feature.id)).not.toContain("target-root-authority");
   });
 
-  it("bumps package version to 2.7.x series and records oraios/serena in NOTICE", async () => {
+  it("bumps package version to 2.8.x series and records oraios/serena in NOTICE", async () => {
     const [pkgText, notice] = await Promise.all([
       readFile(resolve(root, "package.json"), "utf8"),
       readFile(resolve(root, "NOTICE"), "utf8"),
     ]);
     const pkg = JSON.parse(pkgText) as { version: string };
-    expect(pkg.version).toMatch(/^2\.7\.\d+/u);
+    expect(pkg.version).toMatch(/^2\.8\./u);
     expect(notice).toContain("oraios/serena");
   });
 });

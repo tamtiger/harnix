@@ -1,0 +1,79 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-113500-impact-driven-verification",
+  "epicId": "20261016-113456-harnix-dx-and-microservices-enhancement",
+  "title": "Kiểm thử thông minh theo độ ảnh hưởng với verify-plan --impact",
+  "goal": "Tích hợp repo-map --impact vào verify-plan để tự động chạy tập test hẹp bị ảnh hưởng trong chu kỳ implement.",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-16T11:34:56.719+07:00",
+  "updatedAt": "2026-10-16T14:32:02.077+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/core/stack/**",
+    "src/core/repo-map/**",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "verify-plan --impact xác định chính xác danh sách test bị ảnh hưởng dựa trên diff mã nguồn và repo-map graph.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "verify-plan --impact tích hợp mượt mà với quy trình kiểm thử của dự án, hỗ trợ cấu hình cwd và các runner phổ biến.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T14:29:20.192+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "449b829028b33af9e592df7ca66e845b335fadb9d607b1a8a485762cf4fd338b"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T14:31:49.609+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "85dcd09b467d69733bcb4cb9942dbd3552cad9dc10935500545f6dc1672a334d"
+    }
+  ],
+  "completedAt": "2026-10-16T14:32:02.077+07:00"
+}

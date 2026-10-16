@@ -40,6 +40,17 @@ describe("learning model", () => {
     expect(isPromotionEligible({ ...eligible, evidenceIds: ["e1"] })).toBe(false);
   });
 
+  it("calculates confidence cleanly without IEEE-754 floating point imprecision", () => {
+    const single = createLearningCandidate({
+      id: "obs-1",
+      statement: "s",
+      sourceTaskIds: ["a"],
+      evidenceIds: ["e1"],
+      status: "draft",
+    });
+    expect(single.confidence).toBe(0.7);
+  });
+
   it("lapses an unpromoted draft or candidate strictly after the 28 day TTL", () => {
     const recorded = Date.parse(at(0));
     const ttl = LEARNING_TTL_DAYS * day;

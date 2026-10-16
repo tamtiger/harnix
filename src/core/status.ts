@@ -52,6 +52,9 @@ export interface StatusEpicContext {
     title?: string;
   } | null;
   resumeCommand: string;
+  taskIndex?: number | undefined;
+  totalTasks?: number | undefined;
+  completedTasks?: number | undefined;
 }
 
 export interface HarnixStatusResultV1 {
@@ -84,6 +87,7 @@ export function createActiveStatus(
   task: TaskRecord,
   contextDrift: ContextDrift,
   requiredCheckStates: readonly RequiredCheckState[],
+  epicContext?: StatusEpicContext,
 ): HarnixStatusResultV1 {
   const acceptance = countAcceptance(task);
   const requiredChecks = countChecks(requiredCheckStates);
@@ -104,7 +108,8 @@ export function createActiveStatus(
   if (contextDrift.state === "stale") attention.push({ code: "context-stale", count: contextChangeCount });
   if (requiredChecks.failed > 0) attention.push({ code: "required-check-failed", count: requiredChecks.failed });
   if (requiredChecks.stale > 0) attention.push({ code: "required-check-stale", count: requiredChecks.stale });
-  return result(activeTask, nextAction(task, contextDrift, requiredChecks), attention);
+  const base = result(activeTask, nextAction(task, contextDrift, requiredChecks), attention);
+  return epicContext === undefined ? base : { ...base, epicContext };
 }
 
 export async function inspectRequiredCheckEvidence(
@@ -170,6 +175,7 @@ export interface StatusSummaryResultV1 {
     readonly checks: string;
   } | null;
   readonly nextAction: StatusNextActionCode;
+  readonly epicContext?: StatusEpicContext;
 }
 
 export function summarizeStatus(status: HarnixStatusResultV1): StatusSummaryResultV1 {
@@ -180,13 +186,18 @@ export function summarizeStatus(status: HarnixStatusResultV1): StatusSummaryResu
       summary: "No active task.",
       activeTask: null,
       nextAction: status.nextAction.code,
+      ...(status.epicContext ? { epicContext: status.epicContext } : {}),
     };
   }
   const task = status.activeTask;
   const stage = `${task.status}/${task.checkpoint}`;
   const criteria = `${task.progress.acceptance.met}/${task.progress.acceptance.total} met`;
   const checks = `${task.progress.requiredChecks.passed}/${task.progress.requiredChecks.total} passed`;
-  const summary = `Task ${task.id}: ${stage}. Criteria: ${criteria}. Checks: ${checks}. Next: ${status.nextAction.code}`;
+  const epicPart =
+    status.epicContext?.taskIndex !== undefined && status.epicContext?.totalTasks !== undefined
+      ? ` (Epic ${status.epicContext.id} [${status.epicContext.taskIndex}/${status.epicContext.totalTasks}])`
+      : "";
+  const summary = `Task ${task.id}${epicPart}: ${stage}. Criteria: ${criteria}. Checks: ${checks}. Next: ${status.nextAction.code}`;
 
   return {
     generator: "harnix",
@@ -199,5 +210,6 @@ export function summarizeStatus(status: HarnixStatusResultV1): StatusSummaryResu
       checks,
     },
     nextAction: status.nextAction.code,
+    ...(status.epicContext ? { epicContext: status.epicContext } : {}),
   };
 }

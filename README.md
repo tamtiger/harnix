@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.7.2`
+**Version:** `2.8.0`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -177,13 +177,13 @@ Mọi output của public command đều là JSON. Dưới đây là các lệnh
 | `harnix resume [<task-id>] [--force] [--next] [--dry-run]`                                | Tiếp tục task theo ID, hoặc kích hoạt task kế tiếp (`--next`), tự chuyển đổi an toàn (`--force`)                |
 | `harnix context-report --platform <id>`                                                   | Xem context nào thực sự được đưa vào agent                                                                      |
 | `harnix status --explain [--limit <n>]`                                                   | Xem check nào đã stale (input đổi/thiếu) và readiness/completion blocker của task hiện tại                      |
-| `harnix verify-plan [--recursive]`                                                        | Khám phá kiểm thử/build của project hoặc quét đệ quy các sub-repo/sub-packages                                  |
+| `harnix verify-plan [--recursive] [--impact [path]]`                                      | Khám phá kiểm thử/build của project, quét đệ quy sub-packages (`--recursive`), hoặc tìm test bị ảnh hưởng (`--impact`) |
 | `harnix epic [<epic-id>] [--limit <n>]`                                                   | Xem danh sách epic hoặc chi tiết tiến độ member tasks và next task của một epic                                 |
-| `harnix repo-map --query\|--impact\|--tests\|--outline\|--refs`                           | Tìm file liên quan, dependency impact, test bị ảnh hưởng, khung symbol (`--outline`) hoặc tham chiếu (`--refs`) |
+| `harnix repo-map --query\|--impact\|--tests\|--outline\|--refs`                           | Tìm file liên quan (`--query [--format compact] [--workspace]`), dependency impact, test bị ảnh hưởng, khung symbol (`--outline`) hoặc tham chiếu (`--refs`) |
 | `harnix doctor [--fix] [--global]`                                                        | Kiểm tra drift, hook, path safety, secret exposure; tự sửa issue an toàn                                        |
 | `harnix update [--global] [--restore]`                                                    | Đồng bộ lại managed files theo config hiện tại                                                                  |
 | `harnix uninstall --purge` / `--global --kiro --yes`                                      | Gỡ dữ liệu project hoặc một tích hợp global                                                                     |
-| `harnix mem "<query>" [--learning]`                                                       | Tìm journal memory theo từ khóa (`--learning` chỉ lọc learning)                                                 |
+| `harnix mem "<query>" [--learning]`                                                       | Tìm journal memory theo thuật toán xếp hạng BM25 (`--learning` chỉ lọc learning)                                |
 | `harnix learning [--status <s>] [--limit <n>]`                                            | Liệt kê learning (trạng thái hiệu lực) kèm kích thước `.harnix/spec/learned.md`                                 |
 | `harnix learning --prune [--apply]`                                                       | Liệt kê (và với `--apply` loại) draft quá ngắn hoặc chỉ gồm chuỗi test                                          |
 | `harnix learning --reject <id>` / `--retire <id>`                                         | Loại một learning, hoặc gỡ quy tắc đã promote khỏi `learned.md` (ghi journal mới, không sửa dòng cũ)            |

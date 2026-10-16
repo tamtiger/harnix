@@ -1,0 +1,14 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261016-113456-harnix-dx-and-microservices-enhancement",
+  "title": "Đại tu DX và Hỗ trợ Cụm Dự án Microservices (Không dùng MCP)",
+  "goal": "Nâng cấp Harnix 2.8.0 hỗ trợ đa repo workspace và định dạng gọn (compact output) cho repo-map, tối ưu hóa workflow batching loại bỏ ma sát encoding Windows, kiểm thử thông minh dựa trên độ ảnh hưởng (impact-driven verify-plan) và tìm kiếm ký ức theo ngữ nghĩa (BM25 memory).",
+  "nonGoals": [
+    "Không tạo Native MCP Server daemon chạy ngầm, không tạo tool definitions phình context window.",
+    "Không tích hợp vector database hay thư viện embedding nhị phân làm phình kích thước package.",
+    "Không phá vỡ tính cô lập của TaskRecord qua nhiều repo; dùng Workspace Epic để điều phối multi-repo."
+  ],
+  "createdAt": "2026-10-16T11:34:56.719+07:00",
+  "updatedAt": "2026-10-16T11:34:56.719+07:00"
+}

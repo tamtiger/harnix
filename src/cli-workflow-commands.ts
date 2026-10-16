@@ -14,26 +14,15 @@ import { pauseProjectTask } from "./commands/pause.js";
 import { reportProjectContext } from "./commands/context-report.js";
 import { diagnoseProject } from "./commands/doctor.js";
 import { inspectVerifyPlan } from "./commands/verify-plan.js";
-import {
-  impactRepoMapInternal,
-  outlineRepoMapInternal,
-  queryRepoMapInternal,
-  refreshRepoMapInternal,
-  refsRepoMapInternal,
-  testsRepoMapInternal,
-} from "./commands/repo-map-internal.js";
+import { runRepoMapCommand } from "./commands/repo-map-internal.js";
 import { parsePlatformId } from "./core/platform/registry.js";
 import { readBoundedInput } from "./utils/bounded-input.js";
 import {
   parseReportLimit,
-  parseRepoMapDepth,
-  parseRepoMapLimit,
-  parseRepoMapOutlineLimit,
-  parseRepoMapPath,
-  parseRepoMapSymbol,
   parseTaskLimit,
   parseTaskStatus,
   type ProgramOptions,
+  type RepoMapCliOptions,
 } from "./cli-helpers.js";
 
 export function registerWorkflowCliCommands(program: Command, programOptions: ProgramOptions): void {
@@ -233,6 +222,8 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--path <path>", "Scope symbol reference lookup to a file and its dependents when using --refs")
     .option("--limit <count>", "Maximum results")
     .option("--depth <count>", "Reverse-dependent traversal depth for --impact")
+    .option("--format <format>", "Result format for --query (json, compact, outline)")
+    .option("--workspace [path]", "Index and query across sub-repositories in a workspace")
     .addOption(new Option("--refresh", "Rebuild the structural repository map").hideHelp())
     .action(async (options: RepoMapCliOptions) => {
       process.stdout.write(`${JSON.stringify(await runRepoMapCommand(process.cwd(), options))}\n`);
@@ -242,7 +233,8 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .command("verify-plan")
     .description("Inspect deterministic test, lint, typecheck, and format commands for this project and its packages")
     .option("--recursive", "Discover nested repositories, solutions and packages recursively")
-    .action(async (options: { recursive?: boolean }) => {
+    .option("--impact [path]", "Show affected test files and focused test command for modified files or an exact path")
+    .action(async (options: { recursive?: boolean; impact?: string | boolean }) => {
       const plan = await inspectVerifyPlan(process.cwd(), options);
       process.stdout.write(`${JSON.stringify(plan)}\n`);
     });
@@ -260,53 +252,4 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
           : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
       await runInternalContextCommand({ hookInput, platform });
     });
-}
-
-type RepoMapCliOptions = Partial<
-  Record<"query" | "impact" | "tests" | "outline" | "refs" | "symbol" | "path" | "limit" | "depth", string>
-> & { refresh?: boolean };
-
-async function runRepoMapCommand(cwd: string, options: RepoMapCliOptions): Promise<unknown> {
-  const actions = [
-    options.query,
-    options.impact,
-    options.tests,
-    options.outline,
-    options.refs,
-    options.refresh === true ? "refresh" : undefined,
-  ].filter((v) => v !== undefined);
-  if (actions.length !== 1)
-    throw new Error("repo-map requires exactly one of --query, --impact, --tests, --outline, --refs, or --refresh.");
-  if (options.symbol !== undefined && options.outline === undefined)
-    throw new Error("--symbol requires repo-map --outline.");
-  if (options.path !== undefined && options.refs === undefined) throw new Error("--path requires repo-map --refs.");
-  if (options.depth !== undefined && options.impact === undefined)
-    throw new Error("--depth requires repo-map --impact.");
-  if (options.refresh) {
-    if (options.limit !== undefined) throw new Error("--limit is not valid with repo-map --refresh.");
-    return refreshRepoMapInternal(cwd);
-  }
-  if (options.outline !== undefined) {
-    const symbol = options.symbol === undefined ? undefined : parseRepoMapSymbol(options.symbol, "--symbol");
-    return outlineRepoMapInternal(
-      cwd,
-      parseRepoMapPath(options.outline, "--outline"),
-      parseRepoMapOutlineLimit(options.limit ?? "20"),
-      symbol,
-    );
-  }
-  const limit = parseRepoMapLimit(options.limit ?? "20");
-  if (options.refs !== undefined) {
-    const target = options.path === undefined ? undefined : parseRepoMapPath(options.path, "--path");
-    return refsRepoMapInternal(cwd, parseRepoMapSymbol(options.refs, "--refs"), limit, target);
-  }
-  if (options.tests !== undefined) return testsRepoMapInternal(cwd, parseRepoMapPath(options.tests, "--tests"), limit);
-  if (options.impact !== undefined)
-    return impactRepoMapInternal(
-      cwd,
-      parseRepoMapPath(options.impact, "--impact"),
-      parseRepoMapDepth(options.depth ?? "2"),
-      limit,
-    );
-  return queryRepoMapInternal(cwd, options.query!, limit);
 }

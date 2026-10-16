@@ -107,7 +107,7 @@ Hidden `harnix workflow` is the only persistence transport; it is not a supporte
 - `--transition <status>/<checkpoint>`: no body; moves the persisted record through one legal transition.
 - `--evidence --check <id> --result <r> --summary <t> [--exit-code --artifact --digest]` (or a `{ "evidence": ... }` envelope): appends one item; id, `recordedAt` and digest are filled in.
   `--run-checks`: `--run-check` for every required check that is not passing. `--run-check <id> -- <exe> [args]`: snapshot, run without a shell, snapshot, record. `--snapshot --check <id>`: read-only
-  digest. `--criterion <ids> --met [--evidence-ids]`.
+  digest. `--criterion <ids> --met [--evidence-ids]` (supports action batching: can be combined with `--transition`, or `--transition verifying/finishing` with `--finish` in one call).
 - `--set-check`, `--add-criterion --text --check`, `--set-paths` edit obligations and paths; after planning they need `--reason` and make one guarded replan save. `--add-decision`, `--add-risk` record
   review notes at any unfinished stage. `--task <task-id>` on these edit commands, on `--inspect` and on `--batch` edits another unfinished task (for example an epic member in `planning`) without
   changing the active pointer; state changes, evidence and finish refuse it. `--batch` applies criteria, checks, decisions, risks and paths atomically in one call from stdin. `--migrate` upgrades a
@@ -131,7 +131,7 @@ the ready gate enforces them.
 The commands are the same in both shells; double-quote text in PowerShell and single-quote it in bash when it contains backticks or `$`:
 
 ```text
-harnix status --summary                      # micro status projection under 80 tokens (stage, criteria, checks, next action)
+harnix status --summary                      # micro status projection under 80 tokens (stage, epic progress [m/n], criteria, checks, next action)
 harnix workflow --preflight                  # clock.now and clock.idPrefix are the only time source
 harnix workflow --init --title "<task title>" [--mode lite|full] [--goal "<goal>"] [--text "<criterion>"]... [--with-check "id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>"]... [--command "<cmd>"] [--input "src/**"] [--epic <epic-id>] [--follow-up <task-id>] --brief
 harnix workflow --transition ready/ready --dry-run --brief
@@ -139,10 +139,10 @@ harnix workflow --transition ready/ready --reviewed --brief   # a Full task, onl
 harnix workflow --run-checks --brief                       # verify, main path: runs every required check that is not passing (focused first, suite last) with its declared command, stops at the first failure, prints { ran, remaining } (a failing check carries a short outputTail, a launcher error is "could not start" and records nothing)
 harnix workflow --run-check <check-id> --brief -- pnpm test    # snapshot, run, snapshot and record; argv must equal the declared command and runs in the declared cwd
 harnix workflow --evidence --check <check-id> --result pass --exit-code 0 --summary "<command> - <result>" --brief
-harnix workflow --criterion <criterion-id>,<criterion-id> --met --brief
+harnix workflow --criterion <criterion-id>,<criterion-id> --met [--transition verifying/finishing] --brief   # marks criteria, optionally advances transition in one call
 harnix workflow --replace-check <old-check-id> <new-check-id> --reason "<why, required>" [--description "<text>" --command "<cmd>" --scope focused --input "src/**" --criteria <criterion-id> --cwd <path>] --brief
 harnix workflow --set-baseline <check-id> --result fail --classification pre-existing --authorized-by user --scope "<why the suite is red>" --brief   # authorized red suite; pair it with a focused required check
-harnix workflow --transition verifying/finishing --brief
+harnix workflow --transition verifying/finishing [--finish] --brief  # advances transition, optionally finishes in one call
 harnix workflow --set-check <check-id> --description "<text>" --scope focused --command "<command>" [--cwd <path>] --criteria <criterion-id> --input "src/**" --reason "<why, 10-1000 characters, required after planning>" --brief
 harnix workflow --add-criterion <criterion-id> --text "<criterion text>" --check <check-id> --reason "<why>" --brief
 harnix workflow --set-criterion <criterion-id> --text "<new text>" [--reason "<why, required after planning>"] --brief   # rewrite one criterion (a criterion mapped by recorded evidence stays immutable)

@@ -31,7 +31,10 @@ export function createLearningCandidate(
     sourceTaskIds,
     evidenceIds,
     occurrences: sourceTaskIds.length,
-    confidence: Math.min(1, 0.4 + 0.2 * Math.min(sourceTaskIds.length, 2) + 0.1 * Math.min(evidenceIds.length, 2)),
+    confidence:
+      Math.round(
+        Math.min(1, 0.4 + 0.2 * Math.min(sourceTaskIds.length, 2) + 0.1 * Math.min(evidenceIds.length, 2)) * 1000,
+      ) / 1000,
   };
 }
 export function isPromotionEligible(candidate: LearningCandidate): boolean {

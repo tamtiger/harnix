@@ -2,7 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 import { Command } from "commander";
 import { registerWorkflowCommand } from "src/commands/workflow-command.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
-import { initializeUtcProject, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
+import {
+  implementingTaskV3,
+  initializeUtcProject,
+  taskV3,
+  writeProjectSource,
+} from "test/support/workflow-fixtures.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -186,5 +191,95 @@ describe("workflow command unit", () => {
       process.chdir(originalCwd);
       spy.mockRestore();
     }
+  });
+
+  it("executes batched workflow actions: criterion met + transition verifying/finishing", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    const originalCwd = process.cwd();
+    process.chdir(root);
+
+    const program = new Command();
+    registerWorkflowCommand(program, {});
+    let written = "";
+    const spy = vi.spyOn(process.stdout, "write").mockImplementation((chunk) => {
+      written += typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
+      return true;
+    });
+
+    try {
+      await program.parseAsync(["node", "harnix", "workflow", "--transition", "verifying/verifying"]);
+      await program.parseAsync([
+        "node",
+        "harnix",
+        "workflow",
+        "--evidence",
+        "--check",
+        "check",
+        "--result",
+        "pass",
+        "--exit-code",
+        "0",
+        "--summary",
+        "ok",
+      ]);
+
+      written = "";
+      await program.parseAsync([
+        "node",
+        "harnix",
+        "workflow",
+        "--criterion",
+        "a",
+        "--met",
+        "--transition",
+        "verifying/finishing",
+        "--brief",
+      ]);
+      const parsed = JSON.parse(written) as { status: string; checkpoint: string };
+      expect(parsed.status).toBe("verifying");
+      expect(parsed.checkpoint).toBe("finishing");
+    } finally {
+      process.chdir(originalCwd);
+      spy.mockRestore();
+    }
+  });
+
+  it("rejects invalid action batching combinations", async () => {
+    const program1 = new Command();
+    registerWorkflowCommand(program1, {});
+    await expect(
+      program1.parseAsync(["node", "harnix", "workflow", "--init", "--transition", "ready/ready"]),
+    ).rejects.toThrow(/workflow requires exactly one of/u);
+
+    const program2 = new Command();
+    registerWorkflowCommand(program2, {});
+    await expect(
+      program2.parseAsync(["node", "harnix", "workflow", "--transition", "in_progress/implementing", "--finish"]),
+    ).rejects.toThrow(
+      /workflow action batching does not allow combining --transition with --finish unless transitioning to verifying\/finishing/u,
+    );
+
+    const program3 = new Command();
+    registerWorkflowCommand(program3, {});
+    await expect(
+      program3.parseAsync(["node", "harnix", "workflow", "--criterion", "ac-1", "--transition", "verifying/finishing"]),
+    ).rejects.toThrow(/workflow --criterion requires --met/u);
+
+    const program4 = new Command();
+    registerWorkflowCommand(program4, {});
+    await expect(
+      program4.parseAsync([
+        "node",
+        "harnix",
+        "workflow",
+        "--criterion",
+        "ac-1",
+        "--met",
+        "--transition",
+        "verifying/finishing",
+        "--dry-run",
+      ]),
+    ).rejects.toThrow(/workflow action batching does not support --dry-run/u);
   });
 });

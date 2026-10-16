@@ -178,3 +178,29 @@ export function platformFlagList(extra: readonly string[] = []): string {
   const flags = [...platformRecords().map((record) => `--${record.flag}`), ...extra];
   return `${flags.slice(0, -1).join(", ")}, and ${flags[flags.length - 1] ?? ""}`;
 }
+
+export type RepoMapCliOptions = Partial<
+  Record<"query" | "impact" | "tests" | "outline" | "refs" | "symbol" | "path" | "limit" | "depth" | "format", string>
+> & { refresh?: boolean; workspace?: string | boolean };
+
+export function validateRepoMapOptions(options: RepoMapCliOptions): void {
+  const actions = [
+    options.query,
+    options.impact,
+    options.tests,
+    options.outline,
+    options.refs,
+    options.refresh === true ? "refresh" : undefined,
+  ].filter((v) => v !== undefined);
+  if (actions.length !== 1)
+    throw new Error("repo-map requires exactly one of --query, --impact, --tests, --outline, --refs, or --refresh.");
+  if (options.symbol !== undefined && options.outline === undefined)
+    throw new Error("--symbol requires repo-map --outline.");
+  if (options.path !== undefined && options.refs === undefined) throw new Error("--path requires repo-map --refs.");
+  if (options.depth !== undefined && options.impact === undefined)
+    throw new Error("--depth requires repo-map --impact.");
+  if (options.format !== undefined && options.query === undefined)
+    throw new Error("--format requires repo-map --query.");
+  if (options.workspace !== undefined && options.query === undefined && !options.refresh)
+    throw new Error("--workspace requires repo-map --query or --refresh.");
+}

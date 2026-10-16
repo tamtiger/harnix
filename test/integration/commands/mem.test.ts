@@ -108,4 +108,34 @@ describe("searchMemory", () => {
       malformed: 0,
     });
   });
+
+  it("ranks results using BM25 across multiple journal entries", async () => {
+    const root = await initializedRepository();
+    const journal = join(root, ".harnix", "workspace", "tam", "journal");
+    await mkdir(journal, { recursive: true });
+    const e1 = {
+      generator: "harnix",
+      schemaVersion: 1,
+      id: "e1",
+      recordedAt: "2026-08-20T00:00:01.000Z",
+      developer: "tam",
+      kind: "note",
+      summary: "Refactor cache layer without touching database",
+      evidenceIds: [],
+    };
+    const e2 = {
+      generator: "harnix",
+      schemaVersion: 1,
+      id: "e2",
+      recordedAt: "2026-08-20T00:00:02.000Z",
+      developer: "tam",
+      kind: "checkpoint",
+      summary: "Fix database connection leak in database pool",
+      evidenceIds: [],
+    };
+    await writeFile(join(journal, "2026-08-20.jsonl"), `${JSON.stringify(e1)}\n${JSON.stringify(e2)}\n`);
+
+    const result = await searchMemory({ root, query: "database pool" });
+    expect(result.entries.map((entry) => entry.id)).toEqual(["e2", "e1"]);
+  });
 });

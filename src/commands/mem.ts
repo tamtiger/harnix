@@ -2,6 +2,7 @@ import { readdir } from "src/utils/fs-access.js";
 import { join } from "node:path";
 
 import { readConfig, validateDeveloperId } from "src/core/config/config.js";
+import { rankEntriesBM25 } from "src/core/journal/bm25.js";
 import { searchJournal, type JournalEntry } from "src/core/journal/journal.js";
 import { effectiveLearningStatus } from "src/core/journal/learning.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
@@ -34,17 +35,22 @@ export async function searchMemory(options: MemOptions): Promise<MemResult> {
     throw error;
   }
   const limit = Math.max(1, options.limit ?? 20);
+  const hasQuery = options.query !== undefined && options.query.trim().length > 0;
   let entries: JournalEntry[] = [],
     malformed = 0;
   for (const name of names) {
     const result = await searchJournal(join(journalRoot, name), {
       developer,
-      limit,
+      ...(hasQuery ? {} : { limit }),
       ...(options.learningOnly === true ? { kind: "learning" as const } : {}),
-      ...(options.query === undefined ? {} : { query: options.query }),
     });
     malformed += result.malformed;
-    entries = [...entries, ...result.entries]
+    entries.push(...result.entries);
+  }
+  if (hasQuery) {
+    entries = rankEntriesBM25(entries, options.query!, limit);
+  } else {
+    entries = entries
       .sort((left, right) => compareCodeUnits(right.recordedAt, left.recordedAt) || compareCodeUnits(right.id, left.id))
       .slice(0, limit);
   }

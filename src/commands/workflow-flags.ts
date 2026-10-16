@@ -98,15 +98,51 @@ const VALUE_ACTIONS = [
   "setGoal",
 ] as const;
 
-export function selectAction(flags: WorkflowFlags): string {
+const BATCHABLE_ACTIONS = new Set(["criterion", "transition", "finish"]);
+
+export function selectActions(flags: WorkflowFlags): string[] {
   const selected: string[] = BOOLEAN_ACTIONS.filter((name) => flags[name] === true);
   for (const name of VALUE_ACTIONS) if (flags[name] !== undefined) selected.push(name);
-  const [only] = selected;
-  if (selected.length !== 1 || only === undefined)
+
+  if (selected.length === 0) {
     throw new Error(
       "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, or --learn.",
     );
-  return only;
+  }
+
+  if (selected.length === 1) {
+    return selected;
+  }
+
+  const nonBatchable = selected.filter((action) => !BATCHABLE_ACTIONS.has(action));
+  if (nonBatchable.length > 0) {
+    throw new Error(
+      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, or --learn.",
+    );
+  }
+
+  if (selected.includes("criterion") && flags.met !== true) {
+    throw new Error("workflow --criterion requires --met.");
+  }
+
+  if (selected.includes("transition") && selected.includes("finish")) {
+    if (flags.transition !== "verifying/finishing") {
+      throw new Error(
+        "workflow action batching does not allow combining --transition with --finish unless transitioning to verifying/finishing.",
+      );
+    }
+  }
+
+  if (flags.dryRun === true) {
+    throw new Error("workflow action batching does not support --dry-run.");
+  }
+
+  return ["criterion", "transition", "finish"].filter((action) => selected.includes(action));
+}
+
+export function selectAction(flags: WorkflowFlags): string {
+  const actions = selectActions(flags);
+  return actions[0]!;
 }
 
 export function isEvidenceFlagsMode(action: string, flags: WorkflowFlags): boolean {
@@ -131,25 +167,34 @@ export function assertCommandShape(action: string, flags: WorkflowFlags, operand
     throw new Error("--check requires workflow --snapshot, --evidence or --add-criterion.");
 }
 
-export function assertFlagGroups(action: string, flags: WorkflowFlags): void {
+function assertActionRequirements(action: string, flags: WorkflowFlags): void {
+  if (action === "criterion" && flags.met !== true) throw new Error("workflow --criterion requires --met.");
+  if (action === "addCriterion" && flags.text === undefined)
+    throw new Error("workflow --add-criterion requires --text.");
+  if (action === "replaceCheck" && flags.reason === undefined)
+    throw new Error("workflow --replace-check requires --reason.");
+  if (action === "setPaths" && !listed(flags.relevantPath) && !listed(flags.relevantSpec))
+    throw new Error("workflow --set-paths requires --relevant-path and/or --relevant-spec.");
+  if (isEvidenceFlagsMode(action, flags) && (!flags.check || !flags.result || flags.summary === undefined))
+    throw new Error("workflow --evidence with flags requires --check, --result and --summary.");
+}
+
+export function assertFlagGroups(
+  action: string,
+  flags: WorkflowFlags,
+  activeActions: readonly string[] = [action],
+): void {
   if (action === "learn" && (flags.text !== undefined || flags.rationale !== undefined))
     throw new Error(
       "--learn reads a JSON { candidate: { id, statement, sourceTaskIds, evidenceIds } } from stdin and takes no --text or --rationale; " +
         "for a lesson without a stdin body use --add-decision or --add-risk on the active task (finish captures them).",
     );
   for (const owner of FLAG_OWNERS)
-    if (owner.isSet(flags) && !owner.actions.includes(action)) throw new Error(`${owner.name} requires ${owner.hint}.`);
+    if (owner.isSet(flags) && !owner.actions.some((a) => activeActions.includes(a)))
+      throw new Error(`${owner.name} requires ${owner.hint}.`);
   assertTextFlags(action, flags);
-  if (action === "criterion" && flags.met !== true) throw new Error("workflow --criterion requires --met.");
-  if (action === "addCriterion" && flags.text === undefined)
-    throw new Error("workflow --add-criterion requires --text.");
-  if (action === "replaceCheck" && flags.reason === undefined)
-    throw new Error("workflow --replace-check requires --reason.");
+  assertActionRequirements(action, flags);
   assertNoteFlags(action, flags);
-  if (action === "setPaths" && !listed(flags.relevantPath) && !listed(flags.relevantSpec))
-    throw new Error("workflow --set-paths requires --relevant-path and/or --relevant-spec.");
-  if (isEvidenceFlagsMode(action, flags) && (!flags.check || !flags.result || flags.summary === undefined))
-    throw new Error("workflow --evidence with flags requires --check, --result and --summary.");
 }
 
 function assertTextFlags(action: string, flags: WorkflowFlags): void {

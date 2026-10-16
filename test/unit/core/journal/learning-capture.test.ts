@@ -5,8 +5,10 @@ import { describe, expect, it } from "vitest";
 import {
   MAX_OBSERVATIONS_PER_TASK,
   MAX_OBSERVATION_CHARACTERS,
+  autoBugfixObservation,
   captureLearningAtFinish,
   extractObservations,
+  isBugfixTask,
 } from "src/core/journal/learning-capture.js";
 import { observationCandidateId } from "src/core/journal/learning.js";
 import { readLearningStates } from "src/core/journal/learning-store.js";
@@ -246,5 +248,48 @@ describe("captureLearningAtFinish", () => {
 
     expect(await capture(root, buildTaskV3())).toBe(0);
     expect((await readLearningStates(root)).size).toBe(0);
+  });
+
+  it("automatically creates a draft learning candidate when finishing a bugfix task", async () => {
+    const root = await temporaryRepository();
+    const bugfixTask = buildTaskV3({
+      id: "20261016-120000-login-fix",
+      title: "Sửa lỗi crash khi đăng nhập",
+      goal: "Khắc phục lỗi crash bằng cách kiểm tra null token",
+      evidence: [buildEvidence({ id: "ev-fix" })],
+    });
+
+    const created = await capture(root, bugfixTask);
+    expect(created).toBe(1);
+
+    const states = await readLearningStates(root);
+    expect(states.size).toBe(1);
+    const candidate = Array.from(states.values())[0]!.candidate;
+    expect(candidate.status).toBe("draft");
+    expect(candidate.sourceTaskIds).toEqual(["20261016-120000-login-fix"]);
+    expect(candidate.statement).toContain("Bài học sửa lỗi: Khi giải quyết");
+  });
+});
+
+describe("isBugfixTask", () => {
+  it("identifies bugfix tasks across id, title, and goal in English and Vietnamese", () => {
+    expect(isBugfixTask(buildTaskV3({ id: "20261016-100000-fix-typo" }))).toBe(true);
+    expect(isBugfixTask(buildTaskV3({ title: "Sửa lỗi rò rỉ bộ nhớ" }))).toBe(true);
+    expect(isBugfixTask(buildTaskV3({ goal: "Khắc phục vấn đề timeout" }))).toBe(true);
+    expect(isBugfixTask(buildTaskV3({ id: "20261016-100000-hotfix-deploy" }))).toBe(true);
+    expect(isBugfixTask(buildTaskV3({ title: "Feature mới", goal: "Mục tiêu" }))).toBe(false);
+  });
+});
+
+describe("autoBugfixObservation", () => {
+  it("formats compliant learning statement with at least 40 characters and conditional keywords", () => {
+    const task = buildTaskV3({
+      title: "Sửa lỗi timeout",
+      goal: "Tăng timeout lên 30s",
+    });
+    const statement = autoBugfixObservation(task);
+    expect(statement.length).toBeGreaterThanOrEqual(40);
+    expect(statement).toMatch(/\bKhi\b/u);
+    expect(statement).toMatch(/\bbảo đảm\b/u);
   });
 });

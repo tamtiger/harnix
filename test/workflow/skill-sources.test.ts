@@ -322,9 +322,9 @@ describe("canonical Harnix workflow skill sources", () => {
     }
   });
 
-  it("bumps package version to 2.7.x series", async () => {
+  it("bumps package version to 2.8.x series", async () => {
     const { readFile } = await import("node:fs/promises");
     const pkg = JSON.parse(await readFile("package.json", "utf8"));
-    expect(pkg.version).toMatch(/^2\.7\.\d+/u);
+    expect(pkg.version).toMatch(/^2\.8\./u);
   });
 });

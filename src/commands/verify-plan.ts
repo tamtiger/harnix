@@ -3,7 +3,7 @@ import { resolveProjectRoot } from "src/utils/paths.js";
 
 export async function inspectVerifyPlan(
   targetPath = process.cwd(),
-  options?: { recursive?: boolean },
+  options?: { recursive?: boolean; impact?: string | boolean },
 ): Promise<VerifyPlan> {
   const projectRoot = await resolveProjectRoot(targetPath);
   return buildVerifyPlan(projectRoot, options);

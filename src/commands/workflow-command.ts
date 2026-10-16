@@ -2,7 +2,12 @@ import type { Command } from "commander";
 
 import { withTargetTask } from "src/commands/internal-workflow.js";
 import { WORKFLOW_HANDLERS, type Handler, type WorkflowCommandOptions } from "src/commands/workflow-handlers.js";
-import { assertCommandShape, assertFlagGroups, selectAction, type WorkflowFlags } from "src/commands/workflow-flags.js";
+import {
+  assertCommandShape,
+  assertFlagGroups,
+  selectActions,
+  type WorkflowFlags,
+} from "src/commands/workflow-flags.js";
 import { resolveProjectRoot } from "src/utils/paths.js";
 
 export type { WorkflowCommandOptions } from "src/commands/workflow-handlers.js";
@@ -113,13 +118,18 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--brief", "Print only id, status, checkpoint and updatedAt")
     .option("--dry-run", "Validate transition conditions without persisting state")
     .action(async (operands: string[], flags: WorkflowFlags) => {
-      const action = selectAction(flags);
-      assertCommandShape(action, flags, operands);
-      assertFlagGroups(action, flags);
+      const actions = selectActions(flags);
+      for (const action of actions) {
+        assertCommandShape(action, flags, operands);
+        assertFlagGroups(action, flags, actions);
+      }
       const root = await resolveProjectRoot(process.cwd());
-      const result = await withTargetTask(flags.task, () =>
-        (WORKFLOW_HANDLERS[action] as Handler)({ root, flags, operands, options }),
-      );
+      let result: unknown;
+      for (const action of actions) {
+        result = await withTargetTask(flags.task, () =>
+          (WORKFLOW_HANDLERS[action] as Handler)({ root, flags, operands, options }),
+        );
+      }
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
 }

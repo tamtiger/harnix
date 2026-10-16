@@ -1,0 +1,97 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-113457-repo-map-compact-format",
+  "epicId": "20261016-113456-harnix-dx-and-microservices-enhancement",
+  "title": "Hỗ trợ định dạng Compact và Outline cho harnix repo-map query",
+  "goal": "Thêm cờ --format <json|compact|outline> vào repo-map --query giúp cắt giảm 70% token context cho LLM.",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-16T11:34:56.719+07:00",
+  "updatedAt": "2026-10-16T13:45:40.188+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/commands/repo-map-internal.ts",
+    "src/core/repo-map/search.ts",
+    "src/core/repo-map/service.ts",
+    "src/core/repo-map/types.ts",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Lệnh harnix repo-map --query hỗ trợ cờ --format compact và --format outline; định dạng compact trả về danh sách rút gọn { path, score, symbols: string[] }, giảm trên 65% ký tự so với định dạng json mặc định trên cùng fixture.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-compact-1",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án phải xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-compact",
+      "description": "Kiểm thử định dạng compact và outline của repo-map query",
+      "command": "pnpm vitest run test/unit/core/repo-map/compact.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/repo-map/**",
+        "test/unit/core/repo-map/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-compact-1",
+      "checkId": "check-compact",
+      "recordedAt": "2026-10-16T13:41:20.412+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/compact.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "de3fe511759677938b32a6bb7f6c0a2023831f4d69736d54843e937db0ed1a4f"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T13:42:17.662+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "eaaee5664464096340b505b05c843dc15817925b77016dc8fcb39774443cefa0"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T13:44:55.508+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9712aeca4e29f3e284752dadbf7b1ba81673520fef099b9d3e0c10d575502e25"
+    }
+  ],
+  "completedAt": "2026-10-16T13:45:40.188+07:00"
+}

@@ -1,0 +1,87 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-113459-workflow-batching-and-shortcuts",
+  "epicId": "20261016-113456-harnix-dx-and-microservices-enhancement",
+  "title": "Tự động hóa và giảm boilerplate với Workflow Action Batching",
+  "goal": "Hỗ trợ gộp các thao tác workflow thường dùng giảm round-trip của LLM và tối ưu trải nghiệm Windows CLI.",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-16T11:34:56.719+07:00",
+  "updatedAt": "2026-10-16T14:19:22.873+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/core/workflow/**",
+    "src/commands/**",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Cho phép gộp các cờ thao tác workflow (như criterion met và transition) trong cùng một lệnh CLI.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "harnix status --summary và --explain hiển thị ngữ cảnh và tiến trình của Epic hiện tại (vị trí task và tổng số task).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Cờ --file trong workflow cho phép nạp payload an toàn và đầy đủ thông qua đường dẫn tệp.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Workflow CLI kiểm tra tính nhất quán giữa các cờ gộp và từ chối các kết hợp chuyển trạng thái không hợp lệ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T14:19:09.085+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "33e95f01ff0bdc8e729eaf6470ab4194e6d3affd9e764a61ffcb5ac2b6e17b93"
+    }
+  ],
+  "completedAt": "2026-10-16T14:19:22.873+07:00"
+}

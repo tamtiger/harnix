@@ -43,3 +43,20 @@ export function extractObservations(task: TaskRecord): string[] {
   }
   return observations;
 }
+
+/**
+ * Detects whether a task is a bugfix task based on its ID, title, or goal.
+ */
+export function isBugfixTask(task: TaskRecord): boolean {
+  if (task.schemaVersion === 1) return false;
+  const text = `${task.id} ${task.title} ${task.goal}`.toLowerCase().replace(/[-_]/gu, " ");
+  return /\b(?:bugfix|fix|hotfix|sửa lỗi|sua loi|khắc phục|khac phuc)\b/iu.test(text);
+}
+
+/**
+ * Automatically crafts a well-formed learning statement for completed bugfix tasks.
+ */
+export function autoBugfixObservation(task: TaskRecord): string {
+  const statement = `Bài học sửa lỗi: Khi giải quyết ${task.title}, cần lưu ý bảo đảm ${task.goal}`;
+  return statement.length > MAX_OBSERVATION_CHARACTERS ? statement.slice(0, MAX_OBSERVATION_CHARACTERS) : statement;
+}

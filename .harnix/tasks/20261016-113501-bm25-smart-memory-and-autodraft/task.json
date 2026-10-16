@@ -1,0 +1,60 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-113501-bm25-smart-memory-and-autodraft",
+  "epicId": "20261016-113456-harnix-dx-and-microservices-enhancement",
+  "title": "Nâng cấp tìm kiếm ký ức BM25 và tự động nháp Learning sau Bugfix",
+  "goal": "Thay thế so khớp thô sơ trong harnix mem bằng BM25 ranking không dependency, tự động nháp learning sau khi finish bugfix task và đóng Epic phát hành v2.8.0.",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-16T11:34:56.719+07:00",
+  "updatedAt": "2026-10-16T14:45:54.585+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/core/learning/**",
+    "src/core/workflow/finish.ts",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix mem sử dụng thuật toán xếp hạng BM25 cho kết quả ngữ nghĩa cao và tự động tạo bản nháp learning khi hoàn thành task bugfix.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án phải xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T14:45:38.740+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7252ce1813554549ae079f813adaa53ef075baf71619988650589e37e962c5ad"
+    }
+  ],
+  "completedAt": "2026-10-16T14:45:54.585+07:00"
+}

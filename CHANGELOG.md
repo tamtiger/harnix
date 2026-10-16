@@ -4,6 +4,19 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.8.0] - 2026-10-16
+
+### Added
+
+- Thêm cờ --format compact và --format outline cho repo-map query
+- Hỗ trợ Workspace đa repository cho repo-map (--workspace)
+
+### Changed
+
+- Tự động hóa và giảm boilerplate với Workflow Action Batching
+- Kiểm thử thông minh theo độ ảnh hưởng với verify-plan --impact
+- Đại tu DX và Hỗ trợ Cụm Dự án Microservices
+
 ## [2.7.2] - 2026-10-16
 
 ### Fixed

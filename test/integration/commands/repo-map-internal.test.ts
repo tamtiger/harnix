@@ -305,6 +305,65 @@ describe("repository-map operations", () => {
       await expect(runCli(argv)).resolves.toBe(2);
     }
   });
+
+  it("supports --format compact and outline for query and rejects invalid formats or flag combinations", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(
+      join(root, "src", "billing.ts"),
+      "export class BillingManager { processInvoice() { return 1; } }\n",
+    );
+    await initializeProject({ developer: "tam", root, yes: true });
+    process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    await expect(runCli(["node", "harnix", "repo-map", "--query", "billing", "--format", "compact"])).resolves.toBe(0);
+    const compactOutput = JSON.parse(stdout.mock.calls.map((c) => String(c[0])).join(""));
+    expect(compactOutput).toMatchObject({ format: "compact", scope: "project", status: "ready" });
+
+    stdout.mockClear();
+    await expect(runCli(["node", "harnix", "repo-map", "--query", "billing", "--format", "outline"])).resolves.toBe(0);
+    const outlineOutput = JSON.parse(stdout.mock.calls.map((c) => String(c[0])).join(""));
+    expect(outlineOutput).toMatchObject({ format: "outline" });
+
+    stdout.mockClear();
+    await expect(runCli(["node", "harnix", "repo-map", "--format", "compact"])).resolves.toBe(2);
+    await expect(runCli(["node", "harnix", "repo-map", "--query", "billing", "--format", "invalid"])).resolves.toBe(2);
+  });
+
+  it("queries across workspace members when --workspace flag is provided", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "service-x", ".harnix"), { recursive: true });
+    await writeFile(join(root, "service-x", ".harnix", "config.yaml"), "generatorVersion: 1\n");
+    await writeFile(join(root, "service-x", "order.ts"), "export class OrderService {}\n");
+    await mkdir(join(root, "service-y", ".harnix"), { recursive: true });
+    await writeFile(join(root, "service-y", ".harnix", "config.yaml"), "generatorVersion: 1\n");
+    await writeFile(join(root, "service-y", "order-repo.ts"), "export class OrderRepo {}\n");
+
+    process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    await expect(runCli(["node", "harnix", "repo-map", "--refresh", "--workspace"])).resolves.toBe(0);
+    const refreshOutput = JSON.parse(stdout.mock.calls.map((c) => String(c[0])).join(""));
+    expect(refreshOutput).toMatchObject({ scope: "workspace", status: "refreshed" });
+
+    stdout.mockClear();
+    await expect(
+      runCli(["node", "harnix", "repo-map", "--query", "order", "--workspace", "--format", "compact"]),
+    ).resolves.toBe(0);
+    const queryOutput = JSON.parse(stdout.mock.calls.map((c) => String(c[0])).join(""));
+    expect(queryOutput).toMatchObject({ format: "compact", scope: "workspace" });
+    expect(queryOutput.results.map((r: { path: string }) => r.path)).toEqual([
+      "service-x/order.ts",
+      "service-y/order-repo.ts",
+    ]);
+
+    stdout.mockClear();
+    await expect(
+      runCli(["node", "harnix", "repo-map", "--workspace", "--outline", "service-x/order.ts"]),
+    ).resolves.toBe(2);
+  });
 });
 
 async function snapshotTree(root: string): Promise<Array<{ path: string; sha256: string }>> {

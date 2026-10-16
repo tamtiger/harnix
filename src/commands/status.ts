@@ -5,9 +5,10 @@ import {
   inspectRequiredCheckEvidence,
   summarizeStatus,
   type HarnixStatusResultV1,
+  type StatusEpicContext,
   type StatusSummaryResultV1,
 } from "src/core/status.js";
-import { detailPublicEpic, type PublicEpicBriefResult } from "src/commands/epic.js";
+import { detailPublicEpic, type PublicEpicBriefResult, type PublicEpicDetailResult } from "src/commands/epic.js";
 import { listEpicIds } from "src/core/epics/epic.js";
 import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
 import { taskContextDrift } from "src/core/workflow/index.js";
@@ -46,7 +47,25 @@ export async function inspectProjectStatus(cwd: string, now = Date.now()): Promi
   }
   const contextDrift = await taskContextDrift(project.root, harnixRoot, task);
   const requiredCheckStates = await inspectRequiredCheckEvidence(project.root, harnixRoot, task, now);
-  return createActiveStatus(task, contextDrift, requiredCheckStates);
+  let epicContext: StatusEpicContext | undefined;
+  if (task.epicId) {
+    try {
+      const detail = (await detailPublicEpic(project.root, task.epicId, false)) as PublicEpicDetailResult;
+      const index = detail.members.findIndex((m) => m.id === task.id);
+      epicContext = {
+        id: task.epicId,
+        title: detail.epic.title,
+        nextTask: detail.nextTask,
+        resumeCommand: detail.nextTask ? `harnix resume ${detail.nextTask.id}` : "",
+        ...(index >= 0 ? { taskIndex: index + 1 } : {}),
+        totalTasks: detail.members.length,
+        completedTasks: detail.members.filter((m) => m.status === "completed").length,
+      };
+    } catch {
+      // Best effort
+    }
+  }
+  return createActiveStatus(task, contextDrift, requiredCheckStates, epicContext);
 }
 
 export interface StatusExplainResultV1 extends HarnixStatusResultV1 {

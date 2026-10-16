@@ -6,8 +6,13 @@ import {
   type LearningCandidate,
   type LearningStatus,
 } from "src/core/journal/learning.js";
-import { extractObservations } from "src/core/journal/learning-notes.js";
-import { findFoldedMatch } from "src/core/journal/learning-similarity.js";
+import {
+  autoBugfixObservation,
+  extractObservations,
+  isBugfixTask,
+  MAX_OBSERVATIONS_PER_TASK,
+} from "src/core/journal/learning-notes.js";
+import { findFoldedMatch, foldObservation } from "src/core/journal/learning-similarity.js";
 import { readLearningStates, type LearningState } from "src/core/journal/learning-store.js";
 import type { TaskRecord } from "src/core/tasks/task.js";
 import { compareCodeUnits } from "src/utils/order.js";
@@ -15,7 +20,9 @@ import { compareCodeUnits } from "src/utils/order.js";
 const MAX_EVIDENCE_PER_TASK = 4;
 
 export {
+  autoBugfixObservation,
   extractObservations,
+  isBugfixTask,
   MAX_OBSERVATION_CHARACTERS,
   MAX_OBSERVATIONS_PER_TASK,
   reviewNotes,
@@ -34,6 +41,13 @@ export async function captureLearningAtFinish(
   now: string,
 ): Promise<number> {
   const observations = extractObservations(task);
+  if (isBugfixTask(task)) {
+    const autoObservation = autoBugfixObservation(task);
+    const key = foldObservation(autoObservation);
+    if (!observations.some((obs) => foldObservation(obs) === key) && observations.length < MAX_OBSERVATIONS_PER_TASK) {
+      observations.push(autoObservation);
+    }
+  }
   if (observations.length === 0) return 0;
   const states = await readLearningStates(journalRoot);
   const evidenceIds = task.evidence

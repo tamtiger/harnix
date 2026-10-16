@@ -160,4 +160,24 @@ describe("buildVerifyPlan (ac-no-tests & verify-plan)", () => {
     expect(plan).not.toHaveProperty("projectRoot");
     expect(JSON.stringify(plan)).not.toContain(root.replaceAll("\\", "\\\\"));
   });
+
+  it("computes impact-driven verification for an exact target file", async () => {
+    const root = await createFixture();
+    await writeFixture(
+      root,
+      "package.json",
+      JSON.stringify({
+        scripts: { test: "vitest run" },
+      }),
+    );
+    await writeFixture(root, "src/service.ts", "export function service() { return 42; }");
+    await writeFixture(root, "test/service.test.ts", "export const testRan = true;");
+
+    const plan = await buildVerifyPlan(root, { impact: "src/service.ts" });
+    expect(plan.impact).toBeDefined();
+    expect(plan.impact?.files).toEqual(["src/service.ts"]);
+    expect(plan.impact?.tests).toEqual(["test/service.test.ts"]);
+    expect(plan.impact?.command).toContain("test/service.test.ts");
+    expect(plan.impact?.cwd).toBe(".");
+  });
 });
