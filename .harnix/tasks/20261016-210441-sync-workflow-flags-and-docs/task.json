@@ -1,0 +1,112 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-210441-sync-workflow-flags-and-docs",
+  "title": "Đồng bộ cờ lệnh workflow và tài liệu hướng dẫn",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Đồng bộ cờ lệnh workflow vào activation rules, AGENTS.md và docs",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Bổ sung --set-criterion, --run-checks, --set-baseline vào activation rules và danh sách --brief trong activation.ts",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cập nhật danh sách cờ workflow và repo-map trong AGENTS.md và docs/HARNIX_PRD.md",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test suites, instruction budget và contract gates pass sạch sẽ",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "check-gates",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test:gates",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "docs/**",
+        "src/templates/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-16T21:08:17.627+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "dfc9573a8eef4b0582f34b3985ac60aab7adef0005b758c58f944626728c053a"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T21:09:49.582+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b49a90683fc577a176a2608a107eab3a5d658fca67d4fa65d9ac8a8c72176490"
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "docs/HARNIX_PRD.md",
+    "src/templates/harnix/activation.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-16T21:04:41.588+07:00",
+  "updatedAt": "2026-10-16T21:10:05.368+07:00",
+  "decisions": [
+    {
+      "id": "dec-sync-docs",
+      "text": "Đồng bộ cờ lệnh workflow và repo-map vào activation rules và PRD bảo đảm tính nhất quán giữa implementation và hướng dẫn agent.",
+      "rationale": "Tránh drift giữa các tính năng CLI mới và các quy tắc always-loaded."
+    }
+  ],
+  "completedAt": "2026-10-16T21:10:05.368+07:00"
+}
