@@ -1,6 +1,6 @@
 import { readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 
 import { refreshRepoMap } from "./service.js";
 import { searchRepoMap } from "./search.js";
@@ -75,7 +75,13 @@ export interface WorkspaceRefreshResult {
 }
 
 function hasProjectManifest(dir: string): boolean {
-  return MANIFEST_FILES.some((file) => existsSync(join(dir, file)));
+  if (MANIFEST_FILES.some((file) => existsSync(join(dir, file)))) return true;
+  try {
+    const files = readdirSync(dir);
+    return files.some((f) => f.endsWith(".csproj") || f.endsWith(".sln") || f.endsWith(".fsproj"));
+  } catch {
+    return false;
+  }
 }
 
 /**

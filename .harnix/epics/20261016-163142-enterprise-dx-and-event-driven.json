@@ -1,0 +1,13 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261016-163142-enterprise-dx-and-event-driven",
+  "title": "Nâng cấp Nhận diện Kiến trúc Event-Driven, Discovery Giải pháp Phức hợp và Tối ưu Token",
+  "goal": "Hỗ trợ bóc tách Messaging topic và HTTP route, ma trận Event Matrix liên service, tự động nhận diện Solution .NET phức hợp và tối ưu token mặc định cho Harnix.",
+  "nonGoals": [
+    "Không xây dựng semantic static call graph toàn diện để tránh biến Harnix thành CodeQL cồng kềnh.",
+    "Không kéo các parser AST ngoài hay runtime engine nặng nề vào package."
+  ],
+  "createdAt": "2026-10-16T16:31:42.572+07:00",
+  "updatedAt": "2026-10-16T16:31:42.572+07:00"
+}

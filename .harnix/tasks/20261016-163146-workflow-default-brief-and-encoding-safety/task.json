@@ -1,0 +1,119 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-163146-workflow-default-brief-and-encoding-safety",
+  "epicId": "20261016-163142-enterprise-dx-and-event-driven",
+  "title": "Chuyển các lệnh ghi workflow sang mặc định brief và bảo đảm an toàn UTF-8 trên Windows",
+  "goal": "Tiết kiệm tối đa token context cho AI bằng cách mặc định hóa brief output và hoàn thiện chỉ dẫn chống lỗi font Windows.",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-16T16:31:42.572+07:00",
+  "updatedAt": "2026-10-16T17:19:12.969+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/commands/**",
+    "src/core/workflow/**",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Các lệnh workflow thay đổi state mặc định chỉ in brief status thay vì toàn bộ task JSON.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-brief-default-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Bổ sung cờ --full cho workflow nếu cần in toàn bộ task record và giữ --brief tương thích ngược.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-brief-default-2",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án phải xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "required": true
+    },
+    {
+      "id": "check-brief-default",
+      "description": "Kiểm thử mặc định brief và cờ --full cho workflow",
+      "command": "pnpm vitest run test/unit/commands/workflow-handler-utils.test.ts test/integration/commands/workflow-command.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "test/integration/commands/**",
+        "test/unit/commands/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-brief-default-1",
+      "checkId": "check-brief-default",
+      "recordedAt": "2026-10-16T17:14:31.324+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/commands/workflow-handler-utils.test.ts test/integration/commands/workflow-command.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "709eb0b612fe25767001bf714f06fbb12ef3d0717aea1cd435faa41c9a5e82bd"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T17:15:33.431+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "dcd44101828694ff5d0edf3ff5ec5729d773111b95d0cfe356937e75fd06b1a3"
+    },
+    {
+      "id": "ev-check-brief-default-2",
+      "checkId": "check-brief-default",
+      "recordedAt": "2026-10-16T17:17:35.540+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/commands/workflow-handler-utils.test.ts test/integration/commands/workflow-command.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8a2eeb460703ecc1eac148bb1ef987f816ea4026b9096301dabdc0032fb9ae14"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T17:19:00.391+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f2d24ae57d8999d28a4a31928bd75a115062a92ee3a45c21012ad9532e1d25ea"
+    }
+  ],
+  "decisions": [],
+  "residualRisks": [],
+  "completedAt": "2026-10-16T17:19:12.969+07:00"
+}

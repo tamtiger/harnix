@@ -4,6 +4,18 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.9.0] - 2026-10-16
+
+### Added
+
+- Tự động phát hiện .NET Solution và hỗ trợ giải pháp hỗn hợp đa hệ sinh thái
+- Bóc tách metadata HTTP Route và Messaging Topic cho repo-map
+- Ma trận liên kết Publisher và Consumer chéo microservices
+
+### Changed
+
+- Nâng cấp Nhận diện Kiến trúc Event-Driven, Discovery Giải pháp Phức hợp và Tối ưu Token
+
 ## [2.8.0] - 2026-10-16
 
 ### Added

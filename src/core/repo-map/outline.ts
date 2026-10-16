@@ -178,21 +178,43 @@ function extractGoSymbols(lines: readonly string[]): RepoMapSymbolOutlineV1[] {
   return symbols;
 }
 
+function collectPrecedingAttributes(lines: readonly string[], currentIndex: number): string[] {
+  const attrs: string[] = [];
+  let k = currentIndex - 1;
+  while (k >= 0) {
+    const prev = (lines[k] ?? "").trim();
+    if (prev.length === 0) break;
+    if (prev.startsWith("//") || prev.startsWith("/*") || prev.startsWith("*")) break;
+    if (/^\[.+\]$/u.test(prev)) {
+      attrs.unshift(prev);
+      k -= 1;
+    } else {
+      break;
+    }
+  }
+  return attrs;
+}
+
 function tryMatchMethod(
   lines: readonly string[],
   i: number,
   trimmed: string,
   container: string,
 ): RepoMapSymbolOutlineV1 | undefined {
-  const m = methodRe.exec(trimmed);
+  const attrPrefix = /^(?:\[[^\]]+\]\s*)+/u;
+  const matchAttr = attrPrefix.exec(trimmed);
+  const methodPart = matchAttr ? trimmed.slice(matchAttr[0].length) : trimmed;
+  const m = methodRe.exec(methodPart);
   if (!m || reservedMethodNames.has(m[1]!)) return undefined;
+  const preceding = collectPrecedingAttributes(lines, i);
+  const rawSig = preceding.length > 0 ? `${preceding.join(" ")} ${trimmed}` : trimmed;
   return makeSymbol([
     m[1]!,
     "method",
-    /^public\b/u.test(trimmed),
+    /^public\b/u.test(methodPart),
     i + 1,
     findBraceBlockEnd(lines, i),
-    trimmed,
+    rawSig,
     container,
   ]);
 }
@@ -227,10 +249,15 @@ function extractBraceLanguageSymbols(lines: readonly string[]): RepoMapSymbolOut
 }
 
 function matchTopBrace(lines: readonly string[], i: number, trimmed: string): RepoMapSymbolOutlineV1 | undefined {
-  const cMatch = topContainerRe.exec(trimmed);
+  const attrPrefix = /^(?:\[[^\]]+\]\s*)+/u;
+  const matchAttr = attrPrefix.exec(trimmed);
+  const classPart = matchAttr ? trimmed.slice(matchAttr[0].length) : trimmed;
+  const cMatch = topContainerRe.exec(classPart);
   if (cMatch) {
-    const exp = cMatch[1] === "namespace" ? false : /^(?:export\b|public\b)/u.test(trimmed);
-    return makeSymbol([cMatch[2]!, cMatch[1] as ContainerKind, exp, i + 1, findBraceBlockEnd(lines, i), trimmed]);
+    const exp = cMatch[1] === "namespace" ? false : /^(?:export\b|public\b)/u.test(classPart);
+    const preceding = collectPrecedingAttributes(lines, i);
+    const rawSig = preceding.length > 0 ? `${preceding.join(" ")} ${trimmed}` : trimmed;
+    return makeSymbol([cMatch[2]!, cMatch[1] as ContainerKind, exp, i + 1, findBraceBlockEnd(lines, i), rawSig]);
   }
   const exp = /^(?:export\b|public\b)/u.test(trimmed);
   const fnMatch = topFnRe.exec(trimmed);

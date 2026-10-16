@@ -1,0 +1,127 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-163143-dotnet-solution-hybrid-discovery",
+  "epicId": "20261016-163142-enterprise-dx-and-event-driven",
+  "title": "Tự động phát hiện .NET Solution và hỗ trợ giải pháp hỗn hợp đa hệ sinh thái",
+  "goal": "Nhận diện trọn vẹn cả các microservices backend .NET (file .sln / .csproj) trong solution phức hợp có cả frontend web.",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-16T16:31:42.572+07:00",
+  "updatedAt": "2026-10-16T16:43:29.987+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/core/stack/**",
+    "test/unit/core/stack/**"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Bổ sung collectDotNetSolutionWorkspaces phân tích tệp .sln để bóc tách các project .csproj tương ứng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-dotnet-discovery-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cho phép nhận diện đa hệ sinh thái song song (hybrid discovery: vừa có node vừa có dotnet) mà không dừng sớm.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-dotnet-discovery-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "verify-plan và verify-detection xuất lệnh build/test cho toàn bộ các backend microservices .NET được phát hiện.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-dotnet-discovery",
+      "description": "Kiểm thử phát hiện .sln và các csproj con trong hybrid repo",
+      "command": "pnpm vitest run test/unit/core/stack/workspace-detection.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/stack/**",
+        "test/unit/core/stack/**"
+      ],
+      "required": true
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án phải xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "required": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-dotnet-discovery-1",
+      "checkId": "check-dotnet-discovery",
+      "recordedAt": "2026-10-16T16:38:54.923+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/stack/workspace-detection.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ca0bd8f20319ca52f0b80bc8dbe7a3f0de6429c4bdecb3ff74a8eff57f8e5d8e"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T16:39:58.425+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "0f59decfa567433f1f2a937e29ead074c0db0863d738dbe90f99385925621d25"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T16:42:35.741+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "523bb727d0bcdea687f83971f77516cf67a5fe721d37aa153e0578ab8ab24816"
+    },
+    {
+      "id": "ev-check-dotnet-discovery-2",
+      "checkId": "check-dotnet-discovery",
+      "recordedAt": "2026-10-16T16:43:03.760+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/stack/workspace-detection.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ca0bd8f20319ca52f0b80bc8dbe7a3f0de6429c4bdecb3ff74a8eff57f8e5d8e"
+    }
+  ],
+  "decisions": [],
+  "residualRisks": [],
+  "completedAt": "2026-10-16T16:43:29.987+07:00"
+}

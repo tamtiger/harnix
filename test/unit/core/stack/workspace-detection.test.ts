@@ -133,4 +133,59 @@ describe("detectWorkspaces (ac-workspace: nearest-manifest-wins monorepo)", () =
     const workspaces = await detectWorkspaces(root);
     expect(workspaces.map((w) => w.path).sort()).toEqual(["gosub", "subproject"]);
   });
+
+  it("detects .NET solution projects and workspace packages", async () => {
+    const root = await createFixture();
+    const slnContent = `
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentHub.Api", "src\\PaymentHub.Api\\PaymentHub.Api.csproj", "{11111111-1111-1111-1111-111111111111}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentHub.Worker", "src/PaymentHub.Worker/PaymentHub.Worker.csproj", "{22222222-2222-2222-2222-222222222222}"
+EndProject
+Global
+EndGlobal
+`;
+    await writeFixture(root, "PaymentHub.sln", slnContent);
+    await writeFixture(root, "src/PaymentHub.Api/PaymentHub.Api.csproj", '<Project Sdk="Microsoft.NET.Sdk.Web" />');
+    await writeFixture(root, "src/PaymentHub.Worker/PaymentHub.Worker.csproj", '<Project Sdk="Microsoft.NET.Sdk" />');
+
+    const workspaces = await detectWorkspaces(root);
+    expect(workspaces.map((w) => w.path).sort()).toEqual(["src/PaymentHub.Api", "src/PaymentHub.Worker"]);
+    const api = workspaces.find((w) => w.path === "src/PaymentHub.Api");
+    expect(api?.ecosystem).toBe("dotnet");
+    expect(api?.commands.test).toBe("dotnet test");
+  });
+
+  it("detects hybrid multi-ecosystem repository with both web frontend and .NET backend services", async () => {
+    const root = await createFixture();
+    await writeFixture(
+      root,
+      "package.json",
+      JSON.stringify({
+        name: "payment-hub-root",
+        workspaces: ["portal-web"],
+      }),
+    );
+    await writeFixture(
+      root,
+      "portal-web/package.json",
+      JSON.stringify({
+        name: "portal-web",
+        scripts: { test: "vitest run" },
+      }),
+    );
+    const slnContent = `
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderService", "services\\OrderService\\OrderService.csproj", "{33333333-3333-3333-3333-333333333333}"
+EndProject
+`;
+    await writeFixture(root, "backend/Order.sln", slnContent);
+    await writeFixture(root, "backend/services/OrderService/OrderService.csproj", "<Project />");
+
+    const workspaces = await detectWorkspaces(root);
+    expect(workspaces.map((w) => w.path).sort()).toEqual(["backend/services/OrderService", "portal-web"]);
+    const dotnetService = workspaces.find((w) => w.path === "backend/services/OrderService");
+    expect(dotnetService?.ecosystem).toBe("dotnet");
+    expect(dotnetService?.commands.test).toBe("dotnet test");
+  });
 });

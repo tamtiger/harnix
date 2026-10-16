@@ -223,6 +223,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--limit <count>", "Maximum results")
     .option("--depth <count>", "Reverse-dependent traversal depth for --impact")
     .option("--format <format>", "Result format for --query (json, compact, outline)")
+    .option("--events", "Generate cross-service event matrix of publishers and subscribers by topic")
     .option("--workspace [path]", "Index and query across sub-repositories in a workspace")
     .addOption(new Option("--refresh", "Rebuild the structural repository map").hideHelp())
     .action(async (options: RepoMapCliOptions) => {

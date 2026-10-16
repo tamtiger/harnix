@@ -133,6 +133,7 @@ describe.sequential("hidden workflow plan-edit transports", () => {
       "src/**",
       "--input",
       "test/**",
+      "--full",
     ]);
     expect(setCheck.code, setCheck.err).toBe(0);
     const task = JSON.parse(setCheck.out) as {
@@ -191,6 +192,7 @@ describe.sequential("hidden workflow plan-edit transports", () => {
         "focused",
         "--command",
         "pnpm test",
+        "--full",
       ]),
     );
 
@@ -237,6 +239,7 @@ describe.sequential("hidden workflow plan-edit transports", () => {
       "20261006-100000-flag-epic",
       "--command",
       "pnpm test",
+      "--full",
     ]);
     expect(member.code, member.err).toBe(0);
     expect(JSON.parse(member.out)).toMatchObject({ epicId: "20261006-100000-flag-epic" });
@@ -265,7 +268,16 @@ describe.sequential("hidden workflow plan-edit transports", () => {
     const parentId = (JSON.parse(parent.out) as { id: string }).id;
     await run(["--cancel"], { workflowInput: async () => '{"reason":"fixture cleanup reason","authorizedBy":"user"}' });
 
-    const child = await run(["--init", "--title", "Child", "--follow-up", parentId, "--command", "pnpm test"]);
+    const child = await run([
+      "--init",
+      "--title",
+      "Child",
+      "--follow-up",
+      parentId,
+      "--command",
+      "pnpm test",
+      "--full",
+    ]);
 
     expect(child.code, child.err).toBe(0);
     expect(child.err).toMatch(/^notice: /mu);

@@ -79,6 +79,7 @@ describe.sequential("workflow --init with repeated --text and --with-check", () 
       "id=check-a;command=pnpm exec vitest run a.test.ts;criteria=ac-1;input=test/**",
       "--with-check",
       "id=check-b;command=pnpm exec vitest run b.test.ts;criteria=ac-2;input=test/**;scope=full",
+      "--full",
     ]);
 
     expect(result.code).toBe(0);
@@ -96,6 +97,23 @@ describe.sequential("workflow --init with repeated --text and --with-check", () 
       ["check-b", "full"],
     ]);
     expect(task.validationPlan[0]?.criterionIds).toEqual(["ac-1", "ac-2"]);
+  });
+
+  it("defaults to brief output on --init and supports --brief explicitly", async () => {
+    await initializedProject();
+
+    const briefDefault = await run(["--init", "--title", "Default Brief"]);
+    expect(briefDefault.code).toBe(0);
+    const parsedDefault = JSON.parse(briefDefault.out) as Record<string, unknown>;
+    expect(Object.keys(parsedDefault).sort()).toEqual(["checkpoint", "id", "status", "updatedAt"]);
+    expect(parsedDefault.status).toBe("planning");
+
+    await runCli(["node", "harnix", "pause"]);
+
+    const briefExplicit = await run(["--init", "--title", "Explicit Brief", "--brief"]);
+    expect(briefExplicit.code).toBe(0);
+    const parsedExplicit = JSON.parse(briefExplicit.out) as Record<string, unknown>;
+    expect(Object.keys(parsedExplicit).sort()).toEqual(["checkpoint", "id", "status", "updatedAt"]);
   });
 
   it("names the flag to fix and creates nothing when a check spec is wrong", async () => {
@@ -144,10 +162,10 @@ describe.sequential("workflow --finish secret advisory", () => {
     expect(result.out).not.toContain("Hunter2");
   });
 
-  it("keeps the plain --finish output as the bare task", async () => {
+  it("keeps the full --finish output as the bare task with --full", async () => {
     await finishableWithSecret();
 
-    const result = await run(["--finish"]);
+    const result = await run(["--finish", "--full"]);
 
     expect(JSON.parse(result.out)).not.toHaveProperty("secretAdvisory");
     expect(JSON.parse(result.out)).toMatchObject({ status: "completed" });

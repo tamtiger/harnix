@@ -29,5 +29,5 @@ export function presentTask(
   task: Parameters<typeof briefTask>[0],
   evidenceId?: string,
 ): unknown {
-  return context.flags.brief === true ? briefTask(task, evidenceId) : task;
+  return context.flags.full === true ? task : briefTask(task, evidenceId);
 }

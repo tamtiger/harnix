@@ -18,6 +18,7 @@ export interface WorkflowFlags {
   setPaths?: boolean;
   met?: boolean;
   brief?: boolean;
+  full?: boolean;
   dryRun?: boolean;
   required?: boolean;
   transition?: string;
@@ -158,9 +159,14 @@ export function assertCommandShape(action: string, flags: WorkflowFlags, operand
     throw new Error("workflow --run-check requires an executable after --.");
   if (action !== "runCheck" && operands.length > 0)
     throw new Error(`workflow does not accept operands: ${operands.join(" ")}`);
+  if (flags.brief === true && flags.full === true) throw new Error("--brief and --full are mutually exclusive.");
   if (flags.brief === true && !BRIEF_ACTIONS.has(action))
     throw new Error(
       `--brief is not supported for workflow ${actionFlagName(action)}; it works with ${briefFlagNames().join(", ")}.`,
+    );
+  if (flags.full === true && !BRIEF_ACTIONS.has(action))
+    throw new Error(
+      `--full is not supported for workflow ${actionFlagName(action)}; it works with ${briefFlagNames().join(", ")}.`,
     );
   if (action === "snapshot" && flags.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
   if (flags.check !== undefined && !["snapshot", "evidence", "addCriterion"].includes(action))

@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { basename, dirname, extname } from "node:path";
 
 import { sha256 } from "src/utils/hashing.js";
+import { extractRouteAndTopicIdentifiers } from "./event-discovery.js";
 import type { RepoMapFileKind, RepoMapInventoryFile, RepoMapRecordV1 } from "./types.js";
 import { compareCodeUnits } from "src/utils/order.js";
 
@@ -59,15 +60,13 @@ function headings(content: string): string[] {
 }
 
 function identifiers(content: string): string[] {
-  return bounded(
-    [
-      ...content.matchAll(
-        /\b(?:class|interface|function|enum|type|namespace|record|struct|const|let|var)\s+([A-Za-z_$][\w$]*)/gu,
-      ),
-    ].map((match) => match[1] ?? ""),
-    32,
-    96,
-  );
+  const codeIds = [
+    ...content.matchAll(
+      /\b(?:class|interface|function|enum|type|namespace|record|struct|const|let|var)\s+([A-Za-z_$][\w$]*)/gu,
+    ),
+  ].map((match) => match[1] ?? "");
+  const routeAndTopicIds = extractRouteAndTopicIdentifiers(content);
+  return bounded([...codeIds, ...routeAndTopicIds], 48, 96);
 }
 
 function imports(content: string): string[] {

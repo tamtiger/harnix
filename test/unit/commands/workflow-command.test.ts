@@ -12,7 +12,7 @@ import { saveWorkflow } from "src/core/workflow/save.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
-describe("workflow command unit", () => {
+describe.sequential("workflow command unit", () => {
   it("registers workflow command and options on commander", () => {
     const program = new Command();
     registerWorkflowCommand(program, {});
@@ -199,8 +199,11 @@ describe("workflow command unit", () => {
     const originalCwd = process.cwd();
     process.chdir(root);
 
-    const program = new Command();
-    registerWorkflowCommand(program, {});
+    const makeProgram = () => {
+      const p = new Command();
+      registerWorkflowCommand(p, {});
+      return p;
+    };
     let written = "";
     const spy = vi.spyOn(process.stdout, "write").mockImplementation((chunk) => {
       written += typeof chunk === "string" ? chunk : new TextDecoder().decode(chunk);
@@ -208,8 +211,8 @@ describe("workflow command unit", () => {
     });
 
     try {
-      await program.parseAsync(["node", "harnix", "workflow", "--transition", "verifying/verifying"]);
-      await program.parseAsync([
+      await makeProgram().parseAsync(["node", "harnix", "workflow", "--transition", "verifying/verifying"]);
+      await makeProgram().parseAsync([
         "node",
         "harnix",
         "workflow",
@@ -225,7 +228,7 @@ describe("workflow command unit", () => {
       ]);
 
       written = "";
-      await program.parseAsync([
+      await makeProgram().parseAsync([
         "node",
         "harnix",
         "workflow",

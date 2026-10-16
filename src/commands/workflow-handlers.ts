@@ -50,11 +50,12 @@ export interface WorkflowContext {
 }
 
 const OPTIONAL_STDIN_IDLE_MS = 2_000;
-const BYTE_ORDER_MARK = String.fromCharCode(0xfeff);
 
 /** Windows PowerShell 5.1 prefixes piped text with a BOM even for UTF-8 without BOM, which is not valid JSON. */
-const withoutBom = (input: string | undefined): string | undefined =>
-  input?.startsWith(BYTE_ORDER_MARK) ? input.slice(1) : input;
+const withoutBom = (input: string | undefined): string | undefined => {
+  if (input === undefined) return undefined;
+  return input.replace(/^\uFEFF/u, "").replace(/^\uFFFE/u, "");
+};
 
 async function readInput(context: WorkflowContext, optional = false): Promise<string | undefined> {
   if (context.flags.file !== undefined) {
@@ -74,7 +75,7 @@ function parseJson(input: string | undefined, message: string, optional = false)
     throw new Error(message);
   }
   try {
-    return JSON.parse(input) as unknown;
+    return JSON.parse(input.trim()) as unknown;
   } catch {
     throw new Error(message);
   }
@@ -133,7 +134,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
     }
     const envelope = await readRequired(context, "Workflow evidence", "Workflow evidence requires valid JSON.");
     const task = await appendEvidenceWorkflow(root, envelope);
-    return presentTask(context, task, flags.brief === true ? task.evidence.at(-1)?.id : undefined);
+    return presentTask(context, task, flags.full === true ? undefined : task.evidence.at(-1)?.id);
   },
   criterion: async (context) => {
     const { flags, root } = context;
@@ -280,13 +281,13 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
   },
   finish: async (context) => {
     const report = await finishWorkflowReport(context.root);
-    return context.flags.brief === true
-      ? {
+    return context.flags.full === true
+      ? report.task
+      : {
           ...briefTask(report.task),
           learning: report.learning,
           ...(report.baselineAuthorized.length > 0 ? { baselineAuthorized: report.baselineAuthorized } : {}),
           ...(report.secretAdvisory === undefined ? {} : { secretAdvisory: report.secretAdvisory }),
-        }
-      : report.task;
+        };
   },
 };

@@ -1,0 +1,97 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-163144-repo-map-route-and-event-discovery",
+  "epicId": "20261016-163142-enterprise-dx-and-event-driven",
+  "title": "Bóc tách metadata HTTP Route và Messaging Topic cho repo-map",
+  "goal": "repo-map tự động bóc tách các attribute và cấu hình Event/Messaging (CAP, Kafka, RabbitMQ) và HTTP Endpoints.",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-16T16:31:42.572+07:00",
+  "updatedAt": "2026-10-16T16:54:53.032+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/core/repo-map/**",
+    "test/unit/core/repo-map/**"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Trích xuất HTTP routes từ các controller/endpoint attributes như [HttpGet], [HttpPost], [Route].",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-event-discovery-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Trích xuất Messaging topics từ các attribute và cấu hình [CapSubscribe], [Topic], Subscribe(...).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-event-discovery-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án phải xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "required": true
+    },
+    {
+      "id": "check-event-discovery",
+      "description": "Kiểm thử bóc tách HTTP Route và Messaging Topic cho repo-map",
+      "command": "pnpm vitest run test/unit/core/repo-map/event-discovery.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/repo-map/**",
+        "test/unit/core/repo-map/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-event-discovery-1",
+      "checkId": "check-event-discovery",
+      "recordedAt": "2026-10-16T16:53:11.833+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/event-discovery.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5d679bc0bfd670aba0348f7951beb047435cb1c14c1fb809607e7a06086a161e"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T16:54:39.948+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f9ba7f65582aef0335ee7683f23ab6b7d7e1dba2f147843dc3cd95f712dbd969"
+    }
+  ],
+  "decisions": [],
+  "residualRisks": [],
+  "completedAt": "2026-10-16T16:54:53.032+07:00"
+}

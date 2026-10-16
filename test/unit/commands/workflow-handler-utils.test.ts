@@ -4,9 +4,9 @@ import { presentTask, splitGlobList, splitList } from "src/commands/workflow-han
 import type { WorkflowContext } from "src/commands/workflow-handlers.js";
 import { buildTaskV3 } from "test/support/builders.js";
 
-const context = (brief: boolean): WorkflowContext => ({
+const context = (flags: { brief?: boolean; full?: boolean } = {}): WorkflowContext => ({
   root: ".",
-  flags: brief ? { brief } : {},
+  flags,
   operands: [],
   options: {},
 });
@@ -17,11 +17,17 @@ describe("workflow handler utilities", () => {
     expect(splitGlobList("src/**/*.{ts,tsx}, My Dir/**,")).toEqual(["src/**/*.{ts,tsx}", "My Dir/**"]);
   });
 
-  it("presents the whole task, or only its identity with --brief", () => {
+  it("presents brief status by default or with --brief, and whole task with --full", () => {
     const task = buildTaskV3();
 
-    expect(presentTask(context(false), task)).toBe(task);
-    expect(presentTask(context(true), task, "ev-1")).toEqual({
+    expect(presentTask(context({ full: true }), task)).toBe(task);
+    expect(presentTask(context(), task)).toEqual({
+      id: task.id,
+      status: task.status,
+      checkpoint: task.checkpoint,
+      updatedAt: task.updatedAt,
+    });
+    expect(presentTask(context({ brief: true }), task, "ev-1")).toEqual({
       id: task.id,
       status: task.status,
       checkpoint: task.checkpoint,

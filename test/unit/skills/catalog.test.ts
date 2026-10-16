@@ -63,9 +63,9 @@ describe("skill catalog references", () => {
     for (const skill of workflowSkills) expect(renderSkill(skill)).toBe(skill.content);
   });
 
-  it("bumps package version to 2.8.0 series", async () => {
+  it("bumps package version to 2.9.0 series", async () => {
     const { readFile } = await import("node:fs/promises");
     const pkg = JSON.parse(await readFile("package.json", "utf8"));
-    expect(pkg.version).toMatch(/^2\.8\./u);
+    expect(pkg.version).toMatch(/^2\.9\./u);
   });
 });

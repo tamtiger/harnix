@@ -10,6 +10,7 @@ import {
   refsRepoMap,
 } from "src/core/repo-map/service.js";
 import { queryWorkspaceRepoMap, refreshWorkspaceRepoMap } from "src/core/repo-map/workspace.js";
+import { buildProjectEventMatrix, buildWorkspaceEventMatrix } from "src/core/repo-map/event-matrix.js";
 import { findInitializedProject } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { compareCodeUnits } from "src/utils/order.js";
@@ -57,12 +58,29 @@ export async function runRepoMapCommand(cwd: string, options: RepoMapCliOptions)
       parseRepoMapDepth(options.depth ?? "2"),
       limit,
     );
+  if (options.events) {
+    if (options.workspace !== undefined) {
+      const wsPath = typeof options.workspace === "string" ? options.workspace : undefined;
+      return eventsWorkspaceRepoMapInternal(cwd, wsPath);
+    }
+    return eventsRepoMapInternal(cwd);
+  }
   const format = parseRepoMapFormat(options.format);
   if (options.workspace !== undefined) {
     const wsPath = typeof options.workspace === "string" ? options.workspace : undefined;
     return queryWorkspaceRepoMapInternal(cwd, options.query!, limit, format, wsPath);
   }
   return queryRepoMapInternal(cwd, options.query!, limit, format);
+}
+
+export async function eventsWorkspaceRepoMapInternal(cwd: string, workspacePath?: string): Promise<unknown> {
+  const root = await resolveWorkspaceRoot(cwd, workspacePath);
+  return buildWorkspaceEventMatrix(root);
+}
+
+export async function eventsRepoMapInternal(cwd: string): Promise<unknown> {
+  const root = await initializedRoot(cwd);
+  return buildProjectEventMatrix(root);
 }
 
 export async function refreshWorkspaceRepoMapInternal(cwd: string, workspacePath?: string): Promise<unknown> {

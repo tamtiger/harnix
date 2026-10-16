@@ -1,0 +1,119 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261016-163145-repo-map-cross-service-event-matrix",
+  "epicId": "20261016-163142-enterprise-dx-and-event-driven",
+  "title": "Xây dựng ma trận liên kết Publisher và Consumer chéo microservices",
+  "goal": "Hỗ trợ lệnh harnix repo-map --events để kết nối các luồng publish và subscribe topic giữa các service.",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-16T16:31:42.572+07:00",
+  "updatedAt": "2026-10-16T17:04:30.358+07:00",
+  "nonGoals": [],
+  "relevantPaths": [
+    "src/core/repo-map/**",
+    "src/commands/**",
+    "test/**"
+  ],
+  "relevantSpecs": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Bổ sung cờ harnix repo-map --events tổng hợp ma trận Publisher và Subscriber theo từng Topic.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-event-matrix-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Hỗ trợ quét chéo toàn bộ các service con khi kết hợp cờ --workspace.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-event-matrix-2",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án phải xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "required": true
+    },
+    {
+      "id": "check-event-matrix",
+      "description": "Kiểm thử ma trận kết nối microservices cho repo-map --events",
+      "command": "pnpm vitest run test/unit/core/repo-map/event-matrix.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/repo-map/**",
+        "test/unit/core/repo-map/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-event-matrix-1",
+      "checkId": "check-event-matrix",
+      "recordedAt": "2026-10-16T16:59:45.959+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/event-matrix.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "244e4de9ea6113811a9667377e666f10860b413de416c7084086dd07e814f729"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T17:01:01.098+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "97ddbbdba1a886f215561e41253f4db475fb7df19cfe7de5a52ab92ee91b2b08"
+    },
+    {
+      "id": "ev-check-event-matrix-2",
+      "checkId": "check-event-matrix",
+      "recordedAt": "2026-10-16T17:02:51.618+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/event-matrix.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9ea294dde23b21b2b71e85d4256c417bcda2ce75252e8fb8bf25c174954c3c97"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-16T17:04:04.685+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "99d3409ae3f0b925a7d16a47f85abcb3cff409a8ac246ce477a29a25eb0e1965"
+    }
+  ],
+  "decisions": [],
+  "residualRisks": [],
+  "completedAt": "2026-10-16T17:04:30.358+07:00"
+}

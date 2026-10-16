@@ -60,16 +60,23 @@ describe.sequential("hidden workflow flag transports", () => {
     expect(brief.evidenceId).toBe("ev-check-1");
   });
 
-  it("keeps the full task output without --brief and marks criteria met", async () => {
+  it("defaults to brief output and keeps full task output with --full", async () => {
     const root = await fixture();
     await implementingTaskV3(root);
     process.chdir(root);
     await run(["--evidence", "--check", "check", "--result", "pass", "--exit-code", "0", "--summary", "ok"]);
 
-    const met = await run(["--criterion", "a", "--met"]);
+    const metBrief = await run(["--criterion", "a", "--met"]);
+    expect(metBrief.code).toBe(0);
+    expect(JSON.parse(metBrief.out)).toMatchObject({
+      id: "20260813-120000-workflow",
+      status: "in_progress",
+      checkpoint: "implementing",
+    });
 
-    expect(met.code).toBe(0);
-    const task = JSON.parse(met.out) as { acceptanceCriteria: { status: string; evidenceIds: string[] }[] };
+    const metFull = await run(["--criterion", "a", "--met", "--full"]);
+    expect(metFull.code).toBe(0);
+    const task = JSON.parse(metFull.out) as { acceptanceCriteria: { status: string; evidenceIds: string[] }[] };
     expect(task.acceptanceCriteria[0]).toMatchObject({ status: "met", evidenceIds: ["ev-check-1"] });
   });
 
@@ -260,6 +267,7 @@ describe.sequential("hidden workflow flag transports", () => {
       "focused",
       "--reason",
       "Test input splitting on comma-separated values",
+      "--full",
     ]);
 
     expect(result.err).toBe("");
@@ -274,12 +282,12 @@ describe.sequential("hidden workflow flag transports", () => {
     await implementingTaskV3(root);
     process.chdir(root);
 
-    const titleResult = await run(["--set-title", "Tiêu đề mới từ CLI"]);
+    const titleResult = await run(["--set-title", "Tiêu đề mới từ CLI", "--full"]);
     expect(titleResult.code).toBe(0);
     const updatedTask = JSON.parse(titleResult.out) as { title: string };
     expect(updatedTask.title).toBe("Tiêu đề mới từ CLI");
 
-    const goalResult = await run(["--set-goal", "Mục tiêu mới từ CLI"]);
+    const goalResult = await run(["--set-goal", "Mục tiêu mới từ CLI", "--full"]);
     expect(goalResult.code).toBe(0);
     const withGoal = JSON.parse(goalResult.out) as { goal: string };
     expect(withGoal.goal).toBe("Mục tiêu mới từ CLI");
@@ -308,7 +316,7 @@ describe.sequential("hidden workflow flag transports", () => {
     // Pause first so save can create a new planning task
     await runCli(["node", "harnix", "pause"]);
 
-    const saveResult = await run(["--save", "--file", "payload.json"]);
+    const saveResult = await run(["--save", "--file", "payload.json", "--full"]);
     expect(saveResult.code).toBe(0);
     const saved = JSON.parse(saveResult.out) as { id: string; title: string };
     expect(saved.id).toBe("20261015-160000-file-payload");

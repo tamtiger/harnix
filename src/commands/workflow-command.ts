@@ -116,6 +116,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--epic <epic-id>", "Existing epic to attach the new task to (--init only)")
     .option("--follow-up <task-id>", "Task ID to follow up on, inheriting context from a completed task")
     .option("--brief", "Print only id, status, checkpoint and updatedAt")
+    .option("--full", "Print full task record instead of default brief output")
     .option("--dry-run", "Validate transition conditions without persisting state")
     .action(async (operands: string[], flags: WorkflowFlags) => {
       const actions = selectActions(flags);

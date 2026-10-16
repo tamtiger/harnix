@@ -55,6 +55,7 @@ describe("CLI command contract", () => {
       "--limit",
       "--depth",
       "--format",
+      "--events",
       "--workspace",
       "--refresh",
     ]);
@@ -128,6 +129,7 @@ describe("CLI command contract", () => {
       "--epic",
       "--follow-up",
       "--brief",
+      "--full",
       "--dry-run",
     ]);
   });
