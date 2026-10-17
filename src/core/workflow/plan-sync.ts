@@ -53,6 +53,6 @@ export async function syncPlanChecklistPass(
 
   if (!changed) return false;
 
-  await atomicWriteFile(planPath, newLines.join("\n"));
+  await atomicWriteFile(planPath, `${newLines.join("\n").trimEnd()}\n`);
   return true;
 }

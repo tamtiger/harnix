@@ -284,10 +284,21 @@ export async function renderEpicMarkdown(root: string, epicId: string, epic?: Ep
   }
 
   const epicsDir = join(harnixRoot, EPICS_DIRECTORY);
+  const folder = join(epicsDir, epicId);
+  const artifacts: string[] = [];
+  try {
+    await access(join(folder, "research.md"));
+    artifacts.push("- [`research.md`](./research.md) — Khảo sát công nghệ & đối sánh giải pháp.");
+  } catch {}
+  try {
+    await access(join(folder, "spec.md"));
+    artifacts.push("- [`spec.md`](./spec.md) — Đặc tả thiết kế miền & hợp đồng kiến trúc.");
+  } catch {}
+  if (artifacts.length > 0) sections.push(["## Supporting Artifacts", "", ...artifacts].join("\n"));
+
   await mkdir(epicsDir, { recursive: true });
   const mdContent = `${sections.join("\n\n")}\n`;
   await atomicWriteFile(join(epicsDir, `${epicId}.md`), mdContent);
-  const folder = join(epicsDir, epicId);
   await mkdir(folder, { recursive: true });
   await atomicWriteFile(join(folder, "epic.md"), mdContent);
 }

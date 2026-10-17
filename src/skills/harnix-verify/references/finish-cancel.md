@@ -12,5 +12,5 @@
 **Cancel** (only on explicit user instruction, with a short non-secret reason; ambiguous "complete" must be clarified first):
 
 1. Confirm the intended unfinished task with `--inspect` (or `cancelled/cancelling` for recovery).
-2. Send `{ "reason": <text>, "authorizedBy": "user" }` on stdin to `harnix workflow --cancel`; recovery calls need no body. It writes `cancelled/cancelling`, a cancellation journal entry and clears the matching pointer last. Criteria and evidence are preserved; no completion gate runs.
+2. Run `harnix workflow --cancel --reason <text>` directly (or send `{ "reason": <text>, "authorizedBy": "user" }` on stdin); recovery calls need no body. It writes `cancelled/cancelling`, a cancellation journal entry and clears the matching pointer last. Criteria and evidence are preserved; no completion gate runs.
 3. Report the task as cancelled and incomplete, never completed.

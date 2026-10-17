@@ -51,7 +51,8 @@ refreshes); `harnix skill [name] [--raw] [--reference topic]`; `harnix doctor`, 
   `evidence: [{ id, checkId?, recordedAt, result, exitCode?, summary, artifactPaths, inputDigest?, findings? }]`, `blocker?`, `cancellation?: { reason, authorizedBy: "user" }`, `cancelledAt?`;
   `harnix workflow --schema` prints the exact fields. v1/v2 are legacy read-only records; an unfinished one accepts one migration (`harnix skill harnix-plan --reference migration`).
 - **Files:** `.harnix/tasks/<id>/task.json` is the record, written only through `harnix workflow`; `prd.md`, `plan.md`, `design.md`, `research/` are task-owned Markdown you edit directly; `review.md`
-  is derived and always overwritten (point the user there for a plain-file review); `.harnix/tasks/.active` is the pointer; `.harnix/epics/<id>/epic.json|md` are epics (the folder also holds initiative `research.md`/`spec.md`);
+  is derived and always overwritten (point the user there for a plain-file review); `.harnix/tasks/.active` is the pointer; `.harnix/epics/<id>/epic.json|md` are epics (the folder also holds initiative
+  `research.md`/`spec.md` and `epic.md` auto-links them under `## Supporting Artifacts`);
   `.harnix/workspace/<developer>/journal/` holds the journal. Tasks, research and journals are user-owned data.
 - **Obligations** (criteria text, checks, their mapping and inputs) converge during planning and freeze at the first persisted `ready`. Later changes are one guarded replan with a reason; criteria
   mapped by recorded evidence and checks with a pass stay immutable.
@@ -88,7 +89,7 @@ refreshes); `harnix skill [name] [--raw] [--reference topic]`; `harnix doctor`, 
   digest recorded under the former formula is still recognised while the whole task contract is unchanged) and the raw sha256 of each matched file; it omits the active task's own `task.json` and
   `review.md`, and `prd.md`/`plan.md` count only when declared. It skips `.git`, `node_modules`, `TestResults`, `.vs`, `.idea`, `.harnix` and build output next to its build marker.
 - **Finish:** only from `verifying/finishing` with every criterion `met` or `waived` and every required check fresh; `harnix workflow --finish` recomputes every latest required digest. Finish is
-  product-read-only. Cancellation is a separate terminal path on explicit user instruction (`./references/finish-cancel.md` or `harnix skill harnix-verify --reference finish-cancel`).
+  product-read-only. Cancellation is a separate terminal path on explicit user instruction with `harnix workflow --cancel --reason <why>` (or stdin JSON) (`./references/finish-cancel.md` or `harnix skill harnix-verify --reference finish-cancel`).
 - **Convergence:** one automatic remediation round; an identical check, digest, exit code and summary is the strongest stop signal; three failed hypotheses for one symptom mean replan.
 - **Commit discipline:** never commit, branch, push, publish or open a pull request without showing the changes and message and getting approval.
 
@@ -159,8 +160,8 @@ harnix workflow --finish --brief
 ```
 
 Only JSON on stdin and the clock differ. To avoid stdin piping issues (e.g. Windows PowerShell ANSI encoding corruption or Bash heredoc unexpected EOF), use `--file <path>` with `--save`, `--batch` or `--migrate` to load raw UTF-8 JSON/YAML files directly. In PowerShell: `$pf = harnix workflow --preflight | ConvertFrom-Json`, `$json | harnix workflow --save --brief` and
-'{"reason":"<why>","authorizedBy":"user"}' | harnix workflow --cancel. In bash: `now=$(harnix workflow --preflight | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).clock.now")`,
-`printf '%s' "$json" | harnix workflow --save --brief` and `printf '%s' '{"reason":"<why>","authorizedBy":"user"}' | harnix workflow --cancel`. To read JSON from a command in PowerShell, assign the
+`harnix workflow --cancel --reason "<why>"` (or `'{"reason":"<why>","authorizedBy":"user"}' | harnix workflow --cancel`). In bash: `now=$(harnix workflow --preflight | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).clock.now")`,
+`printf '%s' "$json" | harnix workflow --save --brief` and `harnix workflow --cancel --reason "<why>"`. To read JSON from a command in PowerShell, assign the
 output first and parse it: `$out = harnix workflow --inspect | Out-String; $j = $out | ConvertFrom-Json`. Never pipe `harnix` into a nested `pwsh -Command` (it waits for stdin until the timeout). List
 flags such as `--criteria`, `--criterion`, `--evidence-ids` and `--check` accept `a,b` or a repeated flag; `--input` and `--relevant-path` repeat. On Windows, prefer PowerShell 7.4+ (`pwsh`) over
 Windows PowerShell 5.1 or Bash heredocs (which can fail with unexpected EOF on CRLF/pipes), or use `--file <path>`. `--save` is only for new tasks, task text or research; start from `harnix workflow --inspect`.

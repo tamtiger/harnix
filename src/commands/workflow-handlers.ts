@@ -269,8 +269,17 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
     return runChecksWorkflow(root, { runner: options.checkRunner });
   },
   cancel: async (context) => {
-    const input = await readInput(context, true);
-    return cancelWorkflow(context.root, parseJson(input, "Workflow cancellation requires valid bounded JSON.", true));
+    let envelope: unknown;
+    if (context.flags.reason !== undefined) {
+      envelope = {
+        reason: context.flags.reason,
+        authorizedBy: context.flags.authorizedBy ?? "user",
+      };
+    } else {
+      const input = await readInput(context, true);
+      envelope = parseJson(input, "Workflow cancellation requires valid bounded JSON.", true);
+    }
+    return cancelWorkflow(context.root, envelope);
   },
   learn: async (context) => {
     const input = await readInput(context);

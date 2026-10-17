@@ -1,0 +1,242 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261017-190635-refine-artifacts-and-workflow-ergonomics",
+  "title": "Hoan thien he sinh thai tao tac va toi uu cong thai hoc workflow",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Nang cap CLI cancel ho tro flag reason, chuan hoa song ngu PRD 4 khoi, lien ket research/spec trong Epic va chuan hoa trailing newline plan-sync",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "CLI workflow --cancel ho tro flag --reason truc tiep ma khong can pipe JSON qua stdin",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-cancel-2",
+        "ev-check-suite-3"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "PRD va Plan template sinh cau truc song ngu va Guardrails; scanPrdStructure nhan dien song ngu ca Tieng Viet va Tieng Anh",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-prd-2",
+        "ev-check-suite-3"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "epic.md tu dong phat hien va render lien ket toi cac tai lieu bo tro research.md va spec.md trong thu muc Epic",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-2",
+        "ev-check-suite-3"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "plan-sync.ts bao dam trailing newline chuan POSIX khi tu dong dong bo checklist",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-3",
+        "ev-check-sync-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-cancel",
+      "description": "Kiem thu CLI workflow --cancel voi flag --reason",
+      "command": "pnpm vitest run test/integration/commands/workflow-flags.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/workflow/**",
+        "test/integration/commands/**"
+      ]
+    },
+    {
+      "id": "check-prd",
+      "description": "Kiem thu PRD va Plan templates song ngu va scanPrdStructure",
+      "command": "pnpm vitest run test/unit/core/workflow/ready-content.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "check-epic",
+      "description": "Kiem thu epic.md render link Supporting Artifacts research.md va spec.md",
+      "command": "pnpm vitest run test/unit/core/epics/epic.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/epics/**",
+        "test/unit/core/epics/**"
+      ]
+    },
+    {
+      "id": "check-sync",
+      "description": "Kiem thu plan-sync trailing newline POSIX",
+      "command": "pnpm vitest run test/unit/core/workflow/plan-sync.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-cancel-1",
+      "checkId": "check-cancel",
+      "recordedAt": "2026-10-17T19:09:18.307+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/integration/commands/workflow-flags.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e4ca56d95aa395ad2599fb9251ae8c3ed2a14b79aec09be478c791046b6ed8d5"
+    },
+    {
+      "id": "ev-check-prd-1",
+      "checkId": "check-prd",
+      "recordedAt": "2026-10-17T19:09:27.155+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/ready-content.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bb367c0f221b8074ae44056c079b13f04d23e08878832f130cdf75f9a3464cb1"
+    },
+    {
+      "id": "ev-check-epic-1",
+      "checkId": "check-epic",
+      "recordedAt": "2026-10-17T19:09:39.033+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/epics/epic.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "52b732362d03e694534b6082a7e92145785e2695c160779c851c815ebe56d703"
+    },
+    {
+      "id": "ev-check-sync-1",
+      "checkId": "check-sync",
+      "recordedAt": "2026-10-17T19:09:47.949+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/plan-sync.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "82571497076672e970a6f1cb7548eaaec16fda3ca146ea350359103a3182b3f8"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-17T19:11:07.382+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "65864bdc76a2ef3596383dbe598130e12ea58fb5628ab8f6640e38d35b9e5cb9"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-17T19:14:10.617+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cf07e62c372465e78056cebbbf0544e691766c4f8ab175b83e1c9a6ff08a4243"
+    },
+    {
+      "id": "ev-check-cancel-2",
+      "checkId": "check-cancel",
+      "recordedAt": "2026-10-17T19:15:39.581+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/integration/commands/workflow-flags.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3352a6409ed8292ea95f8e6f5306efaa7bd507e4898a257c802481ee0a53f92c"
+    },
+    {
+      "id": "ev-check-prd-2",
+      "checkId": "check-prd",
+      "recordedAt": "2026-10-17T19:15:44.664+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/ready-content.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4435adff7baf59432fbe9754c16b4ee309bdb82a3df31530590c06be86c06c15"
+    },
+    {
+      "id": "ev-check-epic-2",
+      "checkId": "check-epic",
+      "recordedAt": "2026-10-17T19:15:50.116+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/epics/epic.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "52b732362d03e694534b6082a7e92145785e2695c160779c851c815ebe56d703"
+    },
+    {
+      "id": "ev-check-sync-2",
+      "checkId": "check-sync",
+      "recordedAt": "2026-10-17T19:15:54.270+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/plan-sync.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "699464353a0d5416ceecb7ec12454ad96877fcb23e93a410a2ef4fee63bb8946"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-17T19:17:17.270+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "862b4887264662debc971747d269fd97fc83257b8514fe7a2187d589d52a03dc"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-17T19:06:35.561+07:00",
+  "updatedAt": "2026-10-17T19:17:32.816+07:00",
+  "completedAt": "2026-10-17T19:17:32.816+07:00"
+}

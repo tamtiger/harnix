@@ -342,21 +342,15 @@ describe.sequential("hidden workflow note transports", () => {
     process.chdir(root);
 
     const decision = await run([
-      "--add-decision",
-      "d1",
-      "--text",
-      "Ghi decision bằng flag để learning không rỗng",
-      "--rationale",
-      "Agent không phải dựng JSON",
+      "--add-decision", "d1",
+      "--text", "Ghi decision bằng flag để learning không rỗng",
+      "--rationale", "Agent không phải dựng JSON",
       "--brief",
     ]);
     const risk = await run([
-      "--add-risk",
-      "r1",
-      "--text",
-      "Bản cài ở home chỉ đổi sau update global",
-      "--severity",
-      "medium",
+      "--add-risk", "r1",
+      "--text", "Bản cài ở home chỉ đổi sau update global",
+      "--severity", "medium",
       "--brief",
     ]);
     expect(decision.code, decision.err).toBe(0);
@@ -367,7 +361,6 @@ describe.sequential("hidden workflow note transports", () => {
     await run(["--criterion", "a", "--met"]);
     await run(["--transition", "verifying/finishing"]);
     const finish = await run(["--finish", "--brief"]);
-
     expect(finish.code, finish.err).toBe(0);
     const brief = JSON.parse(finish.out) as { status: string; learning: { notes: number; captured: number } };
     expect(brief.status).toBe("completed");
@@ -378,13 +371,23 @@ describe.sequential("hidden workflow note transports", () => {
     const root = await fixture();
     await implementingTaskV3(root);
     process.chdir(root);
-
     const brief = JSON.parse((await run(["--preflight", "--brief"])).out) as Record<string, unknown>;
     const full = JSON.parse((await run(["--preflight"])).out) as Record<string, unknown>;
 
     expect("learning" in brief).toBe(false);
     expect(brief.nextStage).toBe(full.nextStage);
     expect(Array.isArray(full.learning)).toBe(true);
+  });
+
+  it("cancels an active task with --reason without piping JSON", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+    const cancelled = await run(["--cancel", "--reason", "Huỷ bỏ vì thay đổi kiến trúc"]);
+    expect(cancelled.code, cancelled.err).toBe(0);
+    const task = JSON.parse(cancelled.out) as { status: string; checkpoint: string; cancellation?: { reason: string } };
+    expect(task.status).toBe("cancelled");
+    expect(task.cancellation?.reason).toBe("Huỷ bỏ vì thay đổi kiến trúc");
   });
 
   it("names every command that supports --brief when it is refused", () => {

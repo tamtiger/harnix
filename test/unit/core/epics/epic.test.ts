@@ -1,4 +1,4 @@
-import { readFile, readdir } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -196,6 +196,21 @@ describe("epic page renderer", () => {
     expect(await readFile(join(root, ".harnix", "epics", "render-epic", "epic.md"), "utf8")).toContain(
       `\`${detail.nextTask!.id}\``,
     );
+  });
+
+  it("renders Supporting Artifacts when research.md and spec.md exist", async () => {
+    const root = await project();
+    const folder = join(root, ".harnix", "epics", "render-epic");
+    await mkdir(folder, { recursive: true });
+    await writeFile(join(folder, "research.md"), "# Research\n");
+    await writeFile(join(folder, "spec.md"), "# Spec\n");
+
+    await upsertEpic(root, epic);
+
+    const page = await readFile(join(folder, "epic.md"), "utf8");
+    expect(page).toContain("## Supporting Artifacts");
+    expect(page).toContain("- [`research.md`](./research.md) — Khảo sát công nghệ & đối sánh giải pháp.");
+    expect(page).toContain("- [`spec.md`](./spec.md) — Đặc tả thiết kế miền & hợp đồng kiến trúc.");
   });
 });
 

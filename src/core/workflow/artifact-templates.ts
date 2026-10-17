@@ -20,19 +20,19 @@ export function renderPrdTemplate(task: TaskRecordV3): string {
 
   return `# PRD: ${task.title}
 
-## 1. Context & Problem Statement
+## 1. Context & Problem Statement (Bối cảnh & Vấn đề)
 ${task.goal || task.title}
 
-## 2. Scope & Boundaries
+## 2. Scope & Boundaries (Phạm vi & Ranh giới)
 - **In-Scope**:
   - ${task.title}
 - **Out-of-Scope (Non-Goals)**:
 ${nonGoalsList}
 
-## 3. Anchored Acceptance Criteria
+## 3. Anchored Acceptance Criteria (Tiêu chí Nghiệm thu Cốt lõi)
 ${criteriaList}
 
-## 4. Architectural & Safety Constraints
+## 4. Architectural & Safety Constraints (Ràng buộc Kiến trúc & An toàn)
 - Bảo đảm ranh giới kiến trúc và tính toàn vẹn của mã nguồn.
 - Giữ vững các invariant hiện tại, tuân thủ TDD và phòng ngừa hồi quy (regression).
 - Mọi thay đổi tuân thủ quy tắc giới hạn LOC và không để lọt rò rỉ bảo mật.
@@ -42,6 +42,7 @@ ${criteriaList}
 /**
  * Sinh nội dung template Plan với mô hình Execution Slices và tag liên kết check-id:
  * - Execution Slices kèm tag `- [ ] [chk-id]`
+ * - Khối Guardrails & Invariants
  * - Bảng Verification Matrix
  */
 export function renderPlanTemplate(task: TaskRecordV3): string {
@@ -71,6 +72,11 @@ export function renderPlanTemplate(task: TaskRecordV3): string {
 
 ### Slice 1: Implementation & Verification
 ${checkItems}
+
+## Guardrails & Invariants
+- Duy trì tính tương thích ngược 100% (Backward Compatibility).
+- Tuân thủ giới hạn 300 LOC/file trong src/core/.
+- Không vi phạm hướng phụ thuộc kiến trúc (commands -> core -> utils).
 
 ## Verification Matrix
 | Criterion | Check ID | Command | Scope |

@@ -57,7 +57,12 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
     hint: "workflow --evidence or --set-baseline",
   },
   baselineOwner("--classification", (f) => f.classification),
-  baselineOwner("--authorized-by", (f) => f.authorizedBy),
+  {
+    name: "--authorized-by",
+    isSet: (f) => f.authorizedBy !== undefined,
+    actions: ["setBaseline", "cancel"],
+    hint: "workflow --set-baseline or --cancel",
+  },
   {
     name: "--summary",
     isSet: (f) => f.summary !== undefined,
@@ -110,8 +115,8 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   {
     name: "--reason",
     isSet: (f) => f.reason !== undefined,
-    actions: ["setCheck", "addCriterion", "setCriterion", "replaceCheck"],
-    hint: "workflow --set-check, --add-criterion, --set-criterion or --replace-check",
+    actions: ["setCheck", "addCriterion", "setCriterion", "replaceCheck", "cancel"],
+    hint: "workflow --set-check, --add-criterion, --set-criterion, --replace-check or --cancel",
   },
   {
     name: "--text",

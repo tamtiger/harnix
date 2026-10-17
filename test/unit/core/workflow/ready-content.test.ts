@@ -192,6 +192,22 @@ describe("scanPrdStructure", () => {
     expect(scanPrdStructure(prd)).toEqual([]);
   });
 
+  it("recognizes Vietnamese 4-block section headings without advisories", () => {
+    const prd = [
+      "# PRD: Tên tính năng",
+      "## 1. Bối cảnh & Vấn đề",
+      "Vấn đề cần giải quyết.",
+      "## 2. Phạm vi & Ranh giới",
+      "Ranh giới giải pháp.",
+      "## 3. Yêu cầu kỹ thuật cốt lõi",
+      "Các yêu cầu chính.",
+      "## 4. Rủi ro & Chiến lược giảm thiểu",
+      "Biện pháp phòng ngừa.",
+    ].join("\n");
+
+    expect(scanPrdStructure(prd)).toEqual([]);
+  });
+
   it("returns advisories for missing sections when headings exist", () => {
     const prd = "# PRD\n## Overview\nJust plain text.\n";
     const advisories = scanPrdStructure(prd);

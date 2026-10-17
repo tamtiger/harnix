@@ -69,4 +69,17 @@ describe("syncPlanChecklistPass", () => {
     const updated = await syncPlanChecklistPass(join(root, ".harnix"), "task-3", "check-unknown");
     expect(updated).toBe(false);
   });
+
+  it("preserves trailing newline POSIX standard after synchronization", async () => {
+    const root = await temporaryRepository();
+    const taskDir = join(root, ".harnix", "tasks", "task-posix");
+    await mkdir(taskDir, { recursive: true });
+
+    await writeFile(join(taskDir, "plan.md"), "# Plan\n- [ ] [check-1] Item\n\n\n", "utf8");
+    await syncPlanChecklistPass(join(root, ".harnix"), "task-posix", "check-1");
+
+    const content = await readFile(join(taskDir, "plan.md"), "utf8");
+    expect(content.endsWith("\n")).toBe(true);
+    expect(content.endsWith("\n\n")).toBe(false);
+  });
 });

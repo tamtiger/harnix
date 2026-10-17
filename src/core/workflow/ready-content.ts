@@ -119,16 +119,41 @@ export function scanPrdStructure(prd: string): string[] {
   if (!prd.includes("##")) return [];
   const advisories: string[] = [];
   const folded = fold(prd);
-  if (!folded.includes("context") && !folded.includes("boi canh") && !folded.includes("problem")) {
+  if (
+    !folded.includes("context") &&
+    !folded.includes("boi canh") &&
+    !folded.includes("problem") &&
+    !folded.includes("van de")
+  ) {
     advisories.push("prd.md is recommended to include a Context & Problem Statement section");
   }
-  if (!folded.includes("scope") && !folded.includes("ranh gioi") && !folded.includes("boundar")) {
+  if (
+    !folded.includes("scope") &&
+    !folded.includes("ranh gioi") &&
+    !folded.includes("boundar") &&
+    !folded.includes("pham vi")
+  ) {
     advisories.push("prd.md is recommended to include a Scope & Boundaries section");
   }
-  if (!folded.includes("criteria") && !folded.includes("tieu chi") && !folded.includes("acceptance")) {
+  if (
+    !folded.includes("criteria") &&
+    !folded.includes("tieu chi") &&
+    !folded.includes("acceptance") &&
+    !folded.includes("yeu cau") &&
+    !folded.includes("requirement")
+  ) {
     advisories.push("prd.md is recommended to include an Acceptance Criteria section");
   }
-  if (!folded.includes("constraint") && !folded.includes("rang buoc")) {
+  if (
+    !folded.includes("constraint") &&
+    !folded.includes("rang buoc") &&
+    !folded.includes("risk") &&
+    !folded.includes("rui ro") &&
+    !folded.includes("mitigation") &&
+    !folded.includes("giam thieu") &&
+    !folded.includes("safety") &&
+    !folded.includes("an toan")
+  ) {
     advisories.push("prd.md is recommended to include an Architectural & Safety Constraints section");
   }
   return advisories;
