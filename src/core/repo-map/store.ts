@@ -79,7 +79,7 @@ function validateRecord(value: unknown): RepoMapRecordV1 {
   if (value.language !== undefined && typeof value.language !== "string")
     throw new Error("Invalid repo map record: language must be a string.");
   const headings = stringArray(value.headings, 16, 120, "headings"),
-    identifiers = stringArray(value.identifiers, 32, 96, "identifiers"),
+    identifiers = stringArray(value.identifiers, 48, 96, "identifiers"),
     importTargets = stringArray(value.importTargets, 32, 160, "importTargets");
   if ([value.path, ...headings, ...identifiers, ...importTargets].some(isSensitive))
     throw new Error("Repo map record contains sensitive content.");

@@ -1,0 +1,108 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261017-115713-plan-task-sync",
+  "epicId": "20261017-115711-refactor-artifacts-and-epics",
+  "title": "Xây dựng cơ chế tự động đồng bộ hai chiều giữa Plan checklist và Task state",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khi một validation check pass qua lệnh --run-check hoặc --evidence, harness tự động tìm checklist item có tag [chk-id] trong plan.md và chuyển thành [x] [chk-id]; ngăn chặn triệt để tình trạng lệch pha state.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Lệnh --run-check tự động chuyển [ ] thành [x] trong plan.md khi pass",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-check-sync-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Ghi nhan evidence pass qua --evidence cung tu dong dong bo checklist trong plan.md",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-check-sync-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Bao toan nguyen ven cac checklist items khac va bo qua an toan khi khong tim thay plan.md",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-check-sync-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toan bo test suite cua du an phai xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-sync",
+      "description": "Kiem thu unit cho co che tu dong dong bo plan checklist",
+      "command": "pnpm vitest run test/unit/core/workflow/plan-sync.test.ts test/unit/core/workflow/run-check.test.ts test/unit/core/workflow/evidence-flags.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-sync-1",
+      "checkId": "check-sync",
+      "recordedAt": "2026-10-17T13:37:27.554+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/plan-sync.test.ts test/unit/core/workflow/run-check.test.ts test/unit/core/workflow/evidence-flags.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a9b07b3b4d7c9ae4eaef07b8495e99f0a75df241f543d707b741808307433925"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-17T13:38:40.684+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "842170dfc1d3216a445fbed0c39b680b9e02a0a4b2026f41c4694cab337e521c"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/plan-edit.ts",
+    "src/core/workflow/run-check.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-17T11:57:13.000+07:00",
+  "updatedAt": "2026-10-17T13:39:01.107+07:00",
+  "completedAt": "2026-10-17T13:39:01.107+07:00"
+}

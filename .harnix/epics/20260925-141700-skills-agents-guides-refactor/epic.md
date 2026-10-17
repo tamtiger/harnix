@@ -16,11 +16,11 @@ Không còn task nào chưa hoàn tất.
 
 ## Members (3 tasks)
 
-| # | Task ID | Title | Status |
-|---|---------|-------|--------|
-| 1 | `20260925-141701-skills-agents-template-harmonization` | Refactor và đồng bộ toàn diện 7 Canonical Skills, AGENTS.md và AGENTS Template | `completed` |
-| 2 | `20260925-141702-guides-flatten-catalog-detection-expansion` | Flatten cấu trúc src/guides/, mở rộng ngôn ngữ/framework và cập nhật Catalog Auto-Detection | `completed` |
-| 3 | `20260925-162700-upgrade-legacy-engineering-guides` | Nâng cấp và chuẩn hóa toàn diện nội dung 21 Engineering Guides cũ | `completed` |
+| # | Task ID | Title | Mode | Status |
+|---|---------|-------|------|--------|
+| 1 | `20260925-141701-skills-agents-template-harmonization` | Refactor và đồng bộ toàn diện 7 Canonical Skills, AGENTS.md và AGENTS Template | `full` | `completed` |
+| 2 | `20260925-141702-guides-flatten-catalog-detection-expansion` | Flatten cấu trúc src/guides/, mở rộng ngôn ngữ/framework và cập nhật Catalog Auto-Detection | `full` | `completed` |
+| 3 | `20260925-162700-upgrade-legacy-engineering-guides` | Nâng cấp và chuẩn hóa toàn diện nội dung 21 Engineering Guides cũ | `full` | `completed` |
 
 ## Task Overview & Scope
 

@@ -16,6 +16,14 @@ async function read(path: string): Promise<string> {
   return readFile(join(root, path), "utf8");
 }
 
+async function readEpicJson(id: string): Promise<string> {
+  try {
+    return await read(`.harnix/epics/${id}/epic.json`);
+  } catch {
+    return await read(`.harnix/epics/${id}.json`);
+  }
+}
+
 async function skillSources(): Promise<Array<{ name: string; text: string }>> {
   const names = (await readdir(join(root, "src", "skills"), { withFileTypes: true }))
     .filter((entry) => entry.isDirectory())
@@ -265,7 +273,7 @@ describe("ID language convention documentation parity", () => {
   });
 
   it("records the slug rule in the workflow-field-feedback epic through its goal and non-goals", async () => {
-    const epic = JSON.parse(await read(".harnix/epics/20261006-141317-workflow-field-feedback.json")) as {
+    const epic = JSON.parse(await readEpicJson("20261006-141317-workflow-field-feedback")) as {
       nonGoals?: string[];
     };
 
@@ -288,7 +296,7 @@ describe("release versioning policy documentation parity", () => {
   });
 
   it("records the version plan of the workflow-field-feedback epic", async () => {
-    const epic = JSON.parse(await read(".harnix/epics/20261006-141317-workflow-field-feedback.json")) as {
+    const epic = JSON.parse(await readEpicJson("20261006-141317-workflow-field-feedback")) as {
       goal: string;
     };
 

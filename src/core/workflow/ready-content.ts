@@ -86,11 +86,15 @@ export function criteriaWithoutFocusedCheck(task: TaskRecord): string[] {
 
 const CHECK_ID = "check-[a-z0-9]+(?:-[a-z0-9]+)*";
 const CHECK_IN_CODE = new RegExp(`\`(${CHECK_ID})\``, "gu");
-const CHECK_STARTING_ITEM = new RegExp(`^\\s*[-*]\\s+\\[[ xX]\\]\\s+(${CHECK_ID})(?![A-Za-z0-9-])`, "u");
+const CHECK_IN_TAG = new RegExp(`\\[(${CHECK_ID})\\]`, "gu");
+const CHECK_STARTING_ITEM = new RegExp(
+  `^\\s*[-*]\\s+\\[[ xX]\\]\\s+(?:\\[|\`)?(${CHECK_ID})(?:\\]|\`)?(?![A-Za-z0-9-])`,
+  "u",
+);
 
 /**
- * Check ids (the `check-` naming of Harnix) that `plan.md` names in inline code or at the start of a checklist item
- * but `validationPlan` does not declare: a renamed or newly added check the plan and the task disagree about.
+ * Check ids (the `check-` naming of Harnix) that `plan.md` names in inline code, in [check-id] tags,
+ * or at the start of a checklist item but `validationPlan` does not declare.
  */
 export function unknownCheckReferences(task: TaskRecord, plan: string): string[] {
   const declared = new Set(task.validationPlan.map((check) => check.id));
@@ -103,8 +107,41 @@ export function unknownCheckReferences(task: TaskRecord, plan: string): string[]
     }
     if (inFence) continue;
     for (const match of line.matchAll(CHECK_IN_CODE)) found.add(match[1] as string);
+    for (const match of line.matchAll(CHECK_IN_TAG)) found.add(match[1] as string);
     const first = CHECK_STARTING_ITEM.exec(line)?.[1];
     if (first !== undefined) found.add(first);
   }
   return [...found].filter((id) => !declared.has(id)).sort();
 }
+
+/** Advisories when PRD has sections but is missing one of the 4 core technical sections. */
+export function scanPrdStructure(prd: string): string[] {
+  if (!prd.includes("##")) return [];
+  const advisories: string[] = [];
+  const folded = fold(prd);
+  if (!folded.includes("context") && !folded.includes("boi canh") && !folded.includes("problem")) {
+    advisories.push("prd.md is recommended to include a Context & Problem Statement section");
+  }
+  if (!folded.includes("scope") && !folded.includes("ranh gioi") && !folded.includes("boundar")) {
+    advisories.push("prd.md is recommended to include a Scope & Boundaries section");
+  }
+  if (!folded.includes("criteria") && !folded.includes("tieu chi") && !folded.includes("acceptance")) {
+    advisories.push("prd.md is recommended to include an Acceptance Criteria section");
+  }
+  if (!folded.includes("constraint") && !folded.includes("rang buoc")) {
+    advisories.push("prd.md is recommended to include an Architectural & Safety Constraints section");
+  }
+  return advisories;
+}
+
+/** Advisories when Plan has sections but is not organized with Execution Slices. */
+export function scanPlanStructure(plan: string): string[] {
+  if (!plan.includes("##")) return [];
+  const advisories: string[] = [];
+  const folded = fold(plan);
+  if (!folded.includes("slice") && !folded.includes("giai doan") && !folded.includes("buoc")) {
+    advisories.push("plan.md is recommended to organize tasks into Execution Slices");
+  }
+  return advisories;
+}
+

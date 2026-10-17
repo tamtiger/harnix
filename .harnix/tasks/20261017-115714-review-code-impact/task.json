@@ -1,0 +1,107 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261017-115714-review-code-impact",
+  "epicId": "20261017-115711-refactor-artifacts-and-epics",
+  "title": "Nâng cấp báo cáo Review thành Dashboard kiểm chứng tích hợp Code Impact",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bổ sung mục Code Impact (danh sách file thêm/sửa/xóa và số dòng thay đổi) vào review.md; tái cấu trúc Verification Matrix trực quan và thu gọn output log evidence thô trong src/core/tasks/task-review.ts.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "review.md hiển thị bảng Code Impact thống kê file thay đổi",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-review-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Bang Code Impact hien thi chinh xac trang thai file (added, modified, deleted) va so dong thay doi (+/-)",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-review-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Giu nguyen tinh tuong thich 100% khi task khong co code impact (khong lam vo golden snapshot)",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-review-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toan bo test suite cua du an phai xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-review",
+      "description": "Kiem thu unit cho renderTaskReview voi Code Impact",
+      "command": "pnpm vitest run test/unit/core/tasks/task-review.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/tasks/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-review-1",
+      "checkId": "check-review",
+      "recordedAt": "2026-10-17T13:43:17.769+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/tasks/task-review.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9e3164202b2dba6e5ad5a6f9e782603ce0bc28ffca1b92797f6fa0f77380aa05"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-17T13:44:27.657+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fbf31f44b6d2e904c78ae0de192c930f5db7306306e7b6014ba275fc047aba83"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task-review.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-17T11:57:14.000+07:00",
+  "updatedAt": "2026-10-17T13:44:46.543+07:00",
+  "completedAt": "2026-10-17T13:44:46.543+07:00"
+}

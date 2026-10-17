@@ -124,25 +124,37 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
-/** Path of an epic file: the current directory first, then the legacy one, else where it would be created. */
+/** Path of an epic file: folder first, then flat epics, then legacy roadmaps, else where it would be created. */
 export async function resolveEpicFile(harnixRoot: string, epicId: string, extension: "json" | "md"): Promise<string> {
-  const current = join(harnixRoot, EPICS_DIRECTORY, `${epicId}.${extension}`);
-  if (await pathExists(current)) return current;
-  const legacy = join(harnixRoot, LEGACY_EPICS_DIRECTORY, `${epicId}.${extension}`);
-  return (await pathExists(legacy)) ? legacy : current;
+  const folderCandidate = join(harnixRoot, EPICS_DIRECTORY, epicId, `epic.${extension}`);
+  if (await pathExists(folderCandidate)) return folderCandidate;
+  const flatCandidate = join(harnixRoot, EPICS_DIRECTORY, `${epicId}.${extension}`);
+  if (await pathExists(flatCandidate)) return flatCandidate;
+  const legacyCandidate = join(harnixRoot, LEGACY_EPICS_DIRECTORY, `${epicId}.${extension}`);
+  if (await pathExists(legacyCandidate)) return legacyCandidate;
+  return folderCandidate;
 }
 
-/** Sorted epic IDs from both directories; an ID present in both is listed once. */
+/** Sorted epic IDs from directories; an ID present in multiple locations is listed once. */
 export async function listEpicIds(harnixRoot: string): Promise<string[]> {
   const ids = new Set<string>();
-  for (const directory of [EPICS_DIRECTORY, LEGACY_EPICS_DIRECTORY]) {
-    try {
-      for (const entry of await readdir(join(harnixRoot, directory), { withFileTypes: true })) {
-        if (entry.isFile() && entry.name.endsWith(".json")) ids.add(entry.name.slice(0, -".json".length));
+  try {
+    for (const entry of await readdir(join(harnixRoot, EPICS_DIRECTORY), { withFileTypes: true })) {
+      if (entry.isDirectory()) {
+        if (await pathExists(join(harnixRoot, EPICS_DIRECTORY, entry.name, "epic.json"))) ids.add(entry.name);
+      } else if (entry.isFile() && entry.name.endsWith(".json")) {
+        ids.add(entry.name.slice(0, -".json".length));
       }
-    } catch {
-      // A missing directory simply contributes no epics.
     }
+  } catch {
+    // Missing directory contributes no epics.
+  }
+  try {
+    for (const entry of await readdir(join(harnixRoot, LEGACY_EPICS_DIRECTORY), { withFileTypes: true })) {
+      if (entry.isFile() && entry.name.endsWith(".json")) ids.add(entry.name.slice(0, -".json".length));
+    }
+  } catch {
+    // Missing directory contributes no epics.
   }
   return [...ids].sort();
 }
@@ -184,9 +196,13 @@ export function nextEpicMember<T extends { status: string }>(members: readonly T
 }
 
 export async function upsertEpic(root: string, epic: EpicRecord): Promise<void> {
-  const directory = join(root, ".harnix", EPICS_DIRECTORY);
-  await mkdir(directory, { recursive: true });
-  await atomicWriteFile(join(directory, `${epic.id}.json`), `${JSON.stringify(epic, null, 2)}\n`);
+  const epicsDir = join(root, ".harnix", EPICS_DIRECTORY);
+  await mkdir(epicsDir, { recursive: true });
+  const jsonContent = `${JSON.stringify(epic, null, 2)}\n`;
+  await atomicWriteFile(join(epicsDir, `${epic.id}.json`), jsonContent);
+  const folder = join(epicsDir, epic.id);
+  await mkdir(folder, { recursive: true });
+  await atomicWriteFile(join(folder, "epic.json"), jsonContent);
   await renderEpicMarkdown(root, epic.id, epic);
 }
 
@@ -267,6 +283,11 @@ export async function renderEpicMarkdown(root: string, epicId: string, epic?: Ep
     sections.push(["## Task Overview & Scope", "", overview.join("\n\n")].join("\n"));
   }
 
-  await mkdir(join(harnixRoot, EPICS_DIRECTORY), { recursive: true });
-  await atomicWriteFile(join(harnixRoot, EPICS_DIRECTORY, `${epicId}.md`), `${sections.join("\n\n")}\n`);
+  const epicsDir = join(harnixRoot, EPICS_DIRECTORY);
+  await mkdir(epicsDir, { recursive: true });
+  const mdContent = `${sections.join("\n\n")}\n`;
+  await atomicWriteFile(join(epicsDir, `${epicId}.md`), mdContent);
+  const folder = join(epicsDir, epicId);
+  await mkdir(folder, { recursive: true });
+  await atomicWriteFile(join(folder, "epic.md"), mdContent);
 }

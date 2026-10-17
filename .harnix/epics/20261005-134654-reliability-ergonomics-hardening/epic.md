@@ -15,12 +15,12 @@ Không còn task nào chưa hoàn tất.
 
 ## Members (4 tasks)
 
-| # | Task ID | Title | Status |
-|---|---------|-------|--------|
-| 1 | `20261005-134655-windows-runner-glob-validation` | Khac phuc Windows spawn runner cho .cmd/.bat va tang cuong chan doan input globs | `completed` |
-| 2 | `20261005-134656-atomic-replace-check` | Bo sung transport thay the atomic cho required check da fail | `completed` |
-| 3 | `20261005-134657-baseline-checks-and-dryrun` | Co che baseline check truoc freeze contract va dry-run transition | `completed` |
-| 4 | `20261005-134658-multirepo-discovery-and-task-cli` | Ho tro multi-repository discovery trong verify-plan va CLI tao task tien dung | `completed` |
+| # | Task ID | Title | Mode | Status |
+|---|---------|-------|------|--------|
+| 1 | `20261005-134655-windows-runner-glob-validation` | Khac phuc Windows spawn runner cho .cmd/.bat va tang cuong chan doan input globs | `full` | `completed` |
+| 2 | `20261005-134656-atomic-replace-check` | Bo sung transport thay the atomic cho required check da fail | `full` | `completed` |
+| 3 | `20261005-134657-baseline-checks-and-dryrun` | Co che baseline check truoc freeze contract va dry-run transition | `full` | `completed` |
+| 4 | `20261005-134658-multirepo-discovery-and-task-cli` | Ho tro multi-repository discovery trong verify-plan va CLI tao task tien dung | `full` | `completed` |
 
 ## Task Overview & Scope
 

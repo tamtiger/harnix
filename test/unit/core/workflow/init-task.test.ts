@@ -186,7 +186,7 @@ describe("initTaskWorkflow", () => {
       const task = await initTaskWorkflow(root, { title: "Member Task", epic: "20261006-100000-lineage-epic" });
 
       expect(task.epicId).toBe("20261006-100000-lineage-epic");
-      const page = await readFile(join(root, ".harnix", "epics", "20261006-100000-lineage-epic.md"), "utf8");
+      const page = await readFile(join(root, ".harnix", "epics", "20261006-100000-lineage-epic", "epic.md"), "utf8");
       expect(page).toContain(task.id);
     });
 
@@ -325,6 +325,32 @@ describe("initTaskWorkflow slug", () => {
     const root = await project();
 
     expect((await initTaskWorkflow(root, { title: "Plain Title" })).id).toMatch(/-plain-title$/u);
+  });
+
+  it("auto-generates prd.md and plan.md when initializing a full mode task", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeTestProject(root);
+
+    const task = await initTaskWorkflow(root, {
+      title: "Full Ceremony Task",
+      mode: "full",
+      goal: "Implement full workflow artifacts",
+      criteria: ["Artifacts are present and populated"],
+    });
+
+    const prdPath = join(root, ".harnix", "tasks", task.id, "prd.md");
+    const planPath = join(root, ".harnix", "tasks", task.id, "plan.md");
+
+    const prdContent = await readFile(prdPath, "utf8");
+    const planContent = await readFile(planPath, "utf8");
+
+    expect(prdContent).toContain("# PRD: Full Ceremony Task");
+    expect(prdContent).toContain("## 1. Context & Problem Statement");
+    expect(prdContent).toContain("## 3. Anchored Acceptance Criteria");
+    expect(planContent).toContain("# Implementation Plan: Full Ceremony Task");
+    expect(planContent).toContain("## Execution Slices");
+    expect(planContent).toContain("## Verification Matrix");
   });
 });
 

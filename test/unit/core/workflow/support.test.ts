@@ -37,7 +37,7 @@ describe("workflow support", () => {
     await saveTask(harnixRoot, member);
 
     await refreshLinkedEpicMarkdown(root, member);
-    const page = await readFile(join(harnixRoot, "epics", "support-epic.md"), "utf8");
+    const page = await readFile(join(harnixRoot, "epics", "support-epic", "epic.md"), "utf8");
     expect(page).toContain(member.id);
 
     // No epic id, or a legacy v1 record, is a no-op rather than an error.

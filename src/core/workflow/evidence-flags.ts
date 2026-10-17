@@ -2,6 +2,7 @@ import { resolveActiveTask, type EvidenceV3, type TaskRecord } from "src/core/ta
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { syncPlanChecklistPass } from "./plan-sync.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
 
@@ -96,5 +97,9 @@ export async function appendEvidenceFlagsWorkflow(
   const saved = await saveWorkflow(root, {
     task: { ...task, evidence: [...task.evidence, evidence], updatedAt: laterTimestamp(task.updatedAt, now) },
   });
+  if (result === "pass") {
+    const harnixRoot = await resolveSafeHarnixPath(root);
+    await syncPlanChecklistPass(harnixRoot, task.id, flags.check);
+  }
   return { task: saved, evidenceId: evidence.id };
 }

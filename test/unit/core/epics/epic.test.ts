@@ -44,32 +44,32 @@ describe("EpicRecord validation", () => {
 
   const temporaryRepository = useTemporaryRepositories();
 
-  it("persists epic record and regenerates markdown derived view", async () => {
+  it("persists epic record into dedicated folder and regenerates markdown derived view", async () => {
     const root = await temporaryRepository();
     const epic = validateEpic(buildEpic({ id: "my-epic", title: "Tính năng lớn", goal: "Thêm roadmap", ...stamp }));
 
     await upsertEpic(root, epic);
-    const jsonContent = await readFile(join(root, ".harnix", "epics", "my-epic.json"), "utf8");
+    const jsonContent = await readFile(join(root, ".harnix", "epics", "my-epic", "epic.json"), "utf8");
     expect(JSON.parse(jsonContent).id).toBe("my-epic");
 
-    const mdContent = await readFile(join(root, ".harnix", "epics", "my-epic.md"), "utf8");
+    const mdContent = await readFile(join(root, ".harnix", "epics", "my-epic", "epic.md"), "utf8");
     expect(mdContent).toContain("Tính năng lớn");
     expect(mdContent).toContain("Thêm roadmap");
   });
 
-  it("writes both epic files atomically: whole files, a final newline and no temporary leftovers", async () => {
+  it("writes both epic files atomically into folder: whole files, a final newline and no temporary leftovers", async () => {
     const root = await temporaryRepository();
     const epic = validateEpic(buildEpic({ id: "atomic-epic", title: "Epic", goal: "Goal", ...stamp }));
 
     await upsertEpic(root, epic);
     await upsertEpic(root, validateEpic({ ...epic, goal: "A different goal" }));
 
-    const directory = join(root, ".harnix", "epics");
-    const json = await readFile(join(directory, "atomic-epic.json"), "utf8");
+    const directory = join(root, ".harnix", "epics", "atomic-epic");
+    const json = await readFile(join(directory, "epic.json"), "utf8");
     expect(json.endsWith("}\n")).toBe(true);
     expect(JSON.parse(json).goal).toBe("A different goal");
-    expect((await readFile(join(directory, "atomic-epic.md"), "utf8")).endsWith("\n")).toBe(true);
-    expect((await readdir(directory)).sort()).toEqual(["atomic-epic.json", "atomic-epic.md"]);
+    expect((await readFile(join(directory, "epic.md"), "utf8")).endsWith("\n")).toBe(true);
+    expect((await readdir(directory)).sort()).toEqual(["epic.json", "epic.md"]);
   });
 });
 
@@ -121,7 +121,7 @@ describe("epic page renderer", () => {
 
     await upsertEpic(root, epic);
 
-    const page = await readFile(join(root, ".harnix", "epics", "render-epic.md"), "utf8");
+    const page = await readFile(join(root, ".harnix", "epics", "render-epic", "epic.md"), "utf8");
     expect(page).toBe(
       [
         "# Epic: Render epic",
@@ -172,10 +172,10 @@ describe("epic page renderer", () => {
     ) as unknown as typeof epic;
 
     await upsertEpic(root, withoutNonGoals);
-    const empty = await readFile(join(root, ".harnix", "epics", "render-epic.md"), "utf8");
+    const empty = await readFile(join(root, ".harnix", "epics", "render-epic", "epic.md"), "utf8");
     await saveTask(join(root, ".harnix"), memberTask("20260928-100000-done", "completed", "Done task"));
     await upsertEpic(root, withoutNonGoals);
-    const finished = await readFile(join(root, ".harnix", "epics", "render-epic.md"), "utf8");
+    const finished = await readFile(join(root, ".harnix", "epics", "render-epic", "epic.md"), "utf8");
 
     expect(empty).not.toContain("Non-goals");
     expect(empty).toContain("Chưa có task thành viên.");
@@ -193,7 +193,7 @@ describe("epic page renderer", () => {
 
     expect(detail.nextTask?.id).toBe("20260928-100001-open");
     expect((detail as PublicEpicDetailResult).members.map((member) => member.mode)).toEqual(["lite", "lite"]);
-    expect(await readFile(join(root, ".harnix", "epics", "render-epic.md"), "utf8")).toContain(
+    expect(await readFile(join(root, ".harnix", "epics", "render-epic", "epic.md"), "utf8")).toContain(
       `\`${detail.nextTask!.id}\``,
     );
   });
@@ -227,7 +227,7 @@ describe("epic order", () => {
     await upsertEpic(root, ordered);
 
     const detail = (await detailPublicEpic(root, "ordered-epic")) as PublicEpicDetailResult;
-    const page = await readFile(join(root, ".harnix", "epics", "ordered-epic.md"), "utf8");
+    const page = await readFile(join(root, ".harnix", "epics", "ordered-epic", "epic.md"), "utf8");
 
     expect(detail.nextTask?.id).toBe(B);
     expect(detail.members.map((item) => item.id)).toEqual([B, A]);

@@ -4,6 +4,8 @@ import {
   criteriaWithoutFocusedCheck,
   missingCriteriaInPlan,
   scanPlaceholders,
+  scanPlanStructure,
+  scanPrdStructure,
   unknownCheckReferences,
 } from "src/core/workflow/ready-content.js";
 import { buildCheck, buildCriterion, buildTaskV3 } from "test/support/builders.js";
@@ -162,4 +164,62 @@ describe("unknownCheckReferences", () => {
 
     expect(unknownCheckReferences(declared, plan)).toEqual([]);
   });
+
+  it("reports check ids in square bracket tags at the start of a checklist item", () => {
+    const plan = [
+      "- [ ] [check-tag-unknown] run it",
+      "- [ ] [check-a] ok",
+    ].join("\n");
+
+    expect(unknownCheckReferences(declared, plan)).toEqual(["check-tag-unknown"]);
+  });
 });
+
+describe("scanPrdStructure", () => {
+  it("returns no advisories when all 4 core technical sections are present", () => {
+    const prd = [
+      "# PRD",
+      "## 1. Context & Problem Statement",
+      "Explain problem.",
+      "## 2. Scope & Boundaries",
+      "In-scope and non-goals.",
+      "## 3. Anchored Acceptance Criteria",
+      "- ac-1: done",
+      "## 4. Architectural & Safety Constraints",
+      "Keep invariants.",
+    ].join("\n");
+
+    expect(scanPrdStructure(prd)).toEqual([]);
+  });
+
+  it("returns advisories for missing sections when headings exist", () => {
+    const prd = "# PRD\n## Overview\nJust plain text.\n";
+    const advisories = scanPrdStructure(prd);
+
+    expect(advisories).toContain("prd.md is recommended to include a Context & Problem Statement section");
+    expect(advisories).toContain("prd.md is recommended to include a Scope & Boundaries section");
+    expect(advisories).toContain("prd.md is recommended to include an Acceptance Criteria section");
+    expect(advisories).toContain("prd.md is recommended to include an Architectural & Safety Constraints section");
+  });
+
+  it("skips stubs without any section headings", () => {
+    expect(scanPrdStructure("# PRD\n")).toEqual([]);
+  });
+});
+
+describe("scanPlanStructure", () => {
+  it("returns no advisories when Execution Slices section is present", () => {
+    const plan = "# Plan\n## Execution Slices\n- [ ] slice 1\n";
+    expect(scanPlanStructure(plan)).toEqual([]);
+  });
+
+  it("returns an advisory when Execution Slices section is missing from structured plan", () => {
+    const plan = "# Plan\n## Tasks\n- [ ] item 1\n";
+    expect(scanPlanStructure(plan)).toContain("plan.md is recommended to organize tasks into Execution Slices");
+  });
+
+  it("skips stubs without section headings", () => {
+    expect(scanPlanStructure("- [ ] item 1\n")).toEqual([]);
+  });
+});
+

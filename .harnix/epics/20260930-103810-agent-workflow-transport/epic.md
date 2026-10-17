@@ -17,11 +17,11 @@ Không còn task nào chưa hoàn tất.
 
 ## Members (3 tasks)
 
-| # | Task ID | Title | Status |
-|---|---------|-------|--------|
-| 1 | `20260930-103811-fix-suite-gate-and-input-digest` | Sửa suite gate và input digest cho monorepo | `completed` |
-| 2 | `20260930-103812-workflow-cli-transports` | Bổ sung transport CLI cho evidence, criterion và chạy check | `completed` |
-| 3 | `20260930-103813-agent-guidance-cookbook` | Viết lại hướng dẫn skill và template cho agent | `completed` |
+| # | Task ID | Title | Mode | Status |
+|---|---------|-------|------|--------|
+| 1 | `20260930-103811-fix-suite-gate-and-input-digest` | Sửa suite gate và input digest cho monorepo | `full` | `completed` |
+| 2 | `20260930-103812-workflow-cli-transports` | Bổ sung transport CLI cho evidence, criterion và chạy check | `full` | `completed` |
+| 3 | `20260930-103813-agent-guidance-cookbook` | Viết lại hướng dẫn skill và template cho agent | `full` | `completed` |
 
 ## Task Overview & Scope
 

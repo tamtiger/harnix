@@ -16,14 +16,14 @@ Không còn task nào chưa hoàn tất.
 
 ## Members (6 tasks)
 
-| # | Task ID | Title | Status |
-|---|---------|-------|--------|
-| 1 | `20261005-184125-khoi-phuc-gate-xanh-2-0-5` | Khôi phục gate xanh cho HEAD 2.0.4 | `completed` |
-| 2 | `20261005-184126-dong-xanh-gia-run-check` | Đóng các đường xanh giả của check và evidence | `completed` |
-| 3 | `20261005-184127-bao-toan-config-global` | Bảo toàn cấu hình global của người dùng | `completed` |
-| 4 | `20261005-184128-toan-ven-state-machine` | Toàn vẹn state machine và dữ liệu task | `completed` |
-| 5 | `20261005-184129-bao-mat-context-windows` | Bảo mật hook context, learning và thực thi trên Windows | `completed` |
-| 6 | `20261005-184130-dong-bo-docs-va-phat-hanh` | Đồng bộ tài liệu, skill, test cấu trúc và phát hành 2.0.5 | `completed` |
+| # | Task ID | Title | Mode | Status |
+|---|---------|-------|------|--------|
+| 1 | `20261005-184125-khoi-phuc-gate-xanh-2-0-5` | Khôi phục gate xanh cho HEAD 2.0.4 | `full` | `completed` |
+| 2 | `20261005-184126-dong-xanh-gia-run-check` | Đóng các đường xanh giả của check và evidence | `full` | `completed` |
+| 3 | `20261005-184127-bao-toan-config-global` | Bảo toàn cấu hình global của người dùng | `full` | `completed` |
+| 4 | `20261005-184128-toan-ven-state-machine` | Toàn vẹn state machine và dữ liệu task | `full` | `completed` |
+| 5 | `20261005-184129-bao-mat-context-windows` | Bảo mật hook context, learning và thực thi trên Windows | `full` | `completed` |
+| 6 | `20261005-184130-dong-bo-docs-va-phat-hanh` | Đồng bộ tài liệu, skill, test cấu trúc và phát hành 2.0.5 | `full` | `completed` |
 
 ## Task Overview & Scope
 

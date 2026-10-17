@@ -128,4 +128,22 @@ describe("ready content findings in a dry run", () => {
 
     expect(result.issues).toEqual([]);
   });
+
+  it("reports missing PRD 4-block structure and Execution Slices as advisories", async () => {
+    const { root, planning } = await planned();
+    const minimalPrd = "# PRD\n## Overview\nJust bare minimal content.\n";
+    const minimalPlan = "# Plan\n## Tasks\n- [ ] criterion a covered\n";
+
+    const result = await inspectReadyConditions(join(root, ".harnix"), planning, {
+      prd: minimalPrd,
+      plan: minimalPlan,
+    });
+
+    expect(result.issues).toEqual([]);
+    expect(result.advisories).toContain("prd.md is recommended to include a Context & Problem Statement section");
+    expect(result.advisories).toContain("prd.md is recommended to include a Scope & Boundaries section");
+    expect(result.advisories).toContain("prd.md is recommended to include an Acceptance Criteria section");
+    expect(result.advisories).toContain("prd.md is recommended to include an Architectural & Safety Constraints section");
+    expect(result.advisories).toContain("plan.md is recommended to organize tasks into Execution Slices");
+  });
 });

@@ -116,4 +116,23 @@ describe("workflow evidence from flags", () => {
       appendEvidenceFlagsWorkflow(root, { check: "check", result: "pass", exitCode: "0", summary: "x" }, NOW),
     ).rejects.toThrow(/active task/u);
   });
+
+  it("automatically ticks unchecked item with [check-id] tag in plan.md upon pass", async () => {
+    const { writeFile, readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+
+    const planPath = join(root, ".harnix", "tasks", task.id, "plan.md");
+    await writeFile(planPath, "# Plan\n- [ ] [check] Implement verification\n", "utf8");
+
+    await appendEvidenceFlagsWorkflow(
+      root,
+      { check: "check", result: "pass", exitCode: "0", summary: "Passed verification" },
+      NOW,
+    );
+
+    const updatedPlan = await readFile(planPath, "utf8");
+    expect(updatedPlan).toContain("- [x] [check] Implement verification");
+  });
 });

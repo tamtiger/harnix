@@ -4,6 +4,22 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.10.0] - 2026-10-17
+
+### Added
+
+- Nhom Epic vao folder rieng va xay dung bo migration tuong thich nguoc
+- Tu dong dong bo checklist trong plan.md khi validation check pass
+
+### Changed
+
+- Chuan hoa 4 khoi PRD, Execution Slices cho Plan va tu dong sinh template
+- Tai cau truc bo tao tac Epic (folder rieng), PRD (4 khoi ky thuat), Plan (Execution Slices va auto-sync) va Review (Code Impact)
+
+### Fixed
+
+- Dong bo gioi han identifiers trong repo-map store tu 32 len 48 de khop voi extractor khi bóc tách HTTP route va messaging topic
+
 ## [2.9.0] - 2026-10-16
 
 ### Added

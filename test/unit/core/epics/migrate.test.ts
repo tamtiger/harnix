@@ -30,12 +30,12 @@ describe("legacy epic migration", () => {
     const result = await migrateLegacyEpics(root);
 
     expect(result).toEqual({
-      created: [".harnix/epics/old-epic.json"],
+      created: [".harnix/epics/old-epic/epic.json"],
       deleted: [".harnix/roadmaps/old-epic.json"],
       preserved: [],
     });
-    expect(await readFile(join(root, ".harnix", "epics", "old-epic.json"), "utf8")).toBe(json);
-    expect(await readFile(join(root, ".harnix", "epics", "old-epic.md"), "utf8")).toContain("# Epic: Example epic");
+    expect(await readFile(join(root, ".harnix", "epics", "old-epic", "epic.json"), "utf8")).toBe(json);
+    expect(await readFile(join(root, ".harnix", "epics", "old-epic", "epic.md"), "utf8")).toContain("# Epic: Example epic");
     await expect(readdir(join(root, ".harnix", "roadmaps"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
@@ -46,10 +46,25 @@ describe("legacy epic migration", () => {
     expect(await migrateLegacyEpics(root)).toEqual({ created: [], deleted: [], preserved: [] });
   });
 
+  it("migrates flat epics under .harnix/epics/<id>.json into dedicated folders", async () => {
+    const root = await createTestProject(await temporaryRepository());
+    const json = `${JSON.stringify(buildEpic({ id: "flat-epic" }), null, 2)}\n`;
+    await mkdir(join(root, ".harnix", "epics"), { recursive: true });
+    await writeFile(join(root, ".harnix", "epics", "flat-epic.json"), json);
+    await writeFile(join(root, ".harnix", "epics", "flat-epic.md"), "# flat derived page\n");
+
+    const result = await migrateLegacyEpics(root);
+
+    expect(result.created).toContain(".harnix/epics/flat-epic/epic.json");
+    expect(result.deleted).toContain(".harnix/epics/flat-epic.json");
+    expect(await readFile(join(root, ".harnix", "epics", "flat-epic", "epic.json"), "utf8")).toBe(json);
+    expect(await readFile(join(root, ".harnix", "epics", "flat-epic", "epic.md"), "utf8")).toContain("# Epic: Example epic");
+  });
+
   it("keeps both files when the destination differs and leaves invalid records alone", async () => {
     const { root, json } = await projectWithLegacyEpic();
-    await mkdir(join(root, ".harnix", "epics"), { recursive: true });
-    await writeFile(join(root, ".harnix", "epics", "old-epic.json"), `${JSON.stringify({ different: true })}\n`);
+    await mkdir(join(root, ".harnix", "epics", "old-epic"), { recursive: true });
+    await writeFile(join(root, ".harnix", "epics", "old-epic", "epic.json"), `${JSON.stringify({ different: true })}\n`);
     await writeFile(join(root, ".harnix", "roadmaps", "broken.json"), "{ not json");
 
     const result = await migrateLegacyEpics(root);
@@ -61,8 +76,8 @@ describe("legacy epic migration", () => {
 
   it("removes a legacy file whose identical copy already exists at the destination", async () => {
     const { root, json } = await projectWithLegacyEpic();
-    await mkdir(join(root, ".harnix", "epics"), { recursive: true });
-    await writeFile(join(root, ".harnix", "epics", "old-epic.json"), json);
+    await mkdir(join(root, ".harnix", "epics", "old-epic"), { recursive: true });
+    await writeFile(join(root, ".harnix", "epics", "old-epic", "epic.json"), json);
 
     const result = await migrateLegacyEpics(root);
 

@@ -42,4 +42,16 @@ describe("repo map store validation", () => {
       "Invalid repo map record: path must be a normalized repository path.",
     );
   });
+
+  it("accepts up to 48 identifiers and rejects more than 48", () => {
+    const fortyEightIds = Array.from({ length: 48 }, (_, i) => `id_${String(i).padStart(2, "0")}`);
+    const valid48 = { ...validRecord, identifiers: fortyEightIds };
+    expect(() => createRepoMap([valid48])).not.toThrow();
+
+    const fortyNineIds = Array.from({ length: 49 }, (_, i) => `id_${String(i).padStart(2, "0")}`);
+    const invalid49 = { ...validRecord, identifiers: fortyNineIds };
+    expect(() => createRepoMap([invalid49])).toThrow(
+      "Invalid repo map identifiers: must be an array of at most 48 strings (max 96 chars each).",
+    );
+  });
 });

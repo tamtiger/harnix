@@ -291,4 +291,42 @@ describe("task review page", () => {
     };
     expect(persisted.evidence).toHaveLength(3);
   });
+
+  it("renders a Code impact section when codeImpact is provided and omits it when absent", async () => {
+    const root = await temporaryRepository();
+    const taskWithImpact = buildTaskV3({
+      id: "20260924-150200-code-impact",
+      title: "Code impact case",
+      status: "in_progress",
+      checkpoint: "implementing",
+      goal: "g",
+      acceptanceCriteria: [],
+      validationPlan: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    const artifactsWithImpact = {
+      prd: false,
+      plan: false,
+      design: false,
+      codeImpact: [
+        { path: "src/core/epics/epic.ts", status: "modified" as const, additions: 25, deletions: 10 },
+        { path: "src/core/workflow/plan-sync.ts", status: "added" as const, additions: 52, deletions: 0 },
+        { path: "src/old-unused.ts", status: "deleted" as const, additions: 0, deletions: 30 },
+      ],
+    };
+
+    const { renderTaskReview } = await import("src/core/tasks/task-review.js");
+    const reviewWithImpact = renderTaskReview(taskWithImpact, artifactsWithImpact, systemTimezone());
+
+    expect(reviewWithImpact).toContain("## Code impact");
+    expect(reviewWithImpact).toContain("| `src/core/epics/epic.ts` | modified | +25 / -10 |");
+    expect(reviewWithImpact).toContain("| `src/core/workflow/plan-sync.ts` | added | +52 / -0 |");
+    expect(reviewWithImpact).toContain("| `src/old-unused.ts` | deleted | +0 / -30 |");
+
+    const plainArtifacts = { prd: false, plan: false, design: false };
+    const reviewWithoutImpact = renderTaskReview(taskWithImpact, plainArtifacts, systemTimezone());
+    expect(reviewWithoutImpact).not.toContain("## Code impact");
+  });
 });

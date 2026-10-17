@@ -54,10 +54,10 @@ describe("roadmaps to epics migration", () => {
 
     const result = await updateProject({ root });
 
-    expect(result.created).toContain(".harnix/epics/old-epic.json");
+    expect(result.created).toContain(".harnix/epics/old-epic/epic.json");
     expect(result.deleted).toContain(".harnix/roadmaps/old-epic.json");
-    expect(await readFile(join(root, ".harnix", "epics", "old-epic.json"), "utf8")).toBe(legacyJson);
-    expect(await readFile(join(root, ".harnix", "epics", "old-epic.md"), "utf8")).toContain("# Epic: Old epic");
+    expect(await readFile(join(root, ".harnix", "epics", "old-epic", "epic.json"), "utf8")).toBe(legacyJson);
+    expect(await readFile(join(root, ".harnix", "epics", "old-epic", "epic.md"), "utf8")).toContain("# Epic: Old epic");
     expect(await exists(join(root, ".harnix", "roadmaps"))).toBe(false);
     expect((await listPublicEpics(root, 20)).epics.map((item) => item.id)).toEqual(["old-epic"]);
   });
@@ -65,25 +65,25 @@ describe("roadmaps to epics migration", () => {
   it("is idempotent", async () => {
     const root = await legacyProject();
     await updateProject({ root });
-    const before = await readFile(join(root, ".harnix", "epics", "old-epic.md"), "utf8");
+    const before = await readFile(join(root, ".harnix", "epics", "old-epic", "epic.md"), "utf8");
 
     const second = await updateProject({ root });
 
     expect(second.created.filter((path) => path.includes("epics"))).toEqual([]);
     expect(second.deleted.filter((path) => path.includes("roadmaps"))).toEqual([]);
-    expect(await readFile(join(root, ".harnix", "epics", "old-epic.md"), "utf8")).toBe(before);
+    expect(await readFile(join(root, ".harnix", "epics", "old-epic", "epic.md"), "utf8")).toBe(before);
   });
 
   it("keeps both files when a different epic record already sits at the destination", async () => {
     const root = await legacyProject();
-    await mkdir(join(root, ".harnix", "epics"), { recursive: true });
+    await mkdir(join(root, ".harnix", "epics", "old-epic"), { recursive: true });
     const different = `${JSON.stringify({ ...epic, title: "Newer title" }, null, 2)}\n`;
-    await writeFile(join(root, ".harnix", "epics", "old-epic.json"), different);
+    await writeFile(join(root, ".harnix", "epics", "old-epic", "epic.json"), different);
 
     const result = await updateProject({ root });
 
     expect(result.preserved).toContain(".harnix/roadmaps/old-epic.json");
-    expect(await readFile(join(root, ".harnix", "epics", "old-epic.json"), "utf8")).toBe(different);
+    expect(await readFile(join(root, ".harnix", "epics", "old-epic", "epic.json"), "utf8")).toBe(different);
     expect(await readFile(join(root, ".harnix", "roadmaps", "old-epic.json"), "utf8")).toBe(legacyJson);
   });
 
@@ -103,7 +103,7 @@ describe("roadmaps to epics migration", () => {
 
     await diagnoseProject({ root, fix: true });
 
-    expect(await exists(join(root, ".harnix", "epics", "old-epic.json"))).toBe(true);
+    expect(await exists(join(root, ".harnix", "epics", "old-epic", "epic.json"))).toBe(true);
     expect(await exists(join(root, ".harnix", "roadmaps", "old-epic.json"))).toBe(false);
   });
 });

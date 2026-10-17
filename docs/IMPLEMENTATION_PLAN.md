@@ -371,7 +371,7 @@ Explicit hidden context persistence atomically writes a task-owned `.harnix/task
 
 ### 4.8 Epic tracking
 
-File: `.harnix/epics/<epic-id>.json` và `.harnix/epics/<epic-id>.md` (derived, always-overwritten, similar role to review.md). Legacy `.harnix/roadmaps/` is still read as a fallback and is migrated by `harnix update` / `harnix doctor --fix`.
+File: `.harnix/epics/<epic-id>/epic.json` và `.harnix/epics/<epic-id>/epic.md` (derived, always-overwritten, similar role to review.md; backward-compatible with legacy flat `.harnix/epics/<epic-id>.json`). Legacy `.harnix/roadmaps/` is still read as a fallback and is migrated by `harnix update` / `harnix doctor --fix`.
 
 ```ts
 interface EpicRecord {
@@ -815,7 +815,7 @@ Explicit hidden context persistence atomically writes a task-owned `.harnix/task
 
 ### 4.8 Epic tracking
 
-File: `.harnix/epics/<epic-id>.json` và `.harnix/epics/<epic-id>.md` (derived, always-overwritten, similar role to review.md). Legacy `.harnix/roadmaps/` is still read as a fallback and is migrated by `harnix update` / `harnix doctor --fix`.
+File: `.harnix/epics/<epic-id>/epic.json` và `.harnix/epics/<epic-id>/epic.md` (derived, always-overwritten, similar role to review.md; backward-compatible with legacy flat `.harnix/epics/<epic-id>.json`). Legacy `.harnix/roadmaps/` is still read as a fallback and is migrated by `harnix update` / `harnix doctor --fix`.
 
 ```ts
 interface EpicRecord {

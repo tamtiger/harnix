@@ -55,10 +55,18 @@ function displayTime(value: string, timezone: string): string {
   }
 }
 
+export interface CodeImpactItem {
+  path: string;
+  status: "added" | "modified" | "deleted";
+  additions?: number;
+  deletions?: number;
+}
+
 export interface ReviewArtifacts {
   prd: boolean;
   plan: boolean;
   design: boolean;
+  codeImpact?: CodeImpactItem[];
 }
 
 function renderHeader(task: TaskRecord, timezone: string): string[] {
@@ -198,12 +206,35 @@ function renderEvidence(task: TaskRecord, timezone: string): string[] {
   return lines;
 }
 
+function renderCodeImpact(task: TaskRecord, artifacts: ReviewArtifacts): string[] {
+  const impact =
+    ("codeImpact" in task && Array.isArray((task as any).codeImpact) ? (task as any).codeImpact : undefined) ??
+    artifacts.codeImpact;
+  if (!impact || impact.length === 0) return [];
+  const lines = [
+    "",
+    "## Code impact",
+    "",
+    "| File | Status | Changes |",
+    "| --- | --- | --- |",
+  ];
+  for (const item of impact) {
+    const changes =
+      item.additions !== undefined || item.deletions !== undefined
+        ? `+${item.additions ?? 0} / -${item.deletions ?? 0}`
+        : "-";
+    lines.push(`| \`${item.path}\` | ${item.status} | ${changes} |`);
+  }
+  return lines;
+}
+
 /** Derived, always-overwritten human page; it carries no obligation and is never a source of truth. */
 export function renderTaskReview(task: TaskRecord, artifacts: ReviewArtifacts, timezone: string): string {
   const lines = [
     ...renderHeader(task, timezone),
     ...renderScope(task),
     ...renderArtifacts(artifacts),
+    ...renderCodeImpact(task, artifacts),
     ...renderCriteriaAndChecks(task, timezone),
     ...renderReviewData(task),
     ...renderEvidence(task, timezone),

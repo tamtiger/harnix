@@ -17,10 +17,10 @@ Không còn task nào chưa hoàn tất.
 
 ## Members (2 tasks)
 
-| # | Task ID | Title | Status |
-|---|---------|-------|--------|
-| 1 | `20261001-185520-cut-measured-token-load` | Cắt các nguồn token lớn nhất theo số đo | `completed` |
-| 2 | `20261001-185520-measure-token-baseline` | Thêm lệnh đo token thực tế của một vòng đời task | `completed` |
+| # | Task ID | Title | Mode | Status |
+|---|---------|-------|------|--------|
+| 1 | `20261001-185520-cut-measured-token-load` | Cắt các nguồn token lớn nhất theo số đo | `full` | `completed` |
+| 2 | `20261001-185520-measure-token-baseline` | Thêm lệnh đo token thực tế của một vòng đời task | `lite` | `completed` |
 
 ## Task Overview & Scope
 

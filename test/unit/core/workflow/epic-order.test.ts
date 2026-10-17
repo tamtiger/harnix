@@ -39,7 +39,7 @@ describe("workflow --epic-order", () => {
     expect(epic.order).toEqual([B, A]);
     expect(epic.updatedAt).toBe("2026-09-28T15:00:00.000Z");
     expect((await loadEpicOrThrow(join(root, ".harnix"), "ordered-epic")).order).toEqual([B, A]);
-    expect(await readFile(join(root, ".harnix", "epics", "ordered-epic.md"), "utf8")).toMatch(
+    expect(await readFile(join(root, ".harnix", "epics", "ordered-epic", "epic.md"), "utf8")).toMatch(
       /Next task[\s\S]*second/u,
     );
     expect([await taskFile(root, A), await taskFile(root, B)]).toEqual(before);

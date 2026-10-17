@@ -1,4 +1,5 @@
-import { readFile, readdir, rm, rmdir } from "node:fs/promises";
+import { mkdir, readFile, readdir, rm, rmdir } from "node:fs/promises";
+import { dirname } from "node:path";
 
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { compareCodeUnits } from "src/utils/order.js";
@@ -15,25 +16,20 @@ export interface EpicMigrationResult {
 }
 
 /**
- * Moves `.harnix/roadmaps/<id>.json` to `.harnix/epics/<id>.json` and regenerates the derived page.
- * Idempotent, and never deletes a legacy file until an identical copy exists at the destination.
+ * Moves `.harnix/roadmaps/<id>.json` and flat `.harnix/epics/<id>.json` to `.harnix/epics/<id>/epic.json`
+ * and regenerates the derived page. Idempotent, and never deletes a legacy file until an identical copy exists.
  */
 export async function migrateLegacyEpics(root: string): Promise<EpicMigrationResult> {
   const result: EpicMigrationResult = { created: [], deleted: [], preserved: [] };
   const harnixRoot = await resolveSafeHarnixPath(root);
-  const legacyDirectory = await resolveSafeProjectPath(harnixRoot, LEGACY_EPICS_DIRECTORY);
-  let names: string[];
-  try {
-    names = (await readdir(legacyDirectory)).filter((name) => name.endsWith(".json")).sort(compareCodeUnits);
-  } catch {
-    return result;
-  }
 
-  for (const name of names) {
+  async function migrateFile(sourceDir: string, name: string): Promise<void> {
     const epicId = name.slice(0, -".json".length);
-    const legacyPath = await resolveSafeProjectPath(harnixRoot, `${LEGACY_EPICS_DIRECTORY}/${name}`);
-    const targetPath = await resolveSafeProjectPath(harnixRoot, `${EPICS_DIRECTORY}/${name}`);
-    const legacyRelative = `.harnix/${LEGACY_EPICS_DIRECTORY}/${name}`;
+    const legacyPath = await resolveSafeProjectPath(harnixRoot, `${sourceDir}/${name}`);
+    const targetPath = await resolveSafeProjectPath(harnixRoot, `${EPICS_DIRECTORY}/${epicId}/epic.json`);
+    const legacyRelative = `.harnix/${sourceDir}/${name}`;
+    const targetRelative = `.harnix/${EPICS_DIRECTORY}/${epicId}/epic.json`;
+
     let content: string;
     let epic;
     try {
@@ -41,7 +37,7 @@ export async function migrateLegacyEpics(root: string): Promise<EpicMigrationRes
       epic = validateEpic(JSON.parse(content));
     } catch {
       result.preserved.push(legacyRelative);
-      continue;
+      return;
     }
 
     let targetContent: string | undefined;
@@ -52,24 +48,52 @@ export async function migrateLegacyEpics(root: string): Promise<EpicMigrationRes
     }
     if (targetContent !== undefined && targetContent !== content) {
       result.preserved.push(legacyRelative);
-      continue;
+      return;
     }
     if (targetContent === undefined) {
+      await mkdir(dirname(targetPath), { recursive: true });
       await atomicWriteFile(targetPath, content);
       if ((await readFile(targetPath, "utf8")) !== content)
         throw new Error(`Epic migration could not verify ${epicId}.`);
-      result.created.push(`.harnix/${EPICS_DIRECTORY}/${name}`);
+      result.created.push(targetRelative);
     }
     await renderEpicMarkdown(root, epicId, epic);
     await rm(legacyPath);
     result.deleted.push(legacyRelative);
-    const legacyPage = await resolveSafeProjectPath(harnixRoot, `${LEGACY_EPICS_DIRECTORY}/${epicId}.md`);
+    const legacyPage = await resolveSafeProjectPath(harnixRoot, `${sourceDir}/${epicId}.md`);
     await rm(legacyPage, { force: true });
   }
+
+  // 1. Migrate legacy roadmaps/
   try {
-    await rmdir(legacyDirectory);
+    const legacyDirectory = await resolveSafeProjectPath(harnixRoot, LEGACY_EPICS_DIRECTORY);
+    const names = (await readdir(legacyDirectory)).filter((name) => name.endsWith(".json")).sort(compareCodeUnits);
+    for (const name of names) {
+      await migrateFile(LEGACY_EPICS_DIRECTORY, name);
+    }
+    try {
+      await rmdir(legacyDirectory);
+    } catch {
+      /* not empty or already gone: keep whatever remains */
+    }
   } catch {
-    /* not empty or already gone: keep whatever remains */
+    /* missing legacy directory */
   }
+
+  // 2. Migrate flat epics/ files
+  try {
+    const epicsDirectory = await resolveSafeProjectPath(harnixRoot, EPICS_DIRECTORY);
+    const entries = await readdir(epicsDirectory, { withFileTypes: true });
+    const flatFiles = entries
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+      .map((entry) => entry.name)
+      .sort(compareCodeUnits);
+    for (const name of flatFiles) {
+      await migrateFile(EPICS_DIRECTORY, name);
+    }
+  } catch {
+    /* missing epics directory */
+  }
+
   return result;
 }

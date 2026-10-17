@@ -51,7 +51,7 @@ refreshes); `harnix skill [name] [--raw] [--reference topic]`; `harnix doctor`, 
   `evidence: [{ id, checkId?, recordedAt, result, exitCode?, summary, artifactPaths, inputDigest?, findings? }]`, `blocker?`, `cancellation?: { reason, authorizedBy: "user" }`, `cancelledAt?`;
   `harnix workflow --schema` prints the exact fields. v1/v2 are legacy read-only records; an unfinished one accepts one migration (`harnix skill harnix-plan --reference migration`).
 - **Files:** `.harnix/tasks/<id>/task.json` is the record, written only through `harnix workflow`; `prd.md`, `plan.md`, `design.md`, `research/` are task-owned Markdown you edit directly; `review.md`
-  is derived and always overwritten (point the user there for a plain-file review); `.harnix/tasks/.active` is the pointer; `.harnix/epics/<id>.json|md` are epics;
+  is derived and always overwritten (point the user there for a plain-file review); `.harnix/tasks/.active` is the pointer; `.harnix/epics/<id>/epic.json|md` are epics (the folder also holds initiative `research.md`/`spec.md`);
   `.harnix/workspace/<developer>/journal/` holds the journal. Tasks, research and journals are user-owned data.
 - **Obligations** (criteria text, checks, their mapping and inputs) converge during planning and freeze at the first persisted `ready`. Later changes are one guarded replan with a reason; criteria
   mapped by recorded evidence and checks with a pass stay immutable.
@@ -79,7 +79,7 @@ refreshes); `harnix skill [name] [--raw] [--reference topic]`; `harnix doctor`, 
   that suite check without a fresh pass only while its latest run is that red result and another passing required check covers all of its criteria; `introduced`, `unknown`, a missing authorizer or a
   missing focused proof keep the default suite gate. Harnix does not compare a test delta (which tests newly fail) because that needs per-test identity and reports falsely; the focused proof carries
   the deliverable.
-- **Execute:** persist `in_progress/implementing` before the first product edit; tick the Full checklist per slice, 100% before verifying; release preparation (version, changelog, generated output)
+- **Execute:** persist `in_progress/implementing` before the first product edit; tick the Full checklist per slice (passing checks with `harnix workflow --run-check` or `--evidence` automatically tick items tagged with `[<chk-id>]`), 100% before verifying; release preparation (version, changelog, generated output)
   belongs here. Version policy: a standalone task bumps the patch once, a member of an epic bumps the pre-release `X.Y.0-dev.N` once, the last member by ID closes the epic with a minor release (a
   major only for a frozen-contract break); the implementing agent bumps with `pnpm version:sync` before `verifying` (the epic-closing minor adds `--fold-dev` to merge the `X.Y.0-dev.N` changelog
   entries into one), and the script rejects any other pre-release shape. In the Harnix repository itself run `pnpm selfhost:sync` after editing this template.
@@ -125,8 +125,7 @@ with the editor tool, and use bash or `pwsh` 7.4+ when JSON is unavoidable.
 A `--save` envelope is `{ "task": <TaskRecord v3>, "artifacts"?: { "prd": "...", "plan": "..." } }`. Read `harnix workflow --schema` once per session (its `constraints` list the enums, the
 sorted-unique arrays and the `--brief` commands) and build it right the first time rather than discovering the shape by failing: no unknown fields; every criterion carries `id`, `text`, `status`,
 `evidenceIds: []`; each check `scope` is `focused` or `full` (never `project`); a required check needs non-empty `criterionIds` and `inputs`, both sorted and unique. A `--save` reports every
-independent problem at once, so fix them together. A Full task may be created light with the record alone (no `artifacts`); write `prd.md` and `plan.md` directly with the editor tool afterwards, since
-the ready gate enforces them.
+independent problem at once, so fix them together. A Full task created with `--init --mode full` automatically generates structured 4-block `prd.md` and Execution Slices `plan.md` templates; write or refine them directly with the editor tool afterwards, since the ready gate enforces them.
 
 The commands are the same in both shells; double-quote text in PowerShell and single-quote it in bash when it contains backticks or `$`:
 

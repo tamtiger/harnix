@@ -224,4 +224,19 @@ describe("workflow --run-check", () => {
     expect(result.task.evidence).toHaveLength(1);
     expect(result.task.evidence[0]?.checkId).toBe("check-1");
   });
+
+  it("automatically ticks unchecked item in plan.md when check passes", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+    const planPath = join(root, ".harnix", "tasks", task.id, "plan.md");
+    await writeFile(planPath, "# Plan\n- [ ] [check] Run the focused check\n", "utf8");
+
+    const { runner } = fakeRunner(0, "ok");
+    const result = await runCheckWorkflow(root, "check", ["pnpm", "run", "test"], { runner, now: NOW });
+
+    expect(result.result).toBe("pass");
+    const updatedPlan = await readFile(planPath, "utf8");
+    expect(updatedPlan).toContain("- [x] [check] Run the focused check");
+  });
 });

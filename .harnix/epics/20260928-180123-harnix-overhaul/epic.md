@@ -18,26 +18,26 @@ Không còn task nào chưa hoàn tất.
 
 ## Members (18 tasks)
 
-| # | Task ID | Title | Status |
-|---|---------|-------|--------|
-| 1 | `20260928-180123-harnix-overhaul-audit` | Đại tu toàn diện Harnix: audit hiệu quả và lập roadmap | `completed` |
-| 2 | `20260928-205759-fix-baseline` | [01] Đưa HEAD về xanh và sửa lệch validator C1–C3 | `completed` |
-| 3 | `20260928-205800-remove-unused-machinery` | [02] Gỡ code chết và tính năng không được dùng | `completed` |
-| 4 | `20260928-205801-simplify-task-contract` | [03] Đơn giản hóa hợp đồng task và evidence | `completed` |
-| 5 | `20260928-205802-localize-timestamps` | [04] Chuyển mọi thời gian sang múi giờ cấu hình (giờ Việt Nam) | `completed` |
-| 6 | `20260928-205803-unify-epic-naming` | [05] Thống nhất tên gọi epic và sửa renderer trang epic | `completed` |
-| 7 | `20260928-205804-enforce-code-style` | [06] Thiết lập chuẩn định dạng và lint cho toàn repo | `completed` |
-| 8 | `20260928-205805-restructure-code` | [07] Tái cấu trúc code theo đúng tầng và tách module lớn | `completed` |
-| 9 | `20260928-205806-standardize-tests` | [08] Chuẩn hóa cấu trúc và chất lượng test | `completed` |
-| 10 | `20260928-205807-add-verify-detection` | [09] Phát hiện lệnh verify đa ngôn ngữ, workspace và suite gate | `completed` |
-| 11 | `20260928-205808-automate-learning` | [10] Thiết kế lại learning để tự kích hoạt (không bỏ) | `completed` |
-| 12 | `20260928-205809-slim-instructions` | [11] Tinh gọn lớp chỉ dẫn, gộp skill và sửa C4–C8 | `completed` |
-| 13 | `20260928-205810-add-platform-registry` | [12] Registry nền tảng khai báo cho 4 nền tảng hiện có (nền tảng cho OpenCode/Cursor) | `completed` |
-| 14 | `20260928-205811-add-opencode-cursor` | [13] Thêm OpenCode và Cursor qua platform registry | `completed` |
-| 15 | `20260928-205812-rewrite-guides` | [14] Viết lại guides theo dạng lệnh + ràng buộc, bổ sung spec/project-facts | `completed` |
-| 16 | `20260928-205813-add-technique-skills` | [15] Thư viện technique-skill hẹp (5–10, có bằng chứng) + extension point | `completed` |
-| 17 | `20260928-205814-add-test-impact-map` | [16] Repo-map hướng test-impact | `completed` |
-| 18 | `20260928-205815-release-v2` | [17] Tinh gọn gate phát hành, rà nhất quán docs và phát hành 2.0.0 | `completed` |
+| # | Task ID | Title | Mode | Status |
+|---|---------|-------|------|--------|
+| 1 | `20260928-180123-harnix-overhaul-audit` | Đại tu toàn diện Harnix: audit hiệu quả và lập roadmap | `full` | `completed` |
+| 2 | `20260928-205759-fix-baseline` | [01] Đưa HEAD về xanh và sửa lệch validator C1–C3 | `lite` | `completed` |
+| 3 | `20260928-205800-remove-unused-machinery` | [02] Gỡ code chết và tính năng không được dùng | `full` | `completed` |
+| 4 | `20260928-205801-simplify-task-contract` | [03] Đơn giản hóa hợp đồng task và evidence | `full` | `completed` |
+| 5 | `20260928-205802-localize-timestamps` | [04] Chuyển mọi thời gian sang múi giờ cấu hình (giờ Việt Nam) | `full` | `completed` |
+| 6 | `20260928-205803-unify-epic-naming` | [05] Thống nhất tên gọi epic và sửa renderer trang epic | `full` | `completed` |
+| 7 | `20260928-205804-enforce-code-style` | [06] Thiết lập chuẩn định dạng và lint cho toàn repo | `full` | `completed` |
+| 8 | `20260928-205805-restructure-code` | [07] Tái cấu trúc code theo đúng tầng và tách module lớn | `full` | `completed` |
+| 9 | `20260928-205806-standardize-tests` | [08] Chuẩn hóa cấu trúc và chất lượng test | `full` | `completed` |
+| 10 | `20260928-205807-add-verify-detection` | [09] Phát hiện lệnh verify đa ngôn ngữ, workspace và suite gate | `full` | `completed` |
+| 11 | `20260928-205808-automate-learning` | [10] Thiết kế lại learning để tự kích hoạt (không bỏ) | `full` | `completed` |
+| 12 | `20260928-205809-slim-instructions` | [11] Tinh gọn lớp chỉ dẫn, gộp skill và sửa C4–C8 | `full` | `completed` |
+| 13 | `20260928-205810-add-platform-registry` | [12] Registry nền tảng khai báo cho 4 nền tảng hiện có (nền tảng cho OpenCode/Cursor) | `full` | `completed` |
+| 14 | `20260928-205811-add-opencode-cursor` | [13] Thêm OpenCode và Cursor qua platform registry | `full` | `completed` |
+| 15 | `20260928-205812-rewrite-guides` | [14] Viết lại guides theo dạng lệnh + ràng buộc, bổ sung spec/project-facts | `full` | `completed` |
+| 16 | `20260928-205813-add-technique-skills` | [15] Thư viện technique-skill hẹp (5–10, có bằng chứng) + extension point | `full` | `completed` |
+| 17 | `20260928-205814-add-test-impact-map` | [16] Repo-map hướng test-impact | `full` | `completed` |
+| 18 | `20260928-205815-release-v2` | [17] Tinh gọn gate phát hành, rà nhất quán docs và phát hành 2.0.0 | `full` | `completed` |
 
 ## Task Overview & Scope
 

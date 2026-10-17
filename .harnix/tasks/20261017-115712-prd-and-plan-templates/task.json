@@ -1,0 +1,140 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261017-115712-prd-and-plan-templates",
+  "epicId": "20261017-115711-refactor-artifacts-and-epics",
+  "title": "Chuẩn hóa cấu trúc 4 khối kỹ thuật cho PRD và mô hình Execution Slices cho Plan",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cập nhật template khởi tạo và cơ chế validation tại ready gate cho PRD (Context, Boundaries, Anchored AC, Constraints) và Plan (TDD Slices với tag [chk-id]); cập nhật ready-artifacts.ts và init-spec.ts.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Template khởi tạo PRD tuân theo cấu trúc 4 khối kỹ thuật",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-check-templates-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Template khoi tao Plan ho tro Execution Slices va tag lien ket check-id ([chk-id])",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-check-templates-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Co che validation tai ready gate kiem tra cau truc 4 khoi cua PRD, Execution Slices cua Plan va ho tro tag [chk-id]",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-check-templates-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Init task o mode full tu dong sinh file prd.md va plan.md theo template chuan",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-check-templates-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toan bo test suite cua du an phai xanh",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-templates",
+      "description": "Kiem thu unit cho template PRD/Plan va validation ready",
+      "command": "pnpm vitest run test/unit/core/workflow/artifact-templates.test.ts test/unit/core/workflow/ready-artifacts.test.ts test/unit/core/workflow/ready-content.test.ts test/unit/core/workflow/init-task.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-templates-1",
+      "checkId": "check-templates",
+      "recordedAt": "2026-10-17T13:28:38.893+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/artifact-templates.test.ts test/unit/core/workflow/ready-artifacts.test.ts test/unit/core/workflow/ready-content.test.ts test/unit/core/workflow/init-task.te... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "154d4a7f7d2527183320695f2500c266748b4cb315383161604c90a91e75cafc"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-17T13:29:55.653+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "bbc0ab628c108230ba165b2b9d0cbb267c741c7d2eb55cdb3f166ac396ddfc29"
+    },
+    {
+      "id": "ev-check-templates-2",
+      "checkId": "check-templates",
+      "recordedAt": "2026-10-17T13:31:28.278+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/artifact-templates.test.ts test/unit/core/workflow/ready-artifacts.test.ts test/unit/core/workflow/ready-content.test.ts test/unit/core/workflow/init-task.te... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "af4e73057e31049d654f83a1894b685be1ea8cc1db832409fb12f2d6b11c586d"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-17T13:32:43.154+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "db1f07bffe103f9a43787bd8e996b2522c62a7c0922da96c4e146bc8536f64b1"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/init-spec.ts",
+    "src/core/workflow/ready-artifacts.ts",
+    "src/core/workflow/ready-content.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "createdAt": "2026-10-17T11:57:12.000+07:00",
+  "updatedAt": "2026-10-17T13:33:07.709+07:00",
+  "completedAt": "2026-10-17T13:33:07.709+07:00"
+}

@@ -15,12 +15,12 @@ Không còn task nào chưa hoàn tất.
 
 ## Members (4 tasks)
 
-| # | Task ID | Title | Status |
-|---|---------|-------|--------|
-| 1 | `20261005-153157-concurrency-resilience-va-windows-comman` | Concurrency resilience va Windows command auto normalization | `completed` |
-| 2 | `20261005-154055-token-economy-output-thinning-va-micro-s` | Token economy output thinning va micro summary cho CLI | `completed` |
-| 3 | `20261005-155236-batch-state-mutation-envelope-cho-workfl` | Batch state mutation envelope cho workflow | `completed` |
-| 4 | `20261005-160344-multi-repo-workspace-roots-follow-up-tas` | Multi-repo workspace roots follow-up task lifecycle va baseline check workflow | `completed` |
+| # | Task ID | Title | Mode | Status |
+|---|---------|-------|------|--------|
+| 1 | `20261005-153157-concurrency-resilience-va-windows-comman` | Concurrency resilience va Windows command auto normalization | `full` | `completed` |
+| 2 | `20261005-154055-token-economy-output-thinning-va-micro-s` | Token economy output thinning va micro summary cho CLI | `full` | `completed` |
+| 3 | `20261005-155236-batch-state-mutation-envelope-cho-workfl` | Batch state mutation envelope cho workflow | `full` | `completed` |
+| 4 | `20261005-160344-multi-repo-workspace-roots-follow-up-tas` | Multi-repo workspace roots follow-up task lifecycle va baseline check workflow | `full` | `completed` |
 
 ## Task Overview & Scope
 

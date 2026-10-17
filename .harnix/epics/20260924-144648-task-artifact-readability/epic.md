@@ -15,11 +15,11 @@ Không còn task nào chưa hoàn tất.
 
 ## Members (3 tasks)
 
-| # | Task ID | Title | Status |
-|---|---------|-------|--------|
-| 1 | `20260924-144648-review-md-verdict-and-dedupe` | Thêm dòng Verdict và gộp evidence rerun trùng lặp trong review.md | `completed` |
-| 2 | `20260924-145650-finish-cancel-refresh-roadmap` | Refresh roadmap markdown khi finish hoặc cancel task có epicId | `completed` |
-| 3 | `20260924-151442-evidence-findings-severity` | Structured findings với severity trên EvidenceRecordV2 | `completed` |
+| # | Task ID | Title | Mode | Status |
+|---|---------|-------|------|--------|
+| 1 | `20260924-144648-review-md-verdict-and-dedupe` | Thêm dòng Verdict và gộp evidence rerun trùng lặp trong review.md | `lite` | `completed` |
+| 2 | `20260924-145650-finish-cancel-refresh-roadmap` | Refresh roadmap markdown khi finish hoặc cancel task có epicId | `lite` | `completed` |
+| 3 | `20260924-151442-evidence-findings-severity` | Structured findings với severity trên EvidenceRecordV2 | `full` | `completed` |
 
 ## Task Overview & Scope
 

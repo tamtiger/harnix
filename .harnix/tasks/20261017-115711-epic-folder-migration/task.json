@@ -1,0 +1,202 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261017-115711-epic-folder-migration",
+  "epicId": "20261017-115711-refactor-artifacts-and-epics",
+  "title": "Nhóm Epic vào folder riêng và xây dựng bộ di chuyển dữ liệu tương thích ngược",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Chuyển đổi lưu trữ Epic từ file phẳng sang folder .harnix/epics/<id>/epic.json và epic.md; cập nhật src/core/epics/migrate.ts và epic.ts để tự động di chuyển idempotent và duy trì đọc fallback 100%.",
+  "nonGoals": [
+    "Không làm mất dữ liệu các file epic phẳng cũ trong quá trình di chuyển.",
+    "Không thay đổi schema của EpicRecord v1."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Epic mới được tạo và cập nhật vào thư mục .harnix/epics/<id>/epic.json và epic.md",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-unit-3",
+        "ev-check-full-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Module migrate.ts tự động chuyển đổi an toàn các file phẳng cũ sang cấu trúc folder mới (idempotent)",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-unit-3",
+        "ev-check-full-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Hệ thống đọc hỗ trợ cơ chế fallback an toàn: ưu tiên đọc folder mới, fallback về file phẳng cũ",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-unit-3",
+        "ev-check-full-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-epic-unit",
+      "description": "Toàn bộ unit test cho epics và migrate pass",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm test:unit test/unit/core/epics",
+      "cwd": ".",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/epics/**",
+        "test/unit/core/epics/**"
+      ]
+    },
+    {
+      "id": "check-full-suite",
+      "description": "Toan bo test suite cua du an phai xanh",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm test",
+      "cwd": "."
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án phải xanh",
+      "scope": "full",
+      "required": false,
+      "command": "pnpm run test",
+      "cwd": ".",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-epic-unit-1",
+      "checkId": "check-epic-unit",
+      "recordedAt": "2026-10-17T13:04:26.978+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:unit test/unit/core/epics — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "6f862e4f53eab1c1b228bae111e79373f52f7f8c3e017d5d6a54c5d60f8a9764"
+    },
+    {
+      "id": "ev-check-epic-unit-2",
+      "checkId": "check-epic-unit",
+      "recordedAt": "2026-10-17T13:05:58.563+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:unit test/unit/core/epics — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6f862e4f53eab1c1b228bae111e79373f52f7f8c3e017d5d6a54c5d60f8a9764"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-17T13:07:19.658+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "acc4d13ae85aa0ec30c1293ede56e34af679cc1c956ed6e39e566300a9a02e10"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-17T13:10:29.375+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "1a96bf5a9c098b66c6170ef28b650c8e395ccb1a1dd63c968a718636d247cd9a"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-17T13:12:14.325+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Cap nhat check suite voi input bao gom package.json sau khi da fix xong cac test ENOENT",
+      "artifactPaths": [
+        ".harnix/tasks/20261017-115711-epic-folder-migration/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-full-suite-1",
+      "checkId": "check-full-suite",
+      "recordedAt": "2026-10-17T13:13:31.690+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bb075df34c1329806f88499388b8b6e117117b693e50d3551e4d206c0e578868"
+    },
+    {
+      "id": "ev-check-epic-unit-3",
+      "checkId": "check-epic-unit",
+      "recordedAt": "2026-10-17T13:14:19.452+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:unit test/unit/core/epics — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "971c6e9ad34c62d826f5747d4bb2daf55c268cc2a3536ff3fff32c70a8841eac"
+    },
+    {
+      "id": "ev-check-full-suite-2",
+      "checkId": "check-full-suite",
+      "recordedAt": "2026-10-17T13:16:14.779+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "f29ecc4e48449f0f30f8a186f1ec66050f8e58db5b00b67d938c6754b903f216"
+    },
+    {
+      "id": "ev-check-full-suite-3",
+      "checkId": "check-full-suite",
+      "recordedAt": "2026-10-17T13:18:45.503+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "18c0a2d26e4e05cec9f8328c9e7b0fd64aba353b23ebfc42cf6e8c144f4c0903"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/epics/epic.ts",
+    "src/core/epics/migrate.ts",
+    "src/core/epics/order.ts",
+    "test/unit/core/epics/epic.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "createdAt": "2026-10-17T11:57:11.956+07:00",
+  "updatedAt": "2026-10-17T13:18:52.729+07:00",
+  "completedAt": "2026-10-17T13:18:52.729+07:00"
+}

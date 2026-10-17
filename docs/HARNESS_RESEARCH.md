@@ -325,3 +325,13 @@ Harnix is positioned as a **Meta-Harness**, orchestrating cross-agent capabiliti
 1. **Frozen contracts**: Unlike Trellis (fluid configuration) or BMAD (lacks persistent verification), Harnix forces strict schema versions on all task state.
 2. **Exact verification**: Harnix uses input-digest verification to prevent "stale pass" hallucinations.
 3. **Lean footprint**: At roughly 85-99% smaller footprint than Trellis Pro, Harnix maintains project hygiene.
+
+## 10. Nghiên cứu Cải tiến Bộ Tạo tác Task, Epic và Plan Sync (2026-10-17)
+
+Khảo sát chuyên sâu kiến trúc quản lý task từ GitHub Spec Kit, Roo-Code/Cline, OpenDevin và Aider để giải quyết các ma sát trong thực thi:
+
+1. **Epic Folders (`.harnix/epics/<id>/epic.json` + `epic.md`):** Khảo sát từ OpenDevin/All-Hands và Trellis. Chuyển đổi từ file phẳng sang thư mục riêng cho từng Epic, bổ sung module `migrate.ts` tự động di chuyển và duy trì cơ chế đọc fallback để bảo đảm tương thích ngược 100%.
+2. **PRD 4 Khối Kỹ thuật & Plan Execution Slices:** Khảo sát từ GitHub Spec Kit. Chuẩn hóa PRD thành 4 khối kỹ thuật cốt lõi (Bối cảnh, Ranh giới, Yêu cầu, Rủi ro) và Plan thành Execution Slices. CLI tự động sinh sẵn template khi khởi tạo Full task (`workflow --init --mode full`).
+3. **Plan-Task Checklist Auto-Sync:** Khảo sát từ Roo-Code Task Boomerang. Mỗi checklist item trong `plan.md` gắn mã `[chk-id]`; khi check vượt qua qua `workflow --run-check` hoặc `workflow --evidence`, runner tự động chuyển `- [ ]` thành `- [x]`, loại bỏ hoàn toàn việc chỉnh sửa thủ công và chống ảo giác tiến độ.
+4. **Code Impact Dashboard:** Khảo sát từ Aider. Báo cáo `review.md` tích hợp bảng thống kê trực quan số files thay đổi và dòng code `+ / -` trước khi commit.
+

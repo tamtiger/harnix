@@ -15,10 +15,10 @@ Không còn task nào chưa hoàn tất.
 
 ## Members (2 tasks)
 
-| # | Task ID | Title | Status |
-|---|---------|-------|--------|
-| 1 | `20260925-103500-ready-trace-robustness` | Goi 1: Lam robust ready-trace parser, modularize internal-workflow, va scaffold roadmap members | `completed` |
-| 2 | `20260925-103501-verification-diagnostics-structured-findings` | Goi 2: Nang cap verification diagnostics va structured findings | `completed` |
+| # | Task ID | Title | Mode | Status |
+|---|---------|-------|------|--------|
+| 1 | `20260925-103500-ready-trace-robustness` | Goi 1: Lam robust ready-trace parser, modularize internal-workflow, va scaffold roadmap members | `full` | `completed` |
+| 2 | `20260925-103501-verification-diagnostics-structured-findings` | Goi 2: Nang cap verification diagnostics va structured findings | `full` | `completed` |
 
 ## Task Overview & Scope
 

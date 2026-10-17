@@ -8,6 +8,8 @@ import {
   criteriaWithoutFocusedCheck,
   missingCriteriaInPlan,
   scanPlaceholders,
+  scanPlanStructure,
+  scanPrdStructure,
   unknownCheckReferences,
   type ContentFindings,
 } from "./ready-content.js";
@@ -75,6 +77,12 @@ export async function artifactFindings(
       ...missingCriteriaInPlan(task, loaded.plan).map((id) => `plan.md never mentions criterion '${id}'`),
       ...focused.issues,
     ],
-    advisories: [...prd.advisories, ...plan.advisories, ...unknownCheckAdvisory(task, loaded.plan)],
+    advisories: [
+      ...prd.advisories,
+      ...plan.advisories,
+      ...scanPrdStructure(loaded.prd),
+      ...scanPlanStructure(loaded.plan),
+      ...unknownCheckAdvisory(task, loaded.plan),
+    ],
   };
 }

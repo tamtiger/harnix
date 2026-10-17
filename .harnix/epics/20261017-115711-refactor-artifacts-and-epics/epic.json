@@ -1,0 +1,20 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261017-115711-refactor-artifacts-and-epics",
+  "title": "Tái cấu trúc bộ tạo tác Epic, PRD, Plan, Task và Review",
+  "goal": "Hiện đại hóa toàn diện hệ sinh thái tạo tác của Harnix: nhóm Epic vào folder chuyên biệt (.harnix/epics/<id>/) kèm migration an toàn, đồng bộ hai chiều giữa Plan checklist và Task state, chuẩn hóa PRD theo cấu trúc kỹ thuật 4 khối, và nâng cấp Review thành Dashboard kiểm chứng tích hợp Code Impact.",
+  "nonGoals": [
+    "Không thay đổi ranh giới 1 package, 1 executable, không thêm background daemon hoặc cloud dependencies.",
+    "Không làm gãy tính tương thích ngược với các task hoặc epic cũ.",
+    "Không vượt quá giới hạn 300 LOC/file trong src/core/tasks/ và src/core/workflow/."
+  ],
+  "order": [
+    "20261017-115711-epic-folder-migration",
+    "20261017-115712-prd-and-plan-templates",
+    "20261017-115713-plan-task-sync",
+    "20261017-115714-review-code-impact"
+  ],
+  "createdAt": "2026-10-17T11:57:11.956+07:00",
+  "updatedAt": "2026-10-17T11:57:11.956+07:00"
+}
