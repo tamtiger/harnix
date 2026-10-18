@@ -1,0 +1,141 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261018-175353-encoding-zero-pipe-and-base64",
+  "epicId": "20261018-175353-dx-robustness-and-php-resilience",
+  "title": "Xóa bỏ mâu thuẫn Rule 9 và chuẩn hóa nạp payload UTF-8 không phụ thuộc pipe",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cập nhật AGENTS.md và activation.ts tháo gỡ mâu thuẫn Rule 9 (cho phép tạo file payload tạm trong .harnix/); xóa bỏ toàn bộ code mẫu pipe trên Windows trong workflow.md và HARNIX_WORKFLOW.md; bảo đảm lệnh --save --file hoạt động ổn định.",
+  "nonGoals": [
+    "Không bổ sung cờ --payload-base64 do giới hạn độ dài dòng lệnh trên Windows.",
+    "Không nới lỏng cơ chế text-integrity."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Rule 9 trong AGENTS.md và activation.ts được điều chỉnh: làm rõ quyền tạo file payload trong .harnix/ cho --file, xóa bỏ mâu thuẫn cấm tạo file tạm.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-gates-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Tài liệu src/templates/harnix/workflow.md và docs/HARNIX_WORKFLOW.md loại bỏ hoàn toàn code mẫu dùng pipe  | harnix trên Windows.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-gates-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test gates (contract, architecture, docs) pass 100%.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-docs-gates-2",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-docs-gates",
+      "description": "Kiểm tra các test gates về tài liệu, rules và architecture",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "docs/**",
+        "src/templates/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "src/templates/harnix/activation.ts",
+    "src/templates/harnix/workflow.md",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "relevantSpecs": [],
+  "decisions": [],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-18T18:54:07.670+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Tinh chỉnh lại Task 1: Bỏ cờ payload-base64 để tránh giới hạn tham số Windows CLI, tập trung giải quyết tận gốc mâu thuẫn Rule 9 và chuẩn hóa nạp file payload an toàn.",
+      "artifactPaths": [
+        ".harnix/tasks/20261018-175353-encoding-zero-pipe-and-base64/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-docs-gates-1",
+      "checkId": "check-docs-gates",
+      "recordedAt": "2026-10-18T19:06:09.834+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "f61cdb7257a5d62f53345802395c550f300059dc9f1882b810403671eccccad7"
+    },
+    {
+      "id": "ev-check-docs-gates-2",
+      "checkId": "check-docs-gates",
+      "recordedAt": "2026-10-18T19:13:25.444+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f9868765a6b5eb2567331b881fc0208c40176889d09fc3494d403b92b10869f5"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T19:14:43.141+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "a55742d04a2b5927b2cff65efcf63e282808284116215182c713e6c9de0602a4"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T19:18:59.260+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "60463096d26a8fcea0f589a89c5abe74943dc2365c9092aef3a33650bd149ad2"
+    }
+  ],
+  "createdAt": "2026-10-18T17:53:53.404+07:00",
+  "updatedAt": "2026-10-18T19:19:24.529+07:00",
+  "completedAt": "2026-10-18T19:19:24.529+07:00"
+}

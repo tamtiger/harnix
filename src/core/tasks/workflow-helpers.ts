@@ -73,7 +73,7 @@ function assertReplanExit(previous: TaskRecord, next: TaskRecord): void {
     previous.status === "verifying" && next.status === "verifying" && next.checkpoint === "verifying";
   if (readyAgain || stillPlanning || stillVerifying) return;
   throw new Error(
-    `A task at checkpoint replan may only re-enter ready/ready (or planning/planning while planning, or verifying/verifying while verifying), not ${next.status}/${next.checkpoint}.`,
+    `A task at checkpoint replan may only re-enter ready/ready (run: harnix workflow --transition ready/ready [--reviewed] --brief), planning/planning while planning, or verifying/verifying while verifying; not ${next.status}/${next.checkpoint}.`,
   );
 }
 

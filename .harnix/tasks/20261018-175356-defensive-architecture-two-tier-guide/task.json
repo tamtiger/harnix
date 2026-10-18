@@ -1,0 +1,97 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261018-175356-defensive-architecture-two-tier-guide",
+  "epicId": "20261018-175353-dx-robustness-and-php-resilience",
+  "title": "Chuẩn hóa Two-Tier Verification và hướng dẫn tích hợp bền bỉ trong PHP Guide",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cập nhật gọn nhẹ src/guides/languages/php.md bổ sung quy chuẩn 2 tầng kiểm thử (unit mock + CLI dry-run/integration) và kiến trúc post-commit decoupling theo chuẩn hướng dẫn Harnix.",
+  "nonGoals": [
+    "Không đưa kiến thức riêng của từng framework (như FastCGI cụ thể của dự án) vào guide chung của package."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Tài liệu guide PHP được bổ sung ngắn gọn về Two-tier verification và nguyên tắc post-commit dispatch.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-php-guide-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Kiểm tra test gates (docs, guide catalog, instruction budget) pass 100%.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-php-guide-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-php-guide",
+      "description": "Kiểm tra catalog guides và instruction budget sau khi cập nhật guide PHP",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/guides/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/guides/languages/php.md"
+  ],
+  "relevantSpecs": [],
+  "decisions": [],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-check-php-guide-1",
+      "checkId": "check-php-guide",
+      "recordedAt": "2026-10-18T20:30:46.408+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "594ef47f0bd3dbef288e789205c63f2e7cffc8e882492e3bc93bd198f14a1408"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T20:32:02.938+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "91411377b4ee98c8ef2b4d849adfef6c94264a2f4a851caf4b3b928f7deeeaa6"
+    }
+  ],
+  "createdAt": "2026-10-18T17:53:56.404+07:00",
+  "updatedAt": "2026-10-18T20:32:15.925+07:00",
+  "completedAt": "2026-10-18T20:32:15.925+07:00"
+}

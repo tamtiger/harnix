@@ -151,4 +151,27 @@ describe("commands/status", () => {
       totalTasks: 1,
     });
   });
+
+  it("includes git read-only context in status when in a git repository", async () => {
+    const { execFile } = await import("node:child_process");
+    const { promisify } = await import("node:util");
+    const { writeFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    const execFileAsync = promisify(execFile);
+
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await execFileAsync("git", ["init", "-b", "feature/status-git"], { cwd: root });
+    await execFileAsync("git", ["config", "user.name", "Test User"], { cwd: root });
+    await execFileAsync("git", ["config", "user.email", "test@example.com"], { cwd: root });
+    await writeFile(join(root, "init.txt"), "hello");
+    await execFileAsync("git", ["add", "-A"], { cwd: root });
+    await execFileAsync("git", ["commit", "-m", "init"], { cwd: root });
+
+    const status = await inspectProjectStatus(root);
+    expect(status.git).toBeDefined();
+    expect(status.git?.branch).toBe("feature/status-git");
+    expect(status.git?.clean).toBe(true);
+    expect(status.git?.commit).toMatch(/^[0-9a-f]{7,}/u);
+  });
 });

@@ -1,5 +1,6 @@
 import type { ContextDrift } from "./context/context.js";
 import type { TaskMode, TaskRecord, TaskStatus, WorkflowCheckpoint } from "./tasks/task.js";
+import type { GitContext } from "../utils/git.js";
 import { inspectRequiredChecks, type RequiredCheckState } from "./verification/check-report.js";
 
 export type { RequiredCheckState } from "./verification/check-report.js";
@@ -64,6 +65,7 @@ export interface HarnixStatusResultV1 {
   nextAction: StatusNextAction;
   attention: StatusAttention[];
   epicContext?: StatusEpicContext;
+  git?: GitContext;
 }
 
 const nextActionMessages: Record<StatusNextActionCode, string> = {

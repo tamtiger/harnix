@@ -1,0 +1,129 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261018-175354-php-transient-directories-ignore",
+  "epicId": "20261018-175353-dx-robustness-and-php-resilience",
+  "title": "Tự động bỏ qua thư mục tạm, log và cache của PHP và CodeIgniter trong inputDigest",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cập nhật transient-directories.ts để tự động bỏ qua logs, cache, application/logs, application/cache, writable, storage/logs khi tính inputDigest trong dự án PHP.",
+  "nonGoals": [
+    "Không bỏ qua các file source code PHP trong application/models hay application/controllers."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Module transient-directories.ts tự động phát hiện dự án PHP và bỏ qua các thư mục log/cache/writable trong inputDigest.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-transient-dirs-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Unit test cho transient directories xác nhận các thay đổi trong thư mục log/cache không làm thay đổi inputDigest.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-transient-dirs-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test gates pass 100%.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-transient-dirs",
+      "description": "Unit test kiểm tra transient directories cho PHP/CodeIgniter",
+      "command": "pnpm test:unit test/unit/core/verification/transient-directories.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/verification/**",
+        "test/unit/core/verification/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Kiểm tra test gates kiến trúc và contract",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/verification/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/verification/transient-directories.ts",
+    "test/unit/core/verification/transient-directories.test.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-check-transient-dirs-1",
+      "checkId": "check-transient-dirs",
+      "recordedAt": "2026-10-18T20:09:24.750+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:unit test/unit/core/verification/transient-directories.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "15f69e23196efb08c8fc4b104b318640cb225416b09d2883fbefb58b6c15a10e"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-18T20:09:35.698+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "aa92acb522e0de4202769f70d9d05f783e2a1dd67ec131a5cc697873f2927c39"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T20:10:58.019+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d5e5337fc6f4b27829f334197aaf049df37b0a09a60786e5cf9d3b05220179cb"
+    }
+  ],
+  "createdAt": "2026-10-18T17:53:54.404+07:00",
+  "updatedAt": "2026-10-18T20:11:21.885+07:00",
+  "completedAt": "2026-10-18T20:11:21.885+07:00"
+}

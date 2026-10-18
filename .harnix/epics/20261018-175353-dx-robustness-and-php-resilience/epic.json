@@ -1,0 +1,24 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261018-175353-dx-robustness-and-php-resilience",
+  "title": "Tối ưu hóa khả năng chống lỗi encoding, inputDigest cho PHP và trải nghiệm vận hành Harnix",
+  "goal": "Nâng cao độ tin cậy và trải nghiệm vận hành của Harnix trên môi trường Windows và dự án PHP/CodeIgniter: triệt tiêu hoàn toàn rủi ro encoding UTF-8 thông qua chuẩn hóa Rule 9 và nạp file payload, tự động bỏ qua thư mục transient PHP/CodeIgniter để bảo vệ inputDigest, tăng cường nhận biết Git read-only trong Preflight, rút gọn hướng dẫn phòng thủ cho tích hợp API đối tác, nghiên cứu và hỗ trợ điều phối song song Multi-Agent qua Git Worktree, loại bỏ cơ chế dual-write file phẳng cho Epic, và nâng cấp chẩn đoán lỗi chi tiết.",
+  "nonGoals": [
+    "Không bổ sung daemon chạy nền hoặc phá vỡ nguyên tắc 1 package, 1 executable.",
+    "Không tự ý mutate Git (commit, push, checkout) mà chỉ hỗ trợ read-only awareness.",
+    "Không làm thay đổi schema của TaskRecord v3 hay EpicRecord v1."
+  ],
+  "order": [
+    "20261018-175353-encoding-zero-pipe-and-base64",
+    "20261018-175354-php-transient-directories-ignore",
+    "20261018-175355-read-only-git-context-and-flow",
+    "20261018-175356-defensive-architecture-two-tier-guide",
+    "20261018-175357-multi-agent-worktree-research",
+    "20261018-175358-multi-agent-worktree-orchestration",
+    "20261018-175359-epic-pure-folder-storage",
+    "20261018-175400-dx-error-diagnostics-and-epic-decoupling"
+  ],
+  "createdAt": "2026-10-18T17:53:53.404+07:00",
+  "updatedAt": "2026-10-18T18:54:07.670+07:00"
+}

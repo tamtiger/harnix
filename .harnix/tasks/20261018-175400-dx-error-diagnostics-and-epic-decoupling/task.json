@@ -1,0 +1,146 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261018-175400-dx-error-diagnostics-and-epic-decoupling",
+  "epicId": "20261018-175353-dx-robustness-and-php-resilience",
+  "title": "Chẩn đoán lỗi validation chi tiết và tách biệt thao tác Epic độc lập",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Tách biệt thông báo lỗi chi tiết cho task validation (id, mode, status, checkpoint hợp lệ); chuẩn hóa cwd giữa --set-check và --save; cho phép khởi tạo task thành viên mà không cướp active pointer.",
+  "nonGoals": [
+    "Không nới lỏng các quy tắc an toàn của schema TaskRecord v3."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Lỗi assertIdentity trong task-validate.ts chỉ rõ cụ thể trường nào không hợp lệ (id, mode, status hay checkpoint) kèm danh sách giá trị hợp lệ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-dx-diagnostics-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Chuẩn hóa thuộc tính cwd trong kiểm tra obligation để tránh báo nhầm thay đổi hợp đồng, và hỗ trợ khởi tạo member task không đổi active pointer.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-dx-diagnostics-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ unit test và test gates pass 100%.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-dx-diagnostics-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Bổ sung cờ --brief cho lệnh harnix resume và hỗ trợ phân tách danh sách dấu phẩy cho --criterion.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-dx-diagnostics-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Đồng bộ toàn bộ tài liệu dự án: AGENTS.md, activation.ts, workflow templates, skills, README.md và thực hiện fold dev changelog đóng Epic.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-dx-diagnostics-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-dx-diagnostics",
+      "description": "Unit test kiểm tra thông báo lỗi chi tiết, cwd normalization, resume --brief và criteria list",
+      "command": "pnpm test:unit test/unit/core/tasks/task-validate.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task-validate.ts",
+    "src/core/workflow/save.ts",
+    "src/core/workflow/epic-members.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-check-dx-diagnostics-1",
+      "checkId": "check-dx-diagnostics",
+      "recordedAt": "2026-10-18T21:39:26.362+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:unit test/unit/core/tasks/task-validate.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "431f79faa7d5405d7369ff791b75b13b51ef602d55ba996100bb1436cbaf8784"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T21:43:04.960+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "b009bbd5b09eafc825cf0b921cd99990d871ea59df9e81b7634e4728b148f0b1"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T21:45:44.385+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "26e71b9e17bd4e0f88a797c46f7d4b0a0b5122b34dca9c83f98769404a5550e1"
+    },
+    {
+      "id": "ev-check-dx-diagnostics-2",
+      "checkId": "check-dx-diagnostics",
+      "recordedAt": "2026-10-18T21:46:34.170+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:unit test/unit/core/tasks/task-validate.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e0f846178a450645d3f40cead137784964697d824802755ab4bc458bb0596169"
+    }
+  ],
+  "createdAt": "2026-10-18T17:54:00.404+07:00",
+  "updatedAt": "2026-10-18T21:47:05.801+07:00",
+  "completedAt": "2026-10-18T21:47:05.801+07:00"
+}

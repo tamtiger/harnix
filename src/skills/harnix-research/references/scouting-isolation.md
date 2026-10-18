@@ -28,3 +28,17 @@ Concerns/Blockers: <specific risks, broken invariants, or missing information>
 - **`DONE_WITH_CONCERNS`**: Completed, but identified subtle dependencies, performance bottlenecks, or test gaps. Record these in residual risks.
 - **`BLOCKED`**: Hard stop due to environment error, missing permissions, or broken dependencies. Do not retry the failing prompt blindly; adjust strategy or fix environment.
 - **`NEEDS_CONTEXT`**: Ambiguous requirements or conflicting architecture patterns found. Formulate specific clarification choices for the user.
+
+## 3. Multi-Agent Epic task handoff protocol
+
+When an auxiliary subagent completes an implementation task in an isolated Git worktree (`feat/<task-id>`):
+- The delegate must provide the Lead Agent (Orchestrator) with concrete verification evidence:
+
+```text
+Status: DONE
+Task: <task-id>
+Branch: feat/<task-id>
+Evidence: <evidence-id> (exitCode: 0, inputDigest verified)
+```
+
+- The Lead Agent verifies `task.json` and ensures no dirty state before merging the feature branch into the base integration branch.

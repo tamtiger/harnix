@@ -14,6 +14,7 @@ import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
 import { taskContextDrift } from "src/core/workflow/index.js";
 import { findInitializedProject } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { readGitContext } from "src/utils/git.js";
 import { reportProjectChecks, type ChecksReportResultV1 } from "./checks.js";
 import { auditProjectTask } from "./audit.js";
 import type { TaskAuditResultV1 } from "src/core/tasks/task-audit.js";
@@ -43,7 +44,9 @@ export async function inspectProjectStatus(cwd: string, now = Date.now()): Promi
     } catch {
       // Best effort
     }
-    return createNoActiveStatus(epicContext);
+    const noActive = createNoActiveStatus(epicContext);
+    const git = await readGitContext(project.root);
+    return git === undefined ? noActive : { ...noActive, git };
   }
   const contextDrift = await taskContextDrift(project.root, harnixRoot, task);
   const requiredCheckStates = await inspectRequiredCheckEvidence(project.root, harnixRoot, task, now);
@@ -65,7 +68,9 @@ export async function inspectProjectStatus(cwd: string, now = Date.now()): Promi
       // Best effort
     }
   }
-  return createActiveStatus(task, contextDrift, requiredCheckStates, epicContext);
+  const activeStatus = createActiveStatus(task, contextDrift, requiredCheckStates, epicContext);
+  const git = await readGitContext(project.root);
+  return git === undefined ? activeStatus : { ...activeStatus, git };
 }
 
 export interface StatusExplainResultV1 extends HarnixStatusResultV1 {

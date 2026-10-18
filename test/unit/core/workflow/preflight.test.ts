@@ -371,13 +371,7 @@ describe("workflow preflight version skew", () => {
     const epicId = "20261015-120000-sample-epic";
     const taskId = "20261015-120001-member-task";
     const epic = {
-      id: epicId,
-      title: "Sample Epic",
-      goal: "Epic goal",
-      generator: "harnix" as const,
-      schemaVersion: 1 as const,
-      createdAt: at(10),
-      updatedAt: at(10),
+      id: epicId, title: "Sample Epic", goal: "Epic goal", generator: "harnix" as const, schemaVersion: 1 as const, createdAt: at(10), updatedAt: at(10),
     };
     const taskRecord = { ...taskV3("planning", "planning"), id: taskId, title: "Member Task", epicId };
     await saveWorkflow(root, { task: taskRecord, epic });
@@ -390,5 +384,11 @@ describe("workflow preflight version skew", () => {
       nextTask: { id: taskId, status: "planning", title: "Member Task" },
       resumeCommand: `harnix resume ${taskId}`,
     });
+  });
+
+  it("omits git field when root is not a git repository", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    expect((await preflightWorkflow(root, Date.now())).git).toBeUndefined();
   });
 });

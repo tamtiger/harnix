@@ -1,0 +1,130 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261018-175358-multi-agent-worktree-orchestration",
+  "epicId": "20261018-175353-dx-robustness-and-php-resilience",
+  "title": "Hỗ trợ không gian Worktree và xây dựng quy trình điều phối Epic Multi-Agent",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cải tiến Harnix nhận biết và xử lý mượt mà trên các Git worktree độc lập; xử lý hòa giải file trạng thái tránh conflict khi merge branch và cung cấp tài liệu skill điều phối cho Agent Trưởng.",
+  "nonGoals": [
+    "Harnix không tự động chạy git commit, git worktree add hay git merge.",
+    "Không tạo background daemon."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Trạng thái .active và các file tạo tác derived được xử lý để không gây merge conflict giữa các nhánh worktree độc lập.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-orchestration-support-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cung cấp tài liệu quy trình và skill điều phối Epic Multi-Agent chuẩn hóa cho Agent Trưởng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-orchestration-support-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test gates pass 100%.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-orchestration-support-2",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-orchestration-support",
+      "description": "Kiểm tra tính tương thích worktree và quy trình điều phối",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task.ts",
+    "src/core/epics/epic.ts",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "relevantSpecs": [],
+  "decisions": [],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-check-orchestration-support-1",
+      "checkId": "check-orchestration-support",
+      "recordedAt": "2026-10-18T20:43:06.702+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0b009b7ba9d073a01bd82f12af5061f862a9f2a576fd3c2919a39be37ad0057b"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T20:44:29.330+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "c6fd835465818975f6fd7a82ed2b2b6955091fb65bfb6fefd87c474e40ed5a50"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T20:46:43.138+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f6f4cabe9b747639f3e578b3bcd65b5ce1fdae60b5a5e149e7448ce039e60bad"
+    },
+    {
+      "id": "ev-check-orchestration-support-2",
+      "checkId": "check-orchestration-support",
+      "recordedAt": "2026-10-18T20:46:53.787+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "43ab39a8eb9c64d04cd78d84e20702cbbafa494d4913028f422627881803e586"
+    }
+  ],
+  "createdAt": "2026-10-18T17:53:58.404+07:00",
+  "updatedAt": "2026-10-18T20:47:19.224+07:00",
+  "completedAt": "2026-10-18T20:47:19.224+07:00"
+}

@@ -69,13 +69,18 @@ function assertTopLevelKeysAndStrings(value: TaskObject): void {
 }
 
 function assertIdentity(value: TaskObject): void {
-  if (
-    !taskIdPattern.test(String(value.id)) ||
-    !isOneOf(taskModes, value.mode) ||
-    !Object.keys(transitions).includes(String(value.status)) ||
-    !checkpointNames.includes(String(value.checkpoint))
-  )
-    throw new TaskValidationError("Task identity, mode, status, or checkpoint is invalid.");
+  if (!taskIdPattern.test(String(value.id)))
+    throw new TaskValidationError(`Task id '${String(value.id)}' is invalid (expected YYYYMMDD-HHMMSS-slug).`);
+  if (!isOneOf(taskModes, value.mode))
+    throw new TaskValidationError(`Task mode '${String(value.mode)}' is invalid (expected ${taskModes.join(", ")}).`);
+  if (!Object.keys(transitions).includes(String(value.status)))
+    throw new TaskValidationError(
+      `Task status '${String(value.status)}' is invalid (expected ${Object.keys(transitions).join(", ")}).`,
+    );
+  if (!checkpointNames.includes(String(value.checkpoint)))
+    throw new TaskValidationError(
+      `Task checkpoint '${String(value.checkpoint)}' is invalid (expected ${checkpointNames.join(", ")}).`,
+    );
   if (
     value.schemaVersion !== 1 &&
     value.epicId !== undefined &&

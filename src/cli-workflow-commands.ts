@@ -124,10 +124,11 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--dry-run", "Preview without writing the active pointer")
     .option("--force", "Activate even if another task is currently active")
     .option("--next", "Resume the next unfinished task of the active or first unfinished epic")
+    .option("--brief", "Print only id, status, checkpoint and updatedAt")
     .action(
       async (
         taskId: string | undefined,
-        opts: { dryRun?: boolean; epic?: string; force?: boolean; next?: boolean },
+        opts: { dryRun?: boolean; epic?: string; force?: boolean; next?: boolean; brief?: boolean },
       ) => {
         const res = await resumeProjectTask(
           process.cwd(),
@@ -136,6 +137,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
           opts.epic,
           opts.force === true,
           opts.next === true,
+          opts.brief === true,
         );
         process.stdout.write(`${JSON.stringify(res)}\n`);
       },

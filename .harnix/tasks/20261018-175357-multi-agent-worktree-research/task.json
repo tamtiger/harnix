@@ -1,0 +1,119 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261018-175357-multi-agent-worktree-research",
+  "epicId": "20261018-175353-dx-robustness-and-php-resilience",
+  "title": "Khảo sát thực nghiệm Multi-Agent Worktree và xây dựng đặc tả điều phối",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Thực hiện khảo sát thực nghiệm có đối chiếu mã nguồn và tài liệu chính thức của Antigravity/Claude Code/Cursor về quản lý branch worktree; xác định phương án xử lý conflict state (.active, epic.md) khi merge và soạn thảo spec.md cho Epic.",
+  "nonGoals": [
+    "Không tự động tạo worktree hay commit từ phía runtime của Harnix.",
+    "Chưa thay đổi mã nguồn CLI trong task nghiên cứu này."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Tài liệu research.md được hoàn thiện với các trích dẫn và dữ kiện đối sánh thực tế từ các agent runner.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-research-docs-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Soạn thảo spec.md trong thư mục Epic định nghĩa cơ chế xử lý file trạng thái khi merge branch và quy trình điều phối an toàn.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-research-docs-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test gates pass 100%.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-research-docs-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-research-docs",
+      "description": "Kiểm tra test gates bảo đảm tài liệu và định dạng tuân thủ ranh giới",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        ".harnix/epics/**",
+        "docs/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md"
+  ],
+  "relevantSpecs": [],
+  "decisions": [],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-check-research-docs-1",
+      "checkId": "check-research-docs",
+      "recordedAt": "2026-10-18T20:34:18.549+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "70ebe83c3cbbff6ee22c3a15230fe1685271f1a15a09c8271d0ba08e1816aa30"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T20:35:38.779+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d22aaadbe5326ef5b6b679707a96a74e1526cbec2c0c6fb55c438f435c9c58d8"
+    },
+    {
+      "id": "ev-check-research-docs-2",
+      "checkId": "check-research-docs",
+      "recordedAt": "2026-10-18T20:36:09.593+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0f26f68717cc5faa6cb44abb8a9f7027f5b14dceb6d55e36f91cd200a385f8b5"
+    }
+  ],
+  "createdAt": "2026-10-18T17:53:57.404+07:00",
+  "updatedAt": "2026-10-18T20:36:32.548+07:00",
+  "completedAt": "2026-10-18T20:36:32.548+07:00"
+}

@@ -13,6 +13,7 @@ import { stageOwnerFor } from "./routing.js";
 import type { LearningSummaryItem } from "src/core/journal/learning-summary.js";
 import { collectEpicMembers, listEpicIds, loadEpicRecord, nextEpicMember } from "src/core/epics/epic.js";
 import { orderEpicMembers } from "src/core/epics/order.js";
+import { readGitContext, type GitContext } from "src/utils/git.js";
 import { taskContextDrift } from "./context.js";
 import { projectLearningSummary } from "./support.js";
 
@@ -28,6 +29,8 @@ export interface WorkflowPreflightResultV1 {
   clock: { timezone: string; now: string; idPrefix: string };
   /** Redacted, bounded notes from earlier tasks (at most 5); the source for platforms without hooks. */
   learning: LearningSummaryItem[];
+  /** Read-only git context (branch, clean status, short commit hash) when in a Git repository. */
+  git?: GitContext;
   /** Present only when the running CLI is older than the version recorded in the project manifest. */
   versionSkew?: string;
   /** One line asking for an authorized baseline when the suite was already red in the last two finished tasks. */
@@ -66,10 +69,12 @@ export async function preflightWorkflow(
     routed.nextStage === "plan" ? { ...routed, learning: await projectLearningSummary(root, now) } : routed;
   const skew = cliVersion === undefined ? undefined : await recordedSkew(root, cliVersion);
   const hint = await recordedBaselineHint(root);
+  const git = await readGitContext(root);
   return {
     ...result,
     ...(skew === undefined ? {} : { versionSkew: skewMessage(skew) }),
     ...(hint === undefined ? {} : { baselineHint: hint }),
+    ...(git === undefined ? {} : { git }),
   };
 }
 

@@ -7,6 +7,7 @@ const ALWAYS_IGNORED_DIRECTORIES = ["node_modules", "TestResults", ".vs", ".idea
 interface GuardedDirectoryRule {
   names: readonly string[];
   isMarker: (entryName: string) => boolean;
+  wrapperParents?: readonly string[];
 }
 
 /**
@@ -19,6 +20,11 @@ const GUARDED_DIRECTORY_RULES: readonly GuardedDirectoryRule[] = [
   {
     names: ["build", "dist", "coverage", "out"],
     isMarker: (entryName) => /^(package\.json|pom\.xml|build\.gradle(\.kts)?)$/iu.test(entryName),
+  },
+  {
+    names: ["logs", "cache", "writable"],
+    isMarker: (entryName) => /^(composer\.json|index\.php|spark|artisan|\.php-version)$/iu.test(entryName),
+    wrapperParents: ["application", "storage", "writable", "var"],
   },
 ];
 
@@ -70,8 +76,19 @@ export function createGuardedDirectoryFilter(projectRoot: string) {
       if (targeted.has(name)) continue;
       const rule = GUARDED_DIRECTORY_RULES.find((candidate) => candidate.names.includes(name));
       if (rule === undefined) continue;
-      const entries = await list(segments.slice(0, index).join("/"));
+      const directParent = segments.slice(0, index).join("/");
+      const entries = await list(directParent);
       if (entries.some(rule.isMarker)) return false;
+
+      if (rule.wrapperParents && index > 0) {
+        const parentName = (segments[index - 1] ?? "").toLowerCase();
+        if (targeted.has(parentName)) continue;
+        if (rule.wrapperParents.includes(parentName)) {
+          const grandParent = segments.slice(0, index - 1).join("/");
+          const grandEntries = await list(grandParent);
+          if (grandEntries.some(rule.isMarker)) return false;
+        }
+      }
     }
     return true;
   };

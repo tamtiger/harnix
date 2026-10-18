@@ -14,3 +14,36 @@ Use when an initiative, refactor or chain of work has two or more tasks, or the 
 ## Run order
 
 Members run in ID order unless the epic declares an optional `order` (task ids, distinct, all members of the epic). `harnix workflow --epic-order <epic-id> <task-id>...` sets it (no task ids clears it) and rewrites only the epic record and its page, never a `task.json`. `harnix epic <epic-id>` lists the ordered members first in that order and the rest by ascending ID, and `nextTask` is the first unfinished member in that sequence; an epic without `order` behaves as before.
+
+## Branching and task switching flow
+
+1. **Git Awareness**: `harnix status` and `harnix workflow --preflight` surface read-only `git: { branch, clean, commit }`. Inspect `git.branch` before implementing to ensure you are operating on the expected base or feature branch.
+2. **Branching Strategy**:
+   - Establish a clean base branch (e.g. `main`, `develop`, or an epic feature branch `feat/epic-<id>`).
+   - For isolated task development or parallel sub-workspaces, branch off the common base: `git checkout -b feat/<task-id> <base-branch>`.
+3. **Task Switching & Stash Discipline**:
+   - When switching tasks (`harnix resume <other-id> --force` or `harnix resume --next`):
+   - Check `git.clean`. If `false`, never leave uncommitted modified files across task boundaries.
+   - Use `git stash push -m "WIP: <task-id>"` (or request user approval to commit verified progress) before switching.
+   - Upon resuming the task: checkout the task branch and run `git stash pop`.
+4. **Divergence Handling**:
+   - When the base branch moves ahead during a multi-task epic, rebase or merge the base branch cleanly before final verification and closing.
+
+## Multi-Agent Worktree Orchestration and State Reconciliation
+
+For initiatives where member tasks are executed concurrently across isolated Git worktrees:
+
+1. **Isolation Architecture**:
+   - Every concurrent subagent operates in its own dedicated Git worktree (`.harnix/worktrees/<task-id>` on branch `feat/<task-id>`).
+   - This ensures file edits do not collide and `inputDigest` verification inputs remain stable and valid during check execution.
+2. **State Reconciliation & Conflict Avoidance**:
+   - **Active Pointer (`.harnix/tasks/.active`)**: Do not commit `.active` on task worktree branches. Subagents keep `.active` uncommitted or clear it prior to requesting a merge, using task-scoped branch workflows so the active pointer is not part of the PR/merge diff.
+   - **Derived Epic Artifact (`epic.md`)**: Do not commit derived `epic.md` from subagent branches. The Lead Agent (Orchestrator) regenerates `epic.md` from the main integration branch after merging member task branches (`harnix epic <epic-id>`).
+   - **Task Records (`.harnix/tasks/<task-id>/**`)**: Safe to commit directly. Each task resides in its own isolated directory, guaranteeing clean 3-way git merges without conflict.
+3. **Orchestrator Protocol (6-step lifecycle)**:
+   - Step 1 (DAG Analysis): Lead Agent analyzes `epic.json` and selects independent tasks with disjoint `inputs`.
+   - Step 2 (Worktree Setup): Create worktree for each subagent: `git worktree add .harnix/worktrees/<task-id> -b feat/<task-id> HEAD`.
+   - Step 3 (Subagent Delegation): Launch subagents (via host runner or subagent tools) targeted to their worktree.
+   - Step 4 (Task Execution): Subagents run TDD cycle using focused commands and record evidence.
+   - Step 5 (Verification & Handoff): Subagents verify all checks (`exitCode 0`, valid `inputDigest`) and report `evidenceId`.
+   - Step 6 (Integration & Cleanup): Lead Agent verifies task record, merges `feat/<task-id>` into the base branch, removes the worktree (`git worktree remove .harnix/worktrees/<task-id>`), and refreshes Epic status.

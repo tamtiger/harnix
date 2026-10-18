@@ -197,11 +197,9 @@ export function nextEpicMember<T extends { status: string }>(members: readonly T
 
 export async function upsertEpic(root: string, epic: EpicRecord): Promise<void> {
   const epicsDir = join(root, ".harnix", EPICS_DIRECTORY);
-  await mkdir(epicsDir, { recursive: true });
-  const jsonContent = `${JSON.stringify(epic, null, 2)}\n`;
-  await atomicWriteFile(join(epicsDir, `${epic.id}.json`), jsonContent);
   const folder = join(epicsDir, epic.id);
   await mkdir(folder, { recursive: true });
+  const jsonContent = `${JSON.stringify(epic, null, 2)}\n`;
   await atomicWriteFile(join(folder, "epic.json"), jsonContent);
   await renderEpicMarkdown(root, epic.id, epic);
 }
@@ -296,9 +294,7 @@ export async function renderEpicMarkdown(root: string, epicId: string, epic?: Ep
   } catch {}
   if (artifacts.length > 0) sections.push(["## Supporting Artifacts", "", ...artifacts].join("\n"));
 
-  await mkdir(epicsDir, { recursive: true });
-  const mdContent = `${sections.join("\n\n")}\n`;
-  await atomicWriteFile(join(epicsDir, `${epicId}.md`), mdContent);
+  const folderMdContent = `${sections.join("\n\n")}\n`;
   await mkdir(folder, { recursive: true });
-  await atomicWriteFile(join(folder, "epic.md"), mdContent);
+  await atomicWriteFile(join(folder, "epic.md"), folderMdContent);
 }

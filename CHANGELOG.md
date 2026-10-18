@@ -4,6 +4,16 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.11.0] - 2026-10-18
+
+### Fixed
+
+- Xóa bỏ mâu thuẫn Rule 9 và chuẩn hóa nạp payload UTF-8 qua file
+
+### Changed
+
+- Dong bo tai lieu, ho tro Multi-Agent Epic, tiep nhan cac cai tien DX va dong Epic
+
 ## [2.10.1] - 2026-10-17
 
 ### Changed

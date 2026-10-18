@@ -99,8 +99,12 @@ function hasChangedCoverage(
 
 /** The baseline waiver is review data like decisions and risks, so it never counts as an obligation change. */
 function withoutBaseline(check: TaskRecord["validationPlan"][number]): { id: string } & Record<string, unknown> {
-  const { baseline, ...contract } = check as unknown as { id: string; baseline?: unknown } & Record<string, unknown>;
+  const { baseline, ...contract } = check as unknown as { id: string; cwd?: string; baseline?: unknown } & Record<
+    string,
+    unknown
+  >;
   void baseline;
+  if (contract.cwd === "." || contract.cwd === "") delete contract.cwd;
   return contract;
 }
 

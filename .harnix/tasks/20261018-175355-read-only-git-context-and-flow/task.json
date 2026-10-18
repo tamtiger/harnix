@@ -1,0 +1,151 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261018-175355-read-only-git-context-and-flow",
+  "epicId": "20261018-175353-dx-robustness-and-php-resilience",
+  "title": "Bổ sung ngữ cảnh Git chỉ đọc vào Preflight và chuẩn hóa quy trình Branching Stash",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bổ sung trường git chỉ đọc (branch, clean, commit) vào kết quả status/preflight; cập nhật tài liệu hướng dẫn về xác định base branch, target branch, xử lý divergence và quy trình Stash & Switch khi chuyển task.",
+  "nonGoals": [
+    "Không tự động commit, tạo nhánh hay checkout Git.",
+    "Không làm chậm tốc độ preflight khi không ở trong git repository."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Harnix status/preflight trả về thông tin Git read-only một cách an toàn, không làm crash khi chạy trong môi trường không có Git.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-preflight-git-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Tài liệu hướng dẫn branching strategy, xử lý lệch nhánh (divergence) và quy trình pause/stash/switch task được bổ sung đầy đủ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-preflight-git-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test gates pass 100%.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-preflight-git",
+      "description": "Kiểm tra preflight với thông tin Git read-only",
+      "command": "pnpm test:unit test/unit/core/workflow/preflight.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Kiểm tra test gates kiến trúc và contract",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/workflow/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/preflight.ts",
+    "src/core/status.ts",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "relevantSpecs": [],
+  "decisions": [],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-check-preflight-git-1",
+      "checkId": "check-preflight-git",
+      "recordedAt": "2026-10-18T20:18:18.435+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:unit test/unit/core/workflow/preflight.test.ts — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "76609cd5967783e7a475d6b13764bdf8cb68c74a332bfbd9e0acfb5cfe517b16"
+    },
+    {
+      "id": "ev-check-preflight-git-2",
+      "checkId": "check-preflight-git",
+      "recordedAt": "2026-10-18T20:20:54.282+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:unit test/unit/core/workflow/preflight.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ae2b6689527d50ea9f13d17ab228d985e95cd3c9c41dbd5269fa05a9c839ba3f"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-18T20:21:04.619+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "31e5d1e5020c0901e11123091abff02178fd04401e5e29a8cc91135fd66bfbf3"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T20:22:23.422+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "62cf27c057436c8133e11bbb0da1727c824c9bf3d4e5ee062f51bd24c62e1cc6"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T20:24:36.970+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6b1e4611dada4535b86ef52b433ea2dccad89f7215c81e95971a8f868d717db3"
+    }
+  ],
+  "createdAt": "2026-10-18T17:53:55.404+07:00",
+  "updatedAt": "2026-10-18T20:25:07.032+07:00",
+  "completedAt": "2026-10-18T20:25:07.032+07:00"
+}

@@ -11,8 +11,7 @@ composer audit
 
 ## Constraints
 
-- Start every file with `declare(strict_types=1);`.
-- Never use `eval()`, `$$var`, `global` or `$GLOBALS`.
+- Start every file with `declare(strict_types=1);`; never use `eval()`, `$$var`, `global` or `$GLOBALS`.
 - Never pass untrusted data to `unserialize()`; use `json_decode($s, flags: JSON_THROW_ON_ERROR)`.
 - Use PDO prepared statements with bound parameters; never concatenate input into SQL.
 - Hash passwords with `password_hash()` (`PASSWORD_ARGON2ID` or `PASSWORD_BCRYPT`) and check with `password_verify()`.
@@ -21,12 +20,13 @@ composer audit
 - Use `readonly` properties and backed `enum` instead of mutable state and string constants.
 - Inject dependencies through constructors (PSR-11); no static service locators.
 - Catch specific exceptions; catch `\Throwable` only at the top-level kernel.
+- Two-tier verification: mock external APIs in unit tests; use isolated CLI/staging dry-run for integration. Decouple external side effects (webhooks, notifications) post-commit via queues or background events.
 
 ## Common mistakes
 
-- Comparing hashes or tokens with `==` instead of `hash_equals()`.
-- Calling `in_array()` without the strict `true` argument.
+- Comparing hashes or tokens with `==` instead of `hash_equals()`, or calling `in_array()` without `strict: true`.
 - Leaving `opcache.validate_timestamps=1` in production.
 - Committing `.env` files.
 - Running PHPStan below level 8 without a baseline.
 - Mass-assigning request input to ORM models without a writable-field allowlist.
+- Invoking synchronous external partner APIs inside database transactions instead of dispatching post-commit events.

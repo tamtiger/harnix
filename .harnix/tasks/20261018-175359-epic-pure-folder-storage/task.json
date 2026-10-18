@@ -1,0 +1,207 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261018-175359-epic-pure-folder-storage",
+  "epicId": "20261018-175353-dx-robustness-and-php-resilience",
+  "title": "Loại bỏ dual-write file phẳng và chuẩn hóa lưu trữ Epic thuần folder",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Loại bỏ việc ghi đúp file phẳng (.json và .md) trong src/core/epics/epic.ts, chỉ ghi ra folder .harnix/epics/<id>/epic.json|md nhưng vẫn duy trì fallback đọc cho legacy epics; cập nhật test kiểm thử tương ứng.",
+  "nonGoals": [
+    "Không phá vỡ tính tương thích ngược khi đọc các epic legacy từ file phẳng hoặc roadmaps."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Hàm upsertEpic và renderEpicMarkdown trong src/core/epics/epic.ts chỉ ghi vào thư mục .harnix/epics/<id>/, không ghi ra file phẳng ở thư mục cha.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-storage-3"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cơ chế đọc fallback trong resolveEpicFile và listEpicIds vẫn đọc được cả folder mới lẫn file phẳng legacy cũ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-storage-3"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ unit test cho epics và toàn bộ test gates pass 100%.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-storage-3",
+        "ev-check-suite-v4-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Cập nhật harnix-plan SKILL.md và scouting-isolation.md chuẩn hóa giao thức báo cáo kết quả subagent cho Epic Multi-Agent.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-epic-storage-3"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-epic-storage",
+      "description": "Kiểm tra unit test cho epic thuần folder không dual-write và test gates tài liệu",
+      "command": "pnpm test:unit test/unit/core/epics",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/core/epics/**",
+        "src/skills/**",
+        "test/unit/core/epics/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": false,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite-v3",
+      "description": "Replacement for check-suite",
+      "scope": "full",
+      "required": false,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test:fast",
+      "cwd": "."
+    },
+    {
+      "id": "check-suite-v4",
+      "description": "Replacement for check-suite-v3",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test",
+      "cwd": "."
+    }
+  ],
+  "relevantPaths": [
+    "src/core/epics/epic.ts",
+    "test/unit/core/epics/epic.test.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-check-epic-storage-1",
+      "checkId": "check-epic-storage",
+      "recordedAt": "2026-10-18T21:00:29.509+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:unit test/unit/core/epics — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5bd44e6a01aa749c9953d9d9fdbd7b24a0013a8103eaa52000b9b3495cb759bb"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T21:01:54.740+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "2686a98a3eb7c10f6f863367ba3b1daae12a10348c383b5cca2c13ed7665137f"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-18T21:04:07.772+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "2283c8c2e80b4d07b986c8518a1fd5538eb02edefb285a03a1995ae03c2001d6"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-18T21:05:06.415+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Khắc phục đường dẫn file kiểm tra localized-time và internal-workflow-save theo cấu trúc pure folder storage",
+      "artifactPaths": [
+        ".harnix/tasks/20261018-175359-epic-pure-folder-storage/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-18T21:05:24.598+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Cập nhật command check-suite-v4 thành pnpm run test theo đúng project test command",
+      "artifactPaths": [
+        ".harnix/tasks/20261018-175359-epic-pure-folder-storage/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-epic-storage-2",
+      "checkId": "check-epic-storage",
+      "recordedAt": "2026-10-18T21:06:14.864+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:unit test/unit/core/epics — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "78aafa3ea95c7a7cd67024f9ad8323f92581ccd1c435f218d237a6352fbf4d43"
+    },
+    {
+      "id": "ev-check-suite-v4-1",
+      "checkId": "check-suite-v4",
+      "recordedAt": "2026-10-18T21:07:42.620+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "25f9e907c91a376616959f9ff93f4a7da5f885dbcabc603db852f14e40533c9b"
+    },
+    {
+      "id": "ev-check-epic-storage-3",
+      "checkId": "check-epic-storage",
+      "recordedAt": "2026-10-18T21:08:25.465+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:unit test/unit/core/epics — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "78aafa3ea95c7a7cd67024f9ad8323f92581ccd1c435f218d237a6352fbf4d43"
+    }
+  ],
+  "createdAt": "2026-10-18T17:53:59.404+07:00",
+  "updatedAt": "2026-10-18T21:09:00.933+07:00",
+  "completedAt": "2026-10-18T21:09:00.933+07:00"
+}

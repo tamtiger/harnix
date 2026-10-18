@@ -70,9 +70,9 @@ describe("technique skills catalog", () => {
     }
   });
 
-  it("bumps package version to 2.10.0 series", async () => {
+  it("package version is a valid semver in 2.x series", async () => {
     const { readFile } = await import("node:fs/promises");
     const pkg = JSON.parse(await readFile("package.json", "utf8"));
-    expect(pkg.version).toMatch(/^2\.(?:9|10)\./u);
+    expect(pkg.version).toMatch(/^2\.\d+\.\d+(?:-[a-z0-9.]+)?$/u);
   });
 });

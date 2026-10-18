@@ -28,10 +28,10 @@ describe("hidden workflow save epic envelope", () => {
 
     await saveWorkflow(root, { task: planning, epic });
 
-    const jsonContent = await readFile(join(root, ".harnix", "epics", "my-epic.json"), "utf8");
+    const jsonContent = await readFile(join(root, ".harnix", "epics", "my-epic", "epic.json"), "utf8");
     expect(JSON.parse(jsonContent).id).toBe("my-epic");
 
-    const mdContent = await readFile(join(root, ".harnix", "epics", "my-epic.md"), "utf8");
+    const mdContent = await readFile(join(root, ".harnix", "epics", "my-epic", "epic.md"), "utf8");
     expect(mdContent).toContain("Epic title");
     expect(mdContent).toContain("Epic goal");
   });
@@ -59,7 +59,7 @@ describe("hidden workflow save epic envelope", () => {
     };
     await saveWorkflow(root, { task: withEpicId });
 
-    const mdContent = await readFile(join(root, ".harnix", "epics", "my-epic.md"), "utf8");
+    const mdContent = await readFile(join(root, ".harnix", "epics", "my-epic", "epic.md"), "utf8");
     expect(mdContent).toContain(planning.id);
     expect(mdContent).toContain("ready");
     // The refresh must reload the persisted epic record for title/goal
@@ -77,7 +77,7 @@ describe("hidden workflow save epic envelope", () => {
 
     expect(result.id).toBe(planning.id);
     expect(result.status).toBe("planning");
-    await expect(readFile(join(root, ".harnix", "epics", "my-epic.json"), "utf8")).rejects.toThrow();
+    await expect(readFile(join(root, ".harnix", "epics", "my-epic", "epic.json"), "utf8")).rejects.toThrow();
   });
 
   it("refreshes epic markdown with the final completed status when finishing a task with epicId", async () => {
@@ -108,7 +108,7 @@ describe("hidden workflow save epic envelope", () => {
 
     await expect(finishWorkflow(root, completedAt)).resolves.toMatchObject({ status: "completed" });
 
-    const mdContent = await readFile(join(root, ".harnix", "epics", "finish-epic.md"), "utf8");
+    const mdContent = await readFile(join(root, ".harnix", "epics", "finish-epic", "epic.md"), "utf8");
     expect(mdContent).toContain("Finish epic title");
     expect(mdContent).toContain("Finish epic goal");
     expect(mdContent).toContain(completedTask.id);
@@ -131,7 +131,7 @@ describe("hidden workflow save epic envelope", () => {
       cancelWorkflow(root, { reason: "no longer needed", authorizedBy: "user" }, "2026-08-13T00:05:00.000Z"),
     ).resolves.toMatchObject({ status: "cancelled" });
 
-    const mdContent = await readFile(join(root, ".harnix", "epics", "cancel-epic.md"), "utf8");
+    const mdContent = await readFile(join(root, ".harnix", "epics", "cancel-epic", "epic.md"), "utf8");
     expect(mdContent).toContain("Cancel epic title");
     expect(mdContent).toContain("Cancel epic goal");
     expect(mdContent).toContain("cancelled");
@@ -179,7 +179,7 @@ describe("hidden workflow save epic envelope", () => {
       epicMembers: [member2],
     });
 
-    const mdContent = await readFile(join(root, ".harnix", "epics", "batch-epic.md"), "utf8");
+    const mdContent = await readFile(join(root, ".harnix", "epics", "batch-epic", "epic.md"), "utf8");
     expect(mdContent).toContain("Batch epic title");
     expect(mdContent).toContain("Member 1");
     expect(mdContent).toContain("Member 2");
