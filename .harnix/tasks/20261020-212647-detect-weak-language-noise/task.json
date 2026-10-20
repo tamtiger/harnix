@@ -1,0 +1,80 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-212647-detect-weak-language-noise",
+  "title": "Bỏ qua ngôn ngữ weak khi đã có ngôn ngữ xác nhận",
+  "mode": "lite",
+  "status": "cancelled",
+  "checkpoint": "cancelling",
+  "goal": "Detect không gán ngôn ngữ chỉ từ file lẻ (weak) khi project đã có ngôn ngữ probable/confirmed",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Repo có tsconfig.json cùng một file .py và .mjs lẻ chỉ phát hiện typescript; repo chỉ có file weak vẫn nhận ngôn ngữ đó",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Suite dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-focus",
+      "description": "Test detect weak",
+      "command": "pnpm exec vitest run test/unit/core/stack/detection-weak.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/stack/**",
+        "test/unit/core/stack/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-focus-1",
+      "checkId": "check-focus",
+      "recordedAt": "2026-10-20T21:30:08.242+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/stack/detection-weak.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8dd09c315930dfa2549a25dcc3600d0358b1084da9f22589ddf6b4516f7ed7fe"
+    },
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-20T21:32:20.486+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "23db2f228847d52757a2b0a60cdbf08d63963822d3763d1da7c7fdd25806016c"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-20T21:26:47.702+07:00",
+  "updatedAt": "2026-10-20T21:33:03.291+07:00",
+  "cancellation": {
+    "reason": "Đổi tên file test để khớp quy tắc mirror của test-structure; check đã pass bất biến nên tạo lại task",
+    "authorizedBy": "user"
+  },
+  "cancelledAt": "2026-10-20T21:33:03.291+07:00"
+}

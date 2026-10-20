@@ -1,7 +1,7 @@
 {
   "extractorVersion": 1,
   "generator": "harnix",
-  "inventoryFingerprint": "493083478130d2682fee578ea5003f1dd48249dcbf753d2819d6f770953a20f9",
+  "inventoryFingerprint": "ccec1bd9c09bb9a26e32d290d561c6f3048a6845b933dfa0dba20eba0b43bfd5",
   "records": [
     {
       "byteLength": 91,
@@ -55,8 +55,8 @@
       "path": ".prettierrc.json"
     },
     {
-      "byteLength": 34526,
-      "contentHash": "407997bdfdeb5c56a7c500a1044819e4cf6123b30e1dab3012dd97eea1ebb31a",
+      "byteLength": 37481,
+      "contentHash": "850eda354c097c94197b34d9b2bab2bc6401e9ef57209bc1e30ff482150ab107",
       "extension": "md",
       "headings": [
         "Architecture rules",
@@ -86,8 +86,8 @@
       "path": "AGENTS.md"
     },
     {
-      "byteLength": 72823,
-      "contentHash": "9a40ad47d33d31d1fdefe98d371b0072206cfc4c9bce44d76dc04b8923d9f1cd",
+      "byteLength": 79575,
+      "contentHash": "7c374f87c3e51b9bb213c592ebfa253155664d3a26115c172f69eea7cd80095e",
       "extension": "md",
       "headings": [
         "Added",
@@ -151,8 +151,8 @@
       "path": "NOTICE"
     },
     {
-      "byteLength": 27701,
-      "contentHash": "e1ebc6ce0fd9c9d0a5bfea7d5ddaf69b9e170232da5b801780d4367f8edf26df",
+      "byteLength": 33093,
+      "contentHash": "ee03c5ff80c75f0d03b000a06a01206460e35d12cbaf9c4b541248934659c75a",
       "extension": "md",
       "headings": [
         "-> Harnix tự phân loại yêu cầu và dẫn dắt agent qua đúng quy trình, không cần bạn gõ lệnh nào thêm.",
@@ -170,7 +170,7 @@
         "Harnix giải quyết vấn đề gì?",
         "Harnix hoạt động như thế nào",
         "Hoặc đồng bộ lại metadata khi có drift cùng version:",
-        "Mục lục"
+        "Khắc phục sự cố"
       ],
       "identifiers": [
         "g"
@@ -226,11 +226,12 @@
       "path": "docs/HARNESS_FEATURE_PROVENANCE.json"
     },
     {
-      "byteLength": 39421,
-      "contentHash": "97dd4a2e9ebf460cc0b62f06a318c49eee45a307bdea9d28e90031c44ce82c73",
+      "byteLength": 40901,
+      "contentHash": "427a30eaa18863df07c0469e78177ef90c7fdb2e281689595386e26a07b0eded",
       "extension": "md",
       "headings": [
         "1. Khung quyết định",
+        "10. Nghiên cứu Cải tiến Bộ Tạo tác Task, Epic và Plan Sync (2026-10-17)",
         "2. Capability matrix",
         "3. Thiết kế được chọn",
         "3.1 Dual mode",
@@ -244,8 +245,7 @@
         "3.5 Verification model",
         "3.6 Workflow synthesis",
         "3.7 Revalidation 2026-08-14: context drift và freshness theo input",
-        "3.8 Adoption 2026-08-18: four bounded harness capabilities",
-        "3.9 Revalidation 2026-08-26: task observability, navigation, audit và provenance"
+        "3.8 Adoption 2026-08-18: four bounded harness capabilities"
       ],
       "identifiers": [
         "does",
@@ -258,8 +258,8 @@
       "path": "docs/HARNESS_RESEARCH.md"
     },
     {
-      "byteLength": 80137,
-      "contentHash": "d6fcea1268e9ee655f2727e2fe7e6e9cd3df54ae9fcd6bf7c5d433064671cbfb",
+      "byteLength": 86118,
+      "contentHash": "e8a2141f88fbf93654cea2f7bf94a9eb38c3f916ab8e2b6f4dabd5debc63f5d9",
       "extension": "md",
       "headings": [
         "1. Document status",
@@ -299,8 +299,8 @@
       "path": "docs/HARNIX_PRD.md"
     },
     {
-      "byteLength": 68527,
-      "contentHash": "3f5631818861592e79f2872fc55d5443b01278613e1befde184ac8fe1c233c1d",
+      "byteLength": 70166,
+      "contentHash": "9c2f3f4abb8a50b277780d296bd9de25db69830008c293e71b789c03b7a0b644",
       "extension": "md",
       "headings": [
         "1. Purpose and authority",
@@ -339,8 +339,8 @@
       "path": "docs/HARNIX_WORKFLOW.md"
     },
     {
-      "byteLength": 178966,
-      "contentHash": "5befd845497428b5538debc337801ae78d33d65873ac2cfd877842f9e844d0ea",
+      "byteLength": 181514,
+      "contentHash": "a4bc00c32f908152b5c81685cf2bd63905af0ca4d164a66a6c7aa9d7a2e0c8c5",
       "extension": "md",
       "headings": [
         "1. Mục tiêu",
@@ -687,6 +687,31 @@
       "path": "docs/prompts/review-refactor-claude-setup.md"
     },
     {
+      "byteLength": 11385,
+      "contentHash": "6ca43f9984ab4c6ffe97e07b5d7d94b4d3713a24a1d215969ed7142233f10212",
+      "extension": "md",
+      "headings": [
+        "1. Nhiệm vụ và Nguyên tắc Thực thi",
+        "2. Ranh giới An toàn & Môi trường Cô lập (Safety Boundary)",
+        "3. Ma trận 8 Kịch bản Thực thi (Scenario Matrix)",
+        "4. Hướng dẫn Tự Review & Lập Kế Hoạch Khắc Phục (Self-Review & Action Plan)",
+        "Kịch bản 1: Phân luồng Bỏ qua (Bypass Route)",
+        "Kịch bản 2: Vòng đời Nhiệm vụ Gọn (Lite Task Lifecycle)",
+        "Kịch bản 3: Vòng đời Nhiệm vụ Toàn phần & Tự Đồng Bộ (Full Task with Auto-Sync & Code Impact)",
+        "Kịch bản 4: Chuỗi Sáng kiến Đa Nhiệm vụ (Epic Workflow with Folder Hierarchy)",
+        "Kịch bản 5: Ngắt Mạch & Thay Thế Kiểm Tra (Circuit Breaker & Check Replacement)",
+        "Kịch bản 6: Suite Kiểm Thử Đỏ Từ Trước & Cột Mốc Cơ Sở (Red Baseline & Focused Proof)",
+        "Kịch bản 7: Điều Chỉnh Kế Hoạch Sau Đóng Băng (Guarded Replan)",
+        "Kịch bản 8: Hủy Bỏ Tường Minh & Ghi Nhật Ký (Explicit Cancellation)",
+        "Prompt — Chạy Tự Động Workflow Đa Kịch Bản, Kiểm Thử Lặp và Khắc Phục Điểm Yếu (Harnix v2.10.0)"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "docs/prompts/workflow-multi-scenario-runner.md"
+    },
+    {
       "byteLength": 29254,
       "contentHash": "91da8c458d3704094d0b2d495a797096a52f9bbdf2edbe0b6c3ba31c4c2cca2b",
       "extension": "md",
@@ -770,7 +795,7 @@
     },
     {
       "byteLength": 2681,
-      "contentHash": "b9503e6b5469815f9f910ca1bb889c68c5f11632d276645184a6530f9b0aefa8",
+      "contentHash": "1faefe2d33c83f8ae4ef801e0cda796a074c1fe462ef579679ba3f46db4ddb83",
       "extension": "json",
       "headings": [],
       "identifiers": [],
@@ -791,6 +816,23 @@
       "kind": "manifest",
       "packagePath": "",
       "path": "pnpm-lock.yaml"
+    },
+    {
+      "byteLength": 369,
+      "contentHash": "6e2b1d8c0e37be5ef81535e85e254e089af6c7cf034bb1a066bb54844e1fcdc7",
+      "extension": "mjs",
+      "headings": [],
+      "identifiers": [
+        "assertBuilt"
+      ],
+      "importTargets": [
+        "node:fs",
+        "node:path"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "scripts/assert-built.mjs",
+      "language": "javascript"
     },
     {
       "byteLength": 2350,
@@ -867,20 +909,17 @@
       "language": "javascript"
     },
     {
-      "byteLength": 4996,
-      "contentHash": "56ba831e2c5471df140fef2ca2f68460ebc73030ddcf1c508bea9a6803d6493a",
+      "byteLength": 4413,
+      "contentHash": "1979278ceb6e413c5c30b3f97717119e1eb239ed5df4081e6bd0267f4ed6ac8a",
       "extension": "mjs",
       "headings": [],
       "identifiers": [
-        "actionable",
         "assertExpectedGlobalSurfaces",
         "assertNoProjectLocalPlatformSurfaces",
-        "assertSetupExitContract",
         "baselineBytes",
         "baselineFiles",
         "bytes",
         "environment",
-        "expectedStatus",
         "files",
         "forbidden",
         "globalMeasurement",
@@ -903,7 +942,9 @@
         "setup"
       ],
       "importTargets": [
+        "./assert-built.mjs",
         "./isolated-user-home.mjs",
+        "./setup-exit-contract.mjs",
         "node:child_process",
         "node:fs/promises",
         "node:os",
@@ -1108,6 +1149,23 @@
       "kind": "source",
       "packagePath": "",
       "path": "scripts/selfhost-sync.mjs",
+      "language": "javascript"
+    },
+    {
+      "byteLength": 1366,
+      "contentHash": "9b46393cf609db2b0b1decbcd897c153a009dda02d3d7a177dd14f28606b25ef",
+      "extension": "mjs",
+      "headings": [],
+      "identifiers": [
+        "HEALTHY_READINESS",
+        "assertSetupExitContract",
+        "result",
+        "unhealthy"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "scripts/setup-exit-contract.mjs",
       "language": "javascript"
     },
     {
@@ -1548,8 +1606,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 13197,
-      "contentHash": "5cfaea70d3c88f651223b31ea2e8e9794067941e2d21e07237d8ac2aeae271ec",
+      "byteLength": 14661,
+      "contentHash": "dc1fec8d6b3fe342a4fcadb02b0d4ae78126d1798de1479d217ea3095734bfb4",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -1558,10 +1616,13 @@
         "ProgramOptions",
         "RepoMapCliOptions",
         "SkillTemplate",
+        "StatusCliOptions",
         "contextHookStdinIdleTimeoutMs",
+        "exitCode",
         "hookInput",
         "limit",
         "now",
+        "path",
         "plan",
         "platform",
         "projectSkills",
@@ -1585,10 +1646,12 @@
         "./commands/status.js",
         "./commands/tasks.js",
         "./commands/verify-plan.js",
+        "./core/doctor/exit-code.js",
         "./core/platform/registry.js",
         "./core/spec/project-skills.js",
         "./utils/bounded-input.js",
         "./utils/paths.js",
+        "./utils/project-discovery.js",
         "commander"
       ],
       "kind": "source",
@@ -2195,8 +2258,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7587,
-      "contentHash": "cf2616bf95950e1fa5d2b2b01f613e0937f204b5186934ba81c8a59a28ce5589",
+      "byteLength": 7328,
+      "contentHash": "c535fe88376947eecc25a2589c0d93f3184770376e2ffa313e5f1ef84baf72b5",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2216,7 +2279,6 @@
         "refreshRepoMapInternal",
         "refreshWorkspaceRepoMapInternal",
         "refsRepoMapInternal",
-        "resolveWorkspaceRoot",
         "result",
         "root",
         "runRepoMapCommand",
@@ -2227,7 +2289,6 @@
         "wsPath"
       ],
       "importTargets": [
-        "node:path",
         "src/cli-helpers.js",
         "src/core/config/config.js",
         "src/core/repo-map/compact.js",
@@ -2235,6 +2296,7 @@
         "src/core/repo-map/service.js",
         "src/core/repo-map/workspace.js",
         "src/core/tasks/task.js",
+        "src/core/workspace/resolve-root.js",
         "src/utils/order.js",
         "src/utils/paths.js",
         "src/utils/project-discovery.js"
@@ -2245,11 +2307,12 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2626,
-      "contentHash": "ebe73a1cd36f2bb83e8071ed0c51e0c8ab0ba4b9aafeeb625e78870745b3c191",
+      "byteLength": 3202,
+      "contentHash": "d702c63f156e3d538a295853f0d4f07001e47b0239bf4ef70a82aeb08b287879",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "BriefTask",
         "PublicEpicBriefResult",
         "ResumeProjectTaskOptions",
         "TaskResumeResultV1",
@@ -2259,13 +2322,18 @@
         "id",
         "project",
         "resumeProjectTask",
-        "targetEpic"
+        "returnResult",
+        "targetEpic",
+        "task",
+        "taskPath"
       ],
       "importTargets": [
         "src/commands/epic.js",
         "src/core/config/config.js",
         "src/core/epics/epic.js",
         "src/core/tasks/task-resume.js",
+        "src/core/tasks/task.js",
+        "src/core/workflow/brief.js",
         "src/utils/paths.js",
         "src/utils/project-discovery.js"
       ],
@@ -2377,18 +2445,21 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4500,
-      "contentHash": "d96e1cb9df3039d2b5491d22f2e2177508123ae0cad498c6f6584ae3b6fc722c",
+      "byteLength": 5471,
+      "contentHash": "7e793efe424b494c64c5ff9e014558a173f28b04aee3426aa1fa3c0505498402",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "ChecksReportResultV1",
+        "GitRunner",
         "HarnixStatusResultV1",
         "PublicEpicBriefResult",
         "PublicEpicDetailResult",
         "StatusEpicContext",
         "StatusExplainResultV1",
         "StatusSummaryResultV1",
+        "WorkspaceGitStatusResult",
+        "activeStatus",
         "audit",
         "checks",
         "contextDrift",
@@ -2397,10 +2468,13 @@
         "epicId",
         "epics",
         "explainProjectStatus",
+        "git",
         "harnixRoot",
         "index",
         "inspectProjectStatus",
+        "inspectWorkspaceGitStatus",
         "must",
+        "noActive",
         "project",
         "requiredCheckStates",
         "status",
@@ -2417,6 +2491,9 @@
         "src/core/tasks/task-audit.js",
         "src/core/tasks/task.js",
         "src/core/workflow/index.js",
+        "src/core/workspace/git-status.js",
+        "src/core/workspace/resolve-root.js",
+        "src/utils/git.js",
         "src/utils/paths.js",
         "src/utils/project-discovery.js",
         "type"
@@ -2471,11 +2548,12 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5745,
-      "contentHash": "841726cb1e8ce25a6899d672bb6b1712a36c6470d7305ebb90aeaab321c7b6e9",
+      "byteLength": 6143,
+      "contentHash": "89cd5391486591442433bff0f4f735845ada0f3e7bf8d2b22ded535aa09e4b5f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "ConfigRefreshResult",
         "DesiredManagedFile",
         "HarnixConfigV2",
         "ManagedManifest",
@@ -2496,12 +2574,14 @@
         "manifest",
         "manifestPath",
         "mergeManifestEntries",
+        "migrated",
         "paths",
         "reconciled",
         "updateProject"
       ],
       "importTargets": [
         "src/core/config/config.js",
+        "src/core/config/refresh.js",
         "src/core/epics/migrate.js",
         "src/core/managed/project-files.js",
         "src/core/spec/project-facts.js",
@@ -2546,8 +2626,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 420,
-      "contentHash": "84f12b21f12c5f9b40a40c3ca74f5b343387032d2edf19a7169e43096e9e48bf",
+      "byteLength": 471,
+      "contentHash": "1d8f9010884a2ed0cf69537789ca78b5ff6c6f6dc8867081b8b9d4ba050fbc4f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2565,8 +2645,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8158,
-      "contentHash": "050879394161c57fa472e24ac8715eb75e267579c44656f14e44188623797301",
+      "byteLength": 8865,
+      "contentHash": "fbd782689f265a0532e5481999761dc4337c3f784652931af6abfcbad5571d5c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2591,6 +2671,7 @@
         "src/commands/workflow-flags.js",
         "src/commands/workflow-handlers.js",
         "src/utils/paths.js",
+        "src/utils/project-discovery.js",
         "type"
       ],
       "kind": "source",
@@ -2599,8 +2680,27 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5455,
-      "contentHash": "ed64bd4b36a742ed75d9de6d17e36939498be3cf9bffb0394a485c47f6387b88",
+      "byteLength": 710,
+      "contentHash": "e2289d80eb9142182dfd43a76c048979f5890c088fa8ab5e7309270d00eedaf9",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "EDIT_HANDLERS"
+      ],
+      "importTargets": [
+        "src/commands/internal-workflow.js",
+        "src/commands/workflow-handler-utils.js",
+        "src/commands/workflow-handlers.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/commands/workflow-edit-handlers.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 5900,
+      "contentHash": "1e848180607aab864917d497626d124459a203d15f179727a343d42c9c8c9178",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2622,19 +2722,21 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8766,
-      "contentHash": "fa0e199f3353164fc1b86cb761dc0da094d6a26ed272e57d73b9a9679c485db5",
+      "byteLength": 9962,
+      "contentHash": "5b020d59eec954ffc0b942677bec6142fa479f2b5baf95da73f2aecc341e6559",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "BATCHABLE_ACTIONS",
         "BOOLEAN_ACTIONS",
+        "ID_FLAGS",
         "VALUE_ACTIONS",
         "WorkflowFlags",
         "actions",
         "assertActionRequirements",
         "assertCommandShape",
         "assertFlagGroups",
+        "assertIdFlagValues",
         "assertNoteFlags",
         "assertTextFlags",
         "isEvidenceFlagsMode",
@@ -2643,7 +2745,8 @@
         "owner",
         "selectAction",
         "selectActions",
-        "selected"
+        "selected",
+        "value"
       ],
       "importTargets": [
         "src/commands/workflow-flag-owners.js",
@@ -2679,8 +2782,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 11270,
-      "contentHash": "3c7df63594e1a1d9fd84cba5b81566ae31bbde2d6fcf5b11a0bf7964da2bad01",
+      "byteLength": 11657,
+      "contentHash": "28b795442d09e70f7468d34bd110d71c417779b314d0710863bf0a6b130ace80",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -2707,6 +2810,7 @@
       ],
       "importTargets": [
         "src/commands/internal-workflow.js",
+        "src/commands/workflow-edit-handlers.js",
         "src/commands/workflow-flags.js",
         "src/commands/workflow-handler-utils.js",
         "src/commands/workflow-lifecycle-handlers.js",
@@ -2724,8 +2828,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2114,
-      "contentHash": "623af38634b08ab6cb9392f57520c287792b21f370798660fe7fa28d75f6761b",
+      "byteLength": 2145,
+      "contentHash": "bb78eb410117f14012c41f6a7d49f91b6eefcac91097e891034e5869e3296a24",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -3035,6 +3139,43 @@
       "language": "typescript"
     },
     {
+      "byteLength": 4100,
+      "contentHash": "0b734aa5291f937acb72f922cce71713deb0434d4785f77b2eb278087f5d97f7",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "CONFIG_REFRESH_PACKAGE_LIMIT",
+        "ConfigRefreshAdded",
+        "ConfigRefreshResult",
+        "Detected",
+        "HarnixConfigV2",
+        "ProjectDetection",
+        "added",
+        "item",
+        "known",
+        "languages",
+        "mergeDetectedConfig",
+        "merged",
+        "newPackages",
+        "none",
+        "path",
+        "refreshProjectConfig",
+        "repositoryPath",
+        "sortedUnique",
+        "technologies"
+      ],
+      "importTargets": [
+        "./config.js",
+        "src/core/stack/detection.js",
+        "src/utils/order.js",
+        "src/utils/paths.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/config/refresh.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 1711,
       "contentHash": "330a8df411ccbfa756a559e1c79a0106e27946f0ebe1e79cb76c145df22863c3",
       "extension": "ts",
@@ -3239,6 +3380,37 @@
       "language": "typescript"
     },
     {
+      "byteLength": 2205,
+      "contentHash": "cd881430fcdd0a09fb7309562f1ab7515f8fe6afc7bcd1aa8e786f505833c965",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "DoctorFinding",
+        "LISTED_PATHS",
+        "ProjectDetection",
+        "configPackagesDrift",
+        "detection",
+        "inspectConfigDrift",
+        "known",
+        "listed",
+        "missing",
+        "more",
+        "normalize",
+        "posix"
+      ],
+      "importTargets": [
+        "src/core/config/config.js",
+        "src/core/doctor/findings.js",
+        "src/core/stack/detection.js",
+        "src/utils/order.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/doctor/config-drift.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 7037,
       "contentHash": "0d191759929693b34d1671bb5ec899d256d75a97da8b617d3c99d0d9128a34bb",
       "extension": "ts",
@@ -3281,6 +3453,23 @@
       "kind": "source",
       "packagePath": "",
       "path": "src/core/doctor/doctor.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 681,
+      "contentHash": "c08829cb46f47a0969294d4bc4ed9555267598be1b641f54f5ac0bb6b543f0dd",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "doctorExitCode"
+      ],
+      "importTargets": [
+        "src/core/doctor/doctor.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/doctor/exit-code.ts",
       "language": "typescript"
     },
     {
@@ -3556,8 +3745,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7621,
-      "contentHash": "a01b8e7787dea36d0b7c149228a0be6d3ecb99de0adce35cdfb6c8f1a4f45627",
+      "byteLength": 7745,
+      "contentHash": "62b59bd086458a57fa1064365784020fe35743e61eb089a0a09b926ad07f9a39",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -3593,6 +3782,7 @@
       "importTargets": [
         "node:fs/promises",
         "src/core/config/config.js",
+        "src/core/doctor/config-drift.js",
         "src/core/doctor/findings.js",
         "src/core/doctor/project-legacy.js",
         "src/core/doctor/project-tasks.js",
@@ -3607,8 +3797,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 11036,
-      "contentHash": "b75a0fa3ae45816293e1ee71e571d8eaf1ed7ff98cd652a6e9534fb74f1efca9",
+      "byteLength": 11284,
+      "contentHash": "b3de06d0fc02e6eb3d0e8f4e0a06f79a2ebec29fd84be103294812ae8c43a097",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -3618,6 +3808,7 @@
         "EpicRecord",
         "EpicValidationError",
         "LEGACY_EPICS_DIRECTORY",
+        "artifacts",
         "assertEpicOrder",
         "assertExactKeys",
         "collectEpicMembers",
@@ -3630,6 +3821,7 @@
         "flatCandidate",
         "folder",
         "folderCandidate",
+        "folderMdContent",
         "harnixRoot",
         "ids",
         "is",
@@ -3639,7 +3831,6 @@
         "listEpicIds",
         "loadEpicOrThrow",
         "loadEpicRecord",
-        "mdContent",
         "members",
         "next",
         "nextEpicMember",
@@ -5635,8 +5826,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3505,
-      "contentHash": "089f89837d382af7cc85f6fc3621e0d2bf2eb8340cb24dcedbe7c0885273d937",
+      "byteLength": 3207,
+      "contentHash": "0c274dfac608b63109abf62e53bf5098fcc5b65255ff99c8b68fc3edaa241f0b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -5646,7 +5837,6 @@
         "candidate",
         "candidates",
         "files",
-        "ignoredDirectoryNameList",
         "ignoredDirectoryNames",
         "inventoryRepository",
         "isContained",
@@ -5667,6 +5857,7 @@
         "globby",
         "node:fs/promises",
         "node:path",
+        "src/core/stack/ignored-directories.js",
         "src/utils/order.js",
         "src/utils/paths.js"
       ],
@@ -6058,19 +6249,53 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5818,
-      "contentHash": "d7e577908b7c4527c656b0e03abe2a73c076b70efd2245529ed4f57bd971dc9e",
+      "byteLength": 2290,
+      "contentHash": "3ccaaed151cfc761498a62a6931217f0c4a23422d51f02c3754fbcb44f68ff87",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "MISSING_CACHE_HINT",
+        "WORKSPACE_ROOT_NOT_INITIALIZED",
+        "WorkspaceRootCache",
+        "isInitializedDirectory",
+        "memberSliceOfRootMap",
+        "missing",
+        "prefix",
+        "readWorkspaceRootCache",
+        "records",
+        "refreshWorkspaceRootCache"
+      ],
+      "importTargets": [
+        "./service.js",
+        "./store.js",
+        "./types.js",
+        "node:fs/promises",
+        "src/utils/paths.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/repo-map/workspace-root-cache.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 7890,
+      "contentHash": "ede5f484510cec5692946b00c14f7289c0200ed6d98fcf06c94074f4e288ae93",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "IGNORED_DIRS",
         "MANIFEST_FILES",
+        "MemberCache",
         "WorkspaceMember",
         "WorkspaceMemberResultSummary",
         "WorkspaceQueryOptions",
         "WorkspaceQueryResult",
         "WorkspaceRefreshResult",
+        "WorkspaceRootCache",
         "allResults",
+        "cache",
+        "cachedRoot",
         "discoverWorkspaceMembers",
         "entries",
         "entry",
@@ -6078,30 +6303,34 @@
         "fullPath",
         "hasHarnix",
         "hasProjectManifest",
-        "isMissing",
-        "limit",
-        "map",
         "member",
         "memberSummaries",
         "members",
+        "missing",
         "queryWorkspaceRepoMap",
+        "readMemberCache",
         "refreshWorkspaceRepoMap",
         "refreshed",
         "res",
         "results",
+        "root",
+        "rootCache",
+        "rootMap",
         "s",
-        "searchResults",
+        "slice",
         "sub",
         "subEntries",
         "subHarnix",
         "subPath",
-        "subStat"
+        "subStat",
+        "uncovered"
       ],
       "importTargets": [
         "./search.js",
         "./service.js",
         "./store.js",
         "./types.js",
+        "./workspace-root-cache.js",
         "node:fs",
         "node:fs/promises",
         "node:path",
@@ -6249,8 +6478,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8656,
-      "contentHash": "8c6c037d442d17746d3f7008052db5ad409594ebcf8dc2b9a99608069d901e43",
+      "byteLength": 8960,
+      "contentHash": "282a30dfa815b4e04df67e2dc94ee721321b646d16933366e361a75c379793e4",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -6262,6 +6491,7 @@
         "PackageManifest",
         "ProjectDetection",
         "absolute",
+        "byPath",
         "collectDependencies",
         "collectFiles",
         "content",
@@ -6274,21 +6504,39 @@
         "entry",
         "facts",
         "fallbackPackage",
+        "file",
         "files",
         "ignoredDirectoryNames",
         "isRecord",
         "languages",
         "manifest",
+        "manifestFile",
         "matches",
         "maxDepth",
         "maxFiles",
         "maxReadableBytes",
-        "packageFiles",
         "packageManager",
-        "packageManifest"
+        "packageManifest",
+        "packages",
+        "parsed",
+        "path",
+        "prefix",
+        "readBoundedText",
+        "readJsonObject",
+        "results",
+        "root",
+        "rootFiles",
+        "roots",
+        "scoped",
+        "selectedTechnologies",
+        "sorted",
+        "verificationScriptNames"
       ],
       "importTargets": [
         "./detection-engine.js",
+        "./ignored-directories.js",
+        "./language-selection.js",
+        "./package-roots.js",
         "node:fs/promises",
         "node:path",
         "src/catalog/catalog.js",
@@ -6298,6 +6546,107 @@
       "kind": "source",
       "packagePath": "",
       "path": "src/core/stack/detection.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 3390,
+      "contentHash": "68953e76564ebdbb10d8f066e315f82f88f113885f8f9c585afda5a4f18eaeb0",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "DotnetDirectory",
+        "MAX_FILE_BYTES",
+        "MAX_PROJECTS",
+        "PROJECT_FILE",
+        "SOLUTION_FILE",
+        "SOLUTION_PROJECT",
+        "TEST_PROJECT",
+        "file",
+        "hasTests",
+        "inspectDotnetDirectory",
+        "isDotnetProjectFile",
+        "isDotnetTestProject",
+        "isSolutionFile",
+        "leavesTheRepository",
+        "projectFiles",
+        "readBoundedText",
+        "solution",
+        "solutionProjectPaths",
+        "solutions",
+        "target"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/utils/order.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/stack/dotnet-projects.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 796,
+      "contentHash": "271fa2bac488429b40da524fa1a410b3fac4e1154f4a565bd1cabc3574fe4cd5",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "IGNORED_DIRECTORY_NAMES"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/stack/ignored-directories.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1232,
+      "contentHash": "fbf6f2f68d48afbc7a0835e515a094f89a1aa4a1b6e6d8bb3b680d71f0dccf80",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "languages",
+        "projectLanguages",
+        "selectedLanguages",
+        "sortedUnique",
+        "strong"
+      ],
+      "importTargets": [
+        "src/catalog/catalog.js",
+        "src/utils/order.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/stack/language-selection.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1954,
+      "contentHash": "49c8e7a79ed6c8c4d3f051fdf1a82bd3a22d575ed62e7afab82ef34628e37c02",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "MANIFESTS",
+        "covered",
+        "dir",
+        "escapes",
+        "findPackageRoots",
+        "name",
+        "project",
+        "projectDir",
+        "projectDirs",
+        "roots",
+        "solutionDirs"
+      ],
+      "importTargets": [
+        "./dotnet-projects.js",
+        "node:path",
+        "src/utils/order.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/stack/package-roots.ts",
       "language": "typescript"
     },
     {
@@ -6324,8 +6673,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7638,
-      "contentHash": "1ea1c683b88a1f10416ba54b8a96f1b867dbf46b8bb86c0f820b21c73445e230",
+      "byteLength": 8119,
+      "contentHash": "990d36c6a661d9f51014f23dddf508e0090e2be1076badcb3ba7f543749df83a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -6363,6 +6712,7 @@
         "scripts"
       ],
       "importTargets": [
+        "./dotnet-projects.js",
         "node:fs/promises",
         "node:path",
         "src/core/config/config-schema.js",
@@ -6395,8 +6745,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8219,
-      "contentHash": "44981e0b45e6b14b0301c7421ee89606c9a65dfc6bf78c808cff3006ed394af8",
+      "byteLength": 11037,
+      "contentHash": "6ab488a2cf4fc9e60d9cd1d017835950e4ef0c9d15d8c7e1c49d3ddd4755776c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -6410,11 +6760,14 @@
         "affectedTests",
         "affectedTestsSet",
         "buildVerifyPlan",
+        "changedFiles",
         "command",
         "commands",
         "computeImpactVerification",
         "config",
         "detectChangedFiles",
+        "entries",
+        "entry",
         "execFileAsync",
         "existing",
         "file",
@@ -6424,30 +6777,27 @@
         "hasAnyTests",
         "hasTests",
         "impact",
+        "index",
         "map",
         "mergePackages",
         "mergedCommands",
         "normalized",
+        "options",
         "packages",
         "packagesMap",
-        "part",
+        "path",
         "pkgConfig",
         "pkgHasTests",
         "pm",
-        "raw",
+        "prefix",
         "refreshed",
+        "reported",
         "result",
         "root",
         "rootDetected",
-        "target",
-        "targetFiles",
-        "test",
-        "testList",
-        "trimmed",
-        "validFiles",
-        "warnings",
-        "workspacePackages",
-        "wsp"
+        "scope",
+        "scopePackages",
+        "scopePath"
       ],
       "importTargets": [
         "./verify-detection.js",
@@ -6471,8 +6821,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8974,
-      "contentHash": "847cb95c6908f5f575f5e708f8019de7079f1f93759ac8e910105a6f7686bc23",
+      "byteLength": 9731,
+      "contentHash": "58f8aff5324a6355a4574d71e61ea63658242d3f89507e815dd334245729c286",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -6486,6 +6836,7 @@
         "collectMavenWorkspaces",
         "collectNpmWorkspaces",
         "collectPnpmWorkspaces",
+        "covered",
         "detectWorkspaces",
         "detected",
         "dir",
@@ -6496,22 +6847,21 @@
         "fileNames",
         "findSolutionFiles",
         "full",
-        "fullProjDir",
-        "hasProjectFile",
+        "hasDotnetProject",
+        "hasManifest",
         "ignoredDirs",
+        "isInsideRoot",
         "line",
         "lines",
         "match",
         "mod",
         "moduleRegex",
-        "normalizedProjPath",
         "packagePaths",
         "parsed",
         "pattern",
         "patterns",
-        "projectRegex",
+        "projectPath",
         "rawMembers",
-        "rawRelPath",
         "readSafeText",
         "rel",
         "relPath",
@@ -6521,10 +6871,12 @@
         "s",
         "slnDir",
         "slnPath",
-        "slnPaths",
-        "text"
+        "slnRel",
+        "solutionDirs",
+        "solutionProjectDirs"
       ],
       "importTargets": [
+        "./dotnet-projects.js",
         "./verify-detection.js",
         "node:fs/promises",
         "node:path",
@@ -6539,8 +6891,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7589,
-      "contentHash": "8446c43a78a06704b535e4b3e9a187c7718864db1d42db1c45f1ba35a0438398",
+      "byteLength": 7663,
+      "contentHash": "843009af872f753f9078b62466cee784c2e01fb56ec6779123fabfbe62dd69d6",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -6582,6 +6934,7 @@
         "./context/context.js",
         "./tasks/task.js",
         "./verification/check-report.js",
+        "src/utils/git.js",
         "type"
       ],
       "kind": "source",
@@ -6603,6 +6956,48 @@
       "kind": "source",
       "packagePath": "",
       "path": "src/core/tasks/check-cwd.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 5417,
+      "contentHash": "9eaebb03ee24dd2e0eae61be831fb37762914bb5605ff2a4705beaa681ba042f",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "CODE_IMPACT_LIMIT",
+        "CodeImpact",
+        "CodeImpactGitRunner",
+        "DIFF_ARGS",
+        "GIT_TIMEOUT_MS",
+        "PREFIX_ARGS",
+        "READ_ONLY_SUBCOMMANDS",
+        "STATUS_ARGS",
+        "args",
+        "assertReadOnlyCodeImpactGit",
+        "changes",
+        "defaultRunner",
+        "index",
+        "items",
+        "match",
+        "parseNumstat",
+        "parsePorcelainV2",
+        "path",
+        "readCodeImpact",
+        "stats",
+        "statusOf",
+        "subcommand",
+        "token",
+        "tokens"
+      ],
+      "importTargets": [
+        "./task-review.js",
+        "src/utils/git.js",
+        "src/utils/order.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/tasks/code-impact.ts",
       "language": "typescript"
     },
     {
@@ -6807,8 +7202,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 9429,
-      "contentHash": "3b4804c44bc35d8fc4a61588dc9a8a82f237bd133728bde9031c3927526faf99",
+      "byteLength": 10903,
+      "contentHash": "9ce70c7c8952e57b82697ae075d11641e766d215ad1e9be9b155d23824d519a2",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -6824,11 +7219,16 @@
         "decisions",
         "details",
         "displayTime",
+        "extractCodeImpactSection",
+        "fence",
         "impact",
         "isPassed",
         "item",
         "latest",
+        "length",
         "lines",
+        "longestRun",
+        "markdownCode",
         "met",
         "passedChecks",
         "path",
@@ -6848,11 +7248,13 @@
         "rerunNote",
         "residualRisks",
         "risk",
+        "safe",
+        "section",
         "spec",
+        "start",
         "state",
         "totalChecks",
-        "totalCrit",
-        "waiver"
+        "totalCrit"
       ],
       "importTargets": [
         "./task-schema.js",
@@ -6946,27 +7348,35 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6815,
-      "contentHash": "a4c21ce44f67434eeec0059b53f1ca68d1ba04a4464096d11f9c1caedb033709",
+      "byteLength": 8573,
+      "contentHash": "f01506e1e518b2763d66020607b4eff57381de07d3ced1a824b23c9d82a1f6ea",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "CodeImpactGitRunner",
         "ContextManifest",
         "ContextSelectionSnapshotV1",
+        "ReviewArtifacts",
+        "SaveTaskOptions",
         "TaskArtifacts",
         "activePath",
         "archiveTask",
         "artifacts",
         "clearActiveTask",
+        "codeImpactFor",
         "directory",
         "exists",
+        "impact",
         "is",
         "loadTask",
         "manifest",
         "parsed",
         "path",
+        "preserved",
+        "previousSection",
         "raw",
         "resolveActiveTask",
+        "reviewPath",
         "saveTask",
         "saveTaskArtifacts",
         "saveTaskWithArtifacts",
@@ -6977,6 +7387,7 @@
         "validateTaskArtifacts"
       ],
       "importTargets": [
+        "./code-impact.js",
         "./task-review.js",
         "./task-schema.js",
         "./task-validate-common.js",
@@ -7121,8 +7532,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 11249,
-      "contentHash": "3a1cb2671e9c30713c1fa76e9df7fcf4727c4688fee122a44fa1840996e4e896",
+      "byteLength": 11685,
+      "contentHash": "d9efa3524176559b49bf2399c6c43fe6365d65323decd8a8bf17b86dd706099b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7190,8 +7601,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5136,
-      "contentHash": "b9b89d0cec36b6f4bcd922de521dd51cc52c056fee8d7b8d694b46d77f2db23a",
+      "byteLength": 5201,
+      "contentHash": "e61e40f98e3c1ac1124096f7eef98ad011c8bb2c49f6e4a76a8d0a0fd4638f10",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7261,8 +7672,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8901,
-      "contentHash": "8e9d346b9e54edc3577c0a65cd1da3a9dd0520868752bb064fd100c6a882f993",
+      "byteLength": 10120,
+      "contentHash": "64099d5840b6bed31933fc3aa3c2e199e9ad19a9cf04c1f5c1ec55451ba4b75e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7278,6 +7689,7 @@
         "check",
         "compareText",
         "computeInputDigest",
+        "content",
         "covered",
         "current",
         "digestMatches",
@@ -7297,13 +7709,23 @@
         "missing",
         "next",
         "normalized",
-        "path"
+        "path",
+        "paths",
+        "previousIds",
+        "rawEntries",
+        "requiredChecks",
+        "snapshot",
+        "targeted",
+        "taskContractHash",
+        "worker",
+        "workflowOwned"
       ],
       "importTargets": [
         "globby",
         "node:crypto",
         "node:fs/promises",
         "src/core/tasks/task.js",
+        "src/core/verification/line-endings.js",
         "src/core/verification/transient-directories.js",
         "src/utils/paths.js"
       ],
@@ -7313,8 +7735,32 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3252,
-      "contentHash": "abcf20571cfd790f5da269891bcc248bc50dda53e3bc5923d6811ce41b41f537",
+      "byteLength": 1602,
+      "contentHash": "54fb3b06694e03c33797afa56a1f77abae40e2d8ef76b5768eebc4beb790d89f",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "SENSITIVE_EXTENSIONS",
+        "SENSITIVE_NAMES",
+        "byte",
+        "dot",
+        "index",
+        "isLineEndingSensitive",
+        "isTextContent",
+        "length",
+        "name",
+        "normalizeLineEndings",
+        "output"
+      ],
+      "importTargets": [],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/verification/line-endings.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 4079,
+      "contentHash": "94edc4137ba0eadcced4d9f574d3226a77b6bea1e52a33617539f6c983baa5a1",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7325,7 +7771,10 @@
         "buildGlobIgnores",
         "caseInsensitiveSegment",
         "createGuardedDirectoryFilter",
+        "directParent",
         "entries",
+        "grandEntries",
+        "grandParent",
         "ignores",
         "index",
         "isKept",
@@ -7334,6 +7783,7 @@
         "listings",
         "name",
         "normalized",
+        "parentName",
         "rule",
         "segments",
         "targetedSegments"
@@ -7378,15 +7828,16 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2439,
-      "contentHash": "925e2d1136d5d863350a88b0e10a7a126d495b79c7a6e3f03efc23bcf5420ef7",
+      "byteLength": 2885,
+      "contentHash": "79a2453c7bf2b4efa9dc1cc5cf2e740a58857e237b7b5d8b4c679da53d34d223",
       "extension": "ts",
       "headings": [
-        "1. Context & Problem Statement",
-        "2. Scope & Boundaries",
-        "3. Anchored Acceptance Criteria",
-        "4. Architectural & Safety Constraints",
+        "1. Context & Problem Statement (Bối cảnh & Vấn đề)",
+        "2. Scope & Boundaries (Phạm vi & Ranh giới)",
+        "3. Anchored Acceptance Criteria (Tiêu chí Nghiệm thu Cốt lõi)",
+        "4. Architectural & Safety Constraints (Ràng buộc Kiến trúc & An toàn)",
         "Execution Slices",
+        "Guardrails & Invariants",
         "Slice 1: Implementation & Verification",
         "Verification Matrix"
       ],
@@ -7590,8 +8041,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1849,
-      "contentHash": "d9b20fe2c69c4f82fecd477f9efeba3a5db59549e8ce262790cdf3f76de47fab",
+      "byteLength": 1892,
+      "contentHash": "69b229a7507a63a51404cb05fbfe2bc64299e7c4565309da27992a2509586195",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -7818,20 +8269,23 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4082,
-      "contentHash": "d46d1c2f2842416b78922ab97d626e4009552bd2016f46600fac5989e20936ae",
+      "byteLength": 4935,
+      "contentHash": "42a06bcdb843ced9e427e8320c81d3f40cf7a243f14f554382398a0985e52db9",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "AcceptanceCriterion",
+        "Evidence",
         "MarkCriteriaInput",
         "TaskRecord",
         "TaskRecordV3",
+        "ValidationCheckV3",
         "acceptanceCriteria",
         "check",
         "covering",
         "criterion",
         "current",
+        "digestIsCurrent",
         "evidence",
         "explicitEvidence",
         "freshEvidence",
@@ -7843,6 +8297,8 @@
         "named",
         "notFresh",
         "now",
+        "reasons",
+        "refusalReason",
         "task"
       ],
       "importTargets": [
@@ -8024,8 +8480,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1327,
-      "contentHash": "b8dcef050494cc2953db5811e009f70a1afa344f151820a25c7044066cc98c8c",
+      "byteLength": 1361,
+      "contentHash": "5712fcd8a87c87c8dbd1dd27ce334e4cb254acb14f8dedbe109ab34717f5479a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8103,8 +8559,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3290,
-      "contentHash": "3032045222d3dfa3d75d8edbdf6f0f550c5c8b02ed868fb4b0a0c9fff3ee9589",
+      "byteLength": 3375,
+      "contentHash": "b66702e1bb1d5703b347bf09fa0adb51f81298dcfcea0c1fa375ccf4a0683b66",
       "extension": "ts",
       "headings": [],
       "identifiers": [],
@@ -8126,6 +8582,7 @@
         "./learn.js",
         "./migrate-v3.js",
         "./plan-edit.js",
+        "./plan-remove.js",
         "./preflight.js",
         "./replace-check.js",
         "./routing.js",
@@ -8173,8 +8630,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2213,
-      "contentHash": "46bfe6ee8a74b646bda5a80460030ffda361c9e71ecd6479412f8d5c55dafa82",
+      "byteLength": 2334,
+      "contentHash": "e5f78e29fc521308dd686e9e25848a40efcf0cbb2b57fbb63d3568e16ec38957",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8182,6 +8639,7 @@
         "KEYS",
         "REQUIRED",
         "at",
+        "cwd",
         "description",
         "key",
         "list",
@@ -8195,6 +8653,64 @@
       "kind": "source",
       "packagePath": "",
       "path": "src/core/workflow/init-spec.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 7773,
+      "contentHash": "20257769172f47ff436b49dd8ce8a1e6c1d832f76d0b7036dfa251cd688a92e5",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "InitTaskOptions",
+        "SLUG_MAX",
+        "SLUG_PATTERN",
+        "SUITE_DESCRIPTION",
+        "artifacts",
+        "buildCriteria",
+        "candidate",
+        "command",
+        "criteria",
+        "cwd",
+        "declaredCheck",
+        "defaultCheck",
+        "given",
+        "goal",
+        "id",
+        "initTaskWorkflow",
+        "inputs",
+        "isSuite",
+        "mode",
+        "normalized",
+        "now",
+        "packageDirectory",
+        "plan",
+        "prefix",
+        "projectTest",
+        "projectTestCommand",
+        "resolveCheckTarget",
+        "resolveSlug",
+        "slug",
+        "title",
+        "toSlug",
+        "trimmed"
+      ],
+      "importTargets": [
+        "./artifact-templates.js",
+        "./command-match.js",
+        "./init-lineage.js",
+        "./init-spec.js",
+        "./save.js",
+        "./support.js",
+        "src/core/config/config.js",
+        "src/core/stack/verify-plan.js",
+        "src/core/tasks/task.js",
+        "src/utils/clock.js",
+        "src/utils/paths.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workflow/init-task.ts",
       "language": "typescript"
     },
     {
@@ -8345,8 +8861,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 11696,
-      "contentHash": "f681ea3436671f2840a44418f27879f7811e3666959463bdfcd81a3caea8ad99",
+      "byteLength": 11959,
+      "contentHash": "a5657dad26940ea7aa4c8ec4a64a83cedfc559aa8ec0c9d5862b9fc067aa831c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8381,7 +8897,15 @@
         "nextCriteria",
         "obligationsChanged",
         "preserveObligations",
-        "preserveProvenObligations"
+        "preserveProvenObligations",
+        "priorCheckIds",
+        "reason",
+        "retiredWithoutDefinitionChange",
+        "sequence",
+        "validateContractRevision",
+        "waivers",
+        "waiversChanged",
+        "withoutBaseline"
       ],
       "importTargets": [
         "./envelope.js",
@@ -8396,8 +8920,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 11028,
-      "contentHash": "2e20ca29a4b210dd03203a3a0c9c3ed5218def06a13ad4a17b102c4faa73b8f4",
+      "byteLength": 11334,
+      "contentHash": "21f4ba732b359a0c6094e96ae1024e80b396c6294b75df784f6741f9f472a3c0",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8419,12 +8943,14 @@
         "criterionIds",
         "cwd",
         "decisions",
+        "described",
         "description",
         "edited",
         "existing",
         "inputs",
         "mergeCheck",
         "merged",
+        "mitigation",
         "now",
         "rationale",
         "reason",
@@ -8432,7 +8958,21 @@
         "required",
         "resolveDescription",
         "resolveScope",
-        "resumed"
+        "resumed",
+        "revise",
+        "revised",
+        "revisionReason",
+        "risks",
+        "saveObligationEdit",
+        "scope",
+        "setCheckWorkflow",
+        "setGoalWorkflow",
+        "setPathsWorkflow",
+        "setTitleWorkflow",
+        "severity",
+        "sortedUnique",
+        "task",
+        "text"
       ],
       "importTargets": [
         "./save.js",
@@ -8449,8 +8989,37 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1724,
-      "contentHash": "b5543b573c67edff1cfad84c26e1b05211d677e8362807367dc7961254740331",
+      "byteLength": 3227,
+      "contentHash": "38eb69bea9849765aa3f7fd840b814ca6dcae466ac6f68675cead2ba6bd841ba",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "covering",
+        "decisions",
+        "emptied",
+        "now",
+        "recorded",
+        "removeCriterionWorkflow",
+        "removeDecisionWorkflow",
+        "requirePlanning",
+        "task"
+      ],
+      "importTargets": [
+        "./plan-edit.js",
+        "./save.js",
+        "./support.js",
+        "src/core/tasks/task.js",
+        "src/core/tasks/workflow-helpers.js",
+        "type"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workflow/plan-remove.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1786,
+      "contentHash": "57bf955005b6f49be1fd6ee26763209ef8404312f0b211b0a948724c8f945d46",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8479,12 +9048,13 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8983,
-      "contentHash": "be0f95a569155e76766acfb4efa6add06007ca2284951891e5dde90b44151641",
+      "byteLength": 9260,
+      "contentHash": "770cd75f32a30aae5c761cffae613121e2a3eabe84701410b2b2dc7bddec3557",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "Evidence",
+        "GitContext",
         "RequiredCheckState",
         "RequiredChecks",
         "TaskRecord",
@@ -8500,6 +9070,7 @@
         "epicId",
         "epics",
         "evidence",
+        "git",
         "harnixRoot",
         "hint",
         "inspection",
@@ -8515,7 +9086,16 @@
         "requiredChecks",
         "requiredChecksFromEvidence",
         "result",
-        "retryLimitReached"
+        "retryLimitReached",
+        "routePreflight",
+        "routed",
+        "skew",
+        "sortRequiredChecks",
+        "stageOf",
+        "task",
+        "timestamp",
+        "timezone",
+        "values"
       ],
       "importTargets": [
         "./baseline-hint.js",
@@ -8533,6 +9113,7 @@
         "src/core/verification/check-report.js",
         "src/core/versions/skew.js",
         "src/utils/clock.js",
+        "src/utils/git.js",
         "src/utils/order.js",
         "src/utils/paths.js",
         "type"
@@ -8580,8 +9161,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6070,
-      "contentHash": "6220d5865d935dac491119c016f77cfcedadde28d116486b11a95bd6ba01c2ab",
+      "byteLength": 6277,
+      "contentHash": "f0d1595ba8edb617f810ac04d6f4a10c320f3479f0a52fb0d1aecf07ba2eaa02",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8593,6 +9174,7 @@
         "FENCE",
         "HARD_TOKEN",
         "INLINE_CODE",
+        "PRD_SECTIONS",
         "SOFT_PHRASES",
         "advisories",
         "check",
@@ -8922,8 +9504,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 10017,
-      "contentHash": "95b25f09d75b58b4e44715281bed453183eb4970c0cbd73a0486d9505f50ea4c",
+      "byteLength": 10040,
+      "contentHash": "4b3b6e135134142639bb6e714cbc054680f551b59bda5bac0d6ec905685cf542",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -8958,7 +9540,10 @@
         "rollbackSnapshot",
         "saveWorkflow",
         "saveWorkflowLocked",
-        "taskCommitted"
+        "taskCommitted",
+        "validateAgainstExisting",
+        "validateNewTask",
+        "validatedEpic"
       ],
       "importTargets": [
         "./context.js",
@@ -8986,8 +9571,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 9474,
-      "contentHash": "3bc718fe3943c1b7eb3b9ce7770d8054c8d9dfb390591cee8876df04a426e75e",
+      "byteLength": 10135,
+      "contentHash": "50ace7ccf7d9d49b5aa3da13c70d1012f610b748fba086b896ce0d321094bd9a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -9197,8 +9782,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4649,
-      "contentHash": "ee9145aff976d90350e78b60a89191779050b203985579633990fed61b374492",
+      "byteLength": 4764,
+      "contentHash": "5191584421f890f9888d8335c304f36bc0afd71bc3c4650769a3bdd3dc358fac",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -9223,6 +9808,7 @@
         "./ready.js",
         "./save.js",
         "./support.js",
+        "./target-task.js",
         "src/core/tasks/task.js",
         "src/core/tasks/workflow-helpers.js",
         "src/utils/paths.js"
@@ -9250,6 +9836,68 @@
       "kind": "source",
       "packagePath": "",
       "path": "src/core/workflow/workflow-lock.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 4246,
+      "contentHash": "304804c3a56c4cfa22906135aad8a972f2c96f574027ead54a18c216bc9380c2",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "CONCURRENCY",
+        "GitRunner",
+        "READ_ONLY_SUBCOMMANDS",
+        "STATUS_ARGS",
+        "WorkspaceGitMember",
+        "WorkspaceGitStatusResult",
+        "ahead",
+        "assertReadOnlyGit",
+        "behind",
+        "detached",
+        "dirty",
+        "head",
+        "index",
+        "match",
+        "member",
+        "members",
+        "next",
+        "parseGitStatusV2",
+        "readMember",
+        "readWorkspaceGitStatus",
+        "results",
+        "subcommand",
+        "token",
+        "tokens",
+        "upstream",
+        "worker"
+      ],
+      "importTargets": [
+        "node:fs",
+        "node:path",
+        "src/core/repo-map/workspace.js",
+        "src/utils/order.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workspace/git-status.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 627,
+      "contentHash": "a933bd26da58f52aa9dfc674357ae4e153d5ec0590aa640a58732e3f5db26d0a",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "project",
+        "resolveWorkspaceRoot"
+      ],
+      "importTargets": [
+        "node:path",
+        "src/utils/project-discovery.js"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/core/workspace/resolve-root.ts",
       "language": "typescript"
     },
     {
@@ -9428,8 +10076,8 @@
       "path": "src/guides/languages/kotlin.md"
     },
     {
-      "byteLength": 1425,
-      "contentHash": "99ae971c63a7f841b6c07738ca03beee8eec8f2d21011131b466d595b5acbf15",
+      "byteLength": 1772,
+      "contentHash": "82dd91d44dd7a58f4571810c1642480d853cc73e66d02651dfc8da9ad27d11ab",
       "extension": "md",
       "headings": [
         "Common mistakes",
@@ -9962,8 +10610,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4279,
-      "contentHash": "9071c1a5e085fb4b4b7194f1f290ed2f18f696acbde32e88b2ec7fd345e3f6e7",
+      "byteLength": 4389,
+      "contentHash": "bce48f24a7321105cfeeb886c50857bbbc2ce304f68777950f0031657e34f102",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -9994,6 +10642,7 @@
         "./harnix-research/SKILL.md",
         "./harnix-research/references/scouting-isolation.md",
         "./harnix-review/SKILL.md",
+        "./harnix-review/references/multi-lens.md",
         "./harnix-verify/SKILL.md",
         "./harnix-verify/references/evidence.md",
         "./harnix-verify/references/finish-cancel.md",
@@ -10007,8 +10656,7 @@
         "decisionDisciplineReference",
         "epicReference",
         "evidenceReference",
-        "feedbackLoopReference",
-        "feedbackReference"
+        "feedbackLoopReference"
       ],
       "kind": "source",
       "packagePath": "",
@@ -10017,7 +10665,7 @@
     },
     {
       "byteLength": 2211,
-      "contentHash": "b3ac738b9938cd07b3d120fc0304627083c5ae4d38a7665dafb24cc9e6c347da",
+      "contentHash": "ded58c09db287da44737c70a24b336bb7c75623cb0ba7f4bbb58e2a3c2f6f064",
       "extension": "md",
       "headings": [
         "Bugfix preservation",
@@ -10034,7 +10682,7 @@
     },
     {
       "byteLength": 4513,
-      "contentHash": "1a7b1b2ed3f4f478566f674fab866bb3576a28e9493b9aa1fdea9a99f1388e24",
+      "contentHash": "35b3504beac780a3a612f6391afd5b8c52f6d608d4a4b4a751eafb257283f4e6",
       "extension": "md",
       "headings": [
         "Capture",
@@ -10072,7 +10720,7 @@
     },
     {
       "byteLength": 2765,
-      "contentHash": "7a667441b3b90cbdbfdfdccd8c6e1e61a800a30d77cbcf97b09bf6a04cceaf8b",
+      "contentHash": "7a9246e22d59511cd517e800ecf981a9ef929dc33aad197da342cfd753710604",
       "extension": "md",
       "headings": [
         "Common flakiness root causes",
@@ -10091,7 +10739,7 @@
     },
     {
       "byteLength": 5809,
-      "contentHash": "b704495a9998a503c6f9c2ee837af807ed9b15f055c90d25bc17ae58cc3d2ab8",
+      "contentHash": "97cf479986def4130e4d1fed51872701646930042515355e484cf60c373db0e1",
       "extension": "md",
       "headings": [
         "Exit",
@@ -10161,7 +10809,7 @@
     },
     {
       "byteLength": 2679,
-      "contentHash": "f05d49afe4bfd73d7e8df8fbe5ad98ce467c7f7afa33ec6d7d177d030c9569ec",
+      "contentHash": "5e13ede91d5f2401ab7c15922d782c04d62a10a27d3c0c43e561e7fa6f98926b",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -10177,8 +10825,8 @@
       "path": "src/skills/harnix-migration-safety/SKILL.md"
     },
     {
-      "byteLength": 7888,
-      "contentHash": "5767fd8571ec99076300e7e761437f2f793f42fe8e2c31efccc6bbb508f24faa",
+      "byteLength": 8033,
+      "contentHash": "81d8175f48fc999cff9dd51ff198de0b1ab04463abb4954753de005e5e5c6eb2",
       "extension": "md",
       "headings": [
         "Build the task",
@@ -10217,15 +10865,18 @@
       "path": "src/skills/harnix-plan/references/decision-discipline.md"
     },
     {
-      "byteLength": 3690,
-      "contentHash": "b406b63613bfdf674147c49959351db93c4a9fff59bae8738718518f8536033d",
+      "byteLength": 7334,
+      "contentHash": "509b7afdbeaeb3ef9b6624579f24548b9abdbb5b66eba383bf93da4293415216",
       "extension": "md",
       "headings": [
+        "Branching and task switching flow",
         "Epics",
+        "Multi-Agent Worktree Orchestration and State Reconciliation",
         "Run order"
       ],
       "identifiers": [
-        "and"
+        "and",
+        "evidence"
       ],
       "importTargets": [],
       "kind": "documentation",
@@ -10262,13 +10913,15 @@
       "path": "src/skills/harnix-plan/references/migration.md"
     },
     {
-      "byteLength": 2177,
-      "contentHash": "dcfc911ba2aa0f5f37c24e6f4e78a33d327d6252a762fde5b98dc40d8c85ada5",
+      "byteLength": 2545,
+      "contentHash": "30bd954c5e927bb0aef66d4edaf741061e8df4738444b0b1dce5c128992c60cc",
       "extension": "md",
       "headings": [
         "Multi-repository tasks"
       ],
-      "identifiers": [],
+      "identifiers": [
+        "library"
+      ],
       "importTargets": [],
       "kind": "documentation",
       "packagePath": "",
@@ -10306,7 +10959,7 @@
     },
     {
       "byteLength": 3683,
-      "contentHash": "c9d9d733e6f4253dfa5ecf9fa85680b05680c870da55524bddac229e3b86f8e5",
+      "contentHash": "4a465e30a7735fe5b4d429b0b32f8a21ac7671c1eda1fab9fda1ce946880ce58",
       "extension": "md",
       "headings": [
         "Decide",
@@ -10324,12 +10977,13 @@
       "path": "src/skills/harnix-research/SKILL.md"
     },
     {
-      "byteLength": 1617,
-      "contentHash": "b9565cf207f17b4bcdb8b758d556c7b2d755b3716636878310ec545bd241842d",
+      "byteLength": 2170,
+      "contentHash": "21e849fae5e48c0be01ce24b6d03a0e3376c85b2aca9fc9eee9904973f89d8a6",
       "extension": "md",
       "headings": [
         "1. Context isolation",
         "2. Standardized status protocol",
+        "3. Multi-Agent Epic task handoff protocol",
         "Handling status outcomes:",
         "Scouting isolation and subagent protocol"
       ],
@@ -10340,8 +10994,8 @@
       "path": "src/skills/harnix-research/references/scouting-isolation.md"
     },
     {
-      "byteLength": 3766,
-      "contentHash": "72826b19540f53242462383d43eccf417951c0f0bb22ae337bb71c7c7cee51b8",
+      "byteLength": 3952,
+      "contentHash": "e46c2f1a9e5b5dc3dfa937fef55ceb0736e46facaf851a0c9a200d5053e4a656",
       "extension": "md",
       "headings": [
         "1. Spec axis (Requirements and behavior)",
@@ -10361,8 +11015,24 @@
       "path": "src/skills/harnix-review/SKILL.md"
     },
     {
+      "byteLength": 2983,
+      "contentHash": "3c3fe953c7796fa133db320b57665fa68775b25602d74c4e5efc56673a926ff4",
+      "extension": "md",
+      "headings": [
+        "After the reports",
+        "Brief template",
+        "Lens blocks",
+        "Multi-lens review"
+      ],
+      "identifiers": [],
+      "importTargets": [],
+      "kind": "documentation",
+      "packagePath": "",
+      "path": "src/skills/harnix-review/references/multi-lens.md"
+    },
+    {
       "byteLength": 2808,
-      "contentHash": "696d51cc5a9407a2e9641e4e823e7ebd43746cea788385c3640fafed3d1bd058",
+      "contentHash": "37b338881d16e77b1ef8ab61829519b2a8bdef0cdb1475f87fd59e612479cf2d",
       "extension": "md",
       "headings": [
         "Critical vulnerability checks",
@@ -10379,7 +11049,7 @@
     },
     {
       "byteLength": 2771,
-      "contentHash": "f686f06c03fefb777e4990645419b105a31752997562e0ce14a1277420775b34",
+      "contentHash": "ae7dae45c2ace5ea89d7539a073d073974cdc89c21e86d1c07a72f2491f8d861",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -10396,7 +11066,7 @@
     },
     {
       "byteLength": 3546,
-      "contentHash": "556a1d8dbe64c4f3af17ed7f746a07ec1761c71f7d4c18d1e63764031f71bba9",
+      "contentHash": "1b5bc4ba150cc169999dcb30477fe789d8dfae1084d02cebbee6818bfecc1627",
       "extension": "md",
       "headings": [
         "Analysis steps",
@@ -10413,7 +11083,7 @@
     },
     {
       "byteLength": 5962,
-      "contentHash": "4abcf85cfb01de575cd4276171f7da920fd4326265878aa38064937938b97487",
+      "contentHash": "277bb97c009def9060ac0120355bfb97ac632a9de6a5b9a6b11f2cb6f4c8488e",
       "extension": "md",
       "headings": [
         "Finish",
@@ -10433,8 +11103,8 @@
       "path": "src/skills/harnix-verify/SKILL.md"
     },
     {
-      "byteLength": 3606,
-      "contentHash": "2f4d4db719cfaa3d3c43934f9c7422466691d0750bb80fb3b9807f72cdc102da",
+      "byteLength": 3972,
+      "contentHash": "d0102fc5b3c2f25cf9d983537cada0658906b4741a4b507e0501a393f7ff79c1",
       "extension": "md",
       "headings": [
         "Evidence and freshness"
@@ -10449,8 +11119,8 @@
       "path": "src/skills/harnix-verify/references/evidence.md"
     },
     {
-      "byteLength": 2080,
-      "contentHash": "c6876a649ba4a4b0d1bab2a6cc7c80ef858211c9527891f3743ee9b825821da0",
+      "byteLength": 2127,
+      "contentHash": "a79df2e992968c3a1c53d96337c7866b1a3a3a4845ec020a716197d48d4d873b",
       "extension": "md",
       "headings": [
         "Finish, recovery and cancellation"
@@ -10556,8 +11226,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5701,
-      "contentHash": "ac691fd83292cf9dd6bf97fdaa973f81bbb4d8c1ae84c6c016f3ec408333195d",
+      "byteLength": 5805,
+      "contentHash": "c05ea292eb303495c6170ec7e76ae4b4fefcf6de21801ad98ed13d46182e4d06",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -10623,8 +11293,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 23063,
-      "contentHash": "ec43e5c3332af60458c214d1fb858cf07e260f98745842dd7b14d06515dceb44",
+      "byteLength": 24356,
+      "contentHash": "d5cc301fdbad2aadeee718f9319c972f8d76b898e878a2301236afc084654581",
       "extension": "md",
       "headings": [
         "Agent transport",
@@ -10740,16 +11410,20 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4796,
-      "contentHash": "a7d46c8940e989adf9cee0343f216d655833721a5e1f22053a121d39e325de52",
+      "byteLength": 10924,
+      "contentHash": "84f8c34cd927360fffe2694cf6178b0c5e697e2b598067b50159ada8dd1653e2",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "CMD_BUILTINS",
         "CMD_METACHARACTERS",
         "CheckProcessDependencies",
         "CheckRunResult",
         "CheckRunner",
         "ChildProcess",
+        "CommandNotFoundError",
+        "DEFAULT_PATHEXT",
+        "ExecutableLookup",
         "Invocation",
         "OUTPUT_LIMIT",
         "ProcessSpawner",
@@ -10757,24 +11431,43 @@
         "TIMEOUT_EXIT_CODE",
         "TIMEOUT_MS",
         "UNSAFE_MESSAGE",
+        "WRAPPER_EXTENSIONS",
+        "assertResolvable",
         "bareName",
+        "candidate",
         "child",
         "collect",
+        "command",
         "commandLine",
+        "defaultSystemRoot",
+        "directories",
+        "directory",
+        "exists",
+        "extension",
+        "extensions",
+        "file",
+        "findOnPath",
         "invocation",
         "isBatchShim",
         "killProcessTree",
+        "lookup",
         "needsCmd",
         "output",
         "platform",
         "quote",
+        "resolveForRun",
         "resolveInvocation",
+        "resolved",
         "runCheckProcess",
+        "shimPath",
         "spawner",
+        "systemExecutable",
         "timer"
       ],
       "importTargets": [
-        "node:child_process"
+        "node:child_process",
+        "node:fs",
+        "node:path"
       ],
       "kind": "source",
       "packagePath": "",
@@ -10950,6 +11643,36 @@
       "language": "typescript"
     },
     {
+      "byteLength": 2710,
+      "contentHash": "fb826be951fb44e41daff95b490107fa14e794460ae430c3a7881c2ab865dd1c",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "GitContext",
+        "INHERITED_GIT_VARIABLES",
+        "SAFE_CONFIG",
+        "branch",
+        "clean",
+        "commit",
+        "environment",
+        "execFileAsync",
+        "name",
+        "readGitContext",
+        "readOnly",
+        "runGit",
+        "safeGitArgs",
+        "safeGitEnvironment"
+      ],
+      "importTargets": [
+        "node:child_process",
+        "node:util"
+      ],
+      "kind": "source",
+      "packagePath": "",
+      "path": "src/utils/git.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 1372,
       "contentHash": "35207a2b75de0c1be0be9af5c6569eefea9058d0d62383cd217586bf57f3aa49",
       "extension": "ts",
@@ -11052,28 +11775,41 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3320,
-      "contentHash": "f3979298e5fc5e048671ba23e8ebf9cda033e1dd815c4b9ffc11197d43386259",
+      "byteLength": 5699,
+      "contentHash": "5c4537bdbab2579cc610b1187f19f5000e2160b606d172df7700c8f873e3d913",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "CHILD_LISTING_LIMIT",
         "FindInitializedProjectOptions",
         "InitializedProjectResolution",
+        "MISSING_PROJECT_MESSAGE",
+        "SAFE_CHILD_NAME",
+        "children",
         "config",
         "current",
         "discovered",
+        "entries",
         "findInitializedProject",
+        "found",
         "fromCwd",
+        "initializedChildrenHint",
         "invalid",
         "isInaccessible",
         "isMissing",
         "isUsableAbsoluteDirectory",
+        "listInitializedChildren",
+        "name",
+        "names",
         "nearestInitializedRoot",
         "parent",
+        "project",
+        "requireInitializedProject",
         "roots",
         "workspace"
       ],
       "importTargets": [
+        "./order.js",
         "./paths.js",
         "node:fs/promises",
         "node:path"
@@ -11720,8 +12456,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7054,
-      "contentHash": "fd5a4f2f1f68dec37c2ee01fb34f91ec77dca8be4b3f7846693171de938dff5b",
+      "byteLength": 7070,
+      "contentHash": "eedc6883570a85322fd497d1b2d9138e82b68e872a8bee320d9724919ee4b29c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -11758,8 +12494,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 13334,
-      "contentHash": "533bdf3cc06bf1ed17b119dd36b56ffc8e9ce20aca04850fd80c4a4dac6aabb2",
+      "byteLength": 14223,
+      "contentHash": "22abd10656d379826951d09446c3190302d3ca129b5bd1c0e65e5127a060e202",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -11769,6 +12505,7 @@
         "base",
         "before",
         "beforeStaleStatus",
+        "code",
         "current",
         "digestTask",
         "evidence",
@@ -11788,6 +12525,7 @@
         "stdout",
         "task",
         "temporaryRepository",
+        "text",
         "timestamp",
         "value",
         "verificationTask"
@@ -11943,21 +12681,27 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1545,
-      "contentHash": "0702ccff3d99f9080a3a34f35476cf828c9f2a108677535cb6810c9c044f07f3",
+      "byteLength": 3468,
+      "contentHash": "e96799cc67f90d09ca6d3a0c1e087cdef9076dfea9e8302f6fca78f6203093d8",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "execFileAsync",
+        "identity",
+        "name",
         "originalCwd",
         "originalExitCode",
         "output",
         "root",
         "stdout",
-        "temporaryRepository"
+        "temporaryRepository",
+        "value"
       ],
       "importTargets": [
+        "node:child_process",
         "node:fs/promises",
         "node:path",
+        "node:util",
         "src/cli-program.js",
         "src/commands/init.js",
         "test/support/temporary-repository.js",
@@ -11969,8 +12713,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 12868,
-      "contentHash": "2178f78de2f5b3c3ad9e61ed81ef18d33153bebadd9175d735bb34cef75a74a9",
+      "byteLength": 14736,
+      "contentHash": "a9594e8f5bdee57f82146e1375f700ef1a9d4a2cabf1600cba25b5007a521648",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -11981,7 +12725,9 @@
         "cases",
         "check",
         "checkRunner",
+        "child",
         "code",
+        "execFileAsync",
         "filePath",
         "fixture",
         "goalResult",
@@ -12008,6 +12754,7 @@
         "stdout",
         "task",
         "taskData",
+        "text",
         "titleResult",
         "updatedTask",
         "withGoal",
@@ -12015,9 +12762,11 @@
         "withoutSeparator"
       ],
       "importTargets": [
+        "node:child_process",
         "node:fs/promises",
         "node:path",
         "node:stream",
+        "node:util",
         "src/cli-program.js",
         "src/core/tasks/task.js",
         "src/core/workflow/run-check.js",
@@ -12033,8 +12782,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 15930,
-      "contentHash": "191b390337c9986c5fc1b6b68f0605b24d8843c139e4fde1f23ee1673be4ab43",
+      "byteLength": 16554,
+      "contentHash": "565a8ec1df3fd5f4a191d28038970209fbf92aa681d8abda04c52942b0d836a1",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -12042,6 +12791,7 @@
         "addCriterion",
         "base",
         "brief",
+        "cancelled",
         "child",
         "code",
         "decision",
@@ -12053,6 +12803,7 @@
         "garbled",
         "member",
         "memberId",
+        "note",
         "optional",
         "originalCwd",
         "originalExitCode",
@@ -12091,17 +12842,19 @@
       "language": "typescript"
     },
     {
-      "byteLength": 9741,
-      "contentHash": "c57a267aecaa9d77c0496665cf8e5202adac6f40b24df51e464189033b0c485b",
+      "byteLength": 12095,
+      "contentHash": "d4d8729c696f2d5a059881261fa539170d06bd52edff1823c163de57a4729372",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "active",
+        "before",
         "brief",
         "briefDefault",
         "briefExplicit",
         "checkRunner",
         "code",
+        "dry",
         "finishableWithSecret",
         "fixture",
         "full",
@@ -12111,14 +12864,18 @@
         "originalCwd",
         "originalExitCode",
         "other",
+        "otherFile",
         "parsedDefault",
         "parsedExplicit",
+        "prose",
+        "real",
         "repeated",
         "result",
         "root",
         "run",
         "stderr",
         "stdout",
+        "swallowed",
         "task",
         "unchanged",
         "withCheck"
@@ -12142,12 +12899,16 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5396,
-      "contentHash": "3986264af4d1be14d7ba1a33f3826b707fa1bd68198b7bd97909fe192a998259",
+      "byteLength": 8474,
+      "contentHash": "4fde9c99142f67e1c9faef5d2808eb07a30d5da5630ff7a586bda4e8e8fde3ae",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "code",
+        "cwd",
+        "document",
         "errorDocument",
+        "exitCode",
         "fixture",
         "home",
         "message",
@@ -12166,6 +12927,7 @@
         "node:fs/promises",
         "node:path",
         "src/cli-program.js",
+        "src/commands/init.js",
         "src/core/global/managed-files.js",
         "test/support/temporary-repository.js",
         "test/support/temporary-user-home.js",
@@ -12324,6 +13086,40 @@
       "kind": "test",
       "packagePath": "",
       "path": "test/integration/scenarios/codex-legacy-setup.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 4212,
+      "contentHash": "8cb0e2e6abcfc8d88bee42bbc3dea0b87c43b7ff52ad9376ede03c0fcde0e809",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "fixture",
+        "home",
+        "options",
+        "originalCwd",
+        "relaxed",
+        "report",
+        "root",
+        "stdout",
+        "strict",
+        "svc",
+        "temporaryUserHome",
+        "warningOnlyProject"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/cli-program.js",
+        "src/commands/init.js",
+        "src/core/repo-map/service.js",
+        "test/support/temporary-repository.js",
+        "test/support/temporary-user-home.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/integration/scenarios/doctor-exit.test.ts",
       "language": "typescript"
     },
     {
@@ -12553,12 +13349,42 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1555,
-      "contentHash": "09bc298381d870873c48b6622a43eb07f13c7432f44651c3405f7fa1717e4f15",
+      "byteLength": 2310,
+      "contentHash": "54ce6e168eff55a9bf941ff94f2410340d2bab424c93e98d70fbce8d849a321a",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "READ_ONLY_COMMANDS",
+        "before",
+        "code",
+        "originalCwd",
+        "originalExitCode",
+        "root",
+        "stderr",
+        "stdout",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/cli-program.js",
+        "test/support/integration-fixtures.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/integration/scenarios/read-only-commands.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1746,
+      "contentHash": "29a9fe4a33e17d0de99e5503f094408f748d41c68606d70e348ab63749369cab",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "changedOrder",
+        "fixed",
         "order",
         "root",
         "temporaryRepository"
@@ -12607,6 +13433,63 @@
       "language": "typescript"
     },
     {
+      "byteLength": 2459,
+      "contentHash": "b657f88867becc5b6fbd1ca4a54421d1ddbdeb1cb899eadf5dce65b8d53ff207",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "OrderService",
+        "originalCwd",
+        "output",
+        "root",
+        "stdout",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/cli-program.js",
+        "src/commands/init.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/integration/scenarios/repo-map-workspace.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 3224,
+      "contentHash": "28bf33b2f6c929ec5ee448b35415d0f39c2cb9f374328578de53f800738f65a8",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "git",
+        "id",
+        "originalCwd",
+        "review",
+        "reviewOf",
+        "root",
+        "run",
+        "startTask",
+        "tasks",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:child_process",
+        "node:fs/promises",
+        "node:path",
+        "src/cli-program.js",
+        "src/commands/init.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/integration/scenarios/review-code-impact.test.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 2803,
       "contentHash": "3514be0dea2c456db5a3c3ffa7b639af17b919ce5ef288a8a1e990d172596349",
       "extension": "ts",
@@ -12631,6 +13514,75 @@
       "kind": "test",
       "packagePath": "",
       "path": "test/integration/scenarios/setup-exit-codes.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 4594,
+      "contentHash": "8fcc8379726c277f105b35db0b77cbf7672e36badcd27dbedd1d9627b6f5c07d",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "clone",
+        "dirty",
+        "git",
+        "origin",
+        "originalCwd",
+        "output",
+        "path",
+        "repository",
+        "root",
+        "stdout",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:child_process",
+        "node:fs/promises",
+        "node:path",
+        "src/cli-program.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/integration/scenarios/status-workspace.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 3836,
+      "contentHash": "4730ecffd2188ae3fb780d800d4476c02b95b54f996fa885bb42eac975ba0390",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "UpdateOutput",
+        "again",
+        "applied",
+        "before",
+        "code",
+        "config",
+        "configPath",
+        "originalCwd",
+        "output",
+        "packageDir",
+        "preview",
+        "root",
+        "second",
+        "stdout",
+        "temporaryRepository",
+        "updateOutput",
+        "value"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/cli-program.js",
+        "src/commands/init.js",
+        "src/core/config/config.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/integration/scenarios/update-refresh-config.test.ts",
       "language": "typescript"
     },
     {
@@ -12729,8 +13681,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8693,
-      "contentHash": "dc686b2c6e575e03f9dd538fe602e736a232b16df3e3b18bb87ee9acd9cd9d9e",
+      "byteLength": 8889,
+      "contentHash": "87f5b74b78969f72664f1d66413edac6243422e2726be06254db34267f738faf",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -13848,13 +14800,14 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5351,
-      "contentHash": "56e70ede20caa859e60e4e2cfd5d50ba871abb067a4adcb5a20b384167ecba42",
+      "byteLength": 6526,
+      "contentHash": "7ef164e8b37903dc212974b1365bb003f40479244db466d7e611239b24863aa7",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "active",
         "epic",
+        "execFileAsync",
         "explain",
         "noActive",
         "root",
@@ -13867,8 +14820,10 @@
         "temporaryRepository"
       ],
       "importTargets": [
+        "node:child_process",
         "node:fs/promises",
         "node:path",
+        "node:util",
         "src/commands/status.js",
         "src/core/workflow/save.js",
         "test/support/temporary-repository.js",
@@ -13931,8 +14886,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 9686,
-      "contentHash": "95534a6cc32664dbe42e93c9b99b5f09249bd6848ebb245bb405372233f13fd9",
+      "byteLength": 9694,
+      "contentHash": "3e7bb7dc046a0f2366ba8e8df00f8b1e1ee7753238a249693e1ee1f7fc8ea88f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -13968,8 +14923,38 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1223,
-      "contentHash": "2372c394753ec911a73aab23ed05bacea52e4c27b1ab6f7168da127740b0dd98",
+      "byteLength": 3172,
+      "contentHash": "be4356369aa3c802137c98c6d5b59bd7efc0beb37a9d4216c61be8a01d16fddd",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "base",
+        "context",
+        "persisted",
+        "result",
+        "root",
+        "task",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "src/commands/workflow-edit-handlers.js",
+        "src/commands/workflow-handlers.js",
+        "src/core/workflow/plan-edit.js",
+        "src/core/workflow/save.js",
+        "test/support/builders.js",
+        "test/support/temporary-repository.js",
+        "test/support/workflow-fixtures.js",
+        "type",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/commands/workflow-edit-handlers.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1437,
+      "contentHash": "89f5acf067864fdd90b7f8bfdc6c3421739ad4663d7817e5630290b22cd62e93",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -14007,8 +14992,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3806,
-      "contentHash": "51c1b92a8d41710e903b96945c581e1be0d42e5fdbce4af57c3a2271850448f8",
+      "byteLength": 4628,
+      "contentHash": "60583ad8136b3a83a9902236b9c165f860e55cc79229649a2a3fcebcae791343",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -14019,6 +15004,7 @@
         "persisted",
         "result",
         "root",
+        "task",
         "temporaryRepository"
       ],
       "importTargets": [
@@ -14122,6 +15108,36 @@
       "kind": "test",
       "packagePath": "",
       "path": "test/unit/core/config/config.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 5113,
+      "contentHash": "1d3334b46445846ef824fe18b44918dda5c46ec22f14d00f7236507386667579",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "added",
+        "config",
+        "detection",
+        "edited",
+        "first",
+        "many",
+        "original",
+        "pkg",
+        "profiled",
+        "result",
+        "spelled",
+        "trimmed"
+      ],
+      "importTargets": [
+        "src/core/config/config.js",
+        "src/core/config/refresh.js",
+        "type",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/config/refresh.test.ts",
       "language": "typescript"
     },
     {
@@ -14247,6 +15263,28 @@
       "language": "typescript"
     },
     {
+      "byteLength": 2404,
+      "contentHash": "e7a796184f56325bf126e18ed7bc925f141c92cfefa2f9974681b8aa00599e98",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "config",
+        "detected",
+        "findings",
+        "many"
+      ],
+      "importTargets": [
+        "src/core/doctor/config-drift.js",
+        "src/core/doctor/findings.js",
+        "type",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/doctor/config-drift.test.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 4238,
       "contentHash": "b42a99b1be3d539282d47401cae3283a2267339cea5d478aeb108a55fcd2ad27",
       "extension": "ts",
@@ -14276,6 +15314,26 @@
       "kind": "test",
       "packagePath": "",
       "path": "test/unit/core/doctor/doctor.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1577,
+      "contentHash": "dad392c01b2db2a0fcac733fe01762e9f1605e3bcafd14a83c725c86108c53bb",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "report",
+        "value"
+      ],
+      "importTargets": [
+        "src/core/doctor/doctor.js",
+        "src/core/doctor/exit-code.js",
+        "type",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/doctor/exit-code.test.ts",
       "language": "typescript"
     },
     {
@@ -14475,8 +15533,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 9776,
-      "contentHash": "f16ad7e2c1b9cb2db49afba49a6522004c679a1aff09e5819eb3d8f28c85ac9d",
+      "byteLength": 10558,
+      "contentHash": "a715edf7864094550b4687efa1bb03d59e0cc9996662565db823c7daedf62218",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -14490,6 +15548,7 @@
         "empty",
         "epic",
         "finished",
+        "folder",
         "into",
         "invalid",
         "json",
@@ -14525,8 +15584,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4471,
-      "contentHash": "1a9a3a736bf2a681f576d5211fe8a1887acf5c5d9f8923bb7510136366d13f35",
+      "byteLength": 4523,
+      "contentHash": "e4b151d4ce56f1e959de7ff999c387b3bba27bfa30fbcd42755f9eb62fc25124",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -15871,13 +16930,14 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2661,
-      "contentHash": "d89a00040bd92be2415807e518e8c546135753adcaab24d7a23b5f627bc2b5e6",
+      "byteLength": 2927,
+      "contentHash": "a0fb87b1c7dac6655685e39490cc76a9f24a35ace424ce3a6fc100dfd46806d9",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "a",
         "b",
+        "copy",
         "inventory",
         "limited",
         "put",
@@ -16106,6 +17166,42 @@
       "language": "typescript"
     },
     {
+      "byteLength": 5712,
+      "contentHash": "e79dfdf03e5a79ab70ea230b383b7f9d5bceceb294b416b10d71b5fee790d76c",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "a",
+        "before",
+        "billing",
+        "billingRepo",
+        "entry",
+        "found",
+        "initializedRoot",
+        "ledger",
+        "listTree",
+        "path",
+        "plainMember",
+        "result",
+        "root",
+        "temporaryRepository",
+        "under"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/commands/init.js",
+        "src/core/repo-map/store.js",
+        "src/core/repo-map/workspace.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/repo-map/workspace-root-cache.test.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 3868,
       "contentHash": "a314b57ac8b47257bccfea0027eb18e7128278932901bcacca63a49c6c16083c",
       "extension": "ts",
@@ -16215,8 +17311,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 14135,
-      "contentHash": "76fb0bee7ce16662a28e42f9c99c9774b60e7301def48bddbd2b02456db67e55",
+      "byteLength": 18097,
+      "contentHash": "fab640fad18def6171f08448475ab0be1af0b0234becec707e11c58704dd2387",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16225,8 +17321,10 @@
         "Main",
         "Page",
         "Sample",
+        "abpProject",
         "angularRoot",
         "axumRoot",
+        "copy",
         "cppRoot",
         "createFixture",
         "dartRoot",
@@ -16236,18 +17334,24 @@
         "external",
         "fastapiRoot",
         "ginRoot",
+        "hidden",
         "kotlinRoot",
         "laravelRoot",
         "native",
         "nextResult",
         "nextRoot",
         "npmCases",
+        "path",
+        "paths",
         "postgresDotnet",
         "postgresJava",
         "result",
         "root",
         "rustRoot",
+        "service",
+        "solution",
         "sqlServerDotnet",
+        "svc",
         "swiftRoot",
         "web",
         "writeFixtureFile"
@@ -16262,6 +17366,95 @@
       "kind": "test",
       "packagePath": "",
       "path": "test/unit/core/stack/detection.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 6778,
+      "contentHash": "c3b75731f3d1f85b74ee50557c8d0965f3a4d0ed74c0f01af10eef3366d614f4",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "createFixture",
+        "destination",
+        "library",
+        "libraryProject",
+        "name",
+        "root",
+        "solution",
+        "started",
+        "testProject",
+        "text",
+        "writeFixture"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/stack/dotnet-projects.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/stack/dotnet-projects.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 838,
+      "contentHash": "80342ae2c0ed9986587ccfa9c8a4d7f844a498e181c556decba61313c9dc24e1",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "source"
+      ],
+      "importTargets": [
+        "src/core/stack/ignored-directories.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/stack/ignored-directories.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1656,
+      "contentHash": "f98d43e1aa0e7cec33bcc0bbbdfe439087a23873791c862d355ec125bd841975",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "language",
+        "matches"
+      ],
+      "importTargets": [
+        "src/catalog/catalog.js",
+        "src/core/stack/language-selection.js",
+        "type",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/stack/language-selection.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 3538,
+      "contentHash": "8198845e82824b804714c3c14cd9793c02b7554aaf265ff7ac8d8f1d8250ce94",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "escaping",
+        "file",
+        "files",
+        "reader",
+        "solution",
+        "text"
+      ],
+      "importTargets": [
+        "src/core/stack/package-roots.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/stack/package-roots.test.ts",
       "language": "typescript"
     },
     {
@@ -16280,20 +17473,20 @@
       "language": "typescript"
     },
     {
-      "byteLength": 9524,
-      "contentHash": "816896cceaabc5cc8082f28638b45ca7c6107db72f95a6d62999157798f06dbe",
+      "byteLength": 11453,
+      "contentHash": "19a0169e29a08792c27e40778aff42231768442c06e7e1c92400545ac9308b4a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "AppTest",
         "DemoTest",
-        "UnitTest1",
         "bunRes",
         "bunRoot",
         "createFixture",
         "destination",
         "gradleResult",
         "gradleRoot",
+        "library",
         "mavenResult",
         "mavenRoot",
         "poetryResult",
@@ -16301,8 +17494,10 @@
         "res",
         "result",
         "root",
+        "sln",
         "uvResult",
         "uvRoot",
+        "vb",
         "writeFixture",
         "yarnRes",
         "yarnRoot"
@@ -16337,27 +17532,36 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6934,
-      "contentHash": "7e19f7672e3944933524d50295121126b0378298228780d95efa73524e7c1c51",
+      "byteLength": 14287,
+      "contentHash": "24edf61996c9cea6ce870a20cffdb16653d9c994033b74ae93df752235e84609",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "a",
+        "committedMonorepo",
         "corePkg",
         "createFixture",
         "destination",
+        "execFileAsync",
+        "full",
         "gatewayPkg",
+        "monorepo",
+        "name",
         "pkgA",
         "pkgB",
         "plan",
         "root",
+        "scoped",
         "service",
         "testRan",
+        "value",
         "writeFixture"
       ],
       "importTargets": [
+        "node:child_process",
         "node:fs/promises",
         "node:path",
+        "node:util",
         "src/core/stack/verify-plan.js",
         "test/support/temporary-repository.js",
         "vitest"
@@ -16368,8 +17572,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8463,
-      "contentHash": "e4f3c666fdac2d26136d3488282f6b9c30cb3c229fa17e28324f64c25eb1b184",
+      "byteLength": 10947,
+      "contentHash": "374bab26ddb9a8c4939711a6cf195e6fc4760622d1c66f63feb762c5c621b701",
       "extension": "ts",
       "headings": [
         "Visual Studio Version 17"
@@ -16382,9 +17586,12 @@
         "destination",
         "dotnetService",
         "nested",
+        "options",
         "root",
         "server",
+        "service",
         "slnContent",
+        "testProject",
         "web",
         "workspaces",
         "writeFixture"
@@ -16443,6 +17650,34 @@
       "kind": "test",
       "packagePath": "",
       "path": "test/unit/core/tasks/check-cwd.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 5414,
+      "contentHash": "6fe331589f7f60f6e6dbfef4d22eb1fa0110fc39c9a051696df5399e88bc8e26",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "CodeImpactGitRunner",
+        "bad",
+        "calls",
+        "files",
+        "noHead",
+        "nul",
+        "numstat",
+        "result",
+        "runner",
+        "spy",
+        "status",
+        "statusFails"
+      ],
+      "importTargets": [
+        "src/core/tasks/code-impact.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/tasks/code-impact.test.ts",
       "language": "typescript"
     },
     {
@@ -16595,8 +17830,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 14139,
-      "contentHash": "998473d00e260a0a44ef8c151c4d59d00d244dd0d54be185e30c5db176fde05b",
+      "byteLength": 15761,
+      "contentHash": "73f011fbf55eeed32873e141cec6175a094f4ee539f00562c732b99fcd5001a9",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16613,6 +17848,7 @@
         "fullReview",
         "fullTask",
         "headerEnd",
+        "injected",
         "linked",
         "liteReview",
         "liteTask",
@@ -16629,6 +17865,7 @@
         "reviewWithoutImpact",
         "root",
         "second",
+        "section",
         "task",
         "taskWithImpact",
         "temporaryRepository",
@@ -16706,8 +17943,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4530,
-      "contentHash": "89d071791c50bd4c64b9e4f4a03cf19add363202d02d4054076a9d39474df024",
+      "byteLength": 8228,
+      "contentHash": "48d11ea0e82428b0821468151e6b1ef15a4edd0a10acc4e9d11c7bd84f3defcb",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -16715,19 +17952,28 @@
         "done",
         "evidence",
         "external",
+        "failing",
+        "gitRunner",
         "inProgress",
+        "options",
+        "planning",
+        "review",
         "root",
         "task",
         "taskJsonPath",
         "temporaryRepository",
-        "verifying"
+        "verifying",
+        "working"
       ],
       "importTargets": [
         "node:fs/promises",
         "node:path",
+        "src/core/tasks/code-impact.js",
         "src/core/tasks/task.js",
+        "test/support/builders.js",
         "test/support/tasks-fixtures.js",
         "test/support/temporary-repository.js",
+        "type",
         "vitest"
       ],
       "kind": "test",
@@ -16773,6 +18019,38 @@
       "kind": "test",
       "packagePath": "",
       "path": "test/unit/core/tasks/task-validate-common.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 10571,
+      "contentHash": "4e138e70ba66481a4b696c2adc50979dd84762331518316cb2171d28893e719d",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "baseEvidence",
+        "baseline",
+        "check",
+        "criterion",
+        "failedEvidence",
+        "fixture",
+        "fixtureV2",
+        "legacyPass",
+        "severity",
+        "v1WithFindings",
+        "validationPlan",
+        "withCheck",
+        "withCriterion",
+        "withFindings",
+        "withoutFindings"
+      ],
+      "importTargets": [
+        "src/core/tasks/task.js",
+        "test/support/tasks-fixtures.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/tasks/task-validate-contracts.test.ts",
       "language": "typescript"
     },
     {
@@ -16964,21 +18242,74 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2352,
-      "contentHash": "56e46cecfec541fd58cc634599b49e26eaa4f6c38e6f869deb34cd122d3681e1",
+      "byteLength": 7295,
+      "contentHash": "3e6cd80e32360b0a352f6a443382b1eb7521cd61f65972cd34adcaab30741ce1",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "a",
+        "b",
+        "before",
+        "binary",
+        "binaryBefore",
+        "bytes",
+        "content",
+        "crlf",
+        "lf",
+        "oldRaw",
+        "path",
+        "recorded",
+        "repositoryFile",
+        "repositoryWith",
+        "root",
+        "snapshot",
+        "taskFixture",
+        "temporaryRepository",
+        "text",
+        "timestamp",
+        "utf8"
+      ],
+      "importTargets": [
+        "Tiếng Việt\\r\\n",
+        "a\\n\\u0000b\\n",
+        "a\\r\\n\\u0000b\\r\\n",
+        "node:fs/promises",
+        "node:path",
+        "node:url",
+        "src/core/tasks/task.js",
+        "src/core/verification/input-digest.js",
+        "src/core/verification/line-endings.js",
+        "test/support/builders.js",
+        "test/support/temporary-repository.js",
+        "type",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/verification/line-endings.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 8126,
+      "contentHash": "e47d11c6c4825530bf4f694faf7fe705896e67599c2819636a59f0c9514f02e9",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "defaults",
+        "digestAfter",
+        "digestBefore",
         "isKept",
         "root",
+        "sampleTask",
         "targeted",
         "temporaryRepository"
       ],
       "importTargets": [
         "node:fs/promises",
         "node:path",
+        "src/core/verification/input-digest.js",
         "src/core/verification/transient-directories.js",
+        "test/support/builders.js",
         "test/support/temporary-repository.js",
         "vitest"
       ],
@@ -17005,14 +18336,16 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2854,
-      "contentHash": "91c4b64ff64c37d7cdb1939928dae731c61eeb26b472b79192b50986702bd0a3",
+      "byteLength": 3837,
+      "contentHash": "e4130fd41100f6c607f042c0e074cb5bfb060d655791e412667da04d66b3a15f",
       "extension": "ts",
       "headings": [],
       "identifiers": [
+        "harnixOnly",
         "plan",
         "prd",
-        "sampleTask"
+        "sampleTask",
+        "text"
       ],
       "importTargets": [
         "src/core/workflow/artifact-templates.js",
@@ -17346,14 +18679,15 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7151,
-      "contentHash": "0c4b058a1a27c1f75ffe310cf14deae7c8215bb2145d984d9e707e3dcfbaea50",
+      "byteLength": 9449,
+      "contentHash": "ba665274155c25b5242fcb8f96c07f86b819906710fbf447530595d4b43a02a5",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "NOW",
         "a",
         "base",
+        "error",
         "legacy",
         "passingRun",
         "planning",
@@ -17625,8 +18959,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 1778,
-      "contentHash": "28558a09a41108d9da92bc46d737d7498e1d9e296d4450b3c4372c29bb15cff7",
+      "byteLength": 1845,
+      "contentHash": "833ea4dd6b083806dbd928ea13970bd0a696d31a20104e05f558539360742fa2",
       "extension": "ts",
       "headings": [],
       "identifiers": [],
@@ -17667,8 +19001,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2254,
-      "contentHash": "75874e20e8d4206f1dd19a59355c281d8bbbe94170cac40bb95405b9b8d3efff",
+      "byteLength": 2545,
+      "contentHash": "ea8d42847df48a4ad881dcffb4b0c2ce139c27effc2891443a17bdc917a8bbe0",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -17685,8 +19019,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 14941,
-      "contentHash": "bb7976fddb4b2b9d36d4fb0a7c7d4168782480c5c14a5adc5c16d7a1f6d7b9df",
+      "byteLength": 16562,
+      "contentHash": "a5cd4bef25cf305ed0b4bd1356db71291fe71f23d444964f76caae003ff78044",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -17698,6 +19032,7 @@
         "focused",
         "followUp",
         "implicit",
+        "monorepo",
         "page",
         "parent",
         "planContent",
@@ -17900,8 +19235,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 13888,
-      "contentHash": "1ba82dcdc4a609c4e09bc6c1e0a55952fb23c5b6c970f4156e33a1740a39f001",
+      "byteLength": 14567,
+      "contentHash": "82a8120e4e2ecb14fccb827a2446468d7aaa9ba51004dbc9b68d83f14f4a179c",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -17909,6 +19244,7 @@
         "REASON",
         "added",
         "again",
+        "blank",
         "check",
         "garbled",
         "high",
@@ -17928,6 +19264,7 @@
         "verifyingWithPass",
         "withDecision",
         "withGoal",
+        "withMitigation",
         "withRisk",
         "withTitle"
       ],
@@ -17949,8 +19286,39 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2912,
-      "contentHash": "50e6668eee8c1fe6a54e1a466f06ae856f36f5156eff6d1390a8fada251a4ddf",
+      "byteLength": 4897,
+      "contentHash": "6166f7d95f3ea65f715a13427e1ea719c50b51c828bc1f4bdaad47ced0df8c81",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "base",
+        "evidence",
+        "frozen",
+        "planning",
+        "planningWithTwoCriteria",
+        "root",
+        "task",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "src/core/tasks/task.js",
+        "src/core/workflow/plan-edit.js",
+        "src/core/workflow/plan-remove.js",
+        "src/core/workflow/save.js",
+        "src/core/workflow/snapshot.js",
+        "test/support/builders.js",
+        "test/support/temporary-repository.js",
+        "test/support/workflow-fixtures.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/workflow/plan-remove.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 3507,
+      "contentHash": "37d7de378fb0cfbf58c43e843f57b534d7219c5efaea3a9532967a5058eb09b6",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -17975,8 +19343,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 14602,
-      "contentHash": "50af1e9b8fd8cb2dffb8f525b4dc5b693340fbdfd5c5a77054c813da8634dfbb",
+      "byteLength": 14739,
+      "contentHash": "90b93a2419ce14fdb9a824b67c03860549d5d6da8c2ea1147f4c334c76ca8b68",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18028,8 +19396,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6512,
-      "contentHash": "5e31659d9fa848da5a96e479e7a0f82ca23a152095f9c2611c9737b18298cf21",
+      "byteLength": 6527,
+      "contentHash": "a7f5d6ae204d241fd95a4a8edade7c13853593e585aa08f7ce80ea211749f001",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18067,8 +19435,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7973,
-      "contentHash": "1c4824c192c186b5d3d01da6d73504b68145d307d28d07dd98086e4f0cd237b1",
+      "byteLength": 8507,
+      "contentHash": "1049aaff89ec2f048119a29745506b52e8f25c88bd8f75ef95f4c2c73f5abda8",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18187,8 +19555,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4373,
-      "contentHash": "bd0b0a3525dc6262bdee6a58af04679a783ffa0cc7409891025991de07e0b4c7",
+      "byteLength": 5301,
+      "contentHash": "61c318595e6fa84144afac3d723c4ca1f4f43edbb6c771b05b7e0abf4990916b",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18202,6 +19570,7 @@
       ],
       "importTargets": [
         "src/core/verification/input-digest.js",
+        "src/core/workflow/plan-edit.js",
         "src/core/workflow/replace-check.js",
         "src/core/workflow/save.js",
         "test/support/temporary-repository.js",
@@ -18618,8 +19987,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4664,
-      "contentHash": "ef22f4e145889be3a959cb210fdf3bbc68d82c0b207a9359490b7dfb8d3b63c6",
+      "byteLength": 6812,
+      "contentHash": "36358be60c8c53d4b80ff5a88dbc30c720269e677aecfeb82c4c72b6fb5a8c8a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18642,8 +20011,11 @@
         "src/core/tasks/task.js",
         "src/core/workflow/batch.js",
         "src/core/workflow/plan-edit.js",
+        "src/core/workflow/plan-remove.js",
         "src/core/workflow/save.js",
+        "src/core/workflow/set-criterion.js",
         "src/core/workflow/target-task.js",
+        "test/support/builders.js",
         "test/support/temporary-repository.js",
         "test/support/workflow-fixtures.js",
         "vitest"
@@ -18756,6 +20128,63 @@
       "language": "typescript"
     },
     {
+      "byteLength": 4487,
+      "contentHash": "0b479d7f99cf373536f5bc760b8c42e97327d6c9cc1098b10a719dbd41cf26ce",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "GitRunner",
+        "bad",
+        "calls",
+        "empty",
+        "header",
+        "name",
+        "output",
+        "peak",
+        "result",
+        "root",
+        "run",
+        "running",
+        "temporaryRepository",
+        "workspaceWith"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/core/workspace/git-status.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/workspace/git-status.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 1167,
+      "contentHash": "ab82d550a7788779467c42f1cfde31b254e3de9a5750f936ccd4b7d3cc487521",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "initialized",
+        "plain",
+        "root",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:fs/promises",
+        "node:path",
+        "src/commands/init.js",
+        "src/core/workspace/resolve-root.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/core/workspace/resolve-root.test.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 3240,
       "contentHash": "30a0133aa69973fccfd581f5d82902654d20383582028460e5d1586a5464168a",
       "extension": "ts",
@@ -18815,8 +20244,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3317,
-      "contentHash": "e33a980509e8d188f2a6c2a2c16b4ff222c5c23390bc2d95eed8b9284487e573",
+      "byteLength": 3353,
+      "contentHash": "a4f5dab94ec586e00e1fc8096bd1a9c7473a6824fc6ec6c81f369f41cfe791ea",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18845,8 +20274,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 3094,
-      "contentHash": "11cf35b67207df872415233d9493166eec94c9c72b315e4e7ec7f54066471c6c",
+      "byteLength": 3118,
+      "contentHash": "4a6e23277315a93fa1171dfcf8ab387e24b5e792b8be37d9caa7d9faabcef0ea",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18950,8 +20379,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 8642,
-      "contentHash": "8cf3c2f6afbda1a51261c05b63653415b102e89e5c59f7eac4800d14c93056c6",
+      "byteLength": 9057,
+      "contentHash": "7c1749214da65f70f58696b791396c6366ca2990d84391adaaf7249772ab66ab",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -18986,7 +20415,15 @@
         "suite",
         "suites",
         "target",
-        "testFiles"
+        "testFiles",
+        "testPattern",
+        "toPosix",
+        "tooLong",
+        "totals",
+        "unitExceptions",
+        "unitOrphans",
+        "untested",
+        "walk"
       ],
       "importTargets": [
         "node:fs",
@@ -19048,26 +20485,33 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7723,
-      "contentHash": "bd0effab57de774ec5d3cd13a96a447528724412b4956c388cb25112c1775c39",
+      "byteLength": 16121,
+      "contentHash": "5a36a37fb838631bf26330019dd147d01b34dbb4634be3e20514590f2e615ab0",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "FakeChild",
         "ProcessSpawner",
         "bad",
+        "builtin",
         "child",
+        "dotnetExe",
+        "env",
+        "exists",
         "failing",
         "fakeChild",
         "kill",
         "killer",
+        "lookup",
         "ok",
         "originalKill",
+        "present",
         "result",
         "root",
         "run",
         "spawner",
         "subDir",
+        "systemRoot",
         "temporaryRepository"
       ],
       "importTargets": [
@@ -19222,6 +20666,36 @@
       "language": "typescript"
     },
     {
+      "byteLength": 4461,
+      "contentHash": "834e3862d5336422069a3429423e1106d7e06f67a4b4a939c4eeebf612aef92e",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "cleanContext",
+        "context",
+        "controlRan",
+        "dirtyContext",
+        "env",
+        "execFileAsync",
+        "root",
+        "temporaryRepository"
+      ],
+      "importTargets": [
+        "node:child_process",
+        "node:fs",
+        "node:fs/promises",
+        "node:path",
+        "node:util",
+        "src/utils/git.js",
+        "test/support/temporary-repository.js",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/unit/utils/git.test.ts",
+      "language": "typescript"
+    },
+    {
       "byteLength": 2462,
       "contentHash": "b261a203f3a7a93c553fc0c058582d101908e60abbb81a63f55ff85cc13c2e96",
       "extension": "ts",
@@ -19287,19 +20761,23 @@
       "language": "typescript"
     },
     {
-      "byteLength": 2522,
-      "contentHash": "38c37bd6698a359a07be20ca3fb86971bdd40d06bc3673fc5380951fcd0f49b3",
+      "byteLength": 6479,
+      "contentHash": "8670a93149b127abdaf27883b9dc2ceab7a0582c5732b5769097bc37486ba98a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "alias",
+        "before",
+        "caught",
         "child",
         "first",
         "fixture",
         "initialize",
         "initialized",
+        "name",
         "nested",
         "ordinary",
+        "outside",
         "root",
         "second"
       ],
@@ -19307,6 +20785,7 @@
         "node:fs/promises",
         "node:path",
         "src/utils/project-discovery.js",
+        "test/support/integration-fixtures.js",
         "test/support/temporary-repository.js",
         "vitest"
       ],
@@ -19497,8 +20976,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 49459,
-      "contentHash": "415f0a78b86a52e91759b851d595ddc8993748de22ad8714a351f709ce9e4195",
+      "byteLength": 50309,
+      "contentHash": "a75491e85888610e44fcf7e16ccd08f27f456374eaffb1c809a62de9e1da46fd",
       "extension": "json",
       "headings": [],
       "identifiers": [
@@ -19594,13 +21073,14 @@
       "language": "typescript"
     },
     {
-      "byteLength": 5834,
-      "contentHash": "668ef64ef3f31d6d415622da669987714ec36d2c4ed6e56eec92edf5dea59f20",
+      "byteLength": 6178,
+      "contentHash": "80badee9d3b2e9e69f4c7460fe509ba0b56c0e05349a471cc9f21175131e5ea2",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "context",
         "contextReport",
+        "doctor",
         "epic",
         "program",
         "repoMap",
@@ -19888,8 +21368,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 7470,
-      "contentHash": "cf1dbf4f35cdb7170600002c76e9f6647be5ef34bee3151cb7cc5f9df945e37a",
+      "byteLength": 7714,
+      "contentHash": "5458e1b7106988aaaeab0f3bfa489e6326e45be0b7939280a6475c395a0b36e4",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -20010,8 +21490,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 4321,
-      "contentHash": "796d19df18ab568dff295fe2199ce8ab78a018fc530b9d7ad853975fb62d5cae",
+      "byteLength": 4342,
+      "contentHash": "ade1b735ffbb727cc6fa8293a0d47fc0e68c47f0a93aec88a703b4370ec0bb24",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -20053,8 +21533,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6919,
-      "contentHash": "76afac5420eb691f459a9b667632e1c46c9d5d3336494d273f1b51f5f74b2b32",
+      "byteLength": 7115,
+      "contentHash": "8b9b2bf88f71f973531e6a5a824de172f704e2dd2119b9fcad91b766b84599e0",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -20098,6 +21578,25 @@
       "kind": "test",
       "packagePath": "",
       "path": "test/workflow/localized-time.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 855,
+      "contentHash": "0b76e4beaefaa697c61ad0b77bb250cefd156e744a44eaacfdb7d4db8105560f",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "AssertBuilt",
+        "seen"
+      ],
+      "importTargets": [
+        "../../scripts/assert-built.mjs",
+        "node:path",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/workflow/measure-footprint-guard.test.ts",
       "language": "typescript"
     },
     {
@@ -20187,8 +21686,8 @@
       "language": "typescript"
     },
     {
-      "byteLength": 6329,
-      "contentHash": "4d0f2f7d09c4d99a98e513607a0a6e766f8e3930fddcdb293312a775abf407d6",
+      "byteLength": 6341,
+      "contentHash": "e25b27b76a0c3bfd2440722ea3a7680496ee359446c66fdb88a82a78efbd5b46",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -20281,8 +21780,28 @@
       "language": "typescript"
     },
     {
-      "byteLength": 12499,
-      "contentHash": "d75a4a187e0b64d1c5d378d5d52d132db7546dc732d5ba87aaad7be2caabf497",
+      "byteLength": 2218,
+      "contentHash": "5b2fe1f87f39181797d8cd6902922eb9e2d759fbfb6abfbb27b9725a8c6edad1",
+      "extension": "ts",
+      "headings": [],
+      "identifiers": [
+        "SetupExitContract",
+        "SetupRun",
+        "platforms",
+        "setupRun"
+      ],
+      "importTargets": [
+        "../../scripts/setup-exit-contract.mjs",
+        "vitest"
+      ],
+      "kind": "test",
+      "packagePath": "",
+      "path": "test/workflow/setup-exit-contract.test.ts",
+      "language": "typescript"
+    },
+    {
+      "byteLength": 12515,
+      "contentHash": "fe1bebe956208a350d9a77f5e17f3cceaaf1024dd5823582e791aaaea0d0849b",
       "extension": "ts",
       "headings": [],
       "identifiers": [

@@ -5,6 +5,7 @@ import { compareCodeUnits } from "src/utils/order.js";
 import type { DetectionMatch, LanguageId, TechnologyId } from "src/catalog/catalog.js";
 import { evaluateFacts, type CollectedFile, type DependencyFact, type DetectionFacts } from "./detection-engine.js";
 import { IGNORED_DIRECTORY_NAMES } from "./ignored-directories.js";
+import { projectLanguages, selectedLanguages } from "./language-selection.js";
 import { findPackageRoots } from "./package-roots.js";
 
 export type { DetectionMatch, LanguageId, TechnologyId } from "src/catalog/catalog.js";
@@ -50,7 +51,7 @@ export async function detectProject(projectRoot: string): Promise<ProjectDetecti
   const packageManager = detectPackageManager(files);
   const packages = await detectPackages(facts, packageManager);
   return {
-    languages: selectedLanguages(matches),
+    languages: projectLanguages(matches, packages),
     technologies: selectedTechnologies(matches),
     matches,
     packageManager,
@@ -155,14 +156,6 @@ function fallbackPackage(matches: DetectionMatch[], packageManager: PackageManag
   return languages.length === 0 && technologies.length === 0
     ? []
     : [{ languages, technologies, packageManager, path: ".", verificationCommands: [] }];
-}
-
-function selectedLanguages(matches: DetectionMatch[]): LanguageId[] {
-  return sorted(
-    matches
-      .filter((match): match is DetectionMatch & { id: LanguageId } => match.facet === "language")
-      .map(({ id }) => id),
-  );
 }
 
 function selectedTechnologies(matches: DetectionMatch[]): TechnologyId[] {

@@ -4,7 +4,11 @@ developer: TamNT167
 languages:
   - typescript
 technologies: []
-packages: []
+packages:
+  - path: .
+    languages:
+      - typescript
+    technologies: []
 platforms: []
 timezone: Asia/Ho_Chi_Minh
 context:
