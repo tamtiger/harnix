@@ -14,10 +14,25 @@ import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
 import { taskContextDrift } from "src/core/workflow/index.js";
 import { findInitializedProject, initializedChildrenHint } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
-import { readGitContext } from "src/utils/git.js";
+import { readGitContext, runGit } from "src/utils/git.js";
+import {
+  readWorkspaceGitStatus,
+  type GitRunner,
+  type WorkspaceGitStatusResult,
+} from "src/core/workspace/git-status.js";
+import { resolveWorkspaceRoot } from "src/core/workspace/resolve-root.js";
 import { reportProjectChecks, type ChecksReportResultV1 } from "./checks.js";
 import { auditProjectTask } from "./audit.js";
 import type { TaskAuditResultV1 } from "src/core/tasks/task-audit.js";
+
+/** Read-only Git table of the sub-repositories below a workspace root; needs no initialized project. */
+export async function inspectWorkspaceGitStatus(
+  cwd: string,
+  workspacePath: string | undefined,
+  run: GitRunner = runGit,
+): Promise<WorkspaceGitStatusResult> {
+  return readWorkspaceGitStatus(await resolveWorkspaceRoot(cwd, workspacePath), run);
+}
 
 export async function inspectProjectStatus(cwd: string, now = Date.now()): Promise<HarnixStatusResultV1> {
   const project = await findInitializedProject({ cwd });

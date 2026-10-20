@@ -1,0 +1,203 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-104850-workspace-git-status-readonly",
+  "epicId": "20261020-104845-workspace-and-gate-improvements",
+  "title": "Thêm harnix status --workspace: bảng trạng thái Git chỉ đọc của các sub-repo",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cho phép harnix status --workspace [path] liệt kê các sub-repo có .git với nhánh hiện tại, tình trạng thay đổi và số commit ahead/behind so với upstream đã biết cục bộ, chỉ đọc và không dùng mạng, để người dùng đa repo khỏi chạy git thủ công nhiều lần.",
+  "nonGoals": [
+    "Không thêm pull, sync, fetch, checkout hay bất kỳ thao tác ghi Git nào.",
+    "Không gọi mạng: ahead và behind chỉ tính theo ref upstream đã có sẵn trong repo.",
+    "Không thêm lệnh công khai mới ngoài cờ của status."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix status --workspace [path] trả một JSON có scope workspace và danh sách member (thư mục có .git, trực tiếp hoặc lồng hai cấp như discoverWorkspaceMembers) với name, branch (hoặc detached), dirty (số file thay đổi), upstream, ahead và behind; sắp xếp xác định theo tên.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Chỉ đọc và an toàn: mỗi member chạy một lệnh git status --porcelain=v2 --branch -z với --no-optional-locks (và rev-parse nếu cần) bằng mảng đối số không qua shell, có -- khi truyền đường dẫn; không fetch, không đổi HEAD hay index; có timeout từng lệnh, đồng thời bị giới hạn, lỗi một member không làm hỏng bảng, đầu ra không có đường dẫn tuyệt đối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Cờ nằm trong test hợp đồng CLI, README và PRD; chạy ngoài workspace hoặc không có sub-repo trả danh sách rỗng có thông báo rõ; không có bất kỳ đường nào gọi lệnh ghi Git (có test chặn).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Toàn bộ test suite của dự án và test:gates pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test status --workspace chỉ đọc",
+      "command": "pnpm exec vitest run test/unit/core/workspace test/integration/scenarios/status-workspace.test.ts test/unit/commands/status.test.ts test/workflow/cli-contract.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "src/commands/repo-map-internal.ts",
+    "src/commands/status.ts",
+    "src/core/workspace",
+    "test/integration/commands/status-workspace.test.ts",
+    "test/workflow/cli-contract.test.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Đề xuất repo status và repo pull của báo cáo không nhận nguyên: chỉ làm phần đọc, và đặt thành cờ --workspace của status thay vì lệnh public mới.",
+      "rationale": "AGENTS.md cấm tích hợp Git tự động và mọi thao tác ghi Git; pull/sync/fetch chạm mạng và đổi working tree. Phần bảng trạng thái chỉ đọc nằm trong ranh giới (Harnix đã có git context chỉ đọc ở status và preflight) và dùng lại discoverWorkspaceMembers."
+    },
+    {
+      "id": "dec-2",
+      "text": "Chờ người dùng xác nhận chọn cờ của status hay một lệnh riêng; mặc định là cờ.",
+      "rationale": "Một lệnh public mới làm đổi con số mười bảy lệnh public và hợp đồng CLI; cờ thêm vào lệnh hiện có ít xâm lấn hơn."
+    },
+    {
+      "id": "dec-user-1",
+      "text": "Chọn cờ status --workspace thay vì lệnh public mới; pull và sync bị loại.",
+      "rationale": "Giữ nguyên số lệnh public và ranh giới không tự động Git."
+    },
+    {
+      "id": "dec-ver",
+      "text": "Phiên bản 2.13.0 với --fold-dev, kind added; bản đồ dev: 46=dev.1, 47=dev.2, 48=dev.3, 49=dev.4. Dùng git status --porcelain=v2 --branch -z --no-optional-locks mỗi member; trích resolveWorkspaceRoot sang src/core/workspace để core không import commands; nhánh --workspace chạy trước --summary và --explain, kết hợp với --explain, --summary hay --limit bị từ chối exit 2.",
+      "rationale": "Review: rev-parse tách lệnh dễ sai ở unborn branch và rename; status có thể ghi lại index nếu không tắt optional locks."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T11:43:48.841+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workspace test/integration/scenarios/status-workspace.test.ts test/unit/commands/status.test.ts test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "614b3824cc79a2f8dd7f45a97c77a01242d9a3955414983babcb32eb6a01f540"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T11:43:53.734+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0a12c3795d5fa540e4d663462caf8fc4e9aa0dca73e9139ad2d56f28e1386a69"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T11:45:08.682+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "5aa0a57f9aad9bb769003285d2115520f30ad0c49196809371f1171df27db025"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T11:45:38.534+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workspace test/integration/scenarios/status-workspace.test.ts test/unit/commands/status.test.ts test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "87189f8e1046253d180a23d5ad419d82a918f1a903c1a697b4cc38a1692f7669"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T11:45:44.266+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e32e16d11edc5bb36cc09a7d966d6a0a415fdd635ce1d851d14948c8c9a6da81"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T11:46:58.459+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b37b4af2668086fbbad3bad4d32015f6167a2a30d65d106fda8a0d2af43cdea4"
+    }
+  ],
+  "createdAt": "2026-10-20T10:48:45.000+07:00",
+  "updatedAt": "2026-10-20T11:48:43.672+07:00",
+  "completedAt": "2026-10-20T11:48:43.672+07:00"
+}

@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 
-import { readGitContext } from "src/utils/git.js";
+import { readGitContext, runGit } from "src/utils/git.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const execFileAsync = promisify(execFile);
@@ -51,5 +51,10 @@ describe("utils/git", () => {
     const root = await temporaryRepository();
     const context = await readGitContext(root);
     expect(context).toBeUndefined();
+  });
+  it("runs a read-only git command without a shell and rejects on failure", async () => {
+    const root = await temporaryRepository();
+    expect(await runGit(root, ["--version"])).toContain("git version");
+    await expect(runGit(root, ["no-such-subcommand"])).rejects.toThrow();
   });
 });

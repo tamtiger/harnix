@@ -40,6 +40,28 @@ describe.sequential("CLI errors and exit codes", () => {
       error: { exitCode: 2, message: "--limit must be a positive integer." },
     });
   });
+  it.each([
+    ["repo-map without an action flag", ["repo-map"]],
+    ["repo-map with an unknown flag", ["repo-map", "--bogus"]],
+    ["repo-map --query without a value", ["repo-map", "--query"]],
+    ["a command that needs a project", ["mem"]],
+    ["an invalid argument", ["mem", "--limit", "nope"]],
+  ])("should_return_the_process_exit_the_public_error_envelope_declares_for_%s", async (_name, args) => {
+    const root = await fixture();
+    process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    const exitCode = await runCli(["node", "harnix", ...args]);
+
+    const document = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as {
+      error: { exitCode: number; message: string };
+      ok: boolean;
+    };
+    expect(document.ok).toBe(false);
+    expect(exitCode).toBe(document.error.exitCode);
+    expect(stderr.mock.calls.flatMap((call) => call).join("")).toContain(document.error.message);
+  });
   it("should_explain_a_missing_project_without_exposing_the_path_when_a_command_needs_one", async () => {
     const root = await fixture();
     process.chdir(root);

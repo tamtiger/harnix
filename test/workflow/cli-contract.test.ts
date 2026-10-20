@@ -36,6 +36,7 @@ describe("CLI command contract", () => {
     const context = program.commands.find((command) => command.name() === "context");
     const repoMap = program.commands.find((command) => command.name() === "repo-map");
     const status = program.commands.find((command) => command.name() === "status");
+    const doctor = program.commands.find((command) => command.name() === "doctor");
     const tasks = program.commands.find((command) => command.name() === "tasks");
     const resume = program.commands.find((command) => command.name() === "resume");
     const contextReport = program.commands.find((command) => command.name() === "context-report");
@@ -60,7 +61,8 @@ describe("CLI command contract", () => {
       "--refresh",
     ]);
     expect(repoMap?.options.find((option) => option.long === "--refresh")?.hidden).toBe(true);
-    expect(status?.options.map((option) => option.long)).toEqual(["--explain", "--summary", "--limit"]);
+    expect(doctor?.options.map((option) => option.long)).toEqual(["--fix", "--global", "--allow-warnings"]);
+    expect(status?.options.map((option) => option.long)).toEqual(["--explain", "--summary", "--limit", "--workspace"]);
     expect(tasks?.options.map((option) => option.long)).toEqual(["--limit", "--status"]);
     const epic = program.commands.find((command) => command.name() === "epic");
     expect(epic?.options.map((option) => option.long)).toEqual(["--limit", "--brief"]);

@@ -4,6 +4,22 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.13.0] - 2026-10-20
+
+### Fixed
+
+- Sửa cổng measure:footprint: hợp đồng thoát của setup theo readiness khỏe của từng platform (Codex installed-pending-trust, Antigravity precedence-unknown) và tách thành scripts/setup-exit-contract.mjs có test.
+- repo-map --workspace phục vụ sub-repo chưa init từ cache của workspace root (có source và hint), refresh --workspace không còn tạo .harnix trong sub-repo chưa init và báo lỗi rõ khi root chưa init.
+
+### Added
+
+- harnix doctor thêm cờ opt-in --allow-warnings: thoát 0 khi chỉ còn cảnh báo (JSON và mặc định không đổi, lỗi và state invalid vẫn thoát khác 0); logic mã thoát tách thành doctorExitCode.
+- harnix status --workspace [path]: bảng Git chỉ đọc (nhánh, thay đổi, upstream, ahead/behind) của các sub-repo, không fetch, pull hay ghi; đóng epic cải tiến workspace và cổng (measure:footprint, cache root của repo-map, doctor --allow-warnings, test parity mã thoát).
+
+### Changed
+
+- Khóa bằng test scenario việc mã thoát process luôn bằng error.exitCode của public error envelope và ghi mục khắc phục sự cố PowerShell 7 (stderr làm host báo mã 1) vào README và PRD.
+
 ## [2.12.3] - 2026-10-20
 
 ### Changed

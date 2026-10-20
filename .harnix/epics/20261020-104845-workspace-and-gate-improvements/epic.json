@@ -1,0 +1,15 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261020-104845-workspace-and-gate-improvements",
+  "title": "Cải thiện workspace đa repo, cổng nghiệm thu và độ nhất quán của CLI Harnix",
+  "goal": "Xử lý các vấn đề rút ra từ lần dùng Harnix 2.12.3 trên workspace đa repo thực tế (Payment Hub, Long Châu) và từ cổng nghiệm thu: sửa cổng measure:footprint đang đỏ từ trước, để repo-map --workspace dùng cache của workspace root thay vì báo missing và không tạo .harnix rác trong sub-repo, thêm lựa chọn cho doctor không fail khi chỉ có cảnh báo, khóa bằng test việc mã thoát process luôn khớp error.exitCode, và thêm bảng trạng thái Git chỉ đọc cho các sub-repo.",
+  "nonGoals": [
+    "Không thêm lệnh ghi Git như repo pull, repo sync, fetch hay checkout: trái ranh giới không tích hợp Git tự động và không mạng im lặng của Harnix.",
+    "Không đổi mặc định của doctor: exit 1 khi có cảnh báo là hợp đồng đóng băng, chỉ thêm cờ opt-in.",
+    "Không đổi schema TaskRecord v3, EpicRecord v1 hay doctor JSON v2.",
+    "Không thêm package, daemon hay dịch vụ nền."
+  ],
+  "createdAt": "2026-10-20T10:48:45.000+07:00",
+  "updatedAt": "2026-10-20T10:48:45.000+07:00"
+}

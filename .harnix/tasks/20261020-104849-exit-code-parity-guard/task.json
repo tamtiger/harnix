@@ -1,0 +1,154 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-104849-exit-code-parity-guard",
+  "epicId": "20261020-104845-workspace-and-gate-improvements",
+  "title": "Khóa bằng test việc mã thoát process luôn khớp error.exitCode của JSON",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Thêm test hợp đồng bảo đảm với mọi lệnh public lỗi, giá trị trả về của runCli (mã thoát process) bằng error.exitCode trong JSON, và kết luận trung thực về báo cáo exit 1 so với JSON 2 của repo-map.",
+  "nonGoals": [
+    "Không đổi ngữ nghĩa mã thoát 1 và 2 đã đóng băng."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Mở rộng test scenario cli-errors: với mỗi tình huống lỗi công khai (repo-map thiếu cờ, cờ lạ, thiếu project, tham số sai) giá trị trả về của runCli bằng error.exitCode trong JSON stdout và message ở stderr bằng error.message; phạm vi chỉ gồm public error envelope (doctor, setup, uninstall, workflow và context ẩn dùng giao thức riêng nên nằm ngoài).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Báo cáo repo-map exit 1 so với JSON 2 có nguyên nhân gốc đã xác định: wrapper pnpm harnix.ps1 cùng PowerShell 7 biến stderr thô của native command thành NativeCommandError và ghi đè mã thoát 2 thành 1; Node thoát đúng 2. Ghi vào README và docs/HARNIX_PRD.md mục khắc phục sự cố (đọc error.exitCode trong JSON hoặc chuyển hướng stderr bằng 2>$null), không đổi kênh stderr.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test suite của dự án và test:gates pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test parity mã thoát và error.exitCode",
+      "command": "pnpm exec vitest run test/integration/scenarios/cli-errors.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "src/cli-program.ts",
+    "test/integration/scenarios/cli-errors.test.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Báo cáo repo-map exit 1 so với JSON 2 không tái hiện: harnix 2.12.3 trong PowerShell thoát 2 cho repo-map không cờ, cờ lạ và ngoài project.",
+      "rationale": "runCli luôn đặt exitCode 2 cho mọi lỗi công khai (cli-program.ts). Mã 1 có thể đến từ lớp bao ngoài (shim pnpm hoặc cmd, công cụ agent gộp mọi mã khác 0 thành 1); cần shell và lệnh chính xác để kết luận."
+    },
+    {
+      "id": "dec-2",
+      "text": "Nguyên nhân exit 1 so với JSON 2 là hành vi PowerShell 7 với stderr, không phải lỗi mã thoát của Harnix; giữ nguyên stderr, chỉ thêm test parity và tài liệu khắc phục sự cố.",
+      "rationale": "Agent dựa vào stderr và ngữ nghĩa mã thoát đã đóng băng; Node thoát 2 đúng và chuyển hướng stderr giữ được 2."
+    },
+    {
+      "id": "dec-ver",
+      "text": "Phiên bản 2.13.0-dev.4, kind changed. cli-program.ts luôn dùng exitCode 2 cho public error nên test chỉ chứng minh hai giá trị đồng nhất; nguyên nhân PowerShell 7 là quan sát từ báo cáo người dùng, ghi trong tài liệu như quan sát, không có test.",
+      "rationale": "Review: tránh khẳng định vượt quá bằng chứng; mở rộng cli-errors.test.ts thay vì file mới."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T11:36:20.459+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/scenarios/cli-errors.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8562905b814e585fd8a3b635a61f187beea016ca5551d91d2c884471b7c0d548"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T11:36:24.916+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2376de004e1c45f13d1445b0a35d471932b3adb632cbbb14e83d512601a215ec"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T11:37:46.656+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "26f441e8552bbd91dc8f20e76468e2ae05ad75e921a3de13730954a9b907d4f9"
+    }
+  ],
+  "createdAt": "2026-10-20T10:48:45.000+07:00",
+  "updatedAt": "2026-10-20T11:38:43.335+07:00",
+  "completedAt": "2026-10-20T11:38:43.335+07:00"
+}

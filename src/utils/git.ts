@@ -42,3 +42,14 @@ export async function readGitContext(cwd: string): Promise<GitContext | undefine
     return undefined;
   }
 }
+
+/** Default runner for read-only Git calls: no shell, bounded time, stdout only. */
+export async function runGit(cwd: string, args: readonly string[]): Promise<string> {
+  const { stdout } = await execFileAsync("git", [...args], {
+    cwd,
+    maxBuffer: 8 * 1024 * 1024,
+    timeout: 5000,
+    windowsHide: true,
+  });
+  return stdout;
+}

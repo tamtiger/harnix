@@ -1,0 +1,173 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-104848-doctor-allow-warnings",
+  "epicId": "20261020-104845-workspace-and-gate-improvements",
+  "title": "Thêm --allow-warnings cho doctor để pipeline không fail khi chỉ có cảnh báo",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cho phép harnix doctor --allow-warnings thoát 0 khi summary.errors bằng 0 dù có cảnh báo, giữ nguyên mặc định (exit 1 khi có cảnh báo, exit 2 khi trạng thái invalid) vì đó là hợp đồng đóng băng.",
+  "nonGoals": [
+    "Không đổi mặc định của doctor và không đổi trường ok trong JSON v2.",
+    "Không che lỗi hay trạng thái invalid."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix doctor --allow-warnings thoát 0 khi summary.errors bằng 0 dù summary.warnings lớn hơn 0; JSON in ra giữ nguyên (ok vẫn phản ánh có cảnh báo).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Mặc định không đổi: doctor không cờ vẫn thoát 1 khi có cảnh báo và 2 khi project hoặc global integration invalid; --allow-warnings không bao giờ che lỗi (errors lớn hơn 0 vẫn thoát khác 0) hay trạng thái invalid.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Cờ mới được khai báo và có test hợp đồng CLI mới, mô tả đúng ngữ nghĩa mã thoát trong README, docs/HARNIX_PRD.md, docs/HARNIX_WORKFLOW.md và docs/IMPLEMENTATION_PLAN.md mục 4 (nếu các file này nêu mã thoát doctor); --allow-warnings dùng được cùng --fix và --global.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Toàn bộ test suite của dự án và test:gates pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test mã thoát doctor và hợp đồng CLI",
+      "command": "pnpm exec vitest run test/unit/core/doctor test/integration/scenarios/doctor-exit.test.ts test/workflow/cli-contract.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/cli-workflow-commands.ts",
+    "src/core/doctor",
+    "test/integration/scenarios/doctor-exit.test.ts",
+    "test/workflow/cli-contract.test.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Dùng cờ opt-in --allow-warnings thay vì đổi mặc định hoặc thêm --strict.",
+      "rationale": "Mặc định exit 1 khi ok là false nằm trong hợp đồng đóng băng và có thể đang được CI dựa vào; đổi mặc định là thay đổi phá vỡ. Một cờ opt-in cho phép pipeline chấp nhận cảnh báo mà không ảnh hưởng người khác."
+    },
+    {
+      "id": "dec-2",
+      "text": "Chưa rõ 52 cảnh báo trong báo cáo đến từ mã nào: legacy-task-schema đã chỉ là info với task đã kết thúc (project-tasks.ts).",
+      "rationale": "Cần danh sách findings thật của dự án đó để biết có phải lỗi phân loại hay drift global thật; ghi lại trong rủi ro còn lại, không đoán."
+    },
+    {
+      "id": "dec-user-1",
+      "text": "Chọn cờ opt-in --allow-warnings, giữ nguyên mặc định của doctor.",
+      "rationale": "Không phá CI đang dựa vào exit 1 khi có warning và không đổi hợp đồng mã thoát đóng băng."
+    },
+    {
+      "id": "dec-ver",
+      "text": "Phiên bản 2.13.0-dev.3, kind added. doctorExitCode đặt ở src/core/doctor/exit-code.ts; test mã thoát nằm trong test/integration/scenarios/doctor-exit.test.ts qua runCli.",
+      "rationale": "Review: doctor.test.ts không có runCli, cli-workflow-commands.ts đã 270 dòng."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T11:33:48.540+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/doctor test/integration/scenarios/doctor-exit.test.ts test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7fa6de8c42968f130bd64b2c4177e624b3fb179af10547730713ff2db44d6335"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T11:33:53.013+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9fd0a1f06f3f8c515effdad991e308f2ab290bb00b0c7d5b870622826ceece5a"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T11:35:14.423+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5b6ea5f9a60d278cf57837171f43089679f4a868a4bfb8dc890a8b9298b061fa"
+    }
+  ],
+  "createdAt": "2026-10-20T10:48:45.000+07:00",
+  "updatedAt": "2026-10-20T11:35:41.002+07:00",
+  "completedAt": "2026-10-20T11:35:41.002+07:00"
+}

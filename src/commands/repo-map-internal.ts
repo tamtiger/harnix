@@ -1,4 +1,3 @@
-import { resolve } from "node:path";
 import { readConfig } from "src/core/config/config.js";
 import { resolveActiveTask } from "src/core/tasks/task.js";
 import {
@@ -12,6 +11,7 @@ import {
 import { queryWorkspaceRepoMap, refreshWorkspaceRepoMap } from "src/core/repo-map/workspace.js";
 import { buildProjectEventMatrix, buildWorkspaceEventMatrix } from "src/core/repo-map/event-matrix.js";
 import { findInitializedProject } from "src/utils/project-discovery.js";
+import { resolveWorkspaceRoot } from "src/core/workspace/resolve-root.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { compareCodeUnits } from "src/utils/order.js";
 
@@ -197,12 +197,4 @@ function terms(...values: string[]): string[] {
         .match(/[\p{L}\p{N}_-]+/gu) ?? [],
     ),
   ].sort(compareCodeUnits);
-}
-
-async function resolveWorkspaceRoot(cwd: string, workspacePath?: string): Promise<string> {
-  if (workspacePath !== undefined) {
-    return resolve(cwd, workspacePath);
-  }
-  const project = await findInitializedProject({ cwd });
-  return project.kind === "ready" ? project.root : cwd;
 }

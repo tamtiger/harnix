@@ -6,13 +6,19 @@ import { reportSkill, reportSkillCatalog, reportSkillReference } from "./command
 import { discoverProjectSkills, type SkillTemplate } from "./core/spec/project-skills.js";
 import { runLearning, type LearningCommandOptions } from "./commands/learning.js";
 import { searchMemory } from "./commands/mem.js";
-import { inspectProjectStatus, explainProjectStatus, summarizeProjectStatus } from "./commands/status.js";
+import {
+  inspectProjectStatus,
+  inspectWorkspaceGitStatus,
+  explainProjectStatus,
+  summarizeProjectStatus,
+} from "./commands/status.js";
 import { listProjectTasks } from "./commands/tasks.js";
 import { listPublicEpics, detailPublicEpic } from "./commands/epic.js";
 import { resumeProjectTask } from "./commands/resume.js";
 import { pauseProjectTask } from "./commands/pause.js";
 import { reportProjectContext } from "./commands/context-report.js";
 import { diagnoseProject } from "./commands/doctor.js";
+import { doctorExitCode } from "./core/doctor/exit-code.js";
 import { inspectVerifyPlan } from "./commands/verify-plan.js";
 import { runRepoMapCommand } from "./commands/repo-map-internal.js";
 import { parsePlatformId } from "./core/platform/registry.js";
@@ -78,8 +84,16 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--explain", "Include required-check freshness and readiness/completion blockers")
     .option("--summary", "Print a concise micro-summary under 80 tokens")
     .option("--limit <count>", "Maximum required checks when --explain is set", "20")
-    .action(async (options: { explain?: boolean; summary?: boolean; limit: string }) => {
+    .option("--workspace [path]", "Read-only Git table (branch, changes, upstream) of the sub-repositories")
+    .action(async (options: StatusCliOptions, command: Command) => {
       const now = programOptions.statusClock?.() ?? Date.now();
+      if (options.workspace !== undefined) {
+        if (options.explain === true || options.summary === true || command.getOptionValueSource("limit") === "cli")
+          throw new Error("--workspace cannot be combined with --explain, --summary or --limit.");
+        const path = typeof options.workspace === "string" ? options.workspace : undefined;
+        process.stdout.write(`${JSON.stringify(await inspectWorkspaceGitStatus(process.cwd(), path))}\n`);
+        return;
+      }
       const result =
         options.summary === true
           ? await summarizeProjectStatus(process.cwd(), now)
@@ -195,7 +209,8 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .command("doctor")
     .option("--fix", "Repair safe, unchanged managed files")
     .option("--global", "Allow --fix to reconcile safe global integration drift")
-    .action(async (options: { fix?: boolean; global?: boolean }) => {
+    .option("--allow-warnings", "Exit 0 when only warnings remain; errors and invalid state still fail")
+    .action(async (options: { allowWarnings?: boolean; fix?: boolean; global?: boolean }) => {
       const result = await diagnoseProject({
         ...(programOptions.capabilityLookup === undefined ? {} : { capabilityLookup: programOptions.capabilityLookup }),
         ...(programOptions.commandLookup === undefined ? {} : { commandLookup: programOptions.commandLookup }),
@@ -206,12 +221,8 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
         root: await resolveProjectRoot(process.cwd()),
       });
       process.stdout.write(`${JSON.stringify(result)}\n`);
-      if (
-        result.project.status === "invalid" ||
-        result.globalIntegrations.some((integration) => integration.status === "invalid")
-      )
-        process.exitCode = 2;
-      else if (!result.ok) process.exitCode = 1;
+      const exitCode = doctorExitCode(result, options.allowWarnings === true);
+      if (exitCode !== 0) process.exitCode = exitCode;
     });
 
   program
@@ -267,4 +278,11 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
           : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
       await runInternalContextCommand({ hookInput, platform });
     });
+}
+
+interface StatusCliOptions {
+  explain?: boolean;
+  summary?: boolean;
+  limit: string;
+  workspace?: boolean | string;
 }

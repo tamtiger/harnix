@@ -1,0 +1,148 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-104846-fix-measure-footprint-gate",
+  "epicId": "20261020-104845-workspace-and-gate-improvements",
+  "title": "Sửa cổng measure:footprint đang đỏ do giả định readiness sai",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Để scripts/measure-footprint.mjs không tự suy ra trạng thái cần xử lý từ readiness khác installed mà dựa vào chính hợp đồng của setup (exit 1 khi và chỉ khi có nội dung trên stderr), nên cổng không còn đỏ với Codex ở installed-pending-trust.",
+  "nonGoals": [
+    "Không đổi hành vi của harnix setup hay registry nền tảng.",
+    "Không hạ ngưỡng giảm 50% của footprint."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "pnpm run measure:footprint exit 0 sau pnpm build: script không còn dùng điều kiện readiness khác installed để kỳ vọng exit 1; Codex ở installed-pending-trust (readiness khỏe theo registry) không làm cổng fail.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-measure-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "assertSetupExitContract vẫn kiểm hợp đồng: JSON hợp lệ có scope user và mảng platforms; setup thoát 1 chỉ khi stderr có nội dung (stderr không rỗng không suy ra thoát 1 vì setupNotice của Codex nằm ở stderr với thoát 0); mọi platform có readiness installed hoặc installed-pending-trust và không warning thì thoát 0; một fixture đầu vào giả cho script chứng minh script vẫn lỗi khi thoát 1 mà stderr rỗng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-measure-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test suite của dự án và test:gates pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-measure",
+      "description": "measure:footprint exit 0 sau build (cần dist/ có sẵn)",
+      "command": "pnpm run measure:footprint",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "scripts/measure-footprint.mjs",
+    "test/workflow/package-contract.test.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Dùng sự hiện diện của stderr làm tín hiệu cần xử lý thay vì sao chép logic healthyReadiness của registry vào script.",
+      "rationale": "CLI chỉ ghi stderr khi có readiness không khỏe hoặc cảnh báo (reportActionableSetupReadiness); script .mjs không import được registry từ bản bundle, và sao chép bảng readiness sẽ lại lệch khi thêm nền tảng."
+    },
+    {
+      "id": "dec-ver",
+      "text": "Phiên bản 2.13.0-dev.1, kind fixed. Hợp đồng: thoát 1 kéo theo stderr khác rỗng, không ngược lại (setupNotice của Codex ở stderr với thoát 0); healthy gồm installed và installed-pending-trust.",
+      "rationale": "Review: đọc reportActionableSetupReadiness trong src/cli-helpers.ts và healthyReadiness của Codex."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-chk-measure-1",
+      "checkId": "chk-measure",
+      "recordedAt": "2026-10-20T11:25:40.311+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm measure:footprint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "16e5def265c7db87f6bf0edac8028f9c1344f666f0f8b4c3308a62e6aae8f430"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T11:25:44.487+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bd942ac0fec538212e99a2f7c25221ecafb7f2b045337e3f1cca524cacf94f74"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T11:26:51.295+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "37be028452762f3c361b4a41ef744decd198b7354116f8c101ad2a2bde6f0c96"
+    }
+  ],
+  "createdAt": "2026-10-20T10:48:45.000+07:00",
+  "updatedAt": "2026-10-20T11:27:20.751+07:00",
+  "completedAt": "2026-10-20T11:27:20.751+07:00"
+}

@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import { createIsolatedUserEnvironment } from "./isolated-user-home.mjs";
+import { assertSetupExitContract } from "./setup-exit-contract.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const project = await mkdtemp(join(tmpdir(), "harnix-footprint-project-"));
@@ -63,26 +64,6 @@ function run(executable, args, cwd, env, expectedStatuses = [0]) {
   if (!expectedStatuses.includes(result.status))
     throw new Error(result.error?.message || result.stderr || result.stdout || "unknown command failure");
   return result;
-}
-
-function assertSetupExitContract({ status, stderr, stdout }) {
-  let result;
-  try {
-    result = JSON.parse(stdout);
-  } catch {
-    throw new Error(`setup did not return valid JSON: ${stdout}`);
-  }
-  if (result?.scope !== "user" || !Array.isArray(result.platforms))
-    throw new Error(`setup returned an unexpected global result: ${stdout}`);
-  const actionable = result.platforms.some(
-    (platform) =>
-      platform?.readiness !== "installed" || !Array.isArray(platform?.warnings) || platform.warnings.length > 0,
-  );
-  const expectedStatus = actionable ? 1 : 0;
-  if (status !== expectedStatus)
-    throw new Error(`setup returned exit ${status}; expected ${expectedStatus} for its readiness result.`);
-  if (actionable !== stderr.trim().length > 0)
-    throw new Error("setup stderr did not match its actionable readiness result.");
 }
 
 async function assertNoProjectLocalPlatformSurfaces(projectRoot) {
