@@ -17,6 +17,7 @@ import { inspectVerifyPlan } from "./commands/verify-plan.js";
 import { runRepoMapCommand } from "./commands/repo-map-internal.js";
 import { parsePlatformId } from "./core/platform/registry.js";
 import { readBoundedInput } from "./utils/bounded-input.js";
+import { requireInitializedProject } from "./utils/project-discovery.js";
 import {
   parseReportLimit,
   parseTaskLimit,
@@ -43,7 +44,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
         if (limit !== undefined && (!Number.isInteger(limit) || limit < 1))
           throw new Error("--limit must be a positive integer.");
         const result = await searchMemory({
-          root: await resolveProjectRoot(process.cwd()),
+          root: await requireInitializedProject(process.cwd()),
           query: options.query ?? query,
           user: options.user,
           limit,
@@ -175,7 +176,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
       if (options.raw === true && name === undefined) throw new Error("--raw requires a skill name.");
       let projectSkills: readonly SkillTemplate[] = [];
       try {
-        projectSkills = await discoverProjectSkills(await resolveProjectRoot(process.cwd()));
+        projectSkills = await discoverProjectSkills(await requireInitializedProject(process.cwd()));
       } catch {
         // Missing project root is expected outside initialized projects.
       }
@@ -237,10 +238,21 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .description("Inspect deterministic test, lint, typecheck, and format commands for this project and its packages")
     .option("--recursive", "Discover nested repositories, solutions and packages recursively")
     .option("--impact [path]", "Show affected test files and focused test command for modified files or an exact path")
-    .action(async (options: { recursive?: boolean; impact?: string | boolean }) => {
-      const plan = await inspectVerifyPlan(process.cwd(), options);
-      process.stdout.write(`${JSON.stringify(plan)}\n`);
-    });
+    .option("--path <dir>", "Only the packages inside or containing this repository-relative directory")
+    .option("--changed", "Only the packages that hold a file Git reports as changed")
+    .option("--brief", "Only packages with tests, each with just its path and test command")
+    .action(
+      async (options: {
+        recursive?: boolean;
+        impact?: string | boolean;
+        path?: string;
+        changed?: boolean;
+        brief?: boolean;
+      }) => {
+        const plan = await inspectVerifyPlan(process.cwd(), options);
+        process.stdout.write(`${JSON.stringify(plan)}\n`);
+      },
+    );
 
   const contextHookStdinIdleTimeoutMs = 2_000;
   program

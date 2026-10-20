@@ -2,7 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { WORKFLOW_HANDLERS, type WorkflowContext } from "src/commands/workflow-handlers.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
-import { initializeUtcProject, loadPersistedTask, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
+import {
+  implementingTaskV3,
+  initializeUtcProject,
+  loadPersistedTask,
+  taskV3,
+  writeProjectSource,
+} from "test/support/workflow-fixtures.js";
 
 const temporaryRepository = useTemporaryRepositories();
 const BYTE_ORDER_MARK = String.fromCharCode(0xfeff);
@@ -29,6 +35,8 @@ describe("workflow handlers", () => {
         "learn",
         "migrate",
         "preflight",
+        "removeCriterion",
+        "removeDecision",
         "replaceCheck",
         "runCheck",
         "runChecks",
@@ -96,5 +104,26 @@ describe("workflow handlers", () => {
     await expect(WORKFLOW_HANDLERS.replaceCheck!(context(root, "", { replaceCheck: ["only-one"] }))).rejects.toThrow(
       "requires exactly two check IDs",
     );
+  });
+
+  it("addRisk keeps the mitigation inside the risk text", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+
+    await WORKFLOW_HANDLERS.addRisk!(
+      context(root, undefined, {
+        addRisk: "r1",
+        text: "Có thể mất dữ liệu",
+        mitigation: "Sao lưu trước",
+        severity: "high",
+      }),
+    );
+
+    const persisted = (await loadPersistedTask(root, task.id)) as {
+      residualRisks: { text: string; severity: string }[];
+    };
+    expect(persisted.residualRisks).toEqual([
+      expect.objectContaining({ text: "Có thể mất dữ liệu (Mitigation: Sao lưu trước)", severity: "high" }),
+    ]);
   });
 });

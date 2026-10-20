@@ -21,6 +21,7 @@ export {
   setTitleWorkflow,
 } from "./plan-edit.js";
 export type { CheckEdit, PlanEditOptions } from "./plan-edit.js";
+export { removeCriterionWorkflow, removeDecisionWorkflow } from "./plan-remove.js";
 export { setCriterionWorkflow } from "./set-criterion.js";
 export { replaceCheckWorkflow } from "./replace-check.js";
 export type { ReplaceCheckInput } from "./replace-check.js";

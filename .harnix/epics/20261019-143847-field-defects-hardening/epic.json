@@ -1,0 +1,15 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261019-143847-field-defects-hardening",
+  "title": "Khắc phục lỗi thực địa của Harnix trên repo đa dịch vụ .NET/ABP và Windows",
+  "goal": "Sửa các lỗi Harnix đã được xác nhận bằng mã nguồn từ báo cáo thực địa của hai agent: dò gốc dự án theo .harnix gần nhất thay vì git root, thông báo đúng cho cổng baseline của --criterion, chạy được lệnh .exe có ký tự | trên Windows và phân loại lỗi hạ tầng, nhận diện đúng test project .NET cùng lọc verify-plan, chuẩn hóa EOL khi băm inputDigest (tương thích digest cũ), bổ sung các cờ CLI còn thiếu và làm sạch đầu ra/ghi file ở lệnh read-only.",
+  "nonGoals": [
+    "Không đổi schema TaskRecord v3 hay EpicRecord v1.",
+    "Không nới cổng --criterion --met: tiêu chí chỉ met khi có bằng chứng xanh thật.",
+    "Không làm baseline cấp dự án theo tên test (đề xuất #12) trong epic này; cần thiết kế riêng.",
+    "Không thêm daemon, mạng im lặng hay package thứ hai."
+  ],
+  "createdAt": "2026-10-19T14:38:47.328+07:00",
+  "updatedAt": "2026-10-19T15:26:03.425+07:00"
+}

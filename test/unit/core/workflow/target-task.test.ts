@@ -9,8 +9,11 @@ import {
   setCheckWorkflow,
   setPathsWorkflow,
 } from "src/core/workflow/plan-edit.js";
+import { removeCriterionWorkflow, removeDecisionWorkflow } from "src/core/workflow/plan-remove.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
+import { setCriterionWorkflow } from "src/core/workflow/set-criterion.js";
 import { withTargetTask } from "src/core/workflow/target-task.js";
+import { buildCheck, buildCriterion } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { initializeUtcProject, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
 
@@ -83,6 +86,41 @@ describe("--task targeting", () => {
   });
 });
 
+describe("--task with criterion edits", () => {
+  it("rewrites and removes on the targeted task and leaves the active one alone", async () => {
+    const root = await temporaryRepository();
+    const active = await twoTasks(root);
+
+    await withTargetTask(OTHER, async () => {
+      await setCriterionWorkflow(root, { id: "a", text: "Nội dung đã sửa" }, {}, NOW);
+      await addDecisionWorkflow(root, { id: "d1", text: "t", rationale: "r" }, NOW);
+      await removeDecisionWorkflow(root, "d1", NOW);
+    });
+
+    const target = await persisted(root, OTHER);
+    expect(target.acceptanceCriteria[0]?.text).toBe("Nội dung đã sửa");
+    expect(target.decisions ?? []).toEqual([]);
+    expect((await persisted(root, active.id)).acceptanceCriteria[0]?.text).toBe("done");
+    expect((await resolveActiveTask(`${root}/.harnix`))?.id).toBe(active.id);
+  });
+});
+
+describe("--task with --remove-criterion", () => {
+  it("removes a criterion of the targeted task and leaves the active one alone", async () => {
+    const root = await temporaryRepository();
+    const active = await twoTasks(root, {
+      acceptanceCriteria: [buildCriterion({ id: "a", text: "done" }), buildCriterion({ id: "b", text: "also" })],
+      validationPlan: [buildCheck({ id: "check", criterionIds: ["a", "b"], inputs: ["src/**"] })],
+    });
+
+    await withTargetTask(OTHER, () => removeCriterionWorkflow(root, "b", NOW));
+
+    expect((await persisted(root, OTHER)).acceptanceCriteria.map((criterion) => criterion.id)).toEqual(["a"]);
+    expect((await persisted(root, OTHER)).validationPlan[0]?.criterionIds).toEqual(["a"]);
+    expect((await persisted(root, active.id)).acceptanceCriteria).toHaveLength(1);
+  });
+});
+
 describe("--task flag ownership", () => {
   it("belongs to the edit actions and explains why state changes are refused", () => {
     const extras: Record<string, object> = {
@@ -90,8 +128,19 @@ describe("--task flag ownership", () => {
       addDecision: { text: "t", rationale: "r" },
       addRisk: { text: "t" },
       setPaths: { relevantPath: ["a"] },
+      setCriterion: { text: "t" },
     };
-    for (const action of ["setCheck", "addCriterion", "setPaths", "addDecision", "addRisk", "batch"])
+    for (const action of [
+      "setCheck",
+      "addCriterion",
+      "setPaths",
+      "addDecision",
+      "addRisk",
+      "batch",
+      "setCriterion",
+      "removeDecision",
+      "removeCriterion",
+    ])
       expect(() => assertFlagGroups(action, { task: OTHER, ...extras[action] })).not.toThrow();
     for (const action of ["transition", "finish", "cancel", "runCheck", "evidence"])
       expect(() => assertFlagGroups(action, { task: OTHER })).toThrow(/--task .*active task/u);

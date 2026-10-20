@@ -1,3 +1,4 @@
+import { writeFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 import { appendEvidenceFlagsWorkflow } from "src/core/workflow/evidence-flags.js";
@@ -138,5 +139,57 @@ describe("workflow criterion transport with an authorized red baseline", () => {
     const saved = await markCriteriaMetWorkflow(root, { criterionIds: ["a"] }, NOW);
 
     expect(saved.acceptanceCriteria[0]).toMatchObject({ status: "met", evidenceIds: ["ev-focused-1"] });
+  });
+});
+
+describe("workflow criterion refusal reasons", () => {
+  it("says that a required check has not run yet", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+
+    await expect(markCriteriaMetWorkflow(root, { criterionIds: ["a"] }, NOW)).rejects.toThrow(
+      /required check\(s\): check \(not run yet\)\./u,
+    );
+  });
+
+  it("says that the latest run of a required check failed", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    await appendEvidenceFlagsWorkflow(root, { check: "check", result: "fail", exitCode: "1", summary: "RED" }, NOW);
+
+    await expect(markCriteriaMetWorkflow(root, { criterionIds: ["a"] }, NOW)).rejects.toThrow(
+      /check \(latest run failed\)/u,
+    );
+  });
+
+  it("says that the inputs changed after the last pass", async () => {
+    const root = await temporaryRepository();
+    await passingRun(root);
+    await writeFile(`${root}/src/a.ts`, "export const a = 3;\n");
+
+    await expect(markCriteriaMetWorkflow(root, { criterionIds: ["a"] }, NOW)).rejects.toThrow(
+      /check \(inputs changed since its last pass\)/u,
+    );
+  });
+
+  it("explains that a declared baseline has no effect without another passing check covering the criterion", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    await appendEvidenceFlagsWorkflow(root, { check: "check", result: "fail", exitCode: "1", summary: "RED" }, NOW);
+    await setBaselineWorkflow(
+      root,
+      { checkId: "check", result: "fail", classification: "pre-existing", authorizedBy: "user", scope: "suite" },
+      "2026-08-13T00:12:00.000Z",
+    );
+
+    const error = await markCriteriaMetWorkflow(root, { criterionIds: ["a"] }, NOW).then(
+      () => undefined,
+      (caught: unknown) => caught as Error,
+    );
+
+    expect(error?.message).toMatch(/has no fresh passing evidence from required check\(s\): check \(/u);
+    expect(error?.message).toMatch(/baseline is declared but has no effect/u);
+    expect(error?.message).toMatch(/another passing required check without a baseline that covers/u);
+    expect(error?.message).toMatch(/--set-check/u);
   });
 });

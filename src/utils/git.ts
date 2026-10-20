@@ -22,9 +22,7 @@ export async function readGitContext(cwd: string): Promise<GitContext | undefine
       execFileAsync("git", ["branch", "--show-current"], { cwd, windowsHide: true, timeout: 2000 }).catch(
         () => undefined,
       ),
-      execFileAsync("git", ["status", "--porcelain"], { cwd, windowsHide: true, timeout: 2000 }).catch(
-        () => undefined,
-      ),
+      execFileAsync("git", ["status", "--porcelain"], { cwd, windowsHide: true, timeout: 2000 }).catch(() => undefined),
     ]);
 
     if (!commitResult || commitResult.stdout.trim().length === 0) {

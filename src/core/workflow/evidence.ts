@@ -23,7 +23,7 @@ export async function appendEvidenceWorkflow(
   const saved = await saveWorkflow(root, {
     task: { ...task, evidence: [...task.evidence, evidence], updatedAt: laterTimestamp(task.updatedAt, now) },
   });
-  if (evidence.result === "pass") {
+  if (evidence.result === "pass" && evidence.checkId !== undefined) {
     await syncPlanChecklistPass(harnixRoot, task.id, evidence.checkId);
   }
   return saved;

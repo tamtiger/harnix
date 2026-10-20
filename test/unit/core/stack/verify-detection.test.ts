@@ -114,16 +114,58 @@ describe("detectEcosystemVerify (ac-detect: >= 8 ecosystems)", () => {
     expect(mavenResult?.commands.lint).toBe("./mvnw verify");
   });
 
-  it("detects .NET verify commands", async () => {
+  it("detects .NET verify commands for a test project", async () => {
     const root = await createFixture();
-    await writeFixture(root, "Demo.csproj", '<Project Sdk="Microsoft.NET.Sdk" />\n');
-    await writeFixture(root, "UnitTest1.cs", "public class UnitTest1 {}\n");
+    await writeFixture(
+      root,
+      "Demo.Tests.csproj",
+      '<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="Microsoft.NET.Test.Sdk" Version="17" /></ItemGroup></Project>\n',
+    );
 
     const result = await detectEcosystemVerify(root, ".");
     expect(result?.ecosystem).toBe("dotnet");
     expect(result?.hasTests).toBe(true);
     expect(result?.commands.test).toBe("dotnet test");
     expect(result?.commands.format).toBe("dotnet format --verify-no-changes");
+  });
+
+  it("reports no tests and no test command for a .NET class library", async () => {
+    const root = await createFixture();
+    await writeFixture(root, "Domain.csproj", '<Project Sdk="Microsoft.NET.Sdk" />\n');
+
+    const result = await detectEcosystemVerify(root, ".");
+    expect(result?.ecosystem).toBe("dotnet");
+    expect(result?.hasTests).toBe(false);
+    expect(result?.commands.test).toBeUndefined();
+    expect(result?.commands.format).toBe("dotnet format --verify-no-changes");
+  });
+
+  it("recognises a Visual Basic project and an upper-case solution file as .NET", async () => {
+    const vb = await createFixture();
+    await writeFixture(vb, "Legacy.VBPROJ", "<Project />\n");
+    const sln = await createFixture();
+    await writeFixture(sln, "App.SLN", "");
+
+    expect((await detectEcosystemVerify(vb, "."))?.ecosystem).toBe("dotnet");
+    expect((await detectEcosystemVerify(sln, "."))?.ecosystem).toBe("dotnet");
+  });
+
+  it("targets the solution file when the directory holds a solution with a test project", async () => {
+    const root = await createFixture();
+    await writeFixture(
+      root,
+      "Demo.sln",
+      'Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "T", "tests\\T\\T.csproj", "{1}"\nEndProject\n',
+    );
+    await writeFixture(
+      root,
+      "tests/T/T.csproj",
+      '<Project><ItemGroup><PackageReference Include="xunit" Version="2" /></ItemGroup></Project>\n',
+    );
+
+    const result = await detectEcosystemVerify(root, ".");
+    expect(result?.hasTests).toBe(true);
+    expect(result?.commands.test).toBe("dotnet test Demo.sln");
   });
 
   it("detects PHP Composer verify commands", async () => {

@@ -35,7 +35,7 @@ ${criteriaList}
 ## 4. Architectural & Safety Constraints (Ràng buộc Kiến trúc & An toàn)
 - Bảo đảm ranh giới kiến trúc và tính toàn vẹn của mã nguồn.
 - Giữ vững các invariant hiện tại, tuân thủ TDD và phòng ngừa hồi quy (regression).
-- Mọi thay đổi tuân thủ quy tắc giới hạn LOC và không để lọt rò rỉ bảo mật.
+- Mọi thay đổi tuân thủ AGENTS.md và các guide trong .harnix/spec/guides/ của dự án, và không để lọt rò rỉ bảo mật.
 `;
 }
 
@@ -49,10 +49,7 @@ export function renderPlanTemplate(task: TaskRecordV3): string {
   const checkItems =
     task.validationPlan.length > 0
       ? task.validationPlan
-          .map(
-            (chk) =>
-              `- [ ] [${chk.id}] ${chk.description || chk.id} (Lệnh: \`${chk.command || "pnpm test"}\`)`,
-          )
+          .map((chk) => `- [ ] [${chk.id}] ${chk.description || chk.id} (Lệnh: \`${chk.command || "pnpm test"}\`)`)
           .join("\n")
       : "- [ ] [check-1] Triển khai mã nguồn và kiểm chứng";
 
@@ -60,8 +57,7 @@ export function renderPlanTemplate(task: TaskRecordV3): string {
     task.validationPlan.length > 0
       ? task.validationPlan
           .map(
-            (chk) =>
-              `| ${chk.criterionIds.join(", ") || "-"} | ${chk.id} | \`${chk.command || "-"}\` | ${chk.scope} |`,
+            (chk) => `| ${chk.criterionIds.join(", ") || "-"} | ${chk.id} | \`${chk.command || "-"}\` | ${chk.scope} |`,
           )
           .join("\n")
       : "| ac-1 | check-1 | `pnpm test` | focused |";
@@ -75,8 +71,7 @@ ${checkItems}
 
 ## Guardrails & Invariants
 - Duy trì tính tương thích ngược 100% (Backward Compatibility).
-- Tuân thủ giới hạn 300 LOC/file trong src/core/.
-- Không vi phạm hướng phụ thuộc kiến trúc (commands -> core -> utils).
+- Tuân thủ các quy ước kiến trúc và giới hạn của dự án (AGENTS.md, .harnix/spec/guides/).
 
 ## Verification Matrix
 | Criterion | Check ID | Command | Scope |

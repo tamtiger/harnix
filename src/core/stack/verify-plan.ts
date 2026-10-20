@@ -28,6 +28,12 @@ export interface ImpactVerification {
 export interface VerifyPlanOptions {
   recursive?: boolean | undefined;
   impact?: string | boolean | undefined;
+  /** Keep the packages inside or containing this repository-relative directory. */
+  path?: string | undefined;
+  /** Keep the packages that hold a file Git reports as changed. */
+  changed?: boolean | undefined;
+  /** Keep only packages with tests and, for each, only its path, `hasTests` and test command. */
+  brief?: boolean | undefined;
 }
 
 export interface VerifyPlan {
@@ -81,10 +87,57 @@ export async function buildVerifyPlan(projectRoot: string, options?: VerifyPlanO
     schemaVersion: 1,
     hasTests,
     commands,
-    packages,
+    packages: await scopePackages(root, packages, options),
     warnings,
     ...(impact ? { impact } : {}),
   };
+}
+
+async function scopePackages(
+  root: string,
+  packages: PackageVerifyPlan[],
+  options: VerifyPlanOptions | undefined,
+): Promise<PackageVerifyPlan[]> {
+  let scoped = packages;
+  const scope = scopePath(options?.path);
+  if (scope !== undefined) {
+    scoped = scoped.filter(
+      (pkg) => pkg.path === scope || pkg.path.startsWith(`${scope}/`) || scope.startsWith(`${pkg.path}/`),
+    );
+  }
+  if (options?.changed === true) {
+    const reported = await changedFiles(root);
+    // A clean tree changes nothing; only when Git cannot answer is the list left whole.
+    if (reported !== undefined) {
+      const files = reported.map((file) => file.replace(/\/+$/u, ""));
+      scoped = scoped.filter((pkg) =>
+        files.some(
+          (file) =>
+            file === "." || file === pkg.path || file.startsWith(`${pkg.path}/`) || pkg.path.startsWith(`${file}/`),
+        ),
+      );
+    }
+  }
+  if (options?.brief === true) {
+    scoped = scoped
+      .filter((pkg) => pkg.hasTests)
+      .map((pkg) => ({
+        path: pkg.path,
+        hasTests: true,
+        commands: pkg.commands.test === undefined ? {} : { test: pkg.commands.test },
+      }));
+  }
+  return scoped;
+}
+
+function scopePath(value: string | undefined): string | undefined {
+  const trimmed = value?.trim().replace(/\/+$/u, "");
+  if (trimmed === undefined || trimmed === "" || trimmed === ".") return undefined;
+  try {
+    return normalizeRepositoryPath(trimmed);
+  } catch {
+    throw new Error("--path must be a repository-relative directory inside the project.");
+  }
 }
 
 async function computeImpactVerification(
@@ -183,27 +236,37 @@ function formatTestCommand(
   return `test ${testList}`;
 }
 
-async function detectChangedFiles(projectRoot: string): Promise<string[]> {
+/**
+ * Paths Git reports as changed, relative to `projectRoot` (Git prints them from its top level, so the part of the
+ * path above `projectRoot` is cut and files outside it are dropped); NUL-separated, so a space or quote in a name
+ * survives. Undefined when Git cannot say.
+ */
+async function changedFiles(projectRoot: string): Promise<string[] | undefined> {
   try {
     const { execFile } = await import("node:child_process");
     const { promisify } = await import("node:util");
     const execFileAsync = promisify(execFile);
-    const { stdout } = await execFileAsync("git", ["status", "--porcelain"], {
-      cwd: projectRoot,
-      windowsHide: true,
-    });
+    const options = { cwd: projectRoot, windowsHide: true };
+    const prefix = (await execFileAsync("git", ["rev-parse", "--show-prefix"], options)).stdout.trim();
+    const { stdout } = await execFileAsync("git", ["status", "--porcelain", "-z"], options);
+    const entries = stdout.split("\0").filter((entry) => entry !== "");
     const files: string[] = [];
-    for (const raw of stdout.split("\n")) {
-      const trimmed = raw.trim();
-      if (!trimmed) continue;
-      const part = trimmed.slice(2).trim();
-      const file = part.includes(" -> ") ? part.split(" -> ")[1]! : part;
-      files.push(file.replaceAll("\\", "/"));
+    for (let index = 0; index < entries.length; index += 1) {
+      const entry = entries[index] as string;
+      const path = entry.slice(3);
+      // An untracked directory that is the whole Harnix root reports as the prefix itself.
+      if (path.startsWith(prefix)) files.push(path.slice(prefix.length) || ".");
+      // A rename or copy is followed by its original path, which is not a changed file of its own.
+      if (/[RC]/u.test(entry.slice(0, 2))) index += 1;
     }
     return files;
   } catch {
-    return [];
+    return undefined;
   }
+}
+
+async function detectChangedFiles(projectRoot: string): Promise<string[]> {
+  return (await changedFiles(projectRoot)) ?? [];
 }
 
 function mergePackages(

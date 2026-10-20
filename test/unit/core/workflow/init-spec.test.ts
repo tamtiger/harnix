@@ -18,6 +18,11 @@ describe("parseCheckSpec", () => {
     });
   });
 
+  it("reads an optional cwd and leaves it out when absent", () => {
+    expect(parseCheckSpec("id=c;command=dotnet test;criteria=ac-1;input=svc/**;cwd=svc").cwd).toBe("svc");
+    expect("cwd" in parseCheckSpec("id=c;command=dotnet test;criteria=ac-1;input=svc/**")).toBe(false);
+  });
+
   it("defaults the scope to focused and leaves the description out", () => {
     const spec = parseCheckSpec("id=c;command=node -e 0;criteria=ac-1;input=src/**");
 

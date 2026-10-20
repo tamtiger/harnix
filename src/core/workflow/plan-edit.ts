@@ -219,12 +219,15 @@ export async function addDecisionWorkflow(
 
 export async function addRiskWorkflow(
   root: string,
-  input: { id: string; text: string; severity?: string | undefined },
+  input: { id: string; text: string; severity?: string | undefined; mitigation?: string | undefined },
   injectedNow?: string,
 ): Promise<TaskRecordV3> {
   const now = await currentInstant(root, injectedNow);
   const task = await activeV3(root);
-  const text = requireText(input.text, "--text");
+  const mitigation = input.mitigation?.trim();
+  const described = requireText(input.text, "--text");
+  // A risk has only id, text and severity (schema v3), so the mitigation travels inside the text.
+  const text = mitigation === undefined || mitigation === "" ? described : `${described} (Mitigation: ${mitigation})`;
   const severity = input.severity ?? "low";
   if (!SEVERITIES.includes(severity as (typeof SEVERITIES)[number]))
     throw new Error("--severity must be low, medium or high.");

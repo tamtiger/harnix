@@ -1,0 +1,207 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261019-165403-sync-docs-and-fix-lint",
+  "title": "Đồng bộ tài liệu theo epic 2.12.0 và sửa lỗi lint có sẵn",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cập nhật AGENTS.md, README, tài liệu docs, template agent, skill và workflow cho khớp hành vi mới của epic 2.12.0, rồi đưa pnpm run lint về exit 0 mà không đổi hành vi chạy.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Tài liệu và template (AGENTS.md, README.md, docs/, src/templates, src/skills, .harnix/workflow.md) mô tả đúng hành vi mới: dò .harnix gần nhất, tên lệnh .exe qua PATH, digest chuẩn hóa EOL với rawInputDigest, verify-plan --path/--changed/--brief và gom .NET theo solution, các cờ workflow mới, secretAdvisory theo .gitignore, phát hiện package ngoài npm.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "pnpm run lint (ESLint và Prettier) exit 0 trên toàn repository, chỉ sửa định dạng và kiểu, không đổi hành vi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-lint-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test suite và typecheck pass sau thay đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Sửa các lỗi review xác nhận được, mỗi lỗi có test hồi quy: (1) tên lệnh trần resolve ra .cmd hoặc .bat trên PATH được chạy bằng đường dẫn tuyệt đối đã resolve (không để cmd.exe tìm trong thư mục làm việc), vẫn giữ tên trần khi đường dẫn có ký tự cmd đặc biệt; (2) verify-plan --changed trả không package nào khi git báo cây sạch, vẫn trả đủ khi không có git, và đọc git status bằng -z để đường dẫn có dấu cách khớp; (3) package có manifest riêng (ví dụ package.json) cùng thư mục với project .NET mà solution tham chiếu không bị loại; (4) file shell, bat, cmd, Makefile, Dockerfile không bị chuẩn hóa CRLF khi băm digest; (5) thư mục tên bắt đầu bằng hai dấu chấm như ..foo không bị coi là ngoài gốc.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-fixes-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-lint",
+      "description": "Lint ESLint và Prettier phải exit 0",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run lint",
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test:gates",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-fixes",
+      "description": "Test hồi quy cho các lỗi do review phát hiện",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm exec vitest run test/unit/utils/check-runner.test.ts test/unit/core/stack test/unit/core/verification"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-lint-1",
+      "checkId": "chk-lint",
+      "recordedAt": "2026-10-19T17:07:14.560+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f82ebfc91ca49a9076e920763d6a419de55724fece7cb87f02b03a4dd718baee"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-19T17:07:19.102+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "c9724d49ad4d995f84fe1b4c51b5678726db06d39894566de955852b7c4abe52"
+    },
+    {
+      "id": "ev-chk-lint-2",
+      "checkId": "chk-lint",
+      "recordedAt": "2026-10-19T17:09:36.952+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0651569c1eb38c52996653704c20e535deab0c0a2dfc0fb02905b5625402a251"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-19T17:09:41.385+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bb5e4e1f232053898ca9f00852957151dc12dfad5828fbc297afd3de680d79db"
+    },
+    {
+      "id": "ev-chk-fixes-1",
+      "checkId": "chk-fixes",
+      "recordedAt": "2026-10-19T17:09:45.917+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/check-runner.test.ts test/unit/core/stack test/unit/core/verification — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6637972e8d3a8f785fd78e5a7bcfa0a9b89f63a0410aa6cecb9b589c5c1f1c91"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-19T17:10:49.637+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bc531b94af45cf21d5298601e7770565e4955ce8f8389a33ed49353ca4a07844"
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "README.md",
+    "docs",
+    "src/core/epics/epic.ts",
+    "src/core/stack",
+    "src/core/status.ts",
+    "src/core/tasks/task-review.ts",
+    "src/core/verification",
+    "src/core/workflow/ready-content.ts",
+    "src/skills",
+    "src/templates/harnix",
+    "src/utils/check-runner.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-19T16:54:03.322+07:00",
+  "updatedAt": "2026-10-19T17:11:11.804+07:00",
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Lỗi #4 của reviewer (cwd thoát gốc bị ghi lại) không sửa: normalizeRepositoryPath đã từ chối \"..\" và cwd= thừa qua saveWorkflow bị schema từ chối ngay lúc --init.",
+      "rationale": "Đã đọc normalizeRepositoryPath (paths.ts) và quy tắc cwd của check; khẳng định của reviewer không đúng."
+    },
+    {
+      "id": "dec-2",
+      "text": "Chuẩn hóa CRLF khi băm digest bỏ qua file nhạy cảm với kết thúc dòng (.sh, .bash, .zsh, .ksh, .bat, .cmd, Makefile, Dockerfile) thay vì chuẩn hóa mọi file không chứa byte NUL.",
+      "rationale": "CRLF làm hỏng shebang và Makefile nên nội dung hai dạng không tương đương; các file này vẫn băm theo byte thô."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-1",
+      "text": "Dashboard Code impact trong review.md chỉ có hàm hiển thị: task-store.ts không truyền codeImpact nên mục này không bao giờ xuất hiện, trong khi AGENTS.md, HARNIX_WORKFLOW.md, skill harnix-verify và kịch bản runner mô tả nó như tính năng hoạt động. Chưa sửa trong task này.",
+      "severity": "medium"
+    }
+  ],
+  "completedAt": "2026-10-19T17:11:11.804+07:00"
+}

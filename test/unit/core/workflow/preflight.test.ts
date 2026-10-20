@@ -7,7 +7,7 @@ import { saveWorkflow } from "src/core/workflow/save.js";
 import { saveTask, setActiveTask, type TaskRecordV3 } from "src/core/tasks/task.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { sha256 } from "src/utils/hashing.js";
-import { at } from "test/support/builders.js";
+import { at, buildEpic } from "test/support/builders.js";
 import { buildLearningEntry, writeJournalFile } from "test/support/learning-fixtures.js";
 import { initializeUtcProject, writeProjectSource, taskV3 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -370,9 +370,7 @@ describe("workflow preflight version skew", () => {
     await initializeUtcProject(root);
     const epicId = "20261015-120000-sample-epic";
     const taskId = "20261015-120001-member-task";
-    const epic = {
-      id: epicId, title: "Sample Epic", goal: "Epic goal", generator: "harnix" as const, schemaVersion: 1 as const, createdAt: at(10), updatedAt: at(10),
-    };
+    const epic = buildEpic({ id: epicId, title: "Sample Epic", createdAt: at(10), updatedAt: at(10) });
     const taskRecord = { ...taskV3("planning", "planning"), id: taskId, title: "Member Task", epicId };
     await saveWorkflow(root, { task: taskRecord, epic });
     await writeFile(join(root, ".harnix", "tasks", ".active"), "");

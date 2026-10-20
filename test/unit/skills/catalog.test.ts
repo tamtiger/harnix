@@ -9,7 +9,7 @@ const expectedReferences: Record<string, string[]> = {
   "harnix-plan": ["decision-discipline", "epic", "grilling", "migration", "multi-repo", "ready-review", "replan"],
   "harnix-implement": ["brownfield", "commit-hygiene", "feedback"],
   "harnix-verify": ["evidence", "finish-cancel", "rationalizations", "so-what", "technical-recap"],
-  "harnix-review": [],
+  "harnix-review": ["multi-lens"],
   "harnix-research": ["scouting-isolation"],
   "harnix-debug": ["feedback-loop"],
 };

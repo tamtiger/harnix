@@ -14,6 +14,7 @@ import replanReference from "./harnix-plan/references/replan.md";
 import planSource from "./harnix-plan/SKILL.md";
 import researchSource from "./harnix-research/SKILL.md";
 import scoutingIsolationReference from "./harnix-research/references/scouting-isolation.md";
+import multiLensReference from "./harnix-review/references/multi-lens.md";
 import reviewSource from "./harnix-review/SKILL.md";
 import evidenceReference from "./harnix-verify/references/evidence.md";
 import finishCancelReference from "./harnix-verify/references/finish-cancel.md";
@@ -59,7 +60,7 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       "technical-recap": technicalRecapReference,
     },
   ],
-  [reviewSource, {}],
+  [reviewSource, { "multi-lens": multiLensReference }],
   [researchSource, { "scouting-isolation": scoutingIsolationReference }],
   [debugSource, { "feedback-loop": feedbackLoopReference }],
 ];

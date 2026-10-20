@@ -1,0 +1,213 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-090043-polish-after-review",
+  "title": "Tinh chỉnh sau review: catch rỗng, workflow.md và reference review đa góc nhìn",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Thay catch rỗng ở epic.ts bằng hàm pathExists có sẵn, nối lại các dòng bị ngắt cứng giữa câu ở template workflow.md, và thêm reference multi-lens cho skill harnix-review để chạy review nhiều góc nhìn bằng subagent khi nền tảng hỗ trợ.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "epic.ts không còn khối catch rỗng: sự tồn tại của research.md và spec.md được kiểm bằng pathExists đã có trong file, hành vi trang epic.md giữ nguyên.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Template workflow.md (và .harnix/workflow.md sinh từ nó) không ngắt dòng cứng giữa câu ở các đoạn đã sửa trong epic này.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "harnix skill harnix-review --reference multi-lens trả về hướng dẫn review nhiều góc nhìn (mã, test, tài liệu, bảo mật, phát hành), subagent chỉ là tùy chọn, SKILL.md của harnix-review trỏ tới reference, và các test catalog, skill-sources, instruction-budget xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "pnpm run lint, typecheck và toàn bộ test suite pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-lint-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-lint",
+      "description": "Lint ESLint và Prettier phải exit 0",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run lint",
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-focus",
+      "description": "Test epic, skill catalog và skill sources",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/core/epics test/unit/skills test/integration/commands/skills.test.ts test/workflow/skill-sources.test.ts test/workflow/instruction-budget.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test:gates",
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-lint-1",
+      "checkId": "chk-lint",
+      "recordedAt": "2026-10-20T09:02:54.137+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "12a2b548620fd5eb2f69e657e9964b5a0267af97c7ee112904eb9f8cc8efd994"
+    },
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T09:02:58.780+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/epics test/unit/skills test/integration/commands/skills.test.ts test/workflow/skill-sources.test.ts test/workflow/instruction-budget.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "749b4e632665ed6b40f42952866ae5271fb6a8f6d510209fce2fc2e022d42795"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T09:03:03.192+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "902a63f2dc41686927711b2ff8185f7fcde41c00f893e8cecfc967f029f1246f"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T09:04:09.100+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "be932a124d4a54bca54dd31523b2b8c62d83fb034bac859fdf9239be82188181"
+    },
+    {
+      "id": "ev-chk-lint-2",
+      "checkId": "chk-lint",
+      "recordedAt": "2026-10-20T09:05:10.632+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "39892b3f2b73e69a186aef6c78d908edea59aa2bd72714264f99eac47ad0c06e"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T09:05:14.557+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/epics test/unit/skills test/integration/commands/skills.test.ts test/workflow/skill-sources.test.ts test/workflow/instruction-budget.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e9cfcfb920abf072fd8eb3ac2a8a52ecfb10426ea53f7699433c127a195cc4b9"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T09:05:18.668+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c62ae89c92e8368f94fa69bcfd21746b66824ca6bd770d0f780d4d4b4eaf1ea0"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T09:06:26.715+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0c3ca9a787ab274f6ed61b81d1a5e0496d086b681eae2085dca8f91ccbd329c3"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/epics/epic.ts",
+    "src/skills",
+    "src/templates/harnix/workflow.md",
+    "test/integration/commands/skills.test.ts",
+    "test/unit/skills",
+    "test/workflow/skill-sources.test.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-20T09:00:43.478+07:00",
+  "updatedAt": "2026-10-20T09:06:34.689+07:00",
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Chỉ nối lại các đoạn của template workflow.md mà epic này đã sửa, không nối toàn bộ file.",
+      "rationale": "Nối cả file làm diff nhiễu lớn không cần thiết; người dùng có thể yêu cầu nối toàn bộ sau."
+    }
+  ],
+  "completedAt": "2026-10-20T09:06:34.689+07:00"
+}

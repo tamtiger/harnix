@@ -312,3 +312,65 @@ describe("detectProject", () => {
     await expect(detectProject(axumRoot)).resolves.toMatchObject({ technologies: ["axum"] });
   });
 });
+
+describe("detectProject packages beyond package.json", () => {
+  const abpProject = '<Project><ItemGroup><PackageReference Include="Volo.Abp.Core" /></ItemGroup></Project>';
+  const solution = (...projects: string[]): string =>
+    projects
+      .map((project) => `Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "P", "${project}", "{1}"\nEndProject`)
+      .join("\n");
+
+  async function service(root: string, name: string): Promise<void> {
+    await writeFixtureFile(root, `${name}/${name}.sln`, solution(`src\\${name}.Domain\\${name}.Domain.csproj`));
+    await writeFixtureFile(root, `${name}/src/${name}.Domain/${name}.Domain.csproj`, abpProject);
+    await writeFixtureFile(root, `${name}/src/${name}.Domain/Entity.cs`, "namespace Sample;");
+  }
+
+  it("lists every service of a multi-service workspace next to its frontend, one package per solution", async () => {
+    const root = await createFixture();
+    await writeFixtureFile(
+      root,
+      "portal-web/package.json",
+      JSON.stringify({ dependencies: { react: "18", "react-dom": "18" } }),
+    );
+    await service(root, "gateway");
+    await service(root, "core");
+
+    const result = await detectProject(root);
+
+    expect(result.packages.map((pkg) => pkg.path)).toEqual(["core", "gateway", "portal-web"]);
+    for (const path of ["core", "gateway"]) {
+      expect(result.packages.find((pkg) => pkg.path === path)).toMatchObject({
+        languages: ["csharp"],
+        technologies: ["abp", "dotnet"],
+        packageManager: undefined,
+        verificationCommands: [],
+      });
+    }
+  });
+
+  it("recognises packages by their own manifest and keeps a standalone project", async () => {
+    const root = await createFixture();
+    await writeFixtureFile(root, "svc/pom.xml", "<project />");
+    await writeFixtureFile(root, "svc/src/Main.java", "class Main {}");
+    await writeFixtureFile(root, "tools/Gen/Gen.csproj", "<Project />");
+    await writeFixtureFile(root, "tools/Gen/Program.cs", "namespace Sample;");
+
+    const paths = (await detectProject(root)).packages.map((pkg) => pkg.path);
+
+    expect(paths).toEqual(["svc", "tools/Gen"]);
+  });
+
+  it("keeps one package at the root when package.json and a solution live together", async () => {
+    const root = await createFixture();
+    await writeFixtureFile(root, "package.json", JSON.stringify({ scripts: { test: "vitest run" } }));
+    await writeFixtureFile(root, "App.sln", solution("src\\App\\App.csproj"));
+    await writeFixtureFile(root, "src/App/App.csproj", abpProject);
+    await writeFixtureFile(root, "src/App/Program.cs", "namespace Sample;");
+
+    const result = await detectProject(root);
+
+    expect(result.packages.map((pkg) => pkg.path)).toEqual(["."]);
+    expect(result.packages[0]?.languages).toEqual(["csharp"]);
+  });
+});

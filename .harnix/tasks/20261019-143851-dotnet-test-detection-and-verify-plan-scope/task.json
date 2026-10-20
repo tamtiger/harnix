@@ -1,0 +1,152 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261019-143851-dotnet-test-detection-and-verify-plan-scope",
+  "epicId": "20261019-143847-field-defects-hardening",
+  "title": "Nhận diện test project .NET và lọc phạm vi verify-plan",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Chỉ coi project .NET là có test khi thực sự có test runner, gom theo solution, và cho verify-plan lọc theo đường dẫn, thay đổi Git hoặc đầu ra gọn.",
+  "nonGoals": [
+    "Không mutate Git; --changed chỉ đọc.",
+    "Không đổi schema config.yaml."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Project .NET chỉ có hasTests true khi .csproj, .fsproj hoặc .vbproj chứa Microsoft.NET.Test.Sdk, IsTestProject true hoặc PackageReference tới xunit, nunit, mstest; class library như Domain hay Application.Contracts có hasTests false và không có commands.test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Thư mục chứa .sln là một package với lệnh dotnet test <tên>.sln; các project mà solution tham chiếu không còn là package riêng kể cả khi dùng verify-plan --recursive; csproj độc lập không thuộc solution vẫn là package.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "harnix verify-plan hỗ trợ --path <dir>, --changed (package có file thay đổi theo git status, chỉ đọc) và --brief (chỉ package có test, mỗi package chỉ giữ path, hasTests, commands.test); đầu ra mặc định giữ nguyên cấu trúc.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Toàn bộ test suite của dự án pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test phát hiện .NET, gom solution và cờ lọc verify-plan",
+      "command": "pnpm exec vitest run test/unit/core/stack test/unit/commands/verify-plan.test.ts test/integration/commands/verify-plan.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests (test:gates) và bộ test của dự án phải xanh",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test:gates"
+    }
+  ],
+  "relevantPaths": [
+    "README.md",
+    "src/cli-workflow-commands.ts",
+    "src/commands/verify-plan.ts",
+    "src/core/stack/dotnet-projects.ts",
+    "src/core/stack/verify-detection.ts",
+    "src/core/stack/verify-plan.ts",
+    "src/core/stack/workspace-detection.ts",
+    "src/templates/harnix/workflow.md"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Logic xác định csproj là test project và gom theo .sln đặt trong một helper dùng chung với task phát hiện package không có package.json.",
+      "rationale": "Hai task cùng chạm phát hiện .NET ở hai hệ khác nhau (workspace-detection.ts và detection.ts); helper chung tránh hai định nghĩa lệch nhau."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-19T15:46:36.376+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/stack test/unit/commands/verify-plan.test.ts test/integration/commands/verify-plan.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "866fca6b0a7f97f2113361c48682098f677c73a067f256b2a6d73b8facfcadbe"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-19T15:46:40.921+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0aba522628a9ad52c3c824711b316cfbabf571e1bfac89504441b6c4c8d61467"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-19T15:47:49.749+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "47cdc1e226d69d20511ca03a56d0db471116f8e11591bcafae9fcff2be0cfd19"
+    }
+  ],
+  "createdAt": "2026-10-19T14:38:47.328+07:00",
+  "updatedAt": "2026-10-19T15:47:56.119+07:00",
+  "completedAt": "2026-10-19T15:47:56.119+07:00"
+}

@@ -35,7 +35,9 @@ describe("legacy epic migration", () => {
       preserved: [],
     });
     expect(await readFile(join(root, ".harnix", "epics", "old-epic", "epic.json"), "utf8")).toBe(json);
-    expect(await readFile(join(root, ".harnix", "epics", "old-epic", "epic.md"), "utf8")).toContain("# Epic: Example epic");
+    expect(await readFile(join(root, ".harnix", "epics", "old-epic", "epic.md"), "utf8")).toContain(
+      "# Epic: Example epic",
+    );
     await expect(readdir(join(root, ".harnix", "roadmaps"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
@@ -58,13 +60,18 @@ describe("legacy epic migration", () => {
     expect(result.created).toContain(".harnix/epics/flat-epic/epic.json");
     expect(result.deleted).toContain(".harnix/epics/flat-epic.json");
     expect(await readFile(join(root, ".harnix", "epics", "flat-epic", "epic.json"), "utf8")).toBe(json);
-    expect(await readFile(join(root, ".harnix", "epics", "flat-epic", "epic.md"), "utf8")).toContain("# Epic: Example epic");
+    expect(await readFile(join(root, ".harnix", "epics", "flat-epic", "epic.md"), "utf8")).toContain(
+      "# Epic: Example epic",
+    );
   });
 
   it("keeps both files when the destination differs and leaves invalid records alone", async () => {
     const { root, json } = await projectWithLegacyEpic();
     await mkdir(join(root, ".harnix", "epics", "old-epic"), { recursive: true });
-    await writeFile(join(root, ".harnix", "epics", "old-epic", "epic.json"), `${JSON.stringify({ different: true })}\n`);
+    await writeFile(
+      join(root, ".harnix", "epics", "old-epic", "epic.json"),
+      `${JSON.stringify({ different: true })}\n`,
+    );
     await writeFile(join(root, ".harnix", "roadmaps", "broken.json"), "{ not json");
 
     const result = await migrateLegacyEpics(root);

@@ -29,6 +29,7 @@ import {
   workflowEnvelopeSchema,
 } from "src/commands/internal-workflow.js";
 import { presentTask, splitList } from "src/commands/workflow-handler-utils.js";
+import { EDIT_HANDLERS } from "src/commands/workflow-edit-handlers.js";
 import { LIFECYCLE_HANDLERS } from "src/commands/workflow-lifecycle-handlers.js";
 import { packageVersion } from "src/version.js";
 import { isEvidenceFlagsMode, type WorkflowFlags } from "src/commands/workflow-flags.js";
@@ -91,6 +92,7 @@ export type Handler = (context: WorkflowContext) => Promise<unknown>;
 
 export const WORKFLOW_HANDLERS: Record<string, Handler> = {
   ...LIFECYCLE_HANDLERS,
+  ...EDIT_HANDLERS,
   inspect: ({ root }) => inspectWorkflow(root),
   preflight: async ({ root, flags }) => {
     const result = await preflightWorkflow(root, undefined, packageVersion);
@@ -223,6 +225,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
       id: flags.addRisk as string,
       text: flags.text as string,
       severity: flags.severity,
+      mitigation: flags.mitigation,
     });
     return presentTask(context, task);
   },

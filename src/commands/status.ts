@@ -12,7 +12,7 @@ import { detailPublicEpic, type PublicEpicBriefResult, type PublicEpicDetailResu
 import { listEpicIds } from "src/core/epics/epic.js";
 import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
 import { taskContextDrift } from "src/core/workflow/index.js";
-import { findInitializedProject } from "src/utils/project-discovery.js";
+import { findInitializedProject, initializedChildrenHint } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { readGitContext } from "src/utils/git.js";
 import { reportProjectChecks, type ChecksReportResultV1 } from "./checks.js";
@@ -21,7 +21,8 @@ import type { TaskAuditResultV1 } from "src/core/tasks/task-audit.js";
 
 export async function inspectProjectStatus(cwd: string, now = Date.now()): Promise<HarnixStatusResultV1> {
   const project = await findInitializedProject({ cwd });
-  if (project.kind !== "ready") throw new Error("Status requires an initialized Harnix project.");
+  if (project.kind !== "ready")
+    throw new Error(`Status requires an initialized Harnix project.${await initializedChildrenHint(cwd)}`);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
   const task = await resolveActiveTask(harnixRoot);

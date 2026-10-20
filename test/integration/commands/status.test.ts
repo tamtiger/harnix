@@ -323,3 +323,21 @@ function digestTask(now: number): TaskRecordV3 {
     updatedAt: timestamp,
   });
 }
+
+describe.sequential("status without an initialized project", () => {
+  it("keeps the original message and lists initialized child projects", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "ledger"), { recursive: true });
+    await initializeProject({ developer: "tam", root: join(root, "ledger"), yes: true });
+    process.chdir(root);
+    vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    const code = await runCli(["node", "harnix", "status"]);
+
+    const text = stderr.mock.calls.map((call) => String(call[0])).join("");
+    expect(code).not.toBe(0);
+    expect(text).toContain("Status requires an initialized Harnix project.");
+    expect(text).toContain("Initialized projects below this directory: ledger.");
+  });
+});

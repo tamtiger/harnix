@@ -1,4 +1,8 @@
+import { execFile } from "node:child_process";
+import { access, mkdir } from "node:fs/promises";
+import { join } from "node:path";
 import { PassThrough } from "node:stream";
+import { promisify } from "node:util";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "src/cli-program.js";
@@ -14,6 +18,7 @@ import {
   taskV3,
 } from "test/support/workflow-fixtures.js";
 
+const execFileAsync = promisify(execFile);
 const originalCwd = process.cwd();
 const originalExitCode = process.exitCode;
 const fixture = useTemporaryRepositories("harnix-workflow-command-");
@@ -321,5 +326,47 @@ describe.sequential("hidden workflow flag transports", () => {
     const saved = JSON.parse(saveResult.out) as { id: string; title: string };
     expect(saved.id).toBe("20261015-160000-file-payload");
     expect(saved.title).toBe("Task từ file UTF-8");
+  });
+});
+
+describe.sequential("workflow project root discovery", () => {
+  it("finds the initialized ancestor from a nested git repository without writing into it", async () => {
+    const root = await fixture();
+    await initializeUtcProject(root);
+    const child = join(root, "services", "billing");
+    await mkdir(child, { recursive: true });
+    await execFileAsync("git", ["init", "-q", "-b", "main"], { cwd: child });
+    process.chdir(child);
+
+    const result = await run(["--preflight", "--brief"]);
+
+    expect(result.code).toBe(0);
+    expect(JSON.parse(result.out)).toMatchObject({ generator: "harnix", nextStage: "plan" });
+    await expect(access(join(child, ".harnix"))).rejects.toThrow();
+  });
+
+  it("still prints the envelope schema outside an initialized project", async () => {
+    const root = await fixture();
+    process.chdir(root);
+
+    const result = await run(["--schema"]);
+
+    expect(result.code).toBe(0);
+    expect(JSON.parse(result.out)).toMatchObject({ generator: "harnix", schemaVersion: 1 });
+  });
+
+  it("explains the missing project instead of a raw filesystem error", async () => {
+    const root = await fixture();
+    await mkdir(join(root, "alpha"), { recursive: true });
+    await initializeUtcProject(join(root, "alpha"));
+    process.chdir(root);
+
+    const result = await run(["--preflight", "--brief"]);
+
+    expect(result.code).not.toBe(0);
+    const text = result.out + result.err;
+    expect(text).toContain("No initialized Harnix project found from the current directory.");
+    expect(text).toContain("alpha");
+    expect(text).not.toMatch(/ENOENT/u);
   });
 });

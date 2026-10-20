@@ -244,6 +244,21 @@ describe("workflow plan-edit transports", () => {
     expect(high.residualRisks?.map((risk) => risk.severity)).toEqual(["low", "high"]);
   });
 
+  it("folds a mitigation into the risk text and ignores an empty one", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+
+    const withMitigation = await addRiskWorkflow(
+      root,
+      { id: "r1", text: "Có thể mất dữ liệu", mitigation: "Sao lưu trước khi chạy" },
+      NOW,
+    );
+    const blank = await addRiskWorkflow(root, { id: "r2", text: "Rủi ro khác", mitigation: "  " }, NOW);
+
+    expect(withMitigation.residualRisks?.[0]?.text).toBe("Có thể mất dữ liệu (Mitigation: Sao lưu trước khi chạy)");
+    expect(blank.residualRisks?.[1]?.text).toBe("Rủi ro khác");
+  });
+
   it("rejects duplicate ids, empty text or rationale, unknown severity and corrupted text for notes", async () => {
     const root = await temporaryRepository();
     await implementingTaskV3(root);

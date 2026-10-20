@@ -34,6 +34,9 @@ export interface WorkflowFlags {
   setCriterion?: string;
   addDecision?: string;
   addRisk?: string;
+  removeDecision?: string;
+  removeCriterion?: string;
+  mitigation?: string;
   setTitle?: string;
   setGoal?: string;
   file?: string;
@@ -95,6 +98,8 @@ const VALUE_ACTIONS = [
   "setCriterion",
   "addDecision",
   "addRisk",
+  "removeDecision",
+  "removeCriterion",
   "setTitle",
   "setGoal",
 ] as const;
@@ -107,7 +112,7 @@ export function selectActions(flags: WorkflowFlags): string[] {
 
   if (selected.length === 0) {
     throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, or --learn.",
+      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --remove-decision, --remove-criterion, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, or --learn.",
     );
   }
 
@@ -118,7 +123,7 @@ export function selectActions(flags: WorkflowFlags): string[] {
   const nonBatchable = selected.filter((action) => !BATCHABLE_ACTIONS.has(action));
   if (nonBatchable.length > 0) {
     throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, or --learn.",
+      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --remove-decision, --remove-criterion, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, or --learn.",
     );
   }
 

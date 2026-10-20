@@ -43,7 +43,7 @@ describe("workflow flag validation", () => {
     expect(selectAction({ runChecks: true })).toBe("runChecks");
     expect(() => selectAction({})).toThrow(/exactly one of/u);
     expect(() => selectAction({ setPaths: true, inspect: true })).toThrow(
-      /--set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --set-paths/u,
+      /--set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --remove-decision/u,
     );
   });
 
@@ -341,18 +341,16 @@ describe.sequential("hidden workflow note transports", () => {
     await implementingTaskV3(root);
     process.chdir(root);
 
-    const decision = await run([
-      "--add-decision", "d1",
-      "--text", "Ghi decision bằng flag để learning không rỗng",
-      "--rationale", "Agent không phải dựng JSON",
-      "--brief",
-    ]);
-    const risk = await run([
-      "--add-risk", "r1",
-      "--text", "Bản cài ở home chỉ đổi sau update global",
-      "--severity", "medium",
-      "--brief",
-    ]);
+    const note = (flag: string, id: string, text: string, ...more: string[]) =>
+      run([flag, id, "--text", text, ...more, "--brief"]);
+    const decision = await note(
+      "--add-decision",
+      "d1",
+      "Ghi decision bằng flag để learning không rỗng",
+      "--rationale",
+      "Agent không phải dựng JSON",
+    );
+    const risk = await note("--add-risk", "r1", "Bản cài ở home chỉ đổi sau update global", "--severity", "medium");
     expect(decision.code, decision.err).toBe(0);
     expect(risk.code, risk.err).toBe(0);
 

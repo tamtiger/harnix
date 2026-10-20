@@ -1,7 +1,8 @@
 import { rm, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { initializeProject } from "src/commands/init.js";
 import { createProgram, redactPublicErrorMessage, runCli } from "src/cli-program.js";
 import { GlobalManagedTransactionError } from "src/core/global/managed-files.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -39,7 +40,7 @@ describe.sequential("CLI errors and exit codes", () => {
       error: { exitCode: 2, message: "--limit must be a positive integer." },
     });
   });
-  it("should_redact_project_paths_when_command_state_is_missing", async () => {
+  it("should_explain_a_missing_project_without_exposing_the_path_when_a_command_needs_one", async () => {
     const root = await fixture();
     process.chdir(root);
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
@@ -48,14 +49,54 @@ describe.sequential("CLI errors and exit codes", () => {
     await expect(runCli(["node", "harnix", "mem"])).resolves.toBe(2);
 
     const message = stderr.mock.calls.flatMap((call) => call).join("");
-    expect(message).toContain("[PROJECT]");
+    expect(message).toContain("No initialized Harnix project found from the current directory.");
     expect(message).not.toContain(root);
     expect(message).not.toContain("Error:");
     const errorDocument = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as {
       error: { message: string };
     };
-    expect(errorDocument.error.message).toContain("[PROJECT]");
+    expect(errorDocument.error.message).toContain("No initialized Harnix project found");
     expect(errorDocument.error.message).not.toContain(root);
+  });
+
+  it("should_redact_the_project_path_from_an_error_raised_by_a_real_command", async () => {
+    const root = await fixture();
+    await initializeProject({ developer: "tam", root, yes: true });
+    process.chdir(root);
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+    const code = await runCli(["node", "harnix", "workflow", "--save", "--file", "missing.json", "--brief"]);
+
+    const message = stderr.mock.calls.flatMap((call) => call).join("");
+    expect(code).not.toBe(0);
+    expect(message).toContain("[PROJECT]");
+    expect(message).not.toContain(process.cwd());
+    expect(message).not.toContain(root);
+  });
+
+  it("should_redact_the_working_directory_from_a_raw_filesystem_error", async () => {
+    const root = await fixture();
+    process.chdir(root);
+    const cwd = process.cwd();
+
+    const message = redactPublicErrorMessage(
+      new Error(`ENOENT: no such file or directory, realpath '${cwd}${sep}.harnix'`),
+    );
+
+    expect(message).toContain("[PROJECT]");
+    expect(message).not.toContain(cwd);
+  });
+
+  it("should_name_the_project_not_a_generic_path_when_the_working_directory_is_unquoted", async () => {
+    const root = await fixture();
+    process.chdir(root);
+    const cwd = process.cwd();
+
+    // Unquoted, so only the working-directory replacement (not the quoted-path rule) can turn it into [PROJECT].
+    const message = redactPublicErrorMessage(new Error(`EPERM: operation not permitted, mkdir ${cwd}${sep}x`));
+
+    expect(message).toBe("EPERM: operation not permitted, mkdir [PROJECT]" + sep + "x");
   });
 
   it("should_redact_unquoted_windows_and_unix_user_paths_from_lifecycle_errors", () => {

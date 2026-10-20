@@ -14,11 +14,7 @@ function escapeRegex(text: string): string {
  * và chuyển đổi thành `- [x]`.
  * Trả về true nếu có ít nhất một item được cập nhật, ngược lại false.
  */
-export async function syncPlanChecklistPass(
-  harnixRoot: string,
-  taskId: string,
-  checkId: string,
-): Promise<boolean> {
+export async function syncPlanChecklistPass(harnixRoot: string, taskId: string, checkId: string): Promise<boolean> {
   let planPath: string;
   try {
     const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}`);

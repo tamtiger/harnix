@@ -5,9 +5,10 @@ export interface InitCheckSpec {
   inputs: string[];
   scope: "focused" | "full";
   description?: string;
+  cwd?: string;
 }
 
-const KEYS = ["id", "command", "criteria", "input", "scope", "description"] as const;
+const KEYS = ["id", "command", "criteria", "input", "scope", "description", "cwd"] as const;
 const REQUIRED = ["id", "command", "criteria", "input"] as const;
 
 const list = (value: string): string[] =>
@@ -22,7 +23,7 @@ const list = (value: string): string[] =>
 
 /**
  * One `--with-check` value: `key=value` pairs separated by semicolons (id, command, criteria, input, scope,
- * description); `criteria` and `input` are plus-separated lists. A value may contain `=` but not `;`.
+ * description, cwd); `criteria` and `input` are plus-separated lists. A value may contain `=` but not `;`.
  */
 export function parseCheckSpec(spec: string): InitCheckSpec {
   const text = spec.trim();
@@ -44,6 +45,7 @@ export function parseCheckSpec(spec: string): InitCheckSpec {
   if (scope !== "focused" && scope !== "full")
     throw new Error(`--with-check "${spec}": scope must be focused or full.`);
   const description = values.get("description");
+  const cwd = values.get("cwd");
   return {
     id: values.get("id") as string,
     command: values.get("command") as string,
@@ -51,5 +53,6 @@ export function parseCheckSpec(spec: string): InitCheckSpec {
     inputs: list(values.get("input") as string),
     scope,
     ...(description !== undefined && description !== "" ? { description } : {}),
+    ...(cwd !== undefined && cwd !== "" ? { cwd } : {}),
   };
 }

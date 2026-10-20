@@ -42,7 +42,7 @@ const RULES: readonly Rule[] = [
   { name: "connection-string-password", pattern: /\b(?:Password|Pwd)\s*=\s*([^;"'\s]{4,})/giu, valueGroup: 1 },
   {
     name: "connection-string-password",
-    pattern: /\b[a-z][a-z0-9+.-]*:\/\/[^\s'"/@:]+:([^\s'"/@]+)@/giu,
+    pattern: /\b[a-z][a-z0-9+.-]{0,31}:\/\/[^\s'"/@:]+:([^\s'"/@]+)@/giu,
     valueGroup: 1,
   },
   {
@@ -84,7 +84,14 @@ async function candidateFiles(root: string, task: TaskRecord): Promise<string[]>
   const ordered: string[] = [];
   for (const patterns of groups) {
     if (patterns.length === 0) continue;
-    const found = await globby(patterns, { cwd: root, onlyFiles: true, followSymbolicLinks: false, dot: true, ignore });
+    const found = await globby(patterns, {
+      cwd: root,
+      onlyFiles: true,
+      followSymbolicLinks: false,
+      dot: true,
+      gitignore: true,
+      ignore,
+    });
     ordered.push(...found.sort());
   }
   return [...new Set(ordered)].slice(0, MAX_FILES);

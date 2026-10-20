@@ -206,18 +206,10 @@ function renderEvidence(task: TaskRecord, timezone: string): string[] {
   return lines;
 }
 
-function renderCodeImpact(task: TaskRecord, artifacts: ReviewArtifacts): string[] {
-  const impact =
-    ("codeImpact" in task && Array.isArray((task as any).codeImpact) ? (task as any).codeImpact : undefined) ??
-    artifacts.codeImpact;
+function renderCodeImpact(artifacts: ReviewArtifacts): string[] {
+  const impact = artifacts.codeImpact;
   if (!impact || impact.length === 0) return [];
-  const lines = [
-    "",
-    "## Code impact",
-    "",
-    "| File | Status | Changes |",
-    "| --- | --- | --- |",
-  ];
+  const lines = ["", "## Code impact", "", "| File | Status | Changes |", "| --- | --- | --- |"];
   for (const item of impact) {
     const changes =
       item.additions !== undefined || item.deletions !== undefined
@@ -234,7 +226,7 @@ export function renderTaskReview(task: TaskRecord, artifacts: ReviewArtifacts, t
     ...renderHeader(task, timezone),
     ...renderScope(task),
     ...renderArtifacts(artifacts),
-    ...renderCodeImpact(task, artifacts),
+    ...renderCodeImpact(artifacts),
     ...renderCriteriaAndChecks(task, timezone),
     ...renderReviewData(task),
     ...renderEvidence(task, timezone),

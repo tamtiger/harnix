@@ -166,10 +166,7 @@ describe("unknownCheckReferences", () => {
   });
 
   it("reports check ids in square bracket tags at the start of a checklist item", () => {
-    const plan = [
-      "- [ ] [check-tag-unknown] run it",
-      "- [ ] [check-a] ok",
-    ].join("\n");
+    const plan = ["- [ ] [check-tag-unknown] run it", "- [ ] [check-a] ok"].join("\n");
 
     expect(unknownCheckReferences(declared, plan)).toEqual(["check-tag-unknown"]);
   });
@@ -238,4 +235,3 @@ describe("scanPlanStructure", () => {
     expect(scanPlanStructure("- [ ] item 1\n")).toEqual([]);
   });
 });
-

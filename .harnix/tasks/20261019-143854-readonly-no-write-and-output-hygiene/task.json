@@ -1,0 +1,160 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261019-143854-readonly-no-write-and-output-hygiene",
+  "epicId": "20261019-143847-field-defects-hardening",
+  "title": "Lệnh read-only không ghi .harnix và làm sạch đầu ra tự sinh",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Tái hiện và chặn việc sinh thư mục .harnix rác ở repo chưa init, làm secretAdvisory tôn trọng .gitignore, dùng mẫu prd/plan trung tính và gọn đầu ra preflight.",
+  "nonGoals": [
+    "Không đổi nội dung các prd/plan đã có.",
+    "Không bật quét mạng hay phụ thuộc bắt buộc vào Git."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Có test hồi quy: các lệnh read-only (status, verify-plan, repo-map --query, context-report, tasks, epic, workflow --preflight, workflow --inspect) chạy ở thư mục chưa init không tạo hay đổi file nào, kể cả .harnix; chỉ sửa mã nếu test phát hiện một lệnh ghi thật.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "secretAdvisory tôn trọng .gitignore: file bị ignore không được quét, file không bị ignore vẫn được báo; vẫn offline, giới hạn và không trả giá trị bí mật.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "prd.md và plan.md sinh bởi --init --mode full dùng câu trung tính trỏ tới AGENTS.md và .harnix/spec/guides/, không còn câu riêng của Harnix (300 LOC, commands -> core, giới hạn LOC), giữ nguyên các tiêu đề mục.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Có test hồi quy giữ hành vi hiện tại của workflow --preflight --brief: bỏ learning, giữ các trường còn lại; epicContext chỉ có khi chưa có task active và không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Toàn bộ test suite của dự án và test:gates pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test read-only, secret-scan, mẫu init và preflight brief",
+      "command": "pnpm exec vitest run test/unit/core/workflow/secret-scan.test.ts test/unit/core/workflow/artifact-templates.test.ts test/unit/core/workflow/brief.test.ts test/integration/scenarios/read-only-commands.test.ts test/integration/commands/init.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests (test:gates) và bộ test của dự án phải xanh",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test:gates"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/artifact-templates.ts",
+    "src/core/workflow/brief.ts",
+    "src/core/workflow/secret-scan.ts",
+    "test/integration/scenarios/read-only-commands.test.ts",
+    "test/unit/core/workflow/artifact-templates.test.ts",
+    "test/unit/core/workflow/brief.test.ts",
+    "test/unit/core/workflow/secret-scan.test.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Không đổi preflight vì --brief đã lược learning và epicContext; chỉ thêm test hồi quy.",
+      "rationale": "Đã kiểm tra thực tế: preflight đầy đủ khoảng 1,6 KB, bản --brief không có hai trường đó."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-19T16:37:32.127+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/secret-scan.test.ts test/unit/core/workflow/artifact-templates.test.ts test/unit/core/workflow/brief.test.ts test/integration/scenarios/read-only-comman... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a12a39432afa9642579ebadcea2efa69d000a8e159c26d4a115addf2dd512095"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-19T16:37:37.575+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e0ab812a890b18632f57441e54a2326d1ed6855124f8d7e21f3f6f22490852fe"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-19T16:38:55.195+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bbe6c113dd5e1a8bb41bfa3fa73ebe4e118facd505f259e4f98de5c18543723b"
+    }
+  ],
+  "createdAt": "2026-10-19T14:38:47.328+07:00",
+  "updatedAt": "2026-10-19T16:39:26.920+07:00",
+  "completedAt": "2026-10-19T16:39:26.920+07:00"
+}

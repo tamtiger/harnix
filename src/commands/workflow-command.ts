@@ -9,6 +9,7 @@ import {
   type WorkflowFlags,
 } from "src/commands/workflow-flags.js";
 import { resolveProjectRoot } from "src/utils/paths.js";
+import { requireInitializedProject } from "src/utils/project-discovery.js";
 
 export type { WorkflowCommandOptions } from "src/commands/workflow-handlers.js";
 
@@ -73,6 +74,11 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--set-criterion <id>", "Rewrite the text of one acceptance criterion (requires --text)")
     .option("--add-decision <id>", "Record one decision (requires --text and --rationale)")
     .option("--add-risk <id>", "Record one residual risk (requires --text)")
+    .option("--remove-decision <id>", "Remove one decision while the task is in planning")
+    .option(
+      "--remove-criterion <id>",
+      "Remove one acceptance criterion (and its check coverage) while the task is in planning",
+    )
     .option("--set-paths", "Replace the relevant paths and/or specs of the active task")
     .option("--set-title <title>", "Update the title of the active task")
     .option("--set-goal <goal>", "Update the goal of the active task")
@@ -109,9 +115,13 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     )
     .option("--rationale <text>", "Rationale for --add-decision")
     .option("--severity <level>", "Severity for --add-risk: low, medium or high")
+    .option("--mitigation <text>", "Mitigation for --add-risk, kept in the risk text")
     .option("--relevant-path <path>", "Relevant path for --set-paths (repeatable)", collect, [])
     .option("--relevant-spec <path>", "Relevant spec path for --set-paths (repeatable)", collect, [])
-    .option("--cwd <path>", "Working directory relative to project root for check execution")
+    .option(
+      "--cwd <path>",
+      "Working directory relative to project root for check execution; with --init, the package of the task",
+    )
     .option("--reviewed", "Attest that the ready-review was run (required for a Full task at --transition ready/ready)")
     .option("--epic <epic-id>", "Existing epic to attach the new task to (--init only)")
     .option("--follow-up <task-id>", "Task ID to follow up on, inheriting context from a completed task")
@@ -124,7 +134,10 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
         assertCommandShape(action, flags, operands);
         assertFlagGroups(action, flags, actions);
       }
-      const root = await resolveProjectRoot(process.cwd());
+      // The envelope schema is static and must stay printable outside a project; everything else needs the nearest one.
+      const root = actions.every((action) => action === "schema")
+        ? await resolveProjectRoot(process.cwd())
+        : await requireInitializedProject(process.cwd());
       let result: unknown;
       for (const action of actions) {
         result = await withTargetTask(flags.task, () =>

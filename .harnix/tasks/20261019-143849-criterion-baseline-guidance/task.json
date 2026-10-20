@@ -1,0 +1,218 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261019-143849-criterion-baseline-guidance",
+  "epicId": "20261019-143847-field-defects-hardening",
+  "title": "Thông báo rõ cho cổng baseline của --criterion --met",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Giữ nguyên điều kiện met của --criterion nhưng khi bị từ chối thì thông báo nêu từng check, lý do (chưa chạy, fail, stale, baseline chưa có hiệu lực) và cách xử lý.",
+  "nonGoals": [
+    "Không cho tiêu chí met mà thiếu bằng chứng xanh."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Khi workflow --criterion <id> --met bị từ chối, thông báo giữ nguyên cụm \"has no fresh passing evidence from required check(s)\" và thêm với từng check chưa đạt một lý do cụ thể: chưa có bằng chứng, lần chạy gần nhất không pass, hoặc digest stale.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Với check đã khai báo baseline nhưng chưa có hiệu lực (thiếu một check required khác không baseline đang pass và phủ toàn bộ tiêu chí của nó), thông báo nói rõ baseline chưa có hiệu lực vì thiếu check chứng minh và chỉ dẫn thêm một check tập trung bằng --set-check phủ đủ tiêu chí rồi chạy nó; điều kiện cho phép met và cổng --finish không đổi, test hồi quy hiện có vẫn xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test suite của dự án pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "pnpm run typecheck exit 0: sửa lỗi có sẵn từ v2.10.0 tại src/core/workflow/evidence.ts (checkId có thể undefined khi đồng bộ checklist plan.md).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-typecheck-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Khôi phục kiểm thử đầu-cuối cho việc che đường dẫn trong lỗi công khai: một lệnh CLI thật nhả lỗi có đường dẫn thì stderr và JSON chứa [PROJECT] và không chứa đường dẫn thật (thay phần đã yếu đi ở cli-errors.test.ts).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-redaction-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test criterion cho thông báo baseline và hồi quy",
+      "command": "pnpm exec vitest run test/unit/core/workflow/criterion.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests (test:gates) và bộ test của dự án phải xanh",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test:gates"
+    },
+    {
+      "id": "chk-typecheck",
+      "description": "Typecheck toàn dự án phải exit 0",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run typecheck"
+    },
+    {
+      "id": "chk-redaction",
+      "description": "Test kịch bản lỗi CLI che đường dẫn",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm exec vitest run test/integration/scenarios/cli-errors.test.ts"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/criterion.ts",
+    "src/core/workflow/evidence.ts",
+    "test/integration/scenarios/cli-errors.test.ts",
+    "test/unit/core/workflow/criterion.test.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Chỉ sửa thông báo của --criterion --met; không nới điều kiện met và không đổi authorizedRedBaseline.",
+      "rationale": "authorizedRedBaseline đã đòi một check chứng minh đang pass phủ đủ tiêu chí; ca báo cáo là baseline chưa có hiệu lực, nên cần giải thích lý do chứ không cần đổi cổng."
+    },
+    {
+      "id": "dec-2",
+      "text": "Giữ nguyên chuỗi gốc \"has no fresh passing evidence from required check(s)\" làm tiền tố của thông báo.",
+      "rationale": "Test hiện có (criterion.test.ts) và người dùng đang khớp theo cụm này; chỉ nối thêm lý do phía sau."
+    },
+    {
+      "id": "dec-3",
+      "text": "Gộp hai việc tồn đọng của task trước (typecheck lỗi sẵn, kiểm thử che đường dẫn đầu-cuối) vào task này theo chỉ định của người dùng.",
+      "rationale": "Người dùng yêu cầu sửa vào task kế tiếp; cả hai nhỏ và độc lập với thông báo của --criterion."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-1",
+      "text": "Thông báo dài hơn có thể tràn dòng khi nhiều check; giới hạn lý do mỗi check bằng một câu ngắn.",
+      "severity": "low"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-19T15:29:26.859+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/criterion.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0e541cf16eea95ecdf2835fa733d6da50dbc4866f3cb591051d84d02b7dd2835"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-19T15:29:31.965+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "51a6022385f1ce05c8b0f9f0122152fe3fb07ee70e6ae681e458770bcbe9757f"
+    },
+    {
+      "id": "ev-chk-typecheck-1",
+      "checkId": "chk-typecheck",
+      "recordedAt": "2026-10-19T15:29:37.220+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "674e8e11d5406f77227aa24b1b2c481d19bd95514d200a44647d18b01ae4232a"
+    },
+    {
+      "id": "ev-chk-redaction-1",
+      "checkId": "chk-redaction",
+      "recordedAt": "2026-10-19T15:29:42.764+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/scenarios/cli-errors.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "23d67eaebecc33983e803b035e0e43d5d9e1d15e0e1f42876f1c0a68ce347c25"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-19T15:30:57.554+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d21a84890be61ff55f319d7f94789d145c227bfb2e37669c73e2e0d12f1c1ecc"
+    }
+  ],
+  "createdAt": "2026-10-19T14:38:47.328+07:00",
+  "updatedAt": "2026-10-19T15:31:04.302+07:00",
+  "completedAt": "2026-10-19T15:31:04.302+07:00"
+}

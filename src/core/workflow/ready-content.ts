@@ -114,49 +114,33 @@ export function unknownCheckReferences(task: TaskRecord, plan: string): string[]
   return [...found].filter((id) => !declared.has(id)).sort();
 }
 
+/** The sections a PRD is advised to have: an advisory fires when none of the (accent-folded) words of a section occurs. */
+const PRD_SECTIONS: readonly { words: readonly string[]; advisory: string }[] = [
+  {
+    words: ["context", "boi canh", "problem", "van de"],
+    advisory: "prd.md is recommended to include a Context & Problem Statement section",
+  },
+  {
+    words: ["scope", "ranh gioi", "boundar", "pham vi"],
+    advisory: "prd.md is recommended to include a Scope & Boundaries section",
+  },
+  {
+    words: ["criteria", "tieu chi", "acceptance", "yeu cau", "requirement"],
+    advisory: "prd.md is recommended to include an Acceptance Criteria section",
+  },
+  {
+    words: ["constraint", "rang buoc", "risk", "rui ro", "mitigation", "giam thieu", "safety", "an toan"],
+    advisory: "prd.md is recommended to include an Architectural & Safety Constraints section",
+  },
+];
+
 /** Advisories when PRD has sections but is missing one of the 4 core technical sections. */
 export function scanPrdStructure(prd: string): string[] {
   if (!prd.includes("##")) return [];
-  const advisories: string[] = [];
   const folded = fold(prd);
-  if (
-    !folded.includes("context") &&
-    !folded.includes("boi canh") &&
-    !folded.includes("problem") &&
-    !folded.includes("van de")
-  ) {
-    advisories.push("prd.md is recommended to include a Context & Problem Statement section");
-  }
-  if (
-    !folded.includes("scope") &&
-    !folded.includes("ranh gioi") &&
-    !folded.includes("boundar") &&
-    !folded.includes("pham vi")
-  ) {
-    advisories.push("prd.md is recommended to include a Scope & Boundaries section");
-  }
-  if (
-    !folded.includes("criteria") &&
-    !folded.includes("tieu chi") &&
-    !folded.includes("acceptance") &&
-    !folded.includes("yeu cau") &&
-    !folded.includes("requirement")
-  ) {
-    advisories.push("prd.md is recommended to include an Acceptance Criteria section");
-  }
-  if (
-    !folded.includes("constraint") &&
-    !folded.includes("rang buoc") &&
-    !folded.includes("risk") &&
-    !folded.includes("rui ro") &&
-    !folded.includes("mitigation") &&
-    !folded.includes("giam thieu") &&
-    !folded.includes("safety") &&
-    !folded.includes("an toan")
-  ) {
-    advisories.push("prd.md is recommended to include an Architectural & Safety Constraints section");
-  }
-  return advisories;
+  return PRD_SECTIONS.filter(({ words }) => !words.some((word) => folded.includes(word))).map(
+    ({ advisory }) => advisory,
+  );
 }
 
 /** Advisories when Plan has sections but is not organized with Execution Slices. */
@@ -169,4 +153,3 @@ export function scanPlanStructure(plan: string): string[] {
   }
   return advisories;
 }
-

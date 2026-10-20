@@ -2,7 +2,13 @@ import { EventEmitter } from "node:events";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 
-import { killProcessTree, resolveInvocation, runCheckProcess, type ProcessSpawner } from "src/utils/check-runner.js";
+import {
+  findOnPath,
+  killProcessTree,
+  resolveInvocation,
+  runCheckProcess,
+  type ProcessSpawner,
+} from "src/utils/check-runner.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -144,11 +150,12 @@ describe("check runner on Windows", () => {
     const run = runCheckProcess("C:\\Program Files\\nodejs\\npm.cmd", ["test"], "C:\\repo", {
       platform: "win32",
       spawner,
+      systemRoot: "C:\\Windows",
     });
     child.emit("close", 0, null);
     await expect(run).resolves.toEqual({ exitCode: 0, output: "" });
     const [executable, , options] = vi.mocked(spawner).mock.calls[0]!;
-    expect(executable).toBe("cmd.exe");
+    expect(executable).toBe("C:\\Windows\\System32\\cmd.exe");
     expect(options).toMatchObject({ shell: false, windowsVerbatimArguments: true });
   });
 
@@ -172,8 +179,8 @@ describe("check runner on Windows", () => {
 
   it("builds a fixed taskkill argument array for the tree and plain kill elsewhere", () => {
     const spawner = vi.fn();
-    killProcessTree(777, "win32", spawner);
-    expect(spawner).toHaveBeenCalledWith("taskkill", ["/pid", "777", "/T", "/F"], {
+    killProcessTree(777, "win32", spawner, "C:\\Windows");
+    expect(spawner).toHaveBeenCalledWith("C:\\Windows\\System32\\taskkill.exe", ["/pid", "777", "/T", "/F"], {
       shell: false,
       windowsHide: true,
       stdio: "ignore",
@@ -187,5 +194,161 @@ describe("check runner on Windows", () => {
       process.kill = originalKill;
     }
     expect(kill).toHaveBeenCalledWith(888);
+  });
+});
+
+describe("check runner executable lookup", () => {
+  const dotnetExe = "C:\\Program Files\\dotnet\\dotnet.exe";
+
+  it("runs a bare name that resolves to an executable directly so a pipe in an argument is kept", () => {
+    const lookup = (name: string) => (name === "dotnet" ? dotnetExe : undefined);
+
+    expect(resolveInvocation("dotnet", ["test", "--filter", "A|B"], "win32", lookup)).toEqual({
+      executable: dotnetExe,
+      args: ["test", "--filter", "A|B"],
+    });
+  });
+
+  it("launches a batch shim found on PATH by its resolved path so cmd.exe never searches the working directory", () => {
+    const lookup = () => "C:\\nodejs\\pnpm.CMD";
+
+    expect(resolveInvocation("pnpm", ["test"], "win32", lookup)).toEqual({
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "C:\\nodejs\\pnpm.CMD", "test"],
+    });
+    expect(resolveInvocation("pnpm", ["a b"], "win32", () => "C:\\Program Files\\nodejs\\pnpm.cmd")).toEqual({
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", '""C:\\Program Files\\nodejs\\pnpm.cmd" "a b""'],
+      verbatim: true,
+    });
+    expect(() => resolveInvocation("pnpm", ["a|b"], "win32", lookup)).toThrow(/unsafe for cmd\.exe/u);
+  });
+
+  it("refuses a shim whose resolved path holds a cmd metacharacter instead of letting cmd.exe search the working directory", () => {
+    expect(() => resolveInvocation("pnpm", ["test"], "win32", () => "C:\\R&D\\pnpm.cmd")).toThrow(
+      /unsafe for cmd\.exe/u,
+    );
+  });
+
+  it("falls back to the cmd.exe route when the name is not found on the path", () => {
+    expect(resolveInvocation("dotnet", ["test"], "win32", () => undefined)).toEqual({
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "dotnet", "test"],
+    });
+  });
+
+  it("does not look anything up outside Windows", () => {
+    const lookup = vi.fn();
+
+    expect(resolveInvocation("dotnet", ["test"], "linux", lookup)).toEqual({ executable: "dotnet", args: ["test"] });
+    expect(lookup).not.toHaveBeenCalled();
+  });
+
+  it("spawns the resolved executable with the arguments untouched", async () => {
+    const child = fakeChild();
+    const spawner: ProcessSpawner = vi.fn(() => child as never);
+    const run = runCheckProcess("dotnet", ["test", "--filter", "A|B"], "C:\\repo", {
+      platform: "win32",
+      spawner,
+      lookup: () => dotnetExe,
+    });
+    child.emit("close", 0, null);
+
+    await expect(run).resolves.toEqual({ exitCode: 0, output: "" });
+    expect(vi.mocked(spawner).mock.calls[0]?.slice(0, 2)).toEqual([dotnetExe, ["test", "--filter", "A|B"]]);
+  });
+});
+
+describe("check runner with the real Windows path", () => {
+  it.runIf(process.platform === "win32")(
+    "runs a bare executable name found on PATH with a pipe in an argument",
+    async () => {
+      const root = await temporaryRepository();
+
+      const result = await runCheckProcess("node", ["-p", "process.argv[1]", "A|B"], root);
+
+      expect(result.exitCode).toBe(0);
+      expect(result.output.trim()).toBe("A|B");
+    },
+  );
+
+  it.runIf(process.platform === "win32")("runs a command shim found on PATH through the system cmd.exe", async () => {
+    const root = await temporaryRepository();
+
+    const result = await runCheckProcess("npm", ["--version"], root);
+
+    expect(result.exitCode).toBe(0);
+    expect(result.output.trim()).toMatch(/^\d+\.\d+\.\d+/u);
+  });
+});
+
+describe("findOnPath", () => {
+  it("follows PATH order then PATHEXT order and ignores empty and relative entries", () => {
+    const present = new Set(["C:\\a\\dotnet.CMD", "C:\\b\\dotnet.EXE", "tools\\dotnet.EXE", ".\\dotnet.EXE"]);
+    const env = { PATH: "C:\\a;;.;tools;C:\\b", PATHEXT: ".COM;.EXE;.CMD" };
+
+    expect(findOnPath("dotnet", env, (candidate) => present.has(candidate))).toBe("C:\\a\\dotnet.CMD");
+    present.delete("C:\\a\\dotnet.CMD");
+    expect(findOnPath("dotnet", env, (candidate) => present.has(candidate))).toBe("C:\\b\\dotnet.EXE");
+  });
+
+  it("uses the default executable extensions when PATHEXT is missing and returns undefined when nothing matches", () => {
+    expect(findOnPath("tool", { PATH: "C:\\a" }, (candidate) => candidate === "C:\\a\\tool.EXE")).toBe(
+      "C:\\a\\tool.EXE",
+    );
+    expect(findOnPath("tool", { PATH: "C:\\a" }, () => false)).toBeUndefined();
+    expect(findOnPath("tool", {}, () => true)).toBeUndefined();
+  });
+});
+
+describe("check runner system executables and PATH details on Windows", () => {
+  const systemRoot = "C:\\Windows";
+
+  it("starts cmd.exe by its absolute system path so a copy inside the repository is never run", async () => {
+    const child = fakeChild();
+    const spawner: ProcessSpawner = vi.fn(() => child as never);
+    const run = runCheckProcess("pnpm", ["test"], "C:\\repo", {
+      platform: "win32",
+      spawner,
+      lookup: () => undefined,
+      systemRoot,
+    });
+    child.emit("close", 0, null);
+    await run;
+
+    expect(vi.mocked(spawner).mock.calls[0]?.[0]).toBe("C:\\Windows\\System32\\cmd.exe");
+  });
+
+  it("does not rewrite an executable that is launched directly", async () => {
+    const child = fakeChild();
+    const spawner: ProcessSpawner = vi.fn(() => child as never);
+    const run = runCheckProcess("dotnet", ["test"], "C:\\repo", {
+      platform: "win32",
+      spawner,
+      lookup: () => "C:\\tools\\dotnet.exe",
+      systemRoot,
+    });
+    child.emit("close", 0, null);
+    await run;
+
+    expect(vi.mocked(spawner).mock.calls[0]?.[0]).toBe("C:\\tools\\dotnet.exe");
+  });
+
+  it("does not look up a name that already has an extension", () => {
+    const lookup = vi.fn();
+
+    expect(resolveInvocation("dotnet.exe", ["test"], "win32", lookup)).toEqual({
+      executable: "dotnet.exe",
+      args: ["test"],
+    });
+    expect(lookup).not.toHaveBeenCalled();
+  });
+
+  it("resolves a PATH entry that is wrapped in quotes", () => {
+    const env = { PATH: '"C:\\Program Files\\dotnet";C:\\other', PATHEXT: ".EXE" };
+
+    expect(findOnPath("dotnet", env, (candidate) => candidate === "C:\\Program Files\\dotnet\\dotnet.EXE")).toBe(
+      "C:\\Program Files\\dotnet\\dotnet.EXE",
+    );
   });
 });

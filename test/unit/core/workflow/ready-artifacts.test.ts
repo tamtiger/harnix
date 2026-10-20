@@ -143,7 +143,9 @@ describe("ready content findings in a dry run", () => {
     expect(result.advisories).toContain("prd.md is recommended to include a Context & Problem Statement section");
     expect(result.advisories).toContain("prd.md is recommended to include a Scope & Boundaries section");
     expect(result.advisories).toContain("prd.md is recommended to include an Acceptance Criteria section");
-    expect(result.advisories).toContain("prd.md is recommended to include an Architectural & Safety Constraints section");
+    expect(result.advisories).toContain(
+      "prd.md is recommended to include an Architectural & Safety Constraints section",
+    );
     expect(result.advisories).toContain("plan.md is recommended to organize tasks into Execution Slices");
   });
 });

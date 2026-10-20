@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.11.0`
+**Version:** `2.12.3`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -177,7 +177,7 @@ Mọi output của public command đều là JSON. Dưới đây là các lệnh
 | `harnix resume [<task-id>] [--force] [--next] [--dry-run]`                                | Tiếp tục task theo ID, hoặc kích hoạt task kế tiếp (`--next`), tự chuyển đổi an toàn (`--force`)                                                                                                       |
 | `harnix context-report --platform <id>`                                                   | Xem context nào thực sự được đưa vào agent                                                                                                                                                             |
 | `harnix status --explain [--limit <n>]`                                                   | Xem check nào đã stale (input đổi/thiếu) và readiness/completion blocker của task hiện tại                                                                                                             |
-| `harnix verify-plan [--recursive] [--impact [path]]`                                      | Khám phá kiểm thử/build của project, quét đệ quy sub-packages (`--recursive`), hoặc tìm test bị ảnh hưởng (`--impact`)                                                                                 |
+| `harnix verify-plan [--recursive] [--impact [path]] [--path <dir>] [--changed] [--brief]` | Khám phá kiểm thử/build của project, quét đệ quy sub-packages (`--recursive`), tìm test bị ảnh hưởng (`--impact`), hoặc thu hẹp danh sách package (`--path`, `--changed`, `--brief`)                   |
 | `harnix epic [<epic-id>] [--limit <n>]`                                                   | Xem danh sách epic hoặc chi tiết tiến độ member tasks và next task của một epic                                                                                                                        |
 | `harnix repo-map --query\|--impact\|--tests\|--outline\|--refs\|--events`                 | Tìm file liên quan (`--query [--format compact] [--workspace]`), dependency impact, test bị ảnh hưởng, khung symbol (`--outline`), tham chiếu (`--refs`) hoặc ma trận event microservices (`--events`) |
 | `harnix doctor [--fix] [--global]`                                                        | Kiểm tra drift, hook, path safety, secret exposure; tự sửa issue an toàn                                                                                                                               |

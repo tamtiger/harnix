@@ -1,6 +1,7 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import type { VerifyCommandConfig } from "src/core/config/config-schema.js";
+import { inspectDotnetDirectory, isDotnetProjectFile, isSolutionFile } from "./dotnet-projects.js";
 
 export interface EcosystemVerifyResult {
   ecosystem: string;
@@ -56,8 +57,8 @@ export async function detectEcosystemVerify(
     return detectMavenVerify(fileSet);
   }
   // 6. .NET
-  if (entries.some((f) => f.endsWith(".csproj") || f.endsWith(".fsproj") || f.endsWith(".sln"))) {
-    return detectDotnetVerify();
+  if (entries.some((f) => isDotnetProjectFile(f) || isSolutionFile(f))) {
+    return detectDotnetVerify(dir, entries);
   }
   // 7. PHP Composer
   if (fileSet.has("composer.json")) {
@@ -178,12 +179,13 @@ function detectMavenVerify(fileSet: Set<string>): EcosystemVerifyResult {
   };
 }
 
-function detectDotnetVerify(): EcosystemVerifyResult {
+async function detectDotnetVerify(dir: string, entries: readonly string[]): Promise<EcosystemVerifyResult> {
+  const { hasTests, testCommand } = await inspectDotnetDirectory(dir, entries);
   return {
     ecosystem: "dotnet",
-    hasTests: true,
+    hasTests,
     commands: {
-      test: "dotnet test",
+      ...(hasTests ? { test: testCommand } : {}),
       format: "dotnet format --verify-no-changes",
     },
   };

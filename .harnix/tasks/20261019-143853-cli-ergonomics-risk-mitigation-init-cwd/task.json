@@ -1,0 +1,260 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261019-143853-cli-ergonomics-risk-mitigation-init-cwd",
+  "epicId": "20261019-143847-field-defects-hardening",
+  "title": "Bổ sung cờ CLI còn thiếu: --mitigation, --init --cwd, cwd cho --with-check, --task cho --set-criterion và cờ bỏ decision/criterion",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Điền các khoảng trống của CLI workflow: --add-risk nhận --mitigation, --init chạy được ở thư mục gốc đa repo qua --cwd, --with-check nhận cwd, --set-criterion dùng được với --task, và có cờ bỏ decision hoặc criterion khi còn planning.",
+  "nonGoals": [
+    "Không đổi schema TaskRecord v3; mitigation phải lưu trong cấu trúc hiện có."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "workflow --add-risk nhận --mitigation và gộp vào text của rủi ro dạng \"<text> (Mitigation: <m>)\" mà không đổi schema TaskRecord v3; --mitigation ngoài --add-risk bị từ chối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-4"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "workflow --init --cwd <path> lấy lệnh test của package đó từ verify-plan đệ quy, sinh check-suite scope full kèm cwd và inputs mặc định <path>/**; thiếu lệnh test của package thì báo lỗi yêu cầu --command.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-4"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "--with-check nhận thêm khóa cwd=<path>; scope= đã hỗ trợ sẵn.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-4"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Toàn bộ test suite của dự án và test:gates pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-2-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "workflow --set-criterion hỗ trợ --task <task-id> để sửa tiêu chí của task thành viên chưa kết thúc mà không đổi active pointer; --task vẫn bị từ chối với --transition, --finish, --cancel, --run-check, --evidence.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-4"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Có --remove-decision <id> và --remove-criterion <id> (cùng nhận --task và --brief) chỉ dùng được khi task còn planning; --remove-criterion gỡ tiêu chí khỏi mọi check và bị từ chối khi tiêu chí đã có bằng chứng ghi hoặc một check bắt buộc sẽ không còn phủ tiêu chí nào.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-4"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-focus",
+      "description": "Test cờ workflow mới và hợp đồng CLI",
+      "command": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/integration/commands/workflow-flags.test.ts test/workflow/cli-contract.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests (test:gates) và bộ test của dự án phải xanh",
+      "scope": "focused",
+      "required": false,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test:gates"
+    },
+    {
+      "id": "chk-gates-2",
+      "description": "Replacement for chk-gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm exec vitest run test/unit/test-structure.test.ts test/workflow/cli-contract.test.ts test/workflow/architecture.test.ts test/workflow/docs-task-contract.test.ts test/workflow/skill-sources.test.ts test/workflow/instruction-budget.test.ts test/workflow/behavior-snapshot.test.ts"
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNIX_WORKFLOW.md",
+    "src/cli-workflow-commands.ts",
+    "src/commands/workflow-command.ts",
+    "src/commands/workflow-edit-handlers.ts",
+    "src/commands/workflow-flag-owners.ts",
+    "src/commands/workflow-flags.ts",
+    "src/commands/workflow-handlers.ts",
+    "src/core/workflow/brief.ts",
+    "src/core/workflow/index.ts",
+    "src/core/workflow/init-spec.ts",
+    "src/core/workflow/init-task.ts",
+    "src/core/workflow/plan-edit.ts",
+    "src/core/workflow/plan-remove.ts",
+    "src/core/workflow/schema.ts",
+    "src/templates/harnix/workflow.md",
+    "test/workflow/behavior-snapshot.golden.json"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Mitigation lưu trong text của rủi ro, không thêm field mitigation vào TaskResidualRisk.",
+      "rationale": "Thêm field là đổi schema TaskRecord v3, vi phạm nonGoal của epic."
+    },
+    {
+      "id": "dec-2",
+      "text": "check-1 scope focused là cố ý khi lệnh không phải lệnh test của dự án; không đổi mặc định đó.",
+      "rationale": "init-task.ts chỉ coi là suite (full) khi lệnh trùng lệnh test của verify-plan."
+    },
+    {
+      "id": "dec-3",
+      "text": "Hai cờ mới --remove-decision và --remove-criterion chỉ hoạt động trong planning; không xóa dữ liệu đã đóng băng.",
+      "rationale": "Tránh phá bất biến của obligations sau ready, nhưng cho phép dọn quyết định hoặc tiêu chí đã bị thay thế khi lập kế hoạch."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-19T16:06:15.852+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/integration/commands/workflow-flags.test.ts test/workflow/cli-contract.test.ts — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "d3f458403af1a05fafe8dfa6148e3a320d7e20aa580721e6c6471a131e399c08"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-19T16:06:46.100+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/integration/commands/workflow-flags.test.ts test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e756e198bbdf98593986486c721f1e879715e725e923dd4269c889dd9ebfc0a4"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-19T16:06:50.743+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "14881b31fc1c342d17cede609e7e704cda3a6157d2dfeaabe2a6506d8ae8c8ab"
+    },
+    {
+      "id": "ev-chk-focus-3",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-19T16:07:50.607+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/integration/commands/workflow-flags.test.ts test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "17599e41cec509d57d12c8585c8e039400603b2200549fbd51437f4640bc8bf2"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-19T16:07:55.171+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "c7a8ce8f7231fe0beab3e525d48518a71c6eea3798284362a96b10dbcd0654fc"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-19T16:31:44.980+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Test file vượt 400 dòng do reflow Prettier, đã sửa; chạy lại gates với lệnh vitest tường minh",
+      "artifactPaths": [
+        ".harnix/tasks/20261019-143853-cli-ergonomics-risk-mitigation-init-cwd/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-focus-4",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-19T16:32:07.057+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/integration/commands/workflow-flags.test.ts test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fb37ecdc80d6b9a2001ad049576463584a8074ed281064105e5ae3887a33b782"
+    },
+    {
+      "id": "ev-chk-gates-2-1",
+      "checkId": "chk-gates-2",
+      "recordedAt": "2026-10-19T16:32:11.499+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/test-structure.test.ts test/workflow/cli-contract.test.ts test/workflow/architecture.test.ts test/workflow/docs-task-contract.test.ts test/workflow/skill-sources.test... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "402bf2f3e43a7a1c6a5c9860826f954b7231a461d047aab50832a8fc291be78f"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-19T16:33:25.978+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5314bec1083d18de1622cad55e4d8cafc5eef4f2fdc6cd43cbdf00f8d4320537"
+    }
+  ],
+  "createdAt": "2026-10-19T14:38:47.328+07:00",
+  "updatedAt": "2026-10-19T16:34:45.442+07:00",
+  "completedAt": "2026-10-19T16:34:45.442+07:00"
+}

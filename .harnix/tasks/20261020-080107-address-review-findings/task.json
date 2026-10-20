@@ -1,0 +1,200 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-080107-address-review-findings",
+  "title": "Xử lý phát hiện của review độc lập trước khi commit",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sửa các lỗi mã và bảo mật mà năm reviewer độc lập xác nhận, bổ sung test còn yếu và chỉnh các câu tài liệu sai hoặc cũ, rồi chạy lại lint, typecheck và toàn bộ test.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Các lỗi mã và bảo mật đã kiểm chứng được sửa, mỗi lỗi có test hồi quy: đường dẫn git status theo gốc .harnix, cmd.exe và taskkill chạy bằng đường dẫn tuyệt đối, shim có ký tự đặc biệt báo lỗi rõ, regex scheme của secret-scan có chặn, đường dẫn .sln tuyệt đối hoặc UNC bị bỏ, tên thư mục gợi ý được lọc, file nhạy cảm EOL đầy đủ hơn, PATH có dấu nháy, --path sai báo lỗi rõ, và nhận diện .NET dùng chung một predicate.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-fixes-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Các test yếu hoặc thiếu mà review chỉ ra được sửa: kiểm evidence của --remove-criterion, test lệnh read-only có tiêu đề riêng và kiểm exit code, --changed ở mức CLI, test che đường dẫn bao cả dòng thay cwd, test git bền hơn, test hygiene độc lập cwd, và các test thiếu cho handler và check-runner.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-fixes-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Tài liệu và CHANGELOG khớp mã: không còn khẳng định legacyInputDigest nằm trong đầu ra snapshot, mô tả đúng việc chạy trực tiếp .exe, tiêu đề mẫu PRD, danh sách cờ, wording về skill và status, và bullet CHANGELOG cho package ngoài npm.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "pnpm run lint, typecheck và toàn bộ test suite pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-lint-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-lint",
+      "description": "Lint ESLint và Prettier phải exit 0",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run lint",
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-fixes",
+      "description": "Test hồi quy cho lỗi mã, bảo mật và test bổ sung",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit test/integration",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test:gates",
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-lint-1",
+      "checkId": "chk-lint",
+      "recordedAt": "2026-10-20T08:51:25.092+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm lint — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "fe70ad721eef2b100ad06794961564d6e8a5db6c5c4fe711809b30e0d2e4385c"
+    },
+    {
+      "id": "ev-chk-lint-2",
+      "checkId": "chk-lint",
+      "recordedAt": "2026-10-20T08:52:34.439+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "968439094d625fa7a061b4a81929cb1948200f3a108986e7c39e039599f5f90d"
+    },
+    {
+      "id": "ev-chk-fixes-1",
+      "checkId": "chk-fixes",
+      "recordedAt": "2026-10-20T08:53:18.106+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit test/integration — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "07140819c8091475eac93eee766042b620c61525e21b6313c8a610dc2a9c52cf"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T08:53:22.241+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d87c07424e4ebcb10de7bda8b152f9913854d69ff0ca0c0fcc34dcbf2c3cb8c4"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T08:54:27.206+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "68e154816a003b62991db046e1ee0633ed7bafd05f961c7208f94552da1fed01"
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "docs",
+    "src/commands",
+    "src/core/stack",
+    "src/core/verification",
+    "src/core/workflow",
+    "src/skills",
+    "src/templates/harnix",
+    "src/utils",
+    "test"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-20T08:01:07.707+07:00",
+  "updatedAt": "2026-10-20T08:54:35.001+07:00",
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Không sửa trường hợp tên lệnh trần không tìm thấy trên PATH vẫn đi qua cmd.exe; chỉ sửa cmd.exe và taskkill chạy bằng đường dẫn tuyệt đối và đổi lùi-về-tên-trần của shim có ký tự đặc biệt thành lỗi rõ.",
+      "rationale": "Tên không tìm thấy có thể là lệnh dựng sẵn của cmd như echo; chặn hẳn sẽ phá lệnh hợp lệ, còn cmd.exe tuyệt đối đóng lỗ hổng gốc."
+    },
+    {
+      "id": "dec-2",
+      "text": "Không thêm --remove-decision và --remove-criterion vào activation.ts: ngân sách token của khối AGENTS bootstrap đã ở 1500/1500.",
+      "rationale": "Hai cờ được mô tả đầy đủ trong template workflow.md, AGENTS.md, PRD, WORKFLOW và schema; thêm vào activation làm vượt ngân sách."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-1",
+      "text": "Chưa xử lý: tên lệnh trần không tìm thấy trên PATH vẫn đi qua cmd.exe, nơi cmd tự tìm trong thư mục làm việc trước; chỉ cmd.exe và taskkill được cố định bằng đường dẫn System32.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-20T08:54:35.001+07:00"
+}

@@ -1,0 +1,213 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261019-143848-resolve-nearest-harnix-ancestor",
+  "epicId": "20261019-143847-field-defects-hardening",
+  "title": "Dò gốc dự án theo .harnix gần nhất và báo lỗi rõ khi thiếu",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Thay việc dừng ở git root bằng việc tìm ancestor gần nhất có .harnix/config.yaml hợp lệ; khi không có thì báo lỗi rõ ràng thay vì ENOENT realpath với đường dẫn bị che.",
+  "nonGoals": [
+    "Không cho target lấy từ nội dung repository, log hay output công cụ.",
+    "Không tự tạo .harnix hay chạy harnix init."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Các lệnh workflow (--preflight, --save, --init, --inspect...), mem và skill dùng findInitializedProject nên chạy trong repo git con vẫn tìm đúng .harnix/config.yaml của ancestor gần nhất, giống status, pause, resume.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Khi không có ancestor hợp lệ, các lệnh đó trả lỗi rõ ràng (không tìm thấy .harnix kèm hướng dẫn chạy từ thư mục đúng), không còn ENOENT realpath với placeholder [PROJECT].",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Target tường minh vẫn được canonicalize và từ chối traversal, unsafe root, symlink hoặc junction escape; init, update và uninstall giữ nguyên hành vi theo git root.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Toàn bộ test suite của dự án và test:gates pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Khi không có ancestor hợp lệ, lỗi liệt kê các thư mục con cấp 1 có .harnix/config.yaml (chỉ đọc, không tự chọn target) và nhắc chạy lại từ một trong số đó.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test đơn vị và tích hợp cho dò gốc theo .harnix gần nhất và lỗi khi thiếu",
+      "command": "pnpm exec vitest run test/unit/utils/project-discovery.test.ts test/integration/commands/workflow-command.test.ts test/integration/commands/status.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests (test:gates) và bộ test của dự án phải xanh",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test:gates"
+    }
+  ],
+  "relevantPaths": [
+    "src/cli-workflow-commands.ts",
+    "src/commands/status.ts",
+    "src/commands/workflow-command.ts",
+    "src/utils/project-discovery.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Không sửa resolveProjectRoot; chuyển lệnh workflow và verify-plan sang findInitializedProject, giữ resolveProjectRoot cho init, update, uninstall.",
+      "rationale": "findInitializedProject đã dò lên ancestor và đang được status, pause, resume dùng; sửa resolveProjectRoot sẽ làm init trong repo con trỏ nhầm .harnix của thư mục cha."
+    },
+    {
+      "id": "dec-2",
+      "text": "Chuỗi [PROJECT] chỉ là cwd bị che bởi redactPublicErrorMessage, không phải lỗi riêng; lỗi thật là root dừng ở git root.",
+      "rationale": "Đã đối chiếu cli-helpers.ts:131 và workflow-command.ts:127."
+    },
+    {
+      "id": "dec-3",
+      "text": "Phạm vi chuyển sang findInitializedProject chỉ gồm workflow, mem và skill; verify-plan, init, update, uninstall, doctor giữ resolveProjectRoot. Quyết định này thay thế phần verify-plan trong dec-1.",
+      "rationale": "verify-plan đọc manifest của thư mục đang đứng để sinh lệnh test, không đọc .harnix, nên chuyển sang ancestor sẽ phân tích nhầm repo cha; doctor và update ghi state nên giữ hành vi git root."
+    },
+    {
+      "id": "dec-4",
+      "text": "Không sửa docs/HARNIX_WORKFLOW.md, workflow.md và không chạy selfhost:sync trong task này.",
+      "rationale": "Tài liệu và AGENTS.md đã nêu quy tắc nearest ancestor; mã nay khớp quy tắc nên không có câu nào mâu thuẫn cần sửa, và không đổi template."
+    },
+    {
+      "id": "dec-5",
+      "text": "Tách test che đường dẫn trong cli-errors.test.ts thành hai test: lỗi thiếu project của mem và việc che cwd khỏi lỗi ENOENT thô.",
+      "rationale": "Test cũ dựa vào việc mem ngoài project nhả lỗi ENOENT có đường dẫn; hành vi đó chính là lỗi được sửa. Cam kết không lộ đường dẫn vẫn được kiểm bằng cả hai test."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-1",
+      "text": "pnpm run typecheck đang lỗi sẵn trên HEAD tại src/core/workflow/evidence.ts:27 (checkId có thể undefined, từ v2.10.0), và pnpm run lint lỗi sẵn ở các file ngoài phạm vi; hai lệnh này không xanh độc lập với task này.",
+      "severity": "medium"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-19T15:15:31.841+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/project-discovery.test.ts test/integration/commands/workflow-command.test.ts test/integration/commands/status.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "81fa3a1b0cfcad312de878b266a749fd9d5e697a7c660ab6559d0e6c8dbb38c4"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-19T15:15:40.732+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f829e40b8881112007b511f6426bd81ff85e989d7c470c93d72dc4d19bcb8c2b"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-19T15:16:58.043+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "9fb3b09caa80fa768085d38a3de1acd1921bf84bd457f8d91865790349253767"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-19T15:18:54.994+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "07a1974067a1aa603ee3fcc753601e7f9068c5cd13fc7d4078edc2c8b2de6824"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-19T15:20:29.378+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/project-discovery.test.ts test/integration/commands/workflow-command.test.ts test/integration/commands/status.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8fe5edb9fa416dbfd08383deef70264adfc8ecbcd8fb8158a6c31e39028bca2f"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-19T15:20:34.255+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b93e664555b4b6849230ff069c50b7c0b726d0c920b1f5d4cc58514540d330ab"
+    }
+  ],
+  "createdAt": "2026-10-19T14:38:47.328+07:00",
+  "updatedAt": "2026-10-19T15:26:02.391+07:00",
+  "completedAt": "2026-10-19T15:26:02.391+07:00"
+}

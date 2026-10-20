@@ -4,6 +4,7 @@ import { parse } from "yaml";
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath } from "src/utils/paths.js";
 import { matchesSafeGlob } from "src/utils/safe-glob.js";
+import { isDotnetProjectFile, isSolutionFile, solutionProjectPaths } from "./dotnet-projects.js";
 import { detectEcosystemVerify, type EcosystemVerifyResult } from "./verify-detection.js";
 
 export interface WorkspacePackage extends EcosystemVerifyResult {
@@ -33,11 +34,11 @@ export async function detectWorkspaces(
   await collectMavenWorkspaces(root, packagePaths);
 
   // 6. .NET solution workspaces (*.sln)
-  await collectDotNetWorkspaces(root, packagePaths);
+  const solutionProjectDirs = await collectDotNetWorkspaces(root, packagePaths);
 
   // If no explicit workspace config found or recursive requested, discover all nested manifests
   if (packagePaths.size === 0 || options?.recursive === true) {
-    await discoverNestedManifests(root, root, 0, packagePaths);
+    await discoverNestedManifests(root, root, 0, packagePaths, solutionProjectDirs);
   }
 
   const results: WorkspacePackage[] = [];
@@ -140,24 +141,33 @@ async function expandGlobs(root: string, patterns: string[], packagePaths: Set<s
 
 const ignoredDirs = new Set(["node_modules", ".git", "dist", "build", "target", "vendor", ".harnix", "bin", "obj"]);
 
-async function collectDotNetWorkspaces(root: string, packagePaths: Set<string>): Promise<void> {
-  const slnPaths = await findSolutionFiles(root, root, 0);
-  const projectRegex = /Project\s*\([^)]*\)\s*=\s*"[^"]*"\s*,\s*"([^"]+\.(?:csproj|fsproj|vbproj))"/giu;
-  for (const slnPath of slnPaths) {
+/**
+ * Each directory holding a solution is one package; the directories of the projects a solution references are
+ * returned as `covered` so they are not listed again (a solution runs all of its projects at once).
+ */
+async function collectDotNetWorkspaces(root: string, packagePaths: Set<string>): Promise<Set<string>> {
+  const covered = new Set<string>();
+  const solutionDirs = new Set<string>();
+  for (const slnPath of await findSolutionFiles(root, root, 0)) {
     const text = await readSafeText(slnPath);
     if (!text) continue;
     const slnDir = dirname(slnPath);
-    for (const match of text.matchAll(projectRegex)) {
-      const rawRelPath = match[1];
-      if (!rawRelPath) continue;
-      const normalizedProjPath = rawRelPath.replaceAll("\\", "/");
-      const fullProjDir = resolve(slnDir, dirname(normalizedProjPath));
-      const relToRoot = relative(root, fullProjDir).replaceAll("\\", "/");
-      if (relToRoot !== "" && !relToRoot.startsWith("..") && !relToRoot.startsWith("/")) {
-        packagePaths.add(normalizeRepositoryPath(relToRoot, { allowRoot: false }));
-      }
+    const slnRel = relative(root, slnDir).replaceAll("\\", "/");
+    if (isInsideRoot(slnRel) && slnRel !== "") {
+      solutionDirs.add(slnRel);
+      packagePaths.add(normalizeRepositoryPath(slnRel, { allowRoot: false }));
+    }
+    for (const projectPath of solutionProjectPaths(text)) {
+      const relToRoot = relative(root, resolve(slnDir, dirname(projectPath))).replaceAll("\\", "/");
+      if (relToRoot !== slnRel && isInsideRoot(relToRoot) && relToRoot !== "") covered.add(relToRoot);
     }
   }
+  for (const dir of solutionDirs) covered.delete(dir);
+  return covered;
+}
+
+function isInsideRoot(relativePath: string): boolean {
+  return relativePath !== ".." && !relativePath.startsWith("../") && !relativePath.startsWith("/");
 }
 
 async function findSolutionFiles(root: string, current: string, depth: number): Promise<string[]> {
@@ -166,7 +176,7 @@ async function findSolutionFiles(root: string, current: string, depth: number): 
   try {
     const entries = await readdir(current, { withFileTypes: true });
     for (const entry of entries) {
-      if (entry.isFile() && entry.name.endsWith(".sln")) {
+      if (entry.isFile() && isSolutionFile(entry.name)) {
         results.push(join(current, entry.name));
       } else if (entry.isDirectory() && !ignoredDirs.has(entry.name) && !entry.name.startsWith(".")) {
         results.push(...(await findSolutionFiles(root, join(current, entry.name), depth + 1)));
@@ -202,28 +212,29 @@ async function discoverNestedManifests(
   current: string,
   depth: number,
   packagePaths: Set<string>,
+  covered: ReadonlySet<string>,
 ): Promise<void> {
   if (depth > 6) return;
   try {
     const entries = await readdir(current, { withFileTypes: true });
     const fileNames = new Set(entries.filter((e) => e.isFile()).map((e) => e.name));
     const rel = relative(root, current).replaceAll("\\", "/");
-    const hasProjectFile =
+    // A directory that a solution already covers is a package only through a manifest of its own, not through its project file.
+    const hasManifest =
       fileNames.has("package.json") ||
       fileNames.has("Cargo.toml") ||
       fileNames.has("go.mod") ||
       fileNames.has("pom.xml") ||
       fileNames.has("pyproject.toml") ||
       fileNames.has("requirements.txt") ||
-      entries.some(
-        (e) => e.isFile() && (e.name.endsWith(".sln") || e.name.endsWith(".csproj") || e.name.endsWith(".fsproj")),
-      );
-    if (rel !== "" && hasProjectFile) {
+      entries.some((e) => e.isFile() && isSolutionFile(e.name));
+    const hasDotnetProject = entries.some((e) => e.isFile() && isDotnetProjectFile(e.name));
+    if (rel !== "" && (hasManifest || (hasDotnetProject && !covered.has(rel)))) {
       packagePaths.add(normalizeRepositoryPath(rel, { allowRoot: false }));
     }
     for (const entry of entries) {
       if (entry.isDirectory() && !ignoredDirs.has(entry.name) && !entry.name.startsWith(".")) {
-        await discoverNestedManifests(root, join(current, entry.name), depth + 1, packagePaths);
+        await discoverNestedManifests(root, join(current, entry.name), depth + 1, packagePaths, covered);
       }
     }
   } catch {

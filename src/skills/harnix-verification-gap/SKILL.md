@@ -2,7 +2,7 @@
 name: harnix-verification-gap
 description: Use when evaluating whether a test suite, verification plan or review scope has hidden gaps, false-success blind spots or unverified critical requirements.
 metadata:
-  version: "2.11.0"
+  version: "2.12.3"
 ---
 
 # Verification gap analysis

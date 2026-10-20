@@ -18,6 +18,7 @@ export const LIFECYCLE_HANDLERS: Record<string, Handler> = {
       input: context.flags.input?.flatMap(splitGlobList),
       followUp: context.flags.followUp,
       epic: context.flags.epic,
+      cwd: context.flags.cwd,
     });
     if (context.flags.followUp !== undefined && task.epicId === undefined)
       process.stderr.write(

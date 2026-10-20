@@ -313,7 +313,8 @@
             "sha256": "037ecd1db38c230c248787e60fd7bfc0cb0101b187b59535b6e7483be762d350"
           }
         ],
-        "inputDigest": "750ffba894f46352fe4a6d8cf8d4c9dde680c12d5d1c1e8fc65bdbf097815c65"
+        "inputDigest": "750ffba894f46352fe4a6d8cf8d4c9dde680c12d5d1c1e8fc65bdbf097815c65",
+        "rawInputDigest": "750ffba894f46352fe4a6d8cf8d4c9dde680c12d5d1c1e8fc65bdbf097815c65"
       }
     },
     {
@@ -1076,6 +1077,8 @@
             "--init",
             "--migrate",
             "--preflight",
+            "--remove-criterion",
+            "--remove-decision",
             "--replace-check",
             "--run-check",
             "--run-checks",
@@ -1090,7 +1093,7 @@
           ]
         },
         "transports": {
-          "--init": "Create a valid v3 task and set it active: --init --title <t> [--mode lite|full --goal <g> --text <criterion> (repeat for more criteria) --with-check id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>[;scope=focused|full][;description=<text>] (quoted; repeat for more required checks) --command <cmd> --input <glob,glob> --epic <epic-id> --follow-up <task-id>]; the command and inputs default from verify-plan, and a check running the project test command is check-suite with scope full; --epic attaches an existing epic and --follow-up records followUpOf and inherits the parent's epic and paths.",
+          "--init": "Create a valid v3 task and set it active: --init --title <t> [--mode lite|full --goal <g> --text <criterion> (repeat for more criteria) --with-check id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>[;scope=focused|full][;description=<text>][;cwd=<path>] (quoted; repeat for more required checks) --command <cmd> --input <glob,glob> --epic <epic-id> --follow-up <task-id> --cwd <package-dir>]; the command and inputs default from verify-plan (with --cwd, from that package: its test command, the check cwd and the input <package-dir>/**), and a check running the project test command is check-suite with scope full; --epic attaches an existing epic and --follow-up records followUpOf and inherits the parent's epic and paths.",
           "--preflight": "Read-only routing metadata: clock, learning notes, check counts, active task and nextStage; baselineHint (one line) appears while implementing or verifying when the same suite was red in the last two finished tasks, asking for a user-authorized --set-baseline.",
           "--snapshot": "Read-only input digest of one check (--snapshot --check <id>).",
           "--inspect": "Read-only view of the active workflow state; --inspect --task <task-id> reads another unfinished task without moving the active pointer.",
@@ -1103,10 +1106,12 @@
           "--run-checks": "Run every required check that is not passing (pending, stale or failed), focused before full, each with its declared command and cwd like --run-check, and stop at the first failure; prints { ran: [{ id, result, exitCode }], remaining } and nothing is run when a check is at the circuit breaker or declares no command; a failing check also returns its short outputTail, with or without --brief.",
           "--set-check": "Add or update one validation check of the active v3 task from flags; after planning it needs --reason and makes the guarded replan save.",
           "--replace-check": "Retire a failed or unpassed required check and activate or declare a replacement check covering its criteria: --replace-check <old> <new> --reason <why> [--description --command --scope --input --criteria --cwd]; the replacement must differ from the retired check in command, inputs or cwd; schema v3 only.",
-          "--set-criterion": "Rewrite the text of one acceptance criterion: --set-criterion <id> --text <text> [--reason <why>]; free in planning, afterwards it needs --reason and makes the guarded replan save, and a criterion mapped by recorded check evidence stays immutable.",
+          "--set-criterion": "Rewrite the text of one acceptance criterion: --set-criterion <id> --text <text> [--reason <why>] [--task <task-id>]; free in planning, afterwards it needs --reason and makes the guarded replan save, and a criterion mapped by recorded check evidence stays immutable.",
           "--add-criterion": "Add one acceptance criterion from --text and cover it with the --check IDs; same --reason rule as --set-check.",
           "--add-decision": "Record one decision (--text, --rationale) on the active v3 task; review data, so no --reason.",
-          "--add-risk": "Record one residual risk (--text, optional --severity) on the active v3 task; review data, so no --reason.",
+          "--add-risk": "Record one residual risk (--text, optional --severity and --mitigation, which is kept inside the risk text) on the active v3 task; review data, so no --reason.",
+          "--remove-decision": "Remove one decision while the task is in planning (--remove-decision <id> [--task <task-id>]); refused afterwards.",
+          "--remove-criterion": "Remove one acceptance criterion while the task is in planning and take it out of every check that covered it (--remove-criterion <id> [--task <task-id>]); refused afterwards, when a check of it recorded evidence, or when a required check would cover no criterion.",
           "--set-paths": "Replace the relevant paths and/or specs from repeatable --relevant-path and --relevant-spec flags; needs no reason.",
           "--batch": "Apply criteria, checks, decisions, risks and paths atomically from the stdin envelope { criteria?: [{ id, text?, status?, waiverReason?, checks? }], checks?: [{ id, description?, command?, scope?, required?, criteria?, inputs? }], decisions?: [{ id, text, rationale }], risks?: [{ id, text, severity? }], paths?: { paths?, specs? }, reason? } in one save under the workflow lock; decision and risk ids must be new (severity defaults to low); changing criteria or checks follows --set-check, so after planning it needs reason (10-1000 characters); schema v3 only.",
           "--brief": "Print only id, status, checkpoint and updatedAt (preflight: without learning); the commands that accept it are listed in constraints.brief.",

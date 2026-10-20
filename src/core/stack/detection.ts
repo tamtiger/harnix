@@ -1,9 +1,10 @@
 import { readdir, readFile, stat } from "node:fs/promises";
-import { basename, dirname, relative, resolve } from "node:path";
+import { basename, relative, resolve } from "node:path";
 import { compareCodeUnits } from "src/utils/order.js";
 
 import type { DetectionMatch, LanguageId, TechnologyId } from "src/catalog/catalog.js";
 import { evaluateFacts, type CollectedFile, type DependencyFact, type DetectionFacts } from "./detection-engine.js";
+import { findPackageRoots } from "./package-roots.js";
 
 export type { DetectionMatch, LanguageId, TechnologyId } from "src/catalog/catalog.js";
 export type PackageManager = "pnpm" | "yarn" | "npm" | "bun";
@@ -136,11 +137,13 @@ async function detectPackages(
   facts: DetectionFacts,
   packageManager: PackageManager | undefined,
 ): Promise<DetectedPackage[]> {
-  const packageFiles = facts.files.filter(({ path }) => basename(path) === "package.json");
+  const byPath = new Map(facts.files.map((file) => [file.path, file]));
+  const roots = await findPackageRoots(facts.files, async (path) => {
+    const file = byPath.get(path);
+    return file === undefined ? undefined : readBoundedText(file);
+  });
   const results = await Promise.all(
-    packageFiles.map(async (file) => {
-      const path = dirname(file.path).replaceAll("\\", "/");
-      const packagePath = path === "." ? "." : path;
+    roots.map(async (packagePath) => {
       const prefix = packagePath === "." ? "" : `${packagePath}/`;
       const scoped: DetectionFacts = {
         files: facts.files.filter((item) => prefix.length === 0 || item.path.startsWith(prefix)),
@@ -150,11 +153,13 @@ async function detectPackages(
       const languages = selectedLanguages(matches),
         technologies = selectedTechnologies(matches);
       if (languages.length === 0 && technologies.length === 0) return undefined;
-      const manifest = (await readJsonObject(file)) as PackageManifest | undefined;
+      const manifestFile = byPath.get(packagePath === "." ? "package.json" : `${packagePath}/package.json`);
+      const manifest =
+        manifestFile === undefined ? undefined : ((await readJsonObject(manifestFile)) as PackageManifest | undefined);
       return {
         languages,
         technologies,
-        packageManager,
+        packageManager: manifestFile === undefined ? undefined : packageManager,
         path: packagePath,
         verificationCommands: detectVerificationCommands(manifest, packageManager),
       } satisfies DetectedPackage;

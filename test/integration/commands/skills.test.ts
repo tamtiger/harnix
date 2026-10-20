@@ -38,7 +38,7 @@ describe("harnix skill", () => {
       "so-what",
       "technical-recap",
     ]);
-    expect(skills.get("harnix-review")).toEqual([]);
+    expect(skills.get("harnix-review")).toEqual(["multi-lens"]);
     expect(skills.get("harnix-research")).toEqual(["scouting-isolation"]);
     expect(skills.get("harnix-debug")).toEqual(["feedback-loop"]);
   });
@@ -94,7 +94,7 @@ describe("harnix skill", () => {
     expect(() => reportSkillReference("harnix-plan", "nope")).toThrow(
       /Available: replan, migration, epic, multi-repo, ready-review, grilling/u,
     );
-    expect(() => reportSkillReference("harnix-review", "anything")).toThrow(/has no references/u);
+    expect(() => reportSkillReference("harnix-review", "anything")).toThrow(/Available: multi-lens/u);
     expect(() => reportSkillReference("harnix-plan", "__proto__")).toThrow(/Unknown reference/u);
     expect(() => reportSkillReference("harnix-unknown", "replan")).toThrow(/Unknown Harnix skill/u);
   });

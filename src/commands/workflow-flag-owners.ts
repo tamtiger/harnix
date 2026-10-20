@@ -31,6 +31,9 @@ const EDIT_ACTIONS = [
   "setPaths",
   "addDecision",
   "addRisk",
+  "setCriterion",
+  "removeDecision",
+  "removeCriterion",
   "setTitle",
   "setGoal",
   "batch",
@@ -39,7 +42,7 @@ const taskOwner: FlagOwner = {
   name: "--task",
   isSet: (f) => f.task !== undefined,
   actions: EDIT_ACTIONS,
-  hint: "workflow --inspect, --set-check, --add-criterion, --set-paths, --set-title, --set-goal, --add-decision, --add-risk or --batch (state changes, evidence and finish act only on the active task)",
+  hint: "workflow --inspect, --set-check, --add-criterion, --set-criterion, --set-paths, --set-title, --set-goal, --add-decision, --add-risk, --remove-decision, --remove-criterion or --batch (state changes, evidence and finish act only on the active task)",
 };
 
 /** Flags that only make sense with specific actions; anything else is rejected before any state is read. */
@@ -131,6 +134,7 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
     hint: "workflow --add-decision",
   },
   { name: "--severity", isSet: (f) => f.severity !== undefined, actions: ["addRisk"], hint: "workflow --add-risk" },
+  { name: "--mitigation", isSet: (f) => f.mitigation !== undefined, actions: ["addRisk"], hint: "workflow --add-risk" },
   taskOwner,
   initOwner("--title", (f) => f.title),
   initOwner("--slug", (f) => f.slug),
@@ -157,8 +161,8 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   {
     name: "--cwd",
     isSet: (f) => f.cwd !== undefined,
-    actions: ["setCheck", "replaceCheck", "runCheck"],
-    hint: "workflow --set-check, --replace-check or --run-check",
+    actions: ["setCheck", "replaceCheck", "runCheck", "init"],
+    hint: "workflow --set-check, --replace-check, --run-check or --init",
   },
   initOwner("--epic", (f) => f.epic),
   {

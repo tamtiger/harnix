@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { computeInputDigest } from "src/core/verification/input-digest.js";
+import { setCheckWorkflow } from "src/core/workflow/plan-edit.js";
 import { replaceCheckWorkflow } from "src/core/workflow/replace-check.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -130,5 +131,32 @@ describe("workflow replace-check", () => {
       inputs: ["src/a.ts"],
       required: true,
     });
+  });
+});
+
+describe("workflow editing a failed check in place", () => {
+  it("points to --replace-check when the command of a failed check is changed", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+    await saveWorkflow(root, {
+      task: {
+        ...task,
+        evidence: [
+          {
+            id: "ev-fail-1",
+            checkId: "check",
+            recordedAt: NOW,
+            result: "fail",
+            exitCode: 1,
+            summary: "build error",
+            artifactPaths: [],
+          },
+        ],
+      },
+    });
+
+    await expect(
+      setCheckWorkflow(root, { id: "check", command: "pnpm test:unit" }, { reason: "Đổi lệnh vì lệnh cũ sai" }, NOW),
+    ).rejects.toThrow(/harnix workflow --replace-check check <new-id> --reason/u);
   });
 });

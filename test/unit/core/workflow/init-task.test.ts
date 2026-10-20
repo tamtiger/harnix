@@ -354,6 +354,43 @@ describe("initTaskWorkflow slug", () => {
   });
 });
 
+describe("initTaskWorkflow with a working directory", () => {
+  async function monorepo(root: string): Promise<void> {
+    await initializeUtcProject(root);
+    await mkdir(join(root, "packages", "svc"), { recursive: true });
+    await writeFile(join(root, "packages", "svc", "package.json"), JSON.stringify({ scripts: { test: "vitest run" } }));
+    await mkdir(join(root, "packages", "docs"), { recursive: true });
+    await writeFile(join(root, "packages", "docs", "package.json"), JSON.stringify({ name: "docs" }));
+  }
+
+  it("takes the test command of that package and scopes the suite check to it", async () => {
+    const root = await temporaryRepository();
+    await monorepo(root);
+
+    const task = await initTaskWorkflow(root, { title: "Sửa service", slug: "fix-svc", cwd: "packages/svc" });
+
+    expect(task.validationPlan[0]).toMatchObject({
+      id: "check-suite",
+      scope: "full",
+      cwd: "packages/svc",
+      command: "npm run test",
+      inputs: ["packages/svc/**"],
+    });
+  });
+
+  it("asks for --command when the package has no test command and treats . as no cwd", async () => {
+    const root = await temporaryRepository();
+    await monorepo(root);
+
+    await expect(initTaskWorkflow(root, { title: "Docs", slug: "docs", cwd: "packages/docs" })).rejects.toThrow(
+      /--cwd packages\/docs found no test command for that package; pass --command/u,
+    );
+    await writeTestProject(root);
+    const task = await initTaskWorkflow(root, { title: "Gốc", slug: "root", cwd: "." });
+    expect(task.validationPlan[0]?.cwd).toBeUndefined();
+  });
+});
+
 describe("--slug flag ownership", () => {
   it("belongs to --init only", () => {
     expect(() => assertFlagGroups("init", { slug: "x" })).not.toThrow();

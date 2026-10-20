@@ -1,0 +1,114 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261019-144907-detect-non-npm-packages-for-config",
+  "title": "Phát hiện package không có package.json (C#, PHP, Java, Go...) khi ghi config.yaml",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Làm detectPackages nhận diện package theo mọi loại manifest (.sln/.csproj, composer.json, pom.xml, go.mod, Cargo.toml, pyproject.toml), gom .NET theo solution, để packages trong config.yaml phản ánh đủ các service backend thay vì chỉ các thư mục có package.json.",
+  "nonGoals": [],
+  "epicId": "20261019-143847-field-defects-hardening",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "detectPackages nhận diện package từ .sln, .csproj/.fsproj/.vbproj, composer.json, pom.xml, build.gradle, go.mod, Cargo.toml và pyproject.toml, không chỉ package.json; repo đa dịch vụ C# được ghi đủ từng service với languages và technologies đúng (csharp, dotnet, abp).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": ".NET được gom theo thư mục solution (không sinh mỗi csproj một package); project mà solution tham chiếu không là package riêng; csproj độc lập không thuộc solution vẫn là package.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Test hồi quy dựng đúng cấu trúc payment-hub (frontend npm cộng nhiều service C#) cho đủ mọi package; package có package.json giữ nguyên kết quả cũ; repo không có thư mục package nào vẫn dùng fallbackPackage.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-focus-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-focus",
+      "description": "chk-focus",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/core/stack test/integration/commands/init.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-19T16:43:03.678+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/stack test/integration/commands/init.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f9f044b72d4fd66dff0051b4831a55a5f67bc8d29df31e167ad4ec9b158a1af4"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-19T16:44:16.022+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6580eb0a8bb19313541fe97128cc6a33c3832d8fd0c8333a1c874a2b8d8fe77d"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/stack/detection.ts",
+    "src/core/stack/dotnet-projects.ts",
+    "src/core/stack/package-roots.ts",
+    "test/unit/core/stack/detection.test.ts",
+    "test/unit/core/stack/package-roots.test.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-19T14:49:07.973+07:00",
+  "updatedAt": "2026-10-19T16:44:23.836+07:00",
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Dùng chung helper phát hiện .NET (test project, gom theo .sln) với task dotnet-test-detection-and-verify-plan-scope và chạy ngay sau task đó.",
+      "rationale": "Catalog đã nhận csharp, dotnet, abp từ .csproj; lỗi chỉ ở detectPackages chỉ duyệt package.json."
+    }
+  ],
+  "completedAt": "2026-10-19T16:44:23.836+07:00"
+}

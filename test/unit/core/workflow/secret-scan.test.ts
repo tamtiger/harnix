@@ -156,3 +156,41 @@ describe("finish report", () => {
     expect(report.secretAdvisory).toBeUndefined();
   });
 });
+
+describe("scanTaskSecrets and .gitignore", () => {
+  it("does not read files the repository ignores but still reports the ones it does not", async () => {
+    const root = await project({
+      ".gitignore": "src/logs/\n",
+      "src/logs/run.log": `aws = ${AWS_KEY}`,
+      "src/app.ts": `aws = ${AWS_KEY}`,
+    });
+
+    const advisory = await scanTaskSecrets(root, task({ inputs: ["src/**"] }));
+
+    expect(advisory?.findings.map((finding) => finding.path)).toEqual(["src/app.ts"]);
+  });
+
+  it("reports nothing when the only file with a secret is ignored", async () => {
+    const root = await project({ ".gitignore": "*.log\n", "src/run.log": `aws = ${AWS_KEY}`, "src/app.ts": "ok" });
+
+    await expect(scanTaskSecrets(root, task({ inputs: ["src/**"] }))).resolves.toBeUndefined();
+  });
+});
+
+describe("scanTaskSecrets on hostile text", () => {
+  it("finishes quickly on a long run of scheme-like characters without a ://", async () => {
+    const root = await project({ "src/a.txt": "a.".repeat(60_000) });
+    const started = Date.now();
+
+    await expect(scanTaskSecrets(root, task({ inputs: ["src/**"] }))).resolves.toBeUndefined();
+    expect(Date.now() - started).toBeLessThan(1_500);
+  });
+
+  it("still finds a password inside a connection url", async () => {
+    const root = await project({ "src/b.txt": "db = postgres://app:Hunter2xyz@db.internal/main" });
+
+    const advisory = await scanTaskSecrets(root, task({ inputs: ["src/**"] }));
+
+    expect(advisory?.findings).toEqual([{ path: "src/b.txt", rule: "connection-string-password" }]);
+  });
+});

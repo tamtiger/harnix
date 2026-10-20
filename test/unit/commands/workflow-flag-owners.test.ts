@@ -23,6 +23,10 @@ describe("FLAG_OWNERS", () => {
     expect(owner("--with-check")?.isSet({})).toBe(false);
     expect(owner("--with-check")?.actions).toEqual(["init"]);
     expect(owner("--text")?.actions).toContain("setCriterion");
-    expect(owner("--task")?.actions).toContain("inspect");
+    expect(owner("--task")?.actions).toEqual(
+      expect.arrayContaining(["inspect", "setCriterion", "removeDecision", "removeCriterion"]),
+    );
+    expect(owner("--mitigation")?.actions).toEqual(["addRisk"]);
+    expect(owner("--cwd")?.actions).toContain("init");
   });
 });

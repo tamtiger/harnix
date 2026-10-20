@@ -287,7 +287,7 @@ describe("validation check cwd and baseline contracts", () => {
     expect(() => validateTask(withCheck({ cwd: "." }))).not.toThrow();
   });
 
-  it.each(["../other", "/abs", "C:/x", "D:foo", "a/../../b", "", "a b"])("rejects the unsafe cwd %j", (cwd) => {
+  it.each(["../other", "/abs", "C:/x", "D:foo", "a/../../b", "", "a\u0000b"])("rejects the unsafe cwd %j", (cwd) => {
     expect(() => validateTask(withCheck({ cwd }))).toThrow(/cwd/u);
   });
 

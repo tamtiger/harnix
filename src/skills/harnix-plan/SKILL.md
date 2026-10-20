@@ -2,7 +2,7 @@
 name: harnix-plan
 description: Use when a Harnix request needs triage, requirements, planning, a trustworthy ready gate, a replan, a legacy-task migration or an epic before implementation.
 metadata:
-  version: "2.11.0"
+  version: "2.12.3"
 ---
 
 # Plan a Harnix task
@@ -36,7 +36,7 @@ Anything that is not Bypass is tracked. **Lite**: localized, low-risk, obvious c
 - A Full task with `--init --mode full` auto-generates 4-block `prd.md` and Execution Slices `plan.md` (tagged `[chk-id]`). Flesh them out with the editor tool.
 - Persist `planning` before any product edit. Record outcome, non-goals, observable acceptance criteria, relevant paths/specs, affected contracts, risks and rollback, and validation.
 - A task that changes the CLI, documentation or test structure gets a focused required check `pnpm run test:gates` (the contract tests in a few seconds: test-structure, cli-contract, architecture, docs, skill sources, instruction budget, golden) beside its own tests, so the suite does not find those gaps last.
-- Edit obligations with flags, not JSON: `--set-check`, `--add-criterion`, `--set-paths`.
+- Edit obligations with flags, not JSON: `--set-check`, `--add-criterion`, `--set-criterion`, `--remove-criterion`, `--set-paths`.
 - Full `plan.md`: an unchecked `- [ ]` item per ordered slice near the top (e.g. `- [ ] [chk-1] Slice: ...`), concrete files/interfaces, RED then GREEN order, what each check proves.
 - Reconcile findings with real code before freezing criteria: When creating epic members up front, initial criteria and checks are draft. Before `ready`, inspect the exact codebase files: verify the behavior is not already implemented, check that the finding does not contradict a frozen contract or test, ensure check test files exist on disk, and update obsolete obligations with `--set-criterion` or `--replace-check`.
 - Obligations freeze at the first persisted `ready`.

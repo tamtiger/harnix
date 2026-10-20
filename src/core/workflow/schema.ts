@@ -85,7 +85,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
     },
     transports: {
       "--init":
-        "Create a valid v3 task and set it active: --init --title <t> [--mode lite|full --goal <g> --text <criterion> (repeat for more criteria) --with-check id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>[;scope=focused|full][;description=<text>] (quoted; repeat for more required checks) --command <cmd> --input <glob,glob> --epic <epic-id> --follow-up <task-id>]; the command and inputs default from verify-plan, and a check running the project test command is check-suite with scope full; --epic attaches an existing epic and --follow-up records followUpOf and inherits the parent's epic and paths.",
+        "Create a valid v3 task and set it active: --init --title <t> [--mode lite|full --goal <g> --text <criterion> (repeat for more criteria) --with-check id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>[;scope=focused|full][;description=<text>][;cwd=<path>] (quoted; repeat for more required checks) --command <cmd> --input <glob,glob> --epic <epic-id> --follow-up <task-id> --cwd <package-dir>]; the command and inputs default from verify-plan (with --cwd, from that package: its test command, the check cwd and the input <package-dir>/**), and a check running the project test command is check-suite with scope full; --epic attaches an existing epic and --follow-up records followUpOf and inherits the parent's epic and paths.",
       "--preflight":
         "Read-only routing metadata: clock, learning notes, check counts, active task and nextStage; baselineHint (one line) appears while implementing or verifying when the same suite was red in the last two finished tasks, asking for a user-authorized --set-baseline.",
       "--snapshot": "Read-only input digest of one check (--snapshot --check <id>).",
@@ -109,12 +109,16 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--replace-check":
         "Retire a failed or unpassed required check and activate or declare a replacement check covering its criteria: --replace-check <old> <new> --reason <why> [--description --command --scope --input --criteria --cwd]; the replacement must differ from the retired check in command, inputs or cwd; schema v3 only.",
       "--set-criterion":
-        "Rewrite the text of one acceptance criterion: --set-criterion <id> --text <text> [--reason <why>]; free in planning, afterwards it needs --reason and makes the guarded replan save, and a criterion mapped by recorded check evidence stays immutable.",
+        "Rewrite the text of one acceptance criterion: --set-criterion <id> --text <text> [--reason <why>] [--task <task-id>]; free in planning, afterwards it needs --reason and makes the guarded replan save, and a criterion mapped by recorded check evidence stays immutable.",
       "--add-criterion":
         "Add one acceptance criterion from --text and cover it with the --check IDs; same --reason rule as --set-check.",
       "--add-decision": "Record one decision (--text, --rationale) on the active v3 task; review data, so no --reason.",
       "--add-risk":
-        "Record one residual risk (--text, optional --severity) on the active v3 task; review data, so no --reason.",
+        "Record one residual risk (--text, optional --severity and --mitigation, which is kept inside the risk text) on the active v3 task; review data, so no --reason.",
+      "--remove-decision":
+        "Remove one decision while the task is in planning (--remove-decision <id> [--task <task-id>]); refused afterwards.",
+      "--remove-criterion":
+        "Remove one acceptance criterion while the task is in planning and take it out of every check that covered it (--remove-criterion <id> [--task <task-id>]); refused afterwards, when a check of it recorded evidence, or when a required check would cover no criterion.",
       "--set-paths":
         "Replace the relevant paths and/or specs from repeatable --relevant-path and --relevant-spec flags; needs no reason.",
       "--batch":

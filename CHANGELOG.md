@@ -4,6 +4,40 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.12.3] - 2026-10-20
+
+### Changed
+
+- Thêm reference multi-lens cho harnix-review (mẫu brief dùng sẵn và năm góc nhìn, subagent chỉ tùy chọn), thay catch rỗng ở epic.ts bằng pathExists và nối lại các dòng ngắt cứng giữa câu ở template workflow.md
+
+## [2.12.2] - 2026-10-20
+
+### Fixed
+
+- Xử lý phát hiện của review độc lập: chạy cmd.exe và taskkill bằng đường dẫn System32 tuyệt đối, đường dẫn .sln tuyệt đối hoặc UNC bị bỏ và regex .sln/secret-scan có chặn, verify-plan --changed theo gốc .harnix, tên thư mục gợi ý được lọc, thêm file nhạy cảm EOL; bổ sung và siết test; chỉnh tài liệu
+
+## [2.12.1] - 2026-10-19
+
+### Changed
+
+- Đồng bộ tài liệu, template và skill theo epic 2.12.0; sửa lỗi review phát hiện (shim .cmd chạy theo đường dẫn đã resolve, verify-plan --changed khi cây sạch, manifest cùng thư mục project .NET, file nhạy cảm EOL khi băm digest); đưa pnpm run lint về exit 0
+
+## [2.12.0] - 2026-10-19
+
+### Fixed
+
+- Dò gốc dự án theo .harnix gần nhất cho workflow, mem, skill và báo lỗi rõ khi thiếu
+- Thông báo từ chối của --criterion --met nêu lý do từng check, sửa lỗi typecheck sẵn có và khôi phục kiểm thử che đường dẫn đầu-cuối
+- Chạy trực tiếp .exe tìm được trên PATH (dotnet test với | trong filter) và chỉ dẫn --replace-check khi sửa check đã fail
+- Nhận diện test project .NET theo nội dung csproj, gom theo solution và thêm --path, --changed, --brief cho verify-plan
+- Băm inputDigest sau khi chuẩn hóa CRLF thành LF, giữ nhận digest byte thô và digest cũ; chuẩn hóa ba file nguồn bị Git coi là nhị phân
+- secretAdvisory tôn trọng .gitignore, mẫu prd/plan trung tính theo dự án và test hồi quy lệnh read-only không ghi .harnix
+- `harnix init` ghi package theo `.sln`, project .NET độc lập và manifest `composer.json`, `pom.xml`, `go.mod`, `Cargo.toml`, `pyproject.toml` thay vì chỉ `package.json`
+
+### Added
+
+- Thêm --mitigation, --init --cwd, cwd cho --with-check, --task cho --set-criterion và --remove-decision, --remove-criterion
+
 ## [2.11.0] - 2026-10-18
 
 ### Fixed

@@ -198,7 +198,8 @@ function assertEvidencedChecksRetained(previous: TaskRecordV3, next: TaskRecordV
     );
     if (!retiredWithoutDefinitionChange || !hasReplacement) {
       throw new Error(
-        `Workflow contractRevision must retain failed check ${check.id} unchanged or retire it unchanged with a new required replacement ID.`,
+        `Workflow contractRevision must retain failed check ${check.id} unchanged or retire it unchanged with a new required replacement ID. ` +
+          `To change what it runs, use: harnix workflow --replace-check ${check.id} <new-id> --reason "<why>" with a different --command, --input or --cwd.`,
       );
     }
   }

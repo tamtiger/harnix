@@ -293,7 +293,6 @@ describe("task review page", () => {
   });
 
   it("renders a Code impact section when codeImpact is provided and omits it when absent", async () => {
-    const root = await temporaryRepository();
     const taskWithImpact = buildTaskV3({
       id: "20260924-150200-code-impact",
       title: "Code impact case",

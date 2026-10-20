@@ -2,8 +2,10 @@ import {
   resolveActiveTask,
   selectLatestEvidence,
   type AcceptanceCriterion,
+  type Evidence,
   type TaskRecord,
   type TaskRecordV3,
+  type ValidationCheckV3,
 } from "src/core/tasks/task.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { computeInputDigest, digestMatches } from "src/core/verification/input-digest.js";
@@ -31,20 +33,35 @@ function explicitEvidence(task: TaskRecordV3, criterionId: string, evidenceIds: 
   return [...evidenceIds];
 }
 
+/** Why a required check cannot back a criterion right now, in one short clause. */
+function refusalReason(check: ValidationCheckV3, latest: Evidence | undefined): string {
+  if (check.baseline?.result === "fail")
+    return "baseline is declared but has no effect: it needs another passing required check without a baseline that covers all of its criteria; add one with --set-check and run it";
+  if (latest === undefined) return "not run yet";
+  if (latest.result !== "pass") return "latest run failed";
+  return "inputs changed since its last pass";
+}
+
 async function freshEvidence(root: string, task: TaskRecordV3, criterionId: string): Promise<string[]> {
   const covering = task.validationPlan.filter((check) => check.required && check.criterionIds.includes(criterionId));
   const ids: string[] = [];
   const notFresh: string[] = [];
+  const reasons = new Map<string, string>();
   for (const check of covering) {
     if (authorizedRedBaseline(task, check)) continue;
     const latest = selectLatestEvidence(task.evidence, check.id);
     const current = latest?.result === "pass" ? await computeInputDigest(root, task, check.id) : undefined;
-    if (latest?.result === "pass" && current !== undefined && digestMatches(current, latest.inputDigest))
-      ids.push(latest.id);
-    else notFresh.push(check.id);
+    const digestIsCurrent = current !== undefined && digestMatches(current, latest?.inputDigest);
+    if (latest?.result === "pass" && digestIsCurrent) ids.push(latest.id);
+    else {
+      notFresh.push(check.id);
+      reasons.set(check.id, refusalReason(check, latest));
+    }
   }
   if (ids.length === 0 || notFresh.length > 0) {
-    const named = notFresh.length > 0 ? notFresh : covering.map((check) => check.id);
+    const named = (notFresh.length > 0 ? notFresh : covering.map((check) => check.id)).map((id) =>
+      reasons.has(id) ? `${id} (${reasons.get(id)})` : id,
+    );
     throw new Error(
       `Workflow criterion ${criterionId} has no fresh passing evidence from required check(s): ${named.join(", ") || "none declared"}.`,
     );

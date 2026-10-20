@@ -61,7 +61,8 @@ export async function resumeProjectTask(
     throw new Error("resume takes either a task id or --epic, not both.");
   if (taskId === undefined && epicId === undefined) throw new Error("resume requires a task id or --epic <epic-id>.");
 
-  if (epicId === undefined) return returnResult(await resumeTask(harnixRoot, taskId as string, dryRun, undefined, force));
+  if (epicId === undefined)
+    return returnResult(await resumeTask(harnixRoot, taskId as string, dryRun, undefined, force));
   const { nextTask } = (await detailPublicEpic(project.root, epicId, true)) as PublicEpicBriefResult;
   if (nextTask === null) throw new Error(`Epic ${epicId} has no unfinished task to resume.`);
   return returnResult(await resumeTask(harnixRoot, nextTask.id, dryRun, undefined, force));

@@ -7,6 +7,7 @@ import {
   createGuardedDirectoryFilter,
   targetedSegments,
 } from "src/core/verification/transient-directories.js";
+import { buildCheck, buildCriterion, buildTaskV3 } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-transient-");
@@ -119,23 +120,14 @@ describe("transient directory rules", () => {
     await writeFile(join(root, "application", "controllers", "Home.php"), "<?php echo 'home';");
     await writeFile(join(root, "application", "logs", "log-2026-10-18.php"), "log 1");
 
-    const sampleTask: any = {
+    const sampleTask = buildTaskV3({
       id: "20261018-000000-sample",
       mode: "full",
       status: "in_progress",
       checkpoint: "implementing",
-      acceptanceCriteria: [{ id: "ac-1", text: "Test ac" }],
-      validationPlan: [
-        {
-          id: "check-ci",
-          required: true,
-          scope: "focused",
-          criterionIds: ["ac-1"],
-          inputs: ["**/*"],
-        },
-      ],
-      evidence: [],
-    };
+      acceptanceCriteria: [buildCriterion({ id: "ac-1", text: "Test ac" })],
+      validationPlan: [buildCheck({ id: "check-ci", scope: "focused", criterionIds: ["ac-1"], inputs: ["**/*"] })],
+    });
 
     const digestBefore = await computeInputDigest(root, sampleTask, "check-ci");
 

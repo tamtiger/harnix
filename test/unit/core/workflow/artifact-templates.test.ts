@@ -68,3 +68,20 @@ describe("artifact-templates", () => {
     });
   });
 });
+
+describe("artifact-templates stay neutral for any project", () => {
+  it("never carries a rule that belongs to the Harnix repository itself", () => {
+    const text = `${renderPrdTemplate(sampleTask)}\n${renderPlanTemplate(sampleTask)}`;
+
+    for (const harnixOnly of ["300 LOC", "commands -> core", "giới hạn LOC"]) expect(text).not.toContain(harnixOnly);
+    expect(text).toContain("AGENTS.md");
+    expect(text).toContain(".harnix/spec/guides/");
+  });
+
+  it("keeps the section headings that the ready gate and the init flow read", () => {
+    expect(renderPrdTemplate(sampleTask)).toContain("## 1. Context & Problem Statement");
+    expect(renderPrdTemplate(sampleTask)).toContain("## 3. Anchored Acceptance Criteria");
+    expect(renderPlanTemplate(sampleTask)).toContain("## Execution Slices");
+    expect(renderPlanTemplate(sampleTask)).toContain("## Verification Matrix");
+  });
+});

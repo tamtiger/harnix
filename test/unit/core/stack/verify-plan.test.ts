@@ -1,5 +1,7 @@
+import { execFile } from "node:child_process";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 
 import { buildVerifyPlan } from "src/core/stack/verify-plan.js";
@@ -135,8 +137,16 @@ describe("buildVerifyPlan (ac-no-tests & verify-plan)", () => {
     await writeFixture(root, "test/sample.test.ts", "");
 
     // Nested .NET sub-repositories
-    await writeFixture(root, "services/payment-core/PaymentCore.sln", "");
-    await writeFixture(root, "services/payment-core/PaymentCore.csproj", "");
+    await writeFixture(
+      root,
+      "services/payment-core/PaymentCore.sln",
+      'Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "PaymentCore.Tests\\PaymentCore.Tests.csproj", "{1}"\nEndProject\n',
+    );
+    await writeFixture(
+      root,
+      "services/payment-core/PaymentCore.Tests/PaymentCore.Tests.csproj",
+      '<Project><ItemGroup><PackageReference Include="xunit" Version="2" /></ItemGroup></Project>',
+    );
     await writeFixture(root, "services/payment-gateway/Gateway.csproj", "");
 
     const plan = await buildVerifyPlan(root, { recursive: true });
@@ -145,10 +155,12 @@ describe("buildVerifyPlan (ac-no-tests & verify-plan)", () => {
 
     expect(corePkg).toBeDefined();
     expect(corePkg?.ecosystem).toBe("dotnet");
-    expect(corePkg?.commands.test).toBe("dotnet test");
+    expect(corePkg?.commands.test).toBe("dotnet test PaymentCore.sln");
+    expect(plan.packages.some((p) => p.path === "services/payment-core/PaymentCore.Tests")).toBe(false);
 
     expect(gatewayPkg).toBeDefined();
     expect(gatewayPkg?.ecosystem).toBe("dotnet");
+    expect(gatewayPkg?.hasTests).toBe(false);
   });
 
   it("never exposes an absolute project path", async () => {
@@ -179,5 +191,193 @@ describe("buildVerifyPlan (ac-no-tests & verify-plan)", () => {
     expect(plan.impact?.tests).toEqual(["test/service.test.ts"]);
     expect(plan.impact?.command).toContain("test/service.test.ts");
     expect(plan.impact?.cwd).toBe(".");
+  });
+});
+
+const execFileAsync = promisify(execFile);
+
+async function monorepo(root: string): Promise<void> {
+  await writeFixture(root, "pnpm-workspace.yaml", "packages:\n  - 'packages/*'\n");
+  await writeFixture(root, "pnpm-lock.yaml", "");
+  for (const name of ["a", "b"]) {
+    await writeFixture(
+      root,
+      `packages/${name}/package.json`,
+      JSON.stringify({ name, scripts: { test: "vitest run" } }),
+    );
+    await writeFixture(root, `packages/${name}/index.ts`, "export const value = 1;\n");
+  }
+  await writeFixture(root, "packages/docs/package.json", JSON.stringify({ name: "docs" }));
+}
+
+describe("buildVerifyPlan scope options", () => {
+  it("keeps only the packages inside or containing --path and leaves the repository verdict alone", async () => {
+    const root = await createFixture();
+    await monorepo(root);
+
+    const full = await buildVerifyPlan(root);
+    const scoped = await buildVerifyPlan(root, { path: "packages/a/src" });
+
+    expect(full.packages.map((pkg) => pkg.path)).toEqual(["packages/a", "packages/b", "packages/docs"]);
+    expect(scoped.packages.map((pkg) => pkg.path)).toEqual(["packages/a"]);
+    expect(scoped.hasTests).toBe(full.hasTests);
+    expect(scoped.commands).toEqual(full.commands);
+    expect((await buildVerifyPlan(root, { path: "packages" })).packages).toHaveLength(3);
+    expect((await buildVerifyPlan(root, { path: "." })).packages).toHaveLength(3);
+  });
+
+  it("keeps only the packages that hold a file changed according to git for --changed", async () => {
+    const root = await createFixture();
+    await monorepo(root);
+    await execFileAsync("git", ["init", "-q", "-b", "main"], { cwd: root });
+    await execFileAsync("git", ["add", "-A"], { cwd: root });
+    await execFileAsync(
+      "git",
+      [
+        "-c",
+        "user.email=t@example.com",
+        "-c",
+        "user.name=t",
+        "-c",
+        "commit.gpgsign=false",
+        "commit",
+        "-q",
+        "-m",
+        "base",
+      ],
+      {
+        cwd: root,
+      },
+    );
+    await writeFixture(root, "packages/b/index.ts", "export const value = 2;\n");
+
+    const plan = await buildVerifyPlan(root, { changed: true });
+
+    expect(plan.packages.map((pkg) => pkg.path)).toEqual(["packages/b"]);
+  });
+
+  it("does not narrow --changed when git has nothing to report", async () => {
+    const root = await createFixture();
+    await monorepo(root);
+
+    const plan = await buildVerifyPlan(root, { changed: true });
+
+    expect(plan.packages.map((pkg) => pkg.path)).toEqual(["packages/a", "packages/b", "packages/docs"]);
+  });
+
+  it("returns only path, hasTests and the test command of packages with tests for --brief", async () => {
+    const root = await createFixture();
+    await monorepo(root);
+
+    const plan = await buildVerifyPlan(root, { brief: true });
+
+    expect(plan.packages).toEqual([
+      { path: "packages/a", hasTests: true, commands: { test: "pnpm run test" } },
+      { path: "packages/b", hasTests: true, commands: { test: "pnpm run test" } },
+    ]);
+  });
+
+  it("keeps the default output shape when no scope option is given", async () => {
+    const root = await createFixture();
+    await monorepo(root);
+
+    const plan = await buildVerifyPlan(root);
+
+    expect(plan.packages[0]).toMatchObject({ path: "packages/a", ecosystem: "node", hasTests: true });
+    expect(plan.packages.find((pkg) => pkg.path === "packages/docs")?.warning).toMatch(/No tests detected/u);
+  });
+});
+
+describe("buildVerifyPlan --changed against git", () => {
+  async function committedMonorepo(root: string): Promise<void> {
+    await monorepo(root);
+    await writeFixture(root, "packages/my app/package.json", JSON.stringify({ scripts: { test: "vitest run" } }));
+    await writeFixture(root, "packages/my app/index.ts", "export const value = 1;\n");
+    await execFileAsync("git", ["init", "-q", "-b", "main"], { cwd: root });
+    await execFileAsync("git", ["add", "-A"], { cwd: root });
+    await execFileAsync(
+      "git",
+      [
+        "-c",
+        "user.email=t@example.com",
+        "-c",
+        "user.name=t",
+        "-c",
+        "commit.gpgsign=false",
+        "commit",
+        "-q",
+        "-m",
+        "base",
+      ],
+      {
+        cwd: root,
+      },
+    );
+  }
+
+  it("returns no package for a clean working tree", async () => {
+    const root = await createFixture();
+    await committedMonorepo(root);
+
+    expect((await buildVerifyPlan(root, { changed: true })).packages).toEqual([]);
+  });
+
+  it("matches a changed file under a directory whose name has a space", async () => {
+    const root = await createFixture();
+    await committedMonorepo(root);
+    await writeFixture(root, "packages/my app/index.ts", "export const value = 2;\n");
+
+    const plan = await buildVerifyPlan(root, { changed: true });
+
+    expect(plan.packages.map((pkg) => pkg.path)).toEqual(["packages/my app"]);
+  });
+});
+
+describe("buildVerifyPlan when the Harnix root is below the Git root", () => {
+  it("matches changed files against package paths relative to the Harnix root", async () => {
+    const root = await createFixture();
+    await writeFixture(root, "app/pnpm-workspace.yaml", "packages:\n  - 'packages/*'\n");
+    for (const name of ["a", "b"]) {
+      await writeFixture(
+        root,
+        `app/packages/${name}/package.json`,
+        JSON.stringify({ scripts: { test: "vitest run" } }),
+      );
+      await writeFixture(root, `app/packages/${name}/index.ts`, "export const value = 1;\n");
+    }
+    await writeFixture(root, "other/readme.md", "x\n");
+    await execFileAsync("git", ["init", "-q", "-b", "main"], { cwd: root });
+    await execFileAsync("git", ["add", "-A"], { cwd: root });
+    await execFileAsync(
+      "git",
+      [
+        "-c",
+        "user.email=t@example.com",
+        "-c",
+        "user.name=t",
+        "-c",
+        "commit.gpgsign=false",
+        "commit",
+        "-q",
+        "-m",
+        "base",
+      ],
+      { cwd: root },
+    );
+    await writeFixture(root, "app/packages/b/index.ts", "export const value = 2;\n");
+    await writeFixture(root, "other/readme.md", "y\n");
+
+    const plan = await buildVerifyPlan(join(root, "app"), { changed: true });
+
+    expect(plan.packages.map((pkg) => pkg.path)).toEqual(["packages/b"]);
+  });
+
+  it("explains a --path that leaves the repository", async () => {
+    const root = await createFixture();
+    await writeFixture(root, "package.json", JSON.stringify({ scripts: { test: "vitest run" } }));
+
+    await expect(buildVerifyPlan(root, { path: "../elsewhere" })).rejects.toThrow(
+      /--path must be a repository-relative directory/u,
+    );
   });
 });
