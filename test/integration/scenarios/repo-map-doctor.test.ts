@@ -24,6 +24,8 @@ describe("repo-map doctor", () => {
     await expect(diagnoseProject({ root })).resolves.toMatchObject({
       project: { findings: expect.arrayContaining([expect.objectContaining({ code: "repo-map-stale" })]) },
     });
-    await expect(diagnoseProject({ fix: true, root })).resolves.toMatchObject({ project: { findings: [] } });
+    const fixed = await diagnoseProject({ fix: true, root });
+    // The config drift note is informational: init saw an empty repository, the fixture added sources afterwards.
+    expect(fixed.project.findings.filter((entry) => entry.severity !== "info")).toEqual([]);
   });
 });

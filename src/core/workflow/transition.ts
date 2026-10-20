@@ -5,6 +5,7 @@ import { inspectReadyConditions } from "./ready.js";
 import { READY_REVIEW_CHECKLIST, reviewRequiredMessage } from "./ready-review.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
+import { resolveEditableTask } from "./target-task.js";
 
 export interface DryRunTransitionResult {
   generator: "harnix";
@@ -67,7 +68,7 @@ export async function transitionWorkflow(
   const now = await currentInstant(root, injectedNow);
   if (status === "cancelled") throw new Error("Workflow cancellation must use workflow --cancel.");
   const harnixRoot = await resolveSafeHarnixPath(root);
-  const task = await resolveActiveTask(harnixRoot);
+  const task = dryRun === true ? await resolveEditableTask(harnixRoot) : await resolveActiveTask(harnixRoot);
   if (!task) throw new Error("Workflow transition requires an active task.");
   const entersReady = status === "ready" && checkpoint === "ready";
 

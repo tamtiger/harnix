@@ -1,0 +1,162 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-135202-check-runner-unresolved-bare-name",
+  "epicId": "20261020-135200-harness-hardening-followups",
+  "title": "Tên lệnh trần không tìm thấy trên PATH không còn đi qua cmd.exe",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Đóng khe còn lại của check-runner trên Windows: tên lệnh trần mà PATH không resolve được không còn được giao cho cmd.exe (nơi tìm trong thư mục làm việc trước), trừ một danh sách cố định lệnh nội trang.",
+  "nonGoals": [
+    "Không đổi hành vi ngoài win32.",
+    "Không đổi đường chạy .exe và shim đã resolve."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Trên win32, tên lệnh trần mà lookup không tìm thấy và không thuộc danh sách nội trang bị ném lỗi nêu tên lệnh và gợi ý dùng đường dẫn đầy đủ; không bao giờ trả cmd.exe cho tên đó; một tên.cmd đặt trong thư mục làm việc không được chạy.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Lệnh nội trang echo, dir, type, ver, set vẫn chạy qua cmd.exe; shim .cmd/.bat đã resolve, .exe/.com trực tiếp và mọi nền tảng ngoài win32 giữ nguyên hành vi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test suite, lint, typecheck và test:gates pass; changelog ghi rõ thay đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test resolveInvocation cho tên trần không resolve được",
+      "command": "pnpm exec vitest run test/unit/utils/check-runner.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/utils/check-runner.ts",
+    "test/unit/utils/check-runner.test.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Danh sách lệnh nội trang cố định là dir, echo, set, type, ver.",
+      "rationale": "Chỉ các lệnh này không có file thực thi trên PATH; mọi tên khác phải resolve được."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T14:53:48.170+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/check-runner.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "02548be6ae3d0a0aa1c3bdefc1f769636221c49ebbb2901fe19ccf9fb9a19c3e"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T14:53:54.325+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ae0d9fa871c5215597cb52221fdf1ac48bdb27220ccca36808c9afdc67009eb4"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T15:00:08.318+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/check-runner.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "21cc14c2a35997d3f91f92a8a653d6cbb7b7c28cbc80fd705f163267a4b84ea2"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T15:00:13.557+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "764a2dfe7122e868344375f1c809835d2e44160f2bd02bee02ee9bffc25067fa"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T15:01:39.882+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0d76d6989ab17e6b7adc882d20a1effd46f699e18fdb4a1c5946f0f02940dc26"
+    }
+  ],
+  "createdAt": "2026-10-20T13:52:00.000+07:00",
+  "updatedAt": "2026-10-20T15:02:07.424+07:00",
+  "completedAt": "2026-10-20T15:02:07.424+07:00"
+}

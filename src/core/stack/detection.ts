@@ -4,6 +4,7 @@ import { compareCodeUnits } from "src/utils/order.js";
 
 import type { DetectionMatch, LanguageId, TechnologyId } from "src/catalog/catalog.js";
 import { evaluateFacts, type CollectedFile, type DependencyFact, type DetectionFacts } from "./detection-engine.js";
+import { IGNORED_DIRECTORY_NAMES } from "./ignored-directories.js";
 import { findPackageRoots } from "./package-roots.js";
 
 export type { DetectionMatch, LanguageId, TechnologyId } from "src/catalog/catalog.js";
@@ -33,30 +34,8 @@ interface PackageManifest {
   scripts?: Record<string, unknown>;
 }
 
-const ignoredDirectoryNames = new Set([
-  ".agents",
-  ".cache",
-  ".claude",
-  ".codex",
-  ".gemini",
-  ".git",
-  ".harnix",
-  ".kiro",
-  ".next",
-  ".pytest_cache",
-  ".trellis",
-  ".turbo",
-  ".understand-anything",
-  "__pycache__",
-  "node_modules",
-  "vendor",
-  "bin",
-  "obj",
-  "dist",
-  "build",
-  "coverage",
-  "docs",
-]);
+// The shared tool and build directories plus documentation, which detection alone does not read.
+const ignoredDirectoryNames = new Set<string>([...IGNORED_DIRECTORY_NAMES, "docs"]);
 const verificationScriptNames = ["build", "lint", "test", "typecheck"] as const;
 const maxFiles = 20_000;
 const maxDepth = 32;

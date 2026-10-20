@@ -20,6 +20,9 @@ describe("repo-map inventory", () => {
     await put(root, "src/A.ts", "export const a = 1;\n");
     await put(root, "node_modules/dep/index.js", "module.exports = 1;\n");
     await put(root, ".git/config", "[core]\n");
+    await put(root, ".kilo/worktrees/x/a.ts", "export const copy = 1;\n");
+    await put(root, ".worktrees/y/a.ts", "export const copy = 1;\n");
+    await put(root, ".cursor/z.ts", "export const copy = 1;\n");
     await put(root, ".env", "TOKEN=abcdefghijk\n");
     await put(root, "keys/server.pem", "-----BEGIN-----\n");
     await put(root, "assets/logo.png", Buffer.from([0x89, 0x50, 0x00, 0x01]));

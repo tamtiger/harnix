@@ -52,6 +52,41 @@ describe("harnix status --workspace", () => {
     expect(JSON.stringify(output)).not.toContain(root);
   });
 
+  it(
+    "reports ahead and behind of a clone against its local origin without any network",
+    { timeout: 60_000 },
+    async () => {
+      const root = await temporaryRepository();
+      const origin = await repository(root, "a-origin");
+      git(root, "clone", origin, "b-clone");
+      const clone = join(root, "b-clone");
+      await writeFile(join(clone, "clone.txt"), "local\n");
+      git(clone, "add", ".");
+      git(clone, "commit", "-m", "local");
+      await writeFile(join(origin, "origin.txt"), "upstream\n");
+      git(origin, "add", ".");
+      git(origin, "commit", "-m", "upstream");
+      git(clone, "fetch", "origin");
+      process.chdir(root);
+      const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+
+      await expect(runCli(["node", "harnix", "status", "--workspace"])).resolves.toBe(0);
+
+      const output = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as {
+        members: Array<Record<string, unknown>>;
+      };
+      expect(output.members.map((member) => member.name)).toEqual(["a-origin", "b-clone"]);
+      expect(output.members[1]).toMatchObject({
+        ahead: 1,
+        behind: 1,
+        branch: "main",
+        dirty: 0,
+        upstream: "origin/main",
+      });
+      expect(output.members[0]).toMatchObject({ ahead: null, behind: null, upstream: null });
+    },
+  );
+
   it("returns an empty list with a message outside a workspace and rejects incompatible flags", async () => {
     const root = await temporaryRepository();
     process.chdir(root);

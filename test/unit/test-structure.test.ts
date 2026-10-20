@@ -74,7 +74,10 @@ describe("test suite structure", () => {
       (path) => path.startsWith("test/integration/") && !/^test\/integration\/(commands|scenarios)\//u.test(path),
     );
 
-    expect({ unitOrphans, commandOrphans, misplaced }).toEqual({ unitOrphans: [], commandOrphans: [], misplaced: [] });
+    expect(
+      { unitOrphans, commandOrphans, misplaced },
+      "Placement rule: test/unit mirrors src (one spec per module); test/integration/commands mirrors src/commands (one spec per command file); any other integration spec belongs in test/integration/scenarios.",
+    ).toEqual({ unitOrphans: [], commandOrphans: [], misplaced: [] });
   });
 
   it("keeps every suite in a documented directory", () => {

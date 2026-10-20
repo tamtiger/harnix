@@ -1,0 +1,14 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "createdAt": "2026-10-20T13:52:00.000+07:00",
+  "updatedAt": "2026-10-20T13:52:00.000+07:00",
+  "id": "20261020-135200-harness-hardening-followups",
+  "title": "Xử lý các vấn đề tồn đọng và lỗi phát sinh khi chạy Harnix",
+  "goal": "Gom các việc đã ghi nhận mà chưa làm sau epic 2.13.0 và các vướng mắc gặp khi chạy Harnix: dashboard Code impact trong review.md chưa có producer, khe cmd.exe với tên lệnh trần không resolve được, doctor không cảnh báo config.yaml thiếu packages, thông báo cờ workflow gây hiểu nhầm và --task chưa dùng được cho --dry-run, cùng vài cứng hóa test và cổng.",
+  "nonGoals": [
+    "Không thêm lệnh public mới và không thêm điều phối subagent bắt buộc (harnix review-plan bị loại vì chạm ranh giới).",
+    "Không tự ghi config.yaml của người dùng.",
+    "Không chạy update --global hay chỉnh home thật."
+  ]
+}

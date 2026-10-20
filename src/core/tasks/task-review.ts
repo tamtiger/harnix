@@ -67,6 +67,10 @@ export interface ReviewArtifacts {
   plan: boolean;
   design: boolean;
   codeImpact?: CodeImpactItem[];
+  /** Files beyond the listed ones; shown as a trailing note. */
+  codeImpactTruncated?: number;
+  /** The previous `## Code impact` lines, kept verbatim when the task is finished and no longer measured. */
+  preservedCodeImpact?: string[];
 }
 
 function renderHeader(task: TaskRecord, timezone: string): string[] {
@@ -206,7 +210,28 @@ function renderEvidence(task: TaskRecord, timezone: string): string[] {
   return lines;
 }
 
+/** The lines of the `## Code impact` section of an earlier `review.md`, up to the next `## ` heading. */
+export function extractCodeImpactSection(review: string): string[] | undefined {
+  const lines = review.split("\n");
+  const start = lines.indexOf("## Code impact");
+  if (start < 0) return undefined;
+  const length = lines.slice(start + 1).findIndex((line) => line.startsWith("## "));
+  const section = lines.slice(start, length < 0 ? undefined : start + 1 + length);
+  while (section.at(-1) === "") section.pop();
+  return ["", ...section];
+}
+
+/** A file name as an inline code span that cannot break the table or add markdown: no control characters, no bare pipe. */
+export function markdownCode(path: string): string {
+  // eslint-disable-next-line no-control-regex -- control characters are exactly what a file name must not carry here
+  const safe = path.replace(/[\u0000-\u001f\u007f]/gu, "?").replaceAll("|", "\\|");
+  const longestRun = Math.max(0, ...(safe.match(/`+/gu) ?? []).map((run) => run.length));
+  const fence = "`".repeat(longestRun + 1);
+  return longestRun > 0 ? `${fence} ${safe} ${fence}` : `${fence}${safe}${fence}`;
+}
+
 function renderCodeImpact(artifacts: ReviewArtifacts): string[] {
+  if (artifacts.preservedCodeImpact !== undefined) return artifacts.preservedCodeImpact;
   const impact = artifacts.codeImpact;
   if (!impact || impact.length === 0) return [];
   const lines = ["", "## Code impact", "", "| File | Status | Changes |", "| --- | --- | --- |"];
@@ -215,8 +240,10 @@ function renderCodeImpact(artifacts: ReviewArtifacts): string[] {
       item.additions !== undefined || item.deletions !== undefined
         ? `+${item.additions ?? 0} / -${item.deletions ?? 0}`
         : "-";
-    lines.push(`| \`${item.path}\` | ${item.status} | ${changes} |`);
+    lines.push(`| ${markdownCode(item.path)} | ${item.status} | ${changes} |`);
   }
+  if ((artifacts.codeImpactTruncated ?? 0) > 0)
+    lines.push("", `_(${artifacts.codeImpactTruncated} more files not shown)_`);
   return lines;
 }
 

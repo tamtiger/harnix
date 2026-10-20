@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.13.0`
+**Version:** `2.14.0`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -182,7 +182,7 @@ Mọi output của public command đều là JSON. Dưới đây là các lệnh
 | `harnix epic [<epic-id>] [--limit <n>]`                                                   | Xem danh sách epic hoặc chi tiết tiến độ member tasks và next task của một epic                                                                                                                                                                                                                                                                                |
 | `harnix repo-map --query\|--impact\|--tests\|--outline\|--refs\|--events`                 | Tìm file liên quan (`--query [--format compact] [--workspace]`; `--workspace` dùng cache riêng của sub-repo đã `init`, còn lại dùng cache của workspace root đã `--refresh --workspace`, kết quả có `source` và `hint`), dependency impact, test bị ảnh hưởng, khung symbol (`--outline`), tham chiếu (`--refs`) hoặc ma trận event microservices (`--events`) |
 | `harnix doctor [--fix] [--global] [--allow-warnings]`                                     | Kiểm tra drift, hook, path safety, secret exposure; tự sửa issue an toàn; `--allow-warnings` thoát 0 khi chỉ còn cảnh báo (lỗi và state invalid vẫn thoát khác 0)                                                                                                                                                                                              |
-| `harnix update [--global] [--restore]`                                                    | Đồng bộ lại managed files theo config hiện tại                                                                                                                                                                                                                                                                                                                 |
+| `harnix update [--global] [--restore]`                                                    | Phát hiện lại stack và thêm vào `config.yaml` các package còn thiếu cùng language, technology của chúng (chỉ thêm, không xóa; `--dry-run` xem trước, kết quả `configRefreshed`), rồi đồng bộ lại managed files theo config hiện tại                                                                                                                                          |
 | `harnix uninstall --purge` / `--global --kiro --yes`                                      | Gỡ dữ liệu project hoặc một tích hợp global                                                                                                                                                                                                                                                                                                                    |
 | `harnix mem "<query>" [--learning]`                                                       | Tìm journal memory theo thuật toán xếp hạng BM25 (`--learning` chỉ lọc learning)                                                                                                                                                                                                                                                                               |
 | `harnix learning [--status <s>] [--limit <n>]`                                            | Liệt kê learning (trạng thái hiệu lực) kèm kích thước `.harnix/spec/learned.md`                                                                                                                                                                                                                                                                                |
@@ -195,12 +195,13 @@ Mọi output của public command đều là JSON. Dưới đây là các lệnh
 Một vài quy ước chung đáng nhớ:
 
 - Nếu public command lỗi trước khi có kết quả riêng, bạn sẽ nhận `PublicCliErrorV1` trên stdout với `exitCode` là `1` (warning) hoặc `2` (lỗi sử dụng/schema).
+- `harnix doctor` có finding mức `info` `config-packages-drift` khi `.harnix/config.yaml` thiếu thư mục package mà phát hiện hiện tại thấy (chỉ nhắc, không đổi mã thoát và không ghi config).
 - `harnix doctor --fix` chỉ sửa issue được xác định là an toàn; nó không tự trust hook hay bật permission thay bạn.
 - `harnix workflow` (với các cờ `--preflight|--inspect|--save|...`) là transport nội bộ dành cho skill của agent, **không phải** lệnh bạn cần gõ tay.
 
 ## Xem lại một task
 
-Mở trực tiếp `.harnix/tasks/<id>/review.md` — không cần chạy command nào. File này tự động cập nhật mỗi khi task được lưu, luôn phản ánh trạng thái mới nhất: title, status, goal, acceptance criteria, quyết định, rủi ro còn lại, blocker (nếu có) và evidence. Đây là trang chỉ để đọc — đừng chỉnh sửa tay.
+Mở trực tiếp `.harnix/tasks/<id>/review.md` — không cần chạy command nào. File này tự động cập nhật mỗi khi task được lưu, luôn phản ánh trạng thái mới nhất: title, status, goal, acceptance criteria, quyết định, rủi ro còn lại, blocker (nếu có) và evidence. Khi task ở `in_progress` hoặc `verifying` và repo dùng Git, trang có thêm mục `## Code impact` (file thay đổi so với `HEAD`, trạng thái và `+/-`, tối đa 50 file); mục này đọc Git ở chế độ chỉ đọc, được giữ nguyên khi task `completed`. Đây là trang chỉ để đọc — đừng chỉnh sửa tay.
 
 ## Tích hợp platform
 

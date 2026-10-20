@@ -9,7 +9,8 @@ import {
   validateContextSelectionSnapshot,
   type ContextSelectionSnapshotV1,
 } from "src/core/context/selection-freshness.js";
-import { renderTaskReview } from "./task-review.js";
+import { readCodeImpact, type CodeImpactGitRunner } from "./code-impact.js";
+import { extractCodeImpactSection, renderTaskReview, type ReviewArtifacts } from "./task-review.js";
 import type { TaskRecord } from "./task-schema.js";
 import { validateTask } from "./task-validate.js";
 import { TaskValidationError, isMissing, validateTaskId } from "./task-validate-common.js";
@@ -23,6 +24,34 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
+export interface SaveTaskOptions {
+  /** The repository the task belongs to; when set, `review.md` gets a read-only `## Code impact` from Git. */
+  projectRoot?: string;
+  gitRunner?: CodeImpactGitRunner;
+}
+
+async function previousSection(reviewPath: string): Promise<Pick<ReviewArtifacts, "preservedCodeImpact">> {
+  try {
+    const preserved = extractCodeImpactSection(await readFile(reviewPath, "utf8"));
+    return preserved === undefined ? {} : { preservedCodeImpact: preserved };
+  } catch {
+    return {};
+  }
+}
+
+async function codeImpactFor(
+  task: TaskRecord,
+  reviewPath: string,
+  options: SaveTaskOptions,
+): Promise<Pick<ReviewArtifacts, "codeImpact" | "codeImpactTruncated" | "preservedCodeImpact">> {
+  // A finished task is no longer measured, but its last section stays: reading the old review.md needs no repository.
+  if (task.status === "completed") return previousSection(reviewPath);
+  if (options.projectRoot === undefined || (task.status !== "in_progress" && task.status !== "verifying")) return {};
+  const impact = await readCodeImpact(options.projectRoot, options.gitRunner);
+  if (impact === null) return previousSection(reviewPath); // git could not answer: keep the last known section
+  return impact === undefined ? {} : { codeImpact: impact.items, codeImpactTruncated: impact.truncated };
+}
+
 /**
  * `review.md` is a derived, always-overwritten human-reading surface: it is
  * never a source of truth and carries no obligation. It intentionally omits
@@ -30,21 +59,20 @@ async function exists(path: string): Promise<boolean> {
  * risk noted at finish) never touch the Full task's hashed planning inputs
  * and cannot invalidate already-passed evidence.
  */
-export async function saveTask(root: string, task: TaskRecord): Promise<void> {
+export async function saveTask(root: string, task: TaskRecord, options: SaveTaskOptions = {}): Promise<void> {
   const valid = validateTask(task);
   const directory = await resolveSafeProjectPath(root, `tasks/${valid.id}`);
   const path = await resolveSafeProjectPath(root, `tasks/${valid.id}/task.json`);
   await mkdir(directory, { recursive: true });
   await atomicWriteFile(path, JSON.stringify(valid, null, 2) + "\n");
-  const artifacts = {
+  const reviewPath = await resolveSafeProjectPath(directory, "review.md");
+  const artifacts: ReviewArtifacts = {
     prd: await exists(await resolveSafeProjectPath(directory, "prd.md")),
     plan: await exists(await resolveSafeProjectPath(directory, "plan.md")),
     design: await exists(await resolveSafeProjectPath(directory, "design.md")),
+    ...(await codeImpactFor(valid, reviewPath, options)),
   };
-  await atomicWriteFile(
-    await resolveSafeProjectPath(directory, "review.md"),
-    renderTaskReview(valid, artifacts, await readProjectTimezone(root)),
-  );
+  await atomicWriteFile(reviewPath, renderTaskReview(valid, artifacts, await readProjectTimezone(root)));
 }
 
 export interface TaskArtifacts {

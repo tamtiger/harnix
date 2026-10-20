@@ -1,0 +1,154 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-135205-workspace-status-and-gate-hardening",
+  "epicId": "20261020-135200-harness-hardening-followups",
+  "title": "Củng cố status --workspace và các cổng: test ahead/behind git thật, measure:footprint báo thiếu dist, thông điệp test-structure",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Ba điểm cứng hóa nhỏ rút ra từ epic trước: test git thật cho ahead/behind của status --workspace (hiện chỉ phủ bằng parser), measure:footprint báo lỗi rõ khi thiếu dist/cli.js thay vì lỗi khó hiểu, và test-structure nêu quy tắc đặt file khi phát hiện file mồ côi.",
+  "nonGoals": [
+    "Không đổi hành vi runtime của Harnix.",
+    "Không đổi hợp đồng quy tắc test-structure, chỉ đổi thông điệp."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Scenario git thật cho status --workspace phủ ahead và behind: repo clone từ remote cục bộ commit thêm để có ahead 1, remote commit rồi fetch để có behind 1; chỉ dùng đường dẫn cục bộ, không network, có timeout riêng đủ dài.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "measure:footprint thoát khác 0 với thông điệp rõ (cần pnpm build trước) khi thiếu dist/cli.js, và vẫn chạy bình thường khi có dist.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Thông điệp lỗi của test-structure khi có file orphan nêu quy tắc: test/integration/commands phải mirror src/commands, còn lại đặt ở test/integration/scenarios, test/unit mirror src.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Toàn bộ test suite, lint, typecheck, test:gates và chuỗi nghiệm thu mục 11 pass; phiên bản 2.14.0-dev.5 (member cuối theo ID là config-detection-refresh đóng epic bằng 2.14.0).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test ahead/behind, measure-footprint guard, thông điệp test-structure",
+      "command": "pnpm exec vitest run test/integration/scenarios/status-workspace.test.ts test/workflow/measure-footprint-guard.test.ts test/unit/test-structure.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "scripts/measure-footprint.mjs",
+    "test/integration/scenarios/status-workspace.test.ts",
+    "test/unit/test-structure.test.ts",
+    "test/workflow/measure-footprint-guard.test.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Phiên bản 2.14.0-dev.5, kind changed; ahead/behind thử bằng remote cục bộ không network.",
+      "rationale": "Member cuối theo ID là config-detection-refresh nên đóng epic bằng 2.14.0 --fold-dev."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T15:25:00.075+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/scenarios/status-workspace.test.ts test/workflow/measure-footprint-guard.test.ts test/unit/test-structure.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e367f04c40dbd40667989f278ff5dae1b793104f881a88d7cf82a4d5bbfbe431"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T15:25:06.459+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "566d06704d7441480abd95541f2ec72ab74483b165c6fe2eef6126e70de7b4ff"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T15:26:56.946+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "122e97c980753f22e381f7105a62aac11e87f62a6284685acc4b928042bd1d69"
+    }
+  ],
+  "createdAt": "2026-10-20T13:52:00.000+07:00",
+  "updatedAt": "2026-10-20T15:28:52.199+07:00",
+  "completedAt": "2026-10-20T15:28:52.199+07:00"
+}

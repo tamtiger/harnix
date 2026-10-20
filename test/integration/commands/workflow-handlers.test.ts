@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -218,5 +218,61 @@ describe.sequential("workflow --set-criterion", () => {
     expect(inspected.activeTask.acceptanceCriteria[0]?.text).toBe("Tiêu chí đã sửa");
     expect((await run(["--set-criterion", "ac-one"])).err).toMatch(/--set-criterion requires --text/u);
     expect((await run(["--inspect", "--text", "x"])).err).toMatch(/--text requires workflow/u);
+  });
+});
+
+describe.sequential("workflow --transition --dry-run --task", () => {
+  it("checks another planning task read-only and refuses --task for a real state change", async () => {
+    const root = await fixture();
+    const active = await implementingTaskV3(root);
+    const other = buildTaskV3({ id: "20260814-120000-other", title: "Other", goal: "Another task" });
+    await saveTask(join(root, ".harnix"), other);
+    process.chdir(root);
+
+    const otherFile = join(root, ".harnix", "tasks", other.id, "task.json");
+    const before = await readFile(otherFile, "utf8");
+    const dry = await run(["--transition", "ready/ready", "--dry-run", "--task", other.id]);
+    const real = await run(["--transition", "ready/ready", "--task", other.id]);
+    const unchanged = await run(["--inspect"]);
+
+    expect(dry.code).toBe(0);
+    expect(JSON.parse(dry.out)).toMatchObject({
+      dryRun: true,
+      task: { id: other.id, status: "planning" },
+      target: { status: "ready" },
+    });
+    expect(JSON.parse(dry.out)).toHaveProperty("valid");
+    expect(await readFile(otherFile, "utf8")).toBe(before);
+    expect(real.code).not.toBe(0);
+    expect(real.err).toMatch(/only together with --dry-run/u);
+    expect(JSON.parse(unchanged.out)).toMatchObject({ activeTask: { id: active.id } });
+  });
+});
+
+describe.sequential("workflow note flags without an id", () => {
+  it.each([
+    ["--add-decision", ["--rationale", "why"]],
+    ["--add-risk", []],
+    ["--add-criterion", []],
+    ["--set-criterion", []],
+  ])("says %s takes an id instead of reporting stray operands", async (flag, extra) => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+
+    const swallowed = await run([flag, "--text", "lesson", ...extra, "--brief"]);
+    const prose = await run([flag, "a lesson in words", "--text", "t", ...extra, "--brief"]);
+
+    expect(swallowed.code).not.toBe(0);
+    expect(swallowed.err).toContain(`${flag} takes an id (for example dec-1)`);
+    expect(prose.err).toContain(`${flag} takes an id`);
+  });
+
+  it("still accepts a valid id", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+
+    expect((await run(["--add-risk", "r1", "--text", "t", "--brief"])).code).toBe(0);
   });
 });

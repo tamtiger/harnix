@@ -2,6 +2,7 @@ import { access } from "src/utils/fs-access.js";
 
 import { migrateLegacyEpics } from "src/core/epics/migrate.js";
 import { migrateConfig, readConfig, type HarnixConfigV2 } from "src/core/config/config.js";
+import { refreshProjectConfig, type ConfigRefreshResult } from "src/core/config/refresh.js";
 import { guideOutputPath, selectGuideSources } from "src/guides/catalog.js";
 import { workflowTemplate } from "src/templates/harnix/workflow.js";
 import {
@@ -30,13 +31,16 @@ export interface UpdateProjectResult {
   preserved: string[];
   deleted: string[];
   obsolete: string[];
+  /** What re-detection added to config.yaml (only added, never removed); a dry run only previews it. */
+  configRefreshed: ConfigRefreshResult;
 }
 
 /** Reconciles complete, Harnix-owned files only. Injection surfaces stay user-owned. */
 export async function updateProject(options: UpdateProjectOptions): Promise<UpdateProjectResult> {
   const configPath = await resolveSafeHarnixPath(options.root, "config.yaml");
   const manifestPath = await resolveSafeHarnixPath(options.root, ".template-hashes.json");
-  const config = (await migrateConfig(configPath)).config;
+  const migrated = (await migrateConfig(configPath)).config;
+  const { config, refreshed } = await refreshProjectConfig(options.root, configPath, migrated, options.dryRun === true);
   const manifest = await loadManifest(manifestPath);
   const desired = desiredFiles(config);
   const legacyEntries = manifest.entries.filter((entry) => entry.scope !== "project");
@@ -62,6 +66,7 @@ export async function updateProject(options: UpdateProjectOptions): Promise<Upda
   const facts = options.dryRun === true ? "unchanged" : await writeProjectFacts(options.root);
   return {
     ...reconciled.result,
+    configRefreshed: refreshed,
     created: [...reconciled.result.created, ...epics.created, ...(facts === "created" ? [PROJECT_FACTS_PATH] : [])],
     updated: [...reconciled.result.updated, ...(facts === "updated" ? [PROJECT_FACTS_PATH] : [])],
     deleted: [...reconciled.result.deleted, ...epics.deleted],

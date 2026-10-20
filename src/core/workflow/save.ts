@@ -165,7 +165,7 @@ async function persistCandidate(
     if (candidate.schemaVersion === 3) await assertNewEvidenceDigests(root, existing?.evidence ?? [], candidate);
     createdMembers = await writeEpicMembers(harnixRoot, newMembers);
     if (artifacts) await saveTaskArtifacts(harnixRoot, candidate, artifacts);
-    await saveTask(harnixRoot, candidate);
+    await saveTask(harnixRoot, candidate, { projectRoot: root });
     taskCommitted = true;
     if (validatedEpic) await upsertEpic(root, validatedEpic);
     // Regenerate markdown if task has epicId matching an existing epic, unless

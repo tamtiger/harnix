@@ -32,6 +32,8 @@ export interface CheckProcessDependencies {
   /** The Windows directory holding System32; defaults to the SystemRoot variable of this process. */
   systemRoot?: string;
   timeoutMs?: number;
+  /** Whether a file exists; defaults to existsSync (used to find a wrapper in the working directory). */
+  exists?: (path: string) => boolean;
 }
 
 const OUTPUT_LIMIT = 65_536;
@@ -39,6 +41,46 @@ const TIMEOUT_MS = 30 * 60 * 1000;
 const TIMEOUT_EXIT_CODE = 124;
 const CMD_METACHARACTERS = /[&|<>^%"\r\n]/u;
 const DEFAULT_PATHEXT = ".COM;.EXE;.BAT;.CMD";
+/** Commands that exist only inside cmd.exe, so they cannot be found on PATH. */
+const CMD_BUILTINS: ReadonlySet<string> = new Set([
+  "cd",
+  "cls",
+  "copy",
+  "del",
+  "dir",
+  "echo",
+  "exit",
+  "md",
+  "mkdir",
+  "move",
+  "rd",
+  "ren",
+  "rmdir",
+  "set",
+  "type",
+  "ver",
+]);
+/** A wrapper the repository itself ships (gradlew.bat, mvnw.cmd): run by its own path when PATH has nothing of that name. */
+const WRAPPER_EXTENSIONS = [".cmd", ".bat", ".exe", ".com"] as const;
+
+/** A bare command name that PATH cannot resolve: the check never started, so it is a launcher error, not a red run. */
+export class CommandNotFoundError extends Error {}
+
+/**
+ * cmd.exe searches the working directory first for a name PATH cannot resolve, so such a name is refused unless it is
+ * a cmd built-in. Without a resolver (a bare call with no PATH knowledge) the old cmd.exe route is kept.
+ */
+function assertResolvable(
+  executable: string,
+  bareName: boolean,
+  hasLookup: boolean,
+  resolved: string | undefined,
+): void {
+  if (!bareName || !hasLookup || resolved !== undefined || CMD_BUILTINS.has(executable.toLowerCase())) return;
+  throw new CommandNotFoundError(
+    `Command not found on PATH: ${executable}; use its full path or a name with its extension.`,
+  );
+}
 const UNSAFE_MESSAGE =
   "A command contains characters that are unsafe for cmd.exe; run the program by a name with its extension (for example pwsh.exe) or by its full path.";
 
@@ -95,6 +137,7 @@ export function resolveInvocation(
   const needsCmd = isBatchShim || bareName;
   if (platform !== "win32" || !needsCmd) return { executable, args: [...args] };
   const resolved = bareName ? lookup?.(executable) : undefined;
+  assertResolvable(executable, bareName, lookup !== undefined, resolved);
   if (resolved !== undefined && /\.(?:exe|com)$/iu.test(resolved)) return { executable: resolved, args: [...args] };
   // A shim found on PATH runs by its resolved path: cmd.exe would otherwise look in the working directory first.
   const command = shimPath(resolved) ?? executable;
@@ -138,6 +181,29 @@ export function killProcessTree(
   }
 }
 
+/**
+ * PATH decides what a bare name means; only when PATH has nothing of that name does the working directory get a say,
+ * and then only for the wrapper script of that very name (gradlew, mvnw), run by its own path.
+ */
+function resolveForRun(
+  executable: string,
+  args: readonly string[],
+  cwd: string,
+  platform: NodeJS.Platform,
+  dependencies: CheckProcessDependencies,
+): Invocation {
+  const lookup = dependencies.lookup ?? findOnPath;
+  try {
+    return resolveInvocation(executable, args, platform, lookup);
+  } catch (error: unknown) {
+    if (!(error instanceof CommandNotFoundError)) throw error;
+    const exists = dependencies.exists ?? existsSync;
+    const wrapper = WRAPPER_EXTENSIONS.map((extension) => win32.join(cwd, `${executable}${extension}`)).find(exists);
+    if (wrapper === undefined) throw error;
+    return resolveInvocation(wrapper, args, platform, lookup);
+  }
+}
+
 export function runCheckProcess(
   executable: string,
   args: readonly string[],
@@ -145,7 +211,14 @@ export function runCheckProcess(
   dependencies: CheckProcessDependencies = {},
 ): Promise<CheckRunResult> {
   const platform = dependencies.platform ?? process.platform;
-  const invocation = resolveInvocation(executable, args, platform, dependencies.lookup ?? findOnPath);
+  let invocation: Invocation;
+  try {
+    invocation = resolveForRun(executable, args, cwd, platform, dependencies);
+  } catch (error: unknown) {
+    // Reported as output, like any launcher that cannot find its program, so the workflow says "could not start".
+    if (error instanceof CommandNotFoundError) return Promise.resolve({ exitCode: 127, output: error.message });
+    throw error;
+  }
   const spawner = dependencies.spawner ?? spawn;
   return new Promise((resolve, reject) => {
     const file =

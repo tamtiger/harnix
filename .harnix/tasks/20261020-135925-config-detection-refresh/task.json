@@ -1,0 +1,175 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-135925-config-detection-refresh",
+  "epicId": "20261020-135200-harness-hardening-followups",
+  "title": "Phát hiện bỏ qua thư mục worktree của công cụ và để harnix update làm mới config.yaml",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Trên payment-hub, config.yaml chỉ ghi 1 trong 9 package thật vì init chỉ phát hiện một lần và không lệnh nào làm mới; đồng thời phát hiện hiện tại còn lẫn các thư mục worktree của công cụ (.kilo/worktrees/*). Sửa danh sách bỏ qua dùng chung và cho harnix update (không thêm lệnh hay cờ mới) làm mới config.yaml theo kiểu chỉ thêm.",
+  "nonGoals": [
+    "Không xóa hay sửa mục packages, languages, technologies mà người dùng đã có.",
+    "Không thêm lệnh hay cờ public mới và không đổi harnix init.",
+    "Không đổi schema config v2."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Phát hiện stack và package (`detectProject`) bỏ qua các thư mục công cụ `.kilo`, `.worktrees`, `.cursor`, `.idea`, `.vs`, `out` và `.claude`/`.codex`/`.gemini`/`.agents` ở mọi độ sâu bằng một danh sách bỏ qua dùng chung với repo-map inventory; fixture có package thật cùng package nằm trong `.kilo/worktrees/x` và `.worktrees/y` chỉ cho ra package thật.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "`harnix update` (không cờ mới) phát hiện lại và hợp nhất vào `.harnix/config.yaml` theo kiểu chỉ thêm: thêm package, language, technology phát hiện được mà config chưa có; giữ nguyên mọi mục đã có và các khóa khác; ghi nguyên tử, giữ quyền file; kết quả có mục `configRefreshed` (các mục đã thêm, tối đa 20 đường dẫn kèm `+N more`); `update --dry-run` báo mục sẽ thêm mà không ghi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Làm mới là idempotent và an toàn: chạy lần hai không đổi file; config không hợp lệ hoặc project không init thì lỗi rõ ràng như `update` hiện nay và không ghi; sau khi hợp nhất, các file managed (AGENTS bootstrap, guide chọn theo config) được reconcile cùng lần chạy; một lỗi phát hiện không làm `update` thất bại (bỏ qua êm, `configRefreshed` rỗng).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Finding `config-packages-drift` của doctor (task doctor-config-packages-drift) nêu cách xử lý là chạy `harnix update`; README và PRD mô tả hành vi; toàn bộ test suite, lint, typecheck và `test:gates` pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test danh sách bỏ qua dùng chung và update --refresh-config",
+      "command": "pnpm exec vitest run test/unit/core/stack test/unit/commands/update.test.ts test/integration/scenarios/update-refresh-config.test.ts test/unit/core/doctor",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "src/commands/update.ts",
+    "src/core/stack/detection.ts",
+    "src/core/repo-map/inventory.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Tích hợp làm mới vào harnix update (người dùng yêu cầu không thêm lệnh), chỉ thêm và không xóa; task cuối theo ID đóng epic: pnpm version:sync 2.14.0 --summary <text> --kind fixed --fold-dev, còn member workspace-status-and-gate-hardening dùng 2.14.0-dev.5.",
+      "rationale": "update trở thành lệnh có thể ghi config.yaml nên phải chỉ thêm, idempotent, báo trong configRefreshed và có dry-run; chính sách phiên bản epic dành bản phát hành cho member cuối theo ID."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T15:35:39.998+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/stack test/unit/commands/update.test.ts test/integration/scenarios/update-refresh-config.test.ts test/unit/core/doctor — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "069b21e9bfa578ed3260f4308739f498613db3d4aa3c8dd1e57998a8b7fac382"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T15:35:44.996+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "a150115b4dec17038e164c2d304f8efb4f3ab71760b5045483e8cd8e6a6c2670"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T15:38:40.040+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/stack test/unit/commands/update.test.ts test/integration/scenarios/update-refresh-config.test.ts test/unit/core/doctor — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5984d5a8f853beab1d1d63e114b4247f5cbabff6638c0d7d9d4927dc34887faf"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T15:38:45.779+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "852692111fbe4d3860e410d0885faf2ae9b66d7c37e102891bf61c13f58de13c"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T15:40:23.403+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2d090c338bea4049e504ac194002179c43552cee1d4738180d3d69bb74fe6419"
+    }
+  ],
+  "createdAt": "2026-10-20T13:59:25.953+07:00",
+  "updatedAt": "2026-10-20T15:42:13.056+07:00",
+  "completedAt": "2026-10-20T15:42:13.056+07:00"
+}

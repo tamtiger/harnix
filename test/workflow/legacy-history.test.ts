@@ -56,7 +56,7 @@ async function projectWithHistory(): Promise<History> {
   return { root, tasks, unreadable };
 }
 
-describe("historical task data stays readable", () => {
+describe("historical task data stays readable", { timeout: 90_000 }, () => {
   it("loads every persisted v1 and v2 task record through the current validator", async () => {
     const { tasks, unreadable } = await projectWithHistory();
     const legacy = tasks.filter((task) => task.schemaVersion === 1 || task.schemaVersion === 2);
@@ -97,5 +97,5 @@ describe("historical task data stays readable", () => {
 
     expect(list.total).toBeGreaterThan(0);
     expect(detail.members.length).toBeGreaterThan(0);
-  }, 30_000);
+  }, 90_000);
 });

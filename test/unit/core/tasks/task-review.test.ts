@@ -328,4 +328,39 @@ describe("task review page", () => {
     const reviewWithoutImpact = renderTaskReview(taskWithImpact, plainArtifacts, systemTimezone());
     expect(reviewWithoutImpact).not.toContain("## Code impact");
   });
+
+  it("notes files beyond the list and re-extracts a finished section verbatim", async () => {
+    const { extractCodeImpactSection, renderTaskReview } = await import("src/core/tasks/task-review.js");
+    const task = buildTaskV3({ id: "20260916-220300-truncated" });
+    const base = { design: false, plan: false, prd: false };
+    const first = renderTaskReview(
+      task,
+      {
+        ...base,
+        codeImpact: [{ additions: 1, deletions: 0, path: "a.ts", status: "modified" }],
+        codeImpactTruncated: 4,
+      },
+      systemTimezone(),
+    );
+
+    expect(first).toContain("_(4 more files not shown)_");
+    const section = extractCodeImpactSection(first);
+    expect(section?.at(1)).toBe("## Code impact");
+    expect(extractCodeImpactSection("# no section\n")).toBeUndefined();
+    const second = renderTaskReview(task, { ...base, preservedCodeImpact: section! }, systemTimezone());
+    expect(second).toContain("| `a.ts` | modified | +1 / -0 |");
+    expect(second).toContain("_(4 more files not shown)_");
+    expect(second.split("## Code impact")).toHaveLength(2);
+  });
+
+  it("renders a hostile file name as one safe table cell", async () => {
+    const { markdownCode } = await import("src/core/tasks/task-review.js");
+
+    expect(markdownCode("src/a.ts")).toBe("`src/a.ts`");
+    expect(markdownCode("a|b.ts")).toBe("`a\\|b.ts`");
+    expect(markdownCode("odd`name.ts")).toBe("`` odd`name.ts ``");
+    const injected = markdownCode("x\n## Injected\r\n[link](http://example.test)");
+    expect(injected).not.toMatch(/[\r\n]/u);
+    expect(injected).toBe("`x?## Injected??[link](http://example.test)`");
+  });
 });

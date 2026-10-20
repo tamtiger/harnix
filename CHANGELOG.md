@@ -4,6 +4,25 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.14.0] - 2026-10-20
+
+### Fixed
+
+- review.md có mục ## Code impact (file thay đổi so với HEAD, trạng thái và +/-, tối đa 50 file) tính từ Git chỉ đọc khi task in_progress hoặc verifying; giữ nguyên khi completed (kể cả lúc finish) và khi git không trả lời; bỏ qua khi dự án chỉ là thư mục con của repo Git; tên file được làm sạch trong bảng. Renderer đã có nhưng trước đây không có nơi tính.
+- check-runner trên Windows: tên lệnh trần mà PATH không resolve được không còn đi qua cmd.exe (nơi tìm thư mục làm việc trước) mà báo lỗi rõ (launcher error, exit 127); chỉ các lệnh nội trang của cmd (cd, copy, del, dir, echo, mkdir, set, type, ver...) còn qua cmd.exe, và wrapper cùng tên trong thư mục làm việc (gradlew.bat, mvnw.cmd) vẫn chạy bằng đường dẫn riêng khi PATH không có. Chưa xử lý tên có phần mở rộng như pwsh.exe: libuv vẫn tìm thư mục làm việc trước.
+- Hardening Git chỉ đọc: mọi lệnh git của Harnix tắt core.fsmonitor và core.untrackedCache, bỏ GIT_DIR/GIT_WORK_TREE/GIT_INDEX_FILE/GIT_EXTERNAL_DIFF kế thừa và đặt GIT_OPTIONAL_LOCKS=0 (repo sao chép không chạy được chương trình của chính nó); readGitContext có giới hạn bộ đệm.
+
+### Added
+
+- doctor thêm finding mức info config-packages-drift khi config.yaml thiếu thư mục package mà phát hiện hiện tại thấy (không đổi ok, mã thoát hay config).
+
+### Changed
+
+- harnix update làm mới config.yaml theo kiểu chỉ thêm bằng phát hiện hiện tại: package còn thiếu (so khớp theo đường dẫn đã chuẩn hóa) cùng language và technology của các package mới đó, không xóa hay sửa mục đã có, có configRefreshed và --dry-run. Phát hiện package và repo-map inventory dùng chung danh sách thư mục bỏ qua, nay thêm .kilo, .worktrees, .cursor, .idea và .vs (inventory cũng bỏ qua chúng từ bản này).
+- Cờ workflow dễ dùng hơn: --add-decision, --add-risk, --add-criterion và --set-criterion thiếu id báo rõ cần id thay vì 'does not accept operands'; --transition --dry-run nhận --task để kiểm ready cho member đang planning mà không ghi gì.
+- Củng cố cổng: test git thật cho ahead/behind của status --workspace, measure:footprint báo rõ khi thiếu dist/cli.js, thông điệp test-structure nêu quy tắc đặt file.
+- legacy-history.test.ts sao chép toàn bộ task và epic của repo nên chậm dần theo dữ liệu: timeout nâng lên 90 giây (không sửa nguyên nhân gốc).
+
 ## [2.13.0] - 2026-10-20
 
 ### Fixed

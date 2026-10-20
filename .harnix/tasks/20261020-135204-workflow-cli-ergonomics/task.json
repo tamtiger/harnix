@@ -1,0 +1,189 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-135204-workflow-cli-ergonomics",
+  "epicId": "20261020-135200-harness-hardening-followups",
+  "title": "Công thái học cờ workflow: thông báo thiếu id và --task cho --transition --dry-run",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Hai điểm vướng khi dùng hidden workflow: (a) --add-decision, --add-risk hay --add-criterion thiếu id trả thông báo gây hiểu nhầm ('does not accept operands' hay 'requires --text and --rationale') thay vì nói cần id; (b) không kiểm được ready-gate của task member đang planning trong epic vì --transition --dry-run chưa nhận --task.",
+  "nonGoals": [
+    "Không đổi cờ hiện có, không đổi schema, không cho --task thay đổi state."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Gọi --add-decision, --add-risk hay --add-criterion thiếu id (hay đặt giá trị cờ ở vị trí id) trả lỗi nêu đúng dạng dùng: --add-decision <id> --text <text> --rationale <why>, không còn thông báo 'does not accept operands' gây hiểu nhầm.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "workflow --transition ready/ready --dry-run --task <id> trả kết quả dry-run read-only cho task member đang planning mà không đổi con trỏ active hay state; --transition không dry-run kèm --task vẫn bị từ chối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test suite, lint, typecheck và test:gates pass; HARNIX_WORKFLOW.md và template workflow.md mô tả cờ (selfhost:sync).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test cờ workflow: thông báo id và --task dry-run",
+      "command": "pnpm exec vitest run test/integration/commands/workflow-handlers.test.ts test/integration/commands/workflow-flags.test.ts test/unit/core/workflow/target-task.test.ts test/workflow/cli-contract.test.ts test/workflow/action-checklist.test.ts",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNIX_WORKFLOW.md",
+    "src/commands/workflow-command.ts",
+    "src/commands/workflow-flag-owners.ts",
+    "src/commands/workflow-flags.ts",
+    "src/commands/workflow-handlers.ts",
+    "src/templates/harnix/workflow.md"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Phiên bản 2.14.0-dev.4, kind changed. Chỉ --transition kèm --dry-run mới nhận --task; golden snapshot chỉ cập nhật đúng chuỗi mới.",
+      "rationale": "Dry-run không ghi state nên không phá quy tắc 'state changes act only on the active task'."
+    },
+    {
+      "id": "dec-2",
+      "text": "legacy-history.test.ts sao chép toàn bộ task record và epic của repo nên chậm dần theo dữ liệu; tăng timeout của describe và của test epic lên 90 giây thay vì để flake khi suite chạy song song.",
+      "rationale": "Test phụ thuộc kích thước dữ liệu thật của repo: mỗi epic mới làm nó chậm hơn; độ trễ do tải máy, không phải lỗi logic."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-20T15:11:45.413+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Đường dẫn test thực tế nằm ở test/integration/commands và test/unit/core/workflow, không phải test/unit/commands như dự kiến ban đầu.",
+      "artifactPaths": [
+        ".harnix/tasks/20261020-135204-workflow-cli-ergonomics/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T15:12:23.182+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/workflow-handlers.test.ts test/integration/commands/workflow-flags.test.ts test/unit/core/workflow/target-task.test.ts test/workflow/cli-contract.test... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0f6386550742096b1b40fd7b6b4af6de01e7101166d915ac43e228d0d193f85c"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T15:12:29.565+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9a53d4b7d982820afb86c722285c71e7c4add5c1a0da9ab5862156c7a281ae73"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T15:14:19.652+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "3a3c81e804e81d01ed316c9e2c96ac72eaa7810b200272b66e677025499f13bb"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T15:20:58.259+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/workflow-handlers.test.ts test/integration/commands/workflow-flags.test.ts test/unit/core/workflow/target-task.test.ts test/workflow/cli-contract.test... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3b7334a3173a293e06c41f8761a2bbd7f6f00416f2d99813db2dfa4ea2e5de65"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T15:21:04.197+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "eafa0ebb22f9efebb379cab29dd2f99a24c5bcdf83fd3f856484eee9b96834e0"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T15:22:55.799+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2119ce3383ea158b7f937a789cc97dd5e9d9c68cfbb0a9398c322b48d7153b4f"
+    }
+  ],
+  "createdAt": "2026-10-20T13:52:00.000+07:00",
+  "updatedAt": "2026-10-20T15:23:24.810+07:00",
+  "completedAt": "2026-10-20T15:23:24.810+07:00"
+}

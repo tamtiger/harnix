@@ -373,4 +373,22 @@ describe("detectProject packages beyond package.json", () => {
     expect(result.packages.map((pkg) => pkg.path)).toEqual(["."]);
     expect(result.packages[0]?.languages).toEqual(["csharp"]);
   });
+
+  it("does not count the worktree and tool directories of agent tools as packages", async () => {
+    const root = await createFixture();
+    await writeFixtureFile(root, "svc/package.json", JSON.stringify({ name: "svc" }));
+    await writeFixtureFile(root, "svc/index.ts", "export const svc = 1;");
+    for (const hidden of [".kilo/worktrees/x", ".worktrees/y", ".cursor/z", "svc/.kilo/worktrees/w"]) {
+      await writeFixtureFile(root, `${hidden}/index.ts`, "export const copy = 1;");
+      await writeFixtureFile(
+        root,
+        `${hidden}/package.json`,
+        JSON.stringify({ name: "copy", scripts: { test: "vitest run" } }),
+      );
+    }
+
+    const result = await detectProject(root);
+
+    expect(result.packages.map((pkg) => pkg.path)).toEqual(["svc"]);
+  });
 });

@@ -5,9 +5,11 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import { createIsolatedUserEnvironment } from "./isolated-user-home.mjs";
+import { assertBuilt } from "./assert-built.mjs";
 import { assertSetupExitContract } from "./setup-exit-contract.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
+assertBuilt(root);
 const project = await mkdtemp(join(tmpdir(), "harnix-footprint-project-"));
 const home = await mkdtemp(join(tmpdir(), "harnix-footprint-home-"));
 

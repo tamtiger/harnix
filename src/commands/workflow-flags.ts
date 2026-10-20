@@ -159,7 +159,24 @@ export function isEvidenceFlagsMode(action: string, flags: WorkflowFlags): boole
   );
 }
 
+const ID_FLAGS = [
+  ["--add-criterion", "addCriterion", "--text <text>"],
+  ["--set-criterion", "setCriterion", "--text <text>"],
+  ["--add-decision", "addDecision", "--text <text> --rationale <why>"],
+  ["--add-risk", "addRisk", "--text <text>"],
+] as const;
+
+/** `--add-decision --text …` makes commander take `--text` as the id; say what the id slot expects instead. */
+function assertIdFlagValues(flags: WorkflowFlags): void {
+  for (const [name, key, rest] of ID_FLAGS) {
+    const value = flags[key];
+    if (typeof value === "string" && (value.startsWith("-") || /\s/u.test(value)))
+      throw new Error(`${name} takes an id (for example dec-1) before the other flags: ${name} <id> ${rest}.`);
+  }
+}
+
 export function assertCommandShape(action: string, flags: WorkflowFlags, operands: string[]): void {
+  assertIdFlagValues(flags);
   if (action === "runCheck" && operands.length === 0)
     throw new Error("workflow --run-check requires an executable after --.");
   if (action !== "runCheck" && operands.length > 0)
@@ -203,6 +220,10 @@ export function assertFlagGroups(
   for (const owner of FLAG_OWNERS)
     if (owner.isSet(flags) && !owner.actions.some((a) => activeActions.includes(a)))
       throw new Error(`${owner.name} requires ${owner.hint}.`);
+  if (action === "transition" && flags.task !== undefined && flags.dryRun !== true)
+    throw new Error(
+      "--task works with workflow --transition only together with --dry-run (a state change acts on the active task).",
+    );
   assertTextFlags(action, flags);
   assertActionRequirements(action, flags);
   assertNoteFlags(action, flags);

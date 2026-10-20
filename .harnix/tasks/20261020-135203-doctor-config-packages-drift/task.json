@@ -1,0 +1,145 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261020-135203-doctor-config-packages-drift",
+  "epicId": "20261020-135200-harness-hardening-followups",
+  "title": "doctor báo cấu hình packages trong config.yaml lệch so với phát hiện hiện tại",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cho người đã init từ trước thấy khi packages trong config.yaml thiếu so với thư mục package phát hiện được hiện tại: doctor thêm finding mức info, không ghi config và không đổi mã thoát.",
+  "nonGoals": [
+    "Không tự ghi lại config.yaml.",
+    "Không đổi harnix update.",
+    "Không đổi mã thoát hay schema doctor v2."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Khi phát hiện hiện tại tìm thấy thư mục package không có trong packages của config.yaml, doctor thêm một finding config-packages-drift mức info kèm tối đa 10 đường dẫn tương đối POSIX đã sắp xếp và hướng xử lý; đủ package hay không có package thì không có finding.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Finding info không đổi ok, summary.errors hay summary.warnings hay mã thoát; lỗi phát hiện bị bỏ qua êm; doctor vẫn chỉ đọc và không ghi config.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ test suite, lint, typecheck và test:gates pass; README và PRD mô tả finding.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test doctor config packages drift",
+      "command": "pnpm exec vitest run test/unit/core/doctor",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests: docs, skills, instruction budget, golden",
+      "command": "pnpm run test:gates",
+      "cwd": ".",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án pass",
+      "command": "pnpm run test",
+      "cwd": ".",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "src/core/doctor/config-drift.ts",
+    "src/core/doctor/project.ts"
+  ],
+  "relevantSpecs": [],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Finding có mức info để không đổi mã thoát mặc định của doctor.",
+      "rationale": "Mức warning sẽ làm doctor thoát 1 với mọi người dùng đã init từ trước, thay đổi hành vi đã đóng băng."
+    }
+  ],
+  "residualRisks": [],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-10-20T15:05:12.413+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/doctor — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e7db19e72fafc87a516da03e41e573d5905c02dbeec12d68e20624a6c4bae0d2"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-20T15:05:17.084+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "35d90c2fb0aa2fe1cc710346293e18f4d11c1a38522e2b1cf7f3405014211a63"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-20T15:06:35.781+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7e2e6fea44880172bfbefe97eebe8b2a65e20b8cfc86470ac0a66e4fa267a43c"
+    }
+  ],
+  "createdAt": "2026-10-20T13:52:00.000+07:00",
+  "updatedAt": "2026-10-20T15:06:54.149+07:00",
+  "completedAt": "2026-10-20T15:06:54.149+07:00"
+}

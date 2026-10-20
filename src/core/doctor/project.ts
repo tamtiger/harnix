@@ -1,5 +1,6 @@
 import { stat } from "node:fs/promises";
 
+import { inspectConfigDrift } from "src/core/doctor/config-drift.js";
 import { readConfigDocument, type HarnixConfigV2 } from "src/core/config/config.js";
 import {
   containsSecret,
@@ -85,6 +86,7 @@ export async function diagnoseProjectSection(
     findings.push(finding("cli-version-skew", "warning", ".harnix/.template-hashes.json", skewMessage(skew), false));
   const desired = new Set(desiredPaths(config));
   inspectProfiles(config, findings);
+  await inspectConfigDrift(root, config, findings);
   await inspectManagedEntries(root, manifest, desired, findings);
   await inspectUntrackedLegacySurfaces(root, manifest, findings);
   await inspectTaskRecords(root, findings);

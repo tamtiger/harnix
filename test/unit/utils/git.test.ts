@@ -1,10 +1,10 @@
 import { execFile } from "node:child_process";
-import { writeFile } from "node:fs/promises";
+import { access, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 
-import { readGitContext, runGit } from "src/utils/git.js";
+import { readGitContext, runGit, safeGitArgs, safeGitEnvironment } from "src/utils/git.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const execFileAsync = promisify(execFile);
@@ -56,5 +56,41 @@ describe("utils/git", () => {
     const root = await temporaryRepository();
     expect(await runGit(root, ["--version"])).toContain("git version");
     await expect(runGit(root, ["no-such-subcommand"])).rejects.toThrow();
+  });
+
+  it("turns off repository programs for every read-only call and drops inherited git variables", () => {
+    expect(safeGitArgs(["status"])).toEqual([
+      "-c",
+      "core.fsmonitor=false",
+      "-c",
+      "core.untrackedCache=false",
+      "status",
+    ]);
+    const env = safeGitEnvironment({
+      GIT_DIR: "/x",
+      GIT_WORK_TREE: "/y",
+      GIT_INDEX_FILE: "/z",
+      GIT_EXTERNAL_DIFF: "evil",
+      KEEP: "1",
+    });
+    expect(env).toEqual({ GIT_OPTIONAL_LOCKS: "0", GIT_PAGER: "cat", KEEP: "1" });
+  });
+
+  it("does not run a core.fsmonitor program planted in the repository config", { timeout: 30_000 }, async () => {
+    const root = await temporaryRepository();
+    await execFileAsync("git", ["init", "-b", "main"], { cwd: root });
+    await writeFile(join(root, "monitor.js"), "require('node:fs').writeFileSync('marker.txt', 'ran');\n");
+    await execFileAsync("git", ["config", "core.fsmonitor", "node monitor.js"], { cwd: root });
+
+    await runGit(root, ["status", "--porcelain"]);
+    await expect(access(join(root, "marker.txt"))).rejects.toMatchObject({ code: "ENOENT" });
+
+    // Control: the same repository does run the program for a plain git status, so the check above is meaningful.
+    await execFileAsync("git", ["status", "--porcelain"], { cwd: root });
+    const controlRan = await access(join(root, "marker.txt")).then(
+      () => true,
+      () => false,
+    );
+    if (!controlRan) console.warn("git here ignores core.fsmonitor; the guard could not be demonstrated");
   });
 });

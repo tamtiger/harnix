@@ -230,8 +230,20 @@ describe("check runner executable lookup", () => {
     );
   });
 
-  it("falls back to the cmd.exe route when the name is not found on the path", () => {
-    expect(resolveInvocation("dotnet", ["test"], "win32", () => undefined)).toEqual({
+  it("refuses a bare name that PATH cannot resolve so cmd.exe never searches the working directory for it", () => {
+    expect(() => resolveInvocation("dotnet", ["test"], "win32", () => undefined)).toThrow(
+      "Command not found on PATH: dotnet; use its full path or a name with its extension.",
+    );
+    expect(() => resolveInvocation("planted", [], "win32", () => undefined)).toThrow(/not found on PATH: planted/u);
+  });
+
+  it("still runs the cmd.exe built-ins through cmd.exe and leaves a resolver-less call and other platforms alone", () => {
+    for (const builtin of ["dir", "ECHO", "set", "mkdir", "cd"])
+      expect(resolveInvocation(builtin, ["x"], "win32", () => undefined)).toEqual({
+        executable: "cmd.exe",
+        args: ["/d", "/s", "/c", builtin, "x"],
+      });
+    expect(resolveInvocation("dotnet", ["test"], "win32")).toEqual({
       executable: "cmd.exe",
       args: ["/d", "/s", "/c", "dotnet", "test"],
     });
@@ -307,7 +319,7 @@ describe("check runner system executables and PATH details on Windows", () => {
   it("starts cmd.exe by its absolute system path so a copy inside the repository is never run", async () => {
     const child = fakeChild();
     const spawner: ProcessSpawner = vi.fn(() => child as never);
-    const run = runCheckProcess("pnpm", ["test"], "C:\\repo", {
+    const run = runCheckProcess("echo", ["test"], "C:\\repo", {
       platform: "win32",
       spawner,
       lookup: () => undefined,
@@ -317,6 +329,37 @@ describe("check runner system executables and PATH details on Windows", () => {
     await run;
 
     expect(vi.mocked(spawner).mock.calls[0]?.[0]).toBe("C:\\Windows\\System32\\cmd.exe");
+  });
+
+  it("reports an unresolved bare name as launcher output with exit 127 and never spawns anything", async () => {
+    const spawner: ProcessSpawner = vi.fn();
+
+    const result = await runCheckProcess("planted", [], "C:\\repo", {
+      platform: "win32",
+      spawner,
+      lookup: () => undefined,
+      systemRoot,
+    });
+
+    expect(result).toEqual({ exitCode: 127, output: expect.stringContaining("Command not found on PATH: planted") });
+    expect(spawner).not.toHaveBeenCalled();
+  });
+
+  it("runs a wrapper of the same name from the working directory by its own path only when PATH has none", async () => {
+    const child = fakeChild();
+    const spawner: ProcessSpawner = vi.fn(() => child as never);
+    const exists = (path: string) => path === "C:\\repo\\gradlew.bat";
+    const run = runCheckProcess("gradlew", ["test"], "C:\\repo", {
+      exists,
+      lookup: () => undefined,
+      platform: "win32",
+      spawner,
+      systemRoot,
+    });
+    child.emit("close", 0, null);
+    await run;
+
+    expect(vi.mocked(spawner).mock.calls[0]?.[1]).toEqual(["/d", "/s", "/c", "C:\\repo\\gradlew.bat", "test"]);
   });
 
   it("does not rewrite an executable that is launched directly", async () => {

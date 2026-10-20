@@ -5,34 +5,10 @@ import { globby } from "globby";
 
 import { normalizeRepositoryPath } from "src/utils/paths.js";
 import { defaultRepoMapLimits, type RepoMapInventory, type RepoMapLimits } from "./types.js";
+import { IGNORED_DIRECTORY_NAMES } from "src/core/stack/ignored-directories.js";
 import { compareCodeUnits } from "src/utils/order.js";
 
-const ignoredDirectoryNameList = [
-  ".agents",
-  ".cache",
-  ".claude",
-  ".codex",
-  ".gemini",
-  ".git",
-  ".harnix",
-  ".kilo",
-  ".kiro",
-  ".next",
-  ".pytest_cache",
-  ".trellis",
-  ".turbo",
-  ".understand-anything",
-  ".worktrees",
-  "__pycache__",
-  "bin",
-  "build",
-  "coverage",
-  "dist",
-  "node_modules",
-  "obj",
-  "vendor",
-] as const;
-const ignoredDirectoryNames = new Set<string>(ignoredDirectoryNameList);
+const ignoredDirectoryNames = new Set<string>(IGNORED_DIRECTORY_NAMES);
 const secretPath = /(?:^|\/)(?:\.env[^/]*|[^/]*(?:credential|secret|token)[^/]*|id_rsa[^/]*|[^/]*\.(?:pem|key))$/iu;
 
 export async function inventoryRepository(
@@ -49,7 +25,7 @@ export async function inventoryRepository(
       dot: true,
       followSymbolicLinks: false,
       gitignore: true,
-      ignore: ignoredDirectoryNameList.map((name) => `**/${name}/**`),
+      ignore: IGNORED_DIRECTORY_NAMES.map((name) => `**/${name}/**`),
       onlyFiles: true,
     })
   ).sort(compareCodeUnits);
