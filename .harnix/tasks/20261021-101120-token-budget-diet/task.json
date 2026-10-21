@@ -1,0 +1,110 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261021-101120-token-budget-diet",
+  "title": "Cắt giảm ngân sách token của khối hướng dẫn luôn nạp (always-loaded)",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Rút gọn template activation.ts và agents.ts từ 1.493 tokens xuống ~1.300 tokens, giải phóng dư địa an toàn dưới trần 1.500 tokens",
+  "nonGoals": [
+    "Không lược bỏ các luật an toàn cốt lõi"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Khối always-loaded instruction đo bằng measure:tokens và instruction-budget.test.ts giảm xuống dưới 1.350 tokens mà vẫn bảo đảm đầy đủ các chuỗi quy tắc kiểm tra trong activation-instructions.test.ts và persistence-guidance.test.ts",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-budget-2",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm test",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-budget",
+      "description": "Đo lường ngân sách instruction và bảo đảm toàn vẹn các chuỗi quy tắc bắt buộc",
+      "command": "pnpm exec vitest run test/workflow/instruction-budget.test.ts test/workflow/activation-instructions.test.ts test/workflow/persistence-guidance.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/templates/**",
+        "test/workflow/activation-instructions.test.ts",
+        "test/workflow/instruction-budget.test.ts",
+        "test/workflow/persistence-guidance.test.ts"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/templates/harnix/activation.ts",
+    "src/templates/harnix/agents.ts",
+    "test/workflow/activation-instructions.test.ts",
+    "test/workflow/instruction-budget.test.ts",
+    "test/workflow/persistence-guidance.test.ts"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-check-budget-1",
+      "checkId": "check-budget",
+      "recordedAt": "2026-10-21T10:31:48.313+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/instruction-budget.test.ts test/workflow/activation-instructions.test.ts test/workflow/persistence-guidance.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8aab91f209ea483a72a25d34457fb83394fe4a49984af3ae2283d247d7d5b1c1"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-21T10:33:29.066+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "099db4c60ab9dcba50cb1988463b9f6b05c21a125db13508bf418d5e83162d46"
+    },
+    {
+      "id": "ev-check-budget-2",
+      "checkId": "check-budget",
+      "recordedAt": "2026-10-21T10:34:37.580+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/instruction-budget.test.ts test/workflow/activation-instructions.test.ts test/workflow/persistence-guidance.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "604c6fb4b44a83566a665d80ed4b8576aa53dcd132f797b9052df7f11e9ccf69"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-21T10:36:11.899+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ed9703d2a3ddeae2a3bbb4ec4a985c678aa5ee835e0f883fa57623b0bf8d6494"
+    }
+  ],
+  "epicId": "20261021-101119-review-hardening",
+  "createdAt": "2026-10-21T10:11:19.706+07:00",
+  "updatedAt": "2026-10-21T10:36:40.057+07:00",
+  "completedAt": "2026-10-21T10:36:40.057+07:00"
+}

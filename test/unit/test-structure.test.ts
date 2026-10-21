@@ -48,7 +48,10 @@ describe("test suite structure", () => {
   it("keeps only spec files and shared support helpers under test/", () => {
     const stray = testFiles.filter((path) => !path.endsWith(".test.ts") && !path.startsWith("test/support/"));
 
-    expect(stray).toEqual([]);
+    expect(
+      stray,
+      `Only *.test.ts spec files and shared helpers under test/support/** are allowed under test/. Non-spec helper files must be placed in test/support/ (e.g. test/support/my-fixture.ts). Found stray files: ${stray.join(", ")}`,
+    ).toEqual([]);
   });
 
   it("mirrors src in test/unit and src/commands in test/integration/commands", () => {
@@ -74,10 +77,30 @@ describe("test suite structure", () => {
       (path) => path.startsWith("test/integration/") && !/^test\/integration\/(commands|scenarios)\//u.test(path),
     );
 
-    expect(
-      { unitOrphans, commandOrphans, misplaced },
-      "Placement rule: test/unit mirrors src (one spec per module); test/integration/commands mirrors src/commands (one spec per command file); any other integration spec belongs in test/integration/scenarios.",
-    ).toEqual({ unitOrphans: [], commandOrphans: [], misplaced: [] });
+    const guideMessage = [
+      "Test placement violation detected:",
+      unitOrphans.length > 0
+        ? `  - Unit test orphans (each unit test under test/unit/ MUST 1:1 mirror a file in src/, e.g. test/unit/foo/bar.test.ts mirrors src/foo/bar.ts): ${unitOrphans.join(", ")}`
+        : "",
+      commandOrphans.length > 0
+        ? `  - Command test orphans (each command test under test/integration/commands/ MUST 1:1 mirror a file in src/commands/, e.g. test/integration/commands/init.test.ts mirrors src/commands/init.ts): ${commandOrphans.join(", ")}`
+        : "",
+      misplaced.length > 0
+        ? `  - Misplaced integration tests (must be either test/integration/commands/<cmd>.test.ts or test/integration/scenarios/<flow>.test.ts): ${misplaced.join(", ")}`
+        : "",
+      "To avoid digest freeze or task cancellation:",
+      "  - If writing a unit test for src/path/to/module.ts -> place at test/unit/path/to/module.test.ts",
+      "  - If writing an integration test for command src/commands/foo.ts -> place at test/integration/commands/foo.test.ts",
+      "  - If writing a multi-command integration flow -> place at test/integration/scenarios/<flow>.test.ts",
+      "  - If writing a multi-module workflow scenario -> place at test/workflow/<scenario>.test.ts",
+      "  - If writing shared fixtures or helper code -> place at test/support/<name>.ts",
+    ].filter(Boolean).join("\n");
+
+    expect({ unitOrphans, commandOrphans, misplaced }, guideMessage).toEqual({
+      unitOrphans: [],
+      commandOrphans: [],
+      misplaced: [],
+    });
   });
 
   it("keeps every suite in a documented directory", () => {
@@ -91,7 +114,10 @@ describe("test suite structure", () => {
   it(`keeps every test file at ${MAX_TEST_LINES} lines or fewer`, () => {
     const tooLong = testFiles.filter((path) => read(path).split("\n").length > MAX_TEST_LINES);
 
-    expect(tooLong).toEqual([]);
+    expect(
+      tooLong,
+      `Every test file must be ${MAX_TEST_LINES} lines or fewer. Shorten or split the following files: ${tooLong.join(", ")}`,
+    ).toEqual([]);
   });
 
   it("imports src and test modules through the src/ and test/ aliases, never through ../", () => {

@@ -16,6 +16,20 @@ Every spec is a `*.test.ts` file; shared helpers live only in `test/support/`. T
 400-line cap, use of the shared builders, direct coverage of every source module and a floor under the number
 of tests and assertions. Its exception lists must only shrink, and every entry carries a reason.
 
+## Placement and Mirroring Rules
+
+Harnix strictly enforces a 1:1 file mirroring structure in `test/unit/test-structure.test.ts`:
+
+1. **Unit tests (`test/unit/`)**: Every spec must 1:1 mirror its corresponding implementation file in `src/`.
+   - Pattern: `src/<module-path>.ts` <-> `test/unit/<module-path>.test.ts`
+   - Example: `src/utils/check-runner.ts` must be tested in `test/unit/utils/check-runner.test.ts`.
+   - Never create arbitrary unit test filenames or grouped test files that do not exist in `src/`.
+2. **Command tests (`test/integration/commands/`)**: Every spec must 1:1 mirror a command module in `src/commands/`.
+   - Pattern: `src/commands/<command>.ts` <-> `test/integration/commands/<command>.test.ts`
+3. **Integration scenarios (`test/integration/scenarios/`)**: Multi-command end-to-end integration workflows.
+4. **Shared support and fixtures (`test/support/`)**: Any helper, mock, fixture generator, or reusable utility that is NOT a `*.test.ts` file MUST live exclusively under `test/support/` (e.g., `test/support/learning-fixtures.ts`, `test/support/workflow-fixtures.ts`). Non-test files placed anywhere else under `test/` will fail the test suite structure check.
+5. **Agent Task Safety Tip**: Placing a test file in an incorrect path before saving input globs in a task can lead to digest freeze and task cancellation. Always verify test file placement against `test/unit/test-structure.test.ts` before freezing verification digests.
+
 ## Shared builders (`test/support/`)
 
 - `builders.ts`: `buildTaskV3`, `buildTaskV2`, `buildTaskV1`, `buildCheck`, `buildEvidence`, `buildCriterion`,

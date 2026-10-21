@@ -1,0 +1,105 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261021-101122-windows-executable-resolution",
+  "title": "Tra cứu PATH cho executable có đuôi mở rộng trên Windows",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "check-runner tra cứu đường dẫn đầy đủ trên PATH cho executable có phần mở rộng (.exe, .com) trên Windows để tránh libuv tìm trong cwd",
+  "nonGoals": [
+    "Không phá vỡ việc thực thi lệnh nội trang cmd và wrapper script"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Lệnh có đuôi như pwsh.exe hoặc git.exe được findOnPath nhận diện đúng extension và resolveInvocation trả về đường dẫn tuyệt đối; test case cũ tại check-runner.test.ts được cập nhật tương ứng",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-runner-2",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm test",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-runner",
+      "description": "Chạy test kiểm tra check-runner trên Windows và POSIX",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/utils/check-runner.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/utils/check-runner.ts",
+        "test/unit/utils/check-runner.test.ts"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/utils/check-runner.ts",
+    "test/unit/utils/check-runner.test.ts"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-check-runner-1",
+      "checkId": "check-runner",
+      "recordedAt": "2026-10-21T10:44:42.229+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/check-runner.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "07c4e7575fe0e3ff044d5c26b993b4e4a1bb3894517046628f1a3fb409d61821"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-21T10:46:10.862+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "ea0ccf0a773a23ef4e191c30c2a626818d0c67fd1ca3fa78c6196bb04012c569"
+    },
+    {
+      "id": "ev-check-runner-2",
+      "checkId": "check-runner",
+      "recordedAt": "2026-10-21T10:48:31.066+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/check-runner.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2973797ef92ba88a3814d01e878e30d20caeca5b2e3f9f83c0e59bef6e6ef59e"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-21T10:49:57.589+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "eee6f9eafe2d9afbf3547f1832cc7fb7d12101af50db433f9a97db2962960cb1"
+    }
+  ],
+  "epicId": "20261021-101119-review-hardening",
+  "createdAt": "2026-10-21T10:11:19.706+07:00",
+  "updatedAt": "2026-10-21T10:50:19.310+07:00",
+  "completedAt": "2026-10-21T10:50:19.310+07:00"
+}

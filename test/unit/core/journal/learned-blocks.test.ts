@@ -1,3 +1,4 @@
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -83,5 +84,76 @@ describe("learned blocks", () => {
 
     expect(() => assertPromotable(risky)).toThrow(/risk check/iu);
     expect(() => assertPromotable(first)).not.toThrow();
+  });
+
+  it("parses the 5 canonical repository invariant blocks from learned.md", () => {
+    const items = [
+      {
+        candidate: buildLearningCandidate({
+          id: "obs-0a61a11247e91169",
+          statement: "Mitigation lưu trong text của rủi ro, không thêm field mitigation vào TaskResidualRisk.",
+          sourceTaskIds: ["20261019-143853-cli-ergonomics-risk-mitigation-init-cwd"],
+          evidenceIds: ["ev-check-focus-1", "ev-check-suite-1"],
+        }),
+        paths: ["src/core/tasks", "src/commands"],
+      },
+      {
+        candidate: buildLearningCandidate({
+          id: "obs-d6bfc77223f86a42",
+          statement: "Hai cờ mới --remove-decision và --remove-criterion chỉ hoạt động trong planning; không xóa dữ liệu đã đóng băng.",
+          sourceTaskIds: ["20261019-143853-cli-ergonomics-risk-mitigation-init-cwd"],
+          evidenceIds: ["ev-check-focus-1", "ev-check-suite-1"],
+        }),
+        paths: ["src/core/workflow", "src/commands"],
+      },
+      {
+        candidate: buildLearningCandidate({
+          id: "obs-46873b70f8908d8a",
+          statement: "Chuẩn hóa CRLF khi băm digest bỏ qua file nhạy cảm với kết thúc dòng (.sh, .bash, .zsh, .ksh, .bat, .cmd, Makefile, Dockerfile) thay vì chuẩn hóa mọi file không chứa byte NUL.",
+          sourceTaskIds: ["20261019-165403-sync-docs-and-fix-lint"],
+          evidenceIds: ["ev-check-focus-1", "ev-check-suite-1"],
+        }),
+        paths: ["src/core/verification", "src/utils"],
+      },
+      {
+        candidate: buildLearningCandidate({
+          id: "obs-253d24e2e036d4f0",
+          statement: "So với HEAD thay vì lưu baseline commit trong task để không đổi schema đóng băng; mục của task completed được giữ từ lần lưu cuối.",
+          sourceTaskIds: ["20261020-135201-review-code-impact-dashboard"],
+          evidenceIds: ["ev-check-focus-1", "ev-check-suite-1"],
+        }),
+        paths: ["src/core/workflow", "src/commands"],
+      },
+      {
+        candidate: buildLearningCandidate({
+          id: "obs-ab2d82256886df02",
+          statement: "Danh sách lệnh nội trang cố định là dir, echo, set, type, ver.",
+          sourceTaskIds: ["20261020-135202-check-runner-unresolved-bare-name"],
+          evidenceIds: ["ev-check-focus-1", "ev-check-suite-1"],
+        }),
+        paths: ["src/utils", "src/commands"],
+      },
+    ];
+
+    const rendered = [
+      "# Harnix Learned Rules",
+      "",
+      "Quy tắc bất biến và bài học được chuẩn hóa từ quá trình vận hành Harnix.",
+      "",
+      ...items.map((item) => renderLearnedBlock(item.candidate, item.paths)),
+    ].join("\n");
+
+    const specPath = ".harnix/spec/learned.md";
+    mkdirSync(".harnix/spec", { recursive: true });
+    writeFileSync(specPath, rendered, "utf8");
+
+    const parsed = parseLearnedBlocks(readFileSync(specPath, "utf8"));
+    expect(parsed.map((block) => block.id)).toEqual([
+      "obs-0a61a11247e91169",
+      "obs-d6bfc77223f86a42",
+      "obs-46873b70f8908d8a",
+      "obs-253d24e2e036d4f0",
+      "obs-ab2d82256886df02",
+    ]);
   });
 });

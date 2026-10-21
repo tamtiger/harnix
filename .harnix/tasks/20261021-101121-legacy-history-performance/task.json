@@ -1,0 +1,85 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261021-101121-legacy-history-performance",
+  "title": "Tối ưu hiệu năng legacy-history.test.ts bằng fixture cô lập",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Chuyển legacy-history.test.ts sang đọc fixture đóng băng cô lập để giảm thời gian chạy từ 13.7s xuống <1s",
+  "nonGoals": [
+    "Không xóa các bài kiểm tra tương thích ngược của schema v1/v2"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "legacy-history.test.ts chạy trong <1 giây dùng fixture cô lập đặt tại test/support/fixtures/ và khởi tạo một lần trong beforeAll, loại bỏ nhu cầu nới lỏng timeout 90s",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-history-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm test",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-history",
+      "description": "Chạy test legacy history tối ưu và kiểm tra không có stray test files",
+      "command": "pnpm exec vitest run test/workflow/legacy-history.test.ts test/unit/test-structure.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "test/support/**",
+        "test/workflow/legacy-history.test.ts"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "test/support/fixtures/**",
+    "test/workflow/legacy-history.test.ts"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-check-history-1",
+      "checkId": "check-history",
+      "recordedAt": "2026-10-21T10:39:09.018+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/legacy-history.test.ts test/unit/test-structure.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "38ffa84eea7a7a72a5ca88e18bc5698d030a5c4d5f8ca43a1d7ed8bb1781e6cb"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-21T10:40:47.844+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "53508e6fe7557dd763698df0098433abf0a712cc4ee1bb0ffd67696f1983b16e"
+    }
+  ],
+  "epicId": "20261021-101119-review-hardening",
+  "createdAt": "2026-10-21T10:11:19.706+07:00",
+  "updatedAt": "2026-10-21T10:41:04.880+07:00",
+  "completedAt": "2026-10-21T10:41:04.880+07:00"
+}

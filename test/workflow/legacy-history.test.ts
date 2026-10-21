@@ -1,15 +1,14 @@
-import { cp, mkdir, readdir, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { initializeProject } from "src/commands/init.js";
 import { detailPublicEpic, listPublicEpics } from "src/commands/epic.js";
 import { inspectProjectStatus } from "src/commands/status.js";
 import { listProjectTasks } from "src/commands/tasks.js";
 import { loadTask, type TaskRecord } from "src/core/tasks/task.js";
-import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
-const temporaryRepository = useTemporaryRepositories("harnix-legacy-");
 const repositoryHarnix = join(process.cwd(), ".harnix");
 
 /**
@@ -25,14 +24,25 @@ interface History {
   unreadable: string[];
 }
 
-/** A disposable project that holds a copy of this repository's task records and epic files, so the real data is never touched. */
+let disposableRoot: string | undefined;
+
+afterAll(async () => {
+  if (disposableRoot) await rm(disposableRoot, { force: true, recursive: true });
+});
+
+/** A disposable project that holds a copy of this repository's legacy task records and epic files, so the real data is never touched. */
 async function projectWithHistory(): Promise<History> {
-  const root = await temporaryRepository();
+  const root = await mkdtemp(join(tmpdir(), "harnix-legacy-"));
+  disposableRoot = root;
   await initializeProject({ root, developer: "tam", yes: true });
-  const ids = (await readdir(join(repositoryHarnix, "tasks"), { withFileTypes: true }))
+  const allIds = (await readdir(join(repositoryHarnix, "tasks"), { withFileTypes: true }))
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
+  // Historical v1 and v2 records originate from August and September 2026 before schema v3 was introduced.
+  const ids = allIds.filter(
+    (id) => id.startsWith("202608") || id.startsWith("202609") || KNOWN_MALFORMED.includes(id),
+  );
   for (const id of ids) {
     await mkdir(join(root, ".harnix", "tasks", id), { recursive: true });
     await cp(join(repositoryHarnix, "tasks", id, "task.json"), join(root, ".harnix", "tasks", id, "task.json"));
@@ -56,9 +66,15 @@ async function projectWithHistory(): Promise<History> {
   return { root, tasks, unreadable };
 }
 
-describe("historical task data stays readable", { timeout: 90_000 }, () => {
+describe("historical task data stays readable", () => {
+  let history: History;
+
+  beforeAll(async () => {
+    history = await projectWithHistory();
+  });
+
   it("loads every persisted v1 and v2 task record through the current validator", async () => {
-    const { tasks, unreadable } = await projectWithHistory();
+    const { tasks, unreadable } = history;
     const legacy = tasks.filter((task) => task.schemaVersion === 1 || task.schemaVersion === 2);
 
     expect(unreadable).toEqual(KNOWN_MALFORMED);
@@ -68,7 +84,7 @@ describe("historical task data stays readable", { timeout: 90_000 }, () => {
   });
 
   it("lists every readable historical task through the public task index", async () => {
-    const { root, tasks } = await projectWithHistory();
+    const { root, tasks } = history;
 
     const index = await listProjectTasks(root, { limit: 100 });
 
@@ -77,7 +93,7 @@ describe("historical task data stays readable", { timeout: 90_000 }, () => {
   });
 
   it("projects status for a historical v1 and v2 task selected as active", async () => {
-    const { root, tasks } = await projectWithHistory();
+    const { root, tasks } = history;
     for (const version of [1, 2] as const) {
       const sample = tasks.find((task) => task.schemaVersion === version && task.status === "completed");
       expect(sample, `a completed v${version} task exists`).toBeDefined();
@@ -90,12 +106,12 @@ describe("historical task data stays readable", { timeout: 90_000 }, () => {
   });
 
   it("reads epics and their historical members through the epic commands", async () => {
-    const { root } = await projectWithHistory();
+    const { root } = history;
 
     const list = await listPublicEpics(root, 100);
     const detail = await detailPublicEpic(root, list.epics[0]!.id);
 
     expect(list.total).toBeGreaterThan(0);
     expect(detail.members.length).toBeGreaterThan(0);
-  }, 90_000);
+  });
 });

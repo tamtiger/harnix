@@ -1,0 +1,13 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261021-101119-review-hardening",
+  "title": "Khắc phục toàn diện các phát hiện và nợ kỹ thuật từ đợt review",
+  "goal": "Giải quyết 5 vấn đề: ngân sách token always-loaded, hiệu năng test legacy-history, an toàn resolve lệnh Windows, phân loại learning backlog, và công thái học test-structure.",
+  "nonGoals": [
+    "Không thay đổi hợp đồng đóng băng của TaskRecord schema v3",
+    "Không bổ sung lệnh public mới ngoài 17 lệnh hiện có"
+  ],
+  "createdAt": "2026-10-21T10:11:19.706+07:00",
+  "updatedAt": "2026-10-21T10:11:19.706+07:00"
+}

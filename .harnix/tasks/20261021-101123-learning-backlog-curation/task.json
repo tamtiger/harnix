@@ -1,0 +1,99 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261021-101123-learning-backlog-curation",
+  "title": "Gợi ý tự động thăng hạng learning tại --finish và phân loại learning backlog",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bổ sung cơ chế gợi ý thăng hạng (promotable candidate hint) tự động trong kết quả --finish khi có candidate chín muồi, đồng thời chốt 5 quy tắc bất biến vào learned.md và dọn dẹp draft rác",
+  "nonGoals": [
+    "Không sửa đổi cơ chế lưu trữ jsonl của journal"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "learned.md được khởi tạo với 5 block chuẩn theo parser learned-blocks, draft rác bị loại bỏ và các test suite learning-review, learning-automation xanh",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-learning-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Lệnh finish tự động phát hiện và gợi ý lệnh promote 1 chạm khi task hoàn tất tạo ra hoặc tìm thấy candidate đạt chất lượng",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-learning-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm test",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-learning",
+      "description": "Chạy test học hỏi, gợi ý thăng hạng tại finish và quản lý spec learned.md",
+      "command": "pnpm exec vitest run test/unit/core/journal/learning-review.test.ts test/unit/core/workflow/finish.test.ts test/workflow/learning-automation.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        ".harnix/spec/learned.md",
+        "src/core/journal/**",
+        "src/core/workflow/finish.ts",
+        "test/unit/core/journal/**",
+        "test/unit/core/workflow/finish.test.ts",
+        "test/workflow/learning-automation.test.ts"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/spec/learned.md",
+    "src/core/journal/learning-capture.ts",
+    "src/core/workflow/finish.ts"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-check-learning-1",
+      "checkId": "check-learning",
+      "recordedAt": "2026-10-21T10:58:03.057+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/journal/learning-review.test.ts test/unit/core/workflow/finish.test.ts test/workflow/learning-automation.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9d585c9d8645ab48ce2f9468664f39a941fbd7b2b8636d26ac1a42f5db82f490"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-21T10:59:56.058+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "47681bcce3d891c9fd68ce8cb5776d107bd183aae23f3dcb54d94827cbd54092"
+    }
+  ],
+  "epicId": "20261021-101119-review-hardening",
+  "createdAt": "2026-10-21T10:11:19.706+07:00",
+  "updatedAt": "2026-10-21T11:00:20.568+07:00",
+  "completedAt": "2026-10-21T11:00:20.568+07:00"
+}

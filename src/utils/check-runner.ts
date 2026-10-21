@@ -99,11 +99,18 @@ export function findOnPath(
     .map((directory) => directory.replace(/^"|"$/gu, ""))
     .filter((directory) => win32.isAbsolute(directory));
   const extensions = (env.PATHEXT ?? DEFAULT_PATHEXT).split(";").filter((extension) => extension !== "");
-  for (const directory of directories)
-    for (const extension of extensions) {
-      const candidate = win32.join(directory, `${name}${extension}`);
+  const hasExt = extensions.some((extension) => name.toLowerCase().endsWith(extension.toLowerCase()));
+  for (const directory of directories) {
+    if (hasExt) {
+      const candidate = win32.join(directory, name);
       if (exists(candidate)) return candidate;
+    } else {
+      for (const extension of extensions) {
+        const candidate = win32.join(directory, `${name}${extension}`);
+        if (exists(candidate)) return candidate;
+      }
     }
+  }
   return undefined;
 }
 
@@ -132,8 +139,16 @@ export function resolveInvocation(
   if (platform === "win32" && (executable.toLowerCase() === "cmd" || executable.toLowerCase() === "cmd.exe")) {
     return { executable: "cmd.exe", args: [...args] };
   }
+  const hasSlash = /[\\/]/u.test(executable);
+  const isDirectBinary = !hasSlash && /\.(?:exe|com)$/iu.test(executable);
+  if (platform === "win32" && isDirectBinary) {
+    if (lookup === undefined) return { executable, args: [...args] };
+    const resolved = lookup(executable);
+    assertResolvable(executable, true, true, resolved);
+    return { executable: resolved ?? executable, args: [...args] };
+  }
   const isBatchShim = /\.(?:cmd|bat)$/iu.test(executable);
-  const bareName = !/[\\/]/u.test(executable) && !executable.includes(".");
+  const bareName = !hasSlash && !executable.includes(".");
   const needsCmd = isBatchShim || bareName;
   if (platform !== "win32" || !needsCmd) return { executable, args: [...args] };
   const resolved = bareName ? lookup?.(executable) : undefined;

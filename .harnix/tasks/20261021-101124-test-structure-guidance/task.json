@@ -1,0 +1,85 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261021-101124-test-structure-guidance",
+  "title": "Cải thiện hướng dẫn cấu trúc test mirror để tránh bẫy huỷ task",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bổ sung hướng dẫn kiểm tra quy tắc mirror cấu trúc test file trong workflow guide và test-structure message",
+  "nonGoals": [
+    "Không nới lỏng quy tắc mirror 1:1 của test-structure"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Thông báo lỗi test-structure hướng dẫn rõ ràng cấu trúc đặt file theo mẫu cụ thể và test/README.md cập nhật giải thích cách đặt fixture/support",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-structure-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm test",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-structure",
+      "description": "Chạy test cấu trúc test suite",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/test-structure.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "test/README.md",
+        "test/unit/test-structure.test.ts"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "test/README.md",
+    "test/unit/test-structure.test.ts"
+  ],
+  "relevantSpecs": [],
+  "evidence": [
+    {
+      "id": "ev-check-structure-1",
+      "checkId": "check-structure",
+      "recordedAt": "2026-10-21T11:02:19.826+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/test-structure.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "eda4b8defe9c519470c79ca427c551699d64ca22ed00bb9f3d54b7828fa3b536"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-21T11:03:52.586+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bf8de50b2d90c22778aa882e78a0631710affc63d83373b49b2fc64ee41163d4"
+    }
+  ],
+  "epicId": "20261021-101119-review-hardening",
+  "createdAt": "2026-10-21T10:11:19.706+07:00",
+  "updatedAt": "2026-10-21T11:04:10.100+07:00",
+  "completedAt": "2026-10-21T11:04:10.100+07:00"
+}

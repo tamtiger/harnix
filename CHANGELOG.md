@@ -4,6 +4,16 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.15.0] - 2026-10-21
+
+### Changed
+
+- Cắt giảm ngân sách token của khối hướng dẫn luôn nạp (always-loaded)
+- Tối ưu hiệu năng legacy-history.test.ts bằng fixture cô lập
+- Tra cứu PATH cho executable có đuôi mở rộng trên Windows
+- Gợi ý tự động thăng hạng learning tại --finish và phân loại learning backlog
+- Cải thiện hướng dẫn cấu trúc test mirror và hoàn tất khắc phục toàn diện nợ kỹ thuật từ đợt review
+
 ## [2.14.1] - 2026-10-20
 
 ### Fixed

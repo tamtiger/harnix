@@ -2,8 +2,11 @@ import { readConfig } from "src/core/config/config.js";
 import { appendJournal, searchJournal } from "src/core/journal/journal.js";
 import { captureLearningAtFinish } from "src/core/journal/learning-capture.js";
 import { extractObservations, reviewNotes } from "src/core/journal/learning-notes.js";
+import { effectiveLearningStatus } from "src/core/journal/learning.js";
+import { readLearningStates } from "src/core/journal/learning-store.js";
 import { archiveTask, resolveActiveTask, saveTask, transitionTask, type TaskRecord } from "src/core/tasks/task.js";
 import { nowInstant } from "src/utils/clock.js";
+import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertTaskReadyForFinishing, completionEvidenceIds } from "./completion.js";
 import { scanTaskSecrets, type SecretAdvisory } from "./secret-scan.js";
@@ -22,6 +25,7 @@ export interface FinishLearningReport {
   notes: number;
   captured: number;
   hint?: string;
+  promotable?: string[];
 }
 
 export interface FinishReport {
@@ -50,6 +54,23 @@ export async function finishWorkflowReport(root: string, injectedNow?: string): 
   return withWorkflowLock(harnixRoot, () => finishLocked(root, harnixRoot, injectedNow));
 }
 
+async function findPromotableCandidates(root: string, developer: string, nowMs: number): Promise<string[]> {
+  try {
+    const journalRoot = await resolveSafeHarnixPath(root, `workspace/${developer}/journal`);
+    const states = await readLearningStates(journalRoot);
+    const promotable: string[] = [];
+    for (const [id, state] of states) {
+      const status = effectiveLearningStatus(state.candidate.status, state.entry.recordedAt, nowMs);
+      if (status === "candidate") {
+        promotable.push(id);
+      }
+    }
+    return promotable.sort(compareCodeUnits);
+  } catch {
+    return [];
+  }
+}
+
 async function finishLocked(root: string, harnixRoot: string, injectedNow: string | undefined): Promise<FinishReport> {
   const now = await currentInstant(root, injectedNow);
   const task = await resolveActiveTask(harnixRoot);
@@ -61,6 +82,12 @@ async function finishLocked(root: string, harnixRoot: string, injectedNow: strin
   await refreshLinkedEpicMarkdown(root, finished);
   const captured = await captureLearning(root, config.developer, finished, journalPath, journalDate);
   const hint = learningHint(finished, captured);
+  const promotable = await findPromotableCandidates(root, config.developer, Date.parse(journalDate));
+  let learningHintText = hint;
+  if (promotable.length > 0) {
+    const promoteCmd = `harnix learning --promote ${promotable[0]} --apply`;
+    learningHintText = learningHintText ? `${learningHintText} Gợi ý: ${promoteCmd}` : `Gợi ý: ${promoteCmd}`;
+  }
   const secretAdvisory = await scanTaskSecrets(root, finished);
   return {
     task: finished,
@@ -68,7 +95,12 @@ async function finishLocked(root: string, harnixRoot: string, injectedNow: strin
     baselineAuthorized: finished.validationPlan
       .filter((check) => authorizedRedBaseline(finished, check))
       .map((check) => check.id),
-    learning: { notes: reviewNotes(finished).length, captured, ...(hint === undefined ? {} : { hint }) },
+    learning: {
+      notes: reviewNotes(finished).length,
+      captured,
+      ...(learningHintText === undefined ? {} : { hint: learningHintText }),
+      ...(promotable.length > 0 ? { promotable } : {}),
+    },
   };
 }
 
