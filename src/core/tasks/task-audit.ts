@@ -197,32 +197,46 @@ function criterionHasFreshSupport(
     if (latest) latestByCheck.set(checkId, latest);
   }
   const checks = new Map(task.validationPlan.map((check) => [check.id, check]));
-  return criterion.evidenceIds.some((id) => {
-    const evidence = evidenceById.get(id);
-    if (
-      evidence === undefined ||
-      evidence.result !== "pass" ||
-      !isFreshEvidence(evidence, now, task.schemaVersion === 1)
-    )
+  return criterion.evidenceIds.some((id) =>
+    isEvidencePassingCriterion(
+      evidenceById.get(id),
+      criterion.id,
+      task.schemaVersion,
+      now,
+      latestByCheck,
+      stateByCheck,
+      checks,
+    ),
+  );
+}
+
+function isEvidencePassingCriterion(
+  evidence: Evidence | undefined,
+  criterionId: string,
+  schemaVersion: number,
+  now: number,
+  latestByCheck: ReadonlyMap<string, Evidence>,
+  stateByCheck: ReadonlyMap<string, RequiredCheckState>,
+  checks: ReadonlyMap<string, unknown>,
+): boolean {
+  if (evidence === undefined || evidence.result !== "pass" || !isFreshEvidence(evidence, now, schemaVersion === 1)) {
+    return false;
+  }
+  if (evidence.checkId !== undefined) {
+    const latest = latestByCheck.get(evidence.checkId);
+    if (schemaVersion === 1) {
+      if (latest?.id !== evidence.id) return false;
+    } else if (latest === undefined || latest.result !== "pass" || latest.inputDigest !== evidence.inputDigest) {
       return false;
-    if (evidence.checkId !== undefined) {
-      const latest = latestByCheck.get(evidence.checkId);
-      if (task.schemaVersion === 1) {
-        if (latest?.id !== evidence.id) return false;
-      } else if (latest === undefined || latest.result !== "pass" || latest.inputDigest !== evidence.inputDigest) {
-        return false;
-      }
     }
-    if (
-      evidence.checkId !== undefined &&
-      stateByCheck.has(evidence.checkId) &&
-      stateByCheck.get(evidence.checkId) !== "passed"
-    )
+    if (stateByCheck.has(evidence.checkId) && stateByCheck.get(evidence.checkId) !== "passed") {
       return false;
-    if (task.schemaVersion === 1) return true;
-    if (!/^[a-f0-9]{64}$/u.test(evidence.inputDigest ?? "") || evidence.checkId === undefined) return false;
-    return checks.get(evidence.checkId)?.criterionIds?.includes(criterion.id) === true;
-  });
+    }
+  }
+  if (schemaVersion === 1) return true;
+  if (!/^[a-f0-9]{64}$/u.test(evidence.inputDigest ?? "") || evidence.checkId === undefined) return false;
+  const declared = checks.get(evidence.checkId) as { criterionIds?: string[] } | undefined;
+  return declared?.criterionIds?.includes(criterionId) === true;
 }
 
 function isFreshEvidence(evidence: Evidence, now: number, enforceMaxAge: boolean, maxAgeMs = 60 * 60 * 1_000): boolean {

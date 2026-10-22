@@ -22,7 +22,27 @@ const sourceFiles = walk(join(root, "src")).map((path) => toPosix(relative(root,
 const read = (path: string): string => readFileSync(join(root, path), "utf8").replaceAll("\r\n", "\n");
 const specFiles = testFiles.filter((path) => path.endsWith(".test.ts"));
 
-/** Line limit for any test file. */
+// Lines of code: blank lines and comment-only lines do not count (matching eslint max-lines).
+function codeLines(text: string): number {
+  let inBlock = false;
+  let count = 0;
+  for (const raw of text.split(/\r?\n/u)) {
+    const line = raw.trim();
+    if (inBlock) {
+      if (line.includes("*/")) inBlock = false;
+      continue;
+    }
+    if (line.length === 0 || line.startsWith("//")) continue;
+    if (line.startsWith("/*")) {
+      if (!line.includes("*/")) inBlock = true;
+      continue;
+    }
+    count += 1;
+  }
+  return count;
+}
+
+/** Line limit for any test file (measured in code lines, excluding blank lines and comments). */
 const MAX_TEST_LINES = 400;
 
 /**
@@ -94,7 +114,9 @@ describe("test suite structure", () => {
       "  - If writing a multi-command integration flow -> place at test/integration/scenarios/<flow>.test.ts",
       "  - If writing a multi-module workflow scenario -> place at test/workflow/<scenario>.test.ts",
       "  - If writing shared fixtures or helper code -> place at test/support/<name>.ts",
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     expect({ unitOrphans, commandOrphans, misplaced }, guideMessage).toEqual({
       unitOrphans: [],
@@ -112,11 +134,11 @@ describe("test suite structure", () => {
   });
 
   it(`keeps every test file at ${MAX_TEST_LINES} lines or fewer`, () => {
-    const tooLong = testFiles.filter((path) => read(path).split("\n").length > MAX_TEST_LINES);
+    const tooLong = testFiles.filter((path) => codeLines(read(path)) > MAX_TEST_LINES);
 
     expect(
       tooLong,
-      `Every test file must be ${MAX_TEST_LINES} lines or fewer. Shorten or split the following files: ${tooLong.join(", ")}`,
+      `Every test file must be ${MAX_TEST_LINES} lines of code or fewer. Shorten or split the following files: ${tooLong.join(", ")}`,
     ).toEqual([]);
   });
 

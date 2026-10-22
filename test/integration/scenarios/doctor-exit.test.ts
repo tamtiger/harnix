@@ -36,7 +36,7 @@ async function warningOnlyProject(): Promise<{
   };
 }
 
-describe("doctor --allow-warnings", () => {
+describe.sequential("doctor --allow-warnings", () => {
   it("exits 1 by default and 0 with the flag when there are only warnings, with the same JSON", async () => {
     const options = await warningOnlyProject();
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);

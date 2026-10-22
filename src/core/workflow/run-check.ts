@@ -1,6 +1,7 @@
 import { normalizeCheckCwd } from "src/core/tasks/check-cwd.js";
 import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
+import { saveInputDigestSnapshot } from "src/core/verification/snapshot-cache.js";
 import { runCheckProcess, type CheckRunner } from "src/utils/check-runner.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { launcherFailure, summarizeCheckOutput } from "./check-output.js";
@@ -65,7 +66,8 @@ export async function runCheckWorkflow(
 ): Promise<RunCheckResult> {
   const [executable, ...args] = argv;
   if (executable === undefined) throw new Error("workflow --run-check requires an executable after --.");
-  const task = await resolveActiveTask(await resolveSafeHarnixPath(root));
+  const harnixRoot = await resolveSafeHarnixPath(root);
+  const task = await resolveActiveTask(harnixRoot);
   if (!task) throw new Error("Workflow run-check requires an active task.");
   if (task.schemaVersion !== 3) throw new Error("Workflow --run-check requires a TaskRecord schema v3 task.");
   const declared = task.validationPlan.find((check) => check.id === checkId);
@@ -75,7 +77,9 @@ export async function runCheckWorkflow(
     throw new Error(`Workflow run-check command differs from the command declared by check ${checkId}.`);
   }
   const runCwd = await resolveRunCwd(root, checkId, declared.cwd, dependencies.cwd);
-  const before = (await computeInputDigest(root, task, checkId)).inputDigest;
+  const beforeSnapshot = await computeInputDigest(root, task, checkId);
+  const before = beforeSnapshot.inputDigest;
+  await saveInputDigestSnapshot(harnixRoot, beforeSnapshot);
   const run = await (dependencies.runner ?? runCheckProcess)(executable, args, runCwd);
   const launcher = launcherFailure(run.output, run.exitCode, executable);
   if (launcher !== undefined) throw new Error(`Check ${checkId} could not start: ${launcher}; nothing was recorded.`);

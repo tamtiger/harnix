@@ -100,7 +100,8 @@ describe("learned blocks", () => {
       {
         candidate: buildLearningCandidate({
           id: "obs-d6bfc77223f86a42",
-          statement: "Hai cờ mới --remove-decision và --remove-criterion chỉ hoạt động trong planning; không xóa dữ liệu đã đóng băng.",
+          statement:
+            "Hai cờ mới --remove-decision và --remove-criterion chỉ hoạt động trong planning; không xóa dữ liệu đã đóng băng.",
           sourceTaskIds: ["20261019-143853-cli-ergonomics-risk-mitigation-init-cwd"],
           evidenceIds: ["ev-check-focus-1", "ev-check-suite-1"],
         }),
@@ -109,7 +110,8 @@ describe("learned blocks", () => {
       {
         candidate: buildLearningCandidate({
           id: "obs-46873b70f8908d8a",
-          statement: "Chuẩn hóa CRLF khi băm digest bỏ qua file nhạy cảm với kết thúc dòng (.sh, .bash, .zsh, .ksh, .bat, .cmd, Makefile, Dockerfile) thay vì chuẩn hóa mọi file không chứa byte NUL.",
+          statement:
+            "Chuẩn hóa CRLF khi băm digest bỏ qua file nhạy cảm với kết thúc dòng (.sh, .bash, .zsh, .ksh, .bat, .cmd, Makefile, Dockerfile) thay vì chuẩn hóa mọi file không chứa byte NUL.",
           sourceTaskIds: ["20261019-165403-sync-docs-and-fix-lint"],
           evidenceIds: ["ev-check-focus-1", "ev-check-suite-1"],
         }),
@@ -118,7 +120,8 @@ describe("learned blocks", () => {
       {
         candidate: buildLearningCandidate({
           id: "obs-253d24e2e036d4f0",
-          statement: "So với HEAD thay vì lưu baseline commit trong task để không đổi schema đóng băng; mục của task completed được giữ từ lần lưu cuối.",
+          statement:
+            "So với HEAD thay vì lưu baseline commit trong task để không đổi schema đóng băng; mục của task completed được giữ từ lần lưu cuối.",
           sourceTaskIds: ["20261020-135201-review-code-impact-dashboard"],
           evidenceIds: ["ev-check-focus-1", "ev-check-suite-1"],
         }),

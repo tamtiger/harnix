@@ -92,23 +92,37 @@ export async function saveTaskWithArtifacts(
   await saveTask(root, task);
 }
 export function validateTaskArtifacts(task: TaskRecord, artifacts: TaskArtifacts = {}): void {
+  validateCeremonyArtifacts(task, artifacts);
+  validateResearchArtifacts(artifacts.research);
+  validateContextArtifacts(task.id, artifacts);
+}
+
+function validateCeremonyArtifacts(task: TaskRecord, artifacts: TaskArtifacts): void {
   if (task.mode === "full") {
     if (!artifacts.prd?.trim() || !artifacts.plan?.trim())
       throw new TaskValidationError("Full tasks require prd.md and plan.md.");
-  } else if (artifacts.prd || artifacts.plan)
+  } else if (artifacts.prd || artifacts.plan) {
     throw new TaskValidationError("Lite tasks must not create full ceremony artifacts.");
-  if (artifacts.research)
-    for (const [name, content] of Object.entries(artifacts.research))
-      if (!/^[a-z0-9][a-z0-9._-]*\.md$/u.test(name) || !content.trim())
-        throw new TaskValidationError("Research artifact name or content is invalid.");
+  }
+}
+
+function validateResearchArtifacts(research: TaskArtifacts["research"]): void {
+  if (!research) return;
+  for (const [name, content] of Object.entries(research)) {
+    if (!/^[a-z0-9][a-z0-9._-]*\.md$/u.test(name) || !content.trim())
+      throw new TaskValidationError("Research artifact name or content is invalid.");
+  }
+}
+
+function validateContextArtifacts(taskId: string, artifacts: TaskArtifacts): void {
   if ((artifacts.context === undefined) !== (artifacts.contextSelection === undefined))
     throw new TaskValidationError("Context persistence requires both manifest and selection snapshot.");
   if (artifacts.context && artifacts.contextSelection) {
     const manifest = validateContextManifest(artifacts.context);
     const snapshot = validateContextSelectionSnapshot(artifacts.contextSelection);
     if (
-      manifest.taskId !== task.id ||
-      snapshot.taskId !== task.id ||
+      manifest.taskId !== taskId ||
+      snapshot.taskId !== taskId ||
       snapshot.selectionResultHash !== contextSelectionResultHash(manifest)
     )
       throw new TaskValidationError("Context persistence task binding is invalid.");

@@ -108,8 +108,7 @@ function mergeCheck(existing: ValidationCheckV3 | undefined, edit: CheckEdit): V
   const required = edit.required ?? existing?.required ?? true;
   const criterionIds = sortedUnique(edit.criteria ?? existing?.criterionIds ?? []);
   const inputs = sortedUnique(edit.inputs ?? existing?.inputs ?? []);
-  if (required && (criterionIds.length === 0 || inputs.length === 0))
-    throw new Error(`Check ${edit.id} is required: --criteria and at least one --input are needed.`);
+  assertRequiredCheckConstraints(edit.id, required, criterionIds, inputs);
   const command = edit.command ?? existing?.command;
   const cwd = edit.cwd ?? existing?.cwd;
   return {
@@ -122,6 +121,17 @@ function mergeCheck(existing: ValidationCheckV3 | undefined, edit: CheckEdit): V
     criterionIds,
     inputs,
   };
+}
+
+function assertRequiredCheckConstraints(
+  id: string,
+  required: boolean,
+  criterionIds: readonly string[],
+  inputs: readonly string[],
+): void {
+  if (required && (criterionIds.length === 0 || inputs.length === 0)) {
+    throw new Error(`Check ${id} is required: --criteria and at least one --input are needed.`);
+  }
 }
 
 export async function setCheckWorkflow(

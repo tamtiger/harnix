@@ -34,8 +34,14 @@ describe("workflow finish", () => {
     const digest = (await computeInputDigest(root, verifying, "check")).inputDigest;
     verifying.evidence = [
       {
-        id: "e", checkId: "check", recordedAt: new Date().toISOString(),
-        result: "pass", exitCode: 0, summary: "ok", artifactPaths: [], inputDigest: digest,
+        id: "e",
+        checkId: "check",
+        recordedAt: new Date().toISOString(),
+        result: "pass",
+        exitCode: 0,
+        summary: "ok",
+        artifactPaths: [],
+        inputDigest: digest,
       },
     ];
     verifying.acceptanceCriteria = [{ id: "a", text: "done", status: "met", evidenceIds: ["e"] }];
@@ -63,8 +69,13 @@ describe("workflow finish", () => {
     const completedAt = "2026-08-13T23:59:59.000Z";
     const retryAt = "2026-08-14T00:00:01.000Z";
     const completionEvidence = {
-      id: "e", checkId: "check", recordedAt: completedAt,
-      result: "pass" as const, exitCode: 0, summary: "verified", artifactPaths: [],
+      id: "e",
+      checkId: "check",
+      recordedAt: completedAt,
+      result: "pass" as const,
+      exitCode: 0,
+      summary: "verified",
+      artifactPaths: [],
     };
     const verifying = {
       ...task("verifying", "finishing"),
@@ -78,9 +89,15 @@ describe("workflow finish", () => {
     await saveTask(harnixRoot, completed);
     await setActiveTask(harnixRoot, completed.id);
     await appendJournal(originalJournal, {
-      generator: "harnix", schemaVersion: 1, id: `${completed.id}-completion`,
-      recordedAt: completedAt, developer: "tam", taskId: completed.id,
-      kind: "completion", summary: `Completed: ${completed.title}`, evidenceIds: [],
+      generator: "harnix",
+      schemaVersion: 1,
+      id: `${completed.id}-completion`,
+      recordedAt: completedAt,
+      developer: "tam",
+      taskId: completed.id,
+      kind: "completion",
+      summary: `Completed: ${completed.title}`,
+      evidenceIds: [],
     });
 
     await expect(finishWorkflow(root, retryAt)).resolves.toMatchObject({ status: "completed" });
@@ -122,7 +139,12 @@ describe("workflow finish", () => {
       task: { ...withEvidence, status: "ready", checkpoint: "ready", updatedAt: "2026-08-14T00:02:00.000Z" },
     });
     await saveWorkflow(root, {
-      task: { ...withEvidence, status: "in_progress", checkpoint: "implementing", updatedAt: "2026-08-14T00:03:00.000Z" },
+      task: {
+        ...withEvidence,
+        status: "in_progress",
+        checkpoint: "implementing",
+        updatedAt: "2026-08-14T00:03:00.000Z",
+      },
     });
     await saveWorkflow(root, {
       task: { ...withEvidence, status: "verifying", checkpoint: "verifying", updatedAt: "2026-08-14T00:04:00.000Z" },
@@ -370,15 +392,30 @@ describe("finish learning report", () => {
     const developer = "tam";
     const journalDir = join(root, ".harnix", "workspace", developer, "journal");
     await mkdir(journalDir, { recursive: true });
-    await writeFile(join(journalDir, "2026-08-12.jsonl"), JSON.stringify({
-      generator: "harnix", schemaVersion: 1, id: "prior-learning", recordedAt: "2026-08-12T00:00:00.000Z",
-      developer, taskId: "prior-task", kind: "learning", summary: "candidate", evidenceIds: ["ev-1", "ev-2"],
-      learning: {
-        id: "obs-c1", statement: "Inject clock in tests for determinism",
-        sourceTaskIds: ["prior-task", "second-task"], evidenceIds: ["ev-1", "ev-2"],
-        status: "candidate", occurrences: 2, confidence: 0.9,
-      },
-    }) + "\n", "utf8");
+    await writeFile(
+      join(journalDir, "2026-08-12.jsonl"),
+      JSON.stringify({
+        generator: "harnix",
+        schemaVersion: 1,
+        id: "prior-learning",
+        recordedAt: "2026-08-12T00:00:00.000Z",
+        developer,
+        taskId: "prior-task",
+        kind: "learning",
+        summary: "candidate",
+        evidenceIds: ["ev-1", "ev-2"],
+        learning: {
+          id: "obs-c1",
+          statement: "Inject clock in tests for determinism",
+          sourceTaskIds: ["prior-task", "second-task"],
+          evidenceIds: ["ev-1", "ev-2"],
+          status: "candidate",
+          occurrences: 2,
+          confidence: 0.9,
+        },
+      }) + "\n",
+      "utf8",
+    );
     await finishable(root);
     const report = await finishWorkflowReport(root, FINISH_AT);
     expect(report.learning.promotable).toEqual(["obs-c1"]);

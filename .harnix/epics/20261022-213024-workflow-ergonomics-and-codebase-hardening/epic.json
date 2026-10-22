@@ -1,0 +1,14 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261022-213024-workflow-ergonomics-and-codebase-hardening",
+  "title": "Tối ưu hóa trải nghiệm Task Workflow, khắc phục nợ kỹ thuật và gia cố toàn diện Test Suite",
+  "goal": "Giải quyết triệt để 100% các vấn đề phát hiện từ kiểm toán toàn diện: (1) Gia cố hạ tầng test: chuẩn hóa .gitattributes và Prettier eol=lf, cải tiến logic đếm dòng trong test-structure.test.ts (đếm LOC thực tế) để hạ nhiệt 19 file test sát trần 400 dòng, cố định pool: 'forks' và bao phủ describe.sequential cho toàn bộ 26 integration test files có gọi process.chdir(); (2) Cải tiến Workflow Ergonomics & Complexity: bổ sung danh sách file thay đổi khi phát hiện digest-mismatch, thêm cảnh báo checklist plan.md chưa hoàn tất tại workflow transition verifying, và refactor hạ Cyclomatic Complexity cho toàn bộ nhóm 7 hàm chạm trần 20 và các hàm chạm trần 19 trong codebase.",
+  "nonGoals": [
+    "Không thay đổi TaskRecord schema v3 đóng băng",
+    "Không hạ ngưỡng coverage tiêu chuẩn (>= 98.6% functions, >= 95% lines)",
+    "Không tự động commit hay push Git mà không có lệnh người dùng"
+  ],
+  "createdAt": "2026-10-22T21:30:24.000+07:00",
+  "updatedAt": "2026-10-22T21:30:24.000+07:00"
+}

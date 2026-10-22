@@ -219,28 +219,41 @@ function tryMatchMethod(
   ]);
 }
 
+interface ScopeState {
+  ns?: { endLine: number; name: string };
+  cls?: { depth: number; endLine: number; name: string };
+}
+
+function processLineSymbol(
+  lines: readonly string[],
+  i: number,
+  trimmed: string,
+  depth: number,
+  scope: ScopeState,
+): RepoMapSymbolOutlineV1 | undefined {
+  if (scope.ns && i + 1 > scope.ns.endLine) scope.ns = undefined;
+  if (scope.cls && i + 1 > scope.cls.endLine) scope.cls = undefined;
+  const isTop = scope.ns ? depth === 1 : depth === 0;
+  const topSymbol = isTop ? matchTopBrace(lines, i, trimmed) : undefined;
+  if (topSymbol) {
+    if (topSymbol.kind === "namespace") scope.ns = { endLine: topSymbol.endLine, name: topSymbol.name };
+    else if (/^(?:class|interface|struct|record)$/u.test(topSymbol.kind))
+      scope.cls = { depth: depth + 1, endLine: topSymbol.endLine, name: topSymbol.name };
+    return topSymbol;
+  }
+  return scope.cls && depth === scope.cls.depth ? tryMatchMethod(lines, i, trimmed, scope.cls.name) : undefined;
+}
+
 function extractBraceLanguageSymbols(lines: readonly string[]): RepoMapSymbolOutlineV1[] {
   const symbols: RepoMapSymbolOutlineV1[] = [];
-  let activeNs: { endLine: number; name: string } | undefined;
-  let activeCls: { depth: number; endLine: number; name: string } | undefined;
+  const scope: ScopeState = {};
   let depth = 0;
   for (let i = 0; i < lines.length; i += 1) {
     const raw = lines[i] ?? "";
     const trimmed = raw.trim();
-    if (activeNs && i + 1 > activeNs.endLine) activeNs = undefined;
-    if (activeCls && i + 1 > activeCls.endLine) activeCls = undefined;
     if (!/^(?:$|\/\/|\*)/u.test(trimmed) && !secretValue.test(trimmed)) {
-      const isTop = activeNs ? depth === 1 : depth === 0;
-      const topSymbol = isTop ? matchTopBrace(lines, i, trimmed) : undefined;
-      if (topSymbol) {
-        symbols.push(topSymbol);
-        if (topSymbol.kind === "namespace") activeNs = { endLine: topSymbol.endLine, name: topSymbol.name };
-        else if (/^(?:class|interface|struct|record)$/u.test(topSymbol.kind))
-          activeCls = { depth: depth + 1, endLine: topSymbol.endLine, name: topSymbol.name };
-      } else if (activeCls && depth === activeCls.depth) {
-        const methodSym = tryMatchMethod(lines, i, trimmed, activeCls.name);
-        if (methodSym) symbols.push(methodSym);
-      }
+      const symbol = processLineSymbol(lines, i, trimmed, depth, scope);
+      if (symbol) symbols.push(symbol);
     }
     for (const ch of stripComments(raw)) depth += ch === "{" ? 1 : ch === "}" ? -1 : 0;
     depth = Math.max(0, depth);

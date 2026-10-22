@@ -1,0 +1,154 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261022-213026-stale-check-diagnostics-and-complexity-reduction",
+  "title": "Cải tiến chẩn đoán Stale Check và Hạ Cyclomatic Complexity Toàn diện",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Nâng cấp chẩn đoán digest-mismatch trong status --explain và kết quả audit/completion để liệt kê chi tiết các file cụ thể bị thay đổi hash; thêm cảnh báo checklist plan.md chưa hoàn tất tại workflow --transition verifying/verifying; refactor hạ Cyclomatic Complexity cho toàn bộ 7 hàm chạm trần 20 và các hàm chạm trần 19 xuống dưới 15.",
+  "nonGoals": [],
+  "epicId": "20261022-213024-workflow-ergonomics-and-codebase-hardening",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Nâng cấp chẩn đoán digest-mismatch trong status --explain và kết quả audit/completion để liệt kê chi tiết các file cụ thể bị thay đổi hash (không còn mảng changes rỗng), giúp dev biết ngay nguyên nhân check bị stale.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-audit-diagnostics-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Bổ sung cảnh báo sớm (warning) khi chuyển trạng thái sang verifying/verifying nếu checklist trong plan.md chưa đạt 100% [x] (áp dụng cho task có plan.md).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Refactor và hạ Cyclomatic Complexity của toàn bộ các hàm chạm trần 20 và sát trần 19 (đặc biệt trong task-store.ts, plan-edit.ts, transition.ts, project-files.ts, repo-map/outline.ts, verify-plan.ts, task-audit.ts, task-index.ts, task-resume.ts, save-files.ts) xuống dưới 15.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-complexity-lint-2",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "check-audit-diagnostics",
+      "description": "Kiểm tra chẩn đoán audit và completion khi stale check",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/tasks/task-audit.test.ts test/unit/core/workflow/completion.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/tasks/task-audit.ts",
+        "src/core/verification/check-report.ts",
+        "src/core/workflow/completion.ts",
+        "test/unit/core/tasks/task-audit.test.ts",
+        "test/unit/core/workflow/completion.test.ts"
+      ]
+    },
+    {
+      "id": "check-complexity-lint",
+      "description": "Kiểm tra lint và đảm bảo không có hàm nào vi phạm complexity >= 15",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run lint",
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-audit-diagnostics-1",
+      "checkId": "check-audit-diagnostics",
+      "recordedAt": "2026-10-22T21:59:35.037+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/tasks/task-audit.test.ts test/unit/core/workflow/completion.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a6cbb0505153035f59fde42a8a4cb52ce08b7eb68bbecad09d33c9cd5a2600a0"
+    },
+    {
+      "id": "ev-check-complexity-lint-1",
+      "checkId": "check-complexity-lint",
+      "recordedAt": "2026-10-22T22:00:04.526+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "810d416802d5f1540c71f60ebf942e25e3a85b493c8f4fa902773d0411eba64c"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T22:02:25.039+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "e81bc81006f03a80c622b71fb1773ece5d5604e422a782451e53b37c7bc6d7c0"
+    },
+    {
+      "id": "ev-check-audit-diagnostics-2",
+      "checkId": "check-audit-diagnostics",
+      "recordedAt": "2026-10-22T22:04:58.746+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/tasks/task-audit.test.ts test/unit/core/workflow/completion.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a6cbb0505153035f59fde42a8a4cb52ce08b7eb68bbecad09d33c9cd5a2600a0"
+    },
+    {
+      "id": "ev-check-complexity-lint-2",
+      "checkId": "check-complexity-lint",
+      "recordedAt": "2026-10-22T22:05:26.532+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c3c0dc0f4a1d8b84f43e4daf751f7d62f12b5571f717ea3f5e02a4f4ff67ee2f"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T22:07:16.777+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "64730e089c9c2c8501c0ef0e1fb1411159aecc688c8185e5088a56765300a8d0"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-22T21:30:26.000+07:00",
+  "updatedAt": "2026-10-22T22:07:42.056+07:00",
+  "completedAt": "2026-10-22T22:07:42.056+07:00"
+}

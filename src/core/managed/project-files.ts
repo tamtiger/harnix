@@ -95,6 +95,58 @@ export interface ReconcileResult {
   obsolete: string[];
 }
 
+interface FileReconcileContext {
+  target: string;
+  content: string;
+  entry: ManagedEntry;
+  previous: ManagedEntry | undefined;
+  generatedHash: string;
+  dryRun?: boolean | undefined;
+}
+
+async function applyFileDecision(
+  decision: ReturnType<typeof decideWholeFile>,
+  ctx: FileReconcileContext,
+  result: ReconcileResult,
+  nextEntries: ManagedEntry[],
+): Promise<void> {
+  const { target, content, entry, previous, generatedHash, dryRun } = ctx;
+  switch (decision) {
+    case "create":
+      if (dryRun !== true) await atomicWriteFile(target, content);
+      result.created.push(entry.path);
+      nextEntries.push({ ...entry, generatedHash });
+      break;
+    case "keep-deleted":
+      result.deleted.push(entry.path);
+      nextEntries.push(previous!);
+      break;
+    case "collision":
+      result.preserved.push(entry.path);
+      break;
+    case "keep-modified":
+      result.preserved.push(entry.path);
+      nextEntries.push(previous!);
+      break;
+    case "update":
+      if (dryRun !== true) await atomicWriteFile(target, content);
+      result.updated.push(entry.path);
+      nextEntries.push({ ...entry, generatedHash });
+      break;
+    case "unchanged":
+      result.preserved.push(entry.path);
+      if (
+        previous!.generatorVersion !== entry.generatorVersion ||
+        previous!.sourceId !== entry.sourceId ||
+        previous!.scope !== entry.scope
+      ) {
+        result.metadataUpdated.push(entry.path);
+      }
+      nextEntries.push({ ...entry, generatedHash });
+      break;
+  }
+}
+
 export async function reconcileManagedFiles(
   projectRoot: string,
   manifest: ManagedManifest,
@@ -128,47 +180,18 @@ export async function reconcileManagedFiles(
     const target = await resolveSafeProjectPath(projectRoot, entry.path);
     const generatedHash = sha256(file.content);
     oldByPath.delete(entry.path);
-    switch (
-      decideWholeFile({
-        current: await readOptionalText(target),
-        previousHash: previous?.generatedHash,
-        desiredHash: generatedHash,
-        restoreDeleted: options.restoreDeleted === true,
-      })
-    ) {
-      case "create":
-        if (options.dryRun !== true) await atomicWriteFile(target, file.content);
-        result.created.push(entry.path);
-        nextEntries.push({ ...entry, generatedHash });
-        break;
-      case "keep-deleted":
-        result.deleted.push(entry.path);
-        nextEntries.push(previous!);
-        break;
-      case "collision":
-        result.preserved.push(entry.path);
-        break;
-      case "keep-modified":
-        result.preserved.push(entry.path);
-        nextEntries.push(previous!);
-        break;
-      case "update":
-        if (options.dryRun !== true) await atomicWriteFile(target, file.content);
-        result.updated.push(entry.path);
-        nextEntries.push({ ...entry, generatedHash });
-        break;
-      case "unchanged":
-        result.preserved.push(entry.path);
-        if (
-          previous!.generatorVersion !== entry.generatorVersion ||
-          previous!.sourceId !== entry.sourceId ||
-          previous!.scope !== entry.scope
-        ) {
-          result.metadataUpdated.push(entry.path);
-        }
-        nextEntries.push({ ...entry, generatedHash });
-        break;
-    }
+    const decision = decideWholeFile({
+      current: await readOptionalText(target),
+      previousHash: previous?.generatedHash,
+      desiredHash: generatedHash,
+      restoreDeleted: options.restoreDeleted === true,
+    });
+    await applyFileDecision(
+      decision,
+      { target, content: file.content, entry, previous, generatedHash, dryRun: options.dryRun },
+      result,
+      nextEntries,
+    );
   }
   for (const obsolete of oldByPath.values()) {
     const target = await resolveSafeProjectPath(projectRoot, obsolete.path);

@@ -210,25 +210,27 @@ async function computeImpactVerification(
   };
 }
 
+function formatNodeTestCommand(baseTestCommand: string | undefined, testList: string): string {
+  const pm = baseTestCommand?.startsWith("pnpm")
+    ? "pnpm"
+    : baseTestCommand?.startsWith("yarn")
+      ? "yarn"
+      : baseTestCommand?.startsWith("bun")
+        ? "bun"
+        : "npx";
+  if (baseTestCommand?.includes("vitest") || baseTestCommand?.includes("test")) {
+    return `${pm} vitest run ${testList}`;
+  }
+  return `${pm} test -- ${testList}`;
+}
+
 function formatTestCommand(
   rootDetected: EcosystemVerifyResult | undefined,
   baseTestCommand: string | undefined,
   tests: readonly string[],
 ): string {
   const testList = tests.join(" ");
-  if (rootDetected?.ecosystem === "node") {
-    const pm = baseTestCommand?.startsWith("pnpm")
-      ? "pnpm"
-      : baseTestCommand?.startsWith("yarn")
-        ? "yarn"
-        : baseTestCommand?.startsWith("bun")
-          ? "bun"
-          : "npx";
-    if (baseTestCommand?.includes("vitest") || baseTestCommand?.includes("test")) {
-      return `${pm} vitest run ${testList}`;
-    }
-    return `${pm} test -- ${testList}`;
-  }
+  if (rootDetected?.ecosystem === "node") return formatNodeTestCommand(baseTestCommand, testList);
   if (rootDetected?.ecosystem === "python") return `pytest ${testList}`;
   if (rootDetected?.ecosystem === "go") return `go test ${testList}`;
   if (rootDetected?.ecosystem === "rust") return `cargo test ${testList}`;

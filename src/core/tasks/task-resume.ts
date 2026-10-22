@@ -77,6 +77,47 @@ const defaultDependencies: TaskResumeDependencies = {
   activate: setActiveTask,
 };
 
+async function loadAndValidateCandidate(
+  dependencies: TaskResumeDependencies,
+  harnixRoot: string,
+  taskId: string,
+): Promise<TaskRecord> {
+  let candidate: TaskRecord;
+  try {
+    candidate = validateTask(await dependencies.loadCandidate(harnixRoot, taskId));
+  } catch {
+    throw new Error("Resume task is unavailable or invalid.");
+  }
+  if (candidate.id !== taskId || terminalStatuses.has(candidate.status)) {
+    throw new Error(
+      candidate.id !== taskId ? "Resume task is unavailable or invalid." : "Resume requires an unfinished task.",
+    );
+  }
+  return candidate;
+}
+
+async function loadAndValidateActive(
+  dependencies: TaskResumeDependencies,
+  harnixRoot: string,
+  candidateId: string,
+  force: boolean,
+): Promise<TaskRecord | null> {
+  let active: TaskRecord | null;
+  try {
+    const loaded = await dependencies.loadActive(harnixRoot);
+    active = loaded === null ? null : validateTask(loaded);
+  } catch {
+    throw new Error("Active task state is unavailable; run harnix doctor.");
+  }
+  if (active !== null && terminalStatuses.has(active.status)) {
+    throw new Error("Active task state is unavailable; run harnix doctor.");
+  }
+  if (active !== null && active.id !== candidateId && !force) {
+    throw new Error("Resume cannot replace another active task.");
+  }
+  return active;
+}
+
 export async function resumeTask(
   harnixRoot: string,
   taskId: string,
@@ -86,26 +127,8 @@ export async function resumeTask(
 ): Promise<TaskResumeResultV1> {
   if (!taskIdPattern.test(taskId)) throw new Error("Resume task ID is invalid.");
 
-  let candidate: TaskRecord;
-  try {
-    candidate = validateTask(await dependencies.loadCandidate(harnixRoot, taskId));
-  } catch {
-    throw new Error("Resume task is unavailable or invalid.");
-  }
-  if (candidate.id !== taskId) throw new Error("Resume task is unavailable or invalid.");
-  if (terminalStatuses.has(candidate.status)) throw new Error("Resume requires an unfinished task.");
-
-  let active: TaskRecord | null;
-  try {
-    const loaded = await dependencies.loadActive(harnixRoot);
-    active = loaded === null ? null : validateTask(loaded);
-  } catch {
-    throw new Error("Active task state is unavailable; run harnix doctor.");
-  }
-  if (active !== null && terminalStatuses.has(active.status))
-    throw new Error("Active task state is unavailable; run harnix doctor.");
-  if (active !== null && active.id !== candidate.id && !force)
-    throw new Error("Resume cannot replace another active task.");
+  const candidate = await loadAndValidateCandidate(dependencies, harnixRoot, taskId);
+  const active = await loadAndValidateActive(dependencies, harnixRoot, candidate.id, force);
 
   let outcome: TaskResumeOutcome;
   if (active !== null && active.id === candidate.id) outcome = "already-active";

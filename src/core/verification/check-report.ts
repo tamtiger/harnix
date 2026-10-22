@@ -1,5 +1,6 @@
 import { selectLatestEvidence, type EvidenceFindingV1, type TaskRecord } from "src/core/tasks/task.js";
 import { computeInputDigest, digestMatches } from "./input-digest.js";
+import { computeDigestChanges, loadInputDigestSnapshot } from "./snapshot-cache.js";
 
 export type RequiredCheckState = "passed" | "failed" | "stale" | "pending";
 export type RequiredCheckReasonCode =
@@ -12,8 +13,8 @@ export type RequiredCheckReasonCode =
   | "no-evidence";
 
 /**
- * Kept for the public checks payload. Digests are recomputed rather than stored, so
- * there is no snapshot to diff against and the list is always empty.
+ * Kept for the public checks payload, describing files whose hash changed or disappeared
+ * relative to the snapshot captured when the check was last verified.
  */
 export interface VerificationInputChange {
   readonly path: string;
@@ -43,7 +44,7 @@ export function createCheckFailureFinding(
  */
 export async function inspectRequiredChecks(
   projectRoot: string,
-  _harnixRoot: string,
+  harnixRoot: string,
   task: TaskRecord,
   now = Date.now(),
 ): Promise<RequiredCheckInspection[]> {
@@ -55,19 +56,22 @@ export async function inspectRequiredChecks(
         if (evidence === undefined) return inspection(check.id, "pending", ["no-evidence"]);
         const findings =
           task.schemaVersion === 1 ? undefined : (evidence as { findings?: EvidenceFindingV1[] }).findings;
-        if (evidence.result === "skipped") return inspection(check.id, "pending", ["latest-skipped"], findings);
-        if (evidence.result === "fail") return inspection(check.id, "failed", ["latest-failed"], findings);
+        if (evidence.result === "skipped") return inspection(check.id, "pending", ["latest-skipped"], [], findings);
+        if (evidence.result === "fail") return inspection(check.id, "failed", ["latest-failed"], [], findings);
         const timestamp = Date.parse(evidence.recordedAt);
         if (!Number.isFinite(timestamp) || timestamp > now)
-          return inspection(check.id, "stale", ["evidence-expired"], findings);
-        if (task.schemaVersion !== 3) return inspection(check.id, "stale", ["legacy-schema"], findings);
+          return inspection(check.id, "stale", ["evidence-expired"], [], findings);
+        if (task.schemaVersion !== 3) return inspection(check.id, "stale", ["legacy-schema"], [], findings);
         try {
           const current = await computeInputDigest(projectRoot, task, check.id);
-          return digestMatches(current, evidence.inputDigest)
-            ? inspection(check.id, "passed", [], findings)
-            : inspection(check.id, "stale", ["digest-mismatch"], findings);
+          if (digestMatches(current, evidence.inputDigest)) {
+            return inspection(check.id, "passed", [], [], findings);
+          }
+          const cached = await loadInputDigestSnapshot(harnixRoot, task.id, check.id);
+          const changes = computeDigestChanges(cached?.entries, current.entries);
+          return inspection(check.id, "stale", ["digest-mismatch"], changes, findings);
         } catch {
-          return inspection(check.id, "stale", ["inputs-unavailable"], findings);
+          return inspection(check.id, "stale", ["inputs-unavailable"], [], findings);
         }
       }),
   );
@@ -77,13 +81,14 @@ function inspection(
   id: string,
   state: RequiredCheckState,
   reasonCodes: readonly RequiredCheckReasonCode[],
+  changes: readonly VerificationInputChange[] = [],
   findings?: readonly EvidenceFindingV1[],
 ): RequiredCheckInspection {
   return {
     id,
     state,
     reasonCodes,
-    changes: [],
+    changes,
     ...(findings !== undefined && findings.length > 0 ? { findings } : {}),
   };
 }

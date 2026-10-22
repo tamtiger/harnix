@@ -44,7 +44,7 @@ async function repository(root: string, name: string): Promise<string> {
   return path;
 }
 
-describe("harnix status --workspace", () => {
+describe.sequential("harnix status --workspace", () => {
   it("prints a read-only Git table of the sub-repositories", { timeout: 60_000 }, async () => {
     const root = await temporaryRepository();
     await repository(root, "clean-repo");

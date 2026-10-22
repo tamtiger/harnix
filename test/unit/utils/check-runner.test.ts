@@ -56,32 +56,41 @@ describe("check runner", () => {
   it("keeps direct invocation on posix and routes bare command names through cmd.exe on Windows", () => {
     expect(resolveInvocation("pnpm", ["test"], "linux")).toEqual({ executable: "pnpm", args: ["test"] });
     expect(resolveInvocation("pnpm", ["test", "--filter", "a b"], "win32")).toEqual({
-      executable: "cmd.exe", args: ["/d", "/s", "/c", "pnpm", "test", "--filter", "a b"],
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "pnpm", "test", "--filter", "a b"],
     });
     expect(resolveInvocation("C:\\tools\\dotnet.exe", ["test"], "win32")).toEqual({
-      executable: "C:\\tools\\dotnet.exe", args: ["test"],
+      executable: "C:\\tools\\dotnet.exe",
+      args: ["test"],
     });
     expect(resolveInvocation("dotnet.exe", ["test"], "win32")).toEqual({ executable: "dotnet.exe", args: ["test"] });
     expect(resolveInvocation("npm.cmd", ["test"], "win32")).toEqual({
-      executable: "cmd.exe", args: ["/d", "/s", "/c", "npm.cmd", "test"],
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "npm.cmd", "test"],
     });
     expect(resolveInvocation("C:\\nodejs\\npm.cmd", ["test"], "win32")).toEqual({
-      executable: "cmd.exe", args: ["/d", "/s", "/c", "C:\\nodejs\\npm.cmd", "test"],
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "C:\\nodejs\\npm.cmd", "test"],
     });
     expect(resolveInvocation("build.bat", ["arg"], "win32")).toEqual({
-      executable: "cmd.exe", args: ["/d", "/s", "/c", "build.bat", "arg"],
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "build.bat", "arg"],
     });
     expect(resolveInvocation("npm.cmd", ["test"], "linux")).toEqual({
-      executable: "npm.cmd", args: ["test"],
+      executable: "npm.cmd",
+      args: ["test"],
     });
     expect(resolveInvocation("cmd", ["/d", "/c", "echo a && echo b"], "win32")).toEqual({
-      executable: "cmd.exe", args: ["/d", "/c", "echo a && echo b"],
+      executable: "cmd.exe",
+      args: ["/d", "/c", "echo a && echo b"],
     });
     expect(resolveInvocation("cmd.exe", ["/d", "/c", "echo a && echo b"], "win32")).toEqual({
-      executable: "cmd.exe", args: ["/d", "/c", "echo a && echo b"],
+      executable: "cmd.exe",
+      args: ["/d", "/c", "echo a && echo b"],
     });
     expect(resolveInvocation("npm", ["run", "test"], "win32")).toEqual({
-      executable: "cmd.exe", args: ["/d", "/s", "/c", "npm", "run", "test"],
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "npm", "run", "test"],
     });
   });
 
@@ -107,7 +116,10 @@ interface FakeChild extends EventEmitter {
 
 function fakeChild(pid = 4242): FakeChild {
   return Object.assign(new EventEmitter(), {
-    pid, stdout: new EventEmitter(), stderr: new EventEmitter(), kill: vi.fn(),
+    pid,
+    stdout: new EventEmitter(),
+    stderr: new EventEmitter(),
+    kill: vi.fn(),
   });
 }
 
@@ -120,13 +132,16 @@ describe("check runner on Windows", () => {
 
   it("launches a .cmd path containing spaces with one quoted command line and verbatim arguments", () => {
     expect(resolveInvocation("C:\\Program Files\\nodejs\\pnpm.cmd", ["run", "a b"], "win32")).toEqual({
-      executable: "cmd.exe", args: ["/d", "/s", "/c", '""C:\\Program Files\\nodejs\\pnpm.cmd" run "a b""'], verbatim: true,
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", '""C:\\Program Files\\nodejs\\pnpm.cmd" run "a b""'],
+      verbatim: true,
     });
   });
 
   it("routes the upgrade command npm through cmd.exe", () => {
     expect(resolveInvocation("npm", ["install", "--save-dev", "@tamtiger/harnix@latest"], "win32")).toEqual({
-      executable: "cmd.exe", args: ["/d", "/s", "/c", "npm", "install", "--save-dev", "@tamtiger/harnix@latest"],
+      executable: "cmd.exe",
+      args: ["/d", "/s", "/c", "npm", "install", "--save-dev", "@tamtiger/harnix@latest"],
     });
   });
 
@@ -153,9 +168,10 @@ describe("check runner on Windows", () => {
       platform: "win32",
       spawner,
       killer,
+      lookup: () => "C:\\Program Files\\dotnet\\dotnet.exe",
       timeoutMs: 5,
     });
-    await new Promise((resolve) => setTimeout(resolve, 30));
+    await new Promise((resolve) => setTimeout(resolve, 100));
     child.emit("close", null, "SIGTERM");
     const result = await run;
     expect(killer).toHaveBeenCalledWith(777, "win32");
@@ -381,7 +397,10 @@ describe("check runner system executables and PATH details on Windows", () => {
   it("does not append extension in findOnPath when name already ends with an extension from PATHEXT", () => {
     const env = { PATH: "C:\\tools;C:\\other", PATHEXT: ".COM;.EXE" };
     const checkedCandidates: string[] = [];
-    const exists = (candidate: string): boolean => (checkedCandidates.push(candidate), candidate === "C:\\other\\dotnet.exe");
+    const exists = (candidate: string): boolean => (
+      checkedCandidates.push(candidate),
+      candidate === "C:\\other\\dotnet.exe"
+    );
 
     expect(findOnPath("dotnet.exe", env, exists)).toBe("C:\\other\\dotnet.exe");
     expect(checkedCandidates).toEqual(["C:\\tools\\dotnet.exe", "C:\\other\\dotnet.exe"]);

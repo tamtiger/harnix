@@ -94,6 +94,35 @@ const fileSystemTaskIndexSource: TaskIndexSource = {
   },
 };
 
+function resolveActivePointerState(candidate: string | null): {
+  activePointer: string | null;
+  activeUnavailable: boolean;
+} {
+  if (candidate !== null && !taskIdPattern.test(candidate)) {
+    return { activePointer: null, activeUnavailable: true };
+  }
+  return { activePointer: candidate, activeUnavailable: false };
+}
+
+async function loadSelectedTaskRecords(
+  source: TaskIndexSource,
+  harnixRoot: string,
+  ids: readonly string[],
+): Promise<{ validTasks: TaskRecord[]; invalid: number }> {
+  const validTasks: TaskRecord[] = [];
+  let invalid = 0;
+  for (const id of ids) {
+    try {
+      const task = validateTask(await source.loadTaskRecord(harnixRoot, id));
+      if (task.id !== id) throw new Error("Task directory and record IDs differ.");
+      validTasks.push(task);
+    } catch {
+      invalid += 1;
+    }
+  }
+  return { validTasks, invalid };
+}
+
 export async function createTaskIndex(
   harnixRoot: string,
   options: TaskIndexOptions,
@@ -104,9 +133,9 @@ export async function createTaskIndex(
   let activePointer: string | null = null;
   let activeUnavailable = false;
   try {
-    const candidate = await source.readActiveTaskId(harnixRoot);
-    if (candidate !== null && !taskIdPattern.test(candidate)) activeUnavailable = true;
-    else activePointer = candidate;
+    const state = resolveActivePointerState(await source.readActiveTaskId(harnixRoot));
+    activePointer = state.activePointer;
+    activeUnavailable = state.activeUnavailable;
   } catch {
     activeUnavailable = true;
   }
@@ -119,17 +148,7 @@ export async function createTaskIndex(
     selectedIds[selectedIds.length - 1] = activePointer;
   }
 
-  const validTasks: TaskRecord[] = [];
-  let invalid = 0;
-  for (const id of selectedIds) {
-    try {
-      const task = validateTask(await source.loadTaskRecord(harnixRoot, id));
-      if (task.id !== id) throw new Error("Task directory and record IDs differ.");
-      validTasks.push(task);
-    } catch {
-      invalid += 1;
-    }
-  }
+  const { validTasks, invalid } = await loadSelectedTaskRecords(source, harnixRoot, selectedIds);
 
   const activeTask = activePointer === null ? undefined : validTasks.find((task) => task.id === activePointer);
   if (activePointer !== null && activeTask === undefined) activeUnavailable = true;

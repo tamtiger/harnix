@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.17.1] - 2026-10-22
+
+### Fixed
+
+- Gia cố Test Suite Structure, Line Endings và Vitest Isolation
+- Cải tiến chẩn đoán Stale Check với danh sách file thay đổi cụ thể và cảnh báo checklist plan.md
+- Refactor hạ Cyclomatic Complexity toàn diện cho toàn bộ nhóm hàm chạm trần 20 và sát trần 19
+
 ## [2.17.0] - 2026-10-22
 
 ### Fixed

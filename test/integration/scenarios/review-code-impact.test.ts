@@ -49,7 +49,7 @@ async function startTask(): Promise<void> {
   await expect(run("--transition", "in_progress/implementing", "--brief")).resolves.toBe(0);
 }
 
-describe("review.md Code impact in a real Git repository", () => {
+describe.sequential("review.md Code impact in a real Git repository", () => {
   it("lists modified, added and deleted files with their line counts", { timeout: 60_000 }, async () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });

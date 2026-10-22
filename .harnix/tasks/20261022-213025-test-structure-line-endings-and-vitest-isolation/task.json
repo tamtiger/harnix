@@ -1,0 +1,183 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261022-213025-test-structure-line-endings-and-vitest-isolation",
+  "title": "Gia cố Test Suite Structure, Line Endings và Vitest Concurrency Isolation",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cải tiến logic đếm dòng trong test-structure.test.ts đếm lines of code thực tế (bỏ qua dòng trống và comments tương tự architecture.test.ts), hạ nhiệt 19 file test sát trần 400 dòng; bổ sung file .gitattributes eol=lf và Prettier endOfLine='lf' chấm dứt lỗi format trên Windows; cố định pool: 'forks' trong vitest.config.ts và bổ sung describe.sequential cho toàn bộ 26 test files có gọi process.chdir().",
+  "nonGoals": [],
+  "epicId": "20261022-213024-workflow-ergonomics-and-codebase-hardening",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Cải tiến logic đo độ dài file test trong test-structure.test.ts để đếm số dòng code thực tế (bỏ qua dòng trống và comments tương tự như architecture.test.ts), giúp ngăn chặn vỡ test khi chạy prettier và hạ nhiệt 19 file test đang sát trần 400 dòng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-check-test-structure-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Bổ sung file .gitattributes chuẩn hóa eol=lf cho mã nguồn và text scripts; cấu hình Prettier endOfLine='lf' để chấm dứt tình trạng lệch dòng CRLF trên Windows và làm sạch cảnh báo format:check.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-format-2",
+        "ev-check-gitattributes-1",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Cố định tường minh pool: 'forks' trong vitest.config.ts và bổ sung describe.sequential cho toàn bộ 26 integration test files có gọi process.chdir() để triệt tiêu hoàn toàn race condition khi test chạy song song.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gitattributes-1",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "check-test-structure",
+      "description": "Kiểm tra cấu trúc và trần dòng của toàn bộ test files",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/test-structure.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "test/**",
+        "test/unit/test-structure.test.ts"
+      ]
+    },
+    {
+      "id": "check-gitattributes",
+      "description": "Kiểm tra kiến trúc và cấu hình vitest/gitattributes",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/workflow/architecture.test.ts",
+      "criterionIds": [
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        ".gitattributes",
+        ".prettierrc.json",
+        "test/workflow/architecture.test.ts",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "check-format",
+      "description": "Kiểm tra định dạng Prettier chuẩn hóa LF trên toàn bộ repo",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run format:check",
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        ".gitattributes",
+        ".prettierrc.json",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-format-1",
+      "checkId": "check-format",
+      "recordedAt": "2026-10-22T21:43:54.851+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm format:check — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a879449afc3ba9e5d83fc48b84fcf9190ac4e2d0f8cec06ce39c484a32591614"
+    },
+    {
+      "id": "ev-check-test-structure-1",
+      "checkId": "check-test-structure",
+      "recordedAt": "2026-10-22T21:44:03.905+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/test-structure.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d3df8e6a3f1548ced24cc59917f67c63d17eab7aa4397b96601f6d27c49845bc"
+    },
+    {
+      "id": "ev-check-gitattributes-1",
+      "checkId": "check-gitattributes",
+      "recordedAt": "2026-10-22T21:44:11.739+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/architecture.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "70d5a5cf8517afc5960563ba5e4dd98eddd00b4d5a82b664ce44c165272548ce"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T21:46:01.365+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "c7317d1b223b0db588957d9caa3785f6c9ba24af6df90ef08c651fcbe51789a0"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T21:49:14.855+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a4a246167ad06e3b7fa66bd9b7fa1b9502a69676c0f03aa988f728f535d48f92"
+    },
+    {
+      "id": "ev-check-test-structure-2",
+      "checkId": "check-test-structure",
+      "recordedAt": "2026-10-22T21:49:31.750+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/test-structure.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "122cb2ad43cda84d0a4df0e9a4e3d976da2149bdc5632bcbcb38d0d4344f2863"
+    },
+    {
+      "id": "ev-check-format-2",
+      "checkId": "check-format",
+      "recordedAt": "2026-10-22T21:49:44.483+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm format:check — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8fb965c9ffc12b781bc5c46cd203f6318278164363fdf2894420bbcf86fa749d"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-22T21:30:25.000+07:00",
+  "updatedAt": "2026-10-22T21:50:14.215+07:00",
+  "completedAt": "2026-10-22T21:50:14.215+07:00"
+}

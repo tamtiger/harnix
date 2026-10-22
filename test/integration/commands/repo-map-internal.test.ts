@@ -9,14 +9,14 @@ import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-repo-map-cli-");
 const originalCwd = process.cwd();
-const readStdout = (spy: { mock: { calls: unknown[][] } }) =>
+const readStdout = (spy: { mock: { calls: unknown[][] } }): unknown =>
   JSON.parse(spy.mock.calls.map((c) => String(c[0])).join(""));
 afterEach(() => {
   process.chdir(originalCwd);
   vi.restoreAllMocks();
 });
 
-describe("repository-map operations", () => {
+describe.sequential("repository-map operations", () => {
   it("initializes and supports query or refresh as exclusive repo-map actions", async () => {
     const root = await temporaryRepository();
     await mkdir(join(root, "src"), { recursive: true });

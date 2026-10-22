@@ -22,6 +22,7 @@ export default defineConfig({
     },
   ],
   test: {
+    pool: "forks",
     include: ["test/**/*.test.ts"],
     environment: "node",
     globals: false,

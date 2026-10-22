@@ -305,4 +305,20 @@ describe("a dry-run agrees with the real ready transition", () => {
     if (accepted) await expect(real).resolves.toMatchObject({ status: "ready" });
     else await expect(real).rejects.toThrow();
   });
+
+  it("warns about incomplete plan checklist items when transitioning to verifying", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const task = taskV3("in_progress", "implementing");
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, task);
+    await setActiveTask(harnixRoot, task.id);
+    const { mkdir, writeFile } = await import("node:fs/promises");
+    const taskDir = join(harnixRoot, "tasks", task.id);
+    await mkdir(taskDir, { recursive: true });
+    await writeFile(join(taskDir, "plan.md"), "# Plan\n- [ ] Unfinished task item\n- [x] Done item\n");
+
+    const dryRun = await transitionWorkflow(root, "verifying", "verifying", undefined, true);
+    expect(dryRun.advisories).toContain("Checklist trong plan.md chưa hoàn tất 100% [x] trước khi vào verifying.");
+  });
 });

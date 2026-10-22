@@ -13,7 +13,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("repo-map --workspace with a workspace root cache", () => {
+describe.sequential("repo-map --workspace with a workspace root cache", () => {
   it("serves uninitialized sub-repositories from the root cache and labels the source", async () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });

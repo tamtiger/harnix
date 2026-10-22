@@ -110,6 +110,21 @@ export async function assertReplayArtifactsMatch(
   artifacts: TaskArtifacts | undefined,
 ): Promise<void> {
   const directory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
+  const expected = buildExpectedArtifactMap(artifacts);
+  for (const [path, content] of expected) {
+    let persisted: string;
+    try {
+      persisted = await readFile(await resolveSafeProjectPath(directory, path), "utf8");
+    } catch {
+      throw new Error(`Workflow contractRevision replay artifact is missing or unreadable: ${path}`);
+    }
+    if (persisted !== content)
+      throw new Error(`Workflow contractRevision replay cannot replace already committed artifact ${path}.`);
+  }
+  await assertPersistedContextPair(directory, task);
+}
+
+function buildExpectedArtifactMap(artifacts: TaskArtifacts | undefined): Map<string, string> {
   const expected = new Map<string, string>();
   if (artifacts?.prd !== undefined) expected.set("prd.md", artifacts.prd);
   if (artifacts?.plan !== undefined) expected.set("plan.md", artifacts.plan);
@@ -124,17 +139,7 @@ export async function assertReplayArtifactsMatch(
   if (artifacts?.context !== undefined) expected.set("context.json", `${JSON.stringify(artifacts.context, null, 2)}\n`);
   if (artifacts?.contextSelection !== undefined)
     expected.set("context-selection.json", `${JSON.stringify(artifacts.contextSelection, null, 2)}\n`);
-  for (const [path, content] of expected) {
-    let persisted: string;
-    try {
-      persisted = await readFile(await resolveSafeProjectPath(directory, path), "utf8");
-    } catch {
-      throw new Error(`Workflow contractRevision replay artifact is missing or unreadable: ${path}`);
-    }
-    if (persisted !== content)
-      throw new Error(`Workflow contractRevision replay cannot replace already committed artifact ${path}.`);
-  }
-  await assertPersistedContextPair(directory, task);
+  return expected;
 }
 
 async function assertPersistedContextPair(directory: string, task: TaskRecord): Promise<void> {

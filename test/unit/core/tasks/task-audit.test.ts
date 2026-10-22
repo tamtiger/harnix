@@ -222,6 +222,24 @@ describe("task audit", () => {
       },
     });
   });
+
+  it("computes specific changed and missing files for stale check diagnostics", async () => {
+    const { computeDigestChanges } = await import("src/core/verification/snapshot-cache.js");
+    const prev = [
+      { path: "src/a.ts", sha256: "hash1" },
+      { path: "src/deleted.ts", sha256: "hash2" },
+    ];
+    const curr = [
+      { path: "src/a.ts", sha256: "hash1-modified" },
+      { path: "src/new.ts", sha256: "hash3" },
+    ];
+    const changes = computeDigestChanges(prev, curr);
+    expect(changes).toEqual([
+      { path: "src/a.ts", kind: "changed" },
+      { path: "src/deleted.ts", kind: "missing" },
+      { path: "src/new.ts", kind: "changed" },
+    ]);
+  });
 });
 
 function dependencies(

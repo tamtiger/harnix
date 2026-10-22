@@ -13,7 +13,7 @@ function captureStdout(): { writes: () => string[] } {
   return { writes: () => spy.mock.calls.map((call) => String(call[0])) };
 }
 
-describe("parseOptionalHookInput", () => {
+describe.sequential("parseOptionalHookInput", () => {
   it("returns undefined for missing or blank input", () => {
     expect(parseOptionalHookInput(undefined)).toBeUndefined();
     expect(parseOptionalHookInput("")).toBeUndefined();

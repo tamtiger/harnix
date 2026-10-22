@@ -36,7 +36,7 @@ async function packageDir(root: string, path: string): Promise<void> {
   );
 }
 
-describe("harnix update refreshes config.yaml", () => {
+describe.sequential("harnix update refreshes config.yaml", () => {
   it("previews with --dry-run, adds missing packages once, and never touches tool worktrees or existing entries", async () => {
     const root = await temporaryRepository();
     await packageDir(root, "svc-a");

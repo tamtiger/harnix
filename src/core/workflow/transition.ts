@@ -1,6 +1,8 @@
+import { readFile } from "node:fs/promises";
+
 import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { assertLegalTransition, laterTimestamp } from "src/core/tasks/workflow-helpers.js";
-import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { inspectReadyConditions } from "./ready.js";
 import { READY_REVIEW_CHECKLIST, reviewRequiredMessage } from "./ready-review.js";
 import { saveWorkflow } from "./save.js";
@@ -27,12 +29,6 @@ export interface TransitionOptions {
   reviewed?: boolean;
 }
 
-/**
- * Bounded partial transport. It never accepts a task body: the persisted
- * active record is the only source, so a stage owner cannot drop evidence or
- * silently rewrite an obligation while changing state. Every guard, lock and
- * immutability rule of the full save path still applies.
- */
 export function transitionWorkflow(
   root: string,
   status: string,
@@ -70,50 +66,89 @@ export async function transitionWorkflow(
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = dryRun === true ? await resolveEditableTask(harnixRoot) : await resolveActiveTask(harnixRoot);
   if (!task) throw new Error("Workflow transition requires an active task.");
-  const entersReady = status === "ready" && checkpoint === "ready";
 
   if (dryRun === true) {
-    const issues: string[] = [];
-    let advisories: string[] = [];
-    let unbaselinedChecks: string[] | undefined;
-    try {
-      assertLegalTransition(task, {
-        ...task,
-        status: status as TaskRecord["status"],
-        checkpoint: checkpoint as TaskRecord["checkpoint"],
-      });
-    } catch (error: unknown) {
-      issues.push(error instanceof Error ? error.message : String(error));
-    }
-    if (status === "ready") {
-      const readyInspection = await inspectReadyConditions(harnixRoot, task, undefined, task.checkpoint !== "ready");
-      issues.push(...readyInspection.issues);
-      advisories = readyInspection.advisories;
-      if (readyInspection.unbaselined.length > 0) {
-        unbaselinedChecks = readyInspection.unbaselined;
-      }
-    }
-    return {
-      generator: "harnix",
-      schemaVersion: 1,
-      dryRun: true,
-      valid: issues.length === 0,
-      target: { status, checkpoint },
-      task: { id: task.id, status: task.status, checkpoint: task.checkpoint },
-      issues,
-      advisories,
-      ...(unbaselinedChecks ? { unbaselinedChecks } : {}),
-      ...(entersReady && task.mode === "full" ? { reviewChecklist: [...READY_REVIEW_CHECKLIST] } : {}),
-    };
+    return handleDryRunTransition(harnixRoot, task, status, checkpoint);
   }
 
+  const entersReady = status === "ready" && checkpoint === "ready";
   if (entersReady && task.mode === "full" && task.checkpoint !== "ready" && options.reviewed !== true) {
     const found = await inspectReadyConditions(harnixRoot, task);
     throw new Error(reviewRequiredMessage(found.issues, found.advisories));
   }
 
-  // A blocked task keeps its blocker only while blocked; resuming drops it and must land on the recorded status.
+  if (status === "verifying") {
+    const checklistWarning = await inspectPlanChecklistWarning(harnixRoot, task.id);
+    if (checklistWarning !== undefined) {
+      process.stderr.write(`warning: ${checklistWarning}\n`);
+    }
+  }
+
   const base: TaskRecord = { ...task };
   if (base.status === "blocked") delete base.blocker;
   return saveWorkflow(root, { task: { ...base, status, checkpoint, updatedAt: laterTimestamp(task.updatedAt, now) } });
+}
+
+async function handleDryRunTransition(
+  harnixRoot: string,
+  task: TaskRecord,
+  status: string,
+  checkpoint: string,
+): Promise<DryRunTransitionResult> {
+  const issues: string[] = [];
+  let advisories: string[] = [];
+  let unbaselinedChecks: string[] | undefined;
+  const entersReady = status === "ready" && checkpoint === "ready";
+
+  try {
+    assertLegalTransition(task, {
+      ...task,
+      status: status as TaskRecord["status"],
+      checkpoint: checkpoint as TaskRecord["checkpoint"],
+    });
+  } catch (error: unknown) {
+    issues.push(error instanceof Error ? error.message : String(error));
+  }
+
+  if (status === "ready") {
+    const readyInspection = await inspectReadyConditions(harnixRoot, task, undefined, task.checkpoint !== "ready");
+    issues.push(...readyInspection.issues);
+    advisories = readyInspection.advisories;
+    if (readyInspection.unbaselined.length > 0) {
+      unbaselinedChecks = readyInspection.unbaselined;
+    }
+  }
+
+  if (status === "verifying") {
+    const checklistWarning = await inspectPlanChecklistWarning(harnixRoot, task.id);
+    if (checklistWarning !== undefined) {
+      advisories.push(checklistWarning);
+    }
+  }
+
+  return {
+    generator: "harnix",
+    schemaVersion: 1,
+    dryRun: true,
+    valid: issues.length === 0,
+    target: { status, checkpoint },
+    task: { id: task.id, status: task.status, checkpoint: task.checkpoint },
+    issues,
+    advisories,
+    ...(unbaselinedChecks ? { unbaselinedChecks } : {}),
+    ...(entersReady && task.mode === "full" ? { reviewChecklist: [...READY_REVIEW_CHECKLIST] } : {}),
+  };
+}
+
+async function inspectPlanChecklistWarning(harnixRoot: string, taskId: string): Promise<string | undefined> {
+  try {
+    const planPath = await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}/plan.md`);
+    const content = await readFile(planPath, "utf8");
+    if (/^\s*-\s*\[\s\]/mu.test(content)) {
+      return "Checklist trong plan.md chưa hoàn tất 100% [x] trước khi vào verifying.";
+    }
+  } catch {
+    // Lite task without plan.md is normal; ignore
+  }
+  return undefined;
 }
