@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -18,7 +19,9 @@ type SyncVersion = (options: {
   summaries: readonly string[];
   version: string;
 }) => Promise<VersionSyncResult>;
-const { syncVersion } = (await import(new URL("../../scripts/version-sync.mjs", import.meta.url).href)) as {
+const scriptUrl = new URL("../../scripts/version-sync.mjs", import.meta.url);
+const script = fileURLToPath(scriptUrl);
+const { syncVersion } = (await import(scriptUrl.href)) as {
   syncVersion: SyncVersion;
 };
 const execFileAsync = promisify(execFile);
@@ -86,7 +89,6 @@ describe("version sync", () => {
 
   it("accepts the pnpm argument separator used by the documented release command", async () => {
     const root = await fixture();
-    const script = join(process.cwd(), "scripts", "version-sync.mjs");
 
     const { stdout } = await execFileAsync(
       process.execPath,
@@ -100,7 +102,6 @@ describe("version sync", () => {
   // Fix #1: --kind flag
   it("inserts ### Fixed section when --kind fixed is passed via CLI", async () => {
     const root = await fixture();
-    const script = join(process.cwd(), "scripts", "version-sync.mjs");
 
     const { stdout } = await execFileAsync(
       process.execPath,
@@ -327,7 +328,6 @@ describe("version sync --fold-dev", () => {
 
   it("accepts the --fold-dev flag on the command line", async () => {
     const root = await devChain();
-    const script = join(process.cwd(), "scripts", "version-sync.mjs");
 
     const { stdout } = await execFileAsync(process.execPath, [script, "1.1.0", "--fold-dev"], { cwd: root });
 

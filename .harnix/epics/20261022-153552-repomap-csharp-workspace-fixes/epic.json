@@ -1,0 +1,19 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261022-153552-repomap-csharp-workspace-fixes",
+  "title": "Khắc phục triệt để các khiếm khuyết trong Repo-Map, C# Support, Meta-Workspace và UTF-8 Payload",
+  "goal": "Sửa các lỗi và bổ sung các capability còn thiếu: (1) Khắc phục False Positives của bộ lọc bảo mật trên file C#/TS nghiệp vụ và bổ sung default action cho repo-map; (2) Nâng cấp parser tĩnh cho C#/.NET bóc tách Kafka/CAP Topic và ProjectReference dependency graph; (3) Chuẩn hóa phân định Meta-Workspace/Multi-repo không có .git ở root và mở rộng hỗ trợ UTF-8 file payload.",
+  "nonGoals": [
+    "Không đưa thêm external daemon hoặc language server process vào Harnix",
+    "Không phá vỡ format RepoMapRecordV1",
+    "Không tự động commit hay push Git"
+  ],
+  "order": [
+    "20261022-153613-repomap-secret-filter-and-default-action",
+    "20261022-160606-csharp-events-and-project-reference-graph",
+    "20261022-161419-meta-workspace-and-utf8-payload"
+  ],
+  "createdAt": "2026-10-22T15:35:52.035+07:00",
+  "updatedAt": "2026-10-22T15:35:52.035+07:00"
+}

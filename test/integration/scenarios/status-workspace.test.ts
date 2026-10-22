@@ -14,10 +14,24 @@ afterEach(() => {
 });
 
 function git(cwd: string, ...args: string[]): void {
-  execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@example.com", "-c", "commit.gpgsign=false", ...args], {
-    cwd,
-    stdio: "ignore",
-  });
+  execFileSync(
+    "git",
+    [
+      "-c",
+      "user.name=t",
+      "-c",
+      "user.email=t@example.com",
+      "-c",
+      "commit.gpgsign=false",
+      "-c",
+      "protocol.file.allow=always",
+      ...args,
+    ],
+    {
+      cwd,
+      stdio: "pipe",
+    },
+  );
 }
 
 async function repository(root: string, name: string): Promise<string> {
@@ -58,7 +72,7 @@ describe("harnix status --workspace", () => {
     async () => {
       const root = await temporaryRepository();
       const origin = await repository(root, "a-origin");
-      git(root, "clone", origin, "b-clone");
+      git(root, "clone", "--no-local", origin, "b-clone");
       const clone = join(root, "b-clone");
       await writeFile(join(clone, "clone.txt"), "local\n");
       git(clone, "add", ".");

@@ -193,9 +193,9 @@ export function validateRepoMapOptions(options: RepoMapCliOptions): void {
     options.events === true ? "events" : undefined,
     options.refresh === true ? "refresh" : undefined,
   ].filter((v) => v !== undefined);
-  if (actions.length !== 1)
+  if (actions.length > 1)
     throw new Error(
-      "repo-map requires exactly one of --query, --impact, --tests, --outline, --refs, --events, or --refresh.",
+      "repo-map requires at most one of --query, --impact, --tests, --outline, --refs, --events, or --refresh.",
     );
   if (options.symbol !== undefined && options.outline === undefined)
     throw new Error("--symbol requires repo-map --outline.");
@@ -204,6 +204,14 @@ export function validateRepoMapOptions(options: RepoMapCliOptions): void {
     throw new Error("--depth requires repo-map --impact.");
   if (options.format !== undefined && options.query === undefined)
     throw new Error("--format requires repo-map --query.");
-  if (options.workspace !== undefined && options.query === undefined && !options.refresh && !options.events)
+  if (
+    options.workspace !== undefined &&
+    actions.length > 0 &&
+    options.query === undefined &&
+    !options.refresh &&
+    !options.events
+  )
     throw new Error("--workspace requires repo-map --query, --events, or --refresh.");
+  if (options.limit !== undefined && actions.length === 0)
+    throw new Error("--limit is not valid without a repo-map query, outline, refs, tests, or impact action.");
 }

@@ -1,0 +1,278 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261022-153613-repomap-secret-filter-and-default-action",
+  "title": "Sửa False Positives Secret Filter và Bổ sung Default Action cho Repo-Map",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sửa False Positives Secret Filter và Bổ sung Default Action cho Repo-Map",
+  "nonGoals": [],
+  "epicId": "20261022-153552-repomap-csharp-workspace-fixes",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Secret path filter trong repo-map (inventory.ts, outline.ts) không loại trừ các file mã nguồn nghiệp vụ (.cs, .ts, .tsx, .js, .java...) có tên chứa token/credential/secret, trong khi vẫn loại trừ chính xác các file cấu hình nhạy cảm (.env*, id_rsa*, *.pem, *.key, *secret*.json...).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-secret-filter-1",
+        "ev-check-suite-v5-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Lệnh harnix repo-map và harnix repo-map --workspace khi không truyền action flag (--query, --impact, ...) thực hiện hành vi mặc định là in ra tóm tắt trạng thái repo-map thay vì ném lỗi exit code 2.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-repomap-default-action-2",
+        "ev-check-suite-v5-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-repomap-default-action",
+      "description": "Kiểm tra lệnh harnix repo-map và harnix repo-map --workspace in ra tóm tắt status thay vì exit code 2 khi thiếu cờ",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/cli-helpers.ts",
+        "src/commands/repo-map-internal.ts",
+        "test/integration/commands/repo-map-internal.test.ts"
+      ],
+      "command": "pnpm vitest run test/integration/commands/repo-map-internal.test.ts"
+    },
+    {
+      "id": "check-secret-filter",
+      "description": "Kiểm tra inventory và outline không skip nhầm file code nghiệp vụ chứa token/credential và vẫn skip secret config file",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/repo-map/inventory.ts",
+        "src/core/repo-map/outline.ts",
+        "test/unit/core/repo-map/inventory.test.ts",
+        "test/unit/core/repo-map/outline.test.ts"
+      ],
+      "command": "pnpm vitest run test/unit/core/repo-map/inventory.test.ts test/unit/core/repo-map/outline.test.ts"
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite và coverage của dự án phải pass",
+      "scope": "full",
+      "required": false,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "check-suite-v2",
+      "description": "Replacement for check-suite",
+      "scope": "full",
+      "required": false,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm test"
+    },
+    {
+      "id": "check-suite-v3",
+      "description": "Replacement for check-suite-v2",
+      "scope": "full",
+      "required": false,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm test"
+    },
+    {
+      "id": "check-suite-v4",
+      "description": "Replacement for check-suite-v3",
+      "scope": "full",
+      "required": false,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "**"
+      ],
+      "command": "pnpm test"
+    },
+    {
+      "id": "check-suite-v5",
+      "description": "Replacement for check-suite-v4",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm test"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-secret-filter-1",
+      "checkId": "check-secret-filter",
+      "recordedAt": "2026-10-22T15:43:50.252+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/inventory.test.ts test/unit/core/repo-map/outline.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d28adf5e6a3ee6be4ee21bfbef275915079b64084355dc0a1e4e0f56c59548e5"
+    },
+    {
+      "id": "ev-check-repomap-default-action-1",
+      "checkId": "check-repomap-default-action",
+      "recordedAt": "2026-10-22T15:43:59.385+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/integration/commands/repo-map-internal.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "20fedda76da1c0b68205b34045ab36959087ae95672b4e098a7f5418cd0c0a8b"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T15:45:45.174+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "ea1c915fbe370f20d1bcb0f5329a40ca8523138b4529c289777c47f9262dbe6b"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T15:48:55.820+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "43162ae894ed83b371d211ee0b5b9add8b6e1b6060d62ecd81d066cead59e921"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-22T15:50:37.171+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Cap nhat inputs check suite sang src/** va test/** de unblock circuit breaker va toi uu hoa toc do snapshot",
+      "artifactPaths": [
+        ".harnix/tasks/20261022-153613-repomap-secret-filter-and-default-action/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-suite-v2-1",
+      "checkId": "check-suite-v2",
+      "recordedAt": "2026-10-22T15:52:24.037+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "ee5c2f32311852f309881b54f1f00ff2962f37d25811fe2ce55e9f7d90c5dd83"
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-22T15:54:37.862+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: On dinh hoa test status-workspace voi protocol file allow va no-local va them package.json vao inputs",
+      "artifactPaths": [
+        ".harnix/tasks/20261022-153613-repomap-secret-filter-and-default-action/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-suite-v3-1",
+      "checkId": "check-suite-v3",
+      "recordedAt": "2026-10-22T15:56:26.069+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "244dcdb88f4929d8a5345882825b5e531da1ed0a2ab92c01786fdbca4a2be991"
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-10-22T15:59:15.722+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: On dinh hoa version-sync test dung script URL thay vi process.cwd va dat input **",
+      "artifactPaths": [
+        ".harnix/tasks/20261022-153613-repomap-secret-filter-and-default-action/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-suite-v4-1",
+      "checkId": "check-suite-v4",
+      "recordedAt": "2026-10-22T16:01:11.977+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "47861fcdc3085fec12d295e7eb1e1df56da2388598006e3bbd358fa0f99f2723"
+    },
+    {
+      "id": "task-contract-revision-04",
+      "recordedAt": "2026-10-22T16:02:54.775+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bo sung test phu day du coverage cho workspace repo-map default action",
+      "artifactPaths": [
+        ".harnix/tasks/20261022-153613-repomap-secret-filter-and-default-action/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-suite-v5-1",
+      "checkId": "check-suite-v5",
+      "recordedAt": "2026-10-22T16:04:37.791+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "758d9cfeea1dc1d05747a05d71ffd5d64430eaa30c7d33a96e664df973b7c75c"
+    },
+    {
+      "id": "ev-check-repomap-default-action-2",
+      "checkId": "check-repomap-default-action",
+      "recordedAt": "2026-10-22T16:04:59.279+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/integration/commands/repo-map-internal.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "20e4dec69bdeb3e0b5c5f82d14d6713829d3369acefb3af9aea169295c8a9442"
+    }
+  ],
+  "relevantPaths": [
+    "src/cli-helpers.ts",
+    "src/commands/repo-map-internal.ts",
+    "src/core/repo-map/inventory.ts",
+    "src/core/repo-map/outline.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-22T15:36:13.886+07:00",
+  "updatedAt": "2026-10-22T16:05:44.351+07:00",
+  "completedAt": "2026-10-22T16:05:44.351+07:00"
+}

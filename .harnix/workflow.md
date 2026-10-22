@@ -141,7 +141,7 @@ harnix skill <name> --raw                    # print raw Markdown skill text dir
 harnix workflow --finish --brief
 ```
 
-Only JSON on stdin and the clock differ. To avoid stdin piping issues (e.g. Windows PowerShell ANSI encoding corruption or Bash heredoc unexpected EOF), use `--file <path>` with `--save`, `--batch` or `--migrate` to load raw UTF-8 JSON/YAML files directly. In PowerShell: `$pf = harnix workflow --preflight | ConvertFrom-Json`, `harnix workflow --save --file .harnix/payload.json --brief` and
+Only JSON on stdin and the clock differ. To avoid stdin piping issues (e.g. Windows PowerShell ANSI encoding corruption or Bash heredoc unexpected EOF), use `--file <path>` with `--init`, `--save`, `--batch` or `--migrate` to load raw UTF-8 JSON/YAML files directly. In PowerShell: `$pf = harnix workflow --preflight | ConvertFrom-Json`, `harnix workflow --save --file .harnix/payload.json --brief` and
 `harnix workflow --cancel --reason "<why>"`. In bash: `now=$(harnix workflow --preflight | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).clock.now")`,
 `printf '%s' "$json" | harnix workflow --save --brief` and `harnix workflow --cancel --reason "<why>"`. To read JSON from a command in PowerShell, assign the
 output first and parse it: `$out = harnix workflow --inspect | Out-String; $j = $out | ConvertFrom-Json`. Never pipe `harnix` into a nested `pwsh -Command` (it waits for stdin until the timeout). List

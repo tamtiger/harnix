@@ -4,6 +4,17 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.17.0] - 2026-10-22
+
+### Fixed
+
+- Fix repo-map secret filter false positives on business code files and add default status action
+
+### Added
+
+- Upgrade C#/.NET parser for Kafka/CAP topics and ProjectReference dependency graph
+- Fix repo-map false positives, add default action, upgrade C# Kafka/ProjectReference AST, and support workflow --init --file
+
 ## [2.16.0] - 2026-10-22
 
 ### Added

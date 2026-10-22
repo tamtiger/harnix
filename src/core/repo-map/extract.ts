@@ -81,7 +81,14 @@ function imports(content: string): string[] {
   const csharpUsing = [...content.matchAll(/^\s*(?:global\s+)?using\s+(?:static\s+)?([A-Za-z0-9_.]+)\s*;/gmu)].map(
     (match) => match[1] ?? "",
   );
-  return bounded([...quoted, ...goBlocks, ...pythonFrom, ...pythonImport, ...csharpUsing], 32, 160);
+  const csharpProjectRefs = [...content.matchAll(/<ProjectReference\s+Include\s*=\s*["']([^"']+)["']/giu)].map(
+    (match) => (match[1] ?? "").replaceAll("\\", "/"),
+  );
+  return bounded(
+    [...quoted, ...goBlocks, ...pythonFrom, ...pythonImport, ...csharpUsing, ...csharpProjectRefs],
+    32,
+    160,
+  );
 }
 
 function bounded(values: readonly string[], count: number, length: number): string[] {

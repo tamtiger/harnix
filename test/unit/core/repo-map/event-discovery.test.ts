@@ -96,6 +96,45 @@ await capBus.publish("warehouse.allocated", "string payload");
     ]);
   });
 
+  it("extracts C# CAP and Confluent.Kafka topic attributes, constants and producer calls", () => {
+    const csharpCode = `
+using DotNetCore.CAP;
+using Confluent.Kafka;
+
+public static class KafkaTopicNames {
+    public const string PaymentIngress = "paymenthub.ingress.events";
+    public const string OrderPaid = "order.paid.v1";
+}
+
+public class PaymentConsumer : ICapSubscribe {
+    [CapSubscribe(KafkaTopicNames.PaymentIngress)]
+    public async Task HandleIngress(PaymentEvent msg) {}
+
+    [CapSubscribe(KafkaTopicNames.OrderPaid), NonAction]
+    public async Task HandlePaid(OrderPaidEvent msg) {}
+
+    [CapSubscribe("direct.literal.topic")]
+    public async Task HandleDirect(DirectEvent msg) {}
+
+    public async Task SendAsync() {
+        await _kafkaProducer.ProduceAsync("payment.gateway.events", new Message<string, string>());
+        await kafkaProducer.ProduceAsync(KafkaTopicNames.OrderPaid, new Message<string, string>());
+        await _eventBus.PublishAsync("audit.log.events", new {});
+    }
+}
+`;
+    const events = discoverEvents(csharpCode);
+    const subscriberTopics = events.topics.filter((t) => t.role === "subscriber").map((t) => t.topic);
+    expect(subscriberTopics).toContain("KafkaTopicNames.PaymentIngress");
+    expect(subscriberTopics).toContain("KafkaTopicNames.OrderPaid");
+    expect(subscriberTopics).toContain("direct.literal.topic");
+
+    const publisherTopics = events.topics.filter((t) => t.role === "publisher").map((t) => t.topic);
+    expect(publisherTopics).toContain("payment.gateway.events");
+    expect(publisherTopics).toContain("KafkaTopicNames.OrderPaid");
+    expect(publisherTopics).toContain("audit.log.events");
+  });
+
   it("includes routes and topic names into record.identifiers for search indexing", async () => {
     const root = await temporaryRepository();
     const filePath = "services/OrderService/Controllers/OrderController.cs";

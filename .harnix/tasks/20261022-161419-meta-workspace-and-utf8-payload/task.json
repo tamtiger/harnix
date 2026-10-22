@@ -1,0 +1,139 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261022-161419-meta-workspace-and-utf8-payload",
+  "title": "Chuẩn hóa Meta-Workspace Discovery và UTF-8 Payload Handoff",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Chuẩn hóa Meta-Workspace Discovery và UTF-8 Payload Handoff",
+  "nonGoals": [],
+  "epicId": "20261022-153552-repomap-csharp-workspace-fixes",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Quy trình phát hiện Meta-Workspace trong repo-map (workspace.ts) và tác vụ trạng thái Git (code-impact.ts, git-status.ts) xử lý an toàn thư mục meta-workspace không có .git ở root, không làm gián đoạn lệnh và phân biệt rõ ràng giữa workspace mode và project mode.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-meta-workspace-1",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Lệnh harnix workflow --init hỗ trợ cờ --file <path> để nạp spec task từ file UTF-8 trực tiếp mà không bị lỗi encoding tiếng Việt trên Windows PowerShell.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-check-workflow-init-file-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite và coverage của dự án phải pass",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "check-meta-workspace",
+      "description": "Kiểm tra xử lý meta-workspace không có .git ở root và phân định cache sub-repos",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/repo-map/workspace.ts",
+        "test/unit/core/repo-map/workspace-root-cache.test.ts",
+        "test/unit/core/repo-map/workspace.test.ts"
+      ],
+      "command": "pnpm vitest run test/unit/core/repo-map/workspace-root-cache.test.ts test/unit/core/repo-map/workspace.test.ts"
+    },
+    {
+      "id": "check-workflow-init-file",
+      "description": "Kiểm tra workflow --init hỗ trợ cờ --file nạp spec UTF-8 an toàn",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/workflow-flag-owners.ts",
+        "src/commands/workflow-lifecycle-handlers.ts",
+        "test/integration/commands/workflow-handlers.test.ts"
+      ],
+      "command": "pnpm vitest run test/integration/commands/workflow-handlers.test.ts"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-meta-workspace-1",
+      "checkId": "check-meta-workspace",
+      "recordedAt": "2026-10-22T16:22:45.093+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/workspace-root-cache.test.ts test/unit/core/repo-map/workspace.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cb96dad26fdc57ab9ca1ccd884695d84c22583fe4f78306ed543016b13da9514"
+    },
+    {
+      "id": "ev-check-workflow-init-file-1",
+      "checkId": "check-workflow-init-file",
+      "recordedAt": "2026-10-22T16:22:55.436+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/integration/commands/workflow-handlers.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f8f352ad2e626657647b8a2c696b55c513d6c4cf34bd8e24fc1afe1e1ad3acea"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T16:24:37.565+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "33f0c1018f0ad51680f10d9c0f82994451d8c7ee5ec4072358d615c6844ce604"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T16:27:31.900+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f6eb921dbde4e9b052ba1fc23ae1a3ee2358f1509a091eb852c723263aa46810"
+    },
+    {
+      "id": "ev-check-workflow-init-file-2",
+      "checkId": "check-workflow-init-file",
+      "recordedAt": "2026-10-22T16:27:54.722+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/integration/commands/workflow-handlers.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bb0a48dd47bc4dc867b4dce09b634379a2066eb5fc63ef5fb36ca563af22a09b"
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-flag-owners.ts",
+    "src/commands/workflow-lifecycle-handlers.ts",
+    "src/core/repo-map/workspace.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-22T16:14:19.269+07:00",
+  "updatedAt": "2026-10-22T16:28:12.237+07:00",
+  "completedAt": "2026-10-22T16:28:12.237+07:00"
+}

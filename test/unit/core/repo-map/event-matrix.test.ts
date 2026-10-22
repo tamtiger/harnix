@@ -182,7 +182,11 @@ consumer.subscribe({ topic: "payment.completed" });
   it("validates CLI options for --events and rejects mutually exclusive flags", () => {
     expect(() => validateRepoMapOptions({ events: true })).not.toThrow();
     expect(() => validateRepoMapOptions({ events: true, workspace: true })).not.toThrow();
-    expect(() => validateRepoMapOptions({ events: true, query: "search" })).toThrow(/requires exactly one of/iu);
-    expect(() => validateRepoMapOptions({ events: true, refresh: true })).toThrow(/requires exactly one of/iu);
+    expect(() => validateRepoMapOptions({ events: true, query: "search" })).toThrow(
+      /requires (?:at most|exactly) one of/iu,
+    );
+    expect(() => validateRepoMapOptions({ events: true, refresh: true })).toThrow(
+      /requires (?:at most|exactly) one of/iu,
+    );
   });
 });

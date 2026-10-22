@@ -9,6 +9,8 @@ import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-repo-map-cli-");
 const originalCwd = process.cwd();
+const readStdout = (spy: { mock: { calls: unknown[][] } }) =>
+  JSON.parse(spy.mock.calls.map((c) => String(c[0])).join(""));
 afterEach(() => {
   process.chdir(originalCwd);
   vi.restoreAllMocks();
@@ -24,17 +26,25 @@ describe("repository-map operations", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     await createProgram().parseAsync(["node", "harnix", "repo-map", "--refresh"], { from: "node" });
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
-      scope: "project",
-      status: "refreshed",
-    });
+    expect(readStdout(stdout)).toMatchObject({ scope: "project", status: "refreshed" });
     stdout.mockClear();
     await createProgram().parseAsync(["node", "harnix", "repo-map", "--query", "billing"], { from: "node" });
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
+    expect(readStdout(stdout)).toMatchObject({
       scope: "project",
       status: "ready",
       results: [expect.objectContaining({ path: "src/billing.ts" })],
     });
+    stdout.mockClear();
+    await createProgram().parseAsync(["node", "harnix", "repo-map"], { from: "node" });
+    expect(readStdout(stdout)).toMatchObject({
+      generator: "harnix",
+      schemaVersion: 1,
+      scope: "project",
+      status: "ready",
+      records: 2,
+    });
+    stdout.mockClear();
+
     expect(createProgram().helpInformation()).toContain("repo-map");
     await expect(runCli(["node", "harnix", "repo-map", "--query", "billing", "--refresh"])).resolves.toBe(2);
     await expect(runCli(["node", "harnix", "repo-map", "--refresh", "--limit", "3"])).resolves.toBe(2);
@@ -318,13 +328,11 @@ describe("repository-map operations", () => {
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     await expect(runCli(["node", "harnix", "repo-map", "--query", "billing", "--format", "compact"])).resolves.toBe(0);
-    const compactOutput = JSON.parse(stdout.mock.calls.map((c) => String(c[0])).join(""));
-    expect(compactOutput).toMatchObject({ format: "compact", scope: "project", status: "ready" });
+    expect(readStdout(stdout)).toMatchObject({ format: "compact", scope: "project", status: "ready" });
 
     stdout.mockClear();
     await expect(runCli(["node", "harnix", "repo-map", "--query", "billing", "--format", "outline"])).resolves.toBe(0);
-    const outlineOutput = JSON.parse(stdout.mock.calls.map((c) => String(c[0])).join(""));
-    expect(outlineOutput).toMatchObject({ format: "outline" });
+    expect(readStdout(stdout)).toMatchObject({ format: "outline" });
 
     stdout.mockClear();
     await expect(runCli(["node", "harnix", "repo-map", "--format", "compact"])).resolves.toBe(2);
@@ -345,19 +353,21 @@ describe("repository-map operations", () => {
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     await expect(runCli(["node", "harnix", "repo-map", "--refresh", "--workspace"])).resolves.toBe(0);
-    const refreshOutput = JSON.parse(stdout.mock.calls.map((c) => String(c[0])).join(""));
-    expect(refreshOutput).toMatchObject({ scope: "workspace", status: "refreshed" });
+    expect(readStdout(stdout)).toMatchObject({ scope: "workspace", status: "refreshed" });
+
+    stdout.mockClear();
+    await expect(runCli(["node", "harnix", "repo-map", "--workspace"])).resolves.toBe(0);
+    expect(readStdout(stdout)).toMatchObject({ scope: "workspace", status: "ready" });
 
     stdout.mockClear();
     await expect(
       runCli(["node", "harnix", "repo-map", "--query", "order", "--workspace", "--format", "compact"]),
     ).resolves.toBe(0);
-    const queryOutput = JSON.parse(stdout.mock.calls.map((c) => String(c[0])).join(""));
-    expect(queryOutput).toMatchObject({ format: "compact", scope: "workspace" });
-    expect(queryOutput.results.map((r: { path: string }) => r.path)).toEqual([
-      "service-x/order.ts",
-      "service-y/order-repo.ts",
-    ]);
+    expect(readStdout(stdout)).toMatchObject({
+      format: "compact",
+      scope: "workspace",
+      results: [{ path: "service-x/order.ts" }, { path: "service-y/order-repo.ts" }],
+    });
 
     stdout.mockClear();
     await expect(
@@ -367,9 +377,8 @@ describe("repository-map operations", () => {
 });
 
 async function snapshotTree(root: string): Promise<Array<{ path: string; sha256: string }>> {
-  const files = await walk(root);
   return Promise.all(
-    files.map(async (path) => ({
+    (await walk(root)).map(async (path) => ({
       path: path.slice(root.length + 1).replaceAll("\\", "/"),
       sha256: createHash("sha256")
         .update(await readFile(path))

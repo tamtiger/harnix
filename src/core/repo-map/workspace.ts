@@ -236,3 +236,49 @@ export async function queryWorkspaceRepoMap(options: WorkspaceQueryOptions): Pro
   allResults.sort((a, b) => b.score - a.score || compareCodeUnits(a.path, b.path));
   return { members: memberSummaries, results: allResults.slice(0, options.limit ?? 20), scope: "workspace" };
 }
+
+export interface WorkspaceStatusResult {
+  generator: "harnix";
+  schemaVersion: 1;
+  scope: "workspace";
+  status: "ready" | "partial" | "missing";
+  members: WorkspaceMemberResultSummary[];
+}
+
+export async function statusWorkspaceRepoMap(workspaceRoot: string): Promise<WorkspaceStatusResult> {
+  const members = await discoverWorkspaceMembers(workspaceRoot);
+  const memberSummaries: WorkspaceMemberResultSummary[] = [];
+  let cachedRoot: Promise<WorkspaceRootCache> | undefined;
+  const rootCache = (): Promise<WorkspaceRootCache> => (cachedRoot ??= readWorkspaceRootCache(workspaceRoot));
+
+  for (const member of members) {
+    const cache = await readMemberCache(member, rootCache);
+    if (cache.status !== "ready") {
+      memberSummaries.push({
+        ...(cache.status === "missing" ? { hint: MISSING_CACHE_HINT } : {}),
+        name: member.name,
+        records: 0,
+        status: cache.status,
+      });
+      continue;
+    }
+    memberSummaries.push({
+      name: member.name,
+      records: cache.map.records.length,
+      source: cache.source,
+      status: "ready",
+    });
+  }
+
+  const allReady = memberSummaries.length > 0 && memberSummaries.every((m) => m.status === "ready");
+  const noneReady = memberSummaries.every((m) => m.status !== "ready");
+  const status = allReady ? "ready" : noneReady ? "missing" : "partial";
+
+  return {
+    generator: "harnix",
+    members: memberSummaries,
+    schemaVersion: 1,
+    scope: "workspace",
+    status,
+  };
+}

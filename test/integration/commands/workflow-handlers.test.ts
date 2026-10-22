@@ -99,6 +99,37 @@ describe.sequential("workflow --init with repeated --text and --with-check", () 
     expect(task.validationPlan[0]?.criterionIds).toEqual(["ac-1", "ac-2"]);
   });
 
+  it("initializes a task with --file payload avoiding stdin encoding issues", async () => {
+    const root = await initializedProject();
+    const payloadPath = ".harnix/init.json";
+    await writeFile(
+      join(root, payloadPath),
+      JSON.stringify({
+        title: "Khởi tạo tác vụ có dấu tiếng Việt qua file UTF-8",
+        slug: "task-init-utf8-file",
+        mode: "lite",
+        goal: "Mục tiêu thử nghiệm UTF-8 payload handoff",
+        criteria: ["Tiêu chí 1 tiếng Việt có dấu", "Tiêu chí 2 kiểm định UTF-8"],
+      }),
+      "utf8",
+    );
+
+    const result = await run(["--init", "--file", payloadPath, "--full"]);
+    expect(result.code).toBe(0);
+    const task = JSON.parse(result.out) as {
+      id: string;
+      title: string;
+      goal: string;
+      acceptanceCriteria: { id: string; text: string }[];
+    };
+    expect(task.title).toBe("Khởi tạo tác vụ có dấu tiếng Việt qua file UTF-8");
+    expect(task.goal).toBe("Mục tiêu thử nghiệm UTF-8 payload handoff");
+    expect(task.acceptanceCriteria.map((c) => c.text)).toEqual([
+      "Tiêu chí 1 tiếng Việt có dấu",
+      "Tiêu chí 2 kiểm định UTF-8",
+    ]);
+  });
+
   it("defaults to brief output on --init and supports --brief explicitly", async () => {
     await initializedProject();
 

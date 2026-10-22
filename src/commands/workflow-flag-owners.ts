@@ -50,8 +50,8 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   {
     name: "--file",
     isSet: (f) => f.file !== undefined,
-    actions: ["save", "batch", "migrate", "evidence", "cancel", "learn"],
-    hint: "workflow --save, --batch, --migrate, --evidence, --cancel or --learn",
+    actions: ["save", "batch", "migrate", "evidence", "cancel", "learn", "init"],
+    hint: "workflow --save, --batch, --migrate, --evidence, --cancel, --learn or --init",
   },
   {
     name: "--result",

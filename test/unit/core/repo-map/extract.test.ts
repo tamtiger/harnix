@@ -108,4 +108,19 @@ describe("repo-map record extraction", () => {
       identifiers: ["MyApp", "Service"],
     });
   });
+
+  it("extracts ProjectReference dependencies from C# .csproj files", async () => {
+    const root = await temporaryRepository();
+    const csprojContent = `<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\\PaymentHub.Core\\PaymentHub.Core.csproj" />
+    <ProjectReference Include="../PaymentHub.Domain/PaymentHub.Domain.csproj" />
+  </ItemGroup>
+</Project>`;
+    const file = await inventoryFile(root, "services/PaymentHub.Api/PaymentHub.Api.csproj", csprojContent);
+    const record = await extractRepoMapRecord(file, [""]);
+    expect(record).toBeDefined();
+    expect(record?.importTargets).toContain("../PaymentHub.Core/PaymentHub.Core.csproj");
+    expect(record?.importTargets).toContain("../PaymentHub.Domain/PaymentHub.Domain.csproj");
+  });
 });

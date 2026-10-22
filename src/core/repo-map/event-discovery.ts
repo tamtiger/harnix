@@ -76,67 +76,58 @@ function extractRoutes(trimmed: string, lineNumber: number, routes: DiscoveredRo
   }
 }
 
-function extractSubscriberTopics(trimmed: string, lineNumber: number, topics: DiscoveredTopic[]): void {
+function recordSubscriberTopic(
+  topics: DiscoveredTopic[],
+  lineNumber: number,
+  topic: string | undefined,
+  source: string,
+): void {
+  const clean = topic?.trim();
+  if (clean && !secretValue.test(clean) && !topics.some((t) => t.line === lineNumber && t.topic === clean)) {
+    topics.push({
+      line: lineNumber,
+      role: "subscriber",
+      source,
+      topic: clean,
+    });
+  }
+}
+
+function extractCSharpSubscriberTopics(trimmed: string, lineNumber: number, topics: DiscoveredTopic[]): void {
   const csharpSubscriberAttrRe =
-    /(?:\[|,\s*)(CapSubscribe|Topic|KafkaListener|RabbitListener|Queue)\s*\(\s*["']([^"']+)["']\s*(?:,[^\]]+)?\)(?=\s*(?:,|\]))/gu;
+    /(?:\[|,\s*)(CapSubscribe|Topic|KafkaListener|RabbitListener|Queue)\s*\(\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))\s*(?:,[^\]]+)?\)(?=\s*(?:,|\]))/gu;
   for (const match of trimmed.matchAll(csharpSubscriberAttrRe)) {
     const attr = match[1]!;
-    const topic = match[2]!.trim();
-    if (topic && !secretValue.test(topic)) {
-      topics.push({
-        line: lineNumber,
-        role: "subscriber",
-        source: `[${attr}("${topic}")]`,
-        topic,
-      });
-    }
+    const topic = match[2] ?? match[3];
+    const source = `[${attr}(${match[2] ? `"${topic}"` : topic})]`;
+    recordSubscriberTopic(topics, lineNumber, topic, source);
   }
+
+  const csharpSubscriberCallRe = /\b(?:Subscribe|Consume)\s*\(\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))/gu;
+  for (const match of trimmed.matchAll(csharpSubscriberCallRe)) {
+    recordSubscriberTopic(topics, lineNumber, match[1] ?? match[2], "Subscribe");
+  }
+}
+
+function extractSubscriberTopics(trimmed: string, lineNumber: number, topics: DiscoveredTopic[]): void {
+  extractCSharpSubscriberTopics(trimmed, lineNumber, topics);
 
   const jsSubscriberObjectRe =
     /\b(?:consumer|bus|channel|client|subscriber)\.(?:subscribe|consume)\s*\(\s*\{\s*topic\s*:\s*["']([^"']+)["']/gu;
   for (const match of trimmed.matchAll(jsSubscriberObjectRe)) {
-    const topic = match[1]!.trim();
-    if (topic && !secretValue.test(topic) && !topics.some((t) => t.line === lineNumber && t.topic === topic)) {
-      topics.push({
-        line: lineNumber,
-        role: "subscriber",
-        source: "subscribe",
-        topic,
-      });
-    }
+    recordSubscriberTopic(topics, lineNumber, match[1], "subscribe");
   }
 
   const jsSubscriberDirectRe =
     /\b(?:(?:consumer|bus|channel|client|subscriber)\.)?(?:subscribe|consume)\s*\(\s*["']([^"']+)["']/gu;
   for (const match of trimmed.matchAll(jsSubscriberDirectRe)) {
-    const topic = match[1]!.trim();
-    if (topic && !secretValue.test(topic) && !topics.some((t) => t.line === lineNumber && t.topic === topic)) {
-      topics.push({
-        line: lineNumber,
-        role: "subscriber",
-        source: "subscribe",
-        topic,
-      });
-    }
-  }
-
-  const csharpSubscriberCallRe = /\b(?:Subscribe|Consume)\s*\(\s*["']([^"']+)["']/gu;
-  for (const match of trimmed.matchAll(csharpSubscriberCallRe)) {
-    const topic = match[1]!.trim();
-    if (topic && !secretValue.test(topic) && !topics.some((t) => t.line === lineNumber && t.topic === topic)) {
-      topics.push({
-        line: lineNumber,
-        role: "subscriber",
-        source: "Subscribe",
-        topic,
-      });
-    }
+    recordSubscriberTopic(topics, lineNumber, match[1], "subscribe");
   }
 }
 
 function extractPublisherTopics(trimmed: string, lineNumber: number, topics: DiscoveredTopic[]): void {
   const publisherObjectRe =
-    /\b(?:_?capBus|_?bus|_?publisher|_?producer|_?eventBus|kafka|channel|client)\.(?:Publish|PublishAsync|produce|Produce|ProduceAsync|send|publish|emit)\s*\(\s*\{\s*topic\s*:\s*["']([^"']+)["']/gu;
+    /\b(?:_?capBus|_?bus|_?publisher|_?producer|_?eventBus|kafka|channel|client|[\w$]*(?:Producer|Publisher|Bus|EventBus))\.(?:Publish|PublishAsync|produce|Produce|ProduceAsync|send|publish|emit)\s*\(\s*\{\s*topic\s*:\s*["']([^"']+)["']/gu;
   for (const match of trimmed.matchAll(publisherObjectRe)) {
     const topic = match[1]!.trim();
     if (topic && !secretValue.test(topic)) {
@@ -150,9 +141,9 @@ function extractPublisherTopics(trimmed: string, lineNumber: number, topics: Dis
   }
 
   const publisherDirectRe =
-    /\b(?:_?capBus|_?bus|_?publisher|_?producer|_?eventBus|kafka|channel|client)\.(?:Publish|PublishAsync|produce|Produce|ProduceAsync|send|publish|emit|sendToQueue)\s*\(\s*["']([^"']+)["']/gu;
+    /\b(?:_?capBus|_?bus|_?publisher|_?producer|_?eventBus|kafka|channel|client|[\w$]*(?:Producer|Publisher|Bus|EventBus))\.(?:Publish|PublishAsync|produce|Produce|ProduceAsync|send|publish|emit|sendToQueue)\s*\(\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))/gu;
   for (const match of trimmed.matchAll(publisherDirectRe)) {
-    const topic = match[1]!.trim();
+    const topic = (match[1] ?? match[2])?.trim();
     if (topic && !secretValue.test(topic) && !topics.some((t) => t.line === lineNumber && t.topic === topic)) {
       topics.push({
         line: lineNumber,
@@ -163,9 +154,10 @@ function extractPublisherTopics(trimmed: string, lineNumber: number, topics: Dis
     }
   }
 
-  const standalonePublishRe = /\b(?:Publish|PublishAsync|Produce|ProduceAsync)\s*\(\s*["']([^"']+)["']/gu;
+  const standalonePublishRe =
+    /\b(?:Publish|PublishAsync|Produce|ProduceAsync)\s*\(\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))/gu;
   for (const match of trimmed.matchAll(standalonePublishRe)) {
-    const topic = match[1]!.trim();
+    const topic = (match[1] ?? match[2])?.trim();
     if (topic && !secretValue.test(topic) && !topics.some((t) => t.line === lineNumber && t.topic === topic)) {
       topics.push({
         line: lineNumber,

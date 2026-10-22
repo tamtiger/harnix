@@ -9,7 +9,8 @@ import { IGNORED_DIRECTORY_NAMES } from "src/core/stack/ignored-directories.js";
 import { compareCodeUnits } from "src/utils/order.js";
 
 const ignoredDirectoryNames = new Set<string>(IGNORED_DIRECTORY_NAMES);
-const secretPath = /(?:^|\/)(?:\.env[^/]*|[^/]*(?:credential|secret|token)[^/]*|id_rsa[^/]*|[^/]*\.(?:pem|key))$/iu;
+export const secretPath =
+  /(?:^|\/)(?:\.env[^/]*|id_rsa[^/]*|id_ed25519[^/]*|[^/]*\.(?:pem|key|pfx|p12)|(?:secrets?|credentials?)$|[^/]*(?:credential|secret|token)[^/]*\.(?:json|ya?ml|config|xml|ini|properties|toml|conf))$/iu;
 
 export async function inventoryRepository(
   root: string,

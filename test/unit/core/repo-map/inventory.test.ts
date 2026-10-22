@@ -35,6 +35,27 @@ describe("repo-map inventory", () => {
     expect(inventory.files.every((file) => file.byteLength > 0)).toBe(true);
   });
 
+  it("does not exclude business code files containing token or credential substrings while still excluding secret configs", async () => {
+    const root = await temporaryRepository();
+    await put(root, "src/OrderCodeTokenizer.cs", "public class OrderCodeTokenizer {}\n");
+    await put(root, "src/PaymentTokenController.cs", "public class PaymentTokenController {}\n");
+    await put(root, "src/TenantConfigCredentialResolver.cs", "public class TenantConfigCredentialResolver {}\n");
+    await put(root, "src/CredentialForm.tsx", "export function CredentialForm() { return null; }\n");
+    await put(root, "src/appsettings.secrets.json", '{"ApiKey": "12345678"}\n');
+    await put(root, "config/vault-token.yml", "token: 12345678\n");
+
+    const inventory = await inventoryRepository(root);
+
+    const indexedPaths = inventory.files.map((f) => f.path);
+    expect(indexedPaths).toContain("src/OrderCodeTokenizer.cs");
+    expect(indexedPaths).toContain("src/PaymentTokenController.cs");
+    expect(indexedPaths).toContain("src/TenantConfigCredentialResolver.cs");
+    expect(indexedPaths).toContain("src/CredentialForm.tsx");
+
+    expect(inventory.skipped).toContain("src/appsettings.secrets.json");
+    expect(inventory.skipped).toContain("config/vault-token.yml");
+  });
+
   it("skips files above the per-file limit and stops at the file-count limit", async () => {
     const root = await temporaryRepository();
     await put(root, "big.ts", "x".repeat(200));

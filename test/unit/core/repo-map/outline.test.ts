@@ -377,6 +377,14 @@ describe("repository map symbol outline", () => {
     const binary = await createRepoMapOutline({ limit: 20, root, target: "src/binary.ts" });
     expect(binary.status).toBe("skipped");
 
+    await writeFile(
+      join(root, "src", "OrderCodeTokenizer.cs"),
+      "namespace PaymentHub;\npublic class OrderCodeTokenizer {\n    public string Tokenize(string code) => code;\n}\n",
+    );
+    const csharpOutline = await createRepoMapOutline({ limit: 20, root, target: "src/OrderCodeTokenizer.cs" });
+    expect(csharpOutline.status).toBe("ready");
+    expect(csharpOutline.symbols.map((s) => s.name)).toContain("OrderCodeTokenizer");
+
     await expect(createRepoMapOutline({ limit: 20, root, target: "../escape.ts" })).rejects.toThrow(
       /exact normalized repository-relative POSIX path/i,
     );

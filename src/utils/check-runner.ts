@@ -130,6 +130,22 @@ function shimPath(resolved: string | undefined): string | undefined {
  * bare name is a real executable (`dotnet.exe`), it is launched directly: no shell sees its arguments, so a `|` in a
  * test filter is just an argument.
  */
+function buildCmdInvocation(command: string, args: readonly string[]): Invocation {
+  if (CMD_METACHARACTERS.test(command) || args.some((argument) => CMD_METACHARACTERS.test(argument)))
+    throw new Error(UNSAFE_MESSAGE);
+  if (!/\s/u.test(command)) return { executable: "cmd.exe", args: ["/d", "/s", "/c", command, ...args] };
+  const quote = (value: string): string => (/\s/u.test(value) || value === "" ? `"${value}"` : value);
+  const commandLine = `"${[quote(command), ...args.map(quote)].join(" ")}"`;
+  return { executable: "cmd.exe", args: ["/d", "/s", "/c", commandLine], verbatim: true };
+}
+
+function resolveDirectBinary(executable: string, args: readonly string[], lookup?: ExecutableLookup): Invocation {
+  if (lookup === undefined) return { executable, args: [...args] };
+  const resolved = lookup(executable);
+  assertResolvable(executable, true, true, resolved);
+  return { executable: resolved ?? executable, args: [...args] };
+}
+
 export function resolveInvocation(
   executable: string,
   args: readonly string[],
@@ -142,10 +158,7 @@ export function resolveInvocation(
   const hasSlash = /[\\/]/u.test(executable);
   const isDirectBinary = !hasSlash && /\.(?:exe|com)$/iu.test(executable);
   if (platform === "win32" && isDirectBinary) {
-    if (lookup === undefined) return { executable, args: [...args] };
-    const resolved = lookup(executable);
-    assertResolvable(executable, true, true, resolved);
-    return { executable: resolved ?? executable, args: [...args] };
+    return resolveDirectBinary(executable, args, lookup);
   }
   const isBatchShim = /\.(?:cmd|bat)$/iu.test(executable);
   const bareName = !hasSlash && !executable.includes(".");
@@ -156,12 +169,7 @@ export function resolveInvocation(
   if (resolved !== undefined && /\.(?:exe|com)$/iu.test(resolved)) return { executable: resolved, args: [...args] };
   // A shim found on PATH runs by its resolved path: cmd.exe would otherwise look in the working directory first.
   const command = shimPath(resolved) ?? executable;
-  if (CMD_METACHARACTERS.test(command) || args.some((argument) => CMD_METACHARACTERS.test(argument)))
-    throw new Error(UNSAFE_MESSAGE);
-  if (!/\s/u.test(command)) return { executable: "cmd.exe", args: ["/d", "/s", "/c", command, ...args] };
-  const quote = (value: string): string => (/\s/u.test(value) || value === "" ? `"${value}"` : value);
-  const commandLine = `"${[quote(command), ...args.map(quote)].join(" ")}"`;
-  return { executable: "cmd.exe", args: ["/d", "/s", "/c", commandLine], verbatim: true };
+  return buildCmdInvocation(command, args);
 }
 
 /** The Windows directory, from the environment of the process (never from the repository under check). */

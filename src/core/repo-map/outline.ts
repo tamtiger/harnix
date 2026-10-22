@@ -23,7 +23,7 @@ const ignoredDirs = new Set(
     ",",
   ),
 );
-const secretPath = /(?:^|\/)(?:\.env[^/]*|[^/]*(?:credential|secret|token)[^/]*|id_rsa[^/]*|[^/]*\.(?:pem|key))$/iu;
+import { secretPath } from "./inventory.js";
 const secretValue = /(?:api[_-]?key|secret|token|password)\s*[=:]\s*[^\s,]{8,}/iu;
 const reservedMethodNames = new Set("if,for,while,switch,catch,return,sizeof,typeof,new".split(","));
 const topContainerRe =

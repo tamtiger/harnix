@@ -91,6 +91,20 @@ describe("repository map dependency graph ranking", () => {
     expect([...truncated.adjacency.keys()]).toEqual(["src/a.ts", "src/b.ts"]);
     expect(truncated.edgeCount).toBe(1);
   });
+
+  it("resolves ProjectReference edges between C# projects in graph", () => {
+    const records = [
+      record("services/PaymentHub.Api/PaymentHub.Api.csproj", ["../PaymentHub.Core/PaymentHub.Core.csproj"]),
+      record("services/PaymentHub.Core/PaymentHub.Core.csproj"),
+    ];
+    const graph = buildRepoMapGraph(records);
+    expect(graph.adjacency.get("services/PaymentHub.Api/PaymentHub.Api.csproj")).toEqual([
+      "services/PaymentHub.Core/PaymentHub.Core.csproj",
+    ]);
+    expect(graph.reverseAdjacency.get("services/PaymentHub.Core/PaymentHub.Core.csproj")).toEqual([
+      "services/PaymentHub.Api/PaymentHub.Api.csproj",
+    ]);
+  });
 });
 
 function record(
