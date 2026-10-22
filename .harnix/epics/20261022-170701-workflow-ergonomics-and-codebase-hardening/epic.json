@@ -1,0 +1,18 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261022-170701-workflow-ergonomics-and-codebase-hardening",
+  "title": "Tối ưu hóa trải nghiệm Task Workflow, khắc phục nợ kỹ thuật và gia cố Test Suite",
+  "goal": "Giải quyết dứt điểm các điểm nghẽn và nợ kỹ thuật: (1) Gia cố cấu trúc test, hạ nhiệt các file test sát trần 400 dòng, chuẩn hóa .gitattributes line endings và cô lập an toàn process.chdir(); (2) Cải tiến chẩn đoán stale check (chỉ rõ file lệch digest), cảnh báo sớm checklist plan.md, và hạ cyclomatic complexity của 3 hàm sát trần 19/20 trong core.",
+  "nonGoals": [
+    "Không thay đổi TaskRecord schema v3 đóng băng",
+    "Không hạ ngưỡng coverage tiêu chuẩn (giữ vững >= 98.6% functions, >= 95% lines)",
+    "Không tự động commit hay push Git mà không có lệnh người dùng"
+  ],
+  "createdAt": "2026-10-22T17:07:01.704+07:00",
+  "updatedAt": "2026-10-22T17:11:33.597+07:00",
+  "order": [
+    "20261022-170922-test-structure-line-endings-and-vitest-isolation",
+    "20261022-171114-stale-check-diagnostics-and-complexity-reduction"
+  ]
+}
