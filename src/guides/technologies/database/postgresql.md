@@ -20,7 +20,7 @@ psql -c "SELECT datname, age(datfrozenxid) FROM pg_database"
 - Alert on `age(datfrozenxid)` well before `autovacuum_freeze_max_age` to avoid XID wraparound.
 - Dequeue jobs with `SELECT ... FOR UPDATE SKIP LOCKED`; use `pg_try_advisory_xact_lock` for singleton work.
 - Use `jsonb_path_ops` GIN indexes for `@>` containment queries; keep core relational columns typed, not in `jsonb`.
-- Use BRIN on append-only, time-ordered tables and partial indexes for filtered subsets.
+- Use BRIN on append-only tables, partial indexes for filtered subsets (`WHERE deleted_at IS NULL`), and UUIDv7 for sequential keys.
 - Route apps through PgBouncer in transaction pooling mode; do not raise `max_connections` into the thousands.
 - Retry on SQLSTATE `40001` and `40P01` under Repeatable Read, Serializable and deadlocks.
 

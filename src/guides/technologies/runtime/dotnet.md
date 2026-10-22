@@ -17,10 +17,10 @@ dotnet list package --vulnerable
 - Use `IHttpClientFactory` or typed clients; never `new HttpClient()` per request.
 - Bind config with `IOptions<T>` and `ValidateOnStart()`; keep secrets in User Secrets or environment.
 - Go async end-to-end with `CancellationToken`; never `.Result` or `.Wait()`; no `async void` except event handlers.
-- Use `ILogger<T>` with structured message templates, not string interpolation.
-- EF Core: use `AsNoTracking()` for reads, `Include` or projection to avoid N+1, and committed migrations; parameterize all SQL (`FromSql` interpolation, Dapper parameters) and never concatenate into `FromSqlRaw`.
-- Use `IExceptionHandler` and `ProblemDetails` for API errors (no stack traces, SQL text or paths); add health check endpoints.
-- Enforce authorization with policies (`[Authorize]`/`RequireAuthorization`) at endpoint boundaries; use framework auth handlers, not custom token parsing.
+- Use `ILogger<T>` with structured message templates, not string interpolation; mask PII before logging.
+- EF Core: use `AsNoTracking()` for reads, `Include` or projection to avoid N+1, `AsSplitQuery()` for multi-collections, and `HasQueryFilter` for soft delete.
+- EF Core concurrency and security: use `[Timestamp]` or `IsRowVersion()` tokens, parameterize all SQL (`FromSql`, Dapper), and committed migrations with rollback tests.
+- Use `IExceptionHandler` and `ProblemDetails` with `[DOMAIN]_[ACTION]_[REASON]` codes (no stack traces or paths); enforce authorization with `[Authorize]`/`RequireAuthorization`.
 
 ## Common mistakes
 
@@ -28,4 +28,4 @@ dotnet list package --vulnerable
 - Sync-over-async deadlocks from `.Result` in request paths.
 - Disposing `IDisposable` incorrectly, or not at all.
 - Secrets in `appsettings.json`.
-- Returning EF entities directly from controllers.
+- Returning EF entities directly from controllers or suppressing concurrency exceptions without retrying.

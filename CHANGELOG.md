@@ -4,6 +4,14 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.16.0] - 2026-10-22
+
+### Added
+
+- Làm giàu bộ hướng dẫn kỹ thuật Spring Boot, .NET, Relational Database và Redis với các enterprise pattern thực chiến
+- Nâng cấp an toàn migration DB ứng dụng, nhận diện anti-pattern bảo mật và ma trận quyền hạn
+- Tích hợp tinh hoa Backend Harness và Architecture Review từ 04. Backend
+
 ## [2.15.0] - 2026-10-21
 
 ### Changed

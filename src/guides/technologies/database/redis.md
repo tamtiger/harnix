@@ -28,3 +28,4 @@ redis-cli CONFIG GET maxmemory-policy
 - Using Pub/Sub where messages must survive a disconnect.
 - Releasing a lock with a bare `DEL`.
 - Blocking commands (`BLPOP`) on a shared pooled connection.
+- Cache stampede or dual-write desync from unjittered TTLs and non-atomic invalidation.

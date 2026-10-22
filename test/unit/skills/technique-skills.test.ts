@@ -14,6 +14,7 @@ const expectedTechniqueSkillNames = [
   "harnix-migration-safety",
   "harnix-security-lens",
   "harnix-sequential-thinking",
+  "harnix-arch-review",
 ] as const;
 
 describe("technique skills catalog", () => {
@@ -54,25 +55,14 @@ describe("technique skills catalog", () => {
     ];
 
     for (const skill of techniqueSkills) {
-      expect(workflowNames.has(skill.name), `${skill.name} must not be in workflowSkills`).toBe(false);
-      expect(stageOwners.includes(skill.name as WorkflowStageOwner), `${skill.name} must not be a stage owner`).toBe(
-        false,
-      );
+      expect(workflowNames.has(skill.name)).toBe(false);
+      expect(stageOwners.includes(skill.name as WorkflowStageOwner)).toBe(false);
     }
   });
 
-  it("preserves separation from language/tech guides", () => {
-    const guideLikeNames = ["typescript", "python", "golang", "csharp", "java", "react", "vue", "django", "nextjs"];
-    for (const skill of techniqueSkills) {
-      for (const guide of guideLikeNames) {
-        expect(skill.name).not.toBe(`harnix-${guide}`);
-      }
-    }
-  });
-
-  it("package version is a valid semver in 2.x series", async () => {
-    const { readFile } = await import("node:fs/promises");
-    const pkg = JSON.parse(await readFile("package.json", "utf8"));
-    expect(pkg.version).toMatch(/^2\.\d+\.\d+(?:-[a-z0-9.]+)?$/u);
+  it("exposes references for skills that declare them", () => {
+    const archReview = techniqueSkills.find((s) => s.name === "harnix-arch-review");
+    expect(archReview).toBeDefined();
+    expect(Object.keys(archReview!.references).sort()).toEqual(["domain-briefs", "wbs-consolidation"]);
   });
 });

@@ -1,0 +1,14 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261022-130904-backend-harness-integration",
+  "title": "Tích hợp tinh hoa Backend Harness và Kiến trúc Doanh nghiệp vào Harnix",
+  "goal": "Tích hợp các thực hành kiểm chứng từ bộ công cụ 04. Backend vào Harnix: (1) Làm giàu hướng dẫn kỹ thuật Spring Boot, .NET và Relational Database với các enterprise pattern thực chiến; (2) Nâng cấp các core skills của Harnix về an toàn migration cơ sở dữ liệu ứng dụng, nhận diện anti-pattern bảo mật và ma trận vùng quyền; (3) Tích hợp skill phân tích thiết kế kiến trúc doanh nghiệp (harnix-arch-review) hỗ trợ review WBS, gap analysis 3 chiều và bóc tách Core/BFF.",
+  "nonGoals": [
+    "Không thêm runtime Python hay dependency bên ngoài vào Harnix",
+    "Không thêm platform ngoài 6 platform được hỗ trợ trong PRD",
+    "Không tự động commit, merge, push hay deploy"
+  ],
+  "createdAt": "2026-10-22T13:09:04.930+07:00",
+  "updatedAt": "2026-10-22T13:09:04.930+07:00"
+}

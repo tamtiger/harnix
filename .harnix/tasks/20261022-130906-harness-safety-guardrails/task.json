@@ -1,0 +1,155 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261022-130906-harness-safety-guardrails",
+  "title": "Nâng cấp an toàn migration DB ứng dụng, nhận diện anti-pattern bảo mật và ma trận quyền hạn",
+  "goal": "Mở rộng harnix-migration-safety bao hàm an toàn migration database ứng dụng (bắt buộc rollback test pass, cấm thao tác DB production trực tiếp), mở rộng harnix-security-lens và harnix-review phát hiện các anti-pattern (nối chuỗi SQL, logging debug thay vì structured logger), và bổ sung ma trận 3 vùng quyền (Autonomous / Review-required / Blocked) vào harnix-plan và harnix-implement.",
+  "nonGoals": [
+    "Không thêm dependencies ngoài",
+    "Không phá vỡ các contract immutability của task"
+  ],
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-22T13:09:04.930+07:00",
+  "updatedAt": "2026-10-22T14:35:11.420+07:00",
+  "epicId": "20261022-130904-backend-harness-integration",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix-migration-safety/SKILL.md (<=1,200 tokens) bổ sung Application Database Migrations: mẫu expand-contract, bắt buộc rollback/down test pass trước khi hoàn tất verify, và cấm chạy migration trực tiếp lên production DB.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "harnix-security-lens/SKILL.md (<=1,200 tokens) và harnix-review/SKILL.md (<=2,000 tokens) bổ sung 3 content rules (cấm nối chuỗi SQL, cấm System.out.print/Console.Write thay vì structured logger, bảo vệ secret/.env/*.pem), kiểm tra IDOR resource ownership và PII masking trong log.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Đặt Ma trận 3 vùng quyền hạn (Autonomous / Review-required / Blocked), 4 điều kiện kích hoạt Harden bắt buộc, thứ tự triển khai Backend và Observability log line vào harnix-plan/references/decision-discipline.md, harnix-implement/references/brownfield.md và harnix-verify/SKILL.md (giữ harnix-plan/SKILL.md <=2,000 tokens).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Bổ sung test assertions vào test/workflow/skill-sources.test.ts và test/unit/skills/technique-skills.test.ts; đạt exit code 0 với pnpm run test:gates và pnpm run test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Chạy pnpm version:sync 2.16.0-dev.2 cập nhật CHANGELOG.md.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-gates",
+      "description": "Contract tests cho skills, instruction budget và workflow",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/skills/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-22T14:33:05.170+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "712fe2cc0a0c4a731c5f4f559abc83208b5cbc5f5c957b2ec2e4903300791fd8"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T14:34:44.821+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "629dab12d16582ae30181b673e56f2ae863755d05b81bb74642165061ef99492"
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "package.json",
+    "src/skills/harnix-implement/references/brownfield.md",
+    "src/skills/harnix-migration-safety/SKILL.md",
+    "src/skills/harnix-plan/SKILL.md",
+    "src/skills/harnix-plan/references/decision-discipline.md",
+    "src/skills/harnix-review/SKILL.md",
+    "src/skills/harnix-security-lens/SKILL.md",
+    "src/skills/harnix-verify/SKILL.md",
+    "test/unit/skills/technique-skills.test.ts",
+    "test/workflow/skill-sources.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Đặt Ma trận 3 vùng quyền hạn và điều kiện Harden vào harnix-plan/references/decision-discipline.md thay vì harnix-plan/SKILL.md (đang ở 1,994/2,000 tokens)",
+      "rationale": "Tránh vượt trần 2,000 tokens của instruction-budget.test.ts trong khi vẫn giữ đầy đủ capability cho harnix-plan"
+    }
+  ],
+  "completedAt": "2026-10-22T14:35:11.420+07:00"
+}

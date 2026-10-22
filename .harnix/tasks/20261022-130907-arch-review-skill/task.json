@@ -1,0 +1,177 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261022-130907-arch-review-skill",
+  "title": "Tích hợp skill phân tích thiết kế kiến trúc doanh nghiệp harnix-arch-review",
+  "goal": "Tạo skill mới src/skills/harnix-arch-review/ chuyển thể từ GST-Skills, bao gồm domain_briefs.json (tri thức ngành Pharma, Banking, E-commerce, Logistics), quy trình review WBS, gap analysis 3 chiều (Thừa/Thiếu/Chưa hợp lý) và chuẩn hóa bóc tách Backend Core vs BFF 15%, đóng epic với version bump 2.16.0.",
+  "nonGoals": [
+    "Không thêm runtime Python hay dependency sinh file PPTX ngoài Node.js",
+    "Không bắt buộc phải có WBS mới chạy được skill"
+  ],
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-22T13:09:04.930+07:00",
+  "updatedAt": "2026-10-22T14:47:10.367+07:00",
+  "epicId": "20261022-130904-backend-harness-integration",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "src/skills/harnix-arch-review/SKILL.md (<=1,200 tokens, <=200 dòng, có ## Evidence and Rationale trích dẫn external-research.md) được tạo với quy trình: Detect/Research Domain, WBS Dynamic Extraction, 3-Way Gap Analysis trên 2 trục, 8-Layer System Overview (One BFF per Channel), và Core MAX-Dedup + BFF 15% kèm 3 ngoại lệ không áp dụng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Tạo src/skills/harnix-arch-review/references/domain-briefs.md và wbs-consolidation.md (mỗi file <=2,000 tokens, chỉ có SKILL.md và references/ trong thư mục skill), chứa tri thức 10 ngành (pharma, ecommerce, banking, insurance, logistics, healthcare, edtech, saas, manufacturing_iot, supply_chain) và công thức bóc tách WBS/BFF.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Đăng ký harnix-arch-review (kèm references) làm technique skill thứ 7 trong src/skills/technique-skills.ts, cập nhật docs/HARNIX_PRD.md và docs/UPSTREAM_MAPPING.md.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Cập nhật test/unit/skills/technique-skills.test.ts và test/workflow/skill-sources.test.ts; đạt exit code 0 với pnpm run test:gates và pnpm run test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Chạy pnpm version:sync 2.16.0 --fold-dev --summary 'Tích hợp tinh hoa Backend Harness và Architecture Review từ 04. Backend' đóng epic thành công.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-gates",
+      "description": "Contract tests cho skills, docs và package",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "src/skills/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-22T14:41:45.302+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f505f6bc133a0fdbfcfc17a4a9a0844bf2c57969a2ba59ceccda6143f5c06fbf"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T14:43:34.601+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "b09172763c9eae73107f811df825baa4918ddda4a131cc26bbe1daf1ec8ba2de"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-22T14:45:02.675+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "dfd63554e5c2428adeb7d5f0225e6d181671db414f5b00da4f42b0712f2343ba"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T14:46:49.574+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "dfde7704bdb9becd522f45a1446b7af6273a654f4cd64069642c4796d51fd053"
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "docs/UPSTREAM_MAPPING.md",
+    "package.json",
+    "src/skills/harnix-arch-review/SKILL.md",
+    "src/skills/harnix-arch-review/references/domain-briefs.md",
+    "src/skills/harnix-arch-review/references/wbs-consolidation.md",
+    "src/skills/technique-skills.ts",
+    "test/unit/skills/technique-skills.test.ts",
+    "test/workflow/skill-sources.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/UPSTREAM_MAPPING.md"
+  ],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Đăng ký harnix-arch-review vào src/skills/technique-skills.ts (technique skill thứ 7) và đặt tri thức 10 ngành vào references/domain-briefs.md thay vì assets/domain_briefs.json",
+      "rationale": "Tuân thủ khóa cứng 6 workflowSkills trong catalog.ts và quy tắc chỉ cho phép SKILL.md + references/ trong test/workflow/skill-sources.test.ts:188, đồng thời giúp globalSkillDesiredFiles() tự động đóng gói lên cả 6 nền tảng"
+    }
+  ],
+  "completedAt": "2026-10-22T14:47:10.367+07:00"
+}

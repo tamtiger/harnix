@@ -17,3 +17,10 @@ Before altering a routine, identify all callers, expected side effects, and impl
 ## 4. Protect existing test coverage
 
 Never disable, weaken, or comment out an existing test to make new code pass. If an existing test fails, either fix the regression in your implementation or, if the contract intentionally changed, document the contract revision explicitly.
+
+## 5. Code hygiene and content rules
+
+Strictly avoid anti-patterns when introducing or updating code:
+- Never use debug prints (`System.out.print`, `Console.Write`, unformatted `console.log`); use structured loggers with parameterized templates.
+- Always mask or hash personally identifiable information (PII) before emitting log records.
+- Parameterize all database queries; never concatenate variables into raw SQL strings.

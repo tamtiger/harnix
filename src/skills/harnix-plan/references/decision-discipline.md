@@ -25,3 +25,20 @@ With questions that can be answered by inspecting the repository, search and ver
 ## 5. Stable code artifacts
 
 Keep production code completely free of temporary prompt instructions, task markers, or harness ceremony. Business logic belongs in the source; workflow state belongs exclusively in `.harnix/`.
+
+## 6. Operating envelope and tier matrix
+
+Classify modifications into three distinct authorization tiers:
+- **Autonomous tier**: local implementation changes that do not alter public API contracts, do not mutate database schemas, and do not reconfigure auth or external infrastructure. Agent implements and verifies automatically.
+- **Review-required tier**: actions modifying public API contracts, database migrations, authentication/authorization policies, external cloud integrations, or quality gate outputs. Must enforce human review sign-off before merge.
+- **Blocked tier**: direct production database operations, raw secret manipulation, unverified infrastructure mutation, or actions that cannot be rolled back via version control. Agent must never initiate independently.
+
+## 7. Mandatory hardening and backend sequence
+
+Trigger the hardening review stage whenever work involves:
+1. User identity, credentials, or payment data.
+2. Authentication/authorization endpoints.
+3. Adding new third-party dependencies.
+4. Any change marked review-required or blocked.
+
+For backend implementation, order slices systematically: `Entity + Migration → Repository → Service → Controller → Tests`. Use 3-point estimation `(O + 4M + P)/6` with buffer for uncertain tasks.

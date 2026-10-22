@@ -99,6 +99,11 @@ describe("guide gaps found against the ECC rules", () => {
     ["technology-react-web", /setX\(x => x \+ 1\)/u],
     ["technology-angular", /canMatch/u],
     ["technology-dotnet", /RequireAuthorization/u],
+    ["technology-spring", /BaseEntity/u],
+    ["technology-spring", /DOMAIN.*ACTION.*REASON/u],
+    ["technology-dotnet", /AsSplitQuery/u],
+    ["technology-database-relational", /Math\.min/u],
+    ["technology-redis", /stampede/iu],
   ])("%s mentions %s", (id, pattern) => {
     expect(content(id)).toMatch(pattern);
   });

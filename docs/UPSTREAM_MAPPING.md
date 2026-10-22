@@ -262,6 +262,7 @@ Khảo sát ngày 2026-10-15 trên hai kho tài nguyên `frt-public-projects/ai-
 | `technical-recap` | ak-quick-setup (`ak-sumup`) | `harnix-verify` | `adapt` | Mẫu báo cáo hoàn thành cô đọng: kết quả đạt được, sự cố & cách khắc phục, quyết định kiến trúc và sơ đồ flow. |
 | `link-validation` & `trigger-eval` | ai-native-client (`scripts/`) | Test suite & scripts | `adapt` | Tích hợp kiểm định markdown link tự động và harness đo độ phân biệt trigger TF-IDF + Cosine similarity stdlib. |
 | `ui-ux` & `web-testing` | ak-quick-setup | `src/guides/topics/` | `adapt` | 2 Topic Guides mới tuân thủ đúng 3 đề mục (Verify, Constraints, Common mistakes) và trần <= 600 tokens. |
+| `arch-review` & Enterprise Practices | Backend Harness Practices (`04. Backend`) | `src/skills/harnix-arch-review/`, `src/guides/technologies/`, `harnix-migration-safety` | `adapt` | Technique skill 7 `harnix-arch-review` (10 domain briefs, WBS Core MAX + BFF dedup), làm giàu 6 backend guides và quy chuẩn expand-contract application DB rollback. |
 
 #### 8.5.2 Các pattern Explicitly Rejected
 1. **Silent Network Sync & MCP Auto-pull**: `tools/rai-client-sync-mcp/` và session hook tự động fetch/pull remote vi phạm nguyên tắc Lean & Offline-first của Harnix. Harnix dùng lệnh CLI tường minh `harnix update`.

@@ -19,7 +19,7 @@ sqlcmd -Q "RESTORE VERIFYONLY FROM DISK = N'<backup file>'"
 - Use `SET XACT_ABORT ON` in every procedure with a transaction.
 - Batch large writes (for example `TOP (2000)` per loop) to stay below the roughly 5,000-lock escalation threshold.
 - Give each table a narrow clustered key (`BIGINT IDENTITY` or `NEWSEQUENTIALID()`).
-- Use `INCLUDE` columns and filtered indexes to remove key lookups; check plans or Query Store for lookups and `tempdb` spills.
+- Use `INCLUDE` columns and filtered indexes (`WHERE IsDeleted = 0`) to remove key lookups; check plans or Query Store for lookups and `tempdb` spills.
 - Execute dynamic SQL only through `sp_executesql` with typed parameters.
 - Use `TRY...CATCH` with `THROW`, not `RAISERROR`; capture deadlock graphs via Extended Events `xml_deadlock_report`.
 - Keep `AUTO_UPDATE_STATISTICS` on; use several equal-sized `tempdb` data files (up to 8).

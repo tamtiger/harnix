@@ -21,6 +21,7 @@ const techniqueSkillNames = [
   "harnix-migration-safety",
   "harnix-security-lens",
   "harnix-sequential-thinking",
+  "harnix-arch-review",
 ] as const;
 const allSkillNames = [...workflowSkillNames, ...techniqueSkillNames];
 const TASK_SKILLS: readonly SkillName[] = ["harnix-plan", "harnix-implement", "harnix-verify", "harnix-debug"];

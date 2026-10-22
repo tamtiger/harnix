@@ -6,6 +6,9 @@ import migrationSafetySource from "./harnix-migration-safety/SKILL.md";
 import securityLensSource from "./harnix-security-lens/SKILL.md";
 import sequentialThinkingSource from "./harnix-sequential-thinking/SKILL.md";
 import verificationGapSource from "./harnix-verification-gap/SKILL.md";
+import archReviewSource from "./harnix-arch-review/SKILL.md";
+import domainBriefsReference from "./harnix-arch-review/references/domain-briefs.md";
+import wbsConsolidationReference from "./harnix-arch-review/references/wbs-consolidation.md";
 
 import type { SkillTemplate } from "src/core/spec/project-skills.js";
 
@@ -69,6 +72,13 @@ const canonicalTechniqueSources: readonly [string, Record<string, string>][] = [
   [migrationSafetySource, {}],
   [securityLensSource, {}],
   [sequentialThinkingSource, {}],
+  [
+    archReviewSource,
+    {
+      "domain-briefs": domainBriefsReference,
+      "wbs-consolidation": wbsConsolidationReference,
+    },
+  ],
 ];
 
 function validateTechniqueSkillSet(

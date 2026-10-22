@@ -1,0 +1,163 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261022-130905-enrich-backend-guides",
+  "title": "Làm giàu bộ hướng dẫn kỹ thuật Spring Boot, .NET và Relational Database",
+  "goal": "Bổ sung các enterprise pattern thực chiến từ 04. Backend vào src/guides/technologies/ (spring.md, dotnet.md, relational.md, postgresql.md, sqlserver.md): Base Entity auditable, soft-delete với partial index, optimistic locking (@Version / concurrency token), N+1 prevention (JOIN FETCH, EntityGraph, AsSplitQuery, BatchSize), chuẩn mã lỗi DOMAIN_ACTION_REASON, và expand/contract migration; đảm bảo vượt qua toàn bộ test:gates và giới hạn token/section.",
+  "nonGoals": [
+    "Không vượt quá 600 token, 10 constraints và 6 common mistakes mỗi guide",
+    "Không thay đổi định dạng 3 section chuẩn của guide"
+  ],
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "createdAt": "2026-10-22T13:09:04.930+07:00",
+  "updatedAt": "2026-10-22T14:25:25.604+07:00",
+  "epicId": "20261022-130904-backend-harness-integration",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "spring.md được làm giàu (<=10 constraints, <=6 mistakes, <=600 tokens): BaseEntity auditable, cấm @Data trên JPA entity, soft-delete (@SQLDelete/@SQLRestriction), optimistic locking @Version, @BatchSize, mã lỗi DOMAIN_ACTION_REASON, BCrypt>=12, refresh token rotation và PII masking.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "dotnet.md được làm giàu (giữ RequireAuthorization, <=10 constraints, <=6 mistakes, <=600 tokens): EF Core AsSplitQuery, HasQueryFilter cho soft-delete, concurrency token (IsRowVersion), mã lỗi DOMAIN_ACTION_REASON với ProblemDetails, và structured logging kèm PII masking.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "relational.md, postgresql.md, sqlserver.md và redis.md được làm giàu (trong trần bullet/token): khóa theo thứ tự ID tăng dần chống deadlock, chia chunk batch ngắn, partial/filtered index cho soft-delete, UUIDv7, pool sizing (2*cores)+1, và phòng chống cache stampede/dual-write inconsistency.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Bổ sung test assertions kiểm chứng các quy tắc mới vào test/workflow/guide-format.test.ts và đạt exit code 0 với pnpm run test:gates.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Chạy pnpm version:sync 2.16.0-dev.1 ghi nhận tóm tắt thay đổi vào CHANGELOG.md.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-gates-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-gates",
+      "description": "Contract tests (cấu trúc guide, token budget, format)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/guides/**",
+        "src/skills/**",
+        "test/workflow/guide-format.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-22T13:52:07.104+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Cập nhật tiêu chí và phạm vi Task 1 sau khi subagent đọc sâu 04. Backend và kiểm tra trần 10 constraints / 600 tokens của guide-format.test.ts",
+      "artifactPaths": [
+        ".harnix/tasks/20261022-130905-enrich-backend-guides/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-22T14:23:33.564+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "56f9a0ac5b27dd5ed46b28d59c9b03349192a5744fc97f055595bda3791a53b3"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-22T14:25:07.408+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "116f8fc96f8bc3e0443ff50285f3de41ae33bb51d68c7b23efb6eb6695c6b060"
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "package.json",
+    "src/guides/technologies/database/postgresql.md",
+    "src/guides/technologies/database/redis.md",
+    "src/guides/technologies/database/relational.md",
+    "src/guides/technologies/database/sqlserver.md",
+    "src/guides/technologies/framework/spring.md",
+    "src/guides/technologies/runtime/dotnet.md",
+    "test/workflow/guide-format.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md"
+  ],
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Gộp các pattern mới vào trong giới hạn <=10 Constraints, <=6 Common mistakes và <=600 tokens của mỗi guide, đồng thời dùng @SQLRestriction thay cho @Where đã deprecated trên Hibernate 6.2+",
+      "rationale": "Bảo đảm tuân thủ tuyệt đối test/workflow/guide-format.test.ts và chuẩn Spring Boot 3.x hiện đại"
+    }
+  ],
+  "completedAt": "2026-10-22T14:25:25.604+07:00"
+}

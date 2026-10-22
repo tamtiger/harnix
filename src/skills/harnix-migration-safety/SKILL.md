@@ -2,7 +2,7 @@
 name: harnix-migration-safety
 description: Use when designing or reviewing schema migrations, contract breaking changes, data transitions or structural refactorings to guarantee data preservation and backward compatibility.
 metadata:
-  version: "2.15.0"
+  version: "2.16.0"
 ---
 
 # Migration safety and data preservation
@@ -17,6 +17,7 @@ Schema updates and storage refactorings pose significant risks of data corruptio
 ## When to use
 
 - When modifying task schemas, manifest formats, configuration shapes, or persistent storage models.
+- When creating or altering application database migrations (Flyway, Liquibase, EF Core, raw SQL).
 - When deprecating, renaming, or removing public fields, commands, or data artifacts.
 - When reviewing migration adapters or data upgrade scripts.
 
@@ -28,11 +29,13 @@ Schema updates and storage refactorings pose significant risks of data corruptio
 
 2. **Idempotence**:
    - Running the migration multiple times on the same input must produce identical results without duplicating or corrupting data.
-   - A partially failed migration must not leave files in an unrecoverable corrupted state.
+   - A partially failed migration must not leave files or databases in an unrecoverable corrupted state.
 
 3. **Atomic write and rollback safety**:
    - Persist changes using atomic replacement (write to temporary sibling file, sync, atomic rename).
    - Maintain provenance markers or migration audit evidence to trace when and how data was transformed.
+   - Application DB migrations: adhere strictly to the expand-and-contract pattern. Never alter or rename columns destructively in a single release.
+   - Rollback verification mandate: every application database schema change must be accompanied by a validated rollback/down script tested and verified in staging/dev before production approval. Never execute unverified migrations directly against production databases.
 
 4. **Schema validation boundary**:
    - Strictly validate input before writing migrated payloads.
@@ -43,4 +46,5 @@ Schema updates and storage refactorings pose significant risks of data corruptio
 - [ ] Golden fixtures: existing test suites load historical raw fixtures from earlier versions and verify correct parsing.
 - [ ] Roundtrip test: verify that reading legacy data through the migration adapter produces valid current records.
 - [ ] Interrupted migration: verify that a crash or abort before completion does not delete user data or leave unreadable state.
+- [ ] Rollback validation: verify that migration rollback/down procedures succeed cleanly without data loss.
 - [ ] No silent mutation: confirm that read-only commands do not mutate persistent disk state.
