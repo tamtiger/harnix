@@ -1,0 +1,54 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261023-170409-multi-workspace-root-repo-map",
+  "title": "Hỗ trợ Multi-Workspace Root và liên kết cụm repository cho repo-map --events",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Cho phép truyền nhiều path vào --workspace hoặc cấu hình linkedWorkspaces trong .harnix/config.yaml để tạo Cross-system Event Matrix E2E liền mạch.",
+  "nonGoals": [],
+  "epicId": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Cho phép truyền nhiều path vào CLI: harnix repo-map --events --workspace <path1> <path2>...",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Hỗ trợ cấu hình linkedWorkspaces trong config.yaml để tự động quét các repo liên kết.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Xuất ma trận event hợp nhất E2E chính xác giữa các repository độc lập.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite và test multi-workspace repo-map phải pass",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-23T17:04:09.000+07:00",
+  "updatedAt": "2026-10-23T17:08:03.000+07:00"
+}

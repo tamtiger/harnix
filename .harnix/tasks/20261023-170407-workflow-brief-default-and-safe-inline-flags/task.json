@@ -1,0 +1,54 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261023-170407-workflow-brief-default-and-safe-inline-flags",
+  "title": "Mặc định Brief Mode cho Workflow Commands và Tự động ép UTF-8 trên Windows",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Đổi mặc định của toàn bộ các lệnh ghi workflow sang Brief Output (chỉ in id, status, checkpoint, updatedAt); thêm cờ --full khi cần in trọn vẹn JSON; hỗ trợ inline flags --note, --reason; và tự động ép UTF-8 cho stdin trên Windows win32.",
+  "nonGoals": [],
+  "epicId": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Các lệnh workflow ghi trạng thái mặc định chỉ in { id, status, checkpoint, updatedAt } mà không cần truyền cờ --brief.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Truyền cờ --full in toàn bộ task record JSON như hành vi cũ.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Hỗ trợ cờ inline --reason và --note cho các transition/replan mà không bị lỗi encoding tiếng Việt trên PowerShell.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-23T17:04:07.000+07:00",
+  "updatedAt": "2026-10-23T17:08:03.000+07:00"
+}

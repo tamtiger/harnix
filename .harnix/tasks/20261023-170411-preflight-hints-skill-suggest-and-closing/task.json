@@ -1,0 +1,68 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261023-170411-preflight-hints-skill-suggest-and-closing",
+  "title": "Contextual Technique Hints, lệnh skill --suggest, Actionable Error Messages, cảnh báo Stale Facts và đóng Epic",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Thêm suggestedTechniques vào workflow --preflight; bổ sung lệnh harnix skill --suggest; Actionable Error Suggestions; cảnh báo projectFactsStale: true; đồng bộ tài liệu, pnpm selfhost:sync và đóng Epic.",
+  "nonGoals": [],
+  "epicId": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "workflow --preflight tự động phân tích ngữ cảnh và trả về suggestedTechniques?: string[] dựa trên triệu chứng thực tế.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Bổ sung lệnh harnix skill --suggest <query> hỗ trợ tìm kiếm skill theo mô tả ngữ nghĩa.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Actionable Error Suggestions cho lỗi schema validation và sai checkpoint/stage.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Preflight phát hiện commit hash của HEAD thay đổi so với thời điểm trích xuất facts thì cảnh báo projectFactsStale: true.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-5",
+      "text": "Đồng bộ tài liệu dự án, chạy pnpm selfhost:sync và bump minor package đóng Epic.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-23T17:04:11.000+07:00",
+  "updatedAt": "2026-10-23T17:08:03.000+07:00"
+}

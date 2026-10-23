@@ -1,0 +1,54 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261023-170408-events-options-resolution-and-wrapper-tracing",
+  "title": "AST C# Constant/Options Resolution và cấu hình Producer Wrappers cho repo-map --events",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Phân tích AST C# bóc tách chuỗi thực tế từ constant/Options class; hỗ trợ cấu hình events.producerWrappers trong config.yaml; loại bỏ triệt để các biến rác dynamic (eto.EventName, splitTopics, dataKafka).",
+  "nonGoals": [],
+  "epicId": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Trích xuất chính xác giá trị chuỗi từ const string và default property initializer của class *Options.cs.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Hỗ trợ cấu hình events.producerWrappers trong config.yaml để nhận diện caller hàm wrapper là Publisher thực tế.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Loại bỏ hoàn toàn các identifier biến rác (eto.EventName, splitTopics, checkResult.CancelEto, ObjectMapper.Map).",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite và test AST C# events phải pass",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-23T17:04:08.000+07:00",
+  "updatedAt": "2026-10-23T17:08:03.000+07:00"
+}

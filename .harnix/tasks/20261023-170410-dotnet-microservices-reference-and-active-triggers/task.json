@@ -1,0 +1,54 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261023-170410-dotnet-microservices-reference-and-active-triggers",
+  "title": "Bổ sung Reference dotnet-microservices và thiết lập Active Skill Triggers cho Multi-Agent",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Soạn thảo reference chuyên đề dotnet-microservices.md; cập nhật các file SKILL.md thiết lập Active Triggers bắt buộc agent/subagent nạp reference chuyên sâu khi gặp điều kiện (đặc biệt khi dispatch subagent/multi-agent bắt buộc nạp epic.md/scouting-isolation.md).",
+  "nonGoals": [],
+  "epicId": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Soạn thảo reference chuyên đề dotnet-microservices.md chuẩn cấu trúc (DDD layers, Kafka consumer, NSubstitute mocks, ProjectReference, .harnixignore).",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Cập nhật các file SKILL.md bổ sung Active Triggers bắt buộc agent nạp reference chuyên sâu; đặc biệt khi dispatch subagent / multi-agent BẮT BUỘC nạp epic.md / scouting-isolation.md.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Kiểm thử xác thực định dạng reference và các trigger trong SKILL.md.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite và test skills/references phải pass",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-23T17:04:10.000+07:00",
+  "updatedAt": "2026-10-23T17:08:03.000+07:00"
+}
