@@ -1,0 +1,108 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261023-145111-lean-context-injection-and-token-optimization",
+  "title": "Tối ưu hóa Token Hook: Chuyển sang Lean Context Injection tránh tràn mã nguồn vào prompt",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Tái cấu trúc hook renderInternalContext sang Lean Context: mặc định chỉ chèn metadata và task structure tóm tắt (< 300 tokens) thay vì dump toàn bộ raw source code của tất cả các file trong relevantPaths; bổ sung tùy chọn contextMode: lean | full trong cấu hình.",
+  "nonGoals": [],
+  "epicId": "20261023-141853-enterprise-dotnet-and-context-hardening",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "renderInternalContext mặc định trả về lean metadata context (Task ID, status, goal, relevant paths outline) thay vì raw file bodies.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-lean-context-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Hỗ trợ cấu hình context.mode: 'lean' | 'full' trong .harnix/config.yaml để người dùng chủ động cấu hình khi cần full dump.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-lean-context-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Test suite kiểm tra định dạng và kích thước payload của hook không vượt quá budget lean token và tương thích an toàn với các platform hooks.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-lean-context-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-lean-context",
+      "description": "Kiểm tra lean metadata context và tùy chọn config context.mode",
+      "command": "pnpm vitest run test/unit/core/context/effective-context.test.ts test/workflow/internal-context-boundary.test.ts test/workflow/internal-context-hooks.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/internal-context.ts",
+        "src/core/config/config-schema.ts",
+        "src/core/config/config-validate.ts",
+        "src/core/context/effective-context.ts",
+        "test/unit/core/context/effective-context.test.ts",
+        "test/workflow/internal-context-boundary.test.ts",
+        "test/workflow/internal-context-hooks.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-lean-context-1",
+      "checkId": "check-lean-context",
+      "recordedAt": "2026-10-23T15:51:03.997+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/context/effective-context.test.ts test/workflow/internal-context-boundary.test.ts test/workflow/internal-context-hooks.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "907554fab1c71fa976332cc8360a37045c3ab357f659c02c4f098723ba744071"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T15:53:23.670+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c4292ab191a0bba0d3adb0335d8fe8df5716f8f1a105fb784bea12c0f1f87225"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-23T14:51:11.946+07:00",
+  "updatedAt": "2026-10-23T15:54:00.987+07:00",
+  "completedAt": "2026-10-23T15:54:00.987+07:00"
+}

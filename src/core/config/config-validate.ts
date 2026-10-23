@@ -152,6 +152,9 @@ function assertPlatforms(value: unknown): asserts value is PlatformId[] {
 function assertContext(value: unknown): void {
   if (!isRecord(value) || !isPositiveInteger(value.maxCharacters) || !isPositiveNumber(value.tokenApproximation))
     throw new ConfigValidationError("context values must be positive.");
+  if (value.mode !== undefined && value.mode !== "lean" && value.mode !== "full") {
+    throw new ConfigValidationError("context.mode must be 'lean' or 'full'.");
+  }
 }
 
 function assertRuntime(value: unknown): void {

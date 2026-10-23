@@ -16,6 +16,7 @@ describe("internal context untrusted boundary", () => {
     const root = await temporaryRepository();
     const config = createConfig({ developer: "tam" });
     config.context.maxCharacters = 900;
+    config.context.mode = "full";
     await writeConfig(join(root, ".harnix", "config.yaml"), config);
     await Promise.all([
       mkdir(join(root, "docs"), { recursive: true }),

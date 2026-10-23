@@ -1,0 +1,131 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261023-145123-workflow-preflight-switch-detection-and-safe-stdin",
+  "title": "Cảnh báo chuyển Task ngầm trong Workflow Preflight và chuẩn hóa cờ --file",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bổ sung cờ --expected-task trong workflow preflight để phát hiện và cảnh báo kịp thời khi active task bị chuyển đổi ngoài ý muốn trong cùng session; đồng thời chuẩn hóa hỗ trợ cờ --file cho toàn bộ các lệnh nhận payload JSON trong workflow-handlers.",
+  "nonGoals": [],
+  "epicId": "20261023-141853-enterprise-dotnet-and-context-hardening",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "workflow --preflight hỗ trợ --expected-task <task-id>; trả về taskSwitched: true và nextStage: stop khi active task khác expectedTask.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-preflight-switch-2",
+        "ev-check-suite-3"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Chuẩn hóa hỗ trợ --file <path> cho workflow --cancel, --learn và các handler còn lại, đảm bảo đọc an toàn file UTF-8 trên Windows.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-preflight-switch-2",
+        "ev-check-suite-3"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Test suite bao phủ đầy đủ kịch bản switch task trong preflight và đọc file payload trên Windows không lỗi encoding.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-preflight-switch-2",
+        "ev-check-suite-3"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "check-preflight-switch",
+      "description": "Verify preflight switch detection and safe UTF-8 file input",
+      "command": "pnpm vitest run test/workflow/preflight-switch-and-file.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-preflight-switch-1",
+      "checkId": "check-preflight-switch",
+      "recordedAt": "2026-10-23T15:59:37.548+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/preflight-switch-and-file.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6bf6477b9daf1822fbe7c0952b16f3133093275e92a4b1c09050d2d039a23783"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T16:01:30.300+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "7effb64b11b6bec071eca004626e995ea4d016bc170dd3405780ea86c6dc0815"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T16:04:42.936+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "751f92e4a1143b09cd03de9e7beb559cb51b804da85a1945766eb89e2626dd83"
+    },
+    {
+      "id": "ev-check-preflight-switch-2",
+      "checkId": "check-preflight-switch",
+      "recordedAt": "2026-10-23T16:06:07.996+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/preflight-switch-and-file.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "34ef8ed27923a4f2e8355ab6273a56206be6d34047ae31c3cebf4ee4bd20eebd"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T16:08:02.170+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "751f92e4a1143b09cd03de9e7beb559cb51b804da85a1945766eb89e2626dd83"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-23T14:51:23.941+07:00",
+  "updatedAt": "2026-10-23T16:08:22.647+07:00",
+  "completedAt": "2026-10-23T16:08:22.647+07:00"
+}

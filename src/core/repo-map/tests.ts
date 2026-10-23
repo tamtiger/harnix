@@ -48,6 +48,33 @@ export function findAffectedTests(map: RepoMapV1, options: RepoMapTestsOptions):
     affectedDistances.set(testPath, 1);
   }
 
+  // 1b. Tests referencing target symbols (e.g. for C# .NET where tests are named by scenario)
+  const targetStem = posix.basename(options.target).replace(/\.[^.]+$/u, "");
+  const targetSymbols = new Set<string>();
+  targetSymbols.add(targetStem);
+  if (!targetStem.startsWith("I") && targetStem.length > 1) {
+    targetSymbols.add(`I${targetStem}`);
+  } else if (targetStem.startsWith("I") && targetStem.length > 1 && /[A-Z]/u.test(targetStem[1]!)) {
+    targetSymbols.add(targetStem.slice(1));
+  }
+  for (const id of targetRecord.identifiers) {
+    targetSymbols.add(id);
+    if (!id.startsWith("I") && id.length > 1) {
+      targetSymbols.add(`I${id}`);
+    } else if (id.startsWith("I") && id.length > 1 && /[A-Z]/u.test(id[1]!)) {
+      targetSymbols.add(id.slice(1));
+    }
+  }
+
+  for (const record of map.records) {
+    if (record.kind !== "test") continue;
+    if (record.identifiers.some((id) => targetSymbols.has(id))) {
+      if (!affectedDistances.has(record.path)) {
+        affectedDistances.set(record.path, 1);
+      }
+    }
+  }
+
   // 2. Reverse dependents traversal up to depth 5
   const visited = new Set<string>([options.target]);
   let frontier = [options.target];

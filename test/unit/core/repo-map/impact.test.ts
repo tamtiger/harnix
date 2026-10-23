@@ -78,6 +78,27 @@ describe("repository map impact", () => {
     for (const limit of [0, 21, 1.5])
       expect(() => createRepoMapImpact(map, { target: "src/target.ts", depth: 2, limit })).toThrow(/limit/iu);
   });
+
+  it("expands dependencies and dependents for C# .cs files through enclosing .csproj ProjectReference (ac-2)", () => {
+    const map = createRepoMap([
+      record("src/App/App.csproj", ["../Domain/Domain.csproj"]),
+      record("src/App/PaymentService.cs"),
+      record("src/Domain/Domain.csproj"),
+      record("src/Domain/PaymentEntity.cs"),
+      record("test/App.Tests/App.Tests.csproj", ["../../src/App/App.csproj"]),
+      record("test/App.Tests/PaymentServiceTests.cs"),
+    ]);
+
+    const result = createRepoMapImpact(map, {
+      target: "src/App/PaymentService.cs",
+      depth: 2,
+      limit: 20,
+    });
+
+    expect(result.status).toBe("ready");
+    expect(result.dependencies).toContain("src/Domain/Domain.csproj");
+    expect(result.dependents.map((d) => d.path)).toContain("test/App.Tests/App.Tests.csproj");
+  });
 });
 
 function record(path: string, importTargets: string[] = []): RepoMapRecordV1 {

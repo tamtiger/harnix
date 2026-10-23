@@ -25,6 +25,8 @@ export interface WorkflowPreflightResultV1 {
   requiredChecks: Record<RequiredCheckState, string[]>;
   retryLimitReached: string[];
   nextStage: "await" | "debug" | "implement" | "plan" | "stop" | "verify";
+  /** Present when --expected-task was passed; true if active task changed or is missing. */
+  taskSwitched?: boolean;
   /** Authoritative time source for agents: current instant and ID prefix in the configured zone. */
   clock: { timezone: string; now: string; idPrefix: string };
   /** Redacted, bounded notes from earlier tasks (at most 5); the source for platforms without hooks. */
@@ -63,6 +65,7 @@ export async function preflightWorkflow(
   root: string,
   now = Date.now(),
   cliVersion?: string,
+  expectedTask?: string,
 ): Promise<WorkflowPreflightResultV1> {
   const routed = await routePreflight(root, now);
   const result =
@@ -70,8 +73,16 @@ export async function preflightWorkflow(
   const skew = cliVersion === undefined ? undefined : await recordedSkew(root, cliVersion);
   const hint = await recordedBaselineHint(root);
   const git = await readGitContext(root);
+  let taskSwitched: boolean | undefined;
+  let nextStage = result.nextStage;
+  if (expectedTask !== undefined) {
+    taskSwitched = result.activeTask === null || result.activeTask.id !== expectedTask;
+    if (taskSwitched) nextStage = "stop";
+  }
   return {
     ...result,
+    nextStage,
+    ...(taskSwitched === undefined ? {} : { taskSwitched }),
     ...(skew === undefined ? {} : { versionSkew: skewMessage(skew) }),
     ...(hint === undefined ? {} : { baselineHint: hint }),
     ...(git === undefined ? {} : { git }),

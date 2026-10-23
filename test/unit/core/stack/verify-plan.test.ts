@@ -286,6 +286,32 @@ describe("buildVerifyPlan scope options", () => {
     expect(plan.packages[0]).toMatchObject({ path: "packages/a", ecosystem: "node", hasTests: true });
     expect(plan.packages.find((pkg) => pkg.path === "packages/docs")?.warning).toMatch(/No tests detected/u);
   });
+
+  it("deduplicates dotnet test packages when parent solution package already runs them", async () => {
+    const root = await createFixture();
+    const sln = [
+      'Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gateway", "src\\Gateway\\Gateway.csproj", "{1}"',
+      "EndProject",
+      'Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Refund.Tests", "test\\Refund.Tests\\Refund.Tests.csproj", "{2}"',
+      "EndProject",
+    ].join("\n");
+    await writeFixture(root, "gateway/Gateway.sln", sln);
+    await writeFixture(root, "gateway/src/Gateway/Gateway.csproj", "<Project />");
+    await writeFixture(
+      root,
+      "gateway/test/Refund.Tests/Refund.Tests.csproj",
+      '<Project><ItemGroup><PackageReference Include="Microsoft.NET.Test.Sdk" Version="17" /></ItemGroup></Project>',
+    );
+    await writeFixture(
+      root,
+      ".harnix/config.yaml",
+      "verify:\n  packages:\n    - path: gateway\n    - path: gateway/test/Refund.Tests\n",
+    );
+
+    const plan = await buildVerifyPlan(root, { recursive: true });
+    expect(plan.packages.map((p) => p.path)).toEqual(["gateway"]);
+    expect(plan.packages[0]?.commands.test).toBe("dotnet test Gateway.sln");
+  });
 });
 
 describe("buildVerifyPlan --changed against git", () => {

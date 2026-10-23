@@ -990,6 +990,7 @@ interface WorkflowPreflightResultV1 {
   requiredChecks: { passed: string[]; failed: string[]; stale: string[]; pending: string[] };
   retryLimitReached: string[];
   nextStage: "await" | "brainstorm" | "check" | "continue" | "debug" | "finish" | "implement" | "stop";
+  taskSwitched?: boolean; // present when --expected-task was passed; true when activeTask differs from expected
   clock: { timezone: string; now: string; idPrefix: string }; // now = ISO 8601 with zone offset; idPrefix = YYYYMMDD-HHMMSS in the configured zone
   learning: { id: string; status: "draft" | "candidate" | "approved"; sources: number; statement: string }[]; // <= 5 redacted notes, statement <= 160 chars
 }

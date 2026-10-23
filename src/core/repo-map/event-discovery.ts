@@ -22,6 +22,38 @@ export interface DiscoveredEvents {
 
 const secretValue = /(?:api[_-]?key|secret|token|password)\s*[=:]\s*[^\s,]{8,}/iu;
 
+const EXCLUDED_DYNAMIC_IDENTIFIERS = new Set([
+  "createdEto",
+  "refundEto",
+  "payload",
+  "data",
+  "topic",
+  "message",
+  "event",
+  "obj",
+  "object",
+  "new",
+  "stoppingToken",
+  "cancellationToken",
+  "token",
+  "default",
+  "null",
+  "this",
+]);
+
+function isExcludedTopic(topic: string): boolean {
+  if (EXCLUDED_DYNAMIC_IDENTIFIERS.has(topic)) return true;
+  if (/^(?:Arg|It|Mock)\.(?:Any|IsAny|Is|Of)\b/u.test(topic)) return true;
+  if (topic.includes("(") || topic.includes(")") || topic.includes("<") || topic.includes(">")) return true;
+  if (
+    /^[a-z][a-zA-Z0-9_]*$/u.test(topic) &&
+    (topic.endsWith("Token") || topic.endsWith("Eto") || topic.endsWith("Payload"))
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export function discoverEvents(content: string): DiscoveredEvents {
   const lines = content.replaceAll("\r\n", "\n").split("\n");
   const routes: DiscoveredRoute[] = [];
@@ -83,7 +115,12 @@ function recordSubscriberTopic(
   source: string,
 ): void {
   const clean = topic?.trim();
-  if (clean && !secretValue.test(clean) && !topics.some((t) => t.line === lineNumber && t.topic === clean)) {
+  if (
+    clean &&
+    !secretValue.test(clean) &&
+    !isExcludedTopic(clean) &&
+    !topics.some((t) => t.line === lineNumber && t.topic === clean)
+  ) {
     topics.push({
       line: lineNumber,
       role: "subscriber",
@@ -103,7 +140,7 @@ function extractCSharpSubscriberTopics(trimmed: string, lineNumber: number, topi
     recordSubscriberTopic(topics, lineNumber, topic, source);
   }
 
-  const csharpSubscriberCallRe = /\b(?:Subscribe|Consume)\s*\(\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))/gu;
+  const csharpSubscriberCallRe = /\b(?:Subscribe)\s*\(\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))/gu;
   for (const match of trimmed.matchAll(csharpSubscriberCallRe)) {
     recordSubscriberTopic(topics, lineNumber, match[1] ?? match[2], "Subscribe");
   }
@@ -130,7 +167,7 @@ function extractPublisherTopics(trimmed: string, lineNumber: number, topics: Dis
     /\b(?:_?capBus|_?bus|_?publisher|_?producer|_?eventBus|kafka|channel|client|[\w$]*(?:Producer|Publisher|Bus|EventBus))\.(?:Publish|PublishAsync|produce|Produce|ProduceAsync|send|publish|emit)\s*\(\s*\{\s*topic\s*:\s*["']([^"']+)["']/gu;
   for (const match of trimmed.matchAll(publisherObjectRe)) {
     const topic = match[1]!.trim();
-    if (topic && !secretValue.test(topic)) {
+    if (topic && !secretValue.test(topic) && !isExcludedTopic(topic)) {
       topics.push({
         line: lineNumber,
         role: "publisher",
@@ -144,7 +181,12 @@ function extractPublisherTopics(trimmed: string, lineNumber: number, topics: Dis
     /\b(?:_?capBus|_?bus|_?publisher|_?producer|_?eventBus|kafka|channel|client|[\w$]*(?:Producer|Publisher|Bus|EventBus))\.(?:Publish|PublishAsync|produce|Produce|ProduceAsync|send|publish|emit|sendToQueue)\s*\(\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))/gu;
   for (const match of trimmed.matchAll(publisherDirectRe)) {
     const topic = (match[1] ?? match[2])?.trim();
-    if (topic && !secretValue.test(topic) && !topics.some((t) => t.line === lineNumber && t.topic === topic)) {
+    if (
+      topic &&
+      !secretValue.test(topic) &&
+      !isExcludedTopic(topic) &&
+      !topics.some((t) => t.line === lineNumber && t.topic === topic)
+    ) {
       topics.push({
         line: lineNumber,
         role: "publisher",
@@ -158,7 +200,12 @@ function extractPublisherTopics(trimmed: string, lineNumber: number, topics: Dis
     /\b(?:Publish|PublishAsync|Produce|ProduceAsync)\s*\(\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))/gu;
   for (const match of trimmed.matchAll(standalonePublishRe)) {
     const topic = (match[1] ?? match[2])?.trim();
-    if (topic && !secretValue.test(topic) && !topics.some((t) => t.line === lineNumber && t.topic === topic)) {
+    if (
+      topic &&
+      !secretValue.test(topic) &&
+      !isExcludedTopic(topic) &&
+      !topics.some((t) => t.line === lineNumber && t.topic === topic)
+    ) {
       topics.push({
         line: lineNumber,
         role: "publisher",

@@ -1,7 +1,9 @@
+import { posix } from "node:path";
+
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath } from "src/utils/paths.js";
 import { buildRepoMapGraph } from "./graph.js";
-import type { RepoMapV1 } from "./types.js";
+import type { RepoMapRecordV1, RepoMapV1 } from "./types.js";
 
 export interface RepoMapImpactOptions {
   readonly target: string;
@@ -33,8 +35,23 @@ export function createRepoMapImpact(map: RepoMapV1, options: RepoMapImpactOption
   if (!map.records.some((record) => record.path === options.target)) return emptyResult("not-found", options);
 
   const graph = buildRepoMapGraph(map.records);
-  const allDependencies = (graph.adjacency.get(options.target) ?? []).filter((path) => path !== options.target);
-  const allDependents = collectDependents(graph.reverseAdjacency, options.target, options.depth);
+  const directDependencies = new Set(
+    (graph.adjacency.get(options.target) ?? []).filter((path) => path !== options.target),
+  );
+  let allDependents = collectDependents(graph.reverseAdjacency, options.target, options.depth);
+
+  if (options.target.endsWith(".cs")) {
+    const enclosingCsproj = findEnclosingCsproj(options.target, map.records);
+    if (enclosingCsproj) {
+      for (const dep of graph.adjacency.get(enclosingCsproj.path) ?? []) {
+        if (dep !== options.target) directDependencies.add(dep);
+      }
+      const projDependents = collectDependents(graph.reverseAdjacency, enclosingCsproj.path, options.depth);
+      allDependents = mergeDependents(allDependents, projDependents, options.target);
+    }
+  }
+
+  const allDependencies = [...directDependencies].sort(compareCodeUnits);
   const dependencies = allDependencies.slice(0, options.limit);
   const dependents = allDependents.slice(0, options.limit);
 
@@ -53,6 +70,48 @@ export function createRepoMapImpact(map: RepoMapV1, options: RepoMapImpactOption
       dependents: allDependents.length > dependents.length,
     },
   };
+}
+
+function findEnclosingCsproj(targetPath: string, records: readonly RepoMapRecordV1[]): RepoMapRecordV1 | undefined {
+  const targetDir = posix.dirname(targetPath);
+  const csprojRecords = records.filter(
+    (record) => record.extension === "csproj" || record.path.endsWith(".csproj"),
+  );
+  let best: RepoMapRecordV1 | undefined;
+  let bestDepth = -1;
+  for (const record of csprojRecords) {
+    const csprojDir = posix.dirname(record.path);
+    if (targetDir === csprojDir || targetDir.startsWith(`${csprojDir}/`)) {
+      const depth = csprojDir === "." ? 0 : csprojDir.split("/").length;
+      if (depth > bestDepth) {
+        best = record;
+        bestDepth = depth;
+      }
+    }
+  }
+  return best;
+}
+
+function mergeDependents(
+  direct: Array<{ path: string; distance: number }>,
+  indirect: Array<{ path: string; distance: number }>,
+  target: string,
+): Array<{ path: string; distance: number }> {
+  const distanceMap = new Map<string, number>();
+  for (const item of direct) {
+    if (item.path !== target) distanceMap.set(item.path, item.distance);
+  }
+  for (const item of indirect) {
+    if (item.path !== target) {
+      const current = distanceMap.get(item.path);
+      if (current === undefined || item.distance < current) {
+        distanceMap.set(item.path, item.distance);
+      }
+    }
+  }
+  return [...distanceMap.entries()]
+    .map(([path, distance]) => ({ path, distance }))
+    .sort((left, right) => left.distance - right.distance || compareCodeUnits(left.path, right.path));
 }
 
 export function createUnavailableRepoMapImpact(

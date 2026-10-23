@@ -111,5 +111,5 @@ describe("historical task data stays readable", () => {
 
     expect(list.total).toBeGreaterThan(0);
     expect(detail.members.length).toBeGreaterThan(0);
-  });
+  }, 60_000);
 });

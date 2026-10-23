@@ -74,4 +74,21 @@ describe("repo-map inventory", () => {
     expect(() => assertRepoMapLimits({ ...defaultRepoMapLimits, maxFiles: 0 })).toThrow(/maxFiles/u);
     expect(() => assertRepoMapLimits({ ...defaultRepoMapLimits, concurrency: 1.5 })).toThrow(/concurrency/u);
   });
+
+  it("skips files and directories matching .harnixignore", async () => {
+    const root = await temporaryRepository();
+    await put(root, ".harnixignore", "SignTest\nscratch/\n*.draft.ts\n");
+    await put(root, "src/index.ts", "export const x = 1;\n");
+    await put(root, "SignTest/script.cs", "class Script {}\n");
+    await put(root, "scratch/notes.txt", "notes\n");
+    await put(root, "src/feature.draft.ts", "export const draft = 1;\n");
+
+    const inventory = await inventoryRepository(root);
+    const indexedPaths = inventory.files.map((f) => f.path);
+
+    expect(indexedPaths).toEqual(["src/index.ts"]);
+    expect(inventory.skipped).toContain("SignTest/script.cs");
+    expect(inventory.skipped).toContain("scratch/notes.txt");
+    expect(inventory.skipped).toContain("src/feature.draft.ts");
+  });
 });

@@ -202,4 +202,46 @@ public class OrderController {
     expect(tokens).toContain("CapSubscribe");
     expect(tokens).toContain("Route");
   });
+
+  it("filters dynamic identifiers, stoppingToken and mock expressions from Kafka/CAP topics (ac-4)", () => {
+    const csCode = `
+// Confluent.Kafka consume with stoppingToken must be ignored
+var consumeResult = consumer.Consume(stoppingToken);
+var result2 = consumer.Consume(cancellationToken);
+
+// Dynamic payload / variable produces must be ignored
+await publishService.ProduceAsync(createdEto);
+await publishService.ProduceAsync(refundEto);
+await _kafkaProducer.PublishAsync(topic, payload);
+await _capBus.PublishAsync(data, object);
+await _kafkaProducer.PublishAsync(new { Id = 1 });
+
+// Unit test mocks must be ignored
+_kafkaProducer.PublishAsync(Arg.Any<string>(), payload);
+_kafkaProducer.PublishAsync(It.IsAny<string>(), payload);
+
+// Real topics must still be captured
+await _kafkaProducer.PublishAsync("orders.created", payload);
+consumer.Subscribe("orders.incoming");
+consumer.Subscribe(KafkaTopics.WebhookFinished);
+`;
+    const events = discoverEvents(csCode);
+    const topics = events.topics.map((t) => t.topic);
+
+    expect(topics).not.toContain("stoppingToken");
+    expect(topics).not.toContain("cancellationToken");
+    expect(topics).not.toContain("createdEto");
+    expect(topics).not.toContain("refundEto");
+    expect(topics).not.toContain("topic");
+    expect(topics).not.toContain("payload");
+    expect(topics).not.toContain("data");
+    expect(topics).not.toContain("object");
+    expect(topics).not.toContain("new");
+    expect(topics).not.toContain("Arg.Any");
+    expect(topics).not.toContain("It.IsAny");
+
+    expect(topics).toContain("orders.created");
+    expect(topics).toContain("orders.incoming");
+    expect(topics).toContain("KafkaTopics.WebhookFinished");
+  });
 });

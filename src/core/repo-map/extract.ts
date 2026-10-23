@@ -65,8 +65,12 @@ function identifiers(content: string): string[] {
       /\b(?:class|interface|function|enum|type|namespace|record|struct|const|let|var)\s+([A-Za-z_$][\w$]*)/gu,
     ),
   ].map((match) => match[1] ?? "");
+  const testRefs = [
+    ...content.matchAll(/\b(?:new|typeof)\s+([A-Za-z_$][\w$]*)/gu),
+    ...content.matchAll(/\b(?:Mock|Substitute\.For|A\.Fake)\s*<\s*([A-Za-z_$][\w$]*)/gu),
+  ].map((match) => match[1] ?? "");
   const routeAndTopicIds = extractRouteAndTopicIdentifiers(content);
-  return bounded([...codeIds, ...routeAndTopicIds], 48, 96);
+  return bounded([...codeIds, ...testRefs, ...routeAndTopicIds], 48, 96);
 }
 
 function imports(content: string): string[] {

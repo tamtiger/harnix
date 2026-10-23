@@ -98,7 +98,11 @@ export async function replaceCheckWorkflow(
   if (oldCheck === undefined) throw new Error(`Workflow check to replace ${input.oldId} is not declared.`);
   if (input.oldId === input.newId) throw new Error("Replacement check ID must differ from the check being replaced.");
   if (!oldCheck.required) throw new Error(`Workflow check ${input.oldId} is not a required check.`);
-  if (task.evidence.some((evidence) => evidence.checkId === input.oldId && evidence.result === "pass"))
+  const latestEvidence = task.evidence
+    .filter((evidence) => evidence.checkId === input.oldId && evidence.result !== "skipped")
+    .sort((a, b) => Date.parse(a.recordedAt) - Date.parse(b.recordedAt))
+    .at(-1);
+  if (latestEvidence?.result === "pass")
     throw new Error(`Workflow cannot replace check ${input.oldId} after passing evidence.`);
 
   const retiredOld: ValidationCheckV3 = { ...oldCheck, required: false };

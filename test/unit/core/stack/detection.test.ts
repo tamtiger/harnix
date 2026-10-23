@@ -391,4 +391,19 @@ describe("detectProject packages beyond package.json", () => {
 
     expect(result.packages.map((pkg) => pkg.path)).toEqual(["svc"]);
   });
+
+  it("ignores directories specified in .harnixignore from project detection (such as SignTest)", async () => {
+    const root = await createFixture();
+    await writeFixtureFile(root, ".harnixignore", "SignTest\nscratch/\n");
+    await writeFixtureFile(root, "svc/package.json", JSON.stringify({ name: "svc" }));
+    await writeFixtureFile(root, "svc/index.ts", "export const svc = 1;");
+    await writeFixtureFile(root, "SignTest/SignTest.csproj", '<Project Sdk="Microsoft.NET.Sdk" />');
+    await writeFixtureFile(root, "SignTest/Program.cs", "class Program {}");
+    await writeFixtureFile(root, "scratch/test.py", "print('scratch')");
+
+    const result = await detectProject(root);
+
+    expect(result.packages.map((pkg) => pkg.path)).toEqual(["svc"]);
+    expect(result.languages).toEqual(["typescript"]);
+  });
 });

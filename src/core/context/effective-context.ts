@@ -74,6 +74,17 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
   const renderCap = getPlatform(input.platform).contextRenderCap ?? Math.min(input.config.context.maxCharacters, 8_000);
   const bounded = input.forceBounded === true;
   const maxEntries = bounded ? MAX_HOOK_CONTEXT_ENTRIES : Number.POSITIVE_INFINITY;
+  const isLean =
+    input.config.context.mode === "lean" || (!input.config.context.mode && !input.config.runtime.fullContext);
+  const pointerOptions = bounded
+    ? {
+        prefixes: isLean ? [""] : [GUIDE_POINTER_PREFIX],
+        minCharacters: isLean ? 0 : POINTER_MIN_CHARACTERS,
+      }
+    : isLean
+      ? { prefixes: [""], minCharacters: 0 }
+      : undefined;
+
   const output = await buildContext(
     input.projectRoot,
     entries,
@@ -89,17 +100,27 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
     },
     bounded ? false : input.config.runtime.fullContext,
     bounded ? MAX_HOOK_CONTEXT_ENTRIES : undefined,
-    bounded ? { prefixes: [GUIDE_POINTER_PREFIX], minCharacters: POINTER_MIN_CHARACTERS } : undefined,
+    pointerOptions,
   );
 
   const learning = await learningBlock(input);
+  const header = isLean ? taskSummaryHeader(input.task) : undefined;
   return {
-    text: withLearning(output.text, learning),
+    text: withLearning(output.text, learning, header),
     manifest: output.manifest,
     budget: { maxCharacters: renderCap, maxEntries },
     candidates: entries.length,
     reasonCodesByPath: reasonCodes(entries, input.task.relevantPaths, guidePaths, persisted !== undefined),
   };
+}
+
+function taskSummaryHeader(task: TaskRecord): string {
+  return [
+    `[Active Task: ${task.id} (${task.mode})]`,
+    `Status: ${task.status}/${task.checkpoint}`,
+    `Title: ${task.title}`,
+    `Goal: ${task.goal}`,
+  ].join("\n");
 }
 
 /**
@@ -125,11 +146,13 @@ async function unreviewedLearningBlock(input: EffectiveContextInput): Promise<st
   }
 }
 
-/** Learning goes first inside the untrusted frame so the size budget trims file excerpts before it. */
-function withLearning(text: string, learning: string): string {
-  if (learning.length === 0) return text;
-  if (text.length === 0) return `${UNTRUSTED_CONTEXT_PREFIX}\n${learning}${UNTRUSTED_CONTEXT_SUFFIX}`;
-  return `${UNTRUSTED_CONTEXT_PREFIX}\n${learning}\n\n${text.slice(UNTRUSTED_CONTEXT_PREFIX.length)}`;
+/** Learning and task header go first inside the untrusted frame so the size budget trims file excerpts before it. */
+function withLearning(text: string, learning: string, taskHeader?: string): string {
+  const parts = [taskHeader, learning].filter((part): part is string => Boolean(part && part.length > 0));
+  const lead = parts.join("\n\n");
+  if (lead.length === 0) return text;
+  if (text.length === 0) return `${UNTRUSTED_CONTEXT_PREFIX}\n${lead}${UNTRUSTED_CONTEXT_SUFFIX}`;
+  return `${UNTRUSTED_CONTEXT_PREFIX}\n${lead}\n\n${text.slice(UNTRUSTED_CONTEXT_PREFIX.length)}`;
 }
 
 async function loadPersistedEntries(harnixRoot: string, taskId: string): Promise<ContextEntry[] | undefined> {

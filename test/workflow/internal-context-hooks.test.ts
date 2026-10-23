@@ -23,7 +23,9 @@ describe("internal context hooks", () => {
   it("returns empty output for an uninitialized project and JSON for Codex", async () => {
     const root = await temporaryRepository();
     expect(await renderInternalContext(root, "kiro")).toBe("");
-    await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" }));
+    const config = createConfig({ developer: "tam" });
+    config.context.mode = "full";
+    await writeConfig(join(root, ".harnix", "config.yaml"), config);
     await mkdir(join(root, "docs"), { recursive: true });
     await writeFile(join(root, "docs", "a.md"), "context");
     const task: TaskRecord = buildTaskV1({
@@ -46,7 +48,9 @@ describe("internal context hooks", () => {
   });
   it("bounds Codex hook context and fails closed for corrupt Harnix state", async () => {
     const root = await temporaryRepository();
-    await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" }));
+    const config = createConfig({ developer: "tam" });
+    config.context.mode = "full";
+    await writeConfig(join(root, ".harnix", "config.yaml"), config);
     await mkdir(join(root, "docs"), { recursive: true });
     await writeFile(join(root, "docs", "large.md"), "x".repeat(10_000));
     const task: TaskRecord = buildTaskV1({
@@ -130,7 +134,9 @@ describe("internal context hooks", () => {
 
   it("should_emit_plain_text_for_claude_and_stay_a_no_op_outside_an_initialized_project", async () => {
     const root = await temporaryRepository();
-    await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" }));
+    const config = createConfig({ developer: "tam" });
+    config.context.mode = "full";
+    await writeConfig(join(root, ".harnix", "config.yaml"), config);
     await mkdir(join(root, "docs"), { recursive: true });
     await writeFile(join(root, "docs", "a.md"), "context");
     const task: TaskRecord = buildTaskV1({
@@ -201,7 +207,9 @@ describe("internal context hooks", () => {
 
   it("should_only_inject_antigravity_context_for_the_first_invocation", async () => {
     const root = await temporaryRepository();
-    await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" }));
+    const config = createConfig({ developer: "tam" });
+    config.context.mode = "full";
+    await writeConfig(join(root, ".harnix", "config.yaml"), config);
     await mkdir(join(root, "docs"), { recursive: true });
     await writeFile(join(root, "docs", "context.md"), "first invocation context");
     const task: TaskRecord = buildTaskV1({
@@ -252,7 +260,9 @@ describe("internal context hooks", () => {
 
   it("embeds short task files and points to long ones instead of pasting them", async () => {
     const root = await temporaryRepository();
-    await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" }));
+    const config = createConfig({ developer: "tam" });
+    config.context.mode = "full";
+    await writeConfig(join(root, ".harnix", "config.yaml"), config);
     await mkdir(join(root, "docs"), { recursive: true });
     await writeFile(join(root, "docs", "short.md"), "SHORT BODY MARKER");
     await writeFile(join(root, "docs", "long.md"), "LONG BODY MARKER ".repeat(200));

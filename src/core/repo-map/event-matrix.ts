@@ -90,7 +90,10 @@ async function scanFilesForEvents(
   pathPrefix: string | undefined,
   topicMap: Map<string, TopicAccumulator>,
 ): Promise<void> {
+  const constants = await collectConstants(files);
+
   for (const file of files) {
+    if (isTestPath(file.path)) continue;
     const ext = extname(file.path).slice(1).toLowerCase();
     if (!sourceExtensions.has(ext)) continue;
 
@@ -110,10 +113,11 @@ async function scanFilesForEvents(
     const resolvedFilePath = pathPrefix ? `${pathPrefix}/${file.path}` : file.path;
 
     for (const t of events.topics) {
-      let entry = topicMap.get(t.topic);
+      const topicName = constants.get(t.topic) ?? t.topic;
+      let entry = topicMap.get(topicName);
       if (!entry) {
         entry = { publishers: [], subscribers: [] };
-        topicMap.set(t.topic, entry);
+        topicMap.set(topicName, entry);
       }
       const participant: EventMatrixParticipant = {
         file: resolvedFilePath,
@@ -126,6 +130,68 @@ async function scanFilesForEvents(
       } else {
         entry.subscribers.push(participant);
       }
+    }
+  }
+}
+
+function isTestPath(path: string): boolean {
+  const normalized = path.replaceAll("\\", "/").toLowerCase();
+  const segments = normalized.split("/");
+  if (
+    segments.some(
+      (seg) =>
+        /^(tests?|specs?|__tests__)$/iu.test(seg) ||
+        /(^|[._-])(tests?|specs?)$/iu.test(seg) ||
+        /[a-z](tests?|specs?)$/u.test(seg),
+    )
+  ) {
+    return true;
+  }
+  const basename = segments.at(-1) ?? "";
+  return /(?:[._-](?:test|spec)|tests?|specs?)\.[^.]+$/iu.test(basename);
+}
+
+async function collectConstants(files: readonly RepoMapInventoryFile[]): Promise<Map<string, string>> {
+  const constants = new Map<string, string>();
+  for (const file of files) {
+    if (isTestPath(file.path)) continue;
+    const ext = extname(file.path).slice(1).toLowerCase();
+    if (ext !== "cs" && ext !== "ts" && ext !== "js") continue;
+    let content: string;
+    try {
+      content = await readFile(file.absolutePath, "utf8");
+    } catch {
+      continue;
+    }
+    extractFileConstants(content, constants);
+  }
+  return constants;
+}
+
+function extractFileConstants(content: string, map: Map<string, string>): void {
+  const classMatches = [
+    ...content.matchAll(
+      /\b(?:class|interface|struct|record)\s+([A-Za-z0-9_]+)\b([\s\S]*?)(?=\b(?:class|interface|struct|record)\s+[A-Za-z0-9_]+\b|$)/gu,
+    ),
+  ];
+  if (classMatches.length > 0) {
+    for (const match of classMatches) {
+      const className = match[1]!;
+      const classBody = match[2]!;
+      const constMatches = classBody.matchAll(
+        /\b(?:const|readonly)\s+(?:string\s+)?([A-Za-z0-9_]+)\s*=\s*["']([^"']+)["']/gu,
+      );
+      for (const cm of constMatches) {
+        map.set(`${className}.${cm[1]!}`, cm[2]!);
+        map.set(cm[1]!, cm[2]!);
+      }
+    }
+  } else {
+    const constMatches = content.matchAll(
+      /\b(?:const|readonly)\s+(?:string\s+)?([A-Za-z0-9_]+)\s*=\s*["']([^"']+)["']/gu,
+    );
+    for (const cm of constMatches) {
+      map.set(cm[1]!, cm[2]!);
     }
   }
 }

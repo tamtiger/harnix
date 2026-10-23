@@ -7,6 +7,7 @@ import { evaluateFacts, type CollectedFile, type DependencyFact, type DetectionF
 import { IGNORED_DIRECTORY_NAMES } from "./ignored-directories.js";
 import { projectLanguages, selectedLanguages } from "./language-selection.js";
 import { findPackageRoots } from "./package-roots.js";
+import { loadHarnixIgnore, type HarnixIgnore } from "./harnix-ignore.js";
 
 export type { DetectionMatch, LanguageId, TechnologyId } from "src/catalog/catalog.js";
 export type PackageManager = "pnpm" | "yarn" | "npm" | "bun";
@@ -44,7 +45,8 @@ const maxReadableBytes = 256 * 1024;
 
 export async function detectProject(projectRoot: string): Promise<ProjectDetection> {
   const root = resolve(projectRoot);
-  const files = await collectFiles(root, root, 0, []);
+  const ignore = await loadHarnixIgnore(root);
+  const files = await collectFiles(root, root, 0, [], ignore);
   const dependencies = await collectDependencies(files);
   const facts = { files, dependencies };
   const matches = await evaluateFacts(facts);
@@ -64,17 +66,19 @@ async function collectFiles(
   directory: string,
   depth: number,
   collected: CollectedFile[],
+  ignore?: HarnixIgnore,
 ): Promise<CollectedFile[]> {
   if (depth > maxDepth || collected.length >= maxFiles) return collected;
   const entries = await readdir(directory, { withFileTypes: true });
   for (const entry of entries.sort((left, right) => compareCodeUnits(left.name, right.name))) {
     if (collected.length >= maxFiles || entry.isSymbolicLink()) continue;
     const absolute = resolve(directory, entry.name);
+    const relToRoot = relative(root, absolute).replaceAll("\\", "/");
+    if (ignore?.ignores(relToRoot)) continue;
     if (entry.isDirectory()) {
-      if (!ignoredDirectoryNames.has(entry.name)) await collectFiles(root, absolute, depth + 1, collected);
+      if (!ignoredDirectoryNames.has(entry.name)) await collectFiles(root, absolute, depth + 1, collected, ignore);
     } else if (entry.isFile()) {
-      const path = relative(root, absolute).replaceAll("\\", "/");
-      if (path.length > 0 && !path.startsWith("../")) collected.push({ absolute, path });
+      if (relToRoot.length > 0 && !relToRoot.startsWith("../")) collected.push({ absolute, path: relToRoot });
     }
   }
   return collected.sort((left, right) => compareCodeUnits(left.path, right.path));

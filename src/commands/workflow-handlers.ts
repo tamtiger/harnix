@@ -95,7 +95,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
   ...EDIT_HANDLERS,
   inspect: ({ root }) => inspectWorkflow(root),
   preflight: async ({ root, flags }) => {
-    const result = await preflightWorkflow(root, undefined, packageVersion);
+    const result = await preflightWorkflow(root, undefined, packageVersion, flags.expectedTask);
     return flags.brief === true ? briefPreflight(result) : result;
   },
   schema: () => Promise.resolve(workflowEnvelopeSchema()),
@@ -231,9 +231,19 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
   },
   setPaths: async (context) => {
     const { flags, root } = context;
+    let paths = (flags.relevantPath?.length ?? 0) > 0 ? flags.relevantPath : undefined;
+    let specs = (flags.relevantSpec?.length ?? 0) > 0 ? flags.relevantSpec : undefined;
+    if (flags.file !== undefined) {
+      const input = await readInput(context);
+      const parsed = parseJson(input, "Workflow set-paths requires valid JSON.", true) as
+        | { paths?: string[]; specs?: string[] }
+        | undefined;
+      if (parsed?.paths !== undefined) paths = parsed.paths;
+      if (parsed?.specs !== undefined) specs = parsed.specs;
+    }
     const task = await setPathsWorkflow(root, {
-      paths: (flags.relevantPath?.length ?? 0) > 0 ? flags.relevantPath : undefined,
-      specs: (flags.relevantSpec?.length ?? 0) > 0 ? flags.relevantSpec : undefined,
+      paths,
+      specs,
     });
     return presentTask(context, task);
   },

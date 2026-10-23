@@ -42,7 +42,7 @@ export interface HarnixConfigV1 {
   languages: LegacyStackId[];
   packages: LegacyPackageConfig[];
   platforms: PlatformId[];
-  context: { maxCharacters: number; tokenApproximation: number; [key: string]: unknown };
+  context: { maxCharacters: number; tokenApproximation: number; mode?: "lean" | "full"; [key: string]: unknown };
   runtime: { research: "conditional"; fullContext: boolean; [key: string]: unknown };
   [key: string]: unknown;
 }
@@ -57,7 +57,7 @@ export interface HarnixConfigV2 {
   platforms: PlatformId[];
   /** IANA zone for every persisted timestamp; absent in older configs, which then use the system zone. */
   timezone?: string;
-  context: { maxCharacters: number; tokenApproximation: number; [key: string]: unknown };
+  context: { maxCharacters: number; tokenApproximation: number; mode?: "lean" | "full"; [key: string]: unknown };
   runtime: { research: "conditional"; fullContext: boolean; [key: string]: unknown };
   verify?: VerifyConfig;
   [key: string]: unknown;
@@ -116,7 +116,7 @@ export const topLevelKeys = new Set([
 ]);
 
 export const packageKeys = new Set(["path", "languages", "technologies"]);
-export const contextKeys = new Set(["maxCharacters", "tokenApproximation"]);
+export const contextKeys = new Set(["maxCharacters", "tokenApproximation", "mode"]);
 export const runtimeKeys = new Set(["research", "fullContext"]);
 export const verifyKeys = new Set(["test", "lint", "typecheck", "format", "suite", "packages"]);
 export const packageVerifyKeys = new Set(["path", "test", "lint", "typecheck", "format", "suite"]);

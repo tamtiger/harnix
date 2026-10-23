@@ -189,4 +189,70 @@ consumer.subscribe({ topic: "payment.completed" });
       /requires (?:at most|exactly) one of/iu,
     );
   });
+
+  it("excludes test files from event matrix to eliminate mock calls (ac-3)", async () => {
+    const root = await temporaryRepository();
+    await writeSource(
+      root,
+      "src/PaymentService.cs",
+      `
+public class PaymentService {
+    public async Task Pay() {
+        await _producer.PublishAsync("payment.success", new {});
+    }
+}
+`,
+    );
+    await writeSource(
+      root,
+      "test/PaymentServiceTests.cs",
+      `
+public class PaymentServiceTests {
+    public void Test() {
+        _producer.PublishAsync("mock.topic.test", new {});
+    }
+}
+`,
+    );
+
+    const result = await buildProjectEventMatrix(root);
+    const topics = result.matrix.map((m) => m.topic);
+    expect(topics).toContain("payment.success");
+    expect(topics).not.toContain("mock.topic.test");
+  });
+
+  it("resolves constant topic identifiers to string values in event matrix (ac-5)", async () => {
+    const root = await temporaryRepository();
+    await writeSource(
+      root,
+      "src/Common/KafkaTopics.cs",
+      `
+public static class KafkaTopics {
+    public const string WebhookFinished = "paymenthub.webhook.finished";
+    public const string DiscountSaved = "paymenthub.transactionstore.discount.saved";
+}
+`,
+    );
+    await writeSource(
+      root,
+      "src/Consumers/WebhookConsumer.cs",
+      `
+public class WebhookConsumer {
+    [CapSubscribe(KafkaTopics.WebhookFinished)]
+    public void OnWebhook() {}
+
+    public async Task Process() {
+        await _bus.PublishAsync(KafkaTopics.DiscountSaved, new {});
+    }
+}
+`,
+    );
+
+    const result = await buildProjectEventMatrix(root);
+    const topics = result.matrix.map((m) => m.topic);
+    expect(topics).toContain("paymenthub.webhook.finished");
+    expect(topics).toContain("paymenthub.transactionstore.discount.saved");
+    expect(topics).not.toContain("KafkaTopics.WebhookFinished");
+    expect(topics).not.toContain("KafkaTopics.DiscountSaved");
+  });
 });

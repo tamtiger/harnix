@@ -4,6 +4,21 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.18.0] - 2026-10-23
+
+### Fixed
+
+- Fix .NET double testing in verify-plan and add .harnixignore support
+
+### Changed
+
+- Nâng cấp Repo-Map cho C# .NET: quét test qua symbol reference, mở rộng impact qua .csproj và lọc event topic
+- Tối ưu hóa Token Hook: Chuyển sang Lean Context Injection và hỗ trợ context.mode lean/full
+
+### Added
+
+- Gia cố môi trường enterprise .NET, chống double-testing verify-plan, hỗ trợ .harnixignore, sửa lỗi symbol test C#, lean context injection và phát hiện task switch ngầm
+
 ## [2.17.1] - 2026-10-22
 
 ### Fixed

@@ -48,10 +48,16 @@ const taskOwner: FlagOwner = {
 /** Flags that only make sense with specific actions; anything else is rejected before any state is read. */
 export const FLAG_OWNERS: readonly FlagOwner[] = [
   {
+    name: "--expected-task",
+    isSet: (f) => f.expectedTask !== undefined,
+    actions: ["preflight"],
+    hint: "workflow --preflight",
+  },
+  {
     name: "--file",
     isSet: (f) => f.file !== undefined,
-    actions: ["save", "batch", "migrate", "evidence", "cancel", "learn", "init"],
-    hint: "workflow --save, --batch, --migrate, --evidence, --cancel, --learn or --init",
+    actions: ["save", "batch", "migrate", "evidence", "cancel", "learn", "init", "setPaths"],
+    hint: "workflow --save, --batch, --migrate, --evidence, --cancel, --learn, --init or --set-paths",
   },
   {
     name: "--result",

@@ -1,0 +1,187 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261023-145051-verify-plan-deduplication-and-harnixignore",
+  "title": "Tối ưu hóa Verify Plan trên .NET và hỗ trợ cấu hình .harnixignore",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khắc phục hiện tượng chạy test trùng lặp (double testing) trong verify-plan --recursive khi solution cha đã chứa các project con, đồng thời bổ sung cơ chế đọc file cấu hình .harnixignore ở project root để loại trừ các thư mục rác / scratch script / công cụ nội bộ khỏi stack detection và verify plan.",
+  "nonGoals": [],
+  "epicId": "20261023-141853-enterprise-dotnet-and-context-hardening",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "verify-plan --recursive gộp test command ở cấp .sln cao nhất, tự động loại trừ các test project con đã được solution cover để tránh double testing.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-workspace-dedup-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Harnix hỗ trợ đọc file .harnixignore ở project root (hỗ trợ glob pattern) và bỏ qua các đường dẫn tương ứng trong stack detection, workspace detection và repo-map inventory.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-harnixignore-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Test suite bao phủ trường hợp solution .NET đa tầng, kiểm chứng không còn cảnh báo sai cho thư mục như SignTest khi được khai báo trong .harnixignore hoặc không có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-harnixignore-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-harnixignore",
+      "description": "Kiểm tra cơ chế bỏ qua file theo cấu hình .harnixignore",
+      "command": "pnpm vitest run test/unit/core/stack/detection.test.ts test/unit/core/repo-map/inventory.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/repo-map/inventory.ts",
+        "src/core/stack/**",
+        "test/unit/core/repo-map/inventory.test.ts",
+        "test/unit/core/stack/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": false,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite-v2",
+      "description": "Replacement for check-suite",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test"
+    },
+    {
+      "id": "check-workspace-dedup",
+      "description": "Kiểm tra khử trùng lặp test giữa solution và test projects",
+      "command": "pnpm vitest run test/unit/core/stack/workspace-detection.test.ts test/unit/core/stack/verify-plan.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/stack/**",
+        "test/unit/core/stack/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-workspace-dedup-1",
+      "checkId": "check-workspace-dedup",
+      "recordedAt": "2026-10-23T15:05:41.304+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/stack/workspace-detection.test.ts test/unit/core/stack/verify-plan.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1f891825ab2adf91e91d1ea569f5de147b02a1d82f5b436aa968226dd3784cd8"
+    },
+    {
+      "id": "ev-check-harnixignore-1",
+      "checkId": "check-harnixignore",
+      "recordedAt": "2026-10-23T15:05:50.864+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/stack/detection.test.ts test/unit/core/repo-map/inventory.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d8f6bc57f820fc0fd7775dce0f6e09c52a676feeb5b8b849c75f2b5428c57b47"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T15:08:28.947+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "827d93738fdf559a4f2a343339107a163955696ca5f78dbddc0a34895a471c9c"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T15:11:47.337+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "72225ba4654a53cf85fcfbb8a31dbd79eb69c795370b3abf0defb3c3b8ca18b3"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T15:14:25.718+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "827d93738fdf559a4f2a343339107a163955696ca5f78dbddc0a34895a471c9c"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-23T15:26:07.438+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Bổ sung package.json vào inputs và thử lại toàn bộ test suite sau khi đồng bộ SKILL.md",
+      "artifactPaths": [
+        ".harnix/tasks/20261023-145051-verify-plan-deduplication-and-harnixignore/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-suite-v2-1",
+      "checkId": "check-suite-v2",
+      "recordedAt": "2026-10-23T15:28:05.601+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "328aab58e556f3f18ab2eb05c141522e1b805ff79e819c89f05c222bd48af480"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/repo-map/inventory.ts",
+    "src/core/stack/detection.ts",
+    "src/core/stack/verify-plan.ts",
+    "src/core/stack/workspace-detection.ts",
+    "test/unit/core/stack/verify-plan.test.ts",
+    "test/unit/core/stack/workspace-detection.test.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-23T14:50:51.696+07:00",
+  "updatedAt": "2026-10-23T15:28:24.688+07:00",
+  "completedAt": "2026-10-23T15:28:24.688+07:00"
+}

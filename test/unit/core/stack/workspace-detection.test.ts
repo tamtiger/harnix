@@ -240,4 +240,36 @@ describe("detectWorkspaces with solutions and other manifests", () => {
 
     expect(workspaces.map((w) => [w.path, w.ecosystem])).toEqual([["src/Web", "node"]]);
   });
+
+  it("ignores packages in directories listed in .harnixignore", async () => {
+    const root = await createFixture();
+    await writeFixture(root, ".harnixignore", "SignTest\nscratch/\n");
+    await writeFixture(root, "apps/web/package.json", JSON.stringify({ name: "web" }));
+    await writeFixture(root, "SignTest/SignTest.csproj", '<Project Sdk="Microsoft.NET.Sdk" />');
+    await writeFixture(root, "scratch/tool/package.json", JSON.stringify({ name: "tool" }));
+
+    const workspaces = await detectWorkspaces(root, { recursive: true });
+    expect(workspaces.map((w) => w.path)).toEqual(["apps/web"]);
+  });
+
+  it("does not duplicate test project packages when solution covers them across case differences or deep nesting", async () => {
+    const root = await createFixture();
+    const sln = [
+      'Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gateway", "src\\Gateway\\Gateway.csproj", "{1}"',
+      "EndProject",
+      'Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Refund.Tests", "Test\\Refund.Tests\\Refund.Tests.csproj", "{2}"',
+      "EndProject",
+    ].join("\n");
+    await writeFixture(root, "services/gateway/Gateway.sln", sln);
+    await writeFixture(root, "services/gateway/src/Gateway/Gateway.csproj", "<Project />");
+    await writeFixture(
+      root,
+      "services/gateway/test/Refund.Tests/Refund.Tests.csproj",
+      '<Project><ItemGroup><PackageReference Include="Microsoft.NET.Test.Sdk" Version="17" /></ItemGroup></Project>',
+    );
+
+    const workspaces = await detectWorkspaces(root, { recursive: true });
+    expect(workspaces.map((w) => w.path)).toEqual(["services/gateway"]);
+    expect(workspaces[0]?.commands.test).toBe("dotnet test Gateway.sln");
+  });
 });

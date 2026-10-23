@@ -146,6 +146,73 @@ describe("unreviewed learning in the effective context", () => {
   });
 });
 
+describe("lean context injection and token optimization (ac-1, ac-2, ac-3)", () => {
+  it("renders lean metadata context by default when context.mode is lean or omitted (ac-1 & ac-3)", async () => {
+    const root = await temporaryRepository();
+    const harnixRoot = join(root, ".harnix");
+    await mkdir(harnixRoot, { recursive: true });
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(join(root, "src", "service.ts"), "const heavyServiceCode = 1;\n".repeat(30));
+    const config = createConfig({ developer: "tam" });
+    const task = buildTaskV3({
+      id: "20261023-120000-sample-task",
+      title: "Sample Task Title",
+      status: "in_progress",
+      checkpoint: "implementing",
+      goal: "Sample Task Goal for lean verification",
+      relevantPaths: ["src/service.ts"],
+    });
+
+    const result = await buildEffectiveContext({
+      projectRoot: root,
+      harnixRoot,
+      config,
+      task,
+      platform: "codex",
+      forceBounded: true,
+    });
+
+    expect(result.text).toContain("[Active Task: 20261023-120000-sample-task (lite)]");
+    expect(result.text).toContain("Status: in_progress/implementing");
+    expect(result.text).toContain("Title: Sample Task Title");
+    expect(result.text).toContain("Goal: Sample Task Goal for lean verification");
+    expect(result.text).toContain("--- src/service.ts ---");
+    expect(result.text).toContain("(pointer, 840 characters; read it when it matches the files you change)");
+    expect(result.text).not.toContain("const heavyServiceCode = 1;");
+    expect(result.text.length).toBeLessThan(1_500);
+  });
+
+  it("supports context.mode: 'full' in config to dump raw source code bodies (ac-2)", async () => {
+    const root = await temporaryRepository();
+    const harnixRoot = join(root, ".harnix");
+    await mkdir(harnixRoot, { recursive: true });
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(join(root, "src", "service.ts"), "const rawFullCode = 42;");
+    const config = createConfig({ developer: "tam" });
+    config.context.mode = "full";
+    const task = buildTaskV3({
+      id: "20261023-120001-full-task",
+      title: "Full Task Title",
+      status: "in_progress",
+      checkpoint: "implementing",
+      goal: "Full Task Goal",
+      relevantPaths: ["src/service.ts"],
+    });
+
+    const result = await buildEffectiveContext({
+      projectRoot: root,
+      harnixRoot,
+      config,
+      task,
+      platform: "codex",
+      forceBounded: true,
+    });
+
+    expect(result.text).toContain("const rawFullCode = 42;");
+    expect(result.text).not.toContain("[Active Task:");
+  });
+});
+
 function activeTask(relevantPaths: string[]): TaskRecordV2 {
   return buildTaskV2({
     id: "20260826-161001-effective-context",

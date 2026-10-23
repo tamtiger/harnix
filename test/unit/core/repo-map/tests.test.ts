@@ -112,4 +112,34 @@ describe("findAffectedTests", () => {
     expect(limited.tests.length).toBe(1);
     expect(limited.truncated).toBe(true);
   });
+
+  it("resolves affected tests for C# .NET via symbol reference (new Class, Mock<Interface>) when file names differ (ac-1)", () => {
+    const serviceRecord: RepoMapRecordV1 = {
+      ...makeRecord("frt-payment-gateway/src/Services/PaymentRequestAppService.cs", "source", [], "csharp"),
+      identifiers: ["IPaymentRequestAppService", "PaymentRequestAppService"],
+    };
+    const ruleTestRecord: RepoMapRecordV1 = {
+      ...makeRecord("frt-payment-gateway/test/PaymentAmountRuleTests.cs", "test", [], "csharp"),
+      identifiers: ["PaymentAmountRuleTests", "PaymentRequestAppService"],
+    };
+    const propagationTestRecord: RepoMapRecordV1 = {
+      ...makeRecord("frt-payment-gateway/test/FollowTypePropagationTests.cs", "test", [], "csharp"),
+      identifiers: ["FollowTypePropagationTests", "IPaymentRequestAppService"],
+    };
+    const unrelatedTestRecord: RepoMapRecordV1 = {
+      ...makeRecord("frt-payment-gateway/test/UnrelatedTests.cs", "test", [], "csharp"),
+      identifiers: ["UnrelatedTests"],
+    };
+
+    const map = createRepoMap([serviceRecord, ruleTestRecord, propagationTestRecord, unrelatedTestRecord]);
+    const result = findAffectedTests(map, {
+      limit: 20,
+      target: "frt-payment-gateway/src/Services/PaymentRequestAppService.cs",
+    });
+
+    expect(result.status).toBe("ready");
+    expect(result.tests).toContain("frt-payment-gateway/test/FollowTypePropagationTests.cs");
+    expect(result.tests).toContain("frt-payment-gateway/test/PaymentAmountRuleTests.cs");
+    expect(result.tests).not.toContain("frt-payment-gateway/test/UnrelatedTests.cs");
+  });
 });

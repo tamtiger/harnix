@@ -1,0 +1,175 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261023-145100-csharp-repomap-tests-impact-and-events",
+  "title": "Nâng cấp Repo-Map cho C# .NET: Affected Tests qua Symbol, Project Impact và lọc Event Topic",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Nâng cấp toàn diện bộ phân tích mã nguồn C# .NET trong repo-map: (1) repo-map --tests bổ sung quét symbol reference (tìm class name và interface trong test files) để phát hiện test đặt theo use case; (2) repo-map --impact liên kết file .cs với .csproj sở hữu để mở rộng graph dependencies; (3) repo-map --events lọc bỏ tham số nhiễu (stoppingToken, Arg.Any, payload) và hỗ trợ resolve constant class topic.",
+  "nonGoals": [],
+  "epicId": "20261023-141853-enterprise-dotnet-and-context-hardening",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "findAffectedTests cho C# .NET phát hiện các file test chứa symbol của class mục tiêu (new ClassName, Mock<IInterface>) khi không trùng tên file.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-csharp-tests-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "repo-map --impact cho file .cs mở rộng đồ thị phụ thuộc thông qua ProjectReference của .csproj bao chứa nó.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-csharp-impact-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "repo-map --events tự động loại trừ file test (test/, tests/, *Tests.cs) khỏi Event Matrix, triệt tiêu mã mock (Arg.Any, Mock.Of).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-csharp-events-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "repo-map --events chuẩn hóa signature C# Kafka/CAP: bỏ qua consumer.Consume(CancellationToken/stoppingToken); loại trừ các identifier biến động (createdEto, payload, data, new, object) khi không phải topic string literal.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-csharp-events-1",
+        "ev-check-suite-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "repo-map --events resolve hằng số class (như KafkaTopics.WebhookFinished) sang giá trị string thực tế từ định nghĩa const string trong solution.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-csharp-events-1",
+        "ev-check-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-csharp-tests",
+      "description": "findAffectedTests phát hiện test cho C# qua symbol reference",
+      "command": "pnpm vitest run test/unit/core/repo-map/tests.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/repo-map/extract.ts",
+        "src/core/repo-map/tests.ts",
+        "test/unit/core/repo-map/tests.test.ts"
+      ]
+    },
+    {
+      "id": "check-csharp-impact",
+      "description": "repo-map --impact mở rộng đồ thị phụ thuộc C# qua .csproj ProjectReference",
+      "command": "pnpm vitest run test/unit/core/repo-map/impact.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/repo-map/graph.ts",
+        "src/core/repo-map/impact.ts",
+        "test/unit/core/repo-map/impact.test.ts"
+      ]
+    },
+    {
+      "id": "check-csharp-events",
+      "description": "Lọc test, chuẩn hóa Kafka signature và resolve constant class topic",
+      "command": "pnpm vitest run test/unit/core/repo-map/event-discovery.test.ts test/unit/core/repo-map/event-matrix.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/core/repo-map/event-discovery.ts",
+        "src/core/repo-map/event-matrix.ts",
+        "test/unit/core/repo-map/event-discovery.test.ts",
+        "test/unit/core/repo-map/event-matrix.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-csharp-tests-1",
+      "checkId": "check-csharp-tests",
+      "recordedAt": "2026-10-23T15:36:57.124+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/tests.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f9dd23154877a8628989bec87b8578dea24caf0f73b7acdccc361042883b42b9"
+    },
+    {
+      "id": "ev-check-csharp-impact-1",
+      "checkId": "check-csharp-impact",
+      "recordedAt": "2026-10-23T15:36:59.574+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/impact.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6be203c22df7d4fa2d807701933dfb488f673649dc3fe449bf278dec2a17577c"
+    },
+    {
+      "id": "ev-check-csharp-events-1",
+      "checkId": "check-csharp-events",
+      "recordedAt": "2026-10-23T15:37:02.275+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/event-discovery.test.ts test/unit/core/repo-map/event-matrix.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "176980e19db23f6c313aa8d3152aff843f0200918b3694931fc7ea6f7c58fcfb"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T15:39:39.019+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "70f3b6d2f509f95227521ee5b4ea9e655a0952d96117ac124621762ed6ead589"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-23T14:51:00.973+07:00",
+  "updatedAt": "2026-10-23T15:40:06.860+07:00",
+  "completedAt": "2026-10-23T15:40:06.860+07:00"
+}

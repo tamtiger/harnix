@@ -77,6 +77,7 @@ describe("CLI command contract", () => {
     expect(workflow?.options.map((option) => option.long)).toEqual([
       "--inspect",
       "--preflight",
+      "--expected-task",
       "--init",
       "--title",
       "--task",

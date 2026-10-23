@@ -68,6 +68,7 @@ export interface WorkflowFlags {
   followUp?: string;
   reviewed?: boolean;
   epic?: string;
+  expectedTask?: string;
 }
 
 const BOOLEAN_ACTIONS = [

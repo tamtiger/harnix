@@ -6,6 +6,7 @@ import { globby } from "globby";
 import { normalizeRepositoryPath } from "src/utils/paths.js";
 import { defaultRepoMapLimits, type RepoMapInventory, type RepoMapLimits } from "./types.js";
 import { IGNORED_DIRECTORY_NAMES } from "src/core/stack/ignored-directories.js";
+import { loadHarnixIgnore } from "src/core/stack/harnix-ignore.js";
 import { compareCodeUnits } from "src/utils/order.js";
 
 const ignoredDirectoryNames = new Set<string>(IGNORED_DIRECTORY_NAMES);
@@ -19,6 +20,7 @@ export async function inventoryRepository(
   assertRepoMapLimits(limits);
   const resolvedRoot = resolve(root);
   const realRoot = await realpath(resolvedRoot);
+  const harnixIgnore = await loadHarnixIgnore(resolvedRoot);
   const candidates = (
     await globby("**/*", {
       absolute: true,
@@ -42,7 +44,11 @@ export async function inventoryRepository(
       skipped.push("unsafe-path");
       continue;
     }
-    if (isHardExcluded(path) || secretPath.test(path)) {
+    if (path === ".harnixignore" || path.endsWith("/.harnixignore")) {
+      skipped.push(path);
+      continue;
+    }
+    if (isHardExcluded(path) || secretPath.test(path) || harnixIgnore.ignores(path)) {
       skipped.push(path);
       continue;
     }

@@ -305,6 +305,19 @@ function mergePackages(
     if (pkgHasTests) hasAnyTests = true;
   }
 
+  const solutionPackages = [...packagesMap.values()].filter(
+    (pkg) => pkg.ecosystem === "dotnet" && /\.sln(?:\s|"|$)/iu.test(pkg.commands.test ?? ""),
+  );
+  if (solutionPackages.length > 0) {
+    for (const [path, pkg] of packagesMap) {
+      if (pkg.ecosystem === "dotnet" && !solutionPackages.some((sol) => sol.path === path)) {
+        if (solutionPackages.some((sol) => path.startsWith(`${sol.path}/`))) {
+          packagesMap.delete(path);
+        }
+      }
+    }
+  }
+
   const packages = [...packagesMap.values()]
     .map((pkg) => {
       if (!pkg.hasTests) {

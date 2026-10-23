@@ -1,0 +1,20 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261023-141853-enterprise-dotnet-and-context-hardening",
+  "title": "Tối ưu hóa môi trường Enterprise multi-repo .NET / TypeScript, gia cố Context Injection và độ tin cậy Workflow",
+  "goal": "Giải quyết triệt để 5 điểm nghẽn và friction points thực tế trên multi-repo .NET / TypeScript / Windows: (1) Khắc phục double testing trong verify-plan --recursive và hỗ trợ file .harnixignore loại trừ thư mục rác / tools; (2) Nâng cấp repo-map --tests quét symbol reference cho C# .NET, bổ sung quan hệ ProjectReference cho --impact và lọc nhiễu tham số trong --events; (3) Tối ưu hóa Token Hook sang Lean Context Injection tránh dump mã nguồn thô vào prompt; (4) Bổ sung cảnh báo taskSwitched trong workflow preflight khi active task bị chuyển ngầm và hoàn thiện cờ --file cho toàn bộ lệnh workflow.",
+  "nonGoals": [
+    "Không thay đổi TaskRecord schema v3 đóng băng",
+    "Không hạ ngưỡng coverage tiêu chuẩn (>= 98.6% functions, >= 95% lines)",
+    "Không tự động commit hay push Git mà không có lệnh người dùng"
+  ],
+  "createdAt": "2026-10-23T14:18:53.091+07:00",
+  "updatedAt": "2026-10-23T14:51:41.023+07:00",
+  "order": [
+    "20261023-145051-verify-plan-deduplication-and-harnixignore",
+    "20261023-145100-csharp-repomap-tests-impact-and-events",
+    "20261023-145111-lean-context-injection-and-token-optimization",
+    "20261023-145123-workflow-preflight-switch-detection-and-safe-stdin"
+  ]
+}

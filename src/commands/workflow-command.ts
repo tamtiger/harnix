@@ -32,6 +32,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .argument("[operands...]")
     .option("--inspect", "Inspect active workflow state")
     .option("--preflight", "Inspect bounded workflow routing metadata")
+    .option("--expected-task <task-id>", "Verify active task matches this expected task ID for --preflight")
     .option("--init", "Initialize a new task record with boilerplate obligations")
     .option("--title <title>", "Task title for --init")
     .option(
