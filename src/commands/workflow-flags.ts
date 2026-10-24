@@ -56,6 +56,7 @@ export interface WorkflowFlags {
   scope?: string;
   criteria?: string;
   reason?: string;
+  note?: string;
   text?: string | string[];
   withCheck?: string[];
   rationale?: string;

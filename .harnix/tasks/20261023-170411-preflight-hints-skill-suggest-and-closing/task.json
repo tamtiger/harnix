@@ -4,8 +4,8 @@
   "id": "20261023-170411-preflight-hints-skill-suggest-and-closing",
   "title": "Contextual Technique Hints, lệnh skill --suggest, Actionable Error Messages, cảnh báo Stale Facts và đóng Epic",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Thêm suggestedTechniques vào workflow --preflight; bổ sung lệnh harnix skill --suggest; Actionable Error Suggestions; cảnh báo projectFactsStale: true; đồng bộ tài liệu, pnpm selfhost:sync và đóng Epic.",
   "nonGoals": [],
   "epicId": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
@@ -13,32 +13,50 @@
     {
       "id": "ac-1",
       "text": "workflow --preflight tự động phân tích ngữ cảnh và trả về suggestedTechniques?: string[] dựa trên triệu chứng thực tế.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-preflight-and-suggest-2",
+        "ev-check-preflight-and-suggest-v2-1",
+        "ev-check-suite-3"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Bổ sung lệnh harnix skill --suggest <query> hỗ trợ tìm kiếm skill theo mô tả ngữ nghĩa.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-preflight-and-suggest-2",
+        "ev-check-preflight-and-suggest-v2-1",
+        "ev-check-suite-3"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Actionable Error Suggestions cho lỗi schema validation và sai checkpoint/stage.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-preflight-and-suggest-2",
+        "ev-check-preflight-and-suggest-v2-1",
+        "ev-check-suite-3"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Preflight phát hiện commit hash của HEAD thay đổi so với thời điểm trích xuất facts thì cảnh báo projectFactsStale: true.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-preflight-and-suggest-2",
+        "ev-check-preflight-and-suggest-v2-1",
+        "ev-check-suite-3"
+      ]
     },
     {
       "id": "ac-5",
       "text": "Đồng bộ tài liệu dự án, chạy pnpm selfhost:sync và bump minor package đóng Epic.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-3"
+      ]
     }
   ],
   "validationPlan": [
@@ -58,11 +76,131 @@
       "inputs": [
         "**"
       ]
+    },
+    {
+      "id": "check-preflight-and-suggest",
+      "description": "Kiểm tra suggestedTechniques, projectFactsStale và lệnh skill --suggest",
+      "command": "pnpm vitest run test/unit/core/workflow/preflight.test.ts test/unit/commands/skills-suggest.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/cli-workflow-commands.ts",
+        "src/commands/skills.ts",
+        "src/core/spec/project-facts.ts",
+        "src/core/workflow/preflight.ts",
+        "test/unit/commands/skills-suggest.test.ts",
+        "test/unit/core/workflow/preflight.test.ts"
+      ]
+    },
+    {
+      "id": "check-preflight-and-suggest-v2",
+      "description": "Kiểm tra suggestedTechniques, projectFactsStale và lệnh skill --suggest",
+      "command": "pnpm vitest run test/unit/core/workflow/preflight.test.ts test/integration/commands/skills.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/cli-workflow-commands.ts",
+        "src/commands/skills.ts",
+        "src/core/spec/project-facts.ts",
+        "src/core/workflow/preflight.ts",
+        "test/integration/commands/skills.test.ts",
+        "test/unit/core/workflow/preflight.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-preflight-and-suggest-1",
+      "checkId": "check-preflight-and-suggest",
+      "recordedAt": "2026-10-23T21:43:59.069+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/preflight.test.ts test/unit/commands/skills-suggest.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e051b3092428ef96be65595ba3a35dd846af2c2086065cf9ea9fbfcfc5e3bb6e"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T21:46:13.325+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "1b0e6d0ffa8ac78d5f4958dc971e5f46682c611d398898ab8148cbe3f959cb0f"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T21:50:47.334+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4f49438cc101a4c8cc9cee22c75e72988e04643c432f6c4a9c6b67ed362c08d1"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-23T21:51:35.085+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Thay thế check do gộp test file theo kiến trúc test suite",
+      "artifactPaths": [
+        ".harnix/tasks/20261023-170411-preflight-hints-skill-suggest-and-closing/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-preflight-and-suggest-v2-1",
+      "checkId": "check-preflight-and-suggest-v2",
+      "recordedAt": "2026-10-23T21:53:20.440+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/preflight.test.ts test/integration/commands/skills.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5f19e1dec2e2d7da5624745de1eede38db01c927b3f32433e0bc129202688606"
+    },
+    {
+      "id": "ev-check-preflight-and-suggest-2",
+      "checkId": "check-preflight-and-suggest",
+      "recordedAt": "2026-10-23T21:53:37.059+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/preflight.test.ts test/unit/commands/skills-suggest.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "01ad7c5ead6d6f85b4cd5613588c8f1eee1e2bb323d19a9899dd812fcf222229"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T21:55:52.215+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "00908ac836b261ccf818bf30f86ad09258f7ae2005afc863b23ac30a04011746"
+    }
+  ],
+  "relevantPaths": [
+    "src/cli-workflow-commands.ts",
+    "src/commands/skills.ts",
+    "src/core/spec/project-facts.ts",
+    "src/core/workflow/preflight.ts",
+    "test/integration/commands/skills.test.ts",
+    "test/unit/core/workflow/preflight.test.ts"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-23T17:04:11.000+07:00",
-  "updatedAt": "2026-10-23T17:08:03.000+07:00"
+  "updatedAt": "2026-10-23T21:56:22.460+07:00",
+  "completedAt": "2026-10-23T21:56:22.460+07:00"
 }

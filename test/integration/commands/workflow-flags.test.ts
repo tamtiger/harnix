@@ -53,7 +53,10 @@ describe("workflow flag validation", () => {
     );
     expect(() => assertFlagGroups("save", { input: ["src/**"] })).toThrow(/--input/u);
     expect(() => assertFlagGroups("setCheck", { reason: "r" })).not.toThrow();
+    expect(() => assertFlagGroups("transition", { reason: "r" })).not.toThrow();
+    expect(() => assertFlagGroups("transition", { note: "n" })).not.toThrow();
     expect(() => assertFlagGroups("inspect", { reason: "r" })).toThrow(/--reason/u);
+    expect(() => assertFlagGroups("inspect", { note: "n" })).toThrow(/--note/u);
     expect(() => assertFlagGroups("inspect", { text: "t" })).toThrow(/--text requires workflow --add-criterion/u);
     expect(() => assertFlagGroups("addCriterion", {})).toThrow(/--text/u);
     expect(() => assertFlagGroups("setPaths", {})).toThrow(/--relevant-path/u);

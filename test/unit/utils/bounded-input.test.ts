@@ -46,6 +46,22 @@ describe("bounded input", () => {
 
     await expect(readBoundedInput(input, 4)).resolves.toBe("abç");
   });
+
+  it("decodes UTF-16LE with BOM transparently (PowerShell 5.1 pipe signature)", async () => {
+    const text = '{"title":"Tiếng Việt có dấu từ PowerShell"}';
+    const buffer = Buffer.concat([Buffer.from([0xff, 0xfe]), Buffer.from(text, "utf16le")]);
+    const input = chunks([buffer]);
+
+    await expect(readBoundedInput(input, 1024)).resolves.toBe(text);
+  });
+
+  it("decodes UTF-8 with BOM transparently and strips the BOM bytes", async () => {
+    const text = '{"title":"Tiếng Việt có dấu UTF-8 BOM"}';
+    const buffer = Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), Buffer.from(text, "utf8")]);
+    const input = chunks([buffer]);
+
+    await expect(readBoundedInput(input, 1024)).resolves.toBe(text);
+  });
 });
 
 async function* chunks(values: readonly (Buffer | string)[]): AsyncGenerator<Buffer | string> {

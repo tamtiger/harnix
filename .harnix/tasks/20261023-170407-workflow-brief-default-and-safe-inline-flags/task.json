@@ -4,8 +4,8 @@
   "id": "20261023-170407-workflow-brief-default-and-safe-inline-flags",
   "title": "Mặc định Brief Mode cho Workflow Commands và Tự động ép UTF-8 trên Windows",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Đổi mặc định của toàn bộ các lệnh ghi workflow sang Brief Output (chỉ in id, status, checkpoint, updatedAt); thêm cờ --full khi cần in trọn vẹn JSON; hỗ trợ inline flags --note, --reason; và tự động ép UTF-8 cho stdin trên Windows win32.",
   "nonGoals": [],
   "epicId": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
@@ -13,20 +13,29 @@
     {
       "id": "ac-1",
       "text": "Các lệnh workflow ghi trạng thái mặc định chỉ in { id, status, checkpoint, updatedAt } mà không cần truyền cờ --brief.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-check-workflow-brief-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Truyền cờ --full in toàn bộ task record JSON như hành vi cũ.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-check-workflow-brief-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Hỗ trợ cờ inline --reason và --note cho các transition/replan mà không bị lỗi encoding tiếng Việt trên PowerShell.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-safe-inline-flags-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -44,11 +53,84 @@
       "inputs": [
         "**"
       ]
+    },
+    {
+      "id": "check-workflow-brief",
+      "description": "Unit test workflow handlers tra ve brief mac dinh va full khi co co --full",
+      "command": "pnpm vitest run test/unit/commands/workflow-handlers.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/workflow-command.ts",
+        "src/commands/workflow-handler-utils.ts",
+        "src/commands/workflow-handlers.ts",
+        "src/core/workflow/brief.ts",
+        "test/unit/commands/workflow-handlers.test.ts"
+      ]
+    },
+    {
+      "id": "check-safe-inline-flags",
+      "description": "Test workflow cac co inline --reason va --note voi UTF-8 va tieng Viet",
+      "command": "pnpm vitest run test/workflow/preflight-switch-and-file.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/workflow-command.ts",
+        "src/commands/workflow-flags.ts",
+        "test/workflow/preflight-switch-and-file.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-workflow-brief-1",
+      "checkId": "check-workflow-brief",
+      "recordedAt": "2026-10-23T20:58:59.836+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/commands/workflow-handlers.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0596fa08307c920873983c0b301f1cbd65efce54905389e6d0ec332417e8b9da"
+    },
+    {
+      "id": "ev-check-safe-inline-flags-1",
+      "checkId": "check-safe-inline-flags",
+      "recordedAt": "2026-10-23T20:59:09.576+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/preflight-switch-and-file.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e2a83eae2ae853df8c8a8f94943b6261c34b4a4801754c8213cbfdac300d3cdf"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T21:00:56.398+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9633925079d7d11e5dab9603078a7c6d845a580b7efbd793c5fbb745428d0b0e"
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-command.ts",
+    "src/commands/workflow-flags.ts",
+    "src/commands/workflow-handler-utils.ts",
+    "src/commands/workflow-handlers.ts",
+    "src/core/workflow/brief.ts",
+    "test/unit/commands/workflow-handlers.test.ts",
+    "test/workflow/preflight-switch-and-file.test.ts"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-23T17:04:07.000+07:00",
-  "updatedAt": "2026-10-23T17:08:03.000+07:00"
+  "updatedAt": "2026-10-23T21:01:22.335+07:00",
+  "completedAt": "2026-10-23T21:01:22.335+07:00"
 }

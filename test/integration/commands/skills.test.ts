@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { runCli } from "src/cli-program.js";
-import { reportSkill, reportSkillCatalog, reportSkillReference } from "src/commands/skills.js";
+import { reportSkill, reportSkillCatalog, reportSkillReference, suggestSkills } from "src/commands/skills.js";
 import type { WorkflowStageOwner } from "src/core/workflow/routing.js";
 import { renderSkill, workflowSkills } from "src/templates/harnix/workflow.js";
 import { packageVersion } from "src/version.js";
@@ -30,7 +30,12 @@ describe("harnix skill", () => {
       "grilling",
       "decision-discipline",
     ]);
-    expect(skills.get("harnix-implement")).toEqual(["feedback", "brownfield", "commit-hygiene"]);
+    expect(skills.get("harnix-implement")).toEqual([
+      "feedback",
+      "brownfield",
+      "commit-hygiene",
+      "dotnet-microservices",
+    ]);
     expect(skills.get("harnix-verify")).toEqual([
       "evidence",
       "finish-cancel",
@@ -162,5 +167,23 @@ describe("harnix skill", () => {
     expect(out).toContain("# Plan a Harnix task");
     expect(out).not.toContain('{"generator":"harnix"');
     stdout.mockRestore();
+  });
+
+  it("suggests skills by keywords and references", () => {
+    const flaky = suggestSkills("flaky test race condition");
+    expect(flaky.suggestions.length).toBeGreaterThan(0);
+    expect(flaky.suggestions[0]?.name).toBe("harnix-flaky-test");
+
+    const migration = suggestSkills("zero downtime database schema migration");
+    expect(migration.suggestions.length).toBeGreaterThan(0);
+    expect(migration.suggestions[0]?.name).toBe("harnix-migration-safety");
+
+    const security = suggestSkills("path traversal symlink escape shell injection");
+    expect(security.suggestions.length).toBeGreaterThan(0);
+    expect(security.suggestions[0]?.name).toBe("harnix-security-lens");
+
+    const dotnet = suggestSkills("dotnet microservices kafka outbox");
+    expect(dotnet.suggestions.length).toBeGreaterThan(0);
+    expect(dotnet.suggestions.map((s) => s.name)).toContain("harnix-implement");
   });
 });

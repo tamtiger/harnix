@@ -49,56 +49,10 @@ export function findAffectedTests(map: RepoMapV1, options: RepoMapTestsOptions):
   }
 
   // 1b. Tests referencing target symbols (e.g. for C# .NET where tests are named by scenario)
-  const targetStem = posix.basename(options.target).replace(/\.[^.]+$/u, "");
-  const targetSymbols = new Set<string>();
-  targetSymbols.add(targetStem);
-  if (!targetStem.startsWith("I") && targetStem.length > 1) {
-    targetSymbols.add(`I${targetStem}`);
-  } else if (targetStem.startsWith("I") && targetStem.length > 1 && /[A-Z]/u.test(targetStem[1]!)) {
-    targetSymbols.add(targetStem.slice(1));
-  }
-  for (const id of targetRecord.identifiers) {
-    targetSymbols.add(id);
-    if (!id.startsWith("I") && id.length > 1) {
-      targetSymbols.add(`I${id}`);
-    } else if (id.startsWith("I") && id.length > 1 && /[A-Z]/u.test(id[1]!)) {
-      targetSymbols.add(id.slice(1));
-    }
-  }
-
-  for (const record of map.records) {
-    if (record.kind !== "test") continue;
-    if (record.identifiers.some((id) => targetSymbols.has(id))) {
-      if (!affectedDistances.has(record.path)) {
-        affectedDistances.set(record.path, 1);
-      }
-    }
-  }
+  findSymbolMatchingTests(targetRecord, map.records, affectedDistances);
 
   // 2. Reverse dependents traversal up to depth 5
-  const visited = new Set<string>([options.target]);
-  let frontier = [options.target];
-  for (let distance = 1; distance <= 5 && frontier.length > 0; distance += 1) {
-    const nextFrontier = new Set<string>();
-    for (const current of frontier) {
-      for (const dependent of graph.reverseAdjacency.get(current) ?? []) {
-        if (visited.has(dependent)) continue;
-        visited.add(dependent);
-
-        const depRecord = recordsMap.get(dependent);
-        if (depRecord?.kind === "test") {
-          if (!affectedDistances.has(dependent)) affectedDistances.set(dependent, distance);
-        } else {
-          // If dependent is a source file, find tests testing that dependent
-          for (const testPath of findNamingConventionTests(dependent, map.records)) {
-            if (!affectedDistances.has(testPath)) affectedDistances.set(testPath, distance + 1);
-          }
-          nextFrontier.add(dependent);
-        }
-      }
-    }
-    frontier = [...nextFrontier].sort(compareCodeUnits);
-  }
+  traverseDependents(options.target, graph, recordsMap, map.records, affectedDistances);
 
   const sortedTests = [...affectedDistances.entries()]
     .sort((left, right) => left[1] - right[1] || compareCodeUnits(left[0], right[0]))
@@ -115,6 +69,67 @@ export function findAffectedTests(map: RepoMapV1, options: RepoMapTestsOptions):
     tests,
     truncated: sortedTests.length > tests.length,
   };
+}
+
+function collectTargetSymbols(target: string, identifiers: readonly string[]): Set<string> {
+  const targetStem = posix.basename(target).replace(/\.[^.]+$/u, "");
+  const symbols = new Set<string>();
+  const addVariants = (name: string) => {
+    symbols.add(name);
+    if (!name.startsWith("I") && name.length > 1) {
+      symbols.add(`I${name}`);
+    } else if (name.startsWith("I") && name.length > 1 && /[A-Z]/u.test(name[1]!)) {
+      symbols.add(name.slice(1));
+    }
+  };
+  addVariants(targetStem);
+  for (const id of identifiers) addVariants(id);
+  return symbols;
+}
+
+function findSymbolMatchingTests(
+  targetRecord: RepoMapRecordV1,
+  records: readonly RepoMapRecordV1[],
+  affectedDistances: Map<string, number>,
+): void {
+  const targetSymbols = collectTargetSymbols(targetRecord.path, targetRecord.identifiers);
+  for (const record of records) {
+    if (record.kind !== "test") continue;
+    if (record.identifiers.some((id) => targetSymbols.has(id)) && !affectedDistances.has(record.path)) {
+      affectedDistances.set(record.path, 1);
+    }
+  }
+}
+
+function traverseDependents(
+  target: string,
+  graph: ReturnType<typeof buildRepoMapGraph>,
+  recordsMap: Map<string, RepoMapRecordV1>,
+  records: readonly RepoMapRecordV1[],
+  affectedDistances: Map<string, number>,
+): void {
+  const visited = new Set<string>([target]);
+  let frontier = [target];
+  for (let distance = 1; distance <= 5 && frontier.length > 0; distance += 1) {
+    const nextFrontier = new Set<string>();
+    for (const current of frontier) {
+      for (const dependent of graph.reverseAdjacency.get(current) ?? []) {
+        if (visited.has(dependent)) continue;
+        visited.add(dependent);
+
+        const depRecord = recordsMap.get(dependent);
+        if (depRecord?.kind === "test") {
+          if (!affectedDistances.has(dependent)) affectedDistances.set(dependent, distance);
+        } else {
+          for (const testPath of findNamingConventionTests(dependent, records)) {
+            if (!affectedDistances.has(testPath)) affectedDistances.set(testPath, distance + 1);
+          }
+          nextFrontier.add(dependent);
+        }
+      }
+    }
+    frontier = [...nextFrontier].sort(compareCodeUnits);
+  }
 }
 
 export function createUnavailableRepoMapTests(

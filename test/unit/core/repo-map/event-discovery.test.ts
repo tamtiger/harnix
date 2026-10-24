@@ -244,4 +244,36 @@ consumer.Subscribe(KafkaTopics.WebhookFinished);
     expect(topics).toContain("orders.incoming");
     expect(topics).toContain("KafkaTopics.WebhookFinished");
   });
+
+  it("filters out complex dynamic variable expressions (eto.EventName, splitTopics, checkResult.CancelEto, ObjectMapper.Map) (ac-3)", () => {
+    const csCode = `
+await _publishService.ProduceAsync(eto.EventName, payload);
+await _publishService.ProduceAsync(splitTopics);
+await _publishService.ProduceAsync(checkResult.CancelEto);
+await _publishService.ProduceAsync(ObjectMapper.Map);
+await _publishService.ProduceAsync(dataKafka);
+await _publishService.ProduceAsync("legitimate.order.created", payload);
+`;
+    const events = discoverEvents(csCode);
+    const topics = events.topics.map((t) => t.topic);
+
+    expect(topics).not.toContain("eto.EventName");
+    expect(topics).not.toContain("splitTopics");
+    expect(topics).not.toContain("checkResult.CancelEto");
+    expect(topics).not.toContain("ObjectMapper.Map");
+    expect(topics).not.toContain("dataKafka");
+    expect(topics).toContain("legitimate.order.created");
+  });
+
+  it("recognizes custom producer wrappers configured in events.producerWrappers (ac-2)", () => {
+    const csCode = `
+await PublishEventAsync("custom.order.placed", new { OrderId = 123 });
+await SendKafkaMessage(KafkaTopicConstant, payload);
+`;
+    const events = discoverEvents(csCode, ["PublishEventAsync", "SendKafkaMessage"]);
+    const topics = events.topics.map((t) => t.topic);
+
+    expect(topics).toContain("custom.order.placed");
+    expect(topics).toContain("KafkaTopicConstant");
+  });
 });

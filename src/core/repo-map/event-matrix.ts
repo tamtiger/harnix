@@ -1,7 +1,9 @@
 import { readFile } from "node:fs/promises";
-import { dirname, extname } from "node:path";
+import { basename, dirname, extname, resolve } from "node:path";
 
 import { compareCodeUnits } from "src/utils/order.js";
+import { readConfig } from "src/core/config/config.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { discoverEvents } from "./event-discovery.js";
 import { inventoryRepository } from "./inventory.js";
 import { defaultRepoMapLimits, type RepoMapInventoryFile } from "./types.js";
@@ -37,22 +39,89 @@ interface TopicAccumulator {
   subscribers: EventMatrixParticipant[];
 }
 
+async function loadEventsConfig(root: string): Promise<{ wrappers: string[]; linked: string[] }> {
+  try {
+    const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
+    const ev = (config.events ?? {}) as { producerWrappers?: unknown; linkedWorkspaces?: unknown };
+    const wrappers = Array.isArray(ev.producerWrappers)
+      ? ev.producerWrappers.filter((w): w is string => typeof w === "string")
+      : [];
+    const top: readonly unknown[] = Array.isArray(config.linkedWorkspaces) ? config.linkedWorkspaces : [];
+    const sub: readonly unknown[] = Array.isArray(ev.linkedWorkspaces) ? ev.linkedWorkspaces : [];
+    const raw: readonly unknown[] = [...top, ...sub];
+    const linked = raw.filter((p): p is string => typeof p === "string").map((p) => resolve(root, p));
+    return { wrappers, linked };
+  } catch {
+    return { wrappers: [], linked: [] };
+  }
+}
+
+function makeMatrixResult(
+  scope: "project" | "workspace",
+  matrix: readonly EventMatrixTopicEntry[],
+  members?: readonly string[],
+): EventMatrixResult {
+  return {
+    generator: "harnix",
+    matrix,
+    ...(members !== undefined ? { members } : {}),
+    schemaVersion: 1,
+    scope,
+    status: "ready",
+    totalTopics: matrix.length,
+  };
+}
+
 export async function buildProjectEventMatrix(root: string): Promise<EventMatrixResult> {
   const inventory = await inventoryRepository(root, defaultRepoMapLimits);
   const packageRoots = findPackageRoots(inventory.files);
   const topicMap = new Map<string, TopicAccumulator>();
+  const { wrappers: producerWrappers, linked: linkedWorkspaces } = await loadEventsConfig(root);
 
-  await scanFilesForEvents(inventory.files, packageRoots, undefined, topicMap);
+  await scanFilesForEvents(inventory.files, packageRoots, undefined, topicMap, producerWrappers);
+
+  for (const linkedRoot of linkedWorkspaces) {
+    try {
+      const linkedInventory = await inventoryRepository(linkedRoot, defaultRepoMapLimits);
+      const linkedPackageRoots = findPackageRoots(linkedInventory.files);
+      const { wrappers: linkedWrappers } = await loadEventsConfig(linkedRoot);
+      const combinedWrappers = [...new Set([...producerWrappers, ...linkedWrappers])];
+      await scanFilesForEvents(
+        linkedInventory.files,
+        linkedPackageRoots,
+        basename(linkedRoot),
+        topicMap,
+        combinedWrappers,
+      );
+    } catch {
+      // ignore inaccessible linked workspace
+    }
+  }
+
   const matrix = compileMatrix(topicMap);
+  const isMulti = linkedWorkspaces.length > 0;
+  const members = isMulti ? [basename(root), ...linkedWorkspaces.map((w) => basename(w))] : undefined;
+  return makeMatrixResult(isMulti ? "workspace" : "project", matrix, members);
+}
 
-  return {
-    generator: "harnix",
-    matrix,
-    schemaVersion: 1,
-    scope: "project",
-    status: "ready",
-    totalTopics: matrix.length,
-  };
+export async function buildMultiWorkspaceEventMatrix(roots: readonly string[]): Promise<EventMatrixResult> {
+  const topicMap = new Map<string, TopicAccumulator>();
+  const members: string[] = [];
+
+  for (const root of roots) {
+    try {
+      const name = basename(root);
+      members.push(name);
+      const inventory = await inventoryRepository(root, defaultRepoMapLimits);
+      const packageRoots = findPackageRoots(inventory.files);
+      const { wrappers } = await loadEventsConfig(root);
+      await scanFilesForEvents(inventory.files, packageRoots, name, topicMap, wrappers);
+    } catch {
+      // ignore inaccessible root
+    }
+  }
+
+  return makeMatrixResult("workspace", compileMatrix(topicMap), members);
 }
 
 export async function buildWorkspaceEventMatrix(workspaceRoot: string): Promise<EventMatrixResult> {
@@ -62,26 +131,24 @@ export async function buildWorkspaceEventMatrix(workspaceRoot: string): Promise<
   }
 
   const topicMap = new Map<string, TopicAccumulator>();
+  const { wrappers: workspaceWrappers } = await loadEventsConfig(workspaceRoot);
   for (const member of members) {
     try {
       const inventory = await inventoryRepository(member.path, defaultRepoMapLimits);
       const packageRoots = findPackageRoots(inventory.files);
-      await scanFilesForEvents(inventory.files, packageRoots, member.name, topicMap);
+      const { wrappers: memberWrappers } = await loadEventsConfig(member.path);
+      const combinedWrappers = [...new Set([...workspaceWrappers, ...memberWrappers])];
+      await scanFilesForEvents(inventory.files, packageRoots, member.name, topicMap, combinedWrappers);
     } catch {
       // ignore inaccessible member
     }
   }
 
-  const matrix = compileMatrix(topicMap);
-  return {
-    generator: "harnix",
-    matrix,
-    members: members.map((m) => m.name),
-    schemaVersion: 1,
-    scope: "workspace",
-    status: "ready",
-    totalTopics: matrix.length,
-  };
+  return makeMatrixResult(
+    "workspace",
+    compileMatrix(topicMap),
+    members.map((m) => m.name),
+  );
 }
 
 async function scanFilesForEvents(
@@ -89,6 +156,7 @@ async function scanFilesForEvents(
   packageRoots: readonly string[],
   pathPrefix: string | undefined,
   topicMap: Map<string, TopicAccumulator>,
+  producerWrappers: readonly string[] = [],
 ): Promise<void> {
   const constants = await collectConstants(files);
 
@@ -105,7 +173,7 @@ async function scanFilesForEvents(
     }
     if (content.includes("\0")) continue;
 
-    const events = discoverEvents(content);
+    const events = discoverEvents(content, producerWrappers);
     if (events.topics.length === 0) continue;
 
     const nearestPkg = nearestPackage(file.path, packageRoots);
@@ -113,7 +181,8 @@ async function scanFilesForEvents(
     const resolvedFilePath = pathPrefix ? `${pathPrefix}/${file.path}` : file.path;
 
     for (const t of events.topics) {
-      const topicName = constants.get(t.topic) ?? t.topic;
+      const shortName = t.topic.includes(".") ? (t.topic.split(".").at(-1) ?? t.topic) : t.topic;
+      const topicName = constants.get(t.topic) ?? constants.get(shortName) ?? t.topic;
       let entry = topicMap.get(topicName);
       if (!entry) {
         entry = { publishers: [], subscribers: [] };
@@ -169,62 +238,43 @@ async function collectConstants(files: readonly RepoMapInventoryFile[]): Promise
 }
 
 function extractFileConstants(content: string, map: Map<string, string>): void {
+  const store = (name: string, val: string, prefix = "") => {
+    if (prefix) map.set(`${prefix}.${name}`, val);
+    map.set(name, val);
+  };
+  const scan = (text: string, prefix = "") => {
+    const constRe = /\b(?:const|readonly)\s+(?:string\s+)?([A-Za-z0-9_]+)\s*=\s*["']([^"']+)["']/gu;
+    for (const cm of text.matchAll(constRe)) store(cm[1]!, cm[2]!, prefix);
+    const propRe =
+      /\bpublic\s+(?:string\s+)?([A-Za-z0-9_]+)\s*\{\s*get;\s*(?:set|init)?;\s*\}\s*=\s*["']([^"']+)["']/gu;
+    for (const pm of text.matchAll(propRe)) store(pm[1]!, pm[2]!, prefix);
+  };
   const classMatches = [
     ...content.matchAll(
       /\b(?:class|interface|struct|record)\s+([A-Za-z0-9_]+)\b([\s\S]*?)(?=\b(?:class|interface|struct|record)\s+[A-Za-z0-9_]+\b|$)/gu,
     ),
   ];
   if (classMatches.length > 0) {
-    for (const match of classMatches) {
-      const className = match[1]!;
-      const classBody = match[2]!;
-      const constMatches = classBody.matchAll(
-        /\b(?:const|readonly)\s+(?:string\s+)?([A-Za-z0-9_]+)\s*=\s*["']([^"']+)["']/gu,
-      );
-      for (const cm of constMatches) {
-        map.set(`${className}.${cm[1]!}`, cm[2]!);
-        map.set(cm[1]!, cm[2]!);
-      }
-    }
+    for (const match of classMatches) scan(match[2] ?? "", match[1] ?? "");
   } else {
-    const constMatches = content.matchAll(
-      /\b(?:const|readonly)\s+(?:string\s+)?([A-Za-z0-9_]+)\s*=\s*["']([^"']+)["']/gu,
-    );
-    for (const cm of constMatches) {
-      map.set(cm[1]!, cm[2]!);
-    }
+    scan(content);
   }
 }
 
 function compileMatrix(topicMap: Map<string, TopicAccumulator>): EventMatrixTopicEntry[] {
-  const sortedTopics = [...topicMap.keys()].sort(compareCodeUnits);
-  const matrix: EventMatrixTopicEntry[] = [];
-
-  for (const topic of sortedTopics) {
+  const sortP = (l: EventMatrixParticipant[]) => l.sort((a, b) => compareCodeUnits(a.file, b.file) || a.line - b.line);
+  return [...topicMap.keys()].sort(compareCodeUnits).map((topic) => {
     const entry = topicMap.get(topic)!;
-    entry.publishers.sort((a, b) => compareCodeUnits(a.file, b.file) || a.line - b.line);
-    entry.subscribers.sort((a, b) => compareCodeUnits(a.file, b.file) || a.line - b.line);
-    matrix.push({
-      publishers: entry.publishers,
-      subscribers: entry.subscribers,
-      topic,
-    });
-  }
-  return matrix;
+    return { publishers: sortP(entry.publishers), subscribers: sortP(entry.subscribers), topic };
+  });
 }
 
 function findPackageRoots(files: readonly RepoMapInventoryFile[]): string[] {
   return files
-    .filter(
-      ({ path }) =>
-        path.endsWith("package.json") ||
-        path.endsWith(".csproj") ||
-        path.endsWith("go.mod") ||
-        path.endsWith("pom.xml"),
-    )
+    .filter(({ path }) => /(?:package\.json|\.csproj|go\.mod|pom\.xml)$/u.test(path))
     .map(({ path }) => {
-      const dir = dirname(path).replaceAll("\\", "/");
-      return dir === "." ? "" : dir;
+      const d = dirname(path).replaceAll("\\", "/");
+      return d === "." ? "" : d;
     });
 }
 

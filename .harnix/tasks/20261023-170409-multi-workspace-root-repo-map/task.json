@@ -4,8 +4,8 @@
   "id": "20261023-170409-multi-workspace-root-repo-map",
   "title": "Hỗ trợ Multi-Workspace Root và liên kết cụm repository cho repo-map --events",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Cho phép truyền nhiều path vào --workspace hoặc cấu hình linkedWorkspaces trong .harnix/config.yaml để tạo Cross-system Event Matrix E2E liền mạch.",
   "nonGoals": [],
   "epicId": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
@@ -13,20 +13,29 @@
     {
       "id": "ac-1",
       "text": "Cho phép truyền nhiều path vào CLI: harnix repo-map --events --workspace <path1> <path2>...",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-multi-workspace-events-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Hỗ trợ cấu hình linkedWorkspaces trong config.yaml để tự động quét các repo liên kết.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-multi-workspace-events-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Xuất ma trận event hợp nhất E2E chính xác giữa các repository độc lập.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-multi-workspace-events-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -44,11 +53,60 @@
       "inputs": [
         "**"
       ]
+    },
+    {
+      "id": "check-multi-workspace-events",
+      "description": "Test unit multi-workspace root va linkedWorkspaces cho event matrix",
+      "command": "pnpm vitest run test/unit/core/repo-map/event-matrix.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/cli-helpers.ts",
+        "src/commands/repo-map-internal.ts",
+        "src/core/config/config-schema.ts",
+        "src/core/config/config-validate.ts",
+        "src/core/repo-map/event-matrix.ts",
+        "test/unit/core/repo-map/event-matrix.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-multi-workspace-events-1",
+      "checkId": "check-multi-workspace-events",
+      "recordedAt": "2026-10-23T21:15:36.592+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/event-matrix.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "20bcc17de55d4d9f3d4097eb65efb4e4ef5e1d1479258ccdfccadb4ea64917d5"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T21:17:16.696+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "eb61ea62a98ee381a89824055c8aa3686964e982b948c10dd70aa023a554f461"
+    }
+  ],
+  "relevantPaths": [
+    "src/cli-helpers.ts",
+    "src/commands/repo-map-internal.ts",
+    "src/core/config/config-schema.ts",
+    "src/core/config/config-validate.ts",
+    "src/core/repo-map/event-matrix.ts",
+    "test/unit/core/repo-map/event-matrix.test.ts"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-23T17:04:09.000+07:00",
-  "updatedAt": "2026-10-23T17:08:03.000+07:00"
+  "updatedAt": "2026-10-23T21:17:29.850+07:00",
+  "completedAt": "2026-10-23T21:17:29.850+07:00"
 }

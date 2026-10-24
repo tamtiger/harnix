@@ -10,7 +10,11 @@ import {
 } from "src/core/repo-map/service.js";
 import { queryWorkspaceRepoMap, refreshWorkspaceRepoMap, statusWorkspaceRepoMap } from "src/core/repo-map/workspace.js";
 import { readRepoMap } from "src/core/repo-map/store.js";
-import { buildProjectEventMatrix, buildWorkspaceEventMatrix } from "src/core/repo-map/event-matrix.js";
+import {
+  buildMultiWorkspaceEventMatrix,
+  buildProjectEventMatrix,
+  buildWorkspaceEventMatrix,
+} from "src/core/repo-map/event-matrix.js";
 import { findInitializedProject } from "src/utils/project-discovery.js";
 import { resolveWorkspaceRoot } from "src/core/workspace/resolve-root.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
@@ -73,8 +77,9 @@ export async function runRepoMapCommand(cwd: string, options: RepoMapCliOptions)
     );
   }
   if (options.events) {
-    const wsPath = typeof options.workspace === "string" ? options.workspace : undefined;
-    return options.workspace !== undefined ? eventsWorkspaceRepoMapInternal(cwd, wsPath) : eventsRepoMapInternal(cwd);
+    const ws = options.workspace;
+    const wsParam = typeof ws === "string" || Array.isArray(ws) ? ws : undefined;
+    return ws !== undefined ? eventsWorkspaceRepoMapInternal(cwd, wsParam) : eventsRepoMapInternal(cwd);
   }
   return dispatchQueryOrStatus(cwd, options, limit);
 }
@@ -109,8 +114,20 @@ export async function statusRepoMapInternal(cwd: string): Promise<unknown> {
   }
 }
 
-export async function eventsWorkspaceRepoMapInternal(cwd: string, workspacePath?: string): Promise<unknown> {
-  const root = await resolveWorkspaceRoot(cwd, workspacePath);
+export async function eventsWorkspaceRepoMapInternal(cwd: string, workspacePath?: string | string[]): Promise<unknown> {
+  const rawList = Array.isArray(workspacePath)
+    ? workspacePath
+    : workspacePath
+      ? workspacePath
+          .split(/[,\s]+/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+  if (rawList.length > 1) {
+    const roots = await Promise.all(rawList.map((p) => resolveWorkspaceRoot(cwd, p)));
+    return buildMultiWorkspaceEventMatrix(roots);
+  }
+  const root = await resolveWorkspaceRoot(cwd, rawList[0]);
   return buildWorkspaceEventMatrix(root);
 }
 

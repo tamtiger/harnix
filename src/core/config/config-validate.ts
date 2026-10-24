@@ -31,6 +31,12 @@ export function validateConfig(value: unknown): HarnixConfigV2 {
   assertIds(value.technologies, technologyIds, "technologies");
   assertPackagesV2(value.packages);
   if (value.verify !== undefined) assertVerify(value.verify);
+  if (value.events !== undefined) assertEvents(value.events);
+  if (value.linkedWorkspaces !== undefined) {
+    if (!Array.isArray(value.linkedWorkspaces) || !value.linkedWorkspaces.every((w) => typeof w === "string")) {
+      throw new ConfigValidationError("linkedWorkspaces must be a string array.");
+    }
+  }
   return value as HarnixConfigV2;
 }
 
@@ -160,6 +166,20 @@ function assertContext(value: unknown): void {
 function assertRuntime(value: unknown): void {
   if (!isRecord(value) || value.research !== "conditional" || typeof value.fullContext !== "boolean")
     throw new ConfigValidationError("runtime is invalid.");
+}
+
+function assertEvents(value: unknown): void {
+  if (!isRecord(value)) throw new ConfigValidationError("events must be a YAML object.");
+  if (value.producerWrappers !== undefined) {
+    if (!Array.isArray(value.producerWrappers) || !value.producerWrappers.every((w) => typeof w === "string")) {
+      throw new ConfigValidationError("events.producerWrappers must be a string array.");
+    }
+  }
+  if (value.linkedWorkspaces !== undefined) {
+    if (!Array.isArray(value.linkedWorkspaces) || !value.linkedWorkspaces.every((w) => typeof w === "string")) {
+      throw new ConfigValidationError("events.linkedWorkspaces must be a string array.");
+    }
+  }
 }
 
 export function normalizePackages(values: PackageConfig[]): PackageConfig[] {

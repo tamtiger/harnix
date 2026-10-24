@@ -3,7 +3,7 @@
   "schemaVersion": 1,
   "id": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
   "title": "Đại tu Phân tích Sự kiện C# .NET, Mặc định Brief Mode, Kích hoạt Chủ động Technique Skills & Hỗ trợ Multi-Workspace Enterprise",
-  "goal": "Tích hợp toàn diện 2 đợt cải tiến: (1) Token economy & Windows UX (mặc định brief mode, cờ inline --note/--reason, tự động ép UTF-8 stdin win32); (2) AST C# Confluent.Kafka phân giải Options/Literal và truy vết Wrapper callers; (3) Multi-workspace root repo-map và linkedWorkspaces; (4) Reference chuyên đề dotnet-microservices.md và Active Skill Triggers bắt buộc nạp reference khi chạy subagent/multi-agent; (5) Contextual Technique Hints trong preflight, lệnh harnix skill --suggest, Actionable Error Suggestions và cảnh báo stale project-facts.",
+  "goal": "Tích hợp toàn diện các đợt cải tiến: (1) Token economy & Windows UX (mặc định brief mode, cờ inline --note/--reason, tự động ép UTF-8 stdin win32); (2) AST C# Confluent.Kafka phân giải Options/Literal và truy vết Wrapper callers; (3) Multi-workspace root repo-map và linkedWorkspaces; (4) Nghiên cứu cẩm nang chuyên sâu cho 6 technique skills; (5) Reference chuyên đề dotnet-microservices.md và Active Skill Triggers; (6) Contextual Technique Hints trong preflight, lệnh harnix skill --suggest, Actionable Error Suggestions và cảnh báo stale project-facts.",
   "nonGoals": [
     "Không thay đổi TaskRecord schema v3 đóng băng",
     "Không vi phạm quy tắc an toàn bảo mật và cô lập filesystem"
@@ -12,9 +12,10 @@
     "20261023-170407-workflow-brief-default-and-safe-inline-flags",
     "20261023-170408-events-options-resolution-and-wrapper-tracing",
     "20261023-170409-multi-workspace-root-repo-map",
+    "20261023-204538-technique-skills-references-research",
     "20261023-170410-dotnet-microservices-reference-and-active-triggers",
     "20261023-170411-preflight-hints-skill-suggest-and-closing"
   ],
   "createdAt": "2026-10-23T17:04:06.000+07:00",
-  "updatedAt": "2026-10-23T17:08:03.000+07:00"
+  "updatedAt": "2026-10-23T20:45:38.865+07:00"
 }

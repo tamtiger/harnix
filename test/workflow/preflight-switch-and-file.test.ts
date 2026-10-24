@@ -65,7 +65,7 @@ describe("workflow preflight --expected-task and safe file payload", () => {
     // Write UTF-8 BOM + JSON
     await writeFile(pathsFile, "\uFEFF" + pathsPayload, "utf8");
 
-    const handler = WORKFLOW_HANDLERS.setPaths;
+    const handler = WORKFLOW_HANDLERS.setPaths!;
     const result = await handler({
       root,
       flags: { setPaths: true, file: "paths-payload.json" },
@@ -82,7 +82,7 @@ describe("workflow preflight --expected-task and safe file payload", () => {
     const cancelFile = join(root, "cancel-payload.json");
     await writeFile(cancelFile, cancelPayload, "utf8");
 
-    const cancelHandler = WORKFLOW_HANDLERS.cancel;
+    const cancelHandler = WORKFLOW_HANDLERS.cancel!;
     const cancelResult = (await cancelHandler({
       root,
       flags: { cancel: true, file: "cancel-payload.json" },

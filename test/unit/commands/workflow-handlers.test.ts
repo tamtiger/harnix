@@ -126,4 +126,50 @@ describe("workflow handlers", () => {
       expect.objectContaining({ text: "Có thể mất dữ liệu (Mitigation: Sao lưu trước)", severity: "high" }),
     ]);
   });
+
+  it("presentTask returns brief projection by default and full task with --full", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+
+    const briefResult = (await WORKFLOW_HANDLERS.setTitle!(
+      context(root, undefined, { setTitle: "Tiêu đề mới ngắn gọn" }),
+    )) as Record<string, unknown>;
+
+    expect(briefResult).toEqual({
+      id: task.id,
+      status: task.status,
+      checkpoint: task.checkpoint,
+      updatedAt: expect.any(String),
+    });
+    expect(briefResult.title).toBeUndefined();
+
+    const fullResult = (await WORKFLOW_HANDLERS.setTitle!(
+      context(root, undefined, { setTitle: "Tiêu đề mới đầy đủ", full: true }),
+    )) as Record<string, unknown>;
+
+    expect(fullResult.id).toBe(task.id);
+    expect(fullResult.title).toBe("Tiêu đề mới đầy đủ");
+    expect(fullResult.acceptanceCriteria).toBeDefined();
+  });
+
+  it("transition supports --reason and --note with Vietnamese UTF-8 for replan", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+
+    const replanResult = (await WORKFLOW_HANDLERS.transition!(
+      context(root, undefined, {
+        transition: "in_progress/replan",
+        reason: "Điều chỉnh yêu cầu nghiệp vụ theo quyết định kiến trúc mới",
+        note: "Ghi chú tiến độ tiếng Việt",
+      }),
+    )) as { status: string; checkpoint: string };
+
+    expect(replanResult.status).toBe("in_progress");
+    expect(replanResult.checkpoint).toBe("replan");
+
+    const persisted = (await loadPersistedTask(root, task.id)) as {
+      checkpoint: string;
+    };
+    expect(persisted.checkpoint).toBe("replan");
+  });
 });

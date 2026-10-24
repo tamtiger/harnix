@@ -181,10 +181,11 @@ function assertEvidencedChecksRetained(previous: TaskRecordV3, next: TaskRecordV
     if (checkEvidence === undefined) continue;
     const candidate = nextChecks.get(check.id);
     if (candidate !== undefined && semanticJsonEqual(candidate, check)) continue;
-    const isPassing = checkEvidence
-      .filter((evidence) => evidence.result !== "skipped")
-      .sort((a, b) => Date.parse(a.recordedAt) - Date.parse(b.recordedAt))
-      .at(-1)?.result === "pass";
+    const isPassing =
+      checkEvidence
+        .filter((evidence) => evidence.result !== "skipped")
+        .sort((a, b) => Date.parse(a.recordedAt) - Date.parse(b.recordedAt))
+        .at(-1)?.result === "pass";
     if (isPassing) {
       throw new Error(`Workflow contractRevision cannot mutate check ${check.id} after passing evidence.`);
     }

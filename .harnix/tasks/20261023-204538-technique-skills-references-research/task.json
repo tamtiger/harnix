@@ -1,0 +1,116 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261023-204538-technique-skills-references-research",
+  "title": "Nghiên cứu Cẩm nang Chuyên sâu cho 6 Technique Skills và Thiết kế Cơ chế Reference Động",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khảo sát, nghiên cứu các mô hình kiến trúc & kinh nghiệm thực chiến để xây dựng đề cương cẩm nang/chuyên đề chuyên sâu (deep domain references) cho 6 technique skills (bugfix-preserve, flaky-test, migration-safety, security-lens, sequential-thinking, verification-gap) và chuẩn hóa cơ chế nạp references động qua CLI.",
+  "nonGoals": [],
+  "epicId": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Khảo sát và xây dựng đề cương chi tiết các cẩm nang chuyên sâu cho 6 technique skills (invariant debugging, concurrency isolation, zero-downtime evolution, injection/traversal guardrails, multi-step tree search, verification blindspots).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-skills-1",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Thiết kế cấu trúc thư mục references/ và cơ chế đăng ký trong src/skills/technique-skills.ts tương thích lệnh harnix skill <name> --reference <topic>.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-skills-1",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Đo lường tác động token budget theo test/workflow/instruction-budget.test.ts đảm bảo các skill và reference tối ưu ngữ cảnh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-skills-1",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite và test kỹ năng/references phải pass",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "check-skills",
+      "description": "Kiểm tra định dạng và reference của technique skills",
+      "command": "pnpm vitest run test/unit/skills/technique-skills.test.ts test/workflow/instruction-budget.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/skills/**",
+        "test/unit/skills/**",
+        "test/workflow/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-skills-1",
+      "checkId": "check-skills",
+      "recordedAt": "2026-10-23T21:23:28.221+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/skills/technique-skills.test.ts test/workflow/instruction-budget.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0f9b56bb6058a7571a5fd0b4d4977e56c19a04b5beb7c7227d5c4e8c1465fa8a"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T21:25:29.401+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "20506c5356214604f1b7001f6040cccd4bc7ec8e003f1f88fd61c401895eedb8"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T21:28:34.356+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1b595d772d0bad71b6c0bacb1f47c27dfc328181902288ff2e8c377caca03c2b"
+    }
+  ],
+  "relevantPaths": [
+    "src/skills/technique-skills.ts",
+    "test/unit/skills/technique-skills.test.ts",
+    "test/workflow/instruction-budget.test.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-23T20:45:38.865+07:00",
+  "updatedAt": "2026-10-23T21:28:49.126+07:00",
+  "completedAt": "2026-10-23T21:28:49.126+07:00"
+}

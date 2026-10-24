@@ -5,6 +5,7 @@ import type { VerifyCommandConfig } from "src/core/config/config-schema.js";
 import { buildVerifyPlan } from "src/core/stack/verify-plan.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { readGitContext } from "src/utils/git.js";
 
 /** Derived file: rewritten by `init` and `update`, never listed in the managed manifest, never user-owned. */
 export const PROJECT_FACTS_PATH = ".harnix/spec/project-facts.md";
@@ -48,7 +49,7 @@ function capped<T>(items: readonly T[], render: (item: T) => string): string[] {
 }
 
 /** Pure and deterministic: the same stack and plan always give the same text, so a rewrite only happens on a real change. */
-export function renderProjectFacts(input: ProjectFactsInput, plan: ProjectFactsPlan): string {
+export function renderProjectFacts(input: ProjectFactsInput, plan: ProjectFactsPlan, gitCommit?: string): string {
   const sections = [
     "# Project facts",
     "Derived by `harnix init` and `harnix update`; do not edit, it is rewritten on every run. The stack below is the confirmed one from `.harnix/config.yaml`; `harnix verify-plan` prints the same commands.",
@@ -70,13 +71,18 @@ export function renderProjectFacts(input: ProjectFactsInput, plan: ProjectFactsP
   ];
   if (plan.warnings.length > 0)
     sections.push(["## Warnings", ...plan.warnings.map((warning) => `- ${warning}`)].join("\n"));
-  return `${sections.join("\n\n")}\n`;
+  let result = `${sections.join("\n\n")}\n`;
+  if (gitCommit !== undefined) {
+    result += `\n<!-- git-commit: ${gitCommit} -->\n`;
+  }
+  return result;
 }
 
 /** Writes `.harnix/spec/project-facts.md` from the confirmed config and the detected verify plan. */
 export async function writeProjectFacts(root: string): Promise<"created" | "updated" | "unchanged"> {
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
-  const text = renderProjectFacts(config, await buildVerifyPlan(root));
+  const git = await readGitContext(root);
+  const text = renderProjectFacts(config, await buildVerifyPlan(root), git?.commit);
   const destination = await resolveSafeProjectPath(root, PROJECT_FACTS_PATH);
   let current: string | undefined;
   try {

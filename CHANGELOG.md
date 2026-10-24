@@ -4,6 +4,20 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.19.0] - 2026-10-23
+
+### Changed
+
+- Mặc định brief mode cho workflow handlers, hỗ trợ cờ inline --note/--reason và tự động nhận diện UTF-8 stdin
+- AST C# phân giải Options/constant và hỗ trợ events.producerWrappers trong repo-map --events
+- Hỗ trợ Multi-Workspace Root và liên kết cụm repository linkedWorkspaces cho repo-map --events
+- Đại tu Phân tích Sự kiện C# .NET, Mặc định Brief Mode, Kích hoạt Chủ động Technique Skills & Hỗ trợ Multi-Workspace Enterprise
+
+### Added
+
+- Bổ sung cẩm nang chuyên sâu và hỗ trợ dynamic references cho 6 technique skills
+- Bổ sung reference dotnet-microservices và thiết lập Active Triggers trong SKILL.md
+
 ## [2.18.0] - 2026-10-23
 
 ### Fixed

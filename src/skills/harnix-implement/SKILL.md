@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.18.0"
+  version: "2.19.0"
 ---
 
 # Implement with evidence
@@ -50,10 +50,9 @@ Release-visible changes follow the version policy: a standalone task bumps the p
 
 Reviewer or user feedback is a hypothesis: read all of it, verify it against the code and contract, apply one item at a time, push back with evidence (`./references/feedback.md` or `harnix skill harnix-implement --reference feedback`). Stop and route on a new product or compatibility decision, a plan that contradicts evidence, a missing dependency or authority, a repeated unexplained failure, or a change that would overwrite user-owned content.
 
-## Technique skills
+## Technique skills & Active triggers
 
-Use native agent skills on demand (load via `harnix skill <name>`):
-
+- **Active Trigger (.NET / C# Microservices):** When implementing .NET microservices, DDD layering, Kafka event publishing/consumption or NSubstitute mocks, MUST load `harnix skill harnix-implement --reference dotnet-microservices`.
 - Complex bugfix preserving behavior: `harnix skill harnix-bugfix-preserve` builds test specifications to protect working contracts.
 - Schema/contract evolution: `harnix skill harnix-migration-safety` guards data and compatibility.
 

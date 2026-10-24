@@ -35,6 +35,12 @@ export interface VerifyConfig extends VerifyCommandConfig {
   packages?: PackageVerifyConfig[];
 }
 
+export interface EventsConfig {
+  producerWrappers?: string[];
+  linkedWorkspaces?: string[];
+  [key: string]: unknown;
+}
+
 export interface HarnixConfigV1 {
   generator: "harnix";
   schemaVersion: 1;
@@ -60,6 +66,8 @@ export interface HarnixConfigV2 {
   context: { maxCharacters: number; tokenApproximation: number; mode?: "lean" | "full"; [key: string]: unknown };
   runtime: { research: "conditional"; fullContext: boolean; [key: string]: unknown };
   verify?: VerifyConfig;
+  events?: EventsConfig;
+  linkedWorkspaces?: string[];
   [key: string]: unknown;
 }
 

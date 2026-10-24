@@ -9,6 +9,12 @@ import verificationGapSource from "./harnix-verification-gap/SKILL.md";
 import archReviewSource from "./harnix-arch-review/SKILL.md";
 import domainBriefsReference from "./harnix-arch-review/references/domain-briefs.md";
 import wbsConsolidationReference from "./harnix-arch-review/references/wbs-consolidation.md";
+import invariantDebuggingReference from "./harnix-bugfix-preserve/references/invariant-debugging.md";
+import concurrencyIsolationReference from "./harnix-flaky-test/references/concurrency-isolation.md";
+import zeroDowntimeEvolutionReference from "./harnix-migration-safety/references/zero-downtime-evolution.md";
+import injectionTraversalReference from "./harnix-security-lens/references/injection-traversal-guardrails.md";
+import multiStepTreeSearchReference from "./harnix-sequential-thinking/references/multi-step-tree-search.md";
+import verificationBlindspotsReference from "./harnix-verification-gap/references/verification-blindspots.md";
 
 import type { SkillTemplate } from "src/core/spec/project-skills.js";
 
@@ -66,12 +72,42 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 const canonicalTechniqueSources: readonly [string, Record<string, string>][] = [
-  [verificationGapSource, {}],
-  [bugfixPreserveSource, {}],
-  [flakyTestSource, {}],
-  [migrationSafetySource, {}],
-  [securityLensSource, {}],
-  [sequentialThinkingSource, {}],
+  [
+    verificationGapSource,
+    {
+      "verification-blindspots": verificationBlindspotsReference,
+    },
+  ],
+  [
+    bugfixPreserveSource,
+    {
+      "invariant-debugging": invariantDebuggingReference,
+    },
+  ],
+  [
+    flakyTestSource,
+    {
+      "concurrency-isolation": concurrencyIsolationReference,
+    },
+  ],
+  [
+    migrationSafetySource,
+    {
+      "zero-downtime-evolution": zeroDowntimeEvolutionReference,
+    },
+  ],
+  [
+    securityLensSource,
+    {
+      "injection-traversal-guardrails": injectionTraversalReference,
+    },
+  ],
+  [
+    sequentialThinkingSource,
+    {
+      "multi-step-tree-search": multiStepTreeSearchReference,
+    },
+  ],
   [
     archReviewSource,
     {

@@ -22,6 +22,26 @@ const joinList = (value: string, previous: string | undefined): string =>
 const accumulate = (value: string, previous: string | string[] | undefined): string | string[] =>
   previous === undefined ? value : [...[previous].flat(), value];
 
+function enhanceErrorMessage(error: unknown): Error {
+  if (!(error instanceof Error)) return new Error(String(error));
+  const msg = error.message;
+  let hint = "";
+  if (msg.includes("Illegal task transition")) {
+    hint =
+      "Gợi ý: Kiểm tra hợp lệ bằng --dry-run trước; chỉ có thể chuyển từ ready/ready sang in_progress/implementing khi bắt đầu code.";
+  } else if (msg.includes("Task status/checkpoint combination is invalid")) {
+    hint = "Gợi ý: Kiểm tra bảng legalCheckpoints hoặc hướng dẫn trạng thái trong .harnix/workflow.md.";
+  } else if (msg.includes("Checklist trong plan.md chưa hoàn tất")) {
+    hint = "Gợi ý: Đánh dấu [x] cho 100% các mục checklist trong plan.md trước khi chuyển sang verifying.";
+  } else if (msg.includes("Invalid or unsupported task record")) {
+    hint = "Gợi ý: Kiểm tra task.json tuân thủ TaskRecord schema v3 (chạy harnix workflow --schema).";
+  }
+  if (hint !== "") {
+    error.message = `${msg}\n${hint}`;
+  }
+  return error;
+}
+
 export function registerWorkflowCommand(program: Command, options: WorkflowCommandOptions): void {
   // The pnpm PowerShell shim forwards `$args` and drops the `--` separator, so everything after the first operand
   // (the command of `--run-check`) is passed through untouched instead of being parsed as harnix options.
@@ -104,6 +124,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--criteria <ids>", "Criterion IDs a check covers, comma-separated or repeated", joinList)
     .option("--input <glob>", "Repository input glob of a --set-check check (repeatable)", collect, [])
     .option("--reason <text>", "Why obligations change after planning (10-1000 characters)")
+    .option("--note <text>", "Optional note or rationale for workflow transition")
     .option(
       "--text <text>",
       "Text for --add-criterion, --add-decision or --add-risk; repeatable with --init, one criterion each",
@@ -140,10 +161,14 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
         ? await resolveProjectRoot(process.cwd())
         : await requireInitializedProject(process.cwd());
       let result: unknown;
-      for (const action of actions) {
-        result = await withTargetTask(flags.task, () =>
-          (WORKFLOW_HANDLERS[action] as Handler)({ root, flags, operands, options }),
-        );
+      try {
+        for (const action of actions) {
+          result = await withTargetTask(flags.task, () =>
+            (WORKFLOW_HANDLERS[action] as Handler)({ root, flags, operands, options }),
+          );
+        }
+      } catch (error: unknown) {
+        throw enhanceErrorMessage(error);
       }
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });

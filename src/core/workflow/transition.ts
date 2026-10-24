@@ -27,6 +27,8 @@ export interface DryRunTransitionResult {
 export interface TransitionOptions {
   /** The caller attests that the ready-review was run; a Full task cannot enter ready/ready without it. */
   reviewed?: boolean;
+  reason?: string | undefined;
+  note?: string | undefined;
 }
 
 export function transitionWorkflow(
@@ -86,7 +88,9 @@ export async function transitionWorkflow(
 
   const base: TaskRecord = { ...task };
   if (base.status === "blocked") delete base.blocker;
-  return saveWorkflow(root, { task: { ...base, status, checkpoint, updatedAt: laterTimestamp(task.updatedAt, now) } });
+  return saveWorkflow(root, {
+    task: { ...base, status, checkpoint, updatedAt: laterTimestamp(task.updatedAt, now) } as TaskRecord,
+  });
 }
 
 async function handleDryRunTransition(

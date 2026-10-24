@@ -39,12 +39,18 @@ const EXCLUDED_DYNAMIC_IDENTIFIERS = new Set([
   "default",
   "null",
   "this",
+  "splitTopics",
+  "dataKafka",
+  "checkResult",
+  "ObjectMapper",
 ]);
 
 function isExcludedTopic(topic: string): boolean {
   if (EXCLUDED_DYNAMIC_IDENTIFIERS.has(topic)) return true;
   if (/^(?:Arg|It|Mock)\.(?:Any|IsAny|Is|Of)\b/u.test(topic)) return true;
   if (topic.includes("(") || topic.includes(")") || topic.includes("<") || topic.includes(">")) return true;
+  if (/^(?:eto|checkResult|ObjectMapper|splitTopics)\b/iu.test(topic)) return true;
+  if (/\.(?:EventName|CancelEto|Map)\b/iu.test(topic)) return true;
   if (
     /^[a-z][a-zA-Z0-9_]*$/u.test(topic) &&
     (topic.endsWith("Token") || topic.endsWith("Eto") || topic.endsWith("Payload"))
@@ -54,7 +60,7 @@ function isExcludedTopic(topic: string): boolean {
   return false;
 }
 
-export function discoverEvents(content: string): DiscoveredEvents {
+export function discoverEvents(content: string, producerWrappers: readonly string[] = []): DiscoveredEvents {
   const lines = content.replaceAll("\r\n", "\n").split("\n");
   const routes: DiscoveredRoute[] = [];
   const topics: DiscoveredTopic[] = [];
@@ -75,7 +81,7 @@ export function discoverEvents(content: string): DiscoveredEvents {
     const lineNumber = idx + 1;
     extractRoutes(trimmed, lineNumber, routes);
     extractSubscriberTopics(trimmed, lineNumber, topics);
-    extractPublisherTopics(trimmed, lineNumber, topics);
+    extractPublisherTopics(trimmed, lineNumber, topics, producerWrappers);
   }
 
   return { routes, topics };
@@ -130,6 +136,28 @@ function recordSubscriberTopic(
   }
 }
 
+function recordPublisherTopic(
+  topics: DiscoveredTopic[],
+  lineNumber: number,
+  topic: string | undefined,
+  source: string,
+): void {
+  const clean = topic?.trim();
+  if (
+    clean &&
+    !secretValue.test(clean) &&
+    !isExcludedTopic(clean) &&
+    !topics.some((t) => t.line === lineNumber && t.topic === clean)
+  ) {
+    topics.push({
+      line: lineNumber,
+      role: "publisher",
+      source,
+      topic: clean,
+    });
+  }
+}
+
 function extractCSharpSubscriberTopics(trimmed: string, lineNumber: number, topics: DiscoveredTopic[]): void {
   const csharpSubscriberAttrRe =
     /(?:\[|,\s*)(CapSubscribe|Topic|KafkaListener|RabbitListener|Queue)\s*\(\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))\s*(?:,[^\]]+)?\)(?=\s*(?:,|\]))/gu;
@@ -162,56 +190,35 @@ function extractSubscriberTopics(trimmed: string, lineNumber: number, topics: Di
   }
 }
 
-function extractPublisherTopics(trimmed: string, lineNumber: number, topics: DiscoveredTopic[]): void {
+function extractPublisherTopics(
+  trimmed: string,
+  lineNumber: number,
+  topics: DiscoveredTopic[],
+  producerWrappers: readonly string[] = [],
+): void {
   const publisherObjectRe =
     /\b(?:_?capBus|_?bus|_?publisher|_?producer|_?eventBus|kafka|channel|client|[\w$]*(?:Producer|Publisher|Bus|EventBus))\.(?:Publish|PublishAsync|produce|Produce|ProduceAsync|send|publish|emit)\s*\(\s*\{\s*topic\s*:\s*["']([^"']+)["']/gu;
   for (const match of trimmed.matchAll(publisherObjectRe)) {
-    const topic = match[1]!.trim();
-    if (topic && !secretValue.test(topic) && !isExcludedTopic(topic)) {
-      topics.push({
-        line: lineNumber,
-        role: "publisher",
-        source: "publish",
-        topic,
-      });
-    }
+    recordPublisherTopic(topics, lineNumber, match[1], "publish");
   }
 
   const publisherDirectRe =
     /\b(?:_?capBus|_?bus|_?publisher|_?producer|_?eventBus|kafka|channel|client|[\w$]*(?:Producer|Publisher|Bus|EventBus))\.(?:Publish|PublishAsync|produce|Produce|ProduceAsync|send|publish|emit|sendToQueue)\s*\(\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))/gu;
   for (const match of trimmed.matchAll(publisherDirectRe)) {
-    const topic = (match[1] ?? match[2])?.trim();
-    if (
-      topic &&
-      !secretValue.test(topic) &&
-      !isExcludedTopic(topic) &&
-      !topics.some((t) => t.line === lineNumber && t.topic === topic)
-    ) {
-      topics.push({
-        line: lineNumber,
-        role: "publisher",
-        source: "publish",
-        topic,
-      });
-    }
+    recordPublisherTopic(topics, lineNumber, match[1] ?? match[2], "publish");
   }
 
   const standalonePublishRe =
     /\b(?:Publish|PublishAsync|Produce|ProduceAsync)\s*\(\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))/gu;
   for (const match of trimmed.matchAll(standalonePublishRe)) {
-    const topic = (match[1] ?? match[2])?.trim();
-    if (
-      topic &&
-      !secretValue.test(topic) &&
-      !isExcludedTopic(topic) &&
-      !topics.some((t) => t.line === lineNumber && t.topic === topic)
-    ) {
-      topics.push({
-        line: lineNumber,
-        role: "publisher",
-        source: "Publish",
-        topic,
-      });
+    recordPublisherTopic(topics, lineNumber, match[1] ?? match[2], "Publish");
+  }
+
+  for (const wrapper of producerWrappers) {
+    const escaped = wrapper.replaceAll(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+    const wrapperRe = new RegExp(`\\b${escaped}\\s*\\(\\s*(?:["']([^"']+)["']|([A-Za-z0-9_.]+))`, "gu");
+    for (const match of trimmed.matchAll(wrapperRe)) {
+      recordPublisherTopic(topics, lineNumber, match[1] ?? match[2], wrapper);
     }
   }
 }

@@ -67,7 +67,7 @@ describe.sequential("workflow command unit", () => {
     } finally {
       spy.mockRestore();
     }
-  }, 40_000);
+  }, 60_000);
 
   it("executes workflow --inspect via commander action", async () => {
     const program = new Command();

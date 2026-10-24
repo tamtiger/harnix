@@ -129,6 +129,7 @@ describe("CLI command contract", () => {
       "--criteria",
       "--input",
       "--reason",
+      "--note",
       "--text",
       "--with-check",
       "--rationale",

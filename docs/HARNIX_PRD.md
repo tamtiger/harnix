@@ -10,7 +10,7 @@
 | Repository root | Resolved dynamically; no machine-specific path is part of product output |
 | Package / executable | `@tamtiger/harnix` / `harnix` |
 | Project data / generator / skills | `.harnix/` / `harnix` / `harnix-*` |
-| Status | **Implemented in the authorized scope**; Phase 6 and workflow freshness C1–C3 are implemented. Revalidation 2026-08-18 proved disposable `agy` implicit routing/no-op control; current `agy --print` hook loading, Kiro/Codex disposable login/trust and GUI surfaces remain conservative/not-run rather than being inferred active. |
+| Status | **Implemented in the authorized scope**; Phase 6, workflow freshness C1–C3 và Epic 2.19.0 (Enterprise Events, Brief Defaults, Multi-Workspace & Active Technique Skills) đã hoàn tất 100%. Revalidation 2026-08-18 proved disposable `agy` implicit routing/no-op control; current `agy --print` hook loading, Kiro/Codex disposable login/trust and GUI surfaces remain conservative/not-run rather than being inferred active. |
 
 Tài liệu này là nguồn yêu cầu sản phẩm chính. `HARNIX_WORKFLOW.md` là contract chuẩn cho state/transition/gate/artifact của workflow; `IMPLEMENTATION_PLAN.md`, `HARNESS_RESEARCH.md`, `UPSTREAM_MAPPING.md` và `UPSTREAM_BASELINE.md` giải thích cách triển khai và provenance. Khi có mâu thuẫn về product behavior, PRD được ưu tiên; khi chi tiết workflow không được PRD quy định, `HARNIX_WORKFLOW.md` được ưu tiên, trừ khi yêu cầu mới của người dùng ghi rõ override.
 
@@ -143,15 +143,15 @@ harnix resume --epic <epic-id> [--dry-run]
 harnix context-report --platform <kiro|antigravity|codex|claude|opencode|cursor> [--limit <1..50>]
 harnix status --explain [--limit <1..50>]
 harnix status --workspace [path]
-harnix skill [name]
+harnix skill [name] [--raw] [--reference <topic>] [--suggest <query>]
 harnix doctor [--fix] [--global] [--allow-warnings]
-harnix repo-map [--workspace [path]]
-harnix repo-map --query <text> [--format <json|compact|outline>] [--workspace [path]] [--limit <count>]
+harnix repo-map [--workspace [path...]]
+harnix repo-map --query <text> [--format <json|compact|outline>] [--workspace [path...]] [--limit <count>]
 harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]
 harnix repo-map --tests <path> [--limit <1..20>]
 harnix repo-map --outline <path> [--symbol <name>] [--limit <1..50>]
 harnix repo-map --refs <symbol> [--path <path>] [--limit <1..20>]
-harnix repo-map --events
+harnix repo-map --events [--workspace <path...>]
 harnix verify-plan
 ```
 
@@ -404,11 +404,11 @@ Sáu skill (overhaul D4, task `slim-instructions`), mỗi skill sở hữu đún
 - `harnix-review` — standalone code review read-only (Bypass, không cần `.harnix/workflow.md`, không đọc/mutate task).
 - `harnix-research` — standalone read-only research (Bypass) và task-scoped research cho material unknown trong planning/replan/debugging.
 
-Chi tiết ít dùng nằm ở reference nạp theo yêu cầu qua `harnix skill <name> --reference <topic>` (plan: `replan|migration|epic|ready-review`; implement: `feedback`; verify: `evidence|finish-cancel`), không phải file cài thêm. Tên cũ (`harnix-brainstorm|check|finish-work|continue`) còn resolve qua `harnix skill` với `resolvedFrom` để agent đã cache không gãy.
+Chi tiết ít dùng nằm ở reference nạp theo yêu cầu qua `harnix skill <name> --reference <topic>` (plan: `decision-discipline|epic|grilling|migration|multi-repo|ready-review|replan`; implement: `brownfield|commit-hygiene|dotnet-microservices|feedback`; verify: `evidence|finish-cancel|rationalizations|so-what|technical-recap`; review: `multi-lens`; research: `scouting-isolation`; debug: `feedback-loop`; và 6 technique references: `verification-blindspots`, `invariant-debugging`, `concurrency-isolation`, `zero-downtime-evolution`, `injection-traversal-guardrails`, `multi-step-tree-search`, `domain-briefs|wbs-consolidation`), không phải file cài thêm. Lệnh `harnix skill --suggest <query>` hỗ trợ tìm kiếm và xếp hạng gợi ý skill theo ngữ nghĩa và từ khóa. Tên cũ (`harnix-brainstorm|check|finish-work|continue`) còn resolve qua `harnix skill` với `resolvedFrom` để agent đã cache không gãy.
 
 Source of truth của từng skill là file thật `src/skills/harnix-*/SKILL.md`, không phải string prose nhúng trong `workflow.ts`. Build nhúng Markdown vào `dist` để không cần runtime filesystem/network. Kiro, Antigravity và Codex cài cùng byte content canonical; frontmatter có `name`, `description` và `metadata.version`, trong đó version semantic của mọi skill phải đồng bộ với package release. Activation guard, danh sách Bypass và state rule chỉ nằm ở một khối rules always-loaded (`HARNIX_RULES`), skill không lặp lại. Router chọn một current stage owner rồi agent đọc riêng selected skill đến EOF; không batch-load skill stage tương lai, và output truncate phải được reread riêng trước khi hành động. Test bắt buộc kiểm tra frontmatter, sáu skill đầy đủ và ngân sách token (always-loaded ≤1.500, mỗi skill ≤2.000, đường Full ≤15.000 token ước lượng chars/4), version đồng bộ package, ready/TDD/debug/verification/resume/cancellation guardrail và parity giữa platform.
 
-Thư viện technique-skill hẹp (5–10 skill, hiện ship 7 skill: `harnix-verification-gap`, `harnix-bugfix-preserve`, `harnix-flaky-test`, `harnix-migration-safety`, `harnix-security-lens`, `harnix-sequential-thinking`, `harnix-arch-review`) cung cấp các kỹ thuật cross-language có bằng chứng thực nghiệm rõ ràng từ `external-research.md`. Chúng được cài đặt vào global skill sink của 6 nền tảng để agent tự chọn theo mô tả (native discovery), hoàn toàn không qua stage routing (`preflight.nextStage`). Đồng thời, thư mục `.harnix/spec/skills/` mở ra làm extension point để từng dự án tự bổ sung skill riêng (domain, tool vendor), được `harnix skill` tự động khám phá và phục vụ.
+Thư viện technique-skill hẹp (5–10 skill, hiện ship 7 skill: `harnix-verification-gap`, `harnix-bugfix-preserve`, `harnix-flaky-test`, `harnix-migration-safety`, `harnix-security-lens`, `harnix-sequential-thinking`, `harnix-arch-review`) cung cấp các kỹ thuật cross-language có bằng chứng thực nghiệm rõ ràng từ `external-research.md`. Chúng được cài đặt vào global skill sink của 6 nền tảng để agent tự chọn theo mô tả (native discovery), hoặc thông qua trường `suggestedTechniques?: string[]` trong `harnix workflow --preflight` tự động phân tích triệu chứng lỗi và ngữ cảnh task. Đồng thời, thư mục `.harnix/spec/skills/` mở ra làm extension point để từng dự án tự bổ sung skill riêng (domain, tool vendor), được `harnix skill` tự động khám phá và phục vụ. Các lệnh ghi workflow mặc định kích hoạt brief mode (chỉ in `id`, `status`, `checkpoint`, `updatedAt`) và cung cấp cờ `--full` khi cần in trọn vẹn task record. Khi commit của git HEAD thay đổi so với thời điểm trích xuất facts, preflight trả về `projectFactsStale: true` để cảnh báo. Lệnh `harnix repo-map --events` hỗ trợ quét đa workspace thông qua cờ `--workspace <path...>` hoặc cấu hình liên kết `linkedWorkspaces` trong `.harnix/config.yaml`, đồng thời trích xuất hằng số và property initializer từ `*Options.cs` và truy vết callers của `events.producerWrappers`.
 
 - **Lite:** thay đổi tập trung, rủi ro thấp, ít decision; task record tối thiểu vẫn có acceptance, validation và evidence. LOC chỉ là tín hiệu, không phải luật.
 - **Full:** feature, integration, migration, architecture/refactor, security-sensitive hoặc multi-layer; task `prd.md` + `plan.md`, conditional `design.md`/research và decision-complete plan.

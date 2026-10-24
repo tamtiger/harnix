@@ -389,4 +389,22 @@ describe("workflow preflight version skew", () => {
     await initializeUtcProject(root);
     expect((await preflightWorkflow(root, Date.now())).git).toBeUndefined();
   });
+
+  it("suggests techniques based on active task attributes and symptoms", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const task = {
+      ...taskV3("planning", "planning"),
+      title: "Fix flaky database migration test",
+      goal: "Investigate race condition and schema evolution",
+      mode: "full" as const,
+    };
+    await saveWorkflow(root, { task });
+    const preflight = await preflightWorkflow(root, Date.now());
+    expect(preflight.suggestedTechniques).toBeDefined();
+    expect(preflight.suggestedTechniques).toContain("harnix-flaky-test");
+    expect(preflight.suggestedTechniques).toContain("harnix-migration-safety");
+    expect(preflight.suggestedTechniques).toContain("harnix-sequential-thinking");
+    expect(preflight.suggestedTechniques).toContain("harnix-verification-gap");
+  });
 });

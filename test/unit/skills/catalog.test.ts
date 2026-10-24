@@ -7,7 +7,7 @@ const tokens = (text: string): number => Math.ceil(text.length / 4);
 
 const expectedReferences: Record<string, string[]> = {
   "harnix-plan": ["decision-discipline", "epic", "grilling", "migration", "multi-repo", "ready-review", "replan"],
-  "harnix-implement": ["brownfield", "commit-hygiene", "feedback"],
+  "harnix-implement": ["brownfield", "commit-hygiene", "dotnet-microservices", "feedback"],
   "harnix-verify": ["evidence", "finish-cancel", "rationalizations", "so-what", "technical-recap"],
   "harnix-review": ["multi-lens"],
   "harnix-research": ["scouting-isolation"],

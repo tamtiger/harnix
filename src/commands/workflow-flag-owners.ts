@@ -124,8 +124,14 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   {
     name: "--reason",
     isSet: (f) => f.reason !== undefined,
-    actions: ["setCheck", "addCriterion", "setCriterion", "replaceCheck", "cancel"],
-    hint: "workflow --set-check, --add-criterion, --set-criterion, --replace-check or --cancel",
+    actions: ["setCheck", "addCriterion", "setCriterion", "replaceCheck", "cancel", "transition"],
+    hint: "workflow --set-check, --add-criterion, --set-criterion, --replace-check, --cancel or --transition",
+  },
+  {
+    name: "--note",
+    isSet: (f) => f.note !== undefined,
+    actions: ["transition"],
+    hint: "workflow --transition",
   },
   {
     name: "--text",

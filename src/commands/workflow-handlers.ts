@@ -28,15 +28,12 @@ import {
   transitionWorkflow,
   workflowEnvelopeSchema,
 } from "src/commands/internal-workflow.js";
-import { presentTask, splitList } from "src/commands/workflow-handler-utils.js";
+import { parseJson, presentTask, readInput, readRequired, splitList } from "src/commands/workflow-handler-utils.js";
 import { EDIT_HANDLERS } from "src/commands/workflow-edit-handlers.js";
 import { LIFECYCLE_HANDLERS } from "src/commands/workflow-lifecycle-handlers.js";
 import { packageVersion } from "src/version.js";
 import { isEvidenceFlagsMode, type WorkflowFlags } from "src/commands/workflow-flags.js";
 import type { CheckRunner } from "src/utils/check-runner.js";
-import { readBoundedInput } from "src/utils/bounded-input.js";
-import { readFile } from "src/utils/fs-access.js";
-import { resolveSafeFilePath } from "src/utils/paths.js";
 
 export interface WorkflowCommandOptions {
   workflowInput?: (() => Promise<string>) | undefined;
@@ -48,44 +45,6 @@ export interface WorkflowContext {
   flags: WorkflowFlags;
   operands: string[];
   options: WorkflowCommandOptions;
-}
-
-const OPTIONAL_STDIN_IDLE_MS = 2_000;
-
-/** Windows PowerShell 5.1 prefixes piped text with a BOM even for UTF-8 without BOM, which is not valid JSON. */
-const withoutBom = (input: string | undefined): string | undefined => {
-  if (input === undefined) return undefined;
-  return input.replace(/^\uFEFF/u, "").replace(/^\uFFFE/u, "");
-};
-
-async function readInput(context: WorkflowContext, optional = false): Promise<string | undefined> {
-  if (context.flags.file !== undefined) {
-    const target = await resolveSafeFilePath(context.root, context.flags.file);
-    return withoutBom(await readFile(target, "utf8"));
-  }
-  if (context.options.workflowInput) return withoutBom(await context.options.workflowInput());
-  if (!optional) return withoutBom(await readBoundedInput(process.stdin));
-  if (process.stdin.isTTY === true) return "";
-  // An agent shell often leaves stdin as an open pipe that never closes, so an optional body must not wait for EOF.
-  return withoutBom(await readBoundedInput(process.stdin, undefined, OPTIONAL_STDIN_IDLE_MS));
-}
-
-function parseJson(input: string | undefined, message: string, optional = false): unknown {
-  if (!input) {
-    if (optional) return undefined;
-    throw new Error(message);
-  }
-  try {
-    return JSON.parse(input.trim()) as unknown;
-  } catch {
-    throw new Error(message);
-  }
-}
-
-async function readRequired(context: WorkflowContext, subject: string, invalid: string): Promise<unknown> {
-  const input = await readInput(context);
-  if (!input) throw new Error(`${subject} requires a bounded JSON envelope on stdin.`);
-  return parseJson(input, invalid);
 }
 
 export type Handler = (context: WorkflowContext) => Promise<unknown>;
@@ -116,6 +75,8 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
       context.flags.dryRun === true,
       {
         reviewed: context.flags.reviewed === true,
+        reason: context.flags.reason,
+        note: context.flags.note,
       },
     );
     if (context.flags.dryRun === true) return result;
@@ -236,8 +197,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
     if (flags.file !== undefined) {
       const input = await readInput(context);
       const parsed = parseJson(input, "Workflow set-paths requires valid JSON.", true) as
-        | { paths?: string[]; specs?: string[] }
-        | undefined;
+        { paths?: string[]; specs?: string[] } | undefined;
       if (parsed?.paths !== undefined) paths = parsed.paths;
       if (parsed?.specs !== undefined) specs = parsed.specs;
     }

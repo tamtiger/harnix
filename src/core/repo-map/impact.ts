@@ -74,9 +74,7 @@ export function createRepoMapImpact(map: RepoMapV1, options: RepoMapImpactOption
 
 function findEnclosingCsproj(targetPath: string, records: readonly RepoMapRecordV1[]): RepoMapRecordV1 | undefined {
   const targetDir = posix.dirname(targetPath);
-  const csprojRecords = records.filter(
-    (record) => record.extension === "csproj" || record.path.endsWith(".csproj"),
-  );
+  const csprojRecords = records.filter((record) => record.extension === "csproj" || record.path.endsWith(".csproj"));
   let best: RepoMapRecordV1 | undefined;
   let bestDepth = -1;
   for (const record of csprojRecords) {

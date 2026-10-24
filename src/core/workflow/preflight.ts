@@ -1,12 +1,14 @@
+import { readFile } from "node:fs/promises";
 import type { ContextDrift } from "src/core/context/context.js";
 import { readProjectTimezone } from "src/core/config/config.js";
 import { resolveActiveTask, type Evidence, type TaskRecord } from "src/core/tasks/task.js";
 import { inspectRequiredChecks, type RequiredCheckState } from "src/core/verification/check-report.js";
 import { formatInstant, idPrefix } from "src/utils/clock.js";
 import { compareCodeUnits } from "src/utils/order.js";
-import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { readManifest } from "src/core/managed/project-files.js";
 import { detectVersionSkew, skewMessage, type VersionSkew } from "src/core/versions/skew.js";
+import { PROJECT_FACTS_PATH } from "src/core/spec/project-facts.js";
 import { baselineHint } from "./baseline-hint.js";
 import { verificationRetryDisposition } from "./completion.js";
 import { stageOwnerFor } from "./routing.js";
@@ -25,6 +27,10 @@ export interface WorkflowPreflightResultV1 {
   requiredChecks: Record<RequiredCheckState, string[]>;
   retryLimitReached: string[];
   nextStage: "await" | "debug" | "implement" | "plan" | "stop" | "verify";
+  /** Contextually suggested technique skills based on symptoms and active task attributes. */
+  suggestedTechniques?: string[];
+  /** Present and true when project-facts.md was extracted at an older git commit than HEAD. */
+  projectFactsStale?: boolean;
   /** Present when --expected-task was passed; true if active task changed or is missing. */
   taskSwitched?: boolean;
   /** Authoritative time source for agents: current instant and ID prefix in the configured zone. */
@@ -73,6 +79,7 @@ export async function preflightWorkflow(
   const skew = cliVersion === undefined ? undefined : await recordedSkew(root, cliVersion);
   const hint = await recordedBaselineHint(root);
   const git = await readGitContext(root);
+  const factsStale = await checkFactsStale(root, git?.commit);
   let taskSwitched: boolean | undefined;
   let nextStage = result.nextStage;
   if (expectedTask !== undefined) {
@@ -86,6 +93,7 @@ export async function preflightWorkflow(
     ...(skew === undefined ? {} : { versionSkew: skewMessage(skew) }),
     ...(hint === undefined ? {} : { baselineHint: hint }),
     ...(git === undefined ? {} : { git }),
+    ...(factsStale === undefined ? {} : { projectFactsStale: factsStale }),
   };
 }
 
@@ -184,6 +192,7 @@ async function routePreflight(root: string, now: number): Promise<WorkflowPrefli
   const requiredChecks = emptyRequiredChecks();
   for (const inspection of inspections) requiredChecks[inspection.state].push(inspection.id);
   sortRequiredChecks(requiredChecks);
+  const suggestedTechniques = suggestTechniques(task, requiredChecks, retryLimitReached);
   return {
     ...base,
     activeTask,
@@ -191,7 +200,47 @@ async function routePreflight(root: string, now: number): Promise<WorkflowPrefli
     requiredChecks,
     retryLimitReached,
     nextStage: stageOf(task),
+    ...(suggestedTechniques === undefined ? {} : { suggestedTechniques }),
   };
+}
+
+async function checkFactsStale(root: string, currentCommit?: string): Promise<boolean | undefined> {
+  if (currentCommit === undefined) return undefined;
+  try {
+    const factsPath = await resolveSafeProjectPath(root, PROJECT_FACTS_PATH);
+    const text = await readFile(factsPath, "utf8");
+    const match = /<!--\s*git-commit:\s*([a-f0-9]+)\s*-->/u.exec(text);
+    return match === null ? undefined : match[1] !== currentCommit;
+  } catch {
+    return undefined;
+  }
+}
+
+function suggestTechniques(
+  task: TaskRecord | undefined,
+  requiredChecks: RequiredChecks,
+  retryLimitReached: string[],
+): string[] | undefined {
+  if (task === undefined) return undefined;
+  const set = new Set<string>();
+  const text = `${task.title} ${task.goal}`.toLowerCase();
+  if (retryLimitReached.length > 0 || requiredChecks.failed.length > 0) {
+    set.add("harnix-debug");
+    set.add("harnix-bugfix-preserve");
+  }
+  if (/flaky|intermittent|chập chờn|timing|race condition/u.test(text)) set.add("harnix-flaky-test");
+  if (/migration|schema|v3|contract break|chuyển đổi/u.test(text)) set.add("harnix-migration-safety");
+  if (/security|traversal|injection|secret|bảo mật|auth/u.test(text)) set.add("harnix-security-lens");
+  if (task.mode === "full" || /refactor|kiến trúc|complex|đánh đổi/u.test(text)) set.add("harnix-sequential-thinking");
+  if (
+    task.status === "planning" ||
+    task.checkpoint === "planning" ||
+    task.checkpoint === "replan" ||
+    /gap|blindspot|coverage/u.test(text)
+  )
+    set.add("harnix-verification-gap");
+  if (/enterprise|wbs|bff|arch/u.test(text)) set.add("harnix-arch-review");
+  return set.size === 0 ? undefined : [...set].sort(compareCodeUnits);
 }
 
 function requiredChecksFromEvidence(task: TaskRecord, now: number): RequiredChecks {

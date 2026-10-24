@@ -181,7 +181,7 @@ export function platformFlagList(extra: readonly string[] = []): string {
 
 export type RepoMapCliOptions = Partial<
   Record<"query" | "impact" | "tests" | "outline" | "refs" | "symbol" | "path" | "limit" | "depth" | "format", string>
-> & { events?: boolean; refresh?: boolean; workspace?: string | boolean };
+> & { events?: boolean; refresh?: boolean; workspace?: string | boolean | string[] };
 
 export function validateRepoMapOptions(options: RepoMapCliOptions): void {
   const actions = [

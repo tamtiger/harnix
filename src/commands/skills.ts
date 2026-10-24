@@ -146,3 +146,5 @@ export function reportSkillReference(
   }
   return { generator: "harnix", schemaVersion: 1, name: skill.name, reference: topic, content };
 }
+
+export { suggestSkills, type SkillSuggestion, type SkillSuggestResultV1 } from "./skills-suggest.js";

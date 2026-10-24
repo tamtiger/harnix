@@ -2,7 +2,7 @@ import { Option, type Command } from "commander";
 
 import { resolveProjectRoot } from "./utils/paths.js";
 import { runInternalContextCommand } from "./commands/internal-context-cli.js";
-import { reportSkill, reportSkillCatalog, reportSkillReference } from "./commands/skills.js";
+import { reportSkill, reportSkillCatalog, reportSkillReference, suggestSkills } from "./commands/skills.js";
 import { discoverProjectSkills, type SkillTemplate } from "./core/spec/project-skills.js";
 import { runLearning, type LearningCommandOptions } from "./commands/learning.js";
 import { searchMemory } from "./commands/mem.js";
@@ -182,28 +182,40 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .command("skill")
     .argument("[name]", "Canonical Harnix skill name, for example harnix-implement")
     .option("--reference <topic>", "Print one on-demand reference of the skill instead of its instructions")
+    .option("--suggest <query>", "Search and rank skills by semantic relevance or keywords")
     .option("--all", "Include technique skills and custom project skills in the catalog listing")
     .option("--raw", "Print the skill markdown directly instead of JSON-wrapped output")
     .description("Print the canonical Harnix skill catalog, one skill's instructions, or one of its references")
-    .action(async (name: string | undefined, options: { reference?: string; all?: boolean; raw?: boolean }) => {
-      if (options.reference !== undefined && name === undefined) throw new Error("--reference requires a skill name.");
-      if (options.raw === true && name === undefined) throw new Error("--raw requires a skill name.");
-      let projectSkills: readonly SkillTemplate[] = [];
-      try {
-        projectSkills = await discoverProjectSkills(await requireInitializedProject(process.cwd()));
-      } catch {
-        // Missing project root is expected outside initialized projects.
-      }
-      const result =
-        name === undefined
-          ? reportSkillCatalog({ all: options.all, projectSkills })
-          : options.reference === undefined
-            ? reportSkill(name, projectSkills)
-            : reportSkillReference(name, options.reference, projectSkills);
-      process.stdout.write(
-        options.raw === true && "content" in result ? `${result.content}\n` : `${JSON.stringify(result)}\n`,
-      );
-    });
+    .action(
+      async (
+        name: string | undefined,
+        options: { reference?: string; suggest?: string; all?: boolean; raw?: boolean },
+      ) => {
+        if (options.reference !== undefined && name === undefined)
+          throw new Error("--reference requires a skill name.");
+        if (options.raw === true && name === undefined) throw new Error("--raw requires a skill name.");
+        let projectSkills: readonly SkillTemplate[] = [];
+        try {
+          projectSkills = await discoverProjectSkills(await requireInitializedProject(process.cwd()));
+        } catch {
+          // Missing project root is expected outside initialized projects.
+        }
+        if (options.suggest !== undefined) {
+          const result = suggestSkills(options.suggest, { all: options.all, projectSkills });
+          process.stdout.write(`${JSON.stringify(result)}\n`);
+          return;
+        }
+        const result =
+          name === undefined
+            ? reportSkillCatalog({ all: options.all, projectSkills })
+            : options.reference === undefined
+              ? reportSkill(name, projectSkills)
+              : reportSkillReference(name, options.reference, projectSkills);
+        process.stdout.write(
+          options.raw === true && "content" in result ? `${result.content}\n` : `${JSON.stringify(result)}\n`,
+        );
+      },
+    );
 
   program
     .command("doctor")

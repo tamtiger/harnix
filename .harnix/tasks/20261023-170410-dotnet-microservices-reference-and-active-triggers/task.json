@@ -4,8 +4,8 @@
   "id": "20261023-170410-dotnet-microservices-reference-and-active-triggers",
   "title": "Bổ sung Reference dotnet-microservices và thiết lập Active Skill Triggers cho Multi-Agent",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Soạn thảo reference chuyên đề dotnet-microservices.md; cập nhật các file SKILL.md thiết lập Active Triggers bắt buộc agent/subagent nạp reference chuyên sâu khi gặp điều kiện (đặc biệt khi dispatch subagent/multi-agent bắt buộc nạp epic.md/scouting-isolation.md).",
   "nonGoals": [],
   "epicId": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
@@ -13,20 +13,29 @@
     {
       "id": "ac-1",
       "text": "Soạn thảo reference chuyên đề dotnet-microservices.md chuẩn cấu trúc (DDD layers, Kafka consumer, NSubstitute mocks, ProjectReference, .harnixignore).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-check-triggers-and-references-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Cập nhật các file SKILL.md bổ sung Active Triggers bắt buộc agent nạp reference chuyên sâu; đặc biệt khi dispatch subagent / multi-agent BẮT BUỘC nạp epic.md / scouting-isolation.md.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-check-triggers-and-references-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Kiểm thử xác thực định dạng reference và các trigger trong SKILL.md.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-check-triggers-and-references-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -44,11 +53,65 @@
       "inputs": [
         "**"
       ]
+    },
+    {
+      "id": "check-triggers-and-references",
+      "description": "Xác thực references của workflow skills và budget tokens",
+      "command": "pnpm vitest run test/workflow/instruction-budget.test.ts test/unit/skills/technique-skills.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/skills/**",
+        "test/workflow/**"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-triggers-and-references-1",
+      "checkId": "check-triggers-and-references",
+      "recordedAt": "2026-10-23T21:31:53.538+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/instruction-budget.test.ts test/unit/skills/technique-skills.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7fb1ec5560a891c24207ef2da75a56f9ecc97c3ce0e79fc9af00078c59cb003a"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T21:33:36.712+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "84943b06a1f9db3855ac92549c3bce2d06c949a6efa1d134d6326fd58d7a92c5"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T21:36:09.608+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d2232351f9daf6ae84e27c6fc7f1a9b388843a8b13ce71c420b07efa827f9a30"
+    }
+  ],
+  "relevantPaths": [
+    "src/skills/catalog.ts",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-implement/references/dotnet-microservices.md",
+    "src/skills/harnix-plan/SKILL.md",
+    "src/skills/harnix-research/SKILL.md"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-23T17:04:10.000+07:00",
-  "updatedAt": "2026-10-23T17:08:03.000+07:00"
+  "updatedAt": "2026-10-23T21:36:24.051+07:00",
+  "completedAt": "2026-10-23T21:36:24.051+07:00"
 }

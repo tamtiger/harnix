@@ -4,8 +4,8 @@
   "id": "20261023-170408-events-options-resolution-and-wrapper-tracing",
   "title": "AST C# Constant/Options Resolution và cấu hình Producer Wrappers cho repo-map --events",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Phân tích AST C# bóc tách chuỗi thực tế từ constant/Options class; hỗ trợ cấu hình events.producerWrappers trong config.yaml; loại bỏ triệt để các biến rác dynamic (eto.EventName, splitTopics, dataKafka).",
   "nonGoals": [],
   "epicId": "20261023-170406-enterprise-events-brief-defaults-and-multi-workspace",
@@ -13,20 +13,30 @@
     {
       "id": "ac-1",
       "text": "Trích xuất chính xác giá trị chuỗi từ const string và default property initializer của class *Options.cs.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-csharp-event-discovery-1",
+        "ev-check-csharp-event-matrix-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Hỗ trợ cấu hình events.producerWrappers trong config.yaml để nhận diện caller hàm wrapper là Publisher thực tế.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-csharp-event-matrix-1",
+        "ev-check-suite-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Loại bỏ hoàn toàn các identifier biến rác (eto.EventName, splitTopics, checkResult.CancelEto, ObjectMapper.Map).",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-csharp-event-discovery-1",
+        "ev-check-suite-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -44,11 +54,83 @@
       "inputs": [
         "**"
       ]
+    },
+    {
+      "id": "check-csharp-event-discovery",
+      "description": "Test unit boc tach topic AST C# va loai bo bien rac dynamic",
+      "command": "pnpm vitest run test/unit/core/repo-map/event-discovery.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/repo-map/event-discovery.ts",
+        "test/unit/core/repo-map/event-discovery.test.ts"
+      ]
+    },
+    {
+      "id": "check-csharp-event-matrix",
+      "description": "Test unit event matrix boc tach Options va producer wrappers",
+      "command": "pnpm vitest run test/unit/core/repo-map/event-matrix.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/config/config-schema.ts",
+        "src/core/config/config-validate.ts",
+        "src/core/repo-map/event-matrix.ts",
+        "test/unit/core/repo-map/event-matrix.test.ts"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-check-csharp-event-discovery-1",
+      "checkId": "check-csharp-event-discovery",
+      "recordedAt": "2026-10-23T21:07:34.554+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/event-discovery.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "99896391e04b9275b0aada1c7f385f4014c2317b378ec688c3cfffca4c35b935"
+    },
+    {
+      "id": "ev-check-csharp-event-matrix-1",
+      "checkId": "check-csharp-event-matrix",
+      "recordedAt": "2026-10-23T21:07:42.352+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/repo-map/event-matrix.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b0f2da0070c772ce1da529e09c12a5d944dffa652bab5ac260f0ed42626fee51"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-23T21:09:25.345+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2b892b0a4ed2a8f987cb93fc14bfeaebbd6c9824f16c81ac16cc55fb8b8dcfa6"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/config/config-schema.ts",
+    "src/core/config/config-validate.ts",
+    "src/core/config/config.ts",
+    "src/core/repo-map/event-discovery.ts",
+    "src/core/repo-map/event-matrix.ts",
+    "test/unit/core/repo-map/event-discovery.test.ts",
+    "test/unit/core/repo-map/event-matrix.test.ts"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-23T17:04:08.000+07:00",
-  "updatedAt": "2026-10-23T17:08:03.000+07:00"
+  "updatedAt": "2026-10-23T21:09:50.290+07:00",
+  "completedAt": "2026-10-23T21:09:50.290+07:00"
 }

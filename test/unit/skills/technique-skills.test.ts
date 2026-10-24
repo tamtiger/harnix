@@ -64,5 +64,29 @@ describe("technique skills catalog", () => {
     const archReview = techniqueSkills.find((s) => s.name === "harnix-arch-review");
     expect(archReview).toBeDefined();
     expect(Object.keys(archReview!.references).sort()).toEqual(["domain-briefs", "wbs-consolidation"]);
+
+    const bugfixPreserve = techniqueSkills.find((s) => s.name === "harnix-bugfix-preserve");
+    expect(bugfixPreserve).toBeDefined();
+    expect(Object.keys(bugfixPreserve!.references).sort()).toEqual(["invariant-debugging"]);
+
+    const flakyTest = techniqueSkills.find((s) => s.name === "harnix-flaky-test");
+    expect(flakyTest).toBeDefined();
+    expect(Object.keys(flakyTest!.references).sort()).toEqual(["concurrency-isolation"]);
+
+    const migrationSafety = techniqueSkills.find((s) => s.name === "harnix-migration-safety");
+    expect(migrationSafety).toBeDefined();
+    expect(Object.keys(migrationSafety!.references).sort()).toEqual(["zero-downtime-evolution"]);
+
+    const securityLens = techniqueSkills.find((s) => s.name === "harnix-security-lens");
+    expect(securityLens).toBeDefined();
+    expect(Object.keys(securityLens!.references).sort()).toEqual(["injection-traversal-guardrails"]);
+
+    const sequentialThinking = techniqueSkills.find((s) => s.name === "harnix-sequential-thinking");
+    expect(sequentialThinking).toBeDefined();
+    expect(Object.keys(sequentialThinking!.references).sort()).toEqual(["multi-step-tree-search"]);
+
+    const verificationGap = techniqueSkills.find((s) => s.name === "harnix-verification-gap");
+    expect(verificationGap).toBeDefined();
+    expect(Object.keys(verificationGap!.references).sort()).toEqual(["verification-blindspots"]);
   });
 });

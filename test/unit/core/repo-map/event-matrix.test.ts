@@ -182,6 +182,8 @@ consumer.subscribe({ topic: "payment.completed" });
   it("validates CLI options for --events and rejects mutually exclusive flags", () => {
     expect(() => validateRepoMapOptions({ events: true })).not.toThrow();
     expect(() => validateRepoMapOptions({ events: true, workspace: true })).not.toThrow();
+    expect(() => validateRepoMapOptions({ events: true, workspace: ["a", "b"] })).not.toThrow();
+    expect(() => validateRepoMapOptions({ events: true, workspace: "a,b" })).not.toThrow();
     expect(() => validateRepoMapOptions({ events: true, query: "search" })).toThrow(
       /requires (?:at most|exactly) one of/iu,
     );
@@ -254,5 +256,180 @@ public class WebhookConsumer {
     expect(topics).toContain("paymenthub.transactionstore.discount.saved");
     expect(topics).not.toContain("KafkaTopics.WebhookFinished");
     expect(topics).not.toContain("KafkaTopics.DiscountSaved");
+  });
+
+  it("extracts constants and default property initializers from *Options.cs class (ac-1)", async () => {
+    const root = await temporaryRepository();
+    await writeSource(
+      root,
+      "src/Options/KafkaOptions.cs",
+      `
+public class KafkaOptions {
+    public string OrderCreatedTopic { get; set; } = "order.created.from.options";
+    public string PaymentRefundTopic { get; init; } = "payment.refund.from.options";
+}
+`,
+    );
+    await writeSource(
+      root,
+      "src/Services/OrderService.cs",
+      `
+public class OrderService {
+    public async Task CreateOrder() {
+        await _bus.PublishAsync(_options.Value.OrderCreatedTopic, new {});
+    }
+}
+`,
+    );
+
+    const result = await buildProjectEventMatrix(root);
+    const topics = result.matrix.map((m) => m.topic);
+    expect(topics).toContain("order.created.from.options");
+    expect(topics).not.toContain("_options.Value.OrderCreatedTopic");
+  });
+
+  it("recognizes producer wrappers configured in .harnix/config.yaml in event matrix (ac-2)", async () => {
+    const root = await temporaryRepository();
+    await writeSource(
+      root,
+      ".harnix/config.yaml",
+      `
+generator: harnix
+schemaVersion: 2
+developer: test-dev
+languages: []
+technologies: []
+packages: []
+platforms: []
+context:
+  maxCharacters: 1000
+  tokenApproximation: 4
+runtime:
+  research: conditional
+  fullContext: false
+events:
+  producerWrappers:
+    - PublishCustomAsync
+    - DispatchKafka
+`,
+    );
+    await writeSource(
+      root,
+      "src/Services/PaymentService.cs",
+      `
+public class PaymentService {
+    public async Task Process() {
+        await PublishCustomAsync("payment.custom.success", new {});
+        await DispatchKafka("kafka.dispatched.event", payload);
+    }
+}
+`,
+    );
+
+    const result = await buildProjectEventMatrix(root);
+    const topics = result.matrix.map((m) => m.topic);
+    expect(topics).toContain("payment.custom.success");
+    expect(topics).toContain("kafka.dispatched.event");
+    const paymentTopic = result.matrix.find((m) => m.topic === "payment.custom.success");
+    expect(paymentTopic?.publishers).toEqual([
+      expect.objectContaining({
+        file: "src/Services/PaymentService.cs",
+        source: "PublishCustomAsync",
+      }),
+    ]);
+  });
+
+  it("builds unified cross-system E2E event matrix from multiple workspace roots (ac-1 & ac-3)", async () => {
+    const rootA = await temporaryRepository();
+    const rootB = await temporaryRepository();
+
+    await writeSource(
+      rootA,
+      "src/ProducerService.cs",
+      `
+public class ProducerService {
+    public async Task Send() {
+        await _bus.PublishAsync("order.e2e.created", new { Id = 100 });
+    }
+}
+`,
+    );
+
+    await writeSource(
+      rootB,
+      "src/ConsumerService.cs",
+      `
+public class ConsumerService {
+    [CapSubscribe("order.e2e.created")]
+    public void ReceiveOrder() {}
+}
+`,
+    );
+
+    const { buildMultiWorkspaceEventMatrix } = await import("src/core/repo-map/event-matrix.js");
+    const result = await buildMultiWorkspaceEventMatrix([rootA, rootB]);
+
+    expect(result.scope).toBe("workspace");
+    expect(result.status).toBe("ready");
+    const entry = result.matrix.find((m) => m.topic === "order.e2e.created");
+    expect(entry).toBeDefined();
+    expect(entry?.publishers.length).toBe(1);
+    expect(entry?.subscribers.length).toBe(1);
+  });
+
+  it("automatically scans and merges linkedWorkspaces configured in .harnix/config.yaml (ac-2)", async () => {
+    const rootA = await temporaryRepository();
+    const rootB = await temporaryRepository();
+
+    await writeSource(
+      rootB,
+      "src/ShippingConsumer.cs",
+      `
+public class ShippingConsumer {
+    [CapSubscribe("payment.e2e.completed")]
+    public void HandleShipping() {}
+}
+`,
+    );
+
+    await writeSource(
+      rootA,
+      ".harnix/config.yaml",
+      `
+generator: harnix
+schemaVersion: 2
+developer: test-dev
+languages: []
+technologies: []
+packages: []
+platforms: []
+context:
+  maxCharacters: 1000
+  tokenApproximation: 4
+runtime:
+  research: conditional
+  fullContext: false
+linkedWorkspaces:
+  - "${rootB.replaceAll("\\", "/")}"
+`,
+    );
+
+    await writeSource(
+      rootA,
+      "src/PaymentProducer.cs",
+      `
+public class PaymentProducer {
+    public async Task Pay() {
+        await _bus.PublishAsync("payment.e2e.completed", new {});
+    }
+}
+`,
+    );
+
+    const result = await buildProjectEventMatrix(rootA);
+    const entry = result.matrix.find((m) => m.topic === "payment.e2e.completed");
+    expect(entry).toBeDefined();
+    expect(entry?.publishers.length).toBe(1);
+    expect(entry?.subscribers.length).toBe(1);
   });
 });

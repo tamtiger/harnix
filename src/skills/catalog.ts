@@ -3,6 +3,7 @@ import feedbackLoopReference from "./harnix-debug/references/feedback-loop.md";
 import implementSource from "./harnix-implement/SKILL.md";
 import brownfieldReference from "./harnix-implement/references/brownfield.md";
 import commitHygieneReference from "./harnix-implement/references/commit-hygiene.md";
+import dotnetMicroservicesReference from "./harnix-implement/references/dotnet-microservices.md";
 import feedbackReference from "./harnix-implement/references/feedback.md";
 import decisionDisciplineReference from "./harnix-plan/references/decision-discipline.md";
 import epicReference from "./harnix-plan/references/epic.md";
@@ -48,6 +49,7 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       feedback: feedbackReference,
       brownfield: brownfieldReference,
       "commit-hygiene": commitHygieneReference,
+      "dotnet-microservices": dotnetMicroservicesReference,
     },
   ],
   [

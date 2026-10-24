@@ -220,8 +220,8 @@ function tryMatchMethod(
 }
 
 interface ScopeState {
-  ns?: { endLine: number; name: string };
-  cls?: { depth: number; endLine: number; name: string };
+  ns?: { endLine: number; name: string } | undefined;
+  cls?: { depth: number; endLine: number; name: string } | undefined;
 }
 
 function processLineSymbol(
