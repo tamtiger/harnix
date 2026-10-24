@@ -1,3 +1,5 @@
+import { autoRepairMojibake } from "./text-repair.js";
+
 export const defaultMaximumInputBytes = 65_536;
 
 const idleTimeout = Symbol("readBoundedInput idle timeout");
@@ -37,13 +39,15 @@ export async function readBoundedInput(
     chunks.push(buffer);
   }
   const full = Buffer.concat(chunks);
+  let decoded: string;
   if (full.length >= 2 && full[0] === 0xff && full[1] === 0xfe) {
-    return full.subarray(2).toString("utf16le");
+    decoded = full.subarray(2).toString("utf16le");
+  } else if (full.length >= 3 && full[0] === 0xef && full[1] === 0xbb && full[2] === 0xbf) {
+    decoded = full.subarray(3).toString("utf8");
+  } else {
+    decoded = full.toString("utf8");
   }
-  if (full.length >= 3 && full[0] === 0xef && full[1] === 0xbb && full[2] === 0xbf) {
-    return full.subarray(3).toString("utf8");
-  }
-  return full.toString("utf8");
+  return autoRepairMojibake(decoded);
 }
 
 /**

@@ -62,6 +62,14 @@ describe("bounded input", () => {
 
     await expect(readBoundedInput(input, 1024)).resolves.toBe(text);
   });
+
+  it("automatically repairs mojibake resulting from Windows CP1252 pipe", async () => {
+    const original = '{"title":"Khởi tạo tiếng Việt: điều phối cổng thanh toán"}';
+    const garbledBytes = Buffer.from(new TextDecoder("windows-1252").decode(Buffer.from(original, "utf8")), "utf8");
+    const input = chunks([garbledBytes]);
+
+    await expect(readBoundedInput(input, 1024)).resolves.toBe(original);
+  });
 });
 
 async function* chunks(values: readonly (Buffer | string)[]): AsyncGenerator<Buffer | string> {

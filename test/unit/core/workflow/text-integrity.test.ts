@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { assertTextIntegrity, findCorruptedText } from "src/core/workflow/text-integrity.js";
+import { assertTextIntegrity, autoRepairMojibake, findCorruptedText } from "src/core/workflow/text-integrity.js";
 
 /** UTF-8 bytes of `text` re-read as a single-byte code page, which is what a default-encoding shell does. */
 function garble(text: string, label: "windows-1252" | "windows-1258"): string {
@@ -70,5 +70,36 @@ describe("text integrity guard", () => {
 
     expect(message).toContain("…");
     expect(message.length).toBeLessThan(600);
+  });
+
+  it.each(["windows-1252", "windows-1258"] as const)(
+    "automatically repairs UTF-8 Vietnamese garbled by %s",
+    (label) => {
+      const garbled = garble(VIETNAMESE, label);
+      expect(autoRepairMojibake(garbled)).toBe(VIETNAMESE);
+    },
+  );
+
+  it("automatically repairs mojibake inside full JSON payloads", () => {
+    const rawPayload = JSON.stringify({
+      title: VIETNAMESE,
+      goal: "Triển khai dịch vụ thanh toán",
+      status: "planning",
+    });
+    const garbledPayload = garble(rawPayload, "windows-1252");
+    expect(garbledPayload).not.toBe(rawPayload);
+    const repaired = autoRepairMojibake(garbledPayload);
+    expect(repaired).toBe(rawPayload);
+    expect(JSON.parse(repaired)).toEqual({
+      title: VIETNAMESE,
+      goal: "Triển khai dịch vụ thanh toán",
+      status: "planning",
+    });
+  });
+
+  it("leaves genuine Vietnamese, ASCII, emoji and punctuation untouched", () => {
+    expect(autoRepairMojibake(VIETNAMESE)).toBe(VIETNAMESE);
+    expect(autoRepairMojibake("Hello world 123 🚀")).toBe("Hello world 123 🚀");
+    expect(autoRepairMojibake("")).toBe("");
   });
 });

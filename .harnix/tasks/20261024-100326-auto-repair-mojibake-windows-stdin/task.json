@@ -1,0 +1,145 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261024-100326-auto-repair-mojibake-windows-stdin",
+  "title": "Tự động phục hồi Mojibake thành UTF-8 chuẩn trên Windows Stdin",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Tự động phát hiện và khôi phục chuỗi bị méo mã hóa do Windows PowerShell 5.1/CP1252/CP1258 thành UTF-8 chuẩn tại tầng bounded input và workflow handlers",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "autoRepairMojibake khôi phục chuỗi méo mã hóa CP1252/CP1258 thành tiếng Việt UTF-8 chuẩn mà không ném lỗi",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-unit-text-integrity-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "readBoundedInput và readInput tự động áp dụng autoRepairMojibake cho payload stdin trước khi parse JSON",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-unit-bounded-input-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-unit-text-integrity",
+      "description": "chk-unit-text-integrity",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/workflow/text-integrity.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/workflow/text-integrity.ts",
+        "test/unit/core/workflow/text-integrity.test.ts"
+      ]
+    },
+    {
+      "id": "chk-unit-bounded-input",
+      "description": "chk-unit-bounded-input",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/utils/bounded-input.test.ts",
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/workflow-handler-utils.ts",
+        "src/utils/bounded-input.ts",
+        "test/unit/utils/bounded-input.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-unit-text-integrity-1",
+      "checkId": "chk-unit-text-integrity",
+      "recordedAt": "2026-10-24T10:08:32.548+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/text-integrity.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d0439d93176ed3e9a649a127b3422fd63f295524830beae52cd2c8ec1290d56c"
+    },
+    {
+      "id": "ev-chk-unit-bounded-input-1",
+      "checkId": "chk-unit-bounded-input",
+      "recordedAt": "2026-10-24T10:08:39.929+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/utils/bounded-input.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b42664705989d61c194ed9c2b5b22ab46a7c712d4e161a5b11b3b820e54ab25c"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T10:12:07.496+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "1da0c462e25fe0fda28cf4abcc2c75d3b3a01f343bf55aae9449e5cd8b173eaa"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T10:15:38.826+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a5d42ae3211f188b6fbada1984c274f3a45208a2aa38ea86a459b373f637fa09"
+    },
+    {
+      "id": "ev-chk-unit-bounded-input-2",
+      "checkId": "chk-unit-bounded-input",
+      "recordedAt": "2026-10-24T10:15:55.933+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/utils/bounded-input.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "daf91ffdfb964d2fe5b6c490e80399f4f79297eb2a585d00770e9b0e1e65d4ab"
+    },
+    {
+      "id": "ev-chk-unit-text-integrity-2",
+      "checkId": "chk-unit-text-integrity",
+      "recordedAt": "2026-10-24T10:16:02.869+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/text-integrity.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d0439d93176ed3e9a649a127b3422fd63f295524830beae52cd2c8ec1290d56c"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/text-integrity.ts,src/utils/bounded-input.ts,src/commands/workflow-handler-utils.ts,test/unit/core/workflow/text-integrity.test.ts,test/unit/utils/bounded-input.test.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-24T10:03:26.441+07:00",
+  "updatedAt": "2026-10-24T10:18:16.780+07:00",
+  "completedAt": "2026-10-24T10:18:16.780+07:00"
+}

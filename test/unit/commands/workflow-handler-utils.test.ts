@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { presentTask, splitGlobList, splitList } from "src/commands/workflow-handler-utils.js";
+import { presentTask, splitGlobList, splitList, withoutBom } from "src/commands/workflow-handler-utils.js";
 import type { WorkflowContext } from "src/commands/workflow-handlers.js";
 import { buildTaskV3 } from "test/support/builders.js";
 
@@ -34,5 +34,12 @@ describe("workflow handler utilities", () => {
       updatedAt: task.updatedAt,
       evidenceId: "ev-1",
     });
+  });
+
+  it("withoutBom strips BOM", () => {
+    expect(withoutBom(undefined)).toBeUndefined();
+    expect(withoutBom("\uFEFFhello")).toBe("hello");
+    expect(withoutBom("\uFFFEhello")).toBe("hello");
+    expect(withoutBom("hello")).toBe("hello");
   });
 });

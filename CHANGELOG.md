@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.19.1] - 2026-10-24
+
+### Fixed
+
+- Tự động phục hồi chuỗi méo mã hóa Mojibake thành UTF-8 chuẩn trên Windows stdin
+
 ## [2.19.0] - 2026-10-23
 
 ### Changed
