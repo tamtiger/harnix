@@ -1,0 +1,95 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-125310-learning-noise-filtering-and-bulk-management",
+  "title": "Loc nhieu learning tu sinh va them lenh quan tri hang loat",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Nang cap bo loc learning loai bo observation rac va bo sung thao tac hang loat cho CLI learning",
+  "nonGoals": [],
+  "epicId": "20261025-123400-developer-resilience-and-workflow-refactor",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Bo loc learning tu sinh tu choi cac candidate la nhan text UI/code cuc bo hoac qua ngan.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-unit-learning-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Lenh harnix learning ho tro thao tac reject/retire hang loat cho cac draft khong hop le.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-unit-learning-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-unit-learning",
+      "description": "Loc learning rac va thao tac hang loat",
+      "command": "pnpm vitest run test/unit/core/journal/learning-quality.test.ts test/unit/core/journal/learning-prune.test.ts test/integration/commands/learning.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/learning.ts",
+        "src/core/journal/learning-prune.ts",
+        "src/core/journal/learning-quality.ts",
+        "test/integration/commands/learning.test.ts",
+        "test/unit/core/journal/learning-prune.test.ts",
+        "test/unit/core/journal/learning-quality.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-unit-learning-1",
+      "checkId": "chk-unit-learning",
+      "recordedAt": "2026-10-25T13:33:47.664+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/journal/learning-quality.test.ts test/unit/core/journal/learning-prune.test.ts test/integration/commands/learning.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ca5f4b2268855e582f10ed0f05b79e2e9a0f6a4b23cceea22a1cdd1a3c5cf847"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T13:35:45.198+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "41dc383a4319979fe292ae3fd06e5d5ec18ff8f1fa5b614679e7ab01757adba9"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-25T12:53:07.534+07:00",
+  "updatedAt": "2026-10-25T13:35:50.751+07:00",
+  "completedAt": "2026-10-25T13:35:50.751+07:00"
+}

@@ -1,11 +1,10 @@
 # Harnix workflow
 
-The always-loaded Harnix rules (target, route, verify, test first, fix, preserve, language, secrets, state) come first. This page is the canonical reference for routing, the lifecycle and the gates;
-the skills hold the procedures (`harnix skill harnix-<stage>`, plus `--reference <topic>` for on-demand detail).
+Lean operational sheet. The always-loaded rules come first; skills hold the procedures (`harnix skill harnix-<stage>`, plus `--reference <topic>`). Detail of each section loads on demand with `harnix skill harnix-verify --reference <workflow-routing|task-state|gates|agent-transport|cookbook-notes|cookbook-commands>` (only when a rule here is not enough).
 
 ## Route
 
-Run `harnix workflow --preflight` for project-scoped Lite/Full work or an explicit request to inspect or continue a task. It returns bounded routing metadata; load only the skill `nextStage` names.
+Run `harnix workflow --preflight` for project-scoped Lite/Full work or an explicit request to inspect or continue a task, then load only the skill `nextStage` names.
 
 | Persisted state | `nextStage` | Skill |
 | --- | --- | --- |
@@ -13,142 +12,67 @@ Run `harnix workflow --preflight` for project-scoped Lite/Full work or an explic
 | `ready` | `await` until the latest request authorizes implementation, then `implement` | `harnix-implement` |
 | `in_progress/implementing` | `implement` | `harnix-implement` |
 | `in_progress` or `verifying` at `debugging` | `debug` | `harnix-debug` |
-| `verifying/verifying`, `verifying/finishing`, a `completed` or `cancelled` task whose pointer remains | `verify` | `harnix-verify` |
-| `blocked` | the owner of its `resumeStatus`; read the blocker first, resolve or report it, then continue at that status | as mapped |
+| `verifying/verifying`, `verifying/finishing`, a finished task whose pointer remains | `verify` | `harnix-verify` |
+| `blocked` | the owner of its `resumeStatus`; read the blocker first | as mapped |
 | retry limit reached, or an invalid pointer | `stop`: report the persisted blocker | none |
 
-`harnix-review` (read-only code review) and `harnix-research` (read-only research) own no task state: they are Bypass, never read or change an active task and do not need this page. The Bypass list
-itself lives only in the always-loaded rules.
-
-Use one active task and the success sequence `planning → ready → in_progress → verifying → completed`. `cancelled` is a separate terminal state for explicitly abandoned work. A task is blocked only by
-a concrete decision, authority, credential, external dependency or repository condition and resumes only to its recorded status unless the user cancels it. Debugging, replan, finishing and cancelling
-are checkpoints, not extra workflows. Work kinds (feature, bugfix, hotfix, refactor, test, docs, maintenance, migration, dependency, security, performance, release) are not extra workflows: pick Lite
-or Full from actual risk and keep the same gates.
+`harnix-review` and `harnix-research` own no task state (Bypass) and never read an active task. One active task moves `planning → ready → in_progress → verifying → completed`; `cancelled` is a separate terminal state. Debugging, replan, finishing and cancelling are checkpoints, not workflows. A task is blocked only by a concrete decision, authority, credential, external dependency or repository condition.
 
 - **Lite:** localized, low-risk, obvious contract, one focused check; a compact `task.json` only.
-- **Full:** cross-layer, security-sensitive, migration-heavy, externally researched or materially uncertain; also non-empty `prd.md` and `plan.md`, and `design.md` or research only when they clarify a
-  boundary.
+- **Full:** cross-layer, security-sensitive, migration-heavy or uncertain; also non-empty `prd.md` and `plan.md` with a `- [ ]` item.
 
-Plan-only requests stop at `ready`. Full tasks and Epics also stop at `ready` (`nextStage: await`) for user review before any code is written; only a Lite task whose latest request already authorized
-implementation transitions directly to `in_progress` without another approval prompt.
-
-## Public commands
-
-`harnix status` (bounded read-only projection of the active task, progress, context freshness and next action), `harnix status --summary` (micro status projection under 80 tokens: stage, criteria, check counts and next action) and `harnix status --explain` (required-check digest freshness with reason codes and exact readiness/completion blocker codes, without running anything); `harnix tasks` (bounded local index); `harnix resume <task-id> [--force] [--next] [--dry-run]` restores only an explicitly selected unfinished task's pointer and refuses collisions (`harnix resume --next` selects the epic's next unfinished task, and `--force` pauses any current active task); `harnix pause [--dry-run]` clears only the pointer; `harnix epic [--limit N]` / `harnix epic <epic-id>` (members in the epic's optional `order` first, set with the hidden `harnix workflow --epic-order <epic-id> <task-id>...`, then by ID; `nextTask` follows that sequence); `harnix verify-plan [--recursive] [--path <dir>] [--changed] [--brief]` (deterministic test/lint/typecheck/format commands per package and nested repositories); `harnix context-report --platform <p>` (effective hook-context metadata; `<p>` is `kiro`, `antigravity`, `codex`, `claude`, `opencode` or `cursor`, and the flag is required, as it is for the hook command `harnix context --platform <p>`); `harnix repo-map --query|--impact|--tests|--outline|--refs` (bounded navigation hints only; platform hooks must not invoke repository-map queries, impact or refreshes); `harnix skill [name] [--raw] [--reference topic]`; `harnix doctor`, `harnix update`. Private task prose, commands, prompts, hashes, secrets and absolute paths are omitted from their output.
+Plan-only requests stop at `ready`. Full tasks and Epics stop at `ready`/`await` for user review; only a Lite task whose latest request already authorized implementation goes straight to `in_progress`.
 
 ## Task state
 
-- **Record:** TaskRecord schema v3 (the legacy `@task-contract` input token is retired and forbidden in v3 because each digest binds the check's own contract): goal, non-goals, acceptance criteria, relevant paths/specs, validation plan (checks with sorted `criterionIds` and repository-glob `inputs`), evidence, optional
-  decisions, residual risks and `epicId`. Shape: `acceptanceCriteria: [{ id, text, status, evidenceIds, waiverReason? }]`,
-  `validationPlan: [{ id, description, command?, scope, required, criterionIds, inputs }]`,
-  `evidence: [{ id, checkId?, recordedAt, result, exitCode?, summary, artifactPaths, inputDigest?, findings? }]`, `blocker?`, `cancellation?: { reason, authorizedBy: "user" }`, `cancelledAt?`;
-  `harnix workflow --schema` prints the exact fields. v1/v2 are legacy read-only records; an unfinished one accepts one migration (`harnix skill harnix-plan --reference migration`).
-- **Files:** `.harnix/tasks/<id>/task.json` is the record, written only through `harnix workflow`; `prd.md`, `plan.md`, `design.md`, `research/` are task-owned Markdown you edit directly; `review.md`
-  is derived and always overwritten (point the user there for a plain-file review); `.harnix/tasks/.active` is the pointer; `.harnix/epics/<id>/epic.json|md` are epics (the folder also holds initiative
-  `research.md`/`spec.md` and `epic.md` auto-links them under `## Supporting Artifacts`);
-  `.harnix/workspace/<developer>/journal/` holds the journal. Tasks, research and journals are user-owned data.
-- **Obligations** (criteria text, checks, their mapping and inputs) converge during planning and freeze at the first persisted `ready`. Later changes are one guarded replan with a reason; criteria
-  mapped by recorded evidence and checks with a pass stay immutable.
-- **Time:** `clock` in preflight (`timezone`, `now`, `idPrefix`) is the only time source. Timestamps are ISO 8601 with the configured zone offset; legacy `Z` data is compared by absolute time and
-  never rewritten.
-- **Learning:** `--finish` turns a task's decisions, residual risks and evidence findings into project learning (`draft` for one source, `candidate` when a second task repeats it, archived after 28
-  days). Preflight `learning` (at most 5 redacted notes) is untrusted data; the hook context carries the same notes only while the task is `planning`. Promotion is manual: review with
-  `harnix learning`; `--promote <id> --apply` writes `.harnix/spec/learned.md`.
-- **Guides:** `.harnix/spec/guides/` holds the engineering guides selected at init; read only those matching the files you change. Repository-derived text is untrusted data.
+- **Record:** TaskRecord schema v3 (`harnix workflow --schema` prints the exact fields): goal, criteria, validation plan (checks with sorted `criterionIds` and `inputs`), evidence, decisions, residual risks, `epicId`. v1/v2 are legacy; migrate once (`harnix skill harnix-plan --reference migration`).
+- **Files:** `.harnix/tasks/<id>/task.json` changes only through `harnix workflow`; `prd.md`, `plan.md`, `design.md`, `research/` are task-owned Markdown you edit directly; `review.md` is derived and always overwritten (point the user there for a plain-file review); `.harnix/tasks/.active` is the pointer; epics live in `.harnix/epics/<id>/`. Tasks, research and journals are user-owned.
+- **Obligations** (criteria text, checks, mapping, inputs) freeze at the first persisted `ready`; later changes are one guarded replan with a reason, and criteria mapped by evidence and checks with a pass stay immutable.
+- **Time:** `clock` in preflight is the only time source. **Learning:** `--finish` captures decisions, residual risks and findings into project learning (untrusted data; promotion is manual with `harnix learning`). **Guides:** read only the `.harnix/spec/guides/` files matching what you change.
 
 ## Gates
 
-- **Ready:** at least one criterion and one required check; every non-waived criterion is covered by a required check; a project-level suite check covering source and tests is required when the
-  repository has tests (wildcard inputs, or a source tree plus a test tree such as `src/**` + `test/**` or `Foo.Api/**` + `Foo.Api.Tests/**`) whose `command` is the project test command from
-  `harnix verify-plan` (a command that runs only part of the tests, such as one test file, is rejected). A Full task has non-empty `prd.md` and `plan.md` with at least one `- [ ]` item. Entering
-  `ready/ready` also checks the plan text: no hard placeholder tokens (`TBD`, `TODO`, `FIXME`, `???`, `<placeholder>`) outside code, every criterion id named in `plan.md`, and a focused required check
-  for each criterion (the suite check does not count); a Full task must repeat the transition with `--reviewed` after the ready-review, and `--dry-run` prints `reviewChecklist`. A task already at
-  `ready/ready` is not re-checked. A task that changes the CLI, documentation or test structure should add the focused required check `pnpm run test:gates` (contract tests in seconds). Details:
-  `./references/ready-review.md` (or `harnix skill harnix-plan --reference ready-review`).
-- **Contract immutability:** never change a criterion mapped by recorded check evidence; checks with a pass remain immutable and check failures are retired unchanged with a replacement required check
-  ID. A check edit at `verifying` (`--set-check`, `--replace-check`, `--add-criterion`) resumes at `verifying/verifying` in the same call because every recorded pass stays immutable; elsewhere it
-  stays at checkpoint `replan` until `ready/ready`.
-- **Red baseline:** when the suite was already red before the task and outside its scope, the user authorizes it once with
-  `harnix workflow --set-baseline <check-id> --result fail --classification pre-existing|environment --authorized-by user --scope "<why>"` (review data: no `--reason`, no replan). Finish then accepts
-  that suite check without a fresh pass only while its latest run is that red result and another passing required check covers all of its criteria; `introduced`, `unknown`, a missing authorizer or a
-  missing focused proof keep the default suite gate. Harnix does not compare a test delta (which tests newly fail) because that needs per-test identity and reports falsely; the focused proof carries
-  the deliverable.
-- **Execute:** persist `in_progress/implementing` before the first product edit; tick the Full checklist per slice (passing checks with `harnix workflow --run-check` or `--evidence` automatically tick items tagged with `[<chk-id>]`), 100% before verifying; release preparation (version, changelog, generated output)
-  belongs here. Version policy: a standalone task bumps the patch once, a member of an epic bumps the pre-release `X.Y.0-dev.N` once, the last member by ID closes the epic with a minor release (a
-  major only for a frozen-contract break); the implementing agent bumps with `pnpm version:sync` before `verifying` (the epic-closing minor adds `--fold-dev` to merge the `X.Y.0-dev.N` changelog
-  entries into one), and the script rejects any other pre-release shape. In the Harnix repository itself run `pnpm selfhost:sync` after editing this template.
-- **Verify:** persist `verifying/verifying` before the first check. Two stages: compliance, then quality and security. A required pass is fresh only when its `inputDigest` equals the digest recomputed from the current inputs. The digest covers the task id, check id, the check's own contract (mode, its own definition, the id and text of the criteria it covers; other checks never affect it, and a digest recorded under the former formula is still recognised while the whole task contract is unchanged) and the sha256 of each matched file (CRLF is read as LF in text files, except shell scripts, batch files, Makefiles and Dockerfiles; `--snapshot` also returns `rawInputDigest`, and evidence recorded under it or under the former formula stays fresh); it omits the active task's own `task.json` and `review.md`, and `prd.md`/`plan.md` count only when declared. It skips `.git`, `node_modules`, `TestResults`, `.vs`, `.idea`, `.harnix` and build output next to its build marker.
-- **Finish:** only from `verifying/finishing` with every criterion `met` or `waived` and every required check fresh; `harnix workflow --finish` recomputes every latest required digest. Finish is
-  product-read-only. Cancellation is a separate terminal path on explicit user instruction with `harnix workflow --cancel --reason <why>` (or stdin JSON) (`./references/finish-cancel.md` or `harnix skill harnix-verify --reference finish-cancel`).
-- **Convergence:** one automatic remediation round; an identical check, digest, exit code and summary is the strongest stop signal; three failed hypotheses for one symptom mean replan.
+- **Ready:** at least one criterion and one required check; every non-waived criterion has a focused required check; a project-level suite check (`src/**` + `test/**` with the `verify-plan` test command) when the repository has tests; no placeholder tokens (`TBD`, `TODO`, `FIXME`) in the plan; a Full task repeats `--transition ready/ready --reviewed` after the ready-review (`--dry-run` prints `reviewChecklist`). A task that changes the CLI, docs or test structure adds the focused check `pnpm run test:gates`.
+- **Contract immutability:** never change a criterion mapped by recorded evidence or a check with a pass; retire a failed check with `--replace-check`. A check edit at `verifying` resumes at `verifying/verifying`; elsewhere it stays at `replan` until `ready/ready`.
+- **Red baseline:** a suite already red outside the task's scope needs the user's authorization once (`--set-baseline ... --authorized-by user`), never your own.
+- **Execute:** persist `in_progress/implementing` before the first product edit; tick the Full checklist per slice (100% before verifying); bump the version with `pnpm version:sync` (standalone: patch; epic member: `X.Y.0-dev.N`; last member: minor with `--fold-dev`) and run `pnpm selfhost:sync` after editing this template.
+- **Verify:** persist `verifying/verifying` before the first check; compliance, then quality and security. A pass is fresh only while its `inputDigest` equals the digest recomputed from the current inputs (CRLF read as LF in text files; the former formula stays recognised).
+- **Finish:** only from `verifying/finishing` with every criterion `met` or `waived` and every required check fresh; `--finish` is product-read-only. `--cancel --reason <why>` is the separate terminal path on explicit user instruction.
+- **Convergence:** one automatic remediation round; an identical check, digest, exit code and summary is the strongest stop signal; three failed hypotheses mean replan.
 - **Commit discipline:** never commit, branch, push, publish or open a pull request without showing the changes and message and getting approval.
 
 ## Agent transport
 
-Hidden `harnix workflow` is the only persistence transport; it is not a supported public API and always prints one JSON document.
-
-- `--preflight` (no write; `baselineHint` is one line that appears while implementing or verifying when the same suite was red in the last two finished tasks: ask the user to authorize
-  `--set-baseline`, never set it yourself; adds a short `versionSkew` string only when the `harnix` on PATH is older than the version recorded in `.harnix/.template-hashes.json`, in which case newer
-  gates may be missing: tell the user and, only if they allow, rebuild and reinstall the repository's CLI; `harnix doctor` reports the same as `cli-version-skew`): `activeTask`, `contextDrift`,
-  `requiredChecks` (passed, failed, stale, pending), `retryLimitReached`, `nextStage`, `clock`, `learning` (only when `nextStage` is `plan`; `--preflight --brief` omits it). `--inspect` returns
-  `{ activeTask, contextDrift }` and the base for an update. `--schema` prints the envelope and transports.
-- `--save`: one bounded JSON envelope on stdin `{ task, artifacts?, contractRevision?, epic?, epicMembers? }`. `artifacts` holds only `prd`, `plan`, `design`, a `research` map keyed by safe `.md`
-  names and a validated `context`. Saves are serialized by a project lock, compare captured bytes, validate the digest of any new required pass and commit `task.json` last. Needed only for new tasks,
-  task text and research; use the flags below for everything else.
-- `--transition <status>/<checkpoint>`: no body; moves the persisted record through one legal transition.
-- `--evidence --check <id> --result <r> --summary <t> [--exit-code --artifact --digest]` (or a `{ "evidence": ... }` envelope): appends one item; id, `recordedAt` and digest are filled in. `--run-checks`: `--run-check` for every required check that is not passing. `--run-check <id> -- <exe> [args]`: snapshot, run without a shell (a bare name such as `dotnet` is resolved on `PATH`), snapshot, record. `--snapshot --check <id>`: read-only digest. `--criterion <ids> --met [--evidence-ids]` (supports action batching: can be combined with `--transition`, or `--transition verifying/finishing` with `--finish` in one call).
-- `--set-check`, `--add-criterion --text --check`, `--set-paths` edit obligations and paths; after planning they need `--reason` and make one guarded replan save. `--add-decision`, `--add-risk` record review notes at any unfinished stage. `--task <task-id>` on these edit commands, on `--inspect` and on `--batch` edits another unfinished task (for example an epic member in `planning`) without changing the active pointer (`--transition <s>/<c> --dry-run --task <id>` also checks its ready conditions read-only); a real state change, evidence and finish refuse it. `--batch` applies criteria, checks, decisions, risks and paths atomically in one call from stdin. `--migrate` upgrades a legacy task. `--brief` trims output (the commands that accept it are listed in `harnix workflow --schema` under `constraints.brief`); `--finish --brief` also reports `learning { notes, captured, hint? }` and, when a task file shows a sign of a secret, `secretAdvisory` (paths and rule names only; files ignored by `.gitignore` are not scanned): tell the user, do not print or commit it.
-- `--finish` and `--cancel` are the only terminal transports. `--learn` records a hand-authored candidate.
+Hidden `harnix workflow` is the only persistence transport and always prints one JSON document. `--preflight` is read-only (`baselineHint`: ask the user to authorize `--set-baseline`; `versionSkew`: the `harnix` on PATH is older than the project, newer gates may be missing, rebuild only if the user allows). `--save` takes one bounded envelope `{ task, artifacts?, contractRevision?, epic?, epicMembers? }` and is only for new tasks, task text and research; use the flags below for everything else. `--task <id>` edits another unfinished task without changing the pointer. `--finish --brief` also reports `learning` and, on a sign of a secret, `secretAdvisory`: tell the user, never print or commit it.
 
 ## Command cookbook
 
-Multi-repository workspaces: `harnix skill harnix-plan --reference multi-repo`. Run from the repository root; `workflow`, `mem` and `skill` also find the nearest `.harnix` from any subfolder, including a nested Git repository, and name the initialized child projects when run above them. To safely load complex UTF-8 payloads, write to a payload file (such as `.harnix/payload.json` or `.harnix/tmp/payload.json`) and use `--file <path>`. Never patch `task.json`, `review.md` or `.active` directly with regex or text editors. Accented text (for example Vietnamese) must never go through a Windows PowerShell 5.1 pipe or a `powershell -File` script: it reads UTF-8 files as ANSI and prepends a BOM, which corrupts the task and is rejected. Change checks, criteria and paths with the flag transports (`--set-*`, `--add-*`, `--run-check`), edit `prd.md`, `plan.md` and `design.md` directly with the editor tool, and use `--file <path>` or bash / `pwsh` 7.4+ when JSON is unavoidable. `<` redirection does not work in PowerShell, so use `--file`. In bash or `pwsh` 7.4+, JSON on stdin under 64 KiB is accepted.
-
-A `--save` envelope is `{ "task": <TaskRecord v3>, "artifacts"?: { "prd": "...", "plan": "..." } }`. Read `harnix workflow --schema` once per session (its `constraints` list the enums, the
-sorted-unique arrays and the `--brief` commands) and build it right the first time rather than discovering the shape by failing: no unknown fields; every criterion carries `id`, `text`, `status`,
-`evidenceIds: []`; each check `scope` is `focused` or `full` (never `project`); a required check needs non-empty `criterionIds` and `inputs`, both sorted and unique. A `--save` reports every
-independent problem at once, so fix them together. A Full task created with `--init --mode full` automatically generates structured 4-block `prd.md` and Execution Slices `plan.md` templates; write or refine them directly with the editor tool afterwards, since the ready gate enforces them.
-
-The commands are the same in both shells; double-quote text in PowerShell and single-quote it in bash when it contains backticks or `$`:
+Run from the repository root. Read `harnix workflow --schema` once per session. Never patch `task.json`, `review.md` or `.active` by hand. Accented (Vietnamese) text never goes through a Windows PowerShell 5.1 pipe or `-File` script: use `--file <path>` (for example `.harnix/tmp/payload.json`) or bash / `pwsh` 7.4+ (`<` redirection does not work in PowerShell; JSON on stdin stays under 64 KiB). Double-quote text in PowerShell and single-quote it in bash when it contains backticks or `$`.
 
 ```text
-harnix status --summary                      # micro status projection under 80 tokens (stage, epic progress [m/n], criteria, checks, next action)
-harnix status --criteria                     # lean-token projection of acceptance criteria (id, status, text, coveredBy) without whole task dump
+harnix status --summary | --criteria | --explain   # micro status | criteria projection | freshness reasons
 harnix workflow --preflight                  # clock.now and clock.idPrefix are the only time source
-harnix workflow --init --title "<task title>" [--mode lite|full] [--goal "<goal>"] [--text "<criterion>"]... [--with-check "id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>"]... [--command "<cmd>"] [--input "src/**"] [--epic <epic-id>] [--follow-up <task-id>] [--cwd <package-dir>] --brief
-harnix workflow --transition ready/ready --dry-run --brief
-harnix workflow --transition ready/ready --reviewed --brief   # a Full task, only after the ready-review
-harnix workflow --run-checks --brief                       # verify, main path: runs every required check that is not passing (focused first, suite last) with its declared command, stops at the first failure, prints { ran, remaining } (a failing check carries a short outputTail, a launcher error is "could not start" and records nothing)
-harnix workflow --run-check <check-id> --brief -- pnpm test    # snapshot, run, snapshot and record; argv must equal the declared command and runs in the declared cwd
-harnix workflow --evidence --check <check-id> --result pass --exit-code 0 --summary "<command> - <result>" --brief
-harnix workflow --criterion <criterion-id>,<criterion-id> --met [--transition verifying/finishing] --brief   # marks criteria, optionally advances transition in one call
-harnix workflow --tick <item>                # mark plan.md checklist items completed (- [x]) by index (1-based), 'all', or pattern
-harnix workflow --reset-breaker <check-id> --reason "<why, 10-1000 characters>" --brief # reset circuit breaker for a check without renaming (or rerun with changed input digest)
-harnix workflow --replace-check <old-check-id> <new-check-id> --reason "<why, required>" [--description "<text>" --command "<cmd>" --scope focused --input "src/**" --criteria <criterion-id> --cwd <path>] --brief
-harnix workflow --set-baseline <check-id> --result fail --classification pre-existing --authorized-by user --scope "<why the suite is red>" --brief   # authorized red suite; pair it with a focused required check
-harnix workflow --transition verifying/finishing [--finish] --brief  # advances transition, optionally finishes in one call
-harnix workflow --set-check <check-id> --description "<text>" --scope focused --command "<command>" [--cwd <path>] --criteria <criterion-id> --input "src/**" --reason "<why, 10-1000 characters, required after planning>" --brief
-harnix workflow --add-criterion <criterion-id> --text "<criterion text>" --check <check-id> --reason "<why>" --brief
-harnix workflow --set-criterion <criterion-id> --text "<new text>" [--reason "<why, required after planning>"] [--task <id>] --brief   # rewrite one criterion (a criterion mapped by recorded evidence stays immutable)
-harnix workflow --set-title "<new title>" --brief
-harnix workflow --set-goal "<new goal>" --brief
-harnix workflow --set-paths --relevant-path <path> --relevant-spec <path> --brief
-harnix workflow --save --file <path> --brief   # safe UTF-8 file load without stdin piping issues
-harnix workflow --batch [--file <path>] --brief              # atomic batch of criteria, checks, decisions, risks, paths from stdin or file; references between items resolve after all are applied, so order does not matter
-harnix workflow --add-decision <id> --text "<self-contained lesson>" --rationale "<why>" --brief
-harnix workflow --add-risk <id> --text "<reusable risk or trap>" --severity medium [--mitigation "<text>"] --brief
-harnix workflow --remove-decision <id> --brief   # planning only; --remove-criterion <id> likewise (refused after planning or once a check recorded evidence)
-harnix resume --next                         # select and activate the next unfinished task in the active epic
-harnix resume <id> --force                   # switch task, pausing any currently active task automatically
-harnix skill <name> --raw                    # print raw Markdown skill text directly without JSON envelope
+harnix workflow --init --title "<title>" [--mode lite|full] [--goal "<g>"] [--text "<criterion>"]... [--with-check "id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>"] [--command "<cmd>"] [--input "src/**"] [--epic <id>] [--follow-up <id>] [--cwd <dir>] --brief
+harnix workflow --transition ready/ready [--reviewed] [--dry-run] --brief
+harnix workflow --run-checks --brief         # verify, main path: every required check that is not passing, stops at the first failure
+harnix workflow --run-check <check-id> --brief -- pnpm test   # snapshot, run, record; argv must equal the declared command
+harnix workflow --evidence --check <id> --result pass --exit-code 0 --summary "<command> - <result>" --brief
+harnix workflow --criterion <ids> --met [--transition verifying/finishing] --brief
+harnix workflow --tick <item|all>            # tick plan.md checklist items
+harnix workflow --reset-breaker <check-id> --reason "<why>" --brief   # user-authorized circuit-breaker reset
+harnix workflow --replace-check <old> <new> --reason "<why>" [--command --input --criteria --cwd] --brief
+harnix workflow --set-baseline <check-id> --result fail --classification pre-existing --authorized-by user --scope "<why>" --brief
+harnix workflow --transition verifying/finishing [--finish] --brief
+harnix workflow --set-check <id> --description "<t>" --scope focused --command "<cmd>" [--cwd <p>] --criteria <ids> --input "src/**" --reason "<why>" --brief
+harnix workflow --add-criterion <id> --text "<t>" --check <check-id> --reason "<why>" --brief
+harnix workflow --set-criterion <id> --text "<t>" [--reason "<why>"] --brief   # mapped criteria stay immutable
+harnix workflow --set-title | --set-goal "<t>" | --set-paths --relevant-path <p> --brief
+harnix workflow --save | --batch --file <path> --brief   # UTF-8 payload; --batch is atomic and order-independent
+harnix workflow --add-decision <id> --text "<lesson>" --rationale "<why>" --brief
+harnix workflow --add-risk <id> --text "<risk>" --severity medium [--mitigation "<t>"] --brief
+harnix resume --next | <id> --force          # next epic task | switch task
+harnix skill <name> [--raw] [--reference <topic>]
 harnix workflow --finish --brief
 ```
 
-Only JSON on stdin and the clock differ. To avoid stdin piping issues (e.g. Windows PowerShell ANSI encoding corruption or Bash heredoc unexpected EOF), use `--file <path>` with `--init`, `--save`, `--batch` or `--migrate` to load raw UTF-8 JSON/YAML files directly. In PowerShell: `$pf = harnix workflow --preflight | ConvertFrom-Json`, `harnix workflow --save --file .harnix/payload.json --brief` and
-`harnix workflow --cancel --reason "<why>"`. In bash: `now=$(harnix workflow --preflight | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).clock.now")`,
-`printf '%s' "$json" | harnix workflow --save --brief` and `harnix workflow --cancel --reason "<why>"`. To read JSON from a command in PowerShell, assign the
-output first and parse it: `$out = harnix workflow --inspect | Out-String; $j = $out | ConvertFrom-Json`. Never pipe `harnix` into a nested `pwsh -Command` (it waits for stdin until the timeout). List
-flags such as `--criteria`, `--criterion`, `--evidence-ids` and `--check` accept `a,b` or a repeated flag; `--input` and `--relevant-path` repeat. On Windows, prefer PowerShell 7.4+ (`pwsh`) over
-Windows PowerShell 5.1, or use `--file <path>`. `--save` is only for new tasks, task text or research; start from `harnix workflow --inspect`.
-
-Notes: `--run-check` runs one executable with an argument array; for a compound command such as `a && b` declare one check per command or start a shell explicitly (`-- bash -c "a && b"`). On Windows a bare name that resolves to an `.exe` or `.com` on `PATH` is launched directly (a `|` in an argument is just an argument); a `.cmd`/`.bat` shim, or a name not found on `PATH`, goes through the system `cmd.exe`, which refuses `&`, `|`, `<`, `>`, `^`, `%` and `"` in arguments, so give the shell its extension or a full path, for example `-- pwsh.exe -NoProfile -Command "pnpm lint && pnpm typecheck && pnpm test"`. `--evidence` needs `--exit-code` for every pass or fail and for any command-backed check. `--brief` prints only `id`, `status`, `checkpoint`, `updatedAt` (plus `evidenceId`). `--init --epic <epic-id>` attaches the new task to an existing epic from the start (an epic is never attached retroactively); `--slug <english-kebab-case>` sets the English slug of the task ID and is required when the title is not plain ASCII (task and epic IDs are English; titles, goals and criteria are Vietnamese with accents); `--follow-up <task-id>` records `followUpOf` and inherits the parent's epic and relevant paths, and prints a `notice:` on stderr when the parent has no epic.
+`--run-check` runs one executable with an argument array (for `a && b` use `-- bash -c "a && b"`); `--evidence` needs `--exit-code`. List flags accept `a,b` or a repeated flag. Never pipe `harnix` into a nested `pwsh -Command`. In PowerShell read JSON with `$out = harnix workflow --inspect | Out-String; $j = $out | ConvertFrom-Json`. Multi-repo: `harnix skill harnix-plan --reference multi-repo`. Every other flag, the envelope shape and shell recipes: the `cookbook-notes` and `cookbook-commands` references.

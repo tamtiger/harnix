@@ -3,7 +3,7 @@ import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { workflowEnvelopeSchema } from "src/commands/internal-workflow.js";
-import { workflowTemplate } from "src/templates/harnix/workflow.js";
+import { workflowGuidance } from "test/support/workflow-guidance.js";
 import { renderHarnixRules } from "src/templates/harnix/activation.js";
 
 const root = resolve(".");
@@ -40,7 +40,7 @@ async function skillSources(): Promise<Array<{ name: string; text: string }>> {
 describe("task contract documentation parity", () => {
   it("describes the input digest as bound to the check's own contract, with the former formula still recognised", async () => {
     const surfaces = {
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
       "AGENTS.md": await read("AGENTS.md"),
       "docs/HARNIX_PRD.md": await read("docs/HARNIX_PRD.md"),
       "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
@@ -63,7 +63,7 @@ describe("task contract documentation parity", () => {
 
   it("documents --init --epic and followUpOf, and says an epic is never attached retroactively", async () => {
     const surfaces = {
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
       "AGENTS.md": await read("AGENTS.md"),
       "docs/HARNIX_PRD.md": await read("docs/HARNIX_PRD.md"),
       "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
@@ -83,7 +83,7 @@ describe("task contract documentation parity", () => {
 
   it("documents the ready content gate and --reviewed in every surface that describes the ready gate", async () => {
     const surfaces = {
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
       "AGENTS.md": await read("AGENTS.md"),
       "docs/HARNIX_PRD.md": await read("docs/HARNIX_PRD.md"),
       "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
@@ -93,15 +93,15 @@ describe("task contract documentation parity", () => {
     };
 
     for (const [name, text] of Object.entries(surfaces)) expect(text, name).toMatch(/--reviewed/u);
-    expect(workflowTemplate).toMatch(/placeholder/iu);
-    expect(workflowTemplate).toMatch(/focused required check/u);
+    expect(workflowGuidance).toMatch(/placeholder/iu);
+    expect(workflowGuidance).toMatch(/focused required check/u);
     expect(surfaces["ready-review reference"]).toMatch(/reviewChecklist/u);
   });
 
   it("teaches a Windows-safe way to read workflow JSON in the cookbook", () => {
-    expect(workflowTemplate).toMatch(/Out-String/u);
-    expect(workflowTemplate).toMatch(/ConvertFrom-Json/u);
-    expect(workflowTemplate).toMatch(/nested\s+`?pwsh/u);
+    expect(workflowGuidance).toMatch(/Out-String/u);
+    expect(workflowGuidance).toMatch(/ConvertFrom-Json/u);
+    expect(workflowGuidance).toMatch(/nested\s+`?pwsh/u);
   });
 
   it("describes the task record as schema v3 in the workflow doc, implementation plan, PRD, AGENTS.md and template", async () => {
@@ -110,7 +110,7 @@ describe("task contract documentation parity", () => {
       "docs/IMPLEMENTATION_PLAN.md": await read("docs/IMPLEMENTATION_PLAN.md"),
       "docs/HARNIX_PRD.md": await read("docs/HARNIX_PRD.md"),
       "AGENTS.md": await read("AGENTS.md"),
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
     };
 
     for (const [name, text] of Object.entries(documents)) expect(text, name).toMatch(v3Marker);
@@ -128,7 +128,7 @@ describe("task contract documentation parity", () => {
     const sources = [
       { name: "AGENTS.md", text: await read("AGENTS.md") },
       { name: "README.md", text: await read("README.md") },
-      { name: "workflow template", text: workflowTemplate },
+      { name: "workflow template", text: workflowGuidance },
       ...(await skillSources()),
     ];
 
@@ -142,7 +142,7 @@ describe("task contract documentation parity", () => {
   it("points agents at the preflight clock block for timestamps and IDs", async () => {
     const documents = [
       { name: "AGENTS.md", text: await read("AGENTS.md") },
-      { name: "workflow template", text: workflowTemplate },
+      { name: "workflow template", text: workflowGuidance },
       { name: "always-loaded rules", text: renderHarnixRules() },
       { name: "src/skills/harnix-plan/SKILL.md", text: await read("src/skills/harnix-plan/SKILL.md") },
     ];
@@ -156,7 +156,7 @@ describe("task contract documentation parity", () => {
   it("never instructs a shell date command for timestamps", async () => {
     const sources = [
       { name: "AGENTS.md", text: await read("AGENTS.md") },
-      { name: "workflow template", text: workflowTemplate },
+      { name: "workflow template", text: workflowGuidance },
       ...(await skillSources()),
     ];
     const shellDate = /date -u|run `date`|`date`|\$\(date/u;
@@ -237,7 +237,7 @@ describe("task contract documentation parity", () => {
 describe("baseline and verifying-edit documentation parity", () => {
   it("documents --set-baseline, the focused proof, the delta decision and the verifying resume", async () => {
     const surfaces = {
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
       "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
       "docs/IMPLEMENTATION_PLAN.md": await read("docs/IMPLEMENTATION_PLAN.md"),
       "harnix-verify skill": await read("src/skills/harnix-verify/SKILL.md"),
@@ -258,7 +258,7 @@ describe("baseline and verifying-edit documentation parity", () => {
 describe("ID language convention documentation parity", () => {
   it("states that IDs are English with --slug while titles and goals stay Vietnamese", async () => {
     const english = {
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
       "harnix-plan skill": await read("src/skills/harnix-plan/SKILL.md"),
       "harnix-plan epic reference": await read("src/skills/harnix-plan/references/epic.md"),
     };
@@ -284,7 +284,7 @@ describe("ID language convention documentation parity", () => {
 describe("release versioning policy documentation parity", () => {
   it("states the patch, X.Y.0-dev.N and minor rules with the bump owner and timing", async () => {
     const surfaces = {
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
       "harnix-implement skill": await read("src/skills/harnix-implement/SKILL.md"),
       "AGENTS.md": await read("AGENTS.md"),
     };
@@ -311,7 +311,7 @@ describe("self-host sync documentation parity", () => {
     const surfaces = {
       "AGENTS.md": await read("AGENTS.md"),
       "harnix-implement skill": await read("src/skills/harnix-implement/SKILL.md"),
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
     };
     for (const [name, text] of Object.entries(surfaces)) expect(text, name).toContain("pnpm selfhost:sync");
     expect(surfaces["AGENTS.md"]).toMatch(/preserved[^\n]{0,200}unchanged|unchanged[^\n]{0,200}preserved/u);
@@ -321,7 +321,7 @@ describe("self-host sync documentation parity", () => {
 describe("fast contract gates documentation parity", () => {
   it("suggests test:gates as a focused check and documents test:failures", async () => {
     for (const [name, text] of Object.entries({
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
       "harnix-plan skill": await read("src/skills/harnix-plan/SKILL.md"),
     }))
       expect(text, name).toContain("pnpm run test:gates");
@@ -333,7 +333,7 @@ describe("fast contract gates documentation parity", () => {
 
 describe("batch cookbook documentation parity", () => {
   it("states that --batch items resolve cross references regardless of order", () => {
-    expect(workflowTemplate).toMatch(/--batch[^\n]*order does not matter/u);
+    expect(workflowGuidance).toMatch(/--batch[^\n]*order does not matter/u);
   });
 });
 
@@ -343,7 +343,7 @@ describe("--task targeting documentation parity", () => {
     expect(epic).toContain("--task <task-id>");
     expect(epic).not.toMatch(/run `harnix pause`, then `harnix resume/u);
     for (const [name, text] of Object.entries({
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
       "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
       "docs/IMPLEMENTATION_PLAN.md": await read("docs/IMPLEMENTATION_PLAN.md"),
     }))
@@ -354,7 +354,7 @@ describe("--task targeting documentation parity", () => {
 describe("epic order documentation parity", () => {
   it("documents the order field, --epic-order and the next task rule", async () => {
     for (const [name, text] of Object.entries({
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
       "harnix-plan epic reference": await read("src/skills/harnix-plan/references/epic.md"),
       "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
       "docs/IMPLEMENTATION_PLAN.md": await read("docs/IMPLEMENTATION_PLAN.md"),
@@ -367,7 +367,7 @@ describe("epic order documentation parity", () => {
 describe("version skew and release documentation parity", () => {
   it("tells agents what to do when the harnix on PATH is older than the project", async () => {
     for (const [name, text] of Object.entries({
-      "workflow template": workflowTemplate,
+      "workflow template": workflowGuidance,
       "AGENTS.md": await read("AGENTS.md"),
       "docs/HARNIX_WORKFLOW.md": await read("docs/HARNIX_WORKFLOW.md"),
     }))

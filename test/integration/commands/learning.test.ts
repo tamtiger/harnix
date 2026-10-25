@@ -111,6 +111,18 @@ describe.sequential("learning command", () => {
     expect(await readFile(join(root, ".harnix", "spec", "learned.md"), "utf8")).not.toContain("obs-a");
   });
 
+  it("rejects several learnings at once from a comma-separated list and reports unknown ids", async () => {
+    await project();
+
+    const bulk = await learning("--reject", "obs-a,obs-b,obs-missing", "--reason", "noise");
+    const rejected = await learning("--status", "rejected");
+
+    expect(bulk.code).toBe(0);
+    expect(bulk.json).toMatchObject({ action: "reject", ids: ["obs-a", "obs-b"], status: "rejected" });
+    expect((bulk.json.failed as { id: string }[]).map((item) => item.id)).toEqual(["obs-missing"]);
+    expect((rejected.json.items as Item[]).map((item) => item.id).sort()).toEqual(["obs-a", "obs-b"]);
+  });
+
   it("rejects a learning with a reason and then refuses to promote it", async () => {
     await project();
 

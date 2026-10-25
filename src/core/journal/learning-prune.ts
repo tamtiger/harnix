@@ -1,14 +1,16 @@
 import { effectiveLearningStatus } from "src/core/journal/learning.js";
-import { lowValueReason, type LowValueReason } from "src/core/journal/learning-quality.js";
+import { isLocalDecisionOnly, lowValueReason, type LowValueReason } from "src/core/journal/learning-quality.js";
 import { reviewLearning, type ReviewLearningInput } from "src/core/journal/learning-review.js";
 import { readLearningStates } from "src/core/journal/learning-store.js";
 import { compareCodeUnits } from "src/utils/order.js";
 
 export const MAX_PRUNE_BATCH = 100;
 
+export type PruneReason = LowValueReason | "local-decision";
+
 export interface PruneMatch {
   id: string;
-  reason: LowValueReason;
+  reason: PruneReason;
   statement: string;
 }
 
@@ -21,7 +23,8 @@ export async function findLowValueLearning(journalRoot: string, now: string): Pr
   for (const { entry, candidate } of (await readLearningStates(journalRoot)).values()) {
     if (candidate.status !== "draft" && candidate.status !== "candidate") continue;
     if (effectiveLearningStatus(candidate.status, entry.recordedAt, Date.parse(now)) === "archived") continue;
-    const reason = lowValueReason(candidate.statement);
+    const reason: PruneReason | undefined =
+      lowValueReason(candidate.statement) ?? (isLocalDecisionOnly(candidate.statement) ? "local-decision" : undefined);
     if (reason !== undefined) matches.push({ id: candidate.id, reason, statement: candidate.statement });
   }
   return matches.sort((left, right) => compareCodeUnits(left.id, right.id)).slice(0, MAX_PRUNE_BATCH);

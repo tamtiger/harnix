@@ -1,0 +1,114 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-125308-harness-output-tolerance-and-crlf-handling",
+  "title": "Chong bao loi nham exitCode 0 va chuan hoa CRLF Windows",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Xu ly check-output khong bao launcherFailure khi exitCode 0 va bo sung huong dan CRLF git",
+  "nonGoals": [],
+  "epicId": "20261025-123400-developer-resilience-and-workflow-refactor",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "check-output va check-runner khong danh dau loi launcher error khi exitCode la 0, bat ke noi dung stdout/stderr.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-unit-output-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Bao dam git diff --ignore-space-at-eol va .gitattributes duoc huong dan de tranh false-positive diff CRLF/LF tren Windows.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-docs-crlf-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-unit-output",
+      "description": "Kiem tra check output khong loi khi exitCode 0",
+      "command": "pnpm vitest run test/unit/core/workflow/check-output.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/workflow/check-output.ts",
+        "test/unit/core/workflow/check-output.test.ts"
+      ]
+    },
+    {
+      "id": "chk-docs-crlf",
+      "description": "Huong dan CRLF/LF trong evidence reference",
+      "command": "pnpm vitest run test/workflow/crlf-guidance.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/skills/harnix-verify/references/evidence.md",
+        "test/workflow/crlf-guidance.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-unit-output-1",
+      "checkId": "chk-unit-output",
+      "recordedAt": "2026-10-25T13:24:51.480+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/check-output.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f33e61d2bf0b29ef8a30f403835576fad27022f153748b3ce9aad23e04c18900"
+    },
+    {
+      "id": "ev-chk-docs-crlf-1",
+      "checkId": "chk-docs-crlf",
+      "recordedAt": "2026-10-25T13:24:54.437+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/crlf-guidance.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a688b6acc08425302f61a14532c237a781862aaf78cf6f3cad40a516ee6555ca"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T13:26:54.268+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0ef9a25ae116110fbcde0cc3ebd917b489c6c8f8915f0f13b0fa58a9d1943fed"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-25T12:53:07.534+07:00",
+  "updatedAt": "2026-10-25T13:26:58.819+07:00",
+  "completedAt": "2026-10-25T13:26:58.819+07:00"
+}

@@ -18,6 +18,7 @@ export const LEARNING_STATUSES = ["draft", "candidate", "approved", "promoted", 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 const MAX_LISTED_STATEMENT_CHARACTERS = 300;
+const MAX_BULK_IDS = 100;
 const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/u;
 
 export interface LearningCommandOptions {
@@ -62,6 +63,10 @@ export type LearningCommandResult =
 
 type Action = "reject" | "promote" | "retire";
 
+function splitIds(value: string): string[] {
+  return [...new Set(value.split(",").map((id) => id.trim()))].filter((id) => id !== "");
+}
+
 function chosenAction(options: LearningCommandOptions): { action: Action; id: string } | undefined {
   const chosen = (["reject", "promote", "retire"] as const).flatMap((action) => {
     const id = options[action];
@@ -70,8 +75,13 @@ function chosenAction(options: LearningCommandOptions): { action: Action; id: st
   if (chosen.length + (options.prune === true ? 1 : 0) > 1)
     throw new Error("Use only one of --reject, --promote, --retire and --prune.");
   const [one] = chosen;
-  if (one !== undefined && !ID_PATTERN.test(one.id))
-    throw new Error(`Learning id ${JSON.stringify(one.id)} is invalid.`);
+  if (one === undefined) return undefined;
+  const ids = splitIds(one.id);
+  if (ids.length > 1 && one.action === "promote") throw new Error("--promote takes exactly one id.");
+  if (ids.length > MAX_BULK_IDS) throw new Error(`At most ${MAX_BULK_IDS} ids can be given at once.`);
+  const bad = ids.find((id) => !ID_PATTERN.test(id));
+  if (bad !== undefined || ids.length === 0)
+    throw new Error(`Learning id ${JSON.stringify(bad ?? one.id)} is invalid.`);
   return one;
 }
 
@@ -123,6 +133,9 @@ export async function runLearning(cwd: string, options: LearningCommandOptions):
   const head = { generator: "harnix", schemaVersion: 1 } as const;
   if (options.prune === true) return { ...head, ...(await prune(journalRoot, base, options.apply === true)) };
   if (picked === undefined) return { ...head, ...(await list(root, journalRoot, now, options.status, limit)) };
+  const ids = splitIds(picked.id);
+  if (ids.length > 1 && picked.action !== "promote")
+    return { ...head, ...(await bulk(base, picked.action, ids, options.reason)) };
   const input = { ...base, id: picked.id };
   if (picked.action === "reject") {
     const { candidate } = await reviewLearning({ ...input, action: "reject", reason: options.reason });
@@ -196,4 +209,31 @@ async function prune(
     };
   }
   return { action: "prune", applied: true, matches, rejected: await pruneLearning({ journalRoot, ...base }, found) };
+}
+
+/** Rejects or retires several notes in turn; an id that cannot be handled is reported and the rest still go through. */
+async function bulk(
+  base: { projectRoot: string; journalRoot: string; journalPath: string; developer: string; now: string },
+  action: "reject" | "retire",
+  ids: string[],
+  reason: string | undefined,
+): Promise<{
+  action: "reject" | "retire";
+  id: string;
+  ids: string[];
+  status: string;
+  failed: { id: string; message: string }[];
+}> {
+  const done: string[] = [];
+  const failed: { id: string; message: string }[] = [];
+  for (const id of ids) {
+    try {
+      if (action === "reject") await reviewLearning({ ...base, id, action: "reject", reason });
+      else await retireLearning({ ...base, id });
+      done.push(id);
+    } catch (error) {
+      failed.push({ id, message: error instanceof Error ? error.message : String(error) });
+    }
+  }
+  return { action, id: ids.join(","), ids: done, status: action === "reject" ? "rejected" : "archived", failed };
 }

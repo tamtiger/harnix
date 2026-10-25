@@ -7,6 +7,7 @@ import { updateProject } from "src/commands/update.js";
 import { HARNIX_RULES, renderHarnixRules } from "src/templates/harnix/activation.js";
 import { renderAgentsTemplate } from "src/templates/harnix/agents.js";
 import { workflowSkills, workflowTemplate } from "src/templates/harnix/workflow.js";
+import { workflowGuidance } from "test/support/workflow-guidance.js";
 import { packageVersion } from "src/version.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
@@ -35,7 +36,7 @@ describe("workflow templates", () => {
     expect(agentInstructions).toContain("nextStage");
     expect(agentInstructions).not.toContain("passes, Classify");
     for (const needle of ["Convergence", "release preparation", "Finish is product-read-only", "Bypass"])
-      expect(workflowTemplate.replace(/\s+/gu, " "), needle).toContain(needle);
+      expect(workflowGuidance.replace(/\s+/gu, " "), needle).toContain(needle);
   });
 
   it("should_only_reference_skill_and_guide_sources_that_exist_after_init", async () => {
@@ -177,7 +178,7 @@ describe("workflow templates", () => {
       "platform hooks must not invoke repository-map queries, impact or refreshes",
       "never commit, branch, push, publish or open a pull request without showing the changes and message",
     ])
-      expect(workflowTemplate.replace(/\s+/gu, " "), needle).toContain(needle);
+      expect(workflowGuidance.replace(/\s+/gu, " "), needle).toContain(needle);
     expect(workflowTemplate).not.toContain("harnix internal workflow");
     expect(workflowTemplate).not.toContain("Increase the package patch version");
     expect(workflowTemplate).not.toContain("update `CHANGELOG.md`");

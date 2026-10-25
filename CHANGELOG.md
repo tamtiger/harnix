@@ -4,6 +4,22 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.21.0] - 2026-10-25
+
+### Added
+
+- Add `factsHint` (`harnix update`) to preflight when project facts are stale, and only suggest an epic with an in-progress member
+- Reject label-only and local-decision learning notes and allow bulk learning --reject/--retire
+
+### Fixed
+
+- Never report a launcher error for exit code 0 and document CRLF/LF diff handling on Windows
+
+### Changed
+
+- Enforce branch check before commit in commit-hygiene and document criterion rewrite/waive via flags
+- Lean workflow cheat sheet (about 60% fewer tokens), factsHint and quiet epic context, learning noise filter with bulk reject/retire, branch-safety guidance
+
 ## [2.20.0] - 2026-10-24
 
 ### Changed

@@ -1,0 +1,169 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-125311-refactor-lean-workflow-cheat-sheet",
+  "title": "Tai cau truc tinh gon workflow.md thanh Lean Operational Cheat Sheet",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Toi uu hoa workflow.md giam 60% token footprint va chuyen ly thuyet vao references",
+  "nonGoals": [],
+  "epicId": "20261025-123400-developer-resilience-and-workflow-refactor",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "workflow.md giảm tối thiểu 60% token (≤ 2.466 tokens, đo bằng 4 ký tự/token) với cấu trúc Lean Cheat Sheet và Cookbook tập trung.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-lean-workflow-2",
+        "ev-chk-workflow-selfhost-3"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cac reference cua skills chua day du noi dung huong dan chuyen sau khong bi mat mat.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-lean-workflow-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "pnpm selfhost:sync va tat ca test suite/gates xanh hoan toan.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-workflow-selfhost-3"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-workflow-selfhost",
+      "description": "Kiem tra selfhost va do dai workflow template",
+      "command": "pnpm vitest run test/workflow/self-host.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        ".harnix/workflow.md",
+        "src/templates/harnix/workflow.md"
+      ]
+    },
+    {
+      "id": "chk-lean-workflow",
+      "description": "Do kich thuoc lean workflow va reference chi tiet",
+      "command": "pnpm vitest run test/workflow/lean-workflow.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/skills/catalog.ts",
+        "src/skills/harnix-verify/references/**",
+        "src/templates/harnix/workflow.md",
+        "test/workflow/lean-workflow.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-workflow-selfhost-1",
+      "checkId": "chk-workflow-selfhost",
+      "recordedAt": "2026-10-25T13:42:51.604+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm vitest run test/workflow/self-host.test.ts — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "28906665a6b2f4b7f0e7cc836b111caac118f16623e16fd1f717db3a17f66bfa"
+    },
+    {
+      "id": "ev-chk-workflow-selfhost-2",
+      "checkId": "chk-workflow-selfhost",
+      "recordedAt": "2026-10-25T13:43:09.933+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/self-host.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "aeb926b3843f68012a04e7280f9a515cea14bd8957270f9a66592ef65ecaaba5"
+    },
+    {
+      "id": "ev-chk-lean-workflow-1",
+      "checkId": "chk-lean-workflow",
+      "recordedAt": "2026-10-25T13:43:12.999+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm vitest run test/workflow/lean-workflow.test.ts — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "912c45ec06c87aa0807530f35d0190336ff33a4cb0c7faf41f75010e6c9b45e2"
+    },
+    {
+      "id": "ev-chk-workflow-selfhost-3",
+      "checkId": "chk-workflow-selfhost",
+      "recordedAt": "2026-10-25T13:44:33.756+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/self-host.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bd36281ecc2b6264a2921e1c59a1ddba01da238ddb28b8602f8c1250f7da097e"
+    },
+    {
+      "id": "ev-chk-lean-workflow-2",
+      "checkId": "chk-lean-workflow",
+      "recordedAt": "2026-10-25T13:44:36.875+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/lean-workflow.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "07fdd57fc3a2466ef13c82d6bde8100f7ce033ec3c4cc0fe0af656483f38b90b"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T13:46:38.029+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "50e488c6af4ddeb6db59bd70fecf1f967beae53acd9ca236cf4dce2580b3d79e"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T13:51:07.356+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6f1db508e1e29d22e2200ba7f2e93c8fbd75e4a7aec35a52692a6bf6e727545c"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-25T12:53:07.534+07:00",
+  "updatedAt": "2026-10-25T13:51:19.585+07:00",
+  "completedAt": "2026-10-25T13:51:19.585+07:00"
+}

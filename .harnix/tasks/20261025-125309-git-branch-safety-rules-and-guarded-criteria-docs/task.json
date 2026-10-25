@@ -1,0 +1,95 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-125309-git-branch-safety-rules-and-guarded-criteria-docs",
+  "title": "Cuong che quy tac kiem tra nhanh truoc commit va hoan thien Guarded Replanning",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Them quy tac bat buoc kiem tra git branch --show-current truoc commit, cam pipe git checkout va hoan thien huong dan Guarded Replanning",
+  "nonGoals": [],
+  "epicId": "20261025-123400-developer-resilience-and-workflow-refactor",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "AGENTS.md va skills cuong che kiem tra git branch --show-current va cam pipe git checkout truoc khi commit.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-agents-rule-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Tai lieu va huong dan workflow lam ro co che thay the criterion/waive giup developer khong phai sua text thu cong.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-agents-rule-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-agents-rule",
+      "description": "Quy tac git safety va huong dan thay the/waive criterion",
+      "command": "pnpm vitest run test/workflow/git-safety-guidance.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "src/skills/harnix-implement/SKILL.md",
+        "src/skills/harnix-implement/references/commit-hygiene.md",
+        "src/skills/harnix-plan/references/replan.md",
+        "src/templates/harnix/activation.ts",
+        "test/workflow/git-safety-guidance.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-agents-rule-1",
+      "checkId": "chk-agents-rule",
+      "recordedAt": "2026-10-25T13:28:04.677+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/git-safety-guidance.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d2678fc38b03c0f62ceb28a0c33c74099083a30d49bf97fb9f3cc079979e0da0"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T13:30:05.675+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "34271c0fdfab73540f9aa1766cbb8fc3e23f613879d30cdd1e3cdcf8a76ebd41"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-25T12:53:07.534+07:00",
+  "updatedAt": "2026-10-25T13:30:10.583+07:00",
+  "completedAt": "2026-10-25T13:30:10.583+07:00"
+}

@@ -18,6 +18,12 @@ describe("lowValueReason", () => {
     expect(lowValueReason("a".repeat(MIN_LEARNING_CHARACTERS))).toBe("test-string");
   });
 
+  it("rejects a label with fewer than four words even when it is long enough (UI text, path or identifier)", () => {
+    expect(lowValueReason("src/core/workflow/preflight-quieting-helper.ts")).toBe("label-only");
+    expect(lowValueReason("SubmitCustomerOrderConfirmationButtonLabel")).toBe("label-only");
+    expect(lowValueReason("Luôn chạy test:gates trước khi vào verifying")).toBeUndefined();
+  });
+
   it("keeps real lessons, including unaccented Vietnamese and ones that start with a filler word", () => {
     expect(lowValueReason("Tests that read the real clock are flaky on slow Windows runners.")).toBeUndefined();
     expect(

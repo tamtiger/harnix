@@ -66,12 +66,12 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .description("List project learning, or reject, promote (--apply), retire one by id, or --prune low-value drafts")
     .option("--status <status>", "Listing: only this effective status (draft, candidate, promoted, rejected, archived)")
     .option("--limit <count>", "Listing: maximum entries (1-100)")
-    .option("--reject <id>", "Mark a draft or candidate as rejected")
+    .option("--reject <ids>", "Mark drafts or candidates (comma-separated ids) as rejected")
     .option(
       "--promote <id>",
       "Show the rule for a draft or candidate; with --apply write it to .harnix/spec/learned.md",
     )
-    .option("--retire <id>", "Remove a promoted rule from .harnix/spec/learned.md and archive it")
+    .option("--retire <ids>", "Remove promoted rules (comma-separated ids) from .harnix/spec/learned.md and archive")
     .option("--prune", "List drafts and candidates the capture quality filter rejects; with --apply reject them")
     .option("--apply", "With --promote or --prune: write the change instead of only previewing it")
     .option("--reason <text>", "With --reject: why, kept in the journal summary")

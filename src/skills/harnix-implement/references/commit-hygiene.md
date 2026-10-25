@@ -5,6 +5,7 @@ Rules for inspecting diffs, preparing commit proposals, and maintaining clean gi
 ## 1. Inspect actual diffs
 
 Never guess what changed. Run git diff or inspect staged changes directly before drafting a commit proposal. Verify that:
+
 - No temporary debug logs, print statements, or scratch files leaked into source trees.
 - No unintended formatting or whitespace churn exists across unchanged functions.
 - All touched files directly correspond to the task scope.
@@ -18,3 +19,7 @@ Structure proposed commit messages with standard conventional types (`feat`, `fi
 ## 3. Strict user approval gate
 
 Harnix Rule 6 strictly mandates: Never auto-commit, branch, push, or open a pull request autonomously. Always display the complete list of modified files and proposed commit message to the user and wait for explicit approval.
+
+## 4. Verify the branch before any commit
+
+Before proposing or making a commit, run `git branch --show-current` and confirm it is the intended target branch (never assume it from earlier output). Never pipe `git checkout` or `git switch` into another command (a pipe hides its exit code), and do not branch, create a worktree or switch branches on your own. Show the changes, the branch and the message, then wait for explicit approval.

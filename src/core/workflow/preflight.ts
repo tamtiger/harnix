@@ -1,20 +1,18 @@
-import { readFile } from "node:fs/promises";
 import type { ContextDrift } from "src/core/context/context.js";
 import { readProjectTimezone } from "src/core/config/config.js";
 import { resolveActiveTask, type Evidence, type TaskRecord } from "src/core/tasks/task.js";
 import { inspectRequiredChecks, type RequiredCheckState } from "src/core/verification/check-report.js";
 import { formatInstant, idPrefix } from "src/utils/clock.js";
 import { compareCodeUnits } from "src/utils/order.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { readManifest } from "src/core/managed/project-files.js";
 import { detectVersionSkew, skewMessage, type VersionSkew } from "src/core/versions/skew.js";
-import { PROJECT_FACTS_PATH } from "src/core/spec/project-facts.js";
+import { findEpicContext } from "./epic-context.js";
+import { checkFactsStale, FACTS_HINT } from "./facts-hint.js";
 import { baselineHint } from "./baseline-hint.js";
 import { verificationRetryDisposition } from "./completion.js";
 import { stageOwnerFor } from "./routing.js";
 import type { LearningSummaryItem } from "src/core/journal/learning-summary.js";
-import { collectEpicMembers, listEpicIds, loadEpicRecord, nextEpicMember } from "src/core/epics/epic.js";
-import { orderEpicMembers } from "src/core/epics/order.js";
 import { readGitContext, type GitContext } from "src/utils/git.js";
 import { taskContextDrift } from "./context.js";
 import { projectLearningSummary } from "./support.js";
@@ -31,6 +29,8 @@ export interface WorkflowPreflightResultV1 {
   suggestedTechniques?: string[];
   /** Present and true when project-facts.md was extracted at an older git commit than HEAD. */
   projectFactsStale?: boolean;
+  /** Guidance command when projectFactsStale is true. */
+  factsHint?: string;
   /** Present when --expected-task was passed; true if active task changed or is missing. */
   taskSwitched?: boolean;
   /** Authoritative time source for agents: current instant and ID prefix in the configured zone. */
@@ -94,6 +94,7 @@ export async function preflightWorkflow(
     ...(hint === undefined ? {} : { baselineHint: hint }),
     ...(git === undefined ? {} : { git }),
     ...(factsStale === undefined ? {} : { projectFactsStale: factsStale }),
+    ...(factsStale === true ? { factsHint: FACTS_HINT } : {}),
   };
 }
 
@@ -133,31 +134,7 @@ async function routePreflight(root: string, now: number): Promise<WorkflowPrefli
     retryLimitReached: [] as string[],
   };
   if (task === undefined) {
-    let epicContext;
-    try {
-      const epics = await listEpicIds(harnixRoot);
-      for (const epicId of epics) {
-        const epic = await loadEpicRecord(root, epicId);
-        if (epic === undefined) continue;
-        const members = orderEpicMembers(await collectEpicMembers(harnixRoot, epicId), epic.order);
-        const next = nextEpicMember(members);
-        if (next !== null) {
-          epicContext = {
-            id: epicId,
-            title: epic.title,
-            nextTask: {
-              id: next.id,
-              status: next.status,
-              title: next.title,
-            },
-            resumeCommand: `harnix resume ${next.id}`,
-          };
-          break;
-        }
-      }
-    } catch {
-      // Best effort
-    }
+    const epicContext = await findEpicContext(root, harnixRoot);
     return {
       ...base,
       activeTask: null,
@@ -202,18 +179,6 @@ async function routePreflight(root: string, now: number): Promise<WorkflowPrefli
     nextStage: stageOf(task),
     ...(suggestedTechniques === undefined ? {} : { suggestedTechniques }),
   };
-}
-
-async function checkFactsStale(root: string, currentCommit?: string): Promise<boolean | undefined> {
-  if (currentCommit === undefined) return undefined;
-  try {
-    const factsPath = await resolveSafeProjectPath(root, PROJECT_FACTS_PATH);
-    const text = await readFile(factsPath, "utf8");
-    const match = /<!--\s*git-commit:\s*([a-f0-9]+)\s*-->/u.exec(text);
-    return match === null ? undefined : match[1] !== currentCommit;
-  } catch {
-    return undefined;
-  }
 }
 
 function suggestTechniques(

@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.20.0"
+  version: "2.21.0"
 ---
 
 # Implement with evidence
@@ -62,4 +62,4 @@ Reviewer or user feedback is a hypothesis: read all of it, verify it against the
 - Confirmed defect: `harnix-debug`. Requirement gap: replan via `harnix-plan`.
 - Implementation and focused checks done: `--transition verifying/verifying`, hand to `harnix-verify`.
 
-Before showing proposed commits, review diffs and structure messages: read `./references/commit-hygiene.md` (or `harnix skill harnix-implement --reference commit-hygiene`). Never branch, commit, push or open a PR on your own; before a commit show the diff and message and wait for approval.
+Before showing proposed commits, review diffs and structure messages: read `./references/commit-hygiene.md` (or `harnix skill harnix-implement --reference commit-hygiene`). Never branch, commit, push or open a PR on your own; before a commit run `git branch --show-current`, never pipe `git checkout`, show the diff and message and wait for approval.

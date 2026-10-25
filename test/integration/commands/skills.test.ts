@@ -42,6 +42,12 @@ describe("harnix skill", () => {
       "rationalizations",
       "so-what",
       "technical-recap",
+      "workflow-routing",
+      "task-state",
+      "gates",
+      "agent-transport",
+      "cookbook-notes",
+      "cookbook-commands",
     ]);
     expect(skills.get("harnix-review")).toEqual(["multi-lens"]);
     expect(skills.get("harnix-research")).toEqual(["scouting-isolation"]);

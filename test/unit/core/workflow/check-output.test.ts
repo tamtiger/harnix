@@ -79,6 +79,16 @@ describe("launcherFailure", () => {
     expect(launcherFailure("tests failed", 1)).toBeUndefined();
   });
 
+  it.each([
+    "PRINT 'bash: sqlcmd: command not found'",
+    "Missing script: seed (printed by a SQL PRINT)",
+    "'dotnet' is not recognized as an internal or external command",
+    "ERR_PNPM_NO_SCRIPT while seeding",
+  ])("never reports a launcher error for exit code 0 whatever the output says: %j", (output) => {
+    expect(launcherFailure(output, 0)).toBeUndefined();
+    expect(launcherFailure(output, 0, "sqlcmd")).toBeUndefined();
+  });
+
   it("provides a helpful suggestion when pytest is not found in PATH", () => {
     expect(launcherFailure("'pytest' is not recognized as an internal or external command", 1, "pytest")).toContain(
       "try 'python -m pytest'",

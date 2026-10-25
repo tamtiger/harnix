@@ -2,7 +2,7 @@
 name: harnix-verify
 description: Use when a Harnix task needs fresh compliance, correctness and security verification, evidence, and a safe finish or explicit cancellation with an evidence-based handoff.
 metadata:
-  version: "2.20.0"
+  version: "2.21.0"
 ---
 
 # Verify and finish Harnix work
@@ -42,3 +42,7 @@ Use native agent skills on demand (load via `harnix skill <name>`):
 When every criterion is met or waived and every required check is fresh: `--transition verifying/finishing`, record reusable lessons with `--add-risk` / `--add-decision`, then run `harnix workflow --finish --brief` exactly once. It recomputes every digest and captures learning; read `learning.captured` and act on `learning.hint` when it is 0; when it is above 0 tell the user they can review the notes with `harnix learning` (never promote, reject or retire one yourself). Finish never edits the product. Details, recovery and cancellation: `./references/finish-cancel.md` (or `harnix skill harnix-verify --reference finish-cancel`).
 
 Report the outcome first, then the evidence, omitted checks and residual risks. Observability log line format: `[task] <id/summary> | [tier] <autonomous|review-required|blocked> | [touched] <paths> | [verify] <exit-0-fresh>`. Summarize technical decisions, workarounds, and verification results concisely: read `./references/technical-recap.md` (or `harnix skill harnix-verify --reference technical-recap`). For an epic member also report progress (`harnix epic <id>`) and recommend the next task; point to `review.md` for a plain summary and Code impact dashboard. Never branch, commit, push or open a PR; before a commit show the diff and message and wait for approval.
+
+## Workflow detail
+
+`.harnix/workflow.md` is a lean sheet. Load one page only when its rule is not enough: routing and public commands `harnix skill harnix-verify --reference workflow-routing`; record, files and obligations `harnix skill harnix-verify --reference task-state`; every gate `harnix skill harnix-verify --reference gates`; the transport `harnix skill harnix-verify --reference agent-transport`; shell and encoding notes `harnix skill harnix-verify --reference cookbook-notes`; the complete command list `harnix skill harnix-verify --reference cookbook-commands`.

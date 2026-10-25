@@ -1,0 +1,161 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-123540-preflight-facts-hint-and-epic-context-quieting",
+  "title": "Chi dan factsHint khi facts stale va kiem soat goi y epic cu trong preflight",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Chi dan factsHint khi facts stale va kiem soat goi y epic cu trong preflight",
+  "nonGoals": [],
+  "epicId": "20261025-123400-developer-resilience-and-workflow-refactor",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Preflight tra ve truong factsHint neu projectFactsStale la true voi noi dung ro rang huong dan chay harnix facts --refresh va neu ro khong ghi de task state.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-unit-preflight-3"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Preflight khong tu dong nhac resume cac epic cu khong lien quan khi dang khong co active task hoac ho tro che do giam nhieu.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-unit-preflight-3"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-unit-preflight",
+      "description": "Kiem thu preflight factsHint va epic context quieting",
+      "command": "pnpm vitest run test/unit/core/workflow/preflight.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/preflight.ts",
+        "test/unit/core/workflow/preflight.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-unit-preflight-1",
+      "checkId": "chk-unit-preflight",
+      "recordedAt": "2026-10-25T12:38:28.729+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm vitest run test/unit/core/workflow/preflight.test.ts — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "76fdfe3161c004476431e1fe43abe73ce52b4316e657bc44382625823c488491"
+    },
+    {
+      "id": "ev-chk-unit-preflight-2",
+      "checkId": "chk-unit-preflight",
+      "recordedAt": "2026-10-25T12:39:02.232+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm vitest run test/unit/core/workflow/preflight.test.ts — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "14bda11105e7398f90d4e97c38c17cb075e42837509021d168a6c973f6ec5940"
+    },
+    {
+      "id": "ev-chk-unit-preflight-3",
+      "checkId": "chk-unit-preflight",
+      "recordedAt": "2026-10-25T12:40:08.629+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/preflight.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7ef5609880ca8059ffc929a15b507216b2a8538d163be1b9ce8dee557d5e512b"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T12:44:55.080+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "43b8eabc8423a029a9162119a73370bc3a79286b5a0d653351b9bbec62e594c4"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T12:48:17.592+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "33d63be5941458d29782f7d7b0788fa24f99ecdcca194fa75d0e5984e84320db"
+    },
+    {
+      "id": "ev-chk-unit-preflight-4",
+      "checkId": "chk-unit-preflight",
+      "recordedAt": "2026-10-25T13:04:48.219+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/preflight.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b8de91d7990c9616f1617734de8880836b84e73c7a51235f5f99c41976879ce5"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T13:06:49.377+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "8c7d596bd8546ba0fd83d71604ff0fa374e76c79b2d06cd33442fdc6fb09b568"
+    },
+    {
+      "id": "ev-chk-unit-preflight-5",
+      "checkId": "chk-unit-preflight",
+      "recordedAt": "2026-10-25T13:09:03.146+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/preflight.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8cd6f8aec49d2a5de62723fde84bc71f1e43287f9fcb95617635d54a1453c3d6"
+    },
+    {
+      "id": "ev-check-suite-4",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T13:11:09.035+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ad5d1157f8b2afeaed2382dc4ea2f800e7232ce26fe7261c8c0104094d6ce02c"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-25T12:35:40.832+07:00",
+  "updatedAt": "2026-10-25T13:23:35.521+07:00",
+  "completedAt": "2026-10-25T13:23:35.521+07:00"
+}

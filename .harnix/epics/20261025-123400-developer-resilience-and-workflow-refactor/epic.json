@@ -1,0 +1,20 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261025-123400-developer-resilience-and-workflow-refactor",
+  "title": "Nâng Cao Độ Vững Chắc Trải Nghiệm Phát Triển (DX) và Tinh Gọn Workflow Harnix",
+  "goal": "Giải quyết triệt để 7 vấn đề thực chiến phản ánh từ người dùng và tinh gọn workflow: (1) Chỉ dẫn factsHint rõ ràng khi projectFactsStale và kiểm soát gợi ý epic cũ trong preflight; (2) Chống báo lỗi nhầm khi exitCode 0 (output PRINT SQL Server) và chuẩn hóa xử lý CRLF/LF trên Windows; (3) Cưỡng chế quy tắc Git safety kiểm tra nhánh trước commit và hoàn thiện Guarded Replanning; (4) Lọc nhiễu learning tự sinh và hỗ trợ thao tác hàng loạt; (5) Tái cấu trúc tinh gọn workflow.md thành Lean Operational Cheat Sheet giảm 60% token footprint.",
+  "nonGoals": [
+    "Không phá vỡ định dạng TaskRecord schema v3 đóng băng",
+    "Không làm giảm tính toàn vẹn của state machine"
+  ],
+  "order": [
+    "20261025-123540-preflight-facts-hint-and-epic-context-quieting",
+    "20261025-125308-harness-output-tolerance-and-crlf-handling",
+    "20261025-125309-git-branch-safety-rules-and-guarded-criteria-docs",
+    "20261025-125310-learning-noise-filtering-and-bulk-management",
+    "20261025-125311-refactor-lean-workflow-cheat-sheet"
+  ],
+  "createdAt": "2026-10-25T12:34:34.942+07:00",
+  "updatedAt": "2026-10-25T12:53:07.534+07:00"
+}

@@ -7,6 +7,7 @@ import { briefFlagNames } from "src/core/workflow/brief.js";
 import { HARNIX_RULES, renderHarnixRules } from "src/templates/harnix/activation.js";
 import { HARNIX_GLOBAL_ACTIVATION_DOCUMENT } from "src/templates/harnix/global-surface.js";
 import { workflowSkills, workflowTemplate } from "src/templates/harnix/workflow.js";
+import { workflowGuidance } from "test/support/workflow-guidance.js";
 
 const ROUTE_RULE = HARNIX_RULES.find((rule) => /^Route:/u.test(rule))!;
 const ECONOMY_RULE = HARNIX_RULES.find((rule) => /^Token economy:/u.test(rule))!;
@@ -56,9 +57,9 @@ describe("agent persistence guidance", () => {
   });
 
   it("documents a command cookbook with PowerShell and bash for every hand-off step", () => {
-    const start = workflowTemplate.indexOf("## Command cookbook");
+    const start = workflowGuidance.indexOf("## Command cookbook");
     expect(start).toBeGreaterThan(-1);
-    const cookbook = workflowTemplate.slice(start);
+    const cookbook = workflowGuidance.slice(start);
 
     for (const needle of [
       "PowerShell",
@@ -127,9 +128,10 @@ describe("agent persistence guidance", () => {
   });
 
   it("keeps one cookbook command block instead of repeating every command per shell", () => {
-    const cookbook = workflowTemplate.slice(workflowTemplate.indexOf("## Command cookbook"));
+    const leanCookbook = workflowTemplate.slice(workflowTemplate.indexOf("## Command cookbook"));
+    const cookbook = workflowGuidance.slice(workflowGuidance.indexOf("## Command cookbook"));
 
-    expect(cookbook.match(/^```/gmu)).toHaveLength(2);
+    expect(leanCookbook.match(/^```/gmu)).toHaveLength(2);
     expect(flatten(cookbook)).toContain("In PowerShell:");
     expect(flatten(cookbook)).toContain("In bash:");
     expect(cookbook).toContain("pwsh.exe -NoProfile -Command");
@@ -162,8 +164,8 @@ describe("agent persistence guidance", () => {
   it("documents the required --platform flag, the epic ID order and how to edit a member that is not active", () => {
     const plan = skillAndReferences("harnix-plan");
 
-    expect(workflowTemplate).toContain("harnix context --platform <p>");
-    expect(workflowTemplate).toContain("harnix context-report --platform <p>");
+    expect(workflowGuidance).toContain("harnix context --platform <p>");
+    expect(workflowGuidance).toContain("harnix context-report --platform <p>");
     expect(plan).toContain("later idPrefix");
     expect(plan).toContain("--task <task-id>");
     expect(plan).not.toContain("harnix pause");

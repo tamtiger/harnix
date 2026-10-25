@@ -1,6 +1,7 @@
 export const MIN_LEARNING_CHARACTERS = 40;
+export const MIN_LEARNING_WORDS = 4;
 
-export type LowValueReason = "too-short" | "test-string";
+export type LowValueReason = "too-short" | "test-string" | "label-only";
 
 const FILLER_WORDS = new Set([
   "test",
@@ -22,7 +23,8 @@ const TASK_ID = /\b\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*/u;
 
 /**
  * Why a note is not worth keeping, or `undefined` when it is. Only two cheap, low-false-positive rules: shorter than
- * {@link MIN_LEARNING_CHARACTERS} characters, or nothing but filler words, digits or one repeated character. Unaccented
+ * {@link MIN_LEARNING_CHARACTERS} characters, nothing but filler words, digits or one repeated character, or fewer than
+ * {@link MIN_LEARNING_WORDS} whitespace-separated words (a UI label, path or identifier is not a lesson). Unaccented
  * text and text about one task are not rejected here; 24 unaccented notes in this project carry real lessons.
  */
 export function lowValueReason(statement: string): LowValueReason | undefined {
@@ -33,7 +35,8 @@ export function lowValueReason(statement: string): LowValueReason | undefined {
     .toLowerCase()
     .split(/[^\p{L}\p{N}]+/u)
     .filter((word) => word.length > 0);
-  return words.every((word) => FILLER_WORDS.has(word) || /^\d+$/u.test(word)) ? "test-string" : undefined;
+  if (words.every((word) => FILLER_WORDS.has(word) || /^\d+$/u.test(word))) return "test-string";
+  return text.split(" ").length < MIN_LEARNING_WORDS ? "label-only" : undefined;
 }
 
 /** A note that names a task id is mostly about that task; it ranks after general notes instead of being dropped. */

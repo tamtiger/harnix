@@ -39,6 +39,20 @@ describe("learning prune", () => {
     ]);
   });
 
+  it("also flags a local decision that names a file without a rule", async () => {
+    const root = await temporaryRepository();
+    await writeJournalFile(root, "2026-09-29.jsonl", [
+      buildLearningEntry(
+        { id: "obs-local", status: "draft", statement: "Da them ham moi vao src/core/workflow/preflight.ts de goi" },
+        { id: "l1" },
+      ),
+    ]);
+
+    const matches = await findLowValueLearning(root, now);
+
+    expect(matches.map((match) => [match.id, match.reason])).toEqual([["obs-local", "local-decision"]]);
+  });
+
   it("rejects every match with a new entry and leaves the earlier journal lines untouched", async () => {
     const root = await journal();
     const file = join(root, "2026-09-29.jsonl");

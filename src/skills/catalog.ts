@@ -12,6 +12,12 @@ import migrationReference from "./harnix-plan/references/migration.md";
 import multiRepoReference from "./harnix-plan/references/multi-repo.md";
 import readyReviewReference from "./harnix-plan/references/ready-review.md";
 import replanReference from "./harnix-plan/references/replan.md";
+import workflowRoutingRef from "./harnix-verify/references/workflow-routing.md";
+import taskStateRef from "./harnix-verify/references/task-state.md";
+import gatesRef from "./harnix-verify/references/gates.md";
+import agentTransportRef from "./harnix-verify/references/agent-transport.md";
+import cookbookNotesRef from "./harnix-verify/references/cookbook-notes.md";
+import cookbookCommandsRef from "./harnix-verify/references/cookbook-commands.md";
 import planSource from "./harnix-plan/SKILL.md";
 import researchSource from "./harnix-research/SKILL.md";
 import scoutingIsolationReference from "./harnix-research/references/scouting-isolation.md";
@@ -60,6 +66,12 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       rationalizations: rationalizationsReference,
       "so-what": soWhatReference,
       "technical-recap": technicalRecapReference,
+      "workflow-routing": workflowRoutingRef,
+      "task-state": taskStateRef,
+      gates: gatesRef,
+      "agent-transport": agentTransportRef,
+      "cookbook-notes": cookbookNotesRef,
+      "cookbook-commands": cookbookCommandsRef,
     },
   ],
   [reviewSource, { "multi-lens": multiLensReference }],
