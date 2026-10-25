@@ -9,6 +9,16 @@ describe("id suggestions", () => {
     expect(closestMatch("zzz", ["chk-replay"])).toBeUndefined();
   });
 
+  it("suggests nothing for an empty id, a sibling that differs only in its number or a tie", () => {
+    expect(closestMatch("", ["ac", "chk-1"])).toBeUndefined();
+    expect(closestMatch("ac-3", ["ac-1", "ac-2"])).toBeUndefined();
+    expect(closestMatch("chk-10", ["chk-1"])).toBeUndefined();
+    expect(closestMatch("chk-ab", ["chk-aa", "chk-bb"])).toBeUndefined();
+    expect(unknownIdError("Criterion ac-3 is not declared.", "criterion", "ac-3", ["ac-1", "ac-2"]).message).toBe(
+      "Criterion ac-3 is not declared.\nGợi ý: criterion hợp lệ: ac-1, ac-2.",
+    );
+  });
+
   it("lists the valid ids, the nearest one, and says when there are none", () => {
     expect(unknownIdError("Check x is not declared.", "check", "chk-lok", ["chk-lock", "chk-glob"]).message).toBe(
       "Check x is not declared.\nGợi ý: check hợp lệ: chk-lock, chk-glob. Có phải ý bạn là chk-lock?",

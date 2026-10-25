@@ -20,16 +20,13 @@ describe("whole-file ownership decision", () => {
     expect(decideWholeFile({ ...input, restoreDeleted: false })).toBe("keep-deleted");
   });
 
-  it("never adopts an unowned file whose text differs from the desired output", () => {
+  it("never adopts an existing file that has no ownership record", () => {
     expect(
       decideWholeFile({ current: "user text", previousHash: undefined, desiredHash: desired, restoreDeleted: true }),
     ).toBe("collision");
-  });
-
-  it("adopts an unowned file that already holds exactly the desired output", () => {
     expect(
       decideWholeFile({ current: "x", previousHash: undefined, desiredHash: sha256("x"), restoreDeleted: true }),
-    ).toBe("adopt");
+    ).toBe("collision");
   });
 
   it("keeps a file whose content no longer matches the owned hash", () => {

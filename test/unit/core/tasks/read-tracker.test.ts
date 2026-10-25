@@ -49,3 +49,34 @@ describe("task read tracker", () => {
     await expect(retryOnTaskConflict(async () => Promise.reject(new Error("other")))).rejects.toThrow("other");
   });
 });
+
+describe("retry scope", () => {
+  it("never retries an attempt that already wrote a task, so a multi-save command cannot run twice", async () => {
+    let calls = 0;
+    await expect(
+      retryOnTaskConflict(async () => {
+        calls += 1;
+        noteTaskWritten("t", "after first save");
+        throw new TaskConflictError("busy");
+      }),
+    ).rejects.toThrow("busy");
+
+    expect(calls).toBe(1);
+  });
+
+  it("waits a little longer before each new attempt", async () => {
+    const pauses: number[] = [];
+    let calls = 0;
+    await retryOnTaskConflict(
+      async () => {
+        calls += 1;
+        if (calls < 3) throw new TaskConflictError("busy");
+      },
+      async (attempt) => {
+        pauses.push(attempt);
+      },
+    );
+
+    expect(pauses).toEqual([1, 2]);
+  });
+});

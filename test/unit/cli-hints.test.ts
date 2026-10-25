@@ -29,6 +29,28 @@ describe("cli hints", () => {
     expect(commandHints(createProgram(), argv, "error: unknown option '-C'")).toContain("-- <exe>");
   });
 
+  it("does not take an option for the command name", () => {
+    const message = commandHints(
+      createProgram(),
+      ["node", "harnix", "--limit", "3"],
+      "error: unknown option '--limit'",
+    );
+
+    expect(message).not.toContain("harnix --limit;");
+  });
+
+  it("drops the suggestion of a sibling option once it knows which command owns the flag", () => {
+    const argv = ["node", "harnix", "status", "--yes"];
+    const message = commandHints(
+      createProgram(),
+      argv,
+      "error: unknown option '--yes'" + "\n" + "(Did you mean --summary?)",
+    );
+
+    expect(message).toMatch(/--yes không thuộc harnix status/u);
+    expect(message).not.toContain("Did you mean");
+  });
+
   it("leaves a message without a known hint unchanged", () => {
     expect(commandHints(createProgram(), ["node", "harnix", "status"], "Other.")).toBe("Other.");
   });

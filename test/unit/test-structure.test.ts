@@ -133,6 +133,12 @@ describe("test suite structure", () => {
     for (const suite of suites) expect(readme).toContain(`test/${suite}`);
   });
 
+  it("never mocks a whole module, since isolate: false would leak the mock into the next files of a worker", () => {
+    const mocking = testFiles.filter((path) => /\bvi\.(?:do)?mock\(/u.test(read(path)));
+
+    expect(mocking, "inject the dependency instead of vi.mock / vi.doMock").toEqual([]);
+  });
+
   it(`keeps every test file at ${MAX_TEST_LINES} lines or fewer`, () => {
     const tooLong = testFiles.filter((path) => codeLines(read(path)) > MAX_TEST_LINES);
 

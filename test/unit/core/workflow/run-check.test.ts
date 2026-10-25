@@ -1,7 +1,8 @@
-import { symlink, writeFile } from "node:fs/promises";
+import { readFile, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { trackTaskReads } from "src/core/tasks/read-tracker.js";
 import { runCheckWorkflow, type CheckRunner } from "src/core/workflow/run-check.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { implementingTaskV3 } from "test/support/workflow-fixtures.js";
@@ -20,6 +21,26 @@ function fakeRunner(exitCode: number, output = "", onRun: () => Promise<void> = 
 }
 
 describe("workflow --run-check", () => {
+  it("records a failing run once even when another write lands while the check runs", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+    const taskFile = join(root, ".harnix", "tasks", task.id, "task.json");
+    let runs = 0;
+    const runner: CheckRunner = async () => {
+      runs += 1;
+      // Another command saves the task meanwhile: same record, new text on disk.
+      await writeFile(taskFile, `${JSON.stringify(JSON.parse(await readFile(taskFile, "utf8")))}\n`);
+      return { exitCode: 1, output: "boom" };
+    };
+
+    const result = await trackTaskReads(() =>
+      runCheckWorkflow(root, "check", ["pnpm", "run", "test"], { runner, now: NOW }),
+    );
+
+    expect(runs).toBe(1);
+    expect(result).toMatchObject({ result: "fail", evidenceId: "ev-check-1" });
+  });
+
   it("records a pass with the shared digest and returns the output tail without persisting it", async () => {
     const root = await temporaryRepository();
     await implementingTaskV3(root);

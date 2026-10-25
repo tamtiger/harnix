@@ -23,7 +23,7 @@ const COMMAND_AT_STATEMENT_START =
 const COMMAND_ANYWHERE =
   /(?:\b(?:sudo|curl|wget|iex|pwsh|powershell|npx|Invoke-Expression|Invoke-WebRequest)(?:\.exe)?\s+\S|\brm\s+-|\b(?:bash|sh)\s+-c\b|\bcmd(?:\.exe)?\s+\/[a-z]|\bnpm\s+(?:i|install|run|publish|exec)\b|\bpnpm\s+(?:i|add|install|run|dlx|publish|exec)\b|\bgit\s+(?:push|reset|clean|checkout|commit|remote)\b)/iu;
 const CREDENTIAL =
-  /(?:[\w-]{0,40}(?:api[_-]?key|access[_-]?token|auth[_-]?token|token|password|passwd|secret)\b\s*[=:]\s*['"]?[^\s,'"]{6,}|\bBearer\s+[A-Za-z0-9._~+/=-]{8,}|\bsk-[A-Za-z0-9_-]{12,}|\bgh[pousr]_[A-Za-z0-9]{20,}|\bgithub_pat_[A-Za-z0-9_]{20,}|\bAKIA[0-9A-Z]{12,}|\bxox[abprs]-[A-Za-z0-9-]{8,}|-----BEGIN [A-Z0-9 ]+-----|\b[a-z][a-z0-9+.-]*:\/\/[^\s/:@]+:[^\s/@]+@|[?&](?:key|api_?key|sig|signature|secret|pwd|password|token|access_token|auth|credential)=[^\s&#]{6,})/iu;
+  /(?:[\w-]{0,40}(?:api[_-]?key|access[_-]?token|auth[_-]?token|token|password|passwd|secret)\b\s*[=:]\s*['"]?[^\s,'"]{6,}|\bBearer\s+[A-Za-z0-9._~+/=-]{8,}|\bsk-[A-Za-z0-9_-]{12,}|\bgh[pousr]_[A-Za-z0-9]{20,}|\bgithub_pat_[A-Za-z0-9_]{20,}|\bAKIA[0-9A-Z]{12,}|\bxox[abprs]-[A-Za-z0-9-]{8,}|-----BEGIN [A-Z0-9 ]+-----|\b[a-z][a-z0-9+.-]{0,31}:\/\/[^\s/:@]+:[^\s/@]+@|[?&](?:key|api_?key|sig|signature|secret|pwd|password|token|access_token|auth|credential)=[^\s&#]{6,})/iu;
 const ABSOLUTE_PATH =
   /(?:(?:^|[\s"'(=,])\/[\w.@~-]+\/[\w.@~/-]*|(?:^|\s)~\/|\b[A-Za-z]:[\\/][^\s]|\\\\[\w.$-]+\\[\w$])/u;
 
@@ -39,8 +39,10 @@ function normalizeStatement(statement: string): string {
     .replace(/ ?\n[ \n]*/gu, "\n");
 }
 
+/** The bare reading and the one without combining marks, which a joiner or variation selector would otherwise hide in. */
 function overrides(reading: string): boolean {
-  return OVERRIDE_ENGLISH.test(reading) || OVERRIDE_VIETNAMESE.test(withoutDiacritics(reading));
+  const plain = withoutDiacritics(reading);
+  return OVERRIDE_ENGLISH.test(reading) || OVERRIDE_ENGLISH.test(plain) || OVERRIDE_VIETNAMESE.test(plain);
 }
 
 function withoutDiacritics(text: string): string {

@@ -159,7 +159,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--migrate":
         "Migrate the active unfinished legacy v1/v2 task to schema v3; optional stdin { checks } supplies criterionIds and inputs.",
       "--run-check":
-        "Run the command after -- between two input snapshots of one check and record the outcome; the argv must equal the declared command and runs in the declared cwd, and a check that failed twice in a row is refused; a failing check returns a short failure summary as outputTail (also with --brief), a pass none, and it is never stored; a launcher error (no package.json, missing script, command not found) is reported as could not start and records no evidence.",
+        "Run the command after -- between two input snapshots of one check and record the outcome; the argv must equal the declared command and runs in the declared cwd, and a check that failed twice in a row is refused until its inputs change (a new input digest), a user-authorized --reset-breaker or --replace-check; a failing check returns a short failure summary as outputTail (also with --brief), a pass none, and it is never stored; a launcher error (no package.json, missing script, command not found) is reported as could not start and records no evidence.",
       "--run-checks":
         "Run every required check that is not passing (pending, stale or failed), focused before full, each with its declared command and cwd like --run-check, and stop at the first failure; prints { ran: [{ id, result, exitCode }], remaining } and nothing is run when a check is at the circuit breaker or declares no command; a failing check also returns its short outputTail, with or without --brief.",
       "--set-check":

@@ -43,15 +43,12 @@ describe("global reconcile of a whole file", () => {
     expect(result.warnings[0]?.code).toBe("untracked-collision");
   });
 
-  it("takes back an unowned file whose text is exactly the desired output, as after a crash before the manifest write", () => {
+  it("keeps an unowned file even when its text equals the desired output, as the Phase 6 plan requires", () => {
     const result = emptyResult(manifest);
     const state = target("new");
 
-    const entry = reconcileDesired(state, fileItem("new"), undefined, true, result);
-
-    expect(entry?.generatedHash).toBe(sha256("new"));
-    expect(result.warnings).toEqual([]);
-    expect(result.unchanged).toHaveLength(1);
+    expect(reconcileDesired(state, fileItem("new"), undefined, true, result)).toBeUndefined();
+    expect(result.warnings[0]?.code).toBe("untracked-collision");
   });
 
   it("updates an unchanged owned file and keeps a modified one", () => {

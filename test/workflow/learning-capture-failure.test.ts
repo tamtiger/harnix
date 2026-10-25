@@ -1,15 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { inspectWorkflow } from "src/commands/internal-workflow.js";
 import { createTestProject } from "test/support/builders.js";
 import { completeTaskWithDecisions } from "test/support/learning-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
-
-vi.mock("src/core/journal/learning-capture.js", () => ({
-  captureLearningAtFinish: vi.fn().mockRejectedValue(new Error("capture exploded")),
-}));
 
 const temporaryRepository = useTemporaryRepositories("harnix-learning-failure-");
 
@@ -18,7 +14,13 @@ describe("finish when learning capture fails", () => {
     const root = await createTestProject(await temporaryRepository());
     const id = "20260929-090000-learn-a";
 
-    await completeTaskWithDecisions(root, { id, minute: 0, decisions: ["Always inject the clock in tests"] });
+    // An injected capture, not vi.mock: with isolate: false a module mock would leak into later files of the worker.
+    const exploding = () => Promise.reject(new Error("capture exploded"));
+    await completeTaskWithDecisions(
+      root,
+      { id, minute: 0, decisions: ["Always inject the clock in tests"] },
+      { captureLearning: exploding },
+    );
 
     const task = JSON.parse(await readFile(join(root, ".harnix", "tasks", id, "task.json"), "utf8")) as {
       status: string;

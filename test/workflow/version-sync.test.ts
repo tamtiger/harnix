@@ -26,8 +26,8 @@ const { syncVersion: syncWithFormatter } = (await import(scriptUrl.href)) as {
   syncVersion: SyncVersion;
 };
 /**
- * The real formatter spawns pnpm and prettier, about a second per call: the API tests skip it, while the command-line
- * tests and the test that names the formatted files still go through it.
+ * The real formatter spawns pnpm and prettier, about a second per call: the API tests skip it (the test that names the
+ * formatted files injects its own recorder), while the command-line tests still go through the real one.
  */
 const syncVersion: SyncVersion = (options) => syncWithFormatter({ format: () => undefined, ...options });
 const execFileAsync = promisify(execFile);

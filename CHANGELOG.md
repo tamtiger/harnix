@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.22.1] - 2026-10-25
+
+### Fixed
+
+- Sửa lỗi từ đợt review sau 2.22.0: thử lại khi xung đột chỉ lặp phần lưu (không chạy lại check, đọc input một lần, không lặp lệnh đã ghi, có backoff); bỏ vi.mock để isolate: false an toàn; bỏ adopt theo kế hoạch Phase 6; hai regex hết chạy bậc hai; gợi ý id không đưa anh em số; harnix epic total chỉ đếm epic đọc được; git clean xét thay đổi đã stage; đồng bộ tài liệu và contract đóng băng
+
 ## [2.22.0] - 2026-10-25
 
 ### Fixed

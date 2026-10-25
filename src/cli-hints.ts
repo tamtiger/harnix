@@ -25,17 +25,23 @@ function commandsWithOption(program: Command, flag: string): string[] {
 export function commandHints(program: Command, argv: readonly string[], message: string): string {
   const hints: string[] = [];
   const unknown = /unknown option '(-{1,2}[\w-]+)'/u.exec(message);
-  const invoked = argv[2];
+  // argv[2] is the command only when it names one; `harnix --limit 3` has no command at all.
+  const invoked = program.commands.some((command) => command.name() === argv[2]) ? argv[2] : undefined;
+  let ownerFound = false;
   if (unknown !== null) {
     const owners = commandsWithOption(program, unknown[1]!).filter((name) => name !== invoked);
-    if (owners.length > 0)
+    if (owners.length > 0 && invoked !== undefined) {
+      ownerFound = true;
       hints.push(
         `${unknown[1]} không thuộc harnix ${invoked}; nó dùng với ${owners.map((name) => `harnix ${name}`).join(", ")}.`,
       );
+    }
     if (invoked === "workflow" && argv.includes("--run-check") && !argv.includes("--"))
       hints.push("Đặt lệnh cần chạy sau dấu --: harnix workflow --run-check <check-id> -- <exe> [args...].");
   }
   if (hints.length === 0) return message;
   const { message: base, hint } = splitHint(message);
-  return `${base}${HINT_MARKER}${[...hints, ...(hint === undefined ? [] : [hint])].join(" ")}`;
+  // Commander's own "Did you mean" names a sibling option of the wrong command; the owner hint replaces it.
+  const kept = hint === undefined || ownerFound ? [] : [hint];
+  return `${base}${HINT_MARKER}${[...hints, ...kept].join(" ")}`;
 }

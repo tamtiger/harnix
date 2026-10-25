@@ -1,3 +1,5 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "src/cli-program.js";
@@ -50,6 +52,9 @@ describe.sequential("epic command", () => {
     await initializeProject({ developer: "tam", root, yes: true });
     for (const id of ["20260101-000000-old", "20260201-000000-mid", "20260301-000000-new"])
       await upsertEpic(root, epicRecord(id, id, "goal"));
+    // An unreadable epic is neither listed nor counted.
+    await mkdir(join(root, ".harnix", "epics", "20260401-000000-broken"), { recursive: true });
+    await writeFile(join(root, ".harnix", "epics", "20260401-000000-broken", "epic.json"), "{ not json");
 
     process.chdir(root);
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);

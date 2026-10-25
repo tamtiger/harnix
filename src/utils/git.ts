@@ -38,14 +38,17 @@ const readOnly = (cwd: string, args: readonly string[], timeout: number) =>
 
 /**
  * A tree whose only changes are tracked files that differ in line endings (CRLF/LF checkout settings) is clean in
- * substance: `git diff --ignore-space-at-eol` finds nothing to commit. Untracked or staged-new files still count.
+ * substance: neither the working tree nor the index differs from HEAD under `--ignore-space-at-eol`. Untracked or
+ * staged-new files still count, and a status that could not be read is never reported as clean.
  */
-async function isClean(cwd: string, porcelain: string): Promise<boolean> {
+async function isClean(cwd: string, porcelain: string | undefined): Promise<boolean> {
+  if (porcelain === undefined) return false;
   const lines = porcelain.split(/\r?\n/u).filter((line) => line.length > 0);
   if (lines.length === 0) return true;
   if (lines.some((line) => !/^( M|M |MM)/u.test(line))) return false;
   try {
     await readOnly(cwd, ["diff", "--ignore-space-at-eol", "--quiet", "HEAD"], 2000);
+    await readOnly(cwd, ["diff", "--cached", "--ignore-space-at-eol", "--quiet", "HEAD"], 2000);
     return true;
   } catch {
     return false;
@@ -74,7 +77,7 @@ export async function readGitContext(cwd: string): Promise<GitContext | undefine
       branch = `HEAD (${commit})`;
     }
 
-    const clean = await isClean(cwd, statusResult?.stdout ?? "");
+    const clean = await isClean(cwd, statusResult?.stdout);
 
     return { branch, clean, commit };
   } catch {

@@ -1,0 +1,490 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-210914-review-findings-fixes",
+  "title": "Sửa các lỗi từ đợt review sau v2.22.0: phạm vi retry, rò mock, adopt, contract đóng băng, ReDoS, gợi ý id và footprint",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sửa các lỗi mà bốn subagent review phát hiện trong thay đổi v2.22.0 (commit e3b28a8) và đưa gate measure:footprint xanh trở lại, phát hành bản vá 2.22.1.",
+  "nonGoals": [
+    "Không thêm tính năng mới",
+    "Không hạ ngưỡng footprint 50%, coverage hay ngân sách token"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Thử lại khi xung đột chỉ lặp phần lưu task: --run-check và --run-checks không chạy lại tiến trình check và không bỏ kết quả fail, stdin chỉ được đọc một lần, và lần thử đã ghi task thì không thử lại",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-retry-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Không còn vi.mock rò giữa các file khi isolate false: learning-capture-failure dùng tiêm phụ thuộc, và chạy xáo thứ tự file với seed 1 và 2 đều xanh",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-isolation-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Bỏ quyết định adopt: file chưa có trong manifest luôn là collision và được giữ nguyên như kế hoạch Phase 6, test never adopts được khôi phục",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-adopt-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Contract đóng băng được cập nhật: IMPLEMENTATION_PLAN mục 4.25 và HARNIX_PRD ghi lỗi của workflow in PublicCliErrorV1 có hint (chỉ context im lặng), spec status --criteria ghi dạng không có task và việc từ chối --limit",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Regex CREDENTIAL và heuristic dấu hỏi chạy tuyến tính: chuỗi 64 KiB xử lý dưới 100 ms",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-redos-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Gợi ý id gần nhất không đưa ra khi id rỗng, khi hai id chỉ khác phần số cuối hoặc khi có nhiều ứng viên ngang nhau; danh sách id hợp lệ vẫn được in",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-suggest-2"
+      ]
+    },
+    {
+      "id": "ac-7",
+      "text": "Mô tả circuit breaker thống nhất ở AGENTS.md, multi-repo reference, mô tả --run-check trong schema và thông báo của run-checks: input digest mới mở lại breaker, --reset-breaker hoặc --replace-check khi user cho phép",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-8",
+      "text": "harnix epic: total chỉ đếm epic đọc được, và tài liệu ghi rõ thứ tự là theo id giảm dần",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-epic-1",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-9",
+      "text": "Test ghi song song không chập chờn: retry có backoff ngắn hoặc số writer nhỏ hơn số lần thử",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-concurrency-2"
+      ]
+    },
+    {
+      "id": "ac-10",
+      "text": "Các lỗi P3 rẻ được sửa: hint không lấy option làm tên lệnh và bỏ Did you mean khi đã biết lệnh sở hữu cờ; isClean xét thay đổi đã stage và coi status lỗi là chưa sạch; test chứng minh pass bị stale khi sửa chữ tiêu chí; sessionLite báo lỗi khi thiếu số đo; sửa comment version-sync; harnix-plan nhắc no unknown fields; bộ lọc override tiếng Anh chạy cả trên bản bỏ dấu",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-concurrency-2",
+        "ev-chk-gates-2",
+        "ev-chk-suggest-2"
+      ]
+    },
+    {
+      "id": "ac-11",
+      "text": "pnpm measure:footprint đạt lại mức giảm tối thiểu 50% bằng cách rút gọn phần trùng hoặc dài dòng của các reference harnix-verify thêm ở v2.21.0, harnix-plan/references/epic.md và harnix-arch-review/references/domain-briefs.md mà không bỏ nội dung bắt buộc (các test bảo vệ nội dung vẫn xanh)",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-footprint-1"
+      ]
+    },
+    {
+      "id": "ac-12",
+      "text": "Tài liệu đồng bộ với code v2.21.1 đến v2.22.x: HARNIX_PRD dòng 159 (số action nhận --brief và danh sách action), cả hai bản mục 4.11 của IMPLEMENTATION_PLAN (--remove-risk, --remove-decision, --remove-criterion, --schema --full và transportsOmitted), mục measure:tokens (sessionLite), mô tả harnix epic; AGENTS.md (--remove-risk, --init không hỏi --command khi có --with-check, set-criterion tự quay lại implementing cho Lite); harnix-plan SKILL.md và references replan.md, epic.md (git.clean bỏ qua khác biệt cuối dòng)",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/commands/epic.ts",
+    "src/commands/workflow-command.ts",
+    "src/core/journal/learning-safety.ts",
+    "src/core/managed/decision.ts",
+    "src/core/tasks/read-tracker.ts",
+    "src/core/workflow/run-check.ts",
+    "src/core/workflow/text-integrity.ts",
+    "src/skills/harnix-verify/references",
+    "src/utils/suggest.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-retry",
+      "description": "Retry chỉ lặp phần lưu",
+      "command": "pnpm exec vitest run test/unit/core/tasks/read-tracker.test.ts test/integration/commands/workflow-command.test.ts test/unit/core/workflow/run-check.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/integration/commands/**",
+        "test/unit/core/**"
+      ]
+    },
+    {
+      "id": "chk-isolation",
+      "description": "Xáo thứ tự file không làm rò mock",
+      "command": "pnpm exec vitest run test/workflow/learning-capture-failure.test.ts test/workflow/learning-automation.test.ts test/unit/core/journal --maxWorkers=1 --sequence.shuffle.files --sequence.seed=1",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-adopt",
+      "description": "Không adopt file chưa có trong manifest",
+      "command": "pnpm exec vitest run test/unit/core/managed test/unit/core/global/reconcile.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/global/**",
+        "src/core/managed/**",
+        "test/unit/core/global/**",
+        "test/unit/core/managed/**"
+      ]
+    },
+    {
+      "id": "chk-redos",
+      "description": "Regex tuyến tính",
+      "command": "pnpm exec vitest run test/unit/core/journal/learning-safety.test.ts test/unit/core/workflow/text-integrity.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "src/core/journal/**",
+        "src/core/workflow/**",
+        "test/unit/core/journal/**",
+        "test/unit/core/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-suggest",
+      "description": "Gợi ý id gần nhất và hint lệnh",
+      "command": "pnpm exec vitest run test/unit/utils/suggest.test.ts test/unit/cli-hints.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-10",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/unit/**"
+      ]
+    },
+    {
+      "id": "chk-epic",
+      "description": "harnix epic total",
+      "command": "pnpm exec vitest run test/integration/commands/epic.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-8"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/epics/**",
+        "test/integration/commands/**"
+      ]
+    },
+    {
+      "id": "chk-concurrency",
+      "description": "Ghi song song ổn định và các P3",
+      "command": "pnpm exec vitest run test/unit/core/workflow/plan-edit.test.ts test/unit/utils/git.test.ts test/workflow/measure-tokens.test.ts test/unit/core/workflow/set-criterion.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-10",
+        "ac-9"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test, docs parity và golden",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-10",
+        "ac-12",
+        "ac-4",
+        "ac-7",
+        "ac-8"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-footprint",
+      "description": "Footprint giảm tối thiểu 50%",
+      "command": "pnpm measure:footprint",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-11"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-10",
+        "ac-11",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7",
+        "ac-8",
+        "ac-9"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-25T21:12:35.218+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Rà soát đồng bộ tài liệu theo yêu cầu người dùng phát hiện thêm các chỗ lệch ngoài ac-4, ac-7 và ac-8",
+      "artifactPaths": [
+        ".harnix/tasks/20261025-210914-review-findings-fixes/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-retry-1",
+      "checkId": "chk-retry",
+      "recordedAt": "2026-10-25T21:32:31.965+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/tasks/read-tracker.test.ts test/integration/commands/workflow-command.test.ts test/unit/core/workflow/run-check.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0130e40bd79d26e602f6233502106248b915873a3daf1380d1721f1c7e29af47"
+    },
+    {
+      "id": "ev-chk-isolation-1",
+      "checkId": "chk-isolation",
+      "recordedAt": "2026-10-25T21:32:47.009+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/learning-capture-failure.test.ts test/workflow/learning-automation.test.ts test/unit/core/journal --maxWorkers=1 --sequence.shuffle.files --sequence.seed=1 — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c98ee340bb515f3069cb93377a62529a4fc8dca82e38889799412ae254e3ffc1"
+    },
+    {
+      "id": "ev-chk-adopt-1",
+      "checkId": "chk-adopt",
+      "recordedAt": "2026-10-25T21:32:50.952+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/managed test/unit/core/global/reconcile.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "de01cd84ae58d3dede42137045f3386ad921ce1cdef062592e513c06a86ab2df"
+    },
+    {
+      "id": "ev-chk-redos-1",
+      "checkId": "chk-redos",
+      "recordedAt": "2026-10-25T21:32:54.636+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/journal/learning-safety.test.ts test/unit/core/workflow/text-integrity.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a321c018e46cd45b03e4ebab1fcb250b270cdcc745d85183c911f6e998dbc1da"
+    },
+    {
+      "id": "ev-chk-suggest-1",
+      "checkId": "chk-suggest",
+      "recordedAt": "2026-10-25T21:33:00.716+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/suggest.test.ts test/unit/cli-hints.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "daa4066c47e9d5fca4f0bab5ae5778d6b4377a939658811281eb47e7ac9601af"
+    },
+    {
+      "id": "ev-chk-epic-1",
+      "checkId": "chk-epic",
+      "recordedAt": "2026-10-25T21:33:07.272+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/epic.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2a6f3e47616183722453e25c1ccca2e0fb89084d139c7d57248a7565885805d9"
+    },
+    {
+      "id": "ev-chk-concurrency-1",
+      "checkId": "chk-concurrency",
+      "recordedAt": "2026-10-25T21:33:18.053+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/plan-edit.test.ts test/unit/utils/git.test.ts test/workflow/measure-tokens.test.ts test/unit/core/workflow/set-criterion.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6b83ee9929d9c0a23a9c50a6ef877aec9be9694b7413146d076002493cc9f3df"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-25T21:33:25.399+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "05cfef04d131e425ce4f8a8151bc55341c822017ebf4a548d95bf326f64ece96"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T21:34:44.877+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6219be1fee2e677bf4fdc2097a91b41db4bd392d26c072121530b3893fd9b812"
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-25T21:41:08.913+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Rút gọn riêng sáu reference harnix-verify chỉ đạt 48,75%; người dùng chọn mở rộng sang epic.md và domain-briefs.md",
+      "artifactPaths": [
+        ".harnix/tasks/20261025-210914-review-findings-fixes/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-retry-2",
+      "checkId": "chk-retry",
+      "recordedAt": "2026-10-25T21:49:58.909+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/tasks/read-tracker.test.ts test/integration/commands/workflow-command.test.ts test/unit/core/workflow/run-check.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "927cfd9d20973458a598b8a6a5a48be04cca8c47ff4a4fb3b4058763c7a8d8a8"
+    },
+    {
+      "id": "ev-chk-isolation-2",
+      "checkId": "chk-isolation",
+      "recordedAt": "2026-10-25T21:50:15.273+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/learning-capture-failure.test.ts test/workflow/learning-automation.test.ts test/unit/core/journal --maxWorkers=1 --sequence.shuffle.files --sequence.seed=1 — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7c018be94edd79ffe18f35bc9b8f2d9db62b6d834eb328b176bd41053a4a7b82"
+    },
+    {
+      "id": "ev-chk-suggest-2",
+      "checkId": "chk-suggest",
+      "recordedAt": "2026-10-25T21:50:21.213+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/suggest.test.ts test/unit/cli-hints.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "30953a2844c4a1186a515fbd94316c47d39f5b016bc7c7ec93a4273ff18be962"
+    },
+    {
+      "id": "ev-chk-concurrency-2",
+      "checkId": "chk-concurrency",
+      "recordedAt": "2026-10-25T21:50:32.241+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/plan-edit.test.ts test/unit/utils/git.test.ts test/workflow/measure-tokens.test.ts test/unit/core/workflow/set-criterion.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "17360a32312da68340e929926854df8d9d6bd3a41190c490cae7b69e2bf11c6d"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-25T21:50:39.738+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cfdc88ca576a9fe33fa25c6d2313f85fb77a97873f055e066b0ddc982d25400f"
+    },
+    {
+      "id": "ev-chk-footprint-1",
+      "checkId": "chk-footprint",
+      "recordedAt": "2026-10-25T21:50:43.121+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm measure:footprint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d5c438d35ae9ebdce4a471dbd79bdb9c78c76e695d1dcccc482bd9971fb17a89"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T21:52:12.755+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7c8f889177679762da06dc2d4aa0487f881f5e6a8b5bac18fc3428df74cb0fff"
+    }
+  ],
+  "createdAt": "2026-10-25T21:09:14.318+07:00",
+  "updatedAt": "2026-10-25T21:53:21.095+07:00",
+  "completedAt": "2026-10-25T21:53:21.095+07:00"
+}

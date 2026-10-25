@@ -14,13 +14,7 @@ harnix workflow --schema --full              # the envelope schema plus the desc
 - `--run-checks` runs every required check that is not passing (focused first, suite last) with its declared command
   and prints `{ ran, remaining }`; a failing check carries a short `outputTail`, a launcher error is "could not start"
   and records nothing. A check that failed twice in a row runs again once its inputs change (a new input digest).
-- `--run-check` snapshots, runs and records; its argv must equal the declared command and it runs in the declared
-  `cwd`.
 - `--criterion <ids> --met --transition verifying/finishing --finish` marks criteria, advances and finishes in one call.
-- `--reset-breaker` needs a `--reason` of 10-1000 characters and the user's authorization; it is the only way to
-  record a breaker reset.
 - `--batch` is atomic and order does not matter: references between items resolve after all are applied.
-- `harnix status --summary` stays under 80 tokens (stage, epic progress, criteria, checks, next action);
-  `harnix status --criteria` lists id, status, text and coveredBy of each criterion.
-- `harnix resume --next` activates the next unfinished member of the active epic; `harnix resume <id> --force` switches
-  task and pauses the active one.
+- `harnix status --criteria` lists id, status, text and coveredBy of each criterion; the other public commands are in
+  the `workflow-routing` reference.

@@ -1,4 +1,5 @@
 import { normalizeCheckCwd } from "src/core/tasks/check-cwd.js";
+import { retryOnTaskConflict } from "src/core/tasks/read-tracker.js";
 import { unknownIdError } from "src/utils/suggest.js";
 import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
@@ -94,16 +95,19 @@ export async function runCheckWorkflow(
   if (before !== after)
     throw new Error(`Verification inputs for check ${checkId} changed while it ran; nothing was recorded.`);
   const result = run.exitCode === 0 ? "pass" : "fail";
-  const appended = await appendEvidenceFlagsWorkflow(
-    root,
-    {
-      check: checkId,
-      result,
-      exitCode: String(run.exitCode),
-      summary: dependencies.summary ?? `${describeCommand(argv)} — exit ${run.exitCode}`,
-      digest: before,
-    },
-    dependencies.now,
+  // The check already ran: only the save is retried after a concurrent write, never the process.
+  const appended = await retryOnTaskConflict(() =>
+    appendEvidenceFlagsWorkflow(
+      root,
+      {
+        check: checkId,
+        result,
+        exitCode: String(run.exitCode),
+        summary: dependencies.summary ?? `${describeCommand(argv)} — exit ${run.exitCode}`,
+        digest: before,
+      },
+      dependencies.now,
+    ),
   );
   return {
     task: appended.task,

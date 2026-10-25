@@ -50,6 +50,22 @@ describe("utils/git", () => {
     expect((await readGitContext(root))?.clean).toBe(false);
   });
 
+  it("counts a staged change as dirty even when the working tree matches HEAD again", async () => {
+    const root = await temporaryRepository();
+    await execFileAsync("git", ["init", "-b", "main"], { cwd: root });
+    await execFileAsync("git", ["config", "user.name", "Tester"], { cwd: root });
+    await execFileAsync("git", ["config", "user.email", "test@example.com"], { cwd: root });
+    await writeFile(join(root, "file.txt"), "one\n");
+    await execFileAsync("git", ["add", "-A"], { cwd: root });
+    await execFileAsync("git", ["commit", "-m", "initial"], { cwd: root });
+
+    await writeFile(join(root, "file.txt"), "two\n");
+    await execFileAsync("git", ["add", "file.txt"], { cwd: root });
+    await writeFile(join(root, "file.txt"), "one\n");
+
+    expect((await readGitContext(root))?.clean).toBe(false);
+  });
+
   it("returns detached HEAD branch formatting", async () => {
     const root = await temporaryRepository();
     await execFileAsync("git", ["init", "-b", "main"], { cwd: root });

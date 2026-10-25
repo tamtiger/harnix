@@ -50,7 +50,7 @@ export async function runChecksWorkflow(
     const digest = (await computeInputDigest(root, task, check.id)).inputDigest;
     if (verificationRetryDisposition(task, check.id, Date.now(), digest) === "stop")
       throw new Error(
-        `Check ${check.id} failed twice in a row; nothing was run. Stop and report to the user, or continue with a user-authorized harnix workflow --replace-check ${check.id} <new-id> --reason "<why>".`,
+        `Check ${check.id} failed twice in a row; nothing was run. Stop and report to the user. Continue only with code changes (new input digest), user-authorized reset: harnix workflow --reset-breaker ${check.id} --reason "<why>", or replace check: harnix workflow --replace-check ${check.id} <new-id> --reason "<why>".`,
       );
     if (check.command === undefined)
       throw new Error(`Check ${check.id} declares no command; nothing was run. Declare it with --set-check --command.`);

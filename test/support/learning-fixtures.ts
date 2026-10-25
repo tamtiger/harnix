@@ -10,7 +10,7 @@ import {
   transitionWorkflow,
 } from "src/commands/internal-workflow.js";
 import type { JournalEntry } from "src/core/journal/journal.js";
-import type { FinishReport } from "src/core/workflow/finish.js";
+import type { FinishReport, FinishReportDependencies } from "src/core/workflow/finish.js";
 import type { LearningCandidate } from "src/core/journal/learning.js";
 import { at, buildTaskV3 } from "test/support/builders.js";
 
@@ -59,6 +59,7 @@ export async function writeJournalFile(directory: string, name: string, lines: r
 export async function completeTaskWithDecisions(
   root: string,
   input: { id: string; minute: number; decisions?: readonly string[]; evidenceId?: string; relevantPaths?: string[] },
+  finishDependencies: FinishReportDependencies = {},
 ): Promise<FinishReport> {
   const decisions = (input.decisions ?? []).map((text, index) => ({
     id: `d${index + 1}`,
@@ -105,5 +106,5 @@ export async function completeTaskWithDecisions(
       updatedAt: at2(6),
     },
   });
-  return finishWorkflowReport(root, at2(7));
+  return finishWorkflowReport(root, at2(7), finishDependencies);
 }

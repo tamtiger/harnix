@@ -43,6 +43,9 @@ function enhanceErrorMessage(error: unknown): Error {
   return error;
 }
 
+/** Actions that start a check process: they retry only their own final save, never the whole action. */
+const PROCESS_ACTIONS = new Set(["runCheck", "runChecks"]);
+
 export function registerWorkflowCommand(program: Command, options: WorkflowCommandOptions): void {
   // The pnpm PowerShell shim forwards `$args` and drops the `--` separator, so everything after the first operand
   // (the command of `--run-check`) is passed through untouched instead of being parsed as harnix options.
@@ -164,11 +167,14 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
       const root = actions.every((action) => action === "schema")
         ? await resolveProjectRoot(process.cwd())
         : await requireInitializedProject(process.cwd());
+      const commandOptions = { ...options };
       let result: unknown;
       try {
         for (const action of actions) {
+          // One options object per command: the input it read once is reused by a retry instead of an empty stdin.
+          const run = () => (WORKFLOW_HANDLERS[action] as Handler)({ root, flags, operands, options: commandOptions });
           result = await withTargetTask(flags.task, () =>
-            retryOnTaskConflict(() => (WORKFLOW_HANDLERS[action] as Handler)({ root, flags, operands, options })),
+            PROCESS_ACTIONS.has(action) ? run() : retryOnTaskConflict(run),
           );
         }
       } catch (error: unknown) {

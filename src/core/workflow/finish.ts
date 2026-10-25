@@ -49,9 +49,18 @@ function learningHint(task: TaskRecord, captured: number): string | undefined {
 }
 
 /** Finishes the active task and reports how much project learning that produced, so a zero is never silent. */
-export async function finishWorkflowReport(root: string, injectedNow?: string): Promise<FinishReport> {
+/** What a test may replace in a finish; production always uses the real learning capture. */
+export interface FinishReportDependencies {
+  readonly captureLearning?: typeof captureLearningAtFinish;
+}
+
+export async function finishWorkflowReport(
+  root: string,
+  injectedNow?: string,
+  dependencies: FinishReportDependencies = {},
+): Promise<FinishReport> {
   const harnixRoot = await resolveSafeHarnixPath(root);
-  return withWorkflowLock(harnixRoot, () => finishLocked(root, harnixRoot, injectedNow));
+  return withWorkflowLock(harnixRoot, () => finishLocked(root, harnixRoot, injectedNow, dependencies));
 }
 
 async function findPromotableCandidates(root: string, developer: string, nowMs: number): Promise<string[]> {
@@ -71,7 +80,12 @@ async function findPromotableCandidates(root: string, developer: string, nowMs: 
   }
 }
 
-async function finishLocked(root: string, harnixRoot: string, injectedNow: string | undefined): Promise<FinishReport> {
+async function finishLocked(
+  root: string,
+  harnixRoot: string,
+  injectedNow: string | undefined,
+  dependencies: FinishReportDependencies,
+): Promise<FinishReport> {
   const now = await currentInstant(root, injectedNow);
   const task = await resolveActiveTask(harnixRoot);
   if (!task) throw new Error("Workflow finish requires an active task.");
@@ -80,7 +94,8 @@ async function finishLocked(root: string, harnixRoot: string, injectedNow: strin
   const journalPath = await journalFilePath(root, config, journalDate);
   const finished = await finishWorkflowTask(harnixRoot, journalPath, config.developer, task, now);
   await refreshLinkedEpicMarkdown(root, finished);
-  const captured = await captureLearning(root, config.developer, finished, journalPath, journalDate);
+  const capture = dependencies.captureLearning ?? captureLearningAtFinish;
+  const captured = await captureLearning(capture, root, config.developer, finished, journalPath, journalDate);
   const hint = learningHint(finished, captured);
   const promotable = await findPromotableCandidates(root, config.developer, Date.parse(journalDate));
   let learningHintText = hint;
@@ -106,6 +121,7 @@ async function finishLocked(root: string, harnixRoot: string, injectedNow: strin
 
 /** Best-effort by design: learning is a by-product, so a failure here must never undo or hide a completed task. */
 async function captureLearning(
+  capture: typeof captureLearningAtFinish,
   root: string,
   developer: string,
   task: TaskRecord,
@@ -113,7 +129,7 @@ async function captureLearning(
   instant: string,
 ): Promise<number> {
   try {
-    return await captureLearningAtFinish(
+    return await capture(
       await resolveSafeHarnixPath(root, `workspace/${developer}/journal`),
       journalPath,
       developer,

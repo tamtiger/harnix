@@ -20,7 +20,7 @@ export interface CorruptedText {
  */
 function isLossyQuestionMarks(text: string): boolean {
   if (!/\?{3,}/u.test(text)) return false;
-  return /\P{ASCII}/u.test(text) || /[\p{L}\p{N}]\?{3,}|\?{3,}[\p{L}\p{N}]/u.test(text);
+  return /\P{ASCII}/u.test(text) || /[\p{L}\p{N}]\?{3}|\?{3}[\p{L}\p{N}]/u.test(text);
 }
 
 function inspect(text: string): CorruptedText | undefined {

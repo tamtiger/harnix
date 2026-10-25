@@ -254,15 +254,18 @@ export async function measureGuides(directory) {
  * read once, the plan and implement skills, a planning preflight and a planning hook context.
  */
 export function sessionLiteTokens(report) {
-  return (
-    report.alwaysLoaded +
-    report.workflowDoc +
-    report.reads.schema +
-    report.skills["harnix-plan"] +
-    report.skills["harnix-implement"] +
-    report.preflight.planning +
-    report.hookContext.planning
-  );
+  const parts = {
+    alwaysLoaded: report.alwaysLoaded,
+    workflowDoc: report.workflowDoc,
+    schema: report.reads?.schema,
+    "harnix-plan": report.skills?.["harnix-plan"],
+    "harnix-implement": report.skills?.["harnix-implement"],
+    preflight: report.preflight?.planning,
+    hookContext: report.hookContext?.planning,
+  };
+  const missing = Object.keys(parts).filter((name) => !Number.isFinite(parts[name]));
+  if (missing.length > 0) throw new Error(`sessionLite is missing measurements: ${missing.join(", ")}.`);
+  return Object.values(parts).reduce((sum, value) => sum + value, 0);
 }
 
 export function buildReport(brief, full, guides) {

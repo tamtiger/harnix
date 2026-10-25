@@ -31,6 +31,14 @@ describe("text integrity guard", () => {
     expect(findCorruptedText("S?a l?i ???ng d?n")).toMatchObject({ reason: "lossy-question-marks" });
   });
 
+  it("checks a long run of question marks in linear time", () => {
+    const started = performance.now();
+
+    findCorruptedText("?".repeat(60_000));
+
+    expect(performance.now() - started).toBeLessThan(100);
+  });
+
   it("accepts a standalone run of three question marks in plain ASCII text", () => {
     expect(findCorruptedText("Mark the unknown value as ??? until the owner answers")).toBeUndefined();
   });

@@ -43,12 +43,15 @@ export interface EpicTaskMember {
 export async function listPublicEpics(root: string, limit: number): Promise<PublicEpicListResult> {
   const harnixRoot = await resolveSafeHarnixPath(root);
   const epics: EpicSummary[] = [];
-  // Epic IDs start with their creation time, so descending ID order puts the newest first.
+  // Listed by descending ID: an ID that starts with its creation time (the convention) puts the newest first.
   const ids = (await listEpicIds(harnixRoot)).reverse();
+  // `total` counts only the epics that load, so it agrees with what a larger --limit would list.
+  let total = 0;
   for (const epicId of ids) {
-    if (epics.length >= limit) break;
     try {
       const epic = await loadEpicOrThrow(harnixRoot, epicId);
+      total += 1;
+      if (epics.length >= limit) continue;
       const members = await collectEpicMembers(harnixRoot, epicId);
       epics.push({
         id: epicId,
@@ -61,7 +64,7 @@ export async function listPublicEpics(root: string, limit: number): Promise<Publ
       // Skip epics that cannot be loaded.
     }
   }
-  return { generator: "harnix", schemaVersion: 1, epics, total: ids.length };
+  return { generator: "harnix", schemaVersion: 1, epics, total };
 }
 
 /** Identity and progress only: no prose, so an agent can follow an epic without paying for every member's goal. */

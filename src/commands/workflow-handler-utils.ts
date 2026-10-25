@@ -12,7 +12,18 @@ export const withoutBom = (input: string | undefined): string | undefined => {
   return input.replace(/^\uFEFF/u, "").replace(/^\uFFFE/u, "");
 };
 
-export async function readInput(context: WorkflowContext, optional = false): Promise<string | undefined> {
+/** The body of one command, read once: a retried handler gets the same text instead of an already drained stdin. */
+const inputs = new WeakMap<object, Promise<string | undefined>>();
+
+export function readInput(context: WorkflowContext, optional = false): Promise<string | undefined> {
+  const cached = inputs.get(context.options);
+  if (cached !== undefined) return cached;
+  const read = readInputOnce(context, optional);
+  inputs.set(context.options, read);
+  return read;
+}
+
+async function readInputOnce(context: WorkflowContext, optional: boolean): Promise<string | undefined> {
   if (context.flags.file !== undefined) {
     const target = await resolveSafeFilePath(context.root, context.flags.file);
     return withoutBom(await readFile(target, "utf8"));

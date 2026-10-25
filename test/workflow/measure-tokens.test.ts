@@ -154,4 +154,17 @@ describe("measureGuides", () => {
       }),
     ).toBe(127);
   });
+
+  it("refuses to sum a session when a measurement is missing instead of returning NaN", () => {
+    expect(() =>
+      script.sessionLiteTokens({
+        alwaysLoaded: 1,
+        workflowDoc: 2,
+        reads: {},
+        skills: {},
+        preflight: {},
+        hookContext: {},
+      }),
+    ).toThrow(/missing measurements: schema, harnix-plan, harnix-implement, preflight, hookContext/u);
+  });
 });

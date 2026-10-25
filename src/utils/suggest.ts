@@ -13,15 +13,33 @@ function editDistance(left: string, right: string): number {
   return previous[right.length]!;
 }
 
-/** The candidate nearest to `value`, or undefined when none is close enough to be a likely typo. */
+const TRAILING_NUMBER = /^(.*?)(\d+)$/u;
+
+/** `ac-3` and `ac-1` name different things that only share a prefix: suggesting one for the other invites a wrong id. */
+function onlyNumberDiffers(left: string, right: string): boolean {
+  const a = TRAILING_NUMBER.exec(left);
+  const b = TRAILING_NUMBER.exec(right);
+  return a !== null && b !== null && a[1] === b[1] && a[2] !== b[2];
+}
+
+/**
+ * The single candidate nearest to `value`, or undefined when none is close enough to be a likely typo, when two or
+ * more are equally close, or when the nearest differs only in its trailing number (a sibling, not a typo).
+ */
 export function closestMatch(value: string, candidates: readonly string[]): string | undefined {
+  if (value.trim() === "") return undefined;
   const limit = Math.max(2, Math.floor(value.length / 3));
   let best: { candidate: string; distance: number } | undefined;
+  let tied = false;
   for (const candidate of candidates) {
     const distance = editDistance(value.toLowerCase(), candidate.toLowerCase());
-    if (distance <= limit && (best === undefined || distance < best.distance)) best = { candidate, distance };
+    if (distance > limit || (best !== undefined && distance > best.distance)) continue;
+    tied = best !== undefined && distance === best.distance;
+    if (!tied) best = { candidate, distance };
   }
-  return best?.candidate;
+  if (best === undefined || tied || onlyNumberDiffers(value.toLowerCase(), best.candidate.toLowerCase()))
+    return undefined;
+  return best.candidate;
 }
 
 /**

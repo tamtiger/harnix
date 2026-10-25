@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { resolveActiveTask } from "src/core/tasks/task.js";
+import { computeInputDigest } from "src/core/verification/input-digest.js";
 import type { CheckRunner } from "src/core/workflow/run-check.js";
 import { runCheckWorkflow } from "src/core/workflow/run-check.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
@@ -67,6 +68,9 @@ describe("setCriterionWorkflow", () => {
     expect(revised.acceptanceCriteria[0]?.text).toBe("Đổi sau bằng chứng");
     expect(revised.acceptanceCriteria[0]?.status).toBe("pending");
     expect(revised.acceptanceCriteria[0]?.evidenceIds).toEqual([]);
+    // The criterion text is part of the check digest, so the earlier pass no longer matches the inputs: it is stale.
+    const current = (await computeInputDigest(root, revised, "check")).inputDigest;
+    expect(revised.evidence.at(-1)?.inputDigest).not.toBe(current);
     expect((await resolveActiveTask(`${root}/.harnix`))?.acceptanceCriteria[0]?.text).toBe("Đổi sau bằng chứng");
   });
 });

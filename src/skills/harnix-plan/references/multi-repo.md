@@ -14,5 +14,5 @@ Use when one task spans a workspace of several repositories or nested projects t
 7. **Common mistakes:**
    - `inputs` that do not cover the repository under `cwd` (the pass would never go stale).
    - A compound command (`cd x && y`); declare one check per command and use `cwd`.
-   - Retrying a check that failed twice in a row; it refuses evidence until a user-authorized `--replace-check` whose `command`, `inputs` or `cwd` differs.
+   - Retrying a check that failed twice in a row unchanged; it runs again only once its inputs change (a new input digest), after a user-authorized `--reset-breaker`, or after a user-authorized `--replace-check` whose `command`, `inputs` or `cwd` differs.
    - Changing a check after `ready` without `--reason`.

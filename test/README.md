@@ -53,7 +53,9 @@ Do not regenerate `test/workflow/behavior-snapshot.golden.json` to make a refact
 
 Vitest runs with `pool: "forks"` and `isolate: false`: the files of one worker share its module graph instead of
 importing it again, which saves about a third of the wall time. Every test therefore restores what it changes globally
-(`process.chdir`, `process.exitCode`, spies and mocks) in `afterEach`, and must not rely on a fresh module state; run
+(`process.chdir`, `process.exitCode`, spies) in `afterEach`, never mocks a whole module with `vi.mock` or `vi.doMock`
+(an `afterEach` cannot undo it, so inject the dependency instead; `test/unit/test-structure.test.ts` enforces this), and
+must not rely on a fresh module state; run
 `pnpm exec vitest run --sequence.shuffle` to catch an order dependency.
 
 To find the slowest files, run `pnpm exec vitest run --reporter=json --outputFile=<file>` and sort `testResults` by

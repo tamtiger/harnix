@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { presentTask, splitGlobList, splitList, withoutBom } from "src/commands/workflow-handler-utils.js";
+import { presentTask, readInput, splitGlobList, splitList, withoutBom } from "src/commands/workflow-handler-utils.js";
 import type { WorkflowContext } from "src/commands/workflow-handlers.js";
 import { buildTaskV3 } from "test/support/builders.js";
 
@@ -41,5 +41,18 @@ describe("workflow handler utilities", () => {
     expect(withoutBom("\uFEFFhello")).toBe("hello");
     expect(withoutBom("\uFFFEhello")).toBe("hello");
     expect(withoutBom("hello")).toBe("hello");
+  });
+});
+
+describe("readInput", () => {
+  it("reads the body of one command once, so a retried handler sees the same text", async () => {
+    let reads = 0;
+    const options = { workflowInput: async () => `body ${(reads += 1)}` };
+    const context = { root: ".", flags: {}, operands: [], options } as WorkflowContext;
+
+    expect(await readInput(context)).toBe("body 1");
+    expect(await readInput({ ...context })).toBe("body 1");
+    expect(await readInput({ ...context, options: { ...options } })).toBe("body 2");
+    expect(reads).toBe(2);
   });
 });
