@@ -25,15 +25,22 @@ describe("setCriterionWorkflow", () => {
     expect(task.validationPlan).toEqual(planning.validationPlan);
   });
 
-  it("needs a reason once obligations are frozen and then makes the guarded replan save", async () => {
+  it("needs a reason once obligations are frozen", async () => {
     const root = await temporaryRepository();
     await implementingTaskV3(root);
 
     await expect(setCriterionWorkflow(root, { id: "a", text: "Đổi chữ" })).rejects.toThrow(/--reason/u);
+  });
+
+  it("resumes implementing by itself for a Lite task without evidence and keeps the reason as the revision trace", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root, { mode: "lite" });
+
     const revised = await setCriterionWorkflow(root, { id: "a", text: "Đổi chữ" }, { reason: REASON });
 
-    expect(revised).toMatchObject({ checkpoint: "replan" });
+    expect(revised).toMatchObject({ status: "in_progress", checkpoint: "implementing" });
     expect(revised.acceptanceCriteria[0]?.text).toBe("Đổi chữ");
+    expect(JSON.stringify(revised)).toContain(REASON);
   });
 
   it("rejects an unknown criterion and an empty text", async () => {

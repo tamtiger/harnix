@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.21.1] - 2026-10-25
+
+### Fixed
+
+- Sửa ma sát workflow: --init không đòi --command khi có --with-check, thêm --remove-risk, git sạch bỏ qua khác biệt EOL, doctor --fix tạo prd.md/plan.md thiếu của task Full, --set-criterion tự quay lại implementing cho task Lite chưa có evidence
+
 ## [2.21.0] - 2026-10-25
 
 ### Added

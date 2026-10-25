@@ -164,6 +164,8 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
         "Record one residual risk (--text, optional --severity and --mitigation, which is kept inside the risk text) on the active v3 task; review data, so no --reason.",
       "--remove-decision":
         "Remove one decision while the task is in planning (--remove-decision <id> [--task <task-id>]); refused afterwards.",
+      "--remove-risk":
+        "Remove one residual risk (--remove-risk <id> [--task <task-id>]) from an unfinished task; review data, so no --reason.",
       "--remove-criterion":
         "Remove one acceptance criterion while the task is in planning and take it out of every check that covered it (--remove-criterion <id> [--task <task-id>]); refused afterwards, when a check of it recorded evidence, or when a required check would cover no criterion.",
       "--set-paths":

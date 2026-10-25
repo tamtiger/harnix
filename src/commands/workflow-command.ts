@@ -101,6 +101,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
       "--remove-criterion <id>",
       "Remove one acceptance criterion (and its check coverage) while the task is in planning",
     )
+    .option("--remove-risk <id>", "Remove one residual risk from an unfinished task")
     .option("--set-paths", "Replace the relevant paths and/or specs of the active task")
     .option("--set-title <title>", "Update the title of the active task")
     .option("--set-goal <goal>", "Update the goal of the active task")

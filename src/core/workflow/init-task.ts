@@ -123,11 +123,17 @@ function declaredCheck(spec: InitCheckSpec): ValidationCheckV3 {
 async function resolveCheckTarget(
   root: string,
   options: InitTaskOptions,
-): Promise<{ cwd: string | undefined; projectTest: string | undefined; command: string; inputs: string[] }> {
+): Promise<{
+  cwd: string | undefined;
+  projectTest: string | undefined;
+  command: string | undefined;
+  inputs: string[];
+}> {
   const cwd = packageDirectory(options.cwd);
   const projectTest = await projectTestCommand(root, cwd);
   const command = options.command?.trim() || projectTest;
-  if (!command)
+  // Declared --with-check specs already say what to run, so no default check is needed without a test command.
+  if (!command && (options.checks ?? []).length === 0)
     throw new Error(
       cwd === undefined
         ? "workflow --init found no project test command; pass --command <cmd> explicitly."
@@ -171,7 +177,7 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
     ...(followUpOf !== undefined ? { followUpOf } : {}),
     acceptanceCriteria: criteria,
     validationPlan: [
-      defaultCheck(title, command, projectTest, criteria, inputs, cwd),
+      ...(command === undefined ? [] : [defaultCheck(title, command, projectTest, criteria, inputs, cwd)]),
       ...(options.checks ?? []).map(declaredCheck),
     ],
     evidence: [],

@@ -34,6 +34,7 @@ const EDIT_ACTIONS = [
   "setCriterion",
   "removeDecision",
   "removeCriterion",
+  "removeRisk",
   "setTitle",
   "setGoal",
   "batch",
@@ -42,7 +43,7 @@ const taskOwner: FlagOwner = {
   name: "--task",
   isSet: (f) => f.task !== undefined,
   actions: [...EDIT_ACTIONS, "transition"],
-  hint: "workflow --inspect, --transition with --dry-run, --set-check, --add-criterion, --set-criterion, --set-paths, --set-title, --set-goal, --add-decision, --add-risk, --remove-decision, --remove-criterion or --batch (state changes, evidence and finish act only on the active task)",
+  hint: "workflow --inspect, --transition with --dry-run, --set-check, --add-criterion, --set-criterion, --set-paths, --set-title, --set-goal, --add-decision, --add-risk, --remove-decision, --remove-criterion, --remove-risk or --batch (state changes, evidence and finish act only on the active task)",
 };
 
 /** Flags that only make sense with specific actions; anything else is rejected before any state is read. */

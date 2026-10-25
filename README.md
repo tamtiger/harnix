@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.21.0`
+**Version:** `2.21.1`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -199,7 +199,7 @@ Một vài quy ước chung đáng nhớ:
 
 - Nếu public command lỗi trước khi có kết quả riêng, bạn sẽ nhận `PublicCliErrorV1` trên stdout với `exitCode` là `1` (warning) hoặc `2` (lỗi sử dụng/schema).
 - `harnix doctor` có finding mức `info` `config-packages-drift` khi `.harnix/config.yaml` thiếu thư mục package mà phát hiện hiện tại thấy (chỉ nhắc, không đổi mã thoát và không ghi config).
-- `harnix doctor --fix` chỉ sửa issue được xác định là an toàn; nó không tự trust hook hay bật permission thay bạn.
+- `harnix doctor --fix` chỉ sửa issue được xác định là an toàn (kể cả tạo `prd.md`/`plan.md` còn thiếu của task Full chưa kết thúc từ mẫu chuẩn, không ghi đè file có sẵn); nó không tự trust hook hay bật permission thay bạn.
 - `harnix workflow` (với các cờ `--preflight|--inspect|--save|...`) là transport nội bộ dành cho skill của agent, **không phải** lệnh bạn cần gõ tay.
 
 ## Xem lại một task

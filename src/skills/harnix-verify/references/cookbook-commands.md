@@ -29,6 +29,7 @@ harnix workflow --batch [--file <path>] --brief              # atomic batch of c
 harnix workflow --add-decision <id> --text "<self-contained lesson>" --rationale "<why>" --brief
 harnix workflow --add-risk <id> --text "<reusable risk or trap>" --severity medium [--mitigation "<text>"] --brief
 harnix workflow --remove-decision <id> --brief   # planning only; --remove-criterion <id> likewise (refused after planning or once a check recorded evidence)
+harnix workflow --remove-risk <id> --brief   # drops a settled residual risk from any unfinished task
 harnix resume --next                         # select and activate the next unfinished task in the active epic
 harnix resume <id> --force                   # switch task, pausing any currently active task automatically
 harnix skill <name> --raw                    # print raw Markdown skill text directly without JSON envelope

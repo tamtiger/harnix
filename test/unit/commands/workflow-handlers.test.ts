@@ -37,6 +37,7 @@ describe("workflow handlers", () => {
         "preflight",
         "removeCriterion",
         "removeDecision",
+        "removeRisk",
         "replaceCheck",
         "resetBreaker",
         "runCheck",

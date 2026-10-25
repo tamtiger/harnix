@@ -122,10 +122,13 @@ export async function finishingTask(root: string, evidenceAt: string): Promise<T
 }
 
 /** Initialized UTC project whose one v3 task is persisted at `in_progress/implementing` (check `check` covers criterion `a`). */
-export async function implementingTaskV3(root: string): Promise<TaskRecordV3> {
+export async function implementingTaskV3(
+  root: string,
+  options: { mode?: "lite" | "full" } = {},
+): Promise<TaskRecordV3> {
   await initializeUtcProject(root);
   await writeProjectSource(root);
-  const planning = taskV3("planning", "planning");
+  const planning = { ...taskV3("planning", "planning"), ...(options.mode === undefined ? {} : { mode: options.mode }) };
   await saveWorkflow(root, { task: planning });
   const ready = {
     ...planning,

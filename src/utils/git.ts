@@ -37,6 +37,22 @@ const readOnly = (cwd: string, args: readonly string[], timeout: number) =>
   });
 
 /**
+ * A tree whose only changes are tracked files that differ in line endings (CRLF/LF checkout settings) is clean in
+ * substance: `git diff --ignore-space-at-eol` finds nothing to commit. Untracked or staged-new files still count.
+ */
+async function isClean(cwd: string, porcelain: string): Promise<boolean> {
+  const lines = porcelain.split(/\r?\n/u).filter((line) => line.length > 0);
+  if (lines.length === 0) return true;
+  if (lines.some((line) => !/^( M|M |MM)/u.test(line))) return false;
+  try {
+    await readOnly(cwd, ["diff", "--ignore-space-at-eol", "--quiet", "HEAD"], 2000);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Safely reads read-only Git context (current branch, clean status, short commit hash).
  * Returns undefined if cwd is not a Git repository or Git is unavailable.
  */
@@ -58,7 +74,7 @@ export async function readGitContext(cwd: string): Promise<GitContext | undefine
       branch = `HEAD (${commit})`;
     }
 
-    const clean = (statusResult?.stdout.trim().length ?? 0) === 0;
+    const clean = await isClean(cwd, statusResult?.stdout ?? "");
 
     return { branch, clean, commit };
   } catch {

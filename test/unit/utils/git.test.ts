@@ -32,6 +32,24 @@ describe("utils/git", () => {
     expect(dirtyContext?.clean).toBe(false);
   });
 
+  it("treats a tree that differs only in line endings as clean but a real edit as dirty", async () => {
+    const root = await temporaryRepository();
+    await execFileAsync("git", ["init", "-b", "main"], { cwd: root });
+    await execFileAsync("git", ["config", "user.name", "Tester"], { cwd: root });
+    await execFileAsync("git", ["config", "user.email", "test@example.com"], { cwd: root });
+    await execFileAsync("git", ["config", "core.autocrlf", "false"], { cwd: root });
+    await writeFile(join(root, "file.txt"), "one\ntwo\n");
+    await execFileAsync("git", ["add", "-A"], { cwd: root });
+    await execFileAsync("git", ["commit", "-m", "initial"], { cwd: root });
+
+    await writeFile(join(root, "file.txt"), "one\r\ntwo\r\n");
+    expect((await execFileAsync("git", ["status", "--porcelain"], { cwd: root })).stdout).toContain("file.txt");
+    expect((await readGitContext(root))?.clean).toBe(true);
+
+    await writeFile(join(root, "file.txt"), "one\r\nthree\r\n");
+    expect((await readGitContext(root))?.clean).toBe(false);
+  });
+
   it("returns detached HEAD branch formatting", async () => {
     const root = await temporaryRepository();
     await execFileAsync("git", ["init", "-b", "main"], { cwd: root });

@@ -263,6 +263,23 @@ describe("initTaskWorkflow", () => {
     await expect(initTaskWorkflow(root, { title: "No tests" })).rejects.toThrow(/--command/u);
   });
 
+  it("needs no --command when a declared check says what to run and no test command is detected", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const declared = {
+      id: "check-focus",
+      command: "node --test a.test.js",
+      criterionIds: ["ac-1"],
+      inputs: ["src/**"],
+      scope: "focused" as const,
+      description: "Kiểm tra A",
+    };
+
+    const task = await initTaskWorkflow(root, { title: "Declared only", checks: [declared] });
+
+    expect(task.validationPlan.map((check) => check.id)).toEqual(["check-focus"]);
+  });
+
   it("rejects a mode that is neither lite nor full", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);

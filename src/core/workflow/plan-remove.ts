@@ -59,3 +59,18 @@ export async function removeCriterionWorkflow(root: string, id: string, injected
     },
   })) as TaskRecordV3;
 }
+
+/** Drops one residual risk (a review note) from any unfinished task, for example one the user already settled. */
+export async function removeRiskWorkflow(root: string, id: string, injectedNow?: string): Promise<TaskRecordV3> {
+  const now = await currentInstant(root, injectedNow);
+  const task = await activeV3(root);
+  const risks = task.residualRisks ?? [];
+  if (!risks.some((risk) => risk.id === id)) throw new Error(`Residual risk ${id} does not exist.`);
+  return (await saveWorkflow(root, {
+    task: {
+      ...task,
+      residualRisks: risks.filter((risk) => risk.id !== id),
+      updatedAt: laterTimestamp(task.updatedAt, now),
+    },
+  })) as TaskRecordV3;
+}

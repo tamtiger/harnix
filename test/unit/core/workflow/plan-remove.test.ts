@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { resolveActiveTask } from "src/core/tasks/task.js";
-import { addDecisionWorkflow, setCheckWorkflow } from "src/core/workflow/plan-edit.js";
-import { removeCriterionWorkflow, removeDecisionWorkflow } from "src/core/workflow/plan-remove.js";
+import { addDecisionWorkflow, addRiskWorkflow, setCheckWorkflow } from "src/core/workflow/plan-edit.js";
+import { removeCriterionWorkflow, removeDecisionWorkflow, removeRiskWorkflow } from "src/core/workflow/plan-remove.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { snapshotWorkflow } from "src/core/workflow/snapshot.js";
 import { buildCheck, buildCriterion, buildEvidence } from "test/support/builders.js";
@@ -106,5 +106,20 @@ describe("removeCriterionWorkflow", () => {
 
     await expect(removeCriterionWorkflow(root, "b")).rejects.toThrow(/check second already recorded evidence/u);
     expect((await resolveActiveTask(`${root}/.harnix`))?.acceptanceCriteria).toHaveLength(2);
+  });
+});
+
+describe("removeRiskWorkflow", () => {
+  it("drops one residual risk even after planning and rejects an unknown one", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    await addRiskWorkflow(root, { id: "r-1", text: "mapping chưa chốt" });
+    await addRiskWorkflow(root, { id: "r-2", text: "rủi ro khác" });
+
+    const task = await removeRiskWorkflow(root, "r-1");
+
+    expect(task.residualRisks?.map((risk) => risk.id)).toEqual(["r-2"]);
+    expect(task).toMatchObject({ status: "in_progress", checkpoint: "implementing" });
+    await expect(removeRiskWorkflow(root, "r-9")).rejects.toThrow(/r-9/u);
   });
 });

@@ -116,6 +116,7 @@ describe("CLI command contract", () => {
       "--add-risk",
       "--remove-decision",
       "--remove-criterion",
+      "--remove-risk",
       "--set-paths",
       "--set-title",
       "--set-goal",

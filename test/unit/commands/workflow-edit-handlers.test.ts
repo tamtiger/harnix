@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { EDIT_HANDLERS } from "src/commands/workflow-edit-handlers.js";
 import type { WorkflowContext } from "src/commands/workflow-handlers.js";
-import { addDecisionWorkflow } from "src/core/workflow/plan-edit.js";
+import { addDecisionWorkflow, addRiskWorkflow } from "src/core/workflow/plan-edit.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { buildCheck, buildCriterion } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -18,8 +18,8 @@ const context = (root: string, flags: WorkflowContext["flags"]): WorkflowContext
 });
 
 describe("workflow edit handlers", () => {
-  it("exposes the two removal actions", () => {
-    expect(Object.keys(EDIT_HANDLERS).sort()).toEqual(["removeCriterion", "removeDecision"]);
+  it("exposes the removal actions", () => {
+    expect(Object.keys(EDIT_HANDLERS).sort()).toEqual(["removeCriterion", "removeDecision", "removeRisk"]);
   });
 
   it("removeDecision drops the decision and --brief reports only the state", async () => {
@@ -63,5 +63,18 @@ describe("workflow edit handlers", () => {
     };
     expect(persisted.acceptanceCriteria.map((criterion) => criterion.id)).toEqual(["a"]);
     expect(persisted.validationPlan[0]?.criterionIds).toEqual(["a"]);
+  });
+
+  it("removeRisk drops the residual risk and reports the brief state", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const task = taskV3("planning", "planning");
+    await saveWorkflow(root, { task });
+    await addRiskWorkflow(root, { id: "r-1", text: "mapping chưa chốt" });
+
+    const result = await EDIT_HANDLERS.removeRisk!(context(root, { removeRisk: "r-1", brief: true }));
+
+    expect(Object.keys(result as object).sort()).toEqual(["checkpoint", "id", "status", "updatedAt"]);
+    expect(((await loadPersistedTask(root, task.id)) as { residualRisks?: unknown[] }).residualRisks ?? []).toEqual([]);
   });
 });

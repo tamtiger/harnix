@@ -1,4 +1,5 @@
 import { sortFindings, finding } from "src/core/doctor/findings.js";
+import { restoreFullArtifacts } from "src/core/doctor/restore-artifacts.js";
 import { diagnoseGlobal, type DiagnoseGlobalDeps } from "src/core/doctor/global.js";
 import type {
   DiagnoseGlobalIntegrationsOptions,
@@ -85,6 +86,11 @@ export async function runDoctor(options: DoctorRunOptions, deps: DoctorDeps): Pr
 
 async function fixProjectState(root: string, deps: DoctorDeps): Promise<number> {
   let fixed = 0;
+  try {
+    fixed += await restoreFullArtifacts(root);
+  } catch {
+    // No tasks directory or an unsafe path: the diagnosis reports it, nothing is written.
+  }
   try {
     fixed += await deps.fixProject(root);
   } catch {

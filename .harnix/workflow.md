@@ -65,7 +65,8 @@ harnix workflow --set-baseline <check-id> --result fail --classification pre-exi
 harnix workflow --transition verifying/finishing [--finish] --brief
 harnix workflow --set-check <id> --description "<t>" --scope focused --command "<cmd>" [--cwd <p>] --criteria <ids> --input "src/**" --reason "<why>" --brief
 harnix workflow --add-criterion <id> --text "<t>" --check <check-id> --reason "<why>" --brief
-harnix workflow --set-criterion <id> --text "<t>" [--reason "<why>"] --brief   # mapped criteria stay immutable
+harnix workflow --set-criterion <id> --text "<t>" [--reason "<why>"] --brief   # mapped criteria stay immutable; a Lite task implementing without evidence resumes by itself
+harnix workflow --remove-risk <id> --brief   # drop a settled residual risk
 harnix workflow --set-title | --set-goal "<t>" | --set-paths --relevant-path <p> --brief
 harnix workflow --save | --batch --file <path> --brief   # UTF-8 payload; --batch is atomic and order-independent
 harnix workflow --add-decision <id> --text "<lesson>" --rationale "<why>" --brief

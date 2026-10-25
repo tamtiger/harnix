@@ -1,0 +1,224 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-165015-workflow-friction-fixes",
+  "title": "Sửa 5 điểm ma sát workflow: init với --with-check, --remove-risk, git dirty do CRLF, doctor --fix artifact Full, set-criterion khi implementing",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Gỡ các ma sát thực tế khi dùng harnix: --init không đòi --command khi đã có --with-check, thêm --remove-risk, git clean bỏ qua khác biệt EOL, doctor --fix tạo prd.md/plan.md thiếu của task Full, và --set-criterion sửa chữ tiêu chí ở implementing có ghi vết.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix workflow --init không đòi --command khi đã truyền --with-check và dự án không có lệnh test mặc định",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2",
+        "ev-check-focus-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "harnix workflow --remove-risk <id> gỡ một residual risk của task chưa kết thúc",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2",
+        "ev-check-focus-2",
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "readGitContext coi cây làm việc là sạch khi mọi khác biệt chỉ là cuối dòng CRLF/LF",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2",
+        "ev-check-focus-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "doctor --fix tạo prd.md và plan.md còn thiếu của task Full chưa kết thúc từ mẫu chuẩn và không ghi đè file có sẵn",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2",
+        "ev-check-focus-2",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "--set-criterion đổi chữ tiêu chí ở in_progress/implementing của task Lite chưa có evidence mà không cần replan thủ công, bắt buộc --reason và lý do được giữ làm vết sửa hợp đồng",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2",
+        "ev-check-focus-2",
+        "ev-check-gates-2",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Kiểm chứng: Sửa 5 điểm ma sát workflow: init với --with-check, --remove-risk, git dirty do CRLF, doctor --fix artifact Full, set-criterion khi implementing",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm test:gates",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-focus",
+      "description": "Test tập trung cho 5 điểm sửa",
+      "command": "pnpm exec vitest run test/unit/core/workflow/set-criterion.test.ts test/unit/core/workflow/init-task.test.ts test/unit/core/workflow/plan-remove.test.ts test/unit/utils/git.test.ts test/unit/core/doctor/restore-artifacts.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-gates",
+      "description": "Contract gates",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-5"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-25T16:57:17.066+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4fdb15e8e3e26d91b4447b32943778776c7d245cd6b76dc3975ecbbab4c7920a"
+    },
+    {
+      "id": "ev-check-focus-1",
+      "checkId": "check-focus",
+      "recordedAt": "2026-10-25T16:57:26.228+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/set-criterion.test.ts test/unit/core/workflow/init-task.test.ts test/unit/core/workflow/plan-remove.test.ts test/unit/utils/git.test.ts test/unit/core/d... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a545aa3a61e860c33c3cf907442c3f7bb8bd6eacf80e481119962d8b914233ef"
+    },
+    {
+      "id": "ev-check-gates-1",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-25T16:57:32.774+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4420b85cef4aa9f22f67582f0c739656fc1b9a3ced1508cc6947db0c22114ba4"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T16:59:46.481+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "c188b5c1f5b43b13c840e5bccae38010ab3cac1a71ebbcc6215a784a23ce90b3"
+    },
+    {
+      "id": "ev-check-1-2",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-25T17:02:26.364+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "623f65714ddd2a33a8419471ec99b8921724d64512a4a675c1bfd9e6eb18c4d6"
+    },
+    {
+      "id": "ev-check-focus-2",
+      "checkId": "check-focus",
+      "recordedAt": "2026-10-25T17:02:35.631+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/set-criterion.test.ts test/unit/core/workflow/init-task.test.ts test/unit/core/workflow/plan-remove.test.ts test/unit/utils/git.test.ts test/unit/core/d... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "833ffb3df80a4f145383210c81df1335e5943bcecf7e20355db22105f5d23e88"
+    },
+    {
+      "id": "ev-check-gates-2",
+      "checkId": "check-gates",
+      "recordedAt": "2026-10-25T17:02:42.240+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c1a9cd3e2195319905e11040dfb65d0188a76ae122ccbb8a051b0439f9d13dda"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T17:04:52.961+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "93a6eaad1e2849f9fef748b65aa90209e44d2af3766ed59b82369bbdbc11c00d"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-25T16:50:15.338+07:00",
+  "updatedAt": "2026-10-25T17:05:10.688+07:00",
+  "completedAt": "2026-10-25T17:05:10.688+07:00"
+}

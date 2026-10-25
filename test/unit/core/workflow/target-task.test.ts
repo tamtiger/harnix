@@ -140,6 +140,7 @@ describe("--task flag ownership", () => {
       "setCriterion",
       "removeDecision",
       "removeCriterion",
+      "removeRisk",
     ])
       expect(() => assertFlagGroups(action, { task: OTHER, ...extras[action] })).not.toThrow();
     for (const action of ["transition", "finish", "cancel", "runCheck", "evidence"])
