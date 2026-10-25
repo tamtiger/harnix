@@ -27,6 +27,14 @@ describe("text integrity guard", () => {
     });
   });
 
+  it("flags question marks glued to letters in ASCII text, the trace of a fully lossy conversion", () => {
+    expect(findCorruptedText("S?a l?i ???ng d?n")).toMatchObject({ reason: "lossy-question-marks" });
+  });
+
+  it("accepts a standalone run of three question marks in plain ASCII text", () => {
+    expect(findCorruptedText("Mark the unknown value as ??? until the owner answers")).toBeUndefined();
+  });
+
   it("accepts genuine Vietnamese, accented Latin, emoji, punctuation and plain ASCII", () => {
     for (const text of [
       VIETNAMESE,

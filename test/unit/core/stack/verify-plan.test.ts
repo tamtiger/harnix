@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir, writeFile } from "node:fs/promises";
+import { access, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
@@ -340,6 +340,23 @@ describe("buildVerifyPlan --changed against git", () => {
       },
     );
   }
+
+  it("never runs a program the repository configures as core.fsmonitor", async () => {
+    const root = await createFixture();
+    await committedMonorepo(root);
+    const marker = join(root, "fsmonitor-ran");
+    await writeFixture(
+      root,
+      "fsm.js",
+      `require("fs").writeFileSync(${JSON.stringify(marker)}, "x");
+`,
+    );
+    await execFileAsync("git", ["config", "core.fsmonitor", `node "${join(root, "fsm.js")}"`], { cwd: root });
+
+    await buildVerifyPlan(root, { changed: true });
+
+    await expect(access(marker)).rejects.toThrow();
+  });
 
   it("returns no package for a clean working tree", async () => {
     const root = await createFixture();

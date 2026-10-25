@@ -1,4 +1,5 @@
 import { resolveActiveTask, type EvidenceV3, type TaskRecord } from "src/core/tasks/task.js";
+import { unknownIdError } from "src/utils/suggest.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
@@ -81,7 +82,13 @@ export async function appendEvidenceFlagsWorkflow(
   const task = await resolveActiveTask(await resolveSafeHarnixPath(root));
   if (!task) throw new Error("Workflow evidence capture requires an active task.");
   const check = task.validationPlan.find((candidate) => candidate.id === flags.check);
-  if (check === undefined) throw new Error(`Workflow evidence check ${flags.check} is not declared.`);
+  if (check === undefined)
+    throw unknownIdError(
+      `Workflow evidence check ${flags.check} is not declared.`,
+      "check",
+      flags.check ?? "",
+      task.validationPlan.map((check) => check.id),
+    );
   const exitCode = parseExitCode(flags.exitCode, result !== "skipped" || check.command !== undefined);
   const inputDigest = await evidenceDigest(root, task, flags.check, result, flags.digest);
   const evidence: EvidenceV3 = {

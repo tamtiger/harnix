@@ -1,12 +1,17 @@
 import type { WorkflowFlags } from "src/commands/workflow-flags.js";
+import { listFlags } from "src/core/workflow/actions.js";
 
 /** Which workflow action each flag belongs to: a flag used with another action is rejected before any state is read. */
 export interface FlagOwner {
   name: string;
   isSet: (flags: WorkflowFlags) => boolean;
   actions: readonly string[];
-  hint: string;
+  /** Only for a flag that needs more than the list of its actions; otherwise the hint is generated from them. */
+  hint?: string;
 }
+
+/** What a misplaced flag is told: `workflow --a, --b or --c`, from the actions that own it. */
+export const ownerHint = (owner: FlagOwner): string => owner.hint ?? `workflow ${listFlags(owner.actions)}`;
 
 export const listed = (value: readonly string[] | undefined): boolean => (value?.length ?? 0) > 0;
 
@@ -14,14 +19,12 @@ const baselineOwner = (name: string, pick: (flags: WorkflowFlags) => string | un
   name,
   isSet: (f) => pick(f) !== undefined,
   actions: ["setBaseline"],
-  hint: "workflow --set-baseline",
 });
 
 const initOwner = (name: string, pick: (flags: WorkflowFlags) => string | undefined): FlagOwner => ({
   name,
   isSet: (f) => pick(f) !== undefined,
   actions: ["init"],
-  hint: "workflow --init",
 });
 
 const EDIT_ACTIONS = [
@@ -52,102 +55,89 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
     name: "--expected-task",
     isSet: (f) => f.expectedTask !== undefined,
     actions: ["preflight"],
-    hint: "workflow --preflight",
   },
   {
     name: "--file",
     isSet: (f) => f.file !== undefined,
     actions: ["save", "batch", "migrate", "evidence", "cancel", "learn", "init", "setPaths"],
-    hint: "workflow --save, --batch, --migrate, --evidence, --cancel, --learn, --init or --set-paths",
   },
   {
     name: "--result",
     isSet: (f) => f.result !== undefined,
     actions: ["evidence", "setBaseline"],
-    hint: "workflow --evidence or --set-baseline",
   },
   baselineOwner("--classification", (f) => f.classification),
   {
     name: "--authorized-by",
     isSet: (f) => f.authorizedBy !== undefined,
     actions: ["setBaseline", "cancel"],
-    hint: "workflow --set-baseline or --cancel",
   },
   {
     name: "--summary",
     isSet: (f) => f.summary !== undefined,
     actions: ["evidence", "runCheck"],
-    hint: "workflow --evidence or --run-check",
   },
-  { name: "--met", isSet: (f) => f.met === true, actions: ["criterion"], hint: "workflow --criterion" },
+  { name: "--exit-code", isSet: (f) => f.exitCode !== undefined, actions: ["evidence"] },
+  { name: "--artifact", isSet: (f) => listed(f.artifact), actions: ["evidence"] },
+  { name: "--digest", isSet: (f) => f.digest !== undefined, actions: ["evidence"] },
+  { name: "--met", isSet: (f) => f.met === true, actions: ["criterion"] },
   {
     name: "--evidence-ids",
     isSet: (f) => f.evidenceIds !== undefined,
     actions: ["criterion"],
-    hint: "workflow --criterion",
   },
   {
     name: "--description",
     isSet: (f) => f.description !== undefined,
     actions: ["setCheck", "replaceCheck"],
-    hint: "workflow --set-check or --replace-check",
   },
   {
     name: "--command",
     isSet: (f) => f.command !== undefined,
     actions: ["setCheck", "replaceCheck", "init"],
-    hint: "workflow --set-check, --replace-check or --init",
   },
   {
     name: "--scope",
     isSet: (f) => f.scope !== undefined,
     actions: ["setCheck", "replaceCheck", "setBaseline"],
-    hint: "workflow --set-check, --replace-check or --set-baseline",
   },
   {
     name: "--required/--no-required",
     isSet: (f) => f.required !== undefined,
     actions: ["setCheck"],
-    hint: "workflow --set-check",
   },
   {
     name: "--criteria",
     isSet: (f) => f.criteria !== undefined,
     actions: ["setCheck", "replaceCheck"],
-    hint: "workflow --set-check or --replace-check",
   },
   {
     name: "--input",
     isSet: (f) => listed(f.input),
     actions: ["setCheck", "replaceCheck", "init"],
-    hint: "workflow --set-check, --replace-check or --init",
   },
   {
     name: "--reason",
     isSet: (f) => f.reason !== undefined,
     actions: ["setCheck", "addCriterion", "setCriterion", "replaceCheck", "resetBreaker", "cancel", "transition"],
-    hint: "workflow --set-check, --add-criterion, --set-criterion, --replace-check, --reset-breaker, --cancel or --transition",
   },
   {
     name: "--note",
     isSet: (f) => f.note !== undefined,
     actions: ["transition"],
-    hint: "workflow --transition",
   },
   {
     name: "--text",
     isSet: (f) => f.text !== undefined,
     actions: ["addCriterion", "setCriterion", "addDecision", "addRisk", "init"],
-    hint: "workflow --add-criterion, --set-criterion, --add-decision, --add-risk or --init",
   },
   {
     name: "--rationale",
     isSet: (f) => f.rationale !== undefined,
     actions: ["addDecision"],
-    hint: "workflow --add-decision",
   },
-  { name: "--severity", isSet: (f) => f.severity !== undefined, actions: ["addRisk"], hint: "workflow --add-risk" },
-  { name: "--mitigation", isSet: (f) => f.mitigation !== undefined, actions: ["addRisk"], hint: "workflow --add-risk" },
+  { name: "--severity", isSet: (f) => f.severity !== undefined, actions: ["addRisk"] },
+  { name: "--mitigation", isSet: (f) => f.mitigation !== undefined, actions: ["addRisk"] },
   taskOwner,
   initOwner("--title", (f) => f.title),
   initOwner("--slug", (f) => f.slug),
@@ -157,32 +147,27 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
     name: "--relevant-path",
     isSet: (f) => listed(f.relevantPath),
     actions: ["setPaths"],
-    hint: "workflow --set-paths",
   },
   {
     name: "--relevant-spec",
     isSet: (f) => listed(f.relevantSpec),
     actions: ["setPaths"],
-    hint: "workflow --set-paths",
   },
   {
     name: "--dry-run",
     isSet: (f) => f.dryRun === true,
     actions: ["transition"],
-    hint: "workflow --transition",
   },
   {
     name: "--cwd",
     isSet: (f) => f.cwd !== undefined,
     actions: ["setCheck", "replaceCheck", "runCheck", "init"],
-    hint: "workflow --set-check, --replace-check, --run-check or --init",
   },
   initOwner("--epic", (f) => f.epic),
   {
     name: "--reviewed",
     isSet: (f) => f.reviewed === true,
     actions: ["transition"],
-    hint: "workflow --transition",
   },
   initOwner("--follow-up", (f) => f.followUp),
   initOwner("--with-check", (f) => (listed(f.withCheck) ? "set" : undefined)),

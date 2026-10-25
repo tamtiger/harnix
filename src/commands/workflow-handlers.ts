@@ -29,6 +29,7 @@ import {
   tickWorkflow,
   transitionWorkflow,
   workflowEnvelopeSchema,
+  briefWorkflowEnvelopeSchema,
 } from "src/commands/internal-workflow.js";
 import { parseJson, presentTask, readInput, readRequired, splitList } from "src/commands/workflow-handler-utils.js";
 import { EDIT_HANDLERS } from "src/commands/workflow-edit-handlers.js";
@@ -59,7 +60,8 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
     const result = await preflightWorkflow(root, undefined, packageVersion, flags.expectedTask);
     return flags.brief === true ? briefPreflight(result) : result;
   },
-  schema: () => Promise.resolve(workflowEnvelopeSchema()),
+  schema: ({ flags }) =>
+    Promise.resolve(flags.full === true ? workflowEnvelopeSchema() : briefWorkflowEnvelopeSchema()),
   snapshot: ({ root, flags }) => snapshotWorkflow(root, flags.check as string),
   save: async (context) => {
     const envelope = await readRequired(context, "Workflow save", "Workflow save requires valid JSON.");
@@ -68,7 +70,9 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
   transition: async (context) => {
     const [status, checkpoint, ...rest] = (context.flags.transition as string).split("/");
     if (!status || !checkpoint || rest.length > 0)
-      throw new Error("workflow --transition requires <status>/<checkpoint>.");
+      throw new Error(
+        "workflow --transition requires <status>/<checkpoint>.\nGợi ý: ví dụ ready/ready, in_progress/implementing, verifying/verifying hoặc verifying/finishing; thêm --dry-run để kiểm tra trước.",
+      );
     const result = await transitionWorkflow(
       context.root,
       status,

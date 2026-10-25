@@ -219,6 +219,16 @@ describe("workflow completion", () => {
     const now = Date.parse("2026-08-07T09:32:00Z");
     const futurePass = { ...pass, recordedAt: "2026-08-08T09:30:30Z" };
     expect(verificationRetryDisposition({ ...base, evidence: [first, futurePass, second] }, "check", now)).toBe("stop");
+    const forged = {
+      ...first,
+      id: "s2",
+      recordedAt: "2026-08-07T09:31:30Z",
+      result: "skipped" as const,
+      summary: "Circuit breaker reset: x",
+    };
+    expect(verificationRetryDisposition({ ...base, evidence: [first, second, forged] }, "check")).toBe("stop");
+    const reset = { ...forged, id: "ev-reset-check-1" };
+    expect(verificationRetryDisposition({ ...base, evidence: [first, second, reset] }, "check")).toBe("run");
   });
 
   it("does not treat empty completion obligations as complete", () => {

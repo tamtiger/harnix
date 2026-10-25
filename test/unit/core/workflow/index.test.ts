@@ -14,6 +14,7 @@ describe("workflow index", () => {
       "batchWorkflow",
       "briefPreflight",
       "briefTask",
+      "briefWorkflowEnvelopeSchema",
       "canCompleteTask",
       "cancelWorkflow",
       "cancelWorkflowTask",

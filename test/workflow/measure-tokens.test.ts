@@ -17,6 +17,7 @@ interface Meter {
 }
 interface MeasureTokens {
   TOKEN_APPROXIMATION: number;
+  sessionLiteTokens(report: unknown): number;
   estimateTokens(text: string): number;
   createMeter(run: Runner): Meter;
   pairSteps(brief: Step[], full: Step[]): { label: string; brief: Omit<Step, "label">; full: Omit<Step, "label"> }[];
@@ -139,5 +140,18 @@ describe("measureGuides", () => {
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
+  });
+
+  it("sums the cost of one typical Lite session into sessionLite", () => {
+    expect(
+      script.sessionLiteTokens({
+        alwaysLoaded: 1,
+        workflowDoc: 2,
+        reads: { schema: 4 },
+        skills: { "harnix-plan": 8, "harnix-implement": 16, "harnix-debug": 1000 },
+        preflight: { planning: 32, noTask: 1000 },
+        hookContext: { planning: 64, inProgress: 1000 },
+      }),
+    ).toBe(127);
   });
 });

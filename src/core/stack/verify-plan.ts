@@ -6,6 +6,7 @@ import { findAffectedTests } from "src/core/repo-map/tests.js";
 import { refreshRepoMap } from "src/core/repo-map/service.js";
 import { normalizeRepositoryPath, resolveSafeHarnixPath } from "src/utils/paths.js";
 import { resolveActiveTask } from "src/core/tasks/task.js";
+import { runGit } from "src/utils/git.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { detectEcosystemVerify, type EcosystemVerifyResult } from "./verify-detection.js";
 import { detectWorkspaces, type WorkspacePackage } from "./workspace-detection.js";
@@ -245,12 +246,9 @@ function formatTestCommand(
  */
 async function changedFiles(projectRoot: string): Promise<string[] | undefined> {
   try {
-    const { execFile } = await import("node:child_process");
-    const { promisify } = await import("node:util");
-    const execFileAsync = promisify(execFile);
-    const options = { cwd: projectRoot, windowsHide: true };
-    const prefix = (await execFileAsync("git", ["rev-parse", "--show-prefix"], options)).stdout.trim();
-    const { stdout } = await execFileAsync("git", ["status", "--porcelain", "-z"], options);
+    // runGit turns off repository-configured programs (core.fsmonitor) and bounds time and output.
+    const prefix = (await runGit(projectRoot, ["rev-parse", "--show-prefix"])).trim();
+    const stdout = await runGit(projectRoot, ["status", "--porcelain", "-z"], 10_000);
     const entries = stdout.split("\0").filter((entry) => entry !== "");
     const files: string[] = [];
     for (let index = 0; index < entries.length; index += 1) {

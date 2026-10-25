@@ -14,4 +14,21 @@ describe("safe glob matcher", () => {
   ])("matches %s against %s without expanding unsupported syntax", (glob, path, expected) => {
     expect(matchesSafeGlob(path, glob)).toBe(expected);
   });
+
+  it.each([
+    ["**/*.ts", "src/a/b.ts", true],
+    ["src/**", "src/a/b", true],
+    ["src/**/x", "src/x", true],
+    ["a/**/b", "a/c/d/b", true],
+    ["a/**/b", "a/cb", false],
+  ])("keeps globstar semantics for %s against %s", (glob, path, expected) => {
+    expect(matchesSafeGlob(path, glob)).toBe(expected);
+  });
+
+  it("matches a many-star glob from repository content in linear time", () => {
+    const started = performance.now();
+
+    expect(matchesSafeGlob("a".repeat(60) + ".ts", "*a*a*a*a*a*a*a*a*a*a*a*a*b")).toBe(false);
+    expect(performance.now() - started).toBeLessThan(100);
+  });
 });

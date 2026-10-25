@@ -23,6 +23,9 @@ export default defineConfig({
   ],
   test: {
     pool: "forks",
+    // Files share each worker's module graph instead of importing it again per file (about a third of the wall time).
+    // Tests restore process.cwd, process.exitCode and their mocks in afterEach, so sharing modules stays safe.
+    isolate: false,
     include: ["test/**/*.test.ts"],
     environment: "node",
     globals: false,

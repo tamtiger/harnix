@@ -1,0 +1,189 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-174422-token-diet",
+  "title": "Tối ưu token: schema gọn mặc định, bỏ lặp cookbook, giảm skill sát trần, preflight bỏ khóa rỗng",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261025-174418-hardening-and-token-diet",
+  "goal": "Giảm token của một phiên Lite điển hình (baseline khoảng 10,8k) bằng cách bỏ khối transports khỏi --schema mặc định, gộp cookbook lặp giữa workflow.md và reference, chuyển phần ít dùng của skill sát trần sang reference và bỏ khóa rỗng ở preflight, kèm test bảo vệ nội dung bắt buộc. Là member dev.3; task improve-test-speed là member cuối theo ID và đóng epic.",
+  "nonGoals": [
+    "Không làm yếu gate hay bỏ nội dung bắt buộc của skill",
+    "Không đổi contract field đóng băng"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "workflow --schema mặc định không in khối transports; có cờ để in đầy đủ; tiết kiệm tối thiểu 1.200 token",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1",
+        "ev-chk-schema-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cookbook không còn lặp giữa .harnix/workflow.md và reference cookbook-commands, tổng giảm tối thiểu 400 token",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1",
+        "ev-chk-tokens-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Mỗi SKILL.md không vượt 1.800 token và các mục bắt buộc vẫn có test bảo vệ",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-tokens-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "measure:tokens xuất thêm trường sessionLite (alwaysLoaded, workflowDoc, schema, skill harnix-plan và harnix-implement, preflight planning, hookContext planning) và trường này giảm tối thiểu 1.800 token so với số đo ghi lúc bắt đầu task",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-tokens-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/schema.ts",
+    "src/templates/harnix/workflow.md",
+    "src/skills/harnix-plan/SKILL.md",
+    "src/skills/harnix-verify/SKILL.md",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/core/workflow/preflight.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-tokens",
+      "description": "Test ngân sách token, nội dung bắt buộc và số đo phiên",
+      "command": "pnpm exec vitest run test/unit/skills test/workflow/lean-workflow.test.ts test/workflow/measure-tokens.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/unit/skills/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Các contract test (CLI, docs, golden)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-schema",
+      "description": "Test schema gọn mặc định và cờ in đầy đủ",
+      "command": "pnpm exec vitest run test/unit/core/workflow/schema.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/schema.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-tokens-1",
+      "checkId": "chk-tokens",
+      "recordedAt": "2026-10-25T19:50:34.963+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/skills test/workflow/lean-workflow.test.ts test/workflow/measure-tokens.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "08e22eae5be9be752ef7f9df94e720588cea87c63dcf90cc5f7c3199b4a2feb3"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-25T19:50:41.365+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "21c8d3017683f76b903eb66f0b828c384f7c5d9c56a643f129792f843e6a2f18"
+    },
+    {
+      "id": "ev-chk-schema-1",
+      "checkId": "chk-schema",
+      "recordedAt": "2026-10-25T19:50:45.547+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/schema.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4f467053e7832924e27d7163f9b1c3d46ba873a0889445e35a6641c1e2cf4860"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T19:52:38.777+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "064ea6be1cea239dca5228756d1ea2027bb1576a588b12c3a48afa7f5c678621"
+    }
+  ],
+  "createdAt": "2026-10-25T17:44:22.000+07:00",
+  "updatedAt": "2026-10-25T19:52:48.820+07:00",
+  "decisions": [
+    {
+      "id": "dec-late-transition",
+      "text": "Code của token-diet được viết khi task còn ở planning; trạng thái ready và in_progress được bổ sung ngay khi phát hiện, trước khi verify",
+      "rationale": "Ghi vết trung thực việc làm sai thứ tự quy trình để người dùng thấy trong review.md"
+    },
+    {
+      "id": "dec-token-measure",
+      "text": "Số đo measure:tokens sau thay đổi: sessionLite 11.088 xuống 9.240 (giảm 1.848), --schema 2.491 xuống 877 (giảm 1.614), cookbook giảm 620 token trên workflow.md và reference, harnix-plan SKILL.md 1.794 token",
+      "rationale": "Các check chỉ kiểm exit code, nên số đo tiết kiệm token được ghi làm vết để đối chiếu tiêu chí ac-1, ac-2, ac-4"
+    }
+  ],
+  "completedAt": "2026-10-25T19:52:48.820+07:00"
+}

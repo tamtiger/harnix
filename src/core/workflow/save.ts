@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+
 import { createContextSelectionSnapshot } from "src/core/context/selection-freshness.js";
 import { loadEpicRecord, renderEpicMarkdown, upsertEpic, validateEpic, type EpicRecord } from "src/core/epics/epic.js";
 import {
@@ -19,11 +21,13 @@ import {
   semanticJsonEqual,
   semanticTaskEqual,
 } from "src/core/tasks/workflow-helpers.js";
+import { assertTaskUnchangedSinceRead, noteTaskWritten } from "src/core/tasks/read-tracker.js";
 import { assertNewEvidenceDigests } from "src/core/verification/input-digest.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { contextSelectionInput } from "./context.js";
 import { validateWorkflowSaveEnvelope, type WorkflowSaveArtifacts, type WorkflowSaveEnvelope } from "./envelope.js";
 import { prepareEpicMembers, removeEpicMembers, writeEpicMembers } from "./epic-members.js";
+import { isBreakerReset } from "./completion.js";
 import { assertNewEvidenceNotFuture } from "./evidence-time.js";
 import { assertSchemaEvolution } from "./migration.js";
 import { isAppliedContractRevisionReplay, preserveObligations } from "./obligations.js";
@@ -47,14 +51,23 @@ interface SaveContext {
   existing: TaskRecord | undefined;
 }
 
-export async function saveWorkflow(root: string, input: unknown): Promise<TaskRecord> {
+export interface SaveWorkflowOptions {
+  /** Set only by `--reset-breaker`: the one transport allowed to append a breaker-reset entry. */
+  breakerReset?: boolean;
+}
+
+export async function saveWorkflow(
+  root: string,
+  input: unknown,
+  options: SaveWorkflowOptions = {},
+): Promise<TaskRecord> {
   const envelope = validateWorkflowSaveEnvelope(input);
   assertTextIntegrity(envelope);
   if (isRecord(envelope.task) && envelope.task.status === "cancelled")
     throw new Error("Workflow cancellation must use workflow --cancel.");
   const candidate = validateTask(envelope.task);
   const harnixRoot = await resolveSafeHarnixPath(root);
-  return withWorkflowLock(harnixRoot, () => saveWorkflowLocked(root, harnixRoot, envelope, candidate));
+  return withWorkflowLock(harnixRoot, () => saveWorkflowLocked(root, harnixRoot, envelope, candidate, options));
 }
 
 async function saveWorkflowLocked(
@@ -62,7 +75,9 @@ async function saveWorkflowLocked(
   harnixRoot: string,
   envelope: WorkflowSaveEnvelope,
   initialCandidate: TaskRecord,
+  options: SaveWorkflowOptions,
 ): Promise<TaskRecord> {
+  assertTaskUnchangedSinceRead(initialCandidate.id, await readRawTask(harnixRoot, initialCandidate.id));
   const existing = await loadExistingTask(harnixRoot, initialCandidate.id);
   // With --task the targeted task stands in for the active one, so the pointer is neither read nor written.
   const active =
@@ -77,6 +92,7 @@ async function saveWorkflowLocked(
     : validateNewTask(active, initialCandidate);
 
   assertNewEvidenceNotFuture(existing?.evidence ?? [], candidate.evidence);
+  assertNoForgedBreakerReset(existing?.evidence ?? [], candidate.evidence, options.breakerReset === true);
   assertNewEvidenceRetryAllowed(existing, candidate);
   if (candidate.status === "completed") throw new Error("Workflow completion must use workflow --finish.");
   if (candidate.status === "ready")
@@ -86,6 +102,8 @@ async function saveWorkflowLocked(
   const artifacts = await prepareWorkflowArtifacts(root, harnixRoot, candidate, envelope.artifacts);
   if (artifacts) validateTaskArtifacts(candidate, artifacts);
   await persistCandidate(context, candidate, artifacts, validatedEpic);
+  const written = await readRawTask(harnixRoot, candidate.id);
+  if (written !== undefined) noteTaskWritten(candidate.id, written);
   if (active === undefined) await setActiveTask(harnixRoot, candidate.id);
   return candidate;
 }
@@ -94,6 +112,11 @@ async function saveWorkflowLocked(
 async function replayCommittedSave(context: SaveContext, candidate: TaskRecord): Promise<TaskRecord | undefined> {
   const { root, harnixRoot, envelope, active, existing } = context;
   if (!existing) return undefined;
+  // A finished task is terminal: re-sending its record must never point .active back at it.
+  if (active === undefined && (existing.status === "completed" || existing.status === "cancelled"))
+    throw new Error(
+      `Task ${existing.id} is already ${existing.status}; a finished task is never re-activated. Start new work with harnix workflow --init.`,
+    );
   if (isAppliedContractRevisionReplay(existing, candidate, envelope.contractRevision)) {
     await assertReplayMatches(root, harnixRoot, candidate, envelope);
     if (active === undefined) await setActiveTask(harnixRoot, candidate.id);
@@ -207,6 +230,15 @@ async function prepareWorkflowArtifacts(
       };
 }
 
+async function readRawTask(harnixRoot: string, id: string): Promise<string | undefined> {
+  try {
+    return await readFile(await resolveSafeProjectPath(harnixRoot, `tasks/${id}/task.json`), "utf8");
+  } catch (error: unknown) {
+    if (isMissing(error)) return undefined;
+    throw error;
+  }
+}
+
 async function loadExistingTask(harnixRoot: string, id: string): Promise<TaskRecord | undefined> {
   try {
     return await loadTask(await resolveSafeProjectPath(harnixRoot, `tasks/${id}/task.json`));
@@ -214,6 +246,16 @@ async function loadExistingTask(harnixRoot: string, id: string): Promise<TaskRec
     if (isMissing(error)) return undefined;
     throw error;
   }
+}
+
+function assertNoForgedBreakerReset(previous: readonly Evidence[], next: readonly Evidence[], allowed: boolean): void {
+  if (allowed) return;
+  const known = new Set(previous.map((evidence) => evidence.id));
+  const forged = next.find((evidence) => !known.has(evidence.id) && isBreakerReset(evidence));
+  if (forged !== undefined)
+    throw new Error(
+      `Evidence ${forged.id} looks like a circuit-breaker reset; only harnix workflow --reset-breaker <check-id> --reason "<why>" may record one.`,
+    );
 }
 
 function preserveEvidence(previous: readonly Evidence[], next: readonly Evidence[]): void {

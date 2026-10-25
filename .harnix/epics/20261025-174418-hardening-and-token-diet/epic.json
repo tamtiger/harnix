@@ -1,0 +1,14 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261025-174418-hardening-and-token-diet",
+  "title": "Sửa lỗi P1/P2 từ đợt review toàn diện, refactor nguồn duy nhất, tối ưu token và tốc độ test",
+  "goal": "Xử lý các lỗi và lỗi tiềm ẩn do review toàn diện phát hiện (ưu tiên bảo mật và mất dữ liệu), gom các danh sách action/flag phải đồng bộ tay về một nguồn, giảm token mỗi phiên và giảm thời gian chạy toàn bộ test, mà không làm yếu gate, contract hay ngưỡng coverage.",
+  "nonGoals": [
+    "Không đổi field, enum, đường dẫn hay hook protocol đóng băng ngoài phạm vi từng task",
+    "Không thêm nền tảng, service, telemetry hay truy cập mạng thầm lặng",
+    "Không hạ ngưỡng coverage và không regenerate golden để refactor xanh"
+  ],
+  "createdAt": "2026-10-25T17:44:18.199+07:00",
+  "updatedAt": "2026-10-25T18:45:51.134+07:00"
+}

@@ -1,4 +1,5 @@
 import { legacySkillAliases, techniqueSkills } from "src/skills/catalog.js";
+import { unknownIdError } from "src/utils/suggest.js";
 import { renderSkill, workflowSkills, type SkillTemplate } from "src/templates/harnix/workflow.js";
 import { packageVersion } from "src/version.js";
 
@@ -104,7 +105,12 @@ function resolveSkill(name: string, projectSkills?: readonly SkillTemplate[]) {
     techniqueSkills.find((candidate) => candidate.name === target) ??
     projectSkills?.find((candidate) => candidate.name === target);
   if (skill === undefined) {
-    throw new Error(`Unknown Harnix skill. Run harnix skill to list the available stage owners.`);
+    throw unknownIdError(
+      `Unknown Harnix skill. Run harnix skill to list the available stage owners.`,
+      "skill",
+      name,
+      [...workflowSkills, ...techniqueSkills, ...(projectSkills ?? [])].map((candidate) => candidate.name),
+    );
   }
   return { skill, alias: alias === undefined ? undefined : { from: name, note: alias.note } };
 }

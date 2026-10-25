@@ -1,0 +1,357 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-174419-p1-correctness-and-security",
+  "title": "Sửa 8 lỗi P1: replay task đã hoàn tất, mất cập nhật song song, git/glob nguy hiểm, cờ và epic sai, bộ lọc learning",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261025-174418-hardening-and-token-diet",
+  "goal": "Sửa các lỗi P1 đã tái hiện: lưu lại task completed làm kẹt dự án, hai lệnh ghi song song mất dữ liệu, verify-plan chạy chương trình của .git/config, ReDoS trong .harnixignore, --set-paths --file bị từ chối, harnix epic ẩn epic mới nhất, và hai lỗ hổng bộ lọc learning-safety.",
+  "nonGoals": [
+    "Không đổi ý định circuit breaker (chờ người dùng chốt, xem plan.md)",
+    "Không refactor cấu trúc action/flag (thuộc task refactor)"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "--save lại bản ghi của task đã completed hoặc cancelled bị từ chối và không ghi lại con trỏ .active",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-replay-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Các lệnh ghi flag chạy song song (--add-decision, --add-risk, --set-paths...) không mất cập nhật im lặng: đủ N thay đổi hoặc bị từ chối rõ ràng",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-lock-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "verify-plan --changed gọi git qua đường đọc-chỉ an toàn có timeout và maxBuffer nên không chạy chương trình của core.fsmonitor",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-verifyplan-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Khớp glob của .harnixignore không còn backtrack theo cấp số mũ: pattern nhiều dấu * với tên 60 ký tự trả về dưới 100ms",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-glob-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "workflow --set-paths --file <payload> được chấp nhận đúng như FLAG_OWNERS và tài liệu mô tả",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2",
+        "ev-chk-setpaths-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "harnix epic liệt kê epic mới nhất trước và total là tổng số epic, không phải số phần tử đã cắt",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-epic-1",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-7",
+      "text": "learning-safety chặn URL có userinfo (user:pass@host) và tham số query dạng khóa bí mật, không cho vào journal, hook context hay learned.md",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-learning-1"
+      ]
+    },
+    {
+      "id": "ac-8",
+      "text": "learning-safety bắt được câu override có xuống dòng hoặc ký tự định dạng vô hình giữa các từ",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-learning-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/save.ts",
+    "src/core/workflow/plan-edit.ts",
+    "src/core/stack/verify-plan.ts",
+    "src/utils/safe-glob.ts",
+    "src/commands/workflow-flags.ts",
+    "src/commands/epic.ts",
+    "src/core/epics/epic.ts",
+    "src/core/journal/learning-safety.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-replay",
+      "description": "Test save lại task đã kết thúc",
+      "command": "pnpm exec vitest run test/unit/core/workflow/save.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/save.test.ts"
+      ]
+    },
+    {
+      "id": "chk-lock",
+      "description": "Test ghi song song không mất cập nhật",
+      "command": "pnpm exec vitest run test/unit/core/workflow/plan-edit.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/plan-edit.test.ts"
+      ]
+    },
+    {
+      "id": "chk-verifyplan",
+      "description": "Test verify-plan --changed dùng git an toàn",
+      "command": "pnpm exec vitest run test/unit/core/stack/verify-plan.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/stack/**",
+        "test/unit/core/stack/**"
+      ]
+    },
+    {
+      "id": "chk-glob",
+      "description": "Test glob không backtrack",
+      "command": "pnpm exec vitest run test/unit/utils/safe-glob.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/utils/**",
+        "test/unit/utils/**"
+      ]
+    },
+    {
+      "id": "chk-setpaths",
+      "description": "Test --set-paths --file",
+      "command": "pnpm exec vitest run test/unit/commands/workflow-handlers.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "test/unit/commands/**"
+      ]
+    },
+    {
+      "id": "chk-epic",
+      "description": "Test danh sách epic mới nhất trước và total đúng",
+      "command": "pnpm exec vitest run test/integration/commands/epic.test.ts test/unit/core/epics/epic.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-6"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/epics/**",
+        "test/integration/commands/**",
+        "test/unit/core/epics/**"
+      ]
+    },
+    {
+      "id": "chk-learning",
+      "description": "Test bộ lọc learning-safety",
+      "command": "pnpm exec vitest run test/unit/core/journal/learning-safety.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-7",
+        "ac-8"
+      ],
+      "inputs": [
+        "src/core/journal/**",
+        "test/unit/core/journal/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Các contract test (CLI, docs, golden)",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7",
+        "ac-8"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-replay-1",
+      "checkId": "chk-replay",
+      "recordedAt": "2026-10-25T19:04:22.944+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/save.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "59116bdcb0a74df875ed5d310a78797398513a12eafb79dd6001e6436985e639"
+    },
+    {
+      "id": "ev-chk-lock-1",
+      "checkId": "chk-lock",
+      "recordedAt": "2026-10-25T19:04:31.974+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/plan-edit.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "039fb531a41922b88ae4f640e63bd61870d7dc8ad2d388c0ca6b198f63e1af41"
+    },
+    {
+      "id": "ev-chk-verifyplan-1",
+      "checkId": "chk-verifyplan",
+      "recordedAt": "2026-10-25T19:04:37.039+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/stack/verify-plan.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a2575ced3e169596c4c9eed1364d4b591128a3e57e01df9e0a6ef7df8b73821d"
+    },
+    {
+      "id": "ev-chk-glob-1",
+      "checkId": "chk-glob",
+      "recordedAt": "2026-10-25T19:04:40.029+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/safe-glob.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "715dfaa93016bc16f55f0460296e81574fa754444f45336ae7011220d7bf6a19"
+    },
+    {
+      "id": "ev-chk-setpaths-1",
+      "checkId": "chk-setpaths",
+      "recordedAt": "2026-10-25T19:04:46.446+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/commands/workflow-handlers.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d1b80a679a7960f2377bd26687ff72b5ef724b3315f1bfeb64bb7add12efe6f2"
+    },
+    {
+      "id": "ev-chk-epic-1",
+      "checkId": "chk-epic",
+      "recordedAt": "2026-10-25T19:04:52.689+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/epic.test.ts test/unit/core/epics/epic.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0506712b11f58329661e8ecbc0d4ec26520eff9d33670566840817427984291d"
+    },
+    {
+      "id": "ev-chk-learning-1",
+      "checkId": "chk-learning",
+      "recordedAt": "2026-10-25T19:04:55.654+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/journal/learning-safety.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7f5eb208e790d4abe3e2757efbe62b0bd2c59b2f56f1afc4fe0f590b0f8aad0d"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-25T19:05:02.111+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5556a8b6d45af3e980e29c0e0f8183de3d0fa5a09a6d4636618940da6d26c431"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T19:07:15.138+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "cf8ca5fa5fa932fba36e5a2bea49aee7e0303023a23cf9e0aee3949f6b598491"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-25T19:09:57.173+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d8cab6eaf22d58241b362c2b7b603272459086aaaaf1d1cc3d467f04c40b49ad"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T19:12:09.159+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "165037fb9b25929d60d8136ed45a7b5324d2abe1ab4668ae227c62a35fd82ae4"
+    }
+  ],
+  "createdAt": "2026-10-25T17:44:19.000+07:00",
+  "updatedAt": "2026-10-25T19:12:13.295+07:00",
+  "completedAt": "2026-10-25T19:12:13.295+07:00"
+}

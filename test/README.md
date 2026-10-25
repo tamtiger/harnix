@@ -48,3 +48,14 @@ functions 98.6, branches 89) only ever rise: raise them when coverage improves, 
 pass. The per-test timeout is 20 seconds because filesystem-heavy workflow tests run in parallel.
 
 Do not regenerate `test/workflow/behavior-snapshot.golden.json` to make a refactor pass.
+
+## Speed
+
+Vitest runs with `pool: "forks"` and `isolate: false`: the files of one worker share its module graph instead of
+importing it again, which saves about a third of the wall time. Every test therefore restores what it changes globally
+(`process.chdir`, `process.exitCode`, spies and mocks) in `afterEach`, and must not rely on a fresh module state; run
+`pnpm exec vitest run --sequence.shuffle` to catch an order dependency.
+
+To find the slowest files, run `pnpm exec vitest run --reporter=json --outputFile=<file>` and sort `testResults` by
+`endTime - startTime`. A file that is slow only in the full run is waiting for CPU; look for the work it repeats, such
+as spawning `pnpm` or `prettier` (the version-sync API tests inject a no-op `format` for that reason).

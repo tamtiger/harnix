@@ -23,7 +23,7 @@ const COMMAND_AT_STATEMENT_START =
 const COMMAND_ANYWHERE =
   /(?:\b(?:sudo|curl|wget|iex|pwsh|powershell|npx|Invoke-Expression|Invoke-WebRequest)(?:\.exe)?\s+\S|\brm\s+-|\b(?:bash|sh)\s+-c\b|\bcmd(?:\.exe)?\s+\/[a-z]|\bnpm\s+(?:i|install|run|publish|exec)\b|\bpnpm\s+(?:i|add|install|run|dlx|publish|exec)\b|\bgit\s+(?:push|reset|clean|checkout|commit|remote)\b)/iu;
 const CREDENTIAL =
-  /(?:[\w-]{0,40}(?:api[_-]?key|access[_-]?token|auth[_-]?token|token|password|passwd|secret)\b\s*[=:]\s*['"]?[^\s,'"]{6,}|\bBearer\s+[A-Za-z0-9._~+/=-]{8,}|\bsk-[A-Za-z0-9_-]{12,}|\bgh[pousr]_[A-Za-z0-9]{20,}|\bgithub_pat_[A-Za-z0-9_]{20,}|\bAKIA[0-9A-Z]{12,}|\bxox[abprs]-[A-Za-z0-9-]{8,}|-----BEGIN [A-Z0-9 ]+-----)/iu;
+  /(?:[\w-]{0,40}(?:api[_-]?key|access[_-]?token|auth[_-]?token|token|password|passwd|secret)\b\s*[=:]\s*['"]?[^\s,'"]{6,}|\bBearer\s+[A-Za-z0-9._~+/=-]{8,}|\bsk-[A-Za-z0-9_-]{12,}|\bgh[pousr]_[A-Za-z0-9]{20,}|\bgithub_pat_[A-Za-z0-9_]{20,}|\bAKIA[0-9A-Z]{12,}|\bxox[abprs]-[A-Za-z0-9-]{8,}|-----BEGIN [A-Z0-9 ]+-----|\b[a-z][a-z0-9+.-]*:\/\/[^\s/:@]+:[^\s/@]+@|[?&](?:key|api_?key|sig|signature|secret|pwd|password|token|access_token|auth|credential)=[^\s&#]{6,})/iu;
 const ABSOLUTE_PATH =
   /(?:(?:^|[\s"'(=,])\/[\w.@~-]+\/[\w.@~/-]*|(?:^|\s)~\/|\b[A-Za-z]:[\\/][^\s]|\\\\[\w.$-]+\\[\w$])/u;
 
@@ -39,8 +39,46 @@ function normalizeStatement(statement: string): string {
     .replace(/ ?\n[ \n]*/gu, "\n");
 }
 
+function overrides(reading: string): boolean {
+  return OVERRIDE_ENGLISH.test(reading) || OVERRIDE_VIETNAMESE.test(withoutDiacritics(reading));
+}
+
 function withoutDiacritics(text: string): string {
   return text.toLowerCase().replace(/đ/gu, "d").normalize("NFD").replace(/\p{M}/gu, "");
+}
+
+/** The ways a statement is read before matching: the normalized text and the one-line readings of an override. */
+interface Readings {
+  /** Normalized text, line breaks kept so line-anchored checks still work. */
+  readonly text: string;
+  /**
+   * An invisible character may split a word (removed) or join two words (a space), and a line break may split a
+   * phrase: an override matching any of these readings counts.
+   */
+  readonly phrases: readonly string[];
+}
+
+const URL_LIKE = /\bhttps?:\/\/[^\s<>"']+/iu;
+
+/** One rule per risk kind: add a kind by adding a row (and a case to the table test). */
+const RULES: readonly { kind: LearningRiskKind; matches: (readings: Readings) => boolean }[] = [
+  { kind: "instruction-override", matches: ({ phrases }) => phrases.some(overrides) },
+  {
+    kind: "command-like",
+    matches: ({ text }) => COMMAND_AT_STATEMENT_START.test(text) || COMMAND_ANYWHERE.test(text),
+  },
+  { kind: "credential-like", matches: ({ text }) => CREDENTIAL.test(text) },
+  { kind: "path-like", matches: ({ text }) => ABSOLUTE_PATH.test(text) },
+  { kind: "url-like", matches: ({ text }) => URL_LIKE.test(text) },
+];
+
+function readingsOf(bounded: string): Readings {
+  const text = normalizeStatement(bounded);
+  const flat = bounded
+    .normalize("NFKC")
+    .replace(/\p{Cf}/gu, " ")
+    .replace(/\s+/gu, " ");
+  return { text, phrases: [text, text.replace(/\s+/gu, " "), flat] };
 }
 
 export function analyzeLearningStatement(statement: string): LearningStatementAnalysis {
@@ -49,13 +87,7 @@ export function analyzeLearningStatement(statement: string): LearningStatementAn
   const bounded = oversized
     ? Buffer.from(statement, "utf8").subarray(0, MAX_LEARNING_STATEMENT_BYTES).toString("utf8")
     : statement;
-  const text = normalizeStatement(bounded);
-  const plain = withoutDiacritics(text);
-  const findings = new Set<LearningRiskKind>();
-  if (OVERRIDE_ENGLISH.test(text) || OVERRIDE_VIETNAMESE.test(plain)) findings.add("instruction-override");
-  if (COMMAND_AT_STATEMENT_START.test(text) || COMMAND_ANYWHERE.test(text)) findings.add("command-like");
-  if (CREDENTIAL.test(text)) findings.add("credential-like");
-  if (ABSOLUTE_PATH.test(text)) findings.add("path-like");
-  if (/\bhttps?:\/\/[^\s<>"']+/iu.test(text)) findings.add("url-like");
-  return { statementHash: sha256(statement), findings: [...findings].sort(compareCodeUnits), oversized };
+  const readings = readingsOf(bounded);
+  const findings = RULES.filter((rule) => rule.matches(readings)).map((rule) => rule.kind);
+  return { statementHash: sha256(statement), findings: findings.sort(compareCodeUnits), oversized };
 }

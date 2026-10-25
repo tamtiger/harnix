@@ -45,6 +45,26 @@ describe.sequential("epic command", () => {
     });
   });
 
+  it("lists the newest epics first and reports the total number of epics, not the page size", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    for (const id of ["20260101-000000-old", "20260201-000000-mid", "20260301-000000-new"])
+      await upsertEpic(root, epicRecord(id, id, "goal"));
+
+    process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    await expect(runCli(["node", "harnix", "epic", "--limit", "2"])).resolves.toBe(0);
+
+    const output = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""));
+    expect(output.total).toBe(3);
+    expect((output.epics as { id: string }[]).map((epic) => epic.id)).toEqual([
+      "20260301-000000-new",
+      "20260201-000000-mid",
+    ]);
+  });
+
   it("details a specific epic with its member tasks and next task", async () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });

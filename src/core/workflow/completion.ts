@@ -61,6 +61,18 @@ export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceA
         })),
   );
 }
+export const BREAKER_RESET_ID_PREFIX = "ev-reset-";
+export const BREAKER_RESET_SUMMARY_PREFIX = "Circuit breaker reset:";
+
+/** Only `--reset-breaker` writes this pair; a skipped entry with just the summary is an ordinary skip. */
+export function isBreakerReset(evidence: { id: string; result: string; summary: string }): boolean {
+  return (
+    evidence.result === "skipped" &&
+    evidence.id.startsWith(BREAKER_RESET_ID_PREFIX) &&
+    evidence.summary.startsWith(BREAKER_RESET_SUMMARY_PREFIX)
+  );
+}
+
 export type VerificationRetryDisposition = "run" | "debug" | "stop";
 export function verificationRetryDisposition(
   task: TaskRecord,
@@ -73,7 +85,7 @@ export function verificationRetryDisposition(
     .filter(
       ({ evidence }) =>
         evidence.checkId === checkId &&
-        (evidence.result !== "skipped" || evidence.summary.startsWith("Circuit breaker reset:")) &&
+        (evidence.result !== "skipped" || isBreakerReset(evidence)) &&
         (evidence.result !== "pass" || isFresh(evidence, now, Number.POSITIVE_INFINITY, false)),
     )
     .sort((left, right) =>

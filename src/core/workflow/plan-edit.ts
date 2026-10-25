@@ -1,4 +1,5 @@
 import { type TaskRecordV3, type ValidationCheckV3 } from "src/core/tasks/task.js";
+import { unknownIdError } from "src/utils/suggest.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
@@ -172,7 +173,12 @@ export async function addCriterionWorkflow(
     throw new Error("workflow --add-criterion requires --check <check-id> so the criterion is covered.");
   for (const checkId of input.checks)
     if (!task.validationPlan.some((check) => check.id === checkId))
-      throw new Error(`Workflow check ${checkId} is not declared.`);
+      throw unknownIdError(
+        `Workflow check ${checkId} is not declared.`,
+        "check",
+        checkId,
+        task.validationPlan.map((check) => check.id),
+      );
   const validationPlan = task.validationPlan.map((check) =>
     input.checks.includes(check.id)
       ? { ...check, criterionIds: sortedUnique([...check.criterionIds, input.id]) }

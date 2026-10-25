@@ -52,6 +52,17 @@ export interface WorkflowEnvelopeSchemaV1 {
   };
 }
 
+/** The default `--schema`: everything except the per-flag transport prose, which costs most of the tokens. */
+export type BriefWorkflowEnvelopeSchemaV1 = Omit<WorkflowEnvelopeSchemaV1, "transports"> & {
+  transportsOmitted: string;
+};
+
+export function briefWorkflowEnvelopeSchema(): BriefWorkflowEnvelopeSchemaV1 {
+  const { transports, ...rest } = workflowEnvelopeSchema();
+  void transports;
+  return { ...rest, transportsOmitted: "harnix workflow --schema --full prints the description of every flag." };
+}
+
 /** Read-only self-description so an agent can build a valid envelope before its first save fails. */
 export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
   return {
@@ -156,7 +167,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--replace-check":
         "Retire a failed or unpassed required check and activate or declare a replacement check covering its criteria: --replace-check <old> <new> --reason <why> [--description --command --scope --input --criteria --cwd]; the replacement must differ from the retired check in command, inputs or cwd; schema v3 only.",
       "--set-criterion":
-        "Rewrite the text of one acceptance criterion: --set-criterion <id> --text <text> [--reason <why>] [--task <task-id>]; free in planning, afterwards it needs --reason and makes the guarded replan save, and a criterion mapped by recorded check evidence stays immutable.",
+        "Rewrite the text of one acceptance criterion: --set-criterion <id> --text <text> [--reason <why>] [--task <task-id>]; free in planning, afterwards it needs --reason and makes the guarded replan save; when a check of the criterion recorded evidence, those passes turn stale and are rerun.",
       "--add-criterion":
         "Add one acceptance criterion from --text and cover it with the --check IDs; same --reason rule as --set-check.",
       "--add-decision": "Record one decision (--text, --rationale) on the active v3 task; review data, so no --reason.",

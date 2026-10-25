@@ -4,6 +4,19 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.22.0] - 2026-10-25
+
+### Fixed
+
+- Sửa 8 lỗi P1: không kích hoạt lại task đã kết thúc, ghi song song không mất cập nhật, verify-plan --changed dùng git an toàn, glob .harnixignore không backtrack, --set-paths --file, harnix epic mới nhất trước với total đúng, learning-safety chặn URL chứa credential và override bị tách dòng
+- Sửa lỗi P2: breaker không mở bằng evidence skipped giả, --run-checks mở lại breaker khi input đổi, cờ bị bỏ qua im lặng nay bị từ chối, status --criteria không task trả null, id learning được chuẩn hóa, doctor --fix bỏ qua task lệch id, nhận lại file global đúng nội dung sau crash, gợi ý lệnh đúng khi gõ sai và lỗi workflow in JSON có hint
+
+### Changed
+
+- Refactor: bảng WORKFLOW_ACTIONS là nguồn duy nhất cho danh sách action, câu lỗi chọn action, BRIEF_ACTIONS và hint của cờ; mọi lời gọi git qua src/utils/git.ts; bộ lọc learning-safety thành bảng quy tắc
+- Tối ưu token: --schema mặc định bỏ khối transports (--schema --full in đầy đủ), cookbook không còn lặp giữa workflow.md và reference, harnix-plan SKILL.md dưới 1.800 token, measure:tokens thêm sessionLite (11.088 xuống 9.240)
+- Tăng tốc toàn bộ test khoảng 40% (isolate: false, version-sync không spawn prettier trong test API)
+
 ## [2.21.1] - 2026-10-25
 
 ### Fixed

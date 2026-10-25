@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
+
+import { assertCommandShape, assertFlagGroups } from "src/commands/workflow-flags.js";
 import { WORKFLOW_HANDLERS, type WorkflowContext } from "src/commands/workflow-handlers.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import {
@@ -107,6 +111,22 @@ describe("workflow handlers", () => {
     await expect(WORKFLOW_HANDLERS.replaceCheck!(context(root, "", { replaceCheck: ["only-one"] }))).rejects.toThrow(
       "requires exactly two check IDs",
     );
+  });
+
+  it("accepts --set-paths with only --file and applies the paths from the payload", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+    await writeFile(join(root, "paths.json"), JSON.stringify({ paths: ["src/a.ts", "src/b.ts"] }));
+    const flags = { setPaths: true, file: "paths.json" };
+
+    expect(() => assertCommandShape("setPaths", flags, [])).not.toThrow();
+    expect(() => assertFlagGroups("setPaths", flags)).not.toThrow();
+    await WORKFLOW_HANDLERS.setPaths!({ root, flags, operands: [], options: {} });
+
+    expect(((await loadPersistedTask(root, task.id)) as { relevantPaths: string[] }).relevantPaths).toEqual([
+      "src/a.ts",
+      "src/b.ts",
+    ]);
   });
 
   it("addRisk keeps the mitigation inside the risk text", async () => {

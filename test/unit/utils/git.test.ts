@@ -112,3 +112,17 @@ describe("utils/git", () => {
     if (!controlRan) console.warn("git here ignores core.fsmonitor; the guard could not be demonstrated");
   });
 });
+
+describe("one way to run git", () => {
+  it("leaves src/utils/git.ts the only source file that starts git itself", async () => {
+    const { readdir, readFile } = await import("node:fs/promises");
+    const files = (await readdir("src", { recursive: true })).filter((name) => name.endsWith(".ts"));
+    const direct: string[] = [];
+    for (const name of files) {
+      const text = await readFile(join("src", name), "utf8");
+      if (/(?:execFile|execFileAsync|spawn)\(\s*["']git["']/u.test(text)) direct.push(name.replaceAll("\\", "/"));
+    }
+
+    expect(direct).toEqual(["utils/git.ts"]);
+  });
+});

@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -28,5 +28,16 @@ describe("restoreFullArtifacts", () => {
     expect(await readFile(join(harnix, "tasks", FULL, "plan.md"), "utf8")).toContain("- [ ]");
     expect(await restoreFullArtifacts(root)).toBe(0);
     await expect(readFile(join(harnix, "tasks", LITE, "plan.md"), "utf8")).rejects.toThrow();
+  });
+
+  it("skips a task whose id does not match its folder, so a copied folder never spawns another task folder", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const harnix = join(root, ".harnix");
+    await saveTask(harnix, buildTaskV3({ id: FULL, mode: "full" }));
+    await rename(join(harnix, "tasks", FULL), join(harnix, "tasks", "20260929-090500-copied"));
+
+    expect(await restoreFullArtifacts(root)).toBe(0);
+    await expect(readFile(join(harnix, "tasks", FULL, "plan.md"), "utf8")).rejects.toThrow();
   });
 });

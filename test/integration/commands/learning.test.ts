@@ -123,6 +123,14 @@ describe.sequential("learning command", () => {
     expect((rejected.json.items as Item[]).map((item) => item.id).sort()).toEqual(["obs-a", "obs-b"]);
   });
 
+  it("accepts an id with a trailing comma, spaces or a repeat as that one id", async () => {
+    await project();
+
+    expect((await learning("--promote", "obs-a,")).json).toMatchObject({ action: "promote", id: "obs-a" });
+    expect((await learning("--reject", " obs-a ")).json).toMatchObject({ action: "reject", id: "obs-a" });
+    expect((await learning("--reject", "obs-b,obs-b")).json).toMatchObject({ action: "reject", id: "obs-b" });
+  });
+
   it("rejects a learning with a reason and then refuses to promote it", async () => {
     await project();
 

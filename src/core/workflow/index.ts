@@ -64,7 +64,7 @@ export type {
   WorkflowWorkKind,
 } from "./routing.js";
 export { saveWorkflow } from "./save.js";
-export { workflowEnvelopeSchema } from "./schema.js";
+export { briefWorkflowEnvelopeSchema, workflowEnvelopeSchema } from "./schema.js";
 export type { WorkflowEnvelopeSchemaV1 } from "./schema.js";
 export { snapshotWorkflow } from "./snapshot.js";
 export { resetBreakerWorkflow } from "./reset-breaker.js";

@@ -1,4 +1,5 @@
 import { normalizeCheckCwd } from "src/core/tasks/check-cwd.js";
+import { unknownIdError } from "src/utils/suggest.js";
 import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { saveInputDigestSnapshot } from "src/core/verification/snapshot-cache.js";
@@ -71,7 +72,13 @@ export async function runCheckWorkflow(
   if (!task) throw new Error("Workflow run-check requires an active task.");
   if (task.schemaVersion !== 3) throw new Error("Workflow --run-check requires a TaskRecord schema v3 task.");
   const declared = task.validationPlan.find((check) => check.id === checkId);
-  if (!declared) throw new Error(`Workflow run-check check ${checkId} is not declared.`);
+  if (!declared)
+    throw unknownIdError(
+      `Workflow run-check check ${checkId} is not declared.`,
+      "check",
+      checkId,
+      task.validationPlan.map((check) => check.id),
+    );
   const beforeSnapshot = await computeInputDigest(root, task, checkId);
   const before = beforeSnapshot.inputDigest;
   assertRetryAllowed(task, checkId, dependencies.now ? Date.parse(dependencies.now) : undefined, before);

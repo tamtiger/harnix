@@ -5,7 +5,8 @@ import { sha256 } from "src/utils/hashing.js";
  * the global (user-home) reconciler differ only in how they read, write and report; both ask this
  * module what to do so the two never drift apart.
  */
-export type WholeFileDecision = "create" | "keep-deleted" | "collision" | "keep-modified" | "unchanged" | "update";
+export type WholeFileDecision =
+  "create" | "keep-deleted" | "collision" | "adopt" | "keep-modified" | "unchanged" | "update";
 
 export interface WholeFileInput {
   /** Current file text, or undefined when the file does not exist. */
@@ -20,7 +21,9 @@ export function decideWholeFile(input: WholeFileInput): WholeFileDecision {
   if (input.current === undefined) {
     return input.previousHash === undefined || input.restoreDeleted ? "create" : "keep-deleted";
   }
-  if (input.previousHash === undefined) return "collision";
+  // An unowned file that already holds exactly the desired text (a run stopped before its manifest write) is taken
+  // back; any other unowned file stays the user's.
+  if (input.previousHash === undefined) return sha256(input.current) === input.desiredHash ? "adopt" : "collision";
   if (sha256(input.current) !== input.previousHash) return "keep-modified";
   return input.desiredHash === input.previousHash ? "unchanged" : "update";
 }

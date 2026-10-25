@@ -249,6 +249,22 @@ export async function measureGuides(directory) {
   };
 }
 
+/**
+ * What one typical Lite session pays before any task work: the always-loaded block, the workflow sheet, the schema
+ * read once, the plan and implement skills, a planning preflight and a planning hook context.
+ */
+export function sessionLiteTokens(report) {
+  return (
+    report.alwaysLoaded +
+    report.workflowDoc +
+    report.reads.schema +
+    report.skills["harnix-plan"] +
+    report.skills["harnix-implement"] +
+    report.preflight.planning +
+    report.hookContext.planning
+  );
+}
+
 export function buildReport(brief, full, guides) {
   const tokensOf = (label) => {
     const step = brief.steps.find((candidate) => candidate.label === label);
@@ -259,7 +275,7 @@ export function buildReport(brief, full, guides) {
     brief.steps.filter((step) => BRIEF_LABELS.has(step.label)),
     full.steps.filter((step) => BRIEF_LABELS.has(step.label)),
   );
-  return {
+  const report = {
     generator: "harnix",
     tokenApproximation: TOKEN_APPROXIMATION,
     fixture: "disposable-lite-lifecycle",
@@ -287,6 +303,7 @@ export function buildReport(brief, full, guides) {
       fullOutputTokens: steps.reduce((sum, step) => sum + step.full.outputTokens, 0),
     },
   };
+  return { ...report, sessionLite: sessionLiteTokens(report) };
 }
 
 async function main() {

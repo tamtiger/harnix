@@ -1,5 +1,6 @@
 import type { TaskRecord } from "src/core/tasks/task.js";
 import { compareCodeUnits } from "src/utils/order.js";
+import { actionFlagName, WORKFLOW_ACTIONS } from "./actions.js";
 
 export interface BriefTask {
   id: string;
@@ -10,37 +11,11 @@ export interface BriefTask {
 }
 
 /** Workflow actions that accept `--brief`: the one list behind flag validation, `--schema` and the guidance. */
-export const BRIEF_ACTIONS: ReadonlySet<string> = new Set([
-  "init",
-  "batch",
-  "save",
-  "transition",
-  "evidence",
-  "criterion",
-  "migrate",
-  "finish",
-  "preflight",
-  "runCheck",
-  "runChecks",
-  "setCheck",
-  "addCriterion",
-  "setCriterion",
-  "addDecision",
-  "addRisk",
-  "removeDecision",
-  "removeCriterion",
-  "removeRisk",
-  "setPaths",
-  "setTitle",
-  "setGoal",
-  "replaceCheck",
-  "resetBreaker",
-  "setBaseline",
-]);
+export const BRIEF_ACTIONS: ReadonlySet<string> = new Set(
+  WORKFLOW_ACTIONS.filter((spec) => spec.brief).map((spec) => spec.name),
+);
 
-/** The command-line flag of a workflow action: `runCheck` is `--run-check`. */
-export const actionFlagName = (action: string): string =>
-  `--${action.replace(/[A-Z]/gu, (letter) => `-${letter.toLowerCase()}`)}`;
+export { actionFlagName };
 
 /** Every flag that accepts `--brief`, sorted. */
 export const briefFlagNames = (): string[] => [...BRIEF_ACTIONS].map(actionFlagName).sort(compareCodeUnits);

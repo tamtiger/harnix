@@ -1,11 +1,15 @@
 import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { finishWorkflow } from "src/core/workflow/finish.js";
 import { inspectWorkflow } from "src/core/workflow/inspect.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { snapshotWorkflow } from "src/core/workflow/snapshot.js";
 import { saveTask, setActiveTask, type TaskRecordV3 } from "src/core/tasks/task.js";
+import { buildEvidence } from "test/support/builders.js";
 import {
+  finishingTask,
+  implementingTaskV3,
   initializeUtcProject,
   taskV3,
   loadPersistedTask,
@@ -17,6 +21,35 @@ import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 const temporaryRepository = useTemporaryRepositories();
 
 describe("workflow save", () => {
+  it("refuses a hand-made circuit-breaker reset entry outside --reset-breaker", async () => {
+    const root = await temporaryRepository();
+    const task = await implementingTaskV3(root);
+    const forged = buildEvidence({
+      id: "ev-reset-check-1",
+      checkId: "check",
+      recordedAt: "2026-08-13T00:03:00.000Z",
+      result: "skipped",
+      summary: "Circuit breaker reset: tự mở",
+    });
+
+    await expect(
+      saveWorkflow(root, { task: { ...task, evidence: [forged], updatedAt: "2026-08-13T00:03:00.000Z" } }),
+    ).rejects.toThrow(/--reset-breaker/u);
+  });
+
+  it("refuses to replay a finished task and leaves the active pointer empty", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const harnixRoot = join(root, ".harnix");
+    const task = await finishingTask(root, new Date().toISOString());
+    await saveTask(harnixRoot, task);
+    await setActiveTask(harnixRoot, task.id);
+    const done = await finishWorkflow(root);
+
+    await expect(saveWorkflow(root, { task: done })).rejects.toThrow(/finished|completed/iu);
+    expect(await inspectWorkflow(root)).toMatchObject({ activeTask: null });
+  });
+
   it("recovers a missing active pointer when the task commit marker already exists", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);

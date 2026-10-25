@@ -1,9 +1,7 @@
-import { execFile } from "node:child_process";
 import { realpath } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve, sep, win32 } from "node:path";
-import { promisify } from "node:util";
 
-const execFileAsync = promisify(execFile);
+import { runGit } from "src/utils/git.js";
 
 export class UnsafeProjectPathError extends Error {
   override name = "UnsafeProjectPathError";
@@ -55,8 +53,7 @@ function hasUnsafeRepositoryPathCharacter(value: string): boolean {
 
 export async function findGitRoot(cwd: string): Promise<string | undefined> {
   try {
-    const result = await execFileAsync("git", ["rev-parse", "--show-toplevel"], { cwd, windowsHide: true });
-    const root = result.stdout.trim();
+    const root = (await runGit(cwd, ["rev-parse", "--show-toplevel"])).trim();
     return root.length > 0 ? root : undefined;
   } catch {
     return undefined;

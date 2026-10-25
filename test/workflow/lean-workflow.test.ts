@@ -30,7 +30,8 @@ describe("lean workflow cheat sheet", () => {
       expect(workflowTemplate, page).toContain(page);
       expect(verify?.references[page], page).toBeDefined();
     }
-    const detail = DETAIL_PAGES.map((page) => verify?.references[page] ?? "").join("\n");
+    // Each fact lives once: in the sheet itself or in one of its detail pages.
+    const detail = [workflowTemplate, ...DETAIL_PAGES.map((page) => verify?.references[page] ?? "")].join("\n");
     for (const needle of [
       "harnix repo-map --query|--impact",
       "Obligations",

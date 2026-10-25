@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveActiveTask } from "src/core/tasks/task.js";
+import { retryOnTaskConflict } from "src/core/tasks/read-tracker.js";
+import { resolveActiveTask, type TaskRecordV3 } from "src/core/tasks/task.js";
 import {
   addCriterionWorkflow,
   addDecisionWorkflow,
@@ -367,5 +368,22 @@ describe("workflow obligation edits while verifying", () => {
     await expect(
       setCheckWorkflow(root, { id: "check", command: "pnpm other" }, { reason: REASON }, "2026-08-13T00:32:00.000Z"),
     ).rejects.toThrow(/after passing evidence/u);
+  });
+});
+
+describe("workflow writes running at the same time", () => {
+  it("keeps every change when six commands add a decision concurrently", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    const ids = ["d1", "d2", "d3", "d4", "d5", "d6"];
+
+    await Promise.all(
+      ids.map((id) =>
+        retryOnTaskConflict(() => addDecisionWorkflow(root, { id, text: `quyết định ${id}`, rationale: "vì" })),
+      ),
+    );
+
+    const task = await resolveActiveTask(`${root}/.harnix`);
+    expect(((task as TaskRecordV3).decisions ?? []).map((decision) => decision.id).sort()).toEqual(ids);
   });
 });

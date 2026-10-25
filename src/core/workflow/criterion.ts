@@ -1,3 +1,4 @@
+import { unknownIdError } from "src/utils/suggest.js";
 import {
   resolveActiveTask,
   selectLatestEvidence,
@@ -82,7 +83,13 @@ export async function markCriteriaMetWorkflow(
   const marked = new Map<string, string[]>();
   for (const id of new Set(input.criterionIds)) {
     const criterion = task.acceptanceCriteria.find((candidate) => candidate.id === id);
-    if (criterion === undefined) throw new Error(`Workflow criterion ${id} is not declared.`);
+    if (criterion === undefined)
+      throw unknownIdError(
+        `Workflow criterion ${id} is not declared.`,
+        "criterion",
+        id,
+        task.acceptanceCriteria.map((criterion) => criterion.id),
+      );
     if (criterion.status === "waived") throw new Error(`Workflow criterion ${id} is waived and cannot be marked met.`);
     const evidence =
       input.evidenceIds === undefined

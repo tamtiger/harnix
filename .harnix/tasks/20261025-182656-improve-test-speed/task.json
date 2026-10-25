@@ -1,0 +1,164 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-182656-improve-test-speed",
+  "title": "Cải thiện tốc độ test: repo mẫu dùng chung, gộp kịch bản trùng, rút ngắn các file chậm nhất",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261025-174418-hardening-and-token-diet",
+  "goal": "Giảm thời gian chạy toàn bộ test (baseline 109 giây không coverage, 130 giây có coverage, đo ngày 2026-10-25 trên cùng máy) bằng cách dựng repo mẫu một lần rồi copy cho từng test, gộp kịch bản trùng nhau và rút ngắn các file chậm nhất, mà không giảm số test, số assertion hay ngưỡng coverage. Task cuối theo ID nên đóng epic bằng bản minor với --fold-dev.",
+  "nonGoals": [
+    "Không hạ ngưỡng coverage, không xóa test để nhanh hơn",
+    "Không đổi lệnh gate pnpm run test và không chạy một phần suite thay cho gate"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Vitest không cô lập module theo từng file (isolate: false, pool forks giữ nguyên) và test version-sync tiêm format giả trừ test kiểm định dạng, nên không còn spawn prettier cho mỗi lần sync; thời gian collect trong Duration của toàn bộ suite giảm tối thiểu 50% so với baseline 180 giây",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-slow-files-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Thời gian chạy toàn bộ test không coverage giảm tối thiểu 25% so với baseline đo lúc bắt đầu task (123 giây, 2.514 test, cùng máy), ghi số đo trước và sau trong decision; toàn bộ suite xanh ba lần liên tiếp, trong đó một lần xáo thứ tự file",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-slow-files-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Số test và số assertion không giảm và các ngưỡng coverage trong vitest.config.ts không bị hạ",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-structure-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "test/README.md ghi cách dùng repo mẫu dùng chung và cách đo file chậm",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-structure-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "test/support",
+    "test/workflow/version-sync.test.ts",
+    "test/unit/commands/global-uninstall.test.ts",
+    "test/workflow/learning-automation.test.ts",
+    "test/workflow/legacy-history.test.ts",
+    "test/integration/scenarios",
+    "vitest.config.ts",
+    "test/README.md"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-slow-files",
+      "description": "Các file chậm nhất vẫn xanh sau khi rút gọn",
+      "command": "pnpm exec vitest run test/workflow/version-sync.test.ts test/unit/test-structure.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "test/**",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-structure",
+      "description": "Test cấu trúc giữ sàn số test và assertion",
+      "command": "pnpm exec vitest run test/unit/test-structure.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "test/**",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-25T20:03:19.888+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Thời gian từng file trong lần chạy đầy đủ phụ thuộc tranh CPU (learning-automation 12,5 giây khi chạy riêng nhưng 31 giây khi chạy cùng suite) nên không phải thước đo ổn định; collect time đo trực tiếp phần việc được bỏ",
+      "artifactPaths": [
+        ".harnix/tasks/20261025-182656-improve-test-speed/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-slow-files-1",
+      "checkId": "chk-slow-files",
+      "recordedAt": "2026-10-25T20:04:14.806+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/version-sync.test.ts test/unit/test-structure.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "71a739bdf27c3008ed65af2e0250222a05ea2f0cd3207771ff77b6c5c078225a"
+    },
+    {
+      "id": "ev-chk-structure-1",
+      "checkId": "chk-structure",
+      "recordedAt": "2026-10-25T20:04:18.434+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/test-structure.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "97a34d8560fc1aa19e04975a26141868a63cdbe14251d0105df95aa82f304a99"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T20:05:40.236+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ac9a6f21f4b80d953d46456b9857c63e67ff95cb717c9081d43b2344b7aaad51"
+    }
+  ],
+  "createdAt": "2026-10-25T18:26:56.710+07:00",
+  "updatedAt": "2026-10-25T20:05:48.990+07:00",
+  "decisions": [
+    {
+      "id": "dec-speed-measure",
+      "text": "Số đo tốc độ test trên cùng máy: baseline 123 giây (collect 180 giây, 2.514 test); sau thay đổi 74 giây, 77 giây khi xáo thứ tự file, 86 giây khi kèm reporter JSON (collect 39-44 giây); giảm 40% so với 123 giây và 32% so với mốc 109 giây cũ; cả ba lần đều xanh 2.514 test",
+      "rationale": "Check chỉ kiểm exit code nên số đo được ghi làm vết cho ac-1 và ac-2"
+    }
+  ],
+  "completedAt": "2026-10-25T20:05:48.990+07:00"
+}

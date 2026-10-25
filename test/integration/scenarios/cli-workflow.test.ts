@@ -140,7 +140,10 @@ describe.sequential("CLI doctor, context and hidden workflow", () => {
     const message = stderr.mock.calls.flatMap((call) => call).join("");
     expect(message).toContain("active task");
     expect(message).not.toContain("unknown option");
-    expect(stdout.mock.calls.map((call) => String(call[0])).join("")).toBe("");
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
+      ok: false,
+      error: { exitCode: 2 },
+    });
   });
   it("should_cancel_an_active_task_from_a_bounded_json_envelope", async () => {
     const root = await fixture();

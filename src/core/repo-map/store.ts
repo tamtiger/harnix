@@ -10,7 +10,7 @@ import type { RepoMapRecordV1, RepoMapV1 } from "./types.js";
 export const repoMapRelativePath = "cache/repo-map-v1.json";
 
 export function repoMapCachePath(root: string): string {
-  return join(root, ".harnix", repoMapRelativePath.replaceAll("/", "\\"));
+  return join(root, ".harnix", ...repoMapRelativePath.split("/"));
 }
 
 export async function readRepoMap(root: string): Promise<RepoMapV1> {

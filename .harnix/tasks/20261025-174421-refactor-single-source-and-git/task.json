@@ -1,0 +1,170 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-174421-refactor-single-source-and-git",
+  "title": "Refactor: một nguồn duy nhất cho action/flag, module git dùng chung, bộ lọc learning dạng bảng",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261025-174418-hardening-and-token-diet",
+  "goal": "Gom các danh sách action và flag phải đồng bộ tay về một bảng ACTIONS để sinh thông báo lỗi, hint, BRIEF_ACTIONS và schema; đưa mọi lời gọi git qua module dùng chung; biến bộ lọc learning thành bảng quy tắc có test bảng, giữ nguyên hành vi quan sát được.",
+  "nonGoals": [
+    "Không đổi hành vi public ngoài các lỗi đã sửa ở hai task trước",
+    "Không regenerate golden"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Một bảng ACTIONS duy nhất sinh thông báo lỗi, FLAG_OWNERS hint, BRIEF_ACTIONS và mô tả transport; thêm cờ mới chỉ cần sửa bảng đó và test bề mặt",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-actions-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Mọi lời gọi git trong src đi qua module dùng chung với safeGitArgs, timeout và maxBuffer",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-git-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Golden behavior-snapshot và cli-contract không đổi sau refactor",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-actions-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Bộ lọc learning-safety được viết thành bảng quy tắc (loại, mẫu, bước chuẩn hóa) có test dạng bảng, và hành vi lọc giữ nguyên so với cuối task P1",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-learning-table-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-flags.ts",
+    "src/commands/workflow-flag-owners.ts",
+    "src/core/workflow/brief.ts",
+    "src/core/workflow/schema.ts",
+    "src/utils/git.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-actions",
+      "description": "Test bề mặt action/flag và checklist",
+      "command": "pnpm exec vitest run test/workflow/action-checklist.test.ts test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/core/workflow/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-git",
+      "description": "Test module git dùng chung",
+      "command": "pnpm exec vitest run test/unit/utils/git.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/stack/**",
+        "src/utils/**",
+        "test/unit/utils/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-learning-table",
+      "description": "Test dạng bảng cho bộ lọc learning-safety",
+      "command": "pnpm exec vitest run test/unit/core/journal/learning-safety.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/core/journal/**",
+        "test/unit/core/journal/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-actions-1",
+      "checkId": "chk-actions",
+      "recordedAt": "2026-10-25T19:39:45.958+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/action-checklist.test.ts test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "68645003245ac5b12ee635aaa1ca695810c85e65197f1510cf6cfa3a0a816b99"
+    },
+    {
+      "id": "ev-chk-git-1",
+      "checkId": "chk-git",
+      "recordedAt": "2026-10-25T19:39:50.357+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/git.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "452b8e5605006ebff0f5d2756b891772ac5297b3c28bbfe8eadaba9c4a178c8d"
+    },
+    {
+      "id": "ev-chk-learning-table-1",
+      "checkId": "chk-learning-table",
+      "recordedAt": "2026-10-25T19:39:53.179+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/journal/learning-safety.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "69b2996619033836e5c1af894625f3ad8559fae5781ef5f65d28b2fc8834bc0f"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T19:41:51.852+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "49ccb97da87f38b713d696f6f20dae739ee54fe3bbe1153e71b6a335732f0be0"
+    }
+  ],
+  "createdAt": "2026-10-25T17:44:21.000+07:00",
+  "updatedAt": "2026-10-25T19:41:58.152+07:00",
+  "completedAt": "2026-10-25T19:41:58.152+07:00"
+}

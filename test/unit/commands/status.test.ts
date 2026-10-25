@@ -180,12 +180,12 @@ describe("commands/status", () => {
     expect(status.git?.commit).toMatch(/^[0-9a-f]{7,}/u);
   });
 
-  it("reports project criteria lean status and throws without active task", async () => {
+  it("reports project criteria lean status and a null task without an active task, like the other status modes", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
     await writeProjectSource(root);
 
-    await expect(reportProjectCriteria(root)).rejects.toThrow(/No active task/u);
+    await expect(reportProjectCriteria(root)).resolves.toEqual({ taskId: null, criteria: [] });
 
     const task = taskV3("planning", "planning");
     await saveWorkflow(root, { task });

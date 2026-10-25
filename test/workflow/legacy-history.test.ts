@@ -107,7 +107,9 @@ describe("historical task data stays readable", () => {
     const { root } = history;
 
     const list = await listPublicEpics(root, 100);
-    const detail = await detailPublicEpic(root, list.epics[0]!.id);
+    // Newest first: pick an epic that has members, since the newest historical epic may have none.
+    const withMembers = list.epics.find((epic) => epic.totalTasks > 0)!;
+    const detail = await detailPublicEpic(root, withMembers.id);
 
     expect(list.total).toBeGreaterThan(0);
     expect(detail.members.length).toBeGreaterThan(0);

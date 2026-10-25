@@ -57,6 +57,17 @@ describe.sequential("status command", () => {
     await expect(snapshotTree(root)).resolves.toEqual(before);
   });
 
+  it("refuses --criteria with --limit, since the criteria list has no page", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    process.chdir(root);
+    vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    await expect(runCli(["node", "harnix", "status", "--criteria", "--limit", "5"])).resolves.toBe(2);
+    expect(stderr.mock.calls.map((call) => String(call[0])).join("")).toContain("--limit");
+  });
+
   it("returns a bounded no-active-task result without changing project files", async () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });

@@ -26,7 +26,8 @@ export async function restoreFullArtifacts(root: string): Promise<number> {
     if (!entry.isDirectory()) continue;
     try {
       const task = await loadTask(await resolveSafeProjectPath(root, `.harnix/tasks/${entry.name}/task.json`));
-      if (task.schemaVersion !== 3 || task.mode !== "full") continue;
+      // A folder copied under another name keeps the old id inside; writing by that id would create a stray folder.
+      if (task.id !== entry.name || task.schemaVersion !== 3 || task.mode !== "full") continue;
       if (task.status === "completed" || task.status === "cancelled") continue;
       for (const [name, render] of [
         ["prd.md", renderPrdTemplate],

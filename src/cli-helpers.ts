@@ -1,4 +1,5 @@
 import type { Command } from "commander";
+import { splitHint } from "./cli-hints.js";
 import { normalizeRepositoryPath } from "./utils/paths.js";
 import type { HomeResolver } from "./core/platform/user-paths.js";
 import type { GlobalIntegrationCapabilityLookup } from "./commands/global-doctor.js";
@@ -33,6 +34,8 @@ export interface PublicCliErrorV1 {
   readonly error: {
     readonly exitCode: 1 | 2;
     readonly message: string;
+    /** The corrected command or the valid values, when Harnix can tell what was meant. */
+    readonly hint?: string;
   };
 }
 
@@ -118,7 +121,13 @@ export function parseReportLimit(value: string, command: "context-report" | "sta
 }
 
 export function publicCliError(message: string, exitCode: 1 | 2): PublicCliErrorV1 {
-  return { generator: "harnix", schemaVersion: 1, ok: false, error: { exitCode, message } };
+  const split = splitHint(message);
+  return {
+    generator: "harnix",
+    schemaVersion: 1,
+    ok: false,
+    error: { exitCode, message: split.message, ...(split.hint === undefined ? {} : { hint: split.hint }) },
+  };
 }
 
 export function redactPublicErrorMessage(error: unknown): string {
@@ -135,8 +144,9 @@ export function redactPublicErrorMessage(error: unknown): string {
     .replace(/((?:token|secret|password|api[_-]?key)\s*[=:]\s*)[^\s,]+/giu, "$1[REDACTED]");
 }
 
-export function isHiddenProtocolInvocation(argv: readonly string[]): boolean {
-  return argv[2] === "context" || argv[2] === "workflow";
+/** The hook protocol answers on stdout only with its payload, so its errors stay off stdout and Commander's output. */
+export function isHookProtocolInvocation(argv: readonly string[]): boolean {
+  return argv[2] === "context";
 }
 
 /**

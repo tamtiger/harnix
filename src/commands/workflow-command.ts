@@ -1,6 +1,7 @@
 import type { Command } from "commander";
 
 import { withTargetTask } from "src/commands/internal-workflow.js";
+import { retryOnTaskConflict } from "src/core/tasks/read-tracker.js";
 import { WORKFLOW_HANDLERS, type Handler, type WorkflowCommandOptions } from "src/commands/workflow-handlers.js";
 import {
   assertCommandShape,
@@ -167,7 +168,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
       try {
         for (const action of actions) {
           result = await withTargetTask(flags.task, () =>
-            (WORKFLOW_HANDLERS[action] as Handler)({ root, flags, operands, options }),
+            retryOnTaskConflict(() => (WORKFLOW_HANDLERS[action] as Handler)({ root, flags, operands, options })),
           );
         }
       } catch (error: unknown) {

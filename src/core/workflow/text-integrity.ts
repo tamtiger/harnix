@@ -13,10 +13,14 @@ export interface CorruptedText {
 /**
  * Shells like Windows cmd or PowerShell 5.1 convert unmapped non-ASCII characters
  * to literal question marks when piping through an encoding like cp1252. Three or
- * more question marks together (or ??? embedded in words) indicate lossy encoding damage.
+ * more question marks together indicate lossy encoding damage when the text still holds
+ * other non-ASCII characters (a partial loss) or the run is glued to a letter or digit
+ * (a lost character inside a word). A standalone run in plain ASCII text is ordinary
+ * punctuation, for example a placeholder.
  */
 function isLossyQuestionMarks(text: string): boolean {
-  return /\?{3,}/u.test(text);
+  if (!/\?{3,}/u.test(text)) return false;
+  return /\P{ASCII}/u.test(text) || /[\p{L}\p{N}]\?{3,}|\?{3,}[\p{L}\p{N}]/u.test(text);
 }
 
 function inspect(text: string): CorruptedText | undefined {

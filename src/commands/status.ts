@@ -134,9 +134,10 @@ export interface StatusCriteriaItem {
 }
 
 export interface StatusCriteriaResultV1 {
-  readonly taskId: string;
-  readonly mode: string;
-  readonly status: string;
+  /** Null, with no criteria, when no task is active: the same "nothing active" answer the other status modes give. */
+  readonly taskId: string | null;
+  readonly mode?: string;
+  readonly status?: string;
   readonly criteria: readonly StatusCriteriaItem[];
 }
 
@@ -146,7 +147,7 @@ export async function reportProjectCriteria(cwd: string): Promise<StatusCriteria
     throw new Error(`Status requires an initialized Harnix project.${await initializedChildrenHint(cwd)}`);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   const task = await resolveActiveTask(harnixRoot);
-  if (task === undefined) throw new Error("No active task. Use harnix resume <id> or start a new task.");
+  if (task === undefined) return { taskId: null, criteria: [] };
 
   const criteria: StatusCriteriaItem[] = task.acceptanceCriteria.map((c) => {
     const coveringChecks = task.validationPlan

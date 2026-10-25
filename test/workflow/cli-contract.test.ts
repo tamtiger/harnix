@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createProgram, runCli } from "src/cli-program.js";
+import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { implementingTaskV3 } from "test/support/workflow-fixtures.js";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -171,7 +173,11 @@ describe("CLI command contract", () => {
     await expect(runCli(["node", "harnix", "workflow", "--transition", "verifying"])).resolves.toBe(2);
     await expect(runCli(["node", "harnix", "workflow", "--schema", "--evidence"])).resolves.toBe(2);
 
-    expect(stdout.mock.calls.map((call) => String(call[0])).join("")).toBe("");
+    // Every failed workflow call answers with one PublicCliErrorV1 line on stdout, like the public commands.
+    const answers = stdout.mock.calls.map((call) => JSON.parse(String(call[0])) as { ok: boolean });
+    expect(answers).toHaveLength(7);
+    expect(answers.every((answer) => answer.ok === false)).toBe(true);
+    stdout.mockClear();
 
     await expect(runCli(["node", "harnix", "internal", "context", "--platform", "codex"])).resolves.toBe(2);
     expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
@@ -180,5 +186,37 @@ describe("CLI command contract", () => {
       ok: false,
       error: { exitCode: 2, message: "error: unknown command 'internal'" },
     });
+  });
+});
+
+describe("a wrong command answers with the corrected one", () => {
+  const temporaryRepository = useTemporaryRepositories("harnix-cli-hints-");
+  const originalCwd = process.cwd();
+  afterEach(() => process.chdir(originalCwd));
+
+  it.each([
+    [["workflow", "--transition", "ready"], /ready\/ready/u],
+    [["status", "--criteria", "--task", "x"], /--task không thuộc harnix status; nó dùng với harnix workflow/u],
+    [["workflow", "--run-check", "chek", "--", "pnpm", "test"], /check hợp lệ: check\. Có phải ý bạn là check\?/u],
+    [["workflow", "--remove-risk", "r-9"], /chưa có risk nào/u],
+    [["skill", "harnix-plann"], /Có phải ý bạn là harnix-plan\?/u],
+    [["workflow", "--remove-risks", "r"], /Did you mean --remove-risk\?/u],
+  ])("harnix %j", async (args, hint) => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    await expect(runCli(["node", "harnix", ...args])).resolves.toBe(2);
+
+    const answer = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as {
+      ok: boolean;
+      error: { message: string; hint?: string };
+    };
+    expect(answer.ok).toBe(false);
+    expect(answer.error.hint).toMatch(hint);
+    expect(answer.error.message).not.toMatch(/Gợi ý/u);
+    expect(stderr.mock.calls.map((call) => String(call[0])).join("")).toMatch(hint);
   });
 });

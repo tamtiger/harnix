@@ -22,6 +22,7 @@ describe("workflow action checklist in AGENTS.md", () => {
 
     expect(paths).toEqual(
       expect.arrayContaining([
+        "src/core/workflow/actions.ts",
         "src/commands/workflow-command.ts",
         "src/commands/workflow-flags.ts",
         "src/commands/workflow-flag-owners.ts",

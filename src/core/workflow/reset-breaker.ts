@@ -1,4 +1,6 @@
 import { resolveActiveTask, type TaskRecordV3 } from "src/core/tasks/task.js";
+import { unknownIdError } from "src/utils/suggest.js";
+import { BREAKER_RESET_ID_PREFIX, BREAKER_RESET_SUMMARY_PREFIX } from "./completion.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { saveWorkflow } from "./save.js";
@@ -36,11 +38,16 @@ export async function resetBreakerWorkflow(
 
   const declared = task.validationPlan.find((c) => c.id === checkId);
   if (!declared) {
-    throw new Error(`Check ${checkId} is not declared in the active task validationPlan.`);
+    throw unknownIdError(
+      `Check ${checkId} is not declared in the active task validationPlan.`,
+      "check",
+      checkId,
+      task.validationPlan.map((check) => check.id),
+    );
   }
 
   const now = await currentInstant(root, options.injectedNow);
-  const resetEvidenceId = `ev-reset-${checkId}-${Date.now()}`;
+  const resetEvidenceId = `${BREAKER_RESET_ID_PREFIX}${checkId}-${Date.now()}`;
 
   const resetEvidence = {
     id: resetEvidenceId,
@@ -48,7 +55,7 @@ export async function resetBreakerWorkflow(
     recordedAt: now,
     result: "skipped" as const,
     exitCode: 0,
-    summary: `Circuit breaker reset: ${reason}`,
+    summary: `${BREAKER_RESET_SUMMARY_PREFIX} ${reason}`,
     artifactPaths: [],
   };
 
@@ -58,5 +65,5 @@ export async function resetBreakerWorkflow(
     updatedAt: laterTimestamp(task.updatedAt, now),
   };
 
-  return (await saveWorkflow(root, { task: updatedTask })) as TaskRecordV3;
+  return (await saveWorkflow(root, { task: updatedTask }, { breakerReset: true })) as TaskRecordV3;
 }

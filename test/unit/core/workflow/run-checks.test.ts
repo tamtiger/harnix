@@ -1,3 +1,5 @@
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { runChecksWorkflow } from "src/core/workflow/run-checks.js";
@@ -107,6 +109,21 @@ describe("workflow --run-checks", () => {
       /suite failed twice in a row/u,
     );
     expect(calls).toEqual([]);
+  });
+
+  it("runs a check at the circuit breaker again once its inputs changed, like --run-check", async () => {
+    const root = await temporaryRepository();
+    await implementing(root);
+    const failing = fakeRunner({ "pnpm test": 1 });
+    await runChecksWorkflow(root, { runner: failing.runner, now: NOW });
+    await runChecksWorkflow(root, { runner: failing.runner, now: "2026-08-13T00:11:00.000Z" });
+    await writeFile(join(root, "src", "a.ts"), "export const a = 2;\n");
+    const { runner, calls } = fakeRunner();
+
+    const result = await runChecksWorkflow(root, { runner, now: "2026-08-13T00:12:00.000Z" });
+
+    expect(result.ran).toContainEqual(expect.objectContaining({ id: "suite", result: "pass" }));
+    expect(calls).toContain("pnpm test");
   });
 
   it("refuses to run anything when a check to run declares no command", async () => {

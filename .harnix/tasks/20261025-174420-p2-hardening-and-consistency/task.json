@@ -1,0 +1,422 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261025-174420-p2-hardening-and-consistency",
+  "title": "Sửa lỗi P2: breaker skipped giả, cờ không owner, status --criteria, restore-artifacts, crash giữa transaction",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261025-174418-hardening-and-token-diet",
+  "goal": "Xử lý các lỗi P2 đã tái hiện: evidence skipped giả mở breaker, cờ được nhận im lặng, status --criteria khác hành vi, id learning thô, restore-artifacts dùng task.id, collision vĩnh viễn sau crash; đồng bộ --run-checks với quyết định A3 (breaker mở lại khi digest đổi) và tài liệu với quyết định A5 (sửa chữ tiêu chí có evidence kèm --reason); sửa ba lỗi P3 rẻ. Các nghi vấn chưa tái hiện được ghi làm residual risk.",
+  "nonGoals": [
+    "Không refactor cấu trúc action/flag",
+    "Không tối ưu token"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Evidence skipped có summary giả dạng reset không mở circuit breaker; chỉ --reset-breaker hợp lệ mới mở",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-breaker-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Các cờ --exit-code, --artifact, --digest và --file ở chế độ không hỗ trợ bị từ chối; --check lặp lại không bị ghép thành một id",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-flags-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "status --criteria không có task trả null như các chế độ status khác và từ chối --limit",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-status-learning-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "learning --reject/--retire/--promote chuẩn hóa id (dấu phẩy cuối, khoảng trắng, trùng lặp)",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-status-learning-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "doctor --fix restoreFullArtifacts chỉ ghi vào thư mục khớp task.id và bỏ qua task lệch id",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-restore-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Crash giữa ghi file và ghi manifest không để lại collision vĩnh viễn: nội dung đã đúng mong muốn được nhận lại",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-transaction-1"
+      ]
+    },
+    {
+      "id": "ac-7",
+      "text": "AGENTS.md và docs ghi đúng hành vi: --set-criterion sửa được chữ tiêu chí đã có evidence khi có --reason, pass cũ thành stale và lý do được ghi vết contractRevision",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    },
+    {
+      "id": "ac-8",
+      "text": "--run-checks truyền input digest hiện tại vào circuit breaker như --run-check, nên check đã fail hai lần chạy lại được sau khi input đổi; AGENTS.md và docs ghi breaker mở lại khi input digest đổi",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-breaker-digest-1",
+        "ev-chk-gates-1"
+      ]
+    },
+    {
+      "id": "ac-9",
+      "text": "Ba lỗi P3 rẻ được sửa: AGENTS.md ghi --full thay cho --no-brief, repoMapCachePath dùng path join đúng trên POSIX, text-integrity không chặn chuỗi ba dấu hỏi liên tiếp trong text ASCII thuần",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1",
+        "ev-chk-p3-1"
+      ]
+    },
+    {
+      "id": "ac-10",
+      "text": "Lệnh sai trả lỗi kèm gợi ý lệnh đúng: cờ hợp lệ đặt sai lệnh nói rõ cờ thuộc lệnh nào; giá trị sai định dạng in ví dụ và giá trị hợp lệ; id không tồn tại (check, criterion, risk, skill) liệt kê id hợp lệ và id gần nhất; --run-check nhắc khi có vẻ thiếu dấu --; mọi lệnh in lỗi cùng định dạng gồm dòng chữ và JSON { ok: false, error: { message, hint } }",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-error-hints-1",
+        "ev-chk-gates-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/completion.ts",
+    "src/commands/workflow-flag-owners.ts",
+    "src/commands/status.ts",
+    "src/commands/learning.ts",
+    "src/core/doctor/restore-artifacts.ts",
+    "src/core/global/transaction.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-breaker",
+      "description": "Test breaker không bị né bằng skipped giả",
+      "command": "pnpm exec vitest run test/unit/core/workflow/completion.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/completion.test.ts"
+      ]
+    },
+    {
+      "id": "chk-flags",
+      "description": "Test cờ không owner và --check lặp",
+      "command": "pnpm exec vitest run test/workflow/cli-contract.test.ts test/unit/commands/workflow-flag-owners.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "test/unit/commands/**",
+        "test/workflow/cli-contract.test.ts"
+      ]
+    },
+    {
+      "id": "chk-status-learning",
+      "description": "Test status --criteria và id learning",
+      "command": "pnpm exec vitest run test/unit/commands/status.test.ts test/integration/commands/learning.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "test/integration/commands/**",
+        "test/unit/commands/**"
+      ]
+    },
+    {
+      "id": "chk-restore",
+      "description": "Test restoreFullArtifacts lệch id",
+      "command": "pnpm exec vitest run test/unit/core/doctor/restore-artifacts.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "src/core/doctor/**",
+        "test/unit/core/doctor/**"
+      ]
+    },
+    {
+      "id": "chk-transaction",
+      "description": "Test crash giữa file và manifest",
+      "command": "pnpm exec vitest run test/unit/core/global",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-6"
+      ],
+      "inputs": [
+        "src/core/global/**",
+        "test/unit/core/global/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-10",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7",
+        "ac-8",
+        "ac-9"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-breaker-digest",
+      "description": "Test run-checks dùng digest hiện tại cho breaker",
+      "command": "pnpm exec vitest run test/unit/core/workflow/run-checks.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-8"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/run-checks.test.ts"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test, docs parity và golden",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-10",
+        "ac-7",
+        "ac-8",
+        "ac-9"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-p3",
+      "description": "Test ba lỗi P3: text-integrity và repo-map store",
+      "command": "pnpm exec vitest run test/unit/core/workflow/text-integrity.test.ts test/unit/core/repo-map/store.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-9"
+      ],
+      "inputs": [
+        "src/core/repo-map/**",
+        "src/core/workflow/**",
+        "test/unit/core/repo-map/**",
+        "test/unit/core/workflow/text-integrity.test.ts"
+      ]
+    },
+    {
+      "id": "chk-error-hints",
+      "description": "Test dạng bảng: mỗi lệnh sai có hint trỏ đúng lệnh sửa",
+      "command": "pnpm exec vitest run test/workflow/cli-contract.test.ts test/integration/commands/workflow-flags.test.ts test/integration/commands/status.test.ts test/integration/commands/skills.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-10"
+      ],
+      "inputs": [
+        "src/**",
+        "test/integration/commands/**",
+        "test/workflow/cli-contract.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-breaker-1",
+      "checkId": "chk-breaker",
+      "recordedAt": "2026-10-25T19:31:35.285+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/completion.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b6637f68aad5e6701842059543c7f6c20a719ee1ab6d8b9653a0c8fc72c3543d"
+    },
+    {
+      "id": "ev-chk-flags-1",
+      "checkId": "chk-flags",
+      "recordedAt": "2026-10-25T19:31:42.324+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/cli-contract.test.ts test/unit/commands/workflow-flag-owners.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7674e1e429619cd3a00fce012c2d456db15171b5cf6341a04abec0e8fb6900a4"
+    },
+    {
+      "id": "ev-chk-status-learning-1",
+      "checkId": "chk-status-learning",
+      "recordedAt": "2026-10-25T19:31:50.680+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/commands/status.test.ts test/integration/commands/learning.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4d56c1704a51a684328be0da381d9e2442cb65c0c4a63d0db9c9b3898551d8b4"
+    },
+    {
+      "id": "ev-chk-restore-1",
+      "checkId": "chk-restore",
+      "recordedAt": "2026-10-25T19:31:55.496+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/doctor/restore-artifacts.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "06035aa40b381d280211d52542c3877d2b1350f0c6bb2864c1a6dd0e3b503905"
+    },
+    {
+      "id": "ev-chk-transaction-1",
+      "checkId": "chk-transaction",
+      "recordedAt": "2026-10-25T19:32:00.300+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/global — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e9625a9f771e83d622bffab53eee43a41f0fae0fe46257fda425c5951acef0da"
+    },
+    {
+      "id": "ev-chk-breaker-digest-1",
+      "checkId": "chk-breaker-digest",
+      "recordedAt": "2026-10-25T19:32:07.193+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/run-checks.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "446f0abe42c70cf05a3877fc91ecbca934f8e4f48f743b7c2937d86cb7a2128e"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-25T19:32:13.883+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5e725eae5e1789182d85dc2be9b557dd86cf65588917932eb4257b158f387f43"
+    },
+    {
+      "id": "ev-chk-p3-1",
+      "checkId": "chk-p3",
+      "recordedAt": "2026-10-25T19:32:16.981+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/text-integrity.test.ts test/unit/core/repo-map/store.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0cb33a66bc0aa60bf12dd1a1f4857dd1adfbc4e57490a800bdf5390375042a62"
+    },
+    {
+      "id": "ev-chk-error-hints-1",
+      "checkId": "chk-error-hints",
+      "recordedAt": "2026-10-25T19:32:26.558+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/cli-contract.test.ts test/integration/commands/workflow-flags.test.ts test/integration/commands/status.test.ts test/integration/commands/skills.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9e0a73f15f84c234022661818f6344a68ef5203c17cd9cb32d0177e10a6c9eaa"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-25T19:34:29.021+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d328e1a9a3dea0f91b4ddefa79e91c6b13f5dc6d8a813bd16072d62428861ab2"
+    }
+  ],
+  "createdAt": "2026-10-25T17:44:20.000+07:00",
+  "updatedAt": "2026-10-25T19:34:36.165+07:00",
+  "residualRisks": [
+    {
+      "id": "r-lock-path",
+      "text": "Nghi vấn: workflow-lock băm đường dẫn chưa realpath và chưa hạ chữ thường trên Windows, nên D:\\X và d:\\x có thể không loại trừ nhau",
+      "severity": "medium"
+    },
+    {
+      "id": "r-dangling-link",
+      "text": "Nghi vấn: findRealExistingAncestor coi symlink/junction treo là không tồn tại; trên POSIX writeFile trực tiếp có thể đi theo link ra ngoài root",
+      "severity": "medium"
+    },
+    {
+      "id": "r-fsync",
+      "text": "Nghi vấn: atomicWriteFile không fsync trước rename, mất điện có thể để lại task.json rỗng",
+      "severity": "low"
+    },
+    {
+      "id": "r-plan-sync",
+      "text": "Nghi vấn: đánh dấu checklist plan.md sau khi pass làm stale digest nếu plan.md là input của check, và đổi CRLF thành LF",
+      "severity": "low"
+    },
+    {
+      "id": "r-launcher",
+      "text": "Nghi vấn: launcherFailure khớp chuỗi command not found ở bất kỳ đâu trong output, có thể coi một lần fail thật là lỗi khởi chạy và không ghi evidence",
+      "severity": "medium"
+    },
+    {
+      "id": "r-hook-cache",
+      "text": "Nghi vấn: cache hook context theo sessionId không tiêm lại context Harnix sau khi agent compact trong cùng session",
+      "severity": "low"
+    },
+    {
+      "id": "r-noop-flags",
+      "text": "Cờ vô nghĩa bị nhận im lặng ở skill --suggest kèm tên skill, epic --limit với id, doctor --global không có --fix",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-25T19:34:36.165+07:00"
+}

@@ -11,8 +11,8 @@ Detail behind the Task state section of `.harnix/workflow.md`.
   is derived and always overwritten (point the user there for a plain-file review); `.harnix/tasks/.active` is the pointer; `.harnix/epics/<id>/epic.json|md` are epics (the folder also holds initiative
   `research.md`/`spec.md` and `epic.md` auto-links them under `## Supporting Artifacts`);
   `.harnix/workspace/<developer>/journal/` holds the journal. Tasks, research and journals are user-owned data.
-- **Obligations** (criteria text, checks, their mapping and inputs) converge during planning and freeze at the first persisted `ready`. Later changes are one guarded replan with a reason; criteria
-  mapped by recorded evidence and checks with a pass stay immutable.
+- **Obligations** (criteria text, checks, their mapping and inputs) converge during planning and freeze at the first persisted `ready`. Later changes are one guarded replan with a reason; checks
+  with a pass stay immutable, and rewriting a criterion with evidence turns its passes stale.
 - **Time:** `clock` in preflight (`timezone`, `now`, `idPrefix`) is the only time source. Timestamps are ISO 8601 with the configured zone offset; legacy `Z` data is compared by absolute time and
   never rewritten.
 - **Learning:** `--finish` turns a task's decisions, residual risks and evidence findings into project learning (`draft` for one source, `candidate` when a second task repeats it, archived after 28

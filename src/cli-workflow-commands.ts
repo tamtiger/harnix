@@ -102,8 +102,8 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
         return;
       }
       if (options.criteria === true) {
-        if (options.explain === true || options.summary === true)
-          throw new Error("--criteria cannot be combined with --explain or --summary.");
+        if (options.explain === true || options.summary === true || command.getOptionValueSource("limit") === "cli")
+          throw new Error("--criteria cannot be combined with --explain, --summary or --limit.");
         process.stdout.write(`${JSON.stringify(await reportProjectCriteria(process.cwd()))}\n`);
         return;
       }

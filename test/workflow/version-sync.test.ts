@@ -14,6 +14,7 @@ interface VersionSyncResult {
 }
 type SyncVersion = (options: {
   date?: string;
+  format?: (root: string, files: string[]) => unknown;
   kind?: string;
   root: string;
   summaries: readonly string[];
@@ -21,9 +22,14 @@ type SyncVersion = (options: {
 }) => Promise<VersionSyncResult>;
 const scriptUrl = new URL("../../scripts/version-sync.mjs", import.meta.url);
 const script = fileURLToPath(scriptUrl);
-const { syncVersion } = (await import(scriptUrl.href)) as {
+const { syncVersion: syncWithFormatter } = (await import(scriptUrl.href)) as {
   syncVersion: SyncVersion;
 };
+/**
+ * The real formatter spawns pnpm and prettier, about a second per call: the API tests skip it, while the command-line
+ * tests and the test that names the formatted files still go through it.
+ */
+const syncVersion: SyncVersion = (options) => syncWithFormatter({ format: () => undefined, ...options });
 const execFileAsync = promisify(execFile);
 
 const roots: string[] = [];

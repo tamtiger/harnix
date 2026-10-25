@@ -141,7 +141,10 @@ describe.sequential("hidden workflow flag transports", () => {
     await implementingTaskV3(root);
     process.chdir(root);
 
-    const schema = JSON.parse((await run(["--schema"])).out) as { transports: Record<string, string> };
+    const brief = JSON.parse((await run(["--schema"])).out) as { transports?: unknown; transportsOmitted: string };
+    expect(brief.transports).toBeUndefined();
+    expect(brief.transportsOmitted).toContain("--schema --full");
+    const schema = JSON.parse((await run(["--schema", "--full"])).out) as { transports: Record<string, string> };
     expect(Object.keys(schema.transports)).toEqual(expect.arrayContaining(["--criterion", "--migrate", "--run-check"]));
     expect(JSON.parse((await run(["--inspect"])).out)).toHaveProperty("activeTask");
     expect(JSON.parse((await run(["--preflight"])).out)).toHaveProperty("nextStage");

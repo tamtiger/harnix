@@ -8,7 +8,7 @@ Hidden `harnix workflow` is the only persistence transport; it is not a supporte
   `--set-baseline`, never set it yourself; adds a short `versionSkew` string only when the `harnix` on PATH is older than the version recorded in `.harnix/.template-hashes.json`, in which case newer
   gates may be missing: tell the user and, only if they allow, rebuild and reinstall the repository's CLI; `harnix doctor` reports the same as `cli-version-skew`): `activeTask`, `contextDrift`,
   `requiredChecks` (passed, failed, stale, pending), `retryLimitReached`, `nextStage`, `clock`, `learning` (only when `nextStage` is `plan`; `--preflight --brief` omits it). `--inspect` returns
-  `{ activeTask, contextDrift }` and the base for an update. `--schema` prints the envelope and transports.
+  `{ activeTask, contextDrift }` and the base for an update. `--schema` prints the envelope, the task fields and `constraints`; `--schema --full` adds the description of every flag.
 - `--save`: one bounded JSON envelope on stdin `{ task, artifacts?, contractRevision?, epic?, epicMembers? }`. `artifacts` holds only `prd`, `plan`, `design`, a `research` map keyed by safe `.md`
   names and a validated `context`. Saves are serialized by a project lock, compare captured bytes, validate the digest of any new required pass and commit `task.json` last. Needed only for new tasks,
   task text and research; use the flags below for everything else.

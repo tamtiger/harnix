@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { createRepoMap, validateRepoMap } from "src/core/repo-map/store.js";
+import { join } from "node:path";
+
+import { createRepoMap, repoMapCachePath, validateRepoMap } from "src/core/repo-map/store.js";
 import type { RepoMapRecordV1 } from "src/core/repo-map/types.js";
 
 const validRecord: RepoMapRecordV1 = {
@@ -15,6 +17,10 @@ const validRecord: RepoMapRecordV1 = {
 };
 
 describe("repo map store validation", () => {
+  it("builds the cache path from path segments, so it is a nested file on every platform", () => {
+    expect(repoMapCachePath("root")).toBe(join("root", ".harnix", "cache", "repo-map-v1.json"));
+  });
+
   it("validates a well-formed repo map", () => {
     const map = createRepoMap([validRecord]);
     expect(validateRepoMap(map)).toMatchObject({

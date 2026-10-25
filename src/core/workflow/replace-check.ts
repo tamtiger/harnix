@@ -1,4 +1,5 @@
 import type { TaskRecordV3, ValidationCheckV3 } from "src/core/tasks/task.js";
+import { unknownIdError } from "src/utils/suggest.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { equivalentCommand } from "./command-match.js";
 import {
@@ -95,7 +96,13 @@ export async function replaceCheckWorkflow(
   const now = await currentInstant(root, injectedNow);
   const task = await activeV3(root);
   const oldCheck = task.validationPlan.find((check) => check.id === input.oldId);
-  if (oldCheck === undefined) throw new Error(`Workflow check to replace ${input.oldId} is not declared.`);
+  if (oldCheck === undefined)
+    throw unknownIdError(
+      `Workflow check to replace ${input.oldId} is not declared.`,
+      "check",
+      input.oldId,
+      task.validationPlan.map((check) => check.id),
+    );
   if (input.oldId === input.newId) throw new Error("Replacement check ID must differ from the check being replaced.");
   if (!oldCheck.required) throw new Error(`Workflow check ${input.oldId} is not a required check.`);
   const latestEvidence = task.evidence

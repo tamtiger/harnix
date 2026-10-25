@@ -82,7 +82,8 @@ function chosenAction(options: LearningCommandOptions): { action: Action; id: st
   const bad = ids.find((id) => !ID_PATTERN.test(id));
   if (bad !== undefined || ids.length === 0)
     throw new Error(`Learning id ${JSON.stringify(bad ?? one.id)} is invalid.`);
-  return one;
+  // Trimmed and de-duplicated, so "obs-a," or " obs-a " names the learning obs-a.
+  return { action: one.action, id: ids.join(",") };
 }
 
 function validate(options: LearningCommandOptions): { action: Action; id: string } | undefined {

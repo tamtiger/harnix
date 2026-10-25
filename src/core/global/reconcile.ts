@@ -80,6 +80,7 @@ function reconcileWholeFile(
     case "keep-modified":
       preserve(result, label, "modified", "The Harnix-owned whole file was modified by the user.");
       return previous;
+    case "adopt":
     case "unchanged":
       pushUnique(result.unchanged, label);
       return item.entry;

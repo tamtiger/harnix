@@ -11,6 +11,7 @@ import {
 } from "src/core/context/selection-freshness.js";
 import { readCodeImpact, type CodeImpactGitRunner } from "./code-impact.js";
 import { extractCodeImpactSection, renderTaskReview, type ReviewArtifacts } from "./task-review.js";
+import { noteTaskRead } from "./read-tracker.js";
 import type { TaskRecord } from "./task-schema.js";
 import { validateTask } from "./task-validate.js";
 import { TaskValidationError, isMissing, validateTaskId } from "./task-validate-common.js";
@@ -155,7 +156,9 @@ export async function loadTask(path: string): Promise<TaskRecord> {
   } catch (cause) {
     throw new TaskValidationError(`Task record is corrupt or truncated JSON: ${path}`, { cause });
   }
-  return validateTask(parsed);
+  const task = validateTask(parsed);
+  noteTaskRead(task.id, raw);
+  return task;
 }
 export async function setActiveTask(harnixRoot: string, taskId: string): Promise<void> {
   validateTaskId(taskId);

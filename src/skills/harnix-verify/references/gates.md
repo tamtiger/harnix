@@ -9,7 +9,7 @@ Detail behind the Gates section of `.harnix/workflow.md`.
   for each criterion (the suite check does not count); a Full task must repeat the transition with `--reviewed` after the ready-review, and `--dry-run` prints `reviewChecklist`. A task already at
   `ready/ready` is not re-checked. A task that changes the CLI, documentation or test structure should add the focused required check `pnpm run test:gates` (contract tests in seconds). Details:
   `./references/ready-review.md` (or `harnix skill harnix-plan --reference ready-review`).
-- **Contract immutability:** never change a criterion mapped by recorded check evidence; checks with a pass remain immutable and check failures are retired unchanged with a replacement required check
+- **Contract immutability:** rewriting a criterion whose check recorded evidence needs `--reason` and turns those passes stale; checks with a pass remain immutable and check failures are retired unchanged with a replacement required check
   ID. A check edit at `verifying` (`--set-check`, `--replace-check`, `--add-criterion`) resumes at `verifying/verifying` in the same call because every recorded pass stays immutable; elsewhere it
   stays at checkpoint `replan` until `ready/ready`.
 - **Red baseline:** when the suite was already red before the task and outside its scope, the user authorizes it once with

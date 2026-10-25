@@ -1,4 +1,5 @@
 import type { TaskRecordV3 } from "src/core/tasks/task.js";
+import { unknownIdError } from "src/utils/suggest.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { activeV3 } from "./plan-edit.js";
 import { saveWorkflow } from "./save.js";
@@ -15,7 +16,13 @@ export async function removeDecisionWorkflow(root: string, id: string, injectedN
   const task = await activeV3(root);
   requirePlanning(task, "a decision");
   const decisions = task.decisions ?? [];
-  if (!decisions.some((decision) => decision.id === id)) throw new Error(`Decision ${id} does not exist.`);
+  if (!decisions.some((decision) => decision.id === id))
+    throw unknownIdError(
+      `Decision ${id} does not exist.`,
+      "decision",
+      id,
+      decisions.map((decision) => decision.id),
+    );
   return (await saveWorkflow(root, {
     task: {
       ...task,
@@ -35,7 +42,12 @@ export async function removeCriterionWorkflow(root: string, id: string, injected
   const task = await activeV3(root);
   requirePlanning(task, "an acceptance criterion");
   if (!task.acceptanceCriteria.some((criterion) => criterion.id === id))
-    throw new Error(`Acceptance criterion ${id} does not exist.`);
+    throw unknownIdError(
+      `Acceptance criterion ${id} does not exist.`,
+      "criterion",
+      id,
+      task.acceptanceCriteria.map((criterion) => criterion.id),
+    );
   const covering = task.validationPlan.filter((check) => check.criterionIds.includes(id));
   const recorded = covering.find((check) => task.evidence.some((evidence) => evidence.checkId === check.id));
   if (recorded !== undefined)
@@ -65,7 +77,13 @@ export async function removeRiskWorkflow(root: string, id: string, injectedNow?:
   const now = await currentInstant(root, injectedNow);
   const task = await activeV3(root);
   const risks = task.residualRisks ?? [];
-  if (!risks.some((risk) => risk.id === id)) throw new Error(`Residual risk ${id} does not exist.`);
+  if (!risks.some((risk) => risk.id === id))
+    throw unknownIdError(
+      `Residual risk ${id} does not exist.`,
+      "risk",
+      id,
+      risks.map((risk) => risk.id),
+    );
   return (await saveWorkflow(root, {
     task: {
       ...task,

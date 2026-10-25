@@ -1,4 +1,5 @@
 import type { TaskRecordV3 } from "src/core/tasks/task.js";
+import { unknownIdError } from "src/utils/suggest.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { activeV3 } from "./plan-edit.js";
 import { saveWorkflow } from "./save.js";
@@ -42,7 +43,12 @@ export async function setBaselineWorkflow(
     scope: requireText(input.scope, "--scope"),
   };
   if (!task.validationPlan.some((check) => check.id === input.checkId))
-    throw new Error(`Workflow check ${input.checkId} is not declared.`);
+    throw unknownIdError(
+      `Workflow check ${input.checkId} is not declared.`,
+      "check",
+      input.checkId,
+      task.validationPlan.map((check) => check.id),
+    );
   const validationPlan = task.validationPlan.map((check) =>
     check.id === input.checkId ? { ...check, baseline } : check,
   );

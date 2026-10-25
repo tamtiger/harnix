@@ -11,7 +11,7 @@ const CHARACTERS_PER_TOKEN = 4;
 const tokens = (text: string): number => Math.ceil(text.length / CHARACTERS_PER_TOKEN);
 
 const ALWAYS_LOADED_BUDGET = 1_500;
-const SKILL_BUDGET = 2_000;
+const SKILL_BUDGET = 1_800;
 const DIRECT_PATH_BUDGET = 4_000;
 const FULL_PATH_BUDGET = 15_000;
 

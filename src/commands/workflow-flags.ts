@@ -1,4 +1,5 @@
-import { FLAG_OWNERS, listed } from "src/commands/workflow-flag-owners.js";
+import { FLAG_OWNERS, listed, ownerHint } from "src/commands/workflow-flag-owners.js";
+import { EXACTLY_ONE_ACTION_MESSAGE, WORKFLOW_ACTIONS } from "src/core/workflow/actions.js";
 import { BRIEF_ACTIONS, actionFlagName, briefFlagNames } from "src/core/workflow/brief.js";
 
 export interface WorkflowFlags {
@@ -75,53 +76,18 @@ export interface WorkflowFlags {
   expectedTask?: string;
 }
 
-const BOOLEAN_ACTIONS = [
-  "inspect",
-  "preflight",
-  "init",
-  "batch",
-  "save",
-  "snapshot",
-  "finish",
-  "cancel",
-  "learn",
-  "evidence",
-  "schema",
-  "migrate",
-  "runChecks",
-  "setPaths",
-] as const;
-const VALUE_ACTIONS = [
-  "transition",
-  "criterion",
-  "runCheck",
-  "setCheck",
-  "setBaseline",
-  "replaceCheck",
-  "resetBreaker",
-  "epicOrder",
-  "addCriterion",
-  "setCriterion",
-  "addDecision",
-  "addRisk",
-  "removeDecision",
-  "removeCriterion",
-  "removeRisk",
-  "setTitle",
-  "setGoal",
-  "tick",
-] as const;
+const SWITCH_ACTIONS = WORKFLOW_ACTIONS.filter((spec) => spec.kind === "switch").map((spec) => spec.name);
+const VALUE_ACTIONS = WORKFLOW_ACTIONS.filter((spec) => spec.kind === "value").map((spec) => spec.name);
 
 const BATCHABLE_ACTIONS = new Set(["criterion", "transition", "finish"]);
 
 export function selectActions(flags: WorkflowFlags): string[] {
-  const selected: string[] = BOOLEAN_ACTIONS.filter((name) => flags[name] === true);
-  for (const name of VALUE_ACTIONS) if (flags[name] !== undefined) selected.push(name);
+  const values = flags as Record<string, unknown>;
+  const selected: string[] = SWITCH_ACTIONS.filter((name) => values[name] === true);
+  for (const name of VALUE_ACTIONS) if (values[name] !== undefined) selected.push(name);
 
   if (selected.length === 0) {
-    throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --reset-breaker, --add-criterion, --add-decision, --add-risk, --remove-decision, --remove-criterion, --remove-risk, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, --tick, or --learn.",
-    );
+    throw new Error(EXACTLY_ONE_ACTION_MESSAGE);
   }
 
   if (selected.length === 1) {
@@ -130,9 +96,7 @@ export function selectActions(flags: WorkflowFlags): string[] {
 
   const nonBatchable = selected.filter((action) => !BATCHABLE_ACTIONS.has(action));
   if (nonBatchable.length > 0) {
-    throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --reset-breaker, --add-criterion, --add-decision, --add-risk, --remove-decision, --remove-criterion, --remove-risk, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, --tick, or --learn.",
-    );
+    throw new Error(EXACTLY_ONE_ACTION_MESSAGE);
   }
 
   if (selected.includes("criterion") && flags.met !== true) {
@@ -199,6 +163,8 @@ export function assertCommandShape(action: string, flags: WorkflowFlags, operand
       `--full is not supported for workflow ${actionFlagName(action)}; it works with ${briefFlagNames().join(", ")}.`,
     );
   if (action === "snapshot" && flags.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
+  if ((action === "snapshot" || action === "evidence") && flags.check?.includes(","))
+    throw new Error(`workflow ${actionFlagName(action)} takes one check id in --check, not a list: ${flags.check}.`);
   if (flags.check !== undefined && !["snapshot", "evidence", "addCriterion"].includes(action))
     throw new Error("--check requires workflow --snapshot, --evidence or --add-criterion.");
 }
@@ -209,10 +175,26 @@ function assertActionRequirements(action: string, flags: WorkflowFlags): void {
     throw new Error("workflow --add-criterion requires --text.");
   if (action === "replaceCheck" && flags.reason === undefined)
     throw new Error("workflow --replace-check requires --reason.");
-  if (action === "setPaths" && !listed(flags.relevantPath) && !listed(flags.relevantSpec))
-    throw new Error("workflow --set-paths requires --relevant-path and/or --relevant-spec.");
+  if (action === "setPaths" && flags.file === undefined && !listed(flags.relevantPath) && !listed(flags.relevantSpec))
+    throw new Error(
+      "workflow --set-paths requires --relevant-path and/or --relevant-spec, or --file with a { paths, specs } payload.",
+    );
+  assertOnePayloadForm(action, flags);
   if (isEvidenceFlagsMode(action, flags) && (!flags.check || !flags.result || flags.summary === undefined))
     throw new Error("workflow --evidence with flags requires --check, --result and --summary.");
+}
+
+/** `--evidence` and `--cancel` take their payload from flags or from `--file`; a mix would drop one side silently. */
+function assertOnePayloadForm(action: string, flags: WorkflowFlags): void {
+  if (isEvidenceFlagsMode(action, flags) && flags.file !== undefined)
+    throw new Error("workflow --evidence takes either --file <payload.json> or --check/--result/--summary, not both.");
+  if (action !== "cancel") return;
+  if (flags.reason !== undefined && flags.file !== undefined)
+    throw new Error("workflow --cancel takes either --reason <text> or --file <payload.json>, not both.");
+  if (flags.reason === undefined && flags.authorizedBy !== undefined)
+    throw new Error(
+      "workflow --cancel uses --authorized-by only together with --reason <text>; a --file payload carries its own authorizedBy.",
+    );
 }
 
 export function assertFlagGroups(
@@ -227,7 +209,7 @@ export function assertFlagGroups(
     );
   for (const owner of FLAG_OWNERS)
     if (owner.isSet(flags) && !owner.actions.some((a) => activeActions.includes(a)))
-      throw new Error(`${owner.name} requires ${owner.hint}.`);
+      throw new Error(`${owner.name} requires ${ownerHint(owner)}.`);
   if (action === "transition" && flags.task !== undefined && flags.dryRun !== true)
     throw new Error(
       "--task works with workflow --transition only together with --dry-run (a state change acts on the active task).",

@@ -124,6 +124,10 @@ async function applyFileDecision(
     case "collision":
       result.preserved.push(entry.path);
       break;
+    case "adopt":
+      result.preserved.push(entry.path);
+      nextEntries.push({ ...entry, generatedHash });
+      break;
     case "keep-modified":
       result.preserved.push(entry.path);
       nextEntries.push(previous!);

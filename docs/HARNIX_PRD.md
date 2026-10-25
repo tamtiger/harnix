@@ -136,7 +136,7 @@ harnix learning --retire <id>
 harnix learning --prune [--apply]
 harnix status
 harnix tasks [--limit <1..100>] [--status <TaskStatus>]
-harnix epic [<epic-id>] [--limit <1..100>] [--brief]
+harnix epic [<epic-id>] [--limit <1..100>] [--brief]   # list: newest epic first; total counts every epic, not the page
 # hidden: harnix workflow --epic-order <epic-id> <task-id>...   # optional explicit run order of an epic (members in order first, the rest by ID)
 harnix resume <task-id> [--dry-run]
 harnix resume --epic <epic-id> [--dry-run]

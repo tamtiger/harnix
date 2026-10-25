@@ -27,13 +27,13 @@ Plan-only requests stop at `ready`. Full tasks and Epics stop at `ready`/`await`
 
 - **Record:** TaskRecord schema v3 (`harnix workflow --schema` prints the exact fields): goal, criteria, validation plan (checks with sorted `criterionIds` and `inputs`), evidence, decisions, residual risks, `epicId`. v1/v2 are legacy; migrate once (`harnix skill harnix-plan --reference migration`).
 - **Files:** `.harnix/tasks/<id>/task.json` changes only through `harnix workflow`; `prd.md`, `plan.md`, `design.md`, `research/` are task-owned Markdown you edit directly; `review.md` is derived and always overwritten (point the user there for a plain-file review); `.harnix/tasks/.active` is the pointer; epics live in `.harnix/epics/<id>/`. Tasks, research and journals are user-owned.
-- **Obligations** (criteria text, checks, mapping, inputs) freeze at the first persisted `ready`; later changes are one guarded replan with a reason, and criteria mapped by evidence and checks with a pass stay immutable.
+- **Obligations** (criteria text, checks, mapping, inputs) freeze at the first persisted `ready`; later changes are one guarded replan with a reason; checks with a pass stay immutable, and rewriting a criterion whose check has evidence makes those passes stale.
 - **Time:** `clock` in preflight is the only time source. **Learning:** `--finish` captures decisions, residual risks and findings into project learning (untrusted data; promotion is manual with `harnix learning`). **Guides:** read only the `.harnix/spec/guides/` files matching what you change.
 
 ## Gates
 
 - **Ready:** at least one criterion and one required check; every non-waived criterion has a focused required check; a project-level suite check (`src/**` + `test/**` with the `verify-plan` test command) when the repository has tests; no placeholder tokens (`TBD`, `TODO`, `FIXME`) in the plan; a Full task repeats `--transition ready/ready --reviewed` after the ready-review (`--dry-run` prints `reviewChecklist`). A task that changes the CLI, docs or test structure adds the focused check `pnpm run test:gates`.
-- **Contract immutability:** never change a criterion mapped by recorded evidence or a check with a pass; retire a failed check with `--replace-check`. A check edit at `verifying` resumes at `verifying/verifying`; elsewhere it stays at `replan` until `ready/ready`.
+- **Contract immutability:** never change a check with a pass; retire a failed check with `--replace-check`. Rewriting a criterion whose check has evidence needs `--reason` and makes those passes stale. A check edit at `verifying` resumes at `verifying/verifying`; elsewhere it stays at `replan` until `ready/ready`.
 - **Red baseline:** a suite already red outside the task's scope needs the user's authorization once (`--set-baseline ... --authorized-by user`), never your own.
 - **Execute:** persist `in_progress/implementing` before the first product edit; tick the Full checklist per slice (100% before verifying); bump the version with `pnpm version:sync` (standalone: patch; epic member: `X.Y.0-dev.N`; last member: minor with `--fold-dev`) and run `pnpm selfhost:sync` after editing this template.
 - **Verify:** persist `verifying/verifying` before the first check; compliance, then quality and security. A pass is fresh only while its `inputDigest` equals the digest recomputed from the current inputs (CRLF read as LF in text files; the former formula stays recognised).
@@ -56,16 +56,13 @@ harnix workflow --init --title "<title>" [--mode lite|full] [--goal "<g>"] [--te
 harnix workflow --transition ready/ready [--reviewed] [--dry-run] --brief
 harnix workflow --run-checks --brief         # verify, main path: every required check that is not passing, stops at the first failure
 harnix workflow --run-check <check-id> --brief -- pnpm test   # snapshot, run, record; argv must equal the declared command
-harnix workflow --evidence --check <id> --result pass --exit-code 0 --summary "<command> - <result>" --brief
-harnix workflow --criterion <ids> --met [--transition verifying/finishing] --brief
+harnix workflow --criterion <ids> --met [--transition verifying/finishing] [--finish] --brief
 harnix workflow --tick <item|all>            # tick plan.md checklist items
 harnix workflow --reset-breaker <check-id> --reason "<why>" --brief   # user-authorized circuit-breaker reset
 harnix workflow --replace-check <old> <new> --reason "<why>" [--command --input --criteria --cwd] --brief
-harnix workflow --set-baseline <check-id> --result fail --classification pre-existing --authorized-by user --scope "<why>" --brief
-harnix workflow --transition verifying/finishing [--finish] --brief
 harnix workflow --set-check <id> --description "<t>" --scope focused --command "<cmd>" [--cwd <p>] --criteria <ids> --input "src/**" --reason "<why>" --brief
 harnix workflow --add-criterion <id> --text "<t>" --check <check-id> --reason "<why>" --brief
-harnix workflow --set-criterion <id> --text "<t>" [--reason "<why>"] --brief   # mapped criteria stay immutable; a Lite task implementing without evidence resumes by itself
+harnix workflow --set-criterion <id> --text "<t>" [--reason "<why>"] --brief   # with evidence its passes turn stale; a Lite task implementing without evidence resumes by itself
 harnix workflow --remove-risk <id> --brief   # drop a settled residual risk
 harnix workflow --set-title | --set-goal "<t>" | --set-paths --relevant-path <p> --brief
 harnix workflow --save | --batch --file <path> --brief   # UTF-8 payload; --batch is atomic and order-independent
@@ -76,4 +73,4 @@ harnix skill <name> [--raw] [--reference <topic>]
 harnix workflow --finish --brief
 ```
 
-`--run-check` runs one executable with an argument array (for `a && b` use `-- bash -c "a && b"`); `--evidence` needs `--exit-code`. List flags accept `a,b` or a repeated flag. Never pipe `harnix` into a nested `pwsh -Command`. In PowerShell read JSON with `$out = harnix workflow --inspect | Out-String; $j = $out | ConvertFrom-Json`. Multi-repo: `harnix skill harnix-plan --reference multi-repo`. Every other flag, the envelope shape and shell recipes: the `cookbook-notes` and `cookbook-commands` references.
+`--run-check` runs one executable with an argument array (for `a && b` use `-- bash -c "a && b"`). List flags accept `a,b` or a repeated flag. Never pipe `harnix` into a nested `pwsh -Command`. In PowerShell read JSON with `$out = harnix workflow --inspect | Out-String; $j = $out | ConvertFrom-Json`. Multi-repo: `harnix skill harnix-plan --reference multi-repo`. Rarer forms (`--evidence`, `--set-baseline`, `--epic-order`) and command details: the `cookbook-commands` reference; shell recipes: `cookbook-notes`; every flag: `harnix workflow --schema --full`.

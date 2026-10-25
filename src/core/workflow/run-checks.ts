@@ -1,4 +1,5 @@
 import { resolveActiveTask } from "src/core/tasks/task.js";
+import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { inspectRequiredChecks } from "src/core/verification/check-report.js";
 import { type CheckRunner } from "src/utils/check-runner.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
@@ -45,7 +46,9 @@ export async function runChecksWorkflow(
     .filter((check) => pending.has(check.id))
     .sort((left, right) => Number(right.scope === "focused") - Number(left.scope === "focused"));
   for (const check of todo) {
-    if (verificationRetryDisposition(task, check.id, Date.now()) === "stop")
+    // Like --run-check: changed inputs (a new digest) reopen a check that failed twice in a row.
+    const digest = (await computeInputDigest(root, task, check.id)).inputDigest;
+    if (verificationRetryDisposition(task, check.id, Date.now(), digest) === "stop")
       throw new Error(
         `Check ${check.id} failed twice in a row; nothing was run. Stop and report to the user, or continue with a user-authorized harnix workflow --replace-check ${check.id} <new-id> --reason "<why>".`,
       );
