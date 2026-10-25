@@ -72,13 +72,13 @@ export async function runCheckWorkflow(
   if (task.schemaVersion !== 3) throw new Error("Workflow --run-check requires a TaskRecord schema v3 task.");
   const declared = task.validationPlan.find((check) => check.id === checkId);
   if (!declared) throw new Error(`Workflow run-check check ${checkId} is not declared.`);
-  assertRetryAllowed(task, checkId);
+  const beforeSnapshot = await computeInputDigest(root, task, checkId);
+  const before = beforeSnapshot.inputDigest;
+  assertRetryAllowed(task, checkId, dependencies.now ? Date.parse(dependencies.now) : undefined, before);
   if (declared.command !== undefined && !sameCommand(declared.command, argv)) {
     throw new Error(`Workflow run-check command differs from the command declared by check ${checkId}.`);
   }
   const runCwd = await resolveRunCwd(root, checkId, declared.cwd, dependencies.cwd);
-  const beforeSnapshot = await computeInputDigest(root, task, checkId);
-  const before = beforeSnapshot.inputDigest;
   await saveInputDigestSnapshot(harnixRoot, beforeSnapshot);
   const run = await (dependencies.runner ?? runCheckProcess)(executable, args, runCwd);
   const launcher = launcherFailure(run.output, run.exitCode, executable);

@@ -79,11 +79,20 @@ describe("workflow replace-check", () => {
     await expect(
       replaceCheckWorkflow(
         root,
-        { oldId: "check", newId: "check-replacement" },
-        { reason: "Thay the check da pass" },
+        { oldId: "check", newId: "check-replacement", command: "pnpm vitest run other" },
+        {},
         NOW,
       ),
-    ).rejects.toThrow(/after passing evidence/u);
+    ).rejects.toThrow(/after passing evidence without --reason/u);
+
+    const replaced = await replaceCheckWorkflow(
+      root,
+      { oldId: "check", newId: "check-replacement", command: "pnpm vitest run other" },
+      { reason: "Thay the check da pass voi command moi hop le" },
+      NOW,
+    );
+    expect(replaced.validationPlan.find((c) => c.id === "check")?.required).toBe(false);
+    expect(replaced.validationPlan.find((c) => c.id === "check-replacement")?.required).toBe(true);
 
     await expect(
       replaceCheckWorkflow(root, { oldId: "check", newId: "check" }, { reason: "Trùng id cũ và mới" }, NOW),

@@ -113,6 +113,7 @@ The commands are the same in both shells; double-quote text in PowerShell and si
 
 ```text
 harnix status --summary                      # micro status projection under 80 tokens (stage, epic progress [m/n], criteria, checks, next action)
+harnix status --criteria                     # lean-token projection of acceptance criteria (id, status, text, coveredBy) without whole task dump
 harnix workflow --preflight                  # clock.now and clock.idPrefix are the only time source
 harnix workflow --init --title "<task title>" [--mode lite|full] [--goal "<goal>"] [--text "<criterion>"]... [--with-check "id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>"]... [--command "<cmd>"] [--input "src/**"] [--epic <epic-id>] [--follow-up <task-id>] [--cwd <package-dir>] --brief
 harnix workflow --transition ready/ready --dry-run --brief
@@ -121,6 +122,8 @@ harnix workflow --run-checks --brief                       # verify, main path: 
 harnix workflow --run-check <check-id> --brief -- pnpm test    # snapshot, run, snapshot and record; argv must equal the declared command and runs in the declared cwd
 harnix workflow --evidence --check <check-id> --result pass --exit-code 0 --summary "<command> - <result>" --brief
 harnix workflow --criterion <criterion-id>,<criterion-id> --met [--transition verifying/finishing] --brief   # marks criteria, optionally advances transition in one call
+harnix workflow --tick <item>                # mark plan.md checklist items completed (- [x]) by index (1-based), 'all', or pattern
+harnix workflow --reset-breaker <check-id> --reason "<why, 10-1000 characters>" --brief # reset circuit breaker for a check without renaming (or rerun with changed input digest)
 harnix workflow --replace-check <old-check-id> <new-check-id> --reason "<why, required>" [--description "<text>" --command "<cmd>" --scope focused --input "src/**" --criteria <criterion-id> --cwd <path>] --brief
 harnix workflow --set-baseline <check-id> --result fail --classification pre-existing --authorized-by user --scope "<why the suite is red>" --brief   # authorized red suite; pair it with a focused required check
 harnix workflow --transition verifying/finishing [--finish] --brief  # advances transition, optionally finishes in one call

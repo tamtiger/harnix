@@ -1,0 +1,244 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261024-202204-shell-guidelines-scratch-dir-and-git-safety",
+  "title": "Quy ước File Tạm Kiểm thử, Hướng dẫn An toàn Shell Windows và Git Safety Rules",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261024-202200-harnix-dx-workflow-improvements",
+  "goal": "Giải quyết Vấn đề 6, 7 & Git Safety: (1) Chuẩn hóa thư mục scratch .harnix/tmp/ cho kiểm thử và scripts phụ trợ; (2) Hướng dẫn an toàn shell Windows và khuyến nghị --file cho UTF-8; (3) Bổ sung quy tắc Git safety trong AGENTS.md (kiểm tra branch trước commit, cấm pipe checkout); (4) Tối ưu hóa hook ngữ cảnh tránh lặp guides không cần thiết.",
+  "nonGoals": [
+    "Không thay đổi cấu trúc repository ngoài các tài liệu và hook được chỉ định",
+    "Không can thiệp vào các branch Git khác"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Cập nhật tài liệu quy trình docs/HARNIX_WORKFLOW.md, rules/AGENTS.md và root AGENTS.md làm rõ quy ước cho phép tạo file tạm kiểm thử trong .harnix/tmp/ và khuyến nghị dùng --file cho mọi payload UTF-8.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-v2-1",
+        "ev-chk-docs-contract-4"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Bổ sung điều khoản Git Safety vào rules/AGENTS.md và AGENTS.md: bắt buộc chạy git branch --show-current xác nhận nhánh trước khi commit và nghiêm cấm pipe lệnh checkout.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-v2-1",
+        "ev-chk-docs-contract-4"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Tối ưu hóa context hook trong src/core/managed/ để kiểm tra cache ngữ cảnh và tránh chèn lại danh sách guides nếu session và files liên quan không thay đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-v2-1",
+        "ev-chk-unit-context-hook-3"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite bảo đảm không hồi quy",
+      "scope": "full",
+      "required": false,
+      "command": "pnpm test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite-v2",
+      "description": "Replacement for check-suite",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm test"
+    },
+    {
+      "id": "chk-docs-contract",
+      "description": "Kiểm thử tính hợp lệ và đồng bộ của tài liệu và rules",
+      "command": "pnpm vitest run test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "docs/HARNIX_WORKFLOW.md",
+        "src/templates/harnix/activation.ts"
+      ]
+    },
+    {
+      "id": "chk-unit-context-hook",
+      "description": "Kiểm thử ngữ cảnh tối ưu hóa của internal-context command",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/commands/internal-context.test.ts",
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/internal-context.ts",
+        "test/unit/commands/internal-context.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-24T22:16:54.229+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Cập nhật input glob chính xác cho chk-docs-contract",
+      "artifactPaths": [
+        ".harnix/tasks/20261024-202204-shell-guidelines-scratch-dir-and-git-safety/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-docs-contract-1",
+      "checkId": "chk-docs-contract",
+      "recordedAt": "2026-10-24T22:17:11.549+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5e538f5e87de02f60c86d94872e31f58daaccd2070d6e9c3f6d81fdeb38c6cf7"
+    },
+    {
+      "id": "ev-chk-unit-context-hook-1",
+      "checkId": "chk-unit-context-hook",
+      "recordedAt": "2026-10-24T22:17:20.762+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/commands/internal-context.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1fdbff5b5ae895aa2faf692582faa103dc13c50a0e9faa69959c35644b0eacbf"
+    },
+    {
+      "id": "ev-chk-docs-contract-2",
+      "checkId": "chk-docs-contract",
+      "recordedAt": "2026-10-24T22:18:08.475+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5e538f5e87de02f60c86d94872e31f58daaccd2070d6e9c3f6d81fdeb38c6cf7"
+    },
+    {
+      "id": "ev-chk-unit-context-hook-2",
+      "checkId": "chk-unit-context-hook",
+      "recordedAt": "2026-10-24T22:18:16.440+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/commands/internal-context.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1fdbff5b5ae895aa2faf692582faa103dc13c50a0e9faa69959c35644b0eacbf"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T22:20:15.367+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "31d17c5c0554a730b93af9c2f7ef0dd0225946a78b6f82878450974b634d32d2"
+    },
+    {
+      "id": "ev-chk-docs-contract-3",
+      "checkId": "chk-docs-contract",
+      "recordedAt": "2026-10-24T22:21:23.370+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5e538f5e87de02f60c86d94872e31f58daaccd2070d6e9c3f6d81fdeb38c6cf7"
+    },
+    {
+      "id": "ev-chk-docs-contract-4",
+      "checkId": "chk-docs-contract",
+      "recordedAt": "2026-10-24T22:25:21.264+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/workflow/docs-task-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5e538f5e87de02f60c86d94872e31f58daaccd2070d6e9c3f6d81fdeb38c6cf7"
+    },
+    {
+      "id": "ev-chk-unit-context-hook-3",
+      "checkId": "chk-unit-context-hook",
+      "recordedAt": "2026-10-24T22:25:29.632+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/commands/internal-context.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1fdbff5b5ae895aa2faf692582faa103dc13c50a0e9faa69959c35644b0eacbf"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T22:27:31.458+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "6ed12e2e334d7bd27ba6cbab43e7d95b7288259309ff40ed7231be339ae2d716"
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-24T22:28:11.938+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Kích hoạt lại check suite sau khi fix template assertion và changelog fold",
+      "artifactPaths": [
+        ".harnix/tasks/20261024-202204-shell-guidelines-scratch-dir-and-git-safety/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-suite-v2-1",
+      "checkId": "check-suite-v2",
+      "recordedAt": "2026-10-24T22:30:41.420+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "57f1fdf2447e6f5ea9c8967d68e0a6228273f821acba1bf9bde6b2af450ff420"
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNIX_WORKFLOW.md",
+    "rules/AGENTS.md",
+    "AGENTS.md",
+    "src/commands/internal-context.ts",
+    "test/workflow/docs-task-contract.test.ts",
+    "test/unit/commands/internal-context.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "createdAt": "2026-10-24T21:24:00.000+07:00",
+  "updatedAt": "2026-10-24T22:30:56.834+07:00",
+  "completedAt": "2026-10-24T22:30:56.834+07:00"
+}

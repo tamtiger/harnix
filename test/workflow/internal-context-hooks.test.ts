@@ -351,4 +351,49 @@ describe("buildContext pointers", () => {
     expect(result.text).toContain("G".repeat(300));
     expect(result.text).not.toContain("pointer");
   });
+
+  it("elides duplicate context injection for repeated calls with same session_id", async () => {
+    const root = await temporaryRepository();
+    const config = createConfig({ developer: "tam" });
+    config.context.mode = "full";
+    await writeConfig(join(root, ".harnix", "config.yaml"), config);
+    await write(root, "docs/a.md", "sample context content");
+    const task: TaskRecord = buildTaskV1({
+      id: "20260807-120000-session-task",
+      title: "t",
+      status: "in_progress",
+      checkpoint: "implementing",
+      goal: "t",
+      acceptanceCriteria: [],
+      relevantPaths: ["docs/a.md"],
+      validationPlan: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+    await saveTask(join(root, ".harnix"), task);
+    await setActiveTask(join(root, ".harnix"), task.id);
+
+    const first = await renderInternalContextForHook({
+      platform: "codex",
+      fallbackCwd: root,
+      event: { session_id: "sess-123", cwd: root },
+    });
+    expect(first).toContain("sample context content");
+
+    // Second call with same session_id and unchanged task state returns empty payload
+    const second = await renderInternalContextForHook({
+      platform: "codex",
+      fallbackCwd: root,
+      event: { session_id: "sess-123", cwd: root },
+    });
+    expect(second).toBe("");
+
+    // Different session_id receives fresh payload
+    const third = await renderInternalContextForHook({
+      platform: "codex",
+      fallbackCwd: root,
+      event: { session_id: "sess-456", cwd: root },
+    });
+    expect(third).toContain("sample context content");
+  });
 });

@@ -300,4 +300,28 @@ describe("validation check cwd and baseline contracts", () => {
     expect(() => validateTask(withCheck({ baseline: { authorizedBy: 3 } }))).toThrow(/baseline/u);
     expect(() => validateTask(withCheck({ baseline: { scope: 7 } }))).toThrow(/baseline/u);
   });
+
+  it("provides actionable error message with command suggestion when criterion is uncovered", () => {
+    const fixture = taskV2Fixture();
+    const uncovered = {
+      ...fixture,
+      acceptanceCriteria: [
+        ...fixture.acceptanceCriteria,
+        { id: "ac-uncovered", text: "Tiêu chí chưa có check", status: "pending", evidenceIds: [] },
+      ],
+    };
+    expect(() => validateTask(uncovered)).toThrow(
+      /criterion "ac-uncovered" .* not covered by any required validation check.*Gợi ý:/su,
+    );
+  });
+
+  it("provides detailed check ID and suggestion when inputs are unsorted", () => {
+    const fixture = taskV2Fixture();
+    const unsortedInputs = {
+      ...fixture,
+      schemaVersion: 3,
+      validationPlan: [{ ...fixture.validationPlan[0]!, inputs: ["src/z.ts", "src/a.ts"] }],
+    };
+    expect(() => validateTask(unsortedInputs)).toThrow(/inputs must be sorted and unique.*Gợi ý thứ tự chuẩn/su);
+  });
 });

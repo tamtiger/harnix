@@ -33,6 +33,7 @@ export const BRIEF_ACTIONS: ReadonlySet<string> = new Set([
   "setTitle",
   "setGoal",
   "replaceCheck",
+  "resetBreaker",
   "setBaseline",
 ]);
 

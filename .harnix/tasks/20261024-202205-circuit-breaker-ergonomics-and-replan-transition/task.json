@@ -1,0 +1,231 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261024-202205-circuit-breaker-ergonomics-and-replan-transition",
+  "title": "Cải tiến Circuit Breaker Ergonomics, Chuyển Trạng Thái Replan Trực Tiếp và Cảnh Báo Input Glob",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261024-202200-harnix-dx-workflow-improvements",
+  "goal": "Giải quyết 3 vấn đề cọ xát phát sinh trong quá trình thực chiến: (1) Nâng cấp Circuit Breaker của --run-check cho phép reset và chạy lại khi có thay đổi code/digest hoặc dùng cờ --reset-breaker <id> --reason <why> thay vì bắt buộc rename check; (2) Cho phép chuyển trạng thái trực tiếp từ checkpoint replan về in_progress/implementing khi task vốn đang in_progress; (3) Kiểm tra và cảnh báo sớm khi input glob cố định không khớp file nào trong repository.",
+  "nonGoals": [
+    "Không bỏ qua kiểm tra an toàn circuit breaker khi không có thay đổi mã nguồn",
+    "Không cho phép replan không có lý do hợp lệ"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Hỗ trợ cơ chế reset Circuit Breaker cho check bị khóa do fail 2 lần liên tiếp: cho phép chạy lại khi inputDigest của check thay đổi (chứng minh có code change) hoặc cung cấp cờ workflow --reset-breaker <check-id> --reason <why> mà không bắt buộc đổi ID check.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-5",
+        "ev-chk-unit-retry-guard-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cho phép lệnh workflow --transition in_progress/implementing chuyển trực tiếp từ checkpoint replan khi task vốn đang ở status in_progress mà không bắt buộc qua bước trung gian ready/ready.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-5",
+        "ev-chk-unit-transition-replan-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Bổ sung kiểm tra cảnh báo hoặc từ chối sớm ở workflow --init và workflow --set-check nếu một input glob cố định không khớp bất kỳ file nào trong workspace.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-5",
+        "ev-chk-unit-check-inputs-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-unit-retry-guard",
+      "description": "Kiểm thử cơ chế circuit breaker reset và retry khi digest đổi",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/workflow/retry-guard.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/workflow/retry-guard.ts",
+        "test/unit/core/workflow/retry-guard.test.ts"
+      ]
+    },
+    {
+      "id": "chk-unit-transition-replan",
+      "description": "Kiểm thử chuyển trạng thái từ replan về in_progress/implementing",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/workflow/transition.test.ts",
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/transition.ts",
+        "test/unit/core/workflow/transition.test.ts"
+      ]
+    },
+    {
+      "id": "chk-unit-check-inputs",
+      "description": "Kiểm thử kiểm tra input pattern rỗng",
+      "command": "pnpm vitest run test/unit/core/workflow/check-input-validator.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/workflow/check-input-validator.ts",
+        "test/unit/core/workflow/check-input-validator.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite bảo đảm không hồi quy",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-unit-retry-guard-1",
+      "checkId": "chk-unit-retry-guard",
+      "recordedAt": "2026-10-24T22:39:49.666+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/retry-guard.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cd34a489dd6f5d5a957e97fc4936df1ff506e0da73b054d18693bb13f5f94f71"
+    },
+    {
+      "id": "ev-chk-unit-transition-replan-1",
+      "checkId": "chk-unit-transition-replan",
+      "recordedAt": "2026-10-24T22:40:02.100+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/transition.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cf733efb625f05b619f01c0e8db9f72ab8a9cf423ac5710f5f48023e0d81a412"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-24T22:40:39.214+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Update check command and inputs to target dedicated unit test",
+      "artifactPaths": [
+        ".harnix/tasks/20261024-202205-circuit-breaker-ergonomics-and-replan-transition/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-unit-check-inputs-1",
+      "checkId": "chk-unit-check-inputs",
+      "recordedAt": "2026-10-24T22:40:51.191+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/check-input-validator.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "08419c51df5320703ae6bbf85cd15f619d6d18cff7bb693a58195f202db60d74"
+    },
+    {
+      "id": "ev-chk-unit-retry-guard-2",
+      "checkId": "chk-unit-retry-guard",
+      "recordedAt": "2026-10-24T22:41:01.722+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/retry-guard.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cd34a489dd6f5d5a957e97fc4936df1ff506e0da73b054d18693bb13f5f94f71"
+    },
+    {
+      "id": "ev-chk-unit-transition-replan-2",
+      "checkId": "chk-unit-transition-replan",
+      "recordedAt": "2026-10-24T22:41:21.526+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/transition.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cf733efb625f05b619f01c0e8db9f72ab8a9cf423ac5710f5f48023e0d81a412"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T22:43:18.784+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "9194450dd62d9fa986d8e2542408b3703e5de9053061ffc84b054ce15d82055d"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T22:48:20.412+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "09175c07bb7bb1b3dded80ee89de0ea6bda1abe67a837c206c9917eee8f9bb13"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T22:52:18.646+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "33051280f6259bef39d1d8544bcc26cb5410b3a024652fde77343a4ce30aa742"
+    },
+    {
+      "id": "ev-check-suite-4",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T22:55:08.391+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "f9b0ae6802ee66807dc6d66e941e8221120ae76167ae3b9e62fd3a8c63a6a9ce"
+    },
+    {
+      "id": "ev-check-suite-5",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T22:58:15.847+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5fa335f5f0ac3b3e85165633c1560147a95a67fc8482e85a5d9f0e3be0bf445b"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/retry-guard.ts",
+    "src/core/workflow/transition.ts",
+    "src/core/tasks/task-validate-contracts.ts",
+    "test/unit/core/workflow/retry-guard.test.ts",
+    "test/unit/core/workflow/transition.test.ts",
+    "test/unit/core/tasks/task-validate-contracts.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "createdAt": "2026-10-24T22:24:00.000+07:00",
+  "updatedAt": "2026-10-24T22:58:33.712+07:00",
+  "completedAt": "2026-10-24T22:58:33.712+07:00"
+}

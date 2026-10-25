@@ -82,6 +82,11 @@ export async function transitionWorkflow(
   if (status === "verifying") {
     const checklistWarning = await inspectPlanChecklistWarning(harnixRoot, task.id);
     if (checklistWarning !== undefined) {
+      if (checkpoint === "verifying") {
+        throw new Error(
+          `Cannot enter verifying: plan.md checklist is not 100% completed. Tick remaining items using "harnix workflow --tick <item>" or "--tick all".`,
+        );
+      }
       process.stderr.write(`warning: ${checklistWarning}\n`);
     }
   }
@@ -126,7 +131,13 @@ async function handleDryRunTransition(
   if (status === "verifying") {
     const checklistWarning = await inspectPlanChecklistWarning(harnixRoot, task.id);
     if (checklistWarning !== undefined) {
-      advisories.push(checklistWarning);
+      if (checkpoint === "verifying") {
+        issues.push(
+          `Cannot enter verifying: plan.md checklist is not 100% completed. Tick remaining items using "harnix workflow --tick <item>" or "--tick all".`,
+        );
+      } else {
+        advisories.push(checklistWarning);
+      }
     }
   }
 

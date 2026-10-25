@@ -44,10 +44,20 @@ export function canCompleteTask(task: TaskRecord, now = Date.now(), maxEvidenceA
       (criterion.status === "met" &&
         criterion.evidenceIds.some((id) => {
           const evidence = freshPasses.find((candidate) => candidate.id === id);
-          return (
+          if (
             evidence?.checkId !== undefined &&
             checks.get(evidence.checkId)?.criterionIds.includes(criterion.id) === true
-          );
+          ) {
+            return true;
+          }
+          const pastEvidence = task.evidence.find((candidate) => candidate.id === id);
+          if (
+            pastEvidence?.checkId !== undefined &&
+            checks.get(pastEvidence.checkId)?.criterionIds.includes(criterion.id) === true
+          ) {
+            return freshPasses.some((latest) => latest.checkId === pastEvidence.checkId);
+          }
+          return false;
         })),
   );
 }
@@ -56,13 +66,14 @@ export function verificationRetryDisposition(
   task: TaskRecord,
   checkId: string,
   now = Date.now(),
+  currentDigest?: string,
 ): VerificationRetryDisposition {
   const attempts = task.evidence
     .map((evidence, index) => ({ evidence, index }))
     .filter(
       ({ evidence }) =>
         evidence.checkId === checkId &&
-        evidence.result !== "skipped" &&
+        (evidence.result !== "skipped" || evidence.summary.startsWith("Circuit breaker reset:")) &&
         (evidence.result !== "pass" || isFresh(evidence, now, Number.POSITIVE_INFINITY, false)),
     )
     .sort((left, right) =>
@@ -74,7 +85,18 @@ export function verificationRetryDisposition(
     )
     .map(({ evidence }) => evidence);
   const latest = attempts.at(-1);
+  if (latest?.result === "skipped") return "run";
   if (latest?.result !== "fail") return "run";
+  // Nếu input digest hiện tại đã thay đổi so với lần fail gần nhất, cho phép chạy thử nghiệm lại (reset breaker by digest change)
+  if (
+    currentDigest !== undefined &&
+    isInputDigest(currentDigest) &&
+    "inputDigest" in latest &&
+    latest.inputDigest !== undefined &&
+    latest.inputDigest !== currentDigest
+  ) {
+    return "run";
+  }
   const previous = attempts.at(-2);
   if (previous?.result !== "fail") return "debug";
   return "stop";

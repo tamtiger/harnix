@@ -102,8 +102,14 @@ export async function replaceCheckWorkflow(
     .filter((evidence) => evidence.checkId === input.oldId && evidence.result !== "skipped")
     .sort((a, b) => Date.parse(a.recordedAt) - Date.parse(b.recordedAt))
     .at(-1);
-  if (latestEvidence?.result === "pass")
-    throw new Error(`Workflow cannot replace check ${input.oldId} after passing evidence.`);
+  if (latestEvidence?.result === "pass") {
+    const reason = options.reason?.trim();
+    if (reason === undefined || reason.length < 10) {
+      throw new Error(
+        `Workflow cannot replace check ${input.oldId} after passing evidence without --reason (10-1000 characters).`,
+      );
+    }
+  }
 
   const retiredOld: ValidationCheckV3 = { ...oldCheck, required: false };
   const existingNew = task.validationPlan.find((check) => check.id === input.newId);

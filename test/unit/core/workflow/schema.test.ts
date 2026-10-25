@@ -6,12 +6,14 @@ import {
   acceptanceCriterionKeys,
   checkScopes,
   criterionStatuses,
+  decisionKeys,
   evidenceResults,
   taskModes,
   taskStatuses,
   workflowCheckpoints,
   blockerKeys,
   evidenceV2Keys,
+  residualRiskKeys,
   taskRecordFieldManifest,
   validationCheckV2Keys,
 } from "src/core/tasks/task.js";
@@ -54,6 +56,16 @@ describe("workflow schema", () => {
     expect(schema.nested.validationPlan.sort()).toEqual([...validationCheckV2Keys].sort());
     expect(schema.nested.evidence.sort()).toEqual([...evidenceV2Keys].sort());
     expect(schema.nested.blocker.sort()).toEqual([...blockerKeys].sort());
+    expect(schema.nested.decisions.sort()).toEqual([...decisionKeys].sort());
+    expect(schema.nested.residualRisks.sort()).toEqual([...residualRiskKeys].sort());
+  });
+
+  it("provides a valid minimal example envelope", () => {
+    const schema = workflowEnvelopeSchema();
+    expect(schema.exampleEnvelope).toBeDefined();
+    expect(schema.exampleEnvelope.task).toBeDefined();
+    expect((schema.exampleEnvelope.task as Record<string, unknown>).generator).toBe("harnix");
+    expect((schema.exampleEnvelope.task as Record<string, unknown>).schemaVersion).toBe(3);
   });
 
   it("lists the constraints validateTask enforces so an agent need not read prose to build an envelope", () => {

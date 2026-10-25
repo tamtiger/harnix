@@ -62,7 +62,13 @@ describe("CLI command contract", () => {
     ]);
     expect(repoMap?.options.find((option) => option.long === "--refresh")?.hidden).toBe(true);
     expect(doctor?.options.map((option) => option.long)).toEqual(["--fix", "--global", "--allow-warnings"]);
-    expect(status?.options.map((option) => option.long)).toEqual(["--explain", "--summary", "--limit", "--workspace"]);
+    expect(status?.options.map((option) => option.long)).toEqual([
+      "--explain",
+      "--summary",
+      "--criteria",
+      "--limit",
+      "--workspace",
+    ]);
     expect(tasks?.options.map((option) => option.long)).toEqual(["--limit", "--status"]);
     const epic = program.commands.find((command) => command.name() === "epic");
     expect(epic?.options.map((option) => option.long)).toEqual(["--limit", "--brief"]);
@@ -103,6 +109,7 @@ describe("CLI command contract", () => {
       "--authorized-by",
       "--epic-order",
       "--replace-check",
+      "--reset-breaker",
       "--add-criterion",
       "--set-criterion",
       "--add-decision",
@@ -112,6 +119,7 @@ describe("CLI command contract", () => {
       "--set-paths",
       "--set-title",
       "--set-goal",
+      "--tick",
       "--file",
       "--batch",
       "--schema",

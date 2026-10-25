@@ -1,3 +1,4 @@
+import { compareCodeUnits } from "src/utils/order.js";
 import {
   createTaskV2MigrationEvidence,
   createTaskV3MigrationEvidence,
@@ -53,13 +54,22 @@ function assertCheckCriteria(check: ValidationCheckV2, criterionIds: ReadonlySet
     !isSortedUnique(check.criterionIds) ||
     (check.required && check.criterionIds.length === 0)
   ) {
-    throw new TaskValidationError(`TaskRecord ${label} validation criterion coverage is invalid.`);
+    let detail = "";
+    if (!Array.isArray(check.criterionIds)) detail = ": criterionIds must be an array";
+    else if (check.required && check.criterionIds.length === 0)
+      detail = ": required check must cover at least one criterion";
+    else if (!check.criterionIds.every(validId)) detail = ": contains invalid criterion ID format";
+    else if (!isSortedUnique(check.criterionIds))
+      detail = `: criterionIds must be sorted and unique without duplicates (received: [${check.criterionIds.join(", ")}])`;
+    throw new TaskValidationError(
+      `TaskRecord ${label} validation criterion coverage is invalid for check "${check.id}"${detail}.`,
+    );
   }
   const missing = check.criterionIds.filter((id) => !criterionIds.has(id));
   if (missing.length > 0) {
     const valid = Array.from(criterionIds).sort().join(", ");
     throw new TaskValidationError(
-      `TaskRecord ${label} validation criterion reference is invalid: unknown criterion ${missing.join(", ")} (valid: ${valid || "none"}).`,
+      `TaskRecord ${label} validation criterion reference is invalid: unknown criterion ${missing.join(", ")} in check "${check.id}" (valid: ${valid || "none"}).`,
     );
   }
 }
@@ -70,8 +80,13 @@ function assertCriterionCoverage(
   label: SchemaLabel,
 ): void {
   const covered = new Set(validationPlan.filter((check) => check.required).flatMap((check) => check.criterionIds));
-  if (criteria.some((criterion) => criterion.status !== "waived" && !covered.has(criterion.id))) {
-    throw new TaskValidationError(`TaskRecord ${label} criterion coverage is incomplete.`);
+  const missing = criteria.filter((criterion) => criterion.status !== "waived" && !covered.has(criterion.id));
+  if (missing.length > 0) {
+    const missingDesc = missing.map((c) => `"${c.id}" (${c.text || "no text"})`).join(", ");
+    const suggestion = `Gợi ý: Thêm check bắt buộc phủ tiêu chí: --with-check "id=chk-${missing[0]?.id};command=<cmd>;criteria=${missing.map((c) => c.id).join("+")};input=<glob>" hoặc dùng: harnix workflow --set-check "id=...;criteria=..."`;
+    throw new TaskValidationError(
+      `TaskRecord ${label} criterion coverage is incomplete: criterion ${missingDesc} is not covered by any required validation check. ${suggestion}`,
+    );
   }
 }
 
@@ -172,8 +187,9 @@ function assertV3CheckInputs(check: ValidationCheckV3): void {
     );
   }
   if (!isSortedUnique(check.inputs)) {
+    const sorted = [...new Set(check.inputs)].sort(compareCodeUnits);
     throw new TaskValidationError(
-      `TaskRecord v3 validation inputs are invalid for check "${check.id}": inputs must be sorted and unique without duplicates.`,
+      `TaskRecord v3 validation inputs are invalid for check "${check.id}": inputs must be sorted and unique without duplicates. Gợi ý thứ tự chuẩn: [${sorted.map((s) => JSON.stringify(s)).join(", ")}].`,
     );
   }
 }

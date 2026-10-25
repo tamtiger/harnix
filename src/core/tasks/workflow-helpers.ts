@@ -68,12 +68,15 @@ function assertReplanExit(previous: TaskRecord, next: TaskRecord): void {
   if (next.status === "blocked") return;
   const readyAgain = next.status === "ready" && next.checkpoint === "ready";
   const stillPlanning = next.status === "planning" && next.checkpoint === "planning";
+  // Cho phép chuyển trực tiếp từ replan sang implementing nếu task đang ở in_progress
+  const resumeImplementing =
+    previous.status === "in_progress" && next.status === "in_progress" && next.checkpoint === "implementing";
   // A check edit at verifying keeps every pass immutable, so verification resumes instead of replaying the lifecycle.
   const stillVerifying =
     previous.status === "verifying" && next.status === "verifying" && next.checkpoint === "verifying";
-  if (readyAgain || stillPlanning || stillVerifying) return;
+  if (readyAgain || stillPlanning || resumeImplementing || stillVerifying) return;
   throw new Error(
-    `A task at checkpoint replan may only re-enter ready/ready (run: harnix workflow --transition ready/ready [--reviewed] --brief), planning/planning while planning, or verifying/verifying while verifying; not ${next.status}/${next.checkpoint}.`,
+    `A task at checkpoint replan may only re-enter ready/ready (run: harnix workflow --transition ready/ready [--reviewed] --brief), in_progress/implementing while in_progress, planning/planning while planning, or verifying/verifying while verifying; not ${next.status}/${next.checkpoint}.`,
   );
 }
 

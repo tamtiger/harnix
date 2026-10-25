@@ -225,7 +225,7 @@ describe("one-step contract revision", () => {
     ).rejects.toThrow(/replan/u);
   });
 
-  it("keeps a criterion immutable after a check with passing evidence covers it", async () => {
+  it("allows revising criterion text after check pass during replan, but rejects keeping met status", async () => {
     const root = await inProgress();
     await transitionWorkflow(root, "verifying", "verifying", "2026-09-29T09:05:00.000+07:00");
     const snapshot = await snapshotWorkflow(root, "check");
@@ -247,17 +247,31 @@ describe("one-step contract revision", () => {
     );
     const active = (await inspectWorkflow(root)).activeTask as TaskRecordV3;
 
+    // Keeping met status is rejected
     await expect(
       saveWorkflow(root, {
         task: {
           ...active,
           checkpoint: "replan",
           updatedAt: "2026-09-29T09:20:00.000+07:00",
-          acceptanceCriteria: [{ id: "ac-one", text: "One, revised", status: "pending", evidenceIds: [] }],
+          acceptanceCriteria: [{ id: "ac-one", text: "One, revised", status: "met", evidenceIds: ["ev-check"] }],
         },
-        contractRevision: { reason: "Thử sửa tiêu chí đã có bằng chứng pass." },
+        contractRevision: { reason: "Thử sửa tiêu chí và giữ nguyên met." },
       }),
-    ).rejects.toThrow(/proven/u);
+    ).rejects.toThrow(/must reset its status to pending/u);
+
+    // Resetting to pending is allowed
+    const revised = await saveWorkflow(root, {
+      task: {
+        ...active,
+        checkpoint: "replan",
+        updatedAt: "2026-09-29T09:20:00.000+07:00",
+        acceptanceCriteria: [{ id: "ac-one", text: "One, revised", status: "pending", evidenceIds: [] }],
+      },
+      contractRevision: { reason: "Sửa tiêu chí sau khi đổi yêu cầu UI." },
+    });
+    expect(revised.acceptanceCriteria[0]?.text).toBe("One, revised");
+    expect(revised.acceptanceCriteria[0]?.status).toBe("pending");
   });
 
   it("no longer exposes a separate ready audit step", async () => {

@@ -38,6 +38,7 @@ describe("workflow handlers", () => {
         "removeCriterion",
         "removeDecision",
         "replaceCheck",
+        "resetBreaker",
         "runCheck",
         "runChecks",
         "save",
@@ -49,6 +50,7 @@ describe("workflow handlers", () => {
         "setPaths",
         "setTitle",
         "snapshot",
+        "tick",
         "transition",
       ].sort(),
     );
@@ -171,5 +173,20 @@ describe("workflow handlers", () => {
       checkpoint: string;
     };
     expect(persisted.checkpoint).toBe("replan");
+  });
+
+  it("handles resetBreaker action through WORKFLOW_HANDLERS", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+
+    const resetResult = (await WORKFLOW_HANDLERS.resetBreaker!(
+      context(root, undefined, {
+        resetBreaker: "check",
+        reason: "Reset circuit breaker cho check sau khi sửa lỗi",
+        brief: true,
+      }),
+    )) as { status: string };
+
+    expect(resetResult.status).toBe("in_progress");
   });
 });

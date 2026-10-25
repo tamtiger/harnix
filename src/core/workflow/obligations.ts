@@ -145,23 +145,41 @@ function isEditablePlanningDraft(task: TaskRecord): boolean {
 }
 
 function preserveProvenObligations(previous: TaskRecordV3, next: TaskRecordV3): void {
-  const evidencedCheckIds = new Set(
-    previous.evidence.filter((evidence) => evidence.checkId !== undefined).map((evidence) => evidence.checkId!),
-  );
-  const criteriaMappedByEvidencedChecks = new Set(
-    previous.validationPlan.filter((check) => evidencedCheckIds.has(check.id)).flatMap((check) => check.criterionIds),
-  );
   const nextCriteria = new Map(next.acceptanceCriteria.map((criterion) => [criterion.id, criterion]));
   for (const criterion of previous.acceptanceCriteria) {
-    if (
-      criterion.status === "pending" &&
-      criterion.evidenceIds.length === 0 &&
-      !criteriaMappedByEvidencedChecks.has(criterion.id)
-    )
-      continue;
     const candidate = nextCriteria.get(criterion.id);
-    if (candidate === undefined || candidate.text !== criterion.text || candidate.status !== criterion.status)
-      throw new Error(`Workflow contractRevision cannot mutate proven acceptance criterion ${criterion.id}.`);
+    if (candidate === undefined) {
+      throw new Error(
+        `Workflow contractRevision cannot remove acceptance criterion ${criterion.id}; mark it waived instead.`,
+      );
+    }
+    if (candidate.text !== criterion.text) {
+      if (candidate.status !== "pending" || candidate.evidenceIds.length > 0) {
+        throw new Error(
+          `Workflow contractRevision mutating acceptance criterion ${criterion.id} text must reset its status to pending and clear evidenceIds.`,
+        );
+      }
+      continue;
+    }
+    if (candidate.status !== criterion.status) {
+      if (candidate.status === "waived") {
+        if (!candidate.waiverReason || candidate.waiverReason.trim().length < 10) {
+          throw new Error(
+            `Workflow contractRevision waiving criterion ${criterion.id} requires a waiverReason of at least 10 characters.`,
+          );
+        }
+        continue;
+      }
+      if (candidate.status === "pending" && criterion.status === "met") {
+        if (candidate.evidenceIds.length > 0) {
+          throw new Error(
+            `Workflow contractRevision resetting criterion ${criterion.id} to pending must clear evidenceIds.`,
+          );
+        }
+        continue;
+      }
+      throw new Error(`Workflow contractRevision cannot mark acceptance criterion ${criterion.id} as met.`);
+    }
   }
   assertEvidencedChecksRetained(previous, next);
 }
@@ -186,24 +204,31 @@ function assertEvidencedChecksRetained(previous: TaskRecordV3, next: TaskRecordV
         .filter((evidence) => evidence.result !== "skipped")
         .sort((a, b) => Date.parse(a.recordedAt) - Date.parse(b.recordedAt))
         .at(-1)?.result === "pass";
-    if (isPassing) {
-      throw new Error(`Workflow contractRevision cannot mutate check ${check.id} after passing evidence.`);
-    }
+    // Allow retiring passed checks during replan if replaced or all criteria waived
     const retiredWithoutDefinitionChange =
       check.required &&
       candidate !== undefined &&
       candidate.required === false &&
       semanticJsonEqual({ ...candidate, required: true }, check);
-    const hasReplacement = next.validationPlan.some(
-      (replacement) =>
-        (!priorCheckIds.has(replacement.id) ||
-          (replacement.id !== check.id && !evidenceByCheck.get(replacement.id)?.some((e) => e.result === "pass"))) &&
-        replacement.required &&
-        check.criterionIds.every((criterionId) => replacement.criterionIds.includes(criterionId)),
-    );
+    const activeCriteria = check.criterionIds.filter((cid) => {
+      const c = next.acceptanceCriteria.find((criterion) => criterion.id === cid);
+      return c?.status !== "waived";
+    });
+    const hasReplacement =
+      activeCriteria.length === 0 ||
+      next.validationPlan.some(
+        (replacement) =>
+          (!priorCheckIds.has(replacement.id) ||
+            (replacement.id !== check.id && !evidenceByCheck.get(replacement.id)?.some((e) => e.result === "pass"))) &&
+          replacement.required &&
+          activeCriteria.every((criterionId) => replacement.criterionIds.includes(criterionId)),
+      );
     if (!retiredWithoutDefinitionChange || !hasReplacement) {
+      const detail = isPassing
+        ? "passed check " + check.id + " unchanged after passing evidence"
+        : "failed check " + check.id + " unchanged";
       throw new Error(
-        `Workflow contractRevision must retain failed check ${check.id} unchanged or retire it unchanged with a new required replacement ID. ` +
+        `Workflow contractRevision must retain ${detail} or retire it unchanged with a new required replacement ID. ` +
           `To change what it runs, use: harnix workflow --replace-check ${check.id} <new-id> --reason "<why>" with a different --command, --input or --cwd.`,
       );
     }

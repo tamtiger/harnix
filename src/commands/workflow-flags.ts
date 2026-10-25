@@ -29,6 +29,7 @@ export interface WorkflowFlags {
   classification?: string;
   authorizedBy?: string;
   replaceCheck?: string | string[];
+  resetBreaker?: string;
   epicOrder?: string | string[];
   addCriterion?: string;
   setCriterion?: string;
@@ -39,6 +40,7 @@ export interface WorkflowFlags {
   mitigation?: string;
   setTitle?: string;
   setGoal?: string;
+  tick?: string;
   file?: string;
   title?: string;
   task?: string;
@@ -95,6 +97,7 @@ const VALUE_ACTIONS = [
   "setCheck",
   "setBaseline",
   "replaceCheck",
+  "resetBreaker",
   "epicOrder",
   "addCriterion",
   "setCriterion",
@@ -104,6 +107,7 @@ const VALUE_ACTIONS = [
   "removeCriterion",
   "setTitle",
   "setGoal",
+  "tick",
 ] as const;
 
 const BATCHABLE_ACTIONS = new Set(["criterion", "transition", "finish"]);
@@ -114,7 +118,7 @@ export function selectActions(flags: WorkflowFlags): string[] {
 
   if (selected.length === 0) {
     throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --remove-decision, --remove-criterion, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, or --learn.",
+      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --reset-breaker, --add-criterion, --add-decision, --add-risk, --remove-decision, --remove-criterion, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, --tick, or --learn.",
     );
   }
 
@@ -125,7 +129,7 @@ export function selectActions(flags: WorkflowFlags): string[] {
   const nonBatchable = selected.filter((action) => !BATCHABLE_ACTIONS.has(action));
   if (nonBatchable.length > 0) {
     throw new Error(
-      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --remove-decision, --remove-criterion, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, or --learn.",
+      "workflow requires exactly one of --inspect, --preflight, --init, --batch, --save, --transition, --evidence, --criterion, --migrate, --run-check, --run-checks, --set-check, --replace-check, --reset-breaker, --add-criterion, --add-decision, --add-risk, --remove-decision, --remove-criterion, --set-paths, --set-title, --set-goal, --set-criterion, --set-baseline, --epic-order, --schema, --snapshot, --finish, --cancel, --tick, or --learn.",
     );
   }
 

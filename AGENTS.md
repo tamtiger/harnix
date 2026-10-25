@@ -31,7 +31,7 @@ When requirements conflict, follow PRD product behavior, then the canonical work
 - User-global setup is limited to the documented Kiro, Antigravity, Codex, Claude Code, OpenCode, and Cursor files. Never create `~/.harnix`, mutate real user homes in tests, or infer global ownership from a project manifest.
 - No channel/forum/worker network, workflow-template switching, mandatory subagents, or automatic Git integration.
 - Never auto-commit, branch, create a worktree, merge, push, publish, or create a PR.
-- Before any commit, show the proposed changes and commit message, then wait for explicit user approval. A request to commit does not authorize skipping this review.
+- Before any commit, run `git branch --show-current` to verify the target branch, never pipe `git checkout` (which obscures exit codes), show the proposed changes and commit message, then wait for explicit user approval. A request to commit does not authorize skipping this review.
 
 ## Architecture rules
 

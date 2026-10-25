@@ -89,7 +89,7 @@ describe("workflow helpers", () => {
     ).toThrow(/transition/iu);
   });
 
-  it("lets a verifying replan return to verifying but not an implementing one to implementing", () => {
+  it("lets a verifying replan return to verifying and an implementing replan return to implementing", () => {
     const verifying = buildTaskV3({ status: "verifying", checkpoint: "replan" });
     const implementing = buildTaskV3({ status: "in_progress", checkpoint: "replan" });
 
@@ -98,7 +98,7 @@ describe("workflow helpers", () => {
     ).not.toThrow();
     expect(() =>
       assertLegalTransition(implementing, { ...implementing, checkpoint: "implementing", updatedAt: at(2) }),
-    ).toThrow(/re-enter ready/u);
+    ).not.toThrow();
   });
 
   it("validates the cancellation and learning envelopes at the transport boundary", () => {

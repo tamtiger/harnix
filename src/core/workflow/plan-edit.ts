@@ -2,6 +2,7 @@ import { type TaskRecordV3, type ValidationCheckV3 } from "src/core/tasks/task.j
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { assertValidCheckInputs, validateCheckInputs } from "./check-input-validator.js";
 import { saveWorkflow } from "./save.js";
 import { resolveEditableTask } from "./target-task.js";
 import { currentInstant } from "./support.js";
@@ -144,6 +145,10 @@ export async function setCheckWorkflow(
   const task = await activeV3(root);
   const existing = task.validationPlan.find((check) => check.id === edit.id);
   const merged = mergeCheck(existing, edit);
+  if (merged.inputs && merged.inputs.length > 0 && task.checkpoint !== "planning") {
+    const inputValidation = await validateCheckInputs(root, merged.inputs);
+    assertValidCheckInputs(edit.id, inputValidation.emptyInputs);
+  }
   const validationPlan =
     existing === undefined
       ? [...task.validationPlan, merged]

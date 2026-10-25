@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { appendEvidenceFlagsWorkflow } from "src/core/workflow/evidence-flags.js";
 import { replaceCheckWorkflow } from "src/core/workflow/replace-check.js";
+import { resetBreakerWorkflow } from "src/core/workflow/reset-breaker.js";
 import { assertRetryAllowed } from "src/core/workflow/retry-guard.js";
 import { runCheckWorkflow, type CheckRunner } from "src/core/workflow/run-check.js";
 import { buildEvidence } from "test/support/builders.js";
@@ -108,5 +109,46 @@ describe("circuit breaker on the transports", () => {
     await expect(
       saveWorkflow(root, { task: { ...task, updatedAt: "2026-08-13T00:13:00.000Z" } }),
     ).resolves.toBeDefined();
+  });
+
+  it("resets the circuit breaker via --reset-breaker with user-authorized reason", async () => {
+    const root = await twiceFailed();
+    const reason = "Đã xác nhận nguyên nhân và cho phép chạy lại kiểm thử";
+    await resetBreakerWorkflow(root, "check", { reason });
+
+    const runner: CheckRunner = () => Promise.resolve({ exitCode: 0, output: "" });
+    await expect(
+      runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: "2026-08-13T00:14:00.000Z" }),
+    ).resolves.toMatchObject({ result: "pass" });
+  });
+
+  it("allows rerun after two failures when input digest changes", () => {
+    const base = taskV3("in_progress", "implementing");
+    const d1 = "1".repeat(64);
+    const d2 = "2".repeat(64);
+    const fail1 = buildEvidence({
+      id: "f1",
+      checkId: "check",
+      recordedAt: T1,
+      result: "fail",
+      exitCode: 1,
+      summary: "red",
+      inputDigest: d1,
+    });
+    const fail2 = buildEvidence({
+      id: "f2",
+      checkId: "check",
+      recordedAt: T2,
+      result: "fail",
+      exitCode: 1,
+      summary: "red",
+      inputDigest: d1,
+    });
+    const stopped = { ...base, evidence: [fail1, fail2] };
+
+    // Same digest -> throws
+    expect(() => assertRetryAllowed(stopped, "check", undefined, d1)).toThrow(/failed twice in a row/u);
+    // Changed digest -> allowed
+    expect(() => assertRetryAllowed(stopped, "check", undefined, d2)).not.toThrow();
   });
 });

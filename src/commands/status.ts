@@ -125,3 +125,45 @@ export async function summarizeProjectStatus(cwd: string, now = Date.now()): Pro
   const status = await inspectProjectStatus(cwd, now);
   return summarizeStatus(status);
 }
+
+export interface StatusCriteriaItem {
+  readonly id: string;
+  readonly status: "pending" | "met" | "waived";
+  readonly text: string;
+  readonly coveredBy: readonly string[];
+}
+
+export interface StatusCriteriaResultV1 {
+  readonly taskId: string;
+  readonly mode: string;
+  readonly status: string;
+  readonly criteria: readonly StatusCriteriaItem[];
+}
+
+export async function reportProjectCriteria(cwd: string): Promise<StatusCriteriaResultV1> {
+  const project = await findInitializedProject({ cwd });
+  if (project.kind !== "ready")
+    throw new Error(`Status requires an initialized Harnix project.${await initializedChildrenHint(cwd)}`);
+  const harnixRoot = await resolveSafeHarnixPath(project.root);
+  const task = await resolveActiveTask(harnixRoot);
+  if (task === undefined) throw new Error("No active task. Use harnix resume <id> or start a new task.");
+
+  const criteria: StatusCriteriaItem[] = task.acceptanceCriteria.map((c) => {
+    const coveringChecks = task.validationPlan
+      .filter((check) => check.criterionIds?.includes(c.id) ?? false)
+      .map((check) => check.id);
+    return {
+      id: c.id,
+      status: c.status,
+      text: c.text,
+      coveredBy: coveringChecks,
+    };
+  });
+
+  return {
+    taskId: task.id,
+    mode: task.mode,
+    status: task.status,
+    criteria,
+  };
+}

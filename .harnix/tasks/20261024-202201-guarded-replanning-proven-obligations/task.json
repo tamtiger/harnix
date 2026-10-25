@@ -1,0 +1,196 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261024-202201-guarded-replanning-proven-obligations",
+  "title": "Guarded Replanning cho Phép Sửa/Waive Tiêu chí và Thay Thế Check Đã Pass tại Checkpoint Replan",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261024-202200-harnix-dx-workflow-improvements",
+  "goal": "Cho phép sửa text, waive tiêu chí acceptance criteria và replace check đã pass tại checkpoint replan kèm --reason hợp lệ; tự động invalidate evidence pass cũ và reset trạng thái criteria liên quan về pending.",
+  "nonGoals": [
+    "Không cho phép sửa đổi obligations ngoài checkpoint replan",
+    "Không bỏ qua yêu cầu contractRevision.reason tối thiểu 10 ký tự"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Tại checkpoint replan với contractRevision.reason hợp lệ (10-1000 ký tự), cho phép cập nhật nội dung text của tiêu chí hoặc chuyển sang waived (kèm waiverReason), tự động gỡ các pass evidenceId cũ và chuyển trạng thái về pending đối với tiêu chí được sửa.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-3",
+        "ev-chk-unit-obligations-3"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Lệnh workflow --replace-check cho phép thay thế một check đã có pass evidence khi task đang ở checkpoint replan kèm --reason hợp lệ, retire check cũ và kích hoạt check thay thế mới.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-3",
+        "ev-chk-unit-replace-check-3"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Toàn bộ các quy tắc bảo vệ frozen contract khác vẫn được duy trì nghiêm ngặt ngoài checkpoint replan (chặn sửa tiêu chí và check đã pass trong planning draft có check evidence, hoặc khi không có contractRevision).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-3",
+        "ev-chk-unit-obligations-3"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-unit-obligations",
+      "description": "Unit tests cho cơ chế bảo vệ và nới lỏng replan của obligations",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/workflow/obligations.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/workflow/obligations.ts",
+        "test/unit/core/workflow/obligations.test.ts"
+      ]
+    },
+    {
+      "id": "chk-unit-replace-check",
+      "description": "Unit tests cho việc thay thế check đã pass tại checkpoint replan",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/workflow/replace-check.test.ts",
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/replace-check.ts",
+        "test/unit/core/workflow/replace-check.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite bảo đảm không hồi quy",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-unit-obligations-1",
+      "checkId": "chk-unit-obligations",
+      "recordedAt": "2026-10-24T20:31:49.591+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/obligations.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "108c0cb4a28f8d47552c3e77b1119df93d719d27749ba22562bd32a44d1188de"
+    },
+    {
+      "id": "ev-chk-unit-replace-check-1",
+      "checkId": "chk-unit-replace-check",
+      "recordedAt": "2026-10-24T20:32:00.325+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/replace-check.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2501d6013427c1b09463856bf737941edd94fa4982a40e08a21f104a8b482f05"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T20:34:13.635+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "769b152d0ca8b72b4834ccb4bb90cb7d5717c724173cf233b899c16b349e54e2"
+    },
+    {
+      "id": "ev-chk-unit-obligations-2",
+      "checkId": "chk-unit-obligations",
+      "recordedAt": "2026-10-24T20:35:54.824+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/obligations.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a0686cccf74360aa1de9e215282112c565ffed830c70651e8e79ace70a5eaf17"
+    },
+    {
+      "id": "ev-chk-unit-replace-check-2",
+      "checkId": "chk-unit-replace-check",
+      "recordedAt": "2026-10-24T20:36:04.131+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/replace-check.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2501d6013427c1b09463856bf737941edd94fa4982a40e08a21f104a8b482f05"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T20:38:02.576+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "85adbdbc128c6dbe8a6d07b6ca29e2d1285ea4341d08df13149b8ac416c617aa"
+    },
+    {
+      "id": "ev-chk-unit-obligations-3",
+      "checkId": "chk-unit-obligations",
+      "recordedAt": "2026-10-24T20:41:40.262+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/obligations.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "59b8e549473f9a486f499c03a279aabef215e384f8f11fcc015201cd7255c1ad"
+    },
+    {
+      "id": "ev-chk-unit-replace-check-3",
+      "checkId": "chk-unit-replace-check",
+      "recordedAt": "2026-10-24T20:41:49.476+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/replace-check.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2501d6013427c1b09463856bf737941edd94fa4982a40e08a21f104a8b482f05"
+    },
+    {
+      "id": "ev-check-suite-3",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T20:51:09.596+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c85fd8ef1b1c63e855c26b362a1d2f8ef9383eccefe1588eb457e230592edeb0"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/obligations.ts",
+    "src/core/workflow/replace-check.ts",
+    "test/unit/core/workflow/obligations.test.ts",
+    "test/unit/core/workflow/replace-check.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "createdAt": "2026-10-24T20:22:00.000+07:00",
+  "updatedAt": "2026-10-24T20:52:55.430+07:00",
+  "completedAt": "2026-10-24T20:52:55.430+07:00"
+}

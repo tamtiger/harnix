@@ -255,6 +255,11 @@ describe.sequential("hidden workflow flag transports", () => {
   it("splits comma-separated input strings passed to --set-check --input", async () => {
     const root = await fixture();
     await implementingTaskV3(root);
+    await import("node:fs/promises").then(async ({ mkdir, writeFile }) => {
+      const { join } = await import("node:path");
+      await mkdir(join(root, "test"), { recursive: true });
+      await writeFile(join(root, "test", "a.test.ts"), "export {};");
+    });
     process.chdir(root);
 
     const result = await run([

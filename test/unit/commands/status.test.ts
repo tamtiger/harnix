@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { explainProjectStatus, inspectProjectStatus, summarizeProjectStatus } from "src/commands/status.js";
+import {
+  explainProjectStatus,
+  inspectProjectStatus,
+  reportProjectCriteria,
+  summarizeProjectStatus,
+} from "src/commands/status.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { initializeUtcProject, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
@@ -173,5 +178,26 @@ describe("commands/status", () => {
     expect(status.git?.branch).toBe("feature/status-git");
     expect(status.git?.clean).toBe(true);
     expect(status.git?.commit).toMatch(/^[0-9a-f]{7,}/u);
+  });
+
+  it("reports project criteria lean status and throws without active task", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+
+    await expect(reportProjectCriteria(root)).rejects.toThrow(/No active task/u);
+
+    const task = taskV3("planning", "planning");
+    await saveWorkflow(root, { task });
+
+    const result = await reportProjectCriteria(root);
+    expect(result.taskId).toBe(task.id);
+    expect(result.criteria).toHaveLength(1);
+    expect(result.criteria[0]).toMatchObject({
+      id: "a",
+      status: "pending",
+      text: "done",
+      coveredBy: ["check"],
+    });
   });
 });

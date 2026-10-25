@@ -75,6 +75,7 @@ describe("launcherFailure", () => {
   it("ignores a passing run, a red test and an unknown failure", () => {
     expect(launcherFailure("ERR_PNPM_NO_PKG_MANIFEST", 0)).toBeUndefined();
     expect(launcherFailure(`${vitestReport}\nERR_PNPM_NO_SCRIPT`, 1)).toBeUndefined();
+    expect(launcherFailure(" RUN  v3.2.7 D:/MyProject\n × test/a.test.ts\n ERR_PNPM_NO_SCRIPT", 1)).toBeUndefined();
     expect(launcherFailure("tests failed", 1)).toBeUndefined();
   });
 

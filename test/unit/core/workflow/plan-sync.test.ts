@@ -1,7 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { syncPlanChecklistPass } from "src/core/workflow/plan-sync.js";
+import { syncPlanChecklistPass, tickPlanChecklist, tickWorkflow } from "src/core/workflow/plan-sync.js";
+import { saveTask, setActiveTask } from "src/core/tasks/task.js";
+import { initializeUtcProject, taskV3 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -81,5 +83,113 @@ describe("syncPlanChecklistPass", () => {
     const content = await readFile(join(taskDir, "plan.md"), "utf8");
     expect(content.endsWith("\n")).toBe(true);
     expect(content.endsWith("\n\n")).toBe(false);
+  });
+});
+
+describe("tickPlanChecklist", () => {
+  it("ticks all items when selector is 'all'", async () => {
+    const root = await temporaryRepository();
+    const taskDir = join(root, ".harnix", "tasks", "task-all");
+    await mkdir(taskDir, { recursive: true });
+
+    await writeFile(join(taskDir, "plan.md"), "# Plan\n- [ ] First item\n- [ ] Second item\n- [x] Done item\n", "utf8");
+
+    const result = await tickPlanChecklist(join(root, ".harnix"), "task-all", "all");
+    expect(result).toEqual({ updated: 2, remaining: 0, total: 3 });
+
+    const content = await readFile(join(taskDir, "plan.md"), "utf8");
+    expect(content).toContain("- [x] First item");
+    expect(content).toContain("- [x] Second item");
+    expect(content).toContain("- [x] Done item");
+  });
+
+  it("ticks specific item by 1-based index", async () => {
+    const root = await temporaryRepository();
+    const taskDir = join(root, ".harnix", "tasks", "task-idx");
+    await mkdir(taskDir, { recursive: true });
+
+    await writeFile(join(taskDir, "plan.md"), "# Plan\n- [ ] Item 1\n- [ ] Item 2\n- [ ] Item 3\n", "utf8");
+
+    const result = await tickPlanChecklist(join(root, ".harnix"), "task-idx", "2");
+    expect(result).toEqual({ updated: 1, remaining: 2, total: 3 });
+
+    const content = await readFile(join(taskDir, "plan.md"), "utf8");
+    expect(content).toContain("- [ ] Item 1");
+    expect(content).toContain("- [x] Item 2");
+    expect(content).toContain("- [ ] Item 3");
+  });
+
+  it("ticks items matching substring pattern", async () => {
+    const root = await temporaryRepository();
+    const taskDir = join(root, ".harnix", "tasks", "task-pattern");
+    await mkdir(taskDir, { recursive: true });
+
+    await writeFile(
+      join(taskDir, "plan.md"),
+      "# Plan\n- [ ] Implement parser logic\n- [ ] Add unit tests\n- [ ] Documentation\n",
+      "utf8",
+    );
+
+    const result = await tickPlanChecklist(join(root, ".harnix"), "task-pattern", "parser");
+    expect(result).toEqual({ updated: 1, remaining: 2, total: 3 });
+
+    const content = await readFile(join(taskDir, "plan.md"), "utf8");
+    expect(content).toContain("- [x] Implement parser logic");
+    expect(content).toContain("- [ ] Add unit tests");
+  });
+
+  it("throws clear error when pattern does not match", async () => {
+    const root = await temporaryRepository();
+    const taskDir = join(root, ".harnix", "tasks", "task-nomatch");
+    await mkdir(taskDir, { recursive: true });
+
+    await writeFile(join(taskDir, "plan.md"), "- [ ] Only item\n", "utf8");
+
+    await expect(tickPlanChecklist(join(root, ".harnix"), "task-nomatch", "nonexistent")).rejects.toThrow(
+      'No unchecked checklist item matched pattern: "nonexistent".',
+    );
+  });
+
+  it("throws error when index is out of range", async () => {
+    const root = await temporaryRepository();
+    const taskDir = join(root, ".harnix", "tasks", "task-range");
+    await mkdir(taskDir, { recursive: true });
+
+    await writeFile(join(taskDir, "plan.md"), "- [ ] Single item\n", "utf8");
+
+    await expect(tickPlanChecklist(join(root, ".harnix"), "task-range", "5")).rejects.toThrow(
+      "Index 5 out of range for unchecked items (1..1).",
+    );
+  });
+});
+
+describe("tickWorkflow", () => {
+  it("throws error when no active task exists", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await expect(tickWorkflow(root, "all")).rejects.toThrow("Workflow --tick requires an active task.");
+  });
+
+  it("ticks active task plan checklist and returns standard envelope", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const task = taskV3("in_progress", "implementing");
+    const harnixRoot = join(root, ".harnix");
+    await saveTask(harnixRoot, task);
+    await setActiveTask(harnixRoot, task.id);
+
+    const taskDir = join(harnixRoot, "tasks", task.id);
+    await mkdir(taskDir, { recursive: true });
+    await writeFile(join(taskDir, "plan.md"), "# Plan\n- [ ] First\n- [ ] Second\n", "utf8");
+
+    const result = await tickWorkflow(root, "all");
+    expect(result).toEqual({
+      generator: "harnix",
+      schemaVersion: 1,
+      taskId: task.id,
+      updated: 2,
+      remaining: 0,
+      total: 2,
+    });
   });
 });

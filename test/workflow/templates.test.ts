@@ -110,7 +110,7 @@ describe("workflow templates", () => {
     expect(agentInstructions).not.toContain("increment the package patch version");
     expect(agentInstructions).not.toContain("update `CHANGELOG.md`");
     expect(agentInstructions).toContain(
-      "before any commit show the proposed changes and message and wait for approval",
+      "before any commit run `git branch --show-current` to verify target branch, never pipe `git checkout`, show the proposed changes and commit message, and wait for explicit approval",
     );
     expect(agentInstructions).toContain(renderHarnixRules());
     expect(agentInstructions).toContain("workflow --preflight");

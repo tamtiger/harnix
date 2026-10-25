@@ -2,7 +2,7 @@
 name: harnix-arch-review
 description: Use when reviewing enterprise system architecture, evaluating WBS estimations, performing three-way requirement gap analysis or separating Backend Core from BFF layers.
 metadata:
-  version: "2.19.1"
+  version: "2.20.0"
 ---
 
 # Architecture design review

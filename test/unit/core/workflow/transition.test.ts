@@ -247,17 +247,16 @@ describe("leaving the replan checkpoint", () => {
     return root;
   }
 
-  it("refuses to go from in_progress/replan straight back to implementing, for real and in a dry-run", async () => {
+  it("allows going from in_progress/replan straight back to implementing, for real and in a dry-run", async () => {
     const root = await replanned("in_progress");
 
-    await expect(transitionWorkflow(root, "in_progress", "implementing")).rejects.toThrow(
-      /may only re-enter ready\/ready/u,
-    );
     await expect(transitionWorkflow(root, "in_progress", "implementing", undefined, true)).resolves.toMatchObject({
-      valid: false,
+      valid: true,
     });
-    await expect(transitionWorkflow(root, "verifying", "verifying")).rejects.toThrow(/replan/u);
-    expect((await inspectWorkflow(root)).activeTask).toMatchObject({ status: "in_progress", checkpoint: "replan" });
+    await expect(transitionWorkflow(root, "in_progress", "implementing")).resolves.toMatchObject({
+      status: "in_progress",
+      checkpoint: "implementing",
+    });
   });
 
   it("re-enters ready/ready through the ready gate and from there continues normally", async () => {
@@ -306,7 +305,7 @@ describe("a dry-run agrees with the real ready transition", () => {
     else await expect(real).rejects.toThrow();
   });
 
-  it("warns about incomplete plan checklist items when transitioning to verifying", async () => {
+  it("rejects transition to verifying/verifying when plan checklist items are incomplete", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
     const task = taskV3("in_progress", "implementing");
@@ -319,6 +318,20 @@ describe("a dry-run agrees with the real ready transition", () => {
     await writeFile(join(taskDir, "plan.md"), "# Plan\n- [ ] Unfinished task item\n- [x] Done item\n");
 
     const dryRun = await transitionWorkflow(root, "verifying", "verifying", undefined, true);
-    expect(dryRun.advisories).toContain("Checklist trong plan.md chưa hoàn tất 100% [x] trước khi vào verifying.");
+    expect(dryRun.valid).toBe(false);
+    expect(dryRun.issues[0]).toContain("Cannot enter verifying: plan.md checklist is not 100% completed");
+
+    await expect(transitionWorkflow(root, "verifying", "verifying")).rejects.toThrow(
+      "Cannot enter verifying: plan.md checklist is not 100% completed",
+    );
+
+    // After ticking remaining items, transition succeeds
+    await writeFile(join(taskDir, "plan.md"), "# Plan\n- [x] Unfinished task item\n- [x] Done item\n");
+    const dryRunAfter = await transitionWorkflow(root, "verifying", "verifying", undefined, true);
+    expect(dryRunAfter.valid).toBe(true);
+    await expect(transitionWorkflow(root, "verifying", "verifying")).resolves.toMatchObject({
+      status: "verifying",
+      checkpoint: "verifying",
+    });
   });
 });

@@ -4,6 +4,13 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.20.0] - 2026-10-24
+
+### Changed
+
+- Chuẩn hóa quy ước file tạm kiểm thử trong .harnix/tmp/, hướng dẫn an toàn shell Windows, Git safety rules và cache hook context
+- Cải tiến toàn diện DX: Guarded replanning, status --criteria, workflow --tick, circuit breaker ergonomics, chuyển trạng thái replan trực tiếp, mở rộng schema envelope, quy ước scratch tmp và Git safety
+
 ## [2.19.1] - 2026-10-24
 
 ### Fixed

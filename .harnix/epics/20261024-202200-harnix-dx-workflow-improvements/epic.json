@@ -1,0 +1,20 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261024-202200-harnix-dx-workflow-improvements",
+  "title": "Cải tiến Toàn diện Trải nghiệm Phát triển, Linh hoạt Hóa Quy trình Task và Nâng cao Độ vững chắc CLI Harnix",
+  "goal": "Giải quyết triệt để 7 nhóm vấn đề thực tế: (1) Cơ chế Guarded Replanning cho phép sửa/waive tiêu chí và replace check sau khi pass tại checkpoint replan; (2) Thông báo lỗi criterion coverage giàu ngữ cảnh và lệnh harnix status --criteria; (3) Hỗ trợ lệnh workflow --tick cho plan.md và đồng bộ ví dụ schema; (4) Quy ước file tạm kiểm thử, hướng dẫn an toàn shell Windows và Git safety.",
+  "nonGoals": [
+    "Không phá vỡ định dạng TaskRecord schema v3 đóng băng",
+    "Không nới lỏng an toàn ngoài checkpoint replan có giải trình hợp lệ"
+  ],
+  "order": [
+    "20261024-202201-guarded-replanning-proven-obligations",
+    "20261024-202202-criterion-diagnostics-and-status-criteria",
+    "20261024-202203-plan-checklist-management-and-schema-examples",
+    "20261024-202204-shell-guidelines-scratch-dir-and-git-safety",
+    "20261024-202205-circuit-breaker-ergonomics-and-replan-transition"
+  ],
+  "createdAt": "2026-10-24T20:22:00.000+07:00",
+  "updatedAt": "2026-10-24T21:24:00.000+07:00"
+}

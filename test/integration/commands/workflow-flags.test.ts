@@ -13,6 +13,8 @@ import {
   taskV3,
   writeProjectSource,
 } from "test/support/workflow-fixtures.js";
+import { mkdir, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 const originalCwd = process.cwd();
 const originalExitCode = process.exitCode;
@@ -43,7 +45,7 @@ describe("workflow flag validation", () => {
     expect(selectAction({ runChecks: true })).toBe("runChecks");
     expect(() => selectAction({})).toThrow(/exactly one of/u);
     expect(() => selectAction({ setPaths: true, inspect: true })).toThrow(
-      /--set-check, --replace-check, --add-criterion, --add-decision, --add-risk, --remove-decision/u,
+      /--set-check, --replace-check, --reset-breaker, --add-criterion, --add-decision, --add-risk, --remove-decision/u,
     );
   });
 
@@ -102,6 +104,8 @@ describe.sequential("hidden workflow plan-edit transports", () => {
   it("edits checks, criteria and paths from flags, keeping Vietnamese text intact", async () => {
     const root = await fixture();
     await implementingTaskV3(root);
+    await mkdir(join(root, "test"), { recursive: true });
+    await writeFile(join(root, "test", "dummy.test.ts"), "export {};");
     process.chdir(root);
     const reason = "Bổ sung kiểm tra và tiêu chí theo yêu cầu mới";
 
@@ -173,6 +177,8 @@ describe.sequential("hidden workflow plan-edit transports", () => {
   it("treats repeated --criteria like one comma-separated list", async () => {
     const root = await fixture();
     await implementingTaskV3(root);
+    await mkdir(join(root, "test"), { recursive: true });
+    await writeFile(join(root, "test", "dummy.test.ts"), "export {};");
     process.chdir(root);
     const reason = "Bổ sung kiểm tra theo yêu cầu mới";
     await run([
@@ -290,6 +296,8 @@ describe.sequential("hidden workflow plan-edit transports", () => {
   it("accepts a stdin body that starts with a BOM", async () => {
     const root = await fixture();
     await implementingTaskV3(root);
+    await mkdir(join(root, "test"), { recursive: true });
+    await writeFile(join(root, "test", "dummy.test.ts"), "export {};");
     process.chdir(root);
     const task = taskV3("in_progress", "implementing");
 
@@ -342,6 +350,8 @@ describe.sequential("hidden workflow note transports", () => {
   it("records notes from flags and reports the learning captured at finish", async () => {
     const root = await fixture();
     await implementingTaskV3(root);
+    await mkdir(join(root, "test"), { recursive: true });
+    await writeFile(join(root, "test", "dummy.test.ts"), "export {};");
     process.chdir(root);
 
     const note = (flag: string, id: string, text: string, ...more: string[]) =>
@@ -371,6 +381,8 @@ describe.sequential("hidden workflow note transports", () => {
   it("accepts --brief for a preflight and drops learning from it", async () => {
     const root = await fixture();
     await implementingTaskV3(root);
+    await mkdir(join(root, "test"), { recursive: true });
+    await writeFile(join(root, "test", "dummy.test.ts"), "export {};");
     process.chdir(root);
     const brief = JSON.parse((await run(["--preflight", "--brief"])).out) as Record<string, unknown>;
     const full = JSON.parse((await run(["--preflight"])).out) as Record<string, unknown>;
@@ -383,6 +395,8 @@ describe.sequential("hidden workflow note transports", () => {
   it("cancels an active task with --reason without piping JSON", async () => {
     const root = await fixture();
     await implementingTaskV3(root);
+    await mkdir(join(root, "test"), { recursive: true });
+    await writeFile(join(root, "test", "dummy.test.ts"), "export {};");
     process.chdir(root);
     const cancelled = await run(["--cancel", "--reason", "Huỷ bỏ vì thay đổi kiến trúc"]);
     expect(cancelled.code, cancelled.err).toBe(0);

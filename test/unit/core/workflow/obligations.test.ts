@@ -26,57 +26,29 @@ describe("workflow obligations", () => {
     };
     await saveWorkflow(root, { task: ready });
 
-    await expect(
-      saveWorkflow(root, { task: { ...ready, acceptanceCriteria: [], updatedAt: "2026-08-13T00:02:00.000Z" } }),
-    ).rejects.toThrow(/criterion/iu);
-    await expect(
-      saveWorkflow(root, {
-        task: {
-          ...ready,
-          acceptanceCriteria: [{ ...ready.acceptanceCriteria[0]!, id: "renamed" }],
-          updatedAt: "2026-08-13T00:02:00.000Z",
-        },
-      }),
-    ).rejects.toThrow(/criterion/iu);
-    await expect(
-      saveWorkflow(root, {
-        task: {
-          ...ready,
-          acceptanceCriteria: [{ ...ready.acceptanceCriteria[0]!, text: "weaker outcome" }],
-          updatedAt: "2026-08-13T00:02:00.000Z",
-        },
-      }),
-    ).rejects.toThrow("acceptance criterion text");
-    await expect(
-      saveWorkflow(root, { task: { ...ready, validationPlan: [], updatedAt: "2026-08-13T00:02:00.000Z" } }),
-    ).rejects.toThrow(/coverage|required validation/iu);
-    await expect(
-      saveWorkflow(root, {
-        task: {
-          ...ready,
-          validationPlan: [{ ...ready.validationPlan[0]!, required: false }],
-          updatedAt: "2026-08-13T00:02:00.000Z",
-        },
-      }),
-    ).rejects.toThrow(/coverage|required validation/iu);
-    await expect(
-      saveWorkflow(root, {
-        task: {
-          ...ready,
-          validationPlan: [{ ...ready.validationPlan[0]!, command: "echo weaker" }],
-          updatedAt: "2026-08-13T00:02:00.000Z",
-        },
-      }),
-    ).rejects.toThrow("cannot mutate required validation check");
-    await expect(
-      saveWorkflow(root, {
-        task: {
-          ...ready,
-          validationPlan: [{ ...ready.validationPlan[0]!, scope: "focused" }],
-          updatedAt: "2026-08-13T00:02:00.000Z",
-        },
-      }),
-    ).rejects.toThrow("cannot mutate required validation check");
+    const checkReject = (mod: Record<string, unknown>, err: string | RegExp) =>
+      expect(saveWorkflow(root, { task: { ...ready, ...mod, updatedAt: "2026-08-13T00:02:00.000Z" } })).rejects.toThrow(
+        err,
+      );
+    await checkReject({ acceptanceCriteria: [] }, /criterion/iu);
+    await checkReject({ acceptanceCriteria: [{ ...ready.acceptanceCriteria[0]!, id: "renamed" }] }, /criterion/iu);
+    await checkReject(
+      { acceptanceCriteria: [{ ...ready.acceptanceCriteria[0]!, text: "weaker outcome" }] },
+      "acceptance criterion text",
+    );
+    await checkReject({ validationPlan: [] }, /coverage|required validation/iu);
+    await checkReject(
+      { validationPlan: [{ ...ready.validationPlan[0]!, required: false }] },
+      /coverage|required validation/iu,
+    );
+    await checkReject(
+      { validationPlan: [{ ...ready.validationPlan[0]!, command: "echo weaker" }] },
+      "cannot mutate required validation check",
+    );
+    await checkReject(
+      { validationPlan: [{ ...ready.validationPlan[0]!, scope: "focused" }] },
+      "cannot mutate required validation check",
+    );
     await expect(finishWorkflow(root)).rejects.toThrow("verifying/finishing");
     await expect(inspectWorkflow(root)).resolves.toMatchObject({
       activeTask: {
@@ -237,7 +209,7 @@ describe("workflow obligations", () => {
         },
         contractRevision: { reason: "Thay thế check không còn đúng sau khi đã có failure." },
       }),
-    ).rejects.toThrow(/proven acceptance criterion/iu);
+    ).rejects.toThrow(/must retain failed check check unchanged or retire it unchanged/u);
 
     await expect(
       saveWorkflow(root, {
@@ -379,19 +351,39 @@ describe("waiving a frozen criterion", () => {
     ).rejects.toThrow(/freeze at first ready/u);
   });
 
-  it("is refused for a criterion that already has evidence, even during a replan", () => {
-    const met = buildCriterion({ status: "met", evidenceIds: ["ev-check-1"] });
-    const previous = buildTaskV3({
+  const provenTask = (criteria: ReturnType<typeof buildCriterion>[]) =>
+    buildTaskV3({
       status: "ready",
       checkpoint: "replan",
-      acceptanceCriteria: [met],
+      acceptanceCriteria: criteria,
       validationPlan: [buildCheck()],
       evidence: [buildEvidence({ id: "ev-check-1", checkId: "check" })],
     });
-    const next = buildTaskV3({ ...previous, acceptanceCriteria: [{ ...met, ...WAIVER }] });
 
-    expect(() => preserveObligations(previous, next, { reason: "Một lý do đủ dài để thử." })).toThrow(
-      /cannot mutate proven acceptance criterion/u,
+  it("allows waiving a criterion that already has evidence during a replan with valid waiverReason", () => {
+    const met = buildCriterion({ status: "met", evidenceIds: ["ev-check-1"] });
+    const prev = provenTask([met]);
+    const next = provenTask([{ ...met, ...WAIVER }]);
+    const result = preserveObligations(prev, next, { reason: "Một lý do đủ dài để thử." });
+    expect(result.acceptanceCriteria[0]?.status).toBe("waived");
+    expect(result.acceptanceCriteria[0]?.waiverReason).toBe(WAIVER.waiverReason);
+  });
+
+  it("allows mutating criterion text and resetting to pending during replan with valid reason", () => {
+    const met = buildCriterion({ status: "met", evidenceIds: ["ev-check-1"] });
+    const prev = provenTask([met]);
+    const next = provenTask([{ ...met, text: "Yêu cầu UI mới", status: "pending", evidenceIds: [] }]);
+    const res = preserveObligations(prev, next, { reason: "Khách hàng thay đổi yêu cầu giao diện người dùng." });
+    expect(res.acceptanceCriteria[0]?.text).toBe("Yêu cầu UI mới");
+    expect(res.acceptanceCriteria[0]?.status).toBe("pending");
+  });
+
+  it("rejects mutating criterion text if keeping met status during replan", () => {
+    const met = buildCriterion({ status: "met", evidenceIds: ["ev-check-1"] });
+    const prev = provenTask([met]);
+    const next = provenTask([{ ...met, text: "Yêu cầu UI mới", status: "met" }]);
+    expect(() => preserveObligations(prev, next, { reason: "Khách hàng thay đổi yêu cầu." })).toThrow(
+      /must reset its status to pending/u,
     );
   });
 });

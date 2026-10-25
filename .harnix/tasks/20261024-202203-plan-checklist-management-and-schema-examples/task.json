@@ -1,0 +1,237 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261024-202203-plan-checklist-management-and-schema-examples",
+  "title": "Lệnh harnix workflow --tick cho plan.md, Đồng bộ Schema Examples và Chốt chặn Checklist",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "epicId": "20261024-202200-harnix-dx-workflow-improvements",
+  "goal": "Giải quyết Vấn đề 3 & 4: (1) Bổ sung lệnh workflow --tick <index|pattern|all> để đánh dấu hoàn thành [x] trong plan.md an toàn; (2) Chuyển advisory warning checklist plan.md thành strict gate khi chuyển sang verifying; (3) Bổ sung decisions và residualRisks vào nested schema cùng ví dụ envelope tối thiểu.",
+  "nonGoals": [
+    "Không thay đổi logic verify checklist ngoài lệnh transition",
+    "Không thay đổi định dạng schema taskRecord gốc"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Hỗ trợ cờ workflow --tick <item> cho phép đánh dấu - [x] vào checklist của plan.md trực tiếp từ CLI mà không cần sửa file thủ công bằng regex/sed.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-v2-1",
+        "ev-chk-unit-plan-sync-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Chốt chặn chuyển trạng thái workflow --transition verifying/verifying từ chối nếu plan.md còn mục checklist chưa tick (- [ ]), kèm thông báo lỗi hướng dẫn dùng --tick.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-v2-1",
+        "ev-chk-unit-transition-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Lệnh harnix workflow --schema bổ sung decisions: ['id', 'text', 'rationale'] và residualRisks: ['id', 'text', 'severity'] vào nested, đồng thời cung cấp cấu trúc envelope ví dụ tối thiểu hợp lệ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-v2-1",
+        "ev-chk-unit-schema-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test suite bảo đảm không hồi quy",
+      "scope": "full",
+      "required": false,
+      "command": "pnpm test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite-v2",
+      "description": "Replacement for check-suite",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "package.json",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm test"
+    },
+    {
+      "id": "chk-unit-plan-sync",
+      "description": "Kiểm thử lệnh workflow --tick cập nhật checklist plan.md",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/workflow/plan-sync.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/workflow/plan-sync.ts",
+        "test/unit/core/workflow/plan-sync.test.ts"
+      ]
+    },
+    {
+      "id": "chk-unit-schema",
+      "description": "Kiểm thử schema bổ sung decisions/residualRisks và ví dụ",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/workflow/schema.test.ts",
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/workflow/schema.ts",
+        "test/unit/core/workflow/schema.test.ts"
+      ]
+    },
+    {
+      "id": "chk-unit-transition",
+      "description": "Kiểm thử gate transition verifying chặn checklist chưa tick",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm vitest run test/unit/core/workflow/transition.test.ts",
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/workflow/transition.ts",
+        "test/unit/core/workflow/transition.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-unit-plan-sync-1",
+      "checkId": "chk-unit-plan-sync",
+      "recordedAt": "2026-10-24T21:57:11.027+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/plan-sync.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "db9b463c7bcd675b23660d90b0fc0bf56557d3c4f96ff552573b9f44062087cb"
+    },
+    {
+      "id": "ev-chk-unit-transition-1",
+      "checkId": "chk-unit-transition",
+      "recordedAt": "2026-10-24T21:57:22.347+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/transition.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a743d68a3f220a516d55cb5a1caba117dc51b527462059ad1ad1fc8cbaaddd02"
+    },
+    {
+      "id": "ev-chk-unit-schema-1",
+      "checkId": "chk-unit-schema",
+      "recordedAt": "2026-10-24T21:57:30.308+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/schema.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ad3726fbf2ce0f9e30747fcb7f019c441f49f21d80d84df6ff18f23c7c3389ee"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T21:59:48.470+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "3fa838fab64a75b999ff0adb5c4af97c06c72a47b8c9c096ccefae8c2d9e0ef0"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-24T22:04:00.418+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "49f527a549d1c745adbb53fa46b1c277d07723406f5ec5d7b1b411665af6224e"
+    },
+    {
+      "id": "ev-chk-unit-plan-sync-2",
+      "checkId": "chk-unit-plan-sync",
+      "recordedAt": "2026-10-24T22:04:49.394+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/plan-sync.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "962abe826b96d070128f7d701079421d8fe6ca732fb802a944809926c659a76c"
+    },
+    {
+      "id": "ev-chk-unit-transition-2",
+      "checkId": "chk-unit-transition",
+      "recordedAt": "2026-10-24T22:05:00.147+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/transition.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a743d68a3f220a516d55cb5a1caba117dc51b527462059ad1ad1fc8cbaaddd02"
+    },
+    {
+      "id": "ev-chk-unit-schema-2",
+      "checkId": "chk-unit-schema",
+      "recordedAt": "2026-10-24T22:05:08.512+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm vitest run test/unit/core/workflow/schema.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ad3726fbf2ce0f9e30747fcb7f019c441f49f21d80d84df6ff18f23c7c3389ee"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-24T22:05:29.941+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Kích hoạt lại bộ kiểm thử suite sau khi bổ sung test coverage cho tickWorkflow",
+      "artifactPaths": [
+        ".harnix/tasks/20261024-202203-plan-checklist-management-and-schema-examples/task.json"
+      ]
+    },
+    {
+      "id": "ev-check-suite-v2-1",
+      "checkId": "check-suite-v2",
+      "recordedAt": "2026-10-24T22:07:49.085+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fe1a4fd94ca873e5e0365f5ba23902435400671039b7b24285f3a8c7d94fb4da"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/plan-sync.ts",
+    "src/core/workflow/transition.ts",
+    "src/core/workflow/schema.ts",
+    "test/unit/core/workflow/plan-sync.test.ts",
+    "test/unit/core/workflow/transition.test.ts",
+    "test/unit/core/workflow/schema.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "createdAt": "2026-10-24T21:24:00.000+07:00",
+  "updatedAt": "2026-10-24T22:08:19.279+07:00",
+  "completedAt": "2026-10-24T22:08:19.279+07:00"
+}

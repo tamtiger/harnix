@@ -1014,7 +1014,58 @@
             "nextAction",
             "resumeStatus",
             "summary"
+          ],
+          "decisions": [
+            "id",
+            "rationale",
+            "text"
+          ],
+          "residualRisks": [
+            "id",
+            "severity",
+            "text"
           ]
+        },
+        "exampleEnvelope": {
+          "task": {
+            "generator": "harnix",
+            "schemaVersion": 3,
+            "id": "20261024-120000-example-task",
+            "title": "Example task title",
+            "mode": "lite",
+            "status": "planning",
+            "checkpoint": "planning",
+            "goal": "Example goal description",
+            "nonGoals": [],
+            "acceptanceCriteria": [
+              {
+                "id": "ac-1",
+                "text": "Example acceptance criterion",
+                "status": "pending",
+                "evidenceIds": []
+              }
+            ],
+            "relevantPaths": [
+              "src/index.ts"
+            ],
+            "relevantSpecs": [],
+            "validationPlan": [
+              {
+                "id": "chk-1",
+                "description": "Example check",
+                "command": "pnpm test",
+                "scope": "focused",
+                "required": true,
+                "criterionIds": [
+                  "ac-1"
+                ],
+                "inputs": [
+                  "src/**"
+                ]
+              }
+            ],
+            "evidence": []
+          }
         },
         "constraints": {
           "mode": [
@@ -1080,6 +1131,7 @@
             "--remove-criterion",
             "--remove-decision",
             "--replace-check",
+            "--reset-breaker",
             "--run-check",
             "--run-checks",
             "--save",
@@ -1117,6 +1169,7 @@
           "--brief": "Print only id, status, checkpoint and updatedAt (preflight: without learning); the commands that accept it are listed in constraints.brief.",
           "--finish": "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? } and, only when a file of the task (relevant paths or check inputs) shows a sign of a secret, secretAdvisory { files, findings: [{ path, rule }] } (at most 5, never a value; advice, it does not block).",
           "--cancel": "Terminal cancellation; the only cancellation transport.",
+          "--tick": "Mark checklist item(s) in plan.md as completed (- [x]): --tick <item> (item can be 1-based index '1', 'all', or substring pattern).",
           "--learn": "Record one hand-authored learning candidate from stdin { \"candidate\": { id, statement, sourceTaskIds, evidenceIds } } (no --text or --rationale flags); needs an active verifying/finishing task whose required checks are fresh, and the candidate must cite its evidence. Without a stdin body, --add-decision or --add-risk on the active task is captured at --finish."
         }
       }

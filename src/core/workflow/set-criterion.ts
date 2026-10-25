@@ -19,7 +19,7 @@ export async function setCriterionWorkflow(
   if (!task.acceptanceCriteria.some((criterion) => criterion.id === input.id))
     throw new Error(`Acceptance criterion ${input.id} does not exist.`);
   const acceptanceCriteria = task.acceptanceCriteria.map((criterion) =>
-    criterion.id === input.id ? { ...criterion, text } : criterion,
+    criterion.id === input.id ? { ...criterion, text, status: "pending" as const, evidenceIds: [] } : criterion,
   );
   return saveObligationEdit(root, task, { ...task, acceptanceCriteria }, options, now);
 }

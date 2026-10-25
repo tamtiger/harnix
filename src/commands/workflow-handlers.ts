@@ -16,6 +16,7 @@ import {
   preflightWorkflow,
   recordLearningWorkflow,
   replaceCheckWorkflow,
+  resetBreakerWorkflow,
   runCheckWorkflow,
   runChecksWorkflow,
   saveWorkflow,
@@ -25,6 +26,7 @@ import {
   setPathsWorkflow,
   setTitleWorkflow,
   snapshotWorkflow,
+  tickWorkflow,
   transitionWorkflow,
   workflowEnvelopeSchema,
 } from "src/commands/internal-workflow.js";
@@ -125,6 +127,13 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
     );
     return presentTask(context, task);
   },
+  resetBreaker: async (context) => {
+    const { flags, root } = context;
+    const task = await resetBreakerWorkflow(root, flags.resetBreaker as string, {
+      reason: flags.reason as string,
+    });
+    return presentTask(context, task);
+  },
   replaceCheck: async (context) => {
     const { flags, root } = context;
     const raw = Array.isArray(flags.replaceCheck) ? flags.replaceCheck.join(" ") : String(flags.replaceCheck);
@@ -215,6 +224,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
     const task = await setGoalWorkflow(context.root, context.flags.setGoal as string);
     return presentTask(context, task);
   },
+  tick: (context) => tickWorkflow(context.root, context.flags.tick as string),
   batch: async (context) => {
     const envelope = await readRequired(context, "Workflow batch", "Workflow batch requires valid JSON.");
     const task = await batchWorkflow(context.root, envelope);

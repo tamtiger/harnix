@@ -1,3 +1,4 @@
+import { compareCodeUnits } from "src/utils/order.js";
 import { readProjectTimezone } from "src/core/config/config.js";
 import { buildVerifyPlan } from "src/core/stack/verify-plan.js";
 import type { TaskMode, TaskRecordV3, ValidationCheckV3 } from "src/core/tasks/task.js";
@@ -100,8 +101,8 @@ function defaultCheck(
     required: true,
     command,
     ...(cwd === undefined ? {} : { cwd }),
-    criterionIds: criteria.map(({ id }) => id),
-    inputs,
+    criterionIds: criteria.map(({ id }) => id).sort(compareCodeUnits),
+    inputs: [...new Set(inputs)].sort(compareCodeUnits),
   };
 }
 
@@ -113,8 +114,8 @@ function declaredCheck(spec: InitCheckSpec): ValidationCheckV3 {
     required: true,
     command: spec.command,
     ...(spec.cwd === undefined ? {} : { cwd: spec.cwd }),
-    criterionIds: spec.criterionIds,
-    inputs: spec.inputs,
+    criterionIds: [...new Set(spec.criterionIds)].sort(compareCodeUnits),
+    inputs: [...new Set(spec.inputs)].sort(compareCodeUnits),
   };
 }
 

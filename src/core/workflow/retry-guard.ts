@@ -5,10 +5,15 @@ import { verificationRetryDisposition } from "./completion.js";
  * The convergence rule of Harnix: one automatic remediation round, then stop. Two consecutive failures of a check
  * therefore refuse any further pass or fail for it; the way on is a user-authorized replacement check.
  */
-export function assertRetryAllowed(task: TaskRecord, checkId: string, now: number = Date.now()): void {
-  if (verificationRetryDisposition(task, checkId, now) !== "stop") return;
+export function assertRetryAllowed(
+  task: TaskRecord,
+  checkId: string,
+  now: number = Date.now(),
+  currentDigest?: string,
+): void {
+  if (verificationRetryDisposition(task, checkId, now, currentDigest) !== "stop") return;
   throw new Error(
-    `Check ${checkId} failed twice in a row; stop and report to the user. Continue only with a user-authorized new hypothesis: harnix workflow --replace-check ${checkId} <new-id> --reason "<why>".`,
+    `Check ${checkId} failed twice in a row; stop and report to the user. Continue only with code changes (new input digest), user-authorized reset: harnix workflow --reset-breaker ${checkId} --reason "<why>", or replace check: harnix workflow --replace-check ${checkId} <new-id> --reason "<why>".`,
   );
 }
 
@@ -22,6 +27,6 @@ export function assertNewEvidenceRetryAllowed(
   const known = new Set(existing.evidence.map((evidence) => evidence.id));
   for (const evidence of candidate.evidence) {
     if (known.has(evidence.id) || evidence.checkId === undefined || evidence.result === "skipped") continue;
-    assertRetryAllowed(existing, evidence.checkId, now);
+    assertRetryAllowed(existing, evidence.checkId, now, evidence.inputDigest);
   }
 }

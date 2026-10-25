@@ -4,8 +4,10 @@ import {
   blockerKeys,
   checkScopes,
   criterionStatuses,
+  decisionKeys,
   evidenceResults,
   evidenceV2Keys,
+  residualRiskKeys,
   taskIdPattern,
   taskModes,
   taskRecordFieldManifest,
@@ -20,7 +22,15 @@ export interface WorkflowEnvelopeSchemaV1 {
   schemaVersion: 1;
   envelope: Record<string, string>;
   taskRecord: { required: string[]; optional: string[] };
-  nested: { acceptanceCriteria: string[]; validationPlan: string[]; evidence: string[]; blocker: string[] };
+  nested: {
+    acceptanceCriteria: string[];
+    validationPlan: string[];
+    evidence: string[];
+    blocker: string[];
+    decisions: string[];
+    residualRisks: string[];
+  };
+  exampleEnvelope: Record<string, unknown>;
   transports: Record<string, string>;
   /** Values and rules the validator enforces, so an envelope can be built right the first time. */
   constraints: {
@@ -62,6 +72,43 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       validationPlan: [...validationCheckV2Keys].sort(),
       evidence: [...evidenceV2Keys].sort(),
       blocker: [...blockerKeys].sort(),
+      decisions: [...decisionKeys].sort(),
+      residualRisks: [...residualRiskKeys].sort(),
+    },
+    exampleEnvelope: {
+      task: {
+        generator: "harnix",
+        schemaVersion: 3,
+        id: "20261024-120000-example-task",
+        title: "Example task title",
+        mode: "lite",
+        status: "planning",
+        checkpoint: "planning",
+        goal: "Example goal description",
+        nonGoals: [],
+        acceptanceCriteria: [
+          {
+            id: "ac-1",
+            text: "Example acceptance criterion",
+            status: "pending",
+            evidenceIds: [],
+          },
+        ],
+        relevantPaths: ["src/index.ts"],
+        relevantSpecs: [],
+        validationPlan: [
+          {
+            id: "chk-1",
+            description: "Example check",
+            command: "pnpm test",
+            scope: "focused",
+            required: true,
+            criterionIds: ["ac-1"],
+            inputs: ["src/**"],
+          },
+        ],
+        evidence: [],
+      },
     },
     constraints: {
       mode: [...taskModes],
@@ -128,6 +175,8 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--finish":
         "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? } and, only when a file of the task (relevant paths or check inputs) shows a sign of a secret, secretAdvisory { files, findings: [{ path, rule }] } (at most 5, never a value; advice, it does not block).",
       "--cancel": "Terminal cancellation; the only cancellation transport.",
+      "--tick":
+        "Mark checklist item(s) in plan.md as completed (- [x]): --tick <item> (item can be 1-based index '1', 'all', or substring pattern).",
       "--learn":
         'Record one hand-authored learning candidate from stdin { "candidate": { id, statement, sourceTaskIds, evidenceIds } } (no --text or --rationale flags); needs an active verifying/finishing task whose required checks are fresh, and the candidate must cite its evidence. Without a stdin body, --add-decision or --add-risk on the active task is captured at --finish.',
     },

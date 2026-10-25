@@ -45,15 +45,21 @@ describe("setCriterionWorkflow", () => {
     await expect(setCriterionWorkflow(root, { id: "a", text: "   " })).rejects.toThrow(/--text/u);
   });
 
-  it("keeps a criterion immutable once recorded check evidence maps it", async () => {
+  it("allows rewriting criterion text after recorded check evidence when valid reason is provided, resetting status to pending", async () => {
     const root = await temporaryRepository();
     await implementingTaskV3(root);
     const runner: CheckRunner = async () => ({ exitCode: 0, output: "" });
     await runCheckWorkflow(root, "check", ["pnpm", "test"], { runner, now: "2026-08-13T00:10:00.000Z" });
 
-    await expect(
-      setCriterionWorkflow(root, { id: "a", text: "Đổi sau bằng chứng" }, { reason: REASON }),
-    ).rejects.toThrow(/criterion|evidence|immutable/iu);
-    expect((await resolveActiveTask(`${root}/.harnix`))?.acceptanceCriteria[0]?.text).toBe("done");
+    // Without reason, it is rejected
+    await expect(setCriterionWorkflow(root, { id: "a", text: "Đổi sau bằng chứng" })).rejects.toThrow(/--reason/iu);
+
+    // With reason, it succeeds and resets criterion status to pending
+    const revised = await setCriterionWorkflow(root, { id: "a", text: "Đổi sau bằng chứng" }, { reason: REASON });
+    expect(revised.checkpoint).toBe("replan");
+    expect(revised.acceptanceCriteria[0]?.text).toBe("Đổi sau bằng chứng");
+    expect(revised.acceptanceCriteria[0]?.status).toBe("pending");
+    expect(revised.acceptanceCriteria[0]?.evidenceIds).toEqual([]);
+    expect((await resolveActiveTask(`${root}/.harnix`))?.acceptanceCriteria[0]?.text).toBe("Đổi sau bằng chứng");
   });
 });

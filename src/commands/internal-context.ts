@@ -1,4 +1,4 @@
-import { access } from "src/utils/fs-access.js";
+import { access, readFile } from "src/utils/fs-access.js";
 import { isAbsolute, win32 } from "node:path";
 
 import { readConfig } from "src/core/config/config.js";
@@ -6,8 +6,10 @@ import { UNTRUSTED_CONTEXT_PREFIX, UNTRUSTED_CONTEXT_SUFFIX } from "src/core/con
 import { buildEffectiveContext } from "src/core/context/effective-context.js";
 import { getPlatform, type PlatformId } from "src/core/platform/registry.js";
 import { resolveActiveTask } from "src/core/tasks/task.js";
+import { atomicWriteFile } from "src/utils/atomic-write.js";
+import { sha256 } from "src/utils/hashing.js";
 import { findInitializedProject } from "src/utils/project-discovery.js";
-import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 
 export type InternalContextPlatform = PlatformId;
 
@@ -28,6 +30,7 @@ interface NormalizedHookEvent {
   readonly cwd?: string;
   readonly invocationNum?: number;
   readonly workspacePaths: string[];
+  readonly sessionId?: string;
 }
 
 const REDACTED_PROJECT_STATE_WARNING =
@@ -108,7 +111,29 @@ export async function renderInternalContextForHook(options: RenderInternalContex
     return emptyPayload(options.platform);
   }
   try {
-    return await renderInternalContext(project.root, options.platform, { forceBounded: true });
+    const payload = await renderInternalContext(project.root, options.platform, { forceBounded: true });
+    if (event.sessionId !== undefined && payload.length > 0) {
+      const cachePath = await resolveSafeProjectPath(
+        await resolveSafeHarnixPath(project.root),
+        "tmp/context-cache.json",
+      );
+      let previous: { sessionId?: string; payloadHash?: string } | undefined;
+      try {
+        previous = JSON.parse(await readFile(cachePath, "utf8")) as { sessionId?: string; payloadHash?: string };
+      } catch {
+        // Cache miss
+      }
+      const currentHash = sha256(payload);
+      if (previous?.sessionId === event.sessionId && previous?.payloadHash === currentHash) {
+        return emptyPayload(options.platform);
+      }
+      try {
+        await atomicWriteFile(cachePath, JSON.stringify({ sessionId: event.sessionId, payloadHash: currentHash }));
+      } catch {
+        // Best-effort
+      }
+    }
+    return payload;
   } catch {
     // Safe discovery succeeded but project data is corrupt/inaccessible. Keep
     // the agent responsive while giving only a bounded, path-free warning.
@@ -220,9 +245,16 @@ function normalizeHookEvent(value: unknown): NormalizedHookEvent {
     typeof value.invocationNum === "number" && Number.isSafeInteger(value.invocationNum) && value.invocationNum >= 0
       ? value.invocationNum
       : undefined;
+  const sessionId =
+    typeof value.session_id === "string" && value.session_id.length > 0
+      ? value.session_id
+      : typeof value.sessionId === "string" && value.sessionId.length > 0
+        ? value.sessionId
+        : undefined;
   return {
     ...(cwd === undefined ? {} : { cwd }),
     ...(invocationNum === undefined ? {} : { invocationNum }),
+    ...(sessionId === undefined ? {} : { sessionId }),
     workspacePaths,
   };
 }

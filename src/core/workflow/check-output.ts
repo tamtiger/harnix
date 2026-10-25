@@ -50,7 +50,13 @@ export function summarizeCheckOutput(output: string): string {
  * the check never ran, so the run is not a red test. A report with failing tests is never a launcher error.
  */
 export function launcherFailure(output: string, exitCode: number, executable?: string): string | undefined {
-  if (exitCode === 0 || /^\s*FAIL\s/mu.test(output)) return undefined;
+  if (
+    exitCode === 0 ||
+    /^\s*FAIL\s/mu.test(output) ||
+    /\b(?:RUN\s+v\d|Test Files\s+\d|\bTests\s+\d|\s*[✓×]\s+\S+)/u.test(output)
+  ) {
+    return undefined;
+  }
   for (const { pattern, reason } of LAUNCHER_ERRORS) {
     if (pattern.test(output)) {
       if (reason === "command not found" && (executable?.toLowerCase() === "pytest" || /\bpytest\b/iu.test(output))) {
