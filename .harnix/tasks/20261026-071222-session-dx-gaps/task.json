@@ -1,0 +1,213 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261026-071222-session-dx-gaps",
+  "title": "Gỡ các ma sát gặp khi phát triển harnix: file runtime bị commit, lint file nháp, thêm member không đổi con trỏ, sửa không đổi, output gọn và release:check (2.22.3)",
+  "mode": "full",
+  "status": "ready",
+  "checkpoint": "ready",
+  "goal": "Sửa các vấn đề thực tế gặp khi dùng chính harnix để phát triển harnix trong phiên review 2.22.x, để agent đỡ phải chạy script phụ, đọc task.json hay pause rồi resume chỉ để thêm một task.",
+  "nonGoals": [
+    "Không đổi field hay enum đóng băng của TaskRecord",
+    "Không đổi cách phát hành hay ngân sách footprint (task 2.22.2 lo)",
+    "Không tự promote hay reject learning"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "File runtime của harnix không còn bị commit: .harnix/tasks/.active (con trỏ theo từng người) và .harnix/tmp/ (file nháp) được ignore trong repo này, được gỡ khỏi index, và harnix doctor cảnh báo khi .active đang được git track",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "ESLint và Prettier bỏ qua .harnix/**, nên file nháp đặt trong .harnix/tmp/ (được CLAUDE.md và AGENTS.md cho phép) không làm pnpm lint thất bại",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "workflow --init nhận --no-activate cùng --epic hoặc đứng riêng: tạo task ở planning mà không đổi con trỏ .active của task đang làm, để thêm member vào epic hiện có hoặc tạo task tiếp nối mà không phải pause rồi resume",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Sửa nghĩa không đổi (--set-check, --set-criterion, --add-criterion lặp lại đúng giá trị hiện có) không còn báo lỗi contractRevision khó hiểu: lệnh trả thành công với thông báo không có gì thay đổi và không đưa task về replan",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-5",
+      "text": "workflow --transition <s>/<c> --dry-run trả gọn { valid, issues, advisories } theo mặc định; reviewChecklist chỉ in khi thêm --checklist hoặc khi có lỗi",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-6",
+      "text": "status --checks in danh sách gọn các check của task active gồm id, scope, required, criterionIds, command và trạng thái tươi, để agent không phải đọc task.json",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-7",
+      "text": "Decision có id bắt đầu bằng trace- ghi vết đo đạc hoặc quy trình và không bao giờ được --finish chụp thành learning; schema TaskRecord giữ nguyên",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-8",
+      "text": "Một lệnh pnpm release:check chạy đúng chuỗi gate phát hành (install --frozen-lockfile, build, lint, typecheck, test, pack:check, smoke:tarball, measure:init, measure:footprint, scan:release, git diff --check), in từng lệnh với exit code và thời gian, dừng ở lệnh đầu tiên lỗi; được ghi ở IMPLEMENTATION_PLAN mục 11 và AGENTS.md",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-9",
+      "text": "Gửi nhầm kết quả của workflow --inspect (có activeTask và contextDrift) làm task trong --save nhận thông báo nói rõ cần truyền đối tượng activeTask, thay cho Invalid or unsupported task record",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-10",
+      "text": "Tài liệu đồng bộ với các thay đổi trên (AGENTS.md, README, HARNIX_WORKFLOW, HARNIX_PRD, IMPLEMENTATION_PLAN, workflow.md và selfhost, skill references) và bản vá 2.22.3 phát hành với toàn bộ gate xanh",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    ".gitignore",
+    "eslint.config.mjs",
+    "package.json",
+    "scripts",
+    "src/commands/status.ts",
+    "src/core/doctor",
+    "src/core/journal/learning-notes.ts",
+    "src/core/workflow/init-task.ts",
+    "src/core/workflow/transition.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-runtime-files",
+      "description": "Ignore file runtime và cảnh báo doctor",
+      "command": "pnpm exec vitest run test/unit/core/doctor test/workflow/runtime-files.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        ".gitignore",
+        "eslint.config.mjs",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-no-activate",
+      "description": "init --no-activate giữ con trỏ",
+      "command": "pnpm exec vitest run test/unit/core/workflow/init-task.test.ts test/integration/commands/workflow-flags.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-noop-edit",
+      "description": "Sửa không đổi và lỗi inspect",
+      "command": "pnpm exec vitest run test/unit/core/workflow/plan-edit.test.ts test/unit/core/workflow/envelope.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4",
+        "ac-9"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-lean-output",
+      "description": "dry-run gọn, status --checks và trace-",
+      "command": "pnpm exec vitest run test/unit/core/workflow/transition.test.ts test/unit/commands/status.test.ts test/unit/core/journal",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5",
+        "ac-6",
+        "ac-7"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-release-check",
+      "description": "Script release:check",
+      "command": "pnpm exec vitest run test/workflow/release-check.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-8"
+      ],
+      "inputs": [
+        "package.json",
+        "scripts/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test, docs parity và golden",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-10",
+        "ac-3",
+        "ac-5",
+        "ac-6",
+        "ac-8"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-10",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7",
+        "ac-8",
+        "ac-9"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "createdAt": "2026-10-26T07:12:22.586+07:00",
+  "updatedAt": "2026-10-26T07:13:07.951+07:00"
+}

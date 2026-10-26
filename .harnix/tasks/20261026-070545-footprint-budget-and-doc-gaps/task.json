@@ -1,0 +1,171 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261026-070545-footprint-budget-and-doc-gaps",
+  "title": "Đổi gate footprint sang ngân sách byte, sửa 3 lỗi nhỏ và khôi phục quy tắc bị mất khi rút gọn reference (2.22.2)",
+  "mode": "full",
+  "status": "ready",
+  "checkpoint": "ready",
+  "goal": "Thay mốc footprint cố định 50% so với baseline Trellis (đo dung lượng đĩa của bản cài, không phải token) bằng ngân sách byte chỉ tăng có chủ đích, để thêm hướng dẫn vào skill không bị gate chặn một cách máy móc; đồng thời sửa các lỗi nhỏ và khoảng trống tài liệu mà review 2.22.1 tìm thấy.",
+  "nonGoals": [
+    "Không đổi cách cài đặt references lên từng platform",
+    "Không hạ ngưỡng coverage hay ngân sách token"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Gate measure:footprint đổi từ mốc cố định giảm 50% so với baseline Trellis sang ngân sách byte được lưu trong scripts/footprint-budget.json: thất bại khi footprint vượt ngân sách, vẫn in mức giảm so với baseline làm số tham khảo, và ngân sách chỉ đổi bằng một thay đổi có chủ đích trong file đó (như ngưỡng coverage, chỉ nâng khi có lý do ghi rõ)",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Tài liệu ghi quyết định đổi gate: HARNIX_PRD mục chấp nhận về footprint, IMPLEMENTATION_PLAN (mục measure:footprint và các mục chấp nhận), UPSTREAM_BASELINE mục 5, AGENTS.md; nêu rõ mốc 50% là số tham khảo lịch sử, gate hiện hành là ngân sách byte",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Guard test-structure bắt cả vi.mock lẫn vi.doMock; closestMatch so phần số bằng giá trị số nên ac-01 và ac-1 không bị coi là anh em khác số; JSDoc của finishWorkflowReport nằm đúng hàm",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Các quy tắc bị thu hẹp khi rút gọn reference được khôi phục bằng câu ngắn ở nơi agent đọc, và một test giữ danh sách cụm bắt buộc: --task áp dụng cho mọi lệnh edit và --inspect; --exit-code bắt buộc cho mọi kết quả pass hoặc fail; breaker có ba lối ra (input digest mới, --reset-breaker có --reason 10 đến 1000 ký tự, --replace-check) ở replan.md và HARNIX_PRD; chỉ một lần pass hợp lệ hoặc --reset-breaker mới reset breaker; evidence không được ghi ngày tương lai và --cwd khác bị từ chối; --run-checks trỏ đúng cookbook-commands; digest gắn task id và check id; --run-check và --evidence tự tick mục checklist; heredoc Bash gây unexpected EOF và PowerShell ANSI làm hỏng UTF-8 là lý do dùng --file; resume từ chối va chạm con trỏ; epic nhắc kiểm tra nhánh mong đợi và notice khi follow-up không có epic",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-5",
+      "text": "Phát hành bản vá 2.22.2: ngân sách footprint được đặt bằng số đo thực sau thay đổi làm tròn lên 1 KiB và toàn bộ gate phát hành xanh",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/UPSTREAM_BASELINE.md",
+    "scripts/measure-footprint.mjs",
+    "src/skills/harnix-verify/references",
+    "src/utils/suggest.ts",
+    "test/unit/test-structure.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-footprint-gate",
+      "description": "Test gate ngân sách footprint",
+      "command": "pnpm exec vitest run test/workflow/measure-footprint-guard.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "scripts/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-small-fixes",
+      "description": "Test guard vi.mock, closestMatch và finish",
+      "command": "pnpm exec vitest run test/unit/test-structure.test.ts test/unit/utils/suggest.test.ts test/unit/core/workflow/finish.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test, docs parity và golden",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-footprint",
+      "description": "Footprint trong ngân sách",
+      "command": "pnpm measure:footprint",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-rules",
+      "description": "Test giữ các quy tắc bắt buộc của reference sau khi rút gọn",
+      "command": "pnpm exec vitest run test/workflow/reference-rules.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "src/skills/**",
+        "src/templates/**",
+        "test/workflow/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-26T07:09:09.756+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Đối chiếu từng đoạn bị cắt ở 2.22.1 tìm thêm các chỗ mất ý ngoài danh sách của review, và cần một test để việc rút gọn không làm mất ý lần nữa",
+      "artifactPaths": [
+        ".harnix/tasks/20261026-070545-footprint-budget-and-doc-gaps/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-26T07:09:10.266+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Test cụm bắt buộc cho ac-4",
+      "artifactPaths": [
+        ".harnix/tasks/20261026-070545-footprint-budget-and-doc-gaps/task.json"
+      ]
+    }
+  ],
+  "createdAt": "2026-10-26T07:05:45.156+07:00",
+  "updatedAt": "2026-10-26T07:09:15.537+07:00"
+}
