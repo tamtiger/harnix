@@ -1,6 +1,6 @@
 {
   "name": "@tamtiger/harnix",
-  "version": "2.22.1",
+  "version": "2.22.3",
   "description": "Coding-agent harness with project-local workflow data and user-global Kiro, Antigravity, Codex, Claude Code, OpenCode, and Cursor integrations.",
   "license": "AGPL-3.0-or-later",
   "type": "module",
@@ -45,7 +45,8 @@
     "measure:tokens": "node scripts/measure-tokens.mjs",
     "scan:release": "node scripts/scan-release.mjs",
     "version:sync": "node scripts/version-sync.mjs",
-    "selfhost:sync": "node scripts/selfhost-sync.mjs"
+    "selfhost:sync": "node scripts/selfhost-sync.mjs",
+    "release:check": "node scripts/release-check.mjs"
   },
   "dependencies": {
     "commander": "^13.1.0",

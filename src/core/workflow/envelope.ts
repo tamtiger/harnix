@@ -28,8 +28,18 @@ function assertEpicMemberOrder(ids: readonly string[]): void {
   }
 }
 
+/** The `{ activeTask, contextDrift }` that `--inspect` prints is not a TaskRecord; name the part to send instead. */
+function assertNotInspectResult(value: unknown): void {
+  if (isRecord(value) && "activeTask" in value && !("schemaVersion" in value))
+    throw new Error(
+      "Workflow save received the whole --inspect result: pass the activeTask object of --inspect (the TaskRecord itself) as `task`, not `{ activeTask, contextDrift }`.",
+    );
+}
+
 export function validateWorkflowSaveEnvelope(value: unknown): WorkflowSaveEnvelope {
   if (!isRecord(value)) throw new Error("Workflow save envelope is invalid.");
+  assertNotInspectResult(value);
+  assertNotInspectResult(value.task);
   const unknown = Object.keys(value).filter((key) => !ENVELOPE_KEYS.has(key));
   if (!("task" in value)) {
     const found =

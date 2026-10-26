@@ -75,7 +75,7 @@ Hash bản làm việc và bản sao khớp tuyệt đối trước khi chỉnh 
 2. Đếm regular files và tổng bytes của project-data cùng platform files được generator tạo.
 3. Loại trừ `.git`, `node_modules`, cache, build output và user-created files.
 4. Báo riêng từng platform và tổ hợp ba platform.
-5. Harnix phải nhỏ hơn baseline Trellis ít nhất 50% cho cùng measurement definition. Baseline template 236 files/1,343,579 bytes là ngưỡng tham khảo đóng gói; baseline consumer phải được đo lại bằng fixture trong Phase 4 vì `.trellis` của upstream chứa dữ liệu lịch sử của chính dự án.
+5. Harnix từng phải nhỏ hơn baseline Trellis ít nhất 50% cho cùng measurement definition; từ 2.22.2 mốc này là số tham khảo lịch sử (người dùng quyết định ngày 2026-10-26) và gate hiện hành là ngân sách byte `maxBytes` trong `scripts/footprint-budget.json`. Baseline template 236 files/1,343,579 bytes là ngưỡng tham khảo đóng gói; baseline consumer phải được đo lại bằng fixture trong Phase 4 vì `.trellis` của upstream chứa dữ liệu lịch sử của chính dự án.
 
 ## 5. Nội dung nguồn được xem xét
 

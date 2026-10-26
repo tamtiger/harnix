@@ -24,6 +24,8 @@ export interface InitTaskOptions {
   input?: string[] | undefined;
   followUp?: string | undefined;
   epic?: string | undefined;
+  /** False for `--no-activate`: the task is created without touching the active pointer. */
+  activate?: boolean | undefined;
   /** Repository-relative directory of the package the task is about: its test command and inputs become the default. */
   cwd?: string | undefined;
   injectedNow?: string | undefined;
@@ -195,5 +197,9 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
         }
       : undefined;
 
-  return (await saveWorkflow(root, { task: candidate, ...(artifacts ? { artifacts } : {}) })) as TaskRecordV3;
+  return (await saveWorkflow(
+    root,
+    { task: candidate, ...(artifacts ? { artifacts } : {}) },
+    options.activate === false ? { activate: false } : {},
+  )) as TaskRecordV3;
 }

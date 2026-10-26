@@ -54,6 +54,8 @@ interface SaveContext {
 export interface SaveWorkflowOptions {
   /** Set only by `--reset-breaker`: the one transport allowed to append a breaker-reset entry. */
   breakerReset?: boolean;
+  /** `--init --no-activate`: create a new planning task and leave `.active` on the task being worked on. */
+  activate?: boolean;
 }
 
 export async function saveWorkflow(
@@ -70,6 +72,11 @@ export async function saveWorkflow(
   return withWorkflowLock(harnixRoot, () => saveWorkflowLocked(root, harnixRoot, envelope, candidate, options));
 }
 
+/** With --task the targeted task stands in for the active one, so the pointer is neither read nor written. */
+async function resolveSaveTarget(harnixRoot: string): Promise<TaskRecord | undefined> {
+  return targetTaskId() === undefined ? resolveActiveTask(harnixRoot) : resolveEditableTask(harnixRoot);
+}
+
 async function saveWorkflowLocked(
   root: string,
   harnixRoot: string,
@@ -79,9 +86,9 @@ async function saveWorkflowLocked(
 ): Promise<TaskRecord> {
   assertTaskUnchangedSinceRead(initialCandidate.id, await readRawTask(harnixRoot, initialCandidate.id));
   const existing = await loadExistingTask(harnixRoot, initialCandidate.id);
-  // With --task the targeted task stands in for the active one, so the pointer is neither read nor written.
-  const active =
-    targetTaskId() === undefined ? await resolveActiveTask(harnixRoot) : await resolveEditableTask(harnixRoot);
+  const quiet = options.activate === false;
+  if (quiet && existing !== undefined) throw new Error("Workflow --no-activate only creates a new task.");
+  const active = quiet ? undefined : await resolveSaveTarget(harnixRoot);
   const context: SaveContext = { root, harnixRoot, envelope, active, existing };
 
   if (active && active.id !== initialCandidate.id) throw new Error("Workflow save may update only the active task.");
@@ -104,7 +111,7 @@ async function saveWorkflowLocked(
   await persistCandidate(context, candidate, artifacts, validatedEpic);
   const written = await readRawTask(harnixRoot, candidate.id);
   if (written !== undefined) noteTaskWritten(candidate.id, written);
-  if (active === undefined) await setActiveTask(harnixRoot, candidate.id);
+  if (active === undefined && !quiet) await setActiveTask(harnixRoot, candidate.id);
   return candidate;
 }
 

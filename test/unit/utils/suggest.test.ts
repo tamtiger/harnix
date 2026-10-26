@@ -13,6 +13,7 @@ describe("id suggestions", () => {
     expect(closestMatch("", ["ac", "chk-1"])).toBeUndefined();
     expect(closestMatch("ac-3", ["ac-1", "ac-2"])).toBeUndefined();
     expect(closestMatch("chk-10", ["chk-1"])).toBeUndefined();
+    expect(closestMatch("ac-01", ["ac-1", "ac-2"])).toBe("ac-1");
     expect(closestMatch("chk-ab", ["chk-aa", "chk-bb"])).toBeUndefined();
     expect(unknownIdError("Criterion ac-3 is not declared.", "criterion", "ac-3", ["ac-1", "ac-2"]).message).toBe(
       "Criterion ac-3 is not declared.\nGợi ý: criterion hợp lệ: ac-1, ac-2.",

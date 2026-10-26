@@ -44,6 +44,8 @@ function codeLines(text: string): number {
 
 /** Line limit for any test file (measured in code lines, excluding blank lines and comments). */
 const MAX_TEST_LINES = 400;
+/** `vi.mock` and `vi.doMock`, with optional whitespace, line breaks and a type argument before the call. */
+const MODULE_MOCK_CALL = /\bvi\s*\.\s*(?:do)?[mM]ock\s*(?:<[^>]*>)?\s*\(/u;
 
 /**
  * Tests that intentionally write a TaskRecord/EpicRecord literal by hand instead of using
@@ -133,8 +135,23 @@ describe("test suite structure", () => {
     for (const suite of suites) expect(readme).toContain(`test/${suite}`);
   });
 
+  it("recognises a module mock however it is spelled", () => {
+    // Built from parts so this file does not trip the guard it tests.
+    const vi = "v" + "i";
+    const spelled = [
+      `${vi}.mock(`,
+      `${vi}.doMock(`,
+      `${vi}.doMock<typeof import("x")>(`,
+      `${vi}.doMock (`,
+      `${vi}\n  .mock(`,
+    ];
+    for (const call of spelled) expect(MODULE_MOCK_CALL.test(call), call).toBe(true);
+    for (const call of ["vi.fn()", "vi.spyOn(a, b)", "vi.unmock(x)", "vi.mocked(x)"])
+      expect(MODULE_MOCK_CALL.test(call), call).toBe(false);
+  });
+
   it("never mocks a whole module, since isolate: false would leak the mock into the next files of a worker", () => {
-    const mocking = testFiles.filter((path) => /\bvi\.(?:do)?mock\(/u.test(read(path)));
+    const mocking = testFiles.filter((path) => MODULE_MOCK_CALL.test(read(path)));
 
     expect(mocking, "inject the dependency instead of vi.mock / vi.doMock").toEqual([]);
   });

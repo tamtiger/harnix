@@ -11,8 +11,10 @@ import {
   inspectWorkspaceGitStatus,
   explainProjectStatus,
   summarizeProjectStatus,
+  listProjectChecks,
   reportProjectCriteria,
 } from "./commands/status.js";
+import { resolveStatusMode } from "./commands/status-mode.js";
 import { listProjectTasks } from "./commands/tasks.js";
 import { listPublicEpics, detailPublicEpic } from "./commands/epic.js";
 import { resumeProjectTask } from "./commands/resume.js";
@@ -85,35 +87,27 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--explain", "Include required-check freshness and readiness/completion blockers")
     .option("--summary", "Print a concise micro-summary under 80 tokens")
     .option("--criteria", "Print a concise list of acceptance criteria with their status and coverage")
+    .option("--checks", "Print a concise list of the task's checks with scope, command and freshness")
     .option("--limit <count>", "Maximum required checks when --explain is set", "20")
     .option("--workspace [path]", "Read-only Git table (branch, changes, upstream) of the sub-repositories")
     .action(async (options: StatusCliOptions, command: Command) => {
       const now = programOptions.statusClock?.() ?? Date.now();
-      if (options.workspace !== undefined) {
-        if (
-          options.explain === true ||
-          options.summary === true ||
-          options.criteria === true ||
-          command.getOptionValueSource("limit") === "cli"
-        )
-          throw new Error("--workspace cannot be combined with --explain, --summary, --criteria or --limit.");
-        const path = typeof options.workspace === "string" ? options.workspace : undefined;
-        process.stdout.write(`${JSON.stringify(await inspectWorkspaceGitStatus(process.cwd(), path))}\n`);
-        return;
-      }
-      if (options.criteria === true) {
-        if (options.explain === true || options.summary === true || command.getOptionValueSource("limit") === "cli")
-          throw new Error("--criteria cannot be combined with --explain, --summary or --limit.");
-        process.stdout.write(`${JSON.stringify(await reportProjectCriteria(process.cwd()))}\n`);
-        return;
-      }
+      const mode = resolveStatusMode(options, command.getOptionValueSource("limit") === "cli");
+      const cwd = process.cwd();
       const result =
-        options.summary === true
-          ? await summarizeProjectStatus(process.cwd(), now)
-          : options.explain === true
-            ? await explainProjectStatus(process.cwd(), parseReportLimit(options.limit, "status"), now)
-            : await inspectProjectStatus(process.cwd(), now);
-      process.stdout.write(`${JSON.stringify(result)}\n`);
+        mode === "workspace"
+          ? await inspectWorkspaceGitStatus(cwd, typeof options.workspace === "string" ? options.workspace : undefined)
+          : mode === "checks"
+            ? await listProjectChecks(cwd, now)
+            : mode === "criteria"
+              ? await reportProjectCriteria(cwd)
+              : mode === "summary"
+                ? await summarizeProjectStatus(cwd, now)
+                : mode === "explain"
+                  ? await explainProjectStatus(cwd, parseReportLimit(options.limit, "status"), now)
+                  : await inspectProjectStatus(cwd, now);
+      process.stdout.write(`${JSON.stringify(result)}
+`);
     });
 
   program
@@ -309,6 +303,7 @@ interface StatusCliOptions {
   explain?: boolean;
   summary?: boolean;
   criteria?: boolean;
+  checks?: boolean;
   limit: string;
   workspace?: boolean | string;
 }

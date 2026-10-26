@@ -4,8 +4,8 @@
   "id": "20261026-070545-footprint-budget-and-doc-gaps",
   "title": "Đổi gate footprint sang ngân sách byte, sửa 3 lỗi nhỏ và khôi phục quy tắc bị mất khi rút gọn reference (2.22.2)",
   "mode": "full",
-  "status": "ready",
-  "checkpoint": "ready",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Thay mốc footprint cố định 50% so với baseline Trellis (đo dung lượng đĩa của bản cài, không phải token) bằng ngân sách byte chỉ tăng có chủ đích, để thêm hướng dẫn vào skill không bị gate chặn một cách máy móc; đồng thời sửa các lỗi nhỏ và khoảng trống tài liệu mà review 2.22.1 tìm thấy.",
   "nonGoals": [
     "Không đổi cách cài đặt references lên từng platform",
@@ -15,32 +15,52 @@
     {
       "id": "ac-1",
       "text": "Gate measure:footprint đổi từ mốc cố định giảm 50% so với baseline Trellis sang ngân sách byte được lưu trong scripts/footprint-budget.json: thất bại khi footprint vượt ngân sách, vẫn in mức giảm so với baseline làm số tham khảo, và ngân sách chỉ đổi bằng một thay đổi có chủ đích trong file đó (như ngưỡng coverage, chỉ nâng khi có lý do ghi rõ)",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-footprint-gate-1",
+        "ev-chk-lint-1",
+        "ev-chk-typecheck-1"
+      ]
     },
     {
       "id": "ac-2",
       "text": "Tài liệu ghi quyết định đổi gate: HARNIX_PRD mục chấp nhận về footprint, IMPLEMENTATION_PLAN (mục measure:footprint và các mục chấp nhận), UPSTREAM_BASELINE mục 5, AGENTS.md; nêu rõ mốc 50% là số tham khảo lịch sử, gate hiện hành là ngân sách byte",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-docs-decision-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "Guard test-structure bắt cả vi.mock lẫn vi.doMock; closestMatch so phần số bằng giá trị số nên ac-01 và ac-1 không bị coi là anh em khác số; JSDoc của finishWorkflowReport nằm đúng hàm",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-lint-1",
+        "ev-chk-small-fixes-1",
+        "ev-chk-typecheck-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Các quy tắc bị thu hẹp khi rút gọn reference được khôi phục bằng câu ngắn ở nơi agent đọc, và một test giữ danh sách cụm bắt buộc: --task áp dụng cho mọi lệnh edit và --inspect; --exit-code bắt buộc cho mọi kết quả pass hoặc fail; breaker có ba lối ra (input digest mới, --reset-breaker có --reason 10 đến 1000 ký tự, --replace-check) ở replan.md và HARNIX_PRD; chỉ một lần pass hợp lệ hoặc --reset-breaker mới reset breaker; evidence không được ghi ngày tương lai và --cwd khác bị từ chối; --run-checks trỏ đúng cookbook-commands; digest gắn task id và check id; --run-check và --evidence tự tick mục checklist; heredoc Bash gây unexpected EOF và PowerShell ANSI làm hỏng UTF-8 là lý do dùng --file; resume từ chối va chạm con trỏ; epic nhắc kiểm tra nhánh mong đợi và notice khi follow-up không có epic",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-1",
+        "ev-chk-rules-1"
+      ]
     },
     {
       "id": "ac-5",
-      "text": "Phát hành bản vá 2.22.2: ngân sách footprint được đặt bằng số đo thực sau thay đổi làm tròn lên 1 KiB và toàn bộ gate phát hành xanh",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Phát hành bản vá 2.22.2: ngân sách footprint được đặt bằng số đo thực sau mọi thay đổi (đã gồm phần tăng do khôi phục quy tắc ở ac-4) làm tròn lên 1 KiB, mức tăng so với 2.22.1 được ghi thành decision và changelog, và toàn bộ gate phát hành xanh",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-footprint-1"
+      ]
     }
   ],
   "relevantPaths": [
@@ -89,7 +109,6 @@
       "scope": "focused",
       "required": true,
       "criterionIds": [
-        "ac-2",
         "ac-4"
       ],
       "inputs": [
@@ -114,7 +133,7 @@
     },
     {
       "id": "check-suite",
-      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "description": "Toàn bộ test kèm coverage của dự án phải xanh",
       "command": "pnpm run test",
       "scope": "full",
       "required": true,
@@ -126,6 +145,8 @@
         "ac-5"
       ],
       "inputs": [
+        "package.json",
+        "scripts/**",
         "src/**",
         "test/**"
       ]
@@ -140,10 +161,61 @@
         "ac-4"
       ],
       "inputs": [
+        "docs/**",
         "src/skills/**",
         "src/templates/**",
         "test/workflow/**"
       ]
+    },
+    {
+      "id": "chk-docs-decision",
+      "description": "Contract test và docs parity sau khi ghi quyết định đổi gate",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm test:gates"
+    },
+    {
+      "id": "chk-lint",
+      "description": "Lint và format sạch",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm lint"
+    },
+    {
+      "id": "chk-typecheck",
+      "description": "Typecheck sạch",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**",
+        "tsconfig.json"
+      ],
+      "command": "pnpm typecheck"
     }
   ],
   "evidence": [
@@ -164,8 +236,137 @@
       "artifactPaths": [
         ".harnix/tasks/20261026-070545-footprint-budget-and-doc-gaps/task.json"
       ]
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-10-26T08:08:34.840+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Review ready: chk-rules thiếu docs/**, slice chk-gates trùng id cho hai tiêu chí, check-suite không bao lint/typecheck và inputs hẹp, mâu thuẫn ràng buộc ngân sách với phần tăng do ac-4.",
+      "artifactPaths": [
+        ".harnix/tasks/20261026-070545-footprint-budget-and-doc-gaps/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-footprint-gate-1",
+      "checkId": "chk-footprint-gate",
+      "recordedAt": "2026-10-26T08:19:11.040+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/measure-footprint-guard.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "605306ca67f05d8e007ee2cd6f338ccf1d2c487ff5127f7c008da632a60bf75f"
+    },
+    {
+      "id": "ev-chk-small-fixes-1",
+      "checkId": "chk-small-fixes",
+      "recordedAt": "2026-10-26T08:19:18.079+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/test-structure.test.ts test/unit/utils/suggest.test.ts test/unit/core/workflow/finish.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4cb83c8a5f929cc31f9bdbadbd35a486150183d5d3ba8f78b9cf464db4a0efe2"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-26T08:19:23.479+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6138d6b9bbaf9b0b857668370b2d8366af13a29b56823317f6e9b0fc8b22d602"
+    },
+    {
+      "id": "ev-chk-footprint-1",
+      "checkId": "chk-footprint",
+      "recordedAt": "2026-10-26T08:19:25.660+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm measure:footprint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "699de75cc490f8f1b9f06a1f10b2c26945dd7c1791cf16c139978f32d1cc6410"
+    },
+    {
+      "id": "ev-chk-rules-1",
+      "checkId": "chk-rules",
+      "recordedAt": "2026-10-26T08:19:27.497+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/reference-rules.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0f9e0e304f55c8cecb15823fe01f36f7bcc0008db8e11b687566aeb263f71671"
+    },
+    {
+      "id": "ev-chk-docs-decision-1",
+      "checkId": "chk-docs-decision",
+      "recordedAt": "2026-10-26T08:19:32.950+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1050ee7ed6cb02b8a45856ea2563f55b69363cbb6fa6f07e9782ea759fbfac41"
+    },
+    {
+      "id": "ev-chk-lint-1",
+      "checkId": "chk-lint",
+      "recordedAt": "2026-10-26T08:19:52.114+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b26d06b2664f465117570e6362dd0f1d8b60a97eeb0504a594c8b612242cd139"
+    },
+    {
+      "id": "ev-chk-typecheck-1",
+      "checkId": "chk-typecheck",
+      "recordedAt": "2026-10-26T08:19:56.985+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "978fb65d8969643500ae3dbbb15d9477881bf514c83f30cf94bb920e85dc879f"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-26T08:21:20.789+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "c49c1a7c2b0a62a3c683ec3e60e09449c317882a1352266071694215ea264da1"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-26T08:22:59.449+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c49c1a7c2b0a62a3c683ec3e60e09449c317882a1352266071694215ea264da1"
     }
   ],
   "createdAt": "2026-10-26T07:05:45.156+07:00",
-  "updatedAt": "2026-10-26T07:09:15.537+07:00"
+  "updatedAt": "2026-10-26T08:24:29.529+07:00",
+  "decisions": [
+    {
+      "id": "footprint-growth-from-ac4",
+      "text": "Footprint tăng so với 2.22.1 do khôi phục quy tắc ở ac-4 là có chủ đích; ngân sách đặt sau ac-4 và mức tăng được ghi ở changelog",
+      "rationale": "Gate mới là ngân sách byte; mỗi KB reference tốn khoảng 4 KB footprint nên không thể khôi phục quy tắc mà giữ nguyên số byte"
+    },
+    {
+      "id": "footprint-budget-set",
+      "text": "maxBytes khởi điểm 676864 (số đo 676754 làm tròn lên 1 KiB); footprint tăng khoảng 5 KB so với 2.22.1",
+      "rationale": "Khôi phục quy tắc reference ghi ra bốn nơi; đúng ràng buộc PRD"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "flaky-version-sync-fold-dev",
+      "text": "Test version sync --fold-dev lỗi một lần khi chạy cả suite có coverage (pass khi chạy riêng và khi chạy lại); nghi do tải song song",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-26T08:24:29.529+07:00"
 }

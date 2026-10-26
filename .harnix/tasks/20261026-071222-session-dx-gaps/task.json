@@ -4,8 +4,8 @@
   "id": "20261026-071222-session-dx-gaps",
   "title": "Gỡ các ma sát gặp khi phát triển harnix: file runtime bị commit, lint file nháp, thêm member không đổi con trỏ, sửa không đổi, output gọn và release:check (2.22.3)",
   "mode": "full",
-  "status": "ready",
-  "checkpoint": "ready",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Sửa các vấn đề thực tế gặp khi dùng chính harnix để phát triển harnix trong phiên review 2.22.x, để agent đỡ phải chạy script phụ, đọc task.json hay pause rồi resume chỉ để thêm một task.",
   "nonGoals": [
     "Không đổi field hay enum đóng băng của TaskRecord",
@@ -15,63 +15,107 @@
   "acceptanceCriteria": [
     {
       "id": "ac-1",
-      "text": "File runtime của harnix không còn bị commit: .harnix/tasks/.active (con trỏ theo từng người) và .harnix/tmp/ (file nháp) được ignore trong repo này, được gỡ khỏi index, và harnix doctor cảnh báo khi .active đang được git track",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "File runtime của harnix không còn bị commit: .harnix/tasks/.active (con trỏ theo từng người), .harnix/tmp/ (file nháp) và .harnix/cache/ (đã nằm trong .gitignore nhưng repo-map-v1.json vẫn bị track) được ignore trong repo này và gỡ khỏi index bằng git rm --cached (không xóa file); harnix doctor cảnh báo active-pointer-tracked khi .active đang được git track, dùng process runner được tiêm",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-runtime-files-1"
+      ]
     },
     {
       "id": "ac-2",
-      "text": "ESLint và Prettier bỏ qua .harnix/**, nên file nháp đặt trong .harnix/tmp/ (được CLAUDE.md và AGENTS.md cho phép) không làm pnpm lint thất bại",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "ESLint bỏ qua .harnix/** (Prettier đã bỏ qua .harnix trong .prettierignore, test hợp đồng cấu hình giữ cả hai), nên file nháp đặt trong .harnix/tmp/ (được CLAUDE.md và AGENTS.md cho phép) không làm pnpm lint thất bại",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-lint-1",
+        "ev-chk-runtime-files-1"
+      ]
     },
     {
       "id": "ac-3",
       "text": "workflow --init nhận --no-activate cùng --epic hoặc đứng riêng: tạo task ở planning mà không đổi con trỏ .active của task đang làm, để thêm member vào epic hiện có hoặc tạo task tiếp nối mà không phải pause rồi resume",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1",
+        "ev-chk-lint-1",
+        "ev-chk-no-activate-1",
+        "ev-chk-typecheck-1"
+      ]
     },
     {
       "id": "ac-4",
       "text": "Sửa nghĩa không đổi (--set-check, --set-criterion, --add-criterion lặp lại đúng giá trị hiện có) không còn báo lỗi contractRevision khó hiểu: lệnh trả thành công với thông báo không có gì thay đổi và không đưa task về replan",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-noop-edit-1",
+        "ev-chk-typecheck-1"
+      ]
     },
     {
       "id": "ac-5",
-      "text": "workflow --transition <s>/<c> --dry-run trả gọn { valid, issues, advisories } theo mặc định; reviewChecklist chỉ in khi thêm --checklist hoặc khi có lỗi",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "workflow --transition <s>/<c> --dry-run trả gọn { valid, issues, advisories } theo mặc định; reviewChecklist chỉ in khi thêm --checklist, khi có lỗi, hoặc khi đích là ready/ready của task Full (để ready-review của Full vẫn thấy checklist trước --reviewed); workflow.md và skill harnix-plan nêu rõ quy tắc này",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1",
+        "ev-chk-lean-output-1",
+        "ev-chk-typecheck-1"
+      ]
     },
     {
       "id": "ac-6",
       "text": "status --checks in danh sách gọn các check của task active gồm id, scope, required, criterionIds, command và trạng thái tươi, để agent không phải đọc task.json",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1",
+        "ev-chk-lean-output-1",
+        "ev-chk-typecheck-1"
+      ]
     },
     {
       "id": "ac-7",
       "text": "Decision có id bắt đầu bằng trace- ghi vết đo đạc hoặc quy trình và không bao giờ được --finish chụp thành learning; schema TaskRecord giữ nguyên",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-lean-output-1",
+        "ev-chk-typecheck-1"
+      ]
     },
     {
       "id": "ac-8",
-      "text": "Một lệnh pnpm release:check chạy đúng chuỗi gate phát hành (install --frozen-lockfile, build, lint, typecheck, test, pack:check, smoke:tarball, measure:init, measure:footprint, scan:release, git diff --check), in từng lệnh với exit code và thời gian, dừng ở lệnh đầu tiên lỗi; được ghi ở IMPLEMENTATION_PLAN mục 11 và AGENTS.md",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Một lệnh pnpm release:check chạy đúng chuỗi gate phát hành của IMPLEMENTATION_PLAN mục 11 (install --frozen-lockfile, build, lint, typecheck, test, pack:check, smoke:tarball, measure:init, measure:footprint, scan:release, git diff --check), in từng lệnh với exit code và thời gian, dừng ở lệnh đầu tiên lỗi; được ghi ở IMPLEMENTATION_PLAN mục 11, danh sách Required package scripts của AGENTS.md và test/workflow/package-contract.test.ts",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1",
+        "ev-chk-lint-1",
+        "ev-chk-release-check-1"
+      ]
     },
     {
       "id": "ac-9",
       "text": "Gửi nhầm kết quả của workflow --inspect (có activeTask và contextDrift) làm task trong --save nhận thông báo nói rõ cần truyền đối tượng activeTask, thay cho Invalid or unsupported task record",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-noop-edit-1",
+        "ev-chk-typecheck-1"
+      ]
     },
     {
       "id": "ac-10",
-      "text": "Tài liệu đồng bộ với các thay đổi trên (AGENTS.md, README, HARNIX_WORKFLOW, HARNIX_PRD, IMPLEMENTATION_PLAN, workflow.md và selfhost, skill references) và bản vá 2.22.3 phát hành với toàn bộ gate xanh",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Tài liệu đồng bộ với các thay đổi trên (AGENTS.md, README, HARNIX_WORKFLOW, HARNIX_PRD, IMPLEMENTATION_PLAN, workflow.md và selfhost, skill references); sau khi thêm hướng dẫn, pnpm measure:footprint vẫn xanh: nếu vượt thì nâng maxBytes trong scripts/footprint-budget.json bằng số đo thực làm tròn lên 1 KiB kèm lý do ở changelog; bản vá 2.22.3 (kind added hoặc changed, không phải fixed) phát hành với toàn bộ gate xanh",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-footprint-1",
+        "ev-chk-gates-1"
+      ]
     }
   ],
   "relevantPaths": [
@@ -185,7 +229,7 @@
     },
     {
       "id": "check-suite",
-      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "description": "Toàn bộ test kèm coverage của dự án phải xanh",
       "command": "pnpm run test",
       "scope": "full",
       "required": true,
@@ -202,12 +246,194 @@
         "ac-9"
       ],
       "inputs": [
+        ".gitignore",
+        "eslint.config.mjs",
+        "package.json",
+        "scripts/**",
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "chk-lint",
+      "description": "Lint và format sạch (gồm ignore .harnix/**)",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2",
+        "ac-3",
+        "ac-8"
+      ],
+      "inputs": [
+        "eslint.config.mjs",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm lint"
+    },
+    {
+      "id": "chk-typecheck",
+      "description": "Typecheck sạch",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7",
+        "ac-9"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**",
+        "tsconfig.json"
+      ],
+      "command": "pnpm typecheck"
+    },
+    {
+      "id": "chk-footprint",
+      "description": "Footprint trong ngân sách sau khi thêm hướng dẫn",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-10"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**"
+      ],
+      "command": "pnpm measure:footprint"
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-26T08:09:38.596+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Review ready: làm rõ ac-1/2/5/8/10 (cache bị track, Prettier đã ignore, giữ checklist ở ready-review, package-contract, footprint và loại changelog) và bổ sung check lint, typecheck, footprint; mở rộng inputs của check-suite.",
+      "artifactPaths": [
+        ".harnix/tasks/20261026-071222-session-dx-gaps/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-runtime-files-1",
+      "checkId": "chk-runtime-files",
+      "recordedAt": "2026-10-26T08:41:30.216+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/doctor test/workflow/runtime-files.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "058e0947a3354dcc3e48f75970a6b22aac0d73f1c43a9494cc8d4022f066dc28"
+    },
+    {
+      "id": "ev-chk-no-activate-1",
+      "checkId": "chk-no-activate",
+      "recordedAt": "2026-10-26T08:41:38.226+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/init-task.test.ts test/integration/commands/workflow-flags.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d3ca78c6ddf4c3529885bba5c8e929ab745d4d60d896d24b8757ee07f8757be3"
+    },
+    {
+      "id": "ev-chk-noop-edit-1",
+      "checkId": "chk-noop-edit",
+      "recordedAt": "2026-10-26T08:41:47.750+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/plan-edit.test.ts test/unit/core/workflow/envelope.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4e029c4b5b95546a1e273cef179bbb8361ea2c128d75045438e58d4bac71041e"
+    },
+    {
+      "id": "ev-chk-lean-output-1",
+      "checkId": "chk-lean-output",
+      "recordedAt": "2026-10-26T08:41:55.428+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/transition.test.ts test/unit/commands/status.test.ts test/unit/core/journal — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8044782cd7b3136d08cbedf7042eeec6f49850b792821ca0a5f423d3956554b9"
+    },
+    {
+      "id": "ev-chk-release-check-1",
+      "checkId": "chk-release-check",
+      "recordedAt": "2026-10-26T08:41:57.470+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/release-check.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "44ef40f5c57f85bf0387946984e3749b8d91e1ad537d66b9c5fd455fa3ba80b5"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-26T08:42:03.127+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "434cfe8b312c74a93d98b26ec1da760cb516549c0e055e9e17a01f111808f826"
+    },
+    {
+      "id": "ev-chk-lint-1",
+      "checkId": "chk-lint",
+      "recordedAt": "2026-10-26T08:42:21.394+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm lint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0f4913a2ad20612549dbd62f8b28b6e20de106331a6c75b9ec5c6194afcef342"
+    },
+    {
+      "id": "ev-chk-typecheck-1",
+      "checkId": "chk-typecheck",
+      "recordedAt": "2026-10-26T08:42:26.393+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm typecheck — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a1e32a6258d6b2660471b797bb3307a92a1f9dd32eceaa08aab90770617161fa"
+    },
+    {
+      "id": "ev-chk-footprint-1",
+      "checkId": "chk-footprint",
+      "recordedAt": "2026-10-26T08:42:28.829+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm measure:footprint — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7c2b10a53ef8eaaf32cb27d8803f40a5c2bceb644ce8f0a802d08df8e04c092f"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-26T08:43:42.501+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "21836b47fdb9d9c8826dccaaed376e6a1b7ef262942f1754d03e08d2de9efd0d"
+    }
+  ],
   "createdAt": "2026-10-26T07:12:22.586+07:00",
-  "updatedAt": "2026-10-26T07:13:07.951+07:00"
+  "updatedAt": "2026-10-26T08:51:55.445+07:00",
+  "decisions": [
+    {
+      "id": "order-after-footprint-task",
+      "text": "Task này làm sau task 20261026-070545-footprint-budget-and-doc-gaps (2.22.2); không có epic hay followUpOf vì chỉ đặt được lúc --init",
+      "rationale": "Hai task cùng sửa tài liệu và package.json, và ngân sách footprint của task kia phải có trước để ac-10 nâng maxBytes có chủ đích"
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "flaky-version-sync-eperm",
+      "text": "Test version sync --fold-dev thỉnh thoảng lỗi EPERM trên Windows khi chạy cả suite có coverage (lần chạy lại pass); chưa tìm nguyên nhân gốc",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-26T08:51:55.445+07:00"
 }

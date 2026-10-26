@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { retryOnTaskConflict } from "src/core/tasks/read-tracker.js";
 import { resolveActiveTask, type TaskRecordV3 } from "src/core/tasks/task.js";
@@ -145,7 +145,36 @@ describe("workflow plan-edit transports", () => {
     ).toBe("pnpm test");
   });
 
-  it("adds a criterion with Vietnamese text intact and refuses a duplicate id", async () => {
+  it("treats an edit that changes nothing as a successful no-op without a reason or a replan", async () => {
+    const root = await temporaryRepository();
+    const running = await implementingTaskV3(root);
+    const [check] = running.validationPlan;
+    const [criterion] = running.acceptanceCriteria;
+    const notices: string[] = [];
+    const write = vi.spyOn(process.stderr, "write").mockImplementation((chunk) => {
+      notices.push(String(chunk));
+      return true;
+    });
+
+    try {
+      const same = await setCheckWorkflow(root, { id: check?.id ?? "", command: check?.command }, {}, NOW);
+      const repeated = await addCriterionWorkflow(
+        root,
+        { id: criterion?.id ?? "", text: criterion?.text ?? "", checks: [check?.id ?? ""] },
+        {},
+        NOW,
+      );
+
+      expect(same).toMatchObject({ status: "in_progress", checkpoint: "implementing" });
+      expect(repeated).toMatchObject({ status: "in_progress", checkpoint: "implementing" });
+      expect(same.evidence).toEqual(running.evidence);
+      expect(notices.join("")).toMatch(/nothing changed/u);
+    } finally {
+      write.mockRestore();
+    }
+  });
+
+  it("adds a criterion with Vietnamese text intact and refuses a duplicate id with other text", async () => {
     const root = await temporaryRepository();
     await planningProject(root);
     const text = "Khởi tạo đơn hàng thành công với đủ phương thức thanh toán";
@@ -158,7 +187,9 @@ describe("workflow plan-edit transports", () => {
       status: "pending",
       evidenceIds: [],
     });
-    await expect(addCriterionWorkflow(root, { id: "b", text, checks: ["check"] }, {}, NOW)).rejects.toThrow(/already/u);
+    await expect(
+      addCriterionWorkflow(root, { id: "b", text: `${text} khác`, checks: ["check"] }, {}, NOW),
+    ).rejects.toThrow(/already/u);
     await expect(addCriterionWorkflow(root, { id: "c", text: "  ", checks: ["check"] }, {}, NOW)).rejects.toThrow(
       /--text/u,
     );

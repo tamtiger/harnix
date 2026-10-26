@@ -98,4 +98,22 @@ describe("--reviewed on the ready transition", () => {
       (await transitionWorkflow(full, "in_progress", "implementing", undefined, true)).reviewChecklist,
     ).toBeUndefined();
   });
+
+  it("prints the checklist on request, and for a ready target that has issues", async () => {
+    const lite = await planned("lite");
+    const full = await planned("full");
+
+    const requested = await transitionWorkflow(full, "in_progress", "implementing", undefined, true, {
+      checklist: true,
+    });
+    const broken = await planned("lite");
+    await transitionWorkflow(broken, "ready", "ready");
+    await transitionWorkflow(broken, "in_progress", "implementing");
+    const withIssues = await transitionWorkflow(broken, "ready", "ready", undefined, true);
+
+    expect(requested.reviewChecklist).toEqual([...READY_REVIEW_CHECKLIST]);
+    expect(withIssues.valid).toBe(false);
+    expect(withIssues.reviewChecklist).toEqual([...READY_REVIEW_CHECKLIST]);
+    expect((await transitionWorkflow(lite, "ready", "ready", undefined, true)).reviewChecklist).toBeUndefined();
+  });
 });

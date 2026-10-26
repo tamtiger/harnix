@@ -19,7 +19,7 @@ const TRAILING_NUMBER = /^(.*?)(\d+)$/u;
 function onlyNumberDiffers(left: string, right: string): boolean {
   const a = TRAILING_NUMBER.exec(left);
   const b = TRAILING_NUMBER.exec(right);
-  return a !== null && b !== null && a[1] === b[1] && a[2] !== b[2];
+  return a !== null && b !== null && a[1] === b[1] && BigInt(a[2] ?? "0") !== BigInt(b[2] ?? "0");
 }
 
 /**

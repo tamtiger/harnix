@@ -1,7 +1,7 @@
 import type { TaskRecordV3 } from "src/core/tasks/task.js";
 import { unknownIdError } from "src/utils/suggest.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
-import { activeV3, saveObligationEdit, type PlanEditOptions } from "./plan-edit.js";
+import { activeV3, noteNothingChanged, saveObligationEdit, type PlanEditOptions } from "./plan-edit.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
 
@@ -38,13 +38,18 @@ export async function setCriterionWorkflow(
   const task = await activeV3(root);
   const text = input.text.trim();
   if (text === "") throw new Error("--text must not be empty.");
-  if (!task.acceptanceCriteria.some((criterion) => criterion.id === input.id))
+  const current = task.acceptanceCriteria.find((criterion) => criterion.id === input.id);
+  if (current === undefined)
     throw unknownIdError(
       `Acceptance criterion ${input.id} does not exist.`,
       "criterion",
       input.id,
       task.acceptanceCriteria.map((criterion) => criterion.id),
     );
+  if (current.text === text) {
+    noteNothingChanged(`criterion ${input.id}`);
+    return task;
+  }
   const acceptanceCriteria = task.acceptanceCriteria.map((criterion) =>
     criterion.id === input.id ? { ...criterion, text, status: "pending" as const, evidenceIds: [] } : criterion,
   );

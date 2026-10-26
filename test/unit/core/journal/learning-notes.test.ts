@@ -34,6 +34,22 @@ describe("learning review notes", () => {
     ]);
   });
 
+  it("never captures a decision whose id starts with trace-, which records measurements or process", () => {
+    const task = buildTaskV3({
+      decisions: [
+        {
+          id: "trace-footprint-measure",
+          text: "Footprint đo được 676754 byte sau khi thêm hướng dẫn",
+          rationale: "Số đo",
+        },
+        { id: "keep-this", text: "Decision text that is long enough to be kept", rationale: "Why" },
+      ],
+    });
+
+    expect(reviewNotes(task)).toEqual(["Decision text that is long enough to be kept"]);
+    expect(extractObservations(task)).toEqual(["Decision text that is long enough to be kept"]);
+  });
+
   it("filters out local implementation decisions that lack an applicable condition", () => {
     const task = buildTaskV3({
       decisions: [

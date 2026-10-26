@@ -48,12 +48,12 @@ function learningHint(task: TaskRecord, captured: number): string | undefined {
   return "No learning captured: it already exists.";
 }
 
-/** Finishes the active task and reports how much project learning that produced, so a zero is never silent. */
 /** What a test may replace in a finish; production always uses the real learning capture. */
 export interface FinishReportDependencies {
   readonly captureLearning?: typeof captureLearningAtFinish;
 }
 
+/** Finishes the active task and reports how much project learning that produced, so a zero is never silent. */
 export async function finishWorkflowReport(
   root: string,
   injectedNow?: string,

@@ -57,6 +57,18 @@ describe("workflow envelope", () => {
     );
   });
 
+  it("tells an agent that sent the whole --inspect result to pass only its activeTask", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const planning = taskV3("planning", "planning");
+    const hint = /pass the activeTask object of --inspect/u;
+
+    await expect(saveWorkflow(root, { task: { activeTask: planning, contextDrift: "not-recorded" } })).rejects.toThrow(
+      hint,
+    );
+    await expect(saveWorkflow(root, { activeTask: planning, contextDrift: "not-recorded" })).rejects.toThrow(hint);
+  });
+
   it("rejects epic members whose IDs do not increase in execution order and says how to fix it", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);

@@ -81,6 +81,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
       context.flags.dryRun === true,
       {
         reviewed: context.flags.reviewed === true,
+        checklist: context.flags.checklist === true,
         reason: context.flags.reason,
         note: context.flags.note,
       },

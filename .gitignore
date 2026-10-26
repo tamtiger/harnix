@@ -5,3 +5,5 @@ dist/
 coverage/
 *.tsbuildinfo
 .harnix/cache/
+.harnix/tasks/.active
+.harnix/tmp/

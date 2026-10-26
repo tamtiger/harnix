@@ -51,6 +51,7 @@ export const LIFECYCLE_HANDLERS: Record<string, Handler> = {
       followUp: (filePayload.followUp ?? context.flags.followUp) as string | undefined,
       epic: (filePayload.epic ?? context.flags.epic) as string | undefined,
       cwd: (filePayload.cwd ?? context.flags.cwd) as string | undefined,
+      activate: context.flags.activate,
     });
     if (context.flags.followUp !== undefined && task.epicId === undefined)
       process.stderr.write(

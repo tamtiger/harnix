@@ -154,8 +154,10 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--reviewed", "Attest that the ready-review was run (required for a Full task at --transition ready/ready)")
     .option("--epic <epic-id>", "Existing epic to attach the new task to (--init only)")
     .option("--follow-up <task-id>", "Task ID to follow up on, inheriting context from a completed task")
+    .option("--no-activate", "Create the task (--init only) without moving the active pointer")
     .option("--brief", "Print only id, status, checkpoint and updatedAt")
     .option("--full", "Print full task record instead of default brief output")
+    .option("--checklist", "With --transition --dry-run, also print reviewChecklist for any target")
     .option("--dry-run", "Validate transition conditions without persisting state")
     .action(async (operands: string[], flags: WorkflowFlags) => {
       const actions = selectActions(flags);

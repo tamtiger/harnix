@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   explainProjectStatus,
   inspectProjectStatus,
+  listProjectChecks,
   reportProjectCriteria,
   summarizeProjectStatus,
 } from "src/commands/status.js";
@@ -199,5 +200,29 @@ describe("commands/status", () => {
       text: "done",
       coveredBy: ["check"],
     });
+  });
+
+  it("lists the checks of the active task compactly with their freshness, without reading task.json", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+
+    await expect(listProjectChecks(root)).resolves.toEqual({ taskId: null, checks: [] });
+
+    const task = taskV3("planning", "planning");
+    await saveWorkflow(root, { task });
+
+    const result = await listProjectChecks(root);
+    expect(result.taskId).toBe(task.id);
+    expect(result.checks).toEqual([
+      {
+        id: "check",
+        scope: task.validationPlan[0]?.scope,
+        required: true,
+        criterionIds: ["a"],
+        command: task.validationPlan[0]?.command,
+        state: "pending",
+      },
+    ]);
   });
 });

@@ -75,6 +75,7 @@ describe("package invariant", () => {
       "measure:init",
       "measure:tokens",
       "pack:check",
+      "release:check",
       "scan:release",
       "selfhost:sync",
       "smoke:tarball",

@@ -26,6 +26,17 @@ describe("setCriterionWorkflow", () => {
     expect(task.validationPlan).toEqual(planning.validationPlan);
   });
 
+  it("returns a met criterion untouched when the new text equals the current one", async () => {
+    const root = await temporaryRepository();
+    const running = await implementingTaskV3(root);
+    const [criterion] = running.acceptanceCriteria;
+
+    const task = await setCriterionWorkflow(root, { id: "a", text: ` ${criterion?.text ?? ""} ` });
+
+    expect(task).toMatchObject({ status: "in_progress", checkpoint: "implementing" });
+    expect(task.acceptanceCriteria).toEqual(running.acceptanceCriteria);
+  });
+
   it("needs a reason once obligations are frozen", async () => {
     const root = await temporaryRepository();
     await implementingTaskV3(root);

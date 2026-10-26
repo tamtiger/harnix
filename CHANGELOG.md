@@ -4,6 +4,18 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.22.3] - 2026-10-26
+
+### Added
+
+- Gỡ ma sát khi phát triển harnix bằng chính harnix: .active, .harnix/tmp và .harnix/cache được ignore và doctor cảnh báo active-pointer-tracked, ESLint bỏ qua .harnix, workflow --init --no-activate, sửa không đổi trả thành công, --transition --dry-run --checklist, harnix status --checks, decision trace- không vào learning, pnpm release:check, thông báo rõ khi gửi nhầm kết quả --inspect Ngân sách footprint nâng có chủ đích từ 676864 lên 678912 byte (663 KiB; số đo 678522 làm tròn lên 1 KiB, tăng 1658 byte) vì hướng dẫn mới của các cờ này được ghi ra bốn nơi.
+
+## [2.22.2] - 2026-10-26
+
+### Fixed
+
+- Gate measure:footprint theo ngân sách byte scripts/footprint-budget.json thay cho mốc giảm 50% so với Trellis (số tham khảo lịch sử, quyết định ngày 2026-10-26); khôi phục các quy tắc reference bị thu hẹp kèm test reference-rules; sửa guard vi.doMock, closestMatch ac-01/ac-1 và JSDoc finishWorkflowReport Ngân sách ban đầu `maxBytes` 676864 (661 KiB, số đo 676754 byte làm tròn lên 1 KiB); footprint tăng khoảng 5 KB so với 2.22.1 do khôi phục quy tắc reference ở bốn nơi ghi.
+
 ## [2.22.1] - 2026-10-25
 
 ### Fixed

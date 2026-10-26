@@ -72,7 +72,9 @@ export interface WorkflowFlags {
   cwd?: string;
   followUp?: string;
   reviewed?: boolean;
+  checklist?: boolean;
   epic?: string;
+  activate?: boolean;
   expectedTask?: string;
 }
 

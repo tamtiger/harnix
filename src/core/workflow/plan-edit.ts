@@ -1,6 +1,6 @@
 import { type TaskRecordV3, type ValidationCheckV3 } from "src/core/tasks/task.js";
 import { unknownIdError } from "src/utils/suggest.js";
-import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
+import { laterTimestamp, semanticJsonEqual } from "src/core/tasks/workflow-helpers.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertValidCheckInputs, validateCheckInputs } from "./check-input-validator.js";
@@ -36,6 +36,19 @@ export async function activeV3(root: string): Promise<TaskRecordV3> {
   return task;
 }
 
+/** An edit that leaves every obligation as it was is answered with this on stderr instead of an error or a replan. */
+export function noteNothingChanged(what: string): void {
+  process.stderr.write(`notice: nothing changed; ${what} already has that value, so the task was left as it is.
+`);
+}
+
+function sameObligations(left: TaskRecordV3, right: TaskRecordV3): boolean {
+  return semanticJsonEqual(
+    { criteria: left.acceptanceCriteria, checks: left.validationPlan },
+    { criteria: right.acceptanceCriteria, checks: right.validationPlan },
+  );
+}
+
 const FROZEN_HINT = /contractRevision|freeze/iu;
 
 function revisionReason(options: PlanEditOptions): string | undefined {
@@ -59,6 +72,10 @@ export async function saveObligationEdit(
   options: PlanEditOptions,
   now: string,
 ): Promise<TaskRecordV3> {
+  if (sameObligations(task, edited)) {
+    noteNothingChanged("the obligation");
+    return task;
+  }
   const updatedAt = laterTimestamp(task.updatedAt, now);
   const reason = revisionReason(options);
   const revise = async (contractReason: string): Promise<TaskRecordV3> => {
@@ -167,8 +184,17 @@ export async function addCriterionWorkflow(
   const task = await activeV3(root);
   const text = input.text.trim();
   if (text === "") throw new Error("--text must not be empty.");
-  if (task.acceptanceCriteria.some((criterion) => criterion.id === input.id))
+  const present = task.acceptanceCriteria.find((criterion) => criterion.id === input.id);
+  if (present !== undefined) {
+    const covered = input.checks.every((id) =>
+      task.validationPlan.find((check) => check.id === id)?.criterionIds.includes(input.id),
+    );
+    if (present.text === text && input.checks.length > 0 && covered) {
+      noteNothingChanged(`criterion ${input.id}`);
+      return task;
+    }
     throw new Error(`Acceptance criterion ${input.id} already exists.`);
+  }
   if (input.checks.length === 0)
     throw new Error("workflow --add-criterion requires --check <check-id> so the criterion is covered.");
   for (const checkId of input.checks)

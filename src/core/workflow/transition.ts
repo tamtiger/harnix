@@ -20,13 +20,15 @@ export interface DryRunTransitionResult {
   /** Not enforced by the transition; worth fixing before the contract freezes. */
   advisories: string[];
   unbaselinedChecks?: string[];
-  /** Present when a Full task is checked for ready: the ready-review to run before repeating with --reviewed. */
+  /** Present for a Full task checked for ready (the ready-review to run before --reviewed), for a ready target with issues, or with --checklist. */
   reviewChecklist?: string[];
 }
 
 export interface TransitionOptions {
   /** The caller attests that the ready-review was run; a Full task cannot enter ready/ready without it. */
   reviewed?: boolean;
+  /** Dry run only: also print `reviewChecklist` for a target that would not print it by default. */
+  checklist?: boolean;
   reason?: string | undefined;
   note?: string | undefined;
 }
@@ -70,7 +72,7 @@ export async function transitionWorkflow(
   if (!task) throw new Error("Workflow transition requires an active task.");
 
   if (dryRun === true) {
-    return handleDryRunTransition(harnixRoot, task, status, checkpoint);
+    return handleDryRunTransition(harnixRoot, task, status, checkpoint, options.checklist === true);
   }
 
   const entersReady = status === "ready" && checkpoint === "ready";
@@ -103,6 +105,7 @@ async function handleDryRunTransition(
   task: TaskRecord,
   status: string,
   checkpoint: string,
+  checklist: boolean,
 ): Promise<DryRunTransitionResult> {
   const issues: string[] = [];
   let advisories: string[] = [];
@@ -151,7 +154,9 @@ async function handleDryRunTransition(
     issues,
     advisories,
     ...(unbaselinedChecks ? { unbaselinedChecks } : {}),
-    ...(entersReady && task.mode === "full" ? { reviewChecklist: [...READY_REVIEW_CHECKLIST] } : {}),
+    ...(checklist || (entersReady && (task.mode === "full" || issues.length > 0))
+      ? { reviewChecklist: [...READY_REVIEW_CHECKLIST] }
+      : {}),
   };
 }
 

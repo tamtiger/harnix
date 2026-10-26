@@ -6,6 +6,9 @@ import type { TaskRecord } from "src/core/tasks/task.js";
 export const MAX_OBSERVATIONS_PER_TASK = 5;
 export const MAX_OBSERVATION_CHARACTERS = 500;
 
+/** A decision id with this prefix records a measurement or a process step, never a lesson to learn from. */
+const TRACE_PREFIX = "trace-";
+
 /**
  * Review notes the agent already wrote into the task (decisions, residual risks, evidence findings), trimmed and
  * de-duplicated by normalized text. Statements that trip a risk check are dropped here: automatic capture never
@@ -14,7 +17,9 @@ export const MAX_OBSERVATION_CHARACTERS = 500;
 export function reviewNotes(task: TaskRecord): string[] {
   if (task.schemaVersion === 1) return [];
   return [
-    ...(task.decisions ?? []).map((decision) => decision.text),
+    ...(task.decisions ?? [])
+      .filter((decision) => !decision.id.startsWith(TRACE_PREFIX))
+      .map((decision) => decision.text),
     ...(task.residualRisks ?? []).map((risk) => risk.text),
     ...task.evidence.flatMap((evidence) => (evidence.findings ?? []).map((finding) => finding.text)),
   ];

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { createIsolatedUserEnvironment } from "./isolated-user-home.mjs";
 import { assertBuilt } from "./assert-built.mjs";
 import { assertSetupExitContract } from "./setup-exit-contract.mjs";
+import { assertWithinBudget, readBudget } from "./footprint-budget.mjs";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 assertBuilt(root);
@@ -42,6 +43,7 @@ try {
     bytes: projectMeasurement.bytes + globalMeasurement.bytes,
     files: projectMeasurement.files + globalMeasurement.files,
   };
+  const maxBytes = readBudget(root);
   const baselineBytes = 1_343_579;
   const baselineFiles = 236;
   const reduction = 1 - measurement.bytes / baselineBytes;
@@ -53,10 +55,10 @@ try {
       global: globalMeasurement,
       project: projectMeasurement,
       reduction,
+      maxBytes,
     })}\n`,
   );
-  if (reduction < 0.5)
-    throw new Error("Harnix generated footprint is not at least 50% smaller than the frozen template baseline.");
+  assertWithinBudget(measurement.bytes, maxBytes);
 } finally {
   await Promise.all([rm(home, { force: true, recursive: true }), rm(project, { force: true, recursive: true })]);
 }

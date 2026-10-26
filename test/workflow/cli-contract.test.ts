@@ -68,6 +68,7 @@ describe("CLI command contract", () => {
       "--explain",
       "--summary",
       "--criteria",
+      "--checks",
       "--limit",
       "--workspace",
     ]);
@@ -152,8 +153,10 @@ describe("CLI command contract", () => {
       "--reviewed",
       "--epic",
       "--follow-up",
+      "--no-activate",
       "--brief",
       "--full",
+      "--checklist",
       "--dry-run",
     ]);
   });

@@ -9,6 +9,7 @@ harnix workflow --set-baseline <check-id> --result fail --classification pre-exi
 harnix workflow --remove-decision <id> --brief   # planning only; --remove-criterion <id> likewise (refused after planning or once a check recorded evidence)
 harnix workflow --epic-order <epic-id> <task-id>...   # explicit run order of an epic's members
 harnix workflow --schema --full              # the envelope schema plus the description of every flag
+harnix workflow --reset-breaker <check-id> --reason "<why, 10-1000 characters>" --brief   # user-authorized; the other exits are a new input digest and --replace-check
 ```
 
 - `--run-checks` runs every required check that is not passing (focused first, suite last) with its declared command
@@ -16,5 +17,5 @@ harnix workflow --schema --full              # the envelope schema plus the desc
   and records nothing. A check that failed twice in a row runs again once its inputs change (a new input digest).
 - `--criterion <ids> --met --transition verifying/finishing --finish` marks criteria, advances and finishes in one call.
 - `--batch` is atomic and order does not matter: references between items resolve after all are applied.
-- `harnix status --criteria` lists id, status, text and coveredBy of each criterion; the other public commands are in
+- `harnix status --criteria` lists id, status, text and coveredBy of each criterion; `harnix status --checks` lists id, scope, required, criterionIds, command and freshness of each check; the other public commands are in
   the `workflow-routing` reference.

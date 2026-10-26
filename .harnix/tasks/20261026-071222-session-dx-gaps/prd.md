@@ -15,9 +15,9 @@ Trong phiên review và sửa 2.21.1 đến 2.22.1, mỗi vấn đề dưới đ
 
 ## Scope & Boundaries
 
-Trong phạm vi: ac-1 đến ac-10. Ngoài phạm vi: field/enum đóng băng; ngân sách footprint (task `20261026-070545-footprint-budget-and-doc-gaps`); promote, reject hay prune learning (chỉ khi người dùng yêu cầu).
+Trong phạm vi: ac-1 đến ac-10. Ngoài phạm vi: field/enum đóng băng; đổi cơ chế gate footprint (task `20261026-070545-footprint-budget-and-doc-gaps`; riêng việc nâng `maxBytes` có lý do vì hướng dẫn mới của task này thuộc ac-10); promote, reject hay prune learning (chỉ khi người dùng yêu cầu).
 
-Thứ tự: task này làm sau task footprint vì cùng sửa tài liệu và `package.json`; số phiên bản `2.22.3`.
+Thứ tự: task này làm sau task footprint vì cùng sửa tài liệu và `package.json` và vì ngân sách footprint phải có trước; không có epic hay `followUpOf` (chỉ đặt được lúc `--init`); số phiên bản `2.22.3`, changelog kind `added` hoặc `changed`.
 
 ## Anchored Acceptance Criteria
 
@@ -25,4 +25,4 @@ ac-1 đến ac-10 trong `task.json`; mỗi tiêu chí có check tập trung tron
 
 ## Architectural & Safety Constraints
 
-`--no-activate` không đổi schema; `trace-` là quy ước id nên TaskRecord giữ nguyên. Gỡ `.active` khỏi index chỉ là `git rm --cached`, không xóa file. Thêm cờ phải đủ năm nơi của mục "Thêm cờ hoặc action workflow" trong AGENTS.md, và golden chỉ đổi đúng chuỗi mới. Tuân thủ AGENTS.md và `.harnix/spec/guides/`.
+`--no-activate` không đổi schema; dry-run tới `ready/ready` của Full vẫn in checklist nên ready-review không bị yếu đi. `trace-` là quy ước id nên TaskRecord giữ nguyên. Gỡ `.active` khỏi index chỉ là `git rm --cached`, không xóa file. Thêm cờ phải đủ năm nơi của mục "Thêm cờ hoặc action workflow" trong AGENTS.md, và golden chỉ đổi đúng chuỗi mới. Tuân thủ AGENTS.md và `.harnix/spec/guides/`.

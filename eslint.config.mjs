@@ -20,7 +20,16 @@ export default tseslint.config(
   {
     // docs/** may contain untracked, user-owned third-party material (e.g. vendored skill
     // bundles) that is not part of the Harnix package and is never linted as product code.
-    ignores: ["bin/**", "dist/**", "node_modules/**", ".artifacts/**", "docs/**", ".kilo/**", ".worktrees/**"],
+    ignores: [
+      "bin/**",
+      "dist/**",
+      "node_modules/**",
+      ".artifacts/**",
+      "docs/**",
+      ".kilo/**",
+      ".worktrees/**",
+      ".harnix/**",
+    ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,

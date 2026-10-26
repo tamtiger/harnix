@@ -915,7 +915,7 @@ interface HarnixStatusResultV1 {
 }
 ```
 
-`harnix status --criteria` xuất danh sách tiêu chí nghiệm thu gọn nhẹ (lean-token projection) của task đang active với format `{ taskId, mode, status, criteria: Array<{ id, status, text, coveredBy: string[] }> }`; khi không có task active trả `{ taskId: null, criteria: [] }` (exit 0) như các chế độ status khác, và `--criteria` từ chối `--limit`, cho phép đọc nhanh trạng thái nghiệm thu mà không cần inspect toàn bộ envelope hay đọc tay `task.json`.
+`harnix status --criteria` xuất danh sách tiêu chí nghiệm thu gọn nhẹ (lean-token projection) của task đang active với format `{ taskId, mode, status, criteria: Array<{ id, status, text, coveredBy: string[] }> }`; khi không có task active trả `{ taskId: null, criteria: [] }` (exit 0) như các chế độ status khác, và `--criteria` từ chối `--limit`, cho phép đọc nhanh trạng thái nghiệm thu mà không cần inspect toàn bộ envelope hay đọc tay `task.json`. `harnix status --checks` xuất `{ taskId, checks: Array<{ id, scope, required, criterionIds, command?, state }> }` (độ tươi từ `inspectRequiredChecks`; `{ taskId: null, checks: [] }` khi không có task active); `workflow --init --no-activate`, `--transition --dry-run --checklist`, sửa không đổi trả thành công kèm `notice: nothing changed` và decision `trace-` bị bỏ qua khi capture learning được mô tả trong `docs/HARNIX_PRD.md`.
 
 
 Task prose, criterion/check descriptions, validation commands, blocker text, prompts, secrets and absolute paths are never projected. Latest required-check evidence is chosen by `recordedAt`, then persisted append order as the deterministic compatibility tie-break shared with completion/input freshness. Missing/latest skipped is `pending`; latest fail is `failed`; a future/invalid pass is `stale`. A v3 pass is `passed` only when its `inputDigest` equals the freshly recomputed input digest (`digest-mismatch` or `inputs-unavailable` otherwise) and wall-clock age alone never expires it; a legacy v1/v2 pass is `stale` with `legacy-schema`.
@@ -1383,7 +1383,7 @@ Historical implementation retained for provenance and isolated migration tests; 
 - [x] Implement and verify `pack:check`; tarball contains only intended dist/runtime/templates/licenses/notices and exactly one package/bin.
 - [x] Implement `smoke:tarball` with isolated install plus init/setup each platform and multi-platform.
 - [x] Implement `measure:init` with documented fixture/repetitions and <5-second worst-run gate.
-- [x] Implement `measure:footprint` using `UPSTREAM_BASELINE.md` definition and >=50% reduction gate.
+- [x] Implement `measure:footprint` using `UPSTREAM_BASELINE.md` definition; gate ban đầu là giảm >=50%, thay bằng ngân sách byte `scripts/footprint-budget.json` từ 2.22.2 (quyết định của người dùng ngày 2026-10-26; mức giảm so với baseline chỉ còn là số tham khảo).
 - [x] Implement `scan:release` for secrets, machine paths, required TODOs, forbidden branding/surfaces, second package/workspace, dead packaged imports and duplicate hooks.
 - [x] `test:acceptance` orchestrates all non-packaging suites and doctor fixtures; every script propagates non-zero exit on gate failure.
 
@@ -1539,6 +1539,8 @@ pnpm scan:release
 git diff --check
 ```
 
+`pnpm release:check` (`scripts/release-check.mjs`) chạy đúng chuỗi trên theo thứ tự, in từng lệnh kèm exit code và thời gian, dừng ở lệnh đầu tiên lỗi; `test/workflow/release-check.test.ts` so chuỗi trong script với khối này.
+
 Script contracts:
 
 - `format` / `format:check`: Prettier (`printWidth` 120, `endOfLine: auto`) ghi/kiểm `src/**/*.ts`, `test/**/*.ts`, `scripts/**/*.mjs` và các file cấu hình TS/JS ở gốc; `lint` chạy `pnpm format:check` trước rồi `eslint .` (typescript-eslint `recommendedTypeChecked`, `no-floating-promises`, `complexity` 20, `max-lines` 300). Tại bản phát hành 2.0.0, toàn bộ danh sách miễn trừ trong `eslint.config.mjs` (`OVERSIZED_SOURCE_FILES`, `COMPLEX_SOURCE_FILES`, `RELEASE_SCRIPT_EXEMPTIONS`) đã được dọn sạch hoàn toàn về rỗng `[]`; mọi file trong `src/` đều ≤ 300 dòng code và complexity ≤ 20.
@@ -1547,7 +1549,7 @@ Script contracts:
 - `pack:check`: xóa/recreate project-local `.artifacts/` safely, chạy `pnpm pack --pack-destination .artifacts`, assert đúng một `@tamtiger/harnix` tarball và kiểm contents/license/runtime/templates.
 - `smoke:tarball`: cài tarball đó vào two independent temporary roots: fake user home for global setup and one-or-more project fixtures for `init`/context; smoke từng Kiro/Antigravity/Codex và tổ hợp ba platform without a real profile.
 - `measure:init`: chạy documented non-migration fixture nhiều lần, report median/worst wall-clock và fail nếu worst >=5 giây.
-- `measure:footprint`: đo files/bytes theo `UPSTREAM_BASELINE.md`, report numerator/denominator và fail nếu reduction <50%.
+- `measure:footprint`: đo files/bytes theo `UPSTREAM_BASELINE.md`, report numerator/denominator và `reduction` (số tham khảo lịch sử) và fail nếu bytes vượt `maxBytes` trong `scripts/footprint-budget.json`; file này chỉ nâng bằng thay đổi có chủ đích kèm lý do ở changelog, như ngưỡng coverage.
 - `measure:tokens`: chạy một vòng đời Lite thật trong repo tạm với home cô lập (cần `pnpm build` trước), in một JSON số token `ceil(ký tự/4)` theo `alwaysLoaded`, `workflowDoc`, `skills`, `preflight`, `reads`, `hookContext` (planning và in_progress), `steps` (mỗi lệnh workflow có và không `--brief`) và `sessionLite` (chi phí một phiên Lite điển hình: `alwaysLoaded` + `workflowDoc` + `--schema` + skill `harnix-plan` và `harnix-implement` + preflight và hook context lúc planning; báo lỗi khi thiếu một số đo); thoát khác 0 khi một lệnh đo lỗi. Số đo thông tin, không phải gate acceptance.
 - `scan:release`: scan tarball + generated fixtures cho forbidden branding/surfaces, stale project-local setup output, secrets, absolute machine paths, required TODO, second package/workspace, dead packaged imports và duplicate hooks.
 
@@ -1576,7 +1578,7 @@ Harnix chỉ hoàn thành khi:
 - Setup runs from outside a Harnix project and writes only official user-global surfaces with dry-run/status, safe ownership, rollback and scoped uninstall.
 - Doctor JSON v2 clean fixture pass; seeded unsafe/duplicate/legacy/global fixtures are detected and Codex is never claimed active before trust evidence.
 - Tarball smoke uses a fake home plus project fixtures; disposable Windows profile smoke verifies discovery/activation/trust/uninstall after explicit authorization.
-- Init <5 giây và footprint giảm ít nhất 50% theo định nghĩa đã khóa.
+- Init <5 giây và footprint trong ngân sách byte `scripts/footprint-budget.json` (mốc giảm 50% so với Trellis là số tham khảo lịch sử từ 2.22.2).
 - Không có second package/workspace, unsupported adapters, dead imports, secrets, accidental absolute paths, required TODO hoặc duplicate hooks.
 - Trellis chỉ còn trong attribution/research/migration compatibility/license/history.
 - Remaining limitation/deviation được ghi rõ, không được che bằng claim suy luận.

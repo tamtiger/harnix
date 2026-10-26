@@ -164,11 +164,13 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
     actions: ["setCheck", "replaceCheck", "runCheck", "init"],
   },
   initOwner("--epic", (f) => f.epic),
+  { name: "--checklist", isSet: (f) => f.checklist === true, actions: ["transition"] },
   {
     name: "--reviewed",
     isSet: (f) => f.reviewed === true,
     actions: ["transition"],
   },
   initOwner("--follow-up", (f) => f.followUp),
+  { name: "--no-activate", isSet: (f) => f.activate === false, actions: ["init"] },
   initOwner("--with-check", (f) => (listed(f.withCheck) ? "set" : undefined)),
 ];

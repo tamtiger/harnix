@@ -414,3 +414,49 @@ describe("--slug flag ownership", () => {
     expect(() => assertFlagGroups("inspect", { slug: "x" })).toThrow(/--slug requires workflow --init/u);
   });
 });
+
+describe("initTaskWorkflow without activation", () => {
+  it("creates a planning task and leaves the active pointer on the task already being worked on", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeTestProject(root);
+    const working = await initTaskWorkflow(root, { title: "Working", slug: "working" });
+
+    const created = await initTaskWorkflow(root, {
+      title: "Later",
+      slug: "later",
+      activate: false,
+      injectedNow: "2026-10-26T09:00:00.000+07:00",
+    });
+
+    expect(created).toMatchObject({ status: "planning", checkpoint: "planning" });
+    expect((await resolveActiveTask(`${root}/.harnix`))?.id).toBe(working.id);
+    await expect(readFile(join(root, ".harnix", "tasks", created.id, "task.json"), "utf8")).resolves.toContain(
+      created.id,
+    );
+  });
+
+  it("does not create an active pointer when none exists, and still joins an existing epic", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeTestProject(root);
+    await upsertEpic(root, buildEpic({ id: "20261026-090000-quiet-epic" }));
+
+    const created = await initTaskWorkflow(root, {
+      title: "Member",
+      slug: "member",
+      epic: "20261026-090000-quiet-epic",
+      activate: false,
+    });
+
+    expect(created.epicId).toBe("20261026-090000-quiet-epic");
+    expect(await resolveActiveTask(`${root}/.harnix`)).toBeUndefined();
+  });
+});
+
+describe("--no-activate flag ownership", () => {
+  it("belongs to --init only", () => {
+    expect(() => assertFlagGroups("init", { activate: false })).not.toThrow();
+    expect(() => assertFlagGroups("inspect", { activate: false })).toThrow(/--no-activate requires workflow --init/u);
+  });
+});

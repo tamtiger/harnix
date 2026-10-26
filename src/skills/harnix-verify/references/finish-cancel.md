@@ -7,7 +7,7 @@
 3. Any edit after the final evidence (editor autosave, format-on-save) legitimately makes that check stale; the error names the evidence id and paths. Rerun the check; timestamps alone prove nothing.
 4. A partial failure leaves `completed/finishing`; rerun `--finish` to recover, do not use another path.
 
-**Learning:** `--finish` reads the task's own `decisions`, `residualRisks` and evidence `findings` (credential-like, instruction-override and command-like text is never captured; at most 5 per task). Write reusable lessons as self-contained sentences with `--add-risk` / `--add-decision`. A repeated observation becomes a `candidate`; unpromoted entries lapse after 28 days. Promotion into a spec is manual and reviewed. `--learn` is only for a candidate you author with two completed source tasks and two evidence ids.
+**Learning:** `--finish` captures from the task's own `decisions`, `residualRisks` and evidence `findings`; write reusable lessons as self-contained sentences with `--add-risk` / `--add-decision`. Capture, lifecycle and promotion rules: the `task-state` reference. `--learn` is only for a candidate you author with two completed source tasks and two evidence ids.
 
 **Cancel** (only on explicit user instruction, with a short non-secret reason; ambiguous "complete" must be clarified first):
 
