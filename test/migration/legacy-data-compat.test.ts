@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { loadTask } from "src/core/tasks/task.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 /**
  * The former `src/migration/**` code was removed in the overhaul. Its suite slot is
@@ -17,7 +18,7 @@ describe("legacy .harnix data compatibility", () => {
   it("reads a historical TaskRecord v1 record unchanged", async () => {
     const root = await temporaryRepository();
     const id = "20260801-120000-legacy-v1";
-    const dir = join(root, ".harnix", "tasks", id);
+    const dir = join(root, ".harnix", "tasks", taskMonth(id), id);
     await mkdir(dir, { recursive: true });
     const v1 = {
       generator: "harnix",
@@ -48,7 +49,7 @@ describe("legacy .harnix data compatibility", () => {
   it("still loads a v2 task whose directory carries a legacy context.json sidecar", async () => {
     const root = await temporaryRepository();
     const id = "20260901-120000-legacy-context";
-    const dir = join(root, ".harnix", "tasks", id);
+    const dir = join(root, ".harnix", "tasks", taskMonth(id), id);
     await mkdir(dir, { recursive: true });
     const v2 = {
       generator: "harnix",

@@ -9,6 +9,7 @@ import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { buildEvidence, buildTaskV1 } from "test/support/builders.js";
 import { buildGatedTask, buildLegacyEvidence, output, snapshotTree } from "test/support/integration-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const originalCwd = process.cwd();
 const originalExitCode = process.exitCode;
@@ -170,8 +171,8 @@ describe.sequential("status --explain (checks projection)", () => {
     await initializeProject({ developer: "tam", root, yes: true });
     const harnixRoot = join(root, ".harnix");
     const id = "20260826-162002-checks-malformed";
-    await mkdir(join(harnixRoot, "tasks", id), { recursive: true });
-    await writeFile(join(harnixRoot, "tasks", id, "task.json"), "PRIVATE_TASK_PARSE_CANARY");
+    await mkdir(join(harnixRoot, "tasks", taskMonth(id), id), { recursive: true });
+    await writeFile(join(harnixRoot, "tasks", taskMonth(id), id, "task.json"), "PRIVATE_TASK_PARSE_CANARY");
     await writeFile(join(harnixRoot, "tasks", ".active"), `${id}\n`);
     process.chdir(root);
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);

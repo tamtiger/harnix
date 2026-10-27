@@ -14,6 +14,7 @@ import { type TaskRecordV3 } from "src/core/tasks/task.js";
 import { assertInputDigestsFresh } from "src/core/verification/input-digest.js";
 import { initializeUtcProject, taskV3 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -46,7 +47,7 @@ describe("workflow save-files", () => {
 
     await expect(saveWorkflow(root, { task: candidate })).rejects.toThrow(/input digest|snapshot/iu);
     await expect(
-      readFile(join(root, ".harnix", "tasks", planning.id, "verification-inputs.json"), "utf8"),
+      readFile(join(root, ".harnix", "tasks", taskMonth(planning.id), planning.id, "verification-inputs.json"), "utf8"),
     ).rejects.toMatchObject({ code: "ENOENT" });
   });
 
@@ -81,7 +82,7 @@ describe("workflow save-files", () => {
       }),
     ).resolves.toMatchObject({ evidence: [{ id: "stable-failure", result: "fail" }] });
     await expect(
-      readFile(join(root, ".harnix", "tasks", planning.id, "verification-inputs.json"), "utf8"),
+      readFile(join(root, ".harnix", "tasks", taskMonth(planning.id), planning.id, "verification-inputs.json"), "utf8"),
     ).rejects.toMatchObject({ code: "ENOENT" });
   });
 
@@ -92,8 +93,8 @@ describe("workflow save-files", () => {
     const planning = { ...taskV3("planning", "planning", ["input.ts"]), mode: "full" as const };
     const initialArtifacts = { prd: "# PRD\nRequirement.\n", plan: "# Plan\nOriginal semantic plan.\n" };
     await saveWorkflow(root, { task: planning, artifacts: initialArtifacts });
-    const taskPath = join(root, ".harnix", "tasks", planning.id, "task.json");
-    const sidecarPath = join(root, ".harnix", "tasks", planning.id, "verification-inputs.json");
+    const taskPath = join(root, ".harnix", "tasks", taskMonth(planning.id), planning.id, "task.json");
+    const sidecarPath = join(root, ".harnix", "tasks", taskMonth(planning.id), planning.id, "verification-inputs.json");
     const taskBefore = await readFile(taskPath, "utf8");
     const mismatched = {
       ...planning,
@@ -119,9 +120,9 @@ describe("workflow save-files", () => {
         artifacts: { ...initialArtifacts, plan: "# Plan\nChanged semantic plan.\n" },
       }),
     ).rejects.toThrow(/input digest/iu);
-    await expect(readFile(join(root, ".harnix", "tasks", planning.id, "plan.md"), "utf8")).resolves.toBe(
-      initialArtifacts.plan,
-    );
+    await expect(
+      readFile(join(root, ".harnix", "tasks", taskMonth(planning.id), planning.id, "plan.md"), "utf8"),
+    ).resolves.toBe(initialArtifacts.plan);
     await expect(readFile(taskPath, "utf8")).resolves.toBe(taskBefore);
     await expect(readFile(sidecarPath, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
   });
@@ -129,7 +130,7 @@ describe("workflow save-files", () => {
   it("keeps saved pass evidence fresh when its required glob matches the active task record", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
-    const planning = taskV3("planning", "planning", [".harnix/tasks/*/task.json"]);
+    const planning = taskV3("planning", "planning", [".harnix/tasks/**/task.json"]);
     await saveWorkflow(root, { task: planning });
     const snapshot = await snapshotWorkflow(root, "check");
     const withEvidence: TaskRecordV3 = {
@@ -158,7 +159,9 @@ describe("workflow save-files", () => {
     await expect(assertInputDigestsFresh(root, persisted)).resolves.toBeUndefined();
     const current = await snapshotWorkflow(root, "check");
     expect(current.inputDigest).toBe(snapshot.inputDigest);
-    expect(current.entries.map((entry) => entry.path)).not.toContain(`.harnix/tasks/${planning.id}/task.json`);
+    expect(current.entries.map((entry) => entry.path)).not.toContain(
+      `.harnix/tasks/${taskMonth(planning.id)}/${planning.id}/task.json`,
+    );
   });
 
   it("reports an actionable stale message naming --run-check when inputs changed after recording", async () => {
@@ -201,7 +204,7 @@ describe("workflow save-files", () => {
 
 describe("workflow save-files helpers", () => {
   async function taskDirectory(root: string, task: TaskRecordV3): Promise<string> {
-    const directory = join(root, ".harnix", "tasks", task.id);
+    const directory = join(root, ".harnix", "tasks", taskMonth(task.id), task.id);
     await mkdir(directory, { recursive: true });
     return directory;
   }
@@ -216,7 +219,7 @@ describe("workflow save-files helpers", () => {
     const fullFiles = await captureWorkflowSaveFiles(join(root, ".harnix"), full, artifacts);
     const liteFiles = await captureWorkflowSaveFiles(join(root, ".harnix"), lite, artifacts);
 
-    const prefix = `tasks/${lite.id}`;
+    const prefix = `tasks/${taskMonth(lite.id)}/${lite.id}`;
     expect(fullFiles.map((file) => file.relativePath)).toEqual(
       ["context.json", "design.md", "plan.md", "prd.md", "research/a.md", "task.json"].map(
         (name) => `${prefix}/${name}`,

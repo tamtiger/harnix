@@ -21,6 +21,9 @@ import {
   implementingTaskV3,
 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
+
+const savedTask = (root: string, id: string) => loadTask(join(root, "tasks", taskMonth(id), id, "task.json"));
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -58,9 +61,9 @@ describe("workflow finish", () => {
       activeTask: null,
       contextDrift: { state: "not-recorded", changes: [], selectionChanges: [] },
     });
-    await expect(readFile(join(root, ".harnix", "tasks", verifying.id, "task.json"), "utf8")).resolves.toContain(
-      "completed",
-    );
+    await expect(
+      readFile(join(root, ".harnix", "tasks", taskMonth(verifying.id), verifying.id, "task.json"), "utf8"),
+    ).resolves.toContain("completed");
   });
 
   it("recovers a completed task from its original journal date across a UTC day boundary", async () => {
@@ -194,7 +197,7 @@ describe("workflow finish", () => {
     });
     expect(finished.status).toBe("completed");
     expect(await readFile(join(root, "journal.jsonl"), "utf8")).toContain("Completed: t");
-    expect((await loadTask(join(root, "tasks", ready.id, "task.json"))).status).toBe("completed");
+    expect((await savedTask(root, ready.id)).status).toBe("completed");
     expect(await resolveActiveTask(root)).toBeUndefined();
   });
 
@@ -235,10 +238,10 @@ describe("workflow finish", () => {
     ).rejects.toThrow("active pointer write failed");
 
     expect(calls).toEqual(["save", "journal", "archive"]);
-    expect((await loadTask(join(root, "tasks", verifying.id, "task.json"))).status).toBe("completed");
+    expect((await savedTask(root, verifying.id)).status).toBe("completed");
     expect((await resolveActiveTask(root))?.id).toBe(verifying.id);
 
-    const completed = await loadTask(join(root, "tasks", verifying.id, "task.json"));
+    const completed = await savedTask(root, verifying.id);
     await finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", completed, current);
 
     expect(await resolveActiveTask(root)).toBeUndefined();
@@ -273,7 +276,7 @@ describe("workflow finish", () => {
     ).rejects.toThrow("task persistence failed");
 
     expect(calls).toEqual(["save"]);
-    expect((await loadTask(join(root, "tasks", verifying.id, "task.json"))).status).toBe("verifying");
+    expect((await savedTask(root, verifying.id)).status).toBe("verifying");
     expect((await resolveActiveTask(root))?.id).toBe(verifying.id);
   });
 
@@ -302,7 +305,7 @@ describe("workflow finish", () => {
     ).rejects.toThrow("journal write failed");
 
     expect(calls).toEqual(["save", "journal"]);
-    expect((await loadTask(join(root, "tasks", verifying.id, "task.json"))).status).toBe("completed");
+    expect((await savedTask(root, verifying.id)).status).toBe("completed");
     expect((await resolveActiveTask(root))?.id).toBe(verifying.id);
   });
 

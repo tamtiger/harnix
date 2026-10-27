@@ -1,6 +1,7 @@
 import { access, mkdir, readFile } from "node:fs/promises";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
+import { assertTaskWritable, resolveTaskDirectory, taskFilePath } from "./task-location.js";
 import { readProjectTimezone } from "src/core/config/config.js";
 import { saveContextManifest, validateContextManifest, type ContextManifest } from "src/core/context/context.js";
 import {
@@ -62,8 +63,9 @@ async function codeImpactFor(
  */
 export async function saveTask(root: string, task: TaskRecord, options: SaveTaskOptions = {}): Promise<void> {
   const valid = validateTask(task);
-  const directory = await resolveSafeProjectPath(root, `tasks/${valid.id}`);
-  const path = await resolveSafeProjectPath(root, `tasks/${valid.id}/task.json`);
+  await assertTaskWritable(root, valid.id);
+  const directory = await resolveTaskDirectory(root, valid.id);
+  const path = await taskFilePath(root, valid.id, "task.json");
   await mkdir(directory, { recursive: true });
   await atomicWriteFile(path, JSON.stringify(valid, null, 2) + "\n");
   const reviewPath = await resolveSafeProjectPath(directory, "review.md");
@@ -131,7 +133,8 @@ function validateContextArtifacts(taskId: string, artifacts: TaskArtifacts): voi
 }
 export async function saveTaskArtifacts(root: string, task: TaskRecord, artifacts: TaskArtifacts = {}): Promise<void> {
   validateTaskArtifacts(task, artifacts);
-  const directory = await resolveSafeProjectPath(root, `tasks/${task.id}`);
+  await assertTaskWritable(root, task.id);
+  const directory = await resolveTaskDirectory(root, task.id);
   await mkdir(directory, { recursive: true });
   if (task.mode === "full") {
     await atomicWriteFile(await resolveSafeProjectPath(directory, "prd.md"), artifacts.prd!);
@@ -176,7 +179,7 @@ export async function resolveActiveTask(harnixRoot: string): Promise<TaskRecord 
   if (taskId.length === 0) return undefined;
   validateTaskId(taskId);
   try {
-    return await loadTask(await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}/task.json`));
+    return await loadTask(await taskFilePath(harnixRoot, taskId, "task.json"));
   } catch (error: unknown) {
     if (isMissing(error)) throw new TaskValidationError("Active task pointer references a missing task record.");
     throw error;

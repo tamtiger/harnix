@@ -8,6 +8,7 @@ import { transitionWorkflow } from "src/core/workflow/transition.js";
 import { buildCheck } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { initializeUtcProject, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -63,7 +64,14 @@ describe("--reviewed on the ready transition", () => {
 
   it("still reports the content issues when --reviewed is given", async () => {
     const root = await planned("full");
-    const planPath = join(root, ".harnix", "tasks", taskV3("planning", "planning").id, "plan.md");
+    const planPath = join(
+      root,
+      ".harnix",
+      "tasks",
+      taskMonth(taskV3("planning", "planning").id),
+      taskV3("planning", "planning").id,
+      "plan.md",
+    );
     await writeFile(planPath, "- [ ] S1 covers criterion a, TBD\n");
 
     await expect(transitionWorkflow(root, "ready", "ready", undefined, false, { reviewed: true })).rejects.toThrow(

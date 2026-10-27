@@ -115,11 +115,13 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .description("List bounded Harnix task metadata")
     .option("--limit <count>", "Maximum task records")
     .option("--status <status>", "Filter by exact task status")
-    .action(async (options: { limit?: string; status?: string }) => {
+    .option("--archived", "List the read-only archive instead of the live tasks")
+    .action(async (options: { limit?: string; status?: string; archived?: boolean }) => {
       const status = parseTaskStatus(options.status);
       const result = await listProjectTasks(process.cwd(), {
         limit: parseTaskLimit(options.limit ?? "20"),
         ...(status === undefined ? {} : { status }),
+        ...(options.archived === true ? { archived: true } : {}),
       });
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });
@@ -130,10 +132,11 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .argument("[epic-id]", "Exact epic ID for the detail view")
     .option("--limit <count>", "Maximum epic records in the list view", "20")
     .option("--brief", "In the detail view, print only ids, titles, status counts and the next task (no goals)")
-    .action(async (epicId: string | undefined, options: { limit: string; brief?: boolean }) => {
+    .option("--archived", "In the list view, list the read-only archive instead of the live epics")
+    .action(async (epicId: string | undefined, options: { limit: string; brief?: boolean; archived?: boolean }) => {
       const result =
         epicId === undefined
-          ? await listPublicEpics(process.cwd(), parseTaskLimit(options.limit))
+          ? await listPublicEpics(process.cwd(), parseTaskLimit(options.limit), options.archived === true)
           : await detailPublicEpic(process.cwd(), epicId, options.brief === true);
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });

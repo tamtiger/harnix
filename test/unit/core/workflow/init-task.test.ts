@@ -9,6 +9,7 @@ import { initTaskWorkflow } from "src/core/workflow/init-task.js";
 import { buildEpic } from "test/support/builders.js";
 import { initializeUtcProject } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -186,7 +187,10 @@ describe("initTaskWorkflow", () => {
       const task = await initTaskWorkflow(root, { title: "Member Task", epic: "20261006-100000-lineage-epic" });
 
       expect(task.epicId).toBe("20261006-100000-lineage-epic");
-      const page = await readFile(join(root, ".harnix", "epics", "20261006-100000-lineage-epic", "epic.md"), "utf8");
+      const page = await readFile(
+        join(root, ".harnix", "epics", "2026-10", "20261006-100000-lineage-epic", "epic.md"),
+        "utf8",
+      );
       expect(page).toContain(task.id);
     });
 
@@ -356,8 +360,8 @@ describe("initTaskWorkflow slug", () => {
       criteria: ["Artifacts are present and populated"],
     });
 
-    const prdPath = join(root, ".harnix", "tasks", task.id, "prd.md");
-    const planPath = join(root, ".harnix", "tasks", task.id, "plan.md");
+    const prdPath = join(root, ".harnix", "tasks", taskMonth(task.id), task.id, "prd.md");
+    const planPath = join(root, ".harnix", "tasks", taskMonth(task.id), task.id, "plan.md");
 
     const prdContent = await readFile(prdPath, "utf8");
     const planContent = await readFile(planPath, "utf8");
@@ -431,9 +435,9 @@ describe("initTaskWorkflow without activation", () => {
 
     expect(created).toMatchObject({ status: "planning", checkpoint: "planning" });
     expect((await resolveActiveTask(`${root}/.harnix`))?.id).toBe(working.id);
-    await expect(readFile(join(root, ".harnix", "tasks", created.id, "task.json"), "utf8")).resolves.toContain(
-      created.id,
-    );
+    await expect(
+      readFile(join(root, ".harnix", "tasks", taskMonth(created.id), created.id, "task.json"), "utf8"),
+    ).resolves.toContain(created.id);
   });
 
   it("does not create an active pointer when none exists, and still joins an existing epic", async () => {

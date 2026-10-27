@@ -23,7 +23,7 @@ import {
 } from "src/core/tasks/workflow-helpers.js";
 import { assertTaskUnchangedSinceRead, noteTaskWritten } from "src/core/tasks/read-tracker.js";
 import { assertNewEvidenceDigests } from "src/core/verification/input-digest.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { contextSelectionInput } from "./context.js";
 import { validateWorkflowSaveEnvelope, type WorkflowSaveArtifacts, type WorkflowSaveEnvelope } from "./envelope.js";
 import { prepareEpicMembers, removeEpicMembers, writeEpicMembers } from "./epic-members.js";
@@ -42,6 +42,7 @@ import {
   captureWorkflowSaveFiles,
   restoreWorkflowSaveFiles,
 } from "./save-files.js";
+import { taskFilePath } from "src/core/tasks/task-location.js";
 
 interface SaveContext {
   root: string;
@@ -239,7 +240,7 @@ async function prepareWorkflowArtifacts(
 
 async function readRawTask(harnixRoot: string, id: string): Promise<string | undefined> {
   try {
-    return await readFile(await resolveSafeProjectPath(harnixRoot, `tasks/${id}/task.json`), "utf8");
+    return await readFile(await taskFilePath(harnixRoot, id, "task.json"), "utf8");
   } catch (error: unknown) {
     if (isMissing(error)) return undefined;
     throw error;
@@ -248,7 +249,7 @@ async function readRawTask(harnixRoot: string, id: string): Promise<string | und
 
 async function loadExistingTask(harnixRoot: string, id: string): Promise<TaskRecord | undefined> {
   try {
-    return await loadTask(await resolveSafeProjectPath(harnixRoot, `tasks/${id}/task.json`));
+    return await loadTask(await taskFilePath(harnixRoot, id, "task.json"));
   } catch (error: unknown) {
     if (isMissing(error)) return undefined;
     throw error;

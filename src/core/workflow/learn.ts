@@ -5,9 +5,10 @@ import { analyzeLearningStatement, type LearningRiskKind } from "src/core/journa
 import { loadTask, resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { isMissing, validateLearningEnvelope } from "src/core/tasks/workflow-helpers.js";
 import { nowInstant } from "src/utils/clock.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertTaskReadyForFinishing } from "./completion.js";
 import { currentInstant, journalFilePath } from "./support.js";
+import { taskFilePath } from "src/core/tasks/task-location.js";
 
 export interface WorkflowLearningResult {
   entry: JournalEntry;
@@ -76,7 +77,7 @@ export async function recordWorkflowLearning(
 async function loadCompletedSourceTask(harnixRoot: string, sourceTaskId: string): Promise<TaskRecord> {
   let sourceTask: TaskRecord;
   try {
-    sourceTask = await loadTask(await resolveSafeProjectPath(harnixRoot, `tasks/${sourceTaskId}/task.json`));
+    sourceTask = await loadTask(await taskFilePath(harnixRoot, sourceTaskId, "task.json"));
   } catch (error: unknown) {
     if (isMissing(error)) throw new Error(`Learning source task ${sourceTaskId} does not exist.`);
     throw error;

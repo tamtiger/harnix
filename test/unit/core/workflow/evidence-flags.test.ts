@@ -4,6 +4,7 @@ import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { appendEvidenceFlagsWorkflow } from "src/core/workflow/evidence-flags.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { implementingTaskV3 } from "test/support/workflow-fixtures.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 const NOW = "2026-08-13T00:10:00.000Z";
@@ -123,7 +124,7 @@ describe("workflow evidence from flags", () => {
     const root = await temporaryRepository();
     const task = await implementingTaskV3(root);
 
-    const planPath = join(root, ".harnix", "tasks", task.id, "plan.md");
+    const planPath = join(root, ".harnix", "tasks", taskMonth(task.id), task.id, "plan.md");
     await writeFile(planPath, "# Plan\n- [ ] [check] Implement verification\n", "utf8");
 
     await appendEvidenceFlagsWorkflow(

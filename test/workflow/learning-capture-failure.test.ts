@@ -6,6 +6,7 @@ import { inspectWorkflow } from "src/commands/internal-workflow.js";
 import { createTestProject } from "test/support/builders.js";
 import { completeTaskWithDecisions } from "test/support/learning-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-learning-failure-");
 
@@ -22,7 +23,7 @@ describe("finish when learning capture fails", () => {
       { captureLearning: exploding },
     );
 
-    const task = JSON.parse(await readFile(join(root, ".harnix", "tasks", id, "task.json"), "utf8")) as {
+    const task = JSON.parse(await readFile(join(root, ".harnix", "tasks", taskMonth(id), id, "task.json"), "utf8")) as {
       status: string;
     };
     const journal = await readFile(join(root, ".harnix", "workspace", "tam", "journal", "2026-09-29.jsonl"), "utf8");

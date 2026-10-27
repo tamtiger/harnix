@@ -15,6 +15,7 @@ import { taskRecordFieldManifest } from "src/core/tasks/task.js";
 import type { TaskRecord, TaskRecordV3 } from "src/core/tasks/task.js";
 import { at, buildTaskV2, buildTaskV3, createTestProject } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-v3-");
 const createdAt = at(0);
@@ -98,7 +99,7 @@ describe("TaskRecord v3 save flow", () => {
     const finished = await finishWorkflow(root, finishAt);
 
     expect(finished.status).toBe("completed");
-    const { files, lines } = await directoryLines(join(root, ".harnix", "tasks", taskId));
+    const { files, lines } = await directoryLines(join(root, ".harnix", "tasks", taskMonth(taskId), taskId));
     expect(files).toEqual(["review.md", "task.json"]);
     expect(lines).toBeLessThanOrEqual(200);
   });
@@ -301,7 +302,9 @@ describe("free-form planning artifacts", () => {
 
     await saveWorkflow(root, { task: full, artifacts: { prd: "# PRD\n", plan: legacyNotes } });
 
-    expect(await readFile(join(root, ".harnix", "tasks", taskId, "plan.md"), "utf8")).toBe(legacyNotes);
+    expect(await readFile(join(root, ".harnix", "tasks", taskMonth(taskId), taskId, "plan.md"), "utf8")).toBe(
+      legacyNotes,
+    );
   });
 
   it("gates a Full task on non-empty prd and plan with at least one checklist item, and nothing more", async () => {
@@ -321,7 +324,9 @@ describe("free-form planning artifacts", () => {
       artifacts: { prd: "# PRD\n", plan: "- [ ] Bước một cho ac-one\n" },
     });
     expect(saved.status).toBe("ready");
-    await expect(access(join(root, ".harnix", "tasks", taskId, "verification-inputs.json"))).rejects.toMatchObject({
+    await expect(
+      access(join(root, ".harnix", "tasks", taskMonth(taskId), taskId, "verification-inputs.json")),
+    ).rejects.toMatchObject({
       code: "ENOENT",
     });
   });

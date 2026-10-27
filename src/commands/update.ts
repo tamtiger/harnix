@@ -1,6 +1,7 @@
 import { access } from "src/utils/fs-access.js";
 
 import { migrateLegacyEpics } from "src/core/epics/migrate.js";
+import { migrateStorageLayout, type LayoutMigrationResult } from "src/core/tasks/layout-migration.js";
 import { migrateConfig, readConfig, type HarnixConfigV2 } from "src/core/config/config.js";
 import { refreshProjectConfig, type ConfigRefreshResult } from "src/core/config/refresh.js";
 import { guideOutputPath, selectGuideSources } from "src/guides/catalog.js";
@@ -33,6 +34,8 @@ export interface UpdateProjectResult {
   obsolete: string[];
   /** What re-detection added to config.yaml (only added, never removed); a dry run only previews it. */
   configRefreshed: ConfigRefreshResult;
+  /** Task and epic folders moved into month buckets (a dry run previews them); absent when there was nothing to do. */
+  layout?: LayoutMigrationResult;
 }
 
 /** Reconciles complete, Harnix-owned files only. Injection surfaces stay user-owned. */
@@ -62,6 +65,9 @@ export async function updateProject(options: UpdateProjectOptions): Promise<Upda
     options.dryRun === true
       ? { created: [], updated: [], deleted: [], preserved: [] }
       : await migrateLegacyEpics(options.root);
+  const layout = await migrateStorageLayout(await resolveSafeHarnixPath(options.root), {
+    dryRun: options.dryRun === true,
+  });
   // Derived, never user-owned: always rewritten when the confirmed stack or the detected commands changed.
   const facts = options.dryRun === true ? "unchanged" : await writeProjectFacts(options.root);
   return {
@@ -71,6 +77,7 @@ export async function updateProject(options: UpdateProjectOptions): Promise<Upda
     updated: [...reconciled.result.updated, ...(facts === "updated" ? [PROJECT_FACTS_PATH] : [])],
     deleted: [...reconciled.result.deleted, ...epics.deleted],
     preserved: [...reconciled.result.preserved, ...epics.preserved],
+    ...(layout.tasks + layout.epics + layout.skipped.length > 0 ? { layout } : {}),
   };
 }
 

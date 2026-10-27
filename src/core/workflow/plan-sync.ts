@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { resolveActiveTask } from "src/core/tasks/task.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { resolveTaskDirectory } from "src/core/tasks/task-location.js";
 
 const CHECK_UNCHECKED = /^(\s*[-*]\s+)\[\s*\](\s+.*)$/u;
 
@@ -23,7 +24,7 @@ export interface TickPlanResult {
  * - text pattern (substring không phân biệt hoa thường): tick các item khớp nội dung
  */
 export async function tickPlanChecklist(harnixRoot: string, taskId: string, selector: string): Promise<TickPlanResult> {
-  const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}`);
+  const taskDirectory = await resolveTaskDirectory(harnixRoot, taskId);
   const planPath = await resolveSafeProjectPath(taskDirectory, "plan.md");
   let content: string;
   try {
@@ -123,7 +124,7 @@ export async function tickWorkflow(root: string, selector: string): Promise<Work
 export async function syncPlanChecklistPass(harnixRoot: string, taskId: string, checkId: string): Promise<boolean> {
   let planPath: string;
   try {
-    const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}`);
+    const taskDirectory = await resolveTaskDirectory(harnixRoot, taskId);
     planPath = await resolveSafeProjectPath(taskDirectory, "plan.md");
   } catch {
     return false;

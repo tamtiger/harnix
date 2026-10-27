@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createConfig } from "src/core/config/config.js";
 import { buildEffectiveContext } from "src/core/context/effective-context.js";
@@ -12,6 +12,14 @@ import { buildLearningCandidate, buildLearningEntry, writeJournalFile } from "te
 import { buildCommandlessCheck } from "test/support/tasks-fixtures.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-effective-context-");
+
+beforeEach(() => {
+  // The fixtures are dated 2026-09-29; a real clock would age their learning past the 28-day TTL.
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-02T00:00:00+07:00"));
+});
+
+afterEach(() => vi.useRealTimers());
 
 describe("effective context", () => {
   it("uses platform hook caps and derives trusted reason codes for fallback paths", async () => {

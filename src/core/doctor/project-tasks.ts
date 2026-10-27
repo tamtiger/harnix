@@ -5,7 +5,8 @@ import { searchJournal, type JournalEntry } from "src/core/journal/journal.js";
 import { analyzeLearningStatement, type LearningRiskKind } from "src/core/journal/learning-safety.js";
 import { validateTask } from "src/core/tasks/task.js";
 import { compareCodeUnits } from "src/utils/order.js";
-import { normalizeRepositoryPath, resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { listTaskDirectoryNames, taskDisplayPath, taskFilePath } from "src/core/tasks/task-location.js";
+import { normalizeRepositoryPath, resolveSafeHarnixPath } from "src/utils/paths.js";
 
 type ValidTask = ReturnType<typeof validateTask>;
 
@@ -22,14 +23,11 @@ export async function inspectTaskRecords(root: string, findings: DoctorFinding[]
 
   const tasks = new Map<string, ValidTask>();
   try {
-    const entries = await readdir(await resolveSafeHarnixPath(root, "tasks"), {
-      encoding: "utf8",
-      withFileTypes: true,
-    });
+    const harnixRoot = await resolveSafeHarnixPath(root);
+    const ids = await listTaskDirectoryNames(harnixRoot);
     let activeFound = activeId === undefined;
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-      const logicalPath = `tasks/${entry.name}/task.json`;
+    for (const entry of ids.map((name) => ({ name }))) {
+      const logicalPath = taskDisplayPath(entry.name, "task.json");
       try {
         const task = await readTaskRecord(root, entry.name, logicalPath, activeId, findings);
         tasks.set(task.id, task);
@@ -73,7 +71,7 @@ async function readTaskRecord(
   activeId: string | undefined,
   findings: DoctorFinding[],
 ): Promise<ValidTask> {
-  const path = await resolveSafeProjectPath(root, `.harnix/${logicalPath}`);
+  const path = await taskFilePath(await resolveSafeHarnixPath(root), name, "task.json");
   const source = JSON.parse(await readFile(path, "utf8")) as unknown;
   try {
     return validateTask(source);
@@ -144,13 +142,13 @@ async function inspectTaskState(
   if (task.mode !== "full") return;
   for (const artifact of ["prd.md", "plan.md"]) {
     try {
-      await stat(await resolveSafeProjectPath(root, `.harnix/tasks/${task.id}/${artifact}`));
+      await stat(await taskFilePath(await resolveSafeHarnixPath(root), task.id, artifact));
     } catch {
       findings.push(
         finding(
           "task-full-artifact-missing",
           isActive ? "error" : "warning",
-          `tasks/${task.id}/${artifact}`,
+          taskDisplayPath(task.id, artifact),
           "A Full task is missing a required planning artifact.",
           false,
         ),

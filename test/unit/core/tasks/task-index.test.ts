@@ -44,6 +44,55 @@ describe("task index", () => {
     expect(filtered.tasks).toEqual([projection(newest, false)]);
   });
 
+  it("lists the archive on request, reports it in the filter and never marks a task active there", async () => {
+    const live = task("20260826-100000-live-task", "2026-08-26T00:00:00.000Z", "planning");
+    const archived = task("20260801-100000-archived-task", "2026-08-30T00:00:00.000Z", "ready");
+    const scopes: boolean[] = [];
+    const source: TaskIndexSource = {
+      listTaskDirectoryIds: async (_root, wantArchive) => {
+        scopes.push(wantArchive);
+        return [wantArchive ? archived.id : live.id];
+      },
+      readActiveTaskId: async () => live.id,
+      loadTaskRecord: async (_root, id) => (id === live.id ? live : archived),
+    };
+
+    const result = await createTaskIndex("unused", { limit: 5, archived: true }, source);
+
+    expect(scopes).toEqual([true]);
+    expect(result.filter).toEqual({ status: null, limit: 5, archived: true });
+    expect(result.status).toBe("ready");
+    expect(result.activeTaskId).toBeNull();
+    expect(result.attention).toEqual([]);
+    expect(result.tasks).toEqual([projection(archived, false)]);
+    expect((await createTaskIndex("unused", { limit: 5 }, source)).filter).toEqual({ status: null, limit: 5 });
+  });
+
+  it("loads records with a bounded number of reads in flight", async () => {
+    const records = Array.from({ length: 40 }, (_, index) =>
+      task(`20260826-1${String(index).padStart(5, "0")}-bulk-task`, "2026-08-26T00:00:00.000Z", "planning"),
+    );
+    let running = 0;
+    let peak = 0;
+    const source: TaskIndexSource = {
+      listTaskDirectoryIds: async () => records.map((record) => record.id),
+      readActiveTaskId: async () => null,
+      loadTaskRecord: async (_root, id) => {
+        running += 1;
+        peak = Math.max(peak, running);
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        running -= 1;
+        return records.find((record) => record.id === id);
+      },
+    };
+
+    const result = await createTaskIndex("unused", { limit: 3 }, source);
+
+    expect(result.summary).toMatchObject({ scanned: 40, valid: 40, invalid: 0 });
+    expect(peak).toBeGreaterThan(1);
+    expect(peak).toBeLessThanOrEqual(16);
+  });
+
   it("shows epicId and followUpOf only on tasks that carry them", async () => {
     const parentId = "20260826-100000-parent-task";
     const linked = buildTaskV3({

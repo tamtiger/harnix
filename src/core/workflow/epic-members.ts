@@ -1,13 +1,13 @@
 import { rm } from "node:fs/promises";
 import { loadTask, saveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { isMissing, semanticTaskEqual } from "src/core/tasks/workflow-helpers.js";
-import { resolveSafeProjectPath } from "src/utils/paths.js";
+import { taskFilePath, resolveTaskDirectory } from "src/core/tasks/task-location.js";
 
 type MemberWriter = (harnixRoot: string, task: TaskRecord) => Promise<void>;
 
 async function loadPersisted(harnixRoot: string, id: string): Promise<TaskRecord | undefined> {
   try {
-    return await loadTask(await resolveSafeProjectPath(harnixRoot, `tasks/${id}/task.json`));
+    return await loadTask(await taskFilePath(harnixRoot, id, "task.json"));
   } catch (error: unknown) {
     if (isMissing(error)) return undefined;
     throw error;
@@ -67,6 +67,5 @@ export async function writeEpicMembers(
 
 /** Removes the task directories this save created; callers pass only ids prepared as new. */
 export async function removeEpicMembers(harnixRoot: string, ids: readonly string[]): Promise<void> {
-  for (const id of ids)
-    await rm(await resolveSafeProjectPath(harnixRoot, `tasks/${id}`), { force: true, recursive: true });
+  for (const id of ids) await rm(await resolveTaskDirectory(harnixRoot, id), { force: true, recursive: true });
 }

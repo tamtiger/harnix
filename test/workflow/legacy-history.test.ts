@@ -1,4 +1,4 @@
-import { cp, mkdir, mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -8,6 +8,7 @@ import { detailPublicEpic, listPublicEpics } from "src/commands/epic.js";
 import { inspectProjectStatus } from "src/commands/status.js";
 import { listProjectTasks } from "src/commands/tasks.js";
 import { loadTask, type TaskRecord } from "src/core/tasks/task.js";
+import { listTaskIds, taskFilePath } from "src/core/tasks/task-location.js";
 
 const repositoryHarnix = join(process.cwd(), ".harnix");
 
@@ -35,15 +36,12 @@ async function projectWithHistory(): Promise<History> {
   const root = await mkdtemp(join(tmpdir(), "harnix-legacy-"));
   disposableRoot = root;
   await initializeProject({ root, developer: "tam", yes: true });
-  const allIds = (await readdir(join(repositoryHarnix, "tasks"), { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort();
+  const allIds = await listTaskIds(repositoryHarnix);
   // Historical v1 and v2 records originate from August and September 2026 before schema v3 was introduced.
   const ids = allIds.filter((id) => id.startsWith("202608") || id.startsWith("202609") || KNOWN_MALFORMED.includes(id));
   for (const id of ids) {
     await mkdir(join(root, ".harnix", "tasks", id), { recursive: true });
-    await cp(join(repositoryHarnix, "tasks", id, "task.json"), join(root, ".harnix", "tasks", id, "task.json"));
+    await cp(await taskFilePath(repositoryHarnix, id, "task.json"), join(root, ".harnix", "tasks", id, "task.json"));
   }
   for (const directory of ["epics", "roadmaps"]) {
     try {

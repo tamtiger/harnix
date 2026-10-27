@@ -6,6 +6,7 @@ import { initializeProject } from "src/commands/init.js";
 import type { DoctorFinding } from "src/core/doctor/findings.js";
 import { inspectTaskRecords } from "src/core/doctor/project-tasks.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-doctor-tasks-");
 
@@ -28,8 +29,13 @@ describe("task record diagnostics", () => {
 
   it("reports an invalid historical task as a warning and keeps the file", async () => {
     const root = await initialized();
-    await mkdir(join(root, ".harnix", "tasks", "20260101-000000-broken"), { recursive: true });
-    await writeFile(join(root, ".harnix", "tasks", "20260101-000000-broken", "task.json"), "{ not json");
+    await mkdir(join(root, ".harnix", "tasks", taskMonth("20260101-000000-broken"), "20260101-000000-broken"), {
+      recursive: true,
+    });
+    await writeFile(
+      join(root, ".harnix", "tasks", taskMonth("20260101-000000-broken"), "20260101-000000-broken", "task.json"),
+      "{ not json",
+    );
 
     expect(await inspect(root)).toContainEqual(
       expect.objectContaining({
@@ -43,13 +49,23 @@ describe("task record diagnostics", () => {
   it("reports an active invalid task as an error", async () => {
     const root = await initialized();
     const id = "20260101-000000-broken";
-    await mkdir(join(root, ".harnix", "tasks", id), { recursive: true });
-    await writeFile(join(root, ".harnix", "tasks", id, "task.json"), "{ not json");
+    await mkdir(join(root, ".harnix", "tasks", taskMonth(id), id), { recursive: true });
+    await writeFile(join(root, ".harnix", "tasks", taskMonth(id), id, "task.json"), "{ not json");
     await writeFile(join(root, ".harnix", "tasks", ".active"), `${id}\n`);
 
     expect(await inspect(root)).toContainEqual(
       expect.objectContaining({ code: "task-invalid-active", severity: "error" }),
     );
+  });
+
+  it("treats month buckets and the archive as storage, never as task folders", async () => {
+    const root = await initialized();
+    const archived = join(root, ".harnix", "tasks", "_archive", "2026-01", "20260101-000000-broken");
+    await mkdir(archived, { recursive: true });
+    await writeFile(join(archived, "task.json"), "{ not json");
+    await mkdir(join(root, ".harnix", "tasks", "2026-10"), { recursive: true });
+
+    expect(await inspect(root)).toEqual([]);
   });
 
   it("reports an active pointer that names no task", async () => {

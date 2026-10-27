@@ -82,7 +82,7 @@ describe("agent persistence guidance", () => {
       "must never go through a Windows PowerShell 5.1 pipe",
       "edit `prd.md`",
       "single-quote it in bash when it contains backticks",
-      "A `--save` envelope is",
+      "the envelope is in the `agent-transport` reference",
       "harnix workflow --schema",
       "reports every independent problem at once",
     ])

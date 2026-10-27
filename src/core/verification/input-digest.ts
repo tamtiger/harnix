@@ -10,6 +10,7 @@ import {
   targetedSegments,
 } from "src/core/verification/transient-directories.js";
 import { isLineEndingSensitive, normalizeLineEndings } from "src/core/verification/line-endings.js";
+import { taskPhysicalPaths } from "src/core/tasks/task-location.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 
 export interface InputDigestEntry {
@@ -48,11 +49,9 @@ export async function computeInputDigest(
 ): Promise<InputDigestSnapshot> {
   const check = task.validationPlan.find((candidate) => candidate.id === checkId);
   if (check === undefined) throw new Error(`Verification input check ${checkId} is not declared.`);
-  const workflowOwned = new Set([
-    `.harnix/tasks/${task.id}/task.json`,
-    `.harnix/tasks/${task.id}/review.md`,
-    `.harnix/tasks/${task.id}/verification-inputs.json`,
-  ]);
+  const workflowOwned = new Set(
+    ["task.json", "review.md", "verification-inputs.json"].flatMap((file) => taskPhysicalPaths(task.id, file)),
+  );
   const paths = new Set<string>();
   const isKept = createGuardedDirectoryFilter(projectRoot);
   for (const input of check.inputs) {

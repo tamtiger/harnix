@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -7,6 +7,7 @@ import { initializeProject } from "src/commands/init.js";
 import { saveTask, setActiveTask, type TaskRecordV1 } from "src/core/tasks/task.js";
 import { buildLegacyGatedTask, snapshotTree } from "test/support/integration-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const originalCwd = process.cwd();
 const originalExitCode = process.exitCode;
@@ -75,8 +76,11 @@ describe.sequential("tasks command", () => {
     const good = task("20260826-100000-good-task", "2026-08-26T00:00:00.000Z", "planning");
     const badId = "20260826-110000-bad-task";
     await saveTask(harnixRoot, good);
-    await mkdir(join(harnixRoot, "tasks", badId), { recursive: true });
-    await writeFile(join(harnixRoot, "tasks", badId, "task.json"), '{"private":"PRIVATE_MALFORMED_CANARY"}\n');
+    await mkdir(join(harnixRoot, "tasks", taskMonth(badId), badId), { recursive: true });
+    await writeFile(
+      join(harnixRoot, "tasks", taskMonth(badId), badId, "task.json"),
+      '{"private":"PRIVATE_MALFORMED_CANARY"}\n',
+    );
     await writeFile(join(harnixRoot, "tasks", ".active"), `${badId}\n`);
     process.chdir(root);
     const before = await snapshotTree(root);
@@ -96,6 +100,42 @@ describe.sequential("tasks command", () => {
     expect(output).not.toContain("PRIVATE_MALFORMED_CANARY");
     expect(output).not.toContain(root);
     await expect(snapshotTree(root)).resolves.toEqual(before);
+  });
+
+  it("lists live tasks by default and the read-only archive with --archived", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const harnixRoot = join(root, ".harnix");
+    const live = task("20260826-100000-live-task", "2026-08-26T00:00:00.000Z", "planning");
+    const old = task("20260801-100000-old-task", "2026-08-30T00:00:00.000Z", "ready");
+    await Promise.all([saveTask(harnixRoot, live), saveTask(harnixRoot, old)]);
+    await mkdir(join(harnixRoot, "tasks", "_archive", "2026-08"), { recursive: true });
+    await rename(
+      join(harnixRoot, "tasks", "2026-08", old.id),
+      join(harnixRoot, "tasks", "_archive", "2026-08", old.id),
+    );
+    process.chdir(root);
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    const run = async (...extra: string[]) => {
+      stdout.mockClear();
+      await expect(runCli(["node", "harnix", "tasks", ...extra])).resolves.toBe(0);
+      return JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as {
+        filter: object;
+        summary: { scanned: number };
+        tasks: { id: string }[];
+      };
+    };
+
+    const liveResult = await run();
+    const archiveResult = await run("--archived");
+
+    expect(liveResult.tasks.map((item) => item.id)).toEqual([live.id]);
+    expect(liveResult.summary.scanned).toBe(1);
+    expect(liveResult.filter).toEqual({ status: null, limit: 20 });
+    expect(archiveResult.tasks.map((item) => item.id)).toEqual([old.id]);
+    expect(archiveResult.summary.scanned).toBe(1);
+    expect(archiveResult.filter).toEqual({ status: null, limit: 20, archived: true });
   });
 
   it("rejects out-of-range limits and unknown statuses through public JSON errors", async () => {

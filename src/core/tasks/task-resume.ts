@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { setActiveTask, validateTask, type TaskRecord } from "./task.js";
+import { taskFilePath } from "src/core/tasks/task-location.js";
 
 const MAX_TASK_RECORD_BYTES = 1_048_576;
 const MAX_ACTIVE_POINTER_BYTES = 1_024;
@@ -189,7 +190,7 @@ export async function loadBoundedActiveTask(harnixRoot: string): Promise<TaskRec
 
 async function loadBoundedTask(harnixRoot: string, taskId: string): Promise<TaskRecord> {
   if (!taskIdPattern.test(taskId)) throw new Error("Task ID is invalid.");
-  const path = await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}/task.json`);
+  const path = await taskFilePath(harnixRoot, taskId, "task.json");
   if ((await stat(path)).size > MAX_TASK_RECORD_BYTES) throw new Error("Task record is oversized.");
   const source = await readFile(path, "utf8");
   if (Buffer.byteLength(source, "utf8") > MAX_TASK_RECORD_BYTES) throw new Error("Task record is oversized.");

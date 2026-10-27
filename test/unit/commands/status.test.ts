@@ -10,6 +10,7 @@ import {
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { initializeUtcProject, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -60,7 +61,7 @@ describe("commands/status", () => {
     // Corrupt the task.json file
     const { writeFile } = await import("node:fs/promises");
     const { join } = await import("node:path");
-    await writeFile(join(root, ".harnix", "tasks", task.id, "task.json"), "{ invalid json", "utf8");
+    await writeFile(join(root, ".harnix", "tasks", taskMonth(task.id), task.id, "task.json"), "{ invalid json", "utf8");
 
     await expect(explainProjectStatus(root, 10)).rejects.toThrow(/doctor/u);
   });

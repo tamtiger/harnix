@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -156,6 +156,39 @@ describe.sequential("epic command", () => {
     const detail = full as { epic: { goal: string }; members: { goal: string }[] };
     expect(detail.epic.goal).toBe(longGoal);
     expect(detail.members.every((member) => member.goal === longGoal)).toBe(true);
+  });
+
+  it("counts archived members and lists archived epics only with --archived", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const harnixRoot = `${root}/.harnix`;
+    await upsertEpic(root, epicRecord("20261001-100000-live-epic", "Live", "Live goal"));
+    await upsertEpic(root, epicRecord("20260801-100000-old-epic", "Old", "Old goal"));
+    await saveTask(harnixRoot, taskV2("20261002-100000-live-member", "planning", "20261001-100000-live-epic"));
+    const done = taskV2("20260802-100000-old-member", "ready", "20260801-100000-old-epic");
+    await saveTask(harnixRoot, done);
+    await mkdir(join(harnixRoot, "epics", "_archive", "2026-08"), { recursive: true });
+    await rename(
+      join(harnixRoot, "epics", "2026-08", "20260801-100000-old-epic"),
+      join(harnixRoot, "epics", "_archive", "2026-08", "20260801-100000-old-epic"),
+    );
+    await mkdir(join(harnixRoot, "tasks", "_archive", "2026-08"), { recursive: true });
+    await rename(
+      join(harnixRoot, "tasks", "2026-08", done.id),
+      join(harnixRoot, "tasks", "_archive", "2026-08", done.id),
+    );
+    process.chdir(root);
+
+    const live = (await runEpic(["epic"])) as { total: number; epics: { id: string; totalTasks: number }[] };
+    const archived = (await runEpic(["epic", "--archived"])) as typeof live;
+    const detail = (await runEpic(["epic", "20260801-100000-old-epic"])) as { members: { id: string }[] };
+
+    expect(live.epics).toMatchObject([{ id: "20261001-100000-live-epic", totalTasks: 1 }]);
+    expect(archived).toMatchObject({
+      total: 1,
+      epics: [{ id: "20260801-100000-old-epic", totalTasks: 1, completedTasks: 0 }],
+    });
+    expect(detail.members.map((member) => member.id)).toEqual([done.id]);
   });
 
   it("recommends the first unfinished member in ID order as the next task", async () => {

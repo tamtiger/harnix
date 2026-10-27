@@ -16,6 +16,7 @@ import { saveTask } from "src/core/tasks/task.js";
 import type { TaskRecordV1, TaskRecordV3 } from "src/core/tasks/task.js";
 import { buildCriterion, buildEpic, buildTaskV1, buildTaskV3, createTestProject } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-time-");
 const VN = "Asia/Ho_Chi_Minh";
@@ -144,7 +145,7 @@ describe("configured time zone", () => {
 
     await saveWorkflow(root, { task: legacy, epic });
 
-    const review = await readFile(join(root, ".harnix", "tasks", taskId, "review.md"), "utf8");
+    const review = await readFile(join(root, ".harnix", "tasks", taskMonth(taskId), taskId, "review.md"), "utf8");
     const page = await readFile(join(root, ".harnix", "epics", "epic-one", "epic.md"), "utf8");
     expect(review).toContain("**Created:** 2026-09-28 20:58:01 +07:00");
     expect(review).toContain("**Updated:** 2026-09-28 20:58:01 +07:00");
@@ -166,7 +167,7 @@ describe("configured time zone", () => {
       completedAt: "2026-08-13T00:00:00.000Z",
     });
     await saveTask(join(root, ".harnix"), legacy);
-    const path = join(root, ".harnix", "tasks", legacy.id, "task.json");
+    const path = join(root, ".harnix", "tasks", taskMonth(legacy.id), legacy.id, "task.json");
     const before = await readFile(path, "utf8");
 
     await inspectProjectStatus(root);

@@ -1,8 +1,9 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 
 import { selectLatestEvidence, validateTask, type TaskRecord, type TaskRecordV3 } from "src/core/tasks/task.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { normalizeCommand } from "./command-match.js";
+import { listTaskIds, taskFilePath } from "src/core/tasks/task-location.js";
 
 const MAX_SCANNED_TASKS = 8;
 const MAX_TASK_RECORD_BYTES = 1_048_576;
@@ -11,17 +12,14 @@ const TASK_ID = /^\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 type Check = TaskRecordV3["validationPlan"][number];
 
 async function finishedTasks(harnixRoot: string, activeId: string): Promise<TaskRecordV3[]> {
-  const tasksRoot = await resolveSafeProjectPath(harnixRoot, "tasks");
-  const ids = (await readdir(tasksRoot, { withFileTypes: true }))
-    .filter((entry) => entry.isDirectory() && TASK_ID.test(entry.name) && entry.name !== activeId)
-    .map((entry) => entry.name)
-    .sort()
+  const ids = (await listTaskIds(harnixRoot))
+    .filter((id) => TASK_ID.test(id) && id !== activeId)
     .reverse()
     .slice(0, MAX_SCANNED_TASKS);
   const tasks: TaskRecordV3[] = [];
   for (const id of ids) {
     try {
-      const path = await resolveSafeProjectPath(harnixRoot, `tasks/${id}/task.json`);
+      const path = await taskFilePath(harnixRoot, id, "task.json");
       if ((await stat(path)).size > MAX_TASK_RECORD_BYTES) continue;
       const task: TaskRecord = validateTask(JSON.parse(await readFile(path, "utf8")) as unknown);
       if (task.schemaVersion === 3 && (task.status === "completed" || task.status === "cancelled")) tasks.push(task);

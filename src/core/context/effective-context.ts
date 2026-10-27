@@ -17,6 +17,7 @@ import {
   type ContextEntry,
   type ContextManifest,
 } from "./context.js";
+import { taskFilePath } from "src/core/tasks/task-location.js";
 
 export type EffectiveContextReasonCode = "applicable-guide" | "persisted-selection" | "pinned" | "task-reference";
 
@@ -156,7 +157,7 @@ function withLearning(text: string, learning: string, taskHeader?: string): stri
 }
 
 async function loadPersistedEntries(harnixRoot: string, taskId: string): Promise<ContextEntry[] | undefined> {
-  const path = await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}/context.json`);
+  const path = await taskFilePath(harnixRoot, taskId, "context.json");
   try {
     const manifest = await loadContextManifest(path);
     if (manifest.taskId !== taskId) throw new Error("Context manifest task binding is invalid.");

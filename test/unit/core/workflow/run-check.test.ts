@@ -6,6 +6,7 @@ import { trackTaskReads } from "src/core/tasks/read-tracker.js";
 import { runCheckWorkflow, type CheckRunner } from "src/core/workflow/run-check.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { implementingTaskV3 } from "test/support/workflow-fixtures.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 const NOW = "2026-08-13T00:10:00.000Z";
@@ -24,7 +25,7 @@ describe("workflow --run-check", () => {
   it("records a failing run once even when another write lands while the check runs", async () => {
     const root = await temporaryRepository();
     const task = await implementingTaskV3(root);
-    const taskFile = join(root, ".harnix", "tasks", task.id, "task.json");
+    const taskFile = join(root, ".harnix", "tasks", taskMonth(task.id), task.id, "task.json");
     let runs = 0;
     const runner: CheckRunner = async () => {
       runs += 1;
@@ -250,7 +251,7 @@ describe("workflow --run-check", () => {
     const { readFile } = await import("node:fs/promises");
     const root = await temporaryRepository();
     const task = await implementingTaskV3(root);
-    const planPath = join(root, ".harnix", "tasks", task.id, "plan.md");
+    const planPath = join(root, ".harnix", "tasks", taskMonth(task.id), task.id, "plan.md");
     await writeFile(planPath, "# Plan\n- [ ] [check] Run the focused check\n", "utf8");
 
     const { runner } = fakeRunner(0, "ok");

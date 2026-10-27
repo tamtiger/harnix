@@ -14,6 +14,7 @@ import {
   routingTask,
 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -172,7 +173,7 @@ describe("workflow cancel", () => {
     ).rejects.toThrow("active pointer write failed");
     expect(calls).toEqual(["save", "journal", "archive"]);
 
-    const persisted = await loadTask(join(root, "tasks", active.id, "task.json"));
+    const persisted = await loadTask(join(root, "tasks", taskMonth(active.id), active.id, "task.json"));
     expect(persisted.status).toBe("cancelled");
     expect((await resolveActiveTask(root))?.id).toBe(active.id);
 

@@ -3,6 +3,7 @@
 import { Command } from "commander";
 
 import { registerProjectCommands } from "./cli-project-commands.js";
+import { registerArchiveCommand } from "./cli-archive-command.js";
 import { registerWorkflowCliCommands } from "./cli-workflow-commands.js";
 import {
   isHookProtocolInvocation,
@@ -30,6 +31,7 @@ export function createProgram(programOptions: ProgramOptions = {}): Command {
 
   registerProjectCommands(program, programOptions);
   registerWorkflowCliCommands(program, programOptions);
+  registerArchiveCommand(program);
   registerWorkflowCommand(program, programOptions);
 
   return program;

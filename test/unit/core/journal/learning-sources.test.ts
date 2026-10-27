@@ -5,11 +5,12 @@ import { describe, expect, it } from "vitest";
 import { createSourcePathsLoader } from "src/core/journal/learning-sources.js";
 import { buildTaskV3 } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-learning-sources-");
 
 async function writeTask(harnixRoot: string, id: string, relevantPaths: string[]): Promise<void> {
-  const directory = join(harnixRoot, "tasks", id);
+  const directory = join(harnixRoot, "tasks", taskMonth(id), id);
   await mkdir(directory, { recursive: true });
   await writeFile(join(directory, "task.json"), JSON.stringify(buildTaskV3({ id, relevantPaths })));
 }
@@ -19,8 +20,13 @@ describe("createSourcePathsLoader", () => {
     const harnixRoot = join(await temporaryRepository(), ".harnix");
     await writeTask(harnixRoot, "20260901-000000-one", ["src/core/a.ts"]);
     await writeTask(harnixRoot, "20260901-000100-two", ["docs/a.md"]);
-    await mkdir(join(harnixRoot, "tasks", "20260901-000200-bad"), { recursive: true });
-    await writeFile(join(harnixRoot, "tasks", "20260901-000200-bad", "task.json"), "{not json");
+    await mkdir(join(harnixRoot, "tasks", taskMonth("20260901-000200-bad"), "20260901-000200-bad"), {
+      recursive: true,
+    });
+    await writeFile(
+      join(harnixRoot, "tasks", taskMonth("20260901-000200-bad"), "20260901-000200-bad", "task.json"),
+      "{not json",
+    );
     const load = createSourcePathsLoader(harnixRoot);
 
     const paths = await load([

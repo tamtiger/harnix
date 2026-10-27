@@ -1,3 +1,4 @@
+import { locateEpicFile } from "src/core/epics/epic-location.js";
 import { readdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -17,11 +18,9 @@ async function read(path: string): Promise<string> {
 }
 
 async function readEpicJson(id: string): Promise<string> {
-  try {
-    return await read(`.harnix/epics/${id}/epic.json`);
-  } catch {
-    return await read(`.harnix/epics/${id}.json`);
-  }
+  const location = await locateEpicFile(join(root, ".harnix"), id, "json");
+  if (location === undefined) throw new Error(`Epic ${id} not found.`);
+  return readFile(location.path, "utf8");
 }
 
 async function skillSources(): Promise<Array<{ name: string; text: string }>> {

@@ -10,6 +10,7 @@ import { upsertEpic } from "src/core/epics/epic.js";
 import { at, buildEpic } from "test/support/builders.js";
 import { buildGatedTask } from "test/support/integration-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const originalCwd = process.cwd();
 const originalExitCode = process.exitCode;
@@ -44,9 +45,9 @@ describe.sequential("resume command", () => {
     await expect(runCli(["node", "harnix", "resume", candidate.id])).resolves.toBe(0);
     expect(JSON.parse(output(stdout.mock.calls))).toEqual(result(candidate, false, "resumed"));
     await expect(readFile(join(harnixRoot, "tasks", ".active"), "utf8")).resolves.toBe(`${candidate.id}\n`);
-    await expect(readFile(join(harnixRoot, "tasks", candidate.id, "task.json"), "utf8")).resolves.toContain(
-      "PRIVATE_TITLE_CANARY",
-    );
+    await expect(
+      readFile(join(harnixRoot, "tasks", taskMonth(candidate.id), candidate.id, "task.json"), "utf8"),
+    ).resolves.toContain("PRIVATE_TITLE_CANARY");
 
     const afterResume = await snapshotTree(root);
     stdout.mockClear();
@@ -127,10 +128,16 @@ describe.sequential("resume command", () => {
     const malformedId = "20260826-160003-malformed-task";
     const oversizedId = "20260826-160004-oversized-task";
     const terminal = terminalTask("20260826-160005-terminal-task");
-    await mkdir(join(harnixRoot, "tasks", malformedId), { recursive: true });
-    await mkdir(join(harnixRoot, "tasks", oversizedId), { recursive: true });
-    await writeFile(join(harnixRoot, "tasks", malformedId, "task.json"), '{"private":"PRIVATE_MALFORMED_CANARY"}\n');
-    await writeFile(join(harnixRoot, "tasks", oversizedId, "task.json"), `{"padding":"${"x".repeat(1_048_576)}"}`);
+    await mkdir(join(harnixRoot, "tasks", taskMonth(malformedId), malformedId), { recursive: true });
+    await mkdir(join(harnixRoot, "tasks", taskMonth(oversizedId), oversizedId), { recursive: true });
+    await writeFile(
+      join(harnixRoot, "tasks", taskMonth(malformedId), malformedId, "task.json"),
+      '{"private":"PRIVATE_MALFORMED_CANARY"}\n',
+    );
+    await writeFile(
+      join(harnixRoot, "tasks", taskMonth(oversizedId), oversizedId, "task.json"),
+      `{"padding":"${"x".repeat(1_048_576)}"}`,
+    );
     await saveTask(harnixRoot, terminal);
     process.chdir(root);
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);

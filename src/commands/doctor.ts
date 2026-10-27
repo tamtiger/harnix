@@ -24,7 +24,13 @@ export async function diagnoseProject(options: DoctorOptions): Promise<DoctorRep
     fixGlobal: options.globalUpdate ?? updateGlobalPlatforms,
     fixProject: async (root) => {
       const reconciliation = await updateProject({ root });
-      return reconciliation.created.length + reconciliation.updated.length + reconciliation.deleted.length;
+      return (
+        reconciliation.created.length +
+        reconciliation.updated.length +
+        reconciliation.deleted.length +
+        (reconciliation.layout?.tasks ?? 0) +
+        (reconciliation.layout?.epics ?? 0)
+      );
     },
     generatorVersion: packageVersion,
     plans: configuratorPlans(),

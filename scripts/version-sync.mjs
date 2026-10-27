@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { chmod, readdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { chmod, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { foldDevEntries } from "./changelog-fold.mjs";
+import { renameWithRetry } from "./rename-retry.mjs";
 
 const semverPattern = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z.-]+))?$/u;
 const allowedKinds = new Set(["added", "changed", "fixed"]);
@@ -262,7 +263,7 @@ async function atomicWrite(path, contents) {
   try {
     await writeFile(temporary, contents, { encoding: "utf8", mode });
     await chmod(temporary, mode);
-    await rename(temporary, path);
+    await renameWithRetry(temporary, path);
   } finally {
     await rm(temporary, { force: true });
   }

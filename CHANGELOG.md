@@ -4,6 +4,21 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.23.1] - 2026-10-27
+
+### Fixed
+
+- harnix archive: báo bản sống trùng bản trong _archive, giữ epic có member không đọc được, kiểm lại task đang active trong khóa khi apply, và restore epic theo thứ tự member trước epic để chạy lại được sau lỗi giữa chừng.
+
+## [2.23.0] - 2026-10-27
+
+### Changed
+
+- Resolver vị trí task và epic duy nhất (task-location, epic-location): task và epic mới ghi vào .harnix/tasks/<YYYY-MM>/<id>/ và .harnix/epics/<YYYY-MM>/<id>/, bố cục phẳng cũ và _archive vẫn đọc được, đường dẫn logic .harnix/tasks/<id>/... trong evidence và ngoại lệ digest không đổi, test kiến trúc chặn chuỗi dựng đường dẫn; sửa test lệch đồng hồ của learning và cookbook.
+- harnix tasks và harnix epic mặc định chỉ quét phần sống và có cờ --archived cho kho _archive; thành viên epic lấy từ cả bucket lẫn _archive và chỉ quét từ tháng của epic; danh sách epic gom thành viên một lượt; task tải song song tối đa 16 (harnix tasks --limit 3 từ 0,8 giây còn khoảng 0,3 giây, harnix epic từ 2,9 giây còn khoảng 0,3 giây trên 257 task); version-sync thử lại rename tạm khi Windows báo EPERM/EBUSY.
+- Migration bố cục: harnix update và doctor --fix chuyển task và epic phẳng sang bucket tháng bằng rename nguyên tử dưới khóa workflow (không ghi đè, báo skipped, idempotent, update --dry-run chỉ liệt kê); doctor báo task-layout-legacy; chạy thử trên bản sao 257 task và 32 epic cho hash nội dung giống hệt.
+- Bố cục lưu trữ theo tháng và kho lưu trữ: task và epic mới nằm ở .harnix/tasks/<YYYY-MM>/<id>/ và .harnix/epics/<YYYY-MM>/<id>/ qua một resolver duy nhất, bố cục phẳng cũ vẫn đọc được và harnix update hay doctor --fix chuyển sang bucket bằng rename idempotent (doctor báo task-layout-legacy); lệnh mới harnix archive [--days 30] [--apply] [--restore <id>] chuyển task completed/cancelled và epic nguyên cụm quá hạn vào _archive chỉ đọc; harnix tasks và harnix epic có --archived, quét song song nhanh hơn (tasks --limit 3 từ 0,8 giây còn khoảng 0,3 giây, epic từ 2,9 giây còn khoảng 0,3 giây); sửa các test lệch đồng hồ, version-sync thử lại rename khi Windows báo EPERM.
+
 ## [2.22.3] - 2026-10-26
 
 ### Added

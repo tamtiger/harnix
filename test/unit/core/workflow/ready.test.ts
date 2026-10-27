@@ -8,6 +8,7 @@ import { initializeProject } from "src/commands/init.js";
 import { initializeUtcProject, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
 import { buildCheck } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -68,7 +69,10 @@ describe("workflow ready", () => {
         },
       }),
     ).rejects.toThrow("contractRevision");
-    await writeFile(join(root, ".harnix", "tasks", planning.id, "plan.md"), "# Plan\nNo checklist here.\n");
+    await writeFile(
+      join(root, ".harnix", "tasks", taskMonth(planning.id), planning.id, "plan.md"),
+      "# Plan\nNo checklist here.\n",
+    );
     const reready = {
       ...implementationReplan,
       status: "ready" as const,
@@ -153,12 +157,12 @@ describe("workflow ready", () => {
       updatedAt: "2026-08-13T00:01:00.000Z",
     };
 
-    await rm(join(root, ".harnix", "tasks", full.id, "prd.md"));
+    await rm(join(root, ".harnix", "tasks", taskMonth(full.id), full.id, "prd.md"));
     await expect(saveWorkflow(root, { task: ready })).rejects.toThrow(
       "Full tasks require non-empty prd.md and plan.md at ready",
     );
-    await writeFile(join(root, ".harnix", "tasks", full.id, "prd.md"), "# PRD\n");
-    await writeFile(join(root, ".harnix", "tasks", full.id, "plan.md"), "");
+    await writeFile(join(root, ".harnix", "tasks", taskMonth(full.id), full.id, "prd.md"), "# PRD\n");
+    await writeFile(join(root, ".harnix", "tasks", taskMonth(full.id), full.id, "plan.md"), "");
     await expect(saveWorkflow(root, { task: ready })).rejects.toThrow(
       "Full tasks require non-empty prd.md and plan.md at ready",
     );
@@ -203,7 +207,7 @@ describe("workflow ready inspection", () => {
       validationPlan: [{ ...base.validationPlan[0]!, scope: "focused" as const }],
       evidence: [baselineEvidence("pass")],
     };
-    await mkdir(join(root, ".harnix", "tasks", task.id), { recursive: true });
+    await mkdir(join(root, ".harnix", "tasks", taskMonth(task.id), task.id), { recursive: true });
 
     const result = await inspectReadyConditions(join(root, ".harnix"), task, {
       prd: "# PRD\n",
@@ -224,7 +228,7 @@ describe("workflow ready inspection", () => {
       validationPlan: [{ ...base.validationPlan[0]!, scope: "focused" as const }],
       evidence: [baselineEvidence("pass")],
     };
-    await mkdir(join(root, ".harnix", "tasks", task.id), { recursive: true });
+    await mkdir(join(root, ".harnix", "tasks", taskMonth(task.id), task.id), { recursive: true });
     const inspect = (plan: string) => inspectReadyConditions(join(root, ".harnix"), task, { prd: "# PRD\n", plan });
 
     const one = await inspect("- [ ] slice for a `check-2b`\n");
@@ -299,7 +303,7 @@ describe("workflow ready inspection", () => {
     await initializeUtcProject(root);
     await writeProjectSource(root);
     const task = { ...taskV3("planning", "planning"), mode: "full" as const, evidence: [baselineEvidence("fail")] };
-    await mkdir(join(root, ".harnix", "tasks", task.id), { recursive: true });
+    await mkdir(join(root, ".harnix", "tasks", taskMonth(task.id), task.id), { recursive: true });
 
     const noChecklist = await inspectReadyConditions(join(root, ".harnix"), task, {
       prd: "# PRD\n",

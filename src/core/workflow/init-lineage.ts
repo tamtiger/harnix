@@ -1,8 +1,10 @@
 import { readFile } from "node:fs/promises";
 
 import { epicIdPattern, loadEpicRecord } from "src/core/epics/epic.js";
+import { assertEpicWritable, locateEpicFile } from "src/core/epics/epic-location.js";
 import type { TaskRecordV3 } from "src/core/tasks/task.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { taskFilePath } from "src/core/tasks/task-location.js";
 
 export interface LineageOptions {
   epic?: string | undefined;
@@ -20,13 +22,19 @@ async function requireEpic(root: string, requested: string): Promise<string> {
   const epicId = requested.trim();
   if (!epicIdPattern.test(epicId)) throw new Error(`workflow --init --epic '${epicId}' is not a valid epic id.`);
   if ((await loadEpicRecord(root, epicId)) === undefined) throw new Error(`Epic '${epicId}' not found.`);
+  await assertEpicWritable(await resolveSafeHarnixPath(root), epicId);
   return epicId;
+}
+
+async function epicArchived(root: string, epicId: string): Promise<boolean> {
+  const found = await locateEpicFile(await resolveSafeHarnixPath(root), epicId, "json");
+  return found?.kind === "archive";
 }
 
 async function readParent(root: string, parentId: string): Promise<Partial<TaskRecordV3>> {
   try {
     const harnixDir = await resolveSafeHarnixPath(root);
-    const parentTaskFile = await resolveSafeProjectPath(harnixDir, `tasks/${parentId}/task.json`);
+    const parentTaskFile = await taskFilePath(harnixDir, parentId, "task.json");
     return JSON.parse(await readFile(parentTaskFile, "utf8")) as Partial<TaskRecordV3>;
   } catch {
     throw new Error(`Follow-up task '${parentId}' not found.`);
@@ -41,7 +49,9 @@ export async function resolveLineage(root: string, options: LineageOptions): Pro
   const parent = await readParent(root, parentId);
   if (epicId !== undefined && parent.epicId !== undefined && parent.epicId !== epicId)
     throw new Error(`--epic ${epicId} conflicts with epic ${parent.epicId} of follow-up task ${parentId}.`);
-  epicId ??= parent.epicId;
+  // A closed (archived) epic is read-only: the follow-up starts outside it instead of writing into the archive.
+  if (epicId === undefined && parent.epicId !== undefined && !(await epicArchived(root, parent.epicId)))
+    epicId = parent.epicId;
   return {
     ...(epicId === undefined ? {} : { epicId }),
     followUpOf: parentId,

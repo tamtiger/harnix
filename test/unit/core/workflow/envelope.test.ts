@@ -5,6 +5,7 @@ import { saveWorkflow } from "src/core/workflow/save.js";
 import { buildEpic } from "test/support/builders.js";
 import { initializeUtcProject, taskV3 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -16,8 +17,12 @@ describe("workflow envelope", () => {
 
     // A Full task may be created light (task.json only); prd.md/plan.md are written later and enforced at ready.
     await expect(saveWorkflow(root, { task: full })).resolves.toMatchObject({ id: full.id });
-    await expect(access(join(root, ".harnix", "tasks", full.id, "task.json"))).resolves.toBeUndefined();
-    await expect(access(join(root, ".harnix", "tasks", full.id, "prd.md"))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(
+      access(join(root, ".harnix", "tasks", taskMonth(full.id), full.id, "task.json")),
+    ).resolves.toBeUndefined();
+    await expect(access(join(root, ".harnix", "tasks", taskMonth(full.id), full.id, "prd.md"))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
   });
 
   it("rejects unknown hidden-save envelope, artifact, and revision fields", async () => {
@@ -84,7 +89,9 @@ describe("workflow envelope", () => {
     await expect(saveWorkflow(root, { task: first, epic, epicMembers: [second] })).rejects.toThrow(
       /20260813-120000-measure.*20260813-120000-cut.*later idPrefix/su,
     );
-    await expect(access(join(root, ".harnix", "tasks", first.id))).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(access(join(root, ".harnix", "tasks", taskMonth(first.id), first.id))).rejects.toMatchObject({
+      code: "ENOENT",
+    });
 
     const later = { ...second, id: "20260813-120001-cut" };
     await expect(saveWorkflow(root, { task: first, epic, epicMembers: [later] })).resolves.toMatchObject({

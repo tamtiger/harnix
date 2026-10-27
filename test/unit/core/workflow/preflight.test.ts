@@ -11,6 +11,7 @@ import { at, buildEpic } from "test/support/builders.js";
 import { buildLearningEntry, writeJournalFile } from "test/support/learning-fixtures.js";
 import { initializeUtcProject, writeProjectSource, taskV3 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -69,7 +70,7 @@ describe("workflow preflight", () => {
       updatedAt: "2026-08-13T00:02:00.000Z",
     };
     await saveWorkflow(root, { task: active });
-    const taskPath = join(root, ".harnix", "tasks", active.id, "task.json");
+    const taskPath = join(root, ".harnix", "tasks", taskMonth(active.id), active.id, "task.json");
     const pointerPath = join(root, ".harnix", "tasks", ".active");
     const before = await Promise.all([readFile(taskPath, "utf8"), readFile(pointerPath, "utf8")]);
 
@@ -114,7 +115,7 @@ describe("workflow preflight", () => {
     await saveTask(join(root, ".harnix"), active);
     await setActiveTask(join(root, ".harnix"), active.id);
     await writeFile(
-      join(root, ".harnix", "tasks", active.id, "context.json"),
+      join(root, ".harnix", "tasks", taskMonth(active.id), active.id, "context.json"),
       `${JSON.stringify(
         {
           generator: "harnix",
@@ -163,7 +164,7 @@ describe("workflow preflight", () => {
     await saveTask(join(root, ".harnix"), active);
     await setActiveTask(join(root, ".harnix"), active.id);
     await writeFile(
-      join(root, ".harnix", "tasks", active.id, "context.json"),
+      join(root, ".harnix", "tasks", taskMonth(active.id), active.id, "context.json"),
       `${JSON.stringify(
         {
           generator: "harnix",

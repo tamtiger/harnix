@@ -7,6 +7,7 @@ import { transitionWorkflow } from "src/core/workflow/transition.js";
 import { saveTask, setActiveTask, transitionTask } from "src/core/tasks/task.js";
 import { implementingTaskV3, initializeUtcProject, taskV3, routingTask } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -313,7 +314,7 @@ describe("a dry-run agrees with the real ready transition", () => {
     await saveTask(harnixRoot, task);
     await setActiveTask(harnixRoot, task.id);
     const { mkdir, writeFile } = await import("node:fs/promises");
-    const taskDir = join(harnixRoot, "tasks", task.id);
+    const taskDir = join(harnixRoot, "tasks", taskMonth(task.id), task.id);
     await mkdir(taskDir, { recursive: true });
     await writeFile(join(taskDir, "plan.md"), "# Plan\n- [ ] Unfinished task item\n- [x] Done item\n");
 

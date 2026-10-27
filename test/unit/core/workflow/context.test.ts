@@ -8,6 +8,7 @@ import { sha256 } from "src/utils/hashing.js";
 import { continueWorkflowTask } from "src/core/workflow/context.js";
 import { initializeUtcProject, taskV3, routingTask } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -18,7 +19,7 @@ describe("workflow context", () => {
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
     await writeFile(join(root, "tracked.md"), "new content");
-    const contextPath = join(root, ".harnix", "tasks", planning.id, "context.json");
+    const contextPath = join(root, ".harnix", "tasks", taskMonth(planning.id), planning.id, "context.json");
     const context = {
       generator: "harnix",
       schemaVersion: 1,
@@ -71,7 +72,7 @@ describe("workflow context", () => {
     await expect(inspectWorkflow(root)).resolves.toMatchObject({
       contextDrift: { state: "current", changes: [], selectionChanges: [] },
     });
-    const selectionPath = join(root, ".harnix", "tasks", planning.id, "context-selection.json");
+    const selectionPath = join(root, ".harnix", "tasks", taskMonth(planning.id), planning.id, "context-selection.json");
     await expect(readFile(selectionPath, "utf8")).resolves.not.toContain("tracked content");
 
     const changedSignals = { ...planning, relevantPaths: ["docs/**"], updatedAt: "2026-08-13T00:01:00.000Z" };
@@ -118,7 +119,7 @@ describe("workflow context", () => {
       omitted: [],
     };
     await saveWorkflow(root, { task: planning, artifacts: { context } });
-    await rm(join(root, ".harnix", "tasks", planning.id, "context-selection.json"));
+    await rm(join(root, ".harnix", "tasks", taskMonth(planning.id), planning.id, "context-selection.json"));
     await rm(join(root, ".harnix", "tasks", ".active"));
 
     await expect(saveWorkflow(root, { task: planning })).rejects.toThrow(

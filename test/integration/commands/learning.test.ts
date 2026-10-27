@@ -1,6 +1,6 @@
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "src/cli-program.js";
 import { initializeProject } from "src/commands/init.js";
@@ -14,7 +14,14 @@ const originalExitCode = process.exitCode;
 const temporaryRepository = useTemporaryRepositories("harnix-learning-command-");
 const SOURCE_TASK = "20260929-090000-source";
 
+beforeEach(() => {
+  // The fixtures are dated 2026-09-29; a real clock would age their learning past the 28-day TTL.
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-02T00:00:00+07:00"));
+});
+
 afterEach(() => {
+  vi.useRealTimers();
   process.chdir(originalCwd);
   process.exitCode = originalExitCode;
   vi.restoreAllMocks();

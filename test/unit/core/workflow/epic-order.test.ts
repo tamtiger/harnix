@@ -9,6 +9,7 @@ import { setEpicOrderWorkflow } from "src/core/workflow/epic-order.js";
 import { assertFlagGroups, selectAction } from "src/commands/workflow-flags.js";
 import { buildEpic, buildTaskV3 } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-epic-order-");
 const A = "20260928-100000-first";
@@ -27,7 +28,8 @@ async function project(): Promise<string> {
   return root;
 }
 
-const taskFile = (root: string, id: string) => readFile(join(root, ".harnix", "tasks", id, "task.json"), "utf8");
+const taskFile = (root: string, id: string) =>
+  readFile(join(root, ".harnix", "tasks", taskMonth(id), id, "task.json"), "utf8");
 
 describe("workflow --epic-order", () => {
   it("records the order, re-renders the page and leaves every task file untouched", async () => {

@@ -1,11 +1,12 @@
 import { execFileSync } from "node:child_process";
-import { readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "src/cli-program.js";
 import { initializeProject } from "src/commands/init.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { listTaskIds, taskFilePath } from "src/core/tasks/task-location.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-review-impact-");
 const originalCwd = process.cwd();
@@ -22,9 +23,9 @@ function git(cwd: string, ...args: string[]): void {
 }
 
 async function reviewOf(root: string): Promise<string> {
-  const tasks = join(root, ".harnix", "tasks");
-  const id = (await readdir(tasks)).find((name) => /^\d{8}-/u.test(name))!;
-  return readFile(join(tasks, id, "review.md"), "utf8");
+  const harnixRoot = join(root, ".harnix");
+  const [id] = await listTaskIds(harnixRoot);
+  return readFile(await taskFilePath(harnixRoot, id!, "review.md"), "utf8");
 }
 
 async function startTask(): Promise<void> {

@@ -1,4 +1,4 @@
-import { access, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -16,6 +16,7 @@ import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { taskFixture, timestamp } from "test/support/tasks-fixtures.js";
 import { at, buildCriterion, buildEvidence, buildTaskV3 } from "test/support/builders.js";
 import type { CodeImpactGitRunner } from "src/core/tasks/code-impact.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -23,7 +24,9 @@ describe("task store", () => {
   it("creates Full artifacts and rejects ceremony files for Lite", async () => {
     const root = await temporaryRepository();
     await saveTaskWithArtifacts(root, { ...taskFixture(), mode: "full" }, { prd: "# PRD\n", plan: "# Plan\n" });
-    expect(await readFile(join(root, "tasks", "20260807-120000-x", "prd.md"), "utf8")).toContain("PRD");
+    expect(
+      await readFile(join(root, "tasks", taskMonth("20260807-120000-x"), "20260807-120000-x", "prd.md"), "utf8"),
+    ).toContain("PRD");
     await expect(saveTaskWithArtifacts(root, taskFixture(), { prd: "# no\n" })).rejects.toThrow("Lite");
   });
 
@@ -58,7 +61,7 @@ describe("task store", () => {
     const task = taskFixture();
     await saveTask(root, task);
     await setActiveTask(root, task.id);
-    const taskJsonPath = join(root, "tasks", task.id, "task.json");
+    const taskJsonPath = join(root, "tasks", taskMonth(task.id), task.id, "task.json");
     await writeFile(taskJsonPath, '{"generator":"harnix","schemaVersion":2,"id":"20260807-1200', "utf8"); // truncated mid-string
 
     await expect(resolveActiveTask(root)).rejects.toThrow(TaskValidationError);
@@ -86,7 +89,7 @@ describe("task store", () => {
     await setActiveTask(root, done.id);
     await archiveTask(root, done);
     expect(await resolveActiveTask(root)).toBeUndefined();
-    expect(await readFile(join(root, "tasks", done.id, "task.json"), "utf8")).toContain(done.id);
+    expect(await readFile(join(root, "tasks", taskMonth(done.id), done.id, "task.json"), "utf8")).toContain(done.id);
   });
 
   it("fails closed when the active pointer references a missing task record", async () => {
@@ -94,7 +97,7 @@ describe("task store", () => {
     const task = taskFixture();
     await saveTask(root, task);
     await setActiveTask(root, task.id);
-    await rm(join(root, "tasks", task.id), { recursive: true });
+    await rm(join(root, "tasks", taskMonth(task.id), task.id), { recursive: true });
 
     await expect(resolveActiveTask(root)).rejects.toThrow(/active task pointer|missing task/iu);
     await expect(readFile(join(root, "tasks", ".active"), "utf8")).resolves.toBe(`${task.id}\n`);
@@ -104,7 +107,7 @@ describe("task store", () => {
     const gitRunner: CodeImpactGitRunner = (_cwd, args) =>
       Promise.resolve(args.includes("status") ? "? src/new.ts\0" : "");
     const review = async (root: string, id: string): Promise<string> =>
-      readFile(join(root, "tasks", id, "review.md"), "utf8");
+      readFile(join(root, "tasks", taskMonth(id), id, "review.md"), "utf8");
 
     it("writes ## Code impact while in progress or verifying and not while planning", async () => {
       const root = await temporaryRepository();
@@ -162,5 +165,16 @@ describe("task store", () => {
       await saveTask(root, done);
       expect(await review(root, working.id)).toContain("| `src/new.ts` | added | - |");
     });
+  });
+});
+
+describe("task store archive guard", () => {
+  it("rejects saving a task, or its artifacts, that lives in the read-only archive", async () => {
+    const root = await temporaryRepository();
+    const task = taskFixture();
+    await mkdir(join(root, "tasks", "_archive", taskMonth(task.id), task.id), { recursive: true });
+
+    await expect(saveTask(root, task)).rejects.toThrow("harnix archive --restore");
+    await expect(saveTaskWithArtifacts(root, task, {})).rejects.toThrow("harnix archive --restore");
   });
 });

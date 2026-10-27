@@ -1,3 +1,5 @@
+import { mkdir, rename } from "node:fs/promises";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { upsertEpic } from "src/core/epics/epic.js";
@@ -58,5 +60,25 @@ describe("resolveLineage", () => {
     await expect(resolveLineage(root, { followUp: parent.id, epic: "20261006-100001-other" })).rejects.toThrow(
       /conflicts with epic 20261006-100000-known/u,
     );
+  });
+});
+
+describe("resolveLineage with an archived epic", () => {
+  it("lets a follow-up read an archived parent but leaves the closed epic, and refuses --epic for it", async () => {
+    const root = await project();
+    const epicId = "20261006-100000-closed";
+    await upsertEpic(root, epic(epicId));
+    const parent = { ...taskV3("planning", "planning"), epicId };
+    await saveWorkflow(root, { task: parent });
+    await clearActiveTask(`${root}/.harnix`, parent.id);
+    const harnix = join(root, ".harnix");
+    await mkdir(join(harnix, "epics", "_archive", "2026-10"), { recursive: true });
+    await rename(join(harnix, "epics", "2026-10", epicId), join(harnix, "epics", "_archive", "2026-10", epicId));
+
+    const lineage = await resolveLineage(root, { followUp: parent.id });
+
+    expect(lineage.followUpOf).toBe(parent.id);
+    expect(lineage.epicId).toBeUndefined();
+    await expect(resolveLineage(root, { epic: epicId })).rejects.toThrow("harnix archive --restore");
   });
 });

@@ -9,6 +9,7 @@ import { preflightWorkflow } from "src/core/workflow/preflight.js";
 import { at, buildCheck, buildCriterion, buildEvidence, buildTaskV3 } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { implementingTaskV3, taskV3 } from "test/support/workflow-fixtures.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -141,8 +142,13 @@ describe("baselineHint", () => {
     const root = await temporaryRepository();
     const running = await implementingTaskV3(root);
     await seed(root, ...RED_TWICE);
-    await mkdir(join(root, ".harnix", "tasks", "20260805-100000-broken"), { recursive: true });
-    await writeFile(join(root, ".harnix", "tasks", "20260805-100000-broken", "task.json"), "{ not json");
+    await mkdir(join(root, ".harnix", "tasks", taskMonth("20260805-100000-broken"), "20260805-100000-broken"), {
+      recursive: true,
+    });
+    await writeFile(
+      join(root, ".harnix", "tasks", taskMonth("20260805-100000-broken"), "20260805-100000-broken", "task.json"),
+      "{ not json",
+    );
 
     await expect(baselineHint(root, running)).resolves.toContain("red in the last 2 finished tasks");
   });

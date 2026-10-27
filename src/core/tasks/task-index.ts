@@ -1,11 +1,14 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { validateTask, type TaskMode, type TaskRecord, type TaskStatus, type WorkflowCheckpoint } from "./task.js";
+import { mapWithLimit } from "src/utils/concurrency.js";
+import { listTaskIds, taskFilePath } from "src/core/tasks/task-location.js";
 
 const MAX_SCANNED_TASKS = 1_000;
 const MAX_TASK_RECORD_BYTES = 1_048_576;
 const MAX_ACTIVE_POINTER_BYTES = 1_024;
+const READ_CONCURRENCY = 16;
 const taskIdPattern = /^\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const taskStatuses = new Set<TaskStatus>([
   "planning",
@@ -20,10 +23,12 @@ const taskStatuses = new Set<TaskStatus>([
 export interface TaskIndexOptions {
   readonly limit: number;
   readonly status?: TaskStatus | undefined;
+  /** List the read-only archive instead of the live tasks. */
+  readonly archived?: boolean | undefined;
 }
 
 export interface TaskIndexSource {
-  listTaskDirectoryIds(harnixRoot: string): Promise<readonly string[]>;
+  listTaskDirectoryIds(harnixRoot: string, archived: boolean): Promise<readonly string[]>;
   readActiveTaskId(harnixRoot: string): Promise<string | null>;
   loadTaskRecord(harnixRoot: string, taskId: string): Promise<unknown>;
 }
@@ -49,6 +54,8 @@ export interface TaskIndexResultV1 {
   readonly filter: {
     readonly status: TaskStatus | null;
     readonly limit: number;
+    /** Present (true) only when the archive was listed. */
+    readonly archived?: true;
   };
   readonly summary: {
     readonly scanned: number;
@@ -65,16 +72,8 @@ export interface TaskIndexResultV1 {
 }
 
 const fileSystemTaskIndexSource: TaskIndexSource = {
-  async listTaskDirectoryIds(harnixRoot) {
-    const tasksRoot = await resolveSafeProjectPath(harnixRoot, "tasks");
-    try {
-      return (await readdir(tasksRoot, { withFileTypes: true }))
-        .filter((entry) => entry.isDirectory())
-        .map((entry) => entry.name);
-    } catch (error: unknown) {
-      if (isMissing(error)) return [];
-      throw error;
-    }
+  async listTaskDirectoryIds(harnixRoot, archived) {
+    return listTaskIds(harnixRoot, { scope: archived ? "archive" : "live" });
   },
   async readActiveTaskId(harnixRoot) {
     const path = await resolveSafeProjectPath(harnixRoot, "tasks/.active");
@@ -88,7 +87,7 @@ const fileSystemTaskIndexSource: TaskIndexSource = {
     }
   },
   async loadTaskRecord(harnixRoot, taskId) {
-    const path = await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}/task.json`);
+    const path = await taskFilePath(harnixRoot, taskId, "task.json");
     if ((await stat(path)).size > MAX_TASK_RECORD_BYTES) throw new Error("Task record is oversized.");
     return JSON.parse(await readFile(path, "utf8")) as unknown;
   },
@@ -109,18 +108,17 @@ async function loadSelectedTaskRecords(
   harnixRoot: string,
   ids: readonly string[],
 ): Promise<{ validTasks: TaskRecord[]; invalid: number }> {
-  const validTasks: TaskRecord[] = [];
-  let invalid = 0;
-  for (const id of ids) {
+  const loaded = await mapWithLimit(ids, READ_CONCURRENCY, async (id) => {
     try {
       const task = validateTask(await source.loadTaskRecord(harnixRoot, id));
       if (task.id !== id) throw new Error("Task directory and record IDs differ.");
-      validTasks.push(task);
+      return task;
     } catch {
-      invalid += 1;
+      return undefined;
     }
-  }
-  return { validTasks, invalid };
+  });
+  const validTasks = loaded.filter((task): task is TaskRecord => task !== undefined);
+  return { validTasks, invalid: loaded.length - validTasks.length };
 }
 
 export async function createTaskIndex(
@@ -129,11 +127,13 @@ export async function createTaskIndex(
   source: TaskIndexSource = fileSystemTaskIndexSource,
 ): Promise<TaskIndexResultV1> {
   assertOptions(options);
+  const archived = options.archived === true;
 
   let activePointer: string | null = null;
   let activeUnavailable = false;
   try {
-    const state = resolveActivePointerState(await source.readActiveTaskId(harnixRoot));
+    // The archive never holds the active task, so its listing has no pointer to check.
+    const state = resolveActivePointerState(archived ? null : await source.readActiveTaskId(harnixRoot));
     activePointer = state.activePointer;
     activeUnavailable = state.activeUnavailable;
   } catch {
@@ -141,7 +141,7 @@ export async function createTaskIndex(
   }
 
   const directoryIds = [
-    ...new Set((await source.listTaskDirectoryIds(harnixRoot)).filter((id) => taskIdPattern.test(id))),
+    ...new Set((await source.listTaskDirectoryIds(harnixRoot, archived)).filter((id) => taskIdPattern.test(id))),
   ].sort(compareCodeUnitsDescending);
   const selectedIds = directoryIds.slice(0, MAX_SCANNED_TASKS);
   if (activePointer !== null && directoryIds.includes(activePointer) && !selectedIds.includes(activePointer)) {
@@ -174,7 +174,7 @@ export async function createTaskIndex(
     schemaVersion: 1,
     scope: "project",
     status: invalid > 0 || activeUnavailable ? "partial" : "ready",
-    filter: { status: options.status ?? null, limit: options.limit },
+    filter: { status: options.status ?? null, limit: options.limit, ...(archived ? { archived: true as const } : {}) },
     summary: {
       scanned: selectedIds.length,
       valid: validTasks.length,

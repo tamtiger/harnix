@@ -119,6 +119,8 @@ Output là Bypass hoặc một task ở `planning`.
 
 Agent đọc project instructions, relevant docs/code/tests và dirty state trước. Planning hội tụ theo thứ tự:
 
+**Bố cục lưu trữ.** Task và epic mới nằm ở `.harnix/tasks/<YYYY-MM>/<id>/` và `.harnix/epics/<YYYY-MM>/<id>/` (tháng lấy từ tiền tố ID); bố cục phẳng cũ vẫn đọc và ghi tại chỗ cho đến khi `harnix update` hay `doctor --fix` chuyển sang bucket, còn `.harnix/tasks/_archive/<YYYY-MM>/<id>/` và `.harnix/epics/_archive/<YYYY-MM>/<id>/` là kho chỉ đọc do `harnix archive` điền (không tự chạy). Mọi tham chiếu `.harnix/tasks/<id>/...` trong tài liệu, evidence và `artifactPaths` là đường dẫn logic, không phụ thuộc bố cục. Ghi workflow vào task hoặc epic đã archive bị từ chối kèm hint `harnix archive --restore <id>`.
+
 1. Restore `.harnix/tasks/.active`; pointer rỗng nghĩa là chưa có task, còn pointer trỏ tới task record bị thiếu/invalid phải fail closed và repair trước khi tiếp tục. Chỉ khi thực sự chưa có task mới persist một exact TaskRecord schema v3 `planning` và active pointer trước product edits (có thể dùng lệnh thuận tiện `harnix workflow --init --title <t> [--mode lite|full] [--goal <g>] [--text <criterion>]... [--with-check "id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>[;scope=..][;description=..]"]... [--command <cmd>] [--input <glob>]` (lặp `--text` để tạo nhiều criterion `ac-1..n`, lặp `--with-check` để thêm check bắt buộc không cần JSON; check chạy lệnh test của dự án là `check-suite` scope `full`) để khởi tạo an toàn bằng cờ CLI mà không cần tự dựng JSON envelope).
 2. Goal, non-goals và acceptance criteria quan sát được.
 3. Constraints, affected boundaries và validation commands.

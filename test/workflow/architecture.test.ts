@@ -119,6 +119,17 @@ describe("architecture", () => {
     expect(existsSync(join(srcRoot, "core", "workflow.ts"))).toBe(false);
   });
 
+  it("builds task and epic paths only in the location resolvers", () => {
+    const resolvers = new Set(["core/tasks/task-location.ts", "core/epics/epic-location.ts"]);
+    const offenders = sourceFiles
+      .filter((file) => !resolvers.has(rel(file)) && !rel(file).startsWith("templates/"))
+      .filter((file) => /(?:tasks|epics)\/\$\{/u.test(readFileSync(file, "utf8")))
+      .map(rel);
+
+    expect(offenders).toEqual([]);
+    for (const resolver of resolvers) expect(existsSync(join(srcRoot, resolver))).toBe(true);
+  });
+
   it("detects every import form in violating fixtures", () => {
     const fixture = [
       'import { a } from "src/core/a.js";',

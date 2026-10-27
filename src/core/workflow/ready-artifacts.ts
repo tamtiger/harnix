@@ -13,6 +13,7 @@ import {
   unknownCheckReferences,
   type ContentFindings,
 } from "./ready-content.js";
+import { resolveTaskDirectory } from "src/core/tasks/task-location.js";
 
 const FULL_ARTIFACTS_MESSAGE = "Full tasks require non-empty prd.md and plan.md at ready.";
 const CHECKLIST_MESSAGE =
@@ -24,7 +25,7 @@ async function loadFullArtifacts(
   artifacts: TaskArtifacts | undefined,
 ): Promise<{ prd: string; plan: string } | undefined> {
   try {
-    const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
+    const taskDirectory = await resolveTaskDirectory(harnixRoot, task.id);
     const prdPath = await resolveSafeProjectPath(taskDirectory, "prd.md");
     const planPath = await resolveSafeProjectPath(taskDirectory, "plan.md");
     const [prd, plan] = await Promise.all([

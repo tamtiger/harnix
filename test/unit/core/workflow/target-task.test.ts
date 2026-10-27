@@ -16,6 +16,7 @@ import { withTargetTask } from "src/core/workflow/target-task.js";
 import { buildCheck, buildCriterion } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { initializeUtcProject, taskV3, writeProjectSource } from "test/support/workflow-fixtures.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 const NOW = "2026-08-13T00:30:00.000Z";
@@ -31,7 +32,7 @@ async function twoTasks(root: string, other: Partial<TaskRecordV3> = {}) {
 }
 
 const persisted = async (root: string, id: string) =>
-  loadTask(`${root}/.harnix/tasks/${id}/task.json`) as Promise<TaskRecordV3>;
+  loadTask(`${root}/.harnix/tasks/${taskMonth(id)}/${id}/task.json`) as Promise<TaskRecordV3>;
 
 describe("--task targeting", () => {
   it("edits the targeted task with every edit command and leaves the active task and pointer alone", async () => {

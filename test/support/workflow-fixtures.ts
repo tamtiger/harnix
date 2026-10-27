@@ -7,6 +7,7 @@ import type { TaskRecord, TaskRecordV1, TaskRecordV3 } from "src/core/tasks/task
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
 import { buildCheck, buildCriterion, buildEvidence, buildTaskV1, buildTaskV3 } from "./builders.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 /** Fixed stamp of the historical fixtures used by the workflow-persistence specs. */
 export const timestamp = "2026-08-13T00:00:00.000Z";
@@ -68,7 +69,7 @@ export async function writeProjectSource(root: string): Promise<void> {
 }
 
 export async function loadPersistedTask(root: string, id: string): Promise<unknown> {
-  return JSON.parse(await readFile(join(root, ".harnix", "tasks", id, "task.json"), "utf8")) as unknown;
+  return JSON.parse(await readFile(join(root, ".harnix", "tasks", taskMonth(id), id, "task.json"), "utf8")) as unknown;
 }
 
 export function reverseObjectKeys(value: unknown): unknown {

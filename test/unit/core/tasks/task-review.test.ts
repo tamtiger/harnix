@@ -6,6 +6,7 @@ import { formatDisplay, systemTimezone } from "src/utils/clock.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { buildCheck, buildCriterion, buildEvidence, buildTaskV3 } from "test/support/builders.js";
 import { laterTimestamp, timestamp } from "test/support/tasks-fixtures.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -22,7 +23,7 @@ describe("task review lineage", () => {
     await saveTaskWithArtifacts(root, linked, { prd: "# prd", plan: "# plan" });
     await saveTaskWithArtifacts(root, plain, { prd: "# prd", plan: "# plan" });
 
-    const read = async (id: string) => readFile(join(root, "tasks", id, "review.md"), "utf8");
+    const read = async (id: string) => readFile(join(root, "tasks", taskMonth(id), id, "review.md"), "utf8");
 
     const withLinks = await read(linked.id);
     expect(withLinks).toContain("- **Epic:** 20260916-210000-the-epic");
@@ -73,7 +74,7 @@ describe("task review page", () => {
     });
 
     await saveTask(root, base);
-    const reviewPath = join(root, "tasks", base.id, "review.md");
+    const reviewPath = join(root, "tasks", taskMonth(base.id), base.id, "review.md");
     const review = await readFile(reviewPath, "utf8");
 
     expect(review).toContain(base.title);
@@ -123,7 +124,7 @@ describe("task review page", () => {
       updatedAt: timestamp,
     });
     await saveTaskWithArtifacts(root, fullTask, { prd: "# prd", plan: "# plan" });
-    const fullReview = await readFile(join(root, "tasks", fullTask.id, "review.md"), "utf8");
+    const fullReview = await readFile(join(root, "tasks", taskMonth(fullTask.id), fullTask.id, "review.md"), "utf8");
 
     expect(fullReview).toContain("prd.md");
     expect(fullReview).toContain("plan.md");
@@ -136,7 +137,7 @@ describe("task review page", () => {
       title: "Lite task",
     };
     await saveTask(root, liteTask);
-    const liteReview = await readFile(join(root, "tasks", liteTask.id, "review.md"), "utf8");
+    const liteReview = await readFile(join(root, "tasks", taskMonth(liteTask.id), liteTask.id, "review.md"), "utf8");
 
     expect(liteReview).not.toContain("prd.md");
     expect(liteReview).not.toContain("plan.md");
@@ -156,7 +157,7 @@ describe("task review page", () => {
     });
 
     await saveTask(root, minimal);
-    const reviewPath = join(root, "tasks", minimal.id, "review.md");
+    const reviewPath = join(root, "tasks", taskMonth(minimal.id), minimal.id, "review.md");
     const first = await readFile(reviewPath, "utf8");
 
     expect(first).not.toContain("Decisions");
@@ -195,7 +196,7 @@ describe("task review page", () => {
       updatedAt: timestamp,
     });
     await saveTask(root, pending);
-    const pendingReview = await readFile(join(root, "tasks", pending.id, "review.md"), "utf8");
+    const pendingReview = await readFile(join(root, "tasks", taskMonth(pending.id), pending.id, "review.md"), "utf8");
     const headerEnd = pendingReview.indexOf("## Goal");
     const verdictLine = pendingReview.slice(0, headerEnd);
     expect(verdictLine).toMatch(/Verdict.*PENDING.*1\/2/iu);
@@ -213,7 +214,10 @@ describe("task review page", () => {
       updatedAt: laterTimestamp,
     };
     await saveTask(root, completed);
-    const completedReview = await readFile(join(root, "tasks", completed.id, "review.md"), "utf8");
+    const completedReview = await readFile(
+      join(root, "tasks", taskMonth(completed.id), completed.id, "review.md"),
+      "utf8",
+    );
     expect(completedReview.slice(0, completedReview.indexOf("## Goal"))).toMatch(/Verdict.*PASS/iu);
 
     const blocked = {
@@ -229,7 +233,7 @@ describe("task review page", () => {
       },
     };
     await saveTask(root, blocked);
-    const blockedReview = await readFile(join(root, "tasks", blocked.id, "review.md"), "utf8");
+    const blockedReview = await readFile(join(root, "tasks", taskMonth(blocked.id), blocked.id, "review.md"), "utf8");
     expect(blockedReview.slice(0, blockedReview.indexOf("## Goal"))).toMatch(/Verdict.*BLOCKED.*external/iu);
 
     const cancelled = {
@@ -242,7 +246,10 @@ describe("task review page", () => {
       updatedAt: laterTimestamp,
     };
     await saveTask(root, cancelled);
-    const cancelledReview = await readFile(join(root, "tasks", cancelled.id, "review.md"), "utf8");
+    const cancelledReview = await readFile(
+      join(root, "tasks", taskMonth(cancelled.id), cancelled.id, "review.md"),
+      "utf8",
+    );
     expect(cancelledReview.slice(0, cancelledReview.indexOf("## Goal"))).toMatch(/Verdict.*CANCELLED/iu);
   });
 
@@ -277,7 +284,7 @@ describe("task review page", () => {
       updatedAt: timestamp,
     });
     await saveTask(root, task);
-    const reviewPath = join(root, "tasks", task.id, "review.md");
+    const reviewPath = join(root, "tasks", taskMonth(task.id), task.id, "review.md");
     const review = await readFile(reviewPath, "utf8");
     const evidenceSection = review.slice(review.indexOf("## Evidence"));
 
@@ -286,7 +293,9 @@ describe("task review page", () => {
     expect(evidenceSection).not.toContain("RED-2");
     expect(evidenceSection).toMatch(/2 (earlier|previous).*(rerun|attempt)/iu);
 
-    const persisted = JSON.parse(await readFile(join(root, "tasks", task.id, "task.json"), "utf8")) as {
+    const persisted = JSON.parse(
+      await readFile(join(root, "tasks", taskMonth(task.id), task.id, "task.json"), "utf8"),
+    ) as {
       evidence: unknown[];
     };
     expect(persisted.evidence).toHaveLength(3);

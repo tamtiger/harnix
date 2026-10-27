@@ -2,6 +2,7 @@ import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import {
   collectEpicMembers,
+  collectEpicMembersByEpic,
   listEpicIds,
   nextEpicMember,
   loadEpicOrThrow,
@@ -40,30 +41,36 @@ export interface EpicTaskMember {
   readonly goal?: string;
 }
 
-export async function listPublicEpics(root: string, limit: number): Promise<PublicEpicListResult> {
+export async function listPublicEpics(root: string, limit: number, archived = false): Promise<PublicEpicListResult> {
   const harnixRoot = await resolveSafeHarnixPath(root);
-  const epics: EpicSummary[] = [];
   // Listed by descending ID: an ID that starts with its creation time (the convention) puts the newest first.
-  const ids = (await listEpicIds(harnixRoot)).reverse();
+  const ids = (await listEpicIds(harnixRoot, { scope: archived ? "archive" : "live" })).reverse();
   // `total` counts only the epics that load, so it agrees with what a larger --limit would list.
   let total = 0;
+  const shown: { id: string; title: string }[] = [];
   for (const epicId of ids) {
     try {
       const epic = await loadEpicOrThrow(harnixRoot, epicId);
       total += 1;
-      if (epics.length >= limit) continue;
-      const members = await collectEpicMembers(harnixRoot, epicId);
-      epics.push({
-        id: epicId,
-        title: epic.title,
-        totalTasks: members.length,
-        completedTasks: members.filter((member) => member.status === "completed").length,
-        cancelledTasks: members.filter((member) => member.status === "cancelled").length,
-      });
+      if (shown.length < limit) shown.push({ id: epicId, title: epic.title });
     } catch {
       // Skip epics that cannot be loaded.
     }
   }
+  const members = await collectEpicMembersByEpic(
+    harnixRoot,
+    shown.map((epic) => epic.id),
+  );
+  const epics: EpicSummary[] = shown.map(({ id, title }) => {
+    const own = members.get(id) ?? [];
+    return {
+      id,
+      title,
+      totalTasks: own.length,
+      completedTasks: own.filter((member) => member.status === "completed").length,
+      cancelledTasks: own.filter((member) => member.status === "cancelled").length,
+    };
+  });
   return { generator: "harnix", schemaVersion: 1, epics, total };
 }
 

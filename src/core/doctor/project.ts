@@ -16,6 +16,7 @@ import {
   readOptionalSafe,
 } from "src/core/doctor/project-legacy.js";
 import { inspectTrackedRuntimeFiles, type GitReader } from "src/core/doctor/project-runtime.js";
+import { inspectStorageLayout } from "src/core/doctor/layout-finding.js";
 import { inspectTaskRecords } from "src/core/doctor/project-tasks.js";
 import { ownershipState, readManifest, type ManagedManifest } from "src/core/managed/project-files.js";
 import { detectVersionSkew, skewMessage } from "src/core/versions/skew.js";
@@ -92,6 +93,7 @@ export async function diagnoseProjectSection(
   await inspectManagedEntries(root, manifest, desired, findings);
   await inspectUntrackedLegacySurfaces(root, manifest, findings);
   await inspectTaskRecords(root, findings);
+  await inspectStorageLayout(root, findings);
   await inspectTrackedRuntimeFiles(root, findings, git);
   await inspectSensitiveFiles(root, findings);
   await inspectPermissions(root, manifest, findings);

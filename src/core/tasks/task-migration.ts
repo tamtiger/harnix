@@ -1,4 +1,5 @@
 import type { EvidenceV2, EvidenceV3 } from "./task-schema.js";
+import { taskLogicalPath } from "src/core/tasks/task-location.js";
 
 export const TASK_V2_MIGRATION_EVIDENCE_ID = "task-schema-v1-to-v2";
 export const TASK_V2_MIGRATION_SUMMARY =
@@ -12,7 +13,7 @@ export function createTaskV3MigrationEvidence(taskId: string, recordedAt: string
     recordedAt,
     result: "pass",
     summary: TASK_V3_MIGRATION_SUMMARY,
-    artifactPaths: [`.harnix/tasks/${taskId}/task.json`],
+    artifactPaths: [taskLogicalPath(taskId, "task.json")],
   };
 }
 
@@ -22,6 +23,6 @@ export function createTaskV2MigrationEvidence(taskId: string, recordedAt: string
     recordedAt,
     result: "pass",
     summary: TASK_V2_MIGRATION_SUMMARY,
-    artifactPaths: [`.harnix/tasks/${taskId}/task.json`],
+    artifactPaths: [taskLogicalPath(taskId, "task.json")],
   };
 }

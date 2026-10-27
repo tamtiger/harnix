@@ -7,6 +7,7 @@ import { isMissing, sameBytes } from "src/core/tasks/workflow-helpers.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
+import { resolveTaskDirectory, taskRelativeDirectory } from "src/core/tasks/task-location.js";
 
 const RESEARCH_ARTIFACT_NAME = /^[a-z0-9][a-z0-9._-]*\.md$/u;
 
@@ -18,8 +19,11 @@ export interface WorkflowFileSnapshot {
 }
 
 /** Every file a save may write, with the bytes it will write, so a failed save can be rolled back conservatively. */
-function plannedSaveFiles(task: TaskRecord, artifacts: TaskArtifacts | undefined): Map<string, Uint8Array> {
-  const taskDirectory = `tasks/${task.id}`;
+function plannedSaveFiles(
+  task: TaskRecord,
+  artifacts: TaskArtifacts | undefined,
+  taskDirectory: string,
+): Map<string, Uint8Array> {
   const planned = new Map<string, Uint8Array>([
     [`${taskDirectory}/task.json`, Buffer.from(`${JSON.stringify(task, null, 2)}\n`)],
   ]);
@@ -52,7 +56,7 @@ export async function captureWorkflowSaveFiles(
   task: TaskRecord,
   artifacts: TaskArtifacts | undefined,
 ): Promise<WorkflowFileSnapshot[]> {
-  const forwardContent = plannedSaveFiles(task, artifacts);
+  const forwardContent = plannedSaveFiles(task, artifacts, await taskRelativeDirectory(harnixRoot, task.id));
   const snapshots: WorkflowFileSnapshot[] = [];
   for (const relativePath of [...forwardContent.keys()].sort(compareCodeUnits)) {
     const path = await resolveSafeProjectPath(harnixRoot, relativePath);
@@ -109,7 +113,7 @@ export async function assertReplayArtifactsMatch(
   task: TaskRecord,
   artifacts: TaskArtifacts | undefined,
 ): Promise<void> {
-  const directory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
+  const directory = await resolveTaskDirectory(harnixRoot, task.id);
   const expected = buildExpectedArtifactMap(artifacts);
   for (const [path, content] of expected) {
     let persisted: string;

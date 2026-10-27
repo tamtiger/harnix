@@ -7,6 +7,7 @@ import { saveTask } from "src/core/tasks/task.js";
 import { buildTaskV3 } from "test/support/builders.js";
 import { initializeUtcProject } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-restore-artifacts-");
 const FULL = "20260929-090000-full-one";
@@ -19,15 +20,15 @@ describe("restoreFullArtifacts", () => {
     const harnix = join(root, ".harnix");
     await saveTask(harnix, buildTaskV3({ id: FULL, mode: "full" }));
     await saveTask(harnix, buildTaskV3({ id: LITE, mode: "lite" }));
-    await mkdir(join(harnix, "tasks", FULL), { recursive: true });
-    await writeFile(join(harnix, "tasks", FULL, "prd.md"), "# Của người dùng\n");
+    await mkdir(join(harnix, "tasks", taskMonth(FULL), FULL), { recursive: true });
+    await writeFile(join(harnix, "tasks", taskMonth(FULL), FULL, "prd.md"), "# Của người dùng\n");
 
     expect(await restoreFullArtifacts(root)).toBe(1);
 
-    expect(await readFile(join(harnix, "tasks", FULL, "prd.md"), "utf8")).toBe("# Của người dùng\n");
-    expect(await readFile(join(harnix, "tasks", FULL, "plan.md"), "utf8")).toContain("- [ ]");
+    expect(await readFile(join(harnix, "tasks", taskMonth(FULL), FULL, "prd.md"), "utf8")).toBe("# Của người dùng\n");
+    expect(await readFile(join(harnix, "tasks", taskMonth(FULL), FULL, "plan.md"), "utf8")).toContain("- [ ]");
     expect(await restoreFullArtifacts(root)).toBe(0);
-    await expect(readFile(join(harnix, "tasks", LITE, "plan.md"), "utf8")).rejects.toThrow();
+    await expect(readFile(join(harnix, "tasks", taskMonth(LITE), LITE, "plan.md"), "utf8")).rejects.toThrow();
   });
 
   it("skips a task whose id does not match its folder, so a copied folder never spawns another task folder", async () => {
@@ -35,9 +36,12 @@ describe("restoreFullArtifacts", () => {
     await initializeUtcProject(root);
     const harnix = join(root, ".harnix");
     await saveTask(harnix, buildTaskV3({ id: FULL, mode: "full" }));
-    await rename(join(harnix, "tasks", FULL), join(harnix, "tasks", "20260929-090500-copied"));
+    await rename(
+      join(harnix, "tasks", taskMonth(FULL), FULL),
+      join(harnix, "tasks", taskMonth("20260929-090500-copied"), "20260929-090500-copied"),
+    );
 
     expect(await restoreFullArtifacts(root)).toBe(0);
-    await expect(readFile(join(harnix, "tasks", FULL, "plan.md"), "utf8")).rejects.toThrow();
+    await expect(readFile(join(harnix, "tasks", taskMonth(FULL), FULL, "plan.md"), "utf8")).rejects.toThrow();
   });
 });

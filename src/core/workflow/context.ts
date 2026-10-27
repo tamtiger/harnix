@@ -17,6 +17,7 @@ import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { isMissing } from "src/core/tasks/workflow-helpers.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { compareCodeUnits } from "src/utils/order.js";
+import { resolveTaskDirectory } from "src/core/tasks/task-location.js";
 
 export async function continueWorkflowTask(
   harnixRoot: string,
@@ -37,7 +38,7 @@ export async function taskContextDrift(
   task: TaskRecord,
 ): Promise<ContextDrift> {
   try {
-    const taskDirectory = await resolveSafeProjectPath(harnixRoot, `tasks/${task.id}`);
+    const taskDirectory = await resolveTaskDirectory(harnixRoot, task.id);
     const path = await resolveSafeProjectPath(taskDirectory, "context.json");
     const manifest = await loadContextManifest(path);
     const contentDrift = await inspectContextDrift(projectRoot, manifest);

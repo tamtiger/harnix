@@ -17,6 +17,7 @@ import {
   timestamp,
 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 
@@ -108,7 +109,7 @@ describe("workflow save", () => {
     await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
     await saveWorkflow(root, { task: planning });
-    const taskPath = join(root, ".harnix", "tasks", planning.id, "task.json");
+    const taskPath = join(root, ".harnix", "tasks", taskMonth(planning.id), planning.id, "task.json");
     const pointerPath = join(root, ".harnix", "tasks", ".active");
     const before = await readFile(taskPath, "utf8");
     await rm(pointerPath);

@@ -4,9 +4,10 @@ import { listEpicIds } from "src/core/epics/epic.js";
 import { resumeTask, type TaskResumeResultV1 } from "src/core/tasks/task-resume.js";
 import { loadTask } from "src/core/tasks/task.js";
 import { findInitializedProject } from "src/utils/project-discovery.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 import { briefTask, type BriefTask } from "src/core/workflow/brief.js";
+import { taskFilePath } from "src/core/tasks/task-location.js";
 
 export interface ResumeProjectTaskOptions {
   dryRun?: boolean;
@@ -33,7 +34,7 @@ export async function resumeProjectTask(
 
   const returnResult = async (res: TaskResumeResultV1): Promise<TaskResumeResultV1 | BriefTask> => {
     if (!brief) return res;
-    const taskPath = await resolveSafeProjectPath(harnixRoot, `tasks/${res.task.id}/task.json`);
+    const taskPath = await taskFilePath(harnixRoot, res.task.id, "task.json");
     const task = await loadTask(taskPath);
     return briefTask(task);
   };

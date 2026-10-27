@@ -1,7 +1,8 @@
-import { access, mkdir, readFile, readdir } from "node:fs/promises";
+import { access, mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { isIsoTimestamp, isRecord, unknownFieldsMessage } from "src/core/tasks/task.js";
-import { loadTask } from "src/core/tasks/task.js";
+import { assertEpicWritable, epicFolder, locateEpicFile } from "./epic-location.js";
+import { collectEpicMembers, nextEpicMember } from "./members.js";
 import { orderEpicMembers, validateEpicOrder } from "./order.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { formatDisplay } from "src/utils/clock.js";
@@ -102,18 +103,8 @@ function assertExactKeys(value: Record<string, unknown>, allowed: ReadonlySet<st
   if (unknown.length > 0) throw new EpicValidationError(unknownFieldsMessage(label, unknown));
 }
 
-export const EPICS_DIRECTORY = "epics";
-/** Pre-2.0 directory name; still read as a fallback until `harnix update` moves the files. */
-export const LEGACY_EPICS_DIRECTORY = "roadmaps";
-
-export interface EpicMember {
-  id: string;
-  status: string;
-  mode: string;
-  title: string;
-  goal: string;
-  acceptanceCriteriaCount: number;
-}
+export { EPICS_DIRECTORY, LEGACY_EPICS_DIRECTORY, listEpicIds } from "./epic-location.js";
+export { collectEpicMembers, collectEpicMembersByEpic, nextEpicMember, type EpicMember } from "./members.js";
 
 async function pathExists(path: string): Promise<boolean> {
   try {
@@ -124,80 +115,16 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
-/** Path of an epic file: folder first, then flat epics, then legacy roadmaps, else where it would be created. */
+/** Path of an epic file wherever it is, else where it would be created (the month bucket). */
 export async function resolveEpicFile(harnixRoot: string, epicId: string, extension: "json" | "md"): Promise<string> {
-  const folderCandidate = join(harnixRoot, EPICS_DIRECTORY, epicId, `epic.${extension}`);
-  if (await pathExists(folderCandidate)) return folderCandidate;
-  const flatCandidate = join(harnixRoot, EPICS_DIRECTORY, `${epicId}.${extension}`);
-  if (await pathExists(flatCandidate)) return flatCandidate;
-  const legacyCandidate = join(harnixRoot, LEGACY_EPICS_DIRECTORY, `${epicId}.${extension}`);
-  if (await pathExists(legacyCandidate)) return legacyCandidate;
-  return folderCandidate;
-}
-
-/** Sorted epic IDs from directories; an ID present in multiple locations is listed once. */
-export async function listEpicIds(harnixRoot: string): Promise<string[]> {
-  const ids = new Set<string>();
-  try {
-    for (const entry of await readdir(join(harnixRoot, EPICS_DIRECTORY), { withFileTypes: true })) {
-      if (entry.isDirectory()) {
-        if (await pathExists(join(harnixRoot, EPICS_DIRECTORY, entry.name, "epic.json"))) ids.add(entry.name);
-      } else if (entry.isFile() && entry.name.endsWith(".json")) {
-        ids.add(entry.name.slice(0, -".json".length));
-      }
-    }
-  } catch {
-    // Missing directory contributes no epics.
-  }
-  try {
-    for (const entry of await readdir(join(harnixRoot, LEGACY_EPICS_DIRECTORY), { withFileTypes: true })) {
-      if (entry.isFile() && entry.name.endsWith(".json")) ids.add(entry.name.slice(0, -".json".length));
-    }
-  } catch {
-    // Missing directory contributes no epics.
-  }
-  return [...ids].sort();
-}
-
-/** Tasks (schema v2+) that carry this epicId, ordered by task ID; unreadable task records are skipped. */
-export async function collectEpicMembers(harnixRoot: string, epicId: string): Promise<EpicMember[]> {
-  const tasksDirectory = join(harnixRoot, "tasks");
-  const members: EpicMember[] = [];
-  let entries;
-  try {
-    entries = await readdir(tasksDirectory, { withFileTypes: true });
-  } catch {
-    return members;
-  }
-  for (const entry of entries
-    .filter((candidate) => candidate.isDirectory())
-    .sort((left, right) => (left.name < right.name ? -1 : left.name > right.name ? 1 : 0))) {
-    try {
-      const task = await loadTask(join(tasksDirectory, entry.name, "task.json"));
-      if (task.schemaVersion !== 1 && task.epicId === epicId) {
-        members.push({
-          id: entry.name,
-          status: task.status,
-          mode: task.mode,
-          title: task.title,
-          goal: task.goal,
-          acceptanceCriteriaCount: task.acceptanceCriteria.length,
-        });
-      }
-    } catch {
-      // Skip tasks that cannot be loaded.
-    }
-  }
-  return members;
-}
-
-export function nextEpicMember<T extends { status: string }>(members: readonly T[]): T | null {
-  return members.find((member) => member.status !== "completed" && member.status !== "cancelled") ?? null;
+  const found = await locateEpicFile(harnixRoot, epicId, extension);
+  return found?.path ?? join(await epicFolder(harnixRoot, epicId), `epic.${extension}`);
 }
 
 export async function upsertEpic(root: string, epic: EpicRecord): Promise<void> {
-  const epicsDir = join(root, ".harnix", EPICS_DIRECTORY);
-  const folder = join(epicsDir, epic.id);
+  await mkdir(join(root, ".harnix"), { recursive: true });
+  await assertEpicWritable(join(root, ".harnix"), epic.id);
+  const folder = await epicFolder(join(root, ".harnix"), epic.id);
   await mkdir(folder, { recursive: true });
   const jsonContent = `${JSON.stringify(epic, null, 2)}\n`;
   await atomicWriteFile(join(folder, "epic.json"), jsonContent);
@@ -229,6 +156,7 @@ export async function loadEpicRecord(root: string, epicId: string): Promise<Epic
 /** Derived, always-overwritten page: header, goal, non-goals, next task and the member table. */
 export async function renderEpicMarkdown(root: string, epicId: string, epic?: EpicRecord): Promise<void> {
   const harnixRoot = join(root, ".harnix");
+  await assertEpicWritable(harnixRoot, epicId);
   const timezone = await readProjectTimezone(harnixRoot);
   const members = orderEpicMembers(await collectEpicMembers(harnixRoot, epicId), epic?.order);
   const next = nextEpicMember(members);
@@ -281,8 +209,7 @@ export async function renderEpicMarkdown(root: string, epicId: string, epic?: Ep
     sections.push(["## Task Overview & Scope", "", overview.join("\n\n")].join("\n"));
   }
 
-  const epicsDir = join(harnixRoot, EPICS_DIRECTORY);
-  const folder = join(epicsDir, epicId);
+  const folder = await epicFolder(harnixRoot, epicId);
   const artifacts: string[] = [];
   if (await pathExists(join(folder, "research.md")))
     artifacts.push("- [`research.md`](./research.md) — Khảo sát công nghệ & đối sánh giải pháp.");

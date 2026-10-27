@@ -9,6 +9,7 @@ import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { saveTask, setActiveTask } from "src/core/tasks/task.js";
 import { buildTaskV3 } from "test/support/builders.js";
 import { finishingTask, implementingTaskV3, initializeUtcProject } from "test/support/workflow-fixtures.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const originalCwd = process.cwd();
 const originalExitCode = process.exitCode;
@@ -260,7 +261,7 @@ describe.sequential("workflow --transition --dry-run --task", () => {
     await saveTask(join(root, ".harnix"), other);
     process.chdir(root);
 
-    const otherFile = join(root, ".harnix", "tasks", other.id, "task.json");
+    const otherFile = join(root, ".harnix", "tasks", taskMonth(other.id), other.id, "task.json");
     const before = await readFile(otherFile, "utf8");
     const dry = await run(["--transition", "ready/ready", "--dry-run", "--task", other.id]);
     const real = await run(["--transition", "ready/ready", "--task", other.id]);

@@ -9,6 +9,7 @@ import { LEGACY_TIMESTAMP as timestamp, legacyTaskRecord as taskRecord } from "t
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 import { globalDoctorOptions as globalOptions } from "test/support/integration-fixtures.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-doctor-");
 const temporaryUserHome = useTemporaryUserHomes("harnix-doctor-home-");
@@ -19,8 +20,8 @@ describe("diagnoseProject Doctor v2", () => {
     const home = await temporaryUserHome();
     await initializeProject({ developer: "tam", root, yes: true });
     const legacy = taskRecord("20260813-120000-legacy", "in_progress", "implementing");
-    const path = join(root, ".harnix", "tasks", legacy.id, "task.json");
-    await mkdir(join(root, ".harnix", "tasks", legacy.id), { recursive: true });
+    const path = join(root, ".harnix", "tasks", taskMonth(legacy.id), legacy.id, "task.json");
+    await mkdir(join(root, ".harnix", "tasks", taskMonth(legacy.id), legacy.id), { recursive: true });
     const source = `${JSON.stringify(legacy, null, 2)}\n`;
     await writeFile(path, source);
     await writeFile(join(root, ".harnix", "tasks", ".active"), `${legacy.id}\n`);
@@ -47,8 +48,8 @@ describe("diagnoseProject Doctor v2", () => {
       { reason: "Người dùng dừng task không còn cần thiết.", authorizedBy: "user" },
       timestamp,
     );
-    const path = join(root, ".harnix", "tasks", cancelled.id, "task.json");
-    await mkdir(join(root, ".harnix", "tasks", cancelled.id), { recursive: true });
+    const path = join(root, ".harnix", "tasks", taskMonth(cancelled.id), cancelled.id, "task.json");
+    await mkdir(join(root, ".harnix", "tasks", taskMonth(cancelled.id), cancelled.id), { recursive: true });
     const source = `${JSON.stringify(cancelled, null, 2)}\n`;
     await writeFile(path, source);
     await writeFile(join(root, ".harnix", "tasks", ".active"), `${cancelled.id}\n`);
@@ -230,8 +231,11 @@ describe("diagnoseProject Doctor v2", () => {
         artifactPaths: ["../expired-artifact.txt"],
       },
     ];
-    await mkdir(join(root, ".harnix", "tasks", historical.id), { recursive: true });
-    await writeFile(join(root, ".harnix", "tasks", historical.id, "task.json"), JSON.stringify(historical));
+    await mkdir(join(root, ".harnix", "tasks", taskMonth(historical.id), historical.id), { recursive: true });
+    await writeFile(
+      join(root, ".harnix", "tasks", taskMonth(historical.id), historical.id, "task.json"),
+      JSON.stringify(historical),
+    );
 
     const report = await diagnoseProject({ root, ...globalOptions(home) });
 

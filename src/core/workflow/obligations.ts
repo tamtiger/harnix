@@ -9,6 +9,7 @@ import {
 import { semanticJsonEqual, semanticTaskEqual } from "src/core/tasks/workflow-helpers.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import type { WorkflowSaveEnvelope } from "./envelope.js";
+import { taskLogicalPath } from "src/core/tasks/task-location.js";
 
 type ContractRevision = WorkflowSaveEnvelope["contractRevision"];
 
@@ -261,7 +262,7 @@ export function isAppliedContractRevisionReplay(
     audit.recordedAt !== candidate.updatedAt ||
     audit.result !== "skipped" ||
     audit.summary !== `Task contract revised at persisted replan: ${reason}` ||
-    !semanticJsonEqual(audit.artifactPaths, [`.harnix/tasks/${candidate.id}/task.json`])
+    !semanticJsonEqual(audit.artifactPaths, [taskLogicalPath(candidate.id, "task.json")])
   )
     return false;
   return semanticTaskEqual({ ...previous, evidence: candidate.evidence }, candidate);
@@ -280,7 +281,7 @@ function appendContractRevisionEvidence(task: TaskRecordV3, reason: string): Tas
         recordedAt: task.updatedAt,
         result: "skipped",
         summary: `Task contract revised at persisted replan: ${reason}`,
-        artifactPaths: [`.harnix/tasks/${task.id}/task.json`],
+        artifactPaths: [taskLogicalPath(task.id, "task.json")],
       },
     ],
   }) as TaskRecordV3;

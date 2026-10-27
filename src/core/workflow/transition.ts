@@ -2,12 +2,13 @@ import { readFile } from "node:fs/promises";
 
 import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { assertLegalTransition, laterTimestamp } from "src/core/tasks/workflow-helpers.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { inspectReadyConditions } from "./ready.js";
 import { READY_REVIEW_CHECKLIST, reviewRequiredMessage } from "./ready-review.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
 import { resolveEditableTask } from "./target-task.js";
+import { taskFilePath } from "src/core/tasks/task-location.js";
 
 export interface DryRunTransitionResult {
   generator: "harnix";
@@ -162,7 +163,7 @@ async function handleDryRunTransition(
 
 async function inspectPlanChecklistWarning(harnixRoot: string, taskId: string): Promise<string | undefined> {
   try {
-    const planPath = await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}/plan.md`);
+    const planPath = await taskFilePath(harnixRoot, taskId, "plan.md");
     const content = await readFile(planPath, "utf8");
     if (/^\s*-\s*\[\s\]/mu.test(content)) {
       return "Checklist trong plan.md chưa hoàn tất 100% [x] trước khi vào verifying.";

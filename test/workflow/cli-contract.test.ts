@@ -7,7 +7,7 @@ import { implementingTaskV3 } from "test/support/workflow-fixtures.js";
 afterEach(() => vi.restoreAllMocks());
 
 describe("CLI command contract", () => {
-  it("exposes seventeen supported commands without exposing hidden/internal commands", () => {
+  it("exposes eighteen supported commands without exposing hidden/internal commands", () => {
     expect(
       createProgram()
         .commands.filter((command) => !(command as { _hidden?: boolean })._hidden)
@@ -30,6 +30,7 @@ describe("CLI command contract", () => {
       "doctor",
       "repo-map",
       "verify-plan",
+      "archive",
     ]);
   });
 
@@ -72,9 +73,9 @@ describe("CLI command contract", () => {
       "--limit",
       "--workspace",
     ]);
-    expect(tasks?.options.map((option) => option.long)).toEqual(["--limit", "--status"]);
+    expect(tasks?.options.map((option) => option.long)).toEqual(["--limit", "--status", "--archived"]);
     const epic = program.commands.find((command) => command.name() === "epic");
-    expect(epic?.options.map((option) => option.long)).toEqual(["--limit", "--brief"]);
+    expect(epic?.options.map((option) => option.long)).toEqual(["--limit", "--brief", "--archived"]);
     expect(resume?.options.map((option) => option.long)).toEqual([
       "--epic",
       "--dry-run",

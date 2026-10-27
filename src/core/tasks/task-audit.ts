@@ -3,10 +3,10 @@ import { readFile } from "node:fs/promises";
 import { inspectRequiredCheckEvidence, type RequiredCheckState } from "src/core/status.js";
 import { canCompleteTask } from "src/core/workflow/index.js";
 import { compareCodeUnits } from "src/utils/order.js";
-import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { selectLatestEvidence } from "./task.js";
 import type { AcceptanceCriterion, Evidence, TaskMode, TaskRecord, TaskStatus, WorkflowCheckpoint } from "./task.js";
 import { planHasChecklistItem } from "./workflow-helpers.js";
+import { taskFilePath } from "src/core/tasks/task-location.js";
 
 type TaskAuditArtifact = "prd.md" | "plan.md" | "task.json";
 type TaskAuditDiagnosticCode = "artifact-unavailable" | "artifact-empty" | "plan-checklist-missing";
@@ -65,7 +65,7 @@ export interface TaskAuditDependencies {
 
 const defaultDependencies: TaskAuditDependencies = {
   async readArtifact(harnixRoot, taskId, artifact) {
-    return readFile(await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}/${artifact}`), "utf8");
+    return readFile(await taskFilePath(harnixRoot, taskId, artifact), "utf8");
   },
   inspectRequiredChecks: inspectRequiredCheckEvidence,
 };

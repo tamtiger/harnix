@@ -1,10 +1,11 @@
 import { mkdir, readFile, readdir, rm, rmdir } from "node:fs/promises";
-import { dirname } from "node:path";
+import { dirname, join, relative } from "node:path";
 
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
-import { EPICS_DIRECTORY, LEGACY_EPICS_DIRECTORY, renderEpicMarkdown, validateEpic } from "./epic.js";
+import { EPICS_DIRECTORY, LEGACY_EPICS_DIRECTORY, epicFolder } from "./epic-location.js";
+import { renderEpicMarkdown, validateEpic } from "./epic.js";
 
 export interface EpicMigrationResult {
   /** Repository-relative paths written under `.harnix/epics/`. */
@@ -26,9 +27,9 @@ export async function migrateLegacyEpics(root: string): Promise<EpicMigrationRes
   async function migrateFile(sourceDir: string, name: string): Promise<void> {
     const epicId = name.slice(0, -".json".length);
     const legacyPath = await resolveSafeProjectPath(harnixRoot, `${sourceDir}/${name}`);
-    const targetPath = await resolveSafeProjectPath(harnixRoot, `${EPICS_DIRECTORY}/${epicId}/epic.json`);
+    const targetPath = join(await epicFolder(harnixRoot, epicId), "epic.json");
     const legacyRelative = `.harnix/${sourceDir}/${name}`;
-    const targetRelative = `.harnix/${EPICS_DIRECTORY}/${epicId}/epic.json`;
+    const targetRelative = `.harnix/${relative(harnixRoot, targetPath).replaceAll("\\", "/")}`;
 
     let content: string;
     let epic;

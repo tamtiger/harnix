@@ -1,6 +1,6 @@
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { renderInternalContext } from "src/commands/internal-context.js";
 import { saveWorkflow, preflightWorkflow, transitionWorkflow } from "src/commands/internal-workflow.js";
@@ -15,6 +15,12 @@ const observation = "Always inject the clock in tests so runs stay deterministic
 const first = "20260929-090000-learn-a";
 const second = "20260929-091000-learn-b";
 const third = "20260929-092000-learn-c";
+
+beforeEach(() => {
+  // The fixtures are dated 2026-09-29; a real clock would age their learning past the 28-day TTL.
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-02T00:00:00+07:00"));
+});
 
 afterEach(() => vi.useRealTimers());
 

@@ -10,6 +10,7 @@ import { saveTask, setActiveTask, type TaskRecordV3 } from "src/core/tasks/task.
 import { sha256 } from "src/utils/hashing.js";
 import { buildGatedTask } from "test/support/integration-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const originalCwd = process.cwd();
 const originalExitCode = process.exitCode;
@@ -30,7 +31,7 @@ describe.sequential("context-report command", () => {
     await writeFile(join(root, "docs", "visible.md"), "VISIBLE_CONTEXT_BODY_CANARY\n");
     const active = task("20260826-161000-context-report", ["docs/visible.md"]);
     await saveTask(harnixRoot, active);
-    await saveContextManifest(join(harnixRoot, "tasks", active.id), {
+    await saveContextManifest(join(harnixRoot, "tasks", taskMonth(active.id), active.id), {
       generator: "harnix",
       schemaVersion: 1,
       taskId: active.id,
@@ -145,7 +146,7 @@ describe.sequential("context-report command", () => {
     await writeFile(join(root, "docs", "b.md"), "after-b\n");
     const active = task("20260826-161002-context-limit", ["docs/a.md", "docs/b.md"]);
     await saveTask(harnixRoot, active);
-    await saveContextManifest(join(harnixRoot, "tasks", active.id), {
+    await saveContextManifest(join(harnixRoot, "tasks", taskMonth(active.id), active.id), {
       generator: "harnix",
       schemaVersion: 1,
       taskId: active.id,
@@ -208,7 +209,10 @@ describe.sequential("context-report command", () => {
     const active = task("20260826-161003-context-malformed", []);
     await saveTask(harnixRoot, active);
     await setActiveTask(harnixRoot, active.id);
-    await writeFile(join(harnixRoot, "tasks", active.id, "context.json"), "PRIVATE_CONTEXT_PARSE_CANARY");
+    await writeFile(
+      join(harnixRoot, "tasks", taskMonth(active.id), active.id, "context.json"),
+      "PRIVATE_CONTEXT_PARSE_CANARY",
+    );
     process.chdir(root);
     const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);

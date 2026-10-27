@@ -1,9 +1,10 @@
-import { readdir, stat } from "node:fs/promises";
+import { stat } from "node:fs/promises";
 
 import { loadTask } from "src/core/tasks/task.js";
 import { renderPlanTemplate, renderPrdTemplate } from "src/core/workflow/artifact-templates.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
-import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { listTaskIds, taskFilePath } from "src/core/tasks/task-location.js";
+import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 async function exists(path: string): Promise<boolean> {
   try {
@@ -21,11 +22,11 @@ async function exists(path: string): Promise<boolean> {
  */
 export async function restoreFullArtifacts(root: string): Promise<number> {
   let restored = 0;
-  const entries = await readdir(await resolveSafeHarnixPath(root, "tasks"), { encoding: "utf8", withFileTypes: true });
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
+  const harnixRoot = await resolveSafeHarnixPath(root);
+  for (const entryName of await listTaskIds(harnixRoot)) {
+    const entry = { name: entryName };
     try {
-      const task = await loadTask(await resolveSafeProjectPath(root, `.harnix/tasks/${entry.name}/task.json`));
+      const task = await loadTask(await taskFilePath(harnixRoot, entry.name, "task.json"));
       // A folder copied under another name keeps the old id inside; writing by that id would create a stray folder.
       if (task.id !== entry.name || task.schemaVersion !== 3 || task.mode !== "full") continue;
       if (task.status === "completed" || task.status === "cancelled") continue;
@@ -33,7 +34,7 @@ export async function restoreFullArtifacts(root: string): Promise<number> {
         ["prd.md", renderPrdTemplate],
         ["plan.md", renderPlanTemplate],
       ] as const) {
-        const path = await resolveSafeProjectPath(root, `.harnix/tasks/${task.id}/${name}`);
+        const path = await taskFilePath(harnixRoot, task.id, name);
         if (await exists(path)) continue;
         await atomicWriteFile(path, render(task));
         restored += 1;

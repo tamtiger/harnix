@@ -1,5 +1,5 @@
 import { loadTask } from "src/core/tasks/task.js";
-import { resolveSafeProjectPath } from "src/utils/paths.js";
+import { taskFilePath } from "src/core/tasks/task-location.js";
 
 /**
  * Relevant paths of the tasks a learning came from, read from their records. A task that is missing or unreadable adds
@@ -12,7 +12,7 @@ export function createSourcePathsLoader(harnixRoot: string): (taskIds: readonly 
     if (cached !== undefined) return cached;
     let paths: string[] = [];
     try {
-      const task = await loadTask(await resolveSafeProjectPath(harnixRoot, `tasks/${taskId}/task.json`));
+      const task = await loadTask(await taskFilePath(harnixRoot, taskId, "task.json"));
       paths = task.relevantPaths;
     } catch {
       paths = [];

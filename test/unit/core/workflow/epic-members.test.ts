@@ -8,6 +8,7 @@ import { saveWorkflow } from "src/core/workflow/save.js";
 import { buildEvidence } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { initializeUtcProject, taskV3 } from "test/support/workflow-fixtures.js";
+import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
 const EPIC = "epic-1";
@@ -19,7 +20,7 @@ const member = (suffix: string, overrides: Partial<TaskRecordV3> = {}): TaskReco
   ...overrides,
 });
 const mainTask = (): TaskRecordV3 => ({ ...taskV3("planning", "planning"), epicId: EPIC });
-const taskFile = (root: string, id: string) => join(root, ".harnix", "tasks", id, "task.json");
+const taskFile = (root: string, id: string) => join(root, ".harnix", "tasks", taskMonth(id), id, "task.json");
 
 async function project(): Promise<string> {
   const root = await temporaryRepository();
