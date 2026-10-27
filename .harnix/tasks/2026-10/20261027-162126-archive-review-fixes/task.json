@@ -1,0 +1,188 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261027-162126-archive-review-fixes",
+  "title": "Sửa 3 lỗi archive từ review",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sửa trùng ID live/archive, restore epic dở dang và epic có member hỏng, kèm test hồi quy; plan/apply của archive kiểm lại trong khóa.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Một ID có cả bản sống và bản trong _archive không bị bỏ qua âm thầm: kế hoạch archive báo mục trùng và không coi bản sống là đã lưu trữ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-1",
+        "ev-chk-gates-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "harnix archive --restore <epic> restore các member trước epic để lần chạy lại sau lỗi giữa chừng vẫn hoàn tất, và apply kiểm lại trạng thái trong khóa.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-1",
+        "ev-chk-gates-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Epic có task live không đọc được không bị archive, và lý do được báo trong skipped.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-1",
+        "ev-chk-gates-2",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "chk-focused",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/core/tasks/archive.test.ts test/integration/commands/archive.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/tasks/archive.ts",
+        "test/integration/commands/archive.test.ts",
+        "test/support/archive-fixtures.ts",
+        "test/unit/core/tasks/archive.test.ts"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ suite",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Test hợp đồng",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-10-27T16:24:18.838+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/tasks/archive.test.ts test/integration/commands/archive.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "811af5b8788695c5598d41fbcfd2e02d60d69751bb458af4b58026d305d82bfa"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-27T16:24:24.927+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "b67fcc575eb526270d7fe3c84c7e47b818b7a0a63956df6bd13bface726bb5d1"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-27T16:25:39.258+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "33c7df339ee9ffe526f7b9c56a7880cd8cf8d6b46cdc72b52a331ebb82289b68"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-27T16:27:02.770+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "74c5798cb4a7ac85b3d669ce63ea16c45e9eb62a3ce5992c787eb69d425525dd"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-27T16:28:55.886+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "74c5798cb4a7ac85b3d669ce63ea16c45e9eb62a3ce5992c787eb69d425525dd"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-27T16:30:10.830+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2cd9f23c05325c165a0356cafcd02e76edfc29cfe85f1c130cb70dde7b35bdac"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-27T16:21:26.629+07:00",
+  "updatedAt": "2026-10-27T16:30:49.870+07:00",
+  "residualRisks": [
+    {
+      "id": "risk-flaky-concurrency",
+      "text": "Test plan-edit 'six commands add a decision concurrently' lỗi một lần khi chạy cả suite dưới tải và đạt khi chạy riêng 3 lần; có vẻ flaky từ trước, không liên quan archive.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-27T16:30:49.870+07:00"
+}

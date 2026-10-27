@@ -1,0 +1,237 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261027-102138-task-archive-after-30-days",
+  "epicId": "20261027-102134-task-layout-bucket-archive",
+  "title": "Lệnh harnix archive chuyển task và epic đã kết thúc quá 30 ngày vào kho lưu trữ",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Thêm lệnh công khai harnix archive (mặc định dry-run, --apply mới ghi, --days mặc định 30, --restore <id>) chuyển task completed hoặc cancelled và epic đã hoàn tất quá hạn vào _archive bằng rename; epic hoàn tất được lưu trữ cùng toàn bộ thành viên; kho chỉ đọc; đóng epic bằng bản phát hành minor 2.23.0.",
+  "nonGoals": [
+    "Không tự động archive trong init, update hay finish",
+    "Không xóa task và không sửa nội dung task"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix archive mặc định chỉ liệt kê (dry-run) task completed hoặc cancelled và epic có mọi thành viên kết thúc, mốc kết thúc (completedAt hoặc cancelledAt, thiếu thì updatedAt) quá --days ngày (mặc định 30); --apply chuyển task sang .harnix/tasks/_archive/<YYYY-MM>/<id> và epic cùng toàn bộ thành viên sang _archive tương ứng bằng rename, rồi báo danh sách đã chuyển.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-archive-3",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Không bao giờ archive task đang active, task chưa kết thúc, thành viên của epic chưa hoàn tất (thành viên của epic hoàn tất chỉ được archive cùng epic), task cha của follow-up chưa kết thúc hoặc task không đọc được; kết quả đếm theo lý do bỏ qua và liệt kê id cho mọi lý do trừ mục chỉ chưa đủ ngày; việc archive epic bị gián đoạn giữa chừng được hoàn tất ở lần chạy sau.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-archive-3",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "harnix archive --restore <id> đưa task (hoặc epic cùng thành viên) về bucket tháng; mọi thao tác ghi workflow vào task hoặc epic trong _archive bị từ chối với hint trỏ tới --restore, còn mem, learning, epic và --follow-up vẫn đọc được.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-archive-3",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu, skill, template và CHANGELOG đồng bộ cho bố cục bucket và lệnh archive; pnpm selfhost:sync chạy; phiên bản đóng epic là 2.23.0 gộp các mục dev bằng pnpm version:sync --fold-dev; measure:footprint và pnpm release:check xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-2",
+        "ev-chk-release-1",
+        "ev-chk-suite-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/archive.ts",
+    "src/core/tasks/**",
+    "src/cli-workflow-commands.ts",
+    "docs/**",
+    "README.md",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "test/integration/commands/archive.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-archive",
+      "description": "Test lệnh archive và quy tắc đủ điều kiện",
+      "command": "pnpm exec vitest run test/integration/commands/archive.test.ts test/unit/core/tasks test/unit/core/epics",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/integration/commands/archive.test.ts",
+        "test/unit/core/epics/**",
+        "test/unit/core/tasks/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests (CLI, docs, golden, kiến trúc)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-release",
+      "description": "Chuỗi nghiệm thu release",
+      "command": "pnpm run release:check",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "docs/**",
+        "package.json",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-archive-1",
+      "checkId": "chk-archive",
+      "recordedAt": "2026-10-27T14:31:49.280+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/archive.test.ts test/unit/core/tasks test/unit/core/epics — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3711c07b4e95eea0465a9e1ed03ad7122e2fa68df79efcdf3ba9f738f04c4210"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-27T14:31:56.642+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0cbfcb55ab957cecb22940880f99c7e6cdc844f40a01b4b272e8a86f613aeb23"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-27T14:33:23.382+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "3fa7cfec767e009ba6e98aa7fbf0bcb416416d964384891868adf02c8ee0a826"
+    },
+    {
+      "id": "ev-chk-archive-2",
+      "checkId": "chk-archive",
+      "recordedAt": "2026-10-27T14:33:50.007+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm exec vitest run test/integration/commands/archive.test.ts test/unit/core/tasks test/unit/core/epics — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "723a9e956bd79fe56689db6fa3d238ca5982966133c768a5a21313bf5bb47f8c"
+    },
+    {
+      "id": "ev-chk-archive-3",
+      "checkId": "chk-archive",
+      "recordedAt": "2026-10-27T14:34:14.180+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/archive.test.ts test/unit/core/tasks test/unit/core/epics — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "47087540ca522dbca7ad0a0aa67c8ea287778069c917dcce9553eccb13549bcd"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-27T14:34:20.351+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "489e197d79fe5a09892a06d14882e49d985ab0cb0415d6f1945cbf6f74ec3750"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-27T14:35:54.633+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6ecb00a0b65bfddd2bbb07a353f78c0ef12f220fbe37c68b26de7806636405eb"
+    },
+    {
+      "id": "ev-chk-release-1",
+      "checkId": "chk-release",
+      "recordedAt": "2026-10-27T14:39:23.116+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm release:check — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e7420c983f4d0d807b0182603c0f36f645d67510cc923fcf34e4389799580d96"
+    }
+  ],
+  "createdAt": "2026-10-27T10:21:38.000+07:00",
+  "updatedAt": "2026-10-27T14:39:36.078+07:00",
+  "decisions": [
+    {
+      "id": "archive-policy",
+      "text": "Archive chỉ chọn task completed hoặc cancelled quá hạn, mốc là completedAt hoặc cancelledAt (thiếu thì updatedAt); không tự động; --restore chạy ngay và task đã restore sẽ bị archive lại ở lần sau nếu vẫn quá hạn.",
+      "rationale": "Theo quyết định của người dùng: không tự động; task bỏ quên phải --cancel trước."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "archive-restore-rearchive",
+      "text": "Task đã restore vẫn completed hoặc cancelled và quá hạn nên lần harnix archive --apply kế tiếp sẽ chuyển nó lại; muốn giữ lâu hơn phải đổi trạng thái hoặc dùng --days lớn hơn.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-27T14:39:36.078+07:00"
+}

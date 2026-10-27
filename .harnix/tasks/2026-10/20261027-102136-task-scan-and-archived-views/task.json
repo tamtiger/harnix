@@ -1,0 +1,209 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261027-102136-task-scan-and-archived-views",
+  "epicId": "20261027-102134-task-layout-bucket-archive",
+  "title": "Quét task sống, xem task đã lưu trữ và epic qua nhiều bố cục",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Làm harnix tasks, harnix epic, status, doctor, baseline-hint, learning và resume chỉ quét phần task và epic sống theo mặc định, có cờ để xem kho lưu trữ, và để epic gom thành viên từ cả bucket lẫn _archive mà chỉ quét các tháng từ tháng của epic trở đi.",
+  "nonGoals": [
+    "Không đổi định dạng JSON hiện có của harnix tasks ngoài việc thêm trường mới",
+    "Không tạo chỉ mục cache riêng"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix tasks và harnix epic (danh sách) mặc định chỉ quét task và epic sống (bucket tháng và bố cục phẳng); cờ --archived quét kho _archive thay cho phần sống; summary.scanned phản ánh đúng phần đã quét và filter ghi cờ archived.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-2",
+        "ev-chk-suite-3",
+        "ev-chk-views-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "collectEpicMembers và harnix epic <id> gồm cả thành viên đã lưu trữ và chỉ quét các tháng từ tháng của epic trở đi; kết quả bằng kết quả quét toàn bộ trên cùng dữ liệu; danh sách epic gom thành viên của mọi epic trong một lượt quét thay vì quét lại cho từng epic.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-suite-3",
+        "ev-chk-views-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "doctor, status, resume, baseline-hint, restore-artifacts, learning-sources và --follow-up tìm thấy task và epic ở mọi bố cục (phẳng, bucket, _archive), không báo task-root-unreadable giả và không coi thư mục tháng hay _archive là task lỗi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-suite-3",
+        "ev-chk-views-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Danh sách epic đọc mỗi task tối đa một lần dù có bao nhiêu epic và task được tải song song có giới hạn (test đếm số lần đọc); số đo harnix tasks --limit 3 và harnix epic trên bản sao 252 task xếp theo bucket tháng, trước và sau, được ghi vào decision trace-timing so với số đo phẳng 0,8 giây và 2,9 giây.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-suite-3",
+        "ev-chk-views-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/task-index.ts",
+    "src/core/epics/epic.ts",
+    "src/core/doctor/**",
+    "src/core/workflow/baseline-hint.ts",
+    "src/core/journal/learning-sources.ts",
+    "src/commands/tasks.ts",
+    "test/integration/commands/tasks.test.ts",
+    "test/integration/commands/epic.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-views",
+      "description": "Test tasks và epic qua nhiều bố cục",
+      "command": "pnpm exec vitest run test/integration/commands/tasks.test.ts test/integration/commands/epic.test.ts test/unit/core/tasks/task-index.test.ts test/unit/core/tasks/task-location.test.ts test/unit/core/epics/epic.test.ts test/unit/core/doctor",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/integration/commands/**",
+        "test/unit/core/doctor/**",
+        "test/unit/core/epics/**",
+        "test/unit/core/tasks/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests (CLI, docs, golden, kiến trúc)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-views-1",
+      "checkId": "chk-views",
+      "recordedAt": "2026-10-27T14:03:30.146+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/tasks.test.ts test/integration/commands/epic.test.ts test/unit/core/tasks/task-index.test.ts test/unit/core/tasks/task-location.test.ts test/unit/core... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8d749be00c3e682aac560b091cab0cd9f350efb1dbe5f9873b9c65a3ab0dfaa9"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-27T14:03:37.522+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c8f5120f17e9b862429835241cccf20ea677e84b9cb9bb543d6eee527f557a5b"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-27T14:05:08.884+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "b060119c9331989b6427d6b2ddaf68e90a5e6d7807059fe8dcd653370347d0d6"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-27T14:07:13.233+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "080cb7687d84229823f82934f4ab58ae9c207723fefc32b3ed0bf34777a0e1ec"
+    },
+    {
+      "id": "ev-chk-suite-3",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-27T14:09:12.715+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "65eeeb4090f11c90421987ce03d48755089432ca061107c4d91143b2f93220df"
+    },
+    {
+      "id": "ev-chk-views-2",
+      "checkId": "chk-views",
+      "recordedAt": "2026-10-27T14:09:46.265+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/tasks.test.ts test/integration/commands/epic.test.ts test/unit/core/tasks/task-index.test.ts test/unit/core/tasks/task-location.test.ts test/unit/core... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "686bfba8b1b69ae25d76abe093cf20c98ddc3f41108c3e683c270d051a5a3bcc"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-27T14:09:52.285+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d71b33ec53d828eacc8e75b41e463fd010aef8df1771131686494a44c8e7c71f"
+    }
+  ],
+  "createdAt": "2026-10-27T10:21:36.000+07:00",
+  "updatedAt": "2026-10-27T14:10:01.071+07:00",
+  "decisions": [
+    {
+      "id": "trace-timing",
+      "text": "Đo trên bản sao 257 task, 32 epic (Node 5 lần, lấy trung vị, bản build mới): harnix tasks --limit 3 là 341 ms ở bố cục phẳng và 305 ms ở bucket tháng; harnix epic là 322 ms phẳng và 291 ms bucket. Số đo bố cục phẳng trước thay đổi là 0,8 giây và 2,9 giây.",
+      "rationale": "Tải task song song có giới hạn 16 và gom thành viên epic một lượt; phần còn lại chủ yếu là thời gian khởi động Node."
+    },
+    {
+      "id": "version-sync-retry",
+      "text": "scripts/version-sync.mjs thử lại rename tạm tối đa 6 lần khi Windows báo EPERM, EBUSY hoặc EACCES, giống atomicWriteFile.",
+      "rationale": "Test version-sync --fold-dev lỗi EPERM không đều khi chạy cả suite và làm chk-suite đỏ giả."
+    }
+  ],
+  "completedAt": "2026-10-27T14:10:01.071+07:00"
+}

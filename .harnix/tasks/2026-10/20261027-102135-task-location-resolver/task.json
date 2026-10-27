@@ -1,0 +1,207 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261027-102135-task-location-resolver",
+  "epicId": "20261027-102134-task-layout-bucket-archive",
+  "title": "Resolver vị trí task và epic duy nhất, ghi mới vào bucket theo tháng",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Tạo một module duy nhất quyết định vị trí vật lý của task và epic (bucket tháng, bố cục phẳng cũ, kho lưu trữ), chuyển toàn bộ nơi đang dựng đường dẫn tasks/<id> và epics/<id> sang module đó và ghi mới vào bucket tháng, vẫn đọc được mọi bố cục.",
+  "nonGoals": [
+    "Không di chuyển task hiện có (thuộc task migration)",
+    "Không thêm lệnh archive (thuộc task archive)"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Task và epic mới được ghi vào bucket tháng (.harnix/tasks/<YYYY-MM>/<id>/ và .harnix/epics/<YYYY-MM>/<id>/) với tháng suy ra từ tiền tố ngày của ID; resolver tìm được task hoặc epic ở bucket tháng, ở bố cục phẳng cũ (gồm .harnix/epics/<id>/, <id>.json phẳng và roadmaps) và ở _archive theo thứ tự tất định.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-resolver-1",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Không còn chuỗi dựng đường dẫn tasks/${id} hay epics/${id} rải rác trong src; mọi truy cập đi qua resolver và test kiến trúc chặn chuỗi đó quay lại.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-arch-1",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Đường dẫn logic .harnix/tasks/<id>/task.json trong evidence đã lưu (artifactPaths) và ngoại lệ input digest của task đang chạy vẫn khớp với task ở mọi bố cục, không làm đổi digest hay evidence cũ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-resolver-1",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Repo ở bố cục phẳng hiện tại vẫn đọc và ghi đúng; golden behavior-snapshot chỉ đổi khóa đường dẫn của task mới sang bucket tháng (nội dung giữ nguyên từng byte, kiểm bằng diff) và các test workflow hiện có vẫn xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-1",
+        "ev-chk-suite-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/tasks/**",
+    "src/core/workflow/**",
+    "src/core/verification/input-digest.ts",
+    "test/unit/core/tasks/**",
+    "test/workflow/architecture.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-resolver",
+      "description": "Test đơn vị của resolver vị trí task",
+      "command": "pnpm exec vitest run test/unit/core/tasks/task-location.test.ts test/unit/core/epics/epic-location.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/epics/**",
+        "src/core/tasks/**",
+        "test/unit/core/epics/epic-location.test.ts",
+        "test/unit/core/tasks/task-location.test.ts"
+      ]
+    },
+    {
+      "id": "chk-arch",
+      "description": "Test kiến trúc cấm dựng đường dẫn task rải rác",
+      "command": "pnpm exec vitest run test/workflow/architecture.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/workflow/architecture.test.ts"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests (CLI, docs, golden, kiến trúc)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-27T13:41:38.095+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Task mới nay ghi vào bucket tháng nên khóa đường dẫn trong golden buộc phải đổi; giá trị giữ nguyên.",
+      "artifactPaths": [
+        ".harnix/tasks/20261027-102135-task-location-resolver/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-resolver-1",
+      "checkId": "chk-resolver",
+      "recordedAt": "2026-10-27T13:48:53.568+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/tasks/task-location.test.ts test/unit/core/epics/epic-location.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a2800b4b3283a6ede2514e63051b61a2cb4ccc898627c6e6fd2a4fdf905793ec"
+    },
+    {
+      "id": "ev-chk-arch-1",
+      "checkId": "chk-arch",
+      "recordedAt": "2026-10-27T13:48:56.633+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/architecture.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7f31873b18827a2238c3d822de373e62068069b5cad776ecf7f26e6c722c341d"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-27T13:49:03.108+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "aa2170ae67f5c32d151aaf791e4e49e51b0a162603393b72acd516f157f71053"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-27T13:50:17.292+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "26a3fde73a035003e96138e6c88978ad879af1c568555bed5efcdf3aed2fc827"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-27T13:52:20.433+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "26a3fde73a035003e96138e6c88978ad879af1c568555bed5efcdf3aed2fc827"
+    }
+  ],
+  "createdAt": "2026-10-27T10:21:35.000+07:00",
+  "updatedAt": "2026-10-27T13:52:42.456+07:00",
+  "decisions": [
+    {
+      "id": "golden-paths",
+      "text": "Golden behavior-snapshot chỉ đổi 8 khóa đường dẫn sang bucket tháng, giá trị giữ nguyên từng byte (đã đối chiếu bằng diff).",
+      "rationale": "Task mới nay ghi vào bucket tháng; ac-4 được viết lại bằng một replan có lý do."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "version-sync-eperm",
+      "text": "Test version-sync --fold-dev thỉnh thoảng lỗi EPERM khi rename file tạm trên Windows lúc chạy cả suite song song; chạy riêng thì xanh.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-27T13:52:42.456+07:00"
+}

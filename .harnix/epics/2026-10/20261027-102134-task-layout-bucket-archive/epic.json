@@ -1,0 +1,15 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261027-102134-task-layout-bucket-archive",
+  "title": "Chia thư mục task và epic theo tháng, lưu trữ sau 30 ngày và migration",
+  "goal": "Thay thư mục phẳng .harnix/tasks/<id> và .harnix/epics/<id> bằng bố cục chia theo tháng cộng kho lưu trữ chỉ-đọc _archive cho task và epic đã kết thúc quá 30 ngày, có migration idempotent từ bố cục phẳng, để việc quét không còn tăng tuyến tính theo toàn bộ lịch sử mà không mất dữ liệu hay đổi hợp đồng task.",
+  "nonGoals": [
+    "Không đổi schema TaskRecord, ID task, ID epic, enum trạng thái hay giao thức hook",
+    "Không lồng task vào thư mục epic (đường dẫn sẽ không suy ra được từ ID)",
+    "Không tự động commit, xóa hay ghi lại nội dung task; archive chỉ chuyển thư mục",
+    "Không thêm service, telemetry hay truy cập mạng thầm lặng"
+  ],
+  "createdAt": "2026-10-27T10:21:34.990+07:00",
+  "updatedAt": "2026-10-27T10:29:47.584+07:00"
+}

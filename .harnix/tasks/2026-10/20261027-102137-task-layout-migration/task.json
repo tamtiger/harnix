@@ -1,0 +1,170 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261027-102137-task-layout-migration",
+  "epicId": "20261027-102134-task-layout-bucket-archive",
+  "title": "Migration task và epic từ bố cục phẳng sang bucket theo tháng",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Thêm migration idempotent chuyển .harnix/tasks/<id> và .harnix/epics/<id> sang bucket tháng qua harnix update và harnix doctor --fix, bằng rename nguyên tử dưới khóa workflow, có dry-run, không mất dữ liệu và không đổi nội dung; chạy sau migration roadmaps cũ.",
+  "nonGoals": [
+    "Không archive task trong migration",
+    "Không sửa nội dung task.json, review.md hay artifact"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix update và harnix doctor --fix chuyển mọi task phẳng và mọi epic (thư mục, <id>.json phẳng) sang bucket tháng bằng rename; chạy lần hai không đổi gì (idempotent); --dry-run chỉ liệt kê và không ghi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-migration-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Migration chạy dưới khóa workflow của dự án, không bao giờ ghi đè đích đã tồn tại (báo skipped) và một thư mục task không rename được thì chỉ bị bỏ qua có báo cáo; lỗi giữa chừng không để task ở trạng thái mất hay trùng và lần chạy sau tiếp tục được.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-migration-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Con trỏ .active và task đang hoạt động vẫn dùng được sau migration; doctor báo task-layout-legacy khi còn task phẳng và hết báo sau khi sửa.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-1",
+        "ev-chk-migration-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Hash nội dung từng file trước và sau migration bằng nhau, số task và số epic không đổi, kiểm bằng test trên cây có nhiều task và epic đủ bố cục; số liệu chạy trên bản sao repo này (task và epic thật) được ghi vào decision trace-copy.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-migration-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/migration/**",
+    "src/core/doctor/**",
+    "src/commands/update.ts",
+    "src/commands/doctor.ts",
+    "test/migration/**",
+    "test/integration/commands/update.test.ts",
+    "test/integration/commands/doctor.test.ts"
+  ],
+  "relevantSpecs": [
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/HARNIX_WORKFLOW.md"
+  ],
+  "validationPlan": [
+    {
+      "id": "chk-migration",
+      "description": "Test migration bố cục task",
+      "command": "pnpm run test:migration",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/integration/commands/**",
+        "test/migration/**",
+        "test/unit/core/doctor/**",
+        "test/unit/core/tasks/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests (CLI, docs, golden, kiến trúc)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-migration-1",
+      "checkId": "chk-migration",
+      "recordedAt": "2026-10-27T14:16:16.436+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:migration — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6d510fefe91c96c6290a94c7f0d9c7570b48b854449c5ce5ca9e665ea9021167"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-27T14:16:22.769+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bffa2598f9f1ee73d6cec171c35fd64d6e564cc66cdd0663c972cc978a6b3194"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-27T14:17:41.184+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f921f7e50ef409e2c048b9682cc11f2cc89aa83cd0f7a01732b60caf4aac5c8c"
+    }
+  ],
+  "createdAt": "2026-10-27T10:21:37.000+07:00",
+  "updatedAt": "2026-10-27T14:18:15.160+07:00",
+  "decisions": [
+    {
+      "id": "trace-copy",
+      "text": "Chạy harnix update trên bản sao .harnix của repo này: 257 task và 32 epic chuyển sang bucket tháng, 0 skipped, 965 file có hash nội dung giống hệt trước và sau, lần chạy thứ hai không báo gì.",
+      "rationale": "Kiểm chứng ac-4 trên dữ liệu thật mà không chạm repo gốc."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "migration-concurrent-writers",
+      "text": "Migration chạy dưới khóa workflow của dự án nên chỉ chặn các lệnh harnix khác; một editor hay worktree/subagent đang giữ file trong thư mục task làm rename lỗi và thư mục đó chỉ bị bỏ qua có báo cáo (lần sau chạy tiếp).",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-10-27T14:18:15.160+07:00"
+}
