@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.23.4] - 2026-10-28
+
+### Changed
+
+- Thêm test hàng rào học từ hve-core: lệnh workflow bị từ chối để nguyên cây .harnix, catalog DOCTOR_FINDING_CODES với fixture cho từng mã, quét nguồn lockfile và package.json (chỉ npmjs), kèm hai quy tắc cho finding doctor mới và checklist sửa SKILL.md.
+
 ## [2.23.3] - 2026-10-28
 
 ### Changed

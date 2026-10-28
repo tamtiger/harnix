@@ -2,7 +2,7 @@
 name: harnix-sequential-thinking
 description: Use when analyzing complex architectural tradeoffs, multi-step refactoring paths or elusive edge-case hypotheses.
 metadata:
-  version: "2.23.3"
+  version: "2.23.4"
 ---
 
 # Sequential thinking and dynamic hypothesis revision

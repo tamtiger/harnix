@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 // negative fixtures cover the same checks used by `pnpm scan:release`.
 type ReleaseScanner = {
   assertAttribution(notice: string): void;
+  assertLockfileSources(lockfile: string, packageJson: Record<string, unknown>): void;
   assertExpectedGlobalSurfaces(home: string): Promise<void>;
   assertNonHarnixContextNoOutput(stdout: string, stderr?: string): void;
   assertNonHarnixContextPerformance(samples: number[]): {
@@ -34,6 +35,7 @@ const releaseScanner = (await import(
 const {
   assertAttribution,
   assertExpectedGlobalSurfaces,
+  assertLockfileSources,
   assertNonHarnixContextNoOutput,
   assertNonHarnixContextPerformance,
   assertNoDeadPackagedImports,
@@ -188,6 +190,35 @@ describe("release scanner negative fixtures", () => {
     expect(() => assertAttribution("Trellis\nECC\n")).toThrow(/Superpowers/u);
     expect(() => assertAttribution("Trellis\nECC\nSuperpowers\n")).toThrow(/microsoft\/hve-core/u);
     expect(() => assertAttribution("Trellis\nECC\nSuperpowers\nmicrosoft/hve-core\n")).not.toThrow();
+  });
+
+  it("should_accept_a_registry_only_lockfile_and_reject_every_other_source", () => {
+    const clean = "  yaml@2.9.0:\n    resolution: {integrity: sha512-abc}\n    deprecated: see https://eslint.org/x\n";
+    const pkg = { dependencies: { yaml: "^2.9.0" }, devDependencies: { vitest: "3.2.7" } };
+    expect(() => assertLockfileSources(clean, pkg)).not.toThrow();
+
+    const bad: [string, RegExp][] = [
+      ["  a@1.0.0:\n    resolution: {tarball: https://x.test/a.tgz}\n", /tarball/u],
+      ["  a@1.0.0:\n    resolution: {type: git, repo: ssh://x/a.git, commit: abc}\n", /git/u],
+      ["  a@1.0.0:\n    resolution: {integrity: sha512-a, url: http://x.test/a}\n", /http URL/u],
+      ["  a@1.0.0:\n    resolution: {integrity: sha512-a, url: https://user:pw@x.test/a}\n", /credentials/u],
+      ["  a@1.0.0:\n    resolution: {directory: ../a, type: directory}\n", /integrity/u],
+      ["  a@1.0.0:\n    registry: https://evil.test\n", /not npmjs/u],
+    ];
+    for (const [lockfile, message] of bad)
+      expect(() => assertLockfileSources(lockfile, pkg), lockfile).toThrow(message);
+  });
+
+  it("should_reject_a_dependency_that_is_not_a_plain_registry_range", () => {
+    for (const spec of ["https://x.test/a.tgz", "git+https://x.test/a.git", "github:o/a", "file:../a", "link:../a"]) {
+      expect(() => assertLockfileSources("", { devDependencies: { a: spec } }), spec).toThrow(/plain registry range/u);
+    }
+    expect(() => assertLockfileSources("", { publishConfig: { registry: "https://evil.test" } })).toThrow(
+      /npm registry/u,
+    );
+    expect(() =>
+      assertLockfileSources("", { publishConfig: { registry: "https://registry.npmjs.org/" } }),
+    ).not.toThrow();
   });
 
   it("should_reject_non_single_harnix_bin_when_package_metadata_is_invalid", () => {

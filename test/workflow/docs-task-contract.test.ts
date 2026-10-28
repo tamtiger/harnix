@@ -384,3 +384,15 @@ describe("version skew and release documentation parity", () => {
     expect(changelog).not.toMatch(heading(`${major}\\.${minor}\\.0-dev\\.`));
   });
 });
+
+describe("test-gate rules", () => {
+  it("keeps the two short rules for a new doctor finding and a SKILL.md edit", async () => {
+    const agents = await read("AGENTS.md");
+
+    expect(agents).toContain(
+      "Một finding doctor mới ra mức `warning` trước và chỉ lên `error` ở một bản phát hành sau",
+    );
+    expect(agents).toContain("Khi sửa một `SKILL.md`, duyệt checklist trước khi xong");
+    expect(agents).toContain("DOCTOR_FINDING_CODES");
+  });
+});

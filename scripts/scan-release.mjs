@@ -11,6 +11,7 @@ import {
   scanTextFiles,
   structuredSecretPatterns,
 } from "./scan-secrets.mjs";
+import { assertLockfileSources } from "./scan-lockfile.mjs";
 import {
   assertAttribution,
   assertExpectedGlobalSurfaces,
@@ -31,6 +32,7 @@ import {
 
 export {
   assertAttribution,
+  assertLockfileSources,
   assertExpectedGlobalSurfaces,
   assertNoDeadPackagedImports,
   assertNoProjectLocalPlatformSurfaces,
@@ -52,6 +54,7 @@ const repositoryRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
 export async function runReleaseScan(options = {}) {
   const root = options.root ?? repositoryRoot;
   const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+  assertLockfileSources(await readFile(join(root, "pnpm-lock.yaml"), "utf8"), packageJson);
   const artifacts = join(root, ".artifacts");
   const tarballs = (await readdir(artifacts)).filter((name) => name.endsWith(".tgz"));
   if (tarballs.length !== 1)
