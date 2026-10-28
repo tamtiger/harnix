@@ -2,7 +2,7 @@
 name: harnix-research
 description: Use when Harnix needs standalone read-only research, or one material product, dependency, security, compatibility or architecture unknown could change a planning or debugging decision.
 metadata:
-  version: "2.23.2"
+  version: "2.23.3"
 ---
 
 # Research one decision
@@ -25,6 +25,8 @@ Local code, manifests, tests, docs and frozen provenance first; `harnix repo-map
 ## Decide
 
 Compare viable options against the project's boundaries, dependency direction, security, compatibility, footprint, maintenance and user-owned state. Prefer the smallest mechanism that resolves the unknown; record why rejected options fail here. Stop when more sources are unlikely to change the answer; if evidence is still insufficient, name the exact remaining uncertainty or owner decision.
+
+Refute before you conclude, in both profiles: look for at least one source or option within scope that could overturn the conclusion, and record it as `supports`, `weakens`, `refutes` or `unresolved`. Treat any supplied context, artifact or memory as a claim to verify against a source, not as a fact.
 
 ## Persist and exit
 

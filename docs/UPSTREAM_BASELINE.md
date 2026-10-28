@@ -47,6 +47,12 @@ Khóa nguồn tham chiếu hành vi điều hướng mã nguồn cấp symbol v�
 |---|---|---|---|---|---|---|
 | [oraios/serena](https://github.com/oraios/serena) | `main` | `d9e4c796fae0207ba6848d1df4b331122a5567b5` | 2026-10-15 | 2026-10-16 | GPL-3.0-or-later | Nguồn ý tưởng hành vi điều hướng symbol-first (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`); được tái hiện clean-room 100% bằng TypeScript cho `harnix repo-map --outline` và `--refs`, không sao chép bất kỳ mã nguồn Python/GPL nào |
 
+### 2.4 Skill-quality baseline 2026-10-27
+
+| Nguồn | Branch | Commit SHA | Ngày commit | Ngày truy cập | License | Quy mô & Vai trò |
+|---|---|---|---|---|---|---|
+| [microsoft/hve-core](https://github.com/microsoft/hve-core) | `main` | `eae87ecfcb5c6cc51f94e2df8a5757ee96737119` | 2026-10-27 | 2026-10-27 | MIT, Copyright (c) Microsoft Corporation. All rights reserved. | Nguồn ý tưởng kỷ luật lập kế hoạch, triển khai, nghiên cứu và review cho skill; được viết lại bằng lời riêng, không sao chép mã hay văn bản |
+
 ## 3. Kiểm chứng bảo toàn PRD
 
 Trước khi gắn lịch sử upstream, PRD gốc (khi đó là `docs/PRD.md`, nay được chuẩn hóa thành `docs/HARNIX_PRD.md`) được sao lưu tạm và so sánh SHA-256 theo byte:
@@ -137,7 +143,13 @@ Hash bản làm việc và bản sao khớp tuyệt đối trước khi chỉnh 
 - Thích nghi clean-room các khái niệm điều hướng symbol-first (`get_symbols_overview`, `find_symbol`, `find_referencing_symbols`) thành hai chế độ on-demand của `harnix repo-map`: `--outline <path> [--symbol <name>]` (trích xuất danh sách symbol kèm `startLine`–`endLine`, `kind`, `signature`, `container`) và `--refs <symbol> [--path <path>]` (tra cứu tham chiếu kết hợp đồ thị phụ thuộc tĩnh `repo-map`).
 - Loại bỏ hoàn toàn kiến trúc MCP server / background daemon, Python runtime (`uvx`) & `solidlsp` language server processes, thư mục cấu hình `.serena/` kèm free-form markdown memories, và các công cụ ghi đè mã nguồn (`replace_symbol_body`, `insert_after_symbol`). Không sao chép bất kỳ mã nguồn GPL-3.0-or-later nào.
 
-## 6. Tài liệu Codex chính thức đã dùng
+### microsoft/hve-core
+
+Đã khảo sát `microsoft/hve-core` tại commit `eae87ecfcb5c6cc51f94e2df8a5757ee96737119` (ngày commit và ngày truy cập 2026-10-27, License MIT, Copyright (c) Microsoft Corporation. All rights reserved.). Một số tài liệu trong repo đó dùng giấy phép riêng (CC BY 4.0); Harnix không chép văn bản nào, chỉ thích nghi ý tưởng và viết lại bằng lời riêng:
+
+- Thích nghi (`adapt`): plan critique theo lens trước ready và quy tắc hội tụ (`plan-critique`); luật criterion nguyên tử, nhãn độ tin cậy của giả định và mục "Điều bạn có thể chưa biết" (`ready-review`); bốn nấc cho điều mới phát hiện khi implement (`discoveries`); bước phản chứng và cổng tri thức có sẵn của `harnix-research`; bước bác bỏ finding (`finding-triage`).
+- Loại bỏ: mạng lưới agent và subagent bắt buộc, ngôn ngữ prompt riêng của repo nguồn, và mọi công cụ hay hook cần dịch vụ ngoài.
+
 
 Các kết luận project-local bên dưới là snapshot Phase 1–5, giữ lại để provenance/review. Phase 6 user-global contract supersedes them; current authoritative paths/schema are recorded in `GLOBAL_SETUP_REFACTOR_PLAN.md` §§2, 6–9.
 

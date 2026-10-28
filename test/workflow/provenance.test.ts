@@ -149,6 +149,19 @@ describe("external harness feature provenance", () => {
     expect(pkg.version).toMatch(/^2\.\d+\.\d+(?:-[a-z0-9.]+)?$/u);
     expect(notice).toContain("oraios/serena");
   });
+  it("records microsoft/hve-core with its license, baseline commit and adapted ideas", async () => {
+    const [notice, baseline, mapping] = await Promise.all([
+      readFile(resolve(root, "NOTICE"), "utf8"),
+      readFile(resolve(root, "docs/UPSTREAM_BASELINE.md"), "utf8"),
+      readFile(resolve(root, "docs/UPSTREAM_MAPPING.md"), "utf8"),
+    ]);
+    expect(notice).toContain("microsoft/hve-core (MIT, Copyright (c) Microsoft Corporation");
+    expect(baseline).toContain("eae87ecfcb5c6cc51f94e2df8a5757ee96737119");
+    expect(baseline).toContain("### microsoft/hve-core");
+    expect(mapping).toContain("microsoft/hve-core");
+    expect(mapping).toContain("plan-critique");
+    expect(mapping).toContain("finding-triage");
+  });
 });
 
 function exactKeys(value: object): string[] {

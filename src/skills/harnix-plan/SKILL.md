@@ -2,7 +2,7 @@
 name: harnix-plan
 description: Use when a Harnix request needs triage, requirements, planning, a trustworthy ready gate, a replan, a legacy-task migration or an epic before implementation.
 metadata:
-  version: "2.23.2"
+  version: "2.23.3"
 ---
 
 # Plan a Harnix task
@@ -32,10 +32,10 @@ Anything that is not Bypass is tracked. **Lite**: localized, low-risk, obvious c
 
 ## Build the task
 
-- Create new tasks as TaskRecord schema v3 with one `harnix workflow --save` envelope, or use `harnix workflow --init --title <title> [--mode lite|full] [--goal <goal>] [--text <criterion>] [--command <cmd>] [--input <glob,glob>] [--slug <english-kebab-case>]` for safe flag-based creation without manual JSON serialization (the command and inputs default from `harnix verify-plan`; without a test command or `--with-check` it asks for `--command`). If using `--save`: follow the `constraints` of `harnix workflow --schema` (exact fields, no unknown ones, sorted unique arrays, every non-waived criterion covered by a required check) and include one project-level suite check (`scope: full`, source-and-test inputs) from `harnix verify-plan` (`--recursive` for multi-repo or nested projects); a `--save` reports every problem at once. ID = `clock.idPrefix` + lowercase hyphenated English slug (IDs of tasks and epics are English; title, goal and criteria are Vietnamese with accents; `--init` needs `--slug <english-kebab-case>` when the title has accents); all timestamps from `clock`.
+- Create new tasks as TaskRecord schema v3 with one `harnix workflow --save` envelope, or use `harnix workflow --init --title <title> [--mode lite|full] [--goal <goal>] [--text <criterion>] [--command <cmd>] [--input <glob,glob>] [--slug <english-kebab-case>]` for safe flag-based creation without manual JSON serialization (command and inputs default from `harnix verify-plan`). If using `--save`: follow the `constraints` of `harnix workflow --schema` (exact fields, no unknown ones, sorted unique arrays, every non-waived criterion covered by a required check) and include one project-level suite check (`scope: full`, source-and-test inputs) from `harnix verify-plan` (`--recursive` for multi-repo or nested projects); a `--save` reports every problem at once. ID = `clock.idPrefix` + lowercase hyphenated English slug (IDs of tasks and epics are English; title, goal and criteria are Vietnamese with accents; `--init` needs `--slug <english-kebab-case>` when the title has accents); all timestamps from `clock`.
 - A Full task with `--init --mode full` auto-generates 4-block `prd.md` and Execution Slices `plan.md` (tagged `[chk-id]`). Flesh them out with the editor tool.
 - Persist `planning` before any product edit. Record outcome, non-goals, observable acceptance criteria, relevant paths/specs, affected contracts, risks and rollback, and validation.
-- A task that changes the CLI, documentation or test structure gets a focused required check `pnpm run test:gates` (the contract tests, in seconds) beside its own tests, so the suite does not find those gaps last.
+- A task that changes the CLI, documentation or test structure gets a focused required check for the project's fast contract tests beside its own tests, so the suite does not find those gaps last.
 - Edit obligations with flags, not JSON: `--set-check`, `--add-criterion`, `--set-criterion`, `--remove-criterion`, `--set-paths`.
 - Full `plan.md`: an unchecked `- [ ]` item per ordered slice near the top (e.g. `- [ ] [chk-1] Slice: ...`), concrete files/interfaces, RED then GREEN order, what each check proves.
 - Reconcile draft criteria with code before `ready` (epic members are drafts): confirm the behavior is not already implemented or contradicted by a frozen contract, that check test files exist, and fix stale obligations with `--set-criterion` or `--replace-check`.
@@ -43,7 +43,7 @@ Anything that is not Bypass is tracked. **Lite**: localized, low-risk, obvious c
 
 ## Ready
 
-Run the ready self-review (`./references/ready-review.md` or `harnix skill harnix-plan --reference ready-review`) and fix every gap first. `harnix workflow --transition ready/ready --dry-run` tests the conditions without changing state. Then `harnix workflow --transition ready/ready` (a Full task adds `--reviewed`; the gate itself rejects hard placeholder tokens, criterion ids missing from `plan.md` and criteria without a focused required check). A plan-only request, a Full task, or an Epic stops here (`nextStage: await`): present the plan/epic summary, key decisions and checklist to the user, and wait for explicit approval before implementation. For an authorized Lite task only, continue with `harnix-implement` without another approval.
+Optionally critique a Full plan first (`harnix skill harnix-plan --reference plan-critique`). Run the ready self-review (`./references/ready-review.md` or `harnix skill harnix-plan --reference ready-review`) and fix every gap first. `harnix workflow --transition ready/ready --dry-run` tests the conditions without changing state. Then `harnix workflow --transition ready/ready` (a Full task adds `--reviewed`; the gate itself rejects hard placeholder tokens, criterion ids missing from `plan.md` and criteria without a focused required check). A plan-only request, a Full task, or an Epic stops here (`nextStage: await`): present the plan/epic summary, key decisions and checklist to the user, and wait for explicit approval before implementation. For an authorized Lite task only, continue with `harnix-implement` without another approval.
 
 ## Technique skills
 

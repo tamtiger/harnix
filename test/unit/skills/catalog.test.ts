@@ -6,8 +6,17 @@ const TOKEN_BUDGET = 2_000;
 const tokens = (text: string): number => Math.ceil(text.length / 4);
 
 const expectedReferences: Record<string, string[]> = {
-  "harnix-plan": ["decision-discipline", "epic", "grilling", "migration", "multi-repo", "ready-review", "replan"],
-  "harnix-implement": ["brownfield", "commit-hygiene", "dotnet-microservices", "feedback"],
+  "harnix-plan": [
+    "decision-discipline",
+    "epic",
+    "grilling",
+    "migration",
+    "multi-repo",
+    "plan-critique",
+    "ready-review",
+    "replan",
+  ],
+  "harnix-implement": ["brownfield", "commit-hygiene", "discoveries", "dotnet-microservices", "feedback"],
   "harnix-verify": [
     "agent-transport",
     "cookbook-commands",
@@ -21,7 +30,7 @@ const expectedReferences: Record<string, string[]> = {
     "technical-recap",
     "workflow-routing",
   ],
-  "harnix-review": ["multi-lens"],
+  "harnix-review": ["finding-triage", "multi-lens"],
   "harnix-research": ["scouting-isolation"],
   "harnix-debug": ["feedback-loop"],
 };

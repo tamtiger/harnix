@@ -3,7 +3,8 @@
 Run every item before `ready`; if one fails keep the current planning status, use checkpoint `replan` for a previously prepared task, and report the exact gap.
 
 - **Decisions:** no unresolved material decision is disguised as an implementation step.
-- **Criteria:** every criterion describes behavior or evidence that can be checked.
+- **Criteria:** every criterion is atomic: one behavior, one result observable from outside the code, a threshold beside every quantitative word ("fast", "large"), no internal name where the user-visible effect can be stated, one actor. Split a criterion that joins two behaviors.
+- **Assumptions:** list each assumption in `prd.md` as `validated` (checked this session), `assumed` (from context or memory, unchecked) or `unknown`, with its impact if wrong. An `unknown` of high impact becomes a decision, a check or a blocker before `ready`.
 - **Coverage:** every requirement maps to an implementation slice and a validation check; the project-level suite check runs the project's test command from `harnix verify-plan` (a command that runs only part of the tests is rejected).
 - **Contracts:** field names, enums, inputs, outputs, errors, precedence, migration and ownership are exact where they affect implementation.
 - **Placeholders:** no `TBD`, `TODO`, "handle appropriately", "similar to above", unnamed type or deferred choice that could change the implementation.
@@ -14,6 +15,8 @@ Run every item before `ready`; if one fails keep the current planning status, us
 - **Tracking:** the task name is a readable hyphenated slug; the Full checklist maps one-to-one to the ordered slices and starts unchecked.
 - **Artifacts:** a Full task has non-empty `prd.md` and `plan.md`, and the plan has at least one `- [ ]` item (the only checks the ready gate makes on them).
 - **Commit discipline:** before any commit, show the changes and message and wait for approval.
+
+End the summary you present at `await` with "Điều bạn có thể chưa biết": what the user may not know yet (high-impact `assumed` or `unknown` items, side effects, residual risks); write `None` when there is nothing.
 
 A plan may begin with a contract-freeze slice only when it resolves implementation detail, not an undecided product contract.
 

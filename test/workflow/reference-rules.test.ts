@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const VERIFY = "src/skills/harnix-verify/references";
 const PLAN = "src/skills/harnix-plan/references";
+const SKILLS = "src/skills";
 
 interface Rule {
   readonly rule: string;
@@ -80,6 +81,66 @@ const RULES: readonly Rule[] = [
   },
   { rule: "epic: expected branch", file: `${PLAN}/epic.md`, phrases: ["expected base or feature branch"] },
   { rule: "epic: follow-up notice", file: `${PLAN}/epic.md`, phrases: ["`notice:`", "has none"] },
+  {
+    rule: "plan critique: lenses, verified candidates, skipped",
+    file: `${PLAN}/plan-critique.md`,
+    phrases: [
+      "Coverage",
+      "Evidence",
+      "Executability",
+      "Risk",
+      "Reconciliation",
+      "Critical",
+      "Not assessed",
+      "Consistent",
+      "skipped",
+    ],
+  },
+  {
+    rule: "critique and replan converge",
+    file: `${PLAN}/plan-critique.md`,
+    phrases: ["simplif", "residual risk", "oscillate", "earlier member changed"],
+  },
+  {
+    rule: "ready review: atomic criteria, labelled assumptions, what the user may not know",
+    file: `${PLAN}/ready-review.md`,
+    phrases: ["atomic", "validated", "assumed", "unknown", "Điều bạn có thể chưa biết"],
+  },
+  {
+    rule: "plan points at the critique",
+    file: `${SKILLS}/harnix-plan/SKILL.md`,
+    phrases: ["--reference plan-critique"],
+  },
+  {
+    rule: "implement: four tiers for what implementation uncovers",
+    file: `${SKILLS}/harnix-implement/references/discoveries.md`,
+    phrases: ["Local judgment", "implementation-only", "Guidance", "--follow-up", "replan"],
+  },
+  {
+    rule: "implement points at the discovery tiers",
+    file: `${SKILLS}/harnix-implement/SKILL.md`,
+    phrases: ["--reference discoveries"],
+  },
+  {
+    rule: "research: refutation pass and supplied-knowledge gate",
+    file: `${SKILLS}/harnix-research/SKILL.md`,
+    phrases: ["Refute", "supports", "weakens", "refutes", "unresolved", "supplied context"],
+  },
+  {
+    rule: "finding triage: disproof questions, verdicts, one destination",
+    file: `${SKILLS}/harnix-review/references/finding-triage.md`,
+    phrases: ["CONFIRMED", "DISPROVED", "DOWNGRADED", "Not assessed", "one destination", "no subagent"],
+  },
+  {
+    rule: "review and security lens point at the triage",
+    file: `${SKILLS}/harnix-review/SKILL.md`,
+    phrases: ["--reference finding-triage"],
+  },
+  {
+    rule: "security lens uses the same triage",
+    file: `${SKILLS}/harnix-security-lens/SKILL.md`,
+    phrases: ["harnix-review --reference finding-triage"],
+  },
 ];
 
 describe("reference rules kept after shortening", () => {

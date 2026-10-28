@@ -2,7 +2,7 @@
 name: harnix-review
 description: Use when Harnix needs a standalone read-only code review of a diff, commit range or paths, or an evaluation of review feedback, without touching any task.
 metadata:
-  version: "2.23.2"
+  version: "2.23.3"
 ---
 
 # Review code (read-only)
@@ -30,6 +30,8 @@ Evaluate changes along two distinct axes: **Spec axis** (task behavioral require
 - Worth flagging: a find-or-create without a unique constraint; a status transition without an atomic `WHERE old-status` guard; a token compared with `==` instead of a constant-time comparison; untrusted or LLM output stored or queried without validation; an N+1 query from loading an association in a loop; string concatenation in SQL queries; missing resource ownership or authorization checks (IDOR); debug printing (`System.out.print`, `Console.Write`) instead of structured logging; unmasked PII in log records; missing tests for new behavior; an unhandled error path.
 
 Do not report: readability-only redundancy, a request to comment a threshold, consistency-only reshaping, a harmless no-op, style a linter enforces, or anything the diff already fixes. Read the complete diff before flagging a gap. A wide or risky change may use independent lenses, with subagents when the platform has them: read `./references/multi-lens.md` (or `harnix skill harnix-review --reference multi-lens`).
+
+Triage each finding before reporting it: `harnix skill harnix-review --reference finding-triage`.
 
 ## Report
 

@@ -4,12 +4,14 @@ import implementSource from "./harnix-implement/SKILL.md";
 import brownfieldReference from "./harnix-implement/references/brownfield.md";
 import commitHygieneReference from "./harnix-implement/references/commit-hygiene.md";
 import dotnetMicroservicesReference from "./harnix-implement/references/dotnet-microservices.md";
+import discoveriesReference from "./harnix-implement/references/discoveries.md";
 import feedbackReference from "./harnix-implement/references/feedback.md";
 import decisionDisciplineReference from "./harnix-plan/references/decision-discipline.md";
 import epicReference from "./harnix-plan/references/epic.md";
 import grillingReference from "./harnix-plan/references/grilling.md";
 import migrationReference from "./harnix-plan/references/migration.md";
 import multiRepoReference from "./harnix-plan/references/multi-repo.md";
+import planCritiqueReference from "./harnix-plan/references/plan-critique.md";
 import readyReviewReference from "./harnix-plan/references/ready-review.md";
 import replanReference from "./harnix-plan/references/replan.md";
 import workflowRoutingRef from "./harnix-verify/references/workflow-routing.md";
@@ -21,6 +23,7 @@ import cookbookCommandsRef from "./harnix-verify/references/cookbook-commands.md
 import planSource from "./harnix-plan/SKILL.md";
 import researchSource from "./harnix-research/SKILL.md";
 import scoutingIsolationReference from "./harnix-research/references/scouting-isolation.md";
+import findingTriageReference from "./harnix-review/references/finding-triage.md";
 import multiLensReference from "./harnix-review/references/multi-lens.md";
 import reviewSource from "./harnix-review/SKILL.md";
 import evidenceReference from "./harnix-verify/references/evidence.md";
@@ -47,6 +50,7 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       "ready-review": readyReviewReference,
       grilling: grillingReference,
       "decision-discipline": decisionDisciplineReference,
+      "plan-critique": planCritiqueReference,
     },
   ],
   [
@@ -56,6 +60,7 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       brownfield: brownfieldReference,
       "commit-hygiene": commitHygieneReference,
       "dotnet-microservices": dotnetMicroservicesReference,
+      discoveries: discoveriesReference,
     },
   ],
   [
@@ -74,7 +79,7 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       "cookbook-commands": cookbookCommandsRef,
     },
   ],
-  [reviewSource, { "multi-lens": multiLensReference }],
+  [reviewSource, { "multi-lens": multiLensReference, "finding-triage": findingTriageReference }],
   [researchSource, { "scouting-isolation": scoutingIsolationReference }],
   [debugSource, { "feedback-loop": feedbackLoopReference }],
 ];

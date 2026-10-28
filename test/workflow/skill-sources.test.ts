@@ -328,4 +328,15 @@ describe("canonical Harnix workflow skill sources", () => {
     const pkg = JSON.parse(await readFile("package.json", "utf8"));
     expect(pkg.version).toMatch(/^2\.\d+\.\d+(?:-[a-z0-9.]+)?$/u);
   });
+
+  it("serves no command or path that only exists in the Harnix repository", async () => {
+    const root = fileURLToPath(new URL("../../src/skills/", import.meta.url));
+    const files = (await readdir(root, { recursive: true })).filter((file) => file.endsWith(".md"));
+    const repoOnly = /pnpm (?:run )?(?:test:gates|selfhost:sync|version:sync)|docs\/HARNIX_/u;
+    expect(files.length).toBeGreaterThan(20);
+    for (const file of files) {
+      const text = await readFile(`${root}${file}`, "utf8");
+      expect(text, `${file} names a Harnix-repository-only command or path`).not.toMatch(repoOnly);
+    }
+  });
 });

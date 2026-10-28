@@ -309,7 +309,7 @@ describe("self-host sync documentation parity", () => {
   it("points release preparation at pnpm selfhost:sync and explains the update report", async () => {
     const surfaces = {
       "AGENTS.md": await read("AGENTS.md"),
-      "harnix-implement skill": await read("src/skills/harnix-implement/SKILL.md"),
+      "harnix-self-host project skill": await read(".harnix/spec/skills/harnix-self-host/SKILL.md"),
       "workflow template": workflowGuidance,
     };
     for (const [name, text] of Object.entries(surfaces)) expect(text, name).toContain("pnpm selfhost:sync");
@@ -321,7 +321,7 @@ describe("fast contract gates documentation parity", () => {
   it("suggests test:gates as a focused check and documents test:failures", async () => {
     for (const [name, text] of Object.entries({
       "workflow template": workflowGuidance,
-      "harnix-plan skill": await read("src/skills/harnix-plan/SKILL.md"),
+      "harnix-self-host project skill": await read(".harnix/spec/skills/harnix-self-host/SKILL.md"),
     }))
       expect(text, name).toContain("pnpm run test:gates");
     const agents = await read("AGENTS.md");

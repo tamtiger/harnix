@@ -25,7 +25,7 @@ export function assertSingleHarnixExecutable(packageJson) {
 }
 
 export function assertAttribution(notice) {
-  for (const attribution of ["Trellis", "ECC", "Superpowers"]) {
+  for (const attribution of ["Trellis", "ECC", "Superpowers", "microsoft/hve-core"]) {
     if (!notice.includes(attribution)) throw new Error(`NOTICE is missing ${attribution} attribution.`);
   }
 }

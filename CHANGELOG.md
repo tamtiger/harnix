@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.23.3] - 2026-10-28
+
+### Changed
+
+- skill học từ microsoft/hve-core: plan-critique, luật criterion nguyên tử, bốn nấc khi implement, phản chứng khi research, finding-triage; skill phục vụ không còn lệnh riêng của repo (chuyển sang skill dự án harnix-self-host); NOTICE và hồ sơ nguồn ghi hve-core; footprint maxBytes 678912 lên 699000 (đo 698128, nội dung mới nhân theo số nền tảng, người dùng cho phép ngày 2026-10-28)
+
 ## [2.23.2] - 2026-10-28
 
 ### Fixed

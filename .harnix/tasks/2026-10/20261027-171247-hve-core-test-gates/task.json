@@ -1,0 +1,107 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261027-171247-hve-core-test-gates",
+  "title": "Thêm test hàng rào học từ hve-core: lệnh bị từ chối không ghi gì, catalog finding doctor, nguồn lockfile",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Thêm các test xác định (không cần mô hình) bắt hồi quy: lệnh ghi bị từ chối để nguyên cây .harnix, mỗi mã finding của doctor có test sinh ra nó cùng fixture sạch, lockfile không chứa nguồn lạ; kèm quy tắc doc cho finding mới và rubric duyệt SKILL.md.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Một bảng test chứng minh mỗi lệnh harnix workflow ghi bị từ chối (transition sai, evidence ghi giờ tương lai, check bị circuit breaker, --save chứa mojibake, ghi vào task đã archive) để nguyên cây .harnix: băm toàn bộ cây trước và sau rồi so bằng nhau, kèm mã thoát và thông điệp lỗi.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Mọi mã finding của harnix doctor nằm trong một catalog DOCTOR_FINDING_CODES (mã tĩnh và mã dựng theo nền tảng) chia thành các file src/core/doctor không quá 300 dòng; một test duyệt catalog khẳng định mỗi mã có ít nhất một fixture sinh ra nó, và một dự án sạch cho 0 finding.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "scripts/scan-release-assertions.mjs kiểm pnpm-lock.yaml và package.json: không có tarball, URL http, URL git hay thông tin đăng nhập, và registry chỉ là npmjs; test trong test/safety/release-scanner.test.ts cho từng trường hợp vi phạm lẫn trường hợp sạch.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "AGENTS.md hoặc test/README.md ghi hai quy tắc ngắn (finding doctor mới ra mức warning trước; checklist duyệt khi sửa SKILL.md), và test/workflow/docs-task-contract.test.ts khẳng định cả hai câu còn có mặt.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-5",
+      "text": "Một lần bump patch bằng pnpm version:sync kèm mục CHANGELOG, vì catalog doctor và quét release là thay đổi mã nguồn và script phát hành.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Test tập trung cho bảng lệnh ghi bị từ chối, catalog doctor và quét lockfile",
+      "command": "pnpm exec vitest run test/integration/scenarios test/unit/core/doctor test/safety/release-scanner.test.ts test/workflow/docs-task-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "scripts/**",
+        "src/core/doctor/**",
+        "test/README.md",
+        "test/integration/scenarios/**",
+        "test/safety/**",
+        "test/unit/core/doctor/**",
+        "test/workflow/docs-task-contract.test.ts"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Test hợp đồng",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ suite",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-27T17:12:47.508+07:00",
+  "updatedAt": "2026-10-28T10:42:18.336+07:00"
+}

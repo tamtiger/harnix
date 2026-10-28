@@ -2,7 +2,7 @@
 name: harnix-security-lens
 description: Use when reviewing or implementing security-critical code paths including untrusted input boundaries, command execution, path traversal and credential handling.
 metadata:
-  version: "2.23.2"
+  version: "2.23.3"
 ---
 
 # Security review lens
@@ -52,3 +52,4 @@ Coding agents interact directly with host filesystems, processes, and network bo
 3. Verify that all filesystem paths are checked against boundary constraints.
 4. Verify that no subprocess or SQL query is created with unquoted or concatenated input.
 5. Check all logging and output statements for accidental secret, unmasked PII, or absolute path leakage.
+6. Triage each finding before reporting it with `harnix skill harnix-review --reference finding-triage`.

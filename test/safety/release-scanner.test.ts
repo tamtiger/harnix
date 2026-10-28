@@ -186,6 +186,8 @@ describe("release scanner negative fixtures", () => {
 
   it("should_reject_missing_attribution_when_notice_is_incomplete", async () => {
     expect(() => assertAttribution("Trellis\nECC\n")).toThrow(/Superpowers/u);
+    expect(() => assertAttribution("Trellis\nECC\nSuperpowers\n")).toThrow(/microsoft\/hve-core/u);
+    expect(() => assertAttribution("Trellis\nECC\nSuperpowers\nmicrosoft/hve-core\n")).not.toThrow();
   });
 
   it("should_reject_non_single_harnix_bin_when_package_metadata_is_invalid", () => {

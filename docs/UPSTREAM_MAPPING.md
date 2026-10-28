@@ -313,6 +313,19 @@ Harnix kiên định giữ vững các nguyên tắc cốt lõi (lean, determini
    - *Upstream*: Sinh đồng thời nhiều giả thuyết song song và áp dụng đồng loạt các bản sửa thử nghiệm.
    - *Lý do loại bỏ*: Vi phạm kỷ luật debug của Harnix. Harnix áp dụng điều tra tuần tự: kiểm tra một giả thuyết tại một thời điểm, có bằng chứng thực tế chứng minh, tối đa một vòng khắc phục tự động và sau ba giả thuyết phân kỳ phải dừng lại để tái đánh giá (replan). Điều này giúp kiểm soát context lean và tránh phân rã mã nguồn.
 
+### 8.7 Skill discipline mapping (microsoft/hve-core)
+
+Khảo sát ngày 2026-10-27 trên `microsoft/hve-core` (`eae87ecfcb5c6cc51f94e2df8a5757ee96737119`, MIT):
+
+| Khái niệm nguồn | Xuất xứ upstream | Harnix target | Phân loại | Nội dung thích nghi |
+|---|---|---|---|---|
+| Plan critique theo lens và hội tụ | `microsoft/hve-core` | `src/skills/harnix-plan/references/plan-critique.md` | `adapt` | Bốn lens và một lens đối chiếu khi replan, thang severity, ứng viên phải được bên cha xác minh, `Consistent` tách `Not assessed`, một vòng tối đa; viết lại bằng lời riêng, không bắt buộc subagent. |
+| Criterion nguyên tử và nhãn độ tin cậy | `microsoft/hve-core` | `src/skills/harnix-plan/references/ready-review.md` | `adapt` | Luật một hành vi một kết quả quan sát được, nhãn `validated`/`assumed`/`unknown` trong `prd.md` (không thêm field schema), mục "Điều bạn có thể chưa biết". |
+| Bốn nấc khi phát hiện điều mới | `microsoft/hve-core` | `src/skills/harnix-implement/references/discoveries.md` | `adapt` | Phán đoán cục bộ, ghi chú chỉ-triển-khai, follow-up (`--follow-up`), replan; ánh xạ vào lệnh `harnix workflow` sẵn có. |
+| Phản chứng và cổng tri thức | `microsoft/hve-core` | `src/skills/harnix-research/SKILL.md` | `adapt` | Tìm một nguồn có thể bác kết luận, ghi `supports`/`weakens`/`refutes`/`unresolved`; ngữ cảnh cung cấp là claim cần xác minh. |
+| Bác bỏ finding | `microsoft/hve-core` | `src/skills/harnix-review/references/finding-triage.md` | `adapt` | CONFIRMED/DISPROVED/DOWNGRADED, một đích xử lý cho mỗi finding, `Not assessed` tách `Pass`; dùng chung cho `harnix-security-lens`. |
+| Mạng lưới agent bắt buộc và hạ tầng đi kèm | `microsoft/hve-core` | — | `remove` | Từ chối subagent bắt buộc, dịch vụ ngoài và ngôn ngữ prompt riêng của nguồn. |
+
 ## 9. Removal verification
 
 Release scan must prove absence outside allowed research/migration/license contexts:

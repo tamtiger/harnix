@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.23.2"
+  version: "2.23.3"
 ---
 
 # Implement with evidence
@@ -17,7 +17,7 @@ A blocked task: read its blocker, resolve it or report the exact condition, then
 
 ## Review the plan
 
-Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands in `.harnix/spec/project-facts.md`, custom project skills in `.harnix/spec/skills/` (or `harnix skill --all`), the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. `harnix repo-map --query` / `--impact` / `--tests` / `--outline <path> [--symbol <name>]` (symbol spans before slicing large files) / `--refs <symbol> [--path <path>]` (call sites before signature edits) are navigation hints; verify the source yourself. When modifying existing codebases, maintain local conventions and isolate changes: read `./references/brownfield.md` (or `harnix skill harnix-implement --reference brownfield`).
+Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands in `.harnix/spec/project-facts.md`, custom project skills in `.harnix/spec/skills/` (or `harnix skill --all`), the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. New findings during implementation go to one of four tiers (`harnix skill harnix-implement --reference discoveries`). A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. `harnix repo-map --query` / `--impact` / `--tests` / `--outline <path> [--symbol <name>]` (symbol spans before slicing large files) / `--refs <symbol> [--path <path>]` (call sites before signature edits) are navigation hints; verify the source yourself. When modifying existing codebases, maintain local conventions and isolate changes: read `./references/brownfield.md` (or `harnix skill harnix-implement --reference brownfield`).
 
 ## RED, GREEN, REFACTOR per behavior
 
@@ -34,17 +34,12 @@ After each slice and its focused evidence tick its `- [ ]` to `- [x]` in `plan.m
 
 ## Release preparation
 
-Release-visible changes follow the version policy: a standalone task bumps the patch, a member of an epic bumps the pre-release `X.Y.0-dev.N`, the last member by ID closes the epic with the minor release (a major only for a frozen-contract break); you bump, during implementation. Bump the package version at most once with the project's own version command (named in its instructions) and amend the same changelog entry; regenerate managed output when its canonical input changes; in the Harnix repository itself run `pnpm selfhost:sync` after editing the workflow template. Do this before verifying: finish never edits the product.
+Release-visible changes follow the version policy: a standalone task bumps the patch, a member of an epic bumps the pre-release `X.Y.0-dev.N`, the last member by ID closes the epic with the minor release (a major only for a frozen-contract break); you bump, during implementation. Bump the package version at most once with the project's own version command (named in its instructions) and amend the same changelog entry; regenerate managed output when its canonical input changes. Do this before verifying: finish never edits the product.
 
 ## Documentation synchronization
 
-- **In Harnix itself (MANDATORY):** Immediately after implementation and BEFORE transitioning to `verifying`: ALWAYS synchronize all project documentation affected by the change without waiting for user reminders:
-  1. `README.md`: document new features, CLI commands, flags, and usage examples.
-  2. `AGENTS.md` and rules: operational guidance, agent instructions, and platform rules (`rules/AGENTS.md`).
-  3. Templates: `src/templates/AGENTS.md`, `src/templates/harnix/activation.ts`, `src/templates/harnix/agents.ts`.
-  4. Skills: update `SKILL.md` and `references/` when workflows, conventions, or behaviors evolve.
-  5. Canonical workflow and specs: `docs/HARNIX_WORKFLOW.md`, `docs/HARNIX_PRD.md`, `docs/IMPLEMENTATION_PLAN.md`, `.harnix/workflow.md`, and run `pnpm selfhost:sync` whenever workflow templates change.
-- **In other consumer projects (OPTIONAL):** Documentation updates follow the task's explicit scope and requirements (e.g. updating docs only when asked or when modifying public interfaces).
+- **Project documentation:** after implementation and before `verifying`, synchronize the documentation the change affects (README, agent instructions, templates, skills, specs) when the project's instructions or the task require it; a project may keep its own checklist in a project skill (`harnix skill --all`).
+- **Otherwise:** documentation updates follow the task's explicit scope and requirements (e.g. updating docs only when asked or when modifying public interfaces).
 
 ## Feedback and stop conditions
 
