@@ -73,7 +73,9 @@ export async function archiveProject(cwd: string, options: ArchiveCommandOptions
       invalid: plan.invalid,
       failed: [],
     } as ArchiveCommandResult;
-  const moved = await applyArchive(harnixRoot, plan);
+  const moved = await applyArchive(harnixRoot, plan, {
+    replan: () => planArchive(harnixRoot, { days, now: options.now ?? Date.now() }),
+  });
   const epicMembers = Object.fromEntries(moved.epics.map((id) => [id, plan.epicMembers[id] ?? []]));
   return {
     ...base,

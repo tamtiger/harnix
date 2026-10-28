@@ -305,4 +305,36 @@ describe("review regressions", () => {
     expect(result).toEqual({ tasks: [], epics: [], failed: [`task ${OLD}: became active`] });
     expect((await locateTask(harnixRoot, OLD))?.kind).toBe("bucket");
   });
+
+  it("skips an epic whose ID carries no month instead of archiving only its members", async () => {
+    const { root, harnixRoot } = await project();
+    const epicId = "payments-overhaul";
+    await upsertEpic(root, buildEpic({ id: epicId }));
+    await saveAll(harnixRoot, [terminalTask("20260801-100000-d1", { endedDaysAgo: 60, epicId })]);
+
+    const plan = await planArchive(harnixRoot, options);
+    const result = await applyArchive(harnixRoot, plan);
+
+    expect(plan.epics).toEqual([]);
+    expect(plan.skipped).toContainEqual({ kind: "epic", id: epicId, reason: "legacy-layout" });
+    expect(result).toEqual({ tasks: [], epics: [], failed: [] });
+    expect((await locateTask(harnixRoot, "20260801-100000-d1"))?.kind).toBe("bucket");
+  });
+
+  it("replans under the lock so an epic that gained an open member after the plan stays live", async () => {
+    const { root, harnixRoot } = await project();
+    const epicId = "20260801-090000-done-epic";
+    await upsertEpic(root, buildEpic({ id: epicId }));
+    await saveAll(harnixRoot, [terminalTask("20260801-100000-d1", { endedDaysAgo: 60, epicId })]);
+    const plan = await planArchive(harnixRoot, options);
+    await saveAll(harnixRoot, [openTask("20260802-100000-late", { epicId })]);
+
+    const result = await applyArchive(harnixRoot, plan, { replan: () => planArchive(harnixRoot, options) });
+
+    expect(plan.epics).toEqual([epicId]);
+    expect(result.epics).toEqual([]);
+    expect(result.tasks).toEqual([]);
+    expect(result.failed).toEqual([`epic ${epicId}: changed since plan`]);
+    expect((await locateTask(harnixRoot, "20260801-100000-d1"))?.kind).toBe("bucket");
+  });
 });

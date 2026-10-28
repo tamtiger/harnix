@@ -36,7 +36,7 @@ async function projectWithHistory(): Promise<History> {
   const root = await mkdtemp(join(tmpdir(), "harnix-legacy-"));
   disposableRoot = root;
   await initializeProject({ root, developer: "tam", yes: true });
-  const allIds = await listTaskIds(repositoryHarnix);
+  const allIds = await listTaskIds(repositoryHarnix, { scope: "all" });
   // Historical v1 and v2 records originate from August and September 2026 before schema v3 was introduced.
   const ids = allIds.filter((id) => id.startsWith("202608") || id.startsWith("202609") || KNOWN_MALFORMED.includes(id));
   for (const id of ids) {

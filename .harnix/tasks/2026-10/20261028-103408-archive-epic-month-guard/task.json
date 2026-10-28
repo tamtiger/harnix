@@ -1,0 +1,104 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261028-103408-archive-epic-month-guard",
+  "title": "Sửa archive: epic không có tháng trong ID và khoảng hở plan/apply",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Epic có ID không mang tháng không được để lại trạng thái archive dở dang; apply phải lập lại kế hoạch trong khóa để không chuyển epic vừa có thành viên mới.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Epic có ID không bắt đầu bằng tháng hợp lệ bị bỏ qua với lý do skip riêng trước khi bất kỳ thành viên nào được chuyển; lần chạy lại không báo lỗi và không có task nào bị archive dở dang.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1",
+        "ev-check-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "applyArchive lập lại kế hoạch bên trong khóa workflow: epic vừa nhận thêm thành viên chưa kết thúc hoặc task tiếp nối mở sau lúc lập kế hoạch thì bị bỏ qua, không bị chuyển vào kho.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1",
+        "ev-check-suite-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Kiểm chứng: Sửa archive: epic không có tháng trong ID và khoảng hở plan/apply",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/core/tasks/archive.test.ts test/integration/commands/archive.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/archive.ts",
+        "src/core/epics/**",
+        "src/core/tasks/**",
+        "test/integration/commands/archive.test.ts",
+        "test/support/archive-fixtures.ts",
+        "test/unit/core/tasks/archive.test.ts"
+      ]
+    },
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ suite kiểm thử của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-28T10:35:50.272+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/tasks/archive.test.ts test/integration/commands/archive.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "758a856f89ca371a9bbdf268c1f580117603a81b2fd4d654d9aa1828aace83fd"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-28T10:38:03.706+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "0b62aff39849c516768c88f5b866a45ec0b34e6b111e3bc85fcf45b5d38920d9"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-28T10:39:54.778+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3e0ce10eac50fdb3368d5fd05b9c7de1a5f73fff4a457ad66ede516e50c8750e"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-28T10:34:08.831+07:00",
+  "updatedAt": "2026-10-28T10:40:03.054+07:00",
+  "completedAt": "2026-10-28T10:40:03.054+07:00"
+}

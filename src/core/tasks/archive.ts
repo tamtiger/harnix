@@ -154,7 +154,8 @@ export async function planArchive(harnixRoot: string, options: { days: number; n
     const location = await locateEpicFile(harnixRoot, epicId, "json");
     const reason = ((): SkipReason | undefined => {
       if (members.length === 0) return "no-members";
-      if (location === undefined || basename(location.path) !== "epic.json") return "legacy-layout";
+      if (location === undefined || basename(location.path) !== "epic.json" || monthBucket(epicId) === undefined)
+        return "legacy-layout";
       if (brokenEpics.has(epicId)) return "unreadable-member";
       if (members.some(([id]) => duplicates.has(id))) return "archived-copy-exists";
       if (members.some(([id]) => id === active)) return "active";
@@ -190,6 +191,8 @@ export async function planArchive(harnixRoot: string, options: { days: number; n
 export interface ArchiveOptions {
   /** Injectable so a test can make a move fail. */
   rename?: MoveFunction;
+  /** Plans again under the workflow lock; an item the fresh plan no longer lists is left where it is. */
+  replan?: () => Promise<ArchivePlan>;
 }
 
 async function moveFolder(
@@ -222,6 +225,11 @@ export async function applyArchive(
         return false;
       }
     };
+    const fresh = options.replan === undefined ? plan : await options.replan();
+    const kept = (label: string, ids: string[], current: string[]): string[] =>
+      ids.filter((id) => current.includes(id) || !result.failed.push(`${label} ${id}: changed since plan`));
+    const tasks = kept("task", plan.tasks, fresh.tasks);
+    const epics = kept("epic", plan.epics, fresh.epics);
     const active = await activeTaskId(harnixRoot);
     const moveTask = (id: string): Promise<boolean> =>
       attempt(`task ${id}`, async () => {
@@ -229,10 +237,10 @@ export async function applyArchive(
         const source = await resolveTaskDirectory(harnixRoot, id);
         await moveFolder(harnixRoot, source, taskStorePath(id, "archive"), options);
       });
-    for (const id of plan.tasks) if (await moveTask(id)) result.tasks.push(id);
-    for (const epicId of plan.epics) {
+    for (const id of tasks) if (await moveTask(id)) result.tasks.push(id);
+    for (const epicId of epics) {
       let complete = true;
-      for (const id of plan.epicMembers[epicId] ?? []) complete = (await moveTask(id)) && complete;
+      for (const id of fresh.epicMembers[epicId] ?? []) complete = (await moveTask(id)) && complete;
       if (!complete) continue;
       const moved = await attempt(`epic ${epicId}`, async () => {
         const source = await epicFolder(harnixRoot, epicId);
