@@ -1,0 +1,125 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261030-110107-task-sprawl-guard",
+  "epicId": "20261030-110106-workflow-ergonomics",
+  "title": "Cảnh báo task gần giống khi tạo task mới",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khi tạo task mới, cảnh báo nếu title hoặc goal gần giống task đang mở hoặc đã hoàn thành, qua một helper dùng chung để doctor tái dùng.",
+  "nonGoals": [
+    "Không tự động hủy hay gộp task."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Helper dùng chung trong src/core/workflow (tái dùng foldObservation, observationTokens và jaccard của learning-similarity) coi hai task gần giống khi Jaccard trên token đã fold từ 0.6 trở lên (hằng số có tên, test ở 0.59 và 0.6); workflow --init in notice trên stderr nêu id task gần giống về title hoặc goal: với task planning/ready gợi ý --set-goal hoặc resume, với task completed gợi ý --follow-up <id>; vẫn tạo task. Doctor dùng lại đúng helper này.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-sprawl-3",
+        "ev-chk-suite-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/journal/learning-similarity.ts",
+    "src/core/workflow/actions.ts",
+    "src/core/workflow/init-lineage.ts",
+    "src/core/workflow/init-task.ts",
+    "src/core/workflow/schema.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-sprawl",
+      "description": "Test tập trung cho helper task gần giống và cảnh báo của --init",
+      "command": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-sprawl-1",
+      "checkId": "chk-sprawl",
+      "recordedAt": "2026-10-30T11:31:57.230+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "270971aa03172feb5b0a725b7840040df92baf19438a1517e854b726eed7fca5"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T11:33:19.942+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "91671c739a17e7887bbb7d1a1c6a6813b86110d3d96d47d6b01d04db2cee78b4"
+    },
+    {
+      "id": "ev-chk-sprawl-2",
+      "checkId": "chk-sprawl",
+      "recordedAt": "2026-10-30T11:35:36.080+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "ae204a21a6895d557b6604cc4162234fc570ef9285e68512d7e9208269e69966"
+    },
+    {
+      "id": "ev-chk-sprawl-3",
+      "checkId": "chk-sprawl",
+      "recordedAt": "2026-10-30T11:37:00.808+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ae204a21a6895d557b6604cc4162234fc570ef9285e68512d7e9208269e69966"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T11:38:23.316+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fb22fb70dc43adc8507229f414c15de27aa78a1b7779616d8a7a88f515f59146"
+    }
+  ],
+  "createdAt": "2026-10-30T11:01:06.507+07:00",
+  "updatedAt": "2026-10-30T11:38:52.010+07:00",
+  "decisions": [
+    {
+      "id": "helper-first",
+      "text": "Task này đi đầu epic và sở hữu helper task gần giống; member doctor chỉ tái dùng.",
+      "rationale": "Hai nơi dùng cùng ngưỡng thì không cho kết quả khác nhau."
+    }
+  ],
+  "completedAt": "2026-10-30T11:38:52.010+07:00"
+}

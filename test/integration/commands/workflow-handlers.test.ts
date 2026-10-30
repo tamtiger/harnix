@@ -231,6 +231,45 @@ describe.sequential("workflow --inspect --task", () => {
   });
 });
 
+describe.sequential("workflow --cancel --task", () => {
+  it("cancels another unfinished task, keeps the active pointer and refuses a finished task with a hint", async () => {
+    const root = await fixture();
+    const active = await implementingTaskV3(root);
+    const other = buildTaskV3({ id: "20260814-120000-extra", title: "Extra", goal: "Task thừa" });
+    await saveTask(join(root, ".harnix"), other);
+    process.chdir(root);
+
+    const cancelled = await run(["--cancel", "--task", other.id, "--reason", "Trùng với task đang làm."]);
+    const again = await run(["--cancel", "--task", other.id, "--reason", "Trùng với task đang làm."]);
+    const unchanged = await run(["--inspect"]);
+
+    expect(cancelled.code).toBe(0);
+    expect(JSON.parse(cancelled.out)).toMatchObject({ id: other.id, status: "cancelled" });
+    expect(again.err).toMatch(/terminal task cannot be edited/u);
+    expect(JSON.parse(again.out)).toMatchObject({
+      ok: false,
+      error: { hint: expect.stringContaining("harnix tasks") },
+    });
+    expect(JSON.parse(unchanged.out)).toMatchObject({ activeTask: { id: active.id, status: "in_progress" } });
+  });
+});
+
+describe.sequential("workflow --reason hint", () => {
+  it("names the running flag and a runnable --reason example when the reason is missing after planning", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+
+    const result = await run(["--set-criterion", "a", "--text", "Tiêu chí mới"]);
+
+    expect(result.err).toMatch(/--reason/u);
+    expect(JSON.parse(result.out)).toMatchObject({
+      ok: false,
+      error: { hint: expect.stringContaining('harnix workflow --set-criterion ... --reason "<10-1000 ký tự>"') },
+    });
+  });
+});
+
 describe.sequential("workflow --set-criterion", () => {
   it("rewrites a criterion from flags with accented text and keeps the flag rules", async () => {
     const root = await fixture();

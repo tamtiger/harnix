@@ -187,6 +187,55 @@ describe("task index", () => {
   });
 });
 
+describe("task index brief and stale views", () => {
+  const NOW = Date.parse("2026-09-30T00:00:00.000Z");
+  const oldPlanning = task("20260801-100000-old-planning", "2026-08-26T00:00:00.000Z", "planning");
+  const oldReady = task("20260801-110000-old-ready", "2026-08-27T00:00:00.000Z", "ready");
+  const freshPlanning = task("20260829-100000-fresh-planning", "2026-09-29T00:00:00.000Z", "planning");
+  const source = () => memorySource([oldPlanning, oldReady, freshPlanning], null);
+
+  it("keeps only id, status, checkpoint and updatedAt of each task in the brief view", async () => {
+    const result = await createTaskIndex("unused", { limit: 5, brief: true }, source());
+    expect(result.tasks).toEqual(
+      [freshPlanning, oldReady, oldPlanning].map((record) => ({
+        id: record.id,
+        status: record.status,
+        checkpoint: record.checkpoint,
+        updatedAt: record.updatedAt,
+      })),
+    );
+    expect(result.activeTaskId).toBeNull();
+    expect(JSON.stringify(result)).not.toContain("CANARY");
+  });
+
+  it("lists only planning or ready tasks idle for more than the given days and reports the filter", async () => {
+    const result = await createTaskIndex("unused", { limit: 5, stale: { days: 14 }, nowMs: NOW }, source());
+    expect(result.filter).toEqual({ status: null, limit: 5, stale: true, days: 14 });
+    expect(result.tasks.map((item) => item.id)).toEqual([oldReady.id, oldPlanning.id]);
+    expect(result.summary).toMatchObject({ valid: 3, matched: 2, returned: 2 });
+  });
+
+  it("intersects the stale view with an explicit status filter", async () => {
+    const result = await createTaskIndex(
+      "unused",
+      { limit: 5, status: "ready", stale: { days: 14 }, nowMs: NOW },
+      source(),
+    );
+    expect(result.tasks.map((item) => item.id)).toEqual([oldReady.id]);
+    const none = await createTaskIndex(
+      "unused",
+      { limit: 5, status: "completed", stale: { days: 14 }, nowMs: NOW },
+      source(),
+    );
+    expect(none.tasks).toEqual([]);
+  });
+
+  it("rejects a stale day count outside 1..3650", async () => {
+    await expect(createTaskIndex("unused", { limit: 5, stale: { days: 0 } }, source())).rejects.toThrow(/days/u);
+    await expect(createTaskIndex("unused", { limit: 5, stale: { days: 3651 } }, source())).rejects.toThrow(/days/u);
+  });
+});
+
 function memorySource(records: TaskRecordV1[], activeTaskId: string | null): TaskIndexSource {
   const byId = new Map(records.map((record) => [record.id, record]));
   return {

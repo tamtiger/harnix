@@ -324,7 +324,9 @@ describe("initTaskWorkflow slug", () => {
   it("requires an English --slug when the title is not plain ASCII", async () => {
     const root = await project();
 
-    await expect(initTaskWorkflow(root, { title: "Chuẩn hóa ID" })).rejects.toThrow(/--slug <english-kebab-case>/u);
+    await expect(initTaskWorkflow(root, { title: "Chuẩn hóa ID" })).rejects.toThrow(
+      /--slug <english-kebab-case>[^]*Gợi ý:[^]*--slug task-sprawl-guard/u,
+    );
   });
 
   it("uses a valid --slug for the task id and keeps the Vietnamese title", async () => {

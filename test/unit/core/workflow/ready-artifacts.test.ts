@@ -60,7 +60,7 @@ describe("ready content gate when entering ready", () => {
 
     await expect(
       saveWorkflow(root, { task: toReady(planning), artifacts: { prd, plan: "# Plan\n- [ ] S1 something\n" } }),
-    ).rejects.toThrow("plan.md never mentions criterion 'a'");
+    ).rejects.toThrow(/plan.md never mentions criterion 'a'; add the id to a plan.md checklist item/u);
   });
 
   it("blocks a criterion covered only by the full-scope suite check", async () => {

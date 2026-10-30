@@ -1,0 +1,160 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261030-110109-token-and-check-ergonomics",
+  "epicId": "20261030-110106-workflow-ergonomics",
+  "title": "Liệt kê task gọn, task treo và hint secretAdvisory",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Rà soát nhiều task ít token: tasks --brief phát JSON rút gọn, tasks --stale liệt kê task treo; secretAdvisory của --finish có hint ignore.",
+  "nonGoals": [
+    "Không đổi cơ chế bất biến của check; --replace-check giữ nguyên."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix tasks --brief vẫn phát đúng một tài liệu JSON, mỗi task chỉ gồm id, status, checkpoint và updatedAt (không có title, goal), cùng kiểu với epic --brief; test shape và test cli-contract cập nhật.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-suite-4",
+        "ev-chk-token-3"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "secretAdvisory của --finish giữ path và rule hiện có, thêm trường hint nhắc ba cách đã tồn tại (.gitignore, thu hẹp inputs của check, waiver harnix-secret-waiver), không in giá trị bí mật.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-suite-4",
+        "ev-chk-token-3"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "harnix tasks --stale --days N chỉ liệt kê task planning hoặc ready không cập nhật quá N ngày; kết hợp với --status thì giao của hai bộ lọc; trường filter trong kết quả nêu stale và days.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-suite-4",
+        "ev-chk-token-3"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/cli-workflow-commands.ts",
+    "src/commands/tasks.ts",
+    "src/core/tasks/task-index.ts",
+    "src/core/workflow/schema.ts",
+    "src/core/workflow/secret-scan.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-token",
+      "description": "Test tập trung cho tasks --brief, tasks --stale và hint secretAdvisory",
+      "command": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-token-1",
+      "checkId": "chk-token",
+      "recordedAt": "2026-10-30T11:48:02.690+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7c0bd2f2b183f923c5ec65ebc9589d326cec6176e66557d172e00ce79245e3c5"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T11:49:26.343+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "ff15c86b39dd087a24b178476007cff28dd22f9d889eb42341bc9afd17bdd890"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T11:51:32.718+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "ff15c86b39dd087a24b178476007cff28dd22f9d889eb42341bc9afd17bdd890"
+    },
+    {
+      "id": "ev-chk-token-2",
+      "checkId": "chk-token",
+      "recordedAt": "2026-10-30T11:53:30.965+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "15c98f8fb1382e87756e4f3eb5c90b45df7c6566bc3c8736990a3086810df590"
+    },
+    {
+      "id": "ev-chk-suite-3",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T11:54:52.417+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "118c82ea168d7bcce1ec6e504813bfd70f3c43e3e52d4882ff6ada4c69b2b92b"
+    },
+    {
+      "id": "ev-chk-token-3",
+      "checkId": "chk-token",
+      "recordedAt": "2026-10-30T13:21:17.726+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c5175c87dd60d85021f2e09f43102b1f29523b1dc28222227f0baab79e0898e8"
+    },
+    {
+      "id": "ev-chk-suite-4",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T13:22:38.856+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "34f6135e4d342913ad11940b00cbe28852b5f0428946f6af524f652d22fa0e4e"
+    }
+  ],
+  "createdAt": "2026-10-30T11:01:06.507+07:00",
+  "updatedAt": "2026-10-30T13:23:06.540+07:00",
+  "completedAt": "2026-10-30T13:23:06.540+07:00"
+}

@@ -8,7 +8,7 @@ import { inspectStorageLayout } from "src/core/doctor/layout-finding.js";
 import { inspectTaskRecords } from "src/core/doctor/project-tasks.js";
 import { appendJournal } from "src/core/journal/journal.js";
 import { saveTask } from "src/core/tasks/task.js";
-import { buildCriterion, buildEvidence, buildTaskV3, at } from "test/support/builders.js";
+import { buildCheck, buildCriterion, buildEvidence, buildTaskV3, at } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-doctor-fixtures-");
@@ -74,6 +74,43 @@ describe("task diagnostics fixtures", () => {
     await mkdir(join(root, ".harnix", "tasks", "20260101-000000-flat"), { recursive: true });
 
     expect(await codes(inspectStorageLayout, root)).toContain("task-layout-legacy");
+  });
+});
+
+describe("task preflight diagnostics fixtures", () => {
+  it('produces "task-check-cwd-missing" for a package check without cwd in a multi-package project', async () => {
+    const root = await initialized();
+    await saveTask(
+      join(root, ".harnix"),
+      buildTaskV3({ id: "20260929-090000-pkg", validationPlan: [buildCheck({ inputs: ["api/src/**"] })] }),
+    );
+    const findings: DoctorFinding[] = [];
+
+    await inspectTaskRecords(root, findings, ["api", "web"]);
+
+    expect(findings.map((item) => item.code)).toContain("task-check-cwd-missing");
+  });
+
+  it('produces "task-plan-criterion-missing" for a Full plan.md that skips a criterion', async () => {
+    const root = await initialized();
+    const id = "20260929-090000-plan";
+    await saveTask(join(root, ".harnix"), buildTaskV3({ id, mode: "full" }));
+    const directory = join(root, ".harnix", "tasks", "2026-09", id);
+    await writeFile(join(directory, "prd.md"), ["# PRD", "", "Nội dung.", ""].join("\n"));
+    await writeFile(join(directory, "plan.md"), ["# Plan", "", "- [ ] việc khác", ""].join("\n"));
+
+    expect(await codes(inspectTaskRecords, root)).toContain("task-plan-criterion-missing");
+  });
+
+  it('produces "task-near-duplicate" for two planning tasks that describe the same work', async () => {
+    const root = await initialized();
+    for (const id of ["20260929-090000-first", "20260929-090100-second"])
+      await saveTask(
+        join(root, ".harnix"),
+        buildTaskV3({ id, title: "Standardize webhook secret", goal: "Standardize webhook secret configuration" }),
+      );
+
+    expect(await codes(inspectTaskRecords, root)).toContain("task-near-duplicate");
   });
 });
 

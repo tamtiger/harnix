@@ -15,7 +15,6 @@ import {
   reportProjectCriteria,
 } from "./commands/status.js";
 import { resolveStatusMode } from "./commands/status-mode.js";
-import { listProjectTasks } from "./commands/tasks.js";
 import { listPublicEpics, detailPublicEpic } from "./commands/epic.js";
 import { resumeProjectTask } from "./commands/resume.js";
 import { pauseProjectTask } from "./commands/pause.js";
@@ -30,11 +29,11 @@ import { requireInitializedProject } from "./utils/project-discovery.js";
 import {
   parseReportLimit,
   parseTaskLimit,
-  parseTaskStatus,
   type ProgramOptions,
   type RepoMapCliOptions,
   type StatusCliOptions,
 } from "./cli-helpers.js";
+import { registerTasksCommand } from "./cli-tasks-command.js";
 
 export function registerWorkflowCliCommands(program: Command, programOptions: ProgramOptions): void {
   program
@@ -112,24 +111,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
 `);
     });
 
-  program
-    .command("tasks")
-    .description("List bounded Harnix task metadata")
-    .option("--limit <count>", "Maximum task records (1-100, default 20)")
-    .option(
-      "--status <status>",
-      "Filter by exact task status (planning, ready, in_progress, verifying, blocked, completed, cancelled)",
-    )
-    .option("--archived", "List the read-only archive instead of the live tasks")
-    .action(async (options: { limit?: string; status?: string; archived?: boolean }) => {
-      const status = parseTaskStatus(options.status);
-      const result = await listProjectTasks(process.cwd(), {
-        limit: parseTaskLimit(options.limit ?? "20"),
-        ...(status === undefined ? {} : { status }),
-        ...(options.archived === true ? { archived: true } : {}),
-      });
-      process.stdout.write(`${JSON.stringify(result)}\n`);
-    });
+  registerTasksCommand(program);
 
   program
     .command("epic")

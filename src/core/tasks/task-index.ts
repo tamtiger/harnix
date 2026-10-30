@@ -25,6 +25,12 @@ export interface TaskIndexOptions {
   readonly status?: TaskStatus | undefined;
   /** List the read-only archive instead of the live tasks. */
   readonly archived?: boolean | undefined;
+  /** Only planning or ready tasks not updated for more than `days` days. */
+  readonly stale?: { readonly days: number } | undefined;
+  /** Keep only id, status, checkpoint and updatedAt of each task. */
+  readonly brief?: boolean | undefined;
+  /** The instant stale is measured from; the clock when absent. */
+  readonly nowMs?: number | undefined;
 }
 
 export interface TaskIndexSource {
@@ -46,6 +52,8 @@ export interface TaskIndexItemV1 {
   readonly followUpOf?: string;
 }
 
+export type TaskBriefItemV1 = Pick<TaskIndexItemV1, "id" | "status" | "checkpoint" | "updatedAt">;
+
 export interface TaskIndexResultV1 {
   readonly generator: "harnix";
   readonly schemaVersion: 1;
@@ -56,6 +64,9 @@ export interface TaskIndexResultV1 {
     readonly limit: number;
     /** Present (true) only when the archive was listed. */
     readonly archived?: true;
+    /** Present (true, with `days`) only for the stale view. */
+    readonly stale?: true;
+    readonly days?: number;
   };
   readonly summary: {
     readonly scanned: number;
@@ -68,7 +79,7 @@ export interface TaskIndexResultV1 {
   };
   readonly activeTaskId: string | null;
   readonly attention: readonly [{ readonly code: "active-task-unavailable" }] | readonly [];
-  readonly tasks: readonly TaskIndexItemV1[];
+  readonly tasks: readonly TaskIndexItemV1[] | readonly TaskBriefItemV1[];
 }
 
 const fileSystemTaskIndexSource: TaskIndexSource = {
@@ -155,6 +166,7 @@ export async function createTaskIndex(
   const activeTaskId = activeTask?.id ?? null;
   const matched = validTasks
     .filter((task) => options.status === undefined || task.status === options.status)
+    .filter((task) => isStaleTask(task, options))
     .map((task): TaskIndexItemV1 => ({
       id: task.id,
       mode: task.mode,
@@ -166,7 +178,11 @@ export async function createTaskIndex(
       ...(task.schemaVersion === 3 && task.followUpOf !== undefined ? { followUpOf: task.followUpOf } : {}),
     }))
     .sort(compareTaskItems);
-  const tasks = matched.slice(0, options.limit);
+  const page = matched.slice(0, options.limit);
+  const tasks =
+    options.brief === true
+      ? page.map(({ id, status, checkpoint, updatedAt }) => ({ id, status, checkpoint, updatedAt }))
+      : page;
   const attention: TaskIndexResultV1["attention"] = activeUnavailable ? [{ code: "active-task-unavailable" }] : [];
 
   return {
@@ -174,15 +190,20 @@ export async function createTaskIndex(
     schemaVersion: 1,
     scope: "project",
     status: invalid > 0 || activeUnavailable ? "partial" : "ready",
-    filter: { status: options.status ?? null, limit: options.limit, ...(archived ? { archived: true as const } : {}) },
+    filter: {
+      status: options.status ?? null,
+      limit: options.limit,
+      ...(archived ? { archived: true as const } : {}),
+      ...(options.stale === undefined ? {} : { stale: true as const, days: options.stale.days }),
+    },
     summary: {
       scanned: selectedIds.length,
       valid: validTasks.length,
       invalid,
       matched: matched.length,
-      returned: tasks.length,
+      returned: page.length,
       scanTruncated: directoryIds.length > selectedIds.length,
-      resultTruncated: matched.length > tasks.length,
+      resultTruncated: matched.length > page.length,
     },
     activeTaskId,
     attention,
@@ -190,7 +211,21 @@ export async function createTaskIndex(
   };
 }
 
+const MAX_STALE_DAYS = 3650;
+const DAY_MS = 86_400_000;
+
+function isStaleTask(task: TaskRecord, options: TaskIndexOptions): boolean {
+  if (options.stale === undefined) return true;
+  if (task.status !== "planning" && task.status !== "ready") return false;
+  return (options.nowMs ?? Date.now()) - Date.parse(task.updatedAt) > options.stale.days * DAY_MS;
+}
+
 function assertOptions(options: TaskIndexOptions): void {
+  if (
+    options.stale !== undefined &&
+    (!Number.isInteger(options.stale.days) || options.stale.days < 1 || options.stale.days > MAX_STALE_DAYS)
+  )
+    throw new Error(`Task index --days must be an integer between 1 and ${MAX_STALE_DAYS}.`);
   if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 100)
     throw new Error("Task index limit must be an integer between 1 and 100.");
   if (options.status !== undefined && !taskStatuses.has(options.status))

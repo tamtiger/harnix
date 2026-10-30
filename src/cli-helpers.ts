@@ -97,6 +97,12 @@ export function parseTaskLimit(value: string): number {
   return limit;
 }
 
+export function parseStaleDays(value: string): number {
+  if (!/^\d+$/u.test(value) || Number(value) < 1 || Number(value) > 3650)
+    throw new Error("--days must be an integer between 1 and 3650 for tasks --stale.");
+  return Number(value);
+}
+
 export function parseTaskStatus(value: string | undefined): TaskStatus | undefined {
   if (value === undefined) return undefined;
   const statuses: readonly TaskStatus[] = [

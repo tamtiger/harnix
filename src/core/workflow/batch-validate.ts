@@ -77,7 +77,10 @@ export function validateWorkflowBatchEnvelope(input: unknown): WorkflowBatchEnve
   }
   const envelope = input as WorkflowBatchEnvelope & Record<string, unknown>;
   for (const key of Object.keys(envelope)) {
-    if (!ALLOWED_FIELDS.has(key)) throw new Error(`Unknown field in batch envelope: ${key}`);
+    if (!ALLOWED_FIELDS.has(key))
+      throw new Error(
+        `Unknown field in batch envelope: ${key}\nGợi ý: field hợp lệ của --batch: ${[...ALLOWED_FIELDS].join(", ")}.`,
+      );
   }
   assertArray(envelope.criteria, "Batch criteria must be an array.");
   assertArray(envelope.checks, "Batch checks must be an array.");

@@ -2,6 +2,7 @@ import type { TaskRecordV3 } from "src/core/tasks/task.js";
 import { unknownIdError } from "src/utils/suggest.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { activeV3, noteNothingChanged, saveObligationEdit, type PlanEditOptions } from "./plan-edit.js";
+import { notePlanMissingCriteria } from "./plan-criterion-notice.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
 
@@ -54,6 +55,7 @@ export async function setCriterionWorkflow(
     criterion.id === input.id ? { ...criterion, text, status: "pending" as const, evidenceIds: [] } : criterion,
   );
   const revised = await saveObligationEdit(root, task, { ...task, acceptanceCriteria }, options, now);
+  await notePlanMissingCriteria(root, revised, [input.id]);
   const resumable =
     task.mode === "lite" &&
     task.status === "in_progress" &&

@@ -186,8 +186,9 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--brief":
         "Print only id, status, checkpoint and updatedAt (preflight: without learning); the commands that accept it are listed in constraints.brief.",
       "--finish":
-        "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? } and, only when a file of the task (relevant paths or check inputs) shows a sign of a secret, secretAdvisory { files, findings: [{ path, rule }] } (at most 5, never a value; advice, it does not block).",
-      "--cancel": "Terminal cancellation; the only cancellation transport.",
+        "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? } and, only when a file of the task (relevant paths or check inputs) shows a sign of a secret, secretAdvisory { files, findings: [{ path, rule }], hint } (at most 5, never a value; hint names .gitignore, narrower check inputs and harnix-secret-waiver; advice, it does not block).",
+      "--cancel":
+        "Terminal cancellation; the only cancellation transport. Add --task <task-id> to cancel another unfinished task (the active pointer is cleared only if it names that task).",
       "--tick":
         "Mark checklist item(s) in plan.md as completed (- [x]): --tick <item> (item can be 1-based index '1', 'all', or substring pattern).",
       "--learn":

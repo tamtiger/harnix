@@ -1,5 +1,6 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 
+import { inspectTaskPreflight } from "src/core/doctor/task-preflight.js";
 import { finding, isMissing, redact, type DoctorFinding } from "src/core/doctor/findings.js";
 import { searchJournal, type JournalEntry } from "src/core/journal/journal.js";
 import { analyzeLearningStatement, type LearningRiskKind } from "src/core/journal/learning-safety.js";
@@ -10,7 +11,11 @@ import { normalizeRepositoryPath, resolveSafeHarnixPath } from "src/utils/paths.
 
 type ValidTask = ReturnType<typeof validateTask>;
 
-export async function inspectTaskRecords(root: string, findings: DoctorFinding[]): Promise<void> {
+export async function inspectTaskRecords(
+  root: string,
+  findings: DoctorFinding[],
+  packagePaths: readonly string[] = [],
+): Promise<void> {
   const activePath = await resolveSafeHarnixPath(root, "tasks/.active");
   let activeId: string | undefined;
   try {
@@ -61,6 +66,7 @@ export async function inspectTaskRecords(root: string, findings: DoctorFinding[]
   } catch (error: unknown) {
     if (!isMissing(error)) findings.push(finding("task-root-unreadable", "error", "tasks", redact(error, root), false));
   }
+  await inspectTaskPreflight(root, tasks, packagePaths, findings);
   await inspectJournalRecords(root, tasks, findings);
 }
 

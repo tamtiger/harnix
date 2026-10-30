@@ -4,6 +4,7 @@ import { laterTimestamp, semanticJsonEqual } from "src/core/tasks/workflow-helpe
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertValidCheckInputs, validateCheckInputs } from "./check-input-validator.js";
+import { notePlanMissingCriteria } from "./plan-criterion-notice.js";
 import { saveWorkflow } from "./save.js";
 import { resolveEditableTask } from "./target-task.js";
 import { currentInstant } from "./support.js";
@@ -214,7 +215,9 @@ export async function addCriterionWorkflow(
     ...task.acceptanceCriteria,
     { id: input.id, text, status: "pending" as const, evidenceIds: [] },
   ];
-  return saveObligationEdit(root, task, { ...task, acceptanceCriteria, validationPlan }, options, now);
+  const saved = await saveObligationEdit(root, task, { ...task, acceptanceCriteria, validationPlan }, options, now);
+  await notePlanMissingCriteria(root, saved, [input.id]);
+  return saved;
 }
 
 export async function setPathsWorkflow(

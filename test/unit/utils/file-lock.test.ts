@@ -328,6 +328,30 @@ describe("Harnix file lock", () => {
     expect(await readdir(freshPath)).toEqual([]);
   });
 
+  it.each(["EPERM", "EBUSY"])(
+    "waits and retries when creating the lock directory fails with %s while a holder is releasing",
+    async (code) => {
+      const home = await temporaryUserHome();
+      const path = join(home, "releasing.lock");
+      let failed = false;
+      const lock = await acquireHarnixFileLock(path, {
+        filesystem: nativeFilesystem({
+          mkdir: async (directory, options) => {
+            if (options?.recursive === false && !failed) {
+              failed = true;
+              throw Object.assign(new Error(code), { code });
+            }
+            return mkdir(directory, options);
+          },
+        }),
+        operationId: "after-release",
+      });
+      expect(failed).toBe(true);
+      expect((await readLockDirectory(path)).record.operationId).toBe("after-release");
+      await lock.release();
+    },
+  );
+
   it("never removes a lock directory that was replaced by another operation before release", async () => {
     const home = await temporaryUserHome();
     const path = join(home, "harnix.lock");

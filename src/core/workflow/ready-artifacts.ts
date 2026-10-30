@@ -14,6 +14,7 @@ import {
   type ContentFindings,
 } from "./ready-content.js";
 import { resolveTaskDirectory } from "src/core/tasks/task-location.js";
+import { PLAN_CRITERION_FIX } from "./plan-criterion-notice.js";
 
 const FULL_ARTIFACTS_MESSAGE = "Full tasks require non-empty prd.md and plan.md at ready.";
 const CHECKLIST_MESSAGE =
@@ -75,7 +76,9 @@ export async function artifactFindings(
     issues: [
       ...prd.issues,
       ...plan.issues,
-      ...missingCriteriaInPlan(task, loaded.plan).map((id) => `plan.md never mentions criterion '${id}'`),
+      ...missingCriteriaInPlan(task, loaded.plan).map(
+        (id) => `plan.md never mentions criterion '${id}'; ${PLAN_CRITERION_FIX}`,
+      ),
       ...focused.issues,
     ],
     advisories: [

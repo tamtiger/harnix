@@ -33,6 +33,15 @@ async function project(files: Record<string, string>): Promise<string> {
 }
 
 describe("scanTaskSecrets", () => {
+  it("adds a hint naming the ways to clear a finding, without any value", async () => {
+    const root = await project({ "src/a.txt": `password: "${PASSWORD}"` });
+    const advisory = await scanTaskSecrets(root, task());
+    expect(advisory?.hint).toContain(".gitignore");
+    expect(advisory?.hint).toContain("inputs");
+    expect(advisory?.hint).toContain("harnix-secret-waiver:");
+    expect(advisory?.hint).not.toContain(PASSWORD);
+  });
+
   it.each([
     ["private-key", PRIVATE_KEY],
     ["vendor-token", `aws = ${AWS_KEY}`],
@@ -47,7 +56,11 @@ describe("scanTaskSecrets", () => {
 
     const advisory = await scanTaskSecrets(root, task());
 
-    expect(advisory).toEqual({ files: 1, findings: [{ path: "src/app.json", rule }] });
+    expect(advisory).toEqual({
+      files: 1,
+      findings: [{ path: "src/app.json", rule }],
+      hint: expect.stringContaining(".gitignore"),
+    });
     for (const secret of [PASSWORD, AWS_KEY, GITHUB_TOKEN, JWT]) expect(JSON.stringify(advisory)).not.toContain(secret);
   });
 
@@ -146,6 +159,7 @@ describe("finish report", () => {
     expect(report.secretAdvisory).toEqual({
       files: 1,
       findings: [{ path: "config/ci.json", rule: "credential-assignment" }],
+      hint: expect.stringContaining("harnix-secret-waiver:"),
     });
     expect(JSON.stringify(report)).not.toContain(PASSWORD);
   });

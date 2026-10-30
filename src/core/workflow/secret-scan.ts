@@ -20,7 +20,12 @@ export interface SecretAdvisory {
   files: number;
   /** At most five, in path order; only a relative path and a rule name, never a value. */
   findings: SecretFinding[];
+  /** How to clear a finding; names the existing ways only, never a value. */
+  hint: string;
 }
+
+const ADVISORY_HINT =
+  "Review the listed files: add a path to .gitignore, narrow the inputs of the check that reads it, or mark a deliberate file with a harnix-secret-waiver: comment (a single line takes harnix-ignore-secret).";
 
 interface Rule {
   name: string;
@@ -126,7 +131,7 @@ export async function scanTaskSecrets(root: string, task: TaskRecord): Promise<S
     }
     if (hits.length === 0) return undefined;
     hits.sort((left, right) => (left.path < right.path ? -1 : left.path > right.path ? 1 : 0));
-    return { files: hits.length, findings: hits.slice(0, MAX_FINDINGS) };
+    return { files: hits.length, findings: hits.slice(0, MAX_FINDINGS), hint: ADVISORY_HINT };
   } catch {
     return undefined;
   }

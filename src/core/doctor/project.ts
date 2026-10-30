@@ -92,7 +92,11 @@ export async function diagnoseProjectSection(
   await inspectConfigDrift(root, config, findings);
   await inspectManagedEntries(root, manifest, desired, findings);
   await inspectUntrackedLegacySurfaces(root, manifest, findings);
-  await inspectTaskRecords(root, findings);
+  await inspectTaskRecords(
+    root,
+    findings,
+    config.packages.map((item) => item.path),
+  );
   await inspectStorageLayout(root, findings);
   await inspectTrackedRuntimeFiles(root, findings, git);
   await inspectSensitiveFiles(root, findings);

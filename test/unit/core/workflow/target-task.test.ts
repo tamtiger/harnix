@@ -130,6 +130,7 @@ describe("--task flag ownership", () => {
       addRisk: { text: "t" },
       setPaths: { relevantPath: ["a"] },
       setCriterion: { text: "t" },
+      cancel: { reason: "Task trùng lặp, không làm nữa." },
     };
     for (const action of [
       "setCheck",
@@ -142,9 +143,10 @@ describe("--task flag ownership", () => {
       "removeDecision",
       "removeCriterion",
       "removeRisk",
+      "cancel",
     ])
       expect(() => assertFlagGroups(action, { task: OTHER, ...extras[action] })).not.toThrow();
-    for (const action of ["transition", "finish", "cancel", "runCheck", "evidence"])
+    for (const action of ["transition", "finish", "runCheck", "evidence"])
       expect(() => assertFlagGroups(action, { task: OTHER })).toThrow(/--task .*active task/u);
   });
 });

@@ -4,6 +4,19 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.25.0] - 2026-10-30
+
+### Added
+
+- Cảnh báo task gần giống khi workflow --init (title hoặc goal, Jaccard từ 0.6), gợi ý --set-goal, resume hoặc --follow-up
+- tasks --stale --days N và tasks --brief (JSON rút gọn); secretAdvisory của --finish có hint ignore
+- workflow --cancel --task <id> hủy một task chưa kết thúc khác mà không đổi con trỏ .active; khóa file Windows chờ và thử lại khi mkdir báo EPERM/EBUSY lúc holder trước đang giải phóng và retryOnTaskConflict cho tới 10 lượt (N writer đồng thời cần tới N lượt) — sửa test đồng thời flaky.
+- Epic workflow-ergonomics: cảnh báo task gần giống khi --init, tasks --stale/--brief, hint secretAdvisory, --cancel --task, lỗi flag có lệnh sửa chạy được và notice plan.md, doctor cảnh báo task-check-cwd-missing/task-plan-criterion-missing/task-near-duplicate, khóa file Windows chịu EPERM/EBUSY.
+
+### Changed
+
+- Lỗi --reason, batch field lạ, epic member đã tồn tại và --slug có hint chạy được; --add-criterion/--set-criterion in notice khi plan.md thiếu criterion id, cổng ready nêu cách sửa.
+
 ## [2.24.0] - 2026-11-01
 
 ### Fixed

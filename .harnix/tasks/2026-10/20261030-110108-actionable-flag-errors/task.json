@@ -1,0 +1,133 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261030-110108-actionable-flag-errors",
+  "epicId": "20261030-110106-workflow-ergonomics",
+  "title": "Thông báo lỗi flag có ví dụ chạy được và notice plan.md",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Mọi lỗi về --reason, field lạ trong batch và --slug đều in lệnh sửa chạy được; thêm criterion tự đồng bộ dòng trong plan.md; slug tiếng Việt được bỏ dấu tự động.",
+  "nonGoals": [
+    "Không đổi quy tắc bắt buộc --reason sau planning."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Lỗi thiếu hoặc sai độ dài --reason có hint chứa lệnh mẫu dạng --reason \"<10-1000 ký tự>\" với đúng flag đang chạy.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-errors-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Lỗi Unknown field trong batch liệt kê các field hợp lệ của envelope.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-errors-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Không ghi vào plan.md (file thuộc người dùng): khi --add-criterion hoặc --set-criterion chạy trên task Full mà plan.md chưa nhắc criterion id, lệnh in notice trên stderr nêu id cần thêm; thông báo \"plan.md never mentions criterion\" của ready gate nêu cách sửa (thêm id vào một mục checklist của plan.md).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-errors-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Lỗi Epic member task already exists and differs nêu hint dùng --task <id> với --set-check, --set-criterion hoặc --set-goal để sửa member thay vì --save.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-errors-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Lỗi --init do title có dấu mà thiếu --slug kèm ví dụ chạy được dạng --slug task-sprawl-guard; quy ước ID tiếng Anh không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-errors-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/batch-validate.ts",
+    "src/core/workflow/epic-members.ts",
+    "src/core/workflow/init-task.ts",
+    "src/core/workflow/obligations.ts",
+    "src/core/workflow/plan-edit.ts",
+    "src/core/workflow/ready-artifacts.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-errors",
+      "description": "Test tập trung cho hint lỗi, notice plan.md và hint slug",
+      "command": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-errors-1",
+      "checkId": "chk-errors",
+      "recordedAt": "2026-10-30T13:45:27.922+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b8f55cda9da6c4fc44a9efe33fc70ed12214d1888dac999f7ed624c945bce37c"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T13:47:02.684+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1247236284eeabbd2ad89ba7f05fef14e2dd1d8fdece41f18802e89f74d2e624"
+    }
+  ],
+  "createdAt": "2026-10-30T11:01:06.507+07:00",
+  "updatedAt": "2026-10-30T13:47:10.174+07:00",
+  "completedAt": "2026-10-30T13:47:10.174+07:00"
+}

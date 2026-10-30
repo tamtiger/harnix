@@ -49,7 +49,7 @@ describe("prepareEpicMembers", () => {
     await saveTask(join(root, ".harnix"), progressed);
 
     await expect(prepareEpicMembers(join(root, ".harnix"), [member("11")], EPIC)).rejects.toThrow(
-      /Epic member task .* already exists and differs/u,
+      /Epic member task .* already exists and differs[^]*Gợi ý:[^]*--task .* với --set-check, --set-criterion hoặc --set-goal/u,
     );
   });
 

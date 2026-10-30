@@ -25,7 +25,7 @@ describe("FLAG_OWNERS", () => {
     expect(owner("--with-check")?.actions).toEqual(["init"]);
     expect(owner("--text")?.actions).toContain("setCriterion");
     expect(owner("--task")?.actions).toEqual(
-      expect.arrayContaining(["inspect", "setCriterion", "removeDecision", "removeCriterion"]),
+      expect.arrayContaining(["inspect", "setCriterion", "removeDecision", "removeCriterion", "cancel"]),
     );
     expect(owner("--mitigation")?.actions).toEqual(["addRisk"]);
     expect(owner("--cwd")?.actions).toContain("init");

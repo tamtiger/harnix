@@ -1,0 +1,113 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261030-111311-doctor-task-preflight",
+  "title": "Doctor cảnh báo sớm check thiếu cwd, plan.md lệch và task trùng",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "harnix doctor báo mức warning các lỗi cấu hình task mà hiện chỉ lộ ra ở ready gate hoặc lúc chạy check.",
+  "nonGoals": [],
+  "epicId": "20261030-110106-workflow-ergonomics",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Mã finding warning task-check-cwd-missing: check của task chưa kết thúc không có cwd trong khi inputs nằm trọn trong một package của workspace nhiều package (nguồn package roots được inject để test); check có inputs bao nhiều package hoặc ở gốc thì không cảnh báo.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-doctor-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Mã finding warning task-plan-criterion-missing: plan.md của task Full chưa kết thúc không nhắc một criterion id (tái dùng missingCriteriaInPlan của ready-artifacts).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-doctor-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Mã finding warning task-near-duplicate: hai task planning hoặc ready gần giống bằng đúng helper của task cảnh báo khi tạo task; chỉ so task planning và ready.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-doctor-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-doctor",
+      "description": "Test doctor: mã mới, fixture sinh ra từng mã và danh mục mã",
+      "command": "pnpm exec vitest run test/unit/core/doctor test/integration/commands/doctor.test.ts test/workflow/doctor-finding-fixtures-project.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-doctor-1",
+      "checkId": "chk-doctor",
+      "recordedAt": "2026-10-30T13:52:56.112+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/doctor test/integration/commands/doctor.test.ts test/workflow/doctor-finding-fixtures-project.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "98cf86615a2e00b4bfefadd56af5c29731dc5c32f8a2ca17300c5e2249b79718"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-30T13:54:17.783+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e0246c3724608661d9204f593a2eb9d092b2fa9650d7a294943d054a2a6f0c81"
+    }
+  ],
+  "relevantPaths": [
+    "src/core/doctor/finding-codes-project.ts",
+    "src/core/doctor/project-tasks.ts",
+    "src/core/workflow/ready-artifacts.ts",
+    "test/workflow/doctor-finding-fixtures-project.test.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-30T11:13:11.093+07:00",
+  "updatedAt": "2026-10-30T13:58:15.167+07:00",
+  "decisions": [
+    {
+      "id": "late-member",
+      "text": "Member này được thêm sau khi khởi tạo epic bằng --init --epic --no-activate; chạy sau cùng vì dùng helper của task sprawl-guard.",
+      "rationale": "Doctor phát hiện thêm sau lượt review đầu; thứ tự chạy do epic-order."
+    }
+  ],
+  "completedAt": "2026-10-30T13:58:15.167+07:00"
+}

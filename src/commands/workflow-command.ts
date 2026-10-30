@@ -9,6 +9,7 @@ import {
   selectActions,
   type WorkflowFlags,
 } from "src/commands/workflow-flags.js";
+import { reasonHint } from "src/commands/workflow-error-hints.js";
 import { resolveProjectRoot } from "src/utils/paths.js";
 import { requireInitializedProject } from "src/utils/project-discovery.js";
 
@@ -23,23 +24,23 @@ const joinList = (value: string, previous: string | undefined): string =>
 const accumulate = (value: string, previous: string | string[] | undefined): string | string[] =>
   previous === undefined ? value : [...[previous].flat(), value];
 
-function enhanceErrorMessage(error: unknown): Error {
+function fixedHint(msg: string): string {
+  if (msg.includes("Illegal task transition"))
+    return "Gợi ý: Kiểm tra hợp lệ bằng --dry-run trước; chỉ có thể chuyển từ ready/ready sang in_progress/implementing khi bắt đầu code.";
+  if (msg.includes("Task status/checkpoint combination is invalid"))
+    return "Gợi ý: Kiểm tra bảng legalCheckpoints hoặc hướng dẫn trạng thái trong .harnix/workflow.md.";
+  if (msg.includes("Checklist trong plan.md chưa hoàn tất"))
+    return "Gợi ý: Đánh dấu [x] cho 100% các mục checklist trong plan.md trước khi chuyển sang verifying.";
+  if (msg.includes("Invalid or unsupported task record"))
+    return "Gợi ý: Kiểm tra task.json tuân thủ TaskRecord schema v3 (chạy harnix workflow --schema).";
+  return "";
+}
+
+function enhanceErrorMessage(error: unknown, actions: readonly string[] = []): Error {
   if (!(error instanceof Error)) return new Error(String(error));
   const msg = error.message;
-  let hint = "";
-  if (msg.includes("Illegal task transition")) {
-    hint =
-      "Gợi ý: Kiểm tra hợp lệ bằng --dry-run trước; chỉ có thể chuyển từ ready/ready sang in_progress/implementing khi bắt đầu code.";
-  } else if (msg.includes("Task status/checkpoint combination is invalid")) {
-    hint = "Gợi ý: Kiểm tra bảng legalCheckpoints hoặc hướng dẫn trạng thái trong .harnix/workflow.md.";
-  } else if (msg.includes("Checklist trong plan.md chưa hoàn tất")) {
-    hint = "Gợi ý: Đánh dấu [x] cho 100% các mục checklist trong plan.md trước khi chuyển sang verifying.";
-  } else if (msg.includes("Invalid or unsupported task record")) {
-    hint = "Gợi ý: Kiểm tra task.json tuân thủ TaskRecord schema v3 (chạy harnix workflow --schema).";
-  }
-  if (hint !== "") {
-    error.message = `${msg}\n${hint}`;
-  }
+  const hint = fixedHint(msg) || (reasonHint(msg, actions) ?? "");
+  if (hint !== "") error.message = `${msg}\n${hint}`;
   return error;
 }
 
@@ -61,7 +62,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--title <title>", "Task title for --init")
     .option(
       "--task <task-id>",
-      "Edit this unfinished task instead of the active one (edit commands only; the active pointer stays)",
+      "Edit (or, with --cancel, cancel) this unfinished task instead of the active one (the active pointer stays unless it names that task)",
     )
     .option("--slug <slug>", "English kebab-case slug of the task ID for --init (required for a non-ASCII title)")
     .option("--mode <mode>", "Task mode for --init: lite or full")
@@ -180,7 +181,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
           );
         }
       } catch (error: unknown) {
-        throw enhanceErrorMessage(error);
+        throw enhanceErrorMessage(error, actions);
       }
       process.stdout.write(`${JSON.stringify(result)}\n`);
     });

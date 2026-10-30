@@ -1,0 +1,21 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261030-110106-workflow-ergonomics",
+  "title": "Giảm task trùng lặp và lỗi flag khó đoán trong workflow",
+  "goal": "Xử lý các vấn đề còn lại từ phản hồi sử dụng thực tế: task phình to và trùng lặp, thông báo lỗi flag không có ví dụ chạy được, plan.md lệch với criterion, slug tiếng Việt, và các tiện ích dọn dẹp, tiết kiệm token.",
+  "nonGoals": [
+    "Không thêm lệnh merge task hay file khai báo repos[] đa repo (đã có tìm .harnix ở thư mục cha, --cwd và --task).",
+    "Không thêm cờ --shell; check vẫn là executable cộng mảng đối số.",
+    "Không nới lỏng tính bất biến của check đã có evidence."
+  ],
+  "createdAt": "2026-10-30T11:01:06.507+07:00",
+  "updatedAt": "2026-10-30T11:23:54.829+07:00",
+  "order": [
+    "20261030-110107-task-sprawl-guard",
+    "20261030-110109-token-and-check-ergonomics",
+    "20261030-112342-cancel-single-task",
+    "20261030-110108-actionable-flag-errors",
+    "20261030-111311-doctor-task-preflight"
+  ]
+}

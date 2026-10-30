@@ -73,7 +73,14 @@ describe("CLI command contract", () => {
       "--limit",
       "--workspace",
     ]);
-    expect(tasks?.options.map((option) => option.long)).toEqual(["--limit", "--status", "--archived"]);
+    expect(tasks?.options.map((option) => option.long)).toEqual([
+      "--limit",
+      "--status",
+      "--archived",
+      "--stale",
+      "--days",
+      "--brief",
+    ]);
     const epic = program.commands.find((command) => command.name() === "epic");
     expect(epic?.options.map((option) => option.long)).toEqual(["--limit", "--brief", "--archived"]);
     expect(resume?.options.map((option) => option.long)).toEqual([

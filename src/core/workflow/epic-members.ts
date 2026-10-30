@@ -39,7 +39,7 @@ export async function prepareEpicMembers(
     if (persisted === undefined) created.push(member);
     else if (!semanticTaskEqual(persisted, member)) {
       throw new Error(
-        `Epic member task ${member.id} already exists and differs from the planned member; it is not overwritten.`,
+        `Epic member task ${member.id} already exists and differs from the planned member; it is not overwritten.\nGợi ý: sửa member đã có bằng workflow --task ${member.id} với --set-check, --set-criterion hoặc --set-goal thay vì --save.`,
       );
     }
   }

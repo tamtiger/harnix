@@ -8,6 +8,7 @@ import {
   parseRepoMapOutlineLimit,
   parseRepoMapPath,
   parseRepoMapSymbol,
+  parseStaleDays,
   parseTaskLimit,
   parseTaskStatus,
   platformFlagList,
@@ -81,5 +82,11 @@ describe("CLI helpers", () => {
     const flags = platformFlagList();
     expect(flags).toContain("--kiro");
     expect(flags).toContain("--antigravity");
+  });
+
+  it("parses --days for tasks --stale as an integer between 1 and 3650", () => {
+    expect(parseStaleDays("14")).toBe(14);
+    expect(parseStaleDays("3650")).toBe(3650);
+    for (const bad of ["0", "3651", "x", "1.5", ""]) expect(() => parseStaleDays(bad)).toThrow(/--days/u);
   });
 });

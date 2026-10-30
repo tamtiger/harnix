@@ -13,6 +13,7 @@ import { nowInstant } from "src/utils/clock.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import type { WorkflowFinishDependencies } from "./finish.js";
 import { currentInstant, journalFilePath, refreshLinkedEpicMarkdown } from "./support.js";
+import { resolveEditableTask, targetTaskId } from "./target-task.js";
 import { withWorkflowLock } from "./workflow-lock.js";
 
 export async function cancelWorkflow(root: string, envelope: unknown, injectedNow?: string): Promise<TaskRecord> {
@@ -27,7 +28,7 @@ async function cancelLocked(
   injectedNow: string | undefined,
 ): Promise<TaskRecord> {
   const now = await currentInstant(root, injectedNow);
-  const task = await resolveActiveTask(harnixRoot);
+  const task = await cancellationTarget(harnixRoot);
   if (!task) throw new Error("Workflow cancellation requires an active task.");
   const recovering = task.status === "cancelled" && task.checkpoint === "cancelling";
   const cancellation = recovering ? undefined : validateCancellationEnvelope(envelope);
@@ -37,6 +38,23 @@ async function cancelLocked(
   const cancelled = await cancelWorkflowTask(harnixRoot, journalPath, config.developer, task, cancellation, now);
   await refreshLinkedEpicMarkdown(root, cancelled);
   return cancelled;
+}
+
+/** The `--task` target (unfinished only, hint otherwise) or the active task; the active pointer moves only if it names the target. */
+async function cancellationTarget(harnixRoot: string): Promise<TaskRecord | undefined> {
+  if (targetTaskId() === undefined) return resolveActiveTask(harnixRoot);
+  try {
+    return await resolveEditableTask(harnixRoot);
+  } catch (error: unknown) {
+    if (error instanceof Error && error.message.includes("a terminal task cannot be edited"))
+      throw new Error(
+        `${error.message}\nGợi ý: --cancel chỉ áp dụng cho task chưa kết thúc; liệt kê bằng harnix tasks --status planning.`,
+        {
+          cause: error,
+        },
+      );
+    throw error;
+  }
 }
 
 export async function cancelWorkflowTask(

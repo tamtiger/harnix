@@ -1,0 +1,116 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261030-112342-cancel-single-task",
+  "title": "Hủy một task không active bằng --task",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "workflow --cancel nhận --task <id> để hủy task unfinished không active mà không cần resume, giữ nguyên yêu cầu authorizedBy user.",
+  "nonGoals": [],
+  "epicId": "20261030-110106-workflow-ergonomics",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "workflow --cancel --task <id> --reason <why> hủy đúng một task unfinished không active, không đổi con trỏ .active trừ khi nó trỏ tới task đó; id đã kết thúc bị từ chối kèm hint; --schema, workflow-flag-owners và golden được cập nhật.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-cancel-3"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-cancel",
+      "description": "chk-cancel",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-cancel-1",
+      "checkId": "chk-cancel",
+      "recordedAt": "2026-10-30T13:29:34.453+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "bd65961d02bae7c327df58fd64a49b31da6aa08d8ca754396e3a6c1e4a7511c9"
+    },
+    {
+      "id": "ev-chk-cancel-2",
+      "checkId": "chk-cancel",
+      "recordedAt": "2026-10-30T13:31:27.691+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ef6ee286a93fb080329fbae5a17319172a22c4d9d3445974c7f8b085527dbf45"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-30T13:32:47.114+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "49d5c218f0233345d66f607a171d9a5edce8a3d8260a84e2f4dbef0da70c3834"
+    },
+    {
+      "id": "ev-chk-cancel-3",
+      "checkId": "chk-cancel",
+      "recordedAt": "2026-10-30T13:35:16.572+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow test/unit/commands test/unit/core/workflow test/integration/commands — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a1306d14ac6a644f7220cebf0536feb7dd9fa5e4b459b0d835a842055f5bccda"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-10-30T13:36:37.333+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6e4f97eb13187560d8c7b50b48ccd1388afe2a80c9a981ee96d7a1c98d2ec38d"
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-flag-owners.ts",
+    "src/commands/workflow-handlers.ts",
+    "src/core/workflow/actions.ts",
+    "src/core/workflow/cancel.ts",
+    "src/core/workflow/schema.ts",
+    "src/core/workflow/target-task.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-30T11:23:42.517+07:00",
+  "updatedAt": "2026-10-30T13:37:15.399+07:00",
+  "completedAt": "2026-10-30T13:37:15.399+07:00"
+}

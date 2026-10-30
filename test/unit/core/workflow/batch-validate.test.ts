@@ -21,7 +21,9 @@ describe("validateWorkflowBatchEnvelope", () => {
   });
 
   it("rejects unknown top-level fields, including the old top-level specs", () => {
-    expect(() => validateWorkflowBatchEnvelope({ specs: [] })).toThrow("Unknown field in batch envelope: specs");
+    expect(() => validateWorkflowBatchEnvelope({ specs: [] })).toThrow(
+      /Unknown field in batch envelope: specs[^]*Gợi ý: field hợp lệ[^]*criteria, checks, decisions, risks, paths, reason/u,
+    );
   });
 
   it.each([

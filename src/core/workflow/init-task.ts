@@ -9,6 +9,7 @@ import { equivalentCommand } from "./command-match.js";
 import { resolveLineage } from "./init-lineage.js";
 import type { InitCheckSpec } from "./init-spec.js";
 import { saveWorkflow } from "./save.js";
+import { loadSimilarTasks, similarTaskNotice } from "./similar-tasks.js";
 import { currentInstant } from "./support.js";
 
 export interface InitTaskOptions {
@@ -56,7 +57,7 @@ function resolveSlug(title: string, slug: string | undefined): string {
   // eslint-disable-next-line no-control-regex
   if (/[^\u0000-\u007f]/u.test(title))
     throw new Error(
-      "workflow --init: the title is not plain ASCII, so pass --slug <english-kebab-case> for the task ID.",
+      'workflow --init: the title is not plain ASCII, so pass --slug <english-kebab-case> for the task ID.\nGợi ý: thêm --slug với tên tiếng Anh, ví dụ: workflow --init --title "<tiêu đề>" --slug task-sprawl-guard.',
     );
   return toSlug(title);
 }
@@ -197,9 +198,13 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
         }
       : undefined;
 
-  return (await saveWorkflow(
+  const similar = await loadSimilarTasks(root, { title, goal });
+  const saved = (await saveWorkflow(
     root,
     { task: candidate, ...(artifacts ? { artifacts } : {}) },
     options.activate === false ? { activate: false } : {},
   )) as TaskRecordV3;
+  const notice = similarTaskNotice(similar);
+  if (notice !== undefined) process.stderr.write(notice);
+  return saved;
 }

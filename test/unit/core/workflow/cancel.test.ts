@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { cancelWorkflow, cancelWorkflowTask } from "src/core/workflow/cancel.js";
 import { inspectWorkflow } from "src/core/workflow/inspect.js";
 import { saveWorkflow } from "src/core/workflow/save.js";
+import { withTargetTask } from "src/core/workflow/target-task.js";
 import { appendJournal } from "src/core/journal/journal.js";
 import { cancelTask, saveTask, setActiveTask, loadTask, resolveActiveTask } from "src/core/tasks/task.js";
 import {
@@ -191,5 +192,51 @@ describe("workflow cancel", () => {
       .split("\n")
       .map((line) => JSON.parse(line) as { id: string });
     expect(entries.filter((entry) => entry.id === `${active.id}-cancellation`)).toHaveLength(1);
+  });
+});
+
+describe("workflow cancel --task", () => {
+  const reason = { reason: "Task trùng lặp, không làm nữa.", authorizedBy: "user" };
+
+  async function twoTasks(root: string) {
+    await initializeUtcProject(root);
+    const active = taskV3("planning", "planning");
+    await saveWorkflow(root, { task: active });
+    const other = { ...taskV3("planning", "planning"), id: "20260813-000100-other-task" };
+    await saveTask(join(root, ".harnix"), other);
+    return { active, other };
+  }
+
+  it("cancels another unfinished task and leaves the active pointer on the active task", async () => {
+    const root = await temporaryRepository();
+    const { active, other } = await twoTasks(root);
+
+    const cancelled = await withTargetTask(other.id, () => cancelWorkflow(root, reason, timestamp));
+
+    expect(cancelled).toMatchObject({ id: other.id, status: "cancelled", cancelledAt: timestamp });
+    expect((await resolveActiveTask(join(root, ".harnix")))?.id).toBe(active.id);
+    const journal = await readFile(join(root, ".harnix", "workspace", "tam", "journal", "2026-08-13.jsonl"), "utf8");
+    expect(journal).toContain(`${other.id}-cancellation`);
+  });
+
+  it("clears the pointer only when --task names the active task itself", async () => {
+    const root = await temporaryRepository();
+    const { active } = await twoTasks(root);
+    await withTargetTask(active.id, () => cancelWorkflow(root, reason, timestamp));
+    expect(await resolveActiveTask(join(root, ".harnix"))).toBeUndefined();
+  });
+
+  it("rejects a finished or missing task with a hint and cancels nothing", async () => {
+    const root = await temporaryRepository();
+    const { active, other } = await twoTasks(root);
+    await withTargetTask(other.id, () => cancelWorkflow(root, reason, timestamp));
+
+    await expect(withTargetTask(other.id, () => cancelWorkflow(root, reason, timestamp))).rejects.toThrow(
+      /cancelled; a terminal task cannot be edited\.\nGợi ý: .*harnix tasks/u,
+    );
+    await expect(
+      withTargetTask("20260813-000200-missing", () => cancelWorkflow(root, reason, timestamp)),
+    ).rejects.toThrow(/task not found/u);
+    expect((await resolveActiveTask(join(root, ".harnix")))?.id).toBe(active.id);
   });
 });

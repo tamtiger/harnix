@@ -8,8 +8,10 @@ import {
   defaultProcessIdentityInspector,
   inspectExistingLock,
   inspectOwner,
+  isAlreadyExists,
   isCandidateLost,
   isLockRecordName,
+  isReleasePending,
   isSoleOwnedToken,
   isValidProcessIdentity,
   removeObservedLock,
@@ -207,14 +209,8 @@ async function tryCreateLockDirectory(filesystem: FileLockFileSystem, path: stri
     await filesystem.mkdir(path, { recursive: false });
     return true;
   } catch (error: unknown) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      (error as { code?: string }).code === "EEXIST"
-    ) {
-      return false;
-    }
+    // Windows answers EPERM/EBUSY, not EEXIST, while the previous holder's directory deletion is pending.
+    if (isAlreadyExists(error) || isReleasePending(error)) return false;
     throw error;
   }
 }
