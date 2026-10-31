@@ -147,7 +147,7 @@ harnix status --criteria
 harnix status --workspace [path]
 harnix skill [name] [--raw] [--reference <topic>] [--suggest <query>]
 harnix doctor [--fix] [--global] [--allow-warnings]
-harnix repo-map [--workspace [path...]]
+harnix repo-map --refresh [--workspace [path...]]
 harnix repo-map --query <text> [--format <json|compact|outline>] [--workspace [path...]] [--limit <count>]
 harnix repo-map --impact <path> [--depth <1..3>] [--limit <1..20>]
 harnix repo-map --tests <path> [--limit <1..20>]

@@ -23,6 +23,7 @@ import {
 export function registerProjectCommands(program: Command, programOptions: ProgramOptions): void {
   program
     .command("init")
+    .description("Initialize .harnix project data in this repository")
     .option("--user <name>", "Override the detected developer journal ID")
     .option("--languages <csv>", "Override auto-detected language IDs")
     .option("--technologies <csv>", "Override auto-detected technology IDs")
@@ -52,7 +53,14 @@ export function registerProjectCommands(program: Command, programOptions: Progra
       },
     );
 
-  addPlatformFlags(program.command("setup"), (label) => `Install ${label} user-global integration`)
+  addPlatformFlags(
+    program
+      .command("setup")
+      .description(
+        "Install user-global platform integrations (Kiro, Antigravity, Codex, Claude Code, OpenCode, Cursor)",
+      ),
+    (label) => `Install ${label} user-global integration`,
+  )
     .option("--dry-run", "Preview user-global changes without writing")
     .action(async (options: PlatformFlagOptions & { dryRun?: boolean }) => {
       const platforms = selectedPlatforms(options);
@@ -70,6 +78,7 @@ export function registerProjectCommands(program: Command, programOptions: Progra
   addPlatformFlags(
     program
       .command("update")
+      .description("Regenerate managed project files, or reconcile user-global integrations with --global")
       .option("--restore", "Restore explicitly deleted managed files")
       .option("--global", "Reconcile user-global platform integrations"),
     (label) => `Select ${label} for --global`,
@@ -98,6 +107,7 @@ export function registerProjectCommands(program: Command, programOptions: Progra
 
   program
     .command("upgrade")
+    .description("Show the npm command that upgrades Harnix; --apply runs it")
     .option("--apply", "Run the displayed npm upgrade command")
     .action(async (options: { apply?: boolean }) => {
       const result = await upgradeHarnix({
@@ -113,6 +123,7 @@ export function registerProjectCommands(program: Command, programOptions: Progra
   addPlatformFlags(
     program
       .command("uninstall")
+      .description("Remove project data (--purge), global integrations (--global) or legacy project files")
       .option("--purge", "Remove only this project's .harnix data")
       .option("--global", "Uninstall selected user-global platform integrations")
       .option("--legacy-project-surfaces", "Remove manifest-proven legacy project-local integration files"),

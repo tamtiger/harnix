@@ -63,7 +63,7 @@ describe("CLI command contract", () => {
       "--workspace",
       "--refresh",
     ]);
-    expect(repoMap?.options.find((option) => option.long === "--refresh")?.hidden).toBe(true);
+    expect(repoMap?.options.find((option) => option.long === "--refresh")?.hidden).toBe(false);
     expect(doctor?.options.map((option) => option.long)).toEqual(["--fix", "--global", "--allow-warnings"]);
     expect(status?.options.map((option) => option.long)).toEqual([
       "--explain",

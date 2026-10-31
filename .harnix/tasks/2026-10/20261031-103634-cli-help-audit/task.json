@@ -1,0 +1,64 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261031-103634-cli-help-audit",
+  "title": "Rà soát và bổ sung help cho toàn bộ lệnh CLI",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Hiện --refresh của repo-map và mô tả/tùy chọn của mọi lệnh public trong harnix --help",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix repo-map --help liệt kê --refresh; mọi lệnh public có mô tả và mọi tùy chọn có mô tả",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Kiểm chứng: Rà soát và bổ sung help cho toàn bộ lệnh CLI",
+      "command": "pnpm run test",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-31T10:39:32.430+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "de070d28cc661313eb704c33745a6413779b2b11343512494f95be88dd528e63"
+    },
+    {
+      "id": "ev-check-1-2",
+      "checkId": "check-1",
+      "recordedAt": "2026-10-31T10:41:39.351+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1a5dc746133982dab156283f9172563c7d0ef2306ee0ef26ae2e9b8f19a72d8e"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-31T10:36:34.441+07:00",
+  "updatedAt": "2026-10-31T10:42:13.473+07:00",
+  "completedAt": "2026-10-31T10:42:13.473+07:00"
+}

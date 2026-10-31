@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.23.5] - 2026-10-31
+
+### Fixed
+
+- Hiện repo-map --refresh trong --help và bổ sung mô tả cho mọi lệnh và tùy chọn công khai
+
 ## [2.23.4] - 2026-10-28
 
 ### Changed

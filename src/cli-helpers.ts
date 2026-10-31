@@ -225,3 +225,12 @@ export function validateRepoMapOptions(options: RepoMapCliOptions): void {
   if (options.limit !== undefined && actions.length === 0)
     throw new Error("--limit is not valid without a repo-map query, outline, refs, tests, or impact action.");
 }
+
+export interface StatusCliOptions {
+  explain?: boolean;
+  summary?: boolean;
+  criteria?: boolean;
+  checks?: boolean;
+  limit: string;
+  workspace?: boolean | string;
+}

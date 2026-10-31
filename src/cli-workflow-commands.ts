@@ -1,4 +1,4 @@
-import { Option, type Command } from "commander";
+import { type Command } from "commander";
 
 import { resolveProjectRoot } from "./utils/paths.js";
 import { runInternalContextCommand } from "./commands/internal-context-cli.js";
@@ -33,15 +33,17 @@ import {
   parseTaskStatus,
   type ProgramOptions,
   type RepoMapCliOptions,
+  type StatusCliOptions,
 } from "./cli-helpers.js";
 
 export function registerWorkflowCliCommands(program: Command, programOptions: ProgramOptions): void {
   program
     .command("mem")
-    .argument("[query]")
-    .option("--query <query>")
-    .option("--user <id>")
-    .option("--limit <count>")
+    .description("Search the project journal and learning notes")
+    .argument("[query]", "Search text (same as --query)")
+    .option("--query <query>", "Search text")
+    .option("--user <id>", "Only journal entries of this developer ID")
+    .option("--limit <count>", "Maximum results (positive integer, default 20)")
     .option("--learning", "Return only learning candidates")
     .action(
       async (
@@ -88,7 +90,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--summary", "Print a concise micro-summary under 80 tokens")
     .option("--criteria", "Print a concise list of acceptance criteria with their status and coverage")
     .option("--checks", "Print a concise list of the task's checks with scope, command and freshness")
-    .option("--limit <count>", "Maximum required checks when --explain is set", "20")
+    .option("--limit <count>", "Maximum required checks when --explain is set (1-50)", "20")
     .option("--workspace [path]", "Read-only Git table (branch, changes, upstream) of the sub-repositories")
     .action(async (options: StatusCliOptions, command: Command) => {
       const now = programOptions.statusClock?.() ?? Date.now();
@@ -113,8 +115,11 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
   program
     .command("tasks")
     .description("List bounded Harnix task metadata")
-    .option("--limit <count>", "Maximum task records")
-    .option("--status <status>", "Filter by exact task status")
+    .option("--limit <count>", "Maximum task records (1-100, default 20)")
+    .option(
+      "--status <status>",
+      "Filter by exact task status (planning, ready, in_progress, verifying, blocked, completed, cancelled)",
+    )
     .option("--archived", "List the read-only archive instead of the live tasks")
     .action(async (options: { limit?: string; status?: string; archived?: boolean }) => {
       const status = parseTaskStatus(options.status);
@@ -130,7 +135,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .command("epic")
     .description("List epics, or show one epic with its member tasks and next task")
     .argument("[epic-id]", "Exact epic ID for the detail view")
-    .option("--limit <count>", "Maximum epic records in the list view", "20")
+    .option("--limit <count>", "Maximum epic records in the list view (1-100)", "20")
     .option("--brief", "In the detail view, print only ids, titles, status counts and the next task (no goals)")
     .option("--archived", "In the list view, list the read-only archive instead of the live epics")
     .action(async (epicId: string | undefined, options: { limit: string; brief?: boolean; archived?: boolean }) => {
@@ -180,7 +185,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .command("context-report")
     .description("Explain bounded effective Harnix hook context metadata")
     .option("--platform <platform>", "Target Kiro, Antigravity, Codex, Claude Code, OpenCode, or Cursor")
-    .option("--limit <count>", "Maximum details per context category", "20")
+    .option("--limit <count>", "Maximum details per context category (1-50)", "20")
     .action(async (options: { platform?: string; limit: string }) => {
       const platform = parsePlatformId(options.platform);
       process.stdout.write(
@@ -229,6 +234,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
 
   program
     .command("doctor")
+    .description("Diagnose the project and global Harnix integrations, optionally repairing safe drift")
     .option("--fix", "Repair safe, unchanged managed files")
     .option("--global", "Allow --fix to reconcile safe global integration drift")
     .option("--allow-warnings", "Exit 0 when only warnings remain; errors and invalid state still fail")
@@ -249,6 +255,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
 
   program
     .command("repo-map")
+    .description("Query the structural repository map, or rebuild it with --refresh")
     .option("--query <text>", "Search the structural repository map")
     .option("--impact <path>", "Show cached dependency impact for an exact path")
     .option("--tests <path>", "Show affected test files for an exact path")
@@ -256,12 +263,12 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--refs <symbol>", "Find bounded symbol references across the repository map")
     .option("--symbol <name>", "Filter symbols by name when using --outline")
     .option("--path <path>", "Scope symbol reference lookup to a file and its dependents when using --refs")
-    .option("--limit <count>", "Maximum results")
-    .option("--depth <count>", "Reverse-dependent traversal depth for --impact")
+    .option("--limit <count>", "Maximum results (1-20, default 20; 1-50 for --outline)")
+    .option("--depth <count>", "Reverse-dependent traversal depth for --impact (1-3, default 2)")
     .option("--format <format>", "Result format for --query (json, compact, outline)")
     .option("--events", "Generate cross-service event matrix of publishers and subscribers by topic")
     .option("--workspace [path]", "Index and query across sub-repositories in a workspace")
-    .addOption(new Option("--refresh", "Rebuild the structural repository map").hideHelp())
+    .option("--refresh", "Rebuild the structural repository map (with --workspace, every sub-repository)")
     .action(async (options: RepoMapCliOptions) => {
       process.stdout.write(`${JSON.stringify(await runRepoMapCommand(process.cwd(), options))}\n`);
     });
@@ -300,13 +307,4 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
           : await readBoundedInput(process.stdin, undefined, contextHookStdinIdleTimeoutMs);
       await runInternalContextCommand({ hookInput, platform });
     });
-}
-
-interface StatusCliOptions {
-  explain?: boolean;
-  summary?: boolean;
-  criteria?: boolean;
-  checks?: boolean;
-  limit: string;
-  workspace?: boolean | string;
 }
