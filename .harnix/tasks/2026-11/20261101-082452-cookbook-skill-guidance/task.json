@@ -1,0 +1,77 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261101-082452-cookbook-skill-guidance",
+  "title": "Bổ sung cookbook và skill cho các lệnh hay bị gọi sai",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Đóng B1/C1/C3/R7–R9/R11: cookbook thiếu `--set-baseline`, `--cancel`, `pause`, `repo-map`; thiếu hướng dẫn heredoc có dấu nháy và `PYTHONIOENCODING`; Commit discipline không lặp quy tắc nhánh và pipe. Thành viên cuối đóng epic.",
+  "nonGoals": [
+    "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
+    "Không commit, branch, push hay publish."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Cookbook trong `workflow.md` có dòng cho `--set-baseline` đầy đủ, `--cancel`, `pause` (chỉ `--dry-run`), `repo-map` và ghi `status` không nhận tham số vị trí.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "`cookbook-notes` hướng dẫn script phụ có dấu nháy (ghi file vào `.harnix/tmp/` rồi chạy), `PYTHONIOENCODING`; Commit discipline nhắc `git branch --show-current` và không pipe `git checkout`.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Đã chạy `pnpm selfhost:sync`, skill đúng ngân sách token, phát hành minor đóng epic với `--fold-dev`.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/templates/harnix/workflow.md",
+    "src/skills/harnix-verify/references/cookbook-notes.md"
+  ],
+  "relevantSpecs": [],
+  "epicId": "20261101-082443-harnix-session-review",
+  "createdAt": "2026-11-01T08:24:43.222+07:00",
+  "updatedAt": "2026-11-01T08:24:43.222+07:00",
+  "evidence": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Cổng hợp đồng và test tập trung",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        ".harnix/workflow.md",
+        "src/skills/**",
+        "src/templates/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-3"
+      ]
+    }
+  ]
+}

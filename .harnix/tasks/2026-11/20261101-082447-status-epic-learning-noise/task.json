@@ -1,0 +1,80 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261101-082447-status-epic-learning-noise",
+  "title": "Giảm nhiễu status/resume theo epic cũ và learning draft",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Đóng D2/H10/H11/D4: `status` và `resume --next` quét epic cũ nhất, epic hỏng làm dừng im lặng, thứ tự epic theo ID, draft learning chỉ mô tả code.",
+  "nonGoals": [
+    "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
+    "Không commit, branch, push hay publish."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`status` và `resume --next` bỏ qua epic hỏng hoặc đã archive, báo epic hỏng một dòng và không ném lỗi.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "`harnix epic` sắp theo mốc thời gian hợp lệ và không giấu epic không đọc được.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Learning loại draft chỉ mô tả code hoặc có lệnh ẩn draft khỏi danh sách mặc định, có test.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/status.ts",
+    "src/commands/resume.ts",
+    "src/commands/epic.ts",
+    "src/core/journal/learning-quality.ts"
+  ],
+  "relevantSpecs": [],
+  "epicId": "20261101-082443-harnix-session-review",
+  "createdAt": "2026-11-01T08:24:43.222+07:00",
+  "updatedAt": "2026-11-01T08:24:43.222+07:00",
+  "evidence": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Cổng hợp đồng và test tập trung",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/epic.ts",
+        "src/commands/resume.ts",
+        "src/commands/status.ts",
+        "src/core/journal/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-3"
+      ]
+    }
+  ]
+}

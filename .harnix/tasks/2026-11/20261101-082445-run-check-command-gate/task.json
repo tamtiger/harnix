@@ -1,0 +1,77 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261101-082445-run-check-command-gate",
+  "title": "Chặn --run-check ghi pass khi check không khai command và làm save epic idempotent",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Đóng khe hở A5/R1 (check không khai `command` vẫn nhận argv bất kỳ) và R7 (save epic lỗi giữa chừng để lại trạng thái dở).",
+  "nonGoals": [
+    "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
+    "Không commit, branch, push hay publish."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`--run-check` từ chối ghi pass khi check bắt buộc không khai `command` hoặc argv khác lệnh đã khai, thông báo in lệnh đã khai và gợi ý `status --checks`/`--set-check --command`.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "`--save` có `epic`/`epicMembers` lỗi sau khi ghi task có thể chạy lại idempotent hoặc `doctor` báo finding có fixture.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Có test hồi quy cho cả hai và gate `pnpm test:gates` xanh.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/core/workflow/run-check.ts",
+    "src/core/workflow/save.ts",
+    "src/core/workflow/epic-members.ts"
+  ],
+  "relevantSpecs": [],
+  "epicId": "20261101-082443-harnix-session-review",
+  "createdAt": "2026-11-01T08:24:43.222+07:00",
+  "updatedAt": "2026-11-01T08:24:43.222+07:00",
+  "evidence": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Cổng hợp đồng và test tập trung",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/workflow/**",
+        "test/unit/core/workflow/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-3"
+      ]
+    }
+  ]
+}

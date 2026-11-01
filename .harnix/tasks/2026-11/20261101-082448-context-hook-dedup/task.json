@@ -1,0 +1,74 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261101-082448-context-hook-dedup",
+  "title": "Hook context dedup bền theo session và an toàn khi chạy song song",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Đóng D1/R2/R3/R11: một slot cache chung cho nhiều session, mất con trỏ sau compact, cắt giữa cặp surrogate.",
+  "nonGoals": [
+    "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
+    "Không commit, branch, push hay publish."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Cache dedup khoá theo session nên hai session song song không ghi đè nhau.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Sau compact hoặc khi host không gửi session id, payload vẫn được đưa lại hợp lý và có test cho từng nhánh.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Cắt `contentBudget` không phá cặp surrogate hay cắt giữa lead; `pnpm test:gates` xanh.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/internal-context.ts"
+  ],
+  "relevantSpecs": [],
+  "epicId": "20261101-082443-harnix-session-review",
+  "createdAt": "2026-11-01T08:24:43.222+07:00",
+  "updatedAt": "2026-11-01T08:24:43.222+07:00",
+  "evidence": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Cổng hợp đồng và test tập trung",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/internal-context.ts",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-3"
+      ]
+    }
+  ]
+}

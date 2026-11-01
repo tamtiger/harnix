@@ -1,0 +1,87 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261101-082446-cli-error-hints",
+  "title": "Mọi lỗi CLI hay gặp đều có hint nêu lệnh đúng",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Đóng nhóm B1/H1–H8,H12,H15: lỗi chỉ có `message`, cờ giá trị bắt buộc nuốt token kế tiếp, lệnh/option lạ không có hint, id epic không liệt kê id hợp lệ.",
+  "nonGoals": [
+    "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
+    "Không commit, branch, push hay publish."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Lỗi trong `workflow-flags.ts` (`--brief` không hỗ trợ, `--set-baseline`, `--format`, operands) kèm `hint` nêu lệnh hoặc cờ đúng trong JSON lỗi.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Cờ giá trị bắt buộc không nuốt cờ kế tiếp (`--set-baseline --result pass` báo đúng nguyên nhân); lệnh lạ như `harnix facts` gợi ý `harnix update`.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "`No epic found`, `Repo map/Resume/Pause requires an initialized Harnix project` và `status` thừa đối số đều có hint và danh sách id/project hợp lệ.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Test hợp đồng CLI và golden được cập nhật đúng chuỗi mới, `pnpm test:gates` xanh.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/cli-helpers.ts",
+    "src/cli-hints.ts",
+    "src/commands/workflow-flags.ts",
+    "src/commands/workflow-command.ts",
+    "src/commands/epic.ts"
+  ],
+  "relevantSpecs": [],
+  "epicId": "20261101-082443-harnix-session-review",
+  "createdAt": "2026-11-01T08:24:43.222+07:00",
+  "updatedAt": "2026-11-01T08:24:43.222+07:00",
+  "evidence": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Cổng hợp đồng và test tập trung",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/cli-*.ts",
+        "src/commands/**",
+        "test/unit/**",
+        "test/workflow/cli-contract.test.ts"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-4"
+      ]
+    }
+  ]
+}

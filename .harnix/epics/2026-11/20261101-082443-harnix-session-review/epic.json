@@ -1,0 +1,13 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261101-082443-harnix-session-review",
+  "title": "Khắc phục lỗi harnix tổng hợp từ review 20 session",
+  "goal": "Sửa và refactor các lỗi Harnix còn tồn tại, tổng hợp từ 20 session gần đây và review code HEAD v2.23.5, theo thứ tự toàn vẹn workflow, hint CLI, nhiễu, global, test, tài liệu, cookbook.",
+  "nonGoals": [
+    "Không thêm platform, package hay bề mặt tương thích mới.",
+    "Không đổi frozen schema ngoài phạm vi đã cập nhật tài liệu."
+  ],
+  "createdAt": "2026-11-01T08:24:43.222+07:00",
+  "updatedAt": "2026-11-01T08:24:43.222+07:00"
+}

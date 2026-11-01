@@ -1,0 +1,69 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261101-082450-test-stability",
+  "title": "Ổn định test song song và cô lập mock",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Đóng B7/E2: test 6 writer chập chờn khi tải cao, `isolate: false` không ép `restoreMocks`.",
+  "nonGoals": [
+    "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
+    "Không commit, branch, push hay publish."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Test ghi song song không còn chập chờn qua 20 lần chạy liên tiếp (tăng retry hoặc backoff, hoặc giảm writer, có lý do).",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "`vitest.config.ts` bật `restoreMocks` mà không hạ ngưỡng coverage.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "vitest.config.ts",
+    "src/core/tasks/read-tracker.ts"
+  ],
+  "relevantSpecs": [],
+  "epicId": "20261101-082443-harnix-session-review",
+  "createdAt": "2026-11-01T08:24:43.222+07:00",
+  "updatedAt": "2026-11-01T08:24:43.222+07:00",
+  "evidence": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Cổng hợp đồng và test tập trung",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/tasks/read-tracker.ts",
+        "test/**",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-2"
+      ]
+    }
+  ]
+}

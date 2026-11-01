@@ -1,0 +1,79 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261101-082451-docs-contract-sync",
+  "title": "Đồng bộ PRD, WORKFLOW, PLAN và README với hợp đồng thật",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Đóng E5/E6/R1/R3/R4/R5/R10: tài liệu frozen lệch code về envelope lỗi của hidden workflow, breaker, tiêu chí bất biến và cờ `status`.",
+  "nonGoals": [
+    "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
+    "Không commit, branch, push hay publish."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "`HARNIX_PRD.md` mô tả hidden `workflow` phát envelope lỗi và chỉ `context` được miễn.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Breaker và tiêu chí bất biến trong PRD, WORKFLOW, PLAN khớp `schema.ts` và `AGENTS.md` (digest mới, `--reset-breaker`, `--replace-check`, `--set-criterion --reason`).",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "README liệt kê đủ cờ `status`; test docs và `pnpm test:gates` xanh.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "README.md"
+  ],
+  "relevantSpecs": [],
+  "epicId": "20261101-082443-harnix-session-review",
+  "createdAt": "2026-11-01T08:24:43.222+07:00",
+  "updatedAt": "2026-11-01T08:24:43.222+07:00",
+  "evidence": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Cổng hợp đồng và test tập trung",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "README.md",
+        "docs/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-3"
+      ]
+    }
+  ]
+}

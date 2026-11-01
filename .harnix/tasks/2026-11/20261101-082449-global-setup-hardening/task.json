@@ -1,0 +1,88 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261101-082449-global-setup-hardening",
+  "title": "Siết setup global: notice không bị nuốt, hook Codex cũ, an toàn symlink",
+  "mode": "full",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Đóng R4–R10 của review global và S1/S2: notice bị nuốt khi thiếu launcher, thiếu migrate hooks.json Codex, mã `test-*-required` phát khi có VITEST, symlink dotfile, đọc symlink ngoài root.",
+  "nonGoals": [
+    "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
+    "Không commit, branch, push hay publish."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Notice trust/precedence/shadow của Codex, Antigravity, OpenCode luôn hiển thị kể cả khi thiếu launcher trên PATH.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-2",
+      "text": "Hook Harnix cũ trong `$CODEX_HOME/hooks.json` được migrate hoặc doctor báo rõ; có fixture.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-3",
+      "text": "Mã `test-home-required`/`test-command-lookup-required` không kích hoạt ngoài test thật; ghi atomic giữ nguyên symlink nội bộ; đọc skill/stack không theo symlink ra ngoài root.",
+      "status": "pending",
+      "evidenceIds": []
+    },
+    {
+      "id": "ac-4",
+      "text": "Mọi test dùng home dùng một lần, không đụng home thật; `pnpm test:gates` xanh.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "relevantPaths": [
+    "src/core/global/setup.ts",
+    "src/core/doctor/global.ts",
+    "src/utils/atomic-write.ts"
+  ],
+  "relevantSpecs": [],
+  "epicId": "20261101-082443-harnix-session-review",
+  "createdAt": "2026-11-01T08:24:43.222+07:00",
+  "updatedAt": "2026-11-01T08:24:43.222+07:00",
+  "evidence": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Cổng hợp đồng và test tập trung",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/configurators/**",
+        "src/core/doctor/**",
+        "src/core/global/**",
+        "src/core/spec/**",
+        "src/core/stack/**",
+        "src/utils/atomic-write.ts",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "inputs": [
+        "src/**",
+        "test/**"
+      ],
+      "criterionIds": [
+        "ac-4"
+      ]
+    }
+  ]
+}
