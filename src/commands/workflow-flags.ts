@@ -138,6 +138,12 @@ const ID_FLAGS = [
   ["--set-criterion", "setCriterion", "--text <text>"],
   ["--add-decision", "addDecision", "--text <text> --rationale <why>"],
   ["--add-risk", "addRisk", "--text <text>"],
+  ["--set-check", "setCheck", "--command <cmd> --criteria <ids> --input <globs>"],
+  ["--set-baseline", "setBaseline", "--result <r> --classification <k> --authorized-by <who> --scope <s>"],
+  ["--reset-breaker", "resetBreaker", "--reason <why>"],
+  ["--remove-decision", "removeDecision", ""],
+  ["--remove-criterion", "removeCriterion", ""],
+  ["--remove-risk", "removeRisk", ""],
 ] as const;
 
 /** `--add-decision --text …` makes commander take `--text` as the id; say what the id slot expects instead. */
@@ -145,7 +151,9 @@ function assertIdFlagValues(flags: WorkflowFlags): void {
   for (const [name, key, rest] of ID_FLAGS) {
     const value = flags[key];
     if (typeof value === "string" && (value.startsWith("-") || /\s/u.test(value)))
-      throw new Error(`${name} takes an id (for example dec-1) before the other flags: ${name} <id> ${rest}.`);
+      throw new Error(
+        `${name} takes an id (for example dec-1) before the other flags: ${name} <id>${rest === "" ? "" : ` ${rest}`}.\nGợi ý: cờ giá trị nhận token kế tiếp làm giá trị, nên đặt id ngay sau ${name}.`,
+      );
   }
 }
 
@@ -154,15 +162,18 @@ export function assertCommandShape(action: string, flags: WorkflowFlags, operand
   if (action === "runCheck" && operands.length === 0)
     throw new Error("workflow --run-check requires an executable after --.");
   if (action !== "runCheck" && operands.length > 0)
-    throw new Error(`workflow does not accept operands: ${operands.join(" ")}`);
-  if (flags.brief === true && flags.full === true) throw new Error("--brief and --full are mutually exclusive.");
+    throw new Error(
+      `workflow does not accept operands: ${operands.join(" ")}\nGợi ý: Chỉ --run-check nhận đối số (đặt sau dấu --); cờ giá trị nhận token kế tiếp làm giá trị, nên bỏ đối số thừa hoặc đặt id ngay sau cờ.`,
+    );
+  if (flags.brief === true && flags.full === true)
+    throw new Error("--brief and --full are mutually exclusive.\nGợi ý: Chọn một trong --brief hoặc --full.");
   if (flags.brief === true && !BRIEF_ACTIONS.has(action))
     throw new Error(
-      `--brief is not supported for workflow ${actionFlagName(action)}; it works with ${briefFlagNames().join(", ")}.`,
+      `--brief is not supported for workflow ${actionFlagName(action)}; it works with ${briefFlagNames().join(", ")}.\nGợi ý: bỏ --brief khỏi lệnh này; các cờ hỗ trợ --brief được liệt kê ở trên.`,
     );
   if (flags.full === true && !BRIEF_ACTIONS.has(action))
     throw new Error(
-      `--full is not supported for workflow ${actionFlagName(action)}; it works with ${briefFlagNames().join(", ")}.`,
+      `--full is not supported for workflow ${actionFlagName(action)}; it works with ${briefFlagNames().join(", ")}.\nGợi ý: bỏ --full khỏi lệnh này; các cờ hỗ trợ --full được liệt kê ở trên.`,
     );
   if (action === "snapshot" && flags.check === undefined) throw new Error("workflow --snapshot requires --check <id>.");
   if ((action === "snapshot" || action === "evidence") && flags.check?.includes(","))
@@ -235,7 +246,9 @@ function assertNoteFlags(action: string, flags: WorkflowFlags): void {
     action === "setBaseline" &&
     [flags.result, flags.classification, flags.authorizedBy, flags.scope].includes(undefined)
   )
-    throw new Error("workflow --set-baseline requires --result, --classification, --authorized-by and --scope.");
+    throw new Error(
+      'workflow --set-baseline requires --result, --classification, --authorized-by and --scope.\nGợi ý: harnix workflow --set-baseline <check-id> --result pass|fail --classification pre-existing|introduced|environment|unknown --authorized-by user --scope "<phạm vi được duyệt>".',
+    );
   if (action === "addDecision" && (flags.text === undefined || flags.rationale === undefined))
     throw new Error("workflow --add-decision requires --text and --rationale.");
   if (action === "addRisk" && flags.text === undefined) throw new Error("workflow --add-risk requires --text.");

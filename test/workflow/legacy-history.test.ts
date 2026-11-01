@@ -65,9 +65,10 @@ async function projectWithHistory(): Promise<History> {
 describe("historical task data stays readable", () => {
   let history: History;
 
+  // Reads every persisted task of this repository: allow more than the 10 s default hook timeout under a loaded suite.
   beforeAll(async () => {
     history = await projectWithHistory();
-  });
+  }, 30_000);
 
   it("loads every persisted v1 and v2 task record through the current validator", async () => {
     const { tasks, unreadable } = history;

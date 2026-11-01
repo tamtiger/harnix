@@ -142,7 +142,7 @@ function platformResult(
   const hasDrift = targetOutcomes.some(({ outcome }) => outcome.preserved.length > 0 || outcome.warnings.length > 0);
   const record = getPlatform(platform);
   if (!launcherAvailable) warnings.push(LAUNCHER_WARNING);
-  else if (record.setupNotice !== null) warnings.push(record.setupNotice);
+  if (record.setupNotice !== null) warnings.push(record.setupNotice);
   return {
     platform,
     readiness: hasDrift ? "drifted" : !launcherAvailable ? "binary-unavailable" : record.healthyReadiness,

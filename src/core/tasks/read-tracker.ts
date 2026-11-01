@@ -16,7 +16,11 @@ const reads = new AsyncLocalStorage<Attempt>();
 
 export class TaskConflictError extends Error {}
 
-const MAX_ATTEMPTS = 5;
+/**
+ * Six concurrent writers can each lose a round to the five others, and a loaded machine stretches every round, so five
+ * attempts occasionally ran out. Twelve attempts with a growing wait cover that without hiding a real, stuck conflict.
+ */
+export const MAX_TASK_ATTEMPTS = 12;
 
 const newAttempt = (): Attempt => ({ bases: new Map(), wrote: false });
 
@@ -42,7 +46,7 @@ export async function retryOnTaskConflict<T>(
     try {
       return await reads.run(state, command);
     } catch (error: unknown) {
-      if (!(error instanceof TaskConflictError) || state.wrote || attempt >= MAX_ATTEMPTS) throw error;
+      if (!(error instanceof TaskConflictError) || state.wrote || attempt >= MAX_TASK_ATTEMPTS) throw error;
       await pause(attempt);
     }
   }

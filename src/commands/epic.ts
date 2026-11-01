@@ -8,6 +8,7 @@ import {
   loadEpicOrThrow,
   type EpicRecord,
 } from "src/core/epics/epic.js";
+import { sortEpicIdsNewestFirst } from "src/core/epics/epic-location.js";
 import { orderEpicMembers } from "src/core/epics/order.js";
 
 export interface PublicEpicListResult {
@@ -43,8 +44,8 @@ export interface EpicTaskMember {
 
 export async function listPublicEpics(root: string, limit: number, archived = false): Promise<PublicEpicListResult> {
   const harnixRoot = await resolveSafeHarnixPath(root);
-  // Listed by descending ID: an ID that starts with its creation time (the convention) puts the newest first.
-  const ids = (await listEpicIds(harnixRoot, { scope: archived ? "archive" : "live" })).reverse();
+  // Newest first by the date-time prefix of the ID; legacy IDs without one come last.
+  const ids = sortEpicIdsNewestFirst(await listEpicIds(harnixRoot, { scope: archived ? "archive" : "live" }));
   // `total` counts only the epics that load, so it agrees with what a larger --limit would list.
   let total = 0;
   const shown: { id: string; title: string }[] = [];
@@ -53,8 +54,8 @@ export async function listPublicEpics(root: string, limit: number, archived = fa
       const epic = await loadEpicOrThrow(harnixRoot, epicId);
       total += 1;
       if (shown.length < limit) shown.push({ id: epicId, title: epic.title });
-    } catch {
-      // Skip epics that cannot be loaded.
+    } catch (error) {
+      noticeUnreadableEpic(epicId, error);
     }
   }
   const members = await collectEpicMembersByEpic(
@@ -119,4 +120,26 @@ export async function detailPublicEpic(
             ...(nextTask.title === undefined ? {} : { title: nextTask.title }),
           },
   };
+}
+
+/** An epic that cannot be read is named on stderr (the JSON shape stays), never hidden and never fatal. */
+export function noticeUnreadableEpic(epicId: string, error: unknown): void {
+  const reason = (error instanceof Error ? error.message : String(error)).split("\n")[0];
+  process.stderr.write(`notice: epic ${epicId} cannot be read and was skipped (${reason}).\n`);
+}
+
+/** The newest epic that still has an unfinished task; unreadable epics are skipped with a notice. */
+export async function findNextEpic(
+  root: string,
+): Promise<{ readonly id: string; readonly detail: PublicEpicBriefResult } | undefined> {
+  const harnixRoot = await resolveSafeHarnixPath(root);
+  for (const id of sortEpicIdsNewestFirst(await listEpicIds(harnixRoot))) {
+    try {
+      const detail = (await detailPublicEpic(root, id, true)) as PublicEpicBriefResult;
+      if (detail.nextTask !== null) return { id, detail };
+    } catch (error) {
+      noticeUnreadableEpic(id, error);
+    }
+  }
+  return undefined;
 }

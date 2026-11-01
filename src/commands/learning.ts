@@ -12,7 +12,7 @@ import { readLearningStates } from "src/core/journal/learning-store.js";
 import { currentInstant, journalFilePath } from "src/core/workflow/support.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
-import { findInitializedProject } from "src/utils/project-discovery.js";
+import { findInitializedProject, missingProjectError } from "src/utils/project-discovery.js";
 
 export const LEARNING_STATUSES = ["draft", "candidate", "approved", "promoted", "rejected", "archived"] as const;
 const DEFAULT_LIMIT = 20;
@@ -118,7 +118,7 @@ export async function runLearning(cwd: string, options: LearningCommandOptions):
   const picked = validate(options);
   const limit = parseLimit(options.limit);
   const project = await findInitializedProject({ cwd });
-  if (project.kind !== "ready") throw new Error("Learning requires an initialized Harnix project.");
+  if (project.kind !== "ready") throw await missingProjectError("Learning", cwd);
   const root = project.root;
   const harnixRoot = await resolveSafeHarnixPath(root);
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));

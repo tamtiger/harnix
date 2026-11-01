@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   assertTaskUnchangedSinceRead,
+  MAX_TASK_ATTEMPTS,
   noteTaskRead,
   noteTaskWritten,
   retryOnTaskConflict,
@@ -27,7 +28,7 @@ describe("task read tracker", () => {
     });
   });
 
-  it("reruns a command after a conflict and gives up after five attempts", async () => {
+  it("reruns a command after a conflict and gives up after the attempt limit", async () => {
     let calls = 0;
     await expect(
       retryOnTaskConflict(async () => {
@@ -40,12 +41,15 @@ describe("task read tracker", () => {
 
     let always = 0;
     await expect(
-      retryOnTaskConflict(async () => {
-        always += 1;
-        throw new TaskConflictError("busy");
-      }),
+      retryOnTaskConflict(
+        async () => {
+          always += 1;
+          throw new TaskConflictError("busy");
+        },
+        async () => undefined,
+      ),
     ).rejects.toThrow("busy");
-    expect(always).toBe(5);
+    expect(always).toBe(MAX_TASK_ATTEMPTS);
     await expect(retryOnTaskConflict(async () => Promise.reject(new Error("other")))).rejects.toThrow("other");
   });
 });
@@ -62,6 +66,33 @@ describe("retry scope", () => {
     ).rejects.toThrow("busy");
 
     expect(calls).toBe(1);
+  });
+
+  it("lets a writer that loses many rounds in a row still succeed within MAX_TASK_ATTEMPTS, then gives up", async () => {
+    expect(MAX_TASK_ATTEMPTS).toBeGreaterThan(5);
+    const pauses: number[] = [];
+    const pause = async (attempt: number): Promise<void> => {
+      pauses.push(attempt);
+    };
+    let calls = 0;
+    await expect(
+      retryOnTaskConflict(async () => {
+        calls += 1;
+        if (calls < MAX_TASK_ATTEMPTS) throw new TaskConflictError("busy");
+        return "done";
+      }, pause),
+    ).resolves.toBe("done");
+    expect(calls).toBe(MAX_TASK_ATTEMPTS);
+    expect(pauses).toHaveLength(MAX_TASK_ATTEMPTS - 1);
+
+    let always = 0;
+    await expect(
+      retryOnTaskConflict(async () => {
+        always += 1;
+        throw new TaskConflictError("busy");
+      }, pause),
+    ).rejects.toBeInstanceOf(TaskConflictError);
+    expect(always).toBe(MAX_TASK_ATTEMPTS);
   });
 
   it("waits a little longer before each new attempt", async () => {

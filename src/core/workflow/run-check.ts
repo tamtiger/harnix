@@ -1,13 +1,13 @@
 import { normalizeCheckCwd } from "src/core/tasks/check-cwd.js";
 import { retryOnTaskConflict } from "src/core/tasks/read-tracker.js";
 import { unknownIdError } from "src/utils/suggest.js";
-import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
+import { resolveActiveTask, type TaskRecord, type ValidationCheckV3 } from "src/core/tasks/task.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { saveInputDigestSnapshot } from "src/core/verification/snapshot-cache.js";
 import { runCheckProcess, type CheckRunner } from "src/utils/check-runner.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { launcherFailure, summarizeCheckOutput } from "./check-output.js";
-import { describeCommand, sameCommand } from "./command-match.js";
+import { describeCommand, sameCommand, splitCommand } from "./command-match.js";
 import { appendEvidenceFlagsWorkflow } from "./evidence-flags.js";
 import { assertRetryAllowed } from "./retry-guard.js";
 
@@ -54,6 +54,21 @@ async function resolveRunCwd(
   return declaredCwd === undefined || declaredCwd === "." ? root : resolveSafeProjectPath(root, declaredCwd);
 }
 
+/** A required check must declare the command it runs, and a run must be exactly that command. */
+function assertDeclaredCommand(declared: ValidationCheckV3, argv: readonly string[]): void {
+  if (declared.command === undefined) {
+    if (declared.required)
+      throw new Error(
+        `Check ${declared.id} declares no command, so a run cannot be tied to it; nothing was run. Declare it first: harnix workflow --set-check ${declared.id} --command "<cmd>" --reason "<why>" (see harnix status --checks).`,
+      );
+    return;
+  }
+  if (!sameCommand(declared.command, argv))
+    throw new Error(
+      `Workflow run-check command differs from the command declared by check ${declared.id}. The declared command is: ${describeCommand(splitCommand(declared.command))}`,
+    );
+}
+
 /**
  * Snapshot, run, snapshot, record: the evidence is written only when the
  * check ran against unchanged inputs. The output tail is returned to the
@@ -83,9 +98,7 @@ export async function runCheckWorkflow(
   const beforeSnapshot = await computeInputDigest(root, task, checkId);
   const before = beforeSnapshot.inputDigest;
   assertRetryAllowed(task, checkId, dependencies.now ? Date.parse(dependencies.now) : undefined, before);
-  if (declared.command !== undefined && !sameCommand(declared.command, argv)) {
-    throw new Error(`Workflow run-check command differs from the command declared by check ${checkId}.`);
-  }
+  assertDeclaredCommand(declared, argv);
   const runCwd = await resolveRunCwd(root, checkId, declared.cwd, dependencies.cwd);
   await saveInputDigestSnapshot(harnixRoot, beforeSnapshot);
   const run = await (dependencies.runner ?? runCheckProcess)(executable, args, runCwd);

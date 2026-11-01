@@ -1,0 +1,240 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261102-060925-review-findings-fixes",
+  "title": "Sửa các phát hiện của đợt review lại epic harnix-session-review",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sửa toàn bộ phát hiện A-I của đợt review lại epic harnix-session-review, gộp vào mục 2.24.0 chưa phát hành, không bump version.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Đọc file dùng biên là root dự án: junction thư mục thoát root bị chặn, symlink anh em trong repo vẫn đọc được",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Hint --set-baseline và hint cờ id --remove-* đúng với hành vi thật",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "findNextEpic giữ best-effort cho status khi thư mục epics không an toàn, resume --next vẫn báo lỗi rõ",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Cache context hit chạm mtime (LRU) và test không còn assert luôn đúng",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Repair epic khi .active còn hoặc replay epic khác nội dung có notice (hoặc ghi decision bỏ)",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focused-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Tài liệu frozen và CHANGELOG 2.24.0 đồng bộ, không còn chuỗi 2.24.0-dev, gates xanh",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-focused",
+      "description": "chk-focused",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/utils/safe-read.test.ts test/unit/core/context/session-cache.test.ts test/unit/core/workflow/epic-replay.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "chk-gates",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test:gates",
+      "criterionIds": [
+        "ac-2",
+        "ac-6"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "chk-suite",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T06:14:58.130+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/safe-read.test.ts test/unit/core/context/session-cache.test.ts test/unit/core/workflow/epic-replay.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "acf21cd40cfb78cb3b30cdef43853df5a26d0a7ed6839b4c8524a6695ec1d5a1"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-02T06:15:52.581+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "bef7cc3b17864a7d5cb1cca011c0a15cb145dc6a68b080beeb86f4c5d5386cdc"
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T06:16:22.959+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils/safe-read.test.ts test/unit/core/context/session-cache.test.ts test/unit/core/workflow/epic-replay.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5449f5dde32dd88719d4f817e28f3043d4b0bd7756925ed5c52a6112b21b77b0"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-02T06:16:34.139+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "eb8e82c8ed9cdfed9879f76b0fa905d2974b5bb4042b0deb62960d643270e433"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-02T06:18:24.129+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "51c77720db94e43fb2340c872b61ff708a42b840e5d22d813ab008c2f1d08da9"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-02T06:20:15.199+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "7042be5fd318f2c9cd3c9cd04a92f357febf346e3ca0f4ed9c54a3434c70973c"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-02T06:22:03.594+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7042be5fd318f2c9cd3c9cd04a92f357febf346e3ca0f4ed9c54a3434c70973c"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-02T06:09:25.127+07:00",
+  "updatedAt": "2026-11-02T06:23:09.700+07:00",
+  "decisions": [
+    {
+      "id": "dec-1",
+      "text": "Các sửa gộp vào mục 2.24.0 chưa phát hành: không bump version, không chạy version:sync, chỉ sửa CHANGELOG bằng tay.",
+      "rationale": "Bản 2.24.0 chưa phát hành, tránh tạo thêm phiên bản."
+    },
+    {
+      "id": "dec-2",
+      "text": "Mục F không phải lỗi: persistCandidate ghi task rồi epic, còn .active chỉ đặt sau persist; khi .active còn thì gửi lại cùng envelope đi nhánh save thường và upsert epic. Test hồi quy xác nhận, không sửa code.",
+      "rationale": "Test kịch bản .active còn đã xanh ngay lần đầu."
+    },
+    {
+      "id": "dec-3",
+      "text": "Mục D: status khi không có task active bọc findNextEpic bằng catch (best-effort, bỏ epicContext); resume --next giữ lỗi rõ về đường dẫn thoát root. Mục G: replay giữ epic đã lưu và in notice trên stderr, JSON không đổi. Mục J bỏ qua có chủ đích; JSDoc atomic-write đã nói caller's job.",
+      "rationale": "Giữ hợp đồng JSON, chỉ thêm notice."
+    }
+  ],
+  "completedAt": "2026-11-02T06:23:09.700+07:00"
+}

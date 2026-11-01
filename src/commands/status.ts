@@ -8,8 +8,7 @@ import {
   type StatusEpicContext,
   type StatusSummaryResultV1,
 } from "src/core/status.js";
-import { detailPublicEpic, type PublicEpicBriefResult, type PublicEpicDetailResult } from "src/commands/epic.js";
-import { listEpicIds } from "src/core/epics/epic.js";
+import { detailPublicEpic, findNextEpic, type PublicEpicDetailResult } from "src/commands/epic.js";
 import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
 import { inspectRequiredChecks, type RequiredCheckState } from "src/core/verification/check-report.js";
 import { taskContextDrift } from "src/core/workflow/index.js";
@@ -44,23 +43,14 @@ export async function inspectProjectStatus(cwd: string, now = Date.now()): Promi
   const task = await resolveActiveTask(harnixRoot);
   if (task === undefined) {
     let epicContext;
-    try {
-      const epics = await listEpicIds(harnixRoot);
-      for (const epicId of epics) {
-        const detail = (await detailPublicEpic(project.root, epicId, true)) as PublicEpicBriefResult;
-        if (detail.nextTask !== null) {
-          epicContext = {
-            id: epicId,
-            title: detail.epic.title,
-            nextTask: detail.nextTask,
-            resumeCommand: `harnix resume ${detail.nextTask.id}`,
-          };
-          break;
-        }
-      }
-    } catch {
-      // Best effort
-    }
+    const next = await findNextEpic(project.root).catch(() => undefined);
+    if (next !== undefined)
+      epicContext = {
+        id: next.id,
+        title: next.detail.epic.title,
+        nextTask: next.detail.nextTask as NonNullable<typeof next.detail.nextTask>,
+        resumeCommand: `harnix resume ${next.detail.nextTask?.id ?? ""}`,
+      };
     const noActive = createNoActiveStatus(epicContext);
     const git = await readGitContext(project.root);
     return git === undefined ? noActive : { ...noActive, git };

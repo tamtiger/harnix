@@ -141,3 +141,11 @@ function isInaccessible(error: unknown): boolean {
     ["EACCES", "EPERM"].includes(String((error as { code?: unknown }).code))
   );
 }
+
+/** The error of a command that needs an initialized project, with a `Gợi ý:` line naming how to get inside one. */
+export async function missingProjectError(label: string, cwd: string): Promise<Error> {
+  const children = (await initializedChildrenHint(cwd)).trim();
+  return new Error(
+    `${label} requires an initialized Harnix project.\nGợi ý: chạy từ trong thư mục đã khởi tạo hoặc chạy harnix init trong repository.${children === "" ? "" : ` ${children}`}`,
+  );
+}

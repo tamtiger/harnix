@@ -213,7 +213,9 @@ export function validateRepoMapOptions(options: RepoMapCliOptions): void {
   if (options.depth !== undefined && options.impact === undefined)
     throw new Error("--depth requires repo-map --impact.");
   if (options.format !== undefined && options.query === undefined)
-    throw new Error("--format requires repo-map --query.");
+    throw new Error(
+      "--format requires repo-map --query.\nGợi ý: harnix repo-map --query <text> --format json|compact|outline.",
+    );
   if (
     options.workspace !== undefined &&
     actions.length > 0 &&

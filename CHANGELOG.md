@@ -4,6 +4,21 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.24.0] - 2026-11-01
+
+### Fixed
+
+- run-check từ chối check không khai command; replay save epic idempotent và báo notice khi epic đã có nội dung khác
+- Lỗi CLI hay gặp có hint: cờ id không nuốt cờ kế tiếp, lệnh lạ, epic không tồn tại, thiếu dự án
+- Retry xung đột ghi task tăng giới hạn lượt để test 6 writer đồng thời không chập chờn; bật restoreMocks cho vitest
+- Hook context dedup theo session (slot riêng, giới hạn slot) và cắt contentBudget không phá cặp surrogate
+- Siết setup global: notice không bị nuốt khi thiếu launcher, atomic write ghi vào đích thật của symlink nội bộ và từ chối symlink treo (trước đây thay chính link), đọc skill, manifest và file manifest của stack lấy root dự án làm biên nên không theo symlink hay junction ra ngoài root
+
+### Changed
+
+- status, resume --next và epic chọn epic mới nhất, bỏ qua epic hỏng bằng notice thay vì dừng im lặng
+- Đồng bộ tài liệu frozen (PRD, WORKFLOW, PLAN) với envelope lỗi của workflow, lối thoát breaker và sửa chữ criterion có evidence
+
 ## [2.23.5] - 2026-10-31
 
 ### Fixed

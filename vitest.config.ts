@@ -27,6 +27,8 @@ export default defineConfig({
     // Tests restore process.cwd, process.exitCode and their spies in afterEach and never mock a whole module (an
     // afterEach cannot undo vi.mock; test-structure enforces it), so sharing modules stays safe.
     isolate: false,
+    // Resets every spy before each test, so a spy a test forgets to restore cannot leak into the next file of a worker.
+    restoreMocks: true,
     include: ["test/**/*.test.ts"],
     environment: "node",
     globals: false,

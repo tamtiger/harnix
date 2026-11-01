@@ -4,6 +4,7 @@ import { parse } from "yaml";
 
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { resolvesInside } from "src/utils/safe-read.js";
 
 export interface SkillTemplate {
   name: string;
@@ -43,6 +44,7 @@ export async function discoverProjectSkills(root: string): Promise<readonly Skil
 
   for (const name of entries) {
     const skillDirPath = join(skillsDir, name);
+    if (!(await resolvesInside(root, skillDirPath))) continue;
     try {
       const dirStat = await stat(skillDirPath);
       if (!dirStat.isDirectory()) continue;
@@ -51,6 +53,7 @@ export async function discoverProjectSkills(root: string): Promise<readonly Skil
     }
 
     const skillFilePath = join(skillDirPath, "SKILL.md");
+    if (!(await resolvesInside(root, skillFilePath))) continue;
     let rawContent: string;
     try {
       rawContent = await readFile(skillFilePath, "utf8");
@@ -68,6 +71,7 @@ export async function discoverProjectSkills(root: string): Promise<readonly Skil
         const topic = file.slice(0, -3);
         if (!REFERENCE_TOPIC.test(topic)) continue;
         try {
+          if (!(await resolvesInside(root, join(referencesDir, file)))) continue;
           const refContent = await readFile(join(referencesDir, file), "utf8");
           references[topic] = refContent.replaceAll("\r\n", "\n").trimEnd() + "\n";
         } catch {

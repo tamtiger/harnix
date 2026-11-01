@@ -1,9 +1,8 @@
 import { readConfig } from "src/core/config/config.js";
-import { detailPublicEpic, type PublicEpicBriefResult } from "src/commands/epic.js";
-import { listEpicIds } from "src/core/epics/epic.js";
+import { detailPublicEpic, findNextEpic, type PublicEpicBriefResult } from "src/commands/epic.js";
 import { resumeTask, type TaskResumeResultV1 } from "src/core/tasks/task-resume.js";
 import { loadTask } from "src/core/tasks/task.js";
-import { findInitializedProject } from "src/utils/project-discovery.js";
+import { findInitializedProject, missingProjectError } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 import { briefTask, type BriefTask } from "src/core/workflow/brief.js";
@@ -28,7 +27,7 @@ export async function resumeProjectTask(
   brief = false,
 ): Promise<TaskResumeResultV1 | BriefTask> {
   const project = await findInitializedProject({ cwd });
-  if (project.kind !== "ready") throw new Error("Resume requires an initialized Harnix project.");
+  if (project.kind !== "ready") throw await missingProjectError("Resume", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
 
@@ -43,14 +42,7 @@ export async function resumeProjectTask(
     if (taskId !== undefined) throw new Error("resume --next does not accept a task id.");
     let targetEpic = epicId;
     if (targetEpic === undefined) {
-      const epics = await listEpicIds(harnixRoot);
-      for (const id of epics) {
-        const detail = (await detailPublicEpic(project.root, id, true)) as PublicEpicBriefResult;
-        if (detail.nextTask !== null) {
-          targetEpic = id;
-          break;
-        }
-      }
+      targetEpic = (await findNextEpic(project.root))?.id;
       if (targetEpic === undefined) throw new Error("No unfinished epic task found to resume with --next.");
     }
     const { nextTask } = (await detailPublicEpic(project.root, targetEpic, true)) as PublicEpicBriefResult;

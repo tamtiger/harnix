@@ -1130,7 +1130,7 @@
     },
     {
       "step": "epic-missing",
-      "error": "No epic found with ID 'missing-epic'."
+      "error": "No epic found with ID 'missing-epic'.\nGợi ý: epic hợp lệ: golden-epic."
     }
   ],
   "files": {

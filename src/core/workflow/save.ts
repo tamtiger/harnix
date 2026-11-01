@@ -26,6 +26,7 @@ import { assertNewEvidenceDigests } from "src/core/verification/input-digest.js"
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { contextSelectionInput } from "./context.js";
 import { validateWorkflowSaveEnvelope, type WorkflowSaveArtifacts, type WorkflowSaveEnvelope } from "./envelope.js";
+import { repairEpicSideEffects } from "./epic-replay.js";
 import { prepareEpicMembers, removeEpicMembers, writeEpicMembers } from "./epic-members.js";
 import { isBreakerReset } from "./completion.js";
 import { assertNewEvidenceNotFuture } from "./evidence-time.js";
@@ -137,6 +138,7 @@ async function replayCommittedSave(context: SaveContext, candidate: TaskRecord):
       );
     }
     await assertReplayMatches(root, harnixRoot, candidate, envelope);
+    await repairEpicSideEffects(root, harnixRoot, candidate, envelope);
     await setActiveTask(harnixRoot, candidate.id);
     return existing;
   }

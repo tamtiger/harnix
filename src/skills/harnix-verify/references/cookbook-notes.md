@@ -11,6 +11,9 @@ Shell, encoding and envelope notes behind the Command cookbook of `.harnix/workf
   Use the flag transports (`--set-*`, `--add-*`, `--run-check`), edit `prd.md`, `plan.md` and `design.md` directly, and
   load JSON with `--file <path>` (a Bash heredoc into a pipe can fail with `unexpected EOF`, and a Windows PowerShell 5.1 pipe encodes as ANSI and corrupts UTF-8) (for example `.harnix/tmp/payload.json`, valid for `--init`, `--save`, `--batch` and
   `--migrate`) or bash / `pwsh` 7.4+, where JSON on stdin under 64 KiB is accepted. Prefer `pwsh` 7.4+ on Windows.
+- **Helper scripts:** a script (python, bash) that contains quotes or accents is written with the file tool into
+  `.harnix/tmp/` and then run; never embed it in a heredoc or a bare `cat >`. For python set `PYTHONIOENCODING=utf-8`;
+  `python -I` ignores that variable, so read and write files with an explicit `encoding="utf-8"` instead.
 - **`--save`:** the envelope is in the `agent-transport` reference; use it only for new tasks, task text or research, start from the
   `activeTask` of `harnix workflow --inspect` and follow the `constraints` of `harnix workflow --schema` (no unknown fields). It reports every
   independent problem at once, so fix them together.

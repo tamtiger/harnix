@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { trackTaskReads } from "src/core/tasks/read-tracker.js";
 import { runCheckWorkflow, type CheckRunner } from "src/core/workflow/run-check.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
-import { implementingTaskV3 } from "test/support/workflow-fixtures.js";
+import { commandlessImplementingTaskV3, implementingTaskV3 } from "test/support/workflow-fixtures.js";
 import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -96,25 +96,30 @@ describe("workflow --run-check", () => {
     expect((await resolveActiveTask(join(root, ".harnix")))?.evidence).toEqual(task.evidence);
   });
 
-  it("runs a check that declares no command and records the command that really ran", async () => {
+  it("rejects a required check that declares no command without running or recording anything", async () => {
     const root = await temporaryRepository();
-    const task = await implementingTaskV3(root);
-    const { saveWorkflow } = await import("src/core/workflow/save.js");
-    const { id, description, scope, required, criterionIds, inputs } = task.validationPlan[0]!;
-    await saveWorkflow(root, {
-      task: {
-        ...task,
-        checkpoint: "replan",
-        validationPlan: [{ id, description, scope, required, criterionIds, inputs }],
-      },
-      contractRevision: { reason: "Declare the check without a command" },
-    });
+    await commandlessImplementingTaskV3(root);
     const { runner, calls } = fakeRunner(0);
 
-    const result = await runCheckWorkflow(root, "check", ["node", "tool.js", "--name", "a b"], { runner, now: NOW });
+    await expect(runCheckWorkflow(root, "check", ["node", "tool.js"], { runner, now: NOW })).rejects.toThrow(
+      /declares no command.*--set-check check --command/su,
+    );
 
-    expect(calls).toHaveLength(1);
-    expect(result.task.evidence.at(-1)?.summary).toBe("node tool.js --name a b — exit 0");
+    expect(calls).toEqual([]);
+    const { resolveActiveTask } = await import("src/core/tasks/task.js");
+    expect(
+      (await resolveActiveTask(join(root, ".harnix")))?.evidence.filter((item) => item.checkId === "check"),
+    ).toEqual([]);
+  });
+
+  it("names the declared command when the argv differs", async () => {
+    const root = await temporaryRepository();
+    await implementingTaskV3(root);
+    const { runner } = fakeRunner(0);
+
+    await expect(runCheckWorkflow(root, "check", ["node", "-e", "0"], { runner, now: NOW })).rejects.toThrow(
+      /declared command is: pnpm test/u,
+    );
   });
 
   it("records nothing when the inputs change while the command runs", async () => {

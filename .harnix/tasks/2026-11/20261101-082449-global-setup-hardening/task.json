@@ -4,8 +4,8 @@
   "id": "20261101-082449-global-setup-hardening",
   "title": "Siết setup global: notice không bị nuốt, hook Codex cũ, an toàn symlink",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Đóng R4–R10 của review global và S1/S2: notice bị nuốt khi thiếu launcher, thiếu migrate hooks.json Codex, mã `test-*-required` phát khi có VITEST, symlink dotfile, đọc symlink ngoài root.",
   "nonGoals": [
     "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
@@ -15,50 +15,85 @@
     {
       "id": "ac-1",
       "text": "Notice trust/precedence/shadow của Codex, Antigravity, OpenCode luôn hiển thị kể cả khi thiếu launcher trên PATH.",
-      "status": "pending",
-      "evidenceIds": []
-    },
-    {
-      "id": "ac-2",
-      "text": "Hook Harnix cũ trong `$CODEX_HOME/hooks.json` được migrate hoặc doctor báo rõ; có fixture.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
     },
     {
       "id": "ac-3",
-      "text": "Mã `test-home-required`/`test-command-lookup-required` không kích hoạt ngoài test thật; ghi atomic giữ nguyên symlink nội bộ; đọc skill/stack không theo symlink ra ngoài root.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Ghi atomic vào đích là symlink nội bộ thì ghi vào đích thật của symlink (symlink vẫn còn, không bị thay bằng file thường); symlink treo bị từ chối rõ ràng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
     },
     {
-      "id": "ac-4",
-      "text": "Mọi test dùng home dùng một lần, không đụng home thật; `pnpm test:gates` xanh.",
-      "status": "pending",
-      "evidenceIds": []
+      "id": "ac-5",
+      "text": "discoverProjectSkills bỏ qua thư mục skill, SKILL.md hoặc reference là symlink trỏ ra ngoài root dự án, nên harnix skill không phục vụ nội dung ngoài root.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Stack detection (readSafeText) không đọc manifest là symlink trỏ ra ngoài thư mục dự án.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
     }
   ],
   "relevantPaths": [
     "src/core/global/setup.ts",
-    "src/core/doctor/global.ts",
+    "src/core/spec/project-skills.ts",
+    "src/core/stack/verify-detection.ts",
+    "src/core/stack/workspace-detection.ts",
     "src/utils/atomic-write.ts"
   ],
   "relevantSpecs": [],
   "epicId": "20261101-082443-harnix-session-review",
   "createdAt": "2026-11-01T08:24:43.222+07:00",
-  "updatedAt": "2026-11-01T08:24:43.222+07:00",
-  "evidence": [],
+  "updatedAt": "2026-11-02T00:22:58.340+07:00",
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T00:21:30.683+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/scenarios test/unit/core/doctor test/unit/utils/atomic-write.test.ts test/unit/core/global test/unit/core/spec test/unit/core/stack — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7464ab6181bad0e03fba0cce626ce99033daab1d1a944b6ff9fae95dddaa8122"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-02T00:22:49.585+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3e81c50a511deefc710301bbf0edab36dba6c7eef4da7ef12a7f4e984f8aa6e8"
+    }
+  ],
   "validationPlan": [
     {
       "id": "chk-focused",
       "description": "Cổng hợp đồng và test tập trung",
-      "command": "pnpm test:gates",
+      "command": "pnpm exec vitest run test/integration/scenarios test/unit/core/doctor test/unit/utils/atomic-write.test.ts test/unit/core/global test/unit/core/spec test/unit/core/stack",
       "scope": "focused",
       "required": true,
       "criterionIds": [
         "ac-1",
-        "ac-2",
         "ac-3",
-        "ac-4"
+        "ac-5",
+        "ac-6"
       ],
       "inputs": [
         "src/configurators/**",
@@ -73,16 +108,49 @@
     {
       "id": "chk-suite",
       "description": "Toàn bộ test của dự án xanh",
-      "command": "pnpm test",
+      "command": "pnpm run test",
       "scope": "full",
       "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-3",
+        "ac-5",
+        "ac-6"
+      ],
       "inputs": [
         "src/**",
         "test/**"
-      ],
-      "criterionIds": [
-        "ac-4"
       ]
     }
-  ]
+  ],
+  "decisions": [
+    {
+      "id": "d-drop-ac2",
+      "text": "Bỏ ac-2 (hooks.json Codex): migrate đã có test với bản ghi sidecar; hook không có bản ghi sidecar không được suy ra quyền sở hữu theo AGENTS.md, nên giữ nguyên là hành vi đúng.",
+      "rationale": "Đối chiếu code: migrate dựa vào entry json-member path hooks.json trong sidecar (codex-legacy-setup.test.ts)."
+    },
+    {
+      "id": "d-drop-ac3a",
+      "text": "Bỏ ac-3a (test-home-required khi VITEST) và ac-4 (mọi test dùng home dùng một lần): không có bằng chứng bug; isTestProcess và guard đã ép.",
+      "rationale": "Review ready-review đối chiếu HEAD."
+    },
+    {
+      "id": "d-atomic-symlink",
+      "text": "Atomic write theo symlink nội bộ: resolve realpath của đích rồi ghi vào đích thật; symlink treo bị từ chối. Việc chặn symlink ra ngoài root vẫn do resolveSafeUserPath ở caller.",
+      "rationale": "Tránh thay symlink dotfile bằng file thường."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-codex-unrecorded-hook",
+      "text": "Hook Harnix trong hooks.json Codex không có bản ghi sidecar không được migrate hay cảnh báo (có thể chạy hai lần); chưa có doctor finding.",
+      "severity": "low"
+    },
+    {
+      "id": "r-atomic-follow",
+      "text": "atomicWriteFile theo symlink đích mà không tự kiểm root; an toàn dựa vào resolveSafeUserPath/resolveSafeHarnixPath ở caller. Test symlink file bị bỏ qua có điều kiện trên máy Windows không có quyền tạo symlink (logic vẫn được test qua filesystem inject và junction).",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-02T00:22:58.340+07:00"
 }

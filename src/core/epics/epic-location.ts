@@ -119,6 +119,15 @@ export async function listEpicIds(harnixRoot: string, options: { scope?: ListSco
   return [...ids].sort();
 }
 
+const DATED_EPIC_ID = /^\d{8}-\d{6}-/u;
+
+/** Newest first: ids with a date-time prefix by descending prefix, then legacy ids without one (descending). */
+export function sortEpicIdsNewestFirst(ids: readonly string[]): string[] {
+  const dated = ids.filter((id) => DATED_EPIC_ID.test(id));
+  const legacy = ids.filter((id) => !DATED_EPIC_ID.test(id));
+  return [...dated.sort().reverse(), ...legacy.sort().reverse()];
+}
+
 /** Epic folders still in the flat layout (`epics/<id>/epic.json`) that carry a month, so they can move to a bucket. */
 export async function listLegacyEpicIds(harnixRoot: string): Promise<string[]> {
   const ids = new Set<string>();

@@ -4,8 +4,8 @@
   "id": "20261101-082447-status-epic-learning-noise",
   "title": "Giảm nhiễu status/resume theo epic cũ và learning draft",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Đóng D2/H10/H11/D4: `status` và `resume --next` quét epic cũ nhất, epic hỏng làm dừng im lặng, thứ tự epic theo ID, draft learning chỉ mô tả code.",
   "nonGoals": [
     "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
@@ -14,67 +14,148 @@
   "acceptanceCriteria": [
     {
       "id": "ac-1",
-      "text": "`status` và `resume --next` bỏ qua epic hỏng hoặc đã archive, báo epic hỏng một dòng và không ném lỗi.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "`status` và `resume --next` chọn epic mới nhất còn việc dở trước; epic không đọc được bị bỏ qua với một dòng `notice:` trên stderr, không ném lỗi và không làm mất epic còn lại.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-gates-2",
+        "ev-chk-suite-1"
+      ]
     },
     {
       "id": "ac-2",
-      "text": "`harnix epic` sắp theo mốc thời gian hợp lệ và không giấu epic không đọc được.",
-      "status": "pending",
-      "evidenceIds": []
-    },
-    {
-      "id": "ac-3",
-      "text": "Learning loại draft chỉ mô tả code hoặc có lệnh ẩn draft khỏi danh sách mặc định, có test.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "`harnix epic` sắp epic có tiền tố ngày-giờ theo tiền tố giảm dần, epic legacy không tiền tố xếp sau; epic không đọc được không bị giấu mà báo bằng `notice:` trên stderr, `total` vẫn chỉ đếm epic đọc được.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-gates-2",
+        "ev-chk-suite-1"
+      ]
     }
   ],
   "relevantPaths": [
-    "src/commands/status.ts",
-    "src/commands/resume.ts",
     "src/commands/epic.ts",
-    "src/core/journal/learning-quality.ts"
+    "src/commands/resume.ts",
+    "src/commands/status.ts",
+    "src/core/epics/epic-location.ts",
+    "src/core/epics/epic.ts",
+    "src/core/journal/learning-capture.ts"
   ],
   "relevantSpecs": [],
   "epicId": "20261101-082443-harnix-session-review",
   "createdAt": "2026-11-01T08:24:43.222+07:00",
-  "updatedAt": "2026-11-01T08:24:43.222+07:00",
-  "evidence": [],
+  "updatedAt": "2026-11-02T00:05:15.669+07:00",
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T00:03:15.617+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/status.test.ts test/integration/commands/resume.test.ts test/integration/commands/epic.test.ts test/unit/core/epics — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "da73d9d8f27676f0166e655b28b781559bab4998cd4a8b83322469e444cc6823"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-02T00:03:24.232+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "2c4720b69cd13c4bafe0a3c57302adc618ff761fe8fa3b1fe521a58919b69a3e"
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T00:03:44.060+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/status.test.ts test/integration/commands/resume.test.ts test/integration/commands/epic.test.ts test/unit/core/epics — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f16ca542120fe5321f73ceb16dde58d08bdff03bfe42210b8464e7aaa1117068"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-02T00:03:52.512+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2703375a26a84d7a52c5e5c1a91dad5ea9dea7861427e155a8fb799470ff9379"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-02T00:05:10.677+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ee92a25d1d2aac503b223153109f5097398750e6b61d08e7c8d1ae8d899e3ccf"
+    }
+  ],
   "validationPlan": [
     {
       "id": "chk-focused",
-      "description": "Cổng hợp đồng và test tập trung",
-      "command": "pnpm test:gates",
+      "description": "Test tập trung status/resume/epic",
+      "command": "pnpm exec vitest run test/integration/commands/status.test.ts test/integration/commands/resume.test.ts test/integration/commands/epic.test.ts test/unit/core/epics",
       "scope": "focused",
       "required": true,
       "criterionIds": [
         "ac-1",
-        "ac-2",
-        "ac-3"
+        "ac-2"
       ],
       "inputs": [
         "src/commands/epic.ts",
         "src/commands/resume.ts",
         "src/commands/status.ts",
-        "src/core/journal/**",
-        "test/**"
+        "src/core/epics/**",
+        "test/integration/commands/**",
+        "test/unit/core/epics/**"
       ]
     },
     {
       "id": "chk-suite",
-      "description": "Toàn bộ test của dự án xanh",
-      "command": "pnpm test",
+      "description": "Toàn bộ suite",
+      "command": "pnpm run test",
       "scope": "full",
       "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
       "inputs": [
         "src/**",
         "test/**"
-      ],
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Gate hợp đồng",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
       "criterionIds": [
-        "ac-3"
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
       ]
     }
-  ]
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-ac3",
+      "text": "Bộ lọc learning 'chỉ mô tả code' tổng quát chưa có: isLocalDecisionOnly đã nối vào learning-notes và learning-prune, chỉ bắt câu có đường dẫn/đuôi file mà không có điều kiện áp dụng; draft mô tả hành động không nêu đường dẫn vẫn lọt. Không thêm lệnh mới ở member này.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-02T00:05:15.669+07:00"
 }

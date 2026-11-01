@@ -1,7 +1,7 @@
 import { readConfig } from "src/core/config/config.js";
 import { applyArchive, planArchive, restoreFromArchive, type ArchiveSkip } from "src/core/tasks/archive.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
-import { findInitializedProject } from "src/utils/project-discovery.js";
+import { findInitializedProject, missingProjectError } from "src/utils/project-discovery.js";
 
 export interface ArchiveCommandOptions {
   readonly days?: number | undefined;
@@ -38,7 +38,7 @@ export const DEFAULT_ARCHIVE_DAYS = 30;
 
 export async function archiveProject(cwd: string, options: ArchiveCommandOptions): Promise<ArchiveCommandResult> {
   const project = await findInitializedProject({ cwd });
-  if (project.kind !== "ready") throw new Error("Archive requires an initialized Harnix project.");
+  if (project.kind !== "ready") throw await missingProjectError("Archive", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
   const days = options.days ?? DEFAULT_ARCHIVE_DAYS;

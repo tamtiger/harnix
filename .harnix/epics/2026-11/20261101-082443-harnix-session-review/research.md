@@ -29,10 +29,10 @@ Ngày: 2026-11-01. Báo cáo đã ẩn danh: không có secret, đường dẫn 
 | E2 | `isolate:false` rò mock | Không thấy `vi.mock`; thiếu `restoreMocks:true` | test-stability |
 | E3 | `adopt` trái kế hoạch Phase 6 | Đã đóng (không còn nhánh `adopt`) | không |
 | E4 | Hai regex ReDoS | Đã sửa | không |
-| E5/E6 | Mô tả breaker cũ; envelope lỗi | Code và skills đúng; PRD:160, PRD:275, WORKFLOW:221 còn lệch | docs-contract-sync |
+| E5/E6 | Mô tả breaker cũ; envelope lỗi | Code và skills đúng; PRD:160 (envelope) và PRD:275 (breaker) còn lệch; số dòng WORKFLOW:221 và PLAN 334/778 trong bản đầu sai, phải grep lại cụm cũ | docs-contract-sync |
 
 ## Phát hiện mới chỉ thấy khi đọc code (không có sự cố thực tế)
-- global: notice của Codex/Antigravity/OpenCode bị nuốt khi thiếu launcher trên PATH (P3); mã doctor `test-*-required` phát khi môi trường có `VITEST` (P3); thiếu mã migrate `hooks.json` Codex dù AGENTS.md nêu (P2, cần xác minh); ghi atomic thay symlink dotfile bằng file thường (P3); đọc skill dự án và dò stack theo symlink con ra ngoài root, chỉ đọc (P3) → global-setup-hardening.
+- global: notice của Codex/Antigravity/OpenCode bị nuốt khi thiếu launcher trên PATH (P3); mã doctor `test-*-required` chỉ phát khi `VITEST` được set (review lần hai: có thể đã đúng, cần bằng chứng mới giữ); migrate `hooks.json` Codex đã có test `codex-legacy-setup.test.ts` (review lần hai: chỉ còn câu hỏi hook không có bản ghi sidecar); ghi atomic thay symlink dotfile bằng file thường (P3); đọc skill dự án và dò stack theo symlink con ra ngoài root, chỉ đọc (P3) → global-setup-hardening.
 - `--save` có epic: lỗi sau khi ghi task có thể để epic thiếu (P2, cần xác minh có doctor bắt không) → run-check-command-gate.
 - hint: `harnix epic <id>` không liệt kê id hợp lệ (P2); `--limit` bị nuốt im lặng; mọi lỗi exit 2 (cần xác minh phía docs) → cli-error-hints.
 - chưa xác nhận bằng lint: một số file vượt 300 dòng thô (`plan-edit.ts`, `verify-plan.ts`, `user-paths.ts`, `file-lock.ts`, `workspace-detection.ts`); quy tắc tính theo dòng code nên có thể không vi phạm.

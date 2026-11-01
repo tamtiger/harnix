@@ -54,4 +54,23 @@ describe("cli hints", () => {
   it("leaves a message without a known hint unchanged", () => {
     expect(commandHints(createProgram(), ["node", "harnix", "status"], "Other.")).toBe("Other.");
   });
+
+  it("points an unknown command at harnix update, the nearest command, or nothing", () => {
+    const run = (name: string) =>
+      commandHints(createProgram(), ["node", "harnix", name], `error: unknown command '${name}'`);
+
+    expect(run("facts")).toMatch(/Gợi ý: Dùng harnix update/u);
+    expect(run("statuz")).toMatch(/Có phải ý bạn là harnix status\?/u);
+    expect(run("internal")).toBe("error: unknown command 'internal'");
+  });
+
+  it("says a command takes no arguments when one is given", () => {
+    const message = commandHints(
+      createProgram(),
+      ["node", "harnix", "status", "foo"],
+      "error: too many arguments for 'status'. Expected 0 arguments but got 1.",
+    );
+
+    expect(message).toMatch(/Gợi ý: harnix status không nhận đối số/u);
+  });
 });

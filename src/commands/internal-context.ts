@@ -1,13 +1,14 @@
-import { access, readFile } from "src/utils/fs-access.js";
+import { access } from "src/utils/fs-access.js";
 import { isAbsolute, win32 } from "node:path";
 
 import { readConfig } from "src/core/config/config.js";
 import { UNTRUSTED_CONTEXT_PREFIX, UNTRUSTED_CONTEXT_SUFFIX } from "src/core/context/context.js";
 import { buildEffectiveContext } from "src/core/context/effective-context.js";
+import { shouldElideContext } from "src/core/context/session-cache.js";
 import { getPlatform, type PlatformId } from "src/core/platform/registry.js";
 import { resolveActiveTask } from "src/core/tasks/task.js";
-import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { sha256 } from "src/utils/hashing.js";
+import { safeSlice } from "src/utils/safe-slice.js";
 import { findInitializedProject } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 
@@ -113,25 +114,9 @@ export async function renderInternalContextForHook(options: RenderInternalContex
   try {
     const payload = await renderInternalContext(project.root, options.platform, { forceBounded: true });
     if (event.sessionId !== undefined && payload.length > 0) {
-      const cachePath = await resolveSafeProjectPath(
-        await resolveSafeHarnixPath(project.root),
-        "tmp/context-cache.json",
-      );
-      let previous: { sessionId?: string; payloadHash?: string } | undefined;
-      try {
-        previous = JSON.parse(await readFile(cachePath, "utf8")) as { sessionId?: string; payloadHash?: string };
-      } catch {
-        // Cache miss
-      }
-      const currentHash = sha256(payload);
-      if (previous?.sessionId === event.sessionId && previous?.payloadHash === currentHash) {
+      const tmpDirectory = await resolveSafeProjectPath(await resolveSafeHarnixPath(project.root), "tmp");
+      if (await shouldElideContext(tmpDirectory, event.sessionId, sha256(payload)))
         return emptyPayload(options.platform);
-      }
-      try {
-        await atomicWriteFile(cachePath, JSON.stringify({ sessionId: event.sessionId, payloadHash: currentHash }));
-      } catch {
-        // Best-effort
-      }
     }
     return payload;
   } catch {
@@ -202,7 +187,7 @@ export function boundedContext(source: string, omittedPaths: string[], cap: numb
         .map((entry) => entry.text)
         .join("");
     if (body.length > contentBudget && kept > 0) continue;
-    const content = body.slice(0, contentBudget);
+    const content = safeSlice(body, contentBudget);
     const actualSeparator = content.length > 0 && disclosure.length > 0 ? separator : "";
     return `${UNTRUSTED_CONTEXT_PREFIX}${content}${actualSeparator}${disclosure}${UNTRUSTED_CONTEXT_SUFFIX}`;
   }
@@ -213,7 +198,7 @@ function boundedOmissionDisclosure(paths: string[], cap: number): string {
   const disclosure = `Omitted: ${paths.length === 0 ? "none" : paths.map(serializeOmissionPath).join(", ")}`;
   if (disclosure.length <= cap) return disclosure;
   const summary = `Omitted: ${paths.length} path${paths.length === 1 ? "" : "s"} (details truncated)`;
-  return summary.slice(0, cap);
+  return safeSlice(summary, cap);
 }
 
 function serializeOmissionPath(path: string): string {

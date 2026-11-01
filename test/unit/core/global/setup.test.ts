@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { setupGlobal, type SetupGlobalOptions } from "src/core/global/setup.js";
+import { getPlatform } from "src/core/platform/registry.js";
 import type { GlobalPlanProvider } from "src/core/global/targets.js";
 import { acquireHarnixFileLock } from "src/utils/file-lock.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
@@ -61,6 +62,20 @@ describe("global setup lifecycle", () => {
     expect(codex.platforms[0]?.readiness).toBe("installed-pending-trust");
     expect(codex.platforms[0]?.warnings.join("\n")).toContain("/hooks");
   });
+
+  it.each(["codex", "antigravity", "opencode"] as const)(
+    "keeps the %s notice next to the launcher warning when the launcher is missing",
+    async (platform) => {
+      const result = await setupGlobal(
+        await options({ platforms: [platform], commandLookup: () => Promise.resolve(false) }),
+      );
+      const warnings = result.platforms[0]?.warnings.join(" ") ?? "";
+
+      expect(result.platforms[0]?.readiness).toBe("binary-unavailable");
+      expect(warnings).toContain("not found on PATH");
+      expect(warnings).toContain(getPlatform(platform).setupNotice);
+    },
+  );
 
   it("requires at least one platform", async () => {
     await expect(setupGlobal(await options({ platforms: [] }))).rejects.toThrow("At least one platform");

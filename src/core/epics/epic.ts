@@ -1,12 +1,13 @@
 import { access, mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { isIsoTimestamp, isRecord, unknownFieldsMessage } from "src/core/tasks/task.js";
-import { assertEpicWritable, epicFolder, locateEpicFile } from "./epic-location.js";
+import { assertEpicWritable, epicFolder, listEpicIds, locateEpicFile } from "./epic-location.js";
 import { collectEpicMembers, nextEpicMember } from "./members.js";
 import { orderEpicMembers, validateEpicOrder } from "./order.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { formatDisplay } from "src/utils/clock.js";
 import { readProjectTimezone } from "src/core/config/config.js";
+import { unknownIdError } from "src/utils/suggest.js";
 
 export const epicIdPattern = /^[A-Za-z0-9][A-Za-z0-9._-]*$/u;
 
@@ -137,7 +138,7 @@ export async function loadEpicOrThrow(harnixRoot: string, epicId: string): Promi
   try {
     content = await readFile(await resolveEpicFile(harnixRoot, epicId, "json"), "utf8");
   } catch {
-    throw new Error(`No epic found with ID '${epicId}'.`);
+    throw unknownIdError(`No epic found with ID '${epicId}'.`, "epic", epicId, await listEpicIds(harnixRoot));
   }
   return validateEpic(JSON.parse(content));
 }

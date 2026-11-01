@@ -1,4 +1,4 @@
-import { chmod, mkdir, rename, rm, stat, writeFile } from "node:fs/promises";
+import { chmod, lstat, mkdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { randomBytes } from "node:crypto";
 
@@ -9,6 +9,8 @@ export interface AtomicFileSystem {
   rm(filePath: string, options: { force: true }): Promise<void>;
   stat?(filePath: string): Promise<{ mode: number }>;
   chmod?(filePath: string, mode: number): Promise<void>;
+  lstat?(filePath: string): Promise<{ isSymbolicLink(): boolean }>;
+  realpath?(filePath: string): Promise<string>;
 }
 
 export interface AtomicWriteOptions {
@@ -22,15 +24,21 @@ const windowsRenameRetryDelaysMs = [10, 25, 50, 100, 200, 400] as const;
 
 const defaultFilesystem: AtomicFileSystem = {
   chmod,
+  lstat,
   mkdir,
+  realpath,
   writeFile,
   rename,
   rm,
   stat,
 };
 
+/**
+ * Replaces a file atomically. A symlink destination is followed once so the real target is replaced and the link
+ * survives; a dangling link is refused. Keeping symlinks inside a safe root is the caller's job (resolveSafe* helpers).
+ */
 export async function atomicWriteFile(
-  destination: string,
+  requestedDestination: string,
   content: string | Uint8Array,
   options: AtomicWriteOptions = {},
 ): Promise<void> {
@@ -39,6 +47,7 @@ export async function atomicWriteFile(
   const renameRetryDelaysMs = validateRenameRetryDelays(
     options.renameRetryDelaysMs ?? (process.platform === "win32" ? windowsRenameRetryDelaysMs : []),
   );
+  const destination = await followSymlink(filesystem, requestedDestination);
   const temporaryPath = `${destination}.${randomSuffix()}.tmp`;
   const preservedMode = await existingMode(filesystem, destination);
 
@@ -56,6 +65,21 @@ export async function atomicWriteFile(
       // Preserve the original write failure when best-effort cleanup also fails.
     }
     throw error;
+  }
+}
+
+async function followSymlink(filesystem: AtomicFileSystem, destination: string): Promise<string> {
+  if (filesystem.lstat === undefined || filesystem.realpath === undefined) return destination;
+  try {
+    if (!(await filesystem.lstat(destination)).isSymbolicLink()) return destination;
+  } catch (error: unknown) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return destination;
+    throw error;
+  }
+  try {
+    return await filesystem.realpath(destination);
+  } catch {
+    throw new Error("Refusing to write through a dangling symlink destination.");
   }
 }
 

@@ -1,8 +1,9 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 import { parse } from "yaml";
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath } from "src/utils/paths.js";
+import { readTextInside } from "src/utils/safe-read.js";
 import { matchesSafeGlob } from "src/utils/safe-glob.js";
 import { isDotnetProjectFile, isSolutionFile, solutionProjectPaths } from "./dotnet-projects.js";
 import { detectEcosystemVerify, type EcosystemVerifyResult } from "./verify-detection.js";
@@ -69,7 +70,7 @@ export async function detectWorkspaces(
 }
 
 async function collectPnpmWorkspaces(root: string, packagePaths: Set<string>, ignore?: HarnixIgnore): Promise<void> {
-  const text = await readSafeText(join(root, "pnpm-workspace.yaml"));
+  const text = await readTextInside(root, join(root, "pnpm-workspace.yaml"));
   if (text === undefined) return;
   try {
     const parsed = parse(text) as { packages?: string[] };
@@ -82,7 +83,7 @@ async function collectPnpmWorkspaces(root: string, packagePaths: Set<string>, ig
 }
 
 async function collectNpmWorkspaces(root: string, packagePaths: Set<string>, ignore?: HarnixIgnore): Promise<void> {
-  const text = await readSafeText(join(root, "package.json"));
+  const text = await readTextInside(root, join(root, "package.json"));
   if (text === undefined) return;
   try {
     const parsed = JSON.parse(text) as { workspaces?: string[] | { packages?: string[] } };
@@ -100,7 +101,7 @@ async function collectNpmWorkspaces(root: string, packagePaths: Set<string>, ign
 }
 
 async function collectCargoWorkspaces(root: string, packagePaths: Set<string>, ignore?: HarnixIgnore): Promise<void> {
-  const text = await readSafeText(join(root, "Cargo.toml"));
+  const text = await readTextInside(root, join(root, "Cargo.toml"));
   if (text === undefined || !text.includes("[workspace]")) return;
   const match = /members\s*=\s*\[([\s\S]*?)\]/u.exec(text);
   if (match) {
@@ -113,7 +114,7 @@ async function collectCargoWorkspaces(root: string, packagePaths: Set<string>, i
 }
 
 async function collectGoWorkspaces(root: string, packagePaths: Set<string>, ignore?: HarnixIgnore): Promise<void> {
-  const text = await readSafeText(join(root, "go.work"));
+  const text = await readTextInside(root, join(root, "go.work"));
   if (text === undefined) return;
   const match = /use\s*\(([\s\S]*?)\)/u.exec(text);
   if (match) {
@@ -129,7 +130,7 @@ async function collectGoWorkspaces(root: string, packagePaths: Set<string>, igno
 }
 
 async function collectMavenWorkspaces(root: string, packagePaths: Set<string>, ignore?: HarnixIgnore): Promise<void> {
-  const text = await readSafeText(join(root, "pom.xml"));
+  const text = await readTextInside(root, join(root, "pom.xml"));
   if (text === undefined || !text.includes("<modules>")) return;
   const moduleRegex = /<module>\s*([^<\s]+)\s*<\/module>/gu;
   let match: RegExpExecArray | null;
@@ -171,7 +172,7 @@ async function collectDotNetWorkspaces(
   const covered = new Set<string>();
   const solutionDirs = new Set<string>();
   for (const slnPath of await findSolutionFiles(root, root, 0, ignore)) {
-    const text = await readSafeText(slnPath);
+    const text = await readTextInside(root, slnPath);
     if (!text) continue;
     const slnDir = dirname(slnPath);
     const slnRel = relative(root, slnDir).replaceAll("\\", "/");
@@ -307,15 +308,5 @@ async function discoverNestedManifests(
     }
   } catch {
     /* ignore directory read error */
-  }
-}
-
-async function readSafeText(filePath: string): Promise<string | undefined> {
-  try {
-    const s = await stat(filePath);
-    if (s.size > 256 * 1024) return undefined;
-    return await readFile(filePath, "utf8");
-  } catch {
-    return undefined;
   }
 }

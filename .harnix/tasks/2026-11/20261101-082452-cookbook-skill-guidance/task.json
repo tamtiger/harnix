@@ -4,8 +4,8 @@
   "id": "20261101-082452-cookbook-skill-guidance",
   "title": "Bổ sung cookbook và skill cho các lệnh hay bị gọi sai",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Đóng B1/C1/C3/R7–R9/R11: cookbook thiếu `--set-baseline`, `--cancel`, `pause`, `repo-map`; thiếu hướng dẫn heredoc có dấu nháy và `PYTHONIOENCODING`; Commit discipline không lặp quy tắc nhánh và pipe. Thành viên cuối đóng epic.",
   "nonGoals": [
     "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
@@ -14,46 +14,140 @@
   "acceptanceCriteria": [
     {
       "id": "ac-1",
-      "text": "Cookbook trong `workflow.md` có dòng cho `--set-baseline` đầy đủ, `--cancel`, `pause` (chỉ `--dry-run`), `repo-map` và ghi `status` không nhận tham số vị trí.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Khối Command cookbook của `workflow.md` có dòng cú pháp đầy đủ cho `--set-baseline`, `--cancel --reason`, `pause` (chỉ nhận `--dry-run`, không nhận `--brief`), `repo-map`, và ghi rõ `status` không nhận tham số vị trí.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-3"
+      ]
     },
     {
       "id": "ac-2",
-      "text": "`cookbook-notes` hướng dẫn script phụ có dấu nháy (ghi file vào `.harnix/tmp/` rồi chạy), `PYTHONIOENCODING`; Commit discipline nhắc `git branch --show-current` và không pipe `git checkout`.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "`cookbook-notes` hướng dẫn script phụ có dấu nháy (ghi file bằng công cụ file vào `.harnix/tmp/` rồi chạy, không heredoc nhúng nháy), `PYTHONIOENCODING`/`python -I`; Commit discipline trong `workflow.md` chỉ trỏ tới quy tắc có sẵn, không lặp lại.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-3"
+      ]
     },
     {
       "id": "ac-3",
-      "text": "Đã chạy `pnpm selfhost:sync`, skill đúng ngân sách token, phát hành minor đóng epic với `--fold-dev`.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Đã chạy `pnpm selfhost:sync`: `.harnix/workflow.md` được regenerate và manifest khớp template.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-3",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Các skill và template đúng ngân sách token (test instruction-budget xanh) và qua checklist SKILL.md: không nhắc lệnh riêng của repo, mỗi reference có một dòng trỏ tới nó, dòng phiên bản cập nhật.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-3"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Đã phát hành minor 2.24.0 đóng epic bằng `pnpm version:sync --fold-dev`: các mục dev.1-dev.7 gộp thành một entry `2.24.0` trong CHANGELOG.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-3"
+      ]
     }
   ],
   "relevantPaths": [
-    "src/templates/harnix/workflow.md",
-    "src/skills/harnix-verify/references/cookbook-notes.md"
+    ".harnix/.template-hashes.json",
+    ".harnix/workflow.md",
+    "CHANGELOG.md",
+    "package.json",
+    "src/skills/harnix-verify/references/cookbook-commands.md",
+    "src/skills/harnix-verify/references/cookbook-notes.md",
+    "src/templates/harnix/workflow.md"
   ],
   "relevantSpecs": [],
   "epicId": "20261101-082443-harnix-session-review",
   "createdAt": "2026-11-01T08:24:43.222+07:00",
-  "updatedAt": "2026-11-01T08:24:43.222+07:00",
-  "evidence": [],
+  "updatedAt": "2026-11-02T00:35:07.173+07:00",
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T00:29:57.339+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8fa44d77214027f44ef218b29f751aac428b02f0de651652445fb530f893755e"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-02T00:31:18.535+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "2f2fb924eab5e64d68989c0ea01f0e2b73192b775ab7af2702970fbfa475f78c"
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T00:31:57.215+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f8297ce772269ecd6a1d20a00bf17eca0da5020743fb84dae2ab16a2fd26870e"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-02T00:33:17.276+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "d7d9499ee3f93f0abfc69e82c8e81dd6c39d27c6ce8a1fdf469b35b5a40c2363"
+    },
+    {
+      "id": "ev-chk-focused-3",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T00:33:42.833+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "131ec7c1a141da2d6def343e8e4cb2d333ba0fa136b6f3d90d0067fd8d2aabd9"
+    },
+    {
+      "id": "ev-chk-suite-3",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-02T00:35:00.761+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f62c5512eff9fb7ed166ee779ba48cc14271b8934bc6c5339cdc8f654fe2574c"
+    }
+  ],
   "validationPlan": [
     {
       "id": "chk-focused",
-      "description": "Cổng hợp đồng và test tập trung",
-      "command": "pnpm test:gates",
+      "description": "Cổng hợp đồng: instruction-budget, skill-sources, docs, golden",
+      "command": "pnpm run test:gates",
       "scope": "focused",
       "required": true,
       "criterionIds": [
         "ac-1",
         "ac-2",
-        "ac-3"
+        "ac-3",
+        "ac-4",
+        "ac-5"
       ],
       "inputs": [
         ".harnix/workflow.md",
+        "CHANGELOG.md",
+        "docs/**",
+        "package.json",
         "src/skills/**",
         "src/templates/**",
         "test/**"
@@ -62,16 +156,17 @@
     {
       "id": "chk-suite",
       "description": "Toàn bộ test của dự án xanh",
-      "command": "pnpm test",
+      "command": "pnpm run test",
       "scope": "full",
       "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
       "inputs": [
         "src/**",
         "test/**"
-      ],
-      "criterionIds": [
-        "ac-3"
       ]
     }
-  ]
+  ],
+  "completedAt": "2026-11-02T00:35:07.173+07:00"
 }

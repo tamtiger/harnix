@@ -11,7 +11,7 @@ import {
 } from "src/core/verification/check-report.js";
 import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
 import { compareCodeUnits } from "src/utils/order.js";
-import { findInitializedProject } from "src/utils/project-discovery.js";
+import { findInitializedProject, missingProjectError } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 const MAX_PUBLIC_RESULT_BYTES = 262_144;
@@ -62,7 +62,7 @@ interface VisibleInspection {
 
 export async function reportProjectChecks(cwd: string, limit: number, now = Date.now()): Promise<ChecksReportResultV1> {
   const project = await findInitializedProject({ cwd });
-  if (project.kind !== "ready") throw new Error("Checks requires an initialized Harnix project.");
+  if (project.kind !== "ready") throw await missingProjectError("Checks", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
   const task = await resolveActiveTask(harnixRoot).catch(redactChecksParserError);

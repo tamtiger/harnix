@@ -238,4 +238,17 @@ describe("bounded context entries", () => {
     expect(output).not.toContain("aaaa");
     expect(output).toContain('Omitted: "a.md"');
   });
+
+  it("never cuts the learning block through a surrogate pair at the budget edge", () => {
+    const lead = "\u{1F600}".repeat(20);
+    const source = frame(`${lead}${entry("a.md", "a".repeat(400))}`);
+    const cap = frameLength + 21 + "\n\n".length + 'Omitted: "a.md"'.length;
+
+    const output = boundedContext(source, [], cap);
+
+    expect(output).not.toMatch(/[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]/u);
+    expect(output).toContain("\u{1F600}".repeat(10));
+    expect(output).not.toContain("\u{1F600}".repeat(11));
+    expect(output.length).toBeLessThanOrEqual(cap);
+  });
 });

@@ -4,8 +4,8 @@
   "id": "20261101-082446-cli-error-hints",
   "title": "Mọi lỗi CLI hay gặp đều có hint nêu lệnh đúng",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Đóng nhóm B1/H1–H8,H12,H15: lỗi chỉ có `message`, cờ giá trị bắt buộc nuốt token kế tiếp, lệnh/option lạ không có hint, id epic không liệt kê id hợp lệ.",
   "nonGoals": [
     "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
@@ -14,74 +14,185 @@
   "acceptanceCriteria": [
     {
       "id": "ac-1",
-      "text": "Lỗi trong `workflow-flags.ts` (`--brief` không hỗ trợ, `--set-baseline`, `--format`, operands) kèm `hint` nêu lệnh hoặc cờ đúng trong JSON lỗi.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Các lỗi trong `workflow-flags.ts` (`--brief`/`--full` không hỗ trợ, `--set-baseline requires ...`, `workflow does not accept operands`) và `--format requires repo-map --query` trả JSON lỗi có `error.hint` nêu lệnh hoặc cờ đúng (test: bảng hint trong `test/workflow/cli-contract.test.ts`).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-2",
-      "text": "Cờ giá trị bắt buộc không nuốt cờ kế tiếp (`--set-baseline --result pass` báo đúng nguyên nhân); lệnh lạ như `harnix facts` gợi ý `harnix update`.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Cờ nhận id (`--set-baseline`, `--set-check`, `--reset-breaker`, `--remove-decision/criterion/risk`) không nuốt cờ kế tiếp: `workflow --set-baseline --result pass` báo cờ nhận một id kèm hint \"cờ giá trị nhận token kế tiếp làm giá trị\" thay vì lỗi operands (test cụ thể trong cli-contract).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-3",
-      "text": "`No epic found`, `Repo map/Resume/Pause requires an initialized Harnix project` và `status` thừa đối số đều có hint và danh sách id/project hợp lệ.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Lệnh lạ (`harnix facts`) trả hint `harnix update`, lệnh lạ gần giống tên lệnh thật trả \"Có phải ý bạn là ...\"; `internal` (hook) giữ nguyên không hint; hợp đồng `{ok:false,error:{exitCode,message,hint?}}` không đổi (test: cli-hints.test.ts và cli-contract).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-4",
-      "text": "Test hợp đồng CLI và golden được cập nhật đúng chuỗi mới, `pnpm test:gates` xanh.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "`harnix epic <id sai>` trả `No epic found with ID ...` kèm hint liệt kê id epic hợp lệ qua `unknownIdError` (test: epic.test.ts).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Lỗi \"requires an initialized Harnix project\" của pause, resume, repo-map, archive, audit, checks, learning, context report và tasks có hint nêu `harnix init`/thư mục dự án con đã khởi tạo (test: pause.test.ts, resume.test.ts và cli-contract cho repo-map).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "`harnix status foo` (thừa đối số) trả `error.hint` nêu `harnix status` không nhận đối số và cách dùng đúng (test: cli-contract).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1"
+      ]
+    },
+    {
+      "id": "ac-7",
+      "text": "Golden `behavior-snapshot.golden.json` chỉ đổi đúng các chuỗi lỗi/hint mới và `pnpm run test:gates` thoát 0 (kiểm bằng chk-gates).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-1",
+        "ev-chk-suite-2"
+      ]
     }
   ],
   "relevantPaths": [
     "src/cli-helpers.ts",
     "src/cli-hints.ts",
-    "src/commands/workflow-flags.ts",
+    "src/cli-program.ts",
+    "src/cli-workflow-commands.ts",
+    "src/commands/epic.ts",
+    "src/commands/pause.ts",
+    "src/commands/repo-map-internal.ts",
+    "src/commands/resume.ts",
+    "src/commands/status.ts",
     "src/commands/workflow-command.ts",
-    "src/commands/epic.ts"
+    "src/commands/workflow-flags.ts",
+    "src/core/epics/epic.ts",
+    "src/utils/project-discovery.ts"
   ],
   "relevantSpecs": [],
   "epicId": "20261101-082443-harnix-session-review",
   "createdAt": "2026-11-01T08:24:43.222+07:00",
-  "updatedAt": "2026-11-01T08:24:43.222+07:00",
-  "evidence": [],
+  "updatedAt": "2026-11-01T23:48:50.045+07:00",
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-01T23:45:07.930+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/cli-contract.test.ts test/unit/cli-hints.test.ts test/integration/commands/workflow-flags.test.ts test/integration/commands/epic.test.ts test/integration/commands... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "762b498b77bd5644c64b58794a5a9ecbad794130024550c40edb0f430f726386"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-01T23:45:18.236+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "20e6beeae2f398b10bc0f137859f2b4d6c6144ab8dfa7de752eefb90e0a2fd2c"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-01T23:46:52.382+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "6f5055f54bed8d3ffdc3071c8849b39dfc87724a77dabaf83cecc84249bb2c8a"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-01T23:48:43.318+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6f5055f54bed8d3ffdc3071c8849b39dfc87724a77dabaf83cecc84249bb2c8a"
+    }
+  ],
   "validationPlan": [
     {
       "id": "chk-focused",
-      "description": "Cổng hợp đồng và test tập trung",
-      "command": "pnpm test:gates",
+      "description": "Test tập trung của lỗi/hint CLI",
+      "command": "pnpm exec vitest run test/workflow/cli-contract.test.ts test/unit/cli-hints.test.ts test/integration/commands/workflow-flags.test.ts test/integration/commands/epic.test.ts test/integration/commands/pause.test.ts test/integration/commands/resume.test.ts test/integration/commands/status.test.ts",
       "scope": "focused",
       "required": true,
       "criterionIds": [
         "ac-1",
         "ac-2",
         "ac-3",
-        "ac-4"
+        "ac-4",
+        "ac-5",
+        "ac-6"
       ],
       "inputs": [
         "src/cli-*.ts",
         "src/commands/**",
-        "test/unit/**",
+        "src/core/epics/**",
+        "src/utils/**",
+        "test/integration/commands/**",
+        "test/unit/cli-hints.test.ts",
         "test/workflow/cli-contract.test.ts"
       ]
     },
     {
       "id": "chk-suite",
       "description": "Toàn bộ test của dự án xanh",
-      "command": "pnpm test",
+      "command": "pnpm run test",
       "scope": "full",
       "required": true,
+      "criterionIds": [
+        "ac-7"
+      ],
       "inputs": [
         "src/**",
         "test/**"
-      ],
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Cổng hợp đồng: cli-contract, docs, golden, kiến trúc",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
       "criterionIds": [
-        "ac-4"
+        "ac-7"
+      ],
+      "inputs": [
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
       ]
     }
-  ]
+  ],
+  "residualRisks": [
+    {
+      "id": "r-scope",
+      "text": "Ngoài phạm vi: `--limit` bị nuốt im lặng ở vài lệnh và mọi lỗi dùng exit 2 (có thể là hợp đồng, chưa kiểm docs); không đổi ở member này.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-01T23:48:50.045+07:00"
 }

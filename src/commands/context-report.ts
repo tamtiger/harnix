@@ -5,7 +5,7 @@ import { buildEffectiveContext, type EffectiveContextReasonCode } from "src/core
 import type { ContextChange, ContextDrift, ContextManifest } from "src/core/context/context.js";
 import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
 import { taskContextDrift } from "src/core/workflow/index.js";
-import { findInitializedProject } from "src/utils/project-discovery.js";
+import { findInitializedProject, missingProjectError } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
 const MAX_PUBLIC_RESULT_BYTES = 262_144;
@@ -55,7 +55,7 @@ export async function reportProjectContext(
   limit: number,
 ): Promise<ContextReportResultV1> {
   const project = await findInitializedProject({ cwd });
-  if (project.kind !== "ready") throw new Error("Context report requires an initialized Harnix project.");
+  if (project.kind !== "ready") throw await missingProjectError("Context report", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   const config = await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
   const task = await resolveActiveTask(harnixRoot).catch(redactContextReportParserError);

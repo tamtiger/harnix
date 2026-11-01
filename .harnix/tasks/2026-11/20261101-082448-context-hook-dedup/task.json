@@ -4,8 +4,8 @@
   "id": "20261101-082448-context-hook-dedup",
   "title": "Hook context dedup bền theo session và an toàn khi chạy song song",
   "mode": "full",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Đóng D1/R2/R3/R11: một slot cache chung cho nhiều session, mất con trỏ sau compact, cắt giữa cặp surrogate.",
   "nonGoals": [
     "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
@@ -14,36 +14,158 @@
   "acceptanceCriteria": [
     {
       "id": "ac-1",
-      "text": "Cache dedup khoá theo session nên hai session song song không ghi đè nhau.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Dedup của hook context dùng một slot cache riêng cho mỗi session (tệp theo hash của sessionId trong .harnix/tmp/context-cache/, ghi atomic), nên hai session xen kẽ (A, B, A, B) trên cùng repo mỗi bên dedup đúng độc lập; số slot bị giới hạn và slot cũ nhất bị dọn để tmp/ không phình.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-4"
+      ]
     },
     {
       "id": "ac-2",
-      "text": "Sau compact hoặc khi host không gửi session id, payload vẫn được đưa lại hợp lý và có test cho từng nhánh.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Khi sự kiện không có sessionId, hook luôn inject payload đầy đủ và không đọc hay ghi cache; khi payload đổi (hash khác) thì session đó nhận lại payload; có test cho từng nhánh. Hành vi sau compact không nằm trong tiêu chí vì host không gửi tín hiệu compact (ghi thành residual risk).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-4"
+      ]
     },
     {
       "id": "ac-3",
-      "text": "Cắt `contentBudget` không phá cặp surrogate hay cắt giữa lead; `pnpm test:gates` xanh.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "Cắt contentBudget và disclosure trong boundedContext không phá cặp surrogate và không cắt giữa lead: có test với ký tự ngoài BMP (emoji) nằm đúng biên cắt, kết quả không chứa surrogate lẻ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-4",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Các test và cổng hợp đồng mới (test:gates, cấu trúc test mirror src) xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-3"
+      ]
     }
   ],
   "relevantPaths": [
-    "src/commands/internal-context.ts"
+    "src/commands/internal-context.ts",
+    "src/core/context/session-cache.ts",
+    "src/utils/safe-slice.ts",
+    "test/unit/core/context/session-cache.test.ts",
+    "test/unit/utils/safe-slice.test.ts",
+    "test/workflow/internal-context-boundary.test.ts",
+    "test/workflow/internal-context-hooks.test.ts"
   ],
   "relevantSpecs": [],
   "epicId": "20261101-082443-harnix-session-review",
   "createdAt": "2026-11-01T08:24:43.222+07:00",
-  "updatedAt": "2026-11-01T08:24:43.222+07:00",
-  "evidence": [],
+  "updatedAt": "2026-11-02T00:16:17.632+07:00",
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T00:09:09.647+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/commands/internal-context.test.ts test/unit/commands/internal-context-cli.test.ts test/workflow/internal-context-hooks.test.ts test/workflow/internal-context-boundary... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9fe323ba48f4a0bba1027c1199f2b17d17f267354267b19e8c30843fe88757cf"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-02T00:09:17.999+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "95a537596e8578608afe057cefbd60afad84f91e46522a7f86d36a3e7ca6c397"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-02T00:10:34.987+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "1c14c7b444c626a1815fceba9c79326013de9570067c67cc11d47a7c5930aaf9"
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T00:10:54.615+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/commands/internal-context.test.ts test/unit/commands/internal-context-cli.test.ts test/workflow/internal-context-hooks.test.ts test/workflow/internal-context-boundary... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "159a5b6fe69359168f4067c321e46ffe89651847e449c5412656e8f55f1b302e"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-02T00:11:03.376+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "49a8d58ad69a51fe3462a7cd4daea5f6a6bf5979270b314c42bbb3ba74daeff9"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-02T00:12:25.069+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7528d08ce9b8c3ed511790667eafcb88130072668c48d5a239e74413454f5333"
+    },
+    {
+      "id": "ev-chk-focused-3",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T00:13:52.964+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm exec vitest run test/unit/commands/internal-context.test.ts test/unit/commands/internal-context-cli.test.ts test/workflow/internal-context-hooks.test.ts test/workflow/internal-context-boundary... — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "e101a65ecc5ad08551c720d7747a37948d7b58f839ac8af5ab64b4ee3a483f77"
+    },
+    {
+      "id": "ev-chk-focused-4",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T00:14:40.175+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/commands/internal-context.test.ts test/unit/commands/internal-context-cli.test.ts test/workflow/internal-context-hooks.test.ts test/workflow/internal-context-boundary... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "13f65ae733ae38e7b34e5a4f138c67d3a05e6f7a63618cc33543096ed346d10e"
+    },
+    {
+      "id": "ev-chk-gates-3",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-02T00:14:48.872+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4b57f221cd1c678a0c68e5db97ba5fdad55163d20b885031d6faa6aa16eb56e0"
+    },
+    {
+      "id": "ev-chk-suite-3",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-02T00:16:12.677+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c952d5155ac44c7407484cf1c58443611af9edf85996a67246ab4814c833457f"
+    }
+  ],
   "validationPlan": [
     {
       "id": "chk-focused",
-      "description": "Cổng hợp đồng và test tập trung",
-      "command": "pnpm test:gates",
+      "description": "Test tập trung của hook context: dedup theo session và cắt an toàn surrogate",
+      "command": "pnpm exec vitest run test/unit/commands/internal-context.test.ts test/unit/commands/internal-context-cli.test.ts test/workflow/internal-context-hooks.test.ts test/workflow/internal-context-boundary.test.ts test/unit/core/context/session-cache.test.ts test/unit/utils/safe-slice.test.ts",
       "scope": "focused",
       "required": true,
       "criterionIds": [
@@ -53,22 +175,52 @@
       ],
       "inputs": [
         "src/commands/internal-context.ts",
+        "src/core/context/**",
+        "src/utils/safe-slice.ts",
         "test/**"
       ]
     },
     {
       "id": "chk-suite",
       "description": "Toàn bộ test của dự án xanh",
-      "command": "pnpm test",
+      "command": "pnpm run test",
       "scope": "full",
       "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
       "inputs": [
         "src/**",
         "test/**"
-      ],
-      "criterionIds": [
-        "ac-3"
       ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Cổng hợp đồng: cấu trúc test, kiến trúc, docs, golden",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test:gates"
     }
-  ]
+  ],
+  "residualRisks": [
+    {
+      "id": "r-compact",
+      "text": "Host không gửi tín hiệu compact nên sau compact payload vẫn bị elide khi hash không đổi trong cùng session; chỉ đổi hash hoặc session mới inject lại. Không bịa tín hiệu, ngoài phạm vi.",
+      "severity": "low"
+    },
+    {
+      "id": "r-slots",
+      "text": "Giới hạn số slot làm một session cũ bị dọn có thể nhận lại payload một lần (an toàn, chỉ thừa).",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-02T00:16:17.632+07:00"
 }

@@ -1,5 +1,6 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { readTextInside } from "src/utils/safe-read.js";
 import type { VerifyCommandConfig } from "src/core/config/config-schema.js";
 import { inspectDotnetDirectory, isDotnetProjectFile, isSolutionFile } from "./dotnet-projects.js";
 
@@ -33,7 +34,7 @@ export async function detectEcosystemVerify(
     fileSet.has("requirements.txt") ||
     fileSet.has("uv.lock")
   ) {
-    return detectPythonVerify(dir, fileSet);
+    return detectPythonVerify(projectRoot, dir, fileSet);
   }
   // 3. Rust
   if (fileSet.has("Cargo.toml")) {
@@ -62,7 +63,7 @@ export async function detectEcosystemVerify(
   }
   // 7. PHP Composer
   if (fileSet.has("composer.json")) {
-    return detectComposerVerify(dir, fileSet);
+    return detectComposerVerify(projectRoot, dir, fileSet);
   }
   // 8. Swift
   if (fileSet.has("Package.swift")) {
@@ -70,7 +71,7 @@ export async function detectEcosystemVerify(
   }
   // 9. Flutter / Dart
   if (fileSet.has("pubspec.yaml")) {
-    return detectFlutterVerify(dir, fileSet);
+    return detectFlutterVerify(projectRoot, dir, fileSet);
   }
 
   return undefined;
@@ -81,7 +82,7 @@ async function detectNodeVerify(
   dir: string,
   fileSet: Set<string>,
 ): Promise<EcosystemVerifyResult> {
-  const pkgContent = await readSafeText(join(dir, "package.json"));
+  const pkgContent = await readSafeText(projectRoot, join(dir, "package.json"));
   let scripts: Record<string, unknown> = {};
   try {
     const parsed = JSON.parse(pkgContent ?? "{}") as { scripts?: Record<string, unknown> };
@@ -113,8 +114,12 @@ async function detectNodeVerify(
   return { ecosystem: "node", hasTests, commands };
 }
 
-async function detectPythonVerify(dir: string, fileSet: Set<string>): Promise<EcosystemVerifyResult> {
-  const pyproject = (await readSafeText(join(dir, "pyproject.toml"))) ?? "";
+async function detectPythonVerify(
+  projectRoot: string,
+  dir: string,
+  fileSet: Set<string>,
+): Promise<EcosystemVerifyResult> {
+  const pyproject = (await readSafeText(projectRoot, join(dir, "pyproject.toml"))) ?? "";
   let runner = "";
   if (fileSet.has("uv.lock") || pyproject.includes("[tool.uv]")) runner = "uv run ";
   else if (fileSet.has("poetry.lock") || pyproject.includes("[tool.poetry]")) runner = "poetry run ";
@@ -191,8 +196,12 @@ async function detectDotnetVerify(dir: string, entries: readonly string[]): Prom
   };
 }
 
-async function detectComposerVerify(dir: string, fileSet: Set<string>): Promise<EcosystemVerifyResult> {
-  const composer = await readSafeText(join(dir, "composer.json"));
+async function detectComposerVerify(
+  projectRoot: string,
+  dir: string,
+  fileSet: Set<string>,
+): Promise<EcosystemVerifyResult> {
+  const composer = await readSafeText(projectRoot, join(dir, "composer.json"));
   let scripts: Record<string, unknown> = {};
   try {
     const parsed = JSON.parse(composer ?? "{}") as { scripts?: Record<string, unknown> };
@@ -218,8 +227,12 @@ function detectSwiftVerify(fileSet: Set<string>): EcosystemVerifyResult {
   return { ecosystem: "swift", hasTests: fileSet.has("Tests"), commands };
 }
 
-async function detectFlutterVerify(dir: string, fileSet: Set<string>): Promise<EcosystemVerifyResult> {
-  const pubspec = (await readSafeText(join(dir, "pubspec.yaml"))) ?? "";
+async function detectFlutterVerify(
+  projectRoot: string,
+  dir: string,
+  fileSet: Set<string>,
+): Promise<EcosystemVerifyResult> {
+  const pubspec = (await readSafeText(projectRoot, join(dir, "pubspec.yaml"))) ?? "";
   const isFlutter = pubspec.includes("flutter:");
   const cli = isFlutter ? "flutter" : "dart";
   return {
@@ -232,12 +245,7 @@ async function detectFlutterVerify(dir: string, fileSet: Set<string>): Promise<E
   };
 }
 
-async function readSafeText(filePath: string): Promise<string | undefined> {
-  try {
-    const s = await stat(filePath);
-    if (s.size > 256 * 1024) return undefined;
-    return await readFile(filePath, "utf8");
-  } catch {
-    return undefined;
-  }
+/** Reads a manifest, refusing anything that resolves outside the project root (the boundary is the root, never the file's own directory). */
+function readSafeText(projectRoot: string, filePath: string): Promise<string | undefined> {
+  return readTextInside(projectRoot, filePath);
 }

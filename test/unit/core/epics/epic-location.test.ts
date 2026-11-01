@@ -7,6 +7,7 @@ import {
   epicLogicalPath,
   listEpicIds,
   locateEpicFile,
+  sortEpicIdsNewestFirst,
 } from "src/core/epics/epic-location.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
@@ -94,5 +95,16 @@ describe("epic archive guard", () => {
     await folderEpic(root, "epics", "2026-10", "20261028-080000-live");
     await expect(assertEpicWritable(root, "20261028-080000-live")).resolves.toBeUndefined();
     await expect(assertEpicWritable(root, "20261029-080000-new")).resolves.toBeUndefined();
+  });
+});
+
+describe("sortEpicIdsNewestFirst", () => {
+  it("puts date-prefixed ids newest first and legacy ids after them", () => {
+    expect(sortEpicIdsNewestFirst(["zz-old", "20260101-000000-a", "20260301-000000-b", "aa-old"])).toEqual([
+      "20260301-000000-b",
+      "20260101-000000-a",
+      "zz-old",
+      "aa-old",
+    ]);
   });
 });

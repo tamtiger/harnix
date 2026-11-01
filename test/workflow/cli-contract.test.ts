@@ -205,6 +205,20 @@ describe("a wrong command answers with the corrected one", () => {
     [["workflow", "--remove-risk", "r-9"], /chưa có risk nào/u],
     [["skill", "harnix-plann"], /Có phải ý bạn là harnix-plan\?/u],
     [["workflow", "--remove-risks", "r"], /Did you mean --remove-risk\?/u],
+    [["workflow", "--preflight", "extra"], /Chỉ --run-check nhận đối số/u],
+    [["workflow", "--inspect", "--brief"], /bỏ --brief khỏi lệnh này/u],
+    [["workflow", "--preflight", "--brief", "--full"], /Chọn một trong --brief hoặc --full/u],
+    [
+      ["workflow", "--set-baseline", "chk-1"],
+      /--result pass\|fail --classification .*--authorized-by user --scope "<phạm vi được duyệt>"/u,
+    ],
+    [["workflow", "--set-baseline", "--result", "pass"], /cờ giá trị nhận token kế tiếp làm giá trị/u],
+    [["workflow", "--remove-risk", "--brief"], /cờ giá trị nhận token kế tiếp làm giá trị/u],
+    [["facts"], /harnix update/u],
+    [["statuz"], /Có phải ý bạn là harnix status\?/u],
+    [["status", "foo"], /harnix status không nhận đối số/u],
+    [["epic", "nope"], /chưa có epic nào/u],
+    [["repo-map", "--format", "compact"], /--query/u],
   ])("harnix %j", async (args, hint) => {
     const root = await temporaryRepository();
     await implementingTaskV3(root);
@@ -222,5 +236,30 @@ describe("a wrong command answers with the corrected one", () => {
     expect(answer.error.hint).toMatch(hint);
     expect(answer.error.message).not.toMatch(/Gợi ý/u);
     expect(stderr.mock.calls.map((call) => String(call[0])).join("")).toMatch(hint);
+  });
+});
+
+describe("a command outside a Harnix project says how to get inside one", () => {
+  const temporaryRepository = useTemporaryRepositories("harnix-cli-hints-bare-");
+  const originalCwd = process.cwd();
+  afterEach(() => process.chdir(originalCwd));
+
+  it.each([
+    [["pause"], /Pause requires an initialized Harnix project/u],
+    [["resume", "--next"], /Resume requires an initialized Harnix project/u],
+    [["repo-map", "--query", "x"], /Repo map requires an initialized Harnix project/u],
+    [["tasks"], /Tasks requires an initialized Harnix project/u],
+  ])("harnix %j", async (args, message) => {
+    process.chdir(await temporaryRepository());
+    const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+
+    await expect(runCli(["node", "harnix", ...args])).resolves.toBe(2);
+
+    const answer = JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join("")) as {
+      error: { message: string; hint?: string };
+    };
+    expect(answer.error.message).toMatch(message);
+    expect(answer.error.hint).toMatch(/harnix init/u);
   });
 });

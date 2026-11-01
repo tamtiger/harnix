@@ -39,7 +39,7 @@ Plan-only requests stop at `ready`. Full tasks and Epics stop at `ready`/`await`
 - **Verify:** persist `verifying/verifying` before the first check; compliance, then quality and security. A pass is fresh only while its `inputDigest` equals the digest recomputed from the current inputs (CRLF read as LF in text files; the former formula stays recognised).
 - **Finish:** only from `verifying/finishing` with every criterion `met` or `waived` and every required check fresh; `--finish` is product-read-only. `--cancel --reason <why>` is the separate terminal path on explicit user instruction.
 - **Convergence:** one automatic remediation round; an identical check, digest, exit code and summary is the strongest stop signal; three failed hypotheses mean replan.
-- **Commit discipline:** never commit, branch, push, publish or open a pull request without showing the changes and message and getting approval.
+- **Commit discipline:** never commit, branch, push, publish or open a pull request without showing the changes and message and approval; run `git branch --show-current` first and never pipe `git checkout`.
 
 ## Agent transport
 
@@ -47,10 +47,10 @@ Hidden `harnix workflow` is the only persistence transport and always prints one
 
 ## Command cookbook
 
-Run from the repository root. Read `harnix workflow --schema` once per session. Never patch `task.json`, `review.md` or `.active` by hand. Accented (Vietnamese) text never goes through a Windows PowerShell 5.1 pipe or `-File` script: use `--file <path>` (for example `.harnix/tmp/payload.json`) or bash / `pwsh` 7.4+ (`<` redirection does not work in PowerShell; JSON on stdin stays under 64 KiB). Double-quote text in PowerShell and single-quote it in bash when it contains backticks or `$`.
+Run from the repository root; read `harnix workflow --schema` once per session. Accented (Vietnamese) text never goes through a Windows PowerShell 5.1 pipe or `-File` script: use `--file <path>` (for example `.harnix/tmp/payload.json`) or bash / `pwsh` 7.4+ (`<` redirection does not work in PowerShell; JSON on stdin stays under 64 KiB). Double-quote text in PowerShell and single-quote it in bash when it contains backticks or `$`.
 
 ```text
-harnix status --summary | --criteria | --checks | --explain   # micro status | criteria | checks and freshness | reasons
+harnix status --summary | --criteria | --checks | --explain   # no positional argument
 harnix workflow --preflight                  # clock.now and clock.idPrefix are the only time source
 harnix workflow --init --title "<title>" [--mode lite|full] [--goal "<g>"] [--text "<criterion>"]... [--with-check "id=<id>;command=<cmd>;criteria=<ac-1+ac-2>;input=<glob+glob>"] [--command "<cmd>"] [--input "src/**"] [--epic <id>] [--follow-up <id>] [--cwd <dir>] [--no-activate] --brief
 harnix workflow --transition ready/ready [--reviewed] [--dry-run] --brief
@@ -69,8 +69,12 @@ harnix workflow --save | --batch --file <path> --brief   # UTF-8 payload; --batc
 harnix workflow --add-decision <id> --text "<lesson>" --rationale "<why>" --brief
 harnix workflow --add-risk <id> --text "<risk>" --severity medium [--mitigation "<t>"] --brief
 harnix resume --next | <id> --force          # next epic task | switch task
+harnix pause [--dry-run]                     # clear the active pointer; never --brief
+harnix workflow --set-baseline <check-id> --result fail --classification pre-existing --authorized-by user --scope "<why>" --brief   # user-authorized
+harnix workflow --cancel --reason "<why>"     # terminal, only on explicit user instruction
+harnix repo-map --query|--impact|--tests|--outline|--refs <x> | --refresh   # hints
 harnix skill <name> [--raw] [--reference <topic>]
 harnix workflow --finish --brief
 ```
 
-`--run-check` runs one executable with an argument array (for `a && b` use `-- bash -c "a && b"`). List flags accept `a,b` or a repeated flag. Never pipe `harnix` into a nested `pwsh -Command`. In PowerShell read JSON with `$out = harnix workflow --inspect | Out-String; $j = $out | ConvertFrom-Json`. Multi-repo: `harnix skill harnix-plan --reference multi-repo`. Rarer forms (`--evidence`, `--set-baseline`, `--epic-order`) and command details: the `cookbook-commands` reference; shell recipes: `cookbook-notes`; every flag: `harnix workflow --schema --full`.
+`--run-check` runs one executable with an argument array (for `a && b` use `-- bash -c "a && b"`). Never pipe `harnix` into a nested `pwsh -Command`. Rarer forms (`--evidence`, `--epic-order`) and command details: the `cookbook-commands` reference; shell recipes: `cookbook-notes`; every flag: `harnix workflow --schema --full`.

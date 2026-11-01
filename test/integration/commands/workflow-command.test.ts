@@ -10,13 +10,7 @@ import { saveTask, setActiveTask } from "src/core/tasks/task.js";
 import type { CheckRunner } from "src/core/workflow/run-check.js";
 import { output } from "test/support/integration-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
-import {
-  commandlessImplementingTaskV3,
-  implementingTaskV3,
-  initializeUtcProject,
-  legacyTask,
-  taskV3,
-} from "test/support/workflow-fixtures.js";
+import { implementingTaskV3, initializeUtcProject, legacyTask, taskV3 } from "test/support/workflow-fixtures.js";
 
 const execFileAsync = promisify(execFile);
 const originalCwd = process.cwd();
@@ -163,7 +157,7 @@ describe.sequential("hidden workflow flag transports", () => {
 
   it("passes the command of --run-check through even when the -- separator was dropped by a shell shim", async () => {
     const root = await fixture();
-    await commandlessImplementingTaskV3(root);
+    await implementingTaskV3(root);
     process.chdir(root);
     const calls: string[][] = [];
     const checkRunner: CheckRunner = async (executable, args) => {
@@ -171,16 +165,16 @@ describe.sequential("hidden workflow flag transports", () => {
       return { exitCode: 0, output: "" };
     };
 
-    const withoutSeparator = await run(["--run-check", "check", "dotnet", "test", "--filter", "X", "--nologo"], {
+    const withoutSeparator = await run(["--run-check", "check", "pnpm", "test"], {
       checkRunner,
     });
-    const withSeparator = await run(["--run-check", "check", "--", "dotnet", "test", "--filter", "X"], { checkRunner });
+    const withSeparator = await run(["--run-check", "check", "--", "pnpm", "test"], { checkRunner });
 
     expect(withoutSeparator.code).toBe(0);
     expect(withSeparator.code).toBe(0);
     expect(calls).toEqual([
-      ["dotnet", "test", "--filter", "X", "--nologo"],
-      ["dotnet", "test", "--filter", "X"],
+      ["pnpm", "test"],
+      ["pnpm", "test"],
     ]);
   });
 

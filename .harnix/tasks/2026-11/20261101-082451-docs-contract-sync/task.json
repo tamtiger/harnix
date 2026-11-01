@@ -4,8 +4,8 @@
   "id": "20261101-082451-docs-contract-sync",
   "title": "Đồng bộ PRD, WORKFLOW, PLAN và README với hợp đồng thật",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Đóng E5/E6/R1/R3/R4/R5/R10: tài liệu frozen lệch code về envelope lỗi của hidden workflow, breaker, tiêu chí bất biến và cờ `status`.",
   "nonGoals": [
     "Không đổi frozen contract nếu chưa cập nhật PRD, workflow, migration và test trong cùng thay đổi.",
@@ -14,34 +14,64 @@
   "acceptanceCriteria": [
     {
       "id": "ac-1",
-      "text": "`HARNIX_PRD.md` mô tả hidden `workflow` phát envelope lỗi và chỉ `context` được miễn.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "`docs/HARNIX_PRD.md` không còn câu \"không nhận public error envelope\" và nêu hidden `workflow` cũng phát envelope lỗi `{ok:false,error}`, chỉ hook `context` im lặng (grep xác nhận).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-2",
-      "text": "Breaker và tiêu chí bất biến trong PRD, WORKFLOW, PLAN khớp `schema.ts` và `AGENTS.md` (digest mới, `--reset-breaker`, `--replace-check`, `--set-criterion --reason`).",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "PRD nêu cả ba lối thoát breaker (digest mới, `--reset-breaker`, `--replace-check`) ở mọi đoạn mô tả breaker, và PRD, WORKFLOW, PLAN không còn nói criterion đã có evidence là bất biến mà nêu `--set-criterion --reason` (passes thành stale) khớp `schema.ts` và `AGENTS.md` (grep xác nhận).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1"
+      ]
     },
     {
       "id": "ac-3",
-      "text": "README liệt kê đủ cờ `status`; test docs và `pnpm test:gates` xanh.",
-      "status": "pending",
-      "evidenceIds": []
+      "text": "README liệt kê đủ cờ của `harnix status --help` (`--explain`, `--summary`, `--criteria`, `--checks`, `--limit`, `--workspace`) và `pnpm run test:gates` cùng `pnpm run test` exit 0.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
     }
   ],
   "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
     "docs/HARNIX_PRD.md",
     "docs/HARNIX_WORKFLOW.md",
-    "docs/IMPLEMENTATION_PLAN.md",
-    "README.md"
+    "docs/IMPLEMENTATION_PLAN.md"
   ],
   "relevantSpecs": [],
   "epicId": "20261101-082443-harnix-session-review",
   "createdAt": "2026-11-01T08:24:43.222+07:00",
-  "updatedAt": "2026-11-01T08:24:43.222+07:00",
-  "evidence": [],
+  "updatedAt": "2026-11-02T00:27:28.055+07:00",
+  "evidence": [
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-02T00:26:04.689+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4316fe26bef0f0939415c5f24436d8ddd6d88f1eee49f9fa933cb1105eb660c1"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-02T00:27:21.838+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9a3bc9c871c16f6c7571d3121b6675d705ecc72047f23a00226c0c14abb1cf19"
+    }
+  ],
   "validationPlan": [
     {
       "id": "chk-focused",
@@ -64,16 +94,24 @@
     {
       "id": "chk-suite",
       "description": "Toàn bộ test của dự án xanh",
-      "command": "pnpm test",
+      "command": "pnpm run test",
       "scope": "full",
       "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
       "inputs": [
         "src/**",
         "test/**"
-      ],
-      "criterionIds": [
-        "ac-3"
       ]
     }
-  ]
+  ],
+  "decisions": [
+    {
+      "id": "dec-readme",
+      "text": "README bảng lệnh status đã đủ cờ so với status --help, không sửa.",
+      "rationale": "Đối chiếu harnix status --help: explain, summary, criteria, checks, limit, workspace đều có."
+    }
+  ],
+  "completedAt": "2026-11-02T00:27:28.055+07:00"
 }
