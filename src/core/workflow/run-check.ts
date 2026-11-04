@@ -10,6 +10,7 @@ import { launcherFailure, summarizeCheckOutput } from "./check-output.js";
 import { describeCommand, sameCommand, splitCommand } from "./command-match.js";
 import { appendEvidenceFlagsWorkflow } from "./evidence-flags.js";
 import { assertRetryAllowed } from "./retry-guard.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 export type { CheckRunner } from "src/utils/check-runner.js";
 
@@ -85,7 +86,7 @@ export async function runCheckWorkflow(
   if (executable === undefined) throw new Error("workflow --run-check requires an executable after --.");
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
-  if (!task) throw new Error("Workflow run-check requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow run-check");
   if (task.schemaVersion !== 3) throw new Error("Workflow --run-check requires a TaskRecord schema v3 task.");
   const declared = task.validationPlan.find((check) => check.id === checkId);
   if (!declared)

@@ -10,6 +10,7 @@ import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 const RETIRED_INPUT = "@task-contract";
 
@@ -86,7 +87,7 @@ export async function migrateToV3Workflow(
   const now = await currentInstant(root, injectedNow);
   const overrides = parseOverrides(envelope);
   const task = await resolveActiveTask(await resolveSafeHarnixPath(root));
-  if (!task) throw new Error("Workflow migration requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow migration");
   if (task.schemaVersion === 3) throw new Error("Task is already TaskRecord schema v3; nothing to migrate.");
   if (task.status === "completed" || task.status === "cancelled" || task.status === "blocked")
     throw new Error("Workflow migration applies only to an unfinished, unblocked task.");

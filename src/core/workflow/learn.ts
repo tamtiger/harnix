@@ -9,6 +9,7 @@ import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertTaskReadyForFinishing } from "./completion.js";
 import { currentInstant, journalFilePath } from "./support.js";
 import { taskFilePath } from "src/core/tasks/task-location.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 export interface WorkflowLearningResult {
   entry: JournalEntry;
@@ -26,7 +27,7 @@ export async function recordLearningWorkflow(
   const input = validateLearningEnvelope(envelope);
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
-  if (!task) throw new Error("Workflow learning capture requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow learning capture");
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
   const journalRoot = await resolveSafeHarnixPath(root, `workspace/${config.developer}/journal`);
   const journalPath = await journalFilePath(root, config, now);

@@ -6,7 +6,7 @@ import { initializeProject } from "src/commands/init.js";
 import type { DoctorFinding } from "src/core/doctor/findings.js";
 import { inspectTaskRecords } from "src/core/doctor/project-tasks.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
-import { at, buildCriterion, buildEvidence, buildTaskV3 } from "test/support/builders.js";
+import { buildCompletedTaskV3, buildCriterion, buildEvidence } from "test/support/builders.js";
 import { taskMonth } from "test/support/task-paths.js";
 
 const temporaryRepository = useTemporaryRepositories("harnix-doctor-tasks-");
@@ -109,11 +109,8 @@ describe("journal links to archived tasks", () => {
     await writeFile(
       join(directory, "task.json"),
       JSON.stringify(
-        buildTaskV3({
+        buildCompletedTaskV3({
           id: archivedId,
-          status: "completed",
-          checkpoint: "finishing",
-          completedAt: at(20),
           acceptanceCriteria: [buildCriterion({ status: "met", evidenceIds: ["ev-archived"] })],
           evidence: [buildEvidence({ id: "ev-archived" })],
         }),
@@ -138,6 +135,58 @@ describe("journal links to archived tasks", () => {
     await journalling(root, archivedId, ["ev-missing"]);
 
     expect(unlinked(await inspect(root))).toEqual(["journal-evidence-unlinked"]);
+  });
+
+  async function journalEntries(root: string, entries: { taskId: string; evidenceIds: string[] }[]): Promise<void> {
+    await mkdir(join(root, ".harnix", "workspace", "tam", "journal"), { recursive: true });
+    await writeFile(
+      join(root, ".harnix", journalPath),
+      entries
+        .map((entry, index) =>
+          JSON.stringify({
+            generator: "harnix",
+            schemaVersion: 1,
+            id: `entry-${index}`,
+            recordedAt: "2026-01-06T09:00:00.000+07:00",
+            developer: "tam",
+            kind: "completion",
+            summary: "finished",
+            ...entry,
+          }),
+        )
+        .join("\n") + "\n",
+    );
+  }
+
+  it("reports one finding per journal file and code with the number of records, not one per record", async () => {
+    const root = await initialized();
+    await archive(root);
+    await journalEntries(root, [
+      { taskId: "20260101-000000-gone-a", evidenceIds: [] },
+      { taskId: "20260101-000000-gone-b", evidenceIds: [] },
+      { taskId: "20260101-000000-gone-c", evidenceIds: [] },
+      { taskId: archivedId, evidenceIds: ["ev-missing-1"] },
+      { taskId: archivedId, evidenceIds: ["ev-missing-2"] },
+    ]);
+
+    const findings = (await inspect(root)).filter((item) => item.code.endsWith("-unlinked"));
+
+    expect(findings).toHaveLength(2);
+    expect(findings.find((item) => item.code === "journal-task-unlinked")).toMatchObject({
+      severity: "warning",
+      path: journalPath,
+      message: expect.stringContaining("3 records"),
+    });
+    expect(findings.find((item) => item.code === "journal-evidence-unlinked")?.message).toContain("2 records");
+  });
+
+  it("keeps the singular wording for a single affected record", async () => {
+    const root = await initialized();
+    await journalEntries(root, [{ taskId: "20260101-000000-gone-a", evidenceIds: [] }]);
+
+    const [only] = (await inspect(root)).filter((item) => item.code === "journal-task-unlinked");
+
+    expect(only?.message).toContain("1 record ");
   });
 
   it("still reports a task that exists neither live nor archived, and leaves the archive untouched", async () => {

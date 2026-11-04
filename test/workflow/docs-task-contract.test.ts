@@ -286,11 +286,14 @@ describe("release versioning policy documentation parity", () => {
       "workflow template": workflowGuidance,
       "harnix-implement skill": await read("src/skills/harnix-implement/SKILL.md"),
       "AGENTS.md": await read("AGENTS.md"),
+      "harnix-verify gates reference": await read("src/skills/harnix-verify/references/gates.md"),
     };
     for (const [name, text] of Object.entries(surfaces)) {
       expect(text, name).toContain("X.Y.0-dev.N");
       expect(text, name).toMatch(/minor/u);
       expect(text, name).toMatch(/major/u);
+      expect(text, name).toMatch(/epic order/u);
+      expect(text, name).not.toMatch(/last member by ID/u);
     }
   });
 

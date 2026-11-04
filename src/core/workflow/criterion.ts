@@ -15,6 +15,7 @@ import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { saveWorkflow } from "./save.js";
 import { authorizedRedBaseline } from "./suite-gate.js";
 import { currentInstant } from "./support.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 export interface MarkCriteriaInput {
   criterionIds: readonly string[];
@@ -78,7 +79,7 @@ export async function markCriteriaMetWorkflow(
 ): Promise<TaskRecord> {
   const now = await currentInstant(root, injectedNow);
   const task = await resolveActiveTask(await resolveSafeHarnixPath(root));
-  if (!task) throw new Error("Workflow criterion update requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow criterion update");
   if (task.schemaVersion !== 3) throw new Error("Workflow --criterion requires a TaskRecord schema v3 task.");
   const marked = new Map<string, string[]>();
   for (const id of new Set(input.criterionIds)) {

@@ -5,6 +5,7 @@ import { validateEvidenceEnvelope } from "./envelope.js";
 import { syncPlanChecklistPass } from "./plan-sync.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 /**
  * Appends exactly one evidence item to the active task. Existing evidence is
@@ -19,7 +20,7 @@ export async function appendEvidenceWorkflow(
   const evidence = validateEvidenceEnvelope(envelope);
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
-  if (!task) throw new Error("Workflow evidence capture requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow evidence capture");
   const saved = await saveWorkflow(root, {
     task: { ...task, evidence: [...task.evidence, evidence], updatedAt: laterTimestamp(task.updatedAt, now) },
   });

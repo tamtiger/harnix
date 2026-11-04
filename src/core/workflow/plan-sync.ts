@@ -3,6 +3,7 @@ import { resolveActiveTask } from "src/core/tasks/task.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { resolveTaskDirectory } from "src/core/tasks/task-location.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 const CHECK_UNCHECKED = /^(\s*[-*]\s+)\[\s*\](\s+.*)$/u;
 
@@ -105,7 +106,7 @@ export interface WorkflowTickResult {
 export async function tickWorkflow(root: string, selector: string): Promise<WorkflowTickResult> {
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
-  if (!task) throw new Error("Workflow --tick requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow --tick");
   const result = await tickPlanChecklist(harnixRoot, task.id, selector);
   return {
     generator: "harnix",

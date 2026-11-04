@@ -4,6 +4,18 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.27.0] - 2026-11-04
+
+### Fixed
+
+- Lỗi workflow --transition gõ checkpoint vào vị trí status (finishing/finishing), --finish sai checkpoint và mọi action thiếu task active đều có hint nêu lệnh đúng (verifying/finishing, harnix resume, workflow --init); message cũ giữ nguyên
+
+### Changed
+
+- Test: builder buildCompletedTaskV3 dựng task completed hợp lệ (completedAt, tiêu chí met kèm evidence, checkpoint finishing) và hai test doctor dùng nó
+- Quy ước đóng epic: task cuối theo thứ tự epic (--epic-order), không còn theo ID, đồng bộ AGENTS.md, skill harnix-implement, reference gates của harnix-verify và workflow.md; test parity buộc cụm epic order
+- Doctor gộp journal-task-unlinked và journal-evidence-unlinked thành một finding cho mỗi file journal kèm số bản ghi bị ảnh hưởng thay vì một dòng cho mỗi bản ghi (mã, severity, path và exit code không đổi)
+
 ## [2.26.1] - 2026-11-04
 
 ### Fixed

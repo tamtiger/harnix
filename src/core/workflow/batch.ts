@@ -24,6 +24,7 @@ export {
   type BatchRiskItem,
   type WorkflowBatchEnvelope,
 } from "./batch-validate.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 function changesObligations(envelope: WorkflowBatchEnvelope): boolean {
   return (envelope.criteria?.length ?? 0) > 0 || (envelope.checks?.length ?? 0) > 0;
@@ -34,7 +35,7 @@ export async function batchWorkflow(root: string, input: unknown, injectedNow?: 
   const now = await currentInstant(root, injectedNow);
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveEditableTask(harnixRoot);
-  if (!task) throw new Error("Workflow batch mutation requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow batch mutation");
   if (task.schemaVersion !== 3)
     throw new Error("Workflow batch mutation requires a TaskRecord schema v3 task; run --migrate first.");
 

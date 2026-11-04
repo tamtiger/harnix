@@ -1,0 +1,92 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261104-112539-completed-task-builder",
+  "epicId": "20261104-112537-session-friction-fixes",
+  "title": "Thêm builder task completed hợp lệ cho test",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Dựng task completed hợp lệ trong test cần completedAt, tiêu chí met kèm evidence và checkpoint finishing; thiếu builder nên phải thử sai nhiều lần (lỗi 'Completed task is missing completion requirements').",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "test/support/builders.ts có buildCompletedTaskV3 (task completed hợp lệ, cho phép ghi đè), hai test doctor mới nhất (archived-tasks và project-tasks) dùng nó thay cho đoạn dựng tay, và test của builder xác nhận validateTask chấp nhận kết quả.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "test/support/builders.ts",
+    "test/unit/core/doctor/archived-tasks.test.ts",
+    "test/unit/core/doctor/project-tasks.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/unit/core/doctor test/workflow/builders.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "test/support/**",
+        "test/unit/core/doctor/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-04T13:36:04.120+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/doctor test/workflow/builders.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a0a781f91efb4ad4b9baea5de9bc93a32f036520a6f0a037dcf499512792129c"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-04T13:37:11.331+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9983acbf051e992148dca10918f63c5007c26629942f981ea0b296a753db5709"
+    }
+  ],
+  "createdAt": "2026-11-04T11:25:37.965+07:00",
+  "updatedAt": "2026-11-04T13:37:16.359+07:00",
+  "decisions": [
+    {
+      "id": "dec-dev-bump",
+      "text": "Bump 2.27.0-dev.2 (sau transition-status-hint dev.1); không đóng epic.",
+      "rationale": "Chính sách version của epic."
+    }
+  ],
+  "completedAt": "2026-11-04T13:37:16.359+07:00"
+}

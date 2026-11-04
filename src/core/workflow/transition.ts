@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 
 import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
+import { transitions } from "src/core/tasks/task-schema.js";
 import { assertLegalTransition, laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { inspectReadyConditions } from "./ready.js";
@@ -9,6 +10,8 @@ import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
 import { resolveEditableTask } from "./target-task.js";
 import { taskFilePath } from "src/core/tasks/task-location.js";
+import { invalidStatusError } from "src/core/workflow/transition-hints.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 export interface DryRunTransitionResult {
   generator: "harnix";
@@ -70,7 +73,8 @@ export async function transitionWorkflow(
   if (status === "cancelled") throw new Error("Workflow cancellation must use workflow --cancel.");
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = dryRun === true ? await resolveEditableTask(harnixRoot) : await resolveActiveTask(harnixRoot);
-  if (!task) throw new Error("Workflow transition requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow transition");
+  if (!Object.hasOwn(transitions, status)) throw invalidStatusError(status);
 
   if (dryRun === true) {
     return handleDryRunTransition(harnixRoot, task, status, checkpoint, options.checklist === true);

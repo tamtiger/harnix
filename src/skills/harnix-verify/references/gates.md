@@ -17,7 +17,7 @@ Detail behind the Gates section of `.harnix/workflow.md`.
   missing focused proof keep the default suite gate. Harnix does not compare a test delta (which tests newly fail) because that needs per-test identity and reports falsely; the focused proof carries
   the deliverable.
 - **Execute:** persist `in_progress/implementing` before the first product edit; tick the Full checklist per slice (a passing check recorded by `--run-check` or `--evidence` ticks its `[<chk-id>]` items), 100% before verifying; release preparation (version, changelog, generated output)
-  belongs here. Version policy: a standalone task bumps the patch once, a member of an epic bumps the pre-release `X.Y.0-dev.N` once, the last member by ID closes the epic with a minor release (a
+  belongs here. Version policy: a standalone task bumps the patch once, a member of an epic bumps the pre-release `X.Y.0-dev.N` once, the last member in epic order closes the epic with a minor release (a
   major only for a frozen-contract break); the implementing agent bumps with the project's version command before `verifying` (the epic-closing minor adds `--fold-dev` to merge the `X.Y.0-dev.N` changelog
   entries into one), and the script rejects any other pre-release shape.
 - **Verify:** persist `verifying/verifying` before the first check. Two stages: compliance, then quality and security. A required pass is fresh only when its `inputDigest` equals the digest recomputed from the current inputs; the digest is bound to the task id and check id. What the digest covers and skips: `harnix skill harnix-verify --reference evidence`; it omits the active task's own `task.json` and `review.md`, and `prd.md`/`plan.md` count only when declared.

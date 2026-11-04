@@ -208,7 +208,7 @@ describe("workflow finish", () => {
     await saveTask(root, verifying);
     await setActiveTask(root, verifying.id);
     await expect(finishWorkflowTask(root, join(root, "journal.jsonl"), "tam", verifying, current)).rejects.toThrow(
-      "finishing checkpoint",
+      /finishing checkpoint.*\nGợi ý: .*workflow --transition verifying\/finishing/su,
     );
   });
 

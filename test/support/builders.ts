@@ -87,6 +87,18 @@ export function buildTaskV3(overrides: Partial<TaskRecordV3> = {}): TaskRecordV3
   };
 }
 
+/** A completed task that validateTask accepts: finishing checkpoint, a met criterion backed by a passing check, completedAt. */
+export function buildCompletedTaskV3(overrides: Partial<TaskRecordV3> = {}): TaskRecordV3 {
+  return buildTaskV3({
+    status: "completed",
+    checkpoint: "finishing",
+    acceptanceCriteria: [buildCriterion({ status: "met", evidenceIds: ["ev-check"] })],
+    evidence: [buildEvidence()],
+    completedAt: at(20),
+    ...overrides,
+  });
+}
+
 /** Legacy v2 shape (declares the retired `@task-contract` input); only for compatibility tests. */
 export function buildTaskV2(overrides: Partial<TaskRecordV2> = {}): TaskRecordV2 {
   return {

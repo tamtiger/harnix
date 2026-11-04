@@ -1,0 +1,89 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261104-114422-epic-closer-by-order",
+  "title": "Quy ước task đóng epic là task cuối theo thứ tự epic",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "AGENTS.md, skill harnix-implement, reference gates của harnix-verify và template workflow.md đang ghi 'the last member by ID closes the epic', trong khi ID chỉ là nhãn tạo sau và thứ tự epic (--epic-order) mới là kế hoạch thật; đổi quy ước thành task cuối theo thứ tự epic đóng epic.",
+  "nonGoals": [],
+  "epicId": "20261104-112537-session-friction-fixes",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "AGENTS.md, src/skills/harnix-implement/SKILL.md, src/skills/harnix-verify/references/gates.md và src/templates/harnix/workflow.md cùng nêu rằng task cuối theo thứ tự epic (--epic-order) đóng epic bằng bản phát hành X.(Y+1).0, không còn cụm 'by ID'; test docs-task-contract buộc cả ba bề mặt có cụm 'epic order'; pnpm selfhost:sync đã chạy; SKILL.md vẫn trong ngân sách token và mỗi reference có một dòng trỏ tới nó.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Kiểm chứng: Quy ước task đóng epic là task cuối theo thứ tự epic",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts test/workflow/instruction-budget.test.ts test/workflow/skill-sources.test.ts",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "src/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-11-04T13:38:47.867+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/docs-task-contract.test.ts test/workflow/instruction-budget.test.ts test/workflow/skill-sources.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "26e01264932c03a48a011f5f719b17a32e02499a7e595710eb0b0e4d457eb18a"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-04T13:39:57.627+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "74dd20b5e297466a0b13dc20a09aa2e32293bbb959275373e1f8029bffa39826"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-04T11:44:22.067+07:00",
+  "updatedAt": "2026-11-04T13:40:02.657+07:00",
+  "decisions": [
+    {
+      "id": "dec-dev-bump",
+      "text": "Bump 2.27.0-dev.3 (sau completed-task-builder dev.2); không đóng epic.",
+      "rationale": "Chính sách version của epic; task đóng epic là doctor-journal-finding-dedupe."
+    }
+  ],
+  "completedAt": "2026-11-04T13:40:02.657+07:00"
+}

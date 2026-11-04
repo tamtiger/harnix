@@ -1,0 +1,87 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261104-113030-skills-token-research",
+  "title": "Đo và research tối ưu token của skills và references",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Người dùng xác định tối ưu token của skills và references là phần quan trọng (không phải dung lượng setup), nhưng chưa có số đo; đo token nạp thực tế của 14 SKILL.md, các reference và khối luôn nạp, rồi đề xuất cách giảm. Task này chỉ research, không sửa code.",
+  "nonGoals": [],
+  "epicId": "20261104-112537-session-friction-fixes",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "research.md của epic ghi số token đo được (pnpm measure:tokens và đo bổ sung) theo từng skill, từng reference và khối luôn nạp, kèm tần suất nạp theo luồng làm việc (plan, implement, verify), ít nhất hai phương án giảm token có rủi ro và ngân sách instruction-budget tác động, và một khuyến nghị để người dùng duyệt trước khi tạo task thực hiện.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Kiểm chứng: Đo và research tối ưu token của skills và references",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm test:gates",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/skills/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-11-04T13:23:59.167+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "35387cd768e5d4552e4ff5c1beafd74fe1d0ad0073a04635f34c262fdb6e62eb"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-04T13:25:28.922+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2031a68ad9425afa8f2be563c357de97454ccc473343844d740ab5ca348df9a9"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-04T11:30:30.621+07:00",
+  "updatedAt": "2026-11-04T13:25:33.704+07:00",
+  "decisions": [
+    {
+      "id": "dec-no-release",
+      "text": "Task research không bump version và không đóng epic: chỉ ghi research.md; bản phát hành do task cuối theo thứ tự epic (doctor-journal-finding-dedupe) đảm nhiệm.",
+      "rationale": "Quyết định của người dùng ngày 2026-11-04; task chỉ ghi tài liệu nghiên cứu nên không thay đổi package."
+    }
+  ],
+  "completedAt": "2026-11-04T13:25:33.704+07:00"
+}

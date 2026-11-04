@@ -217,7 +217,7 @@ async function inspectJournalFile(
           false,
         ),
       );
-    for (const entry of journal.entries) inspectJournalLink(entry, tasks, logicalPath, findings);
+    inspectJournalLinks(journal.entries, tasks, logicalPath, findings);
     const learningRisks = new Set<LearningRiskKind>();
     for (const entry of journal.entries) {
       if (entry.kind !== "learning" || entry.learning === undefined) continue;
@@ -240,34 +240,40 @@ async function inspectJournalFile(
   }
 }
 
-function inspectJournalLink(
-  entry: JournalEntry,
+type JournalLinkCode = "journal-task-unlinked" | "journal-evidence-unlinked";
+
+const LINK_MESSAGES: Record<JournalLinkCode, string> = {
+  "journal-task-unlinked": "references an unknown task",
+  "journal-evidence-unlinked": "references evidence absent from its task",
+};
+
+function journalLinkProblem(entry: JournalEntry, tasks: ReadonlyMap<string, ValidTask>): JournalLinkCode | undefined {
+  if (!entry.taskId) return undefined;
+  const task = tasks.get(entry.taskId);
+  if (!task) return "journal-task-unlinked";
+  const evidenceIds = new Set(task.evidence.map((evidence) => evidence.id));
+  return entry.evidenceIds.some((id) => !evidenceIds.has(id)) ? "journal-evidence-unlinked" : undefined;
+}
+
+/** One finding per journal file and code, naming how many records are affected, instead of one line per record. */
+function inspectJournalLinks(
+  entries: readonly JournalEntry[],
   tasks: ReadonlyMap<string, ValidTask>,
   path: string,
   findings: DoctorFinding[],
 ): void {
-  if (!entry.taskId) return;
-  const task = tasks.get(entry.taskId);
-  if (!task) {
-    findings.push(
-      finding(
-        "journal-task-unlinked",
-        "warning",
-        path,
-        "A historical journal references an unknown task and was preserved without rewrite.",
-        false,
-      ),
-    );
-    return;
+  const counts = new Map<JournalLinkCode, number>();
+  for (const entry of entries) {
+    const problem = journalLinkProblem(entry, tasks);
+    if (problem !== undefined) counts.set(problem, (counts.get(problem) ?? 0) + 1);
   }
-  const evidenceIds = new Set(task.evidence.map((evidence) => evidence.id));
-  if (entry.evidenceIds.some((id) => !evidenceIds.has(id)))
+  for (const [code, count] of counts)
     findings.push(
       finding(
-        "journal-evidence-unlinked",
+        code,
         "warning",
         path,
-        "A historical journal references evidence absent from its task and was preserved without rewrite.",
+        `A historical journal ${LINK_MESSAGES[code]} in ${count} record${count === 1 ? "" : "s"} and was preserved without rewrite.`,
         false,
       ),
     );

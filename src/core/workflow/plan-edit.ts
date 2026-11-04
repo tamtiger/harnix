@@ -8,6 +8,7 @@ import { notePlanMissingCriteria } from "./plan-criterion-notice.js";
 import { saveWorkflow } from "./save.js";
 import { resolveEditableTask } from "./target-task.js";
 import { currentInstant } from "./support.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 const REASON_MIN = 10;
 const REASON_MAX = 1000;
@@ -31,7 +32,7 @@ export const sortedUnique = (values: readonly string[]): string[] => [...new Set
 
 export async function activeV3(root: string): Promise<TaskRecordV3> {
   const task = await resolveEditableTask(await resolveSafeHarnixPath(root));
-  if (!task) throw new Error("Workflow plan edit requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow plan edit");
   if (task.schemaVersion !== 3)
     throw new Error("Workflow plan edit requires a TaskRecord schema v3 task; run --migrate first.");
   return task;

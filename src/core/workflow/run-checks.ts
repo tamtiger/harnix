@@ -6,6 +6,7 @@ import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { verificationRetryDisposition } from "./completion.js";
 import { splitCommand } from "./command-match.js";
 import { runCheckWorkflow } from "./run-check.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 export interface RunChecksDependencies {
   runner?: CheckRunner | undefined;
@@ -35,7 +36,7 @@ export async function runChecksWorkflow(
   dependencies: RunChecksDependencies = {},
 ): Promise<RunChecksResult> {
   const task = await resolveActiveTask(await resolveSafeHarnixPath(root));
-  if (!task) throw new Error("Workflow run-checks requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow run-checks");
   if (task.schemaVersion !== 3) throw new Error("Workflow --run-checks requires a TaskRecord schema v3 task.");
   const pending = new Set(
     (await inspectRequiredChecks(root, await resolveSafeHarnixPath(root), task))

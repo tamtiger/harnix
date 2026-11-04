@@ -13,6 +13,7 @@ import { scanTaskSecrets, type SecretAdvisory } from "./secret-scan.js";
 import { authorizedRedBaseline } from "./suite-gate.js";
 import { currentInstant, journalFilePath, refreshLinkedEpicMarkdown } from "./support.js";
 import { withWorkflowLock } from "./workflow-lock.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 export interface WorkflowFinishDependencies {
   saveTask?: typeof saveTask;
@@ -88,7 +89,7 @@ async function finishLocked(
 ): Promise<FinishReport> {
   const now = await currentInstant(root, injectedNow);
   const task = await resolveActiveTask(harnixRoot);
-  if (!task) throw new Error("Workflow finish requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow finish");
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
   const journalDate = task.status === "completed" ? task.completedAt! : now;
   const journalPath = await journalFilePath(root, config, journalDate);
@@ -152,7 +153,9 @@ export async function finishWorkflowTask(
 ): Promise<TaskRecord> {
   const recoveringCompletedTask = task.status === "completed" && task.checkpoint === "finishing";
   if (!recoveringCompletedTask && (task.status !== "verifying" || task.checkpoint !== "finishing")) {
-    throw new Error("Task requires the verifying/finishing checkpoint or a completed/finishing recovery state.");
+    throw new Error(
+      "Task requires the verifying/finishing checkpoint or a completed/finishing recovery state.\nGợi ý: khi mọi check bắt buộc đã pass, chạy harnix workflow --transition verifying/finishing rồi --finish.",
+    );
   }
   let completed = task;
   if (!recoveringCompletedTask) {

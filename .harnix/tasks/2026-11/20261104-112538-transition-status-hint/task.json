@@ -1,0 +1,101 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261104-112538-transition-status-hint",
+  "epicId": "20261104-112537-session-friction-fixes",
+  "title": "Lỗi transition, finish và thiếu task active có hint nêu lệnh đúng",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Gõ nhầm --transition finishing/finishing, gọi --finish sai checkpoint hoặc chạy lệnh khi chưa có task active chỉ nhận message mà không có hint nêu lệnh đúng, trái hợp đồng lỗi CLI luôn có hint nêu lệnh đã sửa.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "workflow --transition <checkpoint>/<x> với phần đầu là tên checkpoint chứ không phải status trả lỗi có hint nêu status sở hữu checkpoint đó (finishing -> verifying/finishing, implementing -> in_progress/implementing), vẫn liệt kê status hợp lệ khi phần đầu là chuỗi lạ; test cho cả hai trường hợp và các lỗi transition khác không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Lỗi 'requires an active task' của workflow --transition, --plan-edit và các action tương tự có hint nêu cách chọn task (harnix resume <id>, harnix tasks hoặc workflow --init), và lỗi --finish khi task chưa ở checkpoint finishing có hint nêu workflow --transition verifying/finishing; test cho từng lỗi, không đổi message hiện có.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-handlers.ts",
+    "test/unit/commands/workflow-handlers.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/unit/commands/workflow-handlers.test.ts test/integration/commands/workflow-handlers.test.ts test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "test/integration/commands/**",
+        "test/unit/commands/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-04T13:32:22.370+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/commands/workflow-handlers.test.ts test/integration/commands/workflow-handlers.test.ts test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fa146f61f04d9e43239e0056a9953202cacc360f36df008452921051772b4116"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-04T13:33:36.321+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "53705b394b6e66d5d0e989d9c50fef4532593f4bc4724213eba5ff03418a885e"
+    }
+  ],
+  "createdAt": "2026-11-04T11:25:37.965+07:00",
+  "updatedAt": "2026-11-04T13:34:03.366+07:00",
+  "decisions": [
+    {
+      "id": "dec-dev-bump",
+      "text": "Task đầu của epic code bump 2.27.0-dev.1; completed-task-builder bump 2.27.0-dev.2; doctor-journal-finding-dedupe đóng epic 2.27.0 với --fold-dev.",
+      "rationale": "Chính sách version của epic: member bump X.Y.0-dev.N, task cuối theo thứ tự đóng epic."
+    }
+  ],
+  "completedAt": "2026-11-04T13:34:03.366+07:00"
+}

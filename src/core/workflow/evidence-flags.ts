@@ -6,6 +6,7 @@ import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { syncPlanChecklistPass } from "./plan-sync.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 export interface EvidenceFlags {
   check: string;
@@ -80,7 +81,7 @@ export async function appendEvidenceFlagsWorkflow(
   const summary = flags.summary.trim();
   if (summary === "") throw new Error("--summary must not be empty.");
   const task = await resolveActiveTask(await resolveSafeHarnixPath(root));
-  if (!task) throw new Error("Workflow evidence capture requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow evidence capture");
   const check = task.validationPlan.find((candidate) => candidate.id === flags.check);
   if (check === undefined)
     throw unknownIdError(

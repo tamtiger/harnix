@@ -5,6 +5,7 @@ import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
+import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
 
 const REASON_MIN = 10;
 const REASON_MAX = 1000;
@@ -31,7 +32,7 @@ export async function resetBreakerWorkflow(
 
   const harnixRoot = await resolveSafeHarnixPath(root);
   const task = await resolveActiveTask(harnixRoot);
-  if (!task) throw new Error("Workflow reset-breaker requires an active task.");
+  if (!task) throw noActiveTaskError("Workflow reset-breaker");
   if (task.schemaVersion !== 3) {
     throw new Error("Workflow reset-breaker requires a TaskRecord schema v3 task.");
   }

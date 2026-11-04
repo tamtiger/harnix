@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { initializeProject } from "src/commands/init.js";
 import { readArchivedTasks } from "src/core/doctor/archived-tasks.js";
-import { at, buildCriterion, buildEvidence, buildTaskV3 } from "test/support/builders.js";
+import { buildCompletedTaskV3 } from "test/support/builders.js";
 import { taskMonth } from "test/support/task-paths.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
@@ -22,16 +22,7 @@ describe("readArchivedTasks", () => {
     const root = await temporaryRepository();
     await initializeProject({ developer: "tam", root, yes: true });
     const good = "20260105-090000-good";
-    const goodContent = JSON.stringify(
-      buildTaskV3({
-        id: good,
-        status: "completed",
-        checkpoint: "finishing",
-        completedAt: at(20),
-        acceptanceCriteria: [buildCriterion({ status: "met", evidenceIds: ["ev-check"] })],
-        evidence: [buildEvidence()],
-      }),
-    );
+    const goodContent = JSON.stringify(buildCompletedTaskV3({ id: good }));
     const goodPath = await archived(root, good, goodContent);
     await archived(root, "20260105-090001-broken", "{ not json");
 

@@ -1,0 +1,102 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261104-112540-doctor-journal-finding-dedupe",
+  "epicId": "20261104-112537-session-friction-fixes",
+  "title": "Doctor gộp finding journal lặp theo file",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Doctor phát một finding cho mỗi dòng journal nên một file có thể sinh hàng chục dòng giống hệt nhau (13 journal-task-unlinked cho ba file); gộp theo (mã, file) kèm số bản ghi để báo cáo gọn mà không mất thông tin.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Với journal-task-unlinked và journal-evidence-unlinked, doctor phát tối đa một finding cho mỗi (mã, file journal), message nêu số bản ghi bị ảnh hưởng; mã, severity, path và exit code không đổi, fixture hiện có của danh mục mã vẫn pass, và journal sạch vẫn không sinh finding.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "docs/HARNIX_PRD.md (dòng kiểm tra của doctor) nêu doctor gộp hai mã journal theo file kèm số bản ghi, và CHANGELOG có bullet tương ứng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/doctor/project-tasks.ts",
+    "docs/HARNIX_PRD.md",
+    "CHANGELOG.md"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/unit/core/doctor test/integration/commands/doctor.test.ts test/workflow/doctor-finding-fixtures-project.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-04T13:45:35.111+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/doctor test/integration/commands/doctor.test.ts test/workflow/doctor-finding-fixtures-project.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8985ecea4e07aaa1ccb78b08a1cab1800e6d91cca983dbbc37831cf9275fd122"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-04T13:46:52.848+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9608ee4727e6e8a5fb6eab5dd1d4bc0a2e999a9cccba7bea60b3017fcd7cb6d5"
+    }
+  ],
+  "createdAt": "2026-11-04T11:25:37.965+07:00",
+  "updatedAt": "2026-11-04T13:46:59.777+07:00",
+  "decisions": [
+    {
+      "id": "dec-epic-closer",
+      "text": "Task này là task cuối theo thứ tự epic nên đóng epic bằng bản phát hành 2.27.0 (version:sync 2.27.0 --fold-dev), dù skills-token-research có ID lớn hơn.",
+      "rationale": "Quyết định của người dùng ngày 2026-11-04: task cuối cùng trong epic làm bản phát hành; thứ tự epic (--epic-order) là chuẩn, ID chỉ là nhãn tạo sau."
+    }
+  ],
+  "completedAt": "2026-11-04T13:46:59.777+07:00"
+}

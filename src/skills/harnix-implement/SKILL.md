@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.26.1"
+  version: "2.27.0"
 ---
 
 # Implement with evidence
@@ -34,7 +34,7 @@ After each slice and its focused evidence tick its `- [ ]` to `- [x]` in `plan.m
 
 ## Release preparation
 
-Release-visible changes follow the version policy: a standalone task bumps the patch, a member of an epic bumps the pre-release `X.Y.0-dev.N`, the last member by ID closes the epic with the minor release (a major only for a frozen-contract break); you bump, during implementation. Bump the package version at most once with the project's own version command (named in its instructions) and amend the same changelog entry; regenerate managed output when its canonical input changes. Do this before verifying: finish never edits the product.
+Release-visible changes follow the version policy: a standalone task bumps the patch, a member of an epic bumps the pre-release `X.Y.0-dev.N`, the last member in epic order closes the epic with the minor release (a major only for a frozen-contract break); you bump, during implementation. Bump the package version at most once with the project's own version command (named in its instructions) and amend the same changelog entry; regenerate managed output when its canonical input changes. Do this before verifying: finish never edits the product.
 
 ## Documentation synchronization
 

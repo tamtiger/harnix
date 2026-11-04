@@ -1,0 +1,20 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261104-112537-session-friction-fixes",
+  "title": "Sửa các ma sát gặp khi chạy harnix trong phiên làm việc",
+  "goal": "Xử lý các ma sát đã gặp khi dùng Harnix: lỗi thiếu hint (--transition sai thứ tự, --finish sai checkpoint, thiếu task active), thiếu builder task completed trong test, doctor phát finding journal lặp hàng chục dòng, quy ước task đóng epic còn theo ID thay vì thứ tự epic; kèm một task research số đo token của skills và references trước khi quyết định giảm.",
+  "nonGoals": [
+    "Không đổi hợp đồng đóng băng của Doctor JSON v2 (mã, severity, path, exit code).",
+    "Không sửa hay viết lại journal lịch sử."
+  ],
+  "createdAt": "2026-11-04T11:25:37.965+07:00",
+  "updatedAt": "2026-11-04T11:44:43.119+07:00",
+  "order": [
+    "20261104-113030-skills-token-research",
+    "20261104-112538-transition-status-hint",
+    "20261104-112539-completed-task-builder",
+    "20261104-114422-epic-closer-by-order",
+    "20261104-112540-doctor-journal-finding-dedupe"
+  ]
+}
