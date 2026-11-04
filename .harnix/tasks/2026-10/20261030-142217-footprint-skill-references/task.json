@@ -1,0 +1,98 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261030-142217-footprint-skill-references",
+  "epicId": "20261030-142214-dev-maintenance",
+  "title": "Bỏ giới hạn footprint của setup",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Quyết định của người dùng (2026-10-30): footprint của harnix setup không còn bị giới hạn byte; mục tiêu tối ưu là token của skill và reference. measure:footprint chỉ còn đo và in số liệu.",
+  "nonGoals": [
+    "Chưa sửa code; task này kết thúc bằng quyết định có số liệu."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "measure:footprint chỉ in số file và byte, không còn đọc scripts/footprint-budget.json hay thất bại vì vượt ngân sách; scripts/footprint-budget.mjs và scripts/footprint-budget.json bị xóa; test guard được thay bằng test khẳng định lệnh đo không áp ngân sách; AGENTS.md, README.md, docs (PRD, IMPLEMENTATION_PLAN) và skill harnix-self-host không còn mô tả giới hạn; ngân sách token của skill và reference (instruction-budget) giữ nguyên.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "scripts/footprint-budget.json",
+    "scripts/footprint-budget.mjs",
+    "scripts/measure-footprint.mjs",
+    "test/workflow/measure-footprint-guard.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-gates",
+      "description": "Test đo footprint, release-check, package-contract và các test hợp đồng",
+      "command": "pnpm exec vitest run test/workflow",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "README.md",
+        "docs/**",
+        "scripts/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-10-30T15:12:43.617+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3e5df7c28ecc3382a12311fa38bd0bee654476458cf1313dcc0470ff441f8691"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T15:14:10.585+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a447564ff4427f5f14dbf77882c1378439d4cab175762ce17ddc5d250a012a66"
+    }
+  ],
+  "createdAt": "2026-10-30T14:22:14.291+07:00",
+  "updatedAt": "2026-10-30T15:14:13.516+07:00",
+  "decisions": [
+    {
+      "id": "user-decision",
+      "text": "Người dùng quyết định bỏ giới hạn footprint: đây là kích thước của setup, không phải chi phí token; cái cần tối ưu là token của skill và reference.",
+      "rationale": "Footprint chỉ là số byte ghi ra đĩa; ngân sách token trong instruction-budget mới phản ánh chi phí ngữ cảnh."
+    }
+  ],
+  "completedAt": "2026-10-30T15:14:13.516+07:00"
+}

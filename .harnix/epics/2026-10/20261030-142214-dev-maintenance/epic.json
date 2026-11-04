@@ -1,0 +1,20 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261030-142214-dev-maintenance",
+  "title": "Giảm ma sát khi phát triển Harnix",
+  "goal": "Sửa các điểm gây ma sát khi phát triển đã gặp trong epic workflow-ergonomics: tài liệu hợp đồng bị hỏng, golden ghi sai định dạng, changelog lặp ý, footprint và thời gian test.",
+  "nonGoals": [
+    "Không đổi hợp đồng đóng băng của task, evidence hay hook.",
+    "Không nới mức trần footprint hay ngân sách token chỉ để test qua."
+  ],
+  "createdAt": "2026-10-30T14:22:14.291+07:00",
+  "updatedAt": "2026-10-30T15:20:35.200+07:00",
+  "order": [
+    "20261030-142217-footprint-skill-references",
+    "20261030-142218-speed-up-slow-tests",
+    "20261030-142214-fix-plan-slug-line",
+    "20261030-142215-golden-prettier-output",
+    "20261030-142216-changelog-fold-optional-summary"
+  ]
+}

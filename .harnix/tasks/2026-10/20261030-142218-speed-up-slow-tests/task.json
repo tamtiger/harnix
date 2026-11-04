@@ -1,0 +1,92 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261030-142218-speed-up-slow-tests",
+  "epicId": "20261030-142214-dev-maintenance",
+  "title": "Giảm tranh chấp khi chạy cả suite test",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Đo cho thấy file test chạy riêng nhanh hơn trong suite 4 đến 13 lần (git 2.2 s so với 29 s, learning-automation 10.7 s so với 43 s) và cả suite nhanh nhất ở 8 worker (68 s) so với 12 worker mặc định (89 s): thời gian mất do tranh chấp tài nguyên, không do nội dung test.",
+  "nonGoals": [
+    "Không xóa hay bỏ qua test, không hạ ngưỡng coverage."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "vitest.config.ts đặt maxWorkers (khởi điểm 8, chọn lại theo số đo trên máy hiện tại) kèm lý do trong comment; ghi vào decision thời gian cả suite trước và sau (ít nhất ba lần mỗi cấu hình); thời gian tường trung bình không tăng, số test và assertion không giảm, và suite chạy hai lần liên tiếp không có test mới flaky.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-slow-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "test/README.md",
+    "vitest.config.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-slow",
+      "description": "Cả suite chạy với cấu hình worker mới",
+      "command": "pnpm exec vitest run test/unit/core/workflow test/workflow/learning-automation.test.ts test/unit/utils/git.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "test/**",
+        "vitest.config.ts"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-slow-1",
+      "checkId": "chk-slow",
+      "recordedAt": "2026-10-30T16:15:41.859+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/workflow/learning-automation.test.ts test/unit/utils/git.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a31ec09974e04f3434073ef8c78b08971cb9b8fcb8f8ebfa4324bea8bed1a886"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T16:17:00.126+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "891f1a2353da89e4612a7c03b3093b2ee2650824c21abeeb3303fb404ee4449d"
+    }
+  ],
+  "createdAt": "2026-10-30T14:22:14.291+07:00",
+  "updatedAt": "2026-10-30T16:17:02.964+07:00",
+  "decisions": [
+    {
+      "id": "measured",
+      "text": "Đo sạch (một benchmark tại một thời điểm, 3 lần mỗi cấu hình): 6 worker 80/77/77 s, 12 worker 83/81/98 s, 8 worker 73/91/111 s; đo xen kẽ ba cặp: 12 worker 82/79/80 s, 6 worker 75/76/80 s. Chọn maxWorkers 6. Lần đo đầu 8 worker 68 s là nhiễu; hai benchmark chạy chồng nhau cho số vô nghĩa.",
+      "rationale": "6 worker nhanh hơn khoảng 4 đến 10% và ổn định hơn, không bao giờ chậm hơn trong một cặp."
+    }
+  ],
+  "completedAt": "2026-10-30T16:17:02.964+07:00"
+}

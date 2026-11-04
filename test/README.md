@@ -49,6 +49,8 @@ pass. The per-test timeout is 20 seconds because filesystem-heavy workflow tests
 
 Do not regenerate `test/workflow/behavior-snapshot.golden.json` to make a refactor pass.
 
+`HARNIX_UPDATE_GOLDEN=1` writes `behavior-snapshot.golden.json` through the repository's Prettier (`test/support/golden-format.ts`), so regenerating unchanged code leaves the file byte for byte the same and a changed string shows as one diff line; review that diff before committing.
+
 ## Speed
 
 Vitest runs with `pool: "forks"` and `isolate: false`: the files of one worker share its module graph instead of
@@ -57,6 +59,8 @@ importing it again, which saves about a third of the wall time. Every test there
 (an `afterEach` cannot undo it, so inject the dependency instead; `test/unit/test-structure.test.ts` enforces this), and
 must not rely on a fresh module state; run
 `pnpm exec vitest run --sequence.shuffle` to catch an order dependency.
+
+`maxWorkers: 6` (of 12 cores) keeps the filesystem and process tests from competing for the machine: a file such as `test/unit/utils/git.test.ts` takes about 2 s alone but 29 s in a full run. Interleaved full runs gave 6 workers 75/76/80 s against 12 workers 82/79/80 s; the gain is small, so re-measure (3 runs each, one at a time) before changing it and never run two suites at once.
 
 To find the slowest files, run `pnpm exec vitest run --reporter=json --outputFile=<file>` and sort `testResults` by
 `endTime - startTime`. A file that is slow only in the full run is waiting for CPU; look for the work it repeats, such

@@ -1,0 +1,85 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261030-142215-golden-prettier-output",
+  "epicId": "20261030-142214-dev-maintenance",
+  "title": "Golden ghi đúng định dạng Prettier",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "HARNIX_UPDATE_GOLDEN=1 hiện ghi JSON thụt lề 2 và làm phình diff cả trăm dòng; phải ghi đúng định dạng Prettier của repo để diff chỉ còn thay đổi thật.",
+  "nonGoals": [
+    "Không đổi cách so sánh golden hay quy tắc cấm cập nhật khi CI."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Khi HARNIX_UPDATE_GOLDEN=1, behavior-snapshot ghi golden bằng định dạng Prettier của repo (parser json); chạy lại trên code không đổi không làm git diff của golden thay đổi, và một thay đổi một chuỗi chỉ tạo diff một dòng. Có test cho hàm định dạng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-golden-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "test/workflow/behavior-snapshot.test.ts",
+    "test/workflow/behavior-snapshot.golden.json",
+    "test/README.md"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-golden",
+      "description": "Test golden và hàm định dạng",
+      "command": "pnpm exec vitest run test/workflow/behavior-snapshot.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-golden-1",
+      "checkId": "chk-golden",
+      "recordedAt": "2026-10-30T16:24:08.850+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/behavior-snapshot.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2355d4bc092c98e3750e286c9780b4cbc12119d42896e66f9b450d15d7bee359"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T16:25:48.643+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6628a2dc02fd29bfafd36ea207c955ee30a9d88405f104684321e41e510c4c62"
+    }
+  ],
+  "createdAt": "2026-10-30T14:22:14.291+07:00",
+  "updatedAt": "2026-10-30T16:26:19.018+07:00",
+  "completedAt": "2026-10-30T16:26:19.018+07:00"
+}

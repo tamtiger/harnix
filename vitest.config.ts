@@ -23,6 +23,10 @@ export default defineConfig({
   ],
   test: {
     pool: "forks",
+    // Suites of filesystem and process tests slow down when every core runs one (a file took 4 to 13 times longer in
+    // the suite than alone). Three full runs each on 12 cores: 6 workers 80/77/77 s, 12 workers 83/81/98 s, 8 workers
+    // 73/91/111 s; 6 is the fastest on average and the steadiest.
+    maxWorkers: 6,
     // Files share each worker's module graph instead of importing it again per file (about a third of the wall time).
     // Tests restore process.cwd, process.exitCode and their spies in afterEach and never mock a whole module (an
     // afterEach cannot undo vi.mock; test-structure enforces it), so sharing modules stays safe.

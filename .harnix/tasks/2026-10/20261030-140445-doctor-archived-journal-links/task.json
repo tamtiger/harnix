@@ -1,0 +1,60 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261030-140445-doctor-archived-journal-links",
+  "title": "Doctor không báo journal của task đã archive là mồ côi",
+  "mode": "lite",
+  "status": "planning",
+  "checkpoint": "planning",
+  "goal": "Journal tham chiếu task hoặc evidence của task nằm trong _archive không còn bị doctor báo journal-task-unlinked hoặc journal-evidence-unlinked; chỉ task thật sự không tồn tại ở live lẫn archive mới bị báo.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "inspectJournalRecords của doctor tra task trong cả live lẫn _archive (đọc chỉ đọc): journal của task đã archive không sinh journal-task-unlinked hay journal-evidence-unlinked, còn task không có ở đâu cả vẫn bị báo; test cho cả ba trường hợp và fixture mã hiện có vẫn pass.",
+      "status": "pending",
+      "evidenceIds": []
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-doctor",
+      "description": "Test doctor và fixture mã finding",
+      "command": "pnpm exec vitest run test/unit/core/doctor test/integration/commands/doctor.test.ts test/workflow/doctor-finding-fixtures-project.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-10-30T14:04:45.916+07:00",
+  "updatedAt": "2026-10-30T14:04:47.314+07:00",
+  "decisions": [
+    {
+      "id": "source",
+      "text": "Phát hiện khi chạy doctor sau epic workflow-ergonomics: 73 journal-task-unlinked và 6 journal-evidence-unlinked, id trỏ tới task trong .harnix/tasks/_archive.",
+      "rationale": "Archive là bước thủ công hợp lệ nên doctor không được coi nó là dữ liệu mất."
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261030-142214-fix-plan-slug-line",
+  "epicId": "20261030-142214-dev-maintenance",
+  "title": "Sửa dòng 444 bị hỏng của IMPLEMENTATION_PLAN",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khôi phục mục (10) về --slug trong docs/IMPLEMENTATION_PLAN.md: dòng 444 bị chèn nhầm tiêu đề tài liệu và mất phần cuối của mục, có từ v2.22.1.",
+  "nonGoals": [
+    "Không viết lại các mục khác của IMPLEMENTATION_PLAN."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Mục (10) của dòng 444 nêu đầy đủ quy tắc slug (regex, giới hạn độ dài, --slug bắt buộc khi title có ký tự ngoài ASCII) theo init-task.ts, và dòng không còn chứa chuỗi '# Harnix Implementation Plan'; tiêu đề tài liệu chỉ xuất hiện ở dòng 1.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-docs-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/core/workflow/init-task.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-docs",
+      "description": "Các test hợp đồng tài liệu và so khớp release sequence",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "docs/IMPLEMENTATION_PLAN.md",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-docs-1",
+      "checkId": "chk-docs",
+      "recordedAt": "2026-10-30T16:20:12.040+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5cb77dd92123ccb7c7e276b65dc881dbe4a58dd1bb22575fe9c637fff8d5c0de"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T16:21:29.230+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d69ebe54cbbd8a8122e7f4140dfa4b1d947d2d037de0326898d9bb78706f6a93"
+    }
+  ],
+  "createdAt": "2026-10-30T14:22:14.291+07:00",
+  "updatedAt": "2026-10-30T16:21:59.626+07:00",
+  "decisions": [
+    {
+      "id": "also-888",
+      "text": "Bản thứ hai của đoạn văn (dòng 888, mục 4.11) cũng bị hỏng đối xứng (mất phần đầu mục (10)); đã khôi phục cả hai từ phần còn nguyên của nhau.",
+      "rationale": "Hai bản cùng một lần splice hỏng; sửa một bản sẽ để lại bản kia sai."
+    }
+  ],
+  "completedAt": "2026-10-30T16:21:59.626+07:00"
+}

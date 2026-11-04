@@ -19,6 +19,7 @@ import { inspectProjectStatus } from "src/commands/status.js";
 import { listProjectTasks } from "src/commands/tasks.js";
 import { readConfig, writeConfig } from "src/core/config/config.js";
 import type { TaskRecord, TaskRecordV3 } from "src/core/tasks/task.js";
+import { formatGolden } from "test/support/golden-format.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 /**
@@ -276,7 +277,7 @@ describe("behavior snapshot", () => {
   it("keeps workflow, status, task and epic outputs and written files identical to the golden", async () => {
     const actual = JSON.parse(JSON.stringify(await scenario())) as unknown;
     if (goldenUpdateRequested(process.env)) {
-      await writeFile(goldenPath, `${JSON.stringify(actual, null, 2)}\n`);
+      await writeFile(goldenPath, await formatGolden(actual, goldenPath));
       return;
     }
     const golden = JSON.parse(await readFile(goldenPath, "utf8")) as unknown;

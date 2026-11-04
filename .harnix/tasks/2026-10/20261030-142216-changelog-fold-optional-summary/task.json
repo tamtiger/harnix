@@ -1,0 +1,112 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261030-142216-changelog-fold-optional-summary",
+  "epicId": "20261030-142214-dev-maintenance",
+  "title": "Changelog --fold-dev không lặp ý của bản dev",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "version:sync --fold-dev luôn thêm một gạch đầu dòng tóm tắt dù các bản dev đã mô tả đủ; cho phép đóng epic mà không thêm bullet lặp.",
+  "nonGoals": [
+    "Không đổi hành vi của --summary khi không có --fold-dev."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "version:sync <X.Y.0> --fold-dev chạy không cần --summary và khi đó entry gộp chỉ chứa các bullet của bản dev (test khẳng định đúng nội dung entry); khi có --summary thì thêm đúng một bullet như hiện tại (test); AGENTS.md và skill harnix-self-host nói rõ --summary là tùy chọn với --fold-dev.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-fold-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "scripts/changelog-fold.mjs",
+    "scripts/version-sync.mjs",
+    "AGENTS.md"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-fold",
+      "description": "Test version-sync và changelog-fold",
+      "command": "pnpm exec vitest run test/workflow/version-sync.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "scripts/**",
+        "test/workflow/version-sync.test.ts"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-10-30T16:27:35.485+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Mã đã hỗ trợ --fold-dev không cần --summary; điều còn thiếu chỉ là test nội dung entry và tài liệu, nên sửa tiêu chí cho đúng thực tế.",
+      "artifactPaths": [
+        ".harnix/tasks/20261030-142216-changelog-fold-optional-summary/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-10-30T16:29:29.131+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Đường dẫn test/unit/scripts khi tạo task không tồn tại; test của version-sync nằm ở test/workflow/version-sync.test.ts.",
+      "artifactPaths": [
+        ".harnix/tasks/20261030-142216-changelog-fold-optional-summary/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-fold-1",
+      "checkId": "chk-fold",
+      "recordedAt": "2026-10-30T16:29:32.752+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/version-sync.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7c69b9564da99466762ebfe13e4a26d7d823104cdf71d8a32d8539cac367db49"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-10-30T16:30:51.085+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "11c0e4c2b3d04c0a2bd6fd2a66c2e65e2a58615240f9da188eaca1806c0558db"
+    }
+  ],
+  "createdAt": "2026-10-30T14:22:14.291+07:00",
+  "updatedAt": "2026-10-30T16:34:27.769+07:00",
+  "decisions": [
+    {
+      "id": "premise-wrong",
+      "text": "Giả định ban đầu của task (fold-dev luôn thêm bullet tóm tắt) sai: bullet lặp ở epic trước do người chạy truyền --summary. Mã đã cho --fold-dev không có summary; task chỉ thêm test đặc tính hóa và tài liệu.",
+      "rationale": "Không sửa mã không hỏng; dùng chính tính năng này để đóng epic."
+    }
+  ],
+  "completedAt": "2026-10-30T16:34:27.769+07:00"
+}

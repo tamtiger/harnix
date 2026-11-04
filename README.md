@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.25.0`
+**Version:** `2.26.0`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -294,7 +294,7 @@ git diff --check
 
 `pnpm release:check` chạy đúng chuỗi gate phát hành ở trên theo thứ tự, in từng lệnh kèm exit code và thời gian và dừng ở lệnh đầu tiên lỗi.
 
-`pnpm measure:footprint` thất bại khi dung lượng `harnix setup` ghi ra vượt `maxBytes` trong `scripts/footprint-budget.json`; file này được commit và chỉ nâng bằng thay đổi có chủ đích kèm lý do ở changelog. Mức giảm so với baseline Trellis vẫn được in như số tham khảo.
+`pnpm measure:footprint` chỉ đo và in số file, số byte `harnix setup` ghi ra cùng mức giảm so với baseline Trellis (số tham khảo lịch sử); không còn ngân sách byte (quyết định của người dùng ngày 2026-10-30: kích thước setup không phải chi phí cần tối ưu, token của skill và reference mới là; `instruction-budget` giữ ngân sách token).
 
 `pnpm test` chạy toàn bộ test kèm coverage (`vitest run --coverage`) với sàn ghi trong `vitest.config.ts`; bố cục test và builder dùng chung được mô tả trong `test/README.md`. Import trong `src` và `test` dùng alias `src/...` và `test/...` thay cho đường dẫn cha `../`.
 

@@ -308,6 +308,24 @@ describe("version sync --fold-dev", () => {
     await expect(readFile(join(root, "CHANGELOG.md"), "utf8")).resolves.toBe(changelog);
   });
 
+  it("folds without --summary and adds no bullet of its own; with --summary it adds exactly one", async () => {
+    const quiet = await devChain();
+    // An empty summary is dropped, exactly like leaving --summary out on the command line.
+    await bump(quiet, "1.1.0", "", "fixed", { foldDev: true });
+    const text = await readFile(join(quiet, "CHANGELOG.md"), "utf8");
+    const entry = text.slice(text.indexOf("## [1.1.0]"), text.indexOf("## [1.0.4]"));
+    expect(entry).toBe(
+      ["## [1.1.0] - 2026-10-01", "", "### Added", "", "- A1", "- A3", "", "### Changed", "", "- C2", "", ""].join(
+        "\n",
+      ),
+    );
+
+    const summarized = await devChain();
+    await bump(summarized, "1.1.0", "Final", "fixed", { foldDev: true });
+    const withSummary = await readFile(join(summarized, "CHANGELOG.md"), "utf8");
+    expect(withSummary.match(/^- Final$/gmu)).toHaveLength(1);
+  });
+
   it("rejects --fold-dev for a pre-release or when no dev entry exists", async () => {
     const root = await fixture();
 

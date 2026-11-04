@@ -1,3 +1,4 @@
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -25,39 +26,12 @@ describe("measure:footprint build guard", () => {
   });
 });
 
-interface FootprintBudget {
-  assertWithinBudget(bytes: number, maxBytes: number): void;
-  readBudget(root: string, read?: (path: string) => string): number;
-}
-
-const { assertWithinBudget, readBudget } = (await import(
-  new URL("../../scripts/footprint-budget.mjs", import.meta.url).href
-)) as FootprintBudget;
-
-describe("measure:footprint byte budget", () => {
-  it("passes at or below the budget", () => {
-    expect(() => assertWithinBudget(1000, 1000)).not.toThrow();
-    expect(() => assertWithinBudget(999, 1000)).not.toThrow();
-  });
-
-  it("fails and names the overshoot and the budget file when the footprint exceeds the budget", () => {
-    expect(() => assertWithinBudget(1501, 1000)).toThrow(/501 bytes over.*scripts\/footprint-budget\.json/);
-  });
-
-  it("reads maxBytes from the committed budget file", () => {
-    const seen: string[] = [];
-    const maxBytes = readBudget("/repo", (path) => {
-      seen.push(path);
-      return '{ "maxBytes": 4096 }';
-    });
-
-    expect(maxBytes).toBe(4096);
-    expect(seen).toEqual([join("/repo", "scripts", "footprint-budget.json")]);
-  });
-
-  it("rejects a budget file without a positive integer maxBytes", () => {
-    for (const body of ["{}", '{ "maxBytes": 0 }', '{ "maxBytes": "5" }', '{ "maxBytes": 1.5 }', "not json"]) {
-      expect(() => readBudget("/repo", () => body)).toThrow(/footprint-budget\.json/);
-    }
+describe("measure:footprint has no byte budget", () => {
+  it("only measures: no budget module, file or assertion is left", () => {
+    expect(existsSync(join(process.cwd(), "scripts", "footprint-budget.json"))).toBe(false);
+    expect(existsSync(join(process.cwd(), "scripts", "footprint-budget.mjs"))).toBe(false);
+    expect(readFileSync(join(process.cwd(), "scripts", "measure-footprint.mjs"), "utf8")).not.toMatch(
+      /budget|maxBytes/iu,
+    );
   });
 });

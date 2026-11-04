@@ -4,6 +4,19 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.26.0] - 2026-10-30
+
+### Changed
+
+- Bỏ ngân sách byte của measure:footprint (scripts/footprint-budget.*): lệnh chỉ đo và in; token của skill và reference vẫn bị instruction-budget giới hạn.
+- vitest dùng maxWorkers 6 (đo xen kẽ nhanh hơn khoảng 4 đến 10% và ổn định hơn 12 worker).
+- HARNIX_UPDATE_GOLDEN ghi golden bằng Prettier của repo: chạy lại trên code không đổi không đổi byte nào, thay một chuỗi chỉ tạo diff một dòng.
+- Tài liệu và test nêu rõ version:sync --fold-dev không cần --summary (entry gộp chỉ gồm bullet của bản dev; có --summary thì thêm đúng một bullet).
+
+### Fixed
+
+- Khôi phục mục (10) về --slug của IMPLEMENTATION_PLAN bị hỏng từ 2.22.1 (cả hai bản đoạn văn) và thêm test chống tái phát.
+
 ## [2.25.0] - 2026-10-30
 
 ### Added

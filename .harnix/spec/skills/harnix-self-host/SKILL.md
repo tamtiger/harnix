@@ -13,7 +13,7 @@ A task that changes the CLI, documentation or test structure adds a focused requ
 
 ## Release preparation
 
-Bump the version once, during implementation and before `verifying`, with `pnpm version:sync <version> --summary <text> [--kind added|changed|fixed]` (a standalone task bumps the patch; a member of an epic bumps `X.Y.0-dev.N`; the epic-closing release adds `--fold-dev`). After editing the packaged `workflow.md` template run `pnpm selfhost:sync`. A footprint over `scripts/footprint-budget.json` is first reduced by merging references; the budget is raised only by the measured shortfall with the reason in `CHANGELOG.md`.
+Bump the version once, during implementation and before `verifying`, with `pnpm version:sync <version> --summary <text> [--kind added|changed|fixed]` (a standalone task bumps the patch; a member of an epic bumps `X.Y.0-dev.N`; the epic-closing release adds `--fold-dev` and needs no `--summary`: the dev entries already describe it). After editing the packaged `workflow.md` template run `pnpm selfhost:sync`. `measure:footprint` has no byte budget; keep the token budgets of skills and references (`instruction-budget`) instead.
 
 ## Documentation synchronization (MANDATORY)
 
