@@ -4,6 +4,13 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.28.0] - 2026-11-04
+
+### Changed
+
+- Khối luôn nạp và workflow.md hướng dẫn nạp skill bằng harnix skill harnix-<stage> --raw: cùng nội dung không bọc JSON, bớt khoảng 110 đến 130 token mỗi lần nạp; content byte-identical và đầu ra không --raw giữ nguyên
+- harnix-plan/SKILL.md rút từ 1798 còn 1527 token (giảm 15%, bỏ đường dẫn ./references lặp với lệnh --reference, gọn câu chữ, không mất quy tắc) và trần token của skill này hạ xuống 1630 để chừa đệm 100 token
+
 ## [2.27.0] - 2026-11-04
 
 ### Fixed

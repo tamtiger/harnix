@@ -1,0 +1,132 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261104-140040-skill-output-dedupe",
+  "epicId": "20261104-140039-skills-token-diet",
+  "title": "Hướng dẫn nạp skill bằng --raw để bỏ phần JSON lặp",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Theo research.md (mục 3): đầu ra JSON của harnix skill <name> thừa khoảng 110 đến 130 token mỗi lần nạp so với --raw (description, version và frontmatter lặp, ký tự escape). Hướng đã chọn (người dùng, 2026-11-04): không đổi hợp đồng byte-identical của content mà hướng dẫn agent nạp bằng --raw.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Khối luôn nạp (src/templates/harnix/activation.ts) và src/templates/harnix/workflow.md hướng dẫn nạp skill bằng harnix skill harnix-<stage> --raw; mọi khối luôn nạp vẫn không quá 1500 token (instruction-budget); --raw in đúng nội dung của content, đầu ra không --raw và hợp đồng byte-identical không đổi; một test chứng minh với từng skill workflow rằng đầu ra --raw ngắn hơn JSON, và decision ghi số byte của JSON và --raw cho harnix-plan, harnix-implement, harnix-verify.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Tài liệu nêu cách nạp skill bằng --raw ở nơi đang nhắc lệnh nạp skill (docs/HARNIX_WORKFLOW.md, docs/HARNIX_PRD.md nếu có) và CHANGELOG có bullet tương ứng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "docs/HARNIX_WORKFLOW.md",
+    "src/templates/harnix/activation.ts",
+    "src/templates/harnix/workflow.md",
+    "test/integration/commands/skills.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/integration/commands/skills.test.ts test/workflow/instruction-budget.test.ts test/workflow/activation-instructions.test.ts test/workflow/docs-task-contract.test.ts test/workflow/skill-sources.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-04T14:17:25.728+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Đổi hướng theo quyết định người dùng: dùng --raw thay vì bỏ frontmatter khỏi content vì content byte-identical là hợp đồng đóng băng",
+      "artifactPaths": [
+        ".harnix/tasks/20261104-140040-skill-output-dedupe/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-11-04T14:17:26.418+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Đồng bộ với tiêu chí ac-1 mới",
+      "artifactPaths": [
+        ".harnix/tasks/20261104-140040-skill-output-dedupe/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-11-04T14:17:26.969+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Test của hướng --raw",
+      "artifactPaths": [
+        ".harnix/tasks/20261104-140040-skill-output-dedupe/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-04T14:20:11.476+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/integration/commands/skills.test.ts test/workflow/instruction-budget.test.ts test/workflow/activation-instructions.test.ts test/workflow/docs-task-contract.test.ts test/wo... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "571b6d47926b8110eaf3cc3fd72a8506fc6ae59c066d5b6fb09c6472a5522f93"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-04T14:21:37.313+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "74aac7777c6a275591351dde8f3584530e284b6074bf9a465aa39d9c1953b63c"
+    }
+  ],
+  "createdAt": "2026-11-04T14:00:39.247+07:00",
+  "updatedAt": "2026-11-04T14:21:43.178+07:00",
+  "decisions": [
+    {
+      "id": "dec-raw-measure",
+      "text": "Đo bằng harnix skill <name> (JSON) và --raw, đơn vị byte: harnix-plan 7644 và 7196, harnix-implement 7026 và 6574, harnix-verify 7624 và 7104; chênh 448 đến 520 byte, khoảng 112 đến 130 token mỗi lần nạp (4 ký tự một token).",
+      "rationale": "Số đo trước thay đổi, cùng phép đo của research.md; --raw đã tồn tại nên không đổi hợp đồng content byte-identical."
+    }
+  ],
+  "completedAt": "2026-11-04T14:21:43.178+07:00"
+}

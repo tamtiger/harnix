@@ -1,6 +1,6 @@
 # Harnix workflow
 
-Lean operational sheet. The always-loaded rules come first; skills hold the procedures (`harnix skill harnix-<stage>`, plus `--reference <topic>`). Detail of each section loads on demand with `harnix skill harnix-verify --reference <workflow-routing|task-state|gates|agent-transport|cookbook-notes|cookbook-commands>` (only when a rule here is not enough).
+Lean operational sheet. The always-loaded rules come first; skills hold the procedures (`harnix skill harnix-<stage> --raw`, plus `--reference <topic>`). Detail of each section loads on demand with `harnix skill harnix-verify --reference <workflow-routing|task-state|gates|agent-transport|cookbook-notes|cookbook-commands>` (only when a rule here is not enough).
 
 ## Route
 

@@ -314,4 +314,8 @@ describe("Harnix target authority instructions", () => {
       expect(actual.harnixWriteRoots, `${scenario.id} performed a guard-time write`).toEqual([]);
     }
   });
+  it("tells the agent to load a stage skill with --raw so no JSON wrapper is paid for", () => {
+    for (const surface of [renderHarnixRules(), claudeGlobalMemoryContent, codexGlobalAgentsContent])
+      expect(surface).toContain("harnix skill harnix-<stage> --raw");
+  });
 });

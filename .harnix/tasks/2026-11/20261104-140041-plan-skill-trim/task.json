@@ -1,0 +1,107 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261104-140041-plan-skill-trim",
+  "epicId": "20261104-140039-skills-token-diet",
+  "title": "Rút gọn harnix-plan/SKILL.md và chuyển phần ít dùng sang reference",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Theo research.md (phương án B): harnix-plan là skill nạp nhiều nhất (khoảng 106000 token qua 59 lần nạp) và đang 1798 trên trần 1800 nên mỗi lần bump version có nguy cơ vượt trần; rút gọn khoảng 15 đến 20% mà không mất quy tắc bắt buộc.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix-plan/SKILL.md giảm tối thiểu 15% token so với 1798 (đo bằng cùng phép đo của instruction-budget), phần chuyển ra nằm trong reference hiện có hoặc reference mới và SKILL.md giữ đúng một dòng trỏ tới mỗi reference; mọi quy tắc bắt buộc (Bypass, ready gate, epic, replan, Full phải dừng ở await) vẫn đọc được từ SKILL.md hoặc một reference được trỏ rõ; trần SKILL_BUDGET của harnix-plan hạ xuống mức còn khoảng đệm ít nhất 100 token so với số đo mới; checklist skill của harnix-self-host được duyệt.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Đo lại token bằng pnpm measure:tokens sau thay đổi và ghi số trước và sau vào decision của task; research.md của epic session-friction-fixes không bị sửa.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/skills/harnix-plan",
+    "test/workflow/instruction-budget.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/workflow/instruction-budget.test.ts test/workflow/skill-sources.test.ts test/workflow/docs-task-contract.test.ts test/unit/skills",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/skills/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-04T14:31:04.191+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/instruction-budget.test.ts test/workflow/skill-sources.test.ts test/workflow/docs-task-contract.test.ts test/unit/skills — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "80d63eafa70b3c0a313a93b37a206ee1e2ee2bf03cfe27ec93bbbf4c567de3dc"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-04T14:32:34.284+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3bee236572ecafbc45bb00fb7421323deeda1eb4a164f218518a6518799a0447"
+    }
+  ],
+  "createdAt": "2026-11-04T14:00:39.247+07:00",
+  "updatedAt": "2026-11-04T14:32:40.981+07:00",
+  "decisions": [
+    {
+      "id": "dec-plan-trim-measure",
+      "text": "harnix-plan/SKILL.md: 1798 token (7197 byte) trước, 1527 token sau, giảm 271 token (15.1%). measure:tokens: harnix-plan 1911 trước và nhỏ hơn sau (đo ở dạng có bọc JSON). Trần SKILL_BUDGET riêng của harnix-plan hạ 1800 xuống 1630 (đệm 103 token). Đã bỏ đường dẫn ./references/<topic>.md lặp với lệnh --reference vì test catalog chỉ buộc lệnh harnix skill ... --reference; giữ nguyên cụm 'observable acceptance criteria' mà test responsibility yêu cầu.",
+      "rationale": "Số đo cùng phép đo (độ dài ký tự chia 4) của instruction-budget và research.md; không có quy tắc bắt buộc nào bị bỏ, các test skill-sources, reference-rules và catalog vẫn pass."
+    },
+    {
+      "id": "dec-plan-trim-measure-after",
+      "text": "Đo lại bằng pnpm measure:tokens sau khi build: harnix-plan 1911 xuống 1635 (giảm 276 token, dạng có bọc JSON), phiên Lite đầy đủ sessionLite 9170 xuống 8903 (giảm 267). Cập nhật cho dec-plan-trim-measure, vốn ghi sau là 'nhỏ hơn' khi dist chưa build lại.",
+      "rationale": "Số đo sạch sau release:check (dist mới); thay cho câu chưa có số."
+    }
+  ],
+  "completedAt": "2026-11-04T14:32:40.981+07:00"
+}

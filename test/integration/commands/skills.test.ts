@@ -177,6 +177,29 @@ describe("harnix skill", () => {
     stdout.mockRestore();
   });
 
+  it.each(["harnix-plan", "harnix-implement", "harnix-verify"])(
+    "prints %s with --raw as exactly its content and shorter than the JSON output",
+    async (name) => {
+      const stdout = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+      vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+      const read = async (extra: string[]): Promise<string> => {
+        stdout.mockClear();
+        expect(await runCli(["node", "harnix", "skill", name, ...extra])).toBe(0);
+        return stdout.mock.calls.map((c) => String(c[0])).join("");
+      };
+
+      const json = await read([]);
+      const raw = await read(["--raw"]);
+
+      expect(raw).toBe(`${reportSkill(name).content}
+`);
+      expect(json).toBe(`${JSON.stringify(reportSkill(name))}
+`);
+      expect(raw.length).toBeLessThan(json.length);
+      stdout.mockRestore();
+    },
+  );
+
   it("suggests skills by keywords and references", () => {
     const flaky = suggestSkills("flaky test race condition");
     expect(flaky.suggestions.length).toBeGreaterThan(0);

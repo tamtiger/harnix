@@ -12,6 +12,8 @@ const tokens = (text: string): number => Math.ceil(text.length / CHARACTERS_PER_
 
 const ALWAYS_LOADED_BUDGET = 1_500;
 const SKILL_BUDGET = 1_800;
+/** harnix-plan is the most loaded skill (59 loads in 37 transcripts); it was trimmed to 1527 tokens and keeps 100 tokens of headroom. */
+const SKILL_BUDGETS: Readonly<Record<string, number>> = { "harnix-plan": 1_630 };
 const DIRECT_PATH_BUDGET = 4_000;
 const FULL_PATH_BUDGET = 15_000;
 
@@ -36,7 +38,7 @@ describe("instruction token budgets", () => {
   });
 
   it.each(workflowSkills.map((item) => item.name))("keeps %s within the per-skill budget", (name) => {
-    expect(tokens(skill(name))).toBeLessThanOrEqual(SKILL_BUDGET);
+    expect(tokens(skill(name))).toBeLessThanOrEqual(SKILL_BUDGETS[name] ?? SKILL_BUDGET);
   });
 
   it("keeps the direct path (always-loaded block plus harnix-implement) within budget", () => {
