@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.26.1] - 2026-11-04
+
+### Fixed
+
+- doctor tra task trong cả kho sống lẫn _archive (chỉ đọc) khi kiểm tra journal: journal của task đã archive không còn bị báo journal-task-unlinked hay journal-evidence-unlinked, task không tồn tại ở đâu vẫn bị báo
+
 ## [2.26.0] - 2026-10-30
 
 ### Changed

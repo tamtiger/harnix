@@ -4,16 +4,28 @@
   "id": "20261030-140445-doctor-archived-journal-links",
   "title": "Doctor không báo journal của task đã archive là mồ côi",
   "mode": "lite",
-  "status": "planning",
-  "checkpoint": "planning",
+  "status": "completed",
+  "checkpoint": "finishing",
   "goal": "Journal tham chiếu task hoặc evidence của task nằm trong _archive không còn bị doctor báo journal-task-unlinked hoặc journal-evidence-unlinked; chỉ task thật sự không tồn tại ở live lẫn archive mới bị báo.",
   "nonGoals": [],
   "acceptanceCriteria": [
     {
       "id": "ac-1",
       "text": "inspectJournalRecords của doctor tra task trong cả live lẫn _archive (đọc chỉ đọc): journal của task đã archive không sinh journal-task-unlinked hay journal-evidence-unlinked, còn task không có ở đâu cả vẫn bị báo; test cho cả ba trường hợp và fixture mã hiện có vẫn pass.",
-      "status": "pending",
-      "evidenceIds": []
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-docs-1",
+        "ev-chk-doctor-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "docs/HARNIX_PRD.md (mục Doctor, dòng liệt kê các kiểm tra offline) nêu rằng journal-task-unlinked và journal-evidence-unlinked chỉ báo khi task không có ở live lẫn _archive, và docs/IMPLEMENTATION_PLAN.md được đồng bộ nếu có mục Doctor tương ứng; CHANGELOG ghi một bullet Fixed cho bản vá.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-docs-1"
+      ]
     }
   ],
   "validationPlan": [
@@ -43,18 +55,75 @@
         "src/**",
         "test/**"
       ]
+    },
+    {
+      "id": "chk-docs",
+      "description": "Test hợp đồng tài liệu và so khớp release sequence",
+      "command": "pnpm test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "docs/**",
+        "test/workflow/**"
+      ]
     }
   ],
-  "evidence": [],
-  "relevantPaths": [],
+  "evidence": [
+    {
+      "id": "ev-chk-doctor-1",
+      "checkId": "chk-doctor",
+      "recordedAt": "2026-11-04T10:25:50.143+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/doctor test/integration/commands/doctor.test.ts test/workflow/doctor-finding-fixtures-project.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4b09484c24c8af5d2813d465d5728372687fc8143c071d9e988ed180493a543c"
+    },
+    {
+      "id": "ev-chk-docs-1",
+      "checkId": "chk-docs",
+      "recordedAt": "2026-11-04T10:25:58.100+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e34e50354b2e90d41700a1e3268d332cb43beda063a2cb394eae570474637074"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-04T10:27:22.530+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4a57c6c95fc87536392bb4939a2b0dea29b1ced220b097bf994fc146267a7650"
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/core/doctor/project-tasks.ts"
+  ],
   "relevantSpecs": [],
   "createdAt": "2026-10-30T14:04:45.916+07:00",
-  "updatedAt": "2026-10-30T14:04:47.314+07:00",
+  "updatedAt": "2026-11-04T10:27:54.134+07:00",
   "decisions": [
     {
       "id": "source",
       "text": "Phát hiện khi chạy doctor sau epic workflow-ergonomics: 73 journal-task-unlinked và 6 journal-evidence-unlinked, id trỏ tới task trong .harnix/tasks/_archive.",
       "rationale": "Archive là bước thủ công hợp lệ nên doctor không được coi nó là dữ liệu mất."
+    },
+    {
+      "id": "dec-no-overlap",
+      "text": "Epic session-review (8 task, đã hoàn thành) không chạm doctor journal, archive hay project-tasks.ts, nên task này không trùng phạm vi; thay đổi lên 2.26.x mới ở bản vá kế tiếp.",
+      "rationale": "Đối chiếu ngày 2026-11-04 sau khi rebase lên origin/v2: epic có các task run-check-command-gate, cli-error-hints, status-epic-learning-noise, context-hook-dedup, global-setup-hardening, test-stability, docs-contract-sync, cookbook-skill-guidance."
     }
-  ]
+  ],
+  "completedAt": "2026-11-04T10:27:54.134+07:00"
 }

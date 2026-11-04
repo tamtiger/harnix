@@ -1,5 +1,6 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 
+import { readArchivedTasks } from "src/core/doctor/archived-tasks.js";
 import { inspectTaskPreflight } from "src/core/doctor/task-preflight.js";
 import { finding, isMissing, redact, type DoctorFinding } from "src/core/doctor/findings.js";
 import { searchJournal, type JournalEntry } from "src/core/journal/journal.js";
@@ -67,7 +68,8 @@ export async function inspectTaskRecords(
     if (!isMissing(error)) findings.push(finding("task-root-unreadable", "error", "tasks", redact(error, root), false));
   }
   await inspectTaskPreflight(root, tasks, packagePaths, findings);
-  await inspectJournalRecords(root, tasks, findings);
+  const linkable = new Map([...(await readArchivedTasks(root)), ...tasks]);
+  await inspectJournalRecords(root, linkable, findings);
 }
 
 async function readTaskRecord(
