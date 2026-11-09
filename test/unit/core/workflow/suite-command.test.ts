@@ -11,7 +11,12 @@ async function monorepo(): Promise<string> {
   const root = await temporaryRepository();
   await mkdir(join(root, "svc", "tests"), { recursive: true });
   await writeFile(join(root, "svc", "App.sln"), "");
-  await writeFile(join(root, "svc", "tests", "App.Tests.csproj"), "<Project />");
+  await writeFile(
+    join(root, "svc", "tests", "App.Tests.csproj"),
+    '<Project Sdk="Microsoft.NET.Sdk"><ItemGroup><PackageReference Include="Microsoft.NET.Test.Sdk" /></ItemGroup></Project>',
+  );
+  await mkdir(join(root, "lib"), { recursive: true });
+  await writeFile(join(root, "lib", "Lib.csproj"), "<Project />");
   await mkdir(join(root, "plain"), { recursive: true });
   return root;
 }
@@ -40,6 +45,19 @@ describe("isSafeSolutionArgument", () => {
     expect(await isSafeSolutionArgument(await monorepo(), argument, undefined)).toBe(false);
   });
 
+  it("refuses a solution file that is itself a link to a file outside the repository", async () => {
+    const root = await monorepo();
+    const outside = await temporaryRepository();
+    await writeFile(join(outside, "Out.sln"), "");
+    try {
+      await symlink(join(outside, "Out.sln"), join(root, "svc", "Linked.sln"), "file");
+    } catch {
+      return; // creating a file link needs a privilege some Windows accounts lack
+    }
+
+    expect(await isSafeSolutionArgument(root, "svc/Linked.sln", undefined)).toBe(false);
+  });
+
   it("refuses a solution reached through a link that leaves the repository", async () => {
     const root = await monorepo();
     const outside = await temporaryRepository();
@@ -64,6 +82,7 @@ describe("acceptsSuiteCommand", () => {
     expect(await acceptsSuiteCommand(root, "dotnet test", "svc", ["pnpm test"])).toBe(true);
     expect(await acceptsSuiteCommand(root, "dotnet test", "svc/tests", ["pnpm test"])).toBe(true);
     expect(await acceptsSuiteCommand(root, "dotnet test", "plain", ["pnpm test"])).toBe(false);
+    expect(await acceptsSuiteCommand(root, "dotnet test", "lib", ["pnpm test"])).toBe(false);
     expect(await acceptsSuiteCommand(root, "dotnet test", undefined, ["pnpm test"])).toBe(false);
   });
 

@@ -1,9 +1,11 @@
 import { unknownIdError } from "src/utils/suggest.js";
-import type { AcceptanceCriterion, TaskRecord, ValidationCheck } from "src/core/tasks/task.js";
+import { compareCodeUnits } from "src/utils/order.js";
+import type { AcceptanceCriterion, TaskRecordV3, ValidationCheck } from "src/core/tasks/task.js";
+import { freshEvidence } from "./criterion.js";
 
 /** Refuses, before anything is written, a request to mark criteria met that the evidence just recorded cannot back. */
 export function assertMarkableBy(
-  task: TaskRecord,
+  task: TaskRecordV3,
   check: ValidationCheck,
   result: string,
   ids: readonly string[],
@@ -24,14 +26,19 @@ export function assertMarkableBy(
   }
 }
 
-/** The criteria with `ids` met from the one evidence item, in the same save that records it. */
-export function markMetBy(
-  criteria: readonly AcceptanceCriterion[],
+/**
+ * The criteria with `ids` met in the same save that records the evidence, by the rule of `--criterion --met`: every
+ * required check covering a criterion needs a fresh pass (the one just recorded counts) or an accepted baseline, and
+ * the criterion links all of those passes. Throws before any write when one check is not fresh.
+ */
+export async function markMetFresh(
+  root: string,
+  candidate: TaskRecordV3,
   ids: readonly string[],
-  evidenceId: string,
-): AcceptanceCriterion[] {
-  const marked = new Set(ids);
-  return criteria.map((criterion) =>
-    marked.has(criterion.id) ? { ...criterion, status: "met", evidenceIds: [evidenceId] } : criterion,
+): Promise<AcceptanceCriterion[]> {
+  const marked = new Map<string, string[]>();
+  for (const id of new Set(ids)) marked.set(id, (await freshEvidence(root, candidate, id)).sort(compareCodeUnits));
+  return candidate.acceptanceCriteria.map((criterion) =>
+    marked.has(criterion.id) ? { ...criterion, status: "met", evidenceIds: marked.get(criterion.id) ?? [] } : criterion,
   );
 }

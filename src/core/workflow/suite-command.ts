@@ -1,7 +1,7 @@
-import { readdir } from "node:fs/promises";
+import { readdir, stat } from "node:fs/promises";
 import { win32 } from "node:path";
 
-import { isDotnetProjectFile, isSolutionFile } from "src/core/stack/dotnet-projects.js";
+import { inspectDotnetDirectory, isSolutionFile } from "src/core/stack/dotnet-projects.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { equivalentCommand, splitCommand } from "./command-match.js";
 
@@ -27,19 +27,18 @@ export async function isSafeSolutionArgument(
   const path = joinedPath(argument, cwd);
   if (path.split("/").some((segment) => segment === ".." || segment === "")) return false;
   try {
-    return (
-      await readdir(await resolveSafeProjectPath(projectRoot, path.slice(0, path.lastIndexOf("/")) || "."))
-    ).includes(path.slice(path.lastIndexOf("/") + 1));
+    // The file itself is resolved, so a link that leaves the repository fails even when its directory is inside.
+    return (await stat(await resolveSafeProjectPath(projectRoot, path))).isFile();
   } catch {
     return false;
   }
 }
 
-/** True when the directory holds a solution or a .NET project file, so a bare `dotnet test` there means something. */
-async function isDotnetDirectory(projectRoot: string, cwd: string): Promise<boolean> {
+/** True when the directory holds a solution or project that has a test project, so a bare `dotnet test` there tests something. */
+async function isDotnetTestDirectory(projectRoot: string, cwd: string): Promise<boolean> {
   try {
-    const entries = await readdir(await resolveSafeProjectPath(projectRoot, cwd));
-    return entries.some((name) => isSolutionFile(name) || isDotnetProjectFile(name));
+    const directory = await resolveSafeProjectPath(projectRoot, cwd);
+    return (await inspectDotnetDirectory(directory, await readdir(directory))).hasTests;
   } catch {
     return false;
   }
@@ -63,6 +62,6 @@ export async function acceptsSuiteCommand(
   if (known.some((candidate) => equivalentCommand(candidate, command))) return true;
   const [executable, verb, ...rest] = splitCommand(command).map(unquote);
   if (executable?.replace(/\.(?:exe|cmd|bat)$/iu, "").toLowerCase() !== "dotnet" || verb !== "test") return false;
-  if (rest.length === 0) return cwd !== undefined && cwd !== "." && (await isDotnetDirectory(projectRoot, cwd));
+  if (rest.length === 0) return cwd !== undefined && cwd !== "." && (await isDotnetTestDirectory(projectRoot, cwd));
   return rest.length === 1 && (await isSafeSolutionArgument(projectRoot, rest[0] ?? "", cwd));
 }

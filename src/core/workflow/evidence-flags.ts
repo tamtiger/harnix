@@ -3,7 +3,7 @@ import { unknownIdError } from "src/utils/suggest.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
-import { assertMarkableBy, markMetBy } from "./evidence-criteria.js";
+import { assertMarkableBy, markMetFresh } from "./evidence-criteria.js";
 import { syncPlanChecklistPass } from "./plan-sync.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
@@ -93,7 +93,11 @@ export async function appendEvidenceFlagsWorkflow(
       flags.check ?? "",
       task.validationPlan.map((check) => check.id),
     );
-  if (flags.markMet !== undefined) assertMarkableBy(task, check, result, flags.markMet);
+  if (flags.markMet !== undefined) {
+    if (task.schemaVersion !== 3)
+      throw new Error("--criterion --met with --evidence needs a TaskRecord schema v3 task.");
+    assertMarkableBy(task, check, result, flags.markMet);
+  }
   const exitCode = parseExitCode(flags.exitCode, result !== "skipped" || check.command !== undefined);
   const inputDigest = await evidenceDigest(root, task, flags.check, result, flags.digest);
   const evidence: EvidenceV3 = {
@@ -106,15 +110,13 @@ export async function appendEvidenceFlagsWorkflow(
     artifactPaths: [...(flags.artifacts ?? [])],
     ...(inputDigest === undefined ? {} : { inputDigest }),
   };
+  const recorded = { ...task, evidence: [...task.evidence, evidence], updatedAt: laterTimestamp(task.updatedAt, now) };
+  const acceptanceCriteria =
+    flags.markMet === undefined || recorded.schemaVersion !== 3
+      ? undefined
+      : await markMetFresh(root, recorded, flags.markMet);
   const saved = await saveWorkflow(root, {
-    task: {
-      ...task,
-      ...(flags.markMet === undefined
-        ? {}
-        : { acceptanceCriteria: markMetBy(task.acceptanceCriteria, flags.markMet, evidence.id) }),
-      evidence: [...task.evidence, evidence],
-      updatedAt: laterTimestamp(task.updatedAt, now),
-    },
+    task: { ...recorded, ...(acceptanceCriteria === undefined ? {} : { acceptanceCriteria }) },
   });
   if (result === "pass") {
     const harnixRoot = await resolveSafeHarnixPath(root);

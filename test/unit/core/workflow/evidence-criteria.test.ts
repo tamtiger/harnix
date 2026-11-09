@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { assertMarkableBy, markMetBy } from "src/core/workflow/evidence-criteria.js";
+import { assertMarkableBy } from "src/core/workflow/evidence-criteria.js";
 import { buildCheck, buildCriterion, buildTaskV3 } from "test/support/builders.js";
 
 const check = buildCheck({ id: "c", criterionIds: ["a"] });
@@ -25,14 +25,5 @@ describe("assertMarkableBy", () => {
     ["a criterion the check does not cover", "pass", ["b"], /does not cover/u],
   ])("refuses %s", (_name, result, ids, message) => {
     expect(() => assertMarkableBy(task, check, result, ids)).toThrow(message);
-  });
-});
-
-describe("markMetBy", () => {
-  it("marks only the named criteria met from the one evidence item", () => {
-    const marked = markMetBy(task.acceptanceCriteria, ["a"], "ev-1");
-
-    expect(marked.find((criterion) => criterion.id === "a")).toMatchObject({ status: "met", evidenceIds: ["ev-1"] });
-    expect(marked.find((criterion) => criterion.id === "b")?.status).toBe("pending");
   });
 });

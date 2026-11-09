@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.29.1] - 2026-11-09
+
+### Fixed
+
+- Sửa các phát hiện review của epic workflow-friction-v2: check bị circuit breaker dừng không còn sửa được cwd/description để vượt breaker, --evidence kèm --criterion --met dùng cùng quy tắc tươi với --criterion --met, dotnet test trần chỉ nhận thư mục có test project, kiểm tra symlink của chính file .sln
+
 ## [2.29.0] - 2026-11-09
 
 ### Changed

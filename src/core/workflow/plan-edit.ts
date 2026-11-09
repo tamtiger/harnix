@@ -5,6 +5,7 @@ import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertValidCheckInputs, validateCheckInputs } from "./check-input-validator.js";
 import { notePlanMissingCriteria } from "./plan-criterion-notice.js";
+import { assertBreakerNotBypassed } from "./check-config-edit.js";
 import { checkFlagIssues, setCheckExample } from "./check-flag-issues.js";
 import { obligationsChanged } from "./obligations.js";
 import { flagIssueError } from "./flag-issues.js";
@@ -83,8 +84,10 @@ export async function saveObligationEdit(
   }
   const updatedAt = laterTimestamp(task.updatedAt, now);
   // Only the cwd or description of checks that never passed differ: not a contract change, so a plain save.
-  if (task.status !== "planning" && !obligationsChanged(task, edited))
+  if (task.status !== "planning" && !obligationsChanged(task, edited)) {
+    await assertBreakerNotBypassed(root, task, edited);
     return (await saveWorkflow(root, { task: { ...edited, updatedAt } })) as TaskRecordV3;
+  }
   const reason = revisionReason(options);
   const revise = async (contractReason: string): Promise<TaskRecordV3> => {
     const revised = (await saveWorkflow(root, {

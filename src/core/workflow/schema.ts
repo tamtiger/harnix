@@ -157,7 +157,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--transition":
         "Status and checkpoint only, read from the persisted record: --transition <status>/<checkpoint> [--dry-run] [--reviewed]. Entering ready/ready checks the plan content (placeholders, every criterion named in plan.md, a focused required check per criterion); a Full task also needs --reviewed after the ready-review, and --dry-run returns reviewChecklist for a Full task entering ready, for a ready target that has issues, or on any dry run with --checklist.",
       "--evidence":
-        "Append exactly one evidence item from a stdin envelope, or from --check, --result, --summary and optional --exit-code, --artifact, --digest flags; add --criterion <ids> --met (with --result pass) to mark those criteria met from exactly that pass in the same save, and nothing is written when the pass is refused.",
+        "Append exactly one evidence item from a stdin envelope, or from --check, --result, --summary and optional --exit-code, --artifact, --digest flags; add --criterion <ids> --met (with --result pass) to mark those criteria met in the same save by the rule of --criterion --met (every required check covering a criterion needs a fresh pass, the one just recorded counts), and nothing is written when that is refused.",
       "--criterion":
         "Mark criteria met from fresh passing evidence: --criterion <ids> --met [--evidence-ids <ids>]; schema v3 only.",
       "--migrate":

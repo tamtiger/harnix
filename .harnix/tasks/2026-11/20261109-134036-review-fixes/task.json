@@ -1,0 +1,187 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-134036-review-fixes",
+  "title": "Sửa các phát hiện review của epic workflow-friction-v2",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khép các phát hiện review: breaker không còn bị vượt bằng --set-check cwd/description, lệnh gộp evidence + criterion dùng cùng quy tắc tươi với --criterion --met, dotnet test trần chỉ nhận thư mục có test project, kiểm tra symlink của chính file .sln, và sửa chú thích --reason.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "--set-check chỉ đổi cwd hoặc description được áp dụng thẳng chỉ khi check chưa bị breaker chặn; check đã fail hai lần liên tiếp (breaker đang dừng) bị từ chối kèm hint --reset-breaker hoặc --replace-check cần user cho phép; check fail một lần vẫn sửa cwd thẳng; có test cho cả hai.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "--evidence ... --criterion <ids> --met áp dụng cùng quy tắc tươi với --criterion --met: mọi required check phủ criterion phải có pass còn tươi (pass vừa ghi được tính) hoặc baseline được chấp nhận, evidenceIds gồm các pass đó thay vì chỉ pass vừa ghi; vi phạm thì không ghi gì; có test hai check phủ một criterion.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "dotnet test trần kèm --cwd chỉ được suite gate chấp nhận khi thư mục cwd có test project (qua inspectDotnetDirectory hasTests), không phải mọi thư mục có .sln hoặc .csproj; có test thư mục thư viện bị từ chối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Kiểm tra đường dẫn .sln phân giải chính file (symlink hoặc junction trỏ ra ngoài repo bị từ chối) chứ không chỉ thư mục cha; có test file .sln là symlink ra ngoài.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Chú thích của reason-rules.ts và handler set-title/set-goal nói đúng việc --reason được kiểm tra độ dài rồi bỏ đi, không lưu.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Tài liệu và snapshot đồng bộ: AGENTS.md, docs/HARNIX_PRD.md, docs/IMPLEMENTATION_PLAN.md và hint trong check-config-edit.ts nêu đúng quy tắc breaker của cwd-only và quy tắc tươi của lệnh gộp; golden chỉ đổi đúng chuỗi mới; bump patch 2.29.1 kèm CHANGELOG trước verifying.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của các sửa review",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/core/workflow test/workflow test/unit/core/stack",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test: cli-contract, architecture, docs, golden, instruction budget",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test:gates",
+      "criterionIds": [
+        "ac-6"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T13:46:05.390+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/workflow test/unit/core/stack — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3da3be10f4d48fc830bf94e3f6d1ca7117e0c5b5b6b22a66da9469d063c8af04"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T13:46:13.151+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "462886afe2f687920da0b2c3524734abfd021988d46c6cbceee12763fec8f1da"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-09T13:47:36.305+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7e9026c28918fc9deabd4762d51a123076b50af066842d82f7707feed130a6da"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T14:01:35.236+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/workflow test/unit/core/stack — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e13e529742b9eaf19c7c2db57058f5d710564c68fedf2e275fe8a74284562dd3"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T14:01:47.773+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "70c43466463216a482acf0b7c9322114770ad894d0ae79e20e19502ea95bad89"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-09T14:04:00.957+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ac7604141313bbab4f1d69140dbda3bfecec8f62bec1f5e58338224afe384a43"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-09T13:40:36.490+07:00",
+  "updatedAt": "2026-11-09T14:04:07.521+07:00",
+  "completedAt": "2026-11-09T14:04:07.521+07:00"
+}

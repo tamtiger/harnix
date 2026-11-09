@@ -16,7 +16,7 @@ export const REASON_RULES: Readonly<Record<string, ReasonRule>> = {
   setGoal: "optional",
 };
 
-/** An optional `--reason` (set-title, set-goal: review data) is accepted for symmetry; when given it must be 10-1000 characters. */
+/** An optional `--reason` of set-title and set-goal is only validated (10-1000 characters when given), then dropped: nothing stores it. */
 export function assertOptionalReason(reason: string | undefined): void {
   const length = reason?.trim().length;
   if (length !== undefined && length !== 0 && (length < 10 || length > 1000))

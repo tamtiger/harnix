@@ -44,7 +44,7 @@ function refusalReason(check: ValidationCheckV3, latest: Evidence | undefined): 
   return "inputs changed since its last pass";
 }
 
-async function freshEvidence(root: string, task: TaskRecordV3, criterionId: string): Promise<string[]> {
+export async function freshEvidence(root: string, task: TaskRecordV3, criterionId: string): Promise<string[]> {
   const covering = task.validationPlan.filter((check) => check.required && check.criterionIds.includes(criterionId));
   const ids: string[] = [];
   const notFresh: string[] = [];
