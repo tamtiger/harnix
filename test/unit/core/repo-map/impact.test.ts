@@ -49,8 +49,14 @@ describe("repository map impact", () => {
     const map = createRepoMap([record("src/present.ts")]);
 
     expect(createRepoMapImpact(map, options)).toEqual(empty("not-found"));
-    expect(createUnavailableRepoMapImpact("missing", options)).toEqual(empty("missing"));
-    expect(createUnavailableRepoMapImpact("invalid", options)).toEqual(empty("invalid"));
+    expect(createUnavailableRepoMapImpact("missing", options)).toEqual({
+      ...empty("missing"),
+      hint: "run harnix repo-map --refresh",
+    });
+    expect(createUnavailableRepoMapImpact("invalid", options)).toEqual({
+      ...empty("invalid"),
+      hint: "run harnix repo-map --refresh",
+    });
 
     function empty(status: "missing" | "invalid" | "not-found") {
       return {

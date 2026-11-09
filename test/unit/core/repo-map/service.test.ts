@@ -127,6 +127,46 @@ describe("repository map service", () => {
   });
 });
 
+describe("query fallback to references", () => {
+  it("finds a name that is only used, not declared, by scanning like --refs and labels the result", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(join(root, "src", "a.ts"), "export const x = USED_LITERAL_TOKEN;\n");
+    await writeFile(join(root, "src", "b.ts"), "export const y = 1;\n");
+    await refreshRepoMap({ root });
+
+    const result = await queryRepoMap({ query: "USED_LITERAL_TOKEN", root });
+
+    expect(result.status).toBe("ready");
+    expect(result.fallback).toBe("references");
+    expect(result.results.map((item) => item.path)).toEqual(["src/a.ts"]);
+    expect(result.results[0]?.reasons).toContain("reference fallback");
+  });
+
+  it("does not fall back when the index already answers the query", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(join(root, "src", "a.ts"), "export function indexedName() { return 1; }\n");
+    await refreshRepoMap({ root });
+
+    const result = await queryRepoMap({ query: "indexedName", root });
+
+    expect(result.fallback).toBeUndefined();
+    expect(result.results.map((item) => item.path)).toEqual(["src/a.ts"]);
+  });
+
+  it("does not fall back for a query of several words", async () => {
+    const root = await temporaryRepository();
+    await mkdir(join(root, "src"), { recursive: true });
+    await writeFile(join(root, "src", "a.ts"), "export const x = USED_LITERAL_TOKEN;\n");
+    await refreshRepoMap({ root });
+
+    const result = await queryRepoMap({ query: "USED_LITERAL_TOKEN nothing", root });
+
+    expect(result.fallback).toBeUndefined();
+  });
+});
+
 function record(path: string): RepoMapRecordV1 {
   return {
     byteLength: 0,

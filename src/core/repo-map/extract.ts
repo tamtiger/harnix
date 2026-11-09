@@ -2,9 +2,10 @@ import { readFile } from "node:fs/promises";
 import { basename, dirname, extname } from "node:path";
 
 import { sha256 } from "src/utils/hashing.js";
-import { extractRouteAndTopicIdentifiers } from "./event-discovery.js";
-import type { RepoMapFileKind, RepoMapInventoryFile, RepoMapRecordV1 } from "./types.js";
 import { compareCodeUnits } from "src/utils/order.js";
+import { extractImports } from "./extract-imports.js";
+import { extractIdentifiers, secretValue, selectNames } from "./extract-symbols.js";
+import { repoMapRecordLimits, type RepoMapFileKind, type RepoMapInventoryFile, type RepoMapRecordV1 } from "./types.js";
 
 const languageByExtension: Readonly<Record<string, string>> = {
   cs: "csharp",
@@ -22,12 +23,38 @@ const languageByExtension: Readonly<Record<string, string>> = {
 const sourceExtensions = new Set(["cs", "go", "java", "js", "jsx", "mjs", "cjs", "php", "py", "ts", "tsx"]);
 const configExtensions = new Set(["json", "yaml", "yml", "toml", "ini", "xml"]);
 const documentationExtensions = new Set(["md", "mdx", "rst", "txt"]);
-const secretValue = /(?:api[_-]?key|secret|token|password)\s*[=:]\s*[^\s,]{8,}/iu;
+
+/** A record plus the names its file uses; the names stay in memory for the reference pass and are never cached. */
+export interface ExtractedRepoMapFile {
+  readonly record: RepoMapRecordV1;
+  readonly usedNames: ReadonlySet<string>;
+}
+
+const MAX_USED_NAMES = 1_000;
+const referenceLanguages = new Set(["csharp", "go", "java", "javascript", "php", "python", "typescript"]);
+
+function usedNamesOf(content: string, record: RepoMapRecordV1): ReadonlySet<string> {
+  const names = new Set<string>();
+  if (record.language === undefined || !referenceLanguages.has(record.language) || record.kind === "other")
+    return names;
+  for (const match of content.matchAll(/[A-Za-z_][A-Za-z0-9_]{2,95}/gu)) {
+    names.add(match[0]);
+    if (names.size >= MAX_USED_NAMES) break;
+  }
+  return names;
+}
 
 export async function extractRepoMapRecord(
   file: RepoMapInventoryFile,
   packageRoots: readonly string[],
 ): Promise<RepoMapRecordV1 | undefined> {
+  return (await extractRepoMapFile(file, packageRoots))?.record;
+}
+
+export async function extractRepoMapFile(
+  file: RepoMapInventoryFile,
+  packageRoots: readonly string[],
+): Promise<ExtractedRepoMapFile | undefined> {
   let content: string;
   try {
     content = await readFile(file.absolutePath, "utf8");
@@ -36,75 +63,29 @@ export async function extractRepoMapRecord(
   }
   if (content.includes("\0") || replacementHeavy(content)) return undefined;
   const extension = extname(file.path).slice(1).toLowerCase();
+  const language = languageByExtension[extension];
   const record: RepoMapRecordV1 = {
     byteLength: file.byteLength,
     contentHash: sha256(content),
     extension,
     headings: headings(content),
-    identifiers: identifiers(content),
-    importTargets: imports(content),
+    identifiers: extractIdentifiers(content, language),
+    importTargets: extractImports(content, language),
     kind: fileKind(file.path, extension),
     packagePath: nearestPackage(file.path, packageRoots),
     path: file.path,
-    ...(languageByExtension[extension] === undefined ? {} : { language: languageByExtension[extension] }),
+    ...(language === undefined ? {} : { language }),
   };
-  return hasSensitiveOutline(record) ? undefined : record;
+  return hasSensitiveOutline(record) ? undefined : { record, usedNames: usedNamesOf(content, record) };
 }
 
 function headings(content: string): string[] {
-  return bounded(
+  const { count, length } = repoMapRecordLimits.headings;
+  return selectNames(
     [...content.matchAll(/^#{1,6}\s+(.{1,240})$/gmu)].map((match) => match[1] ?? ""),
-    16,
-    120,
+    count,
+    length,
   );
-}
-
-function identifiers(content: string): string[] {
-  const codeIds = [
-    ...content.matchAll(
-      /\b(?:class|interface|function|enum|type|namespace|record|struct|const|let|var)\s+([A-Za-z_$][\w$]*)/gu,
-    ),
-  ].map((match) => match[1] ?? "");
-  const testRefs = [
-    ...content.matchAll(/\b(?:new|typeof)\s+([A-Za-z_$][\w$]*)/gu),
-    ...content.matchAll(/\b(?:Mock|Substitute\.For|A\.Fake)\s*<\s*([A-Za-z_$][\w$]*)/gu),
-  ].map((match) => match[1] ?? "");
-  const routeAndTopicIds = extractRouteAndTopicIdentifiers(content);
-  return bounded([...codeIds, ...testRefs, ...routeAndTopicIds], 48, 96);
-}
-
-function imports(content: string): string[] {
-  const quoted = [...content.matchAll(/\b(?:from|import|require)\s*\(?\s*["']([^"']+)["']/gu)].map(
-    (match) => match[1] ?? "",
-  );
-  const goBlocks = [...content.matchAll(/\bimport\s*\(([\s\S]*?)\)/gu)].flatMap((block) =>
-    [...(block[1] ?? "").matchAll(/["']([^"']+)["']/gu)].map((match) => match[1] ?? ""),
-  );
-  const pythonFrom = [...content.matchAll(/\bfrom\s+([A-Za-z0-9_.-]+)\s+import\b/gu)].map((match) => match[1] ?? "");
-  const pythonImport = [...content.matchAll(/^\s*import\s+([A-Za-z0-9_.-]+)/gmu)].map((match) => match[1] ?? "");
-  const csharpUsing = [...content.matchAll(/^\s*(?:global\s+)?using\s+(?:static\s+)?([A-Za-z0-9_.]+)\s*;/gmu)].map(
-    (match) => match[1] ?? "",
-  );
-  const csharpProjectRefs = [...content.matchAll(/<ProjectReference\s+Include\s*=\s*["']([^"']+)["']/giu)].map(
-    (match) => (match[1] ?? "").replaceAll("\\", "/"),
-  );
-  return bounded(
-    [...quoted, ...goBlocks, ...pythonFrom, ...pythonImport, ...csharpUsing, ...csharpProjectRefs],
-    32,
-    160,
-  );
-}
-
-function bounded(values: readonly string[], count: number, length: number): string[] {
-  return [
-    ...new Set(
-      values
-        .map((value) => value.trim())
-        .filter((value) => value.length > 0 && value.length <= length && !secretValue.test(value)),
-    ),
-  ]
-    .sort(compareCodeUnits)
-    .slice(0, count);
 }
 
 function nearestPackage(path: string, roots: readonly string[]): string {

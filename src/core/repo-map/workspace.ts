@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { existsSync, readdirSync } from "node:fs";
 
 import { refreshRepoMap } from "./service.js";
+import { summarizeSkipped } from "./refresh-summary.js";
 import { searchRepoMap } from "./search.js";
 import { readRepoMap } from "./store.js";
 import {
@@ -84,6 +85,8 @@ export interface WorkspaceRefreshResult {
     name: string;
     records: number;
     skipped: string[];
+    skippedTotal: number;
+    limitReached: boolean;
   }>;
 }
 
@@ -168,15 +171,19 @@ export async function refreshWorkspaceRepoMap(workspaceRoot: string): Promise<Wo
       results.push({
         name: member.name,
         records: rootMap === undefined ? 0 : (memberSliceOfRootMap(rootMap, member.name)?.records.length ?? 0),
-        skipped: ["Covered by the workspace root cache"],
+        ...summarizeSkipped(["Covered by the workspace root cache"]),
       });
       continue;
     }
     try {
       const refreshed = await refreshRepoMap({ root: member.path });
-      results.push({ name: member.name, records: refreshed.map.records.length, skipped: refreshed.skipped });
+      results.push({
+        name: member.name,
+        records: refreshed.map.records.length,
+        ...summarizeSkipped(refreshed.skipped),
+      });
     } catch {
-      results.push({ name: member.name, records: 0, skipped: ["Failed to refresh"] });
+      results.push({ name: member.name, records: 0, ...summarizeSkipped(["Failed to refresh"]) });
     }
   }
 

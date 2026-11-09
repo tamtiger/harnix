@@ -137,6 +137,7 @@ describe("repository map symbol references", () => {
 
     expect(createUnavailableRepoMapRefs("missing", { limit: 5, symbol: "app" })).toEqual({
       generator: "harnix",
+      hint: "run harnix repo-map --refresh",
       limit: 5,
       references: [],
       schemaVersion: 1,

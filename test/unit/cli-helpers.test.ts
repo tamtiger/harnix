@@ -10,6 +10,7 @@ import {
   parseRepoMapSymbol,
   parseStaleDays,
   parseTaskLimit,
+  validateRepoMapOptions,
   parseTaskStatus,
   platformFlagList,
   publicCliError,
@@ -88,5 +89,47 @@ describe("CLI helpers", () => {
     expect(parseStaleDays("14")).toBe(14);
     expect(parseStaleDays("3650")).toBe(3650);
     for (const bad of ["0", "3651", "x", "1.5", ""]) expect(() => parseStaleDays(bad)).toThrow(/--days/u);
+  });
+});
+
+describe("validateRepoMapOptions --body", () => {
+  it("accepts --body with --outline and --symbol", () => {
+    expect(() => validateRepoMapOptions({ body: true, outline: "src/a.ts", symbol: "run" })).not.toThrow();
+  });
+
+  it("rejects --body without --symbol and names the command to use", () => {
+    expect(() => validateRepoMapOptions({ body: true, outline: "src/a.ts" })).toThrow(
+      /--body requires repo-map --outline and --symbol.*harnix repo-map --outline <path> --symbol <name> --body/su,
+    );
+  });
+
+  it("rejects --body without --outline", () => {
+    expect(() => validateRepoMapOptions({ body: true, query: "x" })).toThrow(/--body requires repo-map --outline/u);
+  });
+});
+
+describe("validateRepoMapOptions --format", () => {
+  it.each([{ query: "x" }, { outline: "src/a.ts" }, { refs: "run" }, { impact: "src/a.ts" }, { tests: "src/a.ts" }])(
+    "accepts --format compact with %j",
+    (mode) => {
+      expect(() => validateRepoMapOptions({ ...mode, format: "compact" })).not.toThrow();
+    },
+  );
+
+  it.each([{ refresh: true }, { events: true }, {}])("rejects --format with %j and lists the valid modes", (mode) => {
+    expect(() => validateRepoMapOptions({ ...mode, format: "compact" })).toThrow(
+      /--format requires repo-map --query, --outline, --refs, --impact or --tests/u,
+    );
+  });
+
+  it("keeps the outline format for --query only", () => {
+    expect(() => validateRepoMapOptions({ format: "outline", query: "x" })).not.toThrow();
+    expect(() => validateRepoMapOptions({ format: "outline", refs: "run" })).toThrow(/outline.*only.*--query/su);
+  });
+
+  it("refuses --body together with --format compact", () => {
+    expect(() => validateRepoMapOptions({ body: true, format: "compact", outline: "src/a.ts", symbol: "run" })).toThrow(
+      /--body cannot be combined with --format compact/u,
+    );
   });
 });

@@ -2,12 +2,17 @@ import { posix } from "node:path";
 
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath } from "src/utils/paths.js";
+import { addReferenceEdges } from "./graph-references.js";
 import type { RepoMapRecordV1 } from "./types.js";
 
 export interface RepoMapGraphLimits {
   maxNodes: number;
   maxEdges: number;
   maxAmbiguousMatches: number;
+  /** Cap on edges that come from `references` (never from imports); defaults to 50,000. */
+  maxReferenceEdges?: number | undefined;
+  /** Cap on reference edges leaving one file; defaults to 8. */
+  maxReferenceEdgesPerFile?: number | undefined;
 }
 
 export interface RepoMapGraph {
@@ -21,6 +26,8 @@ export const defaultRepoMapGraphLimits: RepoMapGraphLimits = Object.freeze({
   maxAmbiguousMatches: 4,
   maxEdges: 100_000,
   maxNodes: 10_000,
+  maxReferenceEdges: 50_000,
+  maxReferenceEdgesPerFile: 8,
 });
 
 export function buildRepoMapGraph(
@@ -51,6 +58,7 @@ export function buildRepoMapGraph(
       }
     }
   }
+  edgeCount += addReferenceEdges(selected, adjacencySets, reverseSets, limits.maxEdges - edgeCount, limits);
   return {
     adjacency: sortedMap(adjacencySets),
     reverseAdjacency: sortedMap(reverseSets),
@@ -130,9 +138,13 @@ function sortedMap(values: ReadonlyMap<string, ReadonlySet<string>>): ReadonlyMa
 
 function assertLimits(limits: RepoMapGraphLimits): void {
   if (
-    ![limits.maxNodes, limits.maxEdges, limits.maxAmbiguousMatches].every(
-      (value) => Number.isInteger(value) && value > 0,
-    )
+    ![
+      limits.maxNodes,
+      limits.maxEdges,
+      limits.maxAmbiguousMatches,
+      ...(limits.maxReferenceEdges === undefined ? [] : [limits.maxReferenceEdges]),
+      ...(limits.maxReferenceEdgesPerFile === undefined ? [] : [limits.maxReferenceEdgesPerFile]),
+    ].every((value) => Number.isInteger(value) && value > 0)
   )
     throw new Error("Repo map graph limits must be positive integers.");
 }

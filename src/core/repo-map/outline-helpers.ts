@@ -78,6 +78,7 @@ export function assertOutlineOptions(options: RepoMapOutlineOptions): void {
     throw new Error("Outline target must be an exact normalized repository-relative POSIX path.");
   if (!Number.isInteger(options.limit) || options.limit < 1 || options.limit > 50)
     throw new Error("Outline limit must be an integer between 1 and 50.");
+  if (options.body === true && options.symbol === undefined) throw new Error("Outline body requires a symbol filter.");
   if (options.symbol !== undefined && (options.symbol.trim().length === 0 || options.symbol.trim().length > 128))
     throw new Error("Outline symbol filter must contain 1 to 128 characters.");
 }

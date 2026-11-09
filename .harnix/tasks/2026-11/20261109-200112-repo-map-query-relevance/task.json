@@ -1,0 +1,189 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-200112-repo-map-query-relevance",
+  "epicId": "20261109-194501-repo-map-insights",
+  "title": "Sửa độ liên quan của repo-map --query khi có task đang active",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khiến --query xếp theo chuỗi truy vấn thay vì bị file và từ khóa của task đang active lấn át, và tìm được file theo từ trong tên file.",
+  "nonGoals": [
+    "Không thêm embedding hay ngữ nghĩa; vẫn là từ vựng và đồ thị.",
+    "Không đổi RepoMapV1 hay extractorVersion.",
+    "Không thêm cờ mới (giảm trọng số bằng điều kiện thay vì cờ --no-task)."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Các điểm cộng từ task đang active (relevantPaths, từ khóa task, file lân cận trong đồ thị) chỉ áp dụng cho file có lexical match với truy vấn, ở cả bước chọn seed và bước mở rộng đồ thị lẫn bonus xếp hạng; truy vấn không khớp file nào trả results rỗng thay vì 20 kết quả nhiễu.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Từ ghép camelCase trong identifiers được tách khi lập chỉ mục từ vựng để truy vấn cache tìm được SessionCache; việc tách theo dấu gạch, gạch dưới, dấu chấm và gạch chéo trong đường dẫn (do MiniSearch làm sẵn) được khóa bằng test hồi quy; không đổi schema cache v1.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Bộ truy vấn vàng tối thiểu 8 cặp (truy vấn, file mong đợi) lấy từ các session thật, chạy trên fixture repo có task active: file mong đợi nằm trong top 3; truy vấn vô nghĩa trả rỗng; tài liệu ghi ranker mới ở IMPLEMENTATION_PLAN mục 4.12 và rollback bằng git revert (nhánh ranker v1 đã bị gỡ); CHANGELOG, phiên bản 2.31.0-dev.3 bằng pnpm version:sync; pnpm run test:gates xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Khớp chính xác token identifier xếp trên khớp mờ và khớp tiền tố; khớp mờ chỉ áp dụng khi không có khớp chính xác; truy vấn một token dạng identifier mà chỉ mục không có thì trả kết quả theo cơ chế tra tham chiếu của --refs kèm nhãn fallback.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/commands/repo-map-internal.ts",
+    "src/core/repo-map/search-terms.ts",
+    "src/core/repo-map/search.ts",
+    "src/core/repo-map/service.ts",
+    "test/support/repo-map-query-fixtures.ts",
+    "test/unit/core/repo-map/search-terms.test.ts",
+    "test/unit/core/repo-map/search.test.ts",
+    "test/unit/core/repo-map/service.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test đơn vị và tích hợp của độ liên quan --query",
+      "command": "pnpm exec vitest run repo-map",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/**",
+        "test/integration/commands/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Test hợp đồng CLI, tài liệu và kiến trúc",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T22:42:48.051+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "368d13b94f3e6df7d9bbc954e7c4db43d265a7191c5f029edf268c02148d05b7"
+    },
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-09T22:42:56.991+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run repo-map — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6d0603f27d96a3e481fed1f9d358d089d02bb74d9213910fbcd13d87c76bedce"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T22:43:07.297+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e2a1e740c62570318698877720dc893cbba6c78ccd1bf162ff119c06419c3a50"
+    }
+  ],
+  "createdAt": "2026-11-09T20:01:10.196+07:00",
+  "updatedAt": "2026-11-09T22:43:20.501+07:00",
+  "decisions": [
+    {
+      "id": "dec-evidence-query",
+      "text": "Chặn điểm task khi không có lexical match thay vì thêm cờ.",
+      "rationale": "Đo ngày 2026-11-09: truy vấn vô nghĩa vẫn trả 20 kết quả điểm 870 trở xuống, đúng bằng relevantPaths của task đang active (search.ts cộng 500, 100 mỗi từ khóa, 120 và 100 cho lân cận); truy vấn session cache đặt graph.ts lên đầu và bỏ sót session-cache.ts."
+    },
+    {
+      "id": "dec-evidence-exact",
+      "text": "Khớp chính xác phải thắng khớp mờ.",
+      "rationale": "Đo trên payment_hub: truy vấn PaymentRequestCode trả 20 file nhưng chỉ 1 file thật sự chứa chuỗi; ProviderTransactionCode trả 1 file không chứa. Phần lớn do khớp mờ và tiền tố trên tên file."
+    },
+    {
+      "id": "dec-premise-tokenizer",
+      "text": "Bỏ yêu cầu lập chỉ mục token từ tên file: MiniSearch đã tách đường dẫn.",
+      "rationale": "Kiểm chứng ngày 2026-11-09: MiniSearch mặc định tách theo gạch, chấm, gạch dưới, gạch chéo; truy vấn session cache khớp session-cache.ts. Nguyên nhân thật là điểm cộng task ở bước seed và rank (search.ts), nên chặn ở cả hai nơi."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-ranker-change",
+      "severity": "medium",
+      "text": "Đổi trọng số xếp hạng có thể làm các truy vấn hiện dùng đổi thứ tự; giảm thiểu bằng bộ truy vấn vàng và ghi chú rollback ranker v1."
+    },
+    {
+      "id": "risk-neighbour-noise",
+      "text": "Truy vấn một tên thuộc tính trả file khai báo đúng tên cùng hàng xóm đồ thị (độ chính xác khoảng 25 phần trăm trên payment_hub, 5 trên 20 file chứa tên); đó là thiết kế của ranker hiện có, cần --refs để liệt kê nơi dùng.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-09T22:43:20.501+07:00"
+}

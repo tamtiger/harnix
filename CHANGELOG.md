@@ -4,6 +4,25 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.31.1] - 2026-11-09
+
+### Fixed
+
+- repo-map --body che thêm YAML không dấu nháy, giá trị trong backtick và token theo tiền tố nhà cung cấp (AWS, GitHub, OpenAI, Slack); giữ nguyên khai báo kiểu như password: string
+
+## [2.31.0] - 2026-11-09
+
+### Changed
+
+- Nâng extractorVersion lên 2: chỉ mục symbol không cắt theo bảng chữ cái, thuộc tính và phương thức C#/Java, import PHP và CodeIgniter, references và cạnh tham chiếu trong đồ thị, hint cho cache cũ
+- repo-map --tests xếp test viết cho file lên đầu, thêm reasons, quy ước tên monorepo và project X.Tests, giới hạn bắc cầu
+- repo-map --query: bonus của task chỉ áp dụng cho file khớp truy vấn, khớp chính xác trước khớp mờ, tách từ trong identifier camelCase, fallback tra tham chiếu cho tên chỉ được dùng
+- repo-map --format compact cho --outline, --refs, --impact, --tests; --refresh trả tóm tắt skipped có trần (skippedTotal, limitReached, tối đa 10 đường dẫn không nhạy cảm); chỉ thị dùng repo-map trong skill plan, implement, debug, quy tắc Token economy của khối AGENTS và một dòng tĩnh trong hook context lean; nâng trần alwaysLoaded lên 1540 token
+
+### Added
+
+- repo-map --outline --symbol --body đọc thân symbol có giới hạn 200 dòng, che dòng giống credential, chỉ đọc file đã lập chỉ mục
+
 ## [2.30.1] - 2026-11-09
 
 ### Fixed

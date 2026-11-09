@@ -1,0 +1,201 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-200111-repo-map-tests-ranking",
+  "epicId": "20261109-194501-repo-map-insights",
+  "title": "Sửa thứ hạng repo-map --tests để test trực tiếp luôn đứng đầu",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khiến harnix repo-map --tests <path> trả test liên quan nhất trước, để agent chạy đúng test hẹp thay vì quay về ls và grep.",
+  "nonGoals": [
+    "Không đổi RepoMapV1 hay cách dựng đồ thị import.",
+    "Không bỏ thông tin bắc cầu, chỉ xếp sau."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "repo-map --tests xếp kết quả theo bậc: (1) test cùng tên hoặc phản chiếu cấu trúc thư mục theo quy ước từng ngôn ngữ (src/a/b.ts với test/unit/a/b.test.ts; Foo.cs với FooTests.cs hoặc FooTest.cs, kể cả trong project X.Tests; Foo.php với FooTest.php; foo.py với test_foo.py), kể cả khi test đó cũng import file đích, (2) test import hoặc tham chiếu trực tiếp file đích, (3) test trùng symbol đặc trưng, (4) test bắc cầu; trong mỗi bậc xếp theo code-unit; test bậc 1 luôn đứng trước test bậc 2 nên không bị cắt bởi --limit khi file được hàng chục test import.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Output giữ tests là mảng đường dẫn (tương thích) và thêm reasons ánh xạ đường dẫn tới bậc (convention, direct, symbol, transitive); bậc bắc cầu tối đa 5 test; bước trùng symbol không đẩy test bậc 1 và 2 ra khỏi --limit; test không có liên hệ nào không được trả (đo thực tế: --tests một AppService C# trả 20 test không liên quan); harnix verify-plan --impact dùng cùng thứ hạng vì gọi chung findAffectedTests. Fixture TypeScript, C#/ABP và PHP có test: test viết cho file nằm trong top 5.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Hành vi xếp hạng và trường reasons mới được đồng bộ trong PRD, README, skill liên quan, CHANGELOG và test hợp đồng CLI; phiên bản nâng lên 2.31.0-dev.2 bằng pnpm version:sync; pnpm run test:gates xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-2",
+        "ev-chk-suite-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/core/repo-map/test-convention.ts",
+    "src/core/repo-map/tests.ts",
+    "test/unit/core/repo-map/test-convention.test.ts",
+    "test/unit/core/repo-map/tests-ranking.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test đơn vị và tích hợp của xếp hạng --tests",
+      "command": "pnpm exec vitest run repo-map",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/**",
+        "test/integration/commands/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Test hợp đồng CLI, tài liệu và kiến trúc",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-09T22:25:39.515+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Đo thực tế ngày 2026-11-09: file trung tâm như store.ts có hơn 20 test import trực tiếp; xếp direct trước convention làm test đơn vị rơi xuống vị trí 18 (store) hoặc bị cắt hẳn (text-integrity), nên convention phải đứng trước.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-200111-repo-map-tests-ranking/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-11-09T22:25:40.132+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Đồng bộ với thứ tự bậc mới: convention trước direct.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-200111-repo-map-tests-ranking/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T22:28:57.684+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "1b3eb681783f6432a4f3fc4ef307d91139ddc04d0b6dd1c6cc3d3a29a467db56"
+    },
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-09T22:29:05.968+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run repo-map — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "50481db14060a62cec7aa264286fbe90ee1f9bbf7c7a8e96769d7a6680c164a9"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T22:29:15.734+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "dcd4d96b62dd0cddba3a96b5b61080355d132f12e5c0c18ede73fa85017541e6"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T22:32:10.048+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "c54e96d5920a1a4273dcd3f156131b608556644ea75481dac6025d5c9b4ea416"
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-09T22:32:18.649+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run repo-map — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "93c13e65c1d2f6e1aaf0c562029e330243d310cdd837e4b6ad43697fe6d441b6"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T22:32:27.739+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "58ae84454aba91695bb5eb2e49fb49bc38934a3afed168424716fced3f41a2d4"
+    }
+  ],
+  "createdAt": "2026-11-09T20:01:10.196+07:00",
+  "updatedAt": "2026-11-09T22:32:35.669+07:00",
+  "decisions": [
+    {
+      "id": "dec-evidence-tests",
+      "text": "Sửa --tests trước mọi tính năng mới.",
+      "rationale": "Đo ngày 2026-11-09 trên 5 file mẫu: cả 5 lần --tests trả đủ 20 test, truncated, và không có test trực tiếp vì sắp theo khoảng cách rồi bảng chữ cái (integration đứng trước unit)."
+    },
+    {
+      "id": "dec-convention-first",
+      "text": "Bậc convention đứng trước direct.",
+      "rationale": "File trung tâm có hàng chục test import trực tiếp; test được đặt tên cho file là liên hệ chính xác nhất nên phải đứng đầu, còn importers sắp theo code-unit phía sau."
+    }
+  ],
+  "completedAt": "2026-11-09T22:32:35.669+07:00"
+}

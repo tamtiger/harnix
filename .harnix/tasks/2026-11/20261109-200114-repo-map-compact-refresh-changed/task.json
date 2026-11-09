@@ -1,0 +1,306 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-200114-repo-map-compact-refresh-changed",
+  "epicId": "20261109-194501-repo-map-insights",
+  "title": "Rút gọn output repo-map, giới hạn --refresh và kích hoạt agent dùng repo-map",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Làm output repo-map gọn hơn grep ở mọi chế độ, chặn output --refresh phình, và tạo cơ chế để agent chủ động dùng repo-map (chỉ thị trong skill, một dòng trong khối AGENTS, một dòng gợi ý tĩnh trong hook context); đóng epic bằng bản phát hành 2.31.0. Không làm --changed vì verify-plan --impact đã có.",
+  "nonGoals": [
+    "Không chạy git ghi và không giữ khóa index.",
+    "Không thêm tokenizer hay tham số ngân sách token.",
+    "Không làm cycles, hubs hay unused."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "--format compact được chấp nhận cho --outline, --refs, --impact và --tests: mỗi mục là một chuỗi ngắn (refs là path:line kind, impact là path@khoảng cách, tests là path kèm bậc, outline là tên kiểu dòng đầu-dòng cuối), vẫn một JSON document và nhỏ hơn bản json; --format outline chỉ dùng với --query; --body không đi cùng --format compact; --format với --refresh hoặc --events bị từ chối bằng lỗi có hint nêu các chế độ hợp lệ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-4"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "--refresh trả records, scope, status, skippedTotal, limitReached (cờ riêng thay cho marker \"limit\" trộn trong mảng) và tối đa 10 đường dẫn bị bỏ qua không phải file nhạy cảm (.env*, secrets); output bị chặn kích thước ngay cả khi hàng nghìn file bị bỏ qua; trường skipped cũ vẫn là mảng nhưng bị cắt còn 10 và ghi rõ trong tài liệu; refresh theo --workspace và init dùng cùng định dạng; test hợp đồng và golden liên quan được cập nhật.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-4"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Chỉ thị kích hoạt dùng repo-map (trước grep -r một symbol dùng --refs; trước sed -n lần hai trên cùng file dùng --outline --symbol --body; trước khi chạy test dùng --tests) được thêm vào skill harnix-plan, harnix-implement và harnix-debug, và thành một dòng trong khối AGENTS luôn nạp; token-budgets.json nâng alwaysLoaded và skills.harnix-plan có quyết định ghi lại (hiện 1459/1500 và 1662/1700), docs/RULE_OWNERSHIP.md có dòng tương ứng, Cursor (không có file instruction toàn cục) chỉ nhận qua skill và OpenCode, Cursor không có hook được ghi rõ; test instruction-budget, rule-ownership và skill-sources xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-2",
+        "ev-chk-suite-4"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "PRD, README, CHANGELOG và test hợp đồng CLI được đồng bộ, phiên bản đóng epic 2.31.0 bằng pnpm version:sync --fold-dev, và pnpm run test:gates xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-2",
+        "ev-chk-suite-4"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Hook context ở chế độ lean tăng không quá 35 token so với golden hiện tại (đo hôm nay: planning 393, inProgress 200) bằng một dòng gợi ý tĩnh nêu các lệnh repo-map hữu ích; dòng này không chạy repo-map và không đọc cache; chế độ full và các nền tảng hookless không đổi; test và golden liên quan được cập nhật đúng chuỗi mới.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-hook-2",
+        "ev-chk-suite-4"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/RULE_OWNERSHIP.md",
+    "src/cli-helpers.ts",
+    "src/cli-workflow-commands.ts",
+    "src/commands/repo-map-internal.ts",
+    "src/core/context/effective-context.ts",
+    "src/core/repo-map/compact.ts",
+    "src/core/repo-map/refresh-summary.ts",
+    "src/core/repo-map/workspace.ts",
+    "src/skills/harnix-debug/SKILL.md",
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-plan/SKILL.md",
+    "src/templates/harnix/activation.ts",
+    "src/templates/harnix/token-budgets.json",
+    "test/unit/core/context/effective-context.test.ts",
+    "test/unit/core/repo-map/compact.test.ts",
+    "test/unit/core/repo-map/refresh-summary.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test đơn vị và tích hợp của compact, refresh và --changed",
+      "command": "pnpm exec vitest run repo-map",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/**",
+        "test/integration/commands/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Test hợp đồng CLI, tài liệu, kiến trúc và ngân sách skill",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4",
+        "ac-6"
+      ],
+      "inputs": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-hook",
+      "description": "Test hook context có dòng gợi ý repo-map tĩnh",
+      "command": "pnpm exec vitest run context",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-5"
+      ],
+      "inputs": [
+        "src/commands/internal-context.ts",
+        "src/core/context/**",
+        "src/templates/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T23:03:15.644+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "30aa51a04b87c743a72822055f0748b685b7efb013e69c5eaa97cbb4e1faa6bd"
+    },
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-09T23:03:24.869+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run repo-map — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d4be8176e791afda2f789668bb582d9998a3cfecdcdbc70014693fee6aefdb39"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T23:03:34.810+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e01cfead544e07a2601f7f2ebcfc98fdae6ef40290c255fb16b66eab81190920"
+    },
+    {
+      "id": "ev-chk-hook-1",
+      "checkId": "chk-hook",
+      "recordedAt": "2026-11-09T23:03:41.524+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run context — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8ca64136abcee1c803527b0f780a8b695a5badf292bf54a3d3d080bd40de941e"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T23:05:17.404+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "30aa51a04b87c743a72822055f0748b685b7efb013e69c5eaa97cbb4e1faa6bd"
+    },
+    {
+      "id": "ev-chk-suite-3",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T23:06:59.598+07:00",
+      "result": "fail",
+      "exitCode": 1073807364,
+      "summary": "pnpm test — exit 1073807364",
+      "artifactPaths": [],
+      "inputDigest": "c1513ebd424323eaad6e8bde9c964f1a2be24ff1a45ea25a71e9409b760a06a8"
+    },
+    {
+      "id": "ev-chk-suite-4",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T00:08:31.946+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6e78abe66a9002425499583a6785cbbe6a992e561f68932a86843811487422a9"
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-10T00:08:40.369+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run repo-map — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f1652789ede23ecd3c1eefa7c180530ae7213c3d1c77c81da98b7fc097da572e"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-10T00:08:48.579+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2672c2eccc343f21b8b91f9d34604f5bb52defb8bf4d7bc0aedd43069ce49c10"
+    },
+    {
+      "id": "ev-chk-hook-2",
+      "checkId": "chk-hook",
+      "recordedAt": "2026-11-10T00:08:54.536+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run context — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3328c39f3536eb6cfb57281fd486bfdde556e4df7214da63a6c8cae741f85783"
+    }
+  ],
+  "createdAt": "2026-11-09T20:01:10.196+07:00",
+  "updatedAt": "2026-11-10T00:09:11.300+07:00",
+  "decisions": [
+    {
+      "id": "dec-evidence-refresh",
+      "text": "Chặn output --refresh và cho --format dùng được ở mọi chế độ.",
+      "rationale": "Ở repo PHP thật --refresh trả 17.929 và 19.274 byte (danh sách skipped gồm cả tên .env.*); agent gõ --outline --format compact và bị lỗi vì --format chỉ nhận --query; --refs trả 2.326 byte so với 1.426 byte của grep -rn."
+    },
+    {
+      "id": "dec-git-readonly",
+      "text": "Cho phép --changed gọi git đọc (status, diff) qua src/utils/git.js.",
+      "rationale": "Có tiền lệ verify-plan --changed và code-impact; không vi phạm cấm tích hợp Git tự động vì không ghi và không commit."
+    },
+    {
+      "id": "dec-activation",
+      "text": "Cơ chế kích hoạt: chỉ thị trong skill, một dòng trong khối AGENTS luôn nạp, và một dòng gợi ý tĩnh trong hook context lean.",
+      "rationale": "Người dùng duyệt ngày 2026-11-09 việc nâng hoặc đổi chỗ ngân sách alwaysLoaded (1500) và thêm dòng hook tĩnh. Hook không chạy repo-map nên không vi phạm cấm hook gọi repo-map; PreToolUse bị loại vì đổi giao thức hook và không đồng đều giữa các nền tảng. Chỉ làm sau khi tests-ranking và query-relevance sửa chất lượng."
+    },
+    {
+      "id": "dec-drop-changed",
+      "text": "Bỏ --changed khỏi epic.",
+      "rationale": "verify-plan --impact (không có path) đã lấy file đổi từ git, gọi findAffectedTests và trả test cùng lệnh test hẹp (verify-plan.ts:144-200), và đã được skill implement và verify nhắc tới; thứ hạng mới của member tests-ranking cải thiện cả hai. Repo PHP his không có test tự động nên giá trị chỉ ở repo harnix."
+    },
+    {
+      "id": "dec-budget-always-loaded",
+      "text": "Nâng trần alwaysLoaded từ 1500 lên 1540 token; trần skills.harnix-plan giữ 1700.",
+      "rationale": "Người dùng duyệt ngày 2026-11-09 việc nâng hoặc đổi chỗ ngân sách để thêm chỉ thị repo-map vào khối AGENTS. Đo bằng pnpm measure:tokens: alwaysLoaded 1460 thành 1508 (+48), harnix-plan 1665 thành 1689, hook lean +33 token (dưới ngưỡng 35). Biên còn 32 token cho các thay đổi sau."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-no-tests-repo",
+      "severity": "low",
+      "text": "Repo PHP thực tế không có bộ test tự động nên --changed và --tests ít giá trị ở đó; giá trị chủ yếu cho repo JS, TS, Python."
+    },
+    {
+      "id": "risk-literal-queries",
+      "text": "Chưa phục vụ truy vấn OR nhiều từ miền và literal (ví dụ THU1|MedCategoryCode, 69% mẫu Grep ở his); repo-map không gọn hơn grep ở nhu cầu này. Giảm thiểu: đo lại bằng transcript sau phát hành; chỉ mục literal cần extractorVersion tiếp theo.",
+      "severity": "medium"
+    },
+    {
+      "id": "risk-his-index-limit",
+      "text": "Ở bản sao repo his, refresh báo limitReached true: chỉ mục chạm trần kích thước (50 MB) nên một phần file không được lập chỉ mục; chưa đổi trần vì ngoài phạm vi epic, cần task riêng nếu muốn.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-10T00:09:11.300+07:00"
+}

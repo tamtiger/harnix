@@ -10,6 +10,8 @@ import {
 } from "src/core/repo-map/service.js";
 import { queryWorkspaceRepoMap, refreshWorkspaceRepoMap, statusWorkspaceRepoMap } from "src/core/repo-map/workspace.js";
 import { readRepoMap } from "src/core/repo-map/store.js";
+import { summarizeSkipped } from "src/core/repo-map/refresh-summary.js";
+import { repoMapRefreshHint } from "src/core/repo-map/types.js";
 import {
   buildMultiWorkspaceEventMatrix,
   buildProjectEventMatrix,
@@ -20,7 +22,17 @@ import { resolveWorkspaceRoot } from "src/core/workspace/resolve-root.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { compareCodeUnits } from "src/utils/order.js";
 
-import { formatQueryResults, parseRepoMapFormat, type RepoMapQueryFormat } from "src/core/repo-map/compact.js";
+import {
+  compactImpact,
+  compactOutline,
+  compactRefs,
+  compactTests,
+  formatQueryResults,
+  parseRepoMapFormat,
+  parseRepoMapListFormat,
+  type RepoMapListFormat,
+  type RepoMapQueryFormat,
+} from "src/core/repo-map/compact.js";
 import {
   parseRepoMapDepth,
   parseRepoMapLimit,
@@ -60,20 +72,36 @@ export async function runRepoMapCommand(cwd: string, options: RepoMapCliOptions)
       parseRepoMapPath(options.outline, "--outline"),
       parseRepoMapOutlineLimit(options.limit ?? "20"),
       symbol,
+      options.body === true,
+      parseRepoMapListFormat(options.format),
     );
   }
   const limit = parseRepoMapLimit(options.limit ?? "20");
   if (options.refs !== undefined) {
     const target = options.path === undefined ? undefined : parseRepoMapPath(options.path, "--path");
-    return refsRepoMapInternal(cwd, parseRepoMapSymbol(options.refs, "--refs"), limit, target);
+    return refsRepoMapInternal(
+      cwd,
+      parseRepoMapSymbol(options.refs, "--refs"),
+      limit,
+      target,
+      parseRepoMapListFormat(options.format),
+    );
   }
-  if (options.tests !== undefined) return testsRepoMapInternal(cwd, parseRepoMapPath(options.tests, "--tests"), limit);
+  if (options.tests !== undefined) {
+    return testsRepoMapInternal(
+      cwd,
+      parseRepoMapPath(options.tests, "--tests"),
+      limit,
+      parseRepoMapListFormat(options.format),
+    );
+  }
   if (options.impact !== undefined) {
     return impactRepoMapInternal(
       cwd,
       parseRepoMapPath(options.impact, "--impact"),
       parseRepoMapDepth(options.depth ?? "2"),
       limit,
+      parseRepoMapListFormat(options.format),
     );
   }
   if (options.events) {
@@ -106,7 +134,7 @@ export async function statusRepoMapInternal(cwd: string): Promise<unknown> {
       typeof error === "object" && error !== null && "code" in error && (error as { code: string }).code === "ENOENT";
     return {
       generator: "harnix",
-      hint: "run harnix repo-map --refresh",
+      hint: repoMapRefreshHint,
       schemaVersion: 1,
       scope: "project",
       status: missing ? "missing" : "invalid",
@@ -162,7 +190,12 @@ export async function queryWorkspaceRepoMapInternal(
 export async function refreshRepoMapInternal(cwd: string): Promise<unknown> {
   const root = await initializedRoot(cwd);
   const result = await refreshRepoMap({ root });
-  return { records: result.map.records.length, scope: "project", skipped: result.skipped, status: "refreshed" };
+  return {
+    records: result.map.records.length,
+    scope: "project",
+    ...summarizeSkipped(result.skipped),
+    status: "refreshed",
+  };
 }
 
 export async function queryRepoMapInternal(
@@ -190,6 +223,8 @@ export async function queryRepoMapInternal(
   const formatted = formatQueryResults(result.results, format);
   return {
     ...(format === "json" ? {} : { format }),
+    ...(result.status === "ready" ? {} : { hint: repoMapRefreshHint }),
+    ...(result.status === "ready" && result.fallback !== undefined ? { fallback: result.fallback } : {}),
     results: formatted,
     scope: "project",
     status: result.status,
@@ -201,16 +236,24 @@ export async function impactRepoMapInternal(
   target: string,
   depth: number,
   limit: number,
+  format: RepoMapListFormat = "json",
 ): Promise<unknown> {
   const root = await initializedRoot(cwd);
   await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
-  return impactRepoMap({ root, target, depth, limit });
+  const result = await impactRepoMap({ root, target, depth, limit });
+  return format === "compact" ? compactImpact(result) : result;
 }
 
-export async function testsRepoMapInternal(cwd: string, target: string, limit: number): Promise<unknown> {
+export async function testsRepoMapInternal(
+  cwd: string,
+  target: string,
+  limit: number,
+  format: RepoMapListFormat = "json",
+): Promise<unknown> {
   const root = await initializedRoot(cwd);
   await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
-  return impactRepoMapTests({ limit, root, target });
+  const result = await impactRepoMapTests({ limit, root, target });
+  return format === "compact" ? compactTests(result) : result;
 }
 
 export async function outlineRepoMapInternal(
@@ -218,10 +261,19 @@ export async function outlineRepoMapInternal(
   target: string,
   limit: number,
   symbol?: string,
+  body = false,
+  format: RepoMapListFormat = "json",
 ): Promise<unknown> {
   const root = await initializedRoot(cwd);
   await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
-  return outlineRepoMap({ limit, root, ...(symbol === undefined ? {} : { symbol }), target });
+  const result = await outlineRepoMap({
+    limit,
+    root,
+    ...(symbol === undefined ? {} : { symbol }),
+    ...(body ? { body: true } : {}),
+    target,
+  });
+  return format === "compact" ? compactOutline(result) : result;
 }
 
 export async function refsRepoMapInternal(
@@ -229,10 +281,12 @@ export async function refsRepoMapInternal(
   symbol: string,
   limit: number,
   target?: string,
+  format: RepoMapListFormat = "json",
 ): Promise<unknown> {
   const root = await initializedRoot(cwd);
   await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
-  return refsRepoMap({ limit, root, symbol, ...(target === undefined ? {} : { target }) });
+  const result = await refsRepoMap({ limit, root, symbol, ...(target === undefined ? {} : { target }) });
+  return format === "compact" ? compactRefs(result) : result;
 }
 
 async function initializedRoot(cwd: string): Promise<string> {

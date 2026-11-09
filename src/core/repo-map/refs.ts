@@ -5,7 +5,7 @@ import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath } from "src/utils/paths.js";
 import { buildRepoMapGraph } from "./graph.js";
 import { findAffectedTests } from "./tests.js";
-import { defaultRepoMapLimits, type RepoMapRecordV1, type RepoMapV1 } from "./types.js";
+import { defaultRepoMapLimits, type RepoMapRecordV1, type RepoMapV1, repoMapRefreshHint } from "./types.js";
 
 export type RepoMapRefKind = "declaration" | "import" | "reference";
 
@@ -23,6 +23,7 @@ export interface RepoMapRefsOptions {
 }
 
 export interface RepoMapRefsResultV1 {
+  readonly hint?: string | undefined;
   readonly generator: "harnix";
   readonly schemaVersion: 1;
   readonly scope: "project";
@@ -91,7 +92,7 @@ export function createUnavailableRepoMapRefs(
   options: RepoMapRefsOptions,
 ): RepoMapRefsResultV1 {
   assertRefsOptions(options);
-  return emptyRefsResult(status, options);
+  return { ...emptyRefsResult(status, options), hint: repoMapRefreshHint };
 }
 
 function selectCandidatePaths(map: RepoMapV1, symbol: string, target: string | undefined): string[] {

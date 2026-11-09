@@ -11,12 +11,14 @@ export interface RepoMapRecordV1 {
   identifiers: string[];
   headings: string[];
   importTargets: string[];
+  /** Names this file uses that are declared in one to four other files; filled in after every file is extracted. */
+  references?: string[] | undefined;
 }
 
 export interface RepoMapV1 {
   generator: "harnix";
   schemaVersion: 1;
-  extractorVersion: 1;
+  extractorVersion: 2;
   inventoryFingerprint: string;
   records: RepoMapRecordV1[];
 }
@@ -68,6 +70,10 @@ export type ContainerKind = "class" | "interface" | "enum" | "struct" | "record"
 export type RepoMapSymbolKind = ContainerKind | "function" | "method" | "type" | "const" | "variable" | "heading";
 
 export interface RepoMapSymbolOutlineV1 {
+  /** Source lines from `startLine` to `endLine`, secret-looking lines hidden; present with `--body`. */
+  readonly body?: readonly string[];
+  /** True when the shared line cap cut this body short. */
+  readonly bodyTruncated?: boolean;
   readonly name: string;
   readonly kind: RepoMapSymbolKind;
   readonly exported: boolean;
@@ -81,9 +87,12 @@ export interface RepoMapOutlineOptions {
   readonly target: string;
   readonly symbol?: string;
   readonly limit: number;
+  /** Add the source lines of each matched symbol (needs `symbol`). */
+  readonly body?: boolean;
 }
 
 export interface RepoMapOutlineResultV1 {
+  readonly hint?: string;
   readonly generator: "harnix";
   readonly schemaVersion: 1;
   readonly scope: "project";
@@ -95,3 +104,14 @@ export interface RepoMapOutlineResultV1 {
   readonly symbols: readonly RepoMapSymbolOutlineV1[];
   readonly truncated: boolean;
 }
+
+/** One place for the per-record name-list caps shared by extraction and cache validation. */
+export const repoMapRecordLimits = Object.freeze({
+  headings: Object.freeze({ count: 16, length: 120 }),
+  identifiers: Object.freeze({ count: 128, length: 96 }),
+  importTargets: Object.freeze({ count: 32, length: 160 }),
+  references: Object.freeze({ count: 48, length: 96 }),
+});
+
+/** Shown with a missing or unreadable cache, so the caller knows the one command that fixes it. */
+export const repoMapRefreshHint = "run harnix repo-map --refresh";

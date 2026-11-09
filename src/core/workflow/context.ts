@@ -11,7 +11,7 @@ import {
   type ContextSelectionInput,
 } from "src/core/context/selection-freshness.js";
 import { readConfig } from "src/core/config/config.js";
-import { readRepoMap } from "src/core/repo-map/store.js";
+import { readInventoryFingerprint } from "src/core/repo-map/store.js";
 import { guideOutputPath, selectGuideSources } from "src/guides/catalog.js";
 import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { isMissing } from "src/core/tasks/workflow-helpers.js";
@@ -86,7 +86,7 @@ export async function contextSelectionInput(
   }).map(guideOutputPath);
   let inventoryFingerprint = "";
   try {
-    inventoryFingerprint = (await readRepoMap(projectRoot)).inventoryFingerprint;
+    inventoryFingerprint = await readInventoryFingerprint(projectRoot);
   } catch (error: unknown) {
     if (requireInventory) throw error;
   }

@@ -1,0 +1,517 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-203650-repo-map-extractor-quality",
+  "epicId": "20261109-194501-repo-map-insights",
+  "title": "Nâng chất lượng trích xuất repo-map (extractorVersion 2) cho PHP, C# và symbol lớn",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Sửa nền tảng mà mọi truy vấn repo-map dựa vào: chỉ mục symbol không còn bị cắt theo bảng chữ cái và có thuộc tính C#, import PHP và CodeIgniter được nhận đúng, đồ thị C# nối file với file khai báo kiểu thay vì với .csproj; nâng extractorVersion lên 2 với cơ chế coi cache cũ là stale.",
+  "nonGoals": [
+    "Không thêm tree-sitter hay dependency mới.",
+    "Không đổi schemaVersion 1 của RepoMapV1 và đường dẫn cache; chỉ thêm trường tùy chọn và nâng extractorVersion.",
+    "Không hỗ trợ ngôn ngữ mới ngoài những ngôn ngữ extract.ts đã nhận."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Với một file nguồn có 200 khai báo, chỉ mục identifiers giữ 128 tên đầu tiên theo thứ tự xuất hiện của khai báo (ưu tiên khai báo hơn tham chiếu), không còn cắt theo thứ tự bảng chữ cái; kết quả lưu vẫn sắp theo code-unit và không trùng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Thuộc tính C# (ví dụ public string PaymentRequestCode { get; set; }) và phương thức C# hoặc Java (ví dụ public async Task<Foo> GetFooAsync(int id)) có trong identifiers của file chứa chúng; constructor, từ khóa và tên kiểu trả về không bị lấy nhầm.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Record JSON (bản ghi ra đĩa, thụt 2 dấu cách) của một file nguồn 100 KB có 500 khai báo không lớn hơn 12 KB (đo bằng test xác định), và trần số tên, độ dài tên lấy từ một hằng số dùng chung cho trích xuất và kiểm tra hợp lệ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Import PHP được nhận trong importTargets: use Ten\\Lop; (dấu gạch chéo ngược đổi thành dấu chấm), require/include(_once) với chuỗi, và ->load->model|library|helper|view('X') của CodeIgniter.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Chuỗi trong ->from('bang alias'), ->join('bang') hoặc SQL của PHP không còn thành importTargets; from 'x' của JavaScript, TypeScript và Python vẫn được nhận; import của Go và Java giữ nguyên kết quả hiện tại (test khóa hành vi).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Record có thêm trường tùy chọn references (đã sắp, không trùng, tối đa 48 tên, mỗi tên tối đa 96 ký tự), chỉ gồm tên mà file này dùng và được khai báo ở từ 1 đến 4 file khác; tính ở bước làm mới sau khi trích xuất mọi file, không dùng lại record của lần trước.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-7",
+      "text": "harnix repo-map --impact <file .cs> trả các file .cs thật tham chiếu tới kiểu khai báo trong file đó (fixture ABP) ở khoảng cách 1, xếp trước các .csproj; việc mở rộng theo ProjectReference của .csproj bao quanh được giữ nguyên (test impact hiện có vẫn xanh); tương tự cho PHP và TypeScript trong fixture.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-8",
+      "text": "Cache có extractorVersion 1: các lệnh query, impact, tests và refs trả status invalid (không thêm giá trị status mới) kèm trường tùy chọn mới hint bằng run harnix repo-map --refresh, và việc đọc không ghi file nào.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-migration-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-9",
+      "text": "PRD, IMPLEMENTATION_PLAN (mục 4.12, 4.16 và mô tả cache), README, CHANGELOG được đồng bộ, cache repo-map được theo dõi trong git và test self-host được cập nhật theo extractorVersion 2, phiên bản nâng lên 2.31.0-dev.1 bằng pnpm version:sync, và pnpm run test:gates xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-10",
+      "text": "--refresh dựng lại bản extractorVersion 2 mà không dùng lại record cũ; doctor báo cache extractorVersion cũ là repo-map-stale (cảnh báo, sửa được) và cache không phải repo map vẫn là repo-map-invalid; doctor --fix đưa cache cũ về ready.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-migration-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-11",
+      "text": "Task đã lưu sidecar context trước khi nâng cấp không chuyển sang contextDrift stale chỉ vì cache còn extractorVersion 1: inventoryFingerprint được đọc từ cache cũ (chỉ phụ thuộc path và contentHash) thay vì rơi về rỗng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-migration-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-12",
+      "text": "Cạnh từ references chịu trần riêng (tối đa 8 cạnh mỗi file và 50.000 cạnh tổng), ưu tiên cạnh import khi hết trần, và loại tên được khai báo ở 1 đến 4 file nhưng được hơn 200 file dùng; kết quả --query, --tests, --impact trên fixture TypeScript hiện có không đổi (test khóa).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-2",
+        "ev-chk-suite-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/core/doctor/project.ts",
+    "src/core/repo-map/extract-imports.ts",
+    "src/core/repo-map/extract-symbols.ts",
+    "src/core/repo-map/extract.ts",
+    "src/core/repo-map/graph.ts",
+    "src/core/repo-map/impact.ts",
+    "src/core/repo-map/references.ts",
+    "src/core/repo-map/refs.ts",
+    "src/core/repo-map/service.ts",
+    "src/core/repo-map/store.ts",
+    "src/core/repo-map/tests.ts",
+    "src/core/repo-map/types.ts",
+    "src/core/workflow/context.ts",
+    "test/migration/repo-map-extractor-v2.test.ts",
+    "test/support/repo-map-fixtures.ts",
+    "test/unit/core/repo-map/extract.test.ts",
+    "test/unit/core/repo-map/graph.test.ts",
+    "test/unit/core/repo-map/impact.test.ts",
+    "test/unit/core/repo-map/store.test.ts",
+    "test/workflow/self-host.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test đơn vị và tích hợp của trích xuất và đồ thị repo-map",
+      "command": "pnpm exec vitest run repo-map",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-12",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7"
+      ],
+      "inputs": [
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/**",
+        "test/integration/commands/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "chk-migration",
+      "description": "Test migration cache extractorVersion cũ sang 2",
+      "command": "pnpm run test:migration",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-10",
+        "ac-11",
+        "ac-8"
+      ],
+      "inputs": [
+        "docs/IMPLEMENTATION_PLAN.md",
+        "src/commands/repo-map-internal.ts",
+        "src/core/context/**",
+        "src/core/doctor/**",
+        "src/core/repo-map/**",
+        "src/core/workflow/context.ts",
+        "test/migration/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Test hợp đồng CLI, tài liệu và kiến trúc",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-9"
+      ],
+      "inputs": [
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-10",
+        "ac-11",
+        "ac-12",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7",
+        "ac-8",
+        "ac-9"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-09T21:00:09.156+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa theo review độc lập ngày 2026-11-09 đã kiểm chứng với mã: impact.ts:41-52 cố ý mở rộng .csproj; hint chỉ có ở nhánh events; context.ts rơi về fingerprint rỗng khi cache cũ; thiếu trần cạnh references.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-02",
+      "recordedAt": "2026-11-09T21:00:09.624+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa theo review độc lập ngày 2026-11-09 đã kiểm chứng với mã: impact.ts:41-52 cố ý mở rộng .csproj; hint chỉ có ở nhánh events; context.ts rơi về fingerprint rỗng khi cache cũ; thiếu trần cạnh references.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-03",
+      "recordedAt": "2026-11-09T21:00:10.108+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa theo review độc lập ngày 2026-11-09 đã kiểm chứng với mã: impact.ts:41-52 cố ý mở rộng .csproj; hint chỉ có ở nhánh events; context.ts rơi về fingerprint rỗng khi cache cũ; thiếu trần cạnh references.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-04",
+      "recordedAt": "2026-11-09T21:00:10.595+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa theo review độc lập ngày 2026-11-09 đã kiểm chứng với mã: impact.ts:41-52 cố ý mở rộng .csproj; hint chỉ có ở nhánh events; context.ts rơi về fingerprint rỗng khi cache cũ; thiếu trần cạnh references.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-05",
+      "recordedAt": "2026-11-09T21:00:12.395+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa theo review độc lập ngày 2026-11-09 đã kiểm chứng với mã: impact.ts:41-52 cố ý mở rộng .csproj; hint chỉ có ở nhánh events; context.ts rơi về fingerprint rỗng khi cache cũ; thiếu trần cạnh references.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-06",
+      "recordedAt": "2026-11-09T21:01:11.901+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa theo review độc lập ngày 2026-11-09 đã kiểm chứng với mã: impact.ts:41-52 cố ý mở rộng .csproj; hint chỉ có ở nhánh events; context.ts rơi về fingerprint rỗng khi cache cũ; thiếu trần cạnh references.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-07",
+      "recordedAt": "2026-11-09T21:01:12.395+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa theo review độc lập ngày 2026-11-09 đã kiểm chứng với mã: impact.ts:41-52 cố ý mở rộng .csproj; hint chỉ có ở nhánh events; context.ts rơi về fingerprint rỗng khi cache cũ; thiếu trần cạnh references.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-08",
+      "recordedAt": "2026-11-09T21:01:12.860+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa theo review độc lập ngày 2026-11-09 đã kiểm chứng với mã: impact.ts:41-52 cố ý mở rộng .csproj; hint chỉ có ở nhánh events; context.ts rơi về fingerprint rỗng khi cache cũ; thiếu trần cạnh references.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-09",
+      "recordedAt": "2026-11-09T21:01:13.725+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa theo review độc lập ngày 2026-11-09 đã kiểm chứng với mã: impact.ts:41-52 cố ý mở rộng .csproj; hint chỉ có ở nhánh events; context.ts rơi về fingerprint rỗng khi cache cũ; thiếu trần cạnh references.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-10",
+      "recordedAt": "2026-11-09T21:01:14.823+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Sửa theo review độc lập ngày 2026-11-09 đã kiểm chứng với mã: impact.ts:41-52 cố ý mở rộng .csproj; hint chỉ có ở nhánh events; context.ts rơi về fingerprint rỗng khi cache cũ; thiếu trần cạnh references.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "task-contract-revision-11",
+      "recordedAt": "2026-11-09T21:37:31.218+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Đo thực tế trên payment_hub ngày 2026-11-09: ngưỡng 25 file dùng loại cả kiểu trung tâm (Transaction có 0 file trong references dù 81 file .cs dùng); với 200 thì 71 file có, --impact Transaction.cs trả 16 file .cs thay vì 7, cache x1,50 so với bản cũ.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T21:44:52.846+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9cfdc18db32c577840f750df9687356cee24409aca97dea9b4831158d888a4e4"
+    },
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-09T21:45:10.632+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run repo-map — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bc0fb99ad39c06df9bf81b35ecefbff213d73ed73c4225a1e22539ff89bd1606"
+    },
+    {
+      "id": "ev-chk-migration-1",
+      "checkId": "chk-migration",
+      "recordedAt": "2026-11-09T21:45:18.147+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:migration — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b22efea7293f30794c289166da549fca898e3a0b039d5ca329654828d0b28d9d"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T21:45:27.649+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "53e9e060a8e51cf3511dab0a3cceeebab9cde3bded9a0e23ba55ed89bd42fe0b"
+    },
+    {
+      "id": "task-contract-revision-12",
+      "recordedAt": "2026-11-09T21:48:10.303+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Kiểm chứng thực tế: doctor --fix chỉ chạy khi trạng thái dự án là ready, nhưng repo-map-invalid là error nên cache extractorVersion cũ không bao giờ được --fix dựng lại; chuyển sang repo-map-stale (warning) như khuyến nghị của review.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-203650-repo-map-extractor-quality/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-focused-2",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-09T21:49:41.629+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run repo-map — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fb0f05a3976bf6e33b83378653828098354f05c2dfd1a037334ff8fa0d452d86"
+    },
+    {
+      "id": "ev-chk-migration-2",
+      "checkId": "chk-migration",
+      "recordedAt": "2026-11-09T21:49:48.351+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:migration — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "10ff821ac0cfb51a569c351521f0f97e2d171210f8ffddc2e5648928f16d6cb5"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T21:49:57.511+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e58d942c5e35c712775f6a67c580970ecaa1042f5d0f7c847fea37498d8b2b8a"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T21:51:30.166+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d8e845cd2a2026b75c52a9a8b3b81b8937f2a7045a59ebf229cc81a5c5bab571"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "dec-evidence-extractor",
+      "text": "Nâng extractorVersion lên 2 và coi nó là member chạy đầu tiên của epic.",
+      "rationale": "Người dùng duyệt ngày 2026-11-09. Đo trên his (PHP, 2.046 file) và payment_hub (C#, 1.437 file): identifiers cắt 48 tên theo bảng chữ cái (generateAutoKeyM01ReceiptCode không có trong chỉ mục dù 15 file dùng); import PHP chỉ là tên bảng SQL từ ->from(); thuộc tính C# không được lập chỉ mục (PaymentRequestCode: 20 kết quả nhưng 1 file thật sự chứa, grep thấy 28; TenantReferenceCode: 0); using C# nối tới .csproj nên --impact Transaction.cs trả 11 .csproj trong khi 81 file .cs dùng nó."
+    },
+    {
+      "id": "dec-additive-fields",
+      "text": "Chỉ thêm trường tùy chọn vào RepoMapRecordV1 và giữ schemaVersion 1.",
+      "rationale": "Giữ tương thích đọc; extractorVersion là tín hiệu làm mới, không phải đổi cấu trúc bắt buộc."
+    },
+    {
+      "id": "dec-select-then-sort",
+      "text": "Chọn tên giữ lại theo thứ tự ưu tiên và xuất hiện, rồi mới sắp theo code-unit khi lưu.",
+      "rationale": "Cache yêu cầu mảng đã sắp và không trùng (store.ts); lỗi hiện tại là cắt 48 tên sau khi sắp theo bảng chữ cái nên tên bắt đầu bằng chữ thường ở file lớn bị mất."
+    },
+    {
+      "id": "dec-references-two-pass",
+      "text": "references được tính ở bước làm mới sau khi mọi file đã trích xuất, từ danh sách tên đã khai báo, và không dùng lại record của lần trước.",
+      "rationale": "Tập tên khai báo toàn cục đổi khi file khác đổi, nên references của một file không đổi nội dung vẫn có thể đổi; trích xuất đã đọc mọi file để băm nên không tốn thêm I/O."
+    },
+    {
+      "id": "dec-invalid-for-old-cache",
+      "text": "Cache extractorVersion 1 dùng trạng thái invalid sẵn có kèm hint --refresh, không thêm giá trị status stale.",
+      "rationale": "Giữ nguyên enum công khai (missing|invalid|ready|not-found) của query, impact, tests, refs; validateRepoMap vốn đã từ chối extractorVersion khác 1 nên readPreviousRecords trả rỗng và không dùng lại record cũ."
+    },
+    {
+      "id": "dec-assumption-csproj",
+      "text": "Nguyên nhân .csproj xuất hiện làm dependents của file .cs chưa xác định; chẩn đoán bằng fixture ở slice đồ thị trước khi sửa.",
+      "rationale": "Đã xác minh importTargets của csproj là đường dẫn ProjectReference tương đối và của file .cs là namespace, nhưng chưa tái hiện cơ chế nối; sửa trong cùng task nếu nằm ở graph.ts, không đổi hợp đồng công khai."
+    },
+    {
+      "id": "dec-csproj-root-cause",
+      "text": "Nguyên nhân .csproj làm dependents của file .cs là impact.ts:41-52, không phải graph.ts; thay dec-assumption-csproj.",
+      "rationale": "impact.ts cố ý mở rộng theo .csproj bao quanh và test impact hiện có khóa hành vi; giữ phần mở rộng này, thêm dependents mức file ở khoảng cách 1 xếp trước."
+    },
+    {
+      "id": "dec-hint-additive",
+      "text": "Thêm trường tùy chọn hint vào kết quả unavailable của query, impact, tests, refs.",
+      "rationale": "Hiện chỉ nhánh --events có hint; thêm trường tùy chọn là thay đổi chỉ cộng thêm và có tiền lệ, cần ghi vào IMPLEMENTATION_PLAN mục 4.16."
+    },
+    {
+      "id": "dec-context-fingerprint",
+      "text": "context.ts đọc inventoryFingerprint bằng hàm không phụ thuộc extractorVersion.",
+      "rationale": "Nếu không, cache v1 làm fingerprint rỗng và mọi task có sidecar context thành contextDrift stale sau nâng cấp, buộc replan theo AGENTS."
+    },
+    {
+      "id": "dec-tracked-cache",
+      "text": "Cache repo-map của chính repo này được tái sinh ở Slice 9 và test self-host đổi kỳ vọng thành 2.",
+      "rationale": "File đang được git theo dõi (722 KB) và self-host.test.ts đọc nó; người dùng quyết định commit và chấp nhận cache lớn hơn."
+    },
+    {
+      "id": "dec-users-threshold",
+      "text": "Ngưỡng loại tên dùng quá rộng là 200 file, không phải 25.",
+      "rationale": "Đo trên payment_hub: tên chung thường được khai báo ở hơn 4 file nên đã bị loại bởi giới hạn nơi khai báo; ngưỡng 25 chủ yếu loại nhầm kiểu trung tâm. Với 200: Transaction trong references của 71 trên 81 file dùng, cache 1,42 MB thành 2,13 MB (x1,50), RSS đỉnh 143 MB."
+    },
+    {
+      "id": "dec-doctor-stale",
+      "text": "Cache extractorVersion cũ là repo-map-stale (warning) trong doctor, không phải repo-map-invalid.",
+      "rationale": "doctor.ts chỉ gọi fixProjectState khi project.status là ready; finding mức error làm status invalid nên --fix không bao giờ dựng lại cache invalid. Query, impact, tests, refs vẫn trả status invalid kèm hint (enum công khai không đổi)."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-cache-size",
+      "severity": "medium",
+      "text": "Trần symbol cao hơn và trường references làm cache lớn hơn; giảm thiểu bằng trần có giới hạn và đo trên his và payment_hub."
+    },
+    {
+      "id": "risk-regex-limits",
+      "severity": "low",
+      "text": "Trích xuất vẫn bằng regex nên tham chiếu động (reflection, DI theo chuỗi) vẫn bị bỏ sót; kết quả là gợi ý điều hướng."
+    },
+    {
+      "id": "risk-doctor-invalid-unfixable",
+      "text": "Cache hỏng thật (không phải repo map) vẫn là repo-map-invalid mức error nên doctor --fix bỏ qua và không dựng lại; lỗi có sẵn từ trước task, ngoài phạm vi; người dùng chạy harnix repo-map --refresh.",
+      "severity": "low"
+    },
+    {
+      "id": "risk-doctor-extra-scan",
+      "text": "diagnoseRepoMap dùng extractRepoMapRecord nên vẫn tính tập usedNames rồi bỏ đi; chỉ tốn CPU thêm khi chạy doctor, không đổi kết quả.",
+      "severity": "low"
+    }
+  ],
+  "createdAt": "2026-11-09T20:36:49.678+07:00",
+  "updatedAt": "2026-11-09T21:51:51.834+07:00",
+  "completedAt": "2026-11-09T21:51:51.834+07:00"
+}

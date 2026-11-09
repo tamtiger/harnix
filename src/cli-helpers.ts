@@ -197,7 +197,33 @@ export function platformFlagList(extra: readonly string[] = []): string {
 
 export type RepoMapCliOptions = Partial<
   Record<"query" | "impact" | "tests" | "outline" | "refs" | "symbol" | "path" | "limit" | "depth" | "format", string>
-> & { events?: boolean; refresh?: boolean; workspace?: string | boolean | string[] };
+> & { body?: boolean; events?: boolean; refresh?: boolean; workspace?: string | boolean | string[] };
+
+function validateFormatFlag(options: RepoMapCliOptions): void {
+  if (options.format === undefined) return;
+  const modes = [options.query, options.outline, options.refs, options.impact, options.tests];
+  if (modes.every((mode) => mode === undefined))
+    throw new Error(
+      "--format requires repo-map --query, --outline, --refs, --impact or --tests.\nGợi ý: harnix repo-map --query <text> --format compact.",
+    );
+  if (options.format === "outline" && options.query === undefined)
+    throw new Error(
+      "The outline format is only valid with repo-map --query; use json or compact here.\nGợi ý: harnix repo-map --outline <path> --format compact.",
+    );
+  if (options.body === true && options.format === "compact")
+    throw new Error(
+      "--body cannot be combined with --format compact.\nGợi ý: drop --format to print the symbol body as JSON.",
+    );
+}
+
+function validateOutlineFlags(options: RepoMapCliOptions): void {
+  if (options.symbol !== undefined && options.outline === undefined)
+    throw new Error("--symbol requires repo-map --outline.");
+  if (options.body === true && (options.outline === undefined || options.symbol === undefined))
+    throw new Error(
+      "--body requires repo-map --outline and --symbol.\nGợi ý: harnix repo-map --outline <path> --symbol <name> --body.",
+    );
+}
 
 export function validateRepoMapOptions(options: RepoMapCliOptions): void {
   const actions = [
@@ -213,15 +239,11 @@ export function validateRepoMapOptions(options: RepoMapCliOptions): void {
     throw new Error(
       "repo-map requires at most one of --query, --impact, --tests, --outline, --refs, --events, or --refresh.",
     );
-  if (options.symbol !== undefined && options.outline === undefined)
-    throw new Error("--symbol requires repo-map --outline.");
+  validateOutlineFlags(options);
   if (options.path !== undefined && options.refs === undefined) throw new Error("--path requires repo-map --refs.");
   if (options.depth !== undefined && options.impact === undefined)
     throw new Error("--depth requires repo-map --impact.");
-  if (options.format !== undefined && options.query === undefined)
-    throw new Error(
-      "--format requires repo-map --query.\nGợi ý: harnix repo-map --query <text> --format json|compact|outline.",
-    );
+  validateFormatFlag(options);
   if (
     options.workspace !== undefined &&
     actions.length > 0 &&

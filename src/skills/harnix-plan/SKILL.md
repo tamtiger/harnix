@@ -2,7 +2,7 @@
 name: harnix-plan
 description: Use when a Harnix request needs triage, requirements, planning, a trustworthy ready gate, a replan, a legacy-task migration or an epic before implementation.
 metadata:
-  version: "2.30.1"
+  version: "2.31.1"
 ---
 
 # Plan a Harnix task
@@ -20,7 +20,7 @@ A blocked task: read its blocker, resolve or report the exact condition, then re
 - Probe assumptions interactively (never in Bypass or automation, no intent files outside prd.md/plan.md): `harnix skill harnix-plan --reference grilling`.
 - Preserve verified and user decisions, model real threats, scout first, and keep code clean: `harnix skill harnix-plan --reference decision-discipline`.
 
-Inspect instructions, code, tests, config, docs, diff and task history (`harnix repo-map --query|--impact|--outline|--refs` are navigation hints only). Never ask the user for a fact the repository answers. Keep an inventory of repository facts, user-owned decisions, unknowns and non-goals; split a broad request into testable deliverables.
+Inspect instructions, code, tests, config, docs, diff and task history (use `harnix repo-map --query <text>`, `--refs <symbol>` or `--outline <path> --symbol <name> --body` before `grep -r` or repeated `sed -n`; they are hints, verify the source). Never ask the user for a fact the repository answers. Keep an inventory of repository facts, user-owned decisions, unknowns and non-goals; split a broad request into testable deliverables.
 
 Ask at most one blocking question at a time, with why it matters, your recommendation and the trade-off. Before it and before `ready`, give a short context checkpoint (outcome, constraints, decisions, assumptions, open choices); it is not a second approval gate. Record each settled choice with `harnix workflow --add-decision <id> --text <t> --rationale <t>`.
 

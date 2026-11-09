@@ -115,12 +115,17 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
   };
 }
 
+/** One static line for the lean header: no repo-map query runs and no cache is read to show it. */
+export const REPO_MAP_TIP =
+  "Tip: before grep -r or a 2nd sed -n use `harnix repo-map --refs <sym>`, `--outline <path> --symbol <name> --body`, `--tests <path>`.";
+
 function taskSummaryHeader(task: TaskRecord): string {
   return [
     `[Active Task: ${task.id} (${task.mode})]`,
     `Status: ${task.status}/${task.checkpoint}`,
     `Title: ${task.title}`,
     `Goal: ${task.goal}`,
+    REPO_MAP_TIP,
   ].join("\n");
 }
 

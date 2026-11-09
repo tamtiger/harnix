@@ -2,7 +2,7 @@
 name: harnix-flaky-test
 description: Use when diagnosing, reproducing and stabilizing intermittent, non-deterministic or timing-dependent test failures.
 metadata:
-  version: "2.30.1"
+  version: "2.31.1"
 ---
 
 # Flaky test diagnosis and stabilization

@@ -5,7 +5,7 @@ import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { sha256 } from "src/utils/hashing.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath, resolveSafeHarnixPath } from "src/utils/paths.js";
-import type { RepoMapRecordV1, RepoMapV1 } from "./types.js";
+import { repoMapRecordLimits, type RepoMapRecordV1, type RepoMapV1 } from "./types.js";
 
 export const repoMapRelativePath = "cache/repo-map-v1.json";
 
@@ -18,6 +18,37 @@ export async function readRepoMap(root: string): Promise<RepoMapV1> {
   return validateRepoMap(JSON.parse(await readFile(path, "utf8")) as unknown);
 }
 
+/**
+ * The inventory fingerprint of a cache written by any extractor version. It depends only on paths and content hashes,
+ * so it survives an extractor upgrade and lets saved task context keep its meaning until the next refresh.
+ */
+async function readCacheHeader(root: string): Promise<Record<string, unknown> & { inventoryFingerprint: string }> {
+  const path = await resolveSafeHarnixPath(root, repoMapRelativePath);
+  const value = JSON.parse(await readFile(path, "utf8")) as unknown;
+  if (
+    !isRecord(value) ||
+    value.generator !== "harnix" ||
+    value.schemaVersion !== 1 ||
+    !hash(value.inventoryFingerprint)
+  )
+    throw new Error("Invalid or unsupported repo map.");
+  return { ...value, inventoryFingerprint: value.inventoryFingerprint };
+}
+
+export async function readInventoryFingerprint(root: string): Promise<string> {
+  return (await readCacheHeader(root)).inventoryFingerprint;
+}
+
+/** True when the cache is a well-formed repo map written by an older extractor: readable, but due for a refresh. */
+export async function isOlderExtractorCache(root: string): Promise<boolean> {
+  try {
+    const { extractorVersion } = await readCacheHeader(root);
+    return typeof extractorVersion === "number" && Number.isInteger(extractorVersion) && extractorVersion < 2;
+  } catch {
+    return false;
+  }
+}
+
 export async function writeRepoMap(root: string, map: RepoMapV1): Promise<void> {
   const path = await resolveSafeHarnixPath(root, repoMapRelativePath);
   await atomicWriteFile(path, `${JSON.stringify(validateRepoMap(map), null, 2)}\n`);
@@ -26,7 +57,7 @@ export async function writeRepoMap(root: string, map: RepoMapV1): Promise<void> 
 export function createRepoMap(records: readonly RepoMapRecordV1[]): RepoMapV1 {
   const sorted = [...records].sort((left, right) => compareRepositoryPaths(left.path, right.path));
   return validateRepoMap({
-    extractorVersion: 1,
+    extractorVersion: 2,
     generator: "harnix",
     inventoryFingerprint: sha256(sorted.map(({ contentHash, path }) => `${path}\0${contentHash}`).join("\n")),
     records: sorted,
@@ -39,7 +70,7 @@ export function validateRepoMap(value: unknown): RepoMapV1 {
     !isRecord(value) ||
     value.generator !== "harnix" ||
     value.schemaVersion !== 1 ||
-    value.extractorVersion !== 1 ||
+    value.extractorVersion !== 2 ||
     !hash(value.inventoryFingerprint) ||
     !Array.isArray(value.records)
   )
@@ -52,7 +83,7 @@ export function validateRepoMap(value: unknown): RepoMapV1 {
     previous = record.path;
   }
   return {
-    extractorVersion: 1,
+    extractorVersion: 2,
     generator: "harnix",
     inventoryFingerprint: value.inventoryFingerprint,
     records,
@@ -78,10 +109,20 @@ function validateRecord(value: unknown): RepoMapRecordV1 {
     throw new Error("Invalid repo map record: kind is invalid.");
   if (value.language !== undefined && typeof value.language !== "string")
     throw new Error("Invalid repo map record: language must be a string.");
-  const headings = stringArray(value.headings, 16, 120, "headings"),
-    identifiers = stringArray(value.identifiers, 48, 96, "identifiers"),
-    importTargets = stringArray(value.importTargets, 32, 160, "importTargets");
-  if ([value.path, ...headings, ...identifiers, ...importTargets].some(isSensitive))
+  const limits = repoMapRecordLimits,
+    headings = stringArray(value.headings, limits.headings.count, limits.headings.length, "headings"),
+    identifiers = stringArray(value.identifiers, limits.identifiers.count, limits.identifiers.length, "identifiers"),
+    importTargets = stringArray(
+      value.importTargets,
+      limits.importTargets.count,
+      limits.importTargets.length,
+      "importTargets",
+    );
+  const references =
+    value.references === undefined
+      ? undefined
+      : stringArray(value.references, limits.references.count, limits.references.length, "references");
+  if ([value.path, ...headings, ...identifiers, ...importTargets, ...(references ?? [])].some(isSensitive))
     throw new Error("Repo map record contains sensitive content.");
   return {
     byteLength: value.byteLength,
@@ -94,6 +135,7 @@ function validateRecord(value: unknown): RepoMapRecordV1 {
     packagePath: value.packagePath,
     path: value.path,
     ...(value.language === undefined ? {} : { language: value.language }),
+    ...(references === undefined ? {} : { references }),
   };
 }
 

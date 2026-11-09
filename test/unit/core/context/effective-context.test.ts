@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createConfig } from "src/core/config/config.js";
-import { buildEffectiveContext } from "src/core/context/effective-context.js";
+import { buildEffectiveContext, REPO_MAP_TIP } from "src/core/context/effective-context.js";
 import { renderLearnedBlock } from "src/core/journal/learned-blocks.js";
 import type { TaskRecordV2 } from "src/core/tasks/task.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -218,6 +218,38 @@ describe("lean context injection and token optimization (ac-1, ac-2, ac-3)", () 
 
     expect(result.text).toContain("const rawFullCode = 42;");
     expect(result.text).not.toContain("[Active Task:");
+  });
+
+  it("adds one short static repo-map tip to the lean header, and none in full mode (ac-5)", async () => {
+    const root = await temporaryRepository();
+    const harnixRoot = join(root, ".harnix");
+    await mkdir(harnixRoot, { recursive: true });
+    const task = buildTaskV3({ id: "20261023-120002-tip-task", status: "in_progress", checkpoint: "implementing" });
+    const lean = createConfig({ developer: "tam" });
+    const full = createConfig({ developer: "tam" });
+    full.context.mode = "full";
+
+    const leanResult = await buildEffectiveContext({
+      projectRoot: root,
+      harnixRoot,
+      config: lean,
+      task,
+      platform: "codex",
+      forceBounded: true,
+    });
+    const fullResult = await buildEffectiveContext({
+      projectRoot: root,
+      harnixRoot,
+      config: full,
+      task,
+      platform: "codex",
+      forceBounded: true,
+    });
+
+    expect(leanResult.text).toContain(REPO_MAP_TIP);
+    expect(leanResult.text).toContain("harnix repo-map --refs");
+    expect(Math.ceil(REPO_MAP_TIP.length / 4)).toBeLessThanOrEqual(35);
+    expect(fullResult.text).not.toContain(REPO_MAP_TIP);
   });
 });
 

@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.30.1"
+  version: "2.31.1"
 ---
 
 # Implement with evidence
@@ -17,7 +17,7 @@ A blocked task: read its blocker, resolve it or report the exact condition, then
 
 ## Review the plan
 
-Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands in `.harnix/spec/project-facts.md`, custom project skills in `.harnix/spec/skills/` (or `harnix skill --all`), the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. New findings during implementation go to one of four tiers (`harnix skill harnix-implement --reference discoveries`). A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. `harnix repo-map --query` / `--impact` / `--tests` / `--outline <path> [--symbol <name>]` (symbol spans before slicing large files) / `--refs <symbol> [--path <path>]` (call sites before signature edits) are navigation hints; verify the source yourself. When modifying existing codebases, maintain local conventions and isolate changes: `harnix skill harnix-implement --reference brownfield`.
+Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands in `.harnix/spec/project-facts.md`, custom project skills in `.harnix/spec/skills/` (or `harnix skill --all`), the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. New findings during implementation go to one of four tiers (`harnix skill harnix-implement --reference discoveries`). A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. Before `grep -r` for a symbol or a second `sed -n` on one file, run `harnix repo-map --refs <symbol> [--path <path>]` (call sites) or `--outline <path> --symbol <name> --body` (that symbol's own lines, secrets hidden; add `--format compact` for a short list); `--query <text>`, `--impact <path>` and `--tests <path>` find files and the tests to run. They are navigation hints: verify the source yourself. When modifying existing codebases, maintain local conventions and isolate changes: `harnix skill harnix-implement --reference brownfield`.
 
 ## RED, GREEN, REFACTOR per behavior
 

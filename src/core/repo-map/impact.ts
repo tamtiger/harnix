@@ -1,4 +1,5 @@
 import { posix } from "node:path";
+import { repoMapRefreshHint } from "./types.js";
 
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath } from "src/utils/paths.js";
@@ -12,6 +13,7 @@ export interface RepoMapImpactOptions {
 }
 
 export interface RepoMapImpactResultV1 {
+  readonly hint?: string | undefined;
   readonly generator: "harnix";
   readonly schemaVersion: 1;
   readonly scope: "project";
@@ -90,26 +92,30 @@ function findEnclosingCsproj(targetPath: string, records: readonly RepoMapRecord
   return best;
 }
 
+/** Merges file-level and project-level dependents; at equal distance a file that references the target comes first. */
 function mergeDependents(
   direct: Array<{ path: string; distance: number }>,
   indirect: Array<{ path: string; distance: number }>,
   target: string,
 ): Array<{ path: string; distance: number }> {
-  const distanceMap = new Map<string, number>();
-  for (const item of direct) {
-    if (item.path !== target) distanceMap.set(item.path, item.distance);
-  }
-  for (const item of indirect) {
-    if (item.path !== target) {
-      const current = distanceMap.get(item.path);
-      if (current === undefined || item.distance < current) {
-        distanceMap.set(item.path, item.distance);
-      }
+  const merged = new Map<string, { distance: number; rank: number }>();
+  const add = (items: Array<{ path: string; distance: number }>, rank: number): void => {
+    for (const item of items) {
+      if (item.path === target) continue;
+      const current = merged.get(item.path);
+      if (current === undefined || item.distance < current.distance)
+        merged.set(item.path, { distance: item.distance, rank });
     }
-  }
-  return [...distanceMap.entries()]
-    .map(([path, distance]) => ({ path, distance }))
-    .sort((left, right) => left.distance - right.distance || compareCodeUnits(left.path, right.path));
+  };
+  add(direct, 0);
+  add(indirect, 1);
+  return [...merged.entries()]
+    .map(([path, { distance, rank }]) => ({ distance, path, rank }))
+    .sort(
+      (left, right) =>
+        left.distance - right.distance || left.rank - right.rank || compareCodeUnits(left.path, right.path),
+    )
+    .map(({ distance, path }) => ({ path, distance }));
 }
 
 export function createUnavailableRepoMapImpact(
@@ -117,7 +123,7 @@ export function createUnavailableRepoMapImpact(
   options: RepoMapImpactOptions,
 ): RepoMapImpactResultV1 {
   assertImpactOptions(options);
-  return emptyResult(status, options);
+  return { ...emptyResult(status, options), hint: repoMapRefreshHint };
 }
 
 function collectDependents(

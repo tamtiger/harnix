@@ -14,7 +14,7 @@ describe("token budgets", () => {
 
   it("keeps the agreed ceilings", () => {
     expect(TOKEN_BUDGETS).toMatchObject({
-      alwaysLoaded: 1500,
+      alwaysLoaded: 1540,
       skill: 2000,
       techniqueSkill: 1200,
       reference: 1200,

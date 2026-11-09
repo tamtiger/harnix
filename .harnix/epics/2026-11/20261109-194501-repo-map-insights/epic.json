@@ -1,0 +1,22 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261109-194501-repo-map-insights",
+  "title": "Cải tiến harnix repo-map theo thực tế sử dụng",
+  "goal": "Làm repo-map đáng tin và gọn hơn grep ở các nhu cầu agent thật sự có trên các repo người dùng hay làm việc (his PHP, payment_hub C# và TypeScript): trích xuất đúng symbol và quan hệ, chạy đúng test hẹp, tìm file theo truy vấn mà không bị task đang active làm lệch, đọc thân symbol thay vì sed -n lặp lại, output gọn, và cơ chế để agent chủ động dùng; không thêm dependency và không để hook gọi repo-map.",
+  "nonGoals": [
+    "Không làm --cycles, --hubs, --budget, --unused: không có nhu cầu trong các session đã đọc.",
+    "Không thêm tree-sitter hoặc call graph.",
+    "Không thêm daemon, watcher, DB, MCP, embedding hay telemetry.",
+    "Không đổi đường dẫn cache và schemaVersion 1 của RepoMapV1; chỉ thêm trường tùy chọn và nâng extractorVersion lên 2 (member repo-map-extractor-quality)."
+  ],
+  "createdAt": "2026-11-09T19:45:01.142+07:00",
+  "updatedAt": "2026-11-09T20:49:22.478+07:00",
+  "order": [
+    "20261109-203650-repo-map-extractor-quality",
+    "20261109-200111-repo-map-tests-ranking",
+    "20261109-200112-repo-map-query-relevance",
+    "20261109-200113-repo-map-symbol-body",
+    "20261109-200114-repo-map-compact-refresh-changed"
+  ]
+}

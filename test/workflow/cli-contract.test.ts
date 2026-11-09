@@ -55,6 +55,7 @@ describe("CLI command contract", () => {
       "--outline",
       "--refs",
       "--symbol",
+      "--body",
       "--path",
       "--limit",
       "--depth",

@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
+import { refreshRepoMap } from "src/core/repo-map/service.js";
 import { createRepoMap } from "src/core/repo-map/store.js";
 import { findAffectedTests } from "src/core/repo-map/tests.js";
 import type { RepoMapRecordV1 } from "src/core/repo-map/types.js";
+import { fixtureRecord, typeScriptFiles, writeFixtureFiles } from "test/support/repo-map-fixtures.js";
+import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 import { createHash } from "node:crypto";
 
@@ -141,5 +144,130 @@ describe("findAffectedTests", () => {
     expect(result.tests).toContain("frt-payment-gateway/test/FollowTypePropagationTests.cs");
     expect(result.tests).toContain("frt-payment-gateway/test/PaymentAmountRuleTests.cs");
     expect(result.tests).not.toContain("frt-payment-gateway/test/UnrelatedTests.cs");
+  });
+});
+
+const temporaryRepository = useTemporaryRepositories("harnix-tests-ranking-");
+
+const test = (path: string, overrides: Partial<RepoMapRecordV1> = {}) =>
+  fixtureRecord(path, { kind: "test", ...overrides });
+
+function integrationTests(count: number, identifiers: string[]): RepoMapRecordV1[] {
+  return Array.from({ length: count }, (_, i) =>
+    test(`test/integration/commands/case-${String(i).padStart(2, "0")}.test.ts`, { identifiers }),
+  );
+}
+
+describe("affected test ranking", () => {
+  it("puts the test written for the file ahead of tests that only share a symbol, whatever the path order", () => {
+    const map = createRepoMap([
+      fixtureRecord("src/core/store.ts", { identifiers: ["readStore", "writeStore"] }),
+      test("test/unit/core/store.test.ts"),
+      ...integrationTests(25, ["readStore"]),
+    ]);
+
+    const result = findAffectedTests(map, { limit: 5, target: "src/core/store.ts" });
+
+    expect(result.tests[0]).toBe("test/unit/core/store.test.ts");
+    expect(result.reasons?.["test/unit/core/store.test.ts"]).toBe("convention");
+    expect(result.truncated).toBe(true);
+  });
+
+  it("orders convention, direct, symbol and transitive tests and labels each one", () => {
+    const map = createRepoMap([
+      fixtureRecord("src/a.ts", { identifiers: ["thing"] }),
+      fixtureRecord("src/user.ts", { importTargets: ["./a"] }),
+      test("test/importer.test.ts", { importTargets: ["../src/a"] }),
+      test("test/unit/a.test.ts"),
+      test("test/symbols.test.ts", { identifiers: ["thing"] }),
+      test("test/user.test.ts"),
+    ]);
+
+    const result = findAffectedTests(map, { limit: 10, target: "src/a.ts" });
+
+    expect(result.tests).toEqual([
+      "test/unit/a.test.ts",
+      "test/importer.test.ts",
+      "test/symbols.test.ts",
+      "test/user.test.ts",
+    ]);
+    expect(result.reasons).toEqual({
+      "test/importer.test.ts": "direct",
+      "test/symbols.test.ts": "symbol",
+      "test/unit/a.test.ts": "convention",
+      "test/user.test.ts": "transitive",
+    });
+  });
+
+  it("keeps the test named for a widely imported file ahead of its many importers", () => {
+    const importers = Array.from({ length: 30 }, (_, i) =>
+      test(`src/modules/case-${String(i).padStart(2, "0")}.test.ts`, { importTargets: ["../src/core/store"] }),
+    );
+    const map = createRepoMap([
+      fixtureRecord("src/core/store.ts"),
+      test("test/unit/core/store.test.ts", { importTargets: ["../../../src/core/store"] }),
+      ...importers,
+    ]);
+
+    const result = findAffectedTests(map, { limit: 3, target: "src/core/store.ts" });
+
+    expect(result.tests[0]).toBe("test/unit/core/store.test.ts");
+    expect(result.reasons?.["test/unit/core/store.test.ts"]).toBe("convention");
+  });
+
+  it("returns at most five transitive tests", () => {
+    const users = Array.from({ length: 8 }, (_, i) => fixtureRecord(`src/u${i}.ts`, { importTargets: ["./a"] }));
+    const tests = users.map((user, i) =>
+      test(`test/u${i}.test.ts`, { importTargets: [`../${user.path.replace(/\.ts$/u, "")}`] }),
+    );
+    const map = createRepoMap([fixtureRecord("src/a.ts"), ...users, ...tests]);
+
+    const result = findAffectedTests(map, { limit: 20, target: "src/a.ts" });
+
+    expect(result.tests.length).toBe(5);
+    expect(Object.values(result.reasons ?? {}).every((reason) => reason === "transitive")).toBe(true);
+  });
+
+  it("ignores a symbol shared by more than four declaring files", () => {
+    const common = Array.from({ length: 5 }, (_, i) => fixtureRecord(`src/c${i}.ts`, { identifiers: ["run"] }));
+    const map = createRepoMap([...common, test("test/noise.test.ts", { identifiers: ["run"] })]);
+
+    expect(findAffectedTests(map, { limit: 20, target: "src/c0.ts" }).tests).toEqual([]);
+  });
+
+  it("pairs C# and PHP classes with their tests in monorepo layouts", () => {
+    const map = createRepoMap([
+      fixtureRecord("frt/src/App/PayAppService.cs"),
+      test("frt/test/App.Tests/PayAppServiceTests.cs"),
+      fixtureRecord("application/models/FooModel.php"),
+      test("tests/models/FooModelTest.php"),
+    ]);
+
+    expect(findAffectedTests(map, { limit: 5, target: "frt/src/App/PayAppService.cs" }).tests).toEqual([
+      "frt/test/App.Tests/PayAppServiceTests.cs",
+    ]);
+    expect(findAffectedTests(map, { limit: 5, target: "application/models/FooModel.php" }).tests).toEqual([
+      "tests/models/FooModelTest.php",
+    ]);
+  });
+
+  it("keeps the direct unit test in the top five of a refreshed TypeScript project", async () => {
+    const root = await temporaryRepository();
+    const importers = Object.fromEntries(
+      Array.from({ length: 12 }, (_, i) => [
+        `test/integration/case-${String(i).padStart(2, "0")}.test.ts`,
+        'import { fetchProviders } from "./api";\nfetchProviders();\n',
+      ]),
+    );
+    await writeFixtureFiles(root, {
+      ...typeScriptFiles,
+      ...importers,
+      "src/modules/api.test.ts": 'import { fetchProviders } from "./api";\nfetchProviders();\n',
+    });
+    const { map } = await refreshRepoMap({ root });
+
+    const result = findAffectedTests(map, { limit: 5, target: "src/modules/api.ts" });
+
+    expect(result.tests).toContain("src/modules/api.test.ts");
   });
 });

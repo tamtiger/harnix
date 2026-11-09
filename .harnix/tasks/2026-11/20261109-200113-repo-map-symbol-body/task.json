@@ -1,0 +1,183 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-200113-repo-map-symbol-body",
+  "epicId": "20261109-194501-repo-map-insights",
+  "title": "Thêm repo-map --outline --symbol --body để đọc thân symbol",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Cho agent đọc đúng thân một symbol (có giới hạn dòng) thay vì lặp lại sed -n trên các file lớn.",
+  "nonGoals": [
+    "Không thêm công cụ sửa symbol (replace, insert).",
+    "Không đọc file ngoài workspace hay theo symlink thoát root."
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix repo-map --outline <path> --symbol <name> --body trả, với mỗi symbol khớp, startLine, endLine và các dòng nguồn từ startLine đến endLine; tổng số dòng nguồn bị chặn ở 200 kèm trường truncated; --limit vẫn đếm số symbol (không đếm dòng); tên trùng nhiều symbol được trả theo thứ tự xuất hiện trong phạm vi tổng 200 dòng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Dòng nguồn trả về bị che toàn dòng thành [redacted] (giữ nguyên số dòng) khi khớp bộ mẫu secret mạnh hơn bộ lọc outline: khóa kiểu 'password' => '...', JSON \"password\": \"...\", gán chỉ mục mảng như $db['default']['password'] = '...', chuỗi kết nối có mật khẩu, Bearer token và khối private key; test riêng cho từng dạng (bộ lọc hiện có bỏ sót 3 trong 5 dạng này).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "--body bị từ chối khi đường dẫn bị .gitignore hoặc .harnixignore loại, hoặc là file cấu hình nhạy cảm (.env*, appsettings.secrets.json, application/config/database.php); đường dẫn được xác thực an toàn như --outline (chống traversal, symlink thoát root); --body không kèm --symbol bị từ chối bằng lỗi có hint nêu lệnh đúng; không đổi schema cache v1.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focused-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "PRD, README, skill liên quan, CHANGELOG và test hợp đồng CLI được đồng bộ cho cờ --body; phiên bản nâng lên 2.31.0-dev.4 bằng pnpm version:sync; pnpm run test:gates xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/cli-helpers.ts",
+    "src/cli-workflow-commands.ts",
+    "src/commands/repo-map-internal.ts",
+    "src/core/repo-map/outline-body.ts",
+    "src/core/repo-map/outline.ts",
+    "src/core/repo-map/service.ts",
+    "src/core/repo-map/types.ts",
+    "test/unit/cli-helpers.test.ts",
+    "test/unit/core/repo-map/outline-body.test.ts",
+    "test/unit/core/repo-map/outline.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focused",
+      "description": "Test đơn vị và tích hợp của --body",
+      "command": "pnpm exec vitest run repo-map",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/**",
+        "test/integration/commands/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Test hợp đồng CLI, tài liệu và kiến trúc",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T22:51:18.241+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cb2f4f8b31aee7bf43e582b31f61ebf159677c91c87360944e03204a3499fbdd"
+    },
+    {
+      "id": "ev-chk-focused-1",
+      "checkId": "chk-focused",
+      "recordedAt": "2026-11-09T22:51:26.705+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run repo-map — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7b9dfe28a74c49c293b23873cd812117d45eba8629989c407da1e52ceb25c4be"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T22:51:35.444+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7104b4a084ae9bb38ebc1c04541ab9ef75c4ca8e6a27f87b7623657ed8759874"
+    }
+  ],
+  "createdAt": "2026-11-09T20:01:10.196+07:00",
+  "updatedAt": "2026-11-09T22:51:44.130+07:00",
+  "decisions": [
+    {
+      "id": "dec-evidence-body",
+      "text": "Đọc thân symbol có giới hạn là tính năng giảm token có bằng chứng nhất.",
+      "rationale": "Repo PHP thật (49 session) có 2.242 lệnh sed -n, trung vị 36 dòng, p90 91 dòng; 168 trên 432 file bị đọc lại từ 4 lần trở lên, riêng một file model bị đọc hơn 90 lần. Repo Python có trung vị 130 dòng."
+    },
+    {
+      "id": "dec-body-module",
+      "text": "Phần --body nằm trong module riêng outline-body.ts.",
+      "rationale": "outline.ts hiện 295 trên 300 dòng code; bộ lọc secret hiện có (outline.ts) chỉ dùng để bỏ dòng khỏi việc dò khai báo, chưa từng che dòng nguồn nên không dùng lại được cho --body."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "risk-outline-size",
+      "severity": "low",
+      "text": "outline.ts đã gần giới hạn 300 dòng code; phần --body cần module riêng."
+    },
+    {
+      "id": "risk-redaction-overreach",
+      "text": "Bộ che secret ưu tiên che thừa nên có thể che nhầm dòng chỉ trông giống credential (ví dụ password = request.password); chấp nhận vì thân đi thẳng vào ngữ cảnh agent.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-09T22:51:44.130+07:00"
+}

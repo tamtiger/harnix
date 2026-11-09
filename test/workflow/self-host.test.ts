@@ -34,7 +34,7 @@ describe("repository self-host state", () => {
 
   it("should_load_the_committed_repository_map_with_the_current_canonical_reader", async () => {
     await expect(readRepoMap(process.cwd())).resolves.toMatchObject({
-      extractorVersion: 1,
+      extractorVersion: 2,
       generator: "harnix",
       schemaVersion: 1,
     });

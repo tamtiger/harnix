@@ -24,6 +24,7 @@ const ignoredDirs = new Set(
   ),
 );
 import { secretPath } from "./inventory.js";
+import { attachSymbolBodies } from "./outline-body.js";
 const secretValue = /(?:api[_-]?key|secret|token|password)\s*[=:]\s*[^\s,]{8,}/iu;
 const reservedMethodNames = new Set("if,for,while,switch,catch,return,sizeof,typeof,new".split(","));
 const topContainerRe =
@@ -50,9 +51,11 @@ export async function createRepoMapOutline(
     const raw = await readFile(candidate);
     if (raw.subarray(0, 8_192).includes(0)) return makeResult("skipped", options);
     const ext = extname(options.target).slice(1).toLowerCase();
-    const all = filterSymbols(extractFileSymbols(raw.toString("utf8"), ext), options.symbol);
-    const symbols = all.slice(0, options.limit);
-    return makeResult("ready", options, symbols, all.length > symbols.length, languageByExtension[ext]);
+    const text = raw.toString("utf8");
+    const all = filterSymbols(extractFileSymbols(text, ext), options.symbol);
+    const listed = all.slice(0, options.limit);
+    const symbols = options.body === true ? attachSymbolBodies(text, listed) : listed;
+    return makeResult("ready", options, symbols, all.length > listed.length, languageByExtension[ext]);
   } catch (error: unknown) {
     const isMissing = typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
     return makeResult(isMissing ? "not-found" : "skipped", options);

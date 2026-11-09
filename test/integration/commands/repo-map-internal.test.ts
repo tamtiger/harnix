@@ -163,7 +163,7 @@ describe.sequential("repository-map operations", () => {
 
     // TS test impact
     await expect(runCli(["node", "harnix", "repo-map", "--tests", "src/math/calc.ts"])).resolves.toBe(0);
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
       generator: "harnix",
       schemaVersion: 1,
       scope: "project",
@@ -177,7 +177,7 @@ describe.sequential("repository-map operations", () => {
     // Python test impact
     stdout.mockClear();
     await expect(runCli(["node", "harnix", "repo-map", "--tests", "pkg/billing/service.py"])).resolves.toBe(0);
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
       generator: "harnix",
       schemaVersion: 1,
       scope: "project",
@@ -191,7 +191,7 @@ describe.sequential("repository-map operations", () => {
     // Go test impact
     stdout.mockClear();
     await expect(runCli(["node", "harnix", "repo-map", "--tests", "pkg/storage/store.go"])).resolves.toBe(0);
-    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toEqual({
+    expect(JSON.parse(stdout.mock.calls.map((call) => String(call[0])).join(""))).toMatchObject({
       generator: "harnix",
       schemaVersion: 1,
       scope: "project",

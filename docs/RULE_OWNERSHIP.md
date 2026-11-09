@@ -12,4 +12,5 @@ Mỗi nhóm quy tắc có đúng một nơi canonical; các nơi khác chỉ tr�
 | Epic và gom member | `harnix skill harnix-plan --reference epic` | `harnix skill harnix-plan --reference epic-git`, `AGENTS.md` |
 | Secret | `src/core/workflow/secret-scan.ts` (quét file đã đổi, không bao giờ in giá trị, waiver `harnix-secret-waiver`) | `src/templates/harnix/workflow.md` (Agent transport, `secretAdvisory`), `AGENTS.md` (Project learning loại câu giống credential) |
 | Commit và branch | `src/templates/harnix/activation.ts` (quy tắc Preserve) | `AGENTS.md`, `src/templates/harnix/workflow.md` (Commit discipline), `harnix skill harnix-implement --reference commit-hygiene` |
+| Điều hướng mã bằng repo-map | `src/skills/harnix-implement/SKILL.md` (mục Review the plan) | `src/templates/harnix/activation.ts` (quy tắc Token economy), `src/skills/harnix-plan/SKILL.md`, `src/skills/harnix-debug/SKILL.md`, `src/core/context/effective-context.ts` (dòng Tip của hook lean) |
 | Trần token | `src/templates/harnix/token-budgets.json` | `src/templates/harnix/token-budgets.ts`, `scripts/measure-tokens.mjs`, `test/workflow/instruction-budget.test.ts`, `AGENTS.md` |

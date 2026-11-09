@@ -2,7 +2,7 @@
 name: harnix-debug
 description: Use when a Harnix implementation or verification has a reproducible bug, failing test, unexpected behavior, loop or repeated unsuccessful fix.
 metadata:
-  version: "2.30.1"
+  version: "2.31.1"
 ---
 
 # Debug with evidence
@@ -23,7 +23,7 @@ A check that failed twice in a row is a circuit breaker, not a retry prompt: `--
 
 ## Find the root cause
 
-Trace data and control backward from the symptom; `harnix repo-map --impact <path>` shows import chains; the matching `.harnix/spec/guides/` set the conventions a fix must obey. Inspect what enters and leaves each boundary, recent changes, configuration, path normalization, dependency state and error propagation. One material unknown about behavior or a dependency: run one bounded `harnix skill harnix-research` pass (task-scoped) and record the conclusion.
+Trace data and control backward from the symptom; `harnix repo-map --impact <path>` shows import chains, `--refs <symbol>` lists call sites and `--outline <path> --symbol <name> --body` reads one symbol, instead of `grep -r` and repeated `sed -n`; the matching `.harnix/spec/guides/` set the conventions a fix must obey. Inspect what enters and leaves each boundary, recent changes, configuration, path normalization, dependency state and error propagation. One material unknown about behavior or a dependency: run one bounded `harnix skill harnix-research` pass (task-scoped) and record the conclusion.
 
 State one hypothesis: **X is the root cause** because **Y evidence**, and **Z minimal check** will separate it from the alternatives. Run only that check, one variable at a time. A failed hypothesis is evidence; record it and form the next instead of stacking fixes.
 

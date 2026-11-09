@@ -3,6 +3,7 @@ import MiniSearch from "minisearch";
 import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath } from "src/utils/paths.js";
 import { buildRepoMapGraph } from "./graph.js";
+import { normalizeTerm, terms } from "./search-terms.js";
 import type { RepoMapQueryResult, RepoMapQuerySignals, RepoMapRecordV1, RepoMapV1 } from "./types.js";
 
 interface SearchDocument {
@@ -47,14 +48,17 @@ export function searchRepoMap(
   const languageTerms = new Set(
     [...(signals.languages ?? []), ...(signals.technologies ?? [])].map(normalizeTerm).filter(Boolean),
   );
-  const lexical = index.search(normalizedQuery, { fuzzy: 0.2, prefix: true }).slice(0, MAX_LEXICAL_SEEDS);
+  // An exact word match beats a prefix or fuzzy one: those only answer a query nothing matches exactly.
+  const exact = index.search(normalizedQuery, { fuzzy: false, prefix: false });
+  const lexical = (exact.length > 0 ? exact : index.search(normalizedQuery, { fuzzy: 0.2, prefix: true })).slice(
+    0,
+    MAX_LEXICAL_SEEDS,
+  );
 
   const lexicalBase = new Map(lexical.map((candidate) => [String(candidate.id), Math.round(candidate.score * 10)]));
   const graph = buildRepoMapGraph(map.records);
-  const seedPaths = sortedUnique([...lexicalBase.keys(), ...[...relevant].filter((path) => records.has(path))]).slice(
-    0,
-    MAX_EXPANDED_CANDIDATES,
-  );
+  // The task's own files are never seeds: only what the query matches can start a result.
+  const seedPaths = sortedUnique([...lexicalBase.keys()]).slice(0, MAX_EXPANDED_CANDIDATES);
   const { directDependencies, directImporters, depthTwoDirections } = computeGraphSignals(seedPaths, graph);
   const candidates = collectCandidates(seedPaths, directDependencies, directImporters, depthTwoDirections, records);
 
@@ -154,23 +158,26 @@ function rank(
 ): RepoMapQueryResult {
   let score = base;
   const reasons: string[] = lexicalMatch ? ["lexical match"] : [];
-  if (relevant.has(record.path)) {
-    score += 500;
-    reasons.push("task reference");
-  }
-  const recordTerms = normalizeTerm(terms(record));
-  const matchedTaskTerms = [...taskTerms].filter((term) => recordTerms.includes(term));
-  if (matchedTaskTerms.length > 0) {
-    score += matchedTaskTerms.length * 100;
-    reasons.push("task terms");
-  }
-  if (packagePath !== undefined && record.packagePath === packagePath) {
-    score += 50;
-    reasons.push("same package");
-  }
-  if (record.language !== undefined && languageTerms.has(normalizeTerm(record.language))) {
-    score += 25;
-    reasons.push("profile language");
+  // What the active task knows only matters for files the query itself found.
+  if (lexicalMatch) {
+    if (relevant.has(record.path)) {
+      score += 500;
+      reasons.push("task reference");
+    }
+    const recordTerms = normalizeTerm(terms(record));
+    const matchedTaskTerms = [...taskTerms].filter((term) => recordTerms.includes(term));
+    if (matchedTaskTerms.length > 0) {
+      score += matchedTaskTerms.length * 100;
+      reasons.push("task terms");
+    }
+    if (packagePath !== undefined && record.packagePath === packagePath) {
+      score += 50;
+      reasons.push("same package");
+    }
+    if (record.language !== undefined && languageTerms.has(normalizeTerm(record.language))) {
+      score += 25;
+      reasons.push("profile language");
+    }
   }
   if (record.kind === "manifest" || record.kind === "config") {
     score += 10;
@@ -224,23 +231,6 @@ function applyGraphSignals(result: RepoMapQueryResult, path: string, graph: Grap
 
 function compareResults(left: RepoMapQueryResult, right: RepoMapQueryResult): number {
   return right.score - left.score || compareCodeUnits(left.path, right.path);
-}
-function terms(record: RepoMapRecordV1): string {
-  return [
-    record.path,
-    record.packagePath,
-    record.language ?? "",
-    record.kind,
-    ...record.identifiers,
-    ...record.headings,
-    ...record.importTargets,
-  ].join(" ");
-}
-function normalizeTerm(value: string): string {
-  return value
-    .toLowerCase()
-    .replaceAll(/[^\p{L}\p{N}_-]+/gu, " ")
-    .trim();
 }
 function sortedUnique(values: readonly string[]): string[] {
   return [...new Set(values)].sort(compareCodeUnits);

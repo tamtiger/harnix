@@ -26,7 +26,7 @@ describe("repo map store validation", () => {
     expect(validateRepoMap(map)).toMatchObject({
       generator: "harnix",
       schemaVersion: 1,
-      extractorVersion: 1,
+      extractorVersion: 2,
     });
   });
 
@@ -49,15 +49,12 @@ describe("repo map store validation", () => {
     );
   });
 
-  it("accepts up to 48 identifiers and rejects more than 48", () => {
-    const fortyEightIds = Array.from({ length: 48 }, (_, i) => `id_${String(i).padStart(2, "0")}`);
-    const valid48 = { ...validRecord, identifiers: fortyEightIds };
-    expect(() => createRepoMap([valid48])).not.toThrow();
-
-    const fortyNineIds = Array.from({ length: 49 }, (_, i) => `id_${String(i).padStart(2, "0")}`);
-    const invalid49 = { ...validRecord, identifiers: fortyNineIds };
-    expect(() => createRepoMap([invalid49])).toThrow(
-      "Invalid repo map identifiers: must be an array of at most 48 strings (max 96 chars each).",
+  it("accepts up to 128 identifiers and rejects more than 128", () => {
+    const names = (count: number): string[] =>
+      Array.from({ length: count }, (_, i) => `id_${String(i).padStart(3, "0")}`);
+    expect(() => createRepoMap([{ ...validRecord, identifiers: names(128) }])).not.toThrow();
+    expect(() => createRepoMap([{ ...validRecord, identifiers: names(129) }])).toThrow(
+      "Invalid repo map identifiers: must be an array of at most 128 strings (max 96 chars each).",
     );
   });
 });

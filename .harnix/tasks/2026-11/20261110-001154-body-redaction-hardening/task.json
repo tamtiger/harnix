@@ -1,0 +1,97 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261110-001154-body-redaction-hardening",
+  "title": "Tăng cường che secret của repo-map --body",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Che thêm các dạng secret còn lọt trong thân symbol của --body: YAML không dấu nháy, giá trị trong dấu nháy ngược, và token theo tiền tố nhà cung cấp.",
+  "nonGoals": [],
+  "epicId": "20261109-194501-repo-map-insights",
+  "followUpOf": "20261109-200113-repo-map-symbol-body",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Các dòng password: hunter2xx, const k = \"AKIAIOSFODNN7EXAMPLE\", token ghp_..., và \"token\" : `abcdefghij` bị che thành [redacted] trong thân symbol của --body, trong khi dòng kiểu khai báo kiểu như password: string vẫn được giữ nguyên; có test cho từng dạng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-1-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-1",
+      "description": "Kiểm chứng: Tăng cường che secret của repo-map --body",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run repo-map",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/core/repo-map/**",
+        "test/unit/core/repo-map/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-check-1-1",
+      "checkId": "check-1",
+      "recordedAt": "2026-11-10T00:14:37.439+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run repo-map — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ba065efb181e76531a054eaef8fc09593d1ed5a5eb4bc0ea2917ba07cb6478dc"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T00:16:02.688+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "75d1afc4a029240bf4a84f040598709bfa949e308f4b331a01d2b7c765b51104"
+    }
+  ],
+  "relevantPaths": [
+    "CHANGELOG.md",
+    "README.md",
+    "docs/HARNESS_RESEARCH.md",
+    "docs/HARNIX_PRD.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "src/cli-helpers.ts",
+    "src/cli-workflow-commands.ts",
+    "src/commands/repo-map-internal.ts",
+    "src/core/repo-map/outline-body.ts",
+    "src/core/repo-map/outline.ts",
+    "src/core/repo-map/service.ts",
+    "src/core/repo-map/types.ts",
+    "test/unit/cli-helpers.test.ts",
+    "test/unit/core/repo-map/outline-body.test.ts",
+    "test/unit/core/repo-map/outline.test.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-10T00:11:54.494+07:00",
+  "updatedAt": "2026-11-10T00:16:15.694+07:00",
+  "completedAt": "2026-11-10T00:16:15.694+07:00"
+}
