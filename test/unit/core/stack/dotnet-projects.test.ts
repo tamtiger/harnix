@@ -114,6 +114,28 @@ describe("inspectDotnetDirectory", () => {
     });
   });
 
+  it("finds a test project below the solution directory that the solution does not list", async () => {
+    const root = await createFixture();
+    await writeFixture(root, "Gateway.sln", solution("src\\Domain\\Domain.csproj"));
+    await writeFixture(root, "src/Domain/Domain.csproj", libraryProject);
+    await writeFixture(root, "test/Gateway.Tests/Gateway.Tests.csproj", testProject);
+
+    await expect(inspectDotnetDirectory(root, ["Gateway.sln"])).resolves.toEqual({
+      hasTests: true,
+      testCommand: "dotnet test Gateway.sln",
+    });
+  });
+
+  it("does not look inside build output or dependency folders for a nested test project", async () => {
+    const root = await createFixture();
+    await writeFixture(root, "Gateway.sln", solution("src\\Domain\\Domain.csproj"));
+    await writeFixture(root, "src/Domain/Domain.csproj", libraryProject);
+    await writeFixture(root, "node_modules/pkg/Some.Tests.csproj", testProject);
+    await writeFixture(root, "bin/Debug/Other.Tests.csproj", testProject);
+
+    await expect(inspectDotnetDirectory(root, ["Gateway.sln"])).resolves.toMatchObject({ hasTests: false });
+  });
+
   it("reports no tests for a solution whose projects are all libraries", async () => {
     const root = await createFixture();
     await writeFixture(root, "Demo.sln", solution("src\\Domain\\Domain.csproj"));

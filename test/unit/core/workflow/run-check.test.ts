@@ -171,12 +171,10 @@ describe("workflow --run-check", () => {
   });
 
   async function declareCwd(root: string, cwd: string): Promise<void> {
-    const task = await implementingTaskV3(root);
-    const { saveWorkflow } = await import("src/core/workflow/save.js");
-    await saveWorkflow(root, {
-      task: { ...task, checkpoint: "replan", validationPlan: [{ ...task.validationPlan[0]!, cwd }] },
-      contractRevision: { reason: "Configure cwd for multi-repo check execution" },
-    });
+    await implementingTaskV3(root);
+    const { setCheckWorkflow } = await import("src/core/workflow/plan-edit.js");
+    // The cwd of a check that never passed is run configuration: applied directly, with no reason and no replan.
+    await setCheckWorkflow(root, { id: "check", cwd });
   }
 
   it("runs a check in its declared cwd and accepts an identical explicit cwd", async () => {

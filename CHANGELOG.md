@@ -4,6 +4,20 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.29.0] - 2026-11-09
+
+### Changed
+
+- Lỗi Illegal task transition nêu chuỗi lệnh --transition cần chạy từ trạng thái hiện tại (hoặc hướng dẫn replan khi đích nằm phía sau), thay cho gợi ý cố định; regression test cho --set-check và --replace-check ở verifying
+- Chẩn đoán gate: secretAdvisory chỉ quét file đã đổi so với HEAD (ngoài Git thì quét như trước kèm ghi chú), status --checks và --explain có baseline { accepted, reason? } dùng chung hàm đánh giá với finish, lỗi input glob không match file nêu thư mục cha còn tồn tại và glob thay thế
+- workflow --init, --set-check và --with-check gom mọi flag thiếu hoặc sai vào một lỗi kèm lệnh mẫu (title không ASCII nêu bản bỏ dấu làm điểm xuất phát cho --slug), --init --cwd lan sang mọi --with-check không khai cwd và in notice liệt kê check đã tạo, cảnh báo khi trùng check suite tự sinh
+- Suite gate trong monorepo .NET: nhận dotnet test <sln> và dotnet test trần kèm --cwd (đường dẫn .sln được validate an toàn), verify-plan nhận test project dưới thư mục solution, status và --transition --dry-run cảnh báo sớm khi thiếu suite check hợp lệ; quy ước thời điểm review (task đơn lẻ sau implement, epic sau khi implement hết)
+
+### Added
+
+- Thêm workflow --remove-check <id> gỡ check chưa có evidence (khi planning tự do, sau đó cần --reason và replan có bảo vệ); --set-check chỉ đổi cwd hoặc description của check chưa có pass được áp dụng trực tiếp, không replan, circuit breaker tính lần thử mới
+- Một lệnh ghi evidence và đánh dấu criterion (--evidence ... --criterion <ids> --met, từ đúng pass vừa ghi, lỗi thì không ghi gì), --set-title và --set-goal nhận --reason tùy chọn, --schema có constraints.reason nêu quy tắc --reason của từng action
+
 ## [2.28.0] - 2026-11-04
 
 ### Changed

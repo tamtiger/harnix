@@ -89,6 +89,18 @@ describe.sequential("hidden workflow flag transports", () => {
     expect(JSON.parse(result.out)).toMatchObject({ status: "verifying", checkpoint: "verifying" });
   });
 
+  it("answers an illegal transition with one hint computed from the current state", async () => {
+    const root = await fixture();
+    await implementingTaskV3(root);
+    process.chdir(root);
+
+    const result = await run(["--transition", "planning/planning"]);
+
+    expect(result.code).not.toBe(0);
+    expect(result.err).toContain("No step leads back to planning");
+    expect(result.err).not.toContain("--dry-run trước");
+  });
+
   it("migrates the active legacy task with --migrate and stdin overrides", async () => {
     const root = await fixture();
     await initializeUtcProject(root);

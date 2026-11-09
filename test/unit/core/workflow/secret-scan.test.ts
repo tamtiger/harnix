@@ -208,3 +208,47 @@ describe("scanTaskSecrets on hostile text", () => {
     expect(advisory?.findings).toEqual([{ path: "src/b.txt", rule: "connection-string-password" }]);
   });
 });
+
+describe("scanTaskSecrets scoped to the files changed since HEAD", () => {
+  const status = (...lines: string[]) => lines.join("\0") + "\0";
+  const modified = (path: string) => `1 .M N... 100644 100644 100644 aaaa bbbb ${path}`;
+  const runner = (output: string) => async (_cwd: string, args: readonly string[]) =>
+    args.includes("rev-parse") ? "" : output;
+
+  it("skips a file with a secret that the task never changed", async () => {
+    const root = await project({ "src/old.txt": `password: "${PASSWORD}"`, "src/new.txt": `password: "${PASSWORD}"` });
+
+    const advisory = await scanTaskSecrets(root, task(), runner(status(modified("src/new.txt"))));
+
+    expect(advisory?.findings.map((finding) => finding.path)).toEqual(["src/new.txt"]);
+    expect(advisory?.hint).not.toContain("could not be read");
+  });
+
+  it("includes untracked files and reports nothing when nothing changed", async () => {
+    const root = await project({
+      "src/old.txt": `password: "${PASSWORD}"`,
+      "src/fresh.txt": `password: "${PASSWORD}"`,
+    });
+
+    const untracked = await scanTaskSecrets(root, task(), runner(status("? src/fresh.txt")));
+    const unchanged = await scanTaskSecrets(root, task(), runner(""));
+
+    expect(untracked?.findings.map((finding) => finding.path)).toEqual(["src/fresh.txt"]);
+    expect(unchanged).toBeUndefined();
+  });
+
+  it("falls back to every file with a note in the hint when Git cannot answer", async () => {
+    const root = await project({ "src/old.txt": `password: "${PASSWORD}"` });
+
+    const advisory = await scanTaskSecrets(root, task(), async () => Promise.reject(new Error("not a repository")));
+
+    expect(advisory?.findings.map((finding) => finding.path)).toEqual(["src/old.txt"]);
+    expect(advisory?.hint).toContain("Git changes could not be read");
+  });
+
+  it("keeps the waiver comment working inside a changed file", async () => {
+    const root = await project({ "src/new.txt": `password: "${PASSWORD}" // harnix-ignore-secret` });
+
+    expect(await scanTaskSecrets(root, task(), runner(status(modified("src/new.txt"))))).toBeUndefined();
+  });
+});

@@ -27,6 +27,8 @@ const initOwner = (name: string, pick: (flags: WorkflowFlags) => string | undefi
   actions: ["init"],
 });
 
+import { REASON_RULES } from "src/core/workflow/reason-rules.js";
+
 const EDIT_ACTIONS = [
   "inspect",
   "setCheck",
@@ -35,6 +37,7 @@ const EDIT_ACTIONS = [
   "addDecision",
   "addRisk",
   "setCriterion",
+  "removeCheck",
   "removeDecision",
   "removeCriterion",
   "removeRisk",
@@ -46,7 +49,7 @@ const taskOwner: FlagOwner = {
   name: "--task",
   isSet: (f) => f.task !== undefined,
   actions: [...EDIT_ACTIONS, "transition", "cancel"],
-  hint: "workflow --inspect, --transition with --dry-run, --set-check, --add-criterion, --set-criterion, --set-paths, --set-title, --set-goal, --add-decision, --add-risk, --remove-decision, --remove-criterion, --remove-risk, --batch or --cancel (the other state changes, evidence and finish act only on the active task)",
+  hint: "workflow --inspect, --transition with --dry-run, --set-check, --remove-check, --add-criterion, --set-criterion, --set-paths, --set-title, --set-goal, --add-decision, --add-risk, --remove-decision, --remove-criterion, --remove-risk, --batch or --cancel (the other state changes, evidence and finish act only on the active task)",
 };
 
 /** Flags that only make sense with specific actions; anything else is rejected before any state is read. */
@@ -80,7 +83,7 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   { name: "--exit-code", isSet: (f) => f.exitCode !== undefined, actions: ["evidence"] },
   { name: "--artifact", isSet: (f) => listed(f.artifact), actions: ["evidence"] },
   { name: "--digest", isSet: (f) => f.digest !== undefined, actions: ["evidence"] },
-  { name: "--met", isSet: (f) => f.met === true, actions: ["criterion"] },
+  { name: "--met", isSet: (f) => f.met === true, actions: ["criterion", "evidence"] },
   {
     name: "--evidence-ids",
     isSet: (f) => f.evidenceIds !== undefined,
@@ -119,7 +122,7 @@ export const FLAG_OWNERS: readonly FlagOwner[] = [
   {
     name: "--reason",
     isSet: (f) => f.reason !== undefined,
-    actions: ["setCheck", "addCriterion", "setCriterion", "replaceCheck", "resetBreaker", "cancel", "transition"],
+    actions: Object.keys(REASON_RULES),
   },
   {
     name: "--note",

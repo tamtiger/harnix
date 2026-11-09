@@ -47,6 +47,19 @@ describe("parseCheckSpec", () => {
     expect(() => parseCheckSpec(parts.join(";"))).toThrow(new RegExp(`missing key ${key}`, "u"));
   });
 
+  it("reports every missing key and a wrong scope in one message with a corrected spec", () => {
+    let message = "";
+    try {
+      parseCheckSpec("id=c;scope=project");
+    } catch (error) {
+      message = (error as Error).message;
+    }
+
+    expect(message).toContain("--with-check has 4 problems");
+    expect(message).toMatch(/missing key command[^]*missing key criteria[^]*missing key input[^]*focused or full/u);
+    expect(message).toContain('--with-check "id=');
+  });
+
   it("rejects an empty spec, an unknown key, a repeated key, a bad scope and a part without a value", () => {
     expect(() => parseCheckSpec("  ")).toThrow(/--with-check/u);
     expect(() => parseCheckSpec("id=c;command=x;criteria=ac-1;input=a;color=red")).toThrow(/unknown key color/u);

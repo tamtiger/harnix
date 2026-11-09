@@ -5,6 +5,9 @@ import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertValidCheckInputs, validateCheckInputs } from "./check-input-validator.js";
 import { notePlanMissingCriteria } from "./plan-criterion-notice.js";
+import { checkFlagIssues, setCheckExample } from "./check-flag-issues.js";
+import { obligationsChanged } from "./obligations.js";
+import { flagIssueError } from "./flag-issues.js";
 import { saveWorkflow } from "./save.js";
 import { resolveEditableTask } from "./target-task.js";
 import { currentInstant } from "./support.js";
@@ -79,6 +82,9 @@ export async function saveObligationEdit(
     return task;
   }
   const updatedAt = laterTimestamp(task.updatedAt, now);
+  // Only the cwd or description of checks that never passed differ: not a contract change, so a plain save.
+  if (task.status !== "planning" && !obligationsChanged(task, edited))
+    return (await saveWorkflow(root, { task: { ...edited, updatedAt } })) as TaskRecordV3;
   const reason = revisionReason(options);
   const revise = async (contractReason: string): Promise<TaskRecordV3> => {
     const revised = (await saveWorkflow(root, {
@@ -124,12 +130,13 @@ export function resolveDescription(existing: ValidationCheckV3 | undefined, edit
 }
 
 function mergeCheck(existing: ValidationCheckV3 | undefined, edit: CheckEdit): ValidationCheckV3 {
+  const issues = checkFlagIssues(existing, edit);
+  if (issues.length > 0) throw flagIssueError("workflow --set-check", issues, setCheckExample(edit.id));
   const scope = resolveScope(existing, edit);
   const description = resolveDescription(existing, edit);
   const required = edit.required ?? existing?.required ?? true;
   const criterionIds = sortedUnique(edit.criteria ?? existing?.criterionIds ?? []);
   const inputs = sortedUnique(edit.inputs ?? existing?.inputs ?? []);
-  assertRequiredCheckConstraints(edit.id, required, criterionIds, inputs);
   const command = edit.command ?? existing?.command;
   const cwd = edit.cwd ?? existing?.cwd;
   return {
@@ -142,17 +149,6 @@ function mergeCheck(existing: ValidationCheckV3 | undefined, edit: CheckEdit): V
     criterionIds,
     inputs,
   };
-}
-
-function assertRequiredCheckConstraints(
-  id: string,
-  required: boolean,
-  criterionIds: readonly string[],
-  inputs: readonly string[],
-): void {
-  if (required && (criterionIds.length === 0 || inputs.length === 0)) {
-    throw new Error(`Check ${id} is required: --criteria and at least one --input are needed.`);
-  }
 }
 
 export async function setCheckWorkflow(

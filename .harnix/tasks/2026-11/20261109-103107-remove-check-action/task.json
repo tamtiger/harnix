@@ -1,0 +1,206 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-103107-remove-check-action",
+  "title": "Vòng đời check: thêm --remove-check và sửa cwd check chưa pass không replan",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Dọn check thừa bằng --remove-check (chưa có evidence) và cho đổi cwd của check chưa pass trực tiếp bằng --set-check mà không nhảy về replan.",
+  "nonGoals": [],
+  "epicId": "20261105-145432-workflow-friction-v2",
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix workflow --remove-check <id> xóa một check chưa có evidence nào; bị từ chối kèm hint (replace-check) nếu check đã có evidence hoặc nếu việc xóa làm một criterion không còn required check phủ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cờ được đăng ký đủ theo checklist thêm action workflow (bảng actions, flag-owners, handler, --schema, brief, cli-contract) và --task áp dụng được như các lệnh remove khác.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Tài liệu và snapshot đồng bộ: docs/HARNIX_WORKFLOW.md, src/templates/harnix/workflow.md (chạy pnpm selfhost:sync), mô tả --schema và docs/HARNIX_PRD.md nếu bề mặt công khai đổi; behavior-snapshot.golden.json chỉ cập nhật cho đúng chuỗi mới; phiên bản bump 2.29.0-dev.N kèm CHANGELOG trước verifying.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "--set-check <id> --cwd <path> cho check không có evidence pass và chỉ đổi cwd (hoặc description) được áp dụng trực tiếp, không cần --replace-check, không đưa task về replan; đổi command, inputs hoặc criteria vẫn theo quy tắc cũ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Đổi cwd như vậy tính là lần thử mới của circuit breaker (không cần --reset-breaker), check đã pass vẫn bất biến, và lỗi từ chối còn lại nêu rõ khi nào cwd-only được phép.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2",
+        "ev-chk-gates-2"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Logic cwd-only đặt trong module riêng hoặc obligations.ts sao cho plan-edit.ts và obligations.ts không vượt 300 dòng code; lint max-lines và test kiến trúc vẫn xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2",
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/workflow/cli-contract.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test: cli-contract, architecture, docs, golden, instruction budget",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test:gates"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T11:37:30.806+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "29b40bf1c1ddb0d240b7b5c2758bdd986225ec3ab38c5c2de57b34dad283d480"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T11:37:38.888+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6495435d348385e2b0dc6a558e1380be67ec770107c367c4a6da0c946b6c991e"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-09T11:38:59.236+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "7bd2d06ab69e620893ca7dc81815f6a7ffa0af71b9932564833d652fa6cae380"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T11:40:58.754+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "71aeddc3f5a81bd641f6d7dd17270f083e072aea1e895f42ff827b9a42e5ac49"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T11:41:06.753+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "34056d76f57beb75bafc5131949a701a6870e874e02c342fe529891c0b1044a9"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-09T11:42:25.550+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "22f3392a8d7a991a5e49ee04e3ef9f2a009c0d5b47afad924205e86f35cb4215"
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-command.ts",
+    "src/commands/workflow-flag-owners.ts",
+    "src/commands/workflow-flags.ts",
+    "src/commands/workflow-handlers.ts",
+    "src/core/workflow/actions.ts",
+    "src/core/workflow/index.ts",
+    "src/core/workflow/obligations.ts",
+    "src/core/workflow/plan-edit.ts",
+    "src/core/workflow/plan-remove.ts",
+    "src/core/workflow/retry-guard.ts",
+    "src/core/workflow/schema.ts"
+  ],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-09T10:31:07.228+07:00",
+  "updatedAt": "2026-11-09T11:42:55.227+07:00",
+  "completedAt": "2026-11-09T11:42:55.227+07:00"
+}

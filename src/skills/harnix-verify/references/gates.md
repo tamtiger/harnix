@@ -4,7 +4,7 @@ Detail behind the Gates section of `.harnix/workflow.md`.
 
 - **Ready:** at least one criterion and one required check; every non-waived criterion is covered by a required check; a project-level suite check covering source and tests is required when the
   repository has tests (wildcard inputs, or a source tree plus a test tree such as `src/**` + `test/**` or `Foo.Api/**` + `Foo.Api.Tests/**`) whose `command` is the project test command from
-  `harnix verify-plan` (a command that runs only part of the tests, such as one test file, is rejected). A Full task has non-empty `prd.md` and `plan.md` with at least one `- [ ]` item and repeats
+  `harnix verify-plan` (a command that runs only part of the tests, such as one test file, is rejected; in a .NET repository `dotnet test <path/to.sln>` with a safe relative path, or a bare `dotnet test` with the `--cwd` of a solution or test project, also counts; `harnix status` and `--transition --dry-run` warn early when no valid suite check exists). A Full task has non-empty `prd.md` and `plan.md` with at least one `- [ ]` item and repeats
   the transition with `--reviewed` after the ready-review (`--dry-run` prints `reviewChecklist`). What entering `ready/ready` rejects (placeholders, criterion ids missing from `plan.md`, a criterion
   without a focused required check) and the review itself: `harnix skill harnix-plan --reference ready-review`. A task already at `ready/ready` is not re-checked. A task that changes the CLI, docs or
   test structure adds a focused check for the project's contract tests.

@@ -325,7 +325,7 @@ describe("initTaskWorkflow slug", () => {
     const root = await project();
 
     await expect(initTaskWorkflow(root, { title: "Chuẩn hóa ID" })).rejects.toThrow(
-      /--slug <english-kebab-case>[^]*Gợi ý:[^]*--slug task-sprawl-guard/u,
+      /--slug <english-kebab-case>[^]*chuan-hoa-id[^]*Gợi ý:[^]*--slug chuan-hoa-id/u,
     );
   });
 

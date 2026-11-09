@@ -3,6 +3,7 @@ import { unknownIdError } from "src/utils/suggest.js";
 import { laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
+import { assertMarkableBy, markMetBy } from "./evidence-criteria.js";
 import { syncPlanChecklistPass } from "./plan-sync.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
@@ -15,6 +16,8 @@ export interface EvidenceFlags {
   exitCode?: string | undefined;
   artifacts?: readonly string[] | undefined;
   digest?: string | undefined;
+  /** Criteria to mark met from this pass, in the same save (`--evidence --criterion <ids> --met`). */
+  markMet?: readonly string[] | undefined;
 }
 
 export interface AppendedEvidence {
@@ -90,6 +93,7 @@ export async function appendEvidenceFlagsWorkflow(
       flags.check ?? "",
       task.validationPlan.map((check) => check.id),
     );
+  if (flags.markMet !== undefined) assertMarkableBy(task, check, result, flags.markMet);
   const exitCode = parseExitCode(flags.exitCode, result !== "skipped" || check.command !== undefined);
   const inputDigest = await evidenceDigest(root, task, flags.check, result, flags.digest);
   const evidence: EvidenceV3 = {
@@ -103,7 +107,14 @@ export async function appendEvidenceFlagsWorkflow(
     ...(inputDigest === undefined ? {} : { inputDigest }),
   };
   const saved = await saveWorkflow(root, {
-    task: { ...task, evidence: [...task.evidence, evidence], updatedAt: laterTimestamp(task.updatedAt, now) },
+    task: {
+      ...task,
+      ...(flags.markMet === undefined
+        ? {}
+        : { acceptanceCriteria: markMetBy(task.acceptanceCriteria, flags.markMet, evidence.id) }),
+      evidence: [...task.evidence, evidence],
+      updatedAt: laterTimestamp(task.updatedAt, now),
+    },
   });
   if (result === "pass") {
     const harnixRoot = await resolveSafeHarnixPath(root);

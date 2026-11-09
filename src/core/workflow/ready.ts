@@ -7,7 +7,7 @@ import { assertSuiteGateReady } from "./suite-gate.js";
 import { globby } from "globby";
 import { buildGlobIgnores, targetedSegments } from "src/core/verification/transient-directories.js";
 
-function projectRootOf(harnixRoot: string): string {
+export function projectRootOf(harnixRoot: string): string {
   return basename(harnixRoot) === ".harnix" ? dirname(harnixRoot) : harnixRoot;
 }
 

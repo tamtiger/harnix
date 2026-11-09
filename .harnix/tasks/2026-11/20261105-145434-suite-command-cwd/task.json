@@ -1,0 +1,203 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261105-145434-suite-command-cwd",
+  "epicId": "20261105-145432-workflow-friction-v2",
+  "title": "Suite check chấp nhận dotnet test <sln> và gợi ý --cwd; cảnh báo sớm ở status",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Giải mâu thuẫn whitelist lệnh suite với cwd của run-check trong monorepo .NET nhiều solution, và báo thiếu suite check ngay từ status thay vì đợi finish. Tham chiếu payment-hub: frt-payment-gateway có sln nhưng test nằm ở test/ nên verify-plan báo hasTests=false và chỉ lộ lệnh dotnet test trần của dự án con.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Whitelist suite check chấp nhận dotnet test <đường dẫn .sln tương đối từ repo root> khi .sln tồn tại, và chấp nhận lệnh dotnet test trần khi check khai --cwd trùng thư mục của solution hoặc dự án test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Thông báo lỗi suite command nêu cả hai cách (đường dẫn .sln hoặc --cwd) và liệt kê cwd khả dĩ lấy từ verify-plan --recursive.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "verify-plan nhận ra solution có dự án test nằm trong thư mục con (như frt-payment-gateway/test/*) là hasTests=true với lệnh dotnet test <sln>.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "harnix status và workflow --transition --dry-run cảnh báo sớm khi task chưa có required suite check hợp lệ (lệnh sai hoặc chưa pass), để không phải đợi đến --finish.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Đường dẫn .sln trong lệnh suite được validate: chỉ tương đối từ repo root, chuẩn hóa POSIX, tồn tại, nằm trong repo; từ chối \"..\", đường dẫn tuyệt đối, symlink hoặc junction thoát ra ngoài và ký tự shell; có test cho từng trường hợp bị từ chối.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Logic nhận diện test project trong thư mục con đặt ở dotnet-projects.ts hoặc module mới để verify-plan.ts không vượt 300 dòng code; lint và test kiến trúc vẫn xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-gates-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-7",
+      "text": "Tài liệu và snapshot đồng bộ: docs/HARNIX_WORKFLOW.md, src/templates/harnix/workflow.md (chạy pnpm selfhost:sync), mô tả --schema và docs/HARNIX_PRD.md nếu bề mặt công khai đổi; behavior-snapshot.golden.json chỉ cập nhật cho đúng chuỗi mới; phiên bản bump 2.29.0-dev.N kèm CHANGELOG trước verifying.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-2",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/status.ts",
+    "src/core/stack/dotnet-projects.ts",
+    "src/core/stack/verify-plan.ts",
+    "src/core/workflow/command-match.ts",
+    "src/core/workflow/ready.ts",
+    "src/core/workflow/suite-gate.ts",
+    "src/core/workflow/transition.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/unit/core/workflow/suite-gate.test.ts test/unit/core/stack",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test: cli-contract, architecture, docs, golden, instruction budget",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-6",
+        "ac-7"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test:gates"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T12:05:37.417+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/suite-gate.test.ts test/unit/core/stack — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "01ac3d4920564b2a300d87e5482ffa02854d32ce6634373fd803fe8933b10b80"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T12:05:46.038+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "05822b8fd0c81b3e8822f6ab30bf11c400219a2e2fe032f3793ff3be8d4659fa"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T12:06:09.036+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow/suite-gate.test.ts test/unit/core/stack — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2a934ae266bdba5a93f3fa69f4a9b24895fd6abc9dfb9e3fc49f73deb898bcd8"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T12:06:17.441+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "06df4f6a59d67c76a9cc991a86554d0af813332ed2c349c001c28cc9dd4a7769"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T12:07:40.589+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "916b0d57349b2239a9abc1db44e684d4289d178e579d5139e5aaa483f6e67d1b"
+    }
+  ],
+  "decisions": [],
+  "residualRisks": [],
+  "createdAt": "2026-11-05T14:54:32.051+07:00",
+  "updatedAt": "2026-11-09T12:11:18.894+07:00",
+  "completedAt": "2026-11-09T12:11:18.894+07:00"
+}

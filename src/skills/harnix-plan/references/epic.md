@@ -11,6 +11,12 @@ Use when an initiative, refactor or chain of work has two or more tasks, or the 
 7. A later task of the same initiative is created with `harnix workflow --init ... --epic <epic-id>`, never with `--follow-up` alone (`--follow-up` only records `followUpOf` and inherits the parent's epic and paths; a `notice:` on stderr says when the parent has none). An epic is never attached retroactively to an existing task, so decide it at creation. To add a member while another task is active, create it with `--init --epic <epic-id> --no-activate`, which leaves `.active` where it is.
 8. Members created up front carry draft criteria and checks: before marking one `ready`, check them against the current code, tests and contracts (earlier members may have moved or deleted files) and adjust them before they freeze.
 
+## Grouping members
+
+Each member pays a full lifecycle (plan, ready, verify, finish, a dev version bump and a suite run), so size members before creating them. A member is one independently verifiable change, not one item of a list: put problems that touch the same module or files, are the same kind of change (for example only diagnostic messages) and share one focused check into one member with several criteria. Split only when the contract, the risk or the order differs: a frozen-contract change, a security-sensitive path or a separate merge. Aim for 3 to 6 members; with more, look for a merge before creating them. Members that edit the same file near the 300-code-line cap belong together or in a declared order. Members that were never run can be merged by moving their criteria into a surviving member (`--task <id> --batch`) and cancelling the rest.
+
+Review an epic once, with `harnix-review` over the whole epic diff, after its last member is implemented; a standalone task is reviewed right after its implementation.
+
 ## Run order
 
 Members run in ID order unless the epic declares an optional `order` (task ids, distinct, all members of the epic). `harnix workflow --epic-order <epic-id> <task-id>...` sets it (no task ids clears it) and rewrites only the epic record and its page, never a `task.json`. `harnix epic <epic-id>` lists the ordered members first in that order and the rest by ascending ID, and `nextTask` is the first unfinished member in that sequence; an epic without `order` behaves as before.

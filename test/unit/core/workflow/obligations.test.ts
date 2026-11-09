@@ -58,7 +58,7 @@ describe("workflow obligations", () => {
     });
   });
 
-  it("treats the working directory of a frozen required check as part of its definition", async () => {
+  it("lets a frozen required check that never passed change its working directory, but not its command", async () => {
     const root = await temporaryRepository();
     await initializeUtcProject(root);
     const planning = taskV3("planning", "planning");
@@ -71,12 +71,20 @@ describe("workflow obligations", () => {
     };
     await saveWorkflow(root, { task: ready });
 
+    const moved = (await saveWorkflow(root, {
+      task: {
+        ...ready,
+        validationPlan: [{ ...ready.validationPlan[0]!, cwd: "packages/other" }],
+        updatedAt: "2026-08-13T00:02:00.000Z",
+      },
+    })) as typeof ready;
+    expect(moved.validationPlan[0]?.cwd).toBe("packages/other");
     await expect(
       saveWorkflow(root, {
         task: {
-          ...ready,
-          validationPlan: [{ ...ready.validationPlan[0]!, cwd: "packages/other" }],
-          updatedAt: "2026-08-13T00:02:00.000Z",
+          ...moved,
+          validationPlan: [{ ...moved.validationPlan[0]!, command: "pnpm other" }],
+          updatedAt: "2026-08-13T00:03:00.000Z",
         },
       }),
     ).rejects.toThrow("Workflow obligations freeze at");

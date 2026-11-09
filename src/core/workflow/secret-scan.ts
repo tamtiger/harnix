@@ -6,6 +6,8 @@ import type { TaskRecord } from "src/core/tasks/task.js";
 import { buildGlobIgnores, targetedSegments } from "src/core/verification/transient-directories.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 
+import { changedPaths, type SecretScanGitRunner } from "./secret-scan-changes.js";
+
 const MAX_FILES = 200;
 const MAX_FILE_BYTES = 128 * 1024;
 const MAX_FINDINGS = 5;
@@ -24,6 +26,7 @@ export interface SecretAdvisory {
   hint: string;
 }
 
+const UNSCOPED_NOTE = " Git changes could not be read, so every file of the task was scanned.";
 const ADVISORY_HINT =
   "Review the listed files: add a path to .gitignore, narrow the inputs of the check that reads it, or mark a deliberate file with a harnix-secret-waiver: comment (a single line takes harnix-ignore-secret).";
 
@@ -80,7 +83,7 @@ function matchesRule(text: string, rule: Rule): boolean {
   return false;
 }
 
-async function candidateFiles(root: string, task: TaskRecord): Promise<string[]> {
+async function candidateFiles(root: string, task: TaskRecord, changed: Set<string> | undefined): Promise<string[]> {
   const inputs = task.validationPlan.flatMap((check) => ("inputs" in check ? check.inputs : []));
   const groups = [task.relevantPaths, inputs].map((patterns) =>
     patterns.filter((pattern) => pattern !== "@task-contract" && !pattern.startsWith("!")),
@@ -97,7 +100,7 @@ async function candidateFiles(root: string, task: TaskRecord): Promise<string[]>
       gitignore: true,
       ignore,
     });
-    ordered.push(...found.sort());
+    ordered.push(...found.sort().filter((path) => changed === undefined || changed.has(path)));
   }
   return [...new Set(ordered)].slice(0, MAX_FILES);
 }
@@ -112,14 +115,20 @@ async function readableText(root: string, path: string): Promise<string | undefi
 
 /**
  * Looks for signs of a secret in the files a task is about (its relevant paths and the inputs of its checks), so the
- * user hears about a password before it is committed. Bounded, offline, never uses Git and never returns a value;
- * any problem just means no advisory.
+ * user hears about a password before it is committed. Bounded and offline; it reads only the read-only Git status to
+ * limit the scan to files that changed since HEAD (every file when Git cannot answer) and never returns a value; any
+ * problem just means no advisory.
  */
-export async function scanTaskSecrets(root: string, task: TaskRecord): Promise<SecretAdvisory | undefined> {
+export async function scanTaskSecrets(
+  root: string,
+  task: TaskRecord,
+  git?: SecretScanGitRunner,
+): Promise<SecretAdvisory | undefined> {
   if (task.schemaVersion !== 3) return undefined;
   try {
     const hits: SecretFinding[] = [];
-    for (const path of await candidateFiles(root, task)) {
+    const changed = await changedPaths(root, git);
+    for (const path of await candidateFiles(root, task, changed)) {
       let text: string | undefined;
       try {
         text = await readableText(root, path);
@@ -131,7 +140,11 @@ export async function scanTaskSecrets(root: string, task: TaskRecord): Promise<S
     }
     if (hits.length === 0) return undefined;
     hits.sort((left, right) => (left.path < right.path ? -1 : left.path > right.path ? 1 : 0));
-    return { files: hits.length, findings: hits.slice(0, MAX_FINDINGS), hint: ADVISORY_HINT };
+    return {
+      files: hits.length,
+      findings: hits.slice(0, MAX_FINDINGS),
+      hint: changed === undefined ? ADVISORY_HINT + UNSCOPED_NOTE : ADVISORY_HINT,
+    };
   } catch {
     return undefined;
   }

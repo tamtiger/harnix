@@ -17,5 +17,5 @@ harnix workflow --reset-breaker <check-id> --reason "<why, 10-1000 characters>" 
   and records nothing. A check that failed twice in a row runs again once its inputs change (a new input digest).
 - `--criterion <ids> --met --transition verifying/finishing --finish` marks criteria, advances and finishes in one call.
 - `--batch` is atomic and order does not matter: references between items resolve after all are applied.
-- `harnix status --criteria` lists id, status, text and coveredBy of each criterion; `harnix status --checks` lists id, scope, required, criterionIds, command and freshness of each check; the other public commands are in
+- `harnix status --criteria` lists id, status, text and coveredBy of each criterion; `harnix status --checks` lists id, scope, required, criterionIds, command and freshness of each check (`harnix workflow --remove-check <id>` drops a check that never recorded evidence; `--evidence ... --criterion <ids> --met` records a pass and marks the criteria in one command), plus `baseline { accepted, reason? }` when a check declares one (`accepted` is what the finish gate decides, `reason` says what is still missing); the other public commands are in
   the `workflow-routing` reference.

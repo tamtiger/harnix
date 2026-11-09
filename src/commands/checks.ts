@@ -1,7 +1,8 @@
 import { Buffer } from "node:buffer";
 
 import { readConfig } from "src/core/config/config.js";
-import type { EvidenceFindingV1, TaskMode, TaskStatus, WorkflowCheckpoint } from "src/core/tasks/task.js";
+import type { EvidenceFindingV1, TaskMode, TaskRecord, TaskStatus, WorkflowCheckpoint } from "src/core/tasks/task.js";
+import { baselineAssessment, type BaselineAssessment } from "src/core/workflow/baseline-status.js";
 import {
   inspectRequiredChecks,
   type RequiredCheckInspection,
@@ -13,6 +14,12 @@ import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { findInitializedProject, missingProjectError } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
+
+function baselineOf(task: TaskRecord, checkId: string): { baseline?: BaselineAssessment } {
+  const check = task.validationPlan.find((candidate) => candidate.id === checkId);
+  const baseline = check === undefined ? undefined : baselineAssessment(task, check);
+  return baseline === undefined ? {} : { baseline };
+}
 
 const MAX_PUBLIC_RESULT_BYTES = 262_144;
 const MAX_CHANGES_PER_CHECK = 20;
@@ -29,6 +36,8 @@ interface PublicCheckItemV1 {
   };
   readonly changes: readonly VerificationInputChange[];
   readonly findings?: readonly EvidenceFindingV1[];
+  /** Present when the check declares a baseline: whether finish accepts its red run, and why not yet. */
+  readonly baseline?: BaselineAssessment;
 }
 
 export interface ChecksReportResultV1 {
@@ -92,6 +101,7 @@ export async function reportProjectChecks(cwd: string, limit: number, now = Date
         changeSummary: { changed, missing, returned: changes.length, truncated: changes.length < item.changes.length },
         changes,
         ...(item.findings && item.findings.length > 0 ? { findings: item.findings } : {}),
+        ...baselineOf(task, item.id),
       };
     });
     const resultTruncated = visible.length < inspections.length;

@@ -11,6 +11,7 @@ import {
 } from "src/core/verification/transient-directories.js";
 import { isLineEndingSensitive, normalizeLineEndings } from "src/core/verification/line-endings.js";
 import { taskPhysicalPaths } from "src/core/tasks/task-location.js";
+import { missingInputHint } from "src/core/verification/input-hint.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 
 export interface InputDigestEntry {
@@ -66,7 +67,9 @@ export async function computeInputDigest(
       onlyFiles: true,
     });
     if (matches.length === 0)
-      throw new Error(`Verification input pattern "${input}" for check ${checkId} matched no files.`);
+      throw new Error(
+        `Verification input pattern "${input}" for check ${checkId} matched no files.${await missingInputHint(projectRoot, input)}`,
+      );
     let kept = 0;
     for (const match of matches) {
       const normalized = normalizeRepositoryPath(match);
@@ -76,7 +79,7 @@ export async function computeInputDigest(
     }
     if (kept === 0)
       throw new Error(
-        `Verification input pattern "${input}" for check ${checkId} matched no files after filtering transient directories.`,
+        `Verification input pattern "${input}" for check ${checkId} matched no files after filtering transient directories.${await missingInputHint(projectRoot, input)}`,
       );
   }
   const { entries, rawEntries } = await hashEntries(projectRoot, [...paths].sort(compareText), checkId);

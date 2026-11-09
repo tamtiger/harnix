@@ -1,7 +1,8 @@
 import { selectLatestEvidence, type TaskRecord, type ValidationCheck } from "src/core/tasks/task.js";
 import { computeInputDigest, digestMatches } from "src/core/verification/input-digest.js";
 import { buildVerifyPlan, type VerifyPlan } from "src/core/stack/verify-plan.js";
-import { equivalentCommand } from "./command-match.js";
+import { baselineAssessment } from "./baseline-status.js";
+import { acceptsSuiteCommand } from "./suite-command.js";
 
 const SOURCE_SEGMENTS = new Set([
   "src",
@@ -89,19 +90,7 @@ export function coversSourceAndTest(inputs: readonly string[] | string[] | undef
  * run must be the latest one, so a check that later passed or never ran is judged by the ordinary rules.
  */
 export function authorizedRedBaseline(task: TaskRecord, check: ValidationCheck): boolean {
-  const baseline = (check as { baseline?: { result?: string; classification?: string; authorizedBy?: string } })
-    .baseline;
-  if (!check.required || baseline?.result !== "fail" || (baseline.authorizedBy ?? "").trim() === "") return false;
-  if (baseline.classification !== "pre-existing" && baseline.classification !== "environment") return false;
-  if (selectLatestEvidence(task.evidence, check.id)?.result !== "fail") return false;
-  return task.validationPlan.some(
-    (proof) =>
-      proof.id !== check.id &&
-      proof.required &&
-      (proof as { baseline?: unknown }).baseline === undefined &&
-      selectLatestEvidence(task.evidence, proof.id)?.result === "pass" &&
-      check.criterionIds?.every((id) => proof.criterionIds?.includes(id)) === true,
-  );
+  return baselineAssessment(task, check)?.accepted === true;
 }
 
 /** Distinct test commands of the repository and its packages, in detection order. */
@@ -110,17 +99,39 @@ export function knownTestCommands(plan: VerifyPlan): string[] {
   return [...new Set(commands.filter((command): command is string => typeof command === "string" && command !== ""))];
 }
 
-function runsProjectTests(check: ValidationCheck, known: readonly string[]): boolean {
-  const command = check.command;
-  return (
-    known.length === 0 || (command !== undefined && known.some((candidate) => equivalentCommand(candidate, command)))
+async function firstAccepted(
+  projectRoot: string,
+  covering: readonly ValidationCheck[],
+  known: readonly string[],
+): Promise<ValidationCheck | undefined> {
+  for (const check of covering)
+    if (await acceptsSuiteCommand(projectRoot, check.command, check.cwd, known)) return check;
+  return undefined;
+}
+
+/** The directories of .NET solutions or test projects a bare `dotnet test` check could name as its cwd. */
+function dotnetCwdCandidates(plan: VerifyPlan): string[] {
+  return plan.packages
+    .filter((item) => item.ecosystem === "dotnet" && item.hasTests)
+    .map((item) => item.path)
+    .slice(0, 10);
+}
+
+function suiteCommandError(action: string, known: readonly string[], plan: VerifyPlan): Error {
+  const candidates = dotnetCwdCandidates(plan);
+  const dotnet =
+    candidates.length === 0
+      ? ""
+      : ` For a .NET repository use dotnet test <path/to/solution.sln> (a relative path to an existing solution) or keep a bare dotnet test and declare --cwd <dir> (candidates from verify-plan --recursive: ${candidates.join(", ")}).`;
+  return new Error(
+    `Workflow ${action}: the suite check command must be the project test command (${known.join(" or ")}); a command that runs only part of the tests, such as a single test file, does not prove the suite.${dotnet}`,
   );
 }
 
 /**
  * The required check that proves the whole suite: its inputs cover source and tests and its command is the project
- * test command, so a check that runs one test file cannot stand in for the suite. Without a detected test command
- * only the inputs are judged.
+ * test command (or a safe `dotnet test` form, see {@link acceptsSuiteCommand}), so a check that runs one test file
+ * cannot stand in for the suite. Without a detected test command only the inputs are judged.
  */
 async function selectSuiteCheck(
   projectRoot: string,
@@ -130,14 +141,44 @@ async function selectSuiteCheck(
 ): Promise<ValidationCheck | undefined> {
   const covering = task.validationPlan.filter((check) => check.required && coversSourceAndTest(check.inputs));
   if (covering.length === 0) return undefined;
-  const direct = covering.find((check) => runsProjectTests(check, knownTestCommands(plan)));
+  const direct = await firstAccepted(projectRoot, covering, knownTestCommands(plan));
   if (direct) return direct;
-  const known = knownTestCommands(await buildVerifyPlan(projectRoot, { recursive: true }));
-  const nested = covering.find((check) => runsProjectTests(check, known));
+  const recursive = await buildVerifyPlan(projectRoot, { recursive: true });
+  const known = knownTestCommands(recursive);
+  const nested = await firstAccepted(projectRoot, covering, known);
   if (nested) return nested;
-  throw new Error(
-    `Workflow ${action}: the suite check command must be the project test command (${known.join(" or ")}); a command that runs only part of the tests, such as a single test file, does not prove the suite.`,
-  );
+  throw suiteCommandError(action, known, recursive);
+}
+
+/**
+ * An early, non-throwing answer to "would the suite gate accept this task": the problem in one sentence, or undefined
+ * when the declared suite check is valid (and, with `requirePass`, has a current pass or an authorized baseline), so
+ * `status` and `--transition --dry-run` can warn long before `--finish` refuses.
+ */
+export async function suiteGateProblem(
+  projectRoot: string,
+  task: TaskRecord,
+  requirePass: boolean,
+): Promise<string | undefined> {
+  try {
+    const plan = await buildVerifyPlan(projectRoot);
+    if (!plan.hasTests) return undefined;
+    const check = await selectSuiteCheck(projectRoot, task, plan, "finish");
+    if (check === undefined)
+      return 'no required check covers source and tests with the project test command (for example inputs ["src/**","test/**"]); finish will refuse.';
+    if (!requirePass || authorizedRedBaseline(task, check)) return undefined;
+    const latest = selectLatestEvidence(task.evidence, check.id);
+    if (latest?.result !== "pass")
+      return `suite check ${check.id} has not passed yet: harnix workflow --run-check ${check.id} -- <command>.`;
+    if (
+      task.schemaVersion !== 3 ||
+      !digestMatches(await computeInputDigest(projectRoot, task, check.id), latest.inputDigest)
+    )
+      return `suite check ${check.id} is stale: run it again last.`;
+    return undefined;
+  } catch (error: unknown) {
+    return error instanceof Error ? error.message : String(error);
+  }
 }
 
 export async function assertSuiteGateReady(projectRoot: string, task: TaskRecord): Promise<void> {

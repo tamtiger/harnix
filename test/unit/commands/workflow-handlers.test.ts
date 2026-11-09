@@ -39,6 +39,7 @@ describe("workflow handlers", () => {
         "learn",
         "migrate",
         "preflight",
+        "removeCheck",
         "removeCriterion",
         "removeDecision",
         "removeRisk",

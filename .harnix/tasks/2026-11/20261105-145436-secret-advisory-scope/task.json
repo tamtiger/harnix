@@ -1,0 +1,189 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261105-145436-secret-advisory-scope",
+  "epicId": "20261105-145432-workflow-friction-v2",
+  "title": "Chẩn đoán gate: secretAdvisory theo diff, baseline-accepted ở status, lỗi digest file đã xóa",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Làm các thông báo chẩn đoán đúng và đủ: secretAdvisory chỉ quét file thuộc diff của task, status hiện check đỏ đã được baseline chấp nhận, và lỗi input digest cho file đã xóa nêu glob thư mục cha thay thế.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "secretAdvisory chỉ quét các file thay đổi so với HEAD (git status/diff, gồm file chưa theo dõi) giao với relevantPaths và inputs của check; file không đổi trong task không bao giờ xuất hiện trong advisory.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Ngoài git hoặc không đọc được diff thì quay về hành vi hiện tại và ghi chú trong hint; waiver bằng comment hiện có vẫn hoạt động.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Mô tả secretAdvisory trong --schema (schema.ts) và workflow docs nêu phạm vi mới (chỉ file đổi trong task); Tài liệu và snapshot đồng bộ: docs/HARNIX_WORKFLOW.md, src/templates/harnix/workflow.md (chạy pnpm selfhost:sync), mô tả --schema và docs/HARNIX_PRD.md nếu bề mặt công khai đổi; behavior-snapshot.golden.json chỉ cập nhật cho đúng chuỗi mới; phiên bản bump 2.29.0-dev.N kèm CHANGELOG trước verifying.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Khi một input glob không match file nào, lỗi nêu input đó, thư mục cha gần nhất còn tồn tại và lệnh mẫu với glob <dir>/** để dùng thay; thông điệp xuất hiện ở --run-check, --snapshot và --set-check.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Không thêm loại check mới và không đổi công thức digest; glob thư mục cha còn tồn tại vẫn sinh digest hợp lệ (có test).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "harnix status --checks và --explain đánh dấu check có baseline với latest run fail đủ điều kiện finish là baseline.accepted true; không đổi trạng thái hay kết quả gate (authorizedRedBaseline dùng chung một hàm đánh giá).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-7",
+      "text": "Khi baseline đã khai nhưng chưa đủ điều kiện để finish chấp nhận (latest run không phải fail, classification không thuộc pre-existing hoặc environment, baseline.result là pass, hoặc chưa có required check khác không baseline đã pass phủ cùng criteria), status nêu lý do cụ thể thay vì để im.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/status.ts",
+    "src/core/verification/check-report.ts",
+    "src/core/verification/input-digest.ts",
+    "src/core/workflow/finish.ts",
+    "src/core/workflow/run-check.ts",
+    "src/core/workflow/schema.ts",
+    "src/core/workflow/secret-scan.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/unit/core/workflow test/unit/core/verification test/unit/commands",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test: cli-contract, architecture, docs, golden, instruction budget",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6",
+        "ac-7"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test:gates"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T11:17:25.691+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/core/verification test/unit/commands — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "53c40cf1368916cfc8476f299b34b1b9f13f1029aefa9472f50c27d5c103d4b2"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T11:17:33.288+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4644fe64a16e411375f80674af96cc78b1c031d3aeb951ff1aaf4bbc49e94449"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T11:19:21.291+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f7a1ece9213192af407d9b8a2196aa1ca6fc961e1bbc99194bb2d08d10fe76b1"
+    }
+  ],
+  "decisions": [],
+  "residualRisks": [],
+  "createdAt": "2026-11-05T14:54:32.051+07:00",
+  "updatedAt": "2026-11-09T11:19:51.535+07:00",
+  "completedAt": "2026-11-09T11:19:51.535+07:00"
+}

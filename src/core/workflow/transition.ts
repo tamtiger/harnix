@@ -4,7 +4,8 @@ import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { transitions } from "src/core/tasks/task-schema.js";
 import { assertLegalTransition, laterTimestamp } from "src/core/tasks/workflow-helpers.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
-import { inspectReadyConditions } from "./ready.js";
+import { inspectReadyConditions, projectRootOf } from "./ready.js";
+import { suiteGateProblem } from "./suite-gate.js";
 import { READY_REVIEW_CHECKLIST, reviewRequiredMessage } from "./ready-review.js";
 import { saveWorkflow } from "./save.js";
 import { currentInstant } from "./support.js";
@@ -134,6 +135,12 @@ async function handleDryRunTransition(
     if (readyInspection.unbaselined.length > 0) {
       unbaselinedChecks = readyInspection.unbaselined;
     }
+  }
+
+  if (status !== "ready") {
+    const finishing = checkpoint === "finishing" || status === "completed";
+    const problem = await suiteGateProblem(projectRootOf(harnixRoot), task, finishing);
+    if (problem !== undefined) advisories.push(`Suite gate: ${problem}`);
   }
 
   if (status === "verifying") {

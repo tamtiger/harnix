@@ -32,6 +32,7 @@ import {
   briefWorkflowEnvelopeSchema,
 } from "src/commands/internal-workflow.js";
 import { parseJson, presentTask, readInput, readRequired, splitList } from "src/commands/workflow-handler-utils.js";
+import { assertOptionalReason } from "src/core/workflow/reason-rules.js";
 import { EDIT_HANDLERS } from "src/commands/workflow-edit-handlers.js";
 import { LIFECYCLE_HANDLERS } from "src/commands/workflow-lifecycle-handlers.js";
 import { packageVersion } from "src/version.js";
@@ -99,6 +100,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
         exitCode: flags.exitCode,
         artifacts: flags.artifact,
         digest: flags.digest,
+        markMet: flags.criterion === undefined ? undefined : splitList(flags.criterion),
       });
       return presentTask(context, appended.task, appended.evidenceId);
     }
@@ -222,10 +224,12 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
     return presentTask(context, task);
   },
   setTitle: async (context) => {
+    assertOptionalReason(context.flags.reason);
     const task = await setTitleWorkflow(context.root, context.flags.setTitle as string);
     return presentTask(context, task);
   },
   setGoal: async (context) => {
+    assertOptionalReason(context.flags.reason);
     const task = await setGoalWorkflow(context.root, context.flags.setGoal as string);
     return presentTask(context, task);
   },

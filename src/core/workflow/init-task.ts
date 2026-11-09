@@ -6,6 +6,9 @@ import { idPrefix } from "src/utils/clock.js";
 import { normalizeRepositoryPath, resolveSafeHarnixPath } from "src/utils/paths.js";
 import { renderPlanTemplate, renderPrdTemplate } from "./artifact-templates.js";
 import { equivalentCommand } from "./command-match.js";
+import { flagIssueError } from "./flag-issues.js";
+import { asciiFold, slugOrIssue } from "./init-issues.js";
+import { checksNotice } from "./init-checks-notice.js";
 import { resolveLineage } from "./init-lineage.js";
 import type { InitCheckSpec } from "./init-spec.js";
 import { saveWorkflow } from "./save.js";
@@ -30,36 +33,6 @@ export interface InitTaskOptions {
   /** Repository-relative directory of the package the task is about: its test command and inputs become the default. */
   cwd?: string | undefined;
   injectedNow?: string | undefined;
-}
-
-function toSlug(title: string): string {
-  const normalized = title
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/gu, "")
-    .replace(/[^a-z0-9]+/gu, "-")
-    .replace(/^-+|-+$/gu, "");
-  return normalized.slice(0, 40).replace(/-+$/u, "") || "task";
-}
-
-const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
-const SLUG_MAX = 60;
-
-/** An explicit English slug, or one derived from a plain-ASCII title; a title with accents never becomes an ID. */
-function resolveSlug(title: string, slug: string | undefined): string {
-  if (slug !== undefined) {
-    if (!SLUG_PATTERN.test(slug) || slug.length > SLUG_MAX)
-      throw new Error(
-        `workflow --init --slug must be english-kebab-case (a-z, 0-9, single hyphens, at most ${SLUG_MAX} characters).`,
-      );
-    return slug;
-  }
-  // eslint-disable-next-line no-control-regex
-  if (/[^\u0000-\u007f]/u.test(title))
-    throw new Error(
-      'workflow --init: the title is not plain ASCII, so pass --slug <english-kebab-case> for the task ID.\nGợi ý: thêm --slug với tên tiếng Anh, ví dụ: workflow --init --title "<tiêu đề>" --slug task-sprawl-guard.',
-    );
-  return toSlug(title);
 }
 
 const SUITE_DESCRIPTION = "Toàn bộ test, lint và typecheck của dự án phải xanh";
@@ -109,14 +82,15 @@ function defaultCheck(
   };
 }
 
-function declaredCheck(spec: InitCheckSpec): ValidationCheckV3 {
+function declaredCheck(spec: InitCheckSpec, defaultCwd: string | undefined): ValidationCheckV3 {
+  const cwd = spec.cwd ?? defaultCwd;
   return {
     id: spec.id,
     description: spec.description ?? spec.id,
     scope: spec.scope,
     required: true,
     command: spec.command,
-    ...(spec.cwd === undefined ? {} : { cwd: spec.cwd }),
+    ...(cwd === undefined ? {} : { cwd }),
     criterionIds: [...new Set(spec.criterionIds)].sort(compareCodeUnits),
     inputs: [...new Set(spec.inputs)].sort(compareCodeUnits),
   };
@@ -131,20 +105,33 @@ async function resolveCheckTarget(
   projectTest: string | undefined;
   command: string | undefined;
   inputs: string[];
+  issue?: string;
 }> {
   const cwd = packageDirectory(options.cwd);
   const projectTest = await projectTestCommand(root, cwd);
   const command = options.command?.trim() || projectTest;
   // Declared --with-check specs already say what to run, so no default check is needed without a test command.
-  if (!command && (options.checks ?? []).length === 0)
-    throw new Error(
-      cwd === undefined
+  const issue =
+    !command && (options.checks ?? []).length === 0
+      ? cwd === undefined
         ? "workflow --init found no project test command; pass --command <cmd> explicitly."
-        : `workflow --init --cwd ${cwd} found no test command for that package; pass --command <cmd> explicitly.`,
-    );
+        : `workflow --init --cwd ${cwd} found no test command for that package; pass --command <cmd> explicitly.`
+      : undefined;
   const given = Array.isArray(options.input) ? options.input : [];
   const inputs = given.length > 0 ? [...new Set(given)].sort() : [cwd === undefined ? "**" : `${cwd}/**`];
-  return { cwd, projectTest, command, inputs };
+  return { cwd, projectTest, command, inputs, ...(issue === undefined ? {} : { issue }) };
+}
+
+/** The task slug, or one error carrying every `--init` problem (slug and missing test command) at once. */
+function resolveSlug(title: string, slug: string | undefined, targetIssue: string | undefined): string {
+  const resolved = slugOrIssue(title, slug);
+  const issues = [resolved.issue, targetIssue].filter((issue): issue is string => issue !== undefined);
+  if (issues.length === 0 && resolved.slug !== undefined) return resolved.slug;
+  throw flagIssueError(
+    "workflow --init",
+    issues,
+    `harnix workflow --init --title "${title}" --slug ${resolved.slug ?? asciiFold(title)} --command "<cmd>"`,
+  );
 }
 
 export async function initTaskWorkflow(root: string, options: InitTaskOptions): Promise<TaskRecordV3> {
@@ -157,12 +144,13 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
   const mode: TaskMode = options.mode ?? "lite";
   const now = await currentInstant(root, options.injectedNow);
   const prefix = idPrefix(Date.parse(now), await readProjectTimezone(await resolveSafeHarnixPath(root)));
-  const slug = resolveSlug(title, options.slug);
-  const id = `${prefix}-${slug}`;
 
   const goal = options.goal?.trim() || title;
   const criteria = buildCriteria(options.criteria, title);
-  const { cwd, projectTest, command, inputs } = await resolveCheckTarget(root, options);
+  const target = await resolveCheckTarget(root, options);
+  const { cwd, projectTest, command, inputs } = target;
+  const slug = resolveSlug(title, options.slug, target.issue);
+  const id = `${prefix}-${slug}`;
 
   const { epicId, followUpOf, relevantPaths, relevantSpecs } = await resolveLineage(root, options);
 
@@ -181,7 +169,7 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
     acceptanceCriteria: criteria,
     validationPlan: [
       ...(command === undefined ? [] : [defaultCheck(title, command, projectTest, criteria, inputs, cwd)]),
-      ...(options.checks ?? []).map(declaredCheck),
+      ...(options.checks ?? []).map((spec) => declaredCheck(spec, cwd)),
     ],
     evidence: [],
     relevantPaths,
@@ -206,5 +194,7 @@ export async function initTaskWorkflow(root: string, options: InitTaskOptions): 
   )) as TaskRecordV3;
   const notice = similarTaskNotice(similar);
   if (notice !== undefined) process.stderr.write(notice);
+  const autoId = command === undefined ? undefined : candidate.validationPlan[0]?.id;
+  process.stderr.write(checksNotice(candidate.validationPlan, autoId));
   return saved;
 }

@@ -31,7 +31,7 @@ describe("the workflow action table", () => {
       expect(BRIEF_ACTIONS.has(spec.name), flag).toBe(spec.brief);
     }
     // Actions --schema does not describe yet; adding one changes the --schema output, so this list may only shrink.
-    const undescribed = ["--reset-breaker", "--set-title", "--set-goal", "--set-baseline", "--epic-order", "--schema"];
+    const undescribed = ["--reset-breaker", "--set-baseline", "--epic-order", "--schema"];
     expect(names.map(actionFlagName).filter((flag) => !transports.includes(flag))).toEqual(undescribed);
   });
 });

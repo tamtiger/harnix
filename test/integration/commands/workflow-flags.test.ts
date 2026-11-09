@@ -49,6 +49,13 @@ describe("workflow flag validation", () => {
     );
   });
 
+  it("accepts --reason for set-title and set-goal but not for actions that never take one", () => {
+    expect(() => assertFlagGroups("setGoal", { reason: "một lý do đủ dài" })).not.toThrow();
+    expect(() => assertFlagGroups("setTitle", { reason: "một lý do đủ dài" })).not.toThrow();
+    expect(() => assertFlagGroups("removeCheck", { reason: "một lý do đủ dài" })).not.toThrow();
+    expect(() => assertFlagGroups("runChecks", { reason: "một lý do đủ dài" })).toThrow(/--reason/u);
+  });
+
   it("keeps plan-edit flags with their action", () => {
     expect(() => assertFlagGroups("inspect", { description: "d" })).toThrow(
       /--description requires workflow --set-check/u,

@@ -9,7 +9,9 @@ import {
   type StatusSummaryResultV1,
 } from "src/core/status.js";
 import { detailPublicEpic, findNextEpic, type PublicEpicDetailResult } from "src/commands/epic.js";
-import { resolveActiveTask, TaskValidationError } from "src/core/tasks/task.js";
+import { resolveActiveTask, TaskValidationError, type TaskRecord, type ValidationCheck } from "src/core/tasks/task.js";
+import { suiteGateProblem } from "src/core/workflow/suite-gate.js";
+import { baselineAssessment, type BaselineAssessment } from "src/core/workflow/baseline-status.js";
 import { inspectRequiredChecks, type RequiredCheckState } from "src/core/verification/check-report.js";
 import { taskContextDrift } from "src/core/workflow/index.js";
 import { findInitializedProject, initializedChildrenHint } from "src/utils/project-discovery.js";
@@ -75,7 +77,15 @@ export async function inspectProjectStatus(cwd: string, now = Date.now()): Promi
       // Best effort
     }
   }
-  const activeStatus = createActiveStatus(task, contextDrift, requiredCheckStates, epicContext);
+  const created = createActiveStatus(task, contextDrift, requiredCheckStates, epicContext);
+  const suiteProblem = await suiteGateProblem(project.root, task, task.status === "verifying");
+  const activeStatus =
+    suiteProblem === undefined
+      ? created
+      : {
+          ...created,
+          attention: [...created.attention, { code: "suite-check-invalid" as const, count: 1, detail: suiteProblem }],
+        };
   const git = await readGitContext(project.root);
   return git === undefined ? activeStatus : { ...activeStatus, git };
 }
@@ -160,6 +170,11 @@ export async function reportProjectCriteria(cwd: string): Promise<StatusCriteria
   };
 }
 
+function baselineField(task: TaskRecord, check: ValidationCheck): { baseline?: BaselineAssessment } {
+  const baseline = baselineAssessment(task, check);
+  return baseline === undefined ? {} : { baseline };
+}
+
 export interface StatusChecksItem {
   readonly id: string;
   readonly scope: "focused" | "full";
@@ -168,6 +183,8 @@ export interface StatusChecksItem {
   readonly command?: string;
   /** Freshness of a required check; a check that is not required has no state to judge. */
   readonly state: RequiredCheckState | "optional";
+  /** Present when the check declares a baseline: whether finish accepts its red run, and why not yet. */
+  readonly baseline?: BaselineAssessment;
 }
 
 export interface StatusChecksResultV1 {
@@ -196,6 +213,7 @@ export async function listProjectChecks(cwd: string, now = Date.now()): Promise<
       criterionIds: check.criterionIds ?? [],
       ...(check.command === undefined ? {} : { command: check.command }),
       state: states.get(check.id) ?? "optional",
+      ...baselineField(task, check),
     })),
   };
 }

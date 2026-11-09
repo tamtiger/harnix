@@ -8,6 +8,7 @@ import {
 } from "src/core/tasks/task.js";
 import { semanticJsonEqual, semanticTaskEqual } from "src/core/tasks/workflow-helpers.js";
 import { compareCodeUnits } from "src/utils/order.js";
+import { CONFIG_ONLY_HINT, provenCheckIds, withoutUnprovenConfig } from "./check-config-edit.js";
 import type { WorkflowSaveEnvelope } from "./envelope.js";
 import { taskLogicalPath } from "src/core/tasks/task-location.js";
 
@@ -109,14 +110,15 @@ function withoutBaseline(check: TaskRecord["validationPlan"][number]): { id: str
   return contract;
 }
 
-function obligationsChanged(previous: TaskRecord, next: TaskRecord): boolean {
+export function obligationsChanged(previous: TaskRecord, next: TaskRecord): boolean {
+  const proven = provenCheckIds(previous);
   const criteria = (task: TaskRecord) =>
     task.acceptanceCriteria
       .map(({ id, text }) => ({ id, text }))
       .sort((left, right) => compareCodeUnits(left.id, right.id));
   const checks = (task: TaskRecord) =>
     task.validationPlan
-      .map((check) => withoutBaseline(check))
+      .map((check) => withoutUnprovenConfig(withoutBaseline(check), proven))
       .sort((left, right) => compareCodeUnits(left.id, right.id));
   return (
     !semanticJsonEqual(criteria(previous), criteria(next)) ||
@@ -230,7 +232,7 @@ function assertEvidencedChecksRetained(previous: TaskRecordV3, next: TaskRecordV
         : "failed check " + check.id + " unchanged";
       throw new Error(
         `Workflow contractRevision must retain ${detail} or retire it unchanged with a new required replacement ID. ` +
-          `To change what it runs, use: harnix workflow --replace-check ${check.id} <new-id> --reason "<why>" with a different --command, --input or --cwd.`,
+          `To change what it runs, use: harnix workflow --replace-check ${check.id} <new-id> --reason "<why>" with a different --command or --input. ${CONFIG_ONLY_HINT}`,
       );
     }
   }

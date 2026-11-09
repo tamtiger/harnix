@@ -40,6 +40,7 @@ export const WORKFLOW_ACTIONS: readonly WorkflowActionSpec[] = [
   action("removeDecision", "value", true),
   action("removeCriterion", "value", true),
   action("removeRisk", "value", true),
+  action("removeCheck", "value", true),
   action("setPaths", "switch", true),
   action("setTitle", "value", true),
   action("setGoal", "value", true),

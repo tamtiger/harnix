@@ -25,8 +25,6 @@ const accumulate = (value: string, previous: string | string[] | undefined): str
   previous === undefined ? value : [...[previous].flat(), value];
 
 function fixedHint(msg: string): string {
-  if (msg.includes("Illegal task transition"))
-    return "Gợi ý: Kiểm tra hợp lệ bằng --dry-run trước; chỉ có thể chuyển từ ready/ready sang in_progress/implementing khi bắt đầu code.";
   if (msg.includes("Task status/checkpoint combination is invalid"))
     return "Gợi ý: Kiểm tra bảng legalCheckpoints hoặc hướng dẫn trạng thái trong .harnix/workflow.md.";
   if (msg.includes("Checklist trong plan.md chưa hoàn tất"))
@@ -101,6 +99,7 @@ export function registerWorkflowCommand(program: Command, options: WorkflowComma
     .option("--set-criterion <id>", "Rewrite the text of one acceptance criterion (requires --text)")
     .option("--add-decision <id>", "Record one decision (requires --text and --rationale)")
     .option("--add-risk <id>", "Record one residual risk (requires --text)")
+    .option("--remove-check <id>", "Remove one check that never recorded evidence (--reason after planning)")
     .option("--remove-decision <id>", "Remove one decision while the task is in planning")
     .option(
       "--remove-criterion <id>",

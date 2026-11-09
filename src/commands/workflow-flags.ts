@@ -37,6 +37,7 @@ export interface WorkflowFlags {
   addDecision?: string;
   addRisk?: string;
   removeDecision?: string;
+  removeCheck?: string;
   removeCriterion?: string;
   removeRisk?: string;
   mitigation?: string;
@@ -96,6 +97,13 @@ export function selectActions(flags: WorkflowFlags): string[] {
     return selected;
   }
 
+  if (selected.includes("evidence")) {
+    if (selected.length === 2 && selected.includes("criterion") && flags.met === true) return ["evidence"];
+    throw new Error(
+      "workflow --evidence combines only with --criterion <ids> --met (one command records the pass and marks the criteria).",
+    );
+  }
+
   const nonBatchable = selected.filter((action) => !BATCHABLE_ACTIONS.has(action));
   if (nonBatchable.length > 0) {
     throw new Error(EXACTLY_ONE_ACTION_MESSAGE);
@@ -141,6 +149,7 @@ const ID_FLAGS = [
   ["--set-check", "setCheck", "--command <cmd> --criteria <ids> --input <globs>"],
   ["--set-baseline", "setBaseline", "--result <r> --classification <k> --authorized-by <who> --scope <s>"],
   ["--reset-breaker", "resetBreaker", "--reason <why>"],
+  ["--remove-check", "removeCheck", "--reason <why>"],
   ["--remove-decision", "removeDecision", ""],
   ["--remove-criterion", "removeCriterion", ""],
   ["--remove-risk", "removeRisk", ""],

@@ -1,0 +1,23 @@
+{
+  "id": "20261105-145432-workflow-friction-v2",
+  "title": "Giảm ma sát vòng đời check và gate của workflow",
+  "goal": "Giảm ma sát vòng đời check và gate khi dùng Harnix trên monorepo .NET payment-hub: lỗi flag và --init --cwd, --remove-check và sửa cwd không replan, whitelist suite với cwd, hint transition, và các thông báo chẩn đoán (secretAdvisory, baseline-accepted, input digest).",
+  "nonGoals": [
+    "Chưa làm --diff-baseline / known-flaky và known-failing cấp project (epic riêng, cùng việc cho phép --filter trong lệnh suite).",
+    "Không tự sinh slug từ title tiếng Việt (ID là slug tiếng Anh, chỉ gợi ý trong lỗi).",
+    "Không phát hiện shell PowerShell 5.1 chủ động; không thêm loại check assert-absence; không đổi công thức digest.",
+    "Không đổi frozen contract của TaskRecord v3."
+  ],
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "createdAt": "2026-11-05T14:54:32.051+07:00",
+  "updatedAt": "2026-11-09T10:47:00.000+07:00",
+  "order": [
+    "20261105-145437-transition-next-step-hint",
+    "20261105-145436-secret-advisory-scope",
+    "20261105-145433-batched-flag-validation",
+    "20261109-103107-remove-check-action",
+    "20261105-145435-consistent-reason-and-combo",
+    "20261105-145434-suite-command-cwd"
+  ]
+}

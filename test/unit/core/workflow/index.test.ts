@@ -34,6 +34,7 @@ describe("workflow index", () => {
       "preflightWorkflow",
       "recordLearningWorkflow",
       "recordWorkflowLearning",
+      "removeCheckWorkflow",
       "removeCriterionWorkflow",
       "removeDecisionWorkflow",
       "removeRiskWorkflow",

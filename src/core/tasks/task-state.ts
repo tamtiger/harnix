@@ -8,6 +8,7 @@ import type {
   TaskStatus,
   WorkflowCheckpoint,
 } from "./task-schema.js";
+import { transitionHint } from "./transition-hint.js";
 import { validateTask } from "./task-validate.js";
 import { TaskValidationError, isCancellationReason } from "./task-validate-common.js";
 
@@ -46,10 +47,7 @@ export function transitionTask(
 ): TaskRecord {
   if (!transitions[task.status].includes(status)) {
     const legal = transitions[task.status];
-    const hint =
-      legal.length === 0
-        ? `${task.status} is terminal and has no further transitions`
-        : `legal next statuses from ${task.status}: ${legal.join(", ")}`;
+    const hint = transitionHint(task.status, status, legal, task.blocker?.resumeStatus);
     throw new TaskValidationError(`Illegal task transition ${task.status} -> ${status}. ${hint}.`);
   }
   if (task.status === "blocked" && task.blocker?.resumeStatus !== status)

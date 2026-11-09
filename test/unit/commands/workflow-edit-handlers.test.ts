@@ -19,7 +19,12 @@ const context = (root: string, flags: WorkflowContext["flags"]): WorkflowContext
 
 describe("workflow edit handlers", () => {
   it("exposes the removal actions", () => {
-    expect(Object.keys(EDIT_HANDLERS).sort()).toEqual(["removeCriterion", "removeDecision", "removeRisk"]);
+    expect(Object.keys(EDIT_HANDLERS).sort()).toEqual([
+      "removeCheck",
+      "removeCriterion",
+      "removeDecision",
+      "removeRisk",
+    ]);
   });
 
   it("removeDecision drops the decision and --brief reports only the state", async () => {
@@ -76,5 +81,19 @@ describe("workflow edit handlers", () => {
 
     expect(Object.keys(result as object).sort()).toEqual(["checkpoint", "id", "status", "updatedAt"]);
     expect(((await loadPersistedTask(root, task.id)) as { residualRisks?: unknown[] }).residualRisks ?? []).toEqual([]);
+  });
+
+  it("removeCheck drops a duplicate check without evidence and reports the brief state", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const task = taskV3("planning", "planning");
+    const second = { ...task.validationPlan[0]!, id: "check-dup", scope: "full" as const };
+    await saveWorkflow(root, { task: { ...task, validationPlan: [...task.validationPlan, second] } });
+
+    const result = await EDIT_HANDLERS.removeCheck!(context(root, { removeCheck: "check-dup", brief: true }));
+
+    expect(Object.keys(result as object).sort()).toEqual(["checkpoint", "id", "status", "updatedAt"]);
+    const persisted = (await loadPersistedTask(root, task.id)) as { validationPlan: { id: string }[] };
+    expect(persisted.validationPlan.map((check) => check.id)).not.toContain("check-dup");
   });
 });

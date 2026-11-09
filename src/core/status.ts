@@ -22,8 +22,10 @@ export interface StatusNextAction {
 }
 
 export interface StatusAttention {
-  code: "context-stale" | "required-check-failed" | "required-check-stale";
+  code: "context-stale" | "required-check-failed" | "required-check-stale" | "suite-check-invalid";
   count: number;
+  /** Why, for the codes that need more than a count (the suite gate problem). */
+  detail?: string;
 }
 
 export interface StatusProgress {

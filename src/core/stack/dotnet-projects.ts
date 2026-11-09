@@ -1,8 +1,10 @@
-import { readFile, stat } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { join, resolve, win32 } from "node:path";
 import { compareCodeUnits } from "src/utils/order.js";
 
 const MAX_PROJECTS = 200;
+const NESTED_DEPTH = 3;
+const SKIPPED_DIRECTORIES = new Set(["bin", "obj", "node_modules", ".git", ".vs", ".idea", "packages", "TestResults"]);
 const MAX_FILE_BYTES = 256 * 1024;
 const PROJECT_FILE = /\.(?:csproj|fsproj|vbproj)$/iu;
 const SOLUTION_FILE = /\.sln$/iu;
@@ -56,15 +58,38 @@ export async function inspectDotnetDirectory(dir: string, entries: readonly stri
     solution === undefined
       ? entries.filter((name) => PROJECT_FILE.test(name)).map((name) => join(dir, name))
       : solutionProjectPaths((await readBoundedText(join(dir, solution))) ?? "").map((path) => resolve(dir, path));
-  let hasTests = false;
-  for (const file of projectFiles.slice(0, MAX_PROJECTS)) {
-    if (isDotnetTestProject((await readBoundedText(file)) ?? "")) {
-      hasTests = true;
-      break;
-    }
-  }
+  let hasTests = await anyTestProject(projectFiles);
+  // A solution does not always list its tests; a test project below its directory still belongs to it.
+  if (!hasTests && solution !== undefined) hasTests = await anyTestProject(await nestedProjectFiles(dir, NESTED_DEPTH));
   const target = solution === undefined ? "" : ` ${/\s/u.test(solution) ? `"${solution}"` : solution}`;
   return { hasTests, testCommand: `dotnet test${target}` };
+}
+
+async function anyTestProject(files: readonly string[]): Promise<boolean> {
+  for (const file of files.slice(0, MAX_PROJECTS))
+    if (isDotnetTestProject((await readBoundedText(file)) ?? "")) return true;
+  return false;
+}
+
+/** Project files below a directory, to a bounded depth and count, skipping build output and dependency folders. */
+async function nestedProjectFiles(dir: string, depth: number): Promise<string[]> {
+  const found: string[] = [];
+  const visit = async (current: string, remaining: number): Promise<void> => {
+    let entries;
+    try {
+      entries = await readdir(current, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries.sort((left, right) => compareCodeUnits(left.name, right.name))) {
+      if (found.length >= MAX_PROJECTS) return;
+      if (entry.isFile() && PROJECT_FILE.test(entry.name)) found.push(join(current, entry.name));
+      else if (entry.isDirectory() && remaining > 0 && !SKIPPED_DIRECTORIES.has(entry.name))
+        await visit(join(current, entry.name), remaining - 1);
+    }
+  };
+  await visit(dir, depth);
+  return found;
 }
 
 async function readBoundedText(path: string): Promise<string | undefined> {

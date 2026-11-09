@@ -1,0 +1,181 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261105-145435-consistent-reason-and-combo",
+  "epicId": "20261105-145432-workflow-friction-v2",
+  "title": "Thống nhất quy tắc --reason và gộp --evidence với --criterion --met",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Làm quy tắc --reason nhất quán và nêu trong --schema; cho phép ghi evidence và đánh dấu criterion trong một lệnh.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "--set-goal và --set-title chấp nhận --reason (tùy chọn) giống các lệnh sửa obligation khác, và --schema nêu cho từng action là --reason bắt buộc, tùy chọn hay không nhận.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-3",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "--evidence --check <id> --result pass ... --criterion <ids> --met chạy trong một lệnh: ghi evidence rồi đánh dấu criterion chỉ từ pass vừa ghi (digest còn mới, không dùng pass cũ), atomic (lỗi thì không ghi gì), và báo lỗi nếu evidence không pass.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-3",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Cờ mới được đăng ký đủ theo checklist thêm cờ workflow (bảng actions, flag-owners, --schema, cli-contract); các test action-checklist và actions.test.ts xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-3",
+        "ev-chk-gates-2",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu và snapshot đồng bộ: docs/HARNIX_WORKFLOW.md, src/templates/harnix/workflow.md (chạy pnpm selfhost:sync), mô tả --schema và docs/HARNIX_PRD.md nếu bề mặt công khai đổi; behavior-snapshot.golden.json chỉ cập nhật cho đúng chuỗi mới; phiên bản bump 2.29.0-dev.N kèm CHANGELOG trước verifying.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-2",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/workflow-command.ts",
+    "src/commands/workflow-flag-owners.ts",
+    "src/commands/workflow-flags.ts",
+    "src/commands/workflow-handlers.ts",
+    "src/core/workflow/actions.ts",
+    "src/core/workflow/criterion.ts",
+    "src/core/workflow/evidence-flags.ts",
+    "src/core/workflow/schema.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/workflow/cli-contract.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test: cli-contract, architecture, docs, golden, instruction budget",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ],
+      "command": "pnpm run test:gates"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T11:49:16.906+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/workflow/cli-contract.test.ts — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "1ca6e544f63811bce91d0c00d01ca48e5aaa606f0fb2bf34d5d21500a46f7284"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T11:50:30.421+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "a41a0710a0793b5d270f5a0ec4cbec98aa9c1270e2ee42be9017be86a163f4fb"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T11:50:39.454+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test:gates — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "a414a36fd7e7a55b5147ea5d394922c7fe057bd97effa36113d9b3a2a78fb4bb"
+    },
+    {
+      "id": "ev-chk-focus-3",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T11:52:08.218+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/commands test/workflow/cli-contract.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "53bf1082c401bfe767210692156a2be890a98f725267d7629ee65b1ea837cfb0"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T11:52:16.271+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f7f59437b1b3a01ed601e803bb6bde2b3577d9cb6c31ae039d33193141945915"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T11:53:35.469+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8f63c093369823db59c6eabe2f302238cb2f818b76e11e2235f75ce739e9229a"
+    }
+  ],
+  "decisions": [],
+  "residualRisks": [],
+  "createdAt": "2026-11-05T14:54:32.051+07:00",
+  "updatedAt": "2026-11-09T11:54:05.099+07:00",
+  "completedAt": "2026-11-09T11:54:05.099+07:00"
+}

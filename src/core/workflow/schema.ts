@@ -16,6 +16,7 @@ import {
   workflowCheckpoints,
 } from "src/core/tasks/task.js";
 import { briefFlagNames } from "./brief.js";
+import { reasonConstraints } from "./reason-rules.js";
 
 export interface WorkflowEnvelopeSchemaV1 {
   generator: "harnix";
@@ -49,6 +50,8 @@ export interface WorkflowEnvelopeSchemaV1 {
     requiredCheck: string;
     envelope: string;
     brief: string[];
+    /** Per action flag: whether `--reason` is required, optional (also after planning) or not accepted. */
+    reason: Record<string, string>;
   };
 }
 
@@ -140,6 +143,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       envelope:
         "{ task, artifacts?, contractRevision?, epic?, epicMembers? }; the TaskRecord goes under task, never bare",
       brief: briefFlagNames(),
+      reason: reasonConstraints(),
     },
     transports: {
       "--init":
@@ -153,7 +157,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--transition":
         "Status and checkpoint only, read from the persisted record: --transition <status>/<checkpoint> [--dry-run] [--reviewed]. Entering ready/ready checks the plan content (placeholders, every criterion named in plan.md, a focused required check per criterion); a Full task also needs --reviewed after the ready-review, and --dry-run returns reviewChecklist for a Full task entering ready, for a ready target that has issues, or on any dry run with --checklist.",
       "--evidence":
-        "Append exactly one evidence item from a stdin envelope, or from --check, --result, --summary and optional --exit-code, --artifact, --digest flags.",
+        "Append exactly one evidence item from a stdin envelope, or from --check, --result, --summary and optional --exit-code, --artifact, --digest flags; add --criterion <ids> --met (with --result pass) to mark those criteria met from exactly that pass in the same save, and nothing is written when the pass is refused.",
       "--criterion":
         "Mark criteria met from fresh passing evidence: --criterion <ids> --met [--evidence-ids <ids>]; schema v3 only.",
       "--migrate":
@@ -173,12 +177,18 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--add-decision": "Record one decision (--text, --rationale) on the active v3 task; review data, so no --reason.",
       "--add-risk":
         "Record one residual risk (--text, optional --severity and --mitigation, which is kept inside the risk text) on the active v3 task; review data, so no --reason.",
+      "--remove-check":
+        "Remove one check that never recorded evidence (--remove-check <id> [--reason <why>] [--task <task-id>]), for example a duplicate suite check; free in planning, afterwards it needs --reason and makes the guarded replan save; refused when the check recorded evidence (use --replace-check) or when a criterion would be left without a required check.",
       "--remove-decision":
         "Remove one decision while the task is in planning (--remove-decision <id> [--task <task-id>]); refused afterwards.",
       "--remove-risk":
         "Remove one residual risk (--remove-risk <id> [--task <task-id>]) from an unfinished task; review data, so no --reason.",
       "--remove-criterion":
         "Remove one acceptance criterion while the task is in planning and take it out of every check that covered it (--remove-criterion <id> [--task <task-id>]); refused afterwards, when a check of it recorded evidence, or when a required check would cover no criterion.",
+      "--set-title":
+        "Update the task title (--set-title <title> [--reason <why>] [--task <task-id>]); review data, so --reason is accepted for symmetry (10-1000 characters when given) and never required.",
+      "--set-goal":
+        "Update the task goal (--set-goal <goal> [--reason <why>] [--task <task-id>]); review data, so --reason is accepted for symmetry (10-1000 characters when given) and never required.",
       "--set-paths":
         "Replace the relevant paths and/or specs from repeatable --relevant-path and --relevant-spec flags; needs no reason.",
       "--batch":
@@ -186,7 +196,7 @@ export function workflowEnvelopeSchema(): WorkflowEnvelopeSchemaV1 {
       "--brief":
         "Print only id, status, checkpoint and updatedAt (preflight: without learning); the commands that accept it are listed in constraints.brief.",
       "--finish":
-        "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? } and, only when a file of the task (relevant paths or check inputs) shows a sign of a secret, secretAdvisory { files, findings: [{ path, rule }], hint } (at most 5, never a value; hint names .gitignore, narrower check inputs and harnix-secret-waiver; advice, it does not block).",
+        "Terminal completion; accepts no body. With --brief it also returns learning { notes, captured, hint? } and, only when a file of the task (relevant paths or check inputs) that changed since HEAD (every such file when Git cannot answer, noted in the hint) shows a sign of a secret, secretAdvisory { files, findings: [{ path, rule }], hint } (at most 5, never a value; hint names .gitignore, narrower check inputs and harnix-secret-waiver; advice, it does not block).",
       "--cancel":
         "Terminal cancellation; the only cancellation transport. Add --task <task-id> to cancel another unfinished task (the active pointer is cleared only if it names that task).",
       "--tick":

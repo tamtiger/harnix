@@ -2,6 +2,7 @@
 
 Adds only what the Route section of `.harnix/workflow.md` (routing table, Lite and Full, stop rules) leaves out.
 
+- Review timing: a standalone task is reviewed (`harnix-review`) right after implementation and before finish; an epic is reviewed once over its whole diff after its last member is implemented, not per member.
 - A `blocked` task resumes only at its recorded status: read the blocker, resolve or report it, then continue there
   unless the user cancels it. A `completed` or `cancelled` task whose pointer remains routes to `verify`.
 - `harnix-review` and `harnix-research` are Bypass: they never read or change an active task and do not need this page.
