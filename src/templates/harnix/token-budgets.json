@@ -1,0 +1,11 @@
+{
+  "alwaysLoaded": 1500,
+  "skill": 2000,
+  "skills": { "harnix-plan": 1700 },
+  "techniqueSkill": 1200,
+  "reference": 1200,
+  "workflow": 2500,
+  "directPath": 3600,
+  "fullPath": 11000,
+  "referenceExemptions": []
+}

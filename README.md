@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.29.1`
+**Version:** `2.30.1`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -158,7 +158,7 @@ Ngoài 6 skill quy trình trên, Harnix đóng gói sẵn **7 technique-skills �
 - `harnix-migration-safety`: Rà soát an toàn di chuyển dữ liệu, schema và breaking changes (`--reference zero-downtime-evolution`).
 - `harnix-security-lens`: Ống kính bảo mật rà soát ranh giới dữ liệu không tin cậy, injection, traversal (`--reference injection-traversal-guardrails`).
 - `harnix-sequential-thinking`: Phân tích tuần tự kiến trúc phức tạp, so sánh tradeoffs và kiểm chứng đa bước (`--reference multi-step-tree-search`).
-- `harnix-arch-review`: Đánh giá kiến trúc hệ thống doanh nghiệp, phân rã WBS và bóc tách Backend Core vs BFF (`--reference domain-briefs`, `wbs-consolidation`).
+- `harnix-arch-review`: Đánh giá kiến trúc hệ thống doanh nghiệp, phân rã WBS và bóc tách Backend Core vs BFF (`--reference domain-briefs`, `domain-briefs-operations`, `wbs-consolidation`).
 - Kèm cẩm nang kiến trúc .NET Microservices trong `harnix-implement` (`--reference dotnet-microservices`).
 
 **Extension Point cho dự án:** Bạn có thể tự thêm skill riêng tại `.harnix/spec/skills/<skill-name>/SKILL.md`. Harnix tự động phát hiện qua `harnix skill --all` và đồng bộ vào platform agent.

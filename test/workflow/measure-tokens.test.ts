@@ -15,7 +15,32 @@ interface Meter {
   steps: Step[];
   step(label: string, args: string[], input?: string): string;
 }
+interface BudgetEntry {
+  tokens: number;
+  budget: number;
+  percent: number;
+}
 interface MeasureTokens {
+  budgetUsage(
+    budgets: {
+      skill: number;
+      skills: Record<string, number>;
+      reference: number;
+      workflow: number;
+      referenceExemptions: string[];
+    },
+    sizes: { workflow: number; skills: Record<string, number>; references: Record<string, number> },
+  ): {
+    workflow: BudgetEntry;
+    skills: Record<string, BudgetEntry>;
+    references: (BudgetEntry & { id: string; exempt: boolean })[];
+    referencesOverCeiling: string[];
+  };
+  measureInstructionFiles(
+    root: string,
+    estimate: (text: string) => number,
+  ): Promise<{ workflow: number; skills: Record<string, number>; references: Record<string, number> }>;
+  loadTokenBudgets(): Promise<{ skill: number; reference: number; workflow: number; skills: Record<string, number> }>;
   TOKEN_APPROXIMATION: number;
   sessionLiteTokens(report: unknown): number;
   estimateTokens(text: string): number;
@@ -36,6 +61,50 @@ const script = (await import(new URL("../../scripts/measure-tokens.mjs", import.
 const ok = (stdout: string): ReturnType<Runner> => ({ status: 0, stdout, stderr: "" });
 
 describe("measure-tokens helpers", () => {
+  it("reports the share of each ceiling that is used, with the references closest to it first", () => {
+    const usage = script.budgetUsage(
+      { skill: 2000, skills: { "harnix-plan": 1000 }, reference: 1200, workflow: 2500, referenceExemptions: ["a/big"] },
+      {
+        workflow: 1250,
+        skills: { "harnix-plan": 500, "harnix-review": 1500 },
+        references: { "a/big": 1800, "a/small": 300 },
+      },
+    );
+
+    expect(usage.workflow).toEqual({ tokens: 1250, budget: 2500, percent: 50 });
+    expect(usage.skills["harnix-plan"]).toEqual({ tokens: 500, budget: 1000, percent: 50 });
+    expect(usage.skills["harnix-review"]?.percent).toBe(75);
+    expect(usage.references.map((item) => item.id)).toEqual(["a/big", "a/small"]);
+    expect(usage.references[0]).toMatchObject({ percent: 150, exempt: true });
+    expect(usage.referencesOverCeiling).toEqual(["a/big"]);
+  });
+
+  it("measures the SKILL.md, reference and workflow.md files of a source tree", async () => {
+    const root = await mkdtemp(join(tmpdir(), "harnix-measure-files-"));
+    try {
+      await mkdir(join(root, "src", "skills", "harnix-x", "references"), { recursive: true });
+      await mkdir(join(root, "src", "skills", "no-skill-file"), { recursive: true });
+      await mkdir(join(root, "src", "templates", "harnix"), { recursive: true });
+      await writeFile(join(root, "src", "skills", "harnix-x", "SKILL.md"), "a".repeat(40));
+      await writeFile(join(root, "src", "skills", "harnix-x", "references", "topic.md"), "b".repeat(8));
+      await writeFile(join(root, "src", "skills", "harnix-x", "references", "notes.txt"), "ignored");
+      await writeFile(join(root, "src", "templates", "harnix", "workflow.md"), "c".repeat(12));
+
+      const sizes = await script.measureInstructionFiles(root, script.estimateTokens);
+
+      expect(sizes).toEqual({ workflow: 3, skills: { "harnix-x": 10 }, references: { "harnix-x/topic": 2 } });
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it("reads the ceilings from the shared token-budgets.json", async () => {
+    const budgets = await script.loadTokenBudgets();
+
+    expect(budgets.skill).toBeGreaterThan(0);
+    expect(budgets.skills["harnix-plan"]).toBeGreaterThan(0);
+  });
+
   it("estimates tokens with the project approximation of four characters per token, rounded up", () => {
     expect(script.TOKEN_APPROXIMATION).toBe(4);
     expect(script.estimateTokens("")).toBe(0);

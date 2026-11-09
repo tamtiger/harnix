@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { TOKEN_BUDGETS, approximateTokens } from "src/templates/harnix/token-budgets.js";
 import { workflowSkills, workflowTemplate } from "src/templates/harnix/workflow.js";
 
-const tokens = (text: string): number => Math.ceil(text.length / 4);
-/** Size of the template before it became a lean cheat sheet (about 6,166 tokens). */
-const BASELINE_TOKENS = 6_166;
+const tokens = approximateTokens;
 const DETAIL_PAGES = [
   "workflow-routing",
   "task-state",
@@ -14,8 +13,8 @@ const DETAIL_PAGES = [
 ];
 
 describe("lean workflow cheat sheet", () => {
-  it("is at least 60% smaller than the former template", () => {
-    expect(tokens(workflowTemplate)).toBeLessThanOrEqual(Math.floor(BASELINE_TOKENS * 0.4));
+  it("stays within the workflow.md ceiling", () => {
+    expect(tokens(workflowTemplate)).toBeLessThanOrEqual(TOKEN_BUDGETS.workflow);
   });
 
   it("keeps the four operational sections and one command block", () => {

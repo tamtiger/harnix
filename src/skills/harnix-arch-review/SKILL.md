@@ -2,7 +2,7 @@
 name: harnix-arch-review
 description: Use when reviewing enterprise system architecture, evaluating WBS estimations, performing three-way requirement gap analysis or separating Backend Core from BFF layers.
 metadata:
-  version: "2.29.1"
+  version: "2.30.1"
 ---
 
 # Architecture design review
@@ -27,7 +27,7 @@ Enterprise initiatives often suffer from misaligned requirements, duplicate back
 1. **Detect & research domain**:
    - Inspect customer identity, vocabulary, and channel names to establish domain context.
    - Reference `domain-briefs` for actors, regulatory regimes, core modules, and integration benchmarks.
-   - Detail: `harnix skill harnix-arch-review --reference domain-briefs`.
+   - Detail: `harnix skill harnix-arch-review --reference domain-briefs` (pharma, e-commerce, banking, insurance, logistics) or `harnix skill harnix-arch-review --reference domain-briefs-operations` (healthcare, EdTech, SaaS, manufacturing, supply chain).
 
 2. **WBS structural extraction**:
    - Scan channel sheets dynamically for the `Backend` effort column; forward-fill Level-1 and Level-2 feature hierarchies.

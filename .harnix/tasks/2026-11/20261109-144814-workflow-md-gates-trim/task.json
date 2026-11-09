@@ -1,0 +1,152 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-144814-workflow-md-gates-trim",
+  "epicId": "20261109-144812-skills-workflow-refactor",
+  "title": "Gọn workflow.md và các khối luôn nạp, đẩy chi tiết Gates sang reference",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Đưa workflow.md về khoảng 2200 token bằng cách rút mỗi mục Gates còn một dòng trỏ vào harnix-verify --reference gates, không mất quy tắc nào, và có chỗ cho --remove-check, lệnh gộp evidence + criterion và quy ước thời điểm review.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "src/templates/harnix/workflow.md ≤ 2200 token (trần 2500): mỗi mục Gates còn một dòng nêu tên cổng và trỏ vào harnix skill harnix-verify --reference gates; mọi quy tắc bị rút đều còn trong gates.md (test parity bắt quy tắc bị mất).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Cookbook trong workflow.md có --remove-check, --evidence ... --criterion --met và một dòng quy ước thời điểm review (task đơn lẻ sau implement, epic sau khi implement hết member) mà vẫn ≤ 2200 token.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Các khối luôn nạp (steering Kiro/Antigravity, khối Claude, khối Codex, bootstrap AGENTS.md) giữ nguyên ≤ 1500 token; pnpm selfhost:sync cho kết quả đồng bộ và .harnix/workflow.md khớp template.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu và snapshot đồng bộ: AGENTS.md, docs/HARNIX_WORKFLOW.md, docs/HARNIX_PRD.md và docs/IMPLEMENTATION_PLAN.md nếu bề mặt công khai đổi; pnpm selfhost:sync khi template workflow đổi; behavior-snapshot.golden.json chỉ đổi đúng chuỗi mới; bump 2.30.0-dev.N (member cuối đóng 2.30.0 bằng --fold-dev) kèm CHANGELOG trước verifying.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    ".harnix/workflow.md",
+    "src/skills/harnix-verify/references/gates.md",
+    "src/templates/harnix/workflow.md",
+    "test/workflow/lean-workflow.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/workflow",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test: cli-contract, architecture, docs, golden, instruction budget",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T15:14:02.686+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8ebaece2c3c5155ed536b389bd638fa621b45eba1e2ba9fb9355d9f575fa1c37"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T15:14:11.292+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "dfe71f6a7baa0256c3349d0fcfcbd328ab55d18d3f041e1c438fd66c389f7ca5"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T15:15:58.221+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5a8d6beb9b1bb9e71cacf52843ee7f6b1cdcdb5680702b3a8ea0f6eb978a6bb5"
+    }
+  ],
+  "createdAt": "2026-11-09T14:48:12.593+07:00",
+  "updatedAt": "2026-11-09T15:16:05.516+07:00",
+  "completedAt": "2026-11-09T15:16:05.516+07:00"
+}

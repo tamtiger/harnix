@@ -1,0 +1,14 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261109-144812-skills-workflow-refactor",
+  "title": "Refactor skills, reference và workflow theo trần token mới",
+  "goal": "Đưa mọi trần token về một nơi, nâng trần (skill 2000, harnix-plan 1700, reference 1200, workflow 2500) đồng thời refactor workflow.md, skill chính, skill phụ, reference và docs để mỗi file nằm dưới mục tiêu, không mất quy tắc nào, và đường nạp mỗi phiên không phình.",
+  "nonGoals": [
+    "Không đổi hành vi của CLI hay hợp đồng đóng băng; chỉ đổi nội dung hướng dẫn, trần token và công cụ đo.",
+    "Không nâng trần khối luôn nạp (giữ 1500) và không đổi trần của guide.",
+    "Không đổi description (trigger) của các skill."
+  ],
+  "createdAt": "2026-11-09T14:48:12.593+07:00",
+  "updatedAt": "2026-11-09T14:48:12.593+07:00"
+}

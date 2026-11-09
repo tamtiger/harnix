@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.29.1"
+  version: "2.30.1"
 ---
 
 # Implement with evidence
@@ -17,7 +17,7 @@ A blocked task: read its blocker, resolve it or report the exact condition, then
 
 ## Review the plan
 
-Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands in `.harnix/spec/project-facts.md`, custom project skills in `.harnix/spec/skills/` (or `harnix skill --all`), the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. New findings during implementation go to one of four tiers (`harnix skill harnix-implement --reference discoveries`). A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. `harnix repo-map --query` / `--impact` / `--tests` / `--outline <path> [--symbol <name>]` (symbol spans before slicing large files) / `--refs <symbol> [--path <path>]` (call sites before signature edits) are navigation hints; verify the source yourself. When modifying existing codebases, maintain local conventions and isolate changes: read `./references/brownfield.md` (or `harnix skill harnix-implement --reference brownfield`).
+Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands in `.harnix/spec/project-facts.md`, custom project skills in `.harnix/spec/skills/` (or `harnix skill --all`), the affected code and tests, and the current diff. Confirm no material decision is open, every named file or interface exists or is created, each slice has a RED and a focused GREEN command, and the checklist is ordered and unchecked. New findings during implementation go to one of four tiers (`harnix skill harnix-implement --reference discoveries`). A critical gap is not coded around: set checkpoint `replan` (a flag edit with `--reason`) and hand back to `harnix-plan`. `harnix repo-map --query` / `--impact` / `--tests` / `--outline <path> [--symbol <name>]` (symbol spans before slicing large files) / `--refs <symbol> [--path <path>]` (call sites before signature edits) are navigation hints; verify the source yourself. When modifying existing codebases, maintain local conventions and isolate changes: `harnix skill harnix-implement --reference brownfield`.
 
 ## RED, GREEN, REFACTOR per behavior
 
@@ -43,7 +43,7 @@ Release-visible changes follow the version policy: a standalone task bumps the p
 
 ## Feedback and stop conditions
 
-Reviewer or user feedback is a hypothesis: read all of it, verify it against the code and contract, apply one item at a time, push back with evidence (`./references/feedback.md` or `harnix skill harnix-implement --reference feedback`). Stop and route on a new product or compatibility decision, a plan that contradicts evidence, a missing dependency or authority, a repeated unexplained failure, or a change that would overwrite user-owned content.
+Reviewer or user feedback is a hypothesis: read all of it, verify it against the code and contract, apply one item at a time, push back with evidence (`harnix skill harnix-implement --reference feedback`). Stop and route on a new product or compatibility decision, a plan that contradicts evidence, a missing dependency or authority, a repeated unexplained failure, or a change that would overwrite user-owned content.
 
 ## Technique skills & Active triggers
 
@@ -58,4 +58,4 @@ Reviewer or user feedback is a hypothesis: read all of it, verify it against the
 - Implementation and focused checks done: `--transition verifying/verifying`, hand to `harnix-verify`.
 - Review timing: a standalone task gets `harnix-review` right after implementation, before finish; an epic is reviewed once, after its last member (`harnix skill harnix-verify --reference workflow-routing`).
 
-Before showing proposed commits, review diffs and structure messages: read `./references/commit-hygiene.md` (or `harnix skill harnix-implement --reference commit-hygiene`). Never branch, commit, push or open a PR on your own; before a commit run `git branch --show-current`, never pipe `git checkout`, show the diff and message and wait for approval.
+Before showing proposed commits, review diffs and structure messages: `harnix skill harnix-implement --reference commit-hygiene`. Never branch, commit, push or open a PR on your own; before a commit run `git branch --show-current`, never pipe `git checkout`, show the diff and message and wait for approval.

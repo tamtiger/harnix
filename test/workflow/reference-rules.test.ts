@@ -79,7 +79,7 @@ const RULES: readonly Rule[] = [
     file: `${VERIFY}/task-state.md`,
     phrases: ["review with `harnix learning`"],
   },
-  { rule: "epic: expected branch", file: `${PLAN}/epic.md`, phrases: ["expected base or feature branch"] },
+  { rule: "epic: expected branch", file: `${PLAN}/epic-git.md`, phrases: ["expected base or feature branch"] },
   { rule: "epic: follow-up notice", file: `${PLAN}/epic.md`, phrases: ["`notice:`", "has none"] },
   {
     rule: "plan critique: lenses, verified candidates, skipped",

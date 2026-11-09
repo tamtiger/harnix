@@ -1,0 +1,196 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-154946-review-fixes-two",
+  "title": "Sửa các phát hiện review của epic skills-workflow-refactor",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Khép các phát hiện review: pointer epic-git đủ rộng, bảng sở hữu quy tắc ghi đúng chủ và test kiểm nội dung, quy tắc --task và git checkout trở lại workflow.md, README liệt kê domain-briefs-operations, measureInstructionFiles có test, và ghi decision về việc nâng trần.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Dòng trỏ trong harnix-plan/SKILL.md tới reference epic-git nêu cả chuyển task với cây làm việc chưa sạch, quy tắc Git branching và worktree/subagent, để agent chuyển task bình thường biết cần nạp nó.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "docs/RULE_OWNERSHIP.md ghi đúng chủ của nhóm Secret (secret-scan.ts và mục Agent transport của workflow.md, không phải mục Secrets không tồn tại của AGENTS.md); test rule-ownership kiểm thêm rằng file chủ chứa cụm từ đặc trưng của quy tắc, để chủ sai làm test đỏ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "workflow.md có lại quy tắc --task <id> (sửa task chưa kết thúc khác mà không đổi pointer) và cụm never pipe git checkout trong Commit discipline, mà vẫn không quá trần 2500 và gần 2200 token.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "README.md liệt kê domain-briefs-operations cạnh domain-briefs; measureInstructionFiles có test trên một cây tạm và comment nói rõ con số đo file thô nên xấp xỉ so với gate.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Một decision của task ghi việc nâng trần (skill 1800 sang 2000, harnix-plan 1630 sang 1700) là quyết định đã thống nhất của epic skills-workflow-refactor, không phải nâng để qua test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-focus-2"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Tài liệu và snapshot đồng bộ: pnpm selfhost:sync khi template workflow đổi, golden chỉ đổi đúng chuỗi mới, bump patch 2.30.1 kèm CHANGELOG trước verifying.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-2",
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của các sửa review",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/workflow test/unit/skills test/unit/templates",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test: cli-contract, architecture, docs, golden, instruction budget",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test:gates",
+      "criterionIds": [
+        "ac-6"
+      ],
+      "inputs": [
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T15:52:52.694+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow test/unit/skills test/unit/templates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bda41114b4d33cbfd1a6e48757288ecf83190f0b887d96c8535520c8906c56cd"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T15:53:00.721+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "677e47c84494da9ef6f0f515da7c1f27541f8740aed17713ff10cc35edbacb05"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-09T15:54:25.984+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b5e9a756146b82c615bed1a227accde03fc819e1ff830a89ff9188d975f56ca9"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T15:56:35.350+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow test/unit/skills test/unit/templates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2f45c7a58925e1adf8bea4aee18a31ae896e2c33a54f69d3495161117e670a2f"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T15:56:43.640+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fbc10ad8ae9baa7dc3aca3d91d66cfc761d285f356072bdfe60cca6318e2a4e8"
+    },
+    {
+      "id": "ev-check-suite-2",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-09T15:58:10.416+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "252a717477634eb9404aa0ab2382dce1538743baf635bec4b1b9e4adcd8a8193"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-09T15:49:46.910+07:00",
+  "updatedAt": "2026-11-09T15:58:54.632+07:00",
+  "decisions": [
+    {
+      "id": "dec-ceilings-agreed",
+      "text": "Việc nâng trần skill 1800 lên 2000 và harnix-plan 1630 lên 1700 là quyết định đã thống nhất của epic skills-workflow-refactor, không nâng để một thay đổi qua test.",
+      "rationale": "Người dùng yêu cầu nâng trần kèm refactor; hai trần đường nạp được hạ (4000 xuống 3600, 15000 xuống 11000) để tổng chi phí không phình."
+    }
+  ],
+  "completedAt": "2026-11-09T15:58:54.632+07:00"
+}

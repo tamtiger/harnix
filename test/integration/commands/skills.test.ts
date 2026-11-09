@@ -25,6 +25,7 @@ describe("harnix skill", () => {
       "replan",
       "migration",
       "epic",
+      "epic-git",
       "multi-repo",
       "ready-review",
       "grilling",
@@ -105,7 +106,7 @@ describe("harnix skill", () => {
     });
     expect(reportSkillReference("harnix-check", "evidence")).toMatchObject({ name: "harnix-verify" });
     expect(() => reportSkillReference("harnix-plan", "nope")).toThrow(
-      /Available: replan, migration, epic, multi-repo, ready-review, grilling/u,
+      /Available: replan, migration, epic, epic-git, multi-repo, ready-review, grilling/u,
     );
     expect(() => reportSkillReference("harnix-review", "anything")).toThrow(/Available: multi-lens, finding-triage/u);
     expect(() => reportSkillReference("harnix-plan", "__proto__")).toThrow(/Unknown reference/u);

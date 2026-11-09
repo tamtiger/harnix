@@ -1,0 +1,184 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-144815-main-skills-refactor",
+  "epicId": "20261109-144812-skills-workflow-refactor",
+  "title": "Refactor skill chính plan, implement, verify và reference của chúng",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Gọn harnix-verify (≤ 1700, tách phần finish/cancel còn dòng trỏ), harnix-plan (≤ 1550, trần 1700) và harnix-implement (≤ 1700) mà không mất quy tắc nào; tách phần Multi-Agent Worktree khỏi epic.md để mỗi reference ≤ 1200.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "harnix-verify/SKILL.md ≤ 1700, harnix-plan/SKILL.md ≤ 1550 và harnix-implement/SKILL.md ≤ 1700 token; phần finish và cancel của harnix-verify chỉ còn dòng trỏ vào reference finish-cancel; các test skill-sources và needle xanh, nghĩa là không mất quy tắc nào.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-gates-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "harnix-plan/references/epic.md ≤ 1200 token sau khi tách phần Multi-Agent Worktree sang một reference riêng; mỗi reference mới có đúng một dòng trỏ tới nó trong SKILL.md hoặc epic.md; epic.md ra khỏi danh sách miễn trừ trần reference.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-gates-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Description của các skill (trigger) không đổi, và dòng phiên bản của mỗi SKILL.md đã cập nhật theo checklist sửa SKILL.md.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-gates-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu và snapshot đồng bộ: AGENTS.md, docs/HARNIX_WORKFLOW.md, docs/HARNIX_PRD.md và docs/IMPLEMENTATION_PLAN.md nếu bề mặt công khai đổi; pnpm selfhost:sync khi template workflow đổi; behavior-snapshot.golden.json chỉ đổi đúng chuỗi mới; bump 2.30.0-dev.N (member cuối đóng 2.30.0 bằng --fold-dev) kèm CHANGELOG trước verifying.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-2",
+        "ev-chk-suite-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/skills/harnix-implement/SKILL.md",
+    "src/skills/harnix-plan/SKILL.md",
+    "src/skills/harnix-plan/references/epic.md",
+    "src/skills/harnix-verify/SKILL.md",
+    "src/skills/harnix-verify/references/finish-cancel.md",
+    "test/workflow/skill-sources.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/workflow",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test: cli-contract, architecture, docs, golden, instruction budget",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T15:21:12.109+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9d5aebbd5b91329ed8b88e92b20902d65dcc93c916a7b7ca1c50e00b65fc20c7"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T15:21:21.442+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "75fe863eca99bb856b1d6d59c315dadf183ea030447c0421ef45464f4f60a2c6"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T15:23:09.169+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "872407f562b4cd752226712051e7b63182bba5170d7b5af837814c8d47b75094"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T15:23:55.232+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "6b89c51660a1bae5aad0040202acc69557a47ec3de16bd6ec4a1e29e71a7100f"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T15:24:04.490+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "d674afeb32d6330099f0ff5ff45691aa6e2d84d0f0d9ea7eed33f80c16416bf9"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T15:25:31.692+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1dac7470b2df1272fff658ed16b2366e424f2c01b53347e2d6658cf5406033e9"
+    }
+  ],
+  "createdAt": "2026-11-09T14:48:12.593+07:00",
+  "updatedAt": "2026-11-09T15:26:02.103+07:00",
+  "completedAt": "2026-11-09T15:26:02.103+07:00"
+}

@@ -4,6 +4,21 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.30.1] - 2026-11-09
+
+### Fixed
+
+- Sửa các phát hiện review của epic skills-workflow-refactor: pointer epic-git đủ rộng, bảng quy tắc ghi đúng chủ và test kiểm cụm từ của owner, workflow.md có lại --task và never pipe git checkout, README liệt kê domain-briefs-operations, measureInstructionFiles có test
+
+## [2.30.0] - 2026-11-09
+
+### Changed
+
+- Mọi trần token về một nơi (token-budgets.json): skill 2000, harnix-plan 1700, reference 1200, workflow 2500, đường nạp trực tiếp 3600 và task Full 11000; có test trần cho từng reference (epic và domain-briefs tạm miễn trừ), measure:tokens in mức đã dùng so với trần
+- workflow.md còn 2200 token: mục Gates rút còn một dòng mỗi cổng (chi tiết ở reference gates), thêm --remove-check, lệnh gộp evidence + criterion và quy ước thời điểm review; lệnh ít dùng chuyển sang reference cookbook-commands
+- Skill chính gọn: harnix-verify còn 1685 token, harnix-implement 1671, harnix-plan 1538; epic.md tách Git flow và multi-agent worktree sang reference epic-git (epic 1189, epic-git 573) nên ra khỏi danh sách miễn trừ trần reference; trần reference và technique skill đọc từ token-budgets.json
+- Refactor skills, reference và workflow theo trần token mới: mọi trần về token-budgets.json (skill 2000, harnix-plan 1700, reference 1200, workflow 2500), workflow.md 2200 token, skill chính gọn, epic.md và domain-briefs tách reference, bảng quy tắc và nơi sở hữu docs/RULE_OWNERSHIP.md
+
 ## [2.29.1] - 2026-11-09
 
 ### Fixed

@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { techniqueSkills } from "src/skills/technique-skills.js";
 import { workflowSkills } from "src/skills/catalog.js";
+import { TOKEN_BUDGETS, approximateTokens } from "src/templates/harnix/token-budgets.js";
 import type { WorkflowStageOwner } from "src/core/workflow/routing.js";
 
-const TOKEN_BUDGET = 1_200;
-const tokens = (text: string): number => Math.ceil(text.length / 4);
+const TOKEN_BUDGET = TOKEN_BUDGETS.techniqueSkill;
+const tokens = approximateTokens;
 
 const expectedTechniqueSkillNames = [
   "harnix-verification-gap",
@@ -63,7 +64,11 @@ describe("technique skills catalog", () => {
   it("exposes references for skills that declare them", () => {
     const archReview = techniqueSkills.find((s) => s.name === "harnix-arch-review");
     expect(archReview).toBeDefined();
-    expect(Object.keys(archReview!.references).sort()).toEqual(["domain-briefs", "wbs-consolidation"]);
+    expect(Object.keys(archReview!.references).sort()).toEqual([
+      "domain-briefs",
+      "domain-briefs-operations",
+      "wbs-consolidation",
+    ]);
 
     const bugfixPreserve = techniqueSkills.find((s) => s.name === "harnix-bugfix-preserve");
     expect(bugfixPreserve).toBeDefined();

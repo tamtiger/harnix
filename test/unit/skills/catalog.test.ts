@@ -2,13 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { legacySkillAliases, renderSkill, workflowSkills } from "src/skills/catalog.js";
 
-const TOKEN_BUDGET = 2_000;
-const tokens = (text: string): number => Math.ceil(text.length / 4);
-
 const expectedReferences: Record<string, string[]> = {
   "harnix-plan": [
     "decision-discipline",
     "epic",
+    "epic-git",
     "grilling",
     "migration",
     "multi-repo",
@@ -47,7 +45,6 @@ describe("skill catalog references", () => {
       for (const [topic, content] of Object.entries(skill.references)) {
         const label = `${skill.name}/${topic}`;
         expect(content.startsWith("# "), label).toBe(true);
-        expect(tokens(content), label).toBeLessThanOrEqual(TOKEN_BUDGET);
         expect(content, label).not.toMatch(/\]\((?:\.\/)?[\w-]+\.md\)/u);
         expect(content.endsWith("\n"), label).toBe(true);
       }

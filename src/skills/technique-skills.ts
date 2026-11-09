@@ -8,6 +8,7 @@ import sequentialThinkingSource from "./harnix-sequential-thinking/SKILL.md";
 import verificationGapSource from "./harnix-verification-gap/SKILL.md";
 import archReviewSource from "./harnix-arch-review/SKILL.md";
 import domainBriefsReference from "./harnix-arch-review/references/domain-briefs.md";
+import domainBriefsOperationsReference from "./harnix-arch-review/references/domain-briefs-operations.md";
 import wbsConsolidationReference from "./harnix-arch-review/references/wbs-consolidation.md";
 import invariantDebuggingReference from "./harnix-bugfix-preserve/references/invariant-debugging.md";
 import concurrencyIsolationReference from "./harnix-flaky-test/references/concurrency-isolation.md";
@@ -112,6 +113,7 @@ const canonicalTechniqueSources: readonly [string, Record<string, string>][] = [
     archReviewSource,
     {
       "domain-briefs": domainBriefsReference,
+      "domain-briefs-operations": domainBriefsOperationsReference,
       "wbs-consolidation": wbsConsolidationReference,
     },
   ],

@@ -8,6 +8,7 @@ import discoveriesReference from "./harnix-implement/references/discoveries.md";
 import feedbackReference from "./harnix-implement/references/feedback.md";
 import decisionDisciplineReference from "./harnix-plan/references/decision-discipline.md";
 import epicReference from "./harnix-plan/references/epic.md";
+import epicGitReference from "./harnix-plan/references/epic-git.md";
 import grillingReference from "./harnix-plan/references/grilling.md";
 import migrationReference from "./harnix-plan/references/migration.md";
 import multiRepoReference from "./harnix-plan/references/multi-repo.md";
@@ -46,6 +47,7 @@ const canonicalSources: readonly [string, Record<string, string>][] = [
       replan: replanReference,
       migration: migrationReference,
       epic: epicReference,
+      "epic-git": epicGitReference,
       "multi-repo": multiRepoReference,
       "ready-review": readyReviewReference,
       grilling: grillingReference,

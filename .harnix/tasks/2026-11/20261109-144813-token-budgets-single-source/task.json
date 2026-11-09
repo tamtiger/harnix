@@ -1,0 +1,154 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-144813-token-budgets-single-source",
+  "epicId": "20261109-144812-skills-workflow-refactor",
+  "title": "Đưa mọi trần token về một nơi và đo mức dùng",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Một module hằng số giữ mọi trần token (skill 2000, harnix-plan 1700, reference 1200, workflow 2500, khối luôn nạp 1500, đường nạp trực tiếp 3600, đường nạp task Full 11000); test và script đo cùng đọc từ đó, và có test trần cho từng reference.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "src/templates/harnix/token-budgets.ts là nơi duy nhất giữ các trần (skill 2000, harnix-plan 1700, reference 1200, workflow 2500, khối luôn nạp 1500, đường nạp trực tiếp 3600, đường nạp task Full 11000); instruction-budget.test.ts, lean-workflow.test.ts, measure-tokens.mjs và chú thích trong activation.ts đọc từ đó, và phép tính 40% của mốc 6166 bị bỏ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Có test trần cho từng file reference (1200 token); reference đang vượt (epic.md, domain-briefs.md) nằm trong một danh sách miễn trừ chỉ được co lại, kèm member sẽ gỡ từng file; một file reference mới vượt trần làm test đỏ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "pnpm measure:tokens in thêm mức đã dùng (phần trăm so với trần) cho skill, reference và workflow.md, để thấy file nào sát trần.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu và snapshot đồng bộ: AGENTS.md, docs/HARNIX_WORKFLOW.md, docs/HARNIX_PRD.md và docs/IMPLEMENTATION_PLAN.md nếu bề mặt công khai đổi; pnpm selfhost:sync khi template workflow đổi; behavior-snapshot.golden.json chỉ đổi đúng chuỗi mới; bump 2.30.0-dev.N (member cuối đóng 2.30.0 bằng --fold-dev) kèm CHANGELOG trước verifying.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "scripts/measure-tokens.mjs",
+    "src/templates/harnix/activation.ts",
+    "src/templates/harnix/token-budgets.ts",
+    "test/workflow/instruction-budget.test.ts",
+    "test/workflow/lean-workflow.test.ts",
+    "test/workflow/measure-tokens.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/workflow/instruction-budget.test.ts test/workflow/lean-workflow.test.ts test/workflow/measure-tokens.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test: cli-contract, architecture, docs, golden, instruction budget",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T15:02:14.255+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/instruction-budget.test.ts test/workflow/lean-workflow.test.ts test/workflow/measure-tokens.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "bdf96a7ee145e80b0ad1f2465d2ca69102f3c5fad2471bb7f5259e14c10e0be3"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T15:02:22.747+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4b255b8c9881680b868a7e9c2cc6aa2f05b281efddedd426f46b4d83de8aa973"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T15:03:50.302+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "410f14b5b25fd4ead0ff6ca96cdcee1043bd3d5a6c18d072a4cb62f18fc55e25"
+    }
+  ],
+  "createdAt": "2026-11-09T14:48:12.593+07:00",
+  "updatedAt": "2026-11-09T15:04:20.780+07:00",
+  "completedAt": "2026-11-09T15:04:20.780+07:00"
+}

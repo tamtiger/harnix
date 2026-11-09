@@ -4,21 +4,18 @@ import { claudeGlobalMemoryContent } from "src/configurators/claude.js";
 import { codexGlobalAgentsContent } from "src/configurators/codex.js";
 import { HARNIX_GLOBAL_ACTIVATION_DOCUMENT } from "src/templates/harnix/global-surface.js";
 import { renderAgentsTemplate } from "src/templates/harnix/agents.js";
-import { renderSkill, workflowSkills, workflowTemplate } from "src/templates/harnix/workflow.js";
+import { TOKEN_BUDGETS, approximateTokens, skillBudget } from "src/templates/harnix/token-budgets.js";
+import { canonicalSkills, renderSkill } from "src/skills/catalog.js";
+import { workflowTemplate } from "src/templates/harnix/workflow.js";
 
-/** Same approximation as `context.tokenApproximation` in `.harnix/config.yaml`. */
-const CHARACTERS_PER_TOKEN = 4;
-const tokens = (text: string): number => Math.ceil(text.length / CHARACTERS_PER_TOKEN);
-
-const ALWAYS_LOADED_BUDGET = 1_500;
-const SKILL_BUDGET = 1_800;
-/** harnix-plan is the most loaded skill (59 loads in 37 transcripts); it was trimmed to 1527 tokens and keeps 100 tokens of headroom. */
-const SKILL_BUDGETS: Readonly<Record<string, number>> = { "harnix-plan": 1_630 };
-const DIRECT_PATH_BUDGET = 4_000;
-const FULL_PATH_BUDGET = 15_000;
+// Every ceiling comes from src/templates/harnix/token-budgets.json; none is written in this file.
+const tokens = approximateTokens;
+const ALWAYS_LOADED_BUDGET = TOKEN_BUDGETS.alwaysLoaded;
+const DIRECT_PATH_BUDGET = TOKEN_BUDGETS.directPath;
+const FULL_PATH_BUDGET = TOKEN_BUDGETS.fullPath;
 
 function skill(name: string): string {
-  const found = workflowSkills.find((candidate) => candidate.name === name);
+  const found = canonicalSkills.find((candidate) => candidate.name === name);
   if (found === undefined) throw new Error(`skill ${name} is missing`);
   return renderSkill(found);
 }
@@ -37,8 +34,34 @@ describe("instruction token budgets", () => {
     expect(tokens(text)).toBeLessThanOrEqual(ALWAYS_LOADED_BUDGET);
   });
 
-  it.each(workflowSkills.map((item) => item.name))("keeps %s within the per-skill budget", (name) => {
-    expect(tokens(skill(name))).toBeLessThanOrEqual(SKILL_BUDGETS[name] ?? SKILL_BUDGET);
+  it.each(canonicalSkills.map((item) => item.name))("keeps %s within the per-skill budget", (name) => {
+    expect(tokens(skill(name))).toBeLessThanOrEqual(skillBudget(name));
+  });
+
+  it("keeps workflow.md within its ceiling", () => {
+    expect(tokens(workflowTemplate)).toBeLessThanOrEqual(TOKEN_BUDGETS.workflow);
+  });
+
+  const references = canonicalSkills.flatMap((item) =>
+    Object.entries(item.references).map(([topic, text]) => ({ id: `${item.name}/${topic}`, tokens: tokens(text) })),
+  );
+
+  it.each(references.filter((item) => !TOKEN_BUDGETS.referenceExemptions.includes(item.id)))(
+    "keeps the reference $id within the reference ceiling",
+    ({ tokens: used }) => {
+      expect(used).toBeLessThanOrEqual(TOKEN_BUDGETS.reference);
+    },
+  );
+
+  it("lets the exemption list only shrink: each exempt reference exists and is still above the ceiling", () => {
+    const known = new Map(references.map((item) => [item.id, item.tokens]));
+
+    for (const id of TOKEN_BUDGETS.referenceExemptions) {
+      expect(known.has(id), `${id} is not a reference`).toBe(true);
+      expect(known.get(id) ?? 0, `${id} fits the ceiling, so drop it from referenceExemptions`).toBeGreaterThan(
+        TOKEN_BUDGETS.reference,
+      );
+    }
   });
 
   it("keeps the direct path (always-loaded block plus harnix-implement) within budget", () => {

@@ -1,0 +1,240 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261109-144816-secondary-skills-and-docs-sync",
+  "epicId": "20261109-144812-skills-workflow-refactor",
+  "title": "Gọn skill phụ, guide, reference còn lại và lập bảng quy tắc ↔ nơi sở hữu",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Tách domain-briefs.md, gọn các reference sát trần (dotnet-microservices, gates, evidence), rà skill phụ và guide, lập bảng quy tắc ↔ nơi sở hữu có test kiểm, cập nhật AGENTS.md và docs bản gốc với trần mới, rồi đóng epic bằng release 2.30.0.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "domain-briefs.md ≤ 1200 token sau khi tách theo miền (domain-briefs và domain-briefs-operations); dotnet-microservices.md, gates.md và evidence.md giữ trong trần 1200 token (không ép 900 vì giảm thêm phải bỏ quy tắc); danh sách miễn trừ trần reference rỗng và test trần reference xanh không miễn trừ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-3",
+        "ev-chk-gates-3",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "docs/RULE_OWNERSHIP.md liệt kê từng nhóm quy tắc (cổng ready/finish, thời điểm review, chính sách version, trạng thái task, secret, trần token) với nơi canonical của nó; một test kiểm mọi đường dẫn và tên reference trong bảng còn tồn tại.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-3",
+        "ev-chk-gates-3",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "AGENTS.md và docs bản gốc nêu trần token mới và đường dẫn module token-budgets.ts; checklist sửa SKILL.md dùng trần mới; mỗi skill phụ và guide đã được rà trùng lặp và vẫn dưới trần.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-3",
+        "ev-chk-gates-3",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "pnpm release:check xanh và phiên bản đóng epic là 2.30.0 bằng pnpm version:sync 2.30.0 --fold-dev; CHANGELOG gộp các bản dev.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-3",
+        "ev-chk-gates-3",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Tài liệu và snapshot đồng bộ: AGENTS.md, docs/HARNIX_WORKFLOW.md, docs/HARNIX_PRD.md và docs/IMPLEMENTATION_PLAN.md nếu bề mặt công khai đổi; pnpm selfhost:sync khi template workflow đổi; behavior-snapshot.golden.json chỉ đổi đúng chuỗi mới; bump 2.30.0-dev.N (member cuối đóng 2.30.0 bằng --fold-dev) kèm CHANGELOG trước verifying.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-gates-3",
+        "ev-chk-suite-3"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "docs/HARNIX_PRD.md",
+    "docs/HARNIX_WORKFLOW.md",
+    "docs/IMPLEMENTATION_PLAN.md",
+    "docs/RULE_OWNERSHIP.md",
+    "src/skills/harnix-arch-review/references/domain-briefs.md",
+    "src/skills/harnix-implement/references/dotnet-microservices.md",
+    "src/skills/harnix-verify/references/evidence.md",
+    "src/skills/harnix-verify/references/gates.md",
+    "test/workflow/docs-task-contract.test.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của thay đổi",
+      "command": "pnpm exec vitest run test/workflow",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract test: cli-contract, architecture, docs, golden, instruction budget",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ test của dự án phải xanh",
+      "command": "pnpm test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "docs/**",
+        "scripts/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-09T15:27:19.493+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Mục tiêu 900 token cho ba reference đòi bỏ quy tắc; giữ trong trần 1200 thay vì cắt nội dung.",
+      "artifactPaths": [
+        ".harnix/tasks/20261109-144816-secondary-skills-and-docs-sync/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T15:29:20.451+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "505a3da3fe35bf4e959bfca1cbcfb7ea276baa3e17a6cdbad82be94a35810652"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T15:29:30.440+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4efe0050d9d56e37ac60a88e38fdf2db0a0f80bd08c582356d6900d4b4958f3a"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T15:30:59.361+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "0489d8b7c749e629ebea3f8533deefe83da17ffb2957e4aac3e70fcbe99e8640"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T15:31:47.532+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "db3686918920d55789bc328c18b7e13f8106f6f4bb3a6da8afca7c425bc290e6"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T15:31:56.221+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b07c8c9a2dac3dea0c4a18652a2c0c4187224d53cdc3d1dbd75af377a8276e32"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T15:33:45.046+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4e60d0e585ffab21849b17bf8b743854e32b5b9a026a8e9b49f729d08461709b"
+    },
+    {
+      "id": "ev-chk-focus-3",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-09T15:37:56.176+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "26fa20af065fe85c683ba40eb1d50041bb8d1beb28f59b869cf94ae834ab946c"
+    },
+    {
+      "id": "ev-chk-gates-3",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-09T15:38:04.705+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8054ee284d4f1b2bfa048412d503512675380e9415292afa0a883971cb666bd7"
+    },
+    {
+      "id": "ev-chk-suite-3",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-09T15:39:28.156+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b9dba893fc8a7d97ac64bbc7b51b827c687b9a8d6f21466265fb9fa940dc0055"
+    }
+  ],
+  "createdAt": "2026-11-09T14:48:12.593+07:00",
+  "updatedAt": "2026-11-09T15:45:45.108+07:00",
+  "completedAt": "2026-11-09T15:45:45.108+07:00"
+}

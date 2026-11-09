@@ -10,7 +10,8 @@ Detail behind the Gates section of `.harnix/workflow.md`.
   test structure adds a focused check for the project's contract tests.
 - **Contract immutability:** rewriting a criterion whose check recorded evidence needs `--reason` and turns those passes stale; checks with a pass remain immutable and check failures are retired unchanged with a replacement required check
   ID. A check edit at `verifying` (`--set-check`, `--replace-check`, `--add-criterion`) resumes at `verifying/verifying` in the same call because every recorded pass stays immutable; elsewhere it
-  stays at checkpoint `replan` until `ready/ready`.
+  stays at checkpoint `replan` until `ready/ready`. A check that never passed may change only its `--cwd` or description with `--set-check` directly (no reason, no replan) unless the circuit breaker already stopped it (failed twice
+  in a row); `--remove-check <id>` drops a check that never recorded evidence (a reason after planning).
 - **Red baseline:** when the suite was already red before the task and outside its scope, the user authorizes it once with
   `harnix workflow --set-baseline <check-id> --result fail --classification pre-existing|environment --authorized-by user --scope "<why>"` (review data: no `--reason`, no replan). Finish then accepts
   that suite check without a fresh pass only while its latest run is that red result and another passing required check covers all of its criteria; `introduced`, `unknown`, a missing authorizer or a

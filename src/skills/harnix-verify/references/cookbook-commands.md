@@ -9,6 +9,10 @@ harnix workflow --set-baseline <check-id> --result fail --classification pre-exi
 harnix workflow --remove-decision <id> --brief   # planning only; --remove-criterion <id> likewise (refused after planning or once a check recorded evidence)
 harnix workflow --epic-order <epic-id> <task-id>...   # explicit run order of an epic's members
 harnix workflow --schema --full              # the envelope schema plus the description of every flag
+harnix workflow --tick <item|all>            # tick plan.md checklist items (Full)
+harnix workflow --set-title | --set-goal "<t>" | --set-paths --relevant-path <p> --brief
+harnix workflow --remove-risk <id> --brief   # drop a settled residual risk
+harnix repo-map --query|--impact|--tests|--outline|--refs <x>   # navigation hints; verify the source yourself
 harnix workflow --reset-breaker <check-id> --reason "<why, 10-1000 characters>" --brief   # user-authorized; the other exits are a new input digest and --replace-check
 ```
 
