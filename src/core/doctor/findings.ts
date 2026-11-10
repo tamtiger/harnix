@@ -29,10 +29,6 @@ export function sortFindings(findings: readonly DoctorFinding[]): DoctorFinding[
   );
 }
 
-export function isMissing(error: unknown): error is NodeJS.ErrnoException {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
-}
-
 /** Strips the project root and secret-looking assignments from an error before it reaches a report. */
 export function redact(value: unknown, root: string): string {
   return String(value instanceof Error ? value.message : value)

@@ -6,6 +6,7 @@ import { buildVerifyPlan } from "src/core/stack/verify-plan.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { readGitContext } from "src/utils/git.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 /** Derived file: rewritten by `init` and `update`, never listed in the managed manifest, never user-owned. */
 export const PROJECT_FACTS_PATH = ".harnix/spec/project-facts.md";
@@ -88,7 +89,7 @@ export async function writeProjectFacts(root: string): Promise<"created" | "upda
   try {
     current = await readFile(destination, "utf8");
   } catch (error: unknown) {
-    if (typeof error !== "object" || error === null || (error as { code?: string }).code !== "ENOENT") throw error;
+    if (!isMissingPathError(error)) throw error;
   }
   if (current === text) return "unchanged";
   await atomicWriteFile(destination, text);

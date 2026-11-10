@@ -2,7 +2,7 @@
 name: harnix-migration-safety
 description: Use when designing or reviewing schema migrations, contract breaking changes, data transitions or structural refactorings to guarantee data preservation and backward compatibility.
 metadata:
-  version: "2.31.1"
+  version: "2.32.0"
 ---
 
 # Migration safety and data preservation
@@ -11,7 +11,6 @@ Design and verify schema and contract changes to ensure historical data remains 
 
 ## Evidence and Rationale
 
-Evidence source: `research/external-research.md` (§C IFScale 2507.11538 regarding instruction growth and compliance decay, and Harnix Core Decision D1/D11 in `docs/OVERHAUL_DECISIONS.md` on breaking changes requiring legacy readability).
 Schema updates and storage refactorings pose significant risks of data corruption or historical loss. Migration safety ensures that structural evolution preserves existing records and handles incomplete runs gracefully.
 
 ## When to use
@@ -48,3 +47,5 @@ Schema updates and storage refactorings pose significant risks of data corruptio
 - [ ] Interrupted migration: verify that a crash or abort before completion does not delete user data or leave unreadable state.
 - [ ] Rollback validation: verify that migration rollback/down procedures succeed cleanly without data loss.
 - [ ] No silent mutation: confirm that read-only commands do not mutate persistent disk state.
+
+Detail on demand: `harnix skill harnix-migration-safety --reference zero-downtime-evolution`.

@@ -1,4 +1,4 @@
-import { sortFindings, finding } from "src/core/doctor/findings.js";
+import { sortFindings, finding, redact } from "src/core/doctor/findings.js";
 import { restoreFullArtifacts } from "src/core/doctor/restore-artifacts.js";
 import { diagnoseGlobal, type DiagnoseGlobalDeps } from "src/core/doctor/global.js";
 import type {
@@ -14,6 +14,7 @@ import {
 import { GlobalManagedTransactionError } from "src/core/global/managed-files.js";
 import { getPlatform } from "src/core/platform/registry.js";
 import { diagnoseRepoMap, refreshRepoMap } from "src/core/repo-map/service.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export interface DoctorReport {
   schemaVersion: 2;
@@ -57,8 +58,13 @@ export async function runDoctor(options: DoctorRunOptions, deps: DoctorDeps): Pr
   if (!options.fix) return report(project, globalIntegrations, 0);
 
   let fixed = 0;
+  let fixFailures: string[] = [];
   let globalRollbackPartial: string[] = [];
-  if (!options.global && project.status === "ready") fixed += await fixProjectState(options.root, deps);
+  if (!options.global && project.status === "ready") {
+    const outcome = await fixProjectState(options.root, deps);
+    fixed += outcome.fixed;
+    fixFailures = outcome.failures;
+  }
   if (options.global) {
     try {
       const reconciliation = await deps.fixGlobal({
@@ -77,6 +83,10 @@ export async function runDoctor(options: DoctorRunOptions, deps: DoctorDeps): Pr
     }
   }
   project = await diagnoseProjectSection(options.root, deps.desiredPaths, deps.generatorVersion);
+  if (fixFailures.length > 0) {
+    const failed = fixFailures.map((message) => finding("fix-step-failed", "warning", undefined, message, false));
+    project = { ...project, findings: [...project.findings, ...failed] };
+  }
   globalIntegrations = await diagnoseGlobals();
   if (globalRollbackPartial.length > 0) {
     globalIntegrations = addPartialRollbackFindings(globalIntegrations, globalRollbackPartial);
@@ -84,28 +94,38 @@ export async function runDoctor(options: DoctorRunOptions, deps: DoctorDeps): Pr
   return report(project, globalIntegrations, fixed);
 }
 
-async function fixProjectState(root: string, deps: DoctorDeps): Promise<number> {
-  let fixed = 0;
-  try {
-    fixed += await restoreFullArtifacts(root);
-  } catch {
-    // No tasks directory or an unsafe path: the diagnosis reports it, nothing is written.
-  }
-  try {
-    fixed += await deps.fixProject(root);
-  } catch {
-    // Re-diagnose to report an invalid project state without exposing an implementation-specific
-    // error in a global hook or JSON consumer.
-  }
-  try {
-    if ((await diagnoseRepoMap(root)) !== "ready") {
-      await refreshRepoMap({ root });
-      fixed += 1;
+/** `redact` hides the project root; any other absolute path in an error message is hidden too. */
+function withoutMachinePaths(message: string): string {
+  return message.replace(/(?:[A-Za-z]:[\\/]|\/)[^\s'"`]+/gu, (path) =>
+    path.startsWith("[PROJECT]") ? path : "[PATH]",
+  );
+}
+
+interface ProjectFixOutcome {
+  fixed: number;
+  /** One redacted line per step that threw, so `doctor --fix` never fails silently. */
+  failures: string[];
+}
+
+async function fixProjectState(root: string, deps: DoctorDeps): Promise<ProjectFixOutcome> {
+  const outcome: ProjectFixOutcome = { fixed: 0, failures: [] };
+  const attempt = async (step: string, run: () => Promise<number>, ignoreMissing = false): Promise<void> => {
+    try {
+      outcome.fixed += await run();
+    } catch (error: unknown) {
+      // No tasks directory is normal for a project without tasks; any other failure is reported next to the diagnosis.
+      if (ignoreMissing && isMissingPathError(error)) return;
+      outcome.failures.push(`${step} failed: ${withoutMachinePaths(redact(error, root))}`);
     }
-  } catch {
-    // The second diagnosis reports the cache state without replacing an unsafe path.
-  }
-  return fixed;
+  };
+  await attempt("Restoring Full task artifacts", () => restoreFullArtifacts(root), true);
+  await attempt("Reconciling managed project files", () => deps.fixProject(root));
+  await attempt("Refreshing the repository map", async () => {
+    if ((await diagnoseRepoMap(root)) === "ready") return 0;
+    await refreshRepoMap({ root });
+    return 1;
+  });
+  return outcome;
 }
 
 function globalOptions(options: DoctorRunOptions): DiagnoseGlobalIntegrationsOptions {

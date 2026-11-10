@@ -1,7 +1,7 @@
 import { secretPath } from "./inventory.js";
 
 /** How many skipped paths a refresh names; the rest are only counted. */
-export const MAX_LISTED_SKIPPED = 10;
+const MAX_LISTED_SKIPPED = 10;
 /** The marker the inventory leaves in its skipped list when it stops at a size or count limit. */
 const LIMIT_MARKER = "limit";
 

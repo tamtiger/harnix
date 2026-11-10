@@ -3,6 +3,7 @@ import { dirname, isAbsolute, join, resolve, win32 } from "node:path";
 
 import { compareCodeUnits } from "./order.js";
 import { UnsafeProjectPathError, resolveSafeHarnixPath } from "./paths.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 const CHILD_LISTING_LIMIT = 10;
 /** Only plain names reach a message: a directory name is untrusted text and must not carry control or markup characters. */
@@ -110,7 +111,7 @@ async function nearestInitializedRoot(start: string): Promise<InitializedProject
       // readable by the current process. Treat that branch as unavailable so
       // explicitly supplied workspace roots can still be considered safely.
       if (isInaccessible(error)) return { kind: "none" };
-      if (!isMissing(error)) throw error;
+      if (!isMissingPathError(error)) throw error;
     }
     const parent = dirname(current);
     if (parent === current) return { kind: "none" };
@@ -125,12 +126,6 @@ async function isUsableAbsoluteDirectory(value: string | undefined): Promise<boo
   } catch {
     return false;
   }
-}
-
-function isMissing(error: unknown): boolean {
-  return (
-    typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT"
-  );
 }
 
 function isInaccessible(error: unknown): boolean {

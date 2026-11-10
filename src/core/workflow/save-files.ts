@@ -3,11 +3,13 @@ import { Buffer } from "node:buffer";
 import { validateContextManifest } from "src/core/context/context.js";
 import { contextSelectionResultHash, validateContextSelectionSnapshot } from "src/core/context/selection-freshness.js";
 import type { TaskArtifacts, TaskRecord } from "src/core/tasks/task.js";
-import { isMissing, sameBytes } from "src/core/tasks/workflow-helpers.js";
+import { sameBytes } from "src/core/tasks/workflow-helpers.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { resolveTaskDirectory, taskRelativeDirectory } from "src/core/tasks/task-location.js";
+import { isMissingPathError } from "src/utils/errno.js";
+import { readOptionalText } from "src/utils/filesystem.js";
 
 const RESEARCH_ARTIFACT_NAME = /^[a-z0-9][a-z0-9._-]*\.md$/u;
 
@@ -63,7 +65,7 @@ export async function captureWorkflowSaveFiles(
     try {
       snapshots.push({ relativePath, path, original: await readFile(path), forward: forwardContent.get(relativePath) });
     } catch (error: unknown) {
-      if (isMissing(error))
+      if (isMissingPathError(error))
         snapshots.push({ relativePath, path, original: undefined, forward: forwardContent.get(relativePath) });
       else throw error;
     }
@@ -103,7 +105,7 @@ async function readOptionalBytes(path: string): Promise<Uint8Array | undefined> 
   try {
     return await readFile(path);
   } catch (error: unknown) {
-    if (!isMissing(error)) throw error;
+    if (!isMissingPathError(error)) throw error;
     return undefined;
   }
 }
@@ -169,14 +171,5 @@ async function assertPersistedContextPair(directory: string, task: TaskRecord): 
     }
   } catch {
     throw new Error("Workflow replay context selection pair is unreadable, invalid, or unbound.");
-  }
-}
-
-async function readOptionalText(path: string): Promise<string | undefined> {
-  try {
-    return await readFile(path, "utf8");
-  } catch (error: unknown) {
-    if (isMissing(error)) return undefined;
-    throw error;
   }
 }

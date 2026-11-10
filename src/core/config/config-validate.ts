@@ -16,6 +16,7 @@ import {
   type PlatformId,
   type VerifyConfig,
 } from "./config-schema.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export function validateDeveloperId(value: string): string {
   if (!developerPattern.test(value)) throw new ConfigValidationError("developer must be a safe journal ID.");
@@ -219,5 +220,5 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export function isMissingFile(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
+  return isMissingPathError(error);
 }

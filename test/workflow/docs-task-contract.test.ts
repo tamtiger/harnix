@@ -313,8 +313,9 @@ describe("self-host sync documentation parity", () => {
     const surfaces = {
       "AGENTS.md": await read("AGENTS.md"),
       "harnix-self-host project skill": await read(".harnix/spec/skills/harnix-self-host/SKILL.md"),
-      "workflow template": workflowGuidance,
     };
+    // The workflow template is served to every repository, so it must not name a command only this repository has.
+    expect(workflowGuidance).not.toContain("pnpm selfhost:sync");
     for (const [name, text] of Object.entries(surfaces)) expect(text, name).toContain("pnpm selfhost:sync");
     expect(surfaces["AGENTS.md"]).toMatch(/preserved[^\n]{0,200}unchanged|unchanged[^\n]{0,200}preserved/u);
   });
@@ -322,11 +323,8 @@ describe("self-host sync documentation parity", () => {
 
 describe("fast contract gates documentation parity", () => {
   it("suggests test:gates as a focused check and documents test:failures", async () => {
-    for (const [name, text] of Object.entries({
-      "workflow template": workflowGuidance,
-      "harnix-self-host project skill": await read(".harnix/spec/skills/harnix-self-host/SKILL.md"),
-    }))
-      expect(text, name).toContain("pnpm run test:gates");
+    expect(workflowGuidance).not.toContain("pnpm run test:gates");
+    expect(await read(".harnix/spec/skills/harnix-self-host/SKILL.md")).toContain("pnpm run test:gates");
     const agents = await read("AGENTS.md");
     expect(agents).toContain("test:gates");
     expect(agents).toContain("test:failures");

@@ -2,14 +2,7 @@ import { stat } from "node:fs/promises";
 
 import { inspectConfigDrift } from "src/core/doctor/config-drift.js";
 import { readConfigDocument, type HarnixConfigV2 } from "src/core/config/config.js";
-import {
-  containsSecret,
-  finding,
-  isMissing,
-  redact,
-  sortFindings,
-  type DoctorFinding,
-} from "src/core/doctor/findings.js";
+import { containsSecret, finding, redact, sortFindings, type DoctorFinding } from "src/core/doctor/findings.js";
 import {
   inspectLegacyEntry,
   inspectUntrackedLegacySurfaces,
@@ -22,6 +15,7 @@ import { ownershipState, readManifest, type ManagedManifest } from "src/core/man
 import { detectVersionSkew, skewMessage } from "src/core/versions/skew.js";
 import { diagnoseRepoMap } from "src/core/repo-map/service.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export type DoctorProjectStatus = "ready" | "not-initialized" | "invalid";
 export interface DoctorProjectSection {
@@ -54,7 +48,7 @@ export async function diagnoseProjectSection(
         ),
       );
   } catch (error: unknown) {
-    if (isMissing(error)) {
+    if (isMissingPathError(error)) {
       return {
         status: "not-initialized",
         findings: [
@@ -215,7 +209,7 @@ async function inspectPermissions(root: string, manifest: ManagedManifest, findi
       if ((metadata.mode & 0o002) !== 0)
         findings.push(finding("broad-permissions", "warning", entry.path, "Managed file is world-writable.", false));
     } catch (error: unknown) {
-      if (!isMissing(error))
+      if (!isMissingPathError(error))
         findings.push(finding("permission-check-failed", "warning", entry.path, redact(error, root), false));
     }
   }

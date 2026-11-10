@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildCriterion, buildTaskV2 } from "test/support/builders.js";
+import { buildCheck, buildCriterion, buildTaskV2 } from "test/support/builders.js";
 import { buildCommandlessCheck } from "test/support/tasks-fixtures.js";
 
 import { resumeTask, type TaskResumeDependencies } from "src/core/tasks/task-resume.js";
@@ -135,3 +135,33 @@ function terminalTask(id: string): TaskRecordV2 {
     completedAt: base.updatedAt,
   };
 }
+
+describe("task resume test-file warnings", () => {
+  it("warns about every missing test file even when several inputs are scanned one after another", async () => {
+    const candidate = {
+      ...task("20260826-160010-warn-target", "planning"),
+      validationPlan: [
+        buildCheck({
+          id: "gate",
+          description: "private",
+          criterionIds: ["criterion"],
+          inputs: ["@task-contract", "test/a.test.ts", "test/b.test.ts"],
+          command: "pnpm exec vitest run test/c.test.ts",
+        }),
+      ],
+    };
+    const dependencies: TaskResumeDependencies = {
+      loadCandidate: async () => candidate,
+      loadActive: async () => null,
+      activate: vi.fn(async () => undefined),
+      fileExists: async () => false,
+    };
+
+    const result = await resumeTask("unused", candidate.id, true, dependencies);
+    const warnings = (result as { warnings?: string[] }).warnings ?? [];
+    expect(warnings).toHaveLength(3);
+    for (const name of ["test/a.test.ts", "test/b.test.ts", "test/c.test.ts"]) {
+      expect(warnings.some((warning) => warning.includes(name))).toBe(true);
+    }
+  });
+});

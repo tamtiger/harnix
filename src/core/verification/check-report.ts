@@ -29,14 +29,6 @@ export interface RequiredCheckInspection {
   readonly findings?: readonly EvidenceFindingV1[] | undefined;
 }
 
-export function createCheckFailureFinding(
-  id: string,
-  text: string,
-  severity: "low" | "medium" | "high" | "critical" = "high",
-): EvidenceFindingV1 {
-  return { id, text, severity };
-}
-
 /**
  * A v3 pass is current exactly when the digest recomputed from today's inputs equals the
  * digest stored inline in the evidence. Legacy v1/v2 passes cannot be re-proven under

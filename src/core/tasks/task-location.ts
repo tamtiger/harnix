@@ -1,6 +1,7 @@
 import { readdir, stat } from "node:fs/promises";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
-import { isMissing, TaskValidationError } from "./task-validate-common.js";
+import { TaskValidationError } from "./task-validate-common.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 /** Read-only store below `tasks/` and `epics/`; its children are month buckets. */
 export const ARCHIVE_DIRECTORY = "_archive";
@@ -46,7 +47,7 @@ export async function directoryExists(path: string): Promise<boolean> {
   try {
     return (await stat(path)).isDirectory();
   } catch (error: unknown) {
-    if (isMissing(error)) return false;
+    if (isMissingPathError(error)) return false;
     throw error;
   }
 }
@@ -104,7 +105,7 @@ async function childNames(path: string): Promise<{ name: string; directory: bool
       directory: entry.isDirectory(),
     }));
   } catch (error: unknown) {
-    if (isMissing(error)) return [];
+    if (isMissingPathError(error)) return [];
     throw error;
   }
 }

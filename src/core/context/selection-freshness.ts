@@ -8,7 +8,7 @@ import { compareCodeUnits } from "src/utils/order.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { validateContextManifest, type ContextManifest } from "./context.js";
 
-export const CONTEXT_SELECTOR_VERSION = 1 as const;
+const CONTEXT_SELECTOR_VERSION = 1 as const;
 
 export interface ContextSelectionSnapshotV1 {
   generator: "harnix";

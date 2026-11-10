@@ -1,5 +1,6 @@
 import { GlobalManagedManifestError } from "src/core/global/managed-error.js";
 import type { JsonArrayMemberSelector, JsonValue } from "src/core/global/managed-files.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 export function defaultJsonMemberMatcher(candidate: JsonValue, selector: JsonArrayMemberSelector): boolean {
   return isJsonObject(candidate) && candidate.id === selector.memberId;
@@ -127,10 +128,6 @@ function escapeJsonPointerToken(token: string): string {
 
 function jsonObject(): { [key: string]: JsonValue } {
   return Object.create(null) as { [key: string]: JsonValue };
-}
-
-function compareCodeUnits(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

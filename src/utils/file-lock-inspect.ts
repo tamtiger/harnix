@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import { hasErrorCode, isMissingPathError } from "src/utils/errno.js";
 import type {
   FileLockClock,
   FileLockFileSystem,
@@ -23,7 +24,7 @@ export type ExistingLockInspection =
 export const lockRecordNamePattern =
   /^owner-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.json$/u;
 
-export const currentProcessIdentity: FileLockProcessIdentity = Object.freeze({
+const currentProcessIdentity: FileLockProcessIdentity = Object.freeze({
   pid: process.pid,
   startedAt: formatInstant(Date.now() - process.uptime() * 1_000),
 });
@@ -80,7 +81,7 @@ export async function inspectExistingLock(
   try {
     directoryMetadata = await filesystem.lstat(path);
   } catch (error: unknown) {
-    if (isMissing(error)) return { action: "wait" };
+    if (isMissingPathError(error)) return { action: "wait" };
     throw error;
   }
   if (!directoryMetadata.isDirectory() || directoryMetadata.isSymbolicLink()) {
@@ -150,7 +151,7 @@ export async function isSoleOwnedToken(
       (await filesystem.readFile(join(path, recordName), "utf8")) === serializedRecord
     );
   } catch (error: unknown) {
-    if (isMissing(error) || isNotDirectory(error)) return false;
+    if (isMissingPathError(error) || isNotDirectory(error)) return false;
     throw error;
   }
 }
@@ -165,7 +166,7 @@ export async function removeObservedLock(
       if ((await filesystem.readFile(token.path, "utf8")) !== token.source) return false;
       await filesystem.rm(token.path, { force: true });
     } catch (error: unknown) {
-      if (!isMissing(error) && !isNotDirectory(error)) throw error;
+      if (!isMissingPathError(error) && !isNotDirectory(error)) throw error;
     }
   }
   return removeEmptyLockDirectory(filesystem, path);
@@ -181,17 +182,17 @@ export async function removeOwnedToken(
     if (source !== token.source) return false;
     await filesystem.rm(token.path, { force: true });
   } catch (error: unknown) {
-    if (!isMissing(error) && !isNotDirectory(error)) throw error;
+    if (!isMissingPathError(error) && !isNotDirectory(error)) throw error;
   }
   return removeEmptyLockDirectory(filesystem, path);
 }
 
-export async function removeEmptyLockDirectory(filesystem: FileLockFileSystem, path: string): Promise<boolean> {
+async function removeEmptyLockDirectory(filesystem: FileLockFileSystem, path: string): Promise<boolean> {
   try {
     await filesystem.rmdir(path);
     return true;
   } catch (error: unknown) {
-    if (isMissing(error)) return true;
+    if (isMissingPathError(error)) return true;
     if (isNotDirectory(error) || isDirectoryNotEmpty(error)) return false;
     throw error;
   }
@@ -202,11 +203,7 @@ export function isAlreadyExists(error: unknown): boolean {
 }
 
 export function isCandidateLost(error: unknown): boolean {
-  return isMissing(error) || isNotDirectory(error) || isAlreadyExists(error);
-}
-
-export function isMissing(error: unknown): boolean {
-  return hasErrorCode(error, "ENOENT");
+  return isMissingPathError(error) || isNotDirectory(error) || isAlreadyExists(error);
 }
 
 /**
@@ -220,19 +217,15 @@ export function isReleasePending(error: unknown): boolean {
 
 /** The lock vanished or its holder is releasing it right now, so the caller should wait and look again. */
 function isLockChanging(error: unknown): boolean {
-  return isMissing(error) || isNotDirectory(error) || isReleasePending(error);
+  return isMissingPathError(error) || isNotDirectory(error) || isReleasePending(error);
 }
 
-export function isNotDirectory(error: unknown): boolean {
+function isNotDirectory(error: unknown): boolean {
   return hasErrorCode(error, "ENOTDIR");
 }
 
-export function isDirectoryNotEmpty(error: unknown): boolean {
+function isDirectoryNotEmpty(error: unknown): boolean {
   return hasErrorCode(error, "ENOTEMPTY") || hasErrorCode(error, "EEXIST");
-}
-
-export function hasErrorCode(error: unknown, code: string): boolean {
-  return typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === code;
 }
 
 export function isValidProcessIdentity(value: FileLockProcessIdentity): boolean {

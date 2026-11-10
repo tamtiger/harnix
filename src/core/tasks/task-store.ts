@@ -15,7 +15,8 @@ import { extractCodeImpactSection, renderTaskReview, type ReviewArtifacts } from
 import { noteTaskRead } from "./read-tracker.js";
 import type { TaskRecord } from "./task-schema.js";
 import { validateTask } from "./task-validate.js";
-import { TaskValidationError, isMissing, validateTaskId } from "./task-validate-common.js";
+import { TaskValidationError, validateTaskId } from "./task-validate-common.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 async function exists(path: string): Promise<boolean> {
   try {
@@ -173,7 +174,7 @@ export async function resolveActiveTask(harnixRoot: string): Promise<TaskRecord 
   try {
     taskId = (await readFile(activePath, "utf8")).trim();
   } catch (error: unknown) {
-    if (isMissing(error)) return undefined;
+    if (isMissingPathError(error)) return undefined;
     throw error;
   }
   if (taskId.length === 0) return undefined;
@@ -181,7 +182,8 @@ export async function resolveActiveTask(harnixRoot: string): Promise<TaskRecord 
   try {
     return await loadTask(await taskFilePath(harnixRoot, taskId, "task.json"));
   } catch (error: unknown) {
-    if (isMissing(error)) throw new TaskValidationError("Active task pointer references a missing task record.");
+    if (isMissingPathError(error))
+      throw new TaskValidationError("Active task pointer references a missing task record.");
     throw error;
   }
 }
@@ -190,7 +192,7 @@ export async function clearActiveTask(harnixRoot: string, taskId: string): Promi
   try {
     if ((await readFile(activePath, "utf8")).trim() === taskId) await atomicWriteFile(activePath, "");
   } catch (error: unknown) {
-    if (!isMissing(error)) throw error;
+    if (!isMissingPathError(error)) throw error;
   }
 }
 export async function archiveTask(harnixRoot: string, task: TaskRecord): Promise<void> {

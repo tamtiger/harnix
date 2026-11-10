@@ -5,6 +5,7 @@ import { parse } from "yaml";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { resolvesInside } from "src/utils/safe-read.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export interface SkillTemplate {
   name: string;
@@ -16,7 +17,7 @@ export interface SkillTemplate {
   references: Readonly<Record<string, string>>;
 }
 
-export const PROJECT_SKILLS_REL_PATH = "spec/skills";
+const PROJECT_SKILLS_REL_PATH = "spec/skills";
 
 const REFERENCE_TOPIC = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
@@ -36,7 +37,7 @@ export async function discoverProjectSkills(root: string): Promise<readonly Skil
   try {
     entries = await readdir(skillsDir);
   } catch (error: unknown) {
-    if (isMissing(error)) return [];
+    if (isMissingPathError(error)) return [];
     throw error;
   }
 
@@ -58,7 +59,7 @@ export async function discoverProjectSkills(root: string): Promise<readonly Skil
     try {
       rawContent = await readFile(skillFilePath, "utf8");
     } catch (error: unknown) {
-      if (isMissing(error)) continue;
+      if (isMissingPathError(error)) continue;
       throw error;
     }
 
@@ -128,10 +129,4 @@ function parseProjectSkillSource(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isMissing(error: unknown): boolean {
-  return (
-    typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"
-  );
 }

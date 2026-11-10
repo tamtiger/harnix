@@ -10,7 +10,7 @@
 | Repository root | Resolved dynamically; no machine-specific path is part of product output |
 | Package / executable | `@tamtiger/harnix` / `harnix` |
 | Project data / generator / skills | `.harnix/` / `harnix` / `harnix-*` |
-| Status | **Implemented in the authorized scope**; Phase 6, workflow freshness C1–C3 và Epic 2.19.0 (Enterprise Events, Brief Defaults, Multi-Workspace & Active Technique Skills) đã hoàn tất 100%. Revalidation 2026-08-18 proved disposable `agy` implicit routing/no-op control; current `agy --print` hook loading, Kiro/Codex disposable login/trust and GUI surfaces remain conservative/not-run rather than being inferred active. |
+| Status | **Implemented in the authorized scope**; Phase 6, workflow freshness C1–C3 và Epic 2.19.0 (Enterprise Events, Brief Defaults, Multi-Workspace & Active Technique Skills) đã hoàn tất 100%; các epic và bản phát hành sau đó được ghi trong `CHANGELOG.md`. Revalidation 2026-08-18 proved disposable `agy` implicit routing/no-op control; current `agy --print` hook loading, Kiro/Codex disposable login/trust and GUI surfaces remain conservative/not-run rather than being inferred active. |
 
 Tài liệu này là nguồn yêu cầu sản phẩm chính. `HARNIX_WORKFLOW.md` là contract chuẩn cho state/transition/gate/artifact của workflow; `IMPLEMENTATION_PLAN.md`, `HARNESS_RESEARCH.md`, `UPSTREAM_MAPPING.md` và `UPSTREAM_BASELINE.md` giải thích cách triển khai và provenance. Khi có mâu thuẫn về product behavior, PRD được ưu tiên; khi chi tiết workflow không được PRD quy định, `HARNIX_WORKFLOW.md` được ưu tiên, trừ khi yêu cầu mới của người dùng ghi rõ override.
 

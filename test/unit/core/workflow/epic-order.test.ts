@@ -52,6 +52,8 @@ describe("workflow --epic-order", () => {
     await setEpicOrderWorkflow(root, "ordered-epic", [B], NOW);
 
     expect((await setEpicOrderWorkflow(root, "ordered-epic", [], NOW)).order).toBeUndefined();
+    // The stored record must lose the order too: a save envelope keeps an order it does not name, --epic-order clears it.
+    expect((await loadEpicOrThrow(join(root, ".harnix"), "ordered-epic")).order).toBeUndefined();
   });
 
   it("rejects a task outside the epic, a duplicate and an unknown epic without writing", async () => {

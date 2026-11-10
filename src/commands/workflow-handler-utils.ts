@@ -1,7 +1,7 @@
 import { briefTask } from "src/commands/internal-workflow.js";
 import type { WorkflowContext } from "src/commands/workflow-handlers.js";
-import { readBoundedInput } from "src/utils/bounded-input.js";
-import { readFile } from "src/utils/fs-access.js";
+import { defaultMaximumInputBytes, readBoundedInput } from "src/utils/bounded-input.js";
+import { lstat, readFile } from "src/utils/fs-access.js";
 import { resolveSafeFilePath } from "src/utils/paths.js";
 
 const OPTIONAL_STDIN_IDLE_MS = 2_000;
@@ -11,6 +11,24 @@ export const withoutBom = (input: string | undefined): string | undefined => {
   if (input === undefined) return undefined;
   return input.replace(/^\uFEFF/u, "").replace(/^\uFFFE/u, "");
 };
+
+/** A `--file` payload under the same size limit as stdin, with the BOM removed; the message names the limit. */
+export async function readBoundedFile(root: string, file: string): Promise<string> {
+  const target = await resolveSafeFilePath(root, file);
+  if ((await lstat(target)).size > defaultMaximumInputBytes)
+    throw new Error(
+      `The --file payload is larger than ${defaultMaximumInputBytes} bytes; split it into smaller payloads.`,
+    );
+  return withoutBom(await readFile(target, "utf8")) ?? "";
+}
+
+/** `--evidence --criterion` only works in the flag form: with a JSON envelope the criteria would be dropped silently. */
+export function assertNoCriterionWithEnvelope(flags: WorkflowContext["flags"]): void {
+  if (flags.criterion === undefined) return;
+  throw new Error(
+    "--criterion with --evidence needs the flag form (--check, --result, --summary); with a JSON envelope record the evidence first, then run: harnix workflow --criterion <ids> --met",
+  );
+}
 
 /** The body of one command, read once: a retried handler gets the same text instead of an already drained stdin. */
 const inputs = new WeakMap<object, Promise<string | undefined>>();
@@ -24,10 +42,7 @@ export function readInput(context: WorkflowContext, optional = false): Promise<s
 }
 
 async function readInputOnce(context: WorkflowContext, optional: boolean): Promise<string | undefined> {
-  if (context.flags.file !== undefined) {
-    const target = await resolveSafeFilePath(context.root, context.flags.file);
-    return withoutBom(await readFile(target, "utf8"));
-  }
+  if (context.flags.file !== undefined) return readBoundedFile(context.root, context.flags.file);
   if (context.options.workflowInput) return withoutBom(await context.options.workflowInput());
   if (!optional) return withoutBom(await readBoundedInput(process.stdin));
   if (process.stdin.isTTY === true) return "";
@@ -53,8 +68,8 @@ export async function readRequired(context: WorkflowContext, subject: string, in
   return parseJson(input, invalid);
 }
 
-export /** Splits a glob list on commas outside braces, so `*.{ts,tsx}` and `My Dir/**` survive intact. */
-const splitGlobList = (value: string): string[] => {
+/** Splits a glob list on commas outside braces, so `*.{ts,tsx}` and `My Dir/**` survive intact. */
+export const splitGlobList = (value: string): string[] => {
   const items: string[] = [];
   let depth = 0;
   let current = "";

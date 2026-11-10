@@ -7,9 +7,9 @@ import {
   loadTargetStates,
   markUnownedSkillUnitCollisions,
   pathExists,
-  readOptionalText,
   rootContainsOnlyOwnedLock,
 } from "src/core/global/discovery.js";
+import { readOptionalText } from "src/utils/filesystem.js";
 import { createVerifiedUserRoot } from "src/core/platform/user-paths.js";
 import { prepareDesired } from "src/core/global/desired.js";
 import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";

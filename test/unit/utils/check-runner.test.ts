@@ -195,7 +195,7 @@ describe("check runner on Windows", () => {
     } finally {
       process.kill = originalKill;
     }
-    expect(kill).toHaveBeenCalledWith(888);
+    expect(kill).toHaveBeenCalledWith(-888, "SIGKILL");
   });
 });
 

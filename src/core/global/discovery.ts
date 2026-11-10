@@ -1,8 +1,10 @@
 import { readFile, readdir, stat } from "node:fs/promises";
 import { GlobalManagedManifestError } from "src/core/global/managed-error.js";
 import { type UserPathRoot } from "src/core/platform/user-paths.js";
-import { entryKey, isMissingPathError, normalizeGlobalPath, resolveSafeGlobalPath } from "src/core/global/manifest.js";
+import { entryKey, normalizeGlobalPath, resolveSafeGlobalPath } from "src/core/global/manifest.js";
 import { type GlobalManagedEntry, type PreparedDesired, type TargetState } from "src/core/global/types.js";
+import { isMissingPathError } from "src/utils/errno.js";
+import { readOptionalText } from "src/utils/filesystem.js";
 
 export async function loadTargetStates(
   relativePaths: readonly string[],
@@ -27,12 +29,14 @@ export async function markUnownedSkillUnitCollisions(
   previousByKey: ReadonlyMap<string, GlobalManagedEntry>,
   root: UserPathRoot,
 ): Promise<void> {
+  // A skill unit that already has an entry in the sidecar is Harnix's own, so a new file added to it is not a collision.
+  const ownedUnits = new Set([...previousByKey.values()].flatMap((entry) => harnixSkillUnitPath(entry.path) ?? []));
   for (const item of prepared) {
     if (item.entry.kind !== "file" || previousByKey.has(entryKey(item.entry))) {
       continue;
     }
     const unitPath = harnixSkillUnitPath(item.entry.path);
-    if (unitPath === undefined) {
+    if (unitPath === undefined || ownedUnits.has(unitPath)) {
       continue;
     }
     const target = getTargetState(targetStates, item.entry.path);
@@ -46,13 +50,9 @@ export async function markUnownedSkillUnitCollisions(
 }
 
 function harnixSkillUnitPath(path: string): string | undefined {
+  // Every file of a skill unit (`SKILL.md` and `references/*.md`) belongs to the unit `skills/harnix-<name>`.
   const segments = path.split("/");
-  if (
-    segments.length !== 3 ||
-    segments[0] !== "skills" ||
-    !segments[1]?.startsWith("harnix-") ||
-    segments[2] !== "SKILL.md"
-  ) {
+  if (segments.length < 3 || segments[0] !== "skills" || !segments[1]?.startsWith("harnix-")) {
     return undefined;
   }
   return `${segments[0]}/${segments[1]}`;
@@ -64,17 +64,6 @@ export function getTargetState(states: ReadonlyMap<string, TargetState>, path: s
     throw new GlobalManagedManifestError("Missing global managed target state.");
   }
   return state;
-}
-
-export async function readOptionalText(path: string): Promise<string | undefined> {
-  try {
-    return await readFile(path, "utf8");
-  } catch (error: unknown) {
-    if (isMissingPathError(error)) {
-      return undefined;
-    }
-    throw error;
-  }
 }
 
 export async function pathExists(path: string): Promise<boolean> {

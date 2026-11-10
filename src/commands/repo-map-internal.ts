@@ -42,6 +42,7 @@ import {
   type RepoMapCliOptions,
   validateRepoMapOptions,
 } from "src/cli-helpers.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 async function dispatchQueryOrStatus(cwd: string, options: RepoMapCliOptions, limit: number): Promise<unknown> {
   const wsPath = typeof options.workspace === "string" ? options.workspace : undefined;
@@ -130,8 +131,7 @@ export async function statusRepoMapInternal(cwd: string): Promise<unknown> {
       status: "ready",
     };
   } catch (error: unknown) {
-    const missing =
-      typeof error === "object" && error !== null && "code" in error && (error as { code: string }).code === "ENOENT";
+    const missing = isMissingPathError(error);
     return {
       generator: "harnix",
       hint: repoMapRefreshHint,

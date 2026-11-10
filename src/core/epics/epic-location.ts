@@ -1,8 +1,8 @@
 import { access, readdir } from "node:fs/promises";
 import { directoryExists, isMonthBucket, monthBucket, ARCHIVE_DIRECTORY } from "src/core/tasks/task-location.js";
 import type { ListScope, StorageKind } from "src/core/tasks/task-location.js";
-import { isMissing } from "src/core/tasks/task-validate-common.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export const EPICS_DIRECTORY = "epics";
 /** Pre-2.0 directory name; still read as a fallback until `harnix update` moves the files. */
@@ -83,7 +83,7 @@ async function entries(path: string): Promise<{ name: string; file: boolean; dir
       directory: entry.isDirectory(),
     }));
   } catch (error: unknown) {
-    if (isMissing(error)) return [];
+    if (isMissingPathError(error)) return [];
     throw error;
   }
 }

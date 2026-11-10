@@ -8,14 +8,9 @@ import {
   reconcileGlobalManagedFiles,
   reconcileGlobalManagedRoots,
 } from "src/core/global/managed-files.js";
-import { createVerifiedUserRoot, type UserPathRoot } from "src/core/platform/user-paths.js";
-import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { useTemporaryGlobalRoots } from "test/support/temporary-global-root.js";
 
-const temporaryRoot = useTemporaryRepositories("harnix-global-managed-");
-
-async function temporaryGlobalRoot(logicalPath = "~/test-global"): Promise<UserPathRoot> {
-  return createVerifiedUserRoot(await temporaryRoot(), logicalPath);
-}
+const temporaryGlobalRoot = useTemporaryGlobalRoots();
 
 describe("global managed files: preflight, dry-run and rollback", () => {
   it("returns exact planned status without writing targets or a sidecar during dry-run", async () => {

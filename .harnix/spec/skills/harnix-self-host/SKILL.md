@@ -20,7 +20,7 @@ Bump the version once, during implementation and before `verifying`, with `pnpm 
 Immediately after implementation and BEFORE transitioning to `verifying`, synchronize every document the change affects without waiting for a reminder:
 
 1. `README.md`: new features, CLI commands, flags and usage examples.
-2. `AGENTS.md` and rules: operational guidance, agent instructions and platform rules (`rules/AGENTS.md`).
-3. Templates: `src/templates/AGENTS.md`, `src/templates/harnix/activation.ts`, `src/templates/harnix/agents.ts`.
+2. `AGENTS.md`: operational guidance and agent instructions.
+3. Templates and platform rules: `src/templates/harnix/agents.ts`, `src/templates/harnix/activation.ts`, `src/templates/harnix/global-surface.ts`.
 4. Skills: `SKILL.md` and `references/` when workflows, conventions or behaviors evolve.
 5. Canonical workflow and specs: `docs/HARNIX_WORKFLOW.md`, `docs/HARNIX_PRD.md`, `docs/IMPLEMENTATION_PLAN.md`, `.harnix/workflow.md`; run `pnpm selfhost:sync` whenever workflow templates change.

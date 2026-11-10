@@ -13,9 +13,12 @@ function conflict(line: number): string {
 }
 
 function definesHooksInline(line: string, table: string): boolean {
-  if (table === "hooks") return /^\s*["']?UserPromptSubmit["']?\s*=/u.test(line);
+  if (table === "hooks") return /^\s*["']?UserPromptSubmit["']?\s*[.=]/u.test(line);
   if (table !== "") return false;
-  return /^\s*hooks\s*\.\s*["']?UserPromptSubmit["']?\s*[.=]/u.test(line) || /^\s*hooks\s*=\s*\{/u.test(line);
+  return (
+    /^\s*["']?hooks["']?\s*\.\s*["']?UserPromptSubmit["']?\s*[.=]/u.test(line) ||
+    /^\s*["']?hooks["']?\s*=\s*\{/u.test(line)
+  );
 }
 
 /**

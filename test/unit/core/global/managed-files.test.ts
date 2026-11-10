@@ -7,10 +7,9 @@ import {
   validateGlobalManagedManifest,
 } from "src/core/global/managed-files.js";
 import { sha256 } from "src/utils/hashing.js";
-import { createVerifiedUserRoot, type UserPathRoot } from "src/core/platform/user-paths.js";
-import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { useTemporaryGlobalRoots } from "test/support/temporary-global-root.js";
 
-const temporaryRoot = useTemporaryRepositories("harnix-global-managed-");
+const temporaryGlobalRoot = useTemporaryGlobalRoots();
 
 const markerSelector = { type: "markers" as const, begin: "<!-- harnix:begin -->", end: "<!-- harnix:end -->" };
 const jsonSelector = {
@@ -19,10 +18,6 @@ const jsonSelector = {
   memberId: "harnix-context",
 };
 const codexContextCommand = "harnix context --platform codex";
-
-async function temporaryGlobalRoot(logicalPath = "~/test-global"): Promise<UserPathRoot> {
-  return createVerifiedUserRoot(await temporaryRoot(), logicalPath);
-}
 
 describe("global managed files", () => {
   it("validates canonical per-root manifests and rejects unsafe or overlapping fragments", () => {

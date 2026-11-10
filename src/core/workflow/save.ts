@@ -16,7 +16,6 @@ import {
 } from "src/core/tasks/task.js";
 import {
   assertLegalTransition,
-  isMissing,
   isRecord,
   semanticJsonEqual,
   semanticTaskEqual,
@@ -44,6 +43,7 @@ import {
   restoreWorkflowSaveFiles,
 } from "./save-files.js";
 import { taskFilePath } from "src/core/tasks/task-location.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 interface SaveContext {
   root: string;
@@ -244,7 +244,7 @@ async function readRawTask(harnixRoot: string, id: string): Promise<string | und
   try {
     return await readFile(await taskFilePath(harnixRoot, id, "task.json"), "utf8");
   } catch (error: unknown) {
-    if (isMissing(error)) return undefined;
+    if (isMissingPathError(error)) return undefined;
     throw error;
   }
 }
@@ -253,7 +253,7 @@ async function loadExistingTask(harnixRoot: string, id: string): Promise<TaskRec
   try {
     return await loadTask(await taskFilePath(harnixRoot, id, "task.json"));
   } catch (error: unknown) {
-    if (isMissing(error)) return undefined;
+    if (isMissingPathError(error)) return undefined;
     throw error;
   }
 }

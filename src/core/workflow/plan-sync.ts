@@ -4,8 +4,10 @@ import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { resolveTaskDirectory } from "src/core/tasks/task-location.js";
 import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
+import { withWorkflowLock } from "src/core/workflow/workflow-lock.js";
 
-const CHECK_UNCHECKED = /^(\s*[-*]\s+)\[\s*\](\s+.*)$/u;
+/** One unchecked checklist item of `plan.md` (`- [ ]` or `* [ ]`); the gate before `verifying` reuses it. */
+export const CHECK_UNCHECKED = /^(\s*[-*]\s+)\[\s*\](\s+.*)$/u;
 
 function escapeRegex(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
@@ -24,7 +26,11 @@ export interface TickPlanResult {
  * - index số 1-based (ví dụ "1", "2" hoặc "1,2"): tick theo thứ tự item chưa tick
  * - text pattern (substring không phân biệt hoa thường): tick các item khớp nội dung
  */
-export async function tickPlanChecklist(harnixRoot: string, taskId: string, selector: string): Promise<TickPlanResult> {
+export function tickPlanChecklist(harnixRoot: string, taskId: string, selector: string): Promise<TickPlanResult> {
+  return withWorkflowLock(harnixRoot, () => tickPlanChecklistLocked(harnixRoot, taskId, selector));
+}
+
+async function tickPlanChecklistLocked(harnixRoot: string, taskId: string, selector: string): Promise<TickPlanResult> {
   const taskDirectory = await resolveTaskDirectory(harnixRoot, taskId);
   const planPath = await resolveSafeProjectPath(taskDirectory, "plan.md");
   let content: string;
@@ -122,7 +128,15 @@ export async function tickWorkflow(root: string, selector: string): Promise<Work
  * và chuyển đổi thành `- [x]`.
  * Trả về true nếu có ít nhất một item được cập nhật, ngược lại false.
  */
-export async function syncPlanChecklistPass(harnixRoot: string, taskId: string, checkId: string): Promise<boolean> {
+export function syncPlanChecklistPass(harnixRoot: string, taskId: string, checkId: string): Promise<boolean> {
+  // Called after the evidence is already saved: a lock that cannot be taken means this tick is skipped (`--tick` does
+  // it later) instead of reporting a failure for a pass that was recorded.
+  return withWorkflowLock(harnixRoot, () => syncPlanChecklistPassLocked(harnixRoot, taskId, checkId)).catch(
+    () => false,
+  );
+}
+
+async function syncPlanChecklistPassLocked(harnixRoot: string, taskId: string, checkId: string): Promise<boolean> {
   let planPath: string;
   try {
     const taskDirectory = await resolveTaskDirectory(harnixRoot, taskId);

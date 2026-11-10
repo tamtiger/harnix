@@ -1,6 +1,8 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
+import { findOnPath, type ExecutableLookup } from "src/utils/check-runner.js";
+
 const execFileAsync = promisify(execFile);
 
 export interface GitContext {
@@ -27,8 +29,23 @@ export function safeGitEnvironment(source: NodeJS.ProcessEnv = process.env): Nod
   return environment;
 }
 
+/**
+ * Windows runs a bare `git` from the working directory before PATH when the process lets it, so a repository carrying
+ * its own `git.exe` could run its program. On Windows git is therefore the `git.exe` of an absolute PATH entry, and
+ * without one the call fails instead of falling back to the bare name.
+ */
+export function resolveGitExecutable(
+  platform: NodeJS.Platform = process.platform,
+  lookup: ExecutableLookup = findOnPath,
+): string {
+  if (platform !== "win32") return "git";
+  const resolved = lookup("git.exe");
+  if (resolved === undefined) throw new Error("git was not found on PATH.");
+  return resolved;
+}
+
 const readOnly = (cwd: string, args: readonly string[], timeout: number) =>
-  execFileAsync("git", safeGitArgs(args), {
+  execFileAsync(resolveGitExecutable(), safeGitArgs(args), {
     cwd,
     env: safeGitEnvironment(),
     maxBuffer: 8 * 1024 * 1024,

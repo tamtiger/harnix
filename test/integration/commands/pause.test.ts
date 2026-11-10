@@ -5,6 +5,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { runCli } from "src/cli-program.js";
 import { initializeProject } from "src/commands/init.js";
+import { pauseProjectTask } from "src/commands/pause.js";
+import { resumeProjectTask } from "src/commands/resume.js";
+import { withWorkflowLock } from "src/core/workflow/workflow-lock.js";
 import { saveTask, setActiveTask, type TaskRecordV3 } from "src/core/tasks/task.js";
 import { buildGatedTask } from "test/support/integration-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -127,3 +130,64 @@ async function snapshotTree(root: string): Promise<Record<string, string>> {
   await visit(root);
   return files;
 }
+
+describe.sequential("pause and resume take the workflow lock", () => {
+  it("makes pause wait for a writer that holds the lock and then clears the pointer", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const harnixRoot = join(root, ".harnix");
+    const active = task("20260928-144800-active-task", "in_progress");
+    await saveTask(harnixRoot, active);
+    await setActiveTask(harnixRoot, active.id);
+
+    let release: () => void = () => undefined;
+    let entered: () => void = () => undefined;
+    const inside = new Promise<void>((resolve) => (entered = resolve));
+    const held = withWorkflowLock(harnixRoot, () => {
+      entered();
+      return new Promise<void>((resolve) => (release = resolve));
+    });
+    // Wait until the section really holds the lock instead of sleeping and hoping it does.
+    await inside;
+    let settled = false;
+    const paused = pauseProjectTask(root).then((value) => {
+      settled = true;
+      return value;
+    });
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    expect(settled).toBe(false);
+
+    release();
+    await held;
+    await expect(paused).resolves.toMatchObject({ outcome: "paused" });
+  });
+
+  it("makes resume wait for a writer that holds the lock and then activates the task", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const harnixRoot = join(root, ".harnix");
+    const candidate = task("20260928-144900-resume-target", "planning");
+    await saveTask(harnixRoot, candidate);
+
+    let release: () => void = () => undefined;
+    let entered: () => void = () => undefined;
+    const inside = new Promise<void>((resolve) => (entered = resolve));
+    const held = withWorkflowLock(harnixRoot, () => {
+      entered();
+      return new Promise<void>((resolve) => (release = resolve));
+    });
+    // Wait until the section really holds the lock instead of sleeping and hoping it does.
+    await inside;
+    let settled = false;
+    const resumed = resumeProjectTask(root, candidate.id).then((value) => {
+      settled = true;
+      return value;
+    });
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    expect(settled).toBe(false);
+
+    release();
+    await held;
+    await expect(resumed).resolves.toMatchObject({ outcome: "resumed" });
+  });
+});

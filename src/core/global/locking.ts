@@ -46,14 +46,17 @@ export async function acquireGlobalLocks<T extends GlobalTarget>(
     }
     return locks;
   } catch (error) {
-    await releaseGlobalLocks(locks.map(({ lock }) => lock));
+    await releaseGlobalLocks(locks.map(({ lock }) => lock)).catch(() => undefined);
     throw error;
   }
 }
 
 /** Releases in reverse acquisition order. */
 export async function releaseGlobalLocks(locks: readonly GlobalLock[]): Promise<void> {
-  await Promise.all([...locks].reverse().map(async (lock) => lock.release()));
+  // Wait for every release: one failing release must neither stop the others nor hide the error that led here.
+  const settled = await Promise.allSettled([...locks].reverse().map(async (lock) => lock.release()));
+  const failed = settled.find((outcome): outcome is PromiseRejectedResult => outcome.status === "rejected");
+  if (failed !== undefined) throw failed.reason;
 }
 
 /** Hands the owned lock record to a reconciliation so the root still counts as Harnix-only. */

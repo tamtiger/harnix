@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { basename, relative, resolve } from "node:path";
 import { compareCodeUnits } from "src/utils/order.js";
 
@@ -8,6 +8,7 @@ import { IGNORED_DIRECTORY_NAMES } from "./ignored-directories.js";
 import { projectLanguages, selectedLanguages } from "./language-selection.js";
 import { findPackageRoots } from "./package-roots.js";
 import { loadHarnixIgnore, type HarnixIgnore } from "./harnix-ignore.js";
+import { readBoundedText } from "src/utils/filesystem.js";
 
 export type { DetectionMatch, LanguageId, TechnologyId } from "src/catalog/catalog.js";
 export type PackageManager = "pnpm" | "yarn" | "npm" | "bun";
@@ -124,7 +125,7 @@ async function detectPackages(
   const byPath = new Map(facts.files.map((file) => [file.path, file]));
   const roots = await findPackageRoots(facts.files, async (path) => {
     const file = byPath.get(path);
-    return file === undefined ? undefined : readBoundedText(file);
+    return file === undefined ? undefined : readBoundedText(file.absolute, maxReadableBytes);
   });
   const results = await Promise.all(
     roots.map(async (packagePath) => {
@@ -193,20 +194,11 @@ function detectVerificationCommands(
 }
 
 async function readJsonObject(file: CollectedFile): Promise<Record<string, unknown> | undefined> {
-  const content = await readBoundedText(file);
+  const content = await readBoundedText(file.absolute, maxReadableBytes);
   if (content === undefined) return undefined;
   try {
     const parsed: unknown = JSON.parse(content);
     return isRecord(parsed) ? parsed : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-async function readBoundedText(file: CollectedFile): Promise<string | undefined> {
-  try {
-    if ((await stat(file.absolute)).size > maxReadableBytes) return undefined;
-    return await readFile(file.absolute, "utf8");
   } catch {
     return undefined;
   }

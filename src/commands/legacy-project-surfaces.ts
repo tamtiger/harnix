@@ -9,6 +9,7 @@ import {
 } from "src/core/managed/project-files.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { compareCodeUnits } from "src/utils/order.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export interface CleanupLegacyProjectSurfacesOptions {
   root: string;
@@ -160,10 +161,6 @@ async function inspectLegacyTarget(root: string, entry: ManagedEntry): Promise<I
     }
     return { entry, absolutePath, state: "unsafe" };
   }
-}
-
-function isMissingPathError(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
 }
 
 function pushUnique(values: string[], value: string): void {

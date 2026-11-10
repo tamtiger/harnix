@@ -53,3 +53,20 @@ describe("global update lifecycle", () => {
     expect(result.platforms.map((platform) => platform.platform)).toEqual(["claude"]);
   });
 });
+
+describe("global update discovery with a broken root", () => {
+  it("still updates an installed platform when another platform's root variable is malformed", async () => {
+    const common = await context();
+    await setupGlobal({ ...common, plans: planWith("v1\n"), platforms: ["kiro"] });
+
+    const result = await updateGlobal({
+      ...common,
+      environment: { CODEX_HOME: "relative/not-an-absolute-path" },
+      plans: planWith("v2\n"),
+    });
+
+    expect(result.platforms).toEqual([
+      expect.objectContaining({ platform: "kiro", updated: ["~/.kiro/steering/harnix.md"] }),
+    ]);
+  });
+});

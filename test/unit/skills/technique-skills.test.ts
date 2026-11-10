@@ -35,12 +35,10 @@ describe("technique skills catalog", () => {
     }
   });
 
-  it("cites concrete empirical evidence from external-research.md in each technique skill", () => {
+  it("states the rationale of each technique skill in its own Evidence and Rationale section", () => {
     for (const skill of techniqueSkills) {
       expect(skill.content, `${skill.name} missing Evidence heading`).toContain("## Evidence and Rationale");
-      expect(skill.content, `${skill.name} missing external-research citation`).toMatch(
-        /external-research\.md|§[A-D]/u,
-      );
+      expect(skill.content, `${skill.name} cites an internal research file`).not.toMatch(/external-research\.md/u);
     }
   });
 

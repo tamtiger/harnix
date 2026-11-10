@@ -29,10 +29,29 @@ export async function loadInputDigestSnapshot(
   try {
     const path = await snapshotPath(harnixRoot, taskId, checkId);
     const text = await readFile(path, "utf8");
-    return JSON.parse(text) as InputDigestSnapshot;
+    const parsed: unknown = JSON.parse(text);
+    return isSnapshot(parsed) ? parsed : undefined;
   } catch {
     return undefined;
   }
+}
+
+/** The cache is a file anyone can edit or truncate: only a snapshot with a list of path and hash entries is used. */
+function isSnapshot(value: unknown): value is InputDigestSnapshot {
+  if (typeof value !== "object" || value === null || !("entries" in value)) return false;
+  const { entries } = value;
+  return (
+    Array.isArray(entries) &&
+    entries.every(
+      (entry: unknown) =>
+        typeof entry === "object" &&
+        entry !== null &&
+        "path" in entry &&
+        typeof entry.path === "string" &&
+        "sha256" in entry &&
+        typeof entry.sha256 === "string",
+    )
+  );
 }
 
 export function computeDigestChanges(

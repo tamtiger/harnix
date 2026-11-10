@@ -1,8 +1,9 @@
 import { readdir, readFile } from "node:fs/promises";
 
-import { finding, isMissing, redact, type DoctorFinding } from "src/core/doctor/findings.js";
+import { finding, redact, type DoctorFinding } from "src/core/doctor/findings.js";
 import { ownershipState, type ManagedEntry, type ManagedManifest } from "src/core/managed/project-files.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 /** Project-local platform surfaces written by Harnix before platform setup became user-global. */
 const LEGACY_SURFACE_CANDIDATES = [
@@ -137,7 +138,7 @@ async function findLegacySkillCandidates(root: string, findings: DoctorFinding[]
         if (entry.name.startsWith("harnix-")) candidates.push(`${skillRoot}/${entry.name}/SKILL.md`);
       }
     } catch (error: unknown) {
-      if (!isMissing(error))
+      if (!isMissingPathError(error))
         findings.push(finding("legacy-surface-inspection-failed", "warning", skillRoot, redact(error, root), false));
     }
   }
@@ -149,7 +150,7 @@ export async function readOptionalSafe(root: string, path: string, findings: Doc
   try {
     return await readFile(await resolveSafeProjectPath(root, path), "utf8");
   } catch (error: unknown) {
-    if (isMissing(error)) return "";
+    if (isMissingPathError(error)) return "";
     findings.push(finding("unsafe-path", "error", path, redact(error, root), false));
     return "";
   }

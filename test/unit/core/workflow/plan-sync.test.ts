@@ -1,8 +1,14 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { syncPlanChecklistPass, tickPlanChecklist, tickWorkflow } from "src/core/workflow/plan-sync.js";
+import {
+  CHECK_UNCHECKED,
+  syncPlanChecklistPass,
+  tickPlanChecklist,
+  tickWorkflow,
+} from "src/core/workflow/plan-sync.js";
 import { saveTask, setActiveTask } from "src/core/tasks/task.js";
+import { withWorkflowLock } from "src/core/workflow/workflow-lock.js";
 import { initializeUtcProject, taskV3 } from "test/support/workflow-fixtures.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import { taskMonth } from "test/support/task-paths.js";
@@ -192,5 +198,55 @@ describe("tickWorkflow", () => {
       remaining: 0,
       total: 2,
     });
+  });
+});
+
+describe("plan.md writes take the workflow lock", () => {
+  async function planProject(): Promise<{ harnixRoot: string; planPath: string }> {
+    const root = await temporaryRepository();
+    const taskDir = join(root, ".harnix", "tasks", "task-1");
+    await mkdir(taskDir, { recursive: true });
+    const planPath = join(taskDir, "plan.md");
+    await writeFile(planPath, "# Plan\n- [ ] [check-1] First item\n", "utf8");
+    return { harnixRoot: join(root, ".harnix"), planPath };
+  }
+
+  async function waitsForLock(run: () => Promise<unknown>, harnixRoot: string): Promise<void> {
+    let release: () => void = () => undefined;
+    let entered: () => void = () => undefined;
+    const inside = new Promise<void>((resolve) => (entered = resolve));
+    const held = withWorkflowLock(harnixRoot, () => {
+      entered();
+      return new Promise<void>((resolve) => (release = resolve));
+    });
+    // Wait until the section really holds the lock instead of sleeping and hoping it does.
+    await inside;
+    let settled = false;
+    const attempt = run().then(() => (settled = true));
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    expect(settled).toBe(false);
+    release();
+    await held;
+    await attempt;
+  }
+
+  it("makes syncPlanChecklistPass wait for a writer that holds the lock", async () => {
+    const { harnixRoot, planPath } = await planProject();
+    await waitsForLock(() => syncPlanChecklistPass(harnixRoot, "task-1", "check-1"), harnixRoot);
+    expect(await readFile(planPath, "utf8")).toContain("- [x] [check-1]");
+  });
+
+  it("makes tickPlanChecklist wait for a writer that holds the lock", async () => {
+    const { harnixRoot, planPath } = await planProject();
+    await waitsForLock(() => tickPlanChecklist(harnixRoot, "task-1", "all"), harnixRoot);
+    expect(await readFile(planPath, "utf8")).toContain("- [x] [check-1]");
+  });
+});
+
+describe("CHECK_UNCHECKED", () => {
+  it("matches an unchecked item written with either bullet and rejects a checked one", () => {
+    expect(CHECK_UNCHECKED.test("- [ ] item")).toBe(true);
+    expect(CHECK_UNCHECKED.test("  * [ ] item")).toBe(true);
+    expect(CHECK_UNCHECKED.test("- [x] item")).toBe(false);
   });
 });

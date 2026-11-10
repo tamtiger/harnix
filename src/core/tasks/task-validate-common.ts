@@ -9,11 +9,6 @@ export const taskIdPattern = /^\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 export function validateTaskId(value: string): void {
   if (!taskIdPattern.test(value)) throw new TaskValidationError("Task ID is unsafe.");
 }
-export function isMissing(error: unknown): boolean {
-  return (
-    typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"
-  );
-}
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }

@@ -19,6 +19,7 @@ import { packageVersion } from "src/version.js";
 import { renderAgentsTemplate } from "src/templates/harnix/agents.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { compareCodeUnits } from "src/utils/order.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export interface UpdateProjectOptions {
   root: string;
@@ -143,8 +144,7 @@ async function loadManifest(path: string): Promise<ManagedManifest> {
     await access(path);
     return await readManifest(path);
   } catch (error: unknown) {
-    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT")
-      return { generator: "harnix", schemaVersion: 1, entries: [] };
+    if (isMissingPathError(error)) return { generator: "harnix", schemaVersion: 1, entries: [] };
     throw error;
   }
 }

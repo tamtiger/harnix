@@ -338,5 +338,11 @@ describe("canonical Harnix workflow skill sources", () => {
       const text = await readFile(`${root}${file}`, "utf8");
       expect(text, `${file} names a Harnix-repository-only command or path`).not.toMatch(repoOnly);
     }
+    // The workflow cheat sheet is installed into every repository too.
+    const template = await readFile(
+      fileURLToPath(new URL("../../src/templates/harnix/workflow.md", import.meta.url)),
+      "utf8",
+    );
+    expect(template, "workflow.md template names a Harnix-repository-only command or path").not.toMatch(repoOnly);
   });
 });

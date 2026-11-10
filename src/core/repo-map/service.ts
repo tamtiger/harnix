@@ -30,6 +30,7 @@ import {
   type RepoMapQuerySignals,
   type RepoMapV1,
 } from "./types.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export interface RefreshRepoMapOptions {
   root: string;
@@ -71,7 +72,7 @@ export async function queryRepoMap(options: QueryRepoMapOptions): Promise<QueryR
   try {
     map = await readRepoMap(options.root);
   } catch (error: unknown) {
-    return isMissing(error) ? { results: [], status: "missing" } : { results: [], status: "invalid" };
+    return isMissingPathError(error) ? { results: [], status: "missing" } : { results: [], status: "invalid" };
   }
   const limit = options.limit ?? 20;
   const results = searchRepoMap(map, options.query, limit, options.signals);
@@ -127,7 +128,7 @@ export async function impactRepoMap(
   try {
     map = await readRepoMap(options.root);
   } catch (error: unknown) {
-    return createUnavailableRepoMapImpact(isMissing(error) ? "missing" : "invalid", options);
+    return createUnavailableRepoMapImpact(isMissingPathError(error) ? "missing" : "invalid", options);
   }
   return createRepoMapImpact(map, options);
 }
@@ -139,7 +140,7 @@ export async function impactRepoMapTests(
   try {
     map = await readRepoMap(options.root);
   } catch (error: unknown) {
-    return createUnavailableRepoMapTests(isMissing(error) ? "missing" : "invalid", options);
+    return createUnavailableRepoMapTests(isMissingPathError(error) ? "missing" : "invalid", options);
   }
   return findAffectedTests(map, options);
 }
@@ -161,7 +162,7 @@ export async function refsRepoMap(
   try {
     map = await readRepoMap(options.root);
   } catch (error: unknown) {
-    return createUnavailableRepoMapRefs(isMissing(error) ? "missing" : "invalid", options);
+    return createUnavailableRepoMapRefs(isMissingPathError(error) ? "missing" : "invalid", options);
   }
   return findRepoMapReferences(map, options);
 }
@@ -172,7 +173,7 @@ export async function diagnoseRepoMap(root: string): Promise<RepoMapHealth> {
   try {
     current = await readRepoMap(root);
   } catch (error: unknown) {
-    if (isMissing(error)) return "missing";
+    if (isMissingPathError(error)) return "missing";
     return (await isOlderExtractorCache(root)) ? "stale" : "invalid";
   }
   const inventory = await inventoryRepository(root);
@@ -207,8 +208,4 @@ async function mapConcurrent<T, U>(
     }),
   );
   return results;
-}
-
-function isMissing(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
 }

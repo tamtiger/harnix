@@ -57,3 +57,15 @@ describe("detectEol and withEol", () => {
     expect(withEol("a\nb\n", "\n")).toBe("a\nb\n");
   });
 });
+
+describe("findHookConflict dotted and quoted keys", () => {
+  it("reports a dotted key under [hooks] and a quoted hooks key at the root", () => {
+    expect(findHookConflict("[hooks]\nUserPromptSubmit.matcher = 1\n")).toContain("line 2");
+    expect(findHookConflict('"hooks".UserPromptSubmit = []\n')).toContain("line 1");
+    expect(findHookConflict('"hooks" = { UserPromptSubmit = [] }\n')).toContain("line 1");
+  });
+
+  it("does not report unrelated keys that merely contain the name", () => {
+    expect(findHookConflict("[hooks]\nPostToolUse = []\nOtherUserPromptSubmit = 1\n")).toBeUndefined();
+  });
+});

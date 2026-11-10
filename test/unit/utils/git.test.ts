@@ -1,10 +1,10 @@
 import { execFile } from "node:child_process";
-import { access, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { access, copyFile, mkdir, writeFile } from "node:fs/promises";
+import { delimiter, join } from "node:path";
 import { promisify } from "node:util";
 import { describe, expect, it } from "vitest";
 
-import { readGitContext, runGit, safeGitArgs, safeGitEnvironment } from "src/utils/git.js";
+import { readGitContext, resolveGitExecutable, runGit, safeGitArgs, safeGitEnvironment } from "src/utils/git.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const execFileAsync = promisify(execFile);
@@ -136,9 +136,53 @@ describe("one way to run git", () => {
     const direct: string[] = [];
     for (const name of files) {
       const text = await readFile(join("src", name), "utf8");
-      if (/(?:execFile|execFileAsync|spawn)\(\s*["']git["']/u.test(text)) direct.push(name.replaceAll("\\", "/"));
+      if (/(?:execFile|execFileAsync|spawn)\(\s*(?:["']git["']|resolveGitExecutable\(\))/u.test(text)) {
+        direct.push(name.replaceAll("\\", "/"));
+      }
     }
 
     expect(direct).toEqual(["utils/git.ts"]);
   });
+});
+
+describe("git executable resolution", () => {
+  it("keeps the bare name outside Windows and never consults a lookup", () => {
+    expect(resolveGitExecutable("linux", () => "/should/not/be/used")).toBe("git");
+  });
+
+  it("resolves git.exe on Windows only through the PATH lookup", () => {
+    const names: string[] = [];
+    const resolved = resolveGitExecutable("win32", (name) => {
+      names.push(name);
+      return "C:\\Program Files\\Git\\cmd\\git.exe";
+    });
+    expect(resolved).toBe("C:\\Program Files\\Git\\cmd\\git.exe");
+    expect(names).toEqual(["git.exe"]);
+  });
+
+  it("refuses to start git on Windows when PATH has none, so a copy in the working directory never runs", () => {
+    expect(() => resolveGitExecutable("win32", () => undefined)).toThrow(/git/u);
+  });
+
+  it.runIf(process.platform === "win32")(
+    "does not run a git.exe planted in the working directory when PATH has no git",
+    async () => {
+      const root = await temporaryRepository();
+      await copyFile(process.execPath, join(root, "git.exe"));
+      const emptyPathDirectory = join(root, "empty-path");
+      await mkdir(emptyPathDirectory, { recursive: true });
+      const pathKey = Object.keys(process.env).find((key) => key.toUpperCase() === "PATH") ?? "PATH";
+      const originalPath = process.env[pathKey];
+      const originalCwd = process.cwd();
+      process.env[pathKey] = [emptyPathDirectory].join(delimiter);
+      process.chdir(root);
+      try {
+        await expect(runGit(root, ["--version"])).rejects.toThrow();
+      } finally {
+        process.chdir(originalCwd);
+        if (originalPath === undefined) delete process.env[pathKey];
+        else process.env[pathKey] = originalPath;
+      }
+    },
+  );
 });

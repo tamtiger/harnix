@@ -4,7 +4,6 @@ import {
   assertExactFields,
   assertLegalTransition,
   canonicalizeJson,
-  isMissing,
   isRecord,
   laterTimestamp,
   planHasChecklistItem,
@@ -31,11 +30,7 @@ describe("workflow helpers", () => {
     expect(laterTimestamp(at(0), at(5))).toBe(at(5));
   });
 
-  it("recognizes only ENOENT-shaped errors as missing files", () => {
-    expect(isMissing(Object.assign(new Error("x"), { code: "ENOENT" }))).toBe(true);
-    expect(isMissing(Object.assign(new Error("x"), { code: "EACCES" }))).toBe(false);
-    expect(isMissing("ENOENT")).toBe(false);
-    expect(isMissing(null)).toBe(false);
+  it("tells a record from every other value", () => {
     expect(isRecord([])).toBe(false);
     expect(isRecord({})).toBe(true);
   });

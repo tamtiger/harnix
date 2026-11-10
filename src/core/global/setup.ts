@@ -98,6 +98,12 @@ export async function setupGlobal(options: SetupGlobalOptions): Promise<SetupGlo
     });
     const lockedOutcomeByTarget = new Map(lockedTargets.map((target, index) => [target, lockedOutcomes[index]!]));
     return finish(targets.map((target, index) => lockedOutcomeByTarget.get(target) ?? preflightOutcomes[index]!));
+  } catch (error: unknown) {
+    // A release that fails must not replace the error that stopped the run.
+    const held = locks;
+    locks = [];
+    await releaseGlobalLocks(held).catch(() => undefined);
+    throw error;
   } finally {
     await releaseGlobalLocks(locks);
   }

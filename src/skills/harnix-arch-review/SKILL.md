@@ -2,7 +2,7 @@
 name: harnix-arch-review
 description: Use when reviewing enterprise system architecture, evaluating WBS estimations, performing three-way requirement gap analysis or separating Backend Core from BFF layers.
 metadata:
-  version: "2.31.1"
+  version: "2.32.0"
 ---
 
 # Architecture design review
@@ -11,7 +11,6 @@ Domain-agnostic enterprise architecture review for multi-channel systems, gap an
 
 ## Evidence and Rationale
 
-Evidence source: `research/external-research.md` (§A enterprise architecture decomposition, industry benchmark briefs, and three-way gap analysis patterns).
 Enterprise initiatives often suffer from misaligned requirements, duplicate backend effort across channels, and missing industry regulatory baselines. Structured gap analysis and layered BFF separation eliminate redundant development while guaranteeing regulatory compliance.
 
 ## When to use

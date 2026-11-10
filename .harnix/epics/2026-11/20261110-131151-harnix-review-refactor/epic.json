@@ -1,0 +1,14 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 1,
+  "id": "20261110-131151-harnix-review-refactor",
+  "title": "Review và refactor toàn diện Harnix",
+  "goal": "Sửa các lỗi đã xác minh, loại trùng lặp và dead code, nâng chất lượng test và đồng bộ tài liệu, skill, token budget của Harnix mà không đổi hành vi công khai hay frozen contract.",
+  "nonGoals": [
+    "Không đổi frozen contract (schema TaskRecord v3, enum, transition, hook protocol, exit code)",
+    "Không thay registry platform thành map trong epic này",
+    "Không regenerate behavior-snapshot.golden.json để refactor pass"
+  ],
+  "createdAt": "2026-11-10T13:11:51.523+07:00",
+  "updatedAt": "2026-11-10T13:11:51.523+07:00"
+}

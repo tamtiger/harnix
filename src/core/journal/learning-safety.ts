@@ -11,7 +11,7 @@ export interface LearningStatementAnalysis {
   oversized: boolean;
 }
 
-export const MAX_LEARNING_STATEMENT_BYTES = 65_536;
+const MAX_LEARNING_STATEMENT_BYTES = 65_536;
 
 const OVERRIDE_ENGLISH =
   /(?:\b(?:ignore|disregard|override)\b[^\r\n]{0,80}\b(?:previous|prior|all|system|developer|instructions?)\b|\b(?:system|developer)\s+(?:prompt|message)\b)/iu;

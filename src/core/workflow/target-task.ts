@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { loadTask, resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
-import { isMissing } from "src/core/tasks/workflow-helpers.js";
 import { taskFilePath } from "src/core/tasks/task-location.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 const TASK_ID = /^\d{8}-\d{6}-[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const targets = new AsyncLocalStorage<{ id: string }>();
@@ -25,7 +25,7 @@ export async function resolveEditableTask(harnixRoot: string): Promise<TaskRecor
   try {
     task = await loadTask(await taskFilePath(harnixRoot, id, "task.json"));
   } catch (error: unknown) {
-    if (isMissing(error)) throw new Error(`--task ${id}: task not found.`, { cause: error });
+    if (isMissingPathError(error)) throw new Error(`--task ${id}: task not found.`, { cause: error });
     throw error;
   }
   if (task.status === "completed" || task.status === "cancelled")

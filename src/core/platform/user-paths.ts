@@ -1,7 +1,9 @@
 import { realpath, stat } from "node:fs/promises";
 import { homedir } from "node:os";
-import { dirname, isAbsolute, join, parse, relative, resolve, sep, win32 } from "node:path";
+import { dirname, isAbsolute, join, parse, resolve, win32 } from "node:path";
 import { getPlatform, PLATFORM_IDS, type PlatformId, type PlatformRoot } from "src/core/platform/registry.js";
+import { isMissingPathError } from "src/utils/errno.js";
+import { isContainedPath } from "src/utils/paths.js";
 
 export class UnsafeUserPathError extends Error {
   override name = "UnsafeUserPathError";
@@ -306,14 +308,6 @@ function isFilesystemRoot(value: string): boolean {
   return normalized === win32.parse(normalized).root;
 }
 
-function isContainedPath(root: string, candidate: string): boolean {
-  const pathToCandidate = relative(root, candidate);
-  return (
-    pathToCandidate === "" ||
-    (!pathToCandidate.startsWith(`..${sep}`) && pathToCandidate !== ".." && !isAbsolute(pathToCandidate))
-  );
-}
-
 async function findRealExistingAncestor(candidate: string): Promise<string> {
   let current = candidate;
   while (true) {
@@ -352,8 +346,4 @@ async function assertDirectoryIfItExists(path: string): Promise<void> {
     if (isMissingPathError(error)) return;
     throw error;
   }
-}
-
-function isMissingPathError(error: unknown): error is NodeJS.ErrnoException {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
 }

@@ -1,7 +1,7 @@
 const MAX_AREA_DIRECTORIES = 2;
 
 /** Coarse area of a path: up to two leading directories, cut at the first glob, a file name is not part of it. */
-export function areaOf(path: string): string[] {
+function areaOf(path: string): string[] {
   const segments = path.split("/").filter((segment) => segment.length > 0);
   const glob = segments.findIndex((segment) => /[*?{[]/u.test(segment));
   const literal = glob < 0 ? segments : segments.slice(0, glob);

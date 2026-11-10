@@ -1,0 +1,165 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261110-131159-test-quality",
+  "title": "Nâng chất lượng bộ test",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Loại test chạy rỗng, assert yếu và phụ thuộc đồng hồ hoặc timer thật, gom helper test dùng chung, giữ coverage floor không giảm.",
+  "nonGoals": [
+    "Không hạ coverage floor",
+    "Không đổi hành vi src"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Test symlink của secret-scan và suite-command dùng it.skipIf thay vì return sớm.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "workflow-command.test.ts assert giá trị thật của decision, risk, paths và criterion.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "workflow-lock và bounded-input bỏ phụ thuộc đồng hồ hoặc timer thật; helper temporaryGlobalRoot nằm một nơi trong test/support (useTemporaryGlobalRoots) thay cho bốn bản sao.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "epic.test.ts hết flaky EPERM nhờ rename có retry trong test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "test"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của member",
+      "command": "pnpm exec vitest run test/unit test/integration",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests nhanh (CLI, docs, cấu trúc test)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ suite của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-10T14:35:53.365+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Helper withCwd và project() dùng chung cần viết lại nhiều thân test dài hoặc đối chiếu từng bản có thân khác nhau; file-lock và session-cache chỉ dùng đồng hồ thật với biên rộng. Làm dở sẽ thêm mã chết nên ghi residual risk.",
+      "artifactPaths": [
+        ".harnix/tasks/20261110-131159-test-quality/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-10T14:38:18.365+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit test/integration — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1b08fdb17a0d1f183eea2a2439eaac7cd821df7710f489a0c5111cf903134cf2"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-10T14:38:27.461+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "7719bf13f5bae8ce2c2502e8d7105eca3dcb413f9e0aae5cb9828d1fa9fbda29"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T14:40:04.141+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "668898d3b63d1d062e6854726783573c5c3a945ecd8423b5cfed94e4390fffee"
+    }
+  ],
+  "epicId": "20261110-131151-harnix-review-refactor",
+  "createdAt": "2026-11-10T13:11:51.523+07:00",
+  "updatedAt": "2026-11-10T14:40:13.525+07:00",
+  "residualRisks": [
+    {
+      "id": "test-helpers-not-merged",
+      "text": "project() lặp ở khoảng 8 file test với thân khác nhau, withCwd chưa có và khoảng 164 chỗ process.chdir còn thủ công; file-lock.test.ts và session-cache.test.ts còn dùng Date.now() với biên 30 đến 60 phút.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-10T14:40:13.525+07:00"
+}

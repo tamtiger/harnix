@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { errorCode, renameWithRetry } from "src/utils/rename-retry.js";
+import { errorCode } from "src/utils/errno.js";
+import { renameWithRetry } from "src/utils/rename-retry.js";
 
 const failure = (code: string): Error => Object.assign(new Error(code), { code });
 

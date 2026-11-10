@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { createInterface } from "node:readline";
 import type { LearningCandidate } from "./learning.js";
 import { validateLearningCandidate } from "./learning.js";
+import { isMissingPathError } from "src/utils/errno.js";
 export interface JournalEntry {
   generator: "harnix";
   schemaVersion: 1;
@@ -71,7 +72,7 @@ export async function searchJournal(
   try {
     stream = createReadStream(path, { encoding: "utf8" });
   } catch (error: unknown) {
-    if (isMissing(error)) return { entries: [], malformed: 0 };
+    if (isMissingPathError(error)) return { entries: [], malformed: 0 };
     throw error;
   }
   stream.on("error", () => undefined);
@@ -93,7 +94,7 @@ export async function searchJournal(
       }
     }
   } catch (error: unknown) {
-    if (isMissing(error)) return { entries: [], malformed: 0 };
+    if (isMissingPathError(error)) return { entries: [], malformed: 0 };
     throw error;
   }
   return { entries: entries.reverse(), malformed };
@@ -103,7 +104,7 @@ async function findJournalEntry(journalRoot: string, id: string): Promise<Journa
   try {
     names = (await readdir(journalRoot)).filter((name) => name.endsWith(".jsonl")).sort();
   } catch (error: unknown) {
-    if (isMissing(error)) return undefined;
+    if (isMissingPathError(error)) return undefined;
     throw error;
   }
   for (const name of names) {
@@ -126,7 +127,7 @@ function journalIdentity(entry: JournalEntry): string {
     learning: entry.learning,
   });
 }
-export function validateJournalEntry(value: unknown): JournalEntry {
+function validateJournalEntry(value: unknown): JournalEntry {
   if (
     !isRecord(value) ||
     value.generator !== "harnix" ||
@@ -147,11 +148,6 @@ export function validateJournalEntry(value: unknown): JournalEntry {
   if (value.kind === "learning" && learning === undefined)
     throw new Error("Learning journal entries require a candidate.");
   return { ...(value as unknown as JournalEntry), ...(learning === undefined ? {} : { learning }) };
-}
-function isMissing(error: unknown): boolean {
-  return (
-    typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"
-  );
 }
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

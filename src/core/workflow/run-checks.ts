@@ -49,7 +49,14 @@ export async function runChecksWorkflow(
   for (const check of todo) {
     // Like --run-check: changed inputs (a new digest) reopen a check that failed twice in a row.
     const digest = (await computeInputDigest(root, task, check.id)).inputDigest;
-    if (verificationRetryDisposition(task, check.id, Date.now(), digest) === "stop")
+    if (
+      verificationRetryDisposition(
+        task,
+        check.id,
+        dependencies.now ? Date.parse(dependencies.now) : Date.now(),
+        digest,
+      ) === "stop"
+    )
       throw new Error(
         `Check ${check.id} failed twice in a row; nothing was run. Stop and report to the user. Continue only with code changes (new input digest), user-authorized reset: harnix workflow --reset-breaker ${check.id} --reason "<why>", or replace check: harnix workflow --replace-check ${check.id} <new-id> --reason "<why>".`,
       );

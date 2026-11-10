@@ -5,6 +5,8 @@ import type { AtomicFileSystem } from "src/utils/atomic-write.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { sha256 } from "src/utils/hashing.js";
 import { compareCodeUnits } from "src/utils/order.js";
+import { isMissingPathError } from "src/utils/errno.js";
+import { readOptionalText } from "src/utils/filesystem.js";
 
 export type ManagedScope = "project" | "kiro" | "antigravity" | "codex";
 export interface ManagedEntry {
@@ -73,7 +75,7 @@ export async function ownershipState(
     if (!previous) return "modified";
     return sha256(content) === previous.generatedHash ? "unchanged" : "modified";
   } catch (error: unknown) {
-    if (isMissing(error)) return previous ? "deleted" : "new";
+    if (isMissingPathError(error)) return previous ? "deleted" : "new";
     throw error;
   }
 }
@@ -220,18 +222,4 @@ export async function reconcileManagedFiles(
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-function isMissing(error: unknown): boolean {
-  return (
-    typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"
-  );
-}
-
-async function readOptionalText(path: string): Promise<string | undefined> {
-  try {
-    return await readFile(path, "utf8");
-  } catch (error: unknown) {
-    if (isMissing(error)) return undefined;
-    throw error;
-  }
 }

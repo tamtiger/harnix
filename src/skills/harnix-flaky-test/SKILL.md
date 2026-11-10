@@ -2,7 +2,7 @@
 name: harnix-flaky-test
 description: Use when diagnosing, reproducing and stabilizing intermittent, non-deterministic or timing-dependent test failures.
 metadata:
-  version: "2.31.1"
+  version: "2.32.0"
 ---
 
 # Flaky test diagnosis and stabilization
@@ -11,7 +11,6 @@ Isolate the source of non-determinism, eliminate environmental dependencies, and
 
 ## Evidence and Rationale
 
-Evidence source: `research/external-research.md` (§B Superpowers "the project's suite defines green", noting that in 11 of 12 runs agents only inspect single test files, leaving cross-test interactions and timing leaks undetected).
 Flaky tests destroy trust in verification gates and waste significant token and execution budgets in repeated runs. Eliminating non-determinism at the root is required for dependable automation.
 
 ## When to use
@@ -51,3 +50,5 @@ Flaky tests destroy trust in verification gates and waste significant token and 
 4. **Prove stability**:
    - Run the isolated test repeated 20 times with exit code 0.
    - Run the broader suite with random seed order to verify no side-effects leak.
+
+Detail on demand: `harnix skill harnix-flaky-test --reference concurrency-isolation`.

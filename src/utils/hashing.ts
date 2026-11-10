@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-export function normalizeContentForHash(content: string): string {
+function normalizeContentForHash(content: string): string {
   return content.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
 }
 

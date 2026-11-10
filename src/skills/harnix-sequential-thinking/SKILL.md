@@ -2,7 +2,7 @@
 name: harnix-sequential-thinking
 description: Use when analyzing complex architectural tradeoffs, multi-step refactoring paths or elusive edge-case hypotheses.
 metadata:
-  version: "2.31.1"
+  version: "2.32.0"
 ---
 
 # Sequential thinking and dynamic hypothesis revision
@@ -11,7 +11,6 @@ Structure complex engineering reasoning through deliberate, iterative, and branc
 
 ## Evidence and Rationale
 
-Evidence source: `research/external-research.md` (§A AgentKit/Superpowers sequential reasoning model, §B cognitive chain decomposition, §C hypothesis revision protocols).
 Complex software problems involving deep architectural invariants or subtle race conditions often derail when an agent jumps immediately to code changes based on an initial flawed premise. Sequential thinking forces explicit thought stepping, hypothesis verification, and course-correction before making irreversible modifications.
 
 ## When to use
@@ -50,3 +49,5 @@ Thought X/Y (or Thought X):
 4. **Convergence to verifiable action**:
    - End sequential reasoning with a concrete, testable outcome: a specific failing test, a minimal diff, or a clear architectural decision.
    - Avoid open-ended philosophizing; every thought sequence must terminate in actionable engineering steps.
+
+Detail on demand: `harnix skill harnix-sequential-thinking --reference multi-step-tree-search`.

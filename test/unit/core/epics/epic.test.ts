@@ -249,3 +249,53 @@ describe("epic order", () => {
     expect(page.indexOf(`\`${B}\` | Second task`)).toBeLessThan(page.indexOf(`\`${A}\` | First task`));
   });
 });
+
+describe("upsertEpic keeps what an envelope does not own", () => {
+  const temporaryRepository = useTemporaryRepositories();
+  const stamp = { createdAt: "2026-09-24T04:00:00Z", updatedAt: "2026-09-24T04:00:00Z" };
+
+  it("keeps the original createdAt and the run order when the envelope resends the epic without an order", async () => {
+    const root = await temporaryRepository();
+    const first = validateEpic(
+      buildEpic({
+        id: "kept-epic",
+        title: "Epic",
+        goal: "Goal",
+        order: ["20260924-040000-a", "20260924-040001-b"],
+        ...stamp,
+      }),
+    );
+    await upsertEpic(root, first);
+
+    const withoutOrder = Object.fromEntries(Object.entries(first).filter(([key]) => key !== "order"));
+    await upsertEpic(
+      root,
+      validateEpic({
+        ...withoutOrder,
+        goal: "New goal",
+        createdAt: "2026-10-01T00:00:00Z",
+        updatedAt: "2026-10-01T00:00:00Z",
+      }),
+    );
+
+    const stored = JSON.parse(await readFile(join(root, ".harnix", "epics", "kept-epic", "epic.json"), "utf8"));
+    expect(stored).toMatchObject({
+      goal: "New goal",
+      createdAt: stamp.createdAt,
+      updatedAt: "2026-10-01T00:00:00Z",
+      order: first.order,
+    });
+  });
+
+  it("lets an envelope that names an order replace the stored one", async () => {
+    const root = await temporaryRepository();
+    const first = validateEpic(
+      buildEpic({ id: "reorder-epic", title: "Epic", goal: "Goal", order: ["20260924-040000-a"], ...stamp }),
+    );
+    await upsertEpic(root, first);
+    await upsertEpic(root, validateEpic({ ...first, order: ["20260924-040001-b"] }));
+
+    const stored = JSON.parse(await readFile(join(root, ".harnix", "epics", "reorder-epic", "epic.json"), "utf8"));
+    expect(stored.order).toEqual(["20260924-040001-b"]);
+  });
+});

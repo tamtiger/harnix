@@ -1,6 +1,8 @@
 import { chmod, lstat, mkdir, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { randomBytes } from "node:crypto";
+import { isMissingPathError } from "src/utils/errno.js";
+import { renameWithRetry } from "src/utils/rename-retry.js";
 
 export interface AtomicFileSystem {
   mkdir(directory: string, options: { recursive: true }): Promise<unknown>;
@@ -57,7 +59,7 @@ export async function atomicWriteFile(
     await filesystem.writeFile(temporaryPath, content);
     if (preservedMode !== undefined && filesystem.chmod !== undefined)
       await filesystem.chmod(temporaryPath, preservedMode);
-    await renameWithRetry(filesystem, temporaryPath, destination, renameRetryDelaysMs);
+    await renameWithRetry(temporaryPath, destination, (from, to) => filesystem.rename(from, to), renameRetryDelaysMs);
   } catch (error) {
     try {
       await filesystem.rm(temporaryPath, { force: true });
@@ -73,32 +75,13 @@ async function followSymlink(filesystem: AtomicFileSystem, destination: string):
   try {
     if (!(await filesystem.lstat(destination)).isSymbolicLink()) return destination;
   } catch (error: unknown) {
-    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return destination;
+    if (isMissingPathError(error)) return destination;
     throw error;
   }
   try {
     return await filesystem.realpath(destination);
   } catch {
     throw new Error("Refusing to write through a dangling symlink destination.");
-  }
-}
-
-async function renameWithRetry(
-  filesystem: AtomicFileSystem,
-  source: string,
-  destination: string,
-  retryDelaysMs: readonly number[],
-): Promise<void> {
-  let retryIndex = 0;
-  while (true) {
-    try {
-      await filesystem.rename(source, destination);
-      return;
-    } catch (error: unknown) {
-      if (!isTransientRenameError(error) || retryIndex >= retryDelaysMs.length) throw error;
-      const delayMs = retryDelaysMs[retryIndex++]!;
-      if (delayMs > 0) await new Promise<void>((resolveDelay) => setTimeout(resolveDelay, delayMs));
-    }
   }
 }
 
@@ -109,21 +92,12 @@ function validateRenameRetryDelays(value: readonly number[]): readonly number[] 
   return value;
 }
 
-function isTransientRenameError(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    ["EACCES", "EBUSY", "EPERM"].includes(String((error as { code?: unknown }).code))
-  );
-}
-
 async function existingMode(filesystem: AtomicFileSystem, destination: string): Promise<number | undefined> {
   if (filesystem.stat === undefined || filesystem.chmod === undefined) return undefined;
   try {
     return (await filesystem.stat(destination)).mode & 0o7777;
   } catch (error: unknown) {
-    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return undefined;
+    if (isMissingPathError(error)) return undefined;
     throw error;
   }
 }

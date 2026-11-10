@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildCheck, buildCriterion, buildTaskV1, buildTaskV3 } from "test/support/builders.js";
 
-import { createCheckFailureFinding, inspectRequiredChecks } from "src/core/verification/check-report.js";
+import { inspectRequiredChecks } from "src/core/verification/check-report.js";
 import { computeInputDigest } from "src/core/verification/input-digest.js";
 import type { TaskRecordV1, TaskRecordV2, TaskRecordV3 } from "src/core/tasks/task.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -146,11 +146,8 @@ describe("required check report", () => {
   });
 
   it("forwards structured findings from evidence to inspection results", async () => {
-    const finding1 = createCheckFailureFinding("err-1", "Test suite failed with exit code 1", "critical");
-    const finding2 = createCheckFailureFinding("warn-1", "Deprecated API usage", "low");
-
-    expect(finding1).toEqual({ id: "err-1", text: "Test suite failed with exit code 1", severity: "critical" });
-    expect(finding2).toEqual({ id: "warn-1", text: "Deprecated API usage", severity: "low" });
+    const finding1 = { id: "err-1", text: "Test suite failed with exit code 1", severity: "critical" } as const;
+    const finding2 = { id: "warn-1", text: "Deprecated API usage", severity: "low" } as const;
 
     const taskWithFindings: TaskRecordV3 = {
       ...v3Task(),

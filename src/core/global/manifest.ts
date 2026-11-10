@@ -5,7 +5,7 @@ import { compareCodeUnits } from "src/utils/order.js";
 import { parseCanonicalJsonPointer } from "src/core/global/managed-json.js";
 import { markersOverlap, markerTokensOverlap } from "src/core/global/managed-markers.js";
 import { normalizeUserRelativePath, resolveSafeUserPath, type UserPathRoot } from "src/core/platform/user-paths.js";
-import { readOptionalText } from "src/core/global/discovery.js";
+import { readOptionalText } from "src/utils/filesystem.js";
 import {
   type GlobalManagedEntry,
   type GlobalManagedKind,
@@ -18,6 +18,7 @@ import {
   type MarkerSelector,
 } from "src/core/global/types.js";
 import { platformRecords } from "src/core/platform/registry.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 /**
  * Validates the sidecar owned by one platform root. It deliberately has no
@@ -276,10 +277,6 @@ export function normalizeGlobalPath(value: string): string {
   } catch {
     throw new GlobalManagedManifestError("Global managed paths must be safe canonical relative paths.");
   }
-}
-
-export function isMissingPathError(error: unknown): error is NodeJS.ErrnoException {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
 }
 
 const GLOBAL_PLATFORM_IDS: readonly GlobalPlatform[] = platformRecords().flatMap((record) =>

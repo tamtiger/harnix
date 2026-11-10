@@ -14,10 +14,10 @@ import { readConfig } from "src/core/config/config.js";
 import { readInventoryFingerprint } from "src/core/repo-map/store.js";
 import { guideOutputPath, selectGuideSources } from "src/guides/catalog.js";
 import { resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
-import { isMissing } from "src/core/tasks/workflow-helpers.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { resolveTaskDirectory } from "src/core/tasks/task-location.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export async function continueWorkflowTask(
   harnixRoot: string,
@@ -48,7 +48,7 @@ export async function taskContextDrift(
         await resolveSafeProjectPath(taskDirectory, "context-selection.json"),
       );
     } catch (error: unknown) {
-      if (isMissing(error))
+      if (isMissingPathError(error))
         return { ...contentDrift, state: contentDrift.state === "stale" ? "stale" : "not-recorded" };
       throw new Error("Context selection snapshot is unreadable or invalid.");
     }
@@ -65,7 +65,7 @@ export async function taskContextDrift(
             : "current",
     };
   } catch (error: unknown) {
-    if (isMissing(error)) return inspectContextDrift(projectRoot, undefined);
+    if (isMissingPathError(error)) return inspectContextDrift(projectRoot, undefined);
     throw error;
   }
 }

@@ -4,7 +4,8 @@ import { epicFolder, epicStorePath, listEpicIds, locateEpicFile } from "src/core
 import { withWorkflowLock } from "src/core/workflow/workflow-lock.js";
 import { mapWithLimit } from "src/utils/concurrency.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
-import { errorCode, renameWithRetry, type MoveFunction } from "src/utils/rename-retry.js";
+import { errorCode } from "src/utils/errno.js";
+import { renameWithRetry, type MoveFunction } from "src/utils/rename-retry.js";
 import {
   directoryExists,
   listTaskIds,

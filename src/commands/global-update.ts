@@ -8,7 +8,7 @@ import {
 import { updateGlobal } from "src/core/global/update.js";
 import type { HomeResolver } from "src/core/platform/user-paths.js";
 import { acquireHarnixFileLock } from "src/utils/file-lock.js";
-import { isTestProcess } from "src/utils/test-process.js";
+import { isTestProcess, requireTestEnvironment } from "src/utils/test-process.js";
 import { packageVersion } from "src/version.js";
 
 export interface UpdateGlobalPlatformsOptions {
@@ -26,6 +26,7 @@ export async function updateGlobalPlatforms(options: UpdateGlobalPlatformsOption
   if (isTestProcess() && options.homeResolver === undefined) {
     throw new Error("Global update requires an injected homeResolver in test mode.");
   }
+  requireTestEnvironment("Global update", options.environment);
   if (isTestProcess() && options.commandLookup === undefined) {
     throw new Error("Global update requires an injected commandLookup in test mode.");
   }

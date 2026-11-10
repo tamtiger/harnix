@@ -4,6 +4,7 @@ import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { validateTask, type TaskMode, type TaskRecord, type TaskStatus, type WorkflowCheckpoint } from "./task.js";
 import { mapWithLimit } from "src/utils/concurrency.js";
 import { listTaskIds, taskFilePath } from "src/core/tasks/task-location.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 const MAX_SCANNED_TASKS = 1_000;
 const MAX_TASK_RECORD_BYTES = 1_048_576;
@@ -93,7 +94,7 @@ const fileSystemTaskIndexSource: TaskIndexSource = {
       const value = (await readFile(path, "utf8")).trim();
       return value.length === 0 ? null : value;
     } catch (error: unknown) {
-      if (isMissing(error)) return null;
+      if (isMissingPathError(error)) return null;
       throw error;
     }
   },
@@ -240,10 +241,4 @@ function compareTaskItems(left: TaskIndexItemV1, right: TaskIndexItemV1): number
 
 function compareCodeUnitsDescending(left: string, right: string): number {
   return left === right ? 0 : left < right ? 1 : -1;
-}
-
-function isMissing(error: unknown): boolean {
-  return (
-    typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT"
-  );
 }

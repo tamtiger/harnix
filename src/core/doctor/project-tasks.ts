@@ -2,13 +2,14 @@ import { readdir, readFile, stat } from "node:fs/promises";
 
 import { readArchivedTasks } from "src/core/doctor/archived-tasks.js";
 import { inspectTaskPreflight } from "src/core/doctor/task-preflight.js";
-import { finding, isMissing, redact, type DoctorFinding } from "src/core/doctor/findings.js";
+import { finding, redact, type DoctorFinding } from "src/core/doctor/findings.js";
 import { searchJournal, type JournalEntry } from "src/core/journal/journal.js";
 import { analyzeLearningStatement, type LearningRiskKind } from "src/core/journal/learning-safety.js";
 import { validateTask } from "src/core/tasks/task.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { listTaskDirectoryNames, taskDisplayPath, taskFilePath } from "src/core/tasks/task-location.js";
 import { normalizeRepositoryPath, resolveSafeHarnixPath } from "src/utils/paths.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 type ValidTask = ReturnType<typeof validateTask>;
 
@@ -23,7 +24,7 @@ export async function inspectTaskRecords(
     const value = (await readFile(activePath, "utf8")).trim();
     if (value.length > 0) activeId = value;
   } catch (error: unknown) {
-    if (!isMissing(error))
+    if (!isMissingPathError(error))
       findings.push(finding("active-pointer-unreadable", "error", "tasks/.active", redact(error, root), false));
   }
 
@@ -39,8 +40,21 @@ export async function inspectTaskRecords(
         tasks.set(task.id, task);
         await inspectTaskState(root, task, entry.name === activeId, logicalPath, findings);
         if (entry.name === activeId) activeFound = true;
-      } catch {
+      } catch (error: unknown) {
         const active = entry.name === activeId;
+        if (isReadFailure(error)) {
+          // The record could not be read at all (permissions, a directory in its place): that is not an invalid record.
+          findings.push(
+            finding(
+              "task-unreadable",
+              "warning",
+              logicalPath,
+              `The task record could not be read: ${redact(error, root)}`,
+              false,
+            ),
+          );
+          continue;
+        }
         findings.push(
           finding(
             active ? "task-invalid-active" : "task-invalid-historical",
@@ -65,11 +79,18 @@ export async function inspectTaskRecords(
         ),
       );
   } catch (error: unknown) {
-    if (!isMissing(error)) findings.push(finding("task-root-unreadable", "error", "tasks", redact(error, root), false));
+    if (!isMissingPathError(error))
+      findings.push(finding("task-root-unreadable", "error", "tasks", redact(error, root), false));
   }
   await inspectTaskPreflight(root, tasks, packagePaths, findings);
   const linkable = new Map([...(await readArchivedTasks(root)), ...tasks]);
   await inspectJournalRecords(root, linkable, findings);
+}
+
+/** A file-system failure other than a missing file; parse and validation errors have no errno code. */
+function isReadFailure(error: unknown): boolean {
+  if (typeof error !== "object" || error === null || !("code" in error)) return false;
+  return typeof error.code === "string" && /^E[A-Z]+$/u.test(error.code) && error.code !== "ENOENT";
 }
 
 async function readTaskRecord(
@@ -177,7 +198,7 @@ async function inspectJournalRecords(
       withFileTypes: true,
     });
   } catch (error: unknown) {
-    if (!isMissing(error))
+    if (!isMissingPathError(error))
       findings.push(finding("journal-root-unreadable", "warning", "workspace", redact(error, root), false));
     return;
   }
@@ -188,7 +209,7 @@ async function inspectJournalRecords(
     try {
       files = await readdir(await resolveSafeHarnixPath(root, journalRoot), { encoding: "utf8", withFileTypes: true });
     } catch (error: unknown) {
-      if (!isMissing(error))
+      if (!isMissingPathError(error))
         findings.push(finding("journal-root-unreadable", "warning", journalRoot, redact(error, root), false));
       continue;
     }

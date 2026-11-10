@@ -1,4 +1,4 @@
-import { mkdir, rename, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -6,6 +6,7 @@ import { runCli } from "src/cli-program.js";
 import { initializeProject } from "src/commands/init.js";
 import { saveTask, setActiveTask, type TaskRecordV3 } from "src/core/tasks/task.js";
 import { upsertEpic, type EpicRecord } from "src/core/epics/epic.js";
+import { renameWithRetry } from "src/utils/rename-retry.js";
 import { buildEpic, buildTaskV3 } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
@@ -168,12 +169,12 @@ describe.sequential("epic command", () => {
     const done = taskV2("20260802-100000-old-member", "ready", "20260801-100000-old-epic");
     await saveTask(harnixRoot, done);
     await mkdir(join(harnixRoot, "epics", "_archive", "2026-08"), { recursive: true });
-    await rename(
+    await renameWithRetry(
       join(harnixRoot, "epics", "2026-08", "20260801-100000-old-epic"),
       join(harnixRoot, "epics", "_archive", "2026-08", "20260801-100000-old-epic"),
     );
     await mkdir(join(harnixRoot, "tasks", "_archive", "2026-08"), { recursive: true });
-    await rename(
+    await renameWithRetry(
       join(harnixRoot, "tasks", "2026-08", done.id),
       join(harnixRoot, "tasks", "_archive", "2026-08", done.id),
     );

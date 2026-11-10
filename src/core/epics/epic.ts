@@ -122,9 +122,29 @@ export async function resolveEpicFile(harnixRoot: string, epicId: string, extens
   return found?.path ?? join(await epicFolder(harnixRoot, epicId), `epic.${extension}`);
 }
 
-export async function upsertEpic(root: string, epic: EpicRecord): Promise<void> {
+/**
+ * Writes an epic from a save envelope. An epic that already exists keeps its `createdAt` and, unless the envelope
+ * names one, its run `order` (set by `--epic-order`): resending the epic text never erases either. `--epic-order`
+ * itself passes `replaceOrder` because it owns the order, so naming none there really clears it.
+ */
+export async function upsertEpic(
+  root: string,
+  incoming: EpicRecord,
+  options: { readonly replaceOrder?: boolean } = {},
+): Promise<void> {
   await mkdir(join(root, ".harnix"), { recursive: true });
-  await assertEpicWritable(join(root, ".harnix"), epic.id);
+  await assertEpicWritable(join(root, ".harnix"), incoming.id);
+  const existing = await loadEpicRecord(root, incoming.id);
+  const epic: EpicRecord =
+    existing === undefined
+      ? incoming
+      : {
+          ...incoming,
+          createdAt: existing.createdAt,
+          ...(options.replaceOrder !== true && incoming.order === undefined && existing.order !== undefined
+            ? { order: existing.order }
+            : {}),
+        };
   const folder = await epicFolder(join(root, ".harnix"), epic.id);
   await mkdir(folder, { recursive: true });
   const jsonContent = `${JSON.stringify(epic, null, 2)}\n`;

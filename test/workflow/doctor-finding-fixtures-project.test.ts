@@ -42,6 +42,19 @@ describe("task diagnostics fixtures", () => {
     expect(await codes(inspectTaskRecords, root)).toContain("task-root-unreadable");
   });
 
+  it('produces "task-unreadable" when a task record cannot be read for a reason other than being invalid', async () => {
+    const root = await initialized();
+    const id = "20260929-090000-unreadable";
+    await saveTask(join(root, ".harnix"), buildTaskV3({ id }));
+    const taskFile = join(root, ".harnix", "tasks", id.slice(0, 4) + "-" + id.slice(4, 6), id, "task.json");
+    await rm(taskFile, { force: true });
+    await mkdir(taskFile, { recursive: true });
+
+    const found = await codes(inspectTaskRecords, root);
+    expect(found).toContain("task-unreadable");
+    expect(found).not.toContain("task-invalid-historical");
+  });
+
   it('produces "task-active-completed" when the active pointer names a finished task', async () => {
     const root = await initialized();
     const id = "20260929-090000-done";

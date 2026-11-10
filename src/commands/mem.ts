@@ -7,6 +7,7 @@ import { searchJournal, type JournalEntry } from "src/core/journal/journal.js";
 import { effectiveLearningStatus } from "src/core/journal/learning.js";
 import { resolveSafeHarnixPath, resolveSafeProjectPath } from "src/utils/paths.js";
 import { compareCodeUnits } from "src/utils/order.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export interface MemOptions {
   root: string;
@@ -30,8 +31,7 @@ export async function searchMemory(options: MemOptions): Promise<MemResult> {
   try {
     names = (await readdir(journalRoot)).filter((name) => name.endsWith(".jsonl")).sort();
   } catch (error: unknown) {
-    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT")
-      return { entries: [], malformed: 0 };
+    if (isMissingPathError(error)) return { entries: [], malformed: 0 };
     throw error;
   }
   const limit = Math.max(1, options.limit ?? 20);

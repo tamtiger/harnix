@@ -2,8 +2,8 @@ import { compareCodeUnits } from "src/utils/order.js";
 import { MAX_NAME_DECLARERS } from "./references.js";
 import type { RepoMapRecordV1 } from "./types.js";
 
-export const MAX_REFERENCE_EDGES_PER_FILE = 8;
-export const MAX_REFERENCE_EDGES = 50_000;
+const MAX_REFERENCE_EDGES_PER_FILE = 8;
+const MAX_REFERENCE_EDGES = 50_000;
 
 export interface ReferenceEdgeLimits {
   readonly maxReferenceEdges?: number | undefined;

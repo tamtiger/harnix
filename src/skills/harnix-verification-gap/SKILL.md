@@ -2,7 +2,7 @@
 name: harnix-verification-gap
 description: Use when evaluating whether a test suite, verification plan or review scope has hidden gaps, false-success blind spots or unverified critical requirements.
 metadata:
-  version: "2.31.1"
+  version: "2.32.0"
 ---
 
 # Verification gap analysis
@@ -11,7 +11,6 @@ Identify what existing tests claim to verify versus what is actually proven by c
 
 ## Evidence and Rationale
 
-Evidence source: `research/external-research.md` (§B Superpowers/BMAD verification-gap reviewer, §C 2606.09863 & 2607.25152 self-evaluation false success rates up to 75.8%, §D 10 verification-gap lens).
 Automated tests and agent self-evaluations frequently exhibit false success when assertions are loose, tautological, or bypassed through mocks that mask runtime assumptions. A systematic verification-gap review exposes blind spots before implementation is declared complete.
 
 ## When to use
@@ -55,3 +54,5 @@ Automated tests and agent self-evaluations frequently exhibit false success when
 2. Read the actual test assertions in the test files matching the criterion.
 3. Formulate one gap hypothesis: "If bug X occurred, would this test catch it or pass silently?"
 4. If it would pass silently, document the verification gap and propose the exact assertion or test case needed.
+
+Detail on demand: `harnix skill harnix-verification-gap --reference verification-blindspots`.

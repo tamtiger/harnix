@@ -4,7 +4,7 @@ import { readLearningStates, type LearningState } from "src/core/journal/learnin
 
 export type LearningAction = "reject" | "promote" | "retire";
 
-export const MAX_REVIEW_REASON_CHARACTERS = 200;
+const MAX_REVIEW_REASON_CHARACTERS = 200;
 
 /** Which stored status an action may start from, and the status it records. */
 const TRANSITIONS: Record<LearningAction, { from: readonly LearningStatus[]; to: LearningStatus }> = {

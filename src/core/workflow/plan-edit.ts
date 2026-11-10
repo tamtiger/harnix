@@ -227,15 +227,10 @@ export async function setPathsWorkflow(
 ): Promise<TaskRecordV3> {
   if (input.paths === undefined && input.specs === undefined)
     throw new Error("workflow --set-paths requires --relevant-path and/or --relevant-spec.");
-  const now = await currentInstant(root, injectedNow);
-  const task = await activeV3(root);
-  const edited: TaskRecordV3 = {
-    ...task,
+  return await editReviewData(root, injectedNow, (task) => ({
     relevantPaths: input.paths === undefined ? task.relevantPaths : sortedUnique(input.paths),
     relevantSpecs: input.specs === undefined ? task.relevantSpecs : sortedUnique(input.specs),
-    updatedAt: laterTimestamp(task.updatedAt, now),
-  };
-  return (await saveWorkflow(root, { task: edited })) as TaskRecordV3;
+  }));
 }
 
 const SEVERITIES = ["low", "medium", "high"] as const;
@@ -246,25 +241,36 @@ function requireText(value: string, flag: string): string {
   return text;
 }
 
-/** Review data (outside the contract hash), so no reason and no replan at any unfinished stage. */
+/**
+ * Review data (outside the contract hash), so no reason and no replan at any unfinished stage: reads the active
+ * task, applies `change` to it and saves with a later `updatedAt`. `change` runs after the task is loaded, so an
+ * invalid argument is reported after a missing active task, as every setter always did.
+ */
+async function editReviewData(
+  root: string,
+  injectedNow: string | undefined,
+  change: (task: TaskRecordV3) => Partial<TaskRecordV3>,
+): Promise<TaskRecordV3> {
+  const now = await currentInstant(root, injectedNow);
+  const task = await activeV3(root);
+  const changes = change(task);
+  return (await saveWorkflow(root, {
+    task: { ...task, ...changes, updatedAt: laterTimestamp(task.updatedAt, now) },
+  })) as TaskRecordV3;
+}
+
 export async function addDecisionWorkflow(
   root: string,
   input: { id: string; text: string; rationale: string },
   injectedNow?: string,
 ): Promise<TaskRecordV3> {
-  const now = await currentInstant(root, injectedNow);
-  const task = await activeV3(root);
-  const text = requireText(input.text, "--text");
-  const rationale = requireText(input.rationale, "--rationale");
-  const decisions = task.decisions ?? [];
-  if (decisions.some((decision) => decision.id === input.id)) throw new Error(`Decision ${input.id} already exists.`);
-  return (await saveWorkflow(root, {
-    task: {
-      ...task,
-      decisions: [...decisions, { id: input.id, text, rationale }],
-      updatedAt: laterTimestamp(task.updatedAt, now),
-    },
-  })) as TaskRecordV3;
+  return await editReviewData(root, injectedNow, (task) => {
+    const text = requireText(input.text, "--text");
+    const rationale = requireText(input.rationale, "--rationale");
+    const decisions = task.decisions ?? [];
+    if (decisions.some((decision) => decision.id === input.id)) throw new Error(`Decision ${input.id} already exists.`);
+    return { decisions: [...decisions, { id: input.id, text, rationale }] };
+  });
 }
 
 export async function addRiskWorkflow(
@@ -272,48 +278,26 @@ export async function addRiskWorkflow(
   input: { id: string; text: string; severity?: string | undefined; mitigation?: string | undefined },
   injectedNow?: string,
 ): Promise<TaskRecordV3> {
-  const now = await currentInstant(root, injectedNow);
-  const task = await activeV3(root);
-  const mitigation = input.mitigation?.trim();
-  const described = requireText(input.text, "--text");
-  // A risk has only id, text and severity (schema v3), so the mitigation travels inside the text.
-  const text = mitigation === undefined || mitigation === "" ? described : `${described} (Mitigation: ${mitigation})`;
-  const severity = input.severity ?? "low";
-  if (!SEVERITIES.includes(severity as (typeof SEVERITIES)[number]))
-    throw new Error("--severity must be low, medium or high.");
-  const risks = task.residualRisks ?? [];
-  if (risks.some((risk) => risk.id === input.id)) throw new Error(`Residual risk ${input.id} already exists.`);
-  return (await saveWorkflow(root, {
-    task: {
-      ...task,
-      residualRisks: [...risks, { id: input.id, text, severity: severity as (typeof SEVERITIES)[number] }],
-      updatedAt: laterTimestamp(task.updatedAt, now),
-    },
-  })) as TaskRecordV3;
+  return await editReviewData(root, injectedNow, (task) => {
+    const mitigation = input.mitigation?.trim();
+    const described = requireText(input.text, "--text");
+    // A risk has only id, text and severity (schema v3), so the mitigation travels inside the text.
+    const text = mitigation === undefined || mitigation === "" ? described : `${described} (Mitigation: ${mitigation})`;
+    const severity = input.severity ?? "low";
+    if (!SEVERITIES.includes(severity as (typeof SEVERITIES)[number]))
+      throw new Error("--severity must be low, medium or high.");
+    const risks = task.residualRisks ?? [];
+    if (risks.some((risk) => risk.id === input.id)) throw new Error(`Residual risk ${input.id} already exists.`);
+    return { residualRisks: [...risks, { id: input.id, text, severity: severity as (typeof SEVERITIES)[number] }] };
+  });
 }
 
 export async function setTitleWorkflow(root: string, title: string, injectedNow?: string): Promise<TaskRecordV3> {
   const text = requireText(title, "--title");
-  const now = await currentInstant(root, injectedNow);
-  const task = await activeV3(root);
-  return (await saveWorkflow(root, {
-    task: {
-      ...task,
-      title: text,
-      updatedAt: laterTimestamp(task.updatedAt, now),
-    },
-  })) as TaskRecordV3;
+  return await editReviewData(root, injectedNow, () => ({ title: text }));
 }
 
 export async function setGoalWorkflow(root: string, goal: string, injectedNow?: string): Promise<TaskRecordV3> {
   const text = requireText(goal, "--goal");
-  const now = await currentInstant(root, injectedNow);
-  const task = await activeV3(root);
-  return (await saveWorkflow(root, {
-    task: {
-      ...task,
-      goal: text,
-      updatedAt: laterTimestamp(task.updatedAt, now),
-    },
-  })) as TaskRecordV3;
+  return await editReviewData(root, injectedNow, () => ({ goal: text }));
 }

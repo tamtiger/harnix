@@ -14,7 +14,7 @@ import { suiteGateProblem } from "src/core/workflow/suite-gate.js";
 import { baselineAssessment, type BaselineAssessment } from "src/core/workflow/baseline-status.js";
 import { inspectRequiredChecks, type RequiredCheckState } from "src/core/verification/check-report.js";
 import { taskContextDrift } from "src/core/workflow/index.js";
-import { findInitializedProject, initializedChildrenHint } from "src/utils/project-discovery.js";
+import { findInitializedProject, missingProjectError } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { readGitContext, runGit } from "src/utils/git.js";
 import {
@@ -38,8 +38,7 @@ export async function inspectWorkspaceGitStatus(
 
 export async function inspectProjectStatus(cwd: string, now = Date.now()): Promise<HarnixStatusResultV1> {
   const project = await findInitializedProject({ cwd });
-  if (project.kind !== "ready")
-    throw new Error(`Status requires an initialized Harnix project.${await initializedChildrenHint(cwd)}`);
+  if (project.kind !== "ready") throw await missingProjectError("Status", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
   const task = await resolveActiveTask(harnixRoot);
@@ -144,8 +143,7 @@ export interface StatusCriteriaResultV1 {
 
 export async function reportProjectCriteria(cwd: string): Promise<StatusCriteriaResultV1> {
   const project = await findInitializedProject({ cwd });
-  if (project.kind !== "ready")
-    throw new Error(`Status requires an initialized Harnix project.${await initializedChildrenHint(cwd)}`);
+  if (project.kind !== "ready") throw await missingProjectError("Status", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   const task = await resolveActiveTask(harnixRoot);
   if (task === undefined) return { taskId: null, criteria: [] };
@@ -196,8 +194,7 @@ export interface StatusChecksResultV1 {
 /** The compact check list `status --checks` prints, so nobody has to read task.json to see what runs. */
 export async function listProjectChecks(cwd: string, now = Date.now()): Promise<StatusChecksResultV1> {
   const project = await findInitializedProject({ cwd });
-  if (project.kind !== "ready")
-    throw new Error(`Status requires an initialized Harnix project.${await initializedChildrenHint(cwd)}`);
+  if (project.kind !== "ready") throw await missingProjectError("Status", cwd);
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   const task = await resolveActiveTask(harnixRoot);
   if (task === undefined) return { taskId: null, checks: [] };

@@ -8,6 +8,7 @@ export const PROJECT_FINDING_CODES = [
   "config-invalid",
   "config-outdated",
   "config-packages-drift",
+  "fix-step-failed",
   "journal-evidence-unlinked",
   "journal-malformed",
   "journal-root-unreadable",
@@ -42,6 +43,7 @@ export const PROJECT_FINDING_CODES = [
   "task-near-duplicate",
   "task-plan-criterion-missing",
   "task-root-unreadable",
+  "task-unreadable",
   "unsafe-managed-path",
   "unsafe-path",
 ] as const;

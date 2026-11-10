@@ -1,6 +1,7 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { join, resolve, win32 } from "node:path";
 import { compareCodeUnits } from "src/utils/order.js";
+import { readBoundedText } from "src/utils/filesystem.js";
 
 const MAX_PROJECTS = 200;
 const NESTED_DEPTH = 3;
@@ -57,7 +58,9 @@ export async function inspectDotnetDirectory(dir: string, entries: readonly stri
   const projectFiles =
     solution === undefined
       ? entries.filter((name) => PROJECT_FILE.test(name)).map((name) => join(dir, name))
-      : solutionProjectPaths((await readBoundedText(join(dir, solution))) ?? "").map((path) => resolve(dir, path));
+      : solutionProjectPaths((await readBoundedText(join(dir, solution), MAX_FILE_BYTES)) ?? "").map((path) =>
+          resolve(dir, path),
+        );
   let hasTests = await anyTestProject(projectFiles);
   // A solution does not always list its tests; a test project below its directory still belongs to it.
   if (!hasTests && solution !== undefined) hasTests = await anyTestProject(await nestedProjectFiles(dir, NESTED_DEPTH));
@@ -67,7 +70,7 @@ export async function inspectDotnetDirectory(dir: string, entries: readonly stri
 
 async function anyTestProject(files: readonly string[]): Promise<boolean> {
   for (const file of files.slice(0, MAX_PROJECTS))
-    if (isDotnetTestProject((await readBoundedText(file)) ?? "")) return true;
+    if (isDotnetTestProject((await readBoundedText(file, MAX_FILE_BYTES)) ?? "")) return true;
   return false;
 }
 
@@ -90,13 +93,4 @@ async function nestedProjectFiles(dir: string, depth: number): Promise<string[]>
   };
   await visit(dir, depth);
   return found;
-}
-
-async function readBoundedText(path: string): Promise<string | undefined> {
-  try {
-    if ((await stat(path)).size > MAX_FILE_BYTES) return undefined;
-    return await readFile(path, "utf8");
-  } catch {
-    return undefined;
-  }
 }

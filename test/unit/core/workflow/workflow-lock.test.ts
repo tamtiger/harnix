@@ -1,3 +1,4 @@
+import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -34,10 +35,12 @@ describe("withWorkflowLock", () => {
 
     let started: () => void = () => undefined;
     const firstStarted = new Promise<void>((resolve) => (started = resolve));
+    let finishFirst: () => void = () => undefined;
+    const firstMayFinish = new Promise<void>((resolve) => (finishFirst = resolve));
     const first = withWorkflowLock(harnixRoot, async () => {
       order.push("first:start");
       started();
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      await firstMayFinish;
       order.push("first:end");
       return 1;
     });
@@ -47,6 +50,10 @@ describe("withWorkflowLock", () => {
       return Promise.resolve(2);
     });
 
+    // The second section has not started while the first still holds the lock; only then is the first released.
+    expect(await stateAfterWindow(second)).toBe("pending");
+    expect(order).toEqual(["first:start"]);
+    finishFirst();
     await expect(Promise.all([first, second])).resolves.toEqual([1, 2]);
     expect(order).toEqual(["first:start", "first:end", "second:start"]);
   });
@@ -112,5 +119,28 @@ describe("terminal transports hold the workflow lock", () => {
 
     await expect(finishing).rejects.toThrow();
     expect((await resolveActiveTask(harnixRoot))?.status).toBe("verifying");
+  });
+});
+
+describe("withWorkflowLock location", () => {
+  it("keeps the lock inside the project and serializes two spellings of the same .harnix path", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    const direct = join(root, ".harnix");
+    const detour = join(root, ".harnix", "..", ".harnix");
+
+    let release: () => void = () => undefined;
+    const held = withWorkflowLock(direct, () => new Promise<void>((resolve) => (release = resolve)));
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      if ((await readdir(join(direct, "tmp")).catch((): string[] => [])).includes("workflow.lock")) break;
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    }
+    expect(await readdir(join(direct, "tmp"))).toContain("workflow.lock");
+
+    const second = withWorkflowLock(detour, () => Promise.resolve("ran"));
+    expect(await stateAfterWindow(second)).toBe("pending");
+    release();
+    await held;
+    await expect(second).resolves.toBe("ran");
   });
 });

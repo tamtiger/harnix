@@ -2,7 +2,7 @@
 name: harnix-verify
 description: Use when a Harnix task needs fresh compliance, correctness and security verification, evidence, and a safe finish or explicit cancellation with an evidence-based handoff.
 metadata:
-  version: "2.31.1"
+  version: "2.32.0"
 ---
 
 # Verify and finish Harnix work
@@ -15,7 +15,7 @@ The guard and state rules are in the always-loaded Harnix block. Run `harnix wor
 
 ## Stage 1: compliance
 
-Read the request, goal and non-goals, PRD/plan, guides and the diff. A Full `plan.md` checklist must be 100% `[x]` (a Lite task has none). Evaluate real-world product impact and eliminate busywork: `harnix skill harnix-verify --reference so-what`. For every criterion identify the changed files, the observable behavior, the fresh evidence and the actual outcome; `met` only with evidence, `waived` only with a reason and authority. Check scope, migration and compatibility, user-owned content, public output and docs (in the Harnix codebase verify README.md, AGENTS.md, templates, skills and workflow docs are 100% synchronized before finish; in consumer projects documentation is optional, judged against task scope). Application schema migrations must include verified rollback/down procedures. A compliance defect stops here: code defects go to `harnix-debug`, requirement defects to a replan via `harnix-plan`.
+Read the request, goal and non-goals, PRD/plan, guides and the diff. A Full `plan.md` checklist must be 100% `[x]` (a Lite task has none). Evaluate real-world product impact and eliminate busywork: `harnix skill harnix-verify --reference so-what`. For every criterion identify the changed files, the observable behavior, the fresh evidence and the actual outcome; `met` only with evidence, `waived` only with a reason and authority. Check scope, migration and compatibility, user-owned content, public output and docs (documentation follows the project's own instructions and the task's scope; a project may require a documented checklist). Application schema migrations must include verified rollback/down procedures. A compliance defect stops here: code defects go to `harnix-debug`, requirement defects to a replan via `harnix-plan`.
 
 ## Stage 2: quality and security
 

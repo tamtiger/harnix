@@ -1,0 +1,163 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261110-131153-workflow-concurrency-fixes",
+  "title": "Sửa tranh chấp khóa và mất cập nhật trong workflow",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Làm khóa workflow ổn định giữa các tiến trình, đưa mọi ghi plan.md và epic.json vào vùng được khóa hoặc merge an toàn, và sửa các lỗi trạng thái cục bộ (regex cờ g, now không inject).",
+  "nonGoals": [
+    "Không đổi schema TaskRecord v3, enum hay transition",
+    "Không đổi định dạng epic.json"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "withWorkflowLock đặt khóa theo realpath đã chuẩn hóa của .harnix, không phụ thuộc tmpdir hay cách viết đường dẫn; có test hai cách viết đường dẫn dùng cùng một khóa.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "tickWorkflow và syncPlanChecklistPass đọc rồi ghi plan.md dưới withWorkflowLock (không lồng khóa); có test hồi quy chống mất cập nhật.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "upsertEpic từ envelope giữ order và createdAt của epic đã tồn tại (merge); có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "pauseTask và resumeTask chạy dưới khóa workflow; có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "TEST_FILE_PATTERN không còn trạng thái lastIndex, regex checklist chưa tick dùng chung một hằng, run-check và run-checks dùng now đã inject; có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-3"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/epics",
+    "src/core/tasks",
+    "src/core/workflow"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của member",
+      "command": "pnpm exec vitest run test/unit/core/workflow test/unit/core/tasks test/unit/core/epics",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/core/epics/**",
+        "src/core/tasks/**",
+        "src/core/workflow/**",
+        "test/unit/core/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ suite của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-10T13:36:27.677+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/core/tasks test/unit/core/epics — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5007aec965902373efb3b20e2f6fef5f2dbeb0b8bff839731321ecef33275a15"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T13:39:03.837+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "0c5205b9e078dd7a213a6c05379d06168ce8b71d28c3ebcb246b4856206a319d"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T13:41:20.127+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0c5205b9e078dd7a213a6c05379d06168ce8b71d28c3ebcb246b4856206a319d"
+    },
+    {
+      "id": "ev-chk-suite-3",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T13:43:21.342+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9ce21cc4addcd8c0646392e7d83c8b7110d3a75838d06b6b466d547742189340"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-10T13:44:28.668+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/workflow test/unit/core/tasks test/unit/core/epics — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "919d35a3fe4db8d1e467b70e112b9eeeb2e60f25f247a15b8084169b96989d2f"
+    }
+  ],
+  "epicId": "20261110-131151-harnix-review-refactor",
+  "createdAt": "2026-11-10T13:11:51.523+07:00",
+  "updatedAt": "2026-11-10T13:44:31.494+07:00",
+  "completedAt": "2026-11-10T13:44:31.494+07:00"
+}

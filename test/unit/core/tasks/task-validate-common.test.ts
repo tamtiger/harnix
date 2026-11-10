@@ -7,7 +7,6 @@ import {
   isCancellationReason,
   isInputDigest,
   isIsoTimestamp,
-  isMissing,
   isRecord,
   isSafeRepositoryPath,
   isSortedUnique,
@@ -104,7 +103,6 @@ describe("task validation helpers", () => {
     expect(() => assertExactKeys({ z: 2 }, new Set(["a"]), "Thing")).toThrow("Thing contains an unknown schema field.");
     expect(() => validateTaskId("20260929-090000-example")).not.toThrow();
     expect(() => validateTaskId("Example")).toThrow("Task ID is unsafe.");
-    expect(isMissing({ code: "ENOENT" })).toBe(true);
     expect(isRecord(null)).toBe(false);
   });
 });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { containsSecret, finding, isMissing, redact, sortFindings } from "src/core/doctor/findings.js";
+import { containsSecret, finding, redact, sortFindings } from "src/core/doctor/findings.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 describe("doctor findings", () => {
   it("builds a finding and omits an absent path", () => {
@@ -32,9 +33,9 @@ describe("doctor findings", () => {
   });
 
   it("recognizes a missing path error", () => {
-    expect(isMissing(Object.assign(new Error("x"), { code: "ENOENT" }))).toBe(true);
-    expect(isMissing(new Error("x"))).toBe(false);
-    expect(isMissing(undefined)).toBe(false);
+    expect(isMissingPathError(Object.assign(new Error("x"), { code: "ENOENT" }))).toBe(true);
+    expect(isMissingPathError(new Error("x"))).toBe(false);
+    expect(isMissingPathError(undefined)).toBe(false);
   });
 
   it("redacts the project root and secret assignments from reported errors", () => {

@@ -1,0 +1,184 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261110-131200-docs-skills-sync",
+  "title": "Đồng bộ tài liệu, skill và token budget (đóng epic)",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Loại lệnh riêng repo khỏi template và skill, sửa đường dẫn sai và tham chiếu treo, đồng bộ README, PRD, CHANGELOG và công cụ đo token; đóng epic bằng bản phát hành minor và release:check.",
+  "nonGoals": [
+    "Không nâng trần token",
+    "Không đổi frozen contract"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Template workflow.md không còn lệnh riêng repo (test:gates, version:sync, selfhost:sync); test docs-task-contract và repoOnly được cập nhật; pnpm selfhost:sync đã chạy.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "AGENTS.md mục 8 và skill harnix-self-host dùng đường dẫn đúng; AGENTS.md không liệt kê số trần token.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Bảy skill technique bỏ tham chiếu Evidence source treo; sáu reference mồ côi có dòng trỏ tới; quy tắc lặp về version và review timing được rút gọn; lệnh riêng repo chuyển khỏi skill.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-3"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "README, PRD và danh mục tài liệu đồng bộ (không còn số token cũ, có link tới ba tài liệu mồ côi, flag resume đủ, trạng thái PRD trỏ tới CHANGELOG).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-3"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs",
+    "scripts/token-budget-usage.mjs",
+    "src/skills",
+    "src/templates"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của member",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "README.md",
+        "docs/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ suite của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-10T14:43:30.192+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Công cụ đo token budgetUsage cần biết danh sách skill technique mà script không đọc được từ TypeScript; thêm một danh sách tên thứ hai sẽ phá nguyên tắc một nguồn sự thật nên ghi thành residual risk.",
+      "artifactPaths": [
+        ".harnix/tasks/20261110-131200-docs-skills-sync/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-10T14:45:04.709+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3942f35770d8dfefc615b2eea322d3ddccf662d272e2b0b4a910b34e5c2f476c"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T14:46:43.907+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "00edf3eb34e60a14c79898761c74447da50dfa7ce88f2eb4f8036752077c544f"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T14:58:06.994+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "8337628565e684c1960ce838da7bb29f45e8da3653f88c01ebb4d1439d8f5f8b"
+    },
+    {
+      "id": "ev-chk-suite-3",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T15:01:42.015+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e5cfe9bb69fd8d284bc26b2338540aa1c17016b1b87c38fa71a1c809dc626ccc"
+    }
+  ],
+  "epicId": "20261110-131151-harnix-review-refactor",
+  "createdAt": "2026-11-10T13:11:51.523+07:00",
+  "updatedAt": "2026-11-10T15:05:36.436+07:00",
+  "residualRisks": [
+    {
+      "id": "budget-usage-technique-ceiling",
+      "text": "scripts/token-budget-usage.mjs tính trần skill technique theo trần skill chung (2000) nên báo phần trăm thấp hơn thực tế so với trần techniqueSkill; sửa cần nguồn danh sách skill technique dùng chung giữa script và TypeScript.",
+      "severity": "low"
+    },
+    {
+      "id": "changelog-date-order",
+      "text": "CHANGELOG 2.24.0 mang ngày 2026-11-01 nhưng đứng sau 2.25.0 và 2.26.0 ngày 2026-10-30; chưa sửa ngày lịch sử.",
+      "severity": "low"
+    },
+    {
+      "id": "review-update-swallow-roots",
+      "text": "update.ts bỏ qua im lặng platform có root không resolve được (kể cả lỗi an toàn đường dẫn), chưa báo lý do trong kết quả.",
+      "severity": "low"
+    },
+    {
+      "id": "review-test-layout",
+      "text": "test/safety/process-timeout.test.ts nằm ngoài ranh giới an toàn mô tả trong test/README.md nhưng check-runner.test.ts đã sát trần 400 dòng; một số test chờ khóa còn dùng timer thật cho cửa sổ chờ; thiếu test mã lỗi errno của hashEntries; một lần chạy suite của reviewer có 1 test fail không lặp lại, chưa rõ tên.",
+      "severity": "low"
+    },
+    {
+      "id": "review-commit-split",
+      "text": "Working tree trộn sửa hành vi của các member 1 đến 5 với hai refactor thuần của member 6 và 7; khi commit nên tách theo task để giữ khả năng bisect.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-10T15:05:36.436+07:00"
+}

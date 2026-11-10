@@ -1,0 +1,129 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261110-131152-security-exec-hardening",
+  "title": "Gia cố thực thi tiến trình ngoài (git, launcher, timeout)",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Loại bỏ nguy cơ chạy executable giả nằm trong cwd hoặc repo khi gọi git và harnix launcher, sửa exit code khi timeout và dọn cây tiến trình, mà không đổi hành vi công khai.",
+  "nonGoals": [
+    "Không đổi cách --run-check khai báo command và cwd",
+    "Không thêm phụ thuộc mới"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "git.ts và harnix-launcher.ts tìm executable qua PATH tuyệt đối (findOnPath hoặc systemExecutable) và không chạy tệp cùng tên trong cwd; có test hồi quy dùng thư mục chứa git.exe hoặc harnix.cmd giả.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "check-runner trả exitCode 124 khi timeout, kể cả khi taskkill làm sự kiện close mang code khác null; có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "killProcessTree dọn cả tiến trình con trên POSIX và output đa byte không bị cắt đôi ký tự (StringDecoder); có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-2",
+        "ev-chk-suite-2"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/utils/check-runner.ts",
+    "src/utils/git.ts",
+    "src/utils/harnix-launcher.ts"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của member",
+      "command": "pnpm exec vitest run test/unit/utils",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/utils/**",
+        "test/unit/utils/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ suite của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-10T13:21:49.717+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f23e77985cb07d82f6f48033090ad0dd8417404affbfb379b95562b0cd64ae4f"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T13:23:35.454+07:00",
+      "result": "fail",
+      "exitCode": 1,
+      "summary": "pnpm test — exit 1",
+      "artifactPaths": [],
+      "inputDigest": "6836fa433cb4a4ae10946d70267853e1b8bc5db34cd76ff5173ae4f36ea92064"
+    },
+    {
+      "id": "ev-chk-suite-2",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T13:27:06.166+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "f4b8e2eee20e107527160f333d757014d6af325a170f878ae88ebb8da47f5980"
+    },
+    {
+      "id": "ev-chk-focus-2",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-10T13:27:24.410+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/utils — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "623d445a055f80e46d4d11214857bbe2ad5eed64e9493c7627df6af827e5b53e"
+    }
+  ],
+  "epicId": "20261110-131151-harnix-review-refactor",
+  "createdAt": "2026-11-10T13:11:51.523+07:00",
+  "updatedAt": "2026-11-10T13:27:29.401+07:00",
+  "completedAt": "2026-11-10T13:27:29.401+07:00"
+}

@@ -127,7 +127,6 @@ export const packageKeys = new Set(["path", "languages", "technologies"]);
 export const contextKeys = new Set(["maxCharacters", "tokenApproximation", "mode"]);
 export const runtimeKeys = new Set(["research", "fullContext"]);
 export const verifyKeys = new Set(["test", "lint", "typecheck", "format", "suite", "packages"]);
-export const packageVerifyKeys = new Set(["path", "test", "lint", "typecheck", "format", "suite"]);
 
 export class ConfigValidationError extends Error {
   override name = "ConfigValidationError";

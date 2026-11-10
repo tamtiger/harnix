@@ -113,3 +113,22 @@ describe("doctor run", () => {
     expect(report.project.status).toBeDefined();
   });
 });
+
+describe("doctor --fix reports a failing step", () => {
+  it("adds a fix-step-failed warning, without the project path, when the project fix throws", async () => {
+    const { root, homeResolver, commandLookup } = await setup();
+    const calls = { project: 0, global: 0 };
+
+    const report = await runDoctor(
+      { root, fix: true, homeResolver, commandLookup, environment: {} },
+      deps(calls, { fixProject: () => Promise.reject(new Error(`cannot write ${root}`)) }),
+    );
+
+    const failed = report.project.findings.filter((item) => item.code === "fix-step-failed");
+    expect(failed).toHaveLength(1);
+    expect(failed[0]).toMatchObject({ severity: "warning" });
+    expect(failed[0]?.message).toContain("cannot write [PROJECT]");
+    expect(failed[0]?.message).not.toContain(root);
+    expect(report.ok).toBe(false);
+  });
+});

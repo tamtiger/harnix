@@ -97,7 +97,6 @@ export function verificationRetryDisposition(
     )
     .map(({ evidence }) => evidence);
   const latest = attempts.at(-1);
-  if (latest?.result === "skipped") return "run";
   if (latest?.result !== "fail") return "run";
   // Nếu input digest hiện tại đã thay đổi so với lần fail gần nhất, cho phép chạy thử nghiệm lại (reset breaker by digest change)
   if (

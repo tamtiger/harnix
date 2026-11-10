@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
 import { setActiveTask, validateTask, type TaskRecord } from "./task.js";
 import { taskFilePath } from "src/core/tasks/task-location.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 const MAX_TASK_RECORD_BYTES = 1_048_576;
 const MAX_ACTIVE_POINTER_BYTES = 1_024;
@@ -34,8 +35,16 @@ export interface TaskResumeDependencies {
   fileExists?: (path: string) => Promise<boolean>;
 }
 
-const TEST_FILE_PATTERN =
-  /(?:^|[\s"'])([\w./\\-]+\.(?:test|spec)\.[a-z0-9]+|[\w./\\-]*test_[\w-]+\.py|[\w./\\-]*[\w-]+_test\.py)(?:[\s"']|$)/giu;
+const TEST_FILE_SOURCE =
+  /(?:^|[\s"'])([\w./\\-]+\.(?:test|spec)\.[a-z0-9]+|[\w./\\-]*test_[\w-]+\.py|[\w./\\-]*[\w-]+_test\.py)(?:[\s"']|$)/u
+    .source;
+
+/** A fresh global regex per scan: a shared `g` regex keeps `lastIndex` between calls and skips later matches. */
+function testFilesIn(text: string): string[] {
+  return [...text.matchAll(new RegExp(TEST_FILE_SOURCE, "giu"))].flatMap((match) =>
+    match[1] ? [match[1].trim()] : [],
+  );
+}
 
 async function sanityCheckTestFiles(
   candidate: TaskRecord,
@@ -45,13 +54,11 @@ async function sanityCheckTestFiles(
   for (const check of candidate.validationPlan) {
     const candidates = new Set<string>();
     if (check.command) {
-      for (const match of check.command.matchAll(TEST_FILE_PATTERN)) {
-        if (match[1]) candidates.add(match[1].trim());
-      }
+      for (const testPath of testFilesIn(check.command)) candidates.add(testPath);
     }
     if ("inputs" in check && Array.isArray(check.inputs)) {
       for (const input of check.inputs) {
-        if (!input.includes("*") && input !== "@task-contract" && TEST_FILE_PATTERN.test(input)) {
+        if (!input.includes("*") && input !== "@task-contract" && testFilesIn(input).length > 0) {
           candidates.add(input.trim());
         }
       }
@@ -177,7 +184,7 @@ export async function loadBoundedActiveTask(harnixRoot: string): Promise<TaskRec
     if ((await stat(pointerPath)).size > MAX_ACTIVE_POINTER_BYTES) throw new Error("Active task pointer is oversized.");
     source = await readFile(pointerPath, "utf8");
   } catch (error: unknown) {
-    if (isMissing(error)) return null;
+    if (isMissingPathError(error)) return null;
     throw error;
   }
   if (Buffer.byteLength(source, "utf8") > MAX_ACTIVE_POINTER_BYTES)
@@ -197,10 +204,4 @@ async function loadBoundedTask(harnixRoot: string, taskId: string): Promise<Task
   const task = validateTask(JSON.parse(source) as unknown);
   if (task.id !== taskId) throw new Error("Task directory and record IDs differ.");
   return task;
-}
-
-function isMissing(error: unknown): boolean {
-  return (
-    typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT"
-  );
 }

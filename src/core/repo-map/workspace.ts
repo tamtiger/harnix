@@ -17,6 +17,7 @@ import {
 } from "./workspace-root-cache.js";
 import type { RepoMapQueryResult, RepoMapQuerySignals, RepoMapV1 } from "./types.js";
 import { compareCodeUnits } from "src/utils/order.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 const IGNORED_DIRS = new Set([
   ".git",
@@ -201,7 +202,7 @@ async function readMemberCache(
     try {
       return { map: await readRepoMap(member.path), source: "member", status: "ready" };
     } catch (error: unknown) {
-      const missing = typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
+      const missing = isMissingPathError(error);
       if (!missing) return { status: "invalid" };
     }
   }

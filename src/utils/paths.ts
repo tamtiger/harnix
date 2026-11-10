@@ -2,6 +2,7 @@ import { realpath } from "node:fs/promises";
 import { dirname, isAbsolute, relative, resolve, sep, win32 } from "node:path";
 
 import { runGit } from "src/utils/git.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export class UnsafeProjectPathError extends Error {
   override name = "UnsafeProjectPathError";
@@ -51,7 +52,7 @@ function hasUnsafeRepositoryPathCharacter(value: string): boolean {
   });
 }
 
-export async function findGitRoot(cwd: string): Promise<string | undefined> {
+async function findGitRoot(cwd: string): Promise<string | undefined> {
   try {
     const root = (await runGit(cwd, ["rev-parse", "--show-toplevel"])).trim();
     return root.length > 0 ? root : undefined;
@@ -115,7 +116,8 @@ export async function resolveSafeHarnixPath(projectRoot: string, harnixPath = ".
   return resolveSafeProjectPath(projectRoot, relativePath);
 }
 
-function isContainedPath(root: string, candidate: string): boolean {
+/** True when `candidate` is `root` or lies below it (a lexical check; resolve symlinks first when they matter). */
+export function isContainedPath(root: string, candidate: string): boolean {
   const pathToCandidate = relative(root, candidate);
   return (
     pathToCandidate === "" ||
@@ -141,8 +143,4 @@ async function findRealExistingAncestor(candidate: string): Promise<string> {
       current = parent;
     }
   }
-}
-
-function isMissingPathError(error: unknown): error is NodeJS.ErrnoException {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
 }

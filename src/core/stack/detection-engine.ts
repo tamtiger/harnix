@@ -1,4 +1,3 @@
-import { readFile, stat } from "node:fs/promises";
 import {
   stackCatalog,
   type DetectionConfidence,
@@ -11,6 +10,7 @@ import {
 } from "src/catalog/catalog.js";
 import { compareCodeUnits } from "src/utils/order.js";
 import { matchesSafeGlob } from "src/utils/safe-glob.js";
+import { readBoundedText } from "src/utils/filesystem.js";
 
 export interface CollectedFile {
   absolute: string;
@@ -105,7 +105,7 @@ async function matchPredicate(predicate: DetectorPredicate, facts: DetectionFact
   const candidates = facts.files.filter((file) => matchesSafeGlob(file.path, predicate.glob));
   const evidence: DetectionEvidence[] = [];
   for (const file of candidates) {
-    const content = await readBoundedText(file);
+    const content = await readBoundedText(file.absolute, maxReadableBytes);
     if (content?.includes(predicate.contains))
       evidence.push({ detail: `contains:${predicate.contains}`, kind: "content", path: file.path });
     if (evidence.length >= maxEvidencePerMatch) break;
@@ -134,15 +134,6 @@ function applyTechnologyImplications(matches: DetectionMatch[]): void {
         changed = true;
       }
     }
-  }
-}
-
-async function readBoundedText(file: CollectedFile): Promise<string | undefined> {
-  try {
-    if ((await stat(file.absolute)).size > maxReadableBytes) return undefined;
-    return await readFile(file.absolute, "utf8");
-  } catch {
-    return undefined;
   }
 }
 

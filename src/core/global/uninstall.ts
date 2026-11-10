@@ -23,6 +23,7 @@ import {
   type UserPathRoot,
 } from "src/core/platform/user-paths.js";
 import { compareCodeUnits } from "src/utils/order.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export interface UninstallGlobalOptions {
   readonly platforms: readonly PlatformId[];
@@ -98,6 +99,12 @@ export async function uninstallGlobal(options: UninstallGlobalOptions): Promise<
     const outcomesByTarget = new Map(activeTargets.map((target, index) => [target, outcomes[index]!]));
     emptiedTargets = activeTargets.filter((target) => outcomesByTarget.get(target)?.manifest.entries.length === 0);
     return resultFromTargets(platforms, targets, outcomesByTarget, false);
+  } catch (error: unknown) {
+    // A release that fails must not replace the error that stopped the run.
+    const held = locks;
+    locks = [];
+    await releaseGlobalLocks(held).catch(() => undefined);
+    throw error;
   } finally {
     await releaseGlobalLocks(locks);
     await cleanupEmptyOwnedDirectories(emptiedTargets);
@@ -261,10 +268,6 @@ function normalizePlatforms(platforms: readonly PlatformId[]): PlatformId[] {
 
 function uniqueSorted(values: readonly string[]): string[] {
   return [...new Set(values)].sort(compareCodeUnits);
-}
-
-function isMissingPathError(error: unknown): boolean {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
 }
 
 function isNonEmptyOrNotDirectory(error: unknown): boolean {

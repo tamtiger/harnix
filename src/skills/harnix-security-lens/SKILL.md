@@ -2,7 +2,7 @@
 name: harnix-security-lens
 description: Use when reviewing or implementing security-critical code paths including untrusted input boundaries, command execution, path traversal and credential handling.
 metadata:
-  version: "2.31.1"
+  version: "2.32.0"
 ---
 
 # Security review lens
@@ -11,7 +11,6 @@ Inspect attack surfaces across path resolution, child process invocation, untrus
 
 ## Evidence and Rationale
 
-Evidence source: `research/external-research.md` (§A2 lines 45, 51 on cross-language security patterns and security review lenses, and Harnix Product Boundaries in `AGENTS.md` rules 1 and 8).
 Coding agents interact directly with host filesystems, processes, and network boundaries. Systematic defense against directory traversal, command injection, and credential exposure is non-negotiable.
 
 ## When to use
@@ -53,3 +52,5 @@ Coding agents interact directly with host filesystems, processes, and network bo
 4. Verify that no subprocess or SQL query is created with unquoted or concatenated input.
 5. Check all logging and output statements for accidental secret, unmasked PII, or absolute path leakage.
 6. Triage each finding before reporting it with `harnix skill harnix-review --reference finding-triage`.
+
+Detail on demand: `harnix skill harnix-security-lens --reference injection-traversal-guardrails`.

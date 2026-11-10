@@ -13,6 +13,8 @@ import { isLineEndingSensitive, normalizeLineEndings } from "src/core/verificati
 import { taskPhysicalPaths } from "src/core/tasks/task-location.js";
 import { missingInputHint } from "src/core/verification/input-hint.js";
 import { normalizeRepositoryPath, resolveSafeProjectPath } from "src/utils/paths.js";
+import { errorCode } from "src/utils/errno.js";
+import { compareCodeUnits } from "src/utils/order.js";
 
 export interface InputDigestEntry {
   path: string;
@@ -82,7 +84,7 @@ export async function computeInputDigest(
         `Verification input pattern "${input}" for check ${checkId} matched no files after filtering transient directories.${await missingInputHint(projectRoot, input)}`,
       );
   }
-  const { entries, rawEntries } = await hashEntries(projectRoot, [...paths].sort(compareText), checkId);
+  const { entries, rawEntries } = await hashEntries(projectRoot, [...paths].sort(compareCodeUnits), checkId);
   const taskContractHash = hashText(canonicalCheckContract(task, check));
   return {
     generator: "harnix",
@@ -166,7 +168,7 @@ function canonicalCheckContract(task: TaskRecordV3, check: ValidationCheckV3): s
     criteria: task.acceptanceCriteria
       .filter((criterion) => covered.has(criterion.id))
       .map((criterion) => ({ id: criterion.id, text: criterion.text }))
-      .sort((left, right) => compareText(left.id, right.id)),
+      .sort((left, right) => compareCodeUnits(left.id, right.id)),
   });
 }
 
@@ -178,8 +180,10 @@ function legacyTaskContract(task: TaskRecordV3): string {
     mode: task.mode,
     acceptanceCriteria: [...task.acceptanceCriteria]
       .map((criterion) => ({ id: criterion.id, text: criterion.text }))
-      .sort((left, right) => compareText(left.id, right.id)),
-    validationPlan: [...task.validationPlan].map(canonicalCheck).sort((left, right) => compareText(left.id, right.id)),
+      .sort((left, right) => compareCodeUnits(left.id, right.id)),
+    validationPlan: [...task.validationPlan]
+      .map(canonicalCheck)
+      .sort((left, right) => compareCodeUnits(left.id, right.id)),
   });
 }
 
@@ -190,7 +194,7 @@ function canonicalCheck(check: ValidationCheckV3) {
     command: check.command ?? null,
     scope: check.scope,
     required: check.required,
-    criterionIds: [...check.criterionIds].sort(compareText),
+    criterionIds: [...check.criterionIds].sort(compareCodeUnits),
     inputs: [...check.inputs],
     ...(check.cwd === undefined ? {} : { cwd: check.cwd }),
   };
@@ -203,6 +207,7 @@ async function hashEntries(
 ): Promise<{ entries: InputDigestEntry[]; rawEntries: InputDigestEntry[] }> {
   const entries: (InputDigestEntry | undefined)[] = paths.map(() => undefined);
   const rawEntries: (InputDigestEntry | undefined)[] = paths.map(() => undefined);
+  const failures: (string | undefined)[] = paths.map(() => undefined);
   let next = 0;
   const worker = async (): Promise<void> => {
     for (let index = next++; index < paths.length; index = next++) {
@@ -214,15 +219,18 @@ async function hashEntries(
           sha256: hashBytes(isLineEndingSensitive(path) ? content : normalizeLineEndings(content)),
         };
         rawEntries[index] = { path, sha256: hashBytes(content) };
-      } catch {
-        /* reported below in path order so the failing file is deterministic */
+      } catch (error: unknown) {
+        // Reported below in path order so the failing file is deterministic; the code says why it failed.
+        failures[index] = errorCode(error) ?? "unknown";
       }
     }
   };
   await Promise.all(Array.from({ length: Math.min(HASH_CONCURRENCY, paths.length) }, worker));
   const missing = entries.findIndex((entry) => entry === undefined);
   if (missing >= 0)
-    throw new Error(`Verification input for check ${checkId} is missing or unreadable: ${paths[missing]}`);
+    throw new Error(
+      `Verification input for check ${checkId} is missing or unreadable (${failures[missing] ?? "unknown"}): ${paths[missing]}`,
+    );
   return { entries: entries as InputDigestEntry[], rawEntries: rawEntries as InputDigestEntry[] };
 }
 
@@ -231,7 +239,4 @@ function hashBytes(content: Uint8Array): string {
 }
 function hashText(content: string): string {
   return createHash("sha256").update(content, "utf8").digest("hex");
-}
-function compareText(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
 }

@@ -5,6 +5,7 @@ import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import {
   implementingTaskV3,
   initializeUtcProject,
+  loadPersistedTask,
   taskV3,
   writeProjectSource,
 } from "test/support/workflow-fixtures.js";
@@ -187,6 +188,27 @@ describe.sequential("workflow command unit", () => {
         "--brief",
       ]);
       expect(written).toContain("updatedAt");
+
+      const persisted = (await loadPersistedTask(root, task.id)) as {
+        decisions: { id: string; text: string; rationale: string }[];
+        residualRisks: { id: string; text: string; severity: string }[];
+        relevantPaths: string[];
+        acceptanceCriteria: { id: string; text: string }[];
+        validationPlan: { id: string; scope: string; cwd?: string; criterionIds: string[] }[];
+      };
+      expect(persisted.decisions).toContainEqual({
+        id: "dec-unit-1",
+        text: "Decision text",
+        rationale: "Decision why",
+      });
+      expect(persisted.residualRisks).toContainEqual({ id: "risk-unit-1", text: "Risk text", severity: "low" });
+      expect(persisted.relevantPaths).toEqual(["src/**"]);
+      expect(persisted.acceptanceCriteria).toContainEqual(
+        expect.objectContaining({ id: "crit-unit-1", text: "Criterion text" }),
+      );
+      expect(persisted.validationPlan).toContainEqual(
+        expect.objectContaining({ id: "check-unit-1", scope: "focused", cwd: "src", criterionIds: ["crit-unit-1"] }),
+      );
     } finally {
       process.chdir(originalCwd);
       spy.mockRestore();

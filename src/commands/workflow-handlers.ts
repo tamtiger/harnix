@@ -31,7 +31,15 @@ import {
   workflowEnvelopeSchema,
   briefWorkflowEnvelopeSchema,
 } from "src/commands/internal-workflow.js";
-import { parseJson, presentTask, readInput, readRequired, splitList } from "src/commands/workflow-handler-utils.js";
+import {
+  assertNoCriterionWithEnvelope,
+  parseJson,
+  presentTask,
+  readInput,
+  readRequired,
+  splitGlobList,
+  splitList,
+} from "src/commands/workflow-handler-utils.js";
 import { assertOptionalReason } from "src/core/workflow/reason-rules.js";
 import { EDIT_HANDLERS } from "src/commands/workflow-edit-handlers.js";
 import { LIFECYCLE_HANDLERS } from "src/commands/workflow-lifecycle-handlers.js";
@@ -104,6 +112,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
       });
       return presentTask(context, appended.task, appended.evidenceId);
     }
+    assertNoCriterionWithEnvelope(flags);
     const envelope = await readRequired(context, "Workflow evidence", "Workflow evidence requires valid JSON.");
     const task = await appendEvidenceWorkflow(root, envelope);
     return presentTask(context, task, flags.full === true ? undefined : task.evidence.at(-1)?.id);
@@ -128,7 +137,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
         scope: flags.scope,
         required: flags.required,
         criteria: flags.criteria === undefined ? undefined : splitList(flags.criteria),
-        inputs: flags.input && flags.input.length > 0 ? flags.input.flatMap((item) => splitList(item)) : undefined,
+        inputs: flags.input && flags.input.length > 0 ? flags.input.flatMap(splitGlobList) : undefined,
       },
       { reason: flags.reason },
     );
@@ -159,7 +168,7 @@ export const WORKFLOW_HANDLERS: Record<string, Handler> = {
         cwd: flags.cwd,
         scope: flags.scope,
         criteria: flags.criteria === undefined ? undefined : splitList(flags.criteria),
-        inputs: flags.input && flags.input.length > 0 ? flags.input.flatMap((item) => splitList(item)) : undefined,
+        inputs: flags.input && flags.input.length > 0 ? flags.input.flatMap(splitGlobList) : undefined,
       },
       { reason: flags.reason },
     );

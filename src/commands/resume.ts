@@ -5,6 +5,7 @@ import { loadTask } from "src/core/tasks/task.js";
 import { findInitializedProject, missingProjectError } from "src/utils/project-discovery.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 
+import { withWorkflowLock } from "src/core/workflow/workflow-lock.js";
 import { briefTask, type BriefTask } from "src/core/workflow/brief.js";
 import { taskFilePath } from "src/core/tasks/task-location.js";
 
@@ -31,6 +32,10 @@ export async function resumeProjectTask(
   const harnixRoot = await resolveSafeHarnixPath(project.root);
   await readConfig(await resolveSafeHarnixPath(project.root, "config.yaml"));
 
+  // Activating a task rewrites the one active pointer, so it takes the same lock as every other task-state write.
+  const locked = <T>(section: () => Promise<T>): Promise<T> =>
+    dryRun ? section() : withWorkflowLock(harnixRoot, section);
+
   const returnResult = async (res: TaskResumeResultV1): Promise<TaskResumeResultV1 | BriefTask> => {
     if (!brief) return res;
     const taskPath = await taskFilePath(harnixRoot, res.task.id, "task.json");
@@ -47,7 +52,7 @@ export async function resumeProjectTask(
     }
     const { nextTask } = (await detailPublicEpic(project.root, targetEpic, true)) as PublicEpicBriefResult;
     if (nextTask === null) throw new Error(`Epic ${targetEpic} has no unfinished task to resume.`);
-    return returnResult(await resumeTask(harnixRoot, nextTask.id, dryRun, undefined, force));
+    return returnResult(await locked(() => resumeTask(harnixRoot, nextTask.id, dryRun, undefined, force)));
   }
 
   if (taskId !== undefined && epicId !== undefined)
@@ -55,8 +60,8 @@ export async function resumeProjectTask(
   if (taskId === undefined && epicId === undefined) throw new Error("resume requires a task id or --epic <epic-id>.");
 
   if (epicId === undefined)
-    return returnResult(await resumeTask(harnixRoot, taskId as string, dryRun, undefined, force));
+    return returnResult(await locked(() => resumeTask(harnixRoot, taskId as string, dryRun, undefined, force)));
   const { nextTask } = (await detailPublicEpic(project.root, epicId, true)) as PublicEpicBriefResult;
   if (nextTask === null) throw new Error(`Epic ${epicId} has no unfinished task to resume.`);
-  return returnResult(await resumeTask(harnixRoot, nextTask.id, dryRun, undefined, force));
+  return returnResult(await locked(() => resumeTask(harnixRoot, nextTask.id, dryRun, undefined, force)));
 }

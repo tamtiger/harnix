@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 
-import { finding, isMissing, sortFindings, type DoctorFinding } from "src/core/doctor/findings.js";
+import { finding, sortFindings, type DoctorFinding } from "src/core/doctor/findings.js";
 import type { GlobalDoctorPlatform } from "src/core/doctor/global-types.js";
 import {
   readGlobalManagedManifest,
@@ -15,6 +15,7 @@ import {
 import type { GlobalTarget } from "src/core/global/targets.js";
 import { getPlatform } from "src/core/platform/registry.js";
 import { selectedUserRoot, type UserPathRoot, type UserPlatformRoots } from "src/core/platform/user-paths.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 /** A registered target together with what the configurators say it should contain. */
 export interface DoctorTarget extends GlobalTarget {
@@ -137,7 +138,7 @@ async function inspectShadowingFile(
           ),
         ];
   } catch (error: unknown) {
-    if (isMissing(error)) return [];
+    if (isMissingPathError(error)) return [];
     return [
       finding(
         `${shadow.code}-invalid`,
@@ -166,7 +167,7 @@ async function inspectTarget(target: DoctorTarget, generatorVersion: string): Pr
   try {
     manifest = await readGlobalManagedManifest(manifestPath);
   } catch (error: unknown) {
-    if (!isMissing(error)) {
+    if (!isMissingPathError(error)) {
       return invalidTarget(
         "global-manifest-invalid",
         target.root.display(target.manifestPath),

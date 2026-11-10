@@ -1,8 +1,8 @@
-import { chmod, readFile, rm, stat } from "node:fs/promises";
+import { chmod, readFile, rm, rmdir, stat } from "node:fs/promises";
+import { dirname } from "node:path";
 import { GlobalManagedManifestError } from "src/core/global/managed-error.js";
 import { compareCodeUnits } from "src/utils/order.js";
-import { readOptionalText } from "src/core/global/discovery.js";
-import { isMissingPathError } from "src/core/global/manifest.js";
+import { readOptionalText } from "src/utils/filesystem.js";
 import { matchesExpectedOutput, pushUnique } from "src/core/global/reconcile.js";
 import {
   type FileSnapshot,
@@ -13,6 +13,7 @@ import {
   type TargetState,
   type TransactionPlan,
 } from "src/core/global/types.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export async function buildPlans(
   states: ReadonlyMap<string, TargetState>,
@@ -53,8 +54,44 @@ export async function applyPlans(
   await applyTransaction(plans.map((plan) => ({ plan, writer, remover })));
 }
 
+/** Directories a transaction will create for files that do not exist yet, deepest first (so they can be removed in order). */
+async function directoriesToCreate(plans: readonly TransactionPlan[]): Promise<string[]> {
+  const missing = new Set<string>();
+  for (const { plan } of plans) {
+    if (plan.output === undefined || plan.snapshot.exists) continue;
+    let directory = dirname(plan.path);
+    while (!missing.has(directory) && !(await isDirectory(directory))) {
+      missing.add(directory);
+      const parent = dirname(directory);
+      if (parent === directory) break;
+      directory = parent;
+    }
+  }
+  return [...missing].sort((left, right) => right.length - left.length);
+}
+
+async function isDirectory(path: string): Promise<boolean> {
+  try {
+    return (await stat(path)).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+/** Removes the directories the failed transaction created; one that still holds anything stays. */
+async function removeCreatedDirectories(directories: readonly string[]): Promise<void> {
+  for (const directory of directories) {
+    try {
+      await rmdir(directory);
+    } catch {
+      /* not empty (a user file landed there) or already gone: leave it */
+    }
+  }
+}
+
 export async function applyTransaction(plans: readonly TransactionPlan[]): Promise<void> {
   const attempted: TransactionPlan[] = [];
+  const created = await directoriesToCreate(plans);
   try {
     for (const transactionPlan of plans) {
       const { plan, writer, remover } = transactionPlan;
@@ -71,6 +108,7 @@ export async function applyTransaction(plans: readonly TransactionPlan[]): Promi
     }
   } catch (error: unknown) {
     const rollback = await rollbackPlans(attempted);
+    await removeCreatedDirectories(created);
     throw new GlobalManagedTransactionError(
       "Global managed reconciliation failed; attempted writes were rolled back conservatively.",
       rollback,

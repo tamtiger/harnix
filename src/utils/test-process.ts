@@ -5,3 +5,13 @@
 export function isTestProcess(): boolean {
   return process.env.VITEST !== undefined;
 }
+
+/**
+ * A test that injects a home must also inject the environment: otherwise CODEX_HOME, CLAUDE_CONFIG_DIR or
+ * XDG_CONFIG_HOME of the developer's machine would relocate the root out of the disposable home.
+ */
+export function requireTestEnvironment(label: string, environment: unknown): void {
+  if (isTestProcess() && environment === undefined) {
+    throw new Error(`${label} requires an injected environment in test mode.`);
+  }
+}

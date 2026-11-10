@@ -2,16 +2,11 @@ import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { GlobalManagedManifestError, reconcileGlobalManagedFiles } from "src/core/global/managed-files.js";
-import { createVerifiedUserRoot, type UserPathRoot } from "src/core/platform/user-paths.js";
-import { useTemporaryRepositories } from "test/support/temporary-repository.js";
+import { useTemporaryGlobalRoots } from "test/support/temporary-global-root.js";
 
-const temporaryRoot = useTemporaryRepositories("harnix-global-managed-");
+const temporaryGlobalRoot = useTemporaryGlobalRoots();
 
 const lockRecordName = "owner-00000000-0000-4000-8000-000000000001.json";
-
-async function temporaryGlobalRoot(logicalPath = "~/test-global"): Promise<UserPathRoot> {
-  return createVerifiedUserRoot(await temporaryRoot(), logicalPath);
-}
 
 describe("global managed files: sidecar and lock ownership", () => {
   it("permits only its own lock-created plugin root but preserves concurrent root content", async () => {

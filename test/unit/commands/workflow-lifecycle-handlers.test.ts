@@ -1,3 +1,5 @@
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { LIFECYCLE_HANDLERS } from "src/commands/workflow-lifecycle-handlers.js";
@@ -38,5 +40,17 @@ describe("workflow lifecycle handlers", () => {
     await expect(
       LIFECYCLE_HANDLERS.epicOrder!(context(root, { epicOrder: ["missing-epic", "20260928-100000-a"] })),
     ).rejects.toThrow(/No epic found/u);
+  });
+});
+
+describe("workflow lifecycle --file payload", () => {
+  it("reports a --file that is not JSON as an ordinary error with the file named, not a raw SyntaxError", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeFile(join(root, "bad.json"), "{ not json");
+
+    await expect(LIFECYCLE_HANDLERS.init!(context(root, { file: "bad.json" }))).rejects.toThrow(
+      "The --file payload is not valid JSON.",
+    );
   });
 });

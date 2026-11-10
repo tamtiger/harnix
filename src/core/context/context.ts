@@ -27,6 +27,7 @@ import {
   type ContextPointerOptions,
   type ContextSignals,
 } from "./context-types.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export const UNTRUSTED_CONTEXT_PREFIX = [
   "<<< HARNIX UNTRUSTED REPOSITORY CONTEXT >>>",
@@ -80,7 +81,7 @@ export async function inspectContextDrift(
       const content = await read(path);
       if (sha256(content) !== entry.contentHash) changes.push({ path: entry.path, kind: "changed" });
     } catch (error: unknown) {
-      changes.push({ path: entry.path, kind: isMissing(error) ? "missing" : "unreadable" });
+      changes.push({ path: entry.path, kind: isMissingPathError(error) ? "missing" : "unreadable" });
     }
   }
   changes.sort((left, right) => compareCodeUnits(left.path, right.path) || compareCodeUnits(left.kind, right.kind));
@@ -282,11 +283,6 @@ function normalizedSet(values: string[] | undefined): Set<string> {
 }
 function isUnsafe(error: unknown): boolean {
   return error instanceof Error && error.name === "UnsafeProjectPathError";
-}
-function isMissing(error: unknown): boolean {
-  return (
-    typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"
-  );
 }
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);

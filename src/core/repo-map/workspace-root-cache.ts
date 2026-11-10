@@ -4,6 +4,7 @@ import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { refreshRepoMap } from "./service.js";
 import { readRepoMap } from "./store.js";
 import type { RepoMapV1 } from "./types.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export const WORKSPACE_ROOT_NOT_INITIALIZED = "workspace root is not initialized: run harnix init";
 export const MISSING_CACHE_HINT = 'Run "harnix repo-map --refresh" at the workspace root or inside this member.';
@@ -25,7 +26,7 @@ export async function readWorkspaceRootCache(root: string): Promise<WorkspaceRoo
   try {
     return { map: await readRepoMap(root), status: "ready" };
   } catch (error: unknown) {
-    const missing = typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
+    const missing = isMissingPathError(error);
     return { status: missing ? "missing" : "invalid" };
   }
 }

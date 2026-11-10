@@ -3,7 +3,8 @@ import { dirname } from "node:path";
 import { listLegacyEpicIds } from "src/core/epics/epic-location.js";
 import { withWorkflowLock } from "src/core/workflow/workflow-lock.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
-import { errorCode, renameWithRetry, type MoveFunction } from "src/utils/rename-retry.js";
+import { errorCode } from "src/utils/errno.js";
+import { renameWithRetry, type MoveFunction } from "src/utils/rename-retry.js";
 import { directoryExists, listLegacyTaskIds, monthBucket } from "./task-location.js";
 
 export interface LayoutMigrationResult {

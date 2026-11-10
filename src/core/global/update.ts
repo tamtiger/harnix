@@ -5,7 +5,8 @@ import {
 } from "src/core/global/managed-files.js";
 import { setupGlobal, type SetupGlobalOptions, type SetupGlobalResult } from "src/core/global/setup.js";
 import { platformRecords, type PlatformId } from "src/core/platform/registry.js";
-import { resolveUserPlatformRoots, selectedUserRoot, type HomeResolver } from "src/core/platform/user-paths.js";
+import { resolveSelectedUserPlatformRoots, selectedUserRoot, type HomeResolver } from "src/core/platform/user-paths.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export interface UpdateGlobalOptions extends Omit<SetupGlobalOptions, "platforms" | "removeObsolete"> {
   /** Explicit platforms; omitted or empty means every platform that already carries a valid Harnix sidecar. */
@@ -33,13 +34,15 @@ export async function updateGlobal(options: UpdateGlobalOptions): Promise<SetupG
 
 /** Platforms with at least one valid sidecar owned by the matching registered target. */
 async function installedPlatforms(options: UpdateGlobalOptions): Promise<PlatformId[]> {
-  const roots = await resolveUserPlatformRoots({
-    ...(options.environment === undefined ? {} : { environment: options.environment }),
-    ...(options.homeResolver === undefined ? {} : { homeResolver: options.homeResolver }),
-  });
   const installed: PlatformId[] = [];
   for (const record of platformRecords()) {
     const id = record.id as PlatformId;
+    // Each platform resolves only its own roots: a malformed CODEX_HOME must not stop Kiro from being updated.
+    const roots = await resolveSelectedUserPlatformRoots([id], {
+      ...(options.environment === undefined ? {} : { environment: options.environment }),
+      ...(options.homeResolver === undefined ? {} : { homeResolver: options.homeResolver }),
+    }).catch(() => undefined);
+    if (roots === undefined) continue;
     const found = await Promise.all(
       record.targets.map(async (target) => {
         const root = selectedUserRoot(roots, id, target.rootKey);
@@ -60,11 +63,7 @@ async function hasValidSidecar(
     const manifest = await readGlobalManagedManifest(await resolveSafeGlobalPath(root, relativePath));
     return manifest.platform === platform;
   } catch (error: unknown) {
-    if (isMissing(error) || error instanceof GlobalManagedManifestError) return false;
+    if (isMissingPathError(error) || error instanceof GlobalManagedManifestError) return false;
     throw error;
   }
-}
-
-function isMissing(error: unknown): error is NodeJS.ErrnoException {
-  return typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
 }

@@ -1,0 +1,167 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261110-131154-commands-input-fixes",
+  "title": "Sửa xử lý đầu vào và lỗi của lớp commands",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Làm các cờ --input, --evidence --criterion, --file và status nhất quán với --init và với các command khác, không còn bỏ qua im lặng hay báo lỗi nghèo hint.",
+  "nonGoals": [
+    "Không thêm cờ hay action mới",
+    "Không chuyển logic sang core trong member này"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "--set-check và --replace-check tách --input bằng splitGlobList như --init, nên src/{a,b}/** và đường dẫn có khoảng trắng giữ nguyên; có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "--evidence --criterion --met qua envelope hoặc stdin báo lỗi rõ hoặc đánh dấu criteria, không bỏ qua im lặng; có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Lỗi chưa khởi tạo của status (mọi chế độ chiếu) có dòng Gợi ý như các command khác; có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "--file bị giới hạn kích thước như stdin và JSON hỏng báo lỗi chuẩn có hint; có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của member",
+      "command": "pnpm exec vitest run test/unit/commands test/integration/commands",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "test/integration/commands/**",
+        "test/unit/commands/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests nhanh (CLI, docs, cấu trúc test)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ suite của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-10T13:46:50.293+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Test status-mode hiện hành ghi rõ --summary thắng --explain là thứ tự ưu tiên có chủ đích của hợp đồng công khai, nên không đổi thành lỗi trong task này.",
+      "artifactPaths": [
+        ".harnix/tasks/20261110-131154-commands-input-fixes/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-10T13:50:01.841+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/commands test/integration/commands — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "603b51e34c3240378efcce0438051e2cba2466a92e3d15526640f885c3337abd"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-10T13:50:23.012+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "befb5df219647a2e9af685a3a8a135692ac244b34f46093ea639f3aaafd15a82"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T13:52:31.910+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8e7f61ed51e7bf61ba5a73a28b29b810e496f9b51a9a5c938ae4eaed218edaad"
+    }
+  ],
+  "epicId": "20261110-131151-harnix-review-refactor",
+  "createdAt": "2026-11-10T13:11:51.523+07:00",
+  "updatedAt": "2026-11-10T13:52:42.493+07:00",
+  "decisions": [
+    {
+      "id": "keep-summary-over-explain",
+      "text": "Giữ --summary thắng --explain trong resolveStatusMode.",
+      "rationale": "Test status-mode.test.ts khóa thứ tự này như hợp đồng công khai; đổi sang lỗi là đổi hành vi ngoài phạm vi sửa lỗi."
+    }
+  ],
+  "completedAt": "2026-11-10T13:52:42.493+07:00"
+}

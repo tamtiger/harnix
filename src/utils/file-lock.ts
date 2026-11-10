@@ -90,7 +90,7 @@ export interface HarnixFileLock {
   release(): Promise<void>;
 }
 
-export class FileLockError extends Error {
+class FileLockError extends Error {
   override name = "FileLockError";
 }
 

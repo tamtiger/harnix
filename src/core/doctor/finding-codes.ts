@@ -17,7 +17,7 @@ export const PLATFORM_FINDING_SUFFIXES = [
 export const SHADOW_FINDING_SUFFIXES = ["invalid", "shadowed"] as const;
 
 /** Repository-map states that produce a `repo-map-<state>` finding (a `ready` map produces none). */
-export const REPO_MAP_FINDING_STATES: readonly Exclude<RepoMapHealth, "ready">[] = ["invalid", "missing", "stale"];
+const REPO_MAP_FINDING_STATES: readonly Exclude<RepoMapHealth, "ready">[] = ["invalid", "missing", "stale"];
 
 export { GLOBAL_FINDING_CODES, PROJECT_FINDING_CODES };
 

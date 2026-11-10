@@ -1,5 +1,5 @@
 import { readFile, realpath, stat } from "node:fs/promises";
-import { isAbsolute, relative, sep } from "node:path";
+import { isContainedPath } from "src/utils/paths.js";
 
 const MAX_BYTES = 256 * 1024;
 
@@ -7,8 +7,7 @@ const MAX_BYTES = 256 * 1024;
 export async function resolvesInside(root: string, path: string): Promise<boolean> {
   try {
     const [realRoot, realPath] = await Promise.all([realpath(root), realpath(path)]);
-    const rel = relative(realRoot, realPath);
-    return rel === "" || !(isAbsolute(rel) || rel === ".." || rel.startsWith(`..${sep}`));
+    return isContainedPath(realRoot, realPath);
   } catch {
     return false;
   }

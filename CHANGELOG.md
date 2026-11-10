@@ -4,6 +4,22 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.32.0] - 2026-11-10
+
+### Fixed
+
+- Gia cố thực thi tiến trình ngoài: git và harnix launcher chỉ chạy executable tìm qua PATH tuyệt đối, timeout luôn trả exit code 124, dọn nhóm tiến trình con trên POSIX và giữ nguyên ký tự đa byte trong output.
+- Sửa tranh chấp khóa và mất cập nhật trong workflow: khóa workflow nằm trong .harnix/tmp, ghi plan.md dưới khóa, upsertEpic giữ order và createdAt, pause và resume chạy dưới khóa, regex test file không còn trạng thái lastIndex, cổng verifying nhận cả bullet *, run-checks dùng now đã tiêm.
+- Sửa xử lý đầu vào của lớp commands: --set-check và --replace-check tách --input giống --init, --evidence --criterion qua envelope báo lỗi rõ thay vì bỏ qua, --file có trần 64 KiB và báo JSON hỏng bằng lỗi chuẩn, lỗi chưa khởi tạo của status có dòng gợi ý.
+- Làm bền setup và update global: rollback dọn thư mục do giao dịch tạo, collision bảo vệ cả references của skill người dùng, toml-guard bắt dotted và quoted key, nhả khóa không che lỗi gốc, update cô lập lỗi root từng platform, guard test yêu cầu environment cùng homeResolver.
+- Doctor và verification không nuốt lỗi: doctor --fix thêm finding fix-step-failed (đã che đường dẫn), task không đọc được báo task-unreadable thay vì task-invalid, cache snapshot digest được kiểm cấu trúc, hashEntries kèm mã lỗi.
+
+### Changed
+
+- Gom helper trùng lặp, refactor thuần: isMissing và các kiểm tra ENOENT về src/utils/errno.ts, isContainedPath, renameWithRetry, readOptionalText, readBoundedText và compareCodeUnits mỗi cái còn một bản.
+- Xóa dead code và gom khung setter: bỏ skills-extension.ts, verify-docs-sync.ts, packageVerifyKeys, createCheckFailureFinding, một dòng thừa trong completion.ts; gỡ export không có caller; plan-edit.ts dùng chung editReviewData cho các setter review-data.
+- Nâng chất lượng bộ test: test symlink dùng skipIf thay vì return sớm, test workflow-command kiểm giá trị đã lưu, workflow-lock và bounded-input bỏ phụ thuộc timer thật, helper useTemporaryGlobalRoots dùng chung, epic test dùng rename có retry.
+
 ## [2.31.1] - 2026-11-09
 
 ### Fixed

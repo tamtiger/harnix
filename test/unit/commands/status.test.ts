@@ -227,3 +227,13 @@ describe("commands/status", () => {
     ]);
   });
 });
+
+describe("status outside a project", () => {
+  it("names the corrected command in every projection, like the other commands", async () => {
+    const root = await temporaryRepository();
+
+    for (const run of [inspectProjectStatus, reportProjectCriteria, listProjectChecks]) {
+      await expect(run(root)).rejects.toThrow(/Status requires an initialized Harnix project\.\nGợi ý: .*harnix init/u);
+    }
+  });
+});

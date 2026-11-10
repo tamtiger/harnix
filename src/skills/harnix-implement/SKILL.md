@@ -2,7 +2,7 @@
 name: harnix-implement
 description: Use when an authorized Harnix task is ready or in progress, or a small direct change needs test-first implementation, refactoring, release preparation or technical-feedback handling.
 metadata:
-  version: "2.31.1"
+  version: "2.32.0"
 ---
 
 # Implement with evidence
@@ -23,7 +23,7 @@ Read the task artifacts, the matching `.harnix/spec/guides/`, confirmed commands
 
 1. **RED:** one focused test of real behavior. Run it and see it fail for the intended reason (not a setup crash, not a rename of a passing test). A test that passes at once proves nothing.
 2. **GREEN:** the minimal implementation of the frozen contract. Run the affected tests (use `harnix repo-map --tests <path>` or `harnix verify-plan --impact [path]` to identify them), then neighboring tests and the package suite. Fix production code when the contract is right; never bend the test.
-3. **Evidence:** for a schema v3 required check run `harnix workflow --run-check <id> -- <exe> [args...]` (snapshots the inputs before and after, records the outcome). Detail: `../harnix-verify/references/evidence.md` (or `harnix skill harnix-verify --reference evidence`).
+3. **Evidence:** for a schema v3 required check run `harnix workflow --run-check <id> -- <exe> [args...]` (snapshots the inputs before and after, records the outcome). Detail: `harnix skill harnix-verify --reference evidence`.
 4. **REFACTOR** only while green, run the project's formatter, then its lint command on the changed files (commands from `harnix verify-plan` or `.harnix/spec/project-facts.md`), then rerun the focused checks.
 
 Prose-only wording, generated snapshots and trivial wiring may skip RED: record why and use the strongest alternative (schema validation, parity, typecheck, build, focused integration test).

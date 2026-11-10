@@ -2,7 +2,7 @@
 name: harnix-bugfix-preserve
 description: Use when fixing a bug to explicitly define invariants that must remain working, prevent regressions and isolate the fix.
 metadata:
-  version: "2.31.1"
+  version: "2.32.0"
 ---
 
 # Bugfix preservation
@@ -11,7 +11,6 @@ Define what must remain working before touching code, isolate regressions with t
 
 ## Evidence and Rationale
 
-Evidence source: `research/external-research.md` (§B Kiro Bugfix Spec "what must remain working", §C TDAD 2603.17973 measuring regression drop from 6.08% to 1.82% when specific tests to run are declared, §D 9 bugfix invariants).
 Generic prompt-based debugging often introduces regressions in neighboring behaviors. Explicitly stating invariants and pinning affected tests dramatically reduces unintended side effects.
 
 ## When to use
@@ -44,3 +43,5 @@ Generic prompt-based debugging often introduces regressions in neighboring behav
 2. Implement the failing regression test and verify the failure mode.
 3. Apply the minimal fix to production code.
 4. Verify both the fix and the preserved invariants pass cleanly.
+
+Detail on demand: `harnix skill harnix-bugfix-preserve --reference invariant-debugging`.

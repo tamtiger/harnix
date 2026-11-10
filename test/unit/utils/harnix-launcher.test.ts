@@ -8,23 +8,34 @@ import { useTemporaryUserHomes } from "test/support/temporary-user-home.js";
 const temporaryUserHome = useTemporaryUserHomes("harnix-launcher-");
 
 describe("Harnix launcher lookup", () => {
-  it("should_probe_a_windows_cmd_shim_through_a_fixed_cmd_exe_invocation", async () => {
+  it("should_probe_a_windows_shim_found_on_path_through_the_safe_runner", async () => {
     const calls: Array<{ executable: string; args: readonly string[] }> = [];
 
     const found = await lookupHarnixLauncher({
       platform: "win32",
+      lookup: () => "C:\\tools\\harnix.cmd",
       runner: async (executable, args) => {
         calls.push({ executable, args });
       },
     });
 
     expect(found).toBe(true);
-    expect(calls).toEqual([
-      {
-        executable: "cmd.exe",
-        args: ["/d", "/s", "/c", "harnix --version"],
+    expect(calls).toEqual([{ executable: "harnix", args: ["--version"] }]);
+  });
+
+  it("should_not_run_anything_on_windows_when_path_has_no_harnix_so_the_working_directory_is_never_searched", async () => {
+    const calls: string[] = [];
+
+    const found = await lookupHarnixLauncher({
+      platform: "win32",
+      lookup: () => undefined,
+      runner: async (executable) => {
+        calls.push(executable);
       },
-    ]);
+    });
+
+    expect(found).toBe(false);
+    expect(calls).toEqual([]);
   });
 
   it("should_probe_the_direct_constant_binary_on_non_windows_platforms", async () => {
@@ -45,6 +56,7 @@ describe("Harnix launcher lookup", () => {
     await expect(
       lookupHarnixLauncher({
         platform: "win32",
+        lookup: () => "C:\\tools\\harnix.cmd",
         runner: async () => {
           throw new Error("missing shim");
         },

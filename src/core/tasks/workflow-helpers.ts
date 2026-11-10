@@ -15,12 +15,6 @@ export function laterTimestamp(previous: string, now: string): string {
   return Date.parse(now) > Date.parse(previous) ? now : previous;
 }
 
-export function isMissing(error: unknown): boolean {
-  return (
-    typeof error === "object" && error !== null && "code" in error && (error as { code?: string }).code === "ENOENT"
-  );
-}
-
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }

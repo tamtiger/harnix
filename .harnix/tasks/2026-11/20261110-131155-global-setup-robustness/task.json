@@ -1,0 +1,180 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261110-131155-global-setup-robustness",
+  "title": "Làm bền cơ chế setup và update global",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Bảo đảm setup, update và uninstall global không để lại trạng thái treo sau lỗi giữa chừng, không trộn nội dung vào skill của người dùng và không chạm home thật khi chạy test.",
+  "nonGoals": [
+    "Không thay registry platform thành map (ghi vào residual risk)",
+    "Không thêm platform mới"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Rollback giao dịch global xóa các thư mục do giao dịch tạo; setup lỗi giữa chừng không để lại root rỗng gây untracked-collision (test fault-injection).",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Một file đã tồn tại mà chưa có mục trong manifest luôn được giữ làm untracked-collision, kể cả khi nội dung bằng desired (hợp đồng Phase 6); test khóa hành vi này và không có đường adopt.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Collision của SKILL.md bảo vệ cả thư mục skill; references/*.md không bị ghi vào skill của người dùng.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "toml-guard phát hiện UserPromptSubmit dạng dotted hoặc quoted key và không sinh TOML không hợp lệ.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-5",
+      "text": "Việc phát hiện platform đã cài của update --global không để lỗi root của một platform làm hỏng platform khác, và releaseGlobalLocks nhả đủ mọi khóa mà không che lỗi gốc; có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-6",
+      "text": "Các điểm vào global từ chối khi homeResolver được truyền mà thiếu environment, không rơi về process.env thật.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands/setup.ts",
+    "src/configurators",
+    "src/core/global",
+    "src/core/managed",
+    "src/core/platform"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của member",
+      "command": "pnpm exec vitest run test/platform test/unit/core/global test/unit/core/managed",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "src/configurators/**",
+        "src/core/global/**",
+        "src/core/managed/**",
+        "src/core/platform/**",
+        "test/platform/**",
+        "test/unit/core/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ suite của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4",
+        "ac-5",
+        "ac-6"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-10T13:58:28.635+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Test global reconcile hiện hành ghi rõ hợp đồng Phase 6: không bao giờ nhận file chưa sở hữu dù nội dung giống hệt. Việc adopt trái hợp đồng đóng băng nên không làm.",
+      "artifactPaths": [
+        ".harnix/tasks/20261110-131155-global-setup-robustness/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-10T14:00:28.838+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/platform test/unit/core/global test/unit/core/managed — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "3f0dbf639bc80e46ad795bcc35ff2f6592d27da520c56c1656520872d63e8210"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T14:01:58.467+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "aceb3ac575389e508a2a2564ee87bbf9269bbc15fd89d6b6af65cdac0e4e2a10"
+    }
+  ],
+  "epicId": "20261110-131151-harnix-review-refactor",
+  "createdAt": "2026-11-10T13:11:51.523+07:00",
+  "updatedAt": "2026-11-10T14:02:36.369+07:00",
+  "residualRisks": [
+    {
+      "id": "update-per-target",
+      "text": "update --global chọn cả platform khi bất kỳ target nào có sidecar: một máy chỉ có Antigravity Desktop sẽ được tạo thêm plugin CLI. Chưa sửa vì cần đổi chữ ký setupGlobal.",
+      "severity": "low"
+    },
+    {
+      "id": "registry-platform-hardcode",
+      "text": "user-paths.ts còn hard-code tên platform nên thêm platform chưa chỉ cần một record như AGENTS.md mô tả; ngoài phạm vi epic này.",
+      "severity": "low"
+    },
+    {
+      "id": "crash-between-file-and-manifest",
+      "text": "Nếu tiến trình bị dừng sau khi ghi file nhưng trước khi ghi sidecar, file Harnix tự sinh bị coi là collision ở lần chạy sau (đặc biệt Antigravity). Hợp đồng Phase 6 cấm adopt nên chỉ giảm bằng rollback dọn thư mục; cần quyết định sản phẩm nếu muốn xử lý tận gốc.",
+      "severity": "low"
+    },
+    {
+      "id": "doctor-global-env-guard",
+      "text": "doctor global trong test chỉ chặn thiếu homeResolver hoặc roots, chưa chặn thiếu environment; cần mã finding mới (warning trước) kèm fixture.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-10T14:02:36.369+07:00"
+}

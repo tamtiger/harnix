@@ -1,0 +1,138 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261110-131157-dedupe-utils-refactor",
+  "title": "Gom helper trùng lặp trong utils và core",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Thay các bản sao isMissing, isContainedPath, renameWithRetry, readBoundedText, readOptionalText và compareCodeUnits bằng một bản dùng chung, đúng như refactor thuần không đổi hành vi.",
+  "nonGoals": [
+    "Không đổi hành vi công khai",
+    "Không regenerate golden để refactor pass"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "isMissing và isEnoent gom về một helper trong src/utils và thay mọi bản lặp, không đổi hành vi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "isContainedPath, renameWithRetry, readBoundedText, readOptionalText và compareCodeUnits mỗi cái chỉ còn một bản.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "behavior-snapshot.golden.json không đổi, architecture test không thêm miễn trừ, suite và test:gates xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core",
+    "src/utils"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của member",
+      "command": "pnpm exec vitest run test/workflow/behavior-snapshot.test.ts test/workflow/architecture.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests nhanh (CLI, docs, cấu trúc test)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ suite của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-10T14:20:05.012+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/behavior-snapshot.test.ts test/workflow/architecture.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "55531bb124e38dae5fd29f1ad617bbb2c9c2e8d12ffcee52e74f7123bf00cc4a"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-10T14:20:14.553+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5726830e06c12597b12ff8b234c7d55848b761fe13ab813d4b3185d66c684259"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T14:21:53.800+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "b7fa85097d71c95bf788648c6f5b4ec8ddd29e9ce91e38b1a95b7ac3db07cb45"
+    }
+  ],
+  "epicId": "20261110-131151-harnix-review-refactor",
+  "createdAt": "2026-11-10T13:11:51.523+07:00",
+  "updatedAt": "2026-11-10T14:22:02.612+07:00",
+  "completedAt": "2026-11-10T14:22:02.612+07:00"
+}

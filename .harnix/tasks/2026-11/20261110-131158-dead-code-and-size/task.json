@@ -1,0 +1,153 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261110-131158-dead-code-and-size",
+  "title": "Xóa dead code và tách file sát trần",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Xóa mã chết đã xác nhận, thu hẹp bề mặt export và tách các file sát trần 300 dòng code để dễ bảo trì, giữ nguyên hành vi.",
+  "nonGoals": [
+    "Không refactor registry platform",
+    "Không đổi hành vi công khai"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Xóa dead code đã xác nhận (skills-extension.ts, selectAction, verify-docs-sync.ts, packageVerifyKeys, dòng thừa trong completion.ts, export không dùng) cùng test liên quan.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "plan-edit.ts dùng một khung chung (editReviewData) cho các setter review-data setPaths, addDecision, addRisk, setTitle, setGoal, giữ nguyên thứ tự lỗi; test đặc trưng hiện có xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "behavior-snapshot.golden.json không đổi và không mở rộng danh sách miễn trừ ESLint hay architecture.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/commands",
+    "src/core/stack",
+    "src/core/tasks",
+    "src/core/verification",
+    "src/core/workflow"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của member",
+      "command": "pnpm exec vitest run test/workflow/behavior-snapshot.test.ts test/workflow/architecture.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/workflow/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests nhanh (CLI, docs, cấu trúc test)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ suite của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-10T14:31:06.332+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/workflow/behavior-snapshot.test.ts test/workflow/architecture.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "5c6728874d8b6fa3cdbb379152773a75148ba33617696ed34df90e7564d4dbd6"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-10T14:31:16.097+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "cdffa5c2aff4c4a2591b47806f47a30900f01ce7581523136ab968ede26d2d30"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T14:32:57.366+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "ed1b8a537ad62549b5062474ecde29892d470588110c2bf122a259525921268a"
+    }
+  ],
+  "epicId": "20261110-131151-harnix-review-refactor",
+  "createdAt": "2026-11-10T13:11:51.523+07:00",
+  "updatedAt": "2026-11-10T14:33:28.511+07:00",
+  "residualRisks": [
+    {
+      "id": "terminal-finalize-duplication",
+      "text": "finish.ts và cancel.ts còn lặp phần lưu bản ghi terminal, journal và archive; archive.ts và plan-edit.ts sát trần 300 dòng thô nhưng vẫn qua lint theo dòng code. Chưa gom vì đường terminal có recover phức tạp.",
+      "severity": "low"
+    },
+    {
+      "id": "select-action-kept",
+      "text": "selectAction chỉ còn test dùng nhưng nhiều test phụ thuộc vào ngữ nghĩa ném lỗi của nó; giữ lại, cân nhắc chuyển sang selectActions ở đợt khác.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-10T14:33:28.511+07:00"
+}

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { acceptsSuiteCommand, isSafeSolutionArgument } from "src/core/workflow/suite-command.js";
+import { fileSymlinksSupported } from "test/support/symlink-support.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -45,18 +46,17 @@ describe("isSafeSolutionArgument", () => {
     expect(await isSafeSolutionArgument(await monorepo(), argument, undefined)).toBe(false);
   });
 
-  it("refuses a solution file that is itself a link to a file outside the repository", async () => {
-    const root = await monorepo();
-    const outside = await temporaryRepository();
-    await writeFile(join(outside, "Out.sln"), "");
-    try {
+  it.skipIf(!fileSymlinksSupported())(
+    "refuses a solution file that is itself a link to a file outside the repository",
+    async () => {
+      const root = await monorepo();
+      const outside = await temporaryRepository();
+      await writeFile(join(outside, "Out.sln"), "");
       await symlink(join(outside, "Out.sln"), join(root, "svc", "Linked.sln"), "file");
-    } catch {
-      return; // creating a file link needs a privilege some Windows accounts lack
-    }
 
-    expect(await isSafeSolutionArgument(root, "svc/Linked.sln", undefined)).toBe(false);
-  });
+      expect(await isSafeSolutionArgument(root, "svc/Linked.sln", undefined)).toBe(false);
+    },
+  );
 
   it("refuses a solution reached through a link that leaves the repository", async () => {
     const root = await monorepo();

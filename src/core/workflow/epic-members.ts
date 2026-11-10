@@ -1,7 +1,8 @@
 import { rm } from "node:fs/promises";
 import { loadTask, saveTask, type TaskRecord } from "src/core/tasks/task.js";
-import { isMissing, semanticTaskEqual } from "src/core/tasks/workflow-helpers.js";
+import { semanticTaskEqual } from "src/core/tasks/workflow-helpers.js";
 import { taskFilePath, resolveTaskDirectory } from "src/core/tasks/task-location.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 type MemberWriter = (harnixRoot: string, task: TaskRecord) => Promise<void>;
 
@@ -9,7 +10,7 @@ async function loadPersisted(harnixRoot: string, id: string): Promise<TaskRecord
   try {
     return await loadTask(await taskFilePath(harnixRoot, id, "task.json"));
   } catch (error: unknown) {
-    if (isMissing(error)) return undefined;
+    if (isMissingPathError(error)) return undefined;
     throw error;
   }
 }

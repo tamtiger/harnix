@@ -11,6 +11,7 @@ import {
 import { planLearningReview, reviewLearning, type ReviewLearningInput } from "src/core/journal/learning-review.js";
 import { atomicWriteFile } from "src/utils/atomic-write.js";
 import { resolveSafeProjectPath } from "src/utils/paths.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 type ReviewBase = Omit<ReviewLearningInput, "action" | "reason">;
 
@@ -36,7 +37,7 @@ async function readSpec(path: string): Promise<string> {
   try {
     return await readFile(path, "utf8");
   } catch (error: unknown) {
-    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return "";
+    if (isMissingPathError(error)) return "";
     throw error;
   }
 }

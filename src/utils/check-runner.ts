@@ -1,6 +1,9 @@
 import { spawn, type ChildProcess, type SpawnOptions } from "node:child_process";
 import { existsSync } from "node:fs";
 import { win32 } from "node:path";
+import { StringDecoder } from "node:string_decoder";
+
+import { forwardInterruptsToGroup } from "src/utils/process-group.js";
 
 export interface CheckRunResult {
   exitCode: number;
@@ -197,6 +200,13 @@ export function killProcessTree(
     });
     return;
   }
+  // The child leads its own process group (see runCheckProcess), so one signal reaches everything it started.
+  try {
+    process.kill(-pid, "SIGKILL");
+    return;
+  } catch {
+    /* no such group: fall back to the process itself */
+  }
   try {
     process.kill(pid);
   } catch {
@@ -252,15 +262,23 @@ export function runCheckProcess(
       cwd,
       shell: false,
       windowsHide: true,
+      // On POSIX the child leads a process group so a timeout can end it together with everything it started.
+      ...(platform === "win32" ? {} : { detached: true }),
       ...(invocation.verbatim ? { windowsVerbatimArguments: true } : {}),
     });
     let output = "";
-    const collect = (chunk: Buffer): void => {
-      output = (output + chunk.toString("utf8")).slice(-OUTPUT_LIMIT);
+    let timedOut = false;
+    // One decoder per stream: a multi-byte character split across two chunks is completed, never cut in half.
+    const collector = (): ((chunk: Buffer) => void) => {
+      const decoder = new StringDecoder("utf8");
+      return (chunk) => {
+        output = (output + decoder.write(chunk)).slice(-OUTPUT_LIMIT);
+      };
     };
-    child.stdout?.on("data", collect);
-    child.stderr?.on("data", collect);
+    child.stdout?.on("data", collector());
+    child.stderr?.on("data", collector());
     const timer = setTimeout(() => {
+      timedOut = true;
       output = `${output}\n[timed out]`.slice(-OUTPUT_LIMIT);
       if (child.pid === undefined) child.kill();
       else
@@ -271,11 +289,15 @@ export function runCheckProcess(
     }, dependencies.timeoutMs ?? TIMEOUT_MS);
     child.once("error", () => {
       clearTimeout(timer);
+      stopForwarding?.();
       reject(new Error(`Could not start executable ${executable}.`));
     });
+    const stopForwarding =
+      platform !== "win32" && child.pid !== undefined ? forwardInterruptsToGroup(child.pid) : undefined;
     child.once("close", (code, signal) => {
       clearTimeout(timer);
-      resolve({ exitCode: code ?? (signal === null ? 1 : TIMEOUT_EXIT_CODE), output });
+      stopForwarding?.();
+      resolve({ exitCode: timedOut ? TIMEOUT_EXIT_CODE : (code ?? (signal === null ? 1 : TIMEOUT_EXIT_CODE)), output });
     });
   });
 }

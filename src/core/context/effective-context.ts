@@ -18,6 +18,7 @@ import {
   type ContextManifest,
 } from "./context.js";
 import { taskFilePath } from "src/core/tasks/task-location.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export type EffectiveContextReasonCode = "applicable-guide" | "persisted-selection" | "pinned" | "task-reference";
 
@@ -168,7 +169,7 @@ async function loadPersistedEntries(harnixRoot: string, taskId: string): Promise
     if (manifest.taskId !== taskId) throw new Error("Context manifest task binding is invalid.");
     return manifest.entries;
   } catch (error: unknown) {
-    if (isMissing(error)) return undefined;
+    if (isMissingPathError(error)) return undefined;
     throw error;
   }
 }
@@ -208,10 +209,4 @@ function taskTopics(...values: string[]): string[] {
         .match(/[a-z0-9-]+/gu) ?? [],
     ),
   ].sort(compareCodeUnits);
-}
-
-function isMissing(error: unknown): boolean {
-  return (
-    typeof error === "object" && error !== null && "code" in error && (error as { code?: unknown }).code === "ENOENT"
-  );
 }

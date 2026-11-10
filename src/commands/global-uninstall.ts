@@ -1,5 +1,5 @@
 import { configuratorPlans } from "src/commands/setup.js";
-import { isTestProcess } from "src/utils/test-process.js";
+import { isTestProcess, requireTestEnvironment } from "src/utils/test-process.js";
 import type { GlobalLock, GlobalLockAcquirer } from "src/core/global/locking.js";
 import {
   uninstallGlobal,
@@ -32,6 +32,7 @@ export async function uninstallGlobalIntegrations(options: GlobalUninstallOption
   if (isTestProcess() && options.roots === undefined && options.homeResolver === undefined) {
     throw new Error("Global uninstall requires an injected homeResolver in test mode.");
   }
+  if (options.roots === undefined) requireTestEnvironment("Global uninstall", options.environment);
   return uninstallGlobal({
     ...options,
     generatorVersion: packageVersion,

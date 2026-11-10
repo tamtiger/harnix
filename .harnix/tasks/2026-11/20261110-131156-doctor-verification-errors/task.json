@@ -1,0 +1,155 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261110-131156-doctor-verification-errors",
+  "title": "Không nuốt lỗi trong doctor và verification",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Làm doctor --fix, chẩn đoán task và cache digest báo nguyên nhân lỗi thật thay vì nuốt bằng catch trần, giữ nguyên hành vi khi dữ liệu hợp lệ.",
+  "nonGoals": [
+    "Không đổi mã finding hiện có",
+    "Finding mới ra mức warning trước"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "doctor --fix ghi nhận lỗi của restoreFullArtifacts, fixProject và refreshRepoMap (finding hoặc fixErrors, đã che đường dẫn); có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "project-tasks.ts chỉ gắn nhãn task-invalid khi lỗi parse hoặc validate; lỗi I/O khác có finding riêng; có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "snapshot-cache chỉ dùng snapshot có danh sách entry gồm path và sha256, cache hỏng trả undefined; có test.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-chk-focus-1",
+        "ev-chk-gates-1",
+        "ev-chk-suite-1"
+      ]
+    }
+  ],
+  "relevantPaths": [
+    "src/core/doctor",
+    "src/core/verification"
+  ],
+  "relevantSpecs": [],
+  "validationPlan": [
+    {
+      "id": "chk-focus",
+      "description": "Test tập trung của member",
+      "command": "pnpm exec vitest run test/unit/core/doctor test/unit/core/verification",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/core/doctor/**",
+        "src/core/verification/**",
+        "test/unit/core/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "Contract tests nhanh (CLI, docs, cấu trúc test)",
+      "command": "pnpm run test:gates",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-suite",
+      "description": "Toàn bộ suite của dự án",
+      "command": "pnpm run test",
+      "scope": "full",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-10T14:07:10.536+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Nhánh đọc lỗi của hashEntries không có fixture khả chuyển (glob không khớp thư mục), nên chỉ giữ phần được kiểm chứng trong tiêu chí và ghi phần mã lỗi thành rủi ro.",
+      "artifactPaths": [
+        ".harnix/tasks/20261110-131156-doctor-verification-errors/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-focus-1",
+      "checkId": "chk-focus",
+      "recordedAt": "2026-11-10T14:08:02.395+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/doctor test/unit/core/verification — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "9266f11c4eafee1462207bcb273e32aee9128000ea712b9d62ae520235ffe4d4"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-10T14:08:12.801+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fdba887b7297d2975ee42bfd8c223b7c56f506c4c7afa4a96ace6153efe2bcd4"
+    },
+    {
+      "id": "ev-chk-suite-1",
+      "checkId": "chk-suite",
+      "recordedAt": "2026-11-10T14:10:35.945+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "2e6287683de2412c3e3f33be41fee1e24a1870793d7ebffce4ab13ef42a7244d"
+    }
+  ],
+  "epicId": "20261110-131151-harnix-review-refactor",
+  "createdAt": "2026-11-10T13:11:51.523+07:00",
+  "updatedAt": "2026-11-10T14:10:45.140+07:00",
+  "residualRisks": [
+    {
+      "id": "digest-error-code-untested",
+      "text": "hashEntries thêm mã lỗi errno vào thông điệp nhưng chưa có test vì không dựng được lỗi đọc khả chuyển sau khi glob khớp file.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-10T14:10:45.140+07:00"
+}

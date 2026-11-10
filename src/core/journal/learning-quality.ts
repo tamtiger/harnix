@@ -1,5 +1,5 @@
 export const MIN_LEARNING_CHARACTERS = 40;
-export const MIN_LEARNING_WORDS = 4;
+const MIN_LEARNING_WORDS = 4;
 
 export type LowValueReason = "too-short" | "test-string" | "label-only";
 
@@ -47,7 +47,7 @@ export function isTaskSpecific(statement: string): boolean {
 const CONDITIONAL_OR_RULE_PATTERN =
   /\b(?:khi|nếu|neu|tránh|tranh|luôn|luon|phải|phai|nên|nen|bảo\s+đảm|bao\s+dam|không|khong|đừng|dung|quy\s+tắc|quy\s+tac|vì|vi|do|nguyên\s+nhân|nguyen\s+nhan|when|if|always|never|ensure|prefer|avoid|rule|because|do\s+not|dont|don't)\b/iu;
 
-export function hasApplicableCondition(statement: string): boolean {
+function hasApplicableCondition(statement: string): boolean {
   return CONDITIONAL_OR_RULE_PATTERN.test(statement);
 }
 

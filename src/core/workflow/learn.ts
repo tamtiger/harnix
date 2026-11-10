@@ -3,13 +3,14 @@ import { appendJournalIdempotent, type JournalEntry } from "src/core/journal/jou
 import { createCapturedLearningCandidate, type LearningCaptureInput } from "src/core/journal/learning.js";
 import { analyzeLearningStatement, type LearningRiskKind } from "src/core/journal/learning-safety.js";
 import { loadTask, resolveActiveTask, type TaskRecord } from "src/core/tasks/task.js";
-import { isMissing, validateLearningEnvelope } from "src/core/tasks/workflow-helpers.js";
+import { validateLearningEnvelope } from "src/core/tasks/workflow-helpers.js";
 import { nowInstant } from "src/utils/clock.js";
 import { resolveSafeHarnixPath } from "src/utils/paths.js";
 import { assertTaskReadyForFinishing } from "./completion.js";
 import { currentInstant, journalFilePath } from "./support.js";
 import { taskFilePath } from "src/core/tasks/task-location.js";
 import { noActiveTaskError } from "src/core/workflow/no-active-task.js";
+import { isMissingPathError } from "src/utils/errno.js";
 
 export interface WorkflowLearningResult {
   entry: JournalEntry;
@@ -80,7 +81,7 @@ async function loadCompletedSourceTask(harnixRoot: string, sourceTaskId: string)
   try {
     sourceTask = await loadTask(await taskFilePath(harnixRoot, sourceTaskId, "task.json"));
   } catch (error: unknown) {
-    if (isMissing(error)) throw new Error(`Learning source task ${sourceTaskId} does not exist.`);
+    if (isMissingPathError(error)) throw new Error(`Learning source task ${sourceTaskId} does not exist.`);
     throw error;
   }
   if (sourceTask.status !== "completed") throw new Error(`Learning source task ${sourceTaskId} is not completed.`);

@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import { scanTaskSecrets } from "src/core/workflow/secret-scan.js";
 import { buildCheck, buildTaskV3, createTestProject } from "test/support/builders.js";
 import { completeTaskWithDecisions } from "test/support/learning-fixtures.js";
+import { fileSymlinksSupported } from "test/support/symlink-support.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 
 const temporaryRepository = useTemporaryRepositories();
@@ -118,14 +119,10 @@ describe("scanTaskSecrets", () => {
     await expect(scanTaskSecrets(root, task())).resolves.toBeUndefined();
   });
 
-  it("does not follow a symlink out of the project", async () => {
+  it.skipIf(!fileSymlinksSupported())("does not follow a symlink out of the project", async () => {
     const root = await project({ "src/ok.txt": "clean" });
     const outside = await project({ "secret.json": `{ "Password": "${PASSWORD}" }` });
-    try {
-      await symlink(join(outside, "secret.json"), join(root, "src", "link.json"));
-    } catch {
-      return; // creating a symlink needs a privilege some Windows accounts lack
-    }
+    await symlink(join(outside, "secret.json"), join(root, "src", "link.json"));
 
     await expect(scanTaskSecrets(root, task())).resolves.toBeUndefined();
   });

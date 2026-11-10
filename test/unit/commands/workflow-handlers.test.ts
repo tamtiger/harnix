@@ -4,6 +4,7 @@ import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { assertCommandShape, assertFlagGroups } from "src/commands/workflow-flags.js";
+import { saveWorkflow } from "src/core/workflow/save.js";
 import { WORKFLOW_HANDLERS, type WorkflowContext } from "src/commands/workflow-handlers.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
 import {
@@ -210,5 +211,45 @@ describe("workflow handlers", () => {
     )) as { status: string };
 
     expect(resetResult.status).toBe("in_progress");
+  });
+});
+
+describe("workflow handler input fixes", () => {
+  it("keeps braces and spaces in the --input of --set-check, like --init", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeProjectSource(root);
+    const task = taskV3("planning", "planning");
+    await saveWorkflow(root, { task });
+
+    await WORKFLOW_HANDLERS.setCheck!(
+      context(root, "", {
+        setCheck: "check",
+        input: ["src/{a,b}/**,My Dir/**"],
+        reason: "Giữ nguyên glob có ngoặc nhọn.",
+      }),
+    );
+
+    const persisted = (await loadPersistedTask(root, task.id)) as { validationPlan: { inputs: string[] }[] };
+    expect(persisted.validationPlan[0]?.inputs).toEqual(["My Dir/**", "src/{a,b}/**"]);
+  });
+
+  it("refuses --evidence --criterion with a JSON envelope instead of silently ignoring the criteria", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+
+    await expect(
+      WORKFLOW_HANDLERS.evidence!(context(root, JSON.stringify({ checkId: "check" }), { criterion: "a", met: true })),
+    ).rejects.toThrow("--criterion");
+  });
+
+  it("refuses a --file payload larger than the stdin limit with a clear message", async () => {
+    const root = await temporaryRepository();
+    await initializeUtcProject(root);
+    await writeFile(join(root, "big.json"), JSON.stringify({ filler: "x".repeat(70_000) }));
+
+    await expect(
+      WORKFLOW_HANDLERS.save!({ root, flags: { file: "big.json" }, operands: [], options: {} }),
+    ).rejects.toThrow("larger than 65536 bytes");
   });
 });

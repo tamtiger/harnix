@@ -176,7 +176,7 @@ async function inspectPlanChecklistWarning(harnixRoot: string, taskId: string): 
   try {
     const planPath = await taskFilePath(harnixRoot, taskId, "plan.md");
     const content = await readFile(planPath, "utf8");
-    if (/^\s*-\s*\[\s\]/mu.test(content)) {
+    if (/^\s*[-*]\s*\[\s\]/mu.test(content)) {
       return "Checklist trong plan.md chưa hoàn tất 100% [x] trước khi vào verifying.";
     }
   } catch {

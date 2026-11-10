@@ -25,6 +25,7 @@ const ignoredDirs = new Set(
 );
 import { secretPath } from "./inventory.js";
 import { attachSymbolBodies } from "./outline-body.js";
+import { isMissingPathError } from "src/utils/errno.js";
 const secretValue = /(?:api[_-]?key|secret|token|password)\s*[=:]\s*[^\s,]{8,}/iu;
 const reservedMethodNames = new Set("if,for,while,switch,catch,return,sizeof,typeof,new".split(","));
 const topContainerRe =
@@ -57,7 +58,7 @@ export async function createRepoMapOutline(
     const symbols = options.body === true ? attachSymbolBodies(text, listed) : listed;
     return makeResult("ready", options, symbols, all.length > listed.length, languageByExtension[ext]);
   } catch (error: unknown) {
-    const isMissing = typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
+    const isMissing = isMissingPathError(error);
     return makeResult(isMissing ? "not-found" : "skipped", options);
   }
 }

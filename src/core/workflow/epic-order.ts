@@ -30,7 +30,7 @@ export async function setEpicOrderWorkflow(
       ...(order.length > 0 ? { order } : {}),
       updatedAt: laterTimestamp(epic.updatedAt, now),
     };
-    await upsertEpic(root, next);
+    await upsertEpic(root, next, { replaceOrder: true });
     return next;
   });
 }

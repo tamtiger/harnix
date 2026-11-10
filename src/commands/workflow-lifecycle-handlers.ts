@@ -1,17 +1,21 @@
-import { readFile } from "src/utils/fs-access.js";
-import { resolveSafeFilePath } from "src/utils/paths.js";
 import { initTaskWorkflow, setBaselineWorkflow, setEpicOrderWorkflow } from "src/commands/internal-workflow.js";
-import { presentTask, splitGlobList, splitList } from "src/commands/workflow-handler-utils.js";
+import {
+  parseJson,
+  presentTask,
+  readBoundedFile,
+  splitGlobList,
+  splitList,
+} from "src/commands/workflow-handler-utils.js";
 import type { Handler } from "src/commands/workflow-handlers.js";
 import type { TaskMode } from "src/core/tasks/task.js";
 import { parseCheckSpec } from "src/core/workflow/init-spec.js";
 
 async function loadInitFilePayload(root: string, file: string | undefined): Promise<Record<string, unknown>> {
   if (file === undefined) return {};
-  const target = await resolveSafeFilePath(root, file);
-  const raw = await readFile(target, "utf8");
-  const withoutBom = raw.startsWith(String.fromCharCode(0xfeff)) ? raw.slice(1) : raw;
-  return JSON.parse(withoutBom) as Record<string, unknown>;
+  return parseJson(await readBoundedFile(root, file), "The --file payload is not valid JSON.") as Record<
+    string,
+    unknown
+  >;
 }
 
 function resolveCriteria(filePayload: Record<string, unknown>, flags: HandlerContext["flags"]): string[] | undefined {
