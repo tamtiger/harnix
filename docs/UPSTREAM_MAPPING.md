@@ -151,7 +151,7 @@ Mapping rules:
 
 | Upstream | Harnix |
 |---|---|
-| ECC / Trellis Claude Code | User-global `~/.claude` skills + marker block in `CLAUDE.md` + one owned `harnix-context` hook inside `UserPromptSubmit` in `settings.json` |
+| ECC / Trellis Claude Code | User-global `~/.claude` skills + marker block in `CLAUDE.md` + one owned `harnix-context` hook inside `UserPromptSubmit` and one owned `harnix-repo-map-hint` hook inside `PreToolUse` in `settings.json` |
 | Native `projects/`, `todos/`, `history` | Ignored. Harnix uses `.harnix/` independent state. |
 | Trellis MCP | No default MCP server required. |
 

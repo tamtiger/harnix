@@ -10,4 +10,4 @@ Derived by `harnix init` and `harnix update`; do not edit, it is rewritten on ev
 ## Verify commands
 - project: test `pnpm run test`; lint `pnpm run lint`; typecheck `pnpm run typecheck`; format `pnpm run format`
 
-<!-- git-commit: ecbfdd0 -->
+<!-- git-commit: 6881ab9 -->

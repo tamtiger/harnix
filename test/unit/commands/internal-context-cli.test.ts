@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { initializeProject } from "src/commands/init.js";
@@ -89,5 +91,112 @@ describe("runInternalContextCommand", () => {
     }
 
     expect(stdout.writes()).toHaveLength(1);
+  });
+});
+
+function preToolUse(cwd: string, pattern: string, extra: Record<string, unknown> = {}): string {
+  return JSON.stringify({
+    cwd,
+    hook_event_name: "PreToolUse",
+    session_id: "session-1",
+    tool_input: { pattern },
+    tool_name: "Grep",
+    ...extra,
+  });
+}
+
+describe("runInternalContextCommand for PreToolUse", () => {
+  it("writes one reminder document for a symbol search in an initialized project", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const stdout = captureStdout();
+
+    await runInternalContextCommand({
+      platform: "claude",
+      hookInput: preToolUse(root, "holds_stock"),
+      fallbackCwd: root,
+    });
+
+    const writes = stdout.writes();
+    expect(writes).toHaveLength(1);
+    const output = JSON.parse(writes[0]!) as {
+      hookSpecificOutput: { hookEventName: string; additionalContext: string };
+    };
+    expect(output.hookSpecificOutput.hookEventName).toBe("PreToolUse");
+    expect(output.hookSpecificOutput.additionalContext).toContain("--refs holds_stock");
+  });
+
+  it("is silent for a text search, another tool, or a non-Claude platform", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const stdout = captureStdout();
+
+    await runInternalContextCommand({
+      platform: "claude",
+      hookInput: preToolUse(root, "two words"),
+      fallbackCwd: root,
+    });
+    await runInternalContextCommand({
+      platform: "claude",
+      hookInput: preToolUse(root, "holds_stock", { tool_name: "Read" }),
+      fallbackCwd: root,
+    });
+    await runInternalContextCommand({
+      platform: "codex",
+      hookInput: preToolUse(root, "holds_stock"),
+      fallbackCwd: root,
+    });
+
+    expect(stdout.writes()).toEqual([]);
+  });
+
+  it("is an output-free no-op outside an initialized project", async () => {
+    const uninitialized = await temporaryRepository();
+    const stdout = captureStdout();
+
+    await runInternalContextCommand({
+      platform: "claude",
+      hookInput: preToolUse(uninitialized, "holds_stock"),
+      fallbackCwd: uninitialized,
+    });
+
+    expect(stdout.writes()).toEqual([]);
+  });
+
+  it("writes nothing to the project: no session cache slot, no tmp directory", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const stdout = captureStdout();
+
+    await runInternalContextCommand({
+      platform: "claude",
+      hookInput: preToolUse(root, "holds_stock"),
+      fallbackCwd: root,
+    });
+    await runInternalContextCommand({
+      platform: "claude",
+      hookInput: preToolUse(root, "holds_stock"),
+      fallbackCwd: root,
+    });
+
+    expect(stdout.writes()).toHaveLength(2);
+    expect(existsSync(join(root, ".harnix", "tmp", "context-cache"))).toBe(false);
+  });
+
+  it("keeps UserPromptSubmit behavior: context text, never the reminder JSON", async () => {
+    const root = await temporaryRepository();
+    await initializeProject({ developer: "tam", root, yes: true });
+    const stdout = captureStdout();
+
+    await runInternalContextCommand({
+      platform: "claude",
+      hookInput: JSON.stringify({ cwd: root, hook_event_name: "UserPromptSubmit" }),
+      fallbackCwd: root,
+    });
+
+    const writes = stdout.writes();
+    expect(writes).toHaveLength(1);
+    expect(writes[0]).toContain("repo-map");
+    expect(writes[0]).not.toContain("hookSpecificOutput");
   });
 });

@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.32.3] - 2026-11-12
+
+### Added
+
+- Hook PreToolUse cho Claude Code: nhắc dùng harnix repo-map --refs ngay trước Grep hoặc grep -r/rg theo một định danh, không chặn tool, im lặng với tìm chuỗi văn bản và ngoài dự án Harnix
+
 ## [2.32.2] - 2026-11-12
 
 ### Fixed

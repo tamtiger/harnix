@@ -1,4 +1,9 @@
-import { renderInternalContextForHook, type InternalContextPlatform } from "./internal-context.js";
+import {
+  isInitializedProjectForHook,
+  renderInternalContextForHook,
+  type InternalContextPlatform,
+} from "./internal-context.js";
+import { isPreToolUseEvent, pretoolHintFor } from "./pretool-hint.js";
 
 export interface RunInternalContextCommandOptions {
   readonly platform: InternalContextPlatform;
@@ -13,8 +18,17 @@ export interface RunInternalContextCommandOptions {
  */
 export async function runInternalContextCommand(options: RunInternalContextCommandOptions): Promise<void> {
   const event = parseOptionalHookInput(options.hookInput);
+  const fallbackCwd = options.fallbackCwd ?? process.cwd();
+  if (isPreToolUseEvent(event)) {
+    // A tool-call event never receives the prompt context; only Claude Code gets the static repo-map reminder.
+    const hint = options.platform === "claude" ? pretoolHintFor(event) : undefined;
+    if (hint !== undefined && (await isInitializedProjectForHook({ fallbackCwd, event }))) {
+      process.stdout.write(`${hint}\n`);
+    }
+    return;
+  }
   const output = await renderInternalContextForHook({
-    fallbackCwd: options.fallbackCwd ?? process.cwd(),
+    fallbackCwd,
     platform: options.platform,
     ...(event === undefined ? {} : { event }),
   });

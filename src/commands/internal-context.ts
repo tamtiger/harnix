@@ -126,6 +126,26 @@ export async function renderInternalContextForHook(options: RenderInternalContex
   }
 }
 
+/**
+ * True when the hook event (or, without one, the process cwd) sits inside an initialized project. Read-only and
+ * silent on every failure, like the context hook: `PreToolUse` reminders are only worth showing in a Harnix project.
+ */
+export async function isInitializedProjectForHook(options: {
+  readonly fallbackCwd: string;
+  readonly event?: unknown;
+}): Promise<boolean> {
+  const event = normalizeHookEvent(options.event);
+  try {
+    const project = await findInitializedProject({
+      cwd: event.cwd ?? safeAbsoluteDirectory(options.fallbackCwd),
+      workspacePaths: event.workspacePaths,
+    });
+    return project.kind === "ready";
+  } catch {
+    return false;
+  }
+}
+
 function formatPlatformPayload(platform: InternalContextPlatform, text: string): string {
   if (text.length === 0) return emptyPayload(platform);
   const record = getPlatform(platform);

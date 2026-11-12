@@ -1,6 +1,6 @@
 # Harnix
 
-**Version:** `2.32.2`
+**Version:** `2.32.3`
 
 Harnix là một coding-agent harness chạy **cục bộ** trong repository của bạn. Nói đơn giản: bạn gõ yêu cầu bằng ngôn ngữ tự nhiên cho agent (Kiro, Antigravity, Codex, Claude Code, OpenCode hoặc Cursor), Harnix sẽ tự động biến yêu cầu đó thành một **task có phạm vi rõ ràng**, chọn đúng phần context cần thiết, dẫn dắt agent triển khai + kiểm chứng theo quy trình chuẩn, rồi lưu lại bằng chứng để lần sau có thể xem lại hoặc tiếp tục.
 
@@ -211,14 +211,14 @@ Mở trực tiếp `review.md` trong thư mục của task (`.harnix/tasks/<YYYY
 
 ## Tích hợp platform
 
-| Platform    | Identity / flag                                     | Nơi Harnix tạo file (user-global)                                                                                                                          |
-| ----------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kiro        | `kiro` / `--kiro`                                   | `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, `~/.kiro/hooks/harnix-context.json`                                                               |
-| Antigravity | `antigravity` / `--antigravity` (executable: `agy`) | `~/.gemini/config/plugins/harnix` (Desktop) và `~/.gemini/antigravity-cli/plugins/harnix` (CLI)                                                            |
-| Codex       | `codex` / `--codex`                                 | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/config.toml`                                                                        |
-| Claude Code | `claude` / `--claude`                               | `~/.claude/skills/harnix-*`, marker block trong `~/.claude/CLAUDE.md`, group `harnix-context` trong `hooks.UserPromptSubmit` của `~/.claude/settings.json` |
-| OpenCode    | `opencode` / `--opencode`                           | `~/.config/opencode/skills/harnix-*`, marker block trong `~/.config/opencode/AGENTS.md` (chế độ không hook)                                                |
-| Cursor      | `cursor` / `--cursor`                               | `~/.cursor/skills/harnix-*` (chế độ không hook)                                                                                                            |
+| Platform    | Identity / flag                                     | Nơi Harnix tạo file (user-global)                                                                                                                                                                                                                                                |
+| ----------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kiro        | `kiro` / `--kiro`                                   | `~/.kiro/skills/harnix-*`, `~/.kiro/steering/harnix.md`, `~/.kiro/hooks/harnix-context.json`                                                                                                                                                                                     |
+| Antigravity | `antigravity` / `--antigravity` (executable: `agy`) | `~/.gemini/config/plugins/harnix` (Desktop) và `~/.gemini/antigravity-cli/plugins/harnix` (CLI)                                                                                                                                                                                  |
+| Codex       | `codex` / `--codex`                                 | `$HOME/.agents/skills/harnix-*`, `$CODEX_HOME/AGENTS.md`, `$CODEX_HOME/config.toml`                                                                                                                                                                                              |
+| Claude Code | `claude` / `--claude`                               | `~/.claude/skills/harnix-*`, marker block trong `~/.claude/CLAUDE.md`, group `harnix-context` trong `hooks.UserPromptSubmit` và group `harnix-repo-map-hint` (matcher `Grep\|Bash`, chỉ nhắc dùng `repo-map`, không chặn) trong `hooks.PreToolUse` của `~/.claude/settings.json` |
+| OpenCode    | `opencode` / `--opencode`                           | `~/.config/opencode/skills/harnix-*`, marker block trong `~/.config/opencode/AGENTS.md` (chế độ không hook)                                                                                                                                                                      |
+| Cursor      | `cursor` / `--cursor`                               | `~/.cursor/skills/harnix-*` (chế độ không hook)                                                                                                                                                                                                                                  |
 
 `harnix setup` chạy được ở bất kỳ thư mục nào, chỉ cần chọn platform flag, không cần đứng trong project. Với Codex, sau khi setup bạn cần mở `/hooks` và tự trust hook. Harnix không bao giờ ghi vào `~/.claude.json`, credentials, MCP server, hay các file không thuộc phạm vi quản lý của nó. Chi tiết đầy đủ về hook protocol nằm ở [Workflow chuẩn](docs/HARNIX_WORKFLOW.md) và [Yêu cầu sản phẩm](docs/HARNIX_PRD.md#9-user-global-setup-and-platform-requirements).
 

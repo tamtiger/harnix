@@ -41,6 +41,12 @@ export const CLAUDE_FACTS: readonly PlatformFact[] = [
     source: "https://code.claude.com/docs/en/memory",
     verifiedOn: "2026-10-01",
   },
+  {
+    claim:
+      "Claude Code PreToolUse hooks read tool_name and tool_input on stdin, accept a matcher such as Grep|Bash, and a hookSpecificOutput.additionalContext reaches the model next to the tool result; exit 0 with no decision continues the normal permission flow",
+    source: "https://code.claude.com/docs/en/hooks",
+    verifiedOn: "2026-11-12",
+  },
 ];
 
 export const OPENCODE_FACTS: readonly PlatformFact[] = [

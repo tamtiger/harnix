@@ -230,7 +230,7 @@ Phase 6 supersedes every former project-local platform setup path. `init` contin
 
 ### 9.4 Claude Code
 
-- User surfaces are `~/.claude/skills/harnix-*/SKILL.md`, a marker block in `~/.claude/CLAUDE.md`, and one owned `harnix-context` group inside `hooks.UserPromptSubmit` in `~/.claude/settings.json`. `CLAUDE_CONFIG_DIR` relocates that root exactly as `CODEX_HOME` relocates the Codex root.
+- User surfaces are `~/.claude/skills/harnix-*/SKILL.md`, a marker block in `~/.claude/CLAUDE.md`, one owned `harnix-context` group inside `hooks.UserPromptSubmit` and one owned `harnix-repo-map-hint` group (matcher `Grep|Bash`) inside `hooks.PreToolUse` in `~/.claude/settings.json`; the `PreToolUse` group only adds a static, never-blocking `additionalContext` reminder to use `harnix repo-map --refs` when the pattern is one identifier, and is silent otherwise and outside an initialized project. `CLAUDE_CONFIG_DIR` relocates that root exactly as `CODEX_HOME` relocates the Codex root.
 - Claude Code reads a project `AGENTS.md` natively (v2.1.277+) only when no `CLAUDE.md` exists in or above the working directory, and the user-level `~/.claude/CLAUDE.md` does not count, so the activation guard lives in user memory (`~/.claude/CLAUDE.md`). Setup preserves every byte outside its markers.
 - `UserPromptSubmit` has no matcher support, so the owned member is one `{ hooks: [...] }` group holding the fixed command `harnix context --platform claude` with timeout 5 seconds. Unrelated groups in the same array are preserved and never reinterpreted; a user-edited Harnix group is preserved and reported as drift instead of being duplicated.
 - The hook emits plain-text stdout, which Claude Code adds as prompt context. A non-Harnix directory exits 0 with empty stdout.

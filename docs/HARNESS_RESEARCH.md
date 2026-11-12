@@ -237,7 +237,7 @@ Phase 6 revalidated user-global surfaces on 2026-08-11. The project-local adapte
 
 ### Claude Code
 
-- Global user surface is `~/.claude/skills/harnix-*`, a marker block in `~/.claude/CLAUDE.md`, and one owned `harnix-context` group inside `hooks.UserPromptSubmit` in `~/.claude/settings.json`.
+- Global user surface is `~/.claude/skills/harnix-*`, a marker block in `~/.claude/CLAUDE.md`, one owned `harnix-context` group inside `hooks.UserPromptSubmit` and one owned `harnix-repo-map-hint` group inside `hooks.PreToolUse` (a never-blocking repo-map reminder) in `~/.claude/settings.json`.
 - Claude Code reads `CLAUDE.md`. From v2.1.277 it also reads a project `AGENTS.md` natively, but only when no `CLAUDE.md` or `CLAUDE.local.md` exists in or above the working directory; `~/.claude/CLAUDE.md` and `.claude/rules/` do not count, and `AGENTS.override.md` and `.agents/` are never read (verified 2026-10-01, https://code.claude.com/docs/en/memory). Before v2.1.277 a `CLAUDE.md` that imports `@AGENTS.md` is required. `UserPromptSubmit` has no matcher field.
 - Respects `CLAUDE_CONFIG_DIR` to relocate that root.
 - Never touches `~/.claude.json`, credentials, MCP servers, `projects/`, `history` or `todos/`.

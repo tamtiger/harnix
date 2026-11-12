@@ -1,0 +1,200 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261112-212444-claude-pretool-repo-map-hint",
+  "title": "Hook PreToolUse nhắc dùng repo-map cho Claude Code",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Agent Claude Code nhận nhắc nhở repo-map ngay tại thời điểm gọi Grep hoặc grep -r/rg theo tên symbol, không bị chặn, để quy tắc dùng repo-map thực sự được tuân theo.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Trong dự án Harnix đã khởi tạo, hook PreToolUse của Claude Code với tool Grep hoặc Bash chạy grep -r/rg có pattern là một định danh trả về additionalContext nhắc dùng harnix repo-map --refs <symbol>, và không bao giờ chặn tool.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-hint-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Hook không phát gì, không ghi file, không dùng mạng khi pattern không phải một định danh (chuỗi văn bản, regex), khi tool khác Grep và Bash, hoặc khi cwd nằm ngoài dự án Harnix đã khởi tạo.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-hint-1"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "harnix setup --claude, update --global và uninstall --global --yes cài, cập nhật và gỡ đúng một nhóm hook PreToolUse do Harnix sở hữu (matcher Grep|Bash), giữ nguyên hook của người dùng; doctor nhận biết nhóm này.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-claude-hook-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Tài liệu và hợp đồng đồng bộ (AGENTS.md, PRD, workflow, implementation plan, template), trần token không tăng, phiên bản và CHANGELOG được nâng một lần.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-hint",
+      "description": "chk-hint",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/commands/pretool-hint.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/**",
+        "test/unit/commands/**"
+      ]
+    },
+    {
+      "id": "chk-claude-hook",
+      "description": "chk-claude-hook",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/platform/claude-global.test.ts",
+      "criterionIds": [
+        "ac-3"
+      ],
+      "inputs": [
+        "src/configurators/**",
+        "src/core/platform/**",
+        "test/platform/**"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "chk-gates",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm run test:gates",
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-hint-1",
+      "checkId": "chk-hint",
+      "recordedAt": "2026-11-12T21:38:50.107+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/commands/pretool-hint.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "e2dfe8da3142162d8be691b9fd388e91aaebcbe19547e71531f63b52a4fb6682"
+    },
+    {
+      "id": "ev-chk-claude-hook-1",
+      "checkId": "chk-claude-hook",
+      "recordedAt": "2026-11-12T21:38:53.866+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/platform/claude-global.test.ts — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "463a548937f0bf4954fdba91291a635aec565a1b095a5d41113a8519998f5140"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-12T21:39:03.810+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "0f635ce400bfa7d8b08e9cc2989048ad0592799a7352a9751f72b99dd811012c"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-12T21:44:50.516+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "50cf504c91505015579c52c083a316b9b05c0052451c99887a90456686225c08"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-12T21:24:44.774+07:00",
+  "updatedAt": "2026-11-12T21:45:22.779+07:00",
+  "decisions": [
+    {
+      "id": "d-remind-not-block",
+      "text": "Hook PreToolUse chỉ nhắc (additionalContext), không chặn.",
+      "rationale": "Người dùng chọn hướng nhắc không chặn ngày 2026-11-12; chặn cứng có nguy cơ chặn nhầm khi tìm chuỗi văn bản."
+    },
+    {
+      "id": "d-claude-only",
+      "text": "Phạm vi chỉ Claude Code.",
+      "rationale": "Vấn đề quan sát ở Claude Code; các nền tảng khác chưa có bằng chứng, mở task riêng khi cần."
+    },
+    {
+      "id": "d-stateless",
+      "text": "Phát hiện không trạng thái: chỉ pattern định danh, không nhận diện đọc lại file lần hai.",
+      "rationale": "Hook phải no-write và không đọc cache phiên; trạng thái vi phạm hợp đồng context."
+    },
+    {
+      "id": "d-pretool-contract",
+      "text": "Claude Code PreToolUse: stdin có tool_name, tool_input (Grep.pattern, Bash.command); hookSpecificOutput.additionalContext được tài liệu hỗ trợ; matcher Grep|Bash là danh sách chính xác hợp lệ; exit 0 không quyết định thì tool chạy qua luồng quyền bình thường.",
+      "rationale": "Xác minh từ code.claude.com/docs/en/hooks (Slice 0). Chưa xác minh: phiên bản đầu tiên hỗ trợ additionalContext cho PreToolUse và hành vi khi chỉ có additionalContext; kiểm bằng smoke thủ công cuối."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-noise-flags",
+      "text": "Bộ phát hiện chưa xử lý cờ nhận giá trị (rg --files src, rg -g src foo): có thể nhắc thừa với từ khóa không phải symbol; chỉ là một dòng nhắc, không chặn.",
+      "severity": "low"
+    },
+    {
+      "id": "r-bash-latency",
+      "text": "Matcher Grep|Bash chạy node mỗi lần gọi Bash (khoảng 0,16 giây đo trên máy này); nếu thấy chậm, thu hẹp matcher hoặc thêm bộ lọc sớm.",
+      "severity": "low"
+    },
+    {
+      "id": "r-additionalcontext-unverified",
+      "text": "Chưa xác minh phiên bản Claude Code đầu tiên hỗ trợ additionalContext cho PreToolUse và hành vi khi chỉ có additionalContext; cần quan sát trong phiên Claude Code thật sau khi cài.",
+      "severity": "medium"
+    }
+  ],
+  "completedAt": "2026-11-12T21:45:22.779+07:00"
+}

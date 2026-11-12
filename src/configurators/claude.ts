@@ -26,6 +26,27 @@ export const CLAUDE_GLOBAL_HOOK_SELECTOR: JsonArrayMemberSelector = {
 
 export const CLAUDE_GLOBAL_CONTEXT_COMMAND = "harnix context --platform claude";
 
+/**
+ * `PreToolUse` reminder: one more owned group, same command (the hook branches on `hook_event_name`). It sits in its
+ * own array, so its member id never collides with the `UserPromptSubmit` group.
+ */
+export const CLAUDE_GLOBAL_PRETOOL_SELECTOR: JsonArrayMemberSelector = {
+  type: "json-array-member",
+  pointer: "/hooks/PreToolUse",
+  memberId: "harnix-repo-map-hint",
+};
+
+export const claudeGlobalPretoolHookGroup: JsonValue = {
+  hooks: [
+    {
+      command: CLAUDE_GLOBAL_CONTEXT_COMMAND,
+      timeout: 5,
+      type: "command",
+    },
+  ],
+  matcher: "Grep|Bash",
+};
+
 export const claudeGlobalMemoryContent = `## Harnix
 
 ${renderHarnixRules()}
@@ -66,6 +87,15 @@ export function claudeGlobalDesiredFiles(): DesiredGlobalManagedFile[] {
       selector: CLAUDE_GLOBAL_HOOK_SELECTOR,
       sourceId: "claude-global-context-hook",
     },
+    {
+      kind: "json-member",
+      member: claudeGlobalPretoolHookGroup,
+      memberMatcher: matchesClaudeGlobalPretoolHookGroup,
+      path: "settings.json",
+      preserveIfUnmatched: true,
+      selector: CLAUDE_GLOBAL_PRETOOL_SELECTOR,
+      sourceId: "claude-global-pretool-hook",
+    },
   ];
 }
 
@@ -85,6 +115,25 @@ export const matchesClaudeGlobalContextHookGroup: GlobalJsonMemberMatcher = (can
   }
   return candidate.hooks.some((handler) => isJsonRecord(handler) && handler.command === CLAUDE_GLOBAL_CONTEXT_COMMAND);
 };
+
+/** Same signature rule as the prompt group: the command is the stable part, the matcher and timeout are user-editable. */
+export const matchesClaudeGlobalPretoolHookGroup: GlobalJsonMemberMatcher = (candidate, selector) => {
+  if (
+    selector.memberId !== CLAUDE_GLOBAL_PRETOOL_SELECTOR.memberId ||
+    selector.pointer !== CLAUDE_GLOBAL_PRETOOL_SELECTOR.pointer ||
+    !isJsonRecord(candidate) ||
+    !Array.isArray(candidate.hooks)
+  ) {
+    return false;
+  }
+  return candidate.hooks.some((handler) => isJsonRecord(handler) && handler.command === CLAUDE_GLOBAL_CONTEXT_COMMAND);
+};
+
+/** Registered by `sourceId` for setup, update, uninstall and doctor. */
+export const CLAUDE_GLOBAL_MEMBER_MATCHERS: ReadonlyMap<string, GlobalJsonMemberMatcher> = new Map([
+  ["claude-global-context-hook", matchesClaudeGlobalContextHookGroup],
+  ["claude-global-pretool-hook", matchesClaudeGlobalPretoolHookGroup],
+]);
 
 function isJsonRecord(value: JsonValue): value is { [key: string]: JsonValue } {
   return typeof value === "object" && value !== null && !Array.isArray(value);
