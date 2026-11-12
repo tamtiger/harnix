@@ -41,6 +41,8 @@ export interface RepoMapInventoryFile {
   path: string;
   absolutePath: string;
   byteLength: number;
+  /** Modification time from the inventory stat; used only to judge freshness and never stored in the cache. */
+  mtimeMs?: number;
 }
 
 export interface RepoMapInventory {

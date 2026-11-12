@@ -197,7 +197,7 @@ export function platformFlagList(extra: readonly string[] = []): string {
 
 export type RepoMapCliOptions = Partial<
   Record<"query" | "impact" | "tests" | "outline" | "refs" | "symbol" | "path" | "limit" | "depth" | "format", string>
-> & { body?: boolean; events?: boolean; refresh?: boolean; workspace?: string | boolean | string[] };
+> & { body?: boolean; cached?: boolean; events?: boolean; refresh?: boolean; workspace?: string | boolean | string[] };
 
 function validateFormatFlag(options: RepoMapCliOptions): void {
   if (options.format === undefined) return;
@@ -240,6 +240,13 @@ export function validateRepoMapOptions(options: RepoMapCliOptions): void {
       "repo-map requires at most one of --query, --impact, --tests, --outline, --refs, --events, or --refresh.",
     );
   validateOutlineFlags(options);
+  if (
+    options.cached === true &&
+    (actions.length === 0 || options.refresh === true || options.events === true || options.workspace !== undefined)
+  )
+    throw new Error(
+      "--cached requires repo-map --query, --outline, --refs, --impact or --tests, and not --workspace.\nGợi ý: harnix repo-map --refs <symbol> --cached.",
+    );
   if (options.path !== undefined && options.refs === undefined) throw new Error("--path requires repo-map --refs.");
   if (options.depth !== undefined && options.impact === undefined)
     throw new Error("--depth requires repo-map --impact.");

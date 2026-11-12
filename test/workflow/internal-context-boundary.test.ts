@@ -1,9 +1,10 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { access, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createConfig, writeConfig } from "src/core/config/config.js";
 import { boundedContext, renderInternalContext, renderInternalContextForHook } from "src/commands/internal-context.js";
 import { UNTRUSTED_CONTEXT_PREFIX, UNTRUSTED_CONTEXT_SUFFIX } from "src/core/context/context.js";
+import { REPO_MAP_TIP } from "src/core/context/effective-context.js";
 import { saveTask, setActiveTask, type TaskRecord } from "src/core/tasks/task.js";
 import { buildTaskV1 } from "test/support/builders.js";
 import { useTemporaryRepositories } from "test/support/temporary-repository.js";
@@ -152,6 +153,47 @@ describe("internal context untrusted boundary", () => {
 
     expect(payload).toBe(`${UNTRUSTED_CONTEXT_PREFIX}${UNTRUSTED_CONTEXT_SUFFIX}`);
     expect(payload.length).toBeLessThanOrEqual(cap);
+  });
+
+  it("prints the static repo-map tip outside the untrusted frame when a task is active", async () => {
+    const root = await temporaryRepository();
+    await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" }));
+    const task: TaskRecord = buildTaskV1({
+      id: "20260826-120003-tip-outside-frame",
+      title: "t",
+      status: "in_progress",
+      checkpoint: "implementing",
+      goal: "t",
+      acceptanceCriteria: [],
+      relevantPaths: [],
+      validationPlan: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+    await saveTask(join(root, ".harnix"), task);
+    await setActiveTask(join(root, ".harnix"), task.id);
+
+    const payload = await renderInternalContext(root, "kiro");
+
+    expect(payload.startsWith(`${REPO_MAP_TIP}\n${UNTRUSTED_CONTEXT_PREFIX}`)).toBe(true);
+    expect(payload.indexOf(REPO_MAP_TIP)).toBeLessThan(payload.indexOf(UNTRUSTED_CONTEXT_PREFIX));
+  });
+
+  it("prints only the static tip for an initialized project without an active task, reading no cache", async () => {
+    const root = await temporaryRepository();
+    await writeConfig(join(root, ".harnix", "config.yaml"), createConfig({ developer: "tam" }));
+
+    expect(await renderInternalContext(root, "kiro")).toBe(REPO_MAP_TIP);
+    const codex = JSON.parse(await renderInternalContext(root, "codex")) as {
+      hookSpecificOutput: { additionalContext: string };
+    };
+    expect(codex.hookSpecificOutput.additionalContext).toBe(REPO_MAP_TIP);
+    expect(
+      await access(join(root, ".harnix", "cache")).then(
+        () => true,
+        () => false,
+      ),
+    ).toBe(false);
   });
 
   it("should_not_read_either_project_when_antigravity_workspace_roots_are_ambiguous", async () => {

@@ -3,7 +3,7 @@ import { isAbsolute, win32 } from "node:path";
 
 import { readConfig } from "src/core/config/config.js";
 import { UNTRUSTED_CONTEXT_PREFIX, UNTRUSTED_CONTEXT_SUFFIX } from "src/core/context/context.js";
-import { buildEffectiveContext } from "src/core/context/effective-context.js";
+import { REPO_MAP_TIP, buildEffectiveContext } from "src/core/context/effective-context.js";
 import { shouldElideContext } from "src/core/context/session-cache.js";
 import { getPlatform, type PlatformId } from "src/core/platform/registry.js";
 import { resolveActiveTask } from "src/core/tasks/task.js";
@@ -53,7 +53,7 @@ export async function renderInternalContext(
 
   const config = await readConfig(await resolveSafeHarnixPath(root, "config.yaml"));
   const active = await resolveActiveTask(harnixRoot);
-  if (!active) return emptyInitializedProjectPayload(platform);
+  if (!active) return formatPlatformPayload(platform, REPO_MAP_TIP);
 
   const output = await buildEffectiveContext({
     projectRoot: root,
@@ -63,12 +63,12 @@ export async function renderInternalContext(
     platform,
     forceBounded: options.forceBounded,
   });
-  const text = boundedContext(
-    output.text,
-    output.manifest.omitted.map((item) => item.path),
-    output.budget.maxCharacters,
-  );
-  return formatPlatformPayload(platform, text);
+  const omitted = output.manifest.omitted.map((item) => item.path);
+  // The tip is static Harnix text, so it sits outside the untrusted repository frame; it is shown only when it
+  // fits inside the configured cap together with a non-empty frame, so the cap is never exceeded.
+  const tipText = boundedContext(output.text, omitted, output.budget.maxCharacters - REPO_MAP_TIP.length - 1);
+  if (tipText.length > 0) return formatPlatformPayload(platform, `${REPO_MAP_TIP}\n${tipText}`);
+  return formatPlatformPayload(platform, boundedContext(output.text, omitted, output.budget.maxCharacters));
 }
 
 /**
@@ -142,14 +142,6 @@ function formatPlatformPayload(platform: InternalContextPlatform, text: string):
 
 function emptyPayload(platform: InternalContextPlatform): string {
   return getPlatform(platform).contextOutput === "antigravity-inject-steps" ? JSON.stringify({ injectSteps: [] }) : "";
-}
-
-function emptyInitializedProjectPayload(platform: InternalContextPlatform): string {
-  const record = getPlatform(platform);
-  if (record.contextOutput === "codex-additional-context") {
-    return JSON.stringify({ hookSpecificOutput: { hookEventName: record.contextHook?.event, additionalContext: "" } });
-  }
-  return emptyPayload(platform);
 }
 
 const ENTRY_HEADER = /\n--- ([^\n]+) ---\n/gu;

@@ -4,6 +4,18 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.32.2] - 2026-11-12
+
+### Fixed
+
+- repo-map tự kiểm tra độ mới của cache và dựng lại một lần khi cũ (freshness refreshed hoặc stale), thêm --cached
+
+## [2.32.1] - 2026-11-12
+
+### Fixed
+
+- Gợi ý repo-map nằm ngoài khung untrusted, có cả khi không có task active, nêu theo tên công cụ Grep/Read và có trong harnix-review
+
 ## [2.32.0] - 2026-11-10
 
 ### Fixed

@@ -62,6 +62,7 @@ describe("CLI command contract", () => {
       "--format",
       "--events",
       "--workspace",
+      "--cached",
       "--refresh",
     ]);
     expect(repoMap?.options.find((option) => option.long === "--refresh")?.hidden).toBe(false);

@@ -251,6 +251,7 @@ export function registerWorkflowCliCommands(program: Command, programOptions: Pr
     .option("--format <format>", "Result format: json or compact (also outline for --query)")
     .option("--events", "Generate cross-service event matrix of publishers and subscribers by topic")
     .option("--workspace [path]", "Index and query across sub-repositories in a workspace")
+    .option("--cached", "Use the cached map as it is: skip the freshness check and the automatic refresh")
     .option("--refresh", "Rebuild the structural repository map (with --workspace, every sub-repository)")
     .action(async (options: RepoMapCliOptions) => {
       process.stdout.write(`${JSON.stringify(await runRepoMapCommand(process.cwd(), options))}\n`);

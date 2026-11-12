@@ -1,0 +1,233 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261112-145027-repo-map-auto-fresh",
+  "title": "Repo-map tự phát hiện và làm mới cache cũ khi truy vấn",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Các lệnh repo-map (--query, --refs, --outline, --tests, --impact) không còn trả dữ liệu cũ một cách im lặng: phát hiện cache lệch với mã nguồn bằng kiểm tra rẻ, tự làm mới một lần rồi trả kết quả đúng, báo freshness khi không làm mới được, có cờ --cached để bỏ qua, và hook vẫn không bao giờ chạy repo-map.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Hàm kiểm tra độ mới của repo-map phát hiện file thêm, sửa, xóa so với cache mà không ghi gì và chỉ đọc nội dung các file ứng viên (mtime mới hơn cache hoặc khác kích thước), không đọc file không đổi.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-fresh-2-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Khi cache cũ, các lệnh repo-map --query, --refs, --outline, --tests và --impact tự làm mới cache đúng một lần rồi trả kết quả từ dữ liệu mới kèm freshness refreshed; khi cache còn mới thì output giữ nguyên, không có trường freshness và không ghi cache.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-fresh-2-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Cờ --cached dùng cache nguyên trạng, không kiểm tra và không ghi; khi làm mới thất bại hoặc vượt giới hạn, lệnh vẫn trả dữ liệu cũ với freshness stale cùng hint --refresh, không ném lỗi và giữ mã thoát 0; hook context vẫn không gọi repo-map.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-fresh-2-2"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Hợp đồng CLI, tài liệu (README, AGENTS.md, PRD, workflow, skill) và test cấu trúc được đồng bộ, trần token không vượt, phiên bản được bump một lần.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-2"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-fresh",
+      "description": "chk-fresh",
+      "scope": "focused",
+      "required": false,
+      "command": "pnpm exec vitest run test/unit/core/repo-map/freshness.test.ts test/integration/commands/repo-map-freshness.test.ts test/integration/scenarios/repo-map-incremental.test.ts test/integration/scenarios/read-only-commands.test.ts",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/cli-helpers.ts",
+        "src/cli-workflow-commands.ts",
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/**",
+        "test/integration/commands/repo-map-freshness.test.ts",
+        "test/integration/scenarios/read-only-commands.test.ts",
+        "test/integration/scenarios/repo-map-incremental.test.ts",
+        "test/unit/core/repo-map/freshness.test.ts"
+      ]
+    },
+    {
+      "id": "chk-fresh-2",
+      "description": "Replacement for chk-fresh",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3"
+      ],
+      "inputs": [
+        "src/cli-helpers.ts",
+        "src/cli-workflow-commands.ts",
+        "src/commands/repo-map-internal.ts",
+        "src/core/repo-map/**",
+        "test/integration/scenarios/read-only-commands.test.ts",
+        "test/integration/scenarios/repo-map-freshness.test.ts",
+        "test/integration/scenarios/repo-map-incremental.test.ts",
+        "test/unit/core/repo-map/freshness.test.ts"
+      ],
+      "command": "pnpm exec vitest run test/unit/core/repo-map/freshness.test.ts test/integration/scenarios/repo-map-freshness.test.ts test/integration/scenarios/repo-map-incremental.test.ts test/integration/scenarios/read-only-commands.test.ts"
+    },
+    {
+      "id": "chk-gates",
+      "description": "chk-gates",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm test:gates",
+      "criterionIds": [
+        "ac-4"
+      ],
+      "inputs": [
+        "AGENTS.md",
+        "README.md",
+        "docs/**",
+        "src/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-fresh-1",
+      "checkId": "chk-fresh",
+      "recordedAt": "2026-11-12T14:55:36.935+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/repo-map/freshness.test.ts test/integration/commands/repo-map-freshness.test.ts test/integration/scenarios/repo-map-incremental.test.ts test/integration/scenario... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "8a0e14211ce1f7877822488fa09631383840e710dfe9bd536fc8f02e5764bf89"
+    },
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-12T14:58:11.131+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Test tích hợp được chuyển sang test/integration/scenarios vì quy tắc test-structure buộc test trong commands phản chiếu 1-1 một file src/commands; check cũ trỏ tới đường dẫn không còn tồn tại.",
+      "artifactPaths": [
+        ".harnix/tasks/20261112-145027-repo-map-auto-fresh/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-fresh-2-1",
+      "checkId": "chk-fresh-2",
+      "recordedAt": "2026-11-12T14:59:00.841+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/repo-map/freshness.test.ts test/integration/scenarios/repo-map-freshness.test.ts test/integration/scenarios/repo-map-incremental.test.ts test/integration/scenari... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "4e4f154908d1fd7a36aa7c2b3101f7c8c6428b36b24415730c3af5b00f6edae3"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-12T14:59:11.073+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "98bd10abadc18a65e77aa08cd0e340cfd75d42b0661f9f6ec3eaac42b9430932"
+    },
+    {
+      "id": "ev-chk-fresh-2-2",
+      "checkId": "chk-fresh-2",
+      "recordedAt": "2026-11-12T15:01:25.274+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/repo-map/freshness.test.ts test/integration/scenarios/repo-map-freshness.test.ts test/integration/scenarios/repo-map-incremental.test.ts test/integration/scenari... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "51fd49ec594ffe196d3adccb75a443ff3252e2d17c5240b6224dd71093076c8e"
+    },
+    {
+      "id": "ev-chk-gates-2",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-12T15:01:34.023+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "61d14a03e05470bfcb8ce4d96df32bbd874ff27a4fa61ddd6d2fb7aac1324891"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-12T15:03:22.477+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1d044a88d0564986ced929c722e073ab8909c7a3a4bea9cf8fd67d1734a243f8"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-12T14:50:27.692+07:00",
+  "updatedAt": "2026-11-12T15:03:38.146+07:00",
+  "decisions": [
+    {
+      "id": "d-auto-refresh",
+      "text": "Truy vấn tự làm mới cache cũ đúng một lần (refresh đầy đủ), có cờ --cached để bỏ qua; không chỉ cảnh báo.",
+      "rationale": "Cảnh báo suông khiến agent vẫn không tin kết quả và quay lại Grep; người dùng đã chấp nhận khuyến nghị tự làm mới."
+    },
+    {
+      "id": "d-no-schema-change",
+      "text": "Phát hiện cũ bằng mtime (không lưu vào cache) cộng băm các file ứng viên, không đổi schema repo-map-v1.json; refresh gia tăng thật sự để ngoài phạm vi.",
+      "rationale": "usedNames không được cache nên làm mới gia tăng cần đọc lại mọi file; đổi schema cache là việc lớn hơn và chỉ đáng làm nếu đo thấy refresh đầy đủ quá chậm."
+    },
+    {
+      "id": "trace-freshness-timing",
+      "text": "Đo trên bản sao payment-hub (4.304 file, 168 MB, Windows): refresh đầy đủ khoảng 7 giây; kiểm tra độ mới khi cache còn mới thêm khoảng 1,1 giây (tổng 1,4 giây so với 0,3 giây khi dùng --cached); sửa một file thì rebuild khoảng 6,7 giây.",
+      "rationale": "Chi phí đã đo thật cho rủi ro r-cost: chấp nhận được cho một truy vấn, nhưng nhân lên khi agent gọi nhiều lần; --cached là lối thoát, refresh gia tăng hoặc bộ nhớ đệm kết quả kiểm tra là hướng tối ưu cho task sau."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-cost",
+      "text": "Refresh đầy đủ trên repo rất lớn (payment-hub) có thể mất vài giây mỗi lần cache cũ; cần đo và, nếu chậm, cân nhắc refresh gia tăng có cache usedNames ở task sau.",
+      "severity": "medium"
+    },
+    {
+      "id": "r-readonly",
+      "text": "Lệnh repo-map vốn chỉ đọc nay có thể ghi .harnix/cache (dữ liệu dẫn xuất, git-ignored); test chỉ-đọc và tài liệu phải nêu rõ, --cached là lối thoát.",
+      "severity": "low"
+    }
+  ],
+  "completedAt": "2026-11-12T15:03:38.146+07:00"
+}

@@ -1,0 +1,188 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261112-131224-repo-map-nudge-reach",
+  "title": "Làm gợi ý repo-map thực sự đến được agent khi đọc code",
+  "mode": "full",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Agent dùng harnix repo-map thay cho Grep/Read lặp lại khi tìm symbol hoặc đọc thân hàm: gợi ý phải nằm ngoài khung untrusted, có mặt cả khi không có task active, dùng từ khóa theo tên công cụ thật (Grep, Read offset) và có cả ở harnix-review, mà không vượt trần token và không để hook gọi repo-map.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Dòng gợi ý repo-map do Harnix sinh ra được render bên ngoài khung UNTRUSTED REPOSITORY CONTEXT trong hook context lean.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-ctx-2"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Hook context của dự án đã init nhưng không có task active vẫn phát ra gợi ý repo-map tĩnh, mà không đọc cache hay chạy repo-map.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-ctx-2"
+      ]
+    },
+    {
+      "id": "ac-3",
+      "text": "Quy tắc Token economy trong khối luôn nạp nêu kích hoạt theo công cụ (Grep tìm symbol, Read hoặc sed -n lần hai trên một file) thay vì chỉ grep -r và sed -n, và khối vẫn không vượt trần alwaysLoaded.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    },
+    {
+      "id": "ac-4",
+      "text": "Skill harnix-review có chỉ thị dùng repo-map trước khi tìm symbol hoặc đọc lại một file, và mọi trần token trong token-budgets.json vẫn xanh.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-gates-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2",
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "**"
+      ]
+    },
+    {
+      "id": "chk-ctx",
+      "description": "chk-ctx",
+      "command": "pnpm exec vitest run test/unit/core/context/effective-context.test.ts test/unit/commands/internal-context.test.ts test/workflow/internal-context-hooks.test.ts test/workflow/internal-context-boundary.test.ts",
+      "scope": "focused",
+      "required": true,
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/commands/internal-context.ts",
+        "src/core/context/**",
+        "test/unit/commands/internal-context.test.ts",
+        "test/unit/core/context/**",
+        "test/workflow/internal-context-boundary.test.ts",
+        "test/workflow/internal-context-hooks.test.ts"
+      ]
+    },
+    {
+      "id": "chk-gates",
+      "description": "chk-gates",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm test:gates",
+      "criterionIds": [
+        "ac-3",
+        "ac-4"
+      ],
+      "inputs": [
+        "src/core/context/**",
+        "src/skills/**",
+        "src/templates/**",
+        "test/**"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "task-contract-revision-01",
+      "recordedAt": "2026-11-12T13:19:36.616+07:00",
+      "result": "skipped",
+      "summary": "Task contract revised at persisted replan: Hai test mới của ac-1 và ac-2 nằm trong internal-context-boundary.test.ts nên check tập trung phải chạy file này.",
+      "artifactPaths": [
+        ".harnix/tasks/20261112-131224-repo-map-nudge-reach/task.json"
+      ]
+    },
+    {
+      "id": "ev-chk-ctx-1",
+      "checkId": "chk-ctx",
+      "recordedAt": "2026-11-12T13:19:54.975+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/context/effective-context.test.ts test/unit/commands/internal-context.test.ts test/workflow/internal-context-hooks.test.ts test/workflow/internal-context-boundar... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "356385ea1176d263762c506c6dde46787d9e14d1162c08394c543034fcb2e3b0"
+    },
+    {
+      "id": "ev-chk-gates-1",
+      "checkId": "chk-gates",
+      "recordedAt": "2026-11-12T13:21:24.101+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test:gates — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "041b8285c6eeea7cb93f1b342d0356154cd908030cf2714525c1f41cccd3d466"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-12T13:23:12.879+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "fe710a7335fefc3091ee8d5d4ba1da19d5d46e141fd11c8615a25209db920694"
+    },
+    {
+      "id": "ev-chk-ctx-2",
+      "checkId": "chk-ctx",
+      "recordedAt": "2026-11-12T13:23:28.846+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/context/effective-context.test.ts test/unit/commands/internal-context.test.ts test/workflow/internal-context-hooks.test.ts test/workflow/internal-context-boundar... — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "dd94fb40e14356e385b03a9a6f227956a6b8f0879b1afc6a19f3077f8d1f7054"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-12T13:12:24.205+07:00",
+  "updatedAt": "2026-11-12T13:23:40.191+07:00",
+  "decisions": [
+    {
+      "id": "d-root-cause",
+      "text": "Gợi ý repo-map hiện bị đặt trong khung UNTRUSTED (bị bảo bỏ qua), vắng khi không có task active, và dùng từ khóa grep/sed thay vì tên công cụ Grep/Read.",
+      "rationale": "Đối chiếu effective-context.ts (withLearning, taskSummaryHeader) và internal-context.ts (nhánh !active); giải thích vì sao epic repo-map-insights giao chỉ thị mà agent vẫn không dùng."
+    },
+    {
+      "id": "d-defer-pretooluse",
+      "text": "Hook PreToolUse nhắc khi gọi Grep/sed là non-goal của task này; chỉ đề xuất cho người dùng quyết định.",
+      "rationale": "Nó đổi tích hợp Claude Code đã đóng băng (một nhóm UserPromptSubmit) và chạm setup, update, uninstall, doctor, registry."
+    },
+    {
+      "id": "d-token-offset",
+      "text": "Mọi chữ mới trong khối luôn nạp phải được bù bằng cách rút gọn chính khối đó (còn ~34 token, không nâng trần).",
+      "rationale": "AGENTS.md: trần chỉ chặn tăng, không nâng để một thay đổi qua test."
+    }
+  ],
+  "residualRisks": [
+    {
+      "id": "r-behavior",
+      "text": "Hành vi LLM không kiểm thử đơn vị được: sau phát hành cần đếm transcript (repo-map so với Grep/sed); nếu chưa đủ thì cân nhắc hook PreToolUse.",
+      "severity": "medium"
+    },
+    {
+      "id": "r-csharp",
+      "text": "Chưa xác minh repo-map --outline/--refs trên mã C# thật lớn; nếu yếu thì việc agent né repo-map là hợp lý và cần sửa extractor trước.",
+      "severity": "medium"
+    }
+  ],
+  "completedAt": "2026-11-12T13:23:40.191+07:00"
+}

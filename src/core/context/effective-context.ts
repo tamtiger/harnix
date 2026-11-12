@@ -116,9 +116,12 @@ export async function buildEffectiveContext(input: EffectiveContextInput): Promi
   };
 }
 
-/** One static line for the lean header: no repo-map query runs and no cache is read to show it. */
+/**
+ * One static Harnix line (never repository content) that the hook prints OUTSIDE the untrusted frame, so a compliant
+ * agent does not discard it: no repo-map query runs and no cache is read to show it.
+ */
 export const REPO_MAP_TIP =
-  "Tip: before grep -r or a 2nd sed -n use `harnix repo-map --refs <sym>`, `--outline <path> --symbol <name> --body`, `--tests <path>`.";
+  "Harnix tip: before Grep for a symbol or a 2nd Read/sed -n of one file, run `harnix repo-map --refs <sym>` or `--outline <path> --symbol <name> --body`.";
 
 function taskSummaryHeader(task: TaskRecord): string {
   return [
@@ -126,7 +129,6 @@ function taskSummaryHeader(task: TaskRecord): string {
     `Status: ${task.status}/${task.checkpoint}`,
     `Title: ${task.title}`,
     `Goal: ${task.goal}`,
-    REPO_MAP_TIP,
   ].join("\n");
 }
 

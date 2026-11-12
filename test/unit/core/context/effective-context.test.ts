@@ -246,10 +246,11 @@ describe("lean context injection and token optimization (ac-1, ac-2, ac-3)", () 
       forceBounded: true,
     });
 
-    expect(leanResult.text).toContain(REPO_MAP_TIP);
-    expect(leanResult.text).toContain("harnix repo-map --refs");
-    expect(Math.ceil(REPO_MAP_TIP.length / 4)).toBeLessThanOrEqual(35);
+    // The tip is static Harnix text printed by the hook outside the untrusted frame, never inside it.
+    expect(leanResult.text).not.toContain(REPO_MAP_TIP);
     expect(fullResult.text).not.toContain(REPO_MAP_TIP);
+    expect(REPO_MAP_TIP).toContain("harnix repo-map --refs");
+    expect(Math.ceil(REPO_MAP_TIP.length / 4)).toBeLessThanOrEqual(40);
   });
 });
 

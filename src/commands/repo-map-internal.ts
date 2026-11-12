@@ -9,6 +9,7 @@ import {
   refsRepoMap,
 } from "src/core/repo-map/service.js";
 import { queryWorkspaceRepoMap, refreshWorkspaceRepoMap, statusWorkspaceRepoMap } from "src/core/repo-map/workspace.js";
+import { ensureFreshRepoMap } from "src/core/repo-map/freshness.js";
 import { readRepoMap } from "src/core/repo-map/store.js";
 import { summarizeSkipped } from "src/core/repo-map/refresh-summary.js";
 import { repoMapRefreshHint } from "src/core/repo-map/types.js";
@@ -66,6 +67,17 @@ export async function runRepoMapCommand(cwd: string, options: RepoMapCliOptions)
     const wsPath = typeof options.workspace === "string" ? options.workspace : undefined;
     return options.workspace !== undefined ? refreshWorkspaceRepoMapInternal(cwd, wsPath) : refreshRepoMapInternal(cwd);
   }
+  const readsProjectCache =
+    options.workspace === undefined &&
+    [options.query, options.outline, options.refs, options.tests, options.impact].some((mode) => mode !== undefined);
+  if (!readsProjectCache || options.cached === true) return runReadAction(cwd, options);
+  // A stale cache is rebuilt once before the read; a fresh one is untouched and the output is unchanged.
+  const note = await ensureFreshRepoMap(await initializedRoot(cwd));
+  const result = await runReadAction(cwd, options);
+  return note === undefined || typeof result !== "object" || result === null ? result : { ...result, ...note };
+}
+
+async function runReadAction(cwd: string, options: RepoMapCliOptions): Promise<unknown> {
   if (options.outline !== undefined) {
     const symbol = options.symbol === undefined ? undefined : parseRepoMapSymbol(options.symbol, "--symbol");
     return outlineRepoMapInternal(

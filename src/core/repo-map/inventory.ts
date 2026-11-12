@@ -13,9 +13,18 @@ const ignoredDirectoryNames = new Set<string>(IGNORED_DIRECTORY_NAMES);
 export const secretPath =
   /(?:^|\/)(?:\.env[^/]*|id_rsa[^/]*|id_ed25519[^/]*|[^/]*\.(?:pem|key|pfx|p12)|(?:secrets?|credentials?)$|[^/]*(?:credential|secret|token)[^/]*\.(?:json|ya?ml|config|xml|ini|properties|toml|conf))$/iu;
 
+export interface InventoryOptions {
+  /**
+   * A file already known to be unchanged (its size and modification time are given) skips the binary sniff that
+   * reads it, so a freshness check reads only the files that may have changed.
+   */
+  readonly isUnchanged?: (path: string, size: number, mtimeMs: number) => boolean;
+}
+
 export async function inventoryRepository(
   root: string,
   limits: RepoMapLimits = defaultRepoMapLimits,
+  options: InventoryOptions = {},
 ): Promise<RepoMapInventory> {
   assertRepoMapLimits(limits);
   const resolvedRoot = resolve(root);
@@ -44,11 +53,7 @@ export async function inventoryRepository(
       skipped.push("unsafe-path");
       continue;
     }
-    if (path === ".harnixignore" || path.endsWith("/.harnixignore")) {
-      skipped.push(path);
-      continue;
-    }
-    if (isHardExcluded(path) || secretPath.test(path) || harnixIgnore.ignores(path)) {
+    if (isExcludedPath(path, harnixIgnore)) {
       skipped.push(path);
       continue;
     }
@@ -58,8 +63,10 @@ export async function inventoryRepository(
         skipped.push(path);
         continue;
       }
-      const realFile = await realpath(candidate);
-      if (!isContained(realRoot, realFile) || metadata.size > limits.maxBytesPerFile) {
+      // A file the caller already knows is unchanged is only counted, never read, so it needs neither the
+      // containment check (done when it was indexed) nor the binary sniff.
+      const unchanged = options.isUnchanged?.(path, metadata.size, metadata.mtimeMs) === true;
+      if (metadata.size > limits.maxBytesPerFile || (!unchanged && !isContained(realRoot, await realpath(candidate)))) {
         skipped.push(path);
         continue;
       }
@@ -67,18 +74,31 @@ export async function inventoryRepository(
         skipped.push("limit");
         break;
       }
-      const sample = await readFile(candidate);
-      if (sample.subarray(0, 8_192).includes(0)) {
+      if (!unchanged && (await looksBinary(candidate))) {
         skipped.push(path);
         continue;
       }
-      files.push({ absolutePath: candidate, byteLength: metadata.size, path });
+      files.push({ absolutePath: candidate, byteLength: metadata.size, mtimeMs: metadata.mtimeMs, path });
       totalBytes += metadata.size;
     } catch {
       skipped.push(path);
     }
   }
   return { files, skipped: [...new Set(skipped)].sort(compareCodeUnits) };
+}
+
+function isExcludedPath(path: string, harnixIgnore: { ignores(path: string): boolean }): boolean {
+  return (
+    path === ".harnixignore" ||
+    path.endsWith("/.harnixignore") ||
+    isHardExcluded(path) ||
+    secretPath.test(path) ||
+    harnixIgnore.ignores(path)
+  );
+}
+
+async function looksBinary(file: string): Promise<boolean> {
+  return (await readFile(file)).subarray(0, 8_192).includes(0);
 }
 
 function isHardExcluded(path: string): boolean {

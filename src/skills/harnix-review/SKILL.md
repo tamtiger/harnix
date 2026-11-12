@@ -2,7 +2,7 @@
 name: harnix-review
 description: Use when Harnix needs a standalone read-only code review of a diff, commit range or paths, or an evaluation of review feedback, without touching any task.
 metadata:
-  version: "2.32.0"
+  version: "2.32.2"
 ---
 
 # Review code (read-only)
@@ -11,7 +11,7 @@ Report evidence-backed findings. This profile never creates, reads or changes ta
 
 ## Scope
 
-Honor an explicit commit range or path list. Otherwise review the current working-tree diff plus only the requirements, implementation and tests needed to judge it. With no diff, infer the smallest paths from the request and state that scope. Use read-only inspection (`git diff`, `git show`, file reads); never move HEAD, change the index, create a worktree or touch an external review system.
+Honor an explicit commit range or path list. Otherwise review the current working-tree diff plus only the requirements, implementation and tests needed to judge it. With no diff, infer the smallest paths from the request and state that scope. Use read-only inspection (`git diff`, `git show`, file reads); before Grep for a symbol or a second Read of one file, run `harnix repo-map --refs <symbol>` or `--outline <path> --symbol <name> --body` (hints: verify the source); never move HEAD, change the index, create a worktree or touch an external review system.
 
 ## Review
 
