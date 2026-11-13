@@ -20,6 +20,12 @@ export interface UserPathRoot {
   display(relativePath?: string): string;
   /** @internal Real containment boundary captured while resolving the root. */
   readonly containmentAnchor: string;
+  /**
+   * @internal Set only for a root the user relocated with an environment variable (CLAUDE_CONFIG_DIR, CODEX_HOME,
+   * XDG_CONFIG_HOME). A child link of such a root (a profile that shares `skills/` with `~/.claude`) is accepted
+   * when its real target stays inside this verified real home; a link leaving it is still rejected.
+   */
+  readonly linkBoundary?: string | undefined;
 }
 
 export interface UserPlatformRoots {
@@ -191,13 +197,22 @@ async function overridableRoot(
     return createVerifiedUserRoot(
       join(override, root.envOverrideSubpath),
       `$${root.envOverride}/${root.envOverrideSubpath}`,
+      home.containmentAnchor,
     );
   }
-  return createVerifiedUserRoot(assertNamedHome(override, root.envOverride), `$${root.envOverride}`);
+  return createVerifiedUserRoot(
+    assertNamedHome(override, root.envOverride),
+    `$${root.envOverride}`,
+    home.containmentAnchor,
+  );
 }
 
 /** Creates a root that can later be used only with resolveSafeUserPath. */
-export async function createVerifiedUserRoot(path: string, logicalPath: string): Promise<UserPathRoot> {
+export async function createVerifiedUserRoot(
+  path: string,
+  logicalPath: string,
+  linkBoundary?: string,
+): Promise<UserPathRoot> {
   if (path.includes("\0") || !isAbsolute(path) || isFilesystemRoot(path)) {
     throw new UnsafeUserPathError("A user root must be an absolute non-root directory.");
   }
@@ -207,7 +222,7 @@ export async function createVerifiedUserRoot(path: string, logicalPath: string):
 
   const root = resolve(path);
   await assertDirectoryIfItExists(root);
-  return createUserPathRoot(root, logicalPath, await findRealExistingAncestor(root));
+  return createUserPathRoot(root, logicalPath, await findRealExistingAncestor(root), linkBoundary);
 }
 
 async function createDerivedUserRoot(
@@ -219,9 +234,15 @@ async function createDerivedUserRoot(
   return createUserPathRoot(path, logicalPath, await realpath(parent.path));
 }
 
-function createUserPathRoot(path: string, logicalPath: string, containmentAnchor: string): UserPathRoot {
+function createUserPathRoot(
+  path: string,
+  logicalPath: string,
+  containmentAnchor: string,
+  linkBoundary?: string,
+): UserPathRoot {
   return {
     containmentAnchor,
+    linkBoundary,
     display: (relativePath = ".") => displayUserPath(logicalPath, relativePath),
     logicalPath,
     path,
@@ -242,7 +263,8 @@ export async function resolveSafeUserPath(root: UserPathRoot, userRelativePath: 
   }
   const realExistingAncestor = await findRealExistingAncestor(candidate);
   const containmentBoundary = realRoot ?? root.containmentAnchor;
-  if (!isContainedPath(containmentBoundary, realExistingAncestor)) {
+  const linkedInsideHome = root.linkBoundary !== undefined && isContainedPath(root.linkBoundary, realExistingAncestor);
+  if (!isContainedPath(containmentBoundary, realExistingAncestor) && !linkedInsideHome) {
     throw new UnsafeUserPathError("The requested path escapes the user root through a symbolic link.");
   }
 

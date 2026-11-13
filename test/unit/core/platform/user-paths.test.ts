@@ -86,6 +86,59 @@ describe("user-global paths", () => {
     );
   });
 
+  describe("linked entries inside an environment-overridden root", () => {
+    const linkType = process.platform === "win32" ? "junction" : "dir";
+
+    it("accepts a child link whose target stays inside the verified home", async () => {
+      const home = await temporaryUserHome();
+      const profile = join(home, "profile");
+      const shared = join(home, ".claude", "skills");
+      await mkdir(profile, { recursive: true });
+      await mkdir(shared, { recursive: true });
+      await symlink(shared, join(profile, "skills"), linkType);
+      const roots = await resolveSelectedUserPlatformRoots(["claude"], {
+        homeResolver: async () => home,
+        environment: { CLAUDE_CONFIG_DIR: profile },
+      });
+
+      await expect(resolveSafeUserPath(roots.claude!, "skills/harnix-plan/SKILL.md")).resolves.toBe(
+        join(profile, "skills", "harnix-plan", "SKILL.md"),
+      );
+    });
+
+    it("rejects a child link whose target leaves the verified home", async () => {
+      const home = await temporaryUserHome();
+      const external = await temporaryUserHome();
+      const profile = join(home, "profile");
+      await mkdir(profile, { recursive: true });
+      await symlink(external, join(profile, "skills"), linkType);
+      const roots = await resolveSelectedUserPlatformRoots(["claude"], {
+        homeResolver: async () => home,
+        environment: { CLAUDE_CONFIG_DIR: profile },
+      });
+
+      await expect(resolveSafeUserPath(roots.claude!, "skills/harnix-plan/SKILL.md")).rejects.toBeInstanceOf(
+        UnsafeUserPathError,
+      );
+    });
+
+    it("still rejects a child link that leaves the root of a default (not overridden) platform root", async () => {
+      const home = await temporaryUserHome();
+      const elsewhere = join(home, "elsewhere");
+      await mkdir(join(home, ".claude"), { recursive: true });
+      await mkdir(elsewhere, { recursive: true });
+      await symlink(elsewhere, join(home, ".claude", "skills"), linkType);
+      const roots = await resolveSelectedUserPlatformRoots(["claude"], {
+        homeResolver: async () => home,
+        environment: {},
+      });
+
+      await expect(resolveSafeUserPath(roots.claude!, "skills/harnix-plan/SKILL.md")).rejects.toBeInstanceOf(
+        UnsafeUserPathError,
+      );
+    });
+  });
+
   it("rejects a symbolic-link ancestor while deriving an Antigravity plugin root from home", async () => {
     const home = await temporaryUserHome();
     const external = await temporaryUserHome();

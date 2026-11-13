@@ -48,7 +48,7 @@ core -X-> Commander/Inquirer/platform templates
 - `test/workflow/architecture.test.ts` enforces the import direction, the `node:fs`-free command list, the 300-code-line cap for `src/core/workflow` and `src/core/tasks`, and the adapter shape. Its exemptions and the lists in `eslint.config.mjs` may only shrink. `test/workflow/behavior-snapshot.golden.json` is the pure-refactor oracle: never regenerate it to make a refactor pass.
 - Inject filesystem, clock, process runner, version lookup, network, and prompt dependencies where deterministic tests need control.
 - Use Node path/realpath APIs and executable-plus-argument arrays. Never concatenate untrusted shell input.
-- Normalize project paths to repository-relative POSIX form and global paths to a verified platform root; reject traversal, unsafe roots, and symlink/junction escape.
+- Normalize project paths to repository-relative POSIX form and global paths to a verified platform root; reject traversal, unsafe roots, and symlink/junction escape. Exception (2.32.4): a root the user relocated with `CLAUDE_CONFIG_DIR`, `CODEX_HOME` or `XDG_CONFIG_HOME` may contain child junctions/symlinks (a profile sharing `skills/` with `~/.claude`) when their real target stays inside the verified real home (`UserPathRoot.linkBoundary`); a target outside the home, a default root with an escaping link, or a link at the root itself is still rejected.
 - Use permission-preserving atomic replacement for config, manifests, task state, and shared global integration files.
 - Preserve unrelated and user-modified content. Tasks, research, and journals are always user-owned.
 - Do not expose machine-specific absolute paths, credentials, prompts, or secret values in generated output or diagnostics.

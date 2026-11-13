@@ -4,6 +4,12 @@ Mọi thay đổi đáng chú ý của Harnix được ghi tại đây.
 
 Định dạng dựa trên [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/). Harnix chưa có bản phát hành npm; mỗi mục dưới đây ghi thay đổi của một phiên bản package đã được kiểm chứng.
 
+## [2.32.4] - 2026-11-13
+
+### Fixed
+
+- Setup/update không còn lỗi symbolic link khi CLAUDE_CONFIG_DIR, CODEX_HOME hoặc XDG_CONFIG_HOME trỏ tới profile có entry con là junction/symlink: chấp nhận khi đích thật nằm trong home đã xác minh, vẫn từ chối đích ngoài home.
+
 ## [2.32.3] - 2026-11-12
 
 ### Added

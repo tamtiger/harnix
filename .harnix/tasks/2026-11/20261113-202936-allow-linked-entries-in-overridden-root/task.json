@@ -1,0 +1,90 @@
+{
+  "generator": "harnix",
+  "schemaVersion": 3,
+  "id": "20261113-202936-allow-linked-entries-in-overridden-root",
+  "title": "Cho phép junction trong root user-global được override",
+  "mode": "lite",
+  "status": "completed",
+  "checkpoint": "finishing",
+  "goal": "Setup/update không còn lỗi 'escapes the user root through a symbolic link' khi CLAUDE_CONFIG_DIR/CODEX_HOME/XDG trỏ tới profile có entry con là junction/symlink tới đích nằm trong home đã xác minh; vẫn từ chối đích ngoài home và root là link thoát.",
+  "nonGoals": [],
+  "acceptanceCriteria": [
+    {
+      "id": "ac-1",
+      "text": "Một entry con (junction/symlink) bên trong root được override bằng biến môi trường, có đích thật nằm trong home đã xác minh, được resolveSafeUserPath chấp nhận.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-linked-focused-1"
+      ]
+    },
+    {
+      "id": "ac-2",
+      "text": "Entry con có đích ngoài home đã xác minh, root mặc định (không override) có link thoát, và root override tự là link thoát khỏi anchor vẫn bị từ chối bằng UnsafeUserPathError.",
+      "status": "met",
+      "evidenceIds": [
+        "ev-check-suite-1",
+        "ev-chk-linked-focused-1"
+      ]
+    }
+  ],
+  "validationPlan": [
+    {
+      "id": "check-suite",
+      "description": "Toàn bộ test, lint và typecheck của dự án phải xanh",
+      "scope": "full",
+      "required": true,
+      "command": "pnpm run test",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/**",
+        "test/**"
+      ]
+    },
+    {
+      "id": "chk-linked-focused",
+      "description": "chk-linked-focused",
+      "scope": "focused",
+      "required": true,
+      "command": "pnpm exec vitest run test/unit/core/platform/user-paths.test.ts --coverage.enabled=false",
+      "criterionIds": [
+        "ac-1",
+        "ac-2"
+      ],
+      "inputs": [
+        "src/core/platform/user-paths.ts",
+        "test/unit/core/platform/user-paths.test.ts"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-chk-linked-focused-1",
+      "checkId": "chk-linked-focused",
+      "recordedAt": "2026-11-13T20:33:13.732+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm exec vitest run test/unit/core/platform/user-paths.test.ts --coverage.enabled=false — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "1b3040462c15ae653d99964f47c9504823af4a5b57c2aebb7bba420527e4b029"
+    },
+    {
+      "id": "ev-check-suite-1",
+      "checkId": "check-suite",
+      "recordedAt": "2026-11-13T20:35:09.320+07:00",
+      "result": "pass",
+      "exitCode": 0,
+      "summary": "pnpm test — exit 0",
+      "artifactPaths": [],
+      "inputDigest": "325255c48373480623102dc92be1382c277cdc23874070230dd8035c8d5d54e4"
+    }
+  ],
+  "relevantPaths": [],
+  "relevantSpecs": [],
+  "createdAt": "2026-11-13T20:29:36.430+07:00",
+  "updatedAt": "2026-11-13T20:35:13.809+07:00",
+  "completedAt": "2026-11-13T20:35:13.809+07:00"
+}

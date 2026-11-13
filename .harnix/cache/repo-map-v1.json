@@ -1,7 +1,7 @@
 {
   "extractorVersion": 2,
   "generator": "harnix",
-  "inventoryFingerprint": "38be841d8932da1698dc3c0c13dfa0f84d4d6a7dc1314d807f8165d90abc38cf",
+  "inventoryFingerprint": "1e289ba99f2762a7ee101faaf74187be1b018ffa498b3e4155b44711d3556f6e",
   "records": [
     {
       "byteLength": 351,
@@ -77,8 +77,8 @@
       "path": ".prettierrc.json"
     },
     {
-      "byteLength": 47309,
-      "contentHash": "02c33ddcbde8b6fc44b5b00f020025e14afb51e94cffe3d06a8c2e9167948902",
+      "byteLength": 47762,
+      "contentHash": "3094235f5c433dca1245e94d5ecc69cd527fac06c672a86e46a5bf4878f1ed8d",
       "extension": "md",
       "headings": [
         "Architecture rules",
@@ -116,15 +116,14 @@
       "path": "AGENTS.md"
     },
     {
-      "byteLength": 102795,
-      "contentHash": "92a51d5b567b08c36545e57ddcaf7951418156ff35295ab9195911c63baf3527",
+      "byteLength": 103053,
+      "contentHash": "a23251d77930bd032866afece042fa902876c0270ee1e230623bbb14b1d01287",
       "extension": "md",
       "headings": [
         "Added",
         "Changed",
         "Changelog",
         "Fixed",
-        "[2.26.1] - 2026-11-04",
         "[2.27.0] - 2026-11-04",
         "[2.28.0] - 2026-11-04",
         "[2.29.0] - 2026-11-09",
@@ -135,7 +134,8 @@
         "[2.31.1] - 2026-11-09",
         "[2.32.0] - 2026-11-10",
         "[2.32.1] - 2026-11-12",
-        "[2.32.2] - 2026-11-12"
+        "[2.32.2] - 2026-11-12",
+        "[2.32.3] - 2026-11-12"
       ],
       "identifiers": [
         "is",
@@ -187,8 +187,8 @@
       "path": "NOTICE"
     },
     {
-      "byteLength": 50788,
-      "contentHash": "9edf1d23f56cd2bbcabe16bcd41d426e418c18dfc0b0709d139db70f4386dca7",
+      "byteLength": 51741,
+      "contentHash": "39ea8d9030b32009654585f622b3ae9cef23470c7c2f55d54c4282076b0cb864",
       "extension": "md",
       "headings": [
         "-> Harnix tự phân loại yêu cầu và dẫn dắt agent qua đúng quy trình, không cần bạn gõ lệnh nào thêm.",
@@ -262,8 +262,8 @@
       "path": "docs/HARNESS_FEATURE_PROVENANCE.json"
     },
     {
-      "byteLength": 41242,
-      "contentHash": "11cfa5e20da24d1554c47bd62b9ece8d93e8e2fb6a77a4d05f9e2e47162c969c",
+      "byteLength": 41345,
+      "contentHash": "795a4231e500a524979cbf3c4746d68883f92f9732632a783254ee86014b8b63",
       "extension": "md",
       "headings": [
         "1. Khung quyết định",
@@ -294,8 +294,8 @@
       "path": "docs/HARNESS_RESEARCH.md"
     },
     {
-      "byteLength": 102760,
-      "contentHash": "60f355c0e67a36ae3eee25a60bf59b23501d32b820e542640a2f81875e52ff10",
+      "byteLength": 103062,
+      "contentHash": "d36ab6e6fd85b97776c3ffbf0f91a2aedb9c26e65e7c7331629eb0356733d1c6",
       "extension": "md",
       "headings": [
         "1. Document status",
@@ -377,8 +377,8 @@
       "path": "docs/HARNIX_WORKFLOW.md"
     },
     {
-      "byteLength": 194052,
-      "contentHash": "7758ef62db01dbf6dbb91d4cc8877ccf6de96be5534d210ecb4de6e8a4984b84",
+      "byteLength": 194954,
+      "contentHash": "e3587ad273000a9335cac400967e11d411937d4fac5eca8e2b269f5690938c88",
       "extension": "md",
       "headings": [
         "1. Mục tiêu",
@@ -562,8 +562,8 @@
       "path": "docs/UPSTREAM_BASELINE.md"
     },
     {
-      "byteLength": 40990,
-      "contentHash": "99875cdad8805dc75b67a0b78fe93aea99c645eae85481462de64064b06f4ade",
+      "byteLength": 41052,
+      "contentHash": "d95130e1ff43e71f333d74bf96b5df83c7107f187e847cd803e730fd4ac97c4d",
       "extension": "md",
       "headings": [
         "1. Nguyên tắc mapping",
@@ -921,7 +921,7 @@
     },
     {
       "byteLength": 2666,
-      "contentHash": "5ce142e744888137b9821caf0a667456576d806f4827714de5b7dffd7abbbd21",
+      "contentHash": "70a966aa9af43aa783e9910a7a544ddbbb637ea955b0637eff81e3e39ef399d4",
       "extension": "json",
       "headings": [],
       "identifiers": [],
@@ -4568,8 +4568,8 @@
       ]
     },
     {
-      "byteLength": 4207,
-      "contentHash": "00b16477982cbe18b69e68841d3657924555aa4820a6721b90b5577b9ed2c179",
+      "byteLength": 4152,
+      "contentHash": "97c95ac6b731893ad47b5eabafb75df3fca01228875e4b31cbf09e93fc7a8920",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -4614,6 +4614,7 @@
       "path": "src/commands/setup.ts",
       "language": "typescript",
       "references": [
+        "CLAUDE_GLOBAL_MEMBER_MATCHERS",
         "GlobalLock",
         "GlobalLockAcquirer",
         "GlobalPlanProvider",
@@ -4633,7 +4634,6 @@
         "launcher",
         "lock",
         "lookupHarnixLauncher",
-        "matchesClaudeGlobalContextHookGroup",
         "matchesCodexGlobalContextHookGroup",
         "memberMatchers",
         "mode",
@@ -5778,22 +5778,27 @@
       ]
     },
     {
-      "byteLength": 3070,
-      "contentHash": "05b4ab02ca0a6f7b52a444ba9e0a042b7da046bc8b6e214492b13c4d4b8da3f1",
+      "byteLength": 4860,
+      "contentHash": "0e460ed3c939431649db1f2db3d08449cc7988eaeac9a5b5e35cea35eb8a3987",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "CLAUDE_GLOBAL_CONTEXT_COMMAND",
         "CLAUDE_GLOBAL_HOOK_SELECTOR",
+        "CLAUDE_GLOBAL_MEMBER_MATCHERS",
         "CLAUDE_GLOBAL_MEMORY_SELECTOR",
+        "CLAUDE_GLOBAL_PRETOOL_SELECTOR",
+        "Map",
         "are",
         "begin",
         "claudeGlobalContextHookGroup",
         "claudeGlobalDesiredFiles",
         "claudeGlobalMemoryContent",
+        "claudeGlobalPretoolHookGroup",
         "end",
         "isJsonRecord",
         "matchesClaudeGlobalContextHookGroup",
+        "matchesClaudeGlobalPretoolHookGroup",
         "value"
       ],
       "importTargets": [
@@ -5828,11 +5833,14 @@
         "managed",
         "marked",
         "matcher",
+        "more",
         "own",
         "part",
         "read",
         "renderHarnixRules",
+        "rule",
         "selector",
+        "setup",
         "sign",
         "signature",
         "skill",
@@ -11056,8 +11064,8 @@
       ]
     },
     {
-      "byteLength": 3450,
-      "contentHash": "c724ff9f1ba216734a3c9a340a427f23d31617c8da4c2ea9b19bd26e06eaa932",
+      "byteLength": 3814,
+      "contentHash": "746a3ec4b7fe69816045d9152119880a87c2ed27296e967efc599f0d8680695e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -11083,6 +11091,7 @@
         "context",
         "count",
         "cursor",
+        "decision",
         "does",
         "events",
         "exact",
@@ -11098,9 +11107,11 @@
         "live",
         "managed",
         "marker",
+        "matcher",
         "opencode",
         "page",
         "quoted",
+        "read",
         "reads",
         "runs",
         "skills",
@@ -22590,7 +22601,7 @@
     },
     {
       "byteLength": 3587,
-      "contentHash": "8d75010769b4c838adddab12b3ddc2f40ef383dcf76291e41cc5b516f92898cc",
+      "contentHash": "8e41fa4f5d426fb05351c2e9971481321004fb26aa0559991ba42722bd223dc8",
       "extension": "md",
       "headings": [
         "Architecture design review",
@@ -22661,7 +22672,7 @@
     },
     {
       "byteLength": 2023,
-      "contentHash": "bd712522573c521b005d75af5e2eb6491efd5a3b1e1ad4054f2b8598f8cb8ea0",
+      "contentHash": "66c6643f8bc46c32409f19e738de872e8f4a4a91cd0ce8feee751518ad1fc7d5",
       "extension": "md",
       "headings": [
         "Bugfix preservation",
@@ -22700,7 +22711,7 @@
     },
     {
       "byteLength": 4741,
-      "contentHash": "5e4e5862a8b8eed3dde73923385c9babc37f95c890dafe5743f6aad3be99de0a",
+      "contentHash": "6bd9793c56f47da28f2b7a8eb706c1797116a95b777c84576431e252f1e7b2ad",
       "extension": "md",
       "headings": [
         "Capture",
@@ -22739,7 +22750,7 @@
     },
     {
       "byteLength": 2566,
-      "contentHash": "6257dc09bf7a70b1c5cee5c91af8b8fb2e8ca91412d0bcd39b1ce3d0f7a945a4",
+      "contentHash": "3fb2b666a9dd6007fe294f7ba80ffef8262c8c31de561d591ba3fd5d75990d6c",
       "extension": "md",
       "headings": [
         "Common flakiness root causes",
@@ -22784,7 +22795,7 @@
     },
     {
       "byteLength": 6781,
-      "contentHash": "b94c9ba75b1c25185fdc5fe1651a26feddd7566e2c5577a418cc81d3bd9db907",
+      "contentHash": "1f750f24628745232554c131d175725ff30917f9ddc8f1105af7792342a726a2",
       "extension": "md",
       "headings": [
         "Documentation synchronization",
@@ -22907,7 +22918,7 @@
     },
     {
       "byteLength": 3130,
-      "contentHash": "02e60bbb9018f972bc6ba18abb0060d853efc42866a0f1a630f63049aca5f390",
+      "contentHash": "069c7de4ef1fec5020e72c9c61f36cb8d02ae3a88757281814259da25ba6ab8e",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -22950,7 +22961,7 @@
     },
     {
       "byteLength": 6291,
-      "contentHash": "630258ab8761d21106cbe9aac26050ba9baa74ec8b45f91eaf3d1b02912d8adc",
+      "contentHash": "5f0d148324049d4189811b65f55993c262aab8f8d1a8f001014b27dc1a8c95d4",
       "extension": "md",
       "headings": [
         "Build the task",
@@ -23124,7 +23135,7 @@
     },
     {
       "byteLength": 3974,
-      "contentHash": "e863e4284bc308af0dd756fd81e13db7b93c498cf6fe81dff2d8eee784adc57a",
+      "contentHash": "5287f878c9273883da775a22cc2ce8525c73d41c121a78460c983a01eab1214a",
       "extension": "md",
       "headings": [
         "Decide",
@@ -23162,7 +23173,7 @@
     },
     {
       "byteLength": 4374,
-      "contentHash": "bb685be5ed08b7c64171769c4507b78145c1bec21c6c6b777d6a06709d6ad686",
+      "contentHash": "2f425c328760ea6eb63a4cedef8a6d651bd89ca495f0bf5ee2d6b4f6c2e0a6b5",
       "extension": "md",
       "headings": [
         "1. Spec axis (Requirements and behavior)",
@@ -23222,7 +23233,7 @@
     },
     {
       "byteLength": 3211,
-      "contentHash": "a5f5fe27562cf51ffeb7726d3214884c38db46d45e717900cf50f457c6093c63",
+      "contentHash": "f947e980d149eb9520d764242988b1ab1324dffaa031592f778a82b5b7d7aa63",
       "extension": "md",
       "headings": [
         "Critical vulnerability checks",
@@ -23264,7 +23275,7 @@
     },
     {
       "byteLength": 2642,
-      "contentHash": "4cc2cbb816bee698522d5fb88956572af4d598293bdcef8c4e452247466ee373",
+      "contentHash": "cc7bf0458c05029719abbe2922c070e9e3925fe6faa87c3294122de40010557e",
       "extension": "md",
       "headings": [
         "Evidence and Rationale",
@@ -23302,7 +23313,7 @@
     },
     {
       "byteLength": 3378,
-      "contentHash": "e75696c520f20cc4c4254b6b36b95253bebf02c9461f5cd7c79113c3866660e1",
+      "contentHash": "d29f7f0b31935226b1f0a7a19bcbc2f6c9ad1fd48e8794e0357730f799fa35e2",
       "extension": "md",
       "headings": [
         "Analysis steps",
@@ -23337,7 +23348,7 @@
     },
     {
       "byteLength": 6653,
-      "contentHash": "04e9a40b3abd7588050ce2aaa39dfe649536852a5a26650b92a0b296ce5fdd09",
+      "contentHash": "982640d262a8ee0b201942025ffcd5f51fc330ae8eaee5ceb7b57b70126f81af",
       "extension": "md",
       "headings": [
         "Finish",
@@ -29057,8 +29068,8 @@
       ]
     },
     {
-      "byteLength": 4606,
-      "contentHash": "17adceaa81d4c3609d49f425dba63201fb6f72e49ff547bec965b5564c8d4364",
+      "byteLength": 6844,
+      "contentHash": "646765d4c453b1e8691676de41708399b7f99384ed25efe8ebf309218d1e33d0",
       "extension": "ts",
       "headings": [],
       "identifiers": [
@@ -29068,7 +29079,9 @@
         "files",
         "first",
         "found",
+        "hooks",
         "memory",
+        "pretool",
         "second",
         "settings",
         "skill",
@@ -29089,7 +29102,9 @@
       "references": [
         "CLAUDE_GLOBAL_CONTEXT_COMMAND",
         "CLAUDE_GLOBAL_HOOK_SELECTOR",
+        "CLAUDE_GLOBAL_MEMBER_MATCHERS",
         "CLAUDE_GLOBAL_MEMORY_SELECTOR",
+        "CLAUDE_GLOBAL_PRETOOL_SELECTOR",
         "DesiredGlobalManagedFile",
         "array",
         "begin",
@@ -29100,13 +29115,16 @@
         "claudeGlobalContextHookGroup",
         "claudeGlobalDesiredFiles",
         "claudeGlobalMemoryContent",
+        "claudeGlobalPretoolHookGroup",
         "commit",
         "context",
+        "hook",
         "hooks",
         "kind",
         "managed",
         "matcher",
         "matchesClaudeGlobalContextHookGroup",
+        "matchesClaudeGlobalPretoolHookGroup",
         "pnpm",
         "renderHarnixRules",
         "renderSkill",
@@ -29676,20 +29694,21 @@
       ]
     },
     {
-      "byteLength": 4344,
-      "contentHash": "ed4946099f43063df820cf6aabcdb58805fec011cfff15cd16349dac04e2da13",
+      "byteLength": 6102,
+      "contentHash": "eba00d99b077471bfe5b81cf6d0d78c9c13e1bf25b5b3f53d22775c1b8d9c15e",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "BOM",
-        "Map",
         "afterSetup",
         "again",
         "base",
         "claudeRoot",
         "created",
+        "edited",
         "first",
         "installed",
+        "mine",
         "path",
         "removed",
         "result",
@@ -29713,6 +29732,7 @@
       "path": "test/platform/settings-json-fidelity.test.ts",
       "language": "typescript",
       "references": [
+        "CLAUDE_GLOBAL_MEMBER_MATCHERS",
         "byte",
         "bytes",
         "claude",
@@ -29732,20 +29752,23 @@
         "layout",
         "managed",
         "matcher",
-        "matchesClaudeGlobalContextHookGroup",
         "memberMatchers",
         "none",
         "number",
         "order",
         "other",
+        "own",
+        "preserved",
         "reconcileGlobalManagedFiles",
         "recursive",
         "removed",
+        "removes",
         "samples",
         "setup",
         "slice",
         "temporaryRoot",
         "unchanged",
+        "updated",
         "useTemporaryRepositories",
         "warning"
       ]
@@ -31673,65 +31696,14 @@
       ]
     },
     {
-      "byteLength": 3579,
-      "contentHash": "7e556d5cc778bb6f5d097631167dd744d1e3534c322b3722decdef758fb8be54",
+      "byteLength": 7175,
+      "contentHash": "02384c9b374d2158c3bf46f6b569b118ce57db3a1efd76b7ceb90e4e1c02137a",
       "extension": "ts",
       "headings": [],
       "identifiers": [
         "captureStdout",
         "fromMalformed",
         "original",
-        "root",
-        "spy",
-        "stdout",
-        "temporaryRepository",
-        "uninitialized",
-        "writes"
-      ],
-      "importTargets": [
-        "src/commands/init.js",
-        "src/commands/internal-context-cli.js",
-        "test/support/temporary-repository.js",
-        "vitest"
-      ],
-      "kind": "test",
-      "packagePath": "",
-      "path": "test/unit/commands/internal-context-cli.test.ts",
-      "language": "typescript",
-      "references": [
-        "absent",
-        "cli",
-        "codex",
-        "commands",
-        "context",
-        "developer",
-        "document",
-        "fallback",
-        "fallbackCwd",
-        "given",
-        "hook",
-        "hookInput",
-        "initializeProject",
-        "instead",
-        "kiro",
-        "malformed",
-        "outside",
-        "parseOptionalHookInput",
-        "process",
-        "runInternalContextCommand",
-        "shape",
-        "stdout",
-        "useTemporaryRepositories",
-        "work"
-      ]
-    },
-    {
-      "byteLength": 4214,
-      "contentHash": "14e9474d2f2c137650b58a7082ece8c7ba1bbb8d17611cee2f1d9f4147698bbf",
-      "extension": "ts",
-      "headings": [],
-      "identifiers": [
-        "captureStdout",
         "output",
         "preToolUse",
         "root",
@@ -31751,9 +31723,10 @@
       ],
       "kind": "test",
       "packagePath": "",
-      "path": "test/unit/commands/internal-context-pretool.test.ts",
+      "path": "test/unit/commands/internal-context-cli.test.ts",
       "language": "typescript",
       "references": [
+        "absent",
         "cache",
         "claude",
         "cli",
@@ -31763,19 +31736,28 @@
         "developer",
         "document",
         "extra",
+        "fallback",
         "fallbackCwd",
+        "given",
+        "hook",
         "hookInput",
         "initializeProject",
+        "instead",
+        "kiro",
+        "malformed",
         "outside",
+        "parseOptionalHookInput",
         "pattern",
         "process",
         "refs",
         "runInternalContextCommand",
+        "shape",
         "slot",
         "stdout",
         "symbol",
         "useTemporaryRepositories",
-        "words"
+        "words",
+        "work"
       ]
     },
     {
